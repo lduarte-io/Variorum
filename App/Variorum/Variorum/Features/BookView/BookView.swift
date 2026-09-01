@@ -369,24 +369,7 @@ struct BookView: View {
                                         .frame(height: 2)
                                 }
                                 Button {
-                                    // Navigate: land the book scroll at the
-                                    // chapter (the flow view shows it too);
-                                    // in the SPREAD, show the chapter's
-                                    // first page (13b 4F; 13c 2B).
-                                    let first = structure
-                                        .grouped(entries: model.entries)
-                                        .first(where: { $0.section?.id == section.id })?
-                                        .entries.first
-                                    if structure.mode == .spread {
-                                        if let first { model.showPost(first.postID) }
-                                    } else if structure.mode == .read,
-                                              structure.readForm == .pages {
-                                        // 13c 2C: a chapter opens at its
-                                        // first PAGE, without leaving Read.
-                                        if let first { model.focus(first.postID) }
-                                    } else {
-                                        scrollTarget = "chapter-\(section.id)"
-                                    }
+                                    navigateToChapter(section)
                                 } label: {
                                     HStack(spacing: 4) {
                                         Text("⠿")
@@ -443,9 +426,16 @@ struct BookView: View {
                                         // no-context-jump rule, R43).
                                         model.focus(entry.postID)
                                     } else {
+                                        // The correction round (rows 7/23/47):
+                                        // a note-row click REVEALS the note
+                                        // and lands in it at its first
+                                        // block — through the model's one
+                                        // landing slot, which Outline lands
+                                        // whether the card is on screen or
+                                        // unrealized far below (`landOutline`).
                                         structure.mode = .outline
                                         model.focus(entry.postID)
-                                        scrollTarget = "page-\(entry.postID)"
+                                        model.requestReveal(entry.postID)
                                     }
                                 } label: {
                                     HStack(spacing: 2) {
@@ -723,8 +713,94 @@ struct BookView: View {
             + "you save it as the book's own order.")
     }
 
-    /// The book scroll's pending landing (chapter/outline clicks).
-    @State private var scrollTarget: String?
+    // MARK: - Outline's landing (the Act 10 correction round, rows 9/12/14/44/47)
+    //
+    // The one programmatic-scroll mechanism Outline has. What it replaces:
+    // a view-private `scrollTarget` beside W21's model slot (two landing
+    // doors), and `withAnimation { proxy.scrollTo(…) }` toward targets in a
+    // LazyVStack. The animated form was the traced class behind her
+    // "scrolling went absolutely berserk … landed me at the end of the
+    // note" and the triage walk's livelock: an animation travels toward an
+    // ESTIMATED offset (unrealized lazy rows, and a focused inline editor
+    // whose row is 20,000 pt tall after its projection fills), rows
+    // realize under the travel, the target moves, and the animation either
+    // stops short (reproduced twice, deterministically, on the Sherlock
+    // book — a chapter click landed mid-story at the same paragraph) or
+    // retargets forever (the walk's 190 s sample: every hot frame lazy
+    // placement). The fix shape: NO animation, and a BOUNDED convergence —
+    // land, read back where the anchor actually sits, hop again while it
+    // is not at the top (at most `landingHopBudget` hops). The
+    // PanePublisher's own heal-turn discipline, applied to a scroll.
+
+    /// One pending landing: the anchor id and how many hops it has taken.
+    private struct OutlineLanding: Equatable {
+        var anchorID: String
+        var hops = 0
+    }
+    @State private var outlineLanding: OutlineLanding?
+    /// The scroll's named space — anchor frames read in it are visible-
+    /// relative, so "at the top" is `minY ≈ 0`.
+    static let outlineSpace = "book-outline-scroll"
+    /// Within this many points of the top, a landing is DONE.
+    static let landingTolerance: CGFloat = 2
+    /// The most hops one landing may take (a hop re-scrolls after the
+    /// realized geometry moved the target). Bounded by construction — a
+    /// target that will not settle stops moving the page rather than
+    /// chasing it for the rest of the session.
+    static let landingHopBudget = 4
+
+    /// Put an Outline anchor at the top of the page (no animation — see the
+    /// mark above), and watch it settle.
+    private func landOutline(_ anchorID: String, _ proxy: ScrollViewProxy) {
+        outlineLanding = OutlineLanding(anchorID: anchorID)
+        proxy.scrollTo(anchorID, anchor: .top)
+    }
+
+    /// A realized anchor reported where it sits. Every report feeds the
+    /// DEBUG geometry oracle; a report for the PENDING landing decides
+    /// whether to hop again.
+    fileprivate func outlineAnchorMoved(_ anchorID: String, top: CGFloat, _ proxy: ScrollViewProxy) {
+        #if DEBUG
+        BookOutlineGeometry.anchorTops[anchorID] = top
+        if outlineLanding?.anchorID == anchorID {
+            BookOutlineGeometry.trace.append("\(anchorID) top=\(top) hops=\(outlineLanding?.hops ?? -1)")
+        }
+        #endif
+        guard var landing = outlineLanding, landing.anchorID == anchorID else { return }
+        if abs(top) <= Self.landingTolerance || landing.hops >= Self.landingHopBudget {
+            outlineLanding = nil
+            return
+        }
+        landing.hops += 1
+        outlineLanding = landing
+        // The next turn, never inside the geometry pass that reported.
+        DispatchQueue.main.async { proxy.scrollTo(anchorID, anchor: .top) }
+    }
+
+    /// The navigator's chapter click — and, since the correction round
+    /// (row 14), the body's chapter HEADING: one act, mode by mode. In the
+    /// SPREAD it shows the chapter's first page; in paginated Read it turns
+    /// to that page; in Read ▸ Scroll it lands the flow on the chapter's
+    /// first note (before this round the click wrote Outline's private
+    /// target there and nothing consumed it — the flow never moved); in
+    /// Outline it lands the chapter heading at the top.
+    private func navigateToChapter(_ section: ReadingSection) {
+        let first = structure
+            .grouped(entries: model.entries)
+            .first(where: { $0.section?.id == section.id })?
+            .entries.first
+        switch structure.mode {
+        case .spread:
+            if let first { model.showPost(first.postID) }
+        case .read where structure.readForm == .pages:
+            // 13c 2C: a chapter opens at its first PAGE, without leaving Read.
+            if let first { model.focus(first.postID) }
+        case .read:
+            if let first { model.requestReveal(first.postID) }
+        case .outline, .index:
+            model.requestChapterReveal(section.id)
+        }
+    }
     /// R19 drag state: the chapter the dragged one would land BEFORE, and
     /// the end zone's highlight.
     @State private var chapterDropTarget: String?
@@ -800,36 +876,42 @@ struct BookView: View {
                         Text("This book has no notes yet.")
                             .foregroundStyle(tokens.muted)
                     }
-                    if structure.chaptersActive {
-                        ForEach(structure.grouped(entries: model.entries), id: \.section?.id) { group in
-                            if let section = group.section {
-                                chapterHeader(section)
-                            } else {
-                                // UNFILED trails the chapters (ratified,
-                                // QUESTIONS #26(b)) — the grouping brain's
-                                // order, rendered, never re-decided here.
-                                Text(tokens.chromeLabel("unfiled"))
-                                    .font(tokens.heading)
-                                    .foregroundStyle(tokens.muted)
-                                    .padding(.top, 28)
-                            }
-                            ForEach(group.entries, id: \.postID) { entry in
-                                postRow(entry)
-                            }
-                        }
-                        bodyChapterEndZone  // N21: drag a chapter past the last
-                    } else {
-                        ForEach(Array(model.entries.enumerated()), id: \.element.postID) { i, entry in
-                            if let section = model.sectionHeader(at: i) {
-                                // Smart books keep tag-path sectioning
-                                // (`grouping_tag_id`) — same heading voice.
-                                Text(section)
-                                    .font(tokens.title)
-                                    .foregroundStyle(tokens.accent)
-                                    .padding(.top, 28)
-                            }
+                    // ONE flat ForEach whose identities ARE the landing
+                    // anchors (`BookOutlineRows` — the correction round): a
+                    // chapter heading, the unfiled heading, a tag-path
+                    // heading and a note are each one lazy item, so a
+                    // landing on an UNREALIZED row is reachable by the
+                    // reader (the nested-ForEach shape hid every anchor
+                    // until its row happened to be on screen).
+                    ForEach(outlineRows) { row in
+                        switch row {
+                        case .chapter(let section):
+                            chapterHeader(section)
+                                .outlineAnchor(row.id, in: self, proxy)
+                        case .unfiledHeading:
+                            // UNFILED trails the chapters (ratified,
+                            // QUESTIONS #26(b)) — the grouping brain's
+                            // order, rendered, never re-decided here.
+                            Text(tokens.chromeLabel("unfiled"))
+                                .font(tokens.heading)
+                                .foregroundStyle(tokens.muted)
+                                .padding(.top, 28)
+                                .outlineAnchor(row.id, in: self, proxy)
+                        case .tagHeading(let path, _):
+                            // Smart books keep tag-path sectioning
+                            // (`grouping_tag_id`) — same heading voice.
+                            Text(path)
+                                .font(tokens.title)
+                                .foregroundStyle(tokens.accent)
+                                .padding(.top, 28)
+                                .outlineAnchor(row.id, in: self, proxy)
+                        case .note(let entry):
                             postRow(entry)
+                                .outlineAnchor(row.id, in: self, proxy)
                         }
+                    }
+                    if structure.chaptersActive {
+                        bodyChapterEndZone  // N21: drag a chapter past the last
                     }
                     if model.truncated {
                         Text("Showing the first \(BookViewModel.entryWindow) notes — "
@@ -848,7 +930,7 @@ struct BookView: View {
                                 Task {
                                     if let id = await structure.newEntry() {
                                         model.focus(id)
-                                        scrollTarget = "page-\(id)"
+                                        model.requestReveal(id)
                                     }
                                 }
                             }
@@ -861,7 +943,7 @@ struct BookView: View {
                                 Task {
                                     if let id = await structure.newPost() {
                                         model.focus(id)
-                                        scrollTarget = "page-\(id)"
+                                        model.requestReveal(id)
                                     }
                                 }
                             }
@@ -890,25 +972,26 @@ struct BookView: View {
                 .padding(.horizontal, 40)
                 .padding(.vertical, 22)
             }
-            .onChange(of: scrollTarget) { _, target in
-                guard let target else { return }
-                withAnimation { proxy.scrollTo(target, anchor: .top) }
-                scrollTarget = nil
-            }
+            .coordinateSpace(name: Self.outlineSpace)
             // 13f W21 — OUTLINE'S LANDING. Both halves are needed and for
             // different reasons: `onAppear` catches the arrival (this body
             // mounts only after the mode has already changed, so the carry's
             // request predates the view), `onChange` catches a reveal that
             // arrives while Outline is already on screen (W20's ascent into
-            // a book that is open).
+            // a book that is open, the navigator's rows).
             //
             // Reveal is SCROLL-TO and never an auto-expand: posts open
-            // collapsed by her #43(a) ruling, and the card carries the same
-            // `page-<id>` anchor the expanded header does, so a collapsed
-            // post is revealed exactly as well as an open one. (If she wants
-            // the arrival unfolded, that is a ruling, not a fix.)
+            // collapsed by her #43(a) ruling, and the ROW carries the
+            // `page-<id>` anchor whichever form it wears (the correction
+            // round moved the anchor from the card/header INSIDE the row to
+            // the row itself — an id on an inner view of an unrealized lazy
+            // row is unknown to the scroll reader, which is why an off-screen
+            // note could not be revealed: row 47). The navigator's note-row
+            // click focuses AND reveals, so the arrival is unfolded by her
+            // own act, never by the reveal.
             .onAppear { landOutlineReveal(proxy) }
             .onChange(of: model.pendingReveal) { _, _ in landOutlineReveal(proxy) }
+            .onChange(of: model.pendingChapterReveal) { _, _ in landOutlineReveal(proxy) }
             // 13c 2A (her item A6, RULED 2026-07-24): Outline's ENTIRE
             // bottom inset is gone — the `Slider` jump control ("it makes
             // no sense to have a horizontal scrollbar on a vertical page")
@@ -923,13 +1006,20 @@ struct BookView: View {
         }
     }
 
-    /// Outline's half of W21's landing: scroll to the requested post and
-    /// consume the request. Nothing else moves — no focus, no expansion.
+    /// Outline's half of W21's landing — and the chapter landing's only
+    /// consumer: put the requested note (or chapter) at the top and consume
+    /// the request. Nothing else moves — no focus, no expansion.
     private func landOutlineReveal(_ proxy: ScrollViewProxy) {
+        if let sectionID = model.pendingChapterReveal {
+            model.consumeChapterReveal()
+            if structure.sections.contains(where: { $0.id == sectionID }) {
+                landOutline(BookOutlineRows.Row.chapterAnchor(sectionID), proxy)
+            }
+        }
         guard let postID = model.pendingReveal else { return }
         model.consumeReveal()
         guard model.entries.contains(where: { $0.postID == postID }) else { return }
-        withAnimation { proxy.scrollTo("page-\(postID)", anchor: .top) }
+        landOutline(BookOutlineRows.Row.noteAnchor(postID), proxy)
     }
 
     /// 13b 3E (N21 — her "the dots … make me feel like it should be
@@ -937,13 +1027,7 @@ struct BookView: View {
     /// dots are honest — same insert-before semantics, same indicator
     /// grammar, and the same model door (`moveChapter(before:)`) as the
     /// navigator; the end zone below the last group lands a chapter last.
-    @ViewBuilder
     private func chapterHeader(_ section: ReadingSection) -> some View {
-        if bodyChapterDropTarget == section.id {
-            Rectangle()
-                .fill(tokens.ring)
-                .frame(height: 2)
-        }
         HStack(spacing: 6) {
             Text("⠿")
                 .font(tokens.small)
@@ -952,12 +1036,33 @@ struct BookView: View {
                     + "(right-click for Move Up / Move Down)")
             // 13c 2A (A39: "has the chapter headings"): a chapter reads as
             // a HEADING in the book's own voice — the title face, with real
-            // air above it — not as a chrome row above a list.
-            Text(tokens.chromeLabel(section.name))
-                .font(tokens.title)
-                .foregroundStyle(tokens.accent)
+            // air above it — not as a chrome row above a list. The
+            // correction round (row 14 — "clicking on the chapters isn't
+            // even TRYING to navigate"): the heading is a DOOR too — a
+            // click puts the chapter at the top of the page, exactly as the
+            // navigator's row does; the drag handle stays a handle.
+            Button {
+                navigateToChapter(section)
+            } label: {
+                Text(tokens.chromeLabel(section.name))
+                    .font(tokens.title)
+                    .foregroundStyle(tokens.accent)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .help("Put this chapter at the top of the page")
         }
         .padding(.top, 28)
+        // The drop indicator rides as an overlay rather than a sibling row,
+        // so the heading is ONE lazy item carrying one anchor (the row-level
+        // identity the scroll reader lands on — see `outlineAnchor`).
+        .overlay(alignment: .top) {
+            if bodyChapterDropTarget == section.id {
+                Rectangle()
+                    .fill(tokens.ring)
+                    .frame(height: 2)
+            }
+        }
         // 13f W11a — THE REACH FIX, at the site batch 1's trace named: the
         // body header carried no `contentShape`, so its target was the
         // GLYPHS (the navigator's is a `Button` and takes its row). It is now
@@ -967,7 +1072,6 @@ struct BookView: View {
         // second view to keep in sync.
         .frame(maxWidth: .infinity, alignment: .leading)
         .contentShape(Rectangle())
-        .id("chapter-\(section.id)")
         .contextMenu { chapterMenu(section) }
         .draggable(BookStructureModel.BookDrag.chapter(section.id).payload)
         .dropDestination(for: String.self) { items, _ in
@@ -1031,6 +1135,14 @@ struct BookView: View {
             || (structure.mode == .spread && model.isOnSpread(entry.postID))
     }
 
+    /// Outline's flat row list (`BookOutlineRows`): chapters from the
+    /// structure model where they govern, else the tag-path grammar.
+    private var outlineRows: [BookOutlineRows.Row] {
+        structure.chaptersActive
+            ? BookOutlineRows.rows(grouped: structure.grouped(entries: model.entries))
+            : BookOutlineRows.rows(flat: model.entries)
+    }
+
     /// Batch 12: kind + extent at a glance under the title.
     private var bookMetaLine: String {
         var parts: [String] = [structure.reading?.kind == .smart ? "smart book" : "book"]
@@ -1059,7 +1171,38 @@ struct BookView: View {
 enum BookOutlineMaterialization {
     static var count = 0
 }
+
+/// The correction round's landing oracle: where every REALIZED Outline
+/// anchor (`page-<postID>` · `chapter-<sectionID>`) sits, in the scroll's
+/// visible space — `0` is the top of the page. Fed by the same geometry
+/// reports the landing's convergence reads, so a pin asserts the landing
+/// the user sees, not a scroll request that was merely issued.
+@MainActor
+enum BookOutlineGeometry {
+    static var anchorTops: [String: CGFloat] = [:]
+    /// The pending landing's report sequence (id · top · hop) — what a pin
+    /// prints when a landing does not converge.
+    static var trace: [String] = []
+}
 #endif
+
+private extension View {
+    /// An Outline row's landing anchor, at the LAZY STACK's level: the id
+    /// the scroll reader lands on, and the geometry report the landing
+    /// converges on (`BookView.outlineAnchorMoved`). At the row, not inside
+    /// it — an unrealized lazy row's inner views do not exist yet, so an id
+    /// on the card or the header was invisible to `scrollTo` until the row
+    /// happened to be on screen (row 47's "the page did not move").
+    func outlineAnchor(_ id: String, in book: BookView, _ proxy: ScrollViewProxy) -> some View {
+        self
+            .id(id)
+            .onGeometryChange(for: CGFloat.self) { geometry in
+                geometry.frame(in: .named(BookView.outlineSpace)).minY
+            } action: { top in
+                book.outlineAnchorMoved(id, top: top, proxy)
+            }
+    }
+}
 
 /// One post in Outline: batch 12's card until it is deliberately expanded,
 /// and then its prose (read-cheap, or THE one live editor when focused).
@@ -1235,7 +1378,8 @@ private struct OutlinePostRow: View {
             .help("Open this note in the full editor (Write · Takes · Lenses · …)")
         }
         .padding(.top, 10)
-        .id("page-\(entry.postID)")  // the navigator's landing anchor
+        // (The `page-<id>` landing anchor moved to the ROW, at the lazy
+        // stack's level — `BookView.outlineAnchor`; the correction round.)
         .contextMenu { outlineChapterMenu(structure: structure, postID: entry.postID) }
     }
 
@@ -1305,7 +1449,6 @@ private struct OutlinePostRow: View {
         }
         .buttonStyle(.plain)
         .help("Click to open this note in the full editor; ▸ unfolds it here")
-        .id("page-\(entry.postID)")  // the navigator's landing anchor
         .contextMenu { outlineChapterMenu(structure: structure, postID: entry.postID) }
     }
 }

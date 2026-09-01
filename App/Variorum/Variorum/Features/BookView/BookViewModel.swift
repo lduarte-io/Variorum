@@ -382,11 +382,24 @@ final class BookViewModel {
     @ObservationIgnored var onPaneFocusRequest: (() -> Void)?
 
     /// Focus a post (nil = release): the focused post is always expanded.
+    ///
+    /// **A bare focus lands at the note's FIRST block** (the Act 10
+    /// correction round, ledger row 44's second symptom): a focus with no
+    /// caret seeds offset 0. Without a seed the inline editor's first
+    /// projection fill carried the insertion point to the document's END
+    /// (AppKit moves a zero-length selection that sits inside an edited
+    /// range to the range's end — a whole-document insertion at 0 over a
+    /// `{0,0}` selection lands at the last character), so a navigator
+    /// click on a 215-block story opened it at block 215/215. The
+    /// detail editor claims the caret itself on a bare arrival; the inline
+    /// editor deliberately never steals the window's focus as a side effect
+    /// of RENDERING, so the deliberate act — this focus — carries the seed.
+    /// Pinned: `BookOutlineLandingTests.aBareFocusLandsAtTheFirstBlock`.
     func focus(_ postID: String?, caret: Int? = nil, fanBlock: String? = nil) {
         // One line covers all twelve call sites — the reason this rides the
         // model rather than being threaded through the views.
         if postID != nil, !paneFocused { onPaneFocusRequest?() }
-        caretSeed = caret
+        caretSeed = postID == nil ? nil : (caret ?? 0)
         fanSeed = fanBlock
         focusedPostID = postID
         if let postID { expandedPosts.insert(postID) }
@@ -492,5 +505,26 @@ final class BookViewModel {
     /// The arriving surface took the landing. Idempotent.
     func consumeReveal() {
         pendingReveal = nil
+    }
+
+    // MARK: - Outline's CHAPTER landing (the Act 10 correction round, rows
+    // 9/12/14/44 — one landing door, not two)
+
+    /// The chapter Outline was asked to put at the top of the page. Beside
+    /// `pendingReveal` (a NOTE landing) rather than folded into it: every
+    /// consumer of the note slot reads a post id, and a chapter is not one.
+    /// The navigator's chapter row and the body's chapter heading both
+    /// request through here — before this round the navigator wrote a
+    /// view-private `scrollTarget` beside W21's slot, so the book had TWO
+    /// landing mechanisms and a test could reach neither.
+    private(set) var pendingChapterReveal: String?
+
+    func requestChapterReveal(_ sectionID: String) {
+        pendingChapterReveal = sectionID
+    }
+
+    /// Outline took the chapter landing. Idempotent.
+    func consumeChapterReveal() {
+        pendingChapterReveal = nil
     }
 }

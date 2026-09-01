@@ -432,6 +432,48 @@ brief: per row → FIXED (pin name, red-on-old evidence as the issue count under
 found that she did not report (as new ledger rows, numbered from 48). Then stop. The orchestrator walks
 your rows before the record is marked closed.
 
+### BATCH B RECORD — THE BOOK (a fresh Fable implementer session, 2026-09-01 ~05:30 →)
+
+#### LIVE STATUS — BATCH B (flipped in the same commit as each piece; a fresh session finishes from this list alone)
+
+- **Row 44 (the hang) + rows 9/12 (the scroll class) + row 47/7/23 (the note-row reveal) + row 14 (chapters):** DONE (this commit) — ONE mechanism: Outline's landing rebuilt (no animation; bounded convergence; the flat `BookOutlineRows` ForEach whose identities ARE the anchors; the model's `pendingChapterReveal` slot beside W21's note slot; chapter HEADINGS are doors; Read ▸ Scroll's chapter click lands the flow). Pins green on the new tree (`BookOutlineLandingTests` ×3, `BookOutlineRowsTests` ×2). **Red-on-old by behavioral revert: PENDING** (next commit).
+- **Row 44's second symptom (focus lands on the LAST block):** DONE (this commit) — a bare `BookViewModel.focus` seeds caret 0; pin `aBareFocusLandsAtTheFirstBlock` green. Red-on-old PENDING.
+- **Row 8 (the duplicate line):** NOT-STARTED — settled design: navigator collapses the note line into the chapter row when the chapter has exactly one note whose `BookNaming.key(displayTitle) == key(section.name)`; the chapter row then opens the note (focus + reveal); pin on a Sherlock-shaped fixture; the field guide untouched.
+- **Row 13 (the gutter):** NOT-STARTED — settled design: the per-card word-count column is DROPPED (C-6 / R-cor-4(d)); the gutter keeps ONLY the takes fact (`⑂ takes on N blocks`) beside a card that has one; the row shares the pane's width honestly (flexible gutter). Verdict for the row-36 table: BookView's 4 metrics → the card `Nw` DROP · the gutter `⑂ takes` KEEP (invisible from a card otherwise) · `bookMetaLine` ("book · 13 chapters · 13 notes") KEEP (the book's shape under its title, not a word count) · the side card's counts → row 40.
+- **Row 22 (the book Index editable in place):** NOT-STARTED — settled design: the pane's note renders per-BLOCK `PaneSurfaceView`s through the `BlockTOCViewModel`/`PaneTextAuthority` road (one live editor); a click makes THAT block live; the double-click handoff to Outline retires; Read stays read-only.
+- **Row 38 (book half — the scrolled-open door):** NOT-STARTED — settled design: `ReadingFlowView` renders paragraphs per BLOCK so a click knows its block; the door brain `BookLanding` `(postID, blockID?, offset?)` → mode switch to Index + select + make live.
+- **Row 40 (the side card):** NOT-STARTED — settled design: the vertical `CommitBar` becomes one calm grouped control (where-you-are line · the block's doors · the note's doors · one count line = the word-target face), collapsible under a width threshold; before/after captures.
+- **Row 45 (previews):** NOT-STARTED — settled design: a pure `CardPreview.excerpt(blocks:)` brain — the first ~40 words across leading blocks, skipping a lone heading/numeral block; pin on a numeral-first fixture.
+- **The USE gate (captures per row into `act10-correction-screens/batch-b/`):** NOT-STARTED — the dev build must be relaunched from the fresh Debug product after the code lands (`open -n`).
+- **Full Mac suite + TutorialWalkTests:** PENDING (at the end).
+- **No revert in flight.**
+
+#### The hang — what reproduced, what did not (recorded before any code moved)
+
+- The dev-store Debug build (pid 49566, the walk's relaunch) reproduced the walk's PRE-conditions exactly: navigator note-row click on "The Boscombe Valley Mystery" → the story expands, focused, the side card reads **block 215/215** (capture `03-boscombe-expanded-before.png`).
+- **The scroll class reproduced twice, deterministically:** a navigator click on the chapter AFTER the expanded story ("the five orange pips") landed mid-story at the same paragraph both times (captures `05-after-five-pips.png`, `09-after-five-pips-2.png`) — her "didn't scroll to the correct item… landed me at the end of the note". A chapter ABOVE the story landed correctly (`04-…`); the last chapter's click landed inside the story too (`06-…`).
+- **The livelock did NOT recur** in six attempts on the same build and sequence (CPU peaked 32–43% for < 2 s per click, then 0%). The triage sample's hot frames are lazy placement under an animated transaction stream; the mis-landing and the livelock are the same mechanism at two phases (an animation travelling toward an ESTIMATED offset while rows realize and the target moves — converging short, or retargeting forever). The fix removes the animation and bounds the convergence, so the class is closed by construction; the pin's watchdog stands as insurance. Recorded honestly: the hang itself was not re-observed.
+- **Harness facts measured this batch (they shaped the fix):** `ScrollViewProxy.scrollTo` reaches an UNREALIZED `LazyVStack` row ONLY through the row's ForEach identity — an explicit `.id` on an unbuilt row is unknown to the reader (a reveal of an off-screen card moved nothing; the same reveal by the ForEach identity landed at top=0.0). Geometry reports (`onGeometryChange` in the scroll's named space) do NOT follow an AppKit-driven `NSClipView.scroll(to:)`, so the landing stays SwiftUI-driven. The last row of a page can never sit at the top (SwiftUI clamps) — the pins target rows with a viewport of content below them.
+
+#### Per-row dispositions (filled as rows close)
+
+| Row | Disposition | Pin | Red-on-old |
+|---|---|---|---|
+| 44 | FIXED — Outline's landing rebuilt; bare focus seeds caret 0 | `BookOutlineLandingTests.aChapterRevealLandsAtTheChapterWithAStoryExpandedAndLive` · `.aBareFocusLandsAtTheFirstBlock` | PENDING |
+| 9 · 12 | FIXED (row 44's mechanism) | the chapter pin above | PENDING |
+| 47 · 7 · 23 | FIXED — a note-row click focuses + reveals through the model slot; the anchor is the row's ForEach identity. Row 23's "intermittent" IS this: the old reveal worked only for a card that happened to be realized | `.anOffScreenCollapsedNoteIsRevealedAtTheTop` | PENDING |
+| 14 | FIXED — the body's chapter headings are doors (`navigateToChapter`); the navigator's chapter click survives an expanded story (the chapter pin) | the chapter pin | — (door class) |
+| 8 | PENDING | | |
+| 13 | PENDING | | |
+| 22 | PENDING | | |
+| 38 (book half) | PENDING | | |
+| 40 | PENDING | | |
+| 45 | PENDING | | |
+
+#### Commits (in order)
+
+1. PENDING(hash) — rows 44/9/12/47/7/23/14: the landing rebuilt + pins + this record's skeleton.
+
 ---
 
 ### BATCH A — THE CHROME (brief for a FRESH Fable implementer session; DRAFTED 2026-09-01 ~05:40 by the orchestrator — spawn ONLY after batch B's record is closed; one code agent at a time)
