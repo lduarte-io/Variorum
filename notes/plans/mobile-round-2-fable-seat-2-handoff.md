@@ -46,11 +46,11 @@
 
 | | |
 |---|---|
-| branch | `mobile`, pushed through **PENDING(batch-10 close hash)**; merge-base with main `43a35ef` (re-derive — main moves) |
-| mobile suite | **PENDING(batch-10 close count)** green; 2 known issues = the ONE documented diagnostic test (`MobileTrashTests.anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor`). The trail: 632/96 cutover → 661/98 (6b) → 667/99 (9) → 678/99 (4.5c-phone) → 712/102 (7) → PENDING (10). A full-suite red at `MobilePerfWalkTests.typingAtTheViewportHoldsThePerKeystrokeBudgetAt100k` is the KNOWN load-flaky pin; a runner restart/death mid-suite has been seen FOUR times under load this round — re-run and report both, never conclude from one |
+| branch | `mobile`, pushed through **`3694a82`** (batch 10's unit close) + this file's fill; merge-base with main `43a35ef` (re-derive — main moves) |
+| mobile suite | **727/103** green (batch 10's unit close, 2026-09-01); 2 known issues = the ONE documented diagnostic test (`MobileTrashTests.anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor`). The trail: 632/96 cutover → 661/98 (6b) → 667/99 (9) → 678/99 (4.5c-phone) → 712/102 (7) → 727/103 (10). A full-suite red at `MobilePerfWalkTests.typingAtTheViewportHoldsThePerKeystrokeBudgetAt100k` is the KNOWN load-flaky pin; a runner restart/death mid-suite has been seen FOUR times under load this round — re-run and report both, never conclude from one |
 | hygiene | zero committed `Sources/`, `Shared/`, Mac-target, EditorBrain, schema, build-config changes ALL SEAT (fence-grep verified at every unit close); marker 7 |
-| this seat shipped | **6b** the per-note tray (PL-14 CLOSED) · **9** the ⋯ vocabulary (the selection defect TRACED, awaiting her device experiment) · **4.5c-phone** (the liveness seam store-confirms every refusal; the FULL ladder) · **7** takes & block doors phone-local (PL-10 (a)/(c)/(d)) · **10** navigation — PENDING(its outcome line) |
-| her phone | **PENDING(install outcome)** — the seat's closing act installs batch 10's closed tree (Release build, `devicectl`, her iPhone 17 Pro `<device-udid>…`); until that line is filled, assume she runs the 2026-08-21 build. First launch of the new build migrates the phone's store to the keyed format (PL-15(b)) |
+| this seat shipped | **6b** the per-note tray (PL-14 CLOSED) · **9** the ⋯ vocabulary (the selection defect TRACED, awaiting her device experiment) · **4.5c-phone** (the liveness seam store-confirms every refusal; the FULL ladder) · **7** takes & block doors phone-local (PL-10 (a)/(c)/(d)) · **10** navigation (the Starred‹Shelf›Library band with a settle spring; the starred page as a face; New Note/New Chapter inside a book with refusals spoken beside the doors) — review 0B/2M/4m/2n, wave `8cb9c25`, closed `3694a82` |
+*[removed for publication]*
 
 ## 2. THE REMAINING ROAD, in order (the first seat's §3, burned down) — AFTER the merge + the #94 hoist batch (see the banner)
 
@@ -121,7 +121,7 @@
   move) · 4.5c-phone's (`presenting:` on Rename Lens; the seam-carve
   deferral) · 7's (door placements · the emoji road's owned-sheet chrome ·
   the `Select` entry button · the confirm-on-bulk-delete doctrine reading)
-  · 10's — PENDING · the standing #87/#89/#90 + 6c's Q-set + the filter
+  · 10's (the band arrangement · the tap glide · the old starred region retired · the finished-book doors staying · the assign-to-chapter door's placement — HERS) · the standing #87/#89/#90 + 6c's Q-set + the filter
   batch's set + the union stamp mapping.
 - **Informational:** the four session deaths (all Opus-pool session
   limits; zero commits lost) and her plan upgrade; the stale
@@ -163,7 +163,7 @@
   `~/.claude/projects/-<home>-dev-variorum/memory/mobile-round-2-fable-seat.md`
   — keep it current at every unit close and every limit warning.
 
-## 5. THE ONE THING NOBODY OWNED — DISCHARGED AT THIS SEAT'S CLOSE (PENDING confirmation in §1)
+## 5. THE ONE THING NOBODY OWNED — DISCHARGED AT THIS SEAT'S CLOSE (confirmed: §1's phone row)
 
 **Her phone ran the 2026-08-21 build all round;** the install of batch 10's tree is this seat's last act at her explicit word. Five closed units, three
 fixed BLOCKERs, the whole recovery story, the tray, the ⋯ vocabulary and

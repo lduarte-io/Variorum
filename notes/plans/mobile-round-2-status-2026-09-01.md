@@ -133,3 +133,8 @@ multi-tenant): ✅ closed · PL-7 (13h): future · PL-9 (bridge door judgment): 
   already so I'll be able to get more of a feel for the app."* The install is what turns the
   round's five closed units into her lived experience; the device queue (§C) is what she can
   answer once it is on her phone.
+
+- **DONE 2026-09-01 22:41 MDT — INSTALLED.** Batch 10's closed tree (`3694a82`; app bytes `8cb9c25`,
+  mobile 727/103) built Release and installed to her iPhone 17 Pro via `devicectl` (bundle
+  `io.lduarte.VariorumMobile`, exit 0). The seat closes; the round is PAUSED. Successor:
+  `notes/plans/mobile-round-2-fable-seat-2-handoff.md` §0.
