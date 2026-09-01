@@ -154,3 +154,16 @@ proven on her real account).
   premise is that none is needed (Step 0 enforces).
 - Fragments-side implementation — the brief carries; their repo is
   hands-off.
+
+## ADDENDUM (2026-09-01 — from the pre-13x postures design, at the author's word)
+The minimal abuse guard gains two named items: **(1) the re-authentication doors** — Replace Keys,
+account deletion, and the Standard-mode confirmations (change-passphrase without biometrics, the
+plaintext export) verify the ACCOUNT PASSWORD through a sign-in call against the suite issuer; that
+road inherits Supabase's auth rate limits — state the numbers, pin a test that a burst of wrong
+passwords is refused, and make the app's refusal wording honest ("too many attempts — wait N
+minutes"); **(2) recent re-authentication for the destructive RPCs** — `account_data_truncate` and
+`sync_purge_execute` should require a session re-authenticated within a short window (an auth-time
+claim check inside the RPC, the tenant-scoped-guard pattern), so a stolen long-lived token cannot
+empty an account's server copy from a custom client. Record: `notes/plans/pre-13x-postures-design.md`
+§18-I (the back-door audit). Both are server SQL + `Sync/`-adjacent — the Fable rider.
+

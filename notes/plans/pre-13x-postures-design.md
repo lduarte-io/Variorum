@@ -77,7 +77,7 @@ can never read your writing in either mode.** The only difference is **who holds
 | opening | silently, on any device signed into your iCloud | Touch ID / Face ID (passphrase fallback), or the passphrase every time |
 | a new device | sign into iCloud + sign into Variorum → everything, nothing typed | sign in + type your passphrase (or twelve words) once |
 | stops | someone in your iCloud? **no.** someone at your unlocked Mac? **no.** the Variorum server? **yes** | someone with your Mac's login password? **yes.** someone in your iCloud? **yes.** the server? **yes.** someone holding your secrets? **no** |
-| if your computer dies | nothing lost — iCloud (or sync + your passphrase, if set) brings it back | sync + your passphrase; or a backup + your passphrase/twelve words |
+| if your computer dies | **with sync:** nothing lost — sign in + iCloud brings everything back. **Without sync:** iCloud holds your KEY, not your writing — you need a copy of the library file that survived the Mac (the app's backup folder placed in iCloud Drive, or Time Machine) + your iCloud | **with sync:** sign in + your passphrase. **Without sync:** a backup that survived the Mac + your passphrase or twelve words |
 | the floor | lose every Apple device AND every Apple recovery path AND (if set) both secrets | lose every enrolled device AND both secrets — **gone; nobody can help, and that is the point** |
 | optional extras | a passphrase + twelve words (one more door in) | an idle-minutes re-lock; "always ask for the passphrase instead of Touch ID" |
 
@@ -274,6 +274,8 @@ The re-issued carry item states: two postures; the passphrase is the only thing 
 the iCloud mirror is Variorum-local and never a Fragments road.
 
 ## 11. MIGRATION (existing stores — pre-launch: hers and the phone)
+**There is exactly ONE existing enrollment — the author's (her Mac + her phone).** The backfill and the
+posture mapping below are her two devices, run in her presence; no population migration exists.
 - Biometric/Passphrase mode + escrow off → **Castle**: at first unlock, move the E2EE Keychain
   material into `sync_state`, delete the E2EE items (plain + CF-12 gated), re-bind the tokens, retire
   the dial keys, write the envelope's master wrap + descriptor.
@@ -348,9 +350,14 @@ Then the cold-review ladder; the two drills; her acceptance walk on both devices
 
 ## 16. OPEN RULINGS FOR HER
 (a) CF-11 forget door folded into sign-out? (b) re-key retained backups at Standard→Castle, or
-record the pre-switch rule? (c) a keyless byte-copy backup at lock time? (d) "Pause sync" as a plain
-convenience switch — offer or not? (e) Castle's idle default (off; N minutes)? (f) the signup
-password minimum. (g) the exact Standard consent sentence and the Castle ceremony's floor sentence.
+record the pre-switch rule? (c) a keyless byte-copy backup at lock time? ~~(d) "Pause sync"~~ —
+**PARKED 2026-09-01 as 17k** ("may or may not happen"), as is the decrypt-without-Variorum recipe
+(**17j**). (e) Castle's idle default (off; N minutes)? (f) the signup password minimum. (g) the exact
+Standard consent sentence and the Castle ceremony's floor sentence — THE POSTURE COPY (§2 is its
+bones; 13s re-voices). **(h) NEW — the backup DESTINATION under Standard:** default the 13l backup
+folder into iCloud Drive when available (with the one sentence: "your Apple account then holds
+everything — key and writing"), or a chooser that says what each placement means? Without it a
+no-sync Standard user's backups die with the Mac while the key survives — §18-I scenario 1.
 
 ## 17. CANON DELTAS AT CLOSEOUT
 AppSpec §14 (this phase's delta) + §7's `setting`/`sync_state` note (keys live in `sync_state`);
@@ -584,3 +591,65 @@ account-password re-authentication is a sign-in call against the suite issuer (1
 email+password road) and inherits Supabase's auth rate limits — 13y's abuse guard should name the
 re-auth doors; stale iCloud items for libraries that no longer exist are harmless and deliberately
 never swept (they still open a surviving backup of that library — a feature).
+
+### I. THE FINAL AUDIT (her 2026-09-01 question: "have I given my users the real security I'm promising, without any back doors? is someone going to be shocked they've lost their work in any tricky scenario?")
+
+**Back doors — Castle, claim by claim.** *The server cannot read:* true — the vault's wraps open only
+under the passphrase or the words; keys never leave clients. *Apple cannot read:* true — no iCloud
+item exists in Castle (after the switch re-keys both the store and the sync keys). *Your login
+password cannot read:* true — the library key is gated or absent, the sync keys sit inside the
+library, a fresh store can only ask. **The one capability a stolen SESSION keeps, disclosed:** a
+custom client holding your tokens can push tombstones or call the truncate RPC — it can DISRUPT
+(deletions land in the 30-day Trash on every device; the server copy can be emptied and re-uploaded
+from any device), never read. The mitigations: tokens device-bound; 13y's abuse guard should require
+a RECENTLY RE-AUTHENTICATED session for the destructive RPCs (truncate, purge) — noted on 13y. The
+deliberate second secrets — the twelve words; an enrolled device ("as powerful as your passphrase");
+Replace Keys by account password (reads nothing) — are disclosed in the ceremony, which is what
+separates a door from a back door. Riders that must hold: the scheduled `.md` insurance WARNS under
+Castle (R13p-8's rider, kept); crash reports (13r, opt-in) carry no content; the plaintext export is
+the ONE deliberate escape and asks for the passphrase in Castle.
+**Back doors — Standard:** the honest list IS the design: anyone fully in your Apple account (and
+Apple's recovery chain), and anyone at your unlocked device — and with an iCloud address as your
+account email, sync too (the compound warning). Nothing undisclosed.
+
+**"Shocked to lose my work" — every scenario walked, with the answer each must have in copy:**
+1. **Standard, NO sync, the Mac dies.** iCloud Keychain holds the KEY; the WRITING was only on that
+   Mac, and the app's own backups live on the same disk. Unless the backup folder lived in iCloud
+   Drive (or Time Machine ran), the writing is gone — with the key safely in iCloud. THIS is the
+   shock scenario, and the §2 table overstated it until this audit ("nothing lost — iCloud brings it
+   back"). Corrected: the sentence is conditional, and §16(h) puts the backup destination into the
+   design. Sync users are not in this scenario (the server is the copy).
+2. **Standard + sync, loses every Apple device and every Apple recovery path.** Sign in + the
+   passphrase (or the words) brings everything back — IF they still know the passphrase they set once
+   at sync setup and never used since. The sync-setup ceremony must say: *"keep your twelve words even
+   in Standard — they are your way back if you ever lose your Apple account."*
+3. **Castle, forgot the passphrase, an enrolled device opens by Face ID / Touch ID:** change it there.
+   No loss. **No Touch ID, no words:** the floor — said in the ceremony as the sign the lock is real.
+4. **Passphrase changed on one device; another device offline for weeks:** the old one still opens it
+   (cache); the prompt fires at the next connection; if the new one was forgotten meanwhile, the
+   unlocked device changes it again. No loss.
+5. **Replace Keys from a stale or near-empty copy:** the T1 count-and-dates warning + the typed
+   confirmation; the second press is deliberate. Anything only on the server is named before it goes.
+6. **Deleted notes vanish after 30 days:** the Trash is visible on every device; Put back; the purge
+   runs only past the horizon; backups are ciphertext + envelope.
+7. **A restored OLD backup after Replace Keys:** lands in keys-replaced; in Standard the iCloud mirror
+   heals it with nothing typed (a corner to build: prefer the mirror when the store's keys mismatch
+   the vault); in Castle, the passphrase once.
+8. **The Standard → Castle switch crashes mid-way** (store re-key · Replace Keys · item removal are
+   three acts): a persisted marker (the `AccountRekeyMarker` pattern) makes re-running complete it, and
+   the iCloud items are deleted LAST — never a half-switched library with no key anywhere.
+9. **Apple resets iCloud Keychain during account recovery (Standard):** existing devices keep their
+   local copies; a new device afterwards needs the passphrase (sync) or a surviving copy + nothing
+   (no sync — scenario 1 again). Disclosed as the Standard floor.
+10. **Lost the twelve words:** regenerate from any unlocked enrolled device. No loss.
+11. **A shared family iCloud (Standard):** the co-user can read — Standard's own sentence.
+12. **The plaintext export left lying around:** the warning says exactly that; a user act.
+Every row above is either already a step in §§3–15 or was added at this audit (§16(h); the marker in
+row 8; the mirror-heals-restore corner in row 7; the sync-setup sentence in row 2; the 13y note).
+
+**The two-sentence version, for when the length of this file makes it dizzying:** *Standard — your
+Apple account holds the key; the server can't read; back up the file somewhere that survives the
+Mac. Castle — only you hold the key; know your passphrase and keep your twelve words; an enrolled
+device can always set a new one.* Everything else is execution and copy, and the two drills catch
+what the sweep missed.
+

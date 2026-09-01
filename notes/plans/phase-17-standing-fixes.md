@@ -995,6 +995,25 @@ against the CODE unless the author rules the sentence wrong. **Related, kept sep
 daily-Journal identity memo (13y) and the dedupe's late-registry residual (KnownIssues, 13y).
 
 
+## 17j — PARKED: the "open your library without Variorum" recipe (may or may not happen)
+
+**Status: parked, unstarted** (author, 2026-09-01: *"I'm not going to worry about a decrypting
+script… I'd park them as 17 items or something. they may or may not happen."*). **What it is:** a
+published, tested recipe that opens a Variorum library with no Variorum app — the key envelope's
+format (`variorum-keys.json`: Argon2id descriptor → RFC 3394 unwrap → the raw 256-bit key) and the
+`sqlcipher` CLI's raw-key pragma — plus a ~30-line reference script. **Why it would matter:** it makes
+"you own your files" true even if the app vanishes; the plaintext SQLite export (pre-13x, ruling 9)
+covers the everyday need, so this is the belt. **Owner if it runs:** its own 17 entry, after pre-13x
+(the envelope format is that phase's). Record: `notes/plans/pre-13x-postures-design.md` §4 / §18.
+
+## 17k — PARKED: a plain "Pause sync" switch (may or may not happen)
+
+**Status: parked, unstarted** (same ruling, same day). **What it is:** a convenience switch on the
+sync row that stops rounds until flipped back — NO posture semantics, NO security claim (deletion
+damage is already bounded by tombstones, the 30-day Trash on every device, the purge horizon, and
+local backups; Castle enrollment needs the passphrase). Cheap: the scheduler's stop + one honest
+line on the sync row. Record: `notes/plans/pre-13x-postures-design.md` §14 item 22 / §16(d).
+
 ## Not slotted — needs the author's call
 
 ### P39. Feature modules call each other directly — 20 mutual pairs, including a hard Library↔Pool view-model cycle and a sibling view model constructed inline
