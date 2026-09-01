@@ -294,7 +294,7 @@ the A1 backup (C-3) → the field-guide re-seed if any lesson text changed → t
 
 - R-cor-3's PROVISIONAL reading of the Library panel (read preview, not writable) — ratify or redirect.
 - *(Read's default half was PROVISIONAL for one turn — RULED `edit` by her follow-up; nothing to ratify.)*
-- Row 20: what is unclear about Lenses — the candidates the orchestrator brings.
+- **The Lenses + Compare design memo — `notes/plans/act10-correction-memo-lenses-compare.md` §7, eight rulings** (R-cor-6's deliverable, WRITTEN; the build is its own phase at her slot).
 - Row 26: the Blocks context panel's order (facts first) — the architect's reading.
 - Any scalpel revert taken under C-5 (none expected; her lean recorded).
 - The row-36 KEEP/DROP table for word counts.
