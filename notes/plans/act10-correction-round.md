@@ -970,7 +970,7 @@ Honesty notes: the dev store now carries the walk's test tags on "three ways of 
 
 - **Counts:** the masthead/door/row-alignment/flow pins 9 / 4 green (`r58-pins-2.log`). **Full Mac suite on the final tree: 2014 tests / 352 suites, all green** (`** TEST SUCCEEDED **`, 301.9 s; log `r58-full-mac.log` in the session scratchpad; the ten `TutorialWalkTests` suites inside it green; **the load-flaky `rewriteStrategyLatencies` (2 cases) and `CanvasDragTrackingTests` PASSED in-run — nothing re-run, nothing loosened**). **Arithmetic against batch A's recorded 2010 / 351:** +2 tests (`MastheadLayoutTests`' two geometry pins) +2 tests (`TrailingFlowRowsTests`) = **+4 ⇒ 2014**, exact; +1 suite (`TrailingFlowRowsTests`) ⇒ **352**, exact. Core 1524 / 165 untouched (zero `Sources/VariorumCore` lines); `Shared/` untouched (the mobile target sees no change).
 
-- **Commits:** `7dee4c7` (the fix + the geometry pins + the record opened) · `b667932` (the red-on-old evidence) · `a3dfe16` (the orphan rule + its pins + the warning fix) · `PENDING-HASH` (the walk's captures + sheets, the counts, this record's close) · the hash fill.
+- **Commits:** `7dee4c7` (the fix + the geometry pins + the record opened) · `b667932` (the red-on-old evidence) · `a3dfe16` (the orphan rule + its pins + the warning fix) · `1409d52` (the walk's captures + sheets, the counts, this record's close) · the hash fill.
 
 ---
 
