@@ -1144,6 +1144,23 @@ Honesty notes: the dev store now remembers `blocksWorkbenchPanelWidth = 458`, `r
 
 Everything is committed and pushed through `cfa4c9b` (+ this record commit); no revert is in flight; the tree is clean; the final Mac suite is green at 2028/356 exact. Every batch-C row is FIXED or RECORDED — none DEFERRED beyond the two with named owners (54 → 13u2 item 1; 60 → 13u2 item 1's family), none REVERTED (C-5 unexercised). Three dispositions are honest limits: the `read ▸ pages` face has no per-block click-through (a `CTFrame` page's click opens links only — landing from `pages` means switching to `continuous` or `edit` first; unpinned, recorded); the outline toggle's fade is walked, not pinned (a 0.18 s animation); row 60's arrival blank (~0.3 s to the observations' first delivery) is measured and owned, not fixed. Row 26's order and Read's per-note face memory are PROVISIONAL for her (§7). Walk suggestions: Boscombe ▸ the seven-mode rail · ⌘3 (opens on `edit`, the column standing at the current block) · click a pane block (live in place, one ring) · `read` ▸ a paragraph click (flips to `edit` at that block) · `pages` (the book's leaves) · the round trip Write→Takes→Read→Blocks→Write on one block · Blocks: a row click (instant), the seam drag (slow drags register; fast ones may not — the walk note), the panel's `history` door (one right region), ⌘1 (the pane gone). Known non-C residue seen in passing: the ⌘K "Block History" palette door speaks Write's caret sentence from Blocks (F's surface, noted); nothing in the book, Compare/Lenses, the masthead or the library panel was touched.
 
+
+#### BATCH C RECORD — CLOSED by the orchestrator (2026-09-01 ~13:30)
+
+Spot-check walked on the final dev build (`orchestrator-c/`): the SEVEN-mode rail with `read` third; Read
+opens on `edit` with the `▸ 01` column and the switch `edit | read`; the current block followed Write →
+Takes → Read(edit, block 02 selected) → Blocks (block 02's panel open) — row 39's round trip seen live;
+the `read` face is the calm serif page with `continuous · pages` and Aa; a paragraph click flips to `edit`
+(an inter-paragraph click is not a door — the book's own rule; my first probe hit padding); Blocks shows
+facts-first with the doors under (row 26 as ruled, PROVISIONAL for her). The implementer's 36-tile sheet
+carries the rest (the divider, the history scoping, the timing series). Counts at close: **Mac 2028/356
+green** (A's 2014 + 14 / 352 + 4); core + `Shared/` untouched; spine green. Residuals owned: row 54 →
+13u2 item 1; row 60 (the ~0.3 s observation-first-delivery blank) → 13u2; row 62 (the harness
+executor-check crash) → 12; rows 26 + Read's face memory PROVISIONAL in §7. The seeder's lesson text moved
+to the seven-mode truth — the LIVE re-seed stays the closeout's (§7b item 8). **Batch F spawned next.**
+
+---
+
 ### BATCH F — THE RECOVERY FAMILY (brief; DRAFTED 2026-09-01 ~05:55 — spawn after C closes; her "special attention")
 
 **Token discipline (binding, from the orchestrator handoff §2c):** build ONE contact sheet of your capture directory with `python3 notes/plans/act10-correction-screens/tools/sheet.py <dir>` and name it in your record; the orchestrator reads the sheet first and opens full captures only where a tile earns it.
