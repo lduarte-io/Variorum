@@ -177,14 +177,14 @@ present), and the 13j recovery doctrine (the Trash is the recovery door).
 | 4 | Read: "doesn't have a centered title above the read" | Masthead (all modes) | The title sits in an asymmetric masthead after item 5's tag cluster took the right — same defect as rows 16/19 | A | TRACED |
 | 5 | Read: "I want the mode where you can scroll horizontally through the pages that the other one has" | Note Read (`read` half, R-cor-7) | `ReadModeView` has no paged mode; the book's paged view (13b Stage 4 — `scroll · pages`) is the reuse, seen working in the book's Read tab on the walk | C | TRACED |
 | 6 | Read: "that contents looks kind of weird with how it's cut off" | Note Read's contents column | Mid-word width truncation of first lines | C | OPEN |
-| 7 | Book: "clicking on a block automatically navigate[d] you there, and now you have to expand it before editing it" | Book Outline | Regressed click model in the Outline rewrite; expand becomes a separate affordance | B | TRACED |
+| 7 | Book: "clicking on a block automatically navigate[d] you there, and now you have to expand it before editing it" | Book Outline | Walk-confirmed (captures 49/25): a note-row click selects + toggles expansion but does not reveal (row 47's mechanism); expanding lands focus on the LAST block. Ruled shape: a note-row click REVEALS and lands in the note at its first block (or the clicked block via row 38's door); the ▸ disclosure is the separate expand affordance | B | TRACED |
 | 8 | "the left outline looks a bit weird in sherlock holmes with the chapters + the blocks named the same" | Book navigator | Chapter and note share a title; collapse the note line when it equals its chapter (read-time) | B | TRACED |
 | 9 | "clicked on an item in the middle of the outline… scrolling went absolutely berserk… landed me at the end" | Book Outline | `BookView.swift:895/932` — `withAnimation { proxy.scrollTo("page-\(id)", anchor: .top) }` over a lazily-realized stack of 9k-word cards: the SwiftUI lazy-stack scrollTo class (estimates, travel, overshoot). NOT TK2. Pin on the Sherlock book | B | TRACED |
 | 10 | "the tags are also misaligned from the text" (image 4) | Library rows | Baseline/vertical-center mismatch | A | OPEN |
 | 11 | "the word book is misaligned" (image 5) | Library rows | Same class as 10 | A | OPEN |
 | 12 | "Scrolling via outline in the book view has completely broken" | Book Outline | Row 9's mechanism | B | TRACED |
 | 13 | The gutter "177w… 236w · ⑂ takes on 1 block" is "crowded", low value; "the point was that the note info that used to be below it would be to the right of it" | Book Outline details gutter | Item 18 invented a facts string instead of moving the note details that rendered under the opening paragraphs; move THOSE aside, drop the string (C-6) | B | TRACED |
-| 14 | "clicking on the chapters isn't even TRYING to navigate the book at all" | Book Outline | Chapter headers have no scroll target wired | B | TRACED |
+| 14 | "clicking on the chapters isn't even TRYING to navigate the book at all" | Book Outline | Walk: a navigator CHAPTER click DOES navigate when every card is collapsed (captures 23/50); with a story expanded it livelocks (row 44). The main column's chapter HEADINGS (⠿ name) are not doors at all — her click may have been there. Fix: chapter headings become doors too; the navigator's chapter click survives expansion (row 44's fix) | B | TRACED |
 | 15 | "showing a tag icon and a + tag at the same time… that's just sloppy"; click → a "tag creator" field slides out, cursor active | Masthead tag cluster | `MastheadTagCluster.swift:54–76` renders cards + "+ tag" + the `#` fold (K12's sticky fold). ONE door with her slide-out field; the fold preference folds into it | A | TRACED |
 | 16 | Compare "horribly misaligned" (buttons useful, clarity improved) | Compare | Two left edges/baselines in the flow | D | OPEN |
 | 17 | Compare: "'This note' is showing nothing" | Compare anchor column | `CompareBoardView.swift:938` `anchor.title ?? "This note"` — a journal entry's title is nil so the literal shows; and "related blocks only" is emptying the ANCHOR, which it must never filter — peers only | D | TRACED |
@@ -199,22 +199,25 @@ present), and the 13j recovery doctrine (the Trash is the recovery door).
 | 26 | Blocks: "the text is also above the details" | Blocks context panel | Architect's read: the block's full text card sits above the facts; the facts should lead (the text is already in the row) — correctable at her word | C | OPEN |
 | 27 | "opening block history doesn't open it correctly" | Block History from Blocks | From Blocks it opens as a THIRD right column beside the workbench's own panel → overflows the window (her "Clos…"/"Restore" cut). One right region at a time | C / F | TRACED |
 | 28 | "not sure what the difference between savepoints and lineage is supposed to be, or if they're both in there" | Block History pane | Both are in it (savepoints = each take's saved moments; lineage = the block it came out of); the sections must READ as sections | F | OPEN |
-| 29 | "the block history tab stays open as you move to other modes which looks bad and is confusing" | Block History host (`PostDetailView.swift:286`) | The pane is not scoped to the mode that opened it; scope it | C | TRACED |
+| 29 | "the block history tab stays open as you move to other modes which looks bad and is confusing" | Block History host (`PostDetailView.swift:286`) | Walk-confirmed (captures 45/46): opened from Write for block 3, it persists into Takes showing block 3's history while block 1 is live — stale AND persistent. Scope it to the mode (and the block) that opened it | C | TRACED |
 | 30 | "the index tab is ALSO uneditable in the notes view… it's literally a new writing mode" | Note Index | Built read-right / edit-in-a-small-left-card (`IndexModeView.swift:380–387`). Her ruling: the RIGHT pane is the writing surface (click → that block goes live there); the left column is a navigator | C | TRACED |
 | 31 | "the index dropdown on the left is also awkwardly sized, the text is bigger than it" | Note Index left column | The expanded card is the misplaced live editor of row 30; retired with that fix | C | TRACED |
 | 32 | "not sure if all of these changes were noted or if you're going to have to look through commit history" | — | Every wave has a record; the 34-commit trail is complete. RECORDED — the gap was use, not record | — | RECORDED |
-| 33 | (R-cor-3) "when I click on a book, i just still see the last note i clicked on - obviously bad. a book could show the outline that it has" | Library right panel | A book selection shows the book's outline in the panel | E | OPEN |
+| 33 | (R-cor-3) "when I click on a book, i just still see the last note i clicked on - obviously bad. a book could show the outline that it has" | Library right panel | Walk-confirmed exactly (capture 20: the book row highlights, the panel keeps the previous note). A book selection shows the book's outline in the panel | E | TRACED |
 | 34 | (R-cor-3) "the line between the 'note info' and the library disappears when you're tabbed out, and it needs significant work" | Library right panel boundary | Inactive-window appearance loses the divider/wash; hold the boundary in both states | E | OPEN |
 | 35 | (R-cor-4) "special attention… to the lineage / history / archive / trash" | This Note's Tray · Block History · Archived · Trash | Batch F walks each surface fresh, lists every defect found, fixes them with pins; the rebuilt tray (Act 10 item 1) is walked at every pane width | F | OPEN |
 | 36 | (R-cor-4) "word count shouldn't just be thrown in everywhere just because" | All Act 10 chrome | Sweep table: every word-count/metric display in the eight rewritten views (Snippets 10 · Read 6 · Blocks 4 · Index 4 · BookView 4 · LibraryInfoPanel 4 · Compare 2 · BookIndex 1) verdicted KEEP-with-reason or DROP (C-6) | A (table) · each batch (its rows) | OPEN |
 | 37 | (R-cor-4) "not sure what the 'reading time' was calculated on… how random is it?" | Note Read | `words ÷ 200` rounded up, a fixed 200-wpm convention — not random, not measured. Stays per her word | — | RECORDED |
 | 38 | (2nd msg) 13u item 17 — "if you click somewhere in the read mode, that it doesn't open there in the outline or the writing mode… it might make sense to pull that issue up into this phase, since it seems like there's a lot of 'cross pane interaction'" | Read → Index/Write click-through; the book's Read → editable view | PULLED IN (her word): the ONE scrolled-open door — click a sentence anywhere read-cheap, land in the editing surface at that block with the caret there — built once here and reused by rows 22/30 and the book; 13u2's item 17 is re-homed to this round | B + C (one mechanism) | OPEN |
-| 39 | (2nd msg) "I haven't even gotten into blocks and index and how clicking through them is impacting the regular write and takes mode" | Cross-mode position continuity (Write ↔ Takes ↔ Index ↔ Read ↔ Blocks) | W8-1's "index tracks position with take / write / probably block too": the walk exercises every mode switch with a block selected and records whether the position follows; each miss becomes a row | triage → C | OPEN |
+| 39 | (2nd msg) "I haven't even gotten into blocks and index and how clicking through them is impacting the regular write and takes mode" | Cross-mode position continuity (Write ↔ Takes ↔ Read ↔ Blocks) | Walk: position is PER-MODE MEMORY today, not one position — Index kept block 03 while Takes made block 1 live; Write→Takes carried the caret's block when the caret was in block 1 (capture 39/40); Blocks keeps its own selection. Ruled by W8-1's letter: ONE current block follows you across Write/Takes/Read(edit)/Blocks; batch C builds the one authority and pins it | C | TRACED |
 | 40 | (2nd msg, image 16) the book Outline's expanded note shows the bottom bar's items stacked VERTICALLY in a floating side card ("block 1/1 · block ▾ · Takes · commit ⌘S · history / note ▾ · comments · Aa / 5w block · 5w in note · ?") — "looks kind of weird… maybe the note menu needs to be collapsible… what's in that menu and how it looks needs to be a bit clearer" | Book Outline's in-place editor chrome | Trace where the side card comes from (the `CommitBar` axis introduced at wave 2c); make it read as one clear, calm control — collapsible if the trace says a stack is the right shape at that width | B | OPEN |
 | 41 | (2nd msg; RULED R-cor-6 — they need a design) "if compare needs its own phase, give it its own phase!! that's fine" | Compare + Lenses | RULED R-cor-6: the design memo is written in-round, the build is its own phase. Earlier note: batch D fixes the defects (rows 16/17); if the triage walk finds Lenses/Compare need a DESIGN rather than fixes, the orchestrator writes the brief for a phase of their own instead of half-building it (the S4-16 condition) | D (memo) | RULED (R-cor-6) |
 | 42 | (2nd msg — RULED R-cor-5: one tab, Read, with the Index's outline) "I also wonder if Index / Read could be condensed into a single tab - making it more similar to book, where it's a selector within a place you're in. and the outline button could hide / show the index, and the index could function as the outline." | The note mode row | A product call — asked at the sitting with the architect's recommendation (see the sitting record) | C | RULED (R-cor-5) |
 | 43 | (2nd msg) "If I need to ship the app with just writing and takes, I'd be willing to do so, but ideally that won't be necessary" | — | Recorded as her floor, not the plan; the round's bar is every mode useful, bug-free and beautiful | — | RECORDED |
 | 44 | **FOUND IN THE TRIAGE WALK — THE BOOK OUTLINE HANGS (BLOCKER): expand a long story, click a chapter in the navigator → 100% CPU, main thread livelocked, window unresponsive (190 s+ observed; killed).** Her "berserk… landed me at the end of the note" is this defect's onset. Reproduced first try on the dev store's Sherlock book (steps: open the book · Outline · click the "The Boscombe Valley Mystery" NOTE row in the navigator, which expands the 9,689-word story in place with focus on **block 215/215** · click any chapter row). Sample: `act10-correction-screens/triage/sample-hang-47298.txt` — every hot frame is SwiftUI (`NSHostingView.beginTransaction → GraphHost.flushTransactions → LazySubviewPlacements.placeSubviews → LazyStack.place → ForEachList.applyNodes → … LayoutEngineBox/UnaryLayout`); our only frames are value copies of `ReadingSection`/`Queries.ReadingEntry`. | Book Outline | **Mechanism (traced at the code, to be confirmed by the implementer's pin):** `BookView.swift:1106–1116` — an EXPANDED note composes the FULL `EditorView` (a TK2 `NSTextView` whose height ESTIMATE moves as its viewport lays out — TEXTKIT2 §2) INSIDE a `LazyVStack` row (`:772`), and the navigator's `withAnimation { proxy.scrollTo(…) }` (`:895`, `:932`) animates toward an anchor whose offset depends on that moving height: place → the editor re-estimates → re-place → the target moves → repeat. Related symptom: expanding lands focus on the LAST block (215/215). Fix shape for batch B: an expanded editor's height must be settled before/while a programmatic scroll runs (measure once — `ensureLayout` over the one expanded note is bounded — and hold it; no animated `scrollTo` at an unsettled anchor), or the expanded body leaves the lazy container; plus the focus-lands-at-end fix. **Red-on-old pin: a mounted book with one 9k-word note expanded receives a navigator scroll request and the run loop returns within a budget (a watchdog), landing at the requested chapter.** | B (FIRST) | TRACED (BLOCKER) |
+| 45 | (walk) The book Outline's collapsed card previews only the FIRST block — "A Scandal in Bohemia" previews as "I." (its section numeral); the field guide's cards read fine because their first blocks are prose | Book Outline cards | Preview = the first ~40 words across the note's leading blocks, skipping a lone heading/numeral block (read-time derived, never stored) | B | TRACED |
+| 46 | (walk) Compare offers "make outline note" and "+ note" TWICE — as top-right buttons AND as the two centered offer cards | Compare | Two doors for one act (C-6's counterexample class); one placement per act — the memo (R-cor-6) decides which; the mechanical fix here is not to duplicate | D | TRACED |
+| 47 | (walk) A navigator NOTE-ROW click in the book Outline selects (›) and toggles expansion but never REVEALS the note when it is off-screen — the field guide's "the take ceremony" got its marker and the page did not move; the Sherlock case only "worked" because a chapter click had already placed the note at the top | Book Outline navigator | `BookView.swift:899–911` — "Reveal is SCROLL-TO and never an auto-expand … the `page-<id>` anchor the expanded header does" — the reveal targets an anchor a collapsed card does not carry, so a collapsed note cannot be revealed; this is row 7's "you have to expand it" and row 23's "intermittent" in one mechanism | B | TRACED |
 
 ## 4. The batches (one surface each — C-1). **ORDER AMENDED after the triage walk: B FIRST** — row 44 is a BLOCKER (the book hangs) and the riskiest fix (TK2 geometry inside lazy layout), so it gets the longest soak before the ladder; A (the chrome) follows immediately; then C, F, D, E.
 
@@ -303,4 +306,113 @@ the A1 backup (C-3) → the field-guide re-seed if any lesson text changed → t
 - **Driving recipe that works:** System Events for keys/menus/window bounds (`vd.sh` in the session scratchpad); clicks via a compiled CoreGraphics event poster (System Events' `click at` never reached this SwiftUI window; `cliclick` is not installed). The dev app restores TWO windows at launch (state restoration) — close one. Zoom = Window ▸ Zoom (the green button is Full Screen).
 - **Confirmed on the dev store, beyond her list:** the masthead title centers in the space LEFT of the right cluster in every mode (rows 4/19 mechanism); Compare offers "make outline note"/"+ note" TWICE (top-right buttons + the centered cards); Compare's anchor column is empty even with a titled note (row 17 — the filter empties the anchor); "position" is per-mode memory, not one position (Index kept block 03 while Takes made block 1 live — row 39); the Library's book-row click leaves the NOTE panel showing (row 33, exact); the "this note" rail vanishes whole on leaving a note (row 24); the library keeps the hairline-separator grammar; the book Outline's card preview shows only the FIRST block ("A Scandal in Bohemia" previews as "I." — the section numeral); the expanded note's vertical side card (row 40) reproduces; expanding a note lands focus on its LAST block.
 - **ROW 44 — THE HANG (BLOCKER)** — see the ledger; sample saved beside the captures; the dev build was killed and relaunched to continue.
+- **Walk verdicts written into rows 7, 14, 15, 22, 29, 33, 39; new rows 45–47.** Captures 00–51 (the file names say what each is). The field guide was restored into the dev store via Help ▸ Restore Tutorial… (capture 48) so both books exist for the batches. The Trash (47) and Archived (41) rendered fine at the dev store's content level — batch F seeds real content before walking them.
+- **What the walk did NOT cover (owed to the batches):** Snippets and the Pool (not in her list); Read's outline toggle (R-cor-5/7 redesigns the mode whole); Canvas; the dark appearance; the Study voice (the walk ran in Terminal — every defect walked is voice-independent; batch A checks the masthead in both voices).
+- **Walk CLOSED 2026-09-01 ~05:20.** Batch B spawned next (the hang first).
 
+
+---
+
+### BATCH B — THE BOOK (brief for a FRESH Fable implementer session; written 2026-09-01 ~05:25 by the orchestrator)
+
+**You are the batch B implementer. Read, in this order, IN FULL: this file (§0–§8 — the constitution, the
+round's rules C-1…C-7, the ledger, the triage record); `notes/author-reports/2026-09-01-post-act10-ui-report.md`
+(§1 verbatim; the image rows 2, 6, 11, 16); `notes/TEXTKIT2_NOTES.md` §2; then the code: `App/Variorum/
+Variorum/Features/BookView/BookView.swift` (1,439 lines — the Outline, the navigator, the lazy stack, the
+reveal), `Features/BookView/BookIndexView.swift`, `Features/TOC/BlockTOCView.swift` (the shared outline
+brain), `Features/Editor/CommitBar.swift` (the `.vertical` axis — row 40), `Shared/NoteIndexOutline.swift`,
+and the existing pins `VariorumTests/BookViewTests.swift`, `BookRedesignMountTests.swift`,
+`BookIndexColumnTests.swift`, `BookAscentTests.swift`, `TutorialWalkTests.swift`. Read the hang sample
+`notes/plans/act10-correction-screens/triage/sample-hang-47298.txt` (Call graph section). Do not brief
+yourself from anything else.**
+
+**Your surface is the BOOK, and only the book (C-1).** Rows, in the order to take them:
+
+1. **Row 44 — THE HANG (BLOCKER) — FIRST.** Reproduce it on the dev-store Debug build before touching code
+   (steps in the row; both books are seeded there). Trace the loop yourself; the orchestrator's hypothesis
+   (an expanded note's full `EditorView` inside the `LazyVStack` + an animated `scrollTo` at a moving anchor)
+   is a hypothesis until your pin says so. **Pin:** a mounted `BookView` with one ~9k-word note expanded
+   receives a navigator reveal for another chapter; the pin asserts the main run loop returns within a
+   budget (a watchdog on a background thread that fails the test if the main thread does not yield within,
+   say, 5 s) AND that the requested chapter is at the top. It must be RED on the current tree (the hang)
+   and green after. Fix shape is yours; constraints: P-3 (the expanded editor stays THE one live editor
+   through `PaneTextAuthority`), P1 (no whole-book layout), TEXTKIT2 §2 (never `ensureLayout` the whole
+   book; one expanded note is bounded). Candidates: settle the expanded editor's height before/while a
+   programmatic scroll runs and hold it; no `withAnimation` around a `scrollTo` whose anchor is unsettled;
+   or take the expanded body out of the lazy container. Also fix the related symptom: **expanding a note
+   lands focus on its LAST block** — it lands on the FIRST (or the requested block); pin it.
+2. **Rows 47 + 7 + 23 — the navigator's note-row click.** A note-row click REVEALS the note (scrolls it to the
+   top of the page) and lands focus in it at its first block; the ▸ disclosure is the separate expand
+   affordance; a collapsed off-screen note must be revealable (the `page-<id>` anchor must exist on the
+   collapsed card too, or the reveal must expand-then-scroll — your call, stated). Pin: a collapsed,
+   off-screen note is revealed by a navigator click (RED on old: the page does not move). Row 23's
+   "intermittent" is this row; say so in the disposition if your trace agrees.
+3. **Row 14 — chapters.** The navigator's chapter click already navigates when collapsed (walk capture 23/50)
+   — keep it, and make it survive expansion (that is row 44). The main column's chapter HEADINGS (the ⠿
+   name rows) become doors too (click → that chapter at the top; the drag handle stays a handle).
+4. **Rows 9 + 12 — the scroll class.** After 1–2, walk it on Sherlock: expanded story + middle chapter; note
+   row far below; chapter far above. Any residual travel/overshoot gets its own pin.
+5. **Row 8 — the duplicate line.** In the navigator, when a chapter has exactly one note whose display name
+   equals the chapter's name (case/whitespace-insensitive — `BookNaming.key` is the existing key), the note
+   line collapses into the chapter row (the row still opens the note). Pin on a Sherlock-shaped fixture;
+   the field guide (different names) must be untouched.
+6. **Row 13 — the details gutter.** Drop the invented "236w · ⑂ takes on 1 block" string. The gutter carries
+   what used to render BELOW an expanded note's opening paragraphs before Act 10 — find it in git
+   (`git show 0e6a09e^:App/Variorum/Variorum/Features/BookView/BookView.swift`) and move THOSE details to
+   the side, calm (C-6: no metric without a reason; a word count may stay ONLY where the pre-Act-10 details
+   had one). The right edge stops being "bizarrely open": the card column + gutter share the width honestly.
+7. **Row 22 — the book's Index becomes EDITABLE in place (R-cor-7).** A click in the right pane makes THAT
+   block live right there (the TOC's read-cheap→live upgrade through `PaneTextAuthority` — one live editor);
+   the double-click handoff to Outline retires; the book's READ word-tab stays read-only. Pin: after a click
+   in the book Index, exactly one live pane exists and it is the clicked block (PaneTextAuthority's
+   invariant); the caret is at/near the click.
+8. **Row 38 (book half) — the scrolled-open door.** A click on a sentence in the book's READ tab lands in the
+   editable view (Index, per R-cor-7) at THAT block with the caret there — not at the top, not at the last
+   block. Build the landing target as ONE small brain (`(postID, blockID, characterOffset?)` → the mode
+   switch + reveal + focus) that batch C will reuse for the note; name it and its file in your record. Pin:
+   a Read click on the third block of the second note lands in Index with that block live.
+9. **Row 40 — the expanded note's vertical side card** (`CommitBar` `.vertical`). Make it read as ONE calm,
+   clear control: group what belongs together, drop what the book already shows, collapse the stack when
+   the width says so, and never a floating box of unrelated items. Her words: "collapsible… what's in that
+   menu and how it looks needs to be a bit clearer." Screenshot pair in your record (before/after) —
+   this is the batch's one taste-shaped item; keep every capability present (she rewrites copy later).
+10. **Row 45 — card previews.** The collapsed card previews the first ~40 words across the note's leading
+    blocks, skipping a lone heading/numeral block; derived at read time. Pin on a numeral-first fixture.
+
+**Rules that bind you (from §2b):** one surface — if you find yourself in `PostDetailView`/`SidebarView`/
+masthead code, stop and record it for A/C instead. Every bug-class row lands with a red-on-old pin verified
+by BEHAVIORAL REVERT (switch the mechanism off in place, run the pin, restore, `git diff --stat` empty).
+`TutorialWalkTests` green at the end. **The acceptance gate is USE (C-2):** after the code, walk EVERY row
+above on the dev-store Debug build with a capture per row into
+`notes/plans/act10-correction-screens/batch-b/` (gitignored) — chapter click with a story expanded (no
+hang, lands there) · off-screen note-row reveal · heading click · Sherlock duplicate line · the gutter ·
+book Index click-to-edit · Read click → Index at that block · the side card before/after · a numeral-first
+preview. Name each capture in your record. **Do NOT touch `/Applications` or her real-store app.**
+
+**Environment (§6 verbatim applies) + the driving recipe:** build the walk build with `cd App/Variorum &&
+xcodebuild -scheme Variorum -configuration Debug -destination 'platform=macOS' build`; the product is
+`~/Library/Developer/Xcode/DerivedData/Variorum-*/Build/Products/Debug/Variorum.app` (bundle
+`io.lduarte.Variorum.debug`, the fenced dev store — both books seeded; if it opens TWO windows, close one).
+Drive it with `notes/plans/act10-correction-screens/tools/vd.sh` (`shot <name>` · `click <x> <y>` in
+window-relative POINTS · `dbl` · `key <code> ["command down"]` · `menu <Menu> <Item>` · `zoom`); set
+`VD_DIR` to your batch's capture dir. Clicks go through the compiled CoreGraphics poster beside it
+(System Events' `click at` does not reach this window). Read a capture with the Read tool; captures are 2×
+— window point = displayed pixel × (window width ÷ displayed width). The machine must stay unlocked and
+untouched by you outside the dev window. Mac tests: from `App/Variorum/`, suite-level `-only-testing:`
+(e.g. `-only-testing:VariorumTests/BookViewTests`), confirm the "Test run with N tests" line, zsh
+`pipestatus`; the full Mac suite once at the END (baseline: pre-13u finals Mac 1985/343 + whatever the two
+13u2 commits since added — state the arithmetic); the known load-flaky reds (`rewriteStrategyLatencies`,
+`CanvasDragTrackingTests`) are re-run isolated, never loosened. Never a custom build configuration.
+
+**Resiliency (binding):** commit per row/piece with the standing trailer and PUSH after each; write a
+`LIVE STATUS — BATCH B` list at the top of your record from your FIRST commit and update it every commit
+(what is done, what is next, what is uncertain); **synchronous foreground waits only — never background a
+build or a suite and end your turn waiting on it** (that is how sessions die); if you approach your context
+limit, finish the piece in hand, write the record, commit, push, and stop with a one-paragraph handoff at
+the end of your record — a successor adopts from the repo, never from you.
+
+**Your deliverable:** the code + pins, and a **BATCH B RECORD** appended to this file directly under this
+brief: per row → FIXED (pin name, red-on-old evidence as the issue count under revert) / RECORDED / DEFERRED
+(owner + why); the door brain's name; the capture list; the counts; the commits in order; anything you
+found that she did not report (as new ledger rows, numbered from 48). Then stop. The orchestrator walks
+your rows before the record is marked closed.
