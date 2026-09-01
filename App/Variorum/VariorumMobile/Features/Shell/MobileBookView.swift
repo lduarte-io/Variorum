@@ -113,6 +113,20 @@ struct MobileBookView: View {
                         .padding(20)
                 }
                 bookDoors
+                // **A REFUSAL SPEAKS WHERE THE TAP WAS** (the batch-10 cold
+                // review, MAJOR 2). The doors trail the contents list, so on
+                // a book longer than a screen the header's slot is off the
+                // top of the viewport and a refused door read as nothing
+                // happening. This is the phone's own root-slot grammar —
+                // `MobileStarredView` puts `stars.error(on:)` beside the door
+                // that fired it for exactly this reason.
+                if let refusal = model.doorRefusal {
+                    Text(refusal)
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.alarm)
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 12)
+                }
             }
         }
         .background(tokens.room.ignoresSafeArea())
@@ -167,8 +181,11 @@ struct MobileBookView: View {
     /// derived membership has no row to mint and chapters are refused by
     /// model rule — P-2's own case, and the phone's `showsDailyDoor`
     /// precedent. On a FINISHED book they stay and REFUSE in the family's
-    /// voice; Details' Reopen row is one tap away and a door that vanished
-    /// on finishing would explain nothing.
+    /// voice — **and the refusal renders immediately beneath them**, which
+    /// is what makes that divergence honest (the cold review's MAJOR 2: a
+    /// door kept so it can explain must explain where the finger is).
+    /// Details' Reopen row is one tap away and a door that vanished on
+    /// finishing would explain nothing.
     @ViewBuilder
     private var bookDoors: some View {
         if model.showsBookDoors {

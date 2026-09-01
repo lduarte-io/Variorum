@@ -36,7 +36,18 @@ final class MobileBookViewModel {
     /// fire-and-DO failure (R115) dressed as a success.
     private(set) var chapters: [ReadingSection] = []
     private(set) var truncated = false
+    /// A STORE-READ failure — the screen's own, not a tap's. It belongs to
+    /// the header, where the book's identity is.
     private(set) var lastError: String?
+    /// **A DOOR'S REFUSAL, HELD APART FROM THE SCREEN'S OWN ERROR** (the
+    /// batch-10 cold review, MAJOR 2). The two doors sit at the BOTTOM of
+    /// the contents list; a refusal rendered only in the header spoke
+    /// hundreds of points above the finger that fired it, so on a book
+    /// longer than a screen the tap read as nothing happening at all —
+    /// which is exactly what the finished-book divergence (doors stay so
+    /// they can EXPLAIN) cannot afford. One slot per speaker: this one
+    /// renders beside the doors.
+    private(set) var doorRefusal: String?
 
     init(session: AppSession, readingID: String, window: Int = 300) {
         self.session = session
@@ -174,10 +185,10 @@ final class MobileBookViewModel {
             let post = try await session.runner.run { ops in
                 try ops.newPostInReading(id)
             }
-            lastError = nil
+            doorRefusal = nil
             return post.id
         } catch {
-            lastError = Self.refusal(error, bookName: reading?.name)
+            doorRefusal = Self.refusal(error, bookName: reading?.name)
             return nil
         }
     }
@@ -194,9 +205,9 @@ final class MobileBookViewModel {
             try await session.runner.run { ops in
                 try ops.createSection(in: id, name: trimmed)
             }
-            lastError = nil
+            doorRefusal = nil
         } catch {
-            lastError = Self.refusal(error, bookName: reading?.name)
+            doorRefusal = Self.refusal(error, bookName: reading?.name)
         }
     }
 

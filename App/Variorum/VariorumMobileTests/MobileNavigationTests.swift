@@ -417,13 +417,16 @@ struct MobileNavigationTests {
             let before = try await counts()
 
             #expect(await model.newNote() == nil, "the note door refuses")
-            #expect(model.lastError
+            // The DOOR's slot, not the screen's (the cold review's MAJOR 2 —
+            // the two are held apart so each speaks where its speaker is).
+            #expect(model.doorRefusal
                     == MobileMembershipModel.refusal(
                         OperationError.lockedReading(id: bookID), bookName: "Poems"))
-            #expect(model.lastError?.contains("finished") == true, "\(model.lastError ?? "")")
+            #expect(model.doorRefusal?.contains("finished") == true, "\(model.doorRefusal ?? "")")
+            #expect(model.lastError == nil, "the screen read fine; only the door refused")
 
             await model.newChapter(named: "Openings")
-            #expect(model.lastError
+            #expect(model.doorRefusal
                     == MobileMembershipModel.refusal(
                         OperationError.lockedReading(id: bookID), bookName: "Poems"))
 
@@ -431,6 +434,68 @@ struct MobileNavigationTests {
             #expect(after.containers == before.containers,
                     "NO STRAY NOTE: refused before the mint, in the mint's own transaction")
             #expect(after.sections == before.sections, "and no stray chapter")
+        }
+    }
+
+    /// **THE REFUSAL SPEAKS WHERE THE TAP WAS** (the batch-10 cold review,
+    /// MAJOR 2 — the one finding that undermined the batch's own deliberate
+    /// divergence from the Mac).
+    ///
+    /// The Mac HIDES both doors on a finished book; this phone keeps them so
+    /// they can EXPLAIN. That is only defensible while the explanation is
+    /// where she is standing — and the doors trail the contents list, so a
+    /// sentence rendered in the HEADER spoke off the top of the viewport on
+    /// any book longer than a screen. From the bottom of a long book, the tap
+    /// did nothing observable at all.
+    ///
+    /// Driven on a REAL mounted finished book with a screenful of notes: the
+    /// real door is activated through UIKit's own dispatch, and the sentence
+    /// is measured against the door's own frame.
+    ///
+    /// RED-ON-OLD: render the refusal only in `header` (the shipped shape)
+    /// and the sentence lands ~500 pt ABOVE the door instead of beneath it.
+    @Test func aRefusedBookDoorSpeaksBesideTheDoorSheTapped() async throws {
+        try await withEditorWorld { session, _ in
+            let bookID = try await session.runner.run { ops -> String in
+                let book = try ops.createReading(name: "Poems", kind: .curated)
+                // A SCREENFUL — the whole point of the finding is a list
+                // long enough to put the header and the doors far apart.
+                for i in 0..<12 {
+                    let post = try ops.createPost(title: "Note \(i)")
+                    _ = try ops.addPostToReading(post.id, to: book.id)
+                }
+                try ops.lockReading(book.id)
+                return book.id
+            }
+            let sentence = MobileMembershipModel.refusal(
+                OperationError.lockedReading(id: bookID), bookName: "Poems")
+            try await withHostedSurface(
+                MobileBookView(
+                    session: session, readingID: bookID, tokens: .terminalLight,
+                    onOpen: { _ in }, onRead: {})
+            ) { surface in
+                await surface.settle(30)
+                // PROOF OF LIFE: the long book really rendered its rows.
+                #expect(surface.visibleLabels.contains { $0.contains("Note 11") },
+                        "labels were \(surface.visibleLabels)")
+                #expect(surface.activate(MobileBookView.newNoteDoorTitle),
+                        "labels were \(surface.visibleLabels)")
+                for _ in 0..<200 where !surface.visibleLabels.contains(sentence) {
+                    await surface.settle(1)
+                }
+                let door = try #require(
+                    surface.element(labeled: MobileBookView.newNoteDoorTitle))
+                let voice = try #require(
+                    surface.element(labeled: sentence),
+                    "the refusal must be ON SCREEN; labels were \(surface.visibleLabels)")
+                let doorFrame = door.accessibilityFrame
+                let voiceFrame = voice.accessibilityFrame
+                #expect(voiceFrame.height > 0, "the sentence has a real frame: \(voiceFrame)")
+                #expect(voiceFrame.minY >= doorFrame.minY,
+                        "the refusal renders BENEATH the door that fired it — door \(doorFrame), refusal \(voiceFrame)")
+                #expect(voiceFrame.minY - doorFrame.maxY < 80,
+                        "and immediately beneath it, not a screen away — door \(doorFrame), refusal \(voiceFrame)")
+            }
         }
     }
 
@@ -507,7 +572,7 @@ struct MobileNavigationTests {
                 await Task.yield()
                 try? await Task.sleep(for: .milliseconds(1))
             }
-            #expect(model.lastError == nil)
+            #expect(model.doorRefusal == nil)
             let groups = model.groupedRows
             #expect(groups.map(\.section) == ["Openings", "Openings", "Endings"],
                     "empty chapters render, and same-named ones stay TWO (resolved by id — names have no uniqueness)")

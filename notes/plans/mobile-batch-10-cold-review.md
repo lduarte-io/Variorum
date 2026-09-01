@@ -808,3 +808,71 @@ durable). Full suite at the end — baseline 725/103 + 2 known issues —
 final line quoted; fence grep + planVisibleTakeEdit zero. Reds quoted,
 production or fixture named. Append a FIX WAVE RESULTS section to THIS
 file (incrementally) before the final message.
+
+---
+
+# FIX WAVE RESULTS (the fix-wave session, 2026-09-01)
+
+*Written incrementally, per item, as the work lands. The brief above is
+the whole scope: seven numbered items, nothing beyond them.*
+
+**Environment:** own fresh simulator `b10-fix` — **iPhone 17 Pro /
+*[removed for publication]*
+runtime; the 18.3 runtime is the INVALID 16-series one),
+`ApplicationAccessibilityEnabled` armed and **read back `1`**, private
+`-derivedDataPath` in the session scratchpad. Simulator deleted at the
+end.
+
+---
+
+## Item 2 · MAJOR 2 — a refused door speaks WHERE THE TAP WAS · **FIXED**
+
+**What changed, and it is one slot, not a rewrite.** The book model held
+ONE error string for two different speakers — the screen's own store-read
+failure and a door's refusal — and the view rendered it in the header
+only. The two are now held apart:
+
+- `MobileBookViewModel.lastError` keeps its meaning: the **store read**
+  failed (`start()`'s catch), which belongs to the header where the
+  book's identity is.
+- `MobileBookViewModel.doorRefusal` is new and is written by the two
+  doors only (`newNote()`, `newChapter(named:)`, cleared on success).
+- `MobileBookView` renders `doorRefusal` **immediately beneath
+  `bookDoors`**, which is the phone's own root-slot grammar
+  (`MobileStarredView` puts `stars.error(on:)` beside the door that
+  fired it for exactly this reason). The header slot is untouched and
+  still carries the store-read error.
+
+**Why this shape rather than moving the one slot down:** a store-read
+error has no door to sit beside — on a smart book `bookDoors` renders
+nothing at all — so moving the single slot would have left that class
+homeless at the bottom of a list. One slot per speaker.
+
+**The Read flow is deliberately untouched:** `MobileReadView` has no
+doors, so `lastError` in its header remains exactly right.
+
+**New pin (PRODUCTION-driven, mounted):**
+`aRefusedBookDoorSpeaksBesideTheDoorSheTapped` builds a CURATED book with
+**twelve** notes and then finishes it, mounts the real `MobileBookView`,
+activates the real `+ New Note` door through `accessibilityActivate()`,
+and measures the refusal's `accessibilityFrame` **against the door's**:
+beneath it, and within 80 pt of it. Proof-of-life first (`Note 11` is on
+screen), so an empty tree cannot read as a pass.
+
+**Pins updated (this batch's own, not weakened):**
+`aRefusedBookDoorMintsNothingAndSpeaksTheFamilysVoice` now reads
+`model.doorRefusal` for both doors **and gained a clause** —
+`#expect(model.lastError == nil, "the screen read fine; only the door
+refused")` — which is a new assertion the old shape could not make;
+`aNewChapterShowsInTheContentsEvenBeforeItHoldsAnything`'s success
+assertion follows the same property.
+
+**Files:** `App/Variorum/VariorumMobile/Features/Shell/MobileBookViewModel.swift`,
+`App/Variorum/VariorumMobile/Features/Shell/MobileBookView.swift`,
+`App/Variorum/VariorumMobileTests/MobileNavigationTests.swift`.
+
+**Suite (targeted):** `✔ Test run with 14 tests in 1 suite passed after
+8.562 seconds.` — exit 0.
+
+**RED-ON-OLD: PENDING** (the revert runs after this commit, per the
+Session Resiliency Protocol's commit-before-revert rule).
