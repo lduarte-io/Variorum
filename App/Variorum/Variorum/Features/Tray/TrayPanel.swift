@@ -889,6 +889,7 @@ struct TrayPanel: View {
                         Task { await model.putBackTake(take.variantID) }
                     }
                     .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary, compact: true))
+                    .fixedSize()
                     .help("Puts this take back exactly as it was — its label, its "
                         + "place in the fan and its savepoints come back with it "
                         + "(a take that was archived when it was deleted comes "
@@ -897,10 +898,16 @@ struct TrayPanel: View {
                     // fourth-sitting addition). It confirms every time — no
                     // don't-ask state exists anywhere in the app, and none may
                     // be added (her round-10 ruling).
+                    //
+                    // Row 63's rider (the post-fix walk): a VERB never
+                    // truncates — the walk met "Delete…" on a destructive
+                    // door; the squeeze belongs to the lead, so both buttons
+                    // keep their natural size.
                     Button(RecoveryCopy.deleteNowVerb, role: .destructive) {
                         model.requestDeleteNowTake(take)
                     }
                     .buttonStyle(CalmButtonStyle(tokens: tokens, role: .danger, compact: true))
+                    .fixedSize()
                     .help("Ends this take's remaining days now. There is no putting "
                         + "it back afterwards.")
                 }
@@ -972,6 +979,7 @@ struct TrayPanel: View {
                     Button(TrayPath.putBackVerb) { Task { await putBack() } }
                         .buttonStyle(CalmButtonStyle(
                             tokens: tokens, role: .primary, compact: true))
+                        .fixedSize()  // a verb never truncates (row 63's rider)
                         .help(help)
                 }
             }
