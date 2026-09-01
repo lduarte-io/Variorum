@@ -208,9 +208,18 @@ extension Queries {
     /// merges them by hand. The repair heals the race it was built for
     /// (two untouched mints) and never touches a book whose name she chose.
     public static func isDailyJournalMintShape(_ reading: Reading) -> Bool {
-        reading.kind == .curated
-            && reading.profile == dailyJournalBookProfile
-            && BookNaming.sameName(reading.name, Operations.defaultDailyJournalBookName)
+        isDailyJournalMintShape(kind: reading.kind, profile: reading.profile, name: reading.name)
+    }
+
+    /// The same predicate over the three columns — for a row that has not
+    /// landed yet (the sync engine reads an ARRIVING reading's shape from
+    /// its wire columns when no local row exists to fetch).
+    public static func isDailyJournalMintShape(
+        kind: ReadingKind, profile: String?, name: String
+    ) -> Bool {
+        kind == .curated
+            && profile == dailyJournalBookProfile
+            && BookNaming.sameName(name, Operations.defaultDailyJournalBookName)
     }
 
     /// **The Journal-keeper repair's candidate set**: every live reading

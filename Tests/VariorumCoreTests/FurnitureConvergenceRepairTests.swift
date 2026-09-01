@@ -329,6 +329,243 @@ struct JournalKeeperRepairTests {
         }
     }
 
+    // MARK: The ladder's F1 — arrival-order independence
+
+    /// The number of outbox rows the push drain sends BEFORE the first row
+    /// of `table` — the drain sorts by registry order, so a mid-drain fault
+    /// armed after exactly this many rows lands every earlier table and
+    /// nothing from `table` onward (the chunk split the finding describes).
+    private func rowsAhead(of table: String, in client: SyncClient) throws -> Int {
+        let boundary = SyncSchema.applyOrderIndex(of: table)
+        return try client.db.read { db in
+            try Row.fetchAll(db, sql: "SELECT table_name FROM sync_outbox")
+                .filter { SyncSchema.applyOrderIndex(of: $0["table_name"]) < boundary }
+                .count
+        }
+    }
+
+    private func liveMemberships(_ client: SyncClient, in bookID: String) throws -> Int {
+        try client.db.fetchInt(
+            "SELECT COUNT(*) FROM reading_post WHERE reading_id = ? AND deleted_at IS NULL",
+            [bookID]) ?? 0
+    }
+
+    private func syncAllToQuiescence(
+        _ clients: [SyncClient], server: FakeSyncServer, maxRounds: Int = 12
+    ) async throws {
+        for _ in 1...maxRounds {
+            for client in clients { try await client.push() }
+            for client in clients { try await client.pull() }
+            let head = await server.headSeq
+            let quiet = try clients.allSatisfy { client in
+                try client.outboxCount() == 0
+                    && client.db.fetchString(
+                        "SELECT value FROM sync_state WHERE key = 'last_server_seq'") == String(head)
+            }
+            if quiet { return }
+        }
+        throw SyncHarnessError.neverQuiesced(maxRounds: maxRounds)
+    }
+
+    /// **RED ON OLD (F1, MAJOR — direction 1):** the repairer's loser
+    /// tombstone (`reading`, registry index 51) and its re-pointed
+    /// memberships (`reading_post`, 68) travel in different push chunks,
+    /// each its own server transaction. A device that pulls between them
+    /// applied the tombstone, its cascade killed the loser's N memberships
+    /// locally, the orphan sweep pushed N tombstones, and the repairer's
+    /// re-points then CAS-rejected into the tombstone-wins merge — the
+    /// Journal ended with only the repairer's own entries, the loser's N
+    /// bookless in the Pool, on BOTH devices. Now the loser's tombstone
+    /// arriving beside a live keeper hands the memberships to the keeper
+    /// before the cascade fires.
+    @Test func theLosersTombstoneArrivingBeforeItsRepointsMovesTheMembershipsToTheKeeper() async throws {
+        let server = FakeSyncServer()
+        let transport = FaultInjectingTransport(server: server)
+        // A (the smaller ids — the keeper's device) is the repairer whose
+        // push splits; B holds the loser with N = 3 entries.
+        let a = try SyncClient(name: "A", prefix: "AA", transport: transport)
+        let b = try SyncClient(name: "B", prefix: "BB", transport: server, clockOffset: 1000, seed: 2)
+
+        var loser: (bookID: String, entryID: String)?
+        var loserEntries: [String] = []
+        for day in ["2026-08-28", "2026-08-29", "2026-08-30"] {
+            let minted = try mintJournal(b, day: day)
+            loser = minted
+            loserEntries.append(minted.entryID)
+        }
+        let journalB = try #require(loser)
+        try await b.push()
+
+        let journalA = try mintJournal(a, day: "2026-08-31")
+        try await a.pull()  // A's repair: keeper A, B's three memberships re-pointed, B's book retired
+        #expect(try liveJournalBookIDs(a) == [journalA.bookID])
+        #expect(try liveMemberships(a, in: journalA.bookID) == 4)
+
+        // The connection dies after every `reading` row and before any
+        // `reading_post` row: the server holds A's Journal and B's tombstone,
+        // not the re-points.
+        let split = try rowsAhead(of: "reading_post", in: a)
+        #expect(split > 0)
+        await transport.armFailNextPush(afterRows: split)
+        await #expect(throws: InjectedNetworkFault.self) { try await a.push() }
+        #expect(await server.currentRow(table: "reading", rowID: journalB.bookID)?.isTombstoned == true,
+                "the loser's tombstone reached the server")
+        #expect(await server.currentRow(table: "reading", rowID: journalA.bookID) != nil,
+                "and so did the keeper")
+
+        try await b.pull()
+        // On B, between the chunks: the keeper holds B's three entries — the
+        // tombstone moved them rather than killing them (old: 0).
+        #expect(try liveJournalBookIDs(b) == [journalA.bookID])
+        #expect(try liveMemberships(b, in: journalA.bookID) == 3,
+                "the loser's memberships moved to the keeper BEFORE the cascade could take them")
+        for entry in loserEntries {
+            let membership = try b.db.read { db in
+                try Row.fetchOne(
+                    db,
+                    sql: "SELECT id, reading_id FROM reading_post WHERE post_id = ? AND deleted_at IS NULL",
+                    arguments: [entry])
+            }
+            #expect(membership?["reading_id"] as String? == journalA.bookID)
+            if let id = membership?["id"] as String? {
+                #expect(try b.outboxContains("reading_post", id),
+                        "every repair write reaches the outbox (SyncSpec §7)")
+            }
+        }
+
+        // A's retry lands the rest; both devices converge on N + 1.
+        try await a.push()
+        try await assertFurnitureConverged(a, b, server)
+        for client in [a, b] {
+            #expect(try liveJournalBookIDs(client) == [journalA.bookID])
+            #expect(try liveMemberships(client, in: journalA.bookID) == 4,
+                    "N + 1 live memberships on the keeper — nothing bookless in the Pool")
+            #expect(try designation(client) == journalA.bookID)
+        }
+    }
+
+    /// **RED ON OLD (F1, MAJOR — the fresh-store leg of direction 1):** a
+    /// device meeting the loser's rows for the FIRST time (a third device,
+    /// a re-onboarded phone) while the repairer's re-points still lag its
+    /// tombstone receives the memberships live (their seqs) and then the
+    /// loser as an already-dead row (its only state) — an INSERT fires no
+    /// cascade, so the memberships dangled live under a dead book, healed
+    /// only if the repairer's retry ever lands. Now the loser landing dead
+    /// beside a live keeper hands them to the keeper on arrival.
+    @Test func aFreshStoreMeetingTheLoserDeadHandsItsMembershipsToTheKeeper() async throws {
+        let server = FakeSyncServer()
+        let transport = FaultInjectingTransport(server: server)
+        let a = try SyncClient(name: "A", prefix: "AA", transport: transport)
+        let b = try SyncClient(name: "B", prefix: "BB", transport: server, clockOffset: 1000, seed: 2)
+        let c = try SyncClient(name: "C", prefix: "CC", transport: server, clockOffset: 2000, seed: 3)
+
+        var loser: (bookID: String, entryID: String)?
+        var loserEntries: [String] = []
+        for day in ["2026-08-28", "2026-08-29", "2026-08-30"] {
+            let minted = try mintJournal(b, day: day)
+            loser = minted
+            loserEntries.append(minted.entryID)
+        }
+        let journalB = try #require(loser)
+        try await b.push()
+
+        let journalA = try mintJournal(a, day: "2026-08-31")
+        try await a.pull()  // A's repair, as above
+        let split = try rowsAhead(of: "reading_post", in: a)
+        await transport.armFailNextPush(afterRows: split)
+        await #expect(throws: InjectedNetworkFault.self) { try await a.push() }
+
+        // C's first pull: the keeper live, the loser dead, and the loser's
+        // three memberships still live and still naming the loser.
+        let first = try await c.pull()
+        #expect(first.applied > 0)
+        #expect(try c.db.deletedAt("reading", journalB.bookID) != nil)
+        #expect(try liveJournalBookIDs(c) == [journalA.bookID])
+        // Three, not four: the keeper's OWN membership rides the lagging
+        // chunk too — it lands with A's retry below.
+        #expect(try liveMemberships(c, in: journalA.bookID) == 3,
+                "the loser's memberships re-pointed to the keeper on arrival (old: dangling under the dead book)")
+        for entry in loserEntries {
+            let membership = try c.db.read { db in
+                try Row.fetchOne(
+                    db,
+                    sql: "SELECT id, reading_id, deleted_at FROM reading_post WHERE post_id = ?",
+                    arguments: [entry])
+            }
+            #expect(membership?["deleted_at"] as String? == nil)
+            #expect(membership?["reading_id"] as String? == journalA.bookID)
+            if let id = membership?["id"] as String? {
+                #expect(try c.outboxContains("reading_post", id))
+            }
+        }
+
+        try await a.push()
+        try await syncAllToQuiescence([a, b, c], server: server)
+        let dumpA = try a.syncedDump()
+        #expect(try b.syncedDump() == dumpA)
+        #expect(try c.syncedDump() == dumpA)
+        for client in [a, b, c] {
+            #expect(try liveJournalBookIDs(client) == [journalA.bookID])
+            #expect(try liveMemberships(client, in: journalA.bookID) == 4)
+        }
+    }
+
+    /// **RED ON OLD (F1, MAJOR — direction 2):** a live membership arriving
+    /// AFTER its loser is already dead here (the loser's device re-versioned
+    /// it — a reorder — and pushed WITHOUT first pulling the repair; the
+    /// engine's `push()` is an API-legal sequence even though the scheduler
+    /// always pulls first) met the orphan repair: stamped dead with the
+    /// loser's stamp, and that tombstone pushed and WON the merge against
+    /// the repairer's re-point. Now it re-points to the standing keeper.
+    @Test func aMembershipArrivingUnderTheDeadLoserRepointsToTheKeeper() async throws {
+        let server = FakeSyncServer()
+        let transport = FaultInjectingTransport(server: server)
+        let a = try SyncClient(name: "A", prefix: "AA", transport: transport)
+        let b = try SyncClient(name: "B", prefix: "BB", transport: server, clockOffset: 1000, seed: 2)
+        let journalB = try mintJournal(b, day: "2026-08-28")
+        let second = try mintJournal(b, day: "2026-08-29")
+        try await b.push()
+
+        let journalA = try mintJournal(a, day: "2026-08-31")
+        try await a.pull()   // A's repair: B's two memberships re-pointed, B's book retired
+        // A's push splits: the loser's tombstone lands, the re-points lag.
+        let split = try rowsAhead(of: "reading_post", in: a)
+        await transport.armFailNextPush(afterRows: split)
+        await #expect(throws: InjectedNetworkFault.self) { try await a.push() }
+
+        // B, not yet having pulled, re-versions one of the memberships
+        // (moves it) and pushes WITHOUT pulling: its base still matches the
+        // server (the re-point never landed), so the row is ACCEPTED naming
+        // the dead loser, at a seq AFTER the loser's tombstone.
+        try b.with { ops, _ in
+            try ops.reorderReadingPost(second.entryID, in: journalB.bookID, to: .start)
+        }
+        let pushed = try await b.push()
+        #expect(pushed.accepted > 0, "positive activity: the re-versioned row landed live")
+
+        // A pulls it: the row arrives live, naming the loser A already holds
+        // dead, with the keeper standing — it re-points on arrival.
+        let report = try await a.pull()
+        #expect(report.applied + report.merged > 0)
+        let landed = try await a.db.read { db in
+            try Row.fetchOne(
+                db,
+                sql: "SELECT id, reading_id, deleted_at FROM reading_post WHERE post_id = ?",
+                arguments: [second.entryID])
+        }
+        #expect(landed?["deleted_at"] as String? == nil, "never stamped dead (old: the orphan cascade)")
+        #expect(landed?["reading_id"] as String? == journalA.bookID, "re-pointed to the keeper")
+        if let id = landed?["id"] as String? {
+            #expect(try a.outboxContains("reading_post", id))
+        }
+
+        try await assertFurnitureConverged(a, b, server)
+        for client in [a, b] {
+            #expect(try liveJournalBookIDs(client) == [journalA.bookID])
+            #expect(try liveMemberships(client, in: journalA.bookID) == 3)
+        }
+    }
+
     /// Re-running rounds over a converged pair changes nothing — the repair
     /// finds one live Journal and stands down.
     @Test func theRepairIsIdempotentOnceConverged() async throws {

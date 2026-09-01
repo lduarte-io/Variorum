@@ -16,9 +16,13 @@ extension SyncEngine {
     /// | `variant.working_text` | conflict-as-variant (S5): the losing side's text becomes a new variant; nothing clobbered |
     ///
     /// After the merge the local row carries the server's `sync_version`.
-    /// The outbox entry is cleared when the merge accepted the server row
-    /// wholesale (nothing of local intent left to push); it stays when local
-    /// intent survived (a tombstone overlay), so the next push carries it.
+    /// The outbox entry is cleared when the row that LANDED equals the
+    /// server row wholesale (nothing of local intent left to push); it stays
+    /// when local intent survived (a tombstone overlay) — or when an inline
+    /// repair altered the landing (a collision tombstone, an orphan stamp,
+    /// the Journal keeper's re-point), so the repair's explicit enqueue is
+    /// honored and the next push carries it (SyncSpec §7; the ladder's F1
+    /// found the pre-repair copy being compared instead).
     func merge(
         _ db: Database, local: SyncRow, server: SyncRow, serverSeq: Int64,
         touched: inout TouchedRows
@@ -40,9 +44,9 @@ extension SyncEngine {
             try rescueLosingText(db, local: local, server: server, touched: &touched)
         }
 
-        try writeResolvedRow(db, merged, serverSeq: serverSeq, touched: &touched)
+        let landed = try writeResolvedRow(db, merged, serverSeq: serverSeq, touched: &touched)
         try recordSeq(db, table: merged.table, rowID: merged.rowID, seq: serverSeq)
-        if merged.columns == server.columns {
+        if landed.columns == server.columns {
             // Server accepted wholesale: local state now IS server state —
             // nothing left to push for this row.
             try clearOutboxEntry(db, table: merged.table, rowID: merged.rowID)

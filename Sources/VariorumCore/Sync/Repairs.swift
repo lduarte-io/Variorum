@@ -51,9 +51,16 @@ extension SyncEngine {
     /// Lands an incoming (or merged) row, first resolving any live-unique
     /// collision per its table's SyncSpec §7 rule. Tombstoned incoming rows
     /// can't collide with a live-row partial index and land verbatim.
+    ///
+    /// Returns the row as it actually LANDED — the incoming row, or the
+    /// inline repairs' resolution of it. `merge` compares THAT against the
+    /// server row to decide whether local intent survived (the ladder's F1:
+    /// comparing its own pre-repair copy instead cleared the outbox entry an
+    /// inline repair had just enqueued, so the repair never pushed).
+    @discardableResult
     func writeResolvedRow(
         _ db: Database, _ row: SyncRow, serverSeq: Int64, touched: inout TouchedRows
-    ) throws {
+    ) throws -> SyncRow {
         var resolved = row
         if !row.isTombstoned {
             switch row.table {
@@ -96,6 +103,16 @@ extension SyncEngine {
                 break
             }
         }
+        // The Journal keeper's arrival-order independence, direction 2
+        // (the ladder's F1): a live membership or chapter arriving under a
+        // DEAD daily-Journal loser while a live keeper exists is the
+        // keeper's, not the cascade's — it re-points (or dedupes) exactly
+        // as the repair would have, instead of joining the loser's cascade
+        // below. Runs BEFORE the orphan check so the re-pointed row is no
+        // orphan; the post-side dead check still applies after it.
+        if !resolved.isTombstoned, ["reading_post", "reading_section"].contains(resolved.table) {
+            resolved = try repointJournalChildUnderDeadLoser(db, resolved, touched: &touched)
+        }
         // Orphan repair, direction 2: a live child arriving under a
         // locally-dead parent joins the parent's cascade — same stamp, so
         // every device converges byte-identically, and `restoreContainer`/
@@ -120,8 +137,146 @@ extension SyncEngine {
                 touched.tombstonedParents.append((resolved.table, resolved.rowID, stamp))
             }
         }
+        // The Journal keeper's arrival-order independence, direction 1 (the
+        // ladder's F1): a daily-Journal LOSER landing dead while a live
+        // keeper stands hands its live local memberships and chapters to
+        // the keeper BEFORE the tombstone lands. Two shapes, one rule:
+        //  - the loser is LIVE here (this device holds its entries — the
+        //    loser's own device, or any device that pulled them): the (still
+        //    active) cascade would otherwise kill them, and this device
+        //    would push N membership tombstones that then WIN the merge
+        //    against the repairer's re-points travelling in a later push
+        //    chunk — the finding's whole-Journal-structure loss;
+        //  - the loser is ABSENT here and arrives already dead (a fresh
+        //    store, a third device: the feed is state-based, so the loser's
+        //    only row is its tombstone, at a seq AFTER its memberships'):
+        //    an INSERT fires no cascade, and the memberships applied earlier
+        //    in the batch would dangle live under a dead book until the
+        //    repairer's re-points land — which they never do if that device
+        //    is gone.
+        // With no keeper in sight this is an ordinary delete: the cascade
+        // takes its victims exactly as ever.
+        if resolved.isTombstoned, resolved.table == "reading",
+           let keeperID = try journalKeeperBesideRetiring(db, arriving: resolved) {
+            touched.inlineRepairs += try moveJournalChildren(
+                db, from: resolved.rowID, to: keeperID, stamp: nowStamp())
+        }
         try resolved.apply(db)
         noteApplied(resolved, touched: &touched)
+        return resolved
+    }
+
+    // MARK: - The Journal keeper's arrival-order legs (the ladder's F1)
+
+    /// The live keeper a dead-landing daily-Journal reading's children move
+    /// to, or nil when the reading is not the daily mint's shape, is already
+    /// dead here (nothing live to move), or no other candidate stands — then
+    /// the tombstone is an ordinary delete. The shape is read from the LOCAL
+    /// row when one exists (a rename she made here counts), else from the
+    /// arriving row's own columns. The keeper is the smallest OTHER
+    /// candidate: the repair only ever retires larger ids, so this is the
+    /// same choice every device makes.
+    private func journalKeeperBesideRetiring(
+        _ db: Database, arriving row: SyncRow
+    ) throws -> String? {
+        let isMintShape: Bool
+        if let local = try Reading.fetchOne(db, key: row.rowID) {
+            guard local.deletedAt == nil else { return nil }
+            isMintShape = Queries.isDailyJournalMintShape(local)
+        } else {
+            guard case .text(let kindText) = row.columns["kind"],
+                  let kind = ReadingKind(rawValue: kindText),
+                  case .text(let name) = row.columns["name"]
+            else { return nil }
+            var profile: String?
+            if case .text(let text) = row.columns["profile"] { profile = text }
+            isMintShape = Queries.isDailyJournalMintShape(kind: kind, profile: profile, name: name)
+        }
+        guard isMintShape else { return nil }
+        return try Queries.dailyJournalBookCandidates(db).first { $0 != row.rowID }
+    }
+
+    /// A live `reading_post` / `reading_section` arriving under a DEAD
+    /// daily-Journal reading while a live keeper stands: re-point it to the
+    /// keeper — a membership whose post the keeper already holds tombstones
+    /// as a pure duplicate instead (`uq_reading_post_live`, the tag.path
+    /// application rule) — and enqueue it explicitly. Byte-identical to
+    /// what `moveJournalChildren` writes on the device that ran the repair,
+    /// so the two devices' rows meet as equals under CAS.
+    private func repointJournalChildUnderDeadLoser(
+        _ db: Database, _ row: SyncRow, touched: inout TouchedRows
+    ) throws -> SyncRow {
+        guard case .text(let readingID) = row.columns["reading_id"],
+              let parent = try Reading.fetchOne(db, key: readingID), parent.deletedAt != nil,
+              Queries.isDailyJournalMintShape(parent),
+              let keeperID = try Queries.dailyJournalBookCandidates(db).first
+        else { return row }
+        var resolved = row
+        if row.table == "reading_post", case .text(let postID) = row.columns["post_id"],
+           try keeperHoldsPost(db, keeperID: keeperID, postID: postID, excluding: row.rowID) {
+            resolved.columns["deleted_at"] = .text(nowStamp())
+        } else {
+            resolved.columns["reading_id"] = .text(keeperID)
+        }
+        try enqueueExplicitly(db, table: row.table, rowID: row.rowID)
+        touched.inlineRepairs += 1
+        return resolved
+    }
+
+    private func keeperHoldsPost(
+        _ db: Database, keeperID: String, postID: String, excluding membershipID: String
+    ) throws -> Bool {
+        try Bool.fetchOne(
+            db,
+            sql: """
+                SELECT EXISTS (SELECT 1 FROM reading_post
+                WHERE reading_id = ? AND post_id = ? AND deleted_at IS NULL AND id <> ?)
+                """,
+            arguments: [keeperID, postID, membershipID]) ?? false
+    }
+
+    /// Moves a daily-Journal loser's live chapters and memberships to the
+    /// keeper, enqueuing every write (SyncSpec §7). Chapters move whole —
+    /// duplicate names and interleaved positions are both legal, so nothing
+    /// is lost and membership `section_id` pointers stay meaningful. A
+    /// membership whose post the keeper already holds is a pure duplicate
+    /// and tombstones (`uq_reading_post_live`). Shared by the post-batch
+    /// repair and direction 1 above so the two roads cannot drift.
+    private func moveJournalChildren(
+        _ db: Database, from loserID: String, to keeperID: String, stamp: String
+    ) throws -> Int {
+        var repairs = 0
+        let sections = try String.fetchAll(
+            db,
+            sql: "SELECT id FROM reading_section WHERE reading_id = ? AND deleted_at IS NULL",
+            arguments: [loserID])
+        for sectionID in sections {
+            try db.execute(
+                sql: "UPDATE reading_section SET reading_id = ?, updated_at = ? WHERE id = ?",
+                arguments: [keeperID, stamp, sectionID])
+            try enqueueExplicitly(db, table: "reading_section", rowID: sectionID)
+            repairs += 1
+        }
+        let memberships = try Row.fetchAll(
+            db,
+            sql: "SELECT id, post_id FROM reading_post WHERE reading_id = ? AND deleted_at IS NULL",
+            arguments: [loserID])
+        for membership in memberships {
+            let membershipID: String = membership["id"]
+            if try keeperHoldsPost(
+                db, keeperID: keeperID, postID: membership["post_id"], excluding: membershipID) {
+                try db.execute(
+                    sql: "UPDATE reading_post SET deleted_at = ? WHERE id = ?",
+                    arguments: [stamp, membershipID])
+            } else {
+                try db.execute(
+                    sql: "UPDATE reading_post SET reading_id = ? WHERE id = ?",
+                    arguments: [keeperID, membershipID])
+            }
+            try enqueueExplicitly(db, table: "reading_post", rowID: membershipID)
+            repairs += 1
+        }
+        return repairs
     }
 
     /// The nearest locally-dead cascade parent's stamp for a live incoming
@@ -547,45 +702,9 @@ extension SyncEngine {
         var repairs = 0
         for loserID in candidates.dropFirst() {
             let stamp = nowStamp()
-            // Chapters move whole — duplicate names and interleaved
-            // positions are both legal, so nothing is lost and membership
-            // `section_id` pointers stay meaningful.
-            let sections = try String.fetchAll(
-                db,
-                sql: "SELECT id FROM reading_section WHERE reading_id = ? AND deleted_at IS NULL",
-                arguments: [loserID])
-            for sectionID in sections {
-                try db.execute(
-                    sql: "UPDATE reading_section SET reading_id = ?, updated_at = ? WHERE id = ?",
-                    arguments: [keeperID, stamp, sectionID])
-                try enqueueExplicitly(db, table: "reading_section", rowID: sectionID)
-                repairs += 1
-            }
-            let memberships = try Row.fetchAll(
-                db,
-                sql: "SELECT id, post_id FROM reading_post WHERE reading_id = ? AND deleted_at IS NULL",
-                arguments: [loserID])
-            for membership in memberships {
-                let membershipID: String = membership["id"]
-                let keeperHasPost = try Bool.fetchOne(
-                    db,
-                    sql: """
-                        SELECT EXISTS (SELECT 1 FROM reading_post
-                        WHERE reading_id = ? AND post_id = ? AND deleted_at IS NULL)
-                        """,
-                    arguments: [keeperID, membership["post_id"] as String]) ?? false
-                if keeperHasPost {
-                    try db.execute(
-                        sql: "UPDATE reading_post SET deleted_at = ? WHERE id = ?",
-                        arguments: [stamp, membershipID])
-                } else {
-                    try db.execute(
-                        sql: "UPDATE reading_post SET reading_id = ? WHERE id = ?",
-                        arguments: [keeperID, membershipID])
-                }
-                try enqueueExplicitly(db, table: "reading_post", rowID: membershipID)
-                repairs += 1
-            }
+            // Chapters and memberships move whole to the keeper (the shared
+            // leg direction 1 also runs, so the two roads cannot drift).
+            repairs += try moveJournalChildren(db, from: loserID, to: keeperID, stamp: stamp)
             // The loser retires. Its live children have all just moved, so
             // the (still-active) cascade trigger finds nothing — the victim
             // sweep is the §7 belt for anything it stamped anyway.
