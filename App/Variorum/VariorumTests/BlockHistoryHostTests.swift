@@ -179,8 +179,18 @@ struct BlockHistoryHostTests {
             let offenders = Self.viewsPastTheEdge(hosting, window: window)
             #expect(offenders.isEmpty,
                     "nothing stands past the window's edge (her cut 'Clos…' / 'Restore'): \(offenders.prefix(5))")
-            #expect(TrayPanelMoveTests.classNames(hosting).contains("ListTableHeaderView"),
-                    "the pane's regions are really drawn, inside the window")
+            // JUSTIFIED PIN EDIT (the correction round, batch F rows 28/65 —
+            // the completion session, caught by the full-suite run): this
+            // assertion named "ListTableHeaderView", the List's own section
+            // header backing — and the List's fixed header measurement was
+            // exactly the mechanism that clipped the region headers to
+            // slivers, so batch F's piece 3 retired it for a ScrollView of
+            // calm sections. Same edit BlockHistoryPaneTests already carries.
+            let paneClasses = TrayPanelMoveTests.classNames(hosting)
+            #expect(paneClasses.contains("HostingScrollView"),
+                    "the pane's calm scroll is really drawn, inside the window")
+            #expect(!paneClasses.contains("ListTableHeaderView"),
+                    "no List section headers — the clipping mechanism is gone")
             // Closing the pane gives the context panel back.
             #expect(session.commandRouter.requestMode(.blocks, postID: post), "a same-mode request is a no-op switch")
             #expect(session.commandRouter.requestMode(.write, postID: post))
