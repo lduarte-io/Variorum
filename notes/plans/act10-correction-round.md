@@ -368,6 +368,22 @@ deferred with owners `PENDING`. Her ratify list: QUESTIONS `#PENDING` (the §7 b
 the use-gate and no-install-without-a-walk — to the architect-phase skill; recorded as a candidate for her,
 not applied).
 
+## 7d. THE LADDER — spawn text (so the review runs by copy; the skill's rules)
+
+After E closes and before the orchestrator's full walk: spawn a fresh `general-purpose` Agent (cold reviewer,
+ZERO framing of the work) with exactly this: *"You are a cold reviewer. Read `notes/REVIEW_PROMPT.md` and
+follow it VERBATIM against the diff `git diff 962e7b8..HEAD -- App/ Sources/ Tests/` (the Act 10 correction
+round's combined diff; `962e7b8` is the last commit before batch B's first code commit — verify with
+`git log --oneline 962e7b8..HEAD`). Your anchor for prior dispositions is `notes/plans/act10-correction-
+round.md` §8 (the batch records). Write your findings — BLOCKER/MAJOR/MINOR/NIT, each with a traced
+mechanism — as a `LADDER ROUND 1` section appended to that plan file, commit with the standing trailer,
+push, and stop. Do not fix anything."* Then: the orchestrator records dispositions in the same section
+(repo-first); a FRESH fix session lands accepted findings with revert-verified pins; round 2 = a fresh
+reviewer re-reviews the fixes + what they touched; any NEW BLOCKER/MAJOR ⇒ round 3; cap three; anything
+open after round 3 is recorded for her. The spec outranks both agents; every finding gets a written
+disposition. The trailer for every commit: `Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>` +
+`Claude-Session: https://claude.ai/code/session_01UBSTZCXPHewx5nd3VB5fvb`.
+
 ## 8. Records (appended per batch; the triage walk first)
 
 ### TRIAGE WALK — LIVE (2026-09-01 ~04:30 → ; the orchestrator, dev-store Debug build `io.lduarte.Variorum.debug`, Terminal voice, window zoomed 1728×1084; captures in `act10-correction-screens/triage/`)
