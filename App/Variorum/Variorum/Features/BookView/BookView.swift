@@ -753,7 +753,7 @@ struct BookView: View {
             + "you save it as the book's own order.")
     }
 
-    // MARK: - Outline's landing (the Act 10 correction round, rows 9/12/14/44/47)
+    // MARK: - Outline's landing (the Act 10 correction round, rows 9/12/14/44/47 — and row 53)
     //
     // The one programmatic-scroll mechanism Outline has. What it replaces:
     // a view-private `scrollTarget` beside W21's model slot (two landing
@@ -767,38 +767,84 @@ struct BookView: View {
     // stops short (reproduced twice, deterministically, on the Sherlock
     // book — a chapter click landed mid-story at the same paragraph) or
     // retargets forever (the walk's 190 s sample: every hot frame lazy
-    // placement). The fix shape: NO animation, and a BOUNDED convergence —
-    // land, read back where the anchor actually sits, hop again while it
-    // is not at the top (at most `landingHopBudget` hops). The
-    // PanePublisher's own heal-turn discipline, applied to a scroll.
+    // placement). The fix shape: NO animation, and a convergence on the
+    // TARGET'S MEASURED FRAME — land, read back where the anchor actually
+    // sits, and hop again while it is not at the top.
+    //
+    // Row 53 (the orchestrator's walk): the first cut of that convergence
+    // hopped at most FOUR times, each hop fired on the very next run-loop
+    // turn after a report. With two or more expanded stories in play that
+    // is not enough, twice over: (1) the rows around the target are still
+    // LOADING while the hops run — an expanded read-cheap story or a live
+    // editor realizes at 40/24 pt and grows to ~8,500 pt a beat later
+    // (its DB read, then its projection fill) — so the anchor oscillates
+    // (traced: 8517 → 470 → −80 → 269 → 200 pt, budget spent, then it
+    // drifted to 361) and the page ends inside the WRONG story; (2) a hop
+    // issued in the same burst as the report it answers scrolls against a
+    // lazy layout whose estimates have not yet absorbed the sizes that
+    // just changed, so four immediate hops can land at the same wrong
+    // offset four times (traced: 399 → 419 → 416 → 417 → 414 pt). The
+    // convergence is therefore STABILITY-driven, never count-driven: every
+    // anchor report re-arms a short quiet interval; when the interval
+    // passes with the anchor AT the top, the landing is done; when it
+    // passes with the anchor away from the top (or with no report at all —
+    // the target may have been de-realized by a shift), the landing hops
+    // ONCE, against a layout that has had the interval to settle, and
+    // waits again. Two fences bound it — a generous hop cap and a time
+    // budget (the watchdog) — so a target that will not settle stops
+    // moving the page rather than chasing it for the rest of the session.
+    // When the click also EXPANDS the target (a collapsed story opened
+    // from the navigator), the same loop lands it after its expansion has
+    // laid out: the target's own growth is downward and leaves its top
+    // where it is, and any neighbour's growth is one more report.
 
-    /// One pending landing: the anchor id and how many hops it has taken.
-    private struct OutlineLanding: Equatable {
+    /// One pending landing: the anchor id, the hops taken, when it began,
+    /// and the anchor's last reported top (nil until the target realizes).
+    private struct OutlineLanding {
         var anchorID: String
         var hops = 0
+        let began = Date()
+        var lastTop: CGFloat?
     }
     @State private var outlineLanding: OutlineLanding?
+    /// The pending quiet-interval check (re-armed by every report and every
+    /// hop; cancelled when the landing finishes).
+    @State private var landingCheck: DispatchWorkItem?
     /// The scroll's named space — anchor frames read in it are visible-
     /// relative, so "at the top" is `minY ≈ 0`.
     static let outlineSpace = "book-outline-scroll"
     /// Within this many points of the top, a landing is DONE.
     static let landingTolerance: CGFloat = 2
-    /// The most hops one landing may take (a hop re-scrolls after the
-    /// realized geometry moved the target). Bounded by construction — a
-    /// target that will not settle stops moving the page rather than
-    /// chasing it for the rest of the session.
-    static let landingHopBudget = 4
+    /// The quiet interval: this long with no anchor report decides the
+    /// landing — done if the last report was at the top, one more hop if
+    /// it was not (or if the target never reported). Long enough for the
+    /// lazy layout to absorb a size change before the next hop reads it;
+    /// short enough that a settled landing feels immediate.
+    static let landingSettleInterval: TimeInterval = 0.15
+    /// The most hops one landing may take. Generous on purpose — the time
+    /// budget is the real fence; this one only guards a pathological loop.
+    static let landingHopBudget = 40
+    /// The watchdog: a landing older than this stops hopping wherever it
+    /// is. Loading a 9k-word story's height takes well under a second; a
+    /// target that has not settled by now will not.
+    static let landingTimeBudget: TimeInterval = 4
 
     /// Put an Outline anchor at the top of the page (no animation — see the
     /// mark above), and watch it settle.
     private func landOutline(_ anchorID: String, _ proxy: ScrollViewProxy) {
+        landingCheck?.cancel()
         outlineLanding = OutlineLanding(anchorID: anchorID)
+        #if DEBUG
+        BookOutlineGeometry.trace.append("\(anchorID) LAND")
+        #endif
         proxy.scrollTo(anchorID, anchor: .top)
+        armLandingCheck(proxy)
     }
 
     /// A realized anchor reported where it sits. Every report feeds the
-    /// DEBUG geometry oracle; a report for the PENDING landing decides
-    /// whether to hop again.
+    /// DEBUG geometry oracle; a report for the PENDING landing records the
+    /// top and re-arms the quiet interval — the decision is the interval's,
+    /// never the report's (row 53).
     fileprivate func outlineAnchorMoved(_ anchorID: String, top: CGFloat, _ proxy: ScrollViewProxy) {
         #if DEBUG
         BookOutlineGeometry.anchorTops[anchorID] = top
@@ -807,14 +853,53 @@ struct BookView: View {
         }
         #endif
         guard var landing = outlineLanding, landing.anchorID == anchorID else { return }
-        if abs(top) <= Self.landingTolerance || landing.hops >= Self.landingHopBudget {
-            outlineLanding = nil
+        landing.lastTop = top
+        outlineLanding = landing
+        armLandingCheck(proxy)
+    }
+
+    /// (Re)arm the quiet interval; when it passes untouched, decide.
+    private func armLandingCheck(_ proxy: ScrollViewProxy) {
+        landingCheck?.cancel()
+        let check = DispatchWorkItem { checkLanding(proxy) }
+        landingCheck = check
+        DispatchQueue.main.asyncAfter(deadline: .now() + Self.landingSettleInterval, execute: check)
+    }
+
+    /// The quiet interval passed: at the top ⇒ landed; away from it (or
+    /// never reported) ⇒ one hop, unless a fence says stop.
+    private func checkLanding(_ proxy: ScrollViewProxy) {
+        guard var landing = outlineLanding else { return }
+        if let top = landing.lastTop, abs(top) <= Self.landingTolerance {
+            finishLanding("settled at top=\(top) after \(landing.hops) hops")
+            return
+        }
+        let elapsed = Date().timeIntervalSince(landing.began)
+        if elapsed > Self.landingTimeBudget || landing.hops >= Self.landingHopBudget {
+            finishLanding("gave up at top=\(landing.lastTop.map { "\($0)" } ?? "unrealized") "
+                + "after \(landing.hops) hops, \(Int(elapsed * 1000)) ms")
             return
         }
         landing.hops += 1
         outlineLanding = landing
-        // The next turn, never inside the geometry pass that reported.
-        DispatchQueue.main.async { proxy.scrollTo(anchorID, anchor: .top) }
+        #if DEBUG
+        BookOutlineGeometry.trace.append("\(landing.anchorID) HOP \(landing.hops)")
+        #endif
+        proxy.scrollTo(landing.anchorID, anchor: .top)
+        // A hop that moves nothing (the target unrealized, or the layout
+        // unchanged) produces no report — the interval decides again.
+        armLandingCheck(proxy)
+    }
+
+    private func finishLanding(_ why: String) {
+        #if DEBUG
+        if let landing = outlineLanding {
+            BookOutlineGeometry.trace.append("\(landing.anchorID) DONE: \(why)")
+        }
+        #endif
+        landingCheck?.cancel()
+        landingCheck = nil
+        outlineLanding = nil
     }
 
     /// The navigator's note-row click in Outline (the correction round,

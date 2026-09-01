@@ -29,12 +29,13 @@ import Testing
 import VariorumCore
 @testable import Variorum
 
-/// A book with ONE long story (Sherlock-shaped: ~215 blocks, ~9.7k words)
-/// among short notes, so a focused row is really tall. `chapters` files
-/// the notes three to a chapter; `longAt` places the story.
+/// A book with long stories (Sherlock-shaped: ~215 blocks, ~9.7k words
+/// each) among short notes, so an expanded row is really tall. `chapters`
+/// files the notes three to a chapter; `longAt` places the stories (row
+/// 53's scenario needs several — three expanded and two collapsed).
 @MainActor
 private func withLandingBook<T>(
-    posts: Int, longAt: Int?, chapters: Bool,
+    posts: Int, longAt: Set<Int>, chapters: Bool,
     _ body: @MainActor (
         AppSession, AppDatabase, _ readingID: String,
         _ postIDs: [String], _ sectionIDs: [String]
@@ -60,7 +61,7 @@ private func withLandingBook<T>(
         var postIDs: [String] = []
         for p in 0..<posts {
             let post = try session.operations.createPost(title: "note \(p)")
-            if p == longAt {
+            if longAt.contains(p) {
                 for b in 0..<215 {
                     _ = try session.operations.newBlock(
                         in: post.id,
@@ -238,7 +239,7 @@ struct BookOutlineLandingTests {
     /// the top of the page — within the run loop's budget (the watchdog),
     /// and AT the heading (the oracle), never mid-story.
     @Test func aChapterRevealLandsAtTheChapterWithAStoryExpandedAndLive() async throws {
-        try await withLandingBook(posts: 18, longAt: 4, chapters: true) { session, db, readingID, postIDs, sectionIDs in
+        try await withLandingBook(posts: 18, longAt: [4], chapters: true) { session, db, readingID, postIDs, sectionIDs in
             let longPostID = postIDs[4]
             let model = BookViewModel(session: session, readingID: readingID)
             model.adopt(try await db.read { [readingID] in
@@ -289,7 +290,7 @@ struct BookOutlineLandingTests {
     /// The old anchor lived INSIDE the unrealized row, so the page never
     /// moved ("intermittent" — it worked only for cards already realized).
     @Test func anOffScreenCollapsedNoteIsRevealedAtTheTop() async throws {
-        try await withLandingBook(posts: 40, longAt: nil, chapters: false) { session, db, readingID, postIDs, _ in
+        try await withLandingBook(posts: 40, longAt: [], chapters: false) { session, db, readingID, postIDs, _ in
             let model = BookViewModel(session: session, readingID: readingID)
             model.adopt(try await db.read { [readingID] in
                 try Queries.assembleReading($0, readingID: readingID)
@@ -329,7 +330,7 @@ struct BookOutlineLandingTests {
     /// Row 44's second symptom: a bare focus (the navigator's note-row
     /// click) lands the caret at the FIRST block, not the 215th.
     @Test func aBareFocusLandsAtTheFirstBlock() async throws {
-        try await withLandingBook(posts: 6, longAt: 2, chapters: true) { session, db, readingID, postIDs, _ in
+        try await withLandingBook(posts: 6, longAt: [2], chapters: true) { session, db, readingID, postIDs, _ in
             let longPostID = postIDs[2]
             let model = BookViewModel(session: session, readingID: readingID)
             model.adopt(try await db.read { [readingID] in
@@ -357,6 +358,72 @@ struct BookOutlineLandingTests {
             #expect(editor.string.count > 5000, "the projection filled")
             #expect(editor.selectedRange().location == 0,
                     "the caret is at the first block, not at \(editor.selectedRange().location)")
+        }
+    }
+
+    /// Row 53 (the orchestrator's walk of batch B — MAJOR): with THREE
+    /// stories expanded, opening a COLLAPSED story far below, then one far
+    /// above, lands each at ITS OWN top — and the landing HOLDS. The old
+    /// convergence stopped at the first "at the top" report (or at a fixed
+    /// four hops); the expanded rows around the viewport then finished
+    /// loading (24/40 pt → ~20,000 pt each) and pushed the page into the
+    /// wrong story. "Landed" here is read twice: when the anchor first
+    /// settles, and again a second later.
+    @Test func openingACollapsedStoryLandsAtItsTopWithThreeStoriesExpanded() async throws {
+        try await withLandingBook(posts: 18, longAt: [1, 3, 7, 11, 15], chapters: true) { session, db, readingID, postIDs, _ in
+            let model = BookViewModel(session: session, readingID: readingID)
+            model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID)
+            })
+            let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
+            BookOutlineGeometry.anchorTops = [:]
+            BookOutlineGeometry.trace = []
+            let watchdog = MainThreadWatchdog()
+            defer { watchdog.stop() }
+            let (window, hosting) = mounted(
+                session: session, readingID: readingID, model: model, structure: structure)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            await settle(window, hosting, watchdog: watchdog, until: { false }, maxTurns: 4)
+
+            /// The navigator's note-row click (`openFromNavigator`): focus +
+            /// reveal; then wait for the landing to settle AND hold.
+            @MainActor func open(_ index: Int, _ what: String) async throws -> CGFloat {
+                let anchor = BookOutlineRows.Row.noteAnchor(postIDs[index])
+                model.focus(postIDs[index])
+                model.requestReveal(postIDs[index])
+                await settle(window, hosting, watchdog: watchdog, until: {
+                    if let top = anchorTop(anchor) { return abs(top) <= BookView.landingTolerance }
+                    return false
+                }, maxTurns: 120)
+                // The hold: a second later the expanded rows around the page
+                // have loaded their heights — the anchor must still be there.
+                await settle(window, hosting, watchdog: watchdog, until: { false }, maxTurns: 24)
+                let top = try #require(anchorTop(anchor), "\(what): the opened story realized")
+                print("LANDING TRACE (\(what)):", BookOutlineGeometry.trace.suffix(24), scrollFacts(hosting))
+                return top
+            }
+
+            // The walk's state: three stories opened in turn (each the live
+            // editor while it is the newest; the earlier two read-cheap).
+            for (i, what) in [(3, "story 3"), (7, "story 7"), (11, "story 11")] {
+                let top = try await open(i, what)
+                #expect(abs(top) <= 4, "\(what) opens at its top, not \(top) pt away")
+            }
+            let editorHeight = firstEditor(in: hosting)?.frame.height ?? 0
+            #expect(editorHeight > 3000, "the newest story's editor is tall: \(editorHeight)")
+
+            // Far BELOW (three expanded stories above and between).
+            let below = try await open(15, "far below")
+            #expect(abs(below) <= 4,
+                    "the story far below lands at its own top and stays there, not \(below) pt away")
+            // Far ABOVE (four expanded stories below it now).
+            let above = try await open(1, "far above")
+            #expect(abs(above) <= 4,
+                    "the story far above lands at its own top and stays there, not \(above) pt away")
+            #expect(model.pendingReveal == nil, "the landing was consumed")
         }
     }
 }
