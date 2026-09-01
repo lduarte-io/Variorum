@@ -1400,7 +1400,7 @@ marked closed.
 - **A harness lesson found on the way (recorded so the ladder's fix session does not relearn it):** the composition-reflection road (`SurfaceComposition`) cannot see inside a `CalmCard { … }` content closure or a `ForEach` body, and a view under `if` dumps as an `Optional(…)` whose one-line description repeats its labels — so the two header/offer cards became VALUE views with a stored `title`, and the one-placement counts read whole `- title:`/`- verbatim:` lines. Recorded at the pin file's header beside `ProtectionSurfaceRenderTests`' two limits.
 - **The USE gate:** NOT-STARTED — captures into `act10-correction-screens/batch-d/`, both voices, sheet `batch-d/contact-sheet.png`.
 - **Suites:** PENDING — `TutorialWalkTests`, then the full Mac suite once on the final tree (baseline Mac 2032 / 356 · core 1524 / 165).
-- **No revert in flight.** `/Applications` untouched; her real-store app untouched (not running).
+- **REVERT STARTING — pre-revert state is the commit `e400618`** (the behavioral red-on-old of rows 17/46/16: every mechanism switched back in place in `CompareBoardView.swift` + `LensesBoardView.swift`, the oracles kept; restore is `git checkout --` on those two files; a successor finding this line with a dirty tree restores exactly that way). `/Applications` untouched; her real-store app untouched (not running).
 
 ---
 
