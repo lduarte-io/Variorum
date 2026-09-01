@@ -438,12 +438,12 @@ your rows before the record is marked closed.
 
 - **Row 44 (the hang) + rows 9/12 (the scroll class) + row 47/7/23 (the note-row reveal) + row 14 (chapters):** DONE (`be32fa7`) — ONE mechanism: Outline's landing rebuilt (no animation; bounded convergence; the flat `BookOutlineRows` ForEach whose identities ARE the anchors; the model's `pendingChapterReveal` slot beside W21's note slot; chapter HEADINGS are doors; Read ▸ Scroll's chapter click lands the flow). Pins green on the new tree (`BookOutlineLandingTests` ×3, `BookOutlineRowsTests` ×2). **Red-on-old VERIFIED by behavioral revert** (animated `scrollTo` + no hops + the anchor as an explicit `.id` inside a positionally-identified lazy row + no caret seed): 4 issues in 3 tests — the chapter landing 937 pt off with the scroll offset still 0 (the page never moved), the off-screen card never realized (`anchorTop == nil` — row 47's "the page did not move"), the caret at 56,004 (the document's end = block 215/215) and `caretSeed == nil`. Restored; `git diff --stat` empty.
 - **Row 44's second symptom (focus lands on the LAST block):** DONE (`be32fa7`) — a bare `BookViewModel.focus` seeds caret 0; pin `aBareFocusLandsAtTheFirstBlock` green; red under revert (2 issues, above).
-- **Row 8 (the duplicate line):** NOT-STARTED — settled design: navigator collapses the note line into the chapter row when the chapter has exactly one note whose `BookNaming.key(displayTitle) == key(section.name)`; the chapter row then opens the note (focus + reveal); pin on a Sherlock-shaped fixture; the field guide untouched.
-- **Row 13 (the gutter):** NOT-STARTED — settled design: the per-card word-count column is DROPPED (C-6 / R-cor-4(d)); the gutter keeps ONLY the takes fact (`⑂ takes on N blocks`) beside a card that has one; the row shares the pane's width honestly (flexible gutter). Verdict for the row-36 table: BookView's 4 metrics → the card `Nw` DROP · the gutter `⑂ takes` KEEP (invisible from a card otherwise) · `bookMetaLine` ("book · 13 chapters · 13 notes") KEEP (the book's shape under its title, not a word count) · the side card's counts → row 40.
+- **Row 8 (the duplicate line):** DONE (this commit) — `BookOutlineRows.noteLineCollapsesIntoChapter` (one note, `BookNaming.sameName(displayTitle, chapter)`); the navigator draws ONE row, which OPENS the note (`openFromNavigator`), wears the › marker, and carries both menus; the field guide untouched (different names). Pins `BookOutlineFacesTests` ×2 (door class — red-on-old by construction: the rule did not exist).
+- **Row 13 (the gutter):** DONE (this commit) — `BookOutlineRows.gutterLine(fannedBlocks:)`: the per-card word count DROPPED (C-6 / R-cor-4(d)); the takes fact KEPT (a card cannot show it otherwise); the gutter beside an expanded read-cheap note is empty (its takes wear badges on the prose); the gutter is FLEXIBLE (`layoutPriority(1)` on the prose column so the measure holds — the `outlineProseSitsOnWritesOwnMeasure` pin caught the first cut splitting the width evenly); the FOCUSED row stays capped at `outlineFocusedRowWidth` so the live editor never exceeds Write's measure. Pin `theGutterCarriesTheTakesFactAndNoWordCount`; red-on-old PENDING (next commit). **Row-36 verdicts for BookView's four metrics:** the card `Nw` → DROP · the gutter `⑂ takes on N blocks` → KEEP · `bookMetaLine` ("book · 13 chapters · 13 notes") → KEEP (the book's shape under its title; not a word count) · the side card's `Nw block` / `Nw in note` → row 40. **Taste note for her (HELD):** the open right of the pane is unchanged in kind — prose and cards still end at Write's measure, left-anchored per batch 12's ruling; the gutter now holds only the takes fact. If she wants the column centred like Write's, that is a one-line ruling.
 - **Row 22 (the book Index editable in place):** NOT-STARTED — settled design: the pane's note renders per-BLOCK `PaneSurfaceView`s through the `BlockTOCViewModel`/`PaneTextAuthority` road (one live editor); a click makes THAT block live; the double-click handoff to Outline retires; Read stays read-only.
 - **Row 38 (book half — the scrolled-open door):** NOT-STARTED — settled design: `ReadingFlowView` renders paragraphs per BLOCK so a click knows its block; the door brain `BookLanding` `(postID, blockID?, offset?)` → mode switch to Index + select + make live.
 - **Row 40 (the side card):** NOT-STARTED — settled design: the vertical `CommitBar` becomes one calm grouped control (where-you-are line · the block's doors · the note's doors · one count line = the word-target face), collapsible under a width threshold; before/after captures.
-- **Row 45 (previews):** NOT-STARTED — settled design: a pure `CardPreview.excerpt(blocks:)` brain — the first ~40 words across leading blocks, skipping a lone heading/numeral block; pin on a numeral-first fixture.
+- **Row 45 (previews):** DONE (this commit) — `BookOutlineRows.cardPreview(blocks:words:)`: the first ~40 words ACROSS the leading blocks, a lone heading/numeral stub skipped (`isLoneHeadingOrNumeral`: a markdown heading, or ≤ 2 words in ≤ 12 characters — `I.`, `Chapter 3`), an ellipsis where the note goes on, never an empty card. Pins ×3; red-on-old PENDING (next commit).
 - **The USE gate (captures per row into `act10-correction-screens/batch-b/`):** NOT-STARTED — the dev build must be relaunched from the fresh Debug product after the code lands (`open -n`).
 - **Full Mac suite + TutorialWalkTests:** PENDING (at the end).
 - **No revert in flight** (the red-on-old revert ran and was restored — `git diff --stat` empty against `be32fa7`; evidence in the table below).
@@ -463,17 +463,18 @@ your rows before the record is marked closed.
 | 9 · 12 | FIXED (row 44's mechanism) | the chapter pin above | the same 1 issue |
 | 47 · 7 · 23 | FIXED — a note-row click focuses + reveals through the model slot; the anchor is the row's ForEach identity. Row 23's "intermittent" IS this: the old reveal worked only for a card that happened to be realized | `.anOffScreenCollapsedNoteIsRevealedAtTheTop` | 1 issue (the card never realized — the page did not move) |
 | 14 | FIXED — the body's chapter headings are doors (`navigateToChapter`); the navigator's chapter click survives an expanded story (the chapter pin) | the chapter pin | — (door class) |
-| 8 | PENDING | | |
-| 13 | PENDING | | |
+| 8 | FIXED — the one-note chapter's duplicate line collapses into the chapter row, which opens the note | `BookOutlineFacesTests.aOneNoteChapterThatSaysTheNotesNameCollapsesTheNoteLine` · `.differentNamesOrSeveralNotesKeepEveryLine` | door class (the rule did not exist) |
+| 13 | FIXED — the word count dropped from the gutter (C-6); takes fact kept; flexible gutter; the focused row capped | `.theGutterCarriesTheTakesFactAndNoWordCount` | PENDING |
 | 22 | PENDING | | |
 | 38 (book half) | PENDING | | |
 | 40 | PENDING | | |
-| 45 | PENDING | | |
+| 45 | FIXED — the preview reads across leading blocks and skips a lone numeral/heading | `.aLeadingNumeralBlockIsSkippedAndTheProseBeginsThePreview` · `.aProseFirstNoteKeepsItsOpeningAndAStubOnlyNotePreviewsTheStub` · `.thePreviewReadsAcrossLeadingBlocksToTheWordCapWithAnEllipsis` | PENDING |
 
 #### Commits (in order)
 
 1. `be32fa7` — rows 44/9/12/47/7/23/14: the landing rebuilt + pins + this record's skeleton.
-2. PENDING(hash) — the red-on-old evidence recorded (this edit).
+2. `ca479eb` — the red-on-old evidence for the landing pins recorded.
+3. PENDING(hash) — rows 45/13/8: the card preview brain, the gutter's line + flexible gutter, the navigator's collapsed duplicate line.
 
 ---
 

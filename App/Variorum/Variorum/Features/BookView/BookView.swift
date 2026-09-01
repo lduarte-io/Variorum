@@ -101,7 +101,13 @@ struct BookView: View {
     /// focused note's whole editor bar. The open right earns its keep.
     static let outlineGutterWidth: CGFloat = 190
     static let outlineGutterSpacing: CGFloat = 24
-    static let outlineRowWidth =
+    /// The FOCUSED note's row: the prose measure + the editor's side bar
+    /// (`EditorView(barPlacement: .side)` splits this into the surface and
+    /// a 190 pt rail). Only the focused row is capped — the correction
+    /// round (row 13) let the other rows span the pane with a flexible
+    /// gutter, but a live editor spanning the pane would put the prose
+    /// past Write's measure (R9 — margins are sacred).
+    static let outlineFocusedRowWidth =
         proseColumn + outlineGutterSpacing + outlineGutterWidth
 
     var body: some View {
@@ -368,13 +374,31 @@ struct BookView: View {
                                         .fill(tokens.ring)
                                         .frame(height: 2)
                                 }
+                                // Row 8 (her "the chapters + the blocks named
+                                // the same" — the Sherlock book): a chapter
+                                // whose ONE note says its name shows ONE row,
+                                // and that row OPENS the note.
+                                let collapsedNote = BookOutlineRows.noteLineCollapsesIntoChapter(
+                                    section: section, entries: group.entries)
+                                    ? group.entries.first : nil
                                 Button {
-                                    navigateToChapter(section)
+                                    if let collapsedNote {
+                                        openFromNavigator(collapsedNote)
+                                    } else {
+                                        navigateToChapter(section)
+                                    }
                                 } label: {
                                     HStack(spacing: 4) {
                                         Text("⠿")
                                             .font(tokens.small)
                                             .foregroundStyle(tokens.faint)
+                                        if let collapsedNote, navigatorMarks(collapsedNote),
+                                           !tokens.selectionMarker.isEmpty {
+                                            Text(tokens.selectionMarker
+                                                .trimmingCharacters(in: .whitespaces))
+                                                .font(tokens.small.weight(.bold))
+                                                .foregroundStyle(tokens.accent)
+                                        }
                                         Text(tokens.chromeLabel(section.name))
                                             .font(tokens.small.weight(.semibold))
                                             .foregroundStyle(tokens.accent)
@@ -386,7 +410,14 @@ struct BookView: View {
                                 // the glyphs (the batch-1 reach trace).
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .contentShape(Rectangle())
-                                .contextMenu { chapterMenu(section) }
+                                .contextMenu {
+                                    chapterMenu(section)
+                                    if let collapsedNote {
+                                        Divider()
+                                        outlineChapterMenu(
+                                            structure: structure, postID: collapsedNote.postID)
+                                    }
+                                }
                                 .draggable(BookStructureModel.BookDrag.chapter(section.id).payload)
                                 .dropDestination(for: String.self) { items, _ in
                                     acceptDrop(
@@ -406,8 +437,14 @@ struct BookView: View {
                             }
                             // The top-level outline: posts; clicking one
                             // opens it in the CURRENT editor (R43 — no
-                            // context jump).
-                            ForEach(group.entries, id: \.postID) { entry in
+                            // context jump). A note line that collapsed into
+                            // its chapter row (row 8) is not drawn twice.
+                            let noteLines = group.section.map { section in
+                                BookOutlineRows.noteLineCollapsesIntoChapter(
+                                    section: section, entries: group.entries)
+                                    ? [] : group.entries
+                            } ?? group.entries
+                            ForEach(noteLines, id: \.postID) { entry in
                                 Button {
                                     // In the SPREAD the navigator is a
                                     // page-jump: show the post, read-cheap
@@ -426,16 +463,7 @@ struct BookView: View {
                                         // no-context-jump rule, R43).
                                         model.focus(entry.postID)
                                     } else {
-                                        // The correction round (rows 7/23/47):
-                                        // a note-row click REVEALS the note
-                                        // and lands in it at its first
-                                        // block — through the model's one
-                                        // landing slot, which Outline lands
-                                        // whether the card is on screen or
-                                        // unrealized far below (`landOutline`).
-                                        structure.mode = .outline
-                                        model.focus(entry.postID)
-                                        model.requestReveal(entry.postID)
+                                        openFromNavigator(entry)
                                     }
                                 } label: {
                                     HStack(spacing: 2) {
@@ -777,6 +805,18 @@ struct BookView: View {
         DispatchQueue.main.async { proxy.scrollTo(anchorID, anchor: .top) }
     }
 
+    /// The navigator's note-row click in Outline (the correction round,
+    /// rows 7/23/47): REVEAL the note and land in it at its first block —
+    /// through the model's one landing slot, which Outline lands whether the
+    /// card is on screen or unrealized far below (`landOutline`). The
+    /// chapter row of a one-note chapter that says the note's name (row 8)
+    /// takes this same door.
+    private func openFromNavigator(_ entry: Queries.ReadingEntry) {
+        structure.mode = .outline
+        model.focus(entry.postID)
+        model.requestReveal(entry.postID)
+    }
+
     /// The navigator's chapter click — and, since the correction round
     /// (row 14), the body's chapter HEADING: one act, mode by mode. In the
     /// SPREAD it shows the chapter's first page; in paginated Read it turns
@@ -965,9 +1005,11 @@ struct BookView: View {
                 // the measure Write puts a post's on. It stays LEFT-ANCHORED
                 // beside the navigator (batch 12, her mockup reference:
                 // "there shouldn't be so much open space to the left").
-                // Wave 2c: the row width now INCLUDES the details gutter —
-                // the prose keeps its measure; the gutter takes the right.
-                .frame(maxWidth: Self.outlineRowWidth, alignment: .leading)
+                // Wave 2c: the row includes the details gutter — the prose
+                // keeps its measure; the gutter takes the right. The
+                // correction round (row 13): the gutter is FLEXIBLE, so the
+                // row spans the pane and the right edge is the pane's own
+                // rather than a rail's cliff 190 pt past the prose.
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 40)
                 .padding(.vertical, 22)
@@ -1262,6 +1304,7 @@ private struct OutlinePostRow: View {
                             barPlacement: .side)
                             .id(entry.postID)
                     }
+                    .frame(maxWidth: BookView.outlineFocusedRowWidth, alignment: .leading)
                     .padding(.bottom, 26)
                 } else {
                     // Expanded, read-cheap: prose at the measure, the
@@ -1286,9 +1329,10 @@ private struct OutlinePostRow: View {
                                 .id("read-\(entry.postID)")
                         }
                         .frame(maxWidth: BookView.proseColumn, alignment: .leading)
-                        gutterDetails
-                            .frame(width: BookView.outlineGutterWidth, alignment: .leading)
-                            .padding(.top, 12)
+                        .layoutPriority(1)  // the prose claims its measure before the gutter flexes
+                        // An expanded note's takes wear their own badges on
+                        // the prose; the gutter beside it stays calm (row 13).
+                        Spacer(minLength: BookView.outlineGutterWidth)
                     }
                     .padding(.bottom, 26)
                 }
@@ -1297,8 +1341,13 @@ private struct OutlinePostRow: View {
                     collapsedPostCard
                         .bookDropRow(self, targeted: $dropTargeted, tokens: tokens)
                         .frame(maxWidth: BookView.proseColumn, alignment: .leading)
+                        .layoutPriority(1)  // the card claims its measure before the gutter flexes
+                    // Row 13: the gutter shares the pane's width with the
+                    // card honestly (flexible, never a fixed rail with a
+                    // cliff at its right), and carries the one fact a card
+                    // cannot show — that a block has takes.
                     gutterDetails
-                        .frame(width: BookView.outlineGutterWidth, alignment: .leading)
+                        .frame(minWidth: BookView.outlineGutterWidth, maxWidth: .infinity, alignment: .leading)
                         .padding(.top, 13)
                 }
                 .padding(.bottom, 2)
@@ -1307,8 +1356,9 @@ private struct OutlinePostRow: View {
         .task(id: entry.postID) { await loadFacts() }
     }
 
-    /// The gutter's details card: the meta that used to sit BELOW the
-    /// card's opening paragraphs (W8-5 — to the side, never below).
+    /// The gutter's details beside a card: the takes fact (row 13 — the
+    /// note info that used to sit BELOW the card's opening paragraphs,
+    /// W8-5 — to the side, never below; the word count dropped, C-6).
     @ViewBuilder private var gutterDetails: some View {
         if !meta.isEmpty {
             Text(tokens.chromeLabel(meta))
@@ -1325,15 +1375,11 @@ private struct OutlinePostRow: View {
         let slots = (try? await session.database.read { [postID = entry.postID] db in
             try Queries.renderPost(db, containerID: postID)
         }) ?? []
-        let first = slots.compactMap(\.text).first { !$0.isEmpty } ?? ""
-        excerpt = String(first.prefix(280))
-        let words = slots.reduce(0) { $0 + TextMetrics.wordCount($1.text ?? "") }
-        let fanned = slots.filter(\.hasFan).count
-        var parts = ["\(words.formatted())w"]
-        if fanned > 0 {
-            parts.append("⑂ takes on \(fanned) block\(fanned == 1 ? "" : "s")")
-        }
-        meta = parts.joined(separator: " · ")
+        // Row 45: the preview reads ACROSS the leading blocks and skips a
+        // lone heading/numeral ("I."); row 13: the gutter carries the takes
+        // fact alone — the per-card word count is DROPPED (C-6).
+        excerpt = BookOutlineRows.cardPreview(blocks: slots.compactMap(\.text))
+        meta = BookOutlineRows.gutterLine(fannedBlocks: slots.filter(\.hasFan).count) ?? ""
     }
 
     /// 13f W11 — the row's own drag/drop contract, shared by both forms

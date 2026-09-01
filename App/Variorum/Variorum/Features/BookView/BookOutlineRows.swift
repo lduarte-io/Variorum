@@ -81,4 +81,95 @@ nonisolated enum BookOutlineRows {
         }
         return result
     }
+
+    // MARK: - The card's preview (row 45) and the gutter's line (row 13)
+
+    /// The words a collapsed card previews (the correction round, row 45 —
+    /// "A Scandal in Bohemia" previewed as "I."): the first ~`words` words
+    /// ACROSS the note's leading blocks, skipping a LONE heading or numeral
+    /// block at the front (a markdown heading; or a one-/two-word stub such
+    /// as `I.`, `II`, `1.`), joined across block breaks by a space, with an
+    /// ellipsis where the note goes on. Derived at read time from the
+    /// rendered texts, never stored. A note that is ONLY a stub previews the
+    /// stub (never an empty card).
+    static func cardPreview(blocks: [String], words limit: Int = 40) -> String {
+        let texts = blocks
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+        guard !texts.isEmpty else { return "" }
+        var leading = texts[...]
+        // Skip stubs at the front — but never the whole note.
+        while leading.count > 1, let first = leading.first, isLoneHeadingOrNumeral(first) {
+            leading = leading.dropFirst()
+        }
+        var pieces: [String] = []
+        var budget = limit
+        var truncated = false
+        for text in leading {
+            // The block's words, as ranges, so the slice keeps its own
+            // punctuation and spacing.
+            var ranges: [Range<String.Index>] = []
+            text.enumerateSubstrings(in: text.startIndex..., options: .byWords) { _, range, _, stop in
+                ranges.append(range)
+                if ranges.count > budget { stop = true }
+            }
+            if ranges.count > budget {
+                let cut = ranges[budget - 1].upperBound
+                pieces.append(String(text[..<cut]))
+                truncated = true
+                budget = 0
+                break
+            }
+            pieces.append(text)
+            budget -= ranges.count
+            if budget <= 0 {
+                // Exactly at the cap — anything after this block is elided.
+                truncated = leading.last != text
+                break
+            }
+        }
+        let joined = pieces
+            .map { $0.replacingOccurrences(of: "\n", with: " ") }
+            .joined(separator: " ")
+        return truncated ? joined + "…" : joined
+    }
+
+    /// A block that is a heading or a numeral by itself: a markdown heading
+    /// line (`NoteIndexOutline`'s rule), or at most two "words" in at most
+    /// twelve characters — `I.`, `II`, `1.`, `Part 2`.
+    static func isLoneHeadingOrNumeral(_ text: String) -> Bool {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, !trimmed.contains("\n") else { return false }
+        if NoteIndexOutline.headingLevel(of: trimmed) != nil { return true }
+        guard trimmed.count <= 12 else { return false }
+        var words = 0
+        trimmed.enumerateSubstrings(
+            in: trimmed.startIndex..., options: [.byWords, .substringNotRequired]
+        ) { _, _, _, _ in words += 1 }
+        return words <= 2
+    }
+
+    /// The details gutter's line beside a collapsed card (row 13 — C-6's
+    /// verdict): the TAKES fact only, because a card cannot show that a
+    /// block carries takes any other way; the word count is dropped (it was
+    /// "thrown in everywhere just because"). nil ⇒ the gutter is empty.
+    static func gutterLine(fannedBlocks: Int) -> String? {
+        guard fannedBlocks > 0 else { return nil }
+        return "⑂ takes on \(fannedBlocks) block\(fannedBlocks == 1 ? "" : "s")"
+    }
+
+    // MARK: - The navigator's duplicate line (row 8)
+
+    /// Does this chapter's ONE note say the chapter's name? Then the
+    /// navigator collapses the note line INTO the chapter row (the Sherlock
+    /// book: chapter "A Scandal in Bohemia" over note "A Scandal in
+    /// Bohemia"); the chapter row opens the note. `BookNaming.key` is the
+    /// comparison — ends-trimmed, case-folded — so the field guide's
+    /// differently-named chapters and notes are untouched.
+    static func noteLineCollapsesIntoChapter(
+        section: ReadingSection, entries: [Queries.ReadingEntry]
+    ) -> Bool {
+        guard entries.count == 1, let only = entries.first else { return false }
+        return BookNaming.sameName(only.displayTitle, section.name)
+    }
 }
