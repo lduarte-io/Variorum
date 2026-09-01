@@ -506,7 +506,7 @@ Honesty notes: the card and pane show `_the_` raw (row 52); the row-38 caret lan
 4. `c768c08` — rows 22/38: the book Index editable in place (`BookIndexEditModel`), the scrolled-open door (`LandingTarget`), the flow's per-block click.
 5. `45608b1` — row 40: the side rail as one grouped, foldable control.
 6. `e4e9dcb` — row 48 (found in the walk): the navigator's rows take the whole row; the walk's captures + this record.
-7. PENDING(hash) — the counts, the door brain's naming, the handoff paragraph (this edit).
+7. `b28128f` — the counts, the door brain's naming, the handoff paragraph. 8. (this commit) the hash filled.
 
 #### The door brain, named (for batch C's reuse)
 
