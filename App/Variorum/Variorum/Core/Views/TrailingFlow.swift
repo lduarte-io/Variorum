@@ -48,6 +48,33 @@ struct TrailingFlow: Layout {
         static let defaultValue = false
     }
 
+    /// Marks an item that never starts a line by itself: when the row rule
+    /// would wrap it alone, the item before it comes down with it (the ＃
+    /// door after the cards — the first walk on the fixed row showed five
+    /// cards exactly filling a line and the door orphaned on the next).
+    struct KeepWithPreviousKey: LayoutValueKey {
+        static let defaultValue = false
+    }
+
+    /// The orphan rule, applied AFTER the row rule (pure — pinned): a row
+    /// that begins with a keep-with-previous item takes the last item of
+    /// the row before it, provided that row keeps at least one item.
+    nonisolated static func keepingTogether(
+        _ rows: [[Int]], keepWithPrevious: Set<Int>
+    ) -> [[Int]] {
+        var rows = rows
+        var index = 1
+        while index < rows.count {
+            if let first = rows[index].first, keepWithPrevious.contains(first),
+               rows[index - 1].count >= 2 {
+                let moved = rows[index - 1].removeLast()
+                rows[index].insert(moved, at: 0)
+            }
+            index += 1
+        }
+        return rows
+    }
+
     /// The ONE row-breaking rule: greedy fill, break when the next item
     /// (plus its leading spacing) would cross the available width; an item
     /// wider than the whole line gets a line of its own (never dropped).
@@ -102,6 +129,7 @@ struct TrailingFlow: Layout {
         var anchor: Int?
         var sizes: [CGSize] = []
         var baselines: [CGFloat] = []
+        var keepWithPrevious = Set<Int>()   // positions within `items`
         for (index, subview) in subviews.enumerated() {
             let size = subview.sizeThatFits(.unspecified)
             sizes.append(size)
@@ -109,12 +137,14 @@ struct TrailingFlow: Layout {
             if subview[AnchorKey.self] {
                 anchor = index
             } else {
+                if subview[KeepWithPreviousKey.self] { keepWithPrevious.insert(items.count) }
                 items.append(index)
             }
         }
         let available = width.isFinite ? max(0, width - leadingReserve) : .infinity
-        let rows = Self.rows(
-            widths: items.map { sizes[$0].width }, available: available, spacing: itemSpacing)
+        let rows = Self.keepingTogether(
+            Self.rows(widths: items.map { sizes[$0].width }, available: available, spacing: itemSpacing),
+            keepWithPrevious: keepWithPrevious)
         var lines: [Line] = []
         for row in rows {
             let members = row.map { items[$0] }
@@ -194,5 +224,11 @@ extension View {
     /// own, placed at the last line's leading edge with the line's height.
     func trailingFlowAnchor() -> some View {
         layoutValue(key: TrailingFlow.AnchorKey.self, value: true)
+    }
+
+    /// Mark this item as one that never starts a `TrailingFlow` line alone
+    /// (the item before it wraps with it).
+    func keepsWithPrevious() -> some View {
+        layoutValue(key: TrailingFlow.KeepWithPreviousKey.self, value: true)
     }
 }

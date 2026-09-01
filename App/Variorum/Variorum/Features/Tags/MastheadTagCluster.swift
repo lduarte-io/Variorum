@@ -95,7 +95,11 @@ struct MastheadTagCluster: View {
                 TagChipCard(tokens: tokens, tag: tag, onRemove: { remove($0) })
                     .mastheadGeometryProbe(.card(tag.id), in: geometryProbeSpace)
             }
+            // The door ends the last line WITH a card — never orphaned on a
+            // line of its own (the first walk on the fixed row: five cards
+            // filled the line exactly and the ＃ stood alone below them).
             door
+                .keepsWithPrevious()
             // THE FIELD IS AN OVERLAY, deliberately outside the flow's
             // items: it slides out of the ＃ to the LEFT of the ＃'s line,
             // into the room every line reserves for it, and no card, the

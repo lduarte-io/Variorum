@@ -180,7 +180,7 @@ struct PostDetailView: View {
     }
     /// The masthead's own coordinate space (the DEBUG oracle reads the
     /// title's midX in it against the masthead's midX).
-    static let mastheadSpace = "variorum-masthead"
+    nonisolated static let mastheadSpace = "variorum-masthead"
 
     var body: some View {
         VStack(spacing: 0) {
