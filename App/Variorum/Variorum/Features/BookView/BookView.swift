@@ -266,21 +266,21 @@ struct BookView: View {
     /// exactly the dated chrome grammar the mockups retire, and its ideal
     /// width already forced `.controlSize(.small)` at three labels; a
     /// fourth would have re-run the b6dae25 overflow the old comment here
-    /// documented). Words truncate never — four short labels measure under
-    /// the 190 pt column in both voices.
+    /// documented). The tabs own their line WHOLE (gear on the title line,
+    /// labels lineLimit(1) + fixedSize): the first claim that "four labels
+    /// + the gear measure under 190 pt" was falsified by the walk — the
+    /// compressed row wrapped the words mid-letter.
     @ViewBuilder private var bookMasthead: some View {
-        Text(tokens.path([readingName ?? model.readingName ?? "book"]))
-            .font(tokens.heading)
-            .foregroundStyle(tokens.accent)
-            .lineLimit(1)
-        HStack(spacing: 8) {
-            // Outline · Index · Book · Read — Index sits beside the
-            // writing surface, mirroring the note row's Write · Takes ·
-            // Index · Read shape (her cohesion mandate, W8-2).
-            modeTab("Outline", .outline)
-            modeTab("Index", .index)
-            modeTab("Book", .spread)
-            modeTab("Read", .read)
+        // The gear rides the TITLE line (which truncates and so always
+        // yields), leaving the tab row the column's whole width — in the
+        // 190 pt navigator, tabs + gear on one line compressed the labels
+        // into mid-word wraps ("outl/ine"), the b6dae25 class this walk
+        // caught live (2026-08-31).
+        HStack(spacing: 4) {
+            Text(tokens.path([readingName ?? model.readingName ?? "book"]))
+                .font(tokens.heading)
+                .foregroundStyle(tokens.accent)
+                .lineLimit(1)
             Spacer(minLength: 2)
             Button {
                 settingsShown = true
@@ -289,6 +289,15 @@ struct BookView: View {
             }
             .buttonStyle(.borderless)
             .help("Book settings — finish, length, rename")
+        }
+        HStack(spacing: 8) {
+            // Outline · Index · Book · Read — Index sits beside the
+            // writing surface, mirroring the note row's Write · Takes ·
+            // Index · Read shape (her cohesion mandate, W8-2).
+            modeTab("Outline", .outline)
+            modeTab("Index", .index)
+            modeTab("Book", .spread)
+            modeTab("Read", .read)
         }
         // 13c 2C: READ's pair of faces (her direction — "the
         // Apple-Books/Kindle PAIR of modes"). It sits UNDER the mode
@@ -326,6 +335,10 @@ struct BookView: View {
                 .font(structure.mode == mode
                     ? tokens.small.weight(.semibold) : tokens.small)
                 .foregroundStyle(structure.mode == mode ? tokens.accent : tokens.muted)
+                // P-8: a chrome label never wraps — a compressed row
+                // must yield elsewhere, not split a word.
+                .lineLimit(1)
+                .fixedSize()
         }
         .buttonStyle(.plain)
         .help(modeHelp(mode))
