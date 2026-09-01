@@ -3419,5 +3419,6 @@ nothing open without an owner.
   sync row → 13u2; the nudge tells her the Keychain is the only key although she has a (vault)
   passphrase → mechanism from the log (the coupling made her escrow posture-OFF under Touch ID;
   the store envelope was never extended; the legs brain omits the sync leg) → 13u2 (two items in
-  the 13u plan's post-round additions #2). Sherlock seeded on her real store: 12 stories, logged.
+  the 13u plan's post-round additions #2). Sherlock seeded on her real store: 12 stories, logged.- **Same launch:** "we NEED a copy all button on the recovery phrase" → 13u2 (post-round
+  addition #3; a one-session 17 entry if she wants it sooner).
 

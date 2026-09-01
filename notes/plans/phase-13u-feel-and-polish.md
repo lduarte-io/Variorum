@@ -623,3 +623,14 @@ passphrase because i do") — TWO 13u2 items:**
   wording and a non-exposed tier; the inset pin: the sync row's frame is fully visible with the
   bar shown.
 
+**POST-ROUND ADDITION #3 (author, 2026-09-01, same launch — verbatim: "we NEED a copy all button
+on the recovery phrase - i had to copy them one by one, it was really annoying"):** **13u2 item —
+COPY ALL on the recovery phrase screen(s).** Everywhere the twelve words are shown (the
+passphrase set-screen's recovery panel, Show My Recovery Phrase…, the phone's twins), ONE
+"Copy all" door places the phrase as a single space-separated line on the pasteboard. Design
+note for the batch (not a ruling): password managers' shape — copy-all with a pasteboard EXPIRY
+(the phrase cleared from the pasteboard after ~60 s, and never landing in the pasteboard history
+if the platform offers the concealed/transient pasteboard type) — so the convenience never
+becomes a leak; the same door on both platforms (the recovery-phrase view is `Shared/`). Her
+priority word: NEED. If she wants it before 13u2 runs, it is a one-session 17 entry.
+
