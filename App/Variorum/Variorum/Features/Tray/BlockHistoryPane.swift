@@ -94,6 +94,12 @@ nonisolated extension BlockHistoryPath {
     static let jumpHelp =
         "Your cursor has moved to a different block — this points the panel at "
         + "that block's history instead, without closing it"
+
+    /// **Row 28 (the Act 10 correction round): the savepoints region's one
+    /// meaning line** — her ask nearly verbatim ("Savepoints: this take's
+    /// saved moments"); the other three regions already carried theirs.
+    static let savepointsExplainer =
+        "Each take's saved moments \u{2014} Restore loads one back into its buffer."
 }
 
 /// A surface's pending request to open the pane — the `TrayRequest` shape,
@@ -420,14 +426,24 @@ struct BlockHistoryPane: View {
                     .textSelection(.enabled)
                     .lineLimit(3)
             }
-            List {
-                savepointRegion
-                archivedRegion
-                deletedRegion
-                cameFromRegion
+            // Rows 28 + 65 (the Act 10 correction round): the pane was a
+            // `List`, and a plain macOS List measures section headers at a
+            // fixed height — so the taller region headers (a title AND a
+            // meaning line) drew as struck-through slivers, the EXACT
+            // mechanism Act 10 item 1 traced and killed in the tray one file
+            // over. Same rebuild, same reason: a ScrollView of ordinary
+            // stacked views cannot clip a header by measuring it elsewhere,
+            // and the four regions now READ as sections — a CalmSectionHeader
+            // with air and one meaning line each (the calm-card grammar).
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 6) {
+                    savepointRegion
+                    archivedRegion
+                    deletedRegion
+                    cameFromRegion
+                }
+                .padding(.bottom, 8)
             }
-            .listStyle(.plain)
-            .scrollContentBackground(.hidden)
         }
         .padding(12)
         .frame(minWidth: 300, minHeight: 280)
@@ -471,14 +487,16 @@ struct BlockHistoryPane: View {
     // MARK: - Region 1 — every live take's saved moments
 
     @ViewBuilder private var savepointRegion: some View {
-        Section(tokens.chromeLabel(BlockHistoryPath.savepointsSection)) {
-            if model.loaded, model.history.activeTakes.isEmpty {
-                quiet(BlockHistoryPath.nothingHere)
-            }
-            let takes = model.history.activeTakes
-            ForEach(Array(takes.enumerated()), id: \.element.id) { index, take in
-                takeRun(take, ordinal: index + 1, of: takes.count)
-            }
+        // Row 28: a real section — a header with air and one meaning line.
+        CalmSectionHeader(
+            tokens: tokens, title: BlockHistoryPath.savepointsSection,
+            detail: BlockHistoryPath.savepointsExplainer)
+        if model.loaded, model.history.activeTakes.isEmpty {
+            quiet(BlockHistoryPath.nothingHere)
+        }
+        let takes = model.history.activeTakes
+        ForEach(Array(takes.enumerated()), id: \.element.id) { index, take in
+            takeRun(take, ordinal: index + 1, of: takes.count)
         }
     }
 
@@ -486,31 +504,19 @@ struct BlockHistoryPane: View {
         _ take: Variant, ordinal: Int, of total: Int
     ) -> some View {
         let commits = model.history.savepoints[take.id] ?? []
-        DisclosureGroup(isExpanded: Binding(
-            get: { expandedTakes.contains(take.id) },
-            set: { open in
-                if open { expandedTakes.insert(take.id) }
-                else { expandedTakes.remove(take.id) }
-            })
-        ) {
-            if commits.isEmpty {
-                quiet(BlockHistoryPath.noSavepoints)
-            }
-            ForEach(SavepointRuns.rows(
-                commits, isQuiet: { $0.kind == .auto }, id: { $0.id })
-            ) { row in
-                let rendered = SavepointHistoryFace.rendered(row, expanded: expandedRuns)
-                if let count = rendered.runCount {
-                    QuietRunRow(count: count, expanded: rendered.expanded, tokens: tokens) {
-                        expandedRuns = SavepointHistoryFace.toggling(row.id, in: expandedRuns)
-                    }
-                }
-                ForEach(rendered.items, id: \.id) { commit in
-                    savepointRow(commit, of: take)
-                }
+        let open = expandedTakes.contains(take.id)
+        // Row 64's generous-target rule, here too: the WHOLE line toggles the
+        // run (the DisclosureGroup it replaces toggled only on its chevron).
+        Button {
+            withAnimation(.easeInOut(duration: 0.15)) {
+                if open { expandedTakes.remove(take.id) }
+                else { expandedTakes.insert(take.id) }
             }
         } label: {
             HStack(spacing: 6) {
+                Text(tokens.chromeLabel(open ? "\u{25BE}" : "\u{25B8}"))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
                 Text(tokens.chromeLabel(
                     BlockHistoryPath.takeHeading(take, ordinal: ordinal, of: total)))
                     .font(tokens.small)
@@ -528,6 +534,26 @@ struct BlockHistoryPane: View {
                     .foregroundStyle(tokens.faint)
                     .lineLimit(1)
             }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        if open {
+            if commits.isEmpty {
+                quiet(BlockHistoryPath.noSavepoints)
+            }
+            ForEach(SavepointRuns.rows(
+                commits, isQuiet: { $0.kind == .auto }, id: { $0.id })
+            ) { row in
+                let rendered = SavepointHistoryFace.rendered(row, expanded: expandedRuns)
+                if let count = rendered.runCount {
+                    QuietRunRow(count: count, expanded: rendered.expanded, tokens: tokens) {
+                        expandedRuns = SavepointHistoryFace.toggling(row.id, in: expandedRuns)
+                    }
+                }
+                ForEach(rendered.items, id: \.id) { commit in
+                    savepointRow(commit, of: take)
+                }
+            }
         }
     }
 
@@ -538,12 +564,17 @@ struct BlockHistoryPane: View {
                 .foregroundStyle(commit.text.isEmpty ? tokens.muted : tokens.ink)
                 .lineLimit(2)
             HStack(spacing: 8) {
+                // Row 63's neighbour: a savepoint's stamp keeps its TIME (two
+                // moments can share a day), so instead of a second slot the
+                // line may WRAP once — "saved by hand" was truncating to
+                // "saved by h…" beside the Restore button at the pane's width.
                 Text(tokens.chromeLabel(SavepointRowFace.meta(
                     commit, predatesSplit: model.predatesSplit(commit))
                     .joined(separator: " \u{B7} ")))
                     .font(tokens.small)
                     .foregroundStyle(tokens.faint)
-                    .lineLimit(1)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
                 Spacer(minLength: 8)
                 Button(BlockHistoryCopy.restoreVerb) {
                     Task { await model.restore(commit, of: take.id) }
@@ -560,8 +591,14 @@ struct BlockHistoryPane: View {
 
     @ViewBuilder private var archivedRegion: some View {
         if !model.history.archivedTakes.isEmpty {
-            Section {
-                ForEach(model.history.archivedTakes, id: \.id) { take in
+            // Row 28: the region reads as a section (header + meaning line),
+            // its rows as calm cards — never a List header that can clip.
+            CalmSectionHeader(
+                tokens: tokens, title: BlockHistoryPath.archivedSection,
+                detail: BlockHistoryCopy.archivedExplainer)
+                .padding(.top, 8)
+            ForEach(model.history.archivedTakes, id: \.id) { take in
+                CalmCard(tokens: tokens) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(BlockPastCopy.rowLabel(take))
                             .font(tokens.body)
@@ -573,6 +610,7 @@ struct BlockHistoryPane: View {
                                 .font(tokens.small)
                                 .foregroundStyle(tokens.faint)
                                 .lineLimit(1)
+                                .fixedSize()
                             Spacer(minLength: 8)
                             Button(BlockHistoryCopy.unarchiveVerb) {
                                 Task { await model.unarchive(take.id) }
@@ -581,10 +619,7 @@ struct BlockHistoryPane: View {
                             .help("Back into the block's fan, exactly as it was")
                         }
                     }
-                    .padding(.vertical, 2)
                 }
-            } header: {
-                header(BlockHistoryPath.archivedSection, BlockHistoryCopy.archivedExplainer)
             }
         }
     }
@@ -593,8 +628,12 @@ struct BlockHistoryPane: View {
 
     @ViewBuilder private var deletedRegion: some View {
         if !model.history.deletedTakes.isEmpty {
-            Section {
-                ForEach(model.history.deletedTakes, id: \.id) { take in
+            CalmSectionHeader(
+                tokens: tokens, title: BlockHistoryPath.deletedSection,
+                detail: BlockHistoryCopy.deletedExplainer)
+                .padding(.top, 8)
+            ForEach(model.history.deletedTakes, id: \.id) { take in
+                CalmCard(tokens: tokens) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(BlockPastCopy.rowLabel(take))
                             .font(tokens.body)
@@ -602,11 +641,20 @@ struct BlockHistoryPane: View {
                                 take.workingText.isEmpty ? tokens.muted : tokens.ink)
                             .lineLimit(2)
                         HStack(spacing: 8) {
-                            Text(tokens.chromeLabel(DeletedTakeFace.meta(
-                                take, now: session.now).joined(separator: " \u{B7} ")))
+                            // Row 63: the lead truncates; the CLOCK never does.
+                            Text(tokens.chromeLabel(DeletedTakeFace.lead(take)
+                                .joined(separator: " \u{B7} ")))
                                 .font(tokens.small)
                                 .foregroundStyle(tokens.faint)
                                 .lineLimit(1)
+                            if let slot = DeletedTakeFace.clockSlot(take, now: session.now) {
+                                Text(tokens.chromeLabel(slot))
+                                    .font(tokens.small)
+                                    .foregroundStyle(tokens.faint)
+                                    .lineLimit(1)
+                                    .fixedSize()
+                                    .layoutPriority(1)
+                            }
                             Spacer(minLength: 8)
                             Button(BlockPastCopy.putBackVerb) {
                                 Task { await model.putBackTake(take.id) }
@@ -615,10 +663,7 @@ struct BlockHistoryPane: View {
                             .help(BlockPastCopy.putBackHelp(take))
                         }
                     }
-                    .padding(.vertical, 2)
                 }
-            } header: {
-                header(BlockHistoryPath.deletedSection, BlockHistoryCopy.deletedExplainer)
             }
         }
     }
@@ -627,8 +672,12 @@ struct BlockHistoryPane: View {
 
     @ViewBuilder private var cameFromRegion: some View {
         if !model.history.origins.isEmpty {
-            Section {
-                ForEach(model.history.origins) { row in
+            CalmSectionHeader(
+                tokens: tokens, title: BlockHistoryPath.cameFromSection,
+                detail: OriginPeekCopy.explainer)
+                .padding(.top, 8)
+            ForEach(model.history.origins) { row in
+                CalmCard(tokens: tokens) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(TrayRowPreview.line(row.text))
                             .font(tokens.body)
@@ -656,26 +705,12 @@ struct BlockHistoryPane: View {
                                 + "everything of its own that is on the clock")
                         }
                     }
-                    .padding(.vertical, 2)
                 }
-            } header: {
-                header(BlockHistoryPath.cameFromSection, OriginPeekCopy.explainer)
             }
         }
     }
 
     // MARK: - Pieces
-
-    private func header(_ title: String, _ explainer: String) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(tokens.chromeLabel(title))
-            Text(tokens.chromeLabel(explainer))
-                .font(tokens.small)
-                .foregroundStyle(tokens.faint)
-                .lineLimit(3)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-    }
 
     private func quiet(_ line: String) -> some View {
         Text(tokens.chromeLabel(line))

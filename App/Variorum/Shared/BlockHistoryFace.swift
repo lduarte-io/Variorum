@@ -213,21 +213,31 @@ nonisolated enum SavepointRowFace {
 /// has. The tray's `TrayTakeFace` names the take's BLOCK because the panel is
 /// the note; here the face IS the block, so the row owes the clock instead.
 nonisolated enum DeletedTakeFace {
-    static func meta(_ take: Variant, now: Date) -> [String] {
+    /// **The Act 10 correction round, row 63: the two-slot split** — the
+    /// truncatable LEAD (a DATE-ONLY stamp; the `OriginPeekCopy.stamp`
+    /// ruling) and the CLOCK in its own slot the layout may never compress.
+    /// Additive beside `meta`, which now derives from the pair, so callers
+    /// on either platform read byte-compatibly.
+    static func lead(_ take: Variant) -> [String] {
         guard let deletedAt = take.deletedAt else { return [] }
-        var pieces = [
-            "deleted " + deletedAt.formatted(date: .abbreviated, time: .shortened)
-        ]
+        return ["deleted " + deletedAt.formatted(date: .abbreviated, time: .omitted)]
+    }
+
+    static func clockSlot(_ take: Variant, now: Date) -> String? {
+        guard let deletedAt = take.deletedAt else { return nil }
         // The window's own arithmetic, over the ONE canonical stamp shape the
         // rest of the recovery family reads (`TrashWindow.daysLeft` parses
         // what the store holds; the record hands us the decoded date, so it
         // is re-encoded through the same formatter rather than a second
         // subtraction written here).
-        if let days = TrashWindow.daysLeft(
+        return TrashWindow.daysLeft(
             DateFormatter.variorumISO8601.string(from: deletedAt), now: now)
-        {
-            pieces.append(RecoveryCopy.daysLeftLabel(days))
-        }
+            .map(RecoveryCopy.daysLeftLabel)
+    }
+
+    static func meta(_ take: Variant, now: Date) -> [String] {
+        var pieces = lead(take)
+        if let slot = clockSlot(take, now: now) { pieces.append(slot) }
         return pieces
     }
 }

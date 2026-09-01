@@ -30,6 +30,63 @@ import VariorumCore
 @MainActor
 @Suite("The Block History pane (post-13l polish round, G2)", .serialized)
 struct BlockHistoryPaneTests {
+    /// **Rows 28 + 65 (the Act 10 correction round): the pane's regions read
+    /// as SECTIONS, and the List that clipped them is gone.** The walk found
+    /// "deleted takes" and "came from" drawn as struck-through slivers — the
+    /// pane was still a `List`, whose fixed section-header measurement is the
+    /// EXACT mechanism Act 10 item 1 traced and killed in the tray. The
+    /// rebuild retires the List for a ScrollView of CalmSectionHeaders (one
+    /// meaning line each — savepoints gains its missing one) over a REAL
+    /// seeded history: a merge's two origins, an archived take, a deleted
+    /// take, savepoints. **RED ON OLD:** the pre-fix body reflects `List<`.
+    @Test func everyRegionReadsAsASectionAndTheListIsGone() async throws {
+        try await withEditor(seedBlocks: ["First half.", "Second half."]) { h in
+            let ops = h.session.operations
+            let slots = try h.storeSlots()
+            let merge = try ops.merge(slots[0].blockID, slots[1].blockID)
+            let mergedID = merge.block.id
+            try ops.commit(merge.variant.id)
+            let branch = try ops.branchVariant(mergedID, from: merge.variant.id)
+            try ops.archiveVariant(branch.id)
+            let doomed = try ops.branchVariant(mergedID, from: merge.variant.id)
+            try ops.deleteVariant(doomed.id)
+
+            let now = h.session.now
+            let history = try await h.session.database.read {
+                try Queries.blockHistory($0, blockID: mergedID, now: now)
+            }
+            #expect(history.origins.count == 2, "the merge's BOTH originals")
+            #expect(!history.archivedTakes.isEmpty)
+            #expect(!history.deletedTakes.isEmpty)
+
+            let model = BlockHistoryModel(
+                session: h.session, postID: h.postID, blockID: mergedID)
+            model.adopt(history)
+            let pane = BlockHistoryPane(
+                session: h.session,
+                request: BlockHistoryRequest(postID: h.postID, blockID: mergedID),
+                model: model)
+            await SurfaceComposition.host(pane, size: NSSize(width: 420, height: 700))
+            let shown = SurfaceComposition.text(of: pane.body)
+
+            // The four section headers AND their meaning lines are in the tree.
+            #expect(SurfaceComposition.carries(BlockHistoryPath.savepointsSection, in: shown))
+            #expect(SurfaceComposition.carries(BlockHistoryPath.savepointsExplainer, in: shown))
+            #expect(SurfaceComposition.carries(BlockHistoryPath.archivedSection, in: shown))
+            #expect(SurfaceComposition.carries(BlockHistoryCopy.archivedExplainer, in: shown))
+            #expect(SurfaceComposition.carries(BlockHistoryPath.deletedSection, in: shown))
+            #expect(SurfaceComposition.carries(BlockHistoryCopy.deletedExplainer, in: shown))
+            #expect(SurfaceComposition.carries(BlockHistoryPath.cameFromSection, in: shown))
+            #expect(SurfaceComposition.carries(OriginPeekCopy.explainer, in: shown))
+
+            // RED ON OLD: the pane was a `List` — the clipping mechanism.
+            #expect(!shown.contains("List<"), "the pane must not be a List again")
+            #expect(shown.contains("ScrollView"), "the calm scroll rebuild")
+            #expect(!shown.contains("DisclosureGroup"),
+                    "the take-run fold is a full-line Button now (row 64's rule)")
+        }
+    }
+
     // MARK: - The door, declared and rendered
 
     /// **ONE act, on BOTH bars, beside commit — and the `note ▾` menus lost
@@ -97,22 +154,26 @@ struct BlockHistoryPaneTests {
                 BlockHistoryRequest(
                     postID: post, blockID: blockID, focusedVariantID: variantID)),
                     "the seam is registered — the request ACTED (P-2)")
-            // Settle until the pane's REGION HEADERS exist, not merely until
-            // the column does: the column arrives a layout pass before the
-            // list inside it has built its section views, and a read taken at
-            // the earlier moment would be asserting about a half-built panel.
-            // (The loop times out rather than looping forever, so a pane that
-            // never builds its regions still fails here.)
+            // JUSTIFIED PIN EDIT (the correction round, rows 28/65): the two
+            // assertions this replaces named the LIST's own backing views
+            // ("OutlineList", "ListTableHeaderView") — and the List's fixed
+            // header measurement was exactly the mechanism that clipped the
+            // region headers to slivers, so the rebuild retired it. The pane
+            // is a ScrollView of calm sections now; its backing is
+            // "HostingScrollView", and the four-regions evidence moved to
+            // `everyRegionReadsAsASectionAndTheListIsGone` (a reflection pin
+            // over a real seeded history, headers AND meaning lines).
             await Self.settle(window, hosting) {
-                TrayPanelMoveTests.classNames(hosting).contains("ListTableHeaderView")
+                TrayPanelMoveTests.classNames(hosting)
+                    .contains { $0.contains("InspectorStyleContext") }
             }
             let open = TrayPanelMoveTests.classNames(hosting)
             #expect(open.contains { $0.contains("InspectorStyleContext") },
                     "the inspector column really opened — her \"pane to the right\"")
-            #expect(open.contains { $0.contains("OutlineList") },
-                    "with the pane's list inside it")
-            #expect(open.contains("ListTableHeaderView"),
-                    "and its REGION HEADERS — the four regions her ruling names")
+            #expect(open.contains("HostingScrollView"),
+                    "with the pane's calm scroll inside it (the List is retired)")
+            #expect(!open.contains("ListTableHeaderView"),
+                    "no List section headers — the clipping mechanism is gone")
             #expect(open.contains("EditorTextView"),
                     "beside the page, never instead of it (it is a panel, not a sheet)")
         }
