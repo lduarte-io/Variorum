@@ -48,7 +48,14 @@ nonisolated struct CompareProjection: Equatable, Sendable {
     struct PostFace: Equatable, Sendable {
         var slots: [Queries.RenderedBlock] = []
         var fans: [String: [Variant]] = [:]
+        /// The stored title, raw (nil where the note is nameless).
         var title: String?
+        /// What the note is CALLED on screen — `Queries.noteDisplayTitle`,
+        /// the ONE single-note display brain (the masthead's: the title,
+        /// else the note's day). The Act 10 correction round, row 17: the
+        /// anchor card used to fall back to the literal "This note" for a
+        /// nameless journal entry; a note's name is its day, everywhere.
+        var displayTitle = ""
         var sealed = false
     }
 
@@ -240,6 +247,7 @@ final class CompareViewModel {
                 fans: try Queries.activeFans(
                     db, blockIDs: slots.filter { !$0.isGap }.map(\.blockID)),
                 title: try Queries.containerTitle(db, id: id),
+                displayTitle: try Queries.noteDisplayTitle(db, id: id) ?? DisplayTitle.placeholder,
                 sealed: try Queries.containerHeader(db, containerID: id)?.locked == true)
         }
         var peers: [String: CompareProjection.PostFace] = [:]
@@ -411,12 +419,26 @@ final class CompareViewModel {
             return projection.kinship[id] ?? [:]
         }
         guard relatedOnly else { return (anchor, peers, kinships) }
+        // **The Act 10 correction round, row 17 — the ANCHOR is EXEMPT from
+        // the filter** (R-cor-6's in-round scope: "the anchor column always
+        // rendering the note"). 13c 2E collapsed EVERY column — the anchor
+        // included — to lineage-connected blocks BY DESIGN, and her #47(c)
+        // ruling made the filter default-on; together they greeted her with
+        // an EMPTY first column whenever no peer had kin ("'This note' is
+        // showing nothing"). This is a RULED narrowing of 2E's anchor half,
+        // not a regression: the PEERS stay filtered by kinship against the
+        // anchor exactly as before (the pure brain and its pins are
+        // byte-unmodified), and the anchor's blocks are handed through WHOLE
+        // — the composition arranges the kin rows and lets the anchor's
+        // unrelated stretches flow with empty peer cells. The brain's "the
+        // anchor is empty exactly when every peer is" invariant is no longer
+        // what this model relies on.
         let kept = CompareComposition.relatedOnly(
             anchorBlocks: anchor, peerBlocks: peers, kinships: kinships)
         // The kinship map rides UNFILTERED: `segments` only ever consults it
-        // for blocks it is handed, and every survivor's kin is a surviving
-        // anchor by `relatedOnly`'s invariant.
-        return (kept.anchorBlocks, kept.peerBlocks, kinships)
+        // for blocks it is handed, and every surviving peer block's kin is an
+        // anchor block the whole anchor column shows.
+        return (anchor, kept.peerBlocks, kinships)
     }
 
     var display: Display {
@@ -563,6 +585,21 @@ final class CompareViewModel {
     func addPeerSlot() {
         guard peerSlots.count < 3 else { return }
         peerSlots.append(PeerSlot())
+    }
+
+    /// The Act 10 correction round, row 46 (ONE placement per act): the
+    /// add-a-column door shows only while EVERY slot is filled and a slot
+    /// remains. An EMPTY slot's dashed "＋ choose a note" IS the add door
+    /// until then, so the two never stand together.
+    var addNoteDoorShows: Bool {
+        peerSlots.count < 3 && !peerSlots.contains { $0.postID == nil }
+    }
+
+    /// The offer band's state: no peer is open anywhere — the two offer
+    /// cards (and the note's version peers as direct rows) show; the header's
+    /// own outline door yields to the card (row 46 — one placement at a time).
+    var noPeerIsOpen: Bool {
+        peerSlots.allSatisfy { $0.postID == nil }
     }
 
     func removePeerSlot(_ slotID: String) {
@@ -761,6 +798,14 @@ struct CompareBoardView: View {
     /// like every other surface door (declared ⇔ rendered).
     static let surfaceCapabilities: [CapabilityID] = [.openPeerPost]
 
+    /// The Act 10 correction round, row 16: the board's ONE horizontal inset
+    /// — the toolbar, the header strip, the offer band and the rows all lead
+    /// at this edge (the toolbar sat at 16, the cards at 12, the offers
+    /// centered — her "horribly misaligned").
+    static let boardInset: CGFloat = 12
+    /// The board's own coordinate space (the DEBUG geometry oracle's).
+    static let boardSpace = "compare-board"
+
     let session: AppSession
     let postID: String
     @State private var model: CompareViewModel
@@ -813,15 +858,26 @@ struct CompareBoardView: View {
         return VStack(alignment: .leading, spacing: 0) {
             header
             columnHeaders(display)
-            if model.peerSlots.allSatisfy({ $0.postID == nil }) {
-                emptyState
-            } else if display.isFiltered, display.rows.isEmpty {
+            // Row 17: the anchor's rows render in EVERY state. The offer
+            // cards used to render INSTEAD of the rows whenever no peer was
+            // open — the second mechanism behind "'This note' is showing
+            // nothing" (the filter was the first). They are a BAND under the
+            // header strip now, and the note reads whole beneath them.
+            if model.noPeerIsOpen {
+                offerBand
+            }
+            if display.isFiltered, display.rows.isEmpty {
+                // With the anchor exempt from the filter this fires only for
+                // a BLOCKLESS anchor — the honesty line is still true there
+                // (nothing can relate to a note with no blocks).
                 nothingRelatedState
             } else {
                 boardRows(display)
             }
         }
         .background(tokens.surface)
+        .coordinateSpace(name: Self.boardSpace)
+        .compareGeometryProbe(.board)
         .task { await model.start() }
         .onAppear {
             // 13b 4D (the 4C handoff): ⌘S acts where it's advertised — the
@@ -878,7 +934,9 @@ struct CompareBoardView: View {
     // MARK: Header (board-level)
 
     private var header: some View {
-        HStack(spacing: 8) {
+        // Row 16: ONE baseline across the toolbar's controls; the board's
+        // one inset (the chips sat at 16 while the cards sat at 12).
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
             VoicedChip(
                 tokens: tokens,
                 text: model.followAnchorOrder ? "follow this note's order: on" : "follow this note's order: off",
@@ -887,6 +945,7 @@ struct CompareBoardView: View {
                 .help("On: the other columns arrange themselves to sit beside their related "
                     + "blocks, in this note's order (display only — nothing is moved). "
                     + "Off: every column flows in its own note's order.")
+                .compareGeometryProbe(.toolbarLead)
             VoicedChip(
                 tokens: tokens,
                 text: model.lineageColorsOn ? "lineage colors: on" : "lineage colors: off",
@@ -905,23 +964,27 @@ struct CompareBoardView: View {
                     + "notes — the unrelated stretches are hidden. Nothing is moved or "
                     + "deleted; this is a way of looking. Off: every block shows.")
             Spacer()
-            // Wave 2c (item 15): generous calm doors (W8-2's grammar) —
-            // same acts, same words, real targets.
-            Button(tokens.chromeLabel("make outline note")) {
-                Task { await model.makeOutlinePost() }
-            }
-            .buttonStyle(CalmButtonStyle(tokens: tokens, compact: true))
-            .help("A linked copy named \u{201C}outline of \u{2026}\u{201D} — each block starts as this "
-                + "note's first sentence per block; it opens beside the note here, "
-                + "registered block-by-block (R99 — the retired Outline tab's power, re-homed)")
-            if model.peerSlots.count < 3 {
-                Button(tokens.chromeLabel("+ note")) { model.addPeerSlot() }
-                    .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary, compact: true))
-                    .help("Open another note beside these (compare holds up to four)")
+            // The Act 10 correction round, row 46 — ONE placement per act.
+            // The outline door renders HERE only while a peer is open; while
+            // the offer band shows (no peer), its card is the one door. It
+            // is not retired outright because `adopt()` auto-fills a version
+            // peer, so a version-linked note (the field guide's own lesson,
+            // whose text says "press make outline note in Compare's header")
+            // never opens on the band — a full retire would leave that note
+            // with no outline door at all. The memo's build settles its home.
+            // "+ note" left this row for the END of the header strip.
+            if !model.noPeerIsOpen {
+                Button(tokens.chromeLabel("make outline note")) {
+                    Task { await model.makeOutlinePost() }
+                }
+                .buttonStyle(CalmButtonStyle(tokens: tokens, compact: true))
+                .help("A linked copy named \u{201C}outline of \u{2026}\u{201D} — each block starts as this "
+                    + "note's first sentence per block; it opens beside the note here, "
+                    + "registered block-by-block (R99 — the retired Outline tab's power, re-homed)")
             }
         }
         .controlSize(.small)
-        .padding(.horizontal, 16)
+        .padding(.horizontal, Self.boardInset)
         .padding(.vertical, 8)
     }
 
@@ -933,35 +996,43 @@ struct CompareBoardView: View {
     /// columns are NOTES; a lens column never wears a relationship line.
     private func columnHeaders(_ display: CompareViewModel.Display) -> some View {
         HStack(alignment: .top, spacing: 8) {
-            CalmCard(tokens: tokens) {
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(model.projection.anchor.title ?? "This note")
-                        .font(tokens.small.weight(.semibold))
-                        .foregroundStyle(tokens.ink)
-                        .lineLimit(1)
-                    Text(tokens.chromeLabel(
-                        model.projection.anchor.sealed
-                            ? "this note · sealed — read-only" : "this note"))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
-                        .lineLimit(1)
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            // Row 17: the derived display name — a nameless journal entry
+            // shows its day, never the literal "This note".
+            CompareAnchorCard(
+                tokens: tokens,
+                title: model.projection.anchor.displayTitle,
+                sealed: model.projection.anchor.sealed)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .compareGeometryProbe(.anchorCard)
             ForEach(Array(model.peerSlots.enumerated()), id: \.element.id) { index, slot in
                 peerHeader(
                     slot,
-                    // The per-column note fires only in the MIXED case —
-                    // when the whole board is empty the board-level line
-                    // says it once, properly (13c 2E).
+                    // The per-column note fires in the MIXED case — a filtered
+                    // peer with no kin beside an anchor that shows (which, with
+                    // the anchor exempt from the filter, is every filtered
+                    // kin-less peer on a note with blocks); the board-level
+                    // line covers the blockless anchor (13c 2E, narrowed by
+                    // the correction round's row 17).
                     filteredEmpty: display.isFiltered && !display.rows.isEmpty
                         && slot.postID != nil
                         && !(index < display.peerHasBlocks.count && display.peerHasBlocks[index]))
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .compareGeometryProbe(.peerCard(index))
+            }
+            // Row 46 / row 16: the add-a-column door sits at the END of the
+            // column strip, at the header's height — never a floating button
+            // in the toolbar — and only while no empty slot stands (an empty
+            // slot's dashed door is the add door until then).
+            if model.addNoteDoorShows {
+                Button(tokens.chromeLabel("+ note")) { model.addPeerSlot() }
+                    .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary, compact: true))
+                    .fixedSize()
+                    .help("Open another note beside these (compare holds up to four)")
+                    .compareGeometryProbe(.addNote)
             }
         }
         .controlSize(.small)
-        .padding(.horizontal, 12)
+        .padding(.horizontal, Self.boardInset)
         .padding(.bottom, 6)
     }
 
@@ -1096,52 +1167,37 @@ struct CompareBoardView: View {
     /// real, generous doors where the centered gray prose stood (her copy
     /// doctrine: structure over sentences), and the note's version peers
     /// as direct one-click rows when they exist.
-    private var emptyState: some View {
+    ///
+    /// The Act 10 correction round (rows 16/17/46): a BAND under the header
+    /// strip, not a page-centered block standing in the rows' place — it
+    /// leads at the board's one inset, under the anchor card, and the note
+    /// reads whole beneath it. The memo's build (its §4) moves these two
+    /// offers into the empty second slot; this is the mechanical fix only.
+    private var offerBand: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Spacer(minLength: 20)
-            HStack(alignment: .top, spacing: 12) {
+            HStack(alignment: .top, spacing: 8) {
                 Button {
                     if let slot = model.peerSlots.first {
                         pickingSlot = SlotPick(id: slot.id)
                     }
                 } label: {
-                    CalmCard(tokens: tokens) {
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text(tokens.chromeLabel("⌕ compare with a note"))
-                                .font(tokens.body)
-                                .fontWeight(.semibold)
-                                .foregroundStyle(tokens.accent)
-                                .lineLimit(1)
-                            Text(tokens.chromeLabel(
-                                "search the library — it opens beside this note, "
-                                + "related blocks tied by lineage"))
-                                .font(tokens.small)
-                                .foregroundStyle(tokens.muted)
-                                .lineLimit(3)
-                                .multilineTextAlignment(.leading)
-                        }
-                    }
+                    CompareOfferCard(
+                        tokens: tokens,
+                        title: "⌕ compare with a note",
+                        detail: "search the library — it opens beside this note, "
+                            + "related blocks tied by lineage",
+                        primary: true)
                 }
                 .buttonStyle(.plain)
+                .compareGeometryProbe(.offerCard)
                 Button {
                     Task { await model.makeOutlinePost() }
                 } label: {
-                    CalmCard(tokens: tokens) {
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text(tokens.chromeLabel("make outline note"))
-                                .font(tokens.body)
-                                .fontWeight(.semibold)
-                                .foregroundStyle(tokens.ink)
-                                .lineLimit(1)
-                            Text(tokens.chromeLabel(
-                                "a linked condensation — first sentence per block — "
-                                + "minted and opened right here"))
-                                .font(tokens.small)
-                                .foregroundStyle(tokens.muted)
-                                .lineLimit(3)
-                                .multilineTextAlignment(.leading)
-                        }
-                    }
+                    CompareOfferCard(
+                        tokens: tokens,
+                        title: "make outline note",
+                        detail: "a linked condensation — first sentence per block — "
+                            + "minted and opened right here")
                 }
                 .buttonStyle(.plain)
             }
@@ -1173,10 +1229,12 @@ struct CompareBoardView: View {
                     .buttonStyle(.plain)
                 }
             }
-            Spacer(minLength: 20)
         }
-        .frame(maxWidth: 560)
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: 560, alignment: .leading)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, Self.boardInset)
+        .padding(.top, 2)
+        .padding(.bottom, 6)
     }
 
     /// 13c 2E — the whole-board honesty state: "related blocks only" with
@@ -1210,7 +1268,7 @@ struct CompareBoardView: View {
                 }
                 endDropZones
             }
-            .padding(12)
+            .padding(Self.boardInset)
         }
     }
 
@@ -1313,8 +1371,8 @@ struct CompareBoardView: View {
         guard let peer = model.face(for: peerID) else { return }
         let anchor = model.projection.anchor
         diffPresentation = TakesDiffPresentation(
-            leftTitle: anchor.title ?? "this note",
-            rightTitle: peer.title ?? "other note",
+            leftTitle: anchor.displayTitle,
+            rightTitle: peer.displayTitle,
             left: Queries.joinRenderedTexts(
                 anchor.slots.compactMap(\.text).filter { !$0.isEmpty }),
             right: Queries.joinRenderedTexts(
@@ -1323,11 +1381,116 @@ struct CompareBoardView: View {
 
     private func peerTitle(_ id: String) -> String {
         // The projection is the truth once a face has loaded (a picked
-        // note may sit outside the recent-100 candidates window).
-        if let title = model.projection.peers[id]?.title, !title.isEmpty {
-            return title
+        // note may sit outside the recent-100 candidates window). Both
+        // roads read the ONE display rule (row 17): a nameless note is
+        // called by its day here too, never "Version".
+        if let face = model.projection.peers[id], !face.displayTitle.isEmpty {
+            return face.displayTitle
         }
         return model.peerCandidates.first { $0.postID == id }?.displayTitle ?? "Version"
+    }
+}
+
+// MARK: - The geometry oracle (DEBUG — the correction round's row 16 pins)
+
+/// Where the board's chrome sits, as rectangles in the board's own space —
+/// the `MastheadGeometry` idiom. A pin asserts the alignment she SEES (one
+/// left edge for the toolbar, the header cards and the offer cards; the add
+/// door at the strip's end at the header's height), not a layout the code
+/// merely intends.
+enum CompareProbeSlot: Hashable {
+    case board
+    case toolbarLead
+    case anchorCard
+    case peerCard(Int)
+    case offerCard
+    case addNote
+}
+
+#if DEBUG
+@MainActor
+enum CompareGeometry {
+    static var frames: [CompareProbeSlot: CGRect] = [:]
+
+    static func record(_ slot: CompareProbeSlot, _ frame: CGRect) {
+        frames[slot] = frame
+    }
+
+    /// A pin resets before its mount, so a stale report from an earlier
+    /// mount (or a door that is no longer rendered) can never satisfy it.
+    static func reset() {
+        frames = [:]
+    }
+}
+#endif
+
+extension View {
+    /// The DEBUG oracle write: this view's frame in the compare board's own
+    /// coordinate space, under `slot`. A no-op outside DEBUG.
+    @ViewBuilder
+    func compareGeometryProbe(_ slot: CompareProbeSlot) -> some View {
+        #if DEBUG
+        self.onGeometryChange(for: CGRect.self) {
+            $0.frame(in: .named(CompareBoardView.boardSpace))
+        } action: { CompareGeometry.record(slot, $0) }
+        #else
+        self
+        #endif
+    }
+}
+
+// MARK: - The header's cards (value views — their titles are stored properties)
+
+/// The anchor column's NOTE card: the note's display name (the ONE rule —
+/// `Queries.noteDisplayTitle`) over "this note". A VALUE view rather than a
+/// `CalmCard { … }` written inline, so the name it shows is a stored property
+/// the composition reflection can read (a card's content closure is opaque
+/// to `dump`; the correction round's row-17 pin reads `title`).
+private struct CompareAnchorCard: View {
+    let tokens: VoiceTokens
+    let title: String
+    let sealed: Bool
+
+    var body: some View {
+        CalmCard(tokens: tokens) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title)
+                    .font(tokens.small.weight(.semibold))
+                    .foregroundStyle(tokens.ink)
+                    .lineLimit(1)
+                Text(tokens.chromeLabel(sealed ? "this note · sealed — read-only" : "this note"))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .lineLimit(1)
+            }
+        }
+    }
+}
+
+/// ONE of the offer band's generous doors (wave 2c's cards, item 15): a
+/// title and one line of what it does. A value view for the same reason as
+/// the anchor card — the row-46 pin counts each act's placements by title.
+private struct CompareOfferCard: View {
+    let tokens: VoiceTokens
+    let title: String
+    let detail: String
+    var primary = false
+
+    var body: some View {
+        CalmCard(tokens: tokens) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text(tokens.chromeLabel(title))
+                    .font(tokens.body)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(primary ? tokens.accent : tokens.ink)
+                    .lineLimit(1)
+                Text(tokens.chromeLabel(detail))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .lineLimit(3)
+                    .multilineTextAlignment(.leading)
+            }
+        }
     }
 }
 

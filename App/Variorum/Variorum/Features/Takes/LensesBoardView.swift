@@ -100,6 +100,13 @@ struct LensesBoardView: View {
     /// walk-asserted with the other contextMenu statics).
     static let columnMenuCapabilities: [CapabilityID] = [.renameLens]
 
+    /// The Act 10 correction round, row 16: the board's ONE horizontal inset
+    /// — the toolbar leads where the rows lead (the ⠿ handle's edge); the
+    /// toolbar sat at 24 while the rows sat at 12.
+    static let boardInset: CGFloat = 12
+    /// The board's own coordinate space (the DEBUG geometry oracle's).
+    static let boardSpace = "lenses-board"
+
     /// The drag payload (one post — no cross-post scoping needed here).
     static func dragPayload(blockID: String) -> String {
         "lens-move:\(blockID)"
@@ -134,6 +141,7 @@ struct LensesBoardView: View {
             TakesBottomBar(model: model)
         }
         .background(tokens.surface)
+        .coordinateSpace(name: Self.boardSpace)
         .task { await model.start() }
         .onAppear {
             model.host = .lenses
@@ -333,7 +341,7 @@ struct LensesBoardView: View {
     /// doctrine: structure first, a sentence behind ? for depth), and the
     /// column door as a generous calm control.
     private var header: some View {
-        HStack(spacing: 8) {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
             if model.columns.count > 1 {
                 VoicedChip(
                     tokens: tokens,
@@ -342,6 +350,7 @@ struct LensesBoardView: View {
                 ) { model.alignmentLocked.toggle() }
                     .help("Locked: registered comparison rows (honest whitespace). "
                         + "Unlocked: each column flows as its own read.")
+                    .lensesGeometryProbe(.toolbarLead)
             }
             Spacer()
             Button("?") { ruleShown.toggle() }
@@ -364,7 +373,7 @@ struct LensesBoardView: View {
                 .help("What a lens column is — the one rule")
             addColumnMenu
         }
-        .padding(.horizontal, 24)
+        .padding(.horizontal, Self.boardInset)
         .padding(.vertical, 8)
     }
 
@@ -405,6 +414,11 @@ struct LensesBoardView: View {
     /// header word-menu remains the standing door). An in-view affordance
     /// of the same un-registered add-column act, recorded — not a new
     /// registry act.
+    ///
+    /// The Act 10 correction round, row 16: a HEADER-HEIGHT door at the
+    /// strip's end — it used to fill the page's whole height with its two
+    /// lines floating mid-way down ("a lone '+ column' ghost floating
+    /// mid-right", her image 9). Its top meets the header cards' top.
     private var addColumnStub: some View {
         Menu {
             addColumnMenuItems
@@ -420,7 +434,7 @@ struct LensesBoardView: View {
                     .lineLimit(3)
             }
             .padding(10)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .frame(maxWidth: .infinity)
             .contentShape(Rectangle())
         }
         .menuStyle(.borderlessButton)
@@ -429,7 +443,13 @@ struct LensesBoardView: View {
             RoundedRectangle(cornerRadius: 8)
                 .strokeBorder(
                     tokens.faint, style: StrokeStyle(lineWidth: 1, dash: [5, 4])))
-        .padding(10)
+        .lensesGeometryProbe(.stub)
+        // The rows' content padding is `boardInset` on every side; the stub's
+        // top sits on the header cards' top, and it keeps the same trailing
+        // edge the rows keep.
+        .padding(.top, Self.boardInset)
+        .padding(.trailing, Self.boardInset)
+        .padding(.leading, 4)
         .help("A column is a way of looking, not a copy — open the note's chosen "
             + "takes, a saved lens, or a fresh one, side by side with this column")
     }
@@ -452,14 +472,18 @@ struct LensesBoardView: View {
         } else {
             // 4C (S4-10): the dashed waiting column sits beside a lone
             // column — the door where the second column would appear.
-            HStack(spacing: 0) {
+            HStack(alignment: .top, spacing: 0) {
                 if model.alignmentLocked {
                     lockedColumns
                 } else {
                     unlockedColumns
                 }
                 if model.columns.count == 1 {
-                    addColumnStub.frame(width: 190)
+                    // Row 16: top-aligned — a door at the header's height,
+                    // never a page-tall dashed column.
+                    addColumnStub
+                        .frame(width: 190)
+                        .frame(maxHeight: .infinity, alignment: .top)
                 }
             }
         }
@@ -473,12 +497,14 @@ struct LensesBoardView: View {
                 columnHeaders
                 ForEach(model.projection.slots, id: \.placementID) { slot in
                     let tints = Sameness.tints(model.rowTexts(slot: slot))
+                    let isFirstRow = slot.placementID == model.projection.slots.first?.placementID
                     VStack(alignment: .leading, spacing: 3) {
                         if dropTargetBlockID == slot.blockID {
                             Rectangle().fill(tokens.ring).frame(height: 2)
                         }
                         HStack(alignment: .top, spacing: 8) {
                             dragHandle(slot.blockID)
+                                .lensesGeometryProbe(isFirstRow ? .rowLead : nil)
                             LineageStripe(blockID: slot.blockID)
                             ForEach(Array(model.columns.enumerated()), id: \.element.id) { i, column in
                                 VStack(alignment: .leading, spacing: 3) {
@@ -490,6 +516,7 @@ struct LensesBoardView: View {
                                     pickSwitcher(slot: slot, column: column)
                                 }
                                 .frame(maxWidth: .infinity, alignment: .topLeading)
+                                .lensesGeometryProbe(isFirstRow && i == 0 ? .firstCell : nil)
                             }
                         }
                     }
@@ -506,12 +533,19 @@ struct LensesBoardView: View {
         }
     }
 
-    /// UNLOCKED: each column flows as its own complete read.
+    /// UNLOCKED: each column flows as its own complete read. Row 16: each
+    /// column carries its OWN header card over its own cells (one strip over
+    /// N independently padded scroll columns could never sit over them).
     private var unlockedColumns: some View {
-        VStack(spacing: 0) {
-            columnHeaders.padding(.horizontal, 12)
-            HStack(alignment: .top, spacing: 8) {
-                ForEach(model.columns) { column in
+        HStack(alignment: .top, spacing: 8) {
+            ForEach(Array(model.columns.enumerated()), id: \.element.id) { index, column in
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(alignment: .top, spacing: 4) {
+                        Text("⠿").font(tokens.small).hidden()
+                        headerCard(column, index: index)
+                    }
+                    .padding(.horizontal, 6)
+                    .padding(.top, Self.boardInset)
                     ScrollView {
                         LazyVStack(alignment: .leading, spacing: 6) {
                             ForEach(model.projection.slots, id: \.placementID) { slot in
@@ -542,8 +576,8 @@ struct LensesBoardView: View {
                         }
                         .padding(6)
                     }
-                    .frame(maxWidth: .infinity)
                 }
+                .frame(maxWidth: .infinity)
             }
         }
     }
@@ -651,31 +685,45 @@ struct LensesBoardView: View {
     /// themselves apart by exactly this structure).
     private var columnHeaders: some View {
         HStack(alignment: .top, spacing: 8) {
-            Color.clear.frame(width: 4, height: 1)
-            ForEach(model.columns) { column in
-                CalmCard(tokens: tokens) {
-                    VStack(alignment: .leading, spacing: 5) {
-                        HStack(spacing: 6) {
-                            slotPicker(column)
-                            Spacer(minLength: 4)
-                            if model.columns.count > 1 {
-                                Button("✕") { model.removeColumn(column.id) }
-                                    .buttonStyle(.plain)
-                                    .foregroundStyle(tokens.muted)
-                                    .help("Close this column (a named lens stays saved; "
-                                        + "an unnamed one is let go)")
-                            }
-                        }
-                        Text(tokens.chromeLabel(kindCaption(column)))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.muted)
-                            .lineLimit(1)
-                        columnDoors(column)
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .topLeading)
+            // Row 16: the strip leads with the ROW's own gutter — the same
+            // glyph in the same font, hidden, then the stripe's width — so
+            // the cards sit over their panes by construction. The old 4-pt
+            // spacer stood in for a ⠿ + stripe gutter and left every card
+            // ~17 pt left of the pane under it.
+            HStack(alignment: .top, spacing: 8) {
+                Text("⠿").font(tokens.small).hidden()
+                Color.clear.frame(width: 4, height: 1)
+            }
+            ForEach(Array(model.columns.enumerated()), id: \.element.id) { index, column in
+                headerCard(column, index: index)
             }
         }
+    }
+
+    /// ONE column's header card (the strip's and the unlocked column's).
+    private func headerCard(_ column: TakesColumn, index: Int) -> some View {
+        CalmCard(tokens: tokens) {
+            VStack(alignment: .leading, spacing: 5) {
+                HStack(spacing: 6) {
+                    slotPicker(column)
+                    Spacer(minLength: 4)
+                    if model.columns.count > 1 {
+                        Button("✕") { model.removeColumn(column.id) }
+                            .buttonStyle(.plain)
+                            .foregroundStyle(tokens.muted)
+                            .help("Close this column (a named lens stays saved; "
+                                + "an unnamed one is let go)")
+                    }
+                }
+                Text(tokens.chromeLabel(kindCaption(column)))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .lineLimit(1)
+                columnDoors(column)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .topLeading)
+        .lensesGeometryProbe(.headerCard(index))
     }
 
     /// What KIND of way-of-looking this column is — said as a fact line,
@@ -814,4 +862,55 @@ struct LensesBoardView: View {
     // (The footer's standing rule sentence retired at wave 2c — item 15's
     // copy doctrine. The exact sentence lives behind the header's ? now:
     // structure teaches at rest, the words wait to be summoned.)
+}
+
+// MARK: - The geometry oracle (DEBUG — the correction round's row 16 pins)
+
+/// Where the board's chrome sits, as rectangles in the board's own space —
+/// the `MastheadGeometry` idiom. A pin asserts what she SEES: the header
+/// cards over their panes, the toolbar on the rows' leading edge, the
+/// `＋ column` door at the header's height and never page-tall.
+enum LensesProbeSlot: Hashable {
+    case toolbarLead
+    case headerCard(Int)
+    case firstCell
+    case rowLead
+    case stub
+}
+
+#if DEBUG
+@MainActor
+enum LensesGeometry {
+    static var frames: [LensesProbeSlot: CGRect] = [:]
+
+    static func record(_ slot: LensesProbeSlot, _ frame: CGRect) {
+        frames[slot] = frame
+    }
+
+    /// A pin resets before its mount, so a stale report from an earlier
+    /// mount can never satisfy it.
+    static func reset() {
+        frames = [:]
+    }
+}
+#endif
+
+extension View {
+    /// The DEBUG oracle write: this view's frame in the lenses board's own
+    /// coordinate space, under `slot` (nil = not a probed view). A no-op
+    /// outside DEBUG.
+    @ViewBuilder
+    func lensesGeometryProbe(_ slot: LensesProbeSlot?) -> some View {
+        #if DEBUG
+        if let slot {
+            self.onGeometryChange(for: CGRect.self) {
+                $0.frame(in: .named(LensesBoardView.boardSpace))
+            } action: { LensesGeometry.record(slot, $0) }
+        } else {
+            self
+        }
+        #else
+        self
+        #endif
+    }
 }
