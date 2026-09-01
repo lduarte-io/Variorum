@@ -200,6 +200,10 @@ struct ProtectionSurfaceRenderTests {
         #expect(ProtectionShapes.spareKeyIsAKey.contains(
             "can never pull your writing from the server"))
         #expect(ProtectionShapes.resetRoad.contains("Passphrase is still the path"))
+        // The ONE LAW's recipe, verbatim from memo §1 (the ladder's F8 found
+        // "+ sync custody" dropped — the one keystone deviation).
+        #expect(ProtectionShapes.oneLaw.contains(
+            "pre-assembled recipe: copy + key + sync custody, kept live"))
 
         let explainer = ProtectionExplainerView()
         await SurfaceComposition.host(explainer, size: NSSize(width: 560, height: 460))

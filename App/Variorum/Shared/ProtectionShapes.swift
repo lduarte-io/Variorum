@@ -33,8 +33,8 @@ nonisolated enum ProtectionShapes {
         "Your passphrase protects the server's copy of your writing. A readable "
         + "copy in someone's hands is already access — no passphrase can "
         + "retroactively guard a copy that opens. An enrolled device is a "
-        + "pre-assembled recipe: copy + key, kept live. A copy of your library "
-        + "on its own is only ingredients."
+        + "pre-assembled recipe: copy + key + sync custody, kept live. A copy "
+        + "of your library on its own is only ingredients."
 
     /// The Touch ID keystone (memo §2, from her sharpest question). On the
     /// Mac this is byte-close to the memo's line; the phone reads its own
