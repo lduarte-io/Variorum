@@ -67,12 +67,28 @@ public struct SampleLibraryDedupeFacts: Sendable {
 ///
 /// A copy is PRISTINE when its live notes are exactly the manifest's titles
 /// with matching per-note rendered-text hashes AND it shows no other sign
-/// of her hands (a fanned or archived take, a savepoint, a comment, a tag,
-/// a membership in another book, a seal, floating notes, a reference — all
-/// invisible to the rendered text, all her writing or her acts, and the
-/// whole point of the rule is that her work is never the copy retired).
-/// Every extension of the ruled hash rule errs in ONE direction only:
-/// toward classifying EDITED, which keeps copies, never retires them.
+/// of her hands (a fanned, archived or LOCKED take, a manual savepoint, a
+/// comment, a tag, a membership in another book, a seal, floating notes, a
+/// reference, a block NAME or callout frame, the book's sort, a chapter or
+/// note REORDERED — all invisible to the rendered text, all her writing or
+/// her acts, and the whole point of the rule is that her work is never the
+/// copy retired). Every extension of the ruled hash rule errs in ONE
+/// direction only: toward classifying EDITED, which keeps copies, never
+/// retires them.
+///
+/// ── THE SEED SHAPE THE CLASSIFIER ASSUMES (the contract the Mac's
+/// `theShippedSeedSatisfiesTheDedupesPristineContract` guards) ──────────
+/// A freshly seeded copy is: a curated book at the schema's default sort
+/// (`manual`/`asc`), unlocked, no extents, no grouping tag; ONE chapter per
+/// note, minted in note order, each note's membership assigned to its own
+/// chapter, both appended — so memberships in book order name exactly the
+/// live chapters in chapter order; every note tagged with the reserved
+/// path; every block one active take, unlocked, unnamed, unframed; no
+/// manual savepoint, comment, block tag, reference, or other membership.
+/// The chapters' NAMES are deliberately NOT read (the front-matter chapter
+/// is not named after its note, and the facts carry note titles only) — a
+/// chapter RENAME is the one act of hers this classifier cannot see, and
+/// is recorded as such (the ladder's R2-5).
 ///
 /// A copy whose rows are still in flight (a membership's post not yet
 /// arrived, a block without any variant row — the SyncSpec §5 straggler
@@ -225,16 +241,22 @@ extension SyncEngine {
         _ db: Database, copyID: String, manifest: [String: String],
         reservedTagID: String?, reservedTagPath: String, hash: (String) -> String
     ) throws -> SampleCopyVerdict {
-        // Book-level acts: a finish, an extent, a grouping.
+        // Book-level acts: a finish, an extent, a grouping — and the book's
+        // SORT moved off the schema default the seed minted at (R2-5).
         guard let reading = try Row.fetchOne(
             db,
-            sql: "SELECT locked, word_target, max_posts, grouping_tag_id FROM reading WHERE id = ?",
+            sql: """
+                SELECT locked, word_target, max_posts, grouping_tag_id, sort_field, sort_dir
+                FROM reading WHERE id = ?
+                """,
             arguments: [copyID])
         else { return .indeterminate }
         if (reading["locked"] as Int? ?? 0) != 0
             || (reading["word_target"] as Int?) != nil
             || (reading["max_posts"] as Int?) != nil
-            || (reading["grouping_tag_id"] as String?) != nil {
+            || (reading["grouping_tag_id"] as String?) != nil
+            || (reading["sort_field"] as String?) != SortField.manual.rawValue
+            || (reading["sort_dir"] as String?) != SortDirection.asc.rawValue {
             return .edited
         }
 
@@ -255,6 +277,41 @@ extension SyncEngine {
         if livePostIDs.count < manifest.count && deadMemberships == 0 {
             return .indeterminate
         }
+
+        // Her hands on the CHAPTERS (R2-5): the seed mints one chapter per
+        // note in note order and assigns each membership to its own
+        // chapter, both appended — so a pristine copy's memberships, in
+        // book order, name exactly its live chapters in chapter order. A
+        // reordered chapter or note, an extra chapter, an unassigned note,
+        // a deleted chapter (its dead row still named): hers. Completeness
+        // first — a membership naming a chapter this store has not seen is
+        // a straggler (chapters precede memberships in the push order, so
+        // only a cross-drain gap reaches here), never a verdict.
+        let assignments = try Row.fetchAll(
+            db,
+            sql: """
+                SELECT section_id FROM reading_post
+                WHERE reading_id = ? AND deleted_at IS NULL ORDER BY position, id
+                """,
+            arguments: [copyID])
+        var assignedChapters: [String] = []
+        for assignment in assignments {
+            guard let sectionID = assignment["section_id"] as String? else { return .edited }
+            guard let chapter = try Row.fetchOne(
+                db, sql: "SELECT deleted_at FROM reading_section WHERE id = ?",
+                arguments: [sectionID])
+            else { return .indeterminate }
+            if (chapter["deleted_at"] as String?) != nil { return .edited }
+            assignedChapters.append(sectionID)
+        }
+        let liveChapters = try String.fetchAll(
+            db,
+            sql: """
+                SELECT id FROM reading_section
+                WHERE reading_id = ? AND deleted_at IS NULL ORDER BY position, id
+                """,
+            arguments: [copyID])
+        if assignedChapters != liveChapters { return .edited }
 
         var titles = Set<String>()
         for postID in livePostIDs.sorted() {
@@ -312,10 +369,17 @@ extension SyncEngine {
                 .filter { ($0["deleted_at"] as String?) == nil }
                 .map { $0["block_id"] as String }
             for blockID in liveBlocks {
-                let blockExists = try Bool.fetchOne(
-                    db, sql: "SELECT EXISTS (SELECT 1 FROM block WHERE id = ?)",
-                    arguments: [blockID]) ?? false
-                guard blockExists else { return .indeterminate }
+                // The block's own metadata is hers too (R2-5): a NAME or a
+                // callout FRAME never changes the rendered text.
+                guard let block = try Row.fetchOne(
+                    db, sql: "SELECT name, presentation FROM block WHERE id = ?",
+                    arguments: [blockID])
+                else { return .indeterminate }
+                if let name = block["name"] as String?, !name.isEmpty { return .edited }
+                if (block["presentation"] as String?) != nil { return .edited }
+                // …and so is a LOCKED take (R2-5): pre-F5 the lock's
+                // insurance auto-commit counted by accident; `kind =
+                // 'manual'` removed that and nothing read `locked`.
                 guard let shape = try Row.fetchOne(
                     db,
                     sql: """
@@ -323,13 +387,15 @@ extension SyncEngine {
                           COALESCE(SUM(CASE WHEN deleted_at IS NULL AND status = 'active'
                                             THEN 1 ELSE 0 END), 0) AS active,
                           COALESCE(SUM(CASE WHEN deleted_at IS NULL AND status = 'archived'
-                                            THEN 1 ELSE 0 END), 0) AS archived
+                                            THEN 1 ELSE 0 END), 0) AS archived,
+                          COALESCE(SUM(CASE WHEN locked = 1 THEN 1 ELSE 0 END), 0) AS locked
                         FROM variant WHERE block_id = ?
                         """,
                     arguments: [blockID])
                 else { return .indeterminate }
                 guard (shape["total"] as Int? ?? 0) > 0 else { return .indeterminate }
-                if (shape["active"] as Int? ?? 0) != 1 || (shape["archived"] as Int? ?? 0) != 0 {
+                if (shape["active"] as Int? ?? 0) != 1 || (shape["archived"] as Int? ?? 0) != 0
+                    || (shape["locked"] as Int? ?? 0) != 0 {
                     return .edited
                 }
             }

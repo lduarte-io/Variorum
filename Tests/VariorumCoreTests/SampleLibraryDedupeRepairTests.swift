@@ -621,6 +621,87 @@ struct SampleLibraryDedupeRepairTests {
         _ = copyB
     }
 
+    // MARK: Round 2 — R2-5: the acts the rendered text cannot see
+
+    /// Her acts on a copy that leave the rendered text byte-identical to the
+    /// manifest — every one must read as EDITED, or the copy carrying it is
+    /// retired when the other device's id is smaller.
+    enum HerAct: String, CaseIterable, Sendable {
+        case lockedATake
+        case namedABlock
+        case framedABlockAsACallout
+        case changedTheBooksSort
+        case reorderedAChapter
+        case reorderedANote
+
+        func perform(on client: SyncClient, copy: (bookID: String, postIDs: [String: String])) throws {
+            let post = copy.postIDs["A Scandal in Bohemia"]!
+            try client.with { ops, db in
+                let (blockID, variantID) = try db.read { db in
+                    try Row.fetchOne(
+                        db,
+                        sql: """
+                            SELECT v.block_id AS b, v.id AS v FROM variant v
+                            JOIN container_block cb ON cb.block_id = v.block_id
+                            WHERE cb.container_id = ? AND cb.deleted_at IS NULL
+                              AND v.deleted_at IS NULL
+                            ORDER BY cb.position, v.id LIMIT 1
+                            """,
+                        arguments: [post]).map { ($0["b"] as String, $0["v"] as String) }!
+                }
+                switch self {
+                case .lockedATake:
+                    try ops.lockVariant(variantID)
+                case .namedABlock:
+                    try ops.setBlockName(blockID, name: "the opening")
+                case .framedABlockAsACallout:
+                    try ops.setBlockPresentation(blockID, BlockPresentation())
+                case .changedTheBooksSort:
+                    try ops.setReadingSort(copy.bookID, field: .entryDate, direction: .desc)
+                case .reorderedAChapter:
+                    let last = try db.read { db in
+                        try String.fetchOne(
+                            db,
+                            sql: "SELECT id FROM reading_section WHERE reading_id = ? AND deleted_at IS NULL ORDER BY position DESC LIMIT 1",
+                            arguments: [copy.bookID])!
+                    }
+                    try ops.reorderSection(last, to: .start)
+                case .reorderedANote:
+                    try ops.reorderReadingPost(post, in: copy.bookID, to: .start)
+                }
+            }
+        }
+    }
+
+    /// **RED ON OLD (round 2, R2-5 — MINOR):** the never-covered class — a
+    /// LOCKED take (pre-F5 its insurance auto-commit counted by accident;
+    /// `kind = 'manual'` removed that and nothing read `locked`), a block
+    /// NAME, a callout FRAME, the book's SORT, a REORDERED chapter or note.
+    /// Each is her act; each left the rendered text untouched; each read as
+    /// PRISTINE, and B's copy — the larger ids — retired with the act in it.
+    @Test(arguments: HerAct.allCases)
+    func herInvisibleActProtectsTheCopy(_ act: HerAct) async throws {
+        let (a, b, server) = try pairWithFacts()
+        let copyA = try seedCopy(a)
+        let copyB = try seedCopy(b)
+        try act.perform(on: b, copy: copyB)
+        #expect(try renderedText(b, postID: copyB.postIDs["A Scandal in Bohemia"]!)
+                == Self.notes[1].text,
+                "positive activity: the act left the rendered text byte-identical")
+
+        try await a.push()
+        try await b.push()
+        try await round(b)
+        try await round(a)
+        try await assertFurnitureConverged(a, b, server)
+
+        for client in [a, b] {
+            #expect(try liveCopyIDs(client) == [copyB.bookID],
+                    "\(act.rawValue): the copy carrying her act survives; the untouched one retires (old: hers retired)")
+            #expect(try client.db.deletedAt("reading", copyA.bookID) != nil)
+        }
+    }
+
     @Test func noInjectedFactsMeansNoDedupe() async throws {
         // An engine nobody wired facts into cannot misidentify anything —
         // the repair is inert by default (the keyProvider pattern).

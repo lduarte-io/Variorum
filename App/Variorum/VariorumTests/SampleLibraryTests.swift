@@ -535,4 +535,164 @@ struct SampleLibraryTests {
             }
         }
     }
+
+    // MARK: - The sync dedupe's contract (pre-13u ladder round 2, R2-5)
+
+    /// **THE SEED-SHAPE DRIFT GUARD.** The sync engine's sample-library
+    /// dedupe (`SampleLibraryDedupe.swift`, core) classifies a seeded copy
+    /// PRISTINE from a fixed list of legs — and it reads the seeder's shape
+    /// through injected facts it cannot otherwise see. This pin walks every
+    /// leg the classifier reads over the REAL shipped seed, so a change to
+    /// either side announces itself here rather than as "both Sherlock
+    /// copies survive forever, silently" on a reader's second device. It
+    /// deliberately mirrors the classifier's queries one for one; keep the
+    /// two in step. (Chapter NAMES are not a leg: the front chapter is not
+    /// named after its note, and the facts carry note titles only.)
+    @Test("The shipped seed satisfies the sync dedupe's PRISTINE contract — every leg the classifier reads")
+    func theShippedSeedSatisfiesTheDedupesPristineContract() async throws {
+        try await withSampleWorld { session, db in
+            let mark = Mark()
+            let outcome = await SampleLibrarySeeder.seedIfNeeded(
+                session: session, loadMark: mark.load, saveMark: mark.save)
+            guard case .seeded(let bookID, _) = outcome else {
+                Issue.record("expected a seed, got \(outcome)")
+                return
+            }
+            let facts = SampleLibrarySeeder.dedupeFacts()
+            let manifest = try facts.loadNoteHashes()
+
+            try await db.read { db in
+                // The book: the schema's default sort, no finish, no extent,
+                // no grouping.
+                let book = try #require(try Row.fetchOne(
+                    db,
+                    sql: """
+                        SELECT locked, word_target, max_posts, grouping_tag_id, sort_field, sort_dir
+                        FROM reading WHERE id = ? AND deleted_at IS NULL
+                        """,
+                    arguments: [bookID]))
+                #expect(book["locked"] as Int == 0)
+                #expect(book["word_target"] as Int? == nil)
+                #expect(book["max_posts"] as Int? == nil)
+                #expect(book["grouping_tag_id"] as String? == nil)
+                #expect(book["sort_field"] as String == SortField.manual.rawValue)
+                #expect(book["sort_dir"] as String == SortDirection.asc.rawValue)
+
+                // Chapters ↔ memberships: one chapter per note, minted in
+                // note order, each membership assigned to its own chapter —
+                // memberships in book order name the live chapters in
+                // chapter order.
+                let assigned = try Row.fetchAll(
+                    db,
+                    sql: """
+                        SELECT section_id FROM reading_post
+                        WHERE reading_id = ? AND deleted_at IS NULL ORDER BY position, id
+                        """,
+                    arguments: [bookID]).map { $0["section_id"] as String? }
+                let chapters = try String.fetchAll(
+                    db,
+                    sql: """
+                        SELECT id FROM reading_section
+                        WHERE reading_id = ? AND deleted_at IS NULL ORDER BY position, id
+                        """,
+                    arguments: [bookID])
+                #expect(assigned.allSatisfy { $0 != nil }, "every note is assigned to a chapter")
+                #expect(assigned.compactMap { $0 } == chapters, "memberships in book order name the chapters in chapter order")
+                #expect(chapters.count == manifest.count)
+
+                let reservedTagID = try String.fetchOne(
+                    db, sql: "SELECT id FROM tag WHERE path = ? AND deleted_at IS NULL",
+                    arguments: [facts.tagPath])
+                #expect(reservedTagID != nil)
+
+                // Every note: a manifest title, untouched metadata, the
+                // reserved tag landed, no engagement, one plain unlocked
+                // unnamed unframed take per block, the shipped hash.
+                let posts = try String.fetchAll(
+                    db,
+                    sql: "SELECT post_id FROM reading_post WHERE reading_id = ? AND deleted_at IS NULL",
+                    arguments: [bookID])
+                var titles = Set<String>()
+                for postID in posts {
+                    let post = try #require(try Row.fetchOne(
+                        db,
+                        sql: """
+                            SELECT title, locked, archived_at, entry_date, floating_notes
+                            FROM container WHERE id = ? AND deleted_at IS NULL
+                            """,
+                        arguments: [postID]))
+                    let title: String = try #require(post["title"] as String?)
+                    #expect(manifest[title] != nil, "\(title) is a manifest title")
+                    #expect(titles.insert(title).inserted, "\(title) appears once")
+                    #expect(post["locked"] as Int == 0)
+                    #expect(post["archived_at"] as String? == nil)
+                    #expect(post["entry_date"] as String? == nil)
+                    #expect((post["floating_notes"] as String? ?? "").isEmpty)
+                    #expect(try Bool.fetchOne(
+                        db,
+                        sql: """
+                            SELECT EXISTS (SELECT 1 FROM post_tag pt JOIN tag t ON t.id = pt.tag_id
+                                           WHERE pt.post_id = ? AND t.path = ? AND pt.deleted_at IS NULL)
+                            """,
+                        arguments: [postID, facts.tagPath]) == true,
+                        "\(title) carries the reserved tag — the classifier's completeness guard")
+                    #expect(try Bool.fetchOne(
+                        db,
+                        sql: """
+                            SELECT EXISTS (SELECT 1 FROM reading_post
+                                           WHERE post_id = ?1 AND reading_id <> ?2 AND deleted_at IS NULL)
+                                OR EXISTS (SELECT 1 FROM post_tag
+                                           WHERE post_id = ?1 AND deleted_at IS NULL AND tag_id <> ?3)
+                                OR EXISTS (SELECT 1 FROM block_tag bt
+                                           JOIN container_block cb ON cb.block_id = bt.block_id
+                                           WHERE cb.container_id = ?1 AND cb.deleted_at IS NULL
+                                             AND bt.deleted_at IS NULL)
+                                OR EXISTS (SELECT 1 FROM block_comment bc
+                                           JOIN container_block cb ON cb.block_id = bc.block_id
+                                           WHERE cb.container_id = ?1 AND cb.deleted_at IS NULL
+                                             AND bc.deleted_at IS NULL)
+                                OR EXISTS (SELECT 1 FROM commit_point cp
+                                           JOIN variant v ON v.id = cp.variant_id
+                                           JOIN container_block cb ON cb.block_id = v.block_id
+                                           WHERE cb.container_id = ?1 AND cb.deleted_at IS NULL
+                                             AND cp.kind = 'manual')
+                                OR EXISTS (SELECT 1 FROM reference
+                                           WHERE container_id = ?1 AND deleted_at IS NULL)
+                            """,
+                        arguments: [postID, bookID, reservedTagID ?? ""]) == false,
+                        "\(title) shows no engagement")
+                    let blocks = try String.fetchAll(
+                        db,
+                        sql: "SELECT block_id FROM container_block WHERE container_id = ? AND deleted_at IS NULL",
+                        arguments: [postID])
+                    #expect(!blocks.isEmpty)
+                    for blockID in blocks {
+                        let block = try #require(try Row.fetchOne(
+                            db, sql: "SELECT name, presentation FROM block WHERE id = ?",
+                            arguments: [blockID]))
+                        #expect((block["name"] as String? ?? "").isEmpty)
+                        #expect(block["presentation"] as String? == nil)
+                        let shape = try #require(try Row.fetchOne(
+                            db,
+                            sql: """
+                                SELECT COUNT(*) AS total,
+                                  COALESCE(SUM(CASE WHEN deleted_at IS NULL AND status = 'active'
+                                                    THEN 1 ELSE 0 END), 0) AS active,
+                                  COALESCE(SUM(CASE WHEN deleted_at IS NULL AND status = 'archived'
+                                                    THEN 1 ELSE 0 END), 0) AS archived,
+                                  COALESCE(SUM(CASE WHEN locked = 1 THEN 1 ELSE 0 END), 0) AS locked
+                                FROM variant WHERE block_id = ?
+                                """,
+                            arguments: [blockID]))
+                        #expect(shape["active"] as Int == 1)
+                        #expect(shape["archived"] as Int == 0)
+                        #expect(shape["locked"] as Int == 0)
+                    }
+                    #expect(manifest[title] == facts.hash(try Queries.renderedText(db, containerID: postID)),
+                            "\(title) hashes to the shipped manifest")
+                }
+                #expect(titles.count == manifest.count)
+            }
+        }
+    }
 }
