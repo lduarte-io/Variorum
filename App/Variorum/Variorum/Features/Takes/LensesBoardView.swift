@@ -437,8 +437,14 @@ struct LensesBoardView: View {
             .frame(maxWidth: .infinity)
             .contentShape(Rectangle())
         }
-        .menuStyle(.borderlessButton)
+        // The plain-button menu (VoicedMenu's idiom) renders the label at its
+        // PROPOSED size; `.borderlessButton` sized the control to the label's
+        // intrinsic width and clipped the second line to a one-word pill once
+        // the page-tall frame was gone (caught in this batch's own walk).
+        .menuStyle(.button)
+        .buttonStyle(.plain)
         .menuIndicator(.hidden)
+        .frame(maxWidth: .infinity)
         .overlay(
             RoundedRectangle(cornerRadius: 8)
                 .strokeBorder(
