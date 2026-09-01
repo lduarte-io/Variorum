@@ -721,6 +721,43 @@ last. Then stop.
 
 ---
 
+### BATCH A RECORD — THE CHROME (a fresh Fable implementer session, 2026-09-01 ~08:10 →)
+
+#### LIVE STATUS — BATCH A (flipped in the same commit as each piece; a fresh session finishes from this list alone)
+
+- **Orientation:** DONE — the brief's files read in the brief's order; the mockup's sidebar/masthead CSS read
+  (the browser render was blocked: the Chrome extension is not connected and `file://` is refused — the
+  grammar was read from the source instead: `.sidebar` = flat `room` column, `1px line` right border,
+  `14px 0 12px` padding; `.sb-group` 12 px side padding, 20 px between groups; `.sb-row` 5×8 px padding,
+  radius 6, gap 6; `.sb-head` 10.5 px faint; `.sb-sep` a 1 px line with 20 px side margins).
+  **Measured on the running dev build (AX tree, text-before-pixels):** the sidebar column sits at
+  x = 8 (the floating pane's inset), its rows are 32 pt List rows — BOTH the five areas AND the eight-mode
+  rail (identical pitch; the rail's code is byte-identical to the pre-Act-10 file) — while the Open strip's
+  rows are ~21 pt (`openRow`: 4 pt padding, min 19, spacing 1). So "the tab spacing has gotten less
+  generous… more compressed" is the OPEN STRIP (her "tabs" = the open notes, her own browser-tabs word),
+  whose rows left the List's 32 pt pitch for the bottom rail's 21 — not the rail's rows. Recorded here
+  before any code moved.
+- **Row 2 (the container):** NOT-STARTED — settled design: a custom `ShellSplit` (HStack + the pane
+  divider's own drag grammar) replaces `NavigationSplitView`; no public opt-out for the Tahoe glass pane
+  exists in the macOS 26 SDK (searched: `NavigationSplitViewStyle` has automatic/balanced/prominentDetail
+  only; AppKit's `NSSplitViewItem` gained only `automaticallyAdjustsSafeAreaInsets` + accessory VCs at 26.0;
+  the 13g finding recorded in `VariorumApp.swift` — the floating card is the KEY-window appearance).
+- **Row 3 (the rail + the Open strip):** NOT-STARTED — the strip returns directly under the rail with
+  32 pt rows at ordinary heights; a pure height-threshold function decides compression.
+- **Rows 4 + 19 (the masthead):** NOT-STARTED — the title block centered on the full masthead width
+  (ZStack), the trailing cluster measured so the title never overlaps it.
+- **Row 15 (one tag door):** NOT-STARTED — `#` opens an inline field; `+ tag` and the K12 fold retire;
+  ⌘⇧I re-pointed to the field (`.tagNote` gains the chord; `.toggleTagChips` retires).
+- **Rows 10 + 11 (library rows):** NOT-STARTED — the book row's HStack is `.center`-aligned (row 11's
+  mechanism, seen in the 2× crop: "book" sits below the title's baseline); the note row's chips measure
+  ~2 pt below the title baseline in the crop — the oracle pin decides the mechanism.
+- **Row 36 (the sweep table):** NOT-STARTED.
+- **Row 24 (the rail's fade):** NOT-STARTED.
+- **The USE gate · the full Mac suite · the contact sheet:** NOT-STARTED.
+- **No revert in flight.**
+
+---
+
 ### BATCH C — THE NOTE MODES (brief; DRAFTED 2026-09-01 ~05:55 — spawn after A closes)
 
 **Token discipline (binding, from the orchestrator handoff §2c):** build ONE contact sheet of your capture directory with `python3 notes/plans/act10-correction-screens/tools/sheet.py <dir>` and name it in your record; the orchestrator reads the sheet first and opens full captures only where a tile earns it.
