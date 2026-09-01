@@ -248,11 +248,18 @@ enum MobileStarterJournal {
     /// (`Operations(undoStack: nil)`, the tutorial seeder's shape), inside
     /// ONE runner turn so nothing else can interleave a Journal of its own.
     ///
-    /// The book is built to the SAME shape the core's own
-    /// `insertDailyJournalBook` builds (curated · `profile: "journal"` ·
-    /// `entry_date` ascending · designated · pinned), so a phone that
-    /// seeded and a phone that pressed Today's Entry first end up with the
-    /// same book.
+    /// **The book half is `shelveInDailyJournalBook`'s ensure, not a second
+    /// mint** (the pre-13u ladder's F9 — the author's #37(iii) ruling that
+    /// ALL doors share one rule). This file used to build the book itself
+    /// "to the same shape" as the core's `insertDailyJournalBook`; that was
+    /// a fourth writer of the shape, and the Journal-keeper repair's
+    /// predicate (`Queries.isDailyJournalMintShape`) is only trustworthy
+    /// while the mint has ONE writer. So the starter entry is imported
+    /// first and then SHELVED through the shared door, which creates,
+    /// designates and pins the Journal exactly as ⌘J, Today's Entry, the
+    /// bridge and the phone's own Today door do — a phone that seeded and
+    /// a phone that pressed Today's Entry first end up with the same book
+    /// because the same code minted it.
     ///
     /// **Returns nil when a book already exists by the time the turn runs**
     /// — guard 3's live half, read INSIDE the write it authorizes rather
@@ -282,15 +289,31 @@ enum MobileStarterJournal {
                 guard case .duplicateBookName = error else { throw error }
                 return nil
             }
-            let book = try quiet.createReading(
-                name: name, kind: .curated, profile: Queries.dailyJournalBookProfile,
-                sortField: .entryDate, sortDir: .asc)
-            try quiet.setDailyJournalBook(book.id)
-            try quiet.setShelfPinned(book.id, pinned: true)
+            // The entry first, then the shared door mints the book around
+            // it: with no designation (guarded above) the ensure CREATES,
+            // designates and pins the Journal — the #37(iii) shape, one
+            // writer. The starter entry carries no entry_date on purpose
+            // (`theStarterEntryIsNotTodaysEntry`), which the ensure never
+            // reads: shelving is membership, not the notebook rule.
             let entry = try quiet.importPost(
                 title: title, text: text, undoLabel: label)
-            _ = try quiet.addPostToReading(entry.container.id, to: book.id)
-            return book.id
+            switch quiet.shelveInDailyJournalBook(entry.container.id) {
+            case .shelved(let readingID):
+                return readingID
+            case let other:
+                // Unreachable with no designation (the ensure mints rather
+                // than refuses) except through a store failure; leave no
+                // stray furniture behind and report honestly.
+                try quiet.deleteContainer(entry.container.id)
+                throw MintError.shelvingDidNotMint(String(describing: other))
+            }
         }
+    }
+
+    /// The one way the shared door can decline a fresh store's starter
+    /// entry — a store failure inside the ensure. Reported through
+    /// `Outcome.refused`, never surfaced.
+    enum MintError: Error {
+        case shelvingDidNotMint(String)
     }
 }

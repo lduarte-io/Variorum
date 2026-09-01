@@ -85,6 +85,36 @@ struct MobileStarterJournalTests {
         }
     }
 
+    /// **THE BOOK IS THE SHARED DOOR'S, NOT A FOURTH MINT (the pre-13u
+    /// ladder's F9 — #37(iii)'s "all doors share one rule").** The seeded
+    /// book must wear exactly the daily mint's signature — the Journal-keeper
+    /// repair's predicate — and the ensure's dated-notebook shape, because
+    /// the same code minted it. A second writer of the shape could drift
+    /// from the predicate silently; this pin is the drift guard on the
+    /// phone's side (its core twin is `theDailyMintWearsTheKeeperSignature…`).
+    @Test func theSeededBookIsTheSharedDoorsOwnMint() async throws {
+        try await withEditorWorld { session, db in
+            let mark = Mark()
+            let outcome = await MobileStarterJournal.seedIfNeeded(
+                session: session, storeVariant: .dev,
+                storeWasEmptyAtLaunch: true,
+                loadMark: mark.load, saveMark: mark.save)
+            guard case .seeded(let readingID) = outcome else {
+                Issue.record("expected a seed, got \(outcome)")
+                return
+            }
+            let facts = try await db.read { db -> (Reading, [String]) in
+                let book = try #require(try Queries.reading(db, id: readingID))
+                return (book, try Queries.dailyJournalBookCandidates(db))
+            }
+            #expect(Queries.isDailyJournalMintShape(facts.0),
+                    "the seeded book must BE the daily mint's shape — the repair's predicate")
+            #expect(facts.1 == [readingID], "…and the one keeper candidate in the store")
+            #expect(facts.0.sortField == .entryDate)
+            #expect(facts.0.sortDir == .asc, "the ensure's dated-notebook order")
+        }
+    }
+
     /// **The entry carries NO `entry_date`, and that is load-bearing.** A
     /// starter note stamped with today would be the note
     /// `createOrOpenJournalEntry` hands her the first time she presses
