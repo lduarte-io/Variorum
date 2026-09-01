@@ -267,6 +267,16 @@ final class AppSession {
     /// the Mac has a `quitFinalize` registry to read it from.
     var openAutosaveCount: Int { postAutosaves.count }
 
+    /// True while any open note's coordinator holds typed text that has not
+    /// landed (pending in its debounce, or a flush in flight). The phone's
+    /// first-write furniture reads this to PACE the sample library's story
+    /// turns behind her own writing (the pre-13u ladder's F12): a story
+    /// import is one serial runner turn, and an autosave queued behind it
+    /// waits the whole turn.
+    var hasPendingAutosave: Bool {
+        postAutosaves.values.contains { $0.coordinator.isDirty }
+    }
+
     @discardableResult
     func releaseAutosave(forPost postID: String) -> Bool {
         guard var hold = postAutosaves[postID] else { return false }

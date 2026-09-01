@@ -195,10 +195,44 @@ final class MobileFirstWriteFurniture {
         // store, not every new reader's). `.unowned` again, for the reason
         // above, and it also makes the Mac's bounded wait structurally
         // unreachable from the phone: this occasion never waits.
-        let sample = await SampleLibrarySeeder.seedIfNeeded(
-            session: session, storeVariant: storeVariant, gate: .unowned,
-            loadMark: marks.loadSample, saveMark: marks.saveSample)
+        //
+        // **Paced behind her writing** (the ladder's F12). The occasion fires
+        // at her FIRST WRITE — she is typing — and the thirteen story imports
+        // share the ONE serial runner her autosaves go through: each import
+        // is one turn (hundreds of milliseconds on a phone), and an autosave
+        // reaching the runner behind one waits the whole turn. So the seed
+        // runs at `.utility` (the runner prefers her writes when both are
+        // queued) and, before every turn, holds while any open note still
+        // has text that has not landed — up to `storyPacingCap` per turn,
+        // so a reader who never pauses still gets her library, at worst
+        // one story per cap. The first note's own autosaves therefore never
+        // queue behind a story turn.
+        let session = self.session
+        let storeVariant = self.storeVariant
+        let marks = self.marks
+        let sample = await Task(priority: .utility) { @MainActor in
+            await SampleLibrarySeeder.seedIfNeeded(
+                session: session, storeVariant: storeVariant, gate: .unowned,
+                loadMark: marks.loadSample, saveMark: marks.saveSample,
+                pacing: { await Self.holdWhileWritingLands(session) })
+        }.value
 
         return .ran(journal: journal, sample: sample)
+    }
+
+    /// How long one story turn may be held behind her pending writing
+    /// before it runs anyway — a cap, not a budget: with it, continuous
+    /// typing costs at most one story per cap; without it a reader who
+    /// never pauses would never get her library.
+    static let storyPacingCap: Duration = .seconds(3)
+    static let storyPacingPoll: Duration = .milliseconds(20)
+
+    /// The pacing wait itself: returns the moment no open note holds
+    /// unlanded text, or at the cap.
+    static func holdWhileWritingLands(_ session: AppSession) async {
+        let deadline = ContinuousClock.now.advanced(by: storyPacingCap)
+        while session.hasPendingAutosave, ContinuousClock.now < deadline {
+            do { try await Task.sleep(for: storyPacingPoll) } catch { return }
+        }
     }
 }

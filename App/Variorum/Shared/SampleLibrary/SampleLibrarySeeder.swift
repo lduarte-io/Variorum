@@ -495,6 +495,15 @@ enum SampleLibrarySeeder {
     private static let log = Logger(
         subsystem: "io.lduarte.Variorum", category: "sample-library")
 
+    /// **Pacing** (the ladder's F12): awaited before the skeleton turn and
+    /// before EVERY story turn. A story import is one serial runner turn
+    /// (~2,500 blocks across the twelve; hundreds of milliseconds each on a
+    /// phone), and an autosave that reaches the runner behind one waits the
+    /// whole turn — so a caller whose reader may be TYPING hands in a wait
+    /// that holds the next turn while her text is still landing. nil (the
+    /// Mac's launch seed, the restore door) paces nothing.
+    typealias Pacing = @MainActor () async -> Void
+
     @discardableResult
     static func seedIfNeeded(
         session: AppSession,
@@ -503,12 +512,13 @@ enum SampleLibrarySeeder {
         firstRoundWait: Duration? = nil,
         pollInterval: Duration = .milliseconds(100),
         loadMark: (() -> Bool)? = nil,
-        saveMark: ((Bool) -> Void)? = nil
+        saveMark: ((Bool) -> Void)? = nil,
+        pacing: Pacing? = nil
     ) async -> Outcome {
         let outcome = await perform(
             session: session, storeVariant: storeVariant, gate: gate,
             firstRoundWait: firstRoundWait, pollInterval: pollInterval,
-            loadMark: loadMark, saveMark: saveMark)
+            loadMark: loadMark, saveMark: saveMark, pacing: pacing)
         log.notice("sample library: \(String(describing: outcome), privacy: .public)")
         return outcome
     }
@@ -520,7 +530,8 @@ enum SampleLibrarySeeder {
         firstRoundWait: Duration?,
         pollInterval: Duration,
         loadMark: (() -> Bool)?,
-        saveMark: ((Bool) -> Void)?
+        saveMark: ((Bool) -> Void)?,
+        pacing: Pacing?
     ) async -> Outcome {
         let key = seededDefaultsKey(for: storeVariant)
         let load = loadMark ?? { UserDefaults.standard.bool(forKey: key) }
@@ -555,7 +566,8 @@ enum SampleLibrarySeeder {
                 }
             }
 
-            let seeded = try await seed(session: session, stories: stories, existing: existing)
+            let seeded = try await seed(
+                session: session, stories: stories, existing: existing, pacing: pacing)
             save(true)
             return seeded
         } catch {
@@ -599,7 +611,8 @@ enum SampleLibrarySeeder {
     /// moves either way.
     @discardableResult
     static func seed(
-        session: AppSession, stories: [Story], existing: Existing
+        session: AppSession, stories: [Story], existing: Existing,
+        pacing: Pacing? = nil
     ) async throws -> Outcome {
         let bookName = Self.bookName
         let tagName = Self.tagName
@@ -614,6 +627,7 @@ enum SampleLibrarySeeder {
         let clock = Self.publicationDate
 
         // Turn 1: the book, the tag, and the front matter.
+        await pacing?()
         let skeleton = try await session.runner.run { _ -> (book: String, tag: String) in
             try withDependencies { $0.date = .constant(clock) } operation: {
                 let quiet = Operations(undoStack: nil)
@@ -642,6 +656,7 @@ enum SampleLibrarySeeder {
         var minted = 0
         for story in stories where !present.contains(story.title) {
             try Task.checkCancellation()
+            await pacing?()
             let bookID = skeleton.book
             let tagID = skeleton.tag
             let stray = strays[story.title]

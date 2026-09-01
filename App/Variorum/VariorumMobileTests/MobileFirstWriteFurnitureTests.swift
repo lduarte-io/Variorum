@@ -13,6 +13,7 @@
 //
 
 import Foundation
+import GRDB
 import Testing
 import VariorumCore
 @testable import VariorumMobile
@@ -241,6 +242,70 @@ struct MobileFirstWriteFurnitureTests {
             #expect(facts.1 == facts.0, "one chapter per note — the front matter has one too")
             #expect(facts.2, "the attribution ships with the public-domain text")
             #expect(facts.3 == facts.0, "every note wears her tag")
+        }
+    }
+
+    /// **RED ON OLD (the ladder's F12, MINOR) — an ORDERING pin, never a
+    /// timing.** The Sherlock seed runs on the SAME serial runner as her
+    /// autosaves, at the moment of her first write; each story import is one
+    /// turn, and an autosave reaching the runner behind it waited the whole
+    /// turn. Now the seed holds every turn while any open note still has
+    /// unlanded text: with an autosave PENDING, no sample turn runs — the
+    /// book does not even exist — and the moment the text lands, the seed
+    /// proceeds to completion. Old code minted the book and its first
+    /// stories immediately, pending autosave or not.
+    @Test func theSampleSeedWaitsForPendingWritingToLand() async throws {
+        try await withEditorWorld { session, db in
+            // Her note, with text sitting in its autosave debounce (a sleep
+            // that never wakes — the pin flushes explicitly, deterministically).
+            let (postID, variantID) = try await session.runner.run { ops in
+                let post = try ops.createPost(title: "my first note")
+                let block = try ops.newBlock(in: post.id, text: "Dear diary")
+                return (post.id, block.variant.id)
+            }
+            let autosave = session.autosave(
+                forPost: postID, sleep: { _ in throw CancellationError() })
+            autosave.record(variantID: variantID, text: "Dear diary, today", charDelta: 7)
+            #expect(session.hasPendingAutosave, "positive activity: her text is pending")
+
+            let marks = Marks()
+            let furniture = MobileFirstWriteFurniture(
+                session: session, storeVariant: .dev, marks: marks.both)
+            await furniture.prime()
+            let occasion = Task { await furniture.run() }
+
+            // While her text has not landed, NOTHING of the library exists —
+            // polled well inside the per-turn cap, so this cannot pass by
+            // the seed simply being slow.
+            let watch = ContinuousClock.now.advanced(by: .milliseconds(400))
+            var sampleBookSeen = false
+            while ContinuousClock.now < watch {
+                try await Task.sleep(for: .milliseconds(25))
+                let books = try await db.read { db in try Queries.readings(db) }
+                if books.contains(where: { $0.name == SampleLibrarySeeder.bookName }) {
+                    sampleBookSeen = true
+                    break
+                }
+            }
+            #expect(!sampleBookSeen, "no story turn may run while her autosave is pending")
+
+            // Her text lands; the seed proceeds and completes.
+            await autosave.flushNow()
+            #expect(!session.hasPendingAutosave)
+            guard case .ran(_, let sample) = await occasion.value,
+                  case .seeded(let readingID, let stories) = sample
+            else {
+                Issue.record("expected the paced seed to complete")
+                return
+            }
+            #expect(stories >= 12)
+            let facts = try await db.read { db -> (Int, String?) in
+                (try Queries.assembleReading(db, readingID: readingID).count,
+                 try String.fetchOne(
+                    db, sql: "SELECT working_text FROM variant WHERE id = ?", arguments: [variantID]))
+            }
+            #expect(facts.0 == stories + 1)
+            #expect(facts.1 == "Dear diary, today", "and her text is exactly what landed")
         }
     }
 
