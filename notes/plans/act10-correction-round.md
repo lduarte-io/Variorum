@@ -436,8 +436,8 @@ your rows before the record is marked closed.
 
 #### LIVE STATUS — BATCH B (flipped in the same commit as each piece; a fresh session finishes from this list alone)
 
-- **Row 44 (the hang) + rows 9/12 (the scroll class) + row 47/7/23 (the note-row reveal) + row 14 (chapters):** DONE (this commit) — ONE mechanism: Outline's landing rebuilt (no animation; bounded convergence; the flat `BookOutlineRows` ForEach whose identities ARE the anchors; the model's `pendingChapterReveal` slot beside W21's note slot; chapter HEADINGS are doors; Read ▸ Scroll's chapter click lands the flow). Pins green on the new tree (`BookOutlineLandingTests` ×3, `BookOutlineRowsTests` ×2). **Red-on-old by behavioral revert: PENDING** (next commit).
-- **Row 44's second symptom (focus lands on the LAST block):** DONE (this commit) — a bare `BookViewModel.focus` seeds caret 0; pin `aBareFocusLandsAtTheFirstBlock` green. Red-on-old PENDING.
+- **Row 44 (the hang) + rows 9/12 (the scroll class) + row 47/7/23 (the note-row reveal) + row 14 (chapters):** DONE (`be32fa7`) — ONE mechanism: Outline's landing rebuilt (no animation; bounded convergence; the flat `BookOutlineRows` ForEach whose identities ARE the anchors; the model's `pendingChapterReveal` slot beside W21's note slot; chapter HEADINGS are doors; Read ▸ Scroll's chapter click lands the flow). Pins green on the new tree (`BookOutlineLandingTests` ×3, `BookOutlineRowsTests` ×2). **Red-on-old VERIFIED by behavioral revert** (animated `scrollTo` + no hops + the anchor as an explicit `.id` inside a positionally-identified lazy row + no caret seed): 4 issues in 3 tests — the chapter landing 937 pt off with the scroll offset still 0 (the page never moved), the off-screen card never realized (`anchorTop == nil` — row 47's "the page did not move"), the caret at 56,004 (the document's end = block 215/215) and `caretSeed == nil`. Restored; `git diff --stat` empty.
+- **Row 44's second symptom (focus lands on the LAST block):** DONE (`be32fa7`) — a bare `BookViewModel.focus` seeds caret 0; pin `aBareFocusLandsAtTheFirstBlock` green; red under revert (2 issues, above).
 - **Row 8 (the duplicate line):** NOT-STARTED — settled design: navigator collapses the note line into the chapter row when the chapter has exactly one note whose `BookNaming.key(displayTitle) == key(section.name)`; the chapter row then opens the note (focus + reveal); pin on a Sherlock-shaped fixture; the field guide untouched.
 - **Row 13 (the gutter):** NOT-STARTED — settled design: the per-card word-count column is DROPPED (C-6 / R-cor-4(d)); the gutter keeps ONLY the takes fact (`⑂ takes on N blocks`) beside a card that has one; the row shares the pane's width honestly (flexible gutter). Verdict for the row-36 table: BookView's 4 metrics → the card `Nw` DROP · the gutter `⑂ takes` KEEP (invisible from a card otherwise) · `bookMetaLine` ("book · 13 chapters · 13 notes") KEEP (the book's shape under its title, not a word count) · the side card's counts → row 40.
 - **Row 22 (the book Index editable in place):** NOT-STARTED — settled design: the pane's note renders per-BLOCK `PaneSurfaceView`s through the `BlockTOCViewModel`/`PaneTextAuthority` road (one live editor); a click makes THAT block live; the double-click handoff to Outline retires; Read stays read-only.
@@ -446,7 +446,7 @@ your rows before the record is marked closed.
 - **Row 45 (previews):** NOT-STARTED — settled design: a pure `CardPreview.excerpt(blocks:)` brain — the first ~40 words across leading blocks, skipping a lone heading/numeral block; pin on a numeral-first fixture.
 - **The USE gate (captures per row into `act10-correction-screens/batch-b/`):** NOT-STARTED — the dev build must be relaunched from the fresh Debug product after the code lands (`open -n`).
 - **Full Mac suite + TutorialWalkTests:** PENDING (at the end).
-- **No revert in flight.**
+- **No revert in flight** (the red-on-old revert ran and was restored — `git diff --stat` empty against `be32fa7`; evidence in the table below).
 
 #### The hang — what reproduced, what did not (recorded before any code moved)
 
@@ -459,9 +459,9 @@ your rows before the record is marked closed.
 
 | Row | Disposition | Pin | Red-on-old |
 |---|---|---|---|
-| 44 | FIXED — Outline's landing rebuilt; bare focus seeds caret 0 | `BookOutlineLandingTests.aChapterRevealLandsAtTheChapterWithAStoryExpandedAndLive` · `.aBareFocusLandsAtTheFirstBlock` | PENDING |
-| 9 · 12 | FIXED (row 44's mechanism) | the chapter pin above | PENDING |
-| 47 · 7 · 23 | FIXED — a note-row click focuses + reveals through the model slot; the anchor is the row's ForEach identity. Row 23's "intermittent" IS this: the old reveal worked only for a card that happened to be realized | `.anOffScreenCollapsedNoteIsRevealedAtTheTop` | PENDING |
+| 44 | FIXED — Outline's landing rebuilt; bare focus seeds caret 0 | `BookOutlineLandingTests.aChapterRevealLandsAtTheChapterWithAStoryExpandedAndLive` · `.aBareFocusLandsAtTheFirstBlock` | 1 issue (937 pt off, offset 0) · 2 issues (caret 56,004; seed nil) |
+| 9 · 12 | FIXED (row 44's mechanism) | the chapter pin above | the same 1 issue |
+| 47 · 7 · 23 | FIXED — a note-row click focuses + reveals through the model slot; the anchor is the row's ForEach identity. Row 23's "intermittent" IS this: the old reveal worked only for a card that happened to be realized | `.anOffScreenCollapsedNoteIsRevealedAtTheTop` | 1 issue (the card never realized — the page did not move) |
 | 14 | FIXED — the body's chapter headings are doors (`navigateToChapter`); the navigator's chapter click survives an expanded story (the chapter pin) | the chapter pin | — (door class) |
 | 8 | PENDING | | |
 | 13 | PENDING | | |
@@ -472,7 +472,8 @@ your rows before the record is marked closed.
 
 #### Commits (in order)
 
-1. PENDING(hash) — rows 44/9/12/47/7/23/14: the landing rebuilt + pins + this record's skeleton.
+1. `be32fa7` — rows 44/9/12/47/7/23/14: the landing rebuilt + pins + this record's skeleton.
+2. PENDING(hash) — the red-on-old evidence recorded (this edit).
 
 ---
 
