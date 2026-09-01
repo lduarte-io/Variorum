@@ -166,35 +166,72 @@ extension Queries {
         try designatedBookID(db, key: "daily_journal_book")
     }
 
-    /// The profile the daily-Journal mint stamps — the durable row-level
-    /// mark of "born as the designated daily book" (pre-13u Act 0,
-    /// R-pre13u-1). `insertDailyJournalBook` mints with THIS constant and
-    /// `dailyJournalBookCandidates` filters on it, so the mint and the
-    /// SyncSpec §7 Journal-keeper repair share one predicate and cannot
-    /// drift.
+    /// **The ONE journal-profile string** (pre-13u Act 0, R-pre13u-1; made
+    /// the single writer at the ladder's F9). Every door that mints a
+    /// journal-profile book stamps THIS constant — the daily mint
+    /// (`insertDailyJournalBook`), the Mac Shelf's "Create Journal Book",
+    /// the phone's `.journal` book kind — and the Journal-keeper predicate
+    /// below filters on it, so no door can drift into a profile spelling
+    /// the repair does not recognise.
+    ///
+    /// What the profile means: *a dated notebook* (entries in `entry_date`
+    /// order). It does NOT mean "the daily Journal" — the product
+    /// deliberately mints ADDITIONAL journal-profile notebooks through two
+    /// user doors (AppSpec §14 item 10's "starting a 'new' journal as a
+    /// separate notebook"), which is why the predicate below needs a
+    /// second leg.
     public static let dailyJournalBookProfile = "journal"
 
-    /// **The Journal-keeper repair's "same book" predicate** (pre-13u
-    /// Act 0, R-pre13u-1): every live reading the daily-Journal mint could
-    /// have produced — curated, `profile = 'journal'` — sorted by id, so
-    /// index 0 is the deterministic keeper everywhere. Two rows here is the
-    /// offline-race state the repair heals: the ONLY writer of this profile
-    /// is `insertDailyJournalBook` (the one shared daily door — ⌘J, Today's
-    /// Entry, the bridge, and the phone's furniture all delegate to it),
-    /// which designates at birth, so the profile IS "was designated on its
-    /// own device" as a fact the setting CAS cannot erase. Deliberately NOT
-    /// the folded name: `BookNaming`'s E13 doctrine keeps deliberate
-    /// same-name books legal, and a rename must not shield a duplicate
-    /// daily book from healing.
+    /// **The daily mint's SIGNATURE — the Journal-keeper repair's "same
+    /// book" predicate, as one pure function** (pre-13u Act 0, R-pre13u-1;
+    /// NARROWED at the ladder's F6). A reading is the daily Journal's shape
+    /// when it is curated, wears the journal profile, AND wears the daily
+    /// mint's default name under `BookNaming`'s key (ends-trimmed,
+    /// case-folded — the E13 rule, reused rather than re-derived).
+    ///
+    /// Why all three legs: `insertDailyJournalBook` — the one shared daily
+    /// door (⌘J, Today's Entry, the bridge, the phone's furniture) — stamps
+    /// exactly this triple, so two devices each minting the Journal offline
+    /// produce two rows that BOTH satisfy it and converge. A deliberate
+    /// second notebook never does: the Mac's "Create Journal Book" and the
+    /// phone's `.journal` kind mint the profile but refuse the name
+    /// (`assertBookNameIsFree` at their doors, against the live Journal),
+    /// and the F6 finding was exactly the profile-only predicate merging
+    /// those notebooks into the Journal. E13's objection was to keying on
+    /// the name ALONE ("would delete a book she made on her phone") — a
+    /// plain `profile:'book'` book named "Journal" still fails the profile
+    /// leg and survives.
+    ///
+    /// The honest consequence of the name leg, recorded at QUESTIONS #85(a):
+    /// a daily Journal she RENAMED no longer converges with a fresh phone
+    /// mint — the two stand as separate journal-profile books until she
+    /// merges them by hand. The repair heals the race it was built for
+    /// (two untouched mints) and never touches a book whose name she chose.
+    public static func isDailyJournalMintShape(_ reading: Reading) -> Bool {
+        reading.kind == .curated
+            && reading.profile == dailyJournalBookProfile
+            && BookNaming.sameName(reading.name, Operations.defaultDailyJournalBookName)
+    }
+
+    /// **The Journal-keeper repair's candidate set**: every live reading
+    /// satisfying `isDailyJournalMintShape`, sorted by id, so index 0 is the
+    /// deterministic keeper everywhere. Two rows here is the offline-race
+    /// state the repair heals. The name leg is applied in Swift so the ONE
+    /// key (`BookNaming.key`) serves — SQLite's `LOWER` is ASCII-only and
+    /// its `TRIM` trims spaces only, and a second folding rule would be a
+    /// second predicate. Cost ∝ the shelf's journal-profile books, never
+    /// the corpus.
     public static func dailyJournalBookCandidates(_ db: Database) throws -> [String] {
-        try String.fetchAll(
+        try Reading.fetchAll(
             db,
             sql: """
-                SELECT id FROM reading
+                SELECT * FROM reading
                 WHERE kind = 'curated' AND profile = ? AND deleted_at IS NULL
                 ORDER BY id
                 """,
             arguments: [dailyJournalBookProfile])
+            .filter(isDailyJournalMintShape)
+            .map(\.id)
     }
 
     /// The designated QUICKNOTES book (13g batch 7 — her R6-4). The daily

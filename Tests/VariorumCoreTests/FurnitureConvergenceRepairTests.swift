@@ -214,6 +214,121 @@ struct JournalKeeperRepairTests {
         }
     }
 
+    // MARK: The ladder's F6 — the predicate is the MINT's signature
+
+    /// **RED ON OLD (F6, BLOCKER):** the product deliberately mints
+    /// additional journal-profile notebooks — the Mac Shelf's "Create
+    /// Journal Book" (§14 item 10's separate notebook) and the phone's
+    /// `.journal` kind — and the old profile-only predicate merged them into
+    /// the Journal on the next batch touching a reading. Single-device users
+    /// too: the changefeed echoes the device's own accepted `reading` rows,
+    /// the pull applies them verbatim, and the repair fires against the
+    /// device's own two notebooks. Old code tombstones the larger id and
+    /// moves its memberships; the narrowed predicate leaves both alone.
+    @Test func twoDeliberateJournalNotebooksSurviveTheirOwnEcho() async throws {
+        let (a, b, server) = try furniturePair()
+        let daily = try mintJournal(a, day: "2026-08-30")
+        // The Mac door's exact shape, twice: curated, the journal profile,
+        // dated order — and names of her own (the door refuses the daily
+        // book's name against the live Journal).
+        let notebooks: [(bookID: String, postID: String)] = try a.with { ops, _ in
+            try ["Work journal", "2027"].map { name in
+                try ops.assertBookNameIsFree(name)
+                let book = try ops.createReading(
+                    name: name, kind: .curated, profile: Queries.dailyJournalBookProfile,
+                    sortField: .entryDate, sortDir: .asc)
+                let post = try ops.createPost(title: "an entry in \(name)", profile: .journal)
+                _ = try ops.addPostToReading(post.id, to: book.id)
+                return (book.id, post.id)
+            }
+        }
+
+        try await a.push()
+        let echo = try await a.pull()  // the device's own rows, echoed
+        #expect(echo.applied > 0, "positive activity: the echo must land rows")
+        #expect(echo.repairs == 0, "the repair must not fire on deliberate notebooks")
+
+        for notebook in notebooks {
+            #expect(try a.db.deletedAt("reading", notebook.bookID) == nil,
+                    "a deliberate journal notebook must survive its own echo")
+            #expect(try a.db.fetchString(
+                "SELECT reading_id FROM reading_post WHERE post_id = ? AND deleted_at IS NULL",
+                [notebook.postID]) == notebook.bookID,
+                "and keep its own memberships — never merged into the Journal")
+        }
+        #expect(try liveJournalBookIDs(a).count == 3, "the Journal + two notebooks, all live")
+
+        // A second device sees the same three, untouched, after convergence.
+        try await assertFurnitureConverged(a, b, server)
+        for client in [a, b] {
+            #expect(try liveJournalBookIDs(client).count == 3)
+            #expect(try designation(client) == daily.bookID)
+        }
+    }
+
+    /// The drift guard between the mint and the predicate: what
+    /// `shelveInDailyJournalBook` mints IS a candidate, and what the Shelf's
+    /// door mints (the profile without the name) is NOT — so a change to
+    /// either side announces itself here before it reaches a sync round.
+    @Test func theDailyMintWearsTheKeeperSignatureAndADoorNotebookDoesNot() async throws {
+        let (a, _, _) = try furniturePair()
+        let daily = try mintJournal(a, day: "2026-08-30")
+        let notebook: String = try a.with { ops, _ in
+            try ops.createReading(
+                name: "Untitled Journal", kind: .curated,
+                profile: Queries.dailyJournalBookProfile,
+                sortField: .entryDate, sortDir: .asc).id
+        }
+        let candidates = try await a.db.read { db in try Queries.dailyJournalBookCandidates(db) }
+        #expect(candidates == [daily.bookID])
+        #expect(!candidates.contains(notebook))
+        // The name leg is BookNaming's key — case and end-whitespace fold,
+        // nothing else (E13's letter): a "  journal " notebook IS the
+        // Journal's shape; "Journal 2" is not.
+        let readings = try await a.db.read { db in try Queries.readings(db) }
+        let dailyRow = try #require(readings.first { $0.id == daily.bookID })
+        var folded = dailyRow
+        folded.name = "  JOURNAL "
+        #expect(Queries.isDailyJournalMintShape(folded))
+        var other = dailyRow
+        other.name = "Journal 2"
+        #expect(!Queries.isDailyJournalMintShape(other))
+        var plainBook = dailyRow
+        plainBook.profile = "book"
+        #expect(!Queries.isDailyJournalMintShape(plainBook),
+                "a plain book wearing the name is E13's legal same-name book, never a candidate")
+    }
+
+    /// **DOCUMENTED CORNER (QUESTIONS #85(a), the F6 amendment):** a daily
+    /// Journal she RENAMED no longer converges with a fresh phone mint — the
+    /// name leg reads the renamed book as her own notebook, so the two
+    /// stand as separate journal-profile books until she merges them by
+    /// hand. The honest consequence of narrowing the predicate; pinned so a
+    /// later change to the name leg says so out loud.
+    @Test func aRenamedDailyJournalStandsBesideAFreshMint() async throws {
+        let (a, b, server) = try furniturePair()
+        let renamed = try mintJournal(a, day: "2026-08-30")
+        try a.with { ops, _ in try ops.renameReading(renamed.bookID, name: "My Journal") }
+        let fresh = try mintJournal(b, day: "2026-08-31")
+
+        try await a.push()
+        try await b.push()
+        try await b.pull()
+        try await a.pull()
+        try await assertFurnitureConverged(a, b, server)
+
+        for client in [a, b] {
+            #expect(try liveJournalBookIDs(client) == [renamed.bookID, fresh.bookID].sorted(),
+                    "two journal-profile books stand — the renamed one is hers by name")
+            #expect(try client.db.fetchInt(
+                "SELECT COUNT(*) FROM reading_post WHERE reading_id = ? AND deleted_at IS NULL",
+                [renamed.bookID]) == 1)
+            #expect(try client.db.fetchInt(
+                "SELECT COUNT(*) FROM reading_post WHERE reading_id = ? AND deleted_at IS NULL",
+                [fresh.bookID]) == 1)
+        }
+    }
+
     /// Re-running rounds over a converged pair changes nothing — the repair
     /// finds one live Journal and stands down.
     @Test func theRepairIsIdempotentOnceConverged() async throws {

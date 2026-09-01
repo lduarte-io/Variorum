@@ -111,7 +111,7 @@ struct ShelfView: View {
                 Task {
                     await readings.create(
                         name: name.isEmpty ? "Untitled Journal" : name,
-                        kind: .curated, profile: "journal",
+                        kind: .curated, profile: Queries.dailyJournalBookProfile,
                         sortField: .entryDate, sortDir: .asc)
                 }
             }

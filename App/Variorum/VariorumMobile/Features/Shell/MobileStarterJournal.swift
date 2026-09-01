@@ -283,7 +283,7 @@ enum MobileStarterJournal {
                 return nil
             }
             let book = try quiet.createReading(
-                name: name, kind: .curated, profile: "journal",
+                name: name, kind: .curated, profile: Queries.dailyJournalBookProfile,
                 sortField: .entryDate, sortDir: .asc)
             try quiet.setDailyJournalBook(book.id)
             try quiet.setShelfPinned(book.id, pinned: true)

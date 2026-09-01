@@ -527,9 +527,13 @@ extension SyncEngine {
     /// `uq_reading_post_live`), the loser is tombstoned, and the daily-book
     /// DESIGNATION converges to the keeper wherever it named a loser.
     ///
-    /// The predicate is `Queries.dailyJournalBookCandidates` — the one
-    /// named function the mint also stamps by (see its doc for why the
-    /// profile, and deliberately never the name, identifies a daily book).
+    /// The predicate is `Queries.dailyJournalBookCandidates` over the one
+    /// pure function `Queries.isDailyJournalMintShape` — curated + the
+    /// journal profile + the daily mint's default NAME under `BookNaming`'s
+    /// key (narrowed at the ladder's F6: profile alone merged the deliberate
+    /// second notebooks the Shelf and the phone mint on purpose; see that
+    /// function's doc for the reasoning and the recorded renamed-keeper
+    /// corner).
     ///
     /// What deliberately does NOT move, the tag.path class ("worst case a
     /// lost rename, never corruption"): the loser's row metadata (a custom

@@ -138,7 +138,8 @@ final class MobileCreateBookModel {
                 id = try await session.runner.run { ops in
                     try ops.assertBookNameIsFree(bookName)
                     return try ops.createReading(
-                        name: bookName, kind: .curated, profile: "journal",
+                        name: bookName, kind: .curated,
+                        profile: Queries.dailyJournalBookProfile,
                         sortField: .entryDate, sortDir: .asc)
                 }.id
             case .smartFromTags:
