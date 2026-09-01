@@ -435,6 +435,15 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport {
         accounts[userID]?.tables[table]?[rowID]?.row
     }
 
+    /// The row's current `server_seq` — its position in the changefeed
+    /// (re-stamped on every accepted change). For pins about ARRIVAL
+    /// ORDER, which is what the seq is.
+    func currentSeq(
+        table: String, rowID: String, for userID: String = FakeSyncServer.defaultUserID
+    ) -> Int64? {
+        accounts[userID]?.tables[table]?[rowID]?.serverSeq
+    }
+
     func rowCount(
         table: String, for userID: String = FakeSyncServer.defaultUserID
     ) -> Int {

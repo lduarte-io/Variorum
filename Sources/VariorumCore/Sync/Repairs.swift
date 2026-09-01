@@ -170,6 +170,14 @@ extension SyncEngine {
         //    in the batch would dangle live under a dead book until the
         //    repairer's re-points land — which they never do if that device
         //    is gone.
+        //    THIS LEG RELIES ON THE DRAIN ORDER (the ladder's R2-7): the
+        //    keeper's `reading` insert reaches `server_seq` BEFORE the
+        //    loser's tombstone only because the push sorts a table's rows
+        //    by ascending id (`SyncEngine.precedesInDrain`) and the keeper
+        //    is the smaller id by the repair's definition — so the fresh
+        //    store applies the keeper first and `journalKeeperBesideRetiring`
+        //    finds it standing when the tombstone lands. Stated here and at
+        //    the comparator, and pinned by `TheDrainOrderTests`.
         // With no keeper in sight this is an ordinary delete: the cascade
         // takes its victims exactly as ever.
         if resolved.isTombstoned, resolved.table == "reading",

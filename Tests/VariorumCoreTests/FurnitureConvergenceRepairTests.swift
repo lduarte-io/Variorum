@@ -778,3 +778,69 @@ struct JournalKeeperRepairTests {
         #expect(try b.syncedDump() == settled)
     }
 }
+
+// MARK: - The drain order (pre-13u ladder round 2, R2-7 — an architectural pin)
+
+/// `SyncEngine.precedesInDrain` is the ONE comparator the push sorts the
+/// outbox by: registry order across tables, ascending id within a table.
+/// The Journal keeper's fresh-store leg silently rides the second half —
+/// the keeper's `reading` insert precedes the loser's `reading` tombstone
+/// in `server_seq` only because the keeper is the smaller id and the drain
+/// sends a table's rows in id order. Green on both sides by nature (nothing
+/// here was broken): this is the class of pin that goes red the day someone
+/// changes the comparator, which is exactly the day that leg's premise
+/// would quietly stop holding.
+@Suite("The drain order (pre-13u ladder round 2, R2-7)")
+struct TheDrainOrderTests {
+    private func row(_ table: String, _ id: String) -> SyncRow {
+        SyncRow(table: table, rowID: id, columns: [:], syncVersion: 0)
+    }
+
+    private func mintJournal(_ client: SyncClient, day: String) throws -> String {
+        try client.with { ops, _ in
+            let entry = try ops.createOrOpenJournalEntry(entryDate: day)
+            guard case .shelved(let readingID) = ops.shelveInDailyJournalBook(entry.container.id) else {
+                throw FurnitureTestError.journalDidNotShelve("not shelved")
+            }
+            return readingID
+        }
+    }
+
+    @Test func registryOrderAcrossTablesThenAscendingIDWithinATable() {
+        let shuffled = [
+            row("reading_post", "BB"), row("reading", "BB"), row("container", "ZZ"),
+            row("reading", "AA"), row("reading_post", "AA"), row("setting", "daily_journal_book"),
+        ]
+        let drained = shuffled.sorted(by: SyncEngine.precedesInDrain)
+        #expect(drained.map { "\($0.table)/\($0.rowID)" } == [
+            "container/ZZ", "reading/AA", "reading/BB",
+            "reading_post/AA", "reading_post/BB", "setting/daily_journal_book",
+        ])
+        #expect(SyncSchema.applyOrderIndex(of: "reading") < SyncSchema.applyOrderIndex(of: "reading_post"),
+                "and reading precedes reading_post in the registry — the chunk-split premise of the F1/F2 pins")
+        // A strict weak order: never both directions.
+        for x in shuffled {
+            for y in shuffled where x != y {
+                #expect(!(SyncEngine.precedesInDrain(x, y) && SyncEngine.precedesInDrain(y, x)))
+            }
+        }
+    }
+
+    /// The fact the fresh-store leg rides, end to end: after the repairer's
+    /// ONE push, the keeper's insert sits before the loser's tombstone in
+    /// `server_seq` — because AA… < BB…, and for no other reason.
+    @Test func theKeeperInsertPrecedesTheLosersTombstoneInServerSeq() async throws {
+        let (a, b, server) = try furniturePair()
+        let journalB = try mintJournal(b, day: "2026-08-30")
+        try await b.push()
+        let journalA = try mintJournal(a, day: "2026-08-31")
+        try await a.pull()  // A's repair: keeper A, B's Journal retired locally
+        let pushed = try await a.push()  // one push: the keeper's insert and the loser's tombstone ride together
+        #expect(pushed.accepted > 0, "positive activity: the repair's rows landed")
+        let keeperSeq = try #require(await server.currentSeq(table: "reading", rowID: journalA))
+        let loserSeq = try #require(await server.currentSeq(table: "reading", rowID: journalB))
+        #expect(journalA < journalB, "the keeper is the smaller id by the repair's definition")
+        #expect(keeperSeq < loserSeq,
+                "…so its insert precedes the loser's tombstone in server_seq: a fresh store applies the keeper first")
+    }
+}

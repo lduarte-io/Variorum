@@ -127,11 +127,7 @@ public struct SyncEngine: Sendable {
                         guard let table = SyncSchema.table(named: entry["table_name"]) else { return nil }
                         return try SyncRow.fetch(db, table: table, rowID: entry["row_id"])
                     }
-                    .sorted {
-                        let (a, b) = (SyncSchema.applyOrderIndex(of: $0.table),
-                                      SyncSchema.applyOrderIndex(of: $1.table))
-                        return a == b ? ($0.rowID < $1.rowID) : (a < b)
-                    }
+                    .sorted(by: Self.precedesInDrain)
             }
             guard !batch.isEmpty else { break }
             report.iterations += 1
@@ -246,6 +242,26 @@ public struct SyncEngine: Sendable {
         var rejected = 0
         var deferred = 0
         var purged = 0
+    }
+
+    /// **THE DRAIN ORDER** — the one comparator the push sorts the outbox
+    /// by: registry (apply) order across tables, then ASCENDING `rowID`
+    /// within a table. Named rather than inlined (the ladder's R2-7)
+    /// because a repair silently depends on the second half: the Journal
+    /// keeper's fresh-store leg (`Repairs.swift`, direction 1) holds only
+    /// because the keeper's `reading` INSERT precedes the loser's `reading`
+    /// TOMBSTONE in `server_seq` whenever both ride one push — and they do
+    /// precisely because the keeper is, by the repair's own definition, the
+    /// SMALLER id. Reverse the within-table order and a third device meets
+    /// the loser's tombstone with no keeper in sight: an ordinary dead
+    /// insert, its memberships dangling live under a dead book until the
+    /// repairer's re-points happen to arrive. Pinned as the architectural
+    /// class it is (`TheDrainOrderTests`): green on both sides by nature,
+    /// red the day someone changes the comparator.
+    static func precedesInDrain(_ lhs: SyncRow, _ rhs: SyncRow) -> Bool {
+        let (a, b) = (SyncSchema.applyOrderIndex(of: lhs.table),
+                      SyncSchema.applyOrderIndex(of: rhs.table))
+        return a == b ? (lhs.rowID < rhs.rowID) : (a < b)
     }
 
     // MARK: - Pull (SyncSpec §5)
