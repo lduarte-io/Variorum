@@ -456,6 +456,15 @@ struct LibraryCatalogView: View {
     /// the scroll view's space — batch C's lesson).
     static let probeSpace = "library-catalog"
 
+    /// Row 24 (the panel half): the panel's presence animates — the column
+    /// slides and fades in and out with the row selection. The mutation
+    /// sites wrap the model's change in this animation explicitly: an
+    /// `.animation(value:)` on the container did NOT carry the transition
+    /// through the `@Observable` model's change (the walk's burst capture
+    /// saw the panel go from absent to settled between two frames 100 ms
+    /// apart), so the transaction is made animated where the change is made.
+    static let panelAnimation: Animation = .easeInOut(duration: 0.22)
+
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
     }
@@ -499,20 +508,19 @@ struct LibraryCatalogView: View {
                     multiCount: model.selectedPosts.count,
                     onOpen: { openHit(hit) },
                     onOpenBookAt: { postID in
-                        model.closeInfo()
+                        withAnimation(Self.panelAnimation) { model.closeInfo() }
                         if let onOpenBook {
                             onOpenBook(hit.id, postID)
                         } else {
                             onOpen(.reading(hit.id))
                         }
                     },
-                    onClose: { model.closeInfo() })
+                    onClose: { withAnimation(Self.panelAnimation) { model.closeInfo() } })
                     .frame(width: LibraryPanelLayout.width(total: libraryWidth))
                     .libraryGeometryProbe(.panel)
                     .transition(.move(edge: .trailing).combined(with: .opacity))
             }
         }
-        .animation(.easeInOut(duration: 0.22), value: model.infoHit != nil)
         .coordinateSpace(name: Self.probeSpace)
         .libraryGeometryProbe(.root)
         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { libraryWidth = $0 }
@@ -595,7 +603,7 @@ struct LibraryCatalogView: View {
     /// `CurrentBlockMemory` (`CommandRouter.registerDetail`) and Write's bare
     /// arrival lands there (else the document's start).
     private func openHit(_ hit: Queries.CatalogHit) {
-        model.closeInfo()
+        withAnimation(Self.panelAnimation) { model.closeInfo() }
         onOpen(hit.kind == .book ? .reading(hit.id) : .post(hit.id))
     }
 
@@ -790,7 +798,9 @@ struct LibraryCatalogView: View {
                         // shows the book's OUTLINE in the panel — her ruled
                         // model, row 33's shape.
                         .onTapGesture(count: 2) { openHit(hit) }
-                        .onTapGesture { model.selectBook(hit) }
+                        .onTapGesture {
+                            withAnimation(Self.panelAnimation) { model.selectBook(hit) }
+                        }
                         .listRowBackground(
                             rowBackground(picked: false, subject: model.infoHit?.id == hit.id))
                     }
@@ -949,7 +959,9 @@ struct LibraryCatalogView: View {
         // instantly.
         .onTapGesture(count: 2) { openHit(hit) }
         .onTapGesture {
-            model.clickNoteRow(hit.id, modifiers: .current)
+            withAnimation(Self.panelAnimation) {
+                model.clickNoteRow(hit.id, modifiers: .current)
+            }
         }
         .draggable(hit.id)
         .contextMenu { postRowMenu(hit) }
