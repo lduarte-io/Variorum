@@ -24,7 +24,7 @@ you do NOT drive the dev window while an implementer might (clicks collide).
 
 ## 2. State at cutover (verify against git before trusting)
 
-- **Done (as of ~09:55):** batch B CLOSED; batch A built + walked, row 58 fix session running (A closes after it is walked); C next. Earlier: the triage walk (captures `act10-correction-screens/triage/`); **batch B (the book)** built by
+- **Done (as of ~10:40):** batches B and A CLOSED; batch C running; F next. Earlier: the triage walk (captures `act10-correction-screens/triage/`); **batch B (the book)** built by
   its implementer (commits `be32fa7`…`1a6ceaf`) and WALKED by the orchestrator (`orchestrator-b/`): the
   hang is gone, rows 7/8/13/14/22/23/38-book/40/45/47 FIXED-walked; **row 53 (MAJOR — multi-expanded
   mis-landing) is being fixed by a fresh fix session** (spawned ~06:45). B's record is NOT closed until
@@ -42,7 +42,7 @@ you do NOT drive the dev window while an implementer might (clicks collide).
 
 ## 2b. PROOF THAT THE CURRENT PIECE FINISHED (for a successor checking in ~50 minutes after 07:30 on 2026-09-01)
 
-The current piece (as of ~09:55) is **the row-58 fix + the founding orchestrator's walk of it + batch A's CLOSE** — B is already closed (`b86b45c`). Read the markers below with 58/A in place of 53/B: the fix commit's subject starts `Correction round, batch A — row 58`; the subsection is `ROW 58 FIX` under the BATCH A RECORD; the close marker is `BATCH A RECORD — CLOSED`; the next batch after A is C. (The original 53/B wording is kept below as the worked example.) The original piece was **the row-53 fix + the founding orchestrator's walk of it + batch B's CLOSE**. Run these,
+The current piece (as of ~10:40) is **BATCH C (the note modes) — its implementer is running**; A is CLOSED. Markers: a `LIVE STATUS — BATCH C` list under the BATCH C brief in the plan (its commits' subjects start `Correction round, batch C`); the close marker `BATCH C RECORD — CLOSED`; the next batch after C is F. Before that (as of ~09:55) the piece was **the row-58 fix + the founding orchestrator's walk of it + batch A's CLOSE** — B is already closed (`b86b45c`). Read the markers below with 58/A in place of 53/B: the fix commit's subject starts `Correction round, batch A — row 58`; the subsection is `ROW 58 FIX` under the BATCH A RECORD; the close marker is `BATCH A RECORD — CLOSED`; the next batch after A is C. (The original 53/B wording is kept below as the worked example.) The original piece was **the row-53 fix + the founding orchestrator's walk of it + batch B's CLOSE**. Run these,
 in order; each is a fact in the repo, never a claim:
 
 1. `git log --oneline -15` — look for (a) a commit whose subject starts `Correction round, batch B — row 53`
@@ -122,6 +122,7 @@ eight rulings · row 52 (underscore emphasis vocabulary) · any scalpel revert (
 ## Batch-close updates (append one line per close; newest last)
 
 - ~06:50 — cutover document written; B walked; row 53 fix session running; A next.
+- ~10:40 — row 58 FIXED and walked; **batch A CLOSED** (Mac 2014/352); **batch C SPAWNED**; the orchestrator at ~64 % of context — cutover candidate after C closes.
 - ~09:55 — batch A BUILT (Mac 2010/351) and walked by the orchestrator; RESIDUAL row 58 (the masthead's second row collides) → a fresh fix session running; A's record stays open until walked; C is next.
 - ~07:50 — row 53 FIXED and walked (orchestrator-b53/ A–C); **batch B CLOSED**; Mac 2001/347; **batch A SPAWNED** (the chrome) — its record will appear under the BATCH A brief in the plan.
 - ~07:30 — the fix session's first commit `7569af3` landed (row 53 converging landing); §2b proof checklist + §2c token discipline added at her question; she is starting a successor session to check in ~50 min.
