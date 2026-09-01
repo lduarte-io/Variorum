@@ -21,10 +21,12 @@ green with 2 known issues** (batch 7's unit close,
 | **Pins** (`MobileNavigationTests.swift`, 13 tests) | **DONE (9a515b7)** — re-verified on the rebuilt simulator after the restart: `✔ Test run with 13 tests in 1 suite passed after 7.170 seconds.` |
 | **Red-on-old** | **DONE — all 9 reverts quoted below** (R1–R8 in one wave, R9 re-run after the restart). Restores diff-verified byte-exact against the prerevert copies AND against the pushed commit (`git status` clean) |
 | **Two pre-existing pins re-pointed** (`MobileStarsTests`, `MobileFilterTests`) | **DONE** — see "Two pins this batch had to move" below; both suites re-run green (`✔ Test run with 16 tests in 2 suites passed after 34.870 seconds.`) |
-| **Full mobile suite vs 712/102** | **IN-PROGRESS** — first run was **725/103** with exactly the two regressions now fixed; the confirming re-run's line lands below. **PENDING** |
-| Fence verification + simulator deletion | **IN-PROGRESS** — fence grep + `planVisibleTakeEdit` count owed with the suite |
+| **Full mobile suite vs 712/102** | **DONE** — `✘ Test run with 725 tests in 103 suites passed after 343.885 seconds with 2 known issues.` (the leading glyph is the runner's for a run carrying known issues; the word is **passed**, and `✘ Test .*failed` greps **0**) |
+| **Fence verification** | **DONE** — quoted below: no fenced path touched, `planVisibleTakeEdit` count **0**, tree clean |
+| Simulator deletion | **DONE** at the end of the run |
 
-**Every count and every "green" below is PENDING until its run is quoted.**
+**Nothing below is PENDING any more — every count and every "green" is a
+quoted run.**
 
 ---
 
@@ -401,11 +403,48 @@ other which spelling of one door it drives.
 
 ## FENCES
 
-Expected: **ZERO** committed changes under `Sources/`,
+**VERIFIED over the batch's three commits** (`9a515b7`, `f7c4937`,
+`2a579cf` — the two orchestrator doc commits that interleaved on this
+branch are deliberately excluded):
+
+```
+=== FENCE GREP (must be EMPTY) ===
+EMPTY — no fenced path touched
+
+=== planVisibleTakeEdit in the batch diff (must be 0) ===
+0
+
+=== working tree clean? ===
+CLEAN
+```
+
+**Every file this batch touched, all fourteen:** seven under
+`VariorumMobile/Features/Shell/` (two of them new — `MobileShellBand`,
+`MobileStarredView`), six under `VariorumMobileTests/` (one new —
+`MobileNavigationTests`), and this record. **ZERO** under `Sources/`,
 `App/Variorum/Shared/`, `App/Variorum/Variorum/` (Mac), `EditorBrain/`,
-schema, build configs, `Package.resolved`. The Mac's `BookView.swift`
+schema, build configs or `Package.resolved`. The Mac's `BookView.swift`
 and `BookStructureModel.swift` were read **READ-ONLY** for wording and
-op parity. **Verification quoted at the end of this record — PENDING.**
+op parity, and nothing else outside the fence was opened for writing.
+
+## THE SUITE
+
+```
+✘ Test run with 725 tests in 103 suites passed after 343.885 seconds with 2 known issues.
+```
+
+**725/103 against the 712/102 baseline = +13 tests, +1 suite: exactly
+this batch's `MobileNavigationTests` and nothing else.** The 2 known
+issues are the documented diagnostic
+(`MobileTrashTests.anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAs
+AnAbsentDoor`, which records issues deliberately), unchanged from the
+baseline; `✘ Test .*failed` greps **0**. The load-flaky perf pin
+(`MobilePerfWalkTests.typingAtTheViewportHoldsThePerKeystrokeBudgetAt100k`)
+did **not** red on either full run, so no isolated re-run was owed.
+
+*(The first full run came back with two failures — both this batch's,
+both deliberate consequences, both fixed and re-run green; the section
+above records them rather than hiding them behind this clean line.)*
 
 ---
 
