@@ -677,10 +677,16 @@ struct MobileFilterTests {
                 MobileShellView(session: session, services: nil, router: router)
             ) { surface in
                 await surface.settle(50)
-                // The tab door's label is voice-cased chrome and
-                // `withEditorWorld` fixes the voice to terminal, which
-                // lowercases it.
-                #expect(surface.activate("library"), "labels were \(surface.visibleLabels)")
+                // **THE DOOR IS NOW LABELLED BY NAME, NOT BY CASING**
+                // (batch 10). This read `"library"` because the label was the
+                // voice-cased chrome text and `withEditorWorld` fixes the
+                // voice to terminal, which lowercases it. That batch gave the
+                // tab doors an explicit `accessibilityLabel` — the `+ New
+                // Note` precedent — so an assistive reader hears the same
+                // proper noun in both voices instead of one voice's casing.
+                // The pin follows the door: same act, same door, the name it
+                // is actually called.
+                #expect(surface.activate("Library"), "labels were \(surface.visibleLabels)")
                 await surface.settle(50)
                 #expect(surface.activate(MobileListingFilter.books.word),
                         "labels were \(surface.visibleLabels)")

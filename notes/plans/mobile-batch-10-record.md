@@ -20,7 +20,8 @@ green with 2 known issues** (batch 7's unit close,
 | **D3 — new note + new chapter in a book** (`MobileBookView.swift`, `MobileBookViewModel.swift`) | **DONE** — same commit |
 | **Pins** (`MobileNavigationTests.swift`, 13 tests) | **DONE (9a515b7)** — re-verified on the rebuilt simulator after the restart: `✔ Test run with 13 tests in 1 suite passed after 7.170 seconds.` |
 | **Red-on-old** | **DONE — all 9 reverts quoted below** (R1–R8 in one wave, R9 re-run after the restart). Restores diff-verified byte-exact against the prerevert copies AND against the pushed commit (`git status` clean) |
-| **Full mobile suite vs 712/102** | **IN-PROGRESS** — the run is the only thing left; result quoted below when it lands. **PENDING** |
+| **Two pre-existing pins re-pointed** (`MobileStarsTests`, `MobileFilterTests`) | **DONE** — see "Two pins this batch had to move" below; both suites re-run green (`✔ Test run with 16 tests in 2 suites passed after 34.870 seconds.`) |
+| **Full mobile suite vs 712/102** | **IN-PROGRESS** — first run was **725/103** with exactly the two regressions now fixed; the confirming re-run's line lands below. **PENDING** |
 | Fence verification + simulator deletion | **IN-PROGRESS** — fence grep + `planVisibleTakeEdit` count owed with the suite |
 
 **Every count and every "green" below is PENDING until its run is quoted.**
@@ -369,6 +370,34 @@ driven through `MobileStarsModel.toggle(_:from:)` for real, including
 the cap refusal's home.
 
 ---
+
+## TWO PRE-EXISTING PINS THIS BATCH HAD TO MOVE — and why each is honest
+
+The first full-suite run came back **725 tests in 103 suites** (the
+baseline 712/102 plus exactly this batch's new file) **with 4 issues,
+2 of them the documented known ones** — so two real regressions, both
+mine, both a direct consequence of a deliberate change rather than a
+defect:
+
+1. **`MobileStarsTests.theCapRefusalSpeaksPhoneWords`** asserted the
+   refusal `.contains("top of the shelf")`. That is the road this batch
+   RETIRED at her word. **The rule the pin was written to protect is
+   untouched and is what it still asserts** — the refusal names a road
+   that exists on the phone, never the Mac's sidebar — and it now names
+   `MobileStarsModel.pageName`, with a new clause asserting the sentence
+   no longer says "shelf" at all. *(A pin encoding the old road is
+   exactly what a deliberate copy change is supposed to trip.)*
+2. **`MobileFilterTests.theShellGivesTheLibraryTheShelfsOwnBooks`** drove
+   `surface.activate("library")` — lowercase, because the tab door's
+   label used to be its voice-cased chrome TEXT and `withEditorWorld`
+   fixes the voice to terminal. This batch gave the tab doors an explicit
+   `accessibilityLabel` (the `+ New Note` precedent), so an assistive
+   reader hears the same proper noun in both voices. The pin follows the
+   door: same act, same door, the name it is actually called.
+
+Both were re-run and are green. **No other pin in the suite moved**, and
+neither edit weakened an assertion — one changed which road it names, the
+other which spelling of one door it drives.
 
 ## FENCES
 
