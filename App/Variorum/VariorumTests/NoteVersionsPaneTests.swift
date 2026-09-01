@@ -73,6 +73,12 @@ struct NoteVersionsPaneTests {
 
     /// **⌘⇧S IS THE ONLY `s` CHORD BESIDE ⌘S** — the collision sweep as a pin,
     /// so a future act cannot quietly take the chord that teaches the pairing.
+    ///
+    /// **The Act 10 correction round, batch A (a JUSTIFIED PIN EDIT):** a THIRD
+    /// `s` chord exists now — ⌃⌘S, the platform's own Toggle Sidebar, declared
+    /// when the shell's split became ours (row 2). It is named here by id so
+    /// the pin still forbids any OTHER act from taking an `s` chord; the two
+    /// moments' pairing (⌘S · ⌘⇧S) is untouched.
     @Test func theSaveAVersionChordIsTheShiftedTwinOfCommitAndNothingElseTakesIt() {
         var sChords: [(CapabilityID, String)] = []
         for id in CapabilityID.allCases {
@@ -84,8 +90,9 @@ struct NoteVersionsPaneTests {
         let byID = Dictionary(uniqueKeysWithValues: sChords)
         #expect(byID[.commitTake] == "\u{2318}S")
         #expect(byID[.saveNoteVersion] == "\u{2318}\u{21E7}S")
-        #expect(sChords.count == 2,
-                "only the two moments carry an `s` chord: \(sChords.map(\.0))")
+        #expect(byID[.toggleSidebar] == "\u{2303}\u{2318}S", "the platform's sidebar chord")
+        #expect(sChords.count == 3,
+                "the two moments and the sidebar toggle carry the `s` chords: \(sChords.map(\.0))")
     }
 
     // MARK: - WALK-DRIVEN: the real mounted detail opens the real panel

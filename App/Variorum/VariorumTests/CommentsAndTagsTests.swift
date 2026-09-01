@@ -420,14 +420,24 @@ struct LibraryTagFaceTests {
 @MainActor
 @Suite("Note tagging is one declared act (13e E8)")
 struct NoteTagDeclarationTests {
+    /// **The Act 10 correction round, row 15 (a JUSTIFIED PIN EDIT, line by
+    /// line):** the act gained ⌘⇧I — the retired fold's chord, re-pointed at
+    /// the act itself — and with it a View-menu row and a ⌘K row, all three
+    /// opening the masthead's ONE inline tag field. So `doors` is three, the
+    /// chord is the label, and availability is NOTE-SCOPED (a menu/palette
+    /// door with no note under it has nothing to tag — honestly grey), where
+    /// the surface-only declaration could say "always" because its chips
+    /// pointed at a note by construction. The surface renderers below are
+    /// untouched.
     @Test func theActIsDeclaredOnceAndEveryRendererNamesIt() {
         let capability = CapabilityRegistry.capability(.tagNote)
         #expect(capability.scope == .post)
-        #expect(capability.doors == [.surface])
-        #expect(capability.shortcutLabel == nil, "no chord — the doors are the chips")
+        #expect(capability.doors == [.menuBar, .palette, .surface])
+        #expect(capability.shortcutLabel == "\u{2318}\u{21e7}I", "⌘⇧I — the fold's chord, re-pointed at the act")
         #expect(!capability.unavailableNote.isEmpty, "a written refusal, like every act")
-        #expect(capability.availability(CapabilityContext()) == .act,
-                "both doors point at a note directly, so a rendered one can always act")
+        #expect(capability.availability(CapabilityContext()) == .unavailable,
+                "with no note open the menu/palette doors are honestly grey")
+        #expect(capability.availability(CapabilityContext(mode: .write)) == .act)
         #expect(CapabilityRegistry.doored(.surface).contains(.tagNote))
         // Every renderer of the ONE act names it (the walk asserts the
         // union equals the declared set; this states the three by name).

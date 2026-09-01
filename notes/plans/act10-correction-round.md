@@ -822,9 +822,92 @@ last. Then stop.
   squeezed the title; the second cut's floor still truncated at three chips) — the masthead is two rows now;
   the final captures show five chips + the open field with the title intact in both voices. The short window
   MEASURED compact (AX: every row 24 pt at a 454 pt column with the rail open; 30 pt generous otherwise).
-- **The full Mac suite:** NOT-STARTED (after the walk).
+- **Full Mac suite + TutorialWalkTests:** DONE — **Mac 2010 tests / 351 suites, all green** on the final tree
+  (`** TEST SUCCEEDED **`, 303 s; log `test-a-full2.log` in the session scratchpad; the ten tutorial suites
+  inside it green; the load-flaky `rewriteStrategyLatencies` (2 cases) and `CanvasDragTrackingTests` passed
+  in-run — nothing re-run, nothing loosened). **Arithmetic against batch B's close 2001 / 347:** +13 tests
+  (`ShellChromeTests` 3 · `SidebarLayoutTests` 5 · `MastheadLayoutTests` 1 · `MastheadTagDoorTests` 2 ·
+  `LibraryRowAlignmentTests` 2) − 4 retired with the fold (`theTagsDoorCarriesTheCountOnlyWhenFolded` +
+  `TagChipsFoldTests` ×3) = **+9 ⇒ 2010**, exact; suites +5 new − 1 retired (`TagChipsFoldTests`) = **+4 ⇒
+  351**, exact. The first full run on the pre-final tree read 2010/351 with 4 issues in TWO pins whose
+  expectations described what this batch changed — `NoteTagDeclarationTests` (`.tagNote`'s surface-only
+  declaration) and `NoteVersionsPaneTests`' `s`-chord count (⌃⌘S is a third) — both JUSTIFIED PIN EDITS,
+  line by line at the pins; the full suite was then run AGAIN on the final tree: the count above. **Core
+  1524 / 165 untouched** (zero `Sources/VariorumCore` lines in the batch). **`Shared/` touched once:**
+  `VoiceTokens.navigation` (a new font slot, all four voices filled) — the mobile target compiles the same
+  file; its suite was not run here (not this batch's), flagged for the orchestrator.
+- **STATUS: BATCH A's build is COMPLETE — the record awaits the orchestrator's hands-on walk (C-2) before it
+  is marked closed.** The dev-store Debug build (the final tree's product, `Variorum-dnpxwqhpxdqrdjbunktnzoahckpd`)
+  is left RUNNING for that walk — Terminal voice, "three ways of working" open, window zoomed; `/Applications`
+  untouched; her real-store app untouched. Tree clean; every commit pushed.
 - **No revert in flight** (the row-2/3 revert ran and was restored — evidence above; tree clean against
   `b22b6ff`).
+
+#### The container decision (row 2) — stated, with its reason
+
+`NavigationSplitView` → **a custom split, `ShellSplit`** (`App/Variorum/Variorum/Workspace/ShellSplit.swift`).
+Reason: Tahoe's floating glass sidebar IS the split view's rendering of its sidebar column in a key window,
+and NO public opt-out exists — searched at the SDK, not assumed: the macOS 26 SwiftUI interface declares
+`NavigationSplitViewStyle` in three forms only (`automatic` · `balanced` · `prominentDetail`), none flat;
+AppKit's `NSSplitViewItem` gained only `automaticallyAdjustsSafeAreaInsets` and the accessory view
+controllers at 26.0 (`NSSplitViewController` nothing); and the 13g measurement already recorded in
+`VariorumApp.swift` had shown the floating card is the KEY-window appearance, not a window style. So the
+container is ours: an `HStack` — the flat sidebar column, ONE 1 pt divider in the voice's `line` carrying the
+pane row's own drag grammar (`RootView.paneDivider`), the detail — with `@AppStorage` width memory
+(180–360, ideal 210) and an animated collapse. What it keeps: every panel `RootView` hosts beside the sidebar
+(the pane row + its inspectors — scraps, references, the tray, Block History, Versions, the Library's info
+panel — all live INSIDE the detail; the tray was opened in the walk and rendered as a column inside the
+detail, within the window); the sidebar's collapse (now a DECLARED act, `.toggleSidebar`: the leading toolbar
+button + View ▸ Toggle Sidebar on ⌃⌘S — the platform's chord, swept free — per-window state
+`ShellRouter.sidebarShown`, grey while a note-only window is key, a row in the ⌘/ helper); the bottom
+status rows (the column's own last region). What it costs, stated: the sidebar List's arrow-key row
+navigation (row 57).
+
+#### Per-row dispositions
+
+| Row | Disposition | Pin | Red-on-old |
+|---|---|---|---|
+| 2 | FIXED — `ShellSplit`; the glass pane gone (flush column, one divider) | `ShellChromeTests.theShellMountsFlatAndTheStripRowsAreGenerous` (zero `NSSplitView` at rest) · `.theSidebarWidthIsClampedToAUsableColumn` · `.theSidebarToggleIsDeclaredOnItsTwoDoors` | 1 issue (`countSplitViews → 1`) under the `NavigationSplitView` revert |
+| 3 | FIXED — the flat column (the mockup's grammar), the Open strip DIRECTLY under the rail, ONE generous 30 pt pitch, compact 24 only when the measured column cannot hold the generous layout | `SidebarLayoutTests` ×5 · the shell pin's oracle half (the DRAWN strip row = 30) | 1 issue (`drawn → 21.0`) under the 21 pt revert; the threshold pins by construction (the function did not exist) |
+| 4 · 19 | FIXED — the title centered on the masthead's full width, every mode; two rows (title ⟂ icon row, path ⟂ tag cards) | `MastheadLayoutTests.theTitleBlockCentersOnTheMastheadInEveryMode` (eight modes via the router; the DEBUG oracle on the title TEXT) | 8 issues (246 pt off in every mode) under the leading-title revert |
+| 15 | FIXED — ONE door (＃) → the inline field with the cursor in it; "＋ tag" and the K12 fold retired (K12 superseded for the masthead); ⌘⇧I RE-POINTED at `.tagNote` | `MastheadTagDoorTests` ×2 · `BookAscentTests.theFoldIsOneDeclaredActWithOneKey` (re-pointed) | by construction (no inline field existed; two acts were declared; the fold's own pins retired with a note) |
+| 10 · 11 | FIXED — the Library rows on ONE text baseline (`CatalogBookLine` · `CatalogNoteLine`; symbols as `Text(Image)`; the chips' stacks on the baseline) | `LibraryRowAlignmentTests` ×2 (both voices, the DEBUG `BaselineProbe`) | 5 issues (1.5 pt off ×4; the book title never reported) under the old-shapes revert |
+| 36 | DONE — the sweep table (this record); nothing on the chrome surface carried a count | — | — |
+| 24 (sidebar half) | FIXED — the rail fades in/out (`.transition(.opacity)` under a 0.22 s animation; the Open group slides) | — (no pin: an animation; capture `03-terminal-rail-fade-mid`) | — |
+| **55** (new — the walk) | FIXED in-batch — the open field squeezed the title; the field is an overlay, the masthead two rows | the masthead + tag-door pins green after | (the walk's own capture, twice) |
+| **56** (new — seen in the walk's probe capture, NOT the chrome) | RECORDED for **batch E** — the Library's List-mode row selection is the SYSTEM blue highlight band (a row clicked once wears a full-width blue selection), against the calm grammar (W8-2: selection is the wash + a tinted border, never a system highlight); the row click model is E's (R-cor-3) | — | — |
+| **57** (new — a cost of row 2, stated) | RECORDED for the orchestrator (owner: **13u2**, the feel-and-faces half, if she wants it back) — the sidebar List's arrow-key row navigation is gone with the List; the flat column's rows are buttons/taps. A `focusable` column with ↑/↓ handling restores it as a small batch; not built here (no ruling asked for it, and the List's keyboard focus was never a door she named) | — | — |
+
+#### The USE gate — the walk (the dev-store Debug build, window zoomed 1728×1084, BOTH voices; `act10-correction-screens/batch-a/`, contact sheet **`batch-a/contact-sheet.png`** — 28 tiles)
+
+| Row | What was done | Capture(s) |
+|---|---|---|
+| 2 | The shelf at launch: the column flush at x = 0, one divider, no glass — Terminal and Study | `01-terminal-shelf-flat-sidebar` · `26-study-shelf-flat-sidebar` |
+| 2 | ⌃⌘S collapses the column (the detail takes the width) and restores it | `15-terminal-sidebar-collapsed` · `15b-terminal-sidebar-restored` |
+| 3 | A note open: areas · "this note" rail · the Open strip DIRECTLY under it, every row 30 pt (AX-measured) | `02-terminal-note-write-masthead-rail-strip` · `21-study-note-write-masthead-rail-strip` |
+| 3 | The SHORT window (600 pt; a 454 pt column, the rail open): every row 24 pt (AX-measured `186x24`), the strip still under the rail | `14-terminal-short-window-compact-rail` · `27-study-short-window-compact-rail` |
+| 24 | Leaving the note for the Library: the rail mid-fade, then gone with the Open group slid up | `03-terminal-rail-fade-mid` · `03b-terminal-library-after-fade` |
+| 4 · 19 | The title centered in Write · Takes · Index · Read · Lenses · Compare · Blocks · Canvas (Terminal) and Write · Read · Lenses (Study) | `02` · `04-…-takes` · `05-…-index` · `06-…-read` · `07-…-lenses` · `08-…-compare` · `09-…-blocks` · `10-…-canvas` · `21` · `22-study-masthead-read` · `23-study-masthead-lenses` |
+| 15 | The ＃ clicked → the field out with the cursor in it; typed; ⏎ applies (the chip lands, the field stays); ⎋ closes — with five cards, the title intact | `11-terminal-tag-field-open` · `11b-…-typed` · `12-…-applied-field-stays` · `12b-…-closed` · `24-study-tag-field-open` · `24b-…-typed` |
+| 10 · 11 | The Library rows' close-up (2× crop): "book" on the title's baseline; the chips and ＋ on the note's | `13-terminal-library-rows-closeup` · `25b-study-library-rows-closeup` |
+| (the book) | Sherlock's Outline on the new shell — the book's masthead is its navigator column's header (B's surface; unchanged) | `16-terminal-book-outline` |
+
+Honesty notes: the dev store now carries the walk's test tags on "three ways of working" (`walked · again · once · final · study` — applied through the real door, left as evidence of the many-chips case); the rail's fade is judged from one mid-frame capture (a 0.22 s animation cannot be pinned); the tray inspector was exercised in the probe pass (scratchpad captures, not in the sheet) — it renders as a column inside the detail.
+
+#### Commits (in order)
+
+1. `f82ff80` — the record skeleton + LIVE STATUS (the sidebar's pitch measured; the container decision).
+2. `b22b6ff` — rows 2 + 3 + 24: `ShellSplit`, the flat column, the strip under the rail, `SidebarLayout`, `VoiceTokens.navigation`, the rail's fade; pins.
+3. `70b6023` — rows 2/3 red-on-old evidence.
+4. `74c72db` — rows 4 + 19: the centered masthead; `MastheadLayoutTests`.
+5. `310c522` — rows 4/19 red-on-old evidence.
+6. `3bc142f` — row 15: one tag door, the inline field, the fold retired, ⌘⇧I re-pointed; pins.
+7. `5a0249c` — rows 10 + 11: the baseline-aligned Library rows; `BaselineProbe`; `LibraryRowAlignmentTests`.
+8. `418b8b4` — rows 10/11 red-on-old evidence + the row-36 table.
+9. `7ffa80d` — row 55 (the walk): the field as an overlay, the title floor.
+10. `512822c` — row 55's second cut: the two-row masthead; the walk's captures + sheet; the record.
+11. `5e0…` (the commit before this one — filled below) — the record's dispositions, the container decision, the walk table, rows 56/57.
+12. (this commit) — the two justified pin edits (`NoteTagDeclarationTests`, `NoteVersionsPaneTests`), the final full-suite counts, the LIVE STATUS final.
 
 #### Row 36 — the word-count / metric sweep (C-6; R-cor-4(d)) — every display in the eight Act 10 views, grep-enumerated (`words\|[0-9]w\b\|wordCount`), verdicted against the brief's bias (a count stays where the pre-Act-10 surface had one or where the mockup grammar shows one; "thrown in" goes)
 
