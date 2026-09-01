@@ -457,6 +457,56 @@ struct SampleLibraryTests {
         }
     }
 
+    /// **RED ON OLD (the ladder's F10, MINOR):** deleting the BOOK tombstones
+    /// its memberships and never its notes, so the thirteen stories survive
+    /// alive and bookless — and the restore door, deriving presence from
+    /// membership alone, minted thirteen fresh twins beside them (26 Sherlock
+    /// notes, the tag on both sets). Discovery now finds the survivors by the
+    /// reserved tag and RE-MEMBERS them; only an absent title mints.
+    @Test("Restore after deleting the BOOK re-members the surviving stories instead of minting twins")
+    func theRestoreDoorReMembersSurvivingStoriesInsteadOfMintingTwins() async throws {
+        try await withSampleWorld { session, db in
+            let mark = Mark()
+            let outcome = await SampleLibrarySeeder.seedIfNeeded(
+                session: session, loadMark: mark.load, saveMark: mark.save)
+            guard case .seeded(let bookID, _) = outcome else {
+                Issue.record("expected a seed, got \(outcome)")
+                return
+            }
+            let originalNoteIDs = try await db.read { db -> Set<String> in
+                Set(try Queries.assembleReading(db, readingID: bookID).map(\.postID))
+            }
+            #expect(originalNoteIDs.count == 13)
+            try await session.runner.run { ops in try ops.deleteReading(bookID) }
+
+            // The door's own two steps (`ShellActions.restoreSampleLibrary`).
+            let stories = try SampleLibrarySeeder.loadStories()
+            let existing = try await db.read { db in try SampleLibrarySeeder.discover(db) }
+            #expect(existing.bookID == nil, "the book is gone")
+            #expect(existing.presentTitles.isEmpty)
+            #expect(existing.strayNoteIDsByTitle.count == 13,
+                    "…but all thirteen notes survive, found by the reserved tag")
+            let restored = try await SampleLibrarySeeder.seed(
+                session: session, stories: stories, existing: existing)
+            guard case .seeded(let newBookID, let cameBack) = restored else {
+                Issue.record("expected a restore, got \(restored)")
+                return
+            }
+            #expect(cameBack == 12, "every story came back — by membership, not by mint")
+
+            let facts = try await db.read { db -> (notes: Int, members: Set<String>, chapters: Int) in
+                let liveNotes = try Int.fetchOne(
+                    db, sql: "SELECT COUNT(*) FROM container WHERE kind = 'post' AND deleted_at IS NULL") ?? 0
+                let members = Set(try Queries.assembleReading(db, readingID: newBookID).map(\.postID))
+                let chapters = try Queries.readingSections(db, readingID: newBookID).count
+                return (liveNotes, members, chapters)
+            }
+            #expect(facts.notes == 13, "exactly thirteen Sherlock notes in the store (old: 26)")
+            #expect(facts.members == originalNoteIDs, "the SAME notes are the book's members again")
+            #expect(facts.chapters == 13, "one chapter per note, rebuilt")
+        }
+    }
+
     @Test("A store that belongs to an account waits for its first clean round")
     func theSyncGateDeclinesUntilTheFirstRound() async throws {
         try await withSampleWorld { session, db in

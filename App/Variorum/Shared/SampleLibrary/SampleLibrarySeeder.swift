@@ -386,6 +386,18 @@ enum SampleLibrarySeeder {
         /// phone's single `occasion` task). Two DEVICES seeding is the
         /// dedupe repair's job, not this projection's.
         var chapterIDsByName: [String: String] = [:]
+        /// **Live notes wearing the reserved tag that are NOT members of the
+        /// book, title → id** (the ladder's F10). Deleting the BOOK
+        /// tombstones its memberships and never its notes, so the thirteen
+        /// stories survive alive and bookless; a restore that derived
+        /// presence from membership alone minted thirteen fresh twins beside
+        /// them (26 Sherlock notes, the tag on both sets). These are
+        /// RE-MEMBERED into the book instead — the note she has is the note
+        /// that comes back — and only a title with no live tagged note mints.
+        /// Read by the reserved tag among LIVE posts (a deleted note is hers
+        /// to have deleted, so its title mints afresh); smallest id first
+        /// where two live tagged notes share a title, for determinism.
+        var strayNoteIDsByTitle: [String: String] = [:]
 
         func isComplete(for titles: [String]) -> Bool {
             bookID != nil && titles.allSatisfy { presentTitles.contains($0) }
@@ -408,6 +420,17 @@ enum SampleLibrarySeeder {
             for chapter in try Queries.readingSections(db, readingID: bookID)
             where existing.chapterIDsByName[chapter.name] == nil {
                 existing.chapterIDsByName[chapter.name] = chapter.id
+            }
+        }
+        // F10: the stories that survive OUTSIDE the book — `everythingTagged`
+        // lists live posts in id order, so the first holder of a title wins.
+        if let tagID = existing.tagID {
+            for postID in try Queries.everythingTagged(db, tagID: tagID).postIDs {
+                guard let title = try Queries.containerTitle(db, id: postID),
+                      !existing.presentTitles.contains(title),
+                      existing.strayNoteIDsByTitle[title] == nil
+                else { continue }
+                existing.strayNoteIDsByTitle[title] = postID
             }
         }
         return existing
@@ -586,6 +609,7 @@ enum SampleLibrarySeeder {
         let label = Self.undoLabel
         let present = existing.presentTitles
         let chapters = existing.chapterIDsByName
+        let strays = existing.strayNoteIDsByTitle
 
         let clock = Self.publicationDate
 
@@ -606,13 +630,9 @@ enum SampleLibrarySeeder {
                     // never mint a second one wearing the same name.
                     let sectionID = try chapters[frontChapter]
                         ?? quiet.createSection(in: bookID, name: frontChapter).id
-                    let note = try quiet.importPost(
-                        title: frontTitle, text: frontText, undoLabel: label,
-                        segmentation: Self.segmentation)
-                    _ = try quiet.addPostToReading(note.container.id, to: bookID)
-                    try quiet.assignPostToSection(
-                        note.container.id, in: bookID, section: sectionID)
-                    _ = try quiet.applyTag(tagID, toPost: note.container.id)
+                    try Self.place(
+                        quiet, title: frontTitle, text: frontText, stray: strays[frontTitle],
+                        in: bookID, section: sectionID, tag: tagID, label: label)
                 }
                 return (bookID, tagID)
             }
@@ -624,6 +644,7 @@ enum SampleLibrarySeeder {
             try Task.checkCancellation()
             let bookID = skeleton.book
             let tagID = skeleton.tag
+            let stray = strays[story.title]
             try await session.runner.run { _ in
                 try withDependencies { $0.date = .constant(clock) } operation: {
                     let quiet = Operations(undoStack: nil)
@@ -631,17 +652,33 @@ enum SampleLibrarySeeder {
                     // `importPost` left this story's chapter standing empty.
                     let sectionID = try chapters[story.title]
                         ?? quiet.createSection(in: bookID, name: story.title).id
-                    let note = try quiet.importPost(
-                        title: story.title, text: story.text, undoLabel: label,
-                        segmentation: Self.segmentation)
-                    _ = try quiet.addPostToReading(note.container.id, to: bookID)
-                    try quiet.assignPostToSection(
-                        note.container.id, in: bookID, section: sectionID)
-                    _ = try quiet.applyTag(tagID, toPost: note.container.id)
+                    try Self.place(
+                        quiet, title: story.title, text: story.text, stray: stray,
+                        in: bookID, section: sectionID, tag: tagID, label: label)
                 }
             }
             minted += 1
         }
         return .seeded(readingID: skeleton.book, stories: minted)
+    }
+
+    /// Puts one shipped note into the book: a surviving tagged note is
+    /// RE-MEMBERED (F10 — it already wears the tag and carries whatever she
+    /// did to it); only a title with no such note mints afresh.
+    nonisolated private static func place(
+        _ quiet: Operations, title: String, text: String, stray: String?,
+        in bookID: String, section sectionID: String, tag tagID: String, label: String
+    ) throws {
+        let noteID: String
+        if let stray {
+            noteID = stray
+        } else {
+            noteID = try quiet.importPost(
+                title: title, text: text, undoLabel: label,
+                segmentation: Self.segmentation).container.id
+            _ = try quiet.applyTag(tagID, toPost: noteID)
+        }
+        _ = try quiet.addPostToReading(noteID, to: bookID)
+        try quiet.assignPostToSection(noteID, in: bookID, section: sectionID)
     }
 }
