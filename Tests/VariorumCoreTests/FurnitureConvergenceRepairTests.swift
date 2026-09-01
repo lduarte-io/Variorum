@@ -508,6 +508,56 @@ struct JournalKeeperRepairTests {
         }
     }
 
+    /// **RED ON OLD (round 2, R2-4 — the post-batch half, PROVISIONAL for
+    /// the architect):** the designation rule now runs whenever a keeper
+    /// stands, not only when this pass retired a loser. Its own scenario:
+    /// she deleted her Journal here (`deleteReading` leaves the designation
+    /// DANGLING at the dead book — the ensure reads it as none) and another
+    /// device's fresh mint arrives. Old: the designation stayed dangling,
+    /// her next entry here minted a THIRD Journal, and the repair then
+    /// merged the two live ones by id — possibly retiring the phone's
+    /// Journal she had been writing in, a Trash row on every device. Now
+    /// the dangling designation adopts the one live candidate, and her
+    /// next entry shelves there.
+    @Test func aDanglingDesignationAdoptsTheArrivingJournal() async throws {
+        let (a, b, server) = try furniturePair()
+        let deleted = try mintJournal(a, day: "2026-08-28")
+        try await a.push()
+        try a.with { ops, _ in try ops.deleteReading(deleted.bookID) }
+        #expect(try designation(a) == deleted.bookID,
+                "positive activity: the designation dangles at the dead book")
+        #expect(try await a.db.read { try Queries.dailyJournalBookID($0) } == nil,
+                "…which the ensure reads as none")
+        try await a.push()
+
+        // B never saw A's Journal live: it mints its own and pushes without
+        // pulling — its designation loses the setting CAS to A's dangling
+        // one, so the server still names the dead book.
+        let fresh = try mintJournal(b, day: "2026-08-30")
+        try await b.push()
+
+        // A pulls B's Journal: one live candidate, a designation at a dead
+        // mint-shaped book — it adopts the arrival (old: stayed dangling).
+        let arrival = try await a.pull()
+        #expect(arrival.applied > 0)
+        #expect(try designation(a) == fresh.bookID,
+                "the dangling designation adopts the arriving Journal (old: dangling at the dead one)")
+        #expect(try a.outboxContains("setting", "daily_journal_book"))
+        let today = try mintJournal(a, day: "2026-09-01")
+        #expect(today.bookID == fresh.bookID, "her next entry shelves into it (old: a third Journal minted)")
+        #expect(try liveJournalBookIDs(a) == [fresh.bookID])
+
+        try await assertFurnitureConverged(a, b, server)
+        for client in [a, b] {
+            #expect(try liveJournalBookIDs(client) == [fresh.bookID])
+            #expect(try designation(client) == fresh.bookID)
+            #expect(try liveMemberships(client, in: fresh.bookID) == 2)
+            #expect(try client.db.fetchInt(
+                "SELECT COUNT(*) FROM reading WHERE profile = 'journal'") == 2,
+                "the deleted one and the adopted one — no third ever minted (old: 3)")
+        }
+    }
+
     /// **RED ON OLD (round 2, R2-2 — MAJOR):** direction 1 read the LOCAL
     /// row's shape only. A loser RENAMED on its own device before the
     /// repairer's tombstone landed is not mint-shape locally, so the
