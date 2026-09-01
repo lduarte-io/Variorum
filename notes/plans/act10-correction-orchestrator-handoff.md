@@ -100,10 +100,12 @@ matters** — `sips -c <h> <w> --cropOffset <y> <x> in.png --out crop.png` befor
 R-cor-3's PROVISIONAL library-panel reading · row 26's panel order · Read's switch memory · the memo's
 eight rulings · row 52 (underscore emphasis vocabulary) · any scalpel revert (none so far; her lean is none).
 
-## 5. PASTE-READY KICKOFF PROMPT FOR THE SUCCESSOR ORCHESTRATOR
+## 5. PASTE-READY KICKOFF PROMPT FOR THE SUCCESSOR ORCHESTRATOR (FINAL FORM per R-cor-9 — a REGULAR handoff, not a shadow; she pastes this once batch F is closed and the founding session has stopped)
 
 > You are the successor architect/orchestrator of Variorum's **Act 10 correction round**, taking over from
-> the founding session at a clean seam. Invoke the `architect-phase` skill. Read IN FULL, in this order:
+> the founding session at its ruled seam (R-cor-9: batches B, A, C and F are CLOSED; you run D → E → the
+> ladder with the owed iOS build → the full acceptance walk → the install → the author handoff — the plan's
+> §7b list, every item). Invoke the `architect-phase` skill. Read IN FULL, in this order:
 > `notes/plans/act10-correction-orchestrator-handoff.md` (this file — the state section tells you which
 > batch is next; VERIFY it against `git log --oneline -30` and the plan's records before acting),
 > `notes/plans/act10-correction-round.md` (the whole file), `notes/author-reports/2026-09-01-post-act10-ui-

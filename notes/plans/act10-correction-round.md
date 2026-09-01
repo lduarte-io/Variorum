@@ -152,6 +152,15 @@ it.
   + the orchestrator's 3–4 captures at the riskiest rows) to stay inside the budget, and if it must stop,
   the successor adopts from the repo — she starts it in the morning if the run is not done.
 
+- **R-cor-9 — THE FOUNDING ORCHESTRATOR WRAPS AFTER BATCH F (her instruction, 2026-09-01 afternoon, at 65 %
+  of the session's context):** *"please wrap up after stage F due to where you're at with the context limit
+  and write a new orchestrator document + kickoff for me - this won't be a shadow session, I just want to do
+  a regular handoff and kickoff message once Batch F is complete."* → The founding session's last acts: walk
+  F's completion, close its record, finish `notes/plans/act10-correction-orchestrator-handoff.md` as the
+  REGULAR cutover (state exact at F's close; the successor prompt un-shadowed), update memory, and hand her
+  the kickoff message. **The successor runs batches D and E, the ladder (§7d) + the owed iOS build, the full
+  acceptance walk, the install (§7b items 8–9), and the author handoff — the whole §7b list.**
+
 **Inherited rulings this round builds to (not re-litigated):** the eighth-wave rulings W8-1…W8-5
 (`pre-13u-round.md`), the fifth-wave item-15 flow ruling, the mode-row canon R60–94 as extended by
 W8-1 (the eight-mode row is AppSpec §12 canon), her copy doctrine (structure and generous targets
