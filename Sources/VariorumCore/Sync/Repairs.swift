@@ -27,6 +27,22 @@ struct TouchedRows {
     /// True when the batch touched the daily-book designation setting —
     /// the Journal keeper's second (belt) firing occasion.
     var dailyDesignationTouched = false
+    /// True for the PULL path's apply — a changefeed batch, or the
+    /// empty-window re-fire — and false for a push chunk's reject-merges.
+    /// The sample-library dedupe fires ONLY under a pull (the ladder's
+    /// R2-1): only a pull can land the rows an in-flight copy is missing,
+    /// so a push-path pass can only ever classify on a picture no pull has
+    /// completed — and production's round is pull → push, so the push half
+    /// ran the deferred pass at the first chunk of the SAME round, with
+    /// nothing new landed, and retired the copy the pull had just deferred
+    /// on. The Journal keeper is untouched by this flag: its evidence is
+    /// the reading row itself.
+    var isPullBatch = false
+    /// Tag ids named by `post_tag` rows applied in this batch — the
+    /// dedupe's EVIDENCE occasion (R2-1/R2-6): a reserved-path application
+    /// landing is exactly the moment a tag-leg deferral was waiting for,
+    /// so the pass re-examines the copy at that apply and at no other.
+    var appliedPostTagTagIDs: Set<String> = []
     /// Inline (write-time) repair count, for reporting.
     var inlineRepairs = 0
 }
@@ -333,6 +349,10 @@ extension SyncEngine {
             touched.readingIDs.insert(row.rowID)
         case "setting" where row.rowID == "daily_journal_book":
             touched.dailyDesignationTouched = true
+        case "post_tag":
+            if case .text(let tagID) = row.columns["tag_id"] {
+                touched.appliedPostTagTagIDs.insert(tagID)
+            }
         default:
             break
         }
@@ -666,10 +686,12 @@ extension SyncEngine {
         if !touched.readingIDs.isEmpty || touched.dailyDesignationTouched {
             repairs += try convergeDailyJournalDuplicates(db, touched: touched)
         }
-        // The dedupe's second occasion (the ladder's F2): a pass deferred
-        // because a copy's book arrived in the previous batch re-runs here
-        // once, on the next apply of anything.
-        if try !touched.readingIDs.isEmpty || sampleDedupePending(db) {
+        // The dedupe's occasions — PULL-ONLY, three of them (the ladder's
+        // F2, then R2-1/R2-6): a book touched by the batch, the one-shot
+        // marker a deferred pass left, or a reserved-path tag application
+        // arriving (the evidence a tag-leg deferral waited for). See
+        // `sampleDedupeOccasion` for why the push path never fires it.
+        if try sampleDedupeOccasion(db, touched: touched) {
             repairs += try dedupeSampleLibraryCopies(db, touched: touched)
         }
         return repairs
@@ -736,7 +758,7 @@ extension SyncEngine {
         return repairs
     }
 
-    private func jsonArray(_ values: Set<String>) -> String {
+    func jsonArray(_ values: Set<String>) -> String {
         let data = try? JSONEncoder().encode(values.sorted())
         return data.flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
     }

@@ -80,6 +80,33 @@ public struct SampleLibraryDedupeFacts: Sendable {
 /// pass: acting on partial data could retire the wrong copy on one device
 /// and a different one on another. Deferring is free — a later batch
 /// completes the picture and every device then computes the same verdicts.
+///
+/// ── WHEN THE PASS RUNS, AND WHAT A DEFERRAL WAITS FOR (the ladder's F2,
+/// then round 2's R2-1/R2-3/R2-6) ────────────────────────────────────────
+/// The pass fires ONLY under a PULL (`TouchedRows.isPullBatch`) — never
+/// from a push chunk's reject-merge transaction — on three occasions:
+///   1. the batch applied a `reading` row (the F2 occasion);
+///   2. the ONE-SHOT local marker left by occasion 1's own deferral: a
+///      copy whose book arrived THIS batch is indeterminate for the pass,
+///      because its engagement rows sort after `reading_post` in the push
+///      order and can still be in the pusher's next chunk; the marker
+///      re-fires the pass at the next pull — an empty window included,
+///      that being the head-reached moment — and is spent the instant a
+///      pass runs, whatever it decides (R2-3);
+///   3. a `post_tag` row for the RESERVED path applied in this batch: the
+///      evidence the reserved-tag completeness guard waits for.
+/// The guard (`classifySampleCopy`, R2-1): every live member post of a
+/// seeded copy carries the reserved tag, and `post_tag` is the FIRST
+/// engagement table in the push order — so a member with NO `post_tag`
+/// row for the reserved path (live or dead; any tag row wearing the path,
+/// live or dead — a collision-retired duplicate counts) proves the
+/// pusher's tag chunk has not landed, and the copy is INDETERMINATE. That
+/// deferral re-arms nothing: it is re-examined at the apply that lands
+/// the reserved-path applications (occasion 3), which is exactly when its
+/// evidence can first exist. What the guard cannot see: an engagement row
+/// in a table AFTER `post_tag` (`block_tag`, `reference`, `block_comment`)
+/// travelling in a chunk of its own behind a landed tag chunk — the
+/// recorded residual (its KnownIssues row, owner 13y).
 extension SyncEngine {
     enum SampleCopyVerdict: Equatable {
         case pristine
@@ -87,10 +114,28 @@ extension SyncEngine {
         case indeterminate
     }
 
-    /// The pass. Fires from `runPostApplyRepairs` when the batch touched a
-    /// `reading` row; the candidate scan is one indexed read, and the
-    /// expensive work (manifest load + per-note classification) runs only
-    /// when two live same-name copies actually coexist.
+    /// Whether this batch is one of the pass's three occasions (above).
+    /// Pull-only by construction; cost: two flag reads, one local-only
+    /// marker read, and — only when the batch applied `post_tag` rows —
+    /// one indexed lookup of their tag ids against the reserved path.
+    func sampleDedupeOccasion(_ db: Database, touched: TouchedRows) throws -> Bool {
+        guard touched.isPullBatch, let facts = sampleLibraryFacts else { return false }
+        if !touched.readingIDs.isEmpty { return true }
+        if try sampleDedupePending(db) { return true }
+        guard !touched.appliedPostTagTagIDs.isEmpty else { return false }
+        return try Bool.fetchOne(
+            db,
+            sql: """
+                SELECT EXISTS (SELECT 1 FROM tag
+                               WHERE path = ? AND id IN (SELECT value FROM json_each(?)))
+                """,
+            arguments: [facts.tagPath, jsonArray(touched.appliedPostTagTagIDs)]) ?? false
+    }
+
+    /// The pass. Fires from `runPostApplyRepairs` on the occasions above;
+    /// the candidate scan is one indexed read, and the expensive work
+    /// (manifest load + per-note classification) runs only when two live
+    /// same-name copies actually coexist.
     func dedupeSampleLibraryCopies(_ db: Database, touched: TouchedRows) throws -> Int {
         guard let facts = sampleLibraryFacts else { return 0 }
         // The seeder's own `discover` rule: EXACT live-name match.
@@ -125,7 +170,7 @@ extension SyncEngine {
         for copyID in copies {
             switch try classifySampleCopy(
                 db, copyID: copyID, manifest: manifest,
-                reservedTagID: reservedTagID, hash: facts.hash) {
+                reservedTagID: reservedTagID, reservedTagPath: facts.tagPath, hash: facts.hash) {
             case .pristine: pristine.append(copyID)
             case .edited: edited.append(copyID)
             case .indeterminate: return 0  // defer the whole pass
@@ -145,8 +190,8 @@ extension SyncEngine {
 
     /// The F2 marker: LOCAL-ONLY (`sync_state`, never synced — it names a
     /// fact about this device's apply history, not about the corpus). Read
-    /// by `runPostApplyRepairs` as the pass's second firing occasion and by
-    /// `pull` at an empty window.
+    /// by `sampleDedupeOccasion` as the pass's second firing occasion and by
+    /// `pull` at an empty window; never by the push path (R2-1).
     static let sampleDedupePendingKey = "sample_dedupe_pending"
 
     func sampleDedupePending(_ db: Database) throws -> Bool {
@@ -172,7 +217,7 @@ extension SyncEngine {
     /// the keeper choice deterministic.
     private func classifySampleCopy(
         _ db: Database, copyID: String, manifest: [String: String],
-        reservedTagID: String?, hash: (String) -> String
+        reservedTagID: String?, reservedTagPath: String, hash: (String) -> String
     ) throws -> SampleCopyVerdict {
         // Book-level acts: a finish, an extent, a grouping.
         guard let reading = try Row.fetchOne(
@@ -228,6 +273,27 @@ extension SyncEngine {
                   manifest[title] != nil,
                   titles.insert(title).inserted
             else { return .edited }
+
+            // The reserved-tag COMPLETENESS guard (the ladder's R2-1): the
+            // seed tags every note it mints, and `post_tag` is the first
+            // engagement table in the push order — a shipped note with no
+            // application of the reserved path at all (any liveness, any
+            // tag row wearing the path: a collision-retired duplicate's
+            // dead application counts) means the pusher's tag chunk has
+            // not landed, and the engagement rows behind it cannot have
+            // either. Indeterminate — re-examined when those applications
+            // arrive (the third occasion), never guessed pristine. After
+            // the title check on purpose: a note SHE added carries no
+            // reserved tag and is already `.edited` above.
+            let reservedTagLanded = try Bool.fetchOne(
+                db,
+                sql: """
+                    SELECT EXISTS (SELECT 1 FROM post_tag pt
+                                   JOIN tag t ON t.id = pt.tag_id
+                                   WHERE pt.post_id = ? AND t.path = ?)
+                    """,
+                arguments: [postID, reservedTagPath]) ?? false
+            guard reservedTagLanded else { return .indeterminate }
 
             // Structural completeness (stragglers defer) + fan shape (a
             // fanned or archived take is engagement the render cannot see).

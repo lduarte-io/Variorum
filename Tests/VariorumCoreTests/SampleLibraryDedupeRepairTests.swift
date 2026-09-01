@@ -426,6 +426,157 @@ struct SampleLibraryDedupeRepairTests {
         }
     }
 
+    // MARK: Round 2 — the pins run PRODUCTION'S round shape (pull → push)
+
+    /// Production's one round (`SyncScheduler.runOneRound`, the A3 pin):
+    /// pull, THEN push. Round 1's pins passed on sequences production never
+    /// runs; these do not.
+    @discardableResult
+    private func round(
+        _ client: SyncClient
+    ) async throws -> (pull: SyncEngine.PullReport, push: SyncEngine.PushReport) {
+        let pull = try await client.pull()
+        let push = try await client.push()
+        return (pull, push)
+    }
+
+    private func marker(_ client: SyncClient) throws -> String? {
+        try client.db.fetchString(
+            "SELECT value FROM sync_state WHERE key = 'sample_dedupe_pending'")
+    }
+
+    private struct SplitAnnotatedWorld {
+        let a: SyncClient
+        let b: SyncClient
+        let server: FakeSyncServer
+        let copyA: (bookID: String, postIDs: [String: String])
+        let copyB: (bookID: String, postIDs: [String: String])
+        let commentID: String
+        var both: [String] { [copyA.bookID, copyB.bookID].sorted() }
+    }
+
+    /// The F2 world: both seed; B annotates a story (engagement the rendered
+    /// text cannot see); A's copy is fully on the server; B's push dies after
+    /// every row through `reading_post` — the reserved-tag applications and
+    /// the comment stay in B's outbox, exactly the between-chunks state.
+    private func splitAnnotatedWorld() async throws -> SplitAnnotatedWorld {
+        let server = FakeSyncServer()
+        let transport = FaultInjectingTransport(server: server)
+        let a = try SyncClient(name: "A", prefix: "AA", transport: server)
+        let b = try SyncClient(name: "B", prefix: "BB", transport: transport, clockOffset: 1000, seed: 2)
+        a.sampleLibraryFacts = Self.facts()
+        b.sampleLibraryFacts = Self.facts()
+        let copyA = try seedCopy(a)
+        let copyB = try seedCopy(b)
+        let annotated = copyB.postIDs["A Scandal in Bohemia"]!
+        let commentID: String = try b.with { ops, db in
+            let blockID = try db.read { db in
+                try String.fetchOne(
+                    db,
+                    sql: "SELECT block_id FROM container_block WHERE container_id = ? AND deleted_at IS NULL ORDER BY position LIMIT 1",
+                    arguments: [annotated])!
+            }
+            return try ops.addBlockComment(to: blockID, text: "Irene Adler, always THE woman.").id
+        }
+        try await a.push()
+        let split = try outboxRowsAhead(of: "post_tag", in: b)
+        await transport.armFailNextPush(afterRows: split)
+        await #expect(throws: InjectedNetworkFault.self) { try await b.push() }
+        #expect(await server.currentRow(table: "block_comment", rowID: commentID) == nil,
+                "the comment has not reached the server yet")
+        #expect(await server.currentRow(table: "reading", rowID: copyB.bookID) != nil,
+                "but B's book and memberships have")
+        return SplitAnnotatedWorld(
+            a: a, b: b, server: server, copyA: copyA, copyB: copyB, commentID: commentID)
+    }
+
+    /// **RED ON OLD (round 2, R2-1 — MAJOR):** F2's deferral held only for a
+    /// pull followed by another pull. Production's round is pull → PUSH, and
+    /// the push path ran `runPostApplyRepairs` per chunk with the marker
+    /// honored and an empty `touched.readingIDs`: the deferring device
+    /// always has dirty rows after that pull (the reserved tag's collision
+    /// repair), so the pass CLASSIFIED at the first push chunk of the same
+    /// round — B's tag applications and comment still in flight, B's copy
+    /// read PRISTINE, retired, and the comment landed under a dead block.
+    /// Now the dedupe fires only under a pull, which is the only road that
+    /// can land what an in-flight copy is missing.
+    @Test func theDeferralSurvivesTheRoundsOwnPush() async throws {
+        let w = try await splitAnnotatedWorld()
+
+        // A's round, production's shape: the pull brings B's first chunk and
+        // defers (the one-shot marker); the same round's PUSH carries A's
+        // dirty rows — and must not run the pass.
+        let (pull, push) = try await round(w.a)
+        #expect(pull.applied > 0)
+        #expect(push.accepted > 0, "positive activity: the round's push had rows to carry")
+        #expect(try liveCopyIDs(w.a) == w.both,
+                "both copies stand after the round's push (old: B's retired at that push's first chunk)")
+        #expect(try w.a.db.deletedAt("reading", w.copyB.bookID) == nil)
+        #expect(try marker(w.a) == "1",
+                "the push never consumes the marker — only a pull can land what is missing")
+
+        // B's retry lands the rest; A's next round reads B's copy as hers.
+        try await w.b.push()
+        try await round(w.a)
+        #expect(try liveCopyIDs(w.a) == [w.copyB.bookID],
+                "with the comment in sight the annotated copy is the survivor")
+        try await assertFurnitureConverged(w.a, w.b, w.server)
+        for client in [w.a, w.b] {
+            #expect(try liveCopyIDs(client) == [w.copyB.bookID])
+            #expect(try client.db.deletedAt("block_comment", w.commentID) == nil,
+                    "her comment lives (old: died under the retired copy's block)")
+        }
+    }
+
+    /// **RED ON OLD (round 2, R2-6 — MINOR; the reserved-tag completeness
+    /// guard of R2-1):** with the push path fixed, a pull between the
+    /// pusher's chunks that carries NOTHING OF THE PUSHER'S — the deferring
+    /// device's own echo, or an empty window — still re-fired the deferred
+    /// pass on the marker and classified a copy whose engagement rows were
+    /// in flight: an apply that cannot carry them. Now a shipped note with
+    /// no reserved-tag application at all proves the tag chunk has not
+    /// landed: the copy is indeterminate, the marker is not re-armed, and
+    /// the pass is re-examined at the apply that lands those applications —
+    /// the third occasion — where the comment behind them is in sight too.
+    @Test func aPullBetweenTheChunksDefersOnTheReservedTagEvidence() async throws {
+        let w = try await splitAnnotatedWorld()
+        try await round(w.a)  // deferred on arrival; the push carries A's repairs
+
+        // The next pull carries only A's own echo — nothing of B's. The
+        // marker re-fires the pass, which defers AGAIN: B's members carry no
+        // reserved-tag row yet.
+        let echo = try await w.a.pull()
+        #expect(echo.applied > 0, "positive activity: the round's push echoes back")
+        #expect(await w.server.currentRow(table: "block_comment", rowID: w.commentID) == nil,
+                "still nothing of B's second chunk on the server")
+        #expect(try liveCopyIDs(w.a) == w.both,
+                "both copies stand through a pull that brought nothing of B's (old: B's retired here)")
+        #expect(try marker(w.a) == nil,
+                "the guard's deferral does not re-arm the one-shot marker — it waits for its evidence")
+        // A truly empty window now does no work at all: the marker is spent.
+        let empty = try await w.a.pull()
+        #expect(empty.applied == 0)
+        #expect(empty.repairs == 0)
+        #expect(try liveCopyIDs(w.a) == w.both)
+        try await w.a.push()
+
+        // B's retry lands the tag applications and the comment. A's next
+        // pull carries them: the reserved-path applications ARE the
+        // occasion — no book touched, no marker, and the pass still runs.
+        try await w.b.push()
+        let evidence = try await w.a.pull()
+        #expect(evidence.applied > 0)
+        #expect(try liveCopyIDs(w.a) == [w.copyB.bookID],
+                "the arriving reserved-tag applications re-examined the copy; the annotated one survives")
+        #expect(try w.a.outboxContains("reading", w.copyA.bookID),
+                "the retirement reaches the outbox (SyncSpec §7)")
+        try await assertFurnitureConverged(w.a, w.b, w.server)
+        for client in [w.a, w.b] {
+            #expect(try liveCopyIDs(client) == [w.copyB.bookID])
+            #expect(try client.db.deletedAt("block_comment", w.commentID) == nil)
+        }
+    }
+
     @Test func noInjectedFactsMeansNoDedupe() async throws {
         // An engine nobody wired facts into cannot misidentify anything —
         // the repair is inert by default (the keyProvider pattern).

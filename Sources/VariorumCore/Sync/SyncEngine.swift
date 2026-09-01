@@ -324,9 +324,10 @@ public struct SyncEngine: Sendable {
             // "quiescent since a prior batch" becomes true with nothing
             // else arriving. One local-only marker read per empty pull;
             // the apply transaction opens only when the marker is set.
+            // (`isPullBatch`: this IS a pull — the dedupe's only road.)
             if try await database.read({ try self.sampleDedupePending($0) }) {
                 emptyReport.repairs = try await applyingRemoteWithDeferredFKs { db in
-                    try runPostApplyRepairs(db, touched: TouchedRows())
+                    try runPostApplyRepairs(db, touched: TouchedRows(isPullBatch: true))
                 }
             }
             return emptyReport
@@ -357,7 +358,10 @@ public struct SyncEngine: Sendable {
                 stopIndex = shrunk
             }
 
-            var touched = TouchedRows()
+            // A pull's apply: the sample-library dedupe's one firing road
+            // (the ladder's R2-1 — the push path's per-chunk pass never
+            // runs it; see `TouchedRows.isPullBatch`).
+            var touched = TouchedRows(isPullBatch: true)
             for item in batch[..<stopIndex] where item.row.isTombstoned {
                 touched.arrivingDeadIDs[item.row.table, default: []].insert(item.row.rowID)
             }
