@@ -1,7 +1,7 @@
 # The Act 10 Correction Round — every UI change of the pre-13u round weighed, corrected, and walked
 
 **STATUS: OPEN — opened 2026-09-01 at the author's sitting (her `/architect-phase` invocation).
-Orchestrator: Fable (the sitting's session). Cast: all Fable — fresh implementer per batch, fresh
+Orchestrator: Fable (the sitting's session; the SUCCESSOR orchestrator, Fable 5.1, from 16:00 MDT 2026-09-01 per R-cor-9). Cast: all Fable — fresh implementer per batch, fresh
 cold reviewer per ladder round. Runs NOW, before `pre-13x` (her ruling R-cor-2). Her acceptance is
 ONE walk at the end on the refreshed `/Applications` build (R-cor-4). Source document:
 `notes/author-reports/2026-09-01-post-act10-ui-report.md` — her words verbatim + the fifteen-image
@@ -395,8 +395,8 @@ push, and stop. Do not fix anything."* Then: the orchestrator records dispositio
 (repo-first); a FRESH fix session lands accepted findings with revert-verified pins; round 2 = a fresh
 reviewer re-reviews the fixes + what they touched; any NEW BLOCKER/MAJOR ⇒ round 3; cap three; anything
 open after round 3 is recorded for her. The spec outranks both agents; every finding gets a written
-disposition. The trailer for every commit: `Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>` +
-`Claude-Session: https://claude.ai/code/session_01UBSTZCXPHewx5nd3VB5fvb`.
+disposition. The trailer for every commit (the successor session's, from 16:00 MDT 2026-09-01): `Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>` +
+`Claude-Session: https://claude.ai/code/session_019VxbpYiG4SvQfYdx5cXCBC`.
 
 ## 8. Records (appended per batch; the triage walk first)
 
@@ -1307,6 +1307,25 @@ run 1). **The founding orchestrator WRAPS here (R-cor-9); the successor runs D �
 
 ---
 
+#### SUCCESSOR ORCHESTRATOR — ORIENTED (2026-09-01 16:00 MDT; Fable 5.1, session `session_019VxbpYiG4SvQfYdx5cXCBC`; R-cor-9's handoff)
+
+Read in full in her order: the orchestrator handoff (§0/§0b first, slowly), this file whole, her report, the
+Lenses+Compare memo, the author handoff, CLAUDE.md, the resiliency protocol. **Verified against the repo, never
+trusted:** `git log --oneline -30` matches the handoff's state — HEAD `7f64b0f` (F CLOSED), tree clean, zero
+unpushed; no `BATCH D RECORD` / `BATCH E RECORD` / `LADDER ROUND` section exists; the dev-store Debug build F's
+completion session left running is pid 5635 (DerivedData, batch F's tree); no agent of any earlier session is
+running; the drive tools (`vd.sh` · `click` · `drag` · `scroll` · `sheet.py`) and `notes/REVIEW_PROMPT.md` are
+present. **Clock note:** the founding records' times ("~17:20" for F's close) ran ahead of the machine — the
+close commit is stamped 15:43 MDT and this orientation began at 16:00 MDT; times in this session's records are
+the machine's. **Acts before the first spawn:** the D and E briefs gain a binding addendum each (the code
+anchors re-verified at `7f64b0f`, the environment/resiliency/baseline/trailer lines the C/F briefs carried by
+reference, row 17's provenance stated honestly — 13c 2E filtered the anchor BY DESIGN and #47(c) made it
+default on, so the fix is a ruled narrowing to peers, not a regression); §7d's trailer moves to this session's;
+memory refreshed; the orchestrator handoff gains its line. **Batch D SPAWNED** as the first act — one code agent;
+the orchestrator writes no code and does not drive the dev window while it runs.
+
+---
+
 ### BATCH D — COMPARE + LENSES, MECHANICAL ONLY (brief; DRAFTED — spawn after F closes; the DESIGN is the memo, not this batch)
 
 **Token discipline (binding, from the orchestrator handoff §2c):** build ONE contact sheet of your capture directory with `python3 notes/plans/act10-correction-screens/tools/sheet.py <dir>` and name it in your record; the orchestrator reads the sheet first and opens full captures only where a tile earns it.
@@ -1328,6 +1347,41 @@ cards share ONE left edge and ONE baseline; the `＋ column`/`+ note` ghost stop
 sits at the column strip's end at the header's height (both boards). Geometry pins. Nothing else — no
 renames, no door moves beyond 46. Acceptance: captures of Compare's first open (anchor whole), a two-column
 compare, Lenses with two columns. **Deliverable:** the BATCH D RECORD under this brief.
+
+**Binding addendum — the successor orchestrator, 2026-09-01 16:05 MDT, written before the spawn (the anchors
+re-verified at `7f64b0f`):** `CompareBoardView.swift:938` is still the `anchor.title ?? "This note"` fallback;
+the top-right duplicates are `:910` ("make outline note") and `:918` ("+ note"), the centered offer card's copy
+at `:1131`; the filter applies in the model's `compositionInputs` (`:413–426`) through
+`CompareComposition.relatedOnly`, which BY 13c 2E's DESIGN collapses EVERY column — the anchor included — to
+lineage-connected blocks, and her 13c ruling #47(c) made it default ON (the model's own comment at `:131–151`
+is the record). **So row 17 is a RULED CHANGE to 2E's anchor half, not a regression:** with no peer, no anchor
+block has kin, the anchor empties, and the board greets her with nothing — R-cor-6's in-round scope ("the
+anchor column always rendering the note") narrows the filter to PEERS ONLY, the anchor exempt; state that
+provenance in your record. Seam suggestion (yours to confirm at the code): exempt the anchor in the model's
+`compositionInputs` — hand the FULL anchor through and keep the peers filtered by kinship against it — so the
+pure `CompareComposition` brain and its pins stay byte-unmodified; if the brain must change, say why. The
+per-column honesty line (`:1032`) and the whole-board honesty state (`:1182–1191`) must still read true after
+the change (a peer with no kin still says so; the whole-board line no longer fires for the anchor alone). The
+derived display name for a titleless journal entry lives in core — `Sources/VariorumCore/Queries/Timeline.swift:38`
+and `Queries/ReadingAssembly.swift:59` (`displayTitle`) — reuse the ONE rule through `Queries`, never a third.
+Lenses' `＋ column` is `LensesBoardView.swift:394` (the menu) / `:413` (the ghost label). **The semantics proof:**
+`Tests/VariorumCoreTests/LensTests.swift`, `VariorumTests/CompareBoardTests.swift`, `TakesBoardSoakTests`,
+`ScrubAndOutlineTests`, `TutorialWalkTests` green UNMODIFIED. **Environment (§6) + the driving recipe + the
+resiliency rules of batch B's brief's last three paragraphs bind identically:** a `LIVE STATUS — BATCH D` list
+from your FIRST commit; commit per piece + push after each; synchronous foreground waits only; never
+`/Applications`, never her real-store app (not running); the dev-store Debug build now running is pid 5635
+(batch F's tree) — quit THAT one and relaunch the product of YOUR tree for the walk (`open -n` on the
+DerivedData product; if two windows restore, close one); both voices; the contact sheet named in the record.
+Row 17 lands with a red-on-old pin verified by BEHAVIORAL REVERT (the anchor filtered again → the pin's anchor
+rows absent); rows 46/16 are registry/geometry pins (door class where the rule did not exist — say so).
+`TutorialWalkTests` green, then the FULL Mac suite once on the final tree — **baseline Mac 2032 / 356 · core
+1524 / 165** (batch F's close); state the arithmetic; the known load-flaky reds (`rewriteStrategyLatencies`,
+`CanvasDragTrackingTests`, and F's noted `BlocksWorkbenchFaceTests` real-click pin) are re-run isolated, never
+loosened. New findings become ledger rows numbered from **69**; anything outside Compare/Lenses (C-1) is
+RECORDED for its owner, never fixed here. **Trailer for every commit:** `Co-Authored-By: Claude Fable 5.1
+<noreply@anthropic.com>` + `Claude-Session: https://claude.ai/code/session_019VxbpYiG4SvQfYdx5cXCBC`. Your
+final message is ONE pointer to your record; then stop — the orchestrator walks your rows before the record is
+marked closed.
 
 ---
 
@@ -1358,3 +1412,22 @@ lands at the remembered block; the inactive state keeps the divider (a render pi
 `controlActiveState`). Acceptance captures: a note selected (long note), a book selected, Open landing,
 inactive window. **Deliverable:** the BATCH E RECORD under this brief. R-cor-3's reading stays PROVISIONAL in
 the morning bundle — her walk ratifies or redirects.
+
+**Binding addendum — the successor orchestrator, 2026-09-01 16:05 MDT (to be refined at D's close if D's
+record bears on it):** environment (§6), the driving recipe and the resiliency rules of batch B's brief's last
+three paragraphs bind identically (a `LIVE STATUS — BATCH E` list from the first commit; commit + push per
+piece; synchronous foreground waits only; never `/Applications` or her real-store app; relaunch the dev build on
+YOUR tree for the walk; both voices; the contact sheet named in the record). The current-block authority for the
+Open door is batch C's `CurrentBlockMemory` — `CommandRouter.currentBlock(for:)` reads it for an UNMOUNTED
+note (C's record names it for exactly this door; land there, else the first block); the reveal for a book's
+note row is batch B's `BookViewModel.requestLanding` / `pendingReveal` road. Two residuals other batches
+recorded for E are YOURS (the Library surface): **row 56** (the Library's List-mode row selection is the
+SYSTEM blue band — W8-2's grammar is the wash + a tinted border, never a system highlight) and **F's (a)** (the
+Library's archive receipt renders clipped at the window's bottom edge under the new-note bar — `seed-33`); each
+gets a traced mechanism and a pin. Row 54 (the read tier's provisional-width first measure, `ReadPostView`)
+is 13u2 item 1's — the preview will inherit that jump if it composes the read tier; do not chase it here, but
+say in the record whether the panel shows it and which tier the preview uses. Baselines: batch D's recorded
+close counts + your pins (state the arithmetic); new rows numbered after D's last. Trailer:
+`Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>` +
+`Claude-Session: https://claude.ai/code/session_019VxbpYiG4SvQfYdx5cXCBC`. Your final message is ONE pointer to
+your record; then stop.
