@@ -18,10 +18,10 @@ green with 2 known issues** (batch 7's unit close,
 | **D1 — the swipe band** (`MobileShellBand.swift` + `MobileShellView.swift`) | **DONE** — in the commit this record lands with |
 | **D2 — the starred page** (`MobileStarredView.swift`, `MobileStars.swift`, `MobileShelfView.swift`) | **DONE** — same commit |
 | **D3 — new note + new chapter in a book** (`MobileBookView.swift`, `MobileBookViewModel.swift`) | **DONE** — same commit |
-| **Pins** (`MobileNavigationTests.swift`, 13 tests) | **DONE** — 13/13 green before the restart; **re-verified PENDING** on the rebuilt simulator |
-| **Red-on-old** | **DONE for 8 pins** (quoted below, reverts R1–R8) · **R9 (the flick's direction clause) IN-PROGRESS** — the revert was applied, the restart wiped the scratchpad before its run; re-run owed |
-| **Full mobile suite vs 712/102** | **NOT-STARTED** — PENDING |
-| Fence verification + simulator deletion | **NOT-STARTED** |
+| **Pins** (`MobileNavigationTests.swift`, 13 tests) | **DONE (9a515b7)** — re-verified on the rebuilt simulator after the restart: `✔ Test run with 13 tests in 1 suite passed after 7.170 seconds.` |
+| **Red-on-old** | **DONE — all 9 reverts quoted below** (R1–R8 in one wave, R9 re-run after the restart). Restores diff-verified byte-exact against the prerevert copies AND against the pushed commit (`git status` clean) |
+| **Full mobile suite vs 712/102** | **IN-PROGRESS** — the run is the only thing left; result quoted below when it lands. **PENDING** |
+| Fence verification + simulator deletion | **IN-PROGRESS** — fence grep + `planVisibleTakeEdit` count owed with the suite |
 
 **Every count and every "green" below is PENDING until its run is quoted.**
 
@@ -337,12 +337,16 @@ The eight files were restored from `b10-prerevert/` and **diff-verified
 byte-exact** (`diff -q` on all six production files, zero differences).
 No `git checkout --` was used on any file this batch edits.
 
-**R9 — `MobileShellBand.landing`, drop the flick's direction-agreement
-clause → `aDragLandsOnlyWhenItCrossesOrIsFlicked`: IN-PROGRESS.** The
-revert was applied and the restart killed the run before its output; the
-scratchpad copy went with it, so the clause was restored by hand and the
-wave is owed a re-run. **Until it is quoted, that pin is declared
-UNVERIFIED, not claimed.**
+**R9 — re-run after the restart, its own wave, and it went red:**
+
+| revert (production) | test | quoted red |
+|---|---|---|
+| **R9** `MobileShellBand.landing` — drop the flick's direction-agreement clause (`(predictedEnd < 0) == (drag < 0) && drag != 0`) | `aDragLandsOnlyWhenItCrossesOrIsFlicked` | `Expectation failed: (MobileShellBand.landing(current: .shelf, drag: -20, predictedEnd: 400, width: width) → .library) == .shelf` ↳ *"A flick whose projection contradicts the finger lands nothing."* |
+
+Without the clause a finger that dragged 20 pt LEFT and was projected 400
+pt RIGHT — a spring-back — landed the band on the page it had been pulled
+away from. Restored and re-verified: the six production files are
+byte-exact against both the prerevert copies and the pushed commit.
 
 ### Pins that pass on BOTH sides — DECLARED, not manufactured
 
