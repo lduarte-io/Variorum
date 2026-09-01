@@ -666,7 +666,10 @@ extension SyncEngine {
         if !touched.readingIDs.isEmpty || touched.dailyDesignationTouched {
             repairs += try convergeDailyJournalDuplicates(db, touched: touched)
         }
-        if !touched.readingIDs.isEmpty {
+        // The dedupe's second occasion (the ladder's F2): a pass deferred
+        // because a copy's book arrived in the previous batch re-runs here
+        // once, on the next apply of anything.
+        if try !touched.readingIDs.isEmpty || sampleDedupePending(db) {
             repairs += try dedupeSampleLibraryCopies(db, touched: touched)
         }
         return repairs

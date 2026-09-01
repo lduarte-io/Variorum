@@ -317,7 +317,20 @@ public struct SyncEngine: Sendable {
         }
         var emptyReport = PullReport()
         emptyReport.newCursor = since
-        guard !pulled.isEmpty else { return emptyReport }
+        guard !pulled.isEmpty else {
+            // The ladder's F2: a sample-library dedupe pass deferred at the
+            // previous batch (a copy's book had just arrived) re-runs at an
+            // empty window too — the head-reached moment is exactly when
+            // "quiescent since a prior batch" becomes true with nothing
+            // else arriving. One local-only marker read per empty pull;
+            // the apply transaction opens only when the marker is set.
+            if try await database.read({ try self.sampleDedupePending($0) }) {
+                emptyReport.repairs = try await applyingRemoteWithDeferredFKs { db in
+                    try runPostApplyRepairs(db, touched: TouchedRows())
+                }
+            }
+            return emptyReport
+        }
 
         let batch = pulled
         return try await applyingRemoteWithDeferredFKs { db in

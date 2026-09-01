@@ -99,6 +99,22 @@ extension SyncEngine {
             sql: "SELECT id FROM reading WHERE name = ? AND deleted_at IS NULL ORDER BY id",
             arguments: [facts.bookName])
         guard copies.count > 1 else { return 0 }
+        // The ladder's F2: a copy whose `reading` row arrived in THIS batch
+        // is indeterminate for the pass. Its engagement signals — post_tag,
+        // block_tag, reference, block_comment — sort AFTER reading_post in
+        // the push order and can still be in the pusher's next chunk, so a
+        // pull landing between the chunks would read an edited-by-comment
+        // copy as pristine and retire it. Classify only copies quiescent
+        // since a prior batch; the deferral leaves a ONE-SHOT local marker
+        // so the next apply (or the next pull, even an empty one) re-runs
+        // the pass instead of waiting for another book to change. Bounded
+        // by construction: the marker is cleared the moment a pass runs
+        // past this check, whatever that pass then decides.
+        if copies.contains(where: touched.readingIDs.contains) {
+            try setSampleDedupePending(db, true)
+            return 0
+        }
+        try setSampleDedupePending(db, false)
         let manifest = try facts.loadNoteHashes()
         let reservedTagID = try String.fetchOne(
             db, sql: "SELECT id FROM tag WHERE path = ? AND deleted_at IS NULL",
@@ -125,6 +141,30 @@ extension SyncEngine {
                 db, copyID: copyID, arrivingDead: touched.arrivingDeadIDs)
         }
         return repairs
+    }
+
+    /// The F2 marker: LOCAL-ONLY (`sync_state`, never synced — it names a
+    /// fact about this device's apply history, not about the corpus). Read
+    /// by `runPostApplyRepairs` as the pass's second firing occasion and by
+    /// `pull` at an empty window.
+    static let sampleDedupePendingKey = "sample_dedupe_pending"
+
+    func sampleDedupePending(_ db: Database) throws -> Bool {
+        try Bool.fetchOne(
+            db, sql: "SELECT EXISTS (SELECT 1 FROM sync_state WHERE key = ?)",
+            arguments: [Self.sampleDedupePendingKey]) ?? false
+    }
+
+    private func setSampleDedupePending(_ db: Database, _ pending: Bool) throws {
+        if pending {
+            try db.execute(
+                sql: "INSERT OR REPLACE INTO sync_state (key, value) VALUES (?, '1')",
+                arguments: [Self.sampleDedupePendingKey])
+        } else {
+            try db.execute(
+                sql: "DELETE FROM sync_state WHERE key = ?",
+                arguments: [Self.sampleDedupePendingKey])
+        }
     }
 
     /// One copy's verdict, computed from SYNCED rows only — the same answer

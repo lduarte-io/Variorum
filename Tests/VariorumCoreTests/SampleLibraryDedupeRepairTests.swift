@@ -107,7 +107,26 @@ struct SampleLibraryDedupeRepairTests {
 
         try await a.push()
         try await b.push()
-        try await b.pull()
+        let arrival = try await b.pull()
+
+        // On B, the batch that BROUGHT A's copy defers the pass (the ladder's
+        // F2: a copy whose book arrived this batch is indeterminate — its
+        // engagement signals may still be in the pusher's next chunk) and
+        // leaves the one-shot marker; both copies stand for now.
+        #expect(try liveCopyIDs(b) == [copyA.bookID, copyB.bookID].sorted())
+        // (The reserved TAG collides too — its tag.path repair rides this
+        // batch; the dedupe itself wrote nothing, as the live ids show.)
+        #expect(arrival.applied > 0)
+        #expect(try b.db.fetchString(
+            "SELECT value FROM sync_state WHERE key = 'sample_dedupe_pending'") == "1",
+            "the deferral leaves its marker")
+        // The next pull — an EMPTY window, nothing else arriving — is the
+        // quiescent moment: the pass runs, and the marker is spent.
+        let quiescent = try await b.pull()
+        #expect(quiescent.applied == 0)
+        #expect(quiescent.repairs > 0, "positive activity: the deferred pass ran at the empty window")
+        #expect(try b.db.fetchString(
+            "SELECT value FROM sync_state WHERE key = 'sample_dedupe_pending'") == nil)
 
         // On B: both copies are byte-identical to the manifest, so the
         // smaller id (A's) keeps and B's whole FAMILY retires — the book,
@@ -344,6 +363,66 @@ struct SampleLibraryDedupeRepairTests {
             #expect(try client.db.deletedAt("reading", copyA.bookID) != nil)
             #expect(try client.db.deletedAt("container", pruned) == nil,
                     "the note she took out of the book is untouched — bookless, hers")
+        }
+    }
+
+    /// **RED ON OLD (the ladder's F2, MINOR):** the engagement signals the
+    /// classifier reads — post_tag, block_tag, reference, block_comment —
+    /// sort AFTER reading_post in the push order and can travel in a later
+    /// chunk than the memberships. A pull landing between those chunks read
+    /// an edited-by-comment copy as PRISTINE and retired it; the comment
+    /// then arrived under a dead block and died with it — "an edited copy
+    /// is NEVER silently retired" violated. Now the batch that brings a
+    /// copy's book defers the pass; the comment lands; the pass then reads
+    /// the copy as hers.
+    @Test func aCommentTravellingBehindTheMembershipsStillProtectsTheCopy() async throws {
+        let server = FakeSyncServer()
+        let transport = FaultInjectingTransport(server: server)
+        let a = try SyncClient(name: "A", prefix: "AA", transport: server)
+        let b = try SyncClient(name: "B", prefix: "BB", transport: transport, clockOffset: 1000, seed: 2)
+        a.sampleLibraryFacts = Self.facts()
+        b.sampleLibraryFacts = Self.facts()
+        let copyA = try seedCopy(a)
+        let copyB = try seedCopy(b)
+        // B annotates a story — engagement the rendered text cannot see.
+        let annotated = copyB.postIDs["A Scandal in Bohemia"]!
+        let commentID: String = try b.with { ops, db in
+            let blockID = try db.read { db in
+                try String.fetchOne(
+                    db,
+                    sql: "SELECT block_id FROM container_block WHERE container_id = ? AND deleted_at IS NULL ORDER BY position LIMIT 1",
+                    arguments: [annotated])!
+            }
+            return try ops.addBlockComment(to: blockID, text: "Irene Adler, always THE woman.").id
+        }
+
+        try await a.push()
+        // B's push dies after every row through reading_post — the tag
+        // applications and the comment stay in B's outbox.
+        let split = try outboxRowsAhead(of: "post_tag", in: b)
+        await transport.armFailNextPush(afterRows: split)
+        await #expect(throws: InjectedNetworkFault.self) { try await b.push() }
+        #expect(await server.currentRow(table: "block_comment", rowID: commentID) == nil,
+                "the comment has not reached the server yet")
+
+        let between = try await a.pull()
+        #expect(between.applied > 0)
+        // Old: A read B's copy as pristine (no comment in sight), kept its
+        // own smaller-id copy and retired B's. Now: deferred, both stand.
+        #expect(try liveCopyIDs(a) == [copyA.bookID, copyB.bookID].sorted(),
+                "a copy whose book arrived THIS batch is never classified")
+        #expect(try a.db.deletedAt("reading", copyB.bookID) == nil)
+
+        // B's retry lands the rest; A's next pull brings the comment, and the
+        // deferred pass reads B's copy as hers.
+        try await b.push()
+        try await a.pull()
+        try await assertFurnitureConverged(a, b, server)
+        for client in [a, b] {
+            #expect(try liveCopyIDs(client) == [copyB.bookID],
+                    "the annotated copy survives; the untouched one retires")
+            #expect(try client.db.deletedAt("block_comment", commentID) == nil,
+                    "her comment lives (old: died under the retired copy's block)")
         }
     }
 

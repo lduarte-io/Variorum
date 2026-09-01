@@ -31,6 +31,19 @@ private enum FurnitureTestError: Error {
     case journalDidNotShelve(String)
 }
 
+/// The number of outbox rows the push drain sends BEFORE the first row of
+/// `table` — the drain sorts by registry order, so a mid-drain fault armed
+/// after exactly this many rows lands every earlier table and nothing from
+/// `table` onward (the chunk split the ladder's F1/F2 findings describe).
+func outboxRowsAhead(of table: String, in client: SyncClient) throws -> Int {
+    let boundary = SyncSchema.applyOrderIndex(of: table)
+    return try client.db.read { db in
+        try Row.fetchAll(db, sql: "SELECT table_name FROM sync_outbox")
+            .filter { SyncSchema.applyOrderIndex(of: $0["table_name"]) < boundary }
+            .count
+    }
+}
+
 // MARK: - The Journal keeper (R-pre13u-1's second half)
 
 /// Two designated daily-Journal books, minted independently offline (each
@@ -331,17 +344,8 @@ struct JournalKeeperRepairTests {
 
     // MARK: The ladder's F1 — arrival-order independence
 
-    /// The number of outbox rows the push drain sends BEFORE the first row
-    /// of `table` — the drain sorts by registry order, so a mid-drain fault
-    /// armed after exactly this many rows lands every earlier table and
-    /// nothing from `table` onward (the chunk split the finding describes).
     private func rowsAhead(of table: String, in client: SyncClient) throws -> Int {
-        let boundary = SyncSchema.applyOrderIndex(of: table)
-        return try client.db.read { db in
-            try Row.fetchAll(db, sql: "SELECT table_name FROM sync_outbox")
-                .filter { SyncSchema.applyOrderIndex(of: $0["table_name"]) < boundary }
-                .count
-        }
+        try outboxRowsAhead(of: table, in: client)
     }
 
     private func liveMemberships(_ client: SyncClient, in bookID: String) throws -> Int {
