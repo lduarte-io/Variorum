@@ -1203,6 +1203,23 @@ RECORD under this brief.
 
 ---
 
+### BATCH F RECORD — THE RECOVERY FAMILY (a fresh Fable implementer session, 2026-09-01 ~13:40 →)
+
+#### LIVE STATUS — BATCH F (flipped in the same commit as each piece; a fresh session finishes from this list alone)
+
+- **Orientation:** DONE — the plan read in full (§0–§8, the constitution, C-1…C-7, R-cor-1…8, the ledger, the triage record, B's/A's/C's records + CLOSED lines, this brief), CLAUDE.md, the resiliency protocol, the handoff's §2c, her report (§1 + image row 12), the purge memo §4, the 13j plan's utility rulings (J6/tray grammar), then the brief's files: `TrayPanel.swift` · `BlockHistoryPane.swift` · `Shared/BlockHistoryFace.swift` · `Shared/RecoveryCopy.swift` · `Shared/RecoveryActs.swift` · `ArchivedView.swift` · `RecoveryView.swift` · `Theme/CalmGrammar.swift`, and the nine pin suites (TrayPanelShape/TrayPanelMove/NoteTray/BlockHistoryPane/RecoveryDoors/TrashSurface/TrashPurgeDoors/IAAndTrashShape/SnippetGroupTrash). Tree clean at `e2c70cd`; the dev-store Debug build pid 99547 running (batch C's final tree — the two commits since are docs-only).
+- **Seeding (piece 1):** NOT-STARTED — the settled plan: one scratch note through the product doors (never SQL): archive a block · delete a block · multi-delete three (Blocks bulk bar) · divide (lineage) · merge two · delete a take · archive a take · two savepoints on one take (⌘S, edit, ⌘S) · a note version (⌘⇧S) · a second scratch note archived whole · a third deleted carrying a version · a snippet group deleted. Steps recorded below as executed.
+- **The walk (piece 2):** NOT-STARTED — This Note's Tray · Block History CONTENT (host is C's, closed) · Archived · the Trash · the lineage doors, at three widths (narrow inspector ~300 · zoomed ~1728 · short window) in BOTH voices; every door exercised (Put back · Restore · Delete Now confirm-then-CANCEL · Open note · "Came from" · Empty Trash cancel · un-archive). Defects → ledger rows from 63, each with a capture + traced mechanism, then FIXED with a red-on-old pin. Act 10 item 1 (the clipped tray header) verified at every width.
+- **Row 28 (piece 3):** NOT-STARTED — the Block History pane's four regions read as SECTIONS (the calm-card grammar; one meaning line each; substance preserved — she rewrites copy later).
+- **Row 35 (piece 4):** NOT-STARTED — the calm-chrome pass (C-6) with batch A's row-36 table applied to these surfaces (the Trash's row facts stay — they ARE the reason a Trash exists).
+- **The USE gate:** NOT-STARTED — captures in `act10-correction-screens/batch-f/` (surface × width × voice minimum + one per fixed row); ONE contact sheet via `sheet.py`.
+- **Suites:** NOT-STARTED — `TutorialWalkTests` green at the end; full Mac suite last. Baselines: Mac 2028/356 (batch C's close), core 1524/165; mine = those + my pins, arithmetic stated.
+- **No revert in flight.** `/Applications` untouched; her real-store app untouched (not running).
+
+*(The rest of this record — the seeding steps, the walk's found-row list with dispositions, the row-28 sections as shipped, the capture list + sheet, counts, commits — is appended as the pieces close.)*
+
+---
+
 ### BATCH D — COMPARE + LENSES, MECHANICAL ONLY (brief; DRAFTED — spawn after F closes; the DESIGN is the memo, not this batch)
 
 **Token discipline (binding, from the orchestrator handoff §2c):** build ONE contact sheet of your capture directory with `python3 notes/plans/act10-correction-screens/tools/sheet.py <dir>` and name it in your record; the orchestrator reads the sheet first and opens full captures only where a tile earns it.
