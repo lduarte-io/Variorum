@@ -22,6 +22,9 @@ The ONE record is `notes/plans/act10-correction-round.md`; this file is what you
      leaves when you switch modes
    - the recovery family: This Note's Tray · Block History's sections · Archived · the Trash
    - Compare: the note renders whole on first open; one placement per act; alignment · Lenses: alignment
+   - the residuals (batch G, added at your R-cor-10): the `#` door's generous target · the masthead and bottom bar at a
+     ~950-pt window · a click on a Read ▸ `pages` page lands in edit · Blocks arrives painted · Sherlock's `_italics_`
+     render · the field guide's "the workspace" lesson names the `#` door
    - the Library panel: a long note's preview · a book's outline · Open lands where you were · the
      inactive-window boundary
 3. **Rule on the morning bundle** (below) — the Lenses + Compare memo's eight rulings decide their own phase.
@@ -30,9 +33,8 @@ The ONE record is `notes/plans/act10-correction-round.md`; this file is what you
 
 ## The morning bundle (PROVISIONALs + rulings to collect)
 
-- R-cor-3's reading of the Library panel (read preview + Open at the saved block; books show their
-  outline) — ratify or redirect.
-- Row 26: the Blocks context panel shows facts first, the text after — flip if you meant the reverse.
+- ~~R-cor-3's reading of the Library panel~~ — you RATIFIED it awake (R-cor-10(1), 16:25 MDT): the simple read preview.
+- ~~Row 26~~ — you RULED facts first (R-cor-10(3)).
 - Read's `edit · read` switch is remembered per note (the architect's call).
 - `notes/plans/act10-correction-memo-lenses-compare.md` §7 — eight rulings; the build is its own phase.
 - Anything a batch deferred: `PENDING`.

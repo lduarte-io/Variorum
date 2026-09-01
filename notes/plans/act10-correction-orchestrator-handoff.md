@@ -138,7 +138,7 @@ you do NOT drive the dev window while an implementer might (clicks collide).
 **LIVE PIECE (the successor orchestrator, Fable 5.1, from 16:00 MDT 2026-09-01): BATCH D.** Markers: a
 `LIVE STATUS — BATCH D` list under the BATCH D brief in the plan (commit subjects start `Correction round, batch
 D`); the close marker `BATCH D RECORD — CLOSED`; after D comes E (`LIVE STATUS — BATCH E` / `BATCH E RECORD —
-CLOSED`), then the ladder (`LADDER ROUND 1/2/3` sections), the full walk, the install (§7b items 8–9), the
+CLOSED`), then **G — residuals and width, ADDED at R-cor-10** (`LIVE STATUS — BATCH G` / `BATCH G RECORD — CLOSED`), then the ladder (`LADDER ROUND 1/2/3` sections), the full walk, the install (§7b items 8–9), the
 author handoff. The machine's clock is the reference from here (the founding records' times ran ~1.5 h ahead of
 it — F's "~17:20" close is the commit stamped 15:43 MDT).
 
@@ -197,6 +197,8 @@ matters** — `sips -c <h> <w> --cropOffset <y> <x> in.png --out crop.png` befor
 
 ## 4. Open author items (already in the plan's §7; nothing new to add here)
 
+**SHE IS AWAKE from ~16:20 MDT 2026-09-01 (R-cor-10)** — taste calls go to her at batch seams as question batches; R-cor-3 RATIFIED (the simple read preview), row 26 RULED (facts first), row 52 RULED (underscore italics → G), batch G ADDED. Still hers: Read's per-note face memory · the memo's eight rulings (6 and 1 first) · any scalpel revert (none).
+
 R-cor-3's PROVISIONAL library-panel reading · row 26's panel order · Read's switch memory · the memo's
 eight rulings · row 52 (underscore emphasis vocabulary) · any scalpel revert (none so far; her lean is none).
 
@@ -235,3 +237,4 @@ eight rulings · row 52 (underscore emphasis vocabulary) · any scalpel revert (
 - ~07:50 — row 53 FIXED and walked (orchestrator-b53/ A–C); **batch B CLOSED**; Mac 2001/347; **batch A SPAWNED** (the chrome) — its record will appear under the BATCH A brief in the plan.
 - ~07:30 — the fix session's first commit `7569af3` landed (row 53 converging landing); §2b proof checklist + §2c token discipline added at her question; she is starting a successor session to check in ~50 min.
 - 16:05 MDT (machine clock) — **SUCCESSOR ORCHESTRATOR (Fable 5.1) ORIENTED**: state verified against git (`7f64b0f` HEAD, clean, pushed; no D/E/ladder records); the D/E briefs gained binding addenda (row 17's provenance: 13c 2E filtered the anchor by design, #47(c) default-on — the fix is a ruled narrowing); §7d's trailer moved to this session's; memory refreshed; **batch D SPAWNED**.
+- ~16:40 MDT — **R-cor-10 recorded**: she is awake (live taste calls at seams); the cold review (§7d) confirmed; row 17 ratified; E's shape RATIFIED (simple read preview); **batch G (residuals and width — rows 59, 80–86 + the D-close walk's Snippets/Pool/Canvas finds) ADDED after E, before the ladder**; rows 26/52 ruled. D still running.
