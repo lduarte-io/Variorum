@@ -536,3 +536,21 @@ identity — "should the Library grow filters, and where is the line between a L
 smart book" is the same design space, and smart books ARE this app's saved-filter machinery, so the
 question must be answered once, not by two mechanisms. Her inclination stands recorded (Pool stays
 its own tab); nothing changes before this sitting rules.
+
+## Agenda line added 2026-08-31 (the pre-13u round's closeout) — the sample library as its own WING
+
+Act 3 of the pre-13u round shipped **The Adventures of Sherlock Holmes** in every reader's store
+(her ruling: default-on, not opt-in — "it makes the power of the app clear in a way that the
+tutorial just doesn't"): a curated book of 13 chapters (a front-matter attribution chapter + one
+per story), ~105k words / 2,533 blocks, every note tagged `sherlock holmes`, in the default wing.
+**Act 3's decision D, deferred here by name:** the sample library should become **its own wing**,
+removable in one gesture — a wing "would keep 105k words of Conan Doyle out of every Library and
+Pool listing she scrolls" (the Acts 3+4 batch record), which membership alone does not do. Two
+facts for the design: (1) the seeded stories carry BACK-DATED stamps (publication date,
+1892-10-14 — the midpoint review's m6, PROVISIONAL pending her nod) so they never displace her
+own writing in recency views; a wing makes that a placement fact rather than a timestamp trick;
+(2) deletion of the library is final on the Mac (the tutorial-style restore door re-mints only
+what is missing), so "remove the wing in one gesture" composes with the existing Trash road. The
+sample library's identity predicate (`SampleLibrarySeeder.discover` — the pristine-copy dedupe's
+seam) is the natural wing-membership key. Sitting call: whether the seeder mints INTO the wing
+from birth (the 13i-era fresh store) or the wing adopts an existing library at migration.
