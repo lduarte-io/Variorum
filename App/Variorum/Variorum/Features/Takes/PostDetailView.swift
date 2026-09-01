@@ -163,6 +163,20 @@ struct PostDetailView: View {
     /// by it on BOTH sides, so the centered title never runs under the icons
     /// (the correction round, rows 4/19).
     @State private var mastheadClusterWidth: CGFloat = 0
+    /// The masthead's own width — the title's padding floor reads it.
+    @State private var mastheadWidth: CGFloat = 0
+    /// The title block never shrinks below this: with many tag cards the
+    /// cluster grows, and a title squeezed to "thr…" is worse than a chip
+    /// row that reaches a long path line's end (the walk's capture 11).
+    private let mastheadTitleFloor: CGFloat = 240
+
+    /// The title layer's symmetric inset: the cluster's width (so the title
+    /// never runs under the icons) — capped so the title keeps its floor.
+    private var mastheadTitleInset: CGFloat {
+        let wanted = mastheadClusterWidth + 12
+        guard mastheadWidth > 0 else { return wanted }
+        return min(wanted, max(0, (mastheadWidth - mastheadTitleFloor) / 2))
+    }
     /// The masthead's own coordinate space (the DEBUG oracle reads the
     /// title's midX in it against the masthead's midX).
     static let mastheadSpace = "variorum-masthead"
@@ -194,7 +208,7 @@ struct PostDetailView: View {
                         recentBookIDs: recentBookIDs)
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.horizontal, mastheadClusterWidth + 12)
+                .padding(.horizontal, mastheadTitleInset)
                 HStack(alignment: .top, spacing: 0) {
                     Spacer(minLength: 0)
                     // Act 10 item 5 — the masthead's right EDGE, one coherent
@@ -243,6 +257,7 @@ struct PostDetailView: View {
                 }
             }
             .frame(maxWidth: mastheadMeasure, alignment: .leading)
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { mastheadWidth = $0 }
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 24)
             .padding(.top, 12)

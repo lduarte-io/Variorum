@@ -64,6 +64,9 @@ struct MastheadTagCluster: View {
 
     @State private var tags: [Tag] = []
     @State private var allTags: [Tag] = []
+    /// The cards-and-door row's own width — the field slides out to its
+    /// LEFT, as an overlay, offset by exactly this.
+    @State private var rowWidth: CGFloat = 0
 
     var body: some View {
         HStack(spacing: 5) {
@@ -72,6 +75,18 @@ struct MastheadTagCluster: View {
                 onApply: { apply($0) },
                 onRemove: { remove($0) },
                 showsAddDoor: Self.chipsShowAddDoor)
+            door
+        }
+        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { rowWidth = $0 }
+        // THE FIELD IS AN OVERLAY, deliberately outside the masthead's
+        // layout: it slides out of the ＃ to the LEFT of the cards, over the
+        // path line's end for the moment she is typing, and the masthead's
+        // measured cluster width never changes — so the centered title
+        // neither moves nor truncates while a tag goes on (the walk's
+        // capture 11: a laid-out field squeezed the title to "thr…"). The
+        // cards stay in view beside it, so the tag she just applied is
+        // visible the moment it lands.
+        .overlay(alignment: .trailing) {
             if fieldOpen {
                 TagInlineField(
                     tokens: tokens, allTags: allTags, applied: Set(tags.map(\.path)),
@@ -81,9 +96,9 @@ struct MastheadTagCluster: View {
                         // tags go on in one breath; ⎋ or ＃ closes it.
                     },
                     onDismiss: { fieldOpen = false })
+                    .offset(x: -(rowWidth + 6))
                     .transition(.move(edge: .trailing).combined(with: .opacity))
             }
-            door
         }
         .animation(.easeInOut(duration: 0.18), value: fieldOpen)
         .task(id: postID) { await load() }
