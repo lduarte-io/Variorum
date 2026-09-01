@@ -90,3 +90,17 @@ multi-tenant): ✅ closed · PL-7 (13h): future · PL-9 (bridge door judgment): 
 (a)(b)(c)(d) ✅, design calls (comment-marker side, margin-comment tap) held for you · PL-11 (13j faces):
 (a)–(e) ✅, (f) batch 8 · PL-12 (13u): OPEN — design together · PL-13 (13l faces): §C row 3 ·
 **PL-14: CLOSED** · PL-15 (13p protection): BUILT, device walk owed · PL-16: informational.
+
+## G. GLOSSARY — the codes these notes are full of (added at her ask: "Opus has a mania of making these odd naming schemes")
+
+| code | means | where the list lives |
+|---|---|---|
+| **PL-n** | **Parity Ledger row n** — what a closed MAC phase says the phone owes; numbered in the order rows were WRITTEN, not by phase (PL-13 ← 13l · PL-14 ← the post-13l polish round · PL-15 ← 13p) | `notes/MobileSoul.md` §6 |
+| **PR-n** | **Parity inventory row n** — a Mac capability the phone lacked when the round was inventoried (PR21 = in-note replace; PR20 = block multi-select; PR14 = the lens-dangle notice…) | `mobile-round-2-parity-inventory.md` |
+| **M-n** | **Mobile finding n** from the round's own walks/reviews (M1 = the editor crash; M14 = the Read hitch; M16 = the drag question; M23 = copy follows the screen; M27 = the post-divide edit) | `mobile-round-2.md` §-numbered sections |
+| **R-n** | **Her Ruling n** in this round (R13 no confirm on delete; R15 copy follows the screen; R16 select-and-delete should just work; R24 "info"; R28 build→review→fix as one unit; R30 the install wait) | `mobile-round-2-orchestrator-handoff.md` §4 |
+| **Q-n / #n** | Q-n = a design-record question (Q8 = where the tray's door sits); **#n = a `notes/QUESTIONS.md` entry** (#84 Two rooms · #92/#93 the filters · #94 the hoist deferral) | `mobile-archive-trash-design/README.md` §7 / `notes/QUESTIONS.md` |
+| **U-n** | the handback checklist's 13u-owed items (U-1 the fan fence's source … U-5 the `CrossBlockRefusal` hoist) | the standing successor handoff §2b |
+| **B45-n / A1-n** | findings from the batch-4.5 investigation / the Act-1 cold read | `mobile-round-2.md` §52 / §56 |
+| **a "hoist"** | MOVING a rule out of one app's private code into `App/Variorum/Shared/` so BOTH apps call one copy (the Mac's old names stay as forwarders; the Mac suite passing unmodified is the proof) — the opposite of a **fork** (a second copy that drifts) | MobileSoul §3; the KnownIssues forked-brains row |
+| **the #94 hoists' direction** | NOT delivered by the Mac: they are MOBILE-round work postponed until main merges INTO mobile, because they edit `Shared/` and Mac files the Mac phases are rewriting; a Mac phase that happens to touch one hoists it then | `mobile-round-2-fable-seat-handoff.md` §4 |
