@@ -144,3 +144,16 @@ available more often than the text assumes.
     mid-run, the orchestrator watches for the first checkpoint commit to appear; if none does
     within a reasonable window, the agent may have died silently again — check its state rather
     than assuming it is working.
+
+## Clarification — the 500k line is a GUIDELINE, not a cliff (author, 2026-08-31 evening)
+
+Her words, verbatim: *"I'd actually clarify the note to say that 500k is the guideline, but it's
+not 100% absolute. If you're close to the stage ending, you should just finish it or it's more of
+a cost to start a new session."* So: the ~500k figure (the orchestrator-side "plan the cutover"
+bullet above, and the skill's "quality cliff" wording) is a guideline for WHERE to plan a seam,
+not a trigger. **If the stage's end is near — a wave closing, a ladder mid-run, a closeout in
+progress — finish it in the session that holds the context; a fresh session's re-orientation
+read costs more than the remaining work.** Cut over only when the remaining work is large
+enough to outweigh that read, at a clean boundary, with the handoff drafted early (addendum 7).
+Applied the same evening: the pre-13u successor orchestrator, at ~560k, was ruled to finish the
+round's tail (midpoint review · ladder · closeout) rather than hand off.

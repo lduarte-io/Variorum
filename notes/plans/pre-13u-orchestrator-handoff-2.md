@@ -1,5 +1,13 @@
 # pre-13u round — orchestrator handoff #2 (2026-08-31 evening, the successor→successor cutover)
 
+> **⚠️ NOT A CUTOVER — RE-PURPOSED AS THE CLOSEOUT CHECKLIST (author, 2026-08-31 evening).** Her
+> ruling: *"no need for you to draft your own successor handoff… 500k is the guideline, but it's
+> not 100% absolute. If you're close to the stage ending, you should just finish it… I think you
+> actually are fine to do the closeout - all you need to handle is running the ladders."* The
+> successor orchestrator that drafted this finishes the round itself. **The NEXT list and the
+> PENDING slots below remain the working checklist for that finish** — nothing else here is live.
+
+
 **Why this exists:** the successor orchestrator (this session) reached ~560k context — past the
 ~500k degradation line — with the round's tail still ahead: the midpoint review, the final ladder,
 and the CLOSEOUT, which is the part needing the freshest judgment. Cutover at a clean seam: **after
