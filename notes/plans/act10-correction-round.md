@@ -195,6 +195,15 @@ it.
   date-only stamps + clock slot, underscore italics), and an explicit "not owed — no such surface / its own design"
   line where it does not (Compare/Lenses, the Library panel, the sidebar chrome).
 
+- **R-cor-11 — THE D-CLOSE SEAM'S THREE RULINGS (2026-09-01 ~17:25 MDT, the question tool; she chose the
+  recommended option in each):** **(1) Row 46 — placement-per-state ACCEPTED** (the outline door is the offer card
+  while the band shows and the header button only while a peer is open — never both; D's deviation from the brief's
+  flat retire stands; the memo's build settles the final home). **(2) Row 87 — the Pool card's first-words preview
+  is BUILT NOW in G via the picker's road** (a derived line under a titleless card's date, reusing the preview the
+  picker already computes — no new rule; 13u2 item 4 still designs the one-brain card family later). **(3) Row 88 —
+  BOTH Canvas fixes in G:** (a) a first arrival with no remembered layout opens FIT-ALL, never mid-bank; (b) the
+  toolbar to the calm-chip grammar, the redundant label dropped.
+
 **Inherited rulings this round builds to (not re-litigated):** the eighth-wave rulings W8-1…W8-5
 (`pre-13u-round.md`), the fifth-wave item-15 flow ruling, the mode-row canon R60–94 as extended by
 W8-1 (the eight-mode row is AppSpec §12 canon), her copy doctrine (structure and generous targets
@@ -288,8 +297,8 @@ present), and the 13j recovery doctrine (the Trash is the recovery door).
 | **84** | (row 52's build, R-cor-10(4)) `_word_` underscore emphasis → italics in the markdown DISPLAY vocabulary (Gutenberg's form; Sherlock reads raw today on cards, the Read faces, the Index column, the book) | the 13g markdown display brain (`Shared/` — the phone shares it; the iOS build is owed at the ladder) | Display-only: `renderedText`, the `.md` export and the bridge's join brain stay byte-unchanged (the 13g rule — pinned); the vocabulary gains `_x_` beside `*x*` with the same escaping/word-boundary discipline as the star form (intra-word underscores — `snake_case` — must NOT italicize; state the boundary rule). Pin on the display attributed runs. If the brain's change is not small, RECORD for 13u2 with the reason instead | G | OPEN |
 | **85** | (A's residue, the record's own line) the seeder's "the workspace" lesson still teaches the RETIRED fold: "＃ folds the note's tag cards away and back (⌘⇧I too…)" | `TutorialSeeder` | The sentence → the `#` door's truth (click → an inline field with the cursor; ⏎ applies; ⌘⇧I opens it); `TutorialBookShapeTests`/`NewModesTests` hold plan ⇔ seed; the LIVE re-seed of her real store is HER morning act (biometric — §7b item 8) | G | OPEN |
 | **86** | (F's walk (d)/(e) — VERIFY FIRST) (d) ⌘K "block history" from Blocks spoke Write's caret sentence instead of opening the pane (likely healed by C's `CurrentBlockMemory` — `focusedBlock` now lives in Blocks); (e) a click on the masthead TITLE did not open the rename field (`seed-03`; the Library row menu's Rename… is the door) | ⌘K palette · the masthead title | Verify each on the dev build first. (d): if it still speaks the sentence, route the palette door to the current block (fix + pin); if healed, RECORD healed-by-C. (e): `git show 0e6a09e^:…PostDetailView.swift` — if the pre-Act-10 title was a rename door, RESTORE it (a regression; pin); if it never was, RECORD as not a defect (the row menu is the door) | G | OPEN |
-| **87** | (the orchestrator's Pool walk at D's close, both voices — `orchestrator-d/04`, `08`) the Pool is a WALL OF BARE DATES: a titleless note's card shows only its day and a lone `+`, no first words — while the note picker (D's `01-crop`) already shows a two-line preview under every match. Ten of the dev store's eleven Pool notes read identically | Pool cards (`Features/Pool/PoolPostsView.swift`) | The picker's preview road exists; a first-words line under a titleless card's date is the same derived, never-stored shape 13u2 item 4 RULED for note cards ("a little snippet of what the post starts with"). **HERS: build the Pool card's preview now in G (reusing the picker's preview road — one brain, no new rule), or leave the whole card family to 13u2 item 4's one-brain design** | G (at her word) or 13u2 item 4 | OPEN (her call) |
-| **88** | (the orchestrator's Canvas walk, both voices — `05`, `09-crop`; Canvas is PRE-Act-10 — the restyle never reached it) Canvas on the 215-block story opens MID-BANK: cards 97–162 visible, the top row and both edge columns CLIPPED, `fit all` a click away; the toolbar mixes grammars — a "Tag filter" LABEL beside a system popup reading "tag filter: all", then calm chips (`fit all` · `Bank · 215` · `order by clicking…`) | Canvas (`Features/Canvas/`) | Not this round's surface by the ledger's letter (Act 10 did not touch Canvas) but her bar applies to what she sees. Two bounded candidates if she wants them: (a) a first arrival with no remembered layout opens FIT-ALL (or at the bank's top-left), never mid-bank; (b) the toolbar to the calm-chip grammar (one chip per control, the redundant label dropped). **HERS: G, or record for 13u2** | G (at her word) or 13u2 | OPEN (her call) |
+| **87** | (the orchestrator's Pool walk at D's close, both voices — `orchestrator-d/04`, `08`) the Pool is a WALL OF BARE DATES: a titleless note's card shows only its day and a lone `+`, no first words — while the note picker (D's `01-crop`) already shows a two-line preview under every match. Ten of the dev store's eleven Pool notes read identically | Pool cards (`Features/Pool/PoolPostsView.swift`) | The picker's preview road exists; a first-words line under a titleless card's date is the same derived, never-stored shape 13u2 item 4 RULED for note cards ("a little snippet of what the post starts with"). **HERS: build the Pool card's preview now in G (reusing the picker's preview road — one brain, no new rule), or leave the whole card family to 13u2 item 4's one-brain design** | **G** (RULED R-cor-11(2)) | OPEN |
+| **88** | (the orchestrator's Canvas walk, both voices — `05`, `09-crop`; Canvas is PRE-Act-10 — the restyle never reached it) Canvas on the 215-block story opens MID-BANK: cards 97–162 visible, the top row and both edge columns CLIPPED, `fit all` a click away; the toolbar mixes grammars — a "Tag filter" LABEL beside a system popup reading "tag filter: all", then calm chips (`fit all` · `Bank · 215` · `order by clicking…`) | Canvas (`Features/Canvas/`) | Not this round's surface by the ledger's letter (Act 10 did not touch Canvas) but her bar applies to what she sees. Two bounded candidates if she wants them: (a) a first arrival with no remembered layout opens FIT-ALL (or at the bank's top-left), never mid-bank; (b) the toolbar to the calm-chip grammar (one chip per control, the redundant label dropped). **HERS: G, or record for 13u2** | **G** (RULED R-cor-11(3) — both (a) and (b)) | OPEN |
 
 ## 4. The batches (one surface each — C-1). **ORDER AMENDED after the triage walk: B FIRST** — row 44 is a BLOCKER (the book hangs) and the riskiest fix (TK2 geometry inside lazy layout), so it gets the longest soak before the ladder; A (the chrome) follows immediately; then C, F, D, E.
 
@@ -381,7 +390,7 @@ the A1 backup (C-3) → the field-guide re-seed if any lesson text changed → t
 - Batch B, row 13: the Outline's prose stays left-anchored at Write's measure (batch 12's ruling) with a flexible, mostly-empty gutter — if she wants the column CENTRED like Write's page, that is a one-line ruling.
 - ~~Batch B, row 52: underscore emphasis~~ — **RULED R-cor-10(4)**: joins the vocabulary as italics (G, row 84).
 - Read's `edit · read` face remembered per note (the architect's call) — still hers to confirm at the walk.
-- **D-close seam (17:15 MDT), put to her live:** row 46's outline-door placement (per-state vs the flat retire) · row 87 (the Pool card preview now or 13u2) · row 88 (Canvas's arrival + toolbar: G or 13u2).
+- ~~D-close seam (17:15 MDT)~~ — **RULED R-cor-11**: row 46 per-state accepted · 87 → G · 88 (both) → G.
 
 ## 7b. CLOSEOUT OBLIGATIONS (written 2026-09-01 ~06:00 so the run's end is a checklist; the standing CLAUDE.md ritual, unabridged, plus this round's own)
 
@@ -1627,10 +1636,14 @@ height is the target) · 80: `Features/Takes/PostDetailView.swift` (the two-row 
 (+ `git show 0e6a09e^:App/Variorum/Variorum/Features/Takes/PostDetailView.swift` for the pre-Act-10 title).
 
 **Rows: 59 · 72 · 80 · 81 · 82 · 83 · 84 · 85 · 86 — each stated in the ledger with its mechanism read and its pin —
-plus, IF she rules them in at the D-close seam (the ledger says which): 87 (the Pool card's first-words preview via
-the picker's road) and 88 (Canvas: fit-all on a first arrival; the toolbar to the calm grammar). The E-close walk
+plus 87 (the Pool card's first-words preview via the picker's road) and 88 (Canvas: fit-all on a first arrival
+with no remembered layout; the toolbar to the calm-chip grammar) — both RULED IN at R-cor-11. The E-close walk
 may add more.** Order: 86 first (verify-first, cheapest), then 59, 80, 81 (the width family — walk them at ~950 pt
-TOGETHER), 72, 83, 82, 85, 87/88 if ruled in, 84 last (the one `Shared/` change).
+TOGETHER), 72, 83, 82, 85, 87, 88, 84 last (the one `Shared/` change). Files for 87: `Features/Pool/PoolPostsView.swift`
++ the picker's preview road in `Core/Views/NotePicker.swift` (find where its two-line preview comes from — reuse THAT
+query/brain, never a second rule); for 88: `Features/Canvas/` (the arrival's viewport when no `canvas_layout` view
+state is remembered; the toolbar row) with the existing canvas pins (`CanvasDragTrackingTests` is load-flaky — a
+KnownIssues row; never loosen it).
 
 **Rules (§2b) bind; the acceptance gate is USE:** captures in `act10-correction-screens/batch-g/` at BOTH 1708 pt
 zoomed and ~950 pt, both voices — the `#` hit at the row's edges, the masthead + bottom bar at 950, a `pages` click
