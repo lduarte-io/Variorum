@@ -117,6 +117,25 @@ it.
   its own phase**, kicked off at her word after she rules on the memo (the S4-16 condition: deferral
   carries its design, never vagueness). Row 20 folds into the memo.
 
+- **R-cor-7 — R-cor-5 SHARPENED (her phone message + her answer, 2026-09-01 ~05:05): INDEX IS THE EDITABLE
+  SURFACE; READ IS NEVER EDITABLE; ONE RAIL TAB NAMED READ WITH AN IN-PLACE `edit · read` SWITCH.** Her words,
+  verbatim: *"index being editable is true for index, but is not true once it moves into being the read mode.
+  it's not editable on book either - so let's clarify now what an editable index suggests now that read mode
+  is separate - book will also have the same thing for index. what do you think? I incline towards there is
+  an editable index surface, then you click read and it isn't anymore."* Offered Index / Read / two tabs as
+  the rail name; she chose: *"Read — the tab keeps R-cor-5's name; inside, 'edit · read' switches the
+  pane."* → **The note rail: Write · Takes · Read · Lenses · Compare · Blocks · Canvas (⌘1–⌘7).** Inside
+  READ, one in-place switch **`edit · read`**: **edit** = the editable index surface — the Index tab's
+  `▸ 01` outline column (toggle to hide/show; its expanded/dropdown type a step larger) beside the text pane
+  in which a clicked block goes LIVE (P-3, one live editor through `PaneTextAuthority`); **read** = the calm
+  read-only page (continuous or horizontal pages — the book's paged view reused), the same outline column
+  available, nothing editable, a click on a sentence flips to `edit` at that block (row 38's door). **Default
+  on entry: `edit`** (her sentence's order — "there is an editable index surface, then you click read" —
+  PROVISIONAL for the morning bundle; per-note memory of the switch is the natural refinement). **The BOOK:
+  its Index word-tab becomes EDITABLE the same way** (the selected note's block goes live in the right pane —
+  row 22); **the book's Read stays read-only.** R-cor-5's other terms stand (the Index tab retires into Read;
+  the `NoteIndexOutline` brains survive as the column; canon + field-guide changes at closeout).
+
 **Inherited rulings this round builds to (not re-litigated):** the eighth-wave rulings W8-1…W8-5
 (`pre-13u-round.md`), the fifth-wave item-15 flow ruling, the mode-row canon R60–94 as extended by
 W8-1 (the eight-mode row is AppSpec §12 canon), her copy doctrine (structure and generous targets
@@ -155,7 +174,7 @@ present), and the 13j recovery doctrine (the Trash is the recovery door).
 | 2 | "the left edge of the program still has the liquid glass floating edge" | Sidebar container | W8-3 half-delivered: interior flattened (`SidebarView.swift:348`), the floating pane kept | A | TRACED |
 | 3 | "the tabs used to be right below the modes, and the tab spacing has gotten less generous… hard to read" | Sidebar mode rail + Open strip | The Open strip rebuilt at the sidebar's bottom (Act 10 item 9); the eight-mode rail compressed (`SidebarView.swift:464–487`). Generous at ordinary heights; compress only under a measured height threshold (the bottom-bar precedent) | A | TRACED |
 | 4 | Read: "doesn't have a centered title above the read" | Masthead (all modes) | The title sits in an asymmetric masthead after item 5's tag cluster took the right — same defect as rows 16/19 | A | TRACED |
-| 5 | Read: "I want the mode where you can scroll horizontally through the pages that the other one has" | Note Read | `ReadModeView` has no paged mode; the book's paged view (13b Stage 4) is the reuse | C | OPEN |
+| 5 | Read: "I want the mode where you can scroll horizontally through the pages that the other one has" | Note Read (`read` half, R-cor-7) | `ReadModeView` has no paged mode; the book's paged view (13b Stage 4 — `scroll · pages`) is the reuse, seen working in the book's Read tab on the walk | C | TRACED |
 | 6 | Read: "that contents looks kind of weird with how it's cut off" | Note Read's contents column | Mid-word width truncation of first lines | C | OPEN |
 | 7 | Book: "clicking on a block automatically navigate[d] you there, and now you have to expand it before editing it" | Book Outline | Regressed click model in the Outline rewrite; expand becomes a separate affordance | B | TRACED |
 | 8 | "the left outline looks a bit weird in sherlock holmes with the chapters + the blocks named the same" | Book navigator | Chapter and note share a title; collapse the note line when it equals its chapter (read-time) | B | TRACED |
@@ -172,7 +191,7 @@ present), and the 13j recovery doctrine (the Trash is the recovery door).
 | 19 | Lenses: "the title is once again weirdly aligned" | Masthead | Row 4's defect | A | TRACED |
 | 20 | "the use of lenses is still a bit unclear" (→ R-cor-6: "absolutely dizzying") | Lenses | Folds into the Lenses + Compare design memo (R-cor-6) | D (memo) | RULED (R-cor-6) |
 | 21 | Read: "the outline isn't working great… being able to tap to toggle the outline being on and off is great though. I love that" | Note Read's companion outline | Click/scroll fixed; the toggle stays byte-as-is | C | OPEN |
-| 22 | Book Index "looks and feels good, but then you can't actually click into it to edit it" | Book Index | Read-only BY DESIGN (`BookIndexView.swift:23` — double-click hands off to Outline). Her ruling: editable in place — the selected note's block goes live in the right pane (one live editor, P3) | B | TRACED |
+| 22 | Book Index "looks and feels good, but then you can't actually click into it to edit it" | Book Index | Read-only BY DESIGN (`BookIndexView.swift:23` — double-click hands off to Outline; walk-confirmed, and the handoff lands focus on the LAST block 3/3, not the clicked one). R-cor-7: editable in place — the clicked block goes live in the right pane (one live editor, P3); the book's Read stays read-only | B | TRACED |
 | 23 | "the error on clicking on note titles in the outline place in the app was intermittent" (the field guide too) | Book navigator | Trace on the field guide as well as Sherlock; likely row 9's class racing realization | B | OPEN |
 | 24 | "the appearance of the 'this note' modes is just as jarring as it has been" | Sidebar rail | R-cor-3: the rail FADES in/out smoothly; nothing added on the left | E | OPEN |
 | 25 | "the blocks page is also weird and laggy - it takes a second after selecting it for it to be selected" | Blocks workbench | Trace: the workbench observation (`observeBlockWorkbench`) + selection work on the main actor are the candidates; measure, then fix | C | OPEN |
@@ -196,7 +215,7 @@ present), and the 13j recovery doctrine (the Trash is the recovery door).
 | 43 | (2nd msg) "If I need to ship the app with just writing and takes, I'd be willing to do so, but ideally that won't be necessary" | — | Recorded as her floor, not the plan; the round's bar is every mode useful, bug-free and beautiful | — | RECORDED |
 | 44 | **FOUND IN THE TRIAGE WALK — THE BOOK OUTLINE HANGS (BLOCKER): expand a long story, click a chapter in the navigator → 100% CPU, main thread livelocked, window unresponsive (190 s+ observed; killed).** Her "berserk… landed me at the end of the note" is this defect's onset. Reproduced first try on the dev store's Sherlock book (steps: open the book · Outline · click the "The Boscombe Valley Mystery" NOTE row in the navigator, which expands the 9,689-word story in place with focus on **block 215/215** · click any chapter row). Sample: `act10-correction-screens/triage/sample-hang-47298.txt` — every hot frame is SwiftUI (`NSHostingView.beginTransaction → GraphHost.flushTransactions → LazySubviewPlacements.placeSubviews → LazyStack.place → ForEachList.applyNodes → … LayoutEngineBox/UnaryLayout`); our only frames are value copies of `ReadingSection`/`Queries.ReadingEntry`. | Book Outline | **Mechanism (traced at the code, to be confirmed by the implementer's pin):** `BookView.swift:1106–1116` — an EXPANDED note composes the FULL `EditorView` (a TK2 `NSTextView` whose height ESTIMATE moves as its viewport lays out — TEXTKIT2 §2) INSIDE a `LazyVStack` row (`:772`), and the navigator's `withAnimation { proxy.scrollTo(…) }` (`:895`, `:932`) animates toward an anchor whose offset depends on that moving height: place → the editor re-estimates → re-place → the target moves → repeat. Related symptom: expanding lands focus on the LAST block (215/215). Fix shape for batch B: an expanded editor's height must be settled before/while a programmatic scroll runs (measure once — `ensureLayout` over the one expanded note is bounded — and hold it; no animated `scrollTo` at an unsettled anchor), or the expanded body leaves the lazy container; plus the focus-lands-at-end fix. **Red-on-old pin: a mounted book with one 9k-word note expanded receives a navigator scroll request and the run loop returns within a budget (a watchdog), landing at the requested chapter.** | B (FIRST) | TRACED (BLOCKER) |
 
-## 4. The batches (one surface each — C-1; order chosen so "crisp" returns first)
+## 4. The batches (one surface each — C-1). **ORDER AMENDED after the triage walk: B FIRST** — row 44 is a BLOCKER (the book hangs) and the riskiest fix (TK2 geometry inside lazy layout), so it gets the longest soak before the ladder; A (the chrome) follows immediately; then C, F, D, E.
 
 **Triage walk FIRST (the orchestrator, zero code):** the dev-store Debug build, every touched
 surface, a screenshot per ledger row, the mechanism traced or the trace plan named — before any
