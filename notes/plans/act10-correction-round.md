@@ -333,6 +333,41 @@ the A1 backup (C-3) → the field-guide re-seed if any lesson text changed → t
 11. **Memory** (`variorum-phase-9-run-state`) → round CLOSED; NEXT `pre-13x`.
 12. **Push** after every commit; the closeout commit last; then STOP — she kicks off what follows.
 
+
+## 7c. CANON DELTAS — DRAFTED for the closeout (applied exactly as ruled, never beyond; the closeout pastes, it does not compose)
+
+**AppSpec §12 (the note mode row — supersession sentence to append after the pre-13u supersession):** *Ratified
+supersession (the Act 10 correction round, 2026-09-01 — her rulings R-cor-5/7, the binding record
+`notes/plans/act10-correction-round.md`): the NOTE mode row is **Write · Takes · Read · Lenses · Compare ·
+Blocks · Canvas** (⌘1–⌘7, derived from the one order). The Index mode RETIRES INTO Read: READ carries an
+in-place `edit · read` switch, opening on `edit` — the editable index surface (the `▸ 01` outline column,
+toggleable, beside a text pane in which a clicked block goes live; P3's one live editor through the one
+authority) — and `read` is the calm page, never editable (continuous or horizontal pages), a click on a
+sentence flipping to `edit` at that block through the ONE scrolled-open door (`LandingTarget`) the book's
+Read → Index click-through shares. The BOOK's Index word-tab is EDITABLE in place; the book's Read stays
+read-only. The 13k K12 masthead tag-fold is superseded: the masthead's `#` glyph is the ONE tag door (an
+inline field with the cursor active), the fold retired there.*
+
+**AppSpec §14 (the dated delta paragraph — replaces the pre-13u paragraph, which rolls verbatim to
+`notes/AppSpecDeltaArchive.md`):** *Author-decision + shipped-semantics delta (2026-09-01, THE ACT 10
+CORRECTION ROUND — the BINDING record is `notes/plans/act10-correction-round.md`: her rulings R-cor-1…8, the
+54-row ledger, the batch records; the source is her verbatim report
+`notes/author-reports/2026-09-01-post-act10-ui-report.md`):* **(1) HER RULINGS:** correct the pre-13u round's
+UI IN PLACE, surface by surface, retiring nothing that could be made right (R-cor-1/4); this round before
+`pre-13x` (R-cor-2); the Library's right panel a simple read preview with one door landing at the saved
+block, books showing their outline, the "this note" rail fading (R-cor-3, her inclinations); Index + Read
+ONE tab named Read with `edit · read`, `edit` the default and editable, `read` never (R-cor-5/7); Lenses +
+Compare NEED A DESIGN — `notes/plans/act10-correction-memo-lenses-compare.md` is the design record, its
+build a phase of its own (R-cor-6); the overnight authorization (R-cor-8). **(2) SHIPPED:** `PENDING — one
+sentence per batch at the closeout; zero schema; zero `Sync/`; the marker STAYS 7.` **(3) HANDED FORWARD:**
+the Lenses + Compare build phase (unslotted, at her word); 13u2's item 17 re-homed here (the door); rows
+deferred with owners `PENDING`. Her ratify list: QUESTIONS `#PENDING` (the §7 bundle).
+
+**OverallModel / CoreDescription:** no change (no model semantics moved). **SyncSpec:** no change.
+**CLAUDE.md:** no change (the round's rules C-1…C-7 live in the plan; a future ruling may promote C-2/C-3 —
+the use-gate and no-install-without-a-walk — to the architect-phase skill; recorded as a candidate for her,
+not applied).
+
 ## 8. Records (appended per batch; the triage walk first)
 
 ### TRIAGE WALK — LIVE (2026-09-01 ~04:30 → ; the orchestrator, dev-store Debug build `io.lduarte.Variorum.debug`, Terminal voice, window zoomed 1728×1084; captures in `act10-correction-screens/triage/`)
@@ -672,6 +707,8 @@ last. Then stop.
 
 ### BATCH C — THE NOTE MODES (brief; DRAFTED 2026-09-01 ~05:55 — spawn after A closes)
 
+**Token discipline (binding, from the orchestrator handoff §2c):** build ONE contact sheet of your capture directory with `python3 notes/plans/act10-correction-screens/tools/sheet.py <dir>` and name it in your record; the orchestrator reads the sheet first and opens full captures only where a tile earns it.
+
 **Read IN FULL, in order:** this file (all of it — the constitution, C-1…C-7, R-cor-1…7 with R-cor-5/7 as
 your governing rulings, the ledger, the triage record, batch B's and A's records — B names the scrolled-open
 DOOR brain you reuse); the source report (§1; image rows 1, 10–15); then the code: `Features/Takes/
@@ -743,6 +780,8 @@ captures, counts, commits, new rows numbered after A's last).
 
 ### BATCH F — THE RECOVERY FAMILY (brief; DRAFTED 2026-09-01 ~05:55 — spawn after C closes; her "special attention")
 
+**Token discipline (binding, from the orchestrator handoff §2c):** build ONE contact sheet of your capture directory with `python3 notes/plans/act10-correction-screens/tools/sheet.py <dir>` and name it in your record; the orchestrator reads the sheet first and opens full captures only where a tile earns it.
+
 **Read IN FULL:** this file; the source report (§1 — her words on lineage/history/archive/trash; image
 row 12); `notes/plans/phase-13j-purge-memo.md` §4 (the doors' doctrine) and the 13j plan's utility
 enumeration for what each surface OWES; then the code: `Features/Tray/TrayPanel.swift`, `Features/Tray/
@@ -783,6 +822,8 @@ RECORD under this brief.
 
 ### BATCH D — COMPARE + LENSES, MECHANICAL ONLY (brief; DRAFTED — spawn after F closes; the DESIGN is the memo, not this batch)
 
+**Token discipline (binding, from the orchestrator handoff §2c):** build ONE contact sheet of your capture directory with `python3 notes/plans/act10-correction-screens/tools/sheet.py <dir>` and name it in your record; the orchestrator reads the sheet first and opens full captures only where a tile earns it.
+
 **Read IN FULL:** this file; `notes/plans/act10-correction-memo-lenses-compare.md` (so your mechanical fixes
 point the same way the design will go — but you build NONE of §3/§4's redesign); the source report's image
 rows 8/9/10/13; `Features/Takes/CompareBoardView.swift` (:938 the `anchor.title ?? "This note"` fallback; the
@@ -804,6 +845,8 @@ compare, Lenses with two columns. **Deliverable:** the BATCH D RECORD under this
 ---
 
 ### BATCH E — THE LIBRARY PANEL (brief; DRAFTED — spawn after D closes; R-cor-3's PROVISIONAL reading)
+
+**Token discipline (binding, from the orchestrator handoff §2c):** build ONE contact sheet of your capture directory with `python3 notes/plans/act10-correction-screens/tools/sheet.py <dir>` and name it in your record; the orchestrator reads the sheet first and opens full captures only where a tile earns it.
 
 **Read IN FULL:** this file (R-cor-3 verbatim is your governing text — her INCLINATIONS, the safer choice);
 the source report's image row 3; `Features/Library/LibraryInfoPanel.swift`, `Features/Library/
