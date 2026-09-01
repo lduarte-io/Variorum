@@ -83,6 +83,27 @@ it.
   (`ReadModeView.swift:302`) — a fixed convention (200 wpm adult silent reading), not measured, not
   random; stays in Read per her word; recorded (row 32), the constant named.
 
+- **R-cor-5 — INDEX + READ BECOME ONE TAB, NAMED READ (her ruling at the sitting, verbatim):** *"I like one
+  tab named read, but don't do the minimal outline of the current read tab - do the useful outline of the
+  index tab. I actually really like how the index tab looks with its > 01, I think it looks nice. the text
+  is a bit too small on the dropdown but it's better with the outline as what the current index has."* →
+  The note mode row becomes **Write · Takes · Read · Lenses · Compare · Blocks · Canvas** (⌘1–⌘7, derived
+  from the one order). READ = the calm page at rest; a click on a block makes THAT block live in place (the
+  one-live-editor upgrade — P-3 through `PaneTextAuthority`, the block-TOC design's own promise); the
+  outline toggle she loves shows/hides the INDEX column — the Index tab's numbered `▸ 01` navigator
+  (headings → sections, blocks nested, filter, scroll-synced), NOT Read's minimal outline, with its
+  dropdown/expanded type a step larger; a small in-place selector picks the page's shape — continuous or
+  horizontal pages (the book's paged view reused). The Index tab retires INTO Read (its brains — 
+  `NoteIndexOutline`, the column — survive as Read's column); AppSpec §12's mode-row line and the field
+  guide's "getting around"/"index · read" lessons change at closeout (the re-seed obligation rides). Her
+  second message's reasoning is the record: *"making it more similar to book, where it's a selector within
+  a place you're in. and the outline button could hide / show the index, and the index could function as
+  the outline."*
+- **Her hands-off note (2026-09-01 ~04:45):** *"i was the reason that screenshot wasn't right  i'll stop
+  clicking anything on my computer and switch to only messaging you via my phone, so you can use my
+  computer better."* → the machine is author-free for the walk from here; her real-store app is closed
+  (the zero-instance window for the end-of-run refresh is open).
+
 **Inherited rulings this round builds to (not re-litigated):** the eighth-wave rulings W8-1…W8-5
 (`pre-13u-round.md`), the fifth-wave item-15 flow ruling, the mode-row canon R60–94 as extended by
 W8-1 (the eight-mode row is AppSpec §12 canon), her copy doctrine (structure and generous targets
@@ -158,7 +179,7 @@ present), and the 13j recovery doctrine (the Trash is the recovery door).
 | 39 | (2nd msg) "I haven't even gotten into blocks and index and how clicking through them is impacting the regular write and takes mode" | Cross-mode position continuity (Write ↔ Takes ↔ Index ↔ Read ↔ Blocks) | W8-1's "index tracks position with take / write / probably block too": the walk exercises every mode switch with a block selected and records whether the position follows; each miss becomes a row | triage → C | OPEN |
 | 40 | (2nd msg, image 16) the book Outline's expanded note shows the bottom bar's items stacked VERTICALLY in a floating side card ("block 1/1 · block ▾ · Takes · commit ⌘S · history / note ▾ · comments · Aa / 5w block · 5w in note · ?") — "looks kind of weird… maybe the note menu needs to be collapsible… what's in that menu and how it looks needs to be a bit clearer" | Book Outline's in-place editor chrome | Trace where the side card comes from (the `CommitBar` axis introduced at wave 2c); make it read as one clear, calm control — collapsible if the trace says a stack is the right shape at that width | B | OPEN |
 | 41 | (2nd msg) "if compare needs its own phase, give it its own phase!! that's fine" | Compare + Lenses | Authorization recorded: batch D fixes the defects (rows 16/17); if the triage walk finds Lenses/Compare need a DESIGN rather than fixes, the orchestrator writes the brief for a phase of their own instead of half-building it (the S4-16 condition) | D | RECORDED |
-| 42 | (2nd msg) "I also wonder if Index / Read could be condensed into a single tab - making it more similar to book, where it's a selector within a place you're in. and the outline button could hide / show the index, and the index could function as the outline." | The note mode row | A product call — asked at the sitting with the architect's recommendation (see the sitting record) | C (gates its design) | OPEN (ruling) |
+| 42 | (2nd msg — RULED R-cor-5: one tab, Read, with the Index's outline) "I also wonder if Index / Read could be condensed into a single tab - making it more similar to book, where it's a selector within a place you're in. and the outline button could hide / show the index, and the index could function as the outline." | The note mode row | A product call — asked at the sitting with the architect's recommendation (see the sitting record) | C | RULED (R-cor-5) |
 | 43 | (2nd msg) "If I need to ship the app with just writing and takes, I'd be willing to do so, but ideally that won't be necessary" | — | Recorded as her floor, not the plan; the round's bar is every mode useful, bug-free and beautiful | — | RECORDED |
 
 ## 4. The batches (one surface each — C-1; order chosen so "crisp" returns first)
