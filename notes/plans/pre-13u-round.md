@@ -3240,3 +3240,22 @@ compile errors**. Shutting every simulator down and booting the target device ex
 *[removed for publication]*
 **by id** rather than by name/OS, cleared it and every run since. Same class as residual 2's
 "the bare scheme resolves to Designed for iPad" — the destination has to be stated exactly.
+
+# Review foci (for the final cold-review ladder — each written into this plan BEFORE the build it
+# concerns, and cited to its pre-build record; the reviewer treats each as a mandatory check)
+
+1. **The stale-copy re-key door (T1):** verdict the Replace Encryption Keys road — is a re-key from
+   a copy the server is AHEAD of guarded by a recency comparison and an honest warning before the
+   re-push, or unguarded (then a KnownIssues row with an owner)? *(Source: "THE NINTH WAVE'S
+   CLOSING RIDERS" — "EITHER WAY the final ladder verdicts the door", recorded before wave 2a.)*
+2. **Render, don't re-derive:** the security-shapes memo's keystone lines (`notes/plans/
+   pre-13u-memo-security-shapes.md` §§1–5) must reach the built settings/tutorial surfaces
+   essentially VERBATIM — almost-true paraphrase is the named failure mode. *(Source: the memo's
+   §9c item 3 and the same riders block, pre-build.)*
+3. **No screen-capture code in any production target:** the product must never be able to
+   request Screen Recording — grep `App/` and `Sources/` for capture APIs. *(Source: "HER
+   OVERNIGHT CHECK-IN", recorded during wave 1, before waves 2a–2c.)*
+4. **P-3 across the new surfaces:** exactly ONE live editor anywhere; the new read-cheap tiers are
+   projections; any liveness extension goes through the one authority (`PaneTextAuthority`),
+   never a sibling mechanism. *(Source: CLAUDE.md's P3 + the architect-phase constitution P-3,
+   standing law.)*
