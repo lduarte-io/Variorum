@@ -1284,6 +1284,29 @@ Honesty notes (the completion session's): the voice switch BACK to Terminal mis-
 
 ---
 
+
+#### BATCH F RECORD — CLOSED by the orchestrator (2026-09-01 ~17:20; the founding session's LAST batch per R-cor-9)
+
+Spot-check walked on the final dev build (`orchestrator-f/`): **the tray** — section headers with their
+meaning lines ("leaving — on the 30-day clock" / "archived — kept, no clock"), full unclipped stamps
+("deleted sep 1, 2026 30 days left"), full-size Put back / Delete Now verbs (row 63 + the adopted
+`.fixedSize()` rider), the "▸ 1 deleted take" disclosure, her Act 10 item 1 (the clipped header) verifiably
+gone; **the Block History pane** — "savepoints" and "came from" as labeled calm sections with one-line
+meanings, the take run's full stamp + Restore, the two merge-released originals as cards with "the original
+is preserved" + Bring back + Open this note's tray (rows 28/65/68). The completion session (a DIFFERENT
+session from the builder) had already walked all six fixed rows and the four surfaces at three widths in
+both voices (94-tile sheet `batch-f/contact-sheet.png`). Counts at close: **Mac 2032/356 exact twice**
+(C's 2028 + 4 pins), spine 71/10, core untouched. Batch machinery note: F's implementer died at the
+account's rate limit mid-USE-gate; its LIVE STATUS let a fresh completion session finish without loss —
+the protocol held. Cosmetic, recorded: the seeded fixture's first block carries a seeding accident ("The
+margin held." typed mid-word into "storms") — dev store only, harmless, left as is. Residual for batch E
+(recorded by F's walk): the Library's archive receipt renders clipped under the new-note bar. One
+load-flaky pin noted for the ladder (`BlocksWorkbenchFaceTests`' real-click rig — green isolated, green in
+run 1). **The founding orchestrator WRAPS here (R-cor-9); the successor runs D → E → the ladder → the walk
+→ the install → the author handoff.**
+
+---
+
 ### BATCH D — COMPARE + LENSES, MECHANICAL ONLY (brief; DRAFTED — spawn after F closes; the DESIGN is the memo, not this batch)
 
 **Token discipline (binding, from the orchestrator handoff §2c):** build ONE contact sheet of your capture directory with `python3 notes/plans/act10-correction-screens/tools/sheet.py <dir>` and name it in your record; the orchestrator reads the sheet first and opens full captures only where a tile earns it.
