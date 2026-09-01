@@ -1261,3 +1261,32 @@ a scratch copy.
 
 **Nothing in this section is PENDING.** The simulator was deleted at the
 close.
+
+---
+
+# UNIT CLOSED (the Fable orchestrator, 2026-09-01)
+
+**Batch 10's R28 unit is COMPLETE — and it is the SEAT'S LAST:** build
+(four checkpoint commits through `9a515b7`…, surviving the harness
+restart + system crash on the resiliency protocol) → cold review
+`3907624` (0B · 2M · 4m · 2n — the band that teleported; the refusal
+that spoke off-screen) → fix wave `8cb9c25`, all seven items, per-piece
+commits pushed. **Final: mobile 727/103 green, 2 known issues.** Fence
+clean at every commit, verified by the orchestrator. Shipped: the
+Starred ‹ Shelf › Library band with a settle spring on every landing
+(taps glide too — her device judges it), the starred page as a face
+over the existing star (the above-the-shelf placement retired), New
+Note (gate inside the mint's transaction) + New Chapter (curated-only)
+inside a book with the refusal spoken beside the doors, empty chapters
+rendering, past-the-window chapters folded under the marker.
+
+**Held/owned out of this unit:** the assign-to-chapter door's placement
+(HER call — status file §C); the swipe's real pan feel + the tap glide
+(device queue); the `MobileSurfaceDriver` harness gap (pre-existing;
+blast radius ZERO today, enumerated in the review — forward risk for
+any future shell-mounted absence pin; noted for the leftover-backlog
+batch's harness half); the finished-book divergence recorded as chosen.
+
+**THE ROUND PAUSES HERE at her word** (status file §H): the Release
+build of this tree installs to her phone as the seat's closing act;
+batch 8 and the rest resume after 13u + the merge.
