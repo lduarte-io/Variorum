@@ -489,28 +489,43 @@ extension Queries {
             .replacingOccurrences(of: "%", with: "\\%")
             .replacingOccurrences(of: "_", with: "\\_")
         let like = "%\(escaped)%"
+        // The bounded id set FIRST, the snippets SECOND (the ladder's F7):
+        // SQLite computes a SELECT list's correlated subquery for every row
+        // that passes WHERE before the sorter applies LIMIT, so the old
+        // single statement paid one placement + variant seek per LIVE NOTE
+        // per keystroke — corpus-shaped on a typing road. The CTE pins the
+        // LIMIT to the scan (which stays a title/day substring walk, the
+        // inherent cost of a substring search), and the snippet subquery
+        // then runs for at most `limit` rows. `NotePickerShapeTests` pins
+        // the VM-step difference flat in corpus size.
         return try Row.fetchAll(
             db,
             sql: """
-                SELECT c.id AS id, c.title AS title, c.entry_date AS entry_date,
-                       c.created_at AS created_at,
-                       COALESCE(c.last_touched_at, c.created_at) AS stamp,
+                WITH hits AS (
+                    SELECT c.id AS id, c.title AS title, c.entry_date AS entry_date,
+                           c.created_at AS created_at,
+                           COALESCE(c.last_touched_at, c.created_at) AS stamp
+                    FROM container c
+                    WHERE c.kind = 'post' AND c.deleted_at IS NULL AND c.archived_at IS NULL
+                      AND (:query = ''
+                           OR COALESCE(c.title, '') LIKE :like ESCAPE '\\'
+                           OR COALESCE(c.entry_date, '') LIKE :like ESCAPE '\\')
+                      AND (:subject IS NULL OR c.id <> :subject)
+                    ORDER BY stamp DESC, c.id DESC
+                    LIMIT :limit
+                )
+                SELECT h.id AS id, h.title AS title, h.entry_date AS entry_date,
+                       h.created_at AS created_at, h.stamp AS stamp,
                        (SELECT SUBSTR(COALESCE(v.working_text, ''), 1, 160)
                           FROM container_block cb
                           JOIN block b ON b.id = cb.block_id AND b.deleted_at IS NULL
                           LEFT JOIN variant v
                             ON v.id = b.default_variant_id AND v.deleted_at IS NULL
-                         WHERE cb.container_id = c.id AND cb.deleted_at IS NULL
+                         WHERE cb.container_id = h.id AND cb.deleted_at IS NULL
                          ORDER BY cb.position, cb.id
                          LIMIT 1) AS snippet
-                FROM container c
-                WHERE c.kind = 'post' AND c.deleted_at IS NULL AND c.archived_at IS NULL
-                  AND (:query = ''
-                       OR COALESCE(c.title, '') LIKE :like ESCAPE '\\'
-                       OR COALESCE(c.entry_date, '') LIKE :like ESCAPE '\\')
-                  AND (:subject IS NULL OR c.id <> :subject)
-                ORDER BY stamp DESC, c.id DESC
-                LIMIT :limit
+                FROM hits h
+                ORDER BY h.stamp DESC, h.id DESC
                 """,
             arguments: [
                 "query": trimmed, "like": like, "subject": subjectID, "limit": limit,
