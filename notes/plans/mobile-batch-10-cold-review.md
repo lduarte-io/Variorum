@@ -1186,3 +1186,78 @@ status row rather than ending in itself.
 
 **Files:** `notes/plans/mobile-round-2-status-2026-09-01.md`,
 `notes/plans/mobile-batch-10-record.md`.
+
+---
+
+## THE FIX WAVE'S CLOSE
+
+### The suite — full mobile target, one run, no restarts
+
+```
+✘ Test run with 727 tests in 103 suites passed after 348.273 seconds with 2 known issues.
+** TEST SUCCEEDED **
+```
+
+Exit `0`; `^✘ Test .* failed` greps **0**; the leading glyph is the
+runner's for a run carrying known issues and the word is **passed** (the
+same two standing known issues as the batch's own run).
+
+**727 against the review's 725 = +2, and the arithmetic is exact:**
+**+3** new pins in `MobileNavigationTests`
+(`aRefusedBookDoorSpeaksBesideTheDoorSheTapped`,
+`aChapterWhoseNotesFellPastTheWindowIsNotShownAsEmpty`,
+`aPageChangeFilesTheQuickNoteBoxAndThisIsWhatItDoes`) and **−1** in
+`MobileShelfLayoutTests` (`starredRowsRideInsideTheBound`, retired with
+the parameter it drove — NIT 1). Suites unchanged at **103**: nothing
+declared a new one.
+
+**The load-flaky perf pin did NOT red** (the box was at load ~19–22 for
+this run): `PERF[sim] keystroke p95 — control 0.943 ms · 100k top 7.473 ms
+· 100k end 8.387 ms` against the 12.0 ms budget. **No runner deaths** —
+one run, one result, nothing re-run.
+
+### The fence — re-derived over the whole wave (`3907624..HEAD`)
+
+```
+=== FILES TOUCHED ===
+App/Variorum/VariorumMobile/Features/Shell/MobileBookView.swift
+App/Variorum/VariorumMobile/Features/Shell/MobileBookViewModel.swift
+App/Variorum/VariorumMobile/Features/Shell/MobileShelfLayout.swift
+App/Variorum/VariorumMobile/Features/Shell/MobileShelfView.swift
+App/Variorum/VariorumMobile/Features/Shell/MobileShellBand.swift
+App/Variorum/VariorumMobile/Features/Shell/MobileShellView.swift
+App/Variorum/VariorumMobileTests/MobileNavigationTests.swift
+App/Variorum/VariorumMobileTests/MobileShelfLayoutTests.swift
+notes/plans/mobile-batch-10-cold-review.md
+notes/plans/mobile-batch-10-record.md
+notes/plans/mobile-round-2-status-2026-09-01.md
+
+=== FENCE GREP (Sources/ | App/Variorum/Shared/ | App/Variorum/Variorum/ |
+    EditorBrain/ | Package.resolved | *.pbxproj | *.xcconfig | Server/) ===
+EMPTY
+
+=== planVisibleTakeEdit in the wave's diff, CODE ONLY ===
+0
+```
+
+No `Package.resolved` drift; no `.pbxproj` change; `git status` clean at
+every commit boundary and at the close. **Every production revert in this
+wave was applied to a COMMITTED tree and restored with
+`git checkout --`** (the protocol's own rule), so no restore depended on
+a scratch copy.
+
+### Every item, and where it landed
+
+| # | item | disposition | evidence |
+|---|---|---|---|
+| 1 | MAJOR 1 · the band teleports | **FIXED** — one settle spring, both roads | animation DECLARED unpinnable in process; the landing contract's pins stay green |
+| 2 | MAJOR 2 · the refusal speaks off-screen | **FIXED** — `doorRefusal` beside the doors | red quoted: refusal at y 89.0 vs door at y 566.7 |
+| 3 | MINOR 1 · a cancelled gesture strands the band | **FIXED** — `@GestureState` + settle on its reset | by construction; DECLARED unpinnable (no synthesizable cancel) |
+| 4 | MINOR 2 · the chapter gap has no home | **DONE** — §C YOUR RULINGS row, hers to place | notes only |
+| 5 | MINOR 3 · the A5-8 claim is inherited | **PINNED**, and the probe's reading explained | `t0 → 0/kept`, `t2 → 1/cleared`, 5 runs; teeth proven by revert |
+| 6 | MINOR 4 · chapters past the window read as empty | **FIXED** — folded under the standing marker | red quoted: `["One","Two","Three"]` with counts `[1,0,0]` |
+| 7 | NIT 1 · the dead `starredRows` parameter | **RETIRED** — pin re-derived to 602 states | green with it gone |
+| 7 | NIT 2 · the missing `width > 0` guard | **FIXED** and PINNED | red quoted: `-120.0` instead of `0` |
+
+**Nothing in this section is PENDING.** The simulator was deleted at the
+close.

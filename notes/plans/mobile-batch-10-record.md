@@ -24,6 +24,7 @@ green with 2 known issues** (batch 7's unit close,
 | **Full mobile suite vs 712/102** | **DONE** — `✘ Test run with 725 tests in 103 suites passed after 343.885 seconds with 2 known issues.` (the leading glyph is the runner's for a run carrying known issues; the word is **passed**, and `✘ Test .*failed` greps **0**) |
 | **Fence verification** | **DONE** — quoted below: no fenced path touched, `planVisibleTakeEdit` count **0**, tree clean |
 | Simulator deletion | **DONE** at the end of the run |
+| **THE COLD REVIEW + ITS FIX WAVE** | **DONE (2026-09-01)** — 2 MAJOR · 4 MINOR · 2 NIT, all accepted, all executed; full suite **`✘ Test run with 727 tests in 103 suites passed after 348.273 seconds with 2 known issues.`** (725 + 3 new pins − 1 retired), fences clean. Per-item dispositions and every quoted red: the **FIX WAVE RESULTS** section of `mobile-batch-10-cold-review.md`; what changed in the shipped shape: the table directly below |
 
 **Nothing below is PENDING any more — every count and every "green" is a
 quoted run.**
