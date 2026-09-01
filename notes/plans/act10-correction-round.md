@@ -502,3 +502,164 @@ yours are those + your pins; state the arithmetic.
 FIXED (pin, red-on-old evidence) / RECORDED / DEFERRED (owner + why); the container decision; the row-36
 table; the capture list; counts; commits in order; new findings as ledger rows numbered after batch B's
 last. Then stop.
+
+---
+
+### BATCH C — THE NOTE MODES (brief; DRAFTED 2026-09-01 ~05:55 — spawn after A closes)
+
+**Read IN FULL, in order:** this file (all of it — the constitution, C-1…C-7, R-cor-1…7 with R-cor-5/7 as
+your governing rulings, the ledger, the triage record, batch B's and A's records — B names the scrolled-open
+DOOR brain you reuse); the source report (§1; image rows 1, 10–15); then the code: `Features/Takes/
+PostDetailView.swift` (the `Mode` enum + `allCases` rail/menu/keys ~:190, the `InspectorPanel` host
+:125–140 / :281–301 / :356, the per-note mode memory :389), `Features/TOC/IndexModeView.swift`,
+`Features/ReadMode/ReadModeView.swift` (`outlineShown`, the minimal outline :131+, the page), `Features/TOC/
+BlocksWorkbenchView.swift` (the split :147–161 — the context panel is `.frame(width: 320)`; the five `.task`s
+:167–171), `Shared/NoteIndexOutline.swift`, `Core/Views/FlowParagraph.swift`, `Features/Tray/
+BlockHistoryPane.swift`, `Registry/CapabilityRegistry.swift` (:144 the read-mode gate; :1173 `switchMode`
+"⌘1–⌘8"), `Registry/Capability.swift` (:576), the book's paged engine (the Book tab's `scroll · pages`
+selector — find it in `Features/BookView/`), the tutorial seeder `Features/Tutorial/TutorialSeeder.swift`
+(:332 the mode enumeration; :1332–1348 the "index · read" lesson — its TEXT states ⌘3/⌘4 and the click-lands-
+in-Index promise; it changes under R-cor-7), and the pins `NewModesTests`, `NoteIndexOutlineTests`,
+`BlocksWorkbenchTests`, `ModesSherlockMeasureTests`, `BlockHistoryPaneTests`, `WorkspaceNavigationTests` (the
+eight-mode rail pin re-anchored at `15c7463` — it becomes seven), `TutorialWalkTests`.
+
+**Your surface is the NOTE's mode row and the modes Read (edit·read), Blocks, and the Block History HOST —
+and only that (C-1).** Rows:
+
+1. **Rows 30/31 + 5/6/21 + 42 — R-cor-5/7, whole.** The rail becomes **Write · Takes · Read · Lenses ·
+   Compare · Blocks · Canvas (⌘1–⌘7, derived from the one order — rail, menu and keys can never disagree;
+   the registry verb follows)**. READ carries an in-place **`edit · read`** switch, **default `edit`**
+   (RULED), remembered per note (your call, stated). **`edit`** = the Index tab's `▸ 01` outline column
+   (toggle to hide/show with the existing outline button; the expanded/dropdown rows' type a step larger;
+   **the small expanded editing card RETIRES**) beside a text pane in which **a clicked block goes LIVE in
+   place** (the read-cheap→live upgrade through `PaneTextAuthority`; ONE live editor — P-3; the Write
+   editor's identity machinery is never duplicated). **`read`** = `ReadModeView`'s calm page, **never
+   editable**, with a `continuous · pages` selector (the book's paged engine reused — no second pager) and
+   the SAME `▸ 01` column available (the minimal outline retires); the row-6 contents truncation goes with
+   it. A click on a sentence in `read` flips to `edit` **at that block with the caret there** — batch B's
+   door brain, reused, never re-implemented (row 38's note half). The Index TAB retires; `IndexModeView`'s
+   brains become Read's `edit` half (keep the names as forwards where pins ride them — the 3C parity shape).
+   Update the registry, the eight-mode pins → seven, and the **seeder's lesson text** to the new truth
+   (⌘3 = Read; "click this paragraph — the page turns to edit with it live"), recording that the LIVE
+   re-seed is the closeout's act. Pins: seven modes + key derivation; `edit` default; a click in `edit`
+   makes exactly that block live (authority invariant); `read` has no live pane; a `read` click lands in
+   `edit` at the clicked block; the pages selector renders the paged engine.
+2. **Row 39 — ONE current block follows you.** Today position is per-mode memory. Define ONE per-note
+   "current block" (the live/caret block in Write and Takes; the selected block in Read's `edit` and in
+   Blocks) that every mode ENTERS on and LEAVES to. Pin the round trip: Write caret in block 2 → Takes live
+   block 2 → Read(edit) block 2 selected/live → Blocks block 2 selected → Write caret in block 2.
+3. **Rows 27 + 29 — Block History's host.** (a) ONE right region at a time: opened from Blocks, the history
+   pane must not stand beside the workbench's own context panel past the window's edge — either the context
+   panel yields or the history renders inside it; a geometry pin: the window's content never exceeds its
+   width. (b) The pane is scoped to the mode that opened it: a mode switch closes it (or re-targets it to
+   the current block — say which); it never shows block 3's history while block 1 is live. Pin: open in
+   Write, ⌘2 → gone/re-targeted (RED on old: it persists stale).
+4. **Row 18 — Blocks' draggable divider** between the list and the context panel (min widths both sides,
+   the width remembered, the resize cursor on hover). Pin: a drag changes the split and it persists.
+5. **Row 25 — the Blocks selection lag.** Measure first (click → rendered) on the Sherlock 215-block note; the
+   candidates are the five `.task`s on appear and `observeBlockWorkbench` re-reading the note's facts on the
+   main actor; render the list first and let facts arrive. Pin: a measure pin (the `ModesSherlockMeasureTests`
+   shape) with a budget you state; RED on old if the budget is honest.
+6. **Row 26 — the context panel's order:** facts first, the text card after (the architect's reading of "the
+   text is also above the details"; note it PROVISIONAL in the record — her morning walk can flip it).
+7. **Row 36 — apply batch A's KEEP/DROP table** to the displays on your surfaces (Read's page line stays per
+   her word; the workbench footer and the Index column's counts per the table).
+
+**Rules (§2b) bind; the acceptance gate is USE:** captures in `act10-correction-screens/batch-c/` — the
+seven-mode rail; Read opening on `edit` with the column; a click making a block live in the pane; `read`
+continuous and pages; the outline toggle; a `read` click landing in `edit` at that block; the five-step
+continuity round trip; Blocks with the divider dragged; the selection timing; history from Blocks inside the
+window; history gone after a mode switch. Environment + driving recipe + resiliency: batch B's brief's last
+three paragraphs bind identically. Baselines: batch A's record's counts + your pins. **Deliverable:** code +
+pins + a BATCH C RECORD under this brief (dispositions, the "current block" authority's name and file, the
+captures, counts, commits, new rows numbered after A's last).
+
+---
+
+### BATCH F — THE RECOVERY FAMILY (brief; DRAFTED 2026-09-01 ~05:55 — spawn after C closes; her "special attention")
+
+**Read IN FULL:** this file; the source report (§1 — her words on lineage/history/archive/trash; image
+row 12); `notes/plans/phase-13j-purge-memo.md` §4 (the doors' doctrine) and the 13j plan's utility
+enumeration for what each surface OWES; then the code: `Features/Tray/TrayPanel.swift`, `Features/Tray/
+BlockHistoryPane.swift`, `Shared/BlockHistoryFace.swift` (the four sections: Savepoints · Archived takes ·
+Deleted takes · **Came from** — the lineage row), `Shared/RecoveryCopy.swift`, `Shared/RecoveryActs.swift`,
+`Features/Library/ArchivedView.swift`, `Features/Library/RecoveryView.swift` (the Trash), `Theme/CalmGrammar.swift`;
+the pins `TrayPanelShapeTests`, `TrayPanelMoveTests`, `NoteTrayTests`, `BlockHistoryPaneTests`,
+`RecoveryDoorsTests`, `TrashSurfaceTests`, `TrashPurgeDoorsTests`, `IAAndTrashShapeTests`,
+`SnippetGroupTrashTests`.
+
+**Your surfaces: This Note's Tray · Block History (the pane's CONTENT; its host is C's) · Archived · the Trash
+· the lineage doors ("Came from", the successors' doors) — and only those (C-1).** This batch is different in
+shape: **it is a WALK FIRST, then fixes.** The dev store has no recovery content, so:
+
+1. **Seed real content on the dev store through the product doors** (never SQL): in a scratch note — archive
+   a block, delete a single block, multi-delete three, divide a block (lineage), merge two, delete a take,
+   archive a take, make two savepoints on one take (⌘S twice with an edit between), save a note version
+   (⌘⇧S), archive a whole note, delete a note that has a version, delete a snippet group. Record the seeding
+   steps so the orchestrator can repeat them.
+2. **Walk every surface at three widths** (a narrow pane, her ~1728-pt window, a short window) **in both
+   voices**, every door exercised — Put back · Restore · Delete Now · Open note · the lineage row's door · the
+   tray's Leaving/Archived sections · Empty Trash's confirm (cancel it) · Archived's un-archive. **Every defect
+   becomes a ledger row** (numbered after C's last) with a capture and a traced mechanism, then FIXED with a
+   red-on-old pin. Her Act 10 item 1 (the clipped tray header) is verified fixed at every width.
+3. **Row 28 — savepoints vs lineage read as sections.** The pane's four sections get real section structure
+   (the calm-card grammar: a header with air, one sentence of meaning under each — "Savepoints: this take's
+   saved moments" · "Came from: the block this one was divided/merged/extracted out of"); "Came from" is the
+   lineage — the word appears once, where it helps. Keep every string's substance (she rewrites copy later).
+4. **Row 35 — the calm-chrome rule (C-6) on these surfaces:** no metric without a reason; the Trash's row
+   facts ("from · deleted · N days left") stay — they ARE the reason a Trash exists.
+
+**The acceptance gate is USE:** captures in `act10-correction-screens/batch-f/`, one per surface × width ×
+voice at minimum, plus one per fixed row. Environment + recipe + resiliency: batch B's brief's last three
+paragraphs bind. **Deliverable:** the seeding steps, the walk's row list, the fixes with pins, the BATCH F
+RECORD under this brief.
+
+---
+
+### BATCH D — COMPARE + LENSES, MECHANICAL ONLY (brief; DRAFTED — spawn after F closes; the DESIGN is the memo, not this batch)
+
+**Read IN FULL:** this file; `notes/plans/act10-correction-memo-lenses-compare.md` (so your mechanical fixes
+point the same way the design will go — but you build NONE of §3/§4's redesign); the source report's image
+rows 8/9/10/13; `Features/Takes/CompareBoardView.swift` (:938 the `anchor.title ?? "This note"` fallback; the
+"related blocks only" filter's application), `Features/Takes/LensesBoardView.swift`, `Core/Views/
+NotePicker.swift`; the pins on `CompareComposition`/`CompareViewModel`/Takes (they stay green UNMODIFIED —
+that is the semantics proof).
+
+**Rows 16, 17, 46 — and only those (C-1):** (17) the anchor column ALWAYS renders the note whole — "related
+blocks only" filters PEER columns, never the anchor; the header uses the derived display name (a journal
+entry shows its day), never the literal "This note". Pin: related-only on + no peer → every anchor block
+renders (RED on old: none). (46) ONE placement per act: the top-right "make outline note"/"+ note" buttons
+retire; the offer cards stay (the memo will move them into the slot later). Pin: a registry/mount walk finds
+exactly one door per act on the board. (16) the alignment: the toolbar row, the header cards and the offer
+cards share ONE left edge and ONE baseline; the `＋ column`/`+ note` ghost stops floating mid-right — it
+sits at the column strip's end at the header's height (both boards). Geometry pins. Nothing else — no
+renames, no door moves beyond 46. Acceptance: captures of Compare's first open (anchor whole), a two-column
+compare, Lenses with two columns. **Deliverable:** the BATCH D RECORD under this brief.
+
+---
+
+### BATCH E — THE LIBRARY PANEL (brief; DRAFTED — spawn after D closes; R-cor-3's PROVISIONAL reading)
+
+**Read IN FULL:** this file (R-cor-3 verbatim is your governing text — her INCLINATIONS, the safer choice);
+the source report's image row 3; `Features/Library/LibraryInfoPanel.swift`, `Features/Library/
+LibraryCatalogView.swift` (the row click model — body selects, title opens, double-click opens: #79's
+ratified gestures, untouched), `Core/Views/FlowParagraph.swift`, `Features/BookView/` (the navigator's
+outline rows, for the book panel), `RootView.swift` (the panel's host and the inactive-window appearance),
+the pins `NoteRowSelectionTests`, `WorkspaceNavigationTests`.
+
+**Rows 1, 33, 34, and the PANEL half of 24 — and only those (C-1):**
+(1) The panel becomes a **simple READ preview** of the selected note: its rendered text (read-cheap,
+`FlowParagraph`, virtualized — P1 holds on a 10k-word note), a calm facts line (words · blocks · last
+edited — the facts she asked for at Act 10 item 10 — nothing more), and ONE generous door **Open** that
+lands in the note **where the caret last was** (find the per-note caret/current-block memory batch C
+built — row 39's authority — and land there; if none is stored, the first block). No takes, no blocks, no
+write surface. (33) Selecting a **book** shows the BOOK's outline in the panel — chapters and notes, the
+navigator's own grammar; a note row there opens the book at that note (batch B's reveal). (34) The
+boundary between the panel and the library holds when the window is INACTIVE (`controlActiveState`) —
+the divider and the panel's wash must not vanish; capture active vs inactive. (24, panel half) the panel's
+appearance/disappearance animates with the row selection (no teleport); the sidebar rail's fade is A's.
+Pins: a note selection renders the note's first block's text; a book selection renders its chapters; Open
+lands at the remembered block; the inactive state keeps the divider (a render pin over
+`controlActiveState`). Acceptance captures: a note selected (long note), a book selected, Open landing,
+inactive window. **Deliverable:** the BATCH E RECORD under this brief. R-cor-3's reading stays PROVISIONAL in
+the morning bundle — her walk ratifies or redirects.
