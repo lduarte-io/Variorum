@@ -66,6 +66,14 @@ struct ReadModeTests {
             while Date() < deadline {
                 if let event = NSApp.nextEvent(
                     matching: .any, until: deadline, inMode: .default, dequeue: true) {
+                    // A kit-/system-defined event (activation, window moves)
+                    // must not be re-sent through `sendEvent` — AppKit asserts
+                    // ("Invalid message sent to event", seen in this batch);
+                    // dequeue it and move on.
+                    if event.type == .appKitDefined || event.type == .systemDefined
+                        || event.type == .applicationDefined {
+                        continue
+                    }
                     NSApp.sendEvent(event)
                 }
             }

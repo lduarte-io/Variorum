@@ -12,10 +12,9 @@
 //  · lock · words · edited · tags, from `Queries.blockWorkbench`),
 //  multi-select with a bulk bar (13e's `BlockSelection` brain and its
 //  ⌘-click merge, given the management face), and a right-hand context
-//  panel for the focused block (its text — editable through the ONE
-//  `PaneTextAuthority` — its facts, its takes, and the doors onward:
-//  Write, Takes, the Block History pane, the tray). The name "Blocks"
-//  stays, as ruled.
+//  panel for the focused block (its facts, its text — editable through the
+//  ONE `PaneTextAuthority` — its takes, and the doors onward: Write, Takes,
+//  the Block History pane, the tray). The name "Blocks" stays, as ruled.
 //
 //  Every door of the retired TOC page survives here: expand-to-edit (the
 //  panel's body), ↑↓, the whole ⋯ menu (name · jump · move to
@@ -24,10 +23,93 @@
 //  shapes (delete = ONE ⌥⌘Z entry; merge = the carry-all chain — the
 //  shared brains, the third door of the same act).
 //
+//  THE ACT 10 CORRECTION ROUND, batch C (her report on this page):
+//  - **row 25 ("weird and laggy — it takes a second after selecting it")**,
+//    MEASURED first on the dev build: a row click landed 0.26–0.49 s late
+//    because the row shell stacked a count-2 tap gesture before the plain
+//    one, so every single click waited out the 0.5 s double-click interval;
+//    and the mode arrived with an EMPTY list for ~0.25 s because the rows
+//    waited on the joined facts query. Now ONE tap handler reads the
+//    event's own click count (a single click acts at once; the second
+//    click of a double still opens in Write), and the list renders from the
+//    TOC rows the moment they land — the facts arrive onto the rows.
+//  - **row 18**: the seam between the list and the panel is DRAGGABLE
+//    (the pane row's grammar), its width remembered.
+//  - **row 26 (PROVISIONAL)**: the panel leads with the block's FACTS; the
+//    text card follows ("the text is also above the details").
+//  - **row 27**: while an inspector column (history, the tray, versions)
+//    stands beside this mode, the context panel YIELDS — ONE right region
+//    at a time, never a third column past the window's edge.
+//
 
 import GRDB  // the panel's savepoint count (one bounded read)
 import SwiftUI
 import VariorumCore
+
+/// The workbench's LIST BRAIN, pure (row 25): the display rows are built
+/// from the TOC rows — which land first, being the same cheap query every
+/// note mode reads — and the joined FACTS are laid onto them when they
+/// arrive. Filtering by a fact (a tag, a comment) and sorting by one
+/// (edited, longest) honestly wait for the facts; note order never does.
+nonisolated enum WorkbenchRows {
+    struct Display: Identifiable, Equatable {
+        let row: Queries.TOCRow
+        let facts: Queries.WorkbenchRow?
+        /// The 1-based NOTE ordinal (derived once per pass — never a
+        /// per-row index walk).
+        let ordinal: Int
+        var id: String { row.placementID }
+    }
+
+    static func display(
+        rows: [Queries.TOCRow], facts: [Queries.WorkbenchRow],
+        filter: String, show: BlocksWorkbenchView.ShowFilter,
+        sort: BlocksWorkbenchView.SortOrder
+    ) -> [Display] {
+        let factsByBlock = Dictionary(facts.map { ($0.blockID, $0) }, uniquingKeysWith: { a, _ in a })
+        var result = rows.enumerated().map { i, row in
+            Display(row: row, facts: factsByBlock[row.blockID], ordinal: i + 1)
+        }
+        let needle = filter.trimmingCharacters(in: .whitespaces)
+        if !needle.isEmpty {
+            result = result.filter { entry in
+                let handle = Queries.tocHandle(name: entry.row.name, text: entry.row.text)
+                return handle.localizedCaseInsensitiveContains(needle)
+                    || (entry.row.text?.localizedCaseInsensitiveContains(needle) ?? false)
+                    || (entry.facts?.tagPaths.contains {
+                        $0.localizedCaseInsensitiveContains(needle)
+                    } ?? false)
+            }
+        }
+        result = result.filter { show.admits($0) }
+        switch sort {
+        case .noteOrder:
+            break
+        case .recentlyEdited:
+            guard !facts.isEmpty else { break }
+            result.sort { ($0.facts?.editedAt ?? "") > ($1.facts?.editedAt ?? "") }
+        case .longest:
+            guard !facts.isEmpty else { break }
+            result.sort { ($0.facts?.wordCount ?? 0) > ($1.facts?.wordCount ?? 0) }
+        }
+        return result
+    }
+}
+
+/// The split's arithmetic (row 18), pure: the panel keeps a readable
+/// measure, the list keeps room to be a list, and a drag can never swallow
+/// either.
+nonisolated enum BlocksWorkbenchLayout {
+    static let defaultPanelWidth: Double = 320
+    static let minimumPanelWidth: Double = 260
+    static let maximumPanelWidth: Double = 640
+    static let minimumListWidth: Double = 320
+
+    static func panelWidth(proposed: Double, total: Double) -> Double {
+        let roomForPanel = max(minimumPanelWidth, total - minimumListWidth)
+        return min(max(proposed, minimumPanelWidth), min(maximumPanelWidth, roomForPanel))
+    }
+}
 
 struct BlocksWorkbenchView: View {
     /// The declared row-menu acts (P-1's declared ⇔ rendered walk) — the
@@ -37,9 +119,19 @@ struct BlocksWorkbenchView: View {
         .archiveBlock, .deleteBlock, .mergeSelectedBlocks, .deleteSelectedBlocks,
     ]
 
+    /// The remembered split (row 18) — a workbench posture, not a per-note
+    /// fact.
+    static let panelWidthKey = "blocksWorkbenchPanelWidth"
+    /// The workbench's own coordinate space — the divider's drag and the
+    /// DEBUG oracle read frames in it.
+    nonisolated static let space = "variorum-blocks-workbench"
+
     let session: AppSession
     let postID: String
     var onJump: ((String) -> Void)?
+    /// Row 27: an inspector column stands beside this mode — the context
+    /// panel yields (one right region at a time).
+    var inspectorOpen = false
 
     @State private var model: BlockTOCViewModel
     /// The context panel's subject — a plain click names it (item 10's
@@ -49,12 +141,15 @@ struct BlocksWorkbenchView: View {
     @State private var showFilter: ShowFilter = .all
     @State private var sortOrder: SortOrder = .noteOrder
     @State private var seeded = false
-    @State private var renameTarget: Queries.WorkbenchRow?
+    @State private var renameTarget: Queries.TOCRow?
     @State private var renameText = ""
-    @State private var moveTarget: Queries.WorkbenchRow?
+    @State private var moveTarget: Queries.TOCRow?
     @State private var moveOrdinalText = ""
     @State private var trayShown = false
     @State private var allTags: [Tag] = []
+    @AppStorage(BlocksWorkbenchView.panelWidthKey) private var panelWidth: Double
+        = BlocksWorkbenchLayout.defaultPanelWidth
+    @State private var totalWidth: CGFloat = 0
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
 
@@ -64,35 +159,39 @@ struct BlocksWorkbenchView: View {
 
     init(
         session: AppSession, postID: String,
-        onJump: ((String) -> Void)? = nil, model: BlockTOCViewModel? = nil
+        onJump: ((String) -> Void)? = nil, inspectorOpen: Bool = false,
+        model: BlockTOCViewModel? = nil
     ) {
         self.session = session
         self.postID = postID
         self.onJump = onJump
+        self.inspectorOpen = inspectorOpen
         _model = State(initialValue: model ?? BlockTOCViewModel(session: session, postID: postID))
     }
 
     // MARK: - Ways of looking (view-local postures, never persisted)
 
-    enum ShowFilter: String, CaseIterable {
+    enum ShowFilter: String, CaseIterable, Sendable {
         case all = "all"
         case withTakes = "with takes"
         case withComments = "with comments"
         case locked = "locked"
         case tagged = "tagged"
 
-        func admits(_ row: Queries.WorkbenchRow) -> Bool {
+        /// The TOC row answers takes and lock at once; comments and tags
+        /// are facts and honestly wait for them.
+        nonisolated func admits(_ entry: WorkbenchRows.Display) -> Bool {
             switch self {
             case .all: true
-            case .withTakes: row.hasFan
-            case .withComments: row.commentCount > 0
-            case .locked: row.variantLocked
-            case .tagged: !row.tagPaths.isEmpty
+            case .withTakes: entry.row.hasFan
+            case .withComments: (entry.facts?.commentCount ?? 0) > 0
+            case .locked: entry.row.variantLocked
+            case .tagged: !(entry.facts?.tagPaths.isEmpty ?? true)
             }
         }
     }
 
-    enum SortOrder: String, CaseIterable {
+    enum SortOrder: String, CaseIterable, Sendable {
         case noteOrder = "note order"
         case recentlyEdited = "recently edited"
         case longest = "longest"
@@ -102,67 +201,49 @@ struct BlocksWorkbenchView: View {
         var isNoteOrder: Bool { self == .noteOrder }
     }
 
-    /// One display row: the fact row + its 1-based note ordinal (derived
-    /// once per pass — never a per-row index walk).
-    private struct DisplayRow: Identifiable {
-        let row: Queries.WorkbenchRow
-        let ordinal: Int
-        var id: String { row.placementID }
-    }
-
-    private func displayRows() -> [DisplayRow] {
-        let needle = filter.trimmingCharacters(in: .whitespaces)
-        var rows = model.facts.enumerated().map { i, row in
-            DisplayRow(row: row, ordinal: i + 1)
-        }
-        if !needle.isEmpty {
-            rows = rows.filter { entry in
-                let handle = Queries.tocHandle(name: entry.row.name, text: entry.row.text)
-                return handle.localizedCaseInsensitiveContains(needle)
-                    || (entry.row.text?.localizedCaseInsensitiveContains(needle) ?? false)
-                    || entry.row.tagPaths.contains {
-                        $0.localizedCaseInsensitiveContains(needle)
-                    }
-            }
-        }
-        rows = rows.filter { showFilter.admits($0.row) }
-        switch sortOrder {
-        case .noteOrder:
-            break
-        case .recentlyEdited:
-            rows.sort { ($0.row.editedAt ?? "") > ($1.row.editedAt ?? "") }
-        case .longest:
-            rows.sort { $0.row.wordCount > $1.row.wordCount }
-        }
-        return rows
+    private func displayRows() -> [WorkbenchRows.Display] {
+        WorkbenchRows.display(
+            rows: model.rows, facts: model.facts,
+            filter: filter, show: showFilter, sort: sortOrder)
     }
 
     private var totalWords: Int {
         model.facts.reduce(0) { $0 + $1.wordCount }
     }
 
+    /// The focused block's FACTS — the panel's subject once the joined row
+    /// is in hand (the list shows the row before that).
+    private var focusedFacts: Queries.WorkbenchRow? {
+        guard let focusedBlockID else { return nil }
+        return model.facts.first { $0.blockID == focusedBlockID }
+    }
+
+    private var panelShown: Bool { focusedFacts != nil && !inspectorOpen }
+
     var body: some View {
         VStack(spacing: 0) {
             toolRow
             HStack(spacing: 0) {
                 listColumn
-                if let focusedBlockID,
-                   let row = model.facts.first(where: { $0.blockID == focusedBlockID }) {
-                    Divider().overlay(tokens.line)
+                if let row = focusedFacts, !inspectorOpen {
+                    divider
                     WorkbenchInfoPanel(
                         session: session, model: model, tokens: tokens,
-                        row: row,
+                        row: row, ordinal: ordinal(of: row.blockID),
                         onJump: { onJump?(row.blockID) },
                         onRename: {
                             renameText = row.name ?? ""
-                            renameTarget = row
+                            renameTarget = tocRow(row.blockID)
                         },
                         onClose: { self.focusedBlockID = nil })
-                        .frame(width: 320)
+                        .frame(width: BlocksWorkbenchLayout.panelWidth(
+                            proposed: panelWidth, total: Double(totalWidth)))
                         .id("wb-panel-\(row.blockID)")
                 }
             }
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { totalWidth = $0 }
         }
+        .coordinateSpace(name: Self.space)
         .background(tokens.surface)
         .task { await model.start() }
         .task { await model.startFacts() }
@@ -175,20 +256,26 @@ struct BlocksWorkbenchView: View {
             BlocksWorkbenchOracle.focusedBlockID = new
             #endif
         }
-        .onChange(of: model.facts) { _, facts in
-            guard !seeded, !facts.isEmpty else {
+        .onChange(of: panelShown, initial: true) { _, shown in
+            #if DEBUG
+            BlocksWorkbenchOracle.panelMounted = shown
+            #endif
+        }
+        .onChange(of: model.rows) { _, rows in
+            guard !seeded, !rows.isEmpty else {
                 // The panel's subject can die under it (deleted in another
                 // window) — close rather than showing a ghost.
-                if let focusedBlockID,
-                   !facts.contains(where: { $0.blockID == focusedBlockID }) {
+                if let focusedBlockID, !rows.isEmpty,
+                   !rows.contains(where: { $0.blockID == focusedBlockID }) {
                     self.focusedBlockID = nil
                 }
                 return
             }
             seeded = true
+            // Arrive where she was (row 39: the ONE current block).
             let fact = session.commandRouter.focusedBlock
             if fact?.postID == postID,
-               let id = fact?.blockID, facts.contains(where: { $0.blockID == id }) {
+               let id = fact?.blockID, rows.contains(where: { $0.blockID == id }) {
                 focusedBlockID = id
             }
         }
@@ -210,25 +297,41 @@ struct BlocksWorkbenchView: View {
             Button("Cancel", role: .cancel) {}
         }
         .alert(
-            "Move to block # (of \(model.facts.count))",
+            "Move to block # (of \(model.rows.count))",
             isPresented: Binding(
                 get: { moveTarget != nil },
                 set: { if !$0 { moveTarget = nil } }),
             presenting: moveTarget
         ) { row in
-            TextField("Position (1–\(model.facts.count))", text: $moveOrdinalText)
+            TextField("Position (1–\(model.rows.count))", text: $moveOrdinalText)
             Button("Move") {
                 let raw = moveOrdinalText.trimmingCharacters(in: .whitespaces)
                 Task {
                     if let target = Int(raw) {
                         await model.move(blockID: row.blockID, toOrdinal: target)
                     } else {
-                        model.speak("\u{201C}\(raw)\u{201D} isn't a position number — type 1 to \(model.facts.count).")
+                        model.speak("\u{201C}\(raw)\u{201D} isn't a position number — type 1 to \(model.rows.count).")
                     }
                 }
             }
             Button("Cancel", role: .cancel) {}
         }
+    }
+
+    private func tocRow(_ blockID: String) -> Queries.TOCRow? {
+        model.rows.first { $0.blockID == blockID }
+    }
+
+    private func ordinal(of blockID: String) -> Int {
+        (model.rows.firstIndex { $0.blockID == blockID } ?? 0) + 1
+    }
+
+    // MARK: - The draggable seam (row 18 — the pane row's grammar)
+
+    private var divider: some View {
+        WorkbenchSeam(
+            tokens: tokens, spaceName: Self.space, totalWidth: totalWidth,
+            panelWidth: $panelWidth)
     }
 
     // MARK: - The tool row
@@ -260,7 +363,12 @@ struct BlocksWorkbenchView: View {
             }
             .help("Show only the blocks that carry the thing you're working on")
             Spacer(minLength: 8)
-            Text(tokens.chromeLabel("\(model.facts.count) blocks · \(totalWords) words"))
+            // The mockup's toolrow anchor (row 36: KEEP) — the words arrive
+            // with the facts; the block count is the rows'.
+            Text(tokens.chromeLabel(
+                model.facts.isEmpty
+                    ? "\(model.rows.count) blocks"
+                    : "\(model.rows.count) blocks · \(totalWords) words"))
                 .font(tokens.small)
                 .foregroundStyle(tokens.muted)
                 .lineLimit(1)
@@ -289,6 +397,7 @@ struct BlocksWorkbenchView: View {
             }
             footer
         }
+        .frame(minWidth: BlocksWorkbenchLayout.minimumListWidth)
     }
 
     /// The bulk bar — appears with the first pick (the mockup's tinted
@@ -362,7 +471,7 @@ struct BlocksWorkbenchView: View {
     /// One block as an object: pick box · ordinal · two-line text · the
     /// facts line · hover-waking ↑↓⋯. Click focuses (the panel);
     /// ⌘-click picks; ⇧-click extends; double-click opens in Write.
-    private func workbenchRow(_ entry: DisplayRow, whisper: Bool) -> some View {
+    private func workbenchRow(_ entry: WorkbenchRows.Display, whisper: Bool) -> some View {
         let row = entry.row
         let isPicked = model.picked.contains(row.blockID)
         let isFocused = focusedBlockID == row.blockID
@@ -370,7 +479,7 @@ struct BlocksWorkbenchView: View {
             tokens: tokens, picked: isPicked, focused: isFocused, whisper: whisper,
             onClick: { modifiers in
                 if modifiers.contains(.shift) {
-                    model.picked.extend(to: row.blockID, in: model.facts.map(\.blockID))
+                    model.picked.extend(to: row.blockID, in: model.rows.map(\.blockID))
                 } else if modifiers.contains(.command) {
                     model.picked.toggle(row.blockID)
                 } else {
@@ -403,55 +512,63 @@ struct BlocksWorkbenchView: View {
                         .foregroundStyle(tokens.ink)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
-                    factsLine(row)
+                    factsLine(entry)
                 }
                 Spacer(minLength: 4)
                 rowControls(row, ordinal: entry.ordinal)
             }
         }
+        .blocksWorkbenchProbe(.row(row.blockID))
     }
 
     /// The facts line — real information per row (the mockup's `met` run).
-    private func factsLine(_ row: Queries.WorkbenchRow) -> some View {
-        HStack(spacing: 8) {
+    /// The TOC row's own facts show at once; the joined ones as they land.
+    private func factsLine(_ entry: WorkbenchRows.Display) -> some View {
+        let row = entry.row
+        let facts = entry.facts
+        return HStack(spacing: 8) {
             if row.hasFan {
-                Text("⑂ \(row.activeVariantCount) takes")
+                Text("⑂ \(facts.map { "\($0.activeVariantCount) " } ?? "")takes")
                     .foregroundStyle(tokens.ring)
             }
             if row.name != nil {
                 Text(tokens.chromeLabel("named block")).foregroundStyle(tokens.faint)
             }
-            Text("\(row.wordCount)w").foregroundStyle(tokens.faint)
-            if row.commentCount > 0 {
-                Text("💬 \(row.commentCount)").foregroundStyle(tokens.commentInk)
+            if let facts {
+                Text("\(facts.wordCount)w").foregroundStyle(tokens.faint)
+                if facts.commentCount > 0 {
+                    Text("💬 \(facts.commentCount)").foregroundStyle(tokens.commentInk)
+                }
             }
             if row.variantLocked {
                 Text(tokens.chromeLabel("locked")).foregroundStyle(Color.orange)
             }
-            ForEach(row.tagPaths.prefix(3), id: \.self) { path in
-                Text("#\(path)")
-                    .foregroundStyle(tokens.accent)
-                    .padding(.horizontal, 5)
-                    .padding(.vertical, 1)
-                    .background(
-                        tokens.accent.opacity(0.08),
-                        in: RoundedRectangle(cornerRadius: 4))
-            }
-            if let day = DisplayTitle.day(fromStamp: row.editedAt) {
-                Text(tokens.chromeLabel("edited \(day)")).foregroundStyle(tokens.faint)
+            if let facts {
+                ForEach(facts.tagPaths.prefix(3), id: \.self) { path in
+                    Text("#\(path)")
+                        .foregroundStyle(tokens.accent)
+                        .padding(.horizontal, 5)
+                        .padding(.vertical, 1)
+                        .background(
+                            tokens.accent.opacity(0.08),
+                            in: RoundedRectangle(cornerRadius: 4))
+                }
+                if let day = DisplayTitle.day(fromStamp: facts.editedAt) {
+                    Text(tokens.chromeLabel("edited \(day)")).foregroundStyle(tokens.faint)
+                }
             }
         }
         .font(tokens.small)
         .lineLimit(1)
     }
 
-    private func rowControls(_ row: Queries.WorkbenchRow, ordinal: Int) -> some View {
+    private func rowControls(_ row: Queries.TOCRow, ordinal: Int) -> some View {
         HStack(spacing: 2) {
             if sortOrder.isNoteOrder {
                 Button("↑") { Task { await model.move(blockID: row.blockID, up: true) } }
                     .disabled(ordinal <= 1)
                 Button("↓") { Task { await model.move(blockID: row.blockID, up: false) } }
-                    .disabled(ordinal >= model.facts.count)
+                    .disabled(ordinal >= model.rows.count)
             }
             Menu("⋯") {
                 rowMenu(row, ordinal: ordinal)
@@ -464,7 +581,7 @@ struct BlocksWorkbenchView: View {
 
     /// The whole TOC ⋯ menu, carried — plus the workbench's own doors.
     @ViewBuilder
-    private func rowMenu(_ row: Queries.WorkbenchRow, ordinal: Int) -> some View {
+    private func rowMenu(_ row: Queries.TOCRow, ordinal: Int) -> some View {
         Button("Name…") {
             renameText = row.name ?? ""
             renameTarget = row
@@ -480,7 +597,7 @@ struct BlocksWorkbenchView: View {
         Button("Move to top") { Task { await model.moveToTop(row.blockID) } }
             .disabled(ordinal == 1)
         Button("Move to bottom") { Task { await model.moveToBottom(row.blockID) } }
-            .disabled(ordinal == model.facts.count)
+            .disabled(ordinal == model.rows.count)
         Button("Move to block #…") {
             moveOrdinalText = "\(ordinal)"
             moveTarget = row
@@ -539,9 +656,51 @@ struct BlocksWorkbenchView: View {
     }
 }
 
+// MARK: - The seam (row 18 — the pane row's grammar)
+
+/// One honest line, and the drag under it: a 1 pt `line`, a 9 pt invisible
+/// grip, the resize cursor on hover (`RootView.paneDivider`, `ShellSplit`'s
+/// divider — the same seam everywhere). The drag proposes `total − x` as
+/// the panel's width, clamped by `BlocksWorkbenchLayout`; the binding is
+/// the workbench's remembered width. Internal so the pin can mount it
+/// alone in a real window and drag it for real.
+struct WorkbenchSeam: View {
+    let tokens: VoiceTokens
+    let spaceName: String
+    let totalWidth: CGFloat
+    @Binding var panelWidth: Double
+
+    var body: some View {
+        Rectangle()
+            .fill(tokens.line)
+            .frame(width: 1)
+            .overlay {
+                Rectangle()
+                    .fill(Color.clear)
+                    .frame(width: 9)
+                    .contentShape(Rectangle())
+                    .gesture(
+                        DragGesture(coordinateSpace: .named(spaceName))
+                            .onChanged { value in
+                                guard totalWidth > 0 else { return }
+                                panelWidth = BlocksWorkbenchLayout.panelWidth(
+                                    proposed: Double(totalWidth - value.location.x),
+                                    total: Double(totalWidth))
+                            })
+                    .onHover { inside in
+                        if inside { NSCursor.resizeLeftRight.push() } else { NSCursor.pop() }
+                    }
+                    .blocksWorkbenchProbe(.divider)
+            }
+            .help("Drag to give the block panel more or less room")
+    }
+}
+
 // MARK: - The row shell (click modifiers + the whisper/selection washes)
 
-private struct WorkbenchRowShell<Content: View>: View {
+/// Internal so the pin can mount one row alone in a real window and click
+/// it for real (row 25's measure).
+struct WorkbenchRowShell<Content: View>: View {
     let tokens: VoiceTokens
     let picked: Bool
     let focused: Bool
@@ -551,6 +710,9 @@ private struct WorkbenchRowShell<Content: View>: View {
     @ViewBuilder var content: () -> Content
 
     @State private var hovering = false
+    /// When this row was last single-clicked — a second click inside the
+    /// system's double-click interval is the double.
+    @State private var lastClick: ContinuousClock.Instant?
 
     var body: some View {
         content()
@@ -567,14 +729,27 @@ private struct WorkbenchRowShell<Content: View>: View {
             }
             .contentShape(Rectangle())
             .onHover { hovering = $0 }
-            // ONE tap handler reading the keyboard's live modifier state
-            // (the walk caught the stacked `.modifiers(...)` TapGestures
-            // dead-stalling every click on the row — the gesture graph
-            // waits on the unmet modifier requirements instead of failing
-            // them; the codebase idiom is count-2 + plain, chords read at
-            // the event).
-            .onTapGesture(count: 2) { onDoubleClick() }
+            // ONE tap handler (row 25 — the lag she felt): a count-2 gesture
+            // stacked before the plain one made every single click wait out
+            // the double-click interval (0.5 s on her Mac) before it was
+            // delivered. The plain tap acts at ONCE; a second click on the
+            // same row inside the system's interval is the double and opens
+            // in Write (the first already focused the row — harmless). The
+            // interval is read from the row's own clock rather than from
+            // `NSApp.currentEvent.clickCount`: `currentEvent` is only USUALLY
+            // the mouse-up a tap concludes on, and `clickCount` asked of any
+            // other event raises `NSInternalInconsistencyException` (the
+            // pin's event pump caught exactly that). Chords read at the
+            // keyboard's live state (the walk's earlier lesson: stacked
+            // modifier TapGestures dead-stall every click).
             .onTapGesture {
+                let now = ContinuousClock.now
+                if let last = lastClick, now - last < .seconds(NSEvent.doubleClickInterval) {
+                    lastClick = nil
+                    onDoubleClick()
+                    return
+                }
+                lastClick = now
                 let flags = NSEvent.modifierFlags
                 var mods: EventModifiers = []
                 if flags.contains(.command) { mods.insert(.command) }
@@ -601,6 +776,7 @@ private struct WorkbenchInfoPanel: View {
     let model: BlockTOCViewModel
     let tokens: VoiceTokens
     let row: Queries.WorkbenchRow
+    let ordinal: Int
     let onJump: () -> Void
     let onRename: () -> Void
     let onClose: () -> Void
@@ -628,6 +804,23 @@ private struct WorkbenchInfoPanel: View {
                     .foregroundStyle(tokens.muted)
                     .lineLimit(2)
 
+                // Row 26 (PROVISIONAL — her "the text is also above the
+                // details"): the FACTS lead — they are what the panel adds
+                // to the row; the text follows.
+                Grid(alignment: .leading, horizontalSpacing: 14, verticalSpacing: 6) {
+                    factRow("words", "\(row.wordCount)")
+                    if let day = DisplayTitle.day(fromStamp: row.editedAt) {
+                        factRow("edited", day)
+                    }
+                    factRow("saved", savepoints == 1 ? "1 savepoint" : "\(savepoints) savepoints")
+                    if !row.tagPaths.isEmpty {
+                        factRow("tags", row.tagPaths.map { "#\($0)" }.joined(separator: " "))
+                    }
+                    if row.commentCount > 0 {
+                        factRow("comments", "\(row.commentCount)")
+                    }
+                }
+
                 // The BODY — the one editable surface of this mode (the
                 // TOC's expand-to-edit, re-homed; the ONE authority).
                 if let variantID = row.variantID {
@@ -650,21 +843,6 @@ private struct WorkbenchInfoPanel: View {
                                     model.liveBlockID == row.blockID
                                         ? tokens.ring : tokens.line,
                                     lineWidth: 1))
-                }
-
-                // The facts grid.
-                Grid(alignment: .leading, horizontalSpacing: 14, verticalSpacing: 6) {
-                    factRow("words", "\(row.wordCount)")
-                    if let day = DisplayTitle.day(fromStamp: row.editedAt) {
-                        factRow("edited", day)
-                    }
-                    factRow("saved", savepoints == 1 ? "1 savepoint" : "\(savepoints) savepoints")
-                    if !row.tagPaths.isEmpty {
-                        factRow("tags", row.tagPaths.map { "#\($0)" }.joined(separator: " "))
-                    }
-                    if row.commentCount > 0 {
-                        factRow("comments", "\(row.commentCount)")
-                    }
                 }
 
                 // The takes, previewed (choosing stays Takes' deliberate ✓).
@@ -741,10 +919,6 @@ private struct WorkbenchInfoPanel: View {
         }
     }
 
-    private var ordinal: Int {
-        (model.facts.firstIndex { $0.blockID == row.blockID } ?? 0) + 1
-    }
-
     private var subtitle: String {
         var parts: [String] = []
         parts.append(row.activeVariantCount == 1 ? "1 take" : "\(row.activeVariantCount) takes")
@@ -768,7 +942,10 @@ private struct WorkbenchInfoPanel: View {
 }
 
 /// A tiny wrapping row for the panel's door buttons (four calm buttons at
-/// 320pt need two lines; HStack would clip — the b6dae25 class).
+/// 320pt need two lines; HStack would clip — the b6dae25 class). Leading-
+/// aligned; `TrailingFlow` (Core/Views) is its right-aligned twin — a hoist
+/// into one flow with an alignment parameter is the next touch's (recorded
+/// at batch A's row 58 and in batch C's record).
 private struct FlowLayoutLite: Layout {
     var spacing: CGFloat = 6
 
@@ -815,12 +992,54 @@ private struct FlowLayoutLite: Layout {
     }
 }
 
+// MARK: - The DEBUG oracle (rows 18/25/27/39)
+
+/// What a workbench geometry probe reports — the slot a frame belongs to.
+/// Always compiled (the modifier's signature names it); the oracle that
+/// stores the frames is DEBUG-only.
+enum BlocksWorkbenchProbeSlot: Hashable {
+    case row(String)
+    case divider
+}
+
+extension View {
+    /// The workbench oracle's DEBUG frame write, in the workbench's own
+    /// named space (a `.global` read inside a macOS `ScrollView` answers in
+    /// the scroll view's own space — the Read pins' measured lesson).
+    @ViewBuilder
+    func blocksWorkbenchProbe(_ slot: BlocksWorkbenchProbeSlot) -> some View {
+        #if DEBUG
+        self.onGeometryChange(for: CGRect.self) {
+            $0.frame(in: .named(BlocksWorkbenchView.space))
+        } action: { frame in
+            switch slot {
+            case .row(let id): BlocksWorkbenchOracle.rowFrames[id] = frame
+            case .divider: BlocksWorkbenchOracle.dividerFrame = frame
+            }
+        }
+        #else
+        self
+        #endif
+    }
+}
+
 #if DEBUG
 /// The correction round's Blocks oracle (the `MastheadGeometry` pattern):
-/// the mounted workbench's focused row, so a pin asserts the block it
-/// entered on (row 39) rather than a state the code merely intends.
+/// the mounted workbench's focused row (row 39), whether its context panel
+/// stands (row 27), and its rows' and divider's frames (rows 18/25 — so a
+/// pin can click and drag them for real).
 @MainActor
 enum BlocksWorkbenchOracle {
     static var focusedBlockID: String?
+    static var panelMounted = false
+    static var rowFrames: [String: CGRect] = [:]
+    static var dividerFrame: CGRect?
+
+    static func reset() {
+        focusedBlockID = nil
+        panelMounted = false
+        rowFrames = [:]
+        dividerFrame = nil
+    }
 }
 #endif

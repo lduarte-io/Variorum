@@ -332,9 +332,13 @@ struct PostDetailView: View {
                 // Wave 2c (item 16, W8-1): "keep Blocks as the poweruser
                 // center" — the workbench (facts, multi-select, the
                 // context panel); the TOC's every door survives inside it.
-                BlocksWorkbenchView(session: session, postID: postID, onJump: { blockID in
-                    jump(to: blockID)
-                })
+                // Row 27: while an inspector column stands beside this
+                // mode (history, the tray, versions…), the workbench's own
+                // context panel yields — ONE right region at a time.
+                BlocksWorkbenchView(
+                    session: session, postID: postID,
+                    onJump: { blockID in jump(to: blockID) },
+                    inspectorOpen: inspectorPanel != nil)
                 .id("blocks-\(postID)")
             case .canvas:
                 // C3 (R40): canvas as a view ON the post — canvasProjection
@@ -465,9 +469,25 @@ struct PostDetailView: View {
             }) ?? 0
             if blocks == 0 { mode = .write }
         }
+        .onChange(of: inspectorPanel, initial: true) { _, panel in
+            #if DEBUG
+            PostDetailOracle.inspectorPanel = panel
+            #endif
+        }
         .onChange(of: mode) { _, new in
             UserDefaults.standard.set(new.rawValue, forKey: "postMode.\(postID)")
             session.commandRouter.noteMode(new)
+            // Row 29 (her words: "the block history tab stays open as you
+            // move to other modes which looks bad and is confusing"): the
+            // pane is SCOPED to the mode that asked — a mode switch CLOSES
+            // it (chosen over re-targeting: the question was asked about a
+            // block in that mode's surface; the next mode asks its own, and
+            // its bar's door is one click away). It can therefore never
+            // show block 3's history beside a mode where block 1 is live
+            // (the walk's captures 45/46).
+            if inspectorPanel?.isBlockHistory == true {
+                withAnimation(.easeInOut(duration: 0.2)) { inspectorPanel = nil }
+            }
         }
     }
 
@@ -650,6 +670,15 @@ extension View {
 }
 
 #if DEBUG
+/// The correction round's detail oracle (rows 27/29): the inspector column's
+/// occupant as the detail holds it — so a pin asserts the Block History pane
+/// is GONE after a mode switch by the state that decides it (the inspector's
+/// AppKit container can linger in the tree, collapsed, after a close).
+@MainActor
+enum PostDetailOracle {
+    static var inspectorPanel: PostDetailView.InspectorPanel?
+}
+
 /// The correction round's masthead oracle (rows 4/19 — the `BookOutlineGeometry`
 /// pattern): where the title block's midX sits against the masthead's own
 /// midX, in the masthead's coordinate space — so a pin asserts the centering
