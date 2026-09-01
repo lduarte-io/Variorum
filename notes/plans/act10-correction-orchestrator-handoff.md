@@ -198,8 +198,11 @@ eight rulings · row 52 (underscore emphasis vocabulary) · any scalpel revert (
 > the founding session at its ruled seam (R-cor-9: batches B, A, C and F are CLOSED; you run D → E → the
 > ladder with the owed iOS build → the full acceptance walk → the install → the author handoff — the plan's
 > §7b list, every item). Invoke the `architect-phase` skill. Read IN FULL, in this order:
-> `notes/plans/act10-correction-orchestrator-handoff.md` (this file — the state section tells you which
-> batch is next; VERIFY it against `git log --oneline -30` and the plan's records before acting),
+> `notes/plans/act10-correction-orchestrator-handoff.md` (this file — **§0 and §0b FIRST and slowly: they
+> carry her original message, the despair this round answers, the quality/premium bar in her words, the
+> 26 complaints' completion table, and the personal-validation method that twice caught defects after an
+> implementer's honest 'done' — taste and patience are this round's whole point**; the state section tells
+> you which batch is next; VERIFY it against `git log --oneline -30` and the plan's records before acting),
 > `notes/plans/act10-correction-round.md` (the whole file), `notes/author-reports/2026-09-01-post-act10-ui-
 > report.md`, `notes/plans/act10-correction-memo-lenses-compare.md`, `notes/handoffs/act10-correction-
 > handoff.md`, `CLAUDE.md`, `notes/SessionResiliencyProtocol.md`. The author is asleep and authorized the
