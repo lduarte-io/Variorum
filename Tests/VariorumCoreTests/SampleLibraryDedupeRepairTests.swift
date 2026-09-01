@@ -261,6 +261,62 @@ struct SampleLibraryDedupeRepairTests {
         _ = copyA
     }
 
+    /// **RED ON OLD (the ladder's F5, MAJOR):** the "a savepoint = engagement"
+    /// signal counted AUTO commits, which the system mints on untouched
+    /// seeded text — `closeAutoCommit` runs on every note that stops being
+    /// shown, and `isDirty` reads a never-committed take as dirty — so merely
+    /// READING a story on each device stamped both copies EDITED and the
+    /// ruled dedupe degraded to both-survive in essentially every real store.
+    /// Engagement is her hand: MANUAL savepoints only.
+    @Test func anAutoSavepointFromReadingAndLeavingIsNotEngagement() async throws {
+        let (a, b, server) = try pairWithFacts()
+        let copyA = try seedCopy(a)
+        let copyB = try seedCopy(b)
+        // Each reader opens one story and leaves — the everyday occasion.
+        for (client, copy) in [(a, copyA), (b, copyB)] {
+            let minted = try client.with { ops, _ in
+                try ops.closeAutoCommit(copy.postIDs["A Scandal in Bohemia"]!)
+            }
+            #expect(!minted.isEmpty, "positive activity: the leaving occasion DID mint an auto savepoint")
+            #expect(minted.allSatisfy { $0.kind == .auto })
+        }
+
+        try await a.push()
+        try await b.push()
+        try await b.pull()
+        try await a.pull()
+        try await assertFurnitureConverged(a, b, server)
+
+        for client in [a, b] {
+            #expect(try liveCopyIDs(client) == [copyA.bookID],
+                    "both copies are still pristine — ONE survives (old: both, forever)")
+        }
+        _ = copyB
+    }
+
+    /// …and a MANUAL savepoint is still her hand: the copy carrying it is
+    /// the survivor whatever the ids.
+    @Test func aManualSavepointStillProtectsTheCopy() async throws {
+        let (a, b, server) = try pairWithFacts()
+        let copyA = try seedCopy(a)
+        let copyB = try seedCopy(b)
+        let savedPost = copyB.postIDs["A Scandal in Bohemia"]!
+        let variant = try firstVariantID(b, postID: savedPost)
+        try b.with { ops, _ in _ = try ops.commit(variant) }
+
+        try await a.push()
+        try await b.push()
+        try await b.pull()
+        try await a.pull()
+        try await assertFurnitureConverged(a, b, server)
+
+        for client in [a, b] {
+            #expect(try liveCopyIDs(client) == [copyB.bookID],
+                    "the copy she deliberately saved survives; the untouched one retires")
+        }
+        _ = copyA
+    }
+
     @Test func noInjectedFactsMeansNoDedupe() async throws {
         // An engine nobody wired facts into cannot misidentify anything —
         // the repair is inert by default (the keyProvider pattern).

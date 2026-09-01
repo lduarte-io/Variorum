@@ -224,7 +224,15 @@ extension SyncEngine {
 
             // Engagement the seed never produces: another book's membership,
             // a tag beyond the reserved one, a block tag, a comment, a
-            // savepoint, a reference.
+            // MANUAL savepoint, a reference. `kind = 'manual'` is
+            // load-bearing (the ladder's F5): the six quiet AUTO occasions
+            // (OverallModel §3 — leaving a note, the idle backstop, the
+            // seals, …) are insurance the system mints on its own, and
+            // `isDirty` reads a never-committed seeded take as dirty, so
+            // merely opening a story and leaving stamps it `'auto'` — on
+            // every device, since commit_point syncs. Counting those made
+            // "both pristine" unreachable in any real store (two Sherlock
+            // books forever, silently). Only her deliberate ⌘S is her hand.
             let engagement = try Bool.fetchOne(
                 db,
                 sql: """
@@ -243,7 +251,8 @@ extension SyncEngine {
                         OR EXISTS (SELECT 1 FROM commit_point cp
                                    JOIN variant v ON v.id = cp.variant_id
                                    JOIN container_block cb ON cb.block_id = v.block_id
-                                   WHERE cb.container_id = ?1 AND cb.deleted_at IS NULL)
+                                   WHERE cb.container_id = ?1 AND cb.deleted_at IS NULL
+                                     AND cp.kind = 'manual')
                         OR EXISTS (SELECT 1 FROM reference
                                    WHERE container_id = ?1 AND deleted_at IS NULL)
                     """,
