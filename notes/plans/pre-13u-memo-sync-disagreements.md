@@ -47,7 +47,7 @@ not fixed — outside every finding's letter):** (a) the tag-collision repair or
 applications arriving AFTER the duplicate tag dies instead of re-pointing them — the later-arriving
 copy's stories lose the reserved tag on both devices; (b) a double-retirement race when the
 classifying device's push is delayed past the other device's pass and the evidence changes between
-the two; (c) the echo pull costs one extra round per two-copy meeting. Each is a probe here first.
+the two; (c) the echo pull costs one extra round per two-copy meeting. Each is a probe here first. **P5(a) was RE-CALIBRATED at ladder round 3 (2026-09-01): it is the GENERAL `tag.path` repair not honoring its own §7 sentence for applications arriving after the duplicate died — pre-existing since Phase 5, MAJOR-class, promoted from probe to 17i's FIRST FIX ITEM (KnownIssues row filed); the pin is stated there.**
 
 ---
 

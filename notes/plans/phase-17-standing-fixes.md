@@ -987,6 +987,8 @@ harness change: production's round shape becomes the convergence suites' default
 `productionRound` helper; chunk splits at registry boundaries as a sweep) — the pre-13u ladder's
 lesson (R2-1/R2-2 passed in the harness's order and failed in production's).
 
+**First fix item (promoted from the memo's P5(a) at the pre-13u ladder's round 3, 2026-09-01):** the general `tag.path` repair's loss of applications that arrive after the duplicate died — the KnownIssues row carries the mechanism and the pin. **Second structural item (R3-2):** the seed-shape guard invokes the real classifier instead of mirroring its SQL.
+
 **Cast:** Fable (all `Sync/`; the standing rider). **Standing rules:** pin before fix; canon (SyncSpec
 §§5–7, §12) outranks the implementation — a probe that falsifies a canon sentence is a finding
 against the CODE unless the author rules the sentence wrong. **Related, kept separate:** the
