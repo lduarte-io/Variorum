@@ -1125,4 +1125,64 @@ non-zero in the pin, because that is the only way the frame can happen:
 **Files:** `App/Variorum/VariorumMobile/Features/Shell/MobileShellBand.swift`,
 `App/Variorum/VariorumMobileTests/MobileNavigationTests.swift`.
 
-**RED-ON-OLD (NIT 2): PENDING** (revert runs after this commit).
+**RED-ON-OLD (NIT 2) — production revert `R-n2`** (the guard line
+removed):
+
+```
+✘ Test theBandPutsTheShelfAtHomeBetweenStarredAndLibrary() recorded an issue at MobileNavigationTests.swift:74:9: Expectation failed: (MobileShellBand.offset(
+            for: .library, current: .shelf, drag: -120, width: 0) → -120.0) == (0 → 0.0)
+✘ Test theBandPutsTheShelfAtHomeBetweenStarredAndLibrary() failed after 0.004 seconds with 2 issues.
+✘ Test run with 16 tests in 1 suite failed after 10.429 seconds with 2 issues.
+```
+
+Restored with `git checkout --`; `git status` clean.
+
+*(NIT 1 carries no revert: it DELETES a parameter, so there is no
+behaviour to red — the honest evidence is the re-derived guarantee count,
+quoted above, and a green suite with the parameter gone.)*
+
+---
+
+## Item 5b · MINOR 3's pin has TEETH — proven by reverting the road it covers
+
+The item changed no behaviour, so its pin cannot red on a fix. It can
+red on the road it exists to protect: with
+`await quickNote.fileOnLeaving()` removed from `selectPage`'s task —
+
+```
+✘ Test aPageChangeFilesTheQuickNoteBoxAndThisIsWhatItDoes() recorded an issue at MobileNavigationTests.swift:296:17: Expectation failed: (router.quickNote.handOffCount → 0) == 1
+✘ Test aPageChangeFilesTheQuickNoteBoxAndThisIsWhatItDoes() recorded an issue at MobileNavigationTests.swift:298:17: Expectation failed: (router.quickNote.text → "a thought left in the box").isEmpty → false
+✘ Test aPageChangeFilesTheQuickNoteBoxAndThisIsWhatItDoes() recorded an issue at MobileNavigationTests.swift:299:17: Expectation failed: (router.quickNote.postID → "00000000-0000-0000-0000-000000000000") == nil
+✘ Test run with 16 tests in 1 suite failed after 14.915 seconds with 3 issues.
+```
+
+A5-8 leaving the shared road is now a red test rather than a silent
+regression. Restored with `git checkout --`; `git status` clean.
+
+---
+
+## Item 4 · MINOR 2 — the named chapter gap has a HOME · **DONE (notes only)**
+
+The gap is real and consequential: `+ New Note` inside a book lands the
+note **unsectioned**, and a chapter minted on the phone can be filled
+only from the Mac — the phone can CREATE a structure it cannot USE. The
+reviewer's point was not the gap but its address: recorded only in a
+batch record, it lives in a file that CLOSES.
+
+**Where it now lives:** `notes/plans/mobile-round-2-status-2026-09-01.md`
+**§C's "YOUR RULINGS"** row — the document the post-13u resume session
+reads — carrying the mechanism note (`newPostInReading` already takes
+`section:`; the door is one argument away) and the three candidate
+placements the record itself named (a per-chapter trailing `+ new note`,
+the membership sheet, a drag). **It is filed as HER call**, per the
+brief's own reading: the placement is a design question, and the
+guardrails forbid inventing one.
+
+**Not a ledger row, deliberately:** MobileSoul's parity ledger tracks
+what MOBILE OWES A MAC PHASE. This is a phone-only door on a phone-only
+surface with no Mac counterpart pending, so a PL row would have pointed
+at nothing. The batch record's own gap section now points forward to the
+status row rather than ending in itself.
+
+**Files:** `notes/plans/mobile-round-2-status-2026-09-01.md`,
+`notes/plans/mobile-batch-10-record.md`.

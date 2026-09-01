@@ -30,6 +30,31 @@ quoted run.**
 
 ---
 
+## ⚙️ FIX WAVE (2026-09-01) — WHAT CHANGED IN THIS BATCH'S SHIPPED SHAPE
+
+The cold review (`mobile-batch-10-cold-review.md`) landed 2 MAJOR, 4
+MINOR, 2 NIT; **all eight were accepted with zero disputes** and one fix
+wave executed them. **The per-item dispositions, the quoted reds and the
+final suite line live in that file's FIX WAVE RESULTS section** — this
+row exists so a reader of THIS record is never told the pre-wave shape as
+though it were the shipped one. What moved:
+
+| item | the shipped shape now |
+|---|---|
+| **MAJOR 1** | The band's release **SETTLES** — one `MobileShellView.settle` spring on `selectPage` (both roads) and on the drag's reset transaction. The animation itself is not observable in this harness and is DECLARED so rather than pinned. |
+| **MAJOR 2** | A door's refusal renders **beside the doors**, not in the header: `MobileBookViewModel.doorRefusal` is its own slot, `lastError` keeps the store read. Pinned on a mounted twelve-note finished book, measured against the door's own frame. |
+| **MINOR 1** | The live drag is `@GestureState`, so a CANCELLED pan can no longer strand the shell mid-page. The latch stays view state (it must be readable in `onEnded`); what a stale latch can still cost is stated in the results. |
+| **MINOR 2** | The named chapter gap below now has a **home outside this file** — `mobile-round-2-status-2026-09-01.md` §C's YOUR RULINGS row. |
+| **MINOR 3** | A5-8 is now **driven on the mounted shell**, and the reviewer's kept-text reading is explained (it is the activation's own turn — the filing is a `Task`, and navigation never waits on a write). |
+| **MINOR 4** | A chapter whose notes fell past the window **folds** under the standing truncation marker; a genuinely empty chapter still renders (the section "EMPTY CHAPTERS NOW RENDER" below carries the amendment). |
+| **NIT 1 / NIT 2** | The dead `starredRows` layout parameter is retired (guarantee pin re-derived: 602 states); `MobileShellBand.offset` gains the `width > 0` guard, pinned. |
+
+**Pins after the wave:** `MobileNavigationTests` **16** (13 + 3 new);
+`MobileShelfLayoutTests` **−1** (`starredRowsRideInsideTheBound`, whose
+subject left the shelf).
+
+---
+
 ## MACHINERY — the restart, and what survived (protocol §7)
 
 The Claude Code process **exited and restarted mid-batch**, between the
@@ -267,6 +292,12 @@ and the star refusal's message slot — the door still fires there.
   `locked`) and follows the brief's own letter — *"refusing under a
   finished book in the family's voice"*. Recorded as a divergence so the
   reviewer sees it was chosen, not missed.
+  > **AMENDED at the fix wave (cold review MAJOR 2):** as shipped in this
+  > batch the refusal rendered in the HEADER, so on a book longer than a
+  > screen it spoke where she was not looking — which is the entire
+  > justification for keeping the doors. The refusal now renders
+  > immediately beneath the doors (`doorRefusal`, its own slot), and the
+  > divergence is honest as written.
 
 ### EMPTY CHAPTERS NOW RENDER — and why that was owed
 
@@ -286,6 +317,16 @@ on smart books), so the list and its chapters cannot disagree. The
 pre-existing `theBookListGroupsByTheAssemblysOwnSections` pin rides
 unmodified as the regression guard.
 
+> **AMENDED at the fix wave (cold review MINOR 4):** teaching an empty
+> header to MEAN "this chapter is empty" made the bounded window lie —
+> `grouped` fills a chapter from the WINDOWED entries, so past the 300-note
+> cut every chapter looked empty too. The model now also reads which
+> chapters hold a member ANYWHERE (one `DISTINCT`, book-scoped, on the same
+> held observation, and **only when the probe row says the window really
+> cut something**); a chapter with no windowed entry and a member folds
+> under the standing truncation marker, and the genuinely empty one still
+> renders, which is what this section is about.
+
 ### 🚩 A NAMED GAP, for the reviewer and the parity ledger
 
 **The phone has no assign-to-chapter door**, so a note minted by
@@ -298,6 +339,17 @@ that door lives (a per-chapter trailing `+ new note`? the membership
 sheet? a drag?) is a design call and inventing one is the thing the
 guardrails forbid. **PROVISIONAL, and the obvious next step is named
 rather than left to be rediscovered.**
+
+> **✅ GIVEN A HOME at the cold review's MINOR 2 (fix wave, 2026-09-01).**
+> The reviewer's point was that a gap recorded only in a batch record is
+> recorded in a file that CLOSES — the KnownIssues owner rule's own
+> failure shape, and this round's Fable-sweep finding 3 all over again.
+> It is now a row in **`notes/plans/mobile-round-2-status-2026-09-01.md`
+> §C's "YOUR RULINGS"**, which is the document the resume session reads:
+> the placement is HERS (three candidates named), the mechanism note
+> rides with it, and nothing about it is a build decision an implementer
+> could take alone. **PROVISIONAL stands; it is now provisional somewhere
+> a planning session looks.**
 
 ---
 
