@@ -567,9 +567,9 @@ name; the Trash's card restyle); wave 2c's residue (the paged Book / book Read c
 Read click-through jump = this file's item 17 — the ONE scrolled-open door already exists on
 `CommandRouter.focusedBlock`, built once at wave 2c for the note's Read→Index — reuse it); M12.
 
-**Baselines at the round's close (the pre-13u handoff carries the finals; verify with your own
-runs):** core 1504/163 · Mac 1983/343 · mobile 605/97 + 2 standing known issues (as of the
-midpoint fixes; the final ladder may add pins).
+**Baselines at the round's close (FINAL — the pre-13u handoff's numbers; verify with your own
+runs):** core 1524/165 · Mac 1985/343 · mobile 607/97 + 2 standing known issues · tutorial spine
+green · lockstep marker 7. The installed `/Applications/Variorum.app` is commit `8566cad`.
 
 **Discipline:** `notes/SessionResiliencyProtocol.md` (+ both seats' addenda) binds every session
 you spawn — checkpoint commits from the first piece, a live record, synchronous waits, one agent
