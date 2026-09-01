@@ -80,6 +80,7 @@ once. Claim a letter here first.
 | **17c** | **CLOSED 2026-08-31 — the pre-13u round's Acts 3+4.** All 4 read-layer items (P18–P21) FIXED with revert-verified red-on-old pins (query plans and statement counts, never timings); the P20 index landed as its own schema commit and is NOT a §12 lockstep event (marker stays 7). Per-item dispositions with before/after numbers in the entry below; one residual (`container_block(block_id)`) re-routed to **12** in KnownIssues | **closed** |
 | **17g** | **CLOSED 2026-08-30 — the `13p-fix` session** (author's live session of 2026-08-30: an issue she found testing the refreshed 13p install). That session owns this letter and writes its own entry; it does **not** fold into 17a. | **closed** |
 | **17h** | **The custody riders 17a never listed** — opened at the author's word 2026-08-30 (the pre-13u sitting: "Open 17h, run it this round"). TWO items, both already traced in `KnownIssuesAndTechDebt.md` rows that carried owner "17a" without being in its 8-item list: **(1)** the `saveGated` delete-before-add window (13p-fix ladder R2-7 — a failed `SecItemAdd` after the forced delete leaves no custody; remedy sketch on the row: add under a temporary account → verify → swap → delete old, or an explicit accepted-window doc line); **(2)** the delete-status-discarded family (R3-5 — `deleteAuto`/`deleteGated` drop `OSStatus`, so the custody law binds writes only; remedy on the row: `Bool`-returning delete seams + refuse/report on failed release + a `deletesSucceed` knob pin; the riders travel with it: `E2EECustodyStorage.live` wiring coverage R3-4, `setMode`'s MainActor SecItem calls R3-6). The rows' mechanisms and remedies are the brief; runs as a small fresh Fable session inside the pre-13u round, after Act 9 closes. **CLOSED 2026-08-31** — both items FIXED (R2-7 as probe-first narrowing with the residual window recorded; R3-5 with all riders), every pin red-on-old by behavioral revert; the entry below is the record | **closed** |
+| **17i** | **Sync across devices — the reconciliation probes, the scenario sweep, and the harness-realism fix** — opened at the author's word 2026-08-31 (the pre-13u round's tail): *"this is really hunting for bugs + discrepancies + issues in the implementation of sync across devices, so I think it's fine to have there… I want to have a more proper phase."* The brief is `notes/plans/pre-13u-memo-sync-disagreements.md` — the posture in five rules, the scenario table, and the UNSETTLED probes at its top (P1 delete-vs-edit-plus-new-take; P2 the purged-past-30-days + returner corner; P3 edit-vs-edit; P4 the production-round-shape sweep of every convergence suite). Structural item: the harness runs production's pull→push chunked round shape by DEFAULT. All `Sync/` — the standing Fable rider applies; pin before fix; a probe whose expected and actual agree is recorded, not "fixed". Not run inside the pre-13u round (her ruling). | **open** |
 
 **Why 13p-fix is 17g and not part of 17a.** 17a is the *sweep's* 13p residue — eight findings from a
 review that read the code. 13p-fix is a *tested* defect she hit in the running app, with its own plan
@@ -972,6 +973,25 @@ WINS — it was written with the real code open and with instructions to refute.
 *No red-on-old pin.* Evidence quotes + verifier trace: review doc, P50.
 
 ---
+
+## 17i — Sync across devices: the reconciliation probes, the scenario sweep, the harness-realism fix
+
+**Status: open, unstarted** (opened 2026-08-31 at the author's word; brief =
+`notes/plans/pre-13u-memo-sync-disagreements.md`).
+
+**What it is.** Not a bug list — a HUNT: the memo's four probes run first (each answer recorded in
+the memo whether it confirms canon or not), then the scenario table's ✔ rows are re-run under
+production's round shape (pull → push, 200-row chunks, interleavings), then every discrepancy found
+becomes an item here with the standard trace + red-on-old pin. The structural deliverable is the
+harness change: production's round shape becomes the convergence suites' default (a
+`productionRound` helper; chunk splits at registry boundaries as a sweep) — the pre-13u ladder's
+lesson (R2-1/R2-2 passed in the harness's order and failed in production's).
+
+**Cast:** Fable (all `Sync/`; the standing rider). **Standing rules:** pin before fix; canon (SyncSpec
+§§5–7, §12) outranks the implementation — a probe that falsifies a canon sentence is a finding
+against the CODE unless the author rules the sentence wrong. **Related, kept separate:** the
+daily-Journal identity memo (13y) and the dedupe's late-registry residual (KnownIssues, 13y).
+
 
 ## Not slotted — needs the author's call
 
