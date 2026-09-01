@@ -865,6 +865,16 @@ Per story: `importPost(title:text:)` — which segments on entry by the global m
 becomes a block — then `addPostToReading`, `createSection` (one chapter per story),
 `assignPostToSection`, and `applyTag` for `sherlock holmes`.
 
+> **DATED CORRECTION (2026-08-31, the midpoint review's M1 — the line above CONFLATES two things and
+> the first implementation followed it faithfully).** "Segments on entry by the global mode" and "so
+> each paragraph becomes a block" are not the same claim: `importPost` reads the reader's synced
+> `default_segmentation`, and under the shipped **One block** option the whole library seeded as
+> thirteen giant blocks — the opposite of what this act exists to demonstrate. **The seed names its
+> own mode** (`SampleLibrarySeeder.segmentation = .paragraph`, passed through `importPost`'s new
+> explicit `segmentation:` parameter), which restores the mode-independence `TutorialSeeder` always
+> had via `newBlock`. Every other `importPost` caller is byte-unchanged. Pinned:
+> `theSeedIsIndependentOfTheReadersSegmentationSetting`.
+
 ### Traps — and default-on makes the first one serious
 
 1. **FIRST-LAUNCH SEEDING COST IS NOW ON EVERY NEW USER'S CRITICAL PATH.** ~105k words segmenting into

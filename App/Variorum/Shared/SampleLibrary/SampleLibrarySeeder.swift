@@ -150,6 +150,26 @@ enum SampleLibrarySeeder {
     /// and `MobileStarterJournal` precedent.
     nonisolated static let undoLabel = "Sample Library"
 
+    /// **The seed's OWN segmentation, named rather than inherited** (the
+    /// pre-13u midpoint review's M1). The stories are hard-unwrapped into
+    /// one line per paragraph by `notes/source/sherlock-extract.py`
+    /// precisely so `.paragraph` mints one block per paragraph — 2,530 of
+    /// them across the twelve — and that shape IS the point of the act:
+    /// her ruling is that this library "makes the power of the app clear",
+    /// which means real blocks, a real Blocks/Index/Outline listing, and
+    /// autosaves proportional to a paragraph.
+    ///
+    /// Reading the reader's `default_segmentation` instead would have made
+    /// the shipped library depend on a setting she can change: under the
+    /// shipped "One block" option the whole 105k words seeded as thirteen
+    /// giant blocks, with an autosave rewriting ~60 KB per keystroke
+    /// inside a story. `TutorialSeeder` never had this exposure — it mints
+    /// through `newBlock`, which takes no mode — so naming the mode here
+    /// restores the property the precedent already had rather than
+    /// inventing one. (The plan's build-shape line conflated "segments on
+    /// entry" with "segments by paragraph"; it now carries a correction.)
+    nonisolated static let segmentation: Segmentation = .paragraph
+
     nonisolated static let attributionText = """
         \u{201C}The Adventures of Sherlock Holmes\u{201D} by Arthur Conan Doyle, first \
         published in 1892. The twelve stories are in the public domain.
@@ -246,10 +266,13 @@ enum SampleLibrarySeeder {
     /// nothing new imported and nothing duplicated.
     ///
     /// **The comparison is apples to apples by construction:** the seed
-    /// mints through `importPost`, whose bulk segmentation round-trips
-    /// byte-for-byte through `Queries.renderedText` (its own documented
-    /// contract, and `theManifestMatchesWhatTheSeedActuallyStores` pins it
-    /// against the real bundled text rather than a fixture).
+    /// mints through `importPost` in this seeder's OWN `segmentation` mode,
+    /// whose bulk segmentation round-trips byte-for-byte through
+    /// `Queries.renderedText` (its own documented contract, and
+    /// `theManifestMatchesWhatTheSeedActuallyStores` pins it against the
+    /// real bundled text rather than a fixture). Naming the mode is what
+    /// makes that contract hold for every reader rather than for readers
+    /// who left `default_segmentation` alone.
     ///
     /// Pure, so a pin can drive it with a fixture.
     nonisolated static func manifest(stories: [Story]) -> SampleLibraryManifest {
@@ -487,7 +510,8 @@ enum SampleLibrarySeeder {
             if !present.contains(frontTitle) {
                 let section = try quiet.createSection(in: bookID, name: frontChapter)
                 let note = try quiet.importPost(
-                    title: frontTitle, text: frontText, undoLabel: label)
+                    title: frontTitle, text: frontText, undoLabel: label,
+                    segmentation: Self.segmentation)
                 _ = try quiet.addPostToReading(note.container.id, to: bookID)
                 try quiet.assignPostToSection(
                     note.container.id, in: bookID, section: section.id)
@@ -506,7 +530,8 @@ enum SampleLibrarySeeder {
                 let quiet = Operations(undoStack: nil)
                 let section = try quiet.createSection(in: bookID, name: story.title)
                 let note = try quiet.importPost(
-                    title: story.title, text: story.text, undoLabel: label)
+                    title: story.title, text: story.text, undoLabel: label,
+                    segmentation: Self.segmentation)
                 _ = try quiet.addPostToReading(note.container.id, to: bookID)
                 try quiet.assignPostToSection(
                     note.container.id, in: bookID, section: section.id)

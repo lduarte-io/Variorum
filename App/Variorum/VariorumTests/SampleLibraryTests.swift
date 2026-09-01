@@ -151,6 +151,52 @@ struct SampleLibraryTests {
         }
     }
 
+    /// **The midpoint review's M1, pinned.** The seed used to mint through
+    /// `importPost`'s GLOBAL-setting chain, so a reader who had chosen the
+    /// shipped "One block" segmentation option got the whole sample library
+    /// as thirteen giant blocks — Blocks/Index/Outline showing thirteen
+    /// rows for 105k words, and an autosave rewriting ~60 KB per keystroke
+    /// inside a story. That inverts the act's entire purpose (her ruling:
+    /// the library exists to make the app's power legible at scale), and
+    /// nothing in the shipped suite could see it, because every other pin
+    /// ran under the schema's `.paragraph` seed.
+    ///
+    /// *Red on the old code:* `.oneBlock` → the scandal renders as ONE
+    /// block, so `> 200` fails. Verified by reverting the fix.
+    @Test("The seed names its own mode: 'One block' does not flatten the library")
+    func theSeedIsIndependentOfTheReadersSegmentationSetting() async throws {
+        try await withSampleWorld { session, db in
+            // The reader's document-global choice — the one door that sets
+            // it (13d batch 4, her A16).
+            try await session.runner.run { ops in
+                try ops.setDefaultSegmentation(.oneBlock)
+            }
+            let mark = Mark()
+            let outcome = await SampleLibrarySeeder.seedIfNeeded(
+                session: session, loadMark: mark.load, saveMark: mark.save)
+            guard case .seeded = outcome else {
+                Issue.record("expected a seed, got \(outcome)")
+                return
+            }
+            try await db.read { db in
+                let book = try #require(
+                    Queries.readings(db)
+                        .first { $0.name == SampleLibrarySeeder.bookName })
+                let entries = try Queries.assembleReading(db, readingID: book.id)
+                let scandal = try #require(
+                    entries.first { $0.title == "A Scandal in Bohemia" })
+                let blocks = try Queries.renderPost(db, containerID: scandal.postID)
+                #expect(blocks.count > 200,
+                        "the sample library must be paragraphs whatever the reader's setting says")
+
+                // …and the reader's own setting is UNTOUCHED: naming a mode
+                // for shipped content must never rewrite her document
+                // semantics (`setting` rows are synced).
+                #expect(try Queries.defaultSegmentation(db) == .oneBlock)
+            }
+        }
+    }
+
     @Test("HER CHECK: the Pool is blank on a freshly seeded store")
     func thePoolIsBlank() async throws {
         try await withSampleWorld { session, db in

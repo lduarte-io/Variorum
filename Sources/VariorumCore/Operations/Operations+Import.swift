@@ -23,8 +23,9 @@ extension Operations {
     }
 
     /// The LIBRARY door: dropped text → a NEW post, segmented by the
-    /// global `default_segmentation` setting (a fresh post carries no
-    /// per-post override; the effective-default chain is the ordinary one).
+    /// global `default_segmentation` setting unless the caller names a mode
+    /// (a fresh post carries no per-post override; the effective-default
+    /// chain is the ordinary one).
     /// Whitespace-only text refuses — nothing to import beats an empty
     /// post. Minting text is working on the post (the ratified `newBlock`
     /// stamp rule): touch + churn accumulate per minted block, exactly as
@@ -37,12 +38,27 @@ extension Operations {
     /// path, and "Undo Import" is not what she did — a menu that says
     /// "Undo Quick Note" says what happened. Nothing else about the entry
     /// changes: same inverse, same redo, same recovery door.
+    ///
+    /// **`segmentation` (pre-13u midpoint review, M1):** an EXPLICIT mode
+    /// for callers whose text has a shape of its own, defaulting to `nil`
+    /// — the reader's setting, which is what every door that lands HER
+    /// text keeps. It exists because SHIPPED CONTENT is not her text: the
+    /// sample library's twelve stories are paragraphed prose whose whole
+    /// job is to show the app at scale, and under the shipped "One block"
+    /// option the global chain would have seeded 105k words as thirteen
+    /// giant blocks — Blocks/Index/Outline showing thirteen rows, and an
+    /// autosave rewriting ~60 KB per keystroke inside a story. Seeded
+    /// furniture must not depend on a setting the reader can change, so
+    /// the seeder names its mode and `TutorialSeeder`'s `newBlock` road
+    /// (mode-independent by construction) keeps its property here.
+    /// Every other caller passes nothing and is byte-unchanged.
     @discardableResult
     public func importPost(
-        title: String?, text: String, undoLabel: String = "Import"
+        title: String?, text: String, undoLabel: String = "Import",
+        segmentation: Segmentation? = nil
     ) throws -> ImportResult {
         let result: ImportResult = try database.write { db in
-            let mode = try globalSegmentation(db)
+            let mode = try segmentation ?? globalSegmentation(db)
             let segments = SegmentationRules.bulkSegments(text, mode: mode)
             guard !segments.isEmpty else { throw OperationError.emptyImport }
             let post = try insertPost(db, title: title, profile: nil, entryDate: nil)
