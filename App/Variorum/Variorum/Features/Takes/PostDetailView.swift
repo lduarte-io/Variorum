@@ -155,15 +155,31 @@ struct PostDetailView: View {
     /// engages only while a fan is open), so the masthead is a constant
     /// and the duplicate UserDefaults-read width brain dies with it.
     private let mastheadMeasure: CGFloat = 680
+    /// The trailing cluster's measured width — the title layer pads itself
+    /// by it on BOTH sides, so the centered title never runs under the icons
+    /// (the correction round, rows 4/19).
+    @State private var mastheadClusterWidth: CGFloat = 0
+    /// The masthead's own coordinate space (the DEBUG oracle reads the
+    /// title's midX in it against the masthead's midX).
+    static let mastheadSpace = "variorum-masthead"
 
     var body: some View {
         VStack(spacing: 0) {
             // Batch 9 (R101): the MASTHEAD — the round-2 canon's et/es
-            // grammar instead of a toolbar. Title over its path line on
-            // the left; the mode tabs as quiet voiced words on the right;
-            // the page below is the hero.
-            HStack(alignment: .top, spacing: 12) {
-                VStack(alignment: .leading, spacing: 1) {
+            // grammar instead of a toolbar. The page below is the hero.
+            //
+            // The Act 10 correction round, batch A (rows 4 + 19 — her words:
+            // Read "doesn't have a centered title above the read"; Lenses
+            // "the title is once again weirdly aligned"): the title block is
+            // CENTERED ON THE MASTHEAD'S FULL WIDTH in every mode. The old
+            // HStack let the trailing cluster take its natural width and
+            // centered the title in the REMAINDER, so it landed a third of
+            // the way across. A ZStack now: the title layer spans the whole
+            // masthead and centers, padded on BOTH sides by the cluster's
+            // measured width so it can never run under the icons; the
+            // cluster trails on its own layer. One layout for all modes.
+            ZStack(alignment: .top) {
+                VStack(alignment: .center, spacing: 1) {
                     // Sitting 9 (R67): the post's NAME, prominent — click
                     // to rename right here.
                     PostTitleLabel(session: session, postID: postID, tokens: tokens)
@@ -173,44 +189,51 @@ struct PostDetailView: View {
                         session: session, postID: postID,
                         recentBookIDs: recentBookIDs)
                 }
-                Spacer()
-                // Act 10 item 5 — the masthead's right EDGE, one coherent
-                // column: the inspector icons on top, the note's tag cards
-                // under them, across from the membership chip (her ruling's
-                // letter — "under the scraps / outside reference / tray
-                // button … across from what books an item is in").
-                VStack(alignment: .trailing, spacing: 3) {
-                    HStack(alignment: .firstTextBaseline, spacing: 2) {
-                        if showsModeSwitcher {
-                            // The same vocabulary the sidebar rail renders, in
-                            // the one chrome control that fits a masthead
-                            // corner. It writes the detail's OWN mode state —
-                            // the same binding `CommandRouter.requestMode`
-                            // writes through, so ⌘1–⌘6 and this door can never
-                            // disagree.
-                            VoicedMenu(tokens: tokens, label: mode.rawValue, role: .quiet) {
-                                ForEach(Mode.allCases, id: \.self) { m in
-                                    Button(m.rawValue) { mode = m }
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, mastheadClusterWidth + 12)
+                HStack(alignment: .top, spacing: 0) {
+                    Spacer(minLength: 0)
+                    // Act 10 item 5 — the masthead's right EDGE, one coherent
+                    // column: the inspector icons on top, the note's tag cards
+                    // under them, across from the membership chip (her ruling's
+                    // letter — "under the scraps / outside reference / tray
+                    // button … across from what books an item is in").
+                    VStack(alignment: .trailing, spacing: 3) {
+                        HStack(alignment: .firstTextBaseline, spacing: 2) {
+                            if showsModeSwitcher {
+                                // The same vocabulary the sidebar rail renders, in
+                                // the one chrome control that fits a masthead
+                                // corner. It writes the detail's OWN mode state —
+                                // the same binding `CommandRouter.requestMode`
+                                // writes through, so ⌘1–⌘6 and this door can never
+                                // disagree.
+                                VoicedMenu(tokens: tokens, label: mode.rawValue, role: .quiet) {
+                                    ForEach(Mode.allCases, id: \.self) { m in
+                                        Button(m.rawValue) { mode = m }
+                                    }
                                 }
+                                .help("This note's mode — Write · Takes · Index · Read · "
+                                    + "Lenses · Compare · Blocks · Canvas (⌘1–⌘8)")
                             }
-                            .help("This note's mode — Write · Takes · Index · Read · "
-                                + "Lenses · Compare · Blocks · Canvas (⌘1–⌘8)")
-                        }
-                        // The masthead's inspector cluster, rendered FROM its
-                        // door table (the `LibraryCatalogView.mastheadDoors`
-                        // precedent — the table is the render source, not a
-                        // comment beside one), so "the tray icon sits with
-                        // scraps and references" is a claim a pin can hold.
-                        ForEach(Self.inspectorDoors, id: \.panel) { door in
-                            Button(door.title, systemImage: door.symbol) {
-                                toggle(door.panel)
+                            // The masthead's inspector cluster, rendered FROM its
+                            // door table (the `LibraryCatalogView.mastheadDoors`
+                            // precedent — the table is the render source, not a
+                            // comment beside one), so "the tray icon sits with
+                            // scraps and references" is a claim a pin can hold.
+                            ForEach(Self.inspectorDoors, id: \.panel) { door in
+                                Button(door.title, systemImage: door.symbol) {
+                                    toggle(door.panel)
+                                }
+                                .labelStyle(.iconOnly)
+                                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                                .help(door.help)
                             }
-                            .labelStyle(.iconOnly)
-                            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                            .help(door.help)
                         }
+                        MastheadTagCluster(session: session, postID: postID, tokens: tokens)
                     }
-                    MastheadTagCluster(session: session, postID: postID, tokens: tokens)
+                    .onGeometryChange(for: CGFloat.self) { $0.size.width } action: {
+                        mastheadClusterWidth = $0
+                    }
                 }
             }
             .frame(maxWidth: mastheadMeasure, alignment: .leading)
@@ -219,6 +242,12 @@ struct PostDetailView: View {
             .padding(.top, 12)
             .padding(.bottom, 8)
             .background(tokens.surface)
+            .coordinateSpace(name: Self.mastheadSpace)
+            #if DEBUG
+            .onGeometryChange(for: CGFloat.self) { $0.size.width / 2 } action: {
+                MastheadGeometry.contentMidX = $0
+            }
+            #endif
             Divider().overlay(tokens.line)
             switch mode {
             case .write:
@@ -449,8 +478,9 @@ struct PostDetailView: View {
                         .font(tokens.title)
                         .foregroundStyle(tokens.ink)
                         .lineLimit(1)
+                        .multilineTextAlignment(.center)
                         .focused($fieldFocused)
-                        .frame(maxWidth: measure, alignment: .leading)
+                        .frame(maxWidth: measure, alignment: .center)
                         .onSubmit { rename() }
                         .onExitCommand { cancel() }
                         .onChange(of: fieldFocused) { _, focused in
@@ -466,7 +496,17 @@ struct PostDetailView: View {
                         .foregroundStyle(title.isEmpty ? tokens.muted : tokens.ink)
                         .lineLimit(1)
                         .truncationMode(.tail)
-                        .frame(maxWidth: measure, alignment: .leading)
+                        #if DEBUG
+                        // The oracle reads the TEXT's own frame (not its
+                        // measure, which centers whatever its content does):
+                        // where the words actually sit.
+                        .onGeometryChange(for: CGFloat.self) {
+                            $0.frame(in: .named(PostDetailView.mastheadSpace)).midX
+                        } action: { MastheadGeometry.titleMidX = $0 }
+                        #endif
+                        // Rows 4/19: the title CENTERS in its measure (it used
+                        // to lead), so the block reads centered over the page.
+                        .frame(maxWidth: measure, alignment: .center)
                         .contentShape(Rectangle())
                         .onTapGesture { beginEditing() }
                         .help("The note's name — click to rename it right here")
@@ -528,3 +568,15 @@ struct PostDetailView: View {
         }
     }
 }
+
+#if DEBUG
+/// The correction round's masthead oracle (rows 4/19 — the `BookOutlineGeometry`
+/// pattern): where the title block's midX sits against the masthead's own
+/// midX, in the masthead's coordinate space — so a pin asserts the centering
+/// she sees, per mode, not a layout the code merely intends.
+@MainActor
+enum MastheadGeometry {
+    static var titleMidX: CGFloat?
+    static var contentMidX: CGFloat?
+}
+#endif
