@@ -104,6 +104,19 @@ it.
   computer better."* → the machine is author-free for the walk from here; her real-store app is closed
   (the zero-instance window for the end-of-run refresh is open).
 
+- **R-cor-6 — LENSES + COMPARE NEED A DESIGN (her ruling from the phone, 2026-09-01 ~04:50, verbatim):**
+  *"Lenses/Compare need a design - I'm just going to tell you now that they need a design. The changes
+  made them a bit clearer (so they're improvements in one sense, even if they look bad), but it's still
+  absolutely dizzying. I need you to consider clearly what the point of each tab is, and make the UX of it
+  better. promote into note (takes ride) for example is kinda vague."* → Row 41's authorization becomes a
+  ruling under the friction doctrine (P-5): **batch D keeps only the mechanical defects** (rows 16/17 —
+  alignment; the anchor column always rendering the note); **the orchestrator writes the LENSES + COMPARE
+  DESIGN MEMO in-round** (`notes/plans/act10-correction-memo-lenses-compare.md` — the point of each tab in
+  one sentence each, the flows a writer actually runs, every door and its wording — "promote into note
+  (takes ride)" first — the edges, the tradeoffs, her rulings to collect), and **the build to the memo is
+  its own phase**, kicked off at her word after she rules on the memo (the S4-16 condition: deferral
+  carries its design, never vagueness). Row 20 folds into the memo.
+
 **Inherited rulings this round builds to (not re-litigated):** the eighth-wave rulings W8-1…W8-5
 (`pre-13u-round.md`), the fifth-wave item-15 flow ruling, the mode-row canon R60–94 as extended by
 W8-1 (the eight-mode row is AppSpec §12 canon), her copy doctrine (structure and generous targets
@@ -157,7 +170,7 @@ present), and the 13j recovery doctrine (the Trash is the recovery door).
 | 17 | Compare: "'This note' is showing nothing" | Compare anchor column | `CompareBoardView.swift:938` `anchor.title ?? "This note"` — a journal entry's title is nil so the literal shows; and "related blocks only" is emptying the ANCHOR, which it must never filter — peers only | D | TRACED |
 | 18 | Blocks: "that line between them should be draggable left / right" | Blocks workbench | Fixed split today; draggable, remembered | C | OPEN |
 | 19 | Lenses: "the title is once again weirdly aligned" | Masthead | Row 4's defect | A | TRACED |
-| 20 | "the use of lenses is still a bit unclear" | Lenses | A design item, not a fix — needs her words on WHAT is unclear; the orchestrator brings a short list of candidates in the morning bundle | D | OPEN (ruling) |
+| 20 | "the use of lenses is still a bit unclear" (→ R-cor-6: "absolutely dizzying") | Lenses | Folds into the Lenses + Compare design memo (R-cor-6) | D (memo) | RULED (R-cor-6) |
 | 21 | Read: "the outline isn't working great… being able to tap to toggle the outline being on and off is great though. I love that" | Note Read's companion outline | Click/scroll fixed; the toggle stays byte-as-is | C | OPEN |
 | 22 | Book Index "looks and feels good, but then you can't actually click into it to edit it" | Book Index | Read-only BY DESIGN (`BookIndexView.swift:23` — double-click hands off to Outline). Her ruling: editable in place — the selected note's block goes live in the right pane (one live editor, P3) | B | TRACED |
 | 23 | "the error on clicking on note titles in the outline place in the app was intermittent" (the field guide too) | Book navigator | Trace on the field guide as well as Sherlock; likely row 9's class racing realization | B | OPEN |
@@ -178,7 +191,7 @@ present), and the 13j recovery doctrine (the Trash is the recovery door).
 | 38 | (2nd msg) 13u item 17 — "if you click somewhere in the read mode, that it doesn't open there in the outline or the writing mode… it might make sense to pull that issue up into this phase, since it seems like there's a lot of 'cross pane interaction'" | Read → Index/Write click-through; the book's Read → editable view | PULLED IN (her word): the ONE scrolled-open door — click a sentence anywhere read-cheap, land in the editing surface at that block with the caret there — built once here and reused by rows 22/30 and the book; 13u2's item 17 is re-homed to this round | B + C (one mechanism) | OPEN |
 | 39 | (2nd msg) "I haven't even gotten into blocks and index and how clicking through them is impacting the regular write and takes mode" | Cross-mode position continuity (Write ↔ Takes ↔ Index ↔ Read ↔ Blocks) | W8-1's "index tracks position with take / write / probably block too": the walk exercises every mode switch with a block selected and records whether the position follows; each miss becomes a row | triage → C | OPEN |
 | 40 | (2nd msg, image 16) the book Outline's expanded note shows the bottom bar's items stacked VERTICALLY in a floating side card ("block 1/1 · block ▾ · Takes · commit ⌘S · history / note ▾ · comments · Aa / 5w block · 5w in note · ?") — "looks kind of weird… maybe the note menu needs to be collapsible… what's in that menu and how it looks needs to be a bit clearer" | Book Outline's in-place editor chrome | Trace where the side card comes from (the `CommitBar` axis introduced at wave 2c); make it read as one clear, calm control — collapsible if the trace says a stack is the right shape at that width | B | OPEN |
-| 41 | (2nd msg) "if compare needs its own phase, give it its own phase!! that's fine" | Compare + Lenses | Authorization recorded: batch D fixes the defects (rows 16/17); if the triage walk finds Lenses/Compare need a DESIGN rather than fixes, the orchestrator writes the brief for a phase of their own instead of half-building it (the S4-16 condition) | D | RECORDED |
+| 41 | (2nd msg; RULED R-cor-6 — they need a design) "if compare needs its own phase, give it its own phase!! that's fine" | Compare + Lenses | RULED R-cor-6: the design memo is written in-round, the build is its own phase. Earlier note: batch D fixes the defects (rows 16/17); if the triage walk finds Lenses/Compare need a DESIGN rather than fixes, the orchestrator writes the brief for a phase of their own instead of half-building it (the S4-16 condition) | D (memo) | RULED (R-cor-6) |
 | 42 | (2nd msg — RULED R-cor-5: one tab, Read, with the Index's outline) "I also wonder if Index / Read could be condensed into a single tab - making it more similar to book, where it's a selector within a place you're in. and the outline button could hide / show the index, and the index could function as the outline." | The note mode row | A product call — asked at the sitting with the architect's recommendation (see the sitting record) | C | RULED (R-cor-5) |
 | 43 | (2nd msg) "If I need to ship the app with just writing and takes, I'd be willing to do so, but ideally that won't be necessary" | — | Recorded as her floor, not the plan; the round's bar is every mode useful, bug-free and beautiful | — | RECORDED |
 
@@ -205,9 +218,10 @@ not remove any.
   Block History (savepoints vs lineage readable as sections), Archived, the Trash. Special attention
   by her word — walked fresh at every pane width, every door exercised (Put back, Restore, Delete
   Now, the lineage doors), each defect pinned.
-- **D · Compare + Lenses** — rows 16, 17, 20. Alignment; the anchor column ALWAYS renders the note
-  (derived display name for a nil title; "related blocks only" filters peers only); Lenses per her
-  words once she gives them (row 20 stays open for the morning bundle if she has not).
+- **D · Compare + Lenses — MECHANICAL ONLY (R-cor-6)** — rows 16, 17. Alignment; the anchor column
+  ALWAYS renders the note (derived display name for a nil title; "related blocks only" filters peers
+  only). **The design is the memo** (`act10-correction-memo-lenses-compare.md`, written by the
+  orchestrator in-round; rows 20/41); the build to it is its own phase at her word.
 - **E · The Library panel + the sidebar rail** — rows 1, 24, 33, 34 under R-cor-3's PROVISIONAL
   reading: the simple read preview (virtualized, read-cheap), a calm facts line, one door landing at
   the saved caret, a book showing its outline, the boundary holding when inactive, the rail fading.
