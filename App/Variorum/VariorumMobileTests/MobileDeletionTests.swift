@@ -322,7 +322,7 @@ struct MobileDeletionTests {
                     model: shelf, stars: stars, quickNote: quick,
                     tokens: .terminalLight, tabBar: { EmptyView() },
                     onOpenBook: { _ in }, onOpenForWriting: { _ in },
-                    onOpenNote: { _ in }, onSettings: {},
+                    onSettings: {},
                     onOpenTrash: { opened.value = true })
             ) { surface in
                 await surface.settle(20)
@@ -419,7 +419,7 @@ struct MobileDeletionTests {
                     quickNote: MobileQuickNoteModel(), tokens: .terminalLight,
                     tabBar: { EmptyView() },
                     onOpenBook: { _ in }, onOpenForWriting: { _ in },
-                    onOpenNote: { _ in }, onSettings: {})
+                    onSettings: {})
             ) { surface in
                 shelf.requestDeleteBook(book)
                 await surface.settle(40)
@@ -499,7 +499,7 @@ struct MobileDeletionTests {
                     model: shelf, stars: stars, quickNote: quickNote,
                     tokens: .terminalLight, tabBar: { EmptyView() },
                     onOpenBook: { _ in }, onOpenForWriting: { _ in },
-                    onOpenNote: { _ in }, onSettings: {})
+                    onSettings: {})
             ) { surface in
                 shelf.requestDeleteBook(book)
                 await surface.settle(40)

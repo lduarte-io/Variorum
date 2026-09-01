@@ -38,7 +38,7 @@ private func todayShelf(
             model: shelf, stars: stars, quickNote: quickNote,
             tokens: .terminalLight, tabBar: { EmptyView() },
             onOpenBook: { _ in }, onOpenForWriting: opened,
-            onOpenNote: { _ in }, onSettings: {}),
+            onSettings: {}),
         size: CGSize(width: 430, height: 932))
 }
 

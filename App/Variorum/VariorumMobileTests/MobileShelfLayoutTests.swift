@@ -142,7 +142,7 @@ private func shelfSurface(
             model: shelf, stars: stars, quickNote: box,
             tokens: .terminalLight, tabBar: { EmptyView() },
             onOpenBook: { _ in }, onOpenForWriting: { _ in },
-            onOpenNote: { _ in }, onSettings: {}),
+            onSettings: {}),
         size: size)
 }
 
