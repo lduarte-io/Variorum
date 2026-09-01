@@ -427,15 +427,21 @@ extension Queries {
         let slots = try renderPost(db, containerID: containerID)
         let slotsByID = Dictionary(uniqueKeysWithValues: slots.map { ($0.blockID, $0) })
 
-        // The rendered takes' edit stamps.
+        // The rendered takes' edit stamps — chunked at `fanChunk` like the
+        // tag lookup below (the ladder's F14: one rule for every IN list
+        // over a note's ids, so a 900-block note never meets SQLite's
+        // variable ceiling on one road and not the other).
         let variantIDs = toc.compactMap(\.variantID)
         var editedAt: [String: String] = [:]
-        if !variantIDs.isEmpty {
-            let placeholders = databaseQuestionMarks(count: variantIDs.count)
+        var variantStart = 0
+        while variantStart < variantIDs.count {
+            let chunk = Array(variantIDs[variantStart..<min(variantStart + fanChunk, variantIDs.count)])
+            variantStart += fanChunk
+            let placeholders = databaseQuestionMarks(count: chunk.count)
             for row in try Row.fetchAll(
                 db,
                 sql: "SELECT id, updated_at FROM variant WHERE id IN (\(placeholders))",
-                arguments: StatementArguments(variantIDs)
+                arguments: StatementArguments(chunk)
             ) {
                 editedAt[row["id"]] = row["updated_at"]
             }
