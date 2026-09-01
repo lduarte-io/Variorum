@@ -3344,3 +3344,19 @@ the F6 interim). The near-empty re-key REFUSE-or-warn question rides the ratify 
 **Per round-1 finding, the reviewer's HOLDS verdicts (kept):** F6 · F5 · F3 · F7 · F9 · F10 · F12 · F8 · F14 HOLD; F1 HOLDS for the pinned sequences but NOT the locally-renamed loser (R2-2) + the designation gap (R2-4); F2 DOES NOT HOLD under pull→push (R2-1) + the leak (R2-3) + the empty-pull residual (R2-6); F4 recorded, F11 doc'd, F13 retitled. **Foci:** T1 untouched (GUARDED stands) · keystones verbatim · capture code CLEAN · P-3 CLEAN.
 
 **Adjudication:** no disputes. R2-1/R2-2 are the class the ladder exists for — a fix that holds in the harness's sequence and not in production's. Both sit in `Sync/`: the fix session is FABLE under the rider and takes R2-1…R2-7 in one checkpointed session; **ROUND 3 follows** (a fresh reviewer, a full pass focused on these fixes); anything open after round 3 is recorded for the author, never looped on.
+
+# LADDER ROUND 2 FIX RECORD (2026-08-31/09-01, the Fable fix session under the `Sync/` rider — one commit per finding, pushed after each; red-on-old by BEHAVIORAL REVERT after each commit; the pins run PRODUCTION'S ROUND SHAPE — pull → push, chunked pushes through `FaultInjectingTransport`)
+
+**LIVE STATUS (the checkpoint protocol — a fresh session with only the repo finishes from here):**
+
+| finding | status |
+|---|---|
+| R2-1 (+ R2-6's guard) | NOT-STARTED — settled design: dedupe occasions PULL-ONLY (`TouchedRows.isPullBatch`; the push path never runs the pass — only a pull can land the in-flight rows); the reserved-tag COMPLETENESS guard (a live member post with no `post_tag` row, any liveness, joined to a tag of the reserved path, any liveness ⇒ `.indeterminate`); a THIRD occasion — a reserved-path `post_tag` arriving in a pull re-fires the pass (evidence-driven, no standing marker, no loop). Pins: F2 + `a.push()` after the deferring pull; F2 + an EMPTY pull between B's chunks |
+| R2-2 | NOT-STARTED — `journalKeeperBesideRetiring`: mint-shape iff the LOCAL row OR the ARRIVING columns satisfy the predicate. Pin: the F1 chunk split + B renames J_B before pulling |
+| R2-3 | NOT-STARTED — clear the marker FIRST in `dedupeSampleLibraryCopies` (before the count guard). Pin: after a two-device convergence the marker is absent on both; an empty pull then does no work |
+| R2-4 | NOT-STARTED — ONE designation helper (`convergeDailyDesignation`) called from direction 1 (the loser retiring here) AND the post-batch pass generalized to "the designation names a DEAD mint-shaped reading while a live keeper stands" (the fresh-store leg, where the setting arrives after the tombstone). Pins: between-chunks `shelveInDailyJournalBook` → `.shelved(keeper)`; the fresh store's designation lands on the keeper |
+| R2-5 | NOT-STARTED — legs: `variant.locked`, `block.name`, `block.presentation`, reading `sort_field`/`sort_dir` off the seed's defaults, section/membership ORDER mismatch. DECLINED: chapter RENAME (the real front chapter is `"about this text"`, its note `"About this book"`; the facts carry note titles only — a title-keyed rename leg reads every real copy as edited). A Mac pin guards the SEED's shape against the classifier's contract |
+| R2-7 | NOT-STARTED — the drain comparator extracted to a named static; comments at the push sort + direction 1's fresh-store leg; a comparator drift pin (architectural class, green both sides by nature) |
+| records + verification | NOT-STARTED — core baseline 1515/164 · Mac 1984/343 · mobile 607/97 + 2 standing (`-destination id=<simulator-udid>`) |
+
+*No revert is in flight.*
