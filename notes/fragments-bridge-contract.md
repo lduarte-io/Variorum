@@ -997,3 +997,18 @@ would add; the binding suite doctrines (one-secret, R-4/R-6, the NEVER list, T1'
 recency warning, the layer separation); and the open (a)/(b) ruling stated without a
 recommendation — that ruling is hers with the Fragments agent. No secrets appear in it. She
 carries it; questions come back through this channel.
+
+## CARRY-ITEM POINTER (2026-09-01) — the TWO-POSTURES brief (the revision Phase 20.10 waits for)
+
+**`notes/fragments-postures-brief-2026-09-01.md`** — self-contained for the Fragments agent, written at
+her word after the encryption-clarity sitting that produced Variorum's `pre-13x` design
+(`notes/plans/pre-13x-postures-design.md`). It carries: the vault + ceremony spec UNCHANGED (the Aug-31
+brief's §2 stands, so 20.10 can start); the suite's new custody model — two postures, Standard/Castle,
+per app; escrow-follows-the-posture simplified to Standard-mirrors/Castle-doesn't; keys INSIDE the
+encrypted store so one unlock covers content and sync (her "remove the sync difference from
+unlocking"); the doors re-authorized (change-passphrase from any unlocked enrolled device; Replace Keys
+and deletion by the ACCOUNT password; the near-empty typed confirmation); the cross-device
+passphrase-change rule (vault is truth, local wraps are caches); the §6 answers that changed; the
+tests to add (the interop fixture first); and what waits for pre-13x. It SUPERSEDES the Aug-31
+lockbox reply's consistency map. She carries it; questions return here.
+
