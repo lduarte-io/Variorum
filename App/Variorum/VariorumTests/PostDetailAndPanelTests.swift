@@ -67,14 +67,15 @@ struct PostDetailModeMemoryTests {
         #expect(PostMode.fromStored("NotAMode") == nil)
     }
 
-    /// The row is EIGHT — Index and Read joined at pre-13u Act 10 wave 2c
-    /// (W8-1, her ruling: "a new mode tab slotted after takes" + the Read
-    /// surface). Justified pin edit, the third in this pin's own lineage:
-    /// seven → six (Outline retired, 13b 4C/S4-3) → eight; the mode-row
-    /// change IS the ruled behavior change each time.
-    @Test func theModeVocabularyIsTheEightModeRail() {
+    /// The row is SEVEN — Index and Read joined at pre-13u Act 10 wave 2c
+    /// (eight), and the Act 10 correction round folded Index INTO Read (her
+    /// rulings R-cor-5/7: one tab named Read with an in-place `edit · read`
+    /// switch). Justified pin edit, the fourth in this pin's own lineage:
+    /// seven → six (Outline retired, 13b 4C/S4-3) → eight → seven; the
+    /// mode-row change IS the ruled behavior change each time.
+    @Test func theModeVocabularyIsTheSevenModeRail() {
         #expect(PostDetailView.Mode.allCases.map(\.rawValue) ==
-                ["Write", "Takes", "Index", "Read", "Lenses", "Compare", "Blocks", "Canvas"])
+                ["Write", "Takes", "Read", "Lenses", "Compare", "Blocks", "Canvas"])
     }
 }
 

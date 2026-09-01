@@ -248,6 +248,15 @@ nonisolated struct CapabilityContext: Equatable, Sendable {
     /// "a new editable surface joins the availability AND registers a
     /// handler" — the handler half the board already had).
     var takesBoardAttached = false
+    /// READ's `edit` face is on screen (the Act 10 correction round,
+    /// R-cor-7): the one tab named Read hosts an EDITABLE index surface
+    /// behind its in-place `edit · read` switch, and a read-only page behind
+    /// the other. The mode alone cannot say which face shows, so the host
+    /// reports the editable one exactly as a takes board reports its
+    /// attachment — and the editing families are honestly available in
+    /// `edit` and honestly grey in `read` (the enabled-into-nil class the
+    /// registry exists to kill, from both sides).
+    var readEditAttached = false
     /// The structural undo stack has an entry.
     var undoAvailable = false
     /// The structural REDO stack has an entry (13c 1B — A10).

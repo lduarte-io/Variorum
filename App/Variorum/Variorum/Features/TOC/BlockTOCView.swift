@@ -178,6 +178,14 @@ final class BlockTOCViewModel {
         }
     }
 
+    /// The ring goes (the Read host flipping to its read-only face; a
+    /// teardown): the leaving pane's text lands through the ONE coordinator.
+    func blur() {
+        guard authority.livePane != nil else { return }
+        authority.blur()
+        Task { await autosave.flushNow() }
+    }
+
     func makeLive(_ blockID: String, variantID: String) {
         let key = PaneTextAuthority.PaneKey(
             columnID: "toc", blockID: blockID, variantID: variantID)

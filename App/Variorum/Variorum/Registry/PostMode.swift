@@ -20,24 +20,25 @@ import Foundation
 
 /// The post detail's modes. Sitting 9's row minus Outline (retired into
 /// Compare at the Stage 4 kickoff, S4-3), PLUS the pre-13u Act 10 wave 2c
-/// pair (item 16, W8-1 — her rulings): **INDEX** ("obviously a need, seems
-/// more fundamental, let's put it in under Takes" — confirmed a NEW MODE
-/// TAB after Takes) and **READ** (the note READ surface, read-only,
-/// vertical/book-like — "that's the thing that notes have been missing
-/// relative to books, is the ability to read"). Read sits beside Index
-/// deliberately (implementer's recorded taste call): the row then reads
-/// as writing (Write · Takes), reading (Index · Read), comparing
-/// (Lenses · Compare), managing (Blocks · Canvas) — and Read's
-/// click-through lands in Index, so the neighbours are the pair.
+/// pair — and then MINUS one of them: **the Act 10 correction round (her
+/// rulings R-cor-5/7) retired INDEX INTO READ.** Her words: *"I like one
+/// tab named read … making it more similar to book, where it's a selector
+/// within a place you're in"*; *"there is an editable index surface, then
+/// you click read and it isn't anymore."* So READ is ONE tab carrying an
+/// in-place `edit · read` switch — `edit` the editable index surface (the
+/// `▸ 01` column beside a text pane whose clicked block goes live), `read`
+/// the calm page, never editable — and a remembered "Index" decodes as Read
+/// (`fromStored`, the Outline→Compare precedent: no stored value strands).
+/// The row reads as writing (Write · Takes), reading (Read), comparing
+/// (Lenses · Compare), managing (Blocks · Canvas).
 ///
 /// Raw values are the user-facing words — they also key the per-post mode
-/// memory (R79). The ⌘1–⌘8 keys derive from THIS order (EditorCommands'
+/// memory (R79). The ⌘1–⌘7 keys derive from THIS order (EditorCommands'
 /// ForEach), as do the sidebar rail and the masthead menu — one order,
 /// three renderers, no way to disagree.
 nonisolated enum PostMode: String, CaseIterable, Sendable {
     case write = "Write"
     case takes = "Takes"
-    case index = "Index"
     case read = "Read"
     case lenses = "Lenses"
     case compare = "Compare"
@@ -46,10 +47,13 @@ nonisolated enum PostMode: String, CaseIterable, Sendable {
 
     /// The decode door for STORED mode strings (the per-post memory's
     /// migration, 13b 4C): a post left in the retired Outline tab reopens
-    /// in Compare — its successor — never in a stranded default. Unknown
+    /// in Compare — its successor — never in a stranded default; a post
+    /// left in the retired Index tab reopens in Read (the correction round,
+    /// R-cor-5/7 — Read's `edit` face IS the index surface). Unknown
     /// strings still decode nil (the caller's fallback owns those).
     static func fromStored(_ raw: String) -> PostMode? {
         if raw == "Outline" { return .compare }
+        if raw == "Index" { return .read }
         return PostMode(rawValue: raw)
     }
 }

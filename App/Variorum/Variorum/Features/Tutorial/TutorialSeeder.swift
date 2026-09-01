@@ -123,7 +123,7 @@ enum TutorialSeeder {
         // from the app's own sentences.
         ("keeping it private",
          ["your library is encrypted", "what you'd have to lose"]),
-        ("ways of looking", ["index \u{B7} read", "lenses", "compare & versions",
+        ("ways of looking", ["read", "lenses", "compare & versions",
                              "blocks \u{B7} canvas"]),
         ("the library of things", ["comments & tags", "books & the shelf",
                                    "pool & scraps", "export — it's all yours",
@@ -328,9 +328,9 @@ enum TutorialSeeder {
 
             // 13b 4D (S4-20): the first-open default is WRITE now; the
             // per-post memory is worth teaching in the same breath.
-            "A note opens into one of eight modes — the tabs read Write \u{B7} Takes \u{B7} "
-            + "Index \u{B7} Read \u{B7} Lenses \u{B7} Compare \u{B7} Blocks \u{B7} Canvas, and "
-            + "\u{2318}1 through \u{2318}8 "
+            "A note opens into one of seven modes — the tabs read Write \u{B7} Takes \u{B7} "
+            + "Read \u{B7} Lenses \u{B7} Compare \u{B7} Blocks \u{B7} Canvas, and "
+            + "\u{2318}1 through \u{2318}7 "
             + "switch between them. A note opens in Write the first time — the "
             + "plain full page; after that it remembers the mode you left it in. "
             + "The rest of this book visits each mode where it earns its keep.",
@@ -355,8 +355,8 @@ enum TutorialSeeder {
             + "one \u{2014} its text is the text you type in; the other reads quietly "
             + "beside it. That is deliberate, and it is what keeps a note with ten "
             + "thousand words as quick as an empty one. A split never shows the same "
-            + "note twice: to see ONE note two ways, that is what Lenses (\u{2318}5) and "
-            + "Compare (\u{2318}6) are for.",
+            + "note twice: to see ONE note two ways, that is what Lenses (\u{2318}4) and "
+            + "Compare (\u{2318}5) are for.",
 
             "Whole WINDOWS too: File \u{25B8} New Window opens another full window, with "
             + "its own sidebar, its own Open list and its own trail. Right-click a note "
@@ -458,7 +458,7 @@ enum TutorialSeeder {
             + "note. Either way, just keep typing.",
 
             "A block can carry a NAME — a handle for finding it, never printed in "
-            + "the prose. This block wears one: open the Blocks tab (\u{2318}7) and "
+            + "the prose. This block wears one: open the Blocks tab (\u{2318}6) and "
             + "you'll see \u{201C}the named block\u{201D} where every other row shows its first "
             + "sentence. Name\u{2026} on any row sets or clears one.",
 
@@ -877,7 +877,7 @@ enum TutorialSeeder {
             + "Library, and in 30 days I'm gone for real.",
 
             "MOVE ME OUT: I'm a decent line in the wrong note. Open Blocks "
-            + "(\u{2318}7), find my row, and use its \u{22EF} menu \u{25B8} Move "
+            + "(\u{2318}6), find my row, and use its \u{22EF} menu \u{25B8} Move "
             + "out to a pool (leaves this note). I become a scrap in that pool "
             + "— material for anywhere — and \u{2325}\u{2318}Z brings me back if "
             + "that wasn't what you meant.",
@@ -1324,35 +1324,41 @@ enum TutorialSeeder {
 
         // ——————————————————————————— ways of looking ———————————————————————
 
-        // pre-13u Act 10 wave 2c (item 16, W8-1): the two modes her
-        // ruling added — taught first in this chapter, because they are
-        // the FUNDAMENTAL ways of looking ("obviously a need, seems more
-        // fundamental"): getting around, and reading.
-        _ = try lesson(looking, "index \u{B7} read", [
-            "INDEX (\u{2318}3) is the note's table of contents: markdown headings "
+        // pre-13u Act 10 wave 2c (item 16, W8-1) gave this chapter two
+        // modes; the Act 10 correction round (R-cor-5/7) folded them into
+        // ONE tab named Read with an in-place `edit · read` switch — taught
+        // first in this chapter, because getting around and reading are the
+        // FUNDAMENTAL ways of looking ("obviously a need, seems more
+        // fundamental").
+        _ = try lesson(looking, "read", [
+            "READ (\u{2318}3) is the note beside its own index \u{2014} and it opens "
+            + "on EDIT. The column on the left is the index: markdown headings "
             + "become sections, every other block files under the one above it, "
-            + "and a note with no headings lists plainly. The left column is for "
-            + "getting around \u{2014} click a row and the page beside it scrolls "
-            + "there; \u{25B8} opens a block right in the column for a quick edit; "
-            + "the \u{22EF} menu carries the block acts. Index opens standing at "
-            + "the block you were just in, whichever mode you came from.",
+            + "and a note with no headings lists plainly. Click a row and the "
+            + "text beside it scrolls there; the \u{22EF} menu carries the block "
+            + "acts. In the text, click any block and it goes live right where "
+            + "it is \u{2014} one block at a time. The outline button folds the "
+            + "column away and back. Read opens standing at the block you were "
+            + "just in, whichever mode you came from.",
 
-            "READ (\u{2318}4) is the note as a page \u{2014} the same paper a book's "
-            + "reading flow uses: markdown rendered, boundaries gone, nothing to "
-            + "edit. A small outline sits beside it (fold it from the rail), and "
-            + "Aa \u{2212} / Aa \u{FF0B} size the type. Reading is the point \u{2014} and "
-            + "when a sentence needs work, click its paragraph and you land in "
-            + "Index, standing at that block.",
+            "Switch the face to READ and the same note is a page \u{2014} the "
+            + "paper a book's reading flow uses: markdown rendered, boundaries "
+            + "gone, nothing to edit. Choose continuous, or pages (the book's "
+            + "own leaves, \u{2190} \u{2192} turn them); Aa \u{2212} / Aa \u{FF0B} "
+            + "size the type. Reading is the point \u{2014} and when a sentence "
+            + "needs work, click its paragraph: the page turns to edit with "
+            + "that block live.",
 
-            "Try it: press \u{2318}4 and read this lesson as a page. Click this "
-            + "very paragraph \u{2014} Index opens with it selected. Then \u{2318}1 "
-            + "back to Write.",
+            "Try it: press \u{2318}3 \u{2014} the column stands at this lesson. "
+            + "Click this very paragraph in the text and it goes live; type a "
+            + "word. Switch to read, click this paragraph again \u{2014} the page "
+            + "turns to edit with it live. Then \u{2318}1 back to Write.",
         ])
 
         let lenses = try lesson(looking, "lenses", [
             "A LENS is a saved way of LOOKING at a note: for each block, which "
             + "take to show. It never changes the note — \u{201C}a lens is the same "
-            + "structure with different choices.\u{201D} Lenses mode (\u{2318}5) is their "
+            + "structure with different choices.\u{201D} Lenses mode (\u{2318}4) is their "
             + "home: full-text columns side by side.",
 
             "Both blocks of this lesson carry two takes, and a lens named "
@@ -1369,7 +1375,7 @@ enum TutorialSeeder {
         ])
         let lensAlt1 = try take(on: lenses.blocks[0],
             "A LENS is a bookmark on your choices: it remembers, for every block, which "
-            + "take you'd show — without moving the note an inch. Lenses mode (\u{2318}5) lays "
+            + "take you'd show — without moving the note an inch. Lenses mode (\u{2318}4) lays "
             + "such readings out as columns.")
         let lensAlt2 = try take(on: lenses.blocks[2],
             "\u{2713} Make this the note is the one door from looking to being: adopt, and the "
@@ -1387,7 +1393,7 @@ enum TutorialSeeder {
             + "in one gesture. Mark = connect, duplicate = copy + connect.",
 
             "This lesson already has a version twin — it was duplicated when "
-            + "the book was seeded. Open Compare (\u{2318}6): the notes sit side "
+            + "the book was seeded. Open Compare (\u{2318}5): the notes sit side "
             + "by side, related blocks tied by lineage — and every pane is "
             + "EDITABLE. Click into either column and type: the edit lands in "
             + "that note, and the one live ring moves wherever you click, "
@@ -1436,8 +1442,9 @@ enum TutorialSeeder {
 
             // 13b 4D (N39 + N32(a)) + wave 2c (item 16, W8-1 direction C):
             // the workbench, taught where the doors live. (The old
-            // table-of-contents half of this lesson lives in Index now.)
-            "BLOCKS (\u{2318}7) is the workbench — the note's blocks as "
+            // table-of-contents half of this lesson lives in Read's edit
+            // face now.)
+            "BLOCKS (\u{2318}6) is the workbench — the note's blocks as "
             + "objects. Every row shows what it carries: takes, comments, "
             + "words, tags, a lock, when it last moved. Click a row and its "
             + "panel opens on the right — edit the text there, see its "
@@ -1452,7 +1459,7 @@ enum TutorialSeeder {
             + "back).",
 
             // 13b 4E (N30/S4-7): the canvas package, taught whole.
-            "CANVAS (\u{2318}8) scatters the blocks as sticky-note cards. They open "
+            "CANVAS (\u{2318}7) scatters the blocks as sticky-note cards. They open "
             + "in a tidy grid until you arrange them; drag a card by its \u{2823} "
             + "header — arrangement is yours and is remembered, the note's order "
             + "doesn't move — and resize it from the corner grip. Click into a "

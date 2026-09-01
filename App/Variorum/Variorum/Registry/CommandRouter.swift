@@ -315,6 +315,30 @@ final class CommandRouter {
         takesBoardAttached = !takesBoardTokens.isEmpty
     }
 
+    // MARK: - Read's editable face (the Act 10 correction round, R-cor-7)
+
+    /// READ's `edit` face reports itself here while it is on screen — the
+    /// takes board's shape exactly, for the same reason: the mode says
+    /// "Read", and only the host knows whether the editable index surface or
+    /// the read-only page is showing. A SET of tokens (mount order is
+    /// SwiftUI's; a flag would be cleared by a departing face's teardown).
+    @ObservationIgnored private var readEditTokens: Set<UUID> = []
+
+    /// Observable so menu enablement re-evaluates when the face flips.
+    private(set) var readEditAttached = false
+
+    func attachReadEdit() -> UUID {
+        let token = UUID()
+        readEditTokens.insert(token)
+        readEditAttached = true
+        return token
+    }
+
+    func detachReadEdit(_ token: UUID) {
+        readEditTokens.remove(token)
+        readEditAttached = !readEditTokens.isEmpty
+    }
+
     // MARK: - Surface command handlers (LIFO — last mounted wins)
 
     @ObservationIgnored private var handlers: [(token: UUID, handler: (RoutedCommand) -> Bool)] = []
@@ -400,6 +424,7 @@ final class CommandRouter {
             writeEditorAttached: writeEditorAttached(),
             writeEditorOwnsScrollView: writeEditorOwnsScrollView(),
             takesBoardAttached: takesBoardAttached,
+            readEditAttached: readEditAttached,
             undoAvailable: undoAvailable(),
             redoAvailable: redoAvailable(),
             openNoteCount: openNoteCount(),

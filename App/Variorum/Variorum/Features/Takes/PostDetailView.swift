@@ -228,15 +228,15 @@ struct PostDetailView: View {
                                 // the one chrome control that fits a masthead
                                 // corner. It writes the detail's OWN mode state —
                                 // the same binding `CommandRouter.requestMode`
-                                // writes through, so ⌘1–⌘6 and this door can never
+                                // writes through, so ⌘1–⌘7 and this door can never
                                 // disagree.
                                 VoicedMenu(tokens: tokens, label: mode.rawValue, role: .quiet) {
                                     ForEach(Mode.allCases, id: \.self) { m in
                                         Button(m.rawValue) { mode = m }
                                     }
                                 }
-                                .help("This note's mode — Write · Takes · Index · Read · "
-                                    + "Lenses · Compare · Blocks · Canvas (⌘1–⌘8)")
+                                .help("This note's mode — Write · Takes · Read · "
+                                    + "Lenses · Compare · Blocks · Canvas (⌘1–⌘7)")
                             }
                             // The masthead's inspector cluster, rendered FROM its
                             // door table (the `LibraryCatalogView.mastheadDoors`
@@ -305,19 +305,17 @@ struct PostDetailView: View {
             case .takes:
                 TakesBoardView(session: session, postID: postID)
                     .id("takes-\(postID)")
-            case .index:
-                // Wave 2c (item 16, W8-1): the block-TOC grown up — the
-                // standing index column beside the scroll-synced reading
-                // pane; arrives at the router's focused-block fact.
-                IndexModeView(session: session, postID: postID, onJump: { blockID in
+            case .read:
+                // The Act 10 correction round (R-cor-5/7): ONE tab named
+                // Read hosting the in-place `edit · read` switch — the
+                // editable index surface (the retired Index tab's column
+                // beside a pane whose clicked block goes live) and the
+                // read-only page (continuous or the book's pages); a
+                // `read` click flips to `edit` at that block.
+                ReadModeView(session: session, postID: postID, onJump: { blockID in
                     jump(to: blockID)
                 })
-                .id("index-\(postID)")
-            case .read:
-                // Wave 2c (item 16, W8-1): the read-only page — clicking a
-                // paragraph lands it in Index (the scrolled-open door).
-                ReadModeView(session: session, postID: postID)
-                    .id("read-\(postID)")
+                .id("read-\(postID)")
             case .lenses:
                 // Sitting 9 (R65/R86): the multi-column editor + lens
                 // machinery's one home — columns never share a surface

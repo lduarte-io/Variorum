@@ -135,12 +135,15 @@ nonisolated enum CapabilityRegistry {
     /// pool editors that carry no mode at all. Whatever surface holds the
     /// keyboard is a surface ⌘B can act on, which is exactly why the door
     /// should not be grey there.
-    /// Wave 2c: READ is the one mode with NO editable surface anywhere in
-    /// it (the projection tier, P-3) — the family greys there honestly
-    /// rather than rendering enabled over nothing (the enabled-into-nil
-    /// class). INDEX keeps the TOC's truth: its expanded row edits.
+    /// Wave 2c made READ the one mode with NO editable surface; the Act 10
+    /// correction round (R-cor-5/7) folded the Index tab INTO Read as its
+    /// `edit` face, so the mode alone no longer says: Read is editable while
+    /// its `edit` face is attached (`readEditAttached`, reported by the host
+    /// like a takes board) and the projection tier while `read` shows — the
+    /// family greys there honestly rather than rendering enabled over
+    /// nothing (the enabled-into-nil class).
     private static let editableText: @Sendable (CapabilityContext) -> Capability.Availability = { ctx in
-        ctx.writeEditorAttached || ctx.takesBoardAttached
+        ctx.writeEditorAttached || ctx.takesBoardAttached || ctx.readEditAttached
             || (ctx.mode != nil && ctx.mode != .read)
             ? .act : .unavailable
     }
@@ -1174,9 +1177,9 @@ nonisolated enum CapabilityRegistry {
 
         // MARK: Modes + app scope
         Capability(
-            id: .switchMode, verb: "Switch Mode (⌘1–⌘8)", scope: .post,
+            id: .switchMode, verb: "Switch Mode (⌘1–⌘7)", scope: .post,
             doors: [.menuBar],
-            shortcutLabel: "⌘1–8", takesAccess: nil,
+            shortcutLabel: "⌘1–7", takesAccess: nil,
             unavailableNote: "Open a note first — the modes live inside a note.",
             availability: { ctx in ctx.mode != nil ? .act : .unavailable }),
         // MARK: The navigation core (13f batch 3 — W3/A27 + W16)

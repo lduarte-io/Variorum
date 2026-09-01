@@ -2,47 +2,107 @@
 //  ReadModeView.swift
 //  Variorum
 //
-//  pre-13u Act 10 wave 2c — **READ, the new read-only mode** (item 16,
-//  W8-1; her ruling verbatim: "a Reading surface SHOULD be added! …the
-//  Read surface that you can't edit … that's the thing that notes have
-//  been missing relative to books, is the ability to read"). Direction B:
-//  the calm page — boundaries gone, markdown rendered, the
-//  voice-independent `ReadingPageTokens` paper (the book flow's own look,
-//  deliberately, per R2) — with reading tools on a light rail and **a
-//  MINIMAL companion outline** (her sharpening: "a more minimal outline
-//  than 'index' for the read only mode" — the book's small TOC-pane
-//  grammar, collapsible, click-to-scroll and nothing else).
+//  **READ — one tab, two faces** (the Act 10 correction round, her rulings
+//  R-cor-5/7). Wave 2c shipped INDEX and READ as two tabs; she folded them
+//  into ONE named Read — *"making it more similar to book, where it's a
+//  selector within a place you're in. and the outline button could hide /
+//  show the index, and the index could function as the outline"* — and
+//  sharpened it: *"there is an editable index surface, then you click read
+//  and it isn't anymore."* So this is the HOST of an in-place `edit · read`
+//  switch, **opening on `edit` (RULED)** and remembering the face per note:
 //
-//  THE CLICK-THROUGH (her ruling: "clicking on it brings you to that
-//  sentence within index, already open"): a click on a block notes the
-//  fact through the ONE mechanism (`CommandRouter.noteFocusedBlock`) and
-//  requests Index — which seeds from the same fact. This is the
-//  scrolled-open-door shape built ONCE here; 13u item 17's book-side jump
-//  fix and 13i's Book Panel click-through reuse it (note the fact, switch
-//  the surface, seed from the fact).
+//  - **`edit`** — the editable index surface: the `▸ 01` column
+//    (`NoteIndexColumn`, the Index tab's navigator she likes) beside a text
+//    pane in which a clicked block goes LIVE in place (`ReadEditPane` — the
+//    read-cheap→live upgrade through the ONE `PaneTextAuthority`; P-3).
+//  - **`read`** — the calm page, NEVER editable: continuous (the wave-2c
+//    paper — markdown rendered, boundaries gone) or PAGES (the book's paged
+//    engine over this one note, `NotePagesView` — row 5, no second pager).
+//    A click on a paragraph flips to `edit` at that block through the ONE
+//    scrolled-open door (`LandingTarget`, batch B's brain — row 38).
 //
-//  P-3: Read is a PROJECTION TIER — no live editor exists in this mode,
-//  ever; nothing here touches `PaneTextAuthority`. P1: a LazyVStack of
-//  per-block rows, each rendering its own markdown in its own task (the
-//  `ReadingFlowView` precedent) — cost ∝ viewport, never note size; the
-//  scroll-sync is SwiftUI anchors, zero TK2 geometry (TEXTKIT2 §2's risk
-//  family deliberately not entered).
+//  The same `▸ 01` column stands beside either face behind the outline
+//  toggle she loves (row 21); the old minimal outline and its mid-word
+//  truncation (row 6) are gone with the tab. The current block is ONE fact
+//  across the modes (row 39): the host ENTERS on `CommandRouter.focusedBlock`
+//  and REPORTS its selection back through the same door.
+//
+//  P1: every face is a LazyVStack of per-block rows or the paged engine's
+//  two leaves — cost ∝ viewport, never note size; zero TK2 geometry in any
+//  scroll-sync (TEXTKIT2 §2's risk family deliberately avoided).
 //
 
 import SwiftUI
 import VariorumCore
 
 struct ReadModeView: View {
+    /// The `.surface` acts this host renders (P-1's declared ⇔ rendered
+    /// walk) — the column's ⋯ menu carries the TOC's archive/delete pair.
+    static let surfaceCapabilities: [CapabilityID] = NoteIndexColumn.surfaceCapabilities
+
+    /// The in-place switch. Raw values are the segment words and the
+    /// per-note memory's stored form.
+    enum Face: String, CaseIterable, Sendable {
+        case edit
+        case read
+    }
+
+    /// The `read` face's shape — continuous paper, or the book's leaves.
+    /// Session/view state like the book's own `ReadForm` (13c: never
+    /// persisted — QUESTIONS #43(b)/#45(e)); the face IS remembered.
+    enum Form: String, CaseIterable, Sendable {
+        case continuous
+        case pages
+    }
+
+    /// Her ruling's letter: *"still default open to the index edit though."*
+    /// Thereafter the face is remembered per note (the per-post mode
+    /// memory's class — local, never synced; the architect's refinement,
+    /// recorded PROVISIONAL for her walk).
+    static func rememberedFace(postID: String, defaults: UserDefaults = .standard) -> Face {
+        defaults.string(forKey: faceKey(postID)).flatMap(Face.init(rawValue:)) ?? .edit
+    }
+
+    static func remember(_ face: Face, postID: String, defaults: UserDefaults = .standard) {
+        defaults.set(face.rawValue, forKey: faceKey(postID))
+    }
+
+    static func faceKey(_ postID: String) -> String { "readFace.\(postID)" }
+
+    /// The host's own coordinate space — the DEBUG geometry oracle reads
+    /// block frames in it (a `.global` read inside a macOS `ScrollView`
+    /// answers in the scroll view's own hosting space, not the window's —
+    /// measured by the first cut of the pins, which clicked a column's
+    /// width to the left of every block).
+    nonisolated static let probeSpace = "variorum-read-host"
+
     let session: AppSession
     let postID: String
+    /// "Jump to block in Write" — the detail switches to Write with the
+    /// caret seeded (the standing hybrid primitive).
+    var onJump: ((String) -> Void)?
 
     @State private var model: BlockTOCViewModel
-    /// The minimal outline pane — collapsible (her sharpening), remembered
+    @State private var face: Face = .edit
+    @State private var form: Form = .continuous
+    /// The outline column — collapsible (her "I love that"), remembered
     /// across notes (a reading posture, not a per-note fact).
     @AppStorage("readModeOutlineShown") private var outlineShown = true
-    /// The page's type size step — a reading tool, session-persistent.
+    /// The continuous page's type size step — a reading tool.
     @AppStorage("readModeTypeScale") private var typeScale = 1.0
-    @State private var trayShown = false
+    /// The CURRENT block on this surface (row 39's fact, mirrored here).
+    @State private var selectedBlockID: String?
+    /// One-shot scroll requests, one per consumer: the column and the
+    /// mounted face each consume their own (two consumers of one nil-after-
+    /// scroll request race each other — the wave-2c walk caught it).
+    @State private var paneTarget: String?
+    @State private var pageTarget: String?
+    @State private var columnTarget: String?
+    @State private var seeded = false
+    /// A `read` click's landing, consumed by the `edit` face as it arrives.
+    @State private var pendingLanding: LandingTarget?
+    /// The registry's `readEditAttached` token while `edit` is on screen.
+    @State private var editToken: UUID?
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
 
@@ -51,48 +111,87 @@ struct ReadModeView: View {
     }
     private var page: ReadingPageTokens { scheme == .dark ? .dark : .light }
 
-    init(session: AppSession, postID: String, model: BlockTOCViewModel? = nil) {
+    init(
+        session: AppSession, postID: String,
+        onJump: ((String) -> Void)? = nil, model: BlockTOCViewModel? = nil
+    ) {
         self.session = session
         self.postID = postID
+        self.onJump = onJump
         _model = State(initialValue: model ?? BlockTOCViewModel(session: session, postID: postID))
     }
 
-    private var outline: NoteIndexOutline.Outline {
-        NoteIndexOutline.outline(of: model.rows.map { ($0.blockID, $0.text) })
-    }
-
-    private var totalWords: Int {
-        model.rows.reduce(0) { $0 + Queries.wordCount($1.text ?? "") }
+    private var rowsByID: [String: Queries.TOCRow] {
+        Dictionary(uniqueKeysWithValues: model.rows.map { ($0.blockID, $0) })
     }
 
     var body: some View {
-        ScrollViewReader { proxy in
-            VStack(spacing: 0) {
-                HStack(alignment: .top, spacing: 0) {
-                    if outlineShown {
-                        minimalOutline(proxy)
-                            .frame(width: 200)
-                            .transition(.move(edge: .leading).combined(with: .opacity))
-                    }
-                    pageColumn
+        VStack(spacing: 0) {
+            faceBar
+            HStack(spacing: 0) {
+                if outlineShown {
+                    NoteIndexColumn(
+                        session: session, model: model, tokens: tokens,
+                        selectedBlockID: selectedBlockID,
+                        showsCount: face == .edit,
+                        columnTarget: $columnTarget,
+                        onSelect: { blockID in select(blockID, scrollFace: true) },
+                        onJump: onJump)
+                        .frame(width: NoteIndexColumn.width)
+                        .transition(.move(edge: .leading).combined(with: .opacity))
+                    Divider().overlay(tokens.line)
                 }
-                metaBar
+                faceView
             }
         }
         .background(tokens.room)
-        .overlay(alignment: .topTrailing) { toolRail }
+        .coordinateSpace(name: Self.probeSpace)
         .task { await model.start() }
         .task { await model.startTray() }
-        .onDisappear { model.teardown() }
-        .sheet(isPresented: $trayShown) {
-            TrayPanel(session: session, postID: postID)
+        .task { await model.startPools() }
+        .onAppear {
+            face = Self.rememberedFace(postID: postID)
+            syncAttachment()
+            report()
         }
+        .onDisappear {
+            model.teardown()
+            if let editToken {
+                session.commandRouter.detachReadEdit(editToken)
+                self.editToken = nil
+            }
+        }
+        .onChange(of: model.rows) { _, rows in
+            guard !seeded, !rows.isEmpty else { return }
+            seeded = true
+            // Arrive where she was (row 39: the ONE current block — Write's
+            // caret, Takes' live pane, Blocks' focused row).
+            let fact = session.commandRouter.focusedBlock
+            let landing = (fact?.postID == postID ? fact?.blockID : nil)
+                .flatMap { id in rows.contains { $0.blockID == id } ? id : nil }
+            select(landing ?? rows[0].blockID, scrollFace: true, report: false)
+        }
+        .onChange(of: face) { _, new in
+            Self.remember(new, postID: postID)
+            syncAttachment()
+            if new == .read {
+                // Nothing is live on the read-only face — the ring goes
+                // (its pending text flushed through the ONE coordinator).
+                model.blur()
+            } else {
+                landIfPending()
+            }
+            report()
+        }
+        .onChange(of: selectedBlockID) { _, _ in report() }
+        .onChange(of: model.liveBlockID) { _, _ in report() }
+        .onChange(of: form) { _, _ in report() }
     }
 
-    // MARK: - The tool rail (light, floating — the mockup's grammar)
+    // MARK: - The face bar (the selector within the place you're in)
 
-    private var toolRail: some View {
-        HStack(spacing: 4) {
+    private var faceBar: some View {
+        HStack(spacing: 10) {
             Button(tokens.chromeLabel("outline")) {
                 withAnimation(.easeInOut(duration: 0.18)) { outlineShown.toggle() }
             }
@@ -104,188 +203,258 @@ struct ReadModeView: View {
             .background(
                 outlineShown ? AnyShapeStyle(tokens.wash) : AnyShapeStyle(.clear),
                 in: RoundedRectangle(cornerRadius: 6))
-            .help("The note's small outline beside the page — fold it away and back")
+            .help("The note's index beside the page — fold it away and back")
             Divider().frame(height: 16)
-            Button("Aa −") { typeScale = max(0.85, typeScale - 0.1) }
-                .buttonStyle(.plain)
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
-                .disabled(typeScale <= 0.86)
-                .help("Smaller type")
-            Button("Aa +") { typeScale = min(1.5, typeScale + 0.1) }
-                .buttonStyle(.plain)
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
-                .disabled(typeScale >= 1.49)
-                .help("Bigger type")
-        }
-        .padding(.horizontal, 9)
-        .padding(.vertical, 6)
-        .background(tokens.card, in: RoundedRectangle(cornerRadius: 10))
-        .overlay(RoundedRectangle(cornerRadius: 10).stroke(tokens.line, lineWidth: 1))
-        .shadow(color: .black.opacity(scheme == .dark ? 0 : 0.05), radius: 6, y: 2)
-        .padding(.top, 12)
-        .padding(.trailing, 18)
-    }
-
-    // MARK: - The minimal outline (the book's small TOC-pane grammar)
-
-    /// More minimal than Index by construction: section heads where the
-    /// note has them, else the block handles — small, muted, click scrolls
-    /// the page, no controls, no filter, no editing.
-    private func minimalOutline(_ proxy: ScrollViewProxy) -> some View {
-        // One dictionary per pass — never a per-row `first(where:)` (the
-        // O(N²) render class this round's KnownIssues row names).
-        let byID = Dictionary(uniqueKeysWithValues: model.rows.map { ($0.blockID, $0) })
-        return ScrollView {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(tokens.chromeLabel("contents"))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
-                    .padding(.bottom, 6)
-                if outline.isFlat {
-                    ForEach(outline.allRows, id: \.blockID) { row in
-                        outlineRow(
-                            title: handle(row.blockID, in: byID), nested: false,
-                            proxy: proxy, target: row.blockID)
-                    }
-                } else {
-                    ForEach(Array(outline.groups.enumerated()), id: \.offset) { _, group in
-                        if let head = group.head {
-                            outlineRow(
-                                title: sectionTitle(head.blockID, in: byID),
-                                nested: false, emphasized: true, proxy: proxy,
-                                target: head.blockID)
-                        }
-                        // Sections only — the kids stay off this pane
-                        // (that is the "more minimal" her ruling asked
-                        // for); the preamble's blocks list plainly.
-                        if group.head == nil {
-                            ForEach(group.rows, id: \.blockID) { row in
-                                outlineRow(
-                                    title: handle(row.blockID, in: byID), nested: false,
-                                    proxy: proxy, target: row.blockID)
-                            }
-                        }
-                    }
+            Picker("", selection: $face) {
+                Text(tokens.chromeLabel("edit")).tag(Face.edit)
+                Text(tokens.chromeLabel("read")).tag(Face.read)
+            }
+            .pickerStyle(.segmented)
+            .controlSize(.small)
+            .fixedSize()
+            .help("edit: the index beside the text — click a block to write in it. "
+                + "read: the note as a page, nothing to edit")
+            if face == .read {
+                Picker("", selection: $form) {
+                    Text(tokens.chromeLabel("continuous")).tag(Form.continuous)
+                    Text(tokens.chromeLabel("pages")).tag(Form.pages)
+                }
+                .pickerStyle(.segmented)
+                .controlSize(.small)
+                .fixedSize()
+                .help("Read the note as one continuous page, or as real pages "
+                    + "with the text flowing across them")
+                if form == .continuous {
+                    Divider().frame(height: 16)
+                    Button("Aa −") { typeScale = max(0.85, typeScale - 0.1) }
+                        .buttonStyle(.plain)
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.muted)
+                        .disabled(typeScale <= 0.86)
+                        .help("Smaller type")
+                    Button("Aa +") { typeScale = min(1.5, typeScale + 0.1) }
+                        .buttonStyle(.plain)
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.muted)
+                        .disabled(typeScale >= 1.49)
+                        .help("Bigger type")
                 }
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 16)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            Spacer(minLength: 8)
         }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 7)
+        .background(tokens.card)
+        .overlay(alignment: .bottom) { Divider().overlay(tokens.line) }
     }
 
-    private func outlineRow(
-        title: String, nested: Bool, emphasized: Bool = false,
-        proxy: ScrollViewProxy, target: String
-    ) -> some View {
-        Button {
-            withAnimation { proxy.scrollTo("rd-\(target)", anchor: .top) }
-        } label: {
-            Text(title.isEmpty ? "· · ·" : title)
-                .font(emphasized ? tokens.small.weight(.semibold) : tokens.small)
-                .foregroundStyle(emphasized ? tokens.ink : tokens.muted)
-                .lineLimit(1)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.vertical, 3)
-                .padding(.leading, nested ? 12 : 0)
-                .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .help("Go to \u{201C}\(title)\u{201D}")
-    }
+    // MARK: - The faces
 
-    private func handle(_ blockID: String, in byID: [String: Queries.TOCRow]) -> String {
-        guard let row = byID[blockID] else { return "" }
-        return Queries.tocHandle(name: row.name, text: row.text)
-    }
-
-    private func sectionTitle(_ blockID: String, in byID: [String: Queries.TOCRow]) -> String {
-        guard let row = byID[blockID] else { return "" }
-        let heading = NoteIndexOutline.headingTitle(of: row.text)
-        return heading.isEmpty ? Queries.tocHandle(name: row.name, text: row.text) : heading
-    }
-
-    // MARK: - The page
-
-    private var pageColumn: some View {
-        ScrollView {
-            LazyVStack(alignment: .leading, spacing: 14 * typeScale) {
-                ReadPageHeader(session: session, postID: postID, page: page,
-                               words: totalWords)
-                ForEach(Array(model.rows.enumerated()), id: \.element.placementID) { i, row in
-                    ReadPageBlock(
-                        page: page, tokens: tokens, typeScale: typeScale,
-                        text: row.text ?? "", ordinal: i + 1,
-                        onOpenInIndex: { openInIndex(row) })
-                        .id("rd-\(row.blockID)")
-                }
-                Text("· · ·")
-                    .font(page.serif)
-                    .foregroundStyle(page.pageMeta)
-                    .padding(.vertical, 30)
-                    .frame(maxWidth: .infinity)
+    @ViewBuilder
+    private var faceView: some View {
+        switch face {
+        case .edit:
+            ReadEditPane(
+                model: model, tokens: tokens,
+                selectedBlockID: selectedBlockID,
+                paneTarget: $paneTarget,
+                onSelect: { blockID in select(blockID, scrollFace: false) })
+        case .read:
+            switch form {
+            case .continuous:
+                ReadPageColumn(
+                    session: session, postID: postID, model: model,
+                    page: page, tokens: tokens, typeScale: typeScale,
+                    dark: scheme == .dark,
+                    pageTarget: $pageTarget,
+                    onOpenInEdit: { row in openInEdit(row) })
+            case .pages:
+                NotePagesView(session: session, postID: postID)
             }
-            .frame(maxWidth: 700)
-            .padding(.horizontal, 60)
-            .padding(.vertical, 46)
-            .background(page.paper)
-            .clipShape(RoundedRectangle(cornerRadius: 6))
-            .shadow(color: .black.opacity(scheme == .dark ? 0 : 0.10), radius: 12, y: 3)
-            .padding(.vertical, 28)
-            .frame(maxWidth: .infinity)
         }
     }
 
-    /// The ruled click-through: note the fact, switch the mode — Index
-    /// seeds from the same fact (the ONE scrolled-open-door mechanism).
-    private func openInIndex(_ row: Queries.TOCRow) {
+    // MARK: - The current block (row 39) + the landing (row 38)
+
+    private func select(_ blockID: String, scrollFace: Bool, report: Bool = true) {
+        selectedBlockID = blockID
+        if scrollFace {
+            paneTarget = blockID
+            pageTarget = blockID
+            columnTarget = blockID
+        }
+        if report {
+            session.commandRouter.noteFocusedBlock(
+                blockID, variantID: rowsByID[blockID]?.variantID, postID: postID)
+        }
+    }
+
+    /// The ruled click-through (R-cor-7): a click on a sentence in `read`
+    /// flips to `edit` AT THAT BLOCK, live — the ONE scrolled-open door's
+    /// value, consumed as the `edit` face arrives.
+    private func openInEdit(_ row: Queries.TOCRow) {
         session.commandRouter.noteFocusedBlock(
             row.blockID, variantID: row.variantID, postID: postID)
-        session.commandRouter.requestMode(.index, postID: postID)
+        pendingLanding = LandingTarget(postID: postID, blockID: row.blockID)
+        face = .edit
     }
 
-    // MARK: - The meta bar
-
-    private var metaBar: some View {
-        HStack(spacing: 14) {
-            Text(tokens.chromeLabel(
-                "\(model.rows.count) blocks · \(totalWords) words · about "
-                + "\(max(1, Int((Double(totalWords) / 200).rounded(.up)))) min"))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
-                .lineLimit(1)
-            Spacer(minLength: 8)
-            if !model.tray.isEmpty {
-                Button(tokens.chromeLabel("\(TrayPath.menuLabel) — \(model.tray.count) waiting")) {
-                    let request = TrayRequest(postID: postID)
-                    if !session.commandRouter.requestNoteTray(request) {
-                        trayShown = true
-                    }
-                }
-                .buttonStyle(.plain)
-                .font(tokens.small)
-                .foregroundStyle(tokens.accent)
-                .help("This note's tray — deleted, archived, and preserved originals")
-            }
-            Button(tokens.chromeLabel("edit in write")) {
-                session.commandRouter.requestMode(.write, postID: postID)
-            }
-            .buttonStyle(.plain)
-            .font(tokens.small)
-            .foregroundStyle(tokens.accent)
-            .help("Back to the full editor (⌘1) — or click any paragraph to land on it in Index")
+    private func landIfPending() {
+        guard let landing = pendingLanding, landing.postID == postID else { return }
+        pendingLanding = nil
+        guard let target = landing.blockID ?? model.rows.first?.blockID else { return }
+        select(target, scrollFace: true, report: false)
+        if let row = rowsByID[target], let variantID = row.variantID, !row.variantLocked {
+            model.makeLive(target, variantID: variantID)
         }
-        .padding(.horizontal, 22)
-        .padding(.vertical, 9)
-        .background(tokens.card)
-        .overlay(alignment: .top) { Divider().overlay(tokens.line) }
+    }
+
+    /// The registry hears which face is on screen (`readEditAttached`).
+    private func syncAttachment() {
+        switch face {
+        case .edit:
+            if editToken == nil { editToken = session.commandRouter.attachReadEdit() }
+        case .read:
+            if let editToken {
+                session.commandRouter.detachReadEdit(editToken)
+                self.editToken = nil
+            }
+        }
+    }
+
+    private func report() {
+        #if DEBUG
+        ReadModeOracle.face = face
+        ReadModeOracle.form = form
+        ReadModeOracle.selectedBlockID = selectedBlockID
+        ReadModeOracle.liveBlockID = model.liveBlockID
+        #endif
     }
 }
 
-// MARK: - The page's header (title + kicker on the paper)
+#if DEBUG
+/// The correction round's Read oracle (the `MastheadGeometry` pattern): the
+/// mounted host's face, form, selection and live block — so a pin asserts
+/// what she sees, per face, not a state the code merely intends.
+@MainActor
+enum ReadModeOracle {
+    static var face: ReadModeView.Face?
+    static var form: ReadModeView.Form?
+    static var selectedBlockID: String?
+    static var liveBlockID: String?
+    /// Each face's block frames in the host's own named space, so a pin
+    /// can CLICK a block for real — the rig's synthesized events.
+    static var pageBlockFrames: [String: CGRect] = [:]
+    static var editBlockFrames: [String: CGRect] = [:]
 
+    static func reset() {
+        face = nil
+        form = nil
+        selectedBlockID = nil
+        liveBlockID = nil
+        pageBlockFrames = [:]
+        editBlockFrames = [:]
+    }
+}
+#endif
+
+/// What a Read geometry probe reports — the slot a frame belongs to.
+/// Always compiled (the modifier's signature names it); the oracle that
+/// stores the frames is DEBUG-only.
+enum ReadModeProbeSlot: Hashable {
+    case pageBlock(String)
+    case editBlock(String)
+}
+
+extension View {
+    /// The Read oracle's DEBUG frame write (the masthead probe's shape): a
+    /// no-op outside DEBUG.
+    @ViewBuilder
+    func readModeGeometryProbe(_ slot: ReadModeProbeSlot) -> some View {
+        #if DEBUG
+        self.onGeometryChange(for: CGRect.self) {
+            $0.frame(in: .named(ReadModeView.probeSpace))
+        } action: { frame in
+            switch slot {
+            case .pageBlock(let id): ReadModeOracle.pageBlockFrames[id] = frame
+            case .editBlock(let id): ReadModeOracle.editBlockFrames[id] = frame
+            }
+        }
+        #else
+        self
+        #endif
+    }
+}
+
+// MARK: - The continuous page (the wave-2c paper, kept)
+
+/// The calm page: the voice-independent `ReadingPageTokens` paper (the
+/// book flow's own look, per R2), a LazyVStack of per-block rows, the
+/// column's click landing the page on its block, a paragraph click opening
+/// `edit` there. No count line but the header's (row 36: the old footer
+/// said the same facts twice).
+private struct ReadPageColumn: View {
+    let session: AppSession
+    let postID: String
+    let model: BlockTOCViewModel
+    let page: ReadingPageTokens
+    let tokens: VoiceTokens
+    let typeScale: Double
+    let dark: Bool
+    @Binding var pageTarget: String?
+    let onOpenInEdit: (Queries.TOCRow) -> Void
+
+    private var totalWords: Int {
+        model.rows.reduce(0) { $0 + Queries.wordCount($1.text ?? "") }
+    }
+
+    var body: some View {
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 14 * typeScale) {
+                    ReadPageHeader(session: session, postID: postID, page: page,
+                                   words: totalWords)
+                    ForEach(Array(model.rows.enumerated()), id: \.element.placementID) { i, row in
+                        ReadPageBlock(
+                            page: page, typeScale: typeScale,
+                            blockID: row.blockID,
+                            text: row.text ?? "", ordinal: i + 1,
+                            onOpenInEdit: { onOpenInEdit(row) })
+                            .id("rd-\(row.blockID)")
+                    }
+                    Text("· · ·")
+                        .font(page.serif)
+                        .foregroundStyle(page.pageMeta)
+                        .padding(.vertical, 30)
+                        .frame(maxWidth: .infinity)
+                }
+                .frame(maxWidth: 700)
+                .padding(.horizontal, 60)
+                .padding(.vertical, 46)
+                .background(page.paper)
+                .clipShape(RoundedRectangle(cornerRadius: 6))
+                .shadow(color: .black.opacity(dark ? 0 : 0.10), radius: 12, y: 3)
+                .padding(.vertical, 28)
+                .frame(maxWidth: .infinity)
+            }
+            .onChange(of: pageTarget) { _, target in
+                guard let target else { return }
+                withAnimation { proxy.scrollTo("rd-\(target)", anchor: UnitPoint(x: 0.5, y: 0.08)) }
+                pageTarget = nil
+            }
+            .task {
+                await Task.yield()
+                guard let target = pageTarget else { return }
+                proxy.scrollTo("rd-\(target)", anchor: UnitPoint(x: 0.5, y: 0.08))
+                pageTarget = nil
+            }
+        }
+    }
+}
+
+/// The page's header: title + kicker on the paper. The kicker's reading
+/// time is `words ÷ 200` rounded up — a fixed 200-wpm convention (adult
+/// silent reading), not measured (R-cor-4(e); it stays here by her word).
 private struct ReadPageHeader: View {
     let session: AppSession
     let postID: String
@@ -314,18 +483,16 @@ private struct ReadPageHeader: View {
     }
 }
 
-// MARK: - One block on the page
-
-/// One block's paragraphs on the paper: markdown via the one transform,
-/// a quiet hover wash + gutter ordinal, one generous click target that
-/// lands this block in Index (the ruled behavior).
+/// One block's paragraphs on the paper: markdown via the one transform, a
+/// quiet hover wash + gutter ordinal, one generous click target that flips
+/// the face to `edit` at this block (the ruled behavior).
 private struct ReadPageBlock: View {
     let page: ReadingPageTokens
-    let tokens: VoiceTokens
     let typeScale: Double
+    let blockID: String
     let text: String
     let ordinal: Int
-    let onOpenInIndex: () -> Void
+    let onOpenInEdit: () -> Void
 
     @State private var paragraphs: [FlowParagraph] = []
     @State private var hovering = false
@@ -359,9 +526,9 @@ private struct ReadPageBlock: View {
         }
         .contentShape(Rectangle())
         .onHover { hovering = $0 }
-        .onTapGesture { onOpenInIndex() }
-        .help("Open this paragraph in Index — the note's table of contents, "
-            + "already standing at this block")
+        .onTapGesture { onOpenInEdit() }
+        .readModeGeometryProbe(.pageBlock(blockID))
+        .help("Click to edit this paragraph — the page turns to edit with this block live")
         .environment(\.openURL, OpenURLAction { url in
             MarkdownLink.open(url.absoluteString) ? .handled : .discarded
         })

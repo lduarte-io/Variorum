@@ -144,7 +144,7 @@ struct HelperView: View {
             ("⌘E", "search for whatever is selected"),
         ]),
         ShortcutGroup(title: "Navigation", items: [
-            ("⌘1–8", "note modes: Write · Takes · Index · Read · Lenses · Compare · Blocks · Canvas"),
+            ("⌘1–7", "note modes: Write · Takes · Read · Lenses · Compare · Blocks · Canvas"),
             ("⌘K", "find anything — notes, books, blocks, commands (not body text)"),
             ("⌘N", "new note"),
             ("⌘J", "today's journal entry"),
