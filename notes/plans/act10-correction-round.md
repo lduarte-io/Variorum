@@ -137,6 +137,21 @@ it.
   row 22); **the book's Read stays read-only.** R-cor-5's other terms stand (the Index tab retires into Read;
   the `NoteIndexOutline` brains survive as the column; canon + field-guide changes at closeout).
 
+- **R-cor-8 — THE OVERNIGHT AUTHORIZATION (her last message before sleep, 2026-09-01 ~06:45, verbatim):**
+  *"I'm going to sleep for now - continue your work and don't stop for questions, just choose, record for me
+  what was chosen + continue. What phase is this saved as? finish with a variorum refresh + make a handoff
+  walk. I probably won't wake this session if you're done before i'm up - maybe. Continue the excellent
+  work."* → Every fork from here is CHOSEN by the orchestrator and RECORDED in §7 (the morning bundle) with
+  its reason — no holds, no questions; the run ends with the `/Applications` refresh (C-3's walk first) and
+  the author handoff whose top is the WALK (her checklist in walk order). Her question answered: this is
+  saved as **the Act 10 correction round** — master plan row `act10-cor`, plan `notes/plans/act10-correction-
+  round.md`, handoff `notes/handoffs/act10-correction-handoff.md`. **Cutover rule for the orchestrator:** at
+  ~57 % of context with five batches ahead, the orchestrator writes its ROLE handoff
+  (`notes/plans/act10-correction-orchestrator-handoff.md`, a paste-ready successor prompt inside) NOW and
+  keeps it current at every batch close, walks each later batch by SPOT-CHECK (the implementer's full walk
+  + the orchestrator's 3–4 captures at the riskiest rows) to stay inside the budget, and if it must stop,
+  the successor adopts from the repo — she starts it in the morning if the run is not done.
+
 **Inherited rulings this round builds to (not re-litigated):** the eighth-wave rulings W8-1…W8-5
 (`pre-13u-round.md`), the fifth-wave item-15 flow ruling, the mode-row canon R60–94 as extended by
 W8-1 (the eight-mode row is AppSpec §12 canon), her copy doctrine (structure and generous targets
