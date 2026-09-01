@@ -416,3 +416,89 @@ brief: per row → FIXED (pin name, red-on-old evidence as the issue count under
 (owner + why); the door brain's name; the capture list; the counts; the commits in order; anything you
 found that she did not report (as new ledger rows, numbered from 48). Then stop. The orchestrator walks
 your rows before the record is marked closed.
+
+---
+
+### BATCH A — THE CHROME (brief for a FRESH Fable implementer session; DRAFTED 2026-09-01 ~05:40 by the orchestrator — spawn ONLY after batch B's record is closed; one code agent at a time)
+
+**You are the batch A implementer. Read, in this order, IN FULL: this file (§0–§8 — the constitution, the
+round's rules C-1…C-7, her rulings R-cor-1…7, the ledger, the triage record, batch B's record);
+`notes/author-reports/2026-09-01-post-act10-ui-report.md` (§1 verbatim; image rows 1, 4, 5, 7, 9);
+`notes/plans/pre-13u-round.md` §"THE MOCKUP FEEDBACK" (W8-2/W8-3 — the style guide and the glass ruling)
+and the mockup itself `notes/plans/pre-13u-mockups/blocks-and-snippets.html` (open it in a browser and
+LOOK — it is the reference grammar); then the code: `App/Variorum/Variorum/RootView.swift` (the
+`NavigationSplitView` at :138 and the panels it hosts, :450), `Features/Library/SidebarView.swift` (the
+rail :464–487, the Open strip :245 and its placement :346–351, the W8-3 comment :348),
+`Features/Takes/PostDetailView.swift` (the masthead — find the title's HStack), `Features/Tags/
+MastheadTagCluster.swift`, `Workspace/ContextBar.swift`, `Features/Library/LibraryCatalogView.swift` (the
+rows at :599/:796/:853 — already `.firstTextBaseline`), `Theme/CalmGrammar.swift`, `Theme/VoiceControls.swift`
+(THE chrome vocabulary, P-8), and the pins `VariorumTests/WorkspaceNavigationTests.swift`,
+`NoteRowSelectionTests.swift`, `ContextBarShapeTests.swift`, `CommitBarLayoutTests.swift`,
+`TutorialWalkTests.swift`. Do not brief yourself from anything else.**
+
+**Your surface is the CHROME — the sidebar, the masthead, the library rows — and only that (C-1).** Rows:
+
+1. **Row 2 — the liquid-glass sidebar retires for real (W8-3, half-delivered).** The floating glass pane is
+   the `NavigationSplitView` sidebar's Tahoe default. Deliver W8-3 whole: solid, geometric — a flat column
+   with one honest divider, no floating inset, no glass; the interior W8-3 already painted stays. Decide
+   the container (a flat style on the split view if macOS 26 offers one that truly removes the floating
+   pane; otherwise an `HSplitView`/custom split that keeps the sidebar's collapse, the width memory, and
+   every panel RootView hosts beside it — Scraps, References, the tray, the info panel). State the
+   decision and its reason in the record. Both voices, light and dark. Pin: a mount smoke that the sidebar
+   renders without the split view's glass material (or, if the container changes, that every hosted panel
+   still mounts — `BookRedesignMountTests` is the shape).
+2. **Row 3 — the rail's spacing and the Open strip.** Compare the rail's row spacing/padding against the
+   pre-Act-10 file (`git show 0e6a09e^:App/Variorum/Variorum/Features/Library/SidebarView.swift`) and
+   restore generous spacing at ordinary heights; compress ONLY under a measured height threshold (the
+   bottom-bar precedent: a pure decision function, pinned red-on-old at the threshold). Move the Open
+   strip back to directly UNDER the rail ("the tabs used to be right below the modes") — it keeps its
+   Act 10 mechanics (scroll past ~7, newcomer never hidden, ⌘⇧1–9, drag reorder, the 20-tab auto-close);
+   the sidebar's bottom keeps the protection/sync/bridge lines. Pins: the existing Open-strip pins ride
+   unmodified; one new pin on the threshold function.
+3. **Rows 4 + 19 — the masthead title centered in EVERY mode.** Mechanism (walk-confirmed in both voices):
+   the title sits in an HStack where the trailing cluster (tray/scraps/references icons + the tag row)
+   takes its natural width and the title centers in the REMAINDER — so it lands ~⅓ across. Fix: the title
+   block centers on the full content width (overlay/ZStack), the clusters lead/trail; the subtitle path
+   (`~/book`) rides with it. One layout for all seven/eight modes and the book. Pin: the title's midX equals
+   the content's midX within 1 pt, parameterized over every mode (mount + geometry read).
+4. **Row 15 — ONE tag door.** Today: `+ tag` (opens a popover field — good) AND `#` (folds the chips to
+   `# N`, K12's sticky fold) side by side. Deliver hers: the `#` glyph is THE door — click → the tag field
+   slides out inline beside the chips with the cursor active (reuse the popover's field brain: ⏎ applies,
+   `/` nests, suggestions); `+ tag` retires; the masthead FOLD retires (K12's fold served the crowded nav
+   bar — record the supersession in the record and at the K12 site's comment). Chips stay visible. ⌘⇧I
+   (the fold's key) is re-pointed to open the field, or retired — say which. Pin: exactly one tag door
+   renders in the masthead; the field receives focus on open.
+5. **Rows 10 + 11 — library row alignment.** The chips and the `book` kind label sit low against the title
+   although the HStacks already align on `.firstTextBaseline` — trace the actual cause (chip vertical
+   padding vs. its baseline, the smaller label's baseline offset, an `Image` in the HStack) and fix it so
+   title, chips, `+`, and kind label sit on one visual line. Pin: a geometry read of the row (title
+   baseline vs chip baseline within 1 pt).
+6. **Row 36 — the word-count sweep table (C-6).** Enumerate EVERY word-count/metric display in the eight
+   Act 10 views (Snippets 10 · Read 6 · Blocks 4 · Index 4 · BookView 4 · LibraryInfoPanel 4 · Compare 2 ·
+   BookIndex 1 — `grep -n -i 'words\|[0-9]w\b'`) into a table in your record: file:line · what it says ·
+   KEEP (with the reader's reason) or DROP. **Fix the ones on YOUR surface** (the masthead/sidebar/library
+   rows if any); the rest are dispositions for their batches (C/D/E/F read your table). Bias: a count
+   stays where the pre-Act-10 surface had one or where the mockup grammar shows one; "thrown in" goes.
+7. **Row 24 (the sidebar half only) — the "this note" rail fades.** The rail appears/disappears whole on
+   note↔library today. Make its arrival/departure a short fade/height animation (nothing added on the
+   left — R-cor-3); the library-panel half of row 24 is batch E's.
+
+**Rules that bind you (from §2b):** one surface — if a fix pulls you into the book, the note modes,
+Compare, or the library PANEL, stop and record it for B/C/D/E. Bug-class rows land with red-on-old pins
+verified by BEHAVIORAL REVERT; geometry pins are pins. `TutorialWalkTests` green at the end (the field
+guide's "getting around" lesson names the sidebar — if your change alters what the lesson describes, say so;
+copy changes are the closeout's). **The acceptance gate is USE (C-2):** walk every row on the dev-store
+Debug build in BOTH voices (Settings ▸ Appearance switches the voice) with a capture per row into
+`notes/plans/act10-correction-screens/batch-a/` — the flat sidebar · the rail spacing at a tall window and
+at a short one · the Open strip under the rail · the title centered in Write, Takes, Read, Lenses, Compare,
+Blocks, Canvas and the book · the one tag door open with the cursor in it · a library row's alignment
+close-up · the rail fading. Name each capture in your record.
+
+**Environment + driving recipe + resiliency: exactly batch B's brief's last three paragraphs (read them
+there; they bind identically).** Baseline counts: batch B's record states the tree's counts at its close —
+yours are those + your pins; state the arithmetic.
+
+**Your deliverable:** the code + pins, and a **BATCH A RECORD** appended under this brief: per row →
+FIXED (pin, red-on-old evidence) / RECORDED / DEFERRED (owner + why); the container decision; the row-36
+table; the capture list; counts; commits in order; new findings as ledger rows numbered after batch B's
+last. Then stop.
