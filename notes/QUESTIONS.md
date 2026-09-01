@@ -1038,6 +1038,29 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
     one-daily-Journal (nothing is lost; every entry lands in THE Journal), but it means "restore
     my old Journal as its own book" is not a state the system will hold. Ratify or redirect.
 
+    **(a) AMENDED at the ladder's F6 (2026-08-31, BLOCKER — fixed): the predicate above was
+    OVER-BROAD and is superseded.** Profile alone is NOT the daily mint's signature: the product
+    deliberately mints additional journal-profile notebooks through two of your own doors (the
+    Shelf's "Create Journal Book" — §14 item 10's separate notebook — and the phone's `.journal`
+    kind), and the profile-only repair MERGED them into the Journal on the next batch touching a
+    reading (the larger id retired, its entries moved — possibly into a finished keeper; your own
+    device's changefeed echo fired it single-device too). **The predicate is now the mint's whole
+    signature** — curated + the journal profile + the default name "Journal" under `BookNaming`'s
+    key (ends-trimmed, case-folded; the E13 rule reused) — as ONE pure function,
+    `Queries.isDailyJournalMintShape`; the mint stamps exactly that triple, and the three app
+    doors share the one profile constant. Two deliberate notebooks now survive their own echo
+    (pinned red-on-old). **The corner this creates, for your eyes:** a daily Journal you RENAME
+    ("My Journal") no longer converges with a fresh phone mint — the two stand as separate
+    journal-profile books until you merge them by hand (pinned as documented behaviour,
+    `aRenamedDailyJournalStandsBesideAFreshMint`). The earlier restore-an-old-Journal corner
+    above now holds ONLY while the restored book still wears the default name. And the reverse
+    edge: a journal-profile book you name "Journal" yourself through Create Journal Book (the
+    door allows it only while no daily Journal is live) wears the mint's signature and WILL
+    converge with a later fresh mint, as the same book. Ratify the narrowed predicate, or
+    redirect — the alternatives are a row-level "born designated" mark (a §12 lockstep event,
+    `reading` gains a column) or the profile-only rule with the notebook doors changed to a
+    different profile (a product change to what "journal book" means).
+
     **(b) The pristine rule's engagement extension (R-pre13u-8).** Your ruled rule is per-note
     rendered-text hashes. As built, a copy also reads EDITED on signals the render cannot see —
     a fanned or archived take, a savepoint, a comment, a non-reserved tag, a membership in
@@ -1056,5 +1079,27 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
     copies, every EDITED copy survives and PRISTINE copies retire beside ANY survivor (keeper =
     smallest-id pristine only when nothing is edited). The uniform extension of both pair rules;
     vanishingly rare (needs 3+ devices seeding offline).
+
+    **(e) The retirement's Trash shape, and Put back (the ladder's F4, 2026-08-31 — recorded,
+    not built).** When the dedupe retires a copy it tombstones the BOOK and its thirteen member
+    notes under ONE stamp — a family shape no ordinary op of yours produces. Two consequences:
+    **(i)** a dedupe you never asked for deposits fourteen rows in your Trash (deliberate —
+    ordinary tombstones, every one recoverable, never purge intents); **(ii)** `restoreReading`
+    revives only stamp-matched MEMBERSHIPS, never containers, so Put back on the retired BOOK
+    yields a book whose members are still in the Trash — the honest road is fourteen put-backs
+    (the book, then each note; a note's own Put back revives its membership by the stamp). The
+    Act 0 record's "Put back works" is corrected to this. Your calls: should `restoreReading`
+    widen to revive stamp-matched member CONTAINERS (an op-semantics change to a recovery door —
+    it would also change what putting back any book whose notes died WITH it means), and is the
+    fourteen-row deposit acceptable as is, or should a retired copy row in the Trash as one
+    grouped entry (a Trash-listing question, the Versions-under-their-note precedent)? Nothing
+    here is built; the retirement stays ordinary tombstones.
+
+    **(f) The engagement rule's narrowing to MANUAL savepoints (the ladder's F5, MAJOR — fixed).**
+    The (b) extension counted every `commit_point` as her hand, but the system mints AUTO
+    savepoints on untouched seeded text (leaving a story you merely opened; the idle backstop),
+    on every device — so in any real store both copies read EDITED and the ruled dedupe never
+    fired (two Sherlock books forever, silently). Engagement now counts `kind = 'manual'` only:
+    your deliberate ⌘S protects a copy; the insurance occasions do not. Ratify.
 
 *(Next free number: **#86**.)*

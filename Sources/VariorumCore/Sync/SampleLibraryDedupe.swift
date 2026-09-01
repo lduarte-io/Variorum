@@ -321,9 +321,19 @@ extension SyncEngine {
     /// Retires one copy, family-complete: the book (its cascade takes the
     /// memberships and chapters at this exact stamp), then each member note
     /// (the container cascade takes placements, blocks, variants, tags,
-    /// references). Ordinary tombstones — the Trash lists them, Put back
-    /// works — and every write reaches the outbox: the direct writes
-    /// explicitly, the cascades via the victim sweep (SyncSpec §7).
+    /// references). Ordinary tombstones — the Trash lists them — and every
+    /// write reaches the outbox: the direct writes explicitly, the cascades
+    /// via the victim sweep (SyncSpec §7).
+    ///
+    /// **Put back, honestly** (the ladder's F4): this family shape — a book
+    /// AND its member notes under ONE stamp — is one no ordinary op mints,
+    /// and `restoreReading` revives only stamp-matched MEMBERSHIPS, never
+    /// containers. Putting the retired BOOK back therefore yields a book
+    /// whose members are still in the Trash; each note's own Put back
+    /// revives it (and its membership, by the stamp). Fourteen rows in a
+    /// Trash she never asked to fill, and a fourteen-step road out — both
+    /// recorded for her at QUESTIONS #85(e); widening the recovery door is
+    /// an op-semantics call, not this repair's.
     private func retireSampleCopy(
         _ db: Database, copyID: String, arrivingDead: [String: Set<String>]
     ) throws -> Int {

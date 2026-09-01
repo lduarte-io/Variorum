@@ -625,7 +625,14 @@ forever — both copies survive, the safe direction, recorded.
 exact stamp; the §7 victim sweep enqueues what the muted outbox triggers could not), then each
 member note via the container cascade (placements → blocks → variants, tags, references) — all
 ONE stamp per copy, so `restoreContainer`/`restoreReading` recognize the family. Ordinary
-tombstones, never purge intents: the Trash lists the retired copy and Put back works.
+tombstones, never purge intents: the Trash lists the retired copy ~~and Put back works~~.
+*(CORRECTED at the ladder's F4, 2026-08-31: "Put back works" overstated it. `restoreReading`
+revives only stamp-matched MEMBERSHIPS, never containers — the family shape the retirement
+mints (a book AND its thirteen member notes under one stamp) is one no ordinary op produces,
+so putting the BOOK back yields a book whose members are still in the Trash; the honest road
+is fourteen put-backs. And a dedupe she never asked for deposits fourteen rows in her Trash.
+Both are now QUESTIONS #85(e), hers — widening `restoreReading` to stamp-matched member
+containers is an op-semantics call, not built.)*
 
 **PINS — red-on-old evidence (test-first: the suites were written and RUN before any repair
 existed).** On the pre-repair tree, **7 of 11 core pins RED, observed and logged**: two live
