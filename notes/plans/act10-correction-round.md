@@ -737,7 +737,7 @@ last. Then stop.
   generous… more compressed" is the OPEN STRIP (her "tabs" = the open notes, her own browser-tabs word),
   whose rows left the List's 32 pt pitch for the bottom rail's 21 — not the rail's rows. Recorded here
   before any code moved.
-- **Row 2 (the container):** DONE (this commit; hash filled at the next) — `ShellSplit`
+- **Row 2 (the container):** DONE (`b22b6ff`) — `ShellSplit`
   (`Workspace/ShellSplit.swift`: an HStack, ONE 1 pt `line` divider with the pane row's drag grammar,
   `@AppStorage` width 180–360, a collapse that animates) replaces `NavigationSplitView` in `RootView`;
   the sidebar toggle is a DECLARED act (`.toggleSidebar` — the leading toolbar button + View ▸ Toggle
@@ -746,9 +746,11 @@ last. Then stop.
   column's own bottom. **Verified in use on the relaunched dev build (probe captures):** the column is flush
   at x = 0 with one divider; the tray inspector opens as a column INSIDE the detail; ⌃⌘S collapses and
   restores. Pin `ShellChromeTests.theShellMountsFlatAndTheStripRowsAreGenerous` (zero `NSSplitView` under
-  the hosting view at rest — the split view's AppKit backing) GREEN; red-on-old PENDING (the behavioral
-  revert runs next, from this committed state).
-- **Row 3 (the rail + the Open strip):** DONE (this commit) — the sidebar's `List` retired for the
+  the hosting view at rest — the split view's AppKit backing) GREEN. **Red-on-old VERIFIED by behavioral revert** (`ShellSplit.body`
+  wrapped back in a `NavigationSplitView`, the column's rows forced to the old 21 pt; run from the committed
+  state `b22b6ff`): **2 issues in 1 test** — `countSplitViews → 1` and `drawn → 21.0 == 30.0`; restored by
+  `git checkout --`, `git diff --stat` empty.
+- **Row 3 (the rail + the Open strip):** DONE (`b22b6ff`) — the sidebar's `List` retired for the
   mockup's flat column (`SidebarView`: groups · `.sb-head` headers · `.sb-row` rows at ONE pitch · `.sb-sep`
   separators); the Open strip sits DIRECTLY UNDER the rail again with every Act 10 mechanic (all open notes
   shown, the section scrolls in place past 7 with the newcomer revealed, ⌘⇧1–9 badges, ✕, drag reorder, the
@@ -757,9 +759,9 @@ last. Then stop.
   register `VoiceTokens.navigation` (13 pt mono in Terminal, 13 pt system in Study) for every row.
   **Measured after (AX tree):** areas · rail · strip rows all 30 pt; the strip's row directly under the rail.
   Pins `SidebarLayoutTests` ×5 (the threshold both ways, few rows never compress, unmeasured never
-  compresses, the 7½-row window) + the oracle half of the shell pin (the strip's DRAWN row = 30). Red-on-old
-  PENDING (next). Recorded honestly: the List's arrow-key row navigation is gone with it.
-- **Row 24 (the rail's fade — the sidebar half):** DONE (this commit) — the rail group carries
+  compresses, the 7½-row window) + the oracle half of the shell pin (the strip's DRAWN row = 30) — red-on-old
+  the second issue above (21.0). Recorded honestly: the List's arrow-key row navigation is gone with it.
+- **Row 24 (the rail's fade — the sidebar half):** DONE (`b22b6ff`) — the rail group carries
   `.transition(.opacity)` under `.animation(.easeInOut(0.22), value: railPostID)`, so it fades in/out and the
   Open group slides rather than snaps; nothing added on the left (R-cor-3). Walk capture PENDING.
 - **Rows 4 + 19 (the masthead):** NOT-STARTED — the title block centered on the full masthead width
@@ -771,8 +773,8 @@ last. Then stop.
   ~2 pt below the title baseline in the crop — the oracle pin decides the mechanism.
 - **Row 36 (the sweep table):** NOT-STARTED.
 - **The USE gate · the full Mac suite · the contact sheet:** NOT-STARTED.
-- **No revert in flight** (the row-2/3 behavioral revert starts AFTER this commit, from this committed
-  state — `git checkout --` restores; announced here first per the protocol's addendum 2).
+- **No revert in flight** (the row-2/3 revert ran and was restored — evidence above; tree clean against
+  `b22b6ff`).
 
 ---
 
