@@ -51,6 +51,13 @@ THAT SECTION WINS (it is canon; this is choreography).
 
 ## Kickoff message (paste-ready)
 
+> **⚠️ READ THE "ADDENDUM 2026-08-31 — 13u1's INHERITANCE FROM THE PRE-13u ROUND" AT THE END OF
+> THIS FILE BEFORE THE MESSAGE BELOW.** The message was written at 13l's closeout; the pre-13u
+> round (2026-08-30/31) ran between 13l and this phase and changed the editor seam's
+> surroundings, the mode row, the baselines, and the session discipline. The addendum is the
+> delta; the message below stands otherwise.
+
+
 > You are running **Variorum Phase 13u — Feel & Polish**, a
 > CROSS-PLATFORM phase by construction (MobileSoul §6's "design
 > together" class — mobile is IN the design sitting, ledger row PL-12;
@@ -513,3 +520,61 @@ to the repo at her follow-up ruling — an artifact that needs to survive). Anyt
 round's item 18 (book Outline glowup + index-like book view) defers lands here with it — and item
 18 defers WHOLE if it defers at all (her ruling: one cohesive Book redesign, never split); the
 pre-13u closeout will say which.
+
+## ADDENDUM 2026-08-31 — 13u1's INHERITANCE FROM THE PRE-13u ROUND (the round's closeout; final counts filled at its close)
+
+The pre-13u round (`notes/plans/pre-13u-round.md` — the ONE record; `notes/handoffs/pre-13u-handoff.md`
+at its close) ran between 13l and this phase. **What it changed that 13u1's editor-seam work
+(items 5 · 7 · 8 · 9 · 12) must know, and what the ONE shared kickoff sitting gains as inputs:**
+
+**On and around the seam 13u1 rewrites:**
+- **`TypedArrows` now rides the MarkdownActs-adjacent typing path** (Act 10 item 12: `->`→→,
+  `<-`→←; a pure Domain brain, line-scoped, never in code spans, own-runloop-pass application so
+  ⌘Z reverts just the substitution; hardened for zero-gap bursts). Wave 1's verdict was **NOT
+  entangled with `MarkdownActs`' arming flow** (the K5 trio shape, no armed-verdict handoff) — so
+  it was built rather than deferred here. Item 7's residual (the arm-then-hand-off sites) is
+  untouched and still yours; when you rewrite the seam, `TypedArrows` is a consumer to carry, not
+  a sibling to merge.
+- **The note mode row is now Write · Takes · Index · Read · Lenses · Compare · Blocks · Canvas
+  (⌘1–⌘8)** (her W8-1 ruling). READ is a projection tier (formatting greys there — the registry
+  pin says so); INDEX's reading pane and READ are read-cheap; **exactly one live editor holds** —
+  any liveness extension goes through `PaneTextAuthority` (P-3), never a sibling mechanism.
+- **Blocks is the WORKBENCH**: multi-select on 13e's `BlockSelection` with a bulk bar (top/bottom
+  · the carry-all merge chain · tag · move-out · archive · delete; delete/merge = ONE ⌥⌘Z entry).
+  **Item 5's cross-block compound (select-across-blocks-and-delete/merge in the Write editor)
+  must COMPOSE with this** — one undo grammar, one refusal grammar, never two.
+- **`CommitBar` gained `axis: .vertical` and `EditorView` a `barPlacement: .side`** (the book
+  Outline's details gutter hosts the focused note's bar); the bottom bar's collapse is a pure
+  `usesTwoRows` decision at a measured 840pt threshold. Touch the bar's brain, not its hosts.
+- **`FlowParagraph` lives in `Core/Views`** (hoisted at wave 2c; the Read mode and the book
+  views consume it); the calm chrome vocabulary is `Theme/CalmGrammar.swift` (P-8's vocabulary
+  beside `VoiceControls`) — 13u2's restyle continuation builds on it; 13u1's surfaces use it
+  where they touch chrome.
+- **The quick-entry bar is UNTOUCHED** — item 9's ownership ruling (one block or many; ⏎ vs
+  shift-⏎; what the hand-off carries) is still the sitting's, for both platforms.
+- **The `planVisibleTakeEdit` O(N²) KnownIssues row is still 13u1's** — the round's read-layer
+  fixes (17c) were `Queries/`-side by design and did not touch the editor seam.
+- The Act 10 item 11 trace is worth reading before any scroll work: a checkbox click's storage
+  edit fired `didChangeText` → `keepCaretClearance` followed the PRE-click caret → a measured
+  6,103pt jump; fixed by running click edits under `withoutCaretFollow`. The seam has a
+  caret-follow contract; keep it.
+
+**13u2's inheritance, already written in this file's earlier addenda + the round's records:**
+P39a/P39b (the Library↔Pool VM cycle; `WriteTakesPanel` constructing `TakesViewModel`); the
+app-wide restyle continuation to the committed mockup style guide with the liquid-glass sidebar
+retired; wave 2a's forks (Settings panes keep system Form chrome; the field-guide door points by
+name; the Trash's card restyle); wave 2c's residue (the paged Book / book Read chrome; the book
+Read click-through jump = this file's item 17 — the ONE scrolled-open door already exists on
+`CommandRouter.focusedBlock`, built once at wave 2c for the note's Read→Index — reuse it); M12.
+
+**Baselines at the round's close (the pre-13u handoff carries the finals; verify with your own
+runs):** core 1504/163 · Mac 1983/343 · mobile 605/97 + 2 standing known issues (as of the
+midpoint fixes; the final ladder may add pins).
+
+**Discipline:** `notes/SessionResiliencyProtocol.md` (+ both seats' addenda) binds every session
+you spawn — checkpoint commits from the first piece, a live record, synchronous waits, one agent
+at a time; the resumed-agent and worktree-moves rules for the orchestrator. The 500k figure is a
+guideline (her clarification): finish a stage near its end.
+
+**The split execution:** this file runs as 13u1 (the editor seam) then 13u2 (feel & faces) with
+ONE shared kickoff sitting; the 13u1 kickoff executes the file split per the banner at the top.
