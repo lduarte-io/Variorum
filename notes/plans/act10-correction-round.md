@@ -130,8 +130,9 @@ it.
   in which a clicked block goes LIVE (P-3, one live editor through `PaneTextAuthority`); **read** = the calm
   read-only page (continuous or horizontal pages — the book's paged view reused), the same outline column
   available, nothing editable, a click on a sentence flips to `edit` at that block (row 38's door). **Default
-  on entry: `edit`** (her sentence's order — "there is an editable index surface, then you click read" —
-  PROVISIONAL for the morning bundle; per-note memory of the switch is the natural refinement). **The BOOK:
+  on entry: `edit` — RULED** (her follow-up, verbatim: *"I want it called Read because it's more distinct.
+  still default open to the index edit though."*; per-note memory of the switch is the natural refinement,
+  the architect's call). **The BOOK:
   its Index word-tab becomes EDITABLE the same way** (the selected note's block goes live in the right pane —
   row 22); **the book's Read stays read-only.** R-cor-5's other terms stand (the Index tab retires into Read;
   the `NoteIndexOutline` brains survive as the column; canon + field-guide changes at closeout).
@@ -289,6 +290,7 @@ the A1 backup (C-3) → the field-guide re-seed if any lesson text changed → t
 ## 7. The morning bundle (HELD for her — grows through the run)
 
 - R-cor-3's PROVISIONAL reading of the Library panel (read preview, not writable) — ratify or redirect.
+- *(Read's default half was PROVISIONAL for one turn — RULED `edit` by her follow-up; nothing to ratify.)*
 - Row 20: what is unclear about Lenses — the candidates the orchestrator brings.
 - Row 26: the Blocks context panel's order (facts first) — the architect's reading.
 - Any scalpel revert taken under C-5 (none expected; her lean recorded).
