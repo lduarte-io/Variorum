@@ -168,3 +168,27 @@ round's tail (midpoint review · ladder · closeout) rather than hand off.
     copy is still wanted, keep it INSIDE the worktree under a gitignored, uniquely named dir,
     never in the scratchpad. And for the orchestrator: an absent prerevert dir proves nothing
     after a crash — read `git diff` against the last commit to see what is reverted.
+
+## Addendum from the Fragments seat (carried by the author, 2026-08-31 evening — three items, all adopted)
+
+1. **Confirm a suspected death by agent METADATA before replacing anything on a shared checkout.**
+   A "died"/"completed" frame can be a display artifact while the agent is still committing.
+   Before spawning a replacement: `ListAgents` (is the agent `running`?), the task status, and a
+   fresh `git status`/`git log` — **a live agent gets a MESSAGE, never a twin.** (Orchestrator
+   rule 1 above named the git check; this names the metadata check that comes first. Proven here
+   the same evening: after the system crash, `ListAgents` showed the wave 2c closer `running` —
+   its "stopped" notification was the artifact, and messaging it would have been wrong only
+   because its transcript had been lost, which the send itself reported.)
+2. **The replacement-agent rule (implementer side): if the worktree MOVES under your reads —
+   files changing that you did not change — you are not alone. Write nothing, report, stop.**
+   A predecessor may be alive and committing in the same checkout; two writers on one tree is the
+   only way the checkpoint protocol can lose work. The orchestrator then resolves it (rule 1 —
+   message the live one, retire the twin).
+3. **A sharpening of implementer rule 4 (foreground waits) from both seats' evidence:** the
+   background-wait trap is precisely about ENDING THE TURN. A subagent whose final message says
+   "waiting on the suite" has ended its turn — and a subagent's end of turn IS its completion, so
+   it dies with the run unfinished (two closes died this way on this seat). A MAIN session, by
+   contrast, is re-invoked when a background command exits (the Fragments seat's reviewer; this
+   orchestrator's `caffeinate` exit). So: **subagents wait in the foreground, always**; a main
+   session may background a long run and act on the re-invoke — and should verify it is a main
+   session before relying on that.
