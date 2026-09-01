@@ -19,6 +19,21 @@
 //  makes this a composition pin rather than a source-text grep; `dump` escapes
 //  non-ASCII, so sentences are matched through `String(reflecting:)`.
 //
+//  **THE ROAD'S OWN LIMIT** (added 2026-08-31, the midpoint review's n1 — the
+//  Mac twin's header carries the same paragraph): a composition dump proves a
+//  `Text` is **COMPOSED**, not that it is **VISIBLE**. `.opacity(0)`,
+//  `.hidden()`, a zero or clipped frame, or a colour matching the ground all
+//  keep these pins green. What it DOES close is the hole it was built for — the
+//  whole `Text` deleted, or a branch that never takes. Anything finer is a
+//  screenshot question and belongs to the visual review (13s).
+//
+//  And one boundary this target has an answer for that the Mac does not: a
+//  sentence composed inside a `GeometryReader`'s content closure is absent from
+//  the dump entirely (the closure runs at layout time). The phone has a LIVE
+//  accessibility tree on a hosted surface, so such a surface gets a MOUNTED pin
+//  instead — `MobileEmptyStoreTests.theEmptyShelfSurfaceNamesBothRoads` is the
+//  worked example, and it is the stronger measurement of the two.
+//
 
 import Foundation
 import SwiftUI

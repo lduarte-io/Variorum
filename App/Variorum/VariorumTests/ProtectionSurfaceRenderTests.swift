@@ -34,6 +34,25 @@
 //  typographic apostrophes) are matched through `String(reflecting:)` — the
 //  same escaping — never against the raw literal.
 //
+//  **THE ROAD'S OWN LIMIT, recorded beside the two rejected ones** (added
+//  2026-08-31, the midpoint review's n1 — a measurement road's boundary is
+//  part of the measurement, and the two roads above are recorded precisely so
+//  nobody re-walks them): a composition dump proves a `Text` is **COMPOSED**,
+//  not that it is **VISIBLE**. `.opacity(0)`, `.hidden()`, a zero or clipped
+//  frame, a colour matching the ground, or a sentence pushed outside its
+//  container all keep these pins green. What the road DOES close is the hole
+//  it was built for — the whole `Text` deleted, or a branch that never takes —
+//  and the hosted-window half of each pin adds "and the surface can be built
+//  and laid out". Anything finer than that is a screenshot question, and it is
+//  the standalone visual review's (13s), not a unit test's.
+//
+//  One consequence worth naming, because it is where the limit bites: a
+//  sentence composed inside a `GeometryReader`'s content closure is NOT in the
+//  dump at all (the closure runs at layout time), so a surface shaped that way
+//  needs a mounted pin instead. The phone's twin met exactly that on its shelf
+//  and records what it did — a live accessibility tree, which this environment
+//  does not have.
+//
 
 import AppKit
 import Foundation
