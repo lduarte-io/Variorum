@@ -794,7 +794,7 @@ last. Then stop.
   fold's own pins were green on the old tree and are gone). **Tutorial text now behind the door:** the seeder's
   "the workspace" lesson still says "＃ folds the note's tag cards away and back (⌘⇧I too…)" — the closeout's
   copy change + re-seed (obligation 8); untouched here by the brief's rule.
-- **Rows 10 + 11 (library rows):** DONE (this commit; hash next) — TWO mechanisms, both baseline: **(11)**
+- **Rows 10 + 11 (library rows):** DONE (`5a0249c`) — TWO mechanisms, both baseline: **(11)**
   the book row's HStack had NO alignment (default `.center`), so the small "book" label centered against the
   body-size title and its baseline sat below the title's; **(10)** the note row DID align on
   `.firstTextBaseline`, but the chips handed the stack a SYMBOL IMAGE's bottom edge as their baseline — each
@@ -807,11 +807,36 @@ last. Then stop.
   `LibraryRowAlignmentTests` ×2 — the lines mounted in a window, the DEBUG `BaselineProbe` oracle
   (`Core/Views/BaselineProbe.swift`: `alignmentGuide` offset + the top in the line's named space) read for the
   title vs the first chip's text vs the ＋, and the title vs the kind label, within 1 pt, in BOTH voices —
-  GREEN. Red-on-old PENDING (the behavioral revert runs next).
-- **Row 36 (the sweep table):** NOT-STARTED.
+  GREEN. **Red-on-old VERIFIED by behavioral revert** (the old shapes put back in place — the book line's
+  bare HStack + `Image`, the chips' `.center` stacks + bare `Image` ✕ — run from `5a0249c`): **5 issues in 2
+  tests** — the chip text and the ＋ each **1.5 pt** off the title in BOTH voices (4), and the book row's title
+  never reported a baseline at all (the unaligned HStack never asked for one — 1); restored by
+  `git checkout --`, diff empty.
+- **Row 36 (the sweep table):** DONE (this commit) — the table is in the "Row 36" section of this record
+  below; NOTHING on the chrome surface carried a count to drop (the masthead, the sidebar and the library rows
+  show no word count — the rows' `detail` is a date or the kind word); the rest are dispositions for C / E.
 - **The USE gate · the full Mac suite · the contact sheet:** NOT-STARTED.
 - **No revert in flight** (the row-2/3 revert ran and was restored — evidence above; tree clean against
   `b22b6ff`).
+
+#### Row 36 — the word-count / metric sweep (C-6; R-cor-4(d)) — every display in the eight Act 10 views, grep-enumerated (`words\|[0-9]w\b\|wordCount`), verdicted against the brief's bias (a count stays where the pre-Act-10 surface had one or where the mockup grammar shows one; "thrown in" goes)
+
+| file:line | what it says | verdict | reason | who applies |
+|---|---|---|---|---|
+| `SnippetsSurface.swift:173` (via `SnippetsCopy.words` :76) | a snippet row's facts: `⑂ N takes · N words · edited …` | KEEP | the mockup's snippet `.met` line shows exactly this (`⑂ 3 takes · 18 words`, mockup :992) — W8-4's ruled row | — (as is) |
+| `SnippetsSurface.swift:147` | sort by word count | KEEP (not a display) | a sort key, not chrome | — |
+| `ReadModeView.swift:302` (via :216) | the page header: `N words · about M minute(s)` | KEEP | her word (R-cor-4(e): stays in Read); the Read mockup's kicker shows it (:859) | C (the `read` half) |
+| `ReadModeView.swift:254–255` | the FOOTER: `N blocks · N words · about M min` | DROP | the same facts twice on one page — the header already says them; the mockup's Read shows one line, not a footer duplicate | C |
+| `BlocksWorkbenchView.swift:258` | the workbench toolrow: `N blocks · N words` | KEEP | the mockup's Blocks toolrow shows it verbatim (:969); the poweruser center's one anchor | — |
+| `BlocksWorkbenchView.swift:419` | per-row `Nw` | KEEP | the mockup's every `.met` row carries `N words` (:1002–:1052); the words SORT (:135) needs its evidence on the row | — |
+| `BlocksWorkbenchView.swift:652` | the context panel's `words` fact row | KEEP | the block's facts sheet; a full fact beside the row's abbreviation (C-6's stated reason: the panel is where the whole fact is read) | C may fold it if the panel's order pass (row 26) finds it redundant |
+| `IndexModeView.swift:484` | the footer: `N blocks · N words` | KEEP-ONE | the Index mockup shows it (:762); but the Index tab RETIRES into Read's `edit` half (R-cor-7) — the merged tab keeps exactly ONE count line (the mockup's), never the `read` header plus this footer | C |
+| `BookView` (batch B's four — verdicted in B's record) | card `Nw` · gutter `⑂ takes on N blocks` · `bookMetaLine` · the side card's counts | DROP · KEEP · KEEP · DROP/KEEP | B's record; unchanged here | done (B) |
+| `CommitBar.swift:228–232` (the side card) / `:549–556` (the flat bar) | `Nw in note` word-target door · `Nw block · Nw selected` | KEEP | pre-Act-10 (R11's bottom-bar idiom, the word-target door's face) — not Act 10's | — |
+| `LibraryInfoPanel.swift:189` | the facts card's `words` row | KEEP | R-cor-3 asks for "a calm facts line (words · blocks · last edited)" — E rebuilds the panel WITH it | E |
+| `CompareBoardView.swift` | — | none found | the brief's "Compare 2" are the takes bottom bar's `Nw note` (`TakesBottomBar.swift:442–466`, pre-Act-10 R11) | — |
+| `BookIndexView.swift:352` | per-chapter NOTE counts (`welcome 3`) | KEEP | a structural count (how many notes a chapter holds — the navigator's shape), not a word count | — |
+| the chrome (masthead · sidebar · library rows) | — | none | no count to drop; the mockup's `pool 59` sidebar badge is NOT built and is not added (C-6) | A ✓ |
 
 ---
 
