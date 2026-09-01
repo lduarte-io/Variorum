@@ -127,6 +127,7 @@ you do NOT drive the dev window while an implementer might (clicks collide).
   a zero-instance window behind the A1 backup → the tutorial re-seed of her real store (Help ▸ Restore
   Tutorial… on the refreshed install; if her store needs her unlock, the handoff's checklist carries the
   act) → the handoff filled → memory → stop.
+- **Her real store's at-open mode is `biometric`** (read 16:10 MDT from `defaults read io.lduarte.Variorum` → `variorum.protection.Variorum.mode = biometric`; the store itself at `~/Library/Containers/io.lduarte.Variorum/Data/Library/Application Support/Variorum/variorum.sqlite` + shm/wal, ciphertext) — a DEMANDED mode: no session can open the refreshed install headlessly, so **the tutorial re-seed (§7b item 8) is HER one in-app act in the morning** (Help ▸ Restore Tutorial… on the refreshed `/Applications` build); the author handoff's checklist item 4 carries it. The A1 backup is unaffected (the app closed ⇒ the WAL quiescent; the whole store folder copied to `~/dev/variorum-store-backups/<name>-<UTC>/`, the pre-13u form).
 - **Her app is CLOSED** (she quit it for the run); the dev-store Debug build runs from DerivedData with
   bundle `io.lduarte.Variorum.debug`; both books are seeded there (the field guide via Help ▸ Restore
   Tutorial…, Sherlock by default).
