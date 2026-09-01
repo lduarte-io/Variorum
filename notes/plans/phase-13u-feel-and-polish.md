@@ -590,3 +590,36 @@ precedent): warn, never refuse (the lost-everything user's only road stays open)
 click-through. Pin: the near-empty world's confirm refuses without the phrase; the ordinary
 server-ahead world keeps the two-press shape. Functional copy; 13s re-words. QUESTIONS #86(c).
 
+**POST-ROUND ADDITIONS #2 (author, 2026-09-01 ~01:54, her first launch of the refreshed build —
+screenshot on file with her; verbatim: "i find it a bit ugly how this covers the app, can you add a
+note to 13u1 or 2 that it should be on the bottom but push the other things up? or it can be on
+the bottom but just not cover the sync part? i'm also confused why it's saying i don't have a
+passphrase because i do") — TWO 13u2 items:**
+
+- **The protection nudge bar OVERLAYS the sidebar's bottom status family.** Her screenshot: the
+  full-width bar ("Your library is encrypted. Two minutes makes it recoverable…" with Set a
+  Passphrase… / Show My Recovery Phrase… / Later / ✕) sits over the window's bottom edge and
+  COVERS the sidebar's Synced/Sync…/Account row. Ruled shape: the bar stays at the bottom but is a
+  bottom INSET that pushes the content up (the sync/account row and the editor bottom bar remain
+  fully visible) — or, at minimum, never covers the sync row. P-8's chrome rules apply; the bar's
+  copy is unchanged here (13s re-words).
+- **The nudge reads "this Mac's Keychain holds the only key" to a user who HAS a passphrase — the
+  leg model omits the SYNC leg, and the coupling silently removed her spare.** Mechanism, from
+  her launch's log: `escrow reconcile: dial ON · posture-effective OFF · item read back == current
+  key: false` — her at-open mode is a DEMANDED one (Touch ID), so the pre-13u coupling
+  (`effectiveEscrowOn = escrowOn && !mode.isDemanded`, her own why-sentence) stopped maintaining
+  the iCloud spare; and her STORE envelope carries no passphrase wrap because the 13p "one visit"
+  that EXTENDS the vault passphrase to the store (13p handoff item 5) was never made. So the legs
+  brain sees: this device (Touch ID) only ⇒ EXPOSED copy. What is TRUE for her: her writing is
+  also on the server behind her vault passphrase (the memo's need-state 3 — "sign in anywhere +
+  passphrase = everything"), so "the only key" is false for her WRITING and true only for THIS
+  COPY. Two fixes for 13u2: (1) the legs brain counts the SYNC leg (account enrolled + vault
+  passphrase set ⇒ a way back in for the writing, named as such) so a synced user is never told
+  the Keychain is the only key; (2) the nudge's action for a vault-enrolled user reads as EXTEND
+  ("extend your passphrase to this library — same passphrase, one visit"), never "Set" as if none
+  exists. Her immediate road TODAY, unchanged: Settings ▸ Protection ▸ Set a Passphrase… extends
+  the one secret to the store (the recovery phrase appears on the same screen) — after which the
+  nudge retires on its own. Pins: a vault-enrolled + no-store-wrap controller renders the extend
+  wording and a non-exposed tier; the inset pin: the sync row's frame is fully visible with the
+  bar shown.
+

@@ -3415,5 +3415,9 @@ nothing open without an owner.
   simplifications I'm adding to the user options first" (her separate encryption-options
   ideation session comes first; the spec brief stands).
 - **17i:** "I'll probably move 17i up in this case" — her lean toward running the sync hunt
-  before 13u1 (the architect's recommendation); not yet a kickoff.
+  before 13u1 (the architect's recommendation); not yet a kickoff.- **First-launch report (2026-09-01 ~01:54; her screenshot):** the nudge bar overlays the sidebar's
+  sync row → 13u2; the nudge tells her the Keychain is the only key although she has a (vault)
+  passphrase → mechanism from the log (the coupling made her escrow posture-OFF under Touch ID;
+  the store envelope was never extended; the legs brain omits the sync leg) → 13u2 (two items in
+  the 13u plan's post-round additions #2). Sherlock seeded on her real store: 12 stories, logged.
 
