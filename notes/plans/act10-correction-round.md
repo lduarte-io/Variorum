@@ -764,14 +764,16 @@ last. Then stop.
 - **Row 24 (the rail's fade — the sidebar half):** DONE (`b22b6ff`) — the rail group carries
   `.transition(.opacity)` under `.animation(.easeInOut(0.22), value: railPostID)`, so it fades in/out and the
   Open group slides rather than snaps; nothing added on the left (R-cor-3). Walk capture PENDING.
-- **Rows 4 + 19 (the masthead):** DONE (this commit; hash next) — `PostDetailView`'s masthead is a ZStack:
+- **Rows 4 + 19 (the masthead):** DONE (`74c72db`) — `PostDetailView`'s masthead is a ZStack:
   the title block (title + the `~/book` chip) CENTERS on the masthead's full width, padded on both sides by
   the trailing cluster's MEASURED width so it can never run under the icons; the cluster (mode menu ·
   tray/scraps/references · the tag cluster) trails on its own layer; `PostTitleLabel` centers in its measure
   (the rename field too). One layout for every mode. Pin `MastheadLayoutTests.theTitleBlockCentersOnTheMastheadInEveryMode`
   — the real detail mounted, switched through all eight modes by the router, the DEBUG oracle
   (`MastheadGeometry`: the title TEXT's own midX vs the masthead's midX, in the masthead's coordinate space)
-  within 1 pt in each — GREEN. Red-on-old PENDING (the behavioral revert runs next from this commit).
+  within 1 pt in each — GREEN. **Red-on-old VERIFIED by behavioral revert** (the title layer put back to
+  the old leading shape, run from `74c72db`): **8 issues in 1 test — 246.0 pt off in every one of the eight
+  modes**; restored by `git checkout --`, diff empty.
   **The book's masthead is NOT touched:** its title lives in the navigator COLUMN's header (`BookView.
   bookMasthead`), a left column by design — the book's surface is batch B's (C-1); recorded for the
   orchestrator.
