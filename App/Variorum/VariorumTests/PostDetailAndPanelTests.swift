@@ -67,12 +67,14 @@ struct PostDetailModeMemoryTests {
         #expect(PostMode.fromStored("NotAMode") == nil)
     }
 
-    /// 13b 4C: the row is SIX — Outline retired (justified pin edit: the
-    /// seven-mode pin's successor; the mode-row change IS the ruled
-    /// behavior change, S4-3).
-    @Test func theModeVocabularyIsTheSixModeRail() {
+    /// The row is EIGHT — Index and Read joined at pre-13u Act 10 wave 2c
+    /// (W8-1, her ruling: "a new mode tab slotted after takes" + the Read
+    /// surface). Justified pin edit, the third in this pin's own lineage:
+    /// seven → six (Outline retired, 13b 4C/S4-3) → eight; the mode-row
+    /// change IS the ruled behavior change each time.
+    @Test func theModeVocabularyIsTheEightModeRail() {
         #expect(PostDetailView.Mode.allCases.map(\.rawValue) ==
-                ["Write", "Takes", "Lenses", "Compare", "Blocks", "Canvas"])
+                ["Write", "Takes", "Index", "Read", "Lenses", "Compare", "Blocks", "Canvas"])
     }
 }
 

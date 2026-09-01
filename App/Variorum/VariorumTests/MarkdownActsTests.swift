@@ -59,11 +59,21 @@ struct MarkdownActsTests {
     }
 
     @Test func formattingIsAvailableWhereverTextIsEditedAndGreyWhereItIsNot() {
-        for mode in PostMode.allCases {
+        // Re-anchored at pre-13u Act 10 wave 2c (W8-1): the old premise
+        // "every mode hosts a live editable surface" was falsified BY
+        // RULING — READ is the projection tier, deliberately read-only, so
+        // formatting greys there (NewModesTests pins the same fact from
+        // the registry side). Every other mode still hosts a live surface.
+        for mode in PostMode.allCases where mode != .read {
             for id in Self.allFormatting {
                 #expect(CapabilityRegistry.availability(id, in: CapabilityContext(mode: mode)) == .act,
-                        "\(id) in \(mode): every mode hosts a live editable surface")
+                        "\(id) in \(mode): every EDITING mode hosts a live editable surface")
             }
+        }
+        for id in Self.allFormatting {
+            #expect(CapabilityRegistry.availability(
+                        id, in: CapabilityContext(mode: .read)) == .unavailable,
+                    "\(id) in read: the projection tier formats nothing — grey, honestly")
         }
         for id in Self.allFormatting {
             // The book-inline / spread / pool editors and a board mounted
