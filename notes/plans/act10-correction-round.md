@@ -288,6 +288,8 @@ present), and the 13j recovery doctrine (the Trash is the recovery door).
 | **84** | (row 52's build, R-cor-10(4)) `_word_` underscore emphasis → italics in the markdown DISPLAY vocabulary (Gutenberg's form; Sherlock reads raw today on cards, the Read faces, the Index column, the book) | the 13g markdown display brain (`Shared/` — the phone shares it; the iOS build is owed at the ladder) | Display-only: `renderedText`, the `.md` export and the bridge's join brain stay byte-unchanged (the 13g rule — pinned); the vocabulary gains `_x_` beside `*x*` with the same escaping/word-boundary discipline as the star form (intra-word underscores — `snake_case` — must NOT italicize; state the boundary rule). Pin on the display attributed runs. If the brain's change is not small, RECORD for 13u2 with the reason instead | G | OPEN |
 | **85** | (A's residue, the record's own line) the seeder's "the workspace" lesson still teaches the RETIRED fold: "＃ folds the note's tag cards away and back (⌘⇧I too…)" | `TutorialSeeder` | The sentence → the `#` door's truth (click → an inline field with the cursor; ⏎ applies; ⌘⇧I opens it); `TutorialBookShapeTests`/`NewModesTests` hold plan ⇔ seed; the LIVE re-seed of her real store is HER morning act (biometric — §7b item 8) | G | OPEN |
 | **86** | (F's walk (d)/(e) — VERIFY FIRST) (d) ⌘K "block history" from Blocks spoke Write's caret sentence instead of opening the pane (likely healed by C's `CurrentBlockMemory` — `focusedBlock` now lives in Blocks); (e) a click on the masthead TITLE did not open the rename field (`seed-03`; the Library row menu's Rename… is the door) | ⌘K palette · the masthead title | Verify each on the dev build first. (d): if it still speaks the sentence, route the palette door to the current block (fix + pin); if healed, RECORD healed-by-C. (e): `git show 0e6a09e^:…PostDetailView.swift` — if the pre-Act-10 title was a rename door, RESTORE it (a regression; pin); if it never was, RECORD as not a defect (the row menu is the door) | G | OPEN |
+| **87** | (the orchestrator's Pool walk at D's close, both voices — `orchestrator-d/04`, `08`) the Pool is a WALL OF BARE DATES: a titleless note's card shows only its day and a lone `+`, no first words — while the note picker (D's `01-crop`) already shows a two-line preview under every match. Ten of the dev store's eleven Pool notes read identically | Pool cards (`Features/Pool/PoolPostsView.swift`) | The picker's preview road exists; a first-words line under a titleless card's date is the same derived, never-stored shape 13u2 item 4 RULED for note cards ("a little snippet of what the post starts with"). **HERS: build the Pool card's preview now in G (reusing the picker's preview road — one brain, no new rule), or leave the whole card family to 13u2 item 4's one-brain design** | G (at her word) or 13u2 item 4 | OPEN (her call) |
+| **88** | (the orchestrator's Canvas walk, both voices — `05`, `09-crop`; Canvas is PRE-Act-10 — the restyle never reached it) Canvas on the 215-block story opens MID-BANK: cards 97–162 visible, the top row and both edge columns CLIPPED, `fit all` a click away; the toolbar mixes grammars — a "Tag filter" LABEL beside a system popup reading "tag filter: all", then calm chips (`fit all` · `Bank · 215` · `order by clicking…`) | Canvas (`Features/Canvas/`) | Not this round's surface by the ledger's letter (Act 10 did not touch Canvas) but her bar applies to what she sees. Two bounded candidates if she wants them: (a) a first arrival with no remembered layout opens FIT-ALL (or at the bank's top-left), never mid-bank; (b) the toolbar to the calm-chip grammar (one chip per control, the redundant label dropped). **HERS: G, or record for 13u2** | G (at her word) or 13u2 | OPEN (her call) |
 
 ## 4. The batches (one surface each — C-1). **ORDER AMENDED after the triage walk: B FIRST** — row 44 is a BLOCKER (the book hangs) and the riskiest fix (TK2 geometry inside lazy layout), so it gets the longest soak before the ladder; A (the chrome) follows immediately; then C, F, D, E.
 
@@ -379,6 +381,7 @@ the A1 backup (C-3) → the field-guide re-seed if any lesson text changed → t
 - Batch B, row 13: the Outline's prose stays left-anchored at Write's measure (batch 12's ruling) with a flexible, mostly-empty gutter — if she wants the column CENTRED like Write's page, that is a one-line ruling.
 - ~~Batch B, row 52: underscore emphasis~~ — **RULED R-cor-10(4)**: joins the vocabulary as italics (G, row 84).
 - Read's `edit · read` face remembered per note (the architect's call) — still hers to confirm at the walk.
+- **D-close seam (17:15 MDT), put to her live:** row 46's outline-door placement (per-state vs the flat retire) · row 87 (the Pool card preview now or 13u2) · row 88 (Canvas's arrival + toolbar: G or 13u2).
 
 ## 7b. CLOSEOUT OBLIGATIONS (written 2026-09-01 ~06:00 so the run's end is a checklist; the standing CLAUDE.md ritual, unabridged, plus this round's own)
 
@@ -1463,7 +1466,7 @@ marked closed.
 | **69** (new — a consequence of row 17, NOT this batch's file) | RECORDED for **the closeout's copy change + the re-seed (§7b item 8)** — `TutorialSeeder.swift:1411–1417`, the compare lesson's fourth paragraph, ends *"Against an unrelated note it tells you there is nothing to show, rather than showing you nothing"* — that describes the RETIRED whole-board state; with the anchor exempt the board shows her note whole and the other column says *"related blocks only — nothing from this note"*. Proposed sentence: *"Against an unrelated note your note still reads whole, and the other column says nothing relates."* The fifth paragraph's *"press 'make outline note' in Compare's header"* stays TRUE (the lesson's twin auto-fills, so the header door shows there). Untouched here per batch A's precedent (a lesson sentence a batch makes stale is RECORDED; copy changes are the closeout's) | — | — |
 | **70** (new — the walk, NOT this batch's surface) | RECORDED — the ⌘K palette cannot find a nameless note by the name it wears: typing its day (`2026-09-01`) lists nothing (capture `06a`), because the catalog search reads STORED titles and a note called by its day has none. A note she sees named "2026-09-01" everywhere is unsearchable by that name. Owner: **13o** (the search phase — `Queries.searchCatalog` is its subject; a display-name match is one predicate), flagged for the orchestrator in case G wants it sooner | — | — |
 | **71** (new — the walk; pre-existing) | RECORDED for **the Lenses + Compare build phase (the memo's §4)** — an EMPTY peer slot added with "+ note" has no close door until it is filled (only a filled card carries ✕; the old toolbar button had the same gap). The memo's slot design owns it | — | — |
-| **72** (new — the walk; pre-existing) | RECORDED for **the Lenses + Compare build phase (the memo's §4 NOTE card)** — the header strip's cards are uneven: the anchor card is two lines while a peer card is three plus its doors (captures `03`/`11`), so the strip's bottom edge steps. The memo's card design settles both cards' shape; not a mechanical row | — | — |
+| **72** (new — the walk; pre-existing) | RECORDED for the memo's build phase by D — **RE-OWNED to batch G by the orchestrator's walk (17:15 MDT):** the header strip's cards are uneven (the anchor card two lines, a peer card three plus its doors — captures `03`/`11`, the orchestrator's `02-crop`), so the strip's bottom edge steps. Equal heights in the strip (every card stretches to the strip's height, content top-aligned) is a mechanical alignment fix under row 16's own rule; the memo's card DESIGN still settles the cards' content later. Geometry pin: every header card's bottom within 1 pt of the strip's | — | — |
 
 #### The USE gate — the walk (the dev-store Debug build of this tree, window zoomed 1728×1084; every capture in `act10-correction-screens/batch-d/`; **the sheet: `batch-d/contact-sheet.png`, 18 tiles**)
 
@@ -1492,6 +1495,35 @@ Honesty notes: the dev store now carries a nameless ⌘N note ("A nameless note 
 #### What the orchestrator should know before walking (the handoff paragraph)
 
 Everything is committed and pushed through `70073fa` (+ this record commit); no revert is in flight; the tree is clean; the final Mac suite is green at 2037/359 exact over F's 2032/356. Every batch-D row is FIXED with a red-on-old pin (rows 17/46/16 — six, three and six issues under the behavioral revert); the four new rows (69–72) are RECORDED with owners (the closeout's copy change; 13o; the memo's build twice); nothing DEFERRED beyond those, nothing REVERTED (C-5 unexercised). The one thing to put to her at this seam: row 46's outline door is placement-per-state (card while the band shows, header while a peer is open) rather than the brief's flat retire — the auto-filled version peer is the reason; the memo's §4 is where it goes for good. Two honest limits: the reflection road cannot see inside a `CalmCard` closure or a `ForEach` (the cards became value views to be readable; the dashed slot is covered by geometry, not by the count), and the Lenses geometry pin measures the stub's position and height, not its label's fit (the in-walk squeeze passed it; recorded for the ladder). Walk suggestions: ⌘K "boscombe" ⌘5 — the note whole, one left edge, no "+ note"; ⌘K "compare & versions" ⌘5 — "+ note" at the strip's end at the cards' height, "make outline note" top-right; click "+ note" (the door yields to the dashed slot), pick an unrelated note into it (the anchor stays whole; the column says why it is empty); ⌘K "lenses" ⌘4 — the stub at the header's height with both lines; `+ column ▾` ▸ Open "the other reading" — the cards over their panes, the align chip on the handles' edge; Settings ▸ Appearance ▸ Study for the same four. Known non-D residue seen in passing: the dev store's seeded lesson text still says ⌘5/⌘6 for Lenses/Compare (the pre-batch-C seed — the closeout's re-seed); nothing in the masthead, the book, the note modes, the recovery family or the library panel was touched.
+
+---
+
+#### BATCH D RECORD — CLOSED by the orchestrator (2026-09-01 17:15 MDT; captures `orchestrator-d/`)
+
+Verified against git first: seven commits `16486ca`…`3833070`, tree clean, pushed; the code diff is exactly
+`CompareBoardView.swift` + `LensesBoardView.swift` + one new pin file (C-1 held; core and `Shared/` untouched).
+Read the 18-tile sheet, then two full captures at the riskiest rows (`batch-d/01` — Boscombe's 215 blocks flow
+whole under its card with the filter on; `03` — the twin: chips, cards and rows on one left edge, `+ note` at the
+strip's end at the cards' height, "make outline note" top-right), then ONE live probe of a state D never captured:
+**an unrelated note as the FIRST peer on Boscombe** (the dashed slot → the picker → "compare & versions"): the
+anchor stays whole, the offer band leaves, the peer card says "there is no relationship here" + "related blocks
+only — nothing from this note" with mark-as-versions · diff · open, the toolbar's outline door appears and
+`+ note` stands at the strip's end (`00-crop-top` · `01-crop` · `02-crop`). **D's rows 16/17/46 are FIXED in
+use.** Her R-cor-10(b) ratification covers row 17's narrowing. **Row 72 RE-OWNED to G** (the header strip's
+cards step because the anchor card is two lines and a peer card three-plus-doors — an equal-heights alignment
+fix, not a design question; her bar: alignment is a defect). **The row-46 deviation goes to her at this seam**
+(the outline door placement-per-state instead of a flat retire — D's reason: the auto-filled version peer makes
+the offer card unreachable on the taught note). **The Snippets/Pool/Canvas walk (both voices; `03`–`09`):**
+Snippets reads clean and calm in both voices (the mockup's `.met` facts line; groups; the drop area; nothing
+thrown in). **Pool: a wall of bare dates** — ten titleless notes show only their day and a lone `+`, no first
+words, while the note picker already carries a two-line preview under every match (row 87, hers). **Canvas**
+(pre-Act-10 — the restyle never reached it): opens the 215-block story MID-BANK with cards clipped at every edge
+(rows 97–162 visible, `fit all` a click away) and a toolbar of mixed grammar ("Tag filter" label + a system
+popup beside calm chips) in both voices (row 88, hers). Counts at close: **Mac 2037/359 green** (F's 2032 + 5 /
+356 + 3), core 1524/165 and `Shared/` untouched, spine green in-run. Machinery lesson: `sips --cropOffset`
+CENTERS the crop on this OS (two tries, verified against a 220-px strip) — crops are made with PIL
+(`Image.crop((x0,y0,x1,y1))` on the 2× PNG), which is exact; the handoff's §2c is corrected. The voice was
+restored to Terminal and the note to Write at the end. **Batch E spawned next** (after her three calls below).
 
 ---
 
@@ -1568,9 +1600,11 @@ height is the target) · 80: `Features/Takes/PostDetailView.swift` (the two-row 
 `Registry/CapabilityRegistry.swift` (the `blockHistory` palette door) and `PostTitleLabel` in `PostDetailView.swift`
 (+ `git show 0e6a09e^:App/Variorum/Variorum/Features/Takes/PostDetailView.swift` for the pre-Act-10 title).
 
-**Rows: 59 · 80 · 81 · 82 · 83 · 84 · 85 · 86 — each stated in the ledger with its mechanism read and its pin —
-plus the walk-minted rows listed here at D's close: PENDING.** Order: 86 first (verify-first, cheapest), then 59,
-80, 81 (the width family — walk them at ~950 pt TOGETHER), 83, 82, 85, 84 last (the one `Shared/` change).
+**Rows: 59 · 72 · 80 · 81 · 82 · 83 · 84 · 85 · 86 — each stated in the ledger with its mechanism read and its pin —
+plus, IF she rules them in at the D-close seam (the ledger says which): 87 (the Pool card's first-words preview via
+the picker's road) and 88 (Canvas: fit-all on a first arrival; the toolbar to the calm grammar). The E-close walk
+may add more.** Order: 86 first (verify-first, cheapest), then 59, 80, 81 (the width family — walk them at ~950 pt
+TOGETHER), 72, 83, 82, 85, 87/88 if ruled in, 84 last (the one `Shared/` change).
 
 **Rules (§2b) bind; the acceptance gate is USE:** captures in `act10-correction-screens/batch-g/` at BOTH 1708 pt
 zoomed and ~950 pt, both voices — the `#` hit at the row's edges, the masthead + bottom bar at 950, a `pages` click

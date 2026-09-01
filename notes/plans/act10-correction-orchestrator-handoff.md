@@ -175,7 +175,7 @@ capture dir and name it in the record. **(2) Text before pixels** — facts the 
 with `osascript` static-text queries (~100 tokens), not screenshots. **(3) Spot-check, not re-walk** — the
 orchestrator reads the implementer's sheet + 2–4 full captures at the riskiest rows + one live probe by hand
 of the row most likely to be wrong (row 53's class: the multi-expanded landing). **(4) Crop when a detail
-matters** — `sips -c <h> <w> --cropOffset <y> <x> in.png --out crop.png` before reading.
+matters** — ~~`sips -c <h> <w> --cropOffset <y> <x>`~~ **CORRECTED 17:10 MDT by the successor: on this OS `sips --cropOffset` CENTERS the crop regardless of the offset (verified twice against a 220-px strip); crop with PIL instead — `python3 -c "from PIL import Image; im=Image.open('in.png'); im.crop((x0,y0,x1,y1)).save('crop.png')"` on the 2× PNG (PIL 12.3 is installed); exact every time.**
 
 ## 3. Machinery lessons (proven this run)
 
@@ -238,3 +238,4 @@ eight rulings · row 52 (underscore emphasis vocabulary) · any scalpel revert (
 - ~07:30 — the fix session's first commit `7569af3` landed (row 53 converging landing); §2b proof checklist + §2c token discipline added at her question; she is starting a successor session to check in ~50 min.
 - 16:05 MDT (machine clock) — **SUCCESSOR ORCHESTRATOR (Fable 5.1) ORIENTED**: state verified against git (`7f64b0f` HEAD, clean, pushed; no D/E/ladder records); the D/E briefs gained binding addenda (row 17's provenance: 13c 2E filtered the anchor by design, #47(c) default-on — the fix is a ruled narrowing); §7d's trailer moved to this session's; memory refreshed; **batch D SPAWNED**.
 - ~16:40 MDT — **R-cor-10 recorded**: she is awake (live taste calls at seams); the cold review (§7d) confirmed; row 17 ratified; E's shape RATIFIED (simple read preview); **batch G (residuals and width — rows 59, 80–86 + the D-close walk's Snippets/Pool/Canvas finds) ADDED after E, before the ladder**; rows 26/52 ruled. D still running.
+- 17:15 MDT — **batch D CLOSED** (walked: two full captures + the unrelated-first-peer live probe; rows 16/17/46 right in use; row 72 re-owned to G); **the Snippets/Pool/Canvas walk done in both voices** — rows 87 (the Pool's bare-date cards) and 88 (Canvas mid-bank + toolbar grammar) minted for HER call; Mac 2037/359; the row-46 deviation + 87/88 put to her at the seam; **E spawns after her answers**.
