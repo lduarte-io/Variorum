@@ -1080,3 +1080,49 @@ proven instead by a revert of the road the pin covers — below.
 10.514 seconds.` — exit 0.
 
 **PIN-HAS-TEETH REVERT: PENDING** (runs after this commit).
+
+---
+
+## Item 7 · NIT 1 + NIT 2 · **BOTH DONE**
+
+### NIT 1 — the dead `starredRows` parameter is RETIRED
+
+The reviewer's own fix shape was *"nothing now"*; the adjudication ruled
+DELETE, and delete is what landed. `MobileShelfLayout.naturalBooksHeight`
+and `.split` lose the parameter, `starredRowHeight` / `starredChromeHeight`
+go with it (their only readers), and `MobileShelfView`'s `starredRows: 0`
+call site and its explanatory comment go with them. The shelf's starred
+section moved to its own page at batch 10, so these were not merely a
+constant caller — they were a dimension the shelf can no longer enter.
+
+**The guarantee pin was re-derived, not weakened.**
+`theWritingFloorIsAGuaranteeInEveryShelfState` keeps every region, every
+book count and both extra-row values; it loses the stars loop and its
+product becomes `43 * 7 * 2`. Measured: **602 shelf states checked** (was
+2,408 — the same states, four times over, three of which the app cannot
+produce). `starredRowsRideInsideTheBound` is DELETED: its whole subject —
+starred rows pushing the books region — left the shelf, so it asserted a
+property of an unreachable input. **Net test count: −1** (accounted for in
+the final suite line below).
+
+**Files:** `App/Variorum/VariorumMobile/Features/Shell/MobileShelfLayout.swift`,
+`App/Variorum/VariorumMobile/Features/Shell/MobileShelfView.swift`,
+`App/Variorum/VariorumMobileTests/MobileShelfLayoutTests.swift`.
+
+**Suite (targeted):** `✔ Test run with 26 tests in 2 suites passed after
+22.864 seconds.` — exit 0, and `PERF[sim] writing-floor guarantee — 602
+shelf states checked, floor 140.0 pt`.
+
+### NIT 2 — `offset` gains the `width > 0` guard its sibling had
+
+One line in `MobileShellBand.offset`, and **pinned** rather than left as a
+comment: two clauses in `theBandPutsTheShelfAtHomeBetweenStarredAndLibrary`
+assert that a zero-width pass parks every page at home instead of
+collapsing all three roots onto the live drag. The drag is deliberately
+non-zero in the pin, because that is the only way the frame can happen:
+`bandDrag` holds a value clamped against the PREVIOUS pass's real width.
+
+**Files:** `App/Variorum/VariorumMobile/Features/Shell/MobileShellBand.swift`,
+`App/Variorum/VariorumMobileTests/MobileNavigationTests.swift`.
+
+**RED-ON-OLD (NIT 2): PENDING** (revert runs after this commit).

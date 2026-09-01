@@ -63,6 +63,18 @@ struct MobileNavigationTests {
             for: .shelf, current: .library, drag: 0, width: width) == -width)
         #expect(MobileShellBand.offset(
             for: .starred, current: .library, drag: 0, width: width) == -2 * width)
+
+        // **A ZERO-WIDTH LAYOUT PASS PARKS EVERYTHING AT HOME** (the cold
+        // review's NIT 2 — the guard `clampedDrag` already carried and this
+        // one did not). Without it every page's offset collapses to the live
+        // drag, drawing all three roots stacked for that frame. The drag can
+        // be non-zero here precisely because it was clamped against the
+        // PREVIOUS pass's real width.
+        // RED-ON-OLD: drop the guard and both return -120.
+        #expect(MobileShellBand.offset(
+            for: .library, current: .shelf, drag: -120, width: 0) == 0)
+        #expect(MobileShellBand.offset(
+            for: .starred, current: .shelf, drag: -120, width: 0) == 0)
     }
 
     /// **THE DIRECTION LATCH — why a vertical scroll never pages.**

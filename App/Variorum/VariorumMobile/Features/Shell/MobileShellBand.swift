@@ -102,7 +102,15 @@ nonisolated enum MobileShellBand {
     static func offset(
         for page: MobileTab, current: MobileTab, drag: CGFloat, width: CGFloat
     ) -> CGFloat {
-        CGFloat(index(of: page) - index(of: current)) * width + drag
+        // The same guard its sibling carries (the cold review's NIT 2): a
+        // layout pass that proposes a ZERO width would put every page's
+        // offset at the drag alone — all three roots stacked for a frame.
+        // Nothing is mis-tappable while it holds (`allowsHitTesting` still
+        // follows `tab`), which is why this is a guard and not a fix, but
+        // one input guarded in one function and not the other reads as an
+        // oversight rather than as a decision.
+        guard width > 0 else { return 0 }
+        return CGFloat(index(of: page) - index(of: current)) * width + drag
     }
 
     /// The share of the screen a drag must cross to land on the next page.

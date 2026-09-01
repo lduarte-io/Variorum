@@ -90,14 +90,6 @@ struct MobileShelfView<TabBar: View>: View {
                 let split = MobileShelfLayout.split(
                     region: proxy.size.height,
                     bookRows: model.orderedBooks.count,
-                    // ZERO since batch 10: the starred section left this
-                    // region for its own page, so the books region no longer
-                    // reserves height for it. The BRAIN keeps the parameter
-                    // and her writing-floor guarantee still spans every value
-                    // of it (`theWritingFloorIsAGuaranteeInEveryShelfState`,
-                    // 2,408 states) — what changed is what this caller has to
-                    // tell it, not the rule.
-                    starredRows: 0,
                     extraRows: extraBooksRegionRows,
                     // Her 2026-08-30 ruling: one line until she clicks in.
                     writing: quickNote.isFocused ? .expanded : .collapsed)
@@ -351,8 +343,10 @@ struct MobileShelfView<TabBar: View>: View {
     // including the books the shelf section also listed.
     //
     // Two consequences, both deliberate: the books region no longer
-    // reserves height for stars (`starredRows: 0` above), and the shelf's
-    // `onOpenNote` callback went with the rows that were its only caller.
+    // reserves height for stars (the layout brain's `starredRows` parameter
+    // was retired with them at the cold review's NIT 1 — its only caller had
+    // been passing `0`), and the shelf's `onOpenNote` callback went with the
+    // rows that were its only caller.
     // What STAYS here is the shelf's own star DOOR (the book row's
     // long-press) and its message slot, because the door still fires here.
 
