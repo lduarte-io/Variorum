@@ -50,6 +50,7 @@
 //
 
 import Foundation
+import OSLog
 import VariorumCore
 
 @MainActor
@@ -98,8 +99,22 @@ final class MobileFirstWriteFurniture {
     /// deliberately does not.
     private var occasion: Task<Outcome, Never>?
 
-    /// The last outcome, for the DEBUG settings surface and for pins.
-    private(set) var lastOutcome: Outcome?
+    /// **Why an occasion nobody can see logs one line** (the midpoint
+    /// review's m3): every outcome here is silent by design — furniture
+    /// never speaks to her — so without this there is no way to tell
+    /// "already seeded" from "the account owns this store" from "the store
+    /// refused", which is exactly the question asked the first time the
+    /// Journal or Sherlock does not appear. It matters most for
+    /// `.accountOwned`, which short-circuits BEFORE either seeder and so
+    /// produced no line anywhere: `SampleLibrarySeeder` logs its own
+    /// outcomes, but only when it is reached.
+    ///
+    /// `log show --predicate 'subsystem == "io.lduarte.Variorum" AND
+    /// category == "first-write-furniture"'` — the `SampleLibrarySeeder`
+    /// precedent, verbatim. `.public` is safe by inspection: `Outcome`
+    /// carries case names and reading ids, never a word she wrote.
+    private static let log = Logger(
+        subsystem: "io.lduarte.Variorum", category: "first-write-furniture")
 
     init(
         session: AppSession,
@@ -136,11 +151,19 @@ final class MobileFirstWriteFurniture {
     /// later one joins it.
     @discardableResult
     func run() async -> Outcome {
-        if let occasion { _ = await occasion.value; return .alreadyRan }
+        if let occasion {
+            _ = await occasion.value
+            Self.log.notice("first write: alreadyRan")
+            return .alreadyRan
+        }
         let task = Task { await perform() }
         occasion = task
         let outcome = await task.value
-        lastOutcome = outcome
+        // ONE line per occasion, naming every case: `.accountOwned`, or
+        // `.ran` with BOTH seeders' own outcomes inside it (seeded /
+        // alreadySeeded / alreadyPresent / storeNotNew / refused).
+        Self.log.notice(
+            "first write: \(String(describing: outcome), privacy: .public)")
         return outcome
     }
 
