@@ -448,6 +448,76 @@ struct JournalKeeperRepairTests {
         }
     }
 
+    /// **RED ON OLD (round 2, R2-2 — MAJOR):** direction 1 read the LOCAL
+    /// row's shape only. A loser RENAMED on its own device before the
+    /// repairer's tombstone landed is not mint-shape locally, so the
+    /// tombstone became an ordinary delete: the cascade killed the N
+    /// memberships, the victim sweep pushed N tombstones at the
+    /// merge-stamped version, the server accepted them, and the repairer's
+    /// lagging re-points CAS-rejected into tombstone-wins — the Journal
+    /// emptied on BOTH devices (the keeper's own entry alone survived).
+    /// Now the arriving tombstone's own columns — the repairer's verdict —
+    /// satisfy the predicate too.
+    @Test func aLoserRenamedLocallyStillHandsItsMembershipsToTheKeeper() async throws {
+        let server = FakeSyncServer()
+        let transport = FaultInjectingTransport(server: server)
+        let a = try SyncClient(name: "A", prefix: "AA", transport: transport)
+        let b = try SyncClient(name: "B", prefix: "BB", transport: server, clockOffset: 1000, seed: 2)
+
+        var loser: (bookID: String, entryID: String)?
+        var loserEntries: [String] = []
+        for day in ["2026-08-28", "2026-08-29", "2026-08-30"] {
+            let minted = try mintJournal(b, day: day)
+            loser = minted
+            loserEntries.append(minted.entryID)
+        }
+        let journalB = try #require(loser)
+        try await b.push()
+
+        let journalA = try mintJournal(a, day: "2026-08-31")
+        try await a.pull()  // A's repair: keeper A, B's three memberships re-pointed, B's book retired
+        let split = try rowsAhead(of: "reading_post", in: a)
+        await transport.armFailNextPush(afterRows: split)
+        await #expect(throws: InjectedNetworkFault.self) { try await a.push() }
+
+        // B, not yet having pulled, renames its Journal — the row is dirty
+        // here and no longer wears the daily name.
+        try b.with { ops, _ in try ops.renameReading(journalB.bookID, name: "My Journal") }
+        #expect(try b.outboxContains("reading", journalB.bookID),
+                "positive activity: the rename is a pending local edit")
+
+        try await b.pull()
+        // Between the chunks on B: the tombstone arrived under the daily
+        // name — the repairer's verdict — and the memberships moved to the
+        // keeper before the cascade could take them (old: 0).
+        #expect(try liveJournalBookIDs(b) == [journalA.bookID])
+        #expect(try liveMemberships(b, in: journalA.bookID) == 3,
+                "the renamed loser's memberships moved to the keeper (old: killed by the cascade)")
+        for entry in loserEntries {
+            let membership = try b.db.read { db in
+                try Row.fetchOne(
+                    db,
+                    sql: "SELECT id, reading_id FROM reading_post WHERE post_id = ? AND deleted_at IS NULL",
+                    arguments: [entry])
+            }
+            #expect(membership?["reading_id"] as String? == journalA.bookID)
+            if let id = membership?["id"] as String? {
+                #expect(try b.outboxContains("reading_post", id),
+                        "every repair write reaches the outbox (SyncSpec §7)")
+            }
+        }
+
+        // A's retry lands the rest; production's rounds converge on N + 1.
+        try await a.push()
+        try await assertFurnitureConverged(a, b, server)
+        for client in [a, b] {
+            #expect(try liveJournalBookIDs(client) == [journalA.bookID])
+            #expect(try liveMemberships(client, in: journalA.bookID) == 4,
+                    "N + 1 live memberships on the keeper on both sides (old: the keeper's own only)")
+            #expect(try designation(client) == journalA.bookID)
+        }
+    }
+
     /// **RED ON OLD (F1, MAJOR — the fresh-store leg of direction 1):** a
     /// device meeting the loser's rows for the FIRST time (a third device,
     /// a re-onboarded phone) while the repairer's re-points still lag its

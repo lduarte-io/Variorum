@@ -187,23 +187,33 @@ extension SyncEngine {
     /// The live keeper a dead-landing daily-Journal reading's children move
     /// to, or nil when the reading is not the daily mint's shape, is already
     /// dead here (nothing live to move), or no other candidate stands — then
-    /// the tombstone is an ordinary delete. The shape is read from the LOCAL
-    /// row when one exists (a rename she made here counts), else from the
-    /// arriving row's own columns. The keeper is the smallest OTHER
-    /// candidate: the repair only ever retires larger ids, so this is the
-    /// same choice every device makes.
+    /// the tombstone is an ordinary delete.
+    ///
+    /// The shape is satisfied by EITHER the local row (when one exists and
+    /// is live) OR the arriving row's own columns (the ladder's R2-2).
+    /// The arriving tombstone is the REPAIRER's verdict: it retired a book
+    /// it saw wearing the daily mint's shape. A loser she RENAMED here
+    /// before that tombstone landed is not mint-shape locally — and
+    /// reading the local row alone turned the repair's verdict into an
+    /// ordinary delete: the cascade killed her N memberships, the victim
+    /// sweep pushed N tombstones at the merge-stamped version, they were
+    /// accepted, and the Journal emptied on both devices — F1's loss by
+    /// another door. The local leg still stands on its own for the mirror
+    /// case (an arriving tombstone whose columns she renamed elsewhere).
+    /// The keeper is the smallest OTHER candidate: the repair only ever
+    /// retires larger ids, so this is the same choice every device makes.
     private func journalKeeperBesideRetiring(
         _ db: Database, arriving row: SyncRow
     ) throws -> String? {
-        let isMintShape: Bool
+        var isMintShape = false
         if let local = try Reading.fetchOne(db, key: row.rowID) {
             guard local.deletedAt == nil else { return nil }
             isMintShape = Queries.isDailyJournalMintShape(local)
-        } else {
-            guard case .text(let kindText) = row.columns["kind"],
-                  let kind = ReadingKind(rawValue: kindText),
-                  case .text(let name) = row.columns["name"]
-            else { return nil }
+        }
+        if !isMintShape,
+           case .text(let kindText) = row.columns["kind"],
+           let kind = ReadingKind(rawValue: kindText),
+           case .text(let name) = row.columns["name"] {
             var profile: String?
             if case .text(let text) = row.columns["profile"] { profile = text }
             isMintShape = Queries.isDailyJournalMintShape(kind: kind, profile: profile, name: name)
