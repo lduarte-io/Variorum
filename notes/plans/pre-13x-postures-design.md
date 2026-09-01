@@ -280,6 +280,15 @@ the iCloud mirror is Variorum-local and never a Fragments road.
 - Auto (+ escrow on/off) → **Standard**: device item → the synchronizable item; sync keys → library +
   mirror; the escrow-dial key retired. Her consent line at first launch for the sync-mirror step.
 - `sync_state` keys and the custody scope migrate to store-ID naming.
+- **THE BACKFILL (her 2026-09-01 incident — §18-H):** an ENROLLED device whose envelope has no
+  passphrase wrap (every pre-13p enrollment; her own Mac) gets its **master wrap written at first
+  unlock from HELD material — no visit, no typing** — which alone gives it the vault road; the
+  passphrase wrap follows the first time the passphrase is typed anywhere on that device (any door),
+  and the migration may ask ONCE ("confirm your passphrase to finish") so it lands the same day.
+  Orphaned iCloud escrow items of stores that moved to Castle are deleted (the coupling already
+  removed hers at the refreshed build — her launch log: `escrow reconcile: dial ON · posture-effective
+  OFF`). Every migration leg logs a line (the 13p launch-log pattern), because that log is what let
+  the incident be diagnosed at all.
 
 ## 12. TESTS & PINS
 Red-on-old for every mechanism: keys-in-library (a fresh store cannot sync without a secret; the
@@ -542,3 +551,36 @@ FINISH deletion. `ThisDeviceOnly` same-device restore: characterized, not quoted
   simplification"): THIS phase IS that simplification; the spec brief stands unchanged (the vault
   format is untouched); the interop fixture is the acceptance bar when Fragments builds it.
 - **#86(h)** / **17i**: pulled in as this phase's last batch (§15.6), on the settled key path.
+
+### H. THE 2026-09-01 INCIDENT — "It says I don't have a passphrase, but I do" (the design's proof)
+Her refreshed Castle-class Mac (Biometric mode) showed the exposed nudge and a "Set a Passphrase…"
+door although she has held the suite passphrase since 14b. Two facts stacked: **(1)** her passphrase
+is the VAULT's; her store's envelope was never extended with it — the one-secret follow hooks fire
+on vault setup/enroll/change ON THE DEVICE THAT ACTS, and her Mac enrolled in 14b, a month before
+envelopes existed (the 13p handoff's owed "one visit"); so the nudge's brain, reading envelope +
+custody facts only, was literally right about the LOCAL copy and wrong about her writing (on the
+server, behind the vault passphrase — a leg the brain never counted). **(2)** the iCloud spare had
+been removed by her own coupling ruling at the first reconcile of the refreshed build. The other
+session recorded a 13u2 item (count the sync leg; say "extend," never "set").
+**Why it cannot recur under this design, for new users AND for her:**
+- Castle makes the passphrase AND the twelve words mandatory at enrollment (ruling 11) — a Castle
+  library with "no passphrase" is not a state that exists.
+- Standard needs no passphrase to have a way back (iCloud); its nudge fires ONLY for iCloud Keychain
+  off + no secrets (§3.6) — and a Standard sync user always has both secrets (ruling 5).
+- The envelope's master wrap (§3.3) lets an enrolled device extend its own envelope from HELD material
+  with no visit (§11's backfill), and the vault road re-wraps the passphrase wrap the first time the
+  passphrase is typed — "vault has it, this library doesn't" cannot persist past one unlock.
+- The legs brain is DELETED; what replaces it (§8's "ways back in" line) is computed from facts —
+  envelope wraps · custody items · the iCloud item's verified presence · vault enrollment — and
+  **counts sync**: an enrolled account IS a way back for the writing, stated as such.
+- The set-screen's one-secret verification stands: with a vault present, "set" verifies against the
+  vault and reads as EXTEND; the words are shown beside it.
+**The 13u2 nudge-copy item is RETIRED at this phase's kickoff** (the brain it would patch is deleted;
+one home, as with #86(c)).
+**Three more lines the incident surfaced, kept here so they are not lost:** the iPhone under Standard
+gets its store key back through iCloud Keychain on Quick Start / an iCloud-backup restore (seamless
+phone migration is a Standard feature; Castle = the passphrase once — the phone's copy says so);
+account-password re-authentication is a sign-in call against the suite issuer (14a's direct
+email+password road) and inherits Supabase's auth rate limits — 13y's abuse guard should name the
+re-auth doors; stale iCloud items for libraries that no longer exist are harmless and deliberately
+never swept (they still open a surviving backup of that library — a feature).
