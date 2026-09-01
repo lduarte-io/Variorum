@@ -82,6 +82,13 @@ struct TrayPanelShapeTests {
             // not reintroduce one.
             #expect(!shown.contains("List<"), "the tray must not be a List again")
             #expect(shown.contains("ScrollView"), "the calm-card scroll rebuild")
+
+            // Row 64 (the correction round): the takes fold's WHOLE line is
+            // the toggle — a DisclosureGroup toggles only on its chevron,
+            // and the walk clicked its label to no effect. RED ON OLD: the
+            // fold was a DisclosureGroup.
+            #expect(!shown.contains("DisclosureGroup"),
+                    "the takes fold is a full-line Button, not a chevron-only DisclosureGroup")
         }
     }
 }

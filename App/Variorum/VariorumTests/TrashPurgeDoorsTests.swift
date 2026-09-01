@@ -564,6 +564,23 @@ struct TrashPurgeDoorsTests {
         #expect(withOriginal.contains("1 thing "), "the total counts the four kinds only")
     }
 
+    /// **Row 66 (the Act 10 correction round): the confirm NAMES snippet
+    /// groups.** `.snippetGroup` joined the door's scope at pre-13u Act 10
+    /// wave 2b but never the sentence's kind order, so the walk's confirm
+    /// read "8 things go for good: 1 note, 1 saved version, 5 blocks" — 7
+    /// named, 8 taken. The count-by-kind promise (round 8) is per KIND,
+    /// every kind the door takes. RED ON OLD: the order array lacked the
+    /// kind, so the singular and plural forms named no group at all.
+    @Test func theEmptyTrashWordsNameSnippetGroups() {
+        let message = RecoveryPath.emptyTrashConfirm([.note: 1, .snippetGroup: 1])
+        #expect(message.contains("2 things go for good"))
+        #expect(message.contains("1 snippet group"),
+                "the newest kind is named: \(message)")
+        let plural = RecoveryPath.emptyTrashConfirm([.snippetGroup: 3])
+        #expect(plural.contains("3 things go for good"))
+        #expect(plural.contains("3 snippet groups"))
+    }
+
     // MARK: - The pruning setting's face words (round 9)
 
     @Test func thePruningWordsCarryHerNumbersAndTheManualImmunity() {

@@ -179,6 +179,44 @@ struct TrayPanelMoveTests {
             note: nil, stamp: nil, when: "deleted", clock: nil, forever: false).isEmpty)
     }
 
+    /// **Row 63 (the Act 10 correction round): the clock is its OWN slot and
+    /// the stamp is DATE-ONLY.** The walk met "· 30…" and "· k…" at every
+    /// width in Terminal — the one joined line truncated tail-first beside
+    /// the Put back button, and the clock (the section's whole point) was
+    /// what went. The lead truncates; the clock never does; `meta` is
+    /// DERIVED from the pair so the pinned value and the rendered pair
+    /// cannot drift. RED ON OLD by behavioral revert: the time-of-day stamp
+    /// and the joined clock put back in place fail the date-only and
+    /// composition halves.
+    @Test func theClockIsItsOwnSlotAndTheStampCarriesNoTimeOfDay() throws {
+        let stamp = "2026-08-24T10:00:00.000Z"
+        let date = try #require(DateFormatter.variorumISO8601.date(from: stamp))
+        let lead = TrayRowFace.lead(note: nil, stamp: stamp, when: "deleted")
+        #expect(lead == ["deleted \(date.formatted(date: .abbreviated, time: .omitted))"],
+                "date-only — the OriginPeek ruling: with a time in it, the clock fell off the end")
+        #expect(TrayRowFace.clockSlot(clock: 12, forever: false) == TrayPath.daysLeftLabel(12))
+        #expect(TrayRowFace.clockSlot(clock: nil, forever: true) == TrayPath.archivedForever)
+        #expect(TrayRowFace.clockSlot(clock: nil, forever: false) == nil)
+        #expect(TrayRowFace.meta(
+            note: nil, stamp: stamp, when: "deleted", clock: 12, forever: false)
+            == lead + [TrayPath.daysLeftLabel(12)],
+            "meta derives from the pair — the pinned value IS the rendered pair")
+
+        // The take row: same split, same date-only rule.
+        let take = Queries.TrayTake(
+            variantID: "v1", blockID: "b1",
+            deletedAt: DateFormatter.variorumISO8601.string(from: harnessNow),
+            label: nil, text: "Another way of saying it.",
+            blockName: nil, blockText: "The sea took the boat.")
+        let takeLead = TrayTakeFace.lead(take)
+        #expect(takeLead.count == 2)
+        #expect(takeLead[1] == "deleted \(harnessNow.formatted(date: .abbreviated, time: .omitted))")
+        #expect(TrayTakeFace.clockSlot(take, now: harnessNow)
+            == TrayPath.daysLeftLabel(TrashWindow.days))
+        #expect(TrayTakeFace.meta(take, now: harnessNow)
+            == takeLead + [TrayPath.daysLeftLabel(TrashWindow.days)])
+    }
+
     // MARK: - Row 20: the leaving section
 
     /// A take row NAMES ITS BLOCK (her A3 discipline at the note grain) and

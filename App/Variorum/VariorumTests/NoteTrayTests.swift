@@ -500,6 +500,50 @@ struct NoteTrayTests {
         }
     }
 
+    /// **Row 68 (the Act 10 correction round): the reveal that names a KEPT
+    /// original.** The Came-from region's "Open this note's tray" on an
+    /// UNCLOCKED origin landed with no mark and no sentence — the origin is
+    /// deliberately not listed (G5 moved what is KEPT to lineage), and
+    /// `revealMissing` is deliberately false (the row exists). The third
+    /// arrival state says where the block actually lives. Driven through the
+    /// REAL store: a merge releases both sources whole, and the reveal names
+    /// one while its family is alive (nothing counting).
+    ///
+    /// **RED ON OLD** by behavioural revert (drop the `revealKeptInLineage`
+    /// latch assignment): the walked silence comes back — no missing line,
+    /// no lineage line, nothing marked.
+    @Test func aRevealForAKeptOriginalSaysItLivesInLineage() async throws {
+        try await withEditor(seedBlocks: ["First half.", "Second half."]) { editor in
+            let ops = editor.session.operations
+            let slots = try editor.storeSlots()
+            _ = try ops.merge(slots[0].blockID, slots[1].blockID)
+
+            let now = editor.session.now
+            let snapshot = try await editor.session.database.read {
+                db -> TrayViewModel.Snapshot in
+                TrayViewModel.Snapshot(
+                    deleted: try Queries.trayBlocks(db, postID: editor.postID, now: now),
+                    archived: try Queries.archivedBlocks(db, postID: editor.postID),
+                    originals: try Queries.preservedOriginals(db, postID: editor.postID),
+                    strandedFates: try Queries.originFamilyClocks(
+                        db, postID: editor.postID, now: now),
+                    takes: try Queries.trayTakes(db, postID: editor.postID, now: now))
+            }
+            let revealed = try #require(snapshot.originals.first?.blockID)
+
+            let model = TrayViewModel(
+                session: editor.session, postID: editor.postID,
+                revealBlockID: revealed)
+            model.adopt(snapshot)
+            #expect(!model.revealMissing,
+                    "the row exists — 'it isn't here' would be the arrival-time lie")
+            #expect(model.revealKeptInLineage,
+                    "the third state: kept whole, living under Came from")
+            #expect(model.stranded.isEmpty, "nothing is counting — the family is alive")
+            #expect(!RecoveryCopy.trayRevealKeptInLineage(.post).isEmpty)
+        }
+    }
+
     // MARK: - The post-13l polish round (ledger rows 1 and 6)
 
     /// **ROW 1 (her A1 ruling on the walk's P-4).** A successful Put back

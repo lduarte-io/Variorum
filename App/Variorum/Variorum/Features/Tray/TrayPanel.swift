@@ -339,6 +339,11 @@ final class TrayViewModel {
     /// revisited: an act of hers can no longer turn the explanation on.
     private(set) var loaded = false
     private(set) var revealMissing = false
+    /// Row 68 (the correction round): the third arrival state — the revealed
+    /// block EXISTS but is a KEPT original (unclocked, so this panel lists it
+    /// nowhere by her G5 ruling). Latched at arrival exactly like
+    /// `revealMissing`, and for its reason.
+    private(set) var revealKeptInLineage = false
 
     func start() async {
         let now = session.now
@@ -412,9 +417,16 @@ final class TrayViewModel {
             // reveal that names one is still answerable — and answering "it
             // isn't here" for a row that exists would be the arrival-time lie
             // this sentence exists to avoid.
-            revealMissing = !deleted.contains { $0.blockID == revealBlockID }
-                && !archived.contains { $0.blockID == revealBlockID }
-                && !snapshot.originals.contains { $0.blockID == revealBlockID }
+            let inDeleted = deleted.contains { $0.blockID == revealBlockID }
+            let inArchived = archived.contains { $0.blockID == revealBlockID }
+            let inOriginals = snapshot.originals.contains { $0.blockID == revealBlockID }
+            let inStranded = stranded.contains { $0.blockID == revealBlockID }
+            revealMissing = !inDeleted && !inArchived && !inOriginals
+            // Row 68: an UNCLOCKED original (in the family, not counting) is
+            // listed nowhere here — the walk's landing marked nothing and
+            // said nothing. The third state says where it lives instead.
+            revealKeptInLineage = inOriginals && !inStranded
+                && !inDeleted && !inArchived
         }
         loaded = true
     }
@@ -720,6 +732,17 @@ struct TrayPanel: View {
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
             }
+            // Row 68 (the correction round): the arrival explanation's THIRD
+            // state — the asked-for block is a KEPT original (G5 moved what
+            // is kept to lineage), so nothing here is wrong and nothing here
+            // is marked; the sentence says where it actually lives.
+            if model.revealKeptInLineage {
+                Text(tokens.chromeLabel(RecoveryCopy.trayRevealKeptInLineage(home)))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .lineLimit(3)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 6) {
                     // ── LEAVING (her G5 ruling) ────────────────────────────
@@ -809,20 +832,34 @@ struct TrayPanel: View {
     /// and carries the two doors her fourth sitting placed here: **Put back**
     /// and **Delete Now**.
     @ViewBuilder private var takesDisclosure: some View {
-        DisclosureGroup(isExpanded: $takesShown) {
+        // Row 64 (the correction round): the WHOLE line is the toggle. The
+        // DisclosureGroup it replaces toggled only on its chevron — a click
+        // on the label did nothing (C-7's generous targets; walked).
+        Button {
+            withAnimation(.easeInOut(duration: 0.15)) { takesShown.toggle() }
+        } label: {
+            HStack(spacing: 6) {
+                Text(tokens.chromeLabel(takesShown ? "\u{25BE}" : "\u{25B8}"))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                Text(tokens.chromeLabel(RecoveryCopy.trayTakesDisclosure(model.takes.count)))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .lineLimit(1)
+                Spacer(minLength: 0)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .help("Takes deleted on their own — each on its own "
+            + "\(TrashWindow.days) days. They never show in the Library's Trash: "
+            + "a take alone is hard to place, so this is where they are audited.")
+        if takesShown {
             ForEach(model.takes) { take in
                 takeRow(take)
             }
             if model.takesTruncated { truncation("deleted") }
-        } label: {
-            Text(tokens.chromeLabel(RecoveryCopy.trayTakesDisclosure(model.takes.count)))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
-                .lineLimit(1)
         }
-        .help("Takes deleted on their own — each on its own "
-            + "\(TrashWindow.days) days. They never show in the Library's Trash: "
-            + "a take alone is hard to place, so this is where they are audited.")
     }
 
     private func takeRow(_ take: Queries.TrayTake) -> some View {
@@ -833,11 +870,20 @@ struct TrayPanel: View {
                     .foregroundStyle(take.text.isEmpty ? tokens.muted : tokens.ink)
                     .lineLimit(2)
                 HStack(spacing: 8) {
-                    Text(tokens.chromeLabel(TrayTakeFace.meta(
-                        take, now: session.now).joined(separator: " \u{B7} ")))
+                    // Row 63: the lead truncates; the CLOCK never does.
+                    Text(tokens.chromeLabel(TrayTakeFace.lead(take)
+                        .joined(separator: " \u{B7} ")))
                         .font(tokens.small)
                         .foregroundStyle(tokens.faint)
                         .lineLimit(1)
+                    if let slot = TrayTakeFace.clockSlot(take, now: session.now) {
+                        Text(tokens.chromeLabel(slot))
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.faint)
+                            .lineLimit(1)
+                            .fixedSize()
+                            .layoutPriority(1)
+                    }
                     Spacer(minLength: 8)
                     Button(TrayPath.putBackVerb) {
                         Task { await model.putBackTake(take.variantID) }
@@ -907,12 +953,21 @@ struct TrayPanel: View {
                     .foregroundStyle(text?.isEmpty == false ? tokens.ink : tokens.muted)
                     .lineLimit(2)
                 HStack(spacing: 8) {
-                    Text(tokens.chromeLabel(TrayRowFace.meta(
-                        note: note, stamp: stamp, when: when, clock: clock,
-                        forever: forever).joined(separator: " \u{B7} ")))
+                    // Row 63: the lead truncates; the CLOCK never does.
+                    Text(tokens.chromeLabel(TrayRowFace.lead(
+                        note: note, stamp: stamp, when: when)
+                        .joined(separator: " \u{B7} ")))
                         .font(tokens.small)
                         .foregroundStyle(tokens.faint)
                         .lineLimit(1)
+                    if let slot = TrayRowFace.clockSlot(clock: clock, forever: forever) {
+                        Text(tokens.chromeLabel(slot))
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.faint)
+                            .lineLimit(1)
+                            .fixedSize()
+                            .layoutPriority(1)
+                    }
                     Spacer(minLength: 8)
                     Button(TrayPath.putBackVerb) { Task { await putBack() } }
                         .buttonStyle(CalmButtonStyle(
@@ -932,21 +987,38 @@ nonisolated enum TrayRowFace {
     /// The quiet line under the preview, in reading order: what the row IS,
     /// when it went, and how long it has. Empty pieces drop out — a row never
     /// wears a separator around nothing.
+    ///
+    /// **Row 63 (the Act 10 correction round): the line is TWO SLOTS now.**
+    /// The walk met "· 30…" and "· k…" at every width in Terminal — the
+    /// clock, the one fact the leaving section exists for, was the piece the
+    /// layout truncated first, and the archived row's whole promise went with
+    /// it. So the truncatable LEAD (what it is · a DATE-ONLY stamp — the
+    /// `OriginPeekCopy.stamp` ruling, whose capture is this same failure) and
+    /// the CLOCK/promise are separate values; the view gives the clock a slot
+    /// the layout may never compress; and `meta` is DERIVED from the pair, so
+    /// the pinned value and the rendered pair cannot drift.
+    static func lead(note: String?, stamp: String?, when: String) -> [String] {
+        var pieces: [String] = []
+        if let note, !note.isEmpty { pieces.append(note) }
+        if let stamp,
+           let display = TrayRowPreview.stampTextDateOnly(stamp, verb: when) {
+            pieces.append(display)
+        }
+        return pieces
+    }
+
+    /// The clock, or the promise of no clock — one of the two, never both
+    /// and never neither for a clocked/kept row (13j J1 / round 7).
+    static func clockSlot(clock: Int?, forever: Bool) -> String? {
+        if let clock { return TrayPath.daysLeftLabel(clock) }
+        return forever ? TrayPath.archivedForever : nil
+    }
+
     static func meta(
         note: String?, stamp: String?, when: String, clock: Int?, forever: Bool
     ) -> [String] {
-        var pieces: [String] = []
-        if let note, !note.isEmpty { pieces.append(note) }
-        if let stamp, let display = TrayRowPreview.stampText(stamp, verb: when) {
-            pieces.append(display)
-        }
-        // The clock, or the promise of no clock — one of the two, never both
-        // and never neither (13j J1 / round 7).
-        if let clock {
-            pieces.append(TrayPath.daysLeftLabel(clock))
-        } else if forever {
-            pieces.append(TrayPath.archivedForever)
-        }
+        var pieces = lead(note: note, stamp: stamp, when: when)
+        if let slot = clockSlot(clock: clock, forever: forever) { pieces.append(slot) }
         return pieces
     }
 }
@@ -969,15 +1041,26 @@ nonisolated enum TrayTakeFace {
     /// block's handle runs through `Queries.tocHandle` — the ONE block-naming
     /// rule (its explicit name, else its first sentence, derived at read time
     /// and never stored) — rather than a second rule invented here.
-    static func meta(_ take: Queries.TrayTake, now: Date) -> [String] {
+    ///
+    /// **Row 63: the same two-slot split as `TrayRowFace`** — the walk found
+    /// this row's stamp AND clock both gone behind the block handle. The
+    /// stamp is date-only; the clock rides its own uncompressible slot.
+    static func lead(_ take: Queries.TrayTake) -> [String] {
         var pieces = [RecoveryCopy.trayTakeInBlock(
             Queries.tocHandle(name: take.blockName, text: take.blockText))]
-        if let stamp = TrayRowPreview.stampText(take.deletedAt, verb: "deleted") {
+        if let stamp = TrayRowPreview.stampTextDateOnly(take.deletedAt, verb: "deleted") {
             pieces.append(stamp)
         }
-        if let days = TrashWindow.daysLeft(take.deletedAt, now: now) {
-            pieces.append(TrayPath.daysLeftLabel(days))
-        }
+        return pieces
+    }
+
+    static func clockSlot(_ take: Queries.TrayTake, now: Date) -> String? {
+        TrashWindow.daysLeft(take.deletedAt, now: now).map(TrayPath.daysLeftLabel)
+    }
+
+    static func meta(_ take: Queries.TrayTake, now: Date) -> [String] {
+        var pieces = lead(take)
+        if let slot = clockSlot(take, now: now) { pieces.append(slot) }
         return pieces
     }
 }

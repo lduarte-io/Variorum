@@ -262,6 +262,17 @@ nonisolated enum TrayRowPreview {
         guard let date = DateFormatter.variorumISO8601.date(from: stamp) else { return nil }
         return "\(verb) \(date.formatted(date: .abbreviated, time: .shortened))"
     }
+
+    /// **The DATE-ONLY stamp** (the Act 10 correction round, row 63 — the
+    /// `OriginPeekCopy.stamp` ruling extended to the recovery rows it was
+    /// learned beside: with the time of day in it, the row's own point — the
+    /// clock — fell off the end "to make room for a minute nobody needs").
+    /// Additive beside `stampText`, so every shipped caller on either
+    /// platform reads byte-identically until its surface adopts this one.
+    static func stampTextDateOnly(_ stamp: String, verb: String) -> String? {
+        guard let date = DateFormatter.variorumISO8601.date(from: stamp) else { return nil }
+        return "\(verb) \(date.formatted(date: .abbreviated, time: .omitted))"
+    }
 }
 
 /// **THE LINEAGE VOCABULARY** — what a came-from row says about the original

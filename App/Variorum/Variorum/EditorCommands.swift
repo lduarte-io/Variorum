@@ -296,7 +296,18 @@ struct EditorCommands: Commands {
                 .keyboardShortcut("k", modifiers: .command)
                 .disabled(!canReachCreationTarget)
         }
-        CommandGroup(after: .saveItem) {
+        // Row 67 (the Act 10 correction round): this group was anchored
+        // `after: .saveItem` — and a non-document WindowGroup's File menu
+        // carries NO save anchor on macOS 26, so the whole group rendered in
+        // NO menu: no Commit/Save-a-Version/Lock items anywhere, ⌘⇧S dead
+        // app-wide (the note ▾ menu door worked; the chord did nothing), and
+        // ⌘S surviving only through the editor's own performKeyEquivalent
+        // override (Write mode only). Measured by AX menu enumeration before
+        // and after — a unit pin cannot reach the app's main menu (the test
+        // host owns its own), so the walk's listing is the evidence.
+        // `.newItem` is an anchor this scene really has (the group above
+        // replaces it), and File's save items belong right after creation.
+        CommandGroup(after: .newItem) {
             // N5 (13b 1b): ⌘S acts wherever advertised — the mounted
             // surface commits its focused/caret take; where truly nothing
             // can commit, the item is honestly grey (it used to be an

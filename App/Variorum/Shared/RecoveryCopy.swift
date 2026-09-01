@@ -234,6 +234,19 @@ nonisolated enum RecoveryCopy {
         "The block you asked to see isn't in this \(homeWord(home))'s tray."
     }
 
+    /// **The reveal that names a KEPT original** (the Act 10 correction
+    /// round, row 68). An unclocked preserved original is deliberately NOT
+    /// listed in the tray — her G5 ruling moved what is KEPT to lineage — so
+    /// a lineage door's landing used to mark nothing and say nothing. The
+    /// arrival explanation's third state: nothing is wrong, and this is
+    /// where the block actually lives.
+    static func trayRevealKeptInLineage(_ home: ContainerKind) -> String {
+        "The block you asked about isn't leaving this \(homeWord(home)) — it "
+            + "was kept whole by a divide or merge, and it lives under "
+            + "\(BlockHistoryPath.cameFromSection) in \(BlockHistoryPath.name), "
+            + "not in the tray."
+    }
+
     /// The takes disclosure's label — **collapsed by default** (her *"albeit
     /// maybe not shown by default"*), and it carries the count either way,
     /// because a fold that hides its own size is not an audit.
@@ -411,7 +424,13 @@ nonisolated enum RecoveryCopy {
             .filter { TrashScope.emptyTrashTakes($0.key) }
             .values.reduce(0, +)
         guard total > 0 else { return "The Trash is empty — nothing to delete." }
-        let order: [Queries.TrashItem.Kind] = [.note, .block, .book]
+        // Row 66 (the Act 10 correction round): `.snippetGroup` joined the
+        // door's SCOPE at pre-13u Act 10 wave 2b but never this ORDER, so
+        // the confirm counted a group in its total and named it nowhere —
+        // "8 things go for good: 1 note, 1 saved version, 5 blocks" (7
+        // named, 8 taken; walked). The count-by-kind promise (round 8) is
+        // per KIND, every kind the door takes.
+        let order: [Queries.TrashItem.Kind] = [.note, .block, .book, .snippetGroup]
         var parts = order.compactMap { kind -> String? in
             // The notes' number is the notes' own: the moments are counted
             // beside them, never inside them.
