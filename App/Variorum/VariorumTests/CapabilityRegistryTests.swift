@@ -281,6 +281,12 @@ struct CapabilityRegistryTests {
             // right edge — the acts moved WITH their renderer, so the
             // cluster is a new line here and the union stays exact.
             .union(MastheadTagCluster.surfaceCapabilities)
+            // The Act 10 correction round, batch A (A JUSTIFIED EDIT, the
+            // E2/E8 convention): the shell's sidebar toggle is OURS now —
+            // `ShellSplit` replaced the system split view, whose toolbar
+            // button was undeclared chrome — so the shell renders one
+            // `.surface` door and joins the walk as a new line here.
+            .union(RootView.surfaceCapabilities)
             // 13e E2 (A17): Write's block-selection banner — the SECOND
             // renderer of the one delete-selected act (the board's banner is
             // the first). A JUSTIFIED EDIT to this pin: E2 adds a surface

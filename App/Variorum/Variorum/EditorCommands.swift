@@ -119,6 +119,9 @@ struct EditorCommands: Commands {
         .toggleTagChips,
         // 13f batch 6 (W5): the quick note's File-menu door.
         .quickNote,
+        // The Act 10 correction round, batch A (row 2): the sidebar toggle,
+        // ours now that the split view is.
+        .toggleSidebar,
     ]
 
     /// The SwiftUI key wiring per shortcut-labeled capability — the walk
@@ -228,6 +231,10 @@ struct EditorCommands: Commands {
         // its neighbour rather than against it: ⌘N makes a note, ⌘⇧N pops
         // the quick-note pad.
         case .quickNote: ("n", [.command, .shift])
+        // The Act 10 correction round, batch A (row 2). THE COLLISION
+        // SWEEP'S RESULT: ⌃⌘S is FREE (see the registry row) — and it is the
+        // platform's own Toggle Sidebar chord.
+        case .toggleSidebar: ("s", [.command, .control])
         case .switchMode: nil  // ⌘1–⌘6, wired per mode below
         case .openNote: nil  // ⌘⇧1–⌘⇧9, wired per ordinal below
         default: nil
@@ -277,6 +284,13 @@ struct EditorCommands: Commands {
         // one (raised) — a note-only or quick-note window's router had no
         // palette to open, so ⌘K there was an enabled dead key.
         CommandGroup(after: .sidebar) {
+            // The Act 10 correction round, batch A (row 2): the sidebar is
+            // ours (`ShellSplit`), so its toggle is a declared door here, on
+            // the platform's own chord, grey while a note-only window is key
+            // (nothing there has a sidebar to show).
+            Button(verb(.toggleSidebar)) { windows.activeRouter?.sidebarShown.toggle() }
+                .keyboardShortcut("s", modifiers: [.command, .control])
+                .disabled(session == nil || windows.activeWindowKind != .full)
             Button(verb(.findAnything)) { windows.creationRouter()?.paletteRequested = true }
                 .keyboardShortcut("k", modifiers: .command)
                 .disabled(!canReachCreationTarget)

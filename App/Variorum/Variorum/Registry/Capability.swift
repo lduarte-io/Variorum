@@ -588,6 +588,13 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // App scope, always available: a thing you cannot see is exactly when
     // you most want the key that brings it back.
     case toggleTagChips
+    // The Act 10 correction round, batch A (row 2) — the SIDEBAR's own
+    // show/hide. It was the system split view's undeclared toolbar button;
+    // the flat `ShellSplit` makes it ours, so it is declared like every
+    // other door: a toolbar door and a View-menu item on the platform's own
+    // ⌃⌘S. App scope; only a full window has a sidebar (the menu's gate
+    // reads the window kind, not this table).
+    case toggleSidebar
     // 13f batch 4 — the SPLIT (her W1/A25 ruling, two panes in v1). Both
     // are app-scope stack gates like the navigation family: one needs a
     // note to put beside, the other needs a split to close.

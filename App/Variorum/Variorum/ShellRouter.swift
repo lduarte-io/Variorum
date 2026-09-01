@@ -32,6 +32,11 @@ final class ShellRouter {
     /// exactly, and P-4's shape: the door names what it wants, the shell
     /// decides what that means.
     var quickNoteRequested = false
+    /// **Whether this window's sidebar is on screen** (the Act 10 correction
+    /// round, batch A — row 2). The split view used to hold this for us; with
+    /// the flat `ShellSplit` it is per-window state here, toggled by the
+    /// toolbar door and View ▸ Toggle Sidebar (⌃⌘S) alike.
+    var sidebarShown = true
 
     /// 13f batch 3: the window's open notes + per-pane back/forward.
     let workspace = WorkspaceModel()

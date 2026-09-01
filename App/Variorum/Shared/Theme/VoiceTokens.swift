@@ -117,6 +117,13 @@ struct VoiceTokens {
     let heading: Font
     let small: Font
     let mono: Font
+    /// **The sidebar's row register** (the Act 10 correction round, batch A —
+    /// rows 2/3): the 13 pt line the List's sidebar rows always had, in the
+    /// voice's own chrome family — monospaced in Terminal, the system face in
+    /// Study. One slot so the areas, the "this note" rail, the Starred rows
+    /// and the Open strip's rows read at ONE size instead of three (13 mono ·
+    /// 13 sans · 11.5 small, which is what the column had grown into).
+    let navigation: Font
 
     // MARK: Idiom slots (R1 — "the special little ways")
     /// The selected-row marker ("› " in terminal; none in study).
@@ -191,6 +198,7 @@ extension VoiceTokens {
         heading: .system(size: 15, weight: .semibold, design: .monospaced),
         small: .system(size: 11.5, design: .monospaced),
         mono: .system(size: 13, design: .monospaced),
+        navigation: .system(size: 13, design: .monospaced),
         selectionMarker: "› ",
         pathPrefix: "~/",
         pathSeparator: "/",
@@ -225,6 +233,7 @@ extension VoiceTokens {
         heading: .system(size: 15, weight: .semibold, design: .monospaced),
         small: .system(size: 11.5, design: .monospaced),
         mono: .system(size: 13, design: .monospaced),
+        navigation: .system(size: 13, design: .monospaced),
         selectionMarker: "› ",
         pathPrefix: "~/",
         pathSeparator: "/",
@@ -260,6 +269,7 @@ extension VoiceTokens {
         heading: .custom("Iowan Old Style", size: 16, relativeTo: .headline).weight(.semibold),
         small: .system(size: 11.5),
         mono: .system(size: 12.5, design: .monospaced),
+        navigation: .system(size: 13),
         selectionMarker: "",
         pathPrefix: "",
         pathSeparator: " · ",
@@ -295,6 +305,7 @@ extension VoiceTokens {
         heading: .custom("Iowan Old Style", size: 16, relativeTo: .headline).weight(.semibold),
         small: .system(size: 11.5),
         mono: .system(size: 12.5, design: .monospaced),
+        navigation: .system(size: 13),
         selectionMarker: "",
         pathPrefix: "",
         pathSeparator: " · ",

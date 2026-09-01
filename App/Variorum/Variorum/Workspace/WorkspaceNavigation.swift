@@ -497,6 +497,10 @@ nonisolated enum WorkspaceNaming {
     /// entirely — is on the walk register, QUESTIONS #55.)
     static let tagChipsVerb = "Toggle Tag Cards"
 
+    /// The sidebar toggle's one name (menu item + toolbar tooltip) — the
+    /// Act 10 correction round, batch A (row 2).
+    static let toggleSidebarVerb = "Toggle Sidebar"
+
     // MARK: - The unfocused pane's own line (13g L5 — WT-5)
 
     /// What an UNFOCUSED pane calls itself. Her report: *"it's a bit

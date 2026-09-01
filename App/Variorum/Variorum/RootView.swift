@@ -134,8 +134,17 @@ struct RootView: View {
         _theme = State(initialValue: ThemeStore(session: session))
     }
 
+    /// The `.surface` acts this shell renders (P-1's declared ⇔ rendered
+    /// walk): the sidebar toggle, a toolbar door since the correction round
+    /// made the split ours (row 2).
+    static let surfaceCapabilities: [CapabilityID] = [.toggleSidebar]
+
     var body: some View {
-        NavigationSplitView {
+        // The Act 10 correction round, batch A (row 2): the flat shell —
+        // `ShellSplit` (an HStack, one honest divider) in place of
+        // `NavigationSplitView`, whose Tahoe sidebar is the floating glass
+        // pane W8-3 ruled out. The container's reason is in its file header.
+        ShellSplit(tokens: theme.tokens(for: scheme), sidebarShown: router.sidebarShown) {
             SidebarView(
                 session: session, model: library, pool: pool,
                 workspace: router.workspace, stars: stars, starDoor: starDoor,
@@ -144,35 +153,8 @@ struct RootView: View {
                 onOpenInNewWindow: openInNewWindow,
                 // 13b 1b: the rail's marker reads the router's observable
                 // mode truth (the broadcast-derived shadow is retired).
-                postMode: (session.commandRouter.activeMode ?? .takes).rawValue)
-                .navigationSplitViewColumnWidth(min: 180, ideal: 210)
-                .safeAreaInset(edge: .bottom) {
-                    if let services {
-                        // Sitting 9 (her report): the scrap rows scroll UNDER
-                        // this inset — an opaque voiced background + divider
-                        // keep the status rows readable over any list content.
-                        VStack(alignment: .leading, spacing: 0) {
-                            Divider().overlay(theme.tokens(for: scheme).line)
-                            // Memo §6: the unchosen-state indicator — the
-                            // bottom-left family's protection row. Renders
-                            // only while the choice is genuinely unmade;
-                            // NEVER "encryption off".
-                            if let protection {
-                                ProtectionStatusRow(
-                                    controller: protection,
-                                    tokens: theme.tokens(for: scheme))
-                            }
-                            SyncStatusRow(services: services)
-                            BridgeStatusRow(
-                                bridge: services.bridge,
-                                tokens: theme.tokens(for: scheme)
-                            ) {
-                                accountSheetShown = true
-                            }
-                        }
-                        .background(theme.tokens(for: scheme).room)
-                    }
-                }
+                postMode: (session.commandRouter.activeMode ?? .takes).rawValue,
+                bottom: statusRows)
         } detail: {
             paneRow
                 // 13b 1b (AD-14): the ONE status/refusal presentation —
@@ -188,6 +170,25 @@ struct RootView: View {
                             .padding(.bottom, 46)
                     }
                 }
+        }
+        .toolbar {
+            // The sidebar's own door, leading — where the split view's
+            // button stood; ⌃⌘S is its View-menu twin.
+            ToolbarItem(placement: .navigation) {
+                Button(WorkspaceNaming.toggleSidebarVerb, systemImage: "sidebar.leading") {
+                    router.sidebarShown.toggle()
+                }
+                .help("\(WorkspaceNaming.toggleSidebarVerb) (\u{2303}\u{2318}S)")
+            }
+            ToolbarItem(placement: .navigation) {
+                Button("New Note", systemImage: "square.and.pencil") {
+                    Task {
+                        if let id = await library.createPost() {
+                            adopt(.post(id), in: router.workspace.focusedPane)
+                        }
+                    }
+                }
+            }
         }
         // 13g L4 (WT-4): *"i don't even konw if we need that empty whitespace
         // that says Variorum at the top - let's try getting rid of it."*
@@ -316,6 +317,29 @@ struct RootView: View {
             // panes were showing.
             SavepointOnLeave.windowClosing(workspace: router.workspace, session: session)
         }
+    }
+
+    /// The sidebar column's BOTTOM — the bottom-left family: the
+    /// protection row (memo §6: renders only while the choice is genuinely
+    /// unmade; NEVER "encryption off"), the sync row, the bridge row. They
+    /// were the split view's `safeAreaInset`; the flat column carries them
+    /// as its own last region (Sitting 9's opaque voiced background survives
+    /// as the column's `room`). nil until the services exist.
+    private var statusRows: AnyView? {
+        guard let services else { return nil }
+        let tokens = theme.tokens(for: scheme)
+        return AnyView(
+            VStack(alignment: .leading, spacing: 0) {
+                if let protection {
+                    ProtectionStatusRow(controller: protection, tokens: tokens)
+                }
+                SyncStatusRow(services: services)
+                BridgeStatusRow(bridge: services.bridge, tokens: tokens) {
+                    accountSheetShown = true
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(tokens.room))
     }
 
     /// 13g batch 2 (L7): keep the markdown face's two colors on the current

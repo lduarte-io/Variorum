@@ -159,6 +159,11 @@ struct HelperView: View {
         // still a door, and this is where she looks for it.
         ShortcutGroup(title: "Windows & panes", items: [
             ("⌘⇧1–9", "jump to the 1st–9th note in the sidebar's Open list"),
+            // The Act 10 correction round, batch A (row 2): the sidebar is
+            // the app's own now (`ShellSplit`), so its toggle is a declared
+            // door with the platform's chord — and a row here, where every
+            // declared shortcut must be findable.
+            ("⌃⌘S", "show or hide the sidebar (the leading toolbar button is the same door)"),
             // 13k round 2 (R2-1): the glyphs are INTERPOLATED from the bar's
             // own constants, so this row can never again describe a door the
             // bar stopped wearing (it read "← and ›" after R4-1 shipped →).

@@ -11,6 +11,29 @@
 //  visible together — the ratified Phase 10 reason survives the rename;
 //  recorded build-time call). Voiced through the token layer.
 //
+//  ── THE ACT 10 CORRECTION ROUND, BATCH A (rows 2 · 3 · 24) — ONE FLAT
+//     COLUMN, THE MOCKUP'S GRAMMAR ────────────────────────────────────────
+//  The `List` is gone. W8-3 ruled the floating glass pane out and W8-2 made
+//  `blocks-and-snippets.html` the style guide; Act 10 painted the List's
+//  interior flat and moved the Open strip out of it to a bottom rail, and
+//  she reported both halves of what that left: the pane's edge still
+//  floated, and *"the tabs used to be right below the modes, and the tab
+//  spacing has gotten less generous"*. So the column is now the mockup's
+//  `.sidebar`: groups of rows at ONE pitch (`SidebarLayout` — generous at
+//  ordinary heights, compact only when the generous layout would not fit),
+//  a header where a group needs one, a 1 pt separator between groups, the
+//  Starred rows at the top, the five areas, the "this note" rail — and
+//  directly under the rail, the OPEN strip, back where her tabs were, with
+//  every Act 10 mechanic intact: every open note shown, the section
+//  scrolling in place past ~7 with the newcomer revealed, ⌘⇧1–9 badges, ✕
+//  closes a row, drag to reorder, the model's 20-tab cap. The rail's
+//  arrival and departure FADE (row 24's sidebar half — *"the appearance of
+//  the 'this note' modes is just as jarring as it has been"*); nothing new
+//  appears on the left (R-cor-3).
+//
+//  What the List gave and this does not: arrow-key row navigation inside
+//  the sidebar. Recorded in the batch record rather than papered over.
+//
 
 import SwiftUI
 import UniformTypeIdentifiers
@@ -100,13 +123,39 @@ struct SidebarView: View {
         .archiveNote,
     ]
 
+    /// The five areas, in R44's ruled order (+ Archived at the end, the
+    /// post-13l polish round's addition). ONE table the column iterates —
+    /// the row count the fit test reads is this table's count.
+    struct Area: Hashable {
+        let title: String
+        let symbol: String
+        let destination: SidebarSelection
+    }
+
+    static let areas: [Area] = [
+        Area(title: "Shelf", symbol: "books.vertical", destination: .shelf),
+        Area(title: "Library", symbol: "text.book.closed", destination: .library),
+        Area(title: "Pool", symbol: "tray", destination: .poolPosts),
+        // Batch 12: Blocks joins as the FOURTH AREA — R44's sidebar,
+        // finally literal. The inline scrap rows are gone ("way too
+        // crowded"); the area page holds them.
+        Area(title: "Snippets", symbol: "square.on.square", destination: .blocks),
+        // Ledger row 8 (B2): ARCHIVED, after the four — her direction's
+        // letter ("a different item on the left, like where library is").
+        // It sits at the END of the standing group deliberately: Shelf ·
+        // Library · Pool · Snippets is R44's ruled order and this is an
+        // addition to it, not a re-ranking of it.
+        Area(title: RecoveryPath.archivedSurface, symbol: "archivebox", destination: .archived),
+    ]
+
     let session: AppSession
     let model: LibraryViewModel
     let pool: PoolViewModel
     /// 13f batch 3 (W3/A27, her ruling: *"i'd use the free space that's
     /// underneath 'library / shelf / pool / blocks' for now"*) — the
-    /// window's OPEN notes render as a fifth section, below the standing
-    /// four and below the contextual "this post" rail.
+    /// window's OPEN notes render as their own group, directly under the
+    /// contextual "this note" rail (the correction round put them back
+    /// there — her "tabs used to be right below the modes").
     let workspace: WorkspaceModel
     /// 13f batch 6 (W4, her round-3 ruling): the STARRED section at the
     /// sidebar's top. Store state, not window state — it is synced and both
@@ -124,10 +173,18 @@ struct SidebarView: View {
     /// Batch 14: the open post's current mode (the rail's › marker) —
     /// broadcast by PostDetailView, tracked by the shell.
     var postMode: String = PostDetailView.Mode.takes.rawValue
+    /// The column's BOTTOM — the protection/sync/bridge status rows, which
+    /// `RootView` composes (they read services it owns) and hands in. They
+    /// were the split view's `safeAreaInset`; with the flat `ShellSplit`
+    /// they are the column's own last region, above nothing.
+    var bottom: AnyView? = nil
     @Environment(ThemeStore.self) private var theme
     @Environment(\.colorScheme) private var scheme
     /// Phase 11b (B2): the drop-in import model, created on first drop.
     @State private var importer: ImportModel?
+    /// The column's height, as laid out — the fit test's input
+    /// (`SidebarLayout`). Zero on the first pass, which never compresses.
+    @State private var columnHeight: CGFloat = 0
 
     struct TagSheetTarget: Identifiable {
         let id: String
@@ -136,83 +193,295 @@ struct SidebarView: View {
 
     private var tokens: VoiceTokens { theme.tokens(for: scheme) }
 
+    /// The note whose rail is showing, if any — the rail's presence AND the
+    /// value the fade animates on.
+    private var railPostID: String? {
+        if case .post(let postID) = selection { return postID }
+        return nil
+    }
+
+    /// Every row the column is about to draw, for the fit test.
+    private var rowCount: Int {
+        SidebarLayout.rowCount(
+            starred: stars.items.count, areas: Self.areas.count,
+            rail: railPostID == nil ? 0 : PostDetailView.Mode.allCases.count,
+            openNotes: workspace.openNotes.shown.count)
+    }
+
+    private var rowHeight: CGFloat {
+        SidebarLayout.rowHeight(columnHeight: columnHeight, rows: rowCount)
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // The groups. An outer scroll is the LAST resort for a window
+            // shorter than even the compact layout — inert at ordinary
+            // sizes (`basedOnSize`), so the column reads as one flat room
+            // and the Open strip's own scroll is the only one that moves.
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    starredGroup
+                    areasGroup
+                    if let railPostID {
+                        railGroup(railPostID)
+                            .transition(.opacity)
+                    }
+                    openGroup
+                }
+                .padding(.top, 14)
+                .padding(.bottom, 12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .scrollBounceBehavior(.basedOnSize)
+            if let bottom {
+                Divider().overlay(tokens.line)
+                bottom
+            }
+        }
+        .background(tokens.room)
+        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { columnHeight = $0 }
+        // Row 24 (the sidebar half): the rail fades in and out with the
+        // note — the groups below it slide, nothing snaps.
+        .animation(.easeInOut(duration: 0.22), value: railPostID)
+        // The strip's names, resolved for exactly what is on screen and
+        // re-read whenever that set or its ORDER changes — which is every
+        // navigation (the shipped `PostTitleLabel` precedent: chrome titles
+        // are one-shot reads keyed on what they show, never a held
+        // observation per row).
+        .task(id: workspace.titleSubjectsKey) {
+            await workspace.resolveTitles(session: session)
+        }
+        // The library import door (Phase 11b, B2): drop `.md`/plain text
+        // anywhere on the sidebar → new post(s). The Blocks rows carry
+        // their own, deeper drop target, so a drop there lands as scraps.
+        // (The Open strip's row reorder rides its OWN transfer type, so a
+        // dragged row can never be mistaken for droppable text.)
+        .onDrop(of: [.fileURL, .plainText], isTargeted: nil) { providers in
+            let model = importer ?? ImportModel(session: session)
+            importer = model
+            return model.handleDrop(providers, into: .library)
+        }
+        .overlay(alignment: .bottom) {
+            if let error = model.lastError ?? importer?.lastError {
+                Text(error)
+                    .font(tokens.small)
+                    .alarmVoice()
+                    .textSelection(.enabled)
+                    .padding(4)
+            } else if let status = importer?.lastReport {
+                Text(status)
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .textSelection(.enabled)
+                    .padding(4)
+            }
+        }
+    }
+
+    // MARK: - The grammar (the mockup's `.sb-group` / `.sb-head` / `.sb-row` / `.sb-sep`)
+
+    /// The mockup's `.sb-group`: 12 pt of side padding around its rows.
+    private static let groupPadding: CGFloat = 12
+    /// The mockup's `.sb-row`: 8 pt of side padding inside the row.
+    private static let rowPadding: CGFloat = 8
+
+    /// A group header — small, in the accent (the voice's own header
+    /// register, kept from the List), sitting on the rows' text edge.
+    private func header(_ title: String) -> some View {
+        Text(tokens.chromeLabel(title))
+            .font(tokens.small)
+            .foregroundStyle(tokens.accent)
+            .lineLimit(1)
+            .padding(.horizontal, Self.groupPadding + Self.rowPadding)
+            .frame(height: 22, alignment: .bottomLeading)
+    }
+
+    /// The mockup's `.sb-sep`: one 1 pt line with side margins and air.
+    private var separator: some View {
+        Rectangle()
+            .fill(tokens.line)
+            .frame(height: 1)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 9)
+    }
+
     /// The `›` idiom (R1): the selected row's label wears the voice's
     /// marker in the ACCENT color; unselected rows carry none. Study's
     /// marker is empty, so this is Terminal's alone.
     @ViewBuilder
-    private func markedTitle(_ title: String, _ target: SidebarSelection) -> some View {
-        HStack(spacing: 2) {
-            if selection == target, !tokens.selectionMarker.isEmpty {
-                Text(tokens.selectionMarker.trimmingCharacters(in: .whitespaces))
-                    .foregroundStyle(tokens.accent)
-                    .fontWeight(.bold)
-            }
-            Text(tokens.chromeLabel(title))
+    private var marker: some View {
+        if !tokens.selectionMarker.isEmpty {
+            Text(tokens.selectionMarker.trimmingCharacters(in: .whitespaces))
+                .font(tokens.navigation)
+                .fontWeight(.bold)
+                .foregroundStyle(tokens.accent)
         }
     }
 
+    /// One row's chrome: the row's padding, ONE height for the whole
+    /// column, the wash when selected (the `.sb-row.sel` grammar — never a
+    /// hairline highlight), the whole row a target.
+    private func rowChrome<Content: View>(
+        selected: Bool, @ViewBuilder content: () -> Content
+    ) -> some View {
+        content()
+            .padding(.horizontal, Self.rowPadding)
+            .frame(height: rowHeight)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                selected ? AnyShapeStyle(tokens.wash) : AnyShapeStyle(Color.clear),
+                in: RoundedRectangle(cornerRadius: 6))
+            .contentShape(Rectangle())
+    }
+
+    /// A row's title, in the column's one register: ink + semibold when
+    /// selected, muted otherwise.
+    private func rowTitle(_ title: String, selected: Bool) -> some View {
+        Text(tokens.chromeLabel(title))
+            .font(tokens.navigation)
+            .fontWeight(selected ? .semibold : .regular)
+            .foregroundStyle(selected ? tokens.ink : tokens.muted)
+            .lineLimit(1)
+            .truncationMode(.tail)
+    }
+
+    // MARK: - Starred (13f batch 6, W4)
+
     /// 13f batch 6 (W4) — the STARRED section, at the sidebar's TOP (her
-    /// ruling's placement). Rows are ordinary tagged List rows, so a click
-    /// navigates through the shell's own selection and the `›` marker lands
-    /// on the current one for free. It renders only when something is
-    /// starred, so an unused feature costs no chrome.
+    /// ruling's placement). A click navigates through the shell's own
+    /// selection and the `›` marker lands on the current one. It renders
+    /// only when something is starred, so an unused feature costs no chrome.
     ///
     /// **Act 10 item 13 (her screenshot showed TWO stars, one each side):
     /// exactly ONE star — the blue one, on the RIGHT** (her lean, confirmed
     /// in place: the right star is also the un-star door, so the mark and
     /// the act live in one spot). Long titles show an ellipsis at rest and
-    /// marquee-scroll on hover ("stereo style" — `MarqueeText`); the
-    /// section carries more air above it (her third clause).
+    /// marquee-scroll on hover ("stereo style" — `MarqueeText`).
     @ViewBuilder
-    private var starredSection: some View {
+    private var starredGroup: some View {
         if !stars.items.isEmpty {
-            Section {
+            VStack(alignment: .leading, spacing: 0) {
+                header(StarCopy.sectionHeader)
                 ForEach(stars.items, id: \.target) { item in
-                    let destination = StarTargeting.selection(for: item.target)
-                    HStack(spacing: 4) {
-                        if selection == destination, !tokens.selectionMarker.isEmpty {
-                            Text(tokens.selectionMarker.trimmingCharacters(in: .whitespaces))
-                                .foregroundStyle(tokens.accent)
-                                .fontWeight(.bold)
-                        }
-                        MarqueeText(
-                            text: tokens.chromeLabel(WorkspaceNaming.label(
-                                for: destination, titles: stars.titles)),
-                            font: tokens.small,
-                            color: selection == destination ? tokens.ink : tokens.muted,
-                            weight: selection == destination ? .semibold : .regular)
-                        if let starDoor {
-                            // THE one star: blue, on the right — and it is
-                            // the un-star door (her ruling: "un-star
-                            // anywhere").
-                            Button(StarCopy.glyph) { starDoor.toggle(item.target) }
-                                .buttonStyle(.plain)
-                                .font(tokens.small)
-                                .foregroundStyle(tokens.star)
-                                .help(StarCopy.rowHelp)
-                        } else {
-                            Text(StarCopy.glyph)
-                                .font(tokens.small)
-                                .foregroundStyle(tokens.star)
-                        }
-                    }
-                    .tag(destination)
-                    .contextMenu {
-                        if let starDoor {
-                            Button(starDoor.title(for: item.target)) {
-                                starDoor.toggle(item.target)
-                            }
-                        }
-                    }
+                    starredRow(item)
                 }
-            } header: {
-                Text(tokens.chromeLabel(StarCopy.sectionHeader))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
-                    .padding(.top, 14)
+            }
+            .padding(.horizontal, Self.groupPadding)
+            separator
+        }
+    }
+
+    private func starredRow(_ item: Queries.StarredItem) -> some View {
+        let destination = StarTargeting.selection(for: item.target)
+        let current = selection == destination
+        return rowChrome(selected: current) {
+            HStack(spacing: 4) {
+                if current { marker }
+                MarqueeText(
+                    text: tokens.chromeLabel(WorkspaceNaming.label(
+                        for: destination, titles: stars.titles)),
+                    font: tokens.navigation,
+                    color: current ? tokens.ink : tokens.muted,
+                    weight: current ? .semibold : .regular)
+                if let starDoor {
+                    // THE one star: blue, on the right — and it is the
+                    // un-star door (her ruling: "un-star anywhere").
+                    Button(StarCopy.glyph) { starDoor.toggle(item.target) }
+                        .buttonStyle(.plain)
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.star)
+                        .help(StarCopy.rowHelp)
+                } else {
+                    Text(StarCopy.glyph)
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.star)
+                }
+            }
+        }
+        .onTapGesture { selection = destination }
+        .contextMenu {
+            if let starDoor {
+                Button(starDoor.title(for: item.target)) {
+                    starDoor.toggle(item.target)
+                }
             }
         }
     }
+
+    // MARK: - The five areas (R44)
+
+    private var areasGroup: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ForEach(Self.areas, id: \.self) { area in
+                let current = selection == area.destination
+                Button {
+                    selection = area.destination
+                } label: {
+                    rowChrome(selected: current) {
+                        HStack(spacing: 6) {
+                            Image(systemName: area.symbol)
+                                .font(tokens.navigation)
+                                .foregroundStyle(current ? tokens.accent : tokens.muted)
+                                .frame(width: 18)
+                            // Batch 7/8 (her audit: "there's no little › to
+                            // show the way … it being a color ›") — the R1
+                            // selection-marker idiom: the selected row alone
+                            // wears the voice's marker, in the ACCENT color.
+                            if current { marker }
+                            rowTitle(area.title, selected: current)
+                        }
+                    }
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, Self.groupPadding)
+    }
+
+    // MARK: - "this note" — the mode rail (batch 14's ruling)
+
+    /// Batch 14 (her ruling — supersedes the bottom mode line): the post
+    /// MODES live here, "in the same verticle pane as shelf / library /
+    /// pools, but with a separator so it's clear that it's only for when
+    /// you're within a post." The separator is the mockup's `.sb-sep`.
+    private func railGroup(_ postID: String) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            separator
+            VStack(alignment: .leading, spacing: 0) {
+                header("this note")
+                ForEach(PostDetailView.Mode.allCases, id: \.self) { m in
+                    let current = m.rawValue == postMode
+                    Button {
+                        // 13b 1b (P-4): composed routing — the rail asks
+                        // the router, which reaches the mounted detail (or
+                        // speaks; never a dropped broadcast).
+                        session.commandRouter.requestMode(m, postID: postID)
+                    } label: {
+                        rowChrome(selected: current) {
+                            HStack(spacing: 4) {
+                                if current { marker }
+                                Text(tokens.chromeLabel(m.rawValue))
+                                    .font(tokens.navigation)
+                                    .fontWeight(current ? .semibold : .regular)
+                                    .foregroundStyle(current ? tokens.accent : tokens.muted)
+                                    .lineLimit(1)
+                            }
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .help("\(m.rawValue) (⌘\((PostDetailView.Mode.allCases.firstIndex(of: m) ?? 0) + 1))")
+                }
+            }
+            .padding(.horizontal, Self.groupPadding)
+            #if DEBUG
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
+                SidebarGeometry.railGroupHeight = height
+            }
+            #endif
+        }
+    }
+
+    // MARK: - The OPEN strip (13f batch 3, W3/A27; rebuilt Act 10 item 9; placed back here by the correction round)
 
     /// **The reorder payload** — its own transfer type, deliberately not a
     /// plain String: the sidebar's whole surface is a `.plainText` import
@@ -226,45 +495,36 @@ struct SidebarView: View {
         }
     }
 
-    /// About how tall one strip row runs (small type + padding) — the
-    /// section's ~7-row window is measured in these.
-    private static let openRowHeight: CGFloat = 24
-
     /// 13f batch 3 (W3/A27) — the OPEN strip. **Act 10 item 9 rebuilt it:**
-    /// it left the List for the sidebar's bottom rail, shows EVERY open
-    /// note (the model's prefix window is gone — a newly opened note can no
-    /// longer land hidden), and past ~7 rows the SECTION scrolls in place
-    /// (her ruled shape, the starred precedent) with the newcomer auto-
-    /// revealed. The dead "…N more open" label died with the hidden set —
-    /// every open note is now its own clickable row, which is strictly more
-    /// door than the label ever was. ⌘⇧1…9 still reach the first nine rows,
-    /// whose badges say so; the ✕ closes a ROW and nothing else (closing
-    /// never deletes — pure view state); drag a row to reorder (her
-    /// session-only ruling, now via the strip's own transfer type).
+    /// it shows EVERY open note (the model's prefix window is gone — a newly
+    /// opened note can no longer land hidden), and past ~7 rows the SECTION
+    /// scrolls in place (her ruled shape, the starred precedent) with the
+    /// newcomer auto-revealed. ⌘⇧1…9 still reach the first nine rows, whose
+    /// badges say so; the ✕ closes a ROW and nothing else (closing never
+    /// deletes — pure view state); drag a row to reorder (her session-only
+    /// ruling, via the strip's own transfer type). **The correction round
+    /// (row 3) moved it back UNDER THE RAIL** — its rows at the column's one
+    /// pitch — where her tabs were before Act 10 sent them to the bottom.
     @ViewBuilder
-    private var openStrip: some View {
+    private var openGroup: some View {
         let shown = workspace.openNotes.shown
         if !shown.isEmpty {
-            VStack(alignment: .leading, spacing: 3) {
-                Text(tokens.chromeLabel(WorkspaceNaming.openSectionHeader))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
-                    .lineLimit(1)
-                    .padding(.horizontal, 16)
-                    .padding(.top, 8)
+            separator
+            VStack(alignment: .leading, spacing: 0) {
+                header(WorkspaceNaming.openSectionHeader)
                 ScrollViewReader { proxy in
                     ScrollView {
-                        LazyVStack(alignment: .leading, spacing: 1) {
+                        LazyVStack(alignment: .leading, spacing: 0) {
                             ForEach(shown, id: \.self) { noteID in
                                 openRow(noteID, ordinal: (shown.firstIndex(of: noteID) ?? 99) + 1)
                                     .id(noteID)
                             }
                         }
-                        .padding(.horizontal, 8)
-                        .padding(.bottom, 6)
                     }
-                    .frame(maxHeight: Self.openRowHeight * 7.5)
-                    .fixedSize(horizontal: false, vertical: shown.count <= 7)
+                    .scrollBounceBehavior(.basedOnSize)
+                    .frame(maxHeight: SidebarLayout.openStripMaxHeight(rowHeight: rowHeight))
+                    .fixedSize(
+                        horizontal: false, vertical: shown.count <= SidebarLayout.openStripWindow)
                     // The newcomer reveal: the most-recently-opened note
                     // scrolls into view the moment it joins — "a newly
                     // opened note never lands hidden", made literal.
@@ -273,46 +533,43 @@ struct SidebarView: View {
                     }
                 }
             }
+            .padding(.horizontal, Self.groupPadding)
         }
     }
 
     private func openRow(_ noteID: String, ordinal: Int) -> some View {
         let destination = SidebarSelection.post(noteID)
         let current = selection == destination
-        return HStack(spacing: 4) {
-            if current, !tokens.selectionMarker.isEmpty {
-                Text(tokens.selectionMarker.trimmingCharacters(in: .whitespaces))
-                    .foregroundStyle(tokens.accent)
-                    .fontWeight(.bold)
-            }
-            MarqueeText(
-                text: tokens.chromeLabel(workspace.label(for: destination)),
-                font: tokens.small,
-                color: current ? tokens.ink : tokens.muted,
-                weight: current ? .semibold : .regular)
-            // The ordinal its key carries — so ⌘⇧n is legible without
-            // opening a menu. Insertion-ordered (her round-7 ruling), so
-            // the number is a STABLE address; rows past nine are
-            // click/scroll rows and carry none.
-            if ordinal <= OpenNotes.ordinalCap {
-                Text(tokens.chromeLabel("\u{2318}\u{21e7}\(ordinal)"))
+        return rowChrome(selected: current) {
+            HStack(spacing: 4) {
+                if current { marker }
+                MarqueeText(
+                    text: tokens.chromeLabel(workspace.label(for: destination)),
+                    font: tokens.navigation,
+                    color: current ? tokens.ink : tokens.muted,
+                    weight: current ? .semibold : .regular)
+                // The ordinal its key carries — so ⌘⇧n is legible without
+                // opening a menu. Insertion-ordered (her round-7 ruling), so
+                // the number is a STABLE address; rows past nine are
+                // click/scroll rows and carry none.
+                if ordinal <= OpenNotes.ordinalCap {
+                    Text(tokens.chromeLabel("\u{2318}\u{21e7}\(ordinal)"))
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.faint)
+                        .lineLimit(1)
+                }
+                Button("\u{2715}") { workspace.closeNote(noteID) }
+                    .buttonStyle(.plain)
                     .font(tokens.small)
-                    .foregroundStyle(tokens.faint)
-                    .lineLimit(1)
+                    .foregroundStyle(tokens.muted)
+                    .help("Close this row — the note itself is untouched")
             }
-            Button("\u{2715}") { workspace.closeNote(noteID) }
-                .buttonStyle(.plain)
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
-                .help("Close this row — the note itself is untouched")
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .frame(minHeight: Self.openRowHeight - 5)
-        .background(
-            current ? AnyShapeStyle(tokens.wash) : AnyShapeStyle(Color.clear),
-            in: RoundedRectangle(cornerRadius: 6))
-        .contentShape(Rectangle())
+        #if DEBUG
+        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
+            SidebarGeometry.openRowHeight = height
+        }
+        #endif
         .onTapGesture { selection = destination }
         .draggable(OpenNoteDragToken(noteID: noteID))
         .dropDestination(for: OpenNoteDragToken.self) { tokens, _ in
@@ -341,158 +598,16 @@ struct SidebarView: View {
             Button("Close") { workspace.closeNote(noteID) }
         }
     }
-
-    var body: some View {
-        // Act 10 item 9: the Open strip lives BELOW the List as the
-        // sidebar's bottom rail — always in reach, its own ~7-row scroll —
-        // and W8-3's solid grammar paints the whole column one flat room.
-        VStack(spacing: 0) {
-            sidebarList
-            openStrip
-        }
-        .background(tokens.room)
-        // The strip's names, resolved for exactly what is on screen and
-        // re-read whenever that set or its ORDER changes — which is every
-        // navigation (the shipped `PostTitleLabel` precedent: chrome titles
-        // are one-shot reads keyed on what they show, never a held
-        // observation per row).
-        .task(id: workspace.titleSubjectsKey) {
-            await workspace.resolveTitles(session: session)
-        }
-        // The library import door (Phase 11b, B2): drop `.md`/plain text
-        // anywhere on the sidebar → new post(s). The Blocks rows carry
-        // their own, deeper drop target, so a drop there lands as scraps.
-        // (The Open strip's row reorder rides its OWN transfer type, so a
-        // dragged row can never be mistaken for droppable text.)
-        .onDrop(of: [.fileURL, .plainText], isTargeted: nil) { providers in
-            let model = importer ?? ImportModel(session: session)
-            importer = model
-            return model.handleDrop(providers, into: .library)
-        }
-        .toolbar {
-            ToolbarItem {
-                Button("New Note", systemImage: "square.and.pencil") {
-                    Task {
-                        if let id = await model.createPost() {
-                            selection = .post(id)
-                        }
-                    }
-                }
-            }
-        }
-        .overlay(alignment: .bottom) {
-            if let error = model.lastError ?? importer?.lastError {
-                Text(error)
-                    .font(tokens.small)
-                    .alarmVoice()
-                    .textSelection(.enabled)
-                    .padding(4)
-            } else if let status = importer?.lastReport {
-                Text(status)
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .textSelection(.enabled)
-                    .padding(4)
-            }
-        }
-    }
-
-    private var sidebarList: some View {
-        List(selection: $selection) {
-            starredSection
-            Section {
-                // Batch 7/8 (her audit: "there's no little › to show the
-                // way … it being a color ›") — the R1 selection-marker
-                // idiom, wired: the selected row alone wears the voice's
-                // marker, in the ACCENT color.
-                Label {
-                    markedTitle("Shelf", .shelf)
-                } icon: {
-                    Image(systemName: "books.vertical")
-                }
-                .tag(SidebarSelection.shelf)
-                Label {
-                    markedTitle("Library", .library)
-                } icon: {
-                    Image(systemName: "text.book.closed")
-                }
-                .tag(SidebarSelection.library)
-                Label {
-                    markedTitle("Pool", .poolPosts)
-                } icon: {
-                    Image(systemName: "tray")
-                }
-                .tag(SidebarSelection.poolPosts)
-                // Batch 12: Blocks joins as the FOURTH AREA — R44's
-                // sidebar, finally literal. The inline scrap rows are
-                // gone ("way too crowded"); the area page holds them.
-                Label {
-                    markedTitle("Snippets", .blocks)
-                } icon: {
-                    Image(systemName: "square.on.square")
-                }
-                .tag(SidebarSelection.blocks)
-                // Ledger row 8 (B2): ARCHIVED, after the four — her
-                // direction's letter ("a different item on the left, like
-                // where library is"). It sits at the END of the standing
-                // group deliberately: Shelf · Library · Pool · Snippets is
-                // R44's ruled order and this is an addition to it, not a
-                // re-ranking of it.
-                Label {
-                    markedTitle(RecoveryPath.archivedSurface, .archived)
-                } icon: {
-                    Image(systemName: "archivebox")
-                }
-                .tag(SidebarSelection.archived)
-            }
-            // 13g L4 (WT-4), her walkthrough: *"i don't even konw if we need
-            // that empty whitespace that says Variorum at the top - let's
-            // try getting rid of it."* Shipped as a TRY — she keeps it or
-            // asks for it back on sight. It was a plain `Section` HEADER
-            // inside the List (never the window's drag area and never the
-            // traffic lights' clearance — those live in the title bar above
-            // this List), so removing it is a header removal and nothing
-            // else: the four areas keep their section, and the two headers
-            // that mean something (Starred, Open) still read as headers
-            // because they now name the only named sections there are.
-            // Batch 14 (her ruling — supersedes the bottom mode line):
-            // the post MODES live here, "in the same verticle pane as
-            // shelf / library / pools, but with a separator so it's clear
-            // that it's only for when you're within a post."
-            if case .post(let postID) = selection {
-                Section {
-                    ForEach(PostDetailView.Mode.allCases, id: \.self) { m in
-                        Button {
-                            // 13b 1b (P-4): composed routing — the rail
-                            // asks the router, which reaches the mounted
-                            // detail (or speaks; never a dropped
-                            // broadcast).
-                            session.commandRouter.requestMode(m, postID: postID)
-                        } label: {
-                            HStack(spacing: 2) {
-                                if m.rawValue == postMode, !tokens.selectionMarker.isEmpty {
-                                    Text(tokens.selectionMarker
-                                        .trimmingCharacters(in: .whitespaces))
-                                        .fontWeight(.bold)
-                                        .foregroundStyle(tokens.accent)
-                                }
-                                Text(tokens.chromeLabel(m.rawValue))
-                                    .font(tokens.mono)
-                                    .fontWeight(m.rawValue == postMode ? .semibold : .regular)
-                                    .foregroundStyle(
-                                        m.rawValue == postMode ? tokens.accent : tokens.muted)
-                            }
-                        }
-                        .buttonStyle(.plain)
-                        .help("\(m.rawValue) (⌘\((PostDetailView.Mode.allCases.firstIndex(of: m) ?? 0) + 1))")
-                    }
-                } header: {
-                    Text(tokens.chromeLabel("this note"))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.accent)
-                }
-            }
-        }
-        .scrollContentBackground(.hidden)
-    }
 }
+
+#if DEBUG
+/// The correction round's sidebar oracle (the `BookOutlineGeometry`
+/// pattern): what the column actually DREW — an Open-strip row's height and
+/// the rail group's — so a pin asserts the pitch she sees, not a constant
+/// the view might not consult.
+@MainActor
+enum SidebarGeometry {
+    static var openRowHeight: CGFloat?
+    static var railGroupHeight: CGFloat?
+}
+#endif

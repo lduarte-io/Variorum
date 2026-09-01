@@ -1249,6 +1249,17 @@ nonisolated enum CapabilityRegistry {
             // modifier combination is bound anywhere in the app.
             shortcutLabel: "\u{2318}\u{21e7}I", takesAccess: nil,
             unavailableNote: "", availability: always),
+        // The Act 10 correction round, batch A (row 2): the sidebar toggle,
+        // declared. THE COLLISION SWEEP'S RESULT: ⌃⌘S is FREE — the only `s`
+        // chords in the app are ⌘S (commit) and ⌘⇧S (save a version), and
+        // the control-command family holds ⌃⌘L and the four take/block
+        // arrows; ⌃⌘S is the platform's own Toggle Sidebar chord.
+        Capability(
+            id: .toggleSidebar, verb: WorkspaceNaming.toggleSidebarVerb, scope: .app,
+            doors: [.menuBar, .surface],
+            shortcutLabel: "\u{2303}\u{2318}S", takesAccess: nil,
+            unavailableNote: "Only a full window has a sidebar — this one shows a single note.",
+            availability: always),
         Capability(
             id: .closeSplit, verb: "Close Split", scope: .app,
             doors: [.menuBar],
