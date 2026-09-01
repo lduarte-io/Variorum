@@ -906,8 +906,8 @@ Honesty notes: the dev store now carries the walk's test tags on "three ways of 
 8. `418b8b4` — rows 10/11 red-on-old evidence + the row-36 table.
 9. `7ffa80d` — row 55 (the walk): the field as an overlay, the title floor.
 10. `512822c` — row 55's second cut: the two-row masthead; the walk's captures + sheet; the record.
-11. `5e0…` (the commit before this one — filled below) — the record's dispositions, the container decision, the walk table, rows 56/57.
-12. (this commit) — the two justified pin edits (`NoteTagDeclarationTests`, `NoteVersionsPaneTests`), the final full-suite counts, the LIVE STATUS final.
+11. `45b8545` — the two justified pin edits (`NoteTagDeclarationTests`, `NoteVersionsPaneTests`), the full suite re-run on the final tree (2010 / 351), the record's dispositions, the container decision, the walk table, rows 56/57, the LIVE STATUS final.
+12. (this commit) — this list's hash filled.
 
 #### Row 36 — the word-count / metric sweep (C-6; R-cor-4(d)) — every display in the eight Act 10 views, grep-enumerated (`words\|[0-9]w\b\|wordCount`), verdicted against the brief's bias (a count stays where the pre-Act-10 surface had one or where the mockup grammar shows one; "thrown in" goes)
 
