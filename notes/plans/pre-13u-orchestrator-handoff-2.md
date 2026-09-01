@@ -62,7 +62,7 @@ resiliency protocol (+ the mobile session's addendum, 713c80e).
       If the closer died: spawn a narrow closer again (the protocol's road), never a redesign.
 - [x] Wave-2c residuals recorded at the record's tail: no Compare/Lenses capture in the 2c walk (item 15 is hers to judge in-app); the mobile full suite stays a round-end act; the workbench's observation cadence (the tray-panel parked class); the closeout carries (re-seed, §12 delta, /Applications refresh, the mobile note).
 
-**Baselines after 2c:** core 1503/163 · Mac 1980/343 · mobile 602/97+2 (untouched since 2a).
+**Baselines after 2c:** core 1503/163 · Mac 1980/343 · mobile 602/97+2. **After the midpoint fixes + ladder R1 fixes:** core 1515/164 · Mac 1984/343 · mobile 607/97+2.
 
 ## NEXT — the remaining sequence (one CODE agent at a time; no-code agents may run beside)
 

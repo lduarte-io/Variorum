@@ -3267,6 +3267,26 @@ compile errors**. Shutting every simulator down and booting the target device ex
    never a sibling mechanism. *(Source: CLAUDE.md's P3 + the architect-phase constitution P-3,
    standing law.)*
 
+**THE ELEVENTH WAVE (2026-08-31, the tail — her response to ladder R1/F6, verbatim, and the
+memo it produced):** *"hmmm. but what if you just decided to download variorum mobile? and it
+mints a journal the first time you open it, then you log in to your account, but *surprise*, you
+don't see your journal there and it's not syncing with the fragments bridge correctly? this seems
+like a little bit of a weird setup, especially because there's only one special journal that has
+a bridge with fragments in the whole app. what are other ways that it could be handled? because
+renaming the phone one won't lead to a convergence, right? Do you think I need to think about this
+whole sync issue more in general? I'm concerned someone trying to enroll their phone could somehow
+overwrite their whole store with nothing - that won't happen, right?"* Answered in-turn (the phone
+mints at first WRITE since Act 0, so sign-in-first produces no duplicate; the renamed corner is
+real and the designation `setting` races by CAS; an empty phone has nothing to push, and the one
+local-as-truth door — Replace Keys — is T1-guarded, warn-not-refuse by her ruling). **Her rulings,
+verbatim: "i'd write the small design memo on fixing this daily journal issue. i do agree it needs
+a first-class identity. i also think we should stop people from hard deleting the journal - it can
+be moved to archived, but if they hard delete it there's no bridge with fragments and that's
+unfortunate for them and me, becuase you can't get that back in any way. Just write the design
+memo for me and link it to 13y for now."** → `notes/plans/pre-13u-memo-daily-journal-identity.md`
+(owner 13y; the 13y row + a KnownIssues row point at it; SyncSpec §7 names it as the successor to
+the F6 interim). The near-empty re-key REFUSE-or-warn question rides the ratify list.
+
 # LADDER ROUND 1 RECORD (2026-08-31 evening — the final Fable cold review over `64fe30b..HEAD`;
 # REVIEW_PROMPT verbatim + the four Review foci; findings recorded BEFORE any fix session; the
 # architect's dispositions at right. Foci: T1 GUARDED · keystones verbatim (one deviation, F8) ·

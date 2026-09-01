@@ -106,6 +106,6 @@ those items."*
 - `notes/SessionResiliencyProtocol.md` (+ the mobile seat's own addendum) binds every session.
 
 ## PENDING — filled at the round's close
-- [ ] Ladder findings that touch mobile (none expected; list any).
-- [ ] The midpoint fixes' mobile outcomes (m2/m3) and the mobile suite count at the round's close.
+- [x] Ladder R1 findings that touched mobile: **F9** — `MobileStarterJournal.mint` now routes through `shelveInDailyJournalBook`'s ensure (one door, one rule; zero literal profile writers); **F12** — the phone's Sherlock story imports are PACED behind pending autosaves (`AppSession.hasPendingAutosave`, `.utility`, 3 s cap) so first-write typing never queues behind a story turn; **F6/F1** — the Journal-keeper predicate + arrival-order independence (engine-side, both platforms by construction). Round 2 pending.
+- [x] Midpoint m2 (composition pins for the empty states — the shelf's is a mounted-accessibility pin because its empty state sits inside a `GeometryReader`) and m3 (`first-write-furniture` logging per outcome; `lastOutcome` deleted). Mobile suite after R1 fixes: **607/97 + 2 standing**.
 - [ ] The MobileSoul ledger row(s) written at closeout (cross-reference).
