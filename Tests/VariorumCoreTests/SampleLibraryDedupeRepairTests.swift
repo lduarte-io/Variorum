@@ -317,6 +317,36 @@ struct SampleLibraryDedupeRepairTests {
         _ = copyA
     }
 
+    /// **RED ON OLD (the ladder's F3, MINOR):** a PRUNED copy — one story
+    /// removed from the book, its membership tombstoned — is her act, and the
+    /// ruled outcome is "edited kept, pristine retired". The final guard
+    /// returned `.indeterminate` for it (contradicting its own comment), so
+    /// the whole pass deferred forever and BOTH copies survived.
+    @Test func aPrunedCopyIsEditedAndTheUntouchedOneRetires() async throws {
+        let (a, b, server) = try pairWithFacts()
+        let copyA = try seedCopy(a)
+        let copyB = try seedCopy(b)
+        let pruned = copyB.postIDs["About this book"]!
+        try b.with { ops, _ in try ops.removePostFromReading(pruned, from: copyB.bookID) }
+        #expect(try b.db.fetchInt(
+            "SELECT COUNT(*) FROM reading_post WHERE reading_id = ? AND deleted_at IS NOT NULL",
+            [copyB.bookID]) == 1, "positive activity: the pruning left its tombstone evidence")
+
+        try await a.push()
+        try await b.push()
+        try await b.pull()
+        try await a.pull()
+        try await assertFurnitureConverged(a, b, server)
+
+        for client in [a, b] {
+            #expect(try liveCopyIDs(client) == [copyB.bookID],
+                    "the pruned copy is hers and survives; the untouched one retires (old: both)")
+            #expect(try client.db.deletedAt("reading", copyA.bookID) != nil)
+            #expect(try client.db.deletedAt("container", pruned) == nil,
+                    "the note she took out of the book is untouched — bookless, hers")
+        }
+    }
+
     @Test func noInjectedFactsMeansNoDedupe() async throws {
         // An engine nobody wired facts into cannot misidentify anything —
         // the repair is inert by default (the keyProvider pattern).

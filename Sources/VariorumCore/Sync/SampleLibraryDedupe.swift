@@ -266,9 +266,14 @@ extension SyncEngine {
         }
         // Every live note pristine — but only the EXACT shipped set is a
         // pristine COPY: fewer titles with tombstone evidence is a pruning,
-        // and any dead membership at all records an act of hers.
+        // and any dead membership at all records an act of hers. Reaching
+        // here with fewer titles MEANS tombstone evidence exists (the
+        // no-evidence case deferred above), so both legs read EDITED — the
+        // ladder's F3 found the second leg returning `.indeterminate`, which
+        // deferred the whole pass forever and kept both copies instead of
+        // the ruled "edited kept, pristine retired".
         guard titles.count == manifest.count, deadMemberships == 0 else {
-            return titles.count == manifest.count ? .edited : .indeterminate
+            return .edited
         }
         return .pristine
     }
