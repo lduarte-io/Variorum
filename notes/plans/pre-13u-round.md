@@ -3220,6 +3220,23 @@ marker untouched at 7** — diff-verified over the whole range. The author's rea
 running (`pgrep` by the `/Applications` path empty throughout); no Release build, no
 `/Applications` refresh.
 
-## Verification at close
+## Verification at close — ALL THREE SUITES, foreground, at `16fcc43`+records
 
-PENDING — filled below when the three suites complete.
+| suite | result | vs baseline |
+|---|---|---|
+| **Core** (`swift test`) | **1504 / 163 GREEN** in 54.5 s | 1503/163 **+1/+0** — exactly `theBatchedPeerLookupChunksItsParameterList` (m1) |
+| **Mac, FULL** (`-scheme Variorum -destination 'platform=macOS'`) | **1983 / 343 GREEN** in 297.7 s | 1980/343 **+3/+0** — M1, m5, m6, all three inside the existing `SampleLibraryTests` suite |
+*[removed for publication]*
+| **Tutorial spine** | **all ten `Tutorial …` suites green** inside the Mac run | unchanged |
+
+**The latency pin passed IN-SUITE this run** (`EditorWindowSmokeTests.rewriteStrategyLatencies`),
+so its KnownIssues paired-worktree protocol was not invoked — recorded as one more quiet-box
+datapoint for that row rather than as a claim about the fixes.
+
+**One environment note for the next mobile run:** the first attempt on
+`platform=iOS Simulator,name=iPhone 17 Pro,OS=26.2` died at
+*"Failed to install or launch the test runner (Mach error -308 — server died)"* with **zero
+compile errors**. Shutting every simulator down and booting the target device explicitly
+*[removed for publication]*
+**by id** rather than by name/OS, cleared it and every run since. Same class as residual 2's
+"the bare scheme resolves to Designed for iPad" — the destination has to be stated exactly.
