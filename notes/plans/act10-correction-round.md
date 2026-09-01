@@ -299,6 +299,21 @@ the A1 backup (C-3) → the field-guide re-seed if any lesson text changed → t
 - Any scalpel revert taken under C-5 (none expected; her lean recorded).
 - The row-36 KEEP/DROP table for word counts.
 
+## 7b. CLOSEOUT OBLIGATIONS (written 2026-09-01 ~06:00 so the run's end is a checklist; the standing CLAUDE.md ritual, unabridged, plus this round's own)
+
+1. **Every ledger row dispositioned** — FIXED (pin) / RECORDED / DEFERRED (owner) / REVERTED (branch); no orphans; rows 44 (the hang) and 47 must be FIXED, never deferred.
+2. **The review ladder** over the combined diff (`notes/REVIEW_PROMPT.md` VERBATIM, a fresh cold reviewer per round, findings recorded here before any fix session sees them, fixes in a fresh session with revert-verified pins, cap three rounds; every finding with a written disposition).
+3. **The orchestrator's FULL acceptance walk** (C-2 at round scale): every touched surface on the dev build, both voices, the batches' capture lists re-shot on the final tree; the row-44 scenario re-run by hand on Sherlock; the tutorial spine green.
+4. **Canon deltas, exactly as ruled, never beyond:** AppSpec §12's note mode row → **Write · Takes · Read · Lenses · Compare · Blocks · Canvas** (⌘1–⌘7) with Read's `edit · read` (R-cor-5/7) and the Index mode's retirement into it; the book's Index editable / Read read-only; the K12 masthead-fold supersession (row 15); AppSpec §14's dated delta paragraph for this round (the pre-13u delta rolls to the archive per the lean-docs rule); the Lenses + Compare memo anchored as the design record for its future phase; QUESTIONS.md gains the morning bundle (§7) as a numbered entry.
+5. **Master plan:** the table row → done; the pointer → `pre-13x` NEXT at her word; the closeout paragraph (the pre-13u paragraph rolls to `PhaseCloseoutArchive.md`); the running order's note; `FuturePhases.md`/the table gain the **Lenses + Compare build phase** row (the memo's §8) — unslotted, at her word.
+6. **KnownIssues:** nothing new expected; if a batch defers, the row carries its owner; the 13u2 item 17 line in the 13u plan is marked re-homed here.
+7. **MOBILE PARITY LINE** (`notes/MobileSoul.md`): the phone owes — the seven-mode grammar with Read's `edit · read`, the one current block, the scrolled-open door, the book's editable Index, the tag door's shape; "nothing mobile-visible" is not available.
+8. **The tutorial re-seed of HER REAL STORE** — batch C changes lesson text (the "index · read" lesson, "getting around"); the closeout re-seeds via the product door (Help ▸ Restore Tutorial…) on the refreshed install, behind the A1 backup, at the zero-instance window — or, if her store is not reachable without her unlock (a demanded mode), the handoff's checklist carries the one in-app act for her morning.
+9. **The install refresh (C-3, R-cor-4(b)):** zero-instance check (`pgrep -fl 'Variorum.app/Contents/MacOS'`), the A1 WAL-safe backup with a UTC name FIRST, `xcodebuild -scheme Variorum -configuration Release build` from `App/Variorum/`, copy the product to `/Applications/Variorum.app`, `codesign -dv` + the build hash recorded here and in the handoff. If her app is somehow running, STAGE the build and swap at the first zero-instance window — never kill it.
+10. **The author handoff** `notes/handoffs/act10-correction-handoff.md` — her checklist at the top (the morning walk in order: the chrome · the book incl. the hang scenario · Read's edit·read · Blocks · the recovery family · Compare/Lenses mechanical · the library panel), the PROVISIONALs (R-cor-3's reading; row 26's order; Read's switch memory), the memo's eight rulings, the counts, the commits, what was deferred and where; self-contained.
+11. **Memory** (`variorum-phase-9-run-state`) → round CLOSED; NEXT `pre-13x`.
+12. **Push** after every commit; the closeout commit last; then STOP — she kicks off what follows.
+
 ## 8. Records (appended per batch; the triage walk first)
 
 ### TRIAGE WALK — LIVE (2026-09-01 ~04:30 → ; the orchestrator, dev-store Debug build `io.lduarte.Variorum.debug`, Terminal voice, window zoomed 1728×1084; captures in `act10-correction-screens/triage/`)
