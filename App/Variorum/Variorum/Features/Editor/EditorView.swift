@@ -26,6 +26,14 @@ struct EditorView: View {
     /// per container by construction (one focused post), which is P3's
     /// one-live-editor rule.
     var inline = false
+    /// Wave 2c (Act 10 item 18, W8-5): where the bar goes. `.bottom` is
+    /// the standing form everywhere; `.side` renders the SAME `CommitBar`
+    /// as a vertical rail beside the surface — the book Outline's focused
+    /// inline note, whose details render to the SIDE, never below the
+    /// paragraphs (her ruling). The rail width is the outline gutter's, so
+    /// the bar lands exactly where the unfocused rows put their details.
+    enum BarPlacement { case bottom, side }
+    var barPlacement: BarPlacement = .bottom
     @State private var model: EditorViewModel
     @State private var inlineHeight: CGFloat = 24
     /// 13b 4D (S4-19, her ruling): drag handles reveal on hover — a
@@ -41,11 +49,13 @@ struct EditorView: View {
 
     init(
         session: AppSession, postID: String, inline: Bool = false,
-        caretSeed: Int? = nil, fanSeed: String? = nil
+        caretSeed: Int? = nil, fanSeed: String? = nil,
+        barPlacement: BarPlacement = .bottom
     ) {
         self.session = session
         self.postID = postID
         self.inline = inline
+        self.barPlacement = barPlacement
         let model = EditorViewModel(session: session, postID: postID)
         model.pendingCaretSeed = caretSeed
         model.pendingFanSeed = fanSeed
@@ -71,8 +81,9 @@ struct EditorView: View {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
     }
 
-    var body: some View {
-        @Bindable var model = model
+    /// The banners + the one text surface — everything above the bar,
+    /// shared by both bar placements.
+    @ViewBuilder private var surfaceColumn: some View {
         VStack(spacing: 0) {
             if let canary = model.canaryMessage {
                 Text(canary)
@@ -97,7 +108,29 @@ struct EditorView: View {
             } else {
                 EditorSurface(model: model, chrome: chrome)
             }
-            CommitBar(model: model)
+        }
+    }
+
+    var body: some View {
+        @Bindable var model = model
+        Group {
+            if case .side = barPlacement {
+                // Wave 2c: the side rail — the SAME bar, vertical, in the
+                // gutter beside the surface (the book Outline's grammar;
+                // the surface column keeps the prose measure the caller
+                // frames, the rail takes the gutter's fixed width).
+                HStack(alignment: .top, spacing: 24) {
+                    surfaceColumn
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    CommitBar(model: model, axis: .vertical)
+                        .frame(width: 190, alignment: .leading)
+                }
+            } else {
+                VStack(spacing: 0) {
+                    surfaceColumn
+                    CommitBar(model: model)
+                }
+            }
         }
         .task { await model.start() }
         .onAppear { pushAppearance() }

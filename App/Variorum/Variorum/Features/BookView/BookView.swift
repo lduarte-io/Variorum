@@ -92,6 +92,18 @@ struct BookView: View {
     static let proseColumn =
         EditorTypography.maxColumnWidth + 2 * EditorTypography.inlineSurfaceInset
 
+    /// Wave 2c (item 18, W8-5 — "it's so bizarrely open on the right and
+    /// it's ugly how the note details render below the note's opening
+    /// paragraphs - if anything, those should render to the side"): the
+    /// DETAILS GUTTER. A fixed rail to the prose column's right that
+    /// carries each note's details — the card's meta, the expanded note's
+    /// facts, and (through `EditorView`'s `.side` bar placement) the
+    /// focused note's whole editor bar. The open right earns its keep.
+    static let outlineGutterWidth: CGFloat = 190
+    static let outlineGutterSpacing: CGFloat = 24
+    static let outlineRowWidth =
+        proseColumn + outlineGutterSpacing + outlineGutterWidth
+
     var body: some View {
         HStack(spacing: 0) {
             // Wave 2c (item 18, W8-5): in INDEX the minimal navigator steps
@@ -744,7 +756,7 @@ struct BookView: View {
     private var outlineBody: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                LazyVStack(alignment: .leading, spacing: 4) {
+                LazyVStack(alignment: .leading, spacing: 10) {
                     // Batch 12 (her mockup reference): the book's TITLE
                     // heads the content column, aligned with the posts —
                     // never floating in rail-side dead space.
@@ -770,7 +782,7 @@ struct BookView: View {
                             .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                         }
                     }
-                    .padding(.bottom, 18)
+                    .padding(.bottom, 22)
                     if model.entries.isEmpty {
                         Text("This book has no notes yet.")
                             .foregroundStyle(tokens.muted)
@@ -858,10 +870,12 @@ struct BookView: View {
                 // the measure Write puts a post's on. It stays LEFT-ANCHORED
                 // beside the navigator (batch 12, her mockup reference:
                 // "there shouldn't be so much open space to the left").
-                .frame(maxWidth: Self.proseColumn, alignment: .leading)
+                // Wave 2c: the row width now INCLUDES the details gutter —
+                // the prose keeps its measure; the gutter takes the right.
+                .frame(maxWidth: Self.outlineRowWidth, alignment: .leading)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 40)
-                .padding(.vertical, 20)
+                .padding(.vertical, 22)
             }
             .onChange(of: scrollTarget) { _, target in
                 guard let target else { return }
@@ -1069,23 +1083,101 @@ private struct OutlinePostRow: View {
 
     /// 13f W11: this row's drop indicator (a chapter or a post is hovering).
     @State private var dropTargeted = false
+    /// The note's details for the gutter (wave 2c — fetched once per
+    /// realized row, the PostCardExcerpt cadence it replaces).
+    @State private var excerpt = ""
+    @State private var meta = ""
 
     var body: some View {
-        if model.isExpanded(entry.postID) {
-            VStack(alignment: .leading, spacing: 6) {
-                // The HEADER is the handle, not the prose: an expanded post
-                // shows a live editor or a read-cheap text surface, and a
-                // drag over those would fight selection. Its title row is
-                // where "pick up this post" belongs.
-                postHeader.bookDropRow(self, targeted: $dropTargeted, tokens: tokens)
-                postBody
+        Group {
+            if model.isExpanded(entry.postID) {
+                if model.liveFocusedPostID == entry.postID {
+                    // THE FOCUSED NOTE: the editor's bar rides the gutter
+                    // (`.side` — W8-5's "those should render to the side";
+                    // the ONE bar, arranged vertically, exactly where the
+                    // unfocused rows put their details).
+                    VStack(alignment: .leading, spacing: 6) {
+                        postHeader
+                            .bookDropRow(self, targeted: $dropTargeted, tokens: tokens)
+                            .frame(maxWidth: BookView.proseColumn, alignment: .leading)
+                        EditorView(
+                            session: session, postID: entry.postID, inline: true,
+                            caretSeed: model.caretSeed, fanSeed: model.fanSeed,
+                            barPlacement: .side)
+                            .id(entry.postID)
+                    }
+                    .padding(.bottom, 26)
+                } else {
+                    // Expanded, read-cheap: prose at the measure, the
+                    // note's facts in the gutter.
+                    HStack(alignment: .top, spacing: BookView.outlineGutterSpacing) {
+                        VStack(alignment: .leading, spacing: 6) {
+                            // The HEADER is the handle, not the prose: an
+                            // expanded post shows a read-cheap text surface,
+                            // and a drag over it would fight selection.
+                            postHeader.bookDropRow(self, targeted: $dropTargeted, tokens: tokens)
+                            ReadPostView(
+                                session: session, postID: entry.postID,
+                                onFocusRequest: { offset in
+                                    model.focus(entry.postID, caret: offset)
+                                },
+                                onBadgeTap: { blockID in
+                                    // Interpretation 1 (PROVISIONAL): focus
+                                    // FIRST, then the fan panel opens on the
+                                    // one live surface.
+                                    model.focus(entry.postID, fanBlock: blockID)
+                                })
+                                .id("read-\(entry.postID)")
+                        }
+                        .frame(maxWidth: BookView.proseColumn, alignment: .leading)
+                        gutterDetails
+                            .frame(width: BookView.outlineGutterWidth, alignment: .leading)
+                            .padding(.top, 12)
+                    }
+                    .padding(.bottom, 26)
+                }
+            } else {
+                HStack(alignment: .top, spacing: BookView.outlineGutterSpacing) {
+                    collapsedPostCard
+                        .bookDropRow(self, targeted: $dropTargeted, tokens: tokens)
+                        .frame(maxWidth: BookView.proseColumn, alignment: .leading)
+                    gutterDetails
+                        .frame(width: BookView.outlineGutterWidth, alignment: .leading)
+                        .padding(.top, 13)
+                }
+                .padding(.bottom, 2)
             }
-            .padding(.bottom, 22)
-        } else {
-            collapsedPostCard
-                .bookDropRow(self, targeted: $dropTargeted, tokens: tokens)
-                .padding(.bottom, 10)
         }
+        .task(id: entry.postID) { await loadFacts() }
+    }
+
+    /// The gutter's details card: the meta that used to sit BELOW the
+    /// card's opening paragraphs (W8-5 — to the side, never below).
+    @ViewBuilder private var gutterDetails: some View {
+        if !meta.isEmpty {
+            Text(tokens.chromeLabel(meta))
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .multilineTextAlignment(.leading)
+        }
+    }
+
+    /// One fetch per realized row (LazyVStack — cost ∝ what's on screen,
+    /// P1; the PostCardExcerpt cadence, hoisted so the card and the gutter
+    /// share it).
+    private func loadFacts() async {
+        let slots = (try? await session.database.read { [postID = entry.postID] db in
+            try Queries.renderPost(db, containerID: postID)
+        }) ?? []
+        let first = slots.compactMap(\.text).first { !$0.isEmpty } ?? ""
+        excerpt = String(first.prefix(280))
+        let words = slots.reduce(0) { $0 + TextMetrics.wordCount($1.text ?? "") }
+        let fanned = slots.filter(\.hasFan).count
+        var parts = ["\(words.formatted())w"]
+        if fanned > 0 {
+            parts.append("⑂ takes on \(fanned) block\(fanned == 1 ? "" : "s")")
+        }
+        meta = parts.joined(separator: " · ")
     }
 
     /// 13f W11 — the row's own drag/drop contract, shared by both forms
@@ -1134,36 +1226,10 @@ private struct OutlinePostRow: View {
         .contextMenu { outlineChapterMenu(structure: structure, postID: entry.postID) }
     }
 
-    @ViewBuilder
-    private var postBody: some View {
-        // 13f batch 4: `liveFocusedPostID`, not `focusedPostID` — a book in
-        // an unfocused PANE mounts no live editor (the mount rule). The
-        // reading position itself is untouched, so regaining focus restores
-        // exactly what she was editing.
-        if model.liveFocusedPostID == entry.postID {
-            // THE one live editor (P3 by construction: a single focused id;
-            // it is the full-document editor, so every routed act — ⌘S,
-            // divide, callout, comments — reaches this surface through the
-            // capability registry's attached-editor arm, exactly as in
-            // Write. Stage 4 lesson 2 holds here without a second handler.)
-            EditorView(
-                session: session, postID: entry.postID, inline: true,
-                caretSeed: model.caretSeed, fanSeed: model.fanSeed)
-                .id(entry.postID)
-        } else {
-            ReadPostView(
-                session: session, postID: entry.postID,
-                onFocusRequest: { offset in
-                    model.focus(entry.postID, caret: offset)
-                },
-                onBadgeTap: { blockID in
-                    // Interpretation 1 (PROVISIONAL): focus FIRST, then the
-                    // fan panel opens on the one live surface.
-                    model.focus(entry.postID, fanBlock: blockID)
-                })
-                .id("read-\(entry.postID)")
-        }
-    }
+    // (postBody's two branches were inlined into `body` at wave 2c — the
+    // focused branch is still THE one live editor, P3 by construction (a
+    // single focused id via `liveFocusedPostID`, 13f batch 4's mount rule);
+    // its bar now rides the gutter through `barPlacement: .side`.)
 
     /// The collapsed card (batch 12's ruling — and, since her #43(a) ruling
     /// at the 13c walk, this surface's DEFAULT form again). 13b 3E
@@ -1205,14 +1271,23 @@ private struct OutlinePostRow: View {
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
                     .help("Open this note in the full editor (Write · Takes · Lenses · …)")
                 }
-                PostCardExcerpt(session: session, postID: entry.postID, tokens: tokens)
+                // Wave 2c (W8-5): the excerpt stays on the card; the META
+                // moved out to the gutter — details to the side, never
+                // below the opening paragraphs.
+                if !excerpt.isEmpty {
+                    Text(excerpt)
+                        .font(tokens.body)
+                        .foregroundStyle(tokens.ink)
+                        .lineLimit(3)
+                        .multilineTextAlignment(.leading)
+                }
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 12)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 13)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(tokens.card)
-            .clipShape(RoundedRectangle(cornerRadius: 8))
-            .overlay(RoundedRectangle(cornerRadius: 8).stroke(tokens.line, lineWidth: 1))
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .overlay(RoundedRectangle(cornerRadius: 10).stroke(tokens.line, lineWidth: 1))
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -1275,47 +1350,9 @@ private func outlineEntryTitle(_ entry: Queries.ReadingEntry) -> String {
     entry.displayTitle
 }
 
-/// Batch 12 — the collapsed card's excerpt + meta line (her referenced
-/// mockup: "2,140w · rev may 3" / "⑂ takes on 2 blocks"). Fetched per
-/// visible card (LazyVStack realization — cost ∝ what's on screen, P1).
-private struct PostCardExcerpt: View {
-    let session: AppSession
-    let postID: String
-    let tokens: VoiceTokens
-    @State private var excerpt = ""
-    @State private var meta = ""
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            if !excerpt.isEmpty {
-                Text(excerpt)
-                    .font(tokens.body)
-                    .foregroundStyle(tokens.ink)
-                    .lineLimit(3)
-                    .multilineTextAlignment(.leading)
-            }
-            if !meta.isEmpty {
-                Text(tokens.chromeLabel(meta))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-            }
-        }
-        .task(id: postID) {
-            let slots = (try? await session.database.read { [postID] db in
-                try Queries.renderPost(db, containerID: postID)
-            }) ?? []
-            let first = slots.compactMap(\.text).first { !$0.isEmpty } ?? ""
-            excerpt = String(first.prefix(280))
-            let words = slots.reduce(0) { $0 + TextMetrics.wordCount($1.text ?? "") }
-            let fanned = slots.filter(\.hasFan).count
-            var parts = ["\(words.formatted())w"]
-            if fanned > 0 {
-                parts.append("⑂ takes on \(fanned) block\(fanned == 1 ? "" : "s")")
-            }
-            meta = parts.joined(separator: " · ")
-        }
-    }
-}
+// (PostCardExcerpt was absorbed into OutlinePostRow at wave 2c — the one
+// fetch now serves the card's excerpt AND the gutter's meta, same
+// per-realized-row cadence.)
 
 /// The navigator's settings leg (R43): finish, rename, extents — the book's
 /// own faces, beside the shelf's.

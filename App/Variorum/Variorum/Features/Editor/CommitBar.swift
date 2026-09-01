@@ -12,8 +12,24 @@ import VariorumCore
 struct CommitBar: View {
     let model: EditorViewModel
 
-    init(model: EditorViewModel, formattingExpanded: Bool = false) {
+    /// Wave 2c (Act 10 item 18, W8-5 — "note details render to the SIDE
+    /// never below the opening paragraphs"): the bar's SECOND arrangement.
+    /// `.horizontal` is the standing bottom bar; `.vertical` stacks the
+    /// same clusters into a narrow side rail for the book Outline's
+    /// focused inline note — ONE brain, every door, two arrangements
+    /// (the drift a second bar would invite is exactly why this is an
+    /// axis and not a sibling view). In the vertical form the Aa slide-out
+    /// becomes a popover (the formatting cluster's ideal width is wider
+    /// than any side rail — same doors, summoned).
+    enum Axis { case horizontal, vertical }
+    var axis: Axis = .horizontal
+
+    init(
+        model: EditorViewModel, formattingExpanded: Bool = false,
+        axis: Axis = .horizontal
+    ) {
         self.model = model
+        self.axis = axis
         _formattingShown = State(initialValue: formattingExpanded)
     }
 
@@ -89,6 +105,112 @@ struct CommitBar: View {
     }
 
     var body: some View {
+        Group {
+            if axis == .vertical {
+                verticalBody
+            } else {
+                horizontalBody
+            }
+        }
+        // Ledger row 17: the FALLBACK host. The pane's named home is the post
+        // detail's inspector; this editor is also composed where there is no
+        // detail (the scraps hosts, the book spread's inline form), and a door
+        // that cannot act in its context should not have been rendered (P-2).
+        .sheet(item: Binding(
+            get: { model.blockHistoryRequest },
+            set: { model.blockHistoryRequest = $0 })
+        ) { request in
+            BlockHistoryPane(
+                session: model.session, request: request,
+                onOpenTray: { blockID in
+                    // No inspector here either, so the tray takes the same
+                    // road this pane did — the bar's own sheet host.
+                    model.blockHistoryRequest = nil
+                    model.trayRequest = TrayRequest(
+                        postID: model.postID, revealBlockID: blockID)
+                },
+                // Ledger row 33: the sheet host re-points the same way the
+                // inspector does — a new request in the same slot.
+                onJump: { request in model.blockHistoryRequest = request })
+        }
+        // Rows 16/23: the same fallback host for the Versions listing, and for
+        // the same reason — this editor is composed where no inspector exists.
+        .sheet(isPresented: Binding(
+            get: { model.versionsRequested },
+            set: { model.versionsRequested = $0 })
+        ) {
+            NoteVersionsPane(session: model.session, postID: model.postID)
+        }
+    }
+
+    /// The SIDE RAIL (wave 2c): the same clusters, stacked — where you
+    /// are, the block's doors, the note's, the counts. It reads top-down
+    /// the way the flat row reads left-to-right.
+    private var verticalBody: some View {
+        VStack(alignment: .leading, spacing: 7) {
+            Text(tokens.chromeLabel(caretLabel))
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .lineLimit(1)
+            blockMenu
+            gestureButton("Takes", available: model.gestureAvailability.takes,
+                          action: model.openCaretFan)
+            Button(tokens.chromeLabel("commit ⌘S")) { model.commitCaretVariant() }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
+                .disabled(model.caretVariantID == nil || model.header?.locked == true)
+                .help("An immutable savepoint of the take under the caret")
+            Button(tokens.chromeLabel(BlockHistoryPath.doorLabel)) {
+                model.requestBlockHistory()
+            }
+            .buttonStyle(VoicedButtonStyle(tokens: tokens))
+            .help("Everything this block has been: each take's saved moments, "
+                + "its archived and deleted takes, and the block it came out of")
+            Divider().overlay(tokens.line).padding(.vertical, 1)
+            noteMenu
+            Button(tokens.chromeLabel("comments")) { model.openCaretComments() }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens))
+                .help("The caret block's comments — working remarks on a block, "
+                    + "never per-take")
+            VoicedChip(
+                tokens: tokens, text: FormattingDoor.label, on: formattingShown
+            ) {
+                formattingShown.toggle()
+            }
+            .help(FormattingDoor.help(expanded: formattingShown))
+            .popover(isPresented: $formattingShown, arrowEdge: .trailing) {
+                // The same slide-out, summoned: the formatting cluster and
+                // the newlines chip, at their own ideal width.
+                formattingRow
+            }
+            Divider().overlay(tokens.line).padding(.vertical, 1)
+            if let block = model.caretBlockWordCount {
+                Text(tokens.chromeLabel("\(block)w block"))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+            }
+            if let selected = model.selectionWordCount {
+                Text(tokens.chromeLabel("\(selected)w selected"))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+            }
+            if let total = model.postWordCount {
+                WordTargetFace(
+                    tokens: tokens, baseLabel: "\(total.formatted())w in note",
+                    words: model.postWordCount,
+                    target: model.header?.wordTarget,
+                    onSet: { target in await model.setPostWordTarget(target) })
+            }
+            Button("?") { openWindow(id: "variorum-helper") }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                .help(HelperCheatSheet.summary)
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(tokens.room, in: RoundedRectangle(cornerRadius: 10))
+        .overlay(RoundedRectangle(cornerRadius: 10).stroke(tokens.line, lineWidth: 1))
+    }
+
+    private var horizontalBody: some View {
         VStack(spacing: 0) {
             Divider().overlay(tokens.line)
             // Ledger row 28: the formatting row slides out ABOVE the flat row
@@ -151,35 +273,6 @@ struct CommitBar: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
             .background(tokens.room)
-        }
-        // Ledger row 17: the FALLBACK host. The pane's named home is the post
-        // detail's inspector; this editor is also composed where there is no
-        // detail (the scraps hosts, the book spread's inline form), and a door
-        // that cannot act in its context should not have been rendered (P-2).
-        .sheet(item: Binding(
-            get: { model.blockHistoryRequest },
-            set: { model.blockHistoryRequest = $0 })
-        ) { request in
-            BlockHistoryPane(
-                session: model.session, request: request,
-                onOpenTray: { blockID in
-                    // No inspector here either, so the tray takes the same
-                    // road this pane did — the bar's own sheet host.
-                    model.blockHistoryRequest = nil
-                    model.trayRequest = TrayRequest(
-                        postID: model.postID, revealBlockID: blockID)
-                },
-                // Ledger row 33: the sheet host re-points the same way the
-                // inspector does — a new request in the same slot.
-                onJump: { request in model.blockHistoryRequest = request })
-        }
-        // Rows 16/23: the same fallback host for the Versions listing, and for
-        // the same reason — this editor is composed where no inspector exists.
-        .sheet(isPresented: Binding(
-            get: { model.versionsRequested },
-            set: { model.versionsRequested = $0 })
-        ) {
-            NoteVersionsPane(session: model.session, postID: model.postID)
         }
     }
 

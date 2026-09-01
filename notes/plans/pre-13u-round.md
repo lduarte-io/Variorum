@@ -2820,4 +2820,23 @@ liveness through `PaneTextAuthority` only); P1 measured on the Sherlock corpus.
   (5 — incl. the ONE deliberate fold/filter divergence from the note
   Index: a matching CHAPTER title keeps all its notes, documented at the
   brain), BookAnchor/BookCarry `.index` arms; adjacent book suites green.
+- (continuation, commit B) — **ITEM 18 PART 2: the OUTLINE GLOWUP.** The
+  three W8-5 asks, one grammar: **the DETAILS GUTTER** — a 190 pt rail at
+  the prose column's right (the "bizarrely open" right earns its keep).
+  Collapsed cards keep title + excerpt; the meta ("N w · ⑂ takes on M
+  blocks") moves INTO the gutter (details to the side, never below the
+  opening paragraphs — her words' letter); expanded read-cheap notes put
+  the same facts there; **the FOCUSED note's editor bar moves to the
+  gutter too** — `CommitBar` gains `axis: .vertical` (ONE brain, every
+  door, two arrangements; the Aa slide-out becomes a popover in the rail —
+  summoned, same doors) and `EditorView` gains `barPlacement: .side`
+  (the book Outline's focused inline form only; every other host keeps
+  `.bottom` byte-unchanged). Her screenshot's "FULL editor bottom-bar
+  inside a card below its paragraphs" is gone. Spacing swept to the W8-2
+  grammar (row spacing 4→10, card padding 16/13, radius 10, air around
+  the title block). The bar's sheet fallback hosts (Block History /
+  Versions) moved to the axis-neutral wrapper — pinned suites green
+  (BlockHistoryPane, NoteVersionsPane, CommitBarLayout, LifecycleFaces,
+  BookView). PostCardExcerpt absorbed into the row (one fetch serves card
+  + gutter, same realized-row cadence — P1 unchanged).
 
