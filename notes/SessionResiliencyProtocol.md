@@ -81,3 +81,66 @@ system crash) — two fresh continuations and a narrow closer, each briefed from
 commits lost, zero design decisions re-derived.** The cost of a death was the minutes of work
 since the last commit plus one re-orientation read — which is exactly what the protocol prices it
 at.
+
+---
+
+## Addendum — the second mobile seat's notes (2026-09-01, at her invitation; from a run that met four Opus session-limit deaths, one auth outage, a harness restart and a system crash with zero commits lost)
+
+**One CORRECTION to the recovery protocol's rule 3.** It says "No transcript found" is *always*
+the case after a harness restart or a crash. Falsified tonight: batch 10's implementer was
+running when the Claude Code process exited under a system crash, and its transcript SURVIVED —
+the notification said so and `SendMessage` resumed it in place with its full context. **So the
+resume order is always (a) `SendMessage` first, even after a restart or crash; (b) a fresh narrow
+continuation only when the send actually fails with "No transcript found."** The cheaper road is
+available more often than the text assumes.
+
+**Additions, each proven once or more this run:**
+
+1. **The orchestrator may COMMIT a dead agent's survival record on its behalf.** 4.5c-phone's
+   implementer died at the session limit exactly one step short of committing the record it had
+   just written (an untracked file). The orchestrator committed it pathspec-limited (`df97677`)
+   BEFORE resuming, so the resume had a pushed baseline and the successor instruction was
+   literally "run one command and fill in §9." Rule: after a death, an untracked record on disk is
+   committed by the orchestrator first, then the agent is resumed.
+2. **Announce the revert state BEFORE starting reverts.** A death mid-behavioural-revert is the
+   one truly dangerous death (a half-restored production file). None occurred tonight because
+   every agent happened to write "no revert is in flight" into its record before starting, and
+   "reverts starting — pre-revert copies in `<dir>`" as it began. Make it a rule: **no revert
+   starts until the record names it and the pre-revert copies exist.** A successor then knows
+   from the record alone whether the tree is mid-revert.
+3. **Unique pre-revert directories per agent, restores verified by `diff` (and `sha256`).** The
+   shared session scratchpad accumulates every batch's `prerevert/` across sessions (eleven by
+   the end of this run); batch 7's wave found a STALE copy of a file it was itself editing in
+   another batch's dir — restoring from it blindly would have clobbered the current work. Rule:
+   `<batch>-prerevert/`, never a shared name; never restore from a dir you did not create; never
+   `git checkout --` on a file the batch also edits (the 6b incident).
+4. **The UNIT CLOSED banner as the cutover signal.** A successor or a timed check must never
+   misread a live wave as a dead one. The first mobile seat's invention — an unmistakable
+   "UNIT CLOSED" section atop the unit's review file, plus the state table updated, all pushed —
+   is the signal; commit recency alone is not (a wave can be live and quiet for an hour). Every
+   unit close writes it; every resume reads it first.
+5. **Reviewers write their findings file INCREMENTALLY, not only before the final message.** A
+   reviewer died mid-read tonight and lost nothing — but a reviewer dying mid-findings with the
+   file unwritten would lose every finding forever (the compressed-summary class). Same rule as
+   implementer records: the file on disk is the deliverable; the final message summarizes it.
+6. **The orchestrator pushes its OWN commits immediately** (adjudications, briefs, unit closes),
+   not only at unit closes — "pushed commits survive" applies to the orchestrator's records too.
+   Tonight adjudication commits rode the next push; a death between would have left an unpushed
+   adjudication that a successor could not see from another machine.
+7. **Draft the successor handoff EARLY, with PENDING slots** — during a build's wait, not at the
+   cliff. The ~500k line arrives mid-unit; a handoff drafted in scratchpad with `PENDING(hash)` /
+   `PENDING(count)` slots is filled in minutes at the next clean seam, and it survives the
+   orchestrator's own death as a mostly-written document. Commit it at the seam.
+8. **The parent usually survives.** Every session-limit death tonight was the Opus subagent pool;
+   the Fable orchestrator's calls kept working through all of them. So the recovery protocol's
+   actor — the orchestrator — is normally ALIVE to run it, and should act immediately (read the
+   tree, commit the survivors, resume) rather than waiting for a reset. Only the harness
+   restart/crash takes the parent too, and even then its transcript resumed.
+9. **Message running agents the checkpoint order the MOMENT she names a limit** — not at the
+   next boundary. The one agent warned at "87%" reached a safe seam, wrote its survival record,
+   and died one step later; without the warning it would have died mid-build with the record
+   unwritten. The warning bought the record.
+10. **Verify a resumed agent's first act is a commit+push.** After adopting the protocol
+    mid-run, the orchestrator watches for the first checkpoint commit to appear; if none does
+    within a reasonable window, the agent may have died silently again — check its state rather
+    than assuming it is working.
