@@ -408,12 +408,18 @@ struct BookView: View {
                                             .foregroundStyle(tokens.accent)
                                             .lineLimit(1)
                                     }
+                                    // 13f W11a: the whole ROW is the target,
+                                    // not the glyphs — INSIDE the label (the
+                                    // correction round's walk, capture 23: a
+                                    // click right of the text did nothing,
+                                    // because a plain Button acts on its
+                                    // LABEL's shape; a frame + contentShape
+                                    // outside the button widened the
+                                    // hover/menu shape only).
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .contentShape(Rectangle())
                                 }
                                 .buttonStyle(.plain)
-                                // 13f W11a: the whole ROW is the target, not
-                                // the glyphs (the batch-1 reach trace).
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .contentShape(Rectangle())
                                 .contextMenu {
                                     chapterMenu(section)
                                     if let collapsedNote {
@@ -491,10 +497,12 @@ struct BookView: View {
                                             .lineLimit(1)
                                     }
                                     .padding(.leading, group.section != nil ? 10 : 0)
+                                    // The whole row is the target — inside
+                                    // the label (see the chapter row).
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .contentShape(Rectangle())
                                 }
                                 .buttonStyle(.plain)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .contentShape(Rectangle())
                                 .contextMenu {
                                     outlineChapterMenu(
                                         structure: structure, postID: entry.postID)
