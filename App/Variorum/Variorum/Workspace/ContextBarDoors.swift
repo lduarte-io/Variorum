@@ -82,14 +82,8 @@ nonisolated enum ContextBarDoors {
         return commandHeld || bookCount > 1 ? .list : .open
     }
 
-    /// What the ＃ door SAYS. Folded it carries the count (the shipped
-    /// folded grammar, kept); unfolded the chips are right there, so a
-    /// number beside them would only repeat what she can see. (The door
-    /// itself lives on the masthead cluster since Act 10 item 5 — the rule
-    /// moved with it, unchanged.)
-    static func tagsDoorCount(folded: Bool, tagCount: Int) -> Int? {
-        folded && tagCount > 0 ? tagCount : nil
-    }
+    // (`tagsDoorCount` — what the ＃ said while folded — RETIRED with the
+    // fold at the Act 10 correction round, row 15.)
 
     /// Whether the bar renders at all. A pane holding a note always has
     /// something to say (its tag door, 13g R6-1's widening); a pane at a
@@ -105,42 +99,15 @@ nonisolated enum ContextBarDoors {
     }
 }
 
-// MARK: - The fold, and its stickiness (K12)
+// MARK: - The fold (K12) — RETIRED
 
-/// Whether the tag cards are folded away — **this Mac's own choice, and it
-/// sticks** (her K12: folding is *"deliberately"* chosen, so it must still
-/// be chosen the next time she opens the app).
-///
-/// The local-view-memory class, exactly like the hover handles, the
-/// paragraph gap and the spellcheck level (`EditorBehaviorSettings`): app
-/// `UserDefaults`, stored NOWHERE in the schema, never synced — it
-/// describes how one Mac's chrome looks, not what a document means.
-///
-/// **DEFAULT FALSE = VISIBLE**, which is the flip her ruling makes (13g
-/// #52(d) shipped the cards folded with the rest of the bar).
-///
-/// Views read it through `@AppStorage`, so the ⌘⇧I door and the ＃ icon —
-/// and any second window — move together without a shared observable
-/// object: `UserDefaults` is the one state, and every reader observes it.
-nonisolated enum TagChipsFold {
-    static let settingKey = "contextBarTagsFolded"
-
-    /// **K12's flip, in ONE place.** The views read the key through
-    /// `@AppStorage`, which needs a literal default of its own — so it
-    /// reads this one, and there is no second statement of "visible by
-    /// default" that could drift from this.
-    static let defaultFolded = false
-
-    static func folded(in defaults: UserDefaults = .standard) -> Bool {
-        defaults.object(forKey: settingKey) as? Bool ?? defaultFolded
-    }
-
-    /// The act behind both doors (⌘⇧I and ＃). Returns the new state so a
-    /// caller can speak it; nothing here speaks.
-    @discardableResult
-    static func toggle(in defaults: UserDefaults = .standard) -> Bool {
-        let next = !folded(in: defaults)
-        defaults.set(next, forKey: settingKey)
-        return next
-    }
-}
+// `TagChipsFold` lived here: K12's sticky choice to fold the tag cards away
+// (*"tag cards should fold into the bar if you deliberately choose that but
+// it should default to visible"*), made for the crowded context bar. The
+// cards left that bar at Act 10 item 5 for the masthead's right edge, and
+// the Act 10 correction round (row 15 — her words: *"showing a tag icon and
+// a + tag at the same time … that's just sloppy"*) retired the fold there:
+// the masthead has ONE tag door, the ＃, which opens the inline tag field;
+// the cards stay visible. **K12 is SUPERSEDED for the masthead** — recorded
+// here at the site, and in the round's record. The `contextBarTagsFolded`
+// default a Mac may still carry is simply unread.

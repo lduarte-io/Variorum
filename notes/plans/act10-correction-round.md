@@ -777,8 +777,23 @@ last. Then stop.
   **The book's masthead is NOT touched:** its title lives in the navigator COLUMN's header (`BookView.
   bookMasthead`), a left column by design — the book's surface is batch B's (C-1); recorded for the
   orchestrator.
-- **Row 15 (one tag door):** NOT-STARTED — `#` opens an inline field; `+ tag` and the K12 fold retire;
-  ⌘⇧I re-pointed to the field (`.tagNote` gains the chord; `.toggleTagChips` retires).
+- **Row 15 (one tag door):** DONE (this commit; hash next) — `MastheadTagCluster` rebuilt: the ＃ is THE
+  door; click → `TagInlineField` slides out INLINE beside the cards with the cursor in it (⏎ applies through
+  the standing `applyTypedPath`, `/` nests, the live taxonomy's matches hang under it, ⎋ or a second ＃ puts it
+  away; the field stays out after an apply so several tags go on in one breath); "＋ tag" RETIRED; **the
+  masthead FOLD RETIRED — K12 SUPERSEDED for the masthead** (recorded at the site, `ContextBarDoors.swift`,
+  and here: the fold served the crowded context bar; the cards stay visible). **⌘⇧I RE-POINTED, not
+  retired:** `.tagNote` carries the chord + View-menu + ⌘K doors (note-scoped — honestly grey with no note),
+  routed to the mounted masthead through a new `CommandRouter.registerDetail(openTagField:)` /
+  `requestTagField()` seam (the tray's pattern, P-4); `.toggleTagChips`, `TagChipsFold`, `tagsDoorCount`,
+  `tagsFoldHelp`, `tagChipsVerb`, `ShellRouter.toggleTagChips` all gone; the ⌘/ helper's two sentences
+  updated. Pins `MastheadTagDoorTests` ×2 (one declared act, no ＋ on the cards — `chipsShowAddDoor`; the field
+  absent at rest, present AND first responder when opened); `BookAscentTests.theFoldIsOneDeclaredActWithOneKey`
+  re-pointed at `.tagNote` (a JUSTIFIED PIN EDIT); the fold's two pins in `ContextBarShapeTests` RETIRED with a
+  note. Red-on-old by construction (the pre-round cluster had no inline field and declared two acts; the
+  fold's own pins were green on the old tree and are gone). **Tutorial text now behind the door:** the seeder's
+  "the workspace" lesson still says "＃ folds the note's tag cards away and back (⌘⇧I too…)" — the closeout's
+  copy change + re-seed (obligation 8); untouched here by the brief's rule.
 - **Rows 10 + 11 (library rows):** NOT-STARTED — the book row's HStack is `.center`-aligned (row 11's
   mechanism, seen in the 2× crop: "book" sits below the title's baseline); the note row's chips measure
   ~2 pt below the title baseline in the crop — the oracle pin decides the mechanism.

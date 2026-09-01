@@ -618,10 +618,14 @@ nonisolated enum CapabilityRegistry {
         // they gain is a catalog row, a written refusal, and walk coverage.
         Capability(
             id: .tagNote, verb: "Tag Note", scope: .post,
-            doors: [.surface],
-            shortcutLabel: nil, takesAccess: nil,
-            unavailableNote: "Tags go on a note where you see it — the context bar's cards and the Library's rows carry the door.",
-            availability: always),
+            // The Act 10 correction round (row 15): the act gained ⌘⇧I (the
+            // retired fold's chord), a View-menu row and a ⌘K row — all
+            // three open the masthead's ONE inline tag field; the Library's
+            // rows keep their ＋ as the act's listing renderer.
+            doors: [.menuBar, .palette, .surface],
+            shortcutLabel: "\u{2318}\u{21e7}I", takesAccess: nil,
+            unavailableNote: "Open a note to tag it — the \u{FF03} in its masthead opens the tag field.",
+            availability: noteScoped),
         // 13e E7 — the canvas BANK (her sitting Round 2 pick; the 4E fork
         // she preserved, built as the FACE that ruling named). Both doors
         // are canvas-surface doors on the `.tagBlock` pattern: the target
@@ -1238,17 +1242,6 @@ nonisolated enum CapabilityRegistry {
         // whole job is to bring back something that is not on screen, so
         // greying it where the cards are hidden would fail in the one state
         // it exists for.
-        Capability(
-            id: .toggleTagChips, verb: WorkspaceNaming.tagChipsVerb, scope: .app,
-            doors: [.menuBar, .palette, .surface],
-            // THE COLLISION SWEEP'S RESULT (13f batch 5): ⌘⇧I is FREE —
-            // swept across `EditorCommands.keyEquivalent`, every
-            // `.keyboardShortcut(` call site in `Variorum/` and `Shared/`,
-            // every `NSMenuItem` key equivalent (all empty strings) and the
-            // one `performKeyEquivalent` override (⌘S). No `i` chord of any
-            // modifier combination is bound anywhere in the app.
-            shortcutLabel: "\u{2318}\u{21e7}I", takesAccess: nil,
-            unavailableNote: "", availability: always),
         // The Act 10 correction round, batch A (row 2): the sidebar toggle,
         // declared. THE COLLISION SWEEP'S RESULT: ⌃⌘S is FREE — the only `s`
         // chords in the app are ⌘S (commit) and ⌘⇧S (save a version), and

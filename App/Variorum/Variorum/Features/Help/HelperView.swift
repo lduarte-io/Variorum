@@ -170,8 +170,10 @@ struct HelperView: View {
             ("⌘[ / ⌘]", "back / forward, in the pane you're in — the "
                 + "\(ContextBarDoors.backGlyph) and \(ContextBarDoors.forwardGlyph) "
                 + "on the context bar are the same two doors"),
-            ("⌘⇧I", "show or fold this note's tag cards (the ＃ on the context bar does "
-                + "it too, and the choice sticks)"),
+            // The Act 10 correction round (row 15): ⌘⇧I tags the note — the
+            // masthead's ＃ opens the same inline field; the fold is gone.
+            ("⌘⇧I", "tag this note — the field slides out in the masthead with the cursor "
+                + "in it (the ＃ beside the tag cards is the same door)"),
             ("⌘⇧N", "the quick note — a floating pad, from anywhere in Variorum"),
             // 13e E14 (W26): the SYSTEM chord. Its own row, because it is a
             // genuinely different promise from the one above — this one works
@@ -370,10 +372,11 @@ struct HelperView: View {
          + "ROW and nothing else (the note is untouched and comes back the next time "
          + "you open it)."),
         ("context bar",
-         "The thin line above a pane, always the same four doors: ← back, the book "
+         "The thin line above a pane, always the same doors: ← back, the book "
          + "this note sits in (click to open that book right at this note; ⌘-click, or "
-         + "a click when it's in several, lists them), ＃ to fold the tag cards away "
-         + "and back, and → forward. A door with nowhere to go is greyed, not hidden — "
+         + "a click when it's in several, lists them), and → forward. The note's tag "
+         + "cards live in the masthead's right edge, with ＃ to add one. A door with "
+         + "nowhere to go is greyed, not hidden — "
          + "the row never changes shape. ⌘[ / ⌘] and ⌘⇧I are the same doors on the "
          + "keyboard."),
         ("star",

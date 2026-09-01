@@ -115,8 +115,9 @@ struct EditorCommands: Commands {
         .openNote, .navigateBack, .navigateForward,
         // 13f batch 4 (W1/A25): the split's.
         .openBeside, .closeSplit,
-        // 13f batch 5 (W20 b), repointed by 13k K12: the tag cards' fold.
-        .toggleTagChips,
+        // The Act 10 correction round (row 15): ⌘⇧I is TAG NOTE — the
+        // masthead's inline field; the fold it used to toggle is retired.
+        .tagNote,
         // 13f batch 6 (W5): the quick note's File-menu door.
         .quickNote,
         // The Act 10 correction round, batch A (row 2): the sidebar toggle,
@@ -221,11 +222,11 @@ struct EditorCommands: Commands {
         // back/forward idiom.
         case .navigateBack: ("[", .command)
         case .navigateForward: ("]", .command)
-        // 13f batch 5 (W20 b). THE COLLISION SWEEP'S RESULT: ⌘⇧I is FREE —
-        // no `i` chord of any modifier combination is bound anywhere in the
-        // app (same five places swept as ⌘[/⌘] were). 13k K12 repointed it
-        // at the one fold her ruling kept: the note's tag cards.
-        case .toggleTagChips: ("i", [.command, .shift])
+        // 13f batch 5 (W20 b) minted ⌘⇧I (the sweep found it free); 13k K12
+        // repointed it at the tag cards' fold; the Act 10 correction round
+        // (row 15) repoints it once more, at the act itself — the masthead's
+        // inline tag field. Same chord, same collision sweep.
+        case .tagNote: ("i", [.command, .shift])
         // 13f batch 6 (W5). THE COLLISION SWEEP'S RESULT: ⌘⇧N is FREE (the
         // same five places swept as ⌘[/⌘] and ⌘⇧I were). It reads beside
         // its neighbour rather than against it: ⌘N makes a note, ⌘⇧N pops
@@ -680,12 +681,11 @@ struct EditorCommands: Commands {
             Button(verb(.navigateForward)) { router?.goForward() }
                 .keyboardShortcut("]", modifiers: .command)
                 .disabled(!enabled(.navigateForward))
-            // 13f batch 5 (W20 b), repointed by 13k K12: the tag cards'
-            // fold, beside the navigation it sits with on the bar (whose
-            // ← and → ARE ⌘[ and ⌘]).
-            Button(verb(.toggleTagChips)) { router?.toggleTagChips() }
+            // The Act 10 correction round (row 15): ⌘⇧I tags the note — it
+            // opens the masthead's inline field, grey with no note open.
+            Button(verb(.tagNote)) { actions?.tagNote() }
                 .keyboardShortcut("i", modifiers: [.command, .shift])
-                .disabled(session == nil)
+                .disabled(!enabled(.tagNote))
             Divider()
             // 13f batch 3 (W3/A27): the Open strip's keys. ONE submenu
             // holding the window's open notes BY NAME, each with its

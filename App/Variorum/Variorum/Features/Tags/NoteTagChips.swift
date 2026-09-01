@@ -110,10 +110,12 @@ struct NoteTagChips: View {
     /// R4-3: the shipped default, overridable so the capture harness can
     /// render her radius variants without a second copy of the chip.
     var cornerRadius: CGFloat = TagChipShape.cornerRadius
-    /// What the add door SAYS. The dense listing rows keep the bare ＋; the
-    /// masthead cluster passes "＋ tag" (Act 10 item 5 — her delegated
-    /// label call, judged in place).
+    /// What the add door SAYS. The dense listing rows keep the bare ＋.
     var addLabel: String = "＋"
+    /// Whether the cards carry their own ＋ (the listing rows do). The
+    /// masthead cluster passes `false` since the correction round (row 15):
+    /// its ONE door is the ＃ beside the cards, which opens the inline field.
+    var showsAddDoor = true
 
     @State private var adding = false
     @Environment(\.colorScheme) private var scheme
@@ -121,7 +123,7 @@ struct NoteTagChips: View {
     var body: some View {
         HStack(spacing: 4) {
             ForEach(tags, id: \.id) { chip($0) }
-            addDoor
+            if showsAddDoor { addDoor }
         }
         .popover(isPresented: $adding, arrowEdge: .bottom) {
             TagChipAdder(

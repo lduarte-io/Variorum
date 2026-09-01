@@ -394,25 +394,28 @@ struct AscentDoorTests {
         #expect(received.value == [["bookID": "book-1", "postID": "post-9"]])
     }
 
-    /// The registry's fold: ONE act, now THREE doors (the ＃ icon joined
-    /// the menu and the palette), one key — and available everywhere,
-    /// because the state it fixes is "the cards are hidden".
-    ///
-    /// **13k K11/K12 repointed it** from the whole bar to the tag cards;
-    /// the key, the scope and the always-availability are unchanged.
+    /// **The Act 10 correction round, row 15 (a JUSTIFIED PIN EDIT — the
+    /// fold's pin becomes the act's):** ⌘⇧I is `.tagNote`'s chord now. The
+    /// fold (`.toggleTagChips` — 13f W20(b)'s, repointed by 13k K11/K12 at
+    /// the tag cards) is RETIRED: the masthead has ONE tag door, the ＃,
+    /// which opens the inline field, and the key opens the same field. What
+    /// this pin held — ONE act, three doors (menu · palette · surface), one
+    /// key — it still holds, of the successor. Scope is `.post` and the act
+    /// is note-scoped (a field with no note under it has nothing to tag),
+    /// which is the one deliberate change from the fold's always-availability.
     @Test func theFoldIsOneDeclaredActWithOneKey() {
-        let capability = CapabilityRegistry.capability(.toggleTagChips)
-        #expect(capability.scope == .app)
+        let capability = CapabilityRegistry.capability(.tagNote)
+        #expect(capability.scope == .post)
         #expect(capability.doors == [.menuBar, .palette, .surface])
-        #expect(capability.verb == WorkspaceNaming.tagChipsVerb)
         #expect(capability.shortcutLabel == "\u{2318}\u{21e7}I")
-        #expect(capability.availability(CapabilityContext()) == .act,
-                "a door whose job is to bring hidden cards back must never be grey")
-        let key = EditorCommands.keyEquivalent(for: .toggleTagChips)
+        #expect(capability.availability(CapabilityContext()) == .unavailable,
+                "with no note open the field has nothing to tag — honestly grey")
+        #expect(capability.availability(CapabilityContext(mode: .write)) == .act)
+        let key = EditorCommands.keyEquivalent(for: .tagNote)
         #expect(key?.0 == "i")
         #expect(key?.1 == [.command, .shift])
-        #expect(EditorCommands.menuRendered.contains(.toggleTagChips))
-        #expect(ShellActions.paletteActs.contains(.toggleTagChips))
+        #expect(EditorCommands.menuRendered.contains(.tagNote))
+        #expect(ShellActions.paletteActs.contains(.tagNote))
         // The bar's own icon row declares its doors, so the `.surface` walk
         // covers them.
         //
@@ -437,13 +440,14 @@ struct AscentDoorTests {
         // elements and their order are untouched.
         // **Act 10 item 5 (a FOURTH justified edit, same convention — and
         // this one REMOVES):** the tag cards and the ＃ fold moved to the
-        // masthead's right edge by her ruling, so `.toggleTagChips` and
-        // `.tagNote` are declared by `MastheadTagCluster` now — the acts
-        // moved WITH their renderer, asserted here from both sides so a
-        // drift in either home fails by name.
+        // masthead's right edge by her ruling, so the tag acts are declared
+        // by `MastheadTagCluster` now — the acts moved WITH their renderer,
+        // asserted here from both sides so a drift in either home fails by
+        // name. **The Act 10 correction round, row 15 (a FIFTH):** the
+        // masthead declares ONE tag act — the fold is retired.
         #expect(ContextBar.surfaceCapabilities
                 == [.navigateBack, .navigateForward, .openBookAtNote, .showNoteTray])
-        #expect(MastheadTagCluster.surfaceCapabilities == [.tagNote, .toggleTagChips])
+        #expect(MastheadTagCluster.surfaceCapabilities == [.tagNote])
     }
 
     /// Visiting a book floats it in the chooser — recorded at the ONE

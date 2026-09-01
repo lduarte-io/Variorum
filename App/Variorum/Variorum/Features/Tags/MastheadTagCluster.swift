@@ -10,83 +10,100 @@
 //
 //  So the note's tag cards sit in the MASTHEAD's right edge, directly under
 //  the tray/scraps/references icon cluster, across from the membership chip
-//  — one coherent right edge (designed together with item 10's panel work,
-//  per the act's own instruction). This SUPERSEDES 13k K12's placement (the
-//  cards on the context bar) in part; everything else about the cards is
-//  the standing machinery, unmoved:
+//  — one coherent right edge. The cards are `NoteTagChips` (13g R6-1's
+//  grammar); applying types through `TagAssignmentViewModel.applyTypedPath`
+//  (the one type-to-create door), removing through the standing op; loading
+//  is the one-shot discipline (a held observation on `post_tag` would
+//  re-read at write rate).
 //
-//    · the cards themselves are `NoteTagChips` (13g R6-1's grammar);
-//    · the fold is `TagChipsFold` — the same sticky preference, so ⌘⇧I and
-//      the ＃ door here move every window's cluster at once (K12's letter);
-//    · applying types through `TagAssignmentViewModel.applyTypedPath` (the
-//      one type-to-create door), removing through the standing op;
-//    · loading is the one-shot discipline (`PaneHost`'s reason: a held
-//      observation on `post_tag` would re-read at write rate).
+//  ── THE ACT 10 CORRECTION ROUND, BATCH A (row 15) — ONE DOOR ────────────
+//  Act 10 shipped TWO doors for one act side by side: a "＋ tag" that opened
+//  a popover field, and the ＃ glyph that FOLDED the cards (13k K12's sticky
+//  fold, moved here with them). Her words: *"showing a tag icon and a + tag
+//  at the same time … that's just sloppy"*; her shape: *"clicking on the tag
+//  button … could slide out a neat 'tag creator' field where your cursor is
+//  already active."* So:
 //
-//  **The add door reads "＋ tag" here** — her delegated call ("maybe
-//  instead of just a + it should have like + tag or something so it's
-//  clear"), judged in place: the masthead's right edge has the room, and a
-//  labeled door beats a bare glyph where nothing crowds it (the generous-
-//  buttons doctrine). The Library rows keep their bare ＋ — a dense listing
-//  is exactly the "chrome clutter" her hedge worried about.
+//    · the ＃ is THE door — click it and the tag field slides out INLINE
+//      beside the cards with the cursor in it (⏎ applies, "/" nests,
+//      suggestions from the live taxonomy, ⎋ or a second ＃ puts it away);
+//    · "＋ tag" retired;
+//    · **the masthead FOLD retired — K12's fold is SUPERSEDED here.** It
+//      served the crowded context bar ("tag cards should fold into the bar
+//      if you deliberately choose that"); the masthead's right edge is not
+//      crowded, the cards are the note's quiet fact, and a door that hides
+//      what the other door adds is the confusion C-6's one-door rule exists
+//      to kill. The chips stay visible.
+//    · ⌘⇧I (the fold's key) is RE-POINTED at the field: `.tagNote` carries
+//      the chord and its menu/palette doors; `.toggleTagChips` is gone.
+//
+//  The field is `TagInlineField` — the popover's brain (`TagChipAdder`'s
+//  pure `suggestions`) in an inline body.
 //
 
 import SwiftUI
 import VariorumCore
 
 struct MastheadTagCluster: View {
-    /// The `.surface` acts this cluster renders (P-1's declared ⇔ rendered
-    /// walk) — both moved here WITH the cards from the context bar.
-    static let surfaceCapabilities: [CapabilityID] = [.tagNote, .toggleTagChips]
+    /// The `.surface` act this cluster renders (P-1's declared ⇔ rendered
+    /// walk): ONE — tagging the note. (`.toggleTagChips` retired with the
+    /// fold, the correction round's row 15.)
+    static let surfaceCapabilities: [CapabilityID] = [.tagNote]
+    /// The cards render WITHOUT their own ＋ here — the ＃ is the cluster's
+    /// one door (row 15). A static, so the one-door claim is a fact a pin
+    /// reads rather than a modifier it would have to find.
+    static let chipsShowAddDoor = false
 
     let session: AppSession
     let postID: String
     let tokens: VoiceTokens
+    /// Whether the inline field is out. A BINDING, owned by the detail, so
+    /// ⌘⇧I (routed to the detail through the command router) and the ＃
+    /// open the same field.
+    @Binding var fieldOpen: Bool
 
     @State private var tags: [Tag] = []
     @State private var allTags: [Tag] = []
-    /// K12 — the same sticky fold every bar read; one preference, every
-    /// window (and ⌘⇧I) moves this cluster too.
-    @AppStorage(TagChipsFold.settingKey) private var folded = TagChipsFold.defaultFolded
 
     var body: some View {
         HStack(spacing: 5) {
-            if !folded {
-                NoteTagChips(
-                    tokens: tokens, tags: tags, allTags: allTags,
-                    onApply: { apply($0) },
-                    onRemove: { remove($0) },
-                    addLabel: "\u{FF0B} tag")
+            NoteTagChips(
+                tokens: tokens, tags: tags, allTags: allTags,
+                onApply: { apply($0) },
+                onRemove: { remove($0) },
+                showsAddDoor: Self.chipsShowAddDoor)
+            if fieldOpen {
+                TagInlineField(
+                    tokens: tokens, allTags: allTags, applied: Set(tags.map(\.path)),
+                    onApply: { path in
+                        apply(path)
+                        // The field stays out after an apply, so several
+                        // tags go on in one breath; ⎋ or ＃ closes it.
+                    },
+                    onDismiss: { fieldOpen = false })
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
             }
-            foldDoor
+            door
         }
+        .animation(.easeInOut(duration: 0.18), value: fieldOpen)
         .task(id: postID) { await load() }
     }
 
-    /// The ＃ door — K12's deliberate, sticky fold, at the cards' new
-    /// address. Folded it carries the count (the shipped grammar, through
-    /// the same pure rule the bar used).
-    private var foldDoor: some View {
+    /// THE door: the ＃ glyph. Open → the field slides out with the cursor
+    /// in it; open again → it slides away.
+    private var door: some View {
         Button {
-            TagChipsFold.toggle()
+            fieldOpen.toggle()
         } label: {
-            HStack(spacing: 2) {
-                Image(systemName: "number")
-                if let count = ContextBarDoors.tagsDoorCount(
-                    folded: folded, tagCount: tags.count) {
-                    Text(tokens.chromeLabel("\(count)"))
-                        .foregroundStyle(tokens.muted)
-                        .lineLimit(1)
-                }
-            }
-            .font(tokens.small)
-            .foregroundStyle(tokens.faint)
-            .padding(.vertical, 2)
-            .padding(.horizontal, 3)
-            .contentShape(Rectangle())
+            Image(systemName: "number")
+                .font(tokens.small)
+                .foregroundStyle(fieldOpen ? tokens.accent : tokens.faint)
+                .padding(.vertical, 2)
+                .padding(.horizontal, 3)
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .help(WorkspaceNaming.tagsFoldHelp(folded: folded))
+        .help(WorkspaceNaming.tagFieldHelp(open: fieldOpen))
     }
 
     // MARK: - The one-shot loads and the standing doors (PaneHost's
@@ -125,5 +142,83 @@ struct MastheadTagCluster: View {
             }
             await load()
         }
+    }
+}
+
+/// **The inline tag field** (row 15 — her "tag creator" field, cursor
+/// already active). The popover's brain in an inline body: one squarish
+/// field (W8-2's search-field grammar), focused on appear; ⏎ applies what
+/// was typed (creating the path if it is new — the standing door), ⎋
+/// dismisses, and the live taxonomy's matches hang under it as a small
+/// list a click applies.
+struct TagInlineField: View {
+    let tokens: VoiceTokens
+    let allTags: [Tag]
+    let applied: Set<String>
+    let onApply: (String) -> Void
+    let onDismiss: () -> Void
+
+    @State private var typed = ""
+    @FocusState private var focused: Bool
+
+    /// The field's width — room for a nested path, never a search bar.
+    static let width: CGFloat = 190
+
+    private var suggestions: [Tag] {
+        TagChipAdder.suggestions(allTags, typed: typed, applied: applied, limit: 6)
+    }
+
+    var body: some View {
+        TextField("", text: $typed, prompt: Text(tokens.chromeLabel("tag — ⏎ applies · / nests")))
+            .textFieldStyle(.plain)
+            .font(tokens.small)
+            .foregroundStyle(tokens.ink)
+            .focused($focused)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 3)
+            .frame(width: Self.width)
+            .background(tokens.card, in: RoundedRectangle(cornerRadius: 7))
+            .overlay(
+                RoundedRectangle(cornerRadius: 7)
+                    .stroke(focused ? tokens.accent.opacity(0.45) : tokens.line, lineWidth: 1))
+            .onSubmit { apply(typed) }
+            .onExitCommand { onDismiss() }
+            // The matches hang UNDER the field, over whatever sits below the
+            // masthead (the masthead's z-order lifts them above the page).
+            .overlay(alignment: .topLeading) {
+                if focused, !suggestions.isEmpty {
+                    VStack(alignment: .leading, spacing: 0) {
+                        ForEach(suggestions, id: \.id) { tag in
+                            Button {
+                                apply(tag.path)
+                            } label: {
+                                Text(tokens.chromeLabel(tag.path))
+                                    .font(tokens.small)
+                                    .foregroundStyle(
+                                        TagChipColor.color(forPath: tag.path, dark: false))
+                                    .lineLimit(1)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .frame(width: Self.width, alignment: .leading)
+                                    .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .background(tokens.card, in: RoundedRectangle(cornerRadius: 7))
+                    .overlay(RoundedRectangle(cornerRadius: 7).stroke(tokens.line, lineWidth: 1))
+                    .offset(y: 26)
+                    .fixedSize()
+                }
+            }
+            .task { focused = true }
+            .help("Tag this note — type a path (\u{201C}/\u{201D} nests: life/goals), \u{23CE} applies, \u{238B} closes")
+    }
+
+    private func apply(_ path: String) {
+        let trimmed = path.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else { return }
+        typed = ""
+        onApply(trimmed)
     }
 }

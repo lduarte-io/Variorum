@@ -39,6 +39,15 @@ struct ShellActions {
         router.requestMode(mode)
     }
 
+    /// **⌘⇧I — tag this note** (the Act 10 correction round, row 15): opens
+    /// the mounted detail's inline tag field through the router's seam; with
+    /// no note under it the registry's honest note speaks (P-2).
+    func tagNote() {
+        if !session.commandRouter.requestTagField() {
+            status.speak(CapabilityRegistry.capability(.tagNote).unavailableNote)
+        }
+    }
+
     /// ⌘S (N5): acts wherever advertised — the mounted surface commits its
     /// focused/caret take through the one authority; where genuinely no
     /// target exists the registry's honest note speaks (and the menu item
@@ -473,9 +482,10 @@ struct ShellActions {
         // pre-13u Act 10: the sample library's restore, typeable like the
         // tutorial's.
         .restoreSampleLibrary,
-        // 13f batch 5 (W20 b), repointed by 13k K12: the tag cards' fold,
-        // typeable.
-        .toggleTagChips,
+        // The Act 10 correction round (row 15): TAG NOTE, typeable — ⌘⇧I's
+        // act (the fold it used to toggle retired with the masthead's second
+        // door).
+        .tagNote,
         // 13f batch 6 (W4): her ruling's "+ ⌘K by name" half.
         .toggleStar,
         // 13f batch 6 (W5): the quick note, typeable like every other door.
@@ -531,7 +541,7 @@ struct ShellActions {
         case .chooseTake: return { dispatch(.takes(.choose)) }
         case .saveChoicesAsLens: return { dispatch(.takes(.saveLens)) }
         case .toggleSeams: return { toggleSeams() }
-        case .toggleTagChips: return { shell.toggleTagChips() }
+        case .tagNote: return { tagNote() }
         case .toggleStar: return { toggleStarForCurrent() }
         case .quickNote: return { shell.quickNoteRequested = true }
         case .showOriginBlock: return { dispatch(.showOriginBlock) }

@@ -140,6 +140,10 @@ struct PostDetailView: View {
         }
     }
     @State private var inspectorPanel: InspectorPanel?
+    /// Row 15 (the correction round): whether the masthead's inline tag
+    /// field is out — the ＃ and ⌘⇧I (routed here by the command router)
+    /// open the same one.
+    @State private var tagFieldOpen = false
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
 
@@ -229,7 +233,9 @@ struct PostDetailView: View {
                                 .help(door.help)
                             }
                         }
-                        MastheadTagCluster(session: session, postID: postID, tokens: tokens)
+                        MastheadTagCluster(
+                            session: session, postID: postID, tokens: tokens,
+                            fieldOpen: $tagFieldOpen)
                     }
                     .onGeometryChange(for: CGFloat.self) { $0.size.width } action: {
                         mastheadClusterWidth = $0
@@ -243,6 +249,9 @@ struct PostDetailView: View {
             .padding(.bottom, 8)
             .background(tokens.surface)
             .coordinateSpace(name: Self.mastheadSpace)
+            // The inline tag field's suggestion list hangs below the
+            // masthead's bottom edge; the masthead draws above the page.
+            .zIndex(1)
             #if DEBUG
             .onGeometryChange(for: CGFloat.self) { $0.size.width / 2 } action: {
                 MastheadGeometry.contentMidX = $0
@@ -370,9 +379,13 @@ struct PostDetailView: View {
             if let initialBlockID { jump(to: initialBlockID) }
             let binding = $mode
             let panel = $inspectorPanel
+            let tagField = $tagFieldOpen
             routerToken = session.commandRouter.registerDetail(
                 postID: postID, mode: mode,
                 applyMode: { binding.wrappedValue = $0 },
+                // Row 15: ⌘⇧I and the ⌘K row reach THIS masthead's tag field
+                // by composition — the same seam the tray uses (P-4).
+                openTagField: { tagField.wrappedValue = true },
                 // Ledger row 9: the badge and any other door onto the tray
                 // reach THIS inspector by composition — the same seam the
                 // mode router uses, never a broadcast (P-4).

@@ -580,14 +580,10 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // one declaration for ⌘1–⌘6 — a family of ordinal keys wired per index
     // by the menu, with every one of them a menu item (R73/R91/R93).
     case openNote, navigateBack, navigateForward
-    // 13f batch 5 — W20(b)'s fold, REPOINTED by 13k K11/K12. It was the
-    // whole context bar's hiding mechanism (*"even if just with a keyboard
-    // command"*); her 13k ruling retired that fold — the bar is a constant
-    // icon row now — and made the TAG CARDS the one deliberate, sticky
-    // fold, with ＃ as its icon door. ⌘⇧I is that door's keyboard twin.
-    // App scope, always available: a thing you cannot see is exactly when
-    // you most want the key that brings it back.
-    case toggleTagChips
+    // (13f batch 5's `toggleTagChips` — W20(b)'s fold, repointed by 13k
+    // K11/K12 at the tag cards — RETIRED at the Act 10 correction round,
+    // row 15: the masthead has ONE tag door, and ⌘⇧I now belongs to
+    // `.tagNote`, the act itself.)
     // The Act 10 correction round, batch A (row 2) — the SIDEBAR's own
     // show/hide. It was the system split view's undeclared toolbar button;
     // the flat `ShellSplit` makes it ours, so it is declared like every

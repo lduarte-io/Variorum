@@ -91,18 +91,10 @@ struct ContextBarDoorsTests {
                 "…and never the retired chevron")
     }
 
-    /// The ＃ carries the count only when the cards are hidden — unfolded,
-    /// a number would repeat what is right beside it. (The door lives on
-    /// the masthead cluster since Act 10 item 5; the rule moved unchanged.)
-    @Test func theTagsDoorCarriesTheCountOnlyWhenFolded() {
-        #expect(ContextBarDoors.tagsDoorCount(folded: true, tagCount: 3) == 3)
-        #expect(ContextBarDoors.tagsDoorCount(folded: true, tagCount: 0) == nil,
-                "a folded door on an untagged note says ＃, not ＃0")
-        #expect(ContextBarDoors.tagsDoorCount(folded: false, tagCount: 3) == nil)
-    }
+    // (`theTagsDoorCarriesTheCountOnlyWhenFolded` RETIRED with the fold —
+    // the Act 10 correction round, row 15: the masthead has ONE tag door and
+    // the cards never hide, so there is no folded count to carry.)
 
-    /// The bar renders when the pane has anything to say — and a pane that
-    /// has only gone BACK now qualifies, because the → is a door.
     @Test func theBarRendersWheneverThePaneHasAnythingToSay() {
         #expect(!ContextBarDoors.hasContent(
             isNote: false, canBack: false, canForward: false, bookCount: 0),
@@ -118,62 +110,13 @@ struct ContextBarDoorsTests {
     }
 }
 
-@Suite("The tag cards' sticky fold (13k K12)")
-struct TagChipsFoldTests {
-    private func scratch(_ name: String) -> UserDefaults {
-        let defaults = UserDefaults(suiteName: "variorum.tests.\(name)")!
-        defaults.removePersistentDomain(forName: "variorum.tests.\(name)")
-        return defaults
-    }
-
-    /// **K12's flip, and the whole of it**: with nothing stored, the cards
-    /// SHOW. (13g #52(d) shipped them folded with the rest of the bar; her
-    /// ruling: *"tag cards should fold into the bar if you deliberately
-    /// choose that but it should default to visible"*.)
-    ///
-    /// DISCRIMINATING REVERT: make `folded(in:)` return `true` when the key
-    /// is absent — the first expectation fails.
-    @Test func theCardsShowUntilSheDeliberatelyFoldsThem() {
-        let defaults = scratch("fold-default")
-        #expect(!TagChipsFold.folded(in: defaults), "visible by default — her K12 ruling")
-    }
-
-    /// …and the choice STICKS: it is written where the app's other
-    /// this-Mac settings live, so it survives a quit (the whole reason a
-    /// deliberate choice is not session state).
-    ///
-    /// DISCRIMINATING REVERT: have `toggle(in:)` return the new value
-    /// without writing it — the third expectation fails (a fresh read finds
-    /// the old state).
-    @Test func theFoldIsWrittenDownAndSurvivesTheLaunch() {
-        let defaults = scratch("fold-sticky")
-        #expect(TagChipsFold.toggle(in: defaults))
-        #expect(TagChipsFold.folded(in: defaults))
-        #expect(defaults.bool(forKey: TagChipsFold.settingKey),
-                "stored under the app's own local-settings key, never in the schema")
-        #expect(!TagChipsFold.toggle(in: defaults))
-        #expect(!TagChipsFold.folded(in: defaults))
-    }
-
-    /// ⌘⇧I and the ＃ icon are ONE choice, because the router writes the
-    /// same preference every bar reads.
-    ///
-    /// DISCRIMINATING REVERT: have `ShellRouter.toggleTagChips` flip a
-    /// local property instead of `TagChipsFold` — the second expectation
-    /// fails (standard defaults never move).
-    @MainActor
-    @Test func theKeyAndTheIconMoveTheSameOneChoice() {
-        let defaults = UserDefaults.standard
-        let before = TagChipsFold.folded()
-        defer { defaults.set(before, forKey: TagChipsFold.settingKey) }
-
-        let router = ShellRouter()
-        router.toggleTagChips()
-        #expect(TagChipsFold.folded() == !before)
-        router.toggleTagChips()
-        #expect(TagChipsFold.folded() == before)
-    }
-}
+// `TagChipsFoldTests` (13k K12 — the sticky fold: visible by default, the
+// choice written down, ⌘⇧I and ＃ moving one choice) RETIRED at the Act 10
+// correction round, row 15: the fold itself is gone from the masthead (K12
+// superseded there — the ＃ is the ONE tag door and it opens the inline
+// field; the cards stay visible), and ⌘⇧I belongs to `.tagNote` now. The
+// pins pinned a behaviour that no longer exists; `MastheadTagDoorTests`
+// pins its successor.
 
 @MainActor
 @Suite("The tag chip's own size (13k R4-2)")

@@ -46,6 +46,7 @@ final class CommandRouter {
     /// as before.
     func registerDetail(
         postID: String, mode: PostMode, applyMode: @escaping (PostMode) -> Void,
+        openTagField: (() -> Void)? = nil,
         showTray: ((TrayRequest) -> Void)? = nil,
         showBlockHistory: ((BlockHistoryRequest) -> Void)? = nil,
         showVersions: (() -> Void)? = nil
@@ -60,6 +61,7 @@ final class CommandRouter {
         activePostID = postID
         activeMode = mode
         self.applyMode = applyMode
+        self.openTagField = openTagField
         self.showTray = showTray
         self.showBlockHistory = showBlockHistory
         self.showVersions = showVersions
@@ -91,6 +93,7 @@ final class CommandRouter {
         guard token == detailToken else { return }  // a stale teardown after the next mount
         detailToken = nil
         applyMode = nil
+        openTagField = nil
         showTray = nil
         showBlockHistory = nil
         showVersions = nil
@@ -237,6 +240,24 @@ final class CommandRouter {
     func requestBlockHistory(_ request: BlockHistoryRequest) -> Bool {
         guard let showBlockHistory, activePostID == request.postID else { return false }
         showBlockHistory(request)
+        return true
+    }
+
+    // MARK: - The masthead's tag field (the Act 10 correction round, row 15)
+
+    /// How ⌘⇧I and the ⌘K row reach the mounted detail's masthead — the ONE
+    /// inline tag field its ＃ opens. Its own seam beside the tray's, for
+    /// the same reason: the detail owns the masthead, so the detail registers
+    /// it; nothing else can open a field that lives in its state.
+    @ObservationIgnored private var openTagField: (() -> Void)?
+
+    /// **Opens the mounted detail's tag field.** It never parks: a tag field
+    /// with no note under it has nothing to tag, and the caller speaks the
+    /// registry's honest note instead. Returns whether a field opened.
+    @discardableResult
+    func requestTagField() -> Bool {
+        guard let openTagField, activePostID != nil else { return false }
+        openTagField()
         return true
     }
 

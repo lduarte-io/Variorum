@@ -481,21 +481,14 @@ nonisolated enum WorkspaceNaming {
         return "\(deletedPhrase) \u{2014} click to put any of them back"
     }
 
-    static func tagsFoldHelp(folded: Bool) -> String {
-        folded
-            ? "Show this note's tag cards (\u{2318}\u{21e7}I)"
-            : "Fold this note's tag cards away (\u{2318}\u{21e7}I)"
+    /// The masthead's ONE tag door (the Act 10 correction round, row 15):
+    /// the ＃ that slides the inline tag field out and back. ⌘⇧I is its
+    /// keyboard twin (the retired fold's chord, re-pointed at the act).
+    static func tagFieldHelp(open: Bool) -> String {
+        open
+            ? "Put the tag field away (\u{2318}\u{21e7}I or \u{238B})"
+            : "Tag this note \u{2014} opens a field with the cursor in it (\u{2318}\u{21e7}I)"
     }
-
-    /// The fold's own act, named once (menu item + palette row).
-    ///
-    /// **13k K11/K12 REPOINTED it.** ⌘⇧I used to fold the whole context
-    /// bar; the bar no longer folds — it is a constant icon row — and the
-    /// one fold her ruling kept is the tag cards', with ＃ as its icon
-    /// door. So the key becomes that door's keyboard twin rather than a
-    /// chord with nothing left to do. (The alternative — retiring ⌘⇧I
-    /// entirely — is on the walk register, QUESTIONS #55.)
-    static let tagChipsVerb = "Toggle Tag Cards"
 
     /// The sidebar toggle's one name (menu item + toolbar tooltip) — the
     /// Act 10 correction round, batch A (row 2).
