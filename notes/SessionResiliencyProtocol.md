@@ -157,3 +157,14 @@ read costs more than the remaining work.** Cut over only when the remaining work
 enough to outweigh that read, at a clean boundary, with the handoff drafted early (addendum 7).
 Applied the same evening: the pre-13u successor orchestrator, at ~560k, was ruled to finish the
 round's tail (midpoint review · ladder · closeout) rather than hand off.
+11. **The session scratchpad is NOT durable across a system crash — pre-revert copies must live
+    where the tree lives.** Batch 10's implementer had a behavioural revert applied when the
+    machine crashed; the tree survived, the scratchpad (and its `prerevert/` dir) did NOT, and
+    the orchestrator's tree read — "no prerevert dir, so no revert in flight" — was therefore
+    WRONG. The agent's own state check caught it and restored by hand. Two rules follow:
+    (a) **commit before you revert** — a committed pre-revert state makes `git checkout --
+    <file>` a SAFE restore and `git diff` an honest "what is reverted right now" (this also
+    retires the batch-6b `checkout --` hazard, which only bites on UNCOMMITTED work); (b) if a
+    copy is still wanted, keep it INSIDE the worktree under a gitignored, uniquely named dir,
+    never in the scratchpad. And for the orchestrator: an absent prerevert dir proves nothing
+    after a crash — read `git diff` against the last commit to see what is reverted.
