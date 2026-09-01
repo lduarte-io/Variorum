@@ -423,8 +423,12 @@ struct SampleLibraryTests {
         }
     }
 
-    @Test("Deleting the library is final — nothing puts it back")
-    func deletionIsFinal() async throws {
+    /// The ladder's F13: this pins the LAUNCH seed only — the device mark
+    /// short-circuits it after a deletion. The restore door (Help ▸ Restore
+    /// the Sample Library, wave 1) is the one road back and is pinned by
+    /// `theRestoreDoorReMembersSurvivingStoriesInsteadOfMintingTwins` below.
+    @Test("The launch seed never re-mints a deleted library — the restore door is the only road back")
+    func theLaunchSeedNeverReMintsADeletedLibrary() async throws {
         try await withSampleWorld { session, db in
             let mark = Mark()
             let outcome = await SampleLibrarySeeder.seedIfNeeded(
