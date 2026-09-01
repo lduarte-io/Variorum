@@ -420,6 +420,11 @@ struct LibraryCatalogView: View {
     var onOpenBeside: ((String) -> Void)? = nil
     /// 13f batch 5b (W2/A26): the note-only window's row door.
     var onOpenInNewWindow: ((String) -> Void)? = nil
+    /// The Act 10 correction round, batch E (row 33): the panel's book
+    /// outline opens the book AT a note — batch B's reveal road, through the
+    /// shell (`RootView.openBook(_:at:in:)`). nil falls back to opening the
+    /// book plainly.
+    var onOpenBook: ((String, String) -> Void)? = nil
     /// 13f batch 6 (W4): the star door, from the one note-row grammar.
     var starDoor: StarDoor? = nil
     // The tutorial door's property LEFT with the \u{22EF} menu (the post-13l
@@ -442,29 +447,75 @@ struct LibraryCatalogView: View {
     /// ⌘-click selection's. One piece of state for both, because it is one
     /// act with one wording and one host.
     @State private var pendingDelete: NoteDeleteConfirm?
+    /// Row 34: the library's measured width — the panel column's width is
+    /// derived from it (`LibraryPanelLayout`), never from an inspector.
+    @State private var libraryWidth: CGFloat = 0
+
+    /// The catalog's own coordinate space — the DEBUG oracle's frames are
+    /// read here (a `.global` read inside a macOS `ScrollView` answers in
+    /// the scroll view's space — batch C's lesson).
+    static let probeSpace = "library-catalog"
 
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            header
-            Divider().overlay(tokens.line)
-            switch model.mode {
-            case .list: listBody
-            case .notes: notesBody
-            case .timeline:
-                TimelineView(session: session) { postID in
-                    onOpen(.post(postID))
+        // The Act 10 correction round, batch E — rows 34 + 24 (the panel
+        // half): the right panel is a column of OUR OWN — the list, ONE 1 pt
+        // `line` divider (the shell's grammar), the panel on the room — every
+        // part drawn by us in every window state. It was a SwiftUI
+        // `.inspector`, whose divider the system draws only in a KEY window:
+        // tabbed out, the boundary between the library and the panel
+        // vanished (her words: "the line between the 'note info' and the
+        // library disappears when you're tabbed out"). The column's presence
+        // slides and fades with the row selection; the subject swap fades
+        // inside the panel — nothing teleports.
+        HStack(spacing: 0) {
+            VStack(spacing: 0) {
+                header
+                Divider().overlay(tokens.line)
+                switch model.mode {
+                case .list: listBody
+                case .notes: notesBody
+                case .timeline:
+                    TimelineView(session: session) { postID in
+                        onOpen(.post(postID))
+                    }
                 }
+                messageRow
+                // Sitting 9 batch 8 (her directive): the round-2 mockup's
+                // quick-entry bar rides the Library too — type, ⏎, and the
+                // typed text IS a post, opened.
+                Divider().overlay(tokens.line)
+                QuickEntryBar(session: session, onOpen: onOpen)
+                    .libraryGeometryProbe(.quickEntry)
             }
-            // Sitting 9 batch 8 (her directive): the round-2 mockup's
-            // quick-entry bar rides the Library too — type, ⏎, and the
-            // typed text IS a post, opened.
-            Divider().overlay(tokens.line)
-            QuickEntryBar(session: session, onOpen: onOpen)
+            .frame(maxWidth: .infinity)
+            if let hit = model.infoHit {
+                panelDivider
+                LibraryInfoPanel(
+                    session: session, hit: hit,
+                    multiCount: model.selectedPosts.count,
+                    onOpen: { openHit(hit) },
+                    onOpenBookAt: { postID in
+                        model.closeInfo()
+                        if let onOpenBook {
+                            onOpenBook(hit.id, postID)
+                        } else {
+                            onOpen(.reading(hit.id))
+                        }
+                    },
+                    onClose: { model.closeInfo() })
+                    .frame(width: LibraryPanelLayout.width(total: libraryWidth))
+                    .libraryGeometryProbe(.panel)
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
+            }
         }
+        .animation(.easeInOut(duration: 0.22), value: model.infoHit != nil)
+        .coordinateSpace(name: Self.probeSpace)
+        .libraryGeometryProbe(.root)
+        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { libraryWidth = $0 }
         .background(tokens.surface)
         .task { await model.search() }
         // 13g R5-6: switching INTO notes fills the cards; switching out
@@ -535,52 +586,78 @@ struct LibraryCatalogView: View {
         .onReceive(NotificationCenter.default.publisher(for: .variorumNotesDeleted)) { _ in
             Task { await model.search() }
         }
-        // Act 10 item 10 — HER RULED PANEL: the library's right region, the
-        // note-side inspector's sibling (same column widths, so moving
-        // between a note and the library keeps the right edge one steady
-        // thing). Presented while a row-body click's subject stands.
-        .inspector(isPresented: Binding(
-            get: { model.infoHit != nil },
-            set: { if !$0 { model.closeInfo() } })
-        ) {
-            if let hit = model.infoHit {
-                LibraryInfoPanel(
-                    session: session, hit: hit,
-                    multiCount: model.selectedPosts.count,
-                    onOpen: {
-                        openHit(hit)
-                    },
-                    onClose: { model.closeInfo() })
-                    .id("info-\(hit.id)")
-                    .inspectorColumnWidth(min: 280, ideal: 420)
-            }
-        }
-        .overlay(alignment: .bottomLeading) {
-            if let error = model.lastError ?? library.lastError {
-                Text(error)
-                    .font(tokens.small)
-                    .alarmVoice()
-                    .textSelection(.enabled)
-                    .padding(6)
-            } else if let receipt = library.receipt {
-                // Ledger row 25: the archive door's own sentence. Its own slot
-                // and its own colour — a receipt in the red slot reads as a
-                // failure (row 6's finding, one surface over).
-                Text(receipt)
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .textSelection(.enabled)
-                    .padding(6)
-            }
-        }
     }
 
     /// Open a hit at its own kind's destination — the one opening road the
     /// title click, the double-click, the context menu and the panel's Open
-    /// door all take.
+    /// door all take. A NOTE lands where the caret last was by construction:
+    /// the mounting detail restores the note's current block from batch C's
+    /// `CurrentBlockMemory` (`CommandRouter.registerDetail`) and Write's bare
+    /// arrival lands there (else the document's start).
     private func openHit(_ hit: Queries.CatalogHit) {
         model.closeInfo()
         onOpen(hit.kind == .book ? .reading(hit.id) : .post(hit.id))
+    }
+
+    /// Row 56 — the pick's grammar (W8-2: the wash + a tinted border, never
+    /// a system highlight): a picked row (⌘/⇧-click) wears the wash with a
+    /// quiet border; the panel's SUBJECT wears the fuller border, so the row
+    /// the panel describes reads as the one she last touched.
+    @ViewBuilder
+    private func rowBackground(picked: Bool, subject: Bool) -> some View {
+        if picked || subject {
+            RoundedRectangle(cornerRadius: 6)
+                .fill(tokens.wash)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6)
+                        .stroke(tokens.accent.opacity(subject ? 0.42 : 0.22), lineWidth: 1))
+                .padding(.horizontal, 6)
+                .padding(.vertical, 1)
+        } else {
+            Color.clear
+        }
+    }
+
+    /// Row 34 — OUR boundary between the list and the panel: the shell's
+    /// one honest line, drawn whatever the window's state.
+    private var panelDivider: some View {
+        Rectangle()
+            .fill(tokens.line)
+            .frame(width: 1)
+            .libraryGeometryProbe(.divider)
+    }
+
+    /// F's (a) — a receipt or an error is a LAID-OUT row above the bottom
+    /// divider, in its own voice. It was an overlay pinned to the column's
+    /// bottom-left, which put it ON the quick-entry bar at the window's edge
+    /// with its descenders clipped (`seed-33`).
+    @ViewBuilder private var messageRow: some View {
+        if let error = model.lastError ?? library.lastError {
+            Text(error)
+                .font(tokens.small)
+                .alarmVoice()
+                .textSelection(.enabled)
+                .lineLimit(3)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 6)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .libraryGeometryProbe(.message)
+        } else if let receipt = library.receipt {
+            // Ledger row 25: the archive door's own sentence. Its own slot
+            // and its own colour — a receipt in the red slot reads as a
+            // failure (row 6's finding, one surface over).
+            Text(receipt)
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .textSelection(.enabled)
+                .lineLimit(3)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 6)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .libraryGeometryProbe(.message)
+        }
     }
 
     /// The ⌘-click pick, in the order the LIST shows it (13l Act 2, item 3).
@@ -686,9 +763,13 @@ struct LibraryCatalogView: View {
     }
 
     private var listBody: some View {
-        List(selection: Binding(
-            get: { model.selectedPosts },
-            set: { model.selectedPosts = $0 })) {
+        // Row 56: the List draws NO selection of its own — the old
+        // `List(selection:)` binding painted the pick as the SYSTEM band
+        // (grey while the list was not first responder, the blue accent when
+        // it was), against W8-2's grammar. The pick and the panel's subject
+        // render through `rowBackground` — the wash + a tinted border — on
+        // note and book rows alike; the model still owns the pick.
+        List {
             let grouped = Dictionary(grouping: model.hits, by: \.kind)
             if let books = grouped[.book], !books.isEmpty {
                 Section(tokens.chromeLabel("Books")) {
@@ -698,14 +779,20 @@ struct LibraryCatalogView: View {
                         CatalogBookLine(
                             tokens: tokens, title: hit.title, detail: hit.detail,
                             onTitleTap: { openHit(hit) })
+                        // Row 33 (a): the WHOLE row is the target — the line
+                        // used to be only as wide as its words, so a click
+                        // right of "book" was a dead click and the panel
+                        // kept whatever it was showing.
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .contentShape(Rectangle())
                         // Double-click anywhere opens (before the single so
                         // the two disambiguate); a body click selects and
-                        // shows the book's info panel — her ruled model.
+                        // shows the book's OUTLINE in the panel — her ruled
+                        // model, row 33's shape.
                         .onTapGesture(count: 2) { openHit(hit) }
                         .onTapGesture { model.selectBook(hit) }
                         .listRowBackground(
-                            model.infoHit?.id == hit.id ? tokens.wash : Color.clear)
+                            rowBackground(picked: false, subject: model.infoHit?.id == hit.id))
                     }
                 }
             }
@@ -713,7 +800,9 @@ struct LibraryCatalogView: View {
                 Section(tokens.chromeLabel("Notes")) {
                     ForEach(posts, id: \.id) { hit in
                         postRow(hit)
-                            .tag(hit.id)
+                            .listRowBackground(rowBackground(
+                                picked: model.selectedPosts.contains(hit.id),
+                                subject: model.infoHit?.id == hit.id))
                     }
                 }
             }
@@ -1164,8 +1253,12 @@ struct CatalogBookLine: View {
                     .foregroundStyle(tokens.muted)
                     .baselineProbe("book.kind", in: Self.probeSpace)
             }
+            // Row 33 (a): the line spans its row, as the note line's does —
+            // so the row's target is the row, never only its words.
+            Spacer(minLength: 0)
         }
         .coordinateSpace(name: Self.probeSpace)
+        .libraryGeometryProbe(.bookLine)
     }
 }
 

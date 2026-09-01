@@ -590,6 +590,9 @@ struct RootView: View {
                 onOpenBlock: { picked, blockID in open(picked, blockID: blockID, in: pane) },
                 onOpenBeside: { router.openBeside(.post($0)) },
                 onOpenInNewWindow: openInNewWindow,
+                // The correction round, batch E (row 33): the panel's book
+                // outline opens the book AT a note — the ascent's landing.
+                onOpenBook: { bookID, postID in openBook(bookID, at: postID, in: pane) },
                 starDoor: starDoor)
         case .poolPosts:
             PoolPostsView(
