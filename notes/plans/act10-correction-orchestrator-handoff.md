@@ -122,6 +122,7 @@ eight rulings · row 52 (underscore emphasis vocabulary) · any scalpel revert (
 ## Batch-close updates (append one line per close; newest last)
 
 - ~06:50 — cutover document written; B walked; row 53 fix session running; A next.
+- ~16:0x — batch F's implementer DIED at the account's rate limit mid-USE-gate (pieces 1–4 committed: the seeded fixture, the walk's rows 63–68, the fixes, the pane's calm sections, the sweep; one uncommitted TrayPanel `.fixedSize()` rider left); the session continues at LOW PRIORITY until ~16:50; a fresh COMPLETION session is finishing F from its LIVE STATUS (adjudicate the diff → USE gate → suites → record). If checking in: the marker is still `BATCH F RECORD — CLOSED` absent/present.
 - ~13:30 — **batch C CLOSED** (Mac 2028/356; the seven-mode rail + Read's edit·read + the current-block authority walked live); **batch F SPAWNED**; the orchestrator at ~68 % — cutover after F or D if above ~750k.
 - ~10:40 — row 58 FIXED and walked; **batch A CLOSED** (Mac 2014/352); **batch C SPAWNED**; the orchestrator at ~64 % of context — cutover candidate after C closes.
 - ~09:55 — batch A BUILT (Mac 2010/351) and walked by the orchestrator; RESIDUAL row 58 (the masthead's second row collides) → a fresh fix session running; A's record stays open until walked; C is next.
