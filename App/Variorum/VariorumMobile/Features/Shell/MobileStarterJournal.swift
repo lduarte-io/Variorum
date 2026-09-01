@@ -146,7 +146,15 @@ enum MobileStarterJournal {
         case storeNotNew
         /// This store's content belongs to an ACCOUNT, so the real Journal
         /// is the account's to deliver. NOT marked: if she signs out and
-        /// starts fresh, the next write asks again.
+        /// starts fresh, the next write asks again — **across LAUNCHES**
+        /// (clarified 2026-08-31, the midpoint review's n2). Within one
+        /// launch the occasion is spent the moment it runs:
+        /// `MobileFirstWriteFurniture` holds a single `occasion` task, so
+        /// every later write joins it and returns `.alreadyRan`. Signing in
+        /// or out mid-session therefore changes nothing until the next
+        /// launch, which is deliberate — the account question is read ONCE
+        /// per launch, at the first write, and re-reading it per keystroke
+        /// is exactly the churn the occasion exists to avoid.
         case accountOwned
         case seeded(readingID: String)
         /// The store said no. Recorded, never surfaced — nothing the user
