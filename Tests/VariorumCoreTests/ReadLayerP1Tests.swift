@@ -215,6 +215,69 @@ struct ReadLayerP1Tests {
         }
     }
 
+    /// **The pre-13u midpoint review's m1.** The batched door built ONE
+    /// `IN (…)` list however long the caller's list was, while its sibling
+    /// `Queries.activeFans` had chunked at `fanChunk` for exactly this
+    /// reason. The caller that makes the list long already exists:
+    /// `trash(limit: nil)` makes it the whole 30-day deletion window, which
+    /// 13w's automated rotation will fill at machine cadence.
+    ///
+    /// **What this pin claims, and what it does NOT.** It is a SHAPE pin,
+    /// like its siblings above: with a thousand ids the door must issue more
+    /// than one statement, which is red on the unchunked code (exactly one)
+    /// and green here. It does NOT claim the parameter ceiling was reachable
+    /// — that was checked rather than assumed, and on this SQLCipher build a
+    /// 65,536-parameter `IN` list SUCCEEDS while 100,000 throws "too many SQL
+    /// variables", so the ceiling is far above any list a real Trash window
+    /// produces. The finding is a LATENT cliff plus an inconsistency with the
+    /// sibling batcher, and this pin holds the fix's shape and its answer
+    /// without pretending the cliff was live.
+    @Test func theBatchedPeerLookupChunksItsParameterList() throws {
+        try withOperations { ops, db in
+            let post = try ops.createPost(title: "the note")
+            _ = try ops.newBlock(in: post.id, text: "body")
+            let first = try ops.saveNoteVersion(post.id)
+            let second = try ops.saveNoteVersion(post.id)
+            let third = try ops.saveNoteVersion(post.id)
+
+            // The three real ids at the head, ON the 400-boundary, and at
+            // the tail, so the merge is exercised as a union ACROSS chunks —
+            // a chunk-boundary answer that got dropped shows here and
+            // nowhere else.
+            var ids = (0..<1_000).map { "absent-\($0)" }
+            ids[0] = first.post.id
+            ids[400] = second.post.id
+            ids[ids.count - 1] = third.post.id
+
+            // SHAPE: one statement per chunk, not one for the whole list.
+            let peerStatements = try captureStatements(db) { database in
+                _ = try Queries.versionsOfNotes(database, versionIDs: ids)
+            }.filter { $0.contains("peer_is_live") }
+            #expect(peerStatements.count == 3,
+                    Comment(rawValue: "1,000 ids must be read in chunks of "
+                            + "\(Queries.fanChunk), not one unbounded IN list "
+                            + "(\(peerStatements.count) statements)"))
+
+            // ANSWER: the chunked result is the unchunked result.
+            let batched = try db.read { database in
+                try Queries.versionsOfNotes(database, versionIDs: ids)
+            }
+            #expect(batched.count == 3, "ids the store does not know answer nothing")
+            #expect(batched[second.post.id]?.id == post.id,
+                    "a version sitting exactly on a chunk boundary must still answer")
+            let short = try db.read { database in
+                try Queries.versionsOfNotes(
+                    database,
+                    versionIDs: [first.post.id, second.post.id, third.post.id])
+            }
+            #expect(short.count == batched.count)
+            for (versionID, peer) in short {
+                #expect(batched[versionID]?.id == peer.id)
+                #expect(batched[versionID]?.title == peer.title)
+            }
+        }
+    }
+
     // MARK: - P20: the version-history classifier
 
     /// RED ON OLD (before migration `v1_15`): the classifier's only

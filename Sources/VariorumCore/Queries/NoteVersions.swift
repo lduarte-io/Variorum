@@ -325,12 +325,45 @@ extension Queries {
     /// `container_block(block_id)`, which is a schema change with its own
     /// write-path cost — recorded in `KnownIssuesAndTechDebt.md` rather
     /// than taken here.
+    ///
+    /// **CHUNKED at `fanChunk`, like `activeFans`** (the pre-13u midpoint
+    /// review's m1). SQLite binds a bounded number of host parameters
+    /// (`SQLITE_MAX_VARIABLE_NUMBER`), and the caller that makes this list
+    /// long already exists: `trash()` takes `limit: nil` for its one-shot
+    /// callers, which makes the id list the whole 30-day deletion window.
+    /// Latent at today's ceiling and at today's version counts — but 13w
+    /// fills that listing at machine cadence, and the sibling batcher two
+    /// files over already solved it, so the two batched reads share one
+    /// shape rather than one of them carrying a cliff.
+    ///
+    /// **Merging is a plain union, not a reduction:** a version's rows can
+    /// only come from the chunk that carries its id (the `mine` CTE filters
+    /// on exactly that), so no version is ever scored across two chunks and
+    /// the per-chunk answers cannot disagree. That is what makes the
+    /// chunked result byte-identical to the single-statement one for any
+    /// chunk size — the property `versionsOfNotesChunksEquivalently` pins.
     public static func versionsOfNotes(
         _ db: Database, versionIDs: [String]
     ) throws -> [String: (id: String, title: String?)] {
         guard !versionIDs.isEmpty else { return [:] }
-        let placeholders = Array(repeating: "?", count: versionIDs.count)
-            .joined(separator: ", ")
+        // The single-id door's ORDER BY, applied per version: a LIVE peer
+        // wins, then the lexically smallest id — deterministic either way.
+        var best: [String: (live: Bool, id: String, title: String?)] = [:]
+        var start = 0
+        while start < versionIDs.count {
+            let chunk = Array(versionIDs[start..<min(start + fanChunk, versionIDs.count)])
+            start += fanChunk
+            try accumulateVersionPeers(db, chunk: chunk, into: &best)
+        }
+        return best.mapValues { (id: $0.id, title: $0.title) }
+    }
+
+    /// One chunk's pass, folded into the running answer.
+    private static func accumulateVersionPeers(
+        _ db: Database, chunk: [String],
+        into best: inout [String: (live: Bool, id: String, title: String?)]
+    ) throws {
+        let placeholders = databaseQuestionMarks(count: chunk.count)
         let rows = try Row.fetchAll(
             db,
             sql: """
@@ -361,10 +394,7 @@ extension Queries {
                     ON n.id = theirs.container_id AND n.kind = 'post'
                    AND n.id <> links.version_id
                 """,
-            arguments: StatementArguments(versionIDs))
-        // The single-id door's ORDER BY, applied per version: a LIVE peer
-        // wins, then the lexically smallest id — deterministic either way.
-        var best: [String: (live: Bool, id: String, title: String?)] = [:]
+            arguments: StatementArguments(chunk))
         for row in rows {
             // The old statement's `theirs.block_id <> mine.block_id`, applied
             // HERE and not in SQL: as a WHERE term — in the arms or in the
@@ -388,7 +418,6 @@ extension Queries {
                     title: row["title"], entryDate: row["entry_date"],
                     createdAt: row["created_at"]))
         }
-        return best.mapValues { (id: $0.id, title: $0.title) }
     }
 }
 
