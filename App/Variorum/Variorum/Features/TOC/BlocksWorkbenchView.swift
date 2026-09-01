@@ -669,6 +669,11 @@ struct WorkbenchSeam: View {
     let spaceName: String
     let totalWidth: CGFloat
     @Binding var panelWidth: Double
+    /// A pin's own frame reporter (the seam's frame in `spaceName`) — nil in
+    /// the app. Its own closure rather than the shared static oracle, because
+    /// suites run in parallel and a workbench mounted by another suite writes
+    /// the static too (the full-suite run caught a stale frame).
+    var onFrame: ((CGRect) -> Void)? = nil
 
     var body: some View {
         Rectangle()
@@ -691,6 +696,11 @@ struct WorkbenchSeam: View {
                         if inside { NSCursor.resizeLeftRight.push() } else { NSCursor.pop() }
                     }
                     .blocksWorkbenchProbe(.divider)
+                    .onGeometryChange(for: CGRect.self) {
+                        $0.frame(in: .named(spaceName))
+                    } action: { frame in
+                        onFrame?(frame)
+                    }
             }
             .help("Drag to give the block panel more or less room")
     }

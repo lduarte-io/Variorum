@@ -141,14 +141,44 @@ struct BlocksWorkbenchFaceTests {
             try? await Task.sleep(for: .milliseconds(15))
         }
 
+        /// Polls for the condition; `redrive` runs each turn while it is
+        /// false (the canvas rig's rule: re-sending a drag's FINAL point is
+        /// idempotent — SwiftUI measures translation from the mouse-down).
         @discardableResult
-        func poll(timeout: TimeInterval = 4, until condition: () -> Bool) async -> Bool {
+        func poll(
+            timeout: TimeInterval = 4, redrive: () -> Void = {}, until condition: () -> Bool
+        ) async -> Bool {
             let deadline = Date().addingTimeInterval(timeout)
             while Date() < deadline {
                 if condition() { return true }
+                redrive()
                 await turn()
             }
             return condition()
+        }
+
+        /// A REAL drag from `from` to `to` (hosting-space points): down, a
+        /// walk of `steps` moves, then a redriven final point until
+        /// `settled` holds, then up. Returns whether it settled.
+        @discardableResult
+        func drag(
+            from: CGPoint, to: CGPoint, steps: Int = 10, until settled: () -> Bool
+        ) async -> Bool {
+            window.makeKeyAndOrderFront(nil)
+            send(.leftMouseDown, at: windowPoint(from))
+            pump(0.005)
+            for step in 1...steps {
+                let t = CGFloat(step) / CGFloat(steps)
+                send(.leftMouseDragged, at: windowPoint(CGPoint(
+                    x: from.x + (to.x - from.x) * t, y: from.y + (to.y - from.y) * t)))
+                pump(0.005)
+            }
+            let ok = await poll(timeout: 3, redrive: {
+                send(.leftMouseDragged, at: windowPoint(to))
+            }, until: settled)
+            send(.leftMouseUp, at: windowPoint(to))
+            pump(0.005)
+            return ok
         }
 
         /// A point in the hosting view's y-down space → WINDOW coordinates.
@@ -234,6 +264,15 @@ struct BlocksWorkbenchFaceTests {
         #expect(clicks.doubles == 1)
     }
 
+    /// The seam's frames, reported to THIS pin alone (suites run in
+    /// parallel; the shared static oracle is written by any mounted
+    /// workbench — the full-suite run caught a stale frame from the host
+    /// pin's window).
+    @MainActor
+    final class SeamFrames {
+        var last: CGRect?
+    }
+
     /// The seam's host — the workbench's own remembered width, bound the
     /// same way (`@AppStorage` under the same key).
     private struct SeamHost: View {
@@ -241,13 +280,15 @@ struct BlocksWorkbenchFaceTests {
         @AppStorage(BlocksWorkbenchView.panelWidthKey) private var panelWidth: Double
             = BlocksWorkbenchLayout.defaultPanelWidth
         let total: CGFloat
+        let frames: SeamFrames
 
         var body: some View {
             HStack(spacing: 0) {
                 Color.clear
                 WorkbenchSeam(
                     tokens: .fallback(for: .light), spaceName: Self.space,
-                    totalWidth: total, panelWidth: $panelWidth)
+                    totalWidth: total, panelWidth: $panelWidth,
+                    onFrame: { frames.last = $0 })
                 Color.clear
                     .frame(width: BlocksWorkbenchLayout.panelWidth(
                         proposed: panelWidth, total: Double(total)))
@@ -259,51 +300,44 @@ struct BlocksWorkbenchFaceTests {
 
     @Test func theSeamDragsThePanelWidthAndItIsRemembered() async throws {
         UserDefaults.standard.removeObject(forKey: BlocksWorkbenchView.panelWidthKey)
-        #if DEBUG
-        BlocksWorkbenchOracle.reset()
-        #endif
         let total: CGFloat = 900
-        let rig = Rig(SeamHost(total: total), width: total, height: 300)
+        let frames = SeamFrames()
+        let rig = Rig(SeamHost(total: total, frames: frames), width: total, height: 300)
         defer {
             rig.close()
             UserDefaults.standard.removeObject(forKey: BlocksWorkbenchView.panelWidthKey)
         }
-        #expect(await rig.poll { BlocksWorkbenchOracle.dividerFrame != nil }, "the seam laid out")
-        let seam = try #require(BlocksWorkbenchOracle.dividerFrame)
-        #expect(abs(seam.midX - (total - 320)) < 6, "the default 320-pt panel puts the seam at \(total - 320)")
+        // Poll for THIS host's seam at the default 320-pt panel's place — a
+        // workbench torn down by an earlier suite can report its seam into
+        // the (static) oracle a beat after the reset (the full-suite run
+        // caught a stale 779.5 from the host pin's 1100-pt window).
+        #expect(await rig.poll {
+            (frames.last?.midX).map { abs($0 - (total - 320)) < 6 } ?? false
+        }, "the seam laid out at \(total - 320) (the default 320-pt panel) — got \(String(describing: frames.last))")
+        let seam = try #require(frames.last)
         #expect(UserDefaults.standard.object(forKey: BlocksWorkbenchView.panelWidthKey) == nil,
                 "nothing remembered yet — the default rules")
 
+        func remembered() -> Double? {
+            UserDefaults.standard.object(forKey: BlocksWorkbenchView.panelWidthKey) as? Double
+        }
         // A REAL drag: down on the grip, a walk of 100 pt to the LEFT, up.
         let from = CGPoint(x: seam.midX, y: seam.midY)
-        rig.send(.leftMouseDown, at: rig.windowPoint(from))
-        rig.pump(0.005)
-        for step in 1...10 {
-            rig.send(.leftMouseDragged, at: rig.windowPoint(CGPoint(x: from.x - CGFloat(step) * 10, y: from.y)))
-            rig.pump(0.005)
+        let grew = await rig.drag(from: from, to: CGPoint(x: from.x - 100, y: from.y)) {
+            remembered().map { abs($0 - 420) < 6 } ?? false
         }
-        rig.send(.leftMouseUp, at: rig.windowPoint(CGPoint(x: from.x - 100, y: from.y)))
+        #expect(grew, "the panel grew by the drag's 100 pt — 320 → ~420 — and the width is REMEMBERED (\(String(describing: remembered())))")
         #expect(await rig.poll {
-            (UserDefaults.standard.object(forKey: BlocksWorkbenchView.panelWidthKey) as? Double)
-                .map { abs($0 - 420) < 6 } ?? false
-        }, "the panel grew by the drag's 100 pt — 320 → ~420 — and the width is REMEMBERED (\(String(describing: UserDefaults.standard.object(forKey: BlocksWorkbenchView.panelWidthKey))))")
-        #expect(await rig.poll {
-            (BlocksWorkbenchOracle.dividerFrame?.midX).map { abs($0 - (from.x - 100)) < 6 } ?? false
-        }, "the seam itself moved with the drag")
+            (frames.last?.midX).map { abs($0 - (from.x - 100)) < 6 } ?? false
+        }, "the seam itself moved with the drag (got \(String(describing: frames.last)))")
         // A drag past the list's floor is clamped: the panel can never
         // swallow the list.
-        let seam2 = try #require(BlocksWorkbenchOracle.dividerFrame)
+        let floor = BlocksWorkbenchLayout.panelWidth(proposed: 900, total: Double(total))
+        let seam2 = try #require(frames.last)
         let from2 = CGPoint(x: seam2.midX, y: seam2.midY)
-        rig.send(.leftMouseDown, at: rig.windowPoint(from2))
-        rig.pump(0.005)
-        for step in 1...8 {
-            rig.send(.leftMouseDragged, at: rig.windowPoint(CGPoint(x: from2.x - CGFloat(step) * 60, y: from2.y)))
-            rig.pump(0.005)
+        let clamped = await rig.drag(from: from2, to: CGPoint(x: from2.x - 480, y: from2.y), steps: 8) {
+            remembered().map { abs($0 - floor) < 6 } ?? false
         }
-        rig.send(.leftMouseUp, at: rig.windowPoint(CGPoint(x: from2.x - 480, y: from2.y)))
-        #expect(await rig.poll {
-            (UserDefaults.standard.object(forKey: BlocksWorkbenchView.panelWidthKey) as? Double)
-                .map { abs($0 - BlocksWorkbenchLayout.panelWidth(proposed: 900, total: Double(total))) < 6 } ?? false
-        }, "clamped at the list's floor: \(BlocksWorkbenchLayout.panelWidth(proposed: 900, total: Double(total)))")
+        #expect(clamped, "clamped at the list's floor: \(floor) (got \(String(describing: remembered())))")
     }
 }

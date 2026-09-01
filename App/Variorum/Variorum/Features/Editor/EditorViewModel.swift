@@ -1700,13 +1700,19 @@ final class EditorViewModel {
         // beat (attach precedes insertion), so a missing window gets ONE
         // next-turn retry, then gives up quietly.
         if !caretClaimed, scrollView != nil, let textView {
+            // The LANDING is placed at once — it needs no window, and a
+            // window-less first render's next-turn retry must never move a
+            // caret she has since put somewhere (the K5 list pin caught the
+            // first cut doing exactly that). The retry claims first
+            // responder only.
             let landing = bareArrivalLanding(fact: arrivalFact)
+            textView.setSelectedRange(NSRange(location: landing, length: 0))
+            if landing > 0 {
+                textView.scrollRangeToVisible(NSRange(location: landing, length: 0))
+            }
+            updateCaretContext()
             let claim = { [weak textView, weak self] in
                 guard let textView, let window = textView.window else { return false }
-                textView.setSelectedRange(NSRange(location: landing, length: 0))
-                if landing > 0 {
-                    textView.scrollRangeToVisible(NSRange(location: landing, length: 0))
-                }
                 window.makeFirstResponder(textView)
                 self?.updateCaretContext()
                 return true
