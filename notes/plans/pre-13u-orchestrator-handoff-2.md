@@ -57,12 +57,12 @@ enrollment brief (`notes/fragments-enrollment-brief-2026-08-31.md`, she carries 
 resiliency protocol (+ the mobile session's addendum, 713c80e).
 
 **PENDING at drafting (fill from git + the ACT 10 WAVE 2c RECORD's close entry):**
-- [ ] The wave 2c CLOSE commit landed (record flipped; item 18 verdict stated with grounds; final
+- [x] The wave 2c CLOSE commit landed (61135c8 — items 15/16/18 BUILT, 18 whole in-wave; Mac 1980/343 · core 1503/163; latency pin 35.5 ms outright; iOS BUILD SUCCEEDED for the explicit simulator destination — the bare scheme now resolves to 'My Mac (Designed for iPad)' and fails on provisioning, recorded as an environment residual) (record flipped; item 18 verdict stated with grounds; final
       counts; iOS build) — expected: Mac ≥1955/337 + wave pins · core ≥1499/161 + pins · iOS builds.
       If the closer died: spawn a narrow closer again (the protocol's road), never a redesign.
-- [ ] Any wave-2c residuals the closer recorded for the midpoint.
+- [x] Wave-2c residuals recorded at the record's tail: no Compare/Lenses capture in the 2c walk (item 15 is hers to judge in-app); the mobile full suite stays a round-end act; the workbench's observation cadence (the tray-panel parked class); the closeout carries (re-seed, §12 delta, /Applications refresh, the mobile note).
 
-**Baselines after 2c (fill):** core ____ · Mac ____ · mobile 602/97+2 (untouched since 2a).
+**Baselines after 2c:** core 1503/163 · Mac 1980/343 · mobile 602/97+2 (untouched since 2a).
 
 ## NEXT — the remaining sequence (one CODE agent at a time; no-code agents may run beside)
 
