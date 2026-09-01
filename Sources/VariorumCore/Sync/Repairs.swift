@@ -176,6 +176,15 @@ extension SyncEngine {
            let keeperID = try journalKeeperBesideRetiring(db, arriving: resolved) {
             touched.inlineRepairs += try moveJournalChildren(
                 db, from: resolved.rowID, to: keeperID, stamp: nowStamp())
+            // …and the DESIGNATION follows the children (the ladder's
+            // R2-4): between this tombstone's chunk and the repairer's
+            // `setting` chunk, a designation still naming the loser read
+            // as "no designation" (the read is liveness-filtered), and
+            // ⌘J / the bridge / the phone's capture MINTED a third
+            // mint-shape Journal — a Trash row and a dangling pin she never
+            // caused, retired by the next batch.
+            touched.inlineRepairs += try convergeDailyDesignation(
+                db, to: keeperID, retiring: resolved.rowID)
         }
         try resolved.apply(db)
         noteApplied(resolved, touched: &touched)
@@ -731,9 +740,16 @@ extension SyncEngine {
     /// harmlessly — the pins read is liveness-filtered). A keeper that is
     /// FINISHED still receives the loser's memberships: a repair is not
     /// authoring, the resolveSyncConflict-under-seal doctrine.
+    ///
+    /// The designation half runs whenever a keeper stands at all — not only
+    /// when this pass retired a loser (the ladder's R2-4): on a fresh store
+    /// the feed can deliver the retired loser's tombstone in one batch and
+    /// the `setting` row still naming it AFTER (registry order), and a
+    /// designation left dangling at a dead Journal is exactly what makes
+    /// the next ⌘J mint a third.
     func convergeDailyJournalDuplicates(_ db: Database, touched: TouchedRows) throws -> Int {
         let candidates = try Queries.dailyJournalBookCandidates(db)
-        guard candidates.count > 1, let keeperID = candidates.first else { return 0 }
+        guard let keeperID = candidates.first else { return 0 }
         var repairs = 0
         for loserID in candidates.dropFirst() {
             let stamp = nowStamp()
@@ -752,20 +768,42 @@ extension SyncEngine {
                 db, parent: ("reading", loserID, stamp),
                 arrivingDead: touched.arrivingDeadIDs)
         }
-        // The designation converges to the keeper — but ONLY where it named
-        // a loser. One she deliberately moved to a different book is hers;
-        // the repair never overrides it. Plain UPDATE, never REPLACE:
-        // `sync_version` is the CAS token and must survive.
-        if let designated = try String.fetchOne(
-            db, sql: "SELECT value FROM setting WHERE key = 'daily_journal_book'"),
-           candidates.dropFirst().contains(designated) {
-            try db.execute(
-                sql: "UPDATE setting SET value = ? WHERE key = 'daily_journal_book'",
-                arguments: [keeperID])
-            try enqueueExplicitly(db, table: "setting", rowID: "daily_journal_book")
-            repairs += 1
-        }
+        repairs += try convergeDailyDesignation(db, to: keeperID, retiring: nil)
         return repairs
+    }
+
+    /// The daily-book designation converges to the keeper where it names a
+    /// RETIRED candidate: the loser this call is retiring (`retiring` —
+    /// direction 1, before its tombstone lands), or a reading that is DEAD
+    /// here and wears the daily mint's shape (a loser another device
+    /// retired, its tombstone already applied; the fresh-store leg). ONE
+    /// rule for both roads, shared exactly like `moveJournalChildren` so
+    /// they cannot drift (the ladder's R2-4).
+    ///
+    /// What it never touches: a designation naming a LIVE book — one she
+    /// deliberately moved to a different, or renamed, book is hers, and the
+    /// repair never overrides it. A designation at a dead NON-mint-shaped
+    /// book is left dangling too (the ensure's own "reads as none" road).
+    /// Plain UPDATE, never REPLACE: `sync_version` is the CAS token and
+    /// must survive; enqueued explicitly (SyncSpec §7).
+    private func convergeDailyDesignation(
+        _ db: Database, to keeperID: String, retiring loserID: String?
+    ) throws -> Int {
+        guard let designated = try String.fetchOne(
+                  db, sql: "SELECT value FROM setting WHERE key = 'daily_journal_book'"),
+              designated != keeperID
+        else { return 0 }
+        if designated != loserID {
+            guard let named = try Reading.fetchOne(db, key: designated),
+                  named.deletedAt != nil,
+                  Queries.isDailyJournalMintShape(named)
+            else { return 0 }
+        }
+        try db.execute(
+            sql: "UPDATE setting SET value = ? WHERE key = 'daily_journal_book'",
+            arguments: [keeperID])
+        try enqueueExplicitly(db, table: "setting", rowID: "daily_journal_book")
+        return 1
     }
 
     func jsonArray(_ values: Set<String>) -> String {

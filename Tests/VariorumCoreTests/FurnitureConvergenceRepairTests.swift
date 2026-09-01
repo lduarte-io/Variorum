@@ -448,6 +448,66 @@ struct JournalKeeperRepairTests {
         }
     }
 
+    /// **RED ON OLD (round 2, R2-4 — MINOR):** direction 1 moved the
+    /// children but never the DESIGNATION. Between the loser-tombstone chunk
+    /// and the repairer's `setting` chunk, the loser's own device still
+    /// named the (now dead) loser — which the liveness-filtered read reports
+    /// as "no designation" — so its next entry MINTED a third mint-shape
+    /// Journal (designated, pinned) that the next batch retired: a Trash
+    /// row and a dangling pin she never caused. Now the designation follows
+    /// the children to the keeper, and the entry shelves there.
+    @Test func theDesignationFollowsTheKeeperBetweenTheChunks() async throws {
+        let server = FakeSyncServer()
+        let transport = FaultInjectingTransport(server: server)
+        let a = try SyncClient(name: "A", prefix: "AA", transport: transport)
+        let b = try SyncClient(name: "B", prefix: "BB", transport: server, clockOffset: 1000, seed: 2)
+
+        var loser: (bookID: String, entryID: String)?
+        for day in ["2026-08-28", "2026-08-29", "2026-08-30"] {
+            loser = try mintJournal(b, day: day)
+        }
+        let journalB = try #require(loser)
+        try await b.push()
+
+        let journalA = try mintJournal(a, day: "2026-08-31")
+        try await a.pull()  // A's repair, as in the F1 pins
+        let split = try rowsAhead(of: "reading_post", in: a)
+        await transport.armFailNextPush(afterRows: split)
+        await #expect(throws: InjectedNetworkFault.self) { try await a.push() }
+        #expect(await server.currentRow(table: "setting", rowID: "daily_journal_book")
+                    .flatMap { row -> String? in
+                        if case .text(let value) = row.columns["value"] { return value }
+                        return nil
+                    } == journalB.bookID,
+                "the server still names the loser — the repairer's rewrite lags")
+
+        try await b.pull()
+        // Between the chunks on B: the designation followed the children.
+        #expect(try liveJournalBookIDs(b) == [journalA.bookID])
+        #expect(try designation(b) == journalA.bookID,
+                "the designation names the keeper (old: the dead loser — read as none)")
+        #expect(try b.outboxContains("setting", "daily_journal_book"),
+                "the designation rewrite reaches the outbox (SyncSpec §7)")
+        // Her next entry, written HERE and NOW, shelves into the keeper.
+        let today = try mintJournal(b, day: "2026-09-01")
+        #expect(today.bookID == journalA.bookID,
+                "shelved in the keeper (old: a third Journal minted)")
+        #expect(try liveJournalBookIDs(b) == [journalA.bookID],
+                "exactly one live Journal (old: two — the keeper and the fresh third)")
+
+        try await a.push()
+        try await assertFurnitureConverged(a, b, server)
+        for client in [a, b] {
+            #expect(try liveJournalBookIDs(client) == [journalA.bookID])
+            #expect(try liveMemberships(client, in: journalA.bookID) == 5,
+                    "N + 1 + today's entry, all on the keeper")
+            #expect(try designation(client) == journalA.bookID)
+            #expect(try client.db.fetchInt(
+                "SELECT COUNT(*) FROM reading WHERE profile = 'journal'") == 2,
+                "no third Journal was ever minted (old: a retired third row in the Trash)")
+        }
+    }
+
     /// **RED ON OLD (round 2, R2-2 — MAJOR):** direction 1 read the LOCAL
     /// row's shape only. A loser RENAMED on its own device before the
     /// repairer's tombstone landed is not mint-shape locally, so the
@@ -559,6 +619,16 @@ struct JournalKeeperRepairTests {
         // chunk too — it lands with A's retry below.
         #expect(try liveMemberships(c, in: journalA.bookID) == 3,
                 "the loser's memberships re-pointed to the keeper on arrival (old: dangling under the dead book)")
+        // **RED ON OLD (round 2, R2-4 — the fresh-store leg):** the feed
+        // still carried `setting = loser` (the repairer's rewrite rides its
+        // lagging chunk) and delivered it AFTER the tombstone; the
+        // post-batch pass found one live candidate and stood down, leaving
+        // the designation dangling at the dead loser — the next ⌘J here
+        // would have minted a THIRD Journal. Now it lands on the keeper.
+        #expect(try designation(c) == journalA.bookID,
+                "the designation converges to the keeper on the fresh store (old: dangling at the dead loser)")
+        #expect(try c.outboxContains("setting", "daily_journal_book"),
+                "the designation rewrite reaches the outbox (SyncSpec §7)")
         for entry in loserEntries {
             let membership = try c.db.read { db in
                 try Row.fetchOne(
