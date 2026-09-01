@@ -980,3 +980,47 @@ The arithmetic the latch feeds is pinned as a pure brain and unchanged.
 
 **Suite (targeted, both items):** `✔ Test run with 14 tests in 1 suite
 passed after 8.549 seconds.` — exit 0.
+
+---
+
+## Item 6 · MINOR 4 — a chapter past the window is no longer shown as EMPTY · **FIXED**
+
+**The shape chosen, said plainly (the brief asked for the minimal honest
+one and for it to be named):** the past-the-cut chapter is **FOLDED under
+the listing's existing truncation marker**; the genuinely empty chapter
+still renders. Nothing gains a second sentence — the marker already says
+*"the rest of this book isn't loaded yet"*, and that is the whole story
+for a chapter whose notes are among the rest.
+
+**The distinction needs one fact, so the model reads exactly that fact.**
+`MobileBookViewModel.populatedChapters` is the set of live chapter ids
+holding at least one live, unarchived member ANYWHERE in the book — a
+single `SELECT DISTINCT rp.section_id`, book-scoped, riding the SAME held
+observation as the entries and the chapters (so the three can never
+disagree), and **read only when the probe row says the window actually
+cut something**. An untruncated book takes byte-identical work to before:
+no extra query, and `populated` empty means `grouped` walks the path it
+always did. The join mirrors the assembly's own membership join
+(`deleted_at IS NULL AND archived_at IS NULL AND kind = 'post'`) so the
+two readings count the same rows.
+
+`grouped(_:chapters:populated:)` gains one clause: a chapter with no
+windowed entry **and** a member somewhere is dropped; a chapter with no
+windowed entry and no member renders, which is D3's New Chapter and the
+reason the batch built empty-chapter rendering at all.
+
+**New pin (PRODUCTION-driven, over a real truncated book):**
+`aChapterWhoseNotesFellPastTheWindowIsNotShownAsEmpty` builds three
+chapters — one holding the first note, one genuinely empty, one holding a
+note that a `window: 1` model cuts off — and asserts the groups are
+`["One", "Two"]` with counts `[1, 0]`, plus that the standing truncation
+marker is the sentence carrying the folded chapter's story.
+
+**Files:** `App/Variorum/VariorumMobile/Features/Shell/MobileBookViewModel.swift`,
+`App/Variorum/VariorumMobileTests/MobileNavigationTests.swift`.
+
+**Suite (targeted):** `✔ Test run with 15 tests in 1 suite passed after
+8.321 seconds.` — exit 0.
+
+**RED-ON-OLD: PENDING** (revert runs after this commit, per the
+commit-before-revert rule).

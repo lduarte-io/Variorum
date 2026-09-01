@@ -585,6 +585,66 @@ struct MobileNavigationTests {
         }
     }
 
+    /// **A CHAPTER PAST THE WINDOW IS NOT AN EMPTY CHAPTER** (the batch-10
+    /// cold review, MINOR 4).
+    ///
+    /// This batch taught the contents list to render a chapter header with
+    /// nothing under it, and made that MEAN "this chapter is empty" — which
+    /// the bounded window then turned into a lie: `grouped` fills a chapter
+    /// from the WINDOWED entries, so on a truncated book every chapter whose
+    /// notes lie past the cut rendered as empty too.
+    ///
+    /// The fix distinguishes the two by the one fact that separates them —
+    /// whether the chapter holds a member ANYWHERE — and folds the
+    /// past-the-cut chapter under the listing's own truncation marker, which
+    /// already says the rest of the book isn't loaded. The genuinely empty
+    /// chapter still renders, because that is D3's whole point.
+    ///
+    /// Driven over a REAL truncated book (`window: 1`), not the pure brain
+    /// alone, so the extra read and the grouping are pinned together.
+    ///
+    /// RED-ON-OLD: drop the `populated` clause from `grouped` and the folded
+    /// chapter comes back as a third, empty-looking group.
+    @Test func aChapterWhoseNotesFellPastTheWindowIsNotShownAsEmpty() async throws {
+        try await withEditorWorld { session, _ in
+            let bookID = try await session.runner.run { ops -> String in
+                let book = try ops.createReading(name: "The Book", kind: .curated)
+                let one = try ops.createSection(in: book.id, name: "One")
+                _ = try ops.createSection(in: book.id, name: "Two")
+                let three = try ops.createSection(in: book.id, name: "Three")
+                let first = try ops.createPost(title: "First")
+                _ = try ops.addPostToReading(first.id, to: book.id)
+                try ops.assignPostToSection(first.id, in: book.id, section: one.id)
+                let last = try ops.createPost(title: "Last")
+                _ = try ops.addPostToReading(last.id, to: book.id)
+                try ops.assignPostToSection(last.id, in: book.id, section: three.id)
+                return book.id
+            }
+            // A window of ONE: "First" fits, "Last" is past the cut.
+            let model = MobileBookViewModel(session: session, readingID: bookID, window: 1)
+            let observation = Task { await model.start() }
+            defer { observation.cancel() }
+            for _ in 0..<3000 where model.chapters.count < 3 || !model.truncated {
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(1))
+            }
+            #expect(model.truncated, "the window really cut the book")
+            #expect(model.entries.map(\.title) == ["First"])
+            #expect(model.populatedChapters.count == 2,
+                    "two chapters hold a member somewhere: \(model.populatedChapters)")
+
+            let groups = model.groupedRows
+            #expect(groups.map(\.section) == ["One", "Two"],
+                    "the EMPTY chapter renders; the one whose note fell past the cut folds under the truncation marker instead of lying")
+            #expect(groups.map { $0.entries.count } == [1, 0])
+
+            // And the marker that carries the folded chapter's story is the
+            // standing one — never a second sentence for this case.
+            #expect(MobileBookViewModel.truncationMarker(shown: model.entries.count)
+                    == "Showing the first 1 notes — the rest of this book isn't loaded yet.")
+        }
+    }
+
     /// The two door words, pinned — and the note door is the phone's ONE
     /// new-note word, so the shelf, the Library and a book cannot come to
     /// spell it three ways.

@@ -35,6 +35,14 @@ final class MobileBookViewModel {
     /// door below would create a real row she could not see, which is the
     /// fire-and-DO failure (R115) dressed as a success.
     private(set) var chapters: [ReadingSection] = []
+    /// **Which live chapters hold a member ANYWHERE in the book** — read
+    /// only while the listing is truncated (the cold review's MINOR 4).
+    /// The window is what makes it necessary: `grouped` fills a chapter
+    /// from the WINDOWED entries, so past the cut every chapter looked
+    /// empty, and this batch had just taught an empty chapter header to
+    /// MEAN "this chapter is empty". Ids only, book-scoped, one `DISTINCT`
+    /// beside the assembly in the same transaction.
+    private(set) var populatedChapters: Set<String> = []
     private(set) var truncated = false
     /// A STORE-READ failure — the screen's own, not a tap's. It belongs to
     /// the header, where the book's identity is.
@@ -73,6 +81,10 @@ final class MobileBookViewModel {
         /// rides the SAME held observation so the contents list and its
         /// chapters can never disagree about what exists.
         var chapters: [ReadingSection]
+        /// Ids of chapters holding at least one live member (MINOR 4).
+        /// EMPTY unless the listing is truncated — an untruncated window
+        /// holds every entry, so a chapter with no windowed entry has none.
+        var populatedChapters: Set<String>
     }
 
     func start() async {
@@ -84,19 +96,41 @@ final class MobileBookViewModel {
                     db,
                     sql: "SELECT * FROM reading WHERE id = ? AND deleted_at IS NULL",
                     arguments: [id])
+                let entries = try Queries.assembleReading(db, readingID: id, limit: probe)
+                // Smart readings refuse sections by model rule, so the
+                // read is skipped rather than returning an empty list —
+                // the same shape `assembleReading` uses for `hasChapters`.
+                let chapters = reading?.kind == .curated
+                    ? try Queries.readingSections(db, readingID: id) : []
+                // MINOR 4: only when the window actually cut something, so
+                // the ordinary book pays nothing for the corner. Mirrors the
+                // assembly's own membership join (live, unarchived posts) so
+                // the two readings can never disagree about what counts.
+                let populated: Set<String> = entries.count > probe - 1 && !chapters.isEmpty
+                    ? Set(try String.fetchAll(
+                        db,
+                        sql: """
+                            SELECT DISTINCT rp.section_id
+                            FROM reading_post rp
+                            JOIN container c
+                              ON c.id = rp.post_id
+                             AND c.deleted_at IS NULL
+                             AND c.archived_at IS NULL
+                             AND c.kind = 'post'
+                            WHERE rp.reading_id = ? AND rp.deleted_at IS NULL
+                              AND rp.section_id IS NOT NULL
+                            """,
+                        arguments: [id]))
+                    : []
                 return Snapshot(
-                    reading: reading,
-                    entries: try Queries.assembleReading(db, readingID: id, limit: probe),
-                    // Smart readings refuse sections by model rule, so the
-                    // read is skipped rather than returning an empty list —
-                    // the same shape `assembleReading` uses for `hasChapters`.
-                    chapters: reading?.kind == .curated
-                        ? try Queries.readingSections(db, readingID: id) : [])
+                    reading: reading, entries: entries, chapters: chapters,
+                    populatedChapters: populated)
             }) {
                 truncated = value.entries.count > window
                 entries = Array(value.entries.prefix(window))
                 reading = value.reading
                 chapters = value.chapters
+                populatedChapters = value.populatedChapters
             }
         } catch is CancellationError {
         } catch {
@@ -107,7 +141,7 @@ final class MobileBookViewModel {
     /// The list grouped by the assembly's own section transitions —
     /// pure, pinned. `section` nil ⇒ unsectioned rows (no header).
     var groupedRows: [(section: String?, entries: [Queries.ReadingEntry])] {
-        Self.grouped(entries, chapters: chapters)
+        Self.grouped(entries, chapters: chapters, populated: populatedChapters)
     }
 
     /// **The grouping, and since batch 10 it resolves CHAPTERS BY ID.**
@@ -129,13 +163,29 @@ final class MobileBookViewModel {
     /// An empty chapter renders a HEADER and nothing under it. That is the
     /// point: it is what makes the New Chapter door's result visible on a
     /// screen that has no chapter navigator to put it in.
+    ///
+    /// **`populated` is the TRUNCATION answer** (the cold review's MINOR 4).
+    /// A chapter is filled from the WINDOWED entries, so on a book past its
+    /// 300-note window a chapter whose notes all lie past the cut rendered a
+    /// header with nothing under it — indistinguishable from the genuinely
+    /// empty chapter this batch had just taught the list to show, and a lie
+    /// where the empty one is a fact. The ids of chapters holding a member
+    /// ANYWHERE settle the difference: a chapter with no windowed entry and
+    /// no member is EMPTY and renders; one with no windowed entry and a
+    /// member is BEYOND THE CUT and folds under the listing's own truncation
+    /// marker, which already says the rest of the book isn't loaded. The set
+    /// is supplied only when the listing is truncated, so an ordinary book
+    /// takes exactly the path it always did.
     nonisolated static func grouped(
-        _ entries: [Queries.ReadingEntry], chapters: [ReadingSection] = []
+        _ entries: [Queries.ReadingEntry], chapters: [ReadingSection] = [],
+        populated: Set<String> = []
     ) -> [(section: String?, entries: [Queries.ReadingEntry])] {
         if !chapters.isEmpty {
-            var groups = chapters.map { chapter in
-                (section: Optional(chapter.name),
-                 entries: entries.filter { $0.sectionID == chapter.id })
+            var groups = chapters.compactMap {
+                chapter -> (section: String?, entries: [Queries.ReadingEntry])? in
+                let mine = entries.filter { $0.sectionID == chapter.id }
+                guard !mine.isEmpty || !populated.contains(chapter.id) else { return nil }
+                return (section: Optional(chapter.name), entries: mine)
             }
             let unfiled = entries.filter { $0.sectionID == nil }
             if !unfiled.isEmpty {
