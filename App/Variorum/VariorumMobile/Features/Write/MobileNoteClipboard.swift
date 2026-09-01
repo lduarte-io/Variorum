@@ -78,6 +78,15 @@ enum MobileNoteClipboard {
     /// second door can word the same outcome differently.
     enum Outcome: Equatable {
         case copied
+        /// **Copied — and the copy did NOT follow the screen, said out
+        /// loud** (the batch-7 fix wave, cold review MAJOR 1). It is the
+        /// callout corner below: the copy carries the note's SAVED takes
+        /// while the surface is showing a peeked or lensed one. Losing a
+        /// `> ` is visible in the pasted text; carrying a paragraph she did
+        /// not choose is not — so the one road that cannot be seen is the
+        /// one that has to speak (P-2's letter, and this batch's own new
+        /// promise is exactly what makes silence wrong here).
+        case copiedSavedTakes
         case nothingToCopy
         case failed(String)
 
@@ -85,12 +94,28 @@ enum MobileNoteClipboard {
             switch self {
             case .copied:
                 return "Copied this note to the clipboard."
+            case .copiedSavedTakes:
+                return "Copied this note to the clipboard — it has callout "
+                    + "blocks, so the copy carries the takes saved in the "
+                    + "note rather than the one on screen."
             case .nothingToCopy:
                 return "This note has no text to copy."
             case .failed(let detail):
                 return "Copy failed: \(detail)"
             }
         }
+    }
+
+    /// What a projection came back as: the text, and the ONE thing about it
+    /// the receipt has to be able to say — whether the callout fence sent
+    /// the copy to the stored road while the surface was showing something
+    /// else. Two values rather than a bare `String` because the caller must
+    /// not have to re-derive a fact this walk already knows.
+    struct Projection: Equatable {
+        let text: String
+        /// True only where `displayed` was offered AND the note carries
+        /// callout frames — the recorded corner, and nothing else.
+        let usedSavedTakesInstead: Bool
     }
 
     /// The note's copyable Markdown: the export projection, plus the open
@@ -120,22 +145,6 @@ enum MobileNoteClipboard {
     /// note with no peek and no lens copies byte-identically to before, and
     /// that is a fact the caller can guarantee cheaply (`takes.peeks.isEmpty`)
     /// rather than a claim this function has to prove.
-    nonisolated static func markdown(
-        _ db: Database, postID: String, openTail: String = "",
-        displayed: [String: String] = [:]
-    ) throws -> String {
-        var pieces: [String] = []
-        let stored = try displayed.isEmpty
-            ? Queries.exportPost(db, postID: postID)
-            : displayedProjection(db, postID: postID, displayed: displayed)
-        if !stored.isEmpty { pieces.append(stored) }
-        if !openTail.isEmpty { pieces.append(openTail) }
-        return Queries.joinRenderedTexts(pieces)
-    }
-
-    /// `exportPost`'s projection with the SURFACE's displayed text in place
-    /// of each slot's stored chosen — same walk, same join brain, same
-    /// drop-the-empties discipline.
     ///
     /// ⚠️ **ONE RECORDED CORNER, and it is a fence collision rather than a
     /// design choice: a note that carries CALLOUT FRAMES takes the stored
@@ -147,16 +156,49 @@ enum MobileNoteClipboard {
     /// behaviour (chosen takes), never a document whose framed blocks
     /// silently lose their `> ` while its plain ones follow the screen.
     ///
+    /// **AND IT SAYS SO** (the batch-7 fix wave, cold review MAJOR 1). The
+    /// two roads' costs are not symmetrical: a missing `> ` is visible in
+    /// the pasted text, while the wrong take's prose reads perfectly and
+    /// marks nothing — so the fallback is reported rather than taken
+    /// quietly. `Projection.usedSavedTakesInstead` is that report, and the
+    /// caller's receipt speaks it.
+    ///
     /// **The fix is one word** — `public` on `Queries.exportMapped`, zero
     /// behaviour change — and it is a `Sources/` edit this batch is fenced
-    /// out of. Owner named on the record's residue list. The corner needs a
-    /// peek or a lens AND a callout in the same note to be reachable at all.
+    /// out of; it lands with the #94 hoists at the post-13u merge (the seat
+    /// handoff's deferral list names it). When it does, this branch and the
+    /// sentence both go.
+    nonisolated static func markdown(
+        _ db: Database, postID: String, openTail: String = "",
+        displayed: [String: String] = [:]
+    ) throws -> Projection {
+        var pieces: [String] = []
+        var usedSavedTakesInstead = false
+        let stored: String
+        if displayed.isEmpty {
+            // The shipped road, verbatim — guaranteed by WHICH FUNCTION
+            // RUNS, never by two projections happening to agree.
+            stored = try Queries.exportPost(db, postID: postID)
+        } else if try Queries.blockPresentations(db, containerID: postID).isEmpty {
+            stored = try displayedProjection(db, postID: postID, displayed: displayed)
+        } else {
+            stored = try Queries.exportPost(db, postID: postID)
+            usedSavedTakesInstead = true
+        }
+        if !stored.isEmpty { pieces.append(stored) }
+        if !openTail.isEmpty { pieces.append(openTail) }
+        return Projection(
+            text: Queries.joinRenderedTexts(pieces),
+            usedSavedTakesInstead: usedSavedTakesInstead)
+    }
+
+    /// `exportPost`'s projection with the SURFACE's displayed text in place
+    /// of each slot's stored chosen — same walk, same join brain, same
+    /// drop-the-empties discipline. The callout fence lives at the caller
+    /// above, where the outcome it produces is decided in one place.
     private nonisolated static func displayedProjection(
         _ db: Database, postID: String, displayed: [String: String]
     ) throws -> String {
-        guard try Queries.blockPresentations(db, containerID: postID).isEmpty else {
-            return try Queries.exportPost(db, postID: postID)
-        }
         let pieces = try Queries.renderPost(db, containerID: postID)
             .map { displayed[$0.blockID] ?? $0.text ?? "" }
             .filter { !$0.isEmpty }
@@ -168,10 +210,10 @@ enum MobileNoteClipboard {
     /// clipboard would be the worse outcome of the two (P-2's honest
     /// refusal, applied to a door that cannot act).
     static func copy(
-        _ markdown: String, to destination: MobileClipboard.Destination = .general
+        _ projection: Projection, to destination: MobileClipboard.Destination = .general
     ) -> Outcome {
-        guard !markdown.isEmpty else { return .nothingToCopy }
-        MobileClipboard.write(markdown, to: destination)
-        return .copied
+        guard !projection.text.isEmpty else { return .nothingToCopy }
+        MobileClipboard.write(projection.text, to: destination)
+        return projection.usedSavedTakesInstead ? .copiedSavedTakes : .copied
     }
 }

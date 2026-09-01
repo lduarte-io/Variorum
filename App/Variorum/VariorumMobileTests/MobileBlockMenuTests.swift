@@ -140,7 +140,11 @@ struct MobileBlockMenuTests {
 
             // **PR19 (batch 7) — THE DRIFT PIN IS EXTENDED, NEVER
             // WEAKENED.** The row WORDS above are untouched: no row was
-            // added, an image was hung on four that existed. What is new is
+            // added, an image was hung on the FIVE that existed (the
+            // palette is blue · green · sand · violet · rose — the literal
+            // list two assertions above says so, and the fix wave corrected
+            // the "four" this comment used to claim; cold review NIT 1).
+            // What is new is
             // the composition claim — the COLOUR rows wear a swatch and the
             // non-colour rows do not, which is the Mac `CalloutMenu.Row`'s
             // own `swatch` nil-ness rule (nil on toggle, emoji and Remove:
@@ -293,6 +297,65 @@ struct MobileBlockMenuTests {
             in: withoutEmoji, primaryLanguage: \.language) == nil)
         #expect(MobileEmojiKeyboard.emojiMode(
             in: [Mode](), primaryLanguage: \.language) == nil)
+    }
+
+    /// **THE EMOJI SHEET STAYS USABLE AT ACCESSIBILITY TEXT SIZES** (the
+    /// batch-7 fix wave, cold review MINOR 4).
+    ///
+    /// As shipped, the sheet fixed itself at one hard 220 pt detent over a
+    /// stack pinned leading/trailing/top ONLY — no bottom constraint, no
+    /// scroll. `.headline` and `.footnote` both scale and the message wraps
+    /// to more lines, so at accessibility sizes the Cancel/Set row was
+    /// pushed past the sheet's bottom with nothing to scroll it back: the
+    /// only road out was swipe-to-dismiss, which is a CANCEL, so the emoji
+    /// could never be SET at large text sizes. MobileSoul §5.6 names
+    /// Dynamic Type as a phone-native expectation.
+    ///
+    /// The content now scrolls (and the detent clamps, with `.medium()`
+    /// beside it so the sheet may grow). Driven at an accessibility size in
+    /// a real window: the stack outgrows the detent, and `Set` is still
+    /// reachable — inside the scroll's content, with somewhere to scroll to.
+    ///
+    /// **Red on old (behavioural revert):** pin the stack straight to
+    /// `view` again (drop the scroll wrapper) and the `#require` for the
+    /// scroll reds, with the reachability assertions behind it.
+    @Test func theEmojiSheetsButtonsStayReachableAtAccessibilityTextSizes() async throws {
+        let controller = MobileEmojiPromptController(
+            title: "Callout Emoji",
+            message: "One character. Leave it empty to remove the emoji.",
+            completion: { _ in })
+        let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 393, height: 220))
+        window.rootViewController = controller
+        window.makeKeyAndVisible()
+        defer { window.isHidden = true; window.rootViewController = nil }
+
+        // The largest system text size, applied the way iOS applies it.
+        controller.traitOverrides.preferredContentSizeCategory =
+            .accessibilityExtraExtraExtraLarge
+        controller.view.frame = window.bounds
+        controller.view.layoutIfNeeded()
+
+        func descendant(_ root: UIView, _ id: String) -> UIView? {
+            for child in root.subviews {
+                if child.accessibilityIdentifier == id { return child }
+                if let found = descendant(child, id) { return found }
+            }
+            return nil
+        }
+        let scroll = try #require(
+            descendant(controller.view, "callout.emoji.scroll") as? UIScrollView)
+        let set = try #require(descendant(controller.view, "callout.emoji.set"))
+
+        // The content genuinely outgrows the sheet at this size — which is
+        // exactly what used to push the buttons off it.
+        #expect(scroll.contentSize.height > scroll.bounds.height,
+                "content \(scroll.contentSize.height) vs frame \(scroll.bounds.height)")
+        // …and `Set` is inside that content, so scrolling reaches it.
+        #expect(set.isDescendant(of: scroll))
+        let inContent = set.convert(set.bounds, to: scroll)
+        #expect(inContent.maxY <= scroll.contentSize.height + 1)
+        #expect(scroll.contentSize.height - scroll.bounds.height > 0,
+                "there is somewhere to scroll to")
     }
 
     /// **The SEAM's fallback, and the Mac's semantics travelling with the

@@ -209,7 +209,7 @@ and QUOTED (§7, R5/R6).
 `CalloutMenu.swatchImage`, phone-imaged, and it composes
 `MobileCallout.color(_:)`: **the same resolution the block's own frame uses**,
 so the chip is a PREVIEW and never a second source of truth, and the stored
-value is still the **NAME** (AppSpec §7's R1). The four colour rows in
+value is still the **NAME** (AppSpec §7's R1). The FIVE colour rows in
 `MobileBlockMenuController.calloutSubmenu` now carry it as their `UIAction`
 image.
 
@@ -222,8 +222,8 @@ Two details carried across deliberately:
   be read aloud (R93; MobileSoul §5.6), and **the words are what the drift
   pin compares**.
 
-**ONE VOCABULARY, UNDISTURBED:** no row was added — an image was hung on four
-that existed — so `MobileBlockMenuController.calloutRowTitles` and its drift
+**ONE VOCABULARY, UNDISTURBED:** no row was added — an image was hung on the
+FIVE that existed — so `MobileBlockMenuController.calloutRowTitles` and its drift
 pin against `CalloutMenu.rowTitles` are **unchanged by this batch**. The pin
 is EXTENDED (never weakened) with a composition assertion that the colour
 rows carry swatches and the non-colour rows do not — the Mac's own `swatch`
@@ -403,6 +403,28 @@ a document whose framed blocks **silently lose their `> `** — a regression
 introduced to half-satisfy a ruling. The honest fallback is the shipped
 behaviour.
 
+> **⚠️ THIS GRADING WAS INCOMPLETE, AND THE FIX WAVE CORRECTED IT** (cold
+> review MAJOR 1, accepted; the fix is in the review file's FIX WAVE
+> RESULTS §1). The paragraph above weighs "framed blocks lose their `> `"
+> against "the shipped behaviour" and **never states its own side's cost in
+> her terms**, which is this: the copy carries **a different take's
+> paragraphs than the screen shows, for the whole note, with nothing
+> marking it.** The two costs are not symmetrical —
+>
+> | road | what she gets | detectable? |
+> |---|---|---|
+> | shipped (stored road) | a **different take's paragraphs** | **NO** — the prose reads fine |
+> | rejected (displayed road) | the right paragraphs, minus `> ` and the emoji | **YES** — visible in the pasted text |
+>
+> — and this batch is what TAUGHT her the promise ("copy follows the
+> screen") that the silence then breaks, on exactly the notes that carry
+> callouts. **The fallback CHOICE stands** (MobileSoul §3 forbids forking
+> the mapper, and `exportMapped` really is `internal`); what was wrong was
+> the silence. The fix wave gives the fallback its own `Outcome` case and
+> sentence, so the one outcome that cannot be seen in the pasted text is
+> the one that is said out loud. The one-word cure now also has a durable
+> owner — the seat handoff §4's #94 deferral list, not only this file.
+
 **The fix is ONE WORD — `public` on `Queries.exportMapped`, zero behaviour
 change — and it is a `Sources/` edit this batch is fenced out of.** The
 corner needs a peek-or-lens AND a callout **in the same note** to be
@@ -525,6 +547,25 @@ The door would say **"Delete 2 Blocks…"** over a gesture that can only reach
 one — the Mac's own stated reason for the rule, verbatim: *"the count in the
 banner would be a lie."* The `pickedInOrder` assertion is kept as the control.
 
+> **THIS ACCOUNT WAS INCOMPLETE — corrected at the fix wave** (cold review
+> NIT 2, accepted). The revert reds **two tests and four assertions**, not
+> the three quoted above: the fourth is
+> `pickingTwoBlocksAndConfirmingDeletesExactlyThoseTwo`'s
+> `!list.isSelecting`, reproduced by the reviewer as
+> `MobileBlockListTests.swift:349:17: Expectation failed: !((list → …).isSelecting → true → true)`
+> — i.e. picking mode never turned off after a SUCCESSFUL delete, because
+> `prune` was also the mode's exit mechanism. The round's discipline is
+> that a revert's output is quoted AS RUN; this one was quoted partially,
+> and the direction of the error was in the batch's favour (the pin was
+> stronger than claimed).
+>
+> **And that coupling is now gone ON PURPOSE** (MINOR 3, §11-4 above): the
+> exit follows the act's returned outcome rather than the re-read, so from
+> the fix wave on this same revert reds **three assertions in one test** —
+> exactly what the original paragraph said, for a different reason. Written
+> down so a later session meets a recorded decision instead of what looks
+> like a regression.
+
 ### R8 — the row's tap always jumps
 
 ```
@@ -605,7 +646,7 @@ $ git diff -- '*.swift' | grep -c planVisibleTakeEdit
    drift apart again — the `historyTitle` lesson applied to the whole row set.
    **Extended, not weakened.**
 2. **`theTwoDoorsShareOneVocabulary`** — the callout drift pin's WORDS are
-   untouched (no row was added; an image was hung on four that existed); the
+   untouched (no row was added; an image was hung on the FIVE that existed); the
    pin GAINS a composition assertion that colour rows carry swatches and
    non-colour rows do not, plus the `.alwaysOriginal` claim.
 
@@ -740,6 +781,19 @@ INVALID for this app.)*
    all-or-nothing, which is what makes that sound — but it is inference from
    a state, not a returned outcome. A `Bool` from `onDeleteBlocks` would be
    stronger; I kept the composition thin instead.
+
+   > **ANSWERED, and the `Bool` was taken** (cold review MINOR 3, accepted;
+   > FIX WAVE RESULTS §5). The traced hole: the discrimination rode on
+   > `refresh()` reaching `adopt` — the only place `prune` runs — and
+   > `refresh()` **swallows a read failure** (`catch { status = … }`, rows
+   > stay stale). So a read that threw immediately after a delete that
+   > SUCCEEDED left the selection un-pruned, the app read its own success
+   > as a refusal, picking mode stayed on and `Delete N Blocks…` stayed
+   > armed over blocks that were already gone. `deleteWholeBlockRun` now
+   > returns `Bool`, `onDeleteBlocks` is `([String]) async -> Bool`, and
+   > the exit follows the ACT's answer; the listing is still re-read, that
+   > discipline is unchanged. **Knock-on, recorded in §7 below:** this
+   > deliberately severs the coupling that produced R7's fourth red.
 5. **The reorder door's enablement/authorization split.** `canMoveTake` reads
    the frozen projection and `moveTake` re-decides from the store. Check the
    two cannot disagree in a way that leaves a row enabled over a fan that

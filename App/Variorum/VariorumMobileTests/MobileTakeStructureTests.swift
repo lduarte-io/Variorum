@@ -469,6 +469,87 @@ struct MobileTakeToBlockTests {
         }
     }
 
+    /// **THE ROW STANDS DOWN WHILE SHE TYPES — AND IT COMES BACK** (the
+    /// batch-7 fix wave, cold review MAJOR 2).
+    ///
+    /// The batch hid the actions row while a card is live, for a real
+    /// reason (the A1 gate defect: with the keyboard up, 30 pt of chrome
+    /// cut the live card's top off). But the rule it was justified by is
+    /// *"while a take is being WRITTEN"*, and nothing a user could do ended
+    /// a card's live state — every caller of `endEditing()` was either the
+    /// sheet's own close, the opening of a DIFFERENT block, or a remote
+    /// vanish — so the row disappeared on an ordinary action and came back
+    /// only by closing the whole browser and reopening it.
+    ///
+    /// The road is iOS's own, on the scroll this sheet already owns: the
+    /// card list dismisses the keyboard on a drag, that resigns the shared
+    /// card editor, and the live state now FOLLOWS the responder. Driven
+    /// here through the real responder transition that dismissal performs.
+    ///
+    /// **Red on old (behavioural revert):** delete
+    /// `MobileTakesBrowserView.textViewDidEndEditing` and the card stays
+    /// live after the resign, so the row never returns — the third block
+    /// below reds, and the act it holds is unreachable.
+    @Test func endingACardsLiveStateBringsTheActionsRowBack() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedThreeTakePost(session)
+            let (model, surface) = await makeBrowserSurface(session, postID: seed.postID)
+            let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 393, height: 700))
+            window.addSubview(surface)
+            window.makeKeyAndVisible()
+            defer { window.isHidden = true }
+            let browserView = try #require(surface.textView.takesBrowserView)
+            @MainActor func door() throws -> UIButton {
+                try #require(descendant(browserView, "takes.browser.takesToBlocks") as? UIButton)
+            }
+            @MainActor func cardsScroll(in root: UIView) -> UIScrollView? {
+                for sub in root.subviews {
+                    if let scroll = sub as? UIScrollView, !(scroll is UITextView) {
+                        return scroll
+                    }
+                    if let hit = cardsScroll(in: sub) { return hit }
+                }
+                return nil
+            }
+
+            // 1 — a fanned block at rest: the row is there.
+            model.takesBrowser.open(blockID: seed.blockA)
+            surface.layoutIfNeeded()
+            #expect(!(try door().isHidden))
+
+            // 2 — a card goes live and the row stands down (the shipped
+            // rule, and the 30 pt the A1 pin is about).
+            model.takesBrowser.beginEditing(variantID: seed.a2)
+            surface.layoutIfNeeded()
+            #expect(try door().isHidden)
+            #expect(browserView.cardEditor.isFirstResponder)
+
+            // THE CONTROL: moving the live editor to ANOTHER card is the
+            // app rehosting its one editor, not her stopping — the resign
+            // that transition performs must never end the live state.
+            model.takesBrowser.beginEditing(variantID: seed.a3)
+            #expect(model.takesBrowser.editingVariantID == seed.a3)
+            surface.layoutIfNeeded()
+            #expect(try door().isHidden)
+
+            // 3 — HER ROAD OUT: the card list puts the keyboard away on a
+            // drag, which resigns the card editor. The gesture is the
+            // scroll's own dismiss mode; the resign is what it delivers.
+            #expect(cardsScroll(in: browserView)?.keyboardDismissMode == .onDrag)
+            _ = browserView.cardEditor.resignFirstResponder()
+            #expect(model.takesBrowser.editingVariantID == nil,
+                    "the live state follows the responder")
+            surface.layoutIfNeeded()
+            #expect(!(try door().isHidden), "the row comes back")
+
+            // …and it ACTS — the door is not merely drawn again.
+            try door().sendActions(for: .touchUpInside)
+            try await Task.sleep(nanoseconds: 200_000_000)
+            #expect(try await blockTexts(db, postID: seed.postID)
+                == ["Take one.", "Take two.", "Take three.", "A second block."])
+        }
+    }
+
     /// **The one-take refusal SPEAKS, and it names the phone's own door.**
     /// I10 through this door means "there is no other take left behind", so
     /// pointing at Delete Block (the delete door's answer) would be wrong —

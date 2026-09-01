@@ -68,6 +68,9 @@ final class MobileEmojiPromptController: UIViewController, UIAdaptivePresentatio
     private let messageText: String
     private var completion: ((String?) -> Void)?
     let field = MobileEmojiTextField()
+    /// The content's scroll (MINOR 4) — the reason the Cancel/Set row stays
+    /// reachable at accessibility text sizes.
+    let scroll = UIScrollView()
 
     init(title: String, message: String, completion: @escaping @MainActor (String?) -> Void) {
         self.messageText = message
@@ -76,7 +79,26 @@ final class MobileEmojiPromptController: UIViewController, UIAdaptivePresentatio
         self.title = title
         modalPresentationStyle = .pageSheet
         if let sheet = sheetPresentationController {
-            sheet.detents = [.custom { _ in 220 }]
+            // **THE SHEET CAN GROW, AND ITS CONTENT SCROLLS** (the batch-7
+            // fix wave, cold review MINOR 4). A single hard 220 pt detent
+            // over a stack with no bottom constraint and no scroll meant
+            // that at accessibility text sizes — `.headline` and
+            // `.footnote` both scale, and the message wraps to more lines —
+            // the Cancel/Set row was pushed off the surface, leaving
+            // swipe-to-dismiss (a CANCEL) as the only road out: the emoji
+            // could never be SET at large text sizes. MobileSoul §5.6 names
+            // Dynamic Type as a phone-native expectation.
+            //
+            // Two changes, both cheap: the resting height is CLAMPED to
+            // what the sheet may actually take, and `.medium()` joins it so
+            // the sheet can grow; `viewDidLoad` puts the stack in a scroll
+            // view so the buttons are reachable at any size regardless.
+            sheet.detents = [
+                .custom(identifier: .init("callout.emoji")) { context in
+                    min(220, context.maximumDetentValue)
+                },
+                .medium(),
+            ]
             sheet.prefersGrabberVisible = true
         }
         presentationController?.delegate = self
@@ -132,11 +154,34 @@ final class MobileEmojiPromptController: UIViewController, UIAdaptivePresentatio
         stack.axis = .vertical
         stack.spacing = 14
         stack.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(stack)
+
+        // The content SCROLLS (MINOR 4): with the stack pinned straight to
+        // the view — leading/trailing/top only, no bottom, no scroll —
+        // anything taller than the detent simply fell off the sheet. The
+        // stack now owns the scroll's content guide top AND bottom, which
+        // is what gives the scroll a content height to work with, and its
+        // width follows the frame guide so nothing lays out horizontally.
+        scroll.translatesAutoresizingMaskIntoConstraints = false
+        scroll.alwaysBounceVertical = true
+        scroll.accessibilityIdentifier = "callout.emoji.scroll"
+        view.addSubview(scroll)
+        scroll.addSubview(stack)
         NSLayoutConstraint.activate([
-            stack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            stack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            stack.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            scroll.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scroll.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scroll.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            scroll.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+
+            stack.leadingAnchor.constraint(
+                equalTo: scroll.contentLayoutGuide.leadingAnchor, constant: 20),
+            stack.trailingAnchor.constraint(
+                equalTo: scroll.contentLayoutGuide.trailingAnchor, constant: -20),
+            stack.topAnchor.constraint(
+                equalTo: scroll.contentLayoutGuide.topAnchor, constant: 20),
+            stack.bottomAnchor.constraint(
+                equalTo: scroll.contentLayoutGuide.bottomAnchor, constant: -20),
+            stack.widthAnchor.constraint(
+                equalTo: scroll.frameLayoutGuide.widthAnchor, constant: -40),
         ])
     }
 

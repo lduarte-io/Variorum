@@ -282,7 +282,12 @@ struct MobileBlockListSheet: View {
     /// another feature would be the feature-to-feature road CLAUDE.md
     /// forbids. nil = a host with no delete road, and then the Select door
     /// does not render at all (P-2).
-    var onDeleteBlocks: (([String]) async -> Void)?
+    ///
+    /// **It ANSWERS whether the act landed** (the fix wave, MINOR 3): the
+    /// sheet's success/refusal roads differ (#59(k) keeps her picks on a
+    /// refusal), and reading that difference back out of a re-read listing
+    /// made it depend on the read succeeding. The act knows; it says.
+    var onDeleteBlocks: (([String]) async -> Bool)?
     let onJump: (String) -> Void
     @Environment(\.dismiss) private var dismiss
     @State private var segment: MobileBlocksSegment = .inTheNote
@@ -290,7 +295,7 @@ struct MobileBlockListSheet: View {
     init(
         model: MobileBlockListModel, tokens: VoiceTokens,
         tray: MobileNoteTrayModel? = nil,
-        onDeleteBlocks: (([String]) async -> Void)? = nil,
+        onDeleteBlocks: (([String]) async -> Bool)? = nil,
         onJump: @escaping (String) -> Void
     ) {
         self.model = model
@@ -310,7 +315,13 @@ struct MobileBlockListSheet: View {
                 // PR20's entry door: chrome, and only where there is a
                 // delete road to reach and blocks to pick (P-2). It swaps
                 // to "Done" while picking, which is also how she leaves.
-                if onDeleteBlocks != nil, segment == .inTheNote, !model.rows.isEmpty {
+                // `|| model.isSelecting` is the missing-exit half (the fix
+                // wave, MINOR 1's rider): if every row leaves the note WHILE
+                // she is picking — a remote delete of the whole note's
+                // blocks — the door she leaves picking mode by must not
+                // leave with them.
+                if onDeleteBlocks != nil, segment == .inTheNote,
+                   !model.rows.isEmpty || model.isSelecting {
                     Button(tokens.chromeLabel(
                         model.isSelecting
                             ? MobileBlockSelectionCopy.doneSelectingTitle
@@ -332,7 +343,17 @@ struct MobileBlockListSheet: View {
                             ? MobileBlockSelectionCopy.doneSelectingLabel
                             : MobileBlockSelectionCopy.selectLabel)
                 }
-                Button(tokens.chromeLabel("Done")) { dismiss() }
+                // **THE SHEET'S OWN DISMISS LEAVES PICKING MODE TOO** (the
+                // fix wave, MINOR 1). `exitSelection`'s doc states the rule
+                // — *"a selection that outlived its surface would offer acts
+                // on blocks she is no longer looking at"* — and this is the
+                // sheet's PRIMARY exit; without it, picking survived the
+                // dismissal and the sheet reopened armed, with the picks and
+                // the delete verb still on the banner.
+                Button(tokens.chromeLabel("Done")) {
+                    model.exitSelection()
+                    dismiss()
+                }
                     .font(tokens.small)
                     .foregroundStyle(tokens.accent)
                     .buttonStyle(.plain)
@@ -357,6 +378,10 @@ struct MobileBlockListSheet: View {
         // delivery — a remote divide landing mid-read appears; the task
         // cancels the observation at dismissal.
         .task { await model.start() }
+        // …and SWIPE-TO-DISMISS is the same exit (the fix wave, MINOR 1).
+        // The Done button above covers the tapped road; this covers the
+        // one the system performs, so the rule holds however she leaves.
+        .onDisappear { model.exitSelection() }
         // PR20's confirm. Its PRESENTATION is pinnable end to end (a real
         // `UIAlertController` in the window); its EFFECT is driven through
         // the model, because a `UIAlertController`'s own buttons measurably
@@ -390,16 +415,23 @@ struct MobileBlockListSheet: View {
         guard let onDeleteBlocks else { return }
         let picked = model.pickedInOrder
         guard !picked.isEmpty else { return }
-        await onDeleteBlocks(picked)
+        let landed = await onDeleteBlocks(picked)
         // A DETERMINISTIC prune, not a hope: the held observation's delivery
-        // is asynchronous, so the outcome is read through the one listing
-        // door instead (the takes browser's own "verbs end in a fresh read"
-        // discipline — correct with or without the observation running, and
-        // its delivery is then an echo). The compound is all-or-nothing, so
-        // an empty selection afterwards means it LANDED; anything left means
-        // it refused, and her picks stay for the retry (#59(k)).
+        // is asynchronous, so the listing is re-read through the one door
+        // (the takes browser's own "verbs end in a fresh read" discipline —
+        // correct with or without the observation running, and its delivery
+        // is then an echo).
         await model.refresh()
-        if model.selection.isEmpty { model.exitSelection() }
+        // **THE OUTCOME DECIDES, NOT THE RE-READ** (the fix wave, MINOR 3).
+        // This used to infer "landed" from an emptied selection, which made
+        // the discrimination ride on `refresh()` reaching `adopt` — and
+        // `refresh()` SWALLOWS a read failure, leaving the rows (and so the
+        // picks) stale. A read that threw right after a successful delete
+        // therefore made the app read its own success as a refusal and keep
+        // `Delete N Blocks…` armed over blocks that were already gone. The
+        // act's own answer cannot be stale. A refusal still KEEPS her picks
+        // — there is nothing to re-tap (#59(k)).
+        if landed { model.exitSelection() }
     }
 
     /// **PR20's banner.** It states the count and offers the one act; it

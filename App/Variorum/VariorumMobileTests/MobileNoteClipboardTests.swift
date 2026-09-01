@@ -236,6 +236,11 @@ struct MobileNoteClipboardTests {
                 #expect(board.pasteboard.string
                         == "The peeked one.\n\nA plain neighbour.",
                         "copy follows the screen (R15)")
+                // THE CONTROL for the fix wave's MAJOR 1 sentence: an
+                // UNFRAMED note followed the screen, so its receipt is the
+                // plain one and says nothing about saved takes.
+                #expect(model.statusMessage
+                        == MobileNoteClipboard.Outcome.copied.message)
             }
 
             // Flipping back to truth ENDS the peek, and the copy is the
@@ -269,7 +274,10 @@ struct MobileNoteClipboardTests {
             let composed = try await db.read { db in
                 try MobileNoteClipboard.markdown(db, postID: postID, displayed: [:])
             }
-            #expect(composed == stored)
+            #expect(composed.text == stored)
+            // …and the projection says it followed the screen, because on
+            // this road there was nothing else to follow.
+            #expect(!composed.usedSavedTakesInstead)
         }
     }
 
@@ -283,6 +291,20 @@ struct MobileNoteClipboardTests {
     ///
     /// **This pin exists so that the one-word core fix (`public` on
     /// `exportMapped`) announces itself here instead of passing quietly.**
+    ///
+    /// ── **AND THE FALLBACK SPEAKS** (the fix wave, cold review MAJOR 1) ──
+    ///
+    /// The two roads' costs are not symmetrical, which is what the batch's
+    /// own grading missed: a missing `> ` is VISIBLE in the pasted text,
+    /// while a paragraph she did not choose reads perfectly and marks
+    /// nothing — and this batch is what taught her the promise ("copy
+    /// follows the screen") that the silence then breaks. So the receipt
+    /// names the fallback. The sentence goes when the one word lands.
+    ///
+    /// **Red on old (behavioural revert):** make `copy` return `.copied`
+    /// unconditionally (drop the `usedSavedTakesInstead` arm) and the
+    /// receipt assertion below reds, while the peeked-unframed control in
+    /// `aPeekedTakeIsWhatTheCopyCarries` stays green.
     @Test func aCalloutNoteKeepsTheStoredRoadEvenWhilePeeking() async throws {
         try await withEditorWorld { session, db in
             let seed = try await session.runner.run { ops -> (post: String, block: String) in
@@ -312,6 +334,19 @@ struct MobileNoteClipboardTests {
                 #expect(board.pasteboard.string == stored)
                 #expect(board.pasteboard.string?.contains("The chosen one.") == true)
                 #expect(board.pasteboard.string?.contains("> Framed.") == true)
+
+                // …AND SHE IS TOLD. The receipt names the road the copy
+                // actually took, so the one outcome that cannot be seen in
+                // the pasted text is the one that is said out loud.
+                let spoken = try #require(model.statusMessage)
+                #expect(spoken == MobileNoteClipboard.Outcome.copiedSavedTakes.message)
+                #expect(spoken != MobileNoteClipboard.Outcome.copied.message)
+                #expect(spoken.contains("callout"))
+                #expect(spoken.contains("saved in the note"))
+                // It names no chord and no other platform (the standing
+                // no-redirect rule for every sentence this phone speaks).
+                #expect(!spoken.contains("⌘"))
+                #expect(!spoken.contains("Mac"))
             }
         }
     }

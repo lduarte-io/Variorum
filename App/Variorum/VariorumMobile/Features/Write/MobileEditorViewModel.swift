@@ -976,11 +976,14 @@ final class MobileEditorViewModel {
         let openTail = mintableTail ? openTailText : ""
         let displayed = displayedTextByBlock
         do {
-            let markdown = try await session.database.read { [postID] db in
+            let projection = try await session.database.read { [postID] db in
                 try MobileNoteClipboard.markdown(
                     db, postID: postID, openTail: openTail, displayed: displayed)
             }
-            report(MobileNoteClipboard.copy(markdown, to: destination).message)
+            // The receipt carries the projection's OWN answer about which
+            // road it took — so the one copy that cannot follow the screen
+            // (the callout corner) says so instead of reading as ordinary.
+            report(MobileNoteClipboard.copy(projection, to: destination).message)
         } catch {
             report(MobileNoteClipboard.Outcome
                 .failed(String(describing: error)).message)

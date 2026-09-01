@@ -784,3 +784,408 @@ known issues — final line quoted; unique pre-revert dir, diff-verified
 restores; fence grep + planVisibleTakeEdit zero; pathspec-limited
 commit; no pushes). Reds quoted, production or fixture named. Append a
 FIX WAVE RESULTS section to THIS file before the final message.
+
+---
+
+# FIX WAVE RESULTS (the implementer, 2026-08-31)
+
+**All seven brief items executed. No item declined, nothing beyond them
+built.** Written INCREMENTALLY as each piece landed — this round has now
+had three session deaths, and a results section on disk survives a final
+message that never gets sent.
+
+## Environment (binding, and discharged)
+
+| what | value |
+|---|---|
+| simulator | `fixwave-b7` — **iPhone 17, iOS 26.2 (23C54)**, created fresh for this wave |
+*[removed for publication]*
+| accessibility | `ApplicationAccessibilityEnabled` written and **read back `1`** |
+| derived data | private `-derivedDataPath` at `<scratchpad>/fw-b7-dd` |
+| pre-revert dir | **`<scratchpad>/b7-wave-prerevert/`** — uniquely named; the shared scratchpad holds NINE stale prerevert dirs from other batches (`prerevert/`, `b7-prerevert/`, `cr-b7-prerevert/`, `fixwave-prerevert/`, the four `45c-*`), and restoring from one of those would clobber this wave |
+| teardown | simulator deleted at the wave's close |
+
+*(The 16-series simulators on this machine carry iOS 18.3 only and are
+INVALID for this app.)*
+
+---
+
+## Per-item dispositions
+
+### 1 · MAJOR 1 — the silence gets its sentence · **FIXED, in-fence**
+
+**Files:** `Features/Write/MobileNoteClipboard.swift` ·
+`Features/Write/MobileEditorViewModel.swift` (the caller) ·
+`VariorumMobileTests/MobileNoteClipboardTests.swift`.
+
+`markdown` now returns a **`Projection`** — the text plus
+`usedSavedTakesInstead`, the one fact the receipt has to be able to state —
+and the callout fence moved OUT of `displayedProjection` and INTO
+`markdown`, so the road taken and the outcome it produces are decided in
+one place. `copy` reads that flag and answers a new `Outcome` case,
+`.copiedSavedTakes`:
+
+> Copied this note to the clipboard — it has callout blocks, so the copy
+> carries the takes saved in the note rather than the one on screen.
+
+One sentence, in the door's existing voice home (`Outcome.message`, where
+the other three live — no second copy vocabulary). The fallback BEHAVIOUR
+is byte-unchanged; only its silence is gone. **The reviewer's dismissal
+option was available and NOT taken:** the sentence rides only the
+framed-note copy, which is the conjunction (callout + peek/lens + whole-note
+copy) the record itself calls rare — so it is not noise on every copy, and
+the one outcome that cannot be seen in the pasted text is the one that
+speaks.
+
+**The record's grading paragraph is corrected** (record §5 — it now names
+the shipped side's own cost: the wrong take's prose, silently, and the
+asymmetry that a missing `> ` is visible while a wrong paragraph is not).
+
+**The one-word cure has its durable owner.** `notes/plans/mobile-round-2-fable-seat-handoff.md` §4's
+#94 deferral list gains the `Queries.exportMapped` → `public` clause, so
+M23's corner closes at the post-13u merge beside the four hoists rather
+than living only in a plan file that closes.
+
+### 2 · MAJOR 2 — the act comes back · **FIXED, inside the sheet's own files**
+
+**Files:** `Features/Takes/MobileTakesBrowserView.swift` only (plus its
+pin). **The brief's stop condition did not trigger** — the trace ended
+inside the sheet.
+
+**The trace, first.** I re-derived the reviewer's enumeration: five callers
+of `endEditing()`, none a user-reachable "done with this card"
+(`open(blockID:)` = a DIFFERENT block · `close()` = the whole browser ·
+`projectionDidChange()` = a remote vanish · archive/delete of the live
+take). `bodyTapped()` → `beginEditing(variantID:)` MOVES the live card
+rather than clearing it. Confirmed: the only road back was closing the
+sheet and reopening it.
+
+**The road, and it is iOS's own on a control this sheet already owns:**
+`cardsScroll.keyboardDismissMode = .onDrag`. Dragging the card list — the
+literal gesture her A1 report is about ("i couldn't scroll down through the
+list of takes") — puts the keyboard away, which resigns the shared card
+editor, and the live state now FOLLOWS the responder
+(`textViewDidEndEditing` → `endEditing()`). The actions row returns on the
+next layout. No new chrome, no new gesture, no invented door.
+
+**The one real hazard, handled at the mechanism:** the app moves that ONE
+shared editor between cards, and `removeFromSuperview()` resigns it — so a
+naive delegate hook would have cancelled the very card a tap on another
+card was installing. `isRehostingCardEditor` fences both the attach and the
+detach, so only a resign the app did not perform reads as hers. The
+existing window-hosted pin
+(`beginEditingRaisesKeyboardFocusOnTheCardEditor`) rides unmodified and is
+the standing guard on that hazard; the new pin carries its own control for
+it too.
+
+**The 30 pt A1 pin (`theKeyboardNeverStrandsTheCardListFooterOrLiveCard`)
+rides unmodified** — the stand-down rule is untouched; what changed is that
+the rule now ends when the writing does.
+
+### 3 · MINOR 1 — `exitSelection` on dismissal · **FIXED (+ the finding's own rider)**
+
+**File:** `Features/Write/MobileBlockList.swift` (+ pins).
+
+The sheet's `Done` now calls `model.exitSelection()` before `dismiss()`,
+and `.onDisappear { model.exitSelection() }` covers swipe-to-dismiss — so
+the rule `exitSelection`'s doc states holds however she leaves. **The
+finding's riding NIT is fixed with it** (it is inside MINOR 1's own text):
+the Select/Done chrome renders while `model.isSelecting` even over an
+emptied listing, so a remote delete of every block can no longer leave
+picking mode on with no button to leave by.
+
+### 4 · MINOR 2 — the JOIN is pinned · **FIXED (a pin, no production change)**
+
+**File:** `VariorumMobileTests/MobileBlockListTests.swift`.
+
+`theRealScreenWiresPickingToTheOneDeleteRoad` hosts the REAL
+`MobileWriteScreen` (the pattern seven existing suites own), opens the real
+blocks sheet from the masthead chip, picks two rows by their real handles,
+confirms at the real alert, and asserts the store **and**
+`session.undoStack.topLabel == "Delete Blocks"` with `depth == before + 1`
+— so the screen's own injected closure provably reaches
+`deleteWholeBlockRun`, and the feature can no longer be disconnected in
+`MobileWriteView` with every pin green.
+
+### 5 · MINOR 3 — the outcome decides · **FIXED at the mechanism**
+
+**Files:** `Features/Write/MobileStructural.swift` ·
+`Features/Write/MobileBlockList.swift` ·
+`Features/Write/MobileWriteView.swift` (+ pins).
+
+The reviewer's own preferred shape, taken: `deleteWholeBlockRun` is now
+`@discardableResult … -> Bool` (false on the flight latch, false on a
+refused flush, false on a throw, true on the landing), `onDeleteBlocks` is
+`([String]) async -> Bool`, and `deletePicked` exits picking mode on the
+ACT's answer. The listing is still re-read — that discipline is unchanged —
+but the success/refusal discrimination no longer rides on `refresh()`
+reaching `adopt`, so a read that throws right after a successful delete can
+no longer make the app read its own success as a refusal and leave
+`Delete N Blocks…` armed over blocks that are gone. A refusal still keeps
+her picks (#59(k)).
+
+**Consequence worth stating, because it changes a prior revert's shape:**
+this fix DELIBERATELY removes the coupling that produced the fourth red in
+the reviewer's revert B (see item 7 / NIT 2).
+
+### 6 · MINOR 4 — the emoji sheet · **FIXED (layout half); the keyboard half stays SPECULATIVE**
+
+**File:** `Features/Write/MobileEmojiField.swift` (+ pin).
+
+The content stack now lives in a `UIScrollView` pinned to the view, owning
+the scroll's content guide top AND bottom (the missing bottom constraint
+was half the defect), and the detent is `min(220, maximumDetentValue)` with
+`.medium()` beside it so the sheet can grow. At the default content size
+the sheet is visually what shipped; at accessibility sizes the Cancel/Set
+row is reachable instead of pushed off a fixed 220 pt with swipe-to-dismiss
+(a CANCEL) as the only road out.
+
+**The keyboard-overlap half is NOT claimed fixed.** Whether
+`UISheetPresentationController` performs keyboard avoidance for a custom
+detent on iOS 26 cannot be settled headlessly, and the scroll does not help
+if the SHEET itself is occluded. It joins the **DEVICE QUEUE** below.
+
+### 7 · NIT 1 + NIT 2 — the record's facts · **FIXED (no pins; comment/record class)**
+
+**NIT 1 — five, not four,** in every home the reviewer named and one more
+they did not: `MobileBlockMenu.swift:103` (the latch's coverage note — it
+also said "four colours"), `MobileBlockMenu.swift:~244` (the production
+comment), `MobileBlockMenuTests.swift:~143` (the pin's comment), and the
+record's §3 and §8. The count is derived from `MobileCallout.names`
+everywhere, so nothing behavioural rode on it.
+
+**NIT 2 — R7's account completed** in record §7: the revert reds **two
+tests, four assertions**, the fourth being
+`pickingTwoBlocksAndConfirmingDeletesExactlyThoseTwo`'s `!list.isSelecting`
+— and the record now also says that item 5 above intentionally severed that
+coupling, so from this wave on the same revert reds three assertions in one
+test. Recorded rather than left to be re-discovered as a regression.
+
+---
+
+## RED-ON-OLD — every fix's revert RUN, output QUOTED
+
+Applied to **production** files only (never tests), from
+`<scratchpad>/b7-wave-prerevert/`, every restore `diff`-verified
+byte-identical afterwards. Two waves, because the reds are in distinct
+files and distinct tests (the batch record's own R1·R2·R4 precedent).
+
+### WAVE A — MAJOR 1 · MAJOR 2 · MINOR 4
+
+Reverts: `copy` returns `.copied` unconditionally (the
+`usedSavedTakesInstead` arm dropped) · `textViewDidEndEditing` renamed out
+of the delegate's vocabulary (the method gone as far as UIKit is
+concerned) · the emoji scroll wrapper removed and the stack pinned straight
+to the view again.
+
+```
+✘ Test theEmojiSheetsButtonsStayReachableAtAccessibilityTextSizes() recorded an issue at MobileBlockMenuTests.swift:345:26: Expectation failed: (descendant(controller.view, "callout.emoji.scroll") → nil) as? (UIScrollView → Optional<UIView>)
+✘ Test theEmojiSheetsButtonsStayReachableAtAccessibilityTextSizes() failed after 0.026 seconds with 1 issue.
+✘ Suite "Mobile block menu — the one builder (S4 batch 1)" failed after 1.290 seconds with 1 issue.
+✘ Test aCalloutNoteKeepsTheStoredRoadEvenWhilePeeking() recorded an issue at MobileNoteClipboardTests.swift:342:17: Expectation failed: (spoken → "Copied this note to the clipboard.") == (MobileNoteClipboard.Outcome.copiedSavedTakes.message → "Copied this note to the clipboard — it has callout blocks, so the copy carries the takes saved in the note rather than the one on screen.")
+✘ Test aCalloutNoteKeepsTheStoredRoadEvenWhilePeeking() recorded an issue at MobileNoteClipboardTests.swift:343:17: Expectation failed: (spoken → "Copied this note to the clipboard.") != (MobileNoteClipboard.Outcome.copied.message → "Copied this note to the clipboard.")
+✘ Test aCalloutNoteKeepsTheStoredRoadEvenWhilePeeking() recorded an issue at MobileNoteClipboardTests.swift:344:17: Expectation failed: (spoken → "Copied this note to the clipboard.").contains("callout")
+✘ Test aCalloutNoteKeepsTheStoredRoadEvenWhilePeeking() recorded an issue at MobileNoteClipboardTests.swift:345:17: Expectation failed: (spoken → "Copied this note to the clipboard.").contains("saved in the note")
+✘ Test aCalloutNoteKeepsTheStoredRoadEvenWhilePeeking() failed after 0.058 seconds with 4 issues.
+✘ Suite "Mobile copy note — the masthead's ⧉ (M3 ≡ R6)" failed after 0.657 seconds with 4 issues.
+✘ Test endingACardsLiveStateBringsTheActionsRowBack() recorded an issue at MobileTakeStructureTests.swift:540:13: Expectation failed: (model.takesBrowser.editingVariantID → "00000000-0000-0000-0000-000000000008") == nil
+✘ Test endingACardsLiveStateBringsTheActionsRowBack() recorded an issue at MobileTakeStructureTests.swift:543:13: Expectation failed: !(try door().isHidden)
+✘ Test endingACardsLiveStateBringsTheActionsRowBack() failed after 0.333 seconds with 2 issues.
+✘ Suite "Mobile takes — take ↔ block (round 2, batch 7 · PL-10(d))" failed after 0.986 seconds with 2 issues.
+✘ Test run with 34 tests in 3 suites failed after 2.935 seconds with 7 issues.
+```
+
+**Three fixes, three reds, each at its own traced mechanism — and the
+CONTROLS held.** 27 of the 34 tests stayed green, including
+`aPeekedTakeIsWhatTheCopyCarries` (the unframed peeked note's receipt is
+the plain one — so the new sentence is scoped to the fallback and not
+sprayed over every copy), every other take↔block pin, and the whole emoji
+seam beneath the sheet. MAJOR 2's red is the finding in two lines: with the
+delegate gone the card is STILL LIVE after the resign
+(`editingVariantID → "…008"`), so the row never returns and the act it
+holds is unreachable.
+
+**Restored and `diff`-verified: five files, five IDENTICAL** (the three
+reverted plus the two carried for wave B).
+
+### WAVE B — MINOR 1 (both halves) · MINOR 3 · MINOR 2
+
+Reverts: `model.exitSelection()` dropped from the sheet's Done AND the
+`.onDisappear` road removed · `|| model.isSelecting` dropped from the
+chrome's condition · `deletePicked` reading the emptied selection again
+instead of the act's answer · `onDeleteBlocks: nil` at `MobileWriteView`'s
+`MobileBlockListSheet`.
+
+```
+✘ Test theSheetsOwnDoneLeavesPickingModeAndDropsThePicks() recorded an issue at MobileBlockListTests.swift:511:17: Expectation failed: !((list → VariorumMobile.MobileBlockListModel).isSelecting → true → true)
+✘ Test theSheetsOwnDoneLeavesPickingModeAndDropsThePicks() recorded an issue at MobileBlockListTests.swift:512:17: Expectation failed: (list.selection → MobileBlockSelection(picked: Set(["00000000-0000-0000-0000-000000000004"]))).isEmpty → false
+✘ Test theSheetsOwnDoneLeavesPickingModeAndDropsThePicks() failed after 4.989 seconds with 2 issues.
+✘ Test theDonePickingDoorSurvivesTheLastRowLeaving() recorded an issue at MobileBlockListTests.swift:549:17: Expectation failed: (surface.visibleLabels → ["blocks", "done", "tap blocks to pick them.", "no blocks yet — type on the page and each finished paragraph becomes one."]).contains(MobileBlockSelectionCopy.doneSelectingLabel → "Done picking")
+✘ Test theDonePickingDoorSurvivesTheLastRowLeaving() recorded an issue at MobileBlockListTests.swift:552:17: Expectation failed: (surface → VariorumMobileTests.HostedSurface<VariorumMobile.MobileBlockListSheet>).activate(MobileBlockSelectionCopy.doneSelectingLabel → "Done picking")
+✘ Test theDonePickingDoorSurvivesTheLastRowLeaving() recorded an issue at MobileBlockListTests.swift:554:17: Expectation failed: !((list → VariorumMobile.MobileBlockListModel).isSelecting → true → true)
+✘ Test theDonePickingDoorSurvivesTheLastRowLeaving() failed after 6.696 seconds with 3 issues.
+✘ Test theExitFollowsTheActsOutcomeNotTheListingsReRead() recorded an issue at MobileBlockListTests.swift:605:17: Expectation failed: !((landedList → VariorumMobile.MobileBlockListModel).isSelecting → true → true)
+✘ Test theExitFollowsTheActsOutcomeNotTheListingsReRead() recorded an issue at MobileBlockListTests.swift:606:17: Expectation failed: (landedList.selection → MobileBlockSelection(picked: Set(["00000000-0000-0000-0000-000000000004"]))).isEmpty → false
+✘ Test theExitFollowsTheActsOutcomeNotTheListingsReRead() failed after 11.700 seconds with 2 issues.
+✘ Test theRealScreenWiresPickingToTheOneDeleteRoad() recorded an issue at MobileBlockListTests.swift:664:17: Expectation failed: (surface → VariorumMobileTests.HostedSurface<VariorumMobile.MobileWriteScreen>).activate(MobileBlockSelectionCopy.selectLabel → "Select blocks")
+✘ Test theRealScreenWiresPickingToTheOneDeleteRoad() recorded an issue at MobileBlockListTests.swift:669:17: Expectation failed: (surface → VariorumMobileTests.HostedSurface<VariorumMobile.MobileWriteScreen>).activate("Delta here.")
+✘ Test theRealScreenWiresPickingToTheOneDeleteRoad() recorded an issue at MobileBlockListTests.swift:672:17: Expectation failed: (surface → VariorumMobileTests.HostedSurface<VariorumMobile.MobileWriteScreen>).activate(MobileBlockSelectionCopy.deleteVerb(picked: 2) → "Delete 2 Blocks…")
+✘ Test theRealScreenWiresPickingToTheOneDeleteRoad() recorded an issue at MobileBlockListTests.swift:675:17: Expectation failed: (surface.presentedAlert?.title → nil) == "Delete 2 Blocks"
+✘ Test theRealScreenWiresPickingToTheOneDeleteRoad() recorded an issue at MobileBlockListTests.swift:676:17: Expectation failed: (surface → VariorumMobileTests.HostedSurface<VariorumMobile.MobileWriteScreen>).activateAlertAction(MobileBlockSelectionCopy.confirmActionTitle → "Delete")
+✘ Test theRealScreenWiresPickingToTheOneDeleteRoad() recorded an issue at MobileBlockListTests.swift:682:17: Expectation failed: (after → ["Alpha here.", "Beta here.", "Gamma here.", "Delta here."]) == ["Alpha here.", "Gamma here."]
+✘ Test theRealScreenWiresPickingToTheOneDeleteRoad() recorded an issue at MobileBlockListTests.swift:684:17: Expectation failed: (session.undoStack.depth → 0) == (before + 1 → 1)
+✘ Test theRealScreenWiresPickingToTheOneDeleteRoad() recorded an issue at MobileBlockListTests.swift:685:17: Expectation failed: (session.undoStack.topLabel → nil) == "Delete Blocks"
+✘ Test theRealScreenWiresPickingToTheOneDeleteRoad() failed after 17.330 seconds with 8 issues.
+✘ Suite "Mobile block selection — pick several, delete once (batch 7 · PR20)" failed after 52.862 seconds with 15 issues.
+✘ Test run with 12 tests in 1 suite failed after 52.862 seconds with 15 issues.
+```
+
+**Four reds at four traced mechanisms; 8 of the suite's 12 tests stayed
+green**, including every pin the batch shipped
+(`pickingTwoBlocksAndConfirmingDeletesExactlyThoseTwo`,
+`aBlockDeletedElsewhereDropsOutOfThePicksAndOutOfTheCount`,
+`thereIsNoMergeSelectedDoorAndTheAbsenceIsRuled`,
+`atRestThereIsNoBannerAndNoDeleteDoor`) — so each new pin is narrow to its
+own fix and none of them is a broad net.
+
+Two of these reds quote the finding better than prose could:
+
+- **MINOR 1's rider:** the reverted tree's REAL mounted label list comes
+  back as `["blocks", "done", "tap blocks to pick them.", "no blocks yet…"]`
+  — picking mode still on, the banner still asking her to tap blocks, and
+  the only "done" in the tree is the sheet's dismiss. That is the missing
+  exit, photographed.
+- **MINOR 2:** with `onDeleteBlocks: nil` the Select door is simply not in
+  the tree, and the eight cascading failures end at
+  `undoStack.topLabel → nil` — i.e. the whole feature disconnected, which
+  before this pin was a green suite.
+
+**Restored and `diff`-verified: five files, five IDENTICAL.**
+
+---
+
+## Files touched (8 production + 4 test + 3 notes)
+
+| file | item |
+|---|---|
+| `Features/Write/MobileNoteClipboard.swift` | 1 (the `Projection`, the fence, the sentence) |
+| `Features/Write/MobileEditorViewModel.swift` | 1 (the receipt's call site) |
+| `Features/Takes/MobileTakesBrowserView.swift` | 2 (the dismiss mode, the rehost fence, the delegate) |
+| `Features/Write/MobileBlockList.swift` | 3 + 5 (the exits; the outcome-driven discrimination) |
+| `Features/Write/MobileStructural.swift` | 5 (`deleteWholeBlockRun -> Bool`) |
+| `Features/Write/MobileWriteView.swift` | 5 (the host's closure returns it) |
+| `Features/Write/MobileEmojiField.swift` | 6 (the scroll + the clamped detent) |
+| `Features/Write/MobileBlockMenu.swift` | 7 (NIT 1 — two comment homes) |
+| `VariorumMobileTests/MobileNoteClipboardTests.swift` | 1 (the fallback's receipt + the control) |
+| `VariorumMobileTests/MobileTakeStructureTests.swift` | 2 (`endingACardsLiveStateBringsTheActionsRowBack`) |
+| `VariorumMobileTests/MobileBlockListTests.swift` | 3 · 4 · 5 (four new pins) |
+| `VariorumMobileTests/MobileBlockMenuTests.swift` | 6 + 7 (the Dynamic-Type pin; NIT 1's comment) |
+| `notes/plans/mobile-batch-7-record.md` | the M23 grading correction · §11-4 answered · §7's R7 account completed · "four" → FIVE (§3 ×2, §8) |
+| `notes/plans/mobile-round-2-fable-seat-handoff.md` | §4 — the `exportMapped` → `public` one-worder joins the #94 deferral list |
+| `notes/plans/mobile-batch-7-cold-review.md` | this section |
+
+**Pin count: +6** (`endingACardsLiveStateBringsTheActionsRowBack` ·
+`theSheetsOwnDoneLeavesPickingModeAndDropsThePicks` ·
+`theDonePickingDoorSurvivesTheLastRowLeaving` ·
+`theExitFollowsTheActsOutcomeNotTheListingsReRead` ·
+`theRealScreenWiresPickingToTheOneDeleteRoad` ·
+`theEmojiSheetsButtonsStayReachableAtAccessibilityTextSizes`), plus
+assertions added to two existing pins (the callout corner's receipt, the
+peeked control's receipt) and one call-site update
+(`markdown(...)` → `.text`).
+
+## DEVICE QUEUE (carried, not claimed)
+
+- **MINOR 4's keyboard half stays SPECULATIVE.** `viewDidAppear` raises the
+  emoji keyboard under the sheet, and whether
+  `UISheetPresentationController` performs keyboard avoidance for a custom
+  detent on iOS 26 cannot be settled in process — a scroll does not help if
+  the SHEET itself is occluded. **The check is one minute on device:**
+  block ⋯ ▸ Callout ▸ Emoji…, and confirm `Set` is hittable with the emoji
+  keyboard up. If it is not, the answer is likely `.medium()` as the
+  RESTING detent rather than the clamp — the machinery for it is already
+  in place.
+- **MAJOR 2's gesture wants her hands too, for feel rather than
+  correctness:** `.onDrag` means a scroll of the card list dismisses the
+  keyboard. That is the standard iOS behaviour and it is what gives the
+  actions row its road back, but whether it feels right *while she is
+  writing a take* is a taste question the pins cannot answer.
+
+## Fence — re-derived after the wave
+
+```
+$ git diff --name-only -- Sources/ App/Variorum/Shared App/Variorum/Variorum "*.xcodeproj" "*.pbxproj"
+(empty)
+
+$ git diff --name-only | grep -i editorbrain
+(empty)
+
+$ git diff -- '*.swift' | grep -c planVisibleTakeEdit
+0
+```
+
+ZERO lines under `Sources/`, `App/Variorum/Shared/`,
+`App/Variorum/Variorum/`, `EditorBrain/`, schema or build configs; core and
+shared types were READ and CALLED, never edited. `Package.resolved`
+checked for test-run drift and clean. No Release build, no install, no
+push; the real store never touched.
+
+## Suite
+
+**Baseline: mobile 706/102 green with 2 known issues** (this batch's close,
+re-run and confirmed by the cold reviewer at the top of this file).
+
+**FULL SUITE — RUN BY THIS SESSION, on the final tree. The exact final line:**
+
+```
+✘ Test run with 712 tests in 102 suites passed after 360.446 seconds with 2 known issues.
+** TEST SUCCEEDED **
+```
+
+*(Swift Testing marks a run carrying known issues with `✘` while reporting
+it `passed`; `** TEST SUCCEEDED **` is the verdict.)*
+
+| | baseline | now | delta |
+|---|---|---|---|
+| tests | 706 | **712** | **+6 — exactly this wave's pins** (1 takes-sheet · 4 block-selection · 1 emoji sheet) |
+| suites | 102 | **102** | 0 — every new pin joined an existing suite |
+| known issues | 2 | 2 | 0 — the same documented diagnostic (`MobileTrashTests.anEmptyAccessibilityTreeIsDiagnosedRatherThanReadAsAnAbsentDoor`, which records issues BY DESIGN) |
+
+### Both watched-for conditions, reported
+
+- **The load-flaky perf pin did NOT red.**
+  `MobilePerfWalkTests.typingAtTheViewportHoldsThePerKeystrokeBudgetAt100k`
+  — `✔ … passed after 1.193 seconds`. No isolated re-run was owed. Worth
+  recording that it held **under real load**: another agent's `xcodebuild`
+  was running the Mac suite in `~/dev/variorum` for part of this run.
+- **No runner death.** Zero `Restarting after unexpected exit` lines; the
+  run completed in one launch (360.446 s).
+- **One run was deliberately ABORTED and is not cited as evidence:** a
+  first full-suite pass was ~160 tests in when I found `Projection.empty`
+  in the MAJOR 1 diff — an unused static, i.e. dead code shipped by this
+  wave. It was removed and the suite re-run from the top, so **the quoted
+  line above is a run of the exact tree being committed**, which is the
+  only reason to quote one.
+
+---
+
+## UNIT — WHAT THIS WAVE LEAVES
+
+**All eight review findings are now dispositioned FIXED.** Nothing was
+disputed, nothing dismissed, nothing deferred without an owner:
+
+| finding | disposition |
+|---|---|
+| MAJOR 1 | FIXED — the fallback speaks; grading corrected; the one-worder owned in the seat handoff |
+| MAJOR 2 | FIXED — inside the sheet's own files; the stop condition did not trigger |
+| MINOR 1 | FIXED — both exits, plus the finding's own riding NIT |
+| MINOR 2 | FIXED — the join pinned on the real screen |
+| MINOR 3 | FIXED — the act answers; §11-4 corrected |
+| MINOR 4 | FIXED (layout); the keyboard half is on the DEVICE QUEUE, unclaimed |
+| NIT 1 | FIXED — five, in four code/test homes and two record homes |
+| NIT 2 | FIXED — R7's account completed, with its own knock-on recorded |
+
+**Carried forward, unchanged by this wave:** the residue list at record §8
+(the four recorded forks, Merge Selected awaiting her ruling) and the #94
+deferrals at record §9 — now joined by the `exportMapped` one-worder in the
+seat handoff, which is the only item this wave added to anyone's list.

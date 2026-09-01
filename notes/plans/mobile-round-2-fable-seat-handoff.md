@@ -157,6 +157,25 @@ batches 7 and 8 build their phone-local halves only, and the deferral is
 recorded on each batch's record so the post-merge session inherits a
 decision, not a discovery.
 
+**AND A FIFTH, ONE-WORDER, RIDES WITH THEM** (added at batch 7's fix wave,
+cold review MAJOR 1 — it is the same fence and the same conversation, and
+it had no owner outside a plan file that closes):
+
+- **`Queries.exportMapped` → `public`** (`Sources/VariorumCore/Queries/Export.swift:59`).
+  Zero behaviour change, one keyword. It is the whole of M23's recorded
+  corner: `exportMapped` maps a callout block to its blockquote, it is
+  `internal` to VariorumCore, and re-implementing it phone-side would fork
+  a core brain (MobileSoul §3) — so a note carrying CALLOUT FRAMES takes
+  the stored road even while a take is peeked or a lens is active, i.e.
+  **the one road on which "copy follows the screen" (R15) is not true.**
+  The phone ships an honest sentence for it meanwhile
+  (`MobileNoteClipboard.Outcome.copiedSavedTakes`). **When the word lands,
+  delete the sentence, the `usedSavedTakesInstead` flag and the fence
+  branch in `MobileNoteClipboard.markdown`, and FLIP the pin**
+  `aCalloutNoteKeepsTheStoredRoadEvenWhilePeeking` (its docstring names the
+  expectation that changes). Record: `mobile-batch-7-record.md` §5 and the
+  batch-7 review's FIX WAVE RESULTS §1.
+
 ## 5. MACHINERY — the rules this seat re-proved or added
 
 Everything in the standing handoff §5/§6 binds. Added or re-proven here:

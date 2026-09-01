@@ -673,11 +673,20 @@ final class MobileStructuralController {
     /// back — the structural undo/redo door (M20) and the per-note tray
     /// (M21), both of which she asked for. The gate carries the same note
     /// at the routing site.
-    func deleteWholeBlockRun(_ blockIDs: [String]) async {
-        guard let model, !blockIDs.isEmpty else { return }
+    ///
+    /// **It ANSWERS whether it landed** (the batch-7 fix wave, cold review
+    /// MINOR 3). A caller that has to decide what to do next — PR20's sheet
+    /// puts picking mode away on a success and KEEPS her picks on a refusal
+    /// (#59(k)) — was inferring that from a re-read of the listing, which
+    /// made the discrimination ride on a read succeeding. The outcome is
+    /// known right here; returning it is cheaper and cannot be wrong.
+    /// `@discardableResult` because every other caller acts on the receipt.
+    @discardableResult
+    func deleteWholeBlockRun(_ blockIDs: [String]) async -> Bool {
+        guard let model, !blockIDs.isEmpty else { return false }
         guard !structuralInFlight else {
             model.report("Another structural change is still landing.")
-            return
+            return false
         }
         structuralInFlight = true
         defer { structuralInFlight = false }
@@ -686,7 +695,7 @@ final class MobileStructuralController {
         // contract): the op validates against the store, and a tombstone
         // landed past a refused flush would strand the typed bytes outside
         // both the surface and the take they belong to.
-        guard await flushPendingText() else { return }
+        guard await flushPendingText() else { return false }
         // The landing is read AFTER the flush, from the then-current index:
         // the flush SUSPENDS, and a projection delivery landing in that
         // window re-tiles the entries. It names a SURVIVING block by ID —
@@ -712,11 +721,13 @@ final class MobileStructuralController {
                 action: .undo)
             await model.refreshTakesFromStore()
             landCaret(landing)
+            return true
         } catch {
             model.report(Self.refusalMessage(
                 error,
                 act: blockIDs.count == 1 ? "delete the paragraph" : "delete the paragraphs",
                 nothingWas: "deleted"))
+            return false
         }
     }
 

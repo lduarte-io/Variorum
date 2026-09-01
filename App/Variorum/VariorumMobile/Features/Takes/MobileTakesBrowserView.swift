@@ -97,6 +97,15 @@ final class MobileTakesBrowserView: UIView {
     /// move, never per render, so her own scrolling is not fought.
     private var lastRevealedEditingVariantID: String?
 
+    /// **True while THIS view is moving the one card editor between cards
+    /// (or tearing it down).** A resign inside that window is the app's own
+    /// doing and must never be read as "she stopped writing": the model's
+    /// live take is already correct, and re-deciding it from the responder
+    /// would cancel the very card the transition is installing (tapping
+    /// card B while A is live removes the shared editor from A first, which
+    /// resigns it). Only a resign this flag is DOWN for came from her.
+    private var isRehostingCardEditor = false
+
     init(textView: MobileEditorTextView, model: MobileEditorViewModel) {
         self.pageTextView = textView
         self.model = model
@@ -161,6 +170,19 @@ final class MobileTakesBrowserView: UIView {
         cardEditor.accessibilityIdentifier = "takes.browser.cardEditor"
         cardEditor.delegate = self
         cardEditor.isScrollEnabled = true
+
+        // **THE WAY OUT OF A LIVE CARD** (the batch-7 fix wave, cold review
+        // MAJOR 2). Before this, nothing a user could do ended a card's
+        // live state except closing the whole sheet — so the actions row
+        // that stands down while she types (below) had no road back, and
+        // the rule it was justified by ("while a take is being written")
+        // outlived the writing. This is iOS's own standard gesture, on the
+        // scroll this sheet already owns: dragging the card list puts the
+        // keyboard away, which resigns the card editor, which ends the live
+        // card (`textViewDidEndEditing`) — and the row returns. Nothing is
+        // invented and nothing is lost: every keystroke has already reached
+        // the VM's ledger through `cardTextDidChange`.
+        cardsScroll.keyboardDismissMode = .onDrag
 
         // A tap on the dimmed page margin closes too (the sheet-over-page
         // convention); the sheet itself swallows its touches.
@@ -337,6 +359,14 @@ final class MobileTakesBrowserView: UIView {
         // doing mid-keystroke. So while a take is being written, the sheet's
         // job is typing room, and this row's geometry is byte-identical to
         // the sheet that shipped.
+        //
+        // **AND THE ROW COMES BACK** (the fix wave, MAJOR 2): the rule reads
+        // "while a take is being WRITTEN", and it now means that — putting
+        // the keyboard away (dragging the card list, `.onDrag` in init) ends
+        // the live card through `textViewDidEndEditing`, and this row
+        // returns on the very next layout. Before that road existed the
+        // condition outlived the writing and the only way back was to close
+        // the sheet and reopen it.
         let showTakesToBlocks = browser.canTurnTakesIntoBlocks
             && browser.editingVariantID == nil
         takesToBlocksButton.isHidden = !showTakesToBlocks
@@ -508,6 +538,10 @@ final class MobileTakesBrowserView: UIView {
 
     private func attachCardEditor(to card: MobileTakesCardView, text: String, face: MobileEditorStyle.Face) {
         if cardEditor.superview !== card {
+            // The rehost window: the removal below resigns the shared
+            // editor, and that resign is OURS, not hers (see the flag).
+            isRehostingCardEditor = true
+            defer { isRehostingCardEditor = false }
             cardEditor.removeFromSuperview()
             card.hostEditor(cardEditor)
             cardEditor.text = text
@@ -528,6 +562,9 @@ final class MobileTakesBrowserView: UIView {
 
     private func detachCardEditor() {
         guard cardEditor.superview != nil else { return }
+        // Same window as the rehost: this teardown's resign is the app's.
+        isRehostingCardEditor = true
+        defer { isRehostingCardEditor = false }
         _ = cardEditor.resignFirstResponder()
         cardEditor.removeFromSuperview()
         cardEditor.text = ""
@@ -556,6 +593,18 @@ extension MobileTakesBrowserView: UITextViewDelegate {
 
     func textViewDidChange(_ textView: UITextView) {
         model?.takesBrowser.cardTextDidChange(textView.text ?? "")
+    }
+
+    /// **THE LIVE STATE FOLLOWS THE RESPONDER** (the fix wave, MAJOR 2).
+    /// When she puts the keyboard away — the scroll's `.onDrag` dismissal
+    /// above, the standard iOS road, and any other resign the app did not
+    /// perform itself — the card stops being live, so the sheet's chrome
+    /// (the actions row) comes back and its geometry returns to the calm
+    /// one. Guarded by `isRehostingCardEditor` so the app's own moves of
+    /// the one shared editor are never mistaken for hers.
+    func textViewDidEndEditing(_ textView: UITextView) {
+        guard !isRehostingCardEditor else { return }
+        model?.takesBrowser.endEditing()
     }
 }
 

@@ -371,6 +371,10 @@ struct MobileWriteScreen: View {
             MobileBlockListSheet(
                 model: blockList, tokens: tokens, tray: tray,
                 onDeleteBlocks: { blockIDs in
+                    // The road ANSWERS (the fix wave, MINOR 3): the sheet
+                    // puts picking mode away on a landing and keeps her
+                    // picks on a refusal, and that difference is the act's
+                    // to report, never a re-read's to infer.
                     await model.structural.deleteWholeBlockRun(blockIDs)
                 }
             ) { blockID in

@@ -302,13 +302,16 @@ struct MobileBlockSelectionTests {
                     model: list, tokens: .terminalLight,
                     onDeleteBlocks: { ids in
                         deleted = ids
-                        try? await session.runner.run { [stack = session.undoStack] ops in
-                            try stack.withCompound(
-                                label: "Delete Blocks", operations: ops
-                            ) {
-                                for id in ids { try ops.deleteBlock(id) }
+                        do {
+                            try await session.runner.run { [stack = session.undoStack] ops in
+                                try stack.withCompound(
+                                    label: "Delete Blocks", operations: ops
+                                ) {
+                                    for id in ids { try ops.deleteBlock(id) }
+                                }
                             }
-                        }
+                            return true
+                        } catch { return false }
                     },
                     onJump: { _ in })
             ) { surface in
@@ -417,7 +420,7 @@ struct MobileBlockSelectionTests {
             try await withHostedSurface(
                 MobileBlockListSheet(
                     model: list, tokens: .terminalLight,
-                    onDeleteBlocks: { _ in }, onJump: { _ in })
+                    onDeleteBlocks: { _ in true }, onJump: { _ in })
             ) { surface in
                 await surface.settle(40)
                 let labels = surface.visibleLabels
@@ -444,7 +447,7 @@ struct MobileBlockSelectionTests {
             try await withHostedSurface(
                 MobileBlockListSheet(
                     model: list, tokens: .terminalLight,
-                    onDeleteBlocks: { _ in }, onJump: { _ in })
+                    onDeleteBlocks: { _ in true }, onJump: { _ in })
             ) { surface in
                 await surface.settle(40)
                 #expect(surface.activate(MobileBlockSelectionCopy.selectLabel))
@@ -460,6 +463,226 @@ struct MobileBlockSelectionTests {
                 #expect(labels.contains(
                     MobileBlockSelectionCopy.deleteVerb(picked: 2).lowercased()))
                 #expect(!labels.contains { $0.contains("merge") })
+            }
+        }
+    }
+
+    /// **PICKING MODE DOES NOT OUTLIVE THE SHEET** (the batch-7 fix wave,
+    /// cold review MINOR 1). `exitSelection`'s own doc states the rule —
+    /// *"a selection that outlived its surface would offer acts on blocks
+    /// she is no longer looking at"* — but the sheet's PRIMARY exit, its
+    /// Done, only called `dismiss()`. The model is `@State` on the screen
+    /// and outlives the presentation, so the sheet came back in picking
+    /// mode with the old picks armed and `Delete N Blocks…` on the banner.
+    ///
+    /// Driven at the REAL Done door, by the VoiceOver name that distinguishes
+    /// it from the Select/Done toggle beside it.
+    ///
+    /// **Red on old (behavioural revert):** drop `model.exitSelection()`
+    /// from that button's closure and both assertions red.
+    @Test func theSheetsOwnDoneLeavesPickingModeAndDropsThePicks() async throws {
+        try await withEditorWorld { session, _ in
+            let seed = try await seedFourBlockNote(session)
+            let list = MobileBlockListModel(session: session, postID: seed.post)
+            try await withHostedSurface(
+                MobileBlockListSheet(
+                    model: list, tokens: .terminalLight,
+                    onDeleteBlocks: { _ in true }, onJump: { _ in })
+            ) { surface in
+                await surface.settle(40)
+                #expect(surface.activate(MobileBlockSelectionCopy.selectLabel))
+                await surface.settle(40)
+                #expect(surface.activate(MobileBlockListModel.handle(list.rows[1])))
+                await surface.settle(40)
+                #expect(list.selection.count == 1, "picked, over a populated sheet")
+
+                // The sheet's own dismiss — the door labelled plain "Done",
+                // NOT the "done picking" toggle beside it. Its label is the
+                // VOICED chrome word (Terminal lowercases), read from the
+                // same tokens the sheet was mounted with rather than typed.
+                let dismissDoor = VoiceTokens.terminalLight.chromeLabel("Done")
+                #expect(surface.visibleLabels.contains(
+                    MobileBlockSelectionCopy.doneSelectingLabel),
+                        "the toggle is distinct: \(surface.visibleLabels)")
+                #expect(surface.activate(dismissDoor),
+                        "labels were \(surface.visibleLabels)")
+                await surface.settle(40)
+
+                #expect(!list.isSelecting, "the mode does not outlive the surface")
+                #expect(list.selection.isEmpty)
+            }
+        }
+    }
+
+    /// **THE MODE'S EXIT SURVIVES AN EMPTIED NOTE** (MINOR 1's rider). The
+    /// Select/Done chrome used to render only over a non-empty listing, so
+    /// if every row left the note WHILE she was picking — a remote delete of
+    /// the whole note's blocks — `isSelecting` stayed true with no button to
+    /// leave by, the banner reading "Tap blocks to pick them." over nothing.
+    ///
+    /// **Red on old (behavioural revert):** drop `|| model.isSelecting` from
+    /// the chrome's condition and the Done-picking door is gone from the
+    /// tree — the presence assertion reds.
+    @Test func theDonePickingDoorSurvivesTheLastRowLeaving() async throws {
+        try await withEditorWorld { session, _ in
+            let seed = try await seedFourBlockNote(session)
+            let list = MobileBlockListModel(session: session, postID: seed.post)
+            try await withHostedSurface(
+                MobileBlockListSheet(
+                    model: list, tokens: .terminalLight,
+                    onDeleteBlocks: { _ in true }, onJump: { _ in })
+            ) { surface in
+                await surface.settle(40)
+                #expect(surface.activate(MobileBlockSelectionCopy.selectLabel))
+                await surface.settle(40)
+                #expect(list.isSelecting)
+
+                // Every block leaves the note while she is picking.
+                try await session.runner.run { [ids = seed.ids] ops in
+                    for id in ids { try ops.deleteBlock(id) }
+                }
+                await list.refresh()
+                await surface.settle(60)
+                #expect(list.rows.isEmpty)
+
+                // The way out is still on screen, and it works.
+                #expect(surface.visibleLabels
+                    .contains(MobileBlockSelectionCopy.doneSelectingLabel),
+                        "labels were \(surface.visibleLabels)")
+                #expect(surface.activate(MobileBlockSelectionCopy.doneSelectingLabel))
+                await surface.settle(40)
+                #expect(!list.isSelecting)
+            }
+        }
+    }
+
+    /// **THE ACT'S OWN ANSWER DECIDES, NOT A RE-READ** (the fix wave, cold
+    /// review MINOR 3 — the record's own §11-4 question, answered).
+    ///
+    /// `deletePicked` used to infer "landed" from an emptied selection,
+    /// which put the whole discrimination on `refresh()` reaching `adopt` —
+    /// and `refresh()` SWALLOWS a read failure, leaving rows and picks
+    /// stale. A read that threw right after a delete that SUCCEEDED made the
+    /// app read its own success as a refusal: picking mode stayed on and
+    /// `Delete N Blocks…` stayed armed over blocks that were already gone.
+    ///
+    /// The double here stands for exactly that world: the act reports that
+    /// it landed while the listing does not move (a stale or failed read).
+    /// The exit must follow the ACT.
+    ///
+    /// **Red on old (behavioural revert):** restore
+    /// `if model.selection.isEmpty { model.exitSelection() }` in place of
+    /// the returned outcome and the landed half reds — the picks are still
+    /// there, so the old road reads the success as a refusal.
+    @Test func theExitFollowsTheActsOutcomeNotTheListingsReRead() async throws {
+        try await withEditorWorld { session, _ in
+            let seed = try await seedFourBlockNote(session)
+
+            // 1 — LANDED, with a listing that never moves.
+            let landedList = MobileBlockListModel(session: session, postID: seed.post)
+            try await withHostedSurface(
+                MobileBlockListSheet(
+                    model: landedList, tokens: .terminalLight,
+                    onDeleteBlocks: { _ in true }, onJump: { _ in })
+            ) { surface in
+                await surface.settle(40)
+                #expect(surface.activate(MobileBlockSelectionCopy.selectLabel))
+                await surface.settle(40)
+                #expect(surface.activate(MobileBlockListModel.handle(landedList.rows[1])))
+                await surface.settle(40)
+                #expect(surface.activate(MobileBlockSelectionCopy.deleteVerb(picked: 1)),
+                        "labels were \(surface.visibleLabels)")
+                await surface.settle(40)
+                #expect(surface.tapAlertAction(
+                    MobileBlockSelectionCopy.confirmActionTitle,
+                    writeBack: { landedList.deleteConfirmPresented = false }))
+                await surface.settle(80)
+
+                // Nothing was deleted, so the re-read still holds the pick —
+                // and picking mode is put away anyway, because the ACT said
+                // it landed.
+                #expect(landedList.rows.count == 4, "the listing did not move")
+                #expect(!landedList.isSelecting)
+                #expect(landedList.selection.isEmpty)
+            }
+
+            // 2 — REFUSED: her picks stay for the retry (#59(k)).
+            let refusedList = MobileBlockListModel(session: session, postID: seed.post)
+            try await withHostedSurface(
+                MobileBlockListSheet(
+                    model: refusedList, tokens: .terminalLight,
+                    onDeleteBlocks: { _ in false }, onJump: { _ in })
+            ) { surface in
+                await surface.settle(40)
+                #expect(surface.activate(MobileBlockSelectionCopy.selectLabel))
+                await surface.settle(40)
+                #expect(surface.activate(MobileBlockListModel.handle(refusedList.rows[1])))
+                await surface.settle(40)
+                #expect(surface.activate(MobileBlockSelectionCopy.deleteVerb(picked: 1)))
+                await surface.settle(40)
+                #expect(surface.tapAlertAction(
+                    MobileBlockSelectionCopy.confirmActionTitle,
+                    writeBack: { refusedList.deleteConfirmPresented = false }))
+                await surface.settle(80)
+
+                #expect(refusedList.isSelecting, "a refusal keeps the mode")
+                #expect(refusedList.selection.count == 1, "and keeps her picks")
+            }
+        }
+    }
+
+    /// **THE JOIN, ON THE REAL SCREEN** (the fix wave, cold review MINOR 2).
+    ///
+    /// The batch's two PR20 pins covered the two halves separately and
+    /// neither crossed the seam: one hosts the sheet with a HAND-WRITTEN
+    /// `onDeleteBlocks` (proving the gesture, not the app's road), the other
+    /// calls `deleteWholeBlockRun` DIRECTLY (proving the road, not the
+    /// sheet's use of it). So the whole feature could be disconnected in
+    /// `MobileWriteView` — `onDeleteBlocks: nil` — and every pin stayed
+    /// green while the Select door simply stopped rendering.
+    ///
+    /// This drives the REAL screen: its masthead chip, its sheet, its
+    /// injected closure, and the ONE compound entry that closure's road
+    /// registers.
+    ///
+    /// **Red on old (behavioural revert):** pass `onDeleteBlocks: nil` at
+    /// `MobileWriteView`'s `MobileBlockListSheet` and the Select door is not
+    /// in the tree — the activate reds, and so does everything after it.
+    @Test func theRealScreenWiresPickingToTheOneDeleteRoad() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedFourBlockNote(session)
+            let (editor, _) = makeEditor(session, postID: seed.post)
+            await editor.loadOnce()
+            let before = session.undoStack.depth
+            try await withHostedSurface(
+                MobileWriteScreen(session: session, postID: seed.post, editor: editor)
+            ) { surface in
+                await surface.settle(60)
+                #expect(surface.activate("Blocks"), "labels were \(surface.visibleLabels)")
+                await surface.settle(60)
+
+                #expect(surface.activate(MobileBlockSelectionCopy.selectLabel),
+                        "labels were \(surface.visibleLabels)")
+                await surface.settle(40)
+                #expect(surface.activate("Beta here."), "labels were \(surface.visibleLabels)")
+                await surface.settle(40)
+                #expect(surface.activate("Delta here."))
+                await surface.settle(40)
+
+                #expect(surface.activate(MobileBlockSelectionCopy.deleteVerb(picked: 2)),
+                        "labels were \(surface.visibleLabels)")
+                await surface.settle(40)
+                #expect(surface.presentedAlert?.title == "Delete 2 Blocks")
+                #expect(surface.activateAlertAction(
+                    MobileBlockSelectionCopy.confirmActionTitle))
+                await surface.settle(120)
+
+                // The store moved…
+                let after = try await liveBlockTexts(db, post: seed.post)
+                #expect(after == ["Alpha here.", "Gamma here."])
+                // …through the ONE road: one compound entry, its label.
+                #expect(session.undoStack.depth == before + 1)
+                #expect(session.undoStack.topLabel == "Delete Blocks")
             }
         }
     }

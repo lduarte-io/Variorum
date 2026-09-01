@@ -100,7 +100,7 @@ final class MobileBlockMenuController {
     ///
     /// **What it covers, and what it does not, stated so the boundary is not
     /// re-derived:** it guards the write roads this controller OWNS —
-    /// `applyCallout` (the callout submenu's toggle, four colours, remove and
+    /// `applyCallout` (the callout submenu's toggle, five colours, remove and
     /// emoji rows all land here) and `rename`. The structural rows (Insert
     /// Below · Divide · Merge · Delete) hand straight to
     /// `MobileStructuralController`, which latches them one layer down, and
@@ -241,7 +241,11 @@ final class MobileBlockMenuController {
         // mandate, and MobileSoul §5.6's VoiceOver expectation), and the
         // words are what the drift pin compares against `CalloutMenu`'s.
         // So `calloutRowTitles` is UNCHANGED by this batch: no row was
-        // added, only an image hung on four that existed.
+        // added, only an image hung on the FIVE that existed
+        // (`MobileCallout.names` — blue · green · sand · violet · rose,
+        // value-mirroring the Mac's `CalloutPalette`; the count is derived
+        // from that array everywhere and was mis-stated as four in three
+        // places, corrected at the fix wave — cold review NIT 1).
         rows += MobileCallout.names.map { name in
             UIAction(
                 title: cased(name.capitalized),
