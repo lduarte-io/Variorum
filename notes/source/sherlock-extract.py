@@ -2,7 +2,7 @@
 """Derive the app's bundled sample-library text from the Project Gutenberg source.
 
 Input:  notes/source/sherlock-adventures-pg1661.txt  (PG #1661, verbatim download)
-Output: App/Variorum/Variorum/Features/SampleLibrary/SherlockAdventures.txt
+Output: App/Variorum/Shared/SampleLibrary/SherlockAdventures.txt
 
 What it does, and why (pre-13u Act 3):
   · Strips the PG header/footer boilerplate — everything outside the
@@ -18,6 +18,13 @@ What it does, and why (pre-13u Act 3):
 
 Re-run after any source change; the output is committed, so the app never
 parses the raw PG file.
+
+Path note (2026-08-31, the midpoint review's m4): the output moved to
+`Shared/` at Act 0, when the seeder was hoisted so the phone gets the same
+library. This script kept pointing at the pre-hoist path and therefore raised
+`FileNotFoundError` on every run, which made the batch record's
+"re-runnable" claim false. Re-run and byte-compared against the committed
+resource when the path was corrected.
 """
 import re
 import sys
@@ -25,7 +32,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "notes/source/sherlock-adventures-pg1661.txt"
-OUT = ROOT / "App/Variorum/Variorum/Features/SampleLibrary/SherlockAdventures.txt"
+OUT = ROOT / "App/Variorum/Shared/SampleLibrary/SherlockAdventures.txt"
 ROMAN = r"(?:I|II|III|IV|V|VI|VII|VIII|IX|X|XI|XII)"
 
 
