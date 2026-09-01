@@ -1125,12 +1125,12 @@ may append; the handoff lists any open findings it leaves.)*
     ("someone trying to enroll their phone could somehow overwrite their whole store with nothing
     - that won't happen, right?") is answered NO for enrollment (an empty phone has nothing to
     push); the re-key door is the one local-as-truth road, and it warns. If you want the
-    near-empty case to REFUSE outright, say so — one ruling, cheap.
+    near-empty case to REFUSE outright, say so — one ruling, cheap. **RULED 2026-09-01, her words: "I would add a typed confirmation phrase for the near empty case - maybe a 13u item."** → a 13u2 item (the 13u plan's post-round addition): the near-empty re-key warning demands a TYPED confirmation phrase (the delete-account door's shape) — warn, never refuse, but never a click-through either.
 
     **(d) The Fragments-only enrollment road — (a) build the ceremony in Fragments to the written
     spec, or (b) accept-and-state the unenrolled state.** The brief you carry is
     `notes/fragments-enrollment-brief-2026-08-31.md`; the carry item in the bridge contract records
-    the roads and costs. Yours with the Fragments agent.
+    the roads and costs. Yours with the Fragments agent. **Her lean, 2026-09-01: "I do think I'll be doing the from fragments enroll road as well, but there's some simplifications I'm adding to the user options first."** — road (a), AFTER her encryption-options simplification (her separate ideation session); the spec brief stands; the acceptance bar to carry when it runs: a vault enrolled from Fragments opens in Variorum and vice versa (a shared interop fixture).
 
     **(e) The taste forks (each built to best judgment under your granted latitude; one-line swaps
     where noted):** wave 1 — the tray's Leaving-first order; "＋ tag" in the masthead vs bare ＋ on

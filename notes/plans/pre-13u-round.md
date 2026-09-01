@@ -3406,3 +3406,14 @@ P-3 CLEAN. **HOLDS verdicts:** R2-1 · R2-2 · R2-3 · R2-4 · R2-5 (six legs) �
 R2-7's premise verified on the REAL RPC (the batch iterates in array order, so `server_seq`
 follows the drain order). **The ladder closes here** — three rounds, every finding dispositioned,
 nothing open without an owner.
+
+# POST-CLOSEOUT (2026-09-01, her morning replies — recorded here so the round's record stays whole; the receiving files carry the work)
+
+- **#86(c) RULED:** the near-empty re-key case gets a TYPED confirmation phrase — a 13u2 item (the
+  13u plan's post-round addition). Warn, never refuse; never a click-through.
+- **#86(d), her lean:** the Fragments enrollment road (a) — "as well, but there's some
+  simplifications I'm adding to the user options first" (her separate encryption-options
+  ideation session comes first; the spec brief stands).
+- **17i:** "I'll probably move 17i up in this case" — her lean toward running the sync hunt
+  before 13u1 (the architect's recommendation); not yet a kickoff.
+

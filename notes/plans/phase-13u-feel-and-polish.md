@@ -578,3 +578,15 @@ guideline (her clarification): finish a stage near its end.
 
 **The split execution:** this file runs as 13u1 (the editor seam) then 13u2 (feel & faces) with
 ONE shared kickoff sitting; the 13u1 kickoff executes the file split per the banner at the top.
+
+**POST-ROUND ADDITION (author, 2026-09-01 — verbatim: "I would add a typed confirmation phrase for
+the near empty case - maybe a 13u item"):** **13u2 gains one item — the NEAR-EMPTY RE-KEY TYPED
+CONFIRMATION.** The Replace Encryption Keys road's T1 guard (built at the pre-13u round's Act 10
+wave 2a) warns with counts and dates when the server is ahead of the local copy and proceeds on a
+second press (her count-and-dates ruling). For the NEAR-EMPTY case — a fresh or nearly empty
+local copy re-keying over a server that holds many notes — the second press becomes a TYPED
+confirmation phrase (the delete-account door's shape, `AuthViews.deleteConfirmationPhrase`'s
+precedent): warn, never refuse (the lost-everything user's only road stays open), but never a
+click-through. Pin: the near-empty world's confirm refuses without the phrase; the ordinary
+server-ahead world keeps the two-press shape. Functional copy; 13s re-words. QUESTIONS #86(c).
+
