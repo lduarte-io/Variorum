@@ -61,44 +61,66 @@ struct MastheadTagCluster: View {
     /// ⌘⇧I (routed to the detail through the command router) and the ＃
     /// open the same field.
     @Binding var fieldOpen: Bool
+    /// Row 58's DEBUG geometry oracle: the named coordinate space the
+    /// cards' and the field's frames are reported in (the masthead passes
+    /// its own; nil — a standalone host — probes nothing).
+    var geometryProbeSpace: String? = nil
 
     @State private var tags: [Tag] = []
     @State private var allTags: [Tag] = []
-    /// The cards-and-door row's own width — the field slides out to its
-    /// LEFT, as an overlay, offset by exactly this.
-    @State private var rowWidth: CGFloat = 0
+
+    /// The gap between the open field's right edge and what it slid out
+    /// beside (the ＃'s line).
+    static let fieldGap: CGFloat = 6
+    /// Row 58: what every line of the flow keeps FREE at its left — the
+    /// field's width plus its gap — so the field slides out beside
+    /// whichever line holds the ＃ without reaching what sits left of the
+    /// cluster (the path chip). Reserved always, open or closed: opening
+    /// the field must never move a card or the chip.
+    static let fieldReserve: CGFloat = TagInlineField.width + fieldGap
 
     var body: some View {
-        HStack(spacing: 5) {
-            NoteTagChips(
-                tokens: tokens, tags: tags, allTags: allTags,
-                onApply: { apply($0) },
-                onRemove: { remove($0) },
-                showsAddDoor: Self.chipsShowAddDoor)
-            door
-        }
-        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { rowWidth = $0 }
-        // THE FIELD IS AN OVERLAY, deliberately outside the masthead's
-        // layout: it slides out of the ＃ to the LEFT of the cards, over the
-        // path line's end for the moment she is typing, and the masthead's
-        // measured cluster width never changes — so the centered title
-        // neither moves nor truncates while a tag goes on (the walk's
-        // capture 11: a laid-out field squeezed the title to "thr…"). The
-        // cards stay in view beside it, so the tag she just applied is
-        // visible the moment it lands.
-        .overlay(alignment: .trailing) {
-            if fieldOpen {
-                TagInlineField(
-                    tokens: tokens, allTags: allTags, applied: Set(tags.map(\.path)),
-                    onApply: { path in
-                        apply(path)
-                        // The field stays out after an apply, so several
-                        // tags go on in one breath; ⎋ or ＃ closes it.
-                    },
-                    onDismiss: { fieldOpen = false })
-                    .offset(x: -(rowWidth + 6))
-                    .transition(.move(edge: .trailing).combined(with: .opacity))
+        // ── ROW 58 — THE CLUSTER IS A RIGHT-ALIGNED WRAPPING ROW ────────────
+        // The cards, then the ＃, fill from the right edge and wrap onto
+        // further lines when the width the masthead hands this cluster
+        // says so (the masthead's row 2 gives it what remains right of the
+        // path chip and a minimum gap — one layout, `PostDetailView`).
+        // Nothing clips, nothing hides, no door moves. Before this the
+        // cards were one non-wrapping HStack trailing on their own layer
+        // and the centered path chip was laid out unaware of them — her
+        // walk found the chip drawn UNDER the first cards on a five-tag
+        // note and gone under the open field.
+        TrailingFlow(itemSpacing: 4, lineSpacing: 4, leadingReserve: Self.fieldReserve) {
+            ForEach(tags, id: \.id) { tag in
+                TagChipCard(tokens: tokens, tag: tag, onRemove: { remove($0) })
+                    .mastheadGeometryProbe(.card(tag.id), in: geometryProbeSpace)
             }
+            door
+            // THE FIELD IS AN OVERLAY, deliberately outside the flow's
+            // items: it slides out of the ＃ to the LEFT of the ＃'s line,
+            // into the room every line reserves for it, and no card, the
+            // chip nor the title moves while a tag goes on (row 55's
+            // lesson, kept: the walk's capture 11 was a laid-out field
+            // squeezing the title to "thr…"). The anchor is the zero-width
+            // item the flow parks at the last line's leading edge.
+            Color.clear
+                .frame(width: 0)
+                .trailingFlowAnchor()
+                .overlay(alignment: .trailing) {
+                    if fieldOpen {
+                        TagInlineField(
+                            tokens: tokens, allTags: allTags, applied: Set(tags.map(\.path)),
+                            onApply: { path in
+                                apply(path)
+                                // The field stays out after an apply, so several
+                                // tags go on in one breath; ⎋ or ＃ closes it.
+                            },
+                            onDismiss: { fieldOpen = false })
+                            .offset(x: -Self.fieldGap)
+                            .transition(.move(edge: .trailing).combined(with: .opacity))
+                            .mastheadGeometryProbe(.field, in: geometryProbeSpace)
+                    }
+                }
         }
         .animation(.easeInOut(duration: 0.18), value: fieldOpen)
         .task(id: postID) { await load() }

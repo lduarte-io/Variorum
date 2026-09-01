@@ -939,6 +939,12 @@ Honesty notes: the dev store now carries the walk's test tags on "three ways of 
 - **RESIDUAL — row 58 (MAJOR):** the masthead's second row collides (the path chip under the tag cards; hidden under the open field). A is REOPENED for it (a fresh fix session); its record stays un-closed until the fix is walked.
 - Row 57 (the sidebar List's arrow-key navigation gone with the flat column): left RECORDED with owner 13u2 as A dispositioned it — she did not ask for it and the flat column is her W8-3 ruling; the ladder may weigh it; noted in §7 for her.
 
+#### ROW 58 FIX — the masthead's second row (a fresh Fable fix session, 2026-09-01 ~09:30 →)
+
+**LIVE STATUS — ROW 58: IN-PROGRESS.** The fix is written (the flow cluster + the one-layout row 2 + the oracle + the pins); build + the masthead pins PENDING; red-on-old PENDING; the walk PENDING; the full suite PENDING. No revert in flight. NEXT: build, run `MastheadLayoutTests` / `MastheadTagDoorTests` / `LibraryRowAlignmentTests`, commit, then the behavioral revert (announced here first), the walk, the full suite.
+
+- **The traced mechanism (verified at the code and by arithmetic against the crop):** the orchestrator's stated cause — "the centering padding measures the FIRST trailing row" — describes `74c72db`'s shape. On the current tree (`512822c`, the two-row masthead) the path row DOES inset by the cards' row's measured width — but `mastheadInset(for:)` caps that inset at `(mastheadWidth − 240) / 2 = 220` pt: the 240-pt floor row 55 added so the TITLE never shrinks, applied to the path row too. Past ~208 pt of cards the inset stops growing, the chip stays centered on the full width (midX 340; `~/the field guide` ≈ 125 pt wide → `[278, 403]`) while five cards + the ＃ occupy `[321, 680]` → the chip is under the first two cards (the crop's exact picture: masthead block at x 630–1310 in the 1728-pt window, chip centered at ~965, cards from ~951). With the field open the overlay extends the cluster 196 pt further left (`[125, 315]`) and row 55 faded the chip to opacity 0 instead of moving it — hidden, its frame still colliding. So row 2's two layers were laid out unaware of each other, exactly as the row says; the cap was the mechanism.
+
 ---
 
 ### BATCH C — THE NOTE MODES (brief; DRAFTED 2026-09-01 ~05:55 — spawn after A closes)

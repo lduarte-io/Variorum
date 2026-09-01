@@ -162,16 +162,17 @@ struct PostDetailView: View {
     /// The icon row's measured width — the TITLE row's symmetric inset, so
     /// the centered title never runs under the icons (rows 4/19, row 55).
     @State private var mastheadIconRowWidth: CGFloat = 0
-    /// The tag cards' row's measured width — the PATH row's symmetric inset.
-    @State private var mastheadChipRowWidth: CGFloat = 0
-    /// The masthead's own width — the insets' floor reads it.
+    /// The masthead's own width — the inset's floor reads it.
     @State private var mastheadWidth: CGFloat = 0
-    /// A centered line never shrinks below this, whatever shares its row.
+    /// The centered title never shrinks below this, whatever shares its row.
     private let mastheadLineFloor: CGFloat = 240
+    /// Row 58: the least room between the path chip and the tag cluster on
+    /// the masthead's second row.
+    static let rowTwoGap: CGFloat = 16
 
-    /// A centered line's symmetric inset for the trailing thing on its row:
-    /// that thing's width (so the line never runs under it), capped so the
-    /// line keeps its floor.
+    /// The title's symmetric inset for the trailing thing on its row: that
+    /// thing's width (so the title never runs under it), capped so the
+    /// title keeps its floor.
     private func mastheadInset(for trailingWidth: CGFloat) -> CGFloat {
         let wanted = trailingWidth + 12
         guard mastheadWidth > 0 else { return wanted }
@@ -196,13 +197,22 @@ struct PostDetailView: View {
             // masthead and centers, padded on BOTH sides by the cluster's
             // measured width so it can never run under the icons; the
             // cluster trails on its own layer. One layout for all modes.
-            // TWO ROWS, each a ZStack: the TITLE row (the title centered on
+            // TWO ROWS. The TITLE row is a ZStack: the title centered on
             // the full width, inset on both sides by the width of what
-            // shares its line — the icon row) and the PATH row (the `~/book`
-            // chip centered, inset by the tag cards' row). Row 55's lesson:
-            // ONE inset for the whole block let the cards' width (three chips,
-            // or an open field) squeeze the title; what can collide with the
-            // title is only ever the icon row, so only that insets it.
+            // shares its line — the icon row, and ONLY the icon row (row
+            // 55's lesson: one inset for the whole block let the cards'
+            // width squeeze the title to "thr…"; the cards never share the
+            // title's line, so they never inset it). The SECOND row is ONE
+            // HStack (row 58 — her walk found the centered `~/book` chip
+            // drawn UNDER the tag cards and gone under the open field): the
+            // path chip LEADS at the masthead's leading edge — the
+            // article's left margin, where the mockup's `.where` line sits
+            // — a minimum gap follows, and the tag cluster TRAILS as a
+            // right-aligned wrapping row inside the width that remains.
+            // The two can never intersect: the cluster's region begins
+            // where the chip's ends, and the cluster wraps rather than grow
+            // past it. The chip's place is the same on every note — never
+            // centered on a bare note and shoved left by its third tag.
             VStack(spacing: 2) {
                 ZStack(alignment: .top) {
                     // Sitting 9 (R67): the post's NAME, prominent — click
@@ -247,32 +257,28 @@ struct PostDetailView: View {
                         }
                     }
                 }
-                ZStack(alignment: .top) {
+                HStack(alignment: .firstTextBaseline, spacing: Self.rowTwoGap) {
                     // Phase 13 (B3, R35): the membership indicator — the es
-                    // path line ("~/orbit") + the add/diverge door.
+                    // path line ("~/orbit") + the add/diverge door. It
+                    // leads, at its own width, and is never compressed:
+                    // the cluster beside it is what yields (by wrapping).
+                    // Row 55's opacity yield is retired with the collision
+                    // it hid — the chip stays in view while a tag goes on.
                     MembershipChip(
                         session: session, postID: postID,
                         recentBookIDs: recentBookIDs)
-                        // Row 55: while the tag field is out it overlays the
-                        // path line's end — the line yields quietly for that
-                        // moment and returns when the field closes, so a tag
-                        // going on never reads as a collision.
-                        .opacity(tagFieldOpen ? 0 : 1)
-                        .animation(.easeInOut(duration: 0.18), value: tagFieldOpen)
+                        .fixedSize()
+                        .layoutPriority(1)
+                        .mastheadGeometryProbe(.pathChip, in: Self.mastheadSpace)
+                    // Act 10 item 5 — the note's tag cards on the
+                    // masthead's right edge, under the icons, across from
+                    // the membership chip (her ruling's letter). Row 58: a
+                    // right-aligned wrapping row in the width that remains.
+                    MastheadTagCluster(
+                        session: session, postID: postID, tokens: tokens,
+                        fieldOpen: $tagFieldOpen,
+                        geometryProbeSpace: Self.mastheadSpace)
                         .frame(maxWidth: .infinity)
-                        .padding(.horizontal, mastheadInset(for: mastheadChipRowWidth))
-                    HStack(alignment: .top, spacing: 0) {
-                        Spacer(minLength: 0)
-                        // Act 10 item 5 — the note's tag cards on the
-                        // masthead's right edge, under the icons, across from
-                        // the membership chip (her ruling's letter).
-                        MastheadTagCluster(
-                            session: session, postID: postID, tokens: tokens,
-                            fieldOpen: $tagFieldOpen)
-                            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: {
-                                mastheadChipRowWidth = $0
-                            }
-                    }
                 }
             }
             .frame(maxWidth: mastheadMeasure, alignment: .leading)
@@ -616,14 +622,64 @@ struct PostDetailView: View {
     }
 }
 
+/// What a masthead geometry probe reports (row 58) — the slot a frame
+/// belongs to. Always compiled (the modifier's signature names it); the
+/// oracle that stores the frames is DEBUG-only.
+enum MastheadProbeSlot: Hashable {
+    case pathChip
+    case card(String)
+    case field
+}
+
+extension View {
+    /// Row 58's DEBUG oracle write: report this view's frame, in the named
+    /// coordinate space `space` (the masthead's own), under `slot`. A no-op
+    /// outside DEBUG, and with no space (a standalone host).
+    @ViewBuilder
+    func mastheadGeometryProbe(_ slot: MastheadProbeSlot, in space: String?) -> some View {
+        #if DEBUG
+        if let space {
+            self.onGeometryChange(for: CGRect.self) {
+                $0.frame(in: .named(space))
+            } action: { MastheadGeometry.record(slot, $0) }
+        } else {
+            self
+        }
+        #else
+        self
+        #endif
+    }
+}
+
 #if DEBUG
 /// The correction round's masthead oracle (rows 4/19 — the `BookOutlineGeometry`
 /// pattern): where the title block's midX sits against the masthead's own
 /// midX, in the masthead's coordinate space — so a pin asserts the centering
-/// she sees, per mode, not a layout the code merely intends.
+/// she sees, per mode, not a layout the code merely intends. Row 58 adds
+/// the second row's frames — the path chip, each tag card by tag id, the
+/// open field — so a pin asserts "these never intersect" as rectangles.
 @MainActor
 enum MastheadGeometry {
     static var titleMidX: CGFloat?
     static var contentMidX: CGFloat?
+    static var pathChipFrame: CGRect?
+    static var cardFrames: [String: CGRect] = [:]
+    static var fieldFrame: CGRect?
+
+    static func record(_ slot: MastheadProbeSlot, _ frame: CGRect) {
+        switch slot {
+        case .pathChip: pathChipFrame = frame
+        case .card(let id): cardFrames[id] = frame
+        case .field: fieldFrame = frame
+        }
+    }
+
+    /// A pin resets the second row's frames before its mount, so a stale
+    /// report from an earlier mount can never satisfy it.
+    static func resetRowTwo() {
+        pathChipFrame = nil
+        cardFrames = [:]
+        fieldFrame = nil
+    }
 }
 #endif

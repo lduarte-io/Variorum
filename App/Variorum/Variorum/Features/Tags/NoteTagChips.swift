@@ -164,14 +164,53 @@ struct NoteTagChips: View {
     /// `Text` compresses under a tight proposal and `truncationMode(.tail)`
     /// is still what it does when it must.
     private func chip(_ tag: Tag, probe: String? = nil) -> some View {
+        TagChipCard(
+            tokens: tokens, tag: tag, cornerRadius: cornerRadius, onRemove: onRemove,
+            baselineProbeID: probe, baselineProbeSpace: baselineProbeSpace)
+    }
+}
+
+/// **ONE tag card** — the body every renderer of the cards draws (the
+/// listing rows and note cards through `NoteTagChips`; the masthead's
+/// cluster directly, one card per flow item — the correction round's row
+/// 58, where the cards became items of a wrapping row and so needed to be
+/// views of their own). The card is the tag's own colour (keyed on the
+/// WHOLE path), its LEAF (her K3 ruling — the path rides the tooltip), and
+/// the ✕ that takes it off this note.
+///
+/// **R4-2 — IT FITS ITS TEXT.** Her round-4 report: *"i don't like how
+/// the tags have so much whitespace in them, it's like goals and just
+/// very stretched out. i think the tag chip should fit to the length of
+/// the tag."* The mechanism was one modifier: the label carried
+/// `.frame(maxWidth: 150)`, and `maxWidth` in SwiftUI does not mean "cap
+/// it" — it means *flexible, up to* — so in a row with space to spare a
+/// five-character tag claimed all 150 points and the chip drew around
+/// the claim. Removing the frame lets the `Text` ask for its ideal
+/// width, which is what "fits the tag" is. Long tags are still safe:
+/// `Text` compresses under a tight proposal and `truncationMode(.tail)`
+/// is still what it does when it must.
+struct TagChipCard: View {
+    let tokens: VoiceTokens
+    let tag: Tag
+    var cornerRadius: CGFloat = TagChipShape.cornerRadius
+    let onRemove: (Tag) -> Void
+    /// Rows 10/11's DEBUG baseline probe (nil probes nothing).
+    var baselineProbeID: String? = nil
+    var baselineProbeSpace: String = ""
+
+    @Environment(\.colorScheme) private var scheme
+
+    var body: some View {
         let tint = TagChipColor.color(forPath: tag.path, dark: scheme == .dark)
+        // Rows 10/11: the card's stack aligns on the FIRST TEXT BASELINE,
+        // so the baseline a row aligns to IS the chip text's.
         return HStack(alignment: .firstTextBaseline, spacing: 3) {
             Text(tokens.chromeLabel(TagChipLabel.leaf(of: tag.path)))
                 .font(tokens.small)
                 .foregroundStyle(tint)
                 .lineLimit(1)
                 .truncationMode(.tail)
-                .baselineProbe(probe, in: baselineProbeSpace)
+                .baselineProbe(baselineProbeID, in: baselineProbeSpace)
             Button {
                 onRemove(tag)
             } label: {
@@ -196,6 +235,9 @@ struct NoteTagChips: View {
                 .stroke(tint.opacity(0.45), lineWidth: 1))
         .help("Tagged \(tag.path)")
     }
+}
+
+extension NoteTagChips {
 
     private var addDoor: some View {
         Button { adding = true } label: {
