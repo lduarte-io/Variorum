@@ -263,7 +263,7 @@ struct BookViewTests {
             let hosting = NSHostingView(rootView: ReadingFlowView(
                 session: session, readingName: "Orbit",
                 grouped: [(section: nil, entries: entries)],
-                onWake: { _ in }))
+                onWake: { _, _ in }))
             hosting.frame = NSRect(x: 0, y: 0, width: 700, height: 500)
             window.contentView = hosting
             window.makeKeyAndOrderFront(nil)

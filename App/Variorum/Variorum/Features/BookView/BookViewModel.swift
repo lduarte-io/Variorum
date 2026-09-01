@@ -500,11 +500,31 @@ final class BookViewModel {
     func requestReveal(_ postID: String) {
         standingAnchorPostID = postID
         pendingReveal = postID
+        pendingLanding = nil
     }
 
-    /// The arriving surface took the landing. Idempotent.
+    /// The arriving surface took the landing. Idempotent. A block-precise
+    /// landing (`pendingLanding`) dies with the note landing it rode.
     func consumeReveal() {
         pendingReveal = nil
+        pendingLanding = nil
+    }
+
+    // MARK: - The scrolled-open door (the correction round, row 38 — 13u
+    // item 17 pulled in): a BLOCK-precise landing
+
+    /// The block a read-cheap click asked the editing surface to make live
+    /// — `LandingTarget`, the one door value. Rides beside `pendingReveal`
+    /// (the note half, which every surface already lands); the book Index
+    /// consumes the block half. Set only through `requestLanding`.
+    private(set) var pendingLanding: LandingTarget?
+
+    /// The scrolled-open door's request: land in this note, at this block.
+    /// The caller switches the mode; the arriving surface lands both halves.
+    func requestLanding(_ target: LandingTarget) {
+        standingAnchorPostID = target.postID
+        pendingReveal = target.postID
+        pendingLanding = target
     }
 
     // MARK: - Outline's CHAPTER landing (the Act 10 correction round, rows

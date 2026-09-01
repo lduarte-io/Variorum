@@ -22,8 +22,10 @@ struct ReadingFlowView: View {
     let session: AppSession
     let readingName: String?
     let grouped: [(section: ReadingSection?, entries: [Queries.ReadingEntry])]
-    /// Wake this post for editing (back in the book view).
-    let onWake: (String) -> Void
+    /// Wake this post for editing — with the BLOCK under the click when a
+    /// paragraph was clicked (the correction round, row 38: the scrolled-
+    /// open door lands at THAT block; nil = the note as a whole).
+    let onWake: (_ postID: String, _ blockID: String?) -> Void
     /// 13f W21: the post a mode switch (or W20's ascent) asked this surface
     /// to land on. Defaults nil, so every pre-existing call site is unchanged.
     var reveal: String?
@@ -86,7 +88,7 @@ struct ReadingFlowView: View {
                         ForEach(group.entries, id: \.postID) { entry in
                             FlowPostView(
                                 session: session, entry: entry, page: page,
-                                onWake: { onWake(entry.postID) })
+                                onWake: { blockID in onWake(entry.postID, blockID) })
                                 .id("flow-\(entry.postID)")  // W21's landing anchor
                         }
                     }
@@ -119,23 +121,26 @@ enum ReadingFlowMaterialization {
 }
 #endif
 
-/// One post on the page: lazy text, serif paragraphs; the whole body is a
-/// click target to wake editing.
+/// One post on the page: lazy text, serif paragraphs; each BLOCK's
+/// paragraphs are a click target that wakes editing AT that block (row 38);
+/// the note's empty state wakes the note as a whole.
 private struct FlowPostView: View {
     let session: AppSession
     let entry: Queries.ReadingEntry
     let page: ReadingPageTokens
-    let onWake: () -> Void
+    let onWake: (String?) -> Void
 
-    /// 13g batch 4 (L11): a rendered paragraph — the display text with its
-    /// markdown applied, plus the line's own style. Read is a reading
-    /// surface (her A43 ruling), so the F-5 surface rule applies: markers
-    /// hidden, nothing here maps a click to a text offset.
-    @State private var paragraphs: [FlowParagraph] = []
+    /// 13g batch 4 (L11): rendered paragraphs — the display text with its
+    /// markdown applied, plus the line's own style — kept PER BLOCK since
+    /// the correction round, so a click knows which block it fell in. Read
+    /// is a reading surface (her A43 ruling), so the F-5 surface rule
+    /// applies: markers hidden; the click maps to a block, never to a
+    /// text offset (a SwiftUI `Text` cannot say where inside itself).
+    @State private var blocks: [(blockID: String, paragraphs: [FlowParagraph])] = []
 
     init(
         session: AppSession, entry: Queries.ReadingEntry,
-        page: ReadingPageTokens, onWake: @escaping () -> Void
+        page: ReadingPageTokens, onWake: @escaping (String?) -> Void
     ) {
         self.session = session
         self.entry = entry
@@ -148,21 +153,28 @@ private struct FlowPostView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 13) {
-            ForEach(Array(paragraphs.enumerated()), id: \.offset) { _, paragraph in
-                Text(paragraph.text)
-                    .font(paragraph.font(page))
-                    .foregroundStyle(page.ink)
-                    .lineSpacing(6)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.leading, paragraph.indent)
+            ForEach(blocks, id: \.blockID) { block in
+                VStack(alignment: .leading, spacing: 13) {
+                    ForEach(Array(block.paragraphs.enumerated()), id: \.offset) { _, paragraph in
+                        Text(paragraph.text)
+                            .font(paragraph.font(page))
+                            .foregroundStyle(page.ink)
+                            .lineSpacing(6)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.leading, paragraph.indent)
+                    }
+                }
+                .contentShape(Rectangle())
+                .onTapGesture { onWake(block.blockID) }
             }
-            if paragraphs.isEmpty {
+            if blocks.isEmpty {
                 Text(" ")
                     .font(page.serif)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
+                    .onTapGesture { onWake(nil) }
             }
         }
-        .contentShape(Rectangle())
-        .onTapGesture { onWake() }
         // A link's plain click opens it (F-5); the scheme guard is the same
         // one every other surface asks, so an inert address does nothing
         // rather than something surprising.
@@ -174,19 +186,20 @@ private struct FlowPostView: View {
         // saw it) — the display brain answers here like everywhere else.
         .help(entry.displayTitle)
         .task(id: entry.postID) {
-            // The rendered projection, split for display at paragraph
-            // boundaries (renderedText semantics — chosen takes, blank
-            // takes skip; nothing here re-decides joins), then RENDERED for
-            // reading (13g L11 — one transform call per realized row, so the
-            // cost stays ∝ what the LazyVStack materialized).
-            let text: String? = try? await session.database.read { [id = entry.postID] db in
-                let slots = try Queries.renderPost(db, containerID: id)
-                return Queries.joinRenderedTexts(slots.compactMap(\.text))
+            // The rendered projection per BLOCK (renderedText semantics —
+            // chosen takes; blank takes and gaps contribute nothing), each
+            // RENDERED for reading (13g L11 — one transform per block of a
+            // realized row, so the cost stays ∝ what the LazyVStack
+            // materialized). 13k K10: the page's own code chip rides in.
+            let slots: [(String, String)] = (try? await session.database.read { [id = entry.postID] db in
+                try Queries.renderPost(db, containerID: id).compactMap { slot in
+                    guard let text = slot.text, !text.isEmpty else { return nil }
+                    return (slot.blockID, text)
+                }
+            }) ?? []
+            blocks = slots.map { blockID, text in
+                (blockID, FlowParagraph.paragraphs(of: text, codeTint: page.codeTint))
             }
-            // 13k K10: the page's own code chip rides in (the reading page
-            // is voice-independent — R2).
-            paragraphs = FlowParagraph.paragraphs(of: text ?? "", codeTint: page.codeTint)
         }
     }
 }
-

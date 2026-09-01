@@ -19,12 +19,18 @@
 //  the grammar (column + synced pane) and the one markdown transform
 //  (`FlowParagraph`).
 //
-//  Liveness: NONE — the index is a projection tier end to end (P-3 holds
-//  by construction). Editing goes where editing lives: a double-click (or
-//  the row's edit door) lands the note focused in OUTLINE — the same
-//  scrolled-open-door shape the note Read mode uses.
+//  Liveness (the Act 10 correction round, row 22 — her R-cor-7 ruling:
+//  "book will also have the same thing for index"): the pane is a
+//  projection tier (SwiftUI `Text` per block, virtualized per note) and
+//  upgrades ONLY the clicked block to THE one live pane — the TOC's
+//  read-cheap→live split through `BookIndexEditModel`'s single
+//  `PaneTextAuthority` (P-3; one ring across every note the pane realizes).
+//  The double-click handoff to Outline is retired; "Show in Outline" stays
+//  a navigation in the row menu. A Read ▸ Scroll click lands HERE at its
+//  block (row 38's door — `LandingTarget`).
 //
 
+import GRDB // AsyncValueObservation iteration
 import SwiftUI
 import VariorumCore
 
@@ -163,14 +169,15 @@ struct BookIndexView<Masthead: View>: View {
     /// composed by `BookView` so the index column and the navigator can
     /// never disagree about what the book's header says.
     @ViewBuilder var masthead: () -> Masthead
-    /// Land this note focused in OUTLINE — editing lives where editing
-    /// lives (`structure.mode = .outline; model.focus`), the note Read
-    /// mode's own click-through shape.
+    /// Show this note focused in OUTLINE (a navigation door in the row
+    /// menu since the correction round — editing happens HERE now).
     let onEditInOutline: (String) -> Void
 
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
 
+    /// The pane's ONE liveness authority (row 22).
+    @State private var edit: BookIndexEditModel
     @State private var selectedPostID: String?
     @State private var collapsed: Set<String> = []
     @State private var filter = ""
@@ -180,6 +187,19 @@ struct BookIndexView<Masthead: View>: View {
     @State private var paneTarget: String?
     @State private var columnTarget: String?
     @State private var seeded = false
+
+    init(
+        session: AppSession, model: BookViewModel, structure: BookStructureModel,
+        @ViewBuilder masthead: @escaping () -> Masthead,
+        onEditInOutline: @escaping (String) -> Void
+    ) {
+        self.session = session
+        self.model = model
+        self.structure = structure
+        self.masthead = masthead
+        self.onEditInOutline = onEditInOutline
+        _edit = State(initialValue: BookIndexEditModel(session: session))
+    }
 
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
@@ -202,15 +222,23 @@ struct BookIndexView<Masthead: View>: View {
         .onAppear { landOrSeed() }
         .onChange(of: model.pendingReveal) { _, _ in landOrSeed() }
         .onChange(of: model.entries) { _, _ in landOrSeed() }
+        // Leaving the index releases its ring (the one live pane), flushing
+        // whatever it held — the same discipline every pane host follows.
+        .onDisappear { edit.teardown() }
     }
 
     /// Arrive where she was: the carry's parked reveal wins; else the
-    /// book's standing place; else the first note. One-shot.
+    /// book's standing place; else the first note. One-shot. A
+    /// BLOCK-precise landing (row 38 — the Read click) rides the reveal:
+    /// the note is selected and shown, and its block goes live once the
+    /// note's rows are in hand.
     private func landOrSeed() {
         if let reveal = model.pendingReveal,
            model.entries.contains(where: { $0.postID == reveal }) {
+            let landing = model.pendingLanding
             model.consumeReveal()
             seeded = true
+            if let landing { edit.requestLiveBlock(landing) }
             select(reveal, scrollPane: true, report: false)
             return
         }
@@ -345,16 +373,16 @@ struct BookIndexView<Masthead: View>: View {
             nested: nested,
             selected: selectedPostID == entry.postID,
             onSelect: { select(entry.postID, scrollPane: true) },
-            onEdit: { onEditInOutline(entry.postID) },
             menu: { AnyView(chapterFilingMenu(entry.postID)) })
             .id("bix-\(entry.postID)")
     }
 
-    /// The chapter-filing menu — the same doors the outline rows carry
-    /// (curated books only; QUESTIONS #25(a)).
+    /// The row menu — a navigation to Outline, the full editor, and the
+    /// chapter-filing doors the outline rows carry (curated books only;
+    /// QUESTIONS #25(a)).
     @ViewBuilder
     private func chapterFilingMenu(_ postID: String) -> some View {
-        Button("Edit here in the book (Outline)") { onEditInOutline(postID) }
+        Button("Show in Outline") { onEditInOutline(postID) }
         Button("Open in the full editor") {
             NotificationCenter.default.post(
                 name: .variorumOpenPost, object: nil, userInfo: ["postID": postID])
@@ -393,27 +421,50 @@ struct BookIndexView<Masthead: View>: View {
         .overlay(alignment: .top) { Divider().overlay(tokens.line) }
     }
 
-    // MARK: The pane (projection tier — P3, zero TK2 geometry)
+    // MARK: The pane (projection tier — P3; ONE live block on click)
+
+    /// One lazy item of the pane — a heading or a note — whose identity IS
+    /// its landing anchor (the Outline lesson of this round: `scrollTo`
+    /// reaches an unrealized lazy row only through the ForEach identity).
+    private enum PaneRow: Identifiable {
+        case heading(BookIndexColumn.Group)
+        case note(Queries.ReadingEntry)
+
+        var id: String {
+            switch self {
+            case .heading(let group): "bip-sec-\(group.id)"
+            case .note(let entry): "bip-\(entry.postID)"
+            }
+        }
+    }
+
+    private var paneRows: [PaneRow] {
+        var rows: [PaneRow] = []
+        for group in groups {
+            if group.title != nil { rows.append(.heading(group)) }
+            rows.append(contentsOf: group.entries.map { .note($0) })
+        }
+        return rows
+    }
 
     private var pane: some View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 6) {
-                    ForEach(groups, id: \.id) { group in
-                        if let title = group.title {
-                            Text(tokens.chromeLabel(title))
+                    ForEach(paneRows) { row in
+                        switch row {
+                        case .heading(let group):
+                            Text(tokens.chromeLabel(group.title ?? ""))
                                 .font(tokens.title)
                                 .foregroundStyle(tokens.accent)
                                 .padding(.top, 26)
-                                .id("bip-sec-\(group.id)")
-                        }
-                        ForEach(group.entries, id: \.postID) { entry in
+                        case .note(let entry):
                             BookIndexPaneNote(
                                 session: session, tokens: tokens, entry: entry,
+                                edit: edit,
                                 selected: selectedPostID == entry.postID,
                                 onTap: { select(entry.postID, scrollPane: false) },
-                                onEdit: { onEditInOutline(entry.postID) })
-                                .id("bip-\(entry.postID)")
+                                onLandedBlock: { blockID in paneTarget = blockID })
                         }
                     }
                 }
@@ -425,10 +476,12 @@ struct BookIndexView<Masthead: View>: View {
             .background(tokens.surface)
             .onChange(of: paneTarget) { _, target in
                 // One address grammar: a note target is its postID, a
-                // chapter target arrives as "sec-<group id>" — both land
-                // under the pane's "bip-" prefix.
+                // chapter target arrives as "sec-<group id>", a landed
+                // BLOCK as its blockID — all under the pane's "bip-" prefix.
+                // No animation (the Outline lesson: an animated scrollTo
+                // toward lazy estimates travels wrong).
                 guard let target else { return }
-                withAnimation { proxy.scrollTo("bip-\(target)", anchor: .top) }
+                proxy.scrollTo("bip-\(target)", anchor: .top)
                 paneTarget = nil
             }
         }
@@ -443,7 +496,6 @@ private struct BookIndexNoteRow: View {
     let nested: Bool
     let selected: Bool
     let onSelect: () -> Void
-    let onEdit: () -> Void
     let menu: () -> AnyView
 
     @State private var hovering = false
@@ -479,39 +531,46 @@ private struct BookIndexNoteRow: View {
             selected ? AnyShapeStyle(tokens.wash) : AnyShapeStyle(.clear),
             in: RoundedRectangle(cornerRadius: 8))
         .contentShape(Rectangle())
-        .onTapGesture(count: 2) { onEdit() }
         .onTapGesture { onSelect() }
         .onHover { hovering = $0 }
-        .help("Click to show this note in the pane; double-click to edit it "
-            + "in Outline")
+        .help("Click to show this note in the pane — then click into any of "
+            + "its blocks to write")
     }
 }
 
 // MARK: - One rendered note of the pane
 
 /// A note as read-cheap prose in the VOICE (the note Index pane's grammar —
-/// the paper look stays Read's). Lazy: the text loads when the LazyVStack
-/// realizes the row (cost ∝ viewport, the FlowPostView shape).
+/// the paper look stays Read's). Lazy: the rows load when the LazyVStack
+/// realizes the note (cost ∝ viewport, the FlowPostView shape) — and they
+/// are OBSERVED, because since the correction round (row 22) any block
+/// here can be written in: a click makes that block THE live pane
+/// (`BookIndexEditModel`, one authority for the whole book), every other
+/// block stays `Text`. Locked takes stay read.
 private struct BookIndexPaneNote: View {
     let session: AppSession
     let tokens: VoiceTokens
     let entry: Queries.ReadingEntry
+    let edit: BookIndexEditModel
     let selected: Bool
     let onTap: () -> Void
-    let onEdit: () -> Void
+    /// A landing made a block live here — the pane may scroll to it.
+    let onLandedBlock: (String) -> Void
 
-    @State private var paragraphs: [FlowParagraph] = []
+    @State private var rows: [Queries.TOCRow] = []
 
     init(
         session: AppSession, tokens: VoiceTokens, entry: Queries.ReadingEntry,
-        selected: Bool, onTap: @escaping () -> Void, onEdit: @escaping () -> Void
+        edit: BookIndexEditModel, selected: Bool,
+        onTap: @escaping () -> Void, onLandedBlock: @escaping (String) -> Void
     ) {
         self.session = session
         self.tokens = tokens
         self.entry = entry
+        self.edit = edit
         self.selected = selected
         self.onTap = onTap
-        self.onEdit = onEdit
+        self.onLandedBlock = onLandedBlock
         #if DEBUG
         BookIndexMaterialization.count += 1
         #endif
@@ -529,15 +588,13 @@ private struct BookIndexPaneNote: View {
                         .foregroundStyle(tokens.muted)
                 }
             }
-            ForEach(Array(paragraphs.enumerated()), id: \.offset) { _, paragraph in
-                Text(paragraph.text)
-                    .font(font(paragraph))
-                    .foregroundStyle(tokens.ink)
-                    .lineSpacing(4)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.leading, paragraph.indent)
+            .contentShape(Rectangle())
+            .onTapGesture { onTap() }
+            ForEach(rows, id: \.blockID) { row in
+                blockView(row)
+                    .id("bip-\(row.blockID)")
             }
-            if paragraphs.isEmpty {
+            if rows.isEmpty {
                 Text(" ").font(tokens.body)
             }
         }
@@ -547,19 +604,80 @@ private struct BookIndexPaneNote: View {
         .background(
             selected ? AnyShapeStyle(tokens.wash) : AnyShapeStyle(.clear),
             in: RoundedRectangle(cornerRadius: 8))
-        .contentShape(Rectangle())
-        .onTapGesture(count: 2) { onEdit() }
-        .onTapGesture { onTap() }
         .environment(\.openURL, OpenURLAction { url in
             MarkdownLink.open(url.absoluteString) ? .handled : .discarded
         })
-        .help("Click to select; double-click to edit this note in Outline")
-        .task(id: entry.postID) {
-            let text: String? = try? await session.database.read { [id = entry.postID] db in
-                let slots = try Queries.renderPost(db, containerID: id)
-                return Queries.joinRenderedTexts(slots.compactMap(\.text))
+        .help("Click a block to write in it right here — one block is live at a time")
+        // A landing that arrives while this note is already realized (its
+        // rows long loaded) is taken here — the observation below takes the
+        // one that arrives BEFORE the rows.
+        .onChange(of: edit.pendingLiveBlock) { _, pending in
+            guard pending?.postID == entry.postID, !rows.isEmpty else { return }
+            if let landed = edit.takePendingLiveBlock(postID: entry.postID, rows: rows) {
+                onLandedBlock(landed)
             }
-            paragraphs = FlowParagraph.paragraphs(of: text ?? "", codeTint: tokens.codeTint)
+        }
+        .task(id: entry.postID) {
+            do {
+                for try await value in session.database.observeBlockTOC(entry.postID) {
+                    rows = value
+                    edit.settle()
+                    if let landed = edit.takePendingLiveBlock(postID: entry.postID, rows: value) {
+                        onLandedBlock(landed)
+                    }
+                }
+            } catch is CancellationError {
+            } catch {
+                session.status.speak(OpsRefusalCopy.message(for: error))
+            }
+        }
+    }
+
+    /// One block: THE live pane when it is the clicked one, else its
+    /// rendered paragraphs (a click on them is the upgrade).
+    @ViewBuilder
+    private func blockView(_ row: Queries.TOCRow) -> some View {
+        let text = edit.displayText(variantID: row.variantID, storeText: row.text)
+        if let variantID = row.variantID,
+           edit.isLive(postID: entry.postID, blockID: row.blockID, variantID: variantID),
+           !row.variantLocked {
+            PaneSurfaceView(
+                text: text,
+                isLive: true,
+                tokens: tokens,
+                role: BookIndexEditModel.columnID, variantID: variantID,
+                onFocusRequest: {
+                    edit.makeLive(postID: entry.postID, blockID: row.blockID, variantID: variantID)
+                },
+                onEdit: { newText in
+                    edit.paneEdited(
+                        postID: entry.postID, variantID: variantID,
+                        oldText: row.text ?? "", newText: newText)
+                })
+                .padding(6)
+                .overlay(RoundedRectangle(cornerRadius: 6).stroke(tokens.ring, lineWidth: 1))
+        } else {
+            let paragraphs = FlowParagraph.paragraphs(of: text, codeTint: tokens.codeTint)
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(Array(paragraphs.enumerated()), id: \.offset) { _, paragraph in
+                    Text(paragraph.text)
+                        .font(font(paragraph))
+                        .foregroundStyle(tokens.ink)
+                        .lineSpacing(4)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.leading, paragraph.indent)
+                }
+                if paragraphs.isEmpty {
+                    Text(" ").font(tokens.body)
+                }
+            }
+            .padding(6)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                guard let variantID = row.variantID, !row.variantLocked else { return }
+                onTap()
+                edit.makeLive(postID: entry.postID, blockID: row.blockID, variantID: variantID)
+            }
         }
     }
 

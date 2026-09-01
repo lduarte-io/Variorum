@@ -155,9 +155,13 @@ struct BookView: View {
                         grouped: structure.chaptersActive
                             ? structure.grouped(entries: model.entries)
                             : [(nil, model.entries)],
-                        onWake: { postID in
-                            structure.mode = .outline
-                            model.focus(postID)
+                        onWake: { postID, blockID in
+                            // The scrolled-open door (row 38, R-cor-7): a
+                            // click on a sentence in Read lands in the
+                            // EDITABLE index at THAT block — the one
+                            // `LandingTarget`, consumed by the index.
+                            model.requestLanding(LandingTarget(postID: postID, blockID: blockID))
+                            structure.mode = .index
                         },
                         reveal: model.pendingReveal,
                         onRevealLanded: { model.consumeReveal() })

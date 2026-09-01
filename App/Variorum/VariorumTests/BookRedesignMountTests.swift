@@ -7,10 +7,10 @@
 //  pinned pure (`BookIndexColumnTests`) but a brain pin cannot prove the
 //  view stands up. What these hold, both P-3's letter:
 //
-//  · the INDEX book view hosts with real chapters and ZERO live editors —
-//    the record's claim ("editing lands in Outline") made falsifiable: a
-//    regression that mounts an editor inside the read-cheap index pane
-//    fails here by count;
+//  · the INDEX book view hosts with real chapters and ZERO live editors
+//    AT REST — no full-document editor, and (since the correction round,
+//    row 22) no live pane either until a block is clicked: the pane is
+//    read-cheap until her act (`BookIndexEditingTests` pins the upgrade);
 //  · the OUTLINE details gutter's focused form — `EditorView` with
 //    `barPlacement: .side` wrapping `CommitBar(axis: .vertical)` — mounts
 //    exactly ONE live editor for the focused note. This is the one road
@@ -68,6 +68,13 @@ private func withChapteredBook<T>(
         }
         return try await body(session, db, reading.id, postIDs)
     }
+}
+
+@MainActor
+private func countEditablePanes(in view: NSView) -> Int {
+    var count = (view as? PaneTextView)?.isEditable == true ? 1 : 0
+    for sub in view.subviews { count += countEditablePanes(in: sub) }
+    return count
 }
 
 @MainActor
@@ -157,7 +164,9 @@ struct BookRedesignMountTests {
 
             #expect(structure.mode == .index, "the mode survived the mount")
             #expect(countLiveEditorViews(in: hosting) == 0,
-                    "the index is read-cheap end to end — editing lands in Outline, never here (P-3)")
+                    "no full-document editor mounts in the index (P-3)")
+            #expect(countEditablePanes(in: hosting) == 0,
+                    "and at rest no block is live — the pane is read-cheap until she clicks a block (row 22)")
         }
     }
 
