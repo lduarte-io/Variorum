@@ -170,6 +170,11 @@ struct BlocksWorkbenchView: View {
         .task { await model.startPools() }
         .task { allTags = (try? await session.database.read { try Queries.allTags($0) }) ?? [] }
         .onDisappear { model.teardown() }
+        .onChange(of: focusedBlockID) { _, new in
+            #if DEBUG
+            BlocksWorkbenchOracle.focusedBlockID = new
+            #endif
+        }
         .onChange(of: model.facts) { _, facts in
             guard !seeded, !facts.isEmpty else {
                 // The panel's subject can die under it (deleted in another
@@ -809,3 +814,13 @@ private struct FlowLayoutLite: Layout {
         }
     }
 }
+
+#if DEBUG
+/// The correction round's Blocks oracle (the `MastheadGeometry` pattern):
+/// the mounted workbench's focused row, so a pin asserts the block it
+/// entered on (row 39) rather than a state the code merely intends.
+@MainActor
+enum BlocksWorkbenchOracle {
+    static var focusedBlockID: String?
+}
+#endif

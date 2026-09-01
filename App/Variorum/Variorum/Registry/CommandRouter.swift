@@ -54,10 +54,11 @@ final class CommandRouter {
         let token = UUID()
         detailToken = token
         // A DIFFERENT note arriving makes the remembered caret a fact about
-        // somewhere else (ledger row 33): forget it rather than let a stale
-        // one offer a jump into a note that is no longer on screen. The same
-        // note re-registering keeps it — a remount is not a caret move.
-        if activePostID != postID { focusedBlock = nil }
+        // somewhere else (ledger row 33): the live fact becomes THAT note's
+        // remembered current block (the Act 10 correction round, row 39 —
+        // one current block per note, kept across mounts), or nothing. The
+        // same note re-registering keeps it — a remount is not a caret move.
+        if activePostID != postID { focusedBlock = currentBlocks.current(for: postID) }
         activePostID = postID
         activeMode = mode
         self.applyMode = applyMode
@@ -131,6 +132,30 @@ final class CommandRouter {
         let fact = FocusedBlock(postID: postID, blockID: blockID, variantID: variantID)
         guard focusedBlock != fact else { return }  // assign only on a real change
         focusedBlock = fact
+        // Row 39: the fact is remembered for its note — every reporter
+        // (Write's caret, the boards' ring, Read's selection, Blocks' row)
+        // feeds the one memory through this door, nothing else.
+        currentBlocks.remember(fact)
+    }
+
+    // MARK: - The current block, remembered per note (the correction round, row 39)
+
+    /// The per-note memory behind `focusedBlock` — `CurrentBlockMemory`'s
+    /// header has the whole argument. Session-scoped, persisted per note.
+    @ObservationIgnored private var currentBlocks = CurrentBlockMemory()
+
+    /// Where she last was in a note — mounted or not. The Library's Open
+    /// door (batch E) lands here; a mode entering a mounted note reads the
+    /// live `focusedBlock`, which this seeded.
+    func currentBlock(for postID: String) -> FocusedBlock? {
+        if let fact = focusedBlock, fact.postID == postID { return fact }
+        return currentBlocks.current(for: postID)
+    }
+
+    /// A pin's reset (or a deleted note): the memory for one note goes.
+    func forgetCurrentBlock(for postID: String) {
+        currentBlocks.forget(postID: postID)
+        if focusedBlock?.postID == postID { focusedBlock = nil }
     }
 
     /// The detail reports its mode truth (its own `@State` changed).

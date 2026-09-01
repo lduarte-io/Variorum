@@ -134,9 +134,23 @@ final class EditorSurfaceController {
             tail = new.isEmpty ? "" : nil
         }
         let anchor = model.topVisibleOffset()
+        // The caret BY IDENTITY across the rewrite (the Act 10 correction
+        // round, rows 39/49): replacing the storage wholesale parks the
+        // insertion point at the document's END, and a full render that
+        // arrives after the arrival's landing — the theme's chrome settling
+        // a beat later, a forced re-render — used to carry her caret to the
+        // last block with nothing re-landing it (row 49's "block 262/262").
+        // The scroll anchor was already preserved; the caret now is too.
+        let caret = model.caretIdentity()
         let (attributed, newIndex) = EditorDocument.materialize(new, tail: tail)
         model.setSurfaceContent(attributed)
         model.adoptRewrite(index: newIndex, slots: new, tailText: tail ?? "")
+        if let caret,
+           let i = model.index.entries.firstIndex(where: { $0.blockID == caret.blockID }) {
+            let range = model.index.range(ofEntryAt: i)
+            textView.setSelectedRange(NSRange(
+                location: range.location + min(caret.offset, range.length), length: 0))
+        }
         textView.undoManager?.removeAllActions()
         if let anchor {
             JumpPrimitive.jump(

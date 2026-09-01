@@ -179,12 +179,19 @@ final class TakesChoreographer {
             return
         }
         // N9/AD-17 — "just start typing" at the Takes landing: with
-        // nothing focused, the first block's article pane takes the ring.
-        if !landingFocusDone, model.focusedPane == nil,
-           let first = new.slots.first, let variantID = first.variantID {
-            landingFocusDone = true
-            model.landAuthorityFocus(TakesViewModel.PaneKey(
-                columnID: landingColumnID, blockID: first.blockID, variantID: variantID))
+        // nothing focused, an article pane takes the ring — the note's
+        // CURRENT block's (the Act 10 correction round, row 39: the one
+        // fact every mode enters on — Write's caret block, Read's
+        // selection, Blocks' row), else the first block's.
+        if !landingFocusDone, model.focusedPane == nil {
+            let fact = model.session.commandRouter.focusedBlock
+            let current = fact?.postID == model.postID
+                ? new.slots.first { $0.blockID == fact?.blockID } : nil
+            if let slot = current ?? new.slots.first, let variantID = slot.variantID {
+                landingFocusDone = true
+                model.landAuthorityFocus(TakesViewModel.PaneKey(
+                    columnID: landingColumnID, blockID: slot.blockID, variantID: variantID))
+            }
         }
     }
 }

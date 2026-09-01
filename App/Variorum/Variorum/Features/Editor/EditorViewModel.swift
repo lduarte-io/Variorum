@@ -653,10 +653,16 @@ final class EditorViewModel {
         switch decision {
         case .initialRender:
             // First render: there is no local tail yet — the pre-load
-            // index is a placeholder, never a tail to preserve.
+            // index is a placeholder, never a tail to preserve. WHERE SHE
+            // WAS is read BEFORE the fill (rows 39/49): the fill parks the
+            // insertion point at the document's end and reports THAT as the
+            // caret's block, so a landing that read the fact afterwards
+            // would honor its own fill's side effect (the first cut did —
+            // and landed at the last block's start).
+            let arrivalFact = session.commandRouter.focusedBlock
             structural.renderFull(new, preserveTail: false)
             loaded = true
-            applyFocusSeeds()
+            applyFocusSeeds(arrivalFact: arrivalFact)
         case .deferUntilClean:
             pendingProjection = new
         case .forcedFullRender:
@@ -1644,7 +1650,7 @@ final class EditorViewModel {
     /// Applies the one-shot focus-handoff seeds after the first render
     /// (Step 3): caret placement from the read-tier click, then the
     /// focus-then-fan panel where a badge tap drove the focus.
-    private func applyFocusSeeds() {
+    private func applyFocusSeeds(arrivalFact: FocusedBlock? = nil) {
         var caretClaimed = false
         if let seed = pendingCaretSeed, let textView {
             pendingCaretSeed = nil
@@ -1682,16 +1688,24 @@ final class EditorViewModel {
         // book-view editor mounts on the book's own focus model and must
         // never steal the window's focus as a side effect of rendering.
         // Nothing rides the router (no new parcel — the noteMode
-        // staleness discipline is untouched by construction); the caret
-        // lands at the document start, matching the Takes landing's
-        // first-block choice. The window can lag the first projection by
-        // a beat (attach precedes insertion), so a missing window gets
-        // ONE next-turn retry, then gives up quietly.
+        // staleness discipline is untouched by construction). WHERE the
+        // caret lands (the Act 10 correction round, rows 39 + 49): at the
+        // start of the note's CURRENT block — the one fact every mode
+        // enters on and leaves to (`CommandRouter.focusedBlock`, this
+        // post's) — else the document start. Before this it landed at the
+        // document's END on every arrival: the projection fill carried the
+        // insertion point to the end, and the old "reset when past the
+        // length" check could never be true (row 49's "block 262/262" on
+        // opening a story). The window can lag the first projection by a
+        // beat (attach precedes insertion), so a missing window gets ONE
+        // next-turn retry, then gives up quietly.
         if !caretClaimed, scrollView != nil, let textView {
+            let landing = bareArrivalLanding(fact: arrivalFact)
             let claim = { [weak textView, weak self] in
                 guard let textView, let window = textView.window else { return false }
-                if textView.selectedRange().location > (self?.index.documentLength ?? 0) {
-                    textView.setSelectedRange(NSRange(location: 0, length: 0))
+                textView.setSelectedRange(NSRange(location: landing, length: 0))
+                if landing > 0 {
+                    textView.scrollRangeToVisible(NSRange(location: landing, length: 0))
                 }
                 window.makeFirstResponder(textView)
                 self?.updateCaretContext()
@@ -1701,6 +1715,16 @@ final class EditorViewModel {
                 Task { @MainActor in _ = claim() }
             }
         }
+    }
+
+    /// The bare arrival's landing offset (rows 39/49): the start of this
+    /// post's current block — the fact as it stood BEFORE the arrival's own
+    /// fill — when the index knows it, else 0. Pure over the index.
+    func bareArrivalLanding(fact: FocusedBlock?) -> Int {
+        guard let fact, fact.postID == postID,
+              let i = index.entries.firstIndex(where: { $0.blockID == fact.blockID })
+        else { return 0 }
+        return min(index.range(ofEntryAt: i).location, max(0, index.documentLength))
     }
 
     /// The choreography's Write half: land the caret/selection (clamped to
@@ -2242,6 +2266,22 @@ final class EditorViewModel {
         let before = blockSelection
         blockSelection.prune(to: Set(index.entries.map(\.blockID)))
         if blockSelection != before { refreshDecorations() }
+    }
+
+    /// The caret's place BY IDENTITY — the block it stands in and its
+    /// UTF-16 offset inside that block — so a full re-render can put it
+    /// back where it was (rows 39/49). Nil with no surface, an empty index,
+    /// or a caret in the open tail (which has no block yet).
+    func caretIdentity() -> (blockID: String, offset: Int)? {
+        guard let textView, !index.entries.isEmpty else { return nil }
+        let caret = textView.selectedRange().location
+        var location = 0
+        for entry in index.entries {
+            let end = location + entry.length
+            if caret <= end { return (entry.blockID, max(0, caret - location)) }
+            location = end + 1
+        }
+        return nil
     }
 
     /// Which block a document offset falls in — the index walk
