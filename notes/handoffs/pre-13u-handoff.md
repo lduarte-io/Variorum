@@ -58,17 +58,15 @@ Every review finding has a written disposition in the round record's four review
 LADDER R1/R2/R3). Nothing was dismissed without a trace; two hollow claims were dismissed by
 measurement (17f's P50; the m1 "throws at 40k ids" pin claim). **Open after the ladder's cap
 (recorded, owned, never looped):** the dedupe's late-registry engagement leg (KnownIssues, 13y);
-the daily Journal's identity (the memo, 13y); the sync probes (17i). **PENDING — round 3's own list,
-filled at the close.**
+the daily Journal's identity (the memo, 13y); the sync probes (17i). **Round 3 (the cap): 0 BLOCKER · 0 MAJOR · 4 MINOR · 1 NIT, all seven round-2 fixes HOLD, "ship with all five."** R3-1 (canon lagging the R2-2 predicate) FIXED at the record; R3-2 (the seed-shape guard mirrors the classifier instead of invoking it) → 17i; R3-3/R3-5 (six of your invisible acts still unread by the dedupe — stars, word target, segmentation default, canvas layouts, lenses, edges — and the chapter-rename leg) + R3-4 (a bounded re-hash loop in one indeterminate state) → 13y's widened KnownIssues row; **P5(a) re-calibrated: a PRE-EXISTING Phase 5 defect — the general tag-collision repair loses applications that arrive after the duplicate tag died (MAJOR-class spec drift, silent) — promoted to 17i's FIRST fix item with a KnownIssues row.** Not fixed in-round at the cap and your word to finish the phase.
 
 ## The install
 
-**PENDING at drafting:** the refresh commit + sha256, the pre-refresh backup folder name, the zero-
-instance verification time. (Filled at the closeout.)
+*[removed for publication]*
 
 ## Counts at close
 
-**PENDING:** core · Mac · mobile · spine; the ladder's final numbers. (Filled at the closeout.)
+**core 1524/165 · Mac 1985/343 · mobile 607/97 + the 2 standing known issues · tutorial spine green** (the ladder's round-2 fix close, 6150f7e; round 3 changed no code). Against 13p's finals (core 1453/154 · Mac 1843/312 · mobile 513/86): +71/+11 · +142/+31 · +94/+11. Lockstep marker 7; the one schema change a LOCAL index (`v1_15`); every `Sync/` line Fable's under the rider.
 
 ## The mobile update note
 
