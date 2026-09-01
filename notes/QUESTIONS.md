@@ -1102,4 +1102,57 @@ Ruled at the walk: **#34** (backspace-merge when no takes — 13d builds) · **#
     fired (two Sherlock books forever, silently). Engagement now counts `kind = 'manual'` only:
     your deliberate ⌘S protects a copy; the insurance occasions do not. Ratify.
 
-*(Next free number: **#86**.)*
+#86 — **The pre-13u round's RATIFY BUNDLE (2026-08-31; the round's full morning bundle is at the
+top of `notes/handoffs/pre-13u-handoff.md` — this entry is the ratify list only).** *(Ladder round 3
+may append; the handoff lists any open findings it leaves.)*
+
+    **(a) The sample library's seeded stamps are BACK-DATED to the work's publication date
+    (1892-10-14) — PROVISIONAL (the midpoint review's m6, built).** Without it the 13 Conan Doyle
+    notes would sit at the TOP of your Library and Timeline above your own recent writing on the
+    next launch of the refreshed build. Built through the ops layer (the seed runs under a constant
+    clock — no ad-hoc row edit); the Timeline shows them in 1892, which reads honestly. The
+    alternative is one constant away (stamp at seed time and accept the displacement). Ratify.
+
+    **(b) A DANGLING daily-book designation adopts an ARRIVING Journal (the ladder's R2-4
+    extension — PROVISIONAL, built).** When your designation points at a book that no longer
+    exists (e.g. after `deleteReading`) and a Journal arrives via sync, the designation adopts it
+    rather than letting ⌘J/the bridge mint a third Journal. One guard line drops it if you would
+    rather the dangling state mint fresh. Ratify.
+
+    **(c) The near-empty re-key corner: WARN (today, your count-and-dates ruling) or REFUSE?** T1's
+    guard warns before Replace Encryption Keys re-pushes a copy the server is ahead of — including
+    a near-EMPTY store over a full server — and proceeds on the second press. Your own question
+    ("someone trying to enroll their phone could somehow overwrite their whole store with nothing
+    - that won't happen, right?") is answered NO for enrollment (an empty phone has nothing to
+    push); the re-key door is the one local-as-truth road, and it warns. If you want the
+    near-empty case to REFUSE outright, say so — one ruling, cheap.
+
+    **(d) The Fragments-only enrollment road — (a) build the ceremony in Fragments to the written
+    spec, or (b) accept-and-state the unenrolled state.** The brief you carry is
+    `notes/fragments-enrollment-brief-2026-08-31.md`; the carry item in the bridge contract records
+    the roads and costs. Yours with the Fragments agent.
+
+    **(e) The taste forks (each built to best judgment under your granted latitude; one-line swaps
+    where noted):** wave 1 — the tray's Leaving-first order; "＋ tag" in the masthead vs bare ＋ on
+    dense rows; Read placed after Index in the mode row; the lobby's endpaper wash. Wave 2a —
+    Settings panes keep system Form chrome (card grammar to 13u2); the field-guide door points by
+    name, not a cross-scene button; the Trash's card restyle deferred to 13u2. Wave 2b — the
+    Snippets card click model (body-click selects / double-click opens — item 10's grammar; a
+    one-line swap back); a deleted seeded-default group rows in the Trash under its stored "Pool"
+    name; the delete-group confirm is the plain 2-click destructive shape; bulk "tag ▾" applies
+    existing tags only. Wave 2c — the book Index's one fold/filter divergence (a matching CHAPTER
+    title keeps all its notes); the excerpt-of-"I." quirk. The per-wave records carry the reasons.
+
+    **(f) Up/down typed arrows (item 12):** `->`/`<-` are built; you wanted up/down too with the
+    typed form undecided — candidates `-^` / `-v` (alt `|^` / `|v`). Your nod builds them.
+
+    **(g) The Screen Recording grant:** the design pass's dev-build capture prompted it under the
+    "Variorum" identity; the product has ZERO capture code (grep-verified twice, incl. by the
+    ladder). Revoke at System Settings ▸ Privacy & Security ▸ Screen & System Audio Recording
+    whenever you like; nothing needs it.
+
+    **(h) Pointers, already recorded:** the renamed-daily-Journal corner (#85(a), interim until the
+    daily-identity memo builds at 13y); the Trash-deposit/put-back shape (#85(e)); the sync
+    reconciliation probes — NOT run this round at your word (entry 17i, the memo's top).
+
+*(Next free number: **#87**.)*
