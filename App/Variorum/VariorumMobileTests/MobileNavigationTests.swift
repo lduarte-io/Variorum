@@ -224,6 +224,86 @@ struct MobileNavigationTests {
         }
     }
 
+    /// **A PAGE CHANGE IS A LEAVING, AND THE BOX REALLY FILES — MEASURED ON
+    /// THE MOUNTED SHELL** (the batch-10 cold review, MINOR 3).
+    ///
+    /// `selectPage` is the pre-batch tab door's body, moved, so a swipe and a
+    /// tap file the quick-note box through the SAME line; the record claimed
+    /// A5-8 (*leaving mints and clears*) on that ground and pinned nothing at
+    /// the shell. **This lands the reviewer's probe as coverage** — and it
+    /// pins BOTH halves of the contract, because the reviewer's own reading
+    /// turned out to be the first half:
+    ///
+    /// · **Navigation never waits on the write.** `selectPage` spawns the
+    ///   filing in a `Task`, so in the ACTIVATION'S OWN TURN — before any
+    ///   `await` — nothing has filed: `handOffCount` is 0 and the words are
+    ///   still in the box. That is the shipped doctrine, deliberately, and it
+    ///   is exactly what a probe reading the box in that turn sees.
+    /// · **And then it completes.** Once the turn yields, the leaving mints
+    ///   (already minted here), flushes, savepoints, clears the box and
+    ///   announces the hand-off. **Measured at ~40 ms** — 5 runs, 5 the
+    ///   same: `handOffCount 0 → 1`, box `"a thought left in the box"` → `""`.
+    ///
+    /// The state driven is the one no existing quick-note pin reaches: every
+    /// leaving pin in `MobileQuickNoteTests` uses `quietBox` (mint clock
+    /// stilled, `postID == nil`), whereas here the REAL clock has already
+    /// minted a real note before the page changes.
+    ///
+    /// Inherited behaviour, now pinned — not batch 10's fix.
+    @Test func aPageChangeFilesTheQuickNoteBoxAndThisIsWhatItDoes() async throws {
+        try await withEditorWorld { session, db in
+            let router = MobileShellRouter()
+            let typed = "a thought left in the box"
+            func containers() async throws -> Int {
+                try await db.read { db in
+                    try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM container") ?? -1
+                }
+            }
+            let before = try await containers()
+            try await withHostedSurface(
+                MobileShellView(session: session, services: nil, router: router)
+            ) { surface in
+                await surface.settle(20)
+                router.quickNote.text = typed
+                // The REAL mint clock (~1 s) — this pin is about the state
+                // after it has fired.
+                for _ in 0..<200 where router.quickNote.postID == nil {
+                    await surface.settle(1)
+                }
+                #expect(router.quickNote.postID != nil, "the box minted its note")
+                #expect(router.quickNote.lastError == nil,
+                        "\(router.quickNote.lastError ?? "")")
+                let minted = try await containers()
+                #expect(minted == before + 1, "a real note exists in the store")
+
+                // THE LEAVING, through the real tab door — the one road a
+                // swipe also takes.
+                #expect(surface.activate("Library"),
+                        "labels were \(surface.visibleLabels)")
+                // Same turn, no await: the filing cannot have run yet.
+                #expect(router.quickNote.handOffCount == 0,
+                        "navigation never waits on the write")
+                #expect(router.quickNote.text == typed,
+                        "her words are still in the box while the page moves")
+
+                for _ in 0..<200 where router.quickNote.handOffCount == 0 {
+                    await surface.settle(1)
+                }
+                #expect(surface.visibleElements.contains {
+                    $0.accessibilityLabel == "Library"
+                        && $0.accessibilityTraits.contains(.selected)
+                }, "the page really changed")
+                #expect(router.quickNote.handOffCount == 1,
+                        "the leaving completed and said so")
+                #expect(router.quickNote.text.isEmpty, "the box came back empty")
+                #expect(router.quickNote.postID == nil, "and owns nothing now")
+                let after = try await containers()
+                #expect(after == before + 1,
+                        "the leaving minted nothing further — the note was already there")
+            }
+        }
+    }
+
     // MARK: - Deliverable 2 · the starred page
 
     /// **THE STARRED LIST MOVED — it is on its own page, and it is GONE from

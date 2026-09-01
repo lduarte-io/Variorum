@@ -1022,5 +1022,61 @@ marker is the sentence carrying the folded chapter's story.
 **Suite (targeted):** `✔ Test run with 15 tests in 1 suite passed after
 8.321 seconds.` — exit 0.
 
-**RED-ON-OLD: PENDING** (revert runs after this commit, per the
-commit-before-revert rule).
+**RED-ON-OLD — production revert `R-m4`** (the shipped grouping restored:
+`chapters.map` with no `populated` clause):
+
+```
+✘ Test aChapterWhoseNotesFellPastTheWindowIsNotShownAsEmpty() recorded an issue at MobileNavigationTests.swift:637:13: Expectation failed: (groups.map(\.section) → [Optional("One"), Optional("Two"), Optional("Three")]) == (["One", "Two"] → [Optional("One"), Optional("Two")])
+✘ Test aChapterWhoseNotesFellPastTheWindowIsNotShownAsEmpty() recorded an issue at MobileNavigationTests.swift:639:13: Expectation failed: (groups.map { $0.entries.count } → [1, 0, 0]) == [1, 0]
+✘ Test run with 15 tests in 1 suite failed after 8.402 seconds with 2 issues.
+```
+
+`"Three"` returning as a third group with **zero** entries is the finding's
+own lie, reproduced. Restored with `git checkout --`; `git status` clean.
+
+---
+
+## Item 5 · MINOR 3 — the A5-8 claim is now PINNED at the shell · **LANDED, and the probe's reading is explained**
+
+**The pin:** `aPageChangeFilesTheQuickNoteBoxAndThisIsWhatItDoes` mounts
+the real shell, types into the quick-note box, lets the **REAL** mint
+clock fire (the state no existing pin reaches — every leaving pin in
+`MobileQuickNoteTests` uses `quietBox`, clock stilled and `postID == nil`),
+then activates the real `Library` tab door and measures the box.
+
+**AND THE MEASUREMENT DIFFERS FROM THE REVIEWER'S — with the reason
+measured rather than argued.** The reviewer observed
+`handOffCount == 0` with the words still in the box, and traced it to
+`file()`'s `guard autosave?.isDirty != true` road. What I measure is that
+**both readings are the same run at two different instants**:
+
+```
+PROBE[A5-8·t0] handOffCount 0 · box "a thought left in the box"
+PROBE[A5-8·t2] handOffCount 1 · box ""
+PROBE[A5-8]    handOffCount 1 · box "" · postID false · containers 1
+```
+
+`selectPage` files in a `Task` — *navigation must never wait on a write*,
+the shipped doctrine — so **in the activation's own turn nothing has filed
+yet**, which is exactly the reviewer's reading; ~40 ms later the leaving
+has completed. Reproduced **5 runs, 5 the same** (three clean repeats plus
+the two instrumented ones). The `isDirty` road cannot be what ran: it
+returns without bumping `handOffCount`, and the counter reaches 1.
+
+**So the pin asserts BOTH halves, and they are both deterministic:** the
+same-turn half has no `await` between the activation and the assertion, so
+the `Task` provably cannot have run; the settled half waits on
+`handOffCount` and then reads the box, the ownership, and the store's
+container count. A5-8 holds on the shared road — the record's claim was
+true, and it is now driven rather than inherited.
+
+**No behaviour changed for this item** (the road is byte-identical to the
+pre-batch one, as the reviewer verified), so there is no fix to red. Teeth
+proven instead by a revert of the road the pin covers — below.
+
+**Files:** `App/Variorum/VariorumMobileTests/MobileNavigationTests.swift`.
+
+**Suite (targeted):** `✔ Test run with 16 tests in 1 suite passed after
+10.514 seconds.` — exit 0.
+
+**PIN-HAS-TEETH REVERT: PENDING** (runs after this commit).
