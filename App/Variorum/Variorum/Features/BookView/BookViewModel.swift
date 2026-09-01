@@ -364,6 +364,36 @@ final class BookViewModel {
         expandedPosts.contains(postID)
     }
 
+    // MARK: - Row 53 (the Act 10 correction round): the expanded surfaces'
+    // REMEMBERED SIZES
+
+    /// The last settled size of each expanded note's text surface (read-
+    /// cheap or live), keyed by post — session view state, never persisted.
+    /// Why it exists: Outline's lazy column re-realizes an expanded story
+    /// every time it scrolls back into range, and the surface comes back
+    /// at its placeholder (24/40 pt), grows to a first measure, then to its
+    /// final ~20,000 pt — thousands of points of layout change per row,
+    /// several rows at once, for hundreds of milliseconds. Under that
+    /// churn the container's estimates never converge and no scroll
+    /// request lands (the orchestrator's walk, row 53: the page inside the
+    /// wrong story). A row that remembers its size reserves it from the
+    /// first frame it is realized (`OutlinePostRow`), so the column's
+    /// layout is right at once and only a story opened for the FIRST time
+    /// ever grows — at the top of the page, downward, harmlessly.
+    ///
+    /// `@ObservationIgnored`: written at geometry cadence and read only at
+    /// a row's realization — an observed property here would re-render the
+    /// whole book per report.
+    @ObservationIgnored private var rememberedSurfaceSizes: [String: CGSize] = [:]
+
+    func rememberedSurfaceSize(_ postID: String) -> CGSize? {
+        rememberedSurfaceSizes[postID]
+    }
+
+    func rememberSurfaceSize(_ postID: String, _ size: CGSize) {
+        rememberedSurfaceSizes[postID] = size
+    }
+
     /// 13f batch 4 (the MOUNT rule): whether this book's PANE is the
     /// focused one. A book in an unfocused pane mounts no live surface —
     /// and it does so through the book's OWN single focus authority below,

@@ -82,6 +82,54 @@ nonisolated enum BookOutlineRows {
         return result
     }
 
+    // MARK: - The column's SEGMENTS (row 53 — one container per row scale)
+
+    /// A stretch of Outline's column: a RUN of small rows (chapter headings,
+    /// cards) that share one lazy container, or ONE expanded note standing
+    /// as a direct child of the column.
+    ///
+    /// Why the split exists (the orchestrator's walk, row 53 — traced on
+    /// the dev store): a `LazyVStack` estimates every row it has not
+    /// realized at the AVERAGE of the rows it has measured. Cards are
+    /// ~100 pt and an expanded story ~20,000 pt; once a few stories have
+    /// been measured the average is thousands of points per card, the
+    /// container's content estimate inflates toward rows × average (the
+    /// trace's asymptote: 26 rows → ~126,000 pt against ~50,000 real), and
+    /// every far target's position is off by tens of thousands of points —
+    /// no scroll request can realize it. Runs of small rows keep their own
+    /// lazy container (uniform rows, honest estimates); an expanded note
+    /// leaves the lazy containers entirely and is virtualized by the book
+    /// itself (`OutlinePostRow`: a placeholder of its remembered height
+    /// when far from the viewport, the real surface when near — P3 for the
+    /// heavy unit, exact geometry for the column).
+    enum Segment: Identifiable, Equatable {
+        case run([Row])
+        case expanded(Queries.ReadingEntry)
+
+        var id: String {
+            switch self {
+            case .run(let rows): "run-" + (rows.first?.id ?? "empty")
+            case .expanded(let entry): Row.noteAnchor(entry.postID)
+            }
+        }
+    }
+
+    /// Split the flat row list at every expanded note. Pure — pinned.
+    static func segments(rows: [Row], isExpanded: (String) -> Bool) -> [Segment] {
+        var result: [Segment] = []
+        var run: [Row] = []
+        for row in rows {
+            if case .note(let entry) = row, isExpanded(entry.postID) {
+                if !run.isEmpty { result.append(.run(run)); run = [] }
+                result.append(.expanded(entry))
+            } else {
+                run.append(row)
+            }
+        }
+        if !run.isEmpty { result.append(.run(run)) }
+        return result
+    }
+
     // MARK: - The card's preview (row 45) and the gutter's line (row 13)
 
     /// The words a collapsed card previews (the correction round, row 45 —
