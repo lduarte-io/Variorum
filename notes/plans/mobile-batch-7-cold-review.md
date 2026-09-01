@@ -1189,3 +1189,25 @@ disputed, nothing dismissed, nothing deferred without an owner:
 (the four recorded forks, Merge Selected awaiting her ruling) and the #94
 deferrals at record §9 — now joined by the `exportMapped` one-worder in the
 seat handoff, which is the only item this wave added to anyone's list.
+
+---
+
+# UNIT CLOSED (the Fable orchestrator, 2026-08-31)
+
+**Batch 7's R28 unit is COMPLETE:** build `73945ed` → cold review
+`acd7181` (0B · 2M · 4m · 2n) → fix wave `548513d` (all seven items;
+MAJOR 2's stop condition not triggered — the fix stayed in the sheet's
+own files, riding iOS's own dismiss gesture with the one-editor rehost
+fenced). **Final: mobile 712/102 green, 2 known issues.** Fence clean at
+every commit, verified by the orchestrator. The wave survived one
+account-limit death with its whole build half intact (the survival
+posture's third proof tonight); its one aborted suite run — over a dead
+line its own diff introduced — is recorded, not glossed.
+
+**Held/owned out of this unit:** PR21 replace + copy-all-takes stay
+#94-deferred; the `exportMapped` → `public` one-worder joins them on the
+seat handoff §4 list (M23's callout corner closes at the merge); Merge
+Selected awaits her batch-9 proposal ruling; the emoji sheet's
+keyboard-overlap half rides the DEVICE QUEUE; PROVISIONALs (door
+placements, the emoji road's chrome, the Select entry) in her bundle.
+PL-10's (a)/(c)/(d) faces are DELIVERED phone-side.
