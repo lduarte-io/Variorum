@@ -114,6 +114,9 @@ struct CanvasView: View {
     /// recorded judgment call; ScrollPosition stays available if this
     /// ever proves insufficient).
     @State private var scrollTarget: CGPoint?
+    /// Row 88(a) (R-cor-11(3)): whether this canvas has already been
+    /// landed on arrival — once per mount.
+    @State private var arrivalFitted = false
     /// The chip under the pointer while dragging out of the bank (the
     /// ghost's whole state — nothing model-side moves until the drop).
     @State private var bankDrag: BankDrag?
@@ -181,6 +184,24 @@ struct CanvasView: View {
         .background(tokens.room)
         .task { await model.start() }
         .task { await model.startTags() }
+        // Row 88(a) (R-cor-11(3)): a FIRST arrival with no remembered
+        // layout opens FIT-ALL — never mid-bank. The orchestrator's walk
+        // found the 215-card story opening with the viewport somewhere in
+        // the middle of its spread grid (rows 97–162, the edges clipped,
+        // `fit all` a click away): a 2-axis scroll view's own initial
+        // position, not a landing of ours. Now a canvas whose store holds
+        // NO card position lands through the fit-all door as its
+        // projection arrives — small boards scroll to their bounds' centre
+        // at 1:1, big ones open the read-only overview (a click lands on a
+        // card). A board with a remembered layout is left as it was.
+        .onChange(of: model.projection.cards.count, initial: true) { _, count in
+            guard CanvasArrival.fitsAllOnArrival(
+                cards: count, storedPositions: model.projection.positions.count,
+                alreadyFitted: arrivalFitted)
+            else { return }
+            arrivalFitted = true
+            handleFitAll(onArrival: true)
+        }
         .sheet(item: $tagSheetBlock) { target in
             BlockTagAssignmentSheet(
                 session: session, blockID: target.id, preview: target.preview)
@@ -229,29 +250,34 @@ struct CanvasView: View {
 
     // MARK: - The top strip
 
+    /// **Row 88(b) (the Act 10 correction round, batch G — R-cor-11(3)):
+    /// the strip in the calm-chip grammar.** It mixed grammars — a "Tag
+    /// filter" LABEL beside a system popup reading "tag filter: all", system
+    /// buttons beside calm chips (the orchestrator's walk, both voices).
+    /// One chip per control now, in `VoiceControls`'s vocabulary (P-8: THE
+    /// chrome vocabulary); the redundant label is dropped — the menu's own
+    /// face says what it is; the Blocks tool row's container (card, a
+    /// bottom line).
     private var topStrip: some View {
-        HStack(spacing: 8) {
-            // 13b 4D (N32(b) — S4-8b): the picker NAMES itself a tag
+        HStack(spacing: 10) {
+            // 13b 4D (N32(b) — S4-8b): the filter NAMES itself a tag
             // filter and its help de-blurs the model — a LABEL filter,
             // never a container switch.
-            Picker("Tag filter", selection: Binding(
-                get: { model.filterTagID },
-                set: { tagID in Task { await model.applyFilter(tagID: tagID) } })) {
-                Text("tag filter: all").tag(String?.none)
+            VoicedMenu(tokens: tokens, label: tagFilterLabel, role: .quiet) {
+                Button("all tags") { Task { await model.applyFilter(tagID: nil) } }
                 ForEach(model.allTags, id: \.id) { tag in
-                    Text("#\(tag.path)").tag(String?.some(tag.id))
+                    Button("#\(tag.path)") { Task { await model.applyFilter(tagID: tag.id) } }
                 }
             }
-            .fixedSize()
             .help("Show only cards wearing a tag — a LABEL filter, not a pool: "
                 + "pools are containers (a block lives in exactly one); tags are "
                 + "labels (a block can wear many). Every card stays where it lives.")
 
             if model.overviewActive {
-                Button("back to 1:1") { model.exitOverview() }
+                VoicedChip(tokens: tokens, text: "back to 1:1", on: true) { model.exitOverview() }
                     .help("Leave the overview — or click any card to land on it")
             } else {
-                Button("fit all") { handleFitAll() }
+                VoicedChip(tokens: tokens, text: "fit all") { handleFitAll() }
                     .help("See every card at once — small boards scroll into "
                         + "view; big boards open a read-only overview")
             }
@@ -260,9 +286,13 @@ struct CanvasView: View {
             // to park or somewhere parked: on a fully-arranged board with
             // the bank closed there is nothing for it to say (P-2).
             if model.bankOpen || !model.bankCards.isEmpty {
-                Button(model.bankOpen
-                       ? "hide bank"
-                       : "\(CapabilityRegistry.capability(.toggleCanvasBank).verb) · \(model.bankCards.count)") {
+                VoicedChip(
+                    tokens: tokens,
+                    text: model.bankOpen
+                        ? "hide bank"
+                        : "\(CapabilityRegistry.capability(.toggleCanvasBank).verb) · \(model.bankCards.count)",
+                    on: model.bankOpen
+                ) {
                     model.toggleBank()
                 }
                 .help("Cards you haven't placed wait in the bank — drag one out "
@@ -272,17 +302,20 @@ struct CanvasView: View {
             // S4-7f — the ONE spatial→structural door: explicit mode,
             // numbered preview, one confirm, ⌥⌘Z undoes, cancel inert.
             if model.orderMode {
-                Text("click cards in reading order — \(model.orderSequence.count) numbered")
+                Text(tokens.chromeLabel(
+                    "click cards in reading order — \(model.orderSequence.count) numbered"))
                     .font(tokens.small)
                     .foregroundStyle(tokens.accent)
                     .lineLimit(1)
-                Button("Apply order") { Task { await model.applyOrder() } }
+                Button(tokens.chromeLabel("apply order")) { Task { await model.applyOrder() } }
+                    .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary, compact: true))
                     .disabled(model.orderSequence.isEmpty)
                     .help("The numbered cards lead the note in click order; "
                         + "everything else keeps its relative order after them (⌥⌘Z undoes)")
-                Button("Cancel") { model.cancelOrderMode() }
+                Button(tokens.chromeLabel("cancel")) { model.cancelOrderMode() }
+                    .buttonStyle(CalmButtonStyle(tokens: tokens, compact: true))
             } else {
-                Button("order by clicking…") { model.enterOrderMode() }
+                VoicedChip(tokens: tokens, text: "order by clicking…") { model.enterOrderMode() }
                     .help("Click cards in the order the note should read — "
                         + "one confirm reorders the note; the spatial arrangement never moves")
             }
@@ -291,14 +324,24 @@ struct CanvasView: View {
             if offersLensSave, !model.viewPicks.isEmpty {
                 // R88: the canvas's picks are a lens-shaped arrangement —
                 // keep them.
-                Button("💾 Save picks as lens…") { lensPromptShown = true }
+                VoicedChip(tokens: tokens, text: "save picks as lens…") { lensPromptShown = true }
                     .help("This canvas's viewed takes become a named lens — "
                         + "open it in Lenses, adopt it, or promote it later")
             }
         }
-        .controlSize(.small)
-        .padding(6)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .background(tokens.card)
+        .overlay(alignment: .bottom) { Divider().overlay(tokens.line) }
         // 13b 1b (AD-14): outcomes speak through the ONE shell toast.
+    }
+
+    /// The tag filter's own face: the chosen tag's path, else "tag filter: all".
+    private var tagFilterLabel: String {
+        if let id = model.filterTagID, let tag = model.allTags.first(where: { $0.id == id }) {
+            return "#\(tag.path)"
+        }
+        return "tag filter: all"
     }
 
     // MARK: - The bank (13e E7)
@@ -446,9 +489,13 @@ struct CanvasView: View {
         }
     }
 
-    private func handleFitAll() {
-        switch model.fitAll(viewport: model.visibleRect.isEmpty
-            ? CGSize(width: 1200, height: 800) : model.visibleRect.size) {
+    private func handleFitAll(onArrival: Bool = false) {
+        let outcome = model.fitAll(viewport: model.visibleRect.isEmpty
+            ? CGSize(width: 1200, height: 800) : model.visibleRect.size)
+        #if DEBUG
+        if onArrival { CanvasArrivalOracle.outcome = outcome }
+        #endif
+        switch outcome {
         case .empty, .overview:
             break  // the overview re-renders scaled; empty spoke
         case .scroll(let center):
@@ -977,3 +1024,22 @@ struct PoolDetailView: View {
         }
     }
 }
+
+/// **Row 88(a)'s rule, pure (pinned):** a canvas lands through fit-all on
+/// its arrival exactly when it has cards, its store holds NO position for
+/// any of them (never arranged), and it has not been landed already.
+nonisolated enum CanvasArrival {
+    static func fitsAllOnArrival(cards: Int, storedPositions: Int, alreadyFitted: Bool) -> Bool {
+        cards > 0 && storedPositions == 0 && !alreadyFitted
+    }
+}
+
+#if DEBUG
+/// Row 88(a)'s DEBUG oracle: what the arrival's fit-all decided — nil
+/// until an arrival lands.
+@MainActor
+enum CanvasArrivalOracle {
+    static var outcome: CanvasViewModel.FitAllOutcome?
+    static func reset() { outcome = nil }
+}
+#endif
