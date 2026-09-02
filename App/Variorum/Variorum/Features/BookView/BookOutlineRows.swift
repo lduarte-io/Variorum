@@ -208,12 +208,16 @@ nonisolated enum BookOutlineRows {
         return true
     }
 
-    /// `1`, `12`, `I`, `iv`, `XLII` — never `one`, never two words.
+    /// `1`, `12`, `I`, `IV`, `XLII` — never `one`, never two words. Ladder
+    /// R2-11: a Roman numeral is UPPERCASE and at most five letters — a
+    /// word that happens to spell in I·V·X·L·C·D·M (`Mild.`, `Dim.`,
+    /// `Civic.`, `Mimic.`) is a sentence and previews like one; `iv.` is
+    /// prose too (a numeral heading is set in capitals).
     private static func isNumeralToken(_ token: String) -> Bool {
         guard !token.isEmpty, !token.contains(" ") else { return false }
         if token.allSatisfy(\.isNumber) { return true }
         let roman = Set("IVXLCDM")
-        return token.uppercased().allSatisfy { roman.contains($0) }
+        return token.count <= 5 && token.allSatisfy { roman.contains($0) }
     }
 
     /// The details gutter's line beside a collapsed card (row 13 — C-6's

@@ -186,6 +186,22 @@ struct BookOutlineRowsTests {
         #expect(BookOutlineRows.cardPreview(blocks: ["I.", story]).hasPrefix("It was"))
     }
 
+    /// Ladder R2-11: a WORD spelled only in Roman-numeral letters is a
+    /// sentence, not a numeral — `Mild.` previews; a real numeral is
+    /// uppercase and short. RED ON OLD: `Mild.` / `Dim.` / `Civic.` were
+    /// skipped from the card as stubs.
+    @Test func aWordSpelledInRomanLettersIsASentenceAndARealNumeralStaysAStub() {
+        for word in ["Mild.", "Dim.", "Civic.", "Mimic.", "iv.", "MMMMMM."] {
+            #expect(!BookOutlineRows.isLoneHeadingOrNumeral(word), "\(word) is a sentence")
+        }
+        for stub in ["XLII.", "MCMX", "IV.", "II", "LIV."] {
+            #expect(BookOutlineRows.isLoneHeadingOrNumeral(stub), "\(stub) is a numeral stub")
+        }
+        let story = "It was a widespread field, the kind a preview reads across."
+        #expect(BookOutlineRows.cardPreview(blocks: ["Mild.", story]).hasPrefix("Mild."))
+        #expect(BookOutlineRows.cardPreview(blocks: ["XLII.", story]).hasPrefix("It was"))
+    }
+
     @Test func flatRowsHeadAtEveryTagPathChange() {
         let rows = BookOutlineRows.rows(flat: [
             entry("a", path: "life"), entry("b", path: "life"), entry("c"), entry("d", path: "life"),
