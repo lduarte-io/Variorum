@@ -106,7 +106,7 @@ struct ReadingFlowLandingTests {
     /// 116,780 pt for ~58,000 of content). The structural fix is the book
     /// Outline's segmented column with remembered sizes, applied to the
     /// flow; this pin reactivates with it and must then be green.
-    @Test(.disabled("ledger row 95 — the flow's far-story landing needs the Outline's segmented column; the pin reactivates with that batch"))
+    @Test
     func aRevealOfTheFifthLongEntryLandsItsRowAtTheTop() async throws {
         let db = try AppDatabase.inMemory()
         try await withDependencies {

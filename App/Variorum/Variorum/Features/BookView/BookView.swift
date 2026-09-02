@@ -1542,154 +1542,6 @@ private extension View {
     }
 }
 
-/// Row 53: whether a row sits within `margin` points of the Outline
-/// scroll's viewport (its frame read in the scroll's named space, where the
-/// viewport's top is 0). Only expanded rows carry it — a dozen observers at
-/// most, each a comparison per scroll tick, writing its state only when the
-/// answer flips. With HYSTERESIS: a row becomes near within `margin` and
-/// far again only beyond three times that — a row's own placeholder ↔
-/// surface swap moves the column, and without the band that move flipped
-/// its neighbours back and forth (traced on the dev store as `861 ↔ 221`
-/// and `21054 ↔ 94` row heights).
-private struct NearViewportObserver: ViewModifier {
-    @Binding var near: Bool
-    let margin: CGFloat
-    var farMargin: CGFloat { margin * 3 }
-
-    func body(content: Content) -> some View {
-        content
-            .onGeometryChange(for: CGFloat.self) { geometry in
-                // The row's distance from the viewport's top-edge region
-                // (0 while any part of it overlaps [0, margin) — a viewport
-                // is at most a couple of thousand points tall).
-                let frame = geometry.frame(in: .named(BookView.outlineSpace))
-                if frame.maxY < 0 { return -frame.maxY }
-                if frame.minY > margin { return frame.minY - margin }
-                return 0
-            } action: { distance in
-                // Decided on the next turn: a geometry report can arrive
-                // inside a layout pass, and a state write there is the
-                // "modifying state during view update" class (it doubled
-                // the mounted editor in the harness).
-                let becomesNear = !near && distance < margin
-                let becomesFar = near && distance > farMargin
-                guard becomesNear || becomesFar else { return }
-                DispatchQueue.main.async { near = becomesNear }
-            }
-    }
-}
-
-/// Below this a surface is a placeholder, never worth remembering.
-private let stableSurfacePlaceholderCeiling: CGFloat = 60
-/// One line of slack on "reached": the read-cheap and live surfaces of one
-/// note differ by their insets.
-private let stableSurfaceReachedSlack: CGFloat = 24
-/// Ladder R1-1: how long a surface must hold ONE size before that size is
-/// adopted as its memory and the reservation is dropped — the Outline
-/// landing's own minimum hold (`BookView.landingMinimumHold`), so a
-/// provisional-width first measure (row 54's class) or a placeholder
-/// waiting on the encrypted store's read never decides.
-let stableSurfaceSettleInterval: TimeInterval = 1.0
-/// Ladder R1-1: a remembered width within this of the surface's reported
-/// width is "the same width" — a memory taken at another width does not
-/// apply (the window resized, the sidebar collapsed, the voice switched
-/// while the row was away).
-let stableSurfaceWidthTolerance: CGFloat = 1
-
-/// Row 53 (the Act 10 correction round): an expanded note's text surface
-/// at its REMEMBERED size from the first frame it is realized. The column
-/// re-realizes an expanded story whenever it scrolls back into range; its
-/// surface would come back at a placeholder height and grow in steps to
-/// ~20,000 pt (a DB read, a first measure at a provisional width, the
-/// final) — the layout churn under which no landing can take. With a
-/// remembered size (`BookViewModel`), the row reserves that height until
-/// the surface has reached it, and the column's layout is right from the
-/// first frame.
-///
-/// **What the memory is (ladder R1-1 — the reservation is honest in BOTH
-/// directions):** the surface's last SETTLED size. While a surface loads,
-/// a read-cheap memory grows with it and a live editor's follows typing
-/// both ways once loaded (`followsShrinks`); and whenever a surface holds
-/// one size for `stableSurfaceSettleInterval` — taller OR shorter than the
-/// memory — that size is adopted and the reservation is dropped, so a
-/// memory that is TALLER than the surface's real height (text reflowed
-/// shorter while the row was away) can never hold a permanent gap under
-/// the story. A memory taken at ANOTHER width (`stableSurfaceWidthTolerance`)
-/// does not apply and reserves nothing from the surface's first real
-/// report — the stored `CGSize`'s width is compared, not merely carried.
-/// Before R1-1 the read-cheap memory only ever grew and `loaded` flipped
-/// only when the surface REACHED the memory, so a stale taller memory
-/// reserved a blank gap for the session (the reviewer's trace). Identity
-/// per surface kind (the caller's `.id`), so a note demoted from live to
-/// read-cheap starts a fresh reservation from the same memory. Internal
-/// (not private) so the pin can mount it alone.
-struct StableSurface<Content: View>: View {
-    let known: CGSize?
-    let followsShrinks: Bool
-    let remember: (CGSize) -> Void
-    @ViewBuilder let content: () -> Content
-    /// The surface has reached (or settled at) a size: the reservation is
-    /// off and the memory follows the surface.
-    @State private var loaded = false
-    /// R1-1: the width the surface last reported above the placeholder
-    /// ceiling — the reservation applies only while it matches the memory's.
-    @State private var reportedWidth: CGFloat?
-    /// R1-1: the settle bookkeeping, in a reference box — no `@State` write
-    /// per geometry report (the landing's own lesson).
-    @State private var settle = SettleBox()
-
-    final class SettleBox {
-        var lastSize: CGSize?
-        var generation = 0
-    }
-
-    var body: some View {
-        content()
-            .onGeometryChange(for: CGSize.self) { $0.size } action: { size in
-                report(size)
-            }
-            .frame(minHeight: reserved, alignment: .top)
-    }
-
-    private func report(_ size: CGSize) {
-        if !loaded {
-            let reached = known.map { size.height >= $0.height - stableSurfaceReachedSlack } ?? true
-            // Flipped on the next turn, never inside the layout pass that
-            // reported (the state-during-update class).
-            if reached { DispatchQueue.main.async { loaded = true } }
-        }
-        guard size.height > stableSurfacePlaceholderCeiling, size.width > 0 else { return }
-        if reportedWidth != size.width {
-            DispatchQueue.main.async { reportedWidth = size.width }
-        }
-        if loaded && followsShrinks {
-            remember(size)
-        } else if size.height > (known?.height ?? 0) {
-            remember(size)
-        }
-        // R1-1: the settle. Every real report re-arms it; the check that
-        // fires after a quiet interval with the size unchanged adopts THAT
-        // size — smaller or larger — and drops the reservation.
-        settle.lastSize = size
-        settle.generation += 1
-        let generation = settle.generation
-        let box = settle
-        DispatchQueue.main.asyncAfter(deadline: .now() + stableSurfaceSettleInterval) {
-            guard box.generation == generation, box.lastSize == size else { return }
-            remember(size)
-            loaded = true
-        }
-    }
-
-    private var reserved: CGFloat? {
-        guard !loaded, let known else { return nil }
-        if let reportedWidth, abs(reportedWidth - known.width) > stableSurfaceWidthTolerance {
-            return nil
-        }
-        return known.height
-    }
-}
-
 /// One post in Outline: batch 12's card until it is deliberately expanded,
 /// and then its prose (read-cheap, or THE one live editor when focused).
 ///
@@ -1774,7 +1626,7 @@ private struct OutlinePostRow: View {
                     }
                     .frame(maxWidth: BookView.outlineFocusedRowWidth, alignment: .leading)
                     .padding(.bottom, 26)
-                    .modifier(NearViewportObserver(near: $nearViewport, margin: Self.nearMargin))
+                    .modifier(NearViewportObserver(near: $nearViewport, margin: Self.nearMargin, space: BookView.outlineSpace))
                 } else {
                     // Expanded, read-cheap: prose at the measure, the
                     // note's facts in the gutter.
@@ -1815,7 +1667,7 @@ private struct OutlinePostRow: View {
                         Spacer(minLength: BookView.outlineGutterWidth)
                     }
                     .padding(.bottom, 26)
-                    .modifier(NearViewportObserver(near: $nearViewport, margin: Self.nearMargin))
+                    .modifier(NearViewportObserver(near: $nearViewport, margin: Self.nearMargin, space: BookView.outlineSpace))
                 }
             } else {
                 HStack(alignment: .top, spacing: BookView.outlineGutterSpacing) {
