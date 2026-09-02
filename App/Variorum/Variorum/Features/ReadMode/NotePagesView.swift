@@ -14,7 +14,11 @@
 //  Read is NOT editable (13c's A43 ruling, restated by R-cor-7 for the
 //  note): a page is a `CTFrame` drawn into a view — no NSTextView, no
 //  ring, no canary, no TK2 geometry. The arrow keys turn leaves, as on the
-//  book's spread: nothing on this face wants them for anything else.
+//  book's spread — but THIS face shares its surface with text fields (the
+//  index column's filter, the masthead's tag field, the title's rename
+//  field), so the arrows go through `PageTurnKeyMonitor` (ladder R1-5):
+//  a leaf turns only while no text field holds the keyboard; SwiftUI's
+//  `.keyboardShortcut` fired BEFORE the field's `keyDown` and stole them.
 //
 
 import AppKit
@@ -62,6 +66,14 @@ struct NotePagesView: View {
             }
         }
         .background(tokens.room)
+        .background(PageTurnKeyMonitor(onTurn: { turn in
+            let leaves = turn == .back ? -2 : 2
+            guard pages.canTurn(by: leaves) else { return }
+            #if DEBUG
+            ReadModeOracle.pageTurns += 1
+            #endif
+            pages.turn(by: leaves)
+        }))
         .safeAreaInset(edge: .bottom) { flipBar }
         .task(id: postID) {
             pages.appearance = appearance
@@ -115,7 +127,6 @@ struct NotePagesView: View {
             HStack(spacing: 10) {
                 Button("◀") { pages.turn(by: -2) }
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                    .keyboardShortcut(.leftArrow, modifiers: [])
                     .disabled(!pages.canTurn(by: -2))
                     .help("Turn the leaf back — two pages (←)")
                 Slider(
@@ -128,7 +139,6 @@ struct NotePagesView: View {
                         + "until a page has been read")
                 Button("▶") { pages.turn(by: 2) }
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                    .keyboardShortcut(.rightArrow, modifiers: [])
                     .disabled(!pages.canTurn(by: 2))
                     .help("Turn the leaf on — two pages (→)")
                 Spacer(minLength: 12)

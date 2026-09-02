@@ -146,9 +146,13 @@ struct ReadModeView: View {
         }
         .background(tokens.room)
         .coordinateSpace(name: Self.probeSpace)
-        .task { await model.start() }
-        .task { await model.startTray() }
-        .task { await model.startPools() }
+        // Ladder R1-9 (row 83's shape, the mode her ruling put beside Takes):
+        // the rows are PRIMED by one bounded read before the observation
+        // starts, and the sibling observations wait for it — Read arrives
+        // painted instead of blank until the observations' first delivery.
+        .task { await model.primeRows(); await model.start() }
+        .task { await model.awaitPrimed(); await model.startTray() }
+        .task { await model.awaitPrimed(); await model.startPools() }
         .onAppear {
             face = Self.rememberedFace(postID: postID)
             syncAttachment()
@@ -350,6 +354,11 @@ enum ReadModeOracle {
     /// can CLICK a block for real — the rig's synthesized events.
     static var pageBlockFrames: [String: CGRect] = [:]
     static var editBlockFrames: [String: CGRect] = [:]
+    /// Ladder R1-5: how many leaves the pages face turned by its arrow keys.
+    static var pageTurns = 0
+    /// Ladder R1-9: when the `edit` face painted its FIRST row (the Blocks
+    /// arrival measure's shape).
+    static var firstEditRowPaintedAt: Date?
 
     static func reset() {
         face = nil
@@ -358,6 +367,8 @@ enum ReadModeOracle {
         liveBlockID = nil
         pageBlockFrames = [:]
         editBlockFrames = [:]
+        pageTurns = 0
+        firstEditRowPaintedAt = nil
     }
 }
 #endif
@@ -381,7 +392,11 @@ extension View {
         } action: { frame in
             switch slot {
             case .pageBlock(let id): ReadModeOracle.pageBlockFrames[id] = frame
-            case .editBlock(let id): ReadModeOracle.editBlockFrames[id] = frame
+            case .editBlock(let id):
+                if ReadModeOracle.firstEditRowPaintedAt == nil {
+                    ReadModeOracle.firstEditRowPaintedAt = Date()
+                }
+                ReadModeOracle.editBlockFrames[id] = frame
             }
         }
         #else
