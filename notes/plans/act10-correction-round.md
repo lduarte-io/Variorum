@@ -420,6 +420,28 @@ the A1 backup (C-3) → the field-guide re-seed if any lesson text changed → t
 - ~~Batch B, row 52: underscore emphasis~~ — **RULED R-cor-10(4)**: joins the vocabulary as italics (G, row 84).
 - Read's `edit · read` face remembered per note (the architect's call) — still hers to confirm at the walk.
 - ~~D-close seam (17:15 MDT)~~ — **RULED R-cor-11**: row 46 per-state accepted · 87 → G · 88 (both) → G.
+- **THE PROCESS-RULE PROPOSAL (R-cor-12's held half — brought to her ~19:10 MDT after the sizing read; HER RULING
+  AWAITED; nothing written into the skill or CLAUDE.md without her word):** (1) **The unit is an ACCEPTANCE UNIT** —
+  the smallest thing whose done-ness is verified on its own by evidence OF ITS KIND: UI → one screen/mode/board/panel,
+  hands-on use in both voices; sync → one lockstep event or one repair rule, the convergence suites + a live two-device
+  round; custody → one road (a posture switch, a door, a recovery leg), its DRILL; operations → one op family, its
+  state-transition suite (her doubt answered: encryption's "walk" is the drill 13p/13l/pre-13x already prescribe).
+  C-2 generalized: *a batch closes only on its kind's use-shaped evidence; a pin or a mount smoke alone never
+  closes it.* (2) **The sizing rule costs sessions, not phases:** ONE acceptance unit per implementer session (C-1
+  generalized — the rule that would have stopped wave 2c; zero phases added); a phase NAMES its units and their
+  evidence up front and holds at most TWO phase-sized units under ONE theme (phase-sized = a new mode/board, an
+  app-wide token pass, a lockstep event, a posture model) — a third is a split, and ONE design sitting may rule
+  several split phases (13u's shared sitting is the precedent), so a split costs a session + a ladder, never a
+  sitting. (3) C-3 generalized: the install refresh only after the walk or the drill. **Applied to the remaining
+  rows (her ask):** 13i = SIX phase-sized units (wings/libraries + the schema event · the smart-book hybrid +
+  auto-tags + the starred smart book · Owned + immutability + the convert door · the shelf: custom order + starred
+  books · the Book Panel · templates) → one sitting, then 13i-a/b/c/d with the ONE lockstep deployed at 13i-a;
+  13y = THREE themes (the per-tenant seq + abuse guard + the Fragments brief · the daily Journal's identity · the
+  dedupe residuals) → 13y keeps the first, the Journal identity its own small pre-release phase, the residuals →
+  17i; pre-13x = ruled and batched (§15) — 17i runs as its own 17 entry AFTER it rather than as its last batch, and
+  the four 13u2 protection items re-home here (R-cor-12); 13o and 13x one theme each — fine; 13r six bounded
+  units — fine as one phase with a session each (the accessibility pass the one that could grow); 13s — its
+  propose-only findings become 17 entries or a bounded follow-up phase, never absorbed into 13s.
 
 ## 7b. CLOSEOUT OBLIGATIONS (written 2026-09-01 ~06:00 so the run's end is a checklist; the standing CLAUDE.md ritual, unabridged, plus this round's own)
 
