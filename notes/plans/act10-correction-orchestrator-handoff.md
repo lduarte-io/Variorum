@@ -399,3 +399,4 @@ shasum -a 256 /Applications/Variorum.app/Contents/MacOS/Variorum "$PRODUCT/Conte
 defaults read /Applications/Variorum.app/Contents/Info.plist CFBundleIdentifier
 echo "== DONE $STAMP (commit $(git -C "$REPO" rev-parse --short HEAD)); backup $BK"
 ```
+- 02:55 MDT — **batch H CLOSED** (both landings exact in H's captures; Mac 2096/377); rows 97 → round 2's fix session (verify-first), 98 → 13u2, 99 → round 2; **LADDER ROUND 2 SPAWNED** (a fresh reviewer over `604e52e..HEAD` — fix 1 + H).
