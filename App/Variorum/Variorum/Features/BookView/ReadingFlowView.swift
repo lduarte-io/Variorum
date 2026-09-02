@@ -101,8 +101,13 @@ struct ReadingFlowView: View {
     /// The flow's own coordinate space — the viewport's top is 0 there; the
     /// near/far observers and the landing's anchor reports read it.
     static let flowSpace = "reading-flow"
-    /// Within this many points of the top, a landing is DONE.
-    static let landingTolerance: CGFloat = 2
+    /// Within this many points of the top, a landing is DONE — and within
+    /// this many the pins accept it (ONE number, ladder R2-7: at 2 pt the
+    /// finisher re-landed on 3-pt drifts the pin would have accepted — the
+    /// field guide's own log spent two of six corrections on `top=5`,
+    /// `top=3`; a book of many short notes above the target could exhaust
+    /// the budget on drifts and give up a few points short).
+    static let landingTolerance: CGFloat = 4
     /// How far beyond the viewport a story still counts as near — this far
     /// above it, twice this far below (`NearViewportObserver`'s band: a row
     /// is near while its distance from the top-edge region is under the
@@ -137,11 +142,18 @@ struct ReadingFlowView: View {
                 .coordinateSpace(name: Self.flowSpace)
                 // Batch H: the landing listens to the WHOLE column — any
                 // content-height change re-arms its quiet interval, and a
-                // scroll by the user ends it.
-                .onScrollGeometryChange(for: CGFloat.self) { geometry in
-                    geometry.contentSize.height
-                } action: { _, height in
-                    contentResized(height, proxy)
+                // scroll by the user ends it. Ladder R2-7 (row 99's eye):
+                // the scroll OFFSET rides beside the height so each `top=`
+                // report in the DEBUG story carries where the page was —
+                // a content transient and an offset transient then read
+                // apart at a glance. Only a HEIGHT change re-arms.
+                .onScrollGeometryChange(for: FlowScrollFacts.self) { geometry in
+                    FlowScrollFacts(
+                        offset: geometry.contentOffset.y,
+                        height: geometry.contentSize.height)
+                } action: { old, new in
+                    landing.lastOffset = new.offset
+                    if old.height != new.height { contentResized(new.height, proxy) }
                 }
                 .onScrollPhaseChange { _, phase in
                     if phase == .interacting { userScrolled() }
@@ -342,7 +354,8 @@ struct ReadingFlowView: View {
         guard landing.anchor == rowID, let proxy = landing.proxy else { return }
         landing.lastTop = top
         #if DEBUG
-        ReadingFlowGeometry.trace.append("top=\(Int(top)) corrections=\(landing.corrections)")
+        ReadingFlowGeometry.trace.append(
+            "top=\(Int(top)) offset=\(Int(landing.lastOffset)) corrections=\(landing.corrections)")
         #endif
         if abs(top) > Self.landingTolerance, landing.corrections < Self.landingCorrectionBudget {
             landing.corrections += 1
@@ -444,6 +457,13 @@ struct ReadingFlowView: View {
     }
 }
 
+/// The scroll's facts the landing listens to (R2-7): the content offset
+/// (logged) and the content height (re-arms the quiet interval).
+nonisolated struct FlowScrollFacts: Equatable, Sendable {
+    var offset: CGFloat
+    var height: CGFloat
+}
+
 /// The pending landing's state — one box per flow, mutated from geometry
 /// reports and timer checks without a `@State` write per report.
 @MainActor
@@ -453,6 +473,9 @@ final class FlowLanding {
     /// The story the reveal named.
     private(set) var target: String?
     var lastTop: CGFloat?
+    /// The page's scroll offset at the last geometry report (R2-7: logged
+    /// beside every `top=` so row 99's class is self-identifying).
+    var lastOffset: CGFloat = 0
     var began = Date()
     var lastDecision = Date()
     /// Re-lands taken so far (`ReadingFlowView.landingCorrectionBudget`).
@@ -673,6 +696,17 @@ nonisolated enum FlowHeightEstimate {
         }
         return estimate
     }
+
+    /// What a story's surface RESERVES from its first frame: the honest
+    /// height at the column's width — or NOTHING once its read has come
+    /// back EMPTY (ladder R2-9: a failed read, or a note whose render is
+    /// blank against extents that said otherwise). A surface under the
+    /// placeholder ceiling never arms the settle that would drop the
+    /// reservation, so without this a story-sized blank hole stood where
+    /// the story should be for the rest of the session.
+    static func reservation(honestHeight: CGFloat, columnWidth: CGFloat, loadedEmpty: Bool) -> CGSize? {
+        loadedEmpty ? nil : CGSize(width: columnWidth, height: honestHeight)
+    }
     /// The calibration from the Sherlock measurement (batch H): the modelled
     /// height against the real one, applied as a factor. 1 = the model as
     /// stated; the record states the measured value and why.
@@ -837,6 +871,10 @@ private struct FlowStoryRow: View {
     let onLoaded: () -> Void
 
     @State private var near = false
+    /// R2-9: the read came back with nothing to render — the reservation is
+    /// off, the memory holds the empty note's line, the landing hears
+    /// "settled" (a ≤ 60-pt surface never says so itself).
+    @State private var loadedEmpty = false
 
     /// The row's height is honest — remembered here, or estimated from
     /// landed extents (R2-5): only then may the near/far observer decide,
@@ -856,7 +894,16 @@ private struct FlowStoryRow: View {
                 ) {
                     FlowPostView(
                         session: session, entry: entry, page: page,
-                        onWake: onWake, onLoaded: onLoaded)
+                        onWake: onWake,
+                        onLoaded: { isEmpty in
+                            onLoaded()
+                            guard isEmpty else { return }
+                            loadedEmpty = true
+                            memory.remember(
+                                entry.postID,
+                                CGSize(width: width, height: FlowHeightEstimate.emptyNoteHeight))
+                            onSettled()
+                        })
                 }
                 .onAppear { materialized() }
             } else {
@@ -885,9 +932,11 @@ private struct FlowStoryRow: View {
     /// What the surface reserves from its first frame — the honest height
     /// at the column's width (`StableSurface` compares the width against
     /// the surface's first real report, so a resize between the two frames
-    /// still drops the reservation rather than holding a stale one).
+    /// still drops the reservation rather than holding a stale one) — or
+    /// nothing once the read came back empty (R2-9).
     private var known: CGSize? {
-        CGSize(width: width, height: honestHeight)
+        FlowHeightEstimate.reservation(
+            honestHeight: honestHeight, columnWidth: width, loadedEmpty: loadedEmpty)
     }
 
     private func materialized() {
@@ -905,8 +954,9 @@ private struct FlowPostView: View {
     let entry: Queries.ReadingEntry
     let page: ReadingPageTokens
     let onWake: (String?) -> Void
-    /// Batch H: the text is in and laid out — the landing's "loaded" signal.
-    let onLoaded: () -> Void
+    /// Batch H: the text is in — and whether there was any (R2-9: an empty
+    /// load has no surface to settle; the row drops its reservation).
+    let onLoaded: (_ isEmpty: Bool) -> Void
 
     /// 13g batch 4 (L11): rendered paragraphs — the display text with its
     /// markdown applied, plus the line's own style — kept PER BLOCK since
@@ -965,7 +1015,7 @@ private struct FlowPostView: View {
             blocks = slots.map { blockID, text in
                 (blockID, FlowParagraph.paragraphs(of: text, codeTint: page.codeTint))
             }
-            onLoaded()
+            onLoaded(blocks.isEmpty)
         }
     }
 }

@@ -66,7 +66,8 @@ private struct FlowHost: View {
 @MainActor
 @Suite("Read ▸ Scroll's chapter landing (ladder R1-4, pin-first; batch H)", .serialized)
 struct ReadingFlowLandingTests {
-    static let landingTolerance: CGFloat = 4
+    /// ONE tolerance with the finisher's (ladder R2-7).
+    static let landingTolerance: CGFloat = ReadingFlowView.landingTolerance
 
     private nonisolated static func pumpRunLoop(_ seconds: TimeInterval) {
         MainActor.assumeIsolated {
@@ -279,8 +280,11 @@ struct ReadingFlowLandingTests {
             #expect(box.landedCount == 1, "the reveal was consumed exactly once")
             #expect(held.map { abs($0) <= Self.landingTolerance } ?? false,
                     "the twelfth story's row is STILL at the top a second later — top \(String(describing: held))")
-            #expect(relands <= ReadingFlowView.landingCorrectionBudget,
-                    "the re-lands stayed inside the budget: \(relands)")
+            // Ladder R2-6: a REAL bound — the record's worst case (2) + 1,
+            // never the budget itself (`anchorMoved` cannot exceed the
+            // budget, so that comparison could not fail on any tree).
+            #expect(relands <= 3,
+                    "the re-lands stayed at the recorded worst case + 1: \(relands)")
         }
     }
 

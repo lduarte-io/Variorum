@@ -149,6 +149,17 @@ struct ReadingFlowEstimateTests {
         #expect(FlowHeightEstimate.defaultColumnWidth == 600, "the one fallback IS the page column's cap")
     }
 
+    /// Ladder R2-9: a story whose read came back EMPTY reserves nothing —
+    /// a surface under the placeholder ceiling never settles, so the
+    /// reservation would have stood for the session. Door class: the rule
+    /// did not exist.
+    @Test func anEmptyLoadReservesNothing() {
+        #expect(FlowHeightEstimate.reservation(honestHeight: 20_000, columnWidth: 600, loadedEmpty: false)
+                == CGSize(width: 600, height: 20_000))
+        #expect(FlowHeightEstimate.reservation(honestHeight: 20_000, columnWidth: 600, loadedEmpty: true) == nil,
+                "an empty load: no reservation")
+    }
+
     /// The metrics come off the real page font, not a guess: a 600-pt
     /// measure holds a plausible number of 16-pt serif characters, and the
     /// pitch is the font's line height plus the flow's line spacing.
