@@ -65,14 +65,17 @@ struct ChromeMinHeightTests {
         #expect(probed.height < 400)
     }
 
-    /// Ladder R1-6: the Block History pane is ALSO hosted in two `.sheet`s
-    /// (the bars' fallback hosts), where no frame pins its width — its
-    /// explainer, an unlimited `fixedSize` text, sat OUTSIDE the pane's
-    /// scroll view (row 89's wrap rule applied in non-scrolling chrome — the
-    /// b6dae25 class). The same probe the window runs, over the pane and
-    /// over the tray (whose kept-in-lineage sentence had the same shape):
-    /// bounded. RED ON OLD: the ~190-character explainer at one character
-    /// per line measured well over a thousand points.
+    /// Ladder R1-6 — HOLLOW, and this pin is the measurement: the finding
+    /// read the Block History pane's explainer (an unlimited `fixedSize`
+    /// text OUTSIDE the pane's scroll view, sheet-hosted too) as the b6dae25
+    /// wedged-window class. The window's own near-zero-width probe over the
+    /// pane and over the tray answers **280 pt** — with the texts where they
+    /// are AND with them moved inside the scroll views (the behavioral
+    /// revert of the move): both panes pin `minWidth` (300 / 280) and
+    /// `minHeight: 280`, so the probe never measures the text at one
+    /// character per line. Kept as the class's guard: a pane that drops its
+    /// width floor turns this red.
+    /// NOT red on old — the finding was dismissed on this evidence.
     @Test func sheetHostedRecoveryPanesNearZeroWidthProbeStayBounded() async throws {
         let db = try AppDatabase.inMemory()
         try await withDependencies {

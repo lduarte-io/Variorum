@@ -74,6 +74,12 @@ struct CanvasArrivalTests {
                 window.close()
             }
             let model = CanvasViewModel(session: session, containerID: post.id)
+            // Ladder R1-14: the projection PRE-LOADED, so the arrival's
+            // `initial: true` fires BEFORE any viewport report — the app's
+            // remembered-note case, and exactly where the old decision ran
+            // against the 1200 × 800 fallback.
+            model.adopt(try await db.read { try Queries.canvasProjection($0, container: post.id) })
+            #expect(model.projection.cards.count == 30, "the cards are in hand before the mount")
             let root = CanvasView(session: session, containerID: post.id, model: model)
             let hosting = NSHostingView(
                 rootView: root.environment(ThemeStore(session: session)))
