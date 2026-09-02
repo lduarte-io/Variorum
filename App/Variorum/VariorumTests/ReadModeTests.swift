@@ -128,6 +128,15 @@ struct ReadModeTests {
             window.orderOut(nil)
             window.close()
             UserDefaults.standard.removeObject(forKey: ReadModeView.faceKey(postID))
+            // Batch G (row 82's revert run surfaced it): every world mints
+            // the SAME post id (`.incrementing` from zero), and Read reports
+            // its selection into `CurrentBlockMemory`, which PERSISTS under
+            // `currentBlock.<postID>` — so one world's click (block 3) can
+            // arrive as the next world's "current block" and fail the
+            // arrival pin (`selectedBlockID` = a block this note never
+            // chose). The world forgets its note on close; each pin starts
+            // from no memory, which is what its expectation describes.
+            session.commandRouter.forgetCurrentBlock(for: postID)
         }
     }
 
