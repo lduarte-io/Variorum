@@ -44,9 +44,14 @@ struct ReadingFlowView: View {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
     }
 
+    /// The flow's own coordinate space — the DEBUG landing oracle reads each
+    /// post row's top in it (ladder R1-4's pin-first).
+    static let flowSpace = "reading-flow"
+
     var body: some View {
         ScrollViewReader { proxy in
             column
+                .coordinateSpace(name: Self.flowSpace)
                 // 13f W21 — the flow's LANDING half. (Its reporting half
                 // does not exist: this surface tracks no scroll position,
                 // and per-row visibility reporting is the machinery 13c 2A
@@ -58,10 +63,28 @@ struct ReadingFlowView: View {
         }
     }
 
+    /// Ladder R1-4 (pin-first — the pin was RED on the shipped form): the
+    /// landing is UNANIMATED and on the reader's IDENTITY (the flat rows
+    /// below) — an animated scroll toward a lazy column's ESTIMATED offset
+    /// travelled wrong while the stories it passed loaded and grew (the
+    /// pin's reveal of a fifth 215-block story landed 1,562 pt short), and
+    /// an explicit `.id` inside a nested ForEach was unknown to the reader
+    /// once the lazy stack had released the row. **What this does NOT fix,
+    /// recorded as ledger row 95:** a far story that has not LOADED is one
+    /// line tall until its text is read, so the lazy stack's estimate of
+    /// its offset is wrong by tens of thousands of points, and a scroll to
+    /// it lands wherever the estimate says — the book Outline's row-53
+    /// class in the flow. A bounded stability-driven corrector (the
+    /// Outline's) was built and measured here and taken OUT: every hop into
+    /// the unrealized void DOUBLED the column's estimate (35,426 → 116,780
+    /// pt for ~58,000 of content in the pin's own log) and the target never
+    /// realized — a page hopping for four seconds would be her "berserk
+    /// scrolling" reborn. The structural answer is B's segmented column
+    /// with remembered sizes, applied to the flow — a batch of its own.
     private func land(_ proxy: ScrollViewProxy) {
         guard let reveal else { return }
         onRevealLanded?()
-        withAnimation { proxy.scrollTo("flow-\(reveal)", anchor: .top) }
+        proxy.scrollTo(FlowRows.anchor(reveal), anchor: .top)
     }
 
     private var column: some View {
@@ -70,32 +93,39 @@ struct ReadingFlowView: View {
                 // LAZY (P3 — round 3 MAJOR): rows materialize near the
                 // viewport only; the page paper/shadow wrap the column,
                 // so laziness costs the styling nothing.
+                // Ladder R1-4 (the Outline lesson, rows 47/53): ONE flat
+                // ForEach whose IDENTITIES are the landing anchors — an
+                // explicit `.id` on a row inside a nested ForEach is unknown
+                // to the scroll reader once the lazy stack has released the
+                // row (the pin's reveal of a fifth story moved nothing), and
+                // a nested lazy id is not a scroll target. The reader reaches
+                // an unrealized row by its ForEach identity alone.
                 LazyVStack(spacing: 28) {
-                    if let readingName {
-                        Text(readingName)
-                            .font(page.serifTitle)
-                            .foregroundStyle(page.ink)
-                            .padding(.top, 56)
-                    }
-                    ForEach(Array(grouped.enumerated()), id: \.offset) { _, group in
-                        if let section = group.section {
+                    ForEach(FlowRows.rows(readingName: readingName, grouped: grouped)) { row in
+                        switch row {
+                        case .title(let name):
+                            Text(name)
+                                .font(page.serifTitle)
+                                .foregroundStyle(page.ink)
+                                .padding(.top, 56)
+                        case .chapter(let section):
                             Text(section.name.uppercased())
                                 .font(.system(size: 12, weight: .medium, design: .serif))
                                 .tracking(3)
                                 .foregroundStyle(page.chapterInk)
                                 .padding(.top, 22)
-                        }
-                        ForEach(group.entries, id: \.postID) { entry in
+                        case .post(let entry):
                             FlowPostView(
                                 session: session, entry: entry, page: page,
                                 onWake: { blockID in onWake(entry.postID, blockID) })
-                                .id("flow-\(entry.postID)")  // W21's landing anchor
+                                .readingFlowAnchorProbe(entry.postID)
+                        case .end:
+                            Text("· · ·")
+                                .font(page.serif)
+                                .foregroundStyle(page.pageMeta)
+                                .padding(.vertical, 40)
                         }
                     }
-                    Text("· · ·")
-                        .font(page.serif)
-                        .foregroundStyle(page.pageMeta)
-                        .padding(.vertical, 40)
                 }
                 .frame(maxWidth: 600)
                 .padding(.horizontal, 56)
@@ -107,6 +137,72 @@ struct ReadingFlowView: View {
             .frame(maxWidth: .infinity)
         }
         .background(tokens.room)
+    }
+}
+
+/// Ladder R1-4: the flow's rows, FLAT, each with the identity the landing
+/// scrolls to (`FlowRows.anchor(postID)` — W21's `flow-<id>`): the reading's
+/// title, a chapter's heading, a post, the closing mark. Pure, so the
+/// order and the anchors are pinnable without a window.
+nonisolated enum FlowRows {
+    enum Row: Identifiable {
+        case title(String)
+        case chapter(ReadingSection)
+        case post(Queries.ReadingEntry)
+        case end
+
+        var id: String {
+            switch self {
+            case .title: "flow-title"
+            case .chapter(let section): "flow-chapter-\(section.id)"
+            case .post(let entry): FlowRows.anchor(entry.postID)
+            case .end: "flow-end"
+            }
+        }
+    }
+
+    /// The landing anchor of a post's row — the ForEach identity itself.
+    static func anchor(_ postID: String) -> String { "flow-\(postID)" }
+
+    static func rows(
+        readingName: String?,
+        grouped: [(section: ReadingSection?, entries: [Queries.ReadingEntry])]
+    ) -> [Row] {
+        var rows: [Row] = []
+        if let readingName { rows.append(.title(readingName)) }
+        for group in grouped {
+            if let section = group.section { rows.append(.chapter(section)) }
+            rows.append(contentsOf: group.entries.map(Row.post))
+        }
+        rows.append(.end)
+        return rows
+    }
+}
+
+#if DEBUG
+/// Ladder R1-4 (pin-first): where each post row's TOP sits in the flow's
+/// scroll space — the landing oracle, so a pin can say whether a reveal
+/// put its post at the top of the page (the book Outline's own
+/// `BookOutlineGeometry` shape).
+@MainActor
+enum ReadingFlowGeometry {
+    static var anchorTops: [String: CGFloat] = [:]
+}
+#endif
+
+extension View {
+    /// The flow's DEBUG landing oracle write; a no-op outside DEBUG.
+    @ViewBuilder
+    func readingFlowAnchorProbe(_ postID: String) -> some View {
+        #if DEBUG
+        self.onGeometryChange(for: CGFloat.self) {
+            $0.frame(in: .named(ReadingFlowView.flowSpace)).minY
+        } action: { top in
+            ReadingFlowGeometry.anchorTops[postID] = top
+        }
+        #else
+        self
+        #endif
     }
 }
 
