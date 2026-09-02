@@ -118,6 +118,11 @@ let stableSurfaceWidthTolerance: CGFloat = 1
 struct StableSurface<Content: View>: View {
     let known: CGSize?
     let followsShrinks: Bool
+    /// How long the surface must hold one size before it is adopted
+    /// (batch H: a parameter — the Outline's TK2 surfaces keep the 1 s
+    /// default that guards a provisional-width first measure; the reading
+    /// flow's `Text` column lays out whole in one pass and settles faster).
+    var settleInterval: TimeInterval = stableSurfaceSettleInterval
     let remember: (CGSize) -> Void
     @ViewBuilder let content: () -> Content
     /// The surface has reached (or settled at) a size: the reservation is
@@ -166,7 +171,7 @@ struct StableSurface<Content: View>: View {
         settle.generation += 1
         let generation = settle.generation
         let box = settle
-        DispatchQueue.main.asyncAfter(deadline: .now() + stableSurfaceSettleInterval) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + settleInterval) {
             guard box.generation == generation, box.lastSize == size else { return }
             remember(size)
             loaded = true

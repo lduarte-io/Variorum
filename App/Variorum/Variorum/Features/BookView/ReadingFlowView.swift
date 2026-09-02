@@ -108,6 +108,16 @@ struct ReadingFlowView: View {
     /// would otherwise realize a hundred surfaces at once (the round-3
     /// virtualization pin's 150-note book counts them).
     static let nearMargin: CGFloat = 1200
+    /// How long a story's surface holds one size before `StableSurface`
+    /// adopts it and drops the reservation. Short here, deliberately: the
+    /// flow's surface is a column of SwiftUI `Text` that lays out whole in
+    /// ONE pass (the first real report IS the final height — there is no
+    /// TK2 provisional-width first measure, row 54's class, which is what
+    /// the Outline's 1 s default guards). The walk found the cost of the
+    /// default: a story above the landed target held its ESTIMATE for a
+    /// second after its text was in, then dropped 181 pt under the page
+    /// after the landing had already finished.
+    static let surfaceSettleInterval: TimeInterval = 0.15
 
     private var rows: [FlowRows.Row] {
         FlowRows.rows(readingName: readingName, grouped: grouped)
@@ -172,8 +182,8 @@ struct ReadingFlowView: View {
                                 onNear: { near in landing.rowNear(entry.postID, near) },
                                 onLoaded: { landing.rowLoaded(entry.postID) })
                                 .id(segment.id)
-                                .flowAnchor(entry.postID) { top in
-                                    anchorMoved(entry.postID, top: top)
+                                .flowAnchor(segment.id) { top in
+                                    anchorMoved(segment.id, top: top)
                                 }
                         }
                     }
@@ -207,6 +217,7 @@ struct ReadingFlowView: View {
                 .tracking(3)
                 .foregroundStyle(page.chapterInk)
                 .padding(.top, 22)
+                .flowAnchor(row.id) { top in anchorMoved(row.id, top: top) }
         case .end:
             Text("· · ·")
                 .font(page.serif)
@@ -256,8 +267,8 @@ struct ReadingFlowView: View {
     private func land(_ proxy: ScrollViewProxy) {
         guard let reveal else { return }
         onRevealLanded?()
-        let anchor = FlowRows.anchor(reveal)
-        landing.begin(target: reveal, storiesInOrder: storyIDs)
+        let anchor = FlowRows.landingAnchor(for: reveal, grouped: grouped)
+        landing.begin(anchor: anchor, target: reveal, storiesInOrder: storyIDs)
         #if DEBUG
         ReadingFlowGeometry.trace.append("\(anchor) LAND")
         #endif
@@ -283,25 +294,28 @@ struct ReadingFlowView: View {
     /// DEBUG oracle; the pending TARGET's report is the anchoring signal —
     /// off the top ⇒ re-land next turn (within the budget) — and re-arms
     /// the quiet interval either way.
-    private func anchorMoved(_ postID: String, top: CGFloat) {
+    private func anchorMoved(_ rowID: String, top: CGFloat) {
         #if DEBUG
-        ReadingFlowGeometry.anchorTops[postID] = top
+        if let postID = FlowRows.postID(ofAnchor: rowID) {
+            ReadingFlowGeometry.anchorTops[postID] = top
+        } else {
+            ReadingFlowGeometry.anchorTops[rowID] = top
+        }
         #endif
-        guard landing.target == postID, let proxy = landing.proxy else { return }
+        guard landing.anchor == rowID, let proxy = landing.proxy else { return }
         landing.lastTop = top
         #if DEBUG
         ReadingFlowGeometry.trace.append("top=\(Int(top)) corrections=\(landing.corrections)")
         #endif
         if abs(top) > Self.landingTolerance, landing.corrections < Self.landingCorrectionBudget {
             landing.corrections += 1
-            let anchor = FlowRows.anchor(postID)
             #if DEBUG
             ReadingFlowGeometry.trace.append("RE-LAND \(landing.corrections) (top was \(Int(top)))")
             #endif
             // Next turn, never inside the layout pass that reported.
             DispatchQueue.main.async {
-                guard landing.target == postID else { return }
-                proxy.scrollTo(anchor, anchor: .top)
+                guard landing.anchor == rowID else { return }
+                proxy.scrollTo(rowID, anchor: .top)
             }
         }
         armCheck(proxy)
@@ -346,14 +360,17 @@ struct ReadingFlowView: View {
 
     /// The quiet interval passed: the landing is DONE when the target sits
     /// at the top, the hold is over and the near stories above it have
-    /// loaded (nothing left that could move it); it ends wherever it is at
+    /// SETTLED — loaded, and past their surfaces' settle, when a reserved
+    /// estimate taller than the text drops (nothing left that could move
+    /// the target); it ends wherever it is at
     /// the time budget. In between it simply looks again — the re-lands
     /// are the reports' (`anchorMoved`), never the interval's.
     private func checkLanding(_ proxy: ScrollViewProxy) {
         guard landing.target != nil else { return }
         let elapsed = Date().timeIntervalSince(landing.began)
         let atTop = landing.lastTop.map { abs($0) <= Self.landingTolerance } ?? false
-        if atTop, elapsed >= BookView.landingMinimumHold, landing.aboveTargetLoaded {
+        if atTop, elapsed >= BookView.landingMinimumHold,
+           landing.aboveTargetSettled(settle: Self.surfaceSettleInterval) {
             finish("settled at top=\(landing.lastTop ?? 0) after \(landing.corrections) re-lands, \(Int(elapsed * 1000)) ms")
             return
         }
@@ -384,6 +401,9 @@ struct ReadingFlowView: View {
 /// reports and timer checks without a `@State` write per report.
 @MainActor
 final class FlowLanding {
+    /// The row the landing scrolls to (a story's, or its chapter heading's).
+    private(set) var anchor: String?
+    /// The story the reveal named.
     private(set) var target: String?
     var lastTop: CGFloat?
     var began = Date()
@@ -397,10 +417,11 @@ final class FlowLanding {
     /// realize have finished trading their estimates for real heights.
     private var order: [String] = []
     private var near: Set<String> = []
-    private var loaded: Set<String> = []
+    private var loaded: [String: Date] = [:]
 
-    func begin(target: String, storiesInOrder: [String]) {
+    func begin(anchor: String, target: String, storiesInOrder: [String]) {
         check?.cancel()
+        self.anchor = anchor
         self.target = target
         order = storiesInOrder
         lastTop = nil
@@ -412,6 +433,7 @@ final class FlowLanding {
     func end() {
         check?.cancel()
         check = nil
+        anchor = nil
         target = nil
     }
 
@@ -419,13 +441,21 @@ final class FlowLanding {
         if isNear { near.insert(postID) } else { near.remove(postID) }
     }
 
-    func rowLoaded(_ postID: String) { loaded.insert(postID) }
+    func rowLoaded(_ postID: String) {
+        if loaded[postID] == nil { loaded[postID] = Date() }
+    }
 
-    /// Every near story above the target has loaded (a far one is a
-    /// placeholder of a stated height and will not move the page).
-    var aboveTargetLoaded: Bool {
+    /// Every near story above the target has SETTLED: its text in, and its
+    /// surface past the settle after which a reserved estimate taller than
+    /// the text drops (a far one is a placeholder of a stated height and
+    /// will not move the page).
+    func aboveTargetSettled(settle: TimeInterval) -> Bool {
         guard let target, let at = order.firstIndex(of: target) else { return true }
-        return order[..<at].allSatisfy { !near.contains($0) || loaded.contains($0) }
+        return order[..<at].allSatisfy { postID in
+            guard near.contains(postID) else { return true }
+            guard let at = loaded[postID] else { return false }
+            return Date().timeIntervalSince(at) >= settle + 0.1
+        }
     }
 }
 
@@ -467,6 +497,29 @@ nonisolated enum FlowRows {
 
     /// The landing anchor of a post's row — the row's own identity.
     static func anchor(_ postID: String) -> String { "flow-\(postID)" }
+
+    /// The post behind a story row's anchor (nil for a heading's).
+    static func postID(ofAnchor id: String) -> String? {
+        guard id.hasPrefix("flow-"), !id.hasPrefix("flow-chapter-"),
+              id != "flow-title", id != "flow-end" else { return nil }
+        return String(id.dropFirst("flow-".count))
+    }
+
+    /// Where a reveal of this post LANDS (batch H): at its CHAPTER's
+    /// heading when it opens the chapter — a chapter click reads as a
+    /// chapter, heading first, the way a book opens — else at the post's
+    /// own row.
+    static func landingAnchor(
+        for postID: String,
+        grouped: [(section: ReadingSection?, entries: [Queries.ReadingEntry])]
+    ) -> String {
+        for group in grouped {
+            if let section = group.section, group.entries.first?.postID == postID {
+                return Row.chapter(section).id
+            }
+        }
+        return anchor(postID)
+    }
 
     static func rows(
         readingName: String?,
@@ -664,6 +717,7 @@ private struct FlowStoryRow: View {
             if near {
                 StableSurface(
                     known: known, followsShrinks: false,
+                    settleInterval: ReadingFlowView.surfaceSettleInterval,
                     remember: { memory.remember(entry.postID, $0) }
                 ) {
                     FlowPostView(

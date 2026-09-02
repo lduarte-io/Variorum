@@ -60,6 +60,25 @@ struct ReadingFlowEstimateTests {
         #expect(flat.map(\.id) == ["flow-x", "run-flow-end"])
     }
 
+    /// Where a reveal LANDS: a post that opens its chapter lands at the
+    /// chapter's heading (a chapter click reads as a chapter); any other
+    /// post — and every post of a flat book — at its own row. The reverse
+    /// lookup names the post behind a story row's anchor and nothing else.
+    @Test func aRevealOfAChaptersFirstPostLandsAtTheHeading() {
+        let grouped: [(section: ReadingSection?, entries: [Queries.ReadingEntry])] = [
+            (section("s1"), [entry("a"), entry("b")]),
+            (nil, [entry("c")]),
+        ]
+        #expect(FlowRows.landingAnchor(for: "a", grouped: grouped) == "flow-chapter-s1")
+        #expect(FlowRows.landingAnchor(for: "b", grouped: grouped) == "flow-b")
+        #expect(FlowRows.landingAnchor(for: "c", grouped: grouped) == "flow-c", "an unfiled first post is its own row")
+        #expect(FlowRows.landingAnchor(for: "a", grouped: [(nil, [entry("a")])]) == "flow-a", "a flat book has no heading to land on")
+        #expect(FlowRows.postID(ofAnchor: "flow-a") == "a")
+        #expect(FlowRows.postID(ofAnchor: "flow-chapter-s1") == nil)
+        #expect(FlowRows.postID(ofAnchor: "flow-title") == nil)
+        #expect(FlowRows.postID(ofAnchor: "flow-end") == nil)
+    }
+
     /// The paragraph model at the flow's metrics: nothing renders nothing
     /// (the blank line); a block is its paragraphs — `max(1, newlines)`,
     /// the stored separator rendering nothing — each ending mid-line (a
