@@ -957,29 +957,31 @@ struct LibraryCatalogView: View {
         // road exactly. The tags column (R46) wears the note's OWN chip
         // grammar since 13e E8 — colour, leaf, ✕ off, ＋ types one on; the
         // sheet stays reachable from the row's context menu ("Tags…").
-        CatalogNoteLine(
-            tokens: tokens, title: hit.title, date: hit.detail,
-            tags: model.postTags[hit.id] ?? [], allTags: tags.tags,
-            onTitleTap: { openHit(hit) },
-            onApply: { path in Task { await model.applyTypedPath(path, to: [hit.id]) } },
-            onRemove: { tag in Task { await model.removeTag(tag.id, from: [hit.id]) } })
-        .contentShape(Rectangle())
-        .libraryGeometryProbe(.noteRow(hit.id))
         // Act 10 item 10 — her click model, on P-0's reachable routing: a
         // DOUBLE-CLICK anywhere opens (it weirdly didn't); a single body
         // click routes through the model AT ONCE — select + info panel, or
-        // the ⌘/⇧ pick. The title's own tap (in the row above) still opens
-        // instantly. ONE shared tap brain (`rowClick`, ladder R1-2): the
-        // stacked count-2 + plain gestures held every single click for the
-        // double-click interval (0.5 s) — batch C's row-25 lag, alive here
-        // since batch E rebuilt the panel behind this click.
-        .rowClick(
-            onClick: { _ in
+        // the ⌘/⇧ pick. The title's own tap (in the line) still opens
+        // instantly. The row's click SHELL is `CatalogNoteRowShell` (one
+        // shared tap brain, `rowClick` — ladder R1-2: the stacked count-2 +
+        // plain gestures held every single click for the double-click
+        // interval, batch C's row-25 lag, alive here since batch E rebuilt
+        // the panel behind this click).
+        CatalogNoteRowShell(
+            postID: hit.id,
+            onClick: { modifiers in
                 withAnimation(Self.panelAnimation) {
-                    model.clickNoteRow(hit.id, modifiers: .current)
+                    model.clickNoteRow(hit.id, modifiers: modifiers)
                 }
             },
-            onDoubleClick: { openHit(hit) })
+            onDoubleClick: { openHit(hit) }
+        ) {
+            CatalogNoteLine(
+                tokens: tokens, title: hit.title, date: hit.detail,
+                tags: model.postTags[hit.id] ?? [], allTags: tags.tags,
+                onTitleTap: { openHit(hit) },
+                onApply: { path in Task { await model.applyTypedPath(path, to: [hit.id]) } },
+                onRemove: { tag in Task { await model.removeTag(tag.id, from: [hit.id]) } })
+        }
         .draggable(hit.id)
         .contextMenu { postRowMenu(hit) }
     }
@@ -1326,5 +1328,30 @@ struct CatalogNoteLine: View {
             Spacer()
         }
         .coordinateSpace(name: Self.probeSpace)
+    }
+}
+
+/// The note row's click SHELL (ladder R1-2): the whole row is the target,
+/// the shared `rowClick` brain decides single vs double, and the modifiers
+/// arrive as the click model's own `NoteRowClickModifiers`. Internal so the
+/// pin can mount ONE row alone in a real window and click it for real (the
+/// workbench shell's own pin shape — the whole catalog under the rig's
+/// event pump hangs, as the whole workbench did in batch C).
+struct CatalogNoteRowShell<Content: View>: View {
+    let postID: String
+    let onClick: (NoteRowClickModifiers) -> Void
+    let onDoubleClick: () -> Void
+    @ViewBuilder var content: () -> Content
+
+    var body: some View {
+        content()
+            .contentShape(Rectangle())
+            .libraryGeometryProbe(.noteRow(postID))
+            .rowClick(
+                onClick: { modifiers in
+                    onClick(NoteRowClickModifiers(
+                        command: modifiers.contains(.command), shift: modifiers.contains(.shift)))
+                },
+                onDoubleClick: onDoubleClick)
     }
 }

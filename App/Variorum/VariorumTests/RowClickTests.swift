@@ -10,9 +10,10 @@
 //  shell's one-tap brain into `rowClick` (`Core/Views/RowClick.swift`) and
 //  puts it on the book row, the note row and the shell.
 //
-//  The pins: the timing rule, pure; and the REAL catalog mounted in the
-//  canvas rig's window (the one that DELIVERS pointer events to a SwiftUI
-//  hosting view under the runner), a real click on a NOTE row → the panel's
+//  The pins: the timing rule, pure; and the note row's click SHELL
+//  (`CatalogNoteRowShell`) mounted alone in the canvas rig's window (the one
+//  that DELIVERS pointer events to a SwiftUI hosting view under the runner),
+//  wired to a real catalog model, a real click on its body → the panel's
 //  subject set within the row-25 budget (150 ms), then a second click inside
 //  the system's interval → the note OPENS exactly once. RED ON OLD by batch
 //  C's own numbers: the old rows delivered the single click only after the
@@ -63,6 +64,10 @@ struct LibraryRowClickTests {
         var selections: [SidebarSelection] = []
     }
 
+    /// The note row's click SHELL mounted ALONE in the rig's panel (the whole
+    /// catalog under the rig's event pump hangs, as the whole workbench did
+    /// in batch C — the pin isolates the mechanism the row is about), wired
+    /// to a REAL catalog model exactly as the row wires it.
     @Test func aBodyClickStandsThePanelUpWithinTheBudgetAndADoubleOpensOnce() async throws {
         let db = try AppDatabase.inMemory()
         try await withDependencies {
@@ -75,36 +80,29 @@ struct LibraryRowClickTests {
             let post = try session.operations.createPost(title: "the row she clicks")
             _ = try session.operations.newBlock(in: post.id, text: "A note with one block.")
             let model = LibraryCatalogModel(session: session)
-            let library = LibraryViewModel(session: session)
             await model.search()
             #expect(model.hits.contains { $0.id == post.id })
             let opened = Opened()
-            #if DEBUG
-            LibraryPanelOracle.reset()
-            #endif
+            let tokens = VoiceTokens.fallback(for: .light)
             let rig = BlocksWorkbenchFaceTests.Rig(
-                LibraryCatalogView(
-                    session: session, model: model, library: library,
-                    tags: TagsViewModel(session: session),
-                    onOpen: { opened.selections.append($0) })
-                    .environment(ThemeStore(session: session)),
-                width: 1000, height: 640)
+                VStack(spacing: 0) {
+                    CatalogNoteRowShell(
+                        postID: post.id,
+                        onClick: { modifiers in model.clickNoteRow(post.id, modifiers: modifiers) },
+                        onDoubleClick: { opened.selections.append(.post(post.id)) }
+                    ) {
+                        Text("the row she clicks — a note row's body")
+                            .font(tokens.body)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .frame(height: 60)
+                    Spacer()
+                }
+                .padding(20))
             defer { rig.close() }
-
-            // The note row's frame, reported in the catalog's own named space.
-            #expect(await rig.poll(timeout: 6) {
-                LibraryPanelOracle.noteRowFrames[post.id] != nil
-                    && LibraryPanelOracle.rootFrame != nil
-            }, "the note row and the catalog's root reported their frames")
-            let row = try #require(LibraryPanelOracle.noteRowFrames[post.id])
-            let root = try #require(LibraryPanelOracle.rootFrame)
-            // The probe space is the catalog's HStack, inset from the hosting
-            // view by its own symmetric padding — the offset is the difference.
-            let dx = (rig.hosting.bounds.width - root.width) / 2
-            let dy = (rig.hosting.bounds.height - root.height) / 2
-            // Right of the title's words (the title's own tap opens; the
-            // BODY selects — her click model), inside the row.
-            let point = rig.windowPoint(CGPoint(x: row.midX + row.width * 0.3 + dx, y: row.midY + dy))
+            await rig.poll(timeout: 2) { false }  // let it lay out
+            // Right of the title's words — the BODY (her click model).
+            let point = rig.windowPoint(CGPoint(x: 600, y: 50))
             #expect(model.infoHit == nil, "the premise: no subject before the click")
 
             rig.send(.leftMouseDown, at: point)
