@@ -912,3 +912,53 @@ struct TakesWordCountTests {
         }
     }
 }
+
+// MARK: - The Act 10 correction round, batch G — row 86(d)
+
+/// **The ⌘K "Block History" row from a mode with no surface handler.** Her
+/// walk (F's (d), verified by G on the running build): Blocks, row 03
+/// selected, ⌘K "block history" ⏎ → the toast "Put the caret in a block and
+/// its History shows…" and no pane. The palette act dispatched to the
+/// mounted SURFACE's command handler, which Read's faces and Blocks never
+/// register — so it fell through to the registry's note while the block
+/// was plainly focused (row 39's memory holds it). RED ON OLD: nothing
+/// opened and the refusal spoke.
+@MainActor
+@Suite("The palette's Block History row where no surface handles it (correction round, row 86(d))")
+struct BlockHistoryPaletteDoorTests {
+    @Test func thePaletteRowOpensTheFocusedBlocksHistoryWhereNoSurfaceHandlesIt() async throws {
+        try await withSessionWorld { session, _ in
+            let post = try session.operations.createPost(title: "in blocks mode")
+            let minted = try session.operations.newBlock(
+                in: post.id, text: "the block she selected in Blocks.")
+            var opened: [BlockHistoryRequest] = []
+            let token = session.commandRouter.registerDetail(
+                postID: post.id, mode: .blocks, applyMode: { _ in },
+                showBlockHistory: { opened.append($0) })
+            defer { session.commandRouter.unregisterDetail(token) }
+            // Blocks reports its selected row as the current block (row 39)
+            // and registers NO command handler — the walk's exact state.
+            session.commandRouter.noteFocusedBlock(
+                minted.block.id, variantID: minted.variant.id, postID: post.id)
+            #expect(session.commandRouter.handlerCount == 0, "no surface handler is mounted")
+
+            let actions = ShellActions(session: session, shell: ShellRouter())
+            let row = try #require(
+                actions.paletteEntries().first { $0.title == BlockHistoryPath.name },
+                "the palette carries the Block History row")
+            row.action()
+            #expect(opened == [BlockHistoryRequest(
+                postID: post.id, blockID: minted.block.id,
+                focusedVariantID: minted.variant.id)],
+                "the row opened the FOCUSED block's history through the detail's inspector")
+            #expect(session.status.current == nil, "no refusal spoke — the pane opened")
+
+            // With no block in hand at all, the honest note still speaks.
+            session.commandRouter.noteFocusedBlock(nil, variantID: nil, postID: post.id)
+            row.action()
+            #expect(opened.count == 1, "nothing to open without a focused block")
+            #expect(session.status.current?.text
+                == CapabilityRegistry.capability(.showBlockHistory).unavailableNote)
+        }
+    }
+}

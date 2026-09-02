@@ -268,6 +268,24 @@ final class CommandRouter {
         return true
     }
 
+    /// **The FOCUSED block's history, for a door with no surface handler**
+    /// (the Act 10 correction round, batch G — row 86(d)). The ⌘K "Block
+    /// History" row is dispatched to the mounted SURFACE's command handler;
+    /// Write, Takes and Lenses register one, but Read's faces and Blocks
+    /// register none — so from those modes the row fell through to the
+    /// registry's "put the caret in a block" note while a block was plainly
+    /// selected (the walk's capture: Blocks, row 03 focused, the sentence).
+    /// What those modes DO report is `focusedBlock` (row 39's one memory);
+    /// this asks the mounted detail's inspector for exactly that block's
+    /// history. Returns whether the pane opened (no block in hand ⇒ false,
+    /// and the caller speaks the honest note).
+    @discardableResult
+    func requestBlockHistoryForFocusedBlock() -> Bool {
+        guard let fact = focusedBlock, fact.postID == activePostID else { return false }
+        return requestBlockHistory(BlockHistoryRequest(
+            postID: fact.postID, blockID: fact.blockID, focusedVariantID: fact.variantID))
+    }
+
     // MARK: - The masthead's tag field (the Act 10 correction round, row 15)
 
     /// How ⌘⇧I and the ⌘K row reach the mounted detail's masthead — the ONE

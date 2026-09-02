@@ -1744,3 +1744,25 @@ orchestrator's rows are 80+ — continue past whichever is higher). **Trailer fo
 `Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>` +
 `Claude-Session: https://claude.ai/code/session_019VxbpYiG4SvQfYdx5cXCBC`. **Deliverable:** the BATCH G RECORD under
 this brief; your final message is ONE pointer to it; then stop.
+
+### BATCH G RECORD — RESIDUALS AND WIDTH (a fresh Fable implementer session, 2026-09-01 18:40 MDT →; the machine's clock)
+
+#### LIVE STATUS — BATCH G (flipped in the same commit as each piece; a fresh session finishes from this list alone)
+
+- **Orientation:** DONE — read in the brief's order: CLAUDE.md; this file whole (§0–§8, R-cor-1…11 with R-cor-10(2)/(4) and R-cor-11(2)/(3) as this batch's rulings, the constitution + C-1…C-7, the ledger's rows 59 · 72 · 73 · 74 · 80–89 with their mechanism columns, every batch record and CLOSED line — B's brief's last three paragraphs, A's masthead history (rows 55/58/59), C's Blocks/Read host, F's recovery family, D's Compare header strip, E's Library column precedent + the row-73 trace); her report §1; the resiliency protocol; the orchestrator handoff §0/§0b/§2c. Tree clean at `f1cc073`; the dev-store Debug build pid 25209 (batch E's tree — byte-identical to mine on every file this batch touches until the first commit) running; her real-store app NOT running; `/Applications` untouched.
+- **Row 86 (verify-first) — VERIFIED on the running build BEFORE any code moved:** **(e) NOT A DEFECT** — a click on the masthead title of a titled note (Boscombe) opened the rename field with the title selected (`crop-86e-01-masthead`); the current `PostTitleLabel` carries `.onTapGesture { beginEditing() }` exactly as the pre-Act-10 file did (`git show 0e6a09e^:…PostDetailView.swift:440`) — no regression; F's seed-03 note was a scratch note NAMED BY ITS DAY, where the open field shows the day as its PROMPT in the label's own place (the one case walked again below). **(d) STILL A DEFECT, not healed by C** — Blocks, row 03 selected, ⌘K "block history" ⏎ → the toast "Put the caret in a block and its History shows…", no pane (`86d-03-after-enter`). Mechanism: the palette act was `dispatch(.showBlockHistory)`, routed only to the mounted SURFACE's command handler — `EditorView`/Takes/Lenses register one, Read's faces and Blocks register none — so it fell through to the registry's unhandled note whatever `focusedBlock` held (C's memory could not heal a handler gap). → FIX (this commit).
+- **Row 86(d):** DONE (this commit; hash next) — `CommandRouter.requestBlockHistoryForFocusedBlock()` (the focused block → a `BlockHistoryRequest` → the mounted detail's inspector) + `ShellActions.showBlockHistory()` (`toggleSeal`'s shape: a QUIET dispatch, the router's focused-block road when no surface handled it, the honest note only with no block in hand); the palette's row routes there. Pin `BlockHistoryPaletteDoorTests.thePaletteRowOpensTheFocusedBlocksHistoryWhereNoSurfaceHandlesIt` (in `CommandRoutingTests.swift`). Red-on-old: PENDING (the behavioral revert after the commit).
+- **Row 59:** NOT-STARTED — the ＃'s hit target grows to the row's height (≥ 24 pt) without moving the glyph; a geometry pin.
+- **Row 80:** NOT-STARTED — the title under the icons at ~950 pt (the 240-pt floor meets the icon row); trace at that width.
+- **Row 81:** NOT-STARTED — the bottom bar at ~950 pt: one row, no truncated verb.
+- **Row 74 + 89:** NOT-STARTED — the note-side inspectors' boundary inactive (E's column precedent); the explainers wrap.
+- **Row 73:** NOT-STARTED — a reveal parked until the entries arrive.
+- **Row 72:** NOT-STARTED — equal header-card heights in Compare's strip.
+- **Row 83:** NOT-STARTED — Blocks' first paint complete.
+- **Row 82:** NOT-STARTED — a `pages` click lands in `edit` at that block.
+- **Row 85:** NOT-STARTED — the seeder's retired-fold sentence.
+- **Row 87:** NOT-STARTED — the Pool card's first-words preview via the picker's road.
+- **Row 88:** NOT-STARTED — Canvas fit-all on a first arrival; the toolbar's grammar.
+- **Row 84:** NOT-STARTED (LAST — the one `Shared/` change) — `_word_` italics, display-only.
+- **The USE gate / suites / counts:** PENDING.
+- **No revert in flight.**

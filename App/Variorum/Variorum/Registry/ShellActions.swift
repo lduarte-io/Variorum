@@ -67,6 +67,21 @@ struct ShellActions {
         router.dispatch(.saveNoteVersion)
     }
 
+    /// **The ⌘K "Block History" row** (the Act 10 correction round, batch G
+    /// — row 86(d); `toggleSeal`'s shape). The mounted surface's handler
+    /// opens the pane for its caret/ring block (Write, Takes, Lenses); where
+    /// NO surface handles it — Read's faces and Blocks report a current
+    /// block (row 39) but register no command handler — the router opens it
+    /// for the FOCUSED block; only with no block in hand does the registry's
+    /// honest note speak. The dispatch is QUIET for the seal's reason: the
+    /// fallback ACTS, so the "put the caret in a block" refusal that used to
+    /// flash — with a block selected on screen — was factually wrong.
+    func showBlockHistory() {
+        if router.dispatch(.showBlockHistory, speakingWhenUnhandled: false) { return }
+        if router.requestBlockHistoryForFocusedBlock() { return }
+        status.speak(CapabilityRegistry.capability(.showBlockHistory).unavailableNote)
+    }
+
     /// The seal door (palette + routed): the mounted surface runs its own
     /// teardown contract (Write finalizes the open tail first); with no
     /// surface handler but an open post, flush-and-toggle directly. The
@@ -545,7 +560,7 @@ struct ShellActions {
         case .toggleStar: return { toggleStarForCurrent() }
         case .quickNote: return { shell.quickNoteRequested = true }
         case .showOriginBlock: return { dispatch(.showOriginBlock) }
-        case .showBlockHistory: return { dispatch(.showBlockHistory) }
+        case .showBlockHistory: return { showBlockHistory() }
         case .showNoteTray: return { dispatch(.showNoteTray) }
         case .saveNoteVersion: return { saveNoteVersion() }
         case .showNoteVersions: return { dispatch(.showNoteVersions) }
