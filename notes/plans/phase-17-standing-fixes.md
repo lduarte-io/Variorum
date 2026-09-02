@@ -984,7 +984,7 @@ WINS — it was written with the real code open and with instructions to refute.
 
 ## 17i — Sync across devices: the reconciliation probes, the scenario sweep, the harness-realism fix
 
-**Status: open, unstarted — PULLED INTO `pre-13x` (author, 2026-09-01: *"I would like to pull 17i into this in between phase"*; it runs as that phase's LAST batch, on the settled key path — `notes/plans/pre-13x-postures-design.md` §15.6)** (opened 2026-08-31 at the author's word; brief =
+**Status: open, unstarted — RUNS AS ITS OWN ENTRY AFTER `pre-13x` (author, 2026-09-01 evening at the Act 10 correction round's sitting, R-cor-13: *"Agree that pre 13x doesn't need 17i to be done within it"* — superseding the morning's pull-in); still on the settled key path, so after pre-13x lands, never before. Earlier wording: PULLED INTO `pre-13x` (author, 2026-09-01 morning: *"I would like to pull 17i into this in between phase"*; it was to run as that phase's LAST batch, on the settled key path — `notes/plans/pre-13x-postures-design.md` §15.6)** (opened 2026-08-31 at the author's word; brief =
 `notes/plans/pre-13u-memo-sync-disagreements.md`).
 
 **What it is.** Not a bug list — a HUNT: the memo's four probes run first (each answer recorded in
@@ -1014,9 +1014,9 @@ format (`variorum-keys.json`: Argon2id descriptor → RFC 3394 unwrap → the ra
 covers the everyday need, so this is the belt. **Owner if it runs:** its own 17 entry, after pre-13x
 (the envelope format is that phase's). Record: `notes/plans/pre-13x-postures-design.md` §4 / §18.
 
-## 17k — PARKED: a plain "Pause sync" switch (may or may not happen)
+## 17k — PARKED: a plain "Pause sync" switch (may or may not happen) — **JOINS 18a (author, 2026-09-01 evening, R-cor-13: "ask to sync, pause sync button, etc." are 18a's sync considerations); this entry stays as the pointer**
 
-**Status: parked, unstarted** (same ruling, same day). **What it is:** a convenience switch on the
+**Status: parked, unstarted — re-homed to 18a's design sitting** (same ruling, same day). **What it is:** a convenience switch on the
 sync row that stops rounds until flipped back — NO posture semantics, NO security claim (deletion
 damage is already bounded by tombstones, the 30-day Trash on every device, the purge horizon, and
 local backups; Castle enrollment needs the passphrase). Cheap: the scheduler's stop + one honest
