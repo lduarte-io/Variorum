@@ -204,6 +204,34 @@ it.
   BOTH Canvas fixes in G:** (a) a first arrival with no remembered layout opens FIT-ALL, never mid-bank; (b) the
   toolbar to the calm-chip grammar, the redundant label dropped.
 
+- **R-cor-12 — THE 13u RE-SPLIT RULED; THE PROCESS-RULE PROMOTION HELD FOR A DEFINITION (2026-09-01 ~18:55 MDT).**
+  Her question (verbatim): *"after seeing the previous failure mode of too much being put into a single phase, do
+  you think I should be concerned about the 13u phases? should they be split from their two phases into 3? … Batch
+  10 was way way way too big and should've never been a batch, it needed to be a phase, maybe several (clearly,
+  since we're in a fix phase for it). I welcome your thoughts."* The orchestrator's reading of the 13u plan FILE
+  (not the master plan's summary): 13u2 had grown to two deep items (pane stability; dark mode) + the app-wide
+  restyle continuation + three medium reworks (comments area; the snippet brain; PDF formatting) + two RootView
+  refactors + four protection items added on her launch morning + the small polish — Act 10's shape again;
+  13u1 carried two non-seam items (the quick-capture ruling; multi-block drag). **RULED (the question tool):
+  FOUR PHASES BY KIND — 13u1 the SEAM only (items 5 · 7 · 8 + the O(N²) keystroke family) · 13u2 FEEL (item 1
+  pane stability incl. row 54 + M12, item 2 the space-eater, items 10/11/13, P39a/P39b) · 13u3 FACES (items 3 · 4
+  incl. the journal split + the title chip · 14 · 15 · 16 + item 9's Mac face once the shared sitting rules the
+  capture shape) · 13u4 the RESTYLE CONTINUATION + DARK MODE (item 6) together, one surface per session, light and
+  dark in both voices.** Moves: item 12 (multi-block drag) becomes its OWN row after 13u1 settles the seam; the
+  four protection items (the near-empty typed confirmation #86(c); the nudge bar overlay; the legs brain's SYNC
+  leg + "extend" wording; COPY ALL on the recovery phrase) re-home to **pre-13x**, which runs first and redesigns
+  those surfaces (its design deletes the loss-legs model — two of the four may be moot by construction; copy-all
+  is a one-session 17 entry if pre-13x is far, her word NEED). The 13u plan file's banner + the master plan's
+  `### 13u` section carry this at the closeout (§7b item 6); the 13u1 kickoff executes the file split.
+  **The process-rule promotion (C-1/C-2/C-3 + a surface budget into the skill and CLAUDE.md) is HELD — her
+  words, verbatim:** *"What does one surface mean here? I don't want to have an overload of phases but I do agree
+  some have been too crowded. Some changes, like encryption, don't have a walk that makes immediate sense to me to
+  require. I would take a look at what the other 13 phases are before making this update - your work and 13u are
+  unusually UI focused compared to the other phases. I do think I need to more freely split phases though - 13y
+  also comes to mind as being a bit crowded."* → the orchestrator reads the remaining phase rows, defines the
+  unit and the kind-shaped acceptance, and brings a proposal (recorded in §7 for her; no rule is written into the
+  skill or CLAUDE.md without her word).
+
 **Inherited rulings this round builds to (not re-litigated):** the eighth-wave rulings W8-1…W8-5
 (`pre-13u-round.md`), the fifth-wave item-15 flow ruling, the mode-row canon R60–94 as extended by
 W8-1 (the eight-mode row is AppSpec §12 canon), her copy doctrine (structure and generous targets
