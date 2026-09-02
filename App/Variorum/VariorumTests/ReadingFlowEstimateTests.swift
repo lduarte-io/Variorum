@@ -117,15 +117,21 @@ struct ReadingFlowEstimateTests {
         #expect(height([extent(4000)]) > height([extent(400)]))
     }
 
-    /// The navigator's collapsed one-note chapter row (row 8) is the
-    /// CHAPTER's door in Read — the flow's landing on a one-note-per-chapter
-    /// book like Sherlock is reachable through it — and the note's door
-    /// everywhere else, as row 8 built it.
-    @Test func aCollapsedChapterRowIsTheChaptersDoorInReadAndTheNotesElsewhere() {
-        #expect(!BookOutlineRows.collapsedChapterRowOpensTheNote(mode: .read))
-        for mode in [BookStructureModel.ViewMode.outline, .index, .spread] {
-            #expect(BookOutlineRows.collapsedChapterRowOpensTheNote(mode: mode), "\(mode) opens the note")
-        }
+    /// R-cor-17 (ladder fix 2, R2-10): a navigator NOTE row — and a
+    /// one-note chapter's collapsed row, which IS that note's row — acts by
+    /// TAB: in Read it lands the read page (Scroll: the flow; Pages: the
+    /// reader) and never leaves Read; in the spread it page-jumps; in
+    /// Outline (and Index) it opens the note. Door class: the brain
+    /// replaces batch H's `collapsedChapterRowOpensTheNote`, whose Read
+    /// answer covered the collapsed row alone while a plain note row still
+    /// left Read for Outline (the pin this one supersedes, a justified edit).
+    @Test func aNavigatorNoteRowActsByTab() {
+        typealias Act = BookOutlineRows.NavigatorRowAct
+        #expect(BookOutlineRows.navigatorNoteRowAct(mode: .read, readForm: .flow) == Act.landTheFlow)
+        #expect(BookOutlineRows.navigatorNoteRowAct(mode: .read, readForm: .pages) == Act.turnThePages)
+        #expect(BookOutlineRows.navigatorNoteRowAct(mode: .spread, readForm: .flow) == Act.showOnSpread)
+        #expect(BookOutlineRows.navigatorNoteRowAct(mode: .outline, readForm: .flow) == Act.openTheNote)
+        #expect(BookOutlineRows.navigatorNoteRowAct(mode: .index, readForm: .pages) == Act.openTheNote)
     }
 
     /// Ladder R2-1 (+ R2-8): a REMEMBERED size sizes a story — the far

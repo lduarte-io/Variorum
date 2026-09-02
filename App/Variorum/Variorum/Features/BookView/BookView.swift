@@ -388,13 +388,14 @@ struct BookView: View {
                                     section: section, entries: group.entries)
                                     ? group.entries.first : nil
                                 Button {
-                                    // Batch H: in Read the row is the
-                                    // chapter's door (the flow lands on the
-                                    // note; the pages turn to it) — never
-                                    // a jump into Outline.
-                                    if let collapsedNote,
-                                       BookOutlineRows.collapsedChapterRowOpensTheNote(mode: structure.mode) {
-                                        openFromNavigator(collapsedNote)
+                                    // A collapsed one-note chapter row IS
+                                    // the note's row (row 8) and takes the
+                                    // note row's act by tab — R-cor-17: in
+                                    // Read it lands the read page, never a
+                                    // jump into Outline.
+                                    if let collapsedNote {
+                                        BookNavigatorDoor.noteRowClicked(
+                                            collapsedNote, model: model, structure: structure)
                                     } else {
                                         navigateToChapter(section)
                                     }
@@ -463,25 +464,13 @@ struct BookView: View {
                             } ?? group.entries
                             ForEach(noteLines, id: \.postID) { entry in
                                 Button {
-                                    // In the SPREAD the navigator is a
-                                    // page-jump: show the post, read-cheap
-                                    // (13b 4F — the calm default; a click in
-                                    // the page upgrades it to the live
-                                    // editor). A post already on the spread
-                                    // stays where it is (13c 2B).
-                                    if structure.mode == .spread {
-                                        model.showPost(entry.postID)
-                                    } else if structure.mode == .read,
-                                              structure.readForm == .pages {
-                                        // 13c 2C: in paginated Read the
-                                        // navigator is a PAGE jump — it must
-                                        // not throw her out of the reading
-                                        // surface into the editor (the 4F
-                                        // no-context-jump rule, R43).
-                                        model.focus(entry.postID)
-                                    } else {
-                                        openFromNavigator(entry)
-                                    }
+                                    // ONE door, by tab (R-cor-17): in Read
+                                    // the row lands the read page (Scroll:
+                                    // the flow; Pages: the reader) and never
+                                    // leaves Read; the spread page-jumps
+                                    // (13b 4F); Outline opens the note.
+                                    BookNavigatorDoor.noteRowClicked(
+                                        entry, model: model, structure: structure)
                                 } label: {
                                     HStack(spacing: 2) {
                                         // Batch 9 (R100's continuation): the
@@ -1012,11 +1001,10 @@ struct BookView: View {
     /// through the model's one landing slot, which Outline lands whether the
     /// card is on screen or unrealized far below (`landOutline`). The
     /// chapter row of a one-note chapter that says the note's name (row 8)
-    /// takes this same door.
+    /// takes this same door. Since R-cor-17 the rows go through
+    /// `BookNavigatorDoor`, whose Outline act is exactly this.
     private func openFromNavigator(_ entry: Queries.ReadingEntry) {
-        structure.mode = .outline
-        model.focus(entry.postID)
-        model.requestReveal(entry.postID)
+        BookNavigatorDoor.openTheNote(entry, model: model, structure: structure)
     }
 
     /// The navigator's chapter click — and, since the correction round
@@ -1998,5 +1986,49 @@ struct BookSettingsSheet: View {
             }
         }
         return true
+    }
+}
+
+// MARK: - The navigator's note-row door (R-cor-17; ladder fix 2, R2-10)
+
+/// ONE door behind every navigator NOTE row — and the collapsed one-note
+/// chapter row, which is that note's row (row 8): the act is decided by
+/// the pure brain (`BookOutlineRows.navigatorNoteRowAct`) and PERFORMED
+/// here on the two models, so a pin can drive it without a window and the
+/// two Buttons cannot drift (P-1's one-declaration rule). Her ruling
+/// R-cor-17 (2026-09-02): in Read — Scroll and Pages — the row lands the
+/// read page at that story and the navigator never leaves Read; Outline
+/// keeps opening the note for editing.
+@MainActor
+enum BookNavigatorDoor {
+    static func noteRowClicked(
+        _ entry: Queries.ReadingEntry, model: BookViewModel, structure: BookStructureModel
+    ) {
+        switch BookOutlineRows.navigatorNoteRowAct(mode: structure.mode, readForm: structure.readForm) {
+        case .openTheNote:
+            openTheNote(entry, model: model, structure: structure)
+        case .showOnSpread:
+            // 13b 4F: show the post read-cheap; a post already on the
+            // spread stays where it is (13c 2B).
+            model.showPost(entry.postID)
+        case .turnThePages:
+            // 13c 2C: the paged reader follows the book's focus to the
+            // story's first page — the road the chapter row takes there.
+            model.focus(entry.postID)
+        case .landTheFlow:
+            // Batch B's row 50 road: the flow consumes the reveal and lands
+            // the story (its chapter's heading when it opens the chapter).
+            model.requestReveal(entry.postID)
+        }
+    }
+
+    /// Outline's act (rows 7/23/47): focus + reveal, landed by Outline
+    /// whether the card is on screen or unrealized far below.
+    static func openTheNote(
+        _ entry: Queries.ReadingEntry, model: BookViewModel, structure: BookStructureModel
+    ) {
+        structure.mode = .outline
+        model.focus(entry.postID)
+        model.requestReveal(entry.postID)
     }
 }

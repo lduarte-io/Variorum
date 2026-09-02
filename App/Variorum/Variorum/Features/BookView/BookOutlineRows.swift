@@ -244,18 +244,47 @@ nonisolated enum BookOutlineRows {
         return BookNaming.sameName(only.displayTitle, section.name)
     }
 
-    /// What the collapsed one-note chapter row DOES (batch H, row 95's
-    /// door): in READ it is the chapter's act — the flow lands on the note,
-    /// the paged reader turns to it — because leaving Read for Outline on a
-    /// chapter click is not navigating the read (and on a one-note-per-
-    /// chapter book like Sherlock the flow's chapter landing was otherwise
-    /// unreachable from the navigator: row 50 wired it, row 8's collapse
-    /// silently bypassed it). Everywhere else the row opens the note, as
-    /// row 8 built it.
-    static func collapsedChapterRowOpensTheNote(mode: BookStructureModel.ViewMode) -> Bool {
-        // A pattern match, not `==`: the mode's Equatable is main-actor
-        // isolated and this brain is nonisolated.
-        if case .read = mode { return false }
-        return true
+    /// What a navigator NOTE row does — and a one-note chapter's COLLAPSED
+    /// row, which IS that note's row (row 8) — decided by the TAB.
+    enum NavigatorRowAct: Equatable {
+        /// Outline (and Index, where the navigator is hidden): open the
+        /// note for editing — focus + reveal, as row 8 built it.
+        case openTheNote
+        /// The spread ("Book"): page-jump to the note (13b 4F).
+        case showOnSpread
+        /// Read ▸ Scroll: the flow lands on the story — its chapter's
+        /// heading when it opens the chapter, the same landing road the
+        /// chapter rows use (`FlowRows.landingAnchor`).
+        case landTheFlow
+        /// Read ▸ Pages: the reader turns to the story's first page.
+        case turnThePages
+    }
+
+    /// **R-cor-17 (2026-09-02, her ruling on round 2's R2-10):** in the
+    /// book's READ tab — Scroll AND Pages — a navigator note row LANDS THE
+    /// READ PAGE at that story; chapter rows and note rows alike land it,
+    /// and the navigator NEVER leaves Read (a note row used to take the
+    /// note-open road into Outline — batch H's door piece had made only
+    /// the collapsed one-note chapter row the chapter's act in Read, and
+    /// round 2 recorded the three-way seam). Outline keeps opening the
+    /// note for editing; the spread keeps its page-jump — and the collapsed
+    /// one-note chapter row takes the NOTE row's act in every tab (it IS
+    /// the note's row), which also closes the reviewer's spread half of the
+    /// seam (it left the Book tab for Outline while a plain note row there
+    /// page-jumped). Pure; pinned.
+    static func navigatorNoteRowAct(
+        mode: BookStructureModel.ViewMode, readForm: BookStructureModel.ReadForm
+    ) -> NavigatorRowAct {
+        // Pattern matches, not `==`: the models' Equatable conformances are
+        // main-actor isolated and this brain is nonisolated.
+        switch mode {
+        case .read:
+            if case .pages = readForm { return .turnThePages }
+            return .landTheFlow
+        case .spread:
+            return .showOnSpread
+        case .outline, .index:
+            return .openTheNote
+        }
     }
 }
