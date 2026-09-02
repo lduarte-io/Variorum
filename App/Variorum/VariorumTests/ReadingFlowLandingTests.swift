@@ -279,4 +279,31 @@ struct ReadingFlowLandingTests {
                     "the re-lands stayed inside the budget: \(relands)")
         }
     }
+
+    /// P3 for the flow, and the honest estimate's load-bearing pin: a
+    /// twelve-story book mounted at a 760-pt viewport realizes only the
+    /// stories inside the near band (the first, and the one or two below it
+    /// — the rest stand as placeholders of their ESTIMATED heights, far).
+    /// RED under a behavioral revert of the estimate (every never-measured
+    /// story one blank line tall): the whole column fits the band and all
+    /// twelve surfaces are realized at once.
+    @Test func theFlowRealizesOnlyTheNearStoriesAtTheMount() async throws {
+        try await withStories(count: 12, seed: 31) { session, entries in
+            #if DEBUG
+            ReadingFlowMaterialization.count = 0
+            #endif
+            let box = FlowRevealBox()
+            let (window, hosting) = mount(session: session, entries: entries, box: box)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            _ = await settle(window, hosting, timeout: 2) { false }
+            let realized = ReadingFlowMaterialization.count
+            print("[batch H] twelve stories at the mount: \(realized) surfaces realized; document \(Self.documentHeight(hosting)) pt")
+            #expect(realized > 0, "the first story rendered")
+            #expect(realized <= 4,
+                    "only the near stories are surfaces — the far ones are placeholders at their estimated heights: \(realized) realized")
+        }
+    }
 }
