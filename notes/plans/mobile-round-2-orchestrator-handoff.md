@@ -1502,3 +1502,11 @@ an objection:
 that does NOT touch `Shared/EditorBrain/` or the cross-block planner
 while 13u1 is live. The tray, the Two-rooms IA, the Library filters, and
 the takes/book doors are all clear of it.
+
+## POINTER 2026-09-02 (from the Mac side — the Act 10 correction round)
+
+For §2b's handback checklist: **13u item 17 (the read-view edit jump) is BUILT on the Mac** by the correction round
+(`Shared/LandingTarget.swift` — the one scrolled-open door, both halves, plus the paged faces' click; batch B/C/G
+records in `notes/plans/act10-correction-round.md`). **13u was RE-SPLIT into FOUR** (13u1 seam · 13u2 feel · 13u3
+faces · 13u4 restyle + dark) — the record is the 13u plan's 2026-09-01/02 banner; the mobile-shared items (2 · 4 ·
+5 · 6 · 9) keep their homes inside those letters. Nothing else on the Mac side changed the checklist.

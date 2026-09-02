@@ -121,3 +121,7 @@ nothing on the row says "this one".
   door that swaps the marker — the old daily becomes 'journal')? Cheap, and it answers "I started
   the wrong one."
 - The near-empty re-key REFUSAL (edge 7) — warn (today, her ruling) or refuse.
+
+**OWNER MOVED 2026-09-01 (the Act 10 correction round's sitting, R-cor-13): 13y → 13i-e** — the daily Journal's
+first-class identity is now the fifth letter of the 13i split (`notes/plans/phase-13i-smart-book-identity-brief.md`'s
+2026-09-02 addendum; the master plan's 13i row). The design here is unchanged.

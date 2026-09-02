@@ -653,3 +653,14 @@ Mac. Castle — only you hold the key; know your passphrase and keep your twelve
 device can always set a new one.* Everything else is execution and copy, and the two drills catch
 what the sweep missed.
 
+## ADDENDUM 2026-09-02 (the Act 10 correction round's sitting — POINTERS ONLY; the design above is untouched)
+
+- **FOUR items JOIN this phase from 13u2 (her ruling R-cor-12, `notes/plans/act10-correction-round.md` §1):** the
+  near-empty re-key TYPED CONFIRMATION (#86(c)) · the protection nudge bar OVERLAYING the sidebar's bottom row ·
+  the legs brain counting the SYNC leg + the "extend" wording · COPY ALL on the recovery phrase (her word NEED — a
+  one-session 17 entry if this phase is far). This design's §8 surfaces absorb them; §2's two-posture model DELETES
+  the loss-legs presentation, so the nudge/legs items may be moot by construction — verify at batch 5 (copy).
+- **§15's batch 6 (17i) is WITHDRAWN from this phase (R-cor-13):** 17i — the sync reconciliation hunt — runs as its
+  OWN 17 entry AFTER this phase lands, on the settled key path; its brief is unchanged. **§16(d)'s parked "Pause
+  sync" (17k) now belongs to 18a** (sync considerations — `DetailedPlanForPhases.md` row 18).
+- The daily-Journal identity memo is **13i-e's** now (from 13y). The dedupe residuals are **18a's** (from 13y).

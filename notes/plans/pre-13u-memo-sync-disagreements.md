@@ -110,3 +110,8 @@ bugs in the Sync family are a sign that we don't have that issue well worked out
 phone deleted it more than 30 days ago?"* · *"I feel like there's actually more to consider and
 think about there and some more testing and scenarios to consider, so I want to have a more proper
 phase."*
+
+**SLOTTING 2026-09-01 (the Act 10 correction round's sitting, R-cor-13): 17i runs as its OWN 17 entry AFTER
+`pre-13x` lands — no longer that phase's last batch** (the morning's pull-in superseded by her evening ruling). Its
+natural companion is 17d (purge, sync & bridge honesty) in one Fable-orchestrated ad-hoc phase; 18a's design sitting
+(deletion-aware sync, ask-to-sync, pause sync) follows the hunt's findings.

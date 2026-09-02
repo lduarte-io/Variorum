@@ -554,3 +554,15 @@ what is missing), so "remove the wing in one gesture" composes with the existing
 sample library's identity predicate (`SampleLibrarySeeder.discover` — the pristine-copy dedupe's
 seam) is the natural wing-membership key. Sitting call: whether the seeder mints INTO the wing
 from birth (the 13i-era fresh store) or the wing adopts an existing library at migration.
+
+## ADDENDUM 2026-09-02 — THE SPLIT RULED (the Act 10 correction round's sitting, R-cor-13; the binding record `notes/plans/act10-correction-round.md` §1)
+
+**13i runs as FIVE phase runs sharing ONE design sitting** (`notes/PhaseSizingGuidance.md` §3 — the sitting first,
+then `/architect-phase 13i-a` in the same session, b–e fresh from their briefs): **13i-a** the schema event +
+wings/libraries (the ONE lockstep deploys here) · **13i-b** the smart-book hybrid identity + auto-tags + the starred
+smart book · **13i-c** Owned + text immutability + the convert door · **13i-d** the shelf (custom order + starred
+books) + the Book Panel + templates if ruled · **13i-e THE DAILY JOURNAL'S FIRST-CLASS IDENTITY** (moved from 13y at
+her word — "honestly in a very similar area"; the memo `notes/plans/pre-13u-memo-daily-journal-identity.md`; the
+never-hard-delete rule rides). The sitting rules all five; this brief is its raw material. **One input from the
+correction round for the Book Panel's agenda:** the book's Read-tab navigator now lands the read page for every row
+(R-cor-17) — the panel's click-through grammar should match.

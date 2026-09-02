@@ -77,6 +77,8 @@
 
 ## Allocation register (read before adding an entry)
 
+**2026-09-01 — PHASE 18 EXISTS (author, R-cor-13): the post-13 collector of PRODUCT work (18a, 18b, …) on the master plan's table — product advancement that has no 13 letter left goes THERE, never here; 17 stays fixes and tech debt.** 17e gained items (11)–(12) from the correction round's ladder; 17i runs AFTER pre-13x; 17k → 18a.
+
 Letters are **allocation order, not priority**, and more than one session may be adding entries at
 once. Claim a letter here first.
 
