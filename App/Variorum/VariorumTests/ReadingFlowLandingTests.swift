@@ -46,6 +46,8 @@ private struct FlowHost: View {
     let session: AppSession
     let entries: [Queries.ReadingEntry]
     let box: FlowRevealBox
+    /// Ladder R2-4: the book's cache, when the pin shares one across mounts.
+    var extentsCache: FlowExtentsCache? = nil
 
     var body: some View {
         ReadingFlowView(
@@ -56,7 +58,8 @@ private struct FlowHost: View {
             onRevealLanded: {
                 box.landedCount += 1
                 box.reveal = nil
-            })
+            },
+            extentsCache: extentsCache)
     }
 }
 
@@ -144,15 +147,16 @@ struct ReadingFlowLandingTests {
         }
     }
 
-    private func mount(session: AppSession, entries: [Queries.ReadingEntry], box: FlowRevealBox)
-        -> (NSWindow, NSHostingView<AnyView>)
-    {
+    private func mount(
+        session: AppSession, entries: [Queries.ReadingEntry], box: FlowRevealBox,
+        extentsCache: FlowExtentsCache? = nil
+    ) -> (NSWindow, NSHostingView<AnyView>) {
         let window = NSWindow(
             contentRect: NSRect(x: 60, y: 60, width: 1000, height: 760),
             styleMask: [.titled], backing: .buffered, defer: false)
         window.isReleasedWhenClosed = false
         let hosting = NSHostingView(rootView: AnyView(
-            FlowHost(session: session, entries: entries, box: box)
+            FlowHost(session: session, entries: entries, box: box, extentsCache: extentsCache)
                 .environment(ThemeStore(session: session))))
         hosting.frame = NSRect(x: 0, y: 0, width: 1000, height: 760)
         window.contentView = hosting
@@ -309,6 +313,46 @@ struct ReadingFlowLandingTests {
         #expect(landing.aboveTargetSettled())
         landing.end()
         #expect(landing.aboveTargetSettled(), "no landing pending: trivially settled")
+    }
+
+    /// Ladder fix 2 (R2-4): the lengths query is book-proportional and the
+    /// flow is re-created per mode — so its extents are cached on the BOOK.
+    /// A second mount over the same cache performs NO extents read and
+    /// stands at its honest height at once. RED ON OLD (behavioral revert —
+    /// the cache never consulted): two mounts, two reads.
+    @Test func aSecondFlowMountOverTheBooksCachePerformsNoExtentsRead() async throws {
+        try await withStories(count: 2, seed: 41) { session, entries in
+            #if DEBUG
+            ReadingFlowExtentsReads.count = 0
+            #endif
+            let cache = FlowExtentsCache()
+            let firstBox = FlowRevealBox()
+            let (window1, hosting1) = mount(
+                session: session, entries: entries, box: firstBox, extentsCache: cache)
+            let firstRead = await settle(window1, hosting1, timeout: 10) {
+                ReadingFlowExtentsReads.count == 1 && Self.documentHeight(hosting1) > 2 * 11_000
+            }
+            #expect(firstRead, "the first mount read the lengths once and stands at its honest height (\(ReadingFlowExtentsReads.count) reads; \(Self.scrollFacts(hosting1)))")
+            window1.contentView = NSView()
+            window1.orderOut(nil)
+            window1.close()
+
+            let secondBox = FlowRevealBox()
+            let (window2, hosting2) = mount(
+                session: session, entries: entries, box: secondBox, extentsCache: cache)
+            defer {
+                window2.orderOut(nil)
+                window2.close()
+            }
+            let honestAtOnce = await settle(window2, hosting2, timeout: 5) {
+                Self.documentHeight(hosting2) > 2 * 11_000
+            }
+            _ = await settle(window2, hosting2, timeout: 1) { false }
+            let reads = ReadingFlowExtentsReads.count
+            print("[fix 2] extents reads across two mounts over one cache: \(reads); second mount \(Self.scrollFacts(hosting2))")
+            #expect(honestAtOnce, "the second mount stands at its honest height from the cache")
+            #expect(reads == 1, "the second mount performed no extents read: \(reads)")
+        }
     }
 
     /// P3 for the flow, and the honest estimate's load-bearing pin: a

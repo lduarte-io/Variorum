@@ -165,7 +165,8 @@ struct BookView: View {
                         },
                         reveal: model.pendingReveal,
                         onRevealLanded: { model.consumeReveal() },
-                        sizes: model.flowSurfaceSizes)
+                        sizes: model.flowSurfaceSizes,
+                        extentsCache: model.flowExtents)
                 case .pages:
                     pagedRead
                 }

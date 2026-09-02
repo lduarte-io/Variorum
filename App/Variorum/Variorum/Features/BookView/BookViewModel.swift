@@ -402,6 +402,11 @@ final class BookViewModel {
     /// itself is re-created per mode.
     @ObservationIgnored let flowSurfaceSizes = SurfaceSizeMemory()
 
+    /// Ladder R2-4: the flow's block extents (the estimate's input), cached
+    /// for the book beside the sizes — a return to Read ▸ Scroll re-reads
+    /// no lengths (the flow itself is re-created per mode).
+    @ObservationIgnored let flowExtents = FlowExtentsCache()
+
     /// 13f batch 4 (the MOUNT rule): whether this book's PANE is the
     /// focused one. A book in an unfocused pane mounts no live surface —
     /// and it does so through the book's OWN single focus authority below,

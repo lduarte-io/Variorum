@@ -62,6 +62,11 @@ struct ReadingFlowView: View {
     /// session across mode switches. nil (every pre-batch call site, the
     /// test hosts) ⇒ the view's own memory below.
     var sizes: SurfaceSizeMemory?
+    /// Ladder R2-4: the book's block extents, cached for the BOOK
+    /// (`BookViewModel.flowExtents`) — the flow is re-created per mode, and
+    /// without the cache every return to Read ▸ Scroll re-ran the
+    /// book-proportional lengths query. nil ⇒ the view's own cache below.
+    var extentsCache: FlowExtentsCache?
 
     // Optional: test hosts (and future embeddings) may lack the
     // environment — fall back to the leading voice's tokens.
@@ -72,6 +77,7 @@ struct ReadingFlowView: View {
     /// survives the host's re-evaluations — a fresh box per body would
     /// forget every story the moment the reveal slot changed).
     @State private var ownSizes = SurfaceSizeMemory()
+    @State private var ownExtentsCache = FlowExtentsCache()
     /// The book's block extents, keyed by post — the estimate's input, ONE
     /// lengths-only query per entry set (the paged reader's model tier).
     /// nil until the read lands: a never-measured story then stands at
@@ -249,12 +255,29 @@ struct ReadingFlowView: View {
                 columnWidth: columnWidth ?? FlowHeightEstimate.defaultColumnWidth))
     }
 
+    /// The extents for this entry set: from the book's cache when it holds
+    /// them (a mode switch re-reads nothing — R2-4), else ONE lengths-only
+    /// query, stored for the next mount. Keyed by the entry-ID list, so a
+    /// changed membership re-reads; a story whose TEXT changed while the
+    /// book stayed open keeps its estimate until then (a visited story is
+    /// governed by its remembered size; an unvisited one is off by the edit
+    /// and corrected at its settle — the bounded, stated staleness).
     private func loadExtents() async {
         let postIDs = grouped.flatMap { $0.entries.map(\.postID) }
+        let cache = extentsCache ?? ownExtentsCache
+        if let cached = cache.lookup(postIDs) {
+            extents = cached
+            return
+        }
+        #if DEBUG
+        ReadingFlowExtentsReads.count += 1
+        #endif
         let rows = (try? await session.database.read { db in
             try Queries.blockExtents(db, containerIDs: postIDs)
         }) ?? []
-        extents = Dictionary(grouping: rows, by: \.containerID)
+        let byPost = Dictionary(grouping: rows, by: \.containerID)
+        cache.store(byPost, for: postIDs)
+        extents = byPost
     }
 
     // MARK: - The landing (batch H: one unanimated scroll, then ANCHORING — bounded)
@@ -713,7 +736,38 @@ nonisolated enum FlowHeightEstimate {
     }
 }
 
+/// The book's block extents for the flow's estimate, cached for the BOOK
+/// (ladder R2-4 — `BookViewModel.flowExtents`): `Queries.blockExtents` is
+/// one lengths-only statement per 400 entries, but its work is `LENGTH()`
+/// over the chosen take of every block of every note — cost ∝ the BOOK's
+/// text (the `bookWordCounts` class, recorded in KnownIssues with owner
+/// 12) — and the flow is re-created on every mode switch. The cache is
+/// keyed by the entry-ID list: a changed membership misses and re-reads.
+/// A plain reference box (never observed — written once per read).
+@MainActor
+final class FlowExtentsCache {
+    private var postIDs: [String] = []
+    private var extents: [String: [Queries.BlockExtent]]?
+
+    /// The cached extents for exactly this entry set, else nil.
+    func lookup(_ postIDs: [String]) -> [String: [Queries.BlockExtent]]? {
+        self.postIDs == postIDs ? extents : nil
+    }
+
+    func store(_ extents: [String: [Queries.BlockExtent]], for postIDs: [String]) {
+        self.postIDs = postIDs
+        self.extents = extents
+    }
+}
+
 #if DEBUG
+/// Ladder R2-4's pin support: how many times the flow ran the lengths
+/// query — a second mount over the book's cache must add nothing.
+@MainActor
+enum ReadingFlowExtentsReads {
+    static var count = 0
+}
+
 /// Where each story row's TOP sits in the flow's scroll space — the
 /// landing oracle, so a pin can say whether a reveal put its post at the
 /// top of the page (the book Outline's own `BookOutlineGeometry` shape) —
