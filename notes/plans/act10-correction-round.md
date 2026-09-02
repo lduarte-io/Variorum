@@ -280,6 +280,26 @@ it.
   (not ruled — the orchestrator's proposal is in §7):** *"Maybe I don't need architects for every 17 item? … the
   whole ladder, cold reviews, etc. are a lot of tokens for small changes."*
 
+- **R-cor-14 — HOW A SPLIT RUNS, CLAUDE.md's LENGTH, AND THE 17-ENTRY REVIEW RULE (2026-09-01 ~19:45 MDT; her
+  message, verbatim where it rules):** *"is the idea that I run 13i as a phase still but it's more ordered? or is
+  it a run architect for 13i-a, etc? Make sure Claude.md isn't becoming too long with these changes … maybe have an
+  extra guidance file that sessions can refer to if they're in doubt but I'm not sure if what 13 phases passed this
+  check is really essential info for the file every session reads. I think that a 17 entry can run as one session
+  but at the very least, an Opus cold review should always be mandatory. Fable cold review for a diff that touches
+  sync, custody code, or the editor seam. and tbh, I'll probably most still run 17s either a couple of them together
+  as a ad hoc phase or with an architect, because I try to only implement with Fable on key items and yet, letting
+  Opus run things on its own leads to an absolute mess - Opus is bad at keeping files caught up with what's
+  happened and lacks the discipline and thoroughness to be an architect or even keep track of its own work. With
+  the Opus cold review addendum, I largely agree."* → **(1) A split = SEPARATE phase runs sharing ONE design sitting**
+  (`/architect-phase 13i-a`, closeout, install; then 13i-b; …) — not one long ordered phase (13b's shape, whose plan
+  file outgrew the reading rule); the answer is written as `notes/PhaseSizingGuidance.md` §3. **(2) CLAUDE.md
+  TRIMMED:** the guidance bullet shrinks to a four-line summary + a pointer; the unit table, how a split runs, the
+  run-history sanity check and the 17 rule move to the new `notes/PhaseSizingGuidance.md` (the skill's section
+  points there too). **(3) THE 17-ENTRY REVIEW RULE:** one session allowed; an OPUS cold review ALWAYS mandatory; a
+  FABLE cold review for `Sync/`, custody/keychain code, or the editor seam — written into the 17 file's header (rule
+  4), CLAUDE.md's standing-fixes bullet (one sentence) and the guidance §5 with her practice (a few entries at a
+  time under a Fable orchestrator; Opus never runs alone).
+
 **Inherited rulings this round builds to (not re-litigated):** the eighth-wave rulings W8-1…W8-5
 (`pre-13u-round.md`), the fifth-wave item-15 flow ruling, the mode-row canon R60–94 as extended by
 W8-1 (the eight-mode row is AppSpec §12 canon), her copy doctrine (structure and generous targets
@@ -468,8 +488,8 @@ the A1 backup (C-3) → the field-guide re-seed if any lesson text changed → t
 - ~~Batch B, row 52: underscore emphasis~~ — **RULED R-cor-10(4)**: joins the vocabulary as italics (G, row 84).
 - Read's `edit · read` face remembered per note (the architect's call) — still hers to confirm at the walk.
 - ~~D-close seam (17:15 MDT)~~ — **RULED R-cor-11**: row 46 per-state accepted · 87 → G · 88 (both) → G.
-- **17 ENTRIES WITHOUT AN ARCHITECT — the orchestrator's proposal for her open question at R-cor-13 (her ruling awaited):** a 17 entry runs as ONE session (no orchestrator, no ladder by default) under the standing-fixes discipline the 17 file already states — pin BEFORE fix, red-on-old by behavioral revert, the record in `phase-17-standing-fixes.md` kept by the session itself, the full suite + the tutorial spine as the gate, push after each commit; a COLD REVIEW is required only when the diff touches `Sync/`, custody/keychain code, or the editor seam (`BlockRangeIndex`/`EditorTextView`/`PaneTextAuthority`), or exceeds ~300 changed lines — the three risk classes where a reviewer has caught real BLOCKERs before; everything else is the session's own self-review plus the suites. The architect's value (docs kept current, the ladder) is what phases buy; a 17 entry buys the discipline without the cast. If adopted: a two-line addition to the 17 file's header + CLAUDE.md's standing-fixes bullet.
-- **THE PROCESS-RULE PROPOSAL (R-cor-12's held half — brought to her ~19:10 MDT after the sizing read; HER RULING
+- ~~17 ENTRIES WITHOUT AN ARCHITECT — the proposal~~ **RULED R-cor-14 (Opus review always; Fable for the three risk classes; her Fable-orchestrator practice).** The proposal as brought: a 17 entry runs as ONE session (no orchestrator, no ladder by default) under the standing-fixes discipline the 17 file already states — pin BEFORE fix, red-on-old by behavioral revert, the record in `phase-17-standing-fixes.md` kept by the session itself, the full suite + the tutorial spine as the gate, push after each commit; a COLD REVIEW is required only when the diff touches `Sync/`, custody/keychain code, or the editor seam (`BlockRangeIndex`/`EditorTextView`/`PaneTextAuthority`), or exceeds ~300 changed lines — the three risk classes where a reviewer has caught real BLOCKERs before; everything else is the session's own self-review plus the suites. The architect's value (docs kept current, the ladder) is what phases buy; a 17 entry buys the discipline without the cast. If adopted: a two-line addition to the 17 file's header + CLAUDE.md's standing-fixes bullet.
+- ~~THE PROCESS-RULE PROPOSAL~~ **RULED R-cor-13 and WRITTEN (CLAUDE.md + the skill + `notes/PhaseSizingGuidance.md`).** As brought (R-cor-12's held half — brought to her ~19:10 MDT after the sizing read; HER RULING
   AWAITED; nothing written into the skill or CLAUDE.md without her word):** (1) **The unit is an ACCEPTANCE UNIT** —
   the smallest thing whose done-ness is verified on its own by evidence OF ITS KIND: UI → one screen/mode/board/panel,
   hands-on use in both voices; sync → one lockstep event or one repair rule, the convergence suites + a live two-device

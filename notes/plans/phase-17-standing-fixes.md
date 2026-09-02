@@ -28,6 +28,14 @@
    the owner that resolves it"). Naming `17c` satisfies it exactly as naming a phase number does —
    the same widening her 2026-07-26 R2-7 ruling made for project rows. **A blank owner is still
    forbidden.**
+4. **THE REVIEW RULE (author, 2026-09-01 at the Act 10 correction round's sitting — R-cor-14):** an
+   entry MAY run as ONE session without an orchestrator, under this file's discipline (pin before fix,
+   red-on-old by behavioral revert, the record kept here by the session itself, the full suite + the
+   tutorial spine as the gate, push after each commit) — **but an OPUS cold review is ALWAYS
+   mandatory, and a FABLE cold review whenever the diff touches `Sync/`, custody/keychain code, or
+   the editor seam** (`BlockRangeIndex` / `EditorTextView` / `PaneTextAuthority`). Her stated practice:
+   mostly a few entries at a time as an ad-hoc phase under a **Fable orchestrator** (Opus alone does
+   not keep records) — `notes/PhaseSizingGuidance.md` §5 has her words.
 4. **This file is not a bug tracker and not a scratchpad.** An entry is a scoped, runnable unit of
    work. Something with no traced mechanism is not ready to be an entry.
 
