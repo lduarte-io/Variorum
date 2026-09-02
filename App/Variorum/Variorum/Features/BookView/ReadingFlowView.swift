@@ -154,6 +154,12 @@ struct ReadingFlowView: View {
                 // states it, and the batch record lists it for her walk.)
                 .onAppear { land(proxy) }
                 .onChange(of: reveal) { _, _ in land(proxy) }
+                // Ladder R2-12: a pending landing dies WITH the flow (a mode
+                // switch mid-landing) — its check would otherwise re-arm
+                // itself against a dead proxy for the whole time budget and
+                // write a DONE into whatever flow mounts next (the harness's
+                // own oracle read the previous test's landing).
+                .onDisappear { landing.end() }
                 .task(id: grouped.flatMap { $0.entries.map(\.postID) }) {
                     await loadExtents()
                 }
@@ -480,6 +486,7 @@ final class FlowLanding {
         check = nil
         anchor = nil
         target = nil
+        proxy = nil
     }
 
     func rowNear(_ postID: String, _ isNear: Bool) {

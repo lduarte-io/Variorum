@@ -355,6 +355,49 @@ struct ReadingFlowLandingTests {
         }
     }
 
+    /// Ladder fix 2 (R2-12): a pending landing dies WITH its flow. Flow A
+    /// is torn down inside its landing's first second (before the minimum
+    /// hold can let it finish); flow B — no reveal, nothing to land — is
+    /// mounted next and left past A's whole time budget: NO landing may
+    /// write a `DONE` into the trace, because A's is gone. RED ON OLD: A's
+    /// check kept re-arming against the dead proxy and finished — `DONE:
+    /// settled` after the hold, or `gave up` at the budget — into B's world
+    /// (the harness's own leak, which round 2 read in the second-story
+    /// pin's trace).
+    @Test func aFlowTornDownMidLandingLeaksNoDoneIntoTheNextFlow() async throws {
+        try await withStories(count: 5, seed: 43) { session, entries in
+            #if DEBUG
+            ReadingFlowGeometry.anchorTops = [:]
+            ReadingFlowGeometry.trace = []
+            #endif
+            let boxA = FlowRevealBox()
+            boxA.reveal = entries[3].postID
+            let (windowA, hostingA) = mount(session: session, entries: entries, box: boxA)
+            let began = await settle(windowA, hostingA, timeout: 5) {
+                ReadingFlowGeometry.trace.contains { $0.hasSuffix(" LAND") }
+            }
+            #expect(began, "flow A's landing began")
+            // Torn down at once — well inside the 1-s minimum hold.
+            windowA.contentView = NSView()
+            windowA.orderOut(nil)
+            windowA.close()
+            let doneBefore = ReadingFlowGeometry.trace.filter { $0.contains(" DONE: ") }.count
+            #expect(doneBefore == 0, "nothing finished before the teardown: \(ReadingFlowGeometry.trace.suffix(6))")
+
+            let boxB = FlowRevealBox()
+            let (windowB, hostingB) = mount(session: session, entries: entries, box: boxB)
+            defer {
+                windowB.orderOut(nil)
+                windowB.close()
+            }
+            // Past A's whole time budget (4 s) and then some.
+            _ = await settle(windowB, hostingB, timeout: BookView.landingTimeBudget + 1.5) { false }
+            let doneAfter = ReadingFlowGeometry.trace.filter { $0.contains(" DONE: ") }
+            print("[fix 2] DONE lines after A's teardown and B's mount: \(doneAfter)")
+            #expect(doneAfter.isEmpty, "the torn-down flow's landing wrote no DONE into the next flow: \(doneAfter)")
+        }
+    }
+
     /// P3 for the flow, and the honest estimate's load-bearing pin: a
     /// twelve-story book mounted at a 760-pt viewport realizes only the
     /// stories inside the near band — the first, and at most one below it
