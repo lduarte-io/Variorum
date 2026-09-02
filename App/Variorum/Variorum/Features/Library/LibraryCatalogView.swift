@@ -502,23 +502,31 @@ struct LibraryCatalogView: View {
             }
             .frame(maxWidth: .infinity)
             if let hit = model.infoHit {
-                panelDivider
-                LibraryInfoPanel(
-                    session: session, hit: hit,
-                    multiCount: model.selectedPosts.count,
-                    onOpen: { openHit(hit) },
-                    onOpenBookAt: { postID in
-                        withAnimation(Self.panelAnimation) { model.closeInfo() }
-                        if let onOpenBook {
-                            onOpenBook(hit.id, postID)
-                        } else {
-                            onOpen(.reading(hit.id))
-                        }
-                    },
-                    onClose: { withAnimation(Self.panelAnimation) { model.closeInfo() } })
-                    .frame(width: LibraryPanelLayout.width(total: libraryWidth))
-                    .libraryGeometryProbe(.panel)
-                    .transition(.move(edge: .trailing).combined(with: .opacity))
+                // Ladder R1-17: the divider and the panel are ONE transitioning
+                // group, so the line slides in WITH the column. (A `.transition`
+                // on the 1-pt line alone moved it by its own width — it faded in
+                // place while the panel was still sliding from the right, a
+                // frame ahead of the column it bounds; the fix session's burst
+                // by window id caught exactly that.)
+                HStack(spacing: 0) {
+                    panelDivider
+                    LibraryInfoPanel(
+                        session: session, hit: hit,
+                        multiCount: model.selectedPosts.count,
+                        onOpen: { openHit(hit) },
+                        onOpenBookAt: { postID in
+                            withAnimation(Self.panelAnimation) { model.closeInfo() }
+                            if let onOpenBook {
+                                onOpenBook(hit.id, postID)
+                            } else {
+                                onOpen(.reading(hit.id))
+                            }
+                        },
+                        onClose: { withAnimation(Self.panelAnimation) { model.closeInfo() } })
+                        .frame(width: LibraryPanelLayout.width(total: libraryWidth))
+                        .libraryGeometryProbe(.panel)
+                }
+                .transition(.move(edge: .trailing).combined(with: .opacity))
             }
         }
         .coordinateSpace(name: Self.probeSpace)
@@ -633,9 +641,6 @@ struct LibraryCatalogView: View {
             .fill(tokens.line)
             .frame(width: 1)
             .libraryGeometryProbe(.divider)
-            // Ladder R1-17: the line rides the column's own transition, so
-            // it never pops a frame ahead of the panel it bounds.
-            .transition(.move(edge: .trailing).combined(with: .opacity))
     }
 
     /// F's (a) — a receipt or an error is a LAID-OUT row above the bottom
