@@ -387,7 +387,12 @@ struct BookView: View {
                                     section: section, entries: group.entries)
                                     ? group.entries.first : nil
                                 Button {
-                                    if let collapsedNote {
+                                    // Batch H: in Read the row is the
+                                    // chapter's door (the flow lands on the
+                                    // note; the pages turn to it) — never
+                                    // a jump into Outline.
+                                    if let collapsedNote,
+                                       BookOutlineRows.collapsedChapterRowOpensTheNote(mode: structure.mode) {
                                         openFromNavigator(collapsedNote)
                                     } else {
                                         navigateToChapter(section)

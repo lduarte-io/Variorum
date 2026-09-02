@@ -98,6 +98,17 @@ struct ReadingFlowEstimateTests {
         #expect(height([extent(4000)]) > height([extent(400)]))
     }
 
+    /// The navigator's collapsed one-note chapter row (row 8) is the
+    /// CHAPTER's door in Read — the flow's landing on a one-note-per-chapter
+    /// book like Sherlock is reachable through it — and the note's door
+    /// everywhere else, as row 8 built it.
+    @Test func aCollapsedChapterRowIsTheChaptersDoorInReadAndTheNotesElsewhere() {
+        #expect(!BookOutlineRows.collapsedChapterRowOpensTheNote(mode: .read))
+        for mode in [BookStructureModel.ViewMode.outline, .index, .spread] {
+            #expect(BookOutlineRows.collapsedChapterRowOpensTheNote(mode: mode), "\(mode) opens the note")
+        }
+    }
+
     /// The metrics come off the real page font, not a guess: a 600-pt
     /// measure holds a plausible number of 16-pt serif characters, and the
     /// pitch is the font's line height plus the flow's line spacing.

@@ -239,4 +239,19 @@ nonisolated enum BookOutlineRows {
         guard entries.count == 1, let only = entries.first else { return false }
         return BookNaming.sameName(only.displayTitle, section.name)
     }
+
+    /// What the collapsed one-note chapter row DOES (batch H, row 95's
+    /// door): in READ it is the chapter's act — the flow lands on the note,
+    /// the paged reader turns to it — because leaving Read for Outline on a
+    /// chapter click is not navigating the read (and on a one-note-per-
+    /// chapter book like Sherlock the flow's chapter landing was otherwise
+    /// unreachable from the navigator: row 50 wired it, row 8's collapse
+    /// silently bypassed it). Everywhere else the row opens the note, as
+    /// row 8 built it.
+    static func collapsedChapterRowOpensTheNote(mode: BookStructureModel.ViewMode) -> Bool {
+        // A pattern match, not `==`: the mode's Equatable is main-actor
+        // isolated and this brain is nonisolated.
+        if case .read = mode { return false }
+        return true
+    }
 }
