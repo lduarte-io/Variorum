@@ -305,4 +305,42 @@ struct MarkdownSyntaxTests {
         MarkdownScanCount.reset()
         #expect(MarkdownScanCount.current == 0)
     }
+
+    // MARK: - The Act 10 correction round, batch G — row 84 (R-cor-10(4))
+
+    /// **`_italic_` joins the vocabulary** — Gutenberg's emphasis, which the
+    /// sample library reads raw without it — with a WORD BOUNDARY on both
+    /// sides: an underscore inside an identifier never opens or closes a
+    /// span. RED ON OLD: `_the_` was plain text.
+    @Test func underscoreEmphasisIsItalicAtWordBoundariesOnly() throws {
+        let plain = "she _really_ meant it"
+        try #require(spans(plain).count == 1)
+        let (kind, markers, content, url) = shape(plain, spans(plain)[0])
+        #expect(kind == .italic)
+        #expect(markers == ["_", "_"])
+        #expect(content == "really")
+        #expect(url == nil)
+        #expect(spans(plain)[0].range == 4..<12)
+
+        // The text's edges and punctuation are word boundaries.
+        #expect(kinds("_the_") == [.italic])
+        #expect(kinds("(_so_)") == [.italic])
+        #expect(shape("(_so_)", spans("(_so_)")[0]).2 == "so")
+        #expect(kinds("\u{201C}_quoted_\u{201D}") == [.italic])
+        // Identifiers stay literal: an underscore after a letter or a digit
+        // neither opens nor closes.
+        #expect(kinds("snake_case_name") == [])
+        #expect(kinds("a_b_c") == [])
+        #expect(kinds("x_1 and y_2") == [])
+        #expect(kinds("_lead_ing") == [], "a closer glued to a following word is not a closer")
+        // The star's flanking rule applies: no whitespace after the opener,
+        // none before the closer; empty content is literal; a run of two
+        // underscores is not an opener.
+        #expect(kinds("_ spaced _") == [])
+        #expect(kinds("__") == [])
+        #expect(kinds("__bold__") == [], "double underscores are not bold in this vocabulary")
+        // Beside the star form, on one line.
+        #expect(kinds("*a* and _b_") == [.italic, .italic])
+        #expect(shape("*a* and _b_", spans("*a* and _b_")[1]).2 == "b")
+    }
 }

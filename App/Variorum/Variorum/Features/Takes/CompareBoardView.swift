@@ -995,6 +995,13 @@ struct CompareBoardView: View {
     /// how Compare tells itself apart from Lenses by structure: these
     /// columns are NOTES; a lens column never wears a relationship line.
     private func columnHeaders(_ display: CompareViewModel.Display) -> some View {
+        // Row 72 (the correction round, batch G — the orchestrator's walk of
+        // D): the strip's cards were UNEVEN — the anchor card two lines, a
+        // peer card three plus its doors — so the strip's bottom edge
+        // stepped. Every card now stretches to the strip's height with its
+        // content top-aligned (`maxHeight: .infinity` inside each card,
+        // resolved against the tallest sibling by the stack's vertical
+        // `fixedSize`); the memo's build still settles what the cards SAY.
         HStack(alignment: .top, spacing: 8) {
             // Row 17: the derived display name — a nameless journal entry
             // shows its day, never the literal "This note".
@@ -1031,6 +1038,7 @@ struct CompareBoardView: View {
                     .compareGeometryProbe(.addNote)
             }
         }
+        .fixedSize(horizontal: false, vertical: true)
         .controlSize(.small)
         .padding(.horizontal, Self.boardInset)
         .padding(.bottom, 6)
@@ -1108,6 +1116,8 @@ struct CompareBoardView: View {
                                 + "\u{201C}related blocks only\u{201D} off to see it whole.")
                     }
                 }
+                // Row 72: the card fills the strip's height, content at the top.
+                .frame(maxHeight: .infinity, alignment: .top)
             }
         } else {
             // An open slot is a DOOR where the column would be (the Lenses
@@ -1463,6 +1473,8 @@ private struct CompareAnchorCard: View {
                     .foregroundStyle(tokens.muted)
                     .lineLimit(1)
             }
+            // Row 72: the card fills the strip's height, content at the top.
+            .frame(maxHeight: .infinity, alignment: .top)
         }
     }
 }

@@ -358,6 +358,30 @@ struct TutorialBookShapeTests {
                     "the pre-R6-4 landing claim is gone")
         }
     }
+
+    /// The Act 10 correction round, batch G — **row 85 (A's residue):** the
+    /// lesson taught the RETIRED masthead fold ("＃ folds the note's tag
+    /// cards away and back") and a four-door bar. It teaches the ＃ door's
+    /// truth now: an inline field with the cursor in it, ⏎ applies, ⌘⇧I
+    /// opens it; the bar is three doors. RED ON OLD: the fold sentence.
+    @Test func theWorkspaceLessonTeachesTheMastheadTagDoor() async throws {
+        try await withTutorialWorld { _, db, bookID in
+            let workspace = try await db.read {
+                try lessonID($0, bookID: bookID, "the workspace")
+            }
+            let stored = try await db.read {
+                try Queries.renderedText($0, containerID: workspace)
+            }
+            #expect(stored.contains("tag field slides out with the cursor already in it"),
+                    "the ＃ is the one tag door — the inline field (row 15)")
+            #expect(stored.contains("\u{2318}\u{21E7}I opens the same field"),
+                    "⌘⇧I is re-pointed at the field")
+            #expect(stored.contains("always the same three doors"),
+                    "the bar's own row is back · book · forward")
+            #expect(!stored.contains("folds the note's tag cards"),
+                    "the retired fold is no longer taught")
+        }
+    }
 }
 
 // MARK: - The doors (seeding is a product door)

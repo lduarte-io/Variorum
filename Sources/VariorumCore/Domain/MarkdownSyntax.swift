@@ -68,6 +68,18 @@ public enum MarkdownScanCount {
 /// `[text](url)` · `#`/`##`/`###` headings · `- ` bullets · `- [ ]` / `- [x]`
 /// checkboxes. Arbitrary per-span sizes are NOT markdown-expressible and are
 /// deliberately absent (sizes = headings — F-3's letter).
+///
+/// **One addition, ruled at the Act 10 correction round (R-cor-10(4), row
+/// 84 — the sample library's Gutenberg `_emphasis_` read raw on every
+/// face): `_italic_` JOINS the vocabulary as italics.** Display-only by
+/// construction — this scanner writes no text; `renderedText`, the `.md`
+/// export and the bridge's join brain never consult it — with a stricter
+/// boundary than the star's: an underscore opens only at a WORD START (the
+/// text's start, or after whitespace/punctuation) and closes only at a WORD
+/// END (the text's end, or before whitespace/punctuation), so `snake_case`
+/// and `a_b_c` stay literal while `_the_ word` and `(_so_)` italicize. The
+/// minimal flanking rule and the non-empty-content rule apply as they do to
+/// `*`; ⌘I keeps writing `*` (`MarkdownEditing`'s vocabulary is untouched).
 public enum MarkdownSyntax {
     /// What a span is. Line-leading kinds (`heading`/`bullet`/`checkbox`) may
     /// only begin at a line's first character; the rest are inline.
@@ -423,12 +435,53 @@ public enum MarkdownSyntax {
                 pairSpan(.italic, offsets, open: index, close: close, width: 1),
                 close + 1)
 
+        case "_":
+            // Row 84: `_italic_` — the star's rule with WORD BOUNDARIES on
+            // both sides, so an underscore inside an identifier never opens
+            // or closes a span.
+            guard isWordStart(chars, at: index),
+                  index + 1 < limit, chars[index + 1] != "_",
+                  let close = closingUnderscore(chars, openerEnd: index + 1, to: limit)
+            else { return nil }
+            return (
+                pairSpan(.italic, offsets, open: index, close: close, width: 1),
+                close + 1)
+
         case "[":
             return linkSpan(chars, offsets, at: index, limit: limit)
 
         default:
             return nil
         }
+    }
+
+    /// Row 84's word boundary: the character before `index` is nothing, or
+    /// not a letter/digit/underscore (whitespace, punctuation, a symbol) —
+    /// so an underscore RUN (`__bold__`, `snake__case`) never opens.
+    private static func isWordStart(_ chars: [Character], at index: Int) -> Bool {
+        index == 0 || !isWordCharacter(chars[index - 1])
+    }
+
+    private static func isWordCharacter(_ char: Character) -> Bool {
+        char.isLetter || char.isNumber || char == "_"
+    }
+
+    /// The closing underscore: the minimal flanking rule (no whitespace
+    /// after the opener, none before the closer) AND the closer must end a
+    /// word — the character after it is nothing, or not a letter/digit.
+    private static func closingUnderscore(
+        _ chars: [Character], openerEnd: Int, to: Int
+    ) -> Int? {
+        guard openerEnd < to, !chars[openerEnd].isWhitespace else { return nil }
+        var index = openerEnd + 1
+        while index < to {
+            if chars[index] == "_", !chars[index - 1].isWhitespace,
+               index + 1 >= to || !isWordCharacter(chars[index + 1]) {
+                return index
+            }
+            index += 1
+        }
+        return nil
     }
 
     private static func pairSpan(

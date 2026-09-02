@@ -418,3 +418,53 @@ struct CompareLensesAlignmentTests {
         }
     }
 }
+
+// MARK: - The Act 10 correction round, batch G — row 72
+
+extension CompareLensesAlignmentTests {
+    /// **Row 72 (the orchestrator's walk of D): the header strip's cards
+    /// share ONE bottom edge.** The anchor card was two lines and a peer
+    /// card three plus its doors, so the strip's bottom stepped. Every
+    /// card stretches to the strip's height now, content top-aligned. RED
+    /// ON OLD: the anchor card's bottom sat above the peer card's.
+    @Test func theHeaderStripsCardsShareOneBottomEdge() async throws {
+        try await withBoardWorld { session, db in
+            let world = try await makeCompareWorld(session)
+            let model = CompareViewModel(session: session, anchorPostID: world.anchor)
+            model.setPeer(slotID: model.peerSlots[0].id, postID: world.twin)
+            try await adoptFresh(model, db, anchor: world.anchor, peers: [world.twin])
+
+            #if DEBUG
+            CompareGeometry.reset()
+            #endif
+            let size = NSSize(width: 1000, height: 700)
+            let window = window(size)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let hosting = NSHostingView(
+                rootView: CompareBoardView(session: session, postID: world.anchor, model: model)
+                    .environment(ThemeStore(session: session)))
+            hosting.frame = NSRect(origin: .zero, size: size)
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+
+            #if DEBUG
+            await settle(window, hosting, until: {
+                CompareGeometry.frames[.anchorCard] != nil
+                    && CompareGeometry.frames[.peerCard(0)] != nil
+            })
+            await settle(window, hosting, until: { false }, maxTurns: 6)
+            let anchorCard = try #require(CompareGeometry.frames[.anchorCard], "the anchor card reported")
+            let peerCard = try #require(CompareGeometry.frames[.peerCard(0)], "the peer card reported")
+            #expect(abs(anchorCard.minY - peerCard.minY) <= 1,
+                    "the cards share one top edge: \(anchorCard.minY) vs \(peerCard.minY)")
+            #expect(abs(anchorCard.maxY - peerCard.maxY) <= 1,
+                    "…and ONE bottom edge (the anchor \(anchorCard.maxY), the peer \(peerCard.maxY)) — the strip no longer steps")
+            #expect(peerCard.height > 30, "the peer card is a real card (its doors laid out): \(peerCard.height)")
+            #endif
+            model.teardown()
+        }
+    }
+}

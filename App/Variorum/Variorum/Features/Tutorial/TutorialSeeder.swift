@@ -379,15 +379,25 @@ enum TutorialSeeder {
             // to see there — the ⌫ tray badge, which appears only when the
             // note has deleted blocks. A lesson that inventories the bar and
             // omits a door that exists is the J8 bar's other half.
-            "Above the page sits the CONTEXT BAR \u{2014} always the same four doors: "
+            // The Act 10 correction round, batch G (row 85 — A's residue):
+            // this sentence taught the RETIRED masthead fold ("＃ folds the
+            // note's tag cards away and back") and a four-door bar. Row 15
+            // made the ＃ THE tag door — an inline field with the cursor in
+            // it — on the MASTHEAD beside the cards; the bar's own row is
+            // three doors (`ContextBarDoors.Door`: back · book · forward).
+            "Above the page sits the CONTEXT BAR \u{2014} always the same three doors: "
             + "\u{2190} and \u{2192} walk back and forward through where this pane has "
-            + "been (\u{2318}[ and \u{2318}] are the same doors), the book glyph opens "
-            + "the book this note lives in at this very note, and \u{FF03} folds the "
-            + "note's tag cards away and back (\u{2318}\u{21E7}I too \u{2014} they "
-            + "start visible, and the choice sticks). One more thing joins them "
-            + "only when there is something to say: a note that has deleted "
+            + "been (\u{2318}[ and \u{2318}] are the same doors), and the book glyph "
+            + "opens the book this note lives in at this very note. One more thing "
+            + "joins them only when there is something to say: a note that has deleted "
             + "blocks wears a quiet \u{232B} badge with the count, and it opens "
-            + "that note's tray \u{2014} the deleting chapter has the whole story.",
+            + "that note's tray \u{2014} the deleting chapter has the whole story. "
+            + "The note's TAGS live on the masthead's right edge, under the tray, "
+            + "scraps and references icons: click the \u{FF03} beside the cards and a "
+            + "tag field slides out with the cursor already in it \u{2014} type a "
+            + "name, \u{23CE} applies it (a \u{201C}/\u{201D} nests, like life/goals), "
+            + "\u{238B} puts the field away, and \u{2318}\u{21E7}I opens the same field "
+            + "from anywhere in the note.",
 
             "Two more, for keeping and catching. Right-click any note or book \u{25B8} "
             + "\u{201C}\(StarCopy.verb)\u{201D} pins it to the sidebar's top \u{2014} up to five, "

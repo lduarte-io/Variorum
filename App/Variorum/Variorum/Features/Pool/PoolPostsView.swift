@@ -24,6 +24,13 @@ final class PoolPostsModel {
     /// 13e E8: whole tags, like the Library's — the chips need the id to
     /// take one off (`TagChips` carries the reasoning).
     private(set) var postTags: [String: [Tag]] = [:]
+    /// Row 87 (the Act 10 correction round, batch G — R-cor-11(2)): the
+    /// listed notes' first words, from the note picker's OWN road
+    /// (`Queries.notePickerNotes(ids:)` — one brain, no second rule),
+    /// keyed by note. Shown under a TITLELESS card's day (the rule is
+    /// `PoolCardFace.preview`); 13u2 item 4 still designs the one-brain
+    /// card family later.
+    private(set) var snippets: [String: String] = [:]
     private(set) var lastError: String?
 
     /// Bounded like every held listing (the observeLibrary discipline).
@@ -51,11 +58,20 @@ final class PoolPostsModel {
         let ids = posts.map(\.postID)
         guard !ids.isEmpty else {
             postTags = [:]
+            snippets = [:]
             return
         }
-        postTags = (try? await session.database.read { db in
-            try TagChips.load(db, postIDs: ids)
-        }) ?? [:]
+        let read = try? await session.database.read { db in
+            (tags: try TagChips.load(db, postIDs: ids),
+             // Row 87: the picker's preview road, for the listed ids — bounded
+             // by the Pool's own window, one statement.
+             snippets: try Queries.notePickerNotes(db, ids: ids))
+        }
+        postTags = read?.tags ?? [:]
+        snippets = Dictionary(
+            uniqueKeysWithValues: (read?.snippets ?? []).compactMap { hit in
+                hit.snippet.map { (hit.id, $0) }
+            })
     }
 
     /// The drainage gesture: into a book (the pool row's whole point).
@@ -245,6 +261,18 @@ struct PoolPostsView: View {
                                 .lineLimit(1)
                         }
                     }
+                    // Row 87: a titleless card is a wall of bare dates
+                    // without this — its first words, under the day, the
+                    // picker's own two-line preview.
+                    if let preview = PoolCardFace.preview(
+                        title: item.title, snippet: model.snippets[item.postID])
+                    {
+                        Text(preview)
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.muted)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.leading)
+                    }
                     // 13e E8: the note's own chip grammar (colour · leaf ·
                     // ✕ off · ＋ types one on) — the ruled metadata-line
                     // chips, identical to the Library's rows.
@@ -303,5 +331,22 @@ struct PoolPostsView: View {
                     session: session, postIDs: [item.postID]) }
             }
         }
+    }
+}
+
+/// **Row 87's rule, pure (pinned):** a Pool card shows the note's first
+/// words ONLY when it has no stored title — a titled card already says what
+/// it is (her ruling R-cor-11(2): "a derived line under a titleless card's
+/// date"); the words are the note picker's own snippet, never a second
+/// derivation.
+nonisolated enum PoolCardFace {
+    static func preview(title: String?, snippet: String?) -> String? {
+        guard title?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true else {
+            return nil
+        }
+        guard let snippet = snippet?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !snippet.isEmpty
+        else { return nil }
+        return snippet
     }
 }
