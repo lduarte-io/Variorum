@@ -485,7 +485,7 @@ the A1 backup (C-3) → the field-guide re-seed if any lesson text changed → t
 ## 7. The morning bundle (HELD for her — grows through the run)
 
 - ~~R-cor-3's PROVISIONAL reading of the Library panel~~ — **RATIFIED R-cor-10(1)** (the simple read preview).
-- iOS target build owed before the ladder (A touched `Shared/VoiceTokens.navigation`; C/E may touch `Shared/` too) — run once at the ladder, record the result.
+- ~~iOS target build owed before the ladder~~ — **DONE at the ladder's start (2026-09-01 21:50 MDT):** `xcodebuild build -scheme VariorumMobile -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO` on the G-close tree (`7e45cc1`) → `** BUILD SUCCEEDED **`, 0 errors, 11 warnings — every warning pre-existing and in files the round never touched (`MobileStructural`, `MobileEditorStyle`, `MobileTutorialSeeder`, `Shared/SignInFlow`, `Shared/EncryptionSession`, the AppIntents metadata note); none in `BlockHistoryFace`, `LandingTarget`, `RecoveryCopy`, `VoiceTokens`, `MarkdownSyntax` or `MarkdownFaceCore`. The phone inherits A's/F's `Shared/` additions and G's core tokenizer by construction, compiling clean (log `scratchpad/ios-build.log`).
 - Row 57 (A): the sidebar's arrow-key row navigation went with the List → flat column; recorded for 13u2 unless you want it back sooner.
 - *(Read's default half was PROVISIONAL for one turn — RULED `edit` by her follow-up; nothing to ratify.)*
 - **The Lenses + Compare design memo — `notes/plans/act10-correction-memo-lenses-compare.md` §7, eight rulings** (R-cor-6's deliverable, WRITTEN; the build is its own phase at her slot).
