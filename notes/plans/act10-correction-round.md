@@ -2116,3 +2116,140 @@ full height becomes the WINDOW's minimum"*).** In the `SideColumn` they are shie
 scroll views and are fine. Proposed: a bounded limit large enough for the longest explainer (they are ≤ 6 lines at
 256 pt — `RecoveryExplainerTests` measured it) on the two non-scrolling ones, or move them inside the scroll. Pin:
 `ChromeMinHeightTests`' near-zero-width probe over a sheet-hosted `BlockHistoryPane` stays bounded.
+
+**[MINOR] · `App/Variorum/Variorum/Core/Views/SideColumn.swift:43, :128` · A drag on the side column's divider
+past the window's trailing edge SNAPS the panel to its ideal width mid-drag.** The drag writes `remembered =
+width(remembered: Double(totalWidth − location.x), …)`; past the edge the proposal is ≤ 0, and the rule's first
+branch (`remembered > 0 ? … : ideal`) reads that as "nothing remembered" and answers 420 — so a panel being dragged
+narrow jumps to 420 the moment the pointer crosses the edge, then follows again on the way back. Proposed: clamp the
+proposal to `minimum` before the `> 0` test (or clamp in the gesture). Pin (pure): `width(remembered: −40, …)` and
+`width(remembered: 0, …)` — the first is a DRAG and must answer `minimum`, never `ideal`.
+
+**[MINOR] · `App/Variorum/Variorum/Features/BookView/BookIndexEditModel.swift:56, :140–145` · `teardown()` stops
+observing every coordinator's refusals but KEEPS the coordinators cached; `coordinator(for:)` returns a cached one
+early and never re-subscribes, so a model reused after a teardown silently drops autosave refusals.** Moot today —
+the `@State` model dies with the view when `BookView` switches modes (`BookView.swift:125–147` is a `switch`) —
+which makes it a latent hazard, not a defect: the first host that keeps the model across an `onDisappear` (a tab,
+a hidden pane) inherits it. Proposed: drop the coordinator entry with its token, or make `teardown` terminal.
+
+**[MINOR · a record gap, not a code defect] · `App/Variorum/Variorum/Features/ReadMode/ReadModeView.swift:149–151` ·
+Row 83's brief asked *"Same shape for any other mode that arrives blank (say which you checked)"*; G's record
+says only that Blocks was primed.** Read's host starts three observations with no prime (`start`, `startTray`,
+`startPools`) and its `edit` face renders from `model.rows` — the same first-delivery blank Blocks had (and Read is
+now ⌘3, the mode her ruling put beside Takes). Either measure it on the dev store and record the number under row
+94's owner, or prime it the same way (`primeRows` already exists on the shared model — one line).
+
+**[MINOR] · `App/Variorum/Variorum/Features/BookView/BookView.swift:1779, :1818` · Every EXPANDED `OutlinePostRow` is
+now a direct child of the outer `VStack` (never lazy), and each runs `.task { loadFacts() }` = `Queries.renderPost`
+over the WHOLE note — including far rows drawing a bare placeholder, and although the expanded forms show neither
+the excerpt nor the gutter line the read feeds.** "Expand all" on Sherlock = twelve full-story reads on mount for
+nothing rendered. Bounded by the expanded count (P1's letter holds — never the corpus), so cleanliness, not a
+violation; proposed: gate `loadFacts` on the collapsed form (`!model.isExpanded`), which is the only form that reads
+`excerpt`/`meta`.
+
+**[MINOR] · `Sources/VariorumCore/Domain/MarkdownSyntax.swift:472–485` · The closer's doc says the character after
+it must be "nothing, or not a letter/digit"; the code asks `!isWordCharacter`, which also excludes `_` — so `_a__`
+closes at the SECOND underscore with content `a_` (the first is glued to a word character and skipped).** A
+nonsense input, but the doc and the code disagree, and the star form (`closingSingle`) has no such rule to mirror.
+`__bold__`, `snake_case`, `_lead_ing` and the rest of the pinned corners are right; the pin passed in this session
+(`swift test --filter MarkdownSyntaxTests` — 21/1 green). Proposed: align the doc to the code (the stricter rule is
+the better one) and add `_a__` to the pin as literal or as `a_` — decide which, then say it.
+
+**[NIT] · `App/Variorum/Variorum/Features/Library/SidebarLayout.swift:50` and `VariorumTests/ShellChromeTests.swift:36`
+·** `fixedChromeHeight = 233` assumes three headers and three separators always; a column with no starred group and
+no rail carries one header and one separator, so the fit test over-counts by ~80 pt and compresses a little early
+in a short window. The pin's fixture says `rail: 8` "the eight-mode rail" — stale since batch C made it seven; the
+arithmetic (20 rows) is unaffected, the comment is not.
+
+**[NIT] · `App/Variorum/Variorum/Features/BookView/BookOutlineRows.swift:192–197` ·** `isLoneHeadingOrNumeral` treats
+ANY ≤ 2-word, ≤ 12-character first block as a stub — "Dear reader." or "Chapter one." is skipped from a card's
+preview whenever another block follows. The numeral case is right; a short SENTENCE (ends in a full stop and is
+not a heading) is a preview, not a stub.
+
+**[NIT] · `App/Variorum/Variorum/Features/Canvas/CanvasView.swift:501` ·** The arrival's centre-vs-origin decision
+runs against the 1200 × 800 FALLBACK viewport when `visibleRect` is still empty (it is, on arrival): a board that
+fits the real, larger viewport lands top-left instead of centred; a board that fits 1200 × 800 but not a smaller
+real viewport lands centred with its edges clipped — the mid-bank symptom in miniature. Land when the viewport has
+reported, or pass the hosting size.
+
+**[NIT] · `App/Variorum/Variorum/Registry/CurrentBlockMemory.swift` ·** `currentBlock.<postID>` joins `postMode.<id>`
+and `readFace.<id>` as per-note `UserDefaults` keys nothing ever reaps — `forgetCurrentBlock` has no production
+caller (deletion, the purge, and Delete Now leave the keys). A pre-existing class this round extended by one
+family; a sweep at note purge is the natural home (13w/17).
+
+**[NIT] · `App/Variorum/Variorum/Features/BookView/BookView.swift:1035` ·** `navigateToChapter`'s `.index` case
+requests a chapter reveal that NOTHING in Index consumes (`BookIndexView.landOrSeed` reads `pendingReveal` only);
+unreachable today (the navigator is hidden in Index, `:121`), but a parked `pendingChapterReveal` would land on the
+NEXT Outline entry as a surprise scroll. Drop the case or consume it.
+
+**[NIT] · `App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift:505` vs `:521` ·** The panel slides and
+fades; the 1-pt divider beside it has no transition, so the line pops a frame ahead of the column.
+
+**[NIT] · `App/Variorum/Variorum/Registry/CapabilityRegistry.swift:1254` with `EditorCommands.swift:294` ·**
+`.toggleSidebar` is declared `availability: always` while its menu item greys on `activeWindowKind != .full` — a
+gate the registry walk cannot see (the comment admits it). A `windowKind` field on `CapabilityContext` would make
+the grey a registry fact like every other one.
+
+### What was checked and found solid (the clean bill)
+
+- **Zero `Sync/`, zero schema, one core file** — verified by the diff itself, not the record: `Sources/` carries
+  only `Domain/MarkdownSyntax.swift` (+53) and its test; the marker question does not arise.
+- **Row 84's underscore italics are display-only by construction:** the scanner writes nothing; `renderedText`, the
+  `.md` export and the bridge's join never consult `MarkdownSyntax.spans`; the word-boundary rule is right at every
+  pinned corner and `⌘I` still writes `*`. The pin exists and passes (run here).
+- **`TrailingFlow.rows` ≡ the phone's `MobileChipFlow.rows`** — diffed against `~/dev/variorum-mobile/…/
+  MobileChipFlow.swift:35–56` in this session: byte-identical bodies, as the record claims. `keepingTogether`,
+  `minimumLineWidth` and the leading-edge guard are the Mac's additions and are pure and pinned.
+- **`LandingTarget`** is what it says — a value with no decision; every consumer (the book Index, Read's `edit`,
+  the paged faces) lands the block and the caret at its start, and the record states the `utf16Offset` limit
+  honestly.
+- **`BookViewModel`'s three slots** (`pendingReveal` · `pendingLanding` · `pendingChapterReveal`) consume
+  coherently: `requestReveal` clears a landing, `consumeReveal` clears both, `BookIndexView.landOrSeed` reads the
+  landing BEFORE consuming; row 73's parking consumes only after `entries.contains` and drops a foreign request
+  only once entries exist — the pin's premise (an empty model, the request before the mount) is the real ascent's.
+- **The Outline landing's convergence** keeps its bookkeeping in a reference box (no `@State` write per report —
+  the second cut's own loop, avoided), re-arms on content-height change, ends on a user scroll, and is fenced by a
+  hop cap and a time budget; `outlineAnchor` puts the id at the LAZY row's level; `BookOutlineRows.segments` is
+  pure and pinned; the P3 materialization count moved to realized content; `NearViewportObserver` and
+  `StableSurface` flip state on the next turn (the modifying-state-during-update class named and avoided).
+- **A bare `focus` seeds caret 0** and the inline editor lands on it (pinned); the detail's bare arrival reads the
+  fact BEFORE the fill (`arrivalFact`) and lands at once, the window-less retry claiming first responder only —
+  the K5 pin's catch, honored; `caretIdentity()` restores the caret by identity across `renderFull`.
+- **`CurrentBlockMemory` + `registerDetail`'s restore:** every consumer tolerates a stale or dead id (Write falls
+  to 0, Takes/Read/Blocks to the first row) — checked at each site; `noteFocusedBlock` writes only on a real change,
+  so the defaults write is per block crossing, not per keystroke.
+- **`BlockTOCViewModel.primeRows`/`awaitPrimed`:** MainActor-serial, `primed` set before the waiters resume, no
+  continuation lost on an early return; the sibling observations wait and nothing in Read/Takes awaits a prime
+  that never runs.
+- **Compare's row 17** exempts the anchor at the MODEL (`compositionInputs`) and leaves `CompareComposition` and
+  its pins byte-unmodified; peers stay filtered by kinship; `noPeerIsOpen`/`addNoteDoorShows` make row 46's one
+  placement a pure fact; the display-title brain is the masthead's own (`Queries.noteDisplayTitle`).
+- **`PageFrameNSView.hit(at:)`** decides link-first-then-block purely; the CoreText origin rebase (`box.minX/minY`)
+  is the documented `CTFrameGetLineOrigins` contract; `PageComposer.blocks` is rebased exactly as the links are and
+  filtered to the display length; the book and the note share one door.
+- **The recovery family:** `lead` + `clockSlot` with `meta` DERIVED from the pair (the pinned value is the rendered
+  pair); the date-only stamp additive in `Shared/`; `emptyTrashConfirm`'s kind order now names every kind
+  `TrashScope` takes; `revealKeptInLineage`'s latch is exact (`inOriginals && !inStranded && !inDeleted &&
+  !inArchived`); the pane's `List` really is gone (the reflection pin + the mounted class assertion).
+- **`WorkbenchRowShell`** never asks `NSApp.currentEvent` anything (the crash class the pins caught, closed); the
+  double is the row's own clock; `WorkbenchRows.display` is pure and honestly waits for facts only where a fact
+  decides; `BlocksWorkbenchLayout.panelWidth` clamps both floors.
+- **`MastheadTitleInsets`, `MastheadRowTwo.arrangement`, `TrailingFlow`'s reserve/yield rules** are pure and
+  pinned, the standing rows 4/19/58 pins ride unmodified; `MastheadTagCluster` declares ONE act and the cards
+  render without their ＋ (a static, read by the pin).
+- **`PostMode` is seven, `fromStored("Index") → .read`**; `readEditAttached` is a token SET (a departing face's
+  teardown cannot clear another's); `.tagNote` is note-scoped on three doors; the `s`-chord sweep holds at three
+  (`EditorCommands.swift:293/316/323` — ⌃⌘S · ⌘S · ⌘⇧S) and the pin was edited to say so.
+- **Row 67's re-anchor** (`after: .saveItem` → `after: .newItem`) is the one change no unit pin can reach (the test
+  host owns its own main menu); the record's AX-listing evidence is the right kind, and the group's new anchor
+  really exists in this scene (`CommandGroup(replacing: .newItem)` at `:247`).
+- **`ShellSplit`** clamps its remembered width; `SidebarLayout`'s thresholds never compress an unmeasured column;
+  `SideColumn` draws its own line in every window state and the Library column's pin runs both
+  `controlActiveState`s.
+- **Every justified pin edit** named in the records (`NoteTagDeclarationTests`, `NoteVersionsPaneTests`' chord
+  count, `BookAscentTests`' fold pin → the act, the four `InspectorStyleContext` → oracle edits, the two
+  `ListTableHeaderView` edits, `CommitBarLayoutTests`' re-expression, `PostDetailAndPanelTests`' seven) describes
+  the ruled behaviour change it follows, line by line at the pin — none loosens a claim the round did not change.
+- **Not re-run here (recorded as such):** the full Mac suite and its arithmetic (2071/367 — the records' per-batch
+  sums were checked against the new test files' `@Test` counts and agree), the iOS build (`6b8b6ed`), and the
+  load-flaky pair; the one core suite the round touched was run and is green.
