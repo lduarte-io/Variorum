@@ -128,6 +128,27 @@ struct ReadingFlowEstimateTests {
         }
     }
 
+    /// Ladder R2-1 (+ R2-8): a REMEMBERED size sizes a story — the far
+    /// placeholder and the surface's reservation alike — only when it was
+    /// taken at the column's CURRENT width (R1-1's rule, which the flow's
+    /// two sites had skipped); at another width the estimate at the current
+    /// width stands. The one fallback for an unreported column is the page
+    /// column's cap. RED ON OLD (behavioral revert — the width ignored): a
+    /// 600-wide memory answered 20,000 in a 450-pt column.
+    @Test func aRememberedSizeAppliesOnlyAtItsOwnWidth() {
+        let remembered = CGSize(width: 600, height: 20_000)
+        #expect(FlowHeightEstimate.honestHeight(remembered: remembered, columnWidth: 600, estimate: 26_000) == 20_000,
+                "at its own width the memory is the height")
+        #expect(FlowHeightEstimate.honestHeight(remembered: remembered, columnWidth: 600.5, estimate: 26_000) == 20_000,
+                "within the tolerance `StableSurface` itself uses (\(stableSurfaceWidthTolerance) pt)")
+        #expect(FlowHeightEstimate.honestHeight(remembered: remembered, columnWidth: 450, estimate: 26_000) == 26_000,
+                "a memory at another width does not apply — the estimate at the current width")
+        #expect(FlowHeightEstimate.honestHeight(remembered: nil, columnWidth: 450, estimate: 26_000) == 26_000,
+                "no memory: the estimate")
+        #expect(FlowHeightEstimate.remembered(remembered, appliesAt: 599) && !FlowHeightEstimate.remembered(remembered, appliesAt: 597))
+        #expect(FlowHeightEstimate.defaultColumnWidth == 600, "the one fallback IS the page column's cap")
+    }
+
     /// The metrics come off the real page font, not a guess: a 600-pt
     /// measure holds a plausible number of 16-pt serif characters, and the
     /// pitch is the font's line height plus the flow's line spacing.

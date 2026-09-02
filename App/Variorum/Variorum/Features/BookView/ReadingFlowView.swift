@@ -233,12 +233,16 @@ struct ReadingFlowView: View {
     // MARK: - The honest estimate
 
     /// A never-measured story's height: from its blocks' lengths once the
-    /// extents have landed; the unknown fallback before that.
+    /// extents have landed; the unknown fallback before that. At the
+    /// column's CURRENT width (ladder R2-1/R2-8: the one fallback for a
+    /// column that has not reported yet is `FlowHeightEstimate.
+    /// defaultColumnWidth`, here and in the row's reservation alike).
     private func estimate(for postID: String) -> CGFloat {
         guard let extents else { return FlowHeightEstimate.unknownHeight }
         return FlowHeightEstimate.height(
             extents: extents[postID] ?? [],
-            metrics: FlowHeightEstimate.metrics(columnWidth: columnWidth ?? 600))
+            metrics: FlowHeightEstimate.metrics(
+                columnWidth: columnWidth ?? FlowHeightEstimate.defaultColumnWidth))
     }
 
     private func loadExtents() async {
@@ -585,6 +589,34 @@ nonisolated enum FlowHeightEstimate {
     static let unknownHeight: CGFloat = 800
     /// A note with no renderable text: the row's one blank line.
     static let emptyNoteHeight: CGFloat = 20
+    /// The column's measure before it has reported (`.frame(maxWidth: 600)`
+    /// — the page column's cap, so the common case exactly). Ladder R2-8:
+    /// the ONE fallback, for the estimate and the reservation alike — the
+    /// reservation used to answer nil for an unreported column while the
+    /// estimate assumed 600, so a story that flipped near on that one turn
+    /// reserved nothing and stood one line tall until its text arrived.
+    static let defaultColumnWidth: CGFloat = 600
+
+    /// Does a REMEMBERED size apply at this column width? Ladder R2-1 —
+    /// R1-1's rule reaches the flow: a size measured at another width is
+    /// not this story's height here (a 600-pt column's 20,000 pt is ~26,000
+    /// at 450), so it neither sizes the far placeholder nor reserves from
+    /// the surface's first frame; the estimate at the CURRENT width does.
+    /// `stableSurfaceWidthTolerance` is the same 1 pt `StableSurface`
+    /// compares with, so the two never disagree about "the same width".
+    static func remembered(_ size: CGSize, appliesAt columnWidth: CGFloat) -> Bool {
+        abs(size.width - columnWidth) <= stableSurfaceWidthTolerance
+    }
+
+    /// The height a story STANDS at before its text is measured here — as
+    /// the far placeholder and as the surface's reservation: the remembered
+    /// size when it was taken at this width, else the estimate at this width.
+    static func honestHeight(remembered: CGSize?, columnWidth: CGFloat, estimate: CGFloat) -> CGFloat {
+        if let remembered, Self.remembered(remembered, appliesAt: columnWidth) {
+            return remembered.height
+        }
+        return estimate
+    }
     /// The calibration from the Sherlock measurement (batch H): the modelled
     /// height against the real one, applied as a factor. 1 = the model as
     /// stated; the record states the measured value and why.
@@ -726,7 +758,7 @@ private struct FlowStoryRow: View {
                 }
                 .onAppear { materialized() }
             } else {
-                Color.clear.frame(height: memory.size(entry.postID)?.height ?? estimate)
+                Color.clear.frame(height: honestHeight)
             }
         }
         .modifier(NearViewportObserver(
@@ -734,13 +766,25 @@ private struct FlowStoryRow: View {
         .onChange(of: near, initial: true) { _, isNear in onNear(isNear) }
     }
 
-    /// What the surface reserves from its first frame: the remembered
-    /// size, else the estimate at the column's width (the width must be
-    /// known for the reservation to apply — `StableSurface` compares it).
+    /// The column's width for this row's geometry — the reported one, else
+    /// the one fallback (R2-8).
+    private var width: CGFloat { columnWidth ?? FlowHeightEstimate.defaultColumnWidth }
+
+    /// The height this story stands at until its text is measured HERE:
+    /// its remembered size when that was taken at this width, else the
+    /// estimate at this width (R2-1 — the one brain for the placeholder
+    /// and the reservation).
+    private var honestHeight: CGFloat {
+        FlowHeightEstimate.honestHeight(
+            remembered: memory.size(entry.postID), columnWidth: width, estimate: estimate)
+    }
+
+    /// What the surface reserves from its first frame — the honest height
+    /// at the column's width (`StableSurface` compares the width against
+    /// the surface's first real report, so a resize between the two frames
+    /// still drops the reservation rather than holding a stale one).
     private var known: CGSize? {
-        if let remembered = memory.size(entry.postID) { return remembered }
-        guard let columnWidth else { return nil }
-        return CGSize(width: columnWidth, height: estimate)
+        CGSize(width: width, height: honestHeight)
     }
 
     private func materialized() {

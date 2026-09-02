@@ -81,12 +81,15 @@ private let stableSurfaceReachedSlack: CGFloat = 24
 /// landing's own minimum hold (`BookView.landingMinimumHold`), so a
 /// provisional-width first measure (row 54's class) or a placeholder
 /// waiting on the encrypted store's read never decides.
-let stableSurfaceSettleInterval: TimeInterval = 1.0
+nonisolated let stableSurfaceSettleInterval: TimeInterval = 1.0
 /// Ladder R1-1: a remembered width within this of the surface's reported
 /// width is "the same width" — a memory taken at another width does not
 /// apply (the window resized, the sidebar collapsed, the voice switched
 /// while the row was away).
-let stableSurfaceWidthTolerance: CGFloat = 1
+/// `nonisolated` (ladder fix 2, R2-1): the flow's pure width brain
+/// (`FlowHeightEstimate.remembered(_:appliesAt:)`) compares with the SAME
+/// constant, so "the same width" is one number in the app.
+nonisolated let stableSurfaceWidthTolerance: CGFloat = 1
 
 /// Row 53 (the Act 10 correction round): an expanded note's text surface
 /// at its REMEMBERED size from the first frame it is realized. The column
