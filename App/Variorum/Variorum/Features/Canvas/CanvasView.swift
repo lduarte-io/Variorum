@@ -114,6 +114,11 @@ struct CanvasView: View {
     /// recorded judgment call; ScrollPosition stays available if this
     /// ever proves insufficient).
     @State private var scrollTarget: CGPoint?
+    /// Where the marker lands in the viewport: the centre for a card
+    /// landing; the top-leading corner for the arrival's overview (row 88 —
+    /// the fitted content still opened with its top rows above the
+    /// viewport, the 2-axis scroll view's own start).
+    @State private var scrollAnchor: UnitPoint = .center
     /// Row 88(a) (R-cor-11(3)): whether this canvas has already been
     /// landed on arrival — once per mount.
     @State private var arrivalFitted = false
@@ -170,8 +175,11 @@ struct CanvasView: View {
                     // The marker renders this pass; scroll on the next
                     // turn, then clear (one-shot).
                     DispatchQueue.main.async {
-                        proxy.scrollTo("canvas-scroll-marker", anchor: .center)
-                        DispatchQueue.main.async { scrollTarget = nil }
+                        proxy.scrollTo("canvas-scroll-marker", anchor: scrollAnchor)
+                        DispatchQueue.main.async {
+                            scrollTarget = nil
+                            scrollAnchor = .center
+                        }
                     }
                 }
             }
@@ -496,9 +504,19 @@ struct CanvasView: View {
         if onArrival { CanvasArrivalOracle.outcome = outcome }
         #endif
         switch outcome {
-        case .empty, .overview:
-            break  // the overview re-renders scaled; empty spoke
+        case .empty:
+            break  // spoke
+        case .overview:
+            // The overview re-renders scaled. On ARRIVAL it also lands at
+            // the board's top-leading corner (row 88 — the fitted content's
+            // top rows sat above the viewport otherwise); a summoned fit-all
+            // leaves the viewport where she has it.
+            if onArrival {
+                scrollAnchor = .topLeading
+                scrollTarget = boardOrigin
+            }
         case .scroll(let center):
+            scrollAnchor = .center
             scrollTarget = center
         }
     }
