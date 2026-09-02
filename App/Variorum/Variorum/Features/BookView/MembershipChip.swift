@@ -56,6 +56,12 @@ struct MembershipChip: View {
             Text(tokens.chromeLabel(label))
                 .font(tokens.small)
                 .foregroundStyle(books.count > 1 ? tokens.accent : tokens.muted)
+                // Row 80b (the correction round, batch G): on a masthead too
+                // narrow for the chip's whole path the chip ELLIPSIZES at
+                // its tail rather than pushing the tag cluster (P-8: a chrome
+                // label is one line, always).
+                .lineLimit(1)
+                .truncationMode(.tail)
         }
         .buttonStyle(.borderless)
         .help("Which books hold this note — add it to one, or diverge a copy")

@@ -314,10 +314,83 @@ struct MastheadLayoutTests {
         }
     }
 
+    // MARK: - Row 80b (her live find): the cluster moves BELOW the chip when the row cannot hold both
+
+    /// **Row 80b.** With the tray open in a ~1740-pt window the detail is
+    /// ≈ 590 pt: the `sherlock holmes ×` card was drawn OVER the path chip's
+    /// words and the ＃ orphaned on a line of its own. Now row 2 is
+    /// width-aware: the chip never covered, the door on the last card's
+    /// line — with one tag and with five, in both voices, at her width and
+    /// at the tighter inspector-minimum one. RED ON OLD: the card's frame
+    /// intersects the chip's; the door's line is below the card's.
+    @Test func theClusterNeverCoversTheChipAndTheDoorNeverOrphansInTerminal() async throws {
+        try await assertRowTwoHoldsAtNarrowWidths(voice: .terminal)
+    }
+
+    @Test func theClusterNeverCoversTheChipAndTheDoorNeverOrphansInStudy() async throws {
+        try await assertRowTwoHoldsAtNarrowWidths(voice: .study)
+    }
+
+    /// The decisions, pure: the row's one-line/two-lines rule and the
+    /// flow's minimum line (the widest card + the door beside it + the
+    /// reserve).
+    @Test func theRowTwoAndTheFlowMinimumRulesArePure() {
+        #expect(MastheadRowTwo.arrangement(width: 680, chipWidth: 125, clusterMinimum: 286, gap: 16) == .oneLine)
+        #expect(MastheadRowTwo.arrangement(width: 542, chipWidth: 230, clusterMinimum: 326, gap: 16) == .twoLines,
+                "her width: the chip and one card + the door + the reserve do not share 542")
+        #expect(MastheadRowTwo.arrangement(width: .infinity, chipWidth: 230, clusterMinimum: 326, gap: 16) == .oneLine,
+                "unmeasured: one line")
+        let minimum = TrailingFlow.minimumLineWidth(
+            widths: [80, 130, 24], keepWithPrevious: [2], spacing: 4, leadingReserve: 196)
+        #expect(abs(minimum - 354) < 0.001, "the widest card, the door beside it, the reserve: \(minimum)")
+        let bare = TrailingFlow.minimumLineWidth(widths: [50], keepWithPrevious: [], spacing: 4, leadingReserve: 0)
+        #expect(abs(bare - 50) < 0.001)
+    }
+
+    private func assertRowTwoHoldsAtNarrowWidths(voice: ThemeVoice) async throws {
+        for (width, tags) in [
+            (CGFloat(590), ["sherlock holmes"]),
+            (CGFloat(590), ["again", "final", "once", "tutorial", "walked"]),
+            (CGFloat(340), ["sherlock holmes"]),
+        ] {
+            try await withMountedDetail(
+                width: width, title: "The Boscombe Valley Mystery", tags: tags,
+                book: "the adventures of sherlock holmes", voice: voice
+            ) { _, _ in
+                #if DEBUG
+                await settle(until: {
+                    MastheadGeometry.pathChipFrame != nil
+                        && MastheadGeometry.cardFrames.count == tags.count
+                        && MastheadGeometry.doorFrame != nil
+                })
+                await settle(until: { false }, maxTurns: 6)
+                let chip = try #require(MastheadGeometry.pathChipFrame, "(\(voice) \(width) \(tags.count) tags) the chip reported")
+                let door = try #require(MastheadGeometry.doorFrame, "(\(voice) \(width)) the door reported")
+                let cards = MastheadGeometry.cardFrames
+                #expect(cards.count == tags.count, "(\(voice) \(width)) every card reported")
+                let masthead = try #require(MastheadGeometry.contentMidX).magnitude * 2
+                for (id, card) in cards {
+                    #expect(!chip.intersects(card),
+                            "(\(voice) \(width) \(tags.count) tags) the chip \(chip) is never covered by card \(id) \(card)")
+                    #expect(card.minX >= -0.5 && card.maxX <= masthead + 0.5,
+                            "(\(voice) \(width)) card \(id) \(card) stays inside the masthead (\(masthead))")
+                }
+                #expect(chip.maxX <= masthead + 0.5, "(\(voice) \(width)) the chip stays inside the masthead: \(chip)")
+                // The door sits on the LAST card's line — never a line alone.
+                let lastLineY = cards.values.map(\.midY).max() ?? 0
+                #expect(abs(door.midY - lastLineY) <= 4,
+                        "(\(voice) \(width) \(tags.count) tags) the door (\(door)) sits on the last card's line (midY \(lastLineY)), never orphaned below it")
+                #expect(!chip.intersects(door), "(\(voice) \(width)) the door never covers the chip")
+                #endif
+            }
+        }
+    }
+
     /// Mounts the real detail at `width` with a titled note carrying `tags`,
     /// the oracles reset first (the rows-58 rig, factored for G's pins).
     private func withMountedDetail(
-        width: CGFloat, title: String, tags: [String],
+        width: CGFloat, title: String, tags: [String], book: String? = nil,
+        voice: ThemeVoice = .terminal,
         _ body: @MainActor (NSWindow, NSView) async throws -> Void
     ) async throws {
         let db = try AppDatabase.inMemory()
@@ -338,11 +411,25 @@ struct MastheadLayoutTests {
             let session = AppSession(database: db)
             let post = try session.operations.createPost(title: title)
             _ = try session.operations.newBlock(in: post.id, text: "a block, so the mode can host.")
+            if let book {
+                let reading = try session.operations.createReading(name: book, kind: .curated)
+                _ = try session.operations.addPostToReading(post.id, to: reading.id)
+            }
             for name in tags {
                 let tag = try session.operations.createTag(name: name)
                 _ = try session.operations.applyTag(tag.id, toPost: post.id)
             }
             UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(post.id)")
+            // The voice: the live store, switched through its own setter
+            // (the rows-58 rig's road).
+            let store = ThemeStore(session: session)
+            let watching = Task { await store.start() }
+            defer { watching.cancel() }
+            if voice == .study {
+                store.setVoice(.study)
+                await settle(until: { store.settings.voice == .study })
+                #expect(store.settings.voice == .study, "the Study voice took")
+            }
             #if DEBUG
             MastheadGeometry.resetRowTwo()
             MastheadGeometry.resetTitleRow()
@@ -358,7 +445,7 @@ struct MastheadLayoutTests {
             }
             let hosting = NSHostingView(
                 rootView: PostDetailView(session: session, postID: post.id)
-                    .environment(ThemeStore(session: session)))
+                    .environment(store))
             hosting.frame = NSRect(x: 0, y: 0, width: width, height: 750)
             window.contentView = hosting
             window.makeKeyAndOrderFront(nil)

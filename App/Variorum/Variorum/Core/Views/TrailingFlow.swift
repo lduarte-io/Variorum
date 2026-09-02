@@ -141,7 +141,19 @@ struct TrailingFlow: Layout {
                 items.append(index)
             }
         }
-        let available = width.isFinite ? max(0, width - leadingReserve) : .infinity
+        // Row 80b: the reserve YIELDS when honoring it would starve the
+        // line's minimum (the widest item with its keep-with-previous item
+        // beside it) — a full-width line the row-2 layout gave the cluster
+        // has nothing to its left for the field to reach, so the room the
+        // reserve kept is the line's own. On a one-line row the layout only
+        // chooses one line when the minimum WITH the reserve fits, so the
+        // reserve never yields beside the chip.
+        let bareMinimum = Self.minimumLineWidth(
+            widths: items.map { sizes[$0].width }, keepWithPrevious: keepWithPrevious,
+            spacing: itemSpacing, leadingReserve: 0)
+        let available = width.isFinite
+            ? min(width, max(width - leadingReserve, bareMinimum))
+            : .infinity
         let rows = Self.keepingTogether(
             Self.rows(widths: items.map { sizes[$0].width }, available: available, spacing: itemSpacing),
             keepWithPrevious: keepWithPrevious)
@@ -161,10 +173,45 @@ struct TrailingFlow: Layout {
             contentWidth: lines.map(\.width).max() ?? 0, height: height)
     }
 
+    /// **The flow's MINIMUM line width** (row 80b): the widest item, plus —
+    /// when an item is marked keep-with-previous (the ＃ door) — that item
+    /// and a spacing beside it, plus the leading reserve. A host that offers
+    /// the flow at least this can lay every item on some line with the door
+    /// beside a card; offered less, a card would overflow the flow's edge
+    /// and the door would orphan (her screenshot). SwiftUI's convention: a
+    /// ZERO-width proposal is answered with this minimum.
+    nonisolated static func minimumLineWidth(
+        widths: [CGFloat], keepWithPrevious: Set<Int>, spacing: CGFloat, leadingReserve: CGFloat
+    ) -> CGFloat {
+        let widest = widths.enumerated().filter { !keepWithPrevious.contains($0.offset) }
+            .map(\.element).max() ?? 0
+        let widestKept = widths.enumerated().filter { keepWithPrevious.contains($0.offset) }
+            .map(\.element).max() ?? 0
+        return leadingReserve + widest + (widestKept > 0 ? spacing + widestKept : 0)
+    }
+
+    private func minimumWidth(subviews: Subviews) -> CGFloat {
+        var widths: [CGFloat] = []
+        var kept = Set<Int>()
+        for subview in subviews where !subview[AnchorKey.self] {
+            if subview[KeepWithPreviousKey.self] { kept.insert(widths.count) }
+            widths.append(subview.sizeThatFits(.unspecified).width)
+        }
+        return Self.minimumLineWidth(
+            widths: widths, keepWithPrevious: kept, spacing: itemSpacing,
+            leadingReserve: leadingReserve)
+    }
+
     func sizeThatFits(
         proposal: ProposedViewSize, subviews: Subviews, cache: inout ()
     ) -> CGSize {
         let proposed = proposal.width
+        // Row 80b: a zero-width proposal asks for the minimum (the
+        // convention `MastheadRowTwo` relies on to decide one line or two).
+        if proposed == 0 {
+            let plan = plan(width: .infinity, subviews: subviews)
+            return CGSize(width: minimumWidth(subviews: subviews), height: plan.height)
+        }
         let plan = plan(width: proposed ?? .infinity, subviews: subviews)
         // A finite proposal is answered with itself (the flow fills the
         // width it is given and right-aligns inside it); nil or infinite
@@ -184,12 +231,22 @@ struct TrailingFlow: Layout {
         var lastLineTop = bounds.minY
         var lastLineHeight: CGFloat = 0
         for line in plan.lines {
-            var x = bounds.maxX - line.width
+            // Row 90 (the correction round, batch G — found at a ~950-pt
+            // window with an inspector open, the masthead ~270): a line
+            // WIDER than the flow's bounds — one card wider than the room
+            // right of the path chip — used to start LEFT of the flow's own
+            // edge (`maxX − width` < `minX`) and draw over the chip. The
+            // line now starts no earlier than the flow's leading edge, and
+            // an item that would still run past the trailing edge is
+            // PROPOSED the width that remains, so a chrome label truncates
+            // (P-8) instead of covering its neighbour.
+            var x = max(bounds.minX, bounds.maxX - line.width)
             lastLineLeading = x
             lastLineTop = y
             lastLineHeight = line.height
             for index in line.members {
-                let size = plan.sizes[index]
+                var size = plan.sizes[index]
+                size.width = min(size.width, max(0, bounds.maxX - x))
                 subviews[index].place(
                     at: CGPoint(x: x, y: y + (line.baseline - plan.baselines[index])),
                     proposal: ProposedViewSize(size))

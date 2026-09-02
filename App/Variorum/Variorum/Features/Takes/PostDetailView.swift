@@ -291,18 +291,25 @@ struct PostDetailView: View {
                         .mastheadGeometryProbe(.iconRow, in: Self.mastheadSpace)
                     }
                 }
-                HStack(alignment: .firstTextBaseline, spacing: Self.rowTwoGap) {
+                // Row 80b (her live find): row 2 is WIDTH-AWARE —
+                // `MastheadRowTwo` lays the chip and the cluster on ONE
+                // line while chip + gap + the cluster's minimum line fit,
+                // and on TWO lines (the chip above, ellipsizing at its
+                // tail; the cluster below on a full-width line, the door on
+                // the cards' line) when they do not. The old HStack let the
+                // chip win its width and offered the flow LESS than its
+                // minimum, which placed a card over the chip's words and
+                // orphaned the ＃ (her screenshot at a ~590-pt detail).
+                MastheadRowTwo(gap: Self.rowTwoGap) {
                     // Phase 13 (B3, R35): the membership indicator — the es
                     // path line ("~/orbit") + the add/diverge door. It
-                    // leads, at its own width, and is never compressed:
-                    // the cluster beside it is what yields (by wrapping).
-                    // Row 55's opacity yield is retired with the collision
-                    // it hid — the chip stays in view while a tag goes on.
+                    // leads, at its own width on one line; on two it may
+                    // ellipsize rather than push. Row 55's opacity yield is
+                    // retired with the collision it hid — the chip stays in
+                    // view while a tag goes on.
                     MembershipChip(
                         session: session, postID: postID,
                         recentBookIDs: recentBookIDs)
-                        .fixedSize()
-                        .layoutPriority(1)
                         .mastheadGeometryProbe(.pathChip, in: Self.mastheadSpace)
                     // Act 10 item 5 — the note's tag cards on the
                     // masthead's right edge, under the icons, across from
@@ -312,7 +319,6 @@ struct PostDetailView: View {
                         session: session, postID: postID, tokens: tokens,
                         fieldOpen: $tagFieldOpen,
                         geometryProbeSpace: Self.mastheadSpace)
-                        .frame(maxWidth: .infinity)
                 }
             }
             .frame(maxWidth: mastheadMeasure, alignment: .leading)
