@@ -51,6 +51,20 @@ struct SideColumnTests {
         return predicate()
     }
 
+    /// Ladder R1-7: a drag past the window's trailing edge means the
+    /// MINIMUM, never the ideal — the old gesture wrote a proposal ≤ 0,
+    /// which the rule read as "nothing remembered" and snapped to 420.
+    @Test func aDragPastTheTrailingEdgeMeansTheMinimumNeverTheIdeal() {
+        // The pointer 40 pt past the edge (a proposal of −40), and exactly at it (0).
+        #expect(SideColumnLayout.draggedWidth(pointerX: 1140, total: 1100, ideal: 420, minimum: 280) == 280)
+        #expect(SideColumnLayout.draggedWidth(pointerX: 1100, total: 1100, ideal: 420, minimum: 280) == 280)
+        // An ordinary drag asks for the room right of the pointer, clamped as before.
+        #expect(SideColumnLayout.draggedWidth(pointerX: 700, total: 1100, ideal: 420, minimum: 280) == 400)
+        #expect(SideColumnLayout.draggedWidth(pointerX: 100, total: 1100, ideal: 420, minimum: 280) == 640)
+        // "Nothing remembered" (0 from the store) is still the ideal — a drag never writes it.
+        #expect(SideColumnLayout.width(remembered: 0, ideal: 420, minimum: 280, total: 1100) == 420)
+    }
+
     @Test func theWidthRuleIsTheRememberedWidthClampedToTheRoom() {
         // Nothing remembered: the ideal, clamped to the room the content keeps.
         #expect(SideColumnLayout.width(remembered: 0, ideal: 420, minimum: 280, total: 1100) == 420)

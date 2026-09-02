@@ -46,6 +46,20 @@ nonisolated enum SideColumnLayout {
         let room = max(minimum, total - contentMinimum)
         return min(max(wanted, minimum), min(maximum, room))
     }
+
+    /// Ladder R1-7 — what a DRAG remembers: the width the pointer asks for
+    /// (the room right of it), clamped by the rule above — and never a
+    /// proposal at or below zero. A pointer past the window's trailing
+    /// edge used to write a proposal ≤ 0, which `width` read as "nothing
+    /// remembered" and answered the IDEAL, so a panel being dragged narrow
+    /// snapped to 420 the moment the pointer crossed the edge; a drag is
+    /// never "nothing remembered" — past the edge it means the minimum.
+    static func draggedWidth(
+        pointerX: CGFloat, total: CGFloat, ideal: CGFloat, minimum: CGFloat
+    ) -> CGFloat {
+        width(remembered: Double(max(minimum, total - pointerX)),
+              ideal: ideal, minimum: minimum, total: total)
+    }
 }
 
 struct SideColumn<Content: View, Panel: View>: View {
@@ -124,9 +138,9 @@ struct SideColumn<Content: View, Panel: View>: View {
                         DragGesture(coordinateSpace: .named(widthKey))
                             .onChanged { value in
                                 guard totalWidth > 0 else { return }
-                                remembered = Double(SideColumnLayout.width(
-                                    remembered: Double(totalWidth - value.location.x),
-                                    ideal: ideal, minimum: minimum, total: totalWidth))
+                                remembered = Double(SideColumnLayout.draggedWidth(
+                                    pointerX: value.location.x, total: totalWidth,
+                                    ideal: ideal, minimum: minimum))
                             })
                     .onHover { inside in
                         if inside { NSCursor.resizeLeftRight.push() } else { NSCursor.pop() }
