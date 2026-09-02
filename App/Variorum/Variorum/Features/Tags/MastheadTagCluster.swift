@@ -130,6 +130,15 @@ struct MastheadTagCluster: View {
         .task(id: postID) { await load() }
     }
 
+    /// Row 59 (the Act 10 correction round, batch G — the orchestrator's walk
+    /// of batch A): the ＃'s HIT TARGET is the row's height, never the
+    /// glyph's. The ~10 pt symbol was its own target, so a click a few
+    /// points off landed on the neighbouring card's × (a tag removed by
+    /// accident) or in the editor. The glyph keeps its place inside a
+    /// square target of this side (C-7's "generous targets"; the geometry
+    /// pin reads the door's frame).
+    static let doorTarget: CGFloat = 24
+
     /// THE door: the ＃ glyph. Open → the field slides out with the cursor
     /// in it; open again → it slides away.
     private var door: some View {
@@ -139,12 +148,12 @@ struct MastheadTagCluster: View {
             Image(systemName: "number")
                 .font(tokens.small)
                 .foregroundStyle(fieldOpen ? tokens.accent : tokens.faint)
-                .padding(.vertical, 2)
-                .padding(.horizontal, 3)
+                .frame(width: Self.doorTarget, height: Self.doorTarget)
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .help(WorkspaceNaming.tagFieldHelp(open: fieldOpen))
+        .mastheadGeometryProbe(.door, in: geometryProbeSpace)
     }
 
     // MARK: - The one-shot loads and the standing doors (PaneHost's

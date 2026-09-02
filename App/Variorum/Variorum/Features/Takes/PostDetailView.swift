@@ -170,13 +170,13 @@ struct PostDetailView: View {
     /// the masthead's second row.
     static let rowTwoGap: CGFloat = 16
 
-    /// The title's symmetric inset for the trailing thing on its row: that
-    /// thing's width (so the title never runs under it), capped so the
-    /// title keeps its floor.
-    private func mastheadInset(for trailingWidth: CGFloat) -> CGFloat {
-        let wanted = trailingWidth + 12
-        guard mastheadWidth > 0 else { return wanted }
-        return min(wanted, max(0, (mastheadWidth - mastheadLineFloor) / 2))
+    /// The title row's two insets (row 80 — `MastheadTitleInsets`, the pure
+    /// rule): the trailing one ALWAYS keeps the icon row's width clear, the
+    /// leading one is what the floor spends when the masthead is narrow.
+    private var titleInsets: (leading: CGFloat, trailing: CGFloat) {
+        MastheadTitleInsets.insets(
+            mastheadWidth: mastheadWidth, iconRowWidth: mastheadIconRowWidth,
+            floor: mastheadLineFloor)
     }
     /// The masthead's own coordinate space (the DEBUG oracle reads the
     /// title's midX in it against the masthead's midX).
@@ -217,9 +217,21 @@ struct PostDetailView: View {
                 ZStack(alignment: .top) {
                     // Sitting 9 (R67): the post's NAME, prominent — click
                     // to rename right here.
+                    // Row 80 (the correction round, batch G — F's walk at a
+                    // ~950-pt window with an inspector open: the title
+                    // touched the tray icon): the two insets are ASYMMETRIC
+                    // once the masthead is too narrow for the floor AND the
+                    // icons. The old symmetric inset was capped by the
+                    // 240-pt floor on BOTH sides, so at ~270 pt the trailing
+                    // inset shrank to ~15 and the title ran under the icon
+                    // row. Now the trailing inset always keeps the icons
+                    // clear; the floor spends the LEADING inset instead, and
+                    // below floor + icons the title yields to `…` — legal;
+                    // a title under the icons is not.
                     PostTitleLabel(session: session, postID: postID, tokens: tokens)
                         .frame(maxWidth: .infinity)
-                        .padding(.horizontal, mastheadInset(for: mastheadIconRowWidth))
+                        .padding(.leading, titleInsets.leading)
+                        .padding(.trailing, titleInsets.trailing)
                     HStack(alignment: .top, spacing: 0) {
                         Spacer(minLength: 0)
                         HStack(alignment: .firstTextBaseline, spacing: 2) {
@@ -255,6 +267,7 @@ struct PostDetailView: View {
                         .onGeometryChange(for: CGFloat.self) { $0.size.width } action: {
                             mastheadIconRowWidth = $0
                         }
+                        .mastheadGeometryProbe(.iconRow, in: Self.mastheadSpace)
                     }
                 }
                 HStack(alignment: .firstTextBaseline, spacing: Self.rowTwoGap) {
@@ -570,10 +583,15 @@ struct PostDetailView: View {
                         #if DEBUG
                         // The oracle reads the TEXT's own frame (not its
                         // measure, which centers whatever its content does):
-                        // where the words actually sit.
-                        .onGeometryChange(for: CGFloat.self) {
-                            $0.frame(in: .named(PostDetailView.mastheadSpace)).midX
-                        } action: { MastheadGeometry.titleMidX = $0 }
+                        // where the words actually sit — its midX for the
+                        // centering pins (rows 4/19), the whole frame for
+                        // row 80's "never under the icons".
+                        .onGeometryChange(for: CGRect.self) {
+                            $0.frame(in: .named(PostDetailView.mastheadSpace))
+                        } action: {
+                            MastheadGeometry.titleMidX = $0.midX
+                            MastheadGeometry.titleFrame = $0
+                        }
                         #endif
                         // Rows 4/19: the title CENTERS in its measure (it used
                         // to lead), so the block reads centered over the page.
@@ -647,6 +665,42 @@ enum MastheadProbeSlot: Hashable {
     case pathChip
     case card(String)
     case field
+    /// Row 80: the icon row (tray · scraps · references) on the title's line.
+    case iconRow
+    /// Row 59: the ＃ door — its frame IS its hit target.
+    case door
+}
+
+/// **Row 80 (the Act 10 correction round, batch G) — the title row's two
+/// insets, as a pure rule.** F's walk at a ~950-pt window with an inspector
+/// open (the detail's column ~316 pt, the masthead ~270) found the title
+/// TOUCHING the tray icon: the title's inset was symmetric and capped by
+/// the 240-pt floor on both sides — `min(icons + 12, (width − 240) / 2)` —
+/// so at ~270 pt the trailing inset shrank to ~15 while the icon row was
+/// ~100 wide, and the words ran under the icons.
+///
+/// The rule now: the TRAILING inset always keeps the icon row clear
+/// (`iconRowWidth + gap`); the LEADING inset is symmetric while the
+/// masthead can hold the floor between two such insets, then shrinks
+/// continuously (no jump) as the width falls — the floor is spent on the
+/// leading side, the title's centre drifting left of the masthead's — and
+/// reaches 0 below `floor + trailing`, where the title yields to `…`. A
+/// title that truncates before the icons is legal; a title under them is
+/// not. At the standing widths (680 ≥ 240 + 2 × 112) both insets equal
+/// `iconRowWidth + gap` exactly as before, so rows 4/19/58's pins hold.
+nonisolated enum MastheadTitleInsets {
+    /// The room between the title's band and the icon row.
+    static let gap: CGFloat = 12
+
+    static func insets(
+        mastheadWidth: CGFloat, iconRowWidth: CGFloat, floor: CGFloat
+    ) -> (leading: CGFloat, trailing: CGFloat) {
+        let wanted = iconRowWidth + gap
+        // Unmeasured (the first pass): symmetric, as it always was.
+        guard mastheadWidth > 0 else { return (wanted, wanted) }
+        let leading = min(wanted, max(0, mastheadWidth - floor - wanted))
+        return (leading, wanted)
+    }
 }
 
 extension View {
@@ -692,12 +746,21 @@ enum MastheadGeometry {
     static var pathChipFrame: CGRect?
     static var cardFrames: [String: CGRect] = [:]
     static var fieldFrame: CGRect?
+    /// Row 80: the title TEXT's frame and the icon row's, both in the
+    /// masthead's space — "the title never runs under the icons" is a
+    /// claim about two rectangles.
+    static var titleFrame: CGRect?
+    static var iconRowFrame: CGRect?
+    /// Row 59: the ＃ door's frame — its hit target.
+    static var doorFrame: CGRect?
 
     static func record(_ slot: MastheadProbeSlot, _ frame: CGRect) {
         switch slot {
         case .pathChip: pathChipFrame = frame
         case .card(let id): cardFrames[id] = frame
         case .field: fieldFrame = frame
+        case .iconRow: iconRowFrame = frame
+        case .door: doorFrame = frame
         }
     }
 
@@ -707,6 +770,14 @@ enum MastheadGeometry {
         pathChipFrame = nil
         cardFrames = [:]
         fieldFrame = nil
+        doorFrame = nil
+    }
+
+    /// Row 80's pin resets the title row's frames the same way.
+    static func resetTitleRow() {
+        titleMidX = nil
+        titleFrame = nil
+        iconRowFrame = nil
     }
 }
 #endif

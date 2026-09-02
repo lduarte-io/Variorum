@@ -246,4 +246,126 @@ struct MastheadLayoutTests {
             #endif
         }
     }
+
+    // MARK: - The Act 10 correction round, batch G — rows 80 and 59
+
+    /// **Row 80's rule, pure.** F's walk at a ~950-pt window with an
+    /// inspector open (the masthead ~270 pt) found the title TOUCHING the
+    /// tray icon: the symmetric inset was capped by the 240-pt floor on
+    /// both sides, so the trailing inset shrank under the icon row's width.
+    /// Now the trailing inset always keeps the icons clear and the floor is
+    /// spent on the leading side; below floor + icons the title yields.
+    @Test func theTitleInsetsKeepTheIconsClearAndSpendTheFloorOnTheLeadingSide() {
+        let icons: CGFloat = 100
+        let wide = MastheadTitleInsets.insets(mastheadWidth: 680, iconRowWidth: icons, floor: 240)
+        #expect(wide.leading == 112 && wide.trailing == 112, "the standing widths: symmetric, as before")
+        let narrow = MastheadTitleInsets.insets(mastheadWidth: 400, iconRowWidth: icons, floor: 240)
+        #expect(narrow.trailing == 112, "the trailing inset never shrinks under the icons")
+        #expect(narrow.leading == 48, "the floor is spent on the leading side (400 − 240 − 112)")
+        #expect(400 - narrow.leading - narrow.trailing == 240, "the title keeps its floor while it can")
+        let tight = MastheadTitleInsets.insets(mastheadWidth: 270, iconRowWidth: icons, floor: 240)
+        #expect(tight.leading == 0 && tight.trailing == 112, "narrower than floor + icons: the title yields, the icons stay clear")
+        let unmeasured = MastheadTitleInsets.insets(mastheadWidth: 0, iconRowWidth: icons, floor: 240)
+        #expect(unmeasured.leading == 112 && unmeasured.trailing == 112, "the first pass: symmetric")
+    }
+
+    /// **Row 80 in geometry.** The real detail mounted at 340 pt (the
+    /// masthead 292 — F's inspector-open measure), a title long enough to
+    /// fill whatever band it is given: the title TEXT's frame ends the
+    /// row's gap before the icon row begins, and starts inside the
+    /// masthead. RED ON OLD: the symmetric cap gave the title the band
+    /// [26, 266] against an icon row starting near 192 — the words under
+    /// the icons.
+    @Test func theTitleNeverRunsUnderTheIconsAtANarrowMasthead() async throws {
+        try await withMountedDetail(
+            width: 340, title: "The Boscombe Valley Mystery — a title long enough to truncate here",
+            tags: []
+        ) { _, _ in
+            #if DEBUG
+            await settle(until: {
+                MastheadGeometry.titleFrame != nil && MastheadGeometry.iconRowFrame != nil
+            })
+            await settle(until: { false }, maxTurns: 6)
+            let title = try #require(MastheadGeometry.titleFrame, "the title reported its frame")
+            let icons = try #require(MastheadGeometry.iconRowFrame, "the icon row reported its frame")
+            let width = try #require(MastheadGeometry.contentMidX).magnitude * 2
+            #expect(title.width > 0 && icons.width > 0)
+            #expect(title.maxX + MastheadTitleInsets.gap <= icons.minX + 0.5,
+                    "the title's words end the gap before the icons begin: title \(title) vs icons \(icons) (masthead \(width))")
+            #expect(title.minX >= -0.5, "the title starts inside the masthead: \(title)")
+            #endif
+        }
+    }
+
+    /// **Row 59.** The ＃ door's hit target is the row's height, not the
+    /// glyph's — the orchestrator's walk removed a tag by hitting a card's ×
+    /// two points from the ＃. RED ON OLD: the door's frame was the ~10-pt
+    /// symbol plus 3 × 2 pt of padding.
+    @Test func theTagDoorsHitTargetIsTheRowsHeightNotTheGlyphs() async throws {
+        try await withMountedDetail(width: 1100, title: "a note with a tag", tags: ["walked"]) { _, _ in
+            #if DEBUG
+            await settle(until: { MastheadGeometry.doorFrame != nil })
+            await settle(until: { false }, maxTurns: 6)
+            let door = try #require(MastheadGeometry.doorFrame, "the ＃ door reported its frame")
+            let target = MastheadTagCluster.doorTarget
+            #expect(door.width >= target - 0.5 && door.height >= target - 0.5,
+                    "the door's target is at least \(target) × \(target): \(door)")
+            #endif
+        }
+    }
+
+    /// Mounts the real detail at `width` with a titled note carrying `tags`,
+    /// the oracles reset first (the rows-58 rig, factored for G's pins).
+    private func withMountedDetail(
+        width: CGFloat, title: String, tags: [String],
+        _ body: @MainActor (NSWindow, NSView) async throws -> Void
+    ) async throws {
+        let db = try AppDatabase.inMemory()
+        let start = Date(timeIntervalSince1970: 1_782_864_000)
+        let tick = LockIsolated(0)
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = DateGenerator {
+                let seconds = tick.withValue { value -> Int in
+                    defer { value += 1 }
+                    return value
+                }
+                return start.addingTimeInterval(Double(seconds))
+            }
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 80))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let post = try session.operations.createPost(title: title)
+            _ = try session.operations.newBlock(in: post.id, text: "a block, so the mode can host.")
+            for name in tags {
+                let tag = try session.operations.createTag(name: name)
+                _ = try session.operations.applyTag(tag.id, toPost: post.id)
+            }
+            UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(post.id)")
+            #if DEBUG
+            MastheadGeometry.resetRowTwo()
+            MastheadGeometry.resetTitleRow()
+            #endif
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: width, height: 750),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+                UserDefaults.standard.removeObject(forKey: "postMode.\(post.id)")
+            }
+            let hosting = NSHostingView(
+                rootView: PostDetailView(session: session, postID: post.id)
+                    .environment(ThemeStore(session: session)))
+            hosting.frame = NSRect(x: 0, y: 0, width: width, height: 750)
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            await settle(window, hosting, until: {
+                session.commandRouter.activePostID == post.id
+            })
+            try await body(window, hosting)
+        }
+    }
 }

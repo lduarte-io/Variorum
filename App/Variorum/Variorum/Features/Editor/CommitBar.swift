@@ -52,8 +52,38 @@ struct CommitBar: View {
     /// is pinned (`CommitBarLayoutTests`), not observed.
     nonisolated static let twoRowThreshold: CGFloat = 840
 
-    nonisolated static func usesTwoRows(width: CGFloat) -> Bool {
-        width > 0 && width < twoRowThreshold
+    /// **Row 81 (the Act 10 correction round, batch G) — the flat bar's
+    /// ARRANGEMENT by its measured width.** F's walk at a ~950-pt window
+    /// with an inspector open (the bar ~316 pt) found item 6's two-row
+    /// fallback wrapping AND truncating every label — "blo… · t… · c… ·
+    /// h…" — P-8's one-line rule honored into illegibility. Her bar: a
+    /// truncated verb is a verb nobody can read. So the bar never wraps and
+    /// never truncates: it FOLDS. `.full` is the standing one row, byte-
+    /// unchanged at ordinary widths. `.folded` (below the old two-row
+    /// threshold) keeps the everyday doors on ONE row — where you are ·
+    /// `block ▾` · commit ⌘S · history · `note ▾` — and slides the rest
+    /// (takes · comments · Aa) into a `more ▾` overflow; the counts reduce to
+    /// the note's total (the word-target door), the side rail's own C-6
+    /// verdict. `.compact` (below `compactThreshold` — an inspector open
+    /// beside a narrow window) keeps where you are · `block ▾` · `more ▾`
+    /// (commit · takes · history · comments · Aa · the note's items as a
+    /// submenu) · `?`. Every door survives at every width; the labels in
+    /// the folded rows are `fixedSize`, so a label can never truncate — the
+    /// tier guarantees the fit, and the pin holds it. Pure, so the decision
+    /// is pinned (`CommitBarLayoutTests`), not observed.
+    nonisolated enum Arrangement: Equatable { case full, folded, compact }
+
+    /// Below this the folded row itself would not fit in the wider
+    /// (Terminal, monospace) voice: its members measure ~570 pt there, plus
+    /// the bar's 24 pt of padding.
+    nonisolated static let compactThreshold: CGFloat = 600
+
+    nonisolated static func arrangement(width: CGFloat) -> Arrangement {
+        // Width 0 = the first pass before geometry lands: the full row, so
+        // the bar does not flash a fold while mounting.
+        guard width > 0 else { return .full }
+        if width >= twoRowThreshold { return .full }
+        return width >= compactThreshold ? .folded : .compact
     }
     /// Ledger row 28: is the formatting row slid out? Session UI state, per
     /// bar — a fold is not document semantics (`FormattingDoor`'s own note).
@@ -204,7 +234,7 @@ struct CommitBar: View {
                 }
                 Divider().overlay(tokens.line).padding(.vertical, 1)
                 railPair {
-                    noteMenu
+                    presentingNoteDoors(noteMenu)
                     Button(tokens.chromeLabel("comments")) { model.openCaretComments() }
                         .buttonStyle(VoicedButtonStyle(tokens: tokens))
                         .help("The caret block's comments — working remarks on a block, "
@@ -284,25 +314,14 @@ struct CommitBar: View {
             // are the SAME registry ids in the same numbers; only where they
             // are rendered moved (`renderedCapabilities` is unchanged, and
             // the registry walk proves it).
+            // Row 81: the width-responsive FOLD (Act 10 item 6's "collapse
+            // only when the window is genuinely small", delivered as one
+            // row that folds rather than two rows that truncate). The
+            // folded rows' members are `fixedSize`: a label never truncates,
+            // the tier guarantees the fit.
             Group {
-                if Self.usesTwoRows(width: barWidth) {
-                    // The width-responsive FALLBACK (Act 10 item 6 — her
-                    // ruling: one row at ordinary widths; collapse only when
-                    // the window is genuinely small). The counts ride the
-                    // first row's right side — her screenshot's collapsed
-                    // state left it empty while both rows packed left.
-                    VStack(alignment: .leading, spacing: 2) {
-                        HStack(spacing: 10) {
-                            identityCluster
-                            Spacer()
-                            trailingCluster
-                        }
-                        HStack(spacing: 10) {
-                            postCluster
-                            Spacer()
-                        }
-                    }
-                } else {
+                switch Self.arrangement(width: barWidth) {
+                case .full:
                     HStack(spacing: 10) {
                         identityCluster
                         StatusDot(tokens: tokens)
@@ -310,40 +329,157 @@ struct CommitBar: View {
                         Spacer()
                         trailingCluster
                     }
+                case .folded:
+                    // A `Group`'s modifier applies to EACH child: every member
+                    // takes its ideal width, so none can truncate; the tier
+                    // guarantees they fit (the pin holds the edge).
+                    HStack(spacing: 10) {
+                        Group {
+                            caretLine
+                            blockMenu
+                            commitDoor
+                            historyDoor
+                            presentingNoteDoors(noteMenu)
+                            overflowMenu(compact: false)
+                        }
+                        .fixedSize()
+                        Spacer(minLength: 8)
+                        Group {
+                            noteTotalFace
+                            helperDoor
+                        }
+                        .fixedSize()
+                    }
+                case .compact:
+                    HStack(spacing: 10) {
+                        Group {
+                            caretLine
+                            blockMenu
+                            presentingNoteDoors(overflowMenu(compact: true))
+                        }
+                        .fixedSize()
+                        Spacer(minLength: 8)
+                        helperDoor
+                            .fixedSize()
+                    }
                 }
             }
+            #if DEBUG
+            .onGeometryChange(for: CGRect.self) {
+                $0.frame(in: .named(Self.barSpace))
+            } action: { CommitBarGeometry.rowFrame = $0 }
+            #endif
             .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { barWidth = $0 }
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
             .background(tokens.room)
+            .coordinateSpace(name: Self.barSpace)
+            #if DEBUG
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: {
+                CommitBarGeometry.barWidth = $0
+            }
+            #endif
         }
     }
+
+    /// The bar's own coordinate space (row 81's DEBUG oracle reads the row's
+    /// frame in it against the bar's width).
+    nonisolated static let barSpace = "variorum-commit-bar"
 
     /// The flat row's block half: where you are, the block group, and the
     /// take door she said earns its place.
     @ViewBuilder private var identityCluster: some View {
+        caretLine
+        blockMenu
+        takesDoor
+        commitDoor
+        historyDoor
+    }
+
+    /// Where you are — "block 6/23".
+    private var caretLine: some View {
         Text(tokens.chromeLabel(caretLabel))
             .font(tokens.small)
             .foregroundStyle(tokens.muted)
             .lineLimit(1)
-        blockMenu
+    }
+
+    private var takesDoor: some View {
         gestureButton("Takes", available: model.gestureAvailability.takes,
                       action: model.openCaretFan)
+    }
+
+    private var commitDoor: some View {
         Button(tokens.chromeLabel("commit ⌘S")) { model.commitCaretVariant() }
             .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
             .disabled(model.caretVariantID == nil || model.header?.locked == true)
             .help("An immutable savepoint of the take under the caret")
-        // Ledger row 17 — THE PAIR. It is never disabled: unlike commit,
-        // which needs a take to write into, a block always has a history to
-        // read, and where the caret is nowhere the act SPEAKS the registry's
-        // note rather than sitting grey (P-2, the standing fire-and-speak
-        // posture for a door with no target).
+    }
+
+    /// Ledger row 17 — THE PAIR. It is never disabled: unlike commit,
+    /// which needs a take to write into, a block always has a history to
+    /// read, and where the caret is nowhere the act SPEAKS the registry's
+    /// note rather than sitting grey (P-2, the standing fire-and-speak
+    /// posture for a door with no target).
+    private var historyDoor: some View {
         Button(tokens.chromeLabel(BlockHistoryPath.doorLabel)) {
             model.requestBlockHistory()
         }
         .buttonStyle(VoicedButtonStyle(tokens: tokens))
         .help("Everything this block has been: each take's saved moments, "
             + "its archived and deleted takes, and the block it came out of")
+    }
+
+    /// **`more ▾`** (row 81): the doors a folded row slides out of sight —
+    /// the same acts, the same calls, in a menu. `compact` folds the whole
+    /// block-and-note family in (commit · takes · history · comments · Aa ·
+    /// the note's items as a submenu); the folded row keeps commit, history
+    /// and `note ▾` visible and folds only takes · comments · Aa.
+    private func overflowMenu(compact: Bool) -> some View {
+        VoicedMenu(tokens: tokens, label: "more") {
+            if compact {
+                Button("commit ⌘S") { model.commitCaretVariant() }
+                    .disabled(model.caretVariantID == nil || model.header?.locked == true)
+            }
+            Button("Takes") { model.openCaretFan() }
+            if compact {
+                Button(BlockHistoryPath.doorLabel) { model.requestBlockHistory() }
+            }
+            Divider()
+            Button("comments") { model.openCaretComments() }
+            Button(formattingShown
+                ? "\(FormattingDoor.label) — put the formatting row away"
+                : "\(FormattingDoor.label) — formatting") { formattingShown.toggle() }
+            if compact {
+                Divider()
+                Menu("note") { noteMenuItems }
+            }
+        }
+        .help(compact
+            ? "The rest of this bar at this width: commit, takes, history, "
+                + "comments, formatting, and the note's own menu"
+            : "The rest of this bar at this width: takes, comments and formatting")
+    }
+
+    /// The note's word total — the word-target door alone (the folded
+    /// row's counts, C-6's verdict from the side rail: the block/selected
+    /// counts are noise where the width is short).
+    @ViewBuilder private var noteTotalFace: some View {
+        if let total = model.postWordCount {
+            WordTargetFace(
+                tokens: tokens, baseLabel: "\(total.formatted())w in note",
+                words: model.postWordCount,
+                target: model.header?.wordTarget,
+                onSet: { target in await model.setPostWordTarget(target) })
+        }
+    }
+
+    /// Sitting 9 (R73/R91): hover = the cheat sheet; click = the full
+    /// helper with the dictionary.
+    private var helperDoor: some View {
+        Button("?") { openWindow(id: "variorum-helper") }
+            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+            .help(HelperCheatSheet.summary)
     }
 
     /// **block ▾** (R6-2): the structural gestures plus the two block-scoped
@@ -380,7 +516,7 @@ struct CommitBar: View {
     /// (13k K7) the formatting toolbar, which sits with them because it acts
     /// on the text of the note you are writing.
     @ViewBuilder private var postCluster: some View {
-        noteMenu
+        presentingNoteDoors(noteMenu)
         Button(tokens.chromeLabel("comments")) { model.openCaretComments() }
             .buttonStyle(VoicedButtonStyle(tokens: tokens))
             .help("The caret block's comments — working remarks on a block, never per-take")
@@ -414,9 +550,32 @@ struct CommitBar: View {
 
     /// **note ▾** (R6-2): history, the seal, the entry date. The date
     /// picker's popover is anchored on the MENU rather than on a row —
-    /// a menu item cannot host one.
+    /// a menu item cannot host one (`presentingNoteDoors`, which the full
+    /// and folded rows put on this menu and the compact row on the
+    /// overflow menu that carries the note's items as a submenu).
     private var noteMenu: some View {
         VoicedMenu(tokens: tokens, label: "note") {
+            noteMenuItems
+        }
+        .help("The note itself: its seal and its date (its tray is the tray "
+            + "icon at the top of the note; a block's savepoints are the "
+            + "history door beside commit)")
+    }
+
+    /// The note menu's two presentations — the date picker's popover and
+    /// the delete confirm — on whichever control carries the note's items.
+    private func presentingNoteDoors<V: View>(_ control: V) -> some View {
+        control
+            .popover(isPresented: $datePickerShown, content: datePickerPopover)
+            .deleteNoteConfirmDialog($pendingDelete) { confirm in
+                NoteDeletion.fire(session: model.session, postIDs: confirm.postIDs)
+            }
+    }
+
+    /// The note's items — one list, rendered by `noteMenu` and, in the
+    /// compact row, by the overflow's `note` submenu.
+    @ViewBuilder private var noteMenuItems: some View {
+        Group {
             // (The "History" item LEFT this menu at the post-13l polish round,
             // ledger row 17 — and its being here is exactly what her F2 report
             // was about: *"it's unclear that history is under Note, that makes
@@ -457,13 +616,6 @@ struct CommitBar: View {
                         session: model.session, postIDs: [model.postID]) }
                 }
             }
-        }
-        .help("The note itself: its seal and its date (its tray is the tray "
-            + "icon at the top of the note; a block's savepoints are the "
-            + "history door beside commit)")
-        .popover(isPresented: $datePickerShown, content: datePickerPopover)
-        .deleteNoteConfirmDialog($pendingDelete) { confirm in
-            NoteDeletion.fire(session: model.session, postIDs: confirm.postIDs)
         }
     }
 
@@ -519,11 +671,7 @@ struct CommitBar: View {
                 target: model.header?.wordTarget,
                 onSet: { target in await model.setPostWordTarget(target) })
         }
-        // Sitting 9 (R73/R91): hover = the cheat sheet; click =
-        // the full helper with the dictionary.
-        Button("?") { openWindow(id: "variorum-helper") }
-            .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-            .help(HelperCheatSheet.summary)
+        helperDoor
     }
 
     private func gestureButton(
@@ -573,3 +721,20 @@ struct CommitBar: View {
         return Calendar.current.date(from: components)
     }
 }
+
+#if DEBUG
+/// Row 81's DEBUG oracle (the `MastheadGeometry` idiom): the flat bar's
+/// row frame in the bar's own space and the bar's width — so a pin holds
+/// "one row, nothing past the edge" at a narrow measure as two numbers,
+/// not a layout the code merely intends.
+@MainActor
+enum CommitBarGeometry {
+    static var rowFrame: CGRect?
+    static var barWidth: CGFloat?
+
+    static func reset() {
+        rowFrame = nil
+        barWidth = nil
+    }
+}
+#endif
