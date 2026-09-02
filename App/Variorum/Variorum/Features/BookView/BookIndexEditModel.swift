@@ -137,6 +137,11 @@ final class BookIndexEditModel {
         return row.blockID
     }
 
+    /// Ladder R1-8: the coordinator ENTRIES leave with their tokens — a
+    /// model reused after a teardown (a host that keeps it across an
+    /// `onDisappear`: a tab, a hidden pane) re-subscribes on its next
+    /// touch through `coordinator(for:)`, instead of returning a cached
+    /// coordinator nobody observes and dropping its refusals silently.
     func teardown() {
         blur()
         for (postID, token) in tokens {
@@ -144,6 +149,7 @@ final class BookIndexEditModel {
         }
         tokens.removeAll()
         let all = Array(coordinators.values)
+        coordinators.removeAll()
         Task { for coordinator in all { await coordinator.flushNow() } }
     }
 }

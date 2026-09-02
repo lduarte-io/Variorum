@@ -224,6 +224,29 @@ struct BookIndexEditingTests {
 
     /// The model alone: one ring over several posts; the overlay; the
     /// landing that waits for rows; blur releases.
+    /// Ladder R1-8: a model reused after a `teardown` re-subscribes to its
+    /// coordinator's refusals — the old teardown kept the coordinators
+    /// cached with their observers gone, so a later refusal went unheard.
+    /// RED ON OLD: nothing spoken after the teardown.
+    @Test func aModelReusedAfterATeardownStillHearsItsCoordinatorsRefusals() async throws {
+        try await withIndexBook { session, _, _, postIDs, blocks in
+            let edit = BookIndexEditModel(session: session)
+            let a = blocks[postIDs[0]]![0]
+            edit.makeLive(postID: postIDs[0], blockID: a.blockID, variantID: a.variantID)
+            edit.teardown()
+
+            // Reused: an edit on a take the store does not hold — the
+            // coordinator's flush refuses, and the model must HEAR it.
+            session.status.clear()
+            edit.makeLive(postID: postIDs[0], blockID: a.blockID, variantID: a.variantID)
+            edit.paneEdited(postID: postIDs[0], variantID: "no-such-take", oldText: "", newText: "typed")
+            await session.autosave(forPost: postIDs[0]).flushNow()
+            #expect(session.status.current != nil,
+                    "the refusal after a teardown is reported — the model re-subscribed")
+            edit.teardown()
+        }
+    }
+
     @Test func theEditModelHoldsOneRingAcrossPostsAndOverlaysTheBuffer() async throws {
         try await withIndexBook { session, _, _, postIDs, blocks in
             let edit = BookIndexEditModel(session: session)
