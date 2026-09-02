@@ -339,6 +339,14 @@ struct MarkdownSyntaxTests {
         #expect(kinds("_ spaced _") == [])
         #expect(kinds("__") == [])
         #expect(kinds("__bold__") == [], "double underscores are not bold in this vocabulary")
+        // Ladder R1-11 — the corner ruled: content that ENDS in an underscore
+        // never italicizes (`_a__` is literal; an italic `a_` is nonsense),
+        // as content that STARTS with one never opens. An underscore INSIDE
+        // the content is content (`_a_b_` italicizes `a_b`).
+        #expect(kinds("_a__") == [], "content ending in an underscore is literal")
+        #expect(kinds("_ab__ cd") == [])
+        #expect(kinds("_a_b_") == [.italic])
+        #expect(shape("_a_b_", spans("_a_b_")[0]).2 == "a_b")
         // Beside the star form, on one line.
         #expect(kinds("*a* and _b_") == [.italic, .italic])
         #expect(shape("*a* and _b_", spans("*a* and _b_")[1]).2 == "b")

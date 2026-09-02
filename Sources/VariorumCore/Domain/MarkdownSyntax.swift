@@ -468,14 +468,19 @@ public enum MarkdownSyntax {
 
     /// The closing underscore: the minimal flanking rule (no whitespace
     /// after the opener, none before the closer) AND the closer must end a
-    /// word — the character after it is nothing, or not a letter/digit.
+    /// word — the character after it is nothing, or not a letter, digit or
+    /// underscore (the stricter rule: `_lead_ing` and `a_b_` never close
+    /// there) — AND the content never ENDS in an underscore (ladder R1-11,
+    /// the orchestrator's rule for the corner: `_a__` is LITERAL; an italic
+    /// `a_` is nonsense, and the opener already refuses content that
+    /// STARTS with one — `__bold__`).
     private static func closingUnderscore(
         _ chars: [Character], openerEnd: Int, to: Int
     ) -> Int? {
         guard openerEnd < to, !chars[openerEnd].isWhitespace else { return nil }
         var index = openerEnd + 1
         while index < to {
-            if chars[index] == "_", !chars[index - 1].isWhitespace,
+            if chars[index] == "_", !chars[index - 1].isWhitespace, chars[index - 1] != "_",
                index + 1 >= to || !isWordCharacter(chars[index + 1]) {
                 return index
             }
