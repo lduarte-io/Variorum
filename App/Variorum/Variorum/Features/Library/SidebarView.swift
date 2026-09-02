@@ -208,8 +208,16 @@ struct SidebarView: View {
             openNotes: workspace.openNotes.shown.count)
     }
 
+    /// The headed groups the column is about to draw (ladder R1-12: the
+    /// fit test counts the chrome actually present).
+    private var headedGroupCount: Int {
+        (stars.items.isEmpty ? 0 : 1) + (railPostID == nil ? 0 : 1)
+            + (workspace.openNotes.shown.isEmpty ? 0 : 1)
+    }
+
     private var rowHeight: CGFloat {
-        SidebarLayout.rowHeight(columnHeight: columnHeight, rows: rowCount)
+        SidebarLayout.rowHeight(
+            columnHeight: columnHeight, rows: rowCount, headedGroups: headedGroupCount)
     }
 
     var body: some View {

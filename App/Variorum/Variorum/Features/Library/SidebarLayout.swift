@@ -41,13 +41,27 @@ nonisolated enum SidebarLayout {
     /// generous layout; still a whole 13 pt line with air, never a squeeze.
     static let compactRowHeight: CGFloat = 24
 
-    /// The column's fixed chrome at the generous pitch: the top padding,
-    /// the group headers, the separators and the bottom status inset —
-    /// everything that is not a row. Stated as one number so the fit test
-    /// is one comparison; measured from the column's own constants below.
-    /// 14 (top) + 3 × 22 (headers) + 3 × 19 (separators) + 96 (the status
-    /// rows and the bottom padding) = 233.
-    static let fixedChromeHeight: CGFloat = 233
+    /// The column's fixed chrome at the generous pitch, for a column that
+    /// carries all THREE headed groups (starred · the note's rail · the Open
+    /// strip — each a 22-pt header and a 19-pt separator): the top padding,
+    /// the headers, the separators and the bottom status inset — everything
+    /// that is not a row. 14 (top) + 3 × 22 + 3 × 19 + 96 (the status rows
+    /// and the bottom padding) = 233. Ladder R1-12: the fit test counts the
+    /// groups ACTUALLY present (`chromeHeight(headedGroups:)`) — a column
+    /// with no starred group and no rail carries one header and one
+    /// separator, ~80 pt less, and used to compress a little early.
+    static let fixedChromeHeight: CGFloat = chromeHeight(headedGroups: 3)
+
+    static let topPadding: CGFloat = 14
+    static let groupHeaderHeight: CGFloat = 22
+    static let separatorHeight: CGFloat = 19
+    static let bottomInset: CGFloat = 96
+
+    /// The chrome for a column carrying `headedGroups` of the three headed
+    /// groups (the five areas carry neither a header nor a separator).
+    static func chromeHeight(headedGroups: Int) -> CGFloat {
+        topPadding + CGFloat(headedGroups) * (groupHeaderHeight + separatorHeight) + bottomInset
+    }
 
     /// How many Open-strip rows show before the SECTION scrolls in place
     /// (Act 10 item 9's ruled window — the starred precedent's "~7").
@@ -57,15 +71,15 @@ nonisolated enum SidebarLayout {
     /// generous layout for `rows` rows would not fit in `columnHeight`.
     /// `rows` counts every row the column is about to draw (areas, rail,
     /// starred, and the strip's rows up to its window).
-    static func compressesRows(columnHeight: CGFloat, rows: Int) -> Bool {
+    static func compressesRows(columnHeight: CGFloat, rows: Int, headedGroups: Int = 3) -> Bool {
         guard columnHeight > 0 else { return false }
-        let generous = CGFloat(rows) * generousRowHeight + fixedChromeHeight
+        let generous = CGFloat(rows) * generousRowHeight + chromeHeight(headedGroups: headedGroups)
         return generous > columnHeight
     }
 
     /// The row height the column draws at.
-    static func rowHeight(columnHeight: CGFloat, rows: Int) -> CGFloat {
-        compressesRows(columnHeight: columnHeight, rows: rows)
+    static func rowHeight(columnHeight: CGFloat, rows: Int, headedGroups: Int = 3) -> CGFloat {
+        compressesRows(columnHeight: columnHeight, rows: rows, headedGroups: headedGroups)
             ? compactRowHeight : generousRowHeight
     }
 

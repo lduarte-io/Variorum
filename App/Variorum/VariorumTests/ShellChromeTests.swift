@@ -30,10 +30,12 @@ import VariorumCore
 
 @Suite("The sidebar's row pitch (correction round, row 3)")
 struct SidebarLayoutTests {
-    /// Twenty rows is the column at its fullest ordinary shape: five areas,
-    /// the eight-mode rail, and seven strip rows in its window.
+    /// Twenty rows is the column at its fullest ordinary shape: one starred
+    /// note, five areas, the SEVEN-mode rail (R-cor-5/7 — batch C; the
+    /// fixture said "eight" until ladder R1-12) and seven strip rows in
+    /// its window — with all three headed groups present.
     private let fullColumnRows = SidebarLayout.rowCount(
-        starred: 0, areas: 5, rail: 8, openNotes: 12)
+        starred: 1, areas: 5, rail: 7, openNotes: 12)
 
     @Test func ordinaryHeightsKeepTheGenerousPitch() {
         #expect(fullColumnRows == 20, "the strip counts only its window's rows")
@@ -51,6 +53,23 @@ struct SidebarLayoutTests {
                 "exactly fitting is fitting")
         #expect(SidebarLayout.rowHeight(columnHeight: 600, rows: fullColumnRows)
                 == SidebarLayout.compactRowHeight)
+    }
+
+    /// Ladder R1-12: the chrome counts the headed groups actually present —
+    /// a column with no starred group and no rail (one header, one
+    /// separator) has ~82 pt more room for its rows than the full column.
+    @Test func theChromeCountsOnlyTheHeadedGroupsPresent() {
+        #expect(SidebarLayout.chromeHeight(headedGroups: 3) == SidebarLayout.fixedChromeHeight)
+        #expect(SidebarLayout.chromeHeight(headedGroups: 1) == SidebarLayout.fixedChromeHeight - 2 * 41)
+        // Twelve rows (five areas + seven strip rows) with ONE headed group
+        // (the strip): the three-group chrome would compress at this height;
+        // the honest count fits.
+        let rows = SidebarLayout.rowCount(starred: 0, areas: 5, rail: 0, openNotes: 12)
+        let height = 12 * SidebarLayout.generousRowHeight + SidebarLayout.chromeHeight(headedGroups: 1)
+        #expect(SidebarLayout.compressesRows(columnHeight: height, rows: rows, headedGroups: 3),
+                "counted as three groups it would compress")
+        #expect(!SidebarLayout.compressesRows(columnHeight: height, rows: rows, headedGroups: 1),
+                "counted as the one group present it fits")
     }
 
     @Test func fewRowsNeverCompressInAShortWindow() {
