@@ -321,6 +321,13 @@ it.
   opening the note for editing. Her choice: *"Scroll the read page to that story"* (the recommended option). → R2-10
   becomes a FIX in ladder fix 2 (the session was told mid-run).
 
+- **R-cor-18 — SHE SLEEPS; AWAY MODE RESUMES (2026-09-02 ~04:05 MDT, verbatim):** *"I'm going to sleep now, so I'll
+  await the closeout notes in the morning and will not be waking you again due to the full context window. Please
+  refresh my application when you're done and record any residuals for my attention tomorrow."* → R-cor-8's away
+  mode governs the rest of the run: choose, record in §7, never stop for a question; the `/Applications` refresh at
+  the end behind the A1 backup (her app is closed — her word); every residual into the author handoff's checklist
+  for her morning; the tutorial re-seed is her one in-app act (biometric).
+
 **Inherited rulings this round builds to (not re-litigated):** the eighth-wave rulings W8-1…W8-5
 (`pre-13u-round.md`), the fifth-wave item-15 flow ruling, the mode-row canon R60–94 as extended by
 W8-1 (the eight-mode row is AppSpec §12 canon), her copy doctrine (structure and generous targets
