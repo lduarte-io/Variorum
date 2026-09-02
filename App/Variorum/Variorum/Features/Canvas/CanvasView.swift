@@ -500,24 +500,40 @@ struct CanvasView: View {
     private func handleFitAll(onArrival: Bool = false) {
         let outcome = model.fitAll(viewport: model.visibleRect.isEmpty
             ? CGSize(width: 1200, height: 800) : model.visibleRect.size)
-        #if DEBUG
-        if onArrival { CanvasArrivalOracle.outcome = outcome }
-        #endif
-        switch outcome {
-        case .empty:
-            break  // spoke
-        case .overview:
-            // The overview re-renders scaled. On ARRIVAL it also lands at
-            // the board's top-leading corner (row 88 — the fitted content's
-            // top rows sat above the viewport otherwise); a summoned fit-all
-            // leaves the viewport where she has it.
-            if onArrival {
-                scrollAnchor = .topLeading
-                scrollTarget = boardOrigin
+        guard onArrival else {
+            switch outcome {
+            case .empty, .overview:
+                break  // the overview re-renders scaled; empty spoke
+            case .scroll(let center):
+                scrollAnchor = .center
+                scrollTarget = center
             }
-        case .scroll(let center):
+            return
+        }
+        // Row 88(a) — THE ARRIVAL'S LANDING (her ruling's two shapes: "opens
+        // FIT-ALL (or at the bank's top-left), never mid-bank"): a board that
+        // fits at 1:1 lands on its bounds' centre (fit-all's own road); a
+        // board too big to fit lands at its TOP-LEFT AT 1:1 — NOT in the
+        // read-only overview: 4E's realization bounds (`realizedCards`
+        // < 80, a live pane on arrival) are measured on a 1:1 arrival and
+        // hold by construction there, and a 215-card note opening as a
+        // wall of silhouettes on every visit would be its own surprise.
+        // Chosen under R-cor-8 and recorded; the summoned `fit all` still
+        // opens the overview.
+        let landing = CanvasArrival.landing(after: outcome)
+        #if DEBUG
+        CanvasArrivalOracle.landing = landing
+        #endif
+        switch landing {
+        case .none:
+            break
+        case .centre(let point):
             scrollAnchor = .center
-            scrollTarget = center
+            scrollTarget = point
+        case .origin:
+            model.exitOverview()
+            scrollAnchor = .topLeading
+            scrollTarget = boardOrigin
         }
     }
 
@@ -1064,19 +1080,36 @@ nonisolated enum CanvasArrival {
     static func fitsAllOnArrival(cards: Int, storedPositions: Int, alreadyFitted: Bool) -> Bool {
         cards > 0 && storedPositions == 0 && !alreadyFitted
     }
+
+    /// Where an arrival lands, from fit-all's own verdict: a board that
+    /// fits at 1:1 on its bounds' centre; a board too big to fit at its
+    /// top-left at 1:1 (never the overview, never mid-bank); nothing when
+    /// there is nothing to fit.
+    enum Landing: Equatable {
+        case none
+        case centre(CGPoint)
+        case origin
+    }
+
+    static func landing(after outcome: CanvasViewModel.FitAllOutcome) -> Landing {
+        switch outcome {
+        case .empty: .none
+        case .scroll(let centre): .centre(centre)
+        case .overview: .origin
+        }
+    }
 }
 
 #if DEBUG
-/// Row 88(a)'s DEBUG oracle: what the arrival's fit-all decided — nil
-/// until an arrival lands.
+/// Row 88(a)'s DEBUG oracle: how the arrival landed — nil until it does.
 @MainActor
 enum CanvasArrivalOracle {
-    static var outcome: CanvasViewModel.FitAllOutcome?
+    static var landing: CanvasArrival.Landing?
     /// Row 91: the board's scroll-content size — in the overview it must be
     /// the SCALED size (the drawing fits the viewport), never the board's.
     static var boardContentSize: CGSize?
     static func reset() {
-        outcome = nil
+        landing = nil
         boardContentSize = nil
     }
 }

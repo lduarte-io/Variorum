@@ -34,6 +34,11 @@ struct CanvasArrivalTests {
                 "nothing to fit")
         #expect(!CanvasArrival.fitsAllOnArrival(cards: 30, storedPositions: 0, alreadyFitted: true),
                 "once per mount")
+        // The landing from fit-all's verdict: a fitting board on its centre;
+        // a board too big to fit at its top-left at 1:1 — never the overview.
+        #expect(CanvasArrival.landing(after: .scroll(to: CGPoint(x: 300, y: 200))) == .centre(CGPoint(x: 300, y: 200)))
+        #expect(CanvasArrival.landing(after: .overview(scale: 0.3)) == .origin)
+        #expect(CanvasArrival.landing(after: .empty) == .none)
     }
 
     @Test func aNeverArrangedCanvasLandsThroughFitAllAsItsProjectionArrives() async throws {
@@ -68,7 +73,8 @@ struct CanvasArrivalTests {
                 window.orderOut(nil)
                 window.close()
             }
-            let root = CanvasView(session: session, containerID: post.id)
+            let model = CanvasViewModel(session: session, containerID: post.id)
+            let root = CanvasView(session: session, containerID: post.id, model: model)
             let hosting = NSHostingView(
                 rootView: root.environment(ThemeStore(session: session)))
             hosting.frame = NSRect(x: 0, y: 0, width: 900, height: 600)
@@ -82,25 +88,39 @@ struct CanvasArrivalTests {
                 pump()
                 await Task.yield()
                 try? await Task.sleep(for: .milliseconds(20))
-                if CanvasArrivalOracle.outcome != nil { break }
+                if CanvasArrivalOracle.landing != nil { break }
             }
-            let outcome = try #require(CanvasArrivalOracle.outcome, "the arrival landed through fit-all")
-            #expect(outcome != .empty, "…with cards to fit: \(outcome)")
-            // Row 91: in the overview the scroll content is the SCALED board,
-            // so the silhouettes fit the viewport (the old ZStack kept its
+            let landing = try #require(CanvasArrivalOracle.landing, "the arrival landed")
+            #expect(landing == .origin,
+                    "a 30-card spread is too big to fit at 1:1 in 900 × 600, so it lands at its top-left: \(landing)")
+            #expect(!model.overviewActive, "…at 1:1 — never in the read-only overview")
+            for _ in 0..<20 {
+                hosting.layoutSubtreeIfNeeded()
+                window.displayIfNeeded()
+                pump()
+                await Task.yield()
+            }
+            let unscaled = try #require(CanvasArrivalOracle.boardContentSize, "the 1:1 board reported its content size")
+            // Row 91: the SUMMONED overview's scroll content is the SCALED
+            // board — the 1:1 content × the overview's scale, exactly — so
+            // the silhouettes fit the viewport (the old ZStack kept its
             // unscaled size and the overview drew off screen).
-            if case .overview(let scale) = outcome {
-                for _ in 0..<40 {
-                    hosting.layoutSubtreeIfNeeded()
-                    window.displayIfNeeded()
-                    pump()
-                    await Task.yield()
-                    if let content = CanvasArrivalOracle.boardContentSize, content.width <= 1200 { break }
-                }
-                let content = try #require(CanvasArrivalOracle.boardContentSize, "the board reported its content size")
-                #expect(content.width <= 1200 + 1 && content.height <= 800 + 1,
-                        "the overview's content (\(content)) fits the fit-all viewport at scale \(scale) — never the unscaled board")
+            let outcome = model.fitAll(viewport: CGSize(width: 900, height: 600))
+            guard case .overview(let scale) = outcome else {
+                Issue.record("the summoned fit-all opens the overview on a 30-card spread: \(outcome)")
+                return
             }
+            for _ in 0..<40 {
+                hosting.layoutSubtreeIfNeeded()
+                window.displayIfNeeded()
+                pump()
+                await Task.yield()
+                if let content = CanvasArrivalOracle.boardContentSize, content.width < unscaled.width - 1 { break }
+            }
+            let content = try #require(CanvasArrivalOracle.boardContentSize, "the board reported its content size")
+            #expect(abs(content.width - unscaled.width * scale) <= 1 && abs(content.height - unscaled.height * scale) <= 1,
+                    "the overview's content (\(content)) is the 1:1 content (\(unscaled)) × \(scale) — never the unscaled board")
+            model.teardown()
             #endif
             // (b) the strip composes no system picker beside a label.
             let composition = SurfaceComposition.text(of: root.body)
@@ -114,7 +134,7 @@ struct CanvasArrivalTests {
     /// silhouette centres left the overview standing ("a click that does
     /// nothing is a defect"). A REAL click (the read rig's road: a
     /// non-activating panel, `NSApp.sendEvent`) at the first silhouette's
-    /// centre after the arrival's overview.
+    /// centre after fit-all summons the overview.
     @Test func aRealClickOnASilhouetteReturnsToOneToOne() async throws {
         let db = try AppDatabase.inMemory()
         let start = Date(timeIntervalSince1970: 1_782_864_000)
@@ -172,8 +192,12 @@ struct CanvasArrivalTests {
                 await Task.yield()
                 try? await Task.sleep(for: .milliseconds(15))
             }
-            for _ in 0..<120 where !model.overviewActive { await turn() }
-            #expect(model.overviewActive, "the arrival opened the overview on a 30-card spread")
+            for _ in 0..<120 where CanvasArrivalOracle.landing == nil { await turn() }
+            #expect(CanvasArrivalOracle.landing == .origin, "the arrival landed at the top-left at 1:1")
+            // Summon the overview (the `fit all` chip's road).
+            _ = model.fitAll(viewport: CGSize(width: 900, height: 600))
+            for _ in 0..<40 where !model.overviewActive { await turn() }
+            #expect(model.overviewActive, "the summoned fit-all opened the overview on a 30-card spread")
             for _ in 0..<20 { await turn() }
             // The scroll view under the strip: the first silhouette sits at
             // the content's top-left (the arrival lands there) — click a
