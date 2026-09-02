@@ -116,7 +116,9 @@ struct ReadingFlowView: View {
     /// the Outline's 1 s default guards). The walk found the cost of the
     /// default: a story above the landed target held its ESTIMATE for a
     /// second after its text was in, then dropped 181 pt under the page
-    /// after the landing had already finished.
+    /// after the landing had already finished. (Ladder R2-2/R2-3: the
+    /// finisher no longer times this interval itself — the surface SAYS
+    /// when it has settled, `StableSurface.settled` → `storySettled`.)
     static let surfaceSettleInterval: TimeInterval = 0.15
 
     private var rows: [FlowRows.Row] {
@@ -180,7 +182,8 @@ struct ReadingFlowView: View {
                                 columnWidth: columnWidth,
                                 onWake: { blockID in onWake(entry.postID, blockID) },
                                 onNear: { near in landing.rowNear(entry.postID, near) },
-                                onLoaded: { landing.rowLoaded(entry.postID) })
+                                onSettled: { storySettled(entry.postID) },
+                                onLoaded: { })
                                 .id(segment.id)
                                 .flowAnchor(segment.id) { top in
                                     anchorMoved(segment.id, top: top)
@@ -335,6 +338,16 @@ struct ReadingFlowView: View {
         armCheck(proxy)
     }
 
+    /// A story's surface settled (R2-2): recorded for the finisher, and —
+    /// while a landing is pending — the quiet interval is re-armed, so the
+    /// check that reads the settle runs a turn AFTER the reservation's drop
+    /// has laid out (never inside the turn that flipped it).
+    private func storySettled(_ postID: String) {
+        landing.rowSettled(postID)
+        guard landing.target != nil, let proxy = landing.proxy else { return }
+        armCheck(proxy)
+    }
+
     /// The user scrolled while a landing was pending: she took over — the
     /// landing ends where she put the page, never fighting her.
     private func userScrolled() {
@@ -364,17 +377,17 @@ struct ReadingFlowView: View {
 
     /// The quiet interval passed: the landing is DONE when the target sits
     /// at the top, the hold is over and the near stories above it have
-    /// SETTLED — loaded, and past their surfaces' settle, when a reserved
-    /// estimate taller than the text drops (nothing left that could move
-    /// the target); it ends wherever it is at
-    /// the time budget. In between it simply looks again — the re-lands
-    /// are the reports' (`anchorMoved`), never the interval's.
+    /// SETTLED — each surface has SAID so (`StableSurface.settled`: it held
+    /// one real size for its settle interval, adopted it and dropped its
+    /// reservation — nothing left in it that could move the target; ladder
+    /// R2-2/R2-3 retired the wall-clock guess that stood here); it ends
+    /// wherever it is at the time budget. In between it simply looks again
+    /// — the re-lands are the reports' (`anchorMoved`), never the interval's.
     private func checkLanding(_ proxy: ScrollViewProxy) {
         guard landing.target != nil else { return }
         let elapsed = Date().timeIntervalSince(landing.began)
         let atTop = landing.lastTop.map { abs($0) <= Self.landingTolerance } ?? false
-        if atTop, elapsed >= BookView.landingMinimumHold,
-           landing.aboveTargetSettled(settle: Self.surfaceSettleInterval) {
+        if atTop, elapsed >= BookView.landingMinimumHold, landing.aboveTargetSettled() {
             finish("settled at top=\(landing.lastTop ?? 0) after \(landing.corrections) re-lands, \(Int(elapsed * 1000)) ms")
             return
         }
@@ -416,12 +429,16 @@ final class FlowLanding {
     var corrections = 0
     var check: DispatchWorkItem?
     var proxy: ScrollViewProxy?
-    /// The stories in page order, and which of them are near / loaded —
+    /// The stories in page order, and which of them are near / SETTLED —
     /// so the check can tell whether the rows ABOVE the target that will
     /// realize have finished trading their estimates for real heights.
+    /// `settled` is fed by the surfaces themselves (`StableSurface.settled`,
+    /// ladder R2-2) and cleared when a story goes far (its surface is gone;
+    /// a re-realized one reports again — R2-3's once-stamped date is gone
+    /// with the clock it served).
     private var order: [String] = []
     private var near: Set<String> = []
-    private var loaded: [String: Date] = [:]
+    private var settled: Set<String> = []
 
     func begin(anchor: String, target: String, storiesInOrder: [String]) {
         check?.cancel()
@@ -442,23 +459,28 @@ final class FlowLanding {
     }
 
     func rowNear(_ postID: String, _ isNear: Bool) {
-        if isNear { near.insert(postID) } else { near.remove(postID) }
+        if isNear {
+            near.insert(postID)
+        } else {
+            near.remove(postID)
+            settled.remove(postID)
+        }
     }
 
-    func rowLoaded(_ postID: String) {
-        if loaded[postID] == nil { loaded[postID] = Date() }
+    /// The story's surface held one real size for its settle interval and
+    /// dropped its reservation — the surface's own word (R2-2).
+    func rowSettled(_ postID: String) {
+        settled.insert(postID)
     }
 
-    /// Every near story above the target has SETTLED: its text in, and its
-    /// surface past the settle after which a reserved estimate taller than
-    /// the text drops (a far one is a placeholder of a stated height and
-    /// will not move the page).
-    func aboveTargetSettled(settle: TimeInterval) -> Bool {
+    /// Every near story above the target has SETTLED — its surface has said
+    /// so (a far one is a placeholder of a stated height and will not move
+    /// the page). Geometry, never a clock: a near story that has not
+    /// reported settled blocks the finish however long it has been loaded.
+    func aboveTargetSettled() -> Bool {
         guard let target, let at = order.firstIndex(of: target) else { return true }
         return order[..<at].allSatisfy { postID in
-            guard near.contains(postID) else { return true }
-            guard let at = loaded[postID] else { return false }
-            return Date().timeIntervalSince(at) >= settle + 0.1
+            !near.contains(postID) || settled.contains(postID)
         }
     }
 }
@@ -740,6 +762,8 @@ private struct FlowStoryRow: View {
     let columnWidth: CGFloat?
     let onWake: (String?) -> Void
     let onNear: (Bool) -> Void
+    /// The surface settled (R2-2) — the landing's "this row is done moving".
+    let onSettled: () -> Void
     let onLoaded: () -> Void
 
     @State private var near = false
@@ -750,6 +774,7 @@ private struct FlowStoryRow: View {
                 StableSurface(
                     known: known, followsShrinks: false,
                     settleInterval: ReadingFlowView.surfaceSettleInterval,
+                    settled: onSettled,
                     remember: { memory.remember(entry.postID, $0) }
                 ) {
                     FlowPostView(

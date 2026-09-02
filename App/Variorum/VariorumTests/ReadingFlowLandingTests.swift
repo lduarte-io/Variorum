@@ -280,6 +280,37 @@ struct ReadingFlowLandingTests {
         }
     }
 
+    /// Ladder fix 2 (R2-2 + R2-3): "the stories above the target have
+    /// settled" is GEOMETRY, never a clock. A near story above the target
+    /// blocks the finish until its surface has SAID it settled — however
+    /// long it has been loaded — and a story released to a placeholder and
+    /// re-realized must say so again (the once-stamped load date is gone);
+    /// a story BELOW the target never blocks. The two-clock race the seam
+    /// closes has no deterministic red-on-old (the disposition labels it
+    /// so); the old finisher had no settled set at all — a pure pin on the
+    /// contract.
+    @Test func theFinisherWaitsOnTheSurfacesWordNeverOnAClock() async throws {
+        let landing = FlowLanding()
+        landing.begin(anchor: "flow-s2", target: "s2", storiesInOrder: ["s1", "s2", "s3"])
+        #expect(landing.aboveTargetSettled(), "nothing near above: nothing to wait for")
+        landing.rowNear("s1", true)
+        #expect(!landing.aboveTargetSettled(), "a near story above, unsettled, blocks")
+        try await Task.sleep(for: .milliseconds(400))
+        #expect(!landing.aboveTargetSettled(), "…and no clock ever settles it")
+        landing.rowNear("s3", true)
+        #expect(!landing.aboveTargetSettled())
+        landing.rowSettled("s1")
+        #expect(landing.aboveTargetSettled(), "the surface's own word settles it; the story below never mattered")
+        landing.rowNear("s1", false)
+        #expect(landing.aboveTargetSettled(), "far: a placeholder of a stated height, nothing to wait for")
+        landing.rowNear("s1", true)
+        #expect(!landing.aboveTargetSettled(), "re-realized: its new surface must speak again")
+        landing.rowSettled("s1")
+        #expect(landing.aboveTargetSettled())
+        landing.end()
+        #expect(landing.aboveTargetSettled(), "no landing pending: trivially settled")
+    }
+
     /// P3 for the flow, and the honest estimate's load-bearing pin: a
     /// twelve-story book mounted at a 760-pt viewport realizes only the
     /// stories inside the near band (the first, and the one or two below it

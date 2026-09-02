@@ -59,7 +59,9 @@ struct StableSurfaceTests {
         return predicate()
     }
 
-    private func mount(known: CGSize?, content: CGSize, frames: Frames) -> (NSWindow, NSHostingView<AnyView>) {
+    private func mount(
+        known: CGSize?, content: CGSize, frames: Frames, settled: (() -> Void)? = nil
+    ) -> (NSWindow, NSHostingView<AnyView>) {
         let window = NSWindow(
             contentRect: NSRect(x: 60, y: 60, width: 600, height: 900),
             styleMask: [.titled], backing: .buffered, defer: false)
@@ -68,6 +70,7 @@ struct StableSurfaceTests {
             VStack(alignment: .leading, spacing: 0) {
                 StableSurface(
                     known: known, followsShrinks: false,
+                    settled: settled,
                     remember: { frames.remembered.append($0) }
                 ) {
                     Color.red.frame(width: content.width, height: content.height)
@@ -108,6 +111,42 @@ struct StableSurfaceTests {
         #expect(abs(height - 200) < 1, "the row is the content's height, never the stale memory's")
         #expect(frames.remembered.last == CGSize(width: 400, height: 200),
                 "the memory is the SETTLED size — smaller than before")
+    }
+
+    /// Ladder fix 2 (R2-2): the surface SAYS when it has settled — never
+    /// before it has held its real size for the settle interval, and with
+    /// that size already adopted as the memory. The flow's landing waits on
+    /// this word instead of on a wall clock read from the load. A unit pin
+    /// on the new seam (the two-clock race it closes has no deterministic
+    /// red-on-old; the disposition labels it so).
+    @Test func aSurfaceAnnouncesSettledOnlyAfterHoldingItsRealSizeForTheInterval() async throws {
+        let frames = Frames()
+        var settledAt: Date?
+        var rememberedAtSettle: CGSize?
+        let mounted = Date()
+        let (window, hosting) = mount(
+            known: CGSize(width: 400, height: 400), content: CGSize(width: 400, height: 200),
+            frames: frames,
+            settled: {
+                settledAt = Date()
+                rememberedAtSettle = frames.remembered.last
+            })
+        defer {
+            window.orderOut(nil)
+            window.close()
+        }
+        let announced = await settle(window, hosting, timeout: stableSurfaceSettleInterval + 3) {
+            settledAt != nil
+        }
+        #expect(announced, "the surface announced its settle")
+        let at = try #require(settledAt)
+        #expect(at.timeIntervalSince(mounted) >= stableSurfaceSettleInterval - 0.05,
+                "…never before the interval had passed: \(at.timeIntervalSince(mounted)) s")
+        #expect(rememberedAtSettle == CGSize(width: 400, height: 200),
+                "…and with the settled size already adopted as the memory: \(String(describing: rememberedAtSettle))")
+        _ = await settle(window, hosting, timeout: 1) { frames.rowHeight.map { abs($0 - 200) < 1 } ?? false }
+        #expect(frames.rowHeight.map { abs($0 - 200) < 1 } ?? false,
+                "the reservation is off once it has spoken: \(String(describing: frames.rowHeight))")
     }
 
     /// A memory taken at ANOTHER width does not apply: from the surface's

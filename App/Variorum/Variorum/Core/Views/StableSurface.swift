@@ -117,7 +117,9 @@ nonisolated let stableSurfaceWidthTolerance: CGFloat = 1
 /// reserved a blank gap for the session (the reviewer's trace). Identity
 /// per surface kind (the caller's `.id`), so a note demoted from live to
 /// read-cheap starts a fresh reservation from the same memory. Internal
-/// (not private) so the pin can mount it alone.
+/// (not private) so the pin can mount it alone. Since ladder fix 2 (R2-2)
+/// the surface also ANNOUNCES its settle (`settled`) — the flow's landing
+/// waits on that, never on a clock.
 struct StableSurface<Content: View>: View {
     let known: CGSize?
     let followsShrinks: Bool
@@ -126,6 +128,16 @@ struct StableSurface<Content: View>: View {
     /// default that guards a provisional-width first measure; the reading
     /// flow's `Text` column lays out whole in one pass and settles faster).
     var settleInterval: TimeInterval = stableSurfaceSettleInterval
+    /// Ladder fix 2 (R2-2): the surface SAYS when it has settled — it held
+    /// ONE real size for `settleInterval`, adopted it and dropped its
+    /// reservation — so a landing that must wait for the rows above its
+    /// target can wait on the surfaces' own geometry instead of guessing
+    /// from a wall clock (the flow's finisher read "loaded + a margin" and
+    /// the margin lost to a long layout pass). Fired synchronously in the
+    /// settle closure, after `loaded` flips; a listener re-arming its own
+    /// quiet interval on it therefore never decides in the same turn as
+    /// the reservation's drop. nil = nobody listening (the Outline).
+    var settled: (() -> Void)? = nil
     let remember: (CGSize) -> Void
     @ViewBuilder let content: () -> Content
     /// The surface has reached (or settled at) a size: the reservation is
@@ -178,6 +190,7 @@ struct StableSurface<Content: View>: View {
             guard box.generation == generation, box.lastSize == size else { return }
             remember(size)
             loaded = true
+            settled?()
         }
     }
 
