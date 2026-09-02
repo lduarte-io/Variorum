@@ -232,6 +232,54 @@ it.
   unit and the kind-shaped acceptance, and brings a proposal (recorded in §7 for her; no rule is written into the
   skill or CLAUDE.md without her word).
 
+- **R-cor-13 — THE SPLITS, PHASE 18, AND THE RULES ADDED AS GUIDANCE (2026-09-01 ~19:30 MDT; her message, verbatim
+  where it rules):** *"I agree with breaking 13i up the way you suggested. But let's bring the Journal identity from
+  13y in as 13i-e, since it's honestly in a very similar area. Agreed on 13y taking out dedupe residuals. Instead of
+  sending those to 17i though, I'd make it the first member of phase 18 - it's time to just start recording the next
+  round of work now that we're out of 13 letters. An item in 18 might run before everything in 13, but it's fine. Our
+  numbering always gets kinda weird anyway, as long as keep track of it. I think 18a should cover dedupe and extra
+  considerations for sync - for example, if another device on sync deleted a lot of work, should you be shown a
+  warning / asked if you want to sync your current device to that? I think there's considerations like that, ask to
+  sync, pause sync button, etc. Agree that pre 13x doesn't need 17i to be done within it. … I think I agree with your
+  rules overall and think that they can be written into the claude.md and architect phase rules and such. I'd put
+  them in as guidance to raise as an issue if this is being violated rather than as an absolute rule though. Also,
+  do these rules allow for a lot of the already accomplished phases? I think they should be sanity checked against
+  what has run, because before Act 10 the sizing seemed like it was working reasonably well - though maybe some
+  phases would've been better and there'd be less issues to fix now if it had been followed. It's also possible that
+  even if the previous phases don't match those rules, we should add them now because the product is maturing. So
+  overall, yes, add the rules."* → **(1) 13i SPLIT: 13i-a** (the schema event + wings/libraries) · **13i-b** (the
+  smart-book hybrid identity + auto-tags + the starred smart book) · **13i-c** (Owned + text immutability + the
+  convert door) · **13i-d** (the shelf: custom order + starred books; the Book Panel; templates if ruled) · **13i-e
+  THE DAILY JOURNAL'S FIRST-CLASS IDENTITY** (moved from 13y — the memo `pre-13u-memo-daily-journal-identity.md`);
+  one design sitting rules all five; the ONE lockstep deploys with 13i-a. **(2) 13y keeps the per-tenant sequence +
+  the abuse guard + the Fragments brief; the dedupe residuals LEAVE it.** **(3) PHASE 18 OPENS — the post-13
+  collector of PRODUCT work (lettered 18a, 18b…; an 18 item may run before a 13 letter): 18a = SYNC CONSIDERATIONS**
+  — the sample-library dedupe residuals (the late-registry leg, the six unread engagement legs, the bounded
+  re-hash), deletion-aware sync (another device deleted a lot of work → a warning / ask before this device follows),
+  ask-to-sync, the pause-sync door (the pre-13x design's parked 17k joins here), and the like — opens with a design
+  sitting. **(4) 17i runs as its OWN entry after pre-13x, never inside it.** **(5) THE RULES ARE ADDED — as GUIDANCE
+  TO RAISE, never an absolute rule** — into CLAUDE.md's build workflow and the architect-phase skill (this commit),
+  worded exactly as the §7 proposal with her guidance clause. **(6) The sanity check she asked for, against the
+  run history (by acceptance units named in each row's deliverables):** 11a (~8 phase-sized: the fan-out styles,
+  lenses + the version family, aligned views, diff, scrub, the TOC, canvas + its lockstep, the pool) → would be
+  FLAGGED; 13b Stage 4 (two ceremonies, Compare rebuilt, the canvas package, the paged book + progress bar,
+  restoreReading, a migration) → FLAGGED (closed early at her EOL directive — the 5k-line plan file was the
+  symptom); 13c (the friction batch + the uniform-page book view + the N38 conversion + Compare related-only + the
+  book-order lens) → borderline; 13d, 13g, 13k → PASS (bounded rows / one theme); 13e → borderline (the overnight
+  run); 13f (side-by-side windows + tabs + starred + the quick note + the string sweep) → FLAGGED; 13j (the purge
+  lockstep + the Trash + the recovery surfaces + the divide/merge default flips + the restoration doors) → FLAGGED
+  (the live 42702 incident was its one visible cost); 13l → PASS (two units); 13p (the spike + the substrate +
+  custody/modes/recovery + copy + the phone's faces) → AT THE LINE (three units, one theme, sequential batches,
+  drills as the gate — it ran clean, which is the shape pre-13x repeats); 14c → FLAGGED (the multi-tenant rebuild
+  + the entitlement + two-user suites + the deletion doors); the pre-13u round (~8: four 17 entries, a review,
+  Sherlock, Act 0 ×2, the custody batch, Act 10 ×4 waves) → FLAGGED HARD — this round is its bill. **Reading:**
+  the flagged phases are where the fix rounds came from (13b → 13c's friction batch; the pre-13u round → here),
+  while the substrate-era phases passed on a different bar — functional, unstyled, tests as the gate. Both of her
+  readings hold at once: the sizing "worked" while the acceptance was tests, and the bar is added now because the
+  product is maturing and the acceptance is use. Recorded in CLAUDE.md's guidance as its why. **HER OPEN QUESTION
+  (not ruled — the orchestrator's proposal is in §7):** *"Maybe I don't need architects for every 17 item? … the
+  whole ladder, cold reviews, etc. are a lot of tokens for small changes."*
+
 **Inherited rulings this round builds to (not re-litigated):** the eighth-wave rulings W8-1…W8-5
 (`pre-13u-round.md`), the fifth-wave item-15 flow ruling, the mode-row canon R60–94 as extended by
 W8-1 (the eight-mode row is AppSpec §12 canon), her copy doctrine (structure and generous targets
@@ -420,6 +468,7 @@ the A1 backup (C-3) → the field-guide re-seed if any lesson text changed → t
 - ~~Batch B, row 52: underscore emphasis~~ — **RULED R-cor-10(4)**: joins the vocabulary as italics (G, row 84).
 - Read's `edit · read` face remembered per note (the architect's call) — still hers to confirm at the walk.
 - ~~D-close seam (17:15 MDT)~~ — **RULED R-cor-11**: row 46 per-state accepted · 87 → G · 88 (both) → G.
+- **17 ENTRIES WITHOUT AN ARCHITECT — the orchestrator's proposal for her open question at R-cor-13 (her ruling awaited):** a 17 entry runs as ONE session (no orchestrator, no ladder by default) under the standing-fixes discipline the 17 file already states — pin BEFORE fix, red-on-old by behavioral revert, the record in `phase-17-standing-fixes.md` kept by the session itself, the full suite + the tutorial spine as the gate, push after each commit; a COLD REVIEW is required only when the diff touches `Sync/`, custody/keychain code, or the editor seam (`BlockRangeIndex`/`EditorTextView`/`PaneTextAuthority`), or exceeds ~300 changed lines — the three risk classes where a reviewer has caught real BLOCKERs before; everything else is the session's own self-review plus the suites. The architect's value (docs kept current, the ladder) is what phases buy; a 17 entry buys the discipline without the cast. If adopted: a two-line addition to the 17 file's header + CLAUDE.md's standing-fixes bullet.
 - **THE PROCESS-RULE PROPOSAL (R-cor-12's held half — brought to her ~19:10 MDT after the sizing read; HER RULING
   AWAITED; nothing written into the skill or CLAUDE.md without her word):** (1) **The unit is an ACCEPTANCE UNIT** —
   the smallest thing whose done-ness is verified on its own by evidence OF ITS KIND: UI → one screen/mode/board/panel,

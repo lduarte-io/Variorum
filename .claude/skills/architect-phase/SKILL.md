@@ -225,6 +225,27 @@ commit(s) → install refresh only at sanctioned zero-instance windows.
   S4-16 condition) — deferral moves work in time, never into
   vagueness.
 
+## Sizing & acceptance guidance (author, 2026-09-01 — the Act 10 correction round's R-cor-13; GUIDANCE TO RAISE, never an absolute rule — CLAUDE.md's build-workflow bullet is the binding text; this is its application here)
+
+- **Plan in ACCEPTANCE UNITS** — the smallest thing whose done-ness is
+  verified on its own by evidence of its kind (UI: hands-on use in both
+  voices; sync: convergence suites + a live round; custody: the drill;
+  operations: the state-transition suite). The plan names each unit and
+  its evidence BEFORE the first spawn.
+- **One unit per implementer session** (the rule that would have stopped
+  the pre-13u round's wave 2c — five surfaces in one session). A session
+  that finds a second unit in its way hands off with a record.
+- **At most two phase-sized units under one theme per phase**; a third
+  is a split, ruled at the same sitting. Say so to the author when a
+  plan is outside this — never split or proceed silently.
+- **The acceptance gate is USE-shaped for the kind, never mount smokes
+  or pins alone**; the install refresh follows the walk/drill (the
+  correction round's C-2/C-3, promoted). The orchestrator walks each
+  batch hands-on before its record closes — an implementer's "done" is
+  a claim, the walk is the verification (the founding orchestrator's
+  method found two MAJORs that way; `notes/plans/act10-correction-
+  orchestrator-handoff.md` §0 is the worked example).
+
 ## The review ladder (identical to /run-phase's rules 3–4; summarized)
 
 One ladder per stage/phase over the combined diff: fresh cold reviewer
