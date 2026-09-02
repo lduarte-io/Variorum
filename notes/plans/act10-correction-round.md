@@ -300,6 +300,13 @@ it.
   4), CLAUDE.md's standing-fixes bullet (one sentence) and the guidance §5 with her practice (a few entries at a
   time under a Fable orchestrator; Opus never runs alone).
 
+- **R-cor-15 — THE G-CLOSE SEAM'S THREE RULINGS (2026-09-01 ~21:40 MDT, the question tool; she kept every one as
+  built):** **(1) Row 88 — the Canvas arrival stays 1:1** (a fitting board centred; a big board at its top-left; the
+  overview only on a summoned `fit all`). **(2) Row 81 — the folded bar as built** (the `Nw block · Nw selected`
+  counts drop below 840 pt; the compact tier drops the note total too). **(3) Row 74 — leave as is:** the note-side
+  column draggable with a remembered width; the Library's preview column fixed. No code moves between G and the
+  ladder.
+
 **Inherited rulings this round builds to (not re-litigated):** the eighth-wave rulings W8-1…W8-5
 (`pre-13u-round.md`), the fifth-wave item-15 flow ruling, the mode-row canon R60–94 as extended by
 W8-1 (the eight-mode row is AppSpec §12 canon), her copy doctrine (structure and generous targets
@@ -489,7 +496,7 @@ the A1 backup (C-3) → the field-guide re-seed if any lesson text changed → t
 - ~~Batch B, row 52: underscore emphasis~~ — **RULED R-cor-10(4)**: joins the vocabulary as italics (G, row 84).
 - Read's `edit · read` face remembered per note (the architect's call) — still hers to confirm at the walk.
 - ~~D-close seam (17:15 MDT)~~ — **RULED R-cor-11**: row 46 per-state accepted · 87 → G · 88 (both) → G.
-- **G-close seam (21:35 MDT), put to her live:** row 88's arrival landing (1:1 top-left, chosen under R-cor-8 — or the overview) · row 81's folded bar dropping the `Nw block · Nw selected` counts below 840 pt and every count in the compact tier · row 74's side column draggable with a remembered width while E's Library column is fixed.
+- ~~G-close seam (21:35 MDT)~~ — **RULED R-cor-15: all three kept as built.** As put: row 88's arrival landing (1:1 top-left, chosen under R-cor-8 — or the overview) · row 81's folded bar dropping the `Nw block · Nw selected` counts below 840 pt and every count in the compact tier · row 74's side column draggable with a remembered width while E's Library column is fixed.
 - **Batch G's three calls (her seam, or the ladder's):** row 88's never-arranged BIG-board arrival lands at the TOP-LEFT at 1:1, not in the overview (her ruling offered both; 4E's realization pins + the every-visit wall of silhouettes decided it — `CanvasArrival.landing(after:)` is one case the other way); row 81's folded bar drops the block/selected counts below 840 pt and every count in the compact tier (C-6); row 74's side column is draggable with a remembered width while E's Library column is fixed — match them either way at her word. Plus rows 92/93/94 (recorded with owners) for the ladder.
 - ~~17 ENTRIES WITHOUT AN ARCHITECT — the proposal~~ **RULED R-cor-14 (Opus review always; Fable for the three risk classes; her Fable-orchestrator practice).** The proposal as brought: a 17 entry runs as ONE session (no orchestrator, no ladder by default) under the standing-fixes discipline the 17 file already states — pin BEFORE fix, red-on-old by behavioral revert, the record in `phase-17-standing-fixes.md` kept by the session itself, the full suite + the tutorial spine as the gate, push after each commit; a COLD REVIEW is required only when the diff touches `Sync/`, custody/keychain code, or the editor seam (`BlockRangeIndex`/`EditorTextView`/`PaneTextAuthority`), or exceeds ~300 changed lines — the three risk classes where a reviewer has caught real BLOCKERs before; everything else is the session's own self-review plus the suites. The architect's value (docs kept current, the ladder) is what phases buy; a 17 entry buys the discipline without the cast. If adopted: a two-line addition to the 17 file's header + CLAUDE.md's standing-fixes bullet.
 - ~~THE PROCESS-RULE PROPOSAL~~ **RULED R-cor-13 and WRITTEN (CLAUDE.md + the skill + `notes/PhaseSizingGuidance.md`).** As brought (R-cor-12's held half — brought to her ~19:10 MDT after the sizing read; HER RULING
