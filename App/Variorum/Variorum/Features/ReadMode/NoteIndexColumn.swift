@@ -145,8 +145,10 @@ struct NoteIndexColumn: View {
                 .onChange(of: columnTarget) { _, target in
                     // A landing or a seed lands the COLUMN on its row (a
                     // long note's landing must be visible on both sides).
+                    // Ladder R1-3: on the row's ForEach IDENTITY (its block
+                    // id — `ColumnRow.id`), never an explicit `.id`.
                     guard let target else { return }
-                    proxy.scrollTo("ixr-\(target)", anchor: .center)
+                    proxy.scrollTo(target, anchor: .center)
                     columnTarget = nil
                 }
                 .task {
@@ -154,7 +156,7 @@ struct NoteIndexColumn: View {
                     // outline toggled back on after a landing).
                     await Task.yield()
                     guard let target = columnTarget else { return }
-                    proxy.scrollTo("ixr-\(target)", anchor: .center)
+                    proxy.scrollTo(target, anchor: .center)
                     columnTarget = nil
                 }
             }
@@ -281,7 +283,6 @@ struct NoteIndexColumn: View {
             },
             trailing: { rowControls(for: entry.row.blockID, ordinal: entry.row.ordinal) },
             onSelect: { onSelect(entry.row.blockID) })
-            .id("ixr-\(entry.row.blockID)")
     }
 
     /// An ordinary row: the `▸` glyph (accent when selected) + ordinal +
@@ -321,7 +322,6 @@ struct NoteIndexColumn: View {
                 },
                 trailing: { rowControls(for: row.blockID, ordinal: entry.row.ordinal) },
                 onSelect: { onSelect(row.blockID) })
-                .id("ixr-\(row.blockID)")
         }
     }
 

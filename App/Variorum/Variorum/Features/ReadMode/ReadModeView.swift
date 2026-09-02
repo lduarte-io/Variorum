@@ -433,13 +433,14 @@ private struct ReadPageColumn: View {
                 LazyVStack(alignment: .leading, spacing: 14 * typeScale) {
                     ReadPageHeader(session: session, postID: postID, page: page,
                                    words: totalWords)
+                    // Ladder R1-3: the ForEach identity (the placement id)
+                    // is the landing anchor — no explicit `.id` on the row.
                     ForEach(Array(model.rows.enumerated()), id: \.element.placementID) { i, row in
                         ReadPageBlock(
                             page: page, typeScale: typeScale,
                             blockID: row.blockID,
                             text: row.text ?? "", ordinal: i + 1,
                             onOpenInEdit: { onOpenInEdit(row) })
-                            .id("rd-\(row.blockID)")
                     }
                     Text("· · ·")
                         .font(page.serif)
@@ -458,16 +459,28 @@ private struct ReadPageColumn: View {
             }
             .onChange(of: pageTarget) { _, target in
                 guard let target else { return }
-                withAnimation { proxy.scrollTo("rd-\(target)", anchor: UnitPoint(x: 0.5, y: 0.08)) }
+                // Ladder R1-3: unanimated, on the row's identity (the Outline
+                // lesson — the pin measured the animated landing drifting).
+                land(target, proxy)
                 pageTarget = nil
             }
             .task {
                 await Task.yield()
                 guard let target = pageTarget else { return }
-                proxy.scrollTo("rd-\(target)", anchor: UnitPoint(x: 0.5, y: 0.08))
+                land(target, proxy)
                 pageTarget = nil
             }
         }
+    }
+}
+
+extension ReadPageColumn {
+    /// The landing: the block's row identity (its placement id), unanimated,
+    /// anchored near the top of the page.
+    private func land(_ blockID: String, _ proxy: ScrollViewProxy) {
+        guard let placementID = model.rows.first(where: { $0.blockID == blockID })?.placementID
+        else { return }
+        proxy.scrollTo(placementID, anchor: UnitPoint(x: 0.5, y: 0.08))
     }
 }
 
@@ -513,8 +526,15 @@ private struct ReadPageBlock: View {
     let ordinal: Int
     let onOpenInEdit: () -> Void
 
-    @State private var paragraphs: [FlowParagraph] = []
     @State private var hovering = false
+
+    /// Ladder R1-3: rendered SYNCHRONOUSLY (a pure transform, cost ∝ the
+    /// realized rows) — deferred, every row stood one line tall for its
+    /// first frame and grew after, the estimate drift that moved a far
+    /// landing (see `ReadEditBlock`).
+    private var paragraphs: [FlowParagraph] {
+        FlowParagraph.paragraphs(of: text, codeTint: page.codeTint)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 11 * typeScale) {
@@ -551,9 +571,6 @@ private struct ReadPageBlock: View {
         .environment(\.openURL, OpenURLAction { url in
             MarkdownLink.open(url.absoluteString) ? .handled : .discarded
         })
-        .task(id: text) {
-            paragraphs = FlowParagraph.paragraphs(of: text, codeTint: page.codeTint)
-        }
     }
 
     /// The page's type at the rail's scale — a look decision, view-local

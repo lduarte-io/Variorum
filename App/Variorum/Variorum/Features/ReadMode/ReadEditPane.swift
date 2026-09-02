@@ -46,6 +46,9 @@ struct ReadEditPane: View {
                     ForEach(
                         Array(model.rows.enumerated()), id: \.element.placementID
                     ) { i, row in
+                        // Ladder R1-3 (the Outline lesson, rows 47/53): the
+                        // ForEach IDENTITY (the placement id) is the landing
+                        // anchor — no explicit `.id` on the row.
                         ReadEditBlock(
                             model: model, tokens: tokens, row: row, ordinal: i + 1,
                             selected: selectedBlockID == row.blockID,
@@ -55,7 +58,6 @@ struct ReadEditPane: View {
                                     model.makeLive(row.blockID, variantID: variantID)
                                 }
                             })
-                            .id("rep-\(row.blockID)")
                     }
                 }
                 .frame(maxWidth: 640, alignment: .leading)
@@ -69,7 +71,11 @@ struct ReadEditPane: View {
                 // CENTER, deliberately: a landed block sits mid-viewport with
                 // room above it, so its ring is never clipped at the pane's
                 // top edge (batch B's nit on the book's flush landing).
-                withAnimation { proxy.scrollTo("rep-\(target)", anchor: .center) }
+                // Ladder R1-3: UNANIMATED, on the row's identity — the pin
+                // measured the animated landing of block 200 of 215 drifting
+                // by ~180 pt with the machine's speed (the rows it passed
+                // grew after their first frame, see `ReadEditBlock`).
+                land(target, proxy)
                 paneTarget = nil
             }
             .task {
@@ -77,10 +83,20 @@ struct ReadEditPane: View {
                 // click flips the face and names its block in one breath).
                 await Task.yield()
                 guard let target = paneTarget else { return }
-                proxy.scrollTo("rep-\(target)", anchor: .center)
+                land(target, proxy)
                 paneTarget = nil
             }
         }
+    }
+}
+
+extension ReadEditPane {
+    /// The landing: the block's ROW IDENTITY (its placement id) is what the
+    /// scroll reader lands on, unanimated (the Outline lesson).
+    private func land(_ blockID: String, _ proxy: ScrollViewProxy) {
+        guard let placementID = model.rows.first(where: { $0.blockID == blockID })?.placementID
+        else { return }
+        proxy.scrollTo(placementID, anchor: .center)
     }
 }
 
@@ -95,12 +111,18 @@ private struct ReadEditBlock: View {
     let selected: Bool
     let onTap: () -> Void
 
-    @State private var paragraphs: [FlowParagraph] = []
-
     /// The block's DISPLAY text — the authority's overlay over the store
     /// row, so a just-blurred block is never staler here than its buffer.
     private var text: String {
         model.displayText(variantID: row.variantID, storeText: row.text)
+    }
+
+    /// Ladder R1-3: the paragraphs render SYNCHRONOUSLY (a pure transform,
+    /// cost ∝ the realized rows). Deferred through a `.task`, every row
+    /// stood one line tall for its first frame and grew after — the lazy
+    /// column's estimate drift that moved a far landing by ~180 pt.
+    private var paragraphs: [FlowParagraph] {
+        FlowParagraph.paragraphs(of: text, codeTint: tokens.codeTint)
     }
 
     private var isLive: Bool {
@@ -163,9 +185,6 @@ private struct ReadEditBlock: View {
         .environment(\.openURL, OpenURLAction { url in
             MarkdownLink.open(url.absoluteString) ? .handled : .discarded
         })
-        .task(id: text) {
-            paragraphs = FlowParagraph.paragraphs(of: text, codeTint: tokens.codeTint)
-        }
     }
 
     /// The pane reads in the VOICE (the pane is the surface, not the paper —
