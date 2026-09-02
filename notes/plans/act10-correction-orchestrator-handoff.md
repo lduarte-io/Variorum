@@ -400,3 +400,4 @@ defaults read /Applications/Variorum.app/Contents/Info.plist CFBundleIdentifier
 echo "== DONE $STAMP (commit $(git -C "$REPO" rev-parse --short HEAD)); backup $BK"
 ```
 - 02:55 MDT — **batch H CLOSED** (both landings exact in H's captures; Mac 2096/377); rows 97 → round 2's fix session (verify-first), 98 → 13u2, 99 → round 2; **LADDER ROUND 2 SPAWNED** (a fresh reviewer over `604e52e..HEAD` — fix 1 + H).
+- ~03:45 MDT (2026-09-02) — **LADDER ROUND 2 COMPLETE** (0 BLOCKER · 0 MAJOR · 5 MINOR · 7 NIT; every round-1 disposition HOLDS incl. R1-6 hollow; the reviewer died once at the limit and resumed) and **DISPOSITIONED** (no round 3 — no new BLOCKER/MAJOR); **LADDER FIX 2 running** (+ row 97 verify-first). Then: my full acceptance walk → the install (appendix B) → the closeout (appendix A) → the handoff → memory → push → stop. The ruled count-free canon edits are ALREADY APPLIED (`7863e29`).
