@@ -2538,3 +2538,230 @@ opens Outline); **98** (the paged reader's paragraph over-count, self-corrected 
 ROUND 2 spawns next** over fix 1 + H (`git diff 604e52e..HEAD -- App/ Sources/ Tests/`).
 
 ---
+
+## LADDER ROUND 2 — the cold re-review of ladder fix 1 + batch H (a fresh Fable reviewer, 2026-09-02; `notes/REVIEW_PROMPT.md` verbatim)
+
+**What was reviewed:** `git diff 604e52e..HEAD -- App/ Sources/ Tests/` — 36 files, +2,859 / −286; the 31 commits of
+`git log --oneline 604e52e..HEAD` verified (`ba28583` the first fix-1 code commit, `6825ba3` HEAD — H's CLOSED line).
+Read in full, in this session: the prompt; this file §0–§2, the ledger, `## LADDER ROUND 1` (every finding), its
+`### Dispositions — round 1` table, `### LADDER FIX 1 RECORD` whole (the LIVE STATUS, the per-item table, the walk
+table, the `LADDER FIX 1 — ADJUDICATED` note), the batch H brief and `### BATCH H RECORD` whole (the mechanism, the
+estimate table, the walk table, rows 97–99, the CLOSED line); the whole diff, production files first (the four
+`Core/Views` files and `ReadingFlowView.swift` read as whole files at HEAD, the rest as hunks in context), then every
+test file; CLAUDE.md/AppSpec/OverallModel/SyncSpec/DetailedPlan/KnownIssues from context. No "Review foci" section
+exists in this plan or beside it. Verified against the tree, not the record: `Sources/` carries only
+`Domain/MarkdownSyntax.swift` (+9) and its test (`swift test --filter MarkdownSyntaxTests` run here: **21 tests / 1
+suite green**); zero `Sync/`, zero schema; `Shared/` untouched. Read-only: nothing fixed, no test added; the session
+died once at its limit before anything reached the repo and was resumed by the coordinator's message — the diff was
+re-read whole. The findings are numbered R2-n in the order found and ranked by severity in the summary line at the
+end of the findings.
+
+### Findings (severity-ranked within each block; the format the prompt asks — `[severity] · file:line · what · evidence · fix`)
+
+**[MINOR] R2-1 · `App/Variorum/Variorum/Features/BookView/ReadingFlowView.swift:729` (the far placeholder), `:740–745`
+(`known`) · The flow's remembered story size is applied WITHOUT its width being compared — the honesty R1-1 built into
+`StableSurface` stops at the reservation and never reaches the placeholder or the fallback.** `FlowStoryRow` reads
+`memory.size(entry.postID)` and uses it (a) as the far placeholder's height (`:729`) and (b) as the whole of `known`
+(`:741` — the estimate is consulted only when NO memory exists). The memory's `CGSize` carries the column width the
+story was measured at; the column is `.frame(maxWidth: 600)` inside 56-pt padding (`:191–195`), so it narrows with
+the pane below ~712 pt + the sidebar — a ~950-pt window (rows 80/81's width, hers) puts it near 450. Trace: a story
+read at 600 is remembered at (600, 20,000); the window narrows; scrolled far → its placeholder stands at 20,000 where
+the true height at 450 is ~26,000 (the estimate at the current width — `estimate(for:)` recomputes it from
+`columnWidth` — would say so); scrolled near → `StableSurface` receives `known: (600, 20,000)`, the first report is
+the 20-pt blank line, which the ceiling guard at `StableSurface.swift:158` returns on BEFORE `reportedWidth` is set,
+so the reservation HOLDS at 20,000 through the load; the real report at width 450 then sets `reportedWidth`, the
+width test fails, the reservation drops, and the row goes 20,000 → 26,000 in one step. Not a collapse (the ceiling
+guard's order saves that), but the ±3 % the estimate bought degrades to the width ratio (~25–30 %) for every VISITED
+story after a resize — the class row 95 exists to end, at a smaller scale, and the flow already holds the honest
+number and does not use it. Fix: in `FlowStoryRow`, use the memory only when `abs(memory.width − columnWidth) ≤
+stableSurfaceWidthTolerance` (both sites), else the estimate at the current width; or key `SurfaceSizeMemory` by
+(post, width). Pin (red on old): a flow with one story remembered at 600 wide, the column re-mounted at 450 → the far
+placeholder's height equals `FlowHeightEstimate.height` at 450, not the memory's.
+
+**[MINOR · SPECULATIVE on frequency, the mechanism concrete] R2-2 · `ReadingFlowView.swift:452–458`
+(`FlowLanding.aboveTargetSettled`) with `Core/Views/StableSurface.swift:158–178` · The landing's "the stories above
+have settled" test is a wall-clock guess from the LOAD time, not the surface's own settle — the exact class the
+walk's first burst caught (`6263d75`), re-opened by a 0.1-s margin.** `aboveTargetSettled` answers true for a near
+story above the target when `Date() − loaded[postID] ≥ settle + 0.1` (`:457`), where `loaded[postID]` is stamped in
+`FlowPostView`'s task the moment `blocks` is assigned. `StableSurface` arms its 0.15-s settle from the surface's
+REAL geometry report (`:170–174`), which follows the assignment by the layout pass that lays out a 200-block `Text`
+column at the measure. The margin between the two clocks is therefore `0.1 s − (that layout pass)`: when the pass
+runs longer than 0.1 s — the loaded machine every record of this round names as its covariate, and a 20,000-pt
+column of 215 paragraphs is not a small pass — `checkLanding` (`:368–384`) reads settled=true, finishes, and the
+story above sheds its over-estimate (the walk's 181 pt; up to 3 % of a story) UNDER a landing already declared done.
+The frequency is not measured here (SPECULATIVE on that); the mechanism is two independent clocks with a fixed
+margin. Fix: let the surface SAY it settled — a `settled: () -> Void` beside `remember`, fired where `loaded = true`
+in the settle closure (`:176–177`), and have `FlowLanding` wait on the set of settled rows instead of on dates (the
+`+ 0.1` and the `settle:` parameter disappear). Pin: a `StableSurface` mounted with a taller `known` and the settle
+callback → the callback fires after the row's height equals the content's, never before (a unit pin on the new
+seam; the race itself has no deterministic red-on-old and should be labelled so in the disposition).
+
+**[MINOR] R2-3 · `ReadingFlowView.swift:444–446` (`FlowLanding.rowLoaded`) · The load date is stamped ONCE per story
+(`if loaded[postID] == nil`), never refreshed: a story released to a placeholder (far) and re-realized (near) re-runs
+`FlowPostView`'s `.task` and calls `onLoaded` again, but the stale first date makes `aboveTargetSettled` read the
+revisited, still-loading story above the target as settled at once.** Benign on the same-width road because a
+revisited story reserves its REMEMBERED height and loads to exactly it (nothing moves); live the moment the memory is
+stale — R2-1's width case, or the story's text edited in Outline and the reader back in Read ▸ Scroll — where the
+drop at the real report lands under a finished landing. Fix: stamp `loaded[postID] = Date()` on every load and clear
+it in `rowNear(_, false)` (a far row has no surface to settle); or R2-2's callback, which makes the date moot.
+
+**[MINOR] R2-4 · `ReadingFlowView.swift:244–250` (`loadExtents`) + `Sources/VariorumCore/Queries/PageExtents.swift:62–`
+(`blockExtents`) · A new DOCUMENT-proportional read the round added and nothing owns.** `loadExtents` runs
+`Queries.blockExtents` over EVERY entry of the book on every flow mount — one statement per 400 containers, but the
+statement's work is `LENGTH(…)` and `LENGTH(REPLACE(…, char(10), ''))` over the chosen take of every block of every
+note (`PageExtents.swift`'s SQL): SQLite reads the book's entire text to answer lengths — cost ∝ the BOOK's text, not
+the viewport (Sherlock: 2,533 blocks, ~561 KB; a few ms; a book ten times that, tens). And the flow is re-created
+per mode (`BookView.swift:158–170` is a `switch`), so every Read ▸ Scroll return re-reads it — `BookViewModel` keeps
+the sizes (`flowSurfaceSizes`) but not the extents. The paged reader ran this query per NOTE (its own model tier);
+the flow widened it to the book. No prose crosses the boundary and it is off-main and one-shot — the `bookWordCounts`
+class exactly (KnownIssues: "the shelf's word aggregate reads every block of every book") — but that row is RECORDED
+with an owner and this one is not (`grep blockExtents notes/KnownIssuesAndTechDebt.md` → nothing). The round's own
+rule (and this file's) forbids the unowned P1-tension. Fix: (a) a KnownIssues row beside `bookWordCounts`, owner
+**12**, remedy sketch: a per-container stored length maintained at the ops layer (churn already tracks
+`baseline_length`) or the extents cached on `BookViewModel` beside `flowSurfaceSizes` and invalidated by the note's
+`updated_at`; (b) at minimum, cache the extents on the model NOW so a mode switch re-reads nothing (a one-property
+move; no pin needed — cleanliness).
+
+**[MINOR] R2-5 · `ReadingFlowView.swift:585` (`unknownHeight = 800`) with `FlowStoryRow` (`:706–748`) · Before the
+extents land, every never-measured story stands 800 pt tall, so a fresh flow realizes the first THREE stories — and
+throws two of them away when the lengths arrive.** 3 × 800 = 2,400 = the near band below the viewport top
+(`NearViewportObserver`: near while `minY − margin < margin`), so stories 1–3 flip near at the mount, each mounts a
+`FlowPostView` whose `.task` runs `Queries.renderPost` over a 215-block story and renders its paragraphs; the extents
+then land (~50 ms in the harness, longer on the encrypted store), stories 2–3 move to ~20,000 and ~40,000, cross
+the 3,600 far band and are released, their reads discarded (`try? await` under a cancelled task). The record's own
+P3 number is this mechanism: **3 surfaces at the mount** (`theFlowRealizesOnlyTheNearStoriesAtTheMount`, bound ≤ 4)
+where the settled geometry justifies one. On her store that is two wasted sequential encrypted story reads competing
+with the first story's and with the landing target's — the reads the record itself measures in "hundreds of
+milliseconds each". Fix: hold every story far until `extents != nil` (a guard in `FlowStoryRow`: `near` may not flip
+while the height is unknown), or make `unknownHeight` an honest prior (the median remembered/estimated story height,
+never 800 for a book of 20,000-pt stories). Pin (red on old): the P3 pin's bound tightens to ≤ 2 — the current tree
+reads 3.
+
+**[NIT] R2-6 · `App/Variorum/VariorumTests/ReadingFlowLandingTests.swift:278` · `#expect(relands <=
+ReadingFlowView.landingCorrectionBudget)` is a tautology.** `anchorMoved` increments `corrections` only while
+`corrections < landingCorrectionBudget` (`ReadingFlowView.swift:310–311`), so the trace can never carry more
+`RE-LAND` lines than the budget; the assertion cannot fail on any tree. The load-bearing claims in that test are
+`held` and `landedCount == 1`; assert the RECORDED worst case instead (≤ 3, the record's "2 re-lands") so budget
+drift shows, or drop the line.
+
+**[NIT] R2-7 · `ReadingFlowView.swift:99` (`landingTolerance = 2`) vs `ReadingFlowLandingTests.swift:69` (the pin's
+4) · A report at 3 pt re-lands; the pin would accept it.** The field guide walk's own log shows the cost —
+`top=5 → RE-LAND 1 · top=3 → RE-LAND 2` — two of six corrections spent on drifts inside the pin's tolerance. A book
+of many short notes above the target, each estimate a few points off and each loading on its own clock (the field
+guide's shape at scale), can exhaust the budget and "give up" a few points short. Cosmetic today; align the two
+(4), or count only corrections above the pin's tolerance.
+
+**[NIT] R2-8 · `ReadingFlowView.swift:740–744` (`known`) vs `:241` (`estimate(for:)`) · `known` returns nil when
+`columnWidth` is nil while the estimate falls back to 600.** On the one turn where a story could flip near before the
+column has reported, `StableSurface` receives `known: nil`, flips `loaded` on the first (20-pt blank) report and
+reserves nothing — the row stands one line tall until its text arrives. In practice `columnWidth` lands in the
+geometry action of the same pass and `near` flips on the next turn, so it is a fragility, not a defect; use
+`columnWidth ?? 600` in both places.
+
+**[NIT] R2-9 · `ReadingFlowView.swift:797–806` (`FlowPostView`'s task) with `StableSurface.swift:158` · A story whose
+read returns nothing keeps its estimate's reservation for the session.** `try? … ?? []` → `blocks = []` → the 20-pt
+blank line renders and `onLoaded()` fires; the surface's report (20 pt) is below the placeholder ceiling, so the
+ceiling guard returns before the settle is armed — `loaded` never flips, `reserved` stays the estimate, and a
+20,000-pt blank hole stands where the story should be. Only on a failed read or a note whose every take is blank
+(then the estimate is `emptyNoteHeight` anyway) — an edge; when `blocks.isEmpty` after the load, hand the memory
+`emptyNoteHeight` (or let the surface settle a placeholder-sized report when `known` was an estimate).
+
+**[NIT · a ruled-shape question, not a code defect] R2-10 · `BookOutlineRows.swift:236–247`
+(`collapsedChapterRowOpensTheNote`) + `BookView.swift:387–395` and `:1015–1019` (`openFromNavigator`) · After H's door
+piece the navigator's rows behave THREE ways in Read.** A collapsed one-note chapter row lands the flow / turns the
+pages (H — `navigateToChapter` → `requestReveal`, consumed by `ReadingFlowView.land` and `PagedReadView.swift:104/111`,
+verified); a chapter row with several notes lands the flow at its heading (row 50); but a NOTE row under such a
+chapter (the field guide's shape) still takes `openFromNavigator` — `structure.mode = .outline` — and LEAVES Read for
+Outline. H's own reasoning ("leaving Read for Outline on a chapter click is not navigating the read") applies to a
+note click exactly as much, and the flow already carries a `flow-<postID>` anchor for every story (`FlowRows.anchor`)
+and the pages face a `showPost`, so `requestReveal(postID)` would land it. Sherlock never shows the seam (every
+chapter collapses); the field guide does. The same seam stands in the SPREAD (`Book`): the brain answers `.spread` →
+"opens the note" (`structure.mode = .outline` — she leaves the Book tab), while a plain note row there page-jumps
+inside the spread (`model.showPost`, `BookView.swift:~440`) and the chapter's own act (`navigateToChapter` → `.spread:
+model.focus(first)`) stays on the spread too. Recorded so the inconsistency is a decision (the orchestrator's, under
+row 7's "click navigates") rather than a discovery in use.
+
+**[NIT] R2-11 · `App/Variorum/Variorum/Features/BookView/BookOutlineRows.swift:212–217` (`isNumeralToken`) · A
+single word spelled only in Roman-numeral letters reads as a numeral.** `token.uppercased().allSatisfy { roman
+.contains($0) }` accepts `Mild.`, `Dim.`, `Civic.`, `Mimic.` as stubs (I·V·X·L·C·D·M), so such a one-word first
+block followed by prose is skipped from the card preview. Vanishingly rare as a WHOLE first block; the pinned corners
+are right. A stricter Roman rule (no letter repeated more than three times, the subtractive order) or a length cap
+(≤ 4 characters) closes it if wanted.
+
+**[NIT] R2-12 · `ReadingFlowView.swift:126–153` (no `onDisappear`) with `FlowLanding.check`/`proxy` · A pending landing
+outlives the flow.** The quiet-interval check is a `DispatchWorkItem` and the re-land a `DispatchQueue.main.async {
+proxy.scrollTo }`; neither is cancelled when the view leaves (a mode switch mid-landing), so the check re-arms itself
+against a dead `ScrollViewProxy` up to `landingTimeBudget` (4 s) and `finish`es with an `NSLog`. Harmless in the app
+(nothing left to scroll) — and VISIBLE in the harness, where it pollutes the next test's oracle: in this session's
+run of `ReadingFlowLandingTests` (4/4 green) the second-story landing's trace carries `"00000000 DONE: settled at
+top=0.0 after 2 re-lands, 2185 ms"` between its own `RE-LAND 1` and `content=107043` — a landing with ONE correction
+and under a second old did not write that line; the fifth-story test's landing did, 2,185 ms after ITS `began`, its
+window already closed (every fixture UUID starts `00000000`, so the prefix cannot tell them apart). Fix:
+`.onDisappear { landing.end() }` on the column (and `end()` nils `proxy`); the pins' traces then belong to their own
+landings.
+
+### Row 99, weighed (the ledger asked round 2 to weigh it)
+
+The walk's `top=2,025` report between two re-lands on Sherlock's eleventh chapter (`LAND · top=0 · content=229,768 ·
+top=−181 → RE-LAND 1 · top=2,025 → RE-LAND 2 · top=0 · content=229,550 · DONE`). **What the harness shows about the
+SHAPE** (run here — `ReadingFlowLandingTests`, all four green): a positive `top=+N` between re-lands reproduces in
+EVERY landing pin — `top=1670` (the fifth story), `top=20522` then `top=1670` (the second), `top=1602` (the twelfth) —
+and there it IS traceable: each equals the `content=` growth logged beside it (110,383 → 112,053 = +1,670; 259,901 →
+261,503 = +1,602). A story ABOVE the target loaded TALLER than its estimate (the fixture's uniform short paragraphs
+under-estimate by ~8 %; Sherlock's prose by ≤ 3 %), the scroll offset is preserved against the document's top, and the
+target moves DOWN by exactly the growth — one re-land, then still. So the general mechanism of a positive transient is
+"the content above the target grew by N in the pass that reported". **The walk's 2,025 does NOT fit it:** no Sherlock
+story's estimate error exceeds 509 pt (Blue Carbuncle), the story directly above the target SHRANK (−181), and no
+`content=` change of +2,025 is logged beside the report (the content moved 229,768 → 229,550 across the whole landing,
+the target story's own −218). It was therefore an OFFSET transient — RE-LAND 1's `scrollTo` resolved against a frame
+the same pass was changing, or the lazy run's cached row frame for the heading (the anchor is a row INSIDE a one-row
+`LazyVStack`) — and it stays untraced here too. **Verdict: no owner needed while it stays sub-frame.** The anchoring
+absorbed it with one re-land; the worst walk used 2 of the 6 corrections; and a re-land targets a BUILT row whose
+position is known, so it cannot loop (row 44's class is structurally closed — the record's own argument holds). Two
+cheap things would make the next occurrence self-identifying and are worth taking with R2-7/R2-12: (1) log the scroll
+OFFSET beside every `top=` report in the DEBUG trace (`onScrollGeometryChange` already has `contentOffset` in hand) —
+a content transient and an offset transient then read apart at a glance; (2) R2-7's tolerance alignment, so the
+budget the transient spends is not also spent on 3-pt drifts.
+
+### Ladder fix 1 — each round-1 disposition checked against the code (does the fix do what its disposition says; did it regress what it touched)
+
+| # | Disposition (round 1) | What the code does — verified at HEAD | Regression in what it touched | Verdict |
+|---|---|---|---|---|
+| R1-1 | FIX: width compared + settled size adopted both ways | `StableSurface.swift:151–187`: `reportedWidth` set from every real report and compared to `known.width` within 1 pt (`reserved` → nil on mismatch); every real report re-arms a `SettleBox` generation and the closure at `:174–178` adopts the unchanged size and flips `loaded`; the ceiling guard keeps 20-pt placeholders from arming it. Doc block rewritten; the hoist to `Core/Views` is verbatim behaviour (+ `space:`, + `settleInterval:` defaulting to the old 1 s). `StableSurfaceTests` ×2 run here: green | None found in the Outline — the default settle is the old constant; `BookOutlineLandingTests` rode unmodified per the record. The flow's use of the memory is where R2-1/R2-3 sit (H's code, not the fix) | HOLDS |
+| R1-2 | FIX: ONE row-click brain hoisted; Library rows act at once | `Core/Views/RowClick.swift`: `RowClickTiming.verdict` pure; `rowClick` = ONE `onTapGesture` deciding double by the row's own clock, chords from `NSEvent.modifierFlags`; consumers `WorkbenchRowShell` (`BlocksWorkbenchView.swift:748–753`), the book row (`LibraryCatalogView.swift:801–818`), `CatalogNoteRowShell` (`:1338–1357`). `RowClickTimingTests` run here: green. The record's "byte-identical" is a hair loose — the hoisted brain also reports `.option`/`.control`, which the old shell did not; the only consumer reading chords tests `.contains(.shift)`/`.contains(.command)` (`:486–489`), so no behaviour changed | None. The title's own tap inside `CatalogNoteLine` still wins over the shell's tap (inner gesture precedence, as before); `.draggable`/`.contextMenu` ride the shell as they rode the line | HOLDS (the real-click pin `LibraryRowClickTests` not re-run here — rig class, load-sensitive; the record's 0.001 s + red-on-old 0.356 s stand as evidence) |
+| R1-3 | PIN FIRST → RED → FIX: identity anchors, unanimated, synchronous paragraphs | `ReadEditPane.swift:46–90` and `ReadModeView.swift:433–470`: `ForEach(…, id: \.element.placementID)` with no explicit `.id`; `land(_:_:)` maps block → placement and scrolls unanimated; `NoteIndexColumn.swift:134` iterates `ColumnRow` (id = `row.blockID`, headed AND nested rows in ONE ForEach — verified `:83–89`, `:296–325`) and lands on the block id. `ReadEditBlock`/`ReadPageBlock` render `FlowParagraph.paragraphs` as a computed property (`ReadEditPane.swift:112–114`, `ReadModeView.swift:531–533`). `ReadLandingTests` run here: block 200 at y **366.0**, 29 realized rows — the record's numbers exactly | The computed parse now runs per body evaluation of a realized row (was: once per text change) — cost ∝ realized rows (~30), microseconds each; P1-legal, noted | HOLDS — the round-1 speculative finding was right about the shape; the fix session found the cause |
+| R1-4 | PIN FIRST → RED → the finding's fix + row 95 → batch H | `ReadingFlowView.land` unanimated on the identity; `FlowRows` flat with pure segments — see the batch H verdict below | — | HOLDS (closed by H) |
+| R1-5 | FIX: gate the turn on no text field first responder | `Core/Views/PageTurnKeys.swift`: the pure rule + a local `keyDown` monitor per window, consuming only when it turns; `NotePagesView.swift:69–76` installs it and drops both `.keyboardShortcut`s (`:127`, `:139`); `PagedReadView` keeps its shortcuts (shares no text field — recorded). `PageTurnKeysRuleTests` run here: green. A non-text first responder that wants arrows (the flip bar's `Slider`) still yields them to the turn — exactly as before the fix; not a regression | None | HOLDS (the rig pin green on both sides is honestly labelled; the red-on-old is the old build's captures 03/04) |
+| R1-6 | FIX → **HOLLOW** | The premise verified at the code: `BlockHistoryPane.swift:456` `.frame(minWidth: 300, minHeight: 280)` and `TrayPanel.swift:823` `.frame(minWidth: 280, minHeight: 280)` sit INSIDE the panes, so every host — the side column AND the two sheets — proposes the explainers ≥ 280 wide; a near-zero-width probe can never measure them one character per line. `ChromeMinHeightTests` run here: **280.0 / 280.0** | The two texts are back where they read; comments at both sites name the measurement | **HOLLOW verdict HOLDS** — the guard's rule applied correctly; the pin kept is the right insurance (a pane that drops its width floor turns it red) |
+| R1-7 | FIX: clamp the proposal before the `> 0` test | `SideColumn.swift:50–62` `draggedWidth` = `width(remembered: max(minimum, total − pointerX))`; the gesture calls it (`:141–143`); `width(remembered: 0)` still means "nothing remembered" — the fix session's deviation from the finding's letter is the right call and is stated. `SideColumnTests` run here: green | None | HOLDS |
+| R1-8 | FIX: drop the coordinator entries with their tokens | `BookIndexEditModel.swift:145–154`: `coordinators.removeAll()` after the flush list is taken; the flush `Task` still drains the old set; `coordinator(for:)` re-subscribes on the next touch. `BookIndexEditingTests` run here: green | None | HOLDS |
+| R1-9 | FIX + RECORD: prime Read's rows; name the other modes | `ReadModeView.swift:144–146`: `primeRows()` then `start()`; the tray/pools tasks `awaitPrimed()` (both exist on the shared model, `BlockTOCView.swift:120/134`); the record names Takes/Lenses/Compare/Canvas as unprimed under row 94's owner | None | HOLDS (the measure pin is a sanity bound, labelled so) |
+| R1-10 | FIX: gate `loadFacts` on the collapsed form | `BookView.swift:1702–1705`: the task id carries the form; an expanded row returns before reading. Verified the expanded forms render NOTHING from the read: `excerpt` is consumed only in `collapsedPostCard` (`:1853`), `meta` only in `gutterDetails` (`:1733`), composed only in the collapsed branch (`:1687`); the expanded read-cheap gutter is a `Spacer` (`:1673`) | None | HOLDS |
+| R1-11 | FIX: the ruled corner (`_a__` literal) | `MarkdownSyntax.swift:475–482`: `chars[index − 1] != "_"` beside the flanking rule; the doc states both. `swift test --filter MarkdownSyntaxTests` run here: **21 / 1 green**; `_a__`, `_ab__ cd` literal, `_a_b_` → `a_b` | None (`__bold__`, `snake_case`, `*a* and _b_` pinned unchanged) | HOLDS |
+| R1-12 | FIX: count the headed groups present | `SidebarLayout.swift:44–64` `chromeHeight(headedGroups:)`; `SidebarView.swift:211–216` counts starred/rail/strip present; `fixedChromeHeight` = 233 still; the fixture says SEVEN. `SidebarLayoutTests` run here: green | None (the default `headedGroups: 3` keeps every standing pin's arithmetic) | HOLDS |
+| R1-13 | FIX: a short sentence previews | `BookOutlineRows.swift:191–217`: terminated text is a sentence unless the body is one numeral-like token. `BookOutlineRowsTests` run here: green | R2-11 (a one-word Roman-letter word reads as a numeral — a NIT) | HOLDS |
+| R1-14 | FIX: land when the viewport has reported | `CanvasView.swift:208–213`, `:504–514`: `landOnArrivalIfReady` guards `!visibleRect.isEmpty`, called on both changes; the oracle records the viewport read. `CanvasArrivalTests` run here: green | None (the 1200 × 800 fallback survives only in the non-arrival `fit all` road, where a reported viewport always exists) | HOLDS |
+| R1-16 | FIX: drop the `.index` case | `BookView.swift:1043–1049`: its own `case`, `break`, the reason at the site | None | HOLDS |
+| R1-17 | FIX: the divider joins the column's transition | `LibraryCatalogView.swift:504–522`: divider + panel in ONE `HStack` carrying the `.transition` | None (the panel's `.frame(width:)` and `.libraryGeometryProbe(.panel)` unchanged) | HOLDS |
+| R1-15 · R1-18 | RECORD (17e) | Not code — the orchestrator's records | — | as dispositioned |
+
+### Batch H as new code — the verdict
+
+The shape is right and it is the shape B proved: the heavy rows leave the lazy estimate (every story a direct child of the outer `VStack` — `FlowRows.segments`, pure and pinned), virtualized by the flow itself (`NearViewportObserver` hoisted with its named space; a `Color.clear` of the honest height when far, `StableSurface` + `FlowPostView` when near), the honest height an estimate from LENGTHS only (`Queries.blockExtents` → `FlowHeightEstimate`, the paged reader's paragraph model at the flow's measured metrics — no prose crosses the boundary), one unanimated `scrollTo` on the identity, then bounded ANCHORING from the target's own reports (budget 6; a re-land targets a built row, so the row-44 loop is structurally impossible). The estimate is measured, not fitted (the record's table; the two model corrections — the stored separator, the inter-line spacing — are traced in the code's own doc). The four landing pins and the estimate suite ran green in this session with the record's numbers (the fifth story 0.0 after 2 re-lands; the twelfth 0.0 held; 3 surfaces at the mount). The findings above are all in the flow's SECOND-order behaviour — the memory's width (R2-1), the settle race between two clocks (R2-2/R2-3), the pre-extents realizations (R2-5), the unowned document-proportional read (R2-4), the leaked landing timer (R2-12) — none is a BLOCKER or MAJOR: the landing lands, holds, and cannot loop. The door piece (`collapsedChapterRowOpensTheNote`) is a real product change made inside the batch and honestly recorded for re-homing; its consumers on BOTH Read faces exist (`ReadingFlowView.land`; `PagedReadView.swift:104/111–114` `pages.showPost`), so no click it redirects is dead; R2-10 records the seam it leaves.
+
+### What was checked and found solid (the clean bill)
+
+- **Zero `Sync/`, zero schema, one core file** — by the diff, not the record: `Sources/` carries `Domain/MarkdownSyntax.swift` (+9) and its test only; `Shared/` untouched; nothing crosses to the phone.
+- **The hoist is a hoist:** `StableSurface`, `NearViewportObserver` and the four constants moved to `Core/Views/StableSurface.swift` with `space:` and `settleInterval:` as the only additions, both defaulting/passing the book's old values at the book's two call sites (`BookView.swift:1635`, `:1677`); `BookView.swift` lost 152 lines and no behaviour; `SurfaceSizeMemory` is a plain `@MainActor` box, `@ObservationIgnored` on the model (`BookViewModel.swift:403`).
+- **The flow's P3 fact holds:** the materialization count moved to the REALIZED surface's `onAppear`; a placeholder never counts; `BookViewTests.theReadingFlowVirtualizesItsRows` rides unmodified at 48 surfaces (recorded) and the new P3 pin reads 3 (R2-5 says why not 1).
+- **The estimate never reads prose:** `blockExtents` returns lengths and newline counts per block; `FlowHeightEstimate` is pure arithmetic; `metrics(columnWidth:)` measures the real 16-pt serif off `NSFont` and caches per width; the `paragraphs = max(1, newlines)` premise matches `SegmentationRules` (k newlines between pieces store k−1 trailing newlines — `SegmentationRules.swift:49/103`) for every block but a note's last (which carries none and reads as one paragraph — correct) and for a block with an internal single newline and no trailing one (the last block of a typed note with a soft break: one paragraph estimated, two rendered — an estimate's honest miss of one tail + gap, ~30 pt, the doc's "normally" covers it). Headings (`FlowParagraph.font` scales 15 × 1.6/1.35/1.15) and list indents are not modelled — bounded by the ±3 % measured; a heading-heavy note is off by a fraction of a line per heading.
+- **The landing cannot loop or fight her:** `anchorMoved` re-lands on the NEXT turn only while `corrections < 6`; `checkLanding` ends at the 4-s budget wherever it is; a user scroll (`.interacting`) ends it at once; `begin` cancels the previous check; `end` cancels and clears. `landingAnchor` puts a chapter's first note on its heading and every other note on its own row (pinned), `postID(ofAnchor:)` is exact on the four id shapes (pinned).
+- **The rows' identities are the anchors everywhere the fix touched:** `FlowStoryRow` under `ForEach(segments)` (Identifiable) with a matching explicit `.id` on a NON-lazy child (harmless redundancy); the small runs' `ForEach(small)` identity IS `Row.id`; Read's three sites on the ForEach identity with the explicit ids gone; the book Index unchanged.
+- **`StableSurface`'s R1-1 shrink path is honest in both directions and cannot adopt a placeholder:** the ceiling guard precedes both the width write and the settle arming; the settle compares the exact size after the interval; a live editor's `followsShrinks` road is unchanged.
+- **`RowClickModifier` never asks `NSApp.currentEvent` anything** (the batch-C crash class stays closed); the per-row `@State` clock means two rows clicked inside 0.5 s are two singles; a double resets the clock so a third click is a single (pinned).
+- **`PageTurnKeyMonitor` is scoped:** installed/removed on `viewDidMoveToWindow`, filters `event.window === window`, consumes only when the pure rule turns; `textIsFirstResponder` covers every field editor (`NSText`) and `NSTextField`; sheets/popovers are other windows and are never intercepted.
+- **The door piece's consumers exist on both Read faces** (`ReadingFlowView.land`; `PagedReadView` reads `pendingReveal` at mount and on change → `pages.showPost`), so the redirected click always acts; `BookIndexView.landOrSeed` consuming a parked reveal on a later mode switch is the pre-existing W21 shape, not new.
+- **Test hygiene where it matters:** every new pin asserts an outcome, not a sample (the estimate measure prints its table and fences a third; the landing pins wait on the oracle; the P3 pin counts surfaces); the one tautology is R2-6. `ReadingFlowEstimateMeasureTests` seeds the whole sample library and reveals thirteen stories with a 1.3-s stability wait each (~20–30 s per run — the suite's 343 → 392 s is mostly this; acceptable, recorded).
+- **Run in this session:** core `MarkdownSyntaxTests` 21/1; Mac `ReadingFlowLandingTests` 4 · `StableSurfaceTests` 2 · `ReadingFlowEstimateTests` 5 · `RowClickTimingTests` 1 · `ReadLandingTests` 2 · `ChromeMinHeightTests` (all) · `SideColumnTests` · `SidebarLayoutTests` · `BookIndexEditingTests` · `BookOutlineRowsTests` · `CanvasArrivalTests` · `PageTurnKeysRuleTests` — all green, the record's numbers reproduced (block 200 at 366.0; the probes 280/280; 3 surfaces at the mount). **Not re-run here** (the pointer rig class — load-sensitive, and a dev build of another tree is running on this Mac): `LibraryRowClickTests`, `PagesArrowKeysHostTests`, `ReadArrivalMeasureTests`, `BookOutlineLandingTests`, `ReadingFlowEstimateMeasureTests`, the full suite and its arithmetic (2096/377 — the per-file `@Test` counts were checked against the record's +9/+2 and agree).
+
+**Severity summary (ranked):** BLOCKER — none. MAJOR — none. MINOR — R2-1 (the memory's width in the flow), R2-2 (the two-clock settle race, SPECULATIVE on frequency), R2-3 (the once-stamped load date), R2-4 (the unowned book-proportional `blockExtents` read — a KnownIssues row is owed), R2-5 (three surfaces realized before the extents land). NIT — R2-6, R2-7, R2-8, R2-9, R2-10 (a ruled-shape question), R2-11, R2-12. Row 99: weighed above — no owner while sub-frame; two cheap trace/tolerance moves recommended. Every round-1 disposition HOLDS at the code, the R1-6 HOLLOW verdict included; no fix regressed what it touched. **Under the ladder's rule (a round 3 only for a NEW BLOCKER/MAJOR in round 2), round 2 surfaces none — the fix session's pass over R2-1…R2-12 and row 99 closes the ladder unless the orchestrator wants a third look at H's second-order behaviour.**
