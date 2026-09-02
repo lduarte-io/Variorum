@@ -246,3 +246,156 @@ eight rulings · row 52 (underscore emphasis vocabulary) · any scalpel revert (
 - ~22:15 MDT — **the round-1 reviewer DIED at the account's session limit** (429, reset 21:50 Denver) before writing anything (tree clean, no `## LADDER ROUND 1`); per the resiliency protocol it was RESUMED by `SendMessage` (the transcript survived — the cheaper road, addendum rule 3) rather than re-spawned; still round 1.
 - ~22:50 MDT — **LADDER ROUND 1 COMPLETE** (0 BLOCKER · 2 MAJOR · 9 MINOR · 7 NIT + a clean bill; the reviewer died once at the limit and resumed) and **DISPOSITIONED** (both MAJORs accepted — the StableSurface shrink path, the Library rows' click hold → one hoisted row-click brain; the two speculative MINORs pin-first; the rest bounded fixes; two NITs → 17e); **LADDER FIX 1 running** (a fresh Fable session; its record `### LADDER FIX 1 RECORD` under the dispositions). Next: round 2 (a fresh reviewer over the fixes + what they touched).
 - 01:25 MDT (2026-09-02) — **LADDER FIX 1 ADJUDICATED + walked** (12 fixed · R1-6 hollow accepted · R1-3 red-then-fixed · R1-4 half-closed → row 95); Mac 2087/375; **BATCH H (Read ▸ Scroll's honest geometry — row 95) SPAWNED** as the orchestrator's call; round 2 reviews fix 1 + H together.
+
+## 6. THE SUCCESSOR'S CUTOVER (drafted 2026-09-02 ~02:40 MDT by the successor orchestrator at 77 % of its context — the resiliency protocol's early-draft rule; VERIFY-NOT-TRUST as always. If this session finishes the round, this section is history; if it dies, the paste-ready prompt below is how the NEXT session finishes.)
+
+**State when drafted:** batches B · A · C · F · D · E · G CLOSED; ladder ROUND 1 done and dispositioned; LADDER FIX 1 done, adjudicated and walked (Mac 2087/375); **BATCH H (row 95 — Read ▸ Scroll's honest geometry) COMPLETE at `9bc6d2e` (Mac 2096/377 · core 1525/165 · spine 72/10) — awaiting the orchestrator's walk + CLOSE.** Her rulings R-cor-10…16 all recorded. The iOS build PASSED. Her real-store app is NOT running (she said so); the dev build runs from DerivedData. `/Applications` untouched.
+
+**What remains, in order (the plan's §7b, every item):** (1) close H (spot-check its captures; mark `BATCH H RECORD — CLOSED`); (2) **LADDER ROUND 2** — a FRESH cold reviewer re-reviewing the fixes + what they touched (the §7d spawn text; the diff `git diff 604e52e..HEAD -- App/ Sources/ Tests/` = ladder fix 1 + batch H; its anchor is `## LADDER ROUND 1` + its dispositions + the fix-1 record + H's record); disposition repo-first; a fresh fix session for accepted findings; any NEW BLOCKER/MAJOR ⇒ round 3; cap three; (3) the orchestrator's FULL acceptance walk of every touched surface on the final tree, both voices (the batches' capture lists re-shot by spot-check; the row-44 scenario by hand on Sherlock; the tutorial spine green); (4) the Release build + `/Applications` refresh behind the A1 backup — the script is appendix B below; (5) the closeout: appendix A's drafts filled and applied (the master plan's closeout paragraph + the pre-13u paragraph rolled to `PhaseCloseoutArchive.md`; AppSpec §12's supersession sentence + §14's paragraph from the plan's §7c, the pre-13u §14 paragraph rolled to `AppSpecDeltaArchive.md`; QUESTIONS #88 replacing its stub; MobileSoul PL-19; the 13u plan's banner + the master plan's `### 13u` lines; KnownIssues: the forked-brains `TrailingFlow` line + the 17e items R1-15/R1-18 + the `CanvasDragTrackingTests` row untouched; FuturePhases: the Lenses + Compare build phase row; the master plan's act10-cor row → done, the pointer → pre-13x NEXT); (6) the author handoff `notes/handoffs/act10-correction-handoff.md` filled (her walk at the top; the re-seed as HER act — biometric); (7) memory; (8) push; stop.
+
+**PASTE-READY KICKOFF PROMPT FOR THE NEXT SUCCESSOR (only if this session dies):**
+
+> You are the successor orchestrator of Variorum's **Act 10 correction round**, taking over from the second orchestrator session at its cutover (`notes/plans/act10-correction-orchestrator-handoff.md` §6 — read that section FIRST, then §0/§0b, then the plan `notes/plans/act10-correction-round.md` IN FULL — it is long; read every batch record's CLOSED line, the ledger, `## LADDER ROUND 1` + its dispositions, `### LADDER FIX 1 RECORD` + the adjudication, `### BATCH H RECORD`, and §7/§7b/§7c/§7d). Invoke the `architect-phase` skill. VERIFY the state against `git log --oneline -40` and the records before acting. Then run §6's "what remains" list in order: close H by spot-check, the ladder's round 2 (a fresh cold reviewer, `notes/REVIEW_PROMPT.md` verbatim, zero framing), dispositions + a fresh fix session + round 3 if needed (cap three), your full acceptance walk, the install (§6 appendix B; zero-instance check; the A1 backup first; the tutorial re-seed is HER act — biometric), the closeout (§6 appendix A), the author handoff, memory, push, stop. The author may be awake — taste calls go to her at seams as question batches; otherwise PROVISIONAL-and-continue and record in §7. The trailer for every commit: `Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>` + the `Claude-Session:` line of YOUR session.
+
+### Appendix A — the closeout drafts (PENDING slots; filled at the close)
+
+# Closeout drafts (PENDING slots filled at the close) — the Act 10 correction round
+
+## A. Master plan — the closeout-log paragraph (replaces the pre-13u paragraph, which rolls to the archive)
+
+- **The Act 10 correction round (closed 2026-09-0PENDING):** her morning-after report on the pre-13u round's UI
+  ("from feeling pretty crisp… to the app feeling like a vibecoded mess") answered surface by surface, retiring
+  nothing (R-cor-1/4). **Seven batches, one surface each, every one walked in USE by the orchestrator before its
+  record closed:** **B the book** (the Outline HANG killed — a SwiftUI lazy-placement livelock under an animated
+  scrollTo; landings exact with several 9k-word stories expanded via the segmented column + remembered surface
+  sizes; a note-row click reveals; chapter headings are doors; the duplicate line collapses; the gutter calm; the
+  book's Index editable in place; the scrolled-open door `LandingTarget`), **A the chrome** (the liquid-glass
+  sidebar retired for `ShellSplit` — W8-3 delivered whole; one 30-pt pitch, the Open strip under the rail; the title
+  centered in every mode; ONE tag door — the `#` with an inline field; the library rows on one baseline; the
+  two-row masthead with the path chip leading and the cluster wrapping), **C the note modes** (R-cor-5/7: the
+  SEVEN-mode rail — Index retired INTO Read with an in-place `edit · read` switch, edit the default and editable,
+  read never; `continuous · pages` reusing the book's engine; ONE current block across modes — `CurrentBlockMemory`;
+  Block History scoped to its mode in the one right region; Blocks' draggable seam, the 0.5-s click hold gone,
+  facts first), **F the recovery family** (date-only stamps + an uncompressible clock slot; the pane's List retired
+  for calm sections with one meaning line each; Empty Trash names snippet groups; the dead ⌘⇧S command group
+  re-anchored; the kept-in-lineage arrival sentence), **D Compare/Lenses mechanical** (the anchor renders WHOLE —
+  the 13c filter narrowed to peers at her ratification; a nameless note named by its day; one placement per act;
+  one left edge; the `＋ column` stub a header-height door), **E the Library panel** (R-cor-3 ratified: the simple
+  read preview with one Open landing where the caret last was; a book shows its outline; a column of our own whose
+  boundary holds inactive; the calm-grammar pick; the laid-out receipt), **G residuals and width** (added at her
+  R-cor-10: the `#` target; the ~950-pt masthead and the FOLDING bottom bar; her live find 80b — the width-aware
+  second row; every note-side inspector → `SideColumn`; the explainers wrap; the pages click lands; Blocks arrives
+  painted; `_italic_` joins the vocabulary in core Domain; the Pool card's first words; Canvas arrives 1:1
+  top-left under a calm strip; the palette's history door; the book landing after an ascent). **Her rulings
+  R-cor-1…15** (the Lenses+Compare DESIGN memo written, its build a phase of its own; the 13u FOUR-way re-split;
+  13i split a–e with the Journal identity as 13i-e; PHASE 18 opened with 18a sync considerations; the sizing &
+  acceptance guidance into CLAUDE.md/the skill/`notes/PhaseSizingGuidance.md`; the 17-entry review rule).
+  **Reviews:** the ladder PENDING (rounds, findings, dispositions). **Finals: core PENDING · Mac PENDING · spine
+  PENDING; zero `Sync/`; zero schema; marker 7.** **MOBILE PARITY LINE:** PL-19 (PENDING pointer). Deferred with
+  owners: row 54 + 92 + 94 → 13u2 item 1; 93 → 13u2 item 13; 57 → 13u2; 70 → 13o; 71 → the memo's build phase;
+  62 → 12. Her ratify list: QUESTIONS #88. Handoff: `notes/handoffs/act10-correction-handoff.md`. Next: **pre-13x
+  at her word.**
+
+## B. AppSpec §14 "(2) SHIPPED" sentence (into §7c's drafted paragraph)
+
+(2) SHIPPED (zero schema; zero `Sync/`; the marker STAYS 7; core touched once — the underscore-emphasis
+tokenizer in Domain, display-only): the book's landing rebuilt (the hang killed; the segmented Outline column;
+`LandingTarget`); the flat `ShellSplit` sidebar; the centered two-row masthead with the ONE `#` tag door and the
+width-aware second row; the seven-mode rail with Read's `edit · read`; `CurrentBlockMemory`; the recovery family's
+calm sections and legible clocks; Compare's whole anchor and one placement per act; the Library's read-preview
+column; `SideColumn` for every side pane; the folding bottom bar; the pages click; Canvas's 1:1 arrival and calm
+strip; `_italic_`. Counts PENDING.
+
+## C. QUESTIONS #88 (replaces the reserved stub)
+
+#88 — **The Act 10 correction round's RATIFY BUNDLE (2026-09-01; the record `notes/plans/act10-correction-round.md`
+§7).** Everything else in the round's §7 you ruled AWAKE at the sitting (R-cor-10…15). Still yours: (a) Read's
+`edit · read` face remembered PER NOTE (the architect's call — confirm or make it global); (b) the Lenses + Compare
+design memo's EIGHT rulings (`notes/plans/act10-correction-memo-lenses-compare.md` §7 — rulings 6 and 1 first;
+your row-17/46 answers already settled its ruling 4's anchor half and the door's placement) and WHEN its build phase
+runs; (c) row 57 — the sidebar's arrow-key row navigation left with the List (13u2 if you want it back); (d) the
+promotion candidate you asked for a definition on is DONE (R-cor-13/14) — nothing left here; (e) PENDING: anything
+the ladder leaves open after round 3.
+
+## D. MobileSoul PL-19
+
+| **PL-19** | **The Act 10 correction round (2026-09-01)** — her instruction at R-cor-10 ("mobile parity rows need to
+be written for some of the changed behavior… it might be relatively a small parity note") | **The phone OWES a
+version of:** the SEVEN-mode grammar with Read's `edit · read` (the Mac's one order: Write · Takes · Read · Lenses ·
+Compare · Blocks · Canvas — the phone keeps the modes it has, in that order); the ONE current block across modes
+(`CurrentBlockMemory`'s idea — the phone's modes enter on the block you were in); the scrolled-open door
+(`Shared/LandingTarget.swift` is already the phone's — its read surfaces should land the editor at the tapped
+block); the `#` tag door's shape (one door, an inline field with the cursor); the recovery rows' date-only stamps +
+uncompressible clock slot (the `Shared/` face pieces `stampTextDateOnly`, `DeletedTakeFace.lead/clockSlot`,
+`trayRevealKeptInLineage`, `savepointsExplainer` are ADDITIVE and already in the phone's build — adopt them in
+the phone's rows); Block History's calm-section grammar with one meaning line per region; `_italic_` (core Domain —
+INHERITED BY CONSTRUCTION; verified by the ladder's iOS build PENDING). **NOT OWED — no such surface / its own
+design:** Compare and Lenses (the memo's phase; the phone has neither), the Library's read-preview column (the
+phone's own library design), the sidebar chrome (`ShellSplit`, the rail, the Open strip), the folding bottom bar,
+Canvas, `SideColumn`. | owed — small, as she said |
+
+## E. The 13u plan's banner + the master plan's `### 13u` section — the dated lines (§7b item 6, R-cor-12/13)
+
+- **2026-09-01 — the Act 10 correction round (R-cor-12, the FOUR-WAY RE-SPLIT):** 13u1 the SEAM only (items 5 · 7 ·
+  8 + the O(N²) keystroke family) · 13u2 FEEL (item 1 incl. row 54 + M12 + the correction round's rows 92/94, item
+  2, items 10/11/13 incl. row 93, P39a/P39b, row 57) · 13u3 FACES (items 3 · 4 incl. the journal split + the title
+  chip, 14 · 15 · 16, item 9's Mac face after the shared sitting) · 13u4 the RESTYLE continuation + DARK MODE
+  (item 6) together, one surface per session. Item 12 (multi-block drag) its OWN row after 13u1. The four protection
+  items (the near-empty typed confirmation #86(c) · the nudge bar overlay · the legs brain's sync leg + "extend" ·
+  COPY ALL on the recovery phrase) → **pre-13x**.
+- **REMOVED / MOVED by the round:** item 17 BUILT (rows 38/49 — `LandingTarget`, both halves); row 60 (the Blocks
+  arrival blank) BUILT (G row 83); item 4's Pool card preview BUILT EARLY (G row 87 — the one-brain card family
+  stays 13u3's); ADDED to item 1's family: row 54 (the read tier's provisional-width measure), row 92 (the canvas
+  silhouette click lands mid-board), row 94 (Blocks' residual ~0.2–0.3 s); ADDED to 13u2: row 57 (arrow-key nav);
+  ADDED to item 13's family: row 93 (the nameless title's prompt).
+
+## F. KnownIssues — the forked-brains row's "remaining" list gains `TrailingFlow.rows ≡ MobileChipFlow.rows`
+   (the row-58 fix's twin; a MOVE at the next touch of either).
+
+## G. FuturePhases — the Lenses + Compare build phase row (unslotted, at her word; the memo's §8 is its scope).
+
+## H. The install record (the handoff's "the install" section) — filled by install-refresh.sh's output.
+
+
+### Appendix B — the install script (run at the zero-instance window, after the ladder and the full walk)
+
+```zsh
+#!/bin/zsh
+# The Act 10 correction round — the /Applications refresh at a ZERO-INSTANCE window (C-3; §7b item 9).
+# Run ONLY after the ladder + the full acceptance walk. Every step prints a fact; stop on any non-zero.
+set -e
+REPO=<home>/dev/variorum
+STORE="$HOME/Library/Containers/io.lduarte.Variorum/Data/Library/Application Support/Variorum"
+STAMP=$(date -u +%Y%m%dT%H%M%SZ)
+BK="$HOME/dev/variorum-store-backups/pre-act10cor-refresh-$STAMP"
+
+echo "== 1. zero-instance check (her real-store app must NOT be running; the dev build may be)"
+if pgrep -fl 'Variorum.app/Contents/MacOS' | grep -v DerivedData; then
+  echo "!! a non-DerivedData Variorum instance is running — STAGE, do not swap"; exit 2
+fi
+echo "   zero real-store instances"
+
+echo "== 2. the A1 backup (the whole store folder, WAL-safe because quiescent)"
+ls -la "$STORE"
+WAL=$(stat -f %z "$STORE/variorum.sqlite-wal" 2>/dev/null || echo 0); echo "   wal bytes: $WAL"
+mkdir -p "$BK" && cp -Rp "$STORE"/. "$BK"/ && echo "   copied to $BK" && ls -la "$BK" | head -12
+head -c 16 "$BK/variorum.sqlite" | xxd | head -1   # ciphertext header (NOT 'SQLite format 3')
+
+echo "== 3. the Release build"
+cd "$REPO/App/Variorum"
+git -C "$REPO" rev-parse --short HEAD
+xcodebuild -scheme Variorum -configuration Release -destination 'platform=macOS' build 2>&1 | tail -3
+PRODUCT=$(ls -d ~/Library/Developer/Xcode/DerivedData/Variorum-*/Build/Products/Release/Variorum.app | head -1)
+echo "   product: $PRODUCT"
+
+echo "== 4. the swap (zero-instance re-check, then copy)"
+if pgrep -fl 'Variorum.app/Contents/MacOS' | grep -v DerivedData; then echo "!! instance appeared — STAGED at $PRODUCT"; exit 3; fi
+rm -rf /Applications/Variorum.app && cp -R "$PRODUCT" /Applications/Variorum.app && echo "   copied"
+
+echo "== 5. verification"
+codesign -dv /Applications/Variorum.app 2>&1 | grep -E "Identifier|TeamIdentifier|Authority" | head -3
+codesign -d --entitlements - /Applications/Variorum.app 2>/dev/null | grep -A1 keychain-access-groups | tail -1
+shasum -a 256 /Applications/Variorum.app/Contents/MacOS/Variorum "$PRODUCT/Contents/MacOS/Variorum"
+defaults read /Applications/Variorum.app/Contents/Info.plist CFBundleIdentifier
+echo "== DONE $STAMP (commit $(git -C "$REPO" rev-parse --short HEAD)); backup $BK"
+```
