@@ -1998,3 +1998,121 @@ landing (1:1 top-left, not the overview), row 81's dropped counts below 840 pt, 
 fixed Library column. **The ladder spawns after her answers** (a fix session first if an answer changes code).
 
 ---
+
+## LADDER ROUND 1 — the cold review of the combined diff (a fresh Fable reviewer, 2026-09-02; `notes/REVIEW_PROMPT.md` verbatim)
+
+**What was reviewed:** `git diff 962e7b8..HEAD -- App/ Sources/ Tests/` — 97 files, +12,564 / −2,454, the 123 commits of
+`git log --oneline 962e7b8..HEAD` verified (B's `be32fa7` is the first code commit after `962e7b8`; HEAD at the
+write is `75bf756`, whose code diff is byte-identical to `7e45cc1`'s — the commits since are records). Read in full,
+in this session: the prompt; this file §0–§8 (every batch record and CLOSED line — the anchor for prior
+dispositions); the whole diff, production files first, then every test file; CLAUDE.md/AppSpec/OverallModel/
+SyncSpec/DetailedPlan/KnownIssues from context. No "Review foci" section exists in this plan or beside it, so the
+prompt's standing context alone applies. Verified against the tree (not the record): zero `Sync/` lines, zero
+schema, ONE core file (`Domain/MarkdownSyntax.swift` + its test); no `SideColumn`/`ShellSplit`/`.inspector` residue
+in the note-side hosts; the code anchors of every finding below re-read at HEAD. The review is read-only: nothing
+was fixed, no test was added; the session died once at its limit and resumed by message (the record above), with
+nothing of it in the repo until this section. A note on the session-limit resume: the diff was re-read from the
+saved copy, so every line below was seen twice.
+
+### Findings (severity-ranked; the format the prompt asks — `[severity] · file:line · what · evidence · fix`)
+
+**[MAJOR] · `App/Variorum/Variorum/Features/BookView/BookView.swift:1600–1631` (`StableSurface`), `:1728–1737` (the
+read-cheap host), `:1541` (the doc claim) · The remembered-surface reservation has NO shrink path, so a memory that
+is TALLER than the surface's real height (after the pane narrows-then-widens, a voice switch, or any reflow that
+shortens a story) reserves a PERMANENT blank gap under the expanded story — and the doc block claims the
+opposite.** Mechanism, traced at the code: `StableSurface` reads `known` (the parent's `model.rememberedSurfaceSize`,
+captured at the parent's LAST render — `rememberedSurfaceSizes` is `@ObservationIgnored`, so nothing re-renders the
+row when it changes) and reserves `.frame(minHeight: known.height)` while `!loaded` (`:1628–1631`); `loaded` flips
+only when the measured height REACHES `known.height − 24` (`:1613`); the memory is updated only upward for
+read-cheap surfaces (`size.height > (known?.height ?? 0)`, `:1621`) and only after `loaded` for live ones
+(`:1619`). So: (1) a story is expanded read-cheap in a book pane narrower than the prose measure (any window where
+sidebar + navigator + 40-pt padding leave the pane under `proseColumn` — e.g. a ~900-pt window) → its text is tall,
+say 25,000 pt, and remembered; (2) the window is widened (or the sidebar collapsed with A's new ⌃⌘S, or the voice
+switched Terminal→Study, or any later shorter reflow) → the same text is now 20,000 pt; the near, loaded row keeps
+no gap yet (`reserved` is nil once `loaded`), but `remember` is never called with the smaller size (20,000 ≯ 25,000;
+`loaded && followsShrinks` is false for read-cheap); (3) the row scrolls far (a 25,000-pt placeholder — the column's
+"exact geometry" is now 5,000 pt wrong) and near again → a FRESH `StableSurface` (`if nearViewport {…}` rebuilds it)
+with `known = 25,000` reserves 25,000, the surface loads at 20,000, `reached` is false, `loaded` never flips, and the
+row stays `minHeight: 25,000` for the rest of the session: a 5,000-pt blank under the story, with every landing past
+it converging on a column whose geometry the fix exists to keep honest. The same road shrinks to a smaller gap for a
+LIVE editor demoted to read-cheap whenever the two forms differ by more than the 24-pt slack (the constant is stated
+as "one line of slack", not measured). Evidence beyond the trace: the doc block at `:1541` says *"a different width
+(the window resized while the row was away) is a memory that does not apply"* and the row-53 record says *"The
+memory ignores width and keeps the MAX for read-cheap surfaces"* — the stored `CGSize` carries a width that nothing
+ever compares, and "keeps the MAX" is a comparison against a stale snapshot, not a max; the code and the record
+disagree with each other. Nothing pins the shrink direction (`BookOutlineLandingTests` only ever grows surfaces).
+Proposed fix: make the reservation honest in both directions — compare the remembered WIDTH (a memory taken at a
+different width does not apply: the doc's own rule), and when a loaded surface settles BELOW its reservation for a
+quiet interval, adopt the smaller size and drop the reservation (the row-53 settle discipline, reused). Pin
+(red-on-old by construction): mount `StableSurface` alone with `known` = 2× its content's height (or the book with a
+story remembered at a narrow width, then widened) → the laid-out row height equals the content's, not `known`'s.
+
+**[MAJOR] · `App/Variorum/Variorum/Features/Library/LibraryCatalogView.swift:800–803` (the book row), `:960–965`
+(the note row) · The Library's row-body click is held for the double-click interval before the panel moves —
+batch C's row 25 mechanism, live on the surface batch E rebuilt.** Both rows stack `.onTapGesture(count: 2)
+{ openHit }` before the plain `.onTapGesture { … selectBook / clickNoteRow }`; batch C traced and MEASURED exactly
+this idiom on the Blocks rows (record: *"a single click is held until the double-click window closes … 0.26–0.49 s
+lag, consistent with `NSEvent.doubleClickInterval` = 0.5 s"*; its pin read 0.357 s on the old shell against a
+150-ms budget) and replaced it with ONE tap handler timing the double by the row's own clock (`WorkbenchRowShell`).
+E's burst evidence is consistent with the hold, not against it: its two early frames (0.12 s, 0.2 s after the
+click) are EMPTY and the panel "settles" afterwards — the record reads that as the poster's ~0.15-s latency, but the
+column cannot begin to slide until the tap is delivered, and the tap is delivered when the double-click window
+closes. Her bar names it (C-7: *"a view that lags a second on selection is a defect"*), and it is the FIRST thing a
+reader feels in the panel this round rebuilt for her. Proposed fix: the `WorkbenchRowShell` idiom on both rows —
+one plain tap that acts at once, a second click inside `NSEvent.doubleClickInterval` opening — hoisted into a shared
+row-click brain rather than copied (the forked-brains discipline; three copies otherwise: the workbench shell, the
+book row, the note row). Pin (the row-25 shape, red on old by C's own numbers): a Library row mounted alone in the
+rig, a real click → `model.infoHit` set within 150 ms; a second click inside the interval opens once.
+
+**[MINOR · SPECULATIVE on the outcome, the mechanism is the round's own] · `App/Variorum/Variorum/Features/ReadMode/
+ReadEditPane.swift:47, :72`; `ReadModeView.swift:421, :446`; `NoteIndexColumn.swift:89, :149` · Read's two faces
+and the `▸ 01` column land with `withAnimation { proxy.scrollTo(…) }` over a `LazyVStack`, targeting an explicit
+`.id` that is NOT the `ForEach` identity — the two mechanisms batch B retired in Outline (rows 9/12: an animated
+scroll toward lazy estimates travels wrong; row 47: an explicit id on an unbuilt lazy row is unknown to the reader —
+*measured in this round's harness*).** `ReadEditPane` and `ReadPageColumn` iterate `id: \.element.placementID` and
+scroll to `"rep-<blockID>"` / `"rd-<blockID>"`; the column iterates `ColumnRow` (id = `blockID`) and scrolls to
+`"ixr-<blockID>"`. The book's Index pane got the fix in the same round (`BookIndexView.paneRows`: the identities ARE
+the anchors, the animation dropped — *"the Outline lesson"*); the note's three landings did not, and no far-block
+landing was walked on the note (C's captures land blocks 05/07/08 of 215, all realized near the top; the pins use a
+three-block note). Whether SwiftUI folds a direct-child `.id` into a lazy row's identity is exactly what B measured
+only for the nested case — so the outcome is not asserted here, only that the note carries the retired shape
+unexamined. Proposed: the book Index pane's form (identity = anchor, no animation) on all three, and ONE walked
+landing on Boscombe's block 200 from the column. Pin: a 215-block note in Read(edit), `select(block200,
+scrollFace: true)` → `ReadModeOracle.editBlockFrames[block200]` centred within the settle (red on old if the id is
+unreachable; green means the class is not live here and the finding is dismissed as hollow).
+
+**[MINOR · SPECULATIVE on the outcome] · `App/Variorum/Variorum/Features/BookView/ReadingFlowView.swift:64` via
+`BookView.swift:1033` (`navigateToChapter`, `.read`) · Row 50 wired the navigator's chapter click in Read ▸ Scroll to
+`model.requestReveal(first.postID)`, whose consumer is the flow's `land(_:)` — `withAnimation { proxy.scrollTo
+("flow-…", anchor: .top) }` over a `LazyVStack` of twelve ~20,000-pt `FlowPostView`s on Sherlock: the animated-
+scroll-over-lazy-estimates class row 44/9/12 traced, on a column whose rows are the heaviest in the app.** B's own
+record marks row 50 *"Not walked"*; nothing pins it. Proposed: the unanimated form (the Outline lesson) and one
+walk — Sherlock ▸ Read ▸ Scroll ▸ the navigator's eleventh chapter. Pin: a flow with five 215-block entries,
+`requestReveal(entries[4])` → the `flow-` anchor's top within tolerance (an `onGeometryChange` oracle the flow does
+not yet carry).
+
+**[MINOR] · `App/Variorum/Variorum/Features/ReadMode/NotePagesView.swift:118, :131` beside `NoteIndexColumn.swift:211`
+(the filter `TextField`) and the masthead's fields · The `read ▸ pages` face binds ← and → as UNMODIFIED keyboard
+shortcuts; SwiftUI resolves `.keyboardShortcut` in the hosting view's `performKeyEquivalent` BEFORE the first
+responder's `keyDown`, so while `pages` shows, an arrow key typed in the index column's filter field (the same
+surface, composed together for the first time this round), the masthead's inline tag field or the title's rename
+field turns a page instead of moving the caret.** The book's `PagedReadView` carries the same two shortcuts
+(`:173, :186`) but shares its surface with no text field; the note host does. Not walked (the mechanism is AppKit's
+dispatch order, well known — a default button's unmodified Return fires from inside a text field for the same
+reason). Proposed: gate the shortcuts on no text field being first responder, or bind them with a modifier the
+fields do not use, or move the turn to the leaf's own key handling. Pin: the pages face mounted with the column,
+the filter field made first responder, a synthesized ← key event → the field's selection moved and `pages.turn`
+not called.
+
+**[MINOR] · `App/Variorum/Variorum/Features/Tray/BlockHistoryPane.swift:411` (the pane's top explainer) and
+`TrayPanel.swift:744` (the kept-in-lineage sentence) — both `lineLimit(nil)` + `fixedSize(horizontal: false,
+vertical: true)` OUTSIDE their panes' `ScrollView`s (`:439`, `:747`) · Row 89's rule (a prose explainer wraps
+whole) was applied to two texts that live in NON-SCROLLING chrome — the b6dae25 class P-8 names (*"an unlimited
+fixedSize text here measures one character per line under the window's near-zero-width minimum-size probe, and its
+full height becomes the WINDOW's minimum"*).** In the `SideColumn` they are shielded only by the column's fixed
+`.frame(width:)`; `BlockHistoryPane` is ALSO hosted in two `.sheet`s (`CommitBar.swift:153`,
+`TakesBottomBar.swift:239` — the fallback hosts) where no frame pins the width. `ChromeMinHeightTests` covers
+`ChromeNotice` and the cause note only. The `CalmSectionHeader` explainers (the rule's real target) sit inside the
+scroll views and are fine. Proposed: a bounded limit large enough for the longest explainer (they are ≤ 6 lines at
+256 pt — `RecoveryExplainerTests` measured it) on the two non-scrolling ones, or move them inside the scroll. Pin:
+`ChromeMinHeightTests`' near-zero-width probe over a sheet-hosted `BlockHistoryPane` stays bounded.
