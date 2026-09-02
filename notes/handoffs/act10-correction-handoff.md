@@ -12,7 +12,7 @@ is what you read first in the morning. Everything in it is answerable from the r
    `~/dev/variorum-store-backups/pre-act10cor-refresh-20260902T094613Z/` — the whole store folder (sqlite + shm +
    wal), copied with the app closed, the header verified ciphertext. The installed binary's sha256
    `600eeef9e5ed50c249c9411d26aef87030e10f4f7cb199904f00c078444189fe` matches the build product exactly;
-   `io.lduarte.Variorum`, team `<apple-team-id>`, `keychain-access-groups` = ``. Your store's mode is biometric, so
+   *[removed for publication]*
    the app asks you at open exactly as before.
 2. **Restore the field guide — YOUR one in-app act:** Help ▸ Restore Tutorial… (Replace). Four lesson texts
    changed this round — "getting around" (seven modes, ⌘1–⌘7), the "read" lesson (the `edit · read` teaching,
@@ -139,7 +139,7 @@ non-DerivedData instance); (2) the A1 backup — the whole store folder copied t
 a set with no writer active; the header verified ciphertext); (3) `xcodebuild -scheme Variorum -configuration
 Release -destination 'platform=macOS' build` at `ded5ac5` → `** BUILD SUCCEEDED **`; (4) the re-check passed and
 *[removed for publication]*
-`keychain-access-groups` = ``; sha256 of the installed binary and the build product identical
+*[removed for publication]*
 (`600eeef9e5ed50c249c9411d26aef87030e10f4f7cb199904f00c078444189fe`). The tutorial re-seed is yours (biometric).
 
 ## What moved, and where (the relocation sweep — your instruction; every file carries a dated pointer)
