@@ -166,7 +166,7 @@ struct BookView: View {
                         reveal: model.pendingReveal,
                         onRevealLanded: { model.consumeReveal() })
                 case .pages:
-                    PagedReadView(session: session, model: model, structure: structure)
+                    pagedRead
                 }
             }
         }
@@ -1315,6 +1315,19 @@ struct BookView: View {
         }
         model.consumeReveal()
         landOutline(BookOutlineRows.Row.noteAnchor(postID), proxy)
+    }
+
+    /// Row 82 (the correction round, batch G): the paged Read's paragraph
+    /// click is the SAME door as the flow's — the editable index at that
+    /// block (its own property: the body's expression outgrew the
+    /// type-checker with the closure inline).
+    private var pagedRead: some View {
+        PagedReadView(
+            session: session, model: model, structure: structure,
+            onWake: { postID, blockID in
+                model.requestLanding(LandingTarget(postID: postID, blockID: blockID))
+                structure.mode = .index
+            })
     }
 
     /// 13b 3E (N21 — her "the dots … make me feel like it should be

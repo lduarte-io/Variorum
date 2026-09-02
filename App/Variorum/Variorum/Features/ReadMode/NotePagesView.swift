@@ -24,14 +24,18 @@ import VariorumCore
 struct NotePagesView: View {
     let session: AppSession
     let postID: String
+    /// Row 82: a click on a page's paragraph flips the note to `edit` at
+    /// that block — the same scrolled-open door the continuous page has.
+    var onOpenInEdit: ((String) -> Void)? = nil
 
     @State private var pages: PagedReadModel
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
 
-    init(session: AppSession, postID: String) {
+    init(session: AppSession, postID: String, onOpenInEdit: ((String) -> Void)? = nil) {
         self.session = session
         self.postID = postID
+        self.onOpenInEdit = onOpenInEdit
         _pages = State(initialValue: PagedReadModel(session: session))
     }
 
@@ -95,7 +99,8 @@ struct NotePagesView: View {
                     PageLeafView(
                         leaf: leaf, geometry: pages.geometry, scale: scale,
                         page: page, appearance: appearance,
-                        dark: scheme == .dark)
+                        dark: scheme == .dark,
+                        onBlockClick: onOpenInEdit)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)

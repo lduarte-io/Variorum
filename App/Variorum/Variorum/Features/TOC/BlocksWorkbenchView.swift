@@ -245,11 +245,17 @@ struct BlocksWorkbenchView: View {
         }
         .coordinateSpace(name: Self.space)
         .background(tokens.surface)
-        .task { await model.start() }
-        .task { await model.startFacts() }
-        .task { await model.startTray() }
-        .task { await model.startPools() }
-        .task { allTags = (try? await session.database.read { try Queries.allTags($0) }) ?? [] }
+        // Row 83: the rows are PRIMED by one bounded read before the
+        // observation starts, and the four sibling observations wait for
+        // that read — the first paint carries the note.
+        .task { await model.primeRows(); await model.start() }
+        .task { await model.awaitPrimed(); await model.startFacts() }
+        .task { await model.awaitPrimed(); await model.startTray() }
+        .task { await model.awaitPrimed(); await model.startPools() }
+        .task {
+            await model.awaitPrimed()
+            allTags = (try? await session.database.read { try Queries.allTags($0) }) ?? []
+        }
         .onDisappear { model.teardown() }
         .onChange(of: focusedBlockID) { _, new in
             #if DEBUG
@@ -1023,7 +1029,12 @@ extension View {
             $0.frame(in: .named(BlocksWorkbenchView.space))
         } action: { frame in
             switch slot {
-            case .row(let id): BlocksWorkbenchOracle.rowFrames[id] = frame
+            case .row(let id):
+                BlocksWorkbenchOracle.rowFrames[id] = frame
+                // Row 83's measure: the FIRST row's paint.
+                if BlocksWorkbenchOracle.firstRowPaintedAt == nil {
+                    BlocksWorkbenchOracle.firstRowPaintedAt = Date()
+                }
             case .divider: BlocksWorkbenchOracle.dividerFrame = frame
             }
         }
@@ -1044,12 +1055,16 @@ enum BlocksWorkbenchOracle {
     static var panelMounted = false
     static var rowFrames: [String: CGRect] = [:]
     static var dividerFrame: CGRect?
+    /// Row 83: when the list's first row was laid out (the arrival's
+    /// first painted row) — nil until then.
+    static var firstRowPaintedAt: Date?
 
     static func reset() {
         focusedBlockID = nil
         panelMounted = false
         rowFrames = [:]
         dividerFrame = nil
+        firstRowPaintedAt = nil
     }
 }
 #endif

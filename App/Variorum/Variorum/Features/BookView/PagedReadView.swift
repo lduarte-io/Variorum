@@ -41,16 +41,23 @@ struct PagedReadView: View {
     let session: AppSession
     let model: BookViewModel
     let structure: BookStructureModel
+    /// Row 82: a click on a page's paragraph WAKES the editable index at
+    /// that (note, block) — the flow's own door (`onWake`), on paper.
+    var onWake: ((_ postID: String, _ blockID: String) -> Void)? = nil
 
     @State private var pages: PagedReadModel
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
 
-    init(session: AppSession, model: BookViewModel, structure: BookStructureModel) {
+    init(
+        session: AppSession, model: BookViewModel, structure: BookStructureModel,
+        onWake: ((_ postID: String, _ blockID: String) -> Void)? = nil
+    ) {
         self.session = session
         self.model = model
         self.structure = structure
         _pages = State(initialValue: PagedReadModel(session: session))
+        self.onWake = onWake
     }
 
     private var tokens: VoiceTokens {
@@ -145,7 +152,10 @@ struct PagedReadView: View {
                     PageLeafView(
                         leaf: leaf, geometry: pages.geometry, scale: scale,
                         page: page, appearance: appearance,
-                        dark: scheme == .dark)
+                        dark: scheme == .dark,
+                        onBlockClick: leaf.map { leaf in
+                            { blockID in onWake?(leaf.postID, blockID) }
+                        })
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)

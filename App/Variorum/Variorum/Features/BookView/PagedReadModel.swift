@@ -265,6 +265,9 @@ final class PagedReadModel {
         /// string indices, so filtering here would only be a second place to
         /// get the arithmetic wrong.
         var links: [PageLink] = []
+        /// Row 82: this post's block ranges, the same way — a click that hit
+        /// no link names the block under it.
+        var blocks: [PageBlockRange] = []
         var id: String { "\(postID)#\(address.pageInPost)" }
     }
 
@@ -281,7 +284,8 @@ final class PagedReadModel {
             return Leaf(
                 address: address, postID: postID, pageNumber: number,
                 frame: paginators[postID]?.frame(forPage: address.pageInPost),
-                links: paginators[postID]?.composed.links ?? [])
+                links: paginators[postID]?.composed.links ?? [],
+                blocks: paginators[postID]?.composed.blocks ?? [])
         }
     }
 

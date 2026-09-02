@@ -101,9 +101,53 @@ final class BlockTOCViewModel {
         }
     }
 
+    // MARK: - Row 83 (the Act 10 correction round, batch G): the rows FIRST
+
+    /// **Blocks arrives painted.** Batch C measured the mode's first paint
+    /// EMPTY for ~0.25–0.5 s on the 215-block story — the tool row up, the
+    /// list blank — until the observations' FIRST delivery (a value
+    /// observation's initial fetch is scheduled through the database's
+    /// queues and delivered a turn later, and five sibling observations
+    /// start at once and contend for the reader pool). So the workbench
+    /// PRIMES the rows with ONE bounded read (the same query the
+    /// observation runs — cost ∝ the note, P1) before its observation
+    /// starts, and the sibling observations wait for that read (their
+    /// first deliveries no longer sit on the critical path). The
+    /// observation then keeps the rows live exactly as before.
+    private(set) var primed = false
+    private var primedWaiters: [CheckedContinuation<Void, Never>] = []
+
+    func primeRows() async {
+        if rows.isEmpty,
+           let first = try? await session.database.read({ [postID] db in
+               try Queries.blockTOC(db, post: postID)
+           }) {
+            adopt(rows: first)
+        }
+        primed = true
+        let waiters = primedWaiters
+        primedWaiters.removeAll()
+        waiters.forEach { $0.resume() }
+    }
+
+    /// Suspends until `primeRows` has run (returns at once after it).
+    func awaitPrimed() async {
+        if primed { return }
+        await withCheckedContinuation { primedWaiters.append($0) }
+    }
+
     /// The workbench's facts observation (wave 2c — opt-in; only the
-    /// Blocks mode pays for the joined row).
+    /// Blocks mode pays for the joined row). Row 83: the facts are primed
+    /// the same way — one bounded read before the observation — so the
+    /// context panel and the per-row facts land with the rows' first
+    /// paint rather than a delivery later.
     func startFacts() async {
+        if facts.isEmpty,
+           let first = try? await session.database.read({ [postID] db in
+               try Queries.blockWorkbench(db, post: postID)
+           }) {
+            adopt(facts: first)
+        }
         do {
             for try await value in session.database.observeBlockWorkbench(postID) {
                 adopt(facts: value)

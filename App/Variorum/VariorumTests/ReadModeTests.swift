@@ -310,3 +310,92 @@ struct ReadModeTests {
         }
     }
 }
+
+// MARK: - The Act 10 correction round, batch G — row 82 (the pages face's door)
+
+extension ReadModeTests {
+    /// **Row 82 in use: a REAL click on a page's paragraph reaches the host
+    /// with the block under it.** The note's `pages` face wires this to
+    /// `openInEdit` (the continuous page's own door — C's pinned road), the
+    /// book's paged Read to its index landing. RED ON OLD: the leaf had no
+    /// block door — the click opened links only, and nothing else happened.
+    @Test func aRealClickOnAPageReachesTheHostWithTheBlockUnderIt() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 82))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let post = try session.operations.createPost(title: "leaves")
+            var blocks: [String] = []
+            for i in 1...6 {
+                let minted = try session.operations.newBlock(
+                    in: post.id,
+                    text: String(repeating: "Paragraph \(i) of a note long enough to page. ", count: 40))
+                blocks.append(minted.block.id)
+            }
+            final class Landed: @unchecked Sendable { var blockIDs: [String] = [] }
+            let landed = Landed()
+            // The canvas rig's window shape — the one that DELIVERS pointer
+            // events to a hosting view under the test runner.
+            let window = NSPanel(
+                contentRect: NSRect(x: 120, y: 120, width: 1100, height: 750),
+                styleMask: [.titled, .nonactivatingPanel], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            window.isFloatingPanel = true
+            window.becomesKeyOnlyIfNeeded = false
+            window.hidesOnDeactivate = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let hosting = NSHostingView(rootView: AnyView(
+                NotePagesView(session: session, postID: post.id, onOpenInEdit: { blockID in
+                    landed.blockIDs.append(blockID)
+                })
+                .environment(ThemeStore(session: session))))
+            hosting.frame = NSRect(x: 0, y: 0, width: 1100, height: 750)
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            let deadline = Date().addingTimeInterval(5)
+            var drawn: [PageFrameNSView] = []
+            while Date() < deadline {
+                hosting.layoutSubtreeIfNeeded()
+                window.displayIfNeeded()
+                Self.pumpRunLoop(0.02)
+                await Task.yield()
+                drawn = Self.frames(in: hosting).filter { $0.visibleRange.length > 0 }
+                if drawn.count >= 2, !drawn[0].blocks.isEmpty { break }
+            }
+            let leaf = try #require(drawn.first, "a leaf drew")
+            #expect(!leaf.blocks.isEmpty, "the leaf carries its block map")
+            // Find a point on the leaf's prose (a grid walk through the pure
+            // decision), then click it FOR REAL.
+            var target: (point: NSPoint, block: String)?
+            for y in stride(from: leaf.bounds.height - 4, through: 4, by: -6) {
+                for x in stride(from: 4, through: leaf.bounds.width - 4, by: 8) {
+                    let p = NSPoint(x: x, y: y)
+                    if case .block(let id)? = leaf.hit(at: p) { target = (p, id); break }
+                }
+                if target != nil { break }
+            }
+            let (point, expected) = try #require(target, "a point on the page's prose")
+            let inWindow = leaf.convert(point, to: nil)
+            for type in [NSEvent.EventType.leftMouseDown, .leftMouseUp] {
+                guard let event = NSEvent.mouseEvent(
+                    with: type, location: inWindow, modifierFlags: [],
+                    timestamp: ProcessInfo.processInfo.systemUptime,
+                    windowNumber: window.windowNumber, context: nil,
+                    eventNumber: 1, clickCount: 1, pressure: type == .leftMouseUp ? 0 : 1)
+                else { continue }
+                NSApp.sendEvent(event)
+                Self.pumpRunLoop(0.01)
+            }
+            #expect(landed.blockIDs == [expected],
+                    "the click reached the host with the block under it: \(landed.blockIDs) vs \(expected)")
+            #expect(blocks.contains(expected), "…one of the note's own blocks")
+        }
+    }
+}

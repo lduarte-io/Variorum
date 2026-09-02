@@ -269,7 +269,11 @@ struct ReadModeView: View {
                     pageTarget: $pageTarget,
                     onOpenInEdit: { row in openInEdit(row) })
             case .pages:
-                NotePagesView(session: session, postID: postID)
+                // Row 82: a page's paragraph is the same door as the
+                // continuous page's — `edit` at that block.
+                NotePagesView(session: session, postID: postID, onOpenInEdit: { blockID in
+                    if let row = rowsByID[blockID] { openInEdit(row) }
+                })
             }
         }
     }

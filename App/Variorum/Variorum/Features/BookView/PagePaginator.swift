@@ -42,6 +42,16 @@ struct PageLink: Equatable {
     let url: String
 }
 
+/// **Row 82 (the Act 10 correction round, batch G):** one block's range in
+/// the composed string — the map a plain click hit-tests against AFTER the
+/// links, so a click on a page can name the block under it (the note's
+/// `pages` face flips to `edit` at that block; the book's paged Read lands
+/// its Index there — the one scrolled-open door, `LandingTarget`).
+struct PageBlockRange: Equatable {
+    let blockID: String
+    let range: NSRange
+}
+
 /// One post, composed for the page: the attributed prose plus the plain
 /// string it renders (kept so tests can pin it against `renderedText`).
 struct ComposedPost {
@@ -62,6 +72,9 @@ struct ComposedPost {
     /// Every link on this post's pages, in composed-string offsets — the map
     /// a plain click hit-tests against (13g batch 4, L10).
     var links: [PageLink] = []
+    /// Row 82: every block's range, in the same composed-string offsets —
+    /// the map a plain click that hit no link resolves to a BLOCK by.
+    var blocks: [PageBlockRange] = []
 }
 
 enum PageComposer {
@@ -243,6 +256,14 @@ enum PageComposer {
                     range: NSRange(
                         location: link.range.location + chromeLength, length: link.range.length),
                     url: link.url)
+            },
+            // Row 82: the blocks' DISPLAY ranges, rebased onto the composed
+            // string exactly as the links are.
+            blocks: ranges.compactMap { blockID, range in
+                guard range.upperBound <= displayLength else { return nil }
+                return PageBlockRange(
+                    blockID: blockID,
+                    range: NSRange(location: range.location + chromeLength, length: range.length))
             })
     }
 

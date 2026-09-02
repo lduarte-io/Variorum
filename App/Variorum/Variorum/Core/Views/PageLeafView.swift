@@ -38,6 +38,11 @@ struct PageLeafView: View {
     let page: ReadingPageTokens
     let appearance: PagedReadModel.PageAppearance
     let dark: Bool
+    /// Row 82 (the correction round, batch G): a plain click that hit no
+    /// link names the BLOCK under it — the host lands its editing surface
+    /// there (the note: `edit` at that block; the book: Index). Nil = a
+    /// page with no editing surface to land.
+    var onBlockClick: ((String) -> Void)? = nil
 
     var body: some View {
         ZStack {
@@ -47,7 +52,8 @@ struct PageLeafView: View {
             if let leaf {
                 PageFrameView(
                     frame: leaf.frame, pageNumber: leaf.pageNumber, scale: scale,
-                    geometry: geometry, meta: appearance.meta, links: leaf.links)
+                    geometry: geometry, meta: appearance.meta, links: leaf.links,
+                    blocks: leaf.blocks, onBlockClick: onBlockClick)
             } else {
                 Text("end of the book")
                     .font(.system(size: 11, design: .serif))
@@ -68,6 +74,8 @@ struct PageFrameView: NSViewRepresentable {
     let geometry: PageGeometry
     let meta: NSColor
     var links: [PageLink] = []
+    var blocks: [PageBlockRange] = []
+    var onBlockClick: ((String) -> Void)? = nil
 
     func makeNSView(context: Context) -> PageFrameNSView {
         #if DEBUG
@@ -89,6 +97,8 @@ struct PageFrameView: NSViewRepresentable {
         view.geometry = geometry
         view.meta = meta
         view.links = links
+        view.blocks = blocks
+        view.onBlockClick = onBlockClick
         view.needsDisplay = true
     }
 }
@@ -103,6 +113,33 @@ final class PageFrameNSView: NSView {
     var meta: NSColor = .tertiaryLabelColor
     /// 13g batch 4 (L10): this post's links, in composed-string offsets.
     var links: [PageLink] = []
+    /// Row 82: this post's block ranges, in the same offsets.
+    var blocks: [PageBlockRange] = []
+    /// Row 82: what a plain click on a block (and not on a link) does.
+    var onBlockClick: ((String) -> Void)?
+
+    /// **What a plain click at `point` means** (row 82) — a PURE decision,
+    /// pinned: the link under the point first (L10's door, unchanged), else
+    /// the block under it, else nothing (the margins, the folio).
+    enum Hit: Equatable {
+        case link(PageLink)
+        case block(String)
+    }
+
+    func hit(at point: NSPoint) -> Hit? {
+        guard let index = characterIndex(at: point) else { return nil }
+        if let link = links.first(where: {
+            $0.range.location <= index && index < $0.range.upperBound
+        }) {
+            return .link(link)
+        }
+        if let block = blocks.first(where: {
+            $0.range.location <= index && index < $0.range.upperBound
+        }) {
+            return .block(block.blockID)
+        }
+        return nil
+    }
     /// The range this leaf draws — read by the pins, so "what is on this
     /// page" is inspectable without a text view.
     var visibleRange: NSRange {
@@ -126,12 +163,19 @@ final class PageFrameNSView: NSView {
     /// argues page BREAKS must be.
     override func mouseDown(with event: NSEvent) {
         let point = convert(event.locationInWindow, from: nil)
-        if let index = characterIndex(at: point),
-           let link = links.first(where: {
-               $0.range.location <= index && index < $0.range.upperBound
-           }),
-           MarkdownLink.open(link.url) {
-            return
+        switch hit(at: point) {
+        case .link(let link):
+            if MarkdownLink.open(link.url) { return }
+        case .block(let blockID):
+            // Row 82 ("a click that does nothing is a defect"): the block
+            // under the click reaches the host, which lands its editing
+            // surface there.
+            if let onBlockClick {
+                onBlockClick(blockID)
+                return
+            }
+        case nil:
+            break
         }
         super.mouseDown(with: event)
     }

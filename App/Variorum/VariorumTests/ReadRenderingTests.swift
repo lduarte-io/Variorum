@@ -327,3 +327,43 @@ struct ReadRenderingTests {
         return nil
     }
 }
+
+// MARK: - The Act 10 correction round, batch G — row 82
+
+extension ReadRenderingTests {
+    /// **Row 82: a plain click on a page names the BLOCK under it — after
+    /// the links.** Her bar: "a click that does nothing is a defect"; a
+    /// `CTFrame` page opened links only. The decision is `hit(at:)`, pure:
+    /// a point on a link is the link (L10's door, unchanged); a point on
+    /// prose is its block; a point off the text is nothing. RED ON OLD: no
+    /// block map existed — `blocks` empty, every prose click nothing.
+    @Test func aPointOnThePageNamesTheBlockUnderItAfterTheLinks() throws {
+        let post = compose([
+            slot("a", "Open [the docs](https://x.test/a) to begin."),
+            slot("b", "A second paragraph, plain prose with no link in it at all."),
+        ])
+        #expect(post.blocks.map(\.blockID) == ["a", "b"], "the composed post carries every block's range")
+        let paginator = PagePaginator(composed: post, contentRect: geometry.contentRect)
+        let view = PageFrameNSView()
+        view.frame = NSRect(origin: .zero, size: geometry.size)
+        view.ctFrame = try #require(paginator.frame(forPage: 0))
+        view.geometry = geometry
+        view.links = post.links
+        view.blocks = post.blocks
+        view.scale = 1
+
+        // A point on the link is the LINK, never its block.
+        let linkRange = try #require(post.links.first).range
+        let onLink = try #require(Self.point(resolvingInto: linkRange, of: view))
+        #expect(view.hit(at: onLink) == .link(post.links[0]))
+        // A point in the second block's prose is that BLOCK.
+        let second = try #require(post.blocks.last).range
+        let onProse = try #require(Self.point(resolvingInto: second, of: view))
+        #expect(view.hit(at: onProse) == .block("b"))
+        // A point in the first block's prose, off the link, is block "a".
+        let atStart = NSPoint(x: geometry.margin + 1, y: onLink.y)
+        #expect(view.hit(at: atStart) == .block("a"))
+        // Off the text: nothing.
+        #expect(view.hit(at: NSPoint(x: geometry.margin + 4, y: 2)) == nil)
+    }
+}
