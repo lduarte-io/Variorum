@@ -8,12 +8,19 @@
 //  `land(_:)` — `withAnimation { proxy.scrollTo("flow-…", anchor: .top) }`
 //  over a LazyVStack of ~20,000-pt `FlowPostView`s (the animated-scroll-
 //  over-lazy-estimates class rows 44/9/12 traced), "not walked" by B's own
-//  record. The pin: the flow mounted over FIVE 215-block entries and its
-//  page DRAWN (every story loaded), the reveal of the fifth requested AFTER
-//  that (the navigator's road), the fifth row's top at the flow's top
+//  record. The first pin: the flow mounted over FIVE 215-block entries, the
+//  reveal of the fifth requested after the mount (the navigator's road)
+//  while the fifth is still UNLOADED, the fifth row's top at the flow's top
 //  within tolerance. RED on the shipped form (1,562 pt short animated;
-//  18,452 pt off unanimated and by identity alone — the pin-first runs);
-//  GREEN with the flow's stability-driven landing.
+//  18,452 pt off unanimated and by identity alone — the pin-first runs;
+//  11,828.5 pt off on the tree batch H began from, the pin disabled there
+//  as ledger row 95); GREEN with batch H's segmented column — every story a
+//  direct child at an honest height, the landing anchored.
+//
+//  The second pin (batch H): the reveal of the SECOND story requested at
+//  the mount, before the first has loaded — the ascent's road, and the case
+//  where the story directly above the target grows under it — lands and is
+//  STILL at the top a second later.
 //
 
 import AppKit
@@ -54,7 +61,7 @@ private struct FlowHost: View {
 }
 
 @MainActor
-@Suite("Read ▸ Scroll's chapter landing (ladder R1-4, pin-first)", .serialized)
+@Suite("Read ▸ Scroll's chapter landing (ladder R1-4, pin-first; batch H)", .serialized)
 struct ReadingFlowLandingTests {
     static let landingTolerance: CGFloat = 4
 
@@ -99,25 +106,28 @@ struct ReadingFlowLandingTests {
         return facts.joined(separator: " | ")
     }
 
-    /// DISABLED with its reason (ledger row 95): the reveal of an UNLOADED
-    /// far story lands on the lazy stack's estimate of its offset — wrong by
-    /// tens of thousands of points — and no scroll can bring it in (the
-    /// corrector's log: the column's estimate DOUBLED under hops, 35,426 →
-    /// 116,780 pt for ~58,000 of content). The structural fix is the book
-    /// Outline's segmented column with remembered sizes, applied to the
-    /// flow; this pin reactivates with it and must then be green.
-    @Test
-    func aRevealOfTheFifthLongEntryLandsItsRowAtTheTop() async throws {
+    /// Sherlock-shaped stories (215 blocks each), in a fresh world.
+    private func withFiveStories<T>(
+        seed: UInt64,
+        _ body: @MainActor (AppSession, [Queries.ReadingEntry]) async throws -> T
+    ) async throws -> T {
+        try await withStories(count: 5, seed: seed, body)
+    }
+
+    private func withStories<T>(
+        count: Int, seed: UInt64,
+        _ body: @MainActor (AppSession, [Queries.ReadingEntry]) async throws -> T
+    ) async throws -> T {
         let db = try AppDatabase.inMemory()
-        try await withDependencies {
+        return try await withDependencies {
             $0.database = db
             $0.uuid = .incrementing
             $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
-            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 19))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: seed))
         } operation: { @MainActor in
             let session = AppSession(database: db)
             var entries: [Queries.ReadingEntry] = []
-            for p in 0..<5 {
+            for p in 0..<count {
                 let post = try session.operations.createPost(title: "story \(p)")
                 for b in 0..<215 {
                     _ = try session.operations.newBlock(
@@ -130,47 +140,143 @@ struct ReadingFlowLandingTests {
                 entries.append(Queries.ReadingEntry(
                     postID: post.id, title: "story \(p)", entryDate: nil, sectionPath: nil))
             }
+            return try await body(session, entries)
+        }
+    }
+
+    private func mount(session: AppSession, entries: [Queries.ReadingEntry], box: FlowRevealBox)
+        -> (NSWindow, NSHostingView<AnyView>)
+    {
+        let window = NSWindow(
+            contentRect: NSRect(x: 60, y: 60, width: 1000, height: 760),
+            styleMask: [.titled], backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
+        let hosting = NSHostingView(rootView: AnyView(
+            FlowHost(session: session, entries: entries, box: box)
+                .environment(ThemeStore(session: session))))
+        hosting.frame = NSRect(x: 0, y: 0, width: 1000, height: 760)
+        window.contentView = hosting
+        window.makeKeyAndOrderFront(nil)
+        return (window, hosting)
+    }
+
+    /// The navigator's chapter click on an OPEN flow: the reveal of the
+    /// fifth story arrives after the mount, while the fifth is UNLOADED
+    /// (row 95's common case — the column's placeholders make the page
+    /// tall at once, so the request meets stories that have not read their
+    /// text). RED on the pre-batch tree (11,828.5 pt off); the record has
+    /// the numbers.
+    @Test func aRevealOfTheFifthLongEntryLandsItsRowAtTheTop() async throws {
+        try await withFiveStories(seed: 19) { session, entries in
             #if DEBUG
             ReadingFlowGeometry.anchorTops = [:]
+            ReadingFlowGeometry.trace = []
             #endif
             let box = FlowRevealBox()
-            let window = NSWindow(
-                contentRect: NSRect(x: 60, y: 60, width: 1000, height: 760),
-                styleMask: [.titled], backing: .buffered, defer: false)
-            window.isReleasedWhenClosed = false
+            let (window, hosting) = mount(session: session, entries: entries, box: box)
             defer {
                 window.orderOut(nil)
                 window.close()
             }
-            let hosting = NSHostingView(rootView: AnyView(
-                FlowHost(session: session, entries: entries, box: box)
-                    .environment(ThemeStore(session: session))))
-            hosting.frame = NSRect(x: 0, y: 0, width: 1000, height: 760)
-            window.contentView = hosting
-            window.makeKeyAndOrderFront(nil)
-            // The flow up and its page DRAWN — every story's text loaded and
-            // laid out (the realistic state when she clicks a chapter; a
-            // click while the stories are still loading is the recorded
-            // residual — the lazy stack's estimate of unloaded 10k-word rows
-            // runs away, the row-53 class in the flow, a batch of its own).
+            // The flow up and its page standing at its honest height — the
+            // first stories loading, the far ones placeholders.
             #expect(await settle(window, hosting, timeout: 20) {
                 Self.documentHeight(hosting) >= 3 * 11_000
-            }, "the flow mounted and every story loaded (\(Self.scrollFacts(hosting)))")
+            }, "the flow mounted at its honest height (\(Self.scrollFacts(hosting)))")
             let target = entries[4].postID
-            print("[ladder R1-4] before the reveal: every row's top: \(entries.map { ReadingFlowGeometry.anchorTops[$0.postID] }); \(Self.scrollFacts(hosting))")
+            print("[batch H] before the reveal: every row's top: \(entries.map { ReadingFlowGeometry.anchorTops[$0.postID] }); \(Self.scrollFacts(hosting))")
 
-            // The navigator's chapter click on an OPEN flow: the reveal
-            // arrives after the mount.
             box.reveal = target
             let landed = await settle(window, hosting, timeout: 10) {
                 ReadingFlowGeometry.anchorTops[target].map { abs($0) <= Self.landingTolerance } ?? false
             }
             let top = ReadingFlowGeometry.anchorTops[target]
-            print("[ladder R1-4] flow reveal of story 5: its top after the settle = \(String(describing: top)) (tolerance \(Self.landingTolerance)); realized rows = \(ReadingFlowGeometry.anchorTops.count); landed acknowledgements = \(box.landedCount)")
-            print("[ladder R1-4] every row's top: \(entries.map { ReadingFlowGeometry.anchorTops[$0.postID] })")
-            print("[ladder R1-4] scroll facts: \(Self.scrollFacts(hosting))")
+            print("[batch H] flow reveal of story 5: its top after the settle = \(String(describing: top)) (tolerance \(Self.landingTolerance)); realized rows = \(ReadingFlowGeometry.anchorTops.count); landed acknowledgements = \(box.landedCount)")
+            print("[batch H] every row's top: \(entries.map { ReadingFlowGeometry.anchorTops[$0.postID] })")
+            print("[batch H] scroll facts: \(Self.scrollFacts(hosting)); trace: \(ReadingFlowGeometry.trace.suffix(30))")
             #expect(box.landedCount == 1, "the reveal was consumed exactly once")
             #expect(landed, "the fifth story's row sits at the top of the flow — top \(String(describing: top))")
+        }
+    }
+
+    /// The ascent's road: the reveal of the SECOND story is set BEFORE the
+    /// mount, so the flow lands at its `onAppear` with the first story
+    /// unloaded — and the first story then loads directly above the target
+    /// (the one event that moves a landed target). The row must be at the
+    /// top once the landing settles AND still be there a second later.
+    /// RED on the pre-batch tree by construction: the first story grew by
+    /// ~20,000 pt under the target after the scroll.
+    @Test func aRevealOfTheSecondStoryWithTheFirstUnloadedLandsAndHolds() async throws {
+        try await withFiveStories(seed: 23) { session, entries in
+            #if DEBUG
+            ReadingFlowGeometry.anchorTops = [:]
+            ReadingFlowGeometry.trace = []
+            #endif
+            let box = FlowRevealBox()
+            let target = entries[1].postID
+            box.reveal = target
+            let (window, hosting) = mount(session: session, entries: entries, box: box)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let landed = await settle(window, hosting, timeout: 10) {
+                ReadingFlowGeometry.anchorTops[target].map { abs($0) <= Self.landingTolerance } ?? false
+            }
+            let first = ReadingFlowGeometry.anchorTops[target]
+            print("[batch H] second story, first unloaded: landed=\(landed) top=\(String(describing: first)); \(Self.scrollFacts(hosting))")
+            #expect(landed, "the second story's row reaches the top — top \(String(describing: first))")
+            // The hold: a second later the story above has loaded and the
+            // column has settled — the target must still be at the top.
+            _ = await settle(window, hosting, timeout: 1.5) { false }
+            let held = ReadingFlowGeometry.anchorTops[target]
+            print("[batch H] second story a second later: top=\(String(describing: held)); \(Self.scrollFacts(hosting)); trace: \(ReadingFlowGeometry.trace.suffix(40))")
+            #expect(box.landedCount == 1, "the reveal was consumed exactly once")
+            #expect(held.map { abs($0) <= Self.landingTolerance } ?? false,
+                    "the second story's row is STILL at the top a second later — top \(String(describing: held))")
+            #expect(Self.documentHeight(hosting) > 3 * 11_000,
+                    "the column stands at its honest height: \(Self.documentHeight(hosting))")
+        }
+    }
+
+    /// Sherlock's own shape — the navigator's TWELFTH story revealed on a
+    /// fresh open, eleven unloaded stories above it. With the HONEST
+    /// estimate the eleven stand as placeholders of their stated heights,
+    /// the landing is exact and at most the one story above it loads under
+    /// the target. Under a behavioral revert of the estimate (every
+    /// never-measured story one blank line tall) the whole column fits the
+    /// near band, every story loads and shifts the target, and the bounded
+    /// re-lands run out: RED — the record has the numbers.
+    @Test func aRevealOfTheTwelfthStoryWithElevenUnloadedAboveLandsAndHolds() async throws {
+        try await withStories(count: 12, seed: 29) { session, entries in
+            #if DEBUG
+            ReadingFlowGeometry.anchorTops = [:]
+            ReadingFlowGeometry.trace = []
+            #endif
+            let box = FlowRevealBox()
+            let (window, hosting) = mount(session: session, entries: entries, box: box)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            _ = await settle(window, hosting, timeout: 5) { Self.documentHeight(hosting) > 0 }
+            let target = entries[11].postID
+            box.reveal = target
+            let landed = await settle(window, hosting, timeout: 12) {
+                ReadingFlowGeometry.anchorTops[target].map { abs($0) <= Self.landingTolerance } ?? false
+            }
+            let first = ReadingFlowGeometry.anchorTops[target]
+            #expect(landed, "the twelfth story's row reaches the top — top \(String(describing: first))")
+            _ = await settle(window, hosting, timeout: 1.5) { false }
+            let held = ReadingFlowGeometry.anchorTops[target]
+            let relands = ReadingFlowGeometry.trace.filter { $0.hasPrefix("RE-LAND") }.count
+            print("[batch H] twelfth story, eleven unloaded above: landed=\(landed) top=\(String(describing: first)) · a second later \(String(describing: held)) · re-lands \(relands) · realized rows \(ReadingFlowGeometry.anchorTops.count); \(Self.scrollFacts(hosting))")
+            print("[batch H] trace: \(ReadingFlowGeometry.trace.suffix(30))")
+            #expect(box.landedCount == 1, "the reveal was consumed exactly once")
+            #expect(held.map { abs($0) <= Self.landingTolerance } ?? false,
+                    "the twelfth story's row is STILL at the top a second later — top \(String(describing: held))")
+            #expect(relands <= ReadingFlowView.landingCorrectionBudget,
+                    "the re-lands stayed inside the budget: \(relands)")
         }
     }
 }

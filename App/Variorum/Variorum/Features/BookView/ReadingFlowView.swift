@@ -8,13 +8,39 @@
 //  text). One continuous page column; chapter breaks are typographic;
 //  posts flow together. Clicking a post opens it for editing in the book
 //  view (in-place waking is Stage C's v2-canon surface). Text loads
-//  lazily per post (`.task` per row inside the LazyVStack — viewport-
-//  shaped, P3). Round 3 MAJOR: the column WAS a plain VStack — every row
-//  materialized and fetched on open, cost ∝ book size, exactly the shape
-//  this header already claimed not to have; now genuinely lazy, pinned by
-//  the DEBUG materialization counter below.
+//  lazily per post — viewport-shaped, P3. Round 3 MAJOR: the column WAS a
+//  plain VStack — every row materialized and fetched on open, cost ∝ book
+//  size, exactly the shape this header already claimed not to have; the
+//  DEBUG materialization counter below pins the bound.
+//
+//  The Act 10 correction round, batch H (ledger row 95 — the flow's
+//  landing lands WRONG whenever the stories between the page and the
+//  target have not loaded): the column is SEGMENTED, the book Outline's
+//  row-53 answer applied here. A `LazyVStack` estimates every row it has
+//  not realized at the AVERAGE of the rows it has measured, and an
+//  unloaded story is one line tall until its text is read — so a far
+//  story's offset was wrong by tens of thousands of points and no scroll
+//  request (animated or not, by identity or not) could land on it; a
+//  stability-driven corrector made it WORSE (every hop into the void
+//  doubled the column's estimate — 35,426 → 116,780 pt for ~58,000 of
+//  content, ladder fix 1's own log). Now every STORY is a DIRECT child of
+//  the column with an HONEST height from its first frame — its remembered
+//  size, or an estimate from its blocks' lengths (`FlowHeightEstimate`,
+//  fed by `Queries.blockExtents`: no prose crosses the boundary) — and is
+//  virtualized by the flow itself: the real text when near the viewport,
+//  a placeholder of that height when far (`NearViewportObserver` +
+//  `StableSurface`, hoisted from the Outline). The small rows — the title,
+//  chapter headings, the closing mark — stay lazy in runs. One unanimated
+//  `scrollTo` on the identity then lands exactly (the geometry above the
+//  target is what it says it is), and the landing ANCHORS the target for
+//  the settle that follows — the one thing that can still move it is a
+//  story above it entering the near band and trading its estimate for its
+//  real height, and each time the target reports itself off the top the
+//  flow re-lands it on the next turn, a bounded few times, never a hop
+//  into a void (there is none).
 //
 
+import AppKit
 import SwiftUI
 import VariorumCore
 
@@ -31,11 +57,32 @@ struct ReadingFlowView: View {
     var reveal: String?
     /// …and the acknowledgement, so the request is consumed exactly once.
     var onRevealLanded: (() -> Void)?
+    /// Batch H: the stories' remembered sizes — the BOOK's (`BookViewModel.
+    /// flowSurfaceSizes`), so a story measured once stays measured for the
+    /// session across mode switches. nil (every pre-batch call site, the
+    /// test hosts) ⇒ the view's own memory below.
+    var sizes: SurfaceSizeMemory?
 
     // Optional: test hosts (and future embeddings) may lack the
     // environment — fall back to the leading voice's tokens.
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
+
+    /// The fallback memory when the host passes none (`@State`, so it
+    /// survives the host's re-evaluations — a fresh box per body would
+    /// forget every story the moment the reveal slot changed).
+    @State private var ownSizes = SurfaceSizeMemory()
+    /// The book's block extents, keyed by post — the estimate's input, ONE
+    /// lengths-only query per entry set (the paged reader's model tier).
+    /// nil until the read lands: a never-measured story then stands at
+    /// `FlowHeightEstimate.unknownHeight`.
+    @State private var extents: [String: [Queries.BlockExtent]]?
+    /// The page column's width (the measure the estimate wraps at, and the
+    /// width a remembered size must match to apply).
+    @State private var columnWidth: CGFloat?
+    /// The pending landing's bookkeeping — a reference box: no `@State`
+    /// write per geometry report (the Outline landing's own lesson).
+    @State private var landing = FlowLanding()
 
     private var page: ReadingPageTokens {
         scheme == .dark ? .dark : .light
@@ -43,15 +90,44 @@ struct ReadingFlowView: View {
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
     }
+    private var memory: SurfaceSizeMemory { sizes ?? ownSizes }
 
-    /// The flow's own coordinate space — the DEBUG landing oracle reads each
-    /// post row's top in it (ladder R1-4's pin-first).
+    /// The flow's own coordinate space — the viewport's top is 0 there; the
+    /// near/far observers and the landing's anchor reports read it.
     static let flowSpace = "reading-flow"
+    /// Within this many points of the top, a landing is DONE.
+    static let landingTolerance: CGFloat = 2
+    /// How far beyond the viewport a story still counts as near — this far
+    /// above it, twice this far below (`NearViewportObserver`'s band: a row
+    /// is near while its distance from the top-edge region is under the
+    /// margin), and far again only beyond three times it (the hysteresis).
+    /// Generous enough that the next story is realized ~2,400 pt before it
+    /// scrolls into view (a story's read takes a fraction of a second) and
+    /// released well after it leaves; smaller than the Outline's 2,500
+    /// because the flow's rows are ALL heavy and a book of many short notes
+    /// would otherwise realize a hundred surfaces at once (the round-3
+    /// virtualization pin's 150-note book counts them).
+    static let nearMargin: CGFloat = 1200
+
+    private var rows: [FlowRows.Row] {
+        FlowRows.rows(readingName: readingName, grouped: grouped)
+    }
 
     var body: some View {
         ScrollViewReader { proxy in
             column
                 .coordinateSpace(name: Self.flowSpace)
+                // Batch H: the landing listens to the WHOLE column — any
+                // content-height change re-arms its quiet interval, and a
+                // scroll by the user ends it.
+                .onScrollGeometryChange(for: CGFloat.self) { geometry in
+                    geometry.contentSize.height
+                } action: { _, height in
+                    contentResized(height, proxy)
+                }
+                .onScrollPhaseChange { _, phase in
+                    if phase == .interacting { userScrolled() }
+                }
                 // 13f W21 — the flow's LANDING half. (Its reporting half
                 // does not exist: this surface tracks no scroll position,
                 // and per-row visibility reporting is the machinery 13c 2A
@@ -60,74 +136,52 @@ struct ReadingFlowView: View {
                 // states it, and the batch record lists it for her walk.)
                 .onAppear { land(proxy) }
                 .onChange(of: reveal) { _, _ in land(proxy) }
+                .task(id: grouped.flatMap { $0.entries.map(\.postID) }) {
+                    await loadExtents()
+                }
         }
     }
 
-    /// Ladder R1-4 (pin-first — the pin was RED on the shipped form): the
-    /// landing is UNANIMATED and on the reader's IDENTITY (the flat rows
-    /// below) — an animated scroll toward a lazy column's ESTIMATED offset
-    /// travelled wrong while the stories it passed loaded and grew (the
-    /// pin's reveal of a fifth 215-block story landed 1,562 pt short), and
-    /// an explicit `.id` inside a nested ForEach was unknown to the reader
-    /// once the lazy stack had released the row. **What this does NOT fix,
-    /// recorded as ledger row 95:** a far story that has not LOADED is one
-    /// line tall until its text is read, so the lazy stack's estimate of
-    /// its offset is wrong by tens of thousands of points, and a scroll to
-    /// it lands wherever the estimate says — the book Outline's row-53
-    /// class in the flow. A bounded stability-driven corrector (the
-    /// Outline's) was built and measured here and taken OUT: every hop into
-    /// the unrealized void DOUBLED the column's estimate (35,426 → 116,780
-    /// pt for ~58,000 of content in the pin's own log) and the target never
-    /// realized — a page hopping for four seconds would be her "berserk
-    /// scrolling" reborn. The structural answer is B's segmented column
-    /// with remembered sizes, applied to the flow — a batch of its own.
-    private func land(_ proxy: ScrollViewProxy) {
-        guard let reveal else { return }
-        onRevealLanded?()
-        proxy.scrollTo(FlowRows.anchor(reveal), anchor: .top)
-    }
+    // MARK: - The column
 
     private var column: some View {
         ScrollView {
             VStack(spacing: 0) {
-                // LAZY (P3 — round 3 MAJOR): rows materialize near the
-                // viewport only; the page paper/shadow wrap the column,
-                // so laziness costs the styling nothing.
-                // Ladder R1-4 (the Outline lesson, rows 47/53): ONE flat
-                // ForEach whose IDENTITIES are the landing anchors — an
-                // explicit `.id` on a row inside a nested ForEach is unknown
-                // to the scroll reader once the lazy stack has released the
-                // row (the pin's reveal of a fifth story moved nothing), and
-                // a nested lazy id is not a scroll target. The reader reaches
-                // an unrealized row by its ForEach identity alone.
-                LazyVStack(spacing: 28) {
-                    ForEach(FlowRows.rows(readingName: readingName, grouped: grouped)) { row in
-                        switch row {
-                        case .title(let name):
-                            Text(name)
-                                .font(page.serifTitle)
-                                .foregroundStyle(page.ink)
-                                .padding(.top, 56)
-                        case .chapter(let section):
-                            Text(section.name.uppercased())
-                                .font(.system(size: 12, weight: .medium, design: .serif))
-                                .tracking(3)
-                                .foregroundStyle(page.chapterInk)
-                                .padding(.top, 22)
-                        case .post(let entry):
-                            FlowPostView(
+                // Batch H: SEGMENTED — runs of small rows keep a lazy
+                // container (uniform rows, honest estimates); every story is
+                // a DIRECT child at an honest height (`FlowStoryRow`), so the
+                // column's geometry is exact and a built row's `.id` is
+                // always known to the scroll reader.
+                VStack(spacing: 28) {
+                    ForEach(FlowRows.segments(rows)) { segment in
+                        switch segment {
+                        case .run(let small):
+                            LazyVStack(spacing: 28) {
+                                ForEach(small) { row in
+                                    smallRow(row)
+                                }
+                            }
+                            .id(segment.id)
+                        case .story(let entry):
+                            FlowStoryRow(
                                 session: session, entry: entry, page: page,
-                                onWake: { blockID in onWake(entry.postID, blockID) })
-                                .readingFlowAnchorProbe(entry.postID)
-                        case .end:
-                            Text("· · ·")
-                                .font(page.serif)
-                                .foregroundStyle(page.pageMeta)
-                                .padding(.vertical, 40)
+                                memory: memory,
+                                estimate: estimate(for: entry.postID),
+                                columnWidth: columnWidth,
+                                onWake: { blockID in onWake(entry.postID, blockID) },
+                                onNear: { near in landing.rowNear(entry.postID, near) },
+                                onLoaded: { landing.rowLoaded(entry.postID) })
+                                .id(segment.id)
+                                .flowAnchor(entry.postID) { top in
+                                    anchorMoved(entry.postID, top: top)
+                                }
                         }
                     }
                 }
                 .frame(maxWidth: 600)
+                .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { width in
+                    if columnWidth != width { columnWidth = width }
+                }
                 .padding(.horizontal, 56)
                 .background(page.paper)
                 .clipShape(RoundedRectangle(cornerRadius: 6))
@@ -138,12 +192,248 @@ struct ReadingFlowView: View {
         }
         .background(tokens.room)
     }
+
+    @ViewBuilder
+    private func smallRow(_ row: FlowRows.Row) -> some View {
+        switch row {
+        case .title(let name):
+            Text(name)
+                .font(page.serifTitle)
+                .foregroundStyle(page.ink)
+                .padding(.top, 56)
+        case .chapter(let section):
+            Text(section.name.uppercased())
+                .font(.system(size: 12, weight: .medium, design: .serif))
+                .tracking(3)
+                .foregroundStyle(page.chapterInk)
+                .padding(.top, 22)
+        case .end:
+            Text("· · ·")
+                .font(page.serif)
+                .foregroundStyle(page.pageMeta)
+                .padding(.vertical, 40)
+        case .post:
+            // Never in a run — `FlowRows.segments` makes every post a story
+            // segment; the switch is exhaustive for the compiler's sake.
+            EmptyView()
+        }
+    }
+
+    // MARK: - The honest estimate
+
+    /// A never-measured story's height: from its blocks' lengths once the
+    /// extents have landed; the unknown fallback before that.
+    private func estimate(for postID: String) -> CGFloat {
+        guard let extents else { return FlowHeightEstimate.unknownHeight }
+        return FlowHeightEstimate.height(
+            extents: extents[postID] ?? [],
+            metrics: FlowHeightEstimate.metrics(columnWidth: columnWidth ?? 600))
+    }
+
+    private func loadExtents() async {
+        let postIDs = grouped.flatMap { $0.entries.map(\.postID) }
+        let rows = (try? await session.database.read { db in
+            try Queries.blockExtents(db, containerIDs: postIDs)
+        }) ?? []
+        extents = Dictionary(grouping: rows, by: \.containerID)
+    }
+
+    // MARK: - The landing (batch H: one unanimated scroll, then ANCHORING — bounded)
+
+    /// Put the requested post's row at the top of the page (no animation
+    /// — an animated scroll toward a moving offset was row 44's class) and
+    /// hold it there while the column settles. The first scroll is exact:
+    /// every row above the target stands at a stated height. What can
+    /// still move the target afterwards is a story ABOVE it entering the
+    /// near band and trading its estimate for its real height (one event
+    /// per such story; the extents landing is another). Each time the
+    /// target REPORTS itself off the top while the landing is pending, the
+    /// flow re-lands it on the next turn — one frame of shift, never a
+    /// second — bounded by `landingCorrectionBudget`; the quiet-interval
+    /// check then ends the landing once the near rows above have loaded
+    /// and the page has held still. Never a hop into an unrealized void:
+    /// there is none — a built row's identity is always known.
+    private func land(_ proxy: ScrollViewProxy) {
+        guard let reveal else { return }
+        onRevealLanded?()
+        let anchor = FlowRows.anchor(reveal)
+        landing.begin(target: reveal, storiesInOrder: storyIDs)
+        #if DEBUG
+        ReadingFlowGeometry.trace.append("\(anchor) LAND")
+        #endif
+        proxy.scrollTo(anchor, anchor: .top)
+        armCheck(proxy)
+    }
+
+    /// The most re-lands one landing may take. The events that can move a
+    /// landed target are few by construction — the extents arriving (every
+    /// placeholder above it re-sized at once), the story above it loading,
+    /// the title's run realizing — three in the pin's own trace, each a
+    /// single frame; the budget is twice that, so a slow load can never
+    /// strand a landing one event short, and past it the landing ends
+    /// wherever it is (never the row-44 loop: every re-land targets a
+    /// built row whose position is known).
+    static let landingCorrectionBudget = 6
+
+    private var storyIDs: [String] {
+        grouped.flatMap { $0.entries.map(\.postID) }
+    }
+
+    /// A story row reported where its top sits. Every report feeds the
+    /// DEBUG oracle; the pending TARGET's report is the anchoring signal —
+    /// off the top ⇒ re-land next turn (within the budget) — and re-arms
+    /// the quiet interval either way.
+    private func anchorMoved(_ postID: String, top: CGFloat) {
+        #if DEBUG
+        ReadingFlowGeometry.anchorTops[postID] = top
+        #endif
+        guard landing.target == postID, let proxy = landing.proxy else { return }
+        landing.lastTop = top
+        #if DEBUG
+        ReadingFlowGeometry.trace.append("top=\(Int(top)) corrections=\(landing.corrections)")
+        #endif
+        if abs(top) > Self.landingTolerance, landing.corrections < Self.landingCorrectionBudget {
+            landing.corrections += 1
+            let anchor = FlowRows.anchor(postID)
+            #if DEBUG
+            ReadingFlowGeometry.trace.append("RE-LAND \(landing.corrections) (top was \(Int(top)))")
+            #endif
+            // Next turn, never inside the layout pass that reported.
+            DispatchQueue.main.async {
+                guard landing.target == postID else { return }
+                proxy.scrollTo(anchor, anchor: .top)
+            }
+        }
+        armCheck(proxy)
+    }
+
+    /// The column's content height changed (a story loaded, the extents
+    /// landed): the layout is still settling — re-arm the interval.
+    private func contentResized(_ height: CGFloat, _ proxy: ScrollViewProxy) {
+        guard landing.target != nil else { return }
+        #if DEBUG
+        ReadingFlowGeometry.trace.append("content=\(Int(height))")
+        #endif
+        armCheck(proxy)
+    }
+
+    /// The user scrolled while a landing was pending: she took over — the
+    /// landing ends where she put the page, never fighting her.
+    private func userScrolled() {
+        guard landing.target != nil else { return }
+        finish("the user scrolled")
+    }
+
+    /// (Re)arm the quiet interval — the Outline landing's constants, reused:
+    /// an event re-arm is capped by the ceiling measured from the last
+    /// decision (so a busy column cannot starve the check); a decision
+    /// passes its own delay.
+    private func armCheck(_ proxy: ScrollViewProxy, after decided: TimeInterval? = nil) {
+        landing.proxy = proxy
+        landing.check?.cancel()
+        let delay: TimeInterval
+        if let decided {
+            delay = decided
+        } else {
+            let sinceDecision = Date().timeIntervalSince(landing.lastDecision)
+            delay = min(BookView.landingSettleInterval,
+                        max(0.01, BookView.landingMaxWait - sinceDecision))
+        }
+        let check = DispatchWorkItem { checkLanding(proxy) }
+        landing.check = check
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: check)
+    }
+
+    /// The quiet interval passed: the landing is DONE when the target sits
+    /// at the top, the hold is over and the near stories above it have
+    /// loaded (nothing left that could move it); it ends wherever it is at
+    /// the time budget. In between it simply looks again — the re-lands
+    /// are the reports' (`anchorMoved`), never the interval's.
+    private func checkLanding(_ proxy: ScrollViewProxy) {
+        guard landing.target != nil else { return }
+        let elapsed = Date().timeIntervalSince(landing.began)
+        let atTop = landing.lastTop.map { abs($0) <= Self.landingTolerance } ?? false
+        if atTop, elapsed >= BookView.landingMinimumHold, landing.aboveTargetLoaded {
+            finish("settled at top=\(landing.lastTop ?? 0) after \(landing.corrections) re-lands, \(Int(elapsed * 1000)) ms")
+            return
+        }
+        if elapsed > BookView.landingTimeBudget {
+            finish("gave up at top=\(landing.lastTop.map { "\($0)" } ?? "unreported") after \(landing.corrections) re-lands, \(Int(elapsed * 1000)) ms")
+            return
+        }
+        landing.lastDecision = Date()
+        armCheck(proxy, after: max(BookView.landingSettleInterval,
+                                   BookView.landingMinimumHold - elapsed))
+    }
+
+    private func finish(_ why: String) {
+        #if DEBUG
+        if let target = landing.target {
+            ReadingFlowGeometry.trace.append("\(target.prefix(8)) DONE: \(why)")
+            let start = ReadingFlowGeometry.trace.lastIndex(where: { $0.hasSuffix(" LAND") }) ?? 0
+            // The dev build's story, readable from outside the process:
+            // `log show --process Variorum --predicate 'eventMessage CONTAINS "ReadingFlow landing"'`.
+            NSLog("ReadingFlow landing — %@", ReadingFlowGeometry.trace[start...].joined(separator: " | "))
+        }
+        #endif
+        landing.end()
+    }
 }
 
-/// Ladder R1-4: the flow's rows, FLAT, each with the identity the landing
-/// scrolls to (`FlowRows.anchor(postID)` — W21's `flow-<id>`): the reading's
-/// title, a chapter's heading, a post, the closing mark. Pure, so the
-/// order and the anchors are pinnable without a window.
+/// The pending landing's state — one box per flow, mutated from geometry
+/// reports and timer checks without a `@State` write per report.
+@MainActor
+final class FlowLanding {
+    private(set) var target: String?
+    var lastTop: CGFloat?
+    var began = Date()
+    var lastDecision = Date()
+    /// Re-lands taken so far (`ReadingFlowView.landingCorrectionBudget`).
+    var corrections = 0
+    var check: DispatchWorkItem?
+    var proxy: ScrollViewProxy?
+    /// The stories in page order, and which of them are near / loaded —
+    /// so the check can tell whether the rows ABOVE the target that will
+    /// realize have finished trading their estimates for real heights.
+    private var order: [String] = []
+    private var near: Set<String> = []
+    private var loaded: Set<String> = []
+
+    func begin(target: String, storiesInOrder: [String]) {
+        check?.cancel()
+        self.target = target
+        order = storiesInOrder
+        lastTop = nil
+        began = Date()
+        lastDecision = Date()
+        corrections = 0
+    }
+
+    func end() {
+        check?.cancel()
+        check = nil
+        target = nil
+    }
+
+    func rowNear(_ postID: String, _ isNear: Bool) {
+        if isNear { near.insert(postID) } else { near.remove(postID) }
+    }
+
+    func rowLoaded(_ postID: String) { loaded.insert(postID) }
+
+    /// Every near story above the target has loaded (a far one is a
+    /// placeholder of a stated height and will not move the page).
+    var aboveTargetLoaded: Bool {
+        guard let target, let at = order.firstIndex(of: target) else { return true }
+        return order[..<at].allSatisfy { !near.contains($0) || loaded.contains($0) }
+    }
+}
+
+/// The flow's rows, FLAT, each with the identity the landing scrolls to
+/// (`FlowRows.anchor(postID)` — W21's `flow-<id>`): the reading's title, a
+/// chapter's heading, a post, the closing mark — and, since batch H, the
+/// SEGMENTS: runs of small rows (lazy) and stories (direct children). Pure,
+/// so the order, the anchors and the split are pinnable without a window.
 nonisolated enum FlowRows {
     enum Row: Identifiable {
         case title(String)
@@ -161,7 +451,21 @@ nonisolated enum FlowRows {
         }
     }
 
-    /// The landing anchor of a post's row — the ForEach identity itself.
+    /// A stretch of the column: a RUN of small rows sharing one lazy
+    /// container, or ONE story standing as a direct child (row 95).
+    enum Segment: Identifiable {
+        case run([Row])
+        case story(Queries.ReadingEntry)
+
+        var id: String {
+            switch self {
+            case .run(let rows): "run-" + (rows.first?.id ?? "empty")
+            case .story(let entry): FlowRows.anchor(entry.postID)
+            }
+        }
+    }
+
+    /// The landing anchor of a post's row — the row's own identity.
     static func anchor(_ postID: String) -> String { "flow-\(postID)" }
 
     static func rows(
@@ -177,45 +481,220 @@ nonisolated enum FlowRows {
         rows.append(.end)
         return rows
     }
-}
 
-#if DEBUG
-/// Ladder R1-4 (pin-first): where each post row's TOP sits in the flow's
-/// scroll space — the landing oracle, so a pin can say whether a reveal
-/// put its post at the top of the page (the book Outline's own
-/// `BookOutlineGeometry` shape).
-@MainActor
-enum ReadingFlowGeometry {
-    static var anchorTops: [String: CGFloat] = [:]
-}
-#endif
-
-extension View {
-    /// The flow's DEBUG landing oracle write; a no-op outside DEBUG.
-    @ViewBuilder
-    func readingFlowAnchorProbe(_ postID: String) -> some View {
-        #if DEBUG
-        self.onGeometryChange(for: CGFloat.self) {
-            $0.frame(in: .named(ReadingFlowView.flowSpace)).minY
-        } action: { top in
-            ReadingFlowGeometry.anchorTops[postID] = top
+    /// Split the flat rows at every post. Pure — pinned.
+    static func segments(_ rows: [Row]) -> [Segment] {
+        var result: [Segment] = []
+        var run: [Row] = []
+        for row in rows {
+            if case .post(let entry) = row {
+                if !run.isEmpty { result.append(.run(run)); run = [] }
+                result.append(.story(entry))
+            } else {
+                run.append(row)
+            }
         }
-        #else
-        self
-        #endif
+        if !run.isEmpty { result.append(.run(run)) }
+        return result
+    }
+}
+
+// MARK: - The honest estimate (pure arithmetic over stored lengths)
+
+/// A never-measured story's height on the page, modelled from its blocks'
+/// LENGTHS (`Queries.blockExtents` — the paged reader's model tier; no
+/// prose is read to estimate). The model is the paged reader's own
+/// (`PageEstimator.lines`): a block is its own paragraph, its internal
+/// newlines are content (I4), each paragraph ends mid-line (half a line
+/// wasted on average) — at the FLOW's metrics: the 16-pt serif page font
+/// wrapped at the column's measure, one line's pitch = the font's line
+/// height + the paragraphs' `lineSpacing(6)`, 13 pt between paragraphs and
+/// between blocks (the column's `spacing: 13`). Empty blocks contribute
+/// nothing (the row renders none). Measured against the Sherlock library
+/// in the batch record (`ReadingFlowEstimateTests`).
+nonisolated enum FlowHeightEstimate {
+    struct Metrics: Equatable {
+        /// Characters per wrapped line at the measure.
+        var charsPerLine: Double
+        /// One line's pitch (the font's line height + the line spacing).
+        var linePitch: CGFloat
+    }
+
+    /// The flow's paragraph spacing (`VStack(spacing: 13)`, both levels).
+    static let paragraphGap: CGFloat = 13
+    /// The row's `lineSpacing` on every paragraph.
+    static let lineSpacing: CGFloat = 6
+    /// The page font (`ReadingPageTokens.serif`: 16-pt system serif).
+    static let fontSize: CGFloat = 16
+    /// A story whose extents have not landed yet (the read is in flight):
+    /// the Outline's own never-measured fallback, corrected the moment the
+    /// lengths arrive.
+    static let unknownHeight: CGFloat = 800
+    /// A note with no renderable text: the row's one blank line.
+    static let emptyNoteHeight: CGFloat = 20
+    /// The calibration from the Sherlock measurement (batch H): the modelled
+    /// height against the real one, applied as a factor. 1 = the model as
+    /// stated; the record states the measured value and why.
+    static let calibration: Double = 1
+
+    /// The page's metrics at a column width, measured off the real font
+    /// rather than guessed (the paged reader's own method).
+    @MainActor
+    static func metrics(columnWidth: CGFloat) -> Metrics {
+        if let cached = metricsCache[columnWidth] { return cached }
+        let base = NSFont.systemFont(ofSize: fontSize)
+        let font = NSFont(descriptor: base.fontDescriptor.withDesign(.serif) ?? base.fontDescriptor,
+                          size: fontSize) ?? base
+        let sample = "the quick brown fox jumps over a lazy dog and keeps going "
+        let width = (sample as NSString)
+            .size(withAttributes: [.font: font]).width / CGFloat(sample.count)
+        let lineHeight = font.ascender - font.descender + font.leading
+        let metrics = Metrics(
+            charsPerLine: max(8, Double(columnWidth / max(width, 1))),
+            linePitch: lineHeight + lineSpacing)
+        metricsCache[columnWidth] = metrics
+        return metrics
+    }
+
+    @MainActor private static var metricsCache: [CGFloat: Metrics] = [:]
+
+    /// The paragraphs a block RENDERS on the page from its newline count.
+    /// A stored block normally ends in ONE newline — the paragraph
+    /// separator the author typed (⏎⏎ between paragraphs stores k−1
+    /// trailing newlines on the block, `SegmentationRules`) and the sample
+    /// library's paragraphs alike — and the flow DROPS blank display lines,
+    /// so that newline renders nothing. The rule: `max(1, newlines)` — a
+    /// block without a trailing newline (a note's last block, a one-block
+    /// note) is one paragraph; the normal block is one; each newline beyond
+    /// the separator is a real break. (The paged reader's `PageEstimator`
+    /// counts `newlines + 1` and absorbs the difference in its runtime
+    /// calibration; measured here against Sherlock, `+ 1` over-read every
+    /// story by ~39 % — the batch record has the table.)
+    static func paragraphs(newlines: Int) -> Int { max(1, newlines) }
+
+    /// The lines one block occupies (the paged reader's rule, restated over
+    /// the rendered paragraph count).
+    static func lines(characters: Int, newlines: Int, metrics: Metrics) -> Double {
+        guard characters > 0 else { return 0 }
+        let paragraphs = Double(Self.paragraphs(newlines: newlines))
+        let full = Double(characters) / metrics.charsPerLine
+        return max(paragraphs, full + paragraphs * 0.5)
+    }
+
+    /// One story's height from its blocks' extents.
+    static func height(extents: [Queries.BlockExtent], metrics: Metrics) -> CGFloat {
+        let rendered = extents.filter { $0.characters > 0 }
+        guard !rendered.isEmpty else { return emptyNoteHeight }
+        var total: CGFloat = 0
+        for extent in rendered {
+            let lines = lines(
+                characters: extent.characters, newlines: extent.newlines, metrics: metrics)
+            let paragraphs = CGFloat(Self.paragraphs(newlines: extent.newlines))
+            // `lineSpacing` sits only BETWEEN a paragraph's lines, never
+            // after its last — one pitch's spacing less per paragraph
+            // (measured on Sherlock: the pitch alone over-read every story
+            // by ~8 %; this is the whole of it).
+            total += CGFloat(lines) * metrics.linePitch - paragraphs * lineSpacing
+                + (paragraphs - 1) * paragraphGap
+        }
+        total += CGFloat(rendered.count - 1) * paragraphGap
+        return (total * calibration).rounded()
     }
 }
 
 #if DEBUG
-/// Round 3 (MAJOR) pin support: counts FlowPostView materializations so
-/// the virtualization pin can assert the LazyVStack defers off-viewport
-/// rows (a plain VStack materializes the whole book at once — red on the
-/// pre-fix code by behavioral revert).
+/// Where each story row's TOP sits in the flow's scroll space — the
+/// landing oracle, so a pin can say whether a reveal put its post at the
+/// top of the page (the book Outline's own `BookOutlineGeometry` shape) —
+/// and the pending landing's story (`LAND` · `CORRECT` · `DONE`).
+@MainActor
+enum ReadingFlowGeometry {
+    static var anchorTops: [String: CGFloat] = [:]
+    static var trace: [String] = []
+}
+#endif
+
+private extension View {
+    /// A story row's landing anchor report: where its top sits in the
+    /// flow's space, to the landing (and, in DEBUG, the oracle).
+    func flowAnchor(_ postID: String, report: @escaping (CGFloat) -> Void) -> some View {
+        self.onGeometryChange(for: CGFloat.self) {
+            $0.frame(in: .named(ReadingFlowView.flowSpace)).minY
+        } action: { top in
+            report(top)
+        }
+    }
+}
+
+#if DEBUG
+/// Round 3 (MAJOR) pin support: counts REALIZED story surfaces so the
+/// virtualization pin can assert the flow defers off-viewport rows (a
+/// plain column materializes the whole book at once — red on the pre-fix
+/// code by behavioral revert). Batch H moved the count from
+/// `FlowPostView.init` to the realized surface's `onAppear`: every story
+/// row is constructed now (a direct child), and a far row's placeholder
+/// is not a surface — the P3 fact the pin guards is how many text
+/// surfaces exist.
 @MainActor
 enum ReadingFlowMaterialization {
     static var count = 0
 }
 #endif
+
+/// One story on the page (batch H): virtualized by the flow itself — the
+/// real text (`FlowPostView` inside a `StableSurface` at its remembered or
+/// estimated size) while near the viewport, a placeholder of exactly that
+/// height while far. Starts far, so a distant row never mounts a surface
+/// for one frame; the row's first geometry report decides.
+private struct FlowStoryRow: View {
+    let session: AppSession
+    let entry: Queries.ReadingEntry
+    let page: ReadingPageTokens
+    let memory: SurfaceSizeMemory
+    let estimate: CGFloat
+    let columnWidth: CGFloat?
+    let onWake: (String?) -> Void
+    let onNear: (Bool) -> Void
+    let onLoaded: () -> Void
+
+    @State private var near = false
+
+    var body: some View {
+        Group {
+            if near {
+                StableSurface(
+                    known: known, followsShrinks: false,
+                    remember: { memory.remember(entry.postID, $0) }
+                ) {
+                    FlowPostView(
+                        session: session, entry: entry, page: page,
+                        onWake: onWake, onLoaded: onLoaded)
+                }
+                .onAppear { materialized() }
+            } else {
+                Color.clear.frame(height: memory.size(entry.postID)?.height ?? estimate)
+            }
+        }
+        .modifier(NearViewportObserver(
+            near: $near, margin: ReadingFlowView.nearMargin, space: ReadingFlowView.flowSpace))
+        .onChange(of: near, initial: true) { _, isNear in onNear(isNear) }
+    }
+
+    /// What the surface reserves from its first frame: the remembered
+    /// size, else the estimate at the column's width (the width must be
+    /// known for the reservation to apply — `StableSurface` compares it).
+    private var known: CGSize? {
+        if let remembered = memory.size(entry.postID) { return remembered }
+        guard let columnWidth else { return nil }
+        return CGSize(width: columnWidth, height: estimate)
+    }
+
+    private func materialized() {
+        #if DEBUG
+        ReadingFlowMaterialization.count += 1
+        #endif
+    }
+}
 
 /// One post on the page: lazy text, serif paragraphs; each BLOCK's
 /// paragraphs are a click target that wakes editing AT that block (row 38);
@@ -225,6 +704,8 @@ private struct FlowPostView: View {
     let entry: Queries.ReadingEntry
     let page: ReadingPageTokens
     let onWake: (String?) -> Void
+    /// Batch H: the text is in and laid out — the landing's "loaded" signal.
+    let onLoaded: () -> Void
 
     /// 13g batch 4 (L11): rendered paragraphs — the display text with its
     /// markdown applied, plus the line's own style — kept PER BLOCK since
@@ -233,19 +714,6 @@ private struct FlowPostView: View {
     /// applies: markers hidden; the click maps to a block, never to a
     /// text offset (a SwiftUI `Text` cannot say where inside itself).
     @State private var blocks: [(blockID: String, paragraphs: [FlowParagraph])] = []
-
-    init(
-        session: AppSession, entry: Queries.ReadingEntry,
-        page: ReadingPageTokens, onWake: @escaping (String?) -> Void
-    ) {
-        self.session = session
-        self.entry = entry
-        self.page = page
-        self.onWake = onWake
-        #if DEBUG
-        ReadingFlowMaterialization.count += 1
-        #endif
-    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 13) {
@@ -285,7 +753,7 @@ private struct FlowPostView: View {
             // The rendered projection per BLOCK (renderedText semantics —
             // chosen takes; blank takes and gaps contribute nothing), each
             // RENDERED for reading (13g L11 — one transform per block of a
-            // realized row, so the cost stays ∝ what the LazyVStack
+            // realized row, so the cost stays ∝ what the column
             // materialized). 13k K10: the page's own code chip rides in.
             let slots: [(String, String)] = (try? await session.database.read { [id = entry.postID] db in
                 try Queries.renderPost(db, containerID: id).compactMap { slot in
@@ -296,6 +764,7 @@ private struct FlowPostView: View {
             blocks = slots.map { blockID, text in
                 (blockID, FlowParagraph.paragraphs(of: text, codeTint: page.codeTint))
             }
+            onLoaded()
         }
     }
 }

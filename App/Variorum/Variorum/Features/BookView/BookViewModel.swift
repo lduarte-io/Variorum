@@ -394,6 +394,14 @@ final class BookViewModel {
         rememberedSurfaceSizes[postID] = size
     }
 
+    /// Batch H (row 95): the Read ▸ Scroll flow's remembered story sizes —
+    /// the same idea at the PAGE's measure (a story on the flow's 600-pt
+    /// serif column is not the story at Write's measure above, so the two
+    /// memories never share a size). Held here so a story measured once
+    /// stays measured for the session across mode switches; the flow
+    /// itself is re-created per mode.
+    @ObservationIgnored let flowSurfaceSizes = SurfaceSizeMemory()
+
     /// 13f batch 4 (the MOUNT rule): whether this book's PANE is the
     /// focused one. A book in an unfocused pane mounts no live surface —
     /// and it does so through the book's OWN single focus authority below,
