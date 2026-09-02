@@ -793,14 +793,18 @@ struct LibraryCatalogView: View {
                         // kept whatever it was showing.
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .contentShape(Rectangle())
-                        // Double-click anywhere opens (before the single so
-                        // the two disambiguate); a body click selects and
-                        // shows the book's OUTLINE in the panel — her ruled
-                        // model, row 33's shape.
-                        .onTapGesture(count: 2) { openHit(hit) }
-                        .onTapGesture {
-                            withAnimation(Self.panelAnimation) { model.selectBook(hit) }
-                        }
+                        // A body click selects AT ONCE and shows the book's
+                        // OUTLINE in the panel (her ruled model, row 33's
+                        // shape); a double-click anywhere opens. ONE shared
+                        // tap brain (`rowClick`, ladder R1-2): the stacked
+                        // count-2 + plain gestures held every single click
+                        // for the double-click interval — batch C's row-25
+                        // lag, alive on this surface until now.
+                        .rowClick(
+                            onClick: { _ in
+                                withAnimation(Self.panelAnimation) { model.selectBook(hit) }
+                            },
+                            onDoubleClick: { openHit(hit) })
                         .listRowBackground(
                             rowBackground(picked: false, subject: model.infoHit?.id == hit.id))
                     }
@@ -952,17 +956,22 @@ struct LibraryCatalogView: View {
             onApply: { path in Task { await model.applyTypedPath(path, to: [hit.id]) } },
             onRemove: { tag in Task { await model.removeTag(tag.id, from: [hit.id]) } })
         .contentShape(Rectangle())
+        .libraryGeometryProbe(.noteRow(hit.id))
         // Act 10 item 10 — her click model, on P-0's reachable routing: a
         // DOUBLE-CLICK anywhere opens (it weirdly didn't); a single body
-        // click routes through the model — select + info panel, or the
-        // ⌘/⇧ pick. The title's own tap (in the row above) still opens
-        // instantly.
-        .onTapGesture(count: 2) { openHit(hit) }
-        .onTapGesture {
-            withAnimation(Self.panelAnimation) {
-                model.clickNoteRow(hit.id, modifiers: .current)
-            }
-        }
+        // click routes through the model AT ONCE — select + info panel, or
+        // the ⌘/⇧ pick. The title's own tap (in the row above) still opens
+        // instantly. ONE shared tap brain (`rowClick`, ladder R1-2): the
+        // stacked count-2 + plain gestures held every single click for the
+        // double-click interval (0.5 s) — batch C's row-25 lag, alive here
+        // since batch E rebuilt the panel behind this click.
+        .rowClick(
+            onClick: { _ in
+                withAnimation(Self.panelAnimation) {
+                    model.clickNoteRow(hit.id, modifiers: .current)
+                }
+            },
+            onDoubleClick: { openHit(hit) })
         .draggable(hit.id)
         .contextMenu { postRowMenu(hit) }
     }

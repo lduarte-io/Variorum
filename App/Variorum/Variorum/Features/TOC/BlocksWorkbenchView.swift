@@ -726,9 +726,6 @@ struct WorkbenchRowShell<Content: View>: View {
     @ViewBuilder var content: () -> Content
 
     @State private var hovering = false
-    /// When this row was last single-clicked — a second click inside the
-    /// system's double-click interval is the double.
-    @State private var lastClick: ContinuousClock.Instant?
 
     var body: some View {
         content()
@@ -751,27 +748,11 @@ struct WorkbenchRowShell<Content: View>: View {
             // delivered. The plain tap acts at ONCE; a second click on the
             // same row inside the system's interval is the double and opens
             // in Write (the first already focused the row — harmless). The
-            // interval is read from the row's own clock rather than from
-            // `NSApp.currentEvent.clickCount`: `currentEvent` is only USUALLY
-            // the mouse-up a tap concludes on, and `clickCount` asked of any
-            // other event raises `NSInternalInconsistencyException` (the
-            // pin's event pump caught exactly that). Chords read at the
-            // keyboard's live state (the walk's earlier lesson: stacked
-            // modifier TapGestures dead-stall every click).
-            .onTapGesture {
-                let now = ContinuousClock.now
-                if let last = lastClick, now - last < .seconds(NSEvent.doubleClickInterval) {
-                    lastClick = nil
-                    onDoubleClick()
-                    return
-                }
-                lastClick = now
-                let flags = NSEvent.modifierFlags
-                var mods: EventModifiers = []
-                if flags.contains(.command) { mods.insert(.command) }
-                if flags.contains(.shift) { mods.insert(.shift) }
-                onClick(mods)
-            }
+            // brain is the shared `rowClick` (`Core/Views/RowClick.swift` —
+            // ladder R1-2 hoisted it here from this shell so the Library's
+            // rows could stop holding their clicks too); the interval is the
+            // row's own clock, never `NSApp.currentEvent.clickCount`.
+            .rowClick(onClick: onClick, onDoubleClick: onDoubleClick)
     }
 
     private var background: AnyShapeStyle {

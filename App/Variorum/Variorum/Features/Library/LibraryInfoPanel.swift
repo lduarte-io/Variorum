@@ -575,6 +575,9 @@ enum LibraryPanelOracle {
     static var quickEntryFrame: CGRect?
     /// A book row's LINE — its width must span the row (row 33 (a)).
     static var bookLineFrame: CGRect?
+    /// Each NOTE row's frame by post id — so a pin can click a row for
+    /// real (ladder R1-2: the row-click brain's timing pin).
+    static var noteRowFrames: [String: CGRect] = [:]
     /// The blocks the note preview realized, in appearance order.
     static var shownBlockIDs: [String] = []
     /// The outline rows the book preview realized.
@@ -587,6 +590,7 @@ enum LibraryPanelOracle {
         messageFrame = nil
         quickEntryFrame = nil
         bookLineFrame = nil
+        noteRowFrames = [:]
         shownBlockIDs = []
         shownOutlineRowIDs = []
     }
@@ -598,6 +602,7 @@ enum LibraryPanelOracle {
 /// stores the frames is DEBUG-only.
 enum LibraryProbeSlot: Hashable {
     case root, divider, panel, message, quickEntry, bookLine
+    case noteRow(String)
 }
 
 extension View {
@@ -616,6 +621,7 @@ extension View {
             case .message: LibraryPanelOracle.messageFrame = frame
             case .quickEntry: LibraryPanelOracle.quickEntryFrame = frame
             case .bookLine: LibraryPanelOracle.bookLineFrame = frame
+            case .noteRow(let id): LibraryPanelOracle.noteRowFrames[id] = frame
             }
         }
         #else
