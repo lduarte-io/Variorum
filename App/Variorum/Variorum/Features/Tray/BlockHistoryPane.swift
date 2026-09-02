@@ -404,12 +404,6 @@ struct BlockHistoryPane: View {
                 Spacer()
                 Button("Close") { close() }
             }
-            // Row 89: the pane's explainer wraps whole, never truncates.
-            Text(tokens.chromeLabel(BlockHistoryPath.explainer))
-                .font(tokens.small)
-                .foregroundStyle(tokens.faint)
-                .lineLimit(nil)
-                .fixedSize(horizontal: false, vertical: true)
             // Ledger row 33 — the current-block jump. It renders only while
             // the caret really is somewhere else (the pure rule decides), and
             // only where a host can act on it, so pressing it always moves
@@ -438,6 +432,20 @@ struct BlockHistoryPane: View {
             // with air and one meaning line each (the calm-card grammar).
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 6) {
+                    // Row 89: the pane's explainer wraps whole, never
+                    // truncates — and it lives INSIDE the scroll (ladder
+                    // R1-6): an unlimited `fixedSize` text in NON-scrolling
+                    // chrome measures one character per line under the
+                    // window's near-zero-width minimum-size probe, and its
+                    // height becomes the WINDOW's minimum (the b6dae25
+                    // wedged-window class, P-8) — this pane is also hosted in
+                    // two `.sheet`s where no frame pins the width.
+                    Text(tokens.chromeLabel(BlockHistoryPath.explainer))
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.faint)
+                        .lineLimit(nil)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.bottom, 4)
                     savepointRegion
                     archivedRegion
                     deletedRegion

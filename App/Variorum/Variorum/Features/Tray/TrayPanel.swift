@@ -736,16 +736,20 @@ struct TrayPanel: View {
             // state — the asked-for block is a KEPT original (G5 moved what
             // is kept to lineage), so nothing here is wrong and nothing here
             // is marked; the sentence says where it actually lives.
-            if model.revealKeptInLineage {
-                // Row 89: an explainer sentence wraps whole, never truncates.
-                Text(tokens.chromeLabel(RecoveryCopy.trayRevealKeptInLineage(home)))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .lineLimit(nil)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 6) {
+                    if model.revealKeptInLineage {
+                        // Row 89: an explainer sentence wraps whole, never
+                        // truncates — INSIDE the scroll (ladder R1-6): an
+                        // unlimited `fixedSize` text in non-scrolling chrome is
+                        // the b6dae25 wedged-window class (P-8).
+                        Text(tokens.chromeLabel(RecoveryCopy.trayRevealKeptInLineage(home)))
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.muted)
+                            .lineLimit(nil)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .padding(.bottom, 4)
+                    }
                     // ── LEAVING (her G5 ruling) ────────────────────────────
                     // The complete per-note pre-purge audit: blocks, takes,
                     // and the originals that have MOVED onto a family's

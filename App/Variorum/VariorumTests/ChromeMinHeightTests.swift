@@ -21,8 +21,10 @@
 //
 
 import AppKit
+import Dependencies
 import SwiftUI
 import Testing
+import VariorumCore
 @testable import Variorum
 
 @MainActor
@@ -61,6 +63,44 @@ struct ChromeMinHeightTests {
         // Bounded = the guidance's 6 lines + the error's 4, caption-sized,
         // with generous headroom for line-height drift across OS releases.
         #expect(probed.height < 400)
+    }
+
+    /// Ladder R1-6: the Block History pane is ALSO hosted in two `.sheet`s
+    /// (the bars' fallback hosts), where no frame pins its width — its
+    /// explainer, an unlimited `fixedSize` text, sat OUTSIDE the pane's
+    /// scroll view (row 89's wrap rule applied in non-scrolling chrome — the
+    /// b6dae25 class). The same probe the window runs, over the pane and
+    /// over the tray (whose kept-in-lineage sentence had the same shape):
+    /// bounded. RED ON OLD: the ~190-character explainer at one character
+    /// per line measured well over a thousand points.
+    @Test func sheetHostedRecoveryPanesNearZeroWidthProbeStayBounded() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 6))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let post = try session.operations.createPost(title: "a note")
+            let block = try session.operations.newBlock(in: post.id, text: "A block.").block.id
+            let pane = NSHostingController(
+                rootView: BlockHistoryPane(
+                    session: session,
+                    request: BlockHistoryRequest(postID: post.id, blockID: block),
+                    onJump: { _ in })
+                    .environment(ThemeStore(session: session)))
+            let probedPane = pane.sizeThatFits(in: NSSize(width: 1, height: 0))
+            print("[ladder R1-6] the sheet-hosted Block History pane's near-zero-width probe: \(probedPane.height) pt")
+            #expect(probedPane.height < 400, "the pane's minimum height stays bounded: \(probedPane.height)")
+
+            let tray = NSHostingController(
+                rootView: TrayPanel(session: session, postID: post.id)
+                    .environment(ThemeStore(session: session)))
+            let probedTray = tray.sizeThatFits(in: NSSize(width: 1, height: 0))
+            print("[ladder R1-6] the tray's near-zero-width probe: \(probedTray.height) pt")
+            #expect(probedTray.height < 400, "the tray's minimum height stays bounded: \(probedTray.height)")
+        }
     }
 
     /// The block must still be a REAL multi-line rendering at the footer's
