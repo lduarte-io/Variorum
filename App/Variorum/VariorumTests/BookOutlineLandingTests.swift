@@ -172,6 +172,20 @@ struct BookOutlineRowsTests {
         if case .run(let all) = none[0] { #expect(all.count == rows.count) }
     }
 
+    /// Ladder R1-13: a short SENTENCE is a preview, not a stub — the
+    /// numeral rule stays exact.
+    @Test func aShortSentenceIsAPreviewAndALoneNumeralIsAStub() {
+        for stub in ["I.", "II", "IV.", "1.", "12", "Part 2", "Chapter 3", "# Part One"] {
+            #expect(BookOutlineRows.isLoneHeadingOrNumeral(stub), "\(stub) is a stub")
+        }
+        for sentence in ["Dear reader.", "Chapter one.", "He ran home.", "Why?", "Go!"] {
+            #expect(!BookOutlineRows.isLoneHeadingOrNumeral(sentence), "\(sentence) is a sentence")
+        }
+        let story = "It was a widespread field, the kind a preview reads across."
+        #expect(BookOutlineRows.cardPreview(blocks: ["Dear reader.", story]).hasPrefix("Dear reader."))
+        #expect(BookOutlineRows.cardPreview(blocks: ["I.", story]).hasPrefix("It was"))
+    }
+
     @Test func flatRowsHeadAtEveryTagPathChange() {
         let rows = BookOutlineRows.rows(flat: [
             entry("a", path: "life"), entry("b", path: "life"), entry("c"), entry("d", path: "life"),
@@ -452,6 +466,40 @@ struct BookOutlineLandingTests {
 // MARK: - The Act 10 correction round, batch G — row 73
 
 extension BookOutlineLandingTests {
+    /// **Ladder R1-10:** an EXPANDED row renders neither the card's excerpt
+    /// nor the gutter line the whole-note facts read feeds — so it performs
+    /// no `renderPost`. "Expand all" on a five-story book mounts with ZERO
+    /// facts reads; collapsing them all reads once per card. RED ON OLD:
+    /// five reads at the mount (every expanded row is a direct, never-lazy
+    /// child now, and each ran the read).
+    @Test func anExpandedRowPerformsNoFactsRead() async throws {
+        try await withLandingBook(posts: 5, longAt: [], chapters: false) { session, db, readingID, postIDs, _ in
+            let model = BookViewModel(session: session, readingID: readingID)
+            model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID, limit: 300)
+            })
+            let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
+            model.expandAll()
+            BookOutlineFactsReads.count = 0
+            let watchdog = MainThreadWatchdog()
+            defer { watchdog.stop() }
+            let (window, hosting) = mounted(
+                session: session, readingID: readingID, model: model, structure: structure)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            await settle(window, hosting, watchdog: watchdog, until: { false }, maxTurns: 12)
+            #expect(BookOutlineFactsReads.count == 0,
+                    "expanded rows read no facts: \(BookOutlineFactsReads.count) reads")
+            model.collapseAll()
+            await settle(window, hosting, watchdog: watchdog, until: {
+                BookOutlineFactsReads.count >= 5
+            }, maxTurns: 40)
+            #expect(BookOutlineFactsReads.count >= 5, "collapsed cards read their facts once each")
+        }
+    }
+
     /// **Row 73 (E's trace): an ascent INTO a not-yet-mounted book lands at
     /// the note, not at the top.** The Library panel's outline row and the
     /// membership chip's link both request a reveal BEFORE the book's

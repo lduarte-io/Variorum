@@ -1032,8 +1032,14 @@ struct BookView: View {
             if let first { model.focus(first.postID) }
         case .read:
             if let first { model.requestReveal(first.postID) }
-        case .outline, .index:
+        case .outline:
             model.requestChapterReveal(section.id)
+        case .index:
+            // Ladder R1-16: nothing in Index consumes a chapter reveal
+            // (`BookIndexView.landOrSeed` reads `pendingReveal` only) and the
+            // navigator is hidden there — a parked chapter request would
+            // land on the NEXT Outline entry as a surprise scroll. No act.
+            break
         }
     }
     /// R19 drag state: the chapter the dragged one would land BEFORE, and
@@ -1485,6 +1491,16 @@ enum BookOutlineMaterialization {
     static var count = 0
 }
 
+#if DEBUG
+/// Ladder R1-10's DEBUG counter: how many whole-note facts reads
+/// (`Queries.renderPost`) the Outline's rows performed — an expanded row
+/// performs none.
+@MainActor
+enum BookOutlineFactsReads {
+    static var count = 0
+}
+#endif
+
 /// The correction round's landing oracle: where every REALIZED Outline
 /// anchor (`page-<postID>` · `chapter-<sectionID>`) sits, in the scroll's
 /// visible space — `0` is the top of the page. Fed by the same geometry
@@ -1819,7 +1835,16 @@ private struct OutlinePostRow: View {
                 .onAppear { materialized() }
             }
         }
-        .task(id: entry.postID) { await loadFacts() }
+        // Ladder R1-10: the facts (one `renderPost` over the WHOLE note) feed
+        // the COLLAPSED card's excerpt and gutter line only — an expanded
+        // row renders neither, and every expanded row is a direct child of
+        // the outer VStack now (never lazy), so "expand all" on Sherlock
+        // used to read twelve full stories for nothing rendered. The task's
+        // id carries the form, so a row collapsing later reads then.
+        .task(id: "\(entry.postID)|\(model.isExpanded(entry.postID))") {
+            guard !model.isExpanded(entry.postID) else { return }
+            await loadFacts()
+        }
     }
 
     /// The far expanded row's stand-in: exactly the surface's remembered
@@ -1859,6 +1884,9 @@ private struct OutlinePostRow: View {
     /// P1; the PostCardExcerpt cadence, hoisted so the card and the gutter
     /// share it).
     private func loadFacts() async {
+        #if DEBUG
+        BookOutlineFactsReads.count += 1
+        #endif
         let slots = (try? await session.database.read { [postID = entry.postID] db in
             try Queries.renderPost(db, containerID: postID)
         }) ?? []

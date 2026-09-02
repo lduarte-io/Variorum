@@ -184,7 +184,11 @@ nonisolated enum BookOutlineRows {
 
     /// A block that is a heading or a numeral by itself: a markdown heading
     /// line (`NoteIndexOutline`'s rule), or at most two "words" in at most
-    /// twelve characters — `I.`, `II`, `1.`, `Part 2`.
+    /// twelve characters — `I.`, `II`, `1.`, `Part 2`, `Chapter 3`. Ladder
+    /// R1-13: a short SENTENCE — one that ends in a full stop, a question
+    /// or an exclamation mark and is not a lone numeral-like token — is a
+    /// preview, never a stub (`Dear reader.` and `Chapter one.` open the
+    /// card; `I.` and `IV.` still do not).
     static func isLoneHeadingOrNumeral(_ text: String) -> Bool {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty, !trimmed.contains("\n") else { return false }
@@ -194,7 +198,22 @@ nonisolated enum BookOutlineRows {
         trimmed.enumerateSubstrings(
             in: trimmed.startIndex..., options: [.byWords, .substringNotRequired]
         ) { _, _, _, _ in words += 1 }
-        return words <= 2
+        guard words <= 2 else { return false }
+        if let last = trimmed.last, ".!?".contains(last) {
+            // A terminated text is a sentence unless what precedes the mark
+            // is one numeral-like token: digits, or a Roman numeral.
+            let body = trimmed.dropLast().trimmingCharacters(in: .whitespaces)
+            return isNumeralToken(body)
+        }
+        return true
+    }
+
+    /// `1`, `12`, `I`, `iv`, `XLII` — never `one`, never two words.
+    private static func isNumeralToken(_ token: String) -> Bool {
+        guard !token.isEmpty, !token.contains(" ") else { return false }
+        if token.allSatisfy(\.isNumber) { return true }
+        let roman = Set("IVXLCDM")
+        return token.uppercased().allSatisfy { roman.contains($0) }
     }
 
     /// The details gutter's line beside a collapsed card (row 13 — C-6's
