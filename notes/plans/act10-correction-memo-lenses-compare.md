@@ -174,6 +174,13 @@ Nothing above is decoration; each row is a fact the two modes genuinely differ o
 
 ## 7. Her rulings to collect (the morning bundle carries this list)
 
+**RULED so far (the Act 10 correction round's sitting, 2026-09-01 — R-cor-10(b), R-cor-11(1), R-cor-16):** **1 —
+the memo's words stand** (Use this lens · Save as lens · New note from this lens, + "bring every take along"); **6 —
+TWO tabs, structurally distinct** (shape A); **3's anchor-whole half and 4's anchor-exempt half are BUILT and ratified**
+(batch D; the filter narrowed to peers); **the outline door's placement-per-state accepted** (D's row 46 — the memo's
+§4 still settles the offer's final home in the slot). **Remaining for her: 2 · 3's offer-in-the-slot half · 4's
+disabled-when-no-relationship half · 5 · 7 · 8 (when the build phase runs).**
+
 1. The door vocabulary in §3's table — **Use this lens · Save as lens · New note from this lens** (+ "bring every take along") — as written, or her words.
 2. **"Duplicate as Version" leaves the Lenses card** (§6 D).
 3. **Compare's anchor always renders whole; the offer lives in the empty second slot; the top-right duplicates retire.**

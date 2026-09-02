@@ -307,6 +307,14 @@ it.
   column draggable with a remembered width; the Library's preview column fixed. No code moves between G and the
   ladder.
 
+- **R-cor-16 — THE #88 BUNDLE, RULED AWAKE (2026-09-01 ~22:05 MDT; her question "what is in questions 88? should I
+  not handle it now?", then the question tool):** **(1) Read's `edit · read` face is remembered PER NOTE** (C's
+  architect call ratified). **(2) Row 57 — the sidebar's arrow-key row navigation stays OUT** ("leave it out";
+  recorded, no owner). **(3) The Lenses + Compare memo's ruling 6 — TWO TABS, structurally distinct** (the memo's
+  shape A). **(4) The memo's ruling 1 — the memo's door words stand:** Use this lens · Save as lens · New note from
+  this lens (+ "bring every take along"). QUESTIONS #88 therefore carries only the memo's remaining rulings (2 · 3 ·
+  the peer half of 4 · 5 · 7 · 8 — and WHEN its build phase runs) plus anything the ladder leaves open.
+
 **Inherited rulings this round builds to (not re-litigated):** the eighth-wave rulings W8-1…W8-5
 (`pre-13u-round.md`), the fifth-wave item-15 flow ruling, the mode-row canon R60–94 as extended by
 W8-1 (the eight-mode row is AppSpec §12 canon), her copy doctrine (structure and generous targets
@@ -486,15 +494,15 @@ the A1 backup (C-3) → the field-guide re-seed if any lesson text changed → t
 
 - ~~R-cor-3's PROVISIONAL reading of the Library panel~~ — **RATIFIED R-cor-10(1)** (the simple read preview).
 - ~~iOS target build owed before the ladder~~ — **DONE at the ladder's start (2026-09-01 21:50 MDT):** `xcodebuild build -scheme VariorumMobile -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO` on the G-close tree (`7e45cc1`) → `** BUILD SUCCEEDED **`, 0 errors, 11 warnings — every warning pre-existing and in files the round never touched (`MobileStructural`, `MobileEditorStyle`, `MobileTutorialSeeder`, `Shared/SignInFlow`, `Shared/EncryptionSession`, the AppIntents metadata note); none in `BlockHistoryFace`, `LandingTarget`, `RecoveryCopy`, `VoiceTokens`, `MarkdownSyntax` or `MarkdownFaceCore`. The phone inherits A's/F's `Shared/` additions and G's core tokenizer by construction, compiling clean (log `scratchpad/ios-build.log`).
-- Row 57 (A): the sidebar's arrow-key row navigation went with the List → flat column; recorded for 13u2 unless you want it back sooner.
+- ~~Row 57 (A): the sidebar's arrow-key row navigation~~ — **RULED R-cor-16(2): stays out; no owner.**
 - *(Read's default half was PROVISIONAL for one turn — RULED `edit` by her follow-up; nothing to ratify.)*
-- **The Lenses + Compare design memo — `notes/plans/act10-correction-memo-lenses-compare.md` §7, eight rulings** (R-cor-6's deliverable, WRITTEN; the build is its own phase at her slot).
+- **The Lenses + Compare design memo — `notes/plans/act10-correction-memo-lenses-compare.md` §7** (R-cor-6's deliverable, WRITTEN; the build is its own phase at her slot): **rulings 6 (two tabs) and 1 (the door words) RULED R-cor-16; the anchor half of 4 and the door's placement settled by R-cor-10(b)/R-cor-11(1); REMAINING for #88: 2 · 3 · 4's peer half · 5 · 7 · 8 + the build's slot.**
 - ~~Row 26: the Blocks context panel's order (facts first)~~ — **RULED R-cor-10(3)**, as built.
 - Any scalpel revert taken under C-5 (none expected; her lean recorded).
 - The row-36 KEEP/DROP table for word counts. *(Batch B's verdicts for the book are in its record: the card `Nw` DROP · the gutter takes fact KEEP · the book meta line KEEP · the side rail's `Nw block`/`Nw selected` DROP, its `Nw in note` word-target door KEEP.)*
 - Batch B, row 13: the Outline's prose stays left-anchored at Write's measure (batch 12's ruling) with a flexible, mostly-empty gutter — if she wants the column CENTRED like Write's page, that is a one-line ruling.
 - ~~Batch B, row 52: underscore emphasis~~ — **RULED R-cor-10(4)**: joins the vocabulary as italics (G, row 84).
-- Read's `edit · read` face remembered per note (the architect's call) — still hers to confirm at the walk.
+- ~~Read's `edit · read` face remembered per note~~ — **RULED R-cor-16(1): per note.**
 - ~~D-close seam (17:15 MDT)~~ — **RULED R-cor-11**: row 46 per-state accepted · 87 → G · 88 (both) → G.
 - ~~G-close seam (21:35 MDT)~~ — **RULED R-cor-15: all three kept as built.** As put: row 88's arrival landing (1:1 top-left, chosen under R-cor-8 — or the overview) · row 81's folded bar dropping the `Nw block · Nw selected` counts below 840 pt and every count in the compact tier · row 74's side column draggable with a remembered width while E's Library column is fixed.
 - **Batch G's three calls (her seam, or the ladder's):** row 88's never-arranged BIG-board arrival lands at the TOP-LEFT at 1:1, not in the overview (her ruling offered both; 4E's realization pins + the every-visit wall of silhouettes decided it — `CanvasArrival.landing(after:)` is one case the other way); row 81's folded bar drops the block/selected counts below 840 pt and every count in the compact tier (C-6); row 74's side column is draggable with a remembered width while E's Library column is fixed — match them either way at her word. Plus rows 92/93/94 (recorded with owners) for the ladder.
