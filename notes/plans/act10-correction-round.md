@@ -1765,4 +1765,4 @@ this brief; your final message is ONE pointer to it; then stop.
 - **Row 88:** NOT-STARTED — Canvas fit-all on a first arrival; the toolbar's grammar.
 - **Row 84:** NOT-STARTED (LAST — the one `Shared/` change) — `_word_` italics, display-only.
 - **The USE gate / suites / counts:** PENDING.
-- **No revert in flight.**
+- **Revert starting (row 86(d)'s red-on-old) — pre-revert state is the commit `bb4645c`**; the palette's `.showBlockHistory` case put back to the bare `dispatch(.showBlockHistory)` in place; restore = `git checkout -- App/Variorum/Variorum/Registry/ShellActions.swift` from the REPO ROOT, then `git diff --stat` empty.
