@@ -202,13 +202,17 @@ struct CanvasView: View {
         // projection arrives — small boards scroll to their bounds' centre
         // at 1:1, big ones open the read-only overview (a click lands on a
         // card). A board with a remembered layout is left as it was.
-        .onChange(of: model.projection.cards.count, initial: true) { _, count in
-            guard CanvasArrival.fitsAllOnArrival(
-                cards: count, storedPositions: model.projection.positions.count,
-                alreadyFitted: arrivalFitted)
-            else { return }
-            arrivalFitted = true
-            handleFitAll(onArrival: true)
+        // Ladder R1-14: the arrival waits for the VIEWPORT to report — the
+        // centre-vs-origin decision used to run against the 1200 × 800
+        // fallback when `visibleRect` was still empty (it is, on arrival), so
+        // a board that fits the real viewport landed top-left, and one that
+        // fits 1200 × 800 but not a smaller real viewport landed centred with
+        // its edges clipped — the mid-bank symptom in miniature.
+        .onChange(of: model.projection.cards.count, initial: true) { _, _ in
+            landOnArrivalIfReady()
+        }
+        .onChange(of: model.visibleRect.isEmpty) { _, _ in
+            landOnArrivalIfReady()
         }
         .sheet(item: $tagSheetBlock) { target in
             BlockTagAssignmentSheet(
@@ -497,9 +501,26 @@ struct CanvasView: View {
         }
     }
 
+    /// Row 88(a) + ladder R1-14: a never-arranged canvas lands through the
+    /// fit-all door once BOTH its projection and its viewport have arrived.
+    private func landOnArrivalIfReady() {
+        guard !model.visibleRect.isEmpty,
+              CanvasArrival.fitsAllOnArrival(
+                cards: model.projection.cards.count,
+                storedPositions: model.projection.positions.count,
+                alreadyFitted: arrivalFitted)
+        else { return }
+        arrivalFitted = true
+        handleFitAll(onArrival: true)
+    }
+
     private func handleFitAll(onArrival: Bool = false) {
-        let outcome = model.fitAll(viewport: model.visibleRect.isEmpty
-            ? CGSize(width: 1200, height: 800) : model.visibleRect.size)
+        let viewport = model.visibleRect.isEmpty
+            ? CGSize(width: 1200, height: 800) : model.visibleRect.size
+        #if DEBUG
+        if onArrival { CanvasArrivalOracle.viewport = viewport }
+        #endif
+        let outcome = model.fitAll(viewport: viewport)
         guard onArrival else {
             switch outcome {
             case .empty, .overview:
@@ -1108,9 +1129,13 @@ enum CanvasArrivalOracle {
     /// Row 91: the board's scroll-content size — in the overview it must be
     /// the SCALED size (the drawing fits the viewport), never the board's.
     static var boardContentSize: CGSize?
+    /// Ladder R1-14: the viewport the arrival's decision read — the REPORTED
+    /// one, never the 1200 × 800 fallback.
+    static var viewport: CGSize?
     static func reset() {
         landing = nil
         boardContentSize = nil
+        viewport = nil
     }
 }
 #endif

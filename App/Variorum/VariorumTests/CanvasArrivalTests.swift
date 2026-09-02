@@ -94,6 +94,14 @@ struct CanvasArrivalTests {
             #expect(landing == .origin,
                     "a 30-card spread is too big to fit at 1:1 in 900 × 600, so it lands at its top-left: \(landing)")
             #expect(!model.overviewActive, "…at 1:1 — never in the read-only overview")
+            // Ladder R1-14: the decision read a REPORTED viewport — never the
+            // 1200 × 800 fallback. (The first report under the test host is
+            // the hosting view's provisional layout — 1050 × 649 for a
+            // 900 × 600 window, measured — and settles to 900 × 566 after;
+            // the row-54 class of first measure, recorded, not chased here.)
+            let viewport = try #require(CanvasArrivalOracle.viewport, "the arrival recorded its viewport")
+            #expect(viewport != CGSize(width: 1200, height: 800), "never the fallback: \(viewport)")
+            #expect(viewport.width > 0 && viewport.height > 0, "a reported viewport: \(viewport)")
             for _ in 0..<20 {
                 hosting.layoutSubtreeIfNeeded()
                 window.displayIfNeeded()
