@@ -633,6 +633,9 @@ struct LibraryCatalogView: View {
             .fill(tokens.line)
             .frame(width: 1)
             .libraryGeometryProbe(.divider)
+            // Ladder R1-17: the line rides the column's own transition, so
+            // it never pops a frame ahead of the panel it bounds.
+            .transition(.move(edge: .trailing).combined(with: .opacity))
     }
 
     /// F's (a) — a receipt or an error is a LAID-OUT row above the bottom
