@@ -737,10 +737,11 @@ struct TrayPanel: View {
             // is kept to lineage), so nothing here is wrong and nothing here
             // is marked; the sentence says where it actually lives.
             if model.revealKeptInLineage {
+                // Row 89: an explainer sentence wraps whole, never truncates.
                 Text(tokens.chromeLabel(RecoveryCopy.trayRevealKeptInLineage(home)))
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
-                    .lineLimit(3)
+                    .lineLimit(nil)
                     .fixedSize(horizontal: false, vertical: true)
             }
             ScrollView {

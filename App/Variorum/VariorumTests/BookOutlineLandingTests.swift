@@ -448,3 +448,48 @@ struct BookOutlineLandingTests {
         }
     }
 }
+
+// MARK: - The Act 10 correction round, batch G — row 73
+
+extension BookOutlineLandingTests {
+    /// **Row 73 (E's trace): an ascent INTO a not-yet-mounted book lands at
+    /// the note, not at the top.** The Library panel's outline row and the
+    /// membership chip's link both request a reveal BEFORE the book's
+    /// entries have arrived; `landOutlineReveal` consumed the request at
+    /// Outline's `onAppear` and only THEN found the note absent — dropped,
+    /// the book opened at the top (reproduced twice in E's walk). Now a
+    /// request whose note the entries have not delivered stays parked, and
+    /// the entries' arrival lands it. RED ON OLD: the card never sits at the
+    /// top (the settle times out, the anchor unreported).
+    @Test func aRevealRequestedBeforeTheEntriesArriveLandsWhenTheyDo() async throws {
+        try await withLandingBook(posts: 40, longAt: [], chapters: false) { session, db, readingID, postIDs, _ in
+            // The model is EMPTY — no `adopt` — exactly the state an ascent
+            // meets: the view's own observation delivers the entries after
+            // the mount.
+            let model = BookViewModel(session: session, readingID: readingID)
+            #expect(model.entries.isEmpty, "the premise: the entries have not arrived")
+            let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
+            BookOutlineGeometry.anchorTops = [:]
+            BookOutlineGeometry.trace = []
+            let watchdog = MainThreadWatchdog()
+            defer { watchdog.stop() }
+            // The ascent's request, BEFORE the mount.
+            model.requestReveal(postIDs[25])
+            let (window, hosting) = mounted(
+                session: session, readingID: readingID, model: model, structure: structure)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let last = BookOutlineRows.Row.noteAnchor(postIDs[25])
+            await settle(window, hosting, watchdog: watchdog, until: {
+                if let top = anchorTop(last) { return abs(top) <= BookView.landingTolerance }
+                return false
+            }, maxTurns: 160)
+            let top = try #require(anchorTop(last), "the revealed card realized once the entries arrived")
+            print("LANDING TRACE (parked reveal):", BookOutlineGeometry.trace, scrollFacts(hosting))
+            #expect(abs(top) <= 4, "the ascent's note sits at the top of the page, not \(top) pt away")
+            #expect(model.pendingReveal == nil, "the landing was consumed — after the entries arrived")
+        }
+    }
+}

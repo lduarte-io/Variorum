@@ -182,7 +182,28 @@ struct PostDetailView: View {
     /// title's midX in it against the masthead's midX).
     nonisolated static let mastheadSpace = "variorum-masthead"
 
+    /// Row 74 (the Act 10 correction round, batch G): the note's side column
+    /// — the tray, Block History, Versions, references and scraps — is a
+    /// `SideColumn` of OUR OWN (the Library's batch-E precedent, hoisted to
+    /// `Core/Views`): our 1-pt divider and the panel at a remembered,
+    /// draggable width, both drawn in every window state. The `.inspector`
+    /// it replaces drew its divider in a KEY window only, so tabbed out the
+    /// boundary between the note and its tray vanished (the orchestrator's
+    /// window-id probe, `orchestrator-e/r74-*`).
+    static let sideColumnWidthKey = "noteSideColumnWidth"
+    /// The column's presence animates from the MUTATION sites (E's burst
+    /// lesson): every door that opens or closes the panel uses this.
+    static let panelAnimation: Animation = .easeInOut(duration: 0.2)
+
     var body: some View {
+        SideColumn(
+            tokens: tokens, shown: inspectorPanel != nil, widthKey: Self.sideColumnWidthKey,
+            onDividerFrame: { frame in
+                #if DEBUG
+                PostDetailOracle.sideColumnDividerFrame = frame
+                #endif
+            }
+        ) {
         VStack(spacing: 0) {
             // Batch 9 (R101): the MASTHEAD — the round-2 canon's et/es
             // grammar instead of a toolbar. The page below is the hero.
@@ -360,17 +381,16 @@ struct PostDetailView: View {
                     .id("canvas-\(postID)")
             }
         }
-        .inspector(isPresented: Binding(
-            get: { inspectorPanel != nil },
-            set: { if !$0 { inspectorPanel = nil } })
-        ) {
+        } panel: {
+            // The column's occupant: ONE width rule for every panel (the
+            // widest ideal the old inspector gave — the tray's 420 / 280,
+            // which every occupant but references and scraps already used;
+            // the dragged width is remembered for all of them).
             switch inspectorPanel {
             case .references:
                 ReferencePanel(session: session, postID: postID)
-                    .inspectorColumnWidth(min: 240, ideal: 340)
             case .scraps:
                 ScrapsPanel(session: session)
-                    .inspectorColumnWidth(min: 220, ideal: 300)
             case .blockHistory(let request):
                 // Row 17's pane, in the room her C1 ruling opened. It gets
                 // the tray's own width: both are lists of things with dates
@@ -378,7 +398,7 @@ struct PostDetailView: View {
                 // exactly what happens when such a list is given less.
                 BlockHistoryPane(
                     session: session, request: request,
-                    onClose: { inspectorPanel = nil },
+                    onClose: { withAnimation(Self.panelAnimation) { inspectorPanel = nil } },
                     // The came-from region's second door swaps the COLUMN's
                     // occupant rather than stacking a sheet over a sheet —
                     // which is how the peek's nested tray dissolves (the
@@ -394,7 +414,6 @@ struct PostDetailView: View {
                         inspectorPanel = .blockHistory(request)
                     })
                     .id("history-\(request.id)")
-                    .inspectorColumnWidth(min: 280, ideal: 420)
             case .versions:
                 // Rows 16/23: the same room the tray and the history pane got,
                 // for the same reason — a list of things with dates and verbs
@@ -402,9 +421,8 @@ struct PostDetailView: View {
                 // P-1 squeeze, one surface over).
                 NoteVersionsPane(
                     session: session, postID: postID,
-                    onClose: { inspectorPanel = nil })
+                    onClose: { withAnimation(Self.panelAnimation) { inspectorPanel = nil } })
                     .id("versions-\(postID)")
-                    .inspectorColumnWidth(min: 280, ideal: 420)
             case .tray(let revealBlockID):
                 // Her C1 ruling's whole point is the ROOM: the tray was a
                 // sheet whose rows squeezed their previews to ten characters
@@ -415,11 +433,10 @@ struct PostDetailView: View {
                 TrayPanel(
                     session: session, postID: postID,
                     revealBlockID: revealBlockID,
-                    onClose: { inspectorPanel = nil })
+                    onClose: { withAnimation(Self.panelAnimation) { inspectorPanel = nil } })
                     // A reveal identifies its own request, so arriving at a
                     // DIFFERENT row rebuilds the panel with its mark.
                     .id("tray-\(postID)#\(revealBlockID ?? "")")
-                    .inspectorColumnWidth(min: 280, ideal: 420)
             case nil:
                 EmptyView()
             }
@@ -445,18 +462,22 @@ struct PostDetailView: View {
                 // reach THIS inspector by composition — the same seam the
                 // mode router uses, never a broadcast (P-4).
                 showTray: { request in
-                    panel.wrappedValue = .tray(revealBlockID: request.revealBlockID)
+                    withAnimation(Self.panelAnimation) {
+                        panel.wrappedValue = .tray(revealBlockID: request.revealBlockID)
+                    }
                 },
                 // Ledger row 17: the same seam for the History pane — the
                 // bars' door and ⌘K reach THIS inspector by composition.
                 showBlockHistory: { request in
-                    panel.wrappedValue = .blockHistory(request)
+                    withAnimation(Self.panelAnimation) {
+                        panel.wrappedValue = .blockHistory(request)
+                    }
                 },
                 // Ledger rows 16/23: the same seam again for the Versions
                 // listing — the bars' door and ⌘K reach THIS inspector by
                 // composition, never a broadcast (P-4).
                 showVersions: {
-                    panel.wrappedValue = .versions
+                    withAnimation(Self.panelAnimation) { panel.wrappedValue = .versions }
                 })
         }
         .onDisappear {
@@ -499,7 +520,7 @@ struct PostDetailView: View {
             // show block 3's history beside a mode where block 1 is live
             // (the walk's captures 45/46).
             if inspectorPanel?.isBlockHistory == true {
-                withAnimation(.easeInOut(duration: 0.2)) { inspectorPanel = nil }
+                withAnimation(Self.panelAnimation) { inspectorPanel = nil }
             }
         }
     }
@@ -511,7 +532,7 @@ struct PostDetailView: View {
     private func toggle(_ panel: InspectorPanel) {
         // Act 10 item 10's principle — regions visibly become things or
         // visibly leave: the column animates in and out instead of popping.
-        withAnimation(.easeInOut(duration: 0.2)) {
+        withAnimation(Self.panelAnimation) {
             if panel.isTray {
                 inspectorPanel = inspectorPanel?.isTray == true ? nil : panel
                 return
@@ -731,6 +752,9 @@ extension View {
 @MainActor
 enum PostDetailOracle {
     static var inspectorPanel: PostDetailView.InspectorPanel?
+    /// Row 74: OUR divider's frame in the side column's space — reported in
+    /// every window state, nil while no panel stands.
+    static var sideColumnDividerFrame: CGRect?
 }
 
 /// The correction round's masthead oracle (rows 4/19 — the `BookOutlineGeometry`

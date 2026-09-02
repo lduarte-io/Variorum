@@ -58,6 +58,9 @@ struct CalmSectionHeader: View {
     let tokens: VoiceTokens
     let title: String
     var detail: String?
+    /// Row 89's pin seam (the `WorkbenchSeam.onFrame` pattern): the
+    /// rendered detail's height — nil in the app.
+    var onDetailHeight: ((CGFloat) -> Void)? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
@@ -67,11 +70,21 @@ struct CalmSectionHeader: View {
                 .fontWeight(.semibold)
                 .lineLimit(1)
             if let detail {
+                // Row 89 (the Act 10 correction round, batch G — the
+                // orchestrator's row-74 probe): the MEANING LINE is prose,
+                // and it WRAPS to its full length — never `lineLimit`-
+                // truncated ("…put back keeps a row; del…" at the tray's
+                // default width was a sentence nobody could finish). P-8's
+                // line-limit rule is for chrome LABELS; F's row 63 ("a
+                // sentence's own point fell off the end") is the rule here.
                 Text(tokens.chromeLabel(detail))
                     .font(tokens.small)
                     .foregroundStyle(tokens.faint)
-                    .lineLimit(3)
+                    .lineLimit(nil)
                     .fixedSize(horizontal: false, vertical: true)
+                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: {
+                        onDetailHeight?($0)
+                    }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

@@ -913,7 +913,19 @@ struct PoolDetailView: View {
     /// scraps area is the third renderer of the one tray door.
     static let surfaceCapabilities: [CapabilityID] = [.showNoteTray]
 
+    /// Row 74 (the Act 10 correction round, batch G): the scraps area's tray
+    /// stands in a `SideColumn` of our own — the same class of `.inspector`
+    /// the note's side and the Library retired: its divider is the system's,
+    /// drawn in a KEY window only.
+    static let sideColumnWidthKey = "scrapsSideColumnWidth"
+    @Environment(ThemeStore.self) private var themeStore: ThemeStore?
+    @Environment(\.colorScheme) private var scheme
+    private var tokens: VoiceTokens {
+        themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
+    }
+
     var body: some View {
+        SideColumn(tokens: tokens, shown: trayShown, widthKey: Self.sideColumnWidthKey) {
         VStack(spacing: 0) {
             HStack(spacing: 8) {
                 Picker("Pool mode", selection: $mode) {
@@ -926,7 +938,7 @@ struct PoolDetailView: View {
                 .frame(maxWidth: 220)
                 Spacer()
                 Button(TrayPath.menuLabel(for: .pool), systemImage: "tray") {
-                    trayShown.toggle()
+                    withAnimation(PostDetailView.panelAnimation) { trayShown.toggle() }
                 }
                 .labelStyle(.iconOnly)
                 .help("What this scraps area has set aside: blocks it archived, "
@@ -944,11 +956,10 @@ struct PoolDetailView: View {
                     .id("canvas-\(poolID)")
             }
         }
-        .inspector(isPresented: $trayShown) {
+        } panel: {
             TrayPanel(
                 session: session, postID: poolID, home: .pool,
-                onClose: { trayShown = false })
-                .inspectorColumnWidth(min: 280, ideal: 420)
+                onClose: { withAnimation(PostDetailView.panelAnimation) { trayShown = false } })
         }
         .onAppear {
             guard let initialBlockID else { return }

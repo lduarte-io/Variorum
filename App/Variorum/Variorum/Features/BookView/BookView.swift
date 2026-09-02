@@ -1264,6 +1264,12 @@ struct BookView: View {
             .onAppear { landOutlineReveal(proxy) }
             .onChange(of: model.pendingReveal) { _, _ in landOutlineReveal(proxy) }
             .onChange(of: model.pendingChapterReveal) { _, _ in landOutlineReveal(proxy) }
+            // Row 73 (the correction round, batch G): a reveal that arrived
+            // BEFORE the entries (an ascent into a not-yet-mounted book —
+            // the Library panel's outline row, the membership chip's link)
+            // stays parked, and the entries' arrival lands it.
+            .onChange(of: model.entries.map(\.postID)) { _, _ in landOutlineReveal(proxy) }
+            .onChange(of: structure.sections.map(\.id)) { _, _ in landOutlineReveal(proxy) }
             // 13c 2A (her item A6, RULED 2026-07-24): Outline's ENTIRE
             // bottom inset is gone — the `Slider` jump control ("it makes
             // no sense to have a horizontal scrollbar on a vertical page")
@@ -1281,16 +1287,33 @@ struct BookView: View {
     /// Outline's half of W21's landing — and the chapter landing's only
     /// consumer: put the requested note (or chapter) at the top and consume
     /// the request. Nothing else moves — no focus, no expansion.
+    ///
+    /// **Row 73 (the Act 10 correction round, batch G — E's trace):** this
+    /// used to CONSUME the request BEFORE checking that its note was in
+    /// `entries`; at Outline's `onAppear` the book's entries have not
+    /// arrived yet, so an ascent INTO a not-yet-mounted book (the Library
+    /// panel's outline row, the standing 13f W20 chip link — reproduced
+    /// twice in E's walk) consumed and DROPPED its reveal, and the book
+    /// opened at the top. Now a request whose note the entries have not
+    /// delivered stays PARKED; the entries' arrival (`onChange` above)
+    /// lands it. A request for a note the DELIVERED entries do not hold is
+    /// foreign and is dropped as before — a stale request must never land
+    /// on a later navigation.
     private func landOutlineReveal(_ proxy: ScrollViewProxy) {
         if let sectionID = model.pendingChapterReveal {
-            model.consumeChapterReveal()
             if structure.sections.contains(where: { $0.id == sectionID }) {
+                model.consumeChapterReveal()
                 landOutline(BookOutlineRows.Row.chapterAnchor(sectionID), proxy)
+            } else if !structure.sections.isEmpty {
+                model.consumeChapterReveal()
             }
         }
         guard let postID = model.pendingReveal else { return }
+        guard model.entries.contains(where: { $0.postID == postID }) else {
+            if !model.entries.isEmpty { model.consumeReveal() }
+            return
+        }
         model.consumeReveal()
-        guard model.entries.contains(where: { $0.postID == postID }) else { return }
         landOutline(BookOutlineRows.Row.noteAnchor(postID), proxy)
     }
 

@@ -55,8 +55,15 @@ struct BlockHistoryHostTests {
         PostDetailOracle.inspectorPanel?.isBlockHistory == true
     }
 
+    /// The side column stands (row 74's oracle: OUR divider reported its
+    /// frame). JUSTIFIED PIN EDIT (the correction round, row 74): the evidence this
+    /// replaces named the SYSTEM inspector's AppKit container
+    /// (`InspectorStyleContext`) — the very host row 74 retires, because
+    /// it drew its divider in a KEY window only. The column is ours now
+    /// (`SideColumn`), and its oracle — our divider's frame, reported
+    /// in every window state — is the honest "the pane stands" signal.
     private static func inspectorColumnMounted(_ hosting: NSView) -> Bool {
-        TrayPanelMoveTests.classNames(hosting).contains { $0.contains("InspectorStyleContext") }
+        PostDetailOracle.sideColumnDividerFrame != nil
     }
 
     /// Every view in the tree whose frame (in the window) runs past the

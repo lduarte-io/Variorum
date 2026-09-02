@@ -404,10 +404,11 @@ struct BlockHistoryPane: View {
                 Spacer()
                 Button("Close") { close() }
             }
+            // Row 89: the pane's explainer wraps whole, never truncates.
             Text(tokens.chromeLabel(BlockHistoryPath.explainer))
                 .font(tokens.small)
                 .foregroundStyle(tokens.faint)
-                .lineLimit(3)
+                .lineLimit(nil)
                 .fixedSize(horizontal: false, vertical: true)
             // Ledger row 33 — the current-block jump. It renders only while
             // the caret really is somewhere else (the pure rule decides), and

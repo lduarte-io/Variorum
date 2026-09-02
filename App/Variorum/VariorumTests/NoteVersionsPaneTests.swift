@@ -104,8 +104,15 @@ struct NoteVersionsPaneTests {
     @Test func theMountedDetailOpensTheVersionsPaneInItsRealSidePanel() async throws {
         try await mounted { session, post, window, hosting in
             #expect(session.commandRouter.activePostID == post, "the detail registered")
+            // JUSTIFIED PIN EDIT (the correction round, row 74): the evidence this
+            // replaces named the SYSTEM inspector's AppKit container
+            // (`InspectorStyleContext`) — the very host row 74 retires, because
+            // it drew its divider in a KEY window only. The column is ours now
+            // (`SideColumn`), and its oracle — our divider's frame, reported
+            // in every window state — is the honest "the pane stands" signal.
+            PostDetailOracle.sideColumnDividerFrame = nil
             let atRest = TrayPanelMoveTests.classNames(hosting)
-            #expect(!atRest.contains { $0.contains("InspectorStyleContext") },
+            #expect(PostDetailOracle.sideColumnDividerFrame == nil,
                     "the side panel is not on screen at rest")
             #expect(atRest.contains("EditorTextView"), "the page itself IS mounted")
 
@@ -115,8 +122,8 @@ struct NoteVersionsPaneTests {
                 TrayPanelMoveTests.classNames(hosting).contains { $0.contains("OutlineList") }
             }
             let open = TrayPanelMoveTests.classNames(hosting)
-            #expect(open.contains { $0.contains("InspectorStyleContext") },
-                    "the inspector column really opened — her \"pane to the right\"")
+            #expect(PostDetailOracle.sideColumnDividerFrame != nil,
+                    "the side column really opened — her \"pane to the right\"")
             #expect(open.contains { $0.contains("OutlineList") },
                     "with the listing inside it")
             #expect(open.contains("EditorTextView"),

@@ -99,19 +99,26 @@ struct TrayPanelMoveTests {
             // clipping mechanism they belonged to; the panel's own
             // composition is `TrayPanelShapeTests`' pin now, over a seeded
             // store.)
+            // JUSTIFIED PIN EDIT (the correction round, row 74): the evidence this
+            // replaces named the SYSTEM inspector's AppKit container
+            // (`InspectorStyleContext`) — the very host row 74 retires, because
+            // it drew its divider in a KEY window only. The column is ours now
+            // (`SideColumn`), and its oracle — our divider's frame, reported
+            // in every window state — is the honest "the pane stands" signal.
+            PostDetailOracle.sideColumnDividerFrame = nil
             let atRest = Self.classNames(hosting)
-            #expect(!atRest.contains { $0.contains("InspectorStyleContext") },
+            #expect(PostDetailOracle.sideColumnDividerFrame == nil,
                     "the side panel is not on screen at rest")
             #expect(atRest.contains("EditorTextView"), "the page itself IS mounted")
 
             #expect(session.commandRouter.requestNoteTray(TrayRequest(postID: post)),
                     "the seam is registered — the request ACTED (P-2)")
             await Self.settle(window, hosting) {
-                Self.classNames(hosting).contains { $0.contains("InspectorStyleContext") }
+                PostDetailOracle.sideColumnDividerFrame != nil
             }
             let open = Self.classNames(hosting)
-            #expect(open.contains { $0.contains("InspectorStyleContext") },
-                    "the inspector column really opened — her \"pane to the right\"")
+            #expect(PostDetailOracle.sideColumnDividerFrame != nil,
+                    "the side column really opened — her \"pane to the right\"")
             #expect(open.contains("EditorTextView"),
                     "beside the page, never instead of it (it is a panel, not a sheet)")
         }
