@@ -46,25 +46,47 @@ struct NearViewportObserver: ViewModifier {
     /// The scroll's named coordinate space — the viewport's top is 0 there
     /// (`BookView.outlineSpace`, `ReadingFlowView.flowSpace`).
     let space: String
+    /// Ladder fix 2 (R2-5): while NOT armed the observer decides nothing —
+    /// a row whose height is not yet honest (the flow's story before its
+    /// extents land, standing on an 800-pt prior) must not flip near on a
+    /// geometry the truth will move. Arming is part of the observed value,
+    /// so the moment it flips the current distance is decided at once even
+    /// when the geometry itself did not change (the first story's distance
+    /// is 0 before and after). Default true — the Outline's rows are
+    /// always honest (their placeholders are remembered sizes).
+    var armed: Bool = true
     var farMargin: CGFloat { margin * 3 }
+
+    /// The observed value: the distance, and whether it may be decided.
+    nonisolated struct Report: Equatable, Sendable {
+        var distance: CGFloat
+        var armed: Bool
+    }
 
     func body(content: Content) -> some View {
         content
-            .onGeometryChange(for: CGFloat.self) { geometry in
+            .onGeometryChange(for: Report.self) { geometry in
                 // The row's distance from the viewport's top-edge region
                 // (0 while any part of it overlaps [0, margin) — a viewport
                 // is at most a couple of thousand points tall).
                 let frame = geometry.frame(in: .named(space))
-                if frame.maxY < 0 { return -frame.maxY }
-                if frame.minY > margin { return frame.minY - margin }
-                return 0
-            } action: { distance in
+                let distance: CGFloat
+                if frame.maxY < 0 {
+                    distance = -frame.maxY
+                } else if frame.minY > margin {
+                    distance = frame.minY - margin
+                } else {
+                    distance = 0
+                }
+                return Report(distance: distance, armed: armed)
+            } action: { report in
+                guard report.armed else { return }
                 // Decided on the next turn: a geometry report can arrive
                 // inside a layout pass, and a state write there is the
                 // "modifying state during view update" class (it doubled
                 // the mounted editor in the harness).
-                let becomesNear = !near && distance < margin
-                let becomesFar = near && distance > farMargin
+                let becomesNear = !near && report.distance < margin
+                let becomesFar = near && report.distance > farMargin
                 guard becomesNear || becomesFar else { return }
                 DispatchQueue.main.async { near = becomesNear }
             }

@@ -179,6 +179,7 @@ struct ReadingFlowView: View {
                                 session: session, entry: entry, page: page,
                                 memory: memory,
                                 estimate: estimate(for: entry.postID),
+                                extentsKnown: extents != nil,
                                 columnWidth: columnWidth,
                                 onWake: { blockID in onWake(entry.postID, blockID) },
                                 onNear: { near in landing.rowNear(entry.postID, near) },
@@ -607,7 +608,10 @@ nonisolated enum FlowHeightEstimate {
     static let fontSize: CGFloat = 16
     /// A story whose extents have not landed yet (the read is in flight):
     /// the Outline's own never-measured fallback, corrected the moment the
-    /// lengths arrive.
+    /// lengths arrive. Only the column's first frames ever stand on it —
+    /// a story mounts NO surface while its height is unknown (ladder R2-5:
+    /// three 800-pt priors fit the near band, so a fresh flow mounted its
+    /// first three stories and threw two away when the lengths landed).
     static let unknownHeight: CGFloat = 800
     /// A note with no renderable text: the row's one blank line.
     static let emptyNoteHeight: CGFloat = 20
@@ -752,13 +756,18 @@ enum ReadingFlowMaterialization {
 /// real text (`FlowPostView` inside a `StableSurface` at its remembered or
 /// estimated size) while near the viewport, a placeholder of exactly that
 /// height while far. Starts far, so a distant row never mounts a surface
-/// for one frame; the row's first geometry report decides.
+/// for one frame; the row's first geometry report decides. And it stays a
+/// placeholder while its HEIGHT IS UNKNOWN — no memory, the extents not
+/// landed (ladder R2-5): a surface mounted against the 800-pt prior is a
+/// whole-story read that the true length then pushes far and discards.
 private struct FlowStoryRow: View {
     let session: AppSession
     let entry: Queries.ReadingEntry
     let page: ReadingPageTokens
     let memory: SurfaceSizeMemory
     let estimate: CGFloat
+    /// The book's extents have landed — the estimate is honest, not the prior.
+    let extentsKnown: Bool
     let columnWidth: CGFloat?
     let onWake: (String?) -> Void
     let onNear: (Bool) -> Void
@@ -767,6 +776,13 @@ private struct FlowStoryRow: View {
     let onLoaded: () -> Void
 
     @State private var near = false
+
+    /// The row's height is honest — remembered here, or estimated from
+    /// landed extents (R2-5): only then may the near/far observer decide,
+    /// so `near` never turns true on the 800-pt prior's geometry.
+    private var heightKnown: Bool {
+        extentsKnown || memory.size(entry.postID) != nil
+    }
 
     var body: some View {
         Group {
@@ -787,7 +803,8 @@ private struct FlowStoryRow: View {
             }
         }
         .modifier(NearViewportObserver(
-            near: $near, margin: ReadingFlowView.nearMargin, space: ReadingFlowView.flowSpace))
+            near: $near, margin: ReadingFlowView.nearMargin, space: ReadingFlowView.flowSpace,
+            armed: heightKnown))
         .onChange(of: near, initial: true) { _, isNear in onNear(isNear) }
     }
 

@@ -313,11 +313,16 @@ struct ReadingFlowLandingTests {
 
     /// P3 for the flow, and the honest estimate's load-bearing pin: a
     /// twelve-story book mounted at a 760-pt viewport realizes only the
-    /// stories inside the near band (the first, and the one or two below it
-    /// — the rest stand as placeholders of their ESTIMATED heights, far).
+    /// stories inside the near band — the first, and at most one below it
+    /// (the rest stand as placeholders of their ESTIMATED heights, far).
     /// RED under a behavioral revert of the estimate (every never-measured
     /// story one blank line tall): the whole column fits the band and all
-    /// twelve surfaces are realized at once.
+    /// twelve surfaces are realized at once. Ladder fix 2 (R2-5) tightened
+    /// the bound from 4 to 2: before the extents landed every story stood
+    /// at the 800-pt prior, so the first THREE flipped near and mounted
+    /// surfaces (three 215-block reads), two of which the lengths then
+    /// pushed far and threw away — the current tree read 3 (RED on it); a
+    /// story now stays FAR until its height is known.
     @Test func theFlowRealizesOnlyTheNearStoriesAtTheMount() async throws {
         try await withStories(count: 12, seed: 31) { session, entries in
             #if DEBUG
@@ -333,8 +338,8 @@ struct ReadingFlowLandingTests {
             let realized = ReadingFlowMaterialization.count
             print("[batch H] twelve stories at the mount: \(realized) surfaces realized; document \(Self.documentHeight(hosting)) pt")
             #expect(realized > 0, "the first story rendered")
-            #expect(realized <= 4,
-                    "only the near stories are surfaces — the far ones are placeholders at their estimated heights: \(realized) realized")
+            #expect(realized <= 2,
+                    "only the near stories are surfaces — the far ones are placeholders at their estimated heights, and none mounts before its height is known: \(realized) realized")
         }
     }
 }
