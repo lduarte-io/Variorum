@@ -656,6 +656,8 @@ WINS — it was written with the real code open and with instructions to refute.
 
 **Status: open, unstarted.** 10 items, no pins.
 
+**Added 2026-09-02 (the Act 10 correction round's ladder, round 1 — RECORDED with this owner; the mechanisms in `notes/plans/act10-correction-round.md` `## LADDER ROUND 1` R1-15 and R1-18):** **(11)** the per-note `UserDefaults` families `currentBlock.<id>` · `postMode.<id>` · `readFace.<id>` are never reaped — deletion, the purge and Delete Now leave the keys (`CommandRouter.forgetCurrentBlock` exists with no production caller); a sweep at note purge is the fix. **(12)** `.toggleSidebar` is declared `availability: always` while its menu item greys on `activeWindowKind != .full` — a gate the registry walk cannot see; a `windowKind` field on `CapabilityContext` makes the grey a registry fact (P-1).
+
 Ten unrelated defects, each small, each traced. No shared mechanism — this is the catch-all, and it
 is the entry most likely to be split when it is actually run.
 

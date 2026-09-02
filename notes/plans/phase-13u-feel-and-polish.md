@@ -49,6 +49,27 @@ execution shape — reading order, the sitting agenda, batch structure,
 obligations, verification. Where this plan and that section disagree,
 THAT SECTION WINS (it is canon; this is choreography).
 
+> **⚠️ RE-SPLIT + REMOVALS (2026-09-01/02, the Act 10 correction round — her rulings R-cor-12/13; the binding
+> record is `notes/plans/act10-correction-round.md` §1).** **FOUR phases by kind, not two:** **13u1 — the SEAM
+> only** (items 5 · 7 · 8 + the O(N²) keystroke family from the tech-debt sweep) · **13u2 — FEEL** (item 1
+> incl. row 54 + M12 + the round's rows 92/94; item 2 the space-eater; items 10 · 11 · 13 incl. row 93; P39a/
+> P39b; row 57 stays OUT at her R-cor-16 word) · **13u3 — FACES** (items 3 · 4 incl. the journal split + the
+> title chip · 14 · 15 · 16 + item 9's Mac face after the shared sitting rules the capture shape) · **13u4 —
+> the RESTYLE continuation + DARK MODE (item 6) together**, one surface per session, light and dark in both
+> voices. **Item 12 (multi-block drag) becomes its OWN row after 13u1 settles the seam.** **The four protection
+> items added on her launch morning** (the near-empty typed confirmation #86(c) · the nudge bar overlay · the
+> legs brain's SYNC leg + "extend" wording · COPY ALL on the recovery phrase) **re-home to `pre-13x`**, which runs
+> first and redesigns those surfaces (its design deletes the loss-legs model — two of the four may be moot by
+> construction; copy-all is a one-session 17 entry if pre-13x is far — her word NEED). **REMOVED / MOVED by the
+> correction round (her instruction: "make sure the 13u plans are updated with what has been removed"):** item
+> 17 BUILT (rows 38/49 — `Shared/LandingTarget.swift`, both halves, plus the pages faces' click); row 60 (the
+> Blocks arrival blank) BUILT (G's row 83); item 4's Pool card preview BUILT EARLY (G's row 87 — the one-brain
+> card family stays 13u3's); the Read landing (R1-3) and the flow's honest geometry (H, row 95) BUILT; ADDED to
+> item 1's family: row 54 (the read tier's provisional-width first measure), row 92 (the canvas silhouette click
+> lands mid-board), row 94 (Blocks' residual ~0.2–0.3 s arrival), row 98 (the paged reader's paragraph
+> over-count); ADDED to item 13's family: row 93 (the nameless title's prompt). The 13u1 kickoff executes the
+> FOUR-way file split.
+
 ## Kickoff message (paste-ready)
 
 > **⚠️ READ THE "ADDENDUM 2026-08-31 — 13u1's INHERITANCE FROM THE PRE-13u ROUND" AT THE END OF
