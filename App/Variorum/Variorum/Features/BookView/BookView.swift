@@ -1526,20 +1526,6 @@ private extension View {
     }
 }
 
-/// Row 53 (the Act 10 correction round): an expanded note's text surface
-/// at its REMEMBERED size from the first frame it is realized. The lazy
-/// column re-realizes an expanded story whenever it scrolls back into
-/// range; its surface would come back at a placeholder height and grow in
-/// steps to ~20,000 pt (a DB read, a first measure, the final) — the
-/// layout churn under which the column's estimates never converge and no
-/// landing can take. With a remembered size (`BookViewModel`), the row
-/// reserves that height until the surface has reached it, and the
-/// column's layout is right from the first frame. The memory FOLLOWS the
-/// surface once it is loaded (typing grows and shrinks a live editor; the
-/// reservation never holds a gap under shortened text), and a different
-/// width (the window resized while the row was away) is a memory that
-/// does not apply. Identity per surface kind (the caller's `.id`), so a
-/// note demoted from live to read-cheap starts a fresh reservation.
 /// Row 53: whether a row sits within `margin` points of the Outline
 /// scroll's viewport (its frame read in the scroll's named space, where the
 /// viewport's top is 0). Only expanded rows carry it — a dozen observers at
@@ -1582,6 +1568,17 @@ private let stableSurfacePlaceholderCeiling: CGFloat = 60
 /// One line of slack on "reached": the read-cheap and live surfaces of one
 /// note differ by their insets.
 private let stableSurfaceReachedSlack: CGFloat = 24
+/// Ladder R1-1: how long a surface must hold ONE size before that size is
+/// adopted as its memory and the reservation is dropped — the Outline
+/// landing's own minimum hold (`BookView.landingMinimumHold`), so a
+/// provisional-width first measure (row 54's class) or a placeholder
+/// waiting on the encrypted store's read never decides.
+let stableSurfaceSettleInterval: TimeInterval = 1.0
+/// Ladder R1-1: a remembered width within this of the surface's reported
+/// width is "the same width" — a memory taken at another width does not
+/// apply (the window resized, the sidebar collapsed, the voice switched
+/// while the row was away).
+let stableSurfaceWidthTolerance: CGFloat = 1
 
 /// Row 53 (the Act 10 correction round): an expanded note's text surface
 /// at its REMEMBERED size from the first frame it is realized. The column
@@ -1591,42 +1588,88 @@ private let stableSurfaceReachedSlack: CGFloat = 24
 /// final) — the layout churn under which no landing can take. With a
 /// remembered size (`BookViewModel`), the row reserves that height until
 /// the surface has reached it, and the column's layout is right from the
-/// first frame. A LIVE editor's memory follows typing both ways once it is
-/// loaded (the reservation never holds a gap under shortened text); a
-/// read-cheap surface only ever grows while it loads, so its memory keeps
-/// the largest height seen. Identity per surface kind (the caller's
-/// `.id`), so a note demoted from live to read-cheap starts a fresh
-/// reservation from the same memory.
-private struct StableSurface<Content: View>: View {
+/// first frame.
+///
+/// **What the memory is (ladder R1-1 — the reservation is honest in BOTH
+/// directions):** the surface's last SETTLED size. While a surface loads,
+/// a read-cheap memory grows with it and a live editor's follows typing
+/// both ways once loaded (`followsShrinks`); and whenever a surface holds
+/// one size for `stableSurfaceSettleInterval` — taller OR shorter than the
+/// memory — that size is adopted and the reservation is dropped, so a
+/// memory that is TALLER than the surface's real height (text reflowed
+/// shorter while the row was away) can never hold a permanent gap under
+/// the story. A memory taken at ANOTHER width (`stableSurfaceWidthTolerance`)
+/// does not apply and reserves nothing from the surface's first real
+/// report — the stored `CGSize`'s width is compared, not merely carried.
+/// Before R1-1 the read-cheap memory only ever grew and `loaded` flipped
+/// only when the surface REACHED the memory, so a stale taller memory
+/// reserved a blank gap for the session (the reviewer's trace). Identity
+/// per surface kind (the caller's `.id`), so a note demoted from live to
+/// read-cheap starts a fresh reservation from the same memory. Internal
+/// (not private) so the pin can mount it alone.
+struct StableSurface<Content: View>: View {
     let known: CGSize?
     let followsShrinks: Bool
     let remember: (CGSize) -> Void
     @ViewBuilder let content: () -> Content
-    /// The surface has reached its remembered size (or has none): the
-    /// reservation is off and the memory follows the surface.
+    /// The surface has reached (or settled at) a size: the reservation is
+    /// off and the memory follows the surface.
     @State private var loaded = false
+    /// R1-1: the width the surface last reported above the placeholder
+    /// ceiling — the reservation applies only while it matches the memory's.
+    @State private var reportedWidth: CGFloat?
+    /// R1-1: the settle bookkeeping, in a reference box — no `@State` write
+    /// per geometry report (the landing's own lesson).
+    @State private var settle = SettleBox()
+
+    final class SettleBox {
+        var lastSize: CGSize?
+        var generation = 0
+    }
 
     var body: some View {
         content()
             .onGeometryChange(for: CGSize.self) { $0.size } action: { size in
-                if !loaded {
-                    let reached = known.map { size.height >= $0.height - stableSurfaceReachedSlack } ?? true
-                    // Flipped on the next turn, never inside the layout
-                    // pass that reported (the state-during-update class).
-                    if reached { DispatchQueue.main.async { loaded = true } }
-                }
-                guard size.height > stableSurfacePlaceholderCeiling, size.width > 0 else { return }
-                if loaded && followsShrinks {
-                    remember(size)
-                } else if size.height > (known?.height ?? 0) {
-                    remember(size)
-                }
+                report(size)
             }
             .frame(minHeight: reserved, alignment: .top)
     }
 
+    private func report(_ size: CGSize) {
+        if !loaded {
+            let reached = known.map { size.height >= $0.height - stableSurfaceReachedSlack } ?? true
+            // Flipped on the next turn, never inside the layout pass that
+            // reported (the state-during-update class).
+            if reached { DispatchQueue.main.async { loaded = true } }
+        }
+        guard size.height > stableSurfacePlaceholderCeiling, size.width > 0 else { return }
+        if reportedWidth != size.width {
+            DispatchQueue.main.async { reportedWidth = size.width }
+        }
+        if loaded && followsShrinks {
+            remember(size)
+        } else if size.height > (known?.height ?? 0) {
+            remember(size)
+        }
+        // R1-1: the settle. Every real report re-arms it; the check that
+        // fires after a quiet interval with the size unchanged adopts THAT
+        // size — smaller or larger — and drops the reservation.
+        settle.lastSize = size
+        settle.generation += 1
+        let generation = settle.generation
+        let box = settle
+        DispatchQueue.main.asyncAfter(deadline: .now() + stableSurfaceSettleInterval) {
+            guard box.generation == generation, box.lastSize == size else { return }
+            remember(size)
+            loaded = true
+        }
+    }
+
     private var reserved: CGFloat? {
         guard !loaded, let known else { return nil }
+        if let reportedWidth, abs(reportedWidth - known.width) > stableSurfaceWidthTolerance {
+            return nil
+        }
         return known.height
     }
 }
