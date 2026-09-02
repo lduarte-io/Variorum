@@ -531,6 +531,15 @@ struct CanvasView: View {
                 }
                 .frame(width: size.width, height: size.height, alignment: .topLeading)
                 .scaleEffect(scale, anchor: .topLeading)
+                // Row 91 (found by row 88's walk — the arrival's overview
+                // drew NOTHING): `scaleEffect` is a visual transform; the
+                // ZStack kept its UNSCALED layout size, so the scroll
+                // content stayed board-sized and the scaled drawing sat at
+                // the content's top-left while the 2-axis scroll view's own
+                // position lay mid-content — off screen. The overview's
+                // layout is the SCALED size now, so it fits the viewport
+                // exactly as the fit-all door promises.
+                .frame(width: size.width * scale, height: size.height * scale, alignment: .topLeading)
             } else {
                 // LAZY REALIZATION (the 4E P1 bound): exactly the model's
                 // culled set renders — plus the live pane's card and any
@@ -544,6 +553,11 @@ struct CanvasView: View {
                 }
             }
         }
+        #if DEBUG
+        .onGeometryChange(for: CGSize.self) { $0.size } action: {
+            CanvasArrivalOracle.boardContentSize = $0
+        }
+        #endif
     }
 
     /// FREE movement (Sitting 9): stored coordinates may be negative — the
@@ -1040,6 +1054,12 @@ nonisolated enum CanvasArrival {
 @MainActor
 enum CanvasArrivalOracle {
     static var outcome: CanvasViewModel.FitAllOutcome?
-    static func reset() { outcome = nil }
+    /// Row 91: the board's scroll-content size — in the overview it must be
+    /// the SCALED size (the drawing fits the viewport), never the board's.
+    static var boardContentSize: CGSize?
+    static func reset() {
+        outcome = nil
+        boardContentSize = nil
+    }
 }
 #endif

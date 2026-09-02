@@ -86,6 +86,21 @@ struct CanvasArrivalTests {
             }
             let outcome = try #require(CanvasArrivalOracle.outcome, "the arrival landed through fit-all")
             #expect(outcome != .empty, "…with cards to fit: \(outcome)")
+            // Row 91: in the overview the scroll content is the SCALED board,
+            // so the silhouettes fit the viewport (the old ZStack kept its
+            // unscaled size and the overview drew off screen).
+            if case .overview(let scale) = outcome {
+                for _ in 0..<40 {
+                    hosting.layoutSubtreeIfNeeded()
+                    window.displayIfNeeded()
+                    pump()
+                    await Task.yield()
+                    if let content = CanvasArrivalOracle.boardContentSize, content.width <= 1200 { break }
+                }
+                let content = try #require(CanvasArrivalOracle.boardContentSize, "the board reported its content size")
+                #expect(content.width <= 1200 + 1 && content.height <= 800 + 1,
+                        "the overview's content (\(content)) fits the fit-all viewport at scale \(scale) — never the unscaled board")
+            }
             #endif
             // (b) the strip composes no system picker beside a label.
             let composition = SurfaceComposition.text(of: root.body)
