@@ -315,6 +315,12 @@ it.
   this lens (+ "bring every take along"). QUESTIONS #88 therefore carries only the memo's remaining rulings (2 · 3 ·
   the peer half of 4 · 5 · 7 · 8 — and WHEN its build phase runs) plus anything the ladder leaves open.
 
+- **R-cor-17 — THE READ TAB'S NAVIGATOR ROWS (2026-09-02 ~03:55 MDT, the question tool; round 2's R2-10 put to her):**
+  in the book's Read tab — Scroll AND Pages — clicking a NOTE row in the left navigator **scrolls the read page to
+  that story** (chapter rows and note rows alike land the read page; the navigator never leaves Read); Outline keeps
+  opening the note for editing. Her choice: *"Scroll the read page to that story"* (the recommended option). → R2-10
+  becomes a FIX in ladder fix 2 (the session was told mid-run).
+
 **Inherited rulings this round builds to (not re-litigated):** the eighth-wave rulings W8-1…W8-5
 (`pre-13u-round.md`), the fifth-wave item-15 flow ruling, the mode-row canon R60–94 as extended by
 W8-1 (the eight-mode row is AppSpec §12 canon), her copy doctrine (structure and generous targets
@@ -2777,7 +2783,7 @@ The shape is right and it is the shape B proved: the heavy rows leave the lazy e
 | R2-6 · R2-7 · R2-8 · R2-9 | **ACCEPT — FIX (nits).** | R2-6 the tautology becomes a real bound; R2-7 one tolerance for the pin and the finisher (4 pt), and the DEBUG log gains the scroll offset beside each `top=` (row 99's recommended eye); R2-8 one fallback for `known` nil and the estimate; R2-9 an empty/failed read drops the reservation |
 | R2-11 | **ACCEPT — FIX.** `isNumeralToken` accepts "Mild." | Roman numerals are UPPERCASE only (I V X L C D M), ≤ 5 characters; "Mild." previews; pin case in `BookOutlineRowsTests` |
 | R2-12 | **ACCEPT — FIX.** A pending landing outlives the flow | cancel the landing on `onDisappear`; pin: a flow torn down mid-landing leaks no DONE into the next flow (the harness's own leak is the red) |
-| R2-10 | **RECORD — for her (§7 / QUESTIONS #88):** the navigator's rows behave three ways in Read (a chapter row lands the flow; a one-note chapter row is the chapter's act in Read; a NOTE row still leaves for Outline, and the spread has the same seam) — a ruled-shape question, not a mechanical row; 13i's Book Panel sitting owns the navigator's grammar | — |
+| R2-10 | **RULED R-cor-17 → FIX (added to fix 2 mid-run):** in Read (Scroll + Pages) a navigator NOTE row lands the read page at that story (the flow scrolls to the story's heading; the paged view turns to its first page); the navigator never leaves Read; Outline unchanged; pins on both faces (door class where the road did not exist; the old road's leave-for-Outline is the red). Originally: **RECORD — for her (§7 / QUESTIONS #88):** the navigator's rows behave three ways in Read (a chapter row lands the flow; a one-note chapter row is the chapter's act in Read; a NOTE row still leaves for Outline, and the spread has the same seam) — a ruled-shape question, not a mechanical row; 13i's Book Panel sitting owns the navigator's grammar | — |
 | Row 99 | **NO OWNER while sub-frame** (round 2's weighing accepted); R2-7's offset log is its eye | — |
 | **Row 97** (H's find) | **VERIFY FIRST, then FIX or RECORD:** a book opened from the shelf comes up in Outline after being left in Read ▸ Scroll | if the book's mode memory is simply not written on the shelf road (or not read), fix + pin (red on old); if the shelf deliberately opens Outline, RECORD as designed with the site |
 
