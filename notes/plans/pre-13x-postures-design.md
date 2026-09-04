@@ -649,6 +649,39 @@ recorded with her one-line instruction), the probes exist behind DEBUG, and this
 
 ### 17c. BATCH RECORDS (appended by each implementer; newest at the bottom)
 
+### Batch 0 — record (implementer: Fable, 2026-09-04)
+
+**Scope:** the BATCH 0 BRIEF above, nothing more. **Baseline:** `a3ff54c` (the brief's own commit). **Environment
+at start:** her live real-store app running (`/Applications/Variorum.app`, PID 79767) — NEVER touched; no Release
+build, no `/Applications` refresh, no store touch, no `Sync/` line, no production Keychain item, anywhere in this
+batch. Builds use a gitignored `App/Variorum/DerivedData/pre13x-b0` inside the worktree. **No revert is in flight.**
+**Facts read before any change (read-only):** the Mac Team Provisioning Profile embedded in her install and the iOS
+*[removed for publication]*
+so the Q1 hypothesis is "signing accepts the shared group without an App-ID change" — to be proven by building.
+
+**LIVE STATUS (flipped in the same commit as each piece; PENDING = unverified):**
+- **Q1 (shared group on both targets)** — NOT-STARTED. Settled design: `Variorum.entitlements` gains the second
+  entry; `App/Variorum/VariorumMobile.entitlements` is CREATED with the two-entry shape (default first) and wired by
+  `CODE_SIGN_ENTITLEMENTS` on both VariorumMobile configs; Mac Debug build + iOS `generic/platform=iOS` Debug build,
+  each verified by `codesign -d --entitlements`; the Mac `EntitlementsTests` gains a pin that the signed host carries
+  the shared group. Own commit.
+- **Q2 (Mac synchronizable round trip under the shared group)** — NOT-STARTED. Settled design: a shared DEBUG-only
+  probe brain (`App/Variorum/Shared/SharedKeychainGroupProbe.swift`, throwaway service
+  `io.lduarte.Variorum.pre13x-shared-group-probe`, timestamped account for the local leg) driven by a Mac test suite
+  that is DISABLED BY DEFAULT (`.enabled(if:)` on `VARIORUM_SHARED_GROUP_PROBE=1`, passed as
+  `TEST_RUNNER_VARIORUM_SHARED_GROUP_PROBE=1`); every status code recorded.
+- **Q3 (the item crosses to the phone)** — NOT-STARTED → will land as PENDING-HER-SITTING. Settled design: DEBUG-only
+  doors on BOTH apps over the same brain (a Help-menu item on the Mac; a Settings row on the phone), a fixed
+  `cross-device` account under the throwaway service (production custody never named), and the five-minute
+  procedure in the memo.
+- **Q4 (pre-unlock network floor)** — NOT-STARTED. Five unauthenticated GETs to `rest/v1/key_vault` on
+  `ProjectConfig.variorumProjectURL`, fresh connection each; median + max.
+- **Q5 (synchronizable + access-group facts)** — NOT-STARTED. Measured inside the Q2 suite: delete WITH the flag under
+  the shared group; a query naming the OTHER (default) group; a query naming no group from the same app; a query
+  WITHOUT the synchronizable flag.
+- **Q6 (Argon2id v1 on this Mac)** — NOT-STARTED. `swift test --filter PassphraseKDFTests/kdfLatencyHarnessMac`.
+- **The memo** `notes/plans/pre-13x-spike-memo.md` — NOT-STARTED. **Ledger rows 1–3 + U0 line** — not yet flipped.
+
 
 ---
 
