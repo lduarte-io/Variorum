@@ -71,7 +71,7 @@ Verify by: §15's per-batch gates, the two drills, her walk on both devices.
 **From the 2026-09-03 kickoff sitting (verbatim-faithful where quoted):**
 16. **The Fragments bridge is RETIRED** — *"it's just on there due to history… if I had a feature list for
     each app's v1, the bridge wouldn't be on there."* Preserved on a branch; removed from `main` as its own
-    batch (0b) with its own cold review, BEFORE any key work. No postures per app, no suite-level posture
+    batch (0b) with its own cold review, BEFORE any key work. No postures per app, no suite-level posture *(DONE 2026-09-04 — tag `archive/fragments-bridge-2026-09-04`; the record `notes/plans/pre-13x-bridge-retirement.md`.)*
     floor, no frozen vault format. If it ever returns it returns as shared rows in a collaboration era.
 17. **One Apple-held key; every Apple leg is a WRAP under it.** Standard = the vault and the key file each
     carry one extra box that the Apple key opens; Castle = they do not. The raw sync-key iCloud mirror the
@@ -556,7 +556,7 @@ key-proof token) + §12's running record (marker 7 → 8: the vault's additive c
 sync RPCs — the choreography executed in her window); CoreDescription untouched (substrate) except §8's 9b
 mention retired with the bridge; the 13p constitution's R13p-5/6/7/9 recorded as superseded; the memo
 superseded; KnownIssues rows resolved; 13x's row trimmed to portability; MobileSoul parity line; QUESTIONS
-#81 / #87 dissolved / re-listed; the bridge's canon deltas (§10) land with batch 0b.
+#81 / #87 dissolved / re-listed; the bridge's canon deltas (§10) LANDED with batch 0b, 2026-09-04 (AppSpec §9 · SyncSpec §3 · OverallModel §3, applied in place; pre-13x's closeout records the §14 delta).
 
 ---
 
@@ -566,7 +566,7 @@ superseded; KnownIssues rows resolved; 13x's row trimmed to portability; MobileS
 | unit | kind | evidence that closes it |
 |---|---|---|
 | U0 batch 0 — measurements | spike (not a unit) | the decision memo `notes/plans/pre-13x-spike-memo.md` |
-| U1 batch 0b — the bridge set-aside | operations | core + Mac + iOS suites green with the bridge gone; no bridge door renders; its own cold review |
+| U1 batch 0b — the bridge set-aside — **DONE 2026-09-04** | operations | core + Mac + iOS suites green with the bridge gone; no bridge door renders; its own cold review |
 | U2 batch 1 — substrate + the lockstep event (marker 7→8) | sync/protocol (phase-sized) | convergence suites incl. the key proof; ONE live two-device round on the real mirror after her deploy |
 | U3 batch 2 — postures + the two switches | custody (phase-sized) | three drills: the Standard new-device road (nothing typed), the Castle new-device road (passphrase once), the Standard→Castle switch with a Standard sibling device following |
 | U4 batch 3 + 4 — doors + lobby + cross-device | custody (phase-sized) | per-door drills (change passphrase across two devices; regenerate; sign out everywhere; delete + re-setup + re-upload; the plaintext export's strip pin; the vault road at the lobby) |
@@ -597,7 +597,7 @@ never spawn subagents (one Sonnet lookup for external facts is the sole exceptio
 - U1 batch 0b — **DONE 2026-09-04** (`notes/plans/pre-13x-bridge-retirement.md` §6 UNIT CLOSED; its ladder §8; batch 1a inherits one KnownIssues row — the sweep's sign-in occasion). *(Was: NOT-STARTED — placement: before the key work per ruling 16; her 09-04 question "is it fine
   to remove the bridge after?" answered in the sitting — either order works; "after" costs a small port of
   the bridge's key provider in batch 1 and carries its tests through; "first" is recommended).
-- U2 batch 1 — NOT-STARTED (BRIEF WRITTEN 2026-09-04 in §17b: two sessions, 1a client substrate then 1b the protocol event; runs only after the bridge retirement lands). U3 batch 2 — NOT-STARTED. U4 batches 3–4 — NOT-STARTED. U5 batch 5 — NOT-STARTED.
+- U2 batch 1 — NOT-STARTED (BRIEF WRITTEN 2026-09-04 in §17b: two sessions, 1a client substrate then 1b the protocol event; the bridge retirement LANDED 2026-09-04, so batch 1a is NEXT — a different session at her word). U3 batch 2 — NOT-STARTED. U4 batches 3–4 — NOT-STARTED. U5 batch 5 — NOT-STARTED.
 
 ### THE LEDGER (numbered; every row owned; grows as batches land)
 | # | item | owner | status |

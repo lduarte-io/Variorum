@@ -3,7 +3,7 @@
 **Why a cutover here:** the design sitting spent ~720k of context settling the shape (three review passes, the
 rewrite, the copy, batch 0); the build half ahead (batches 1a · 1b · 2 · 3 · 4 · 5, the deploy window, the
 ladder, two drills, her walk) is larger than the re-orientation read. The seam is clean: batch 0 CLOSED and
-verified; the bridge retirement is HERS to run next from its own kickoff; batch 1's brief is written.
+verified; the bridge retirement is HERS to run next from its own kickoff; batch 1's brief is written. *(UPDATED 2026-09-04 13:30: the bridge retirement RAN and CLOSED the same day under `/architect-phase` — see the filled slot below; batch 1a is the successor's first act.)*
 
 ## PASTE-READY KICKOFF (for the successor orchestrator — a fresh Fable session)
 
@@ -15,9 +15,9 @@ verified; the bridge retirement is HERS to run next from its own kickoff; batch 
 > ledger, the BATCH 0 and BATCH 1 briefs), §17c the batch records; `notes/plans/pre-13x-copy.md` (every
 > user-facing string — render, don't re-derive); `notes/plans/pre-13x-design-review.md` §8 and §3 P5 (why the
 > shape is what it is; do not re-derive its traces); `notes/plans/pre-13x-spike-memo.md`; this handoff whole.
-> Then VERIFY, never trust (git log, git status, the plan files' status banners): (1) has the bridge retirement
+> Then VERIFY, never trust (git log, git status, the plan files' status banners): (1) the bridge retirement HAS LANDED (2026-09-04 — confirm it: has the bridge retirement
 > landed (`notes/plans/pre-13x-bridge-retirement.md` §6 DONE, §8 review closed, tag
-> `archive/fragments-bridge-2026-09-04` present)? If not, it is HERS to run from that file's kickoff — do not
+> `archive/fragments-bridge-2026-09-04` present? all three are true at `5bdeabdc`); if somehow not, it is HERS to run from that file's kickoff — do not
 > start batch 1 over the bridge code; (2) batch 0's Q3 (the phone leg) — the memo's PENDING-HER-SITTING slot and
 > ledger row 2: filled by her report, or still open (not blocking until batch 2 writes the real Apple key).
 > Then run the batch loop from BATCH 1a per §17b's brief: one FRESH Fable implementer per session, briefed by
@@ -37,7 +37,7 @@ verified; the bridge retirement is HERS to run next from its own kickoff; batch 
   doors (Mac Help menu · phone Settings dev row — DELETED at batch 2 when the real Apple key lands, ledger 12);
   the memo; spine 72/10 green on the batch 0 tree. Q3 PENDING-HER-SITTING (the design session was installing
   the dev build on her iPhone 17 Pro at cutover — see PENDING slots below).
-- **The bridge retirement:** PLANNED (`293b25e`), NOT RUN at cutover; hers to run; its own Fable review.
+- **The bridge retirement:** ~~PLANNED (`293b25e`), NOT RUN at cutover~~ — **DONE 2026-09-04** (`notes/plans/pre-13x-bridge-retirement.md` §6 UNIT CLOSED; the three-round ladder in §8; the install refreshed at her word, SHA-256 `fbd3f4a774d92230…`). Batch 1a inherits ONE KnownIssues row (the retired-credential sweep's sign-in occasion + the required seam).
 - **Batch 1:** BRIEF WRITTEN (§17b): 1a client substrate; 1b the protocol event + deploy checklist.
 - **Her devices:** Mac = Biometric mode, escrow off (→ Castle at migration); phone = signed in, opens SILENTLY
   today (her words 2026-09-04: "my phone doesn't require face id") — under ruling 19 the phone becomes Castle at
@@ -67,3 +67,4 @@ verified; the bridge retirement is HERS to run next from its own kickoff; batch 
 4. At the batch 2 sitting: her phone's move to Castle (Face ID at open) — a consequence of ruling 19 she has not
    explicitly seen stated; and the one-time "confirm your passphrase to finish" on both devices.
 5. §16(e): the posture copy is 13s's; nothing owed now.
+6. **At pre-13x's closeout:** AppSpec §14's delta must include the bridge retirement's canon changes (AppSpec §9's `applyBridgeLanding` row struck, `resolveSyncConflict`'s `'fragments'` label retired, the daily door's list; SyncSpec §3's wire sentence; OverallModel §3's five occasions) — applied in place 2026-09-04, recorded in §14 at the phase's close per the lean-docs rule.
