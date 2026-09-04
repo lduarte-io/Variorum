@@ -244,13 +244,12 @@ public enum SyncSchema {
     ]
 
     /// Local-only machinery that must never appear in a payload or a mirror.
-    /// `bridge_state`/`bridge_day` (Phase 9b) are the Fragments bridge's
-    /// per-device bookkeeping — deliberately unsynced (SyncSpec §12 exempt);
-    /// the registry/completeness walks pin that they stay out of the synced
-    /// set, and `BridgeStateTests` pins that registering one WOULD fail.
+    /// The registry/completeness walks (`SyncSchemaTests`) pin that this set
+    /// is exactly the schema minus the synced registry. (The retired Fragments
+    /// bridge's `bridge_state`/`bridge_day` left this list when
+    /// `v1_16_drop_bridge_tables` dropped them, 2026-09-04.)
     public static let localOnlyTables: Set<String> = [
         "sync_outbox", "sync_state", "sync_row_seq", "_sync_applying",
-        "bridge_state", "bridge_day",
     ]
 
     private static let byName: [String: SyncTable] = Dictionary(

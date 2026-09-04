@@ -64,6 +64,10 @@ extension AppDatabase {
                 """)
         }
         // Phase 9b (Fragments bridge): the bridge's LOCAL-ONLY state —
+        // RETIRED 2026-09-04 with the bridge (archived at tag
+        // `archive/fragments-bridge-2026-09-04`; `v1_16_drop_bridge_tables`
+        // below drops both tables — this migration STAYS because migrations
+        // are append-only). The original rationale, kept as history:
         // never synced, no sync_version, no outbox triggers, exempt from
         // SyncSpec §12's lockstep (nothing on the mirror changes). Two
         // tables where the plan sketched one, because the two lifetimes
@@ -500,6 +504,24 @@ extension AppDatabase {
                 CREATE INDEX idx_container_note_version
                   ON container(kind, deleted_at, id)
                   WHERE archived_at IS NOT NULL AND archived_at = created_at;
+                """)
+        }
+        // The Fragments bridge's RETIREMENT (2026-09-04, pre-13x batch 0b —
+        // the plan `notes/plans/pre-13x-bridge-retirement.md`, the archive
+        // `notes/archive/fragments-bridge.md`): the bridge's two LOCAL-ONLY
+        // state tables from v1_4 leave the schema. LOCAL only — they were
+        // never synced (no sync_version, no outbox triggers, never in the
+        // registry), so there is no SyncSpec §12 lockstep event and the
+        // marker stays 7: an un-migrated client and a migrated one push and
+        // pull identical rows. The `IF EXISTS` guard is for a store whose
+        // v1_4 was somehow skipped — none exists, but a drop is the one
+        // migration that must never fail on absence. Their contents were
+        // per-device bookkeeping (a pull cursor, per-day agreed hashes)
+        // that nothing reads any more; nothing of hers lived there.
+        migrator.registerMigration("v1_16_drop_bridge_tables") { db in
+            try db.execute(sql: """
+                DROP TABLE IF EXISTS bridge_day;
+                DROP TABLE IF EXISTS bridge_state;
                 """)
         }
         return migrator

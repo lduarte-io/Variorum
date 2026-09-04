@@ -10,8 +10,8 @@ struct MigrationTests {
         "container_block", "reading", "reading_post", "tag",
         "post_tag", "block_tag", "reference", "setting",
         "sync_outbox", "sync_state", "sync_row_seq", "_sync_applying",
-        // Phase 9b (v1_4): the Fragments bridge's local-only state.
-        "bridge_state", "bridge_day",
+        // (Phase 9b's v1_4 `bridge_state`/`bridge_day` were DROPPED by
+        // v1_16 at the bridge's 2026-09-04 retirement — pinned below.)
         // Phase 11 (v1_5/v1_7, the one §12 lockstep event): canvas card
         // positions + saved lenses.
         "canvas_layout", "lens", "lens_choice",
@@ -70,6 +70,35 @@ struct MigrationTests {
                 db, sql: "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'grdb_%' AND name NOT LIKE 'sqlite_%'"))
         }
         #expect(tables == Self.expectedTables)
+    }
+
+    /// The Fragments bridge's retirement (2026-09-04, pre-13x batch 0b): a
+    /// store that ran every migration up to v1_15 still carries the bridge's
+    /// two LOCAL-ONLY tables from v1_4; `v1_16_drop_bridge_tables` takes them
+    /// and nothing else, contents included (per-device bookkeeping nothing
+    /// reads any more). Red on the pre-retirement tree by construction: no
+    /// such migration existed and `expectedTables` named both tables.
+    @Test func theRetirementMigrationDropsTheBridgeTablesFromAnOlderStore() throws {
+        let queue = try DatabaseQueue()
+        try AppDatabase.migrator.migrate(queue, upTo: "v1_15_note_version_index")
+        let (hasState, hasDay) = try queue.read { db in
+            (try db.tableExists("bridge_state"), try db.tableExists("bridge_day"))
+        }
+        #expect(hasState, "a v1_15 store still carries the bridge's key-value table")
+        #expect(hasDay, "…and its per-day table")
+        try queue.write { db in
+            try db.execute(
+                sql: "INSERT INTO bridge_day (day_key, last_synced_hash) VALUES ('2026-08-01', 'abc')")
+        }
+        try AppDatabase.migrator.migrate(queue)
+        let tables = try queue.read { db in
+            Set(try String.fetchAll(
+                db, sql: "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'grdb_%' AND name NOT LIKE 'sqlite_%'"))
+        }
+        #expect(!tables.contains("bridge_state") && !tables.contains("bridge_day"),
+                "v1_16 drops both bridge tables")
+        #expect(tables == Self.expectedTables,
+                "the drop takes exactly the two bridge tables and nothing else")
     }
 
     @Test func allIndexesExist() throws {

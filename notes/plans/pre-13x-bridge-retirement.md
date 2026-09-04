@@ -302,15 +302,21 @@ this record unless a line below says so.**
     three SHA-256 vector pins carried into `SampleLibraryDedupeRepairTests.theManifestHashRecipeIsStableSHA256Hex`.
     `swift build` clean; **`swift test`: `Test run with 1390 tests in 152 suites passed`** (1525/165 − 13 deleted
     suites; 136 bridge tests gone, 1 pin added; the ONE skipped test is the standing env-gated real-Supabase pass,
-    skipped at every baseline) — commit PENDING(hash)
-  - step 3 — NOT-STARTED — settled design: migration **`v1_16_drop_bridge_tables`** (NOT v1_15 — see delta D2);
-    `SyncSchema.localOnlyTables` loses the two names; `MigrationTests.expectedTables` loses them + a migrate-from-v1_15
-    pin
+    skipped at every baseline) — `ee09c50`
+  - step 3 — DONE — migration **`v1_16_drop_bridge_tables`** (`DROP TABLE IF EXISTS bridge_day; … bridge_state;` —
+    local-only, no §12 event, marker stays 7; the v1_4 block's comment re-headed as history, the migration itself
+    untouched); **the ONE `Sync/` touch: `SyncSchema.localOnlyTables` loses the two names and its four-line doc
+    re-words** (the deleted `BridgeStateTests` reference had to go with them — same block, recorded);
+    `MigrationTests.expectedTables` loses them; new pin `theRetirementMigrationDropsTheBridgeTablesFromAnOlderStore`
+    (migrate `upTo: v1_15_note_version_index` → both tables present, a row inserted → full migrate → both gone and
+    the table set == `expectedTables`; red on the old tree by construction). Filtered walk (`MigrationTests` ·
+    `SyncSchemaTests` · `SerializerCompletenessTests` · `SupabaseTransportTests`) 46/6 green; **`swift test`:
+    `Test run with 1391 tests in 152 suites passed`** — commit PENDING(hash)
   - step 4 — NOT-STARTED
   - step 5 — NOT-STARTED
   - step 6 — NOT-STARTED
   - step 7 — NOT-STARTED
-- **Counts:** core **1390/152 green (step 2)** · Mac PENDING · iOS build PENDING · spine PENDING
+- **Counts:** core **1391/152 green (step 3)** · Mac PENDING · iOS build PENDING · spine PENDING
 - **Deltas from §2/§2b's inventory found by the re-run greps (on `32d3fdf`):**
   - **D1 · `BridgeHash.body` is NOT bridge-only.** It is the sample library's manifest hash recipe: `SampleLibrarySeeder`
     (`:154`, `:333-334`, `:361` — the bundled manifest's title→hash entries were computed with it), the dedupe facts
