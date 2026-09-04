@@ -285,10 +285,56 @@ is the ordinary English word — leave.
 > bridge ever returns it returns as shared rows on Variorum's own sync in a collaboration era, designed then.
 
 ## 6. THE RECORD (the implementer writes; LIVE STATUS first)
-- LIVE STATUS: step 1 — NOT-STARTED · step 2 — · step 3 — · step 4 — · step 5 — · step 6 — · step 7 —
-- Counts: core PENDING · Mac PENDING · iOS build PENDING
-- Deltas from §2's inventory found by the re-run greps: PENDING
-- Open items for the orchestrator: PENDING
+
+**Session: the Fable implementer, 2026-09-04, from the KICKOFF PROMPT; tree at kickoff `32d3fdf` (clean, in sync
+with origin); her live app PID 79767 running beside every suite, untouched. No revert is in flight at any point in
+this record unless a line below says so.**
+
+- **LIVE STATUS:**
+  - step 1 — DONE (branch `archive/fragments-bridge` + tag `archive/fragments-bridge-2026-09-04` both at `32d3fdf`,
+    both pushed and verified on `origin`; `notes/archive/fragments-bridge.md` written; this record opened) — commit
+    PENDING(hash)
+  - step 2 — NOT-STARTED — settled design: delete `Sources/VariorumCore/Bridge/` + the 16 core test files; delete
+    `applyBridgeLanding`; drop `AccountRekey` step 6 (the marker clears after step 5); `Operations+Container` docs;
+    `AccountLifecycleTests`' B4 trim; **`BridgeHash` moves verbatim to `Sources/VariorumCore/Domain/BridgeHash.swift`
+    (name kept), its SHA-256 pins carried into `SampleLibraryDedupeRepairTests`** (fork F1 below)
+  - step 3 — NOT-STARTED — settled design: migration **`v1_16_drop_bridge_tables`** (NOT v1_15 — see delta D2);
+    `SyncSchema.localOnlyTables` loses the two names; `MigrationTests.expectedTables` loses them + a migrate-from-v1_15
+    pin
+  - step 4 — NOT-STARTED
+  - step 5 — NOT-STARTED
+  - step 6 — NOT-STARTED
+  - step 7 — NOT-STARTED
+- **Counts:** core PENDING · Mac PENDING · iOS build PENDING · spine PENDING
+- **Deltas from §2/§2b's inventory found by the re-run greps (on `32d3fdf`):**
+  - **D1 · `BridgeHash.body` is NOT bridge-only.** It is the sample library's manifest hash recipe: `SampleLibrarySeeder`
+    (`:154`, `:333-334`, `:361` — the bundled manifest's title→hash entries were computed with it), the dedupe facts
+    wired at `SyncSession.configure`, `Sync/SampleLibraryDedupe.swift:21`'s doc, and three SURVIVING tests
+    (`SampleLibraryDedupeFactsTests`, `SampleLibraryManifestTests`, `SampleLibraryDedupeRepairTests`). Deleting the
+    module as listed would break the build and the shipped manifest. → fork F1.
+  - **D2 · `v1_15` is taken** (`v1_15_note_version_index`, pre-13u Act 4 / 17c P20). The drop migration is
+    `v1_16_drop_bridge_tables`. The archive note names v1_16.
+  - **D3 · `NoteVersionsPaneTests.theBridgeRowTakesTheLiveVoiceAndTheMacPassesIt` (`:369`) reads
+    `Shared/BridgeStatusViews.swift` and `Variorum/RootView.swift` AS SOURCE TEXT** — it dies with the file. Deleted in
+    step 4 (its subject, the bridge row's alarm token, no longer exists).
+  - **D4 · `SavepointOnLeaveTests.swift:325`** — `#expect(note.contains("Fragments"))`: the string pin §2b-A1
+    anticipated; flipped in step 4 to the surviving wording.
+  - **D5 · `BridgeStateTests` carries nothing forward:** its registry/mirror walks are the GENERAL pins in
+    `SyncSchemaTests.registryMatchesLiveSchemaExactly` (`localOnlyTables == allTables − synced`, which stays green by
+    construction once the tables are dropped and de-listed) and `SerializerCompletenessTests`. Deleted whole.
+  - **D6 · `Operations+Container.swift` references `BridgeEngine` in DOCS only** (`:111`) — no code edit, comments only.
+  - **D7 · `applyBridgeLanding` has zero surviving callers** outside the deleted module/tests (one doc mention,
+    `AppSession.swift:306`, re-worded in step 5).
+  - The rest of §2/§2b holds exactly (line counts match: 2,226 in `Bridge/`, 4,319 across the 16 core test files).
+- **Forks (the implementer proposes, the architect rules):**
+  - **F1 · `BridgeHash` — PROVISIONAL: move verbatim, keep the name.** Options: (a) move the enum unchanged to
+    `Sources/VariorumCore/Domain/BridgeHash.swift` with a doc comment saying the name is history and the recipe is the
+    manifest's; (b) rename to e.g. `ContentHash` — touches `Sync/SampleLibraryDedupe.swift`'s comment (inside the
+    fence) and the shipped-manifest tests for no behavioral gain; (c) leave a typealias. **(a) chosen:** zero `Sync/`
+    touches, zero behavioral change, the manifest's hashes stay valid; the three `bodyHashIsStableSHA256Hex` pins from
+    the deleted `FragmentsContractTests` move into `SampleLibraryDedupeRepairTests` so the recipe stays pinned. A
+    rename is a later touch under the `Sync/` rider (18a/13y) if she wants the word gone.
+- **Open items for the orchestrator:** PENDING
 
 ## 7. THE COLD REVIEW (after §6 says DONE)
 A FRESH Fable reviewer runs `notes/REVIEW_PROMPT.md` verbatim over the combined diff (`git diff
