@@ -1101,3 +1101,17 @@ what the sweep missed.
   OWN 17 entry AFTER this phase lands, on the settled key path; its brief is unchanged. **§16(d)'s parked "Pause
   sync" (17k) now belongs to 18a** (sync considerations — `DetailedPlanForPhases.md` row 18).
 - The daily-Journal identity memo is **13i-e's** now (from 13y). The dedupe residuals are **18a's** (from 13y).
+
+**Batch 0 — the architect's verification (2026-09-04, after the implementer's close).** Spot-checked, never
+trusted: the five commits are on `origin/main` (`fa64534` · `a37f9cd` · `e29ebe3` · `e8f7a11` · `2b90724`); the
+entitlements diff is exactly the second-entry shape on both targets with the default group first; the probe
+files are DEBUG-only and the Mac suite is `.enabled(if:)`-gated (re-run by the architect without the variable:
+both tests `skipped:`, `EntitlementsTests` green — the shared-group pin holds); the memo answers Q1–Q6 with
+numbers and Q3 as PENDING-HER-SITTING with the five-minute procedure. **The tutorial spine ran against the
+batch 0 tree: 72 tests in 10 suites passed** (the standing 72/10; the new Help-menu door disturbed nothing).
+The memo's forward items became ledger rows 8–12. **U0 is CLOSED**; what remains of it is hers (row 2, the
+phone leg). Two orchestrator-side machinery notes, recorded in the resiliency protocol's 2026-09-04 addendum:
+the `tail | grep -m1` wait, and Swift Testing's skipped-test count — plus one of the architect's own: zsh does
+not word-split an unquoted `$VAR` of `-only-testing` flags; build an array and pass `"${ARGS[@]}"`, or the
+whole list arrives as ONE argument and xcodebuild exits 65 before running anything.
+
