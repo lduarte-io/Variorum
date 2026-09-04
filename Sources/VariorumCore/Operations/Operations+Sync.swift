@@ -17,9 +17,10 @@ extension Operations {
     /// outcome the sync design forbids. (PROVISIONAL — logged for the
     /// author; the alternative wedges sync on sealed posts.)
     ///
-    /// `label` (Phase 9b): the Fragments bridge lands its rescued bodies
-    /// through this same door labeled `'fragments'` — the S5 doctrine
-    /// extended to the second writer (the 9b brief). Default unchanged.
+    /// `label` (Phase 9b): a second writer may land its rescued bodies
+    /// through this same door under its own label — the S5 doctrine
+    /// extended beyond the engine (the retired Fragments bridge used
+    /// `'fragments'`; archived 2026-09-04). Default unchanged.
     @discardableResult
     public func resolveSyncConflict(
         _ variantID: String, losingText: String, label: String = "conflict"
@@ -41,78 +42,6 @@ extension Operations {
                 label: label,
                 id: newID(),
                 now: date.now)
-        }
-    }
-
-    /// The Fragments bridge's landing overwrite (Phase 9b review round 1,
-    /// MAJOR 1) — ONE transaction composing the fifth-occasion insurance,
-    /// the overwrite, and insurance OF THE LANDED BODY ITSELF:
-    ///
-    /// 1. auto-commit every dirty buffer under the entry (the pre-image —
-    ///    including any edit that landed after the bridge's classification
-    ///    read: composing in one transaction is what makes "insured before
-    ///    the overwrite" structurally true; the `lockPost` precedent);
-    /// 2. write `body` into the variant's buffer (churn per the
-    ///    whole-buffer-replace convention);
-    /// 3. append one `commit_point(kind:'auto')` of the landed body — the
-    ///    landed text is Fragments-typed writing with no history surface of
-    ///    its own, and WITHOUT this commit the open editor's keep-pending
-    ///    flush (Phase 7) can overwrite it seconds later while the next
-    ///    push LWW-replaces it on the Fragments side too: gone everywhere,
-    ///    the forbidden outcome. An empty body (a landed deletion) takes no
-    ///    commit — emptiness is not losable text, and step 1's pre-image
-    ///    commit is the insurance that matters there.
-    ///
-    /// Refuses under a sealed post / locked variant exactly like `autosave`
-    /// (the engine classifies those into the conflict-variant path first; a
-    /// lock RACING the landing surfaces as a failed round and re-lands next
-    /// round — as does any transient sync-race state a projection renders
-    /// but this op refuses, e.g. an archived default variant behind a
-    /// dangling chosen pointer mid-pull: the round fails, the store heals
-    /// on the next sync round, the landing retries. Round-2 SPECULATIVE
-    /// note — no persistent wedge is constructible; same self-healing
-    /// class).
-    @discardableResult
-    public func applyBridgeLanding(
-        _ variantID: String, in containerID: String, body: String
-    ) throws -> Variant {
-        try database.write { db in
-            let container = try liveContainer(db, containerID)
-            try ensureUnlocked(container)
-            var variant = try liveVariant(db, variantID)
-            // Bind the variant to the container whose buffers step 1
-            // insures (review round 2, MINOR 3): a mismatched pair would
-            // overwrite a variant whose dirty pre-image the auto-commit
-            // sweep never touched — the round-1 loss class, one caller bug
-            // away, inside the very op built to make it impossible.
-            // Enforcement lives at the ops boundary, not in callers (the
-            // `branchVariant` source-block guard's precedent).
-            guard let placement = try livePlacement(db, blockID: variant.blockId),
-                  placement.containerId == containerID
-            else {
-                throw OperationError.blockNotPlaced(id: variant.blockId)
-            }
-            guard variant.status != .archived else {
-                throw OperationError.archivedVariant(id: variantID)
-            }
-            guard !variant.locked else {
-                throw OperationError.lockedVariant(id: variantID)
-            }
-            let now = date.now
-            _ = try autoCommitDirtyVariants(db, containerID: containerID, now: now)
-            let oldText = variant.workingText
-            guard oldText != body else { return variant }
-            variant.workingText = body
-            variant.updatedAt = now
-            try variant.update(db)
-            try registerTextChange(
-                db, blockID: variant.blockId,
-                charDelta: oldText.count + body.count,
-                forceMajorRevision: false, now: now)
-            if !body.isEmpty {
-                _ = try insertCommit(db, variant: variant, kind: .auto, message: nil, now: now)
-            }
-            return variant
         }
     }
 

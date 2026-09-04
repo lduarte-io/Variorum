@@ -223,10 +223,10 @@ struct AccountLifecycleTests {
     /// The whole CF-8 road through the REAL brain: corpus authored and
     /// synced under the old key → re-key → the mirror is emptied and the
     /// re-enqueued corpus drains re-sealed under the NEW key (the old key
-    /// provably unable to open it); the bridge's agreed days are staged
-    /// for the 14d re-push; a stale writer holding the OLD keys refuses
-    /// both round halves with the CF-16 state, outbox intact.
-    @Test func theRekeyRoadReSealsTheCorpusStagesTheBridgeAndFencesStaleWriters() async throws {
+    /// provably unable to open it); a stale writer holding the OLD keys
+    /// refuses both round halves with the CF-16 state, outbox intact.
+    /// (The bridge-staging leg left with the bridge, 2026-09-04.)
+    @Test func theRekeyRoadReSealsTheCorpusAndFencesStaleWriters() async throws {
         let world = try await makeRekeyWorld()
         let old = try await world.enrollment.setUp(passphrase: Self.passphrase)
         world.client.keyProvider = FixedSyncKeyProvider(keys: keys(of: old))
@@ -237,14 +237,6 @@ struct AccountLifecycleTests {
         }
         try await drain(world.client)
         #expect(await world.server.rowCount(table: "container") > 0)
-        // A bridge world that has agreed on a day (and one stamp-only row
-        // — the deletion-raced-an-edit bookkeeping, which must survive).
-        try await world.client.db.write { db in
-            try BridgeEngine.recordDay(
-                db, dayKey: "2026-08-01", hash: "0123abcd", remoteStamp: "2026-08-01T00:00:00Z")
-            try BridgeEngine.recordDay(
-                db, dayKey: "2026-08-02", hash: nil, remoteStamp: "2026-08-02T00:00:00Z")
-        }
 
         // A second device still holding the OLD keys, with pending work.
         let stale = try SyncClient(
@@ -271,19 +263,6 @@ struct AccountLifecycleTests {
         }
         #expect(try world.client.outboxCount() == expectedRows,
                 "resyncReinitialize re-enqueued EVERY synced row")
-
-        // The bridge staging (CF-8's trigger; inert until 14d's un-pause):
-        // the agreed day is staged, the stamp-only row untouched.
-        let staged = try await world.client.db.read { db in
-            try BridgeEngine.dayRow(db, dayKey: "2026-08-01")
-        }
-        #expect(staged?.hash == BridgeEngine.restagedHashSentinel)
-        #expect(staged?.remoteStamp == "2026-08-01T00:00:00Z",
-                "the LWW stamp survives staging — the re-push must outrank it")
-        let stampOnly = try await world.client.db.read { db in
-            try BridgeEngine.dayRow(db, dayKey: "2026-08-02")
-        }
-        #expect(stampOnly?.hash == nil, "stamp-only bookkeeping is not an agreement — never staged")
 
         // THE FENCE: the stale device refuses BOTH halves, outbox intact.
         await #expect(throws: SyncError.encryptionKeysReplaced) { _ = try await stale.push() }

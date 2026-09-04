@@ -38,19 +38,16 @@ import GRDB
 ///     the app's ordinary scheduler pushes the outbox down round by round
 ///     with visible progress on the sync row (the headless drain shape
 ///     stays `vault-bootstrap`'s).
-///  6. **The bridge's staged re-push trigger** — every agreed journal day
-///     marked for re-push from Variorum truth (`BridgeEngine
-///     .stageRepushFromTruth`). INERT while the bridge's structural pause
-///     stands (no round runs); live from 14d, whose staged re-push
-///     re-seals the satellite's bodies under the NEW journal-bridge key
-///     (the contract's point 9: old-key bodies refuse until the re-push
-///     overwrites them).
+///  *(A former step 6 — the retired Fragments bridge's staged re-push
+///     trigger — left with the bridge on 2026-09-04; the marker now clears
+///     after step 5. The `journalBridge` class key is still minted in step
+///     2: the vault format carries the class, dormant.)*
 ///
 /// **The sequence is not atomic — the road back from any mid-run failure
 /// is running the door again** (pinned): steps 1–2 re-run cleanly (the
 /// passphrase unwraps the NEW vault; another fresh vault is minted —
 /// harmless, everything re-encrypts from local truth at the repush), and
-/// steps 4–6 are idempotent against an already-truncated account. The
+/// steps 4–5 are idempotent against an already-truncated account. The
 /// surface speaks this road on every THROWN failure — and a CRASH is
 /// covered by the persisted marker (`AccountRekeyMarker`, ladder R1-1):
 /// written after authorization and BEFORE the vault write, cleared only
@@ -169,14 +166,7 @@ public struct AccountRekey: Sendable {
             try await engine.resyncReinitialize()
         }
 
-        // 6. The bridge's staged re-push trigger — inert while the
-        // structural pause stands; live from 14d.
-        try await database.write { db in
-            _ = try BridgeEngine.stageRepushFromTruth(db)
-        }
-
-        // The marker clears ONLY here — after the WHOLE road (the bridge
-        // staging included, so 14d's leg is protected too). Any earlier
+        // The marker clears ONLY here — after the WHOLE road. Any earlier
         // exit leaves it set and the rerun road prompted.
         try await database.write { db in try AccountRekeyMarker.clear(db) }
 

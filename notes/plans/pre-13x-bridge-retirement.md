@@ -292,12 +292,17 @@ this record unless a line below says so.**
 
 - **LIVE STATUS:**
   - step 1 — DONE (branch `archive/fragments-bridge` + tag `archive/fragments-bridge-2026-09-04` both at `32d3fdf`,
-    both pushed and verified on `origin`; `notes/archive/fragments-bridge.md` written; this record opened) — commit
-    PENDING(hash)
-  - step 2 — NOT-STARTED — settled design: delete `Sources/VariorumCore/Bridge/` + the 16 core test files; delete
-    `applyBridgeLanding`; drop `AccountRekey` step 6 (the marker clears after step 5); `Operations+Container` docs;
-    `AccountLifecycleTests`' B4 trim; **`BridgeHash` moves verbatim to `Sources/VariorumCore/Domain/BridgeHash.swift`
-    (name kept), its SHA-256 pins carried into `SampleLibraryDedupeRepairTests`** (fork F1 below)
+    both pushed and verified on `origin`; `notes/archive/fragments-bridge.md` written; this record opened) — `4c1d443`
+  - step 2 — DONE — `Sources/VariorumCore/Bridge/` (6 files, 2,226 lines) + the 16 core test files (4,319 lines)
+    deleted; `applyBridgeLanding` removed (`Operations+Sync.swift`, the `label` doc re-worded); `AccountRekey` step 6
+    removed (doc + code; the marker clears after step 5; "steps 4–5 are idempotent"); `Operations+Container`'s seven
+    bridge doc lines re-worded (history kept where it explains a shape — her verbatim #37 ruling stays);
+    `AccountLifecycleTests`' B4 legs removed, the test renamed `theRekeyRoadReSealsTheCorpusAndFencesStaleWriters`;
+    **`BridgeHash` moved verbatim to `Sources/VariorumCore/Domain/BridgeHash.swift` (name kept, fork F1)** with its
+    three SHA-256 vector pins carried into `SampleLibraryDedupeRepairTests.theManifestHashRecipeIsStableSHA256Hex`.
+    `swift build` clean; **`swift test`: `Test run with 1390 tests in 152 suites passed`** (1525/165 − 13 deleted
+    suites; 136 bridge tests gone, 1 pin added; the ONE skipped test is the standing env-gated real-Supabase pass,
+    skipped at every baseline) — commit PENDING(hash)
   - step 3 — NOT-STARTED — settled design: migration **`v1_16_drop_bridge_tables`** (NOT v1_15 — see delta D2);
     `SyncSchema.localOnlyTables` loses the two names; `MigrationTests.expectedTables` loses them + a migrate-from-v1_15
     pin
@@ -305,7 +310,7 @@ this record unless a line below says so.**
   - step 5 — NOT-STARTED
   - step 6 — NOT-STARTED
   - step 7 — NOT-STARTED
-- **Counts:** core PENDING · Mac PENDING · iOS build PENDING · spine PENDING
+- **Counts:** core **1390/152 green (step 2)** · Mac PENDING · iOS build PENDING · spine PENDING
 - **Deltas from §2/§2b's inventory found by the re-run greps (on `32d3fdf`):**
   - **D1 · `BridgeHash.body` is NOT bridge-only.** It is the sample library's manifest hash recipe: `SampleLibrarySeeder`
     (`:154`, `:333-334`, `:361` — the bundled manifest's title→hash entries were computed with it), the dedupe facts

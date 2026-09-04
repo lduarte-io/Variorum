@@ -9,8 +9,8 @@ extension Operations {
     /// Day keys are canonical "yyyy-MM-dd" or nothing (Phase 9b review
     /// round 2, MINOR 2 — this op was the REMAINING permissive door after
     /// Step 6 closed `setEntryDate`): a malformed key mints a live entry
-    /// invisible to its own day (`createOrOpenJournalEntry` never finds it;
-    /// the bridge notes it every round, forever). The ops boundary is the
+    /// invisible to its own day (`createOrOpenJournalEntry` never finds
+    /// it). The ops boundary is the
     /// enforcement line (Phase 8 round 2's rationale).
     @discardableResult
     public func createPost(
@@ -31,8 +31,7 @@ extension Operations {
     /// that already has a live journal entry OPENS it instead. Enforced
     /// here, at the operations level, deliberately NOT as a DB unique index
     /// (no new sync-repair class): an offline same-day double-create
-    /// converges to two visible entries on that day's page, hand-merged,
-    /// with the Fragments bridge pausing that day's push until resolved.
+    /// converges to two visible entries on that day's page, hand-merged.
     ///
     /// When more than one entry carries the date (that converged race),
     /// preference is **unarchived first, then earliest `(created_at, id)`**
@@ -54,14 +53,15 @@ extension Operations {
         // Well-formedness at the operations boundary (review round 2): a
         // malformed key ("2026-7-7") would create a live entry invisible to
         // the canonical "2026-07-07" — two irreconcilable "same-day" pages
-        // and broken lexicographic ordering. This op is the door the
-        // Fragments bridge (Phase 9b) feeds with EXTERNAL day keys.
+        // and broken lexicographic ordering. This op is the door EXTERNAL
+        // day keys arrive through (the phone's capture; historically the
+        // Fragments bridge, retired 2026-09-04).
         guard JournalDay.isValid(entryDate) else {
             throw OperationError.invalidEntryDate(entryDate)
         }
         return try database.write { db in
-            // ONE preference implementation, shared with the bridge's
-            // duplicate-day landing target (round 2, NIT 5).
+            // ONE preference implementation, shared with every door that
+            // opens a day by key (round 2, NIT 5).
             if let existing = try Queries.canonicalJournalEntry(db, day: entryDate) {
                 return JournalEntryResult(container: existing, created: false)
             }
@@ -107,10 +107,10 @@ extension Operations {
     /// and appear, but not in the journal book, just appeared in the pool."*
     ///
     /// This is that half, made shared so the class cannot recur one door at
-    /// a time. Callers: the Fragments bridge's landing half
-    /// (`BridgeEngine.pullAndLand`), the phone's capture door
-    /// (`EntryListViewModel.open(on:)`), and ⌘J / "Today's Entry"
-    /// (`JournalBooks.openToday`).
+    /// a time. Callers: the phone's capture door
+    /// (`EntryListViewModel.open(on:)`) and ⌘J / "Today's Entry"
+    /// (`JournalBooks.openToday`); the retired Fragments bridge's landing
+    /// half was the third door until 2026-09-04.
     ///
     /// **The ENSURE is whole here (author ruling, 13d sitting 2026-07-28 —
     /// QUESTIONS #37 OVERTURNED to option (iii); her words: "the fragments
@@ -231,9 +231,10 @@ extension Operations {
         return book
     }
 
-    /// The residual bucket's wording (13c Stage 1 ladder, R1-3). Both
-    /// callers put this string in front of the author — the bridge's status
-    /// row and the phone's capture note — and raw `String(describing:)` on
+    /// The residual bucket's wording (13c Stage 1 ladder, R1-3). Its
+    /// callers put this string in front of the author — the phone's capture
+    /// note (and, until 2026-09-04, the retired bridge's status row) — and
+    /// raw `String(describing:)` on
     /// an `OperationError` renders its associated values: row ids and
     /// fully-qualified enum case paths. The same batch retired exactly that
     /// pattern in `ShellActions`; this is the same fix at the source.
@@ -290,8 +291,8 @@ extension Operations {
 
     /// Day keys are canonical "yyyy-MM-dd" or nothing (Phase 9b, Step 6 —
     /// closing the KnownIssues row): this op was the one permissive door to
-    /// a malformed key, which the notebook rule's open-by-date and the
-    /// Fragments bridge's join would then never find — a live entry
+    /// a malformed key, which the notebook rule's open-by-date would then
+    /// never find — a live entry
     /// invisible to its own day. `nil` stays allowed (un-dating a post is
     /// legitimate); the same boundary `createOrOpenJournalEntry` enforces.
     public func setEntryDate(_ id: String, entryDate: String?) throws {

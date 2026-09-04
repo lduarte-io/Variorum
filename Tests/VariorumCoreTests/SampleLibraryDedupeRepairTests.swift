@@ -37,6 +37,20 @@ struct SampleLibraryDedupeRepairTests {
             loadNoteHashes: { hashes }, hash: BridgeHash.body(_:))
     }
 
+    /// The manifest hash recipe, pinned to independently computed vectors
+    /// (carried from the retired bridge's `FragmentsContractTests` at the
+    /// 2026-09-04 retirement — `BridgeHash` moved to core `Domain/` with the
+    /// name kept). The BUNDLED manifest's hashes were computed with it: a
+    /// drift would mark every shipped copy EDITED and never pristine again.
+    @Test func theManifestHashRecipeIsStableSHA256Hex() {
+        // Independently computed: echo -n "hello" | shasum -a 256
+        #expect(BridgeHash.body("hello")
+                == "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824")
+        #expect(BridgeHash.body("")
+                == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
+        #expect(BridgeHash.body("hello") != BridgeHash.body("hello "))
+    }
+
     private func pairWithFacts() throws -> (a: SyncClient, b: SyncClient, server: FakeSyncServer) {
         let (a, b, server) = try furniturePair()
         a.sampleLibraryFacts = Self.facts()
