@@ -573,3 +573,70 @@ the 13v row, the `shelveInDailyJournalBook` bridge caller, and the Fragments sec
 | what the account password alone can do | sign in · delete the account · (if she keeps that arm) confirm a forgotten-passphrase change on a Mac without Touch ID · **never read, never re-key** | sign in · delete the account · **never read, never open, never change a passphrase, never re-key** |
 | a new device gets everything by | iCloud + sign-in, nothing typed | sign-in + the passphrase or twelve words, once |
 | the floor | lose every Apple device and every Apple recovery path and (if set) both secrets | lose every enrolled device and both secrets |
+
+---
+
+## 8. SECOND PASS — the shape after her evening reply (2026-09-03; recorded before the reply, so it lives in the repo, not the chat)
+
+**Her positions, verbatim-faithful:** the open-app attacker is not a fair gate ("at that point, it's kinda
+wraps"); the point is to be unlike Day One, whose "password-locked" database reads from the terminal;
+re-auth inside an open Castle session is acceptable ("you need touchid or recovery phrase even inside an
+open Castle session — shouldn't be an issue for a user that got into the session, so whatever"); a Standard
+phone under a Castle Mac is "obviously an issue"; the bridge is retired, as its own batch first; with
+Standard's leg in the vault "nobody needs an account password road"; the twelve words may stand in for
+Touch ID on a Mac without it; "if you're in castle mode, you NEED TO KNOW your passphrase or your 12
+words. we cannot save users from that simple fact"; changing the MODE to Standard must need the passphrase
+or Touch ID; deletion by account password is natural; re-enrollment must re-initialize sync; the backup
+file being overwritten "absolutely shouldn't happen"; the words surviving a re-key "would be nice"; the
+set ceremony for Castle or sync "should ABSOLUTELY REQUIRE both a passphrase and the 12 words," impressed
+on iCloud users too; "sign out everywhere" may be "the real mitigation that I need instead of re-key";
+she wants "passphrase + 12 words for everyone, then iCloud for those who want the ease + less risk" — still
+not NO risk, and that floor stated. Open questions she asked: should re-key be OFFERED at all (Standard
+Notes does not); what happens to the master and to other devices at a re-key; how the "confused user"
+reaches re-key at all when logged-in ≠ unlocked; does a deleted-then-recreated account sync its old
+library; is the memo-era four-row table still true; "am I making a mess?"
+
+**The refinement this pass adds — ONE Apple-held KEY, and every Apple-held leg is a WRAP under it:**
+P2 put the master's Apple-held wrap in the vault under an iCloud-Keychain KEK. Take it to its end: the
+ENVELOPE gains the same wrap for the LIBRARY key, under the SAME KEK. Standard = each locked box (vault,
+envelope) carries one extra wrap under the Apple key; Castle = neither does. Consequences, all
+simplifying: (1) NO raw key ever sits in iCloud — not the library key item the design had, not the sync-key
+mirror; iCloud holds exactly one random key that unwraps nothing on its own; (2) the Standard → Castle
+switch becomes "remove the Apple-held wraps + delete the KEK item" — NO store re-key, NO Replace Keys, NO
+device re-enrollment, other devices simply adopt the gate at their next open; P7 dissolves and P6(c) dissolves
+with it; (3) the no-account Standard user gets the same recovery road as the sync user (KEK → envelope →
+library key on a new Mac with a copy of the library), one mechanism for both populations; (4) the KEK is
+re-mintable from any enrolled device if Apple's account recovery ever resets iCloud Keychain — self-heal,
+logged; (5) posture is DERIVABLE and account-wide: Standard ⇔ the vault (or, with no account, the
+envelope) carries an Apple-held wrap. The day-to-day silent open under Standard is unchanged: the device
+Keychain's bound item, this device only.
+
+**Re-key, resolved:** with the KEK model the only thing a Standard → Castle switcher might want to
+"un-copy" is a master someone ALREADY extracted through their Apple account before today — the same class
+as "my passphrase was already stolen," and the same rare answer: rotate. So: **no user-facing "Replace
+Keys" front door in v1.** Everyday tools are Change passphrase (a leaked passphrase), Sign out everywhere
+(a leaked session), and the lock itself (a lost device). The rotation machinery (`AccountRekey`) stays for
+the headless migration tool and, if she wants it, an "Advanced ▸ Rotate encryption keys" door from an
+ENROLLED device, authorized by the passphrase or the words, with the recency count + the typed phrase, and
+"keep my twelve words" by typing them. The empty-store confusion, the account-password debate, and the
+stale-clobber door all leave with the front door.
+
+**The owner re-stamp moves to SYNC SETUP.** A deleted-then-recreated account today cannot sync its old
+library: every row carries the OLD owner id, and the push RPC refuses "owner_id mismatch" (`09_phase14c
+_multitenant.sql`). The design hid the fix inside Replace Keys. It belongs in the first-device setup:
+"turning on sync for a library that once synced under another account moves it to this account" — re-stamp
++ full enqueue, authorized by the new account's own ceremony (passphrase + words, which setup demands).
+
+**Mode changes re-authenticate in BOTH directions** (her addition): Castle → Standard needs the passphrase or
+Touch ID exactly as the doors in P4 do.
+
+**The memo-era four-row table (her screenshot), corrected:** row 1 — "set a new passphrase" is confirmed by
+Touch ID, else the twelve words (never the account password), in both postures; row 2 unchanged; row 3
+unchanged; row 4 — "start over" is account deletion (or setup under a fresh account adopting a fresh
+library), never Replace Keys. The full corrected table is in the reply and will be the design's §5.
+
+**What the second pass supersedes in §3 above:** P2 (extended to the envelope; the per-store iCloud
+library-key item is NOT built), P3 (the door itself retreats to Advanced or nothing; its narrowing rules
+apply to whatever remains), P6(c) and P7 (dissolved — no store re-key at the switch), P9.3 (moot without
+an account-password arm). Everything else stands. The design file is rewritten after her rulings on this
+pass, not before.
