@@ -266,6 +266,24 @@ corpus key, which a re-wrap never reaches. **So users get THREE acts, not five:*
 | **Replace All Keys** (q; = the key half of the Castle switch) | the master, the corpus key (every row re-encrypted), and — device by device as each follows — every library key | type the passphrase once, re-key their own library, re-pull | someone may have USED a secret, or holds a copy of a library or backup, or had a device unlocked; the Standard → Castle switch runs it automatically |
 | **Delete the account and set sync up again** | everything Replace All Keys does, plus the account, the server copy and the login | join the new account | the recovery road when no enrolled device is left (an old backup + iCloud + a fresh account), and the road for a compromised ACCOUNT |
 
+**The two switches, credential by credential (her ask, 09-04 night):**
+
+| credential | Standard → Castle | Castle → Standard |
+|---|---|---|
+| the iCloud key (iCloud Keychain) | stays where it is, untouched; nothing current is wrapped under it any more | read from iCloud Keychain; minted and written ONLY if absent — the one thing that can ever be added to iCloud, and only if it wasn't there already; nothing else ever enters iCloud Keychain |
+| the library key, raw (device Keychain) | REPLACED by a new key (export-and-swap); the raw copy moves to the Touch ID item, or nowhere under Always ask | the same key; the raw copy moves from the Touch ID item to the silent device-only item |
+| the library key, wrapped (the key file) | a NEW key file for the new key — copies under P, W and M′, no iCloud-key copy; the old key file stays beside old snapshots | the same key file gains ONE field: the library key wrapped under the iCloud key; the P, W, M copies unchanged |
+| the master key | REPLACED (M′); the server's wrapped copies rewritten under P and W only, in one CAS write the old proof authorizes; the old master refused from then on | the same master; the server gains ONE wrapped copy, under the iCloud key, in one CAS write under the proof; the P and W copies unchanged |
+| the corpus key | REPLACED (C′ under M′); every row re-pushed re-encrypted behind the fence | unchanged |
+| the key proof | replaced with M′'s | unchanged |
+| the passphrase / the twelve words | unchanged (set / generated at the switch if none) | unchanged |
+| the account password / the session | unchanged | unchanged |
+| Touch ID | becomes the gate on the raw library key | the gate is removed |
+| re-lock on sleep / screen lock | on | off |
+| backups | untouched; the offer to delete the app's own pre-switch snapshots | untouched; the next snapshot's key file carries the iCloud-key copy |
+| other devices | at their next open: the notice → type P or W once → M′/C′ → re-key their own library → re-pull | at their next open: the notice → add the iCloud-key copy to their own key file (the iCloud key read from their own iCloud Keychain) → custody silent; nothing typed, nothing rotated |
+| what is written, where | the vault (one write), this device's library file + key file, the server's rows (the re-push), custody | the vault (one write), this device's key file, custody — everything in place, nothing rotated |
+
 ### 3.2 Sync keys inside the library
 `sync_state` is local-only, never synced, and lives inside the SQLCipher store; `resyncReinitialize` spares
 its non-bookkeeping rows. M, C (+id) and J (+id) land there as base64 rows. `DeviceKeySyncProvider`
@@ -346,7 +364,10 @@ session-only insert that sets the hash (no vault exists yet to protect); **a vau
 NULL accepts its FIRST proof from any session** — the migration arm for her existing vault at the window,
 harmless pre-launch and closed the moment the hash lands. Vault READ stays session-only (a new device
 must fetch the boxes to obtain M). `account_purge` stays session-only (deletion
-is mandated and loud). Consequences: **the account password alone can sign in, see nothing, push nothing,
+is mandated and loud). **EVERY OTHER mutating RPC takes the proof — `sync_purge_execute` and `account_data_truncate`
+INCLUDED (clarified 09-04 night, her attacker scenario §14.32): today's purge-execute checks only the session and the
+`active_key_id` fence, and the key id is READABLE from the vault by any session — a bare session could hand the server
+row ids to delete. The fence stays as the stale-device honesty check; the proof is the authorization.** Consequences: **the account password alone can sign in, see nothing, push nothing,
 delete nothing but the whole account**; a stolen or cloned session is inert against the corpus; the "poison
 push" and "quiet tombstone" classes vanish; the pull side stops disclosing even the structure to a bare
 session. Cost: two nullable columns on `key_vault` (`master_wrapped_by_apple_held`, `apple_key_id`) + one
@@ -403,6 +424,16 @@ door and the recorded manual road for L).
 re-encrypted under a new key the Apple account never held; sync keys, the server copy, the passphrase and the
 words are untouched; other devices re-key their own libraries as they follow. Old backups keep the old key and open
 as they always did.
+**Who re-wraps on a passphrase change, and why it is only a re-wrap (her question, 09-04 night):** the app on the
+device where the new passphrase is typed derives the new wrapping key (Argon2id) and rewrites two copies — the
+master's copy on the server (one CAS write under the proof) and the library key's copy in its own key file. Every
+other device still has ITS library key wrapped under the old passphrase in its own key file; it re-wraps that copy
+itself the first time the new passphrase is typed there (the lobby's vault road refuses the old word online and opens
+with the new, §3.4 Rule 1; a device that opens by Touch ID gets the post-unlock prompt). The passphrase never
+travels. The utility is exactly what she named: forgetting or changing the word must not become a rotation — other
+devices keep syncing (they hold the master), no corpus is re-encrypted, no library is re-keyed. The honest limit:
+a re-wrap stops someone who had ONLY the old word; someone who USED it, or holds a copy of a library, holds keys a
+re-wrap never reaches — Replace All Keys is for that (§3.1c's three acts).
 
 ---
 
@@ -557,7 +588,12 @@ the vault (the passphrase-change road is closed to it); the follow into Castle l
 the acting device's rotation is one CAS write (a concurrent second switch refuses and retries); under (m-corpus): after
 the switch NO row on the fake server decrypts under the old corpus key, an old-C push or pull is refused by the
 fence, a device that follows re-pulls to an identical store (convergence), and a crash injected mid-re-push re-runs
-to completion with every row under C′**;** posture derivation + follow (a Standard phone under a Castle account gates at its next
+to completion with every row under C′; **Replace All Keys from a library holding a STALE master is refused twice — the door's
+front check (the key file's recorded master id ≠ the vault's) and the server (the old proof); a session with the
+right `active_key_id` but no proof cannot purge or truncate; an upload under a NEW account never touches another
+tenant's rows and there is no ownership-change instruction on the wire (the two-user suite gains her attacker
+scenario, §14.32: old backup + iCloud key + account password → reads pre-switch writing, deletes the whole account,
+and nothing else)**;** posture derivation + follow (a Standard phone under a Castle account gates at its next
 open; a Castle→Standard switch propagates); the plaintext export carries no local sync table and no
 key-shaped value; per-store-ID custody; per-fingerprint key files (a second key's file never replaces the
 first); setup adopts a foreign-stamped library (delete → recreate → every row syncs); re-enrollment
@@ -639,7 +675,23 @@ an enrolled device frozen in time. So a Standard-era snapshot + the iCloud key +
 whole CURRENT corpus by sync, and the Standard forgot-passphrase road from that copy could rewrite the account's
 wraps. The library re-key (a) protects only the library FILE; the account's sync is protected only if the master
 changes when the account enters Castle — §16 (m). With (m), her sentence is exactly true: the old copy opens
-through iCloud, you can sign in, but sync does not come back, and the only road is delete-and-set-up-again.
+through iCloud, you can sign in, but sync does not come back, and the only road is delete-and-set-up-again. **32.
+HER ATTACKER SCENARIO (09-04 night — a Standard user's iCloud-Drive backups + the iCloud key + the account password,
+after the switch to Castle):** the attacker opens the old backup (pre-switch writing) and signs in. Push and pull:
+refused (stale proof). The follow into Castle: needs P or W — stuck. Replace All Keys: refused (§14.33). Change
+passphrase: the vault write is refused. Purge / truncate: refused once they take the proof (§3.8 — WITHOUT that, a
+bare session + the readable key id could delete pre-switch rows and the purged-row ledger would then fence the real
+user's own edits to them; closed at batch 1b). What they CAN do with the account password: delete the whole account
+(loud; every local copy survives; the user re-creates and re-uploads), sign out everywhere, change the account
+password (email reset recovers it; worst case a new account) — the disclosed account-password class, and 13y's
+recently-re-authenticated-session guard for the destructive doors. Create a NEW account and upload the old backup:
+yes — into THEIR OWN partition (14c's `(owner_id, id)` keys + forced RLS + tenant-scoped RPC guards); the adopt
+road re-stamps `owner_id` in the LOCAL copy before pushing, there is no ownership-change instruction on the wire,
+and nothing in the real user's partition moves. "Resyncing" is not the attack surface; the account password is,
+and its worst case is the loud one. **33. Replace All Keys REQUIRES the current master (her question — "it should
+be"):** the door checks the key file's recorded master id against the vault before offering itself (*"this account's
+keys don't match this library"* instead), and the server refuses the old proof regardless — a stale copy can never
+rotate an account's keys out from under its owner.
 
 ## 15. BATCHES (strictly sequential; each red-on-old; the tutorial spine green every batch)
 0. **Measure + spike**: A's item written under the shared group on the Mac and read on the phone (and the
@@ -838,6 +890,15 @@ Batch 0 authorized (*"you're clear to start batch 0"*).
   in-place shape, and her disclaimer test (a Castle sentence that must say "unless a court gets our server and you
   kept a Standard backup" does not fit the posture) corrected the weighing. Recorded as a change of mind, not a fact
   that changed.
+- **(r) THE BARE-SESSION PURGE HOLE (found 09-04 night by her attacker scenario):** `sync_purge_execute` today
+  authorizes by session + the `active_key_id` fence, and the key id is readable from the vault by any session; the
+  batch 1b brief had left it off the proof list. It takes `key_proof` (§3.8, 1b.2, ledger 24). With that, §3.8's
+  sentence — *the account password alone can sign in, see nothing, push nothing, delete nothing but the whole
+  account* — is true of every RPC.
+- **(s) Castle → Standard, answered (§3.1c's switch table):** nothing is rotated and at most ONE item is added to
+  iCloud — the iCloud key itself, only if absent. The wrapped copies are added on the SERVER (one vault write) and on
+  DISK (the key file), in place; the passphrase, words, master, corpus key and library key are unchanged; other
+  devices add their own iCloud-key copy from their own iCloud Keychain and type nothing.
 
 **STILL HERS:** (e) the posture copy — 13s re-voices from `pre-13x-copy.md`; the bridge removal's ORDER
 (before the key work, recommended, or after — see LIVE STATUS); the sizing flag (17b: three phase-sized
@@ -925,6 +986,8 @@ never spawn subagents (one Sonnet lookup for external facts is the sole exceptio
 | 19 | ~~the "Give this library a new key" door~~ — RETIRED 09-04 evening (§16 (l)); superseded by row 23 | — | retired |
 | 20 | the MASTER rotation at the Standard → Castle switch (§16 (m); §14.31): M′ + the vault's wraps under P/W + the proof hash replaced under the old proof; the non-silent follow; the snapshot-refused pin | U2 (1b: `key_vault_update` may replace the hash) → U3 → U4 | **RULED 09-04 evening** |
 | 20b | the CORPUS-KEY rotation with it — C′ under M′, pull-to-head, every row re-pushed in place under C′, the `active_key_id` fence, the marker, online required (§4's row; §16 (m-corpus)) | U3 → U4 | **RULED 09-04 evening** |
+| 24 | `sync_purge_execute` (and `account_data_truncate`) take `key_proof` — the fence is not an authorization (§16 (r); §3.8; 1b.2) | U2 (1b) | open — MUST |
+| 25 | Replace All Keys refuses on a stale master (front check + server); the two-user suite's attacker scenario (§14.32) | U4 | open |
 | 23 | **Replace All Keys** — the switch's key half as its own door + the checkbox on Change Passphrase / Regenerate Words; Castle: Touch ID or P/W; Standard: P or a confirm (§4's row; §16 (q)) | U4 | **PROVISIONAL — recommended; her one word** |
 | 22 | the credential audit §3.1c kept current + walked by every ladder reviewer (the posture law) | every unit; U5 pins each "at the switch" cell | open |
 | 21 | the ENCRYPTION BOOK (a second seeded book in Home; copy §7b) + the tutorial's short chapter (copy §7); the two-register vocabulary rule | U5 | open (title hers) |
@@ -1024,7 +1087,9 @@ record's LIVE STATUS per item. Commit per item, push after each.
    `variorum_definer`-owned like the data RPCs, carrying the revision CAS inside; the client's PostgREST PATCH
    is replaced by it (`KeyVaultClient.updateVault`); vault CREATE stays a session-only insert that MUST carry
    the hash. **(09-04, for (m)):** `key_vault_update` may REPLACE `key_proof_hash` when the call carries the CURRENT
-   proof — the master rotation's road; pin: a call with the old proof after a rotation is refused. `account_data_truncate` gains `key_proof` too (its only caller is the headless tool). **No RPC
+   proof — the master rotation's road; pin: a call with the old proof after a rotation is refused. `account_data_truncate` gains `key_proof` too (its only caller is the headless tool); **`sync_purge_execute` gains
+   `key_proof` too (09-04 night — the janitor's execute call carries it like push and pull; pin: a session with the
+   right `active_key_id` but no proof, or a stale proof, deletes nothing — the fence is not an authorization).** **No RPC
    parameter may shadow a column it writes** (the 13j rule). The marker bump is the file's LAST statement.
 3. **The client:** `SyncSchema.lockstepVersion = 8`; `SyncTransport`/`SupabaseTransport` pass `key_proof` from the
    engine's key provider (the provider returns M's proof beside C — extend `SyncEncryptionKeys` with `keyProof`);

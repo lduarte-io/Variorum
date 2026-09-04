@@ -534,6 +534,11 @@ sign your other devices out on your word. Everything else is yours.*
   Sync will not come back from it: entering Castle replaced your sync keys, and the new ones open only with your
   passphrase or twelve words. Delete your Stargazing account and set sync up again from that copy. Anything written
   after the backup and kept only on the server is gone — that is Castle's floor.*
+- **Someone has my old backups and my Apple account — and I've since moved to Castle.** *They can open those
+  backups: what you wrote before the switch, as it was then. Nothing more. Your library and your sync have new keys
+  that were never wrapped for your Apple account, and the server refuses the old ones. If they also have your
+  account password they can delete your account or sign you out — loud, and every copy on your devices survives —
+  so change that password and use Sign Out Everywhere.*
 - **Does Castle on my Mac make my iPhone Castle?** *Once sync is on, yes — Castle belongs to your account and every
   device follows. Before sync, each library has its own mode; your iPhone learns the account's mode when it joins.*
 
