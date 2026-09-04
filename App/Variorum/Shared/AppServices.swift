@@ -94,6 +94,10 @@ final class AppServices {
     /// The app session (store + runner) the services compose over —
     /// internal so the wiring tests can drive the production runner path.
     let session: AppSession
+    /// The retired-credential sweep (`LegacyPasteInCleanup.clear` in
+    /// production; a spy in the wiring pin): runs at every `start()` off-main
+    /// and on the first real sign-in — see the enum's doc for why both.
+    private let legacyCleanup: @Sendable () -> Void
 
     /// 13j ladder B (B3): the LOCAL purge cadence — launch + hourly, each
     /// tick a no-op while sync is configured (`AppSession.sweepLocalPurge`
@@ -129,9 +133,11 @@ final class AppServices {
         makeSyncTransport: ((any UserSessionProviding) -> any SyncTransport)? = nil,
         makeSyncKeyProvider: (() -> any SyncKeyProviding)? = nil,
         keyVault: KeyVaultClient? = nil,
-        makeAccountLifecycle: ((any UserSessionProviding) -> any AccountLifecycleProviding)? = nil
+        makeAccountLifecycle: ((any UserSessionProviding) -> any AccountLifecycleProviding)? = nil,
+        legacyCleanup: @escaping @Sendable () -> Void = { LegacyPasteInCleanup.clear() }
     ) {
         self.session = session
+        self.legacyCleanup = legacyCleanup
         self.makeAccountLifecycle = makeAccountLifecycle ?? { provider in
             AccountLifecycleClient(
                 configuration: ProjectConfig.variorumTransport,
@@ -244,6 +250,13 @@ final class AppServices {
                 await self?.variorumSignInChanged(tokens)
             }
         }
+        // The retired-credential sweep, every start, OFF-MAIN (the 13e
+        // class: no Keychain call on the main thread at launch). A persisted
+        // session adopted below never routes through `variorumSignInChanged`,
+        // so without this the bridge's retired Fragments-project item would
+        // outlive every launch of a user who never signs out again
+        // (round-1 MINOR-1; the seam's doc has the whole story).
+        Task.detached(priority: .utility) { [legacyCleanup] in legacyCleanup() }
         // The persisted session from a previous launch.
         if let userID = await auth.currentUserID {
             account.variorum = AccountState.SignedIn(
@@ -268,15 +281,6 @@ final class AppServices {
         backup?.stop()
         localPurgeTask?.cancel()
         localPurgeTask = nil
-    }
-
-    /// THE LIFECYCLE CADENCE PULSE (the app's became-active hook; launch runs
-    /// its own through the sign-in chain): one sync round. Kept as the ONE
-    /// became-active door (13c A2's shape — it used to add a bridge round
-    /// when sync could not deliver one; that half left with the bridge on
-    /// 2026-09-04) so a future second follower of the cadence has a home.
-    func triggerLifecycleRound() {
-        sync.triggerSync()
     }
 
     // MARK: - The Variorum sign-in (Phase 14a: direct — the identity)
@@ -348,8 +352,9 @@ final class AppServices {
                 userID: tokens.userID, email: tokens.email)
             account.lastNotice = nil  // the sign-up notice's job is done
             // The paste-in's retirement completes at the first real
-            // sign-in: the legacy Keychain item dies here (idempotent).
-            LegacyPasteInCleanup.clear()
+            // sign-in: the legacy Keychain items die here (idempotent; the
+            // same sweep also runs at every start — see the seam's doc).
+            legacyCleanup()
             await connectSyncIfAllowed()
         } else {
             account.variorum = nil

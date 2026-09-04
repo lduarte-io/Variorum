@@ -279,16 +279,66 @@ struct Phase9cAuthWiringTests {
     /// (the source-walk form, beside the retirement walk below). Since the
     /// bridge's retirement the door is one sync trigger; it stays the one
     /// door so a future second follower of the cadence has a home.
-    @Test func theBecomeActiveHookRoutesThroughTheLifecycleCadence() throws {
+    /// The became-active hook runs one sync round through the sync
+    /// session's one trigger. (Until the bridge's 2026-09-04 retirement a
+    /// wrapper added a bridge round beside it and this pin forbade the
+    /// direct call; the wrapper left with its second half — round-1
+    /// MINOR-4 — and the pin now asserts the direct door.)
+    @Test func theBecomeActiveHookRunsOneSyncRound() throws {
         let appFile = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()  // VariorumTests
             .deletingLastPathComponent()  // App/Variorum
             .appendingPathComponent("Variorum/VariorumApp.swift")
         let text = try String(contentsOf: appFile, encoding: .utf8)
-        #expect(text.contains("services?.triggerLifecycleRound()"),
-                "the became-active hook must run the lifecycle cadence")
-        #expect(!text.contains("services?.sync.triggerSync()"),
-                "…and never sync alone: the became-active hook goes through the one door")
+        #expect(text.contains("services?.sync.triggerSync()"),
+                "the became-active hook must run one sync round")
+        #expect(!text.contains("triggerLifecycleRound"),
+                "…through the sync session directly: the bridge-era wrapper is gone")
+    }
+
+    /// The retirement's round-1 fix (MINOR-1): the retired-credential sweep
+    /// runs at every `start()`, not only at the next real sign-in — a
+    /// persisted session adopted at launch never routes through
+    /// `variorumSignInChanged`, so a user who never signs out again would
+    /// keep the bridge's cross-project refresh token in the login keychain
+    /// forever (Supabase refresh tokens never expire on their own). The
+    /// sweep is injected so the pin never touches the real Keychain; it
+    /// runs off-main (detached), so the pin settles on it. Red on old:
+    /// `start()` never called the sweep.
+    @Test func startRunsTheRetiredCredentialSweep() async throws {
+        let db = try AppDatabase.inMemory()
+        let authStore = AuthTokensStore.inMemory()
+        let auth = AuthSession(
+            configuration: Self.testAuthConfiguration, store: authStore,
+            http: Self.noNetwork)
+        let sweeps = SweepSpy()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.ownerIdentity = OwnerIdentity { authStore.load()?.userID }
+        } operation: { @MainActor in
+            let services = AppServices(
+                session: AppSession(database: db), storeVariant: .real,
+                backupEnabled: false,
+                auth: auth,
+                makeSyncTransport: { _ in RecordingSyncTransport() },
+                makeSyncKeyProvider: { AppTestKeyProvider() },
+                legacyCleanup: { sweeps.record() })
+            await services.start()
+            await settle { sweeps.count >= 1 }
+            #expect(sweeps.count >= 1,
+                    "start() must run the retired-credential sweep (off-main)")
+            services.stop()
+        }
+    }
+
+    /// A Sendable counter for the sweep pin.
+    private final class SweepSpy: @unchecked Sendable {
+        private let lock = NSLock()
+        private var _count = 0
+        var count: Int { lock.withLock { _count } }
+        func record() { lock.withLock { _count += 1 } }
     }
 
     // MARK: The retirement walk (review focus 4 — "no dead credential

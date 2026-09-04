@@ -314,8 +314,9 @@ enum SampleLibrarySeeder {
     /// repair runs inside `Sources/VariorumCore/Sync/`, which cannot see
     /// app-target code at all — so the two sides must agree on a recipe
     /// that BOTH can name. `BridgeHash.body` is public core (SHA-256 hex of
-    /// the UTF-8 bytes) and is already the bridge's own change-detection
-    /// recipe, so the engine side reads
+    /// the UTF-8 bytes; it WAS the retired bridge's change-detection recipe
+    /// and lives on as the manifest recipe, `Domain/BridgeHash.swift`), so
+    /// the engine side reads
     /// `BridgeHash.body(Queries.renderedText(db, containerID: id))` with
     /// nothing new imported and nothing duplicated.
     ///
@@ -575,10 +576,9 @@ enum SampleLibrarySeeder {
         }
     }
 
-    /// Polled rather than subscribed, for the starter journal's reason:
-    /// `SyncSession.onRoundCompleted` is a single closure (it was
-    /// `AppServices`' bridge trigger until 2026-09-04), and sample content
-    /// must not claim a seam another owner may take.
+    /// Polled: `SyncSession` exposes no round-completed closure (the one it
+    /// had was the Fragments bridge's trigger and left with it, 2026-09-04);
+    /// the gate reads the scheduler's status, which is the seam.
     private static func waitForFirstCleanRound(
         gate: SyncGate, limit: Duration, poll: Duration
     ) async -> Bool {

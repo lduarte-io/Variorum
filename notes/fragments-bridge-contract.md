@@ -1015,7 +1015,17 @@ lockbox reply's consistency map. She carries it; questions return here.
 > **CARRY ITEM (2026-09-04) — the journal bridge is RETIRED on the Variorum side.** Variorum removed its
 > half of the journal bridge from `main` (archived at tag `archive/fragments-bridge-2026-09-04`). Nothing is
 > owed by Fragments: the 20.10 passphrase-set ceremony is moot for the bridge's sake (build it or not on
-> your own merits); the journal-class E2EE bodies already in `journal_entries` are yours to keep, migrate or
-> drop; the `journal_bridge` class key remains in the suite vault format, dormant. UNCHANGED: the ONE
+> your own merits); the journal-class E2EE bodies already in `journal_entries` are yours to keep or migrate;
+> the `journal_bridge` class key remains in the suite vault format, dormant. UNCHANGED: the ONE
 > Stargazing account and the suite issuer (14a/14d) — this retires the bridge, not the account. If the
 > bridge ever returns it returns as shared rows on Variorum's own sync in a collaboration era, designed then.
+>
+> **TWO ASKS, both from the retirement's cold review (2026-09-04):** **(1) ORDER — do NOT tombstone or
+> delete `journal_entries` rows on the sync-visible road until Variorum says its INSTALLED Mac build no
+> longer runs the bridge.** Until that build is refreshed (or its journal bridge disconnected), it still runs
+> the old engine, and that engine lands a Fragments tombstone as a BLANKED Variorum entry (the archived
+> landing rule at `BridgeEngine.swift:384-517` on the tag). Variorum will send the word; nothing on your side
+> waits on it except deletions. **(2) REVOKE the Variorum bridge's Fragments-project sessions server-side**
+> (the delegated `custom:stargazing` sign-ins Variorum's bridge held). Variorum only clears its LOCAL copy of
+> that refresh token; Supabase refresh tokens never expire on their own, so the server-side session stays
+> valid until you revoke it or the author signs out of Fragments globally.

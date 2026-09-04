@@ -312,7 +312,7 @@ this record unless a line below says so.**
     the table set == `expectedTables`; red on the old tree by construction). Filtered walk (`MigrationTests` ·
     `SyncSchemaTests` · `SerializerCompletenessTests` · `SupabaseTransportTests`) 46/6 green; **`swift test`:
     `Test run with 1391 tests in 152 suites passed`** — `80f88bc`
-  - step 4 — DONE (Mac) · iOS build PENDING — deleted `Shared/BridgeSession` · `Shared/BridgeStatusViews` ·
+  - step 4 — DONE (Mac; the iOS build passed at this step — recorded at step 5) — deleted `Shared/BridgeSession` · `Shared/BridgeStatusViews` ·
     `Shared/SignInFlow` (bridge-only: its one production caller was the delegated Fragments-project door) ·
     `VariorumTests/Phase9bBridgeWiringTests`. `AppServices`: the second auth session, the bridge composition, the
     `makeBridgeTransport`/`makeBridgeKeyProvider` seams, `bridgeEnabled`/`bridgeMinimumRoundInterval`, the
@@ -385,7 +385,7 @@ this record unless a line below says so.**
     passed`**, 0 skipped; the phone (iPhone 17 Pro / OS 26.2): the seven `MobileTutorialWalkTests.swift` types +
     `MobileStarterJournalTests` → **`Test run with 41 tests in 8 suites passed`**, 0 skipped (the iOS BUILD passed
     at step 4). Her app PID 79767 ran beside every suite, untouched; no Release build; no `/Applications`; no real
-    store — commit PENDING(hash)
+    store — commit `d17fe45`
 - **Counts (final tree):** core **1391/152** (baseline 1525/165 − 13 deleted suites; 136 bridge tests gone, 2 pins
   added: the `BridgeHash` vectors, the v1_16 migration) · Mac **2094/378** (baseline 2106/378 − 15 deleted bridge
   cases [`Phase9bBridgeWiringTests` 5/1 · `Phase9cAuthWiringTests` 5 · `AuthSessionTests` 4 · `NoteVersionsPaneTests`
@@ -453,7 +453,9 @@ this record unless a line below says so.**
     the first real sign-in — precedent-shaped, no launch-path Keychain hop (the 13e windowless-launch class);
     (c) clear it at every launch off-main. **(b) chosen** (one enum, one occasion); until she signs in again the
     item simply sits. The Fragments project's refresh token is NOT logged out server-side (no client remains to
-    present it; it expires unused) — recorded for the orchestrator.
+    present it; it expires unused) — recorded for the orchestrator. **RULED at round 1 (MINOR-1): (b) AND (c) —
+    the sweep runs at every `start()` off-main as well; and the premise was false: a Supabase refresh token never
+    expires unused, so the carry item asks Fragments to revoke the sessions server-side.**
   - **F1 · `BridgeHash` — PROVISIONAL: move verbatim, keep the name.** Options: (a) move the enum unchanged to
     `Sources/VariorumCore/Domain/BridgeHash.swift` with a doc comment saying the name is history and the recipe is the
     manifest's; (b) rename to e.g. `ContentHash` — touches `Sync/SampleLibraryDedupe.swift`'s comment (inside the
@@ -461,7 +463,6 @@ this record unless a line below says so.**
     touches, zero behavioral change, the manifest's hashes stay valid; the three `bodyHashIsStableSHA256Hex` pins from
     the deleted `FragmentsContractTests` move into `SampleLibraryDedupeRepairTests` so the recipe stays pinned. A
     rename is a later touch under the `Sync/` rider (18a/13y) if she wants the word gone.
-- **Open items for the orchestrator:** PENDING
 
 ## 7. THE COLD REVIEW (after §6 says DONE)
 A FRESH Fable reviewer runs `notes/REVIEW_PROMPT.md` verbatim over the combined diff (`git diff
@@ -532,4 +533,16 @@ Reviewer: fresh Fable, zero implementation context. Verification: every load-bea
 - **W-2 · recorded, not a finding · ⌘J / ⌘N and typed text did NOT reach the app under the walk's synthetic events** (the search field never received "sherlock"; the AX menu click on File ▸ Today's Entry, enabled, changed nothing; no WAL write followed) — the walk harness, not the diff, is the first suspect for these three; W-1 is independent of it (a real sidebar click, a pure read).
 - **W-3 · verified on the dev store:** no bridge row in the sidebar's bottom rows ("protection" + "Sync off (dev store)" only; the control build shows the retired "Bridge off" row beneath them); Settings ▸ Appearance's Savepoints help names three insurance occasions and no Fragments; Settings' six tabs carry no bridge text; the menus carry no bridge item. NOT walkable on the dev store: the Account sheet (its only door is the sync row's, which the dev store's fence renders doorless — verified by the diff + `TierAndOnboardingTests`/`AuthSessionTests`), a sync round (fenced off), the Takes-mode journal notice (blocked behind W-2).
 
-### Round 1 — ADJUDICATION: PENDING (after W-1's trace)
+### Round 1 — ADJUDICATION + THE FIX PASS (the orchestrator, as the architect's adjudication edits — 2026-09-04)
+Every finding traced by the orchestrator against the code before its disposition; the spec outranks both agents.
+- **MAJOR-1 — CONFIRMED (process, docs-only).** The mechanism holds at the tag (`BridgeEngine.swift:384-517`: an incoming tombstone on an agreed, locally-unchanged day lands `applyBridgeLanding(body: "")`), and her installed build is the Act 10 close's. FIXED by record: the carry item loses "or drop" and gains TWO ASKS (no deletions until Variorum's word; revoke the bridge's sessions server-side); QUESTIONS #89 carries THE ORDER OF HER ACTS (refresh or Disconnect FIRST, the carry item ONLY THEN); the handoff repeats it. No pin (process).
+- **MINOR-1 — CONFIRMED; FIXED with a pin.** The sweep now also runs at every `AppServices.start()`, off-main (`Task.detached`), through an injected `legacyCleanup` seam (default `LegacyPasteInCleanup.clear`); the sign-in occasion routes through the same seam. The false premise corrected in the code doc, §6 P1 and #89; the carry item asks Fragments to revoke. **Pin:** `Phase9cAuthWiringTests.startRunsTheRetiredCredentialSweep` — a spy through the seam (never the real Keychain: the retired item's identity on this machine IS her installed build's live bridge session — a real-Keychain pin would have disconnected her running app). Red-on-old form: step 1 landed the INERT seam + the pin and ran RED (`start()` did not call the sweep); step 2 added the call and ran GREEN. Result lines: RED run `Test run with 11 tests in 1 suite failed after 3.010 seconds with 1 issue` — `startRunsTheRetiredCredentialSweep … (sweeps.count → 0) >= 1`, the other ten green; GREEN run below.
+- **MINOR-2 — CONFIRMED; FIXED** (`OverallModel.md` §3: "the other three").
+- **MINOR-3 — CONFIRMED; FIXED** (17d: P30 DISSOLVED with the tag named; 5 → 4 items; the header's `Bridge/` sentence marked moot).
+- **MINOR-4 — CONFIRMED; RULED: REMOVE, not name a follower.** The plan's own §1 argument governs (no dormant machinery): `SyncSession.onRoundCompleted` and its `seenRounds` firing are gone (the status stream is the seam); `AppServices.triggerLifecycleRound()` is gone and the became-active hook calls `services?.sync.triggerSync()`; the source-walk pin is rewritten to assert the direct door and the wrapper's absence (`theBecomeActiveHookRunsOneSyncRound`); `SampleLibrarySeeder`'s orphaned rationale re-worded. Neither the phone nor `Sync/` referenced either symbol (grep-verified).
+- **MINOR-5 — CONFIRMED; FIXED** (past tense, points at `Domain/BridgeHash.swift`).
+- **NIT-1 — FIXED** (`import CryptoKit` dropped; nothing in the file used it). **NIT-2 — FIXED** (`KeychainAuthStorage.account` internal, referenced by the sweep). **NIT-3 — FIXED by the orchestrator under the `Sync/` rider** (a comment inside `Repairs.swift` — the ONE additional `Sync/` touch of this unit, comment-only, recorded). **NIT-4 — FIXED** (the record's placeholders).
+- **The orchestrator's own find — FIXED:** two KnownIssues rows still pointed at "the bridge-push-sweep row above" after it was removed; re-worded as history.
+- **W-1 — DOWNGRADED to OBSERVED-ONCE, no mechanism, no fix.** Not reproduced in three further launches of the same build: one replaying the Settings-tabs excursion, one replaying the Today's-Entry attempts (which then SUCCEEDED end to end: ⌘J minted + shelved the day, Takes mode opened with the trimmed notice, the Library listed the new Journal book + the entry) and one plain. The diff carries no non-comment change on any read path (`git diff -w` over `Queries/`, `Persistence/`, `Domain/`, `Models/`, `Auth/` and the app tree outside the intended files: only `BridgeHash` and `v1_16`); the control tree ran the same query code. First place to look if it ever recurs: `LibraryCatalogView`'s `search()` generation guard / a cancelled `.task` on first appearance (SPECULATIVE). W-2's dead keystrokes belong to the same first launch and are the walk harness's.
+- **Verification of the fix pass (2026-09-04, her app PID 79767 beside it, untouched):** Mac — the eight touched files' 33 suite types (`Phase9cAuthWiringTests` · `AuthSessionTests` · the tier/onboarding suites · `EncryptionFlowTests` · the Phase 8 services suites · the Keychain-off-main suites · `SampleLibraryDedupeFactsTests` · the TEN tutorial-spine suites) → **`Test run with 176 tests in 33 suites passed after 55.909 seconds`**, 0 skipped, `** TEST SUCCEEDED **`; iOS — `xcodebuild build -scheme VariorumMobile` → `** BUILD SUCCEEDED **`; core — `swift build` clean (the only core touch is one comment in `Sync/Repairs.swift`; the core suite stood at 1391/152 on `d17fe45` and no core code changed). **Machinery lesson, repeated the hard way:** the first green attempt passed the spine's ten names as ONE unquoted `$SPINE` and three files' suite names by FILE name — 32/4 ran and the spine did not; zsh does not word-split, and `-only-testing` wants the `@Suite` TYPE names (`TierAndOnboardingTests.swift` holds `HostedSyncTierFaceTests` …). The re-run grepped every `struct …Tests` per file into a proper array. The fix pass is ONE commit (the hash in §6's close).
+- **Round 2:** REQUIRED by §7 (a MAJOR appeared) — a FRESH Fable reviewer over the fix diff.

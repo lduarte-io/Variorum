@@ -40,12 +40,6 @@ final class SyncSession {
     var isConfigured: Bool { scheduler != nil }
     /// False for dev-store sessions (the A4 fence's sync seam, above).
     let allowsSync: Bool
-    /// Fired on the main actor each time a sync round FINISHES (clean or
-    /// failed) — a seam for anything that must follow a round and never
-    /// interleave with one. Its one production subscriber (the Fragments
-    /// bridge, Phase 9b) retired 2026-09-04; the seam stays, unsubscribed.
-    var onRoundCompleted: (() -> Void)?
-
     private let database: AppDatabase
     /// Post-write settle debounce: outbox growth quiets down for this long
     /// before a round runs (keystroke-rate autosaves coalesce; S1's outbox
@@ -122,14 +116,12 @@ final class SyncSession {
         // Status → the observable surface (+ the round-completion hook:
         // roundsCompleted increments exactly once per finished round).
         observationTasks.append(Task { [weak self] in
-            var seenRounds = 0
+            // (A round-completed closure seam lived here for the Fragments
+            // bridge, Phase 9b → 2026-09-04; it left with its one subscriber
+            // — the status stream IS the seam, `roundsCompleted` its count.)
             for await status in await scheduler.statusUpdates() {
                 guard let self else { break }
                 self.status = status
-                if status.roundsCompleted > seenRounds {
-                    seenRounds = status.roundsCompleted
-                    self.onRoundCompleted?()
-                }
             }
         })
         // Local writes settle → one round. The outbox observation fires at

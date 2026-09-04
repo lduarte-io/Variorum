@@ -188,7 +188,8 @@ extension SyncEngine {
             // R2-4): between this tombstone's chunk and the repairer's
             // `setting` chunk, a designation still naming the loser read
             // as "no designation" (the read is liveness-filtered), and
-            // ⌘J / the bridge / the phone's capture MINTED a third
+            // ⌘J / the phone's capture (and, until 2026-09-04, the
+            // bridge) MINTED a third
             // mint-shape Journal — a Trash row and a dangling pin she never
             // caused, retired by the next batch.
             touched.inlineRepairs += try convergeDailyDesignation(

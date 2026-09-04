@@ -562,11 +562,11 @@ WINS — it was written with the real code open and with instructions to refute.
 
 **The `Sources/VariorumCore/Sync/` Fable rider binds P8, P9, P28 and P31.**
 
-**Status: open, unstarted.** 5 items, no pins.
+**Status: open, unstarted.** 4 items, no pins *(was 5: **P30 DISSOLVED 2026-09-04** — its file, `Sources/VariorumCore/Bridge/BridgeEngine.swift`, left `main` with the Fragments bridge's retirement, pre-13x batch 0b; the trace survives at tag `archive/fragments-bridge-2026-09-04`; found by that unit's cold review, MINOR-3)*.
 
 The standing rider makes any change inside `Sources/VariorumCore/Sync/` sync-engine surgery and
-therefore Fable work in every phase — that is not a cast decision this entry gets to make. **P30 is
-`Bridge/`, not `Sync/`**, so the rider does not reach it; it is named here for subject, not for cast.
+therefore Fable work in every phase — that is not a cast decision this entry gets to make. *(P30 was
+`Bridge/`, not `Sync/` — moot since its 2026-09-04 dissolution.)*
 
 **P8 is the only finding in the entire sweep the verifier would not confirm by reading**, and it is
 the highest-consequence one in this entry: a permanent, unrecoverable pull stall. Its next step is
@@ -625,6 +625,8 @@ WINS — it was written with the real code open and with instructions to refute.
 *No red-on-old pin.* Evidence quotes + verifier trace: review doc, P28.
 
 #### P30. The bridge's daily-book shelving failure is a one-shot ephemeral note, and its own comment promises a retry the advanced cursor makes impossible
+
+**DISSOLVED 2026-09-04 — the Fragments bridge was RETIRED (pre-13x batch 0b; `notes/archive/fragments-bridge.md`); the file this item names no longer exists on `main`.** Kept below as the record of what was found; if the bridge ever returns as shared rows it returns without this engine.
 
 `Sources/VariorumCore/Bridge/BridgeEngine.swift:240` · **MINOR** · CONFIRMED · error-swallowing · finder confidence 0.85
 

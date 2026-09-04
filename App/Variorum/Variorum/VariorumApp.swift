@@ -130,10 +130,11 @@ struct VariorumApp: App {
                     }
                     .onReceive(NotificationCenter.default.publisher(
                         for: NSApplication.didBecomeActiveNotification)) { _ in
-                        // The lifecycle cadence's one became-active door
-                        // (13c A2's shape; one sync round since the bridge's
-                        // 2026-09-04 retirement). See AppServices.
-                        services?.triggerLifecycleRound()
+                        // The became-active hook: one sync round (13c A2's
+                        // shape; it also asked for a bridge round until the
+                        // bridge's 2026-09-04 retirement — the wrapper that
+                        // held both halves left with it, round-1 MINOR-4).
+                        services?.sync.triggerSync()
                     }
             case .opening:
                 // 13l L-c: the store opens off the main thread now, so there

@@ -38,7 +38,6 @@
 //  it held" (see `ensureLoadedFromStore`'s note on why that matters).
 //
 
-import CryptoKit
 import Foundation
 import Security
 import VariorumCore
@@ -112,7 +111,11 @@ nonisolated struct AuthTokensStore: Sendable {
 nonisolated enum KeychainAuthStorage {
     /// The Variorum-project session's home.
     static let variorumService = "io.lduarte.Variorum.auth"
-    private static let account = "session"
+    /// The ONE account name every session item of this storage carries —
+    /// internal so `LegacyPasteInCleanup` names the retired item by the
+    /// same constant (round-1 NIT-2: two copies of one identity string
+    /// would let a drift turn the delete into a silent no-op).
+    static let account = "session"
 
     static func load(service: String) -> AuthTokens? {
         var query = baseQuery(service: service)
@@ -155,20 +158,33 @@ nonisolated enum KeychainAuthStorage {
 }
 
 /// The Phase 8 paste-in's Keychain item (its store type was deleted at
-/// Phase 9c Step 5): cleared on the first real sign-in — and, since the
-/// bridge's 2026-09-04 retirement, the retired Fragments-project session
-/// item goes with it on the same occasion (a LOCAL clear only: no client
-/// remains to present that project's refresh token, so it simply expires
-/// unused server-side — PROVISIONAL, QUESTIONS #89). This is the ONE
-/// remaining reference to either old service string — pinned by the
-/// retirement walk in `Phase9cAuthWiringTests`.
+/// Phase 9c Step 5) and, since the bridge's 2026-09-04 retirement, the
+/// retired Fragments-project session item: cleared on TWO occasions — the
+/// first real sign-in (the paste-in's original occasion) and every
+/// `AppServices.start()`, off-main (the retirement's round-1 fix, MINOR-1:
+/// a persisted session adopted at launch never routes through the sign-in
+/// occasion, and a user who never signs out again would otherwise keep the
+/// bridge's cross-project refresh token in the login keychain forever).
+/// A LOCAL clear only: the Fragments project's session is NOT revoked
+/// server-side by this — Supabase refresh tokens never expire on their own,
+/// they are only ever consumed or revoked — so it stays valid until she
+/// signs out of Fragments globally or the Fragments agent revokes it (the
+/// carry item asks; QUESTIONS #89). No Variorum client presents it. This is
+/// the ONE remaining reference to either old service string — pinned by
+/// the retirement walk in `Phase9cAuthWiringTests`.
 nonisolated enum LegacyPasteInCleanup {
     static let retiredService = "io.lduarte.Variorum.sync"
     /// The retired bridge's Fragments-project session home (2026-09-04).
     static let retiredFragmentsService = "io.lduarte.Variorum.fragments-auth"
 
     static func clear() {
-        for (service, account) in [(retiredService, "supabase"), (retiredFragmentsService, "session")] {
+        // The paste-in's item carried its own account name ("supabase",
+        // the Phase 8 store); the Fragments item was a `KeychainAuthStorage`
+        // session, so it carries that storage's one account constant.
+        for (service, account) in [
+            (retiredService, "supabase"),
+            (retiredFragmentsService, KeychainAuthStorage.account),
+        ] {
             let query: [String: Any] = [
                 kSecClass as String: kSecClassGenericPassword,
                 kSecAttrService as String: service,
