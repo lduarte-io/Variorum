@@ -1,8 +1,10 @@
 # pre-13x — THE ARCHITECT'S FINAL REVIEW OF THE SETTLED DESIGN (2026-09-04 night, after the clean rewrite)
 
-**Status (2026-09-04, later):** R1, R5 (both halves), R7 (her words: type the existing words or generate new — never a
-silent reuse) and R9 are RULED and folded into the design file; R2, R3, R4, R6, R8 await her word after the plain
-explanations given in the sitting.
+**Status (2026-09-04, later):** R1, R2, R4 (with the machine-side device-identity marker, because an Always-ask Castle library holds no
+custody item — her catch), R5 (both halves), R6, R7 (her words: type the existing words or generate new — never a silent
+reuse), R8 (the lost-device FAQ; an original animated progress indicator) and R9 are RULED and folded into the design
+file; R3 awaits her word after the Castle walk-through (Face ID · the twelve words · the new passphrase online through
+the server's master copy; only an Always-ask device that learned of the change and is offline falls back to the words).
 
 **Read as:** a review of `notes/plans/pre-13x-postures-design.md` as it stands, by the architect who sat through every
 sitting, asked to broaden — holistic first, then scenario by scenario, then a verdict. Its purpose is confidence, not

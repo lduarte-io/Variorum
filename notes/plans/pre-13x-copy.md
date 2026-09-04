@@ -172,7 +172,9 @@ why the words go on paper.*
 Checkbox: *I know my passphrase, and my twelve words are written down.*
 Confirmation: Touch ID, or the passphrase.
 Button: *Enter Castle*
-**During:** *Re-encrypting your library on the server… (N of M)* — then *Giving your library a new key…*
+**During:** *Re-encrypting your library on the server… (N of M)* — then *Giving your library a new key…* — under an
+ORIGINAL animated indicator with movement (a line with a few black dots travelling back and forth, or of that family;
+never the system spinner).
 **If the scheduled plaintext export was on:** *Your weekly unencrypted Markdown export is now off — it would have kept
 writing readable copies of your library to disk. You can turn it back on in Backups; Castle will warn you there.*
 **Done:** *You're in Castle. Your library has a new key that your Apple account never held. A fresh backup was made
@@ -198,6 +200,9 @@ and can take longer. You can also enter your passphrase or twelve words instead.
 **Standard, iCloud Keychain off on this device:** *iCloud Keychain is off on this Mac, so your Apple account
 can't hand over the key here. Enter your passphrase or twelve words instead, or turn on iCloud Keychain in
 System Settings.*
+**Standard, a different Apple ID than the one that turned on sync:** *This Mac's Apple account isn't the one that set
+up sync, so it can't hand over the key. Enter your passphrase or twelve words once; after that this Mac opens on its
+own.*
 **Castle:** Title *Enter your passphrase to join sync.* Sub-door: *Use my twelve words instead.*
 **Castle, and this library was in Standard (one sentence under the title):** *This account is in Castle, so this
 library gets a new key as it joins. Everything you wrote here stays.*
@@ -551,6 +556,12 @@ sign your other devices out on your word. Everything else is yours.*
   that were never wrapped for your Apple account, and the server refuses the old ones. If they also have your
   account password they can delete your account or sign you out — loud, and every copy on your devices survives —
   so change that password and use Sign Out Everywhere.*
+- **I lost a device, or one was stolen.** *In this order: Settings ▸ Account ▸ Sign Out Everywhere, so the device can't
+  sync; Settings ▸ Encryption ▸ Replace All Keys, so nothing it holds opens anything new; then change your account
+  password. In Castle the writing on that device stays locked behind its Touch ID or your passphrase. In Standard,
+  whoever can unlock that device can read what was on it — that is Standard's trade.*
+- **My other device uses a different Apple ID.** *Sync still works — that device types your passphrase once to join,
+  then opens on its own. The nothing-typed road is for devices signed into the Apple account that turned on sync.*
 - **Does Castle on my Mac make my iPhone Castle?** *Once sync is on, yes — Castle belongs to your account and every
   device follows. Before sync, each library has its own mode; your iPhone learns the account's mode when it joins.*
 
