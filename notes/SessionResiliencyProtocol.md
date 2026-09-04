@@ -192,3 +192,14 @@ round's tail (midpoint review · ladder · closeout) rather than hand off.
    orchestrator's `caffeinate` exit). So: **subagents wait in the foreground, always**; a main
    session may background a long run and act on the re-invoke — and should verify it is a main
    session before relying on that.
+
+
+## Addendum — two machinery facts from pre-13x batch 0 (2026-09-04; recorded by the orchestrator at the implementer's report)
+
+1. **`tail -n +1 -f <log> | grep -m1 '<EXIT LINE>'` does NOT return once the line has ALREADY landed** — `tail -f`
+   keeps the pipe open and `grep -m1` has already exited; the implementer's two blocking waits hit the harness's
+   10-minute limit for runs that finished in seconds. Poll instead: a loop of `grep -q '<EXIT LINE>' <log> && break;
+   sleep 5` (foreground, repeated past the Bash timeout as needed). The foreground rule stands; the tool changes.
+2. **Swift Testing's "Test run with N tests in M suites passed" COUNTS SKIPPED TESTS.** A suite disabled by
+   `.enabled(if:)` still contributes to N. Read the `skipped:` lines (or XCTest's `Executed 0 tests`) before
+   claiming a gated suite ran — the batch's record flips rode one commit late on exactly this.

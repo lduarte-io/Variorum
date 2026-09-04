@@ -609,6 +609,11 @@ never spawn subagents (one Sonnet lookup for external facts is the sole exceptio
 | 5 | "Open a library file…" (plaintext → fresh key + identity; ciphertext + key file) | **13x** | deferred, owned |
 | 6 | the inactivity dial: default 10, offered 5 · 10 · 30 · never; clock = time since Variorum was last used | U3 | open |
 | 7 | the keyless byte-copy at lock (app folder only) | U3 | open |
+| 8 | the Apple key's Keychain ACCOUNT carries the dev-store scope discriminator (the shared group is config-independent — a Debug build and the Release install would otherwise share one A; batch 0 surprise 4) | U3 | open |
+| 9 | the Apple-key query family: ONE builder carrying `kSecAttrSynchronizable = true` + `kSecAttrAccessGroup = <shared>` + the DP marker on add/read/update/delete/probe; the `KeychainPartitionTests` structural pin extended to it (batch 0 Q5: a flagless delete is a silent no-op) | U3 | open |
+| 10 | the lobby's vault road: derive ONCE when the key file's recorded descriptor equals the vault's; start the vault read concurrently with the derivation; progress from ~200 ms; ~10 s ceiling hands off to offline grace (batch 0 Q4/Q6: 0.77 s per derivation, 0.05–0.3 s RTT) | U4 | open |
+| 11 | Keychain Sharing on BOTH App IDs with `io.lduarte.Variorum.shared` — needed when DISTRIBUTION profiles list explicit groups (batch 0 Q1: the team wildcard covers dev) | **13r** (the KnownIssues Developer-ID row widens at closeout) | deferred, owned |
+| 12 | the two DEBUG probe doors (Mac Help menu; the phone's Settings dev row) are DELETED when the real Apple-key item lands | U3 | open |
 
 ### BATCH 0 BRIEF — measurements (a FRESH Fable implementer; self-contained; read §0's list first)
 **Goal:** the facts the postures depend on, measured on real hardware, in a decision memo — and NOTHING
