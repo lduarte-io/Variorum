@@ -597,7 +597,7 @@ never spawn subagents (one Sonnet lookup for external facts is the sole exceptio
 - U1 batch 0b — NOT-STARTED (placement: before the key work per ruling 16; her 09-04 question "is it fine
   to remove the bridge after?" answered in the sitting — either order works; "after" costs a small port of
   the bridge's key provider in batch 1 and carries its tests through; "first" is recommended).
-- U2 batch 1 — NOT-STARTED. U3 batch 2 — NOT-STARTED. U4 batches 3–4 — NOT-STARTED. U5 batch 5 — NOT-STARTED.
+- U2 batch 1 — NOT-STARTED (BRIEF WRITTEN 2026-09-04 in §17b: two sessions, 1a client substrate then 1b the protocol event; runs only after the bridge retirement lands). U3 batch 2 — NOT-STARTED. U4 batches 3–4 — NOT-STARTED. U5 batch 5 — NOT-STARTED.
 
 ### THE LEDGER (numbered; every row owned; grows as batches land)
 | # | item | owner | status |
@@ -654,6 +654,80 @@ recorded with her one-line instruction), the probes exist behind DEBUG, and this
 `U0 — DONE (hash)` with Q3 PENDING-HER-SITTING.
 
 ### 17c. BATCH RECORDS (appended by each implementer; newest at the bottom)
+### BATCH 1 BRIEF — the substrate (U2, phase-sized; run as TWO implementer sessions, 1a then 1b; each a FRESH Fable)
+**Read first (both sessions):** `CLAUDE.md`; `notes/SessionResiliencyProtocol.md` (binding); this file §0–§4, §11,
+§12, §17b (units · traps · LIVE STATUS · ledger); `notes/plans/pre-13x-design-review.md` §3 P5 and §8 only.
+**Baseline:** the bridge retirement has LANDED on `main` (its plan `notes/plans/pre-13x-bridge-retirement.md` §6
+says DONE and its §8 review closed) — if it has not, STOP and report; batch 1 never runs over the bridge code.
+**Rule for both:** her installed Release app keeps working untouched — NO install refresh, NO Release build, no
+migration of her real store (that is batch 2's §11, after the deploy). The dev store is the proving ground.
+
+**1a — the CLIENT substrate (zero server, zero lockstep):**
+1. **Sync keys inside the library** (§3.2): M, C(+id), J(+id) as base64 rows in `sync_state` (keys named
+   `e2ee.master`, `e2ee.corpus`, `e2ee.corpus_key_id`, `e2ee.journal_bridge`, `e2ee.journal_bridge_key_id`);
+   `resyncReinitialize` already spares them (pin it). A DB-backed `SyncKeyProviding` (`LibraryKeySyncProvider`)
+   with a cached read refreshed on write, synchronous by contract; a LOCKED library reads as no keys →
+   `SyncError.encryptionKeysUnavailable` (pin). `EncryptionSession`'s custody hand-off writes the library, not
+   the Keychain; `heldMaterial()` reads it. DELETE `E2EEKeychainStorage`, `E2EELaunchKeyCache`, `E2EECustodyStorage`,
+   the CF-12 gate + `SyncGateOptIn`, `DeviceKeySyncProvider`; the `KeychainTestTripwire`'s E2EE leaves go with them.
+   **Her migration hook** (§11, batch 2 runs it): a one-shot `migrateE2EECustodyIntoLibrary` that reads the legacy
+   plain/gated items if present and moves them — WRITE IT NOW behind a seam, RUN IT at batch 2.
+2. **The key file, format 2** (§3.3): `StoreKeyEnvelope` gains `master: Data?`, `apple: Data?`, `appleKeyID:
+   String?`, `vaultKDF: PassphraseKDF.Descriptor?`, `vaultCorpusKeyID: String?`; `formatVersion = 2`; format-1
+   files read as "no master box, no Apple box, unknown descriptor" (pin). Per-fingerprint NAMING:
+   `variorum-keys-<fp16>.json` beside the store and in backup folders, legacy `variorum-keys.json` read for the
+   store's current key when no fingerprint file exists; `StoreBackup.copyKeyEnvelope` writes the fingerprint-named
+   file and NEVER overwrites a file whose fingerprint differs (pin: two keys' files coexist; snapshots gain the
+   fingerprint in their filename — `variorum-backup-<stamp>-<fp8>.sqlite`; `existingBackups` accepts both names).
+   Writers of the master box: enrollment/setup (batch 3) — this batch lands the FORMAT + the `masterBox(key:
+   under: master)` / `unwrapKey(master:)` roads + the Apple box roads (`appleBox(key:under: A)` / `unwrapKey(apple:)`).
+3. **Custody per STORE ID** (ruling 8): the bound item and the gated item accounts keyed by the key file's
+   `storeID` (with the scope discriminator kept as a prefix: `<scope>-<storeID>-bound` / `-biometric`); a
+   TN3137-style read-legacy → re-add → verify → delete-legacy migration exactly like `StoreKeyKeychain.load`'s
+   #82 road (pin: legacy item migrates once; a second store on the same Mac never collides).
+4. **Device-bound session tokens** (§3.1): `KeychainAuthStorage` moves to the data-protection keychain with
+   `kSecAttrAccessibleWhenUnlockedThisDeviceOnly` under a `-bound` account, the same migration shape; the
+   `KeychainPartitionTests` structural pin extends to it. (A migrated Mac signs in again — recorded, not a bug.)
+5. **The absent-store route re-ruled** (§3.5): `StoreLaunchRoute.openResettingModeToAuto` → `.libraryMissing`;
+   `AppBootstrap` renders the three-door face (`pre-13x-copy.md` §3 "Library file missing"); "Start a New Library"
+   mints under a NEW store ID; the lock never resets (red pin on both targets: a demanded mode over an absent
+   store no longer persists a mode change and never opens a pullable library).
+**1a's gate:** `swift test` + the touched Mac suites + the tutorial spine green; the iOS target builds; the
+record's LIVE STATUS per item. Commit per item, push after each.
+
+**1b — the PROTOCOL event (the ONE §12 lockstep, marker 7 → 8; DRAFTED and PINNED here, DEPLOYED by her):**
+1. **The vault's additive columns** (§3.8): `master_wrapped_by_apple_held text`, `apple_key_id text`,
+   `key_proof_hash text` (all nullable) in a NEW file `Server/supabase/11_pre13x_postures.sql`; `KeyVaultFormat`
+   gains the two optional fields (format version STAYS 1 — additive; pin: a format-1 vault without them decodes);
+   `KeyVaultWireRow` maps them.
+2. **The key-proof token:** `KeyProof.token(master:) = HMAC-SHA256(M, "variorum.key-proof.v1")` (32 bytes, base64
+   on the wire); the server stores `SHA-256(token)` hex. `sync_push(batch, active_key_id, key_proof)` and
+   `sync_pull(since_seq, active_key_id, max_rows, for_device, key_proof)` REFUSE with a typed marker
+   `VARIORUM_KEY_PROOF_REQUIRED` unless `sha256(key_proof) = key_vault.key_proof_hash` (constant-time compare);
+   a NULL hash accepts the FIRST proof and stores its hash (the migration arm — hers only, pre-launch); the
+   OLD signatures are DROPPED FIRST in the file (the 14c precedent — no unfenced door survives).
+   `key_vault_update(payload jsonb, expected_revision int, key_proof text)` SECURITY DEFINER,
+   `variorum_definer`-owned like the data RPCs, carrying the revision CAS inside; the client's PostgREST PATCH
+   is replaced by it (`KeyVaultClient.updateVault`); vault CREATE stays a session-only insert that MUST carry
+   the hash. `account_data_truncate` gains `key_proof` too (its only caller is the headless tool). **No RPC
+   parameter may shadow a column it writes** (the 13j rule). The marker bump is the file's LAST statement.
+3. **The client:** `SyncSchema.lockstepVersion = 8`; `SyncTransport`/`SupabaseTransport` pass `key_proof` from the
+   engine's key provider (the provider returns M's proof beside C — extend `SyncEncryptionKeys` with `keyProof`);
+   `VaultEnrollment`/setup compute and land the hash; the FAKE SERVER enforces the proof exactly as the SQL does
+   (the harness realism rule) — pins: a session without the proof cannot push, pull, or update the vault, CAN
+   fetch it, CAN purge; the wrong proof refuses; the NULL-hash first write lands once. `AuthRLSDDLTests` pins the
+   DDL ↔ registry ↔ `lockstepVersion` together; `SerializerCompletenessTests` classifies the new columns.
+4. **The deploy checklist** (`notes/plans/pre-13x-deploy-checklist.md`): the 13j choreography — A1 backup rail;
+   run `11_…sql` on the mirror in HER window (author-only; the `!` road); verify `sync_schema_version()` = 8,
+   the three columns present, the RPC signatures, the grant sweep (`maintenance/14c-post-deploy-grant-sweep.sql`);
+   her installed marker-7 app then visibly refuses until batch 2's install — so the deploy is scheduled
+   immediately BEFORE batch 2's migration + install, never earlier.
+**1b's gate:** the convergence suites + the two-user suites green against the fake server with the proof; the
+DDL pin; `swift test` green; NO live round (the mirror is still marker 7 until her window). Record + push.
+
+**What batch 1 hands to batch 2:** the migration hooks (1a.1, 1a.3, 1a.4) unrun; the deploy checklist; the
+key-file roads unused until enrollment writes them; the ledger rows 8–12 still open for U3/U4.
+
 
 ### Batch 0 — record (implementer: Fable, 2026-09-04)
 
