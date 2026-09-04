@@ -13,6 +13,7 @@
 //  entitlement) — the review's required red state, confirmed by run.
 //
 
+import Foundation
 import Security
 import Testing
 
@@ -41,5 +42,27 @@ struct EntitlementsTests {
         #expect(entitlement("com.apple.security.app-sandbox"))
         // The 9c network entitlement must survive the merge too.
         #expect(entitlement("com.apple.security.network.client"))
+    }
+
+    /// pre-13x batch 0 (design §3.7, review P8): the SHARED keychain access
+    /// group rides SECOND behind the target's own — the order is
+    /// load-bearing (an item written with no group lands in the FIRST
+    /// group, so the default must stay first or every existing custody
+    /// item strands), and the shared string is what makes an iCloud item
+    /// visible from the phone. RED before the entitlements change (one
+    /// group); a Developer ID build that drops either goes red here too.
+    @Test func theSharedKeychainAccessGroupRidesSecondBehindTheTargetsOwn() {
+        guard let task = SecTaskCreateFromSelf(nil) else {
+            Issue.record("SecTaskCreateFromSelf returned nil")
+            return
+        }
+        let groups = SecTaskCopyValueForEntitlement(task, "keychain-access-groups" as CFString, nil)
+            as? [String] ?? []
+        let bundleID = Bundle.main.bundleIdentifier ?? ""
+        #expect(groups.count == 2, "two groups, got \(groups)")
+        #expect(groups.first?.hasSuffix("." + bundleID) == true,
+                "the FIRST group is the target's own (\(bundleID)), got \(groups)")
+        #expect(groups.last?.hasSuffix(".io.lduarte.Variorum.shared") == true,
+                "the SECOND group is the shared one, got \(groups)")
     }
 }
