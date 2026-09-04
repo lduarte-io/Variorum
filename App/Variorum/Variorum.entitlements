@@ -31,6 +31,20 @@
 	<key>keychain-access-groups</key>
 	<array>
 		<string>$(AppIdentifierPrefix)$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+		<!-- pre-13x batch 0 (design §3.7, review P8), 2026-09-04: the SHARED
+		     group, SECOND — the default group above stays FIRST so every item
+		     already written (the gated store key, the bound item, her migrated
+		     items) keeps its identity; an item written with no explicit group
+		     lands in the FIRST group listed. This one is the same string in
+		     Debug, Release and on the iOS target (VariorumMobile.entitlements
+		     carries the identical two-entry shape), so an iCloud-synchronizable
+		     item written under it on one device is visible to the other — the
+		     Standard posture's Apple key (A) is the one item the design writes
+		     there, always naming the group explicitly via kSecAttrAccessGroup.
+		     The team provisioning profiles permit it by wildcard
+		     (keychain-access-groups = TEAMID.*, both platforms — measured at
+		     batch 0); a Developer ID build must carry BOTH (KnownIssues, 13r). -->
+		<string>$(AppIdentifierPrefix)io.lduarte.Variorum.shared</string>
 	</array>
 </dict>
 </plist>

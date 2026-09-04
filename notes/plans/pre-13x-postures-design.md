@@ -660,11 +660,15 @@ batch. Builds use a gitignored `App/Variorum/DerivedData/pre13x-b0` inside the w
 so the Q1 hypothesis is "signing accepts the shared group without an App-ID change" — to be proven by building.
 
 **LIVE STATUS (flipped in the same commit as each piece; PENDING = unverified):**
-- **Q1 (shared group on both targets)** — NOT-STARTED. Settled design: `Variorum.entitlements` gains the second
-  entry; `App/Variorum/VariorumMobile.entitlements` is CREATED with the two-entry shape (default first) and wired by
-  `CODE_SIGN_ENTITLEMENTS` on both VariorumMobile configs; Mac Debug build + iOS `generic/platform=iOS` Debug build,
-  each verified by `codesign -d --entitlements`; the Mac `EntitlementsTests` gains a pin that the signed host carries
-  the shared group. Own commit.
+- **Q1 (shared group on both targets)** — DONE (this commit). `Variorum.entitlements` carries the second entry;
+  `App/Variorum/VariorumMobile.entitlements` CREATED (two entries, default first) and wired by `CODE_SIGN_ENTITLEMENTS`
+  on both VariorumMobile configs. **Both builds succeeded with NO signing change and NO App-ID step** — the team
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  *[removed for publication]*
+  Profile: *". The first entry resolves to each target's own bundle id, as required. Nothing for the author here.
+  (The Mac `EntitlementsTests` pin for the shared group rides the PROBES commit, beside the other tests.)
 - **Q2 (Mac synchronizable round trip under the shared group)** — NOT-STARTED. Settled design: a shared DEBUG-only
   probe brain (`App/Variorum/Shared/SharedKeychainGroupProbe.swift`, throwaway service
   `io.lduarte.Variorum.pre13x-shared-group-probe`, timestamped account for the local leg) driven by a Mac test suite

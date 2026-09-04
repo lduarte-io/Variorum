@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- pre-13x batch 0 (design §3.7, review P8), 2026-09-04: the iOS target's
+	     FIRST entitlements file. Until now VariorumMobile declared nothing, so
+	     its keychain identity was the implicit default group
+	     (TEAMID.io.lduarte.VariorumMobile) and an iCloud-synchronizable item
+	     written by the Mac was INVISIBLE to the phone (and vice versa) — no
+	     Standard cross-device story could exist. The shape is the Mac's,
+	     byte-for-byte in meaning: the target's OWN group FIRST (an item
+	     written with no explicit group lands in the first group listed, so
+	     nothing the phone already wrote — the E2EE custody item, the store
+	     key, the session — strands), and the SHARED group SECOND, the same
+	     string on both platforms and in both configurations. Every
+	     iCloud-synchronizable write names the shared group explicitly via
+	     kSecAttrAccessGroup. -->
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(AppIdentifierPrefix)$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+		<string>$(AppIdentifierPrefix)io.lduarte.Variorum.shared</string>
+	</array>
+</dict>
+</plist>
