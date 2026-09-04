@@ -174,7 +174,8 @@ Touch ID from now on; your other devices will ask the next time they open.*
 **Then, once — the offer:** Title *Delete the backups Variorum made before today?* Body: *They still open through
 your Apple account, and they always will. Deleting them closes that door for what they hold. Variorum can only
 delete its own backups — Time Machine, copies you made, and anything outside Variorum's folders aren't touched and
-still open the old way.* Buttons: *Delete Them* · *Keep Them*
+still open the old way. If your backups are in iCloud Drive, iCloud keeps deleted files for 30 days in Recently
+Deleted.* Buttons: *Delete Them* · *Keep Them*
 
 ### 2c. Leaving Castle for Standard (Settings ▸ Protection ▸ Use Standard)
 Title: *Back to Standard?*
@@ -422,9 +423,10 @@ makes.*
 
 **Chapter 4 — Castle, step by step**
 *Entering Castle does four things. Your library is re-encrypted under a brand-new library key, and the new key file
-wraps it under your passphrase, your twelve words and the master key only — never under the iCloud key. [m] Your
+wraps it under your passphrase, your twelve words and the master key only — never under the iCloud key. Your
 sync gets a new master key too, sent to the server wrapped only under your passphrase and twelve words; the old
-master key stops being accepted. The copy of the library key your Mac keeps moves behind Touch ID — held by the
+master key stops being accepted. [m-corpus] And a new corpus key: everything on the server is re-encrypted under it
+from your Mac, so nothing written after today is ever under a key an old copy holds. The copy of the library key your Mac keeps moves behind Touch ID — held by the
 security chip, released to your fingerprint, never to your login password — or is kept nowhere if you choose
 Always ask. And your other devices follow: each re-encrypts its own library the same way [m] and asks for your
 passphrase once to pick up the new sync keys.*
