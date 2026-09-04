@@ -478,19 +478,40 @@ minted locally, never from the server (§19). 25. "Pause sync" is 18a's; "rotate
 Then the cold-review ladder (Fable reviewers — the phase is `Sync/` + custody + the editor-adjacent lobby),
 the two drills, her acceptance walk on both devices, the `/Applications` refresh and the phone install.
 
-## 16. OPEN RULINGS FOR HER (each with the recommendation first)
-(a) CF-11's "forget keys on this device" folded into sign-out? *(yes)* (b) a keyless byte-copy backup at lock
-time when due? *(yes; the app's own folder only)* (c) Castle's idle re-lock default *(off; 15 minutes when
-on)*; sleep/screen-lock re-lock always ON in Castle, not a dial *(yes)* (d) the account-password minimum at
-signup *(12, the passphrase's floor)* (e) the posture copy — 13s re-voices; §2 is its bones (f) default the
-13l backup folder into iCloud Drive under Standard? *(offer at the first backup run with the one sentence;
-never silently)* (g) may a device keep a stricter local gate under a Standard account? *(no for v1 — two
-postures, no hybrids)* (h) gate the LIBRARY-wide `.md` export behind P in Castle? *(yes)* (i) the
-key-proof token: in THIS phase's lockstep event *(yes — recommended as the architect's sign-off condition,
-§19)*, or deferred to 13y with the disclosed interim that a bare session can still push tombstones and read
-structure? (j) when a Castle→Standard switch propagates, do other devices adopt silent open automatically
-with a notice *(yes)* or wait for a visit? (k) her walk's copy for the Castle ceremony's floor and the
-Standard ceremony's keep-your-words line — exact words.
+## 16. OPEN RULINGS — her 2026-09-03 evening answers recorded; the rest with the recommendation first
+
+**RULED 2026-09-03 (evening):**
+- **(i) The key-proof token: YES** — ships in THIS phase's lockstep event (marker 7 → 8). Her words on the
+  class: *"I agree with your change — I was uncomfortable with deletion with only the account password
+  anyway."* (Clarified in reply: the token does NOT gate deletion — deletion stays account-password + typed
+  phrase + a FRESH re-authentication, because Apple's 5.1.1(v) requires it reachable by a user who has lost
+  every secret; what the token removes is every OTHER power a bare session had.)
+- **Sleep / screen-lock re-lock always ON in Castle: YES** — *"but the app unfocused should still have an
+  inactivity dial."* The dial's clock is therefore **time since Variorum was last USED** (frontmost with
+  input), not system idle — tabbing out never locks instantly (ruling 13's letter), N minutes unfocused
+  does. Default: pending her pick (her float: 5 min; recommendation below).
+- **(g) A stricter local gate under a Standard account: NO.** Two postures, no hybrids.
+- **(h) The library-wide `.md` export gated in Castle: NO** — *"we're taking the position that if your
+  variorum is open that's it."*
+- **iCloud Keychain propagation latency: ACCEPTED** — *"icloud sync is known to suck, the passphrase is the
+  alternative."* The waiting state + its passphrase door stand as designed.
+- **L rotation by plaintext export → a NEW library: AGREED as the recorded manual road.** Her question
+  *"do we have a way for a user to get started with a plaintext backup?"* → today only by hand (place a
+  plaintext `.sqlite` at the store path; the 13p migration encrypts it on the next open — the runbook's
+  road); the user DOOR is 13x's "Open a library file…" (plaintext → encrypted under a FRESH key + identity;
+  ciphertext → with its key file). Recorded on 13x's row at closeout.
+
+**STILL HERS (the recommendation first):**
+(a) CF-11 "forget keys on this device" folded into sign-out — explained in the reply; *(recommend fold: no
+separate door; the sign-out sheet says what stays and names Sign out everywhere / delete-the-library for
+the two real needs)*. (b) a keyless byte-copy backup at lock time when due *(yes; the app's own folder
+only)*. (c) the inactivity default *(10 minutes, offered 5 · 10 · 30 · never; her float was 5)*. (d) the
+account-password minimum *(12 — one floor for both things you type into Variorum; plus Supabase's
+leaked-password protection switched ON in the dashboard)*. (e) the posture copy — 13s re-voices; §2 is its
+bones. (f) the backup-folder-in-iCloud-Drive offer — explained in the reply; *(recommend: offered ONCE at the
+first backup run, default a Variorum folder in iCloud Drive when available, with the one sentence; never
+silently)*. (j) when a Castle → Standard switch propagates, other devices adopt silent open automatically
+with a one-time notice *(yes)*. (k) the exact ceremony words — at batch 5.
 
 ## 17. CANON DELTAS AT CLOSEOUT
 AppSpec §14 (this phase's delta) + §7's `setting`/`sync_state` note (keys live in `sync_state`; the key file
