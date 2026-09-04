@@ -31,7 +31,7 @@ EncryptionSession,StoreLaunchGate,AppBootstrap,ProtectionShapes,StoreBackup,Auth
 `Sources/VariorumCore/Persistence/{StoreKey,StoreKeyEnvelope,StoreBinding}.swift`,
 `Sources/VariorumCore/Crypto/{KeyVaultFormat,KeyVaultClient,VaultEnrollment,AccountRekey,AccountDeletion,
 PassphraseKDF}.swift`, `Server/supabase/{08_phase14b_lockstep,09_phase14c_multitenant,10_phase13j_purge}.sql`.
-Do first: §15 batch 0 (the measurements), then batch 0b (the bridge set-aside — its own cold review).
+The 13b constitution P-1…P-9 binds this phase BYTE-VERBATIM as written in `.claude/skills/architect-phase/SKILL.md` (read it there; not re-copied here to keep this file readable in full). Do first: §15 batch 0 (the measurements), then batch 0b (the bridge set-aside — its own cold review).
 Verify by: §15's per-batch gates, the two drills, her walk on both devices.
 
 ---
@@ -155,6 +155,32 @@ every key act — never an account credential. iCloud holds a KEY TO A BOX — n
 "Box" = the key encrypted under another key (RFC 3394 `AES.KeyWrap`, exactly as `KeyVaultFormat` and
 `StoreKeyEnvelope` already do it; a wrong key REFUSES, never yields bytes). The passphrase box is the only
 brute-forceable one (Argon2id, the v1 descriptor, `PassphraseKDF`); every other box is under a random key.
+
+### 3.1b Every credential — what unlocks it, what it unlocks, where it stays (per posture; her table, 2026-09-04)
+
+| credential / key | what unlocks it | what it unlocks | where it stays — Standard | where it stays — Castle |
+|---|---|---|---|---|
+| **the account password** | your memory (resettable by email) | sign-in (a session); account deletion. **Never a key.** | your head / password manager; the server holds a hash | same |
+| **the session** (tokens) | sign-in | fetching the vault's boxes; and — only together with the key proof — sync | this device's Keychain, device-bound; cleared by sign-out | same |
+| **the passphrase** P | your memory | the library key (the key file's P box); the master (the vault's P box); enrolling a new device | nowhere | nowhere |
+| **the twelve words** W | the paper | exactly what P unlocks | nowhere but paper | nowhere but paper |
+| **the Apple key** A | being signed into your iCloud on a trusted device (iCloud Keychain, end-to-end encrypted; Apple's account recovery) | the library key (the key file's Apple box); the master (the vault's Apple box) | ONE item in iCloud Keychain, readable only by Variorum | the item may exist (it was minted before, or serves another library on this iCloud) but **no box opens with it** |
+| **Touch ID / Face ID** | a finger/face enrolled on this device's user account | the gated library-key item | not used to open (silent open instead) | the Secure Enclave gates the item; adding a fingerprint invalidates it (P recovers) |
+| **the library key** L | silently, this device's Keychain (Standard) · the gated item (Castle) · or ANY box in the key file: P, W, the master, A | the library file (SQLCipher decrypts pages with it) | raw: this device's Keychain, bound to the hardware. Boxed: the key file beside the library and in every backup folder (P, W, master, **Apple**) | raw: the gated item, or nowhere (always-ask). Boxed: the key file (P, W, master — **no Apple box**) |
+| **the master** M | any vault box (P, W, A) — or it is already inside an open enrolled library | the class keys → everything in sync; the master box in every key file → the library key; the key proof | raw: inside every enrolled library. Boxed: the vault under P, W, **and A** | raw: inside every enrolled library. Boxed: the vault under P and W only |
+| **the class key** C | the master | the text on the server | inside enrolled libraries; the vault under M | same |
+| **the key proof** | derived from the master | the right to read or write the sync copy, and to update the vault | computed on demand by any device holding M; the server keeps only its hash | same |
+| **the key file** | nothing — it is boxes | nothing alone | beside the library; in backup folders; public | same |
+
+**Read it as two sentences.** Standard: Apple holds A; A opens a box in the key file and a box in the vault;
+those boxes hold L and M; L opens the file, M opens sync. Castle: no box opens with A; only P, W, an
+enrolled device's Touch ID, or the master already inside an open library reach L and M.
+
+**A deleted-then-recreated account, in these terms:** the old vault (M's boxes) is gone with the account;
+A, the key file, and L are untouched, so every library and backup opens as before. The new account's setup
+mints M′, seals it in NEW boxes (under P, W, and — Standard — the SAME A) in a NEW vault, and puts M′ inside
+the library beside its rows, which re-stamp and re-upload. So yes: a new boxed master exists — on the
+server, under the same Apple key. Nothing in iCloud changes.
 
 ### 3.2 Sync keys inside the library
 `sync_state` is local-only, never synced, and lives inside the SQLCipher store; `resyncReinitialize` spares
@@ -514,9 +540,14 @@ A deleted-then-recreated Standard account leaves iCloud UNCHANGED: one Apple key
 account's box and every old backup's key file (the library key never changed) — "two keys in iCloud" cannot
 occur.
 
-**STILL HERS:** (b) the keyless byte-copy backup at lock time (explained in the reply; *recommend yes, the
-app's own folder only*). (c) the inactivity default *(10 minutes; her float 5)*. (e) the posture copy — 13s
-re-voices from `pre-13x-copy.md`.
+**RULED 2026-09-04:** (b) the keyless byte-copy at lock time: YES, the app's own folder only. (c) the
+inactivity default: **10 minutes, 5 offered** (offered set 5 · 10 · 30 · never). The guard against working
+from a library inside iCloud Drive: **13x's** (no door in this phase can place the live library there).
+Batch 0 authorized (*"you're clear to start batch 0"*).
+
+**STILL HERS:** (e) the posture copy — 13s re-voices from `pre-13x-copy.md`; the bridge removal's ORDER
+(before the key work, recommended, or after — see LIVE STATUS); the sizing flag (17b: three phase-sized
+units — one phase or a split at U3).
 
 ## 17. CANON DELTAS AT CLOSEOUT
 AppSpec §14 (this phase's delta) + §7's `setting`/`sync_state` note (keys live in `sync_state`; the key file
@@ -526,6 +557,98 @@ sync RPCs — the choreography executed in her window); CoreDescription untouche
 mention retired with the bridge; the 13p constitution's R13p-5/6/7/9 recorded as superseded; the memo
 superseded; KnownIssues rows resolved; 13x's row trimmed to portability; MobileSoul parity line; QUESTIONS
 #81 / #87 dissolved / re-listed; the bridge's canon deltas (§10) land with batch 0b.
+
+---
+
+## 17b. EXECUTION RECORD (the running record the `/architect-phase` skill requires — kept lean enough to read in full)
+
+### Acceptance units (the sizing guidance, said out loud)
+| unit | kind | evidence that closes it |
+|---|---|---|
+| U0 batch 0 — measurements | spike (not a unit) | the decision memo `notes/plans/pre-13x-spike-memo.md` |
+| U1 batch 0b — the bridge set-aside | operations | core + Mac + iOS suites green with the bridge gone; no bridge door renders; its own cold review |
+| U2 batch 1 — substrate + the lockstep event (marker 7→8) | sync/protocol (phase-sized) | convergence suites incl. the key proof; ONE live two-device round on the real mirror after her deploy |
+| U3 batch 2 — postures + the two switches | custody (phase-sized) | three drills: the Standard new-device road (nothing typed), the Castle new-device road (passphrase once), the Standard→Castle switch with a Standard sibling device following |
+| U4 batch 3 + 4 — doors + lobby + cross-device | custody (phase-sized) | per-door drills (change passphrase across two devices; regenerate; sign out everywhere; delete + re-setup + re-upload; the plaintext export's strip pin; the vault road at the lobby) |
+| U5 batch 5 — copy + tutorial + mobile faces | UI | hands-on use of both apps, both postures; the tutorial spine green |
+**This is THREE phase-sized units under one theme — one over the guidance's two.** Raised to the author
+2026-09-04 with two roads: run as one phase with sequential batches and drills as gates (13p's shape,
+"at the line", ran clean), or split at the seam after U3 (pre-13x-a: U1–U3; pre-13x-b: U4–U5), sharing this
+sitting's rulings. Her call; U0 proceeds either way.
+
+### Environment traps (the standing set — every batch brief carries this verbatim)
+Instance checks via `pgrep -fl 'Variorum.app/Contents/MacOS'` discriminated by PATH; treat real-store
+instances by STORE — NEVER quit/kill one; NO Release builds or `/Applications` refreshes while one lives
+(and none at all before the lockstep deploy lands — a marker-8 client would visibly refuse against the
+marker-7 mirror); core tests via `swift test` from the repo root; Mac app tests from `App/Variorum/` with
+suite-level `-only-testing` only, confirm the "Test run with N tests" line; `xcodebuild build-for-testing`
+compiles without the runner; NEVER add a custom build configuration (SPM deps compile RELEASE under any
+configuration not named exactly "Debug", silently stripping DEBUG-gated oracles — the 4G trap); zsh
+`pipestatus`; scratch and screenshots in gitignored dirs INSIDE the worktree (never the session
+scratchpad — it dies with a crash); never `git checkout` over uncommitted work; commit per piece and PUSH
+after every commit (the resiliency protocol outranks the older "architect pushes" line); synchronous
+foreground waits only; the A1 backup rail before ANY touch of the real store; suites beside her live
+session flash the test host's windows — prefer zero-instance windows for timing-sensitive measurements;
+never spawn subagents (one Sonnet lookup for external facts is the sole exception, read-only).
+
+### LIVE STATUS (flipped in the same commit as each piece; PENDING = unverified)
+- **U0 batch 0** — IN-PROGRESS (spawned 2026-09-04; brief below).
+- U1 batch 0b — NOT-STARTED (placement: before the key work per ruling 16; her 09-04 question "is it fine
+  to remove the bridge after?" answered in the sitting — either order works; "after" costs a small port of
+  the bridge's key provider in batch 1 and carries its tests through; "first" is recommended).
+- U2 batch 1 — NOT-STARTED. U3 batch 2 — NOT-STARTED. U4 batches 3–4 — NOT-STARTED. U5 batch 5 — NOT-STARTED.
+
+### THE LEDGER (numbered; every row owned; grows as batches land)
+| # | item | owner | status |
+|---|---|---|---|
+| 1 | the shared keychain access group on both targets (review P8) | U0 → U2 | open |
+| 2 | A crosses Mac ⇄ phone under the shared group (measured on her two devices) | U0 | open |
+| 3 | the decision memo | U0 | open |
+| 4 | the guard against working from a library inside iCloud Drive | **13x** (the Open-a-library door is the only road that could put it there; recorded on 13x's row at closeout) | deferred, owned |
+| 5 | "Open a library file…" (plaintext → fresh key + identity; ciphertext + key file) | **13x** | deferred, owned |
+| 6 | the inactivity dial: default 10, offered 5 · 10 · 30 · never; clock = time since Variorum was last used | U3 | open |
+| 7 | the keyless byte-copy at lock (app folder only) | U3 | open |
+
+### BATCH 0 BRIEF — measurements (a FRESH Fable implementer; self-contained; read §0's list first)
+**Goal:** the facts the postures depend on, measured on real hardware, in a decision memo — and NOTHING
+built beyond what measuring requires. **Deliverables:** `notes/plans/pre-13x-spike-memo.md` (the Phase 6 /
+13p memo pattern: each question, the observed fact, the number, the recommendation) + this file's LIVE
+STATUS and ledger rows 1–3 flipped + the batch record (§17c, appended by you).
+**Q1 — the shared access group compiles, signs and launches on BOTH targets.** Add a SECOND entry
+`$(AppIdentifierPrefix)io.lduarte.Variorum.shared` to `App/Variorum/Variorum.entitlements` and create the
+iOS target's entitlements file with the same two-entry shape (the default group first, so nothing already
+written strands — confirm the first entry resolves to the target's own bundle id on each target). Build
+both. If signing refuses (the provisioning profile / App ID may need "Keychain Sharing" enabled in her
+developer account — an AUTHOR-ONLY step), STOP on that leg, record the exact error, and write the
+one-line instruction for her; do not work around signing.
+**Q2 — a synchronizable item written under the shared group on the Mac is readable on the Mac** (the
+shape of `StoreKeyGuardKeychain.escrowQuery` with `kSecAttrAccessGroup` = the shared group, `AfterFirstUnlock`,
+no ACL): write, read back, delete, under a DEBUG-only probe (a `#if DEBUG` menu item or a Mac test marked
+`.disabled` by default — NEVER a fixed account that a test process could touch in production; use a
+throwaway account name with a timestamp; `KeychainTestTripwire` stays honored). Record the status codes.
+**Q3 — the item crosses to the PHONE.** You cannot install on her phone; PREPARE the leg: the same probe
+in the iOS target behind `#if DEBUG` (write on one device, read on the other, both directions), and a
+five-minute written procedure for her sitting (install the dev build via Xcode, tap, read the result on
+screen). Record Q3 as PENDING-HER-SITTING with the procedure.
+**Q4 — the vault read's latency before unlock:** measure the round-trip of an UNauthenticated request to
+the project URL (`ProjectConfig`'s host; a HEAD or a 401-returning GET on `rest/v1/key_vault`) five
+times; report median and max. That is the pre-unlock network contact's floor; the authenticated fetch adds
+one PostgREST query. No credentials are needed and none are used.
+**Q5 — `kSecAttrSynchronizable` + `kSecAttrAccessGroup` interaction facts on THIS macOS point release:** does
+a delete under the shared group with the synchronizable flag match the item (it must); does a query
+WITHOUT the group match it (it must not from another group); record.
+**Q6 — Argon2id v1 derivation time on this Mac** (the existing `PassphraseKDF` harness test reports it; one
+number for the memo's lobby-latency budget).
+**Explicitly NOT batch 0:** the key-proof RPC (batch 1), any Keychain custody change to the app's real
+items, any store touch, any `Sync/` change, any Release build. **Scratch:** gitignored dir inside the
+worktree. **Record:** append `### Batch 0 — record (implementer: Fable, 2026-09-04)` under §17c with the
+LIVE STATUS lines per Q, flipped per piece; commit per piece, push after every commit; foreground waits
+only. **Done when:** the memo is committed, the entitlements change is committed (or its signing refusal
+recorded with her one-line instruction), the probes exist behind DEBUG, and this file's LIVE STATUS says
+`U0 — DONE (hash)` with Q3 PENDING-HER-SITTING.
+
+### 17c. BATCH RECORDS (appended by each implementer; newest at the bottom)
+
 
 ---
 
