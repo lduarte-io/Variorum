@@ -71,9 +71,10 @@ Verify by: §15's per-batch gates, the two drills, her walk on both devices.
 11. **The recovery phrase is MANDATORY at Castle enrollment** — generated, written down, confirmed by re-entry,
     ONCE. (With ruling 5's extension: at sync setup too.)
 12. **A passphrase change refreshes the key files in the on-disk backup folders** — extended 09-03 to words
-    regeneration and posture changes. **NARROWED 09-04:** a POSTURE change never touches a backup folder (§16
-    09-04 (b)); whether the passphrase-change / words refresh itself survives is PROVISIONAL, hers (§16 STILL HERS —
-    recommendation: drop it, one rule: the app never rewrites a backup's key file after it is written).
+    regeneration and posture changes. **SUPERSEDED 09-04 (afternoon, later):** the app NEVER rewrites a backup folder's key file after it is written —
+    not at a posture change, not at a passphrase change, not at a words regeneration. Her words: *"I do not think the
+    app should refresh its own backup folders' key files on a passphrase change - it's confusing."* The LIVE library's
+    own key file (not a backup) stays current as always, and it pairs with every snapshot of the same library key (§6).
 13. **Castle keeps the idle-minutes re-lock dial** (reads SYSTEM idle — tabbing out never locks).
 14. **The absent-store route is re-ruled**: never a silent reset.
 15. ~~17i is pulled into this phase.~~ Withdrawn 2026-09-02 (R-cor-13): 17i runs after, on the settled path.
@@ -165,6 +166,14 @@ every key act — never an account credential. iCloud holds a KEY TO A BOX — n
 "Box" = the key encrypted under another key (RFC 3394 `AES.KeyWrap`, exactly as `KeyVaultFormat` and
 `StoreKeyEnvelope` already do it; a wrong key REFUSES, never yields bytes). The passphrase box is the only
 brute-forceable one (Argon2id, the v1 descriptor, `PassphraseKDF`); every other box is under a random key.
+**In plain credential words (her ask, 09-04 — say the credential, not "box"):** the JSON key file beside a library
+holds THE LIBRARY KEY, encrypted separately under the passphrase, under the twelve words, under the master key, and
+(Standard only) under the iCloud key. The vault on the server holds THE MASTER KEY, encrypted separately under the
+passphrase, under the twelve words, and (Standard only) under the iCloud key. Inside an enrolled library's own
+`sync_state` rows sit the master key and the corpus key in the clear — protected by the library's encryption, not by
+a further wrap. The raw library key sits in the device Keychain (Standard: silent; Castle: behind Touch ID, or
+nowhere). The library key is PER LIBRARY FILE — the Mac's and the phone's differ; the master key is PER ACCOUNT — the
+same inside every enrolled library.
 
 ### 3.1b Every credential — what unlocks it, what it unlocks, where it stays (per posture; her table, 2026-09-04)
 
@@ -339,8 +348,14 @@ app's own folder only).
 **The key file in a backup folder is named by key fingerprint and NEVER overwritten by a different key's
 file** (ruling 25) — a folder holds one per library key it has ever held; new snapshots carry the fingerprint
 in their filename so the restore surface pairs them; legacy `variorum-keys.json` serves legacy snapshots.
-Refreshed on every passphrase change and words regeneration (ruling 12 — PROVISIONAL since 09-04, §16 STILL HERS);
-**NEVER touched by a posture change (ruled 09-04): no strip, no re-key.** A Standard-era snapshot keeps its Apple
+**NEVER rewritten after it is written (ruling 12 SUPERSEDED 09-04): not at a passphrase change, not at a words
+regeneration, not at a posture change — no strip, no re-key, no refresh.** What keeps the current passphrase useful
+anyway: the LIVE library's own key file is always current, and every snapshot made under the same library key pairs
+with it (the fingerprint in both names) — so on the Mac the library lives on, the current passphrase opens every old
+snapshot of the current key without any backup folder being touched; the restore surface looks for a
+matching-fingerprint key file beside the live library as well as in the backup folder (a step for 13x's open door
+and the 13l restore drill). A cold restore elsewhere uses the passphrase of the day, the twelve words, or — a sync
+user of an undeleted account — the master key online. A Standard-era snapshot keeps its Apple
 box and opens through the Apple account for as long as it exists; snapshots made after the switch come from the
 re-keyed library under the new key and its new key file.
 **The one user sentence, true in every case:** *"A backup opens with your twelve words — always, unless you
@@ -457,8 +472,11 @@ enrolls with nothing typed; a Castle vault carries none — pin the ABSENCE); **
 a Standard-era key file + A opens NO page of the post-switch library; the switch run on a byte-copy of her real
 store, its time recorded; a crash injected after the export and before the swap re-runs to completion; the vault's
 Apple box is removed last); enrollment re-keys a Standard-born library (the phone's pre-sign-in rows survive; its
-old key file + A opens only the old file); NO backup folder is written by a posture change (pin the ABSENCE — the
-folder's bytes before == after);** posture derivation + follow (a Standard phone under a Castle account gates at its next
+old key file + A opens only the old file); NO backup folder is EVER rewritten after it is written — posture change, passphrase change, words regeneration alike
+(pin the ABSENCE — the folder's bytes before == after; ruling 12 superseded); a same-fingerprint snapshot opens with
+the LIVE library's current key file (the restore surface's second look); the delete-pre-switch-backups button removes
+only the app's own snapshots and never a same-fingerprint one made after the switch; the (l) door, if ruled: identity
+preserved, backups untouched, the old key file + A opens no page of the new file;** posture derivation + follow (a Standard phone under a Castle account gates at its next
 open; a Castle→Standard switch propagates); the plaintext export carries no local sync table and no
 key-shaped value; per-store-ID custody; per-fingerprint key files (a second key's file never replaces the
 first); setup adopts a foreign-stamped library (delete → recreate → every row syncs); re-enrollment
@@ -484,7 +502,10 @@ keys"). If it ever returns: from an ENROLLED device only; authorized by P or W (
 the count-and-dates recency warning + a typed confirmation phrase; "keep my twelve words" by typing them;
 never from a library with no writing of its own; re-enrolling devices re-initialize. **The manual road that
 exists instead:** delete the account and set sync up again (rotates M). **L is rotated by exactly ONE v1 road —
-entering Castle (ruled 09-04; §4)**; for any other occasion the recorded workaround is the plaintext export opened as a NEW library (13x's open-an-existing-library
+entering Castle (ruled 09-04; §4) — and, at her word on (l), by a "Give this library a new key" door that is ONE MORE
+CALLER of the switch's mechanism (§16 (l), PROVISIONAL)**; the plaintext-export → new-library WORKAROUND recorded on
+09-03 is RETIRED as a rotation road (it only ever stood in for a door that did not exist) — the export is the
+open-format escape (ruling 9) and 13x's door opens backups and copies, a plaintext export included, which it opens as a NEW library (13x's open-an-existing-library
 door can adopt a plaintext SQLite by encrypting it under a fresh key — the 13p migration road), losing
 nothing. Also declined: a per-device stricter gate under a Standard account (hybrids). ~~L rotation at the Castle
 switch~~ — **RULED IN 09-04** (§4; §16): the one gap the 09-03 text left, a Standard-era key file that Time Machine
@@ -529,8 +550,9 @@ session by sign out everywhere — the three-line rule (§8). **29. An iOS devic
 Castle enrollment holds the old ciphertext + its key file (Apple box) — the Mac's Time Machine class exactly; the raw
 key is `ThisDeviceOnly` and restores nowhere else; the enrollment re-key makes it an old-writing-only artifact.
 **30. The delete-and-set-up-again road needs NO export (09-04):** it re-stamps and re-uploads the SAME library —
-every take, savepoint, edge and comment stays; the plaintext export → new-library road is the LIBRARY-key road and
-13x's portability door, not the master's.
+every take, savepoint, edge and comment stays; the plaintext export is the open-format escape and 13x's open door is
+restore/portability — NEITHER is a key-rotation road (09-04, later): the library key rotates IN PLACE (the switch;
+the (l) door), the master by delete + set up again.
 
 ## 15. BATCHES (strictly sequential; each red-on-old; the tutorial spine green every batch)
 0. **Measure + spike**: A's item written under the shared group on the Mac and read on the phone (and the
@@ -549,13 +571,14 @@ every take, savepoint, edge and comment stays; the plaintext export → new-libr
    waiting state; A's item family; Castle's gated custody + always-ask + re-lock; the two switches with
    re-auth; **the re-key at the switch and at Castle enrollment (export-and-swap, the persisted marker, the vault's Apple box
    last — measured first on a byte-copy of her store; ruled 09-04)**; backup key files per fingerprint (NAMING only —
-   no posture change writes a backup folder); the migration (§11) for her two devices.
+   no backup folder is ever rewritten); **the delete-pre-switch-backups offer (ledger 18)**; the migration (§11) for her
+   two devices.
 3. **Doors**: setup-adopts (re-stamp + re-init) and re-enrollment re-inits; change passphrase + regenerate
    under §4's authorizations; sign out everywhere; deletion by account password (reachable unenrolled); the
    plaintext export **+ the sync-reconciliation DESIGN NOTE for 13x's open door** (§16 09-04 (g): the export keeps
    the synced tables' `sync_version`/`owner_id` columns and strips only the local tables; opened under the SAME
    account it enrolls and pulls from cursor 0 with an empty outbox — zero pushes; under a NEW or NO account it takes
-   the adopt road); the 12-character floor; the descriptor floor.
+   the adopt road); the 12-character floor; the descriptor floor; **the "Give this library a new key" door at her word (ledger 19)**.
 4. **Lobby + cross-device**: the vault road; Rule 1 with the key-id distinction; offline grace; the post-
    unlock prompt; the posture-follow notice; the phone's faces; convergence pins for §7.
 5. **Copy + tutorial + runbook + parity line + the deletions** (§8, §13); the privacy-policy brief re-issued; the
@@ -639,18 +662,31 @@ Batch 0 authorized (*"you're clear to start batch 0"*).
   tables; it KEEPS the synced tables' `sync_version` and `owner_id` columns so 13x's open door can reconcile: same
   account → enroll, pull from cursor 0, empty outbox (zero pushes, convergence by the ≤-version rule); new or no
   account → the adopt road (re-stamp + `resyncReinitialize`). Written as batch 3's design note; handed to 13x's row.
+  **Corrected the same afternoon:** this is a PORTABILITY corner, not a rotation road — the master needs no export
+  (§14.30) and the library key rotates in place ((a), (l)); *"I'm honestly confused at where the export -> reimport
+  idea is even still holding weight"* — it holds weight only as the open-format escape and as a file 13x's door must
+  be able to open.
 - **(h) Posture before sync** — §14.26/27: an account alone makes nothing Castle; the vault does.
 - **(i) 13y is told** — pre-13x's closeout writes ONE pin onto 13y's row: the adopt road converges under per-tenant
   `server_seq` (a cursor reset to 0 under a NEW owner reads that owner's sequence from its start; the two-user
   suite gains a delete → recreate → adopt scenario). The master plan's 13y row carries the note as of 09-04.
+- **(j) Ruling 12 DROPPED** — *"I do not think the app should refresh its own backup folders' key files on a
+  passphrase change - it's confusing."* One rule: the app never rewrites a backup folder's key file after writing it
+  (§6 — the live key file + same-fingerprint pairing keeps the current passphrase useful on the same Mac).
+- **(k) The "Delete backups made before today" button is IN** — offered once at the end of the Castle ceremony, for
+  the app's OWN folders, with the note that *"any outside backups, copies, time machine, etc. aren't covered"*
+  (copy 2b's offer).
+- **(l) A "Give this library a new key" door — her lean, PROVISIONAL until her one word:** *"shouldn't we just expose
+  a 'change library key' door rather than asking users to do that?"* Recommendation: YES, batch 3 — one more caller
+  of the switch's mechanism (export-and-swap, identity preserved, the marker), Castle authorizes by Touch ID or the
+  passphrase, Standard by a plain confirm, the same sentence about old backups; the export-reimport workaround
+  retires with it (§13).
 
 **STILL HERS:** (e) the posture copy — 13s re-voices from `pre-13x-copy.md`; the bridge removal's ORDER
 (before the key work, recommended, or after — see LIVE STATUS); the sizing flag (17b: three phase-sized
-units — one phase or a split at U3); **(09-04) ruling 12's fate** — keep the passphrase-change / words refresh of the
-app's own backup folders' key files, or drop it for the same reason as (b) (recommendation: DROP — one rule, "the app
-never rewrites a backup's key file after it is written"; the words and the master box already make the backup
-sentence true); **(09-04) a "Delete backups made before today" button** in the Castle ceremony for the app's OWN
-folders (recommendation: offer it — a real deletion is not a half gate; Time Machine stays the user's act).
+units — one phase or a split at U3); **(09-04) the "Give this library a new key" door** — her lean is YES ((l)); recommendation: build it in batch 3 as one
+more caller of the switch's mechanism; her one word flips (l) from PROVISIONAL. *(Ruling 12's fate and the
+delete-pre-switch-backups button were RULED the same afternoon — (j), (k).)*
 
 ## 17. CANON DELTAS AT CLOSEOUT
 AppSpec §14 (this phase's delta) + §7's `setting`/`sync_state` note (keys live in `sync_state`; the key file
@@ -721,10 +757,12 @@ never spawn subagents (one Sonnet lookup for external facts is the sole exceptio
 | 11 | Keychain Sharing on BOTH App IDs with `io.lduarte.Variorum.shared` — needed when DISTRIBUTION profiles list explicit groups (batch 0 Q1: the team wildcard covers dev) | **13r** (the KnownIssues Developer-ID row widens at closeout) | deferred, owned |
 | 12 | the two DEBUG probe doors (Mac Help menu; the phone's Settings dev row) are DELETED when the real Apple-key item lands | U3 | open |
 | 13 | the LIBRARY RE-KEY at the Castle switch and at Castle enrollment of a Standard-born library (export-and-swap, the marker, the vault's Apple box last; time measured on a byte-copy of her store) — her ruling 09-04 (§16 (a)) | U3 | open |
-| 14 | NO backup folder written by a posture change — the absence pin (§16 (b)); ruling 12's refresh PROVISIONAL (STILL HERS) | U3 | open |
+| 14 | NO backup folder is EVER rewritten after it is written — posture change, passphrase change, words regeneration alike (§16 (b)/(j); ruling 12 SUPERSEDED) — the absence pin; the restore surface's same-fingerprint second look | U3 (the look: U4 → 13x) | open |
 | 15 | the Touch ID "where the key sits" line on every Castle surface + the Standard mirror sentence + the three-line compromise rule (§16 (c)/(d); the copy file updated 09-04) | U5 | open |
 | 16 | the plaintext-export → open-door sync-reconciliation design note (§16 (g)) — written at batch 3, handed to 13x | U4 → 13x | open |
 | 17 | the 13y hand-forward (the adopt-road pin under per-tenant seq) and 13x's row updated at closeout (§16 (i), §17) | U5 | open |
+| 18 | the "Delete backups made before today" offer at the end of the Castle ceremony — the app's own folders only, the outside-copies note (§16 (k); copy 2b) | U3 | open |
+| 19 | the "Give this library a new key" door — one more caller of the switch's mechanism (§16 (l)) | U4 | **PROVISIONAL — her one word** |
 
 ### BATCH 0 BRIEF — measurements (a FRESH Fable implementer; self-contained; read §0's list first)
 **Goal:** the facts the postures depend on, measured on real hardware, in a decision memo — and NOTHING

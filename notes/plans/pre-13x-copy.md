@@ -166,6 +166,10 @@ Confirmation: Touch ID, or the passphrase.
 Button: *Enter Castle*
 **Done:** *You're in Castle. Your library has a new key that your Apple account never held. This Mac asks for
 Touch ID from now on; your other devices will ask the next time they open.*
+**Then, once — the offer:** Title *Delete the backups Variorum made before today?* Body: *They still open through
+your Apple account, and they always will. Deleting them closes that door for what they hold. Variorum can only
+delete its own backups — Time Machine, copies you made, and anything outside Variorum's folders aren't touched and
+still open the old way.* Buttons: *Delete Them* · *Keep Them*
 
 ### 2c. Leaving Castle for Standard (Settings ▸ Protection ▸ Use Standard)
 Title: *Back to Standard?*
@@ -246,6 +250,14 @@ they need a passphrase.*
 Title: *New twelve words.*
 Body: *Your current words will stop working the moment the new ones are confirmed. Write the new ones down
 first.* Same authorization as change passphrase. Then 2a's Screens 3/3b.
+
+### Give this library a new key (PROVISIONAL — her 09-04 lean; built only at her word)
+Title: *Give your library a new key.*
+Body: *Your library is re-encrypted under a new key, on this Mac, right now. Sync, your passphrase and your twelve
+words don't change. Backups made before today keep the old key and open exactly as they do now — delete them if
+that matters to you.*
+Authorization: Castle — Touch ID or the passphrase. Standard — a plain confirm.
+Button: *New Key*
 
 ### Sign out
 Title: *Sign out of this Mac?*
@@ -371,7 +383,8 @@ new Mac, and opening a library file are in the Help guide.*
 - **Restoring a backup.** *A backup folder holds sealed copies and a key file. Open a copy through File ▸
   Open Library; it opens the same way your library does — through your Apple account in Standard, with your
   passphrase or twelve words in Castle. Old copies open with the passphrase you had when they were made, or
-  your twelve words.*
+  your twelve words — and, on the Mac your library lives on, a backup of that same library also opens with your
+  current passphrase.*
 - **Deleting my account and starting over.** *Deleting removes the server copy and the account's keys; your
   libraries stay on your devices and still open. Create a new account and turn on sync; the library moves to
   it and uploads. Your other devices join the new account the usual way.*
