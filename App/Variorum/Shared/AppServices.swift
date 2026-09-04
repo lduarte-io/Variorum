@@ -7,22 +7,23 @@
 //  sweep (Step 5), and (where enabled) rotating store backups (A1).
 //  Composition-root property, injected downward; no globals.
 //
-//  Phase 9c, Step 5 — the sign-in era: AppServices owns the TWO auth
-//  sessions (the Variorum session — the identity everything keys on; and
-//  the bridge's direct Fragments-project session — QUESTIONS #16 shape
-//  (c)) and wires sign-in state into everything downstream: the
-//  owner-adoption backfill runs at sign-in and at every signed-in launch
-//  (idempotent — Step 4), the sync chain is composed over the AuthSession
-//  session provider (Step 2's seam), the bridge engine is composed over
-//  the Fragments session, and sign-out tears the chains down. The Phase 8
-//  paste-in is fully retired; its Keychain item is cleared on the first
-//  real sign-in.
+//  Phase 9c, Step 5 — the sign-in era: AppServices owns the Variorum auth
+//  session (the identity everything keys on) and wires sign-in state into
+//  everything downstream: the owner-adoption backfill runs at sign-in and
+//  at every signed-in launch (idempotent — Step 4), the sync chain is
+//  composed over the AuthSession session provider (Step 2's seam), and
+//  sign-out tears the chain down. The Phase 8 paste-in is fully retired;
+//  its Keychain item is cleared on the first real sign-in.
 //
 //  Phase 14a, batch 1 — the Variorum sign-in goes DIRECT (round 0h): the
 //  suite email+password drives the password grant against the Variorum
-//  project itself; the delegated browser flow is retired from this file
-//  (the Fragments batch rebuilds delegation for the BRIDGE's session,
-//  against the live suite provider).
+//  project itself; the delegated browser flow is retired from this file.
+//
+//  2026-09-04 — THE FRAGMENTS BRIDGE RETIRED (pre-13x batch 0b; archived at
+//  tag `archive/fragments-bridge-2026-09-04`, `notes/archive/fragments-bridge.md`):
+//  the second auth session (the bridge's Fragments-project session), the
+//  bridge engine's composition, its key-provider seam and its round trigger
+//  all left this file. One session, one chain.
 //
 
 import Dependencies  // the T1 probe's database binding (Act 10 wave 2a)
@@ -41,7 +42,6 @@ final class AccountState {
     }
 
     var variorum: SignedIn?
-    var fragments: SignedIn?
     var busy = false
     var lastError: String?
     /// Phase 14c (the deletion door): the best-effort subscription note —
@@ -75,9 +75,6 @@ final class AccountState {
 @MainActor
 final class AppServices {
     let sync: SyncSession
-    /// The Fragments journal bridge (Phase 9b). Mac-side only this phase;
-    /// configured by the Fragments session's sign-in below.
-    let bridge: BridgeSession
     let idleCommits: IdleCommitScheduler
     /// Rotating cold copies (A1). Wired on the Mac; nil on iOS — the
     /// phone's store is re-derivable from the mirror.
@@ -86,8 +83,6 @@ final class AppServices {
     /// Phase 14a round 0h): the identity `owner_id` and the mirror's RLS
     /// key on.
     let auth: AuthSession
-    /// The bridge's Fragments-project session (QUESTIONS #16, shape (c)).
-    let fragmentsAuth: AuthSession
     /// The E2EE flows' state + doors (Phase 14b batch 3, L9) — one seam for
     /// Mac and phone, exactly like the account surface.
     let encryption: EncryptionSession
@@ -114,26 +109,12 @@ final class AppServices {
     /// transports; tests inject recording fakes, which also turns the
     /// fence/wiring assertions into COMPOSITION checks, not network luck.
     private let makeSyncTransport: (any UserSessionProviding) -> any SyncTransport
-    private let makeBridgeTransport:
-        (any UserSessionProviding, _ expectedUserID: String) -> any FragmentsBridgeTransport
     /// The engine's E2EE key seam (Phase 14b batch 3 — batch 2's
     /// PROVISIONAL 2 resolved at THIS construction site): production is the
     /// Keychain-backed provider (enrollment-only cadence, R-6); tests
     /// inject fixed/locked providers so wiring pins never touch the real
     /// Keychain.
     private let makeSyncKeyProvider: () -> any SyncKeyProviding
-    /// The BRIDGE's journal-class key seam (Phase 14b, gate-morning GM-2).
-    /// **THE PAUSE ENDED AT 14D (2026-08-16, the deliberate act):** the
-    /// Mac's production composition (VariorumApp) wires
-    /// `DeviceBridgeKeyProvider` here, so bridge rounds run against
-    /// Keychain custody; an unenrolled or locked device still refuses
-    /// before network contact (the provider reads no keys). nil now means
-    /// only the engine's refusing default (`UnenrolledBridgeKeyProvider`)
-    /// — held by tests that model the keyless state and by the phone's
-    /// composition (bridge disabled there; Phase 9b's Mac-side scope).
-    /// History: production passed nil from 14b's gate morning through
-    /// 14c — the RULED structural pause while the Fragments handoff waited.
-    private let makeBridgeKeyProvider: (() -> any BridgeKeyProviding)?
     /// Phase 14c: the account lifecycle doors' server seam (the re-key's
     /// truncate, the deletion's purge, the entitlement read). Tests inject
     /// recording fakes; production composes the real client over the same
@@ -143,19 +124,14 @@ final class AppServices {
     init(
         session: AppSession, storeVariant: AppDatabase.StoreVariant,
         backupEnabled: Bool, backupRunbookText: String? = nil,
-        bridgeEnabled: Bool = false,
-        auth: AuthSession? = nil, fragmentsAuth: AuthSession? = nil,
+        auth: AuthSession? = nil,
         encryption: EncryptionSession? = nil,
-        bridgeMinimumRoundInterval: Duration = .seconds(60),
         makeSyncTransport: ((any UserSessionProviding) -> any SyncTransport)? = nil,
-        makeBridgeTransport: ((any UserSessionProviding, String) -> any FragmentsBridgeTransport)? = nil,
         makeSyncKeyProvider: (() -> any SyncKeyProviding)? = nil,
-        makeBridgeKeyProvider: (() -> any BridgeKeyProviding)? = nil,
         keyVault: KeyVaultClient? = nil,
         makeAccountLifecycle: ((any UserSessionProviding) -> any AccountLifecycleProviding)? = nil
     ) {
         self.session = session
-        self.makeBridgeKeyProvider = makeBridgeKeyProvider
         self.makeAccountLifecycle = makeAccountLifecycle ?? { provider in
             AccountLifecycleClient(
                 configuration: ProjectConfig.variorumTransport,
@@ -167,14 +143,6 @@ final class AppServices {
                 sessionProvider: provider)
         }
         self.makeSyncKeyProvider = makeSyncKeyProvider ?? { DeviceKeySyncProvider() }
-        self.makeBridgeTransport = makeBridgeTransport ?? { provider, expectedUserID in
-            FragmentsRPCTransport(
-                configuration: FragmentsRPCTransport.Configuration(
-                    projectURL: ProjectConfig.fragmentsProjectURL,
-                    apiKey: ProjectConfig.fragmentsPublishableKey,
-                    expectedUserID: expectedUserID),
-                sessionProvider: provider)
-        }
         // THE A4 FENCE, SYNC SEAM (Phase 8 review round 1, BLOCKER): only
         // the REAL store may pair with the one production mirror. Debug and
         // release builds share a bundle identity and Keychain, so a
@@ -185,15 +153,7 @@ final class AppServices {
         // 13j ladder B (B3): the purge doors' receipts and the local purge
         // road both read this — one truth, the sync session's own.
         session.syncConfigured = { [weak sync = sync] in sync?.isConfigured ?? false }
-        // THE A4 FENCE EXTENDS TO THE BRIDGE (Phase 9b): the author's live
-        // Fragments journal pairs with the REAL store only.
-        bridge = BridgeSession(
-            allowsBridge: bridgeEnabled && storeVariant == .real,
-            minimumRoundInterval: bridgeMinimumRoundInterval)
         self.auth = auth ?? AuthSession(configuration: ProjectConfig.variorumAuth)
-        self.fragmentsAuth = fragmentsAuth ?? AuthSession(
-            configuration: ProjectConfig.fragmentsAuth,
-            store: .keychain(service: KeychainAuthStorage.fragmentsService))
         // The E2EE flows compose over the SAME auth session the sync
         // transport rides — the vault lives on the account (R-1). One
         // vault client serves the flows AND the 14c account doors.
@@ -213,12 +173,6 @@ final class AppServices {
             // R-pre13u-2: the ONE production site passes the PERSISTED
             // opt-in marker — the ephemeral default exists for tests.
             syncGateOptIn: .live)
-        // Bridge rounds ride the sync cadence: AFTER each sync round, never
-        // interleaved with one (a landing sees the store the mirror sync
-        // just settled). Unconfigured sessions no-op.
-        sync.onRoundCompleted = { [weak bridge = bridge] in
-            bridge?.trigger()
-        }
         // The sweep's low-water mark is per-store bookkeeping: scoped by
         // variant so a dev-store sweep can never advance the real store's
         // mark (review round 1, MINOR).
@@ -245,9 +199,9 @@ final class AppServices {
         }
     }
 
-    /// Launch: adopt persisted sessions (Keychain), wire sign-in state into
-    /// sync + bridge, run the idempotent owner adoption when signed in,
-    /// then the sweep and the backup clock.
+    /// Launch: adopt the persisted session (Keychain), wire sign-in state
+    /// into sync, run the idempotent owner adoption when signed in, then
+    /// the sweep and the backup clock.
     func start() async {
         // Enrollment/setup landing keys heals the engine's keys-refusal
         // immediately (Phase 14b): one round, through the ordinary trigger.
@@ -290,21 +244,11 @@ final class AppServices {
                 await self?.variorumSignInChanged(tokens)
             }
         }
-        await fragmentsAuth.setOnChange { [weak self] tokens in
-            Task { @MainActor [weak self] in
-                await self?.fragmentsSignInChanged(tokens)
-            }
-        }
-        // Persisted sessions from a previous launch.
+        // The persisted session from a previous launch.
         if let userID = await auth.currentUserID {
             account.variorum = AccountState.SignedIn(
                 userID: userID, email: await auth.currentEmail)
             await connectSyncIfAllowed()
-        }
-        if let userID = await fragmentsAuth.currentUserID {
-            account.fragments = AccountState.SignedIn(
-                userID: userID, email: await fragmentsAuth.currentEmail)
-            await connectBridgeIfAllowed(fragmentsUserID: userID)
         }
         idleCommits.start()
         backup?.start()
@@ -320,7 +264,6 @@ final class AppServices {
 
     func stop() {
         sync.stop()
-        bridge.stop()
         idleCommits.stop()
         backup?.stop()
         localPurgeTask?.cancel()
@@ -328,32 +271,12 @@ final class AppServices {
     }
 
     /// THE LIFECYCLE CADENCE PULSE (the app's became-active hook; launch runs
-    /// its own through the sign-in chains): one sync round, and — only when
-    /// sync cannot deliver one — one bridge round directly.
-    ///
-    /// **A2 (Phase 13c) — the traced hole.** Bridge rounds ride
-    /// `sync.onRoundCompleted` above, which is the ordering contract and
-    /// stays exactly as it is (a landing sees the store the mirror sync just
-    /// settled). But an UNCONFIGURED sync session completes no rounds at
-    /// all, so in that state the bridge lost EVERY cadence trigger it has
-    /// and ran exactly once per launch. That is not a corner: it is the
-    /// state the author was in from 2026-07-20 to 07-25 (signed out of the
-    /// Variorum project while the Fragments session stayed valid — her
-    /// report was "the bridge doesn't seem to refresh often enough"), and it
-    /// is equally reachable through an expired Variorum session or a failed
-    /// owner adoption, since `connectSyncIfAllowed` returns before composing
-    /// on either. The 9b plan's Step 5 names the bridge's cadence as
-    /// "launch / became-active / post-write-settle"; this makes the
-    /// became-active half hold when sync is off.
-    ///
-    /// When sync IS configured, behaviour is byte-identical to before — the
-    /// bridge still follows the completed round and never interleaves with
-    /// one. The fallback is a CADENCE trigger (never manual), so the 60 s
-    /// throttle still guards the corpus hash sweep (QUESTIONS #15) against
-    /// rapid app switching.
+    /// its own through the sign-in chain): one sync round. Kept as the ONE
+    /// became-active door (13c A2's shape — it used to add a bridge round
+    /// when sync could not deliver one; that half left with the bridge on
+    /// 2026-09-04) so a future second follower of the cadence has a home.
     func triggerLifecycleRound() {
         sync.triggerSync()
-        if !sync.isConfigured { bridge.trigger() }
     }
 
     // MARK: - The Variorum sign-in (Phase 14a: direct — the identity)
@@ -580,79 +503,5 @@ final class AppServices {
             account.subscriptionNote =
                 "This account has an active hosted-sync plan — cancel it first."
         }
-    }
-
-    // MARK: - The Fragments session (the bridge's — QUESTIONS #16 (c))
-
-    // (The direct Fragments email+password door — `connectFragmentsJournal`
-    // — was REMOVED at 14d: the batch retired her Fragments password
-    // server-side (provider off, the grant 422s), so the door could only
-    // ever refuse. The delegated road below is the one Fragments sign-in.)
-
-    /// The DELEGATED road (Phase 14d — the door back in, her ruling at the
-    /// kickoff sitting: "there should not be some kind of session
-    /// dependency"): sign into the FRAGMENTS project through the suite
-    /// issuer's provider entry (`custom:stargazing`, touchpoint #1) via
-    /// the browser flow. One interactive flow per device; afterwards the
-    /// same persisted-session + refresh loop as the password door — which
-    /// touchpoint #1 retires, making this the ONLY road back in.
-    func connectFragmentsJournalDelegated() async {
-        guard ProjectConfig.fragmentsConfigured else {
-            account.lastError = "Project keys not configured (ProjectConfig.swift)"
-            return
-        }
-        guard !account.busy else { return }
-        account.busy = true
-        account.lastError = nil
-        defer { account.busy = false }
-        do {
-            let verifier = PKCE.generateVerifier()
-            let authorizeURL = fragmentsAuth.authorizeURL(
-                verifier: verifier,
-                providerSlug: ProjectConfig.fragmentsSuiteProviderSlug,
-                redirectURI: ProjectConfig.fragmentsBridgeRedirectURI)
-            let scheme = URL(string: ProjectConfig.fragmentsBridgeRedirectURI)!.scheme!
-            let callback = try await SignInFlow().run(
-                authorizeURL: authorizeURL, callbackScheme: scheme)
-            try await fragmentsAuth.handleCallback(callback, verifier: verifier)
-        } catch SignInFlow.FlowError.cancelled {
-            // A closed browser sheet is a decision, not an error.
-        } catch {
-            account.lastError = ErrorPresentation.signInFailureMessage(error)
-        }
-    }
-
-    func disconnectFragmentsJournal() async {
-        await fragmentsAuth.signOut()
-    }
-
-    private func fragmentsSignInChanged(_ tokens: AuthTokens?) async {
-        if let tokens {
-            account.fragments = AccountState.SignedIn(
-                userID: tokens.userID, email: tokens.email)
-            await connectBridgeIfAllowed(fragmentsUserID: tokens.userID)
-        } else {
-            account.fragments = nil
-            bridge.stop()
-        }
-    }
-
-    /// Composes the bridge engine over the Fragments session: the transport
-    /// cross-checks the session's user against the configured one (the 9b
-    /// round-2 guard), and the engine resolves the canonical user from
-    /// `user_settings` each round with the fail-closed gate (9b's
-    /// reconciled contract — nothing here guesses identity).
-    private func connectBridgeIfAllowed(fragmentsUserID: String) async {
-        guard bridge.allowsBridge else { return }
-        let engine = BridgeEngine(
-            transport: makeBridgeTransport(fragmentsAuth, fragmentsUserID),
-            configuration: FragmentsBridgeConfiguration(userID: fragmentsUserID),
-            // nil ⇒ the engine's refusing default. Through 14b–14c this
-            // WAS the ruled structural pause (GM-2); since the 14d
-            // un-pause production always passes the live provider, so
-            // nil here means a test composition or a keyless state.
-            keyProvider: makeBridgeKeyProvider?() ?? UnenrolledBridgeKeyProvider())
-        await bridge.configure(engine: engine)
-        bridge.trigger(manual: true)
     }
 }

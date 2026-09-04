@@ -60,17 +60,7 @@ struct VariorumApp: App {
                             backupEnabled: true,
                             // 13l Act 4 (row 13): the Mac's own restore
                             // recipe, dropped into every backup folder.
-                            backupRunbookText: DataSafetyCopy.runbook,
-                            bridgeEnabled: true,  // Mac-side (Phase 9b scope)
-                            // THE 14D UN-PAUSE (2026-08-16, the phase's
-                            // deliberate act): the LIVE journal-bridge key
-                            // provider ends the 14b structural pause —
-                            // bridge rounds run again, bodies sealing and
-                            // opening through Keychain custody. An
-                            // unenrolled or locked device still refuses
-                            // before any network contact through this same
-                            // provider (no keys ⇒ the round refuses).
-                            makeBridgeKeyProvider: { DeviceBridgeKeyProvider() })
+                            backupRunbookText: DataSafetyCopy.runbook)
                         services = fresh
                         // Phase 13p (the re-lock teardown, THE DESIGN's
                         // ruled order): a lock FLUSHES and SAVEPOINTS every
@@ -140,11 +130,9 @@ struct VariorumApp: App {
                     }
                     .onReceive(NotificationCenter.default.publisher(
                         for: NSApplication.didBecomeActiveNotification)) { _ in
-                        // The lifecycle cadence, not sync alone (13c A2): a
-                        // sync round, plus a bridge round when sync cannot
-                        // deliver one — otherwise the bridge silently loses
-                        // every cadence trigger it has whenever the Variorum
-                        // session is absent. See AppServices.
+                        // The lifecycle cadence's one became-active door
+                        // (13c A2's shape; one sync round since the bridge's
+                        // 2026-09-04 retirement). See AppServices.
                         services?.triggerLifecycleRound()
                     }
             case .opening:

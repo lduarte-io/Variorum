@@ -311,8 +311,32 @@ this record unless a line below says so.**
     (migrate `upTo: v1_15_note_version_index` → both tables present, a row inserted → full migrate → both gone and
     the table set == `expectedTables`; red on the old tree by construction). Filtered walk (`MigrationTests` ·
     `SyncSchemaTests` · `SerializerCompletenessTests` · `SupabaseTransportTests`) 46/6 green; **`swift test`:
-    `Test run with 1391 tests in 152 suites passed`** — commit PENDING(hash)
-  - step 4 — NOT-STARTED
+    `Test run with 1391 tests in 152 suites passed`** — `80f88bc`
+  - step 4 — DONE (Mac) · iOS build PENDING — deleted `Shared/BridgeSession` · `Shared/BridgeStatusViews` ·
+    `Shared/SignInFlow` (bridge-only: its one production caller was the delegated Fragments-project door) ·
+    `VariorumTests/Phase9bBridgeWiringTests`. `AppServices`: the second auth session, the bridge composition, the
+    `makeBridgeTransport`/`makeBridgeKeyProvider` seams, `bridgeEnabled`/`bridgeMinimumRoundInterval`, the
+    `onRoundCompleted → bridge.trigger()` hook, the whole Fragments-session section, `AccountState.fragments`;
+    `triggerLifecycleRound` kept as the ONE became-active door (one sync trigger now). `SyncSession`:
+    `onRoundCompleted` KEPT as an unsubscribed seam, doc re-worded (recorded; a future follower's home).
+    `AuthSession`: PKCE · `authorizeURL`/`handleCallback`/`exchangeCode` · `callbackWithoutCode` ·
+    `KeychainAuthStorage.fragmentsService` removed; **`LegacyPasteInCleanup.clear()` now also deletes the retired
+    Fragments-session Keychain item on the same occasion (first real sign-in) — PROVISIONAL P1 below.** `AuthViews`:
+    the "Journal bridge (Fragments)" section + its divider gone. `ProjectConfig`: every Fragments constant gone.
+    `EncryptionKeychain`: `DeviceBridgeKeyProvider` gone. `ErrorPresentation`: the `SignInFlow.FlowError` and both
+    `.callbackWithoutCode` arms gone. `RootView`: the bridge row AND the account sheet it alone opened
+    (`accountSheetShown` + its `.sheet`; the sync row hosts its own `AccountView`). `VariorumApp`: the composition
+    caller's two bridge arguments (B1). A1 the Savepoints help (three occasions) + A2 the two Takes notices (the S5
+    half only — PROVISIONAL, §2b's wording). Tests: `Phase8ServicesTests`' provider (B2); `Phase9cAuthWiringTests`
+    trimmed to the sync half — the bridge cadence/ordering pins, the 14d liveness pin, the `SignInFlow` message pins
+    and the transport's park/gate machinery gone, the retirement walk RE-POINTED (`SignInFlow.swift` absent,
+    no `ASWebAuthentication`/`custom:stargazing` anywhere under `Shared/` — red on old) and the paste-in walk
+    extended to the Fragments-session service string; `AuthSessionTests`' delegated-door + PKCE cases (the deleted
+    bridge cases; the direct sign-in cases UNMODIFIED); `EncryptionFlowTests`/`TierAndOnboardingTests` lose the two
+    arguments, the re-key test its staged-day leg (B3); `NoteVersionsPaneTests`' source-reading bridge-row test (D3);
+    `SavepointOnLeaveTests`' pin flipped to `!contains("Fragments")` (D4, red on old). Touched suites
+    (`AuthSessionTests` · `Phase9cAuthWiringTests` · `TierAndOnboardingTests` · `EncryptionFlowTests` ·
+    `NoteVersionsPaneTests`): **`Test run with 50 tests in 5 suites passed`** — commit PENDING(hash)
   - step 5 — NOT-STARTED
   - step 6 — NOT-STARTED
   - step 7 — NOT-STARTED
@@ -338,6 +362,13 @@ this record unless a line below says so.**
     `AppSession.swift:306`, re-worded in step 5).
   - The rest of §2/§2b holds exactly (line counts match: 2,226 in `Bridge/`, 4,319 across the 16 core test files).
 - **Forks (the implementer proposes, the architect rules):**
+  - **P1 · the retired Fragments-session Keychain item — PROVISIONAL: cleared locally at the next real sign-in.**
+    Her Keychain holds `io.lduarte.Variorum.fragments-auth` (the bridge's Fragments-project session). Options:
+    (a) leave it (harmless, her machine, nothing reads it); (b) clear it on the `LegacyPasteInCleanup` occasion —
+    the first real sign-in — precedent-shaped, no launch-path Keychain hop (the 13e windowless-launch class);
+    (c) clear it at every launch off-main. **(b) chosen** (one enum, one occasion); until she signs in again the
+    item simply sits. The Fragments project's refresh token is NOT logged out server-side (no client remains to
+    present it; it expires unused) — recorded for the orchestrator.
   - **F1 · `BridgeHash` — PROVISIONAL: move verbatim, keep the name.** Options: (a) move the enum unchanged to
     `Sources/VariorumCore/Domain/BridgeHash.swift` with a doc comment saying the name is history and the recipe is the
     manifest's; (b) rename to e.g. `ContentHash` — touches `Sync/SampleLibraryDedupe.swift`'s comment (inside the

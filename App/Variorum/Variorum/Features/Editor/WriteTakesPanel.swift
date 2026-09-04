@@ -9,7 +9,7 @@
 //  "✓ chosen" bar, the growth doors (minting never chooses — R90; the
 //  explicit blank-and-choose door beside them), the take lifecycle
 //  (archive/lock/delete, refusals speaking), archived takes visible with
-//  their way back, and the R84 Fragments note on journal-shaped posts.
+//  their way back, and the R84 note on journal-shaped posts.
 //
 
 import GRDB
@@ -81,11 +81,11 @@ struct WriteTakesPanel: View {
                 Button("Close") { dismiss() }
             }
             if model.isJournalShaped {
-                // R84 — her note, tuned: what leaves for Fragments is the
-                // chosen text only; takes are Variorum's.
-                Text("Takes live here in Variorum. Only the CHOSEN text is what Fragments "
-                    + "sees (when a Fragments account is linked) — sync conflicts can add "
-                    + "takes here too; nothing is lost, choose what the entry shows.")
+                // R84's journal-entry note, its S5 half only — the Fragments
+                // clause left with the bridge (2026-09-04; PROVISIONAL
+                // wording, QUESTIONS #89).
+                Text("Sync conflicts can add takes here; nothing is lost — "
+                    + "choose what the entry shows.")
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
                     .fixedSize(horizontal: false, vertical: true)

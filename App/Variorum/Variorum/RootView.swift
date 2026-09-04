@@ -50,9 +50,6 @@ struct RootView: View {
     /// each window observes it for itself, exactly as it does the library.
     @State private var stars: StarsModel
     @State private var paletteOpen = false
-    /// Sitting 9 (R94): the bridge row's auth-shaped failures open the
-    /// account sheet from right there.
-    @State private var accountSheetShown = false
     /// Stage C: a palette/Library block hit lands CARET-PRECISE — the
     /// target block rides beside the selection and seeds the opened
     /// editor's caret (cleared on ordinary navigation).
@@ -209,11 +206,6 @@ struct RootView: View {
                 onWindow: { windows.attach($0, to: windowID) },
                 onKey: { windows.noteKey(windowID) })
         }
-        .sheet(isPresented: $accountSheetShown) {
-            if let services {
-                AccountView(services: services)
-            }
-        }
         .sheet(isPresented: $paletteOpen) {
             CommandPaletteView(model: palette) { picked, blockID in
                 open(picked, blockID: blockID)
@@ -321,7 +313,8 @@ struct RootView: View {
 
     /// The sidebar column's BOTTOM — the bottom-left family: the
     /// protection row (memo §6: renders only while the choice is genuinely
-    /// unmade; NEVER "encryption off"), the sync row, the bridge row. They
+    /// unmade; NEVER "encryption off") and the sync row (the bridge row
+    /// stood third until the bridge's 2026-09-04 retirement). They
     /// were the split view's `safeAreaInset`; the flat column carries them
     /// as its own last region (Sitting 9's opaque voiced background survives
     /// as the column's `room`). nil until the services exist.
@@ -334,9 +327,6 @@ struct RootView: View {
                     ProtectionStatusRow(controller: protection, tokens: tokens)
                 }
                 SyncStatusRow(services: services)
-                BridgeStatusRow(bridge: services.bridge, tokens: tokens) {
-                    accountSheetShown = true
-                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(tokens.room))

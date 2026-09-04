@@ -8,7 +8,9 @@
 //  password grant against the app's own project is THE sign-in door; the
 //  delegated PKCE/exchange machinery and the captured provider token pair
 //  are retired (their pins retired with them — the mechanism no longer
-//  exists to preserve).
+//  exists to preserve). 14d rebuilt that machinery for the Fragments
+//  bridge's delegated road; it left again with the bridge on 2026-09-04
+//  (pre-13x batch 0b), its pins with it.
 //
 
 import Foundation
@@ -69,85 +71,6 @@ struct AuthSessionTests {
         AuthTokens(
             accessToken: access, refreshToken: refresh, expiresAt: expiresAt,
             *[removed for publication]*
-    }
-
-    // MARK: The delegated door (Phase 14d — the bridge's road back in;
-    // the 9c pins rebuilt for the new direction: custom:stargazing on the
-    // FRAGMENTS project, no provider-token capture)
-
-    @Test func pkceChallengeMatchesTheRFCTestVector() {
-        // RFC 7636 appendix B.
-        #expect(PKCE.challenge(
-            forVerifier: "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk")
-            == "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM")
-        let verifier = PKCE.generateVerifier()
-        #expect(verifier.count == 43)
-        #expect(verifier.allSatisfy {
-            $0.isLetter || $0.isNumber || $0 == "-" || $0 == "_" })
-    }
-
-    @Test func theDelegatedAuthorizeURLTargetsTheSuiteProviderWithS256() {
-        let session = AuthSession(
-            configuration: Self.configuration,
-            store: .inMemory(), http: ScriptedEndpoint([]).loader())
-        let verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
-        let url = session.authorizeURL(
-            verifier: verifier, providerSlug: "stargazing",
-            redirectURI: "variorum://auth-callback")
-        #expect(url.absoluteString.hasPrefix(
-            "https://variorum-project.supabase.co/auth/v1/authorize?"))
-        let components = URLComponents(url: url, resolvingAgainstBaseURL: false)!
-        let items = Dictionary(uniqueKeysWithValues:
-            components.queryItems!.map { ($0.name, $0.value ?? "") })
-        #expect(items["provider"] == "custom:stargazing")
-        #expect(items["redirect_to"] == "variorum://auth-callback")
-        #expect(items["code_challenge"] == "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM")
-        #expect(items["code_challenge_method"] == "s256")
-    }
-
-    @Test func aCallbackWithoutACodeRefusesAndSignsNothingIn() async {
-        let store = AuthTokensStore.inMemory()
-        let session = AuthSession(
-            configuration: Self.configuration, store: store,
-            http: ScriptedEndpoint([]).loader())
-        let callback = URL(string:
-            "variorum://auth-callback?error=access_denied&error_description=refused")!
-        await #expect(throws: AuthSessionError.callbackWithoutCode(callback.absoluteString)) {
-            try await session.handleCallback(callback, verifier: "v")
-        }
-        #expect(store.load() == nil)
-        #expect(await session.isSignedIn == false)
-    }
-
-    @Test func theCodeExchangeMintsAndPersistsTheDelegatedSession() async throws {
-        let endpoint = ScriptedEndpoint([(200, """
-            {"access_token": "f-access", "refresh_token": "f-refresh",
-             "expires_in": 3600, "token_type": "bearer",
-             "user": {"id": "<account-uuid>",
-                      "email": "author@example.com"}}
-            """)])
-        let store = AuthTokensStore.inMemory()
-        let epoch = Date(timeIntervalSince1970: 1_000_000)
-        let session = AuthSession(
-            configuration: Self.configuration, store: store,
-            now: { epoch }, http: endpoint.loader())
-
-        try await session.handleCallback(
-            URL(string: "variorum://auth-callback?code=the-code")!,
-            verifier: "the-verifier")
-
-        let request = endpoint.requests[0]
-        #expect(request.url?.absoluteString
-                == "https://variorum-project.supabase.co/auth/v1/token?grant_type=pkce")
-        let body = try JSONDecoder().decode(
-            [String: String].self, from: request.httpBody ?? Data())
-        #expect(body == ["auth_code": "the-code", "code_verifier": "the-verifier"])
-
-        let saved = try #require(store.load())
-        #expect(saved.accessToken == "f-access")
-        #expect(saved.userID == "<account-uuid>")
-        #expect(saved.expiresAt == epoch.addingTimeInterval(3600))
-        #expect(await session.isSignedIn)
     }
 
     // MARK: The password grant — THE sign-in door (Phase 14a: direct)

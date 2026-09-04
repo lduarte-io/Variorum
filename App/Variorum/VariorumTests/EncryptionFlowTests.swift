@@ -1030,12 +1030,6 @@ struct AccountDoorWiringTests {
                 apiKey: "publishable-test-key"),
             sessionProvider: auth,
             load: vault.load)
-        let fragmentsAuth = AuthSession(
-            configuration: AuthConfiguration(
-                projectURL: URL(string: "https://fragments-project.test.invalid")!,
-                apiKey: "publishable"),
-            store: .inMemory(),
-            http: { _ in throw AuthSessionError.malformedResponse("no network") })
         let store = DeviceKeyStore.inMemory()
         let encryption = EncryptionSession(
             store: store, client: keyVault, signedIn: { true })
@@ -1048,8 +1042,8 @@ struct AccountDoorWiringTests {
         } operation: { @MainActor in
             let services = AppServices(
                 session: AppSession(database: db), storeVariant: .real,
-                backupEnabled: false, bridgeEnabled: false,
-                auth: auth, fragmentsAuth: fragmentsAuth, encryption: encryption,
+                backupEnabled: false,
+                auth: auth, encryption: encryption,
                 makeSyncTransport: { _ in QuietTransport() },
                 makeSyncKeyProvider: { AppTestKeyProvider() },
                 keyVault: keyVault,
@@ -1063,21 +1057,17 @@ struct AccountDoorWiringTests {
     /// THE REKEY WIRING, end to end through the app seam: the wired
     /// runner drives the REAL brain — new vault written (new ids), the
     /// truncate presented the NEW corpus key id, custody adopted mid-run,
-    /// the store fully re-enqueued, the bridge's agreed day staged — and
-    /// the flow lands in the mandatory phrase step.
+    /// the store fully re-enqueued — and the flow lands in the mandatory
+    /// phrase step. (The bridge-staging leg left with the bridge,
+    /// 2026-09-04.)
     @Test func theRekeyWiringRunsTheBrainAdoptsCustodyAndReEnqueues() async throws {
         try await withDoorWorld { services, encryption, store, lifecycle, db, _ in
             await encryption.setUp(passphrase: "orchard-lantern-13")
             #expect(encryption.lastError == nil)
             let old = try #require(store.load())
-            // A synced row + an agreed bridge day, both pre-re-key.
+            // A synced row, pre-re-key.
             _ = try await services.session.runner.run { ops in
                 try ops.createPost(title: "pre-rekey").id
-            }
-            try await db.write { dbi in
-                try dbi.execute(
-                    sql: "INSERT INTO bridge_day (day_key, last_synced_hash) VALUES (?, ?)",
-                    arguments: ["2026-08-01", "aaaa1111"])
             }
 
             await encryption.rekeyAccount(passphrase: "orchard-lantern-13")
@@ -1093,10 +1083,6 @@ struct AccountDoorWiringTests {
             let rows = try #require(try db.doorInt(
                 "SELECT (SELECT COUNT(*) FROM container) + (SELECT COUNT(*) FROM block) + (SELECT COUNT(*) FROM variant) + (SELECT COUNT(*) FROM container_block)"))
             #expect(outbox >= rows, "resyncReinitialize re-enqueued the store")
-            let stagedHash = try #require(try db.doorString(
-                "SELECT last_synced_hash FROM bridge_day WHERE day_key = '2026-08-01'"))
-            #expect(stagedHash == "restaged:repush-from-truth",
-                    "the bridge's staged re-push trigger rode the re-key (inert until 14d; the literal is core's restagedHashSentinel, symbol-pinned there)")
             // Ladder R1-1: the completed road left NO rekey-in-progress
             // residue — marker clear in the real store, banner down.
             let marker = try await db.read { try AccountRekeyMarker.isSet($0) }

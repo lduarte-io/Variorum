@@ -12,11 +12,10 @@
 //  DIRECT password grant against its own project — "the 9c AuthSession
 //  password grant, re-aimed". The delegated custom-provider flow (PKCE,
 //  the browser hop, the authorize/exchange doors, the captured provider
-//  token pair) is retired wholesale from this file; it returns at the
-//  Fragments batch, rebuilt against the live suite provider (the 9c plan
-//  documents the browser-flow lifecycle lessons). The bridge's
-//  Fragments-project session signs in through the SAME password door
-//  (QUESTIONS #16 shape (c) — its active road until that batch).
+//  token pair) is retired wholesale from this file. (It returned at 14d
+//  for the Fragments bridge's delegated road into the Fragments project,
+//  and left again with the bridge on 2026-09-04 — pre-13x batch 0b,
+//  archived at tag `archive/fragments-bridge-2026-09-04`.)
 //
 //  Refresh failures surface and KEEP the session: a transient network error
 //  must not destroy a signed-in state (the scheduler's offline posture
@@ -77,9 +76,9 @@ nonisolated struct AuthTokensStore: Sendable {
     var save: @Sendable (AuthTokens) -> Void
     var clear: @Sendable () -> Void
 
-    /// One Keychain item per session home: the Variorum session and the
-    /// bridge's Fragments session (QUESTIONS #16 shape (c)) live under
-    /// distinct services so neither sign-out disturbs the other.
+    /// One Keychain item per session home (the `service` parameter; the
+    /// retired bridge's Fragments-project session had its own — see
+    /// `LegacyPasteInCleanup`).
     static func keychain(service: String = KeychainAuthStorage.variorumService) -> AuthTokensStore {
         AuthTokensStore(
             load: { KeychainAuthStorage.load(service: service) },
@@ -113,8 +112,6 @@ nonisolated struct AuthTokensStore: Sendable {
 nonisolated enum KeychainAuthStorage {
     /// The Variorum-project session's home.
     static let variorumService = "io.lduarte.Variorum.auth"
-    /// The bridge's Fragments-project session (QUESTIONS #16 shape (c)).
-    static let fragmentsService = "io.lduarte.Variorum.fragments-auth"
     private static let account = "session"
 
     static func load(service: String) -> AuthTokens? {
@@ -158,48 +155,27 @@ nonisolated enum KeychainAuthStorage {
 }
 
 /// The Phase 8 paste-in's Keychain item (its store type was deleted at
-/// Phase 9c Step 5): cleared on the first real sign-in. This is the ONE
-/// remaining reference to the old service string — pinned by the
+/// Phase 9c Step 5): cleared on the first real sign-in — and, since the
+/// bridge's 2026-09-04 retirement, the retired Fragments-project session
+/// item goes with it on the same occasion (a LOCAL clear only: no client
+/// remains to present that project's refresh token, so it simply expires
+/// unused server-side — PROVISIONAL, QUESTIONS #89). This is the ONE
+/// remaining reference to either old service string — pinned by the
 /// retirement walk in `Phase9cAuthWiringTests`.
 nonisolated enum LegacyPasteInCleanup {
     static let retiredService = "io.lduarte.Variorum.sync"
+    /// The retired bridge's Fragments-project session home (2026-09-04).
+    static let retiredFragmentsService = "io.lduarte.Variorum.fragments-auth"
 
     static func clear() {
-        let query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: retiredService,
-            kSecAttrAccount as String: "supabase",
-        ]
-        SecItemDelete(query as CFDictionary)
-    }
-}
-
-// MARK: - PKCE (RFC 7636, S256 — pinned against the RFC's test vector;
-// retired at 14a with the old delegated direction, REBUILT at 14d for the
-// bridge's delegated road into the Fragments project)
-
-nonisolated enum PKCE {
-    /// 32 random bytes, base64url — 43 chars of the unreserved alphabet.
-    static func generateVerifier() -> String {
-        var bytes = [UInt8](repeating: 0, count: 32)
-        let status = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
-        // 14d cold review (NIT): a failed RNG must never yield a
-        // deterministic all-zeros verifier — refuse loudly instead
-        // (essentially unreachable; the honest guard costs one line).
-        precondition(status == errSecSuccess, "SecRandomCopyBytes failed: \(status)")
-        return base64URL(Data(bytes))
-    }
-
-    /// S256: base64url(SHA256(ascii(verifier))).
-    static func challenge(forVerifier verifier: String) -> String {
-        base64URL(Data(SHA256.hash(data: Data(verifier.utf8))))
-    }
-
-    private static func base64URL(_ data: Data) -> String {
-        data.base64EncodedString()
-            .replacingOccurrences(of: "+", with: "-")
-            .replacingOccurrences(of: "/", with: "_")
-            .replacingOccurrences(of: "=", with: "")
+        for (service, account) in [(retiredService, "supabase"), (retiredFragmentsService, "session")] {
+            let query: [String: Any] = [
+                kSecClass as String: kSecClassGenericPassword,
+                kSecAttrService as String: service,
+                kSecAttrAccount as String: account,
+            ]
+            SecItemDelete(query as CFDictionary)
+        }
     }
 }
 
@@ -210,8 +186,6 @@ nonisolated enum AuthSessionError: Error, Equatable, Sendable {
     case endpointFailure(status: Int, body: String)
     case notHTTP
     case malformedResponse(String)
-    /// The callback URL carried no `code` (an error or a cancelled flow).
-    case callbackWithoutCode(String)
 }
 
 /// Phase 14c batch 3 (L8): what a sign-up produced. Supabase answers the
@@ -240,8 +214,8 @@ actor AuthSession: UserSessionProviding {
     private var storeLoaded = false
     /// Single-flight: concurrent refresh demands coalesce onto one request.
     private var refreshTask: Task<AuthTokens, Error>?
-    /// Sign-in/out notification (the app wires the UI + sync/bridge session
-    /// lifecycles here). Fired on adopt and on sign-out, never on refresh.
+    /// Sign-in/out notification (the app wires the UI + the sync session
+    /// lifecycle here). Fired on adopt and on sign-out, never on refresh.
     private var onChange: (@Sendable (AuthTokens?) -> Void)?
 
     init(
@@ -301,9 +275,8 @@ actor AuthSession: UserSessionProviding {
 
     /// `POST /auth/v1/token?grant_type=password` — THE sign-in door.
     /// The Variorum session signs in with the suite email+password against
-    /// its own project (round 0h); the bridge's Fragments-project session
-    /// uses the same grant (QUESTIONS #16 shape (c)). Only the resulting
-    /// session persists, never the password.
+    /// its own project (round 0h). Only the resulting session persists,
+    /// never the password.
     func signInWithPassword(email: String, password: String) async throws {
         let response = try await tokenRequest(
             grantType: "password",
@@ -360,65 +333,6 @@ actor AuthSession: UserSessionProviding {
             userID: user.id,
             email: user.email))
         return .signedIn
-    }
-
-    // MARK: The delegated sign-in door (Phase 14d — the bridge's road
-    // back in; the 9c machinery rebuilt, pointed the other way)
-
-    /// The URL the browser flow opens against THIS session's project:
-    /// `/auth/v1/authorize?provider=custom:<slug>` with a PKCE S256
-    /// challenge. At 14d the caller is the BRIDGE's session signing into
-    /// the FRAGMENTS project through the suite issuer's provider entry
-    /// (touchpoint #1 creates it) — the road that outlives the retired
-    /// Fragments password. The verifier must be kept for the exchange.
-    /// Slug and redirect ride as parameters deliberately: the 14a-narrowed
-    /// `AuthConfiguration` stays two fields, and the Variorum session
-    /// never grows delegated shape it doesn't use.
-    nonisolated func authorizeURL(
-        verifier: String, providerSlug: String, redirectURI: String
-    ) -> URL {
-        var components = URLComponents(
-            url: configuration.projectURL.appendingPathComponent("auth/v1/authorize"),
-            resolvingAgainstBaseURL: false)!
-        components.queryItems = [
-            URLQueryItem(name: "provider", value: "custom:\(providerSlug)"),
-            URLQueryItem(name: "redirect_to", value: redirectURI),
-            URLQueryItem(name: "code_challenge", value: PKCE.challenge(forVerifier: verifier)),
-            URLQueryItem(name: "code_challenge_method", value: "s256"),
-        ]
-        return components.url!
-    }
-
-    /// Completes the flow from the captured callback URL: extracts `?code`
-    /// and exchanges it. Throws `callbackWithoutCode` on an error callback.
-    func handleCallback(_ url: URL, verifier: String) async throws {
-        let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
-        guard let code = components?.queryItems?
-            .first(where: { $0.name == "code" })?.value
-        else {
-            throw AuthSessionError.callbackWithoutCode(url.absoluteString)
-        }
-        try await exchangeCode(code, verifier: verifier)
-    }
-
-    /// `POST /auth/v1/token?grant_type=pkce`. The minted session IS the
-    /// goal — no provider-token capture (that was the retired 9c
-    /// architecture's need; the 14d road signs into the target project
-    /// directly and the session persists like any other).
-    func exchangeCode(_ code: String, verifier: String) async throws {
-        let response = try await tokenRequest(
-            grantType: "pkce",
-            body: ["auth_code": code, "code_verifier": verifier])
-        let adopted = AuthTokens(
-            accessToken: response.accessToken,
-            refreshToken: response.refreshToken,
-            expiresAt: response.expiryDate(now: now()),
-            userID: response.user?.id ?? "",
-            email: response.user?.email)
-        guard !adopted.userID.isEmpty else {
-            throw AuthSessionError.malformedResponse("token response carried no user id")
-        }
-        adopt(adopted)
     }
 
     /// The injectable entry (tests; any future door): adopt a ready-made

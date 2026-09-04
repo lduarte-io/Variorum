@@ -28,21 +28,6 @@ struct AppTestKeyProvider: SyncKeyProviding {
     }
 }
 
-/// Phase 14b gate-morning (GM-2): the BRIDGE twin — a working journal-class
-/// key world for the bridge wiring suites, so their cadence/interleaving/
-/// pause-status machinery pins keep pinning THROUGH the ruled pause era
-/// (production wires no bridge provider; the engine's refusing default IS
-/// the pause, pinned separately against the default composition). The core
-/// test target's BridgeTestKeys is not visible here — same fixed-bytes
-/// pattern, target-internal.
-struct AppTestBridgeKeyProvider: BridgeKeyProviding {
-    func currentKeys() throws -> BridgeEncryptionKeys {
-        BridgeEncryptionKeys(
-            journalKey: SymmetricKey(data: Data((0..<32).map { UInt8($0 &+ 0x80) })),
-            journalKeyID: "app-test-journal-key-00000000001")
-    }
-}
-
 // MARK: - A4: dev-store separation
 
 @Suite("Store location (Phase 8, A4)")

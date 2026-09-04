@@ -6,10 +6,11 @@
 //  ruling: *"a single enum-valued setting… Not full knobs; not settingless"*).
 //
 //  **The help copy's job is to not overclaim.** The setting governs exactly
-//  two occasions; four others — sealing a note, locking a take with unsaved
-//  changes, a structural undo about to overwrite an edited buffer, and a
-//  Fragments-bridge landing — insure text that is about to become unreachable
-//  (OverallModel §3) and stay on in every mode. A setting called "Only when I
+//  two occasions; three others — sealing a note, locking a take with unsaved
+//  changes, and a structural undo about to overwrite an edited buffer —
+//  insure text that is about to become unreachable (OverallModel §3) and
+//  stay on in every mode. (A fourth, the Fragments-bridge landing, left with
+//  the bridge on 2026-09-04.) A setting called "Only when I
 //  commit" that left those unsaid would be read as "nothing else writes
 //  savepoints", which is the J8 copy-truth defect exactly.
 //
@@ -40,9 +41,9 @@ nonisolated enum SavepointCadenceCopy {
     static let insuranceNote =
         "Whichever you choose, Variorum still saves a take right before "
         + "something could make your text unreachable — marking a note "
-        + "complete, locking a take with unsaved changes, undoing a "
-        + "structural change over edits, and a journal entry arriving from "
-        + "Fragments. Those aren't a schedule; they're insurance."
+        + "complete, locking a take with unsaved changes, and undoing a "
+        + "structural change over edits. Those aren't a schedule; they're "
+        + "insurance."
 }
 
 /// Phase 13j batch 6b — the words of the HISTORY PRUNING setting (her

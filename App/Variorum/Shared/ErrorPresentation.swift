@@ -7,7 +7,8 @@
 //  was auth-shaped (fixed by sign-out/sign-in after Fragments changed
 //  their sync). Errors CLASSIFY and SPEAK: an auth-shaped failure says
 //  "sign in again" and the row offers the door; the detail renders inline,
-//  never hover-only.
+//  never hover-only. (The bridge itself retired 2026-09-04; the doctrine
+//  and this block serve the sync row and the sign-in form.)
 //
 
 import Foundation
@@ -121,10 +122,6 @@ enum ErrorPresentation {
                 return "Account creation failed — the server refused (HTTP \(status)). Try again in a moment."
             case .notHTTP, .malformedResponse:
                 return "Account creation failed — the server's response couldn't be read. Try again in a moment."
-            case .callbackWithoutCode:
-                // The delegated door's refusal (14d) — unreachable from the
-                // sign-up form, spoken honestly if it ever routes here.
-                return "The browser sign-in came back without a sign-in code — try again."
             }
         }
         if error is URLError || (error as NSError).domain == NSURLErrorDomain {
@@ -147,20 +144,6 @@ enum ErrorPresentation {
     /// inserted between this comment and its function, re-attaching it to
     /// `signUpClosedMessage`.)
     static func signInFailureMessage(_ error: any Error) -> String {
-        // The delegated door's browser-flow failures (14d cold review,
-        // MINOR 4 — the R94 class): speak human, never the enum's raw
-        // face. `.cancelled` is swallowed by the caller (a closed sheet
-        // is a decision); these are the arms that reach a surface.
-        if let flowError = error as? SignInFlow.FlowError {
-            switch flowError {
-            case .couldNotPresent:
-                return "The browser sign-in couldn't open — bring a Variorum window to the front and try again."
-            case .alreadyRunning:
-                return "A browser sign-in is already in progress — finish or close it first."
-            case .cancelled, .failed:
-                return "The browser sign-in didn't complete — try again."
-            }
-        }
         if let authError = error as? AuthSessionError {
             switch authError {
             case .endpointFailure(let status, let body):
@@ -174,12 +157,6 @@ enum ErrorPresentation {
                 return "Sign-in failed — the server refused (HTTP \(status)). Try again in a moment."
             case .notHTTP, .malformedResponse:
                 return "Sign-in failed — the server's response couldn't be read. Try again in a moment."
-            case .callbackWithoutCode:
-                // The delegated bridge door (14d): the browser flow
-                // returned an error callback — commonly a refused or
-                // abandoned consent, or the provider entry not existing
-                // yet (pre-touchpoint-#1).
-                return "The browser sign-in didn't complete — no sign-in code came back. Try again."
             }
         }
         if error is URLError || (error as NSError).domain == NSURLErrorDomain {

@@ -4,14 +4,11 @@
 //
 //  Phase 9c, Step 5 — the sign-in surface replacing Phase 8's paste-in
 //  (SyncSetupView, deleted). Functional and unstyled (Phase 13 owns
-//  beauty). Two sections, two sessions:
-//   - the VARIORUM sign-in: the SUITE account, direct email+password
-//     against the Variorum project (Phase 14a, round 0h — the delegated
-//     browser flow is retired);
-//   - the FRAGMENTS JOURNAL connection: the bridge's direct
-//     Fragments-project session (QUESTIONS #16, shape (c) — the active
-//     road until the Fragments batch swaps it to the suite-delegated
-//     flow).
+//  beauty). One section, one session: the VARIORUM sign-in — the SUITE
+//  account, direct email+password against the Variorum project (Phase
+//  14a, round 0h — the delegated browser flow is retired). The Fragments
+//  journal connection that stood beside it left with the bridge on
+//  2026-09-04 (pre-13x batch 0b).
 //
 //  Phase 14b CROSSOVER ROUND (CF-14, her ruling): the Account sheet gains
 //  TABS — Account · Encryption ("account will one day show payment") —
@@ -233,9 +230,9 @@ struct AccountView: View {
         // MARK: The Variorum session (the suite identity)
         // Act 10 wave 2a (item 4 — manifest row 04's de-crowding): the tab
         // groups by the question each element answers — who am I · what
-        // does sync do · the journal bridge — and the DESTRUCTIVE door
-        // moves to the very end, no longer parked mid-column between the
-        // tier and the bridge. Every door survives; only order moved.
+        // does sync do — and the DESTRUCTIVE door sits at the very end,
+        // never mid-column. (The journal-bridge group that stood between
+        // them left with the bridge, 2026-09-04.)
         if let signedIn = services.account.variorum {
             HStack(alignment: pageStyle != nil ? .firstTextBaseline : .center) {
                 Text("Signed in\(signedIn.email.map { " as \($0)" } ?? "")")
@@ -273,37 +270,6 @@ struct AccountView: View {
                 services.account.lastNotice = nil
             }
             Text("One account for the suite — sync and everything you write run under it.")
-                .pageCaption(pageStyle)
-        }
-
-        PageDivider(pageStyle)
-
-        // MARK: The journal bridge's connection (Phase 14d — ONE
-        // Stargazing identity, presented as such; her ruling: "I don't
-        // want a variorum + stargazing account, I want just one
-        // stargazing account." The bridge holds a second SESSION of the
-        // SAME account against the Fragments project — a connection, not
-        // another sign-in. The email+password form is GONE, not hidden:
-        // the batch retired her Fragments password server-side (the
-        // grant 422s), so the delegated browser road is the only honest
-        // door.)
-        if let fragments = services.account.fragments {
-            HStack(alignment: pageStyle != nil ? .firstTextBaseline : .center) {
-                Text("Journal bridge (Fragments) connected\(fragments.email.map { " (\($0))" } ?? "")")
-                    .pageProse(pageStyle)
-                Spacer()
-                PageDoor("Disconnect", form: .inlineAct, style: pageStyle) {
-                    Task { await services.disconnectFragmentsJournal() }
-                }
-            }
-        } else {
-            Text("Journal bridge (Fragments) — journal in either app, one journal:")
-                .pageProse(pageStyle)
-            PageDoor("Connect with your Stargazing account", style: pageStyle) {
-                Task { await services.connectFragmentsJournalDelegated() }
-            }
-            .disabled(!ProjectConfig.fragmentsConfigured || services.account.busy)
-            Text("Opens a quick browser sign-in with the same Stargazing account; only the session is kept.")
                 .pageCaption(pageStyle)
         }
 

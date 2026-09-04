@@ -315,14 +315,15 @@ struct SavepointHistoryFaceTests {
     }
 
     /// The cadence setting's help must NAME the insurance occasions — a
-    /// setting reading as "nothing else writes savepoints" while four other
+    /// setting reading as "nothing else writes savepoints" while three other
     /// occasions still do is the J8 copy-truth defect (this phase's own bar).
     @Test func theCadenceSettingsHelpNamesTheInsuranceOccasions() {
         let note = SavepointCadenceCopy.insuranceNote
         #expect(note.contains("complete"), "sealing a note")
         #expect(note.contains("locking a take"))
         #expect(note.contains("structural"))
-        #expect(note.contains("Fragments"))
+        #expect(!note.contains("Fragments"),
+                "the bridge's landing occasion left with the bridge (2026-09-04) — the help must not name it")
         #expect(SavepointCadenceCopy.label(.onlyOnCommit).contains("\u{2318}S"))
         // Every mode is worded — a picker row with no words is a silent door.
         for cadence in SavepointCadence.allCases {

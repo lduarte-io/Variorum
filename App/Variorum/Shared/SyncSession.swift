@@ -41,8 +41,9 @@ final class SyncSession {
     /// False for dev-store sessions (the A4 fence's sync seam, above).
     let allowsSync: Bool
     /// Fired on the main actor each time a sync round FINISHES (clean or
-    /// failed). Phase 9b: AppServices triggers the Fragments bridge here,
-    /// so bridge rounds follow sync rounds and never interleave with one.
+    /// failed) — a seam for anything that must follow a round and never
+    /// interleave with one. Its one production subscriber (the Fragments
+    /// bridge, Phase 9b) retired 2026-09-04; the seam stays, unsubscribed.
     var onRoundCompleted: (() -> Void)?
 
     private let database: AppDatabase

@@ -357,35 +357,6 @@ struct NoteVersionsPaneTests {
         }
     }
 
-    // MARK: - Routed flag 3: the bridge row's last literal red
-
-    /// **THE BRIDGE ROW TAKES A VOICE.** It is in `Shared/`, so neither of
-    /// batch 4's two roads reaches it: the Mac's `.alarmVoice()` is Mac-only
-    /// (the mobile target would not compile a call to it), and
-    /// `\.sharedPageStyle` is **nil on macOS by construction** — a pinned
-    /// one-seam law, which would have made a `pageCaptionError` "fix" compile
-    /// to the same literal red. A defaulted parameter is the road that works
-    /// for both, and the ONE caller passes the live voice.
-    @Test func theBridgeRowTakesTheLiveVoiceAndTheMacPassesIt() throws {
-        let source = try String(
-            contentsOf: URL(fileURLWithPath: #filePath)
-                .deletingLastPathComponent()
-                .deletingLastPathComponent()
-                .appendingPathComponent("Shared/BridgeStatusViews.swift"),
-            encoding: .utf8)
-        #expect(source.contains("var tokens: VoiceTokens?"))
-        #expect(source.contains("tokens?.alarm ?? .red"),
-                "the alarm token where the literal was")
-        let root = try String(
-            contentsOf: URL(fileURLWithPath: #filePath)
-                .deletingLastPathComponent()
-                .deletingLastPathComponent()
-                .appendingPathComponent("Variorum/RootView.swift"),
-            encoding: .utf8)
-        #expect(root.contains("tokens: theme.tokens(for: scheme)"),
-                "the one caller really hands it over — otherwise the seam is a no-op")
-    }
-
     // MARK: - Harness
 
     private func mounted(

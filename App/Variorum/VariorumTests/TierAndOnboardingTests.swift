@@ -197,12 +197,6 @@ struct HostedSyncStatusReadTests {
             accessToken: "access", refreshToken: "refresh",
             expiresAt: Date().addingTimeInterval(3600),
             userID: "user-tier", email: "tier@example.com"))
-        let fragmentsAuth = AuthSession(
-            configuration: AuthConfiguration(
-                projectURL: URL(string: "https://fragments-project.test.invalid")!,
-                apiKey: "publishable"),
-            store: .inMemory(),
-            http: { _ in throw AuthSessionError.malformedResponse("no network") })
         let keyVault = KeyVaultClient(
             configuration: KeyVaultClient.Configuration(
                 projectURL: URL(string: "https://vault.test.invalid")!,
@@ -220,8 +214,8 @@ struct HostedSyncStatusReadTests {
         } operation: { @MainActor in
             let services = AppServices(
                 session: AppSession(database: db), storeVariant: .real,
-                backupEnabled: false, bridgeEnabled: false,
-                auth: auth, fragmentsAuth: fragmentsAuth, encryption: encryption,
+                backupEnabled: false,
+                auth: auth, encryption: encryption,
                 makeSyncTransport: { _ in QuietTransport() },
                 makeSyncKeyProvider: { AppTestKeyProvider() },
                 keyVault: keyVault,

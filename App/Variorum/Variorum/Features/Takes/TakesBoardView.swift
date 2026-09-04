@@ -136,12 +136,13 @@ struct TakesBoardView: View {
                     .background(tokens.wash)
             }
             if model.isJournalShaped {
-                // R84 — the Fragments projection note on journal entries.
+                // R84's journal-entry note, its S5 half only — the Fragments
+                // clause left with the bridge (2026-09-04; PROVISIONAL
+                // wording, QUESTIONS #89).
                 ChromeNotice(
                     tokens: tokens,
-                    text: "Takes live here in Variorum. Only the CHOSEN text is what Fragments sees "
-                        + "(when a Fragments account is linked) — sync conflicts can add takes here "
-                        + "too; nothing is lost, choose what the entry shows.")
+                    text: "Sync conflicts can add takes here; nothing is lost — "
+                        + "choose what the entry shows.")
                     .padding(.horizontal, 24)
                     .padding(.vertical, 4)
             }

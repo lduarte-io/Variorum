@@ -2,9 +2,11 @@
 //  Phase9cAuthWiringTests.swift
 //  VariorumTests
 //
-//  Phase 9c, Step 5 — sign-in state drives both sessions (sync + bridge),
-//  the adoption backfill rides the sign-in, the A4 fence holds in the
-//  sign-in era, and the paste-in is provably retired (the source walk).
+//  Phase 9c, Step 5 — sign-in state drives the sync session, the adoption
+//  backfill rides the sign-in, the A4 fence holds in the sign-in era, and
+//  the paste-in is provably retired (the source walk). (The bridge half —
+//  the Fragments session driving the bridge engine, its cadence pins, the
+//  14d liveness pin — left with the bridge, 2026-09-04, pre-13x batch 0b.)
 //
 
 import Dependencies
@@ -41,91 +43,35 @@ struct Phase9cAuthWiringTests {
     /// composition-truths).
     private actor RecordingSyncTransport: SyncTransport {
         private(set) var calls = 0
-        /// Round PARKING for the 13c A2 ordering pin — off by default, so
-        /// every pre-existing test sees the original pass-through transport.
-        /// Parked, a round that reaches the transport suspends until
-        /// `open()`, which is how "no bridge round starts while a sync round
-        /// is in flight" becomes observable at the AppServices level.
-        private var gated = false
-        private var gateWaiters: [CheckedContinuation<Void, Never>] = []
-        private var arrivalWaiters: [CheckedContinuation<Void, Never>] = []
-
-        func park() { gated = true }
-
-        func awaitParked() async {
-            if !gateWaiters.isEmpty { return }
-            await withCheckedContinuation { arrivalWaiters.append($0) }
-        }
-
-        func open() {
-            gated = false
-            let waiters = gateWaiters
-            gateWaiters.removeAll()
-            for waiter in waiters { waiter.resume() }
-        }
-
-        private func pass() async {
-            let arrivals = arrivalWaiters
-            arrivalWaiters.removeAll()
-            for arrival in arrivals { arrival.resume() }
-            guard gated else { return }
-            await withCheckedContinuation { gateWaiters.append($0) }
-        }
 
         func push(_ batch: [SyncRow], activeKeyID: String) async throws -> [SyncPushOutcome] {
             calls += 1
-            await pass()
             return batch.map { _ in .rejected(current: nil) }
         }
         func pull(since: Int64, limit: Int, activeKeyID: String, deviceID: String?) async throws -> [SyncPulledRow] {
             calls += 1
-            await pass()
             return []
         }
         /// Uncounted round plumbing (the pins count data calls).
         func schemaVersion() async throws -> Int { SyncSchema.lockstepVersion }
     }
 
-    private actor RecordingBridgeTransport: FragmentsBridgeTransport {
-        private(set) var calls = 0
-        func push(_ entries: [FragmentsEntry]) async throws -> FragmentsPushResponse {
-            calls += 1
-            return FragmentsPushResponse(applied: entries.count, skipped: 0)
-        }
-        func pull(after cursor: FragmentsPullCursor?, limit: Int) async throws -> [FragmentsEntry] {
-            calls += 1
-            return []
-        }
-        func delete(ids: [String]) async throws -> Int { 0 }
-        func fetchLocalUserID() async throws -> String? {
-            calls += 1
-            return nil  // the fail-closed gate holds pushes; pulls still run
-        }
-    }
-
     /// One composed world: in-memory store, real AppSession/AppServices,
-    /// injected auth sessions over in-memory stores, recording transports
-    /// through the factory seam, and — mirroring the production install in
-    /// AppBootstrap — an ownerIdentity closure reading the SAME
+    /// an injected auth session over an in-memory store, a recording
+    /// transport through the factory seam, and — mirroring the production
+    /// install in AppBootstrap — an ownerIdentity closure reading the SAME
     /// persisted-session store AuthSession writes.
     private func withWiredServices(
         storeVariant: AppDatabase.StoreVariant = .real,
-        bridgeEnabled: Bool = true,
-        bridgeMinimumRoundInterval: Duration = .seconds(60),
         authHTTP: (@Sendable (URLRequest) async throws -> (Data, URLResponse))? = nil,
-        _ body: @MainActor (AppServices, AuthSession, AuthSession, AppDatabase, RecordingSyncTransport, RecordingBridgeTransport) async throws -> Void
+        _ body: @MainActor (AppServices, AuthSession, AppDatabase, RecordingSyncTransport) async throws -> Void
     ) async throws {
         let db = try AppDatabase.inMemory()
         let authStore = AuthTokensStore.inMemory()
-        let fragmentsStore = AuthTokensStore.inMemory()
         let auth = AuthSession(
             configuration: Self.testAuthConfiguration, store: authStore,
             http: authHTTP ?? Self.noNetwork)
-        let fragmentsAuth = AuthSession(
-            configuration: Self.testAuthConfiguration, store: fragmentsStore,
-            http: Self.noNetwork)
         let syncTransport = RecordingSyncTransport()
-        let bridgeTransport = RecordingBridgeTransport()
         try await withDependencies {
             $0.database = db
             $0.uuid = .incrementing
@@ -138,21 +84,14 @@ struct Phase9cAuthWiringTests {
             let session = AppSession(database: db)
             let services = AppServices(
                 session: session, storeVariant: storeVariant,
-                backupEnabled: false, bridgeEnabled: bridgeEnabled,
-                auth: auth, fragmentsAuth: fragmentsAuth,
-                bridgeMinimumRoundInterval: bridgeMinimumRoundInterval,
+                backupEnabled: false,
+                auth: auth,
                 makeSyncTransport: { _ in syncTransport },
-                makeBridgeTransport: { _, _ in bridgeTransport },
                 // Phase 14b: a working fixed key world so wiring rounds
-                // reach the transports (never the real Keychain in tests).
-                // GM-2: the bridge twin rides the new AppServices seam —
-                // production passes nil (the refusing default, the RULED
-                // pause); these wiring pins guard the cadence machinery the
-                // 14c-era resumption needs.
-                makeSyncKeyProvider: { AppTestKeyProvider() },
-                makeBridgeKeyProvider: { AppTestBridgeKeyProvider() })
+                // reach the transport (never the real Keychain in tests).
+                makeSyncKeyProvider: { AppTestKeyProvider() })
             await services.start()
-            try await body(services, auth, fragmentsAuth, db, syncTransport, bridgeTransport)
+            try await body(services, auth, db, syncTransport)
             services.stop()
         }
     }
@@ -190,7 +129,7 @@ struct Phase9cAuthWiringTests {
                 HTTPURLResponse(url: request.url!, statusCode: 200,
                                 httpVersion: nil, headerFields: nil)!)
         }
-        try await withWiredServices(authHTTP: grant) { services, _, _, db, syncTransport, _ in
+        try await withWiredServices(authHTTP: grant) { services, _, db, syncTransport in
             #expect(!services.sync.isConfigured, "signed out ⇒ no sync chain")
             // A pre-sign-in (unowned) row — the adoption's target.
             let postID = try await services.runnerPostID(title: "pre-sign-in")
@@ -222,7 +161,7 @@ struct Phase9cAuthWiringTests {
              HTTPURLResponse(url: request.url!, statusCode: 400,
                              httpVersion: nil, headerFields: nil)!)
         }
-        try await withWiredServices(authHTTP: refusal) { services, _, _, _, _, _ in
+        try await withWiredServices(authHTTP: refusal) { services, _, _, _ in
             await services.signInWithVariorum(email: "her@example.com", password: "wrong")
             #expect(services.account.lastError == "Wrong email or password.")
             #expect(services.account.variorum == nil, "a refused sign-in signs nothing in")
@@ -241,7 +180,7 @@ struct Phase9cAuthWiringTests {
              HTTPURLResponse(url: request.url!, statusCode: 400,
                              httpVersion: nil, headerFields: nil)!)
         }
-        try await withWiredServices(authHTTP: refusal) { services, _, _, _, _, _ in
+        try await withWiredServices(authHTTP: refusal) { services, _, _, _ in
             await services.signInWithVariorum(email: "her@example.com", password: "wrong")
             #expect(services.account.lastError == "Wrong email or password.")
             #expect(services.account.variorum == nil, "a refused sign-in signs nothing in")
@@ -265,24 +204,12 @@ struct Phase9cAuthWiringTests {
         let garbled = ErrorPresentation.signInFailureMessage(
             AuthSessionError.malformedResponse("decode failed"))
         #expect(garbled == "Sign-in failed — the server's response couldn't be read. Try again in a moment.")
-
-        // 14d cold review (MINOR 4): the delegated door's browser-flow
-        // failures must speak human, never the enum's raw face — the
-        // R94 class. `.couldNotPresent` is reachable (start() == false).
-        let noWindow = ErrorPresentation.signInFailureMessage(
-            SignInFlow.FlowError.couldNotPresent)
-        #expect(!noWindow.contains("FlowError"), "never the enum's own face")
-        #expect(noWindow == "The browser sign-in couldn't open — bring a Variorum window to the front and try again.")
-        let browserFailed = ErrorPresentation.signInFailureMessage(
-            SignInFlow.FlowError.failed("boom"))
-        #expect(!browserFailed.contains("FlowError"), "never the enum's own face")
-        #expect(browserFailed == "The browser sign-in didn't complete — try again.")
     }
 
     // MARK: Sign-in drives sync + adoption
 
     @Test func signInConfiguresSyncRunsTheAdoptionAndUpdatesTheAccount() async throws {
-        try await withWiredServices { services, auth, _, db, syncTransport, _ in
+        try await withWiredServices { services, auth, db, syncTransport in
             #expect(!services.sync.isConfigured, "signed out ⇒ no sync chain")
             #expect(services.account.variorum == nil)
 
@@ -308,7 +235,7 @@ struct Phase9cAuthWiringTests {
     }
 
     @Test func signOutTearsTheChainDownAndKeepsTheStore() async throws {
-        try await withWiredServices { services, auth, _, db, _, _ in
+        try await withWiredServices { services, auth, db, _ in
             await auth.adopt(Self.tokens(userID: "owner-9c"))
             await settle { services.sync.isConfigured }
             let postID = try await services.runnerPostID(title: "kept")
@@ -327,126 +254,31 @@ struct Phase9cAuthWiringTests {
 
     /// THE A4 FENCE IN THE SIGN-IN ERA: debug and release builds share a
     /// Keychain, so a dev-store session may LAUNCH already signed in — and
-    /// must still never compose the sync chain, run the adoption against
-    /// the dev store, or touch the bridge.
+    /// must still never compose the sync chain or run the adoption against
+    /// the dev store.
     @Test func devStoreSessionsStayFencedEvenWhenSignedIn() async throws {
-        try await withWiredServices(storeVariant: .dev) { services, auth, fragmentsAuth, db, syncTransport, bridgeTransport in
+        try await withWiredServices(storeVariant: .dev) { services, auth, db, syncTransport in
             let postID = try await services.runnerPostID(title: "dev row")
 
             await auth.adopt(Self.tokens(userID: "owner-9c"))
-            await fragmentsAuth.adopt(Self.tokens(userID: "frag-user"))
             try await Task.sleep(for: .milliseconds(150))
 
             #expect(!services.sync.isConfigured,
                     "a dev-store session must never pair with the production mirror")
-            #expect(!services.bridge.isConfigured,
-                    "a dev-store session must never touch the live Fragments journal")
             #expect(try db.fetchString(
                 "SELECT owner_id FROM container WHERE id = ?", [postID]) == nil,
                 "the fence precedes adoption — dev rows stay untouched")
             #expect(await syncTransport.calls == 0)
-            #expect(await bridgeTransport.calls == 0)
         }
     }
 
-    // MARK: The Fragments session drives the bridge (QUESTIONS #16, ratified (c))
+    // MARK: The lifecycle cadence (Phase 13c, batch 1D — ledger A2; the
+    // bridge half — its cadence + ordering pins — retired 2026-09-04)
 
-    @Test func fragmentsSignInConfiguresTheBridgeAndDisconnectStopsIt() async throws {
-        try await withWiredServices { services, _, fragmentsAuth, _, _, bridgeTransport in
-            #expect(!services.bridge.isConfigured)
-
-            await fragmentsAuth.adopt(Self.tokens(userID: "frag-user"))
-            await settle { services.bridge.isConfigured }
-            #expect(services.bridge.isConfigured,
-                    "the Fragments session must compose the bridge engine")
-            #expect(services.account.fragments?.userID == "frag-user")
-            await settle { await bridgeTransport.calls > 0 }
-            #expect(await bridgeTransport.calls > 0,
-                    "the launch bridge round must ride the INJECTED transport")
-
-            await fragmentsAuth.signOut()
-            await settle { !services.bridge.isConfigured }
-            #expect(!services.bridge.isConfigured)
-            #expect(services.account.fragments == nil)
-        }
-    }
-
-    @Test func theBridgeStaysDownWhereItIsNotEnabled() async throws {
-        // The mobile composition (bridgeEnabled: false — Mac-only scope).
-        try await withWiredServices(bridgeEnabled: false) { services, _, fragmentsAuth, _, _, bridgeTransport in
-            await fragmentsAuth.adopt(Self.tokens(userID: "frag-user"))
-            try await Task.sleep(for: .milliseconds(150))
-            #expect(!services.bridge.isConfigured)
-            #expect(await bridgeTransport.calls == 0)
-        }
-    }
-
-    // MARK: The lifecycle cadence (Phase 13c, batch 1D — ledger A2)
-    //
-    // Her report: *"the bridge doesn't seem to refresh often enough."*
-    // Traced: bridge rounds ride `sync.onRoundCompleted`, so an UNCONFIGURED
-    // sync session — signed out of the Variorum project, an expired session,
-    // or a failed owner adoption, all of which return from
-    // `connectSyncIfAllowed` before composing — leaves the bridge with NO
-    // cadence trigger at all. It then runs exactly once per launch, which is
-    // what starved it from 2026-07-20 to 07-25 while her Fragments session
-    // stayed perfectly valid.
-
-    /// THE PIN (red-on-old): with sync off and the bridge configured, a
-    /// lifecycle event still reaches the bridge.
-    @Test func theLifecycleCadenceReachesTheBridgeWhenSyncIsOff() async throws {
-        try await withWiredServices(bridgeMinimumRoundInterval: .milliseconds(50)) {
-            services, _, fragmentsAuth, _, _, bridgeTransport in
-            // Her exact state: Fragments signed in, Variorum signed out.
-            await fragmentsAuth.adopt(Self.tokens(userID: "frag-user"))
-            await settle { services.bridge.isConfigured }
-            #expect(!services.sync.isConfigured, "precondition: no sync chain")
-            await settle { await bridgeTransport.calls > 0 }
-            let afterLaunch = await bridgeTransport.calls
-            #expect(afterLaunch > 0, "the launch round is the only one the old wiring had")
-
-            // Past the cadence throttle, the app becomes active.
-            try await Task.sleep(for: .milliseconds(80))
-            services.triggerLifecycleRound()
-
-            await settle { await bridgeTransport.calls > afterLaunch }
-            #expect(await bridgeTransport.calls > afterLaunch,
-                    "with sync off, a lifecycle event must still reach the bridge")
-        }
-    }
-
-    /// THE ORDERING PIN, unchanged by the fallback: with sync ON, the bridge
-    /// still rides the COMPLETED sync round and never starts beside one — so
-    /// the fallback can never become "always trigger both".
-    @Test func theLifecycleCadenceStillNeverInterleavesWhenSyncIsOn() async throws {
-        try await withWiredServices(bridgeMinimumRoundInterval: .milliseconds(50)) {
-            services, auth, fragmentsAuth, _, syncTransport, bridgeTransport in
-            await syncTransport.park()
-            await auth.adopt(Self.tokens(userID: "owner-13c"))
-            await settle { services.sync.isConfigured }
-            await fragmentsAuth.adopt(Self.tokens(userID: "frag-user"))
-            await settle { services.bridge.isConfigured }
-            await settle { await bridgeTransport.calls > 0 }
-            let afterLaunch = await bridgeTransport.calls
-
-            // A sync round is parked mid-flight; the app becomes active.
-            await syncTransport.awaitParked()
-            try await Task.sleep(for: .milliseconds(80))
-            services.triggerLifecycleRound()
-            try await Task.sleep(for: .milliseconds(80))
-            #expect(await bridgeTransport.calls == afterLaunch,
-                    "no bridge round may start while a sync round is in flight")
-
-            // The completed round carries the bridge with it, as always.
-            await syncTransport.open()
-            await settle { await bridgeTransport.calls > afterLaunch }
-            #expect(await bridgeTransport.calls > afterLaunch)
-        }
-    }
-
-    /// The production hook actually uses it — otherwise the method above is
-    /// a correct rule nothing calls (the source-walk form, beside the
-    /// retirement walk below).
+    /// The production hook still routes through the ONE became-active door
+    /// (the source-walk form, beside the retirement walk below). Since the
+    /// bridge's retirement the door is one sync trigger; it stays the one
+    /// door so a future second follower of the cadence has a home.
     @Test func theBecomeActiveHookRoutesThroughTheLifecycleCadence() throws {
         let appFile = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()  // VariorumTests
@@ -456,7 +288,7 @@ struct Phase9cAuthWiringTests {
         #expect(text.contains("services?.triggerLifecycleRound()"),
                 "the became-active hook must run the lifecycle cadence")
         #expect(!text.contains("services?.sync.triggerSync()"),
-                "…and never sync alone: with sync unconfigured the bridge would lose every cadence trigger it has")
+                "…and never sync alone: the became-active hook goes through the one door")
     }
 
     // MARK: The retirement walk (review focus 4 — "no dead credential
@@ -487,51 +319,36 @@ struct Phase9cAuthWiringTests {
         return walk.compactMap { $0 as? URL }.filter { $0.pathExtension == "swift" }
     }
 
-    /// THE 14D UN-PAUSE PIN (2026-08-16 — the liveness half of 14c batch
-    /// 2's dormancy/readiness pair): the Mac's production composition
-    /// wires the LIVE journal-bridge key provider at the AppServices
-    /// seam. The 14b structural pause is OVER — a regression to the
-    /// refusing default (dropping the argument) would silently re-pause
-    /// the bridge, which after 14d is a data outage, not a designed
-    /// state. Source-anchored like the retirement walks below: the
-    /// SwiftUI scene body is not constructible headless, so the pin
-    /// reads the composition site itself.
-    @Test func theMacProductionCompositionWiresTheLiveBridgeKeyProvider() throws {
-        let appSource = URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent()  // VariorumTests
-            .deletingLastPathComponent()  // App/Variorum
-            .appendingPathComponent("Variorum/VariorumApp.swift")
-        let text = try String(contentsOf: appSource, encoding: .utf8)
-        #expect(
-            text.contains("makeBridgeKeyProvider: { DeviceBridgeKeyProvider() }"),
-            "the Mac app must wire the LIVE bridge key provider — its absence re-pauses the bridge (the 14b pause ended at 14d)")
-    }
-
-    /// AMENDED AT 14D (the rebuild round 0x foretold): the browser-flow
-    /// machinery RETURNED — `SignInFlow.swift` lives again, now pointed
-    /// the OTHER way (the bridge signs into the FRAGMENTS project via
-    /// `custom:stargazing`). What stays retired forever is the OLD
-    /// direction: the `custom:fragments` provider (Variorum trusting
-    /// Fragments' issuer), its `signInWithFragments` door, and the
-    /// captured provider-token pair. The walk now pins both truths.
-    @Test func theRetiredFragmentsIssuerDirectionStaysOutWhileTheRebuiltFlowLives() throws {
+    /// AMENDED AT 14D, and again at THE BRIDGE'S RETIREMENT (2026-09-04,
+    /// pre-13x batch 0b): the browser-flow machinery 14d rebuilt for the
+    /// bridge's delegated road into the Fragments project (`SignInFlow.swift`,
+    /// ASWebAuthenticationSession, PKCE, the authorize/exchange doors, the
+    /// `custom:stargazing` provider entry) is OUT again, with the bridge —
+    /// and the OLD direction stays retired forever: the `custom:fragments`
+    /// provider (Variorum trusting Fragments' issuer), its
+    /// `signInWithFragments` door, and the captured provider-token pair.
+    /// Red on the pre-retirement tree: `SignInFlow.swift` existed and the
+    /// shared sources named `custom:stargazing`.
+    @Test func theDelegatedBrowserFlowAndBothIssuerDirectionsStayOut() throws {
         let sources = Self.sharedSwiftSources()
         #expect(!sources.isEmpty)
         #expect(sources.contains {
                     $0.deletingLastPathComponent().lastPathComponent != "Shared" },
                 "the walk must be DEEP — subdirectory sources included (R1-3)")
-        #expect(sources.contains { $0.lastPathComponent == "SignInFlow.swift" },
-                "the rebuilt delegated browser flow must exist (14d — the bridge's road back in)")
+        #expect(!sources.contains { $0.lastPathComponent == "SignInFlow.swift" },
+                "the delegated browser flow left with the bridge (2026-09-04)")
 
         for file in sources {
             let text = try String(contentsOf: file, encoding: .utf8)
             let name = file.lastPathComponent
             #expect(!text.contains("custom:fragments"),
                     "\(name) still references the retired provider direction")
+            #expect(!text.contains("custom:stargazing"),
+                    "\(name) still references the retired bridge's delegated road into the Fragments project")
             #expect(!text.contains("signInWithFragments"),
                     "\(name) still carries the retired delegated Variorum sign-in door")
-            #expect(!text.contains("ASWebAuthentication") || name == "SignInFlow.swift",
-                    "\(name) references the browser-flow machinery outside its one home")
+            #expect(!text.contains("ASWebAuthentication"),
+                    "\(name) references the retired browser-flow machinery")
             #expect(!text.contains("provider_token"),
                     "\(name) still captures the retired delegated provider pair")
         }
@@ -558,6 +375,13 @@ struct Phase9cAuthWiringTests {
                 #expect(name == "AuthSession.swift",
                         "\(name) must not read the retired Keychain keys")
                 #expect(text.contains("LegacyPasteInCleanup"))
+            }
+            // The retired bridge's Fragments-session service string
+            // (2026-09-04) survives in exactly that same one place.
+            if text.contains("io.lduarte.Variorum.fragments-auth") {
+                #expect(name == "AuthSession.swift",
+                        "\(name) must not read the retired Fragments-session keys")
+                #expect(text.contains("retiredFragmentsService"))
             }
         }
     }
