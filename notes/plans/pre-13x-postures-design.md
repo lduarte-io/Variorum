@@ -669,22 +669,40 @@ so the Q1 hypothesis is "signing accepts the shared group without an App-ID chan
   *[removed for publication]*
   Profile: *". The first entry resolves to each target's own bundle id, as required. Nothing for the author here.
   (The Mac `EntitlementsTests` pin for the shared group rides the PROBES commit, beside the other tests.)
-- **Q2 (Mac synchronizable round trip under the shared group)** — NOT-STARTED. Settled design: a shared DEBUG-only
-  probe brain (`App/Variorum/Shared/SharedKeychainGroupProbe.swift`, throwaway service
-  `io.lduarte.Variorum.pre13x-shared-group-probe`, timestamped account for the local leg) driven by a Mac test suite
-  that is DISABLED BY DEFAULT (`.enabled(if:)` on `VARIORUM_SHARED_GROUP_PROBE=1`, passed as
-  `TEST_RUNNER_VARIORUM_SHARED_GROUP_PROBE=1`); every status code recorded.
-- **Q3 (the item crosses to the phone)** — NOT-STARTED → will land as PENDING-HER-SITTING. Settled design: DEBUG-only
-  doors on BOTH apps over the same brain (a Help-menu item on the Mac; a Settings row on the phone), a fixed
-  `cross-device` account under the throwaway service (production custody never named), and the five-minute
-  procedure in the memo.
-- **Q4 (pre-unlock network floor)** — NOT-STARTED. Five unauthenticated GETs to `rest/v1/key_vault` on
-  `ProjectConfig.variorumProjectURL`, fresh connection each; median + max.
-- **Q5 (synchronizable + access-group facts)** — NOT-STARTED. Measured inside the Q2 suite: delete WITH the flag under
-  the shared group; a query naming the OTHER (default) group; a query naming no group from the same app; a query
-  WITHOUT the synchronizable flag.
-- **Q6 (Argon2id v1 on this Mac)** — NOT-STARTED. `swift test --filter PassphraseKDFTests/kdfLatencyHarnessMac`.
-- **The memo** `notes/plans/pre-13x-spike-memo.md` — NOT-STARTED. **Ledger rows 1–3 + U0 line** — not yet flipped.
+- **Q2 (Mac synchronizable round trip under the shared group)** — DONE (`e29ebe3`; this line flipped one commit
+  late — the flip script aborted on a counting assertion and the commit chain ran anyway; machinery honesty).
+  `Shared/SharedKeychainGroupProbe.swift` (DEBUG-only, both targets; throwaway service
+  `io.lduarte.Variorum.pre13x-shared-group-probe`; timestamped account, deleted at the end) +
+  `VariorumTests/SharedKeychainGroupProbeTests` gated `.enabled(if:)` on `VARIORUM_SHARED_GROUP_PROBE=1`. **Run
+  2026-09-04T06:22:11Z in the signed host:** add `0` → read (shared group named, synchronizable=true) `0`, landed in
+  *[removed for publication]*
+  `-25300`. The tripwire stayed armed and never fired (its own suite ran green beside it). **Verified DISABLED BY
+  DEFAULT:** the same suite without the variable → both tests `skipped: "writes one synchronizable throwaway item (it
+  rides into iCloud Keychain and is deleted) — run deliberately with TEST_RUNNER_VARIORUM_SHARED_GROUP_PROBE=1"`,
+  XCTest's counter `Executed 0 tests` (Swift Testing's own summary still says "Test run with 2 tests in 1 suite
+  passed" — it counts the skipped tests; read the `skipped:` lines, not the count). The gated run: 16 tests / 5
+  suites green (`SharedKeychainGroupProbeTests` · `EntitlementsTests` incl. the new shared-group pin ·
+  `Phase13pKeychainFactTests` — the keychain-identity regression guard, still landing ACL'd writes after the
+  entitlements change · `KeychainPartitionTests` · `KeychainTripwireTests`).
+- **Q3 (the item crosses to the phone)** — **PENDING-HER-SITTING.** Built (`e29ebe3`): the Mac Help-menu door
+  (`Variorum/Core/SharedKeychainGroupProbeDoor.swift`, `#if DEBUG`) and the phone's Settings row + sheet
+  (`VariorumMobile/Features/Shell/MobileKeychainProbeScreen.swift`, `#if DEBUG`), both over the one brain and a
+  fixed `cross-device` account under the throwaway service; the iOS Debug build with the screen compiles and signs
+  (generic device, `IOS-BUILD2-EXIT 0`). The five-minute procedure is in the memo's Q3. Nothing was installed on her
+  phone (prepare-only). Both doors sit outside the capability registry by the TK2 Spike door's rule (DEBUG-only dev
+  instruments; the registry walk covers every build a user can hold) — recorded here so the choice is visible.
+- **Q4 (pre-unlock network floor)** — DONE (measured this session; the memo has the table). Five cold GETs to
+  `rest/v1/key_vault`: totals 0.177 / 0.041 / 0.314 / 0.051 / 0.050 s → **median 0.051 s, max 0.314 s**; warm
+  keep-alive 0.015 s; the gateway answers `401 UNAUTHORIZED_MISSING_API_KEY` before PostgREST. No credentials used.
+- **Q5 (synchronizable + access-group facts)** — DONE (the same run as Q2): delete WITH the flag under the shared
+  group `0` (matches); read naming the DEFAULT group `-25300` (another group does not see it); read with NO group
+  from the same app `0` (the writer's own app searches all its groups); read/delete WITHOUT the flag `-25300` — a
+  flagless delete is a silent no-op and the item survives it; `kSecAttrSynchronizableAny` `0`.
+- **Q6 (Argon2id v1 on this Mac)** — DONE: `KDF-LATENCY (Mac, v1 descriptor m=64MiB t=3 p=1): 0.769s 0.766s 0.763s —
+  median 0.766s` (M3 Pro, load ~3, her live app running).
+- **The memo** `notes/plans/pre-13x-spike-memo.md` — DONE (this commit): the headline table, environment, Q1–Q6
+  each with the observed fact · the number · the recommendation, Q3 as PENDING-HER-SITTING with the five-minute
+  procedure, the surprises, what is handed forward. **Ledger rows 1–3 + U0 line** — flipped in the closing commit.
 
 
 ---
