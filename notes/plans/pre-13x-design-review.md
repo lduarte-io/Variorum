@@ -180,6 +180,36 @@ cold review, BEFORE the crypto batches, so the deletion never mixes with key cha
 keeps its `journal_bridge` class key column (the server column is NOT NULL; minting a key nobody uses is
 free); one outbound line to the Fragments agent through the contract file closes their 20.10 work.
 
+### 2E. THE ADVERSARY SHE NAMED — "someone with access to their unlocked Mac, which is probably logged into their email" — walked road by road against the design AS WRITTEN
+
+Her sharpened requirement (this sitting): *"even someone with access to their unlocked mac (which probably
+is logged into their email) won't be able to get their work."* That is Castle's adversary, precisely.
+Give them everything that follows from an unlocked macOS session: the file system, the app's own
+device-bound SESSION (sign-in is no barrier on that Mac — the tokens are there), the email (so the account
+password, by reset), any iCloud item the APP can read on that Mac. Deny them: the passphrase, the twelve
+words, an enrolled finger. Goal: read the writing.
+
+| road | design as written | verdict | closed by |
+|---|---|---|---|
+| the lobby (Variorum locked) | Touch ID refuses a foreign finger; the passphrase is unknown | **holds** — with one caveat: `.biometryCurrentSet` and `confirmPresence` accept ANY finger enrolled on that macOS user account (a spouse's); the copy must say so, and "always ask for the passphrase" is that user's answer | P9.6 (copy) |
+| the app left OPEN and unlocked | readable on screen until re-lock | **holds as disclosed** — Castle's stated cost; the idle dial + sleep/screen-lock re-lock + Lock Now bound it; nothing in software changes this without the per-note theater she refused | — |
+| the library file, its backups, Time Machine | SQLCipher ciphertext; the key is gated (`WhenUnlockedThisDeviceOnly` + biometry) or absent; the envelope's wraps need a secret | **holds** (pre-switch Standard backups under the old key: P6) | — |
+| **Change passphrase inside an open Castle session** | §4: "nothing more if you typed it" (always-ask mode); Touch ID if opened by Touch ID | **READS EVERYTHING.** An always-ask user opens at 9:00, steps away at 9:20; the adversary changes the passphrase with no re-auth, now HOLDS a passphrase that unwraps the vault, enrolls their own machine, and reads the whole corpus by sync, forever, from anywhere — long after the Mac is out of reach | **P4** (always re-ask the current passphrase; the forgot road needs Touch ID, which refuses them) |
+| **Regenerate the twelve words inside an open session** | §4: "same as change-passphrase" — this RELAXES today's CF-2 (passphrase-gated) | **READS EVERYTHING** by the same route (new words → enroll) | **P4** |
+| the email → account password → their own machine → enroll | needs the passphrase or words | **holds** | — |
+| the email → account password → their own machine → Replace Keys | allowed from an empty library; truncates the server; reads nothing | holds for reading; disruption + a kept foothold | **P3** (a secret or an enrolled device; refuses from an empty library) |
+| **move the store aside on the Mac → "start a new library" → the new library defaults to Standard** while the user's PHONE runs Standard (per-device posture) | the new library reads the account's sync-key MIRROR through the app on that Mac (its iCloud is the Mac's) and pulls the corpus | **READS EVERYTHING** under the design's per-device posture whenever any sibling device is Standard | **P1 + P2** (posture is the account's; a Castle account has no Apple-held wrap and no mirror) |
+| the plaintext `.sqlite` export in an open session | asks for the passphrase | **holds** | — |
+| the bulk `.md` export of the whole library in an open session | no authorization today (a menu act) | holds strictly (open = readable), but hands the adversary the whole library as plaintext in ONE gesture | **new question 12**: gate the LIBRARY-wide export behind the passphrase in Castle, as the sqlite export is; single-note export stays free |
+| account deletion by account password | server copy + vault gone; local copies untouched | holds for reading; disclosed; mandated | — |
+| a stolen session pushing tombstones from a custom client | deletions land in the 30-day Trash everywhere | holds for reading; disclosed | 13y's re-auth for destructive RPCs |
+| the recovery phrase on the clipboard at generation (the COPY ALL item joining this phase) | Universal Clipboard carries it to every device in the iCloud | a real window | P9.11: clear the clipboard after 60 s, the password-manager convention |
+
+**The reading:** against her named adversary the design has exactly two roads that read the writing, and
+both come from the same instinct — treating "the library is open" as sufficient authorization to mint a NEW
+secret. Reading an open library is Castle's disclosed cost and ends when the app re-locks; a new secret
+outlives the Mac. P4 and P1/P2 are therefore not polish. They are the phase.
+
 ---
 
 ## 3. THE PROPOSALS (each: the flaw traced → the change → the cost)
@@ -402,6 +432,9 @@ road is iCloud Keychain SYNC after the restore, never the backup itself; the cop
    Mac signed into your iCloud."
 10. **`openResettingModeToAuto` exists on the phone too** (`StoreLaunchGate.swift:198` is shared) — the
     re-rule lands on both by construction; the pin runs on both targets.
+11. **The recovery phrase's COPY ALL** (the 13u2 item joining this phase): Universal Clipboard carries the
+    clipboard to every device in the iCloud. Clear it after 60 seconds (the password-manager convention)
+    and say so beside the button.
 
 ---
 
@@ -490,6 +523,9 @@ the 13v row, the `shelveInDailyJournalBook` bridge caller, and the Fragments sec
 11. **The pre-unlock vault read (§3.4)** contacts the server before the Castle lobby opens. You ruled
     "nothing runs before unlock" for the STORE; this is one account read. Fine as stated? *(Recommend yes,
     disclosed in the lobby's copy.)*
+12. **Gate the LIBRARY-wide `.md` export behind the passphrase in Castle** (as the plaintext `.sqlite` export
+    already is), leaving single-note export free? *(Recommend yes — 2E's table: it is the one gesture that
+    hands an open library to a visitor whole.)*
 
 ---
 
