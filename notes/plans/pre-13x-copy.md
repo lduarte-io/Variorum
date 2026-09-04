@@ -243,6 +243,9 @@ from another account. Enter your passphrase to connect it; everything here will 
 
 ### Change passphrase
 Title: *Change your encryption passphrase.*
+Lead (her framing, 09-04): *For when you've forgotten it or want a different one. Your devices keep syncing; the old
+passphrase stops opening anything for anyone who never used it. If someone else may have USED it, tick "Also replace
+my keys" below.*
 Fields: Current passphrase · New passphrase · Confirm new
 Link: *Forgot your current passphrase?*
 - Standard forgot road: *This Mac holds your keys, so you can set a new passphrase now.* Button: *Set a New
@@ -268,6 +271,8 @@ Mac, and this library gets a new key. Your other devices will each ask for your 
 libraries new keys. Your passphrase and twelve words stay the same unless you change them below. Old backups keep
 their old keys and open exactly as they do now.*
 Checkbox: *Also choose a new passphrase*
+Entrances (one mechanism, four doors): this screen; the *"Also replace my keys"* checkbox on Change Passphrase and on
+Regenerate Twelve Words; and entering Castle, which runs it for you.
 Authorization: Castle — Touch ID or the passphrase. Standard — the passphrase if set, else a plain confirm.
 Button: *Replace Keys* · progress line: *Re-encrypting your library on the server… (N of M)*
 Done: *Done. Your other devices will ask for your passphrase the next time they open.*
@@ -461,7 +466,8 @@ only on the server, is gone. That is Castle's floor, met from the other side.*
 about Time Machine and copies you made: those still open the old way, and only you can remove them.*
 
 **Chapter 6 — Changing things**
-*Changing your passphrase re-wraps the same keys under the new word. The library key, the master key, your twelve
+*Changing your passphrase is for when you've forgotten it or want a different one — not a security measure. It
+re-wraps the same keys under the new word. The library key, the master key, your twelve
 words and sync are untouched; your other devices ask for the new passphrase the next time they need one. Old
 backups keep the passphrase of their day — on the Mac they were made on, the current passphrase still opens them
 as long as the library key hasn't changed, because the key file beside your library pairs with them.*
