@@ -97,7 +97,8 @@ struct NoteVersionsTests {
 
     /// **V3, half one:** a version of a JOURNAL note carries no `entry_date`.
     /// A saved moment is not a day, and the notebook rule allows one entry per
-    /// day. (The bridge half is pinned in `BridgeVersionTests`.)
+    /// day. (The bridge half was pinned in `BridgeVersionTests`, retired with
+    /// the bridge on 2026-09-04.)
     @Test func aVersionOfAJournalNoteCarriesNoEntryDate() throws {
         try withOperations { ops, db in
             let day = try ops.createOrOpenJournalEntry(entryDate: "2026-08-25").container

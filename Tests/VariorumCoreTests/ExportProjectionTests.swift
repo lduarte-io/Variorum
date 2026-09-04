@@ -10,7 +10,7 @@ import Testing
 @Suite("Export projections (Phase 11b, B1)")
 struct ExportProjectionTests {
     private func setLabel(_ db: AppDatabase, _ variantID: String, _ label: String) throws {
-        // No variant-label operation exists (labels are minted by sync/bridge
+        // No variant-label operation exists (labels are minted by sync
         // landings); the projection is what's under test, so the label lands
         // by direct row write.
         try db.write { database in

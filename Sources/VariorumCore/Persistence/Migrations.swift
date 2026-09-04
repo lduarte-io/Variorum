@@ -186,7 +186,7 @@ extension AppDatabase {
         // 2026-07-13 — SAVED LENSES, synced): a lens is a durable NAMED
         // selection profile over one post — "the same structure with
         // different choices" (her ratified boundary sentence). A lens is
-        // NEVER rendering truth: exports, the bridge, and every view read
+        // NEVER rendering truth: exports and every view read
         // chosen pointers; ✓/adopt are the only lens→chosen doors (I3/I8
         // untouched). Choices are SPARSE overrides — only divergences
         // stored; un-overridden slots follow the post's chosen; the empty

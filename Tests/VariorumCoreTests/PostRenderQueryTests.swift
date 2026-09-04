@@ -439,8 +439,8 @@ struct PostRenderQueryTests {
     }
 
     @Test func joinRenderedTextsIsTheOneJoinBrain() {
-        // The pure join the bridge's per-day projection shares with
-        // renderedText — pinned directly so the two can never diverge in
+        // The pure join `renderedText` rides (the retired bridge's per-day
+        // projection shared it too, until 2026-09-04) — pinned directly so the two can never diverge in
         // shape (the pushed body always equals the export).
         #expect(Queries.joinRenderedTexts([]) == "")
         #expect(Queries.joinRenderedTexts(["A"]) == "A")

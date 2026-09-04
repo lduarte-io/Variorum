@@ -7,7 +7,7 @@ import Testing
 /// Phase 13, Stage C1 — the writing surface's read-side additions: the
 /// per-container decoration feeds (comments + callout frames) and the
 /// callout → blockquote EXPORT mapping, with the load-bearing negative
-/// pin: `renderedText` (the one join brain the Fragments bridge pushes)
+/// pin: `renderedText` (the one join brain; once the Fragments bridge's pushed body)
 /// NEVER maps — a callout stays plain prose everywhere truth flows.
 @Suite("Phase 13 C1 — surface queries + the callout export mapping")
 struct Phase13SurfaceQueryTests {
@@ -107,8 +107,8 @@ struct Phase13SurfaceQueryTests {
 
     @Test func renderedTextNeverMapsCallouts() throws {
         // THE load-bearing negative pin: `renderedText` is the ONE join
-        // brain — the Fragments bridge's pushed body and the diff/export
-        // fast path read it. A callout frame is presentation; truth stays
+        // brain — the diff/export fast path reads it (the retired Fragments
+        // bridge's pushed body did too). A callout frame is presentation; truth stays
         // plain prose.
         try withOperations { ops, db in
             let post = try ops.createPost(title: "p", profile: .generic)

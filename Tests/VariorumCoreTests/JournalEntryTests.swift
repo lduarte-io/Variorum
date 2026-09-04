@@ -255,8 +255,8 @@ struct JournalEntryDayKeyTests {
     /// THE PIN: a malformed day key ("2026-7-7") must refuse at the
     /// operations boundary — accepted, it would mint a live entry invisible
     /// to the canonical "2026-07-07" (two irreconcilable same-day pages,
-    /// broken lexicographic ordering), and this op is the door the Phase 9b
-    /// Fragments bridge feeds with EXTERNAL day keys.
+    /// broken lexicographic ordering), and this op is the door EXTERNAL day
+    /// keys arrive through (the phone's capture; the retired Phase 9b bridge).
     @Test func aMalformedDayKeyRefusesAtTheOperationsBoundary() throws {
         try withOperations { ops, db in
             for bad in ["2026-7-7", "07-07-2026", "2026/07/07", "2026-02-30", "today", ""] {

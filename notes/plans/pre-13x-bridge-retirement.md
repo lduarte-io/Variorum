@@ -1,6 +1,6 @@
 # The Fragments bridge — RETIREMENT (pre-13x batch 0b, run as its OWN session before the key work)
 
-**Status: KICKED OFF 2026-09-04 by the author under `/architect-phase` (a fresh Fable orchestrator session; her kickoff words and expanded scope are recorded in §2b); the implementer runs from the KICKOFF PROMPT below.** *(Was: PLANNED 2026-09-04 at the pre-13x kickoff sitting; NOT RUN.)* Her ruling (pre-13x design §1
+**Status: IMPLEMENTED 2026-09-04 — §6 says DONE (seven steps, seven commits, every suite green on the final tree); the cold review (§7) is next.** *(Was:)* **KICKED OFF 2026-09-04 by the author under `/architect-phase` (a fresh Fable orchestrator session; her kickoff words and expanded scope are recorded in §2b); the implementer runs from the KICKOFF PROMPT below.** *(Was: PLANNED 2026-09-04 at the pre-13x kickoff sitting; NOT RUN.)* Her ruling (pre-13x design §1
 ruling 16 + 2026-09-04: *"I'll run the removal before this phase — seems like it would be cleaner and there's
 no reason not to do it."*). One acceptance unit (kind: operations): the bridge is gone from `main`, every
 suite is green, no bridge door renders, its own cold review closes clean. **Cast: ONE Fable implementer
@@ -372,9 +372,60 @@ this record unless a line below says so.**
     with the MERGE NOTE for the mobile seat (`main`'s deletions win; drop the phone's `bridgeEnabled: false`; the
     `BridgeHash` new home); C7 the identity memo's rationale note. **The §5 CARRY ITEM appended verbatim to
     `notes/fragments-bridge-contract.md`.** C8 untouched as instructed (`pre-13x-postures-design.md` §10/§17b are the
-    architect's). — commit PENDING(hash)
-  - step 7 — NOT-STARTED
-- **Counts:** core **1391/152 green (step 3)** · Mac PENDING · iOS build PENDING · spine PENDING
+    architect's). — `a2704c4`
+  - step 7 — DONE — the §4 residue grep read whole and classified (below); EIGHT more present-tense comment lines
+    it surfaced fixed before the final runs (`PostRenderQueryTests:442` · `Phase13SurfaceQueryTests:10/110` ·
+    `JournalEntryTests:259` · `ExportProjectionTests:13` · `NoteVersionsTests:100` — it named the DELETED
+    `BridgeVersionTests` · `Migrations.swift:189`'s lens comment · `OperationError.swift:24`; and MobileSoul PL-13's
+    "bridge deletion-travel engine" parity phrase marked retired). Then, on the FINAL tree, in this order and never
+    two at once on the shared DerivedData: `swift test` → **`Test run with 1391 tests in 152 suites passed`**; the
+    full Mac suite (`-only-testing:VariorumTests`) → **`Test run with 2094 tests in 378 suites passed`**, `** TEST
+    SUCCEEDED **`, 2 skipped = batch 0's env-gated iCloud-Keychain probes (skipped by default, as batch 0 recorded);
+    the tutorial spine (the TEN suite types in `TutorialWalkTests.swift`) → **`Test run with 72 tests in 10 suites
+    passed`**, 0 skipped; the phone (iPhone 17 Pro / OS 26.2): the seven `MobileTutorialWalkTests.swift` types +
+    `MobileStarterJournalTests` → **`Test run with 41 tests in 8 suites passed`**, 0 skipped (the iOS BUILD passed
+    at step 4). Her app PID 79767 ran beside every suite, untouched; no Release build; no `/Applications`; no real
+    store — commit PENDING(hash)
+- **Counts (final tree):** core **1391/152** (baseline 1525/165 − 13 deleted suites; 136 bridge tests gone, 2 pins
+  added: the `BridgeHash` vectors, the v1_16 migration) · Mac **2094/378** (baseline 2106/378 − 15 deleted bridge
+  cases [`Phase9bBridgeWiringTests` 5/1 · `Phase9cAuthWiringTests` 5 · `AuthSessionTests` 4 · `NoteVersionsPaneTests`
+  1] + batch 0's +3 tests / +1 suite — the arithmetic closes exactly) · spine **72/10** · iOS **build green;
+  41/8** on the simulator
+- **The §4 residue grep, classified (every surviving "fragments"/"bridge" in `Sources App Tests Tools`, DerivedData
+  and TextKit's layout "fragments" excluded — 260 lines):** 61 the vault-format `journalBridge` family
+  (`KeyVaultFormat` · `DeviceKeyMaterial` · `VaultEnrollment` · `KeyVaultClient` · `AccountRekey` · `VaultBootstrap`
+  · `EncryptionSession:588` · the custody fixtures — KEPT by design, the class marked DORMANT); 22 `BridgeHash` (the
+  manifest recipe, fork F1); 62 dated history notes this session wrote ("retired 2026-09-04"); 10 in `Sync/`
+  (UNTOUCHED: `SyncEncryption:19` still true; `SupabaseTransport:49/174` history; `Repairs:191` a door list;
+  `SampleLibraryDedupe:21` still true; `SyncSchema:248-250` the ONE touch; `SyncScheduler:55-56` the English verb);
+  the remaining 105 are the English word ("bridges to", "a bridge across", "the storage delegate bridge",
+  "`NSPanel` bridge", "bridged ObjC factory", "promote is the bridge" — her tutorial/help copy), her verbatim
+  rulings (#37's "the fragments entries should arrive as part of Journal"), the v1_4 migration's own DDL and
+  history block, the v1_16 migration and its pin, and history notes that read as history (`OwnerIdentity`'s 9c
+  keying, `ChromeMinHeightTests`' fixture provenance, `VisibilitySkewTests`/`SerializerCompletenessTests`' "Fragments
+  post-mortem"). No present-tense claim that the bridge runs survives.
+- **Inventory deltas, final:** D1–D7 above, all handled; plus the eight late comment lines (step 7) and the
+  `TierAndOnboardingTests`/`MobileTutorialWalkTests` file-vs-type naming notes (steps 4/7).
+- **Open items for the orchestrator:**
+  1. **The walk (§4, hers/the orchestrator's, dev store):** no bridge row in the sidebar's status family; the Account
+     sheet (opened from the sync row) shows only the Variorum sign-in/create/delete faces; ⌘J still mints and shelves
+     today's entry; a sync round completes; Settings ▸ Savepoints' help names three occasions; the Takes-mode journal
+     notice reads its S5 half. Not walked by this session (headless).
+  2. **QUESTIONS #89 for her:** PROVISIONAL (a) the Takes notice's wording · (b) the C7 rationale re-base; the briefs
+     she carries (privacy DELTA + website bullet → the stargazing.tech agent; the CARRY ITEM → the Fragments agent).
+  3. **Fork F1 / P1 for the architect:** `BridgeHash`'s kept name (a `Sync/`-rider rename later if wanted); the
+     retired Fragments-session Keychain item cleared at her next real sign-in only, never logged out server-side.
+  4. **C8, the architect's own edits:** `pre-13x-postures-design.md` §10 → "DONE (tag …)", §17b — not touched here.
+  5. **The mobile seat's merge note** (item 16 of its handoff) — the `mobile` branch meets delete/modify conflicts on
+     every bridge file at its next merge; `main`'s deletions win.
+  6. **`SyncSession.onRoundCompleted`** kept as an unsubscribed seam (recorded at step 4) — remove at a later `Shared/`
+     touch if no follower appears.
+  7. **The cold review (§7):** the combined diff is `git diff archive/fragments-bridge-2026-09-04..HEAD`; the
+     orchestrator's after-pass foci from §7 apply (the 14a direct sign-in byte-identical in behaviour — its
+     `AuthSessionTests` cases ran UNMODIFIED; `resyncReinitialize`/`AccountRekeyMarker` semantics without step 6 —
+     `AccountLifecycleTests` + `EncryptionFlowTests`' re-key test green; no bridge door renders — the walk's).
+- **Machinery honesty:** one session, no deaths, no resumes; every step's commit pushed before the next began; the
+  eight late comment fixes ride this step-7 commit (recorded above).
 - **Deltas from §2/§2b's inventory found by the re-run greps (on `32d3fdf`):**
   - **D1 · `BridgeHash.body` is NOT bridge-only.** It is the sample library's manifest hash recipe: `SampleLibrarySeeder`
     (`:154`, `:333-334`, `:361` — the bundled manifest's title→hash entries were computed with it), the dedupe facts
