@@ -1,3 +1,5 @@
+> **HISTORY (2026-09-04).** This review examined the 2026-09-01 design and drove the 09-03 rewrite; parts of it were superseded the same week (its §8 says where), and the 09-04 sittings changed the switch again. The settled design is `notes/plans/pre-13x-postures-design.md`; the arc is `notes/plans/pre-13x-design-history.md`. Nothing here binds the build.
+
 # pre-13x — THE ARCHITECT'S DESIGN REVIEW (cold read, 2026-09-03; questions for the author)
 
 **Status:** the pre-build review the author asked for at the pre-13x kickoff sitting ("thoroughly review it,

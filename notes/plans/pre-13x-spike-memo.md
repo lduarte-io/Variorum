@@ -2,7 +2,7 @@
 
 **Status: COMPLETE on the Mac; Q3 PENDING-HER-SITTING (the phone leg is PREPARED, not run).**
 Run 2026-09-04 by the batch 0 Fable implementer, per the BATCH 0 BRIEF in
-`notes/plans/pre-13x-postures-design.md` §17b. This is the Phase 6 / 13p pattern:
+`notes/plans/pre-13x-postures-design.md` §18 (the execution record). This is the Phase 6 / 13p pattern:
 evidence before commitment. **What landed on `main` beyond this memo:** the shared
 access group on both targets' entitlements (its own commit) and three DEBUG-only
 probe doors over one throwaway-service brain (never a production Keychain item, never

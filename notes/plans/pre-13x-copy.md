@@ -5,12 +5,12 @@ also be your job to update the settings + the tutorial with the utmost clarity o
 want you to write all the user facing text that's required now though and I'll handle copy changes later."*
 This file is that text. **Render, don't re-derive:** the batches copy these strings verbatim (placeholder
 VOICE with honest CONTENT — 13s re-voices later; the FACTS in every sentence are binding and come from
-`notes/plans/pre-13x-postures-design.md` §2–§6). Where a sentence differs between platforms, the device
+`notes/plans/pre-13x-postures-design.md` §2–§8; that file is the settled design; its history is `pre-13x-design-history.md`). Where a sentence differs between platforms, the device
 words ride the standing interpolation (`Mac` / `iPhone`, `Touch ID` / `Face ID`, `login password` /
 `passcode`).
 
-**Vocabulary — TWO REGISTERS (her 09-04 rule: the plain-credential legend is the standard for talking to users,
-with a brief explanation of technical terms where needed).** *Everyday surfaces* (settings, ceremonies, notices,
+**Vocabulary — TWO REGISTERS (the plain-credential legend is the standard for talking to users, with a brief
+explanation of technical terms where needed).** *Everyday surfaces* (settings, ceremonies, notices,
 lobby): *your library* · *your passphrase* · *your twelve words* (never "recovery phrase" alone on first use — "your
 twelve words, the recovery phrase") · *your Apple account* · *an enrolled device* · *Standard* and *Castle* · *sync*
 · *a key* — no key is named there. *The Encryption book (§7b) and the FAQ:* the keys are NAMED and each term is
@@ -243,7 +243,7 @@ from another account. Enter your passphrase to connect it; everything here will 
 
 ### Change passphrase
 Title: *Change your encryption passphrase.*
-Lead (her framing, 09-04): *For when you've forgotten it or want a different one. Your devices keep syncing; the old
+Lead: *For when you've forgotten it or want a different one. Your devices keep syncing; the old
 passphrase stops opening anything for anyone who never used it. If someone else may have USED it, tick "Also replace
 my keys" below.*
 Fields: Current passphrase · New passphrase · Confirm new
@@ -252,7 +252,7 @@ Link: *Forgot your current passphrase?*
   Passphrase*
 - Castle forgot road, Touch ID mode: *Confirm with Touch ID to set a new passphrase.* Always-ask mode: no
   link (you typed it to get in); instead: *Use your twelve words instead.*
-Checkbox (PROVISIONAL (q)): *Also replace my keys — choose this if someone may have USED the old passphrase, or has
+Checkbox: *Also replace my keys — choose this if someone may have USED the old passphrase, or has
 a copy of your library.*
 Done: *Your passphrase is changed. Your other devices keep syncing; they'll ask for the new one the next time
 they need a passphrase. The old passphrase now opens nothing for anyone who never used it.*
@@ -260,10 +260,10 @@ they need a passphrase. The old passphrase now opens nothing for anyone who neve
 ### Regenerate twelve words
 Title: *New twelve words.*
 Body: *Your current words will stop working the moment the new ones are confirmed. Write the new ones down
-first.* Checkbox (PROVISIONAL (q)): *Also replace my keys — choose this if someone may have USED the old words, or
+first.* Checkbox: *Also replace my keys — choose this if someone may have USED the old words, or
 has a copy of your library.* Same authorization as change passphrase. Then 2a's Screens 3/3b.
 
-### Replace All Keys (PROVISIONAL (q) — recommended; built at her word; the standalone "new library key" door is gone)
+### Replace All Keys
 Title: *Replace all your keys.*
 Body: *Use this if someone may have used your passphrase or twelve words, or has a copy of your library or a
 backup. Your sync gets a new master key and a new corpus key, everything on the server is re-encrypted from this
@@ -315,11 +315,12 @@ Button: *Choose Where…*
 another device. Enter the new one to update this Mac.* Doors: *Enter…* · *Later* (sub-line: *Until then,
 Touch ID keeps working here.*)
 **Account moved to Castle (a device that was Standard):** *Your account is now in Castle — set on [device] on
-[day]. From now on this Mac asks for Touch ID to open your library, with your passphrase as the fallback.*
-Button: *OK* — **superseded by (m), RULED — the notice is:** *…with your passphrase as the fallback. Enter your passphrase once to pick up your
-new sync keys: they were replaced when Castle was entered, and only your passphrase or twelve words open them.*
-Doors: *Enter Passphrase…* · *Use Twelve Words…* · *Later* (sub-line: *Until then this Mac opens and reads, but
-doesn't sync.*)
+[day]. From now on this Mac asks for Touch ID to open your library, with your passphrase as the fallback. Enter your
+passphrase once to pick up your new sync keys: they were replaced when Castle was entered, and only your passphrase or
+twelve words open them.* Doors: *Enter Passphrase…* · *Use Twelve Words…* · *Later* (sub-line: *Until then this Mac
+opens and reads, but doesn't sync.*)
+**Keys replaced elsewhere (a device that has not followed yet):** *Your keys were replaced on [device] on [day]. Enter
+your passphrase once to pick up the new ones.* Doors: the same three; the same sub-line.
 **Account moved to Standard (a device that was Castle):** *Your account is back in Standard — set on [device]
 on [day]. This Mac opens silently again; your Apple account holds a key.* Button: *OK*
 **The nudge — covered:** *At least one real way back into your writing exists beyond this Mac.*
@@ -356,7 +357,7 @@ folder is good at. To have your writing on every device, use sync.*
 
 ---
 
-## 7. THE TUTORIAL — "Keeping it private" (the SHORT chapter; her 09-04 direction — the full story is the Encryption book, §7b)
+## 7. THE TUTORIAL — "Keeping it private" (the SHORT chapter; the full story is the Encryption book, §7b)
 
 **Lesson 1 — What's true in every mode**
 *Your library is encrypted on disk: the file Variorum writes is unreadable without its key — to Finder, to
@@ -380,14 +381,13 @@ does — is in the book "Encryption Explained" on this shelf.*
 
 ---
 
-## 7b. THE ENCRYPTION BOOK — "Encryption Explained" (a seeded book in Home beside the tutorial; her 09-04 direction; title RULED; 13s re-voices; every FACT binding)
+## 7b. THE ENCRYPTION BOOK — "Encryption Explained" (a seeded book in Home beside the tutorial; 13s re-voices; every FACT binding)
 
 **Register rule for this book and the FAQ:** plain credential words, each defined the first time it appears:
 *encrypted* (scrambled so that only a key unscrambles it) · *key* (a long random number) · *wrapped* (a key that
 has itself been encrypted under another key or under your passphrase, so the wrapped copy is useless without what
 wraps it) · *the library key* · *the master key* · *the corpus key* · *the iCloud key* · *your passphrase* · *your
 twelve words* · *the key file*. Never: box, vault, escrow, KDF, token, session, RLS.
-(The master and corpus-key rotation at the switch — §16 (m)/(m-corpus) — are RULED; the [m] marks are gone.)
 
 **Chapter 1 — What is encrypted, and with what**
 *Your library is one file. Every page of it is encrypted with AES-256 under the library key — a random 256-bit
