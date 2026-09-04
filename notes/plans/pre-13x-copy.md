@@ -118,6 +118,9 @@ Protection if you're unsure.*
 Button: *Continue*
 
 **Screen 3 — the twelve words**
+If the library already has twelve words (a Castle library turning on sync): Title *Your library already has twelve
+words.* Body: *Type them to use the same twelve for sync, or generate new ones — the new ones replace the old
+everywhere.* Buttons: *Type My Words…* (→ Screen 3b) · *Generate New Ones* (→ Screen 3). Otherwise:
 Title: *Write down your twelve words.*
 Body: *These twelve words open your account and your library exactly as your passphrase does. Write them on
 paper and keep the paper somewhere real. They are shown once.*
@@ -169,8 +172,11 @@ why the words go on paper.*
 Checkbox: *I know my passphrase, and my twelve words are written down.*
 Confirmation: Touch ID, or the passphrase.
 Button: *Enter Castle*
-**Done:** *You're in Castle. Your library has a new key that your Apple account never held. This Mac asks for
-Touch ID from now on; your other devices will ask the next time they open.*
+**During:** *Re-encrypting your library on the server… (N of M)* — then *Giving your library a new key…*
+**If the scheduled plaintext export was on:** *Your weekly unencrypted Markdown export is now off — it would have kept
+writing readable copies of your library to disk. You can turn it back on in Backups; Castle will warn you there.*
+**Done:** *You're in Castle. Your library has a new key that your Apple account never held. A fresh backup was made
+under it. This Mac asks for Touch ID from now on; your other devices will ask the next time they open.*
 **Then, once — the offer:** Title *Delete the backups Variorum made before today?* Body: *They still open through
 your Apple account, and they always will. Deleting them closes that door for what they hold. Variorum can only
 delete its own backups — Time Machine, copies you made, and anything outside Variorum's folders aren't touched and

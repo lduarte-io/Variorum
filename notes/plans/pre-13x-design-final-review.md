@@ -1,5 +1,9 @@
 # pre-13x — THE ARCHITECT'S FINAL REVIEW OF THE SETTLED DESIGN (2026-09-04 night, after the clean rewrite)
 
+**Status (2026-09-04, later):** R1, R5 (both halves), R7 (her words: type the existing words or generate new — never a
+silent reuse) and R9 are RULED and folded into the design file; R2, R3, R4, R6, R8 await her word after the plain
+explanations given in the sitting.
+
 **Read as:** a review of `notes/plans/pre-13x-postures-design.md` as it stands, by the architect who sat through every
 sitting, asked to broaden — holistic first, then scenario by scenario, then a verdict. Its purpose is confidence, not
 change: every recommendation below is a completeness or robustness refinement of a ruled shape, never a reversal. Nothing
