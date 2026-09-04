@@ -1,5 +1,56 @@
 # DESIGN MEMO — the daily Journal's first-class identity (and why it can never be hard-deleted)
 
+> **⚠️ RE-SCOPED BY THE AUTHOR, 2026-09-04 (at the Fragments bridge retirement's close — read §0 before the rest; §§1–7 below are the pre-retirement design, kept as history and as the sitting's starting material).**
+
+## 0. AUTHOR RULING 2026-09-04 — "a 'journal book' is dead as a concept"
+
+**Her words, verbatim (the bridge retirement session, 2026-09-04):** *"Can you add a note to whichever plan was
+supposed to determine the shape of a Journal (I believe it's 13i-e) that the special shape of a journal book as
+a fragments bridge is unneeded? also, journal books don't need to have anything at all against multiple day
+entries at this point - I think we did allow the collision before but maybe it was discouraged in the UI somehow?
+not sure, but at this point a 'journal book' is dead as a concept - it would only be a book auto stamped with its
+date when an entry is created, like any other book."*
+
+**What this rules (recorded, not re-derived):**
+1. **The bridge-shaped identity need is GONE.** The Fragments bridge was retired 2026-09-04 (pre-13x batch 0b;
+   tag `archive/fragments-bridge-2026-09-04`; `notes/archive/fragments-bridge.md`). This memo's §2 problem
+   statement, §3 "the ONE book the bridge shelves into", §4's hard-delete guard ("there's no bridge with
+   fragments and that's unfortunate"), and every bridge-motivated edge in §5 lose their reason. Whatever
+   identity the daily Journal keeps is on her ordinary-book grounds alone.
+2. **No guard against multiple entries on one day.** "journal books don't need to have anything at all against
+   multiple day entries at this point."
+3. **The concept is dead:** a "journal book" is only *"a book auto stamped with its date when an entry is
+   created, like any other book"* — an ordinary book whose entries get their `entry_date` stamped at creation.
+
+**What the code does TODAY (facts for the sitting, checked 2026-09-04 — this answers her "not sure"):** the
+STORE never forbade two entries on one day (no uniqueness on `container.entry_date`); the collision was
+discouraged at the DOORS by the Phase 8 "notebook rule" (author, 2026-07-07): Today's Entry (⌘J) and a book's
+"+ new entry" for a date both go through `createOrOpenJournalEntry`, which looks the day up
+(`Queries.canonicalJournalEntry`) and OPENS the existing entry rather than minting a second (an archived one
+included, when it is all the day has); the book's day page reads the same canonical lookup; and the retired
+bridge PAUSED its push on a duplicate day. So: allowed in the store, steered away at the doors — exactly her
+recollection. `profile='journal'` on a note still means "sort by `entry_date`" in the journal lens and the
+phone's journal list; `reading.profile='journal'` + `entry_date` ascending is the daily book's mint shape (the
+SyncSpec §7 keeper repair keys on it); `setting.daily_journal_book` is the ⌘J designation.
+
+**What the 13i-e sitting now owns (listed, NOT decided here — each is hers):**
+- (a) Whether `createOrOpenJournalEntry`'s create-OR-open stays as ⌘J's convenience ("open today's entry")
+  or ⌘J becomes plain "new entry, date-stamped" — her ruling says nothing is needed AGAINST a collision; it does
+  not say the convenience must go.
+- (b) Whether `profile='journal'` survives as anything more than "date-stamp at creation + sort by date"
+  (the journal lens, the phone's journal list, the tutorial's books chapter line), or folds into an ordinary
+  book with a per-book "stamp entries with their date" trait.
+- (c) The daily-book DESIGNATION (`setting.daily_journal_book`, ⌘J's target, the phone's capture target): keep
+  as "the book ⌘J files into", derive it, or drop ⌘J's filing and let the entry land where any new note lands.
+- (d) The SyncSpec §7 keeper repair (two devices minting the daily mint-shape offline): with no bridge and no
+  special identity, whether the repair stays as the mint-shape dedupe it is, or retires with the concept.
+- (e) The hard-delete guard (§4): DISSOLVED as a bridge argument (C7 re-base, QUESTIONS #89); whether any
+  never-hard-delete rule remains for the daily book on identity grounds alone is this sitting's call, per #89.
+- (f) The phone (`MobileStarterJournal`, the capture door) and the tutorial's journal lesson — the faces that
+  follow whatever (a)–(c) rule.
+
+*(Sections 1–7 below predate this ruling. Read them for the edges they enumerate, not for their conclusions.)*
+
 **Provenance:** written 2026-08-31 at the pre-13u round's tail, at the author's instruction after
 the final ladder's F6 finding exposed the gap. A P-5 design memo: the intended behavior whole,
 the edges enumerated on paper, her rulings verbatim. **Owner: 13y** (the pre-release `Sync/`
