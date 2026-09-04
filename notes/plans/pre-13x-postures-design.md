@@ -592,7 +592,8 @@ session flash the test host's windows — prefer zero-instance windows for timin
 never spawn subagents (one Sonnet lookup for external facts is the sole exception, read-only).
 
 ### LIVE STATUS (flipped in the same commit as each piece; PENDING = unverified)
-- **U0 batch 0** — IN-PROGRESS (spawned 2026-09-04; brief below).
+- **U0 batch 0** — **DONE (`e8f7a11`; Q3 PENDING-HER-SITTING)** — the memo `notes/plans/pre-13x-spike-memo.md`; commits
+  `fa64534` · `a37f9cd` · `e29ebe3` · `e8f7a11` + the closing one; the batch record is under §17c.
 - U1 batch 0b — NOT-STARTED (placement: before the key work per ruling 16; her 09-04 question "is it fine
   to remove the bridge after?" answered in the sitting — either order works; "after" costs a small port of
   the bridge's key provider in batch 1 and carries its tests through; "first" is recommended).
@@ -601,9 +602,9 @@ never spawn subagents (one Sonnet lookup for external facts is the sole exceptio
 ### THE LEDGER (numbered; every row owned; grows as batches land)
 | # | item | owner | status |
 |---|---|---|---|
-| 1 | the shared keychain access group on both targets (review P8) | U0 → U2 | open |
-| 2 | A crosses Mac ⇄ phone under the shared group (measured on her two devices) | U0 | open |
-| 3 | the decision memo | U0 | open |
+| 1 | the shared keychain access group on both targets (review P8) | U0 → U2 | **done at U0 (`a37f9cd`)** — both signed products carry `[own group, ….Variorum.shared]` under the team wildcard, no App-ID step; U2 consumes it (Keychain Sharing on the App IDs is 13r's, for the distribution profiles) |
+| 2 | A crosses Mac ⇄ phone under the shared group (measured on her two devices) | U0 | **PENDING-HER-SITTING** — both DEBUG doors built (`e29ebe3`); the five-minute procedure is the memo's Q3; flips when she reports the five values |
+| 3 | the decision memo | U0 | **done (`e8f7a11`)** — `notes/plans/pre-13x-spike-memo.md` |
 | 4 | the guard against working from a library inside iCloud Drive | **13x** (the Open-a-library door is the only road that could put it there; recorded on 13x's row at closeout) | deferred, owned |
 | 5 | "Open a library file…" (plaintext → fresh key + identity; ciphertext + key file) | **13x** | deferred, owned |
 | 6 | the inactivity dial: default 10, offered 5 · 10 · 30 · never; clock = time since Variorum was last used | U3 | open |
@@ -703,6 +704,21 @@ so the Q1 hypothesis is "signing accepts the shared group without an App-ID chan
 - **The memo** `notes/plans/pre-13x-spike-memo.md` — DONE (this commit): the headline table, environment, Q1–Q6
   each with the observed fact · the number · the recommendation, Q3 as PENDING-HER-SITTING with the five-minute
   procedure, the surprises, what is handed forward. **Ledger rows 1–3 + U0 line** — flipped in the closing commit.
+
+**CLOSE (2026-09-04, ~00:50 local).** Commits: `fa64534` (the record opened) · `a37f9cd` (Q1 — the entitlements,
+its own commit) · `e29ebe3` (the probe brain, the Mac suite, both doors, the entitlements pin) · `e8f7a11` (the memo +
+the late Q2–Q6 flips) · this closing commit (ledger rows 1–3, the U0 line). **Needs the author: ONLY Q3's sitting**
+— five minutes on both devices, the memo's procedure; no signing step, no App-ID change, no account action of any
+kind arose. **Environment at close:** her live app (PID 79767) still running, never touched; no Release build; no
+store touch; no `Sync/` line; no production Keychain item; the only synchronizable bytes that ever existed were one
+throwaway item for ~30 ms and its tombstone. Suites beside the piece: 16/16 green in the gated probe run (the
+keychain-identity guard `Phase13pKeychainFactTests` among them); the full Mac suite was NOT run (a measurement
+batch touching no production code path; the reviewer's call whether the closeout wants it). **Two machinery lessons,
+for the resiliency protocol's owner:** (1) `tail -n +1 -f <log> | grep -m1 EXIT` does NOT return when the EXIT line
+lands — `tail -f` only dies on the NEXT write after grep exits, so both blocking waits here ran to the harness's
+10-minute limit for runs that had finished in seconds; poll with a `grep -q` loop instead. (2) Swift Testing's
+"Test run with N tests" counts SKIPPED tests — read the `skipped:` lines / XCTest's `Executed 0 tests`, never the
+count; the assertion that mis-read it is why the Q2–Q6 flips rode one commit late.
 
 
 ---
