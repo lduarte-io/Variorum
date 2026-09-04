@@ -190,7 +190,8 @@ and CLAUDE.md conflict, CLAUDE.md wins.
   (13b's lesson: ~5k lines), close the phase at a clean seam and open
   the next rather than weakening the reading rule.
 - Memory (`variorum-phase-9-run-state`) updates at every significant
-  state change. Commits per batch/record with the standing trailer.
+  state change. Commits per batch/record — NO attribution trailer (her
+  2026-09-04 rule, CLAUDE.md's Environment notes).
 
 ## The batch loop (binding, every batch)
 

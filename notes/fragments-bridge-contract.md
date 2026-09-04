@@ -1025,7 +1025,8 @@ lockbox reply's consistency map. She carries it; questions return here.
 > longer runs the bridge.** Until that build is refreshed (or its journal bridge disconnected), it still runs
 > the old engine, and that engine lands a Fragments tombstone as a BLANKED Variorum entry (the archived
 > landing rule at `BridgeEngine.swift:384-517` on the tag). Variorum will send the word; nothing on your side
-> waits on it except deletions. **(2) REVOKE the Variorum bridge's Fragments-project sessions server-side**
-> (the delegated `custom:stargazing` sign-ins Variorum's bridge held). Variorum only clears its LOCAL copy of
-> that refresh token; Supabase refresh tokens never expire on their own, so the server-side session stays
-> valid until you revoke it or the author signs out of Fragments globally.
+> waits on it except deletions. **(2) VERIFY, and REVOKE any leftover, of the Variorum bridge's Fragments-project
+> sessions server-side** (the delegated `custom:stargazing` sign-ins Variorum's bridge held). The author's
+> Disconnect on her installed build logs its session out best-effort; Variorum otherwise only clears its LOCAL
+> copy of that refresh token, and Supabase refresh tokens never expire on their own — so a session that missed
+> the logout stays valid until you revoke it or the author signs out of Fragments globally.

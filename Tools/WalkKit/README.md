@@ -36,5 +36,6 @@ swiftc -O -o /tmp/walk-scroll Tools/WalkKit/scroll.swift
 - `open -n <app>` launches a second instance beside hers; `pgrep -fl 'Variorum.app/Contents/MacOS'` then shows
   both — never quit or kill the `/Applications` one.
 - Every launch of the Debug build takes a dev-store backup (`…/Variorum-dev/Backups/`); harmless, expected.
-- `cliclick` (Homebrew) is the one-binary alternative to all of the above for click/type/drag/scroll
-  (`cliclick c:x,y`, `kd:cmd t:j ku:cmd`, `dd:x,y du:x,y`, `w:ms`); not installed as of 2026-09-04 — her call.
+- `cliclick` 5.1 IS INSTALLED (she ran `brew install cliclick`, 2026-09-04): the one-binary road for
+  click/type/drag/scroll — `cliclick c:x,y` (click at points), `kd:cmd t:j ku:cmd` (⌘J), `t:text` (type),
+  `dd:x,y du:x,y` (drag), `w:ms` (wait). Prefer it over the osascript keystroke road for typing into fields.

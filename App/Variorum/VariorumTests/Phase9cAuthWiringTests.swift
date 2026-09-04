@@ -89,7 +89,12 @@ struct Phase9cAuthWiringTests {
                 makeSyncTransport: { _ in syncTransport },
                 // Phase 14b: a working fixed key world so wiring rounds
                 // reach the transport (never the real Keychain in tests).
-                makeSyncKeyProvider: { AppTestKeyProvider() })
+                makeSyncKeyProvider: { AppTestKeyProvider() },
+                // Round 2 of the bridge retirement (N1): the retired-credential
+                // sweep is INERT in every test world — the real one is a
+                // login-keychain SecItemDelete that reaches the INSTALLED
+                // build's items from the test host.
+                legacyCleanup: {})
             await services.start()
             try await body(services, auth, db, syncTransport)
             services.stop()
@@ -329,6 +334,44 @@ struct Phase9cAuthWiringTests {
             await settle { sweeps.count >= 1 }
             #expect(sweeps.count >= 1,
                     "start() must run the retired-credential sweep (off-main)")
+            services.stop()
+        }
+    }
+
+    /// Round 2 of the retirement (N1): the sweep is REAL-STORE ONLY. A
+    /// dev-store session — Xcode Run, the test host — shares the machine's
+    /// login keychain with the installed Release build (a different bundle
+    /// identity, `io.lduarte.Variorum.debug`), and the retired item there
+    /// is the INSTALLED build's live bridge session: a dev launch must never
+    /// reach it (the A4 fence's spirit). Red on old: the round-1 sweep fired
+    /// on every `start()`, dev store included — and the fix pass's own test
+    /// run swept the real item from the test host.
+    @Test func startOnTheDevStoreNeverRunsTheSweep() async throws {
+        let db = try AppDatabase.inMemory()
+        let authStore = AuthTokensStore.inMemory()
+        let auth = AuthSession(
+            configuration: Self.testAuthConfiguration, store: authStore,
+            http: Self.noNetwork)
+        let sweeps = SweepSpy()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.ownerIdentity = OwnerIdentity { authStore.load()?.userID }
+        } operation: { @MainActor in
+            let services = AppServices(
+                session: AppSession(database: db), storeVariant: .dev,
+                backupEnabled: false,
+                auth: auth,
+                makeSyncTransport: { _ in RecordingSyncTransport() },
+                makeSyncKeyProvider: { AppTestKeyProvider() },
+                legacyCleanup: { sweeps.record() })
+            await services.start()
+            // The sweep is detached; give a fired one time to land before
+            // asserting it never did.
+            try await Task.sleep(for: .milliseconds(400))
+            #expect(sweeps.count == 0,
+                    "a dev-store start() must never run the retired-credential sweep")
             services.stop()
         }
     }

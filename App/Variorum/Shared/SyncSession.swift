@@ -113,8 +113,8 @@ final class SyncSession {
         let scheduler = SyncScheduler(engine: engine, janitor: janitor)
         self.scheduler = scheduler
 
-        // Status → the observable surface (+ the round-completion hook:
-        // roundsCompleted increments exactly once per finished round).
+        // Status → the observable surface (`roundsCompleted` increments
+        // exactly once per finished round; the scheduler counts it).
         observationTasks.append(Task { [weak self] in
             // (A round-completed closure seam lived here for the Fragments
             // bridge, Phase 9b → 2026-09-04; it left with its one subscriber

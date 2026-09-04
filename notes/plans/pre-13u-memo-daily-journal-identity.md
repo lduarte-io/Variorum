@@ -61,8 +61,11 @@ retired."*
   retired"), Today's Entry stays as a mobile button, and the journal book is special ONLY as the destination —
   *"where Today's Entry and the shortcut takes you"* — i.e. the designation survives in exactly that role and
   nothing else about the book is special. (b), (d), (e), (f) remain the sitting's, read in that light.
-- **Owner of the build:** 13i-e as slotted; the door change is small (one op + its three doors + the pins on the
-  notebook rule) and could run as a 17 entry sooner at her word — nothing built from this here.
+- **Owner of the build — RULED (her third message, 2026-09-04): 13i-e.** *"13i-e is the right place to handle the
+  changes to the journal book"* — not a 17 entry; nothing built from this here.
+- **(e) HER LEAN, same message, uncertainty kept:** *"if there's a command that opens it, it probably still
+  shouldn't be deletable"* — the never-hard-delete guard PROBABLY survives on the new ground (⌘J opens it), no
+  longer on the bridge's; the sitting confirms the wording.
 
 *(Sections 1–7 below predate this ruling. Read them for the edges they enumerate, not for their conclusions.)*
 

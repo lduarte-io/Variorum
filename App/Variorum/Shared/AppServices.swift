@@ -154,7 +154,11 @@ final class AppServices {
         // release builds share a bundle identity and Keychain, so a
         // dev-store session must never adopt the signed-in session for
         // syncing — a dev bug's writes would push to the mirror and
-        // replicate to her real devices.
+        // replicate to her real devices. (The Debug build's bundle identity
+        // is `io.lduarte.Variorum.debug`, the installed Release build's
+        // `io.lduarte.Variorum` — they share the machine's LOGIN KEYCHAIN,
+        // not an identity; the retirement's round-2 N1 corrected this
+        // comment's old "share a bundle identity" wording.)
         sync = SyncSession(database: session.database, allowsSync: storeVariant == .real)
         // 13j ladder B (B3): the purge doors' receipts and the local purge
         // road both read this — one truth, the sync session's own.
@@ -255,8 +259,15 @@ final class AppServices {
         // session adopted below never routes through `variorumSignInChanged`,
         // so without this the bridge's retired Fragments-project item would
         // outlive every launch of a user who never signs out again
-        // (round-1 MINOR-1; the seam's doc has the whole story).
-        Task.detached(priority: .utility) { [legacyCleanup] in legacyCleanup() }
+        // (round-1 MINOR-1; the seam's doc has the whole story.) REAL STORE
+        // ONLY (round-2 N1): a dev-store session — Xcode Run, the test host —
+        // shares the machine's login keychain with the installed Release
+        // build under a different bundle identity, and the retired item
+        // there is the INSTALLED build's; the A4 fence's own seam gates it
+        // (`sync.allowsSync` IS `storeVariant == .real`).
+        if sync.allowsSync {
+            Task.detached(priority: .utility) { [legacyCleanup] in legacyCleanup() }
+        }
         // The persisted session from a previous launch.
         if let userID = await auth.currentUserID {
             account.variorum = AccountState.SignedIn(

@@ -1047,7 +1047,10 @@ struct AccountDoorWiringTests {
                 makeSyncTransport: { _ in QuietTransport() },
                 makeSyncKeyProvider: { AppTestKeyProvider() },
                 keyVault: keyVault,
-                makeAccountLifecycle: { _ in lifecycle })
+                makeAccountLifecycle: { _ in lifecycle },
+                // The bridge retirement's round 2 (N1): the retired-credential
+                // sweep is inert in test worlds (a real login-keychain delete).
+                legacyCleanup: {})
             await services.start()
             try await body(services, encryption, store, lifecycle, db, auth)
             services.stop()

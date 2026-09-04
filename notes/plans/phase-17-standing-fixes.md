@@ -558,7 +558,7 @@ WINS — it was written with the real code open and with instructions to refute.
 
 ---
 
-## 17d — Purge, sync & bridge honesty
+## 17d — Purge & sync honesty *(the bridge half DISSOLVED 2026-09-04 — P30)*
 
 **The `Sources/VariorumCore/Sync/` Fable rider binds P8, P9, P28 and P31.**
 
