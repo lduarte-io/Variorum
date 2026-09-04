@@ -325,6 +325,7 @@ re-enrolls (Standard: nothing typed) with re-stamp + re-init.
 ---
 
 ## 8. COMMUNICATION CHANGES (every surface)
+- **ALL user-facing text is `notes/plans/pre-13x-copy.md`** (written 2026-09-03; render, don't re-derive).
 - **Protection pane** → the two-posture chooser (Standard default; Castle behind the ceremony) + Castle's
   two switches + the idle dial + Lock Now. Presets / escrow / loss legs / sync-gate sections deleted.
 - **`ProtectionShapes`** → §2's table rendered; two what-ifs per posture; the keystone lines; the two design
@@ -501,17 +502,21 @@ the two drills, her acceptance walk on both devices, the `/Applications` refresh
   road); the user DOOR is 13x's "Open a library file…" (plaintext → encrypted under a FRESH key + identity;
   ciphertext → with its key file). Recorded on 13x's row at closeout.
 
-**STILL HERS (the recommendation first):**
-(a) CF-11 "forget keys on this device" folded into sign-out — explained in the reply; *(recommend fold: no
-separate door; the sign-out sheet says what stays and names Sign out everywhere / delete-the-library for
-the two real needs)*. (b) a keyless byte-copy backup at lock time when due *(yes; the app's own folder
-only)*. (c) the inactivity default *(10 minutes, offered 5 · 10 · 30 · never; her float was 5)*. (d) the
-account-password minimum *(12 — one floor for both things you type into Variorum; plus Supabase's
-leaked-password protection switched ON in the dashboard)*. (e) the posture copy — 13s re-voices; §2 is its
-bones. (f) the backup-folder-in-iCloud-Drive offer — explained in the reply; *(recommend: offered ONCE at the
-first backup run, default a Variorum folder in iCloud Drive when available, with the one sentence; never
-silently)*. (j) when a Castle → Standard switch propagates, other devices adopt silent open automatically
-with a one-time notice *(yes)*. (k) the exact ceremony words — at batch 5.
+**RULED 2026-09-03 (late evening), continued:** (a) CF-11 folded into sign-out: YES (*"sounds simpler"*).
+(d) the account-password minimum: **12** (+ Supabase leaked-password protection ON). (f) the iCloud Drive
+backup offer: YES (*"agree to promoting backups to be kept in icloud drive"*); the LIVE library stays local
+(iCloud Drive syncs files while they are written — corruption class; sync is the road to every device).
+(j) other devices adopt silent open automatically on a Castle → Standard switch, with a one-time notice: YES.
+(k) the ceremony words and ALL user-facing text: the architect's, written now — **`notes/plans/pre-13x-
+copy.md`** (render, don't re-derive; she re-voices later); the tutorial carries the facts, the website FAQ
+carries the restore/re-upload detail. 13x gains "Open a library file…" (plaintext → fresh key + identity).
+A deleted-then-recreated Standard account leaves iCloud UNCHANGED: one Apple key, the same one opens the new
+account's box and every old backup's key file (the library key never changed) — "two keys in iCloud" cannot
+occur.
+
+**STILL HERS:** (b) the keyless byte-copy backup at lock time (explained in the reply; *recommend yes, the
+app's own folder only*). (c) the inactivity default *(10 minutes; her float 5)*. (e) the posture copy — 13s
+re-voices from `pre-13x-copy.md`.
 
 ## 17. CANON DELTAS AT CLOSEOUT
 AppSpec §14 (this phase's delta) + §7's `setting`/`sync_state` note (keys live in `sync_state`; the key file
