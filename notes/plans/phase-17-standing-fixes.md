@@ -575,7 +575,7 @@ against the in-process fake server) is where it either reproduces or dies, and *
 red-on-old pin*. If it does not reproduce, it is recorded as refuted and closed; the purge design's
 own memo (`notes/plans/phase-13j-purge-memo.md` §4f) is the contract to read it against.
 
-P31 and P30 are the honesty half: a permanently stalled cursor currently reports a **clean, successful
+P31 (and P30, DISSOLVED 2026-09-04) are the honesty half: a permanently stalled cursor currently reports a **clean, successful
 round forever**, and the bridge's shelving failure promises a retry in its own comment that the
 advanced cursor makes impossible. Both are cases of the system telling her something is fine when it
 is not — which in a sync engine is worse than the underlying fault.

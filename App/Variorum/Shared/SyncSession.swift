@@ -13,8 +13,10 @@
 //
 //  THE A4 FENCE, SYNC SEAM (Phase 8 review round 1, BLOCKER): there is
 //  exactly ONE production mirror, and it pairs with the REAL store only.
-//  Debug and release builds share a bundle identity and therefore a
-//  Keychain, so once the author signs in, an ungated dev-store session
+//  Debug and release builds share the machine's login Keychain (their
+//  bundle identities differ: `.debug` vs the installed one — the bridge
+//  retirement's round-2 N3 corrected this sentence), so once the author
+//  signs in, an ungated dev-store session
 //  would auto-configure sync, pull her whole corpus into the dev store,
 //  and push every dev-session write — a dev bug's destructive writes
 //  included — into the mirror that replicates to her real devices.

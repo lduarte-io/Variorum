@@ -15,8 +15,7 @@ record; her rulings R-cor-1…18; a 100-row ledger; eight batches B · A · C ·
 every one walked hands-on by the orchestrator before its record closed; a two-round cold-review ladder with two fix
 sessions). **Finals: core 1525/165 · Mac 2106/378 · spine 72/10 · zero `Sync/` · zero schema · marker 7.** `/Applications` refreshed at the
 close behind the A1 backup; the tutorial re-seed is HER morning act (her store's mode is biometric). Her morning
-bundle: QUESTIONS #88 + `notes/handoffs/act10-correction-handoff.md`. **NEXT — `pre-13x` (Postures & recovery) at
-her word**, its design at `notes/plans/pre-13x-postures-design.md`; then 13u1 (the seam — the 13u work RE-SPLIT into
+bundle: QUESTIONS #88 + `notes/handoffs/act10-correction-handoff.md`. **`pre-13x` (Postures & recovery) is OPEN: batch 0 (the spike) and batch 0b (the Fragments bridge RETIRED 2026-09-04 — tag `archive/fragments-bridge-2026-09-04`, its own three-round ladder, the install refreshed at her word) are DONE; NEXT its batch 1a at her word**, its design at `notes/plans/pre-13x-postures-design.md`; then 13u1 (the seam — the 13u work RE-SPLIT into
 four at her R-cor-12); 13i split a–e; PHASE 18 opened (18a sync considerations). Two founding-session-era
 guidance changes landed at her word: `notes/PhaseSizingGuidance.md` (the acceptance unit; one unit per session;
 two phase-sized units per phase) and the 17-entry review rule.

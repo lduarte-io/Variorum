@@ -345,7 +345,7 @@ struct Phase9cAuthWiringTests {
     /// is the INSTALLED build's live bridge session: a dev launch must never
     /// reach it (the A4 fence's spirit). Red on old: the round-1 sweep fired
     /// on every `start()`, dev store included — and the fix pass's own test
-    /// run swept the real item from the test host.
+    /// run most likely swept the real item from the test host (§8's fact).
     @Test func startOnTheDevStoreNeverRunsTheSweep() async throws {
         let db = try AppDatabase.inMemory()
         let authStore = AuthTokensStore.inMemory()
@@ -367,9 +367,12 @@ struct Phase9cAuthWiringTests {
                 makeSyncKeyProvider: { AppTestKeyProvider() },
                 legacyCleanup: { sweeps.record() })
             await services.start()
-            // The sweep is detached; give a fired one time to land before
-            // asserting it never did.
-            try await Task.sleep(for: .milliseconds(400))
+            // The sweep would be a detached utility task; a barrier task at
+            // the same priority lands after any fired one (round 3, NIT 8 —
+            // a fixed sleep could pass green on a loaded box), then a short
+            // grace, before asserting none did.
+            await Task.detached(priority: .utility) {}.value
+            try await Task.sleep(for: .milliseconds(200))
             #expect(sweeps.count == 0,
                     "a dev-store start() must never run the retired-credential sweep")
             services.stop()

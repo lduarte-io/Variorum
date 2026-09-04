@@ -71,8 +71,8 @@ retired."*
 
 **Provenance:** written 2026-08-31 at the pre-13u round's tail, at the author's instruction after
 the final ladder's F6 finding exposed the gap. A P-5 design memo: the intended behavior whole,
-the edges enumerated on paper, her rulings verbatim. **Owner: 13y** (the pre-release `Sync/`
-phase — her word: "link it to 13y for now"); a `KnownIssuesAndTechDebt.md` row points here.
+the edges enumerated on paper, her rulings verbatim. **Owner: 13i-e** (moved from 13y at her word 2026-09-01
+— "honestly in a very similar area" — and RULED again 2026-09-04, §0); a `KnownIssuesAndTechDebt.md` row points here.
 Nothing in this memo is built by the pre-13u round; the round's F6 fix (the narrowed
 mint-signature predicate) is the SAFE INTERIM — it can no longer merge a deliberate second
 notebook — and this memo is the real answer.

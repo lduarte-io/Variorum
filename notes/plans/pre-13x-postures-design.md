@@ -390,7 +390,7 @@ an iCloud device backup restores only to the SAME device — a new phone receive
 SYNC, so the road is "sign into iCloud, open Variorum," never "restore the backup"). Parity ledger line at
 closeout.
 
-## 10. THE FRAGMENTS BRIDGE — RETIRED (ruling 16)
+## 10. THE FRAGMENTS BRIDGE — RETIRED (ruling 16) — **DONE 2026-09-04: tag `archive/fragments-bridge-2026-09-04` (+ branch `archive/fragments-bridge`), the record `notes/plans/pre-13x-bridge-retirement.md`, the archive note `notes/archive/fragments-bridge.md`; three review rounds closed at the cap; the install refreshed at her word.**
 Batch 0b (§15) sets it aside on a branch and removes it from `main`: `Sources/VariorumCore/Bridge/` (6 files,
 2,226 lines), `BridgeSession.swift`, `BridgeStatusViews.swift`, the Fragments-project delegated session in
 `AuthSession.swift` + `SignInFlow.swift`, the bridge legs of `AppServices.swift` / `SyncSession.swift`, the
@@ -485,7 +485,7 @@ minted locally, never from the server (§19). 25. "Pause sync" is 18a's; "rotate
    reverse) — propagation observed on two real devices; the pre-unlock vault read's latency; a same-Mac
    restore of `ThisDeviceOnly` items characterized; the `key_proof` RPC change drafted against the fake
    server. Decision memo → her.
-0b. **The bridge set-aside** (ruling 16): `git branch fragments-bridge-archive` at `main`; the removal on
+0b. **The bridge set-aside** (ruling 16) — **DONE 2026-09-04** (names as the retirement plan §1 ruled them: `archive/fragments-bridge` + the dated tag): the removal on
    `main` (§10); the canon deltas; the outbound carry item; ITS OWN cold review (a FRESH Fable reviewer — the diff
    touches `AuthSession` and `Sync/`-adjacent seams).
 1. **Substrate**: keys into `sync_state` + the DB-backed provider (Sync/); key file format 2 (master box ·
@@ -594,7 +594,7 @@ never spawn subagents (one Sonnet lookup for external facts is the sole exceptio
 ### LIVE STATUS (flipped in the same commit as each piece; PENDING = unverified)
 - **U0 batch 0** — **DONE (`e8f7a11`; Q3 PENDING-HER-SITTING)** — the memo `notes/plans/pre-13x-spike-memo.md`; commits
   `fa64534` · `a37f9cd` · `e29ebe3` · `e8f7a11` + the closing one; the batch record is under §17c.
-- U1 batch 0b — NOT-STARTED (placement: before the key work per ruling 16; her 09-04 question "is it fine
+- U1 batch 0b — **DONE 2026-09-04** (`notes/plans/pre-13x-bridge-retirement.md` §6 UNIT CLOSED; its ladder §8; batch 1a inherits one KnownIssues row — the sweep's sign-in occasion). *(Was: NOT-STARTED — placement: before the key work per ruling 16; her 09-04 question "is it fine
   to remove the bridge after?" answered in the sitting — either order works; "after" costs a small port of
   the bridge's key provider in batch 1 and carries its tests through; "first" is recommended).
 - U2 batch 1 — NOT-STARTED (BRIEF WRITTEN 2026-09-04 in §17b: two sessions, 1a client substrate then 1b the protocol event; runs only after the bridge retirement lands). U3 batch 2 — NOT-STARTED. U4 batches 3–4 — NOT-STARTED. U5 batch 5 — NOT-STARTED.

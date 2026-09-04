@@ -48,7 +48,7 @@ verified; the bridge retirement is HERS to run next from its own kickoff; batch 
 ## PENDING SLOTS (fill at the next seam)
 - Q3 phone-leg results: Mac→phone status + time PENDING · phone→Mac PENDING · the phone's local round trip
   PENDING · the phone's own-group line PENDING. The dev build install to her phone: PENDING(hash/outcome).
-- The bridge retirement's landing: PENDING(tag · final commit · review verdict).
+- The bridge retirement's landing — FILLED 2026-09-04: tag `archive/fragments-bridge-2026-09-04` (+ branch, both on origin, at `32d3fdf`); the implementer's seven commits `4c1d443`…`d17fe45`; the ladder closed at the cap (round 1: 1 MAJOR process + 5 MINOR + 4 NIT; round 2: N1 MAJOR — the sweep reached the login keychain — fixed `65af5e4d`; round 3: 0/0/2/7, the two MINORs → KnownIssues owner pre-13x batch 1a); the `/Applications` refresh done at her word at the close (the hash in the record §8); HER ACTS: she quit the old build and is having Fragments delete its side, so the carry item's ordering is moot. **Batch 1a inherits:** the retired-credential sweep's sign-in occasion (gate + off-main + a required seam) — the KnownIssues row.
 
 ## MACHINERY LESSONS (this session's, beyond the protocol's addenda)
 - zsh does not word-split an unquoted `$VAR`; pass `-only-testing` flags as `"${ARGS[@]}"` or xcodebuild exits 65
@@ -62,7 +62,7 @@ verified; the bridge retirement is HERS to run next from its own kickoff; batch 
 ## OPEN AUTHOR ITEMS (bundle for her next sitting)
 1. Q3's five values (or her word that the phone leg is skipped — she said 2026-09-04 she is "not terribly
    concerned"; the probe needs only iCloud Keychain on both devices, NOT her account or posture).
-2. The bridge retirement run (hers) — then its review verdict.
+2. ~~The bridge retirement run (hers) — then its review verdict.~~ DONE 2026-09-04 (see the filled slot above).
 3. The lockstep deploy window (after 1b, before batch 2).
 4. At the batch 2 sitting: her phone's move to Castle (Face ID at open) — a consequence of ruling 19 she has not
    explicitly seen stated; and the one-time "confirm your passphrase to finish" on both devices.
