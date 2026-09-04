@@ -1,6 +1,11 @@
 # BRIEF: suite enrollment & the passphrase-set ceremony — the facts and the format spec
 ### (2026-08-31 · carried by the author · self-contained for the Fragments agent)
 
+> **BANNER 2026-09-04 — the journal bridge is RETIRED on the Variorum side** (pre-13x batch 0b;
+> tag `archive/fragments-bridge-2026-09-04`). The authoritative word to Fragments is the 2026-09-04
+> CARRY ITEM at the end of `notes/fragments-bridge-contract.md`. The spec below stands on
+> Fragments' OWN merits (build it or not); nothing bridge-motivated is owed by Fragments any more.
+
 **Provenance:** the author's question, surfaced in the lockbox exchange and carried to the Variorum
 architect the same night — *"if fragments can't sign up and mint its own token, that's an issue for
 it, right? can i give fragments the ability to do that?"* — plus the thread's sharper half: whether

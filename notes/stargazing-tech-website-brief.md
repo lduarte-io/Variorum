@@ -71,9 +71,11 @@ arrives with the paid sync tier — a later phase owns it).
 - **Account deletion is in-app** and removes the user's server-side data.
 - **Export is always free**: markdown and PDF, whole-library export in
   one gesture. Local data is always the user's.
-- **Fragments bridge:** journal entries can flow between Variorum and
+- ~~**Fragments bridge:** journal entries can flow between Variorum and
   Fragments under the one account; journal content is end-to-end
-  encrypted on both ends.
+  encrypted on both ends.~~ **RETIRED 2026-09-04** — the bridge left
+  Variorum's `main` (pre-13x batch 0b; tag `archive/fragments-bridge-2026-09-04`); the
+  site must NOT advertise it. The one account (above and below) stands.
 - **Sync pricing:** currently free; a paid plan will eventually cover
   hosting costs. The ratified framing (use it verbatim wherever pricing
   comes up): *"If you don't subscribe, nothing is lost or held hostage —

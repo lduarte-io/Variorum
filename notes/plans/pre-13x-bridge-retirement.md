@@ -355,8 +355,24 @@ this record unless a line below says so.**
     the engine" — still true; `SupabaseTransport.swift:49/174` "the bridge transport's fakes" / "mirrored from the
     9b bridge transport" — history; `Repairs.swift:191` "⌘J / the bridge / the phone's capture MINTED"; the
     `SampleLibraryDedupe.swift:21` `BridgeHash` reference — still true) and `Spikes/DesignCorpusSeeder` (no target).
-    `swift build` clean — commit PENDING(hash)
-  - step 6 — NOT-STARTED
+    `swift build` clean — `66e68bf`
+  - step 6 — DONE — canon: AppSpec §9 (`applyBridgeLanding`'s row struck to a RETIRED one-liner naming the tag; the
+    `resolveSyncConflict` bridge sentence past-tensed, the `label` parameter kept generic; `shelveInDailyJournalBook`'s
+    door list + "all four doors (three since…)"); SyncSpec §3's wire paragraph (the `journal_entries.body` sentence
+    past-tensed, the class key dormant); OverallModel §3 (six → FIVE quiet occasions, the Fragments landing named as
+    the retired sixth); the master plan (the 9b row's RETIRED note with tag/branch/revival shape; the not-in-this-order
+    list's 13v struck; the 13y row's rationale re-based — C7); `FuturePhases` 13v RETIRED with the revival shape;
+    MobileSoul PL-9's dated retirement note (the row's status cell → dissolved); KnownIssues: the bridge-push-sweep
+    row REMOVED (resolved by retirement), the daily-Journal row's rationale re-based (C7). Briefs: C1 the privacy
+    brief's dated DELTA (the journal-bridge tier drops from Variorum's disclosure; the ONE account unchanged; she
+    carries it); C2 the website brief's bullet struck RETIRED; C3 dated banners under both Fragments briefs; C4 two
+    dated SUPERSESSION notes in the release strategy (§1's SUITE bullet, §4's rider); C5 QUESTIONS **#89** appended
+    (the tag, the archive note, PROVISIONALs (a) the Takes notice + (b) the C7 re-base, the briefs she carries, the
+    dissolutions) and #86(d) marked dissolved-as-a-bridge-question in place; C6 the mobile handoff's item 16 DISSOLVED
+    with the MERGE NOTE for the mobile seat (`main`'s deletions win; drop the phone's `bridgeEnabled: false`; the
+    `BridgeHash` new home); C7 the identity memo's rationale note. **The §5 CARRY ITEM appended verbatim to
+    `notes/fragments-bridge-contract.md`.** C8 untouched as instructed (`pre-13x-postures-design.md` §10/§17b are the
+    architect's). — commit PENDING(hash)
   - step 7 — NOT-STARTED
 - **Counts:** core **1391/152 green (step 3)** · Mac PENDING · iOS build PENDING · spine PENDING
 - **Deltas from §2/§2b's inventory found by the re-run greps (on `32d3fdf`):**

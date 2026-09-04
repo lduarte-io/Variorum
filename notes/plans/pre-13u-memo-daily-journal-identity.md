@@ -67,7 +67,9 @@ nothing on the row says "this one".
   your days go; it came back because a day arrived").
 - **Why refusal and not the Trash:** her words — the bridge with Fragments is the one relationship
   in the app that cannot be rebuilt from the store; a purged daily book severs it for the user
-  AND for her. The 30-day Trash window does not help: the purge is final and the bridge's
+  AND for her. *(Rationale re-based 2026-09-04: the bridge is RETIRED — pre-13x batch 0b, tag
+  `archive/fragments-bridge-2026-09-04`; whether the daily Journal stays never-hard-deletable on identity
+  grounds alone is 13i-e's sitting call — PROVISIONAL, QUESTIONS #89.)* The 30-day Trash window does not help: the purge is final and the bridge's
   day-keyed landing would then mint into a NEW book with a different id, orphaning the mirror's
   history. Entries inside the Journal remain individually deletable (a day is a note; the Trash
   road holds).

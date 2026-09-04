@@ -1,5 +1,15 @@
 # Privacy-policy brief for the stargazing.tech agent — the 13p update
 
+> **DELTA 2026-09-04 — THE JOURNAL BRIDGE IS RETIRED.** Variorum removed its half of the
+> Fragments journal bridge from `main` on 2026-09-04 (pre-13x batch 0b, the author's ruling;
+> archived at tag `archive/fragments-bridge-2026-09-04`). For the policy: **Variorum's disclosure
+> DROPS the journal-bridge tier** — no user writing crosses from Variorum to Fragments any
+> more, so Tier 1's "journal bridge" bullet and Tier 3's "the journal class from Variorum's
+> bridge" boundary sentence below are HISTORY; **the ONE Stargazing account line is UNCHANGED**
+> (this retires the bridge, not the account); the "sanity-check against the Fragments agent's
+> read" ask below is moot for the bridge's sake. Everything else in this brief stands. **She
+> carries the amended brief to the stargazing.tech agent.**
+
 **Dated 2026-08-30, authored inside Phase 13p (whole-store encryption) as
 one of its two ruled outbound deliverables** (the author's instruction,
 2026-08-25: *"the phase for encryption needs to both write a brief for the

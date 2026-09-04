@@ -1,6 +1,11 @@
 # BRIEF: the TWO POSTURES — what changes for Fragments (the revision Phase 20.10 waits for)
 ### (2026-09-01 · carried by the author · self-contained for the Fragments agent · REVISES `fragments-enrollment-brief-2026-08-31.md` and the Aug-31 lockbox reply)
 
+> **BANNER 2026-09-04 — the journal bridge is RETIRED on the Variorum side** (pre-13x batch 0b;
+> tag `archive/fragments-bridge-2026-09-04`). The authoritative word to Fragments is the 2026-09-04
+> CARRY ITEM at the end of `notes/fragments-bridge-contract.md`. The spec below stands on
+> Fragments' OWN merits (build it or not); nothing bridge-motivated is owed by Fragments any more.
+
 **TL;DR.** The vault, the ceremony format spec and the enrollment flows are UNCHANGED — the Aug-31
 brief's §2 stands byte-for-byte, so the 20.10 ceremony can be built to it today. What changed is the
 suite's CUSTODY MODEL around the vault: Variorum collapsed its at-open modes / escrow dial / presets /

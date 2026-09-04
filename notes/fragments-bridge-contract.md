@@ -1012,3 +1012,10 @@ passphrase-change rule (vault is truth, local wraps are caches); the §6 answers
 tests to add (the interop fixture first); and what waits for pre-13x. It SUPERSEDES the Aug-31
 lockbox reply's consistency map. She carries it; questions return here.
 
+> **CARRY ITEM (2026-09-04) — the journal bridge is RETIRED on the Variorum side.** Variorum removed its
+> half of the journal bridge from `main` (archived at tag `archive/fragments-bridge-2026-09-04`). Nothing is
+> owed by Fragments: the 20.10 passphrase-set ceremony is moot for the bridge's sake (build it or not on
+> your own merits); the journal-class E2EE bodies already in `journal_entries` are yours to keep, migrate or
+> drop; the `journal_bridge` class key remains in the suite vault format, dormant. UNCHANGED: the ONE
+> Stargazing account and the suite issuer (14a/14d) — this retires the bridge, not the account. If the
+> bridge ever returns it returns as shared rows on Variorum's own sync in a collaboration era, designed then.
