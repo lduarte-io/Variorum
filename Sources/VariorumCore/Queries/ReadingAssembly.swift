@@ -115,8 +115,8 @@ extension Queries {
     ///
     /// **It is a way of LOOKING, never the book.** The lens doctrine
     /// applies literally: an override changes what this read returns and
-    /// nothing else — `reading.sort_field` is untouched, so export, the
-    /// Fragments projection, and every other reader keep seeing the book's
+    /// nothing else — `reading.sort_field` is untouched, so export and every
+    /// other reader keep seeing the book's
     /// own order until she deliberately saves one (`setReadingSort`).
     ///
     /// The override is applied at exactly the point the stored field would

@@ -173,7 +173,7 @@ struct SidebarView: View {
     /// Batch 14: the open post's current mode (the rail's › marker) —
     /// broadcast by PostDetailView, tracked by the shell.
     var postMode: String = PostDetailView.Mode.takes.rawValue
-    /// The column's BOTTOM — the protection/sync/bridge status rows, which
+    /// The column's BOTTOM — the protection/sync status rows, which
     /// `RootView` composes (they read services it owns) and hands in. They
     /// were the split view's `safeAreaInset`; with the flat `ShellSplit`
     /// they are the column's own last region, above nothing.

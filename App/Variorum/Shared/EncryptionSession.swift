@@ -189,7 +189,7 @@ final class EncryptionSession {
     /// like an unconfigured client). CONTRACT: the runner adopts custody
     /// mid-run through `adoptRekeyedMaterial` — before its truncate — and
     /// returns only when the whole road (new vault → truncate →
-    /// resyncReinitialize → bridge staging) has run.
+    /// resyncReinitialize) has run.
     var rekeyRunner: ((String) async throws -> DeviceKeyMaterial)?
 
     /// Ladder R1-1: the persisted rekey-in-progress read, injected by the

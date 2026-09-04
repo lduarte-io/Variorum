@@ -336,8 +336,26 @@ this record unless a line below says so.**
     arguments, the re-key test its staged-day leg (B3); `NoteVersionsPaneTests`' source-reading bridge-row test (D3);
     `SavepointOnLeaveTests`' pin flipped to `!contains("Fragments")` (D4, red on old). Touched suites
     (`AuthSessionTests` · `Phase9cAuthWiringTests` · `TierAndOnboardingTests` · `EncryptionFlowTests` ·
-    `NoteVersionsPaneTests`): **`Test run with 50 tests in 5 suites passed`** — commit PENDING(hash)
-  - step 5 — NOT-STARTED
+    `NoteVersionsPaneTests`): **`Test run with 50 tests in 5 suites passed`** — `6188d52` (the
+    `TierAndOnboardingTests` name did not match a suite type — its cases ride the full Mac run at step 7).
+    **iOS: `xcodebuild build -scheme VariorumMobile -destination 'generic/platform=iOS Simulator'` → `** BUILD
+    SUCCEEDED **`; `MobileStarterJournalTests` on iPhone 17 Pro / OS 26.2 → `Test run with 14 tests in 1 suite
+    passed`** (the mobile tutorial suites are seven TYPES in `MobileTutorialWalkTests.swift` — run at step 7).
+  - step 5 — DONE — the comment sweep, 44 files (19 core · 13 app/mobile · 12 test): present-tense claims that the
+    bridge reads/pushes/sweeps re-worded (`renderedText`/export lists, the join-brain notes, the insurance-occasion
+    lists, the R57 rationale in both tutorial seeders + both `nothingSeededIsJournalShaped` pins — the RULE and the
+    `journalShaped == 0` expectations unchanged, the message now names the daily Journal — A4; the V3 must-pin's
+    rationale re-based on the notebook rule; `KeyVaultFormat`'s class marked DORMANT; `SidebarView`/
+    `ProtectionStatusRow` per A5); history left as history where it reads as such (`OwnerIdentity`'s 9c keying
+    note, `CommitBar`'s "SignInFlow lesson", `ChromeMinHeightTests`' fixture provenance, her verbatim #37 quotes in
+    `Operations+Container`/`BookStructureModel:654`, `HelperView`/`TutorialSeeder:1684`'s "promote is the bridge",
+    the English "bridge"/"bridges" in `AccountLifecycle`/`IdentityProjectionAudit`/`OriginBlockDoorTests`/
+    `RecoveryDoorsTests`/`EditorTypography`/`EditorUndoHint`/`MobileEditorViewModel`). **UNTOUCHED, recorded:**
+    `Sync/` docs naming the bridge (`SyncEncryption.swift:19` "the journal-bridge key is the bridge's… never enters
+    the engine" — still true; `SupabaseTransport.swift:49/174` "the bridge transport's fakes" / "mirrored from the
+    9b bridge transport" — history; `Repairs.swift:191` "⌘J / the bridge / the phone's capture MINTED"; the
+    `SampleLibraryDedupe.swift:21` `BridgeHash` reference — still true) and `Spikes/DesignCorpusSeeder` (no target).
+    `swift build` clean — commit PENDING(hash)
   - step 6 — NOT-STARTED
   - step 7 — NOT-STARTED
 - **Counts:** core **1391/152 green (step 3)** · Mac PENDING · iOS build PENDING · spine PENDING

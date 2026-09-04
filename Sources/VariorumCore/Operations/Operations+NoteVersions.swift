@@ -33,10 +33,12 @@ extension Operations {
     ///   display, and the copy's own title is never touched.
     ///
     /// **The copy carries NO `entry_date`, and that is the V3 MUST-PIN.** The
-    /// Fragments bridge's day scan reads every LIVE journal-profile container
-    /// with an `entry_date` and PAUSES any day that has more than one — never
-    /// newest-wins, because a slipped push would overwrite one text with the
-    /// other on the Fragments side. `copyPost` copies `entry_date` verbatim, so
+    /// notebook rule's day lookup (`canonicalJournalEntry`) reads every LIVE
+    /// journal-profile container with an `entry_date`, and a day with more
+    /// than one is the converged double-create case every day door then has
+    /// to pick from (the retired Fragments bridge's day scan PAUSED such a
+    /// day outright — the pin's original reason, 2026-08-24; the pin stands
+    /// on the notebook rule alone). `copyPost` copies `entry_date` verbatim, so
     /// without this line saving a version of a journal entry would silently
     /// stop that day pushing. Dropping the date is the honest fix as well as
     /// the safe one: **a saved moment is not a day.** The day belongs to the

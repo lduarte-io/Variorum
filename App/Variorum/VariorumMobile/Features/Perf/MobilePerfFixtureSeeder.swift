@@ -29,7 +29,7 @@
 //  (undoStack: nil — a seed is not HER act). All content is NON-JOURNAL
 //  (`.generic`, no entry dates — the R57 discipline mirrored from B1;
 //  the dev store never syncs, but no fixture row may ever be shaped
-//  like something the Fragments bridge would sweep).
+//  like a daily Journal entry).
 //
 
 import Foundation

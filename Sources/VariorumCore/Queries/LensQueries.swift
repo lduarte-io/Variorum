@@ -3,8 +3,8 @@ import GRDB
 
 // Lens read side (Phase 11, Step A1 — v1_7). A lens is a VIEW-side
 // projection: these traversals overlay sparse overrides onto the ordinary
-// slot resolution and never touch rendering truth. Exports, the bridge,
-// and the book view keep reading `renderPost`/`renderedText` — a lens
+// slot resolution and never touch rendering truth. Exports and the book
+// view keep reading `renderPost`/`renderedText` — a lens
 // changes what a lens-bound COLUMN shows, nothing else.
 extension Queries {
     /// The post's live lenses, stable order (creation, id tiebreak).

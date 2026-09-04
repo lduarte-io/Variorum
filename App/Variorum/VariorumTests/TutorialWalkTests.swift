@@ -173,8 +173,10 @@ struct TutorialBookShapeTests {
     }
 
     @Test func nothingSeededIsJournalShaped() async throws {
-        // R57's class: the Fragments bridge sweeps journal days — tutorial
-        // text must be structurally invisible to it.
+        // R57's class: journal-shaped rows are the daily Journal's assembly —
+        // tutorial text must be structurally invisible to it (the rule's
+        // original reason, the Fragments bridge's day sweep, retired
+        // 2026-09-04; the rule stays).
         try await withTutorialWorld { _, db, _ in
             let journalShaped = try await db.read { db in
                 try Int.fetchOne(
@@ -185,7 +187,7 @@ struct TutorialBookShapeTests {
                           AND (profile = 'journal' OR entry_date IS NOT NULL)
                         """) ?? -1
             }
-            #expect(journalShaped == 0, "no tutorial row can ever reach the bridge")
+            #expect(journalShaped == 0, "no tutorial row can ever reach the daily Journal")
         }
     }
 

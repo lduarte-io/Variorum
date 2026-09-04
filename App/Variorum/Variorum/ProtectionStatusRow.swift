@@ -4,7 +4,7 @@
 //
 //  pre-13u Act 10 wave 2a — **the unchosen-state indicator (memo §6):**
 //  prominent, bottom-left family (the sidebar's status rows, beside
-//  Sync/Bridge), and TRUTHFUL — NEVER "encryption off": the store is
+//  Sync), and TRUTHFUL — NEVER "encryption off": the store is
 //  always encrypted (R13p-2); what is unchosen is the lock and the spare
 //  keys. It renders only while the protection choice is genuinely
 //  unmade (Auto + no secrets, facts readable) and leaves the moment a

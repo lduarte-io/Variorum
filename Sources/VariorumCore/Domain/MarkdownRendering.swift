@@ -18,7 +18,7 @@ import Foundation
 /// out. It never returns a font, a color, or a point size — those are the
 /// app's, chosen from the voice tokens (P-8). It writes nothing, decides no
 /// product behavior, and is not a second source of truth: the stored text is
-/// untouched, `renderedText`/export/the bridge never see this, and a reader
+/// untouched, `renderedText`/export never see this, and a reader
 /// who hides a marker has changed only what is on the glass.
 ///
 /// **Offsets are UTF-16 code units** in the DISPLAY string (`text`), the

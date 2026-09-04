@@ -18,8 +18,10 @@
 //  mechanism is also the teaching.
 //
 //  Every write goes through Operations (never ad-hoc rows); all content is
-//  NON-JOURNAL (`.generic`, no entry dates — R57: the Fragments bridge
-//  sweeps journal days only, and no tutorial text may ever reach it).
+//  NON-JOURNAL (`.generic`, no entry dates — R57: journal-shaped rows are
+//  the daily Journal's assembly, and no tutorial text may ever land in it;
+//  the rule's original reason, the Fragments bridge's day sweep, retired
+//  2026-09-04 — the rule stays).
 //
 //  This absorbs the Phase 11 A10 modes tutorial: its polish-in-place /
 //  thread-one-piece / fork-the-piece teaching is now the "three ways of

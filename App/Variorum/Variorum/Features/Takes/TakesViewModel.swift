@@ -1428,7 +1428,7 @@ final class TakesViewModel {
     }
 
     /// R84's note condition: the daily-journal SHAPE (profile journal +
-    /// entry date) is exactly what the Fragments bridge sweeps.
+    /// entry date) — the day's entry, where sync conflicts land as takes.
     var isJournalShaped: Bool {
         projection.profile == .journal && projection.entryDate != nil
     }

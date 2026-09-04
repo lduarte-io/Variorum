@@ -1,9 +1,9 @@
 import Foundation
 
 /// One authenticated user session, as the transports consume it (Phase 9c —
-/// generalized from Phase 9b's Fragments-side seam: ONE shape, TWO backends.
-/// The Variorum mirror's transport and the Fragments bridge's transport each
-/// ask their own provider; Phase 9c's real sign-in implements the providers
+/// generalized from Phase 9b's Fragments-side seam: ONE shape, once TWO
+/// backends — the Variorum mirror's transport and, until the bridge's
+/// 2026-09-04 retirement, the Fragments bridge's — each asking its own provider; Phase 9c's real sign-in implements the providers
 /// in the app layer, so token persistence and refresh live in exactly one
 /// place and never in a transport).
 public struct UserSession: Equatable, Sendable {

@@ -256,8 +256,8 @@ enum MobileStarterJournal {
     /// predicate (`Queries.isDailyJournalMintShape`) is only trustworthy
     /// while the mint has ONE writer. So the starter entry is imported
     /// first and then SHELVED through the shared door, which creates,
-    /// designates and pins the Journal exactly as ⌘J, Today's Entry, the
-    /// bridge and the phone's own Today door do — a phone that seeded and
+    /// designates and pins the Journal exactly as ⌘J, Today's Entry and the
+    /// phone's own Today door do — a phone that seeded and
     /// a phone that pressed Today's Entry first end up with the same book
     /// because the same code minted it.
     ///

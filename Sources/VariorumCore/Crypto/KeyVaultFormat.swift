@@ -3,7 +3,9 @@ import Foundation
 
 /// The key class a wrapped per-class key serves (Phase 14b ruling R-8:
 /// master + per-class keys — Variorum corpus · journal-bridge; Fragments'
-/// side only ever handles the journal-bridge key at touchpoint #2).
+/// side only ever handled the journal-bridge key at touchpoint #2). The
+/// journal-bridge class is DORMANT since the bridge's 2026-09-04 retirement
+/// — the format keeps it (a deployed wire shape); nothing reads it.
 public enum VaultKeyClass: String, Codable, CaseIterable, Sendable {
     case corpus
     case journalBridge = "journal_bridge"

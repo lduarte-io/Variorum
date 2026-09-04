@@ -155,8 +155,9 @@ extension Queries {
     /// review round 2, NIT 5 — one implementation, shared): the live
     /// journal-profile entry the day opens to, preferring **unarchived
     /// first, then earliest `(created_at, id)`** — deterministic on every
-    /// device. `createOrOpenJournalEntry` opens through this; the bridge's
-    /// duplicate-day landings target it; anything else that must agree on
+    /// device. `createOrOpenJournalEntry` opens through this (the retired
+    /// bridge's duplicate-day landings targeted it too); anything else that
+    /// must agree on
     /// "the day's entry" uses this, never a re-typed ORDER BY.
     public static func canonicalJournalEntry(
         _ db: Database, day: String

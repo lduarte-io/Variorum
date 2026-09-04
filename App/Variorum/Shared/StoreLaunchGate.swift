@@ -5,7 +5,7 @@
 //
 //  Phase 13p, Batch 2 — the locked lobby (THE DESIGN's keyed-stack
 //  paragraph): in the demanded modes NOTHING runs before unlock — no
-//  migrations, no sync round, no bridge round, no purge janitor. The
+//  migrations, no sync round, no purge janitor. The
 //  mechanism is structural, not a splash screen: the launch ROUTES
 //  before any store file is opened, and the demanded routes stop at a
 //  `StoreLobby` state that holds no store, no session, and no services —

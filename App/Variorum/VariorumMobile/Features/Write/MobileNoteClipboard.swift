@@ -13,8 +13,8 @@
 //  `Queries.exportPost` (core), which the Mac's export doors already write
 //  to disk. **No second joining rule exists in this file** — the one join
 //  brain (`Queries.joinRenderedTexts`, the 2026-07-12 conditional join) is
-//  what stitches the pieces, exactly as `renderedText` and the Fragments
-//  bridge do, so a copy and an export of the same note are byte-identical
+//  what stitches the pieces, exactly as `renderedText` does, so a copy and
+//  an export of the same note are byte-identical
 //  (pinned). Nothing here writes a row: this is a projection read plus a
 //  pasteboard write, which is why a SEALED note copies exactly like an open
 //  one — the seal freezes authoring, and reading stays free under it.

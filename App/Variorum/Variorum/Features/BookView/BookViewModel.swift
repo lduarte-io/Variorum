@@ -36,8 +36,8 @@ final class BookViewModel {
     ///
     /// **View-local by design, and that IS the answer to her lens
     /// analogy.** A lens is never rendering truth (the 11a ratification):
-    /// browsing a book by date must not change what export writes, what the
-    /// Fragments projection pushes, or what the book looks like on another
+    /// browsing a book by date must not change what export writes or what
+    /// the book looks like on another
     /// device — only `setReadingSort` does that, through the one deliberate
     /// save door. Not persisted, like every other view-local state (fan
     /// expansion, canvas picks, the Compare toggles, #43(b)).

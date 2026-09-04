@@ -24,7 +24,8 @@
 //  with checksums).
 //
 //  What is deliberately NOT pinned here: the engine's
-//  `DeviceKeySyncProvider`/`DeviceBridgeKeyProvider` custody reads — they
+//  `DeviceKeySyncProvider` custody reads (once `DeviceBridgeKeyProvider`'s
+//  too, until the bridge's 2026-09-04 retirement) — they
 //  already run off-main from the engine's own rounds, their seam is
 //  synchronous by contract, and the batch's fence names them untouchable.
 //

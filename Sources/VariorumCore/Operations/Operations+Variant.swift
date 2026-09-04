@@ -98,7 +98,7 @@ extension Operations {
     /// `savepoint_cadence` — "Only when I commit" turns it off. The gate is
     /// here rather than in the scheduler so the rule cannot be missed by a
     /// second caller; the insurance occasions (`lockPost`, `lockVariant`,
-    /// structural-undo divergence, bridge landings) share
+    /// structural-undo divergence) share
     /// `autoCommitDirtyVariants` BELOW this gate and are untouched by it.
     @discardableResult
     public func idleAutoCommit(_ containerID: String) throws -> [CommitPoint] {

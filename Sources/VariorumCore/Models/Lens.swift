@@ -7,7 +7,7 @@ import GRDB
 /// same structure with different choices; a version is a different
 /// structure; promote is the bridge."*
 ///
-/// A lens is NEVER rendering truth — exports, the bridge, book views, and
+/// A lens is NEVER rendering truth — exports, book views, and
 /// every other surface read `container_block.chosen_variant_id` (I3);
 /// ✓/adopt gestures are the only doors from lens to chosen. Choices are
 /// sparse (`LensChoice` rows exist only where the lens diverges from

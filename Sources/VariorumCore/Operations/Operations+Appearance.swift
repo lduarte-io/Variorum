@@ -85,8 +85,8 @@ extension Operations {
     /// It governs the two CADENCE occasions only —
     /// `Operations.closeAutoCommit` and `Operations.idleAutoCommit`, each of
     /// which reads it inside its own transaction. The insurance occasions
-    /// (post-seal, locking a dirty take, structural-undo divergence, bridge
-    /// landings) are deliberately NOT governed by it and stay on in every
+    /// (post-seal, locking a dirty take, structural-undo divergence) are
+    /// deliberately NOT governed by it and stay on in every
     /// mode; the setting's help copy says so, because a setting that reads
     /// as "stop making savepoints" while savepoints still happen is exactly
     /// the copy-truth defect this phase is about.

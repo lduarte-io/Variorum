@@ -190,9 +190,9 @@ extension Queries {
     /// (k ≥ 2) exports as k newlines again, while a SINGLE-newline paste
     /// stores no trailing content and exports through the default
     /// `"\n\n"` join (the ratified rendering separator); unspaced posts
-    /// join byte-identical to the pre-ruling `"\n\n"`. One join brain: `renderedText` AND the
-    /// bridge's per-day projection both call this — the pushed body always
-    /// equals the export.
+    /// join byte-identical to the pre-ruling `"\n\n"`. One join brain: `renderedText` calls
+    /// this (the retired bridge's per-day projection did too — its pushed
+    /// body always equalled the export).
     public static func joinRenderedTexts(_ texts: [String]) -> String {
         var result = ""
         for (i, text) in texts.enumerated() {

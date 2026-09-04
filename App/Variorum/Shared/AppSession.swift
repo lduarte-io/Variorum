@@ -303,8 +303,8 @@ final class AppSession {
     /// guaranteed unflushed — and `copyPost` reads `working_text` rows, so
     /// a click inside the debounce minted a book copy missing the very
     /// keystrokes that summoned it. The insure-before-copy doctrine
-    /// (structural undo's auto-commit, `applyBridgeLanding`, the lock
-    /// family), applied to the copy door that is offered at the dirty
+    /// (structural undo's auto-commit, the lock family — and, until
+    /// 2026-09-04, the retired bridge's landing), applied to the copy door that is offered at the dirty
     /// moment. The pre-existing 11a copy doors (`duplicateAsVersion` /
     /// `promoteLens`) are deliberately untouched — that class goes to
     /// KnownIssues at the closeout (the orchestrator's ruling).

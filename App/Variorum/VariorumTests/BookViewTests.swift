@@ -899,8 +899,8 @@ struct SpreadBookViewTests {
             model.openSpread(leftIndex: 1)  // p1 · p2
             #expect(model.leftPage?.postID == postIDs[1])
 
-            // A membership INSERTION before the spread (a sync round, the
-            // bridge's daily shelving): the pairing survives by identity.
+            // A membership INSERTION before the spread (a sync round's daily
+            // shelving): the pairing survives by identity.
             let landed = Queries.ReadingEntry(
                 postID: "landed-mid-read", title: "today's entry",
                 entryDate: nil, sectionPath: nil)

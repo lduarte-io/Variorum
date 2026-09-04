@@ -761,7 +761,7 @@ enum TypewriterCaretClearance {
 /// answer — ALWAYS ON, no setting.
 ///
 /// **The room is ALLOWANCE, never content:** zero bytes stored, zero text
-/// written, `renderedText`, export and the bridge byte-untouched, and the
+/// written, `renderedText` and export byte-untouched, and the
 /// ratified edge-trimming rules unchanged. It is scroll extent, not paper —
 /// pinned as such.
 ///

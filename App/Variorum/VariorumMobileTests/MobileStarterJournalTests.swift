@@ -150,9 +150,9 @@ struct MobileStarterJournalTests {
             // `entry_date` and `stampOrder` puts NULLs LAST, so the
             // introduction settles at the END of the book once real days
             // arrive. Deliberate: the alternative — giving it a fabricated
-            // past day so it sorts first — would make it a DAY, which the
-            // Fragments bridge pushes by `entry_date`, inventing a journal
-            // entry in her other app for a day she never wrote.
+            // past day so it sorts first — would make it a DAY: a journal
+            // entry for a day she never wrote (and, until 2026-09-04, one the
+            // retired bridge would have pushed to her other app).
             #expect(members.last?.postID == starter.postID,
                     "the introduction sorts after the dated days")
         }

@@ -409,7 +409,7 @@ struct MobilePerfFixtureTests {
 
     @Test func nothingSeededIsJournalShaped() async throws {
         // The R57 discipline mirrored from B1: no fixture row may be
-        // shaped like something the Fragments bridge would sweep.
+        // shaped like a daily Journal entry.
         let world = try PerfWorlds.big.get()
         let journalShaped = try await world.db.read { db in
             try Int.fetchOne(db, sql: """

@@ -247,8 +247,8 @@ struct JournalBooksTests {
         }
     }
 
-    /// **⌘J obeys the same "already decided" rule the bridge and the phone
-    /// do** (13c Stage 1 ladder, R1-4). The shared helper treats ANY
+    /// **⌘J obeys the same "already decided" rule the phone does** (and the
+    /// retired bridge did, until 2026-09-04) (13c Stage 1 ladder, R1-4). The shared helper treats ANY
     /// membership row — live OR tombstoned — as the pair being decided, which
     /// is what stops a headless round from re-shelving something she took off
     /// the shelf. `openToday` used to call `addPostToReading` itself and
@@ -333,10 +333,10 @@ struct JournalBooksTests {
         // Round 2, BLOCKER (red-on-old, verified by behavioral revert):
         // with a dream entry created FIRST on day D, the daily door must
         // still mint ITS OWN entry (the old .journal-profile dream WAS
-        // canonicalJournalEntry's answer), and the Fragments bridge's
-        // day-enumeration shape (profile='journal' + entry_date) must see
-        // exactly ONE row on D — no duplicate-day pause, no dream text
-        // pushed as the day's journal.
+        // canonicalJournalEntry's answer), and the daily-journal day shape
+        // (profile='journal' + entry_date — once the Fragments bridge's
+        // enumeration too) must see exactly ONE row on D — no duplicate-day
+        // ambiguity, no dream text as the day's journal.
         try await withShellSession2 { session, db in
             let dreamBookID = try await session.runner.run { ops in
                 try ops.createReading(name: "Dream Journal", kind: .curated, profile: "journal").id
@@ -348,7 +348,7 @@ struct JournalBooksTests {
             #expect(outcome.postID != dreamID,
                     "the daily door mints its own entry — the dream is not the day's journal")
 
-            // The bridge sweep's exact shape: ONE journal-profile row on D.
+            // The daily-journal day shape: ONE journal-profile row on D.
             let journalShaped = try await db.read { db in
                 try Int.fetchOne(db, sql: """
                     SELECT COUNT(*) FROM container
@@ -357,7 +357,7 @@ struct JournalBooksTests {
                     """)
             }
             #expect(journalShaped == 1,
-                    "exactly one daily-shaped entry on the day — the bridge never pauses D")
+                    "exactly one daily-shaped entry on the day — D is never ambiguous")
         }
     }
 

@@ -130,8 +130,8 @@ public enum PayloadCipher {
     /// ASCII digits ONLY (cold pass, 2026-08-04): `Character.isNumber` alone
     /// is true for superscripts/fractions/non-ASCII numerals ("e²:", "e٢:"),
     /// which silently widened the refusing class past the documented
-    /// `e<digits>:` — load-bearing on the bridge, whose legacy pass-through
-    /// rides `.notEncrypted` alone. A version prefix we mint is only ever
+    /// `e<digits>:` — historically load-bearing on the retired bridge, whose
+    /// legacy pass-through rode `.notEncrypted` alone. A version prefix we mint is only ever
     /// ASCII.
     private static func foreignVersionPrefix(of value: String) -> String? {
         guard value.first == "e" else { return nil }

@@ -72,8 +72,8 @@ public enum MarkdownScanCount {
 /// **One addition, ruled at the Act 10 correction round (R-cor-10(4), row
 /// 84 — the sample library's Gutenberg `_emphasis_` read raw on every
 /// face): `_italic_` JOINS the vocabulary as italics.** Display-only by
-/// construction — this scanner writes no text; `renderedText`, the `.md`
-/// export and the bridge's join brain never consult it — with a stricter
+/// construction — this scanner writes no text; `renderedText` and the `.md`
+/// export never consult it — with a stricter
 /// boundary than the star's: an underscore opens only at a WORD START (the
 /// text's start, or after whitespace/punctuation) and closes only at a WORD
 /// END (the text's end, or before whitespace/punctuation), so `snake_case`
@@ -131,8 +131,8 @@ public enum MarkdownSyntax {
         /// count `floor(count / 2)` — two spaces per level, because that is
         /// exactly the width of the `- ` lead, so a nested item's marker
         /// lines up under its parent's first word and the text round-trips
-        /// as REAL nesting in any markdown renderer that sees an export or
-        /// the bridge's body. Uncapped: the stored text is the truth, and
+        /// as REAL nesting in any markdown renderer that sees an export.
+        /// Uncapped: the stored text is the truth, and
         /// refusing to read what she typed would be a lie (a reading
         /// surface may clamp what it DRAWS — that is a look decision, not
         /// this one).

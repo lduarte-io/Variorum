@@ -190,7 +190,8 @@ extension Queries {
     /// case-folded — the E13 rule, reused rather than re-derived).
     ///
     /// Why all three legs: `insertDailyJournalBook` — the one shared daily
-    /// door (⌘J, Today's Entry, the bridge, the phone's furniture) — stamps
+    /// door (⌘J, Today's Entry, the phone's furniture; the retired bridge
+    /// until 2026-09-04) — stamps
     /// exactly this triple, so two devices each minting the Journal offline
     /// produce two rows that BOTH satisfy it and converge. A deliberate
     /// second notebook never does: the Mac's "Create Journal Book" and the

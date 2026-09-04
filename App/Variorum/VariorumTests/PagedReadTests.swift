@@ -632,8 +632,8 @@ struct PagedReadViewTests {
     /// The address rule's letter: a page is addressed by (post,
     /// page-in-post) — post IDENTITY, not a position in the membership
     /// list. `Position.postIndex` is an index, so before this fix a
-    /// membership insertion (the Fragments bridge shelving today's entry —
-    /// 1D's own work) or an A31 order flip (2D's own order menu, two
+    /// membership insertion (a sync round shelving today's entry — 1D's
+    /// own work) or an A31 order flip (2D's own order menu, two
     /// clicks away) shifted every later index and left the address naming
     /// a DIFFERENT post. The existing address pin
     /// (`aCorrectionMovesTheLabelAndNeverThePage`) never varies the postID
@@ -651,8 +651,8 @@ struct PagedReadViewTests {
             pages.seed(fromFocus: postIDs[1])
             #expect(pages.leaves.first??.postID == postIDs[1])
 
-            // A membership INSERTION before her post (a sync round, the
-            // bridge's daily shelving): every later index shifts.
+            // A membership INSERTION before her post (a sync round's daily
+            // shelving): every later index shifts.
             let landed = Queries.ReadingEntry(
                 postID: "landed-mid-read", title: "today's entry",
                 entryDate: nil, sectionPath: nil)

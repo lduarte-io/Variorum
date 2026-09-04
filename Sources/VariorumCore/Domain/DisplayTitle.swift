@@ -18,8 +18,8 @@ import Foundation
 /// nothing is copied (the no-denormalization rule), and renaming edits the
 /// real title exactly as it always did — which is what makes this fix every
 /// EXISTING untitled note for free rather than only the ones minted from
-/// now on. `renderedText`, the export BODY projections and the Fragments
-/// bridge's join brain are untouched by construction: a title has never
+/// now on. `renderedText` and the export BODY projections are untouched by
+/// construction: a title has never
 /// been body content.
 ///
 /// ── ONE BRAIN, VIEWS **AND** EXPORTS ────────────────────────────────────

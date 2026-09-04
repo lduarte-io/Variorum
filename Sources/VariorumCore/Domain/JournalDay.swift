@@ -3,8 +3,9 @@ import Foundation
 /// The journal's calendar-day key (Phase 8; AppSpec §14, author 2026-07-07):
 /// `entry_date` is the USER'S stated day — "yyyy-MM-dd" in her calendar and
 /// timezone — defaulting to the local date at creation and user-settable to
-/// any date, past or future. It is also the join key the Fragments bridge
-/// (Phase 9b) rides: both apps agree the user's stated day IS the key.
+/// any date, past or future. It was also the join key the Fragments bridge
+/// (Phase 9b; retired 2026-09-04) rode: both apps agreed the user's stated
+/// day IS the key.
 ///
 /// Pure functions (CLAUDE.md: domain rules are pure, tested independently).
 /// Wall-clock/timezone inputs are explicit parameters; `@Dependency(\.date)`

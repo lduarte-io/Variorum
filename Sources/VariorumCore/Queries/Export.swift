@@ -52,8 +52,8 @@ extension Queries {
     /// plan's letter: "export maps to blockquote") — `> ` per line, the
     /// frame's emoji leading the first line. EXPORT-ONLY by design: this
     /// mapper is called by the export projections and NEVER by
-    /// `renderedText` — the one join brain feeding the Fragments bridge
-    /// stays plain prose (pinned). Non-callout kinds pass through
+    /// `renderedText` — the one join brain (once the Fragments bridge's;
+    /// retired 2026-09-04) stays plain prose (pinned). Non-callout kinds pass through
     /// unchanged (a future frame family exports as prose until it earns
     /// its own mapping).
     static func exportMapped(_ text: String, presentation: BlockPresentation?) -> String {
@@ -72,8 +72,8 @@ extension Queries {
 
     /// A post (or pool) as Markdown. Without variants (and without
     /// callouts) this IS `renderedText` — one brain, pinned equal; callout
-    /// blocks map to blockquotes (export-only — the rendering/bridge
-    /// projection never maps). With `includeVariants`, each fanned block's
+    /// blocks map to blockquotes (export-only — the rendering projection
+    /// never maps). With `includeVariants`, each fanned block's
     /// alternates section follows the block IN PLACE (the chosen take
     /// renders in the document flow; the section trails it — the
     /// single-block export shape, repeated), joined through the same

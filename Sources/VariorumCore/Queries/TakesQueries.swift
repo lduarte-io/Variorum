@@ -30,7 +30,7 @@ extension Queries {
         public var fanStyle: FanStyle
         public var sealed: Bool
         /// The post's profile + entry date (taste-checkpoint R84: the
-        /// journal-shaped surfaces show the Fragments projection note; the
+        /// journal-shaped surfaces show the R84 journal note; the
         /// Takes bottom bar shows the date face). Same container row the
         /// seal already reads.
         public var profile: Profile?

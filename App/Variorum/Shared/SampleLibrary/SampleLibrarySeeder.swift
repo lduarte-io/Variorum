@@ -576,9 +576,9 @@ enum SampleLibrarySeeder {
     }
 
     /// Polled rather than subscribed, for the starter journal's reason:
-    /// `SyncSession.onRoundCompleted` is a single closure already owned by
-    /// `AppServices` (it triggers the Fragments bridge), and sample content
-    /// must not be able to displace the bridge.
+    /// `SyncSession.onRoundCompleted` is a single closure (it was
+    /// `AppServices`' bridge trigger until 2026-09-04), and sample content
+    /// must not claim a seam another owner may take.
     private static func waitForFirstCleanRound(
         gate: SyncGate, limit: Duration, poll: Duration
     ) async -> Bool {

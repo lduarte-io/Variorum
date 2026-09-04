@@ -517,14 +517,14 @@ final class BookStructureModel {
 
     /// "New Entry" on a journal-profile book. THE DAILY BOOK routes
     /// through `createOrOpenJournalEntry` — the one-entry-per-day rule is
-    /// a Fragments-bridge rule and is UNTOUCHABLE (R50). OTHER journal
+    /// the daily Journal's own rule and is UNTOUCHABLE (R50; the retired bridge's too, until 2026-09-04). OTHER journal
     /// books (the dream journal) mint a **`.generic`** dated post with
     /// one-block segmentation set explicitly (the notebook feel) and add
     /// it to THIS book — **NEVER container `profile='journal'`** (Stage B
     /// review round 2, BLOCKER: that profile+date shape IS the daily
-    /// journal's identity — `canonicalJournalEntry` and the Fragments
-    /// bridge sweep both key on it, so a `.journal` dream entry became
-    /// "the day's entry" for ⌘J and pushed/paused the bridge's day.
+    /// journal's identity — `canonicalJournalEntry` (and, then, the Fragments
+    /// bridge sweep) keyed on it, so a `.journal` dream entry became
+    /// "the day's entry" for ⌘J (and pushed/paused the bridge's day).
     /// Journal-BOOK identity lives on `reading.profile`, not the post).
     /// Several entries on one day stay legal in these books; the daily
     /// rule's scope is the daily SHAPE, which these entries no longer

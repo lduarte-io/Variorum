@@ -89,7 +89,7 @@ private struct AppearancePane: View {
     @AppStorage(LongBlockLayout.settingKey) private var longBlockLayout = true
     /// 13d batch 4 (A23): the paragraph-gap choice. LOCAL like its two
     /// neighbours above — one Mac's editor look, not document semantics,
-    /// and stored nowhere in the schema (no export/bridge byte moves).
+    /// and stored nowhere in the schema (no export byte moves).
     @AppStorage(ParagraphGap.settingKey) private var paragraphGap = ParagraphGap.standard
     /// 13d batch 4 (A24): spellcheck level, coarse by TEXTKIT2 §3's warning.
     @AppStorage(SpellcheckLevel.settingKey) private var spellcheck = SpellcheckLevel.off

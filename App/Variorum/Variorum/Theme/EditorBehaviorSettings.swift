@@ -6,8 +6,8 @@
 //  asked for: A23 (a paragraph-tall gap between paragraphs) and A24
 //  (levels of spellchecking). Both follow the precedent set by the hover
 //  handles (13b 4D / S4-19) and the phantom kill switch (13c 1E): app-local
-//  `UserDefaults`, stored NOWHERE in the schema, so `renderedText`, export,
-//  and the Fragments bridge are byte-untouched by either.
+//  `UserDefaults`, stored NOWHERE in the schema, so `renderedText` and
+//  export are byte-untouched by either.
 //
 //  Why local and not the synced `setting` table: both describe how ONE
 //  Mac's text surfaces behave — not what a document MEANS. (A16, in the

@@ -29,9 +29,10 @@
 //  (PROVISIONAL PB1-1 — placement is hers).
 //
 //  Every write goes through Operations (never ad-hoc rows); all content
-//  is NON-JOURNAL (`.generic`, no entry dates — R57: the Fragments
-//  bridge sweeps journal days only, and no tutorial text may ever reach
-//  it). Seeding runs through a QUIET Operations facade (undoStack: nil,
+//  is NON-JOURNAL (`.generic`, no entry dates — R57: journal-shaped rows
+//  are the daily Journal's and the phone's journal list's, and no tutorial
+//  text may ever land there; the rule's original reason, the Fragments
+//  bridge's day sweep, retired 2026-09-04 — the rule stays). Seeding runs through a QUIET Operations facade (undoStack: nil,
 //  the Mac's MINOR-D1 discipline): a seed is not HER act, and nothing
 //  here may land an inverse on the session's structural-undo stack.
 //
