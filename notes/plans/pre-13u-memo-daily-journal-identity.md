@@ -49,6 +49,21 @@ SyncSpec §7 keeper repair keys on it); `setting.daily_journal_book` is the ⌘J
 - (f) The phone (`MobileStarterJournal`, the capture door) and the tutorial's journal lesson — the faces that
   follow whatever (a)–(c) rule.
 
+**HER SECOND MESSAGE, same sitting (2026-09-04) — two of the six settled, verbatim:** *"We should remove the door
+discouragement. I do think Today's Entry is nice as a button for mobile - so maybe a journal book is still special
+only in that it's where Today's Entry and the shortcut takes you? I do like command J, so maybe it shouldn't be
+retired."*
+- **(a) RULED — the door discouragement goes.** `createOrOpenJournalEntry`'s create-OR-open (the Phase 8
+  notebook rule) is retired: Today's Entry / ⌘J / a book's "+ new entry" for a date always MINT a new
+  date-stamped entry; nothing at any door steers away from a second entry on one day. (`Queries.canonicalJournalEntry`
+  and the book day page's single-entry reading follow — the sitting says how a day with two entries reads.)
+- **(a′)/(c) HER LEAN, uncertainty preserved ("maybe"):** ⌘J STAYS ("I do like command J, so maybe it shouldn't be
+  retired"), Today's Entry stays as a mobile button, and the journal book is special ONLY as the destination —
+  *"where Today's Entry and the shortcut takes you"* — i.e. the designation survives in exactly that role and
+  nothing else about the book is special. (b), (d), (e), (f) remain the sitting's, read in that light.
+- **Owner of the build:** 13i-e as slotted; the door change is small (one op + its three doors + the pins on the
+  notebook rule) and could run as a 17 entry sooner at her word — nothing built from this here.
+
 *(Sections 1–7 below predate this ruling. Read them for the edges they enumerate, not for their conclusions.)*
 
 **Provenance:** written 2026-08-31 at the pre-13u round's tail, at the author's instruction after
