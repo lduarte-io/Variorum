@@ -145,12 +145,12 @@ account and uploads everything in it. Your other account isn't changed.* Button:
 ### 2b. Entering Castle (Settings ▸ Protection ▸ Use Castle…)
 **Screen 1 — what changes**
 Title: *Castle: only you hold the keys.*
-Body: *Your library gets a new key [m: and so does your sync]. From now on your Mac's login password can't open it,
+Body: *Your library gets a new key, and so does your sync. From now on your Mac's login password can't open it,
 and your Apple account holds no key to it. Opening takes Touch ID or your passphrase.*
 Bullets:
 - *Your other devices will start asking too — Touch ID or Face ID, with your passphrase as the fallback — and each
-  gives its own library a new key the same way. [m: Each will ask for your passphrase once, to pick up your new
-  sync keys.]*
+  gives its own library a new key the same way. Each will ask for your passphrase once, to pick up your new sync
+  keys.*
 - *Backups made before today — Variorum's own, Time Machine, copies you made — still open through your Apple
   account. Delete them, Time Machine included, if you want Castle to cover everything you have ever written. Keep
   them if you want a way back to what you wrote before today, should you ever lose your passphrase and twelve words.*
@@ -249,21 +249,28 @@ Link: *Forgot your current passphrase?*
   Passphrase*
 - Castle forgot road, Touch ID mode: *Confirm with Touch ID to set a new passphrase.* Always-ask mode: no
   link (you typed it to get in); instead: *Use your twelve words instead.*
+Checkbox (PROVISIONAL (q)): *Also replace my keys — choose this if someone may have USED the old passphrase, or has
+a copy of your library.*
 Done: *Your passphrase is changed. Your other devices keep syncing; they'll ask for the new one the next time
-they need a passphrase.*
+they need a passphrase. The old passphrase now opens nothing for anyone who never used it.*
 
 ### Regenerate twelve words
 Title: *New twelve words.*
 Body: *Your current words will stop working the moment the new ones are confirmed. Write the new ones down
-first.* Same authorization as change passphrase. Then 2a's Screens 3/3b.
+first.* Checkbox (PROVISIONAL (q)): *Also replace my keys — choose this if someone may have USED the old words, or
+has a copy of your library.* Same authorization as change passphrase. Then 2a's Screens 3/3b.
 
-### Give this library a new key (PROVISIONAL — her 09-04 lean; built only at her word)
-Title: *Give your library a new key.*
-Body: *Your library is re-encrypted under a new key, on this Mac, right now. Sync, your passphrase and your twelve
-words don't change. Backups made before today keep the old key and open exactly as they do now — delete them if
-that matters to you.*
-Authorization: Castle — Touch ID or the passphrase. Standard — a plain confirm.
-Button: *New Key*
+### Replace All Keys (PROVISIONAL (q) — recommended; built at her word; the standalone "new library key" door is gone)
+Title: *Replace all your keys.*
+Body: *Use this if someone may have used your passphrase or twelve words, or has a copy of your library or a
+backup. Your sync gets a new master key and a new corpus key, everything on the server is re-encrypted from this
+Mac, and this library gets a new key. Your other devices will each ask for your passphrase once, then give their own
+libraries new keys. Your passphrase and twelve words stay the same unless you change them below. Old backups keep
+their old keys and open exactly as they do now.*
+Checkbox: *Also choose a new passphrase*
+Authorization: Castle — Touch ID or the passphrase. Standard — the passphrase if set, else a plain confirm.
+Button: *Replace Keys* · progress line: *Re-encrypting your library on the server… (N of M)*
+Done: *Done. Your other devices will ask for your passphrase the next time they open.*
 
 ### Sign out
 Title: *Sign out of this Mac?*
@@ -304,7 +311,7 @@ another device. Enter the new one to update this Mac.* Doors: *Enter…* · *Lat
 Touch ID keeps working here.*)
 **Account moved to Castle (a device that was Standard):** *Your account is now in Castle — set on [device] on
 [day]. From now on this Mac asks for Touch ID to open your library, with your passphrase as the fallback.*
-Button: *OK* — **[m] instead:** *…with your passphrase as the fallback. Enter your passphrase once to pick up your
+Button: *OK* — **superseded by (m), RULED — the notice is:** *…with your passphrase as the fallback. Enter your passphrase once to pick up your
 new sync keys: they were replaced when Castle was entered, and only your passphrase or twelve words open them.*
 Doors: *Enter Passphrase…* · *Use Twelve Words…* · *Later* (sub-line: *Until then this Mac opens and reads, but
 doesn't sync.*)
@@ -363,19 +370,19 @@ unlocked Mac or fully inside your Apple account, can read.*
 your passphrase is what lets a new device in. Lose every enrolled device and both secrets, and your writing is gone
 — nobody can help. That is the point.*
 *The whole story — every key, where it lives, what happens when you switch, why an old backup behaves the way it
-does — is in the book "How Variorum keeps your writing private" on this shelf.*
+does — is in the book "Encryption Explained" on this shelf.*
 (The walk asserts the chapter names both modes, both floors, keystone 3 and keystone 4, and the book's door.)
 
 ---
 
-## 7b. THE ENCRYPTION BOOK — "How Variorum keeps your writing private" (a seeded book in Home beside the tutorial; her 09-04 direction; title PROVISIONAL; 13s re-voices; every FACT binding)
+## 7b. THE ENCRYPTION BOOK — "Encryption Explained" (a seeded book in Home beside the tutorial; her 09-04 direction; title RULED; 13s re-voices; every FACT binding)
 
 **Register rule for this book and the FAQ:** plain credential words, each defined the first time it appears:
 *encrypted* (scrambled so that only a key unscrambles it) · *key* (a long random number) · *wrapped* (a key that
 has itself been encrypted under another key or under your passphrase, so the wrapped copy is useless without what
 wraps it) · *the library key* · *the master key* · *the corpus key* · *the iCloud key* · *your passphrase* · *your
 twelve words* · *the key file*. Never: box, vault, escrow, KDF, token, session, RLS.
-*[m]* marks sentences that are true only if §16 (m) — the master rotation at the switch — is ruled in.
+(The master and corpus-key rotation at the switch — §16 (m)/(m-corpus) — are RULED; the [m] marks are gone.)
 
 **Chapter 1 — What is encrypted, and with what**
 *Your library is one file. Every page of it is encrypted with AES-256 under the library key — a random 256-bit
@@ -425,10 +432,10 @@ makes.*
 *Entering Castle does four things. Your library is re-encrypted under a brand-new library key, and the new key file
 wraps it under your passphrase, your twelve words and the master key only — never under the iCloud key. Your
 sync gets a new master key too, sent to the server wrapped only under your passphrase and twelve words; the old
-master key stops being accepted. [m-corpus] And a new corpus key: everything on the server is re-encrypted under it
+master key stops being accepted. And a new corpus key: everything on the server is re-encrypted under it
 from your Mac, so nothing written after today is ever under a key an old copy holds. The copy of the library key your Mac keeps moves behind Touch ID — held by the
 security chip, released to your fingerprint, never to your login password — or is kept nowhere if you choose
-Always ask. And your other devices follow: each re-encrypts its own library the same way [m] and asks for your
+Always ask. And your other devices follow: each re-encrypts its own library the same way and asks for your
 passphrase once to pick up the new sync keys.*
 *After that, three things can open your library: your passphrase, your twelve words, or a device you already
 enrolled, through its fingerprint. Nothing in iCloud can. Nothing on our server can. Your Mac's login password can't.
@@ -441,12 +448,12 @@ Standard — your iCloud key. Variorum never changes a backup after it makes it.
 *Why your iCloud key can still open an old backup after you moved to Castle, but not your library: the old key
 file holds the old library key wrapped under the iCloud key. Your library now has a new key that was never wrapped
 that way. The old copy is exactly as private as it was on the day it was made — no more.*
-*[m] Why opening that old backup does not bring sync back: the old backup holds the old master key inside it.
+*Why opening that old backup does not bring sync back: the old backup holds the old master key inside it.
 Entering Castle replaced it. The server accepts only the new one, and the new one is wrapped only under your
 passphrase and twelve words. Signing in with your account password gets you a session, not a key — and a device
 holding the old master key cannot change your passphrase either, because the server refuses it before it can touch
 anything.*
-*[m] So if you are in Castle, have lost your passphrase and twelve words, and have no enrolled device left: an old
+*So if you are in Castle, have lost your passphrase and twelve words, and have no enrolled device left: an old
 Standard backup opened through your Apple account gives you back what you wrote up to that day. To sync again you
 delete your Stargazing account and set sync up fresh from that copy. Whatever you wrote after the backup, and kept
 only on the server, is gone. That is Castle's floor, met from the other side.*
@@ -460,9 +467,12 @@ backups keep the passphrase of their day — on the Mac they were made on, the c
 as long as the library key hasn't changed, because the key file beside your library pairs with them.*
 *Regenerating your twelve words re-wraps the same keys under new words; the old words stop working the moment the
 new ones are confirmed.*
-*Giving your library a new key (Settings ▸ Encryption ▸ Advanced) re-encrypts this one library under a fresh key,
-on this device only. Nothing changes anywhere else — not your passphrase, not sync, not your other devices. Backups
-of this library from before keep the old key.*
+*Replacing all your keys (Settings ▸ Encryption) is the heavy act: a new master key, a new corpus key with everything
+on the server re-encrypted under it, and a new library key on each of your devices as they follow — each asks for
+your passphrase once. Your passphrase and twelve words stay unless you change them too. Use it when someone may have
+USED a secret of yours, or holds a copy of a library or a backup: a changed passphrase stops someone who only saw
+it, but a copy of your library carries the keys inside it, and only new keys leave that copy behind. Entering Castle
+runs this same act for you.*
 *Switching to Standard wraps the library key and the master key under your iCloud key again. Switching to Castle is
 Chapter 4.*
 *Deleting your account and setting sync up again is the one act that replaces everything: a new master key, a new
@@ -474,9 +484,10 @@ open your library and your sync; in Castle, nobody through Apple. Your Mac's log
 can log in as you can open Variorum and read; in Castle, no. Someone holding your passphrase or twelve words: yes,
 in either mode — those are the keys. Someone at your Mac while Variorum is open and unlocked: yes, in either mode —
 that is what open means.*
-*If only your passphrase leaked, change it. If your account password leaked, sign out everywhere and change it. If
-someone may actually hold your keys — an unlocked enrolled device of yours together with your account password, or,
-in Standard, your Apple account — delete your Stargazing account and set sync up again.*
+*If your passphrase or twelve words were only seen, and nobody has a copy of your library, change or regenerate
+them. If someone may have used them, or holds a copy of a library or a backup, or had one of your devices unlocked,
+replace all your keys. If your account password leaked, sign out everywhere and change it. If your account itself
+may be in someone else's hands, delete it and set sync up again.*
 
 **Chapter 8 — What we can and cannot do for you**
 *We cannot read your writing, in either mode. We cannot reset a Castle passphrase — a reset would be a key we
@@ -510,17 +521,17 @@ sign your other devices out on your word. Everything else is yours.*
 - **Someone knows my account password.** *Settings ▸ Account ▸ Sign Out Everywhere, then change it. They
   could never read your writing with it, and after that they can't sign in either.*
 - **My twelve words were seen.** *Settings ▸ Encryption ▸ Regenerate Twelve Words. The old ones stop
-  working the moment the new ones are confirmed.*
+  working the moment the new ones are confirmed — for anyone who never used them. If they may have been used, or
+  whoever saw them could also have a copy of your library or a backup, tick "Also replace my keys".*
 - **I switched to Castle. Are my old backups protected?** *No. A backup made while you were in Standard still opens
   through your Apple account, and always will. Delete the ones you don't want, Time Machine included. Backups made
   after the switch are under Castle's key.*
-- **Someone may hold my keys themselves.** *If only your passphrase leaked, change it. If someone may actually hold
-  your keys — an unlocked enrolled device of yours plus your account password, or, in Standard, your Apple account —
-  delete your Stargazing account and set sync up again. Your libraries stay on your devices and re-upload under fresh
-  keys; nothing in them is lost.*
+- **Someone may hold my keys themselves.** *Settings ▸ Encryption ▸ Replace All Keys: a new master key, a new corpus
+  key, the server re-encrypted, and each device gives its library a new key as it follows. Nothing is lost and your
+  account stays. If your ACCOUNT itself may be in someone else's hands, delete it and set sync up again instead.*
 - **I moved to Castle, lost my passphrase and twelve words, and have an old backup and my iCloud.** *That backup
   opens through your Apple account, because it was made in Standard — you get back everything up to that day.
-  [m] Sync will not come back from it: entering Castle replaced your sync keys, and the new ones open only with your
+  Sync will not come back from it: entering Castle replaced your sync keys, and the new ones open only with your
   passphrase or twelve words. Delete your Stargazing account and set sync up again from that copy. Anything written
   after the backup and kept only on the server is gone — that is Castle's floor.*
 - **Does Castle on my Mac make my iPhone Castle?** *Once sync is on, yes — Castle belongs to your account and every
