@@ -38,7 +38,8 @@ wrap, box, vault, escrow, KDF, token, session, RLS.
 **Name:** Standard · **Tag:** the default
 **One line:** *Your Apple account holds a key. Nothing to remember day to day.*
 **Who holds a key:** your Apple account — iCloud Keychain, and Apple's ways of recovering it (your device
-passcode, a recovery contact, a recovery key).
+passcode, a recovery contact, a recovery key). *That key lives in iCloud Keychain: it travels with your Apple
+account to every device signed into it, and Apple's account recovery can reach it.*
 **Opening:** silently, on any device signed into your iCloud.
 **A new device:** sign into iCloud, sign into Variorum, and everything is there. Nothing typed.
 **Who it stops:** the Variorum server — yes. Someone at your unlocked Mac — no: anyone who can open Variorum
@@ -54,6 +55,9 @@ account is ever gone.
 **Name:** Castle · **Tag:** only you
 **One line:** *Only you hold the keys. Your Mac's login password can't open your library.*
 **Who holds a key:** only you — your passphrase, your twelve words, and your enrolled devices behind Touch ID.
+*With Touch ID on, this Mac's security chip holds a copy of the key. It is released only to your fingerprint —
+never to your login password, never to iCloud — and it never leaves this Mac. Turn on Always ask, and no copy
+exists anywhere.*
 **Opening:** Touch ID, with your passphrase as the fallback — or your passphrase every time, if you choose.
 **A new device:** sign into Variorum and type your passphrase or your twelve words, once.
 **Who it stops:** the Variorum server — yes. Your Mac's login password — yes: nothing on this Mac releases
@@ -70,7 +74,8 @@ words down.
 ### Castle's switches (shown only in Castle)
 - **Always ask for the passphrase** — *Skip Touch ID and type your passphrase every time Variorum opens.
   Choose this if other people's fingerprints are enrolled on your Mac.* (Sub-line: *Any fingerprint enrolled
-  on your Mac account can unlock with Touch ID — Touch ID guards the Mac, not the person.*)
+  on your Mac account can unlock with Touch ID — Touch ID guards the Mac, not the person.* Second sub-line: *With
+  this on, no copy of the key is kept on this Mac at all.*)
 - **Lock after time away** — *Lock your library after you haven't used Variorum for:* 5 minutes · 10
   minutes · 30 minutes · never (default 10). Sub-line: *Switching to another app doesn't lock it; time away
   does. Variorum always locks when your Mac sleeps or its screen locks.*
@@ -136,14 +141,17 @@ account and uploads everything in it. Your other account isn't changed.* Button:
 ### 2b. Entering Castle (Settings ▸ Protection ▸ Use Castle…)
 **Screen 1 — what changes**
 Title: *Castle: only you hold the keys.*
-Body: *From now on your Mac's login password can't open your library, and your Apple account holds no key to
-it. Opening takes Touch ID or your passphrase.*
+Body: *Your library gets a new key. From now on your Mac's login password can't open it, and your Apple account
+holds no key to it. Opening takes Touch ID or your passphrase.*
 Bullets:
-- *Your other devices will start asking too — Touch ID or Face ID, with your passphrase as the fallback.*
-- *Backups Variorum keeps for you are updated so your Apple account no longer opens them. Copies you made
-  elsewhere before today can still be opened through your Apple account.*
-- *If you think someone already had your Apple account, also delete your Stargazing account and set sync up
-  again — that gives your sync fresh keys.*
+- *Your other devices will start asking too — Touch ID or Face ID, with your passphrase as the fallback — and each
+  gives its own library a new key the same way.*
+- *Backups made before today — Variorum's own, Time Machine, copies you made — still open through your Apple
+  account. Delete them, Time Machine included, if you want Castle to cover everything you have ever written. Keep
+  them if you want a way back to what you wrote before today, should you ever lose your passphrase and twelve words.*
+- *If you think someone may already hold your keys — your Apple account, or an unlocked device of yours together
+  with your account password — also delete your Stargazing account and set sync up again. That gives your sync
+  fresh keys.*
 Button: *Continue*
 **Screen 2 — the passphrase** (only if none is set): 2a's Screen 2, title *Castle needs a passphrase.*
 **Screen 3 — the twelve words** (only if none exist): 2a's Screens 3/3b. If they exist: *You already have
@@ -156,8 +164,8 @@ why the words go on paper.*
 Checkbox: *I know my passphrase, and my twelve words are written down.*
 Confirmation: Touch ID, or the passphrase.
 Button: *Enter Castle*
-**Done:** *You're in Castle. This Mac asks for Touch ID from now on. Your other devices will ask the next
-time they open.*
+**Done:** *You're in Castle. Your library has a new key that your Apple account never held. This Mac asks for
+Touch ID from now on; your other devices will ask the next time they open.*
 
 ### 2c. Leaving Castle for Standard (Settings ▸ Protection ▸ Use Standard)
 Title: *Back to Standard?*
@@ -175,6 +183,8 @@ and can take longer. You can also enter your passphrase or twelve words instead.
 can't hand over the key here. Enter your passphrase or twelve words instead, or turn on iCloud Keychain in
 System Settings.*
 **Castle:** Title *Enter your passphrase to join sync.* Sub-door: *Use my twelve words instead.*
+**Castle, and this library was in Standard (one sentence under the title):** *This account is in Castle, so this
+library gets a new key as it joins. Everything you wrote here stays.*
 
 ---
 
@@ -297,7 +307,8 @@ Mac account can unlock with Touch ID.*
 
 **Standard sentence:** *A backup opens through your Apple account — or with your passphrase or twelve words.*
 **Castle sentence:** *A backup opens with your twelve words — always, unless you regenerated them — or with
-the passphrase you had when it was made. Backups run while your library is open.*
+the passphrase you had when it was made. Backups made while you were in Standard also open through your Apple
+account. Backups run while your library is open.*
 **Lock-time copy line (Castle, if built):** *When you lock, Variorum also keeps a sealed copy of the library
 as it was — checked the next time you unlock.*
 **The iCloud Drive offer (once, at the first backup run):** Title *Keep a copy of your backups in iCloud
@@ -327,16 +338,21 @@ that is what open means. Locking is how you end that.*
 device joins with nothing typed, and Apple's own account recovery is your safety net. Anyone who can open
 Variorum as you — at your unlocked Mac, or fully inside your Apple account — can read.*
 *Castle means only you hold the keys. Opening takes Touch ID or your passphrase; your Mac's login password
-can't do it; your Apple account holds nothing. A new device needs your passphrase or twelve words, once.
-Lose every enrolled device and both secrets, and your writing is gone — nobody can help. That is the point.*
+can't do it; your Apple account holds nothing. With Touch ID on, this Mac's security chip keeps a copy of the key
+behind your fingerprint — never behind your login password, never in iCloud; turn on Always ask and no copy is kept.
+A new device needs your passphrase or twelve words, once. Lose every enrolled device and both secrets, and your
+writing is gone — nobody can help. That is the point.*
 *Both modes ask for the same two things when you turn on sync: a passphrase and twelve words. In Standard
 you'll rarely type them. Keep them anyway — if your Apple account is ever gone, they are the only way back.*
 
 **Lesson 3 — Changing your mind, and starting over**
 *Changing your passphrase is a new word for the same locks: nothing else changes, your other devices keep
 syncing and ask for the new one when they next need it.*
-*Switching to Castle removes your Apple account's key. Switching back gives it one again. Every device
-follows the account.*
+*Switching to Castle gives your library a new key that your Apple account never held. Backups from before the
+switch still open the old way — delete them, Time Machine included, if you want Castle to cover everything. Switching
+back gives your Apple account a key again. Every device follows the account.*
+*If you ever think someone holds your keys themselves — not just a password — starting over is the answer, in
+either mode.*
 *Starting over — new sync keys — means deleting your Stargazing account and setting sync up again. Your
 libraries on your devices aren't touched; they upload to the new account. Restoring a backup, moving to a
 new Mac, and opening a library file are in the Help guide.*
@@ -361,13 +377,23 @@ new Mac, and opening a library file are in the Help guide.*
   it and uploads. Your other devices join the new account the usual way.*
 - **What can Apple see? What can Variorum see?** *Variorum's server: never your writing, in either mode. Apple:
   in Standard, iCloud Keychain holds a key to your library — protected by Apple's end-to-end encryption and
-  reachable through Apple's account recovery; in Castle, nothing.*
+  reachable through Apple's account recovery; in Castle, nothing. With Touch ID on in Castle, this device's security
+  chip holds a copy of the key for your fingerprint alone — Apple's servers and your Apple account never do.*
 - **Why is there no "reset"?** *Because a reset would be a key we hold. In Castle nobody holds one but you.
   In Standard your Apple account is the reset.*
 - **Someone knows my account password.** *Settings ▸ Account ▸ Sign Out Everywhere, then change it. They
   could never read your writing with it, and after that they can't sign in either.*
 - **My twelve words were seen.** *Settings ▸ Encryption ▸ Regenerate Twelve Words. The old ones stop
   working the moment the new ones are confirmed.*
+- **I switched to Castle. Are my old backups protected?** *No. A backup made while you were in Standard still opens
+  through your Apple account, and always will. Delete the ones you don't want, Time Machine included. Backups made
+  after the switch are under Castle's key.*
+- **Someone may hold my keys themselves.** *If only your passphrase leaked, change it. If someone may actually hold
+  your keys — an unlocked enrolled device of yours plus your account password, or, in Standard, your Apple account —
+  delete your Stargazing account and set sync up again. Your libraries stay on your devices and re-upload under fresh
+  keys; nothing in them is lost.*
+- **Does Castle on my Mac make my iPhone Castle?** *Once sync is on, yes — Castle belongs to your account and every
+  device follows. Before sync, each library has its own mode; your iPhone learns the account's mode when it joins.*
 
 ---
 

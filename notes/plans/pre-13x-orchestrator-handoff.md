@@ -3,7 +3,7 @@
 **Why a cutover here:** the design sitting spent ~720k of context settling the shape (three review passes, the
 rewrite, the copy, batch 0); the build half ahead (batches 1a · 1b · 2 · 3 · 4 · 5, the deploy window, the
 ladder, two drills, her walk) is larger than the re-orientation read. The seam is clean: batch 0 CLOSED and
-verified; the bridge retirement is HERS to run next from its own kickoff; batch 1's brief is written. *(UPDATED 2026-09-04 13:30: the bridge retirement RAN and CLOSED the same day under `/architect-phase` — see the filled slot below; batch 1a is the successor's first act.)*
+verified; the bridge retirement is HERS to run next from its own kickoff; batch 1's brief is written. *(UPDATED 2026-09-04 13:30: the bridge retirement RAN and CLOSED the same day under `/architect-phase` — see the filled slot below; batch 1a is the successor's first act.)* *(UPDATED 2026-09-04 afternoon: her LIBRARY-KEY rulings landed in the design's §16 — RULED 2026-09-04 (afternoon): the library RE-KEYS at the Castle switch and at Castle enrollment, no posture change writes a backup folder, the copy's iCloud-vs-device line, the general compromise rule, no real-store delete-and-set-up-again drill; ledger rows 13–17. Read that block before batch 1a — it changes batch 2's scope, not batch 1a's.)*
 
 ## PASTE-READY KICKOFF (for the successor orchestrator — a fresh Fable session)
 
