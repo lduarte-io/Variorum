@@ -1,4 +1,5 @@
 import CryptoKit
+import Dependencies
 import Foundation
 import Testing
 @testable import VariorumCore
@@ -103,6 +104,71 @@ struct KeyVaultClientTests {
             current.format, expectedRevision: current.revision,
             keyProof: KeyProof.wireToken(master: sample.master))
         #expect(try await world.client.fetchVault()?.revision == 3)
+    }
+
+    // MARK: pre-13x — the ONE write road is the RPC, under the proof
+
+    /// The update travels as `POST rest/v1/rpc/key_vault_update` with the
+    /// proof in the BODY (never the URL), the row as `payload`, and the
+    /// expected revision — and the receipt carries the new revision. A
+    /// wrong proof refuses typed with the stored row byte-untouched.
+    @Test func theUpdateRidesTheRPCWithTheProofInTheBodyAndAWrongProofWritesNothing() async throws {
+        let world = VaultTestWorld()
+        let sample = try sampleFormat()
+        let requests = LockIsolated<[URLRequest]>([])
+        let recording = KeyVaultClient(
+            configuration: KeyVaultClient.Configuration(
+                projectURL: URL(string: "https://vault.test.invalid")!,
+                apiKey: "publishable-test-key"),
+            sessionProvider: StaticSessionProvider(
+                session: UserSession(accessToken: "token-1", userID: world.userID)),
+            load: { [load = world.server.load] request in
+                requests.withValue { $0.append(request) }
+                return try await load(request)
+            })
+        try await recording.createVault(sample.format)
+        let proof = KeyProof.wireToken(master: sample.master)
+        let receipt = try await recording.updateVault(
+            try sample.format.addingRecoveryWrap(masterKey: sample.master, recoveryKey: sample.recoveryKey),
+            expectedRevision: 1, keyProof: proof)
+        #expect(receipt == KeyVaultClient.UpdateReceipt(revision: 2, rotationStartedSeq: nil))
+        let update = try #require(requests.value.last)
+        #expect(update.httpMethod == "POST")
+        #expect(update.url?.path.hasSuffix("/rest/v1/rpc/key_vault_update") == true, "the RPC, never a PATCH")
+        #expect(update.url?.query() == nil, "no URL items — the proof and the filter both ride the body")
+        // Decoded, not substring-matched: Foundation escapes `/` in JSON
+        // strings, and a base64 token carries slashes.
+        let body = try JSONSerialization.jsonObject(with: update.httpBody ?? Data()) as? [String: Any]
+        #expect(body?["key_proof"] as? String == proof, "the proof is a BODY parameter")
+        #expect(body?["expected_revision"] as? Int == 1)
+        #expect((body?["payload"] as? [String: Any])?["corpus_key_id"] as? String == "corpus-id-1")
+        #expect(world.server.patchCount == 0, "the client never PATCHes")
+        #expect(world.server.updateCount == 1)
+
+        // A wrong proof: refused typed, nothing written, the revision unmoved.
+        let before = world.server.storedRow(userID: world.userID)
+        await #expect(throws: KeyVaultClientError.keyProofRefused) {
+            try await recording.updateVault(
+                sample.format, expectedRevision: 2,
+                keyProof: KeyProof.wireToken(master: SymmetricKey(size: .bits256)))
+        }
+        #expect(world.server.storedRow(userID: world.userID) == before)
+        #expect(try await recording.fetchVault()?.revision == 2)
+    }
+
+    /// The RPC's refusal markers classify into the client's typed errors,
+    /// each one.
+    @Test func theRPCsRefusalMarkersClassifyTyped() {
+        #expect(KeyVaultClient.classifiedUpdateFailure(
+            status: 400, body: "VARIORUM_VAULT_ABSENT: none") == .vaultAbsent)
+        #expect(KeyVaultClient.classifiedUpdateFailure(
+            status: 400, body: "VARIORUM_VAULT_REVISION_CONFLICT: moved") == .vaultRevisionConflict)
+        #expect(KeyVaultClient.classifiedUpdateFailure(
+            status: 400, body: "VARIORUM_KEY_PROOF_REQUIRED: none") == .keyProofRefused)
+        #expect(KeyVaultClient.classifiedUpdateFailure(
+            status: 400, body: "VARIORUM_ROTATION_IN_PROGRESS: wait") == .rotationInProgress)
+        #expect(KeyVaultClient.classifiedUpdateFailure(
+            status: 503, body: "down") == .httpFailure(status: 503, body: "down"))
     }
 
     @Test func aNewerFormatVersionRefusesByVersion() async throws {

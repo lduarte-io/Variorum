@@ -356,6 +356,73 @@ struct SupabaseTransportSessionTests {
         #expect(provider.refreshCalls == 0)
     }
 
+    // MARK: pre-13x — the proof is a BODY-ONLY bearer token
+
+    /// The proof travels in the request BODY of every RPC — push, pull,
+    /// horizon, ledger, purge, re-encrypt — and NEVER in the URL (a query
+    /// item lands in gateway logs) nor in a header. Recorded off the real
+    /// transport's requests against a scripted hop.
+    @Test func theProofRidesTheBodyOnlyNeverTheURLOrAHeader() async throws {
+        let proof = "the-secret-proof-token"
+        let http = ScriptedHTTP([
+            (200, "[]"), (200, "[]"), (200, "0"),
+            (200, #"{"floor": 0, "entries": []}"#), (200, "7"), (200, "[]"),
+        ])
+        let transport = SupabaseTransport(
+            configuration: Self.projectConfiguration,
+            sessionProvider: StaticSessionProvider(
+                session: UserSession(accessToken: "session-token", userID: "u1")),
+            load: http.loader())
+        _ = try await transport.push([], activeKeyID: "k", keyProof: proof)
+        _ = try await transport.pull(since: 0, limit: 1, activeKeyID: "k", keyProof: proof, deviceID: "d")
+        _ = try await transport.syncHorizon(activeKeyID: "k", keyProof: proof)
+        _ = try await transport.purgeLedger(since: 0, activeKeyID: "k", keyProof: proof)
+        _ = try await transport.executePurge([], activeKeyID: "k", keyProof: proof)
+        _ = try await transport.reencrypt([], activeKeyID: "k", keyProof: proof)
+        #expect(http.requests.count == 6)
+        for request in http.requests {
+            let body = String(data: request.httpBody ?? Data(), encoding: .utf8) ?? ""
+            #expect(body.contains(#""key_proof":"\#(proof)""#), "\(request.url!.lastPathComponent): the proof is in the body")
+            #expect(request.url!.query()?.contains("key_proof") != true
+                        && request.url!.absoluteString.contains(proof) == false,
+                    "\(request.url!.lastPathComponent): never a URL item")
+            for (name, value) in request.allHTTPHeaderFields ?? [:] {
+                #expect(!value.contains(proof) && name.lowercased() != "key_proof",
+                        "\(request.url!.lastPathComponent): never a header")
+            }
+        }
+        #expect(http.requests.map { $0.url!.lastPathComponent }
+                == ["sync_push", "sync_pull", "sync_horizon", "sync_purge_ledger", "sync_purge_execute", "sync_reencrypt"])
+    }
+
+    /// The proof's refusal marker classifies into ITS typed error on every
+    /// RPC — the un-followed device's state, never a raw HTTP failure.
+    @Test func aKeyProofRefusalClassifiesTyped() async throws {
+        let http = ScriptedHTTP([(400, #"{"message":"VARIORUM_KEY_PROOF_REQUIRED: no proof"}"#)])
+        let transport = SupabaseTransport(
+            configuration: Self.projectConfiguration,
+            sessionProvider: StaticSessionProvider(
+                session: UserSession(accessToken: "t", userID: "u1")),
+            load: http.loader())
+        await #expect(throws: SyncError.keyProofRefused) {
+            _ = try await transport.push([], activeKeyID: "k", keyProof: "stale")
+        }
+        // And the re-encryption door's result shapes decode.
+        let replaced = try JSONDecoder().decode(
+            ReencryptResult.self, from: Data(#"{"status":"replaced","server_seq":91}"#.utf8)).outcome()
+        #expect(replaced == .replaced(serverSeq: 91))
+        let skipped = try JSONDecoder().decode(
+            ReencryptResult.self, from: Data(#"{"status":"skipped","current_version":4}"#.utf8)).outcome()
+        #expect(skipped == .skipped(currentVersion: 4))
+        let gone = try JSONDecoder().decode(
+            ReencryptResult.self, from: Data(#"{"status":"skipped","current_version":null}"#.utf8)).outcome()
+        #expect(gone == .skipped(currentVersion: nil))
+        let item = try JSONSerialization.jsonObject(with: JSONEncoder().encode(ReencryptItem(row: SyncRow(
+            table: "variant", rowID: "v1", columns: ["id": .text("v1")], syncVersion: 6)))) as? [String: Any]
+        #expect(item?["expected_version"] as? Int == 6, "the pulled version rides as expected_version — the CAS")
+        #expect(item?["row_id"] as? String == "v1")
+    }
+
     // MARK: Refusal leaves engine state byte-intact (the scheduler's
     // offline posture, reused not duplicated)
 

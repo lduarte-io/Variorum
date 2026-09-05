@@ -197,6 +197,44 @@ struct AccountLifecycleTests {
         #expect(!markerAfter, "the marker clears only when the whole road completes — and it did")
     }
 
+    /// pre-13x 1b: THE WHOLE-REPLACE PIN (a real defect the RPC road fixes
+    /// — the batch record's settled-design note 4): the PATCH road set only
+    /// the keys PRESENT in the body, and Codable omits a nil optional, so a
+    /// re-key over a vault that HAD a recovery wrap left the OLD master's
+    /// wrap (under the OLD words) standing beside the NEW class keys —
+    /// `hasRecoveryWrap` said true, and the phrase road unwrapped a master
+    /// the class keys refused. The shipped pin passed vacuously because its
+    /// world never landed a wrap before re-keying. RED-ON-OLD by
+    /// behavioural revert of the fake's update route to PATCH-merge
+    /// semantics.
+    @Test func aRekeyOverAVaultWithARecoveryWrapLeavesNoStaleWrap() async throws {
+        let world = try await makeRekeyWorld()
+        let old = try await world.enrollment.setUp(passphrase: Self.passphrase)
+        let words = try RecoveryPhrase.generate()
+        try await world.enrollment.landRecoveryWrap(words: words, material: old)
+        #expect(try await world.enrollment.hasRecoveryWrap() == true, "the pin isn't vacuous")
+
+        _ = try await brain(world, onNewVaultMaterial: { _ in }).run(passphrase: Self.passphrase)
+
+        let fetched = try #require(try await world.vaultClient.fetchVault())
+        #expect(fetched.format.masterWrappedByRecovery == nil,
+                "the re-key's fresh vault carries NO recovery wrap — the OLD words' wrap must not survive the WHOLE replace")
+        #expect(try await world.enrollment.hasRecoveryWrap() == false)
+        await #expect(throws: (any Error).self, "the old words open nothing") {
+            _ = try await world.enrollment.enroll(recoveryWords: words)
+        }
+        // And the stored row's hash is the NEW master's — the old proof is
+        // dead on the mirror.
+        #expect(world.vault.storedRow(userID: RekeyWorld.vaultUserID)?.keyProofHash
+                != KeyProof.hash(master: old.masterSymmetricKey))
+        await #expect(throws: SyncError.keyProofRefused) {
+            _ = try await world.server.pull(
+                since: 0, limit: 1,
+                activeKeyID: fetched.format.classKey(for: .corpus)!.keyID,
+                keyProof: KeyProof.wireToken(master: old.masterSymmetricKey), deviceID: nil)
+        }
+    }
+
     /// A WRONG passphrase refuses the whole act with NOTHING touched: no
     /// vault write, no truncate, no re-enqueue.
     @Test func aWrongPassphraseRefusesTheRekeyWithNothingTouched() async throws {
