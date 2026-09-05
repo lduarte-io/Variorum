@@ -65,15 +65,23 @@ enum VaultRPCEmulation {
             current["key_proof_hash"] = presented
         }
 
-        // The rotation seq (decision 31) + one rotation at a time (32).
+        // The rotation seq (decision 31) + one rotation at a time (32): the
+        // previous key is its id AND its wrap (two columns); the SAME pair
+        // carries through, a DIFFERENT one refuses.
+        let incomingPreviousID = payload["corpus_previous_key_id"] as? String
         let incomingPrevious = payload["corpus_previous_wrapped_by_master"] as? String
+        guard (incomingPreviousID == nil) == (incomingPrevious == nil) else {
+            return Served(status: 400, body: Data(
+                #"{"code":"P0001","message":"a previous corpus key travels as its id AND its wrap"}"#.utf8))
+        }
+        let storedPreviousID = current["corpus_previous_key_id"] as? String
         let storedPrevious = current["corpus_previous_wrapped_by_master"] as? String
         let nextSeq: Int64?
         if incomingPrevious == nil {
             nextSeq = nil
         } else if storedPrevious == nil {
             lock.lock(); seq += 1; nextSeq = seq; lock.unlock()
-        } else if incomingPrevious == storedPrevious {
+        } else if incomingPrevious == storedPrevious && incomingPreviousID == storedPreviousID {
             nextSeq = (current["rotation_started_seq"] as? NSNumber)?.int64Value
         } else {
             return marker("VARIORUM_ROTATION_IN_PROGRESS")

@@ -278,6 +278,9 @@ struct KeyProofGateTests {
         let seq = try #require(begun.rotationStartedSeq, "a rotation takes the next seq")
         let mid = try #require(try await world.client.fetchVault())
         #expect(mid.format.previousCorpusKey?.keyID == "the-old-corpus-id")
+        #expect(await world.syncServer.vaultRow()?.previousCorpusKeyID == "the-old-corpus-id",
+                "the id in its OWN column on the mirror's row")
+        #expect(world.server.storedRow(userID: world.userID)?.corpusPreviousKeyID == "the-old-corpus-id")
         #expect(mid.format.rotationStartedSeq == seq, "the wire row carries the server's seq back")
         #expect(await world.syncServer.vaultRow()?.rotationStartedSeq == seq)
 
@@ -305,7 +308,8 @@ struct KeyProofGateTests {
         #expect(after.format.previousCorpusKey == nil && after.format.rotationStartedSeq == nil,
                 "the previous key AND the seq are nil TOGETHER outside a rotation")
         let row = try #require(await world.syncServer.vaultRow())
-        #expect(row.previousCorpusKey == nil && row.rotationStartedSeq == nil, "…on the mirror's row too")
+        #expect(row.previousCorpusKey == nil && row.previousCorpusKeyID == nil && row.rotationStartedSeq == nil,
+                "…on the mirror's row too: the key, its id and the seq")
         #expect(row.revision == completed.revision)
     }
 
@@ -525,7 +529,8 @@ struct KeyProofGateTests {
         let revision = try #require(await server.vaultRow()?.revision)
         try await RotationDrill.complete(on: server, world: world, expectedRevision: revision)
         let row = try #require(await server.vaultRow())
-        #expect(row.previousCorpusKey == nil && row.rotationStartedSeq == nil, "cleared together")
+        #expect(row.previousCorpusKey == nil && row.previousCorpusKeyID == nil && row.rotationStartedSeq == nil,
+                "cleared together — the key, its id and the seq")
         // The completed world (no previous key) still reads everything.
         a.keyProvider = FixedSyncKeyProvider(keys: world.completedKeys)
         b.keyProvider = FixedSyncKeyProvider(keys: world.completedKeys)

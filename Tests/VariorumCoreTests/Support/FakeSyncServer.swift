@@ -111,8 +111,10 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
         /// nil = the NULL-hash MIGRATION ARM (the author's existing vault):
         /// the first proof presented lands its hash and is accepted, once.
         var keyProofHash: String?
-        /// The previous corpus key's wire value (`<id>:<base64>`) while a
-        /// rotation is finishing — nil otherwise, TOGETHER with the seq.
+        /// The previous corpus key — its id and its bare wrap, two columns
+        /// — while a rotation is finishing; nil otherwise, TOGETHER with the
+        /// seq.
+        var previousCorpusKeyID: String?
         var previousCorpusKey: String?
         var rotationStartedSeq: Int64?
         var revision: Int = 1
@@ -492,7 +494,8 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
     /// FIRST and stores the payload only when it returns.
     func keyVaultUpdate(
         as userID: String, expectedRevision: Int, keyProof: String,
-        newCorpusKeyID: String, newKeyProofHash: String?, previousCorpusKey: String?
+        newCorpusKeyID: String, newKeyProofHash: String?,
+        previousCorpusKeyID: String?, previousCorpusKey: String?
     ) throws -> VaultUpdateReceipt {
         guard var account = accounts[userID] else {
             throw KeyVaultClientError.vaultAbsent
@@ -503,6 +506,10 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
             throw KeyVaultClientError.keyProofRefused
         }
         account = accounts[userID]!
+        // The id and the wrap travel together, never one without the other.
+        guard (previousCorpusKeyID == nil) == (previousCorpusKey == nil) else {
+            throw FakeSyncServerError.previousKeyHalfMissing
+        }
         let nextSeq: Int64?
         if previousCorpusKey == nil {
             nextSeq = nil
@@ -511,7 +518,10 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
             // rows take (`nextval('sync_server_seq')`), inside this call.
             seq += 1
             nextSeq = seq
-        } else if account.vault.previousCorpusKey == previousCorpusKey {
+        } else if account.vault.previousCorpusKey == previousCorpusKey
+                    && account.vault.previousCorpusKeyID == previousCorpusKeyID {
+            // The carry-through (decision 32's precision): the SAME
+            // previous key — a re-wrap mid-rotation — keeps the seq.
             nextSeq = account.vault.rotationStartedSeq
         } else {
             throw KeyVaultClientError.rotationInProgress
@@ -521,6 +531,7 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
         }
         account.vault.corpusKeyID = newCorpusKeyID
         if let newKeyProofHash { account.vault.keyProofHash = newKeyProofHash }
+        account.vault.previousCorpusKeyID = previousCorpusKeyID
         account.vault.previousCorpusKey = previousCorpusKey
         account.vault.rotationStartedSeq = nextSeq
         account.vault.revision = expectedRevision + 1
@@ -733,4 +744,7 @@ enum FakeSyncServerError: Error, Equatable {
     /// The 09 push guard's RAISE: a client-carried owner table's row named
     /// an owner other than the caller.
     case ownerMismatch(table: String, rowID: String)
+    /// The vault update's RAISE (11): a previous corpus key travels as its
+    /// id AND its wrap — one without the other refuses.
+    case previousKeyHalfMissing
 }

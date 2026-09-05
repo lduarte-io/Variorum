@@ -4,11 +4,12 @@ import Testing
 @testable import VariorumCore
 
 /// pre-13x batch 1b — THE KEY PROOF's client half (design §3.10, decision
-/// 12) and the vault format's five additive fields (§3.10; the format
+/// 12) and the vault format's six additive columns (§3.10; the format
 /// version STAYS 1): the token's shape, its hash, the wire round trip, a
-/// pre-postures row decoding with the fields nil, the previous-key +
-/// rotation-seq pair being NIL TOGETHER outside a rotation, the Apple-held
-/// copy's presence/absence roads, and the one-column previous-key value.
+/// pre-postures row decoding with the fields nil, the previous key + its
+/// id + the rotation seq being NIL TOGETHER outside a rotation, the
+/// Apple-held copy's presence/absence roads, and the previous key's two
+/// columns (its id in its OWN column — the orchestrator's ruling).
 @Suite("The key proof + the vault's postures fields (pre-13x 1b)")
 struct KeyProofTests {
     private func sampleFormat() throws
@@ -89,7 +90,8 @@ struct KeyProofTests {
         let row = try KeyVaultWireRow(format: sample.format, userID: "u")
         var wire = try JSONSerialization.jsonObject(with: JSONEncoder().encode(row)) as! [String: Any]
         for key in ["master_wrapped_by_apple_held", "apple_key_id", "key_proof_hash",
-                    "corpus_previous_wrapped_by_master", "rotation_started_seq"] {
+                    "corpus_previous_key_id", "corpus_previous_wrapped_by_master",
+                    "rotation_started_seq"] {
             wire.removeValue(forKey: key)
         }
         let decodedRow = try JSONDecoder().decode(
@@ -98,9 +100,10 @@ struct KeyProofTests {
         #expect(try decodedRow.format().keyProofHash == nil)
     }
 
-    /// The five columns round-trip the wire row exactly, and the
-    /// previous-key value is ONE column carrying `<id>:<base64>`.
-    @Test func theWireRowCarriesTheFivePosturesColumnsAndTheOneColumnPreviousKeyValue() throws {
+    /// The six columns round-trip the wire row exactly, and the previous
+    /// key travels as its id in ITS OWN column beside its bare wrap —
+    /// never packed into one value; one column without the other refuses.
+    @Test func theWireRowCarriesTheSixPosturesColumnsAndThePreviousKeysTwoColumns() throws {
         let sample = try sampleFormat()
         let apple = SymmetricKey(size: .bits256)
         let previous = SymmetricKey(size: .bits256)
@@ -117,10 +120,11 @@ struct KeyProofTests {
         #expect((json["master_wrapped_by_apple_held"] as? String).flatMap { Data(base64Encoded: $0) }
                 == format.masterWrappedByAppleHeld)
         #expect(json["rotation_started_seq"] as? Int64 == 4_242)
+        #expect(json["corpus_previous_key_id"] as? String == "corpus-id-0",
+                "the previous key's ID in its OWN column")
         let previousWire = try #require(json["corpus_previous_wrapped_by_master"] as? String)
-        #expect(previousWire.hasPrefix("corpus-id-0:"), "the previous key's ID leads the one column")
-        #expect(Data(base64Encoded: String(previousWire.dropFirst("corpus-id-0:".count)))
-                == format.previousCorpusKey?.wrappedByMaster)
+        #expect(!previousWire.contains(":"), "the wrap is bare base64 — never a packed <id>:<wrap>")
+        #expect(Data(base64Encoded: previousWire) == format.previousCorpusKey?.wrappedByMaster)
 
         let back = try JSONDecoder().decode(KeyVaultWireRow.self, from: JSONEncoder().encode(row)).format()
         #expect(back == format, "the five columns round-trip exactly")
@@ -129,21 +133,23 @@ struct KeyProofTests {
         #expect(try back.unwrapMaster(withAppleKey: apple) == sample.master)
         let unwrapped = try back.unwrapPreviousCorpusKey(masterKey: sample.master)
         #expect(unwrapped.key == previous && unwrapped.keyID == "corpus-id-0")
-        // A malformed one-column value refuses typed, never crashes.
-        #expect(throws: KeyVaultError.malformedPayload) {
-            _ = try KeyVaultFormat.PreviousCorpusKey(wireValue: "no-separator")
-        }
-        #expect(throws: KeyVaultError.malformedPayload) {
-            _ = try KeyVaultFormat.PreviousCorpusKey(wireValue: "id:not!!base64")
-        }
+        // One column without the other is a malformed row; a non-base64
+        // wrap refuses typed, never crashes.
+        var idOnly = row
+        idOnly.corpusPreviousWrappedByMaster = nil
+        #expect(throws: KeyVaultClientError.self, "an id without its wrap") { _ = try idOnly.format() }
+        var wrapOnly = row
+        wrapOnly.corpusPreviousKeyID = nil
+        #expect(throws: KeyVaultClientError.self, "a wrap without its id") { _ = try wrapOnly.format() }
         var bad = row
-        bad.corpusPreviousWrappedByMaster = "garbage"
+        bad.corpusPreviousWrappedByMaster = "not!!base64"
         #expect(throws: KeyVaultClientError.self) { _ = try bad.format() }
     }
 
-    /// The previous key AND the rotation seq are NIL TOGETHER outside a
-    /// rotation: completion clears both (§3.10's "pin the absence of both,
-    /// together"); the Apple-held copy's ABSENCE is what Castle pins.
+    /// The previous key, ITS ID and the rotation seq are NIL TOGETHER
+    /// outside a rotation: completion clears all three (§3.10's "pin the
+    /// absence of both, together" — three columns since the ruling); the
+    /// Apple-held copy's ABSENCE is what Castle pins.
     @Test func thePreviousKeyAndTheSeqClearTogetherAndCastleCarriesNoAppleCopy() throws {
         let sample = try sampleFormat()
         var format = try sample.format.carryingPreviousCorpusKey(
@@ -153,6 +159,10 @@ struct KeyProofTests {
         let done = format.clearingPreviousCorpusKey()
         #expect(done.previousCorpusKey == nil && done.rotationStartedSeq == nil,
                 "completion clears the key AND the seq together — never one without the other")
+        let doneRow = try KeyVaultWireRow(format: done, userID: "u")
+        #expect(doneRow.corpusPreviousKeyID == nil && doneRow.corpusPreviousWrappedByMaster == nil
+                    && doneRow.rotationStartedSeq == nil,
+                "on the wire: the id, the wrap and the seq all nil together")
         #expect(throws: KeyVaultError.noRotationInProgress) {
             _ = try done.unwrapPreviousCorpusKey(masterKey: sample.master)
         }

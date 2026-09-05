@@ -42,9 +42,9 @@ enum RotationDrill {
 
     /// Begin a rotation on the fake's vault row (the `key_vault_update`
     /// twin, authorized by the OLD proof): a fresh master + corpus key, the
-    /// new proof hash installed, the previous corpus key carried (its wire
-    /// value is `<old id>:<base64>` — the value's content is opaque to the
-    /// server, so any string in that shape serves the fake).
+    /// new proof hash installed, the previous corpus key carried as its id
+    /// + a bare wrap (the wrap's content is opaque to the server; any base64
+    /// serves the fake).
     static func beginRotation(
         on server: FakeSyncServer, as userID: String = FakeSyncServer.defaultUserID,
         previous: SyncEncryptionKeys, oldProof: String, expectedRevision: Int = 1
@@ -55,7 +55,8 @@ enum RotationDrill {
         let receipt = try await server.keyVaultUpdate(
             as: userID, expectedRevision: expectedRevision, keyProof: oldProof,
             newCorpusKeyID: newID, newKeyProofHash: KeyProof.hash(master: newMaster),
-            previousCorpusKey: "\(previous.corpusKeyID):\(Data(repeating: 0x11, count: 40).base64EncodedString())")
+            previousCorpusKeyID: previous.corpusKeyID,
+            previousCorpusKey: Data(repeating: 0x11, count: 40).base64EncodedString())
         guard let seq = receipt.rotationStartedSeq else { throw DrillError.noRotationInProgress }
         let keys = SyncEncryptionKeys(
             corpusKey: newCorpus, corpusKeyID: newID,
@@ -129,6 +130,7 @@ enum RotationDrill {
     ) async throws {
         _ = try await server.keyVaultUpdate(
             as: userID, expectedRevision: expectedRevision, keyProof: world.keyProof,
-            newCorpusKeyID: world.newCorpusKeyID, newKeyProofHash: nil, previousCorpusKey: nil)
+            newCorpusKeyID: world.newCorpusKeyID, newKeyProofHash: nil,
+            previousCorpusKeyID: nil, previousCorpusKey: nil)
     }
 }

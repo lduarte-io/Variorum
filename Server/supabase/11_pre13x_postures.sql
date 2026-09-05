@@ -34,15 +34,17 @@
 --     first post-install round). A `BEFORE INSERT` trigger refuses a NULL
 --     hash at vault CREATION — a trigger, never a CHECK, precisely so her
 --     existing row may stay NULL until that round.
---   * THE VAULT'S FIVE ADDITIVE COLUMNS (all nullable):
+--   * THE VAULT'S SIX ADDITIVE COLUMNS (all nullable):
 --     `master_wrapped_by_apple_held` + `apple_key_id` (Standard's one
 --     Apple-held copy, decision 3); `key_proof_hash`;
---     `corpus_previous_wrapped_by_master` (the PREVIOUS corpus key wrapped
---     under the NEW master for a rotation's duration, decision 6 — the
---     value carries the previous key's ID before a `:` so a follower can
---     bind the AAD of pre-rotation rows; batch 1b's recorded reading);
---     `rotation_started_seq` (decision 31 — which key a row is under is
---     told by its `server_seq`).
+--     `corpus_previous_key_id` + `corpus_previous_wrapped_by_master` (the
+--     PREVIOUS corpus key — its id, which a follower binds the AAD of
+--     pre-rotation rows to, and its bare RFC 3394 wrap under the NEW
+--     master — for a rotation's duration, decision 6; the existing
+--     `corpus_key_id` / `corpus_key_wrapped_by_master` pair's shape, never
+--     an id packed inside a value — the orchestrator's ruling on batch 1b's
+--     question 1); `rotation_started_seq` (decision 31 — which key a row
+--     is under is told by its `server_seq`).
 --   * `key_vault_update(payload, expected_revision, key_proof)` — the ONLY
 --     write road into the vault after creation: SECURITY DEFINER,
 --     `variorum_definer`-owned, the row locked FOR UPDATE (decision 31's
@@ -52,8 +54,10 @@
 --     `nextval('sync_server_seq')` taken into `rotation_started_seq` in the
 --     same transaction when the payload sets a previous corpus key —
 --     REFUSED with VARIORUM_ROTATION_IN_PROGRESS when a DIFFERENT previous
---     key is already present (decision 32: one rotation at a time); a
---     payload that clears the previous key clears the seq with it.
+--     key is already present (decision 32: one rotation at a time — a
+--     re-wrap carrying the SAME previous key (id + wrap) through is not a
+--     second rotation and is allowed); a payload that clears the previous
+--     key clears its id and the seq with it.
 --   * THE VAULT'S TABLE-LEVEL WRITE ROAD CLOSES (ledger 41 — found by the
 --     orchestrator reading 08:113-118): `key_vault_owner_update` DROPPED,
 --     UPDATE REVOKED from `authenticated` (SELECT + INSERT stay: the
@@ -168,17 +172,18 @@ drop function if exists sync_purge_execute(jsonb, text);
 drop function if exists account_data_truncate(text);
 
 -- ---------------------------------------------------------------------------
--- 1. The vault's five additive columns — all nullable (the format version
+-- 1. The vault's six additive columns — all nullable (the format version
 --    STAYS 1: a row without them decodes as a pre-postures vault; the
 --    author's row is exactly that until her first round lands the hash).
---    Key material is base64 TEXT as everywhere in this table;
---    `corpus_previous_wrapped_by_master` carries `<previous corpus key id>:`
---    before the base64 wrap.
+--    Key material is base64 TEXT as everywhere in this table; the previous
+--    corpus key is an id + a bare wrap, two columns, exactly as the current
+--    corpus key is.
 -- ---------------------------------------------------------------------------
 
 alter table key_vault add column master_wrapped_by_apple_held text;
 alter table key_vault add column apple_key_id text;
 alter table key_vault add column key_proof_hash text;
+alter table key_vault add column corpus_previous_key_id text;
 alter table key_vault add column corpus_previous_wrapped_by_master text;
 alter table key_vault add column rotation_started_seq bigint;
 
@@ -826,6 +831,8 @@ $$;
 --         holding M′ finishes);
 --       * the payload clears the previous key → the seq clears with it
 --         (completion: "no row of mine below it").
+--     A previous key travels as its id AND its bare wrap (two columns —
+--     the current key's own shape); one without the other refuses.
 --     `revision`, `rotation_started_seq`, `user_id`, `created_at` and
 --     `updated_at` are SERVER-managed — the payload's copies are ignored.
 --     Returns `{revision, rotation_started_seq}` — the acting device reads
@@ -839,8 +846,10 @@ as $$
 declare
   caller uuid;
   vault_revision int;
+  vault_previous_id text;
   vault_previous text;
   vault_seq bigint;
+  incoming_previous_id text;
   incoming_previous text;
   next_seq bigint;
   updated_rows int;
@@ -850,8 +859,8 @@ begin
     raise exception 'account acts require an authenticated user';
   end if;
 
-  select revision, corpus_previous_wrapped_by_master, rotation_started_seq
-    into vault_revision, vault_previous, vault_seq
+  select revision, corpus_previous_key_id, corpus_previous_wrapped_by_master, rotation_started_seq
+    into vault_revision, vault_previous_id, vault_previous, vault_seq
     from key_vault where user_id = caller for update;
   if vault_revision is null then
     raise exception 'VARIORUM_VAULT_ABSENT: no vault exists for this account — set up sync first';
@@ -859,12 +868,22 @@ begin
 
   perform sync_key_proof_check(key_proof);
 
+  incoming_previous_id := payload->>'corpus_previous_key_id';
   incoming_previous := payload->>'corpus_previous_wrapped_by_master';
+  if (incoming_previous is null) <> (incoming_previous_id is null) then
+    raise exception 'a previous corpus key travels as its id AND its wrap — never one without the other';
+  end if;
   if incoming_previous is null then
+    -- Completion (or no rotation): the key, its id and the seq clear together.
     next_seq := null;
   elsif vault_previous is null then
+    -- A rotation begins: the next value of the rows' own sequence, inside
+    -- this transaction, with the row locked.
     next_seq := nextval('sync_server_seq');
-  elsif incoming_previous = vault_previous then
+  elsif incoming_previous = vault_previous and incoming_previous_id = vault_previous_id then
+    -- A carry-through (decision 32's precision): a re-wrap mid-rotation
+    -- sends the vault whole with the SAME previous key — not a second
+    -- rotation; the seq is kept.
     next_seq := vault_seq;
   else
     raise exception 'VARIORUM_ROTATION_IN_PROGRESS: a key rotation started elsewhere is still finishing — let it complete before starting another';
@@ -888,6 +907,7 @@ begin
     master_wrapped_by_apple_held         = payload->>'master_wrapped_by_apple_held',
     apple_key_id                         = payload->>'apple_key_id',
     key_proof_hash                       = coalesce(payload->>'key_proof_hash', key_proof_hash),
+    corpus_previous_key_id               = incoming_previous_id,
     corpus_previous_wrapped_by_master    = incoming_previous,
     rotation_started_seq                 = next_seq,
     revision                             = expected_revision + 1,

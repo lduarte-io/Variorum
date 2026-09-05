@@ -47,7 +47,7 @@ public struct KeyVaultFormat: Codable, Equatable, Sendable {
     /// The per-class keys, each wrapped by master.
     public var classKeys: [WrappedClassKey]
 
-    // MARK: pre-13x — the five additive fields (design §3.10; the format
+    // MARK: pre-13x — the six additive columns (design §3.10; the format
     // version STAYS 1: a row without them decodes as a pre-postures vault)
 
     /// Standard's ONE Apple-held copy (decision 3): master wrapped under
@@ -62,9 +62,12 @@ public struct KeyVaultFormat: Codable, Equatable, Sendable {
     /// first round's migration arm lands it).
     public var keyProofHash: String?
     /// The PREVIOUS corpus key for a rotation's duration (decision 6):
-    /// wrapped under the NEW master, carrying its own id so a follower can
-    /// bind the AAD of pre-rotation rows. nil outside a rotation — TOGETHER
-    /// with `rotationStartedSeq` (pinned).
+    /// its id (`corpus_previous_key_id` — what a follower binds the AAD of
+    /// pre-rotation rows to) and its bare wrap under the NEW master
+    /// (`corpus_previous_wrapped_by_master`) — two columns, the current
+    /// key's own shape (the orchestrator's ruling on batch 1b's question
+    /// 1). nil outside a rotation — TOGETHER with `rotationStartedSeq`
+    /// (pinned).
     public var previousCorpusKey: PreviousCorpusKey?
     /// Which key a row is under is told by its `server_seq` (decision 31):
     /// SERVER-assigned when a rotation begins (`key_vault_update` takes
@@ -73,10 +76,10 @@ public struct KeyVaultFormat: Codable, Equatable, Sendable {
     /// rotation. Never set client-side — the wire row carries it back.
     public var rotationStartedSeq: Int64?
 
-    /// The previous corpus key as the vault carries it: its id + the wrap.
-    /// ONE text column on the wire — `"<keyID>:<base64 wrap>"` (batch 1b's
-    /// recorded reading: the design names five columns and the AAD needs
-    /// the old key's id).
+    /// The previous corpus key as the vault carries it: its id and its
+    /// wrap — TWO columns on the wire (`corpus_previous_key_id` +
+    /// `corpus_previous_wrapped_by_master`), never one packed value; one
+    /// without the other is malformed (`KeyVaultWireRow.format()` refuses).
     public struct PreviousCorpusKey: Codable, Equatable, Sendable {
         public var keyID: String
         public var wrappedByMaster: Data
@@ -84,26 +87,6 @@ public struct KeyVaultFormat: Codable, Equatable, Sendable {
         public init(keyID: String, wrappedByMaster: Data) {
             self.keyID = keyID
             self.wrappedByMaster = wrappedByMaster
-        }
-
-        /// The wire value: `<keyID>:<base64>`.
-        public var wireValue: String {
-            "\(keyID):\(wrappedByMaster.base64EncodedString())"
-        }
-
-        /// Parse the wire value; a value without the `:` or with a
-        /// non-base64 wrap refuses as malformed.
-        public init(wireValue: String) throws {
-            guard let separator = wireValue.firstIndex(of: ":") else {
-                throw KeyVaultError.malformedPayload
-            }
-            let id = String(wireValue[..<separator])
-            let encoded = String(wireValue[wireValue.index(after: separator)...])
-            guard !id.isEmpty, let wrap = Data(base64Encoded: encoded) else {
-                throw KeyVaultError.malformedPayload
-            }
-            self.keyID = id
-            self.wrappedByMaster = wrap
         }
     }
 

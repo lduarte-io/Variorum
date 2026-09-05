@@ -37,9 +37,10 @@ fence). Nothing here touches her real STORE — only the mirror and, at step 3 o
 - [ ] **The A1 rail's local half:** a WAL-safe backup of her real store into `Backups/` with
       `PRAGMA integrity_check` = ok (the 13j window's shape: `Backups/variorum-<stamp>-pre-pre13x-window.sqlite`).
       The mirror half is satisfied by the pre-deploy snapshot (step 2) + local-truth repushability (the 14b/14c
-      doctrine): 11 DROPS NO DATA TABLE and REWRITES NO ROW — it adds five nullable columns, replaces functions,
+      doctrine): 11 DROPS NO DATA TABLE and REWRITES NO ROW — it adds six nullable columns, replaces functions,
       and moves one privilege.
-- [ ] Read `11_pre13x_postures.sql`'s header once more; confirm the sweep file names every signature 11 creates
+- [ ] Read `11_pre13x_postures.sql`'s header once more (six columns; the gate's peek-then-lock; the carry-through);
+      confirm the sweep file names every signature 11 creates
       (`AuthRLSDDLTests.thePostDeployGrantSweepIsReadOnlyAndCoversEverything` is the pin).
 
 ## 2. THE PRE-DEPLOY SNAPSHOT (read-only, the stored-PAT query road)
@@ -48,7 +49,7 @@ Record in the batch-2 record, in this order:
 
 - [ ] `select value from sync_meta where key = 'lockstep_version';` → **7**.
 - [ ] Row counts: `container` · `block` · `variant` · `commit_point` · `key_vault` (expect 1).
-- [ ] The vault row's state: `select revision, corpus_key_id from key_vault;` — and confirm the five columns are
+- [ ] The vault row's state: `select revision, corpus_key_id from key_vault;` — and confirm the six columns are
       ABSENT (`select column_name from information_schema.columns where table_name = 'key_vault';`).
 - [ ] The current function set: `select oid::regprocedure from pg_proc where pronamespace = 'public'::regnamespace
       order by 1;` — the six OLD signatures present (`sync_push(jsonb,text)`, `sync_pull(bigint,text,integer,text)`,
@@ -69,12 +70,14 @@ Record in the batch-2 record, in this order:
 ## 4. VERIFICATION (read-only; all must pass before any install)
 
 - [ ] **The marker:** `select sync_schema_version();` → **8**.
-- [ ] **The five columns:** `select column_name, data_type, is_nullable from information_schema.columns where
+- [ ] **The six columns:** `select column_name, data_type, is_nullable from information_schema.columns where
       table_name = 'key_vault' and column_name in ('master_wrapped_by_apple_held','apple_key_id','key_proof_hash',
-      'corpus_previous_wrapped_by_master','rotation_started_seq');` → five rows, `text` ×4 + `bigint`, all `YES`.
+      'corpus_previous_key_id','corpus_previous_wrapped_by_master','rotation_started_seq');` → six rows, `text` ×5 +
+      `bigint`, all `YES`; `select count(*) from information_schema.columns where table_name = 'key_vault';` → **24**.
 - [ ] **Her vault row untouched and pre-postures:** `select revision, corpus_key_id, key_proof_hash,
-      corpus_previous_wrapped_by_master, rotation_started_seq from key_vault;` → the SAME revision and key id as
-      step 2; the three new values NULL (the NULL-hash migration arm is what her first round lands).
+      corpus_previous_key_id, corpus_previous_wrapped_by_master, rotation_started_seq from key_vault;` → the SAME
+      revision and key id as step 2; the four new values NULL (the NULL-hash migration arm is what her first round
+      lands).
 - [ ] **Every signature:** `select oid::regprocedure from pg_proc where pronamespace = 'public'::regnamespace order
       by 1;` → the six OLD signatures ABSENT; present: `sync_push(jsonb,text,text)`,
       `sync_pull(bigint,text,integer,text,text)`, `sync_horizon(text,text)`, `sync_purge_ledger(bigint,text,text)`,
@@ -121,8 +124,13 @@ Record in the batch-2 record, in this order:
       (the status row idle, no refusal) and `select key_proof_hash from key_vault;` → **a 64-char lowercase hex**
       value — the migration arm landed, ONCE. A second query after the next round shows the SAME value.
 - [ ] **The phone's first round** (the same master, so the same proof) completes against the landed hash.
-- [ ] `select rotation_started_seq, corpus_previous_wrapped_by_master from key_vault;` → both NULL (no rotation
-      has begun; the pair is nil together).
+- [ ] `select corpus_previous_key_id, corpus_previous_wrapped_by_master, rotation_started_seq from key_vault;` → all
+      three NULL (no rotation has begun; the triple is nil together).
+- [ ] **The FOR UPDATE arm, if her two devices' first rounds ever coincide:** nothing to probe by hand — the gate
+      peeks the hash unlocked, takes the row `FOR UPDATE` on a NULL, re-reads and sets only if still NULL; a second
+      first-round waits on the lock and then compares against what landed (the same proof passes; a different one
+      refuses typed). If the mirror's logs ever show a `40P01` (deadlock) on `key_vault` at this step, that is a
+      defect of the deploy, not of the choreography — stop and read `sync_key_gate`'s lock choice.
 - [ ] `device_cursor` carries BOTH devices' rows from these rounds (the 13j window's own verification).
 - [ ] Run the grant sweep ONCE MORE after the rounds — every row OK/INFO (nothing a round does can change the
       posture; the second run is the record's belt).
@@ -142,7 +150,7 @@ Record in the batch-2 record, in this order:
 
 ## 8. THE RECORD AT CLOSEOUT
 
-- SyncSpec §12's running record gains the marker 7 → 8 entry (the file, the five columns, the closed write road,
+- SyncSpec §12's running record gains the marker 7 → 8 entry (the file, the six columns, the closed write road,
   the proof on every mutating RPC and the two read RPCs, the NULL-hash arm's one-time landing on her row, the
   PATCH probe's answer, the sweep's verdict) — the closeout's canon delta (design §17).
 - The batch-2 record carries the window's paragraph in the 13j shape (pre-deploy snapshot · deploy · verification ·

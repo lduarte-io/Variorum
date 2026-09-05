@@ -240,13 +240,14 @@ struct SerializerCompletenessTests {
         "revision": .bookkeeping,
         "created_at": .bookkeeping,
         "updated_at": .bookkeeping,
-        // pre-13x 11 — the five additive columns (design §3.10).
+        // pre-13x 11 — the six additive columns (design §3.10): the
+        // previous corpus key is an id + a bare wrap, two columns, the
+        // current key's own shape (the orchestrator's ruling on 1b's
+        // question 1).
         "master_wrapped_by_apple_held": .wrappedKey,
         "apple_key_id": .id,
         "key_proof_hash": .hash,
-        // The previous corpus key's id rides INSIDE this value before a
-        // `:` (batch 1b's recorded reading) — an id + a wrapped key, both
-        // structure.
+        "corpus_previous_key_id": .id,
         "corpus_previous_wrapped_by_master": .wrappedKey,
         "rotation_started_seq": .bookkeeping,
     ]
@@ -259,12 +260,14 @@ struct SerializerCompletenessTests {
                 "key_vault carries unclassified column(s) \(vault.subtracting(declared).sorted()) — every vault column takes a side: id / KDF parameter / wrapped key / hash / bookkeeping")
         #expect(declared.subtracting(vault).isEmpty,
                 "the classification names vault column(s) the DDL lacks: \(declared.subtracting(vault).sorted())")
-        // The five postures columns are all present — the additive event
-        // reached the walk.
+        // The six postures columns are all present — the additive event
+        // reached the walk; 24 vault columns in all.
         for column in ["master_wrapped_by_apple_held", "apple_key_id", "key_proof_hash",
-                       "corpus_previous_wrapped_by_master", "rotation_started_seq"] {
+                       "corpus_previous_key_id", "corpus_previous_wrapped_by_master",
+                       "rotation_started_seq"] {
             #expect(vault.contains(column), "11 must add \(column)")
         }
+        #expect(vault.count == 24)
         // And no class is prose: the enum has no such case — stated so the
         // reader sees the disclosure list's promise where it is kept.
         #expect(Set(Self.keyVaultColumnClasses.values.map(\.rawValue))

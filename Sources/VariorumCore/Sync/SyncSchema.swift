@@ -91,7 +91,7 @@ public enum SyncSchema {
     /// the OLD signatures dropped first; the NEW `sync_reencrypt`
     /// (version-neutral re-encryption) and `key_vault_update` (the ONE
     /// vault write road, the PostgREST PATCH road CLOSED); the vault's
-    /// five nullable columns incl. `rotation_started_seq`; mirror DDL
+    /// six nullable columns incl. `rotation_started_seq`; mirror DDL
     /// 11_pre13x_postures.sql — deploy is the orchestrator's window under
     /// her standing pre-authorization, immediately before batch 2's
     /// migration + both installs). **Bump this

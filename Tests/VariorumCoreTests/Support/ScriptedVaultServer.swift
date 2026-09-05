@@ -228,6 +228,7 @@ final class ScriptedVaultServer: @unchecked Sendable {
                 as: userID, expectedRevision: call.expectedRevision, keyProof: call.keyProof,
                 newCorpusKeyID: call.payload.corpusKeyID,
                 newKeyProofHash: call.payload.keyProofHash,
+                previousCorpusKeyID: call.payload.corpusPreviousKeyID,
                 previousCorpusKey: call.payload.corpusPreviousWrappedByMaster)
         } catch KeyVaultClientError.vaultAbsent {
             return refusal(request, marker: SyncServerRefusalMarker.vaultAbsent)
@@ -237,6 +238,9 @@ final class ScriptedVaultServer: @unchecked Sendable {
             return refusal(request, marker: SyncServerRefusalMarker.rotationInProgress)
         } catch KeyVaultClientError.vaultRevisionConflict {
             return refusal(request, marker: SyncServerRefusalMarker.vaultRevisionConflict)
+        } catch FakeSyncServerError.previousKeyHalfMissing {
+            return response(request, 400, body: Data(
+                #"{"code":"P0001","message":"a previous corpus key travels as its id AND its wrap"}"#.utf8))
         }
         // The write: the format columns replaced WHOLE from the payload;
         // the server-managed columns from the receipt / the clock.

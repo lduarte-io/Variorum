@@ -1365,21 +1365,23 @@ struct AuthRLSDDLTests {
                 "account_purge stays session-only and untouched (decision 12)")
     }
 
-    /// The five additive columns, all NULLABLE (the author's row stays
-    /// NULL until her first round lands the hash) — and the insert arm is
-    /// a TRIGGER, never a CHECK, for exactly that reason.
-    @Test func theVaultGainsExactlyTheFivePosturesColumnsAllNullable() throws {
+    /// The six additive columns, all NULLABLE (the author's row stays
+    /// NULL until her first round lands the hash) — the previous corpus key
+    /// as its id + its bare wrap, two columns (the orchestrator's ruling on
+    /// 1b's question 1) — and the insert arm is a TRIGGER, never a CHECK,
+    /// for exactly that reason.
+    @Test func theVaultGainsExactlyTheSixPosturesColumnsAllNullable() throws {
         let sql = Self.strippingComments(try Self.sqlFile("11_pre13x_postures.sql"))
         for (column, type) in [
             ("master_wrapped_by_apple_held", "text"), ("apple_key_id", "text"),
-            ("key_proof_hash", "text"), ("corpus_previous_wrapped_by_master", "text"),
-            ("rotation_started_seq", "bigint"),
+            ("key_proof_hash", "text"), ("corpus_previous_key_id", "text"),
+            ("corpus_previous_wrapped_by_master", "text"), ("rotation_started_seq", "bigint"),
         ] {
             #expect(sql.contains("alter table key_vault add column \(column) \(type);"),
                     "11 must add \(column) \(type), nullable")
         }
-        #expect(sql.components(separatedBy: "alter table key_vault add column").count - 1 == 5,
-                "exactly five additive columns")
+        #expect(sql.components(separatedBy: "alter table key_vault add column").count - 1 == 6,
+                "exactly six additive columns")
         #expect(!sql.contains("add column key_proof_hash text not null"),
                 "NULLABLE — a NOT NULL would refuse the author's existing row")
         #expect(!sql.lowercased().contains("check (key_proof_hash"),
@@ -1503,17 +1505,22 @@ struct AuthRLSDDLTests {
                 "the serialization point (decision 31)")
         #expect(body.contains(SyncServerRefusalMarker.vaultAbsent))
         #expect(body.contains("perform sync_key_proof_check(key_proof);"), "the CURRENT proof authorizes")
-        #expect(body.contains("incoming_previous := payload->>'corpus_previous_wrapped_by_master';"))
+        #expect(body.contains("incoming_previous_id := payload->>'corpus_previous_key_id';")
+                    && body.contains("incoming_previous := payload->>'corpus_previous_wrapped_by_master';"),
+                "the previous key is its id AND its wrap — two columns")
+        #expect(body.contains("if (incoming_previous is null) <> (incoming_previous_id is null) then"),
+                "one without the other refuses")
         #expect(body.contains("elsif vault_previous is null then")
                     && body.contains("next_seq := nextval('sync_server_seq');"),
                 "a rotation begins: nextval INSIDE this transaction, the row locked")
-        #expect(body.contains("elsif incoming_previous = vault_previous then")
+        #expect(body.contains("elsif incoming_previous = vault_previous and incoming_previous_id = vault_previous_id then")
                     && body.contains("next_seq := vault_seq;"),
-                "a carry-through (a re-wrap mid-rotation) keeps the seq")
+                "a carry-through (a re-wrap mid-rotation with the SAME previous key) keeps the seq — decision 32's precision")
         #expect(body.contains(SyncServerRefusalMarker.rotationInProgress),
                 "a DIFFERENT previous key while one stands refuses (decision 32)")
         #expect(body.contains("if incoming_previous is null then") && body.contains("next_seq := null;"),
                 "clearing the key clears the seq with it")
+        #expect(body.contains("corpus_previous_key_id               = incoming_previous_id,"))
         #expect(body.contains("corpus_previous_wrapped_by_master    = incoming_previous,"))
         #expect(body.contains("rotation_started_seq                 = next_seq,"))
         #expect(body.contains("where user_id = caller and revision = expected_revision;"), "the CAS inside")

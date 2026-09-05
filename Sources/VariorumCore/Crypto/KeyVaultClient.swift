@@ -383,12 +383,14 @@ struct KeyVaultWireRow: Codable, Equatable {
     /// timestamp stays truthful through re-wraps and re-keys. Display
     /// data only — never ordering.
     var updatedAt: String?
-    /// pre-13x — the five additive columns (11_pre13x_postures.sql), all
+    /// pre-13x — the six additive columns (11_pre13x_postures.sql), all
     /// optional on the wire: a pre-postures row decodes with them nil.
     var masterWrappedByAppleHeld: String?
     var appleKeyID: String?
     var keyProofHash: String?
-    /// `<previous corpus key id>:<base64 wrap>` — ONE text column.
+    /// The previous corpus key: its id and its bare base64 wrap — two
+    /// columns, the current key's own shape; always both or neither.
+    var corpusPreviousKeyID: String?
     var corpusPreviousWrappedByMaster: String?
     /// Server-assigned (`key_vault_update` takes `nextval` with the row
     /// locked); read back, never written by the client.
@@ -415,6 +417,7 @@ struct KeyVaultWireRow: Codable, Equatable {
         case masterWrappedByAppleHeld = "master_wrapped_by_apple_held"
         case appleKeyID = "apple_key_id"
         case keyProofHash = "key_proof_hash"
+        case corpusPreviousKeyID = "corpus_previous_key_id"
         case corpusPreviousWrappedByMaster = "corpus_previous_wrapped_by_master"
         case rotationStartedSeq = "rotation_started_seq"
     }
@@ -453,6 +456,7 @@ struct KeyVaultWireRow: Codable, Equatable {
             String.self, forKey: .masterWrappedByAppleHeld)
         appleKeyID = try container.decodeIfPresent(String.self, forKey: .appleKeyID)
         keyProofHash = try container.decodeIfPresent(String.self, forKey: .keyProofHash)
+        corpusPreviousKeyID = try container.decodeIfPresent(String.self, forKey: .corpusPreviousKeyID)
         corpusPreviousWrappedByMaster = try container.decodeIfPresent(
             String.self, forKey: .corpusPreviousWrappedByMaster)
         rotationStartedSeq = try container.decodeIfPresent(Int64.self, forKey: .rotationStartedSeq)
@@ -486,7 +490,8 @@ struct KeyVaultWireRow: Codable, Equatable {
         self.masterWrappedByAppleHeld = format.masterWrappedByAppleHeld?.base64EncodedString()
         self.appleKeyID = format.appleKeyID
         self.keyProofHash = format.keyProofHash
-        self.corpusPreviousWrappedByMaster = format.previousCorpusKey?.wireValue
+        self.corpusPreviousKeyID = format.previousCorpusKey?.keyID
+        self.corpusPreviousWrappedByMaster = format.previousCorpusKey?.wrappedByMaster.base64EncodedString()
         self.rotationStartedSeq = format.rotationStartedSeq
     }
 
@@ -535,14 +540,24 @@ struct KeyVaultWireRow: Codable, Equatable {
             },
             appleKeyID: appleKeyID,
             keyProofHash: keyProofHash,
-            previousCorpusKey: try corpusPreviousWrappedByMaster.map { wire in
-                do {
-                    return try KeyVaultFormat.PreviousCorpusKey(wireValue: wire)
-                } catch {
-                    throw KeyVaultClientError.malformedRow(
-                        "corpus_previous_wrapped_by_master is not <key id>:<base64>")
-                }
-            },
+            previousCorpusKey: try previousCorpusKey(decode: decode),
             rotationStartedSeq: rotationStartedSeq)
+    }
+
+    /// The previous key's two columns: both or neither; one without the
+    /// other is a malformed row.
+    private func previousCorpusKey(
+        decode: (String, String) throws -> Data
+    ) throws -> KeyVaultFormat.PreviousCorpusKey? {
+        switch (corpusPreviousKeyID, corpusPreviousWrappedByMaster) {
+        case (nil, nil):
+            return nil
+        case (let id?, let wrap?):
+            return KeyVaultFormat.PreviousCorpusKey(
+                keyID: id, wrappedByMaster: try decode(wrap, "corpus_previous_wrapped_by_master"))
+        default:
+            throw KeyVaultClientError.malformedRow(
+                "a previous corpus key travels as its id AND its wrap — never one without the other")
+        }
     }
 }
