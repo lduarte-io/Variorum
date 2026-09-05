@@ -79,17 +79,24 @@ public struct AccountRekey: Sendable {
     /// the caller's custody adoption point.
     public var onNewVaultMaterial: (@Sendable (DeviceKeyMaterial) async -> Void)?
 
+    /// pre-13x 1a: this device's identity (the custody item's) — the
+    /// re-initialization engine's provider carries it for the seam's shape;
+    /// no round runs inside the brain.
+    public let deviceID: String
+
     public init(
         client: KeyVaultClient,
         lifecycle: any AccountLifecycleProviding,
         transport: any SyncTransport,
         database: AppDatabase,
+        deviceID: String,
         onNewVaultMaterial: (@Sendable (DeviceKeyMaterial) async -> Void)? = nil
     ) {
         self.client = client
         self.lifecycle = lifecycle
         self.transport = transport
         self.database = database
+        self.deviceID = deviceID
         self.onNewVaultMaterial = onNewVaultMaterial
     }
 
@@ -158,11 +165,15 @@ public struct AccountRekey: Sendable {
         try await withDependencies {
             $0.database = database
         } operation: {
+            // pre-13x 1a: a `resyncReinitialize`-only engine — no round, no
+            // identity use; the static world carries the caller's device id
+            // for the seam's shape alone.
             let engine = SyncEngine(
-                transport: transport, keyProvider: RekeyMaterialProvider(
+                transport: transport, keyProvider: StaticSyncKeyProvider(
                     keys: SyncEncryptionKeys(
                         corpusKey: material.corpusSymmetricKey,
-                        corpusKeyID: material.corpusKeyID)))
+                        corpusKeyID: material.corpusKeyID),
+                    deviceID: deviceID))
             try await engine.resyncReinitialize()
         }
 
@@ -177,7 +188,7 @@ public struct AccountRekey: Sendable {
 /// Phase 14c ladder R1-1 — the persisted rekey-in-progress MARKER: the
 /// crash-window closure for the brain's non-atomic sequence. It lives in
 /// the LOCAL-ONLY `sync_state` keyspace (never synced, no triggers watch
-/// it — the `device_id` precedent), so it is per-device by construction,
+/// it — the local-only keyspace's precedent), so it is per-device by construction,
 /// exactly the scope of the road it tracks.
 ///
 /// Why `sync_state` and not the device Keychain: (i) local-only BY
@@ -213,10 +224,3 @@ public enum AccountRekeyMarker {
     }
 }
 
-/// The brain's in-run key world (the runner's `MaterialKeyProvider`
-/// shape) — only `resyncReinitialize` composes over it, which never
-/// touches the network.
-private struct RekeyMaterialProvider: SyncKeyProviding {
-    let keys: SyncEncryptionKeys
-    func currentKeys() throws -> SyncEncryptionKeys { keys }
-}

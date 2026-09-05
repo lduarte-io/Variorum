@@ -120,8 +120,7 @@ struct SyncMirrorDumpAndResyncTests {
         _ = try await a.push()
         _ = try await a.pull()
         #expect(try a.outboxCount() == 0)
-        let deviceID = try a.db.fetchString("SELECT value FROM sync_state WHERE key = 'device_id'")
-        #expect(deviceID != nil)
+        #expect(try a.storedDeviceID() == nil, "pre-13x 1a: no identity in the file")
         let tombstonedBlock = try a.db.fetchString(
             "SELECT id FROM block WHERE deleted_at IS NOT NULL")!
 
@@ -146,13 +145,13 @@ struct SyncMirrorDumpAndResyncTests {
         let anyCommit = try a.db.fetchString("SELECT id FROM commit_point LIMIT 1")!
         #expect(try a.outboxContains("commit_point", anyCommit))
         #expect(try a.outboxContains("setting", "default_segmentation"))
-        // Bookkeeping cleared; identity kept.
+        // Bookkeeping cleared; nothing identity-shaped to keep — the
+        // identity rides custody, never the file (pre-13x 1a).
         #expect(try a.db.fetchInt("SELECT COUNT(*) FROM sync_row_seq") == 0)
         #expect(try a.db.fetchString(
             "SELECT value FROM sync_state WHERE key = 'last_server_seq'") == nil)
-        #expect(try a.db.fetchString(
-            "SELECT value FROM sync_state WHERE key = 'device_id'") == deviceID,
-                "device identity is not sync bookkeeping")
+        #expect(try a.storedDeviceID() == nil,
+                "resyncReinitialize spares nothing key-shaped because nothing key-shaped is in the file")
     }
 
     // MARK: - The scenario: wipe the mirror, re-init, repush, fresh onboard

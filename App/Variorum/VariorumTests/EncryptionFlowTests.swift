@@ -217,178 +217,77 @@ struct CopyFlowRoundTests {
                 "the hook fires so the next round surfaces the locked line NOW, not at the next cadence")
     }
 
-    /// CF-12's gated arm: the toggle re-persists custody behind the gate;
-    /// the SAME launch stays unlocked; a FRESH launch is locked — sync's
-    /// key seam refuses — until the biometric unlock fills the launch.
-    @Test func theBiometricGateLocksCustodyAcrossALaunchUntilUnlocked() async throws {
-        let backing = InMemoryKeyBacking(
-            biometryAvailable: true, biometricUnlockSucceeds: true)
+    /// pre-13x 1a (§3.3) — CASTLE'S GATED SHAPE: under the library key's
+    /// biometric mode the sync record lives in the gated item, so a fresh
+    /// launch reads NO keys — the engine's seam refuses visibly — until the
+    /// lobby's ONE gated read fills the session; a relock drops it again.
+    /// Custody follows the library key's posture, never a toggle (the CF-12
+    /// gate this pin replaces). RED ON OLD: the gate was a separate opt-in
+    /// (`setBiometricRequirement`) — there was no shape to follow.
+    @Test func underTheBiometricShapeAFreshLaunchReadsNoKeysUntilTheLobbysOneGatedRead() async throws {
+        let backing = InMemoryKeyBacking(shape: .biometric)
         let store = DeviceKeyStore.inMemory(backing: backing)
         let vault = ScriptedVault()
         let session = makeEncryptionSession(store: store, vault: vault)
         await session.setUp(passphrase: passphrase)
-
-        // JUSTIFIED EDIT (13e batch 9, B-1): the toggle act is async now —
-        // its custody read+write ride one off-main hop. Expectations below
-        // are byte-unchanged.
-        await session.setBiometricRequirement(true)
         #expect(session.lastError == nil)
-        #expect(session.biometricRequired)
         #expect(store.load() != nil,
-                "the toggle itself never locks the launch that flipped it")
+                "the device that just proved the passphrase is unlocked for the rest of the launch")
 
-        backing.simulateRelaunch()
-        #expect(store.load() == nil,
-                "a fresh launch is locked until an unlock")
+        backing.simulateRelaunch()  // a fresh launch, or a relock
+        #expect(store.load() == nil, "a locked library reads as no keys")
         let provider = DeviceKeySyncProvider(store: store)
         #expect(throws: SyncKeyProviderError.notEnrolled) {
             try provider.currentKeys()
         }
         await session.refresh()
-        #expect(session.state == .enrolledLocked(hasRecoveryWrap: false),
-                "the surface offers the unlock, not re-enrollment")
+        #expect(session.state == .notEnrolled(hasRecoveryWrap: false),
+                "before the unlock the surface offers the roads, never a false enrolled")
 
-        var healed = 0
-        session.onKeysChanged = { healed += 1 }
-        await session.unlockWithBiometrics()
-        #expect(session.lastError == nil)
+        backing.simulateUnlock()  // the lobby's one Touch ID read
         #expect(store.load() != nil, "unlocked for the rest of the launch")
-        #expect(session.state == .enrolled(hasRecoveryWrap: false))
         #expect(throws: Never.self) { try provider.currentKeys() }
-        #expect(healed == 1, "the unlock heals sync immediately")
-    }
-
-    /// CF-12's fallback arm — her ruling's second half: biometric failure
-    /// is never a dead end; the PASSPHRASE road unlocks the launch, and
-    /// the gate policy SURVIVES it (turning it off is a deliberate act).
-    @Test func aBiometricFailureFallsBackToThePassphraseRoadAndTheGateSurvives() async throws {
-        let backing = InMemoryKeyBacking(
-            biometryAvailable: true, biometricUnlockSucceeds: false)
-        let store = DeviceKeyStore.inMemory(backing: backing)
-        let vault = ScriptedVault()
-        let session = makeEncryptionSession(store: store, vault: vault)
-        await session.setUp(passphrase: passphrase)
-        await session.setBiometricRequirement(true)  // JUSTIFIED EDIT: 13e batch 9 (B-1)
-        backing.simulateRelaunch()
-
-        await session.unlockWithBiometrics()
-        #expect(session.lastError == EncryptionSession.biometricUnlockFailedMessage,
-                "the failure speaks and names the fallback")
-        #expect(store.load() == nil, "a failed unlock lands nothing")
-
-        await session.enroll(passphrase: passphrase)
-        #expect(session.lastError == nil)
-        #expect(store.load() != nil,
-                "the passphrase road re-derives from the vault and unlocks this launch")
-        #expect(store.isBiometricGateOn(),
-                "the gate survives the fallback — the policy is hers to turn off, never a side effect")
+        await session.refresh()
         #expect(session.state == .enrolled(hasRecoveryWrap: false))
+        #expect(try provider.deviceIdentity() == backing.deviceID,
+                "the identity rides the same custody")
     }
 
-    /// CF-12's ungated arm: turning the gate OFF re-persists plain custody
-    /// that reads across launches with no unlock at all (R-6's
-    /// enrollment-only cadence, restored).
-    @Test func turningTheGateOffRestoresUngatedCustodyAcrossLaunches() async throws {
-        let backing = InMemoryKeyBacking(
-            biometryAvailable: true, biometricUnlockSucceeds: true)
+    /// pre-13x 1a (decision 10) — ALWAYS ASK: no key item exists; the keys
+    /// live in the session for the unlocked session and a relock drops
+    /// them; the library keeps its IDENTITY across opens (the identity-only
+    /// item).
+    @Test func underAlwaysAskTheKeysLiveInTheSessionAndTheIdentitySurvivesARelock() async throws {
+        let backing = InMemoryKeyBacking(shape: .sessionOnly)
         let store = DeviceKeyStore.inMemory(backing: backing)
         let vault = ScriptedVault()
         let session = makeEncryptionSession(store: store, vault: vault)
         await session.setUp(passphrase: passphrase)
-        // JUSTIFIED EDIT (13e batch 9, B-1): async act; the two flips still
-        // land in this order — the custody hop's queue is serial.
-        await session.setBiometricRequirement(true)
-        await session.setBiometricRequirement(false)
-        #expect(!session.biometricRequired)
-        #expect(!store.isBiometricGateOn())
+        #expect(store.load() != nil, "held for the session")
+        let identity = try DeviceKeySyncProvider(store: store).deviceIdentity()
 
-        backing.simulateRelaunch()
-        #expect(store.load() != nil,
-                "ungated custody reads across launches with no unlock")
-        let provider = DeviceKeySyncProvider(store: store)
-        #expect(throws: Never.self) { try provider.currentKeys() }
-    }
-
-    // MARK: - R-pre13u-2 (pre-13u Act 9): the sync gate is OPT-IN, default
-    // OFF — and legacy gates reset
-
-    /// THE RESET, RED ON OLD. A gated custody item claimed by NO recorded
-    /// opt-in is legacy state under the OLD semantics (her device's exact
-    /// state — the double-Touch-ID report). The first biometric unlock is
-    /// a material-in-hand moment: custody transitions back to plain, so
-    /// that was the LAST second prompt — the next launch reads keys with
-    /// no unlock at all (under Auto, sync is auto too; under a demanded
-    /// mode the lobby's one prompt covers both).
-    @Test func aLegacyGateWithNoRecordedOptInResetsAtTheNextBiometricUnlock() async throws {
-        let backing = InMemoryKeyBacking(
-            biometryAvailable: true, biometricUnlockSucceeds: true)
-        let store = DeviceKeyStore.inMemory(backing: backing)
-        let vault = ScriptedVault()
-        let session = makeEncryptionSession(store: store, vault: vault)
-        await session.setUp(passphrase: passphrase)
-        // The LEGACY state: gated custody with no opt-in recorded (the
-        // old-world toggle never wrote the marker) — set through the
-        // store, not the session's toggle.
-        let material = try #require(await session.heldMaterial())
-        #expect(store.setBiometricGate(true, material) == .done)
-        backing.simulateRelaunch()
-        #expect(store.load() == nil, "the legacy world: locked at launch")
-
-        await session.unlockWithBiometrics()
-        #expect(session.lastError == nil)
-        #expect(!store.isBiometricGateOn(),
-                "the unclaimed gate RESET to plain at the material-in-hand moment")
-        #expect(!session.biometricRequired, "the toggle reads OFF — the new default")
-
-        backing.simulateRelaunch()
-        #expect(store.load() != nil,
-                "the ONE-prompt world: a fresh launch reads keys with no second unlock")
-        #expect(throws: Never.self) {
+        backing.simulateRelaunch()  // the relock
+        #expect(store.load() == nil, "a relock drops the session's keys")
+        #expect(throws: SyncKeyProviderError.notEnrolled) {
             try DeviceKeySyncProvider(store: store).currentKeys()
         }
+        #expect(try DeviceKeySyncProvider(store: store).deviceIdentity() == identity,
+                "an Always-ask library keeps its identity across opens")
     }
 
-    /// The control — her "one click re-enables" half: an opt-in recorded
-    /// THROUGH the toggle is honored regardless of at-open mode, and no
-    /// unlock ever resets it (two prompts is what opting in asks for).
-    @Test func anOptInRecordedThroughTheToggleIsNeverReset() async throws {
-        let backing = InMemoryKeyBacking(
-            biometryAvailable: true, biometricUnlockSucceeds: true)
-        let store = DeviceKeyStore.inMemory(backing: backing)
-        let vault = ScriptedVault()
-        let session = makeEncryptionSession(store: store, vault: vault)
-        await session.setUp(passphrase: passphrase)
-        await session.setBiometricRequirement(true)  // the deliberate opt-in
-        backing.simulateRelaunch()
-
-        await session.unlockWithBiometrics()
-        #expect(store.isBiometricGateOn(),
-                "an opted-in gate SURVIVES the unlock — never reset")
-        #expect(session.biometricRequired)
-        backing.simulateRelaunch()
-        #expect(store.load() == nil,
-                "and the next launch waits for its unlock again, exactly as opted into")
-    }
-
-    /// The passphrase road is a material-in-hand moment too: enrolling by
-    /// passphrase over a legacy gate resets it the same way.
-    @Test func thePassphraseRoadAlsoResetsALegacyGate() async throws {
-        let backing = InMemoryKeyBacking(
-            biometryAvailable: true, biometricUnlockSucceeds: false)
-        let store = DeviceKeyStore.inMemory(backing: backing)
-        let vault = ScriptedVault()
-        let session = makeEncryptionSession(store: store, vault: vault)
-        await session.setUp(passphrase: passphrase)
-        let material = try #require(await session.heldMaterial())
-        #expect(store.setBiometricGate(true, material) == .done)
-        backing.simulateRelaunch()
-
-        await session.enroll(passphrase: passphrase)
-        #expect(session.lastError == nil)
-        #expect(!store.isBiometricGateOn(),
-                "the unclaimed gate reset on the passphrase road too")
-        backing.simulateRelaunch()
-        #expect(store.load() != nil, "one-prompt world from here on")
+    /// The session memory itself (decision 10): an offline Always-ask
+    /// unlock keeps the DERIVED wrapping key — never the typed word — and
+    /// a relock drops it with the record.
+    @Test func theSessionMemoryHoldsTheDerivedKeyNeverTheWordAndDropsAtRelock() {
+        let memory = SyncCustodySession()
+        let derived = SymmetricKey(size: .bits256)
+        memory.holdDerivedWrappingKey(derived)
+        memory.hold(SyncCustodyRecord(deviceID: "dev-1", material: nil))
+        #expect(memory.derivedWrappingKey == derived)
+        #expect(memory.record?.deviceID == "dev-1")
+        memory.drop()
+        #expect(memory.derivedWrappingKey == nil, "a relock drops the derived key")
+        #expect(memory.record == nil, "…and the record")
     }
 
     /// CF-2's pin: REGENERATING the phrase is authorized by the passphrase
@@ -1227,6 +1126,9 @@ struct SyncLockedFaceTests {
 
     private struct LockedProvider: SyncKeyProviding {
         func currentKeys() throws -> SyncEncryptionKeys {
+            throw SyncKeyProviderError.notEnrolled
+        }
+        func deviceIdentity() throws -> String {
             throw SyncKeyProviderError.notEnrolled
         }
     }

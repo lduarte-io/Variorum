@@ -40,6 +40,11 @@ final class SyncClient {
     /// device (`LockedSyncKeyProvider`) mid-life; the next engine call
     /// binds it.
     var keyProvider: any SyncKeyProviding = FixedSyncKeyProvider()
+    /// pre-13x 1a: THIS DEVICE'S IDENTITY — the custody item's in
+    /// production, the client's own here, riding whatever key world the
+    /// client holds (`engine()` wraps it). Mutable so a scenario can model
+    /// a RE-MINTED identity (a wiped Keychain — §14.37's returner).
+    var deviceID: String = UUID().uuidString.lowercased()
     /// The sample-library dedupe's injected facts (pre-13u Act 0) — nil by
     /// default, exactly like production: the repair is inert unless a
     /// scenario wires facts in. Mutable so a scenario binds it; the next
@@ -54,9 +59,10 @@ final class SyncClient {
     /// device modelable without wall-clock tricks or hand-rolled snapshots:
     /// take a real `AppDatabase.backup(to:)` of a converged device, copy the
     /// file, and open a client on the copy. The restored client then carries
-    /// the backup's rows, its cursor, its outbox and — the part that matters
-    /// for M7 — its `sync_state.device_id`, because device identity lives in
-    /// the store and therefore travels inside a backup.
+    /// the backup's rows, its cursor and its outbox — and, since pre-13x 1a,
+    /// NOT an identity: a copy of the library is writing, never a device
+    /// (the identity rides the sync-key custody item), so a restored client
+    /// is a NEW device with a fresh `deviceID` (M7's flipped premise).
     ///
     /// Give a restored client its OWN `prefix`: the UUID counter restarts at
     /// zero, so reusing the source device's prefix would mint ids it already
@@ -129,7 +135,8 @@ final class SyncClient {
     func engine(batchSize: Int = 200, maxPushIterations: Int = 5) -> SyncEngine {
         SyncEngine(
             transport: transport, batchSize: batchSize, maxPushIterations: maxPushIterations,
-            keyProvider: keyProvider, sampleLibraryFacts: sampleLibraryFacts)
+            keyProvider: ClientIdentityKeyProvider(inner: keyProvider, deviceID: deviceID),
+            sampleLibraryFacts: sampleLibraryFacts)
     }
 
     @discardableResult
@@ -254,8 +261,9 @@ struct RestoreScratch {
 }
 
 extension SyncClient {
-    /// The device identity a backup carries with it (SyncSpec §3).
-    func deviceID() throws -> String? {
+    /// pre-13x 1a: a backup carries NO identity — this is what the STORE
+    /// holds under the retired key (always nil now; pinned).
+    func storedDeviceID() throws -> String? {
         try db.fetchString("SELECT value FROM sync_state WHERE key = 'device_id'")
     }
 

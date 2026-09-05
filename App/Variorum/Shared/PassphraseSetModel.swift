@@ -58,7 +58,7 @@ struct VaultTie {
                 hasRecoveryWrap: false,
                 verifyPassphrase: { _ in refusal },
                 verifyRecoveryWords: { _ in refusal })
-        case .enrolled(let hasRecovery), .enrolledLocked(let hasRecovery),
+        case .enrolled(let hasRecovery),
              .notEnrolled(let hasRecovery), .keysReplaced(let hasRecovery):
             return VaultTie(
                 hasRecoveryWrap: hasRecovery,

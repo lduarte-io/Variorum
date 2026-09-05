@@ -19,7 +19,10 @@ import Testing
 struct KeychainPartitionTests {
     @Test func everyDataProtectionResidentFamilyCarriesThePartitionMarker() {
         let families: [(String, [String: Any])] = [
-            ("E2EE gated device keys (14b CF-12)", E2EEKeychainStorage.gatedBaseQuery()),
+            ("E2EE gated sync custody (14b CF-12 → pre-13x 1a, per store)",
+             E2EEKeychainStorage.gatedQuery(scope: SyncCustodyScope(scope: "partition-probe", storeID: "partition-probe-store"))),
+            ("E2EE bound sync custody (pre-13x 1a, per store)",
+             E2EEKeychainStorage.boundQuery(scope: SyncCustodyScope(scope: "partition-probe", storeID: "partition-probe-store"))),
             ("gated store key (13p Biometric mode)",
              StoreKeyGuardKeychain.gatedQuery(scope: "partition-probe", storeID: "partition-probe-store")),
             ("iCloud escrow (13p R13p-6)",

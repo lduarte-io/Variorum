@@ -74,61 +74,15 @@ struct CustodyHandoverTests {
 
     // MARK: - The E2EE transition (round 2's MAJOR)
 
+    private func record() -> SyncCustodyRecord {
+        SyncCustodyRecord(deviceID: "handover-device", material: material())
+    }
+
     private func material() -> DeviceKeyMaterial {
         DeviceKeyMaterial(
             masterKey: Data(repeating: 0, count: 32),
             corpusKey: Data(repeating: 1, count: 32), corpusKeyID: "corpus",
             journalBridgeKey: Data(repeating: 2, count: 32), journalBridgeKeyID: "bridge")
-    }
-
-    /// RED ON OLD for the half round 1 left unpinned: revert
-    /// `setBiometricGate` to the pre-fix two-liner and this fails, because
-    /// the transition would stop consulting the handover outcome at all.
-    /// Drives a FAKE custody seam — no Keychain is touched.
-    @Test func theE2EEGateRefusesWhenTheGatedWriteCannotBeReadBack() {
-        let store = DeviceKeyStore.keychain(
-            custody: E2EECustodyStorage(
-                setGated: { _ in .wroteButUnreadable },
-                setPlain: { _ in .done }))
-        #expect(store.setBiometricGate(true, material()) == .wroteButUnreadable,
-                "a gated item nothing can find is not a landed gate — and the plain item it would have replaced must not have been deleted")
-    }
-
-    /// 13p-fix R3-2, red-on-old: the E2EE surface must NOT say "nothing
-    /// was altered" when something landed somewhere unreadable. Before the
-    /// fix the seam returned a Bool, so this arm and a genuine refusal
-    /// were the same sentence — on the family whose custody went missing.
-    ///
-    /// FULLY FAKED STORE (pre-13u Act 9, F1 — the state-dependent pin).
-    /// The earlier form drove `.keychain(custody: fake)`, which fakes the
-    /// TRANSITION only: its `load` is LIVE (`E2EELaunchKeyCache` → the
-    /// real `E2EEKeychainStorage`), and `setBiometricRequirement` guards
-    /// `store.load()` first — so on any machine without a readable plain
-    /// `e2ee-keys` item the fake seam was never consulted and the pin
-    /// went red on machine Keychain state. (Its green at 17g's close was
-    /// borrowed from the R3-1 drill's litter; the author's owed cleanup
-    /// turned it red.) A memberwise store consults nothing live — the pin
-    /// is about the SESSION's outcome→sentence mapping, and the factory's
-    /// transition mapping keeps its own pin above.
-    @MainActor @Test func theE2EESurfaceNamesTheSymptomWhenAWriteLandsUnreadable() async {
-        let material = material()
-        let session = EncryptionSession(
-            store: DeviceKeyStore(
-                load: { material },
-                save: { _ in true },
-                clear: {},
-                biometryAvailable: { true },
-                isBiometricGateOn: { false },
-                setBiometricGate: { _, _ in .wroteButUnreadable },
-                unlockWithBiometrics: { nil }),
-            client: nil, signedIn: { true })
-        await session.setBiometricRequirement(true)
-        // F6 (pre-13u Act 9): the E2EE arm speaks its OWN sentence now —
-        // the store-key one promised "still open your library", which is
-        // non-responsive here; this surface's road back is passphrase
-        // re-enrollment of sync custody.
-        #expect(session.lastError == ProtectionCopy.syncKeysWroteButUnreadable,
-                "the honest arm names the keychain-identity symptom AND this surface's own road back")
     }
 
     // MARK: - The LIVE wiring's composition (17h R3-4)
@@ -145,12 +99,13 @@ struct CustodyHandoverTests {
     private func recordingLeaves(
         _ log: OrderedCalls,
         gatedExists: Bool = true,
-        loadedBack: DeviceKeyMaterial? = nil,
-        deletesSucceed: Bool = true
+        loadedBack: SyncCustodyRecord? = nil,
+        deletesSucceed: Bool = true,
+        savePlainSucceeds: Bool = true
     ) -> E2EECustodyLeaves {
         E2EECustodyLeaves(
             saveGated: { _ in log.note("saveGated"); return true },
-            savePlain: { _ in log.note("savePlain"); return true },
+            savePlain: { _ in log.note("savePlain"); return savePlainSucceeds },
             loadPlain: { log.note("loadPlain"); return loadedBack },
             gatedExists: { log.note("gatedExists"); return gatedExists },
             deletePlain: { log.note("deletePlain"); return deletesSucceed },
@@ -164,25 +119,30 @@ struct CustodyHandoverTests {
     /// `deleteOutgoing`/`rollBackIncoming` in `wired` — the 2026-08-30
     /// incident's reinstatement, which round 3 found no test could see —
     /// changes these names: red.
-    @Test func gateOnReleasesThePlainItemAndOnlyThePlainItem() {
+    /// pre-13x 1a: the gate-ON direction's OUTGOING act is no longer a
+    /// delete — the bound item stays as the IDENTITY-ONLY item (the library
+    /// keeps its identity; the material leaves it) — so the composition's
+    /// third leaf is `savePlain`, and the rollback target stays the gated
+    /// item.
+    @Test func gateOnLeavesTheIdentityOnlyBoundItemAndOnlyThat() {
         let log = OrderedCalls()
         let storage = E2EECustodyStorage.wired(leaves: recordingLeaves(log))
-        #expect(storage.setGated(material()) == .done)
-        #expect(log.names == ["saveGated", "gatedExists", "deletePlain"])
+        #expect(storage.setGated(record()) == .done)
+        #expect(log.names == ["saveGated", "gatedExists", "savePlain"])
     }
 
     @Test func gateOnRollsBackTheGatedItemWhenTheWriteIsUnreadable() {
         let log = OrderedCalls()
         let storage = E2EECustodyStorage.wired(
             leaves: recordingLeaves(log, gatedExists: false))
-        #expect(storage.setGated(material()) == .wroteButUnreadable)
+        #expect(storage.setGated(record()) == .wroteButUnreadable)
         #expect(log.names == ["saveGated", "gatedExists", "deleteGated"],
                 "the rollback tidies the INCOMING gated write — never the plain custody")
     }
 
     @Test func gateOffReleasesTheGatedItemAndOnlyTheGatedItem() {
         let log = OrderedCalls()
-        let m = material()
+        let m = record()
         let storage = E2EECustodyStorage.wired(
             leaves: recordingLeaves(log, loadedBack: m))
         #expect(storage.setPlain(m) == .done)
@@ -193,38 +153,58 @@ struct CustodyHandoverTests {
         let log = OrderedCalls()
         let storage = E2EECustodyStorage.wired(
             leaves: recordingLeaves(log, loadedBack: nil))
-        #expect(storage.setPlain(material()) == .wroteButUnreadable)
+        #expect(storage.setPlain(record()) == .wroteButUnreadable)
         #expect(log.names == ["savePlain", "loadPlain", "deletePlain"])
     }
 
-    /// 17h R3-5 through the composition: a refused release backs out, and
-    /// the best-effort rollback targets the INCOMING item.
-    @Test func aRefusedPlainReleaseBacksTheGateOnTransitionOut() {
+    /// 17h R3-5 through the composition: a refused outgoing act backs out,
+    /// and the best-effort rollback targets the INCOMING item (pre-13x 1a:
+    /// the outgoing act of gate-ON is the identity-only rewrite).
+    @Test func aRefusedIdentityRewriteBacksTheGateOnTransitionOut() {
         let log = OrderedCalls()
         let storage = E2EECustodyStorage.wired(
-            leaves: recordingLeaves(log, deletesSucceed: false))
-        #expect(storage.setGated(material()) == .outgoingNotReleased)
-        #expect(log.names == ["saveGated", "gatedExists", "deletePlain", "deleteGated"],
-                "the refused release, then the best-effort rollback of the incoming item")
+            leaves: recordingLeaves(log, savePlainSucceeds: false))
+        #expect(storage.setGated(record()) == .outgoingNotReleased)
+        #expect(log.names == ["saveGated", "gatedExists", "savePlain", "deleteGated"],
+                "the refused rewrite, then the best-effort rollback of the incoming item")
     }
 
-    @Test func theE2EEGateTurnsOffOnlyWhenThePlainItemReadsBack() {
-        // R3-NIT rider (pre-13u Act 9): the `.done` arms of the real
-        // factory write the process-global `E2EELaunchKeyCache` — save and
-        // restore it so this test never leaks state into a neighbor.
-        let cacheBefore = E2EELaunchKeyCache.shared.value
-        defer { E2EELaunchKeyCache.shared.value = cacheBefore }
+    /// The migration hook (§11 — batch 2 runs it), pinned over recording
+    /// leaves: the legacy material lands per shape, VERIFIED, then the legacy
+    /// items are released and the CF-12 opt-in retired; a refused write
+    /// leaves the legacy items in place.
+    @Test func theSyncCustodyMigrationLandsPerShapeThenReleasesTheLegacyItems() {
+        let log = OrderedCalls()
+        let retired = OrderedCalls()
+        let legacy = SyncCustodyMigration.Legacy(
+            material: material(), deviceID: "from-sync-state",
+            deleteLegacyItems: { log.note("legacyDelete"); return true },
+            retireOptIn: { retired.note("retired") })
+        let session = SyncCustodySession()
+        let expected = SyncCustodyRecord(deviceID: "from-sync-state", material: material())
+        let silent = SyncCustodyMigration.migrateSyncCustodyToStoreScope(
+            legacy: legacy, shape: .silent,
+            leaves: recordingLeaves(log, loadedBack: expected), session: session)
+        #expect(silent == .done)
+        #expect(log.names == ["savePlain", "loadPlain", "legacyDelete"])
+        #expect(retired.names == ["retired"], "the CF-12 opt-in default retires with the migration")
+        #expect(session.record == nil, "the silent shape holds nothing in session memory")
 
-        let refusing = DeviceKeyStore.keychain(
-            custody: E2EECustodyStorage(
-                setGated: { _ in .done },
-                setPlain: { _ in .wroteButUnreadable }))
-        #expect(refusing.setBiometricGate(false, material()) == .wroteButUnreadable)
+        let log2 = OrderedCalls()
+        let identityOnly = SyncCustodyRecord(deviceID: "from-sync-state", material: nil)
+        let gated = SyncCustodyMigration.migrateSyncCustodyToStoreScope(
+            legacy: legacy, shape: .biometric,
+            leaves: recordingLeaves(log2, loadedBack: identityOnly), session: session)
+        #expect(gated == .done)
+        #expect(log2.names == ["saveGated", "savePlain", "gatedExists", "loadPlain", "legacyDelete"])
+        #expect(session.record == expected, "the biometric shape unlocks the session that migrated")
 
-        let working = DeviceKeyStore.keychain(
-            custody: E2EECustodyStorage(
-                setGated: { _ in .done },
-                setPlain: { _ in .done }))
-        #expect(working.setBiometricGate(false, material()) == .done)
+        let log3 = OrderedCalls()
+        let refused = SyncCustodyMigration.migrateSyncCustodyToStoreScope(
+            legacy: legacy, shape: .silent,
+            leaves: recordingLeaves(log3, loadedBack: nil), session: SyncCustodySession())
+        #expect(refused == .wroteButUnreadable)
+        #expect(!log3.names.contains("legacyDelete"), "a refused write leaves the legacy items in place")
     }
+
 }

@@ -274,29 +274,6 @@ struct EncryptionView: View {
         #endif
     }
 
-    /// CF-12: the toggle's own copy — the sync-waits cost, the
-    /// never-the-passcode rule, and the re-enrollment note, all stated.
-    /// R-pre13u-2 (pre-13u Act 9): opt-in framing — the OFF default is
-    /// stated honestly (sync keys open with the library; one unlock
-    /// covers both), and this is a SEPARATE extra ask, never required by
-    /// any at-open mode. (Functional copy; Act 10 styles, 13s re-voices.)
-    static let biometricToggleCopy: String = {
-        #if os(macOS)
-        "Off, your sync keys open with your library — one unlock covers both. "
-        + "While this is on, sync separately waits each launch until you unlock — "
-        + "with Touch ID, or by typing your encryption passphrase — whatever your "
-        + "at-open mode. Your device passcode never unlocks it. If Touch ID is "
-        + "re-enrolled, the stored keys are invalidated by design — the passphrase "
-        + "still gets you in."
-        #else
-        "Off, your sync keys open with your library — one unlock covers both. "
-        + "While this is on, sync separately waits each launch until you unlock — "
-        + "with Face ID or Touch ID, or by typing your encryption passphrase — "
-        + "whatever your at-open mode. Your device passcode never unlocks it. If "
-        + "biometrics are re-enrolled, the stored keys are invalidated by design — "
-        + "the passphrase still gets you in."
-        #endif
-    }()
 
     var body: some View {
         // CF-14: no chrome of its own — the tabbed Account sheet carries
@@ -335,8 +312,6 @@ struct EncryptionView: View {
                 setupSection
             case .notEnrolled(let hasRecoveryWrap):
                 enrollmentSection(hasRecoveryWrap: hasRecoveryWrap)
-            case .enrolledLocked(let hasRecoveryWrap):
-                lockedSection(hasRecoveryWrap: hasRecoveryWrap)
             case .keysReplaced(let hasRecoveryWrap):
                 keysReplacedSection(hasRecoveryWrap: hasRecoveryWrap)
             case .enrolled(let hasRecoveryWrap):
@@ -569,20 +544,6 @@ struct EncryptionView: View {
 
     /// CF-12: custody exists here but this launch hasn't unlocked — the
     /// biometric door first, the passphrase (and phrase) roads beside it.
-    @ViewBuilder
-    private func lockedSection(hasRecoveryWrap: Bool) -> some View {
-        Text("Sync is locked on this device.")
-            .pageProse(pageStyle)
-        Text("\(Self.biometricName) — or your encryption passphrase — unlocks it. Your device passcode never does.")
-            .pageCaption(pageStyle)
-            .fixedSize(horizontal: false, vertical: true)
-        PageDoor("Unlock with \(Self.biometricName)", style: pageStyle) {
-            Task { await encryption.unlockWithBiometrics() }
-        }
-        .disabled(encryption.busy)
-        PageDivider(pageStyle)
-        unlockRoads(offerPhraseRoad: hasRecoveryWrap)
-    }
 
     /// CF-16: the honest replaced state — custody exists, but the account
     /// was re-keyed after this device enrolled. The headline is the ruled
@@ -691,10 +652,6 @@ struct EncryptionView: View {
         // verifies by being used. It writes nothing — see `SecretCheck.swift`.
         SecretCheckSection(
             framing: .sanityCheck, offersRecoveryPhrase: true, model: secretCheck)
-
-        PageDivider(pageStyle)
-
-        biometricToggleSection
 
         PageDivider(pageStyle)
 
@@ -886,38 +843,6 @@ struct EncryptionView: View {
                 generatedWords = words
             }
         }
-    }
-
-    // MARK: - The biometric unlock policy (CF-12's ruling)
-
-    @ViewBuilder
-    private var biometricToggleSection: some View {
-        // 13e batch 9 (B-1): the act is async now (its custody read+write
-        // hops off the main thread), so the setter starts it the way every
-        // other door on this surface does — a `Task`. The toggle keeps
-        // showing `biometricRequired`, which still flips only when custody
-        // actually landed, so a refused change still snaps back.
-        Toggle(isOn: Binding(
-            get: { encryption.biometricRequired },
-            set: { required in
-                Task { await encryption.setBiometricRequirement(required) }
-            })
-        ) {
-            Text("Require \(Self.biometricName) to unlock sync")
-                .pageProse(pageStyle)
-        }
-        #if os(macOS)
-        .toggleStyle(.checkbox)
-        #endif
-        .disabled(encryption.busy
-                  || (!encryption.biometricRequired && !encryption.biometryAvailable))
-        if !encryption.biometryAvailable {
-            Text("No \(Self.biometricName) is set up on this device.")
-                .pageCaption(pageStyle)
-        }
-        Text(Self.biometricToggleCopy)
-            .pageCaption(pageStyle)
-            .fixedSize(horizontal: false, vertical: true)
     }
 
     // MARK: - The forget door (CF-11)

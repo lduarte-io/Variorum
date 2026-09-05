@@ -42,17 +42,46 @@ public protocol SyncKeyProviding: Sendable {
     /// the engine maps every throw to `SyncError.encryptionKeysUnavailable`
     /// and refuses the round before any network contact.
     func currentKeys() throws -> SyncEncryptionKeys
+
+    /// pre-13x batch 1a (the postures design §1.13 / §3.3): THIS DEVICE'S
+    /// IDENTITY for this library's sync — the `device_id` the pull's
+    /// `for_device` carries (the server's `device_cursor`, the purge
+    /// horizon's substrate). It RIDES THE SYNC-KEY CUSTODY ITEM, never the
+    /// store file: a copy of the library on another machine has no custody
+    /// for its store id and therefore no identity — it is writing, never a
+    /// device — and gets a fresh one when it enrolls. `sync_state.device_id`
+    /// is gone. Throw to signal no custody (the engine refuses the round
+    /// exactly as for absent keys).
+    func deviceIdentity() throws -> String
 }
 
 /// The post-14b default: a device with no enrollment wired refuses every
 /// round. This is the DESIGNED behavior, not a stub — the app target keeps
 /// compiling through the defaulted engine parameter, and its rounds refuse
-/// visibly until batch 3's enrollment flow installs a real provider.
+/// visibly until the enrollment flow installs a real provider.
 public struct UnenrolledKeyProvider: SyncKeyProviding {
     public init() {}
     public func currentKeys() throws -> SyncEncryptionKeys {
         throw SyncKeyProviderError.notEnrolled
     }
+    public func deviceIdentity() throws -> String {
+        throw SyncKeyProviderError.notEnrolled
+    }
+}
+
+/// A fixed key world with a FIXED identity — the in-process worlds that
+/// hold keys in memory (the `vault-bootstrap` runner, the re-key brain's
+/// `resyncReinitialize`-only engine, the tests' fixed providers) compose
+/// over it. Public so the app's test target can build one too.
+public struct StaticSyncKeyProvider: SyncKeyProviding {
+    public let keys: SyncEncryptionKeys
+    public let deviceID: String
+    public init(keys: SyncEncryptionKeys, deviceID: String) {
+        self.keys = keys
+        self.deviceID = deviceID
+    }
+    public func currentKeys() throws -> SyncEncryptionKeys { keys }
+    public func deviceIdentity() throws -> String { deviceID }
 }
 
 public enum SyncKeyProviderError: Error, Equatable, Sendable {

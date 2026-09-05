@@ -328,11 +328,14 @@ struct RestoreMatrixTests {
         try await syncToQuiescence(a, b, server: server)
         try await round(a)
 
-        let deviceID = try #require(try a.deviceID())
+        // pre-13x 1a (§3.3): a backup carries NO identity — the identity
+        // rides the sync-key custody item on the machine that made it.
+        let deviceID = a.deviceID
         let snapshot = try scratch.snapshot(a, as: "backup.sqlite")
         let cursorAtBackup = try a.cursor()
         let recordedAtBackup = await server.deviceCursor(deviceID)
         #expect(recordedAtBackup ?? 0 >= cursorAtBackup - 1)
+        #expect(try a.storedDeviceID() == nil, "no identity in the file")
 
         // Life goes on: B writes, A reads, everyone's cursor advances.
         try b.with { ops, _ in
@@ -343,24 +346,35 @@ struct RestoreMatrixTests {
         try await round(a)
         let advanced = try #require(await server.deviceCursor(deviceID))
         #expect(advanced > (recordedAtBackup ?? 0), "the account has moved on")
-        let horizonBefore = try await server.syncHorizon(activeKeyID: a.keyProvider.currentKeys().corpusKeyID)
 
-        // THE RESTORE — same device_id (it lives in the store), older cursor.
+        // THE RESTORE — a copy of the library is WRITING, NEVER A DEVICE
+        // (the design's rule): the restored client has no custody for the
+        // store id and gets a FRESH identity; its cursor is the older one.
+        // (M7's original premise — "device identity travels inside a
+        // backup" — is the one the postures design reverses.)
         let restored = try scratch.restore(
             snapshot, as: "restored", prefix: "AC", transport: server)
-        #expect(try restored.deviceID() == deviceID,
-                "device identity travels inside the backup — that is the premise")
+        #expect(restored.deviceID != deviceID,
+                "a restored copy is a NEW device — a fresh identity, never the source's")
+        #expect(try restored.storedDeviceID() == nil, "the backup carried none")
         #expect(try restored.cursor() < advanced)
+        let restoredCursor = try restored.cursor()
 
         try await round(restored)
 
-        let afterRestore = try #require(await server.deviceCursor(deviceID))
-        #expect(afterRestore >= advanced,
-                "the server's cursor is monotonic — a restored device cannot drag it back")
+        // The source device's cursor is untouched by the restore's round
+        // (a different identity wrote its own row); the restored device's
+        // row records where IT stood — an in-window laggard, so the purge
+        // horizon HOLDS at its position: nothing it has not integrated
+        // becomes purgeable (the safe direction; the laggard rule).
+        #expect(await server.deviceCursor(deviceID) == advanced,
+                "the source's cursor is untouched — a different identity")
+        let restoredRecorded = try #require(await server.deviceCursor(restored.deviceID))
+        #expect(restoredRecorded >= restoredCursor)
         let horizonAfter = try await server.syncHorizon(
             activeKeyID: a.keyProvider.currentKeys().corpusKeyID)
-        #expect(horizonAfter >= horizonBefore,
-                "so the purge horizon stays sound; nothing already purgeable becomes un-purgeable")
+        #expect(horizonAfter <= restoredRecorded,
+                "the horizon holds at the restored device's position — nothing it has not seen is purgeable")
         // And the re-pull was harmless: the restored store caught up.
         #expect(try restored.db.fetchInt(
             "SELECT COUNT(*) FROM container WHERE title = 'after' AND deleted_at IS NULL") == 1)

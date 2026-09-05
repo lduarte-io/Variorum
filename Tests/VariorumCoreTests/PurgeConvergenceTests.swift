@@ -469,6 +469,52 @@ struct PurgeConvergenceTests {
         #expect(try a.outboxCount() == 0)
     }
 
+    /// pre-13x 1a (§14.37, ledger row 39): a RE-MINTED device identity (a
+    /// wiped Keychain — the store keeps its cursor and its ledger scan point;
+    /// only the custody item's identity is new) is a RETURNER to the purge
+    /// ledger: its first round reconciles the ledger from the STORE's scan
+    /// point (the rows a peer purged meanwhile are dropped locally, nothing
+    /// stranded, nothing resurrected) and the server records the NEW
+    /// identity's cursor; the old identity's row is simply left behind.
+    /// RED ON OLD: the identity lived in `sync_state` and could not be
+    /// re-minted without the store — the scenario did not exist.
+    @Test func aReMintedIdentityWithANonZeroCursorIsReconciledAsAReturner() async throws {
+        let server = FakeSyncServer()
+        let a = try SyncClient(name: "A", prefix: "AA", transport: server)
+        let b = try SyncClient(name: "B", prefix: "BB", transport: server, clockOffset: 90, seed: 2)
+
+        let family = try buildAndDeleteFamily(a)
+        try backdate(a, from: family.deletedStamp, to: oldStamp)
+        try await syncToQuiescence(a, b, server: server)
+        try await round(a)
+        try await round(b)
+        let oldIdentity = b.deviceID
+        let cursorBefore = try b.cursor()
+        #expect(cursorBefore > 0, "a non-zero cursor — the returner's premise")
+
+        // A purges the family (mirror + local); B has not seen it yet.
+        let report = try await sweep(a, server)
+        #expect(report.familiesPurged >= 1)
+        #expect(try familyRowCount(b, post: family.post) > 0, "B still holds the family")
+
+        // B's identity is RE-MINTED (a wiped Keychain): the store is
+        // untouched — cursor and ledger scan point survive.
+        b.deviceID = UUID().uuidString.lowercased()
+        #expect(try b.cursor() == cursorBefore)
+
+        // The first round as a returner: the ledger scan from the STORE's
+        // scan point drops the purged family locally; the new identity's
+        // cursor lands on the server; the old identity's row is untouched.
+        _ = try await sweep(b, server)
+        try await round(b)
+        #expect(try familyRowCount(b, post: family.post) == 0, "reconciled — nothing stranded")
+        #expect(await server.deviceCursor(b.deviceID) != nil, "the NEW identity's cursor is recorded")
+        #expect(await server.deviceCursor(oldIdentity) != nil, "the old identity's row is left behind, never rewritten")
+        #expect(try b.outboxCount() == 0)
+        try await round(a)
+        #expect(try a.syncedDump() == b.syncedDump(), "the stores converge")
+    }
+
     // MARK: - 9. 13j ladder B (B1): a restored family is NEVER purged by
     // its stale intent — the single-device ⌥⌘Z door (the sharper red)
 

@@ -112,7 +112,6 @@ public struct SyncEngine: Sendable {
         // lockstep because its prescription (re-run the re-key door)
         // subsumes both; before any network contact by construction.
         try await refuseIfRekeyIncomplete()
-        try ensureDeviceID()
         // Keys first (Phase 14b): absent/locked keys refuse the round
         // before any network contact — outbox intact, cursor unmoved.
         let crypto = try roundCrypto()
@@ -296,15 +295,16 @@ public struct SyncEngine: Sendable {
     public func pull() async throws -> PullReport {
         // The unfinished-re-key guard, the push half's twin (ladder R1-1).
         try await refuseIfRekeyIncomplete()
-        try ensureDeviceID()
         // Keys first (Phase 14b): absent/locked keys refuse the round
         // before any network contact — outbox intact, cursor unmoved.
         let crypto = try roundCrypto()
+        // pre-13x 1a: the device identity rides the sync-key custody item,
+        // read through the same provider (never the store file — a copy of
+        // the library is writing, not a device). No custody ⇒ no identity ⇒
+        // the same visible refusal as absent keys.
+        let deviceID = try roundDeviceIdentity()
         try await verifySchemaLockstep()
         let since = try await database.read { try cursor($0) }
-        let deviceID = try await database.read { db in
-            try String.fetchOne(db, sql: "SELECT value FROM sync_state WHERE key = 'device_id'")
-        }
         var pulled: [SyncPulledRow] = []
         var fetchCursor = since
         while true {
@@ -442,7 +442,9 @@ public struct SyncEngine: Sendable {
     ///    `server_seq` itself is NEVER reset — SyncSpec §9);
     ///  - EVERY row enqueued into the outbox.
     ///
-    /// `device_id` survives: device identity is not sync bookkeeping.
+    /// Nothing key-shaped and nothing identity-shaped lives in the file
+    /// (pre-13x 1a): the device identity rides the sync-key custody item,
+    /// so re-initialization has nothing of it to spare or to reset.
     public func resyncReinitialize() async throws {
         try await database.write { db in
             for table in SyncSchema.tables {
@@ -581,18 +583,14 @@ public struct SyncEngine: Sendable {
             arguments: [String(seq)])
     }
 
-    /// Mints `sync_state.device_id` once (SyncSpec §3). `sync_state` is
-    /// local-only — no triggers watch it, so a plain write is safe.
-    func ensureDeviceID() throws {
-        let existing = try database.read { db in
-            try String.fetchOne(db, sql: "SELECT value FROM sync_state WHERE key = 'device_id'")
-        }
-        guard existing == nil else { return }
-        let id = uuid().uuidString
-        try database.write { db in
-            try db.execute(
-                sql: "INSERT OR IGNORE INTO sync_state (key, value) VALUES ('device_id', ?)",
-                arguments: [id])
+    /// pre-13x 1a: the round's device identity, from the provider (the
+    /// custody item), mapped to the keys refusal exactly as `roundCrypto`
+    /// maps absent keys — a locked or copied library has neither.
+    func roundDeviceIdentity() throws -> String {
+        do {
+            return try keyProvider.deviceIdentity()
+        } catch {
+            throw SyncError.encryptionKeysUnavailable
         }
     }
 

@@ -343,11 +343,26 @@ nonisolated enum StoreKeyGuardKeychain {
             localizedReason: "Unlock your Variorum library"))
             == true
         else { return nil }
-        if let key = readGated(scope: scope, storeID: storeID, context: context) { return key }
-        guard let storeID, let legacy = readGated(scope: scope, storeID: nil, context: context)
-        else { return nil }
-        migrateLegacyGated(legacy, scope: scope, storeID: storeID)
-        return legacy
+        let key: StoreKey?
+        if let own = readGated(scope: scope, storeID: storeID, context: context) {
+            key = own
+        } else if let storeID, let legacy = readGated(scope: scope, storeID: nil, context: context) {
+            migrateLegacyGated(legacy, scope: scope, storeID: storeID)
+            key = legacy
+        } else {
+            key = nil
+        }
+        // pre-13x 1a (§14.41 — ONE gated read per unlock): the sync record
+        // rides the SAME evaluated context — one Touch ID prompt for the
+        // library key, the master, the corpus key, the journal key and the
+        // identity. It lands in the session memory; the bootstrap's relock
+        // drops it.
+        if key != nil, let storeID,
+           let record = E2EEKeychainStorage.readGated(
+               scope: SyncCustodyScope(scope: scope, storeID: storeID), context: context) {
+            SyncCustodySession.shared.hold(record)
+        }
+        return key
     }
 
     /// Read the gated item's DATA under an evaluated context.

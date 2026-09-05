@@ -26,6 +26,8 @@ struct AppTestKeyProvider: SyncKeyProviding {
             corpusKey: SymmetricKey(data: Data((0..<32).map { UInt8($0 &+ 0x40) })),
             corpusKeyID: "app-test-corpus-key-000000000001")
     }
+    /// pre-13x 1a: the identity rides the provider (never the store).
+    func deviceIdentity() throws -> String { "app-test-device-0001" }
 }
 
 // MARK: - A4: dev-store separation

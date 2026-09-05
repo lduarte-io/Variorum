@@ -501,6 +501,10 @@ final class AppBootstrap {
         }.value
         state = .locked(makeLobby(facts))
         protection.dropResident()
+        // pre-13x 1a: the sync keys held for the unlocked session (the
+        // gated record, the Always-ask derived key) go with the library
+        // key — a locked library reads as no keys (pinned).
+        SyncCustodySession.shared.drop()
         _ = await Task.detached(priority: .userInitiated) {
             binding.lock()
         }.value

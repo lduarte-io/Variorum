@@ -7,17 +7,20 @@
 //  sentence and failed once (the 13p-fix R3-1 incident: a revert drill
 //  removed a seam's use, fake-driven pins fell through to the real
 //  fixed-account leaves, and her live custody was overwritten with test
-//  material). Every fixed-account write/delete leaf now refuses from a
-//  test process BEFORE any SecItem call.
+//  material). Every write/delete leaf refuses from a test process BEFORE
+//  any SecItem call.
 //
-//  RED-ON-OLD, verified by a SAFE behavioral drill (recorded in the Act 9
-//  batch record): the detection is forced off AND the family's
-//  service/account constants are redirected to a throwaway drill service
-//  in the same temporary edit — the leaves then really write (drill
-//  service only, never custody), and this suite's refusal assertions go
-//  red; restore, green, drill litter deleted. Reverting the detection
-//  ALONE against the real constants is exactly the R3-1 act and is never
-//  performed.
+//  pre-13x 1a: the family is PER STORE (`<scope>-<storeID>-…`), so the guard
+//  names the REAL scopes (the store variants' raw values, and the legacy
+//  fixed accounts) rather than fixed account names — a throwaway scope
+//  writes for real (the store-key family's precedent), which is what lets
+//  the per-store custody be pinned against the real Keychain.
+//
+//  RED-ON-OLD (the original F4 drill, recorded in the Act 9 batch record):
+//  the detection forced off AND the constants redirected to a throwaway
+//  service in one temporary edit; the refusal assertions went red;
+//  restored. Reverting the detection ALONE against the real constants is
+//  exactly the R3-1 act and is never performed.
 //
 
 import Foundation
@@ -26,66 +29,73 @@ import Testing
 @testable import Variorum
 import VariorumCore
 
-/// `.serialized` since 17h: the exact `tripCount == before + 5` below and
-/// the new leaf-mapping pin both trip the wire — a global counter — so the
-/// suite's own tests must not interleave with each other. (No OTHER suite
-/// trips the wire; the leaf-mapping pin's delta assertions tolerate
-/// cross-suite noise by construction anyway.)
+/// `.serialized` since 17h: the exact trip-count deltas below trip a global
+/// counter, so the suite's own tests must not interleave.
 @Suite("pre-13u — the keychain test-process tripwire (F4)", .serialized)
 struct KeychainTripwireTests {
-    private func material() -> DeviceKeyMaterial {
-        DeviceKeyMaterial(
-            masterKey: Data(repeating: 9, count: 32),
-            corpusKey: Data(repeating: 8, count: 32), corpusKeyID: "tripwire-corpus",
-            journalBridgeKey: Data(repeating: 7, count: 32), journalBridgeKeyID: "tripwire-bridge")
+    private func record() -> SyncCustodyRecord {
+        SyncCustodyRecord(
+            deviceID: "tripwire-device",
+            material: DeviceKeyMaterial(
+                masterKey: Data(repeating: 9, count: 32),
+                corpusKey: Data(repeating: 8, count: 32), corpusKeyID: "tripwire-corpus",
+                journalBridgeKey: Data(repeating: 7, count: 32), journalBridgeKeyID: "tripwire-bridge"))
+    }
+
+    private var realScope: SyncCustodyScope {
+        SyncCustodyScope(scope: AppDatabase.StoreVariant.real.rawValue, storeID: "tripwire-store")
     }
 
     @Test func theTripwireIsArmedInThisTestProcess() {
         #expect(KeychainTestTripwire.armed,
                 "a test process must be detected — this whole guard rides on it")
+        #expect(KeychainTestTripwire.realScopes.contains("Variorum"))
+        #expect(KeychainTestTripwire.realScopes.contains("Variorum-dev"))
     }
 
-    /// Every fixed-account WRITE/DELETE leaf refuses, is counted, and
+    /// Every WRITE/DELETE leaf under a REAL scope refuses, is counted, and
     /// performs zero Keychain traffic (the guard is the first line, before
     /// any encode or SecItem call).
-    @Test func fixedAccountMutationsRefuseFromATestProcess() {
+    @Test func realScopeMutationsRefuseFromATestProcess() {
         let before = KeychainTestTripwire.tripCount
-        #expect(E2EEKeychainStorage.save(material()) == false,
-                "the plain write refuses — this exact leaf carried the R3-1 sentinel")
-        #expect(E2EEKeychainStorage.saveGated(material()) == false,
+        #expect(E2EEKeychainStorage.save(record(), scope: realScope) == false,
+                "the bound write refuses — this exact leaf carried the R3-1 sentinel")
+        #expect(E2EEKeychainStorage.saveGated(record(), scope: realScope) == false,
                 "the gated write refuses")
-        #expect(E2EEKeychainStorage.clear() == false, "the clear refuses")
         // 17h R3-5: a tripwire-refused delete answers false — the release
-        // did not happen, and saying otherwise would be the dropped-status
-        // class this entry closes.
-        #expect(E2EEKeychainStorage.deletePlainItem() == false)
-        #expect(E2EEKeychainStorage.deleteGatedItem() == false)
+        // did not happen.
+        #expect(E2EEKeychainStorage.deletePlainItem(scope: realScope) == false)
+        #expect(E2EEKeychainStorage.deleteGatedItem(scope: realScope) == false)
+        #expect(E2EEKeychainStorage.legacyDelete() == false, "the legacy fixed accounts are guarded too")
         #expect(KeychainTestTripwire.tripCount == before + 5,
                 "all five mutation leaves tripped, none silently proceeded")
     }
 
-    /// 17h R3-4's second half — the NAME→FUNCTION mapping of
-    /// `E2EECustodyLeaves.live`, pinned with ZERO Keychain traffic: each
-    /// live mutation leaf refuses from a test process AND records WHICH
-    /// static function it reached, so a leaves struct wired to the wrong
-    /// function (`deletePlain` reaching `deleteGatedItem`) records the
-    /// wrong name: red. Containment over the per-call delta — a concurrent
-    /// suite's trips could only ADD names, never remove the expected one.
-    /// (The composition half — which leaf plays which handover role —
-    /// is `CustodyHandoverTests`' wiring pins.)
+    /// The leaf-mapping pin (17h R3-4): `E2EECustodyLeaves.live(scope:)`
+    /// reaches the static function its name claims — under a real scope
+    /// each refuses and records WHICH function it reached.
     @Test func theLiveLeavesReachTheStaticFunctionsTheirNamesClaim() {
         func refusedNames(during act: () -> Void) -> [String] {
             let before = KeychainTestTripwire.refusedLeafNames.count
             act()
             return Array(KeychainTestTripwire.refusedLeafNames.dropFirst(before))
         }
-        #expect(refusedNames { _ = E2EECustodyLeaves.live.deletePlain() }
-            .contains("deletePlainItem"))
-        #expect(refusedNames { _ = E2EECustodyLeaves.live.deleteGated() }
-            .contains("deleteGatedItem"))
-        #expect(refusedNames { _ = E2EECustodyLeaves.live.saveGated(material()) }
-            .contains("saveGated"))
-        #expect(refusedNames { _ = E2EECustodyLeaves.live.savePlain(material()) }
-            .contains("save"))
+        let leaves = E2EECustodyLeaves.live(scope: realScope)
+        #expect(refusedNames { _ = leaves.deletePlain() }.contains("deletePlainItem"))
+        #expect(refusedNames { _ = leaves.deleteGated() }.contains("deleteGatedItem"))
+        #expect(refusedNames { _ = leaves.saveGated(record()) }.contains("saveGated"))
+        #expect(refusedNames { _ = leaves.savePlain(record()) }.contains("save"))
+    }
+
+    /// A THROWAWAY scope is not guarded — it writes for real, under its own
+    /// account, and cleans up: the per-store pins' road (never a real scope).
+    @Test func aThrowawayScopeWritesForRealAndNeverTrips() {
+        let scope = SyncCustodyScope(scope: "1a-tripwire-\(UUID().uuidString)", storeID: "s")
+        let before = KeychainTestTripwire.tripCount
+        let saved = E2EEKeychainStorage.save(record(), scope: scope)
+        defer { _ = E2EEKeychainStorage.deletePlainItem(scope: scope) }
+        #expect(saved, "a throwaway scope lands (the signed host has the keychain identity)")
+        #expect(E2EEKeychainStorage.load(scope: scope) == record())
+        #expect(KeychainTestTripwire.tripCount == before, "nothing tripped")
     }
 }

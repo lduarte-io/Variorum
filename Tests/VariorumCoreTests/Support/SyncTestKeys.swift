@@ -55,15 +55,37 @@ enum SyncTestKeys {
 }
 
 /// The harness default: working keys every round (the crown's premise).
+/// pre-13x 1a: the identity rides the provider — a fresh one per instance
+/// (a directly-constructed engine is its own device); `SyncClient` wraps
+/// whatever provider it holds with the CLIENT's identity, so swapping a
+/// client's keys mid-life never changes which device it is.
 struct FixedSyncKeyProvider: SyncKeyProviding {
     var keys: SyncEncryptionKeys = SyncTestKeys.keys
+    var deviceID: String = UUID().uuidString.lowercased()
     func currentKeys() throws -> SyncEncryptionKeys { keys }
+    func deviceIdentity() throws -> String { deviceID }
 }
 
 /// Models the pre-enrollment / locked-Keychain device: every round must
-/// refuse visibly (`SyncError.encryptionKeysUnavailable`).
+/// refuse visibly (`SyncError.encryptionKeysUnavailable`) — no custody, so
+/// no identity either.
 struct LockedSyncKeyProvider: SyncKeyProviding {
     func currentKeys() throws -> SyncEncryptionKeys {
         throw SyncKeyProviderError.notEnrolled
+    }
+    func deviceIdentity() throws -> String {
+        throw SyncKeyProviderError.notEnrolled
+    }
+}
+
+/// The client's identity over any key world (pre-13x 1a): keys from the
+/// inner provider, the identity the client's own.
+struct ClientIdentityKeyProvider: SyncKeyProviding {
+    let inner: any SyncKeyProviding
+    let deviceID: String
+    func currentKeys() throws -> SyncEncryptionKeys { try inner.currentKeys() }
+    func deviceIdentity() throws -> String {
+        _ = try inner.currentKeys()  // a locked world has no identity either
+        return deviceID
     }
 }

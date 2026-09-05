@@ -155,7 +155,14 @@ final class AppServices {
                 configuration: ProjectConfig.variorumTransport,
                 sessionProvider: provider)
         }
-        self.makeSyncKeyProvider = makeSyncKeyProvider ?? { DeviceKeySyncProvider() }
+        // pre-13x 1a: ONE per-store custody store (the key file's id beside
+        // the store; the shape from its dials; the session shared with the
+        // bootstrap's relock) serves the E2EE flows AND the engine's key
+        // provider — the same custody by construction.
+        let keyStore = DeviceKeyStore.keychain(
+            scope: storeVariant.rawValue,
+            storeURL: try? AppDatabase.defaultStoreURL(variant: storeVariant))
+        self.makeSyncKeyProvider = makeSyncKeyProvider ?? { DeviceKeySyncProvider(store: keyStore) }
         // THE A4 FENCE, SYNC SEAM (Phase 8 review round 1, BLOCKER): only
         // the REAL store may pair with the one production mirror. Debug and
         // release builds share a bundle identity and Keychain, so a
@@ -184,12 +191,9 @@ final class AppServices {
             : nil)
         self.keyVault = vaultClient
         self.encryption = encryption ?? EncryptionSession(
-            store: .keychain(),
+            store: keyStore,
             client: vaultClient,
-            signedIn: { await authSession.currentUserID != nil },
-            // R-pre13u-2: the ONE production site passes the PERSISTED
-            // opt-in marker — the ephemeral default exists for tests.
-            syncGateOptIn: .live)
+            signedIn: { await authSession.currentUserID != nil })
         // The sweep's low-water mark is per-store bookkeeping: scoped by
         // variant so a dev-store sweep can never advance the real store's
         // mark (review round 1, MINOR).
@@ -440,6 +444,8 @@ final class AppServices {
             lifecycle: makeAccountLifecycle(auth),
             transport: makeSyncTransport(auth),
             database: session.database,
+            // pre-13x 1a: this device's identity, from custody (off-main).
+            deviceID: await encryption.deviceIdentity(),
             onNewVaultMaterial: { material in
                 // The brain AWAITS this before its truncate — custody
                 // must land before this device's rounds resume. STRONG

@@ -90,10 +90,7 @@ private func recordingKeyStore(
         load: { log.note("load"); return inner.load() },
         save: { log.note("save"); return inner.save($0) },
         clear: { log.note("clear"); inner.clear() },
-        biometryAvailable: { inner.biometryAvailable() },
-        isBiometricGateOn: { log.note("isBiometricGateOn"); return inner.isBiometricGateOn() },
-        setBiometricGate: { log.note("setBiometricGate"); return inner.setBiometricGate($0, $1) },
-        unlockWithBiometrics: { await inner.unlockWithBiometrics() })
+        deviceID: { log.note("deviceID"); return inner.deviceID() })
 }
 
 private func authTokens(
@@ -309,26 +306,6 @@ private func keyMaterial(_ seed: UInt8) -> DeviceKeyMaterial {
 @MainActor
 @Suite("Custody hops leave the main thread (13e B-1 — the settings cadence)")
 struct EncryptionCustodyThreadTests {
-    /// THE TOGGLE path (CF-12's device-local policy). Red pre-fix: both
-    /// `SecItem*` calls ran inline on the MainActor. The pin also holds the
-    /// ADJACENCY the fix promised — the read and the re-persist are still
-    /// consecutive, with no other custody call between them.
-    @Test func theBiometricToggleTouchesCustodyOffTheMainThread() async {
-        let log = KeychainCallLog()
-        let backing = InMemoryKeyBacking(
-            initial: keyMaterial(3), biometryAvailable: true)
-        let session = makeSession(
-            store: recordingKeyStore(log, backing: backing), vault: nil)
-
-        await session.setBiometricRequirement(true)
-
-        #expect(session.lastError == nil)
-        #expect(session.biometricRequired, "the policy landed, exactly as before")
-        #expect(log.names == ["load", "setBiometricGate"],
-                "the read and the re-persist stay adjacent — one hop")
-        #expect(log.anyOnMainThread == false)
-    }
-
     /// THE FORGET path (CF-11). Red pre-fix: `clear()` ran inline on the
     /// MainActor. Its outcome is unchanged — custody gone, gate off.
     @Test func theForgetDoorClearsCustodyOffTheMainThread() async {
@@ -341,7 +318,6 @@ struct EncryptionCustodyThreadTests {
 
         #expect(log.names.contains("clear"))
         #expect(log.anyOnMainThread == false)
-        #expect(!session.biometricRequired)
         #expect(throws: SyncKeyProviderError.notEnrolled) {
             try DeviceKeySyncProvider(store: store).currentKeys()
         }
@@ -360,14 +336,9 @@ struct EncryptionCustodyThreadTests {
 
         #expect(session.lastError == nil)
         #expect(session.state == .enrolled(hasRecoveryWrap: false))
-        // JUSTIFIED EDIT (pre-13u Act 9, R-pre13u-2): adopt now consults
-        // the gate FIRST (`resetLegacyGateIfUnclaimed` — a legacy gated
-        // custody with no recorded opt-in resets to plain at this
-        // material-in-hand moment), so the sequence gains one off-main
-        // read before the same one write. The off-main discipline this
-        // suite pins is unchanged — the consult rides the same hop.
-        #expect(log.names == ["isBiometricGateOn", "save"],
-                "the reset consult, then the flow's one custody write")
+        // pre-13x 1a: the CF-12 gate consult is gone with the gate — the
+        // flow's ONE custody write, off-main.
+        #expect(log.names == ["save"], "the flow's one custody write")
         #expect(log.anyOnMainThread == false)
     }
 
@@ -387,8 +358,7 @@ struct EncryptionCustodyThreadTests {
 
         #expect(session.state == .enrolled(hasRecoveryWrap: false),
                 "the projection is byte-unchanged — only the thread moved")
-        #expect(log.names == ["isBiometricGateOn", "load"],
-                "the same two reads, in the same order")
+        #expect(log.names == ["load"], "the one custody read (pre-13x 1a: the gate probe is gone)")
         #expect(log.anyOnMainThread == false)
     }
 }

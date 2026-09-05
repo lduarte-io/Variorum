@@ -127,8 +127,11 @@ public struct VaultBootstrap: Sendable {
         return try await withDependencies {
             $0.database = database
         } operation: {
+            // pre-13x 1a: a headless run is its own device — a fresh
+            // identity per run (never persisted; the runner dies with it).
             let engine = SyncEngine(
-                transport: transport, keyProvider: MaterialKeyProvider(keys: keys))
+                transport: transport, keyProvider: StaticSyncKeyProvider(
+                    keys: keys, deviceID: UUID().uuidString.lowercased()))
 
             try await engine.resyncReinitialize()
             let (_, outboxAfterReset) = try await storeCounts()
@@ -295,11 +298,6 @@ public struct VaultBootstrap: Sendable {
     }
 }
 
-/// The runner's in-memory key world — keys die with the process.
-private struct MaterialKeyProvider: SyncKeyProviding {
-    let keys: SyncEncryptionKeys
-    func currentKeys() throws -> SyncEncryptionKeys { keys }
-}
 
 public enum VaultBootstrapError: Error, Equatable, Sendable {
     /// The passphrase file's bytes are not UTF-8.

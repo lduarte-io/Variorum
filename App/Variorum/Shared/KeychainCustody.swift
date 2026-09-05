@@ -13,13 +13,15 @@
 
 import Foundation
 import Security
+import VariorumCore
 
-/// A TEST PROCESS NEVER MUTATES A FIXED-ACCOUNT CUSTODY ITEM — the rule,
-/// made structural (pre-13u Act 9, F4).
+/// A TEST PROCESS NEVER MUTATES A REAL-SCOPE E2EE CUSTODY ITEM — the rule,
+/// made structural (pre-13u Act 9, F4; pre-13x 1a: per store, so the
+/// guard names the REAL scopes rather than fixed accounts).
 ///
-/// `E2EEKeychainStorage`'s accounts are FIXED (`device-keys` /
-/// `device-keys-biometric`): there is no scope parameter, so ANY
-/// write/delete that reaches its leaves from a test process lands on the
+/// `E2EEKeychainStorage`'s accounts WERE fixed (`device-keys` /
+/// `device-keys-biometric`): there was no scope parameter, so ANY
+/// write/delete that reached its leaves from a test process landed on the
 /// author's live custody. The 13p-fix plan's environment-traps section
 /// states exactly that — and on 2026-08-30 the sentence failed anyway
 /// (R3-1): a revert drill removed an injected seam's USE, the fake-driven
@@ -81,19 +83,27 @@ nonisolated enum KeychainTestTripwire {
         return refusedNames
     }
 
-    /// Consulted FIRST by every fixed-account write/delete leaf: true =
-    /// refuse, recorded. Never fires in production. A REFUSAL rather than
-    /// a trap, deliberately: the leaf's `false`/no-op is observable (the
-    /// pin exercises the leaves themselves), while a trap would kill the
-    /// very run that proves the guard — the refused mutation is already
+    /// pre-13x 1a: the E2EE family is per store now (`<scope>-<storeID>-…`),
+    /// so what a test process must never mutate is an item under one of
+    /// the REAL scopes — the store variants' raw values (`Variorum`,
+    /// `Variorum-dev`) — and the legacy fixed accounts. A throwaway scope is
+    /// exactly that, and the per-store pins write under one (the store-key
+    /// family's own precedent).
+    static let realScopes: Set<String> = Set(AppDatabase.StoreVariant.allCases.map(\.rawValue)).union(["legacy"])
+
+    /// Consulted FIRST by every E2EE write/delete leaf: true = refuse,
+    /// recorded. Never fires in production. A REFUSAL rather than a trap,
+    /// deliberately: the leaf's `false`/no-op is observable (the pin
+    /// exercises the leaves themselves), while a trap would kill the very
+    /// run that proves the guard — the refused mutation is already
     /// harmless by construction.
-    static func refusesFixedAccountMutation(_ leaf: String) -> Bool {
-        guard armed else { return false }
+    static func refusesRealScopeMutation(_ scope: String, leaf: String) -> Bool {
+        guard armed, realScopes.contains(scope) else { return false }
         tripLock.lock()
         trips += 1
         refusedNames.append(leaf)
         tripLock.unlock()
-        NSLog("KeychainTestTripwire: refused E2EEKeychainStorage.%@ from a test process (the 13p-fix R3-1 class) — drive the injected seams instead", leaf)
+        NSLog("KeychainTestTripwire: refused E2EEKeychainStorage.%@ under the REAL scope %@ from a test process (the 13p-fix R3-1 class) — drive the injected seams or a throwaway scope instead", leaf, scope)
         return true
     }
 }
@@ -115,14 +125,13 @@ nonisolated enum KeychainTestTripwire {
 /// itself. It is a documented no-op on iOS, which has only the
 /// data-protection keychain.
 ///
-/// **Two plain families deliberately do NOT merge it** (the E2EE custody
-/// item, the auth tokens): those items exist in the file-based keychain
-/// today, and moving them is unruled — the vault re-derives both by
-/// passphrase/sign-in, so neither is the gap the store key's was. **The
-/// store key's silent item DOES merge it since #82 (R-pre13u-3)** — core's
-/// `StoreKeyKeychain` runs the TN3137 read→re-add-with-flag→delete-old
-/// migration so the existing item moves instead of stranding, and the
-/// `…ThisDeviceOnly` class is finally in force for the key to the library.
+/// **Every custody family merges it since pre-13x 1a** — the store key's
+/// silent item since #82 (R-pre13u-3: core's `StoreKeyKeychain` runs the
+/// TN3137 read→re-add-with-flag→delete-old migration), and now the E2EE
+/// sync custody (`E2EEKeychainStorage`, per store) and the session tokens
+/// (`KeychainAuthStorage`, device-bound) by the same road — the postures
+/// design's §1.13: custody items per store id, session tokens device-bound,
+/// nothing usable in a Migration-Assistant or Time-Machine copy.
 nonisolated enum KeychainPartition {
     /// Computed, not stored: `[String: Any]` is not `Sendable`, and a
     /// fresh dictionary per call costs nothing beside a Keychain round

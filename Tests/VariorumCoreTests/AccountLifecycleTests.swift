@@ -140,6 +140,7 @@ struct AccountLifecycleTests {
         AccountRekey(
             client: world.vaultClient, lifecycle: world.lifecycle,
             transport: world.server, database: world.client.db,
+            deviceID: world.client.deviceID,
             onNewVaultMaterial: onNewVaultMaterial)
     }
 

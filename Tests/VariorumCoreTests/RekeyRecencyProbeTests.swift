@@ -63,12 +63,9 @@ struct RekeyRecencyProbeTests {
             try String.fetchOne(
                 $0, sql: "SELECT value FROM sync_state WHERE key = 'last_server_seq'")
         }
-        let staleDeviceID = try await stale.db.read {
-            try String.fetchOne(
-                $0, sql: "SELECT value FROM sync_state WHERE key = 'device_id'")
-        }
-        var serverCursorBefore: Int64?
-        if let staleDeviceID { serverCursorBefore = await server.deviceCursor(staleDeviceID) }
+        // pre-13x 1a: the identity is the client's (custody), not the store's.
+        let staleDeviceID = stale.deviceID
+        let serverCursorBefore: Int64? = await server.deviceCursor(staleDeviceID)
 
         let report = try await assess(stale, server)
         #expect(report.notesOnlyOnServer == 2, "Delta + Epsilon; never the tombstoned Ghost")
@@ -86,9 +83,7 @@ struct RekeyRecencyProbeTests {
         }
         #expect(cursorAfter == cursorBefore)
         #expect(try stale.outboxCount() == 0)
-        if let staleDeviceID {
-            #expect(await server.deviceCursor(staleDeviceID) == serverCursorBefore)
-        }
+        #expect(await server.deviceCursor(staleDeviceID) == serverCursorBefore)
         // A second assess reads the same answer — nothing was consumed.
         let again = try await assess(stale, server)
         #expect(again == report)

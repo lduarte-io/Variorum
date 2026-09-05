@@ -240,14 +240,20 @@ struct SyncPushTests {
         #expect(serverRow?.syncVersion == 1, "re-accepted as a fresh insert")
     }
 
-    @Test func deviceIDIsMintedOnceAndKept() async throws {
+    /// pre-13x 1a (§1.13 / §3.3): the device identity RIDES THE PROVIDER
+    /// (the sync-key custody item in production), never the store —
+    /// `sync_state.device_id` is gone. RED ON OLD: the engine minted the row
+    /// on the first push.
+    @Test func theDeviceIdentityRidesTheProviderAndNeverTheStore() async throws {
         let server = FakeSyncServer()
         let a = try SyncClient(name: "A", prefix: "AA", transport: server)
         try await a.push()
-        let minted = try a.db.fetchString("SELECT value FROM sync_state WHERE key = 'device_id'")
-        #expect(minted != nil)
+        try await a.pull()
+        #expect(try a.storedDeviceID() == nil, "no identity in the file — ever")
+        #expect(await server.deviceCursor(a.deviceID) != nil,
+                "the pull carried the provider's identity to the server's device_cursor")
         try await a.push()
-        #expect(try a.db.fetchString("SELECT value FROM sync_state WHERE key = 'device_id'") == minted)
+        #expect(try a.storedDeviceID() == nil)
     }
 }
 
