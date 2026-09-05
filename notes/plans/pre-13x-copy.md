@@ -323,8 +323,14 @@ Button: *Choose Where…*
 ## 5. NOTICES AND ONE-TIME PROMPTS
 
 **Passphrase changed elsewhere (post-unlock, device opened by Touch ID):** *Your passphrase was changed on
-another device. Enter the new one to update this Mac.* Doors: *Enter…* · *Later* (sub-line: *Until then,
-Touch ID keeps working here.*)
+another device. Enter the new one to update this Mac. The old one no longer opens this Mac.* Doors: *Enter…* · *Later*
+(sub-line: *Until then, Touch ID and your twelve words keep working here.*) — **on an Always-ask device there is no
+Later:** *Your passphrase was changed on another device. Enter the new one now — this Mac has no other way to open
+while you're offline.* Doors: *Enter…* · *Use my twelve words*. The same two forms for regenerated words (*Your twelve
+words were regenerated on another device…*).
+**Waiting for your passphrase (the persistent banner on a device that has not followed a rotation):** *Sync is paused
+until you enter your passphrase once — your keys were replaced on [device] on [day].* Button: *Enter…* — and on every
+key door meanwhile: *Pick up your new keys first — enter your passphrase.*
 **Account moved to Castle (a device that was Standard):** *Your account is now in Castle — set on [device] on
 [day]. From now on this Mac asks for Touch ID to open your library, with your passphrase as the fallback. Enter your
 passphrase once to pick up your new sync keys: they were replaced when Castle was entered, and only your passphrase or
