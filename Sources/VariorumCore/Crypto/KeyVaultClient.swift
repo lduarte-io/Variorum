@@ -38,10 +38,15 @@ public actor KeyVaultClient {
     public struct FetchedVault: Equatable, Sendable {
         public let format: KeyVaultFormat
         public let revision: Int
+        /// pre-13x 2b: the row's `updated_at` (server-stamped; display only
+        /// — never ordering) — the day a rotation started elsewhere, for
+        /// the "still finishing" sentence (copy §4).
+        public let updatedAt: String?
 
-        public init(format: KeyVaultFormat, revision: Int) {
+        public init(format: KeyVaultFormat, revision: Int, updatedAt: String? = nil) {
             self.format = format
             self.revision = revision
+            self.updatedAt = updatedAt
         }
     }
 
@@ -138,7 +143,7 @@ public actor KeyVaultClient {
             throw KeyVaultClientError.malformedRow(String(describing: error))
         }
         guard let row = rows.first else { return nil }
-        return FetchedVault(format: try row.format(), revision: row.revision)
+        return FetchedVault(format: try row.format(), revision: row.revision, updatedAt: row.updatedAt)
     }
 
     // MARK: - Create

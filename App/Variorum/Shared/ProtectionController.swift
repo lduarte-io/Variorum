@@ -252,6 +252,40 @@ final class ProtectionController {
     /// pending its resume) — the same guard across a relaunch; wired by the
     /// bootstrap at ready.
     @ObservationIgnored var readSwitchPending: (@Sendable () async -> Bool)?
+    /// THE CEREMONY IN PROGRESS, held HERE so it survives the re-key's
+    /// reopen (the `.ready` tree — the pane and its sheet state with it —
+    /// is rebuilt across the pool swap; the controller is not). The pane
+    /// presents it as a sheet whenever non-nil.
+    private(set) var activeSwitch: PostureSwitchModel?
+
+    /// Open a ceremony (Use Castle… · Use Standard · the resume door).
+    /// nil runner ⇒ nothing opens (the doors do not render — P-2).
+    func openSwitch(_ mode: PostureSwitchModel.Mode, vaultTie: VaultTie?) {
+        guard let switchRunner, activeSwitch == nil else { return }
+        activeSwitch = PostureSwitchModel(
+            mode: mode, runner: switchRunner, controller: self, vaultTie: vaultTie)
+    }
+
+    func closeSwitch() {
+        activeSwitch = nil
+        refreshEnvelopeFacts()
+        refreshNotices()
+    }
+
+    /// The biometric confirmation (leaving Castle's Touch ID road) —
+    /// PROMPTS in production; scripted in tests.
+    func confirmPresence(_ reason: String) async -> Bool {
+        await guardSeam.confirmPresence(reason)
+    }
+
+    /// The words on file, checked against THIS library's key file (the
+    /// local-only ceremony's road for "Type My Words…").
+    func verifyRecoveryWordsAgainstStore(_ text: String) async -> Bool? {
+        guard let envelope = loadEnvelope(), envelope.recovery != nil else { return nil }
+        return await Task.detached(priority: .userInitiated) {
+            (try? envelope.unwrapKey(recoveryWords: EncryptionSession.words(from: text))) != nil
+        }.value
+    }
 
     private func refreshEnvelopeFacts() {
         let reading = readEnvelope()

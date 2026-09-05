@@ -205,3 +205,119 @@ nonisolated extension ProtectionCopy {
         "Done. This device opens with \(biometryName); your passphrase and twelve "
         + "words are your other ways in."
 }
+
+// MARK: - pre-13x 2b — the two switches' ceremonies (copy §2b · §2c · §4's
+// still-finishing line), rendered VERBATIM; the device nouns interpolated.
+
+nonisolated extension ProtectionCopy {
+    // §2b Screen 1 — what changes
+    static let enterCastleTitle = "Castle: only you hold the keys."
+    static let enterCastleBody =
+        "Your library gets a new key, and so does your sync. From now on your "
+        + "\(deviceName)'s \(credentialName) can't open it, and your Apple account "
+        + "holds no key to it. Opening takes \(biometryName) or your passphrase."
+    static let enterCastleBullets: [String] = [
+        "Your other devices will start asking too — Touch ID or Face ID, with your "
+        + "passphrase as the fallback — and each gives its own library a new key the "
+        + "same way. Each will ask for your passphrase once, to pick up your new sync keys.",
+        "Backups made before today — Variorum's own, Time Machine, copies you made — "
+        + "still open through your Apple account. Delete them, Time Machine included, "
+        + "if you want Castle to cover everything you have ever written. Keep them if "
+        + "you want a way back to what you wrote before today, should you ever lose "
+        + "your passphrase and twelve words.",
+        "If you think someone may already hold your keys — your Apple account, or an "
+        + "unlocked device of yours together with your account password — also delete "
+        + "your Stargazing account and set sync up again. That gives your sync fresh keys.",
+    ]
+    static let enterCastleContinue = "Continue"
+
+    // §2b Screen 2 — the passphrase (2a's Screen 2 under this title)
+    static let castleNeedsPassphraseTitle = "Castle needs a passphrase."
+    static let passphraseFieldLabel = "Passphrase"
+    static let passphraseConfirmLabel = "Confirm passphrase"
+    static let passphraseSubline =
+        "At least 12 characters. Four or more random words work well. This is the one "
+        + "thing a stolen copy of the server could be guessed against, so make it long."
+    static let passphraseTooShort = "Your passphrase needs at least 12 characters."
+    static let passphraseMismatch = "The two entries don't match."
+    static let passphraseAlreadyOnAccount =
+        "Your library already has a passphrase — sync uses the same one. Type it here."
+    static let passphraseNotTheLibrarys =
+        "That isn't your library's passphrase. Check it under Settings ▸ Protection "
+        + "if you're unsure."
+
+    // §2b Screen 3 — the twelve words (2a's Screens 3 / 3b)
+    static let wordsExistTitle = "Your library already has twelve words."
+    static let wordsExistBody =
+        "Type them to use the same twelve for sync, or generate new ones — the new "
+        + "ones replace the old everywhere."
+    static let wordsTypeMineDoor = "Type My Words…"
+    static let wordsGenerateNewDoor = "Generate New Ones"
+    static let wordsWriteDownTitle = "Write down your twelve words."
+    static let wordsWriteDownBody =
+        "These twelve words open your account and your library exactly as your "
+        + "passphrase does. Write them on paper and keep the paper somewhere real. "
+        + "They are shown once."
+    static let wordsCopyAll = "Copy All"
+    static let wordsCopied = "Copied. Your clipboard clears in 60 seconds."
+    static let wordsWrittenDoor = "I've written them down"
+    static let wordsConfirmTitle = "Type your twelve words to confirm."
+    static let wordsConfirmBody = "This proves the paper is right before anything depends on it."
+    static let wordsConfirmDoor = "Confirm"
+    static let wordsMismatch =
+        "That's not quite the phrase — one of the twelve words is off. Compare it "
+        + "with what you wrote down."
+
+    // §2b Screen 4 — the floor, said once
+    static let floorTitle = "Read this once."
+    static let floorBody =
+        "In Castle, nobody can help you if you forget your passphrase and lose your "
+        + "twelve words while no enrolled device is left. Not Apple. Not us. There is "
+        + "no reset. That is what makes Castle real — and it's why the words go on paper."
+    static let floorCheckbox = "I know my passphrase, and my twelve words are written down."
+    static let enterCastleDoor = "Enter Castle"
+
+    // §2b During / the notice / Done / the offer
+    static func reencryptingLine(done: Int, total: Int) -> String {
+        "Re-encrypting your library on the server… (\(done) of \(total))"
+    }
+    static let rekeyingLibraryLine = "Giving your library a new key…"
+    static let insuranceTurnedOffNotice =
+        "Your weekly unencrypted Markdown export is now off — it would have kept "
+        + "writing readable copies of your library to disk. You can turn it back on "
+        + "in Backups; Castle will warn you there."
+    static let enteredCastleDone =
+        "You're in Castle. Your library has a new key that your Apple account never "
+        + "held. A fresh backup was made under it. This \(deviceName) asks for "
+        + "\(biometryName) from now on; your other devices will ask the next time they open."
+    static let deleteOldBackupsTitle = "Delete the backups Variorum made before today?"
+    static let deleteOldBackupsBody =
+        "They still open through your Apple account, and they always will. Deleting "
+        + "them closes that door for what they hold. Variorum can only delete its own "
+        + "backups — Time Machine, copies you made, and anything outside Variorum's "
+        + "folders aren't touched and still open the old way. If your backups are in "
+        + "iCloud Drive, iCloud keeps deleted files for 30 days in Recently Deleted."
+    static let deleteOldBackupsDoor = "Delete Them"
+    static let keepOldBackupsDoor = "Keep Them"
+
+    // §2c Leaving Castle
+    static let leaveCastleTitle = "Back to Standard?"
+    static let leaveCastleBody =
+        "Your Apple account will hold a key to your library again. Anyone fully in "
+        + "your Apple account, or at your unlocked \(deviceName), can then read your "
+        + "writing. Your other devices will open silently again the next time they open."
+    static let leaveCastleDoor = "Use Standard"
+
+    // §4 — still finishing (decision 32), at either door
+    static func rotationStillFinishing(device: String, day: String) -> String {
+        "A key replacement started on \(device) on \(day) is still finishing. Any "
+        + "signed-in device that has picked up the new keys can finish it. Try again after."
+    }
+    /// The resume door's word (a switch that crashed mid-road on this device).
+    static let finishEnteringCastleDoor = "Finish Entering Castle…"
+    static let finishReplacingKeysDoor = "Finish Replacing Keys…"
+    static let resumeBody =
+        "Entering Castle didn't finish on this \(deviceName) — sync is paused until it "
+        + "completes. Nothing is lost; finishing picks up exactly where it stopped."
+    static let resumeNeedsPassphrase = "Enter your passphrase to finish."
+}

@@ -600,9 +600,12 @@ nonisolated enum ProtectionCopy {
     /// R13p-8's rider wearing Locked-down's face: enabling the scheduled
     /// plain-text export under a locked-down posture warns that it
     /// re-opens the door the encryption closed.
+    /// pre-13x 2b: the CASTLE warning (§8's Backups tab — a scheduled
+    /// plaintext export re-enabled under Castle shows it; the switch turns
+    /// the export OFF with copy §2b's notice).
     static let plaintextExportUnderLockedDown =
-        "Your settings are locked down — and a scheduled plain-text export re-opens "
-        + "the door they closed: every note, readable, on a timer, in the folder you "
+        "You're in Castle — and a scheduled plain-text export re-opens the door "
+        + "Castle closed: every note, readable, on a timer, in the folder you "
         + "picked. Turn it on only if that trade is one you mean."
 
     // The EXPOSED tier's copy — pre-13x 2a: copy §5's nudge, VERBATIM

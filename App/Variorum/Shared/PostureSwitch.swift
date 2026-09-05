@@ -197,6 +197,40 @@ final class PostureSwitchRunner {
         await Self.pendingMarker(database: leaves.database)
     }
 
+    // MARK: - The door check (decision 32: "the doors refuse before asking")
+
+    /// What the door learns before the ceremony opens: whether this
+    /// library is enrolled (a vault + a session + sync custody), whether
+    /// the vault carries a previous corpus key (a rotation started
+    /// elsewhere is still finishing — the door refuses with copy §4's
+    /// sentence) and the vault's day for that sentence. Offline throws
+    /// (the transport's own URLError) — every key door is an online act
+    /// for an enrolled library (decision 9).
+    struct DoorFacts: Equatable, Sendable {
+        var enrolled: Bool
+        var rotationInProgress: Bool
+        var vaultUpdatedAt: String?
+        var vaultHasRecoveryWrap: Bool
+    }
+
+    func checkDoor() async throws -> DoorFacts {
+        let signedIn = await leaves.signedIn()
+        let custody = await leaves.keyStore.offMain { $0.load() }
+        guard let vault = leaves.vault, leaves.transport != nil, signedIn, custody != nil else {
+            return DoorFacts(enrolled: false, rotationInProgress: false, vaultUpdatedAt: nil,
+                             vaultHasRecoveryWrap: false)
+        }
+        guard let fetched = try await vault.fetchVault() else {
+            return DoorFacts(enrolled: false, rotationInProgress: false, vaultUpdatedAt: nil,
+                             vaultHasRecoveryWrap: false)
+        }
+        return DoorFacts(
+            enrolled: true,
+            rotationInProgress: fetched.format.previousCorpusKey != nil,
+            vaultUpdatedAt: fetched.updatedAt,
+            vaultHasRecoveryWrap: fetched.format.masterWrappedByRecovery != nil)
+    }
+
     // MARK: - The two switches + Replace All Keys
 
     /// STANDARD → CASTLE (§4 whole). `passphrase`: the ceremony's — set at

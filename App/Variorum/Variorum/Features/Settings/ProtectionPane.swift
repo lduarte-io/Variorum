@@ -175,6 +175,8 @@ struct ProtectionPane: View {
     @State private var setSheetModel: PassphraseSetModel?
     @State private var resetSheetShown = false
     @State private var reminderCheck: SecretCheckModel?
+    /// pre-13x 2b: a switch that did not finish on this device (the marker).
+    @State private var pendingSwitch: RotationMarker?
 
     var body: some View {
         Form {
@@ -198,6 +200,14 @@ struct ProtectionPane: View {
         }
         .sheet(isPresented: $resetSheetShown) {
             PassphraseResetSheet(controller: controller) { resetSheetShown = false }
+        }
+        // pre-13x 2b: THE CEREMONY, held on the controller (it survives the
+        // re-key's reopen — this pane does not).
+        .sheet(item: Binding(
+            get: { controller.activeSwitch },
+            set: { if $0 == nil { controller.closeSwitch() } })
+        ) { model in
+            PostureSwitchSheet(model: model) { controller.closeSwitch() }
         }
     }
 
@@ -272,8 +282,38 @@ struct ProtectionPane: View {
                 postureCard(.standard)
                 postureCard(.castle)
             }
-            // The choose doors are batch 2b's (the switches' ceremony);
-            // per P-2 nothing that cannot act renders here.
+            // pre-13x 2b: THE CHOOSE DOORS (copy §1 — the ellipsis: a
+            // ceremony follows). Rendered only when a runner is wired
+            // (P-2); a switch that crashed mid-road offers its resume
+            // instead of a second start.
+            if controller.switchRunner != nil {
+                HStack {
+                    if let pending = pendingSwitch {
+                        Button(pending.entersCastle
+                               ? ProtectionCopy.finishEnteringCastleDoor
+                               : ProtectionCopy.finishReplacingKeysDoor) {
+                            controller.openSwitch(.resume(pending), vaultTie: VaultTie.make(services: services))
+                        }
+                        Text(ProtectionCopy.resumeBody)
+                            .font(.caption)
+                            .alarmVoice()
+                            .fixedSize(horizontal: false, vertical: true)
+                    } else if controller.posture == .standard {
+                        Button(ProtectionCopy.useCastleDoor) {
+                            controller.openSwitch(.enter, vaultTie: VaultTie.make(services: services))
+                        }
+                    } else {
+                        Button(ProtectionCopy.useStandardDoor) {
+                            controller.openSwitch(.leave, vaultTie: VaultTie.make(services: services))
+                        }
+                    }
+                    Spacer()
+                }
+                .disabled(controller.activeSwitch != nil)
+            }
+        }
+        .task(id: controller.activeSwitch?.id) {
+            pendingSwitch = await controller.switchRunner?.pendingMarker()
         }
     }
 
@@ -713,5 +753,281 @@ private struct PhraseOnlySheet: View {
         }
         .padding(24)
         .frame(width: 440)
+    }
+}
+
+// MARK: - pre-13x 2b: the Castle ceremony (copy §2b / §2c / §4's resume)
+
+/// The ceremony's Mac face over `PostureSwitchModel` — one sheet, one
+/// screen per phase in the copy's order. The words render ONLY here, once
+/// (`.privacySensitive()`); the During line reads the runner's phase.
+struct PostureSwitchSheet: View {
+    @Bindable var model: PostureSwitchModel
+    var onDone: () -> Void
+
+    @State private var passphrase = ""
+    @State private var confirmation = ""
+    @State private var typedWords = ""
+    @State private var acknowledged = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            switch model.phase {
+            case .checking:
+                title("Checking…")
+            case .explain:
+                title(ProtectionCopy.enterCastleTitle)
+                body(ProtectionCopy.enterCastleBody)
+                VStack(alignment: .leading, spacing: 6) {
+                    ForEach(ProtectionCopy.enterCastleBullets, id: \.self) { line in
+                        Text("• \(line)")
+                            .font(.callout)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                HStack {
+                    Button("Cancel") { onDone() }
+                    Spacer()
+                    Button(ProtectionCopy.enterCastleContinue) { model.continueFromExplain() }
+                        .keyboardShortcut(.defaultAction)
+                }
+            case .setPassphrase:
+                title(ProtectionCopy.castleNeedsPassphraseTitle)
+                body(model.vaultConstrains
+                     ? ProtectionCopy.passphraseAlreadyOnAccount
+                     : ProtectionCopy.passphraseSubline)
+                PeekableSecretField(label: ProtectionCopy.passphraseFieldLabel, text: $passphrase)
+                    .textFieldStyle(.roundedBorder)
+                PeekableSecretField(label: ProtectionCopy.passphraseConfirmLabel, text: $confirmation)
+                    .textFieldStyle(.roundedBorder)
+                HStack {
+                    Button("Cancel") { onDone() }
+                    Spacer()
+                    Button(ProtectionCopy.enterCastleContinue) {
+                        Task { await model.commitPassphrase(passphrase, confirmation: confirmation) }
+                    }
+                    .keyboardShortcut(.defaultAction)
+                    .disabled(model.busy || passphrase.isEmpty)
+                }
+            case .wordsExisting:
+                title(ProtectionCopy.wordsExistTitle)
+                body(ProtectionCopy.wordsExistBody)
+                HStack {
+                    Button("Cancel") { onDone() }
+                    Spacer()
+                    Button(ProtectionCopy.wordsGenerateNewDoor) { model.chooseGenerateNewWords() }
+                    Button(ProtectionCopy.wordsTypeMineDoor) { model.chooseTypeWords() }
+                        .keyboardShortcut(.defaultAction)
+                }
+            case .wordsType:
+                title(ProtectionCopy.wordsConfirmTitle)
+                wordsField
+                HStack {
+                    Button("Cancel") { onDone() }
+                    Spacer()
+                    Button(ProtectionCopy.wordsConfirmDoor) {
+                        Task { await model.submitExistingWords(typedWords) }
+                    }
+                    .keyboardShortcut(.defaultAction)
+                    .disabled(model.busy || typedWords.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+            case .wordsShow(let words):
+                title(ProtectionCopy.wordsWriteDownTitle)
+                body(ProtectionCopy.wordsWriteDownBody)
+                wordsGrid(words).privacySensitive()
+                HStack {
+                    Button(ProtectionCopy.wordsCopyAll) {
+                        let pasteboard = NSPasteboard.general
+                        pasteboard.clearContents()
+                        pasteboard.setString(words.joined(separator: " "), forType: .string)
+                        let count = pasteboard.changeCount
+                        model.markWordsCopied()
+                        Task {
+                            try? await Task.sleep(for: .seconds(60))
+                            if NSPasteboard.general.changeCount == count {
+                                NSPasteboard.general.clearContents()
+                            }
+                        }
+                    }
+                    if model.copiedWords {
+                        Text(ProtectionCopy.wordsCopied).font(.caption).foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Button(ProtectionCopy.wordsWrittenDoor) { model.acknowledgeWordsWritten() }
+                        .keyboardShortcut(.defaultAction)
+                }
+            case .wordsConfirm:
+                title(ProtectionCopy.wordsConfirmTitle)
+                body(ProtectionCopy.wordsConfirmBody)
+                wordsField
+                HStack {
+                    Button("Cancel") { onDone() }
+                    Spacer()
+                    Button(ProtectionCopy.wordsConfirmDoor) { model.confirmWords(typedWords) }
+                        .keyboardShortcut(.defaultAction)
+                        .disabled(typedWords.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+            case .floor(let needsPassphrase):
+                title(ProtectionCopy.floorTitle)
+                body(ProtectionCopy.floorBody)
+                Toggle(ProtectionCopy.floorCheckbox, isOn: $acknowledged)
+                    .toggleStyle(.checkbox)
+                if needsPassphrase {
+                    PeekableSecretField(label: ProtectionCopy.passphraseFieldLabel, text: $passphrase)
+                        .textFieldStyle(.roundedBorder)
+                }
+                HStack {
+                    Button("Cancel") { onDone() }
+                    Spacer()
+                    Button(ProtectionCopy.enterCastleDoor) {
+                        Task { await model.enterCastle(
+                            passphrase: needsPassphrase ? passphrase : nil, acknowledged: acknowledged) }
+                    }
+                    .keyboardShortcut(.defaultAction)
+                    .disabled(model.busy || !acknowledged || (needsPassphrase && passphrase.isEmpty))
+                }
+            case .running:
+                title(model.mode == .leave ? ProtectionCopy.leaveCastleTitle : ProtectionCopy.enterCastleTitle)
+                HStack(spacing: 8) {
+                    ProgressView().controlSize(.small)
+                    Text(runningLine).font(.callout).foregroundStyle(.secondary)
+                }
+                Text("Keep Variorum open. If it quits, the switch picks up where it stopped.")
+                    .font(.caption).foregroundStyle(.secondary)
+            case .done(let insuranceOff, _):
+                title("Done")
+                body(ProtectionCopy.enteredCastleDone)
+                if insuranceOff {
+                    Text(ProtectionCopy.insuranceTurnedOffNotice)
+                        .font(.callout)
+                        .alarmVoice()
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                HStack {
+                    Spacer()
+                    Button("Continue") {
+                        model.continueFromDone()
+                        if model.phase == .closed { onDone() }
+                    }
+                    .keyboardShortcut(.defaultAction)
+                }
+            case .offer:
+                title(ProtectionCopy.deleteOldBackupsTitle)
+                body(ProtectionCopy.deleteOldBackupsBody)
+                HStack {
+                    Button(ProtectionCopy.keepOldBackupsDoor) { model.keepOldBackups(); onDone() }
+                        .keyboardShortcut(.cancelAction)
+                    Spacer()
+                    Button(ProtectionCopy.deleteOldBackupsDoor, role: .destructive) {
+                        model.deleteOldBackups()
+                        onDone()
+                    }
+                }
+            case .leaveConfirm:
+                title(ProtectionCopy.leaveCastleTitle)
+                body(ProtectionCopy.leaveCastleBody)
+                PeekableSecretField(label: ProtectionCopy.passphraseFieldLabel, text: $passphrase)
+                    .textFieldStyle(.roundedBorder)
+                HStack {
+                    Button("Cancel") { onDone() }
+                    Spacer()
+                    Button("Confirm with Touch ID") { Task { await model.leaveWithBiometrics() } }
+                        .disabled(model.busy)
+                    Button(ProtectionCopy.leaveCastleDoor) { Task { await model.leave(passphrase: passphrase) } }
+                        .keyboardShortcut(.defaultAction)
+                        .disabled(model.busy || passphrase.isEmpty)
+                }
+            case .leftCastle:
+                title("You're in Standard.")
+                body("Your Apple account holds a key again. Nothing else changed.")
+                HStack { Spacer(); Button("Close") { onDone() }.keyboardShortcut(.defaultAction) }
+            case .resumeAsk:
+                title(ProtectionCopy.resumeBody)
+                body(ProtectionCopy.resumeNeedsPassphrase)
+                PeekableSecretField(label: ProtectionCopy.passphraseFieldLabel, text: $passphrase)
+                    .textFieldStyle(.roundedBorder)
+                HStack {
+                    Button("Later") { onDone() }
+                    Spacer()
+                    Button("Finish") { Task { await model.resume(passphrase: passphrase) } }
+                        .keyboardShortcut(.defaultAction)
+                        .disabled(model.busy || passphrase.isEmpty)
+                }
+            case .failed(let sentence):
+                title("Nothing was changed.")
+                Text(sentence)
+                    .font(.callout)
+                    .alarmVoice()
+                    .fixedSize(horizontal: false, vertical: true)
+                HStack { Spacer(); Button("Close") { onDone() }.keyboardShortcut(.defaultAction) }
+            case .closed:
+                EmptyView()
+            }
+            if model.busy, model.phase != .running {
+                HStack(spacing: 6) {
+                    ProgressView().controlSize(.small)
+                    Text("Working…").font(.caption).foregroundStyle(.secondary)
+                }
+            }
+            if let error = model.lastError {
+                Text(error)
+                    .font(.callout)
+                    .alarmVoice()
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(24)
+        .frame(width: 460)
+        .task { await model.start() }
+        .interactiveDismissDisabled(model.phase == .running)
+    }
+
+    private var runningLine: String {
+        switch model.runnerPhase {
+        case .reencrypting(let done, let total):
+            return ProtectionCopy.reencryptingLine(done: done, total: total)
+        case .rekeyingLibrary, .movingCustody, .snapshotting:
+            return ProtectionCopy.rekeyingLibraryLine
+        case .pullingToHead:
+            return "Catching up with the server…"
+        case .rotatingKeys:
+            return "Minting your new keys…"
+        case .idle, .done:
+            return "Working…"
+        }
+    }
+
+    private var wordsField: some View {
+        TextField("The 12 words, separated by spaces", text: $typedWords, axis: .vertical)
+            .lineLimit(3, reservesSpace: true)
+            .autocorrectionDisabled()
+            .privacySensitive()
+            .textFieldStyle(.roundedBorder)
+    }
+
+    private func title(_ text: String) -> some View {
+        Text(text)
+            .font(.title3.weight(.semibold))
+            .fixedSize(horizontal: false, vertical: true)
+    }
+
+    private func body(_ text: String) -> some View {
+        Text(text)
+            .font(.callout)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+
+    private func wordsGrid(_ words: [String]) -> some View {
+        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())],
+                  alignment: .leading, spacing: 6) {
+            ForEach(Array(words.enumerated()), id: \.offset) { index, word in
+                Text("\(index + 1). \(word)")
+                    .font(.body.monospaced())
+                    .textSelection(.enabled)
+            }
+        }
+        .padding(12)
+        .background(RoundedRectangle(cornerRadius: 8).fill(.quaternary.opacity(0.5)))
     }
 }
