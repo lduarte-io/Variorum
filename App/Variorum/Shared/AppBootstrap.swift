@@ -474,7 +474,7 @@ private nonisolated func openStoreOffMain(
         // `openStore(at:)` bare and get the in-memory test custody; this
         // line is the app's store, which is real whichever process opens it.
         return .success(try AppDatabase.openStore(
-            at: url, custody: custody ?? .deviceKeychain(scope: variant.rawValue)))
+            at: url, custody: custody ?? .deviceKeychain(scope: variant.rawValue, storeURL: url)))
     } catch let error as AppDatabase.StoreOpenError {
         return .failure(error)
     } catch {

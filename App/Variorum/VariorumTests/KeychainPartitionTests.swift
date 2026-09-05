@@ -21,7 +21,7 @@ struct KeychainPartitionTests {
         let families: [(String, [String: Any])] = [
             ("E2EE gated device keys (14b CF-12)", E2EEKeychainStorage.gatedBaseQuery()),
             ("gated store key (13p Biometric mode)",
-             StoreKeyGuardKeychain.gatedQuery(scope: "partition-probe")),
+             StoreKeyGuardKeychain.gatedQuery(scope: "partition-probe", storeID: "partition-probe-store")),
             ("iCloud escrow (13p R13p-6)",
              StoreKeyGuardKeychain.escrowQuery(storeID: "partition-probe")),
         ]

@@ -114,31 +114,56 @@ extension StoreKeyCustody {
     /// string and drifting.
     public static let deviceKeychainService = "io.lduarte.Variorum.store-key"
 
-    /// The real device custody: one Keychain item per store scope (the
-    /// store-variant raw value — `Variorum` vs `Variorum-dev` — so dev-build
-    /// activity never shares key custody with her real library; the A4
-    /// dev-store fence extended to keys). This is R13p-5's AUTO mode item:
-    /// WhenUnlocked-class accessibility, no user presence, ThisDeviceOnly —
-    /// the escrow item (a SEPARATE synchronizable item, R13p-6) and the
-    /// biometric-gated item are Batch 2's.
-    public static func deviceKeychain(scope: String) -> StoreKeyCustody {
+    /// The real device custody (pre-13x 1a: PER STORE ID — the postures
+    /// design §1.13 / §14.3): one Keychain item per (scope, store id). The
+    /// scope is the store-variant raw value — `Variorum` vs `Variorum-dev`,
+    /// so dev-build activity never shares key custody with her real library
+    /// (the A4 dev-store fence extended to keys) — and the store id is the
+    /// LIBRARY's identity, read from the key file beside `storeURL` without
+    /// the key (`StoreIdentity`); a machine with no item for a store id has
+    /// never opened that library, so a copied library gets a fresh key mint
+    /// ONLY where the design allows one (never over ciphertext). This is
+    /// R13p-5's AUTO / the design's Standard silent item: WhenUnlocked-class
+    /// accessibility, no user presence, ThisDeviceOnly, data-protection
+    /// resident. The mint road WRITES THE KEY FILE (store id + fingerprint,
+    /// no wraps) before the Keychain add, so the item's name exists on disk
+    /// before the item does.
+    public static func deviceKeychain(scope: String, storeURL: URL) -> StoreKeyCustody {
         StoreKeyCustody(
-            load: { StoreKeyKeychain.load(scope: scope) },
-            save: { StoreKeyKeychain.save($0, scope: scope) })
+            load: { StoreKeyKeychain.load(scope: scope, storeURL: storeURL) },
+            save: { StoreKeyKeychain.save($0, scope: scope, storeURL: storeURL) })
     }
 
-    /// Remove the device-Keychain item for `scope` (Phase 13p Batch 2 —
-    /// the at-open mode transitions: entering Biometric or
+    /// The same custody with the store id KNOWN (the app's gated family
+    /// resolves it per act; tests use throwaway scopes + ids).
+    public static func deviceKeychain(scope: String, storeID: String) -> StoreKeyCustody {
+        StoreKeyCustody(
+            load: { StoreKeyKeychain.load(scope: scope, storeID: storeID) },
+            save: { StoreKeyKeychain.save($0, scope: scope, storeID: storeID) })
+    }
+
+    /// Remove the device-Keychain item for (scope, store id) (Phase 13p
+    /// Batch 2 — the at-open mode transitions: entering Biometric or
     /// Passphrase-every-open DELETES the silently-releasing Auto item,
     /// because a gate whose key still releases silently is theater,
     /// R13p-14's exact prohibition). The one deletion door; the guard's
     /// custody choreography orders it AFTER the replacement custody lands.
     /// 17h (13p-fix ladder R3-5): answers whether the item is RELEASED —
-    /// gone from BOTH keychains, or never there. A dropped delete status
-    /// enforced the custody law in one direction only.
+    /// gone from BOTH keychains and the legacy accounts, or never there. A
+    /// dropped delete status enforced the custody law in one direction only.
     @discardableResult
-    public static func deviceKeychainRemove(scope: String) -> Bool {
-        StoreKeyKeychain.delete(scope: scope)
+    public static func deviceKeychainRemove(scope: String, storeID: String) -> Bool {
+        StoreKeyKeychain.delete(scope: scope, storeID: storeID)
+    }
+
+    /// The store-URL form of the delete: the id read from the key file; with
+    /// no key file only the legacy shapes can exist, and they are released.
+    @discardableResult
+    public static func deviceKeychainRemove(scope: String, storeURL: URL) -> Bool {
+        if case .known(let storeID) = StoreIdentity.resolve(besideStore: storeURL) {
+            return StoreKeyKeychain.delete(scope: scope, storeID: storeID)
+        }
+        return StoreKeyKeychain.deleteLegacy(scope: scope)
     }
 
     /// A scriptable in-memory custody for tests and drills.
@@ -179,8 +204,14 @@ extension StoreKeyCustody: DependencyKey {
     /// explicitly per resolved store variant (AppBootstrap); this default
     /// serves the package's own `liveValue` open, which targets the real
     /// store by construction.
-    public static let liveValue = StoreKeyCustody.deviceKeychain(
-        scope: AppDatabase.StoreVariant.real.rawValue)
+    public static let liveValue: StoreKeyCustody = {
+        let scope = AppDatabase.StoreVariant.real.rawValue
+        guard let url = try? AppDatabase.defaultStoreURL(variant: .real) else {
+            // No resolvable store home ⇒ no custody (the open refuses typed).
+            return StoreKeyCustody(load: { nil }, save: { _ in false })
+        }
+        return StoreKeyCustody.deviceKeychain(scope: scope, storeURL: url)
+    }()
     /// See `processEphemeral` — never the Keychain in a test process.
     public static let testValue = StoreKeyCustody.processEphemeral
 }
@@ -196,107 +227,154 @@ extension DependencyValues {
 /// The Keychain half — the `E2EEKeychainStorage` pattern, its own service
 /// so neither surface's clear can touch the other. The item class per the
 /// batch brief: `WhenUnlockedThisDeviceOnly`, no access control (Auto mode
-/// releases silently; the demanded modes' gated item is Batch 2's).
+/// releases silently; the demanded modes' gated item is the app layer's).
 ///
-/// **#82 (R-pre13u-3, pre-13u Act 9) — THE STORE KEY IS DEVICE-BOUND
-/// NOW.** The 13p-fix R1-2 finding: `kSecAttrAccessible` is inert on
-/// macOS without `kSecUseDataProtectionKeychain` (or synchronizable), so
-/// this family's `…ThisDeviceOnly` class was NOT in force — the only key
-/// to the encrypted library sat in `login.keychain-db`, which Migration
-/// Assistant and Time Machine carry to OTHER HARDWARE, so a library
-/// backup plus the account password opened it elsewhere. Her ruling:
-/// *"binding the store key only — it closes the last gap where only a
-/// computer password is enough to get your text."* Every query in this
-/// family now merges the DP flag (see `KeychainPartition`'s app-layer
-/// twin), and `load` runs the TN3137 read→re-add-with-flag→delete-old
-/// migration for the pre-#82 file-based item: idempotent (the DP hit
-/// short-circuits), crash-tolerant (a half-migrated state re-heals — a
-/// lingering legacy copy is swept at the next DP hit, once per scope per
-/// process), and the key is returned even when the migration itself is
-/// refused (opening her store never hinges on the move; the next launch
-/// retries). The write-verify-then-delete order is the app layer's
-/// `CustodyHandover` discipline, restated here because core cannot see
-/// that type — a write's success is never proof the item reads back.
+/// **#82 (R-pre13u-3, pre-13u Act 9) — THE STORE KEY IS DEVICE-BOUND.**
+/// The 13p-fix R1-2 finding: `kSecAttrAccessible` is inert on macOS
+/// without `kSecUseDataProtectionKeychain` (or synchronizable), so this
+/// family's `…ThisDeviceOnly` class was NOT in force — the only key to the
+/// encrypted library sat in `login.keychain-db`, which Migration Assistant
+/// and Time Machine carry to OTHER HARDWARE. Every query in this family
+/// merges the DP flag, and `load` runs the TN3137 read→re-add-with-flag→
+/// delete-old migration: idempotent (the hit short-circuits),
+/// crash-tolerant (a half-migrated state re-heals — a lingering legacy copy
+/// is swept at the next hit, once per account per process), and the key is
+/// returned even when the migration itself is refused (opening never
+/// hinges on the move; the next launch retries). The write-verify-then-
+/// delete order is the app layer's `CustodyHandover` discipline, restated
+/// here because core cannot see that type.
 ///
-/// SCOPE OF THE RULING: this family ONLY. The E2EE custody item and the
-/// auth tokens stay file-based (their move is not ruled); the escrow item
-/// is synchronizable BY DESIGN (the ruled recovery net, verified this
-/// round); the gated items were always DP-resident.
+/// **pre-13x 1a — PER STORE ID (§1.13 / §14.3).** The bound item's
+/// account is `<scope>-<storeID>-bound`; the two LEGACY shapes — the
+/// #82-era `<scope>-bound` (DP) and the 13p-era `<scope>` (file-based) —
+/// migrate onto it by the SAME road the moment a store id is in hand:
+/// read legacy → re-add under the store id → verify through the
+/// production read → delete the legacy copy. A second store under the
+/// same scope names a different account, so it can never read the
+/// first's key (the collision pin); the legacy item, once migrated, is
+/// gone, so a second store's first load finds nothing and mints.
 ///
 /// Recorded consequence (the access group is part of a DP item's
-/// identity): the migrated item belongs to the build configuration that
-/// migrated it — `…io.lduarte.Variorum` for Release, `….debug` for
-/// Debug — exactly as the gated family already does (the KnownIssues
-/// Developer-ID row). The rare debug-build-with-real-store opt-in road
-/// therefore reads no silent key post-migration and lands on the
-/// sidecar-unlock recovery surface rather than opening silently; the
-/// A4 fence keeps the two stores' scopes apart as always.
+/// identity): the item belongs to the build configuration that wrote it —
+/// `…io.lduarte.Variorum` for Release, `….debug` for Debug — exactly as
+/// the gated family already does (the KnownIssues Developer-ID row).
 nonisolated enum StoreKeyKeychain {
     static let service = StoreKeyCustody.deviceKeychainService
 
-    /// The BOUND item's account — distinct from the legacy account on
-    /// purpose (the gated family's "the account carries the policy"
-    /// pattern, `-biometric`'s sibling). MEASURED at this round's own
-    /// pins: a PLAIN (no-ACL) data-protection item under the same
-    /// service/account IS matched by a no-flag SecItemDelete — unlike the
-    /// ACL'd items 13p-fix measured — so a shared account would let the
-    /// legacy sweep destroy the bound item it had just verified. Distinct
-    /// accounts make the two families structurally unable to touch each
-    /// other, whatever a point release decides about cross-visibility.
-    static func boundAccount(scope: String) -> String { "\(scope)-bound" }
+    /// The per-store BOUND item's account (pre-13x 1a).
+    static func boundAccount(scope: String, storeID: String) -> String {
+        "\(scope)-\(storeID)-bound"
+    }
+    /// The #82-era legacy bound account (DP; no store id).
+    static func legacyBoundAccount(scope: String) -> String { "\(scope)-bound" }
 
-    static func load(scope: String) -> StoreKey? {
-        if let bound = read(scope: scope, dataProtection: true) {
+    // MARK: - The store-URL road (the app's open; the store id from the key file)
+
+    static func load(scope: String, storeURL: URL) -> StoreKey? {
+        switch StoreIdentity.resolve(besideStore: storeURL) {
+        case .known(let storeID):
+            return load(scope: scope, storeID: storeID)
+        case .none:
+            // No key file yet: only a legacy item could hold this
+            // library's key (a pre-1a store that never landed a wrap).
+            // Hand the key back WITHOUT migrating — the id is minted by
+            // `save`'s road, and `establish` below re-scopes the item the
+            // moment the key file exists.
+            guard let legacy = readLegacy(scope: scope) else { return nil }
+            guard let storeID = try? StoreIdentity.establish(besideStore: storeURL, key: legacy)
+            else { return legacy }
+            migrateLegacyItems(legacy, scope: scope, storeID: storeID)
+            return legacy
+        case .unreadable:
+            // P1/P11: an unreadable key file is a REFUSAL to write anything
+            // beside it — the id cannot be known, so no re-scoping happens;
+            // a legacy item still opens the library.
+            return readLegacy(scope: scope)
+        }
+    }
+
+    @discardableResult
+    static func save(_ key: StoreKey, scope: String, storeURL: URL) -> Bool {
+        // The key file FIRST (store id + fingerprint, no wraps): the item's
+        // name must exist on disk before the item does, or the next launch
+        // could not find it.
+        guard let storeID = try? StoreIdentity.establish(besideStore: storeURL, key: key)
+        else { return false }
+        return save(key, scope: scope, storeID: storeID)
+    }
+
+    // MARK: - The store-id road
+
+    static func load(scope: String, storeID: String) -> StoreKey? {
+        if let bound = read(account: boundAccount(scope: scope, storeID: storeID), dataProtection: true) {
             // Idempotent steady state — and the crash-window heal: a
-            // legacy copy left by a crash between the DP add and the
-            // legacy delete is swept here (once per scope per process;
-            // leaving it would keep the Migration-Assistant gap open).
-            sweepLegacyOnce(scope: scope)
+            // legacy copy left by a crash between the add and the legacy
+            // delete is swept here (once per account per process).
+            sweepLegacyOnce(scope: scope, storeID: storeID)
             return bound
         }
-        // The TN3137 migration road: the pre-#82 item lives file-based.
-        guard let legacy = read(scope: scope, dataProtection: false) else { return nil }
-        migrateLegacyItem(legacy, scope: scope)
+        guard let legacy = readLegacy(scope: scope) else { return nil }
+        migrateLegacyItems(legacy, scope: scope, storeID: storeID)
         return legacy
     }
 
     @discardableResult
-    static func save(_ key: StoreKey, scope: String) -> Bool {
-        guard add(key, scope: scope) else { return false }
+    static func save(_ key: StoreKey, scope: String, storeID: String) -> Bool {
+        guard add(key, account: boundAccount(scope: scope, storeID: storeID)) else { return false }
         // A fresh save supersedes any legacy copy outright (same
         // Migration-Assistant reasoning as the load-road sweep).
-        deleteItem(scope: scope, dataProtection: false)
+        deleteLegacyItems(scope: scope)
         return true
     }
 
     @discardableResult
-    static func delete(scope: String) -> Bool {
-        // BOTH keychains: a lingering legacy item under a demanded mode
-        // would be a silently-readable copy — the theater R13p-14 forbids.
-        // 17h R3-5: released = success or not-found, on BOTH legs — a
-        // refusal on either leaves a copy the caller believes gone.
-        let bound = deleteItem(scope: scope, dataProtection: true)
-        let legacy = deleteItem(scope: scope, dataProtection: false)
-        return bound && legacy
+    static func delete(scope: String, storeID: String) -> Bool {
+        // The bound item AND both legacy shapes: a lingering legacy item
+        // under a demanded mode would be a silently-readable copy — the
+        // theater R13p-14 forbids. 17h R3-5: released = success or
+        // not-found, on EVERY leg — a refusal on any leaves a copy the
+        // caller believes gone.
+        let bound = deleteItem(account: boundAccount(scope: scope, storeID: storeID), dataProtection: true)
+        return deleteLegacyItems(scope: scope) && bound
     }
 
-    // MARK: - The #82 migration (write → VERIFY → delete old)
+    // MARK: - The legacy shapes (read; migrate; delete)
 
-    private static func migrateLegacyItem(_ key: StoreKey, scope: String) {
-        guard add(key, scope: scope) else { return }
-        guard read(scope: scope, dataProtection: true) == key else {
-            // The CustodyHandover rule's middle step: an unreadable write
-            // releases nothing — roll the DP copy back best-effort and
-            // leave the legacy item as the working custody; the next
-            // launch retries.
-            deleteItem(scope: scope, dataProtection: true)
+    /// The #82-era DP item, else the 13p-era file-based item.
+    private static func readLegacy(scope: String) -> StoreKey? {
+        read(account: legacyBoundAccount(scope: scope), dataProtection: true)
+            ?? read(account: scope, dataProtection: false)
+    }
+
+    /// TN3137: write → VERIFY → delete old. An unreadable write releases
+    /// nothing — roll the new copy back best-effort and leave the legacy
+    /// item as the working custody; the next launch retries.
+    private static func migrateLegacyItems(_ key: StoreKey, scope: String, storeID: String) {
+        let account = boundAccount(scope: scope, storeID: storeID)
+        guard add(key, account: account) else { return }
+        guard read(account: account, dataProtection: true) == key else {
+            deleteItem(account: account, dataProtection: true)
             return
         }
-        deleteItem(scope: scope, dataProtection: false)
+        deleteLegacyItems(scope: scope)
     }
 
-    private static func add(_ key: StoreKey, scope: String) -> Bool {
-        var attributes = baseQuery(scope: scope, dataProtection: true)
+    /// The legacy shapes alone (a store with no key file can hold nothing
+    /// else).
+    @discardableResult
+    static func deleteLegacy(scope: String) -> Bool { deleteLegacyItems(scope: scope) }
+
+    @discardableResult
+    private static func deleteLegacyItems(scope: String) -> Bool {
+        let bound = deleteItem(account: legacyBoundAccount(scope: scope), dataProtection: true)
+        let file = deleteItem(account: scope, dataProtection: false)
+        return bound && file
+    }
+
+    // MARK: - The Sec* leaves
+
+    private static func add(_ key: StoreKey, account: String) -> Bool {
+        var attributes = baseQuery(account: account, dataProtection: true)
         attributes[kSecValueData as String] = key.data
         // IN FORCE now that the DP flag rides the query (#82's point).
         attributes[kSecAttrAccessible as String] =
@@ -305,14 +383,14 @@ nonisolated enum StoreKeyKeychain {
         if status == errSecDuplicateItem {
             let update: [String: Any] = [kSecValueData as String: key.data]
             return SecItemUpdate(
-                baseQuery(scope: scope, dataProtection: true) as CFDictionary,
+                baseQuery(account: account, dataProtection: true) as CFDictionary,
                 update as CFDictionary) == errSecSuccess
         }
         return status == errSecSuccess
     }
 
-    private static func read(scope: String, dataProtection: Bool) -> StoreKey? {
-        var query = baseQuery(scope: scope, dataProtection: dataProtection)
+    private static func read(account: String, dataProtection: Bool) -> StoreKey? {
+        var query = baseQuery(account: account, dataProtection: dataProtection)
         query[kSecReturnData as String] = true
         query[kSecMatchLimit as String] = kSecMatchLimitOne
         var result: AnyObject?
@@ -323,18 +401,17 @@ nonisolated enum StoreKeyKeychain {
     }
 
     @discardableResult
-    private static func deleteItem(scope: String, dataProtection: Bool) -> Bool {
+    private static func deleteItem(account: String, dataProtection: Bool) -> Bool {
         let status = SecItemDelete(
-            baseQuery(scope: scope, dataProtection: dataProtection) as CFDictionary)
+            baseQuery(account: account, dataProtection: dataProtection) as CFDictionary)
         return status == errSecSuccess || status == errSecItemNotFound
     }
 
-    private static func baseQuery(scope: String, dataProtection: Bool) -> [String: Any] {
+    private static func baseQuery(account: String, dataProtection: Bool) -> [String: Any] {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
-            kSecAttrAccount as String:
-                dataProtection ? boundAccount(scope: scope) : scope,
+            kSecAttrAccount as String: account,
         ]
         // The one rule the whole 13p-fix incident taught: a DP-resident
         // family merges the flag on EVERY query, or reads and writes
@@ -349,26 +426,31 @@ nonisolated enum StoreKeyKeychain {
     // MARK: - The once-per-process legacy sweep
 
     private static let sweepLock = NSLock()
-    nonisolated(unsafe) private static var sweptScopes: Set<String> = []
+    nonisolated(unsafe) private static var sweptAccounts: Set<String> = []
 
-    private static func sweepLegacyOnce(scope: String) {
+    private static func sweepLegacyOnce(scope: String, storeID: String) {
         sweepLock.lock()
-        let alreadySwept = !sweptScopes.insert(scope).inserted
+        let alreadySwept = !sweptAccounts.insert(boundAccount(scope: scope, storeID: storeID)).inserted
         sweepLock.unlock()
         guard !alreadySwept else { return }
-        deleteItem(scope: scope, dataProtection: false)
+        deleteLegacyItems(scope: scope)
     }
     // (No test-reset hook: pins use a FRESH throwaway scope per run, so
-    // the per-scope sweep is always unconsumed where a pin needs it.)
+    // the per-account sweep is always unconsumed where a pin needs it.)
 }
 #else
 nonisolated enum StoreKeyKeychain {
-    static func load(scope: String) -> StoreKey? { nil }
+    static func load(scope: String, storeURL: URL) -> StoreKey? { nil }
+    static func load(scope: String, storeID: String) -> StoreKey? { nil }
     @discardableResult
-    static func save(_ key: StoreKey, scope: String) -> Bool { false }
+    static func save(_ key: StoreKey, scope: String, storeURL: URL) -> Bool { false }
+    @discardableResult
+    static func save(_ key: StoreKey, scope: String, storeID: String) -> Bool { false }
     // No keychain ⇒ no item ⇒ trivially released (17h R3-5).
     @discardableResult
-    static func delete(scope: String) -> Bool { true }
+    static func delete(scope: String, storeID: String) -> Bool { true }
+    @discardableResult
+    static func deleteLegacy(scope: String) -> Bool { true }
 }
 #endif
 

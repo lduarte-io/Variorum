@@ -67,7 +67,14 @@ nonisolated struct StoreLaunchGate: Sendable {
     static let live = StoreLaunchGate(
         dials: { ProtectionDefaults.dials(scope: $0, in: .standard) },
         saveDials: { ProtectionDefaults.save($0, scope: $1, in: .standard) },
-        guardFor: { StoreKeyGuard.keychain(scope: $0) },
+        // pre-13x 1a: the guard's items are per STORE ID, read from the key
+        // file beside the scope's store home at each act.
+        guardFor: { scope in
+            let storeURL = AppDatabase.StoreVariant(rawValue: scope)
+                .flatMap { try? AppDatabase.defaultStoreURL(variant: $0) }
+                ?? URL(fileURLWithPath: "/dev/null")
+            return StoreKeyGuard.keychain(scope: scope, storeURL: storeURL)
+        },
         // pre-13x 1a: the store's CURRENT key file (fingerprint-named, else
         // the legacy name), located without the key; a write lands under the
         // envelope's own fingerprint name.

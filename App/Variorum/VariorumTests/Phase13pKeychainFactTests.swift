@@ -234,21 +234,21 @@ struct Phase13pKeychainFactTests {
     /// test write would land on the author's live custody.)
     @Test func theGatedStoreKeyIsFoundByProductionsOwnProbeAfterProductionWritesIt() {
         let scope = "13p-fix-probe-\(UUID().uuidString)"
-        defer { StoreKeyGuardKeychain.deleteGated(scope: scope) }
-        #expect(StoreKeyGuardKeychain.gatedItemExists(scope: scope) == false,
+        defer { StoreKeyGuardKeychain.deleteGated(scope: scope, storeID: nil) }
+        #expect(StoreKeyGuardKeychain.gatedItemExists(scope: scope, storeID: nil) == false,
                 "clean start")
-        #expect(StoreKeyGuardKeychain.saveGated(StoreKey.mint(), scope: scope),
+        #expect(StoreKeyGuardKeychain.saveGated(StoreKey.mint(), scope: scope, storeID: nil),
                 "the ACL'd write lands (this half passed even before the fix)")
-        #expect(StoreKeyGuardKeychain.gatedItemExists(scope: scope),
+        #expect(StoreKeyGuardKeychain.gatedItemExists(scope: scope, storeID: nil),
                 "and production's own probe must FIND it — the half that was broken")
 
         // 13p-fix R1-7: the third leg of the same round trip — a DELETE
         // must reach the keychain the WRITE reached. Unasserted cleanup is
         // how this suite left invisible ACL'd litter on every run.
         // (17h R3-5: the delete now ANSWERS, so the leg asserts directly.)
-        #expect(StoreKeyGuardKeychain.deleteGated(scope: scope),
+        #expect(StoreKeyGuardKeychain.deleteGated(scope: scope, storeID: nil),
                 "the delete reaches the same keychain the write did — and says so")
-        #expect(StoreKeyGuardKeychain.gatedItemExists(scope: scope) == false)
+        #expect(StoreKeyGuardKeychain.gatedItemExists(scope: scope, storeID: nil) == false)
     }
 
     /// 17h R2-7 — the probe-first RE-SAVE round trip against the real
@@ -260,12 +260,12 @@ struct Phase13pKeychainFactTests {
     /// construction.
     @Test func aGatedReSaveOverAnExistingItemLandsAndLeavesNoProbeLitter() {
         let scope = "17h-resave-probe-\(UUID().uuidString)"
-        defer { StoreKeyGuardKeychain.deleteGated(scope: scope) }
-        #expect(StoreKeyGuardKeychain.saveGated(StoreKey.mint(), scope: scope),
+        defer { StoreKeyGuardKeychain.deleteGated(scope: scope, storeID: nil) }
+        #expect(StoreKeyGuardKeychain.saveGated(StoreKey.mint(), scope: scope, storeID: nil),
                 "the first gated save lands")
-        #expect(StoreKeyGuardKeychain.saveGated(StoreKey.mint(), scope: scope),
+        #expect(StoreKeyGuardKeychain.saveGated(StoreKey.mint(), scope: scope, storeID: nil),
                 "the RE-SAVE over an existing item lands through the probe-first choreography")
-        #expect(StoreKeyGuardKeychain.gatedItemExists(scope: scope),
+        #expect(StoreKeyGuardKeychain.gatedItemExists(scope: scope, storeID: nil),
                 "production's own probe finds the re-saved item")
 
         // No probe litter: the probe account's item was swept within the
@@ -274,7 +274,7 @@ struct Phase13pKeychainFactTests {
         var probe: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: StoreKeyCustody.deviceKeychainService,
-            kSecAttrAccount as String: StoreKeyGuardKeychain.probeAccount(scope: scope),
+            kSecAttrAccount as String: StoreKeyGuardKeychain.probeAccount(scope: scope, storeID: nil),
             kSecUseDataProtectionKeychain as String: true,
         ]
         probe[kSecReturnAttributes as String] = true
@@ -284,7 +284,7 @@ struct Phase13pKeychainFactTests {
         #expect(SecItemCopyMatching(probe as CFDictionary, nil) == errSecItemNotFound,
                 "the probe item is swept before the call returns")
 
-        #expect(StoreKeyGuardKeychain.deleteGated(scope: scope))
-        #expect(StoreKeyGuardKeychain.gatedItemExists(scope: scope) == false)
+        #expect(StoreKeyGuardKeychain.deleteGated(scope: scope, storeID: nil))
+        #expect(StoreKeyGuardKeychain.gatedItemExists(scope: scope, storeID: nil) == false)
     }
 }

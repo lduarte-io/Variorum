@@ -67,16 +67,28 @@ nonisolated struct StoreKeyGuard: Sendable {
     /// confirmation") — PROMPTS; production only. False = not confirmed.
     var confirmPresence: @Sendable (_ reason: String) async -> Bool
 
-    static func keychain(scope: String) -> StoreKeyGuard {
-        let custody = StoreKeyCustody.deviceKeychain(scope: scope)
+    /// pre-13x 1a (§1.13 / §14.3): every item is PER STORE ID. The id is
+    /// the key file's, read beside `storeURL` at each act (a small file
+    /// read at launch / settings cadence — `StoreIdentity.resolve`); a
+    /// store with no key file yet resolves to nil, and the gated leaves
+    /// then act on the LEGACY (scope-only) items alone, which is exactly
+    /// what a pre-1a store holds. The silent item's road (load / save /
+    /// delete) goes through core's `StoreKeyCustody`, which mints the key
+    /// file on the save road so the id exists before the item does.
+    static func keychain(scope: String, storeURL: URL) -> StoreKeyGuard {
+        let custody = StoreKeyCustody.deviceKeychain(scope: scope, storeURL: storeURL)
+        @Sendable func storeID() -> String? {
+            if case .known(let id) = StoreIdentity.resolve(besideStore: storeURL) { return id }
+            return nil
+        }
         return StoreKeyGuard(
             loadAuto: { custody.load() },
             saveAuto: { custody.save($0) },
-            deleteAuto: { StoreKeyCustody.deviceKeychainRemove(scope: scope) },
-            gatedItemExists: { StoreKeyGuardKeychain.gatedItemExists(scope: scope) },
-            saveGated: { StoreKeyGuardKeychain.saveGated($0, scope: scope) },
-            deleteGated: { StoreKeyGuardKeychain.deleteGated(scope: scope) },
-            unlockGated: { await StoreKeyGuardKeychain.unlockGated(scope: scope) },
+            deleteAuto: { StoreKeyCustody.deviceKeychainRemove(scope: scope, storeURL: storeURL) },
+            gatedItemExists: { StoreKeyGuardKeychain.gatedItemExists(scope: scope, storeID: storeID()) },
+            saveGated: { StoreKeyGuardKeychain.saveGated($0, scope: scope, storeID: storeID()) },
+            deleteGated: { StoreKeyGuardKeychain.deleteGated(scope: scope, storeID: storeID()) },
+            unlockGated: { await StoreKeyGuardKeychain.unlockGated(scope: scope, storeID: storeID()) },
             biometryAvailable: {
                 // Biometrics ONLY — `.deviceOwnerAuthentication` (the
                 // passcode fallback) is deliberately never consulted
@@ -208,14 +220,29 @@ nonisolated final class InMemoryStoreKeyGuardBacking: @unchecked Sendable {
 /// synchronizable, named by storeID, never by device or scope.
 nonisolated enum StoreKeyGuardKeychain {
     static let escrowService = "io.lduarte.Variorum.store-key-escrow"
-    static func gatedAccount(scope: String) -> String { "\(scope)-biometric" }
+    /// pre-13x 1a: the gated item's account is PER STORE ID
+    /// (`<scope>-<storeID>-biometric`); nil = the 13p-era LEGACY account
+    /// (`<scope>-biometric`), which `unlockGated` migrates onto the
+    /// per-store one under the evaluated context (a gated item can only be
+    /// read with a prompt, so its TN3137 road runs at unlock).
+    static func gatedAccount(scope: String, storeID: String?) -> String {
+        storeID.map { "\(scope)-\($0)-biometric" } ?? legacyGatedAccount(scope: scope)
+    }
+    static func legacyGatedAccount(scope: String) -> String { "\(scope)-biometric" }
 
     // MARK: The gated item (R13p-5's Biometric mode)
 
     /// Non-prompting existence probe (attributes read without user auth;
-    /// the non-interactive context is the belt — the E2EE pattern).
-    static func gatedItemExists(scope: String) -> Bool {
-        var query = gatedQuery(scope: scope)
+    /// the non-interactive context is the belt — the E2EE pattern). The
+    /// per-store item OR the legacy one — a pre-1a store's gate is real
+    /// until its unlock migrates it.
+    static func gatedItemExists(scope: String, storeID: String?) -> Bool {
+        if itemExists(gatedQuery(scope: scope, storeID: storeID)) { return true }
+        return storeID != nil && itemExists(gatedQuery(scope: scope, storeID: nil))
+    }
+
+    private static func itemExists(_ base: [String: Any]) -> Bool {
+        var query = base
         query[kSecReturnAttributes as String] = true
         query[kSecMatchLimit as String] = kSecMatchLimitOne
         let probe = LAContext()
@@ -239,57 +266,76 @@ nonisolated enum StoreKeyGuardKeychain {
     /// because ONE choreography for both gated families is the point, and
     /// an R3-5-class lingering item is exactly when it earns its keep.
     @discardableResult
-    static func saveGated(_ key: StoreKey, scope: String) -> Bool {
-        var error: Unmanaged<CFError>?
-        guard let control = SecAccessControlCreateWithFlags(
-            kCFAllocatorDefault,
-            kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
-            .biometryCurrentSet,
-            &error)
-        else { return false }
+    static func saveGated(_ key: StoreKey, scope: String, storeID: String?) -> Bool {
+        guard let control = accessControl() else { return false }
         return GatedSaveChoreography.run(
-            sweepProbe: { SecItemDelete(probeQuery(scope: scope) as CFDictionary) },
+            sweepProbe: { SecItemDelete(probeQuery(scope: scope, storeID: storeID) as CFDictionary) },
             addProbe: {
-                var attributes = probeQuery(scope: scope)
+                var attributes = probeQuery(scope: scope, storeID: storeID)
                 attributes[kSecValueData as String] = Data("probe".utf8)
                 attributes[kSecAttrAccessControl as String] = control
                 return SecItemAdd(attributes as CFDictionary, nil) == errSecSuccess
             },
-            releaseExisting: { deleteGated(scope: scope) },
+            releaseExisting: { deleteGated(scope: scope, storeID: storeID) },
             addIncoming: {
-                var attributes = gatedQuery(scope: scope)
+                var attributes = gatedQuery(scope: scope, storeID: storeID)
                 attributes[kSecValueData as String] = key.data
                 attributes[kSecAttrAccessControl as String] = control
                 return SecItemAdd(attributes as CFDictionary, nil) == errSecSuccess
             })
     }
 
+    /// Her ruling, in flags: `.biometryCurrentSet` ALONE — never
+    /// `.devicePasscode`, never an `.or` escape.
+    private static func accessControl() -> SecAccessControl? {
+        var error: Unmanaged<CFError>?
+        return SecAccessControlCreateWithFlags(
+            kCFAllocatorDefault,
+            kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
+            .biometryCurrentSet,
+            &error)
+    }
+
     /// 17h R2-7: the probe item's account — the gated account's sibling
     /// (the account-carries-the-policy pattern), same service, same DP
     /// partition, dummy bytes, swept within the same call.
-    static func probeAccount(scope: String) -> String { "\(scope)-biometric-probe" }
+    static func probeAccount(scope: String, storeID: String?) -> String {
+        "\(gatedAccount(scope: scope, storeID: storeID))-probe"
+    }
 
-    private static func probeQuery(scope: String) -> [String: Any] {
+    private static func probeQuery(scope: String, storeID: String?) -> [String: Any] {
         [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: StoreKeyCustody.deviceKeychainService,
-            kSecAttrAccount as String: probeAccount(scope: scope),
+            kSecAttrAccount as String: probeAccount(scope: scope, storeID: storeID),
         ].merging(KeychainPartition.dataProtection) { a, _ in a }
     }
 
     /// 17h (R3-5): released = deleted, or never there. Anything else is a
     /// refusal the caller must not paper over — the `.biometric` arm's
     /// silently-still-releasing key and the `.auto` arm's lingering gate
-    /// were both this dropped status.
+    /// were both this dropped status. pre-13x 1a: the per-store item AND
+    /// the legacy one — a lingering legacy gated item would be a second
+    /// road nobody knows about.
     @discardableResult
-    static func deleteGated(scope: String) -> Bool {
-        let status = SecItemDelete(gatedQuery(scope: scope) as CFDictionary)
-        return status == errSecSuccess || status == errSecItemNotFound
+    static func deleteGated(scope: String, storeID: String?) -> Bool {
+        let own = SecItemDelete(gatedQuery(scope: scope, storeID: storeID) as CFDictionary)
+        var released = own == errSecSuccess || own == errSecItemNotFound
+        if storeID != nil {
+            let legacy = SecItemDelete(gatedQuery(scope: scope, storeID: nil) as CFDictionary)
+            released = released && (legacy == errSecSuccess || legacy == errSecItemNotFound)
+        }
+        return released
     }
 
     /// The at-open unlock: evaluate biometrics (ONLY), then read under
-    /// the evaluated context so the system never double-prompts.
-    static func unlockGated(scope: String) async -> StoreKey? {
+    /// the evaluated context so the system never double-prompts. pre-13x
+    /// 1a: ONE evaluation serves the per-store item, and — a pre-1a store
+    /// — the legacy item, whose key is then re-added under the store id
+    /// (verified by presence; the legacy released) so the next unlock
+    /// reads the per-store item straight: the TN3137 road for an item
+    /// that can only be read with a prompt.
+    static func unlockGated(scope: String, storeID: String?) async -> StoreKey? {
         let context = LAContext()
         context.localizedFallbackTitle = ""  // our fallback is the passphrase
         guard (try? await context.evaluatePolicy(
@@ -297,7 +343,16 @@ nonisolated enum StoreKeyGuardKeychain {
             localizedReason: "Unlock your Variorum library"))
             == true
         else { return nil }
-        var query = gatedQuery(scope: scope)
+        if let key = readGated(scope: scope, storeID: storeID, context: context) { return key }
+        guard let storeID, let legacy = readGated(scope: scope, storeID: nil, context: context)
+        else { return nil }
+        migrateLegacyGated(legacy, scope: scope, storeID: storeID)
+        return legacy
+    }
+
+    /// Read the gated item's DATA under an evaluated context.
+    private static func readGated(scope: String, storeID: String?, context: LAContext) -> StoreKey? {
+        var query = gatedQuery(scope: scope, storeID: storeID)
         query[kSecReturnData as String] = true
         query[kSecMatchLimit as String] = kSecMatchLimitOne
         query[kSecUseAuthenticationContext as String] = context
@@ -308,14 +363,32 @@ nonisolated enum StoreKeyGuardKeychain {
         return StoreKey(data: data)
     }
 
+    /// The legacy gated item's TN3137 road, run once the key is in hand:
+    /// add under the store id → VERIFY (presence — reading an ACL'd item's
+    /// data would prompt again) → release the legacy. A refused add or an
+    /// unverified write leaves the legacy item as the working custody; the
+    /// next unlock retries.
+    private static func migrateLegacyGated(_ key: StoreKey, scope: String, storeID: String) {
+        guard let control = accessControl() else { return }
+        var attributes = gatedQuery(scope: scope, storeID: storeID)
+        attributes[kSecValueData as String] = key.data
+        attributes[kSecAttrAccessControl as String] = control
+        guard SecItemAdd(attributes as CFDictionary, nil) == errSecSuccess else { return }
+        guard itemExists(gatedQuery(scope: scope, storeID: storeID)) else {
+            SecItemDelete(gatedQuery(scope: scope, storeID: storeID) as CFDictionary)
+            return
+        }
+        SecItemDelete(gatedQuery(scope: scope, storeID: nil) as CFDictionary)
+    }
+
     /// Internal (see `EncryptionKeychain.gatedBaseQuery`): the partition
     /// marker is asserted structurally, for every family, by
     /// `KeychainPartitionTests`.
-    static func gatedQuery(scope: String) -> [String: Any] {
+    static func gatedQuery(scope: String, storeID: String?) -> [String: Any] {
         [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: StoreKeyCustody.deviceKeychainService,
-            kSecAttrAccount as String: gatedAccount(scope: scope),
+            kSecAttrAccount as String: gatedAccount(scope: scope, storeID: storeID),
         ].merging(KeychainPartition.dataProtection) { a, _ in a }
     }
 
