@@ -508,6 +508,7 @@ struct ProtectionNoticeBar: View {
 
     @State private var setSheetModel: PassphraseSetModel?
     @State private var phraseWords: [String]?
+    @State private var migrationConfirm: MigrationConfirmModel?
     @Environment(\.openSettings) private var openSettings
 
     var body: some View {
@@ -515,11 +516,15 @@ struct ProtectionNoticeBar: View {
             switch controller.notice {
             case .nudge: nudgeBar
             case .reminderDue: reminderBar
+            case .migrationConfirm: migrationBar
             case nil: EmptyView()
             }
         }
         .sheet(item: $setSheetModel) { model in
             PassphraseSetSheet(model: model) { setSheetModel = nil }
+        }
+        .sheet(item: $migrationConfirm) { model in
+            MigrationConfirmSheet(model: model) { migrationConfirm = nil }
         }
         .sheet(isPresented: Binding(
             get: { phraseWords != nil }, set: { if !$0 { phraseWords = nil } })
@@ -580,6 +585,24 @@ struct ProtectionNoticeBar: View {
         }
     }
 
+    /// pre-13x 2a (§11) — HER MIGRATION'S ONE-TIME MESSAGE (copy §9,
+    /// verbatim): Confirm… opens the passphrase sheet; Later hides the
+    /// face for this launch (the mark stays — the next ready asks again).
+    private var migrationBar: some View {
+        bar {
+            Text(ProtectionCopy.migrationConfirmBody)
+                .font(.callout)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer()
+            Button(ProtectionCopy.migrationConfirmDoor) {
+                migrationConfirm = MigrationConfirmModel.make(
+                    keyVault: services?.keyVault, controller: controller)
+            }
+            .disabled(services?.keyVault == nil)
+            Button(ProtectionCopy.migrationLaterDoor) { controller.deferMigrationConfirm() }
+        }
+    }
+
     private var reminderBar: some View {
         bar {
             VStack(alignment: .leading, spacing: 2) {
@@ -604,6 +627,55 @@ struct ProtectionNoticeBar: View {
             .padding(.vertical, 8)
             .background(.bar)
             .overlay(alignment: .top) { Divider() }
+    }
+}
+
+/// pre-13x 2a (§11) — the confirm sheet: one passphrase field; the word is
+/// verified against the vault and the local copy re-wrapped under the
+/// vault's descriptor; then copy §9's done line.
+struct MigrationConfirmSheet: View {
+    @Bindable var model: MigrationConfirmModel
+    var onDone: () -> Void
+
+    @State private var passphrase = ""
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            if model.done {
+                Text(ProtectionCopy.migrationDoneBody)
+                    .font(.callout)
+                    .fixedSize(horizontal: false, vertical: true)
+                HStack { Spacer(); Button("Done") { onDone() }.keyboardShortcut(.defaultAction) }
+            } else {
+                Text(ProtectionCopy.migrationConfirmBody)
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                PeekableSecretField(label: "Encryption passphrase", text: $passphrase)
+                    .textFieldStyle(.roundedBorder)
+                if let error = model.lastError {
+                    Text(error).font(.callout).alarmVoice()
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                if model.busy {
+                    HStack(spacing: 6) {
+                        ProgressView().controlSize(.small)
+                        Text("Confirming…").font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+                HStack {
+                    Button(ProtectionCopy.migrationLaterDoor) { onDone() }
+                    Spacer()
+                    Button("Confirm") {
+                        Task { await model.confirm(passphrase: passphrase) }
+                    }
+                    .keyboardShortcut(.defaultAction)
+                    .disabled(model.busy || passphrase.isEmpty)
+                }
+            }
+        }
+        .padding(24)
+        .frame(width: 440)
     }
 }
 

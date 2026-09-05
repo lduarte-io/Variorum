@@ -113,12 +113,30 @@ nonisolated final class SyncCustodySession: @unchecked Sendable {
     private let lock = NSLock()
     private var storedRecord: SyncCustodyRecord?
     private var storedDerivedKey: SymmetricKey?
+    /// pre-13x 2a (§11): the 14b/CF-12 LEGACY GATED item's material, read
+    /// under the lobby's one evaluated context at unlock and held here
+    /// until the migration consumes it (`takeLegacyMaterial`); a relock
+    /// drops it.
+    private var storedLegacyMaterial: DeviceKeyMaterial?
 
     init() {}
 
     var record: SyncCustodyRecord? {
         lock.lock(); defer { lock.unlock() }
         return storedRecord
+    }
+
+    func holdLegacyMaterial(_ material: DeviceKeyMaterial) {
+        lock.lock(); defer { lock.unlock() }
+        storedLegacyMaterial = material
+    }
+
+    /// The migration's read — consumed once.
+    func takeLegacyMaterial() -> DeviceKeyMaterial? {
+        lock.lock(); defer { lock.unlock() }
+        let held = storedLegacyMaterial
+        storedLegacyMaterial = nil
+        return held
     }
     /// The derived wrapping key of an offline Always-ask unlock (§3.3).
     var derivedWrappingKey: SymmetricKey? {
@@ -141,6 +159,7 @@ nonisolated final class SyncCustodySession: @unchecked Sendable {
         lock.lock(); defer { lock.unlock() }
         storedRecord = nil
         storedDerivedKey = nil
+        storedLegacyMaterial = nil
     }
 }
 

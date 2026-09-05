@@ -149,6 +149,27 @@ final class AppBootstrap {
             gate: gate,
             isRealVariant: variant == .real))
         protection.performLock = { [weak self] in await self?.lock() }
+        // pre-13x 2a (§11): the production migration leaves — the Keychain,
+        // the defaults, the store — per store id, built at ready. NEVER in
+        // the TEST HOST: the tripwire refuses every real-scope Keychain
+        // mutation there, so the road could not complete (a refused leg
+        // every launch), and the dev scope's 14b login-keychain item sits
+        // behind an ACL prompt for a rebuilt host binary ("Variorum Dev
+        // wants to use your confidential information…", the login
+        // password) that no test can answer — observed 2026-09-05 as the
+        // runner timing out while preparing. The migration's Keychain
+        // proof is the opt-in drill under throwaway scopes; the dev
+        // store's own run is the Debug APP's, at her keychain password.
+        let scope = variant.rawValue
+        let storeURL = try? AppDatabase.defaultStoreURL(variant: variant)
+        if KeychainTestTripwire.armed {
+            makeMigrationLeaves = nil
+        } else {
+            makeMigrationLeaves = { [protection, gate] database, storeID in
+                .live(scope: scope, storeID: storeID, storeURL: storeURL,
+                      database: database, gate: gate, protection: protection)
+            }
+        }
         #if os(macOS)
         // Production instances only: the monitors re-check the dials at
         // fire time, so they are safe always-on listeners.
@@ -440,8 +461,16 @@ final class AppBootstrap {
                     _ = guardSeam.saveAuto(unlockedKey)
                 }
             }
-            if testOpener == nil {
-                Task { [weak protection] in await protection?.reconcile() }
+            // pre-13x 2a (§11): the migration runs ONCE per store at ready
+            // — before the reconcile, never before unlock — then the
+            // reconcile (the launch housekeeping, the Apple arm, the
+            // notices). The test-opener road runs it only when a test
+            // injected leaves.
+            Task { [weak self, weak protection] in
+                await self?.runMigrationIfNeeded(database: database, unlockedKey: unlockedKey)
+                if self?.testOpener == nil || self?.makeMigrationLeaves != nil {
+                    await protection?.reconcile()
+                }
             }
             // pre-13x 2a: the idle clock starts at ready (decision 18 —
             // time since Variorum was last used).
@@ -457,6 +486,39 @@ final class AppBootstrap {
         case .failed(let error, let recoveryFacts):
             state = .failed(error, recovery: recoveryFacts.map(makeLobby))
         }
+    }
+
+    /// §11 — the migration at ready (see `ProtectionMigration`): the facts
+    /// are gathered here (the key in hand, the gate the route used, the
+    /// posture the vault says when reachable, biometry), the leaves come
+    /// from the composition, and the confirm's pending read is wired into
+    /// the controller's notices. Awaited by the ready road so the reconcile
+    /// that follows sees the migrated state.
+    private func runMigrationIfNeeded(database: AppDatabase, unlockedKey: StoreKey?) async {
+        guard let makeMigrationLeaves, let storeID = currentStoreID() else { return }
+        let scope = storeVariant.rawValue
+        let guardSeam = gate.guardFor(scope)
+        guard let key = unlockedKey ?? guardSeam.loadAuto() else { return }
+        let leaves = makeMigrationLeaves(database, storeID)
+        protection.readMigrationConfirmPending = { leaves.isConfirmPending() }
+        protection.clearMigrationConfirmPending = { leaves.setConfirmPending(false) }
+        guard !leaves.isDone() else { return }
+        let storeURL = testOpener != nil
+            ? testStoreURL
+            : (try? AppDatabase.defaultStoreURL(variant: storeVariant))
+        let effectiveGate = currentEffectiveGate
+        let reading = await protection.readVaultPosture?()
+        let keyFile = gate.readEnvelope(storeURL).envelope
+        let posture = Posture.derive(
+            legacyMode: nil, vaultHasAppleHeldCopy: reading?.hasAppleHeldCopy, keyFile: keyFile)
+        let targetGate = StoreAtOpenMode.effective(posture: posture, dials: gate.dials(scope, storeID))
+        let facts = ProtectionMigration.Facts(
+            scope: scope, storeID: storeID, key: key,
+            effectiveGate: effectiveGate, targetGate: targetGate,
+            biometryAvailable: guardSeam.biometryAvailable(),
+            vaultKDF: reading?.passphraseKDF,
+            vaultHasPassphraseWrap: reading?.hasPassphraseWrap ?? false)
+        lastMigrationReport = await ProtectionMigration.run(facts: facts, leaves: leaves)
     }
 
     /// The persisted dials of THIS bootstrap's store, read fresh (pre-13x
@@ -483,6 +545,14 @@ final class AppBootstrap {
     /// backup is due; the app's own folder only. Wired by the Mac's
     /// composition (the phone keeps no backups); nil = no copy.
     @ObservationIgnored var lockTimeCopy: (@Sendable () -> Void)?
+    /// pre-13x 2a (§11): the migration's leaves, built at READY for the
+    /// store id in hand — production's `.live` (the production init wires
+    /// it); a test injects its recorders here BEFORE the open completes;
+    /// nil = no migration runs (the test-opener default).
+    @ObservationIgnored var makeMigrationLeaves:
+        (@MainActor (_ database: AppDatabase, _ storeID: String) -> ProtectionMigration.Leaves)?
+    /// The last migration's report (a test-visible receipt; nil = none ran).
+    @ObservationIgnored private(set) var lastMigrationReport: ProtectionMigration.Report?
 
     /// The store id the dials are keyed by, for THIS bootstrap's store
     /// (pre-13x 1a) — re-read per call, since "Start a New Library"

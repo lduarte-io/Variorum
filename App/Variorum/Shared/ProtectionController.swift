@@ -49,6 +49,11 @@ nonisolated struct VaultPostureReading: Equatable, Sendable {
     /// The id of the A that copy is under (the key file's `appleKeyID`
     /// must agree — the client VERIFIES, never adopts).
     var appleKeyID: String?
+    /// The vault's passphrase-KDF descriptor (the key file records what its
+    /// local copy was last reconciled against — §3.6; the migration lands
+    /// it) and whether a passphrase wrap exists (the confirm's gate).
+    var passphraseKDF: PassphraseKDF.Descriptor? = nil
+    var hasPassphraseWrap: Bool = false
 }
 
 @MainActor
@@ -177,9 +182,21 @@ final class ProtectionController {
         /// R13p-9's "do you still remember your passphrase?" — always on
         /// in Castle (§13: the dial is gone).
         case reminderDue
+        /// pre-13x 2a (§11): her migration's one-time face (copy §9) —
+        /// *"Confirm your passphrase once to finish."*
+        case migrationConfirm
     }
 
     private(set) var notice: Notice?
+    /// §11: the passphrase confirm is pending (set by the migration; read
+    /// from the per-store defaults at every reconcile; cleared by the
+    /// confirm). *Later* hides the face for this launch only.
+    private(set) var migrationConfirmPending = false
+    @ObservationIgnored private var migrationConfirmDeferredThisLaunch = false
+    /// The pending read (injected by the bootstrap's composition; nil = no
+    /// migration wiring).
+    @ObservationIgnored var readMigrationConfirmPending: (@Sendable () -> Bool)?
+    @ObservationIgnored var clearMigrationConfirmPending: (@Sendable () -> Void)?
 
     init(configuration: Configuration) {
         self.configuration = configuration
@@ -429,6 +446,12 @@ final class ProtectionController {
         return .changed
     }
 
+    /// The move as a Bool (the migration's leaf calls it from a nonisolated
+    /// closure — `ModeChangeOutcome`'s conformance is MainActor-isolated).
+    func moveCustodyChanged(to target: StoreAtOpenMode) async -> Bool {
+        await moveCustody(to: target) == .changed
+    }
+
     /// THE CUSTODY MOVE, both items (pre-13x 2a; 2b's posture switches
     /// call it for `.auto` ↔ a demanded gate): the library key's item by
     /// the 13p `CustodyHandover` choreography, then the sync record's by
@@ -674,9 +697,50 @@ final class ProtectionController {
             verified: verified, landingFailed: !verified, wrotePass: true)
     }
 
+    // MARK: - The migration's one-time confirm (§11; copy §9)
+
+    /// The confirm's act: the typed word already unwrapped the VAULT's
+    /// master (the model verified it); re-wrap the local passphrase copy
+    /// under the vault's descriptor and record the reconciliation — the
+    /// lobby's vault road then derives once. Returns the worded refusal.
+    @discardableResult
+    func reconcilePassphraseWrap(
+        passphrase: String, vaultKDF: PassphraseKDF.Descriptor, corpusKeyID: String
+    ) async -> String? {
+        guard !passphrase.isEmpty else { return "Type the passphrase first." }
+        guard let key = currentKey() else { return Self.keyUnavailable }
+        do {
+            let wrap = try await Task.detached(priority: .userInitiated) {
+                try StoreKeyEnvelope.makePassphraseWrap(key: key, passphrase: passphrase, kdf: vaultKDF)
+            }.value
+            var envelope = try ensuredEnvelope(for: key).envelope
+            try envelope.adoptPassphraseWrap(wrap, key: key)
+            try envelope.recordVaultReconciliation(kdf: vaultKDF, corpusKeyID: corpusKeyID)
+            try saveEnvelope(envelope)
+            clearMigrationConfirmPending?()
+            migrationConfirmPending = false
+            refreshEnvelopeFacts()
+            refreshNotices()
+            return nil
+        } catch {
+            return ProtectionCopy.message(for: error)
+        }
+    }
+
+    /// *Later* — the face is hidden for this launch; the mark stays.
+    func deferMigrationConfirm() {
+        migrationConfirmDeferredThisLaunch = true
+        refreshNotices()
+    }
+
     // MARK: - Notices
 
     func refreshNotices(now: Date = Date()) {
+        migrationConfirmPending = readMigrationConfirmPending?() ?? false
+        if migrationConfirmPending, !migrationConfirmDeferredThisLaunch {
+            notice = .migrationConfirm
+            return
+        }
         // The reminder: always on in Castle (§13 — the dial is gone; the
         // Standard nudge covers the no-passphrase state).
         if ReminderCheckPolicy.isDue(
@@ -903,7 +967,9 @@ func wireOneSecretHooks(
             guard let fetched = try? await vault.fetchVault() else { return nil }
             return VaultPostureReading(
                 hasAppleHeldCopy: fetched.format.masterWrappedByAppleHeld != nil,
-                appleKeyID: fetched.format.appleKeyID)
+                appleKeyID: fetched.format.appleKeyID,
+                passphraseKDF: fetched.format.kdf,
+                hasPassphraseWrap: true)
         }
     } else {
         // Totality (ladder R3-n1): "re-wired per session" must hold for the

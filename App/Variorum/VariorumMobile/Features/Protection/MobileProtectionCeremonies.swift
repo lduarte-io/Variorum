@@ -317,6 +317,7 @@ struct MobileProtectionNoticeBar: View {
 
     @State private var setSheetModel: PassphraseSetModel?
     @State private var phraseWords: [String]?
+    @State private var migrationConfirm: MigrationConfirmModel?
     /// The protection screen's door from the reminder notice — the shell
     /// wires it (Settings is a sheet, so the bar cannot present it itself
     /// without stacking two sheets on one presenter).
@@ -327,11 +328,15 @@ struct MobileProtectionNoticeBar: View {
             switch controller.notice {
             case .nudge: nudgeBar
             case .reminderDue: reminderBar
+            case .migrationConfirm: migrationBar
             case nil: EmptyView()
             }
         }
         .sheet(item: $setSheetModel) { model in
             MobilePassphraseSetSheet(model: model, tokens: tokens) { setSheetModel = nil }
+        }
+        .sheet(item: $migrationConfirm) { model in
+            MobileMigrationConfirmSheet(model: model, tokens: tokens) { migrationConfirm = nil }
         }
         .sheet(isPresented: Binding(
             get: { phraseWords != nil }, set: { if !$0 { phraseWords = nil } })
@@ -410,6 +415,27 @@ struct MobileProtectionNoticeBar: View {
         }
     }
 
+    /// pre-13x 2a (§11) — HER MIGRATION'S ONE-TIME MESSAGE on the phone
+    /// (copy §9, verbatim; the phone's nouns ride the interpolation).
+    private var migrationBar: some View {
+        bar {
+            Text(ProtectionCopy.migrationConfirmBody)
+                .font(tokens.small)
+                .foregroundStyle(tokens.ink)
+                .fixedSize(horizontal: false, vertical: true)
+            HStack(spacing: 16) {
+                offer(ProtectionCopy.migrationConfirmDoor) {
+                    migrationConfirm = MigrationConfirmModel.make(
+                        keyVault: services?.keyVault, controller: controller)
+                }
+                Spacer()
+                offer(ProtectionCopy.migrationLaterDoor, quiet: true) {
+                    controller.deferMigrationConfirm()
+                }
+            }
+        }
+    }
+
     private func offer(
         _ label: String, quiet: Bool = false, act: @escaping () -> Void
     ) -> some View {
@@ -431,6 +457,72 @@ struct MobileProtectionNoticeBar: View {
             .overlay(alignment: .bottom) {
                 Rectangle().fill(tokens.line).frame(height: 1)
             }
+    }
+}
+
+/// pre-13x 2a (§11) — the phone's confirm sheet: one passphrase field; the
+/// word is verified against the vault and the local copy re-wrapped under
+/// the vault's descriptor; then copy §9's done line.
+struct MobileMigrationConfirmSheet: View {
+    @Bindable var model: MigrationConfirmModel
+    let tokens: VoiceTokens
+    var onDone: () -> Void
+
+    @State private var passphrase = ""
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 14) {
+                if model.done {
+                    Text(ProtectionCopy.migrationDoneBody)
+                        .font(tokens.body)
+                        .foregroundStyle(tokens.ink)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Button(tokens.chromeLabel("Done")) { onDone() }
+                        .font(tokens.body)
+                        .foregroundStyle(tokens.accent)
+                        .buttonStyle(.plain)
+                } else {
+                    Text(ProtectionCopy.migrationConfirmBody)
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.muted)
+                        .fixedSize(horizontal: false, vertical: true)
+                    PeekableSecretField(
+                        label: "Encryption passphrase", text: $passphrase,
+                        onSubmit: { Task { await model.confirm(passphrase: passphrase) } })
+                        .font(tokens.body)
+                        .foregroundStyle(tokens.ink)
+                        .padding(EdgeInsets(top: 11, leading: 12, bottom: 11, trailing: 12))
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(tokens.card)
+                                .overlay(RoundedRectangle(cornerRadius: 8)
+                                    .stroke(tokens.line, lineWidth: 1)))
+                    if let error = model.lastError {
+                        Text(error)
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.alarm)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    HStack(spacing: 16) {
+                        Button(tokens.chromeLabel("Confirm")) {
+                            Task { await model.confirm(passphrase: passphrase) }
+                        }
+                        .font(tokens.body)
+                        .foregroundStyle(tokens.accent)
+                        .buttonStyle(.plain)
+                        .disabled(model.busy || passphrase.isEmpty)
+                        Spacer()
+                        Button(tokens.chromeLabel(ProtectionCopy.migrationLaterDoor)) { onDone() }
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.muted)
+                            .buttonStyle(.plain)
+                    }
+                }
+            }
+            .padding(24)
+        }
+        .background(tokens.room.ignoresSafeArea())
     }
 }
 

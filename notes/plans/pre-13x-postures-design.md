@@ -1317,7 +1317,7 @@ The batch's evidence is pins (its kind is sync/protocol; the ONE live two-device
 - **2a.2 A's item family + the key file's `apple` copy + the escrow family deleted + the probe doors deleted:** IN-PROGRESS (`41afd430` the family + the arm + the deletions; this commit `AppleKeyRoundTripTests` — the signed-host round trip under a THROWAWAY account, opt-in `TEST_RUNNER_VARIORUM_APPLE_KEY_ROUND_TRIP=1`, run once and quoted under DRILLS RUN) — REMAINS: the legacy-escrow removal leg (2a.5's migration); the reverts.
 - **2a.3 Standard's open road (the A road; the waiting state; the probe/nudge re-based on A):** DONE PENDING-THE-REVERT (this commit — `StoreLobby.Kind` (`castle` · `waitingForICloudKeychain(differentAppleID:)`), `StoreLobby.openWithAppleKey` (the verdict: opened · appleKeyAbsent · differentAppleID · noAppleCopy) + `appleRoad` polled by `beginWaiting(every:)` (5 s in production — no notification exists for a synchronizable item's arrival, the lookup's fact); `AppBootstrap.routeAndOpen`'s `.open` arm: a missing bound item over an encrypted Standard store tries A → the key file's Apple copy → opens and RE-LANDS the bound item (R1-M3), else `.waitingForICloudKeychain(StoreLobby)` — a new `State` both roots render through the lobby faces with copy §2d (the title, the body, the different-Apple-ID sentence, `Enter Passphrase…` / `Enter Twelve Words…` as the doors); never a silent mint (the open refuses typed without a key; nothing lands in custody until a secret or A opens); `ProtectionShapes.tierSentence` renders copy §5's three lines; the nudge's covered/exposed/unknown re-based on `appleKeyVerified` at 2a.1) — the revert quoted under PINS when run.
 - **2a.4 row 42 — one key file per snapshot:** DONE PENDING-THE-REVERT (`41afd430` the pairs; this commit `SnapshotPairTests` — the two §12 pins: an earlier pair byte-identical across a passphrase change and NO folder file rewritten, the later pair under the new word; prune takes the pair; the lock-time copy's pin rides the same suite) — the revert quoted under PINS when run.
-- **2a.5 the §11 migration behind the seam + the one-time confirm face on both targets:** NOT-STARTED — settled design: `ProtectionMigration.run` at the first ready (idempotent per store id; every leg logs a line, never key material): the sync custody re-scope (1a's hook) with the legacy gated E2EE item read under the lobby's ONE evaluated context; the plain item + the CF-12 opt-in items deleted; `sync_state.device_id` → custody, then the row deleted; the dial keys retired to per-store (`mode` → `alwaysAsk`); the key file's master copy + the corpus key id from held material (the vault's KDF descriptor lands when the reconcile READ fetches the vault); the legacy escrow item removed (ownership-guarded); the passphrase confirm (copy §9, verbatim) re-wraps the local P copy under the VAULT's descriptor after the typed word unwraps the vault's master — the one-time face; *Later* defers.
+- **2a.5 the §11 migration behind the seam + the one-time confirm face on both targets:** DONE PENDING-THE-REVERT (this commit — `ProtectionMigration` (`Facts` · `Leaves` · `Report` · `run`), the production leaves `Leaves.live(...)` built in `AppBootstrap.init(variant:gate:)` and run ONCE per store id at the first ready, awaited BEFORE the reconcile; the legacy gated E2EE item read under the lobby's ONE evaluated context in `StoreKeyGuard.unlockGated` and held on `SyncCustodySession.legacyMaterial` until the migration takes it; `StoreKeyGuardKeychain.loadLegacyEscrow`/`removeLegacyEscrow` (the escrow seam's last two verbs); `ProtectionController.reconcilePassphraseWrap` + `deferMigrationConfirm` + `Notice.migrationConfirm`; `MigrationConfirmModel` (copy §9, verbatim) rendered as `MigrationConfirmSheet` (Mac) and `MobileMigrationConfirmSheet` (phone); eight recording-leaves pins in `ProtectionMigrationTests` incl. the NO-KEY-MATERIAL log scan and the off-main pin; the opt-in `ProtectionMigrationDrillTests` under `TEST_RUNNER_VARIORUM_MIGRATION_DRILL=1` — RUN ONCE, its before/after inventory quoted under DRILLS RUN) — TWO FINDINGS at the first launch of the test host with the live road wired (recorded under MACHINERY NOTES): the run executes OFF the main thread by construction now, and the live leaves are never built in the test host (`KeychainTestTripwire.armed`) — the dev store's OWN migration is therefore the Debug APP's, and it stops at the login-keychain ACL prompt for the dev scope's 2026-08-31 legacy item, which needs HER keychain password (handed forward) — settled design: `ProtectionMigration.run` at the first ready (idempotent per store id; every leg logs a line, never key material): the sync custody re-scope (1a's hook) with the legacy gated E2EE item read under the lobby's ONE evaluated context; the plain item + the CF-12 opt-in items deleted; `sync_state.device_id` → custody, then the row deleted; the dial keys retired to per-store (`mode` → `alwaysAsk`); the key file's master copy + the corpus key id from held material (the vault's KDF descriptor lands when the reconcile READ fetches the vault); the legacy escrow item removed (ownership-guarded); the passphrase confirm (copy §9, verbatim) re-wraps the local P copy under the VAULT's descriptor after the typed word unwraps the vault's master — the one-time face; *Later* defers.
 - **Gate:** PENDING.
 - **Reverts:** no revert in flight. Pre-revert copies, when made, go to `App/Variorum/DerivedData/2a-prerevert/` (gitignored, inside the worktree — `git check-ignore` confirmed at this record's first commit).
 
@@ -1333,16 +1333,62 @@ The batch's evidence is pins (its kind is sync/protocol; the ONE live two-device
 *(each red-on-old; the revert's failing assertion quoted when run)*
 
 #### DRILLS RUN
-*(the migration drill's inventory; the A round trip)*
+- **The migration drill (`ProtectionMigrationDrillTests`, opt-in, run once 2026-09-05 in the signed test host — a scratch encrypted store dressed in the 13p-era shape under a THROWAWAY scope: the 14b plain E2EE item under a throwaway service, the legacy-scope bound store-key item, the legacy synchronizable escrow item holding the RAW key, a `sync_state.device_id` row, the 13p dial keys; the vault's word scripted as Castle):**
+```
+dress: escrow add 0 (No error.)
+BEFORE inventory:
+  PRESENT — e2ee legacy plain (device-keys, throwaway service)
+  absent  — e2ee per-store GATED (-sync-biometric)
+  absent  — e2ee per-store bound (-sync)
+  PRESENT — legacy ESCROW (synchronizable, raw key)
+  PRESENT — store-key legacy bound (drill-abfb1120-bound)
+  absent  — store-key per-store GATED (biometric)
+  absent  — store-key per-store bound
+BEFORE sync_state.device_id = drill-device-13j · dial keys: mode=auto
+route-time gate (the legacy mode reads through): auto · posture standard · biometry available: true
+migration 2a: begins for store 4cfa62a3… under auto
+migration 2a: sync custody re-scoped → done (identity from sync_state)
+migration 2a: legacy iCloud escrow item removed → true
+migration 2a: dial keys retired to the per-store keys
+migration 2a: custody aligned auto → biometric: done
+migration 2a: key file gains the master copy + corpus key id + the vault's descriptor
+migration 2a: passphrase confirm pending (the one-time face)
+migration 2a: done
+AFTER inventory:
+  absent  — e2ee legacy plain (device-keys, throwaway service)
+  PRESENT — e2ee per-store GATED (-sync-biometric)
+  PRESENT — e2ee per-store bound (-sync)
+  absent  — legacy ESCROW (synchronizable, raw key)
+  absent  — store-key legacy bound (drill-abfb1120-bound)
+  PRESENT — store-key per-store GATED (biometric)
+  absent  — store-key per-store bound
+AFTER sync_state.device_id = nil · legacy dial keys: retired · alwaysAsk=false idle=Optional(15) · opt-in key: retired · confirm pending: true
+```
+  Read: leg 1 re-scoped the sync custody from the legacy plain item into the per-store pair under the SILENT shape the route used (the identity taken from `sync_state`, the row deleted after); leg 2 removed the legacy escrow item because it held THIS store's key; leg 3 retired the scope-wide dial keys into the store's own (the idle 15 carried, `alwaysAsk` false); leg 4 aligned custody `auto → biometric` — the store key AND the sync record moved to their gated items in one transition (both `-biometric` items PRESENT after, both bound items absent); leg 5 wrote the key file's master copy + the corpus key id + the vault's descriptor from the held material; leg 6 left the one-time confirm pending. The AFTER inventory shows exactly the per-store custody of the design and NONE of the 13p-era items. Pollution: none — every item under `drill-<uuid>` accounts and the throwaway service, deleted at the end of the test.
+- **The A round trip (`AppleKeyRoundTripTests`, opt-in `TEST_RUNNER_VARIORUM_APPLE_KEY_ROUND_TRIP=1`, run once 2026-09-05 — the REAL family under a throwaway account):**
+```
+*[removed for publication]*
+flagged delete: released true — gone: true
+flagless delete: -25300 (The specified item could not be found in the keychain.) — item still there: true
+read: id 465c1764-b772-4f48-a6b5-5b5e6ebc4883 — equal: true
+readOrMint (again): equal to the first: true
+readOrMint (mint): id 465c1764-b772-4f48-a6b5-5b5e6ebc4883, 32 bytes: true
+*[removed for publication]*
+```
+  *[removed for publication]*
+- **Pollution to state (the test host boots the DEV store):** the reconcile's Apple arm ran for real in the host at 2a.1's first run — ONE `Variorum-dev-apple-key` item under `io.lduarte.Variorum.apple-key` in the shared group, synchronizable, in her iCloud Keychain, never deleted by production (the dev scope's own A; harmless, dev-only, recorded so no one mistakes it for a stray).
 
 #### SUITE COUNTS
 PENDING.
 
 #### HANDED FORWARD
-*(to 2b, 2c, batch 3, the window)*
+*(to 2b, 2c, batch 3, the window — filled at the gate; the first entries below)*
+- **To the batch 2 sitting / her hands (the dev store):** launch the Debug app (dev store) once and enter the login-keychain password at the *Variorum Dev wants to use your confidential information…* prompt (Always Allow) — the dev store's §11 migration then runs to `done` and the one-time confirm face appears; the orchestrator reads the `[protection] migration 2a:` lines from `log show`. Until then the dev store stays in the 13p shape (nothing lost; the legacy read-through keeps it opening as before).
+- **To the window (the real store, both devices):** the migration runs at the first ready of the marker-8 build; watch for a keychain prompt at the legacy items' DELETE leg (MACHINERY NOTES) — *Always Allow*; the confirm face's *Later* is safe at any point (the mark persists until confirmed).
 
 #### MACHINERY NOTES
 - The batch's DerivedData: `App/Variorum/DerivedData/pre13x-b0` (reused); logs beside it as `2a-*.log` (gitignored).
+- **THE HANG (2026-09-05, the first launch of the test host with the live migration wired):** `xcodebuild test` reported *the test runner timed out while preparing to run tests* after `[protection] migration 2a: begins for store 4077e8a5… under auto` — the dev store's — and nothing more. `sample` of the host: the MAIN thread parked in `ProtectionMigration.run` → `E2EEKeychainStorage.legacyLoadPlain` → `SecItemCopyMatching` → `SecKeychainItemCopyContent` → securityd decrypt (`mach_msg`) — the login-keychain ACL road. Launching the dev-store Debug APP itself showed the dialog: *"Variorum Dev wants to use your confidential information stored in \"io.lduarte.Variorum.e2ee-keys\" in your keychain. To allow this, enter the \"login\" keychain password."* (screenshot `App/Variorum/DerivedData/2a-devapp-launch.png`, gitignored; `security find-generic-password` without `-w`: the item was created 2026-08-31 07:24 UTC in `login.keychain-db` — a Debug build's, whose signature this rebuilt binary does not match). Two consequences, both fixed here: (1) **the migration ran its Keychain legs on the MainActor** — under approachable concurrency a nonisolated async function runs on its CALLER's actor and the bootstrap calls from the MainActor — so `run` now hops to a detached utility task by construction (the KeychainOffMain law; pinned: `theKeychainLegsNeverRunOnTheMainThread` records `Thread.isMainThread` in the Keychain-class leaves — red without the hop); (2) **the test host must never run the live migration over the dev scope** — the tripwire refuses every real-scope Keychain mutation there, so the road could only ever end `writeRefused` at every launch — `AppBootstrap.init(variant:gate:)` builds no production leaves when `KeychainTestTripwire.armed` (the drill under throwaway scopes is the real-Keychain proof; the bootstrap's own migration road is pinned through injected leaves). What is NOT fixed, deliberately: the dev scope's legacy item stays behind its prompt — answering it needs her login-keychain password, which no session types; the dev store's app-level run is handed forward. **For the WINDOW (her real store):** the Release app has read its own legacy item on every sync round since 14b without a prompt (its ACL trusts the app), so the migration's read is silent there; the one leg the drill cannot show under the real ACL is `SecItemDelete` of the legacy login-keychain items — if a prompt appears at that leg on window day, it is this class, and *Always Allow* is the answer.
 
 #### QUESTIONS FOR THE AUTHOR / ARCHITECT
 1. **Copy §9's first sentence is stale against the final design** — *"Variorum now keeps your sync keys inside your encrypted library"* — the exact phrase `e499f5ca` corrected elsewhere (the keys live in per-store custody beside the library key, NEVER in the file). Rendered VERBATIM per the render-don't-re-derive rule and flagged here: the orchestrator should correct the copy file (copy §4's enrolled line has the true sentence: *"This Mac keeps your sync keys in its own protected Keychain, beside your library's key."*) and the string follows in one edit before the window.
