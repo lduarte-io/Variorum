@@ -488,7 +488,7 @@ library; into Standard silently.
 | **Regenerate twelve words** | same (online if enrolled) | same | the W copies replaced in the vault and this key file; the old words dead the moment the new are confirmed; the same checkbox | the new words work there at once online; their local W copy re-lands when the new words are typed there; the old words keep opening them until then (the vault road) |
 | **Standard → Castle** | §4 | §4 | §4 | §7 |
 | **Castle → Standard** | §4 | §4 | §4 | §7 |
-| **Replace All Keys** | an open, ENROLLED library, signed in, online, holding the CURRENT master (the door checks the key file's recorded corpus key id against the vault before offering itself; else *"this account's keys don't match this library"*); refused while the vault carries a previous corpus key — a rotation still finishing (decision 32) | Castle: Touch ID, or P (or W) verified against the vault's copy — a retired word is refused. Standard: P if one is set (the same check), else a plain confirm | §4's steps 1–4 without the posture change: M′, C′, the vault rewritten under the same posture's wrappers (+ the iCloud copy again in Standard), the proof replaced under the old proof, every row re-pushed under C′, THIS library re-keyed; the checkbox *"Also choose a new passphrase"*; the marker. The server refuses a stale proof regardless of the front check | the same follow as entering Castle: type P or W once, re-key own library, pull |
+| **Replace All Keys** | an open, ENROLLED library, signed in, online, holding the CURRENT master (the door checks the key file's recorded corpus key id against the vault before offering itself; else *"this account's keys don't match this library"*); refused while the vault carries a previous corpus key — a rotation still finishing (decision 32) | Castle: Touch ID, or P (or W) verified against the vault's copy — a retired word is refused. Standard: P if one is set (the same check), else a plain confirm | §4's steps 1–4 without the posture change: M′, C′, the vault rewritten under the same posture's wrappers (+ the iCloud copy again in Standard), the proof replaced under the old proof, every row re-pushed under C′, THIS library re-keyed; the checkbox *"Also choose a new passphrase"*; the marker. The server refuses a stale proof regardless of the front check | the same follow as entering Castle: type P or W once, re-key own library, pull — asked once even in Standard, where the iCloud key could hand M′ over silently (her call: *"it's making sure you have it"*) |
 | **Delete account** | signed in (enrolled or not) | account password + typed phrase + a FRESH re-authentication | server copy + vault + login gone (`account_purge`); LOCAL COPIES UNTOUCHED; the app signs out; the keys stay in this device's custody; A stays in iCloud | lose sync; keep everything local; a later account adopts them at setup |
 | **Sign out everywhere** | signed in | — (the mitigation for a stolen password or session; `signOut(scope: global)`) | every session revoked; keys untouched | sign in again |
 | **Sign out** | — | — | clears this device's tokens; the keys stay in this device's custody (behind the library key's own gate) | — |
@@ -787,8 +787,12 @@ a closed MacBook on an external keyboard): the Castle ceremony offers Always ask
 biometry; an existing biometric item on a lidded MacBook falls to the passphrase road for that open. 37. **A re-minted
 device identity with a non-zero cursor is a RETURNER** to the purge ledger (13j's fence) — reconciled at its first round,
 never stranded. 38. **Sign Out Everywhere revokes refresh tokens;** an access token already issued lives to its expiry
-(≤ 1 h) — inert against the corpus (no proof), able only to read the vault's wrapped copies and to delete the account;
-13y may shorten the lifetime. 39. **A CAS refuse at a posture switch re-reads:** if the account already changed posture,
+(≤ 1 h — the project's default access-token lifetime; a signed JWT is checked by signature and expiry, never against a
+revocation list, so a global sign-out revokes the refresh tokens and cannot recall a token already in hand) — inert
+against the corpus (no proof), able only to read the vault's wrapped copies and, through a custom client, to call
+`account_purge` — loud and survivable, the disclosed account-password class; ACCEPTED as it stands (her word); 13y's
+recently-re-authenticated-session guard on the destructive RPCs closes the deletion arm, and 13y may shorten the
+lifetime. 39. **A CAS refuse at a posture switch re-reads:** if the account already changed posture,
 the retry is the follow, never a second rotation. 40. **A rotation re-delivers the whole corpus to every device once,**
 seq-recorded only — the pull-to-head memory shape at corpus scale, once per rotation. 41. **The biometric custody item is
 read ONCE per unlock** — L, M, C, J and the device identity in one gated read, one Touch ID prompt. 42. **A third crash
@@ -1052,7 +1056,14 @@ item. Commit per item, push after each.
 roads unused until enrollment writes them; ledger rows 6–9, 12–14, 18 for U3.
 
 ### BATCH 2 → 5 BRIEFS
-Written by the orchestrator at each seam, from §4, §5, §7, §12 and §15, in this file's §19 — never from the history file.
+Written by the orchestrator at each seam, from §4, §5, §7, §12 and §15, in this file's §19 — never from the history file
+— **and only after the orchestrator has READ THE SHIPPED CODE each batch's mechanisms assume and checked the design's
+claims against it** (the decision 31 precedent: the `e1:` envelope's missing key id was found by reading
+`PayloadCipher` and the mirror DDL — a check the design file cannot make for itself; her instruction, relayed from
+another session: keep doing that at every batch brief).
 
 ### BATCH RECORDS (appended by each implementer; newest at the bottom)
 *(batch 0's record lives in the history file, Part II; batch 0b's in its own plan.)*
+**Every record carries a section ORCHESTRATOR-DECIDED NOTES:** what the orchestrator settled under the mandate without
+the author, listed there so the cold reviewer sees what was decided without her (her instruction, relayed from
+another session).

@@ -1060,3 +1060,14 @@ only · Sign Out Everywhere's ≤ 1 h access-token tail · a re-minted identity 
 returner · the account password's fourth power on a vault-less account (creating the vault) and its copy line ·
 Regenerate's body aligned with the FAQ (a device where the new words were not yet used still takes the old ones) ·
 the lost-device FAQ's Standard line (remove the device from the Apple account). Corners 35–43, ledger rows 37–40.
+
+## V.6 Her reply to the review's recap (2026-09-05) — two corners ruled, two process rules adopted
+Verbatim: *"I think the follow after a standard replace all keys should still ask for the passphrase once, it's making
+sure you have it. i think an already issued access token being alive for up to an hour is fine ? why up to an hour."*
+→ The Standard follow keeps asking once (§5's Replace All Keys row carries her reason); corner 38 accepted as it stands,
+with the answer recorded there (the hour is the project's default access-token lifetime; a signed JWT is checked by
+signature and expiry, not against a revocation list, so a global sign-out revokes the refresh tokens and cannot recall
+a token already in hand; 13y's recently-re-authenticated guard closes the deletion arm). Relayed from another session,
+adopted as standing rules in §19: every batch record carries ORCHESTRATOR-DECIDED NOTES (what was settled without her,
+for the cold reviewer), and every batch brief is written only after the orchestrator has read the shipped code the
+batch's mechanisms assume and checked the design's claims against it (the decision 31 precedent).
