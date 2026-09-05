@@ -47,6 +47,66 @@ public struct KeyVaultFormat: Codable, Equatable, Sendable {
     /// The per-class keys, each wrapped by master.
     public var classKeys: [WrappedClassKey]
 
+    // MARK: pre-13x — the five additive fields (design §3.10; the format
+    // version STAYS 1: a row without them decodes as a pre-postures vault)
+
+    /// Standard's ONE Apple-held copy (decision 3): master wrapped under
+    /// the iCloud key A, with A's id beside it. nil under Castle — the
+    /// posture is DERIVED from this field's presence (design §3.1) — and
+    /// nil on every vault until batch 2 writes it.
+    public var masterWrappedByAppleHeld: Data?
+    public var appleKeyID: String?
+    /// The key proof's hash (decision 12): `KeyProof.hash(master:)` — what
+    /// the server compares every RPC's `key_proof` against. Landed at
+    /// CREATE; nil only on a pre-postures row (the author's, until her
+    /// first round's migration arm lands it).
+    public var keyProofHash: String?
+    /// The PREVIOUS corpus key for a rotation's duration (decision 6):
+    /// wrapped under the NEW master, carrying its own id so a follower can
+    /// bind the AAD of pre-rotation rows. nil outside a rotation — TOGETHER
+    /// with `rotationStartedSeq` (pinned).
+    public var previousCorpusKey: PreviousCorpusKey?
+    /// Which key a row is under is told by its `server_seq` (decision 31):
+    /// SERVER-assigned when a rotation begins (`key_vault_update` takes
+    /// `nextval` with the row locked); a row below it is under the previous
+    /// corpus key, every other row under the current. nil outside a
+    /// rotation. Never set client-side — the wire row carries it back.
+    public var rotationStartedSeq: Int64?
+
+    /// The previous corpus key as the vault carries it: its id + the wrap.
+    /// ONE text column on the wire — `"<keyID>:<base64 wrap>"` (batch 1b's
+    /// recorded reading: the design names five columns and the AAD needs
+    /// the old key's id).
+    public struct PreviousCorpusKey: Codable, Equatable, Sendable {
+        public var keyID: String
+        public var wrappedByMaster: Data
+
+        public init(keyID: String, wrappedByMaster: Data) {
+            self.keyID = keyID
+            self.wrappedByMaster = wrappedByMaster
+        }
+
+        /// The wire value: `<keyID>:<base64>`.
+        public var wireValue: String {
+            "\(keyID):\(wrappedByMaster.base64EncodedString())"
+        }
+
+        /// Parse the wire value; a value without the `:` or with a
+        /// non-base64 wrap refuses as malformed.
+        public init(wireValue: String) throws {
+            guard let separator = wireValue.firstIndex(of: ":") else {
+                throw KeyVaultError.malformedPayload
+            }
+            let id = String(wireValue[..<separator])
+            let encoded = String(wireValue[wireValue.index(after: separator)...])
+            guard !id.isEmpty, let wrap = Data(base64Encoded: encoded) else {
+                throw KeyVaultError.malformedPayload
+            }
+            self.keyID = id
+            self.wrappedByMaster = wrap
+        }
+    }
+
     public struct WrappedClassKey: Codable, Equatable, Sendable {
         public var keyClass: VaultKeyClass
         /// Plaintext key identifier (a UUID string) — carried in every
@@ -95,7 +155,10 @@ public struct KeyVaultFormat: Codable, Equatable, Sendable {
                 kdf: kdf,
                 masterWrappedByPassphrase: byPassphrase,
                 masterWrappedByRecovery: byRecovery,
-                classKeys: wrapped
+                classKeys: wrapped,
+                // pre-13x: a vault is CREATED with its proof hash — the
+                // server's BEFORE INSERT trigger refuses one without.
+                keyProofHash: KeyProof.hash(master: masterKey)
             )
         } catch let error as KeyVaultError {
             throw error
@@ -109,13 +172,109 @@ public struct KeyVaultFormat: Codable, Equatable, Sendable {
         kdf: PassphraseKDF.Descriptor,
         masterWrappedByPassphrase: Data,
         masterWrappedByRecovery: Data?,
-        classKeys: [WrappedClassKey]
+        classKeys: [WrappedClassKey],
+        masterWrappedByAppleHeld: Data? = nil,
+        appleKeyID: String? = nil,
+        keyProofHash: String? = nil,
+        previousCorpusKey: PreviousCorpusKey? = nil,
+        rotationStartedSeq: Int64? = nil
     ) {
         self.formatVersion = formatVersion
         self.kdf = kdf
         self.masterWrappedByPassphrase = masterWrappedByPassphrase
         self.masterWrappedByRecovery = masterWrappedByRecovery
         self.classKeys = classKeys
+        self.masterWrappedByAppleHeld = masterWrappedByAppleHeld
+        self.appleKeyID = appleKeyID
+        self.keyProofHash = keyProofHash
+        self.previousCorpusKey = previousCorpusKey
+        self.rotationStartedSeq = rotationStartedSeq
+    }
+
+    // MARK: - pre-13x roads (batch 2 / 3 call them; batch 1b lands the format)
+
+    /// Standard's Apple-held copy: master wrapped under the iCloud key A.
+    /// Verifies `masterKey` against the class keys (the wrap-addition
+    /// guard's discipline) — a mismatched master must never become the
+    /// silent road's content.
+    public func settingAppleHeldCopy(
+        masterKey: SymmetricKey, appleKey: SymmetricKey, appleKeyID: String
+    ) throws -> KeyVaultFormat {
+        try requireCurrentFormat()
+        try verifyMaster(masterKey)
+        var updated = self
+        do {
+            updated.masterWrappedByAppleHeld = try AES.KeyWrap.wrap(masterKey, using: appleKey)
+        } catch {
+            throw KeyVaultError.wrapFailed
+        }
+        updated.appleKeyID = appleKeyID
+        return updated
+    }
+
+    /// Castle: NO copy under the Apple-held key (pin the ABSENCE).
+    public func removingAppleHeldCopy() -> KeyVaultFormat {
+        var updated = self
+        updated.masterWrappedByAppleHeld = nil
+        updated.appleKeyID = nil
+        return updated
+    }
+
+    /// Unwrap master by the Apple-held road (Standard's silent open).
+    /// Refuses loudly when the vault carries no such copy (Castle).
+    public func unwrapMaster(withAppleKey key: SymmetricKey) throws -> SymmetricKey {
+        try requireCurrentFormat()
+        guard let wrapped = masterWrappedByAppleHeld else {
+            throw KeyVaultError.appleHeldCopyAbsent
+        }
+        return try Self.unwrap(wrapped, using: key)
+    }
+
+    /// A rotation's vault: the PREVIOUS corpus key (with its id) wrapped
+    /// under `masterKey` (the NEW master) for the rotation's duration.
+    /// Verifies the new master against the vault's class keys — the class
+    /// keys must already be the NEW ones (the caller builds the rotated
+    /// format first, then keeps the old key beside it).
+    public func carryingPreviousCorpusKey(
+        _ previous: SymmetricKey, keyID: String, masterKey: SymmetricKey
+    ) throws -> KeyVaultFormat {
+        try requireCurrentFormat()
+        try verifyMaster(masterKey)
+        var updated = self
+        do {
+            updated.previousCorpusKey = PreviousCorpusKey(
+                keyID: keyID, wrappedByMaster: try AES.KeyWrap.wrap(previous, using: masterKey))
+        } catch {
+            throw KeyVaultError.wrapFailed
+        }
+        return updated
+    }
+
+    /// Completion: the previous key AND the seq go together (the server
+    /// clears the seq when the payload clears the key; the client clears
+    /// both so the value it holds never disagrees with what it sends).
+    public func clearingPreviousCorpusKey() -> KeyVaultFormat {
+        var updated = self
+        updated.previousCorpusKey = nil
+        updated.rotationStartedSeq = nil
+        return updated
+    }
+
+    /// Unwrap the previous corpus key with the (new) master. Refuses when
+    /// no rotation is in progress.
+    public func unwrapPreviousCorpusKey(masterKey: SymmetricKey) throws -> (key: SymmetricKey, keyID: String) {
+        try requireCurrentFormat()
+        guard let previous = previousCorpusKey else {
+            throw KeyVaultError.noRotationInProgress
+        }
+        return (try Self.unwrap(previous.wrappedByMaster, using: masterKey), previous.keyID)
+    }
+
+    private func verifyMaster(_ masterKey: SymmetricKey) throws {
+        guard let probe = classKeys.first else { throw KeyVaultError.noClassKeys }
+        guard (try? AES.KeyWrap.unwrap(probe.wrappedByMaster, using: masterKey)) != nil else {
+            throw KeyVaultError.masterKeyMismatch
+        }
     }
 
     // MARK: - Wrap-addition (Round 5)
@@ -303,4 +462,10 @@ public enum KeyVaultError: Error, Equatable, Sendable {
     case unwrapFailed
     /// The stored payload's bytes do not decode as a vault.
     case malformedPayload
+    /// pre-13x: the vault carries no Apple-held copy (Castle — the
+    /// silent road does not exist by design).
+    case appleHeldCopyAbsent
+    /// pre-13x: no previous corpus key is carried — no rotation is in
+    /// progress.
+    case noRotationInProgress
 }

@@ -324,6 +324,16 @@ struct KeyVaultWireRow: Codable, Equatable {
     /// timestamp stays truthful through re-wraps and re-keys. Display
     /// data only — never ordering.
     var updatedAt: String?
+    /// pre-13x — the five additive columns (11_pre13x_postures.sql), all
+    /// optional on the wire: a pre-postures row decodes with them nil.
+    var masterWrappedByAppleHeld: String?
+    var appleKeyID: String?
+    var keyProofHash: String?
+    /// `<previous corpus key id>:<base64 wrap>` — ONE text column.
+    var corpusPreviousWrappedByMaster: String?
+    /// Server-assigned (`key_vault_update` takes `nextval` with the row
+    /// locked); read back, never written by the client.
+    var rotationStartedSeq: Int64?
 
     enum CodingKeys: String, CodingKey {
         case userID = "user_id"
@@ -343,6 +353,11 @@ struct KeyVaultWireRow: Codable, Equatable {
         case journalBridgeKeyWrappedByMaster = "journal_bridge_key_wrapped_by_master"
         case revision = "revision"
         case updatedAt = "updated_at"
+        case masterWrappedByAppleHeld = "master_wrapped_by_apple_held"
+        case appleKeyID = "apple_key_id"
+        case keyProofHash = "key_proof_hash"
+        case corpusPreviousWrappedByMaster = "corpus_previous_wrapped_by_master"
+        case rotationStartedSeq = "rotation_started_seq"
     }
 
     /// Hand-written decode for exactly one reason: `revision` defaults to
@@ -375,6 +390,13 @@ struct KeyVaultWireRow: Codable, Equatable {
             String.self, forKey: .journalBridgeKeyWrappedByMaster)
         revision = try container.decodeIfPresent(Int.self, forKey: .revision) ?? 1
         updatedAt = try container.decodeIfPresent(String.self, forKey: .updatedAt)
+        masterWrappedByAppleHeld = try container.decodeIfPresent(
+            String.self, forKey: .masterWrappedByAppleHeld)
+        appleKeyID = try container.decodeIfPresent(String.self, forKey: .appleKeyID)
+        keyProofHash = try container.decodeIfPresent(String.self, forKey: .keyProofHash)
+        corpusPreviousWrappedByMaster = try container.decodeIfPresent(
+            String.self, forKey: .corpusPreviousWrappedByMaster)
+        rotationStartedSeq = try container.decodeIfPresent(Int64.self, forKey: .rotationStartedSeq)
     }
 
     /// Format → row. Refuses a format missing either v1 class key — the
@@ -402,6 +424,11 @@ struct KeyVaultWireRow: Codable, Equatable {
         self.corpusKeyWrappedByMaster = corpus.wrappedByMaster.base64EncodedString()
         self.journalBridgeKeyID = journal.keyID
         self.journalBridgeKeyWrappedByMaster = journal.wrappedByMaster.base64EncodedString()
+        self.masterWrappedByAppleHeld = format.masterWrappedByAppleHeld?.base64EncodedString()
+        self.appleKeyID = format.appleKeyID
+        self.keyProofHash = format.keyProofHash
+        self.corpusPreviousWrappedByMaster = format.previousCorpusKey?.wireValue
+        self.rotationStartedSeq = format.rotationStartedSeq
     }
 
     /// Row → format. A newer `format_version` refuses HERE (the client's
@@ -443,6 +470,20 @@ struct KeyVaultWireRow: Codable, Equatable {
                     wrappedByMaster: try decode(
                         journalBridgeKeyWrappedByMaster,
                         field: "journal_bridge_key_wrapped_by_master")),
-            ])
+            ],
+            masterWrappedByAppleHeld: try masterWrappedByAppleHeld.map {
+                try decode($0, field: "master_wrapped_by_apple_held")
+            },
+            appleKeyID: appleKeyID,
+            keyProofHash: keyProofHash,
+            previousCorpusKey: try corpusPreviousWrappedByMaster.map { wire in
+                do {
+                    return try KeyVaultFormat.PreviousCorpusKey(wireValue: wire)
+                } catch {
+                    throw KeyVaultClientError.malformedRow(
+                        "corpus_previous_wrapped_by_master is not <key id>:<base64>")
+                }
+            },
+            rotationStartedSeq: rotationStartedSeq)
     }
 }
