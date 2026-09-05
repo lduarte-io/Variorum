@@ -21,8 +21,10 @@ EncryptionKeychain,EncryptionSession,StoreLaunchGate,AppBootstrap,ProtectionShap
 `Sources/VariorumCore/Crypto/{KeyVaultFormat,KeyVaultClient,VaultEnrollment,AccountRekey,AccountDeletion,
 PassphraseKDF}.swift`, `Sources/VariorumCore/Sync/SyncEngine.swift` (`resyncReinitialize`),
 `Server/supabase/{08_phase14b_lockstep,09_phase14c_multitenant,10_phase13j_purge}.sql`.
-**Do:** the batch named NEXT in §18's LIVE STATUS, per its brief in §19. **Verify by:** §15's per-batch gates, the
-two drills, her acceptance walk on both devices. **Never** read the history file to decide a mechanism — if this
+**Do:** the batch named NEXT in §18's LIVE STATUS, per its brief in §19. **Verify by:** §15's per-batch gates — the
+orchestrator RE-RUNS each batch's named drill or suite itself and reads the output before the record flips (the Act
+10 precedent: not a re-implementation, not a second review — the ladder does that); the two drills; the book walked
+against the build; her acceptance walk on both devices. **Never** read the history file to decide a mechanism — if this
 file is silent, stop and ask.
 
 ---
@@ -737,8 +739,9 @@ turned on sync.
   deletions + the privacy-policy brief + the 13y / 13x hand-forwards; the lost-device FAQ entry; the ceremonies'
   progress indicator (an ORIGINAL animated indicator with movement — her example: a line with a few black dots
   travelling back and forth — never the system spinner).**
-Then the cold-review ladder (Fable reviewers on every round; each walks §3.4), the two drills, her acceptance walk on
-both devices, the `/Applications` refresh and the phone install. **The delete-and-set-up-again road runs on the DEV
+Then the cold-review ladder (Fable reviewers on every round; each walks §3.4), the two drills, the book walked
+sentence by sentence against the build (§18's condition vii), her acceptance walk on both devices, the
+`/Applications` refresh and the phone install. **The delete-and-set-up-again road runs on the DEV
 store and the fake server only.**
 
 ## 16. OPEN
@@ -845,7 +848,10 @@ tutorial spine is SIX suites in `TutorialWalkTests.swift` addressed by TYPE name
 pins land in batch 1; (iii) A is observed crossing her two real devices under the shared group before any Standard copy
 is written (Q3); (iv) Fable reviewers on every ladder round, each walking §3.4; the two drills on both devices; (v) the
 honest boundaries in §2 and §14 survive 13s's re-voicing in substance; (vi) §3.4 holds at closeout with every "at the
-switch" cell pinned.
+switch" cell pinned; **(vii) THE BOOK IS THE ACCEPTANCE CHECKLIST: before closeout the orchestrator walks
+*Encryption Explained* (copy §7b) and the tutorial chapter (copy §7) sentence by sentence against the build — every
+sentence maps to a pin, a drill, or a hands-on observation, recorded beside it; a sentence that is not true of the
+build is a DEFECT of the build, never a copy edit.**
 
 ---
 

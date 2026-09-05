@@ -19,8 +19,10 @@ are DONE. **Batch 1a is the next act.** Nothing in the design is provisional.
 > (`notes/plans/pre-13x-bridge-retirement.md` §6 DONE; tag `archive/fragments-bridge-2026-09-04` present); batch 0's
 > Q3 (the phone leg — ledger row 2) is PENDING her sitting and does not block batch 1.
 > Then run the batch loop from BATCH 1a per §19's brief: one FRESH Fable implementer per session, briefed by the
-> design file's named sections only; verify each batch hands-on or by its drill before its record closes; every
-> ladder reviewer walks §3.4's "at the switch" columns; commit and push every record; keep the
+> design file's named sections only; before each batch's record closes, RE-RUN its named drill or suite yourself and
+> read the output (the Act 10 precedent — not a re-implementation, not a second review; the ladder does that); every
+> ladder reviewer walks §3.4's "at the switch" columns; before closeout walk *Encryption Explained* and the tutorial
+> chapter sentence by sentence against the build (design §18, condition vii); commit and push every record; keep the
 > `variorum-phase-9-run-state` memory current. The lockstep deploy (marker 7 → 8) is HER act in HER window, scheduled
 > immediately before batch 2's migration + install — never earlier. Bring her decisions as question-tool batches;
 > record rulings verbatim-faithful in the design's §1 the same turn, and move any superseded text to the history file
