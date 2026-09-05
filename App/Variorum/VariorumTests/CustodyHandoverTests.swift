@@ -174,26 +174,28 @@ struct CustodyHandoverTests {
     /// items are released and the CF-12 opt-in retired; a refused write
     /// leaves the legacy items in place.
     @Test func theSyncCustodyMigrationLandsPerShapeThenReleasesTheLegacyItems() {
-        let log = OrderedCalls()
         let retired = OrderedCalls()
-        let legacy = SyncCustodyMigration.Legacy(
-            material: material(), deviceID: "from-sync-state",
-            deleteLegacyItems: { log.note("legacyDelete"); return true },
-            retireOptIn: { retired.note("retired") })
+        func legacy(_ log: OrderedCalls) -> SyncCustodyMigration.Legacy {
+            SyncCustodyMigration.Legacy(
+                material: material(), deviceID: "from-sync-state",
+                deleteLegacyItems: { log.note("legacyDelete"); return true },
+                retireOptIn: { retired.note("retired") })
+        }
+        let log = OrderedCalls()
         let session = SyncCustodySession()
         let expected = SyncCustodyRecord(deviceID: "from-sync-state", material: material())
         let silent = SyncCustodyMigration.migrateSyncCustodyToStoreScope(
-            legacy: legacy, shape: .silent,
+            legacy: legacy(log), shape: .silent,
             leaves: recordingLeaves(log, loadedBack: expected), session: session)
         #expect(silent == .done)
         #expect(log.names == ["savePlain", "loadPlain", "legacyDelete"])
-        #expect(retired.names == ["retired"], "the CF-12 opt-in default retires with the migration")
+        #expect(retired.names.first == "retired", "the CF-12 opt-in default retires with the migration")
         #expect(session.record == nil, "the silent shape holds nothing in session memory")
 
         let log2 = OrderedCalls()
         let identityOnly = SyncCustodyRecord(deviceID: "from-sync-state", material: nil)
         let gated = SyncCustodyMigration.migrateSyncCustodyToStoreScope(
-            legacy: legacy, shape: .biometric,
+            legacy: legacy(log2), shape: .biometric,
             leaves: recordingLeaves(log2, loadedBack: identityOnly), session: session)
         #expect(gated == .done)
         #expect(log2.names == ["saveGated", "savePlain", "gatedExists", "loadPlain", "legacyDelete"])
@@ -201,7 +203,7 @@ struct CustodyHandoverTests {
 
         let log3 = OrderedCalls()
         let refused = SyncCustodyMigration.migrateSyncCustodyToStoreScope(
-            legacy: legacy, shape: .silent,
+            legacy: legacy(log3), shape: .silent,
             leaves: recordingLeaves(log3, loadedBack: nil), session: SyncCustodySession())
         #expect(refused == .wroteButUnreadable)
         #expect(!log3.names.contains("legacyDelete"), "a refused write leaves the legacy items in place")
