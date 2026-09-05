@@ -34,20 +34,36 @@ struct MobileStoreLockView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 18) {
-                Image(systemName: "lock.fill")
+                Image(systemName: lobby.isWaitingForICloudKeychain ? "icloud" : "lock.fill")
                     .font(.system(size: 30, weight: .light))
                     .foregroundStyle(tokens.muted)
-                Text(tokens.chromeLabel("Variorum is locked"))
-                    .font(tokens.title)
-                    .foregroundStyle(tokens.ink)
-                Text(ProtectionCopy.lobbyPrompt(lobby.demand))
-                    .font(tokens.body)
-                    .foregroundStyle(tokens.muted)
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
+                if lobby.isWaitingForICloudKeychain {
+                    // pre-13x 2a (§3.8) — STANDARD'S WAITING STATE, copy §2d
+                    // verbatim (the phone's nouns ride the interpolation).
+                    Text(tokens.chromeLabel(ProtectionCopy.waitingTitle))
+                        .font(tokens.title)
+                        .foregroundStyle(tokens.ink)
+                        .multilineTextAlignment(.center)
+                    Text(lobby.differentAppleID
+                         ? ProtectionCopy.waitingDifferentAppleID
+                         : ProtectionCopy.waitingBody)
+                        .font(tokens.body)
+                        .foregroundStyle(tokens.muted)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                } else {
+                    Text(tokens.chromeLabel("Variorum is locked"))
+                        .font(tokens.title)
+                        .foregroundStyle(tokens.ink)
+                    Text(ProtectionCopy.lobbyPrompt(lobby.demand))
+                        .font(tokens.body)
+                        .foregroundStyle(tokens.muted)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
 
                 if lobby.noRoadExists {
-                    deadEnd
+                    if !lobby.isWaitingForICloudKeychain { deadEnd }
                 } else {
                     roads
                 }
@@ -134,7 +150,9 @@ struct MobileStoreLockView: View {
                 Button {
                     showsRecoveryRoad.toggle()
                 } label: {
-                    Text(tokens.chromeLabel("Forgot your passphrase?"))
+                    Text(tokens.chromeLabel(lobby.isWaitingForICloudKeychain
+                                            ? ProtectionCopy.waitingWordsDoor
+                                            : "Forgot your passphrase?"))
                         .font(tokens.small)
                         .foregroundStyle(tokens.accent)
                 }

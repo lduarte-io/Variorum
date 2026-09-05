@@ -60,6 +60,12 @@ final class AppBootstrap {
         /// Phase 13p: a demanded at-open mode over an existing store —
         /// nothing runs until the lobby unlocks.
         case locked(StoreLobby)
+        /// pre-13x 2a (§3.8): a STANDARD library whose bound item is
+        /// missing and whose iCloud key has not arrived — "Getting your key
+        /// from iCloud Keychain…" (copy §2d), the passphrase / twelve words
+        /// as doors that act, the Apple road re-probed until it lands.
+        /// Never a silent mint over an existing store.
+        case waitingForICloudKeychain(StoreLobby)
         /// pre-13x 1a (§3.7): a demanded mode over an ABSENT store — the
         /// three-door face; nothing opened, nothing persisted, the lock
         /// untouched.
@@ -212,11 +218,14 @@ final class AppBootstrap {
     private enum OpenOutcome: Sendable {
         case ready(AppDatabase, unlockedKey: StoreKey?)
         case locked(LobbyFacts)
+        /// pre-13x 2a (§3.8): Standard's waiting state.
+        case waiting(LobbyFacts)
         case libraryMissing(demand: StoreAtOpenMode, storeURL: URL?)
         case failed(AppDatabase.StoreOpenError, recovery: LobbyFacts?)
     }
 
     private struct LobbyFacts: Sendable {
+        var kind: StoreLobby.Kind = .castle
         var demand: StoreAtOpenMode
         var biometryOffered: Bool
         var passphraseOffered: Bool
@@ -253,6 +262,7 @@ final class AppBootstrap {
 
         // An unlocked key means the lobby already ran — go straight to the
         // open with that key as custody.
+        var unlockedKey = unlockedKey
         if unlockedKey == nil {
             // pre-13x 2a: the EFFECTIVE gate, derived at the route — the
             // posture from the key file beside the store (read without the
@@ -272,7 +282,40 @@ final class AppBootstrap {
                 : (storeURL.map(StoreFilePresence.classify(at:)) ?? .encryptedOrUnknown)
             switch StoreLaunchRoute.resolve(gate: effectiveGate, presence: presence) {
             case .open:
-                break
+                // pre-13x 2a — STANDARD'S OPEN ROAD (§3.8): the bound item
+                // opens silently; a MISSING item (a restored copy on a
+                // fresh device; a wiped Keychain) tries the key file's Apple
+                // copy via A from iCloud Keychain; A absent — or another
+                // Apple ID's — is the WAITING STATE with the passphrase and
+                // the words as doors. Never a silent mint over an existing
+                // store: the open below refuses typed without a key.
+                if presence == .encryptedOrUnknown, let storeURL,
+                   gate.guardFor(scope).loadAuto() == nil {
+                    let reading = gate.readEnvelope(storeURL)
+                    if reading.envelope?.apple != nil || reading.envelope?.passphrase != nil
+                        || reading.envelope?.recovery != nil {
+                        switch StoreLobby.openWithAppleKey(scope: scope, storeURL: storeURL, gate: gate) {
+                        case .opened(let key):
+                            unlockedKey = key  // re-landed as the bound item at ready (R1-M3)
+                        case .appleKeyAbsent, .differentAppleID, .noAppleCopy:
+                            let different: Bool
+                            if case .differentAppleID = StoreLobby.openWithAppleKey(
+                                scope: scope, storeURL: storeURL, gate: gate) {
+                                different = true
+                            } else {
+                                different = false
+                            }
+                            return .waiting(LobbyFacts(
+                                kind: .waitingForICloudKeychain(differentAppleID: different),
+                                demand: .auto,
+                                biometryOffered: false,
+                                passphraseOffered: reading.envelope?.passphrase != nil,
+                                recoveryOffered: reading.envelope?.recovery != nil,
+                                envelopeUnreadable: reading.isUnreadable,
+                                storeURL: storeURL))
+                        }
+                    }
+                }
             case .libraryMissing(let demand):
                 // §3.7: THE LOCK STAYS — no dial write, no open, no mint.
                 // The three-door face renders; "Start a New Library" is the
@@ -405,6 +448,10 @@ final class AppBootstrap {
             protection.noteActivity()
         case .locked(let facts):
             state = .locked(makeLobby(facts))
+        case .waiting(let facts):
+            let lobby = makeLobby(facts)
+            state = .waitingForICloudKeychain(lobby)
+            lobby.beginWaiting()
         case .libraryMissing(let demand, let storeURL):
             state = .libraryMissing(makeMissingLobby(demand: demand, storeURL: storeURL))
         case .failed(let error, let recoveryFacts):
@@ -460,11 +507,14 @@ final class AppBootstrap {
     }
 
     private func makeLobby(_ facts: LobbyFacts) -> StoreLobby {
-        let guardSeam = gate.guardFor(storeVariant.rawValue)
-        let envelopeRoad = StoreLobby.envelopeRoad(
-            storeURL: facts.storeURL ?? URL(fileURLWithPath: "/dev/null"),
-            gate: gate)
+        let scope = storeVariant.rawValue
+        let guardSeam = gate.guardFor(scope)
+        let storeURL = facts.storeURL ?? URL(fileURLWithPath: "/dev/null")
+        let envelopeRoad = StoreLobby.envelopeRoad(storeURL: storeURL, gate: gate)
+        let waiting: Bool
+        if case .waitingForICloudKeychain = facts.kind { waiting = true } else { waiting = false }
         return StoreLobby(
+            kind: facts.kind,
             demand: facts.demand,
             biometryOffered: facts.biometryOffered,
             passphraseOffered: facts.passphraseOffered,
@@ -472,6 +522,8 @@ final class AppBootstrap {
             envelopeUnreadable: facts.envelopeUnreadable,
             gatedRoad: { await guardSeam.unlockGated() },
             envelopeRoad: envelopeRoad,
+            // pre-13x 2a: the waiting kind re-probes the Apple road.
+            appleRoad: waiting ? StoreLobby.appleRoad(scope: scope, storeURL: storeURL, gate: gate) : nil,
             complete: { [weak self] key in
                 self?.beginOpening(unlockedKey: key)
             })

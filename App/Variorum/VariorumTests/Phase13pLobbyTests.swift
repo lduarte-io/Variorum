@@ -443,21 +443,149 @@ struct Phase13pLobbyTests {
         }
     }
 
-    /// **Ladder R1-M3(a) — the sidecar-present unlock road on the `.failed`
-    /// surface.** An encrypted store whose key custody is EMPTY lands in
-    /// `.failed` (the typed `keyUnavailable` refusal) — and until this fix
-    /// that state was DOORLESS even when a wraps-bearing
-    /// `variorum-keys.json` sat beside the store, while the plan's own
-    /// words claimed "Batch 2's recovery roads re-derive". Now the failure
-    /// carries a recovery lobby (the SAME `StoreLobby` machinery, same
-    /// envelope road — never a new crypto road), unlocking opens, and —
-    /// under the Auto dials this state arises in — the proven key re-lands
-    /// as the silent custody item so the NEXT launch opens normally.
-    ///
-    /// RED ON OLD (behavioral revert executed): with `failedOutcome`
-    /// returning `recovery: nil` unconditionally — the pre-fix shape — the
-    /// recovery guard below records the doorless state.
-    @Test func aKeyGoneFailureWithASidecarOffersTheEnvelopeRoadAndUnlockOpens() async throws {
+    /// **pre-13x 2a — STANDARD'S OPEN ROAD (§3.8).** A Standard library
+    /// whose bound item is MISSING (a restored copy on a fresh device; a
+    /// wiped Keychain) opens SILENTLY through the key file's Apple copy when
+    /// A is in iCloud Keychain, and the proven key RE-LANDS as the bound
+    /// item (R1-M3's heal) so the next launch opens normally.
+    /// RED ON OLD (13p's road): the open failed `keyUnavailable` into the
+    /// `.failed` surface — no Apple road existed.
+    @Test func aStandardLibraryWithAMissingBoundItemOpensThroughTheAppleKey() async throws {
+        try await withDeps {
+            let dir = try temporaryDirectory()
+            defer { try? FileManager.default.removeItem(at: dir) }
+            let storeURL = dir.appendingPathComponent("store.sqlite")
+            let key = StoreKey.mint()
+            let apple = AppleKey.mint()
+            var envelope = StoreKeyEnvelope()
+            try envelope.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
+            try envelope.appleBox(key: key, under: apple.symmetricKey, appleKeyID: apple.id)
+            let backing = InMemoryStoreKeyGuardBacking()  // NO bound item
+            let gate = StoreLaunchGate.scripted(
+                dials: ProtectionDials(), backing: backing, envelope: envelope,
+                appleKey: InMemoryAppleKeyBacking(key: apple))  // A is here
+            let openCount = LockIsolated(0)
+            let bootstrap = AppBootstrap(
+                testOpener: {
+                    openCount.withValue { $0 += 1 }
+                    return Result { try AppDatabase.onDisk(url: storeURL, key: key) }
+                        .mapError { AppDatabase.StoreOpenError(
+                            storePath: storeURL.path, reason: String(describing: $0)) }
+                },
+                gate: gate, testStoreURL: storeURL)
+            await bootstrap.awaitOpen()
+            guard case .ready = bootstrap.state else {
+                Issue.record("expected .ready through the Apple road, got \(bootstrap.state)")
+                return
+            }
+            #expect(openCount.value == 1, "opened silently — nothing typed")
+            var healed = false
+            for _ in 0..<400 where !healed {
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(1))
+                healed = backing.auto == key
+            }
+            #expect(healed, "the proven key re-lands as the bound item — the next launch opens normally")
+        }
+    }
+
+    /// **THE WAITING STATE (§3.8; copy §2d).** A absent ⇒ no silent mint
+    /// (nothing opens, nothing lands in custody), a real state whose
+    /// doors ACT: the passphrase unlocks and the key re-lands; the Apple
+    /// road is RE-PROBED and opens the moment A lands.
+    /// RED ON OLD: the pre-2a road failed into `.failed(recovery:)`; no
+    /// waiting state, no re-probe.
+    @Test func anAbsentAppleKeyIsTheWaitingStateWhoseDoorsActAndWhoseProbeOpensWhenALands() async throws {
+        try await withDeps {
+            let dir = try temporaryDirectory()
+            defer { try? FileManager.default.removeItem(at: dir) }
+            let storeURL = dir.appendingPathComponent("store.sqlite")
+            let key = StoreKey.mint()
+            let apple = AppleKey.mint()
+            var envelope = StoreKeyEnvelope()
+            try envelope.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
+            try envelope.appleBox(key: key, under: apple.symmetricKey, appleKeyID: apple.id)
+            let backing = InMemoryStoreKeyGuardBacking()
+            let appleKeys = InMemoryAppleKeyBacking()  // A NOT here yet
+            let gate = StoreLaunchGate.scripted(
+                dials: ProtectionDials(), backing: backing, envelope: envelope, appleKey: appleKeys)
+            let openCount = LockIsolated(0)
+            let bootstrap = AppBootstrap(
+                testOpener: {
+                    openCount.withValue { $0 += 1 }
+                    return Result { try AppDatabase.onDisk(url: storeURL, key: key) }
+                        .mapError { AppDatabase.StoreOpenError(
+                            storePath: storeURL.path, reason: String(describing: $0)) }
+                },
+                gate: gate, testStoreURL: storeURL)
+            await bootstrap.awaitOpen()
+            guard case .waitingForICloudKeychain(let lobby) = bootstrap.state else {
+                Issue.record("expected the waiting state, got \(bootstrap.state)")
+                return
+            }
+            #expect(openCount.value == 0, "NOTHING opens — never a silent mint over an existing store")
+            #expect(backing.auto == nil, "no key minted into custody")
+            #expect(lobby.isWaitingForICloudKeychain)
+            #expect(!lobby.differentAppleID)
+            #expect(lobby.passphraseOffered, "the door that acts (no twelve words on file here — that door renders when they exist)")
+            #expect(!lobby.recoveryOffered)
+            #expect(lobby.demand == .auto, "no gate — the library is Standard")
+            #expect(!bootstrap.canLock)
+
+            // The doors act: a wrong secret refuses in words; the right one
+            // opens THROUGH the waiting state, and the key re-lands.
+            await lobby.unlock(passphrase: "not it")
+            #expect(lobby.lastError == "That passphrase doesn't unlock this library.")
+            #expect(openCount.value == 0)
+            await lobby.unlock(passphrase: "sesame")
+            await bootstrap.awaitOpen()
+            guard case .ready = bootstrap.state else {
+                Issue.record("expected .ready after the passphrase door")
+                return
+            }
+            #expect(openCount.value == 1)
+            var healed = false
+            for _ in 0..<400 where !healed {
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(1))
+                healed = backing.auto == key
+            }
+            #expect(healed, "the proven key re-lands as the bound item")
+
+            // THE RE-PROBE: a second launch with the bound item gone again
+            // waits — and opens the moment A lands in iCloud Keychain.
+            backing.auto = nil
+            let again = AppBootstrap(
+                testOpener: {
+                    openCount.withValue { $0 += 1 }
+                    return Result { try AppDatabase.onDisk(url: storeURL, key: key) }
+                        .mapError { AppDatabase.StoreOpenError(
+                            storePath: storeURL.path, reason: String(describing: $0)) }
+                },
+                gate: gate, testStoreURL: storeURL)
+            await again.awaitOpen()
+            guard case .waitingForICloudKeychain(let waiting) = again.state else {
+                Issue.record("expected the waiting state again, got \(again.state)")
+                return
+            }
+            waiting.stopWaiting()
+            waiting.beginWaiting(every: .milliseconds(5))
+            appleKeys.key = apple  // …A arrives
+            var opened = false
+            for _ in 0..<800 where !opened {
+                try? await Task.sleep(for: .milliseconds(2))
+                await again.awaitOpen()
+                if case .ready = again.state { opened = true }
+            }
+            #expect(opened, "the waiting state's probe opened the library when A landed")
+            #expect(waiting.appleProbes >= 1, "the Apple road was polled")
+        }
+    }
+
+    /// A DIFFERENT Apple ID's A (the key file's copy is under another id):
+    /// the waiting state says so (copy §2d's third sentence) — the
+    /// passphrase road answers once; nothing is adopted from the wire.
+    @Test func anotherAppleIDsKeyRendersTheDifferentAppleIDSentence() async throws {
         try await withDeps {
             let dir = try temporaryDirectory()
             defer { try? FileManager.default.removeItem(at: dir) }
@@ -465,76 +593,21 @@ struct Phase13pLobbyTests {
             let key = StoreKey.mint()
             var envelope = StoreKeyEnvelope()
             try envelope.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
-            // pre-13x 2a: a STANDARD library — its Apple copy is under an A
-            // this device does not hold (a fresh device before iCloud
-            // Keychain delivered it).
-            try envelope.appleBox(key: key, under: AppleKey.mint().symmetricKey, appleKeyID: "elsewhere")
-
-            // Standard + empty custody: the route opens, the open fails
-            // with the typed key-gone refusal — scripted here; the drill
-            // (`Phase13pKeyedDrillTests`) proves the production `openStore`
-            // throws exactly this marker over real files.
+            try envelope.appleBox(key: key, under: AppleKey.mint().symmetricKey, appleKeyID: "the-other-mac")
             let backing = InMemoryStoreKeyGuardBacking()
             let gate = StoreLaunchGate.scripted(
-                dials: ProtectionDials(), backing: backing, envelope: envelope)
-            let openCount = LockIsolated(0)
+                dials: ProtectionDials(), backing: backing, envelope: envelope,
+                appleKey: InMemoryAppleKeyBacking(key: AppleKey.mint()))  // THIS iCloud's A
             let bootstrap = AppBootstrap(
-                testOpener: {
-                    let n = openCount.withValue { value -> Int in
-                        value += 1
-                        return value
-                    }
-                    guard n > 1 else {
-                        return .failure(AppDatabase.StoreOpenError(
-                            storePath: storeURL.path,
-                            reason: "This library is encrypted, and its key is not "
-                                + "available on this device.",
-                            keyUnavailable: true))
-                    }
-                    return Result { try AppDatabase.onDisk(url: storeURL, key: key) }
-                        .mapError { AppDatabase.StoreOpenError(
-                            storePath: storeURL.path, reason: String(describing: $0)) }
-                },
-                gate: gate)
+                testOpener: { .failure(AppDatabase.StoreOpenError(storePath: "", reason: "must not open")) },
+                gate: gate, testStoreURL: storeURL)
             await bootstrap.awaitOpen()
-            guard case .failed(let error, let recovery) = bootstrap.state else {
-                Issue.record("expected .failed, got \(bootstrap.state)")
+            guard case .waitingForICloudKeychain(let lobby) = bootstrap.state else {
+                Issue.record("expected the waiting state, got \(bootstrap.state)")
                 return
             }
-            #expect(error.keyUnavailable)
-            guard let recovery else {
-                Issue.record(
-                    "a wraps-bearing sidecar must open the recovery road — the doorless state is the finding")
-                return
-            }
-            #expect(recovery.passphraseOffered)
-            #expect(!recovery.biometryOffered, "no gated item exists on this road")
-
-            // A wrong secret refuses in words and stays failed.
-            await recovery.unlock(passphrase: "not it")
-            #expect(recovery.lastError == "That passphrase doesn't unlock this library.")
-            #expect(openCount.value == 1)
-
-            // The right passphrase unlocks THROUGH the failure surface.
-            await recovery.unlock(passphrase: "sesame")
-            await bootstrap.awaitOpen()
-            guard case .ready = bootstrap.state else {
-                Issue.record("expected .ready after the recovery unlock")
-                return
-            }
-            #expect(openCount.value == 2)
-
-            // The custody HEAL: under Auto the custody law says a silent
-            // item exists — the proven key re-lands (off-main; bounded wait,
-            // the house pattern) so the next launch opens silently instead
-            // of failing into the same surface.
-            var healed = false
-            for _ in 0..<400 where !healed {
-                await Task.yield()
-                try? await Task.sleep(for: .milliseconds(1))
-                healed = backing.auto == key
-            }
-            #expect(healed, "the proven key re-lands as the Auto custody item")
+            #expect(lobby.differentAppleID, "iCloud Keychain holds an A that is not this library's")
+            #expect(backing.auto == nil, "nothing adopted from a key that does not open the copy")
         }
     }
 

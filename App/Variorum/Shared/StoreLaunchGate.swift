@@ -323,7 +323,24 @@ nonisolated extension StoreLaunchGate {
 @MainActor
 @Observable
 final class StoreLobby {
-    /// `.biometric` or `.passphrase` — never `.auto` (no lobby exists there).
+    /// What this lobby IS (pre-13x 2a): Castle's locked lobby, or
+    /// Standard's WAITING STATE (design §3.8 — the bound item is missing
+    /// and the iCloud key A has not arrived: "Getting your key from iCloud
+    /// Keychain…", copy §2d, with the passphrase and the twelve words as
+    /// doors that act, and a re-probe of A that opens silently the moment
+    /// it lands; propagation latency is unbounded and unobservable, so the
+    /// probe polls).
+    nonisolated enum Kind: Equatable, Sendable {
+        case castle
+        /// `differentAppleID`: iCloud Keychain holds an A that is NOT the
+        /// one this library's key file was written under — copy §2d's
+        /// third sentence renders (the passphrase road answers once).
+        case waitingForICloudKeychain(differentAppleID: Bool)
+    }
+
+    let kind: Kind
+    /// `.biometric` or `.passphrase` under Castle; `.auto` under the
+    /// waiting kind (no gate exists — the library is Standard).
     let demand: StoreAtOpenMode
     /// Whether the biometric road renders (demand is biometric AND the
     /// gated item exists on this device).
@@ -363,9 +380,17 @@ final class StoreLobby {
     // The roads (injected).
     private let gatedRoad: @Sendable () async -> StoreKey?
     private let envelopeRoad: @Sendable (Secret) async -> Result<StoreKey, StoreLobby.Refusal>
+    /// pre-13x 2a: the Apple road (the waiting kind only) — A from iCloud
+    /// Keychain → the key file's Apple copy → the key; nil while A has not
+    /// arrived (or is not this library's). Polled by `beginWaiting`.
+    private let appleRoad: (@Sendable () async -> StoreKey?)?
     /// Fires on the MainActor with the unlocked key; the composition root
     /// (AppBootstrap) opens the store with it.
     private let complete: @MainActor (StoreKey) -> Void
+    @ObservationIgnored private var waitingTask: Task<Void, Never>?
+    /// How many times the Apple road has been asked (the pin's evidence
+    /// that the waiting state POLLS).
+    private(set) var appleProbes = 0
 
     nonisolated enum Secret: Sendable {
         case passphrase(String)
@@ -378,6 +403,7 @@ final class StoreLobby {
     }
 
     init(
+        kind: Kind = .castle,
         demand: StoreAtOpenMode,
         biometryOffered: Bool,
         passphraseOffered: Bool,
@@ -385,8 +411,10 @@ final class StoreLobby {
         envelopeUnreadable: Bool = false,
         gatedRoad: @escaping @Sendable () async -> StoreKey?,
         envelopeRoad: @escaping @Sendable (Secret) async -> Result<StoreKey, StoreLobby.Refusal>,
+        appleRoad: (@Sendable () async -> StoreKey?)? = nil,
         complete: @escaping @MainActor (StoreKey) -> Void
     ) {
+        self.kind = kind
         self.demand = demand
         self.biometryOffered = biometryOffered
         self.passphraseOffered = passphraseOffered
@@ -394,7 +422,52 @@ final class StoreLobby {
         self.envelopeUnreadable = envelopeUnreadable
         self.gatedRoad = gatedRoad
         self.envelopeRoad = envelopeRoad
+        self.appleRoad = appleRoad
         self.complete = complete
+    }
+
+    /// Whether this is Standard's waiting state.
+    var isWaitingForICloudKeychain: Bool {
+        if case .waitingForICloudKeychain = kind { return true }
+        return false
+    }
+
+    var differentAppleID: Bool {
+        if case .waitingForICloudKeychain(let different) = kind { return different }
+        return false
+    }
+
+    // MARK: - The waiting state's re-probe (the Apple road, polled)
+
+    /// Ask the Apple road now, and every `interval` until it answers or the
+    /// lobby is torn down. The interval is a parameter so the pin drives it
+    /// fast; production polls every few seconds (the lookup's fact: no
+    /// notification exists for a synchronizable item's arrival).
+    func beginWaiting(every interval: Duration = .seconds(5)) {
+        guard appleRoad != nil, waitingTask == nil else { return }
+        waitingTask = Task { @MainActor [weak self] in
+            while !Task.isCancelled {
+                guard let self else { return }
+                if await self.probeAppleRoad() { return }
+                try? await Task.sleep(for: interval)
+            }
+        }
+    }
+
+    func stopWaiting() {
+        waitingTask?.cancel()
+        waitingTask = nil
+    }
+
+    /// One probe: true when the key arrived and the open began.
+    @discardableResult
+    func probeAppleRoad() async -> Bool {
+        guard let appleRoad, !busy else { return false }
+        appleProbes += 1
+        guard let key = await appleRoad() else { return false }
+        stopWaiting()
+        complete(key)
+        return true
     }
 
     /// The biometric road — PROMPTS in production (the gated item's read
@@ -438,10 +511,59 @@ final class StoreLobby {
         defer { busy = false }
         switch await envelopeRoad(secret) {
         case .success(let key):
+            stopWaiting()
             complete(key)
         case .failure(let refusal):
             lastError = refusal.message
         }
+    }
+
+    /// pre-13x 2a — THE APPLE ROAD's production builder (§3.8): A from
+    /// this device's iCloud Keychain (the scope's family), the key file's
+    /// Apple copy unwrapped with it — nil when A is absent, when the copy
+    /// is under another A (the client VERIFIES the id, never adopts), or
+    /// when the key file is missing/unreadable. Off-main (a Keychain read
+    /// + one AES key-unwrap).
+    nonisolated static func appleRoad(
+        scope: String, storeURL: URL, gate: StoreLaunchGate
+    ) -> @Sendable () async -> StoreKey? {
+        {
+            await Task.detached(priority: .userInitiated) {
+                Self.openWithAppleKey(scope: scope, storeURL: storeURL, gate: gate).key
+            }.value
+        }
+    }
+
+    /// The Apple road's verdict, synchronous (the route consults it once
+    /// before deciding on the waiting state): the key, or why not.
+    nonisolated enum AppleRoadReading: Sendable {
+        case opened(StoreKey)
+        /// A is not on this device (not yet propagated · iCloud Keychain
+        /// off · no Apple ID).
+        case appleKeyAbsent
+        /// A is here but the key file's copy is under ANOTHER A.
+        case differentAppleID
+        /// No key file, no Apple copy, or an unreadable file.
+        case noAppleCopy
+
+        var key: StoreKey? {
+            if case .opened(let key) = self { return key }
+            return nil
+        }
+    }
+
+    nonisolated static func openWithAppleKey(
+        scope: String, storeURL: URL, gate: StoreLaunchGate
+    ) -> AppleRoadReading {
+        guard let envelope = gate.readEnvelope(storeURL).envelope,
+              envelope.apple != nil
+        else { return .noAppleCopy }
+        guard let apple = gate.appleKeyFor(scope).read() else { return .appleKeyAbsent }
+        if let expected = envelope.appleKeyID, expected != apple.id { return .differentAppleID }
+        guard let key = try? envelope.unwrapKey(apple: apple.symmetricKey) else {
+            return .differentAppleID
+        }
+        return .opened(key)
     }
 
     // MARK: - The roads' production builder

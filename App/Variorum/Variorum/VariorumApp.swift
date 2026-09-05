@@ -164,6 +164,10 @@ struct VariorumApp: App {
                 // Phase 13p: the demanded at-open modes' lobby — no store,
                 // no session, no services until it unlocks (R13p-5).
                 StoreLockView(lobby: lobby)
+            case .waitingForICloudKeychain(let lobby):
+                // pre-13x 2a (§3.8): Standard's waiting state — the same
+                // face, copy §2d's words, the doors that act.
+                StoreLockView(lobby: lobby)
             case .libraryMissing(let lobby):
                 // pre-13x 1a (§3.7): the three-door face — the lock stays.
                 LibraryMissingView(lobby: lobby)
@@ -232,7 +236,7 @@ struct VariorumApp: App {
                 StoreFailureView(error: error) { bootstrap.retry() }
             case (.opening, _):
                 StoreOpeningView()
-            case (.locked, _):
+            case (.locked, _), (.waitingForICloudKeychain, _):
                 // 13p: note windows never outlive a lock (the whole
                 // `.ready` tree tears down); a restored one says so.
                 Text("Variorum is locked — unlock it in the main window.")

@@ -231,19 +231,15 @@ nonisolated enum ProtectionShapes {
     /// "Can't tell" is never dressed as comfort or alarm — its own gentle
     /// sentence (memo §9b T2; the verification half rides 13r's
     /// fresh-machine walk).
+    /// pre-13x 2a: copy §5's three nudge lines, verbatim.
     static func tierSentence(_ tier: ProtectionLegs.Tier) -> String {
         switch tier {
         case .covered:
-            return "At least one real way back in exists beyond this device."
+            return ProtectionCopy.coveredNudgeLine
         case .exposed:
-            return ProtectionCopy.exposedNudgeHeadline
-                + " Two minutes fixes that — set a passphrase, or take the "
-                + "recovery phrase."
+            return ProtectionCopy.exposedNudgeHeadline + " " + ProtectionCopy.exposedNudgeBody
         case .unknown:
-            return "Whether a spare way in exists can't be told right now — "
-                + "this library's key file exists but can't be read. That is a "
-                + "fact about this check, not about your writing: whatever "
-                + "opened the library still does."
+            return ProtectionCopy.unknownNudgeLine
         }
     }
 

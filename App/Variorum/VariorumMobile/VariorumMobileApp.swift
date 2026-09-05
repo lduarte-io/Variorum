@@ -157,6 +157,10 @@ struct VariorumMobileApp: App {
                 // unlock first, never a plaintext side channel); the box's
                 // own worded refusal covers the re-lock seam.
                 MobileStoreLockView(lobby: lobby, tokens: lockedTokens)
+            case .waitingForICloudKeychain(let lobby):
+                // pre-13x 2a (§3.8): Standard's waiting state — the same
+                // face, copy §2d's words, the doors that act.
+                MobileStoreLockView(lobby: lobby, tokens: lockedTokens)
             case .libraryMissing(let lobby):
                 // pre-13x 1a (§3.7): the three-door face — the lock stays.
                 MobileLibraryMissingView(lobby: lobby, tokens: lockedTokens)

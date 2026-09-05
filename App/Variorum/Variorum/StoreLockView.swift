@@ -95,22 +95,50 @@ struct StoreLockView: View {
 
     private var card: some View {
         VStack(spacing: 14) {
-            Image(systemName: "lock.fill")
+            Image(systemName: lobby.isWaitingForICloudKeychain ? "icloud" : "lock.fill")
                 .font(.system(size: 30, weight: .light))
                 .foregroundStyle(tokens.muted)
-            Text("Variorum is locked")
-                .font(tokens.heading)
-                .foregroundStyle(tokens.ink)
-                .lineLimit(1)
-            Text(ProtectionCopy.lobbyPrompt(lobby.demand))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
-                .multilineTextAlignment(.center)
-                .lineLimit(4)
-                .fixedSize(horizontal: false, vertical: true)
+            if lobby.isWaitingForICloudKeychain {
+                // pre-13x 2a (§3.8) — STANDARD'S WAITING STATE, copy §2d
+                // verbatim: the title, the body, and (where iCloud Keychain
+                // holds another Apple ID's key) the third sentence.
+                Text(ProtectionCopy.waitingTitle)
+                    .font(tokens.heading)
+                    .foregroundStyle(tokens.ink)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(lobby.differentAppleID
+                     ? ProtectionCopy.waitingDifferentAppleID
+                     : ProtectionCopy.waitingBody)
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(6)
+                    .fixedSize(horizontal: false, vertical: true)
+                if !lobby.differentAppleID {
+                    HStack(spacing: 6) {
+                        ProgressView().controlSize(.small)
+                        Text("Checking iCloud Keychain…")
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.muted)
+                            .lineLimit(1)
+                    }
+                }
+            } else {
+                Text("Variorum is locked")
+                    .font(tokens.heading)
+                    .foregroundStyle(tokens.ink)
+                    .lineLimit(1)
+                Text(ProtectionCopy.lobbyPrompt(lobby.demand))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(4)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
 
             if lobby.noRoadExists {
-                deadEnd
+                if !lobby.isWaitingForICloudKeychain { deadEnd }
             } else {
                 roads
             }
@@ -155,8 +183,15 @@ struct StoreLockView: View {
         if lobby.passphraseOffered {
             // Under a BIOMETRIC demand the field waits behind one quiet
             // word (item 7's less-on-screen); under a passphrase demand the
-            // field IS the road and shows directly.
-            if lobby.demand == .biometric && lobby.biometryOffered && !passphraseRevealed {
+            // field IS the road and shows directly. The WAITING state's
+            // door is copy §2d's "Enter Passphrase…" (P-2: it acts — the
+            // same envelope road).
+            if lobby.isWaitingForICloudKeychain && !passphraseRevealed {
+                Button(ProtectionCopy.waitingPassphraseDoor) {
+                    passphraseRevealed = true
+                }
+                .buttonStyle(CalmButtonStyle(tokens: tokens))
+            } else if lobby.demand == .biometric && lobby.biometryOffered && !passphraseRevealed {
                 Button("Use your encryption passphrase instead") {
                     passphraseRevealed = true
                 }
@@ -197,7 +232,8 @@ struct StoreLockView: View {
                 }
                 .padding(.top, 6)
             } label: {
-                Text("Forgot your passphrase?")
+                Text(lobby.isWaitingForICloudKeychain
+                     ? ProtectionCopy.waitingWordsDoor : "Forgot your passphrase?")
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
                     .lineLimit(1)
