@@ -68,10 +68,13 @@ nonisolated struct StoreLaunchGate: Sendable {
         dials: { ProtectionDefaults.dials(scope: $0, in: .standard) },
         saveDials: { ProtectionDefaults.save($0, scope: $1, in: .standard) },
         guardFor: { StoreKeyGuard.keychain(scope: $0) },
-        loadEnvelope: { try StoreKeyEnvelope.load(at: StoreKeyEnvelope.url(besideStore: $0)) },
-        saveEnvelope: { try $0.write(at: StoreKeyEnvelope.url(besideStore: $1)) },
+        // pre-13x 1a: the store's CURRENT key file (fingerprint-named, else
+        // the legacy name), located without the key; a write lands under the
+        // envelope's own fingerprint name.
+        loadEnvelope: { try StoreKeyEnvelope.loadCurrent(besideStore: $0) },
+        saveEnvelope: { try $0.write(at: $0.preferredURL(besideStore: $1)) },
         setAsideEnvelope: { storeURL in
-            let url = StoreKeyEnvelope.url(besideStore: storeURL)
+            guard let url = StoreKeyEnvelope.locate(besideStore: storeURL) else { return }
             let aside = url.deletingPathExtension()
                 .appendingPathExtension("stale-\(Int(Date().timeIntervalSince1970)).json")
             try? FileManager.default.moveItem(at: url, to: aside)

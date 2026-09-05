@@ -57,14 +57,17 @@ final class StoreBackup {
         /// shared and the words are the caller's. nil = write nothing.
         var runbookText: String?
         /// Phase 13p Batch 2: the store-key ENVELOPE (the wrapped-copies
-        /// sidecar beside the store) rides into every backup folder — a
+        /// key file beside the store) rides into every backup folder — a
         /// ciphertext backup restored on a NEW machine is unopenable
         /// without it, so "restore via passphrase / recovery phrase" is
         /// true only if the wraps travel with the copies. Every byte in
         /// the file is non-secret by design (wrapped blobs, salts, an
-        /// id), so a cloud-synced folder may hold it. nil = no envelope
-        /// (pre-passphrase stores have nothing to carry yet).
-        var keyEnvelopeSourceURL: URL?
+        /// id), so a cloud-synced folder may hold it. pre-13x 1a: this is
+        /// the STORE's URL — the run locates the store's CURRENT key file
+        /// beside it at run time (`StoreKeyEnvelope.locate`; the name
+        /// carries the key's fingerprint and may change at a re-key). nil
+        /// = no store to look beside.
+        var keyEnvelopeStoreURL: URL?
     }
 
     nonisolated static let filePrefix = "variorum-backup-"
@@ -211,7 +214,10 @@ final class StoreBackup {
         // open, so a copy that lives only inside the app is not a runbook.
         writeRunbook(configuration.runbookText, into: directory)
         // 13p: the recovery legs ride beside the recipe (see Configuration).
-        copyKeyEnvelope(configuration.keyEnvelopeSourceURL, into: directory)
+        // pre-13x 1a: the CURRENT key file, located beside the store per run.
+        let keyFile = configuration.keyEnvelopeStoreURL
+            .flatMap { StoreKeyEnvelope.locate(besideStore: $0) }
+        copyKeyEnvelope(keyFile, into: directory)
 
         let secondary = performSecondLeg(
             directory: directory, configuration: configuration,
@@ -232,17 +238,24 @@ final class StoreBackup {
             at: now, primary: primary, secondary: secondary, markdown: markdown)
     }
 
-    /// Phase 13p Batch 2: copy the store-key envelope into a backup
-    /// folder, only when its bytes would change (the runbook's cloud-sync
-    /// churn rule). Quiet on failure like every leg-side write — the next
-    /// run retries; the snapshots themselves never depend on it.
+    /// Phase 13p Batch 2 → pre-13x 1a: copy the store's key file into a
+    /// backup folder, under the SOURCE'S OWN NAME (`variorum-keys-<fp>.json`
+    /// — one per library key the folder has ever held; the legacy
+    /// `variorum-keys.json` serves legacy snapshots), and ONLY WHEN ABSENT.
+    /// A backup folder's key file is NEVER rewritten after it is written
+    /// (the design's decision 11 / §6: not at a passphrase change, a words
+    /// regeneration or a posture change — a snapshot opens with the
+    /// passphrase its folder's key file was written under, or the twelve
+    /// words, or the master copy); two keys' files coexist by name, so no
+    /// key's file ever overwrites another's. (13p wrote-when-bytes-changed;
+    /// that refresh is exactly the rewrite the design forbids.) Quiet on
+    /// failure like every leg-side write — the next run retries; the
+    /// snapshots themselves never depend on it.
     nonisolated static func copyKeyEnvelope(_ source: URL?, into folder: URL) {
         guard let source,
               let bytes = try? Data(contentsOf: source) else { return }
         let destination = folder.appendingPathComponent(source.lastPathComponent)
-        if let existing = try? Data(contentsOf: destination), existing == bytes {
-            return
-        }
+        guard !FileManager.default.fileExists(atPath: destination.path) else { return }
         try? FileManager.default.createDirectory(
             at: folder, withIntermediateDirectories: true)
         try? bytes.write(to: destination, options: .atomic)
@@ -295,9 +308,11 @@ final class StoreBackup {
                     configuration.runbookText,
                     into: BackupDestination.variorumFolder(in: resolved.picked))
                 // 13p: the far folder gets the recovery legs too — this is
-                // the copy a NEW machine restores from.
+                // the copy a NEW machine restores from (pre-13x 1a: the
+                // current key file, located per run; never rewritten).
                 copyKeyEnvelope(
-                    configuration.keyEnvelopeSourceURL,
+                    configuration.keyEnvelopeStoreURL
+                        .flatMap { StoreKeyEnvelope.locate(besideStore: $0) },
                     into: BackupDestination.variorumFolder(in: resolved.picked))
                 // Due-ness is the FAR folder's own question: picking a folder
                 // today must seed it immediately even though the container's
@@ -434,8 +449,13 @@ final class StoreBackup {
            now.timeIntervalSince(newestDate) < configuration.interval {
             return nil
         }
+        // pre-13x 1a (§6): a keyed store's snapshot carries its key's short
+        // fingerprint — `variorum-backup-<stamp>-<fp8>.sqlite` — so a folder
+        // holding several keys' snapshots says which key file opens which.
+        let fingerprintSuffix = database.storeKeyFingerprint
+            .map { "-" + StoreKeyEnvelope.shortFingerprint($0) } ?? ""
         let url = directory.appendingPathComponent(
-            "\(filePrefix)\(stampFormatter.string(from: now)).\(fileExtension)")
+            "\(filePrefix)\(stampFormatter.string(from: now))\(fingerprintSuffix).\(fileExtension)")
         try database.backup(to: url)
         try prune(directory: directory, keep: configuration.keep)
         return url
@@ -463,11 +483,30 @@ final class StoreBackup {
             .sorted { $0.lastPathComponent < $1.lastPathComponent }
     }
 
+    /// Both names parse (pre-13x 1a): the 13p-era `variorum-backup-<stamp>`
+    /// and the fingerprinted `variorum-backup-<stamp>-<fp8>`.
     nonisolated static func date(fromBackupURL url: URL) -> Date? {
         let name = url.deletingPathExtension().lastPathComponent
         guard name.hasPrefix(filePrefix) else { return nil }
-        return stampFormatter.date(from: String(name.dropFirst(filePrefix.count)))
+        let rest = name.dropFirst(filePrefix.count)
+        let stamp = rest.prefix(stampLength)
+        let tail = rest.dropFirst(stampLength)
+        guard tail.isEmpty || tail.hasPrefix("-") else { return nil }
+        return stampFormatter.date(from: String(stamp))
     }
+
+    /// The short fingerprint a snapshot's name carries, nil for a legacy
+    /// name — the restore surface's "which key file opens this" fact.
+    nonisolated static func shortFingerprint(fromBackupURL url: URL) -> String? {
+        let name = url.deletingPathExtension().lastPathComponent
+        guard name.hasPrefix(filePrefix) else { return nil }
+        let tail = name.dropFirst(filePrefix.count).dropFirst(stampLength)
+        guard tail.hasPrefix("-"), tail.count == 9 else { return nil }
+        return String(tail.dropFirst())
+    }
+
+    /// `yyyy-MM-dd-HHmmss` is 17 characters.
+    nonisolated private static let stampLength = 17
 
     /// Filename-safe, lexicographically chronological. (DateFormatter is
     /// documented thread-safe for formatting on modern OS versions.)

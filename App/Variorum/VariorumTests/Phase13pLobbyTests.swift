@@ -108,7 +108,7 @@ struct Phase13pLobbyTests {
         let key = StoreKey.mint()
         var envelope = StoreKeyEnvelope()
         try envelope.setPassphraseWrap(key: key, passphrase: "open sesame", kdf: fastKDF())
-        try envelope.write(at: StoreKeyEnvelope.url(besideStore: storeURL))
+        try envelope.write(at: envelope.preferredURL(besideStore: storeURL))
 
         // Route: demanded ⇒ lobby; the store file untouched.
         let route = StoreLaunchRoute.resolve(
@@ -126,7 +126,7 @@ struct Phase13pLobbyTests {
             dials: { _ in ProtectionDials(mode: .passphrase) },
             saveDials: { _, _ in },
             guardFor: { _ in StoreKeyGuard.inMemory(backing: InMemoryStoreKeyGuardBacking()) },
-            loadEnvelope: { try StoreKeyEnvelope.load(at: StoreKeyEnvelope.url(besideStore: $0)) },
+            loadEnvelope: { try StoreKeyEnvelope.loadCurrent(besideStore: $0) },
             saveEnvelope: { _, _ in },
             setAsideEnvelope: { _ in },
             stamp: { _, _ in nil },

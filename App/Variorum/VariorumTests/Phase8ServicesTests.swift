@@ -175,6 +175,41 @@ struct StoreBackupTests {
         #expect(dates.last.map { $0 > start.addingTimeInterval(14 * 25 * 3600) } == true)
     }
 
+    /// pre-13x 1a (§6): a KEYED store's snapshot is named
+    /// `variorum-backup-<stamp>-<fp8>.sqlite`; both that name and the 13p-era
+    /// one list and date-parse, and the short fingerprint reads back. RED ON
+    /// OLD: the name carried no fingerprint and `date(fromBackupURL:)`
+    /// refused the suffixed name.
+    @Test func aKeyedStoresSnapshotCarriesItsShortFingerprintAndBothNamesParse() async throws {
+        let dir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("variorum-backup-fp-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let key = StoreKey.mint()
+        let database = try AppDatabase.openStore(
+            at: dir.appendingPathComponent("variorum.sqlite"), custody: .inMemory(initial: key))
+        let backups = dir.appendingPathComponent("Backups", isDirectory: true)
+        let now = Date(timeIntervalSince1970: 1_782_900_000)
+        let written = try await Task.detached {
+            try StoreBackup.performBackupIfDue(
+                database: database, directory: backups, configuration: .init(), now: now, force: true)
+        }.value
+        let url = try #require(written)
+        let fp8 = StoreKeyEnvelope.shortFingerprint(StoreKeyEnvelope.fingerprint(of: key))
+        #expect(url.lastPathComponent.hasSuffix("-\(fp8).sqlite"), "the snapshot names its key")
+        #expect(StoreBackup.shortFingerprint(fromBackupURL: url) == fp8)
+        #expect(StoreBackup.date(fromBackupURL: url) == now)
+        // The 13p-era name beside it lists and parses too.
+        let legacy = backups.appendingPathComponent("variorum-backup-2026-07-18-020000.sqlite")
+        try Data("x".utf8).write(to: legacy)
+        let listed = try StoreBackup.existingBackups(in: backups)
+        #expect(listed.count == 2)
+        #expect(StoreBackup.date(fromBackupURL: legacy) != nil)
+        #expect(StoreBackup.shortFingerprint(fromBackupURL: legacy) == nil)
+        #expect(StoreBackup.date(fromBackupURL: backups.appendingPathComponent("variorum-backup-2026-07-18-020000x.sqlite")) == nil,
+                "a malformed tail never parses as a date")
+    }
+
     @Test func backupOfAnInUseWALStoreIsConsistent() async throws {
         // A real on-disk WAL pool with writes landing DURING the backup.
         let directory = try temporaryDirectory()

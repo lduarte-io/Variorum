@@ -30,12 +30,32 @@ import Foundation
 // verifies a typed passphrase against the account vault when one
 // exists); this format cannot and does not try to enforce it — it just
 // never mints a secret of its own.
+//
+// pre-13x batch 1a — FORMAT 2 (the postures design §3.5): the file gains
+// the LIBRARY KEY wrapped under the account's MASTER key (`master` — what
+// makes both local secret copies caches: any device holding the master can
+// extend its own key file with no visit, and the twelve words open a
+// Castle library online through the vault before the local W copy has
+// ever landed here), the library key wrapped under the iCloud key
+// (`apple` + `appleKeyID` — Standard's silent road; ABSENT in Castle), and
+// what the local passphrase copy was last reconciled against (`vaultKDF`,
+// `vaultCorpusKeyID`). Files are named by key FINGERPRINT
+// (`variorum-keys-<fp16>.json`) beside the store and in every backup
+// folder; the legacy `variorum-keys.json` reads as format 1 for the
+// store's current key when no fingerprint file exists. A format-1 file
+// reads as "no master copy, no iCloud copy, unknown descriptor" (every new
+// field optional). `storeID` is the LIBRARY's identity — stable across
+// re-keys — and names this device's per-store custody items (batch 1a's
+// §3.3 / §1.13): every key file of one library carries the same id.
 
 /// The wrapped-copies sidecar: versioned, Codable, atomic on disk.
 public struct StoreKeyEnvelope: Codable, Equatable, Sendable {
-    /// The current (and only) envelope format version. A newer envelope
-    /// refuses every operation — never guess at a future format.
-    public static let currentFormatVersion = 1
+    /// The current envelope format version (2 since pre-13x batch 1a). A
+    /// newer envelope refuses every operation — never guess at a future
+    /// format; an OLDER one (format 1) reads with the format-2 fields nil.
+    public static let currentFormatVersion = 2
+    /// The 13p-era format: passphrase + recovery wraps only.
+    public static let formatVersion1 = 1
 
     public var formatVersion: Int
     /// Random identity minted with the envelope (lowercased UUID). Names
@@ -54,6 +74,24 @@ public struct StoreKeyEnvelope: Codable, Equatable, Sendable {
     /// another library) without holding any secret; reveals nothing about
     /// a random 256-bit key. nil on a wraps-less envelope.
     public var keyFingerprint: String?
+    /// FORMAT 2 — the library key wrapped under the account's MASTER key
+    /// (RFC 3394). Written at enrollment / setup (batch 3); nil on a
+    /// local-only library and on every format-1 file.
+    public var master: Data?
+    /// FORMAT 2 — the library key wrapped under the iCloud key (Standard's
+    /// silent road, §3.8). ABSENT in Castle; nil on a format-1 file.
+    public var apple: Data?
+    /// FORMAT 2 — which iCloud key `apple` is under (the vault carries the
+    /// same id; the client VERIFIES it, never adopts a key from the wire).
+    public var appleKeyID: String?
+    /// FORMAT 2 — the vault's passphrase-KDF descriptor the local passphrase
+    /// copy was last reconciled against (§3.6: derive ONCE when it equals
+    /// the vault's; a difference means a change happened elsewhere).
+    public var vaultKDF: PassphraseKDF.Descriptor?
+    /// FORMAT 2 — the vault's corpus key id last reconciled against (§3.6's
+    /// owner distinction: a differing id after unlock is the follow or the
+    /// adopt road).
+    public var vaultCorpusKeyID: String?
 
     public struct PassphraseWrap: Codable, Equatable, Sendable {
         /// The versioned KDF parameters this wrap's key was derived with
@@ -73,13 +111,29 @@ public struct StoreKeyEnvelope: Codable, Equatable, Sendable {
         storeID: String = UUID().uuidString.lowercased(),
         passphrase: PassphraseWrap? = nil,
         recovery: Data? = nil,
-        keyFingerprint: String? = nil
+        keyFingerprint: String? = nil,
+        master: Data? = nil,
+        apple: Data? = nil,
+        appleKeyID: String? = nil,
+        vaultKDF: PassphraseKDF.Descriptor? = nil,
+        vaultCorpusKeyID: String? = nil
     ) {
         self.formatVersion = formatVersion
         self.storeID = storeID
         self.passphrase = passphrase
         self.recovery = recovery
         self.keyFingerprint = keyFingerprint
+        self.master = master
+        self.apple = apple
+        self.appleKeyID = appleKeyID
+        self.vaultKDF = vaultKDF
+        self.vaultCorpusKeyID = vaultCorpusKeyID
+    }
+
+    /// The first 8 hex characters of the fingerprint — what a snapshot's
+    /// filename carries (`variorum-backup-<stamp>-<fp8>.sqlite`, §6).
+    public static func shortFingerprint(_ fingerprint: String) -> String {
+        String(fingerprint.prefix(8))
     }
 
     /// The public fingerprint of a key (see `keyFingerprint`).
@@ -144,6 +198,7 @@ public struct StoreKeyEnvelope: Codable, Equatable, Sendable {
         try requireCurrentFormat()
         passphrase = wrap
         keyFingerprint = Self.fingerprint(of: key)
+        formatVersion = Self.currentFormatVersion  // a rewritten file is the current format
     }
 
     /// Set (or replace) the recovery wrap from the twelve words. Phrase
@@ -155,9 +210,99 @@ public struct StoreKeyEnvelope: Codable, Equatable, Sendable {
         do {
             recovery = try AES.KeyWrap.wrap(SymmetricKey(data: key.data), using: wrapKey)
             keyFingerprint = Self.fingerprint(of: key)
+            formatVersion = Self.currentFormatVersion
         } catch {
             throw StoreKeyEnvelopeError.wrapFailed
         }
+    }
+
+    // MARK: - FORMAT 2: the master copy and the iCloud copy (pre-13x 1a)
+
+    /// Wrap the library key under the account's MASTER key (§3.5 — "the
+    /// master copy is what makes both local secret copies caches"). Lands
+    /// at enrollment / sync setup (batch 3); an enrolled device that holds
+    /// the master can add it with no visit. Replaces wholesale.
+    public mutating func masterBox(key: StoreKey, under master: SymmetricKey) throws {
+        try requireCurrentFormat()
+        do {
+            self.master = try AES.KeyWrap.wrap(SymmetricKey(data: key.data), using: master)
+        } catch {
+            throw StoreKeyEnvelopeError.wrapFailed
+        }
+        keyFingerprint = Self.fingerprint(of: key)
+        formatVersion = Self.currentFormatVersion
+    }
+
+    /// The master road: an enrolled device's master (or a master unwrapped
+    /// from the vault by the passphrase / the words — the lobby's vault
+    /// road, batch 4) opens the library key. RFC 3394 refuses a wrong key.
+    public func unwrapKey(master: SymmetricKey) throws -> StoreKey {
+        try requireCurrentFormat()
+        guard let blob = self.master else { throw StoreKeyEnvelopeError.noMasterBox }
+        let unwrapped: SymmetricKey
+        do {
+            unwrapped = try AES.KeyWrap.unwrap(blob, using: master)
+        } catch {
+            throw StoreKeyEnvelopeError.wrongMasterKey
+        }
+        guard let key = StoreKey(data: unwrapped.withUnsafeBytes { Data($0) }) else {
+            throw StoreKeyEnvelopeError.wrongMasterKey
+        }
+        return key
+    }
+
+    /// Wrap the library key under the iCloud key A (Standard's silent
+    /// road, §3.8). `appleKeyID` names which A — the vault carries the
+    /// same id and the client verifies it. Replaces wholesale; ABSENT in
+    /// Castle (`removeAppleBox` at the switch — batch 2).
+    public mutating func appleBox(
+        key: StoreKey, under apple: SymmetricKey, appleKeyID: String
+    ) throws {
+        try requireCurrentFormat()
+        do {
+            self.apple = try AES.KeyWrap.wrap(SymmetricKey(data: key.data), using: apple)
+        } catch {
+            throw StoreKeyEnvelopeError.wrapFailed
+        }
+        self.appleKeyID = appleKeyID
+        keyFingerprint = Self.fingerprint(of: key)
+        formatVersion = Self.currentFormatVersion
+    }
+
+    /// The iCloud road. RFC 3394 refuses a wrong key.
+    public func unwrapKey(apple: SymmetricKey) throws -> StoreKey {
+        try requireCurrentFormat()
+        guard let blob = self.apple else { throw StoreKeyEnvelopeError.noAppleBox }
+        let unwrapped: SymmetricKey
+        do {
+            unwrapped = try AES.KeyWrap.unwrap(blob, using: apple)
+        } catch {
+            throw StoreKeyEnvelopeError.wrongAppleKey
+        }
+        guard let key = StoreKey(data: unwrapped.withUnsafeBytes { Data($0) }) else {
+            throw StoreKeyEnvelopeError.wrongAppleKey
+        }
+        return key
+    }
+
+    /// Entering Castle: the iCloud copy goes (the key itself stays in
+    /// iCloud Keychain — §14.5); the other copies are untouched.
+    public mutating func removeAppleBox() throws {
+        try requireCurrentFormat()
+        apple = nil
+        appleKeyID = nil
+        formatVersion = Self.currentFormatVersion
+    }
+
+    /// Record what the local passphrase copy was last reconciled against
+    /// (§3.6): the vault's descriptor and corpus key id.
+    public mutating func recordVaultReconciliation(
+        kdf: PassphraseKDF.Descriptor?, corpusKeyID: String?
+    ) throws {
+        try requireCurrentFormat()
+        vaultKDF = kdf
+        vaultCorpusKeyID = corpusKeyID
+        formatVersion = Self.currentFormatVersion
     }
 
     // MARK: - Unwrapping (the unlock roads)
@@ -208,14 +353,95 @@ public struct StoreKeyEnvelope: Codable, Equatable, Sendable {
 
     // MARK: - The file (atomic; beside the store)
 
-    /// The sidecar's name, public so backups and drills name the same file.
+    /// The LEGACY sidecar's name (format 1's fixed name; read for the
+    /// store's current key when no fingerprint-named file exists). Public
+    /// so the copy that names it and the drills name the same file.
     public static let filename = "variorum-keys.json"
+    public static var legacyFilename: String { filename }
+    private static let fingerprintPrefix = "variorum-keys-"
+    private static let fileExtension = "json"
 
-    /// `<store folder>/variorum-keys.json` — beside the store so a moved
-    /// or restored library folder carries its recovery legs.
-    public static func url(besideStore storeURL: URL) -> URL {
+    /// FORMAT 2's name: `variorum-keys-<fp16>.json` — one file per library
+    /// key, beside the store and in every backup folder (§3.5, §6); a
+    /// folder therefore holds one per key it has ever held, and no key's
+    /// file is ever overwritten by another's.
+    public static func filename(forFingerprint fingerprint: String) -> String {
+        "\(fingerprintPrefix)\(fingerprint).\(fileExtension)"
+    }
+
+    /// The fingerprint a `variorum-keys-<fp>.json` name carries; nil for
+    /// the legacy name and for anything else.
+    public static func fingerprint(fromFilename name: String) -> String? {
+        guard name.hasPrefix(fingerprintPrefix), name.hasSuffix(".\(fileExtension)") else { return nil }
+        let middle = name.dropFirst(fingerprintPrefix.count).dropLast(fileExtension.count + 1)
+        guard middle.count == 16, middle.allSatisfy(\.isHexDigit) else { return nil }
+        return String(middle)
+    }
+
+    /// `<store folder>/variorum-keys-<fp>.json`.
+    public static func url(besideStore storeURL: URL, fingerprint: String) -> URL {
+        storeURL.deletingLastPathComponent()
+            .appendingPathComponent(filename(forFingerprint: fingerprint), isDirectory: false)
+    }
+
+    /// `<store folder>/variorum-keys.json` — the legacy name.
+    public static func legacyURL(besideStore storeURL: URL) -> URL {
         storeURL.deletingLastPathComponent()
             .appendingPathComponent(filename, isDirectory: false)
+    }
+
+    /// Where THIS envelope is written beside a store: its key's fingerprint
+    /// name when it carries one, else the legacy name (a wraps-less,
+    /// fingerprint-less envelope — the pre-1a escrow stub shape).
+    public func preferredURL(besideStore storeURL: URL) -> URL {
+        if let keyFingerprint {
+            return Self.url(besideStore: storeURL, fingerprint: keyFingerprint)
+        }
+        return Self.legacyURL(besideStore: storeURL)
+    }
+
+    /// Every key file beside a store: the fingerprint-named ones (sorted
+    /// by name) plus the legacy one when present.
+    public static func keyFileURLs(besideStore storeURL: URL) -> [URL] {
+        let folder = storeURL.deletingLastPathComponent()
+        let entries = (try? FileManager.default.contentsOfDirectory(
+            at: folder, includingPropertiesForKeys: [.contentModificationDateKey])) ?? []
+        var files = entries
+            .filter { fingerprint(fromFilename: $0.lastPathComponent) != nil }
+            .sorted { $0.lastPathComponent < $1.lastPathComponent }
+        let legacy = legacyURL(besideStore: storeURL)
+        if FileManager.default.fileExists(atPath: legacy.path) { files.append(legacy) }
+        return files
+    }
+
+    /// THE STORE'S CURRENT KEY FILE, found WITHOUT the key (the custody
+    /// item is named by the file's `storeID`, so the file must be found
+    /// first): the sole fingerprint-named file; several ⇒ the most recently
+    /// modified (a state only a re-key produces — batch 2's lobby revisits
+    /// the rule; recorded in the 1a record); none ⇒ the legacy file; nil
+    /// when nothing is there.
+    public static func locate(besideStore storeURL: URL) -> URL? {
+        let files = keyFileURLs(besideStore: storeURL)
+        let fingerprinted = files.filter { fingerprint(fromFilename: $0.lastPathComponent) != nil }
+        if fingerprinted.count == 1 { return fingerprinted[0] }
+        if fingerprinted.count > 1 {
+            return fingerprinted.max { a, b in
+                let da = (try? a.resourceValues(forKeys: [.contentModificationDateKey]))?
+                    .contentModificationDate ?? .distantPast
+                let db = (try? b.resourceValues(forKeys: [.contentModificationDateKey]))?
+                    .contentModificationDate ?? .distantPast
+                return da < db
+            }
+        }
+        let legacy = legacyURL(besideStore: storeURL)
+        return FileManager.default.fileExists(atPath: legacy.path) ? legacy : nil
+    }
+
+    /// The current key file's envelope (see `locate`); nil when none
+    /// exists; throws `unreadable` on a present-but-undecodable file.
+    public static func loadCurrent(besideStore storeURL: URL) throws -> StoreKeyEnvelope? {
+        guard let url = locate(besideStore: storeURL) else { return nil }
+        return try load(at: url)
     }
 
     /// nil = no envelope exists there (fresh store, or pre-passphrase).
@@ -254,6 +480,17 @@ public enum StoreKeyEnvelopeError: Error, Equatable, Sendable {
     case wrongPassphrase
     /// A valid-checksum phrase that is not THIS store's phrase.
     case wrongRecoveryPhrase
+    /// FORMAT 2 (pre-13x 1a): no master copy exists in this file (a
+    /// local-only library, or a format-1 file).
+    case noMasterBox
+    /// The given master does not unwrap the master copy (a different
+    /// account's master, or a tampered blob).
+    case wrongMasterKey
+    /// No iCloud copy exists in this file (Castle, a local-only library
+    /// before its first Standard launch, or a format-1 file).
+    case noAppleBox
+    /// The given iCloud key does not unwrap the iCloud copy.
+    case wrongAppleKey
     /// An empty passphrase is never legal (the 14b floor, kept).
     case emptyPassphrase
     /// CryptoKit's wrap refused (not expected in practice).

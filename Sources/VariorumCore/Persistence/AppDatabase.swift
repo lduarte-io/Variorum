@@ -143,6 +143,19 @@ public struct AppDatabase: Sendable {
     /// REFUSES (`StoreLockedError` from `prepareDatabase`) — never the
     /// plain configuration, which would silently open a keyed artifact as
     /// "not a database" or, worse, create an unkeyed one.
+    /// The fingerprint of the key this store is open under (pre-13x 1a —
+    /// what snapshot filenames and the key file's name carry); nil for a
+    /// plaintext-era store or a LOCKED bound one (a locked store has no key
+    /// in hand, and a snapshot cannot be taken from it anyway).
+    public var storeKeyFingerprint: String? {
+        switch storage {
+        case .direct(_, let key):
+            return key.map(StoreKeyEnvelope.fingerprint(of:))
+        case .bound(let binding):
+            return binding.currentState()?.key.map(StoreKeyEnvelope.fingerprint(of:))
+        }
+    }
+
     public func artifactConfiguration() -> Configuration {
         switch storage {
         case .direct(_, let key):

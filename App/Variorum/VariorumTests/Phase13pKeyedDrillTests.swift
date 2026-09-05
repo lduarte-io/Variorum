@@ -65,8 +65,8 @@ struct Phase13pKeyedDrillTests {
             dials: { _ in dials },
             saveDials: { _, _ in },
             guardFor: { _ in StoreKeyGuard.inMemory(backing: InMemoryStoreKeyGuardBacking()) },
-            loadEnvelope: { try StoreKeyEnvelope.load(at: StoreKeyEnvelope.url(besideStore: $0)) },
-            saveEnvelope: { try $0.write(at: StoreKeyEnvelope.url(besideStore: $1)) },
+            loadEnvelope: { try StoreKeyEnvelope.loadCurrent(besideStore: $0) },
+            saveEnvelope: { try $0.write(at: $0.preferredURL(besideStore: $1)) },
             setAsideEnvelope: { _ in },
             stamp: { _, _ in nil },
             setStamp: { _, _, _ in })
@@ -93,7 +93,8 @@ struct Phase13pKeyedDrillTests {
         var envelope = StoreKeyEnvelope()
         try envelope.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
         try envelope.setRecoveryWrap(key: key, words: words)
-        try envelope.write(at: StoreKeyEnvelope.url(besideStore: storeURL))
+        try envelope.write(at: envelope.preferredURL(besideStore: storeURL))
+        let keyFileName = envelope.preferredURL(besideStore: storeURL).lastPathComponent
 
         // The backup folder: the app's own snapshot door + the traveling
         // sidecar (the Batch 2 finding's mechanism — the wraps ride).
@@ -101,7 +102,7 @@ struct Phase13pKeyedDrillTests {
         let backupURL = backupFolder.appendingPathComponent("variorum-backup-drill.sqlite")
         try source.backup(to: backupURL)
         StoreBackup.copyKeyEnvelope(
-            StoreKeyEnvelope.url(besideStore: storeURL), into: backupFolder)
+            StoreKeyEnvelope.locate(besideStore: storeURL), into: backupFolder)
         source.asRebindable().binding.lock()  // the "old machine" closes
 
         // The backup is CIPHERTEXT and carries no prose in the clear.
@@ -110,8 +111,8 @@ struct Phase13pKeyedDrillTests {
         #expect(try !fileContains(prose, at: backupURL),
                 "zero plaintext in the backup file")
         #expect(FileManager.default.fileExists(
-            atPath: backupFolder.appendingPathComponent(StoreKeyEnvelope.filename).path),
-            "the recovery legs travel WITH the copies")
+            atPath: backupFolder.appendingPathComponent(keyFileName).path),
+            "the recovery legs travel WITH the copies, under the key's fingerprint name")
 
         // The restore (runbook §3's moves): the snapshot lands as the store,
         // the sidecar beside it. One fresh folder per leg — each leg is a
@@ -123,8 +124,8 @@ struct Phase13pKeyedDrillTests {
             let restored = folder.appendingPathComponent("variorum.sqlite")
             try FileManager.default.copyItem(at: backupURL, to: restored)
             try FileManager.default.copyItem(
-                at: backupFolder.appendingPathComponent(StoreKeyEnvelope.filename),
-                to: StoreKeyEnvelope.url(besideStore: restored))
+                at: backupFolder.appendingPathComponent(keyFileName),
+                to: restored.deletingLastPathComponent().appendingPathComponent(keyFileName))
             return restored
         }
 

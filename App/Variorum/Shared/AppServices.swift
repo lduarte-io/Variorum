@@ -208,9 +208,10 @@ final class AppServices {
                 // machinery — see StoreBackup.Configuration.runbookText.
                 configuration: StoreBackup.Configuration(
                     runbookText: backupRunbookText,
-                    // 13p: the wraps sidecar rides into every backup folder
-                    // (the new-machine passphrase/recovery restore legs).
-                    keyEnvelopeSourceURL: StoreKeyEnvelope.url(besideStore: storeURL)))
+                    // 13p: the wraps key file rides into every backup folder
+                    // (the new-machine passphrase/recovery restore legs);
+                    // pre-13x 1a: located beside the STORE at run time.
+                    keyEnvelopeStoreURL: storeURL))
         } else {
             backup = nil
         }

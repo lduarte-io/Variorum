@@ -178,10 +178,10 @@ struct StoreKeyEnvelopeTests {
     @Test func newerFormatRefusesEveryOperation() throws {
         let key = StoreKey.mint()
         var envelope = StoreKeyEnvelope(formatVersion: StoreKeyEnvelope.currentFormatVersion + 1)
-        #expect(throws: StoreKeyEnvelopeError.newerFormat(2)) {
+        #expect(throws: StoreKeyEnvelopeError.newerFormat(StoreKeyEnvelope.currentFormatVersion + 1)) {
             try envelope.setPassphraseWrap(key: key, passphrase: "x", kdf: fastKDF())
         }
-        #expect(throws: StoreKeyEnvelopeError.newerFormat(2)) {
+        #expect(throws: StoreKeyEnvelopeError.newerFormat(StoreKeyEnvelope.currentFormatVersion + 1)) {
             try envelope.unwrapKey(passphrase: "x")
         }
     }
@@ -199,7 +199,7 @@ struct StoreKeyEnvelopeTests {
         let dir = try temporaryDirectory()
         defer { try? FileManager.default.removeItem(at: dir) }
         let storeURL = dir.appendingPathComponent("variorum.sqlite")
-        let url = StoreKeyEnvelope.url(besideStore: storeURL)
+        let url = StoreKeyEnvelope.legacyURL(besideStore: storeURL)
         #expect(url.lastPathComponent == StoreKeyEnvelope.filename)
         #expect(url.deletingLastPathComponent() == storeURL.deletingLastPathComponent())
 
@@ -243,5 +243,165 @@ struct StoreKeyEnvelopeTests {
         let bytes = try Data(contentsOf: url)
         #expect(bytes.range(of: key.data) == nil)
         #expect(bytes.range(of: Data(key.hexEncoded.utf8)) == nil)
+    }
+}
+
+/// pre-13x batch 1a — THE KEY FILE, FORMAT 2 (the postures design §3.5).
+/// Red-on-old by construction: the format-2 fields, the master/apple roads
+/// and the fingerprint naming do not exist on the pre-1a tree (compile
+/// failure); the format-1 READ pin below is the behavioural half — a
+/// 13p-era file decodes with the new fields nil, never refuses.
+@Suite("pre-13x 1a — the key file, format 2")
+struct StoreKeyEnvelopeFormat2Tests {
+    private func fastKDF() -> PassphraseKDF.Descriptor {
+        PassphraseKDF.Descriptor(
+            algorithm: PassphraseKDF.algorithmArgon2id, argon2Version: 0x13,
+            memoryKiB: 256, iterations: 1, parallelism: 1,
+            salt: PassphraseKDF.randomSalt(), outputBytes: 32)
+    }
+
+    private func temporaryDirectory() throws -> URL {
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("variorum-env2-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+        return url
+    }
+
+    /// A 13p-era file (formatVersion 1, passphrase + recovery only) reads as
+    /// "no master copy, no iCloud copy, unknown descriptor" — and still
+    /// opens by its passphrase.
+    @Test func aFormatOneFileReadsWithTheNewFieldsNilAndStillOpens() throws {
+        let key = StoreKey.mint()
+        var legacy = StoreKeyEnvelope(formatVersion: StoreKeyEnvelope.formatVersion1)
+        try legacy.setPassphraseWrap(key: key, passphrase: "pp", kdf: fastKDF())
+        legacy.formatVersion = StoreKeyEnvelope.formatVersion1  // a file the OLD build wrote
+        let encoder = JSONEncoder()
+        var object = try JSONSerialization.jsonObject(with: encoder.encode(legacy)) as! [String: Any]
+        // Exactly the 13p on-disk shape: no format-2 keys at all.
+        for gone in ["master", "apple", "appleKeyID", "vaultKDF", "vaultCorpusKeyID"] {
+            object.removeValue(forKey: gone)
+        }
+        let bytes = try JSONSerialization.data(withJSONObject: object)
+        let read = try JSONDecoder().decode(StoreKeyEnvelope.self, from: bytes)
+        #expect(read.formatVersion == 1)
+        #expect(read.master == nil, "no master copy")
+        #expect(read.apple == nil && read.appleKeyID == nil, "no iCloud copy")
+        #expect(read.vaultKDF == nil && read.vaultCorpusKeyID == nil, "unknown descriptor")
+        #expect(try read.unwrapKey(passphrase: "pp") == key, "the passphrase road is untouched")
+        #expect(throws: StoreKeyEnvelopeError.noMasterBox) { _ = try read.unwrapKey(master: SymmetricKey(size: .bits256)) }
+        #expect(throws: StoreKeyEnvelopeError.noAppleBox) { _ = try read.unwrapKey(apple: SymmetricKey(size: .bits256)) }
+    }
+
+    /// A wrap landing on a format-1 envelope writes it as format 2.
+    @Test func aWrapLandingRewritesAFormatOneFileAsFormatTwo() throws {
+        let key = StoreKey.mint()
+        var envelope = StoreKeyEnvelope(formatVersion: StoreKeyEnvelope.formatVersion1)
+        #expect(envelope.formatVersion == 1)
+        try envelope.setPassphraseWrap(key: key, passphrase: "pp", kdf: fastKDF())
+        #expect(envelope.formatVersion == StoreKeyEnvelope.currentFormatVersion)
+    }
+
+    @Test func theMasterRoadRoundTripsAndRefusesAForeignMaster() throws {
+        let key = StoreKey.mint()
+        let master = SymmetricKey(size: .bits256)
+        var envelope = StoreKeyEnvelope()
+        try envelope.masterBox(key: key, under: master)
+        #expect(envelope.master != nil)
+        #expect(envelope.keyFingerprint == StoreKeyEnvelope.fingerprint(of: key))
+        #expect(try envelope.unwrapKey(master: master) == key)
+        #expect(throws: StoreKeyEnvelopeError.wrongMasterKey) {
+            _ = try envelope.unwrapKey(master: SymmetricKey(size: .bits256))
+        }
+    }
+
+    @Test func theAppleRoadRoundTripsRecordsItsKeyIDAndCanBeRemoved() throws {
+        let key = StoreKey.mint()
+        let apple = SymmetricKey(size: .bits256)
+        var envelope = StoreKeyEnvelope()
+        try envelope.appleBox(key: key, under: apple, appleKeyID: "apple-key-1")
+        #expect(envelope.appleKeyID == "apple-key-1")
+        #expect(try envelope.unwrapKey(apple: apple) == key)
+        #expect(throws: StoreKeyEnvelopeError.wrongAppleKey) {
+            _ = try envelope.unwrapKey(apple: SymmetricKey(size: .bits256))
+        }
+        try envelope.removeAppleBox()
+        #expect(envelope.apple == nil && envelope.appleKeyID == nil, "Castle: no iCloud copy")
+        #expect(throws: StoreKeyEnvelopeError.noAppleBox) { _ = try envelope.unwrapKey(apple: apple) }
+    }
+
+    @Test func theVaultReconciliationIsRecorded() throws {
+        var envelope = StoreKeyEnvelope()
+        let kdf = fastKDF()
+        try envelope.recordVaultReconciliation(kdf: kdf, corpusKeyID: "corpus-9")
+        #expect(envelope.vaultKDF == kdf)
+        #expect(envelope.vaultCorpusKeyID == "corpus-9")
+    }
+
+    /// Naming: `variorum-keys-<fp16>.json`; the legacy name parses to no
+    /// fingerprint; a writer with a fingerprint prefers the fingerprint name.
+    @Test func filesAreNamedByFingerprint() throws {
+        let key = StoreKey.mint()
+        let fp = StoreKeyEnvelope.fingerprint(of: key)
+        #expect(fp.count == 16)
+        let name = StoreKeyEnvelope.filename(forFingerprint: fp)
+        #expect(name == "variorum-keys-\(fp).json")
+        #expect(StoreKeyEnvelope.fingerprint(fromFilename: name) == fp)
+        #expect(StoreKeyEnvelope.fingerprint(fromFilename: StoreKeyEnvelope.filename) == nil)
+        #expect(StoreKeyEnvelope.fingerprint(fromFilename: "variorum-keys-nothex.json") == nil)
+        #expect(StoreKeyEnvelope.shortFingerprint(fp) == String(fp.prefix(8)))
+        let storeURL = URL(fileURLWithPath: "/tmp/lib/variorum.sqlite")
+        var envelope = StoreKeyEnvelope()
+        #expect(envelope.preferredURL(besideStore: storeURL).lastPathComponent == StoreKeyEnvelope.filename,
+                "a fingerprint-less envelope still writes under the legacy name")
+        try envelope.setPassphraseWrap(key: key, passphrase: "pp", kdf: fastKDF())
+        #expect(envelope.preferredURL(besideStore: storeURL).lastPathComponent == name)
+    }
+
+    /// `locate` finds the store's CURRENT key file without the key: the
+    /// sole fingerprint file wins over a legacy one; a legacy file alone is
+    /// it; nothing ⇒ nil.
+    @Test func locateFindsTheCurrentKeyFileWithoutTheKey() throws {
+        let dir = try temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let storeURL = dir.appendingPathComponent("variorum.sqlite")
+        #expect(StoreKeyEnvelope.locate(besideStore: storeURL) == nil)
+        #expect(try StoreKeyEnvelope.loadCurrent(besideStore: storeURL) == nil)
+
+        let legacyKey = StoreKey.mint()
+        var legacy = StoreKeyEnvelope(formatVersion: 1)
+        try legacy.setPassphraseWrap(key: legacyKey, passphrase: "pp", kdf: fastKDF())
+        legacy.formatVersion = 1
+        try legacy.write(at: StoreKeyEnvelope.legacyURL(besideStore: storeURL))
+        #expect(StoreKeyEnvelope.locate(besideStore: storeURL)?.lastPathComponent == StoreKeyEnvelope.filename,
+                "the legacy file is read for the current key when no fingerprint file exists")
+
+        let key = StoreKey.mint()
+        var current = StoreKeyEnvelope(storeID: legacy.storeID)
+        try current.setPassphraseWrap(key: key, passphrase: "pp", kdf: fastKDF())
+        try current.write(at: current.preferredURL(besideStore: storeURL))
+        let located = StoreKeyEnvelope.locate(besideStore: storeURL)
+        #expect(located?.lastPathComponent == StoreKeyEnvelope.filename(forFingerprint: StoreKeyEnvelope.fingerprint(of: key)),
+                "a fingerprint file beside the store wins over the legacy one")
+        #expect(try StoreKeyEnvelope.loadCurrent(besideStore: storeURL) == current)
+        #expect(StoreKeyEnvelope.keyFileURLs(besideStore: storeURL).count == 2)
+    }
+
+    /// Several fingerprint files (a re-key's state) resolve to the most
+    /// recently modified one — the recorded 1a interim.
+    @Test func severalFingerprintFilesResolveToTheNewest() throws {
+        let dir = try temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let storeURL = dir.appendingPathComponent("variorum.sqlite")
+        let older = StoreKey.mint(), newer = StoreKey.mint()
+        var a = StoreKeyEnvelope(); try a.setPassphraseWrap(key: older, passphrase: "pp", kdf: fastKDF())
+        var b = StoreKeyEnvelope(storeID: a.storeID); try b.setPassphraseWrap(key: newer, passphrase: "pp", kdf: fastKDF())
+        let aURL = a.preferredURL(besideStore: storeURL), bURL = b.preferredURL(besideStore: storeURL)
+        try a.write(at: aURL)
+        try b.write(at: bURL)
+        try FileManager.default.setAttributes([.modificationDate: Date(timeIntervalSince1970: 1_000)], ofItemAtPath: aURL.path)
+        try FileManager.default.setAttributes([.modificationDate: Date(timeIntervalSince1970: 2_000)], ofItemAtPath: bURL.path)
+        #expect(StoreKeyEnvelope.locate(besideStore: storeURL)?.lastPathComponent == bURL.lastPathComponent)
+        try FileManager.default.setAttributes([.modificationDate: Date(timeIntervalSince1970: 3_000)], ofItemAtPath: aURL.path)
+        #expect(StoreKeyEnvelope.locate(besideStore: storeURL)?.lastPathComponent == aURL.lastPathComponent)
     }
 }
