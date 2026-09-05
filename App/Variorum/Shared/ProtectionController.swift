@@ -287,7 +287,7 @@ final class ProtectionController {
         }.value
     }
 
-    private func refreshEnvelopeFacts() {
+    func refreshEnvelopeFacts() {
         let reading = readEnvelope()
         envelopeUnreadable = reading.isUnreadable
         hasPassphraseWrap = reading.envelope?.passphrase != nil
