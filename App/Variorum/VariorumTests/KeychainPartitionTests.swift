@@ -24,6 +24,8 @@ struct KeychainPartitionTests {
              StoreKeyGuardKeychain.gatedQuery(scope: "partition-probe", storeID: "partition-probe-store")),
             ("iCloud escrow (13p R13p-6)",
              StoreKeyGuardKeychain.escrowQuery(storeID: "partition-probe")),
+            ("device-bound session tokens (pre-13x 1a)",
+             KeychainAuthStorage.boundQuery(service: "io.lduarte.Variorum.auth-partition-probe")),
         ]
         for (name, query) in families {
             #expect(query[kSecUseDataProtectionKeychain as String] as? Bool == true,

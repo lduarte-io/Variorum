@@ -106,19 +106,92 @@ nonisolated struct AuthTokensStore: Sendable {
 
 /// The Keychain half — same Sec* pattern as the Phase 8 store, NEW service
 /// so retirement of the paste-in (Step 5) could delete the old item without
-/// touching this one. `AfterFirstUnlock` for the same background-round
-/// reason as Phase 8.
+/// touching this one.
+///
+/// **pre-13x batch 1a — DEVICE-BOUND (the postures design §1.13 / §3.1 "the
+/// session … the data-protection Keychain, `ThisDeviceOnly` — a cloned Mac
+/// signs in again").** The session lives in the DATA-PROTECTION keychain
+/// under the `session-bound` account with `WhenUnlockedThisDeviceOnly` IN
+/// FORCE (the 13p-fix R1-2 fact: `kSecAttrAccessible` is inert on macOS
+/// without `kSecUseDataProtectionKeychain`), so Migration Assistant and
+/// Time Machine no longer carry a signed-in session to other hardware — a
+/// migrated Mac signs in again (recorded, not a bug). The 9c-era
+/// file-based item under `session` migrates by the store key's own TN3137
+/// road: read legacy → re-add bound → VERIFY through the production read →
+/// delete legacy; idempotent, crash-tolerant (a lingering legacy copy is
+/// swept at the next bound hit, once per service per process), and the
+/// tokens are returned even when the move is refused. `AfterFirstUnlock`
+/// gave way to `WhenUnlocked…`: a background round after reboot-then-lock
+/// is a refused round (the design's own "a locked device never syncs").
 nonisolated enum KeychainAuthStorage {
     /// The Variorum-project session's home.
     static let variorumService = "io.lduarte.Variorum.auth"
-    /// The ONE account name every session item of this storage carries —
-    /// internal so `LegacyPasteInCleanup` names the retired item by the
-    /// same constant (round-1 NIT-2: two copies of one identity string
-    /// would let a drift turn the delete into a silent no-op).
+    /// The LEGACY account name (the 9c-era file-based item) — internal so
+    /// `LegacyPasteInCleanup` names the retired Fragments item by the same
+    /// constant (round-1 NIT-2: two copies of one identity string would let
+    /// a drift turn the delete into a silent no-op).
     static let account = "session"
+    /// The BOUND account (pre-13x 1a) — distinct from the legacy one on
+    /// purpose (the store-key family's measured lesson: a plain DP item
+    /// under a SHARED account is matched by a no-flag delete, so the
+    /// legacy sweep would destroy the bound item it just verified).
+    static let boundAccount = "session-bound"
 
     static func load(service: String) -> AuthTokens? {
-        var query = baseQuery(service: service)
+        if let bound = read(service: service, bound: true) {
+            sweepLegacyOnce(service: service)
+            return bound
+        }
+        guard let legacy = read(service: service, bound: false) else { return nil }
+        migrateLegacyItem(legacy, service: service)
+        return legacy
+    }
+
+    @discardableResult
+    static func save(_ tokens: AuthTokens, service: String) -> Bool {
+        guard add(tokens, service: service) else { return false }
+        // A fresh save supersedes any legacy copy outright.
+        deleteItem(service: service, bound: false)
+        return true
+    }
+
+    /// Released = gone from BOTH shapes, or never there (17h R3-5's
+    /// semantics; a lingering file-based session would be exactly the copy
+    /// the binding exists to end).
+    @discardableResult
+    static func clear(service: String) -> Bool {
+        let bound = deleteItem(service: service, bound: true)
+        let legacy = deleteItem(service: service, bound: false)
+        return bound && legacy
+    }
+
+    // MARK: - The TN3137 road (write → VERIFY → delete old)
+
+    private static func migrateLegacyItem(_ tokens: AuthTokens, service: String) {
+        guard add(tokens, service: service) else { return }
+        guard read(service: service, bound: true) == tokens else {
+            deleteItem(service: service, bound: true)
+            return
+        }
+        deleteItem(service: service, bound: false)
+    }
+
+    private static func add(_ tokens: AuthTokens, service: String) -> Bool {
+        guard let data = try? JSONEncoder().encode(tokens) else { return false }
+        var attributes = boundQuery(service: service)
+        attributes[kSecValueData as String] = data
+        attributes[kSecAttrAccessible as String] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+        let status = SecItemAdd(attributes as CFDictionary, nil)
+        if status == errSecDuplicateItem {
+            let update: [String: Any] = [kSecValueData as String: data]
+            return SecItemUpdate(boundQuery(service: service) as CFDictionary, update as CFDictionary)
+                == errSecSuccess
+        }
+        return status == errSecSuccess
+    }
+
+    private static func read(service: String, bound: Bool) -> AuthTokens? {
+        var query = bound ? boundQuery(service: service) : legacyQuery(service: service)
         query[kSecReturnData as String] = true
         query[kSecMatchLimit as String] = kSecMatchLimitOne
         var result: AnyObject?
@@ -129,31 +202,42 @@ nonisolated enum KeychainAuthStorage {
     }
 
     @discardableResult
-    static func save(_ tokens: AuthTokens, service: String) -> Bool {
-        guard let data = try? JSONEncoder().encode(tokens) else { return false }
-        var attributes = baseQuery(service: service)
-        attributes[kSecValueData as String] = data
-        attributes[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlock
-        let status = SecItemAdd(attributes as CFDictionary, nil)
-        if status == errSecDuplicateItem {
-            let update: [String: Any] = [kSecValueData as String: data]
-            return SecItemUpdate(baseQuery(service: service) as CFDictionary, update as CFDictionary)
-                == errSecSuccess
-        }
-        return status == errSecSuccess
+    private static func deleteItem(service: String, bound: Bool) -> Bool {
+        let status = SecItemDelete(
+            (bound ? boundQuery(service: service) : legacyQuery(service: service)) as CFDictionary)
+        return status == errSecSuccess || status == errSecItemNotFound
     }
 
-    @discardableResult
-    static func clear(service: String) -> Bool {
-        SecItemDelete(baseQuery(service: service) as CFDictionary) == errSecSuccess
+    /// The bound item's query — DP marker on EVERY verb (the family rule
+    /// `KeychainPartitionTests` asserts structurally). Internal for that pin.
+    static func boundQuery(service: String) -> [String: Any] {
+        [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: boundAccount,
+        ].merging(KeychainPartition.dataProtection) { a, _ in a }
     }
 
-    private static func baseQuery(service: String) -> [String: Any] {
+    /// The 9c-era file-based item's query (read for migration; deleted).
+    private static func legacyQuery(service: String) -> [String: Any] {
         [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecAttrAccount as String: account,
         ]
+    }
+
+    // MARK: - The once-per-process legacy sweep
+
+    private static let sweepLock = NSLock()
+    nonisolated(unsafe) private static var sweptServices: Set<String> = []
+
+    private static func sweepLegacyOnce(service: String) {
+        sweepLock.lock()
+        let alreadySwept = !sweptServices.insert(service).inserted
+        sweepLock.unlock()
+        guard !alreadySwept else { return }
+        deleteItem(service: service, bound: false)
     }
 }
 
