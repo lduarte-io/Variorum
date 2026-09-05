@@ -124,7 +124,13 @@ confidential information stored in 'io.lduarte.Variorum.e2ee-keys'…"*) — she
 **Always Allow**; then the one-time *confirm your passphrase* sheet (*Later* is safe at any point; the mark persists
 until confirmed). The DEV store's own migration wants the same prompt answered ONCE on a Debug launch (the dev scope's
 2026-08-31 login-keychain item vs a rebuilt binary) — any time before or at the sitting; the orchestrator then reads
-the `[protection] migration 2a:` lines from `log show`.
+the `[protection] migration 2a:` lines from `/usr/bin/log show` — the full path: in her zsh `log` is a BUILTIN, and the
+migration must log at a PERSISTED level (`.notice`; 2b's item 0) for `log show` to read it afterwards.
+
+**She is SIGNED OUT of the real store at this writing (her word):** at the window, after the install and the migration's
+run, she SIGNS IN first — the confirm face's vault verify and the first round both need the session — and then runs
+the 13l sanity check with her twelve words (the 1b stale-recovery-wrap defect's definitive check, moved here from
+before the sitting because the face reads the vault).
 
 ## 6. THE FIRST ROUNDS (the migration arm lands; both devices sync)
 

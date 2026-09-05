@@ -942,7 +942,7 @@ tutorial spine is SIX suites in `TutorialWalkTests.swift` addressed by TYPE name
 | # | item | owner | status |
 |---|---|---|---|
 | 1 | the shared keychain access group on both targets | U0 → U2 | done at U0 (`a37f9cd`) |
-| 2 | A crosses Mac ⇄ phone under the shared group (her two devices) | U0 → the batch 2 sitting | PENDING — five minutes on both devices at the batch 2 sitting (she is present for the migration anyway); needed before Standard's iCloud road is treated as verified, not before |
+| 2 | A crosses Mac ⇄ phone under the shared group (her two devices) | U0 → the batch 2 sitting → RUN EARLY at her authorization | RUNNING at her word (*"you can put the dev store debug app on my phone, it's fine if it replaces the release build"*): the orchestrator builds the Debug (dev-store) app from a pinned worktree at `e9e27adb` and installs it on her iPhone 17 Pro over the Release app (same bundle id — the container and her real phone library survive untouched; the real store's sync pauses until the window's install); the probe doors are gone (row 12), so the PROOF IS DATA — the phone's dev key file's `appleKeyID` equals the Mac's dev key file's (`765a12c5…`), read from the app container by `devicectl`; a MINT on the phone instead means the item had not propagated (the race the reconcile's re-land arm heals) — the time to propagation recorded either way |
 | 3 | the decision memo | U0 | done |
 | 4 | the guard against working from a library inside iCloud Drive | 13x | deferred, owned |
 | 5 | "Open a library file…" (plaintext → fresh key + identity; ciphertext + key file; the same-fingerprint second look; §14.13's reconciliation) | 13x | deferred, owned |
