@@ -1073,3 +1073,14 @@ for the cold reviewer), and every batch brief is written only after the orchestr
 batch's mechanisms assume and checked the design's claims against it (the decision 31 precedent).
 Her confirmation the same day, verbatim: *"both of those are fully accepted, I'll keep the lifetime as is."* — corner
 38 now says the lifetime stays; the 13y "may shorten" clause is gone.
+
+## V.7 The 1a implementer's snapshot corner — RULED "One key file per snapshot" (2026-09-05)
+The finding (1a's record, note 3): a backup folder held ONE key file per library key, written once and never rewritten,
+so a snapshot taken after a passphrase change sat beside a key file under the OLD word — offline it opened with the
+word the folder's file was first written under, not "the passphrase you had when it was made." Offered: one key file
+per snapshot (recommended) · keep one per key and say it honestly. **She ruled: one key file per snapshot.** Landed:
+decision 11 amended; §6, §3.5, §12 (two pins), corner 44; ledger row 42 (batch 2 builds it on 1a.2's naming); the 1a
+adjudication's item 2 closed. Superseded text: decision 11's *"Key files are named by key fingerprint and never
+overwritten by another key's file"*; §6's *"the key file beside them is named by fingerprint and NEVER overwritten by a
+different key's file — a folder holds one per library key it has ever held"*; the 1a brief's *"Per-fingerprint NAMING
+beside the store and in backup folders"* (beside the store it stands; in folders the rule is per snapshot).

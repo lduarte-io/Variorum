@@ -87,7 +87,10 @@ file is silent, stop and ask.
     follows, which is what retires an old word everywhere). *Delete the account and set sync up again* (the recovery
     road and the compromised-account road). No standalone library-key door.
 11. **Backups are never rewritten after they are written** — not at a posture change, a passphrase change or a
-    words regeneration. Key files are named by key fingerprint and never overwritten by another key's file. The
+    words regeneration. Beside the live library the key file is named by key fingerprint; in a backup folder EVERY
+    SNAPSHOT has its own key file, written with it and never rewritten (`variorum-backup-<stamp>-<fp8>.sqlite` +
+    `variorum-backup-<stamp>-<fp8>.keys.json`), so a backup opens with the passphrase and the twelve words you had
+    the day it was made — her call, over one key file per library key. The
     Castle ceremony says, once, that pre-switch backups still open through the Apple account (a limit AND a way back)
     and offers to delete the app's own; Time Machine and copies elsewhere are the user's.
 12. **The key proof.** Every mutating RPC except whole-account deletion requires proof of the master key; a bare
@@ -341,7 +344,8 @@ store (every key file of one library carries the same id); the key file for a KE
 raw key names it directly (zero derivations), and with no custody every fingerprint file beside the store is tried
 newest-first, the one whose unwrapped key opens the file winning; nothing is set aside or deleted (a folder holds one
 per library key it has ever held, §6). Written at enrollment, at every re-wrap, at every
-posture change — of the LIVE library's key file only. Format 1 files read as "no master copy, no iCloud copy,
+posture change — of the LIVE library's key file only; in a backup folder each snapshot carries its own key file, written
+with it (decision 11). Format 1 files read as "no master copy, no iCloud copy,
 unknown descriptor." **The master copy is what makes both local secret copies CACHES:** any device holding M can
 extend its own key file with no visit (§11's backfill), and the twelve words open a Castle library ONLINE through the
 vault before the local W copy has ever been landed on that device.
@@ -519,9 +523,10 @@ The 13l backups are ciphertext + key file(s), launch-if-due + daily, 14 dailies 
 made through GRDB `backup(to:)` from an OPEN keyed connection — under Castle they run **at the first unlock of the day
 if due**, plus a keyless byte-copy at lock time when due (the app's own folder only). **A backup is writing, never a
 device:** the file carries no sync key and no device identity (§3.3). Snapshots carry the key fingerprint in their
-filename (`variorum-backup-<stamp>-<fp8>.sqlite`); the key file beside them is named by fingerprint and **NEVER
-overwritten by a different key's file** — a folder holds one per library key it has ever held; legacy
-`variorum-keys.json` serves legacy snapshots. **A backup folder is never rewritten after it is written** — not at a
+filename (`variorum-backup-<stamp>-<fp8>.sqlite`); each snapshot has ITS OWN key file beside it
+(`variorum-backup-<stamp>-<fp8>.keys.json`, written with the snapshot and **NEVER rewritten**), so it opens with the
+wrappers of its day; a fingerprint-named key file in a folder serves the snapshots made before this rule (1a's
+shape — never overwritten by a different key's file), and legacy `variorum-keys.json` serves legacy snapshots. **A backup folder is never rewritten after it is written** — not at a
 passphrase change, a words regeneration or a posture change.
 **Opening a snapshot:** by whatever its key file's copies open under — the passphrase of its day, the twelve words,
 the master copy (an enrolled device's master, or the current passphrase online through the vault), and, if it was made
@@ -692,8 +697,10 @@ phone becomes Castle at its migration (Face ID with passphrase fallback) — say
   scheduled plaintext insurance is OFF after the switch and re-enabling shows the warning.
 - **Backups:** NO backup folder is EVER rewritten (the folder's bytes before == after a posture change, a passphrase
   change, a words regeneration); a same-fingerprint snapshot opens with the live library's custody / current key file;
-  the delete offer removes only the app's own pre-switch snapshots and never a post-switch one; a second key's file
-  never replaces the first; a restored snapshot enrolls with a fresh identity and never syncs before enrolling.
+  the delete offer removes only the app's own pre-switch snapshots and never a post-switch one (pairs — the snapshot
+  and its key file); a second key's file never replaces the first; each snapshot's key file is written with it and
+  never rewritten (a passphrase change between two snapshots leaves the earlier pair byte-identical and the later pair
+  under the new word — pin both); a restored snapshot enrolls with a fresh identity and never syncs before enrolling.
 - **Replace All Keys:** refused twice on a stale master (the front check; the server); the same follow as the switch.
 - **The un-followed device:** opens and reads; sync refused; the key doors unavailable with the sentence; sign out and
   delete work; the notice returns at every open; a passphrase typed to open is reused for the follow.
@@ -812,7 +819,10 @@ read ONCE per unlock** — L, M, C, J and the device identity in one gated read,
 point is pinned:** between the swap and custody (the silent custody still holds M′; the new key file's master copy
 opens the re-keyed file; the marker resumes at step 5). 43. **The account password's fourth power on a vault-less
 account** is creating the vault (racing sync setup) — loud: the owner's passphrase never opens it, the Turn On Sync door
-says so, and the remedy is deletion.
+says so, and the remedy is deletion. 44. **Snapshot pairs (decision 11 as ruled):** a snapshot taken after a passphrase
+change or a words regeneration opens OFFLINE with the new word, because its own key file was written with it; the
+earlier pairs keep their day's words; the master copy and, online, the current passphrase through the vault open every
+snapshot regardless.
 
 ## 15. BATCHES (strictly sequential; each red-on-old; the tutorial spine green every batch)
 - **0 — measurements: DONE** (`notes/plans/pre-13x-spike-memo.md`; the facts in §18). **0b — the bridge retirement:
@@ -957,6 +967,7 @@ tutorial spine is SIX suites in `TutorialWalkTests.swift` addressed by TYPE name
 | 39 | one gated read per unlock for the biometric custody item (L, M, C, J, the identity — one Touch ID prompt); a re-minted identity with a non-zero cursor reconciled as a returner | U2 (1a) | open |
 | 40 | the third crash point (between the swap and custody); a CAS refuse at a switch becomes the follow; Macs without Touch ID get Always ask only; the vault-less account's fourth account-password power said in copy | U3 | open |
 | 41 | the vault's table-level UPDATE road CLOSED (drop `key_vault_owner_update`, revoke UPDATE from `authenticated`, the definer grant + policy) — the DDL pin + the deploy's live PATCH probe | U2 (1b) | open — MUST |
+| 42 | one key file PER SNAPSHOT in backup folders (decision 11 as ruled): `StoreBackup` writes `…-<fp8>.keys.json` beside each snapshot at its time; `existingBackups` pairs them; the fingerprint-named folder file serves 1a-era snapshots; the delete offer and the restore surface handle pairs; the two §12 pins | U3 (batch 2, on 1a.2's naming) | open |
 
 ### The architect's sign-off conditions (the reasoning is in the history file)
 (i) the key proof ships in this phase's lockstep event; (ii) the descriptor-floor and never-wrap-under-a-network-key
@@ -1168,7 +1179,7 @@ The batch's evidence is pins (its kind is substrate); the drills it created and 
 
 #### ORCHESTRATOR ADJUDICATION — batch 1a (verified against git before adoption: 18 commits `2a9caea6`…`10079de2`, HEAD == `origin/main`, tree clean; the claimed deletions' only residue is three doc comments; the record's counts adopted as recorded)
 1. **Several fingerprint key files beside a live library — RULED (architect):** the store id is read from ANY of them (they agree — note 2); the key file for a KEY is chosen by FINGERPRINT — custody's raw key names it directly; with no custody, every fingerprint file beside the store is tried newest-first and the one whose unwrapped key opens the file wins. Nothing is set aside or deleted (§6's "one per library key it has ever held"; the old file is the same-fingerprint second look's road). Batch 2's re-key builds the fingerprint match; the newest-first trial is the lobby's (batch 4). §3.5 carries the sentence.
-2. **The post-passphrase-change snapshot corner — TO THE AUTHOR** (bundled at the next sitting; does not gate 1b).
+2. **The post-passphrase-change snapshot corner — RULED BY THE AUTHOR: one key file per snapshot** (decision 11 amended; §6, §3.5, §12, corner 44; ledger 42 — batch 2 builds it on 1a.2's naming; the copy's "the passphrase you had when it was made" is now literally true).
 3. **The libraryMissing doors — RULED (architect, P-2's letter):** a door that cannot act is not rendered; the copy's third door ships with 13x's road; the phone gains a restore door when a restore road exists there (the parity line at closeout names it). Content as built.
 4. **`DeviceKeyStore.clear` keeps the identity — INTENDED:** the identity is the machine's for this library (decision 13) and survives a forget exactly as it survives a sign-out; the forget door itself folds into sign-out at §13 (batch 5's deletions). A fresh id is minted only where no custody item exists.
 The two implementer readings — the identity as a provider METHOD; the dials per store id early with the legacy read-through — are ADOPTED: 1b composes `deviceIdentity()` beside `keyProof`; batch 2 retires the read-through with §11.
