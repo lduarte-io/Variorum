@@ -336,7 +336,11 @@ The SESSION: all sign in again.
 `StoreKeyEnvelope` gains `master: Data?` (L under M), `apple: Data?` + `appleKeyID: String?` (L under A),
 `vaultKDF: PassphraseKDF.Descriptor?` + `vaultCorpusKeyID: String?` (what the local P copy was last reconciled
 against); `formatVersion = 2`; files are named by key fingerprint (`variorum-keys-<fp16>.json`; the legacy
-`variorum-keys.json` reads as format 1 for the store's current key). Written at enrollment, at every re-wrap, at every
+`variorum-keys.json` reads as format 1 for the store's current key). The store id is read from ANY key file beside the
+store (every key file of one library carries the same id); the key file for a KEY is chosen by FINGERPRINT — custody's
+raw key names it directly (zero derivations), and with no custody every fingerprint file beside the store is tried
+newest-first, the one whose unwrapped key opens the file winning; nothing is set aside or deleted (a folder holds one
+per library key it has ever held, §6). Written at enrollment, at every re-wrap, at every
 posture change — of the LIVE library's key file only. Format 1 files read as "no master copy, no iCloud copy,
 unknown descriptor." **The master copy is what makes both local secret copies CACHES:** any device holding M can
 extend its own key file with no visit (§11's backfill), and the twelve words open a Castle library ONLINE through the
@@ -897,7 +901,7 @@ tutorial spine is SIX suites in `TutorialWalkTests.swift` addressed by TYPE name
 
 ### LIVE STATUS (flipped in the same commit as each piece; PENDING = unverified)
 - U0 — DONE. U1 — DONE 2026-09-04.
-- **U2 batch 1a — IN PROGRESS** (a fresh Fable implementer; brief §19; its record under §19 BATCH RECORDS — verify by `git log` before trusting). U2 batch 1b — NOT-STARTED. U3 — NOT-STARTED.
+- **U2 batch 1a — DONE** (`10079de2`; the record + the orchestrator adjudication under §19 BATCH RECORDS). **U2 batch 1b — NEXT** (a fresh Fable implementer; brief §19 1b, extended after the orchestrator read the shipped RPC + vault code). U3 — NOT-STARTED.
   U4 — NOT-STARTED. U5 — NOT-STARTED.
 
 ### THE LEDGER (every row owned)
@@ -1131,3 +1135,10 @@ The batch's evidence is pins (its kind is substrate); the drills it created and 
 2. Note 3's copy corner for batch 5.
 3. The libraryMissing face's doors (P-2): "Open an Existing Library…" is not rendered until 13x builds it, and the phone renders no restore door — is the orchestrator content with the two copy §3 doors being absent on their targets until their roads exist, or should a disabled door with its sentence render instead (a rendered door that cannot act is what P-2 forbids; the copy lists three)?
 4. `DeviceKeyStore.clear` (the CF-11 forget door, still wired to account deletion) keeps the device identity and drops the material — read as "this machine has opened this library" surviving a forget; if the forget should also retire the identity (a fresh id at the next enrollment), say so at batch 2/3.
+
+#### ORCHESTRATOR ADJUDICATION — batch 1a (verified against git before adoption: 18 commits `2a9caea6`…`10079de2`, HEAD == `origin/main`, tree clean; the claimed deletions' only residue is three doc comments; the record's counts adopted as recorded)
+1. **Several fingerprint key files beside a live library — RULED (architect):** the store id is read from ANY of them (they agree — note 2); the key file for a KEY is chosen by FINGERPRINT — custody's raw key names it directly; with no custody, every fingerprint file beside the store is tried newest-first and the one whose unwrapped key opens the file wins. Nothing is set aside or deleted (§6's "one per library key it has ever held"; the old file is the same-fingerprint second look's road). Batch 2's re-key builds the fingerprint match; the newest-first trial is the lobby's (batch 4). §3.5 carries the sentence.
+2. **The post-passphrase-change snapshot corner — TO THE AUTHOR** (bundled at the next sitting; does not gate 1b).
+3. **The libraryMissing doors — RULED (architect, P-2's letter):** a door that cannot act is not rendered; the copy's third door ships with 13x's road; the phone gains a restore door when a restore road exists there (the parity line at closeout names it). Content as built.
+4. **`DeviceKeyStore.clear` keeps the identity — INTENDED:** the identity is the machine's for this library (decision 13) and survives a forget exactly as it survives a sign-out; the forget door itself folds into sign-out at §13 (batch 5's deletions). A fresh id is minted only where no custody item exists.
+The two implementer readings — the identity as a provider METHOD; the dials per store id early with the legacy read-through — are ADOPTED: 1b composes `deviceIdentity()` beside `keyProof`; batch 2 retires the read-through with §11.
