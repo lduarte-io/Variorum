@@ -1309,3 +1309,40 @@ The batch's evidence is pins (its kind is sync/protocol; the ONE live two-device
 2. **The implementer's 1b.6 reading ADOPTED over the ruling's letter:** a `FOR SHARE → FOR UPDATE` upgrade deadlocks by construction when two rounds hold `FOR SHARE`, so the gate peeks the hash unlocked and takes `FOR UPDATE` from the start on a NULL — the ruled OUTCOME (deterministic, never the deadlock detector) met by a sounder mechanism; §3.10's sentence stands as the outcome.
 3. **U2's closing evidence is SPLIT:** the convergence suites with the proof are green; the ONE live two-device round on the real mirror is the deploy window's (the checklist §6) — U2 reads DONE-PENDING-THE-WINDOW.
 4. The forked `VaultRPCEmulation` (two byte-identical test-support copies) is a project-file hoist owned by whoever next touches the project file — recorded in KnownIssues at closeout if still forked.
+
+### BATCH 2a RECORD (custody & posture — the implementer's record; LIVE STATUS first)
+
+#### LIVE STATUS (flipped in the same commit as each piece; PENDING = unverified)
+- **2a.1 posture DERIVED + the derived effective gate + the §13 deletions + the idle dial + Lock Now + the keyless byte-copy + backups-at-first-unlock:** NOT-STARTED — settled design: `Posture` (standard · castle) derived by ONE pure function from (the vault's Apple-held copy when enrolled | the key file's `apple` copy when local-only); `StoreAtOpenMode` stays the ROUTES' enum and becomes `effective(posture:dials:)` (Standard ⇒ `.auto`; Castle ⇒ `.biometric`, or `.passphrase` under Always ask); `ProtectionDials` shrinks to Castle's two switches (`alwaysAsk`, `relockAfterIdleMinutes` default 10 · 5 · 10 · 30 · never) with a legacy read-through (`mode == passphrase` ⇒ `alwaysAsk`) until §11 retires the keys; `ProtectionPreset`, `escrowOn` / `effectiveEscrowOn` + the coupling copy, `relockOnSleepAndScreenLock` and `reminderChecksOn` as dials DELETED (Castle: re-lock always on; the reminder always on); the idle clock = time since Variorum was last used (an app-local activity stamp, never the system idle); a gate-style change moves BOTH custody items (the store key's `CustodyHandover` + the sync record) in one transition; the keyless byte-copy at lock when a backup is due (app folder only, paired with its key file — row 42's shape), integrity-checked at the next unlock.
+- **2a.2 A's item family + the key file's `apple` copy + the escrow family deleted + the probe doors deleted:** NOT-STARTED — settled design: ONE builder (`AppleKeyKeychain.query`) carrying `kSecAttrSynchronizable = true` + the shared access group + the DP marker on add / read / update / delete / probe; service `io.lduarte.Variorum.apple-key`, ACCOUNT `<scope>-apple-key` (the dev-scope discriminator, spike surprise 4); the item's value carries `{id, key}`; A is read, else minted, at the first ready of a Standard library with the key in hand, and the key file gains `apple` + `appleKeyID` through 1a's `appleBox` road; the escrow family reduced to the migration's read + ownership-guarded delete; `SharedKeychainGroupProbe` + both doors + its test DELETED; `EntitlementsTests`' shared-group pin stays.
+- **2a.3 Standard's open road (the A road; the waiting state; the probe/nudge re-based on A):** NOT-STARTED — settled design: on the `.open` route a missing bound item tries A → the key file's `apple` copy → opens and RE-LANDS the bound item (the R1-M3 heal); A absent or a different A ⇒ `.waitingForICloudKeychain` (a `StoreLobby` of kind `.waitingForICloudKeychain`, copy §2d's title/body and the different-Apple-ID sentence where A is present but not the key file's; the passphrase + words doors act; a re-probe of A every few seconds opens silently when it lands); never a silent mint over an existing store; `ProtectionLegs.escrowVerifiedLanded` → `appleKeyVerified` (A reads back AND the key file's `apple` copy unwraps to the key in hand); the tier's copy from copy §5.
+- **2a.4 row 42 — one key file per snapshot:** NOT-STARTED — settled design: `StoreBackup.performBackupIfDue` writes `variorum-backup-<stamp>-<fp8>.keys.json` (the live key file's bytes of that moment) beside the snapshot; `existingBackups` pairs them; prune removes pairs; the second leg copies pairs; the fingerprint-named folder file keeps serving 1a-era snapshots; NO folder rewritten.
+- **2a.5 the §11 migration behind the seam + the one-time confirm face on both targets:** NOT-STARTED — settled design: `ProtectionMigration.run` at the first ready (idempotent per store id; every leg logs a line, never key material): the sync custody re-scope (1a's hook) with the legacy gated E2EE item read under the lobby's ONE evaluated context; the plain item + the CF-12 opt-in items deleted; `sync_state.device_id` → custody, then the row deleted; the dial keys retired to per-store (`mode` → `alwaysAsk`); the key file's master copy + the corpus key id from held material (the vault's KDF descriptor lands when the reconcile READ fetches the vault); the legacy escrow item removed (ownership-guarded); the passphrase confirm (copy §9, verbatim) re-wraps the local P copy under the VAULT's descriptor after the typed word unwraps the vault's master — the one-time face; *Later* defers.
+- **Gate:** PENDING.
+- **Reverts:** no revert in flight. Pre-revert copies, when made, go to `App/Variorum/DerivedData/2a-prerevert/` (gitignored, inside the worktree — `git check-ignore` confirmed at this record's first commit).
+
+#### THE SETTLED DESIGN, PER ITEM (the readings the brief left to the implementer)
+*(filled per piece as it lands)*
+
+#### ORCHESTRATOR-DECIDED NOTES (settled under the mandate without the author — for the cold reviewer)
+- The four binding facts of the BATCH 2 brief: (i) `StoreAtOpenMode` becomes the DERIVED effective gate, the stored three-way setting deleted; (ii) the 13p escrow family put the RAW library key in iCloud Keychain — deleted, and every legacy escrow item REMOVED at the migration under the R1-m1 ownership guard; (iii) the keyed → keyed re-key twin of `StoreEncryptionMigration` (2b's); (iv) `pullToHead` as a named engine primitive (2b's).
+- The three-session split of batch 2 under ONE acceptance unit (2a → 2b → 2c), the unit closing at the batch 2 sitting (= the deploy window).
+- The same-Mac half of the A road is 2a's evidence; the cross-device fact (Q3) is verified at her sitting — until then the iCloud road is treated as unverified.
+
+#### PINS
+*(each red-on-old; the revert's failing assertion quoted when run)*
+
+#### DRILLS RUN
+*(the migration drill's inventory; the A round trip)*
+
+#### SUITE COUNTS
+PENDING.
+
+#### HANDED FORWARD
+*(to 2b, 2c, batch 3, the window)*
+
+#### MACHINERY NOTES
+- The batch's DerivedData: `App/Variorum/DerivedData/pre13x-b0` (reused); logs beside it as `2a-*.log` (gitignored).
+
+#### QUESTIONS FOR THE AUTHOR / ARCHITECT
+1. **Copy §9's first sentence is stale against the final design** — *"Variorum now keeps your sync keys inside your encrypted library"* — the exact phrase `e499f5ca` corrected elsewhere (the keys live in per-store custody beside the library key, NEVER in the file). Rendered VERBATIM per the render-don't-re-derive rule and flagged here: the orchestrator should correct the copy file (copy §4's enrolled line has the true sentence: *"This Mac keeps your sync keys in its own protected Keychain, beside your library's key."*) and the string follows in one edit before the window.
