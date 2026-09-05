@@ -1330,7 +1330,14 @@ The batch's evidence is pins (its kind is sync/protocol; the ONE live two-device
 - The same-Mac half of the A road is 2a's evidence; the cross-device fact (Q3) is verified at her sitting — until then the iCloud road is treated as unverified.
 
 #### PINS
-*(each red-on-old; the revert's failing assertion quoted when run)*
+*(each red-on-old by a behavioural revert of its mechanism from the committed state `c8b3ca8c`, signatures kept, the tree restored to an empty diff after each batch; the failing assertion quoted verbatim from the run's log)*
+
+**Revert batch A (2026-09-05; `StoreBackup.writeSnapshotKeyFile` → no-op · `StoreBackup.performLockTimeCopyIfDue` → nil · `StoreLobby.openWithAppleKey` → `.appleKeyAbsent` always · `ProtectionMigration.run` without its detached hop; suites `SnapshotPairTests` · `Phase13pLobbyTests` · `ProtectionMigrationTests` — 23 tests, 7 red with 8 issues, the other 16 green):**
+- **Row 42 — one key file per snapshot** (`writeSnapshotKeyFile` reverted): `eachSnapshotsKeyFileIsWrittenWithItAndNeverRewritten` — `SnapshotPairTests.swift:77: Expectation failed: (FileManager.default).fileExists(atPath: firstPair.path …) → false` and `:79: Expectation failed: try StoreKeyEnvelope.load(at: firstPair) → nil`; `pruningRemovesTheSnapshotAndItsPair` — `:150: Expectation failed: (FileManager.default).fileExists(atPath: StoreBackup.pairedKeyFile(for: urls[2]).path …)` (no pair ever existed to prune).
+- **Row 7 — the keyless byte-copy at lock** (`performLockTimeCopyIfDue` reverted): `theLockTimeCopyIsKeylessCiphertextPairedAndCheckedAtTheNextRun` — `SnapshotPairTests.swift:190: Expectation failed: StoreBackup.performLockTimeCopyIfDue(storeURL: …) → nil`.
+- **§3.8 — Standard's open road** (`openWithAppleKey` reverted): `aStandardLibraryWithAMissingBoundItemOpensThroughTheAppleKey` — `Phase13pLobbyTests.swift:478: Issue recorded` (the bootstrap never reaches `.ready`; the `#require` on the ready state); `anAbsentAppleKeyIsTheWaitingStateWhoseDoorsActAndWhoseProbeOpensWhenALands` — `:580: Expectation failed: opened` (A landed in the scripted Keychain and the probe never opened); `anotherAppleIDsKeyRendersTheDifferentAppleIDSentence` — `:609: Expectation failed: (lobby → Variorum.StoreLobby).differentAppleID → false`. (The waiting state's own doors and the copy pins stayed green — they script A absent, which the revert also says.)
+- **The KeychainOffMain law on the migration** (the detached hop reverted): `theKeychainLegsNeverRunOnTheMainThread` — `ProtectionMigrationTests.swift:266: Expectation failed: (w.onMain → ["legacyPlainMaterial", "loadLegacyEscrow"]).isEmpty → false` — the exact shape that parked the test host behind the login-keychain prompt.
+
 
 #### DRILLS RUN
 - **The migration drill (`ProtectionMigrationDrillTests`, opt-in, run once 2026-09-05 in the signed test host — a scratch encrypted store dressed in the 13p-era shape under a THROWAWAY scope: the 14b plain E2EE item under a throwaway service, the legacy-scope bound store-key item, the legacy synchronizable escrow item holding the RAW key, a `sync_state.device_id` row, the 13p dial keys; the vault's word scripted as Castle):**
