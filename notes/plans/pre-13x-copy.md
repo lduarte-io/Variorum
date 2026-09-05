@@ -323,9 +323,12 @@ Button: *Choose Where…*
 
 ## 5. NOTICES AND ONE-TIME PROMPTS
 
-**Passphrase changed elsewhere (a one-time notice, post-unlock):** *Your passphrase was changed on [device] on [day].
-Use the new one here the next time you need a passphrase; until then this Mac still takes the old one.* Button: *OK*.
-The same for regenerated words (*Your twelve words were regenerated on [device] on [day]…*).
+**Passphrase changed elsewhere (a dismissable banner at every open, until the new word has been used here):** *Your
+passphrase was changed on [device] on [day]. Use the new one here when you can — this Mac still takes the old one until
+you do.* Buttons: *Enter It Now…* · dismiss. The same for regenerated words (*Your twelve words were regenerated on
+[device] on [day]…*).
+**A retired passphrase at a key door (Change Passphrase's current-passphrase field, Replace All Keys, the posture
+switches):** *That's a passphrase you've since changed. Enter the current one — or use Touch ID, or your twelve words.*
 **Waiting for your passphrase (the persistent banner on a device that has not followed a rotation):** *Sync is paused
 until you enter your passphrase once — your keys were replaced on [device] on [day].* Button: *Enter…* — and on every
 key door meanwhile: *Pick up your new keys first — enter your passphrase.*
