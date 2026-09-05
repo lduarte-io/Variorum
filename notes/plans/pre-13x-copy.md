@@ -246,7 +246,8 @@ Library…* · *Start a New Library* (sub-line: *A new library starts empty and 
 characters.* Breached-password refusal (Supabase leaked-password protection): *That password has appeared in
 a known data breach — choose another.*
 **Signed in, no sync yet:** *Sync isn't set up on this account.* Button: *Turn On Sync…* (→ 2a)
-**Enrolled:** *Sync is on. This Mac holds your keys inside your library.* Line: keystone 3.
+**Enrolled:** *Sync is on. This Mac keeps your sync keys in its own protected Keychain, beside your library's key.*
+Line: keystone 3.
 **Keys don't match (re-enroll):** *This account's keys changed since this Mac joined — or this library came
 from another account. Enter your passphrase to connect it; everything here will upload.* Standard addendum:
 *Or wait a moment — your Apple account can hand over the key.*
