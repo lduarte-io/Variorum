@@ -330,7 +330,8 @@ the VAULT's current copy, never the local key file — a retired word is refused
 library; Touch ID passes; forgot → Touch ID or the words. A passphrase or words change is a convenience act (§1.10);
 the security act is Replace All Keys, one tick away on the same screen.
 **THE OWNER DISTINCTION.** If the vault's corpus key id DIFFERS from the key file's recorded one, the local
-copy stands as a road, and after unlock the device lands in one of two states: **same owner ⇒ the account's keys
+copy stands as a road, and after unlock the device lands in one of two states — told apart by comparing the
+library's rows' `owner_id` stamp (the account that last synced them) with the signed-in account's user id: **same owner ⇒ the account's keys
 were ROTATED (entering Castle, Replace All Keys) ⇒ the FOLLOW** (§7); **different owner ⇒ a different vault** (a
 deleted-then-recreated account; a library moved between accounts) ⇒ *"this account's keys don't match this library —
 re-enroll"* (the enrollment row of §5 re-stamps and `resyncReinitialize`s). **A change on another account can never
@@ -741,7 +742,7 @@ both devices, the `/Applications` refresh and the phone install. **The delete-an
 store and the fake server only.**
 
 ## 16. OPEN
-Nothing in the design. **Her acts pending:** Q3's phone leg (optional — the shared-group probe on both devices); the
+Nothing in the design. **Her acts pending:** Q3's phone leg at the batch 2 sitting (the shared-group probe on both devices, five minutes); the
 lockstep deploy window (after 1b, immediately before batch 2's migration + install); at the batch 2 sitting: her phone's
 move to Castle and the one-time passphrase confirm on both devices; the sizing flag (three phase-sized units under
 one theme — one phase with drills as gates, or a split after U3; U2 proceeds either way); 13s re-voices the copy later.
@@ -806,7 +807,7 @@ tutorial spine is SIX suites in `TutorialWalkTests.swift` addressed by TYPE name
 | # | item | owner | status |
 |---|---|---|---|
 | 1 | the shared keychain access group on both targets | U0 → U2 | done at U0 (`a37f9cd`) |
-| 2 | A crosses Mac ⇄ phone under the shared group (her two devices) | U0 | PENDING her sitting (both DEBUG doors built) |
+| 2 | A crosses Mac ⇄ phone under the shared group (her two devices) | U0 → the batch 2 sitting | PENDING — five minutes on both devices at the batch 2 sitting (she is present for the migration anyway); needed before Standard's iCloud road is treated as verified, not before |
 | 3 | the decision memo | U0 | done |
 | 4 | the guard against working from a library inside iCloud Drive | 13x | deferred, owned |
 | 5 | "Open a library file…" (plaintext → fresh key + identity; ciphertext + key file; the same-fingerprint second look; §14.13's reconciliation) | 13x | deferred, owned |
