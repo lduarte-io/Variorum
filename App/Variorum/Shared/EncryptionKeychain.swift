@@ -327,10 +327,18 @@ nonisolated struct DeviceKeyStore: Sendable {
             // from the posture (the key file beside the store; the 13p-era
             // stored mode until §11 retires it) and Castle's gate style.
             let store = defaults()
+            // pre-13x 2b (corner 45): the raw library key's PRESENCE in its
+            // silent item is what tells Standard-waiting from Castle for a
+            // key file with no Apple copy — the sync record must follow the
+            // library key's actual shape, never a guess from the wraps.
+            let rawKeyCustody: RawKeyCustody =
+                StoreKeyCustody.deviceKeychain(scope: scope, storeID: custody.storeID).load() != nil
+                ? .silent : .gatedOrNone
             let facts = RoutePostureFacts(
                 legacyMode: ProtectionDefaults.legacyMode(
                     scope: scope, storeID: custody.storeID, in: store),
-                keyFile: storeURL.flatMap { try? StoreKeyEnvelope.loadCurrent(besideStore: $0) })
+                keyFile: storeURL.flatMap { try? StoreKeyEnvelope.loadCurrent(besideStore: $0) },
+                rawKeyCustody: rawKeyCustody)
             return SyncCustodyShape(mode: StoreAtOpenMode.effective(
                 posture: facts.posture,
                 dials: ProtectionDefaults.dials(scope: scope, storeID: custody.storeID, in: store)))

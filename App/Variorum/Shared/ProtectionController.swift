@@ -212,10 +212,13 @@ final class ProtectionController {
 
     func adoptResident(_ key: StoreKey?) {
         residentKey = key
+        residentAdopted = true
+        refreshEnvelopeFacts()
     }
 
     func dropResident() {
         residentKey = nil
+        residentAdopted = false
     }
 
     /// The idle clock's stamp (decision 18): called from the Mac's event
@@ -240,13 +243,31 @@ final class ProtectionController {
     }
 
     /// THE DERIVATION, applied: the legacy mode (the read-through, until
-    /// §11), the vault's last reading, the key file.
+    /// §11), the vault's last reading, the key file — and (corner 45,
+    /// pre-13x 2b) the raw key's custody shape as this controller knows
+    /// it without a Keychain hop: a RESIDENT key exists only under a
+    /// demanded gate (the lobby adopted it), so after the bootstrap has
+    /// adopted, resident ⇒ gated-or-nowhere and no resident ⇒ the silent
+    /// item; before adoption the shape is unknown (the route derives with
+    /// the real presence reads).
     private func refreshPosture(keyFile: StoreKeyEnvelope?) {
+        let custody: RawKeyCustody
+        if residentAdopted {
+            custody = residentKey != nil ? .gatedOrNone : .silent
+        } else {
+            custody = .unknown
+        }
         posture = Posture.derive(
             legacyMode: gate.legacyMode(scope, configuration.resolvedStoreID()),
             vaultHasAppleHeldCopy: vaultReading?.hasAppleHeldCopy,
-            keyFile: keyFile)
+            keyFile: keyFile,
+            rawKeyCustody: custody)
     }
+
+    /// Set once the bootstrap has handed the unlocked key over (nil under
+    /// Standard — the silent item releases on demand): from then on the
+    /// resident's presence is the custody shape (corner 45).
+    @ObservationIgnored private var residentAdopted = false
 
     private func loadEnvelope() -> StoreKeyEnvelope? {
         readEnvelope().envelope

@@ -295,25 +295,62 @@ nonisolated enum StoreLaunchRoute: Equatable, Sendable {
 nonisolated struct RoutePostureFacts: Sendable {
     var legacyMode: StoreAtOpenMode?
     var keyFile: StoreKeyEnvelope?
+    /// pre-13x 2b (corner 45): where the raw library key sits — read by
+    /// presence at the route (the silent item's non-prompting read, the
+    /// gated item's non-prompting probe); `.unknown` where a caller cannot
+    /// read custody.
+    var rawKeyCustody: RawKeyCustody = .unknown
 
     var posture: Posture {
-        Posture.derive(legacyMode: legacyMode, vaultHasAppleHeldCopy: nil, keyFile: keyFile)
+        Posture.derive(
+            legacyMode: legacyMode, vaultHasAppleHeldCopy: nil, keyFile: keyFile,
+            rawKeyCustody: rawKeyCustody)
     }
 }
 
 nonisolated extension StoreLaunchGate {
     /// The effective gate at the route, from the gate's own reads: the
-    /// legacy mode (the read-through), the key file (posture) and the
-    /// dials (style). An UNREADABLE key file reads as no key file for the
-    /// posture (a demanded gate still routes to its lobby through the
+    /// legacy mode (the read-through), the key file (posture), the raw
+    /// key's custody SHAPE (corner 45 — presence only, never an unlock) and
+    /// the dials (style). An UNREADABLE key file reads as no key file for
+    /// the posture (a demanded gate still routes to its lobby through the
     /// legacy mode while it survives; after §11 an unreadable file opens
     /// the Standard road, where the open refuses typed — P1/P11's honesty
     /// is the lobby's and the controller's, never a silent mint).
+    ///
+    /// pre-13x 2b item (0): the route TRIES THE APPLE LANDING BEFORE IT
+    /// DERIVES — a Standard-waiting key file (no `apple` copy, the raw key
+    /// in the silent item) whose A is readable now gets its copy landed
+    /// here, so the one route between a refused landing and the next
+    /// ready reads Standard by the copy itself, not only by the shape.
     func effectiveGate(scope: String, storeID: String?, storeURL: URL?) -> StoreAtOpenMode {
+        let guardSeam = guardFor(scope)
+        let custody = rawKeyCustody(guardSeam: guardSeam)
+        var reading = readEnvelope(storeURL)
+        if custody == .silent, let storeURL, let envelope = reading.envelope,
+           envelope.apple == nil, envelope.passphrase != nil,
+           let key = guardSeam.loadAuto(), envelope.belongs(to: key),
+           let apple = appleKeyFor(scope).read() {
+            var landed = envelope
+            if (try? landed.appleBox(key: key, under: apple.symmetricKey, appleKeyID: apple.id)) != nil,
+               (try? saveEnvelope(landed, storeURL)) != nil {
+                reading = .loaded(landed)
+            }
+        }
         let facts = RoutePostureFacts(
             legacyMode: legacyMode(scope, storeID),
-            keyFile: readEnvelope(storeURL).envelope)
+            keyFile: reading.envelope,
+            rawKeyCustody: custody)
         return StoreAtOpenMode.effective(posture: facts.posture, dials: dials(scope, storeID))
+    }
+
+    /// The raw key's custody shape by PRESENCE (corner 45): the silent
+    /// item releases on a non-prompting read; the gated item answers a
+    /// non-prompting probe; neither ⇒ nowhere (Always ask, or never
+    /// minted). Never an unlock.
+    func rawKeyCustody(guardSeam: StoreKeyGuard) -> RawKeyCustody {
+        if guardSeam.loadAuto() != nil { return .silent }
+        return .gatedOrNone
     }
 }
 

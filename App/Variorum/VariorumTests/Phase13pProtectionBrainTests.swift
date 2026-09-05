@@ -68,6 +68,35 @@ struct ProtectionDialsTests {
         #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: wordsOnly) == .standard)
     }
 
+    /// CORNER 45 (pre-13x 2b item (0); the 2a adjudication's ruling 2): a
+    /// refused Apple landing never makes Castle. A local-only key file with
+    /// a passphrase wrap and NO `apple` copy is Castle only when the raw
+    /// key's custody is the gated item or nowhere (Castle was ENTERED);
+    /// with the raw key in the SILENT bound item it is Standard-waiting —
+    /// the state a refused landing followed by a passphrase set leaves —
+    /// never a lock. RED ON OLD: arm (c) read every such file as Castle.
+    @Test func aRefusedAppleLandingNeverMakesCastle() throws {
+        let key = StoreKey.mint()
+        var waiting = StoreKeyEnvelope()
+        try waiting.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
+        #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: waiting,
+                               rawKeyCustody: .silent) == .standard,
+                "the raw key in the silent item: Standard-waiting, whatever the wraps say")
+        #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: waiting,
+                               rawKeyCustody: .gatedOrNone) == .castle,
+                "the raw key behind Touch ID or nowhere: Castle was entered")
+        #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: waiting,
+                               rawKeyCustody: .unknown) == .castle,
+                "a caller that cannot read custody keeps the older reading")
+        // The shape never overrides the vault (decision 8) or an Apple copy.
+        #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: false, keyFile: waiting,
+                               rawKeyCustody: .silent) == .castle)
+        var landed = waiting
+        try landed.appleBox(key: key, under: AppleKey.mint().symmetricKey, appleKeyID: "a")
+        #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: landed,
+                               rawKeyCustody: .gatedOrNone) == .standard)
+    }
+
     /// The pre-2a read-through (§11 retires it): the 13p-era stored mode
     /// decides until the migration runs — her Mac (Biometric) routes to
     /// its lobby, her phone (silent) opens silently once more.
@@ -167,6 +196,22 @@ struct ProtectionCopyTests {
         #expect(ProtectionCopy.idleLabel == "Lock after time away")
         #expect(ProtectionCopy.keystoneOpenMeansReadable.hasPrefix(
             "While Variorum is open and unlocked, everything in it is readable"))
+    }
+
+    /// pre-13x 2b item (0): her migration's one-time message (copy §9)
+    /// renders the CORRECTED sentence — the sync keys live in this Mac's
+    /// own protected Keychain beside the library's key, NEVER in the
+    /// library file. RED ON OLD: the 2a string said "inside your
+    /// encrypted library" (the 2a record's questions 1 and 4).
+    @Test func theMigrationConfirmRendersCopyNinesCorrectedSentence() {
+        #expect(ProtectionCopy.migrationConfirmBody
+            == "Variorum now keeps your sync keys in this Mac's own protected Keychain, "
+            + "beside your library's key — never in the library file — and your account "
+            + "is in Castle. Nothing else changed. Confirm your passphrase once to finish.")
+        #expect(!ProtectionCopy.migrationConfirmBody.contains("inside your encrypted library"),
+                "the design's §3.3: never in the library file")
+        #expect(ProtectionCopy.migrationConfirmDoor == "Confirm…")
+        #expect(ProtectionCopy.migrationLaterDoor == "Later")
     }
 
     @Test func envelopeRefusalsSpeakInWords() {

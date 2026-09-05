@@ -190,10 +190,15 @@ nonisolated extension ProtectionCopy {
 
     // MARK: - §9 Her migration's one-time messages (Mac + phone, once each)
 
+    /// pre-13x 2b item (0) — the CORRECTED sentence (the 2a adjudication's
+    /// ruling 1): the sync keys live in this device's own protected
+    /// Keychain beside the library's key — NEVER in the library file (the
+    /// design's §3.3; the phrase `e499f5ca` corrected everywhere else).
     static let migrationConfirmBody =
-        "Variorum now keeps your sync keys inside your encrypted library, and your "
-        + "account is in Castle. Nothing else changed. Confirm your passphrase once "
-        + "to finish."
+        "Variorum now keeps your sync keys in this \(deviceName)'s own protected "
+        + "Keychain, beside your library's key — never in the library file — and "
+        + "your account is in Castle. Nothing else changed. Confirm your passphrase "
+        + "once to finish."
     static let migrationConfirmDoor = "Confirm…"
     static let migrationLaterDoor = "Later"
     static let migrationDoneBody =

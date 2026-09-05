@@ -52,17 +52,45 @@ nonisolated enum Posture: String, Sendable, Codable {
     ///    what it is is a Standard library whose Apple copy has not landed
     ///    (the exposed nudge's state, §14.20), never a lock.
     /// 4. No key file at all ⇒ a fresh library, born Standard (§14.26).
+    ///
+    /// **Corner 45 (pre-13x 2b item (0); the 2a adjudication's ruling 2 —
+    /// a refused Apple landing never makes Castle):** Castle is ENTERED,
+    /// and entering moves the raw library key behind Touch ID or nowhere;
+    /// so a local-only key file with NO `apple` copy derives Castle only
+    /// when the raw key's custody is the gated item or nowhere
+    /// (`rawKeyCustody == .gatedOrNone`) — with the raw key in the SILENT
+    /// bound item it is Standard-waiting (the reconcile keeps trying to
+    /// land A; the exposed nudge speaks), never a lock. The custody SHAPE
+    /// tells the two apart by presence alone, no unlock. A caller that
+    /// cannot read custody passes `.unknown` and gets arm 3's older
+    /// reading (a passphrase wrap ⇒ Castle), so nothing regresses where
+    /// the shape is not in view.
     static func derive(
         legacyMode: StoreAtOpenMode?,
         vaultHasAppleHeldCopy: Bool?,
-        keyFile: StoreKeyEnvelope?
+        keyFile: StoreKeyEnvelope?,
+        rawKeyCustody: RawKeyCustody = .unknown
     ) -> Posture {
         if let legacyMode { return legacyMode.isDemanded ? .castle : .standard }
         if let vaultHasAppleHeldCopy { return vaultHasAppleHeldCopy ? .standard : .castle }
         guard let keyFile else { return .standard }
         if keyFile.apple != nil { return .standard }
-        return keyFile.passphrase != nil ? .castle : .standard
+        guard keyFile.passphrase != nil else { return .standard }
+        switch rawKeyCustody {
+        case .silent: return .standard        // corner 45: Standard-waiting, never a lock
+        case .gatedOrNone, .unknown: return .castle
+        }
     }
+}
+
+/// WHERE THE RAW LIBRARY KEY SITS on this device (pre-13x 2b, corner 45) —
+/// a presence reading, never an unlock: the silent bound item (Standard's
+/// road), the gated item or nowhere (Castle was ENTERED — Touch ID or
+/// Always ask), or unknown (the caller cannot read custody).
+nonisolated enum RawKeyCustody: Equatable, Sendable {
+    case silent
+    case gatedOrNone
+    case unknown
 }
 
 // MARK: - The effective gate (was the three stored at-open modes, R13p-5)

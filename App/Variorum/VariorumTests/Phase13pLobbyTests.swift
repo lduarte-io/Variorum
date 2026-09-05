@@ -85,6 +85,56 @@ struct StoreLaunchRouteTests {
         #expect(gate(standard, dials: ProtectionDials(), legacy: .biometric) == .biometric,
                 "the 13p-era stored mode reads through until the migration retires it")
     }
+
+    /// CORNER 45 AT THE ROUTE (pre-13x 2b item (0)): a Standard library
+    /// whose Apple landing was refused and which then set a passphrase —
+    /// a passphrase wrap, no `apple` copy, the raw key in the SILENT item —
+    /// routes to the OPEN road (Standard-waiting), never to a lobby; and
+    /// the route TRIES THE LANDING before it derives: with A readable, the
+    /// key file gains its Apple copy right there. RED ON OLD: the route
+    /// read the wraps alone and sent the library to a Touch ID lobby.
+    @Test func aRefusedLandingFollowedByAPassphraseSetNeverRoutesToALobby() throws {
+        let dir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("variorum-2b-route-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let storeURL = dir.appendingPathComponent("variorum.sqlite")
+        let key = StoreKey.mint()
+        let kdf = PassphraseKDF.Descriptor(
+            algorithm: PassphraseKDF.algorithmArgon2id, argon2Version: 0x13,
+            memoryKiB: 256, iterations: 1, parallelism: 1,
+            salt: PassphraseKDF.randomSalt(), outputBytes: 32)
+        var waiting = StoreKeyEnvelope()
+        try waiting.setPassphraseWrap(key: key, passphrase: "sesame", kdf: kdf)
+        let envelopeBox = ScriptedEnvelopeBox(waiting)
+        let appleBacking = InMemoryAppleKeyBacking()  // A unreadable: the refused landing
+        let silent = InMemoryStoreKeyGuardBacking(auto: key)
+        let gate = StoreLaunchGate.scripted(
+            dials: ScriptedDialsBox(ProtectionDials()), backing: silent,
+            envelope: envelopeBox, appleKey: appleBacking)
+
+        // The raw key in the silent item, A absent: Standard-waiting — the
+        // open road, no lobby, and nothing written to the key file.
+        #expect(gate.effectiveGate(scope: "route", storeID: waiting.storeID, storeURL: storeURL) == .auto,
+                "a refused landing never makes Castle")
+        #expect(envelopeBox.value?.apple == nil, "nothing landed while A is unreadable")
+
+        // A arrives (iCloud Keychain propagated): the route lands the copy
+        // BEFORE deriving — the key file now carries it under A's id.
+        let apple = AppleKey.mint()
+        appleBacking.key = apple
+        #expect(gate.effectiveGate(scope: "route", storeID: waiting.storeID, storeURL: storeURL) == .auto)
+        let landed = try #require(envelopeBox.value)
+        #expect(landed.appleKeyID == apple.id, "the route landed the Apple copy")
+        #expect(try landed.unwrapKey(apple: apple.symmetricKey) == key)
+
+        // The same wraps with the raw key GATED (Castle was entered): the lobby.
+        let gated = InMemoryStoreKeyGuardBacking(gated: key)
+        let castleGate = StoreLaunchGate.scripted(
+            dials: ScriptedDialsBox(ProtectionDials()), backing: gated,
+            envelope: ScriptedEnvelopeBox(waiting), appleKey: InMemoryAppleKeyBacking())
+        #expect(castleGate.effectiveGate(scope: "route", storeID: waiting.storeID, storeURL: storeURL) == .biometric)
+    }
 }
 
 @MainActor

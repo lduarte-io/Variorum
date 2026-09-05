@@ -510,7 +510,10 @@ final class AppBootstrap {
         let reading = await protection.readVaultPosture?()
         let keyFile = gate.readEnvelope(storeURL).envelope
         let posture = Posture.derive(
-            legacyMode: nil, vaultHasAppleHeldCopy: reading?.hasAppleHeldCopy, keyFile: keyFile)
+            legacyMode: nil, vaultHasAppleHeldCopy: reading?.hasAppleHeldCopy, keyFile: keyFile,
+            // corner 45: an unlocked key arrived through a demanded gate;
+            // none ⇒ the silent item opened the library.
+            rawKeyCustody: unlockedKey != nil ? .gatedOrNone : .silent)
         let targetGate = StoreAtOpenMode.effective(posture: posture, dials: gate.dials(scope, storeID))
         let facts = ProtectionMigration.Facts(
             scope: scope, storeID: storeID, key: key,
