@@ -1240,13 +1240,16 @@ enum TutorialSeeder {
             + "\u{2014} you type it at every open, and nothing on this Mac "
             + "opens the library silently.",
 
-            "Two presets set those dials for you. "
-            + "\u{201C}\(ProtectionCopy.presetTitle(.standard))\u{201D}: "
-            + "\(ProtectionCopy.presetBlurb(.standard)) "
-            + "\u{201C}\(ProtectionCopy.presetTitle(.lockedDown))\u{201D}: "
-            + "\(ProtectionCopy.presetBlurb(.lockedDown)) Presets set the "
-            + "dials; the dials rule \u{2014} move one by hand and the pane "
-            + "says so instead of pretending you picked a preset.",
+            // pre-13x 2a: the presets are gone (§13) — the two POSTURES
+            // stand where they stood (copy §1's names and one-lines; the
+            // SHORT chapter of copy §7 is batch 5's re-seed).
+            "Two postures decide who holds a key. "
+            + "\u{201C}\(ProtectionCopy.postureName(.standard))\u{201D}: "
+            + "\(ProtectionCopy.postureOneLine(.standard)) "
+            + "\u{201C}\(ProtectionCopy.postureName(.castle))\u{201D}: "
+            + "\(ProtectionCopy.postureOneLine(.castle)) The posture is never "
+            + "a switch you set by hand \u{2014} it is what exists: whether "
+            + "your Apple account holds a key to a copy.",
 
             // pre-13u ninth wave (memo §4 + §1's corollary): the coupling
             // truth + spare-key-is-a-key, taught where the dial is taught.

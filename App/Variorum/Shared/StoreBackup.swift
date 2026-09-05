@@ -195,6 +195,10 @@ final class StoreBackup {
         let artifactConfiguration = database.artifactConfiguration()
         var primary = BackupRunRecord.Leg(outcome: .upToDate)
         primary.destination = BackupDestination.displayPath(directory)
+        // pre-13x 2a (row 7): the lock-time copies made keyless are checked
+        // NOW, with the key in hand — "checked the next time you unlock".
+        let lockTimeChecks = checkPendingLockTimeCopies(
+            in: directory, defaults: defaults, using: artifactConfiguration)
         do {
             let written = try performBackupIfDue(
                 database: database, directory: directory,
@@ -207,6 +211,10 @@ final class StoreBackup {
         } catch {
             primary.outcome = .failed
             primary.detail = String(describing: error)
+        }
+        if !lockTimeChecks.isEmpty {
+            primary.detail = ([primary.detail].compactMap { $0 } + lockTimeChecks)
+                .joined(separator: " · ")
         }
 
         // The recipe rides beside the copies it is about (13l row 13). The
@@ -336,6 +344,14 @@ final class StoreBackup {
                     try FileManager.default.removeItem(at: destination)
                 }
                 try FileManager.default.copyItem(at: source, to: destination)
+                // pre-13x 2a (row 42): the pair travels with its snapshot —
+                // written once beside the far copy, never rewritten.
+                let sourcePair = pairedKeyFile(for: source)
+                let farPair = pairedKeyFile(for: destination)
+                if FileManager.default.fileExists(atPath: sourcePair.path),
+                   !FileManager.default.fileExists(atPath: farPair.path) {
+                    try? FileManager.default.copyItem(at: sourcePair, to: farPair)
+                }
                 leg.outcome = .written
                 leg.file = destination.lastPathComponent
                 leg.integrity = integrityCheck(of: destination, using: artifactConfiguration)
@@ -358,7 +374,7 @@ final class StoreBackup {
             date(fromBackupURL: url).map { BackupRetention.Candidate(url: url, date: $0) }
         }
         let doomed = BackupRetention.prune(candidates, policy: policy)
-        for url in doomed { try FileManager.default.removeItem(at: url) }
+        for url in doomed { try removeSnapshotPair(url) }
         return doomed.count
     }
 
@@ -457,17 +473,128 @@ final class StoreBackup {
         let url = directory.appendingPathComponent(
             "\(filePrefix)\(stampFormatter.string(from: now))\(fingerprintSuffix).\(fileExtension)")
         try database.backup(to: url)
+        // pre-13x 2a (row 42 — decision 11 as ruled): EVERY SNAPSHOT has
+        // its own key file, written with it and never rewritten — the live
+        // key file's bytes of this moment, under the snapshot's name.
+        writeSnapshotKeyFile(
+            for: url,
+            from: configuration.keyEnvelopeStoreURL
+                .flatMap { StoreKeyEnvelope.locate(besideStore: $0) })
         try prune(directory: directory, keep: configuration.keep)
         return url
     }
 
+    // MARK: - Snapshot pairs (pre-13x 2a, row 42)
+
+    /// `variorum-backup-<stamp>-<fp8>.keys.json` — the snapshot's OWN key
+    /// file, beside it.
+    nonisolated static func pairedKeyFile(for snapshot: URL) -> URL {
+        snapshot.deletingPathExtension().appendingPathExtension("keys.json")
+    }
+
+    /// The live key file's bytes, copied beside a snapshot as its pair —
+    /// ONLY WHEN ABSENT (a pair is written with its snapshot and NEVER
+    /// rewritten: a passphrase change between two snapshots leaves the
+    /// earlier pair byte-identical and the later pair under the new word).
+    /// Quiet on failure like every leg-side write; the folder file
+    /// (`copyKeyEnvelope`) and the master copy still serve the snapshot.
+    nonisolated static func writeSnapshotKeyFile(for snapshot: URL, from liveKeyFile: URL?) {
+        guard let liveKeyFile, let bytes = try? Data(contentsOf: liveKeyFile) else { return }
+        let pair = pairedKeyFile(for: snapshot)
+        guard !FileManager.default.fileExists(atPath: pair.path) else { return }
+        try? bytes.write(to: pair, options: .atomic)
+    }
+
+    /// Remove a snapshot AND its pair (the pair goes with its snapshot;
+    /// a 1a-era snapshot has no pair — nothing extra to remove).
+    nonisolated static func removeSnapshotPair(_ snapshot: URL) throws {
+        try FileManager.default.removeItem(at: snapshot)
+        let pair = pairedKeyFile(for: snapshot)
+        if FileManager.default.fileExists(atPath: pair.path) {
+            try FileManager.default.removeItem(at: pair)
+        }
+    }
+
     /// Oldest-first pruning down to `keep` (names sort chronologically —
-    /// the stamp format is lexicographic).
+    /// the stamp format is lexicographic). Pairs go with their snapshots.
     nonisolated static func prune(directory: URL, keep: Int) throws {
         let backups = try existingBackups(in: directory)
         guard backups.count > keep else { return }
         for url in backups.dropLast(keep) {
-            try FileManager.default.removeItem(at: url)
+            try removeSnapshotPair(url)
+        }
+    }
+
+    // MARK: - The keyless byte-copy at lock time (pre-13x 2a, row 7)
+
+    /// The lock-time copies awaiting their integrity check ("checked the
+    /// next time you unlock" — copy §6): filenames, device-local.
+    nonisolated static let pendingLockTimeChecksKey = "variorum.backup.pendingLockTimeChecks"
+
+    /// **A keyless byte-copy of the CLOSED library when a backup is due**
+    /// (decision 18; the app's own folder only). Runs AFTER the pool closed
+    /// and the key dropped — no key opens the file here, so the copy is
+    /// plain `Data`, ciphertext as it sits on disk; its pair rides beside
+    /// it. A library whose `-wal` still holds frames (an unclean close) is
+    /// NOT copied — a byte-copy of a half-checkpointed store would open
+    /// inconsistent; the next unlock's keyed run takes the snapshot
+    /// instead. Returns the copy's URL, or nil (not due · no key file · a
+    /// live WAL · a write failure). Never throws.
+    @discardableResult
+    nonisolated static func performLockTimeCopyIfDue(
+        storeURL: URL, directory: URL, interval: TimeInterval,
+        defaults: UserDefaults, now: Date
+    ) -> URL? {
+        guard StoreFilePresence.classify(at: storeURL) == .encryptedOrUnknown else { return nil }
+        if let newest = try? existingBackups(in: directory).last,
+           let newestDate = date(fromBackupURL: newest),
+           now.timeIntervalSince(newestDate) < interval {
+            return nil
+        }
+        let wal = URL(fileURLWithPath: storeURL.path + "-wal")
+        if let size = try? FileManager.default.attributesOfItem(atPath: wal.path)[.size] as? Int,
+           size > 0 {
+            return nil
+        }
+        guard let keyFileURL = StoreKeyEnvelope.locate(besideStore: storeURL),
+              let envelope = try? StoreKeyEnvelope.load(at: keyFileURL),
+              let fingerprint = envelope.keyFingerprint,
+              let bytes = try? Data(contentsOf: storeURL)
+        else { return nil }
+        let url = directory.appendingPathComponent(
+            "\(filePrefix)\(stampFormatter.string(from: now))-"
+            + "\(StoreKeyEnvelope.shortFingerprint(fingerprint)).\(fileExtension)")
+        do {
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+            try bytes.write(to: url, options: .atomic)
+        } catch {
+            return nil
+        }
+        writeSnapshotKeyFile(for: url, from: keyFileURL)
+        copyKeyEnvelope(keyFileURL, into: directory)
+        try? prune(directory: directory, keep: 14)
+        var pending = defaults.stringArray(forKey: pendingLockTimeChecksKey) ?? []
+        pending.append(url.lastPathComponent)
+        defaults.set(pending, forKey: pendingLockTimeChecksKey)
+        return url
+    }
+
+    /// The next unlock's check of every pending lock-time copy, with the
+    /// store's keyed configuration (a keyless copy can only be checked
+    /// once a key is in hand). Returns one line per copy for the run
+    /// record; clears the pending list.
+    nonisolated static func checkPendingLockTimeCopies(
+        in directory: URL, defaults: UserDefaults, using configuration: GRDB.Configuration
+    ) -> [String] {
+        let pending = defaults.stringArray(forKey: pendingLockTimeChecksKey) ?? []
+        guard !pending.isEmpty else { return [] }
+        defaults.removeObject(forKey: pendingLockTimeChecksKey)
+        return pending.map { name in
+            let url = directory.appendingPathComponent(name)
+            guard FileManager.default.fileExists(atPath: url.path) else {
+                return "lock-time copy \(name): gone before it could be checked"
+            }
+            return "lock-time copy \(name): \(integrityCheck(of: url, using: configuration))"
         }
     }
 

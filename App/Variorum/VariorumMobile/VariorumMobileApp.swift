@@ -226,7 +226,9 @@ struct VariorumMobileApp: App {
         if let relock { return relock }
         let bootstrap = bootstrap
         let fresh = MobileRelockCoordinator(
-            dials: { bootstrap.currentDials },  // pre-13x 1a: per store id
+            // pre-13x 2a: the EFFECTIVE gate (derived) + Castle's dials,
+            // read fresh per store id at every fire.
+            facts: { (bootstrap.currentEffectiveGate, bootstrap.currentDials) },
             lock: { await bootstrap.lock() })
         relock = fresh
         return fresh

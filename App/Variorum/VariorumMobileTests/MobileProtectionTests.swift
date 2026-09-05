@@ -169,8 +169,10 @@ struct MobilePhoneLobbyTests {
             gated: mode == .biometric ? key : nil,
             biometryAvailable: mode == .biometric,
             biometricSucceeds: biometricSucceeds)
+        // pre-13x 2a: the key file (a passphrase wrap, no Apple copy)
+        // DERIVES Castle; the gate style is the dial.
         let gate = StoreLaunchGate.scripted(
-            dials: ProtectionDials(mode: mode), backing: backing, envelope: envelope)
+            dials: ProtectionDials(alwaysAsk: mode == .passphrase), backing: backing, envelope: envelope)
         let openCount = LockIsolated(0)
         let bootstrap = AppBootstrap(
             testOpener: {
@@ -360,8 +362,10 @@ struct MobilePhoneLobbyTests {
             var oldEnvelope = StoreKeyEnvelope()
             try oldEnvelope.setPassphraseWrap(key: oldKey, passphrase: "sesame", kdf: fastKDF())
             try oldEnvelope.write(at: oldEnvelope.preferredURL(besideStore: storeURL))
+            // pre-13x 2a: the old key file (a passphrase wrap, no Apple copy)
+            // derives Castle — Face ID by the default style.
             let backing = InMemoryStoreKeyGuardBacking(biometryAvailable: true)
-            let dialsBox = ScriptedDialsBox(ProtectionDials(mode: .biometric))
+            let dialsBox = ScriptedDialsBox(ProtectionDials())
             let gate = StoreLaunchGate.scripted(
                 dials: dialsBox, backing: backing, envelope: ScriptedEnvelopeBox(oldEnvelope))
             let openCount = LockIsolated(0)
@@ -379,7 +383,8 @@ struct MobilePhoneLobbyTests {
                 return
             }
             #expect(openCount.value == 0)
-            #expect(dialsBox.value.mode == .biometric, "the lock never resets")
+            #expect(dialsBox.perStoreDials(oldEnvelope.storeID) == nil, "the lock never resets: no dial write")
+            #expect(lobby.demand == .biometric)
             await lobby.startNewLibrary()
             #expect(lobby.lastError == nil)
             await bootstrap.awaitOpen()
@@ -389,8 +394,10 @@ struct MobilePhoneLobbyTests {
             }
             let fresh = try #require(try StoreKeyEnvelope.loadCurrent(besideStore: storeURL))
             #expect(fresh.storeID != oldEnvelope.storeID, "a NEW store id")
-            #expect(dialsBox.perStoreDials(fresh.storeID)?.mode == .auto)
-            #expect(dialsBox.value.mode == .biometric, "the old library's lock is untouched")
+            #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: fresh) == .standard,
+                    "the new library is born Standard")
+            #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: oldEnvelope) == .castle,
+                    "the old library's lock is untouched")
         }
     }
 
@@ -402,7 +409,7 @@ struct MobilePhoneLobbyTests {
             let storeURL = dir.appendingPathComponent("store.sqlite")
             let key = StoreKey.mint()
             let gate = StoreLaunchGate.scripted(
-                dials: ProtectionDials(mode: .auto),
+                dials: ProtectionDials(),
                 backing: InMemoryStoreKeyGuardBacking())
             let bootstrap = AppBootstrap(
                 testOpener: {
@@ -429,36 +436,37 @@ struct MobilePhoneLobbyTests {
 
 @Suite("13p phone — the re-lock policy (pure)")
 struct MobileRelockPolicyTests {
-    @Test func autoNeverLocksEitherWay() {
-        var dials = ProtectionDials(mode: .auto)
-        dials.relockOnSleepAndScreenLock = true
-        dials.relockAfterIdleMinutes = 5
-        #expect(!MobileRelockPolicy.locksOnLeaving(dials))
-        #expect(!MobileRelockPolicy.locksOnReturn(dials, awayFor: 60 * 60))
+    /// pre-13x 2a: Standard has no gate — leaving and returning lock
+    /// nothing (a lock there would be theater, R13p-14).
+    @Test func standardNeverLocksEitherWay() {
+        let dials = ProtectionDials(relockAfterIdleMinutes: 5)
+        #expect(!MobileRelockPolicy.locksOnLeaving(gate: .auto))
+        #expect(!MobileRelockPolicy.locksOnReturn(gate: .auto, dials: dials, awayFor: 60 * 60))
     }
 
-    @Test func leavingLocksOnlyWhenTheDialSaysSo() {
-        var dials = ProtectionDials(mode: .passphrase)
-        #expect(!MobileRelockPolicy.locksOnLeaving(dials))
-        dials.relockOnSleepAndScreenLock = true
-        #expect(MobileRelockPolicy.locksOnLeaving(dials))
+    /// Castle ALWAYS locks on leaving (decision 18 — re-lock on sleep /
+    /// screen lock is always on; backgrounding IS the phone's leaving).
+    @Test func leavingLocksUnderCastleAlways() {
+        #expect(MobileRelockPolicy.locksOnLeaving(gate: .passphrase))
+        #expect(MobileRelockPolicy.locksOnLeaving(gate: .biometric))
     }
 
     @Test func timeAwayIsAThresholdNotATrigger() {
-        var dials = ProtectionDials(mode: .biometric)
-        dials.relockAfterIdleMinutes = 15
-        #expect(!MobileRelockPolicy.locksOnReturn(dials, awayFor: 14 * 60))
-        #expect(MobileRelockPolicy.locksOnReturn(dials, awayFor: 15 * 60))
+        var dials = ProtectionDials(relockAfterIdleMinutes: 15)
+        #expect(!MobileRelockPolicy.locksOnReturn(gate: .biometric, dials: dials, awayFor: 14 * 60))
+        #expect(MobileRelockPolicy.locksOnReturn(gate: .biometric, dials: dials, awayFor: 15 * 60))
         dials.relockAfterIdleMinutes = nil
-        #expect(!MobileRelockPolicy.locksOnReturn(dials, awayFor: 24 * 60 * 60),
+        #expect(!MobileRelockPolicy.locksOnReturn(gate: .biometric, dials: dials, awayFor: 24 * 60 * 60),
                 "never means never")
     }
 
-    @Test func theAwayRowsReadAsTheyShould() {
-        #expect(MobileRelockPolicy.awayChoices.first == 0)
-        #expect(MobileRelockPolicy.awayLabel(0) == "Never")
-        #expect(MobileRelockPolicy.awayLabel(60) == "After an hour")
-        #expect(MobileRelockPolicy.awayLabel(15) == "After 15 minutes")
+    /// The four values (decision 18: 5 · 10 · 30 · never), the SAME dial
+    /// as the Mac's, in the copy's words.
+    @Test func theAwayRowsAreTheDesignsFourValues() {
+        #expect(MobileRelockPolicy.awayChoices == [5, 10, 30, nil])
+        #expect(MobileRelockPolicy.awayLabel(nil) == "never")
+        #expect(MobileRelockPolicy.awayLabel(10) == "10 minutes")
+        #expect(ProtectionDials().relockAfterIdleMinutes == 10, "the default")
     }
 }
 
@@ -466,21 +474,20 @@ struct MobileRelockPolicyTests {
 @Suite("13p phone — the re-lock coordinator & the scene seam's order")
 struct MobileRelockCoordinatorTests {
     private func coordinator(
-        _ dials: ProtectionDials, clock: LockIsolatedBox<Date>,
+        gate: StoreAtOpenMode, _ dials: ProtectionDials, clock: LockIsolatedBox<Date>,
         locks: LockIsolatedBox<Int>
     ) -> MobileRelockCoordinator {
         MobileRelockCoordinator(
-            dials: { dials },
+            facts: { (gate, dials) },
             lock: { locks.value += 1 },
             now: { clock.value })
     }
 
-    @Test func leavingLocksImmediatelyWhenTheDialIsOn() async {
-        var dials = ProtectionDials(mode: .passphrase)
-        dials.relockOnSleepAndScreenLock = true
+    @Test func leavingLocksImmediatelyUnderCastle() async {
+        let dials = ProtectionDials()
         let clock = LockIsolatedBox(Date(timeIntervalSince1970: 1_000))
         let locks = LockIsolatedBox(0)
-        let subject = coordinator(dials, clock: clock, locks: locks)
+        let subject = coordinator(gate: .passphrase, dials, clock: clock, locks: locks)
         await subject.didLeaveTheScreen()
         #expect(locks.value == 1)
         // A lock clears the stamp: the NEXT session must not be locked by
@@ -490,23 +497,21 @@ struct MobileRelockCoordinatorTests {
         #expect(locks.value == 1)
     }
 
-    @Test func aLongTripAwayLocksOnReturnAndAShortOneDoesNot() async {
-        var dials = ProtectionDials(mode: .biometric)
-        dials.relockAfterIdleMinutes = 5
+    /// pre-13x 2a: under Castle leaving ALWAYS locks (decision 18), so the
+    /// return road's threshold is exercised under Standard's silent gate
+    /// (where it never fires) and directly through the policy under
+    /// Castle (`MobileRelockPolicyTests`).
+    @Test func aReturnUnderStandardNeverLocksWhateverTheTimeAway() async {
+        let dials = ProtectionDials(relockAfterIdleMinutes: 5)
         let clock = LockIsolatedBox(Date(timeIntervalSince1970: 1_000))
         let locks = LockIsolatedBox(0)
-        let subject = coordinator(dials, clock: clock, locks: locks)
+        let subject = coordinator(gate: .auto, dials, clock: clock, locks: locks)
 
         await subject.didLeaveTheScreen()
-        #expect(locks.value == 0, "the leaving dial is off — leaving alone locks nothing")
-        clock.value = clock.value.addingTimeInterval(60)
+        #expect(locks.value == 0, "Standard has no gate — leaving locks nothing")
+        clock.value = clock.value.addingTimeInterval(6 * 60)
         #expect(await subject.didReturnToTheScreen() == false)
         #expect(locks.value == 0)
-
-        await subject.didLeaveTheScreen()
-        clock.value = clock.value.addingTimeInterval(6 * 60)
-        #expect(await subject.didReturnToTheScreen() == true)
-        #expect(locks.value == 1)
     }
 
     /// **THE ORDER IS THE LEG'S CORRECTNESS** (this file's own rule, and
@@ -515,11 +520,9 @@ struct MobileRelockCoordinatorTests {
     /// at the moment it ran — a lock that beat it would have been counted
     /// first.
     @Test func theLockLandsAfterTheWholeFlush() async {
-        var dials = ProtectionDials(mode: .passphrase)
-        dials.relockOnSleepAndScreenLock = true
         let order = LockIsolatedBox<[String]>([])
         let subject = MobileRelockCoordinator(
-            dials: { dials },
+            facts: { (.passphrase, ProtectionDials()) },
             lock: { order.value.append("lock") })
         let editors = MobileLivenessAuthority()
         let work = mobileScenePhaseChanged(
@@ -534,11 +537,13 @@ struct MobileRelockCoordinatorTests {
     /// A return that LOCKS must not first wake a sync round against the
     /// pool it is about to close.
     @Test func aReturnThatLocksDoesNotTriggerASyncRound() async {
-        var dials = ProtectionDials(mode: .passphrase)
-        dials.relockAfterIdleMinutes = 5
+        // Under Castle the leaving itself locks (decision 18); the return
+        // then finds nothing to re-lock — the seam still awaits the
+        // coordinator's answer, which is the pin's subject.
+        let dials = ProtectionDials(relockAfterIdleMinutes: 5)
         let clock = LockIsolatedBox(Date(timeIntervalSince1970: 1_000))
         let locks = LockIsolatedBox(0)
-        let subject = coordinator(dials, clock: clock, locks: locks)
+        let subject = coordinator(gate: .passphrase, dials, clock: clock, locks: locks)
         await subject.didLeaveTheScreen()
         clock.value = clock.value.addingTimeInterval(10 * 60)
 
@@ -562,7 +567,7 @@ struct MobilePhoneProtectionCopyTests {
     @Test func theSentencesNameThePhoneAndItsBiometry() {
         #expect(ProtectionCopy.deviceName == "iPhone")
         #expect(ProtectionCopy.biometryName == "Face ID")
-        #expect(ProtectionCopy.escrowOn.contains("if you lose this iPhone"))
+        #expect(ProtectionCopy.postureOneLine(.castle).contains("Your iPhone's passcode can't open your library"))
         #expect(ProtectionCopy.modeLabel(.biometric) == "Ask for Face ID")
         #expect(ProtectionCopy.lobbyPrompt(.biometric) == "Unlock your library with Face ID.")
         // The one arm the Batch-4 sweep caught: it named Touch ID as a

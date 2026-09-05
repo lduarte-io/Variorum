@@ -1,18 +1,31 @@
 //
 //  ProtectionController.swift
 //  Variorum (shared: Mac + Mobile — the custody choreography's one brain;
-//  the Mac's pane composes it this batch, the phone's faces in Batch 4)
+//  the Mac's pane and the phone's sheet compose it)
 //
 //  Phase 13p, Batch 2 — everything that CHANGES protection state: the
-//  at-open mode transitions (with the custody law — see StoreKeyGuard's
-//  header), the escrow dial's acts (R13p-6), the presets applied as
-//  dial-setters (R13p-7), setting the passphrase + landing the recovery
-//  wrap (knot 4's one-moment-two-artifacts), the R13p-9 RESET door
-//  (biometric-confirmed re-wrap — red-pinned: the old wrap must stop
-//  unwrapping), the launch reconcile (escrow consistency; foreign
-//  sidecars set ASIDE, never deleted — they are some other library's
-//  recovery legs), the reminder/nudge notice state, and — on the Mac —
-//  the re-lock monitors (sleep · screen lock · idle).
+//  at-open custody transitions (with the custody law — see StoreKeyGuard's
+//  header), setting the passphrase + landing the recovery wrap (knot 4's
+//  one-moment-two-artifacts), the R13p-9 RESET door (biometric-confirmed
+//  re-wrap — red-pinned: the old wrap must stop unwrapping), the launch
+//  reconcile (foreign sidecars set ASIDE, never deleted — they are some
+//  other library's recovery legs), the reminder/nudge notice state, and —
+//  on the Mac — the re-lock monitors (sleep · screen lock · idle).
+//
+//  pre-13x batch 2a — POSTURE IS DERIVED, NEVER A SETTING (the postures
+//  design §3.1's posture row; the BATCH 2 brief's fact i). The controller
+//  projects `posture` (Standard · Castle) from what exists — the vault's
+//  Apple-held copy when enrolled, the key file's `apple` copy when
+//  local-only, the 13p-era stored mode until §11 retires it — and the
+//  EFFECTIVE GATE from (posture, Castle's gate style); the stored three-way
+//  mode, the presets, the escrow dial and its coupling copy, the re-lock and
+//  reminder dials are GONE (§13). What remains adjustable is Castle's two
+//  switches (Always ask · Lock after time away) and Lock Now. A gate-style
+//  change moves BOTH custody items — the library key's and the sync
+//  record's — in one act (§3.3: "the same item family, the same shape").
+//  The launch reconcile's Apple arm replaces the escrow arm: under Standard
+//  with the key in hand it reads A (else mints it), lands the key file's
+//  Apple copy and VERIFIES it opens (§3.8) — the nudge's covered leg.
 //
 //  ONE SECRET (R13p-4) is enforced here procedurally, in both directions:
 //  the vault's passphrase changes FOLLOW into the store wrap
@@ -27,6 +40,17 @@ import Observation
 import os
 import VariorumCore
 
+/// What the vault says about the ACCOUNT's posture (decision 8: once a
+/// vault exists, every device follows it) — read at ready by the injected
+/// closure; nil = no vault reachable (signed out, no vault yet, offline).
+nonisolated struct VaultPostureReading: Equatable, Sendable {
+    /// An Apple-held copy of the master exists ⇒ Standard; none ⇒ Castle.
+    var hasAppleHeldCopy: Bool
+    /// The id of the A that copy is under (the key file's `appleKeyID`
+    /// must agree — the client VERIFIES, never adopts).
+    var appleKeyID: String?
+}
+
 @MainActor
 @Observable
 final class ProtectionController {
@@ -34,11 +58,9 @@ final class ProtectionController {
         var scope: String
         var storeURL: URL?
         var gate: StoreLaunchGate
-        /// The AUTOMATIC escrow reconcile runs only for the real store —
-        /// PROVISIONAL (run record): a hosted test run boots the app host
-        /// over the DEV store, and auto-writing dev keys into her iCloud
-        /// Keychain on every test run is pollution; the escrow DIAL's
-        /// deliberate acts still work on any variant.
+        /// Kept from 13p for the compositions that pass it; the 2a Apple
+        /// arm runs on EVERY variant (A is per scope by construction —
+        /// the dev build mints and reads its own, the spike's surprise 4).
         var isRealVariant: Bool
         /// The KDF parameters a fresh wrap mints (tests inject small ones;
         /// production takes the v1 default per set).
@@ -51,6 +73,11 @@ final class ProtectionController {
         /// the scope's legacy keys. Injectable for tests; the default
         /// resolves from `storeURL`.
         var storeID: (@Sendable () -> String?)? = nil
+        /// pre-13x 2a: the sync record's custody leaves for the store (the
+        /// gate-style transition moves them beside the library key's item);
+        /// production is the Keychain per store id, tests inject recorders.
+        var syncCustodyLeaves: (@Sendable (_ storeID: String) -> E2EECustodyLeaves)? = nil
+        var syncCustodySession: SyncCustodySession = .shared
 
         func resolvedStoreID() -> String? {
             if let storeID { return storeID() }
@@ -58,18 +85,33 @@ final class ProtectionController {
             if case .known(let id) = StoreIdentity.resolve(besideStore: storeURL) { return id }
             return nil
         }
+
+        func resolvedSyncLeaves() -> E2EECustodyLeaves? {
+            guard let storeID = resolvedStoreID() else { return nil }
+            if let syncCustodyLeaves { return syncCustodyLeaves(storeID) }
+            return .live(scope: SyncCustodyScope(scope: scope, storeID: storeID))
+        }
     }
 
     private let configuration: Configuration
     private let guardSeam: StoreKeyGuard
-    /// R-pre13u-5: the escrow reconcile's Console-side evidence line rides
-    /// this (the author-run check reads it in Console/log stream).
+    private let appleKeys: AppleKeyLeaves
     private let logger = Logger(subsystem: "io.lduarte.Variorum", category: "protection")
     private var gate: StoreLaunchGate { configuration.gate }
     private var scope: String { configuration.scope }
 
-    /// The current dials, projected for the pane (writes persist).
+    /// Castle's two switches, projected for the pane (writes persist).
     private(set) var dials: ProtectionDials
+    /// THE POSTURE (derived — never written): `refreshPosture` re-derives
+    /// it from the legacy mode, the vault's last reading and the key file.
+    private(set) var posture: Posture = .standard
+    /// The vault's word, as last read (nil = no vault reachable).
+    private(set) var vaultReading: VaultPostureReading?
+    /// THE EFFECTIVE GATE — what the routes, the lobby and the custody law
+    /// act on. Standard ⇒ silent; Castle ⇒ the device's style.
+    var effectiveGate: StoreAtOpenMode {
+        StoreAtOpenMode.effective(posture: posture, dials: dials)
+    }
     /// The envelope's projected facts (the pane and the notices read these).
     private(set) var hasPassphraseWrap = false
     private(set) var hasRecoveryWrap = false
@@ -81,56 +123,59 @@ final class ProtectionController {
     private(set) var envelopeUnreadable = false
     private(set) var busy = false
     var lastError: String?
-    /// HONESTY about the escrow dial (the Q3 codesigned finding, this
-    /// batch): true when the dial reads ON but the last attempt to LAND
-    /// the iCloud item was refused by the Keychain (today's Mac signing
-    /// carries no data-protection keychain identity, so the write reads
-    /// -34018) — the pane says so instead of letting the dial imply a
-    /// copy that does not exist.
-    private(set) var escrowLandingFailed = false
-    /// R-pre13u-4 (pre-13u Act 9) — ESCROW, VERIFIED-LANDED, never
-    /// assumed: true only when the launch reconcile READ the iCloud item
-    /// BACK equal to the key in hand (a dial that is ON, or a write that
-    /// returned success, counts for nothing — the 13p-fix lesson applied
-    /// to the safety net). nil until a reconcile with the key in hand has
-    /// run this launch; false when the dial is off, the item mismatches,
-    /// or a fresh write could not be read back. This observable is BOTH
-    /// the nudge brain's escrow leg AND the author-run escrow check's
-    /// instrument (R-pre13u-5); the reconcile logs the same fact for
-    /// Console-side confirmation.
-    private(set) var escrowVerifiedLanded: Bool?
+    /// The Apple-key leg, VERIFIED (pre-13x 2a — the R-pre13u-4 doctrine
+    /// re-based on A): true only when the reconcile read A back AND the
+    /// key file's `apple` copy unwrapped to the key in hand; false when
+    /// the write could not land, A is unreadable, or the posture is
+    /// Castle (no copy opens with A); nil until a reconcile with the key
+    /// in hand has run this launch.
+    private(set) var appleKeyVerified: Bool?
+    /// Honesty about the Apple key: the last attempt to LAND it (or the
+    /// key file's copy) was refused — the pane says so instead of letting
+    /// the posture imply a copy that does not exist.
+    private(set) var appleKeyLandingFailed = false
 
-    /// R-pre13u-4: the ONE nudge brain's inputs, projected (the faces —
-    /// Act 10's pane and nudge, the phone's parity twin — read THIS; the
-    /// tier can never diverge between platforms because both read it).
+    /// R-pre13u-4: the ONE nudge brain's inputs, projected (both
+    /// platforms' faces read THIS; the tier can never diverge).
     var legs: ProtectionLegs {
         ProtectionLegs(
             hasPassphraseWrap: hasPassphraseWrap,
             hasRecoveryWrap: hasRecoveryWrap,
-            escrowVerifiedLanded: escrowVerifiedLanded,
-            storeCustodyGated: dials.mode == .biometric,
+            appleKeyVerified: appleKeyVerified,
+            storeCustodyGated: effectiveGate == .biometric,
             factsUnknown: envelopeUnreadable)
     }
 
-    /// The resident key under the DEMANDED modes (adopted at unlock,
-    /// dropped at lock). Under Auto the Keychain releases on demand and
-    /// nothing is cached here.
+    /// The resident key under the DEMANDED gates (adopted at unlock,
+    /// dropped at lock). Under Standard the Keychain releases on demand
+    /// and nothing is cached here.
     @ObservationIgnored private var residentKey: StoreKey?
 
-    /// Wired by AppBootstrap: the lock act (demanded modes only; the
-    /// callee re-checks).
+    /// Wired by AppBootstrap: the lock act (Castle only; the callee
+    /// re-checks).
     @ObservationIgnored var performLock: (@MainActor () async -> Void)?
     /// Wired where a vault is enrolled (AppServices): re-wrap the VAULT
     /// master under a new passphrase using held material — the reset
     /// door's vault half. Throws = the reset refuses WHOLE (one secret).
     @ObservationIgnored var rewrapVaultPassphrase: ((String) async throws -> Void)?
+    /// pre-13x 2a: the vault's posture reading (AppServices wires the
+    /// fetch: signed in + a vault row ⇒ the reading; else nil). Consulted
+    /// by the reconcile — the READ half of "an enrolled library's key file
+    /// must agree with the vault"; the acts on a disagreement are 2c's
+    /// (the follow) and batch 3's (the adopt).
+    @ObservationIgnored var readVaultPosture: (@Sendable () async -> VaultPostureReading?)?
+    /// pre-13x 2a: the idle clock's stamp — when Variorum was last USED
+    /// (decision 18). The Mac's event monitor and the became-active hook
+    /// stamp it; `relockIfIdle` reads it.
+    @ObservationIgnored private(set) var lastUsedAt: Date?
 
     // MARK: - Notices (the nudge + the reminder)
 
     enum Notice: Equatable {
         /// Standard's two-offer nudge (knot 4's amendment).
         case nudge
-        /// R13p-9's "do you still remember your passphrase?".
+        /// R13p-9's "do you still remember your passphrase?" — always on
+        /// in Castle (§13: the dial is gone).
         case reminderDue
     }
 
@@ -139,16 +184,12 @@ final class ProtectionController {
     init(configuration: Configuration) {
         self.configuration = configuration
         self.guardSeam = configuration.gate.guardFor(configuration.scope)
+        self.appleKeys = configuration.gate.appleKeyFor(configuration.scope)
         self.dials = configuration.gate.dials(configuration.scope, configuration.resolvedStoreID())
         refreshEnvelopeFacts()
     }
 
     var biometryAvailable: Bool { guardSeam.biometryAvailable() }
-
-    /// Which preset the dials currently read as (nil = hand-adjusted).
-    var matchingPreset: ProtectionPreset? {
-        ProtectionPreset.matching(dials, biometryAvailable: biometryAvailable)
-    }
 
     // MARK: - Resident key custody (the bootstrap's two calls)
 
@@ -160,9 +201,15 @@ final class ProtectionController {
         residentKey = nil
     }
 
-    /// The key in hand right now: the resident (demanded modes, unlocked)
-    /// or the Auto item's silent release. nil = no act that needs the key
-    /// can run (worded by callers).
+    /// The idle clock's stamp (decision 18): called from the Mac's event
+    /// monitor and both platforms' became-active hooks.
+    func noteActivity(now: Date = Date()) {
+        lastUsedAt = now
+    }
+
+    /// The key in hand right now: the resident (demanded gates, unlocked)
+    /// or the silent item's release. nil = no act that needs the key can
+    /// run (worded by callers).
     private func currentKey() -> StoreKey? {
         residentKey ?? guardSeam.loadAuto()
     }
@@ -172,6 +219,16 @@ final class ProtectionController {
         envelopeUnreadable = reading.isUnreadable
         hasPassphraseWrap = reading.envelope?.passphrase != nil
         hasRecoveryWrap = reading.envelope?.recovery != nil
+        refreshPosture(keyFile: reading.envelope)
+    }
+
+    /// THE DERIVATION, applied: the legacy mode (the read-through, until
+    /// §11), the vault's last reading, the key file.
+    private func refreshPosture(keyFile: StoreKeyEnvelope?) {
+        posture = Posture.derive(
+            legacyMode: gate.legacyMode(scope, configuration.resolvedStoreID()),
+            vaultHasAppleHeldCopy: vaultReading?.hasAppleHeldCopy,
+            keyFile: keyFile)
     }
 
     private func loadEnvelope() -> StoreKeyEnvelope? {
@@ -191,27 +248,15 @@ final class ProtectionController {
     /// contradicts the key is FOREIGN (copied from another library, or
     /// left behind by a deleted store) — it is set ASIDE, never deleted:
     /// its wraps are somebody's recovery legs. `onDisk` says whether the
-    /// returned envelope is the one already sitting beside the store (13p
-    /// ladder R1-n3: callers used to re-`loadEnvelope()` to answer exactly
-    /// that — a second disk read per act, and a doubled one in reconcile).
+    /// returned envelope is the one already sitting beside the store.
     ///
-    /// THROWS `.unreadable` on a present-but-undecodable sidecar (P1/P11,
-    /// pre-13u Act 9): the old `try?` swallow made unreadable read as
-    /// absent, and this method's fresh-blank return then let every caller
-    /// OVERWRITE the file — destroying wraps that may be perfectly intact
-    /// on disk (a transient I/O failure is the strict destruction case)
-    /// and orphaning the escrow item under a fresh storeID. Foreign is a
-    /// MOVE; unreadable is a REFUSAL; only true absence mints.
+    /// THROWS `.unreadable` on a present-but-undecodable sidecar (P1/P11):
+    /// foreign is a MOVE; unreadable is a REFUSAL; only true absence mints.
     private func ensuredEnvelope(for key: StoreKey) throws
         -> (envelope: StoreKeyEnvelope, onDisk: Bool) {
         try Self.ensuredEnvelope(for: key, gate: gate, storeURL: configuration.storeURL)
     }
 
-    // Nonisolated twins (13p ladder R2-m2): the reconcile's escrow arm
-    // runs its guard-seam work OFF the main actor, and these are the
-    // pieces it shares with the MainActor doors above — same reads, same
-    // writes, byte-identical semantics; only the executor differs. The
-    // gate's closures are `@Sendable` by construction.
     nonisolated private static func ensuredEnvelope(
         for key: StoreKey, gate: StoreLaunchGate, storeURL: URL?
     ) throws -> (envelope: StoreKeyEnvelope, onDisk: Bool) {
@@ -240,15 +285,8 @@ final class ProtectionController {
             // P10 (pre-13u Act 9): the heavy KDF derives the WRAP first,
             // envelope-free — the envelope is read FRESH after the
             // derivation returns, and the read→write pair below is
-            // awaitless on the MainActor. The old shape read the envelope
-            // BEFORE suspending in the derivation (hundreds of ms), so a
-            // recovery wrap landed during that window (the main window's
-            // nudge phrase door beside the Settings window's set sheet —
-            // both MainActor doors over ONE controller) was overwritten by
-            // the stale snapshot and the shown twelve words stopped
-            // opening the library. Every MainActor envelope writer is now
-            // read→write with no suspension between, so no such window
-            // exists between any two of them.
+            // awaitless on the MainActor, so a wrap landed during the
+            // derivation is never clobbered.
             let wrap = try await Task.detached(priority: .userInitiated) {
                 try StoreKeyEnvelope.makePassphraseWrap(
                     key: key, passphrase: passphrase, kdf: kdf)
@@ -276,13 +314,6 @@ final class ProtectionController {
     /// ONE SECRET, the guarding direction: does `passphrase` unwrap the
     /// STORE wrap? nil = no wrap exists (nothing to guard); the vault
     /// setup uses this to refuse minting a SECOND passphrase.
-    ///
-    /// Recorded corner (P1/P11's sweep, deliberately unchanged): an
-    /// UNREADABLE sidecar answers nil here — vault setup then proceeds
-    /// unguarded, exactly as over an absent sidecar. Refusing would need a
-    /// third answer in the guard's vocabulary (a design act, not a fix);
-    /// the write doors all refuse over unreadable regardless, so no
-    /// overwrite can follow from it.
     func verifyPassphraseAgainstStore(_ passphrase: String) async -> Bool? {
         guard let envelope = loadEnvelope(), envelope.passphrase != nil else { return nil }
         return await Task.detached(priority: .userInitiated) {
@@ -292,19 +323,16 @@ final class ProtectionController {
 
     /// THE RESET DOOR (R13p-9): forgot the passphrase — any enrolled
     /// device re-wraps under a new one after BIOMETRIC confirmation, no
-    /// old passphrase needed (the envelope's whole point). The vault half
-    /// runs FIRST where wired (one secret): a vault that cannot be
-    /// re-wrapped refuses the WHOLE reset rather than diverging; a store
-    /// half that then fails leaves the vault ahead — re-running the door
-    /// heals (the vault re-wrap from held material is idempotent).
-    /// Returns the worded refusal, nil = reset landed.
+    /// old passphrase needed. The vault half runs FIRST where wired (one
+    /// secret). Returns the worded refusal, nil = reset landed. (Batch 5
+    /// merges this door into change-passphrase per §13.)
     @discardableResult
     func resetPassphrase(to newPassphrase: String) async -> String? {
         guard !newPassphrase.isEmpty else { return "Type the new passphrase first." }
-        // P1/P11: over an unreadable sidecar the wrap facts are UNKNOWN —
-        // "No passphrase is set yet" would be a false cause steering into
-        // the set screen (whose write now refuses too; this refusal names
-        // the real problem first).
+        // P2 (pre-13x 2a): the door authorizes from the DISK, never the
+        // cached projection — an unreadable sidecar is named as such even
+        // when the projection last read it whole.
+        refreshEnvelopeFacts()
         if envelopeUnreadable {
             return ProtectionCopy.message(for: StoreKeyEnvelopeError.unreadable(""))
         }
@@ -335,8 +363,7 @@ final class ProtectionController {
     // MARK: - The recovery phrase (knot 4: generated and shown at the set-screen)
 
     /// Mint the twelve words, wrap the store key under them, land the
-    /// wrap, and hand the words back FOR DISPLAY — the one moment they
-    /// exist outside the user's own writing-down. nil = refused (worded
+    /// wrap, and hand the words back FOR DISPLAY. nil = refused (worded
     /// in `lastError`).
     func generateAndLandRecoveryPhrase() async -> [String]? {
         guard let key = currentKey() else {
@@ -358,9 +385,7 @@ final class ProtectionController {
     }
 
     /// Land TYPED words as the store's recovery wrap — the road for a
-    /// vault-enrolled user whose twelve words already exist (one secret:
-    /// never a second phrase; the caller verifies them against the vault
-    /// first where one exists). Returns the worded refusal, nil = landed.
+    /// vault-enrolled user whose twelve words already exist (one secret).
     @discardableResult
     func landRecoveryWrap(words: [String]) async -> String? {
         guard let key = currentKey() else { return Self.keyUnavailable }
@@ -376,30 +401,45 @@ final class ProtectionController {
         }
     }
 
-    // MARK: - The at-open mode (the custody law)
+    // MARK: - Castle's gate style (the custody law, both items)
 
     enum ModeChangeOutcome: Equatable {
         case changed
-        /// The demanded modes need a passphrase first (Biometric's
-        /// fallback IS the passphrase; Passphrase-every-open obviously) —
-        /// the pane summons the set-screen, then retries.
+        /// The demanded gates need a passphrase first (the fallback IS the
+        /// passphrase) — the pane summons the set-screen, then retries.
         case needsPassphrase
         case refused(String)
     }
 
+    /// **Always ask for the passphrase** (copy §1) — Castle's first
+    /// switch. Moves the library key's custody between the Touch ID item
+    /// and nowhere AND the sync record between the gated item and the
+    /// session, in ONE act; persists the dial only when both moved.
     @discardableResult
-    func setMode(_ newMode: StoreAtOpenMode) async -> ModeChangeOutcome {
-        guard newMode != dials.mode else { return .changed }
-        if newMode.isDemanded {
+    func setAlwaysAsk(_ on: Bool) async -> ModeChangeOutcome {
+        guard posture == .castle else {
+            return .refused("Always ask is a Castle switch — in Standard the library opens silently.")
+        }
+        let target: StoreAtOpenMode = on ? .passphrase : .biometric
+        guard target != effectiveGate else { return .changed }
+        let outcome = await moveCustody(to: target)
+        guard outcome == .changed else { return outcome }
+        dials.alwaysAsk = on
+        persistDials()
+        return .changed
+    }
+
+    /// THE CUSTODY MOVE, both items (pre-13x 2a; 2b's posture switches
+    /// call it for `.auto` ↔ a demanded gate): the library key's item by
+    /// the 13p `CustodyHandover` choreography, then the sync record's by
+    /// its twin; a refused sync move reverses the library key's move so
+    /// the two families never disagree about the shape.
+    func moveCustody(to target: StoreAtOpenMode) async -> ModeChangeOutcome {
+        if target.isDemanded {
             // P2 (pre-13u Act 9): the authorization reads the DISK at the
-            // act, never the cached projection. Two doors (`setEscrow(true)`
-            // and the reconcile's escrow arm) can set a foreign sidecar
-            // aside and mint a fresh wrap-less envelope without refreshing
-            // the projection, and a stale `hasPassphraseWrap == true` here
-            // authorized deleting BOTH Keychain items over an envelope with
-            // no wraps — a permanently unopenable library. Same doctrine as
-            // `deleteBlock`'s in-transaction precondition: a precondition
-            // read stale is no precondition.
+            // act, never the cached projection (a stale `true` once
+            // authorized deleting both Keychain items over a wrap-less
+            // envelope — a permanently unopenable library).
             refreshEnvelopeFacts()
             if envelopeUnreadable {
                 return .refused(
@@ -407,73 +447,50 @@ final class ProtectionController {
             }
             guard hasPassphraseWrap else { return .needsPassphrase }
         }
-        // 17h (13p-fix ladder R3-6): the transition's SecItem work — the
-        // key read plus up to three handover round-trips — hops OFF the
-        // main actor (the 13e B-1 discipline; the reconcile's escrow arm
-        // already follows it, R2-m2). Byte-identical custody semantics:
-        // same reads, same writes, same order, same short-circuits — only
-        // the thread moved. The hop rides a SERIAL queue (the
-        // DeviceKeyStore.custodyQueue pattern) because the pre-fix
-        // MainActor body had no suspension point across its custody work,
-        // so two transitions could never interleave their SecItem calls —
-        // a detached task per call would give that ordering up for
-        // nothing. The dial write and resident adoption stay MainActor.
+        // 17h (13p-fix ladder R3-6): the SecItem work hops OFF the main
+        // actor on a SERIAL queue — byte-identical custody semantics.
         let resident = residentKey
         let guardSeam = self.guardSeam
+        let outgoing = effectiveGate
         let transition = await Self.onCustodyQueue {
             Self.transitionCustody(
-                to: newMode, residentKey: resident, guardSeam: guardSeam)
+                to: target, residentKey: resident, guardSeam: guardSeam)
         }
         guard transition.outcome == .changed, let key = transition.key else {
             return transition.outcome
         }
-        dials.mode = newMode
-        // The key stays IN HAND across a mid-session transition (surfaced
-        // by ladder R1-m1's ownership guard): entering a demanded mode
-        // deletes the silent item, and every later key-needing act this
-        // session — the escrow dial's delete-with-ownership-proof, the
-        // set-screen, the phrase mint — reads `currentKey()`. The session
-        // that just HELD the key to make the transition keeps it as the
-        // resident, exactly as the unlock road adopts it; `lock()` drops
-        // it as always.
-        if newMode.isDemanded { residentKey = key }
-        persistDials()
-        // THE ESCROW/POSTURE COUPLING (ninth wave — memo §4, the one
-        // behavior change): the spare key follows the posture AT THE ACT,
-        // not merely at the next launch's reconcile — entering a demanded
-        // mode removes our own iCloud item (ownership-guarded, exactly the
-        // launch arm's semantics); returning to Auto re-lands the stored
-        // choice. The dial is untouched — it remembers her Auto choice.
-        await reconcileEscrowToPosture()
+        // The sync record follows (§3.3): the same shape, the same act.
+        let leaves = configuration.resolvedSyncLeaves()
+        let session = configuration.syncCustodySession
+        let syncOutcome: CustodyHandover.Outcome = await Self.onCustodyQueue {
+            guard let leaves else { return .done }  // no store id ⇒ no custody exists
+            return SyncCustodyTransition.move(
+                to: SyncCustodyShape(mode: target), leaves: leaves, session: session)
+        }
+        if syncOutcome != .done {
+            // Reverse the library key's move — the two families move together
+            // or not at all.
+            _ = await Self.onCustodyQueue {
+                Self.transitionCustody(to: outgoing, residentKey: key, guardSeam: guardSeam)
+            }
+            switch syncOutcome {
+            case .done: break
+            case .writeRefused:
+                return .refused("The Keychain refused the sync keys' item — nothing was altered.")
+            case .wroteButUnreadable:
+                return .refused(ProtectionCopy.syncKeysWroteButUnreadable)
+            case .outgoingNotReleased:
+                return .refused(ProtectionCopy.syncKeysOutgoingNotReleased)
+            }
+        }
+        // The key stays IN HAND across a mid-session transition (ladder
+        // R1-m1): the session that just held the key keeps it as the
+        // resident under a demanded gate; `lock()` drops it as always.
+        residentKey = target.isDemanded ? key : nil
         return .changed
     }
 
-    /// The coupling's act-time enforcement — the launch reconcile's escrow
-    /// arm, run with the CURRENT posture's effective value (same reads,
-    /// same writes, same off-main hop; nil leaves every projection alone,
-    /// exactly as at launch).
-    private func reconcileEscrowToPosture() async {
-        let effective = dials.effectiveEscrowOn
-        let resident = residentKey
-        let gate = self.gate
-        let guardSeam = self.guardSeam
-        let storeURL = configuration.storeURL
-        let outcome = await Task.detached(priority: .userInitiated) {
-            Self.reconcileEscrowOffMain(
-                escrowOn: effective, residentKey: resident,
-                gate: gate, guardSeam: guardSeam, storeURL: storeURL)
-        }.value
-        if let outcome {
-            escrowLandingFailed = outcome.landingFailed
-            escrowVerifiedLanded = outcome.verifiedLanded
-        }
-        // The arm can mint/save a fresh envelope; the projection follows
-        // the disk it just changed (the P2 doctrine).
-        refreshEnvelopeFacts()
-    }
-
-    /// 17h R3-6 — the serial off-main custody hop (`setMode`'s SecItem
-    /// work; the E2EE twin's `DeviceKeyStore.offMain` pattern).
+    /// 17h R3-6 — the serial off-main custody hop.
     nonisolated private static let custodyQueue = DispatchQueue(
         label: "io.lduarte.Variorum.store-custody", qos: .userInitiated)
 
@@ -485,11 +502,8 @@ final class ProtectionController {
         }
     }
 
-    /// The mode transition's custody choreography, extracted verbatim from
-    /// `setMode` at 17h R3-6 so it runs off-main. Returns the outcome and
-    /// — on `.changed` — the key in hand, for the MainActor's resident
-    /// adoption. Everything here is guard-seam work; nothing touches
-    /// controller state.
+    /// The library key's custody choreography (13p, off-main since 17h
+    /// R3-6). Returns the outcome and — on `.changed` — the key in hand.
     nonisolated private static func transitionCustody(
         to newMode: StoreAtOpenMode, residentKey: StoreKey?, guardSeam: StoreKeyGuard
     ) -> (outcome: ModeChangeOutcome, key: StoreKey?) {
@@ -503,9 +517,7 @@ final class ProtectionController {
             switch CustodyHandover.perform(
                 write: { guardSeam.saveAuto(key) },
                 // Identity, not presence (R2-4): a stale item under the
-                // same service/account — an earlier access group's orphan —
-                // satisfies `!= nil` and would pass custody to a key that
-                // may not open the store.
+                // same service/account would pass `!= nil`.
                 verify: { guardSeam.loadAuto() == key },
                 deleteOutgoing: { guardSeam.deleteGated() },
                 rollBackIncoming: { _ = guardSeam.deleteAuto() }) {
@@ -515,22 +527,16 @@ final class ProtectionController {
             case .wroteButUnreadable:
                 return (.refused(ProtectionCopy.wroteButUnreadable), nil)
             case .outgoingNotReleased:
-                // 17h R3-5's third shape: leaving the gated item behind
-                // under Auto would let a later Biometric-mode reading of
-                // "a gated item exists" mean nothing.
                 return (.refused(ProtectionCopy.outgoingCustodyNotReleased), nil)
             }
         case .biometric:
             guard guardSeam.biometryAvailable() else {
                 return (.refused("This \(ProtectionCopy.deviceName) has no "
                     + "\(ProtectionCopy.biometryName) to gate the key with — use "
-                    + "Passphrase at every open instead."), nil)
+                    + "Always ask instead."), nil)
             }
             // The gated item lands FIRST; only then does the silent item
             // go (never a keyless moment, never a silent one either).
-            // 13p-fix R1-1: "lands" means READS BACK, not "the write
-            // returned true" — that distinction cost the author her Auto
-            // item on 2026-08-30 (see `CustodyHandover`).
             switch CustodyHandover.perform(
                 write: { guardSeam.saveGated(key) },
                 // Presence only — reading an ACL'd item's DATA prompts, and
@@ -544,19 +550,11 @@ final class ProtectionController {
             case .wroteButUnreadable:
                 return (.refused(ProtectionCopy.wroteButUnreadable), nil)
             case .outgoingNotReleased:
-                // 17h R3-5's first shape: a "Biometric" dial over a key
-                // that still releases silently is the theater R13p-14
-                // forbids — refuse rather than claim a gate that isn't.
                 return (.refused(ProtectionCopy.outgoingCustodyNotReleased), nil)
             }
         case .passphrase:
             // 17h R3-5's second shape: this arm's law is "NEITHER item
-            // exists", and it used to take both deletes on no evidence at
-            // all. Each release is verified; gated goes FIRST so a refusal
-            // leaves a coherent state either way (from Auto the gated item
-            // is absent — trivially released — and a refused Auto release
-            // keeps the mode that item serves; from Biometric a refused
-            // gated release keeps the gate).
+            // exists", each release verified; gated goes FIRST.
             guard guardSeam.deleteGated() else {
                 return (.refused(ProtectionCopy.outgoingCustodyNotReleased), nil)
             }
@@ -567,106 +565,13 @@ final class ProtectionController {
         return (.changed, key)
     }
 
-    // MARK: - The escrow dial (R13p-6)
+    // MARK: - Castle's idle dial
 
-    /// Returns false with `lastError` worded on refusal.
-    ///
-    /// THE COUPLING (ninth wave — memo §4): the dial stores the
-    /// AUTO-posture choice; custody acts on the EFFECTIVE value. Under a
-    /// demanded posture the pane never offers this dial, but presets and
-    /// any future caller route through here too — an ON write then stores
-    /// the choice and lands nothing (the delete arm keeps the posture's
-    /// no-spare truth).
-    @discardableResult
-    func setEscrow(_ on: Bool) async -> Bool {
-        if on && !dials.mode.isDemanded {
-            guard let key = currentKey() else {
-                lastError = Self.keyUnavailable
-                return false
-            }
-            let ensured: (envelope: StoreKeyEnvelope, onDisk: Bool)
-            do {
-                ensured = try ensuredEnvelope(for: key)
-            } catch {
-                // P1/P11: an unreadable sidecar refuses the dial — writing
-                // a fresh envelope over it would destroy wraps that may be
-                // intact on disk.
-                lastError = ProtectionCopy.message(for: error)
-                refreshEnvelopeFacts()
-                return false
-            }
-            let envelope = ensured.envelope
-            if !ensured.onDisk {
-                // A fresh envelope needs to exist on disk so its storeID
-                // names the item durably. (`onDisk` answers this from the
-                // ONE load — ladder R1-n3's doubled read retired.)
-                do { try saveEnvelope(envelope) } catch {
-                    lastError = ProtectionCopy.message(for: error)
-                    return false
-                }
-            }
-            guard guardSeam.saveEscrow(key, envelope.storeID) else {
-                lastError = "The Keychain refused the iCloud item — nothing was altered."
-                escrowLandingFailed = true
-                return false
-            }
-            escrowLandingFailed = false
-        } else if let envelope = loadEnvelope() {
-            // OWNERSHIP guard (ladder R1-m1): delete only OUR OWN escrow
-            // item. A FOREIGN sidecar's storeID names some other library's
-            // iCloud copy — one of somebody's recovery legs, which the
-            // never-delete-foreign rule protects (the same rule that makes
-            // `setAsideEnvelope` a move, never a delete). No key in hand ⇒
-            // ownership unverifiable ⇒ the item stays; the dial still
-            // flips, and a later owned act cleans up.
-            if let key = currentKey(), envelope.belongs(to: key) {
-                guardSeam.deleteEscrow(envelope.storeID)
-            }
-            escrowLandingFailed = false
-        }
-        dials.escrowOn = on
-        persistDials()
-        // P2: this door's `ensuredEnvelope` can set a foreign sidecar
-        // aside and write a fresh envelope — the projection follows the
-        // disk it just changed, so no later act authorizes from a stale
-        // reading (the pane's "Passphrase — Set" line included).
-        refreshEnvelopeFacts()
-        return true
-    }
-
-    // MARK: - Presets (R13p-7: dial-setters)
-
-    @discardableResult
-    func applyPreset(_ preset: ProtectionPreset) async -> ModeChangeOutcome {
-        let target = preset.dials(biometryAvailable: biometryAvailable)
-        if target.mode.isDemanded, !hasPassphraseWrap { return .needsPassphrase }
-        let modeOutcome = await setMode(target.mode)
-        guard modeOutcome == .changed else { return modeOutcome }
-        _ = await setEscrow(target.escrowOn)
-        dials.relockOnSleepAndScreenLock = target.relockOnSleepAndScreenLock
-        dials.relockAfterIdleMinutes = target.relockAfterIdleMinutes
-        dials.reminderChecksOn = target.reminderChecksOn
-        persistDials()
-        refreshNotices()
-        return .changed
-    }
-
-    /// The re-lock dials' setters (demanded modes; the pane renders them
-    /// only there).
-    func setRelockOnSleep(_ on: Bool) {
-        dials.relockOnSleepAndScreenLock = on
-        persistDials()
-    }
-
+    /// **Lock after time away** (copy §1): 5 · 10 · 30 · never; the
+    /// clock is time since Variorum was last used.
     func setRelockIdleMinutes(_ minutes: Int?) {
         dials.relockAfterIdleMinutes = minutes
         persistDials()
-    }
-
-    func setReminderChecks(_ on: Bool) {
-        dials.reminderChecksOn = on
-        persistDials()
-        refreshNotices()
     }
 
     private func persistDials() {
@@ -676,143 +581,107 @@ final class ProtectionController {
     // MARK: - The launch reconcile
 
     /// Idempotent launch housekeeping, called once the store is READY
-    /// (never before unlock): stamp first use (the nudge's "real use
-    /// begins" anchor), keep the escrow item consistent with its dial
-    /// (real store only — see Configuration.isRealVariant), and refresh
-    /// the notice state.
+    /// (never before unlock): re-read the dials, stamp first use, read the
+    /// vault's posture word, re-derive the posture, run the Apple arm
+    /// (Standard: A read or minted, the key file's Apple copy landed and
+    /// VERIFIED), and refresh the notice state.
     func reconcile(now: Date = Date()) async {
         // Re-read the persisted dials FIRST (ladder R1-m2's corner): the
-        // launch road can write the stored dials WITHOUT this controller
-        // (pre-13x 1a: "Start a New Library" writes the NEW store id's
-        // dials through the gate before the open), and `canLock` + the
-        // panes read THIS observable projection — a stale projection would
-        // render a Lock Now door that `lock()` then silently refuses (a
-        // P-2 violation: a door that cannot act).
+        // launch road can write the stored dials WITHOUT this controller.
         dials = gate.dials(scope, configuration.resolvedStoreID())
         if gate.stamp(Self.firstUseStamp, scope) == nil {
             gate.setStamp(now, Self.firstUseStamp, scope)
         }
-        refreshEnvelopeFacts()
-        if configuration.isRealVariant {
-            // Ladder R2-m2: the escrow arm's guard-seam work — up to three
-            // synchronous SecItem round-trips (the silent item's read, the
-            // escrow read, the escrow write/delete) — hops OFF the main
-            // actor in ONE detached task, at this launch/unlock cadence
-            // (the 13e B-1 discipline: the hop moves the THREAD, never the
-            // meaning — same reads, same writes, same short-circuit order,
-            // inside one hop so nothing interleaves between them). The
-            // resident key is MainActor state, read here and carried in;
-            // the honesty flag lands back on the MainActor after.
-            // THE ESCROW/POSTURE COUPLING (ninth wave — memo §4): the
-            // reconcile acts on the EFFECTIVE value, so a demanded posture
-            // removes the spare at every ready launch and a return to Auto
-            // re-lands the stored choice. The dial itself is untouched.
-            let escrowOn = dials.effectiveEscrowOn
-            let resident = residentKey
-            let gate = self.gate
-            let guardSeam = self.guardSeam
-            let storeURL = configuration.storeURL
-            let outcome = await Task.detached(priority: .userInitiated) {
-                Self.reconcileEscrowOffMain(
-                    escrowOn: escrowOn, residentKey: resident,
-                    gate: gate, guardSeam: guardSeam, storeURL: storeURL)
-            }.value
-            if let outcome {
-                escrowLandingFailed = outcome.landingFailed
-                escrowVerifiedLanded = outcome.verifiedLanded
-                // R-pre13u-5: the author-run check's Console-side fact —
-                // "the reconcile reads its own item back" vs "re-writes".
-                logger.info("escrow reconcile: dial \(self.dials.escrowOn ? "ON" : "OFF", privacy: .public) · posture-effective \(escrowOn ? "ON" : "OFF", privacy: .public) · item read back == current key: \(String(describing: outcome.verifiedLanded), privacy: .public) · wrote this pass: \(outcome.wrotePass, privacy: .public)")
-            }
-            // P2: the escrow arm can set a foreign sidecar aside and mint
-            // a fresh envelope; the projection (read above, BEFORE the
-            // arm) follows the disk it just changed.
-            refreshEnvelopeFacts()
+        // The vault's word (decision 8) — one authenticated read, when a
+        // vault is reachable; nil leaves the last reading standing.
+        if let readVaultPosture, let reading = await readVaultPosture() {
+            vaultReading = reading
         }
+        refreshEnvelopeFacts()
+        await reconcileAppleKey()
         refreshNotices(now: now)
     }
 
-    /// The reconcile's escrow reading — landing honesty + the R-pre13u-4
-    /// VERIFICATION fact (`wrotePass` feeds the author-check log line:
-    /// "reads its own item back" vs "re-writes").
-    nonisolated struct EscrowReconcileOutcome: Sendable {
+    /// THE APPLE ARM (§3.8 / the brief's item 2): under Standard with the
+    /// key in hand — read A, else mint it; land the key file's `apple`
+    /// copy under A's id when absent or under another id; VERIFY the copy
+    /// unwraps to the key in hand. Under Castle: no copy opens with A, and
+    /// A is never touched (§14.5). Off-main (the guard-seam and Keychain
+    /// work); the projections land back on the MainActor.
+    private func reconcileAppleKey() async {
+        guard posture == .standard else {
+            appleKeyVerified = false
+            appleKeyLandingFailed = false
+            return
+        }
+        let resident = residentKey
+        let gate = self.gate
+        let guardSeam = self.guardSeam
+        let appleKeys = self.appleKeys
+        let storeURL = configuration.storeURL
+        let outcome = await Task.detached(priority: .userInitiated) {
+            Self.reconcileAppleKeyOffMain(
+                residentKey: resident, gate: gate, guardSeam: guardSeam,
+                appleKeys: appleKeys, storeURL: storeURL)
+        }.value
+        if let outcome {
+            appleKeyVerified = outcome.verified
+            appleKeyLandingFailed = outcome.landingFailed
+            logger.info("apple key reconcile: verified \(String(describing: outcome.verified), privacy: .public) · wrote this pass: \(outcome.wrotePass, privacy: .public) · landing failed: \(outcome.landingFailed, privacy: .public)")
+        }
+        // The arm can mint/save the envelope; the projection follows the
+        // disk it just changed (the P2 doctrine).
+        refreshEnvelopeFacts()
+    }
+
+    nonisolated struct AppleKeyReconcileOutcome: Sendable {
+        var verified: Bool?
         var landingFailed: Bool
-        var verifiedLanded: Bool?
         var wrotePass: Bool = false
     }
 
-    /// The reconcile's escrow housekeeping, off-main (ladder R2-m2) —
-    /// byte-identical landing semantics to the inline arm it replaced,
-    /// plus the R-pre13u-4 verification leg: whatever this pass did, the
-    /// last word is a READ-BACK comparing the item to the key in hand —
-    /// a write's success is never proof (the 13p-fix lesson, applied to
-    /// the safety net escrow becomes post-#82). nil = leave every
-    /// projection untouched (the no-key and unreadable-sidecar cases,
-    /// exactly as before).
-    nonisolated private static func reconcileEscrowOffMain(
-        escrowOn: Bool, residentKey: StoreKey?,
-        gate: StoreLaunchGate, guardSeam: StoreKeyGuard, storeURL: URL?
-    ) -> EscrowReconcileOutcome? {
-        if escrowOn {
-            guard let key = residentKey ?? guardSeam.loadAuto() else { return nil }
-            // P1 (pre-13u Act 9) — THE LAUNCH-TIME OVERWRITE, closed: this
-            // arm runs on every ready launch with escrow defaulting ON, and
-            // the old absent-or-unreadable conflation made a transiently
-            // unreadable sidecar mint a fresh WRAP-LESS envelope here,
-            // save it over the file, and orphan the escrow item under the
-            // fresh storeID — silently, with no user action. An unreadable
-            // sidecar now SKIPS the arm whole (the honesty flag is left
-            // untouched: its sentence names a Keychain refusal, which this
-            // is not; the controller's facts carry the unreadable truth).
-            guard let ensured = try? ensuredEnvelope(
-                for: key, gate: gate, storeURL: storeURL) else { return nil }
-            let envelope = ensured.envelope
-            if !ensured.onDisk {
-                try? gate.saveEnvelope(
-                    envelope, storeURL ?? URL(fileURLWithPath: "/dev/null"))
-            }
-            if guardSeam.loadEscrow(envelope.storeID) == key {
-                // The steady state the author-run check looks for: the
-                // reconcile READ ITS OWN ITEM BACK, nothing re-written.
-                return EscrowReconcileOutcome(
-                    landingFailed: false, verifiedLanded: true, wrotePass: false)
-            }
-            guard guardSeam.saveEscrow(key, envelope.storeID) else {
-                // The outcome feeds the dial's honesty line: an ON dial
-                // whose item cannot land must SAY so (the Q3 codesigned
-                // finding's class).
-                return EscrowReconcileOutcome(
-                    landingFailed: true, verifiedLanded: false, wrotePass: true)
-            }
-            // VERIFIED-LANDED means the fresh write READS BACK — never the
-            // write's own word for it.
-            return EscrowReconcileOutcome(
-                landingFailed: false,
-                verifiedLanded: guardSeam.loadEscrow(envelope.storeID) == key,
-                wrotePass: true)
-        } else {
-            // The dial is OFF: a leftover item (a crashed flip) goes — but
-            // only OUR OWN (ladder R1-m1): a FOREIGN sidecar's storeID
-            // names another library's escrow copy, somebody's recovery
-            // leg, and this housekeeping must never take it. No key in
-            // hand ⇒ ownership unverifiable ⇒ the item stays.
-            if let envelope = gate.readEnvelope(storeURL).envelope,
-               let key = residentKey ?? guardSeam.loadAuto(),
-               envelope.belongs(to: key) {
-                guardSeam.deleteEscrow(envelope.storeID)
-            }
-            // No leg exists with the dial off — false, not nil (the brain
-            // must not read an off dial as "unknown, maybe covered").
-            return EscrowReconcileOutcome(landingFailed: false, verifiedLanded: false)
+    nonisolated private static func reconcileAppleKeyOffMain(
+        residentKey: StoreKey?, gate: StoreLaunchGate, guardSeam: StoreKeyGuard,
+        appleKeys: AppleKeyLeaves, storeURL: URL?
+    ) -> AppleKeyReconcileOutcome? {
+        guard let key = residentKey ?? guardSeam.loadAuto() else { return nil }
+        // P1: an unreadable sidecar SKIPS the arm whole — nothing is ever
+        // written over a file that may hold intact wraps.
+        guard let ensured = try? ensuredEnvelope(for: key, gate: gate, storeURL: storeURL)
+        else { return nil }
+        var envelope = ensured.envelope
+        // A: read, else minted (the first Standard library on this iCloud).
+        guard let apple = appleKeys.readOrMint() else {
+            return AppleKeyReconcileOutcome(verified: false, landingFailed: true)
         }
+        // The steady state: the copy is under THIS A and opens.
+        if envelope.appleKeyID == apple.id,
+           (try? envelope.unwrapKey(apple: apple.symmetricKey)) == key {
+            return AppleKeyReconcileOutcome(verified: true, landingFailed: false)
+        }
+        do {
+            try envelope.appleBox(key: key, under: apple.symmetricKey, appleKeyID: apple.id)
+            try gate.saveEnvelope(envelope, storeURL ?? URL(fileURLWithPath: "/dev/null"))
+        } catch {
+            return AppleKeyReconcileOutcome(verified: false, landingFailed: true, wrotePass: true)
+        }
+        // VERIFIED means the fresh copy READS BACK and opens — never the
+        // write's own word for it.
+        let readBack = gate.readEnvelope(storeURL).envelope
+        let verified = readBack?.appleKeyID == apple.id
+            && (try? readBack?.unwrapKey(apple: apple.symmetricKey)) == key
+        return AppleKeyReconcileOutcome(
+            verified: verified, landingFailed: !verified, wrotePass: true)
     }
 
     // MARK: - Notices
 
     func refreshNotices(now: Date = Date()) {
+        // The reminder: always on in Castle (§13 — the dial is gone; the
+        // Standard nudge covers the no-passphrase state).
         if ReminderCheckPolicy.isDue(
             now: now,
-            enabled: dials.reminderChecksOn,
+            enabled: posture == .castle,
             passphraseSetAt: gate.stamp(Self.passphraseSetAtStamp, scope),
             lastConfirmedAt: gate.stamp(Self.reminderConfirmedStamp, scope),
             lastDismissedAt: gate.stamp(Self.reminderDismissedStamp, scope)) {
@@ -820,10 +689,8 @@ final class ProtectionController {
             return
         }
         // P1/P11: while the sidecar is unreadable the wrap facts are
-        // UNKNOWN — a nudge claiming "the Keychain holds the only key"
-        // over a library that may have both wraps on disk is a false
-        // steer into the set screen (whose write refuses anyway).
-        if !envelopeUnreadable, StandardNudgePolicy.isEligible(
+        // UNKNOWN — a nudge claiming "no passphrase" would be a false steer.
+        if !envelopeUnreadable, posture == .standard, StandardNudgePolicy.isEligible(
             now: now,
             firstUseAt: gate.stamp(Self.firstUseStamp, scope),
             dismissedForever: gate.stamp(Self.nudgeDismissedStamp, scope) != nil,
@@ -847,9 +714,8 @@ final class ProtectionController {
         refreshNotices(now: now)
     }
 
-    /// The reminder's outcomes: a CONFIRMED check (the SecretCheck face
-    /// answered "correct") resets the cadence; a dismissal snoozes one
-    /// full cadence (the policy's letter).
+    /// The reminder's outcomes: a CONFIRMED check resets the cadence; a
+    /// dismissal snoozes one full cadence (the policy's letter).
     func recordReminderConfirmed(now: Date = Date()) {
         gate.setStamp(now, Self.reminderConfirmedStamp, scope)
         refreshNotices(now: now)
@@ -861,9 +727,8 @@ final class ProtectionController {
     }
 
     /// The reminder face's local check road (SecretCheckModel's
-    /// `storeCheck` — one face serves the sanity check AND the reminder,
-    /// the plan's letter): the REAL unwrap against the sidecar, off-main,
-    /// result discarded. Confirmations feed the cadence automatically.
+    /// `storeCheck`): the REAL unwrap against the sidecar, off-main,
+    /// result discarded.
     func makeStoreSecretCheck() -> @Sendable (SecretCheckModel.Secret, String) async
         -> SecretCheckModel.LocalOutcome {
         let gate = gate
@@ -901,18 +766,18 @@ final class ProtectionController {
     // MARK: - Re-lock monitors (Mac — sleep · screen lock · idle)
 
     #if os(macOS)
-    /// Tokens tracked BESIDE the center that minted them (ladder R1-n3):
-    /// the earlier one-array shape removed every token from BOTH centers —
-    /// harmless today only by accident of NotificationCenter tolerating
-    /// foreign tokens, and exactly the shape a future third monitor would
-    /// copy wrong.
     @ObservationIgnored private var workspaceTokens: [NSObjectProtocol] = []
     @ObservationIgnored private var distributedTokens: [NSObjectProtocol] = []
     @ObservationIgnored private var idleTask: Task<Void, Never>?
+    @ObservationIgnored private var activityMonitor: Any?
 
     /// Started by the production bootstrap only (never test instances):
-    /// each trigger re-checks the dials at FIRE time, so the monitors are
-    /// always-on listeners over always-current policy.
+    /// each trigger re-checks the derived gate at FIRE time. pre-13x 2a:
+    /// re-lock on sleep / screen lock is ALWAYS ON in Castle (decision
+    /// 18), and the idle clock is Variorum's own activity — the local
+    /// event monitor stamps it (never the system's idle clock, which any
+    /// app resets: "switching to another app doesn't lock it; time away
+    /// does").
     func startRelockMonitors() {
         stopRelockMonitors()
         let workspace = NSWorkspace.shared.notificationCenter
@@ -927,6 +792,14 @@ final class ProtectionController {
         ) { [weak self] _ in
             Task { @MainActor [weak self] in await self?.relockIfPolicySays() }
         })
+        activityMonitor = NSEvent.addLocalMonitorForEvents(
+            matching: [.keyDown, .leftMouseDown, .rightMouseDown, .otherMouseDown,
+                       .scrollWheel, .magnify, .swipe]
+        ) { [weak self] event in
+            Task { @MainActor [weak self] in self?.noteActivity() }
+            return event
+        }
+        noteActivity()
         idleTask = Task { @MainActor [weak self] in
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(30))
@@ -943,21 +816,22 @@ final class ProtectionController {
         }
         workspaceTokens = []
         distributedTokens = []
+        if let activityMonitor { NSEvent.removeMonitor(activityMonitor) }
+        activityMonitor = nil
         idleTask?.cancel()
         idleTask = nil
     }
 
     private func relockIfPolicySays() async {
-        guard dials.mode.isDemanded, dials.relockOnSleepAndScreenLock else { return }
+        guard effectiveGate.isDemanded else { return }
         await performLock?()
     }
 
     private func relockIfIdle() async {
-        guard dials.mode.isDemanded,
-              let minutes = dials.relockAfterIdleMinutes, minutes > 0 else { return }
-        let idle = CGEventSource.secondsSinceLastEventType(
-            .combinedSessionState, eventType: CGEventType(rawValue: ~0)!)
-        guard idle >= Double(minutes * 60) else { return }
+        guard effectiveGate.isDemanded else { return }
+        guard IdleLockClock.isDue(
+            now: Date(), lastUsedAt: lastUsedAt, minutes: dials.relockAfterIdleMinutes)
+        else { return }
         await performLock?()
     }
     #endif
@@ -978,7 +852,6 @@ final class ProtectionController {
 
 #if os(macOS)
 import AppKit
-import CoreGraphics
 #endif
 
 /// The reset door's vault half, refused because this device's key
@@ -995,27 +868,9 @@ nonisolated struct VaultRewrapNeedsUnlockedKeys: Error, CustomStringConvertible 
 
 /// THE FOUR ONE-SECRET HOOKS, as ONE factory both compositions call
 /// (ladder R2-M1; the `mobileWillLock` precedent — production's own
-/// composition drivable by a scripted pin). Until this fix the block
-/// lived inline in the Mac's `VariorumApp.task` and the PHONE wired
-/// none of it while presenting the full shared vault flows AND its own
-/// reset door — four silent-divergence mechanisms against R13p-4's
-/// "no second passphrase exists anywhere":
-///
-/// · `storePassphraseGuard` — vault SETUP refuses a passphrase the
-///   store's own wrap does not open (a phone user could mint a
-///   DIFFERENT vault passphrase).
-/// · `onPassphraseChanged` — a vault setup/enrollment/change FOLLOWS
-///   into the store wrap (without it, a change made on the phone left
-///   the sidecar holding the retired passphrase).
-/// · `onRecoveryPhraseLanded` — the vault's twelve confirmed words land
-///   on the store envelope too (without it, vault-minted words opened
-///   the account but not the library — R1-m3's mechanism, phone-side).
-/// · `rewrapVaultPassphrase` — the reset door's vault half runs FIRST
-///   where a vault is wired, refusing WHOLE when it cannot (without it,
-///   a phone reset re-wrapped the store and silently skipped the vault).
-///
-/// Wired in each app's `.task`, re-wired per session exactly as the
-/// lock teardown is (the next unlock's fresh services get fresh hooks).
+/// composition drivable by a scripted pin). pre-13x 2a adds the fifth
+/// wire: the vault's POSTURE reading (`readVaultPosture`) — signed in and
+/// a vault row ⇒ the account's word; else nil.
 @MainActor
 func wireOneSecretHooks(
     protection: ProtectionController,
@@ -1043,11 +898,18 @@ func wireOneSecretHooks(
             try await VaultEnrollment(client: vault).rewrapPassphrase(
                 material: material, newPassphrase: newPassphrase)
         }
+        protection.readVaultPosture = {
+            guard await auth.currentUserID != nil else { return nil }
+            guard let fetched = try? await vault.fetchVault() else { return nil }
+            return VaultPostureReading(
+                hasAppleHeldCopy: fetched.format.masterWrappedByAppleHeld != nil,
+                appleKeyID: fetched.format.appleKeyID)
+        }
     } else {
         // Totality (ladder R3-n1): "re-wired per session" must hold for the
-        // long-lived controller hook too — a vault-less composition clears
-        // any prior session's closure rather than leaving its retired
-        // sessions captured across the locked window.
+        // long-lived controller hooks too — a vault-less composition clears
+        // any prior session's closures.
         protection.rewrapVaultPassphrase = nil
+        protection.readVaultPosture = nil
     }
 }

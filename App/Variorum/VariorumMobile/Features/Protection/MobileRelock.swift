@@ -41,31 +41,30 @@ import VariorumCore
 // MARK: - The policy (pure — the dials' phone reading)
 
 nonisolated enum MobileRelockPolicy {
-    /// The "lock after time away" rows, in minutes (0 = never). The Mac's
-    /// idle picker offers the same shape; the phone's wording differs
-    /// because the mechanism does.
-    static let awayChoices = [0, 5, 15, 60]
+    /// The "lock after time away" rows — pre-13x 2a: the design's four
+    /// values (decision 18: 5 · 10 · 30 · never; default 10), the SAME
+    /// dial and the same values as the Mac's; only the mechanism differs.
+    static let awayChoices: [Int?] = ProtectionDials.idleChoices
 
-    static func awayLabel(_ minutes: Int) -> String {
-        switch minutes {
-        case 0: return "Never"
-        case 1: return "After a minute"
-        case 60: return "After an hour"
-        default: return "After \(minutes) minutes"
-        }
+    static func awayLabel(_ minutes: Int?) -> String {
+        ProtectionCopy.idleChoiceLabel(minutes)
     }
 
-    /// Does leaving the screen lock the library right now?
-    static func locksOnLeaving(_ dials: ProtectionDials) -> Bool {
-        dials.mode.isDemanded && dials.relockOnSleepAndScreenLock
+    /// Does leaving the screen lock the library right now? pre-13x 2a: in
+    /// Castle ALWAYS (decision 18 — re-lock on sleep / screen lock is
+    /// always on; backgrounding IS the phone's leaving); in Standard never
+    /// (no gate exists — a lock there would be theater, R13p-14).
+    static func locksOnLeaving(gate: StoreAtOpenMode) -> Bool {
+        gate.isDemanded
     }
 
-    /// Does coming back after `awayFor` seconds lock it? (Nil/0 minutes =
-    /// never; a demanded mode is required, exactly as on the Mac.)
-    static func locksOnReturn(_ dials: ProtectionDials, awayFor seconds: TimeInterval) -> Bool {
-        guard dials.mode.isDemanded else { return false }
-        guard let minutes = dials.relockAfterIdleMinutes, minutes > 0 else { return false }
-        return seconds >= Double(minutes) * 60
+    /// Does coming back after `awayFor` seconds lock it? (nil minutes =
+    /// never; a demanded gate is required, exactly as on the Mac.)
+    static func locksOnReturn(
+        gate: StoreAtOpenMode, dials: ProtectionDials, awayFor seconds: TimeInterval
+    ) -> Bool {
+        guard gate.isDemanded else { return false }
+        return IdleLockClock.isDue(idleSeconds: seconds, minutes: dials.relockAfterIdleMinutes)
     }
 }
 
@@ -113,7 +112,9 @@ func mobileWillLock(
 /// above, and everything it DOES is `lock`, which is the bootstrap's.
 @MainActor
 final class MobileRelockCoordinator {
-    private let dials: @MainActor () -> ProtectionDials
+    /// The facts at FIRE time (pre-13x 2a): the effective gate (derived —
+    /// Castle or not) and Castle's dials (the idle minutes).
+    private let facts: @MainActor () -> (gate: StoreAtOpenMode, dials: ProtectionDials)
     private let lock: @MainActor () async -> Void
     private let now: @MainActor () -> Date
     /// When the app last left the screen — nil before the first leaving,
@@ -122,20 +123,20 @@ final class MobileRelockCoordinator {
     private(set) var leftAt: Date?
 
     init(
-        dials: @escaping @MainActor () -> ProtectionDials,
+        facts: @escaping @MainActor () -> (gate: StoreAtOpenMode, dials: ProtectionDials),
         lock: @escaping @MainActor () async -> Void,
         now: @escaping @MainActor () -> Date = { Date() }
     ) {
-        self.dials = dials
+        self.facts = facts
         self.lock = lock
         self.now = now
     }
 
     /// Called AFTER the background flush has finished (the ordering rule
-    /// in this file's header). Locks when the dial says so.
+    /// in this file's header). Locks under Castle, always (decision 18).
     func didLeaveTheScreen() async {
         leftAt = now()
-        guard MobileRelockPolicy.locksOnLeaving(dials()) else { return }
+        guard MobileRelockPolicy.locksOnLeaving(gate: facts().gate) else { return }
         leftAt = nil
         await lock()
     }
@@ -149,7 +150,9 @@ final class MobileRelockCoordinator {
         guard let leftAt else { return false }
         let away = now().timeIntervalSince(leftAt)
         self.leftAt = nil
-        guard MobileRelockPolicy.locksOnReturn(dials(), awayFor: away) else { return false }
+        let current = facts()
+        guard MobileRelockPolicy.locksOnReturn(
+            gate: current.gate, dials: current.dials, awayFor: away) else { return false }
         await lock()
         return true
     }

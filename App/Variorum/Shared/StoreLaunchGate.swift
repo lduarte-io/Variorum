@@ -29,7 +29,16 @@ nonisolated struct StoreLaunchGate: Sendable {
     /// `ProtectionDefaults.dials(scope:storeID:in:)` for the read-through.
     var dials: @Sendable (_ scope: String, _ storeID: String?) -> ProtectionDials
     var saveDials: @Sendable (ProtectionDials, _ scope: String, _ storeID: String?) -> Void
+    /// pre-13x 2a: the 13p-era stored at-open mode, while it survives —
+    /// the posture derivation's read-through (`Posture.derive`), retired
+    /// per store by §11's migration (`retireLegacyDials`). nil = none.
+    var legacyMode: @Sendable (_ scope: String, _ storeID: String?) -> StoreAtOpenMode?
+    /// §11 — the dial keys retired to the per-store keys.
+    var retireLegacyDials: @Sendable (_ scope: String, _ storeID: String) -> Void
     var guardFor: @Sendable (_ scope: String) -> StoreKeyGuard
+    /// pre-13x 2a: the iCloud key A's leaves (per scope — the dev-scope
+    /// discriminator rides the account); scripted in tests.
+    var appleKeyFor: @Sendable (_ scope: String) -> AppleKeyLeaves
     var loadEnvelope: @Sendable (_ storeURL: URL) throws -> StoreKeyEnvelope?
     /// Atomic write of the sidecar beside the store (the controller's
     /// wrap-landing acts ride this; the lobby never writes).
@@ -70,6 +79,8 @@ nonisolated struct StoreLaunchGate: Sendable {
     static let live = StoreLaunchGate(
         dials: { ProtectionDefaults.dials(scope: $0, storeID: $1, in: .standard) },
         saveDials: { ProtectionDefaults.save($0, scope: $1, storeID: $2, in: .standard) },
+        legacyMode: { ProtectionDefaults.legacyMode(scope: $0, storeID: $1, in: .standard) },
+        retireLegacyDials: { ProtectionDefaults.retireLegacyKeys(scope: $0, storeID: $1, in: .standard) },
         // pre-13x 1a: the guard's items are per STORE ID, read from the key
         // file beside the scope's store home at each act.
         guardFor: { scope in
@@ -78,6 +89,7 @@ nonisolated struct StoreLaunchGate: Sendable {
                 ?? URL(fileURLWithPath: "/dev/null")
             return StoreKeyGuard.keychain(scope: scope, storeURL: storeURL)
         },
+        appleKeyFor: { AppleKeyLeaves.live(scope: $0) },
         // pre-13x 1a: the store's CURRENT key file (fingerprint-named, else
         // the legacy name), located without the key; a write lands under the
         // envelope's own fingerprint name.
@@ -97,11 +109,13 @@ nonisolated struct StoreLaunchGate: Sendable {
     static func scripted(
         dials: ProtectionDials,
         backing: InMemoryStoreKeyGuardBacking,
-        envelope: StoreKeyEnvelope? = nil
+        envelope: StoreKeyEnvelope? = nil,
+        legacyMode: StoreAtOpenMode? = nil,
+        appleKey: InMemoryAppleKeyBacking = InMemoryAppleKeyBacking()
     ) -> StoreLaunchGate {
         scripted(
-            dials: ScriptedDialsBox(dials), backing: backing,
-            envelope: ScriptedEnvelopeBox(envelope))
+            dials: ScriptedDialsBox(dials, legacyMode: legacyMode), backing: backing,
+            envelope: ScriptedEnvelopeBox(envelope), appleKey: appleKey)
     }
 
     /// The fully-scripted form: live boxes so tests observe writes.
@@ -109,12 +123,16 @@ nonisolated struct StoreLaunchGate: Sendable {
         dials: ScriptedDialsBox,
         backing: InMemoryStoreKeyGuardBacking,
         envelope: ScriptedEnvelopeBox,
-        stamps: ScriptedStampsBox = ScriptedStampsBox()
+        stamps: ScriptedStampsBox = ScriptedStampsBox(),
+        appleKey: InMemoryAppleKeyBacking = InMemoryAppleKeyBacking()
     ) -> StoreLaunchGate {
         StoreLaunchGate(
             dials: { _, storeID in dials.dials(for: storeID) },
             saveDials: { new, _, storeID in dials.save(new, for: storeID) },
+            legacyMode: { _, storeID in dials.legacyMode(for: storeID) },
+            retireLegacyDials: { _, storeID in dials.retireLegacy(for: storeID) },
             guardFor: { _ in StoreKeyGuard.inMemory(backing: backing) },
+            appleKeyFor: { _ in AppleKeyLeaves.inMemory(backing: appleKey) },
             loadEnvelope: { _ in
                 // P1/P11: the scripted gate can now script UNREADABILITY —
                 // the case the verifier found "entirely unexercised"
@@ -157,7 +175,36 @@ nonisolated final class ScriptedDialsBox: @unchecked Sendable {
     private let lock = NSLock()
     private var stored: ProtectionDials
     private var perStore: [String: ProtectionDials] = [:]
-    init(_ initial: ProtectionDials) { stored = initial }
+    /// pre-13x 2a: the scripted 13p-era stored mode (the read-through) —
+    /// nil for a store that never had one or whose keys §11 retired.
+    private var legacyStored: StoreAtOpenMode?
+    private var legacyPerStore: [String: StoreAtOpenMode] = [:]
+    private var _retiredStoreIDs: [String] = []
+    init(_ initial: ProtectionDials, legacyMode: StoreAtOpenMode? = nil) {
+        stored = initial
+        legacyStored = legacyMode
+    }
+    /// The scripted legacy mode read-through (production's shape: the
+    /// store's own where 1a wrote one, else the scope's).
+    func legacyMode(for storeID: String?) -> StoreAtOpenMode? {
+        lock.lock(); defer { lock.unlock() }
+        if let storeID, _retiredStoreIDs.contains(storeID) { return nil }
+        return storeID.flatMap { legacyPerStore[$0] } ?? legacyStored
+    }
+    func setLegacyMode(_ mode: StoreAtOpenMode?, for storeID: String? = nil) {
+        lock.lock(); defer { lock.unlock() }
+        if let storeID { legacyPerStore[storeID] = mode } else { legacyStored = mode }
+    }
+    func retireLegacy(for storeID: String) {
+        lock.lock(); defer { lock.unlock() }
+        _retiredStoreIDs.append(storeID)
+        legacyPerStore[storeID] = nil
+        legacyStored = nil
+    }
+    var retiredStoreIDs: [String] {
+        lock.lock(); defer { lock.unlock() }
+        return _retiredStoreIDs
+    }
     /// The LEGACY (per-scope) dials — what a store id with no keys of its
     /// own reads through to, exactly as production's read-through.
     var value: ProtectionDials {
@@ -214,9 +261,10 @@ nonisolated final class ScriptedEnvelopeBox: @unchecked Sendable {
 
 /// Where a launch goes, decided BEFORE any store open.
 nonisolated enum StoreLaunchRoute: Equatable, Sendable {
-    /// The Auto road — Batch 1's open, custody and all.
+    /// The Standard road — Batch 1's open, custody and all (and, since
+    /// pre-13x 2a, the Apple-key road when the bound item is missing).
     case open
-    /// A demanded mode over an existing store: stop at the lobby.
+    /// A demanded gate over an existing store: stop at the lobby.
     case lobby(demand: StoreAtOpenMode)
     /// pre-13x 1a (the postures design §3.7 / decision 14 — RE-RULED): a
     /// demanded mode over an ABSENT store — "your library file is missing
@@ -229,10 +277,43 @@ nonisolated enum StoreLaunchRoute: Equatable, Sendable {
     /// closes (KnownIssues, the Castle-bypass row).
     case libraryMissing(demand: StoreAtOpenMode)
 
-    static func resolve(dials: ProtectionDials, presence: StoreFilePresence) -> StoreLaunchRoute {
-        guard dials.mode.isDemanded else { return .open }
-        guard presence != .absent else { return .libraryMissing(demand: dials.mode) }
-        return .lobby(demand: dials.mode)
+    /// pre-13x 2a: the route reads the EFFECTIVE gate — derived at the
+    /// route from the posture (the key file beside the store, read without
+    /// the key; the 13p-era stored mode until §11 retires it) and Castle's
+    /// gate style (the dials). Never a stored mode.
+    static func resolve(gate: StoreAtOpenMode, presence: StoreFilePresence) -> StoreLaunchRoute {
+        guard gate.isDemanded else { return .open }
+        guard presence != .absent else { return .libraryMissing(demand: gate) }
+        return .lobby(demand: gate)
+    }
+}
+
+/// The route-time posture facts (pre-13x 2a): what can be known BEFORE
+/// any store open or network contact — the 13p-era stored mode (until §11
+/// retires it) and the key file beside the store. The vault's word joins
+/// at ready (`ProtectionController.reconcile`).
+nonisolated struct RoutePostureFacts: Sendable {
+    var legacyMode: StoreAtOpenMode?
+    var keyFile: StoreKeyEnvelope?
+
+    var posture: Posture {
+        Posture.derive(legacyMode: legacyMode, vaultHasAppleHeldCopy: nil, keyFile: keyFile)
+    }
+}
+
+nonisolated extension StoreLaunchGate {
+    /// The effective gate at the route, from the gate's own reads: the
+    /// legacy mode (the read-through), the key file (posture) and the
+    /// dials (style). An UNREADABLE key file reads as no key file for the
+    /// posture (a demanded gate still routes to its lobby through the
+    /// legacy mode while it survives; after §11 an unreadable file opens
+    /// the Standard road, where the open refuses typed — P1/P11's honesty
+    /// is the lobby's and the controller's, never a silent mint).
+    func effectiveGate(scope: String, storeID: String?, storeURL: URL?) -> StoreAtOpenMode {
+        let facts = RoutePostureFacts(
+            legacyMode: legacyMode(scope, storeID),
+            keyFile: readEnvelope(storeURL).envelope)
+        return StoreAtOpenMode.effective(posture: facts.posture, dials: dials(scope, storeID))
     }
 }
 

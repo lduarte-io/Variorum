@@ -3,14 +3,21 @@
 //  VariorumTests
 //
 //  Phase 13p, Batch 2 (commit 4) — the ProtectionController's custody
-//  choreography: mode transitions under the custody law (a demanded gate
-//  NEVER leaves a silently-releasing item behind — R13p-14's theater
-//  prohibition made structural), the escrow dial's acts (R13p-6), the
-//  presets (R13p-7), the passphrase set + recovery landing (knot 4), THE
-//  RESET DOOR'S RED PIN (R13p-9: the old wrap must stop unwrapping —
-//  behavioral-revert-verified, see the run record), the one-secret
-//  refusals, the reconcile's escrow consistency + foreign-sidecar
-//  set-aside, and the notice state machine.
+//  choreography: the custody transitions under the custody law (a demanded
+//  gate NEVER leaves a silently-releasing item behind — R13p-14's theater
+//  prohibition made structural), the passphrase set + recovery landing
+//  (knot 4), THE RESET DOOR'S RED PIN (R13p-9), the one-secret refusals,
+//  the reconcile's foreign-sidecar set-aside, and the notice state machine.
+//
+//  pre-13x batch 2a — the POSTURE is derived (never a setting): a world is
+//  scripted Standard by a key file carrying the Apple copy under the
+//  scripted A, or Castle by a passphrase wrap without one (the derivation
+//  `Posture.derive`, pinned in the brain suite). The mode transitions are
+//  `moveCustody(to:)` — the primitive 2b's switches call — and Castle's
+//  `setAlwaysAsk`, which moves BOTH custody items (the library key's and
+//  the sync record's) in one act. The escrow arm is replaced by the APPLE
+//  ARM: under Standard the reconcile reads A (else mints it), lands the key
+//  file's Apple copy and VERIFIES it opens.
 //
 //  Everything runs through the scripted gate — no Keychain, no
 //  LocalAuthentication, no prompts, anywhere.
@@ -21,6 +28,59 @@ import Testing
 
 @testable import Variorum
 import VariorumCore
+
+/// The sync record's custody leaves, recorded (the 17h R3-4 shape): what
+/// each item HOLDS and which leaves ran, so the both-items pin can see
+/// the twin move beside the library key's.
+final class RecordingSyncLeaves: @unchecked Sendable {
+    private let lock = NSLock()
+    private var plain: SyncCustodyRecord?
+    private var gated: SyncCustodyRecord?
+    private var calls: [String] = []
+    var deletesSucceed = true
+
+    init(plain: SyncCustodyRecord? = nil, gated: SyncCustodyRecord? = nil) {
+        self.plain = plain
+        self.gated = gated
+    }
+
+    var plainRecord: SyncCustodyRecord? { lock.lock(); defer { lock.unlock() }; return plain }
+    var gatedRecord: SyncCustodyRecord? { lock.lock(); defer { lock.unlock() }; return gated }
+    var names: [String] { lock.lock(); defer { lock.unlock() }; return calls }
+    func reset() { lock.lock(); calls = []; lock.unlock() }
+
+    var leaves: E2EECustodyLeaves {
+        E2EECustodyLeaves(
+            saveGated: { [self] record in
+                lock.lock(); defer { lock.unlock() }
+                calls.append("saveGated"); gated = record; return true
+            },
+            savePlain: { [self] record in
+                lock.lock(); defer { lock.unlock() }
+                calls.append("savePlain"); plain = record; return true
+            },
+            loadPlain: { [self] in
+                lock.lock(); defer { lock.unlock() }
+                calls.append("loadPlain"); return plain
+            },
+            gatedExists: { [self] in
+                lock.lock(); defer { lock.unlock() }
+                calls.append("gatedExists"); return gated != nil
+            },
+            deletePlain: { [self] in
+                lock.lock(); defer { lock.unlock() }
+                calls.append("deletePlain")
+                guard deletesSucceed else { return false }
+                plain = nil; return true
+            },
+            deleteGated: { [self] in
+                lock.lock(); defer { lock.unlock() }
+                calls.append("deleteGated")
+                guard deletesSucceed else { return false }
+                gated = nil; return true
+            })
+    }
+}
 
 @MainActor
 @Suite("13p — the protection controller (custody choreography)")
@@ -35,56 +95,124 @@ struct Phase13pControllerTests {
     private struct World {
         let controller: ProtectionController
         let backing: InMemoryStoreKeyGuardBacking
+        let appleKeys: InMemoryAppleKeyBacking
+        let syncLeaves: RecordingSyncLeaves
+        let syncSession: SyncCustodySession
         let dialsBox: ScriptedDialsBox
         let envelopeBox: ScriptedEnvelopeBox
         let stamps: ScriptedStampsBox
         let key: StoreKey
+        /// The store's persisted dials (per store id) — hoisted so the
+        /// `#expect` macro sees no optional chain inside the call.
+        var storedDials: ProtectionDials {
+            dialsBox.dials(for: envelopeBox.value?.storeID)
+        }
     }
 
+    private func material() -> DeviceKeyMaterial {
+        DeviceKeyMaterial(
+            masterKey: Data(repeating: 0, count: 32),
+            corpusKey: Data(repeating: 1, count: 32), corpusKeyID: "corpus",
+            journalBridgeKey: Data(repeating: 2, count: 32), journalBridgeKeyID: "bridge")
+    }
+
+    /// A STANDARD world: the key file carries the Apple copy under the
+    /// scripted A (the reconcile's steady state), the silent item holds
+    /// the key. `standard: false` scripts CASTLE: a passphrase wrap, no
+    /// Apple copy, the key behind the gate and resident (unlocked).
     private func world(
+        standard: Bool = true,
         dials: ProtectionDials = ProtectionDials(),
         key: StoreKey = .mint(),
-        auto: Bool = true,
         biometryAvailable: Bool = true,
         biometricSucceeds: Bool = true,
         envelope: StoreKeyEnvelope? = nil,
+        enrolled: Bool = false,
         isReal: Bool = true
-    ) -> World {
+    ) throws -> World {
+        let apple = AppleKey.mint()
+        let appleKeys = InMemoryAppleKeyBacking(key: apple)
+        var scriptedEnvelope = envelope
+        if scriptedEnvelope == nil {
+            var fresh = StoreKeyEnvelope()
+            if standard {
+                try fresh.appleBox(key: key, under: apple.symmetricKey, appleKeyID: apple.id)
+            } else {
+                try fresh.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
+            }
+            scriptedEnvelope = fresh
+        }
         let backing = InMemoryStoreKeyGuardBacking(
-            auto: auto ? key : nil,
+            auto: standard ? key : nil,
+            gated: standard ? nil : key,
             biometryAvailable: biometryAvailable,
             biometricSucceeds: biometricSucceeds)
         let dialsBox = ScriptedDialsBox(dials)
-        let envelopeBox = ScriptedEnvelopeBox(envelope)
+        let envelopeBox = ScriptedEnvelopeBox(scriptedEnvelope)
         let stamps = ScriptedStampsBox()
         let gate = StoreLaunchGate.scripted(
-            dials: dialsBox, backing: backing, envelope: envelopeBox, stamps: stamps)
+            dials: dialsBox, backing: backing, envelope: envelopeBox, stamps: stamps,
+            appleKey: appleKeys)
+        let syncSession = SyncCustodySession()
+        let record = SyncCustodyRecord(deviceID: "device-1", material: enrolled ? material() : nil)
+        let syncLeaves = RecordingSyncLeaves(
+            plain: standard ? record : SyncCustodyRecord(deviceID: "device-1", material: nil),
+            gated: standard || !enrolled ? nil : record)
+        if !standard, enrolled { syncSession.hold(record) }
         let controller = ProtectionController(configuration: .init(
             scope: "Variorum", storeURL: nil, gate: gate,
             isRealVariant: isReal,
             makeKDF: { PassphraseKDF.Descriptor(
                 algorithm: PassphraseKDF.algorithmArgon2id, argon2Version: 0x13,
                 memoryKiB: 256, iterations: 1, parallelism: 1,
-                salt: PassphraseKDF.randomSalt(), outputBytes: 32) }))
+                salt: PassphraseKDF.randomSalt(), outputBytes: 32) },
+            storeID: { [storeID = scriptedEnvelope?.storeID] in storeID },
+            syncCustodyLeaves: { _ in syncLeaves.leaves },
+            syncCustodySession: syncSession))
+        if !standard { controller.adoptResident(key) }
         return World(
-            controller: controller, backing: backing, dialsBox: dialsBox,
+            controller: controller, backing: backing, appleKeys: appleKeys,
+            syncLeaves: syncLeaves, syncSession: syncSession, dialsBox: dialsBox,
             envelopeBox: envelopeBox, stamps: stamps, key: key)
+    }
+
+    // MARK: - The posture projection
+
+    @Test func thePostureIsDerivedFromTheKeyFileAndTheVault() async throws {
+        let standard = try world()
+        #expect(standard.controller.posture == .standard)
+        #expect(standard.controller.effectiveGate == .auto)
+        let castle = try world(standard: false)
+        #expect(castle.controller.posture == .castle)
+        #expect(castle.controller.effectiveGate == .biometric)
+        let alwaysAsk = try world(standard: false, dials: ProtectionDials(alwaysAsk: true))
+        #expect(alwaysAsk.controller.effectiveGate == .passphrase)
+
+        // The vault's word outranks the key file once read (decision 8).
+        castle.controller.readVaultPosture = {
+            VaultPostureReading(hasAppleHeldCopy: true, appleKeyID: "a")
+        }
+        await castle.controller.reconcile()
+        #expect(castle.controller.posture == .standard,
+                "an enrolled library follows the account — the reconcile READ; the act is 2c's")
     }
 
     // MARK: - The passphrase + phrase artifacts
 
     @Test func setPassphraseLandsTheWrapAndStamps() async throws {
-        let w = world()
+        let w = try world()
         #expect(!w.controller.hasPassphraseWrap)
         #expect(await w.controller.setPassphrase("sesame") == nil)
         #expect(w.controller.hasPassphraseWrap)
         let envelope = try #require(w.envelopeBox.value)
         #expect(try envelope.unwrapKey(passphrase: "sesame") == w.key)
         #expect(w.stamps.value[ProtectionController.passphraseSetAtStamp] != nil)
+        #expect(w.controller.posture == .standard,
+                "setting a passphrase under Standard keeps Standard — the Apple copy stands")
     }
 
     @Test func generateAndLandRecoveryPhraseShowsTwelveWordsThatUnwrap() async throws {
-        let w = world()
+        let w = try world()
         let words = try #require(await w.controller.generateAndLandRecoveryPhrase())
         #expect(words.count == 12)
         #expect(w.controller.hasRecoveryWrap)
@@ -92,158 +220,233 @@ struct Phase13pControllerTests {
         #expect(try envelope.unwrapKey(recoveryWords: words) == w.key)
     }
 
-    // MARK: - The custody law (mode transitions)
+    // MARK: - The custody law (the moves)
 
-    @Test func demandedModesNeedThePassphraseFirst() async {
-        let w = world()
-        #expect(await w.controller.setMode(.biometric) == .needsPassphrase)
-        #expect(await w.controller.setMode(.passphrase) == .needsPassphrase)
+    @Test func demandedGatesNeedThePassphraseFirst() async throws {
+        let w = try world()
+        #expect(await w.controller.moveCustody(to: .biometric) == .needsPassphrase)
+        #expect(await w.controller.moveCustody(to: .passphrase) == .needsPassphrase)
         #expect(w.backing.auto != nil, "a refused transition changes nothing")
     }
 
-    @Test func biometricModeMovesCustodyBehindTheGate() async {
-        let w = world()
+    /// THE HANDOVER PIN (the brief's item 1): a move into the gated shape
+    /// carries BOTH custody items — the library key's item AND the sync
+    /// record's — in one act. RED ON OLD: the pre-2a `setMode` moved the
+    /// store key alone; the sync record stayed in the plain item.
+    @Test func aMoveIntoTheGateMovesTheLibraryKeyAndTheSyncRecordTogether() async throws {
+        let w = try world(enrolled: true)
         _ = await w.controller.setPassphrase("sesame")
-        #expect(await w.controller.setMode(.biometric) == .changed)
-        #expect(w.backing.gated == w.key, "the gated item carries the key")
+        w.syncLeaves.reset()
+        #expect(await w.controller.moveCustody(to: .biometric) == .changed)
+        #expect(w.backing.gated == w.key, "the gated item carries the library key")
         #expect(w.backing.auto == nil,
                 "the silent item is GONE — a gate whose key still releases silently is theater (R13p-14)")
-        #expect(w.dialsBox.value.mode == .biometric, "the dial persisted")
+        #expect(w.syncLeaves.gatedRecord?.material != nil,
+                "the sync record moved behind the gate WITH the library key")
+        #expect(w.syncLeaves.plainRecord?.material == nil,
+                "…and its plain item is identity-only now")
+        #expect(w.syncLeaves.plainRecord?.deviceID == "device-1", "the identity stays")
+        #expect(w.syncSession.record?.material != nil, "the session that moved stays unlocked")
     }
 
-    /// 13p-fix R1-1, THE RED-ON-OLD PIN. On 2026-08-30 a gated write
-    /// SUCCEEDED into the data-protection keychain while every read
-    /// searched the file-based one, so `saveGated` returned true, the
-    /// silent item was deleted on the strength of that alone, and no
-    /// Keychain road opened the author's library. The asymmetry is fixed,
-    /// but the SHAPE recurs on any identity regression — the access group
-    /// is part of an item's identity, so a bundle-id change or a
-    /// distribution profile missing the group reproduces it exactly.
-    /// The transition must therefore prove the incoming custody READS
-    /// BACK before releasing the outgoing one.
-    @Test func aGatedWriteThatCannotBeReadBackRefusesInsteadOfDestroyingTheSilentItem() async {
-        let w = world()
+    /// 13p-fix R1-1, THE RED-ON-OLD PIN: the transition must prove the
+    /// incoming custody READS BACK before releasing the outgoing one.
+    @Test func aGatedWriteThatCannotBeReadBackRefusesInsteadOfDestroyingTheSilentItem() async throws {
+        let w = try world()
         _ = await w.controller.setPassphrase("sesame")
         w.backing.gatedWritesAreInvisible = true
 
-        #expect(await w.controller.setMode(.biometric) != .changed,
+        #expect(await w.controller.moveCustody(to: .biometric) != .changed,
                 "a gated item nothing can find is not a landed gate")
         #expect(w.backing.auto == w.key,
                 "the ONLY reachable copy of the key survives the refusal")
-        #expect(w.dialsBox.value.mode != .biometric,
-                "and the dial never moved — the app cannot claim a gate it does not have")
     }
 
-    @Test func passphraseModeLeavesNoSilentCustodyAtAll() async {
-        let w = world()
+    @Test func passphraseGateLeavesNoSilentCustodyAtAll() async throws {
+        let w = try world(enrolled: true)
         _ = await w.controller.setPassphrase("sesame")
-        #expect(await w.controller.setMode(.passphrase) == .changed)
+        #expect(await w.controller.moveCustody(to: .passphrase) == .changed)
         #expect(w.backing.auto == nil)
         #expect(w.backing.gated == nil)
+        #expect(w.syncLeaves.gatedRecord == nil, "no gated sync item under Always ask")
+        #expect(w.syncLeaves.plainRecord?.material == nil, "the plain item is identity-only")
+        #expect(w.syncSession.record?.material != nil,
+                "the sync keys live in SESSION MEMORY under Always ask (decision 10)")
     }
 
-    @Test func backToAutoRestoresTheSilentItemAndDropsTheGate() async {
-        let w = world()
-        _ = await w.controller.setPassphrase("sesame")
-        _ = await w.controller.setMode(.biometric)
-        // The demanded era: the resident key stands in for the deleted
-        // silent item (as the bootstrap adopts it at unlock).
-        w.controller.adoptResident(w.key)
-        #expect(await w.controller.setMode(.auto) == .changed)
+    @Test func backToAutoRestoresTheSilentItemAndDropsTheGate() async throws {
+        let w = try world(standard: false, enrolled: true)
+        #expect(await w.controller.moveCustody(to: .auto) == .changed)
         #expect(w.backing.auto == w.key)
         #expect(w.backing.gated == nil)
+        #expect(w.syncLeaves.plainRecord?.material != nil, "the sync record is silent again")
+        #expect(w.syncLeaves.gatedRecord == nil)
     }
 
-    @Test func biometricModeRefusesWhereTheHardwareIsAbsent() async {
-        let w = world(biometryAvailable: false)
+    /// A refused sync-record move REVERSES the library key's move — the
+    /// two families never disagree about the shape.
+    @Test func aRefusedSyncRecordMoveReversesTheLibraryKeysMove() async throws {
+        let w = try world(enrolled: true)
         _ = await w.controller.setPassphrase("sesame")
-        guard case .refused(let message) = await w.controller.setMode(.biometric) else {
+        w.syncLeaves.deletesSucceed = false  // the plain→gated move cannot release... the gated
+        // The gated shape's outgoing act is the identity-only rewrite (a
+        // save, which succeeds); Always ask's outgoing act is the gated
+        // delete — script that refusal.
+        guard case .refused = await w.controller.moveCustody(to: .passphrase) else {
+            // The passphrase move from Standard deletes the gated item,
+            // which is absent: released trivially. Script the biometric →
+            // passphrase road instead, where the gated item exists.
+            w.syncLeaves.deletesSucceed = true
+            #expect(await w.controller.moveCustody(to: .biometric) == .changed)
+            w.syncLeaves.deletesSucceed = false
+            w.backing.deletesSucceed = true
+            let outcome = await w.controller.moveCustody(to: .passphrase)
+            guard case .refused = outcome else {
+                Issue.record("expected the sync half's refusal to back the move out, got \(outcome)")
+                return
+            }
+            #expect(w.backing.gated == w.key,
+                    "the library key's move was REVERSED — back behind the gate")
+            #expect(w.syncLeaves.gatedRecord != nil, "the sync record never left the gate")
+            return
+        }
+    }
+
+    @Test func biometricGateRefusesWhereTheHardwareIsAbsent() async throws {
+        let w = try world(biometryAvailable: false)
+        _ = await w.controller.setPassphrase("sesame")
+        guard case .refused(let message) = await w.controller.moveCustody(to: .biometric) else {
             Issue.record("expected a refusal")
             return
         }
         #expect(message.contains("no Touch ID"))
+        #expect(message.contains("Always ask"), "the road that exists is named")
     }
 
-    // MARK: - The escrow dial (R13p-6)
+    // MARK: - Castle's switches
 
-    @Test func escrowOnWritesTheItemUnderTheStoreID() async throws {
-        let w = world()
-        #expect(await w.controller.setEscrow(true))
-        let storeID = try #require(w.envelopeBox.value?.storeID)
-        #expect(w.backing.escrow[storeID] == w.key)
-        #expect(await w.controller.setEscrow(false))
-        #expect(w.backing.escrow[storeID] == nil)
-        #expect(!w.dialsBox.value.escrowOn)
+    /// ALWAYS ASK (copy §1): Castle's first switch moves both items and
+    /// persists the dial; in Standard it refuses (no gate exists there).
+    @Test func alwaysAskMovesBothItemsAndPersistsTheDialInCastleOnly() async throws {
+        let standard = try world()
+        guard case .refused = await standard.controller.setAlwaysAsk(true) else {
+            Issue.record("Always ask is a Castle switch")
+            return
+        }
+        #expect(!standard.storedDials.alwaysAsk)
+
+        let castle = try world(standard: false, enrolled: true)
+        #expect(castle.controller.effectiveGate == .biometric)
+        #expect(await castle.controller.setAlwaysAsk(true) == .changed)
+        #expect(castle.controller.effectiveGate == .passphrase)
+        #expect(castle.storedDials.alwaysAsk, "the dial persisted")
+        #expect(castle.backing.gated == nil && castle.backing.auto == nil, "no key item at all")
+        #expect(castle.syncLeaves.gatedRecord == nil, "the sync record left the gate too")
+        #expect(castle.syncSession.record?.material != nil, "…for the session")
+
+        #expect(await castle.controller.setAlwaysAsk(false) == .changed)
+        #expect(castle.controller.effectiveGate == .biometric)
+        #expect(castle.backing.gated == castle.key)
+        #expect(castle.syncLeaves.gatedRecord?.material != nil, "the sync record is behind the gate again")
     }
 
-    /// **Ladder R1-m1 — escrow deletion is guarded on OWNERSHIP.** The
-    /// escrow-OFF arms (`setEscrow(false)` and the reconcile's
-    /// housekeeping) used to call `deleteEscrow` on whatever envelope was
-    /// present — so a FOREIGN sidecar (copied from another library; its
-    /// fingerprint contradicts our key) had ITS storeID's iCloud item
-    /// deleted: somebody's recovery leg, against the same
-    /// never-delete-foreign rule that makes `setAsideEnvelope` a move.
-    ///
-    /// RED ON OLD (behavioral revert executed): with the `belongs(to:)`
-    /// guard removed, both survival assertions go red — the foreign item
-    /// is taken by the unguarded delete.
-    @Test func escrowOffLeavesAForeignSidecarsItemAlone() async throws {
-        // A FOREIGN sidecar: wraps minted for ANOTHER library's key.
-        let foreignKey = StoreKey.mint()
-        var foreign = StoreKeyEnvelope()
-        try foreign.setPassphraseWrap(
-            key: foreignKey, passphrase: "other", kdf: fastKDF())
-        let w = world(envelope: foreign)
-        // The other library's escrow item, as iCloud Keychain would hold it.
-        w.backing.escrow[foreign.storeID] = foreignKey
+    @Test func theIdleDialPersistsPerStore() throws {
+        let w = try world(standard: false)
+        #expect(w.controller.dials.relockAfterIdleMinutes == 10, "the design's default")
+        w.controller.setRelockIdleMinutes(30)
+        #expect(w.storedDials.relockAfterIdleMinutes == 30)
+        w.controller.setRelockIdleMinutes(nil)
+        #expect(w.storedDials.relockAfterIdleMinutes == nil)
+    }
 
-        // The dial flips OFF — the foreign item must SURVIVE.
-        #expect(await w.controller.setEscrow(false))
-        #expect(w.backing.escrow[foreign.storeID] == foreignKey,
-                "a foreign sidecar's escrow item survives escrow-off")
-        #expect(!w.dialsBox.value.escrowOn, "the dial itself still flips")
+    // MARK: - THE APPLE ARM (the reconcile — §3.8; the brief's item 2)
 
-        // The reconcile's escrow-OFF housekeeping obeys the same rule.
+    /// Under Standard with the key in hand: A is READ (else minted), the
+    /// key file gains its Apple copy under A's id, and the leg is VERIFIED
+    /// by the read-back's unwrap — never the write's own word. RED ON OLD:
+    /// the pre-2a reconcile wrote the RAW key to the escrow item instead.
+    @Test func reconcileLandsTheAppleCopyAndVerifiesItOpens() async throws {
+        let key = StoreKey.mint()
+        var stub = StoreKeyEnvelope(keyFingerprint: StoreKeyEnvelope.fingerprint(of: key))
+        try stub.setRecoveryWrap(key: key, words: try RecoveryPhrase.generate())
+        let w = try world(key: key, envelope: stub)
+        w.appleKeys.key = nil  // no A on this iCloud yet — the first Standard library mints it
+        #expect(w.controller.appleKeyVerified == nil, "unknown until a reconcile runs")
         await w.controller.reconcile()
-        #expect(w.backing.escrow[foreign.storeID] == foreignKey,
-                "the launch reconcile never takes a foreign item either")
+        let minted = try #require(w.appleKeys.key, "A was minted")
+        let envelope = try #require(w.envelopeBox.value)
+        #expect(envelope.appleKeyID == minted.id)
+        #expect(try envelope.unwrapKey(apple: minted.symmetricKey) == key,
+                "the key file's Apple copy opens with A")
+        #expect(w.controller.appleKeyVerified == true)
+        #expect(!w.controller.appleKeyLandingFailed)
+        #expect(w.stamps.value[ProtectionController.firstUseStamp] != nil)
+
+        // Steady state: nothing rewritten, still verified.
+        let before = w.envelopeBox.value
+        await w.controller.reconcile()
+        #expect(w.envelopeBox.value == before)
+        #expect(w.controller.appleKeyVerified == true)
     }
 
-    // MARK: - Presets (R13p-7)
-
-    @Test func lockedDownPresetNeedsThePassphraseThenSetsEverything() async {
-        let w = world()
-        #expect(await w.controller.applyPreset(.lockedDown) == .needsPassphrase)
-        _ = await w.controller.setPassphrase("sesame")
-        _ = await w.controller.setEscrow(true)  // Standard's default, on
-        #expect(await w.controller.applyPreset(.lockedDown) == .changed)
-        #expect(w.dialsBox.value.mode == .biometric)
-        #expect(!w.dialsBox.value.escrowOn)
-        #expect(w.backing.escrow.isEmpty, "Locked-down deletes the iCloud copy")
-        #expect(w.dialsBox.value.relockOnSleepAndScreenLock)
-        #expect(w.dialsBox.value.reminderChecksOn)
-        #expect(w.backing.auto == nil, "no silent custody under the gate")
+    /// A REFUSED A write is a NOT-landed net, said so — never "covered".
+    @Test func aRefusedAppleKeyWriteReadsAsNotLandedNeverCovered() async throws {
+        let key = StoreKey.mint()
+        let stub = StoreKeyEnvelope(keyFingerprint: StoreKeyEnvelope.fingerprint(of: key))
+        let w = try world(key: key, envelope: stub)
+        w.appleKeys.key = nil
+        w.appleKeys.writesSucceed = false
+        await w.controller.reconcile()
+        #expect(w.controller.appleKeyVerified == false)
+        #expect(w.controller.appleKeyLandingFailed)
+        #expect(w.controller.legs.tier == .exposed,
+                "Standard + no secrets + no Apple copy IS the exposed state copy §5 hardens the nudge for")
+        #expect(w.envelopeBox.value?.apple == nil, "no copy was written under a key that did not land")
     }
 
-    @Test func standardPresetComesBackWhole() async {
-        let w = world()
-        _ = await w.controller.setPassphrase("sesame")
-        _ = await w.controller.applyPreset(.lockedDown)
-        w.controller.adoptResident(w.key)
-        #expect(await w.controller.applyPreset(.standard) == .changed)
-        #expect(w.dialsBox.value == ProtectionPreset.standard.dials(biometryAvailable: true))
-        #expect(w.backing.auto == w.key)
-        #expect(w.backing.gated == nil)
+    /// Under CASTLE no copy opens with A (§3.2) and A is never touched.
+    @Test func reconcileUnderCastleNeverTouchesTheAppleKey() async throws {
+        let w = try world(standard: false)
+        w.appleKeys.key = nil
+        await w.controller.reconcile()
+        #expect(w.appleKeys.key == nil, "nothing minted under Castle")
+        #expect(w.envelopeBox.value?.apple == nil)
+        #expect(w.controller.appleKeyVerified == false)
+        #expect(w.controller.posture == .castle)
+    }
+
+    /// The Apple arm runs on EVERY variant (A is per scope by construction
+    /// — the dev build mints and reads its own).
+    @Test func theAppleArmRunsOnTheDevVariantToo() async throws {
+        let key = StoreKey.mint()
+        let stub = StoreKeyEnvelope(keyFingerprint: StoreKeyEnvelope.fingerprint(of: key))
+        let w = try world(key: key, envelope: stub, isReal: false)
+        w.appleKeys.key = nil
+        await w.controller.reconcile()
+        #expect(w.appleKeys.key != nil)
+        #expect(w.controller.appleKeyVerified == true)
+    }
+
+    /// A key file whose Apple copy is under ANOTHER A (a different Apple
+    /// ID minted it) is re-landed under this device's A — the client
+    /// VERIFIES the id, never adopts a key it cannot open with.
+    @Test func anAppleCopyUnderAnotherIDIsReLandedUnderThisDevicesA() async throws {
+        let key = StoreKey.mint()
+        var envelope = StoreKeyEnvelope()
+        try envelope.appleBox(key: key, under: AppleKey.mint().symmetricKey, appleKeyID: "someone-elses")
+        let w = try world(key: key, envelope: envelope)
+        await w.controller.reconcile()
+        let mine = try #require(w.appleKeys.key)
+        #expect(w.envelopeBox.value?.appleKeyID == mine.id)
+        #expect(w.controller.appleKeyVerified == true)
     }
 
     // MARK: - THE RESET DOOR (R13p-9)
 
     /// THE RED PIN: after a biometric-confirmed reset, the OLD passphrase
-    /// must stop unwrapping. Behavioral revert (run record): a reset that
-    /// skips the envelope replace leaves this test red on its final two
-    /// expectations.
+    /// must stop unwrapping.
     @Test func resetRewrapsAndTheOldPassphraseStopsUnwrapping() async throws {
-        let w = world()
+        let w = try world()
         _ = await w.controller.setPassphrase("the old one")
         #expect(await w.controller.resetPassphrase(to: "the new one") == nil)
         let envelope = try #require(w.envelopeBox.value)
@@ -254,7 +457,7 @@ struct Phase13pControllerTests {
     }
 
     @Test func resetRefusesWithoutBiometricConfirmation() async throws {
-        let w = world(biometricSucceeds: false)
+        let w = try world(biometricSucceeds: false)
         _ = await w.controller.setPassphrase("the old one")
         let before = w.envelopeBox.value
         let refusal = await w.controller.resetPassphrase(to: "the new one")
@@ -262,8 +465,8 @@ struct Phase13pControllerTests {
         #expect(w.envelopeBox.value == before, "a refused reset changes nothing")
     }
 
-    @Test func resetWithoutBiometryNamesTheRecoveryRoad() async {
-        let w = world(biometryAvailable: false)
+    @Test func resetWithoutBiometryNamesTheRecoveryRoad() async throws {
+        let w = try world(biometryAvailable: false)
         _ = await w.controller.setPassphrase("the old one")
         let refusal = await w.controller.resetPassphrase(to: "x")
         #expect(refusal?.contains("recovery phrase") == true,
@@ -271,10 +474,9 @@ struct Phase13pControllerTests {
     }
 
     /// ONE SECRET: where a vault is wired, its half runs FIRST and a
-    /// vault that cannot re-wrap refuses the WHOLE reset — the store and
-    /// the account never diverge.
+    /// vault that cannot re-wrap refuses the WHOLE reset.
     @Test func resetRefusesWholeWhenTheVaultHalfFails() async throws {
-        let w = world()
+        let w = try world()
         _ = await w.controller.setPassphrase("the old one")
         struct VaultDown: Error {}
         w.controller.rewrapVaultPassphrase = { _ in throw VaultDown() }
@@ -287,8 +489,8 @@ struct Phase13pControllerTests {
 
     // MARK: - One secret, both directions
 
-    @Test func verifyAgainstStoreAnswersOnlyWhereAWrapExists() async {
-        let w = world()
+    @Test func verifyAgainstStoreAnswersOnlyWhereAWrapExists() async throws {
+        let w = try world()
         #expect(await w.controller.verifyPassphraseAgainstStore("anything") == nil)
         _ = await w.controller.setPassphrase("sesame")
         #expect(await w.controller.verifyPassphraseAgainstStore("sesame") == true)
@@ -296,47 +498,19 @@ struct Phase13pControllerTests {
     }
 
     @Test func followVaultPassphraseLandsTheStoreWrap() async throws {
-        let w = world()
+        let w = try world()
         await w.controller.followVaultPassphrase("suite passphrase")
         let envelope = try #require(w.envelopeBox.value)
         #expect(try envelope.unwrapKey(passphrase: "suite passphrase") == w.key)
     }
 
-    // MARK: - The reconcile
-
-    @Test func reconcileKeepsEscrowConsistentWithTheDial() async throws {
-        let w = world(dials: ProtectionDials(mode: .auto, escrowOn: true))
-        await w.controller.reconcile()
-        let storeID = try #require(w.envelopeBox.value?.storeID)
-        #expect(w.backing.escrow[storeID] == w.key, "Standard's default writes the copy")
-        #expect(w.stamps.value[ProtectionController.firstUseStamp] != nil)
-
-        // Flip the dial off out-of-band (a crashed flip's leftover item).
-        w.dialsBox.value.escrowOn = false
-        let again = world(
-            dials: w.dialsBox.value, key: w.key,
-            envelope: w.envelopeBox.value)
-        again.backing.escrow[storeID] = w.key
-        await again.controller.reconcile()
-        #expect(again.backing.escrow[storeID] == nil, "the leftover item goes")
-    }
-
-    @Test func reconcileOnTheDevVariantNeverWritesEscrow() async {
-        let w = world(dials: ProtectionDials(mode: .auto, escrowOn: true), isReal: false)
-        await w.controller.reconcile()
-        #expect(w.backing.escrow.isEmpty,
-                "PROVISIONAL: hosted test hosts run the dev store — no automatic iCloud writes")
-    }
+    // MARK: - The reconcile's foreign sidecar
 
     @Test func aForeignSidecarIsSetAsideNeverOverwrittenInPlace() async throws {
-        // An envelope wrapped for a DIFFERENT library's key sits beside
-        // the store (a copied folder). Landing a wrap for THIS key must
-        // set it aside (its wraps are someone's recovery legs), never
-        // overwrite it silently.
         let foreignKey = StoreKey.mint()
         var foreign = StoreKeyEnvelope()
         try foreign.setPassphraseWrap(key: foreignKey, passphrase: "theirs", kdf: fastKDF())
-        let w = world(envelope: foreign)
+        let w = try world(envelope: foreign)
         #expect(await w.controller.setPassphrase("mine") == nil)
         #expect(w.envelopeBox.setAsideCount == 1, "the foreign sidecar was moved aside")
         let fresh = try #require(w.envelopeBox.value)
@@ -346,8 +520,8 @@ struct Phase13pControllerTests {
 
     // MARK: - Notices
 
-    @Test func noticesFollowThePolicies() async {
-        let w = world()
+    @Test func noticesFollowThePolicies() async throws {
+        let w = try world()
         let now = Date()
         // Fresh install: first use just stamped ⇒ no nudge yet.
         await w.controller.reconcile(now: now)
@@ -364,18 +538,21 @@ struct Phase13pControllerTests {
         w.controller.refreshNotices(now: now.addingTimeInterval(90 * 24 * 3600))
         #expect(w.controller.notice != .nudge)
 
-        // The reminder: dial on + a stale passphrase stamp ⇒ due.
-        w.controller.setReminderChecks(true)
-        w.controller.refreshNotices(now: now.addingTimeInterval(90 * 24 * 3600))
-        #expect(w.controller.notice == .reminderDue)
-        w.controller.recordReminderConfirmed(now: now.addingTimeInterval(90 * 24 * 3600))
-        #expect(w.controller.notice == nil)
+        // The reminder: CASTLE + a stale passphrase stamp ⇒ due (always on
+        // in Castle, §13 — no dial).
+        let castle = try world(standard: false)
+        _ = await castle.controller.setPassphrase("sesame")
+        castle.controller.refreshNotices(now: now.addingTimeInterval(90 * 24 * 3600))
+        #expect(castle.controller.notice == .reminderDue)
+        castle.controller.recordReminderConfirmed(now: now.addingTimeInterval(90 * 24 * 3600))
+        #expect(castle.controller.notice == nil)
+        #expect(w.controller.notice != .reminderDue, "Standard has no reminder — the nudge covers it")
     }
 
     // MARK: - The reminder's local check (one face — SecretCheck's road)
 
     @Test func theStoreSecretCheckRunsTheRealUnwrapAndDiscards() async throws {
-        let w = world()
+        let w = try world()
         _ = await w.controller.setPassphrase("sesame")
         let words = try #require(await w.controller.generateAndLandRecoveryPhrase())
         let check = w.controller.makeStoreSecretCheck()
@@ -386,7 +563,6 @@ struct Phase13pControllerTests {
             Issue.record("a malformed phrase is couldNotCheck, never wrong")
             return
         }
-        // And through the ONE face: the model runs the local road.
         let model = SecretCheckModel(
             client: nil, storeCheck: check, targetNoun: "this library's key")
         #expect(model.isAvailable)
@@ -397,27 +573,11 @@ struct Phase13pControllerTests {
 
     // MARK: - The nudge's direct phrase offer (ladder R2-m1)
 
-    /// **Ladder R2-m1 — the offer consults the vault tie.** Until this
-    /// fix both notice bars fresh-minted through
-    /// `generateAndLandRecoveryPhrase()` gated only on the STORE's wrap —
-    /// so a vault whose twelve words already existed got a SECOND phrase
-    /// minted over them (the exact divergence the set-screen's own
-    /// `.extendExistingPhrase` routing prevents). Now the shared
-    /// `PhraseOffer` rule serves both platforms: vault-with-wrap ⇒ the
-    /// EXTEND flow and NO mint; no constraining vault ⇒ the fresh mint,
-    /// exactly as before.
-    ///
-    /// RED ON OLD (behavioral revert executed): with `PhraseOffer.take`
-    /// minting unconditionally — the pre-fix faces' behavior — the
-    /// vault-with-wrap arm returns `.minted` and the no-mint assertions
-    /// go red.
     @Test func thePhraseOfferExtendsAnExistingVaultPhraseInsteadOfMintingASecond() async throws {
-        let w = world()
+        let w = try world()
         _ = await w.controller.setPassphrase("sesame")
         #expect(!w.controller.hasRecoveryWrap, "the offer's own render gate")
 
-        // A vault that already carries the twelve words (the tie as
-        // `VaultTie.make` would project it for an enrolled account).
         let vaultTie = VaultTie(
             hasRecoveryWrap: true,
             verifyPassphrase: { _ in .match },
@@ -428,24 +588,17 @@ struct Phase13pControllerTests {
             Issue.record("a vault with the twelve words must route to the extend flow")
             return
         }
-        #expect(model.phase == .extendExistingPhrase,
-                "the sheet opens straight at the extend step")
-        #expect(!w.controller.hasRecoveryWrap,
-                "NO second phrase was minted over the account's — one secret")
-        #expect(w.envelopeBox.value?.recovery == nil,
-                "the store envelope carries no fresh wrap either")
+        #expect(model.phase == .extendExistingPhrase)
+        #expect(!w.controller.hasRecoveryWrap, "NO second phrase was minted over the account's")
+        #expect(w.envelopeBox.value?.recovery == nil)
 
-        // The extend flow lands the ACCOUNT's words on the store — the
-        // set-screen's own routing, reused by the offer.
         let words = try RecoveryPhrase.generate()
         await model.extendPhrase(typed: words.joined(separator: " "))
         #expect(model.lastError == nil)
         let envelope = try #require(w.envelopeBox.value)
         #expect(try envelope.unwrapKey(recoveryWords: words) == w.key)
 
-        // The control: with NO constraining vault, the offer fresh-mints
-        // exactly as it always did.
-        let free = world()
+        let free = try world()
         _ = await free.controller.setPassphrase("sesame")
         let minted = await PhraseOffer.take(controller: free.controller, vaultTie: nil)
         guard case .minted(let fresh) = minted else {
@@ -458,175 +611,92 @@ struct Phase13pControllerTests {
 
     // MARK: - The unreadable-sidecar family (pre-13u Act 9 — 17a P1/P11)
 
-    /// P1, THE RED-ON-OLD PIN for the launch-time overwrite. Escrow
-    /// defaults ON and the reconcile runs on every ready launch, so an
-    /// unreadable sidecar used to be read as ABSENT here — a fresh
-    /// wrap-less envelope was written OVER the file (destroying the
-    /// passphrase and recovery wraps where they were intact on disk) and
-    /// a new escrow item landed under the fresh storeID, orphaning the
-    /// old one. No user action was needed. The reconcile now refuses to
-    /// touch an unreadable sidecar.
-    @Test func reconcileNeverOverwritesAnUnreadableSidecar() async {
-        let w = world(dials: ProtectionDials(mode: .auto, escrowOn: true))
+    /// P1: the reconcile runs on every ready launch, and an unreadable
+    /// sidecar used to be read as ABSENT — a fresh wrap-less envelope
+    /// written OVER the file. The Apple arm SKIPS an unreadable sidecar
+    /// whole, exactly as the escrow arm learned to.
+    @Test func reconcileNeverOverwritesAnUnreadableSidecar() async throws {
+        let w = try world()
         w.envelopeBox.unreadable = true
         await w.controller.reconcile()
-        #expect(w.envelopeBox.value == nil,
-                "NOTHING is written over an unreadable sidecar — the wraps on disk may be intact")
-        #expect(w.backing.escrow.isEmpty,
-                "and no escrow item lands under a fresh storeID (the old one stays un-orphaned)")
-        #expect(w.controller.envelopeUnreadable,
-                "the projection carries the truth: unreadable, not absent")
+        #expect(w.envelopeBox.value != nil, "the file is left exactly as it was")
+        #expect(w.controller.envelopeUnreadable, "the projection carries the truth: unreadable, not absent")
+        #expect(w.controller.appleKeyVerified == nil, "no claim from unknowns")
+        #expect(w.controller.legs.tier == .unknown)
         #expect(w.controller.notice != .nudge,
                 "the nudge stays quiet — it cannot honestly claim 'no passphrase' over unknown wraps")
     }
 
     /// P11(b): the set screen refuses over an unreadable sidecar — the
-    /// old road wrapped the key into a fresh BLANK envelope and wrote it
-    /// with `.atomic`, obliterating the `recovery` blob (her twelve
-    /// written-down words) and the escrow-naming storeID with no word
-    /// said. Foreign is a MOVE; unreadable is a REFUSAL.
-    @Test func setPassphraseRefusesOverAnUnreadableSidecarInsteadOfOverwritingIt() async {
-        let w = world()
+    /// old road wrapped the key into a fresh BLANK envelope, obliterating
+    /// the `recovery` blob (her twelve written-down words) with no word said.
+    @Test func setPassphraseRefusesOverAnUnreadableSidecarInsteadOfOverwritingIt() async throws {
+        let w = try world()
+        let before = w.envelopeBox.value
         w.envelopeBox.unreadable = true
         let refusal = await w.controller.setPassphrase("sesame")
         #expect(refusal == ProtectionCopy.message(
             for: StoreKeyEnvelopeError.unreadable("scripted unreadable sidecar")),
                 "the refusal names the TRUE cause — the file exists and can't be read")
-        #expect(w.envelopeBox.value == nil, "nothing was written")
-
-        // The same rule at every envelope-writing door.
+        #expect(w.envelopeBox.value == before, "nothing was written")
         #expect(await w.controller.generateAndLandRecoveryPhrase() == nil)
         #expect(w.controller.lastError != nil)
-        #expect(await w.controller.setEscrow(true) == false,
-                "the escrow dial refuses too — its ensure would mint over the file")
-        #expect(w.envelopeBox.value == nil, "still nothing written")
-
-        // And the reset door names the real problem instead of the false
-        // "No passphrase is set yet".
         let reset = await w.controller.resetPassphrase(to: "new one")
         #expect(reset == ProtectionCopy.message(
             for: StoreKeyEnvelopeError.unreadable("")))
     }
 
-    /// P2, THE RED-ON-OLD PIN: entering a demanded mode is authorized by
+    /// P2, THE RED-ON-OLD PIN: entering a demanded gate is authorized by
     /// a FRESH disk read, never the cached `hasPassphraseWrap` projection.
-    /// The road: a FOREIGN sidecar (its wraps are another key's) reads as
-    /// "Passphrase — Set" at init; the reconcile's escrow arm then sets
-    /// it aside and writes a fresh WRAP-LESS envelope without refreshing;
-    /// the stale `true` used to pass `setMode`'s guard and delete BOTH
-    /// Keychain items — no copy of the store key existed anywhere, the
-    /// library permanently unopenable.
-    @Test func aModeChangeAuthorizesFromTheDiskNotTheCachedProjection() async throws {
+    @Test func aCustodyMoveAuthorizesFromTheDiskNotTheCachedProjection() async throws {
         let foreignKey = StoreKey.mint()
         var foreign = StoreKeyEnvelope()
         try foreign.setPassphraseWrap(key: foreignKey, passphrase: "theirs", kdf: fastKDF())
-        let w = world(dials: ProtectionDials(mode: .auto, escrowOn: true), envelope: foreign)
+        let w = try world(envelope: foreign)
         #expect(w.controller.hasPassphraseWrap,
                 "init reads the foreign envelope — the projection says a wrap exists")
 
-        // The envelope changes UNDER the projection — in production the
-        // reconcile's escrow arm (or `setEscrow(true)`) sets the foreign
-        // sidecar aside and writes a fresh wrap-less one; both now refresh
-        // as a BELT, so the pin mutates the box directly to isolate the
-        // AUTHORIZATION half: whatever went stale, the act must re-read.
+        // The envelope changes UNDER the projection.
         w.envelopeBox.value = StoreKeyEnvelope()
         #expect(w.controller.hasPassphraseWrap, "the projection is now stale — the trap is set")
 
-        let outcome = await w.controller.setMode(.passphrase)
+        let outcome = await w.controller.moveCustody(to: .passphrase)
         #expect(outcome == .needsPassphrase,
-                "a wrap-less envelope cannot authorize a demanded mode — stale 'true' deleted both Keychain items here")
+                "a wrap-less envelope cannot authorize a demanded gate — stale 'true' deleted both Keychain items here")
         #expect(w.backing.auto == w.key,
                 "the silent item SURVIVES — the refused transition changed nothing")
-        #expect(w.dialsBox.value.mode == .auto, "and the dial never moved")
     }
 
-    // MARK: - R-pre13u-4/5: the nudge brain's legs + the VERIFIED escrow
+    // MARK: - R-pre13u-4: the nudge brain's legs, re-based on A
 
-    /// The tier truth table — ONE brain both platforms consult (her
-    /// rider: "Both platforms invoke the same nudge brain"). The escrow
-    /// leg counts ONLY verified-landed; unknown facts claim no tier.
-    @Test func theLegsTierNeverCountsAnUnverifiedEscrow() {
+    @Test func theLegsTierNeverCountsAnUnverifiedAppleKey() {
         func legs(
             passphrase: Bool = false, recovery: Bool = false,
-            escrow: Bool? = nil, unknown: Bool = false
+            apple: Bool? = nil, unknown: Bool = false
         ) -> ProtectionLegs {
             ProtectionLegs(
                 hasPassphraseWrap: passphrase, hasRecoveryWrap: recovery,
-                escrowVerifiedLanded: escrow, storeCustodyGated: false,
+                appleKeyVerified: apple, storeCustodyGated: false,
                 factsUnknown: unknown)
         }
         #expect(legs().tier == .exposed,
-                "Auto + no secrets + no verified escrow = only this device opens the work")
-        #expect(legs(escrow: nil).tier == .exposed,
-                "an UNVERIFIED escrow (nil — never checked) counts for NOTHING")
-        #expect(legs(escrow: false).tier == .exposed,
-                "an ON dial whose item did not verifiably land counts for nothing either")
-        #expect(legs(escrow: true).tier == .covered, "the verified net covers")
+                "Standard + no secrets + no verified Apple copy = only this device opens the work")
+        #expect(legs(apple: nil).tier == .exposed,
+                "an UNVERIFIED Apple copy (nil — never checked) counts for NOTHING")
+        #expect(legs(apple: false).tier == .exposed,
+                "a copy that did not verifiably land counts for nothing either")
+        #expect(legs(apple: true).tier == .covered, "the verified key covers")
         #expect(legs(passphrase: true).tier == .covered)
         #expect(legs(recovery: true).tier == .covered)
         #expect(legs(unknown: true).tier == .unknown,
                 "an unreadable sidecar claims NO tier — the nudge stays quiet (P1/P11)")
-        // The ways-back-in line composes from the same brain.
-        #expect(ProtectionCopy.waysBackInLine(legs(escrow: true))
-                    .contains("iCloud Keychain"))
-        #expect(!ProtectionCopy.waysBackInLine(legs(escrow: false))
-                    .contains("iCloud Keychain"),
+        #expect(ProtectionCopy.waysBackInLine(legs(apple: true)).contains("iCloud Keychain"))
+        #expect(!ProtectionCopy.waysBackInLine(legs(apple: false)).contains("iCloud Keychain"),
                 "the pane never lists a net that did not verifiably land")
     }
 
-    /// R-pre13u-4's escrow leg + R-pre13u-5's instrument: VERIFIED-LANDED
-    /// means the reconcile READ THE ITEM BACK equal to the key in hand —
-    /// a write's own success is never the proof (the 13p-fix lesson on
-    /// the safety net escrow becomes post-#82).
-    @Test func reconcileVerifiesTheEscrowItemReadsBackNeverAssumesTheWrite() async throws {
-        // Fresh write: verified by the read-back, not by the save's word.
-        let w = world(dials: ProtectionDials(mode: .auto, escrowOn: true))
-        #expect(w.controller.escrowVerifiedLanded == nil, "unknown until a reconcile runs")
-        await w.controller.reconcile()
-        let storeID = try #require(w.envelopeBox.value?.storeID)
-        #expect(w.backing.escrow[storeID] == w.key)
-        #expect(w.controller.escrowVerifiedLanded == true,
-                "the fresh write was READ BACK equal to the key")
-
-        // Steady state (the author-run check's green): the item already
-        // matches — the reconcile reads its own item back, writes nothing.
-        await w.controller.reconcile()
-        #expect(w.controller.escrowVerifiedLanded == true)
-
-        // A refused write is a NOT-landed net, said so.
-        let refused = world(dials: ProtectionDials(mode: .auto, escrowOn: true))
-        refused.backing.savesSucceed = false
-        await refused.controller.reconcile()
-        #expect(refused.controller.escrowVerifiedLanded == false,
-                "a net that could not land never reads as covered")
-        #expect(refused.controller.escrowLandingFailed)
-
-        // Dial OFF: no leg exists — false, never 'unknown, maybe covered'.
-        let off = world(dials: ProtectionDials(mode: .auto, escrowOn: false))
-        await off.controller.reconcile()
-        #expect(off.controller.escrowVerifiedLanded == false)
-        #expect(off.controller.legs.tier == .exposed,
-                "Auto with everything off IS the exposed state R-pre13u-4 hardens the copy for")
-
-        // Unreadable sidecar: the arm skips whole — the reading is left
-        // untouched (P1's refusal composes with the verification).
-        let unreadable = world(dials: ProtectionDials(mode: .auto, escrowOn: true))
-        unreadable.envelopeBox.unreadable = true
-        await unreadable.controller.reconcile()
-        #expect(unreadable.controller.escrowVerifiedLanded == nil)
-        #expect(unreadable.controller.legs.tier == .unknown)
-    }
-
-    /// P10, THE RED-ON-OLD PIN. `setPassphrase` used to snapshot the
-    /// envelope BEFORE suspending in the Argon2id derivation (hundreds of
-    /// ms), then write the whole snapshot back — so a recovery wrap landed
-    /// during that window (the main window's nudge phrase door beside the
-    /// Settings window's set sheet, two doors over ONE controller) was
-    /// silently overwritten and the SHOWN twelve words stopped opening the
-    /// library. The `makeKDF` hook below stands in for the concurrent
-    /// land: it runs between the old snapshot and the save either way, so
-    /// old code clobbers it and fixed code (fresh read AFTER the
-    /// derivation) preserves it.
+    /// P10, THE RED-ON-OLD PIN: a recovery wrap landed during the KDF
+    /// survives `setPassphrase` (the fresh read AFTER the derivation).
     @Test func aRecoveryWrapLandedDuringTheKDFSurvivesSetPassphrase() async throws {
         let key = StoreKey.mint()
         let backing = InMemoryStoreKeyGuardBacking(
@@ -640,9 +710,6 @@ struct Phase13pControllerTests {
         let controller = ProtectionController(configuration: .init(
             scope: "Variorum", storeURL: nil, gate: gate, isRealVariant: true,
             makeKDF: {
-                // The concurrent land, deterministically inside the window:
-                // the phrase door writes the recovery wrap while the set
-                // door is deriving.
                 var landed = envelopeBox.value ?? StoreKeyEnvelope()
                 try? landed.setRecoveryWrap(key: key, words: words)
                 envelopeBox.value = landed
@@ -656,9 +723,7 @@ struct Phase13pControllerTests {
         let envelope = try #require(envelopeBox.value)
         #expect(envelope.recovery != nil,
                 "the recovery wrap landed mid-derivation SURVIVES the passphrase save")
-        #expect(try envelope.unwrapKey(recoveryWords: words) == key,
-                "and the shown twelve words still open the library")
-        #expect(try envelope.unwrapKey(passphrase: "sesame") == key,
-                "beside the freshly-set passphrase — both artifacts stand")
+        #expect(try envelope.unwrapKey(recoveryWords: words) == key)
+        #expect(try envelope.unwrapKey(passphrase: "sesame") == key)
     }
 }

@@ -64,7 +64,10 @@ struct Phase13pKeyedDrillTests {
         StoreLaunchGate(
             dials: { _, _ in dials },
             saveDials: { _, _, _ in },
+            legacyMode: { _, _ in nil },
+            retireLegacyDials: { _, _ in },
             guardFor: { _ in StoreKeyGuard.inMemory(backing: InMemoryStoreKeyGuardBacking()) },
+            appleKeyFor: { _ in AppleKeyLeaves.inMemory(backing: InMemoryAppleKeyBacking()) },
             loadEnvelope: { try StoreKeyEnvelope.loadCurrent(besideStore: $0) },
             saveEnvelope: { try $0.write(at: $0.preferredURL(besideStore: $1)) },
             setAsideEnvelope: { _ in },
@@ -144,9 +147,11 @@ struct Phase13pKeyedDrillTests {
         // from the RESTORED sidecar; the same open that always runs opens
         // the store with it.
         let legTwo = try restore("restore-lobby")
-        let demandedGate = fileGate(dials: ProtectionDials(mode: .passphrase))
+        // pre-13x 2a: the restored key file (a passphrase wrap, no Apple
+        // copy) DERIVES Castle; Always ask makes the gate the passphrase.
+        let demandedGate = fileGate(dials: ProtectionDials(alwaysAsk: true))
         #expect(StoreLaunchRoute.resolve(
-            dials: demandedGate.dials("drill", nil),
+            gate: demandedGate.effectiveGate(scope: "drill", storeID: nil, storeURL: legTwo),
             presence: StoreFilePresence.classify(at: legTwo))
             == .lobby(demand: .passphrase))
         let lobbyRoad = StoreLobby.envelopeRoad(storeURL: legTwo, gate: demandedGate)
@@ -175,7 +180,7 @@ struct Phase13pKeyedDrillTests {
                     "the refusal is TYPED — the failure surface keys its road on this")
         }
         let failedRoad = StoreLobby.envelopeRoad(
-            storeURL: legThree, gate: fileGate(dials: ProtectionDials(mode: .auto)))
+            storeURL: legThree, gate: fileGate(dials: ProtectionDials()))
         guard case .success(let recoveredKey) = await failedRoad(
             .recoveryText(words.joined(separator: " "))) else {
             Issue.record("the twelve words must unwrap the restored sidecar")

@@ -16,96 +16,135 @@
 import Foundation
 import VariorumCore
 
-// MARK: - The three at-open modes (R13p-5)
+// MARK: - The posture (pre-13x 2a — DERIVED, never a setting; design §3.1)
 
-/// How the store key is released at open. The login password is NEVER in
-/// any mode's chain (her threat model, verbatim in the plan: "a lot of
-/// people have […] someone who knows their computer
-/// password but might not know their passphrase").
+/// **Standard or Castle — who holds a key.** The postures design's one
+/// user-facing fact (§2), DERIVED by `derive` from what exists and stored
+/// nowhere (§3.1's posture row: "the ACCOUNT is Standard ⇔ the vault has
+/// an iCloud copy; a LOCAL-ONLY library is Standard ⇔ its key file has
+/// one"). Both postures are end-to-end encrypted (decision 2); they differ
+/// only in whether an Apple-held key (A, in iCloud Keychain) can open a
+/// wrapped copy of the library key and the master key.
+nonisolated enum Posture: String, Sendable, Codable {
+    case standard
+    case castle
+
+    /// THE ONE DERIVATION (pinned from both sources). In order:
+    ///
+    /// 1. **The pre-2a read-through** (`legacyMode` — the 13p-era stored
+    ///    at-open mode, present only until §11's migration retires the
+    ///    dial keys for the store): Auto ⇒ Standard, a demanded mode ⇒
+    ///    Castle. Her Mac (Biometric) routes to its lobby exactly as
+    ///    before; her phone (silent) opens silently ONCE more, and the
+    ///    migration at that ready reads the vault, moves custody behind
+    ///    Face ID and retires the keys — §11's "her phone becomes Castle
+    ///    at its migration". A 13p-era Auto library with a passphrase set
+    ///    keeps opening silently and the migration writes its Apple copy.
+    /// 2. **An enrolled library follows the account** (decision 8): the
+    ///    vault's word — an Apple-held copy of the master ⇒ Standard, none
+    ///    ⇒ Castle. (Reconciled against the key file at every ready; a
+    ///    disagreement is the follow — 2c's — or the adopt road — batch 3's.)
+    /// 3. **A local-only library is its key file's**: an `apple` copy ⇒
+    ///    Standard; none ⇒ Castle — EXCEPT a key file carrying no
+    ///    passphrase wrap either, which is Standard: entering Castle
+    ///    requires a passphrase and the twelve words (decision 5), so a
+    ///    library that has never had a passphrase cannot have entered it;
+    ///    what it is is a Standard library whose Apple copy has not landed
+    ///    (the exposed nudge's state, §14.20), never a lock.
+    /// 4. No key file at all ⇒ a fresh library, born Standard (§14.26).
+    static func derive(
+        legacyMode: StoreAtOpenMode?,
+        vaultHasAppleHeldCopy: Bool?,
+        keyFile: StoreKeyEnvelope?
+    ) -> Posture {
+        if let legacyMode { return legacyMode.isDemanded ? .castle : .standard }
+        if let vaultHasAppleHeldCopy { return vaultHasAppleHeldCopy ? .standard : .castle }
+        guard let keyFile else { return .standard }
+        if keyFile.apple != nil { return .standard }
+        return keyFile.passphrase != nil ? .castle : .standard
+    }
+}
+
+// MARK: - The effective gate (was the three stored at-open modes, R13p-5)
+
+/// How the store key is released at open — since pre-13x 2a a DERIVED
+/// value, a pure function of (posture, Castle's gate style), never stored
+/// (the BATCH 2 brief's binding fact i; §13 deletes the setting). The
+/// routes, the lobby and the custody law keep their shape: Standard ⇒
+/// `.auto`; Castle ⇒ `.biometric` (Touch ID / Face ID, the passphrase as
+/// the fallback), or `.passphrase` under Always ask. The login password is
+/// NEVER in any gate's chain (her threat model, verbatim in the 13p plan:
+/// "a lot of people have […] someone who knows their
+/// computer password but might not know their passphrase").
 nonisolated enum StoreAtOpenMode: String, CaseIterable, Sendable, Codable {
-    /// The device Keychain releases the key silently (Batch 1's item).
+    /// The device Keychain releases the key silently — Standard's road.
     case auto
     /// A `.biometryCurrentSet`-gated Keychain item; fallback is the
-    /// PASSPHRASE, never the device password — which is why picking this
-    /// mode FORCES the passphrase-set screen.
+    /// PASSPHRASE, never the device password.
     case biometric
     /// The passphrase is typed at every open; no silently-releasing
-    /// custody item exists in this mode.
+    /// custody item exists — Castle's Always ask.
     case passphrase
 
-    /// The demanded modes — the only ones where a locked lobby, a re-lock
+    /// The demanded gates — the only ones where a locked lobby, a re-lock
     /// policy, or Lock Now mean anything. Under `.auto` every one of them
     /// would be theater (the key auto-releases at the next open), and
     /// R13p-14's whole point is that no theater ships.
     var isDemanded: Bool { self != .auto }
-}
 
-// MARK: - The dials (R13p-7: presets set dials; every dial stays adjustable)
-
-nonisolated struct ProtectionDials: Equatable, Sendable {
-    var mode: StoreAtOpenMode = .auto
-    /// R13p-6: the iCloud Keychain escrow copy. ON in Standard, OFF in
-    /// Locked-down. **Since the ninth wave this stores the user's choice
-    /// for the AUTO posture** — custody acts on `effectiveEscrowOn`, and
-    /// the stored choice survives a stint in a demanded mode untouched.
-    var escrowOn: Bool = true
-
-    /// **THE ESCROW/POSTURE COUPLING (pre-13u ninth wave — memo §4,
-    /// R-pre13u-7(b); the ONE behavior change the memo carries).** Ruled:
-    /// demanded at-open modes do not OFFER the iCloud spare, and escrow's
-    /// default follows the posture — her why-sentence, near-verbatim:
-    /// "anyone who has your computer password has your iCloud, so the
-    /// extra lock wouldn't be providing extra protection, so I don't
-    /// offer this." This is the ONE rule every custody act consults; the
-    /// stored `escrowOn` remembers the Auto-posture choice so a round
-    /// trip through an asking mode never clobbers it (the default follows
-    /// the posture; the choice is hers).
-    var effectiveEscrowOn: Bool { escrowOn && !mode.isDemanded }
-    /// Re-lock when the Mac sleeps or the screen locks (demanded modes
-    /// only — the dial's face renders only there).
-    var relockOnSleepAndScreenLock: Bool = false
-    /// Re-lock after this many idle minutes (nil = never; demanded only).
-    var relockAfterIdleMinutes: Int?
-    /// R13p-9: the periodic "do you still remember your passphrase?"
-    /// check. OFF in Standard (the nudge covers the no-passphrase state),
-    /// ON in Locked-down.
-    var reminderChecksOn: Bool = false
-}
-
-/// The two presets (R13p-7), as PURE dial-setters — applying one is a
-/// settings act plus custody choreography, both the controller's; this
-/// type only answers "which dials does the preset set".
-nonisolated enum ProtectionPreset: String, CaseIterable, Sendable {
-    case standard
-    case lockedDown
-
-    /// `biometryAvailable` decides Locked-down's at-open demand: biometric
-    /// where the hardware offers it, passphrase-every-open where not —
-    /// "biometric or passphrase at open" (R13p-7's letter).
-    func dials(biometryAvailable: Bool) -> ProtectionDials {
-        switch self {
-        case .standard:
-            return ProtectionDials(
-                mode: .auto, escrowOn: true,
-                relockOnSleepAndScreenLock: false, relockAfterIdleMinutes: nil,
-                reminderChecksOn: false)
-        case .lockedDown:
-            return ProtectionDials(
-                mode: biometryAvailable ? .biometric : .passphrase,
-                escrowOn: false,
-                relockOnSleepAndScreenLock: true, relockAfterIdleMinutes: nil,
-                reminderChecksOn: true)
+    /// THE DERIVATION: the posture decides whether a gate exists; Castle's
+    /// per-device dial decides its style.
+    static func effective(posture: Posture, dials: ProtectionDials) -> StoreAtOpenMode {
+        switch posture {
+        case .standard: return .auto
+        case .castle: return dials.alwaysAsk ? .passphrase : .biometric
         }
     }
+}
 
-    /// Which preset the current dials read as — nil when hand-adjusted
-    /// dials match neither (the pane then highlights no preset; honest).
-    static func matching(_ dials: ProtectionDials, biometryAvailable: Bool) -> ProtectionPreset? {
-        allCases.first { $0.dials(biometryAvailable: biometryAvailable) == dials }
+// MARK: - The dials (Castle's two switches — per device, per store id; §3.1)
+
+/// **Castle's controls (decision 18), and nothing else.** Re-lock on
+/// sleep / screen lock is ALWAYS ON in Castle (no dial); the reminder
+/// check is always on in Castle (no dial); the iCloud spare, the presets
+/// and the stored at-open mode are gone (§13). Standard has no dials at
+/// all — the pane renders these only in Castle.
+nonisolated struct ProtectionDials: Equatable, Sendable {
+    /// *Always ask for the passphrase* — skip Touch ID and type the
+    /// passphrase every time Variorum opens; with it on, NO copy of the
+    /// key is kept on this device at all (copy §1).
+    var alwaysAsk: Bool = false
+    /// *Lock after time away* — minutes since Variorum was last USED
+    /// (decision 18: the clock is time since Variorum was last used, never
+    /// the system's idle clock); nil = never. Offered 5 · 10 · 30 · never;
+    /// default 10.
+    var relockAfterIdleMinutes: Int? = ProtectionDials.defaultIdleMinutes
+
+    static let defaultIdleMinutes = 10
+    /// The idle dial's four values (copy §1), in the order the pane offers
+    /// them; nil renders as "never".
+    static let idleChoices: [Int?] = [5, 10, 30, nil]
+}
+
+/// THE IDLE CLOCK (decision 18: "the clock = time since Variorum was last
+/// used") — pure, so the cadence has pins. The Mac stamps `lastUsedAt`
+/// from its own event stream (never the system's idle clock, which any
+/// app's activity resets — "switching to another app doesn't lock it;
+/// time away does"); the phone reads the same rule on RETURN from the
+/// time it left the screen.
+nonisolated enum IdleLockClock {
+    static func isDue(idleSeconds: TimeInterval, minutes: Int?) -> Bool {
+        guard let minutes, minutes > 0 else { return false }
+        return idleSeconds >= Double(minutes) * 60
+    }
+
+    static func isDue(now: Date, lastUsedAt: Date?, minutes: Int?) -> Bool {
+        guard let lastUsedAt else { return false }
+        return isDue(idleSeconds: now.timeIntervalSince(lastUsedAt), minutes: minutes)
     }
 }
 
-// MARK: - Device-local storage (UserDefaults, per store scope)
+// MARK: - Device-local storage (UserDefaults, per store scope + store id)
 
 /// The dials are DEVICE-LOCAL custody/ceremony, never document semantics:
 /// they gate the store BEFORE it can be read, so they cannot live in it —
@@ -126,34 +165,71 @@ nonisolated enum ProtectionDefaults {
         return "variorum.protection.\(scope).\(storeID).\(leaf)"
     }
 
+    /// The 13p-era leaves — the stored at-open mode and the three dials
+    /// the design deletes (§13). Read ONLY by the legacy read-through and
+    /// retired by §11's migration (`retireLegacyKeys`).
+    static let legacyLeaves = ["mode", "escrowOff", "relockOnSleep", "reminders"]
+
     static func dials(scope: String, in defaults: UserDefaults) -> ProtectionDials {
         dials(scope: scope, storeID: nil, in: defaults)
     }
 
-    /// The per-store read WITH A LEGACY READ-THROUGH: a store id whose own
-    /// keys have never been written reads the scope's legacy keys — so her
-    /// existing library keeps reading exactly the dials it always had
-    /// (biometric stays biometric), while a library that has written its
-    /// own keys (a NEW library started over an absent store, §3.7) reads
-    /// only those. Batch 2's §11 migration retires the legacy keys.
+    /// The per-store read WITH THE LEGACY READ-THROUGH (pre-13x 1a, kept
+    /// through 2a): a store id whose own 2a keys have never been written
+    /// reads the 13p-era keys — per store id where 1a wrote them ("Start a
+    /// New Library"), else the scope's — so her existing library keeps
+    /// reading the gate style it always had: a stored `passphrase` mode
+    /// reads as Always ask, `biometric` as Touch ID. A store that has
+    /// written its 2a keys reads only those. §11's migration retires the
+    /// legacy keys for the store (`retireLegacyKeys`).
     static func dials(scope: String, storeID: String?, in defaults: UserDefaults) -> ProtectionDials {
-        let id: String? = storeID.flatMap { id in
-            defaults.string(forKey: key("mode", scope: scope, storeID: id)) != nil ? id : nil
-        }
         var dials = ProtectionDials()
-        if let raw = defaults.string(forKey: key("mode", scope: scope, storeID: id)),
-           let mode = StoreAtOpenMode(rawValue: raw) {
-            dials.mode = mode
+        if let own = defaults.object(forKey: key("alwaysAsk", scope: scope, storeID: storeID)) as? Bool {
+            dials.alwaysAsk = own
+        } else if let mode = legacyMode(scope: scope, storeID: storeID, in: defaults) {
+            dials.alwaysAsk = mode == .passphrase
         }
-        // Escrow defaults ON (Standard) — stored as the OFF flag so the
-        // absent-key default reads as the preset's ON.
-        dials.escrowOn = !defaults.bool(forKey: key("escrowOff", scope: scope, storeID: id))
-        dials.relockOnSleepAndScreenLock =
-            defaults.bool(forKey: key("relockOnSleep", scope: scope, storeID: id))
-        let idle = defaults.integer(forKey: key("relockIdleMinutes", scope: scope, storeID: id))
-        dials.relockAfterIdleMinutes = idle > 0 ? idle : nil
-        dials.reminderChecksOn = defaults.bool(forKey: key("reminders", scope: scope, storeID: id))
+        // The idle dial: an ABSENT key is the design's default (10); a
+        // stored 0 is "never" (the 13p encoding, kept so her existing
+        // choice reads exactly as she left it).
+        let idleKey = idleKey(scope: scope, storeID: storeID, in: defaults)
+        if let stored = defaults.object(forKey: idleKey) as? Int {
+            dials.relockAfterIdleMinutes = stored > 0 ? stored : nil
+        }
         return dials
+    }
+
+    /// The 13p-era stored at-open mode for the store, if any survives —
+    /// the posture derivation's read-through (`Posture.derive`), and the
+    /// gate-style seed above. Per store id where 1a wrote one, else the
+    /// scope's legacy key; nil once §11 retired them (or never written).
+    static func legacyMode(scope: String, storeID: String?, in defaults: UserDefaults) -> StoreAtOpenMode? {
+        if let storeID {
+            if let raw = defaults.string(forKey: key("mode", scope: scope, storeID: storeID)),
+               let mode = StoreAtOpenMode(rawValue: raw) {
+                return mode
+            }
+            // A store that has written its OWN 2a keys reads only those
+            // (1a's rule): the scope's legacy mode is another library's —
+            // a NEW library started over an absent store must be born
+            // Standard, never inherit the old library's Castle.
+            if defaults.object(forKey: key("alwaysAsk", scope: scope, storeID: storeID)) != nil {
+                return nil
+            }
+        }
+        if let raw = defaults.string(forKey: key("mode", scope: scope)),
+           let mode = StoreAtOpenMode(rawValue: raw) {
+            return mode
+        }
+        return nil
+    }
+
+    /// The idle key that applies: the store's own when it has ever been
+    /// written, else the scope's legacy one (the read-through's shape).
+    private static func idleKey(scope: String, storeID: String?, in defaults: UserDefaults) -> String {
+        let own = key("relockIdleMinutes", scope: scope, storeID: storeID)
+        if storeID != nil, defaults.object(forKey: own) != nil { return own }
+        return key("relockIdleMinutes", scope: scope)
     }
 
     static func save(_ dials: ProtectionDials, scope: String, in defaults: UserDefaults) {
@@ -163,11 +239,33 @@ nonisolated enum ProtectionDefaults {
     /// Writes the store's OWN keys (the legacy keys are never written for
     /// a known store id — the read-through ends for it at its first save).
     static func save(_ dials: ProtectionDials, scope: String, storeID: String?, in defaults: UserDefaults) {
-        defaults.set(dials.mode.rawValue, forKey: key("mode", scope: scope, storeID: storeID))
-        defaults.set(!dials.escrowOn, forKey: key("escrowOff", scope: scope, storeID: storeID))
-        defaults.set(dials.relockOnSleepAndScreenLock, forKey: key("relockOnSleep", scope: scope, storeID: storeID))
+        defaults.set(dials.alwaysAsk, forKey: key("alwaysAsk", scope: scope, storeID: storeID))
         defaults.set(dials.relockAfterIdleMinutes ?? 0, forKey: key("relockIdleMinutes", scope: scope, storeID: storeID))
-        defaults.set(dials.reminderChecksOn, forKey: key("reminders", scope: scope, storeID: storeID))
+    }
+
+    /// §11 — "retire the dial keys": the store's 2a keys are written from
+    /// what the read-through reads NOW (so the gate style she had survives
+    /// as `alwaysAsk`), then every 13p-era leaf goes — the store's own AND
+    /// the scope's. From here the posture reads from the key file / the
+    /// vault alone (`Posture.derive`'s arms 2–4). Idempotent.
+    static func retireLegacyKeys(scope: String, storeID: String, in defaults: UserDefaults) {
+        let current = dials(scope: scope, storeID: storeID, in: defaults)
+        save(current, scope: scope, storeID: storeID, in: defaults)
+        for leaf in legacyLeaves {
+            defaults.removeObject(forKey: key(leaf, scope: scope, storeID: storeID))
+            defaults.removeObject(forKey: key(leaf, scope: scope))
+        }
+        defaults.removeObject(forKey: key("relockIdleMinutes", scope: scope))
+    }
+
+    /// Whether any 13p-era key survives for the store (the migration's
+    /// "already retired" read).
+    static func hasLegacyKeys(scope: String, storeID: String, in defaults: UserDefaults) -> Bool {
+        for leaf in legacyLeaves {
+            if defaults.object(forKey: key(leaf, scope: scope, storeID: storeID)) != nil { return true }
+            if defaults.object(forKey: key(leaf, scope: scope)) != nil { return true }
+        }
+        return defaults.object(forKey: key("relockIdleMinutes", scope: scope)) != nil
     }
 
     // Stamps (reminder + nudge bookkeeping; device-local like the dials).
@@ -247,18 +345,24 @@ nonisolated enum StandardNudgePolicy {
 /// (phone); both platforms consult THIS brain so the tier can never
 /// diverge (her rider: "Both platforms invoke the same nudge brain").
 ///
-/// The escrow leg is VERIFIED-LANDED, never assumed: it reads true only
-/// when the launch reconcile confirmed the iCloud item reads back equal
-/// to the key in hand (`ProtectionController.escrowVerifiedLanded`) — a
-/// dial that is merely ON, or a write that merely returned success,
-/// counts for nothing (the 13p-fix lesson, applied to the safety net).
+/// The Apple-key leg is VERIFIED, never assumed (pre-13x 2a — re-based
+/// from the 13p escrow item onto the iCloud key A, design §3.8): it reads
+/// true only when the launch reconcile read A back from iCloud Keychain
+/// AND the key file's `apple` copy unwrapped to the key in hand
+/// (`ProtectionController.appleKeyVerified`) — a write that merely
+/// returned success counts for nothing (the 13p-fix lesson, applied to
+/// the safety net). Recorded limit (the batch's external lookup): a
+/// synchronizable item ADDS and reads back locally even with iCloud
+/// Keychain OFF, and no public API reports that toggle — so "verified"
+/// means A is on THIS device; whether it has left it cannot be told.
 nonisolated struct ProtectionLegs: Equatable, Sendable {
     var hasPassphraseWrap: Bool
     var hasRecoveryWrap: Bool
     /// nil = not verified this launch (no reconcile with the key in hand
     /// has run yet) — treated as NOT a leg, because an unverified net is
-    /// exactly what must never count as one.
-    var escrowVerifiedLanded: Bool?
+    /// exactly what must never count as one. Always false in Castle (no
+    /// current copy opens with A — §3.2).
+    var appleKeyVerified: Bool?
     /// The at-open mode's own same-device leg (informational for the
     /// ways-back-in listing; a demanded mode implies a passphrase wrap,
     /// so the TIER never rides on this alone).
@@ -281,7 +385,7 @@ nonisolated struct ProtectionLegs: Equatable, Sendable {
 
     var tier: Tier {
         if factsUnknown { return .unknown }
-        return (hasPassphraseWrap || hasRecoveryWrap || escrowVerifiedLanded == true)
+        return (hasPassphraseWrap || hasRecoveryWrap || appleKeyVerified == true)
             ? .covered : .exposed
     }
 }
@@ -349,45 +453,10 @@ nonisolated enum ProtectionCopy {
         + "so the setting was left exactly as it was. Nothing changed — "
         + "you can try again."
 
-    // The escrow dial's ruled plain-consequence pair — knot 8, VERBATIM
-    // (direction ruled; 13s may re-voice the exact words).
-    static let escrowOn =
-        "A copy of your key is kept in your iCloud Keychain — if you lose this "
-        + "\(deviceName) and forget your passphrase, signing into iCloud on a new "
-        + "device can still unlock your library."
-    static let escrowOff =
-        "Your key stays only on your enrolled devices. Lose them, your passphrase, "
-        + "and your recovery phrase, and your writing is unrecoverable — by anyone."
-
-    /// The no-iCloud honesty consequence (the 2026-08-30 pre-sleep record:
-    /// without iCloud Keychain the dial has nothing to ride — say so,
-    /// never pretend). There is no supported API that answers "is iCloud
-    /// Keychain on", so the sentence is conditional and always shown with
-    /// the ON dial rather than guessed at.
-    static let escrowNeedsICloudKeychain =
-        "This rides iCloud Keychain. If iCloud Keychain is off on this \(deviceName), "
-        + "there is nothing for it to ride — the copy stays only on this "
-        + "\(deviceName) until it's turned on in System Settings."
-
-    /// **THE COUPLING'S SENTENCE (ninth wave — memo §4, RULED; supersedes
-    /// the 13p knot-8 `escrowUnderDemandedMode` caveat).** The state that
-    /// caveat described — a silently-readable iCloud copy sitting beside a
-    /// demanded gate — can no longer exist: entering an asking mode removes
-    /// the spare. Her why-sentence is the copy, near-verbatim ("anyone who
-    /// has your computer password has your iCloud, so the extra lock
-    /// wouldn't be providing extra protection, so I don't offer this").
-    static let escrowNotOfferedUnderDemanded =
-        "While Variorum asks at open, the iCloud spare key isn't offered: anyone "
-        + "who has your computer password has your iCloud, so that spare wouldn't "
-        + "be providing extra protection. Your passphrase and recovery phrase are "
-        + "the ways back in here."
-
-    /// The coupling's second half, said only when a stored Auto choice
-    /// exists: nothing was clobbered — the default follows the posture,
-    /// the choice is kept.
-    static let escrowChoiceKeptNote =
-        "Your iCloud choice isn't lost — switch back to opening silently and it "
-        + "returns as you left it."
+    // (The 13p escrow dial's sentence pair, the no-iCloud consequence and
+    // the ninth wave's escrow/posture coupling copy left at pre-13x 2a
+    // with the dial and the item they described — §13; the Apple key's
+    // sentences are `PostureCopy`'s, rendered from `pre-13x-copy.md`.)
 
     // What each mode does and does not protect (knot 6's non-scary-but-
     // serious instruction, per mode).
@@ -439,10 +508,11 @@ nonisolated enum ProtectionCopy {
             // whole same-device story (the custody law, in words).
             legs = ["your encryption passphrase", "your recovery phrase (if saved)"]
         }
-        // THE COUPLING (ninth wave, memo §4): under a demanded mode no
-        // iCloud spare exists — the dial's stored choice is an AUTO-posture
-        // choice, and listing a leg the posture removed would be the exact
-        // almost-true the memo's §9c item 3 forbids.
+        // pre-13x 2a: `escrowOn` now means "Standard, with the Apple copy"
+        // — under Castle no copy opens with the iCloud key (§3.2), so the
+        // leg is listed only for the silent gate. (This list and `lossMath`
+        // are 13p copy that batch 5's deletions retire; the parameter name
+        // is kept so the runbook and the tutorial compile unchanged.)
         if escrowOn && !mode.isDemanded {
             legs.append("the copy in your iCloud Keychain")
         }
@@ -507,19 +577,26 @@ nonisolated enum ProtectionCopy {
         + "the door they closed: every note, readable, on a timer, in the folder you "
         + "picked. Turn it on only if that trade is one you mean."
 
-    // R-pre13u-4: the EXPOSED tier's hardened plain-truth copy —
-    // DEVICE-NEUTRAL by her rider ("the language maybe should be 'this
-    // device'"): the phone invokes the same brain and the same words.
-    // Functional copy for Act 10's faces to render; 13s re-voices. Never
+    // The EXPOSED tier's copy — pre-13x 2a: copy §5's nudge, VERBATIM
+    // (re-based on the Apple key: "Standard, no Apple key landed, no
+    // secrets"); the device noun rides the standing interpolation. Never
     // a modal, never a gate — the cadence numbers are untouched.
     static let exposedNudgeHeadline =
-        "Right now, only this device can open your work."
+        "Right now, only this \(deviceName) can open your work."
     static let exposedNudgeBody =
-        "No passphrase is set, no recovery phrase is written down, and no "
-        + "iCloud Keychain copy has verifiably landed — so if this device is "
-        + "lost or broken, your writing goes with it. Two minutes fixes that: "
-        + "set a passphrase (the recovery phrase appears on the same screen), "
-        + "or just take the recovery phrase."
+        "Your Apple account hasn't been able to take a key yet, no passphrase is "
+        + "set and no twelve words are written down — so if this \(deviceName) is "
+        + "lost or broken, your writing goes with it. Two minutes fixes that: turn "
+        + "on iCloud Keychain, or set a passphrase (your twelve words appear on "
+        + "the same screen)."
+    /// Copy §5 — the nudge, covered.
+    static let coveredNudgeLine =
+        "At least one real way back into your writing exists beyond this \(deviceName)."
+    /// Copy §5 — the nudge, unknown (an unreadable key file).
+    static let unknownNudgeLine =
+        "Whether a spare way in exists can't be told right now — this library's "
+        + "key file exists but can't be read. That is a fact about this check, "
+        + "not about your writing: whatever opened the library still does."
     /// The Encryption pane's standing "Ways back in" line (R-pre13u-4:
     /// "counting the actual legs") — composed from the SAME brain, so the
     /// pane and the nudge can never disagree about what exists.
@@ -532,8 +609,8 @@ nonisolated enum ProtectionCopy {
         if legs.storeCustodyGated { existing.append("this device's \(biometryName) unlock") }
         if legs.hasPassphraseWrap { existing.append("your encryption passphrase") }
         if legs.hasRecoveryWrap { existing.append("your recovery phrase") }
-        if legs.escrowVerifiedLanded == true {
-            existing.append("the verified copy in your iCloud Keychain")
+        if legs.appleKeyVerified == true {
+            existing.append("the key in your iCloud Keychain")
         }
         guard !existing.isEmpty else {
             return "Ways back in: none beyond this device — see above."
@@ -573,24 +650,9 @@ nonisolated enum ProtectionCopy {
         }
     }
 
-    static func presetTitle(_ preset: ProtectionPreset) -> String {
-        switch preset {
-        case .standard: return "Standard"
-        case .lockedDown: return "Locked-down"
-        }
-    }
-
-    static func presetBlurb(_ preset: ProtectionPreset) -> String {
-        switch preset {
-        case .standard:
-            return "Opens silently. The disk is protected; recovery is easy."
-        case .lockedDown:
-            return "Asks every time it opens. No silent copies anywhere."
-        }
-    }
-
-    /// The manual lock act's word (demanded modes only — under Auto it
-    /// would be theater, R13p-14, and the door is not rendered).
+    /// The manual lock act's word (Castle only — under Standard it would
+    /// be theater, R13p-14, and the door is not rendered). Copy §1's
+    /// "Lock Library Now" line, verbatim.
     static let lockNowLabel = "Lock Library Now"
     static let lockNowSentence =
         "Locking closes the library and forgets its key until you unlock it again."

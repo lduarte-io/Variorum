@@ -247,13 +247,14 @@ nonisolated enum ProtectionShapes {
         }
     }
 
-    /// The escrow LEG's own three-value truth (T2 applied per-leg): a
+    /// The Apple-key LEG's own three-value truth (T2 applied per-leg —
+    /// pre-13x 2a, re-based from the escrow item onto the iCloud key A): a
     /// verified copy, a copy that is verifiably not landing, and a copy
     /// this launch simply hasn't checked yet.
     static func escrowLegSentence(_ verified: Bool?) -> String {
         switch verified {
-        case true: return "verified this launch — the copy reads back"
-        case false: return "not landing — no copy verifiably exists"
+        case true: return "verified this launch — the iCloud key opens the key file's copy"
+        case false: return "not landing — no copy verifiably opens with the iCloud key"
         case nil: return "not checked yet this launch"
         }
     }
@@ -307,13 +308,13 @@ nonisolated enum ProtectionShapes {
                 : "not saved"))
         if mode.isDemanded {
             rows.append(ChecklistRow(
-                name: "iCloud spare key", present: false,
-                note: "not offered while Variorum asks at open"))
+                name: "iCloud key", present: false,
+                note: "no copy opens with it in Castle"))
         } else {
             rows.append(ChecklistRow(
-                name: "iCloud spare key",
-                present: legs.escrowVerifiedLanded,
-                note: escrowLegSentence(legs.escrowVerifiedLanded)))
+                name: "iCloud key",
+                present: legs.appleKeyVerified,
+                note: escrowLegSentence(legs.appleKeyVerified)))
         }
         return rows
     }

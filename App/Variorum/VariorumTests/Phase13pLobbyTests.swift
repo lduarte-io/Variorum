@@ -32,19 +32,18 @@ import VariorumCore
 
 @Suite("13p — launch routing")
 struct StoreLaunchRouteTests {
+    /// pre-13x 2a: the route reads the EFFECTIVE gate (derived), never a
+    /// stored mode.
     @Test func autoAlwaysOpens() {
-        let dials = ProtectionDials(mode: .auto)
-        #expect(StoreLaunchRoute.resolve(dials: dials, presence: .plaintext) == .open)
-        #expect(StoreLaunchRoute.resolve(dials: dials, presence: .encryptedOrUnknown) == .open)
-        #expect(StoreLaunchRoute.resolve(dials: dials, presence: .absent) == .open)
+        #expect(StoreLaunchRoute.resolve(gate: .auto, presence: .plaintext) == .open)
+        #expect(StoreLaunchRoute.resolve(gate: .auto, presence: .encryptedOrUnknown) == .open)
+        #expect(StoreLaunchRoute.resolve(gate: .auto, presence: .absent) == .open)
     }
 
-    @Test func demandedModesStopAtTheLobby() {
-        #expect(StoreLaunchRoute.resolve(
-            dials: ProtectionDials(mode: .biometric), presence: .encryptedOrUnknown)
+    @Test func demandedGatesStopAtTheLobby() {
+        #expect(StoreLaunchRoute.resolve(gate: .biometric, presence: .encryptedOrUnknown)
             == .lobby(demand: .biometric))
-        #expect(StoreLaunchRoute.resolve(
-            dials: ProtectionDials(mode: .passphrase), presence: .plaintext)
+        #expect(StoreLaunchRoute.resolve(gate: .passphrase, presence: .plaintext)
             == .lobby(demand: .passphrase))
     }
 
@@ -52,12 +51,39 @@ struct StoreLaunchRouteTests {
     /// demanded gate over an absent store is the LIBRARY-MISSING route —
     /// the lock stays. RED ON OLD: `.openResettingModeToAuto`.
     @Test func aDemandedGateOverAnAbsentStoreIsTheLibraryMissingRoute() {
-        #expect(StoreLaunchRoute.resolve(
-            dials: ProtectionDials(mode: .passphrase), presence: .absent)
+        #expect(StoreLaunchRoute.resolve(gate: .passphrase, presence: .absent)
             == .libraryMissing(demand: .passphrase))
-        #expect(StoreLaunchRoute.resolve(
-            dials: ProtectionDials(mode: .biometric), presence: .absent)
+        #expect(StoreLaunchRoute.resolve(gate: .biometric, presence: .absent)
             == .libraryMissing(demand: .biometric))
+    }
+
+    /// pre-13x 2a — THE GATE AT THE ROUTE derives from the key file beside
+    /// the store (Castle: a passphrase wrap, no Apple copy; Standard: an
+    /// Apple copy) and Castle's style; the 13p-era stored mode reads
+    /// through until §11 retires it. RED ON OLD: the route read a stored
+    /// three-way mode.
+    @Test func theRouteDerivesTheGateFromTheKeyFileAndTheStyle() throws {
+        let key = StoreKey.mint()
+        let kdf = PassphraseKDF.Descriptor(
+            algorithm: PassphraseKDF.algorithmArgon2id, argon2Version: 0x13,
+            memoryKiB: 256, iterations: 1, parallelism: 1,
+            salt: PassphraseKDF.randomSalt(), outputBytes: 32)
+        var castle = StoreKeyEnvelope()
+        try castle.setPassphraseWrap(key: key, passphrase: "sesame", kdf: kdf)
+        var standard = castle
+        try standard.appleBox(key: key, under: AppleKey.mint().symmetricKey, appleKeyID: "a")
+        func gate(_ envelope: StoreKeyEnvelope?, dials: ProtectionDials, legacy: StoreAtOpenMode? = nil) -> StoreAtOpenMode {
+            StoreLaunchGate.scripted(
+                dials: dials, backing: InMemoryStoreKeyGuardBacking(), envelope: envelope,
+                legacyMode: legacy
+            ).effectiveGate(scope: "route", storeID: envelope?.storeID, storeURL: nil)
+        }
+        #expect(gate(standard, dials: ProtectionDials()) == .auto)
+        #expect(gate(castle, dials: ProtectionDials()) == .biometric)
+        #expect(gate(castle, dials: ProtectionDials(alwaysAsk: true)) == .passphrase)
+        #expect(gate(nil, dials: ProtectionDials(alwaysAsk: true)) == .auto, "a fresh library is born Standard")
+        #expect(gate(standard, dials: ProtectionDials(), legacy: .biometric) == .biometric,
+                "the 13p-era stored mode reads through until the migration retires it")
     }
 }
 
@@ -117,7 +143,7 @@ struct Phase13pLobbyTests {
 
         // Route: demanded ⇒ lobby; the store file untouched.
         let route = StoreLaunchRoute.resolve(
-            dials: ProtectionDials(mode: .passphrase),
+            gate: .passphrase,
             presence: StoreFilePresence.classify(at: storeURL))
         #expect(route == .lobby(demand: .passphrase))
         #expect(try Data(contentsOf: storeURL) == bytesBefore,
@@ -128,9 +154,12 @@ struct Phase13pLobbyTests {
 
         // The unlock road (the production builder over the live sidecar).
         let gate = StoreLaunchGate(
-            dials: { _, _ in ProtectionDials(mode: .passphrase) },
+            dials: { _, _ in ProtectionDials(alwaysAsk: true) },
             saveDials: { _, _, _ in },
+            legacyMode: { _, _ in nil },
+            retireLegacyDials: { _, _ in },
             guardFor: { _ in StoreKeyGuard.inMemory(backing: InMemoryStoreKeyGuardBacking()) },
+            appleKeyFor: { _ in AppleKeyLeaves.inMemory(backing: InMemoryAppleKeyBacking()) },
             loadEnvelope: { try StoreKeyEnvelope.loadCurrent(besideStore: $0) },
             saveEnvelope: { _, _ in },
             setAsideEnvelope: { _ in },
@@ -185,8 +214,10 @@ struct Phase13pLobbyTests {
             gated: mode == .biometric ? key : nil,
             biometryAvailable: mode == .biometric,
             biometricSucceeds: biometricSucceeds)
+        // pre-13x 2a: the key file (a passphrase wrap, no Apple copy) DERIVES
+        // Castle; the gate style is the dial.
         let gate = StoreLaunchGate.scripted(
-            dials: ProtectionDials(mode: mode), backing: backing, envelope: envelope)
+            dials: ProtectionDials(alwaysAsk: mode == .passphrase), backing: backing, envelope: envelope)
         let openCount = LockIsolated(0)
         let bootstrap = AppBootstrap(
             testOpener: {
@@ -221,8 +252,10 @@ struct Phase13pLobbyTests {
             try oldEnvelope.write(at: oldEnvelope.preferredURL(besideStore: storeURL))
             let oldStoreID = oldEnvelope.storeID
 
+            // pre-13x 2a: the OLD library's key file (a passphrase wrap, no
+            // Apple copy) derives Castle — Touch ID by the default style.
             let backing = InMemoryStoreKeyGuardBacking()
-            let dialsBox = ScriptedDialsBox(ProtectionDials(mode: .biometric))
+            let dialsBox = ScriptedDialsBox(ProtectionDials())
             let envelopeBox = ScriptedEnvelopeBox(oldEnvelope)
             let gate = StoreLaunchGate.scripted(dials: dialsBox, backing: backing, envelope: envelopeBox)
             let openCount = LockIsolated(0)
@@ -240,8 +273,8 @@ struct Phase13pLobbyTests {
                 return
             }
             #expect(openCount.value == 0, "nothing opens — no pullable library exists")
-            #expect(dialsBox.value.mode == .biometric, "the lock never resets: no dial write")
-            #expect(dialsBox.perStoreDials(oldStoreID) == nil, "…and no per-store write either")
+            #expect(dialsBox.perStoreDials(oldStoreID) == nil, "the lock never resets: no dial write")
+            #expect(dialsBox.retiredStoreIDs.isEmpty, "…and nothing retired")
             #expect(lobby.demand == .biometric)
             #expect(backing.auto == nil, "no key was minted into custody")
 
@@ -260,8 +293,10 @@ struct Phase13pLobbyTests {
             let minted = try #require(backing.auto)
             #expect(fresh.keyFingerprint == StoreKeyEnvelope.fingerprint(of: minted),
                     "the new key file names the minted key")
-            #expect(dialsBox.perStoreDials(fresh.storeID)?.mode == .auto, "the new library is born silent")
-            #expect(dialsBox.value.mode == .biometric,
+            #expect(dialsBox.perStoreDials(fresh.storeID) != nil, "the new library writes its own dials")
+            #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: fresh) == .standard,
+                    "the new library is born Standard (silent)")
+            #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: oldEnvelope) == .castle,
                     "the OLD library's lock is untouched — restoring its file routes to its lobby")
             #expect(envelopeBox.setAsideCount == 1, "the old key file was set aside, never deleted")
             #expect(try StoreKeyEnvelope.load(at: oldEnvelope.preferredURL(besideStore: storeURL)) == nil
@@ -277,8 +312,11 @@ struct Phase13pLobbyTests {
     /// the sentence that always existed for it (restore the key file from
     /// a backup folder).
     @Test func anUnreadableSidecarLobbySaysTheTrueCauseNeverTheAbsentOne() async throws {
+        // pre-13x 2a: an unreadable key file cannot say the posture; the
+        // 13p-era stored mode (the read-through, until §11) still routes a
+        // demanded library to its lobby.
         let backing = InMemoryStoreKeyGuardBacking()
-        let dialsBox = ScriptedDialsBox(ProtectionDials(mode: .passphrase))
+        let dialsBox = ScriptedDialsBox(ProtectionDials(alwaysAsk: true), legacyMode: .passphrase)
         let envelopeBox = ScriptedEnvelopeBox(nil)
         envelopeBox.unreadable = true
         let gate = StoreLaunchGate.scripted(
@@ -427,14 +465,18 @@ struct Phase13pLobbyTests {
             let key = StoreKey.mint()
             var envelope = StoreKeyEnvelope()
             try envelope.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
+            // pre-13x 2a: a STANDARD library — its Apple copy is under an A
+            // this device does not hold (a fresh device before iCloud
+            // Keychain delivered it).
+            try envelope.appleBox(key: key, under: AppleKey.mint().symmetricKey, appleKeyID: "elsewhere")
 
-            // AUTO dials + empty custody: the route opens, the open fails
+            // Standard + empty custody: the route opens, the open fails
             // with the typed key-gone refusal — scripted here; the drill
             // (`Phase13pKeyedDrillTests`) proves the production `openStore`
             // throws exactly this marker over real files.
             let backing = InMemoryStoreKeyGuardBacking()
             let gate = StoreLaunchGate.scripted(
-                dials: ProtectionDials(mode: .auto), backing: backing, envelope: envelope)
+                dials: ProtectionDials(), backing: backing, envelope: envelope)
             let openCount = LockIsolated(0)
             let bootstrap = AppBootstrap(
                 testOpener: {
@@ -496,19 +538,16 @@ struct Phase13pLobbyTests {
         }
     }
 
-    /// **Ladder R1-m2 — the Lock Now door tracks the OBSERVABLE dials
-    /// projection, both ways.** `canLock` used to read `gate.dials` — an
-    /// un-observed defaults read — so the Mac menu (and the phone's sheet,
-    /// which worse still captured a `let canLock: Bool` at construction)
-    /// re-evaluated only when something ELSE changed: a mode flip through
-    /// the pane left a Lock Now door rendered that `lock()` then silently
-    /// refused, or a door missing that should have appeared.
+    /// **Ladder R1-m2 — the Lock Now door tracks the OBSERVABLE projection,
+    /// both ways.** `canLock` used to read `gate.dials` — an un-observed
+    /// defaults read — so a change never re-rendered the door. pre-13x 2a:
+    /// the door follows the DERIVED posture — a key file that gains its
+    /// Apple copy (Standard) withdraws Lock Now at the next reconcile, and
+    /// one that loses it (Castle) brings it back, each OBSERVABLY.
     ///
-    /// RED ON OLD (behavioral revert executed): with the un-observed read
-    /// restored, the flips below mutate only `protection.dials`, no
-    /// tracked access changes, and `onChange` never fires — both
-    /// `#expect(fired…)` lines go red.
-    @Test func canLockTracksAModeFlipBothWays() async throws {
+    /// RED ON OLD (behavioral revert executed at 13p): with the un-observed
+    /// read restored, no tracked access changes and `onChange` never fires.
+    @Test func canLockTracksTheDerivedPostureBothWays() async throws {
         try await withDeps {
             let world = try demandedWorld(mode: .passphrase)
             await world.bootstrap.awaitOpen()
@@ -523,30 +562,39 @@ struct Phase13pLobbyTests {
                 return
             }
             #expect(world.bootstrap.canLock)
+            let protection = world.bootstrap.protection
 
-            // Demanded → Auto: the door must withdraw, OBSERVABLY — a
-            // renderer that read `canLock` must be invalidated by the flip.
+            // Castle → Standard: the key file gains an Apple copy (the
+            // switch's key-file act, 2b's) — the derived posture follows at
+            // the reconcile, and the door withdraws, OBSERVABLY.
             let firedDown = LockIsolated(false)
             withObservationTracking {
                 _ = world.bootstrap.canLock
             } onChange: {
                 firedDown.setValue(true)
             }
-            #expect(await world.bootstrap.protection.setMode(.auto) == .changed)
+            var standardFile = try #require(world.bootstrap.gate.readEnvelope(nil).envelope)
+            try standardFile.appleBox(key: world.key, under: AppleKey.mint().symmetricKey, appleKeyID: "a")
+            try world.bootstrap.gate.saveEnvelope(standardFile, URL(fileURLWithPath: "/dev/null"))
+            await protection.reconcile()
+            #expect(protection.posture == .standard)
             #expect(firedDown.value,
-                    "the demanded→auto flip must invalidate whatever renders the door")
+                    "the Castle→Standard derivation must invalidate whatever renders the door")
             #expect(!world.bootstrap.canLock)
 
-            // Auto → demanded: the door must come BACK the same way.
+            // Standard → Castle: the Apple copy goes; the door comes BACK.
             let firedUp = LockIsolated(false)
             withObservationTracking {
                 _ = world.bootstrap.canLock
             } onChange: {
                 firedUp.setValue(true)
             }
-            #expect(await world.bootstrap.protection.setMode(.passphrase) == .changed)
-            #expect(firedUp.value,
-                    "the auto→demanded flip must invalidate it too")
+            var castleFile = try #require(world.bootstrap.gate.readEnvelope(nil).envelope)
+            try castleFile.removeAppleBox()
+            try world.bootstrap.gate.saveEnvelope(castleFile, URL(fileURLWithPath: "/dev/null"))
+            await protection.reconcile()
+            #expect(protection.posture == .castle)
+            #expect(firedUp.value, "the Standard→Castle derivation must invalidate it too")
             #expect(world.bootstrap.canLock)
         }
     }
@@ -557,7 +605,7 @@ struct Phase13pLobbyTests {
             let storeURL = dir.appendingPathComponent("store.sqlite")
             let key = StoreKey.mint()
             let gate = StoreLaunchGate.scripted(
-                dials: ProtectionDials(mode: .auto),
+                dials: ProtectionDials(),
                 backing: InMemoryStoreKeyGuardBacking())
             let bootstrap = AppBootstrap(
                 testOpener: {

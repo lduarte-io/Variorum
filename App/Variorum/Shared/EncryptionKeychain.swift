@@ -206,6 +206,62 @@ nonisolated struct E2EECustodyStorage: Sendable {
     }
 }
 
+/// THE SYNC RECORD'S CUSTODY TRANSITION (pre-13x 2a — the store key's
+/// `CustodyHandover` twin, moved IN THE SAME ACT by every gate change:
+/// Castle's Always ask ↔ Touch ID here; the posture switches at 2b). The
+/// record in hand — the session's (Castle, unlocked) or the silent item's
+/// (Standard) — lands in the target shape's items, VERIFIED, before the
+/// other shape's item goes; the session memory follows the shape (held
+/// under the gated and session-only shapes, so the device that just moved
+/// stays unlocked; dropped under silent — the item is the road there).
+/// An UNENROLLED library (no material anywhere) has only its identity to
+/// keep: the identity-only bound item stays whatever the shape, and the
+/// transition is `.done` with nothing moved.
+nonisolated enum SyncCustodyTransition {
+    static func move(
+        to shape: SyncCustodyShape,
+        leaves: E2EECustodyLeaves,
+        session: SyncCustodySession
+    ) -> CustodyHandover.Outcome {
+        let plain = leaves.loadPlain()
+        guard let record = session.record ?? plain,
+              record.material != nil
+        else {
+            // Not enrolled: nothing but the identity exists, and it lives
+            // in the bound item under every shape. A gated item without a
+            // session record can only be a leftover under `.silent` /
+            // `.sessionOnly` — released; under `.biometric` it is left (it
+            // may hold the material this session never read).
+            if shape != .biometric { _ = leaves.deleteGated() }
+            return .done
+        }
+        let identityOnly = SyncCustodyRecord(deviceID: record.deviceID, material: nil)
+        let storage = E2EECustodyStorage.wired(leaves: leaves)
+        switch shape {
+        case .silent:
+            let outcome = storage.setPlain(record)
+            if outcome == .done { session.drop() }
+            return outcome
+        case .biometric:
+            let outcome = storage.setGated(record)
+            if outcome == .done { session.hold(record) }
+            return outcome
+        case .sessionOnly:
+            let outcome = CustodyHandover.perform(
+                write: { leaves.savePlain(identityOnly) },
+                verify: { leaves.loadPlain() == identityOnly },
+                deleteOutgoing: { leaves.deleteGated() },
+                rollBackIncoming: {
+                    // Best-effort: the material's item is what the shape it
+                    // came from held; re-land it there if it was the plain one.
+                    if plain?.material != nil { _ = leaves.savePlain(record) }
+                })
+            if outcome == .done { session.hold(record) }
+            return outcome
+        }
+    }
+}
+
 /// Persistence seam for the device's sync custody (tests inject in-memory;
 /// production is the Keychain) — the `AuthTokensStore` pattern.
 nonisolated struct DeviceKeyStore: Sendable {
@@ -248,8 +304,17 @@ nonisolated struct DeviceKeyStore: Sendable {
             return SyncCustodyScope(scope: scope, storeID: id)
         }
         @Sendable func shape(_ custody: SyncCustodyScope) -> SyncCustodyShape {
-            SyncCustodyShape(mode: ProtectionDefaults.dials(
-                scope: scope, storeID: custody.storeID, in: defaults()).mode)
+            // pre-13x 2a: the shape follows the EFFECTIVE gate — derived
+            // from the posture (the key file beside the store; the 13p-era
+            // stored mode until §11 retires it) and Castle's gate style.
+            let store = defaults()
+            let facts = RoutePostureFacts(
+                legacyMode: ProtectionDefaults.legacyMode(
+                    scope: scope, storeID: custody.storeID, in: store),
+                keyFile: storeURL.flatMap { try? StoreKeyEnvelope.loadCurrent(besideStore: $0) })
+            return SyncCustodyShape(mode: StoreAtOpenMode.effective(
+                posture: facts.posture,
+                dials: ProtectionDefaults.dials(scope: scope, storeID: custody.storeID, in: store)))
         }
         return DeviceKeyStore(
             load: {

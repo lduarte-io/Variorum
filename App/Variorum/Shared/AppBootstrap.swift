@@ -254,9 +254,12 @@ final class AppBootstrap {
         // An unlocked key means the lobby already ran — go straight to the
         // open with that key as custody.
         if unlockedKey == nil {
-            // pre-13x 1a: the dials are the STORE's (read through to the
-            // scope's legacy keys until the store writes its own).
-            let dials = gate.dials(scope, storeID(besideStore: storeURL))
+            // pre-13x 2a: the EFFECTIVE gate, derived at the route — the
+            // posture from the key file beside the store (read without the
+            // key; the 13p-era stored mode until §11 retires it) and
+            // Castle's gate style from the store's dials. Never a stored mode.
+            let effectiveGate = gate.effectiveGate(
+                scope: scope, storeID: storeID(besideStore: storeURL), storeURL: storeURL)
             // The one pre-unlock file contact: 16 bytes of presence. The
             // test-opener path has no file of its own — it routes as the
             // scripted presence ("present" by default, so demanded gates
@@ -267,7 +270,7 @@ final class AppBootstrap {
             let presence: StoreFilePresence = testOpener != nil
                 ? testPresence
                 : (storeURL.map(StoreFilePresence.classify(at:)) ?? .encryptedOrUnknown)
-            switch StoreLaunchRoute.resolve(dials: dials, presence: presence) {
+            switch StoreLaunchRoute.resolve(gate: effectiveGate, presence: presence) {
             case .open:
                 break
             case .libraryMissing(let demand):
@@ -388,8 +391,7 @@ final class AppBootstrap {
             // PROVEN key so the next launch opens silently instead of
             // failing into the same surface. (The demanded modes' lobby
             // road never lands custody — that is its own law.)
-            if let unlockedKey,
-               !gate.dials(storeVariant.rawValue, currentStoreID()).mode.isDemanded {
+            if let unlockedKey, !currentEffectiveGate.isDemanded {
                 let guardSeam = gate.guardFor(storeVariant.rawValue)
                 Task.detached(priority: .utility) {
                     _ = guardSeam.saveAuto(unlockedKey)
@@ -398,6 +400,9 @@ final class AppBootstrap {
             if testOpener == nil {
                 Task { [weak protection] in await protection?.reconcile() }
             }
+            // pre-13x 2a: the idle clock starts at ready (decision 18 —
+            // time since Variorum was last used).
+            protection.noteActivity()
         case .locked(let facts):
             state = .locked(makeLobby(facts))
         case .libraryMissing(let demand, let storeURL):
@@ -413,6 +418,24 @@ final class AppBootstrap {
     var currentDials: ProtectionDials {
         gate.dials(storeVariant.rawValue, currentStoreID())
     }
+
+    /// pre-13x 2a: the EFFECTIVE gate of this bootstrap's store, derived
+    /// fresh from the gate's own reads (the key file, the legacy mode, the
+    /// dials) — the ACTING authority for `lock()` and the phone's relock
+    /// coordinator; the controller's observable projection is the faces'.
+    var currentEffectiveGate: StoreAtOpenMode {
+        let storeURL = testOpener != nil
+            ? testStoreURL
+            : (try? AppDatabase.defaultStoreURL(variant: storeVariant))
+        return gate.effectiveGate(
+            scope: storeVariant.rawValue, storeID: currentStoreID(), storeURL: storeURL)
+    }
+
+    /// pre-13x 2a (decision 18, ledger row 7): the KEYLESS BYTE-COPY at
+    /// lock time — run AFTER the pool closed and the key dropped, when a
+    /// backup is due; the app's own folder only. Wired by the Mac's
+    /// composition (the phone keeps no backups); nil = no copy.
+    @ObservationIgnored var lockTimeCopy: (@Sendable () -> Void)?
 
     /// The store id the dials are keyed by, for THIS bootstrap's store
     /// (pre-13x 1a) — re-read per call, since "Start a New Library"
@@ -470,7 +493,7 @@ final class AppBootstrap {
     /// as the ACTING authority.
     var canLock: Bool {
         guard case .ready = state, binding != nil else { return false }
-        return protection.dials.mode.isDemanded
+        return protection.effectiveGate.isDemanded
     }
 
     /// The teardown, in the ruled order: flush/savepoint/stop (the
@@ -483,17 +506,20 @@ final class AppBootstrap {
     func lock() async {
         guard case .ready = state, let binding else { return }
         let scope = storeVariant.rawValue
-        let dials = gate.dials(scope, currentStoreID())
-        guard dials.mode.isDemanded else { return }
+        // pre-13x 2a: the derived effective gate is the acting authority.
+        let demand = currentEffectiveGate
+        guard demand.isDemanded else { return }
         await onWillLock?()
         let gate = gate
-        let storeURL = try? AppDatabase.defaultStoreURL(variant: storeVariant)
+        let storeURL = testOpener != nil
+            ? testStoreURL
+            : (try? AppDatabase.defaultStoreURL(variant: storeVariant))
         let facts = await Task.detached(priority: .userInitiated) { () -> LobbyFacts in
             let guardSeam = gate.guardFor(scope)
             let reading = gate.readEnvelope(storeURL)
             return LobbyFacts(
-                demand: dials.mode,
-                biometryOffered: dials.mode == .biometric && guardSeam.gatedItemExists(),
+                demand: demand,
+                biometryOffered: demand == .biometric && guardSeam.gatedItemExists(),
                 passphraseOffered: reading.envelope?.passphrase != nil,
                 recoveryOffered: reading.envelope?.recovery != nil,
                 envelopeUnreadable: reading.isUnreadable,
@@ -505,8 +531,14 @@ final class AppBootstrap {
         // gated record, the Always-ask derived key) go with the library
         // key — a locked library reads as no keys (pinned).
         SyncCustodySession.shared.drop()
+        let lockTimeCopy = lockTimeCopy
         _ = await Task.detached(priority: .userInitiated) {
             binding.lock()
+            // pre-13x 2a (row 7): the keyless byte-copy of the CLOSED
+            // library — after the pool closed and the key dropped, never
+            // before (a copy is writing, never a device; no key opens it
+            // here). Quiet on failure; the next unlock's run retries.
+            lockTimeCopy?()
         }.value
     }
 }

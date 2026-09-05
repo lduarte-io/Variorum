@@ -25,7 +25,7 @@ struct ProtectionStatusRow: View {
     /// facts READABLE (an unreadable sidecar must not be dressed as an
     /// unmade choice — the pane carries the unknown sentence instead).
     private var unchosen: Bool {
-        controller.dials.mode == .auto
+        controller.posture == .standard
             && !controller.hasPassphraseWrap
             && !controller.hasRecoveryWrap
             && !controller.legs.factsUnknown

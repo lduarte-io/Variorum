@@ -2,13 +2,14 @@
 //  Phase13pProtectionBrainTests.swift
 //  VariorumTests
 //
-//  Phase 13p, Batch 2 (commit 2) — the protection brains: the at-open
-//  modes' vocabulary, the presets as PURE dial-setters (R13p-7), the
-//  device-local dials storage, the ruled escrow copy pinned VERBATIM
-//  (knot 8 — direction ruled; a drift here is a drift from her ruling),
-//  the reminder-check cadence (R13p-9) and the Standard nudge's
-//  two-offer eligibility (knot 4's amendment), and the guard backing's
-//  scripted custody world.
+//  Phase 13p, Batch 2 (commit 2) — the protection brains. pre-13x batch
+//  2a: the POSTURE is derived (never a setting), the effective gate is a
+//  pure function of (posture, Castle's gate style), the dials are Castle's
+//  two switches with the 13p-era keys read through until §11 retires
+//  them, and the presets / the escrow dial / its coupling copy are gone
+//  (§13). The reminder-check cadence (R13p-9), the Standard nudge's
+//  two-offer eligibility (knot 4's amendment) and the guard backing's
+//  scripted custody world stand.
 //
 
 import Foundation
@@ -17,86 +18,108 @@ import Testing
 @testable import Variorum
 import VariorumCore
 
-@Suite("13p — modes, presets & dials")
+@Suite("pre-13x 2a — the posture derivation, the effective gate & the dials")
 struct ProtectionDialsTests {
-    @Test func demandedIsEveryModeButAuto() {
+    private func fastKDF() -> PassphraseKDF.Descriptor {
+        PassphraseKDF.Descriptor(
+            algorithm: PassphraseKDF.algorithmArgon2id, argon2Version: 0x13,
+            memoryKiB: 256, iterations: 1, parallelism: 1,
+            salt: PassphraseKDF.randomSalt(), outputBytes: 32)
+    }
+
+    @Test func demandedIsEveryGateButAuto() {
         #expect(!StoreAtOpenMode.auto.isDemanded)
         #expect(StoreAtOpenMode.biometric.isDemanded)
         #expect(StoreAtOpenMode.passphrase.isDemanded)
     }
 
-    @Test func standardPresetSetsTheRuledDials() {
-        let dials = ProtectionPreset.standard.dials(biometryAvailable: true)
-        #expect(dials == ProtectionDials(
-            mode: .auto, escrowOn: true,
-            relockOnSleepAndScreenLock: false, relockAfterIdleMinutes: nil,
-            reminderChecksOn: false))
+    /// THE DERIVATION, from BOTH sources (design §3.1's posture row; the
+    /// brief's pin): the vault's word when enrolled; the key file's Apple
+    /// copy when local-only. RED ON OLD by construction (`Posture` and the
+    /// derivation do not exist on the pre-2a tree; the mode was stored).
+    @Test func postureDerivesFromTheVaultWhenEnrolledAndTheKeyFileWhenLocalOnly() throws {
+        let key = StoreKey.mint()
+        var castleFile = StoreKeyEnvelope()
+        try castleFile.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
+        var standardFile = castleFile
+        try standardFile.appleBox(key: key, under: AppleKey.mint().symmetricKey, appleKeyID: "a-1")
+
+        // Enrolled: the vault's word outranks the key file (decision 8).
+        #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: true, keyFile: castleFile) == .standard)
+        #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: false, keyFile: standardFile) == .castle)
+        // Local-only: the key file's Apple copy.
+        #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: standardFile) == .standard)
+        #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: castleFile) == .castle)
+        // No key file at all: born Standard (§14.26).
+        #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: nil) == .standard)
     }
 
-    @Test func lockedDownPresetSetsTheRuledDials() {
-        let withBiometry = ProtectionPreset.lockedDown.dials(biometryAvailable: true)
-        #expect(withBiometry.mode == .biometric, "biometric where the hardware offers it")
-        #expect(!withBiometry.escrowOn, "escrow OFF in Locked-down (R13p-6)")
-        #expect(withBiometry.relockOnSleepAndScreenLock)
-        #expect(withBiometry.reminderChecksOn, "reminder checks ON in Locked-down (R13p-7)")
-
-        let without = ProtectionPreset.lockedDown.dials(biometryAvailable: false)
-        #expect(without.mode == .passphrase, "passphrase-every-open where biometry is absent")
+    /// The safety arm: a key file with NO passphrase wrap and no Apple copy
+    /// is a Standard library whose Apple copy has not landed — entering
+    /// Castle requires a passphrase (decision 5), so such a library cannot
+    /// have entered it; reading it as Castle would lock a fresh user behind
+    /// a lobby with no road.
+    @Test func aKeyFileWithNoSecretsAndNoAppleCopyIsStandardNeverALock() throws {
+        let key = StoreKey.mint()
+        let stub = StoreKeyEnvelope(keyFingerprint: StoreKeyEnvelope.fingerprint(of: key))
+        #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: stub) == .standard)
+        var wordsOnly = stub
+        try wordsOnly.setRecoveryWrap(key: key, words: try RecoveryPhrase.generate())
+        #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: wordsOnly) == .standard)
     }
 
-    @Test func matchingReadsHandAdjustedDialsAsNoPreset() {
-        var dials = ProtectionPreset.standard.dials(biometryAvailable: true)
-        #expect(ProtectionPreset.matching(dials, biometryAvailable: true) == .standard)
-        dials.escrowOn = false
-        #expect(ProtectionPreset.matching(dials, biometryAvailable: true) == nil,
-                "hand-adjusted dials match neither preset — the pane highlights none")
+    /// The pre-2a read-through (§11 retires it): the 13p-era stored mode
+    /// decides until the migration runs — her Mac (Biometric) routes to
+    /// its lobby, her phone (silent) opens silently once more.
+    @Test func theLegacyModeReadsThroughUntilTheMigrationRetiresIt() throws {
+        let key = StoreKey.mint()
+        var castleFile = StoreKeyEnvelope()
+        try castleFile.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
+        #expect(Posture.derive(legacyMode: .auto, vaultHasAppleHeldCopy: false, keyFile: castleFile) == .standard,
+                "a silent 13p-era store opens silently until its migration reads the vault")
+        #expect(Posture.derive(legacyMode: .biometric, vaultHasAppleHeldCopy: nil, keyFile: nil) == .castle)
+        #expect(Posture.derive(legacyMode: .passphrase, vaultHasAppleHeldCopy: true, keyFile: nil) == .castle)
     }
 
-    @Test func defaultsRoundTripPerScope() {
-        let defaults = UserDefaults(suiteName: "variorum-13p-dials-\(UUID().uuidString)")!
-        // The absent-key default IS the Standard preset (escrow ON).
-        let fresh = ProtectionDefaults.dials(scope: "Variorum", in: defaults)
-        #expect(fresh == ProtectionPreset.standard.dials(biometryAvailable: true))
+    /// THE EFFECTIVE GATE (the brief's fact i): Standard ⇒ silent; Castle
+    /// ⇒ the device's style.
+    @Test func theEffectiveGateIsAPureFunctionOfPostureAndStyle() {
+        #expect(StoreAtOpenMode.effective(posture: .standard, dials: ProtectionDials()) == .auto)
+        #expect(StoreAtOpenMode.effective(posture: .standard, dials: ProtectionDials(alwaysAsk: true)) == .auto,
+                "Always ask is a Castle switch — Standard has no gate")
+        #expect(StoreAtOpenMode.effective(posture: .castle, dials: ProtectionDials()) == .biometric)
+        #expect(StoreAtOpenMode.effective(posture: .castle, dials: ProtectionDials(alwaysAsk: true)) == .passphrase)
+    }
 
-        var dials = ProtectionDials(
-            mode: .passphrase, escrowOn: false,
-            relockOnSleepAndScreenLock: true, relockAfterIdleMinutes: 15,
-            reminderChecksOn: true)
-        ProtectionDefaults.save(dials, scope: "Variorum", in: defaults)
-        #expect(ProtectionDefaults.dials(scope: "Variorum", in: defaults) == dials)
+    /// The idle dial: default 10, offered 5 · 10 · 30 · never (decision 18).
+    @Test func theIdleDialDefaultsToTenAndOffersTheFourValues() {
+        #expect(ProtectionDials().relockAfterIdleMinutes == 10)
+        #expect(ProtectionDials.idleChoices == [5, 10, 30, nil])
+        #expect(ProtectionCopy.idleChoiceLabel(nil) == "never")
+        #expect(ProtectionCopy.idleChoiceLabel(30) == "30 minutes")
+    }
 
-        // Scoped: the dev store's dials never gate the real library.
-        #expect(ProtectionDefaults.dials(scope: "Variorum-dev", in: defaults)
-                == ProtectionPreset.standard.dials(biometryAvailable: true))
+    @Test func defaultsRoundTripPerScopeAndStore() {
+        let defaults = UserDefaults(suiteName: "variorum-2a-dials-\(UUID().uuidString)")!
+        // The absent-key default IS the design's default (Touch ID, 10).
+        #expect(ProtectionDefaults.dials(scope: "Variorum", in: defaults) == ProtectionDials())
 
+        var dials = ProtectionDials(alwaysAsk: true, relockAfterIdleMinutes: 30)
+        ProtectionDefaults.save(dials, scope: "Variorum", storeID: "store-a", in: defaults)
+        #expect(ProtectionDefaults.dials(scope: "Variorum", storeID: "store-a", in: defaults) == dials)
+        // Scoped: the dev store's dials never gate her real library.
+        #expect(ProtectionDefaults.dials(scope: "Variorum-dev", storeID: "store-a", in: defaults) == ProtectionDials())
+
+        // "never" round-trips as the stored 0 (the 13p encoding, kept).
         dials.relockAfterIdleMinutes = nil
-        ProtectionDefaults.save(dials, scope: "Variorum", in: defaults)
-        #expect(ProtectionDefaults.dials(scope: "Variorum", in: defaults)
+        ProtectionDefaults.save(dials, scope: "Variorum", storeID: "store-a", in: defaults)
+        #expect(ProtectionDefaults.dials(scope: "Variorum", storeID: "store-a", in: defaults)
             .relockAfterIdleMinutes == nil)
     }
 }
 
-@Suite("13p — the ruled copy (knot 8 verbatim; the honesty grammar)")
+@Suite("13p — the ruled copy (the honesty grammar)")
 struct ProtectionCopyTests {
-    /// Knot 8's ruling, byte-for-byte. 13s may re-voice — by editing this
-    /// pin alongside, never by drifting silently.
-    @Test func escrowPairIsHerRuledPair() {
-        #expect(ProtectionCopy.escrowOn ==
-            "A copy of your key is kept in your iCloud Keychain — if you lose this "
-            + "Mac and forget your passphrase, signing into iCloud on a new device "
-            + "can still unlock your library.")
-        #expect(ProtectionCopy.escrowOff ==
-            "Your key stays only on your enrolled devices. Lose them, your "
-            + "passphrase, and your recovery phrase, and your writing is "
-            + "unrecoverable — by anyone.")
-    }
-
-    @Test func theNoICloudConsequenceIsStated() {
-        // The 2026-08-30 pre-sleep record: without iCloud Keychain the
-        // dial has nothing to ride — the copy says so, never pretends.
-        #expect(ProtectionCopy.escrowNeedsICloudKeychain.contains("nothing for it to ride"))
-    }
-
     @Test func everyModeSaysWhatItDoesNotProtect() {
         #expect(ProtectionCopy.modeSentence(.auto).contains("anyone who can use this Mac"))
         #expect(ProtectionCopy.modeSentence(.biometric).contains("login password can NOT"))
@@ -105,7 +128,7 @@ struct ProtectionCopyTests {
 
     /// Knot 6's letter: the demanded-mode short chain is stated — her own
     /// example ("forgetting the passphrase without the phrase written
-    /// down IS enough") lands in passphrase-mode-with-escrow-off.
+    /// down IS enough") lands in passphrase-mode.
     @Test func lossMathShortensHonestlyWithTheMode() {
         let standard = ProtectionCopy.lossMath(.auto, escrowOn: true)
         #expect(standard.contains("ALL of these have to go wrong at once"))
@@ -114,7 +137,36 @@ struct ProtectionCopyTests {
         let strictest = ProtectionCopy.lossMath(.passphrase, escrowOn: false)
         #expect(strictest.contains("IS enough"))
         #expect(!ProtectionCopy.lossMath(.auto, escrowOn: false).contains("iCloud"),
-                "escrow off ⇒ no iCloud leg is claimed")
+                "no Apple copy ⇒ no iCloud leg is claimed")
+    }
+
+    /// pre-13x 2a: copy §1's posture words, verbatim — both postures
+    /// named, tagged, one-lined, and their six card rows in the copy's
+    /// order (a re-derived card would be the almost-true paraphrase the
+    /// design forbids).
+    @Test func thePostureCopyRendersCopySectionOneVerbatim() {
+        #expect(ProtectionCopy.postureName(.standard) == "Standard")
+        #expect(ProtectionCopy.postureName(.castle) == "Castle")
+        #expect(ProtectionCopy.postureTag(.standard) == "the default")
+        #expect(ProtectionCopy.postureTag(.castle) == "only you")
+        #expect(ProtectionCopy.currentStateLine(.standard)
+            == "You're in Standard. Your Apple account holds a key.")
+        #expect(ProtectionCopy.currentStateLine(.castle)
+            == "You're in Castle. Only you hold the keys.")
+        #expect(ProtectionCopy.postureOneLine(.standard)
+            == "Your Apple account holds a key. Nothing to remember day to day.")
+        #expect(ProtectionCopy.postureOneLine(.castle)
+            == "Only you hold the keys. Your Mac's login password can't open your library.")
+        let labels = ["Who holds a key", "Opening", "A new device", "Who it stops",
+                      "If your Mac dies", "The floor"]
+        #expect(ProtectionCopy.postureCard(.standard).map(\.label) == labels)
+        #expect(ProtectionCopy.postureCard(.castle).map(\.label) == labels)
+        #expect(ProtectionCopy.postureCard(.castle)[0].text.contains(
+            "released only to your fingerprint — never to your login password, never to iCloud"))
+        #expect(ProtectionCopy.alwaysAskLabel == "Always ask for the passphrase")
+        #expect(ProtectionCopy.idleLabel == "Lock after time away")
+        #expect(ProtectionCopy.keystoneOpenMeansReadable.hasPrefix(
+            "While Variorum is open and unlocked, everything in it is readable"))
     }
 
     @Test func envelopeRefusalsSpeakInWords() {
@@ -131,7 +183,7 @@ struct ProtectionCopyTests {
 struct ProtectionCadenceTests {
     private let day: TimeInterval = 24 * 60 * 60
 
-    @Test func reminderNeedsAPassphraseAndTheDial() {
+    @Test func reminderNeedsAPassphraseAndCastle() {
         let now = Date()
         #expect(!ReminderCheckPolicy.isDue(
             now: now, enabled: true, passphraseSetAt: nil,
@@ -140,7 +192,7 @@ struct ProtectionCadenceTests {
         #expect(!ReminderCheckPolicy.isDue(
             now: now, enabled: false, passphraseSetAt: now.addingTimeInterval(-90 * day),
             lastConfirmedAt: nil, lastDismissedAt: nil),
-            "the dial gates it")
+            "Standard has no reminder — the nudge covers it (§13)")
     }
 
     @Test func reminderAnchorsOnTheNewestOfSetConfirmDismiss() {
@@ -185,6 +237,19 @@ struct ProtectionCadenceTests {
             snoozedUntil: now.addingTimeInterval(day),
             hasPassphraseWrap: false, hasRecoveryWrap: false))
     }
+
+    /// pre-13x 2a — THE IDLE CLOCK (decision 18): time since Variorum was
+    /// last USED; nil minutes = never; the threshold is inclusive.
+    @Test func theIdleClockIsTimeSinceVariorumWasLastUsed() {
+        let now = Date()
+        #expect(IdleLockClock.isDue(now: now, lastUsedAt: now.addingTimeInterval(-10 * 60), minutes: 10))
+        #expect(!IdleLockClock.isDue(now: now, lastUsedAt: now.addingTimeInterval(-9 * 60), minutes: 10))
+        #expect(!IdleLockClock.isDue(now: now, lastUsedAt: now.addingTimeInterval(-24 * 3600), minutes: nil),
+                "never means never")
+        #expect(!IdleLockClock.isDue(now: now, lastUsedAt: nil, minutes: 5),
+                "no activity stamp yet ⇒ nothing to measure against")
+        #expect(IdleLockClock.isDue(idleSeconds: 5 * 60, minutes: 5))
+    }
 }
 
 @Suite("13p — the guard's scripted custody world")
@@ -221,46 +286,71 @@ struct StoreKeyGuardBackingTests {
         #expect(await guardSeam.confirmPresence("reset") == true)
     }
 
-    @Test func escrowItemsAreNamedByStoreID() {
+    /// pre-13x 2a: the 13p escrow family survives ONLY as the migration's
+    /// door — read by store id, removed released-or-never-there.
+    @Test func theLegacyEscrowDoorReadsAndRemovesPerStoreID() {
         let backing = InMemoryStoreKeyGuardBacking()
         let guardSeam = StoreKeyGuard.inMemory(backing: backing)
         let a = StoreKey.mint()
         let b = StoreKey.mint()
-        #expect(guardSeam.saveEscrow(a, "store-a"))
-        #expect(guardSeam.saveEscrow(b, "store-b"))
-        #expect(guardSeam.loadEscrow("store-a") == a)
-        #expect(guardSeam.loadEscrow("store-b") == b)
-        guardSeam.deleteEscrow("store-a")
-        #expect(guardSeam.loadEscrow("store-a") == nil)
-        #expect(guardSeam.loadEscrow("store-b") == b, "per-store items never cross")
+        backing.escrow["store-a"] = a
+        backing.escrow["store-b"] = b
+        #expect(guardSeam.loadLegacyEscrow("store-a") == a)
+        #expect(guardSeam.removeLegacyEscrow("store-a"))
+        #expect(guardSeam.loadLegacyEscrow("store-a") == nil)
+        #expect(guardSeam.loadLegacyEscrow("store-b") == b, "per-store items never cross")
+        #expect(guardSeam.removeLegacyEscrow("never-there"), "released = gone, or never there")
     }
 }
 
-/// pre-13x 1a — the dials are PER STORE ID with a legacy read-through
-/// (the postures design §3.1; pulled in by the absent-store route so a new
-/// library is not born gated and a restored old one is not born silent).
-/// RED ON OLD: `ProtectionDefaults` had no store-id form (compile).
-@Suite("pre-13x 1a — the dials per store id, with the legacy read-through")
+/// pre-13x 1a → 2a — the dials are PER STORE ID with a legacy read-through
+/// (the postures design §3.1), retired per store by §11's migration.
+@Suite("pre-13x 2a — the dials per store id, the legacy read-through, and its retirement")
 struct ProtectionDialsPerStoreTests {
-    @Test func aStoreWithNoKeysOfItsOwnReadsTheLegacyScopeDials() {
-        let defaults = UserDefaults(suiteName: "variorum-1a-dials-\(UUID().uuidString)")!
+    @Test func aStoreWithNoKeysOfItsOwnReadsTheLegacyScopeKeys() {
+        let defaults = UserDefaults(suiteName: "variorum-2a-dials-\(UUID().uuidString)")!
         let scope = "probe"
-        ProtectionDefaults.save(ProtectionDials(mode: .biometric, relockOnSleepAndScreenLock: true), scope: scope, in: defaults)
+        // The 13p-era scope keys, as her existing library holds them.
+        defaults.set("passphrase", forKey: ProtectionDefaults.key("mode", scope: scope))
+        defaults.set(15, forKey: ProtectionDefaults.key("relockIdleMinutes", scope: scope))
         let read = ProtectionDefaults.dials(scope: scope, storeID: "store-a", in: defaults)
-        #expect(read.mode == .biometric, "her existing library keeps reading exactly the dials it had")
-        #expect(read.relockOnSleepAndScreenLock)
+        #expect(read.alwaysAsk, "a stored passphrase-every-open mode reads as Always ask")
+        #expect(read.relockAfterIdleMinutes == 15)
+        #expect(ProtectionDefaults.legacyMode(scope: scope, storeID: "store-a", in: defaults) == .passphrase)
     }
 
     @Test func aStoresOwnSaveEndsTheReadThroughForThatStoreOnly() {
-        let defaults = UserDefaults(suiteName: "variorum-1a-dials-\(UUID().uuidString)")!
+        let defaults = UserDefaults(suiteName: "variorum-2a-dials-\(UUID().uuidString)")!
         let scope = "probe"
-        ProtectionDefaults.save(ProtectionDials(mode: .biometric), scope: scope, in: defaults)
-        ProtectionDefaults.save(ProtectionDials(mode: .auto), scope: scope, storeID: "store-new", in: defaults)
-        #expect(ProtectionDefaults.dials(scope: scope, storeID: "store-new", in: defaults).mode == .auto,
-                "the new library reads its own dials")
-        #expect(ProtectionDefaults.dials(scope: scope, storeID: "store-old", in: defaults).mode == .biometric,
-                "another store id still reads through to the legacy dials")
-        #expect(ProtectionDefaults.dials(scope: scope, in: defaults).mode == .biometric,
-                "the legacy keys are never written by a per-store save")
+        defaults.set("biometric", forKey: ProtectionDefaults.key("mode", scope: scope))
+        ProtectionDefaults.save(ProtectionDials(), scope: scope, storeID: "store-new", in: defaults)
+        #expect(ProtectionDefaults.legacyMode(scope: scope, storeID: "store-new", in: defaults) == nil,
+                "a NEW library reads only its own keys — never the old library's Castle")
+        #expect(ProtectionDefaults.legacyMode(scope: scope, storeID: "store-old", in: defaults) == .biometric,
+                "another store id still reads through to the legacy mode")
+        #expect(!ProtectionDefaults.dials(scope: scope, storeID: "store-new", in: defaults).alwaysAsk)
+    }
+
+    /// §11's leg: the 13p-era keys retire — the gate style she had
+    /// survives as the store's own `alwaysAsk`, and every legacy leaf goes
+    /// at both levels. Idempotent.
+    @Test func retiringTheLegacyKeysKeepsTheStyleAndRemovesEveryLeaf() {
+        let defaults = UserDefaults(suiteName: "variorum-2a-dials-\(UUID().uuidString)")!
+        let scope = "probe"
+        defaults.set("passphrase", forKey: ProtectionDefaults.key("mode", scope: scope))
+        defaults.set(true, forKey: ProtectionDefaults.key("escrowOff", scope: scope))
+        defaults.set(true, forKey: ProtectionDefaults.key("relockOnSleep", scope: scope))
+        defaults.set(true, forKey: ProtectionDefaults.key("reminders", scope: scope))
+        defaults.set(30, forKey: ProtectionDefaults.key("relockIdleMinutes", scope: scope))
+        #expect(ProtectionDefaults.hasLegacyKeys(scope: scope, storeID: "store-a", in: defaults))
+
+        ProtectionDefaults.retireLegacyKeys(scope: scope, storeID: "store-a", in: defaults)
+        #expect(!ProtectionDefaults.hasLegacyKeys(scope: scope, storeID: "store-a", in: defaults))
+        #expect(ProtectionDefaults.legacyMode(scope: scope, storeID: "store-a", in: defaults) == nil)
+        let after = ProtectionDefaults.dials(scope: scope, storeID: "store-a", in: defaults)
+        #expect(after.alwaysAsk, "the style she had survives as the store's own key")
+        #expect(after.relockAfterIdleMinutes == 30)
+        ProtectionDefaults.retireLegacyKeys(scope: scope, storeID: "store-a", in: defaults)
+        #expect(ProtectionDefaults.dials(scope: scope, storeID: "store-a", in: defaults) == after, "idempotent")
     }
 }

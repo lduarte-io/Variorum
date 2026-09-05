@@ -2,20 +2,19 @@
 //  MobileProtectionSheet.swift
 //  VariorumMobile
 //
-//  Phase 13p, Batch 4 — THE PHONE'S PROTECTION SCREEN (the mobile-only-
-//  user expansion's items (c) (f) (g) (h); PL-15). The Mac's Settings ▸
-//  Protection pane, re-faced for the phone over the SAME brain
-//  (`ProtectionController`, Shared) and the SAME words
-//  (`ProtectionCopy`, Shared) — so a dial, a refusal or a consequence
-//  sentence exists once and reads the same on both devices, with only the
-//  platform nouns ("iPhone", "Face ID") riding interpolation.
+//  Phase 13p, Batch 4 — THE PHONE'S PROTECTION SCREEN (PL-15). pre-13x
+//  batch 2a — THE POSTURE SCREEN: the Mac's Settings ▸ Protection pane,
+//  re-faced for the phone over the SAME brain (`ProtectionController`,
+//  Shared) and the SAME words (`ProtectionCopy` + `PostureCopy`, Shared —
+//  copy §1 verbatim, the platform nouns riding interpolation): the
+//  current-state line, the two posture cards, Castle's two switches +
+//  Lock Now (shown only in Castle), keystone 4. The presets, the at-open
+//  picker, the escrow dial and the reminder dial are GONE (§13); the
+//  choose doors are batch 2b's (P-2: unrendered until they act).
 //
 //  THE PHONE IS A FIRST-CLASS BIRTHPLACE OF STORES (her rider at the
-//  Batch-1 GO: *"some people will be mobile only users"*), so nothing
-//  here assumes a Mac ever existed: the key was minted on this device at
-//  its own first launch, the passphrase and the twelve words are set
-//  HERE, and the loss math is stated for a library whose only home is
-//  this phone (`ProtectionCopy.oneDeviceNote`).
+//  Batch-1 GO: *"some people will be mobile only users"*) and of Castle
+//  (design §9), so nothing here assumes a Mac ever existed.
 //
 //  The chrome follows the phone's own register — text-forward rows with
 //  the voice's selection grammar, never a foreign control set (this app
@@ -33,11 +32,8 @@ struct MobileProtectionSheet: View {
     @Bindable var controller: ProtectionController
     let services: AppServices?
     /// The bootstrap itself, NOT a captured `canLock` Bool (ladder R1-m2 —
-    /// the exact staleness Batch 4's PROVISIONAL 5 warned about, one view
-    /// lower: a Bool snapshot frozen at sheet construction kept the Lock
-    /// Now door stale while the user flipped the mode INSIDE this very
-    /// sheet). Reading `bootstrap.canLock` in the body tracks the
-    /// observable dials projection, so a mode flip re-renders the door.
+    /// reading `bootstrap.canLock` in the body tracks the observable
+    /// projection, so a gate change re-renders the door).
     let bootstrap: AppBootstrap?
     let tokens: VoiceTokens
 
@@ -46,35 +42,30 @@ struct MobileProtectionSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var setSheetModel: PassphraseSetModel?
-    /// A demanded pick waiting on the passphrase-set screen — retried the
-    /// moment it lands its wrap (the Mac pane's own choreography).
-    @State private var pendingAfterSet: PendingAct?
     @State private var resetPresented = false
     @State private var reminderCheck: SecretCheckModel?
-
-    enum PendingAct: Equatable {
-        case mode(StoreAtOpenMode)
-        case preset(ProtectionPreset)
-    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    presetSection
+                    leadSection
                     divider
-                    modeSection
-                    divider
-                    escrowSection
-                    if controller.dials.mode.isDemanded {
+                    postureSection
+                    if controller.posture == .castle {
                         divider
-                        relockSection
+                        castleSwitchesSection
                     }
                     divider
                     passphraseSection
+                    if controller.posture == .castle,
+                       controller.hasPassphraseWrap || controller.hasRecoveryWrap {
+                        divider
+                        reminderSection
+                    }
                     divider
-                    reminderSection
+                    prose(ProtectionCopy.keystoneOpenMeansReadable)
                 }
                 .padding(.bottom, 32)
             }
@@ -83,7 +74,6 @@ struct MobileProtectionSheet: View {
         .sheet(item: $setSheetModel) { model in
             MobilePassphraseSetSheet(model: model, tokens: tokens) {
                 setSheetModel = nil
-                Task { await retryPendingAct() }
             }
         }
         .sheet(isPresented: $resetPresented) {
@@ -98,7 +88,7 @@ struct MobileProtectionSheet: View {
 
     private var header: some View {
         HStack {
-            Text(tokens.path(["Protection"]))
+            Text(tokens.path([ProtectionCopy.protectionPaneTitle]))
                 .font(tokens.small)
                 .foregroundStyle(tokens.muted)
             Spacer()
@@ -216,121 +206,114 @@ struct MobileProtectionSheet: View {
         .accessibilityLabel(label)
     }
 
-    // MARK: - Presets (R13p-7)
+    // MARK: - The lead: keystone 1 + the current-state line + the legs
 
-    private var presetSection: some View {
+    private var leadSection: some View {
         VStack(alignment: .leading, spacing: 0) {
-            sectionHeader("Protection")
-            ForEach(ProtectionPreset.allCases, id: \.self) { preset in
-                choiceRow(
-                    ProtectionCopy.presetTitle(preset),
-                    selected: controller.matchingPreset == preset
-                ) {
-                    Task { await apply(.preset(preset)) }
-                }
-                prose(ProtectionCopy.presetBlurb(preset))
-            }
-            if controller.matchingPreset == nil {
-                prose("Your dials are hand-adjusted — they match neither preset, "
-                      + "which is fine: presets set the dials, the dials rule.")
-            }
-        }
-    }
-
-    // MARK: - The at-open mode (R13p-5)
-
-    private var modeSection: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            sectionHeader("Opening Variorum")
-            ForEach(StoreAtOpenMode.allCases, id: \.self) { mode in
-                let available = mode != .biometric || controller.biometryAvailable
-                choiceRow(
-                    ProtectionCopy.modeLabel(mode),
-                    selected: controller.dials.mode == mode,
-                    enabled: available
-                ) {
-                    Task { await apply(.mode(mode)) }
-                }
-            }
-            prose(ProtectionCopy.modeSentence(controller.dials.mode))
-            prose(ProtectionCopy.lossMath(
-                controller.dials.mode, escrowOn: controller.dials.escrowOn))
-            // R-pre13u-4's standing ways-back-in line (Act 10 wave 2a) —
-            // the SAME brain as the Mac's checklist, so the two can never
-            // disagree about what exists.
+            prose(ProtectionCopy.keystoneOneMode)
+            Text(ProtectionCopy.currentStateLine(controller.posture))
+                .font(tokens.body)
+                .foregroundStyle(tokens.ink)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, 20)
+                .padding(.top, 10)
+            // R-pre13u-4's standing ways-back-in line — the SAME brain as
+            // the Mac's checklist, so the two can never disagree.
             prose(ProtectionCopy.waysBackInLine(controller.legs))
+            prose(ProtectionShapes.tierSentence(controller.legs.tier))
             // Item (h): a phone-only library has ONE enrolled device, so
             // the chain above is shorter than a reader may assume — say so.
             prose(ProtectionCopy.oneDeviceNote)
-            // The named non-goal, said where the reader is choosing.
-            prose(ProtectionCopy.openAppIsReadable)
-            if let error = controller.lastError {
-                alarm(error)
+            if controller.appleKeyLandingFailed {
+                alarm("Your Apple account hasn't been able to take a key yet — this "
+                      + "iPhone's Keychain refused to keep the iCloud key, so no copy "
+                      + "exists beyond this iPhone; your other ways back in stand.")
             }
         }
     }
 
-    // MARK: - Escrow (R13p-6, knot 8's ruled pair)
+    // MARK: - The two posture cards (copy §1)
 
-    /// THE ESCROW/POSTURE COUPLING (ninth wave — memo §4; ONE posture per
-    /// account, the R-pre13u-8(f) parity rule): demanded modes do not OFFER
-    /// the spare — the same brain and the same sentences as the Mac's pane.
-    private var escrowSection: some View {
+    private var postureSection: some View {
         VStack(alignment: .leading, spacing: 0) {
-            sectionHeader("iCloud spare key")
-            if controller.dials.mode.isDemanded {
-                prose(ProtectionCopy.escrowNotOfferedUnderDemanded)
-                if controller.dials.escrowOn {
-                    prose(ProtectionCopy.escrowChoiceKeptNote)
+            sectionHeader("Standard or Castle")
+            ForEach([Posture.standard, Posture.castle], id: \.self) { posture in
+                postureCard(posture)
+            }
+            // The choose doors are batch 2b's (P-2).
+        }
+    }
+
+    private func postureCard(_ posture: Posture) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 6) {
+                Text(tokens.chromeLabel(ProtectionCopy.postureName(posture)))
+                    .font(tokens.body)
+                    .foregroundStyle(tokens.ink)
+                Text(tokens.chromeLabel(ProtectionCopy.postureTag(posture)))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                if controller.posture == posture {
+                    Text(tokens.chromeLabel("current"))
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.accent)
                 }
-            } else {
-                dialRow("Keep a spare key in iCloud Keychain",
-                        on: controller.dials.escrowOn) {
-                    let next = !controller.dials.escrowOn
-                    Task { _ = await controller.setEscrow(next) }
-                }
-                prose(controller.dials.escrowOn
-                      ? ProtectionCopy.escrowOn : ProtectionCopy.escrowOff)
-                if controller.dials.escrowOn {
-                    if controller.escrowLandingFailed {
-                        alarm("The copy could not actually be saved — the Keychain refused "
-                              + "it. The dial is on, but no copy exists yet; your other "
-                              + "legs stand.")
+            }
+            Text(ProtectionCopy.postureOneLine(posture))
+                .font(tokens.small)
+                .foregroundStyle(tokens.ink)
+                .fixedSize(horizontal: false, vertical: true)
+            ForEach(ProtectionCopy.postureCard(posture), id: \.label) { row in
+                Text(row.label + " — " + row.text)
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 8)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(ProtectionCopy.postureName(posture))
+    }
+
+    // MARK: - Castle's switches (shown only in Castle — copy §1)
+
+    private var castleSwitchesSection: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            sectionHeader(ProtectionCopy.postureName(.castle))
+            dialRow(ProtectionCopy.alwaysAskLabel, on: controller.dials.alwaysAsk) {
+                let next = !controller.dials.alwaysAsk
+                Task {
+                    if case .refused(let message) = await controller.setAlwaysAsk(next) {
+                        controller.lastError = message
+                    } else {
+                        controller.lastError = nil
                     }
-                    prose(ProtectionCopy.escrowNeedsICloudKeychain)
-                    // The compound warning (memo §3) rides the ON state here
-                    // exactly as on the Mac.
-                    prose(ProtectionShapes.compoundWarning)
                 }
             }
-        }
-    }
-
-    // MARK: - Re-lock (demanded modes only) — item (g)
-
-    private var relockSection: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            sectionHeader("Locking while you're away")
-            dialRow(ProtectionCopy.relockOnBackgroundLabel,
-                    on: controller.dials.relockOnSleepAndScreenLock) {
-                controller.setRelockOnSleep(!controller.dials.relockOnSleepAndScreenLock)
-            }
-            prose(ProtectionCopy.relockOnBackgroundSentence)
-            sectionHeader(ProtectionCopy.relockAfterAwayLabel)
+            prose(ProtectionCopy.alwaysAskSentence)
+            prose(ProtectionCopy.enrolledFingerLine)
+            prose(ProtectionCopy.alwaysAskNoCopyLine)
+            sectionHeader(ProtectionCopy.idleLabel)
                 .padding(.top, 10)
+            prose(ProtectionCopy.idleSentence)
             ForEach(MobileRelockPolicy.awayChoices, id: \.self) { minutes in
                 choiceRow(
                     MobileRelockPolicy.awayLabel(minutes),
-                    selected: (controller.dials.relockAfterIdleMinutes ?? 0) == minutes
+                    selected: controller.dials.relockAfterIdleMinutes == minutes
                 ) {
-                    controller.setRelockIdleMinutes(minutes == 0 ? nil : minutes)
+                    controller.setRelockIdleMinutes(minutes)
                 }
             }
+            prose(ProtectionCopy.idleSubline)
             if canLock {
                 door(ProtectionCopy.lockNowLabel) {
                     Task { await controller.performLock?() }
                 }
                 prose(ProtectionCopy.lockNowSentence)
+            }
+            if let error = controller.lastError {
+                alarm(error)
             }
         }
     }
@@ -339,10 +322,10 @@ struct MobileProtectionSheet: View {
 
     private var passphraseSection: some View {
         VStack(alignment: .leading, spacing: 0) {
-            sectionHeader("Passphrase & recovery phrase")
+            sectionHeader("Passphrase & twelve words")
             statusRow("Encryption passphrase",
                       controller.hasPassphraseWrap ? "Set" : "Not set")
-            statusRow("Recovery phrase",
+            statusRow("Twelve words",
                       controller.hasRecoveryWrap ? "On file" : "Not saved")
             door(controller.hasPassphraseWrap ? "Change Passphrase…" : "Set a Passphrase…") {
                 openSetSheet()
@@ -371,25 +354,16 @@ struct MobileProtectionSheet: View {
         .accessibilityElement(children: .combine)
     }
 
-    // MARK: - The reminder (R13p-9 — one face: SecretCheck over the store road)
+    // MARK: - The reminder (Castle — always on; one face: SecretCheck over the store road)
 
     @ViewBuilder
     private var reminderSection: some View {
         VStack(alignment: .leading, spacing: 0) {
             sectionHeader("Remembering your secrets")
-            dialRow("Check in on the passphrase now and then",
-                    on: controller.dials.reminderChecksOn) {
-                controller.setReminderChecks(!controller.dials.reminderChecksOn)
-            }
-            prose("A secret you never type is a secret that slips away. When this is "
-                  + "on, Variorum occasionally asks whether you still remember it — "
-                  + "a rehearsal, never a reset.")
-            if controller.hasPassphraseWrap || controller.hasRecoveryWrap {
-                checkSection
-                    .padding(.horizontal, 20)
-                    .padding(.top, 10)
-                    .environment(\.sharedPageStyle, SharedPageStyle(tokens: tokens))
-            }
+            checkSection
+                .padding(.horizontal, 20)
+                .padding(.top, 10)
+                .environment(\.sharedPageStyle, SharedPageStyle(tokens: tokens))
         }
     }
 
@@ -416,35 +390,11 @@ struct MobileProtectionSheet: View {
         }
     }
 
-    // MARK: - Acts (the Mac pane's choreography, unchanged)
+    // MARK: - Acts
 
     private func openSetSheet() {
         setSheetModel = PassphraseSetModel(
             controller: controller,
             vaultTie: VaultTie.make(services: services))
-    }
-
-    private func apply(_ act: PendingAct) async {
-        let outcome: ProtectionController.ModeChangeOutcome
-        switch act {
-        case .mode(let mode): outcome = await controller.setMode(mode)
-        case .preset(let preset): outcome = await controller.applyPreset(preset)
-        }
-        switch outcome {
-        case .changed:
-            controller.lastError = nil
-        case .needsPassphrase:
-            pendingAfterSet = act
-            openSetSheet()
-        case .refused(let message):
-            controller.lastError = message
-        }
-    }
-
-    private func retryPendingAct() async {
-        guard let act = pendingAfterSet else { return }
-        pendingAfterSet = nil
-        guard controller.hasPassphraseWrap else { return }  // the screen was cancelled
-        await apply(act)
     }
 }

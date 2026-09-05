@@ -164,7 +164,7 @@ struct DataSafetyPane: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-            if protection?.dials.mode.isDemanded == true {
+            if protection?.posture == .castle {
                 // R13p-8's rider: under a locked-down posture the warning
                 // speaks whether she is about to turn it on or already has.
                 Text(ProtectionCopy.plaintextExportUnderLockedDown)

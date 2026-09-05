@@ -59,10 +59,15 @@ nonisolated struct StoreKeyGuard: Sendable {
     /// biometry re-enrollment (the passphrase road recovers, by design).
     var unlockGated: @Sendable () async -> StoreKey?
     var biometryAvailable: @Sendable () -> Bool
-    // The escrow item (R13p-6), named by the envelope's storeID.
-    var loadEscrow: @Sendable (_ storeID: String) -> StoreKey?
-    var saveEscrow: @Sendable (StoreKey, _ storeID: String) -> Bool
-    var deleteEscrow: @Sendable (_ storeID: String) -> Void
+    /// pre-13x 2a — the 13p escrow item (R13p-6) is DELETED as a family
+    /// (§13; the BATCH 2 brief's fact ii: it put the RAW library key in
+    /// iCloud Keychain, the one thing decision 3 forbids). What survives
+    /// is the MIGRATION's door: read the legacy item for a store id, and
+    /// remove it under the R1-m1 ownership guard (only an item equal to
+    /// the key in hand). `removeLegacyEscrow` answers RELEASED (gone, or
+    /// never there).
+    var loadLegacyEscrow: @Sendable (_ storeID: String) -> StoreKey?
+    var removeLegacyEscrow: @Sendable (_ storeID: String) -> Bool
     /// The reset door's biometric confirmation (R13p-9: "after biometric
     /// confirmation") — PROMPTS; production only. False = not confirmed.
     var confirmPresence: @Sendable (_ reason: String) async -> Bool
@@ -96,9 +101,8 @@ nonisolated struct StoreKeyGuard: Sendable {
                 LAContext().canEvaluatePolicy(
                     .deviceOwnerAuthenticationWithBiometrics, error: nil)
             },
-            loadEscrow: { StoreKeyGuardKeychain.loadEscrow(storeID: $0) },
-            saveEscrow: { StoreKeyGuardKeychain.saveEscrow($0, storeID: $1) },
-            deleteEscrow: { StoreKeyGuardKeychain.deleteEscrow(storeID: $0) },
+            loadLegacyEscrow: { StoreKeyGuardKeychain.loadLegacyEscrow(storeID: $0) },
+            removeLegacyEscrow: { StoreKeyGuardKeychain.removeLegacyEscrow(storeID: $0) },
             confirmPresence: { reason in
                 let context = LAContext()
                 context.localizedFallbackTitle = ""  // no system credential
@@ -140,13 +144,12 @@ nonisolated struct StoreKeyGuard: Sendable {
             },
             unlockGated: { backing.biometricSucceeds ? backing.gated : nil },
             biometryAvailable: { backing.biometryAvailable },
-            loadEscrow: { backing.escrow[$0] },
-            saveEscrow: {
-                guard backing.savesSucceed else { return false }
-                backing.escrow[$1] = $0
+            loadLegacyEscrow: { backing.escrow[$0] },
+            removeLegacyEscrow: {
+                guard backing.deletesSucceed else { return false }
+                backing.escrow[$0] = nil
                 return true
             },
-            deleteEscrow: { backing.escrow[$0] = nil },
             confirmPresence: { _ in backing.biometricSucceeds })
     }
 }
@@ -407,14 +410,19 @@ nonisolated enum StoreKeyGuardKeychain {
         ].merging(KeychainPartition.dataProtection) { a, _ in a }
     }
 
-    // MARK: The escrow item (R13p-6)
+    // MARK: The LEGACY escrow item (13p R13p-6 — the migration's only door)
 
-    /// Synchronizable, NO access control (the two-item design is platform
-    /// fact — Q3's errSecParam), non-ThisDeviceOnly accessibility (a
-    /// ThisDeviceOnly class cannot sync by definition). `AfterFirstUnlock`
-    /// so a restore onto a new device can read it without ceremony.
-    static func loadEscrow(storeID: String) -> StoreKey? {
-        var query = escrowQuery(storeID: storeID)
+    /// pre-13x 2a: the 13p escrow family put the RAW LIBRARY KEY in iCloud
+    /// Keychain (synchronizable, `AfterFirstUnlock`, no ACL). §13 deletes
+    /// the family; §11 REMOVES every legacy item at the migration (the
+    /// BATCH 2 brief's fact ii), under the R1-m1 ownership guard — the
+    /// caller reads it, compares it to the key in hand, and removes only
+    /// its own. No production road WRITES one any more; nothing consults
+    /// it at open. `kSecAttrSynchronizable` rides every query (a search
+    /// without it does not match synchronizable items — the batch-0
+    /// measured fact; a flagless delete is a silent no-op).
+    static func loadLegacyEscrow(storeID: String) -> StoreKey? {
+        var query = legacyEscrowQuery(storeID: storeID)
         query[kSecReturnData as String] = true
         query[kSecMatchLimit as String] = kSecMatchLimitOne
         var result: AnyObject?
@@ -424,35 +432,15 @@ nonisolated enum StoreKeyGuardKeychain {
         return StoreKey(data: data)
     }
 
+    /// Released = deleted, or never there (17h R3-5).
     @discardableResult
-    static func saveEscrow(_ key: StoreKey, storeID: String) -> Bool {
-        var attributes = escrowQuery(storeID: storeID)
-        attributes[kSecValueData as String] = key.data
-        attributes[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlock
-        let status = SecItemAdd(attributes as CFDictionary, nil)
-        if status == errSecDuplicateItem {
-            let update: [String: Any] = [kSecValueData as String: key.data]
-            return SecItemUpdate(
-                escrowQuery(storeID: storeID) as CFDictionary, update as CFDictionary)
-                == errSecSuccess
-        }
-        return status == errSecSuccess
+    static func removeLegacyEscrow(storeID: String) -> Bool {
+        let status = SecItemDelete(legacyEscrowQuery(storeID: storeID) as CFDictionary)
+        return status == errSecSuccess || status == errSecItemNotFound
     }
 
-    static func deleteEscrow(storeID: String) {
-        SecItemDelete(escrowQuery(storeID: storeID) as CFDictionary)
-    }
-
-    /// `kSecAttrSynchronizable` rides EVERY escrow query — a search
-    /// without it does not match synchronizable items.
-    /// NOTE (13p-fix ladder R1-4 — the escrow leg of the original
-    /// diagnosis was WRONG and is corrected here): this family was never
-    /// asymmetric. `kSecAttrSynchronizable` ALREADY targets the
-    /// data-protection keychain on its own, so load/save/delete have
-    /// always agreed. The partition marker rides anyway, per Apple's
-    /// set-it-everywhere guidance and so all three families are visibly
-    /// one rule — a belt, not a fix.
-    static func escrowQuery(storeID: String) -> [String: Any] {
+    /// Internal so `KeychainPartitionTests` can assert the flag + marker.
+    static func legacyEscrowQuery(storeID: String) -> [String: Any] {
         [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: escrowService,

@@ -30,6 +30,7 @@
 //  synchronous by contract, and the batch's fence names them untouchable.
 //
 
+import Dependencies
 import Foundation
 import Testing
 import VariorumCore
@@ -368,7 +369,7 @@ struct EncryptionCustodyThreadTests {
     }
 }
 
-// MARK: - ProtectionController: the reconcile's escrow arm (13p ladder R2-m2)
+// MARK: - ProtectionController: the custody move and the Apple arm (13p ladder R2-m2 / 17h R3-6 → pre-13x 2a)
 
 /// A real in-memory store-key guard with every SecItem-class call recorded
 /// (the row's named pin shape, applied to the 13p guard seam).
@@ -385,124 +386,152 @@ private func recordingStoreKeyGuard(
         deleteGated: { log.note("deleteGated"); return inner.deleteGated() },
         unlockGated: { await inner.unlockGated() },
         biometryAvailable: { inner.biometryAvailable() },
-        loadEscrow: { log.note("loadEscrow"); return inner.loadEscrow($0) },
-        saveEscrow: { log.note("saveEscrow"); return inner.saveEscrow($0, $1) },
-        deleteEscrow: { log.note("deleteEscrow"); inner.deleteEscrow($0) },
+        loadLegacyEscrow: { log.note("loadLegacyEscrow"); return inner.loadLegacyEscrow($0) },
+        removeLegacyEscrow: { log.note("removeLegacyEscrow"); return inner.removeLegacyEscrow($0) },
         confirmPresence: { await inner.confirmPresence($0) })
 }
 
-/// **17h (13p-fix ladder R3-6) — `setMode` makes ZERO synchronous SecItem
-/// calls on the main thread.** The mode transition ran its whole custody
-/// choreography — the key read plus up to three handover round-trips —
-/// INLINE on the MainActor, the 13e B-1 class one settings-cadence door
-/// over, while its E2EE twin (`setBiometricRequirement`) rode `offMain`.
-/// The work now rides ONE serial off-main hop; the custody semantics are
-/// byte-identical (same reads, same writes, same order — the
-/// `CustodyReleaseTests` and `Phase13pControllerTests` transition pins
-/// ride unmodified as that half's proof).
+/// The Apple-key leaves, recorded the same way (pre-13x 2a).
+private func recordingAppleKeys(
+    _ log: KeychainCallLog, backing: InMemoryAppleKeyBacking
+) -> AppleKeyLeaves {
+    let inner = AppleKeyLeaves.inMemory(backing: backing)
+    return AppleKeyLeaves(
+        read: { log.note("appleRead"); return inner.read() },
+        readOrMint: { log.note("appleReadOrMint"); return inner.readOrMint() })
+}
+
+/// The sync record's leaves, recorded (the custody move's twin).
+private func recordingSyncLeaves(_ log: KeychainCallLog) -> E2EECustodyLeaves {
+    let plain = LockIsolated<SyncCustodyRecord?>(nil)
+    let gated = LockIsolated<SyncCustodyRecord?>(nil)
+    return E2EECustodyLeaves(
+        saveGated: { record in log.note("syncSaveGated"); gated.setValue(record); return true },
+        savePlain: { record in log.note("syncSavePlain"); plain.setValue(record); return true },
+        loadPlain: { log.note("syncLoadPlain"); return plain.value },
+        gatedExists: { log.note("syncGatedExists"); return gated.value != nil },
+        deletePlain: { log.note("syncDeletePlain"); plain.setValue(nil); return true },
+        deleteGated: { log.note("syncDeleteGated"); gated.setValue(nil); return true })
+}
+
+private func fastKDF() -> PassphraseKDF.Descriptor {
+    PassphraseKDF.Descriptor(
+        algorithm: PassphraseKDF.algorithmArgon2id, argon2Version: 0x13,
+        memoryKiB: 256, iterations: 1, parallelism: 1,
+        salt: PassphraseKDF.randomSalt(), outputBytes: 32)
+}
+
+/// **17h (13p-fix ladder R3-6) — the custody move makes ZERO synchronous
+/// SecItem calls on the main thread.** The transition ran its whole custody
+/// choreography INLINE on the MainActor, the 13e B-1 class one
+/// settings-cadence door over. The work rides ONE serial off-main hop; the
+/// custody semantics are byte-identical (same reads, same writes, same
+/// order — the `CustodyReleaseTests` and `Phase13pControllerTests`
+/// transition pins ride as that half's proof). pre-13x 2a: the move is
+/// `moveCustody(to:)` / `setAlwaysAsk`, and it moves the SYNC RECORD in the
+/// same hop — its leaves are recorded here too, and they arrive off-main.
 ///
-/// RED ON OLD (behavioral revert executed): with the transition inlined
-/// back onto the MainActor — the pre-fix shape — every recorded call
-/// lands main-thread and `anyOnMainThread` goes red on all three arms.
+/// RED ON OLD (behavioral revert executed at 17h): with the transition
+/// inlined back onto the MainActor every recorded call lands main-thread
+/// and `anyOnMainThread` goes red on all three arms.
 @MainActor
-@Suite("The mode transition's custody work hops off the main thread (17h R3-6)")
+@Suite("The custody move's work hops off the main thread (17h R3-6)")
 struct ProtectionSetModeOffMainTests {
     @Test func everyTransitionArmsGuardSeamWorkArrivesOffMain() async throws {
         let log = KeychainCallLog()
         let key = StoreKey.mint()
+        let apple = AppleKey.mint()
         let backing = InMemoryStoreKeyGuardBacking(
             auto: key, biometryAvailable: true, biometricSucceeds: true)
         let recording = recordingStoreKeyGuard(log, backing: backing)
         let dialsBox = ScriptedDialsBox(ProtectionDials())
-        let envelopeBox = ScriptedEnvelopeBox(nil)
+        // A STANDARD key file (the Apple copy under A) — the move's
+        // authorization reads it; the posture stays Standard throughout,
+        // the moves being the primitive 2b's switches call.
+        var envelope = StoreKeyEnvelope()
+        try envelope.appleBox(key: key, under: apple.symmetricKey, appleKeyID: apple.id)
+        let envelopeBox = ScriptedEnvelopeBox(envelope)
         let stamps = ScriptedStampsBox()
         let gate = StoreLaunchGate(
             dials: { _, _ in dialsBox.value },
             saveDials: { new, _, _ in dialsBox.value = new },
+            legacyMode: { _, _ in nil },
+            retireLegacyDials: { _, _ in },
             guardFor: { _ in recording },
+            appleKeyFor: { _ in AppleKeyLeaves.inMemory(backing: InMemoryAppleKeyBacking(key: apple)) },
             loadEnvelope: { _ in envelopeBox.value },
             saveEnvelope: { new, _ in envelopeBox.value = new },
             setAsideEnvelope: { _ in envelopeBox.value = nil },
             stamp: { leaf, _ in stamps.value[leaf] },
             setStamp: { date, leaf, _ in stamps.value[leaf] = date })
+        let syncLog = KeychainCallLog()
         let controller = ProtectionController(configuration: .init(
             scope: "set-mode-off-main", storeURL: nil, gate: gate,
             isRealVariant: true,
-            makeKDF: { PassphraseKDF.Descriptor(
-                algorithm: PassphraseKDF.algorithmArgon2id, argon2Version: 0x13,
-                memoryKiB: 256, iterations: 1, parallelism: 1,
-                salt: PassphraseKDF.randomSalt(), outputBytes: 32) }))
+            makeKDF: { fastKDF() },
+            storeID: { [storeID = envelope.storeID] in storeID },
+            syncCustodyLeaves: { _ in recordingSyncLeaves(syncLog) },
+            syncCustodySession: SyncCustodySession()))
         #expect(await controller.setPassphrase("sesame") == nil)
         log.reset()  // the setup's own seam reads are not this pin's subject
 
-        // SUPERSESSION (pre-13u Act 10 wave 2a — the escrow/posture
-        // coupling, memo §4): `setMode` now ALSO reconciles the escrow
-        // item to the new posture at the act, so each arm's expected list
-        // grows by the coupling's escrow calls — which arrive OFF-MAIN
-        // through the same detached-hop discipline this pin polices (the
-        // `anyOnMainThread == false` half is the law; the lists moved
-        // with the cheese, deliberately).
-
         // INTO BIOMETRIC: the key read, the gated landing, its read-back
-        // verify, the silent item's release — then the coupling removes
-        // the spare (the demanded posture keeps none) — all off-main.
-        #expect(await controller.setMode(.biometric) == .changed)
-        #expect(log.names == ["loadAuto", "saveGated", "gatedItemExists", "deleteAuto",
-                              "deleteEscrow"],
+        // verify, the silent item's release — all off-main; the sync twin's
+        // leaves ride the same hop.
+        #expect(await controller.moveCustody(to: .biometric) == .changed)
+        #expect(log.names == ["loadAuto", "saveGated", "gatedItemExists", "deleteAuto"],
                 "the same reads and writes, in the same order — only the thread moves")
         #expect(log.anyOnMainThread == false,
                 "ZERO synchronous SecItem calls on the main thread: \(log.calls)")
+        #expect(syncLog.anyOnMainThread == false, "the sync twin's leaves hop too: \(syncLog.calls)")
 
-        // INTO PASSPHRASE (the resident key stands in — no key read):
-        // both verified releases (17h R3-5) + the coupling's spare
-        // removal, off-main.
+        // INTO PASSPHRASE (the resident key stands in — no key read): both
+        // verified releases (17h R3-5), off-main.
         log.reset()
-        #expect(await controller.setMode(.passphrase) == .changed)
-        #expect(log.names == ["deleteGated", "deleteAuto", "deleteEscrow"])
+        #expect(await controller.moveCustody(to: .passphrase) == .changed)
+        #expect(log.names == ["deleteGated", "deleteAuto"])
         #expect(log.anyOnMainThread == false, "\(log.calls)")
 
         // BACK TO AUTO: the landing, its identity verify, the gate's
-        // release — then the coupling RE-LANDS the stored escrow choice
-        // (read → save → verify read-back), off-main.
+        // release — off-main.
         log.reset()
-        #expect(await controller.setMode(.auto) == .changed)
-        #expect(log.names == ["saveAuto", "loadAuto", "deleteGated",
-                              "loadEscrow", "saveEscrow", "loadEscrow"])
+        #expect(await controller.moveCustody(to: .auto) == .changed)
+        #expect(log.names == ["saveAuto", "loadAuto", "deleteGated"])
         #expect(log.anyOnMainThread == false, "\(log.calls)")
     }
 }
 
 /// **Ladder R2-m2 — the launch/unlock road makes ZERO synchronous SecItem
 /// calls on the main thread.** `ProtectionController.reconcile()` runs at
-/// exactly that cadence (AppBootstrap fires it once the stack is ready),
-/// and its escrow arm made up to three synchronous guard-seam round-trips
-/// INLINE on the MainActor — the silent item's read, the escrow read, and
-/// the escrow write (or delete) — the 13e B-1 class re-introduced one type
-/// over, masked today only by the Mac's -34018 fast-fail and REAL the
-/// moment her signing lands a keychain identity. The arm now runs in ONE
-/// detached hop; the custody semantics are byte-identical (same reads,
-/// same writes, same short-circuit order — the escrow-consistency and
-/// foreign-sidecar pins in `Phase13pControllerTests` ride unmodified as
-/// that half's proof).
+/// exactly that cadence, and its escrow arm used to make up to three
+/// synchronous guard-seam round-trips INLINE on the MainActor. pre-13x 2a:
+/// the arm is the APPLE ARM — the silent item's read, the A read (or mint),
+/// the key file's Apple copy landed and read back — and it runs in ONE
+/// detached hop, exactly as the escrow arm learned to.
 ///
-/// RED ON OLD (behavioral revert executed): with the arm inlined back onto
-/// the MainActor — the pre-fix shape — every recorded call lands
-/// main-thread and `anyOnMainThread` goes red in both dial states.
+/// RED ON OLD (behavioral revert executed at 13p): with the arm inlined
+/// back onto the MainActor every recorded call lands main-thread and
+/// `anyOnMainThread` goes red.
 @MainActor
-@Suite("The reconcile's escrow arm hops off the main thread (13p R2-m2)")
+@Suite("The reconcile's Apple arm hops off the main thread (13p R2-m2)")
 struct ProtectionReconcileOffMainTests {
-    @Test func theEscrowArmsGuardSeamWorkArrivesOffMainInBothDialStates() async throws {
+    @Test func theAppleArmsGuardSeamWorkArrivesOffMainInBothPostures() async throws {
         let log = KeychainCallLog()
         let key = StoreKey.mint()
         let backing = InMemoryStoreKeyGuardBacking(auto: key)
         let recording = recordingStoreKeyGuard(log, backing: backing)
-        let dialsBox = ScriptedDialsBox(ProtectionDials(mode: .auto, escrowOn: true))
-        let envelopeBox = ScriptedEnvelopeBox(nil)
+        let appleBacking = InMemoryAppleKeyBacking()
+        let dialsBox = ScriptedDialsBox(ProtectionDials())
+        let envelopeBox = ScriptedEnvelopeBox(
+            StoreKeyEnvelope(keyFingerprint: StoreKeyEnvelope.fingerprint(of: key)))
         let stamps = ScriptedStampsBox()
         let gate = StoreLaunchGate(
             dials: { _, _ in dialsBox.value },
             saveDials: { new, _, _ in dialsBox.value = new },
+            legacyMode: { _, _ in nil },
+            retireLegacyDials: { _, _ in },
             guardFor: { _ in recording },
+            appleKeyFor: { _ in recordingAppleKeys(log, backing: appleBacking) },
             loadEnvelope: { _ in envelopeBox.value },
             saveEnvelope: { new, _ in envelopeBox.value = new },
             setAsideEnvelope: { _ in envelopeBox.value = nil },
@@ -513,33 +542,30 @@ struct ProtectionReconcileOffMainTests {
             isRealVariant: true))
         log.reset()  // construction reads no guard seam; belt anyway
 
-        // THE ON ARM (Standard's default): the silent item's read, the
-        // escrow read, the landing write — all off-main, and the escrow
-        // item really lands (the thread moved, never the meaning).
+        // STANDARD (a key file with no secrets): the silent item's read,
+        // then A read-or-minted — all off-main, and the Apple copy really
+        // lands and VERIFIES (the thread moved, never the meaning).
         await controller.reconcile()
-        // JUSTIFIED EDIT (pre-13u Act 9, R-pre13u-4): the arm ends every
-        // writing pass with a READ-BACK now — VERIFIED-LANDED is never
-        // the write's own word (the fourth call). Same reads, same
-        // writes, same short-circuit order, same hop.
-        #expect(log.names == ["loadAuto", "loadEscrow", "saveEscrow", "loadEscrow"],
-                "the same three reads/writes, then the verification read-back")
+        #expect(log.names == ["loadAuto", "appleReadOrMint"],
+                "the key read, then the A read-or-mint — then the key file's copy, verified by read-back")
         #expect(log.anyOnMainThread == false,
                 "ZERO synchronous SecItem calls on the main thread: \(log.calls)")
-        let storeID = try #require(envelopeBox.value?.storeID)
-        #expect(backing.escrow[storeID] == key, "the escrow copy landed")
-        #expect(!controller.escrowLandingFailed)
-        #expect(controller.escrowVerifiedLanded == true,
-                "and the read-back projected the verified fact")
+        let minted = try #require(appleBacking.key, "A was minted for the first Standard library")
+        #expect(try envelopeBox.value?.unwrapKey(apple: minted.symmetricKey) == key,
+                "the Apple copy landed")
+        #expect(controller.appleKeyVerified == true, "and the read-back projected the verified fact")
 
-        // THE OFF ARM: the leftover item goes (ownership-guarded, R1-m1)
-        // — same discipline, same evidence.
-        dialsBox.value.escrowOn = false
+        // CASTLE: no A touch at all (§14.5), the leg reads false.
+        var castle = try #require(envelopeBox.value)
+        try castle.removeAppleBox()
+        try castle.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
+        envelopeBox.value = castle
         log.reset()
         await controller.reconcile()
-        #expect(log.names == ["loadAuto", "deleteEscrow"],
-                "the ownership read then the delete, in order")
-        #expect(log.anyOnMainThread == false,
-                "the OFF arm hops too: \(log.calls)")
-        #expect(backing.escrow.isEmpty, "the leftover item went")
+        #expect(controller.posture == .castle)
+        #expect(!log.names.contains("appleReadOrMint") && !log.names.contains("appleRead"),
+                "Castle never touches the iCloud key: \(log.names)")
+        #expect(log.anyOnMainThread == false, "\(log.calls)")
+        #expect(controller.appleKeyVerified == false)
     }
 }

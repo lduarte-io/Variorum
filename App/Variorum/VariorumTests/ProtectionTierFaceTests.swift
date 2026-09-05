@@ -46,8 +46,8 @@ struct ProtectionTierFaceTests {
         stamps.value[ProtectionController.firstUseStamp] =
             Date(timeIntervalSinceNow: -3 * 24 * 60 * 60)
         let (controller, _) = makeController(stamps: stamps)
-        // The exposed state: Auto, no secrets, escrow verifiably absent.
-        _ = await controller.setEscrow(false)
+        // The exposed state (copy §5): Standard, no secrets, no Apple key
+        // verifiably landed (no reconcile has run — nil counts for nothing).
         controller.refreshNotices()
         #expect(controller.notice == .nudge)
         #expect(controller.legs.tier == .exposed)
@@ -82,8 +82,7 @@ struct ProtectionTierFaceTests {
     /// and NEVER the words "encryption off" (the store is always
     /// encrypted — what is unchosen is the lock and the keys).
     @Test func theIndicatorRendersOnlyWhileTheChoiceIsUnmade() async {
-        let (unchosen, _) = makeController()
-        _ = await unchosen.setEscrow(false)  // exposed: no legs at all
+        let (unchosen, _) = makeController()  // exposed: no legs at all
         let row = ProtectionStatusRow(
             controller: unchosen, tokens: .fallback(for: .light))
         await SurfaceComposition.host(row, size: NSSize(width: 240, height: 80))

@@ -55,8 +55,6 @@ struct MobileSettingsView: View {
     @State private var tracePresented = false
     #if DEBUG
     @State private var spikePresented = false
-    /// pre-13x batch 0 (Q3): the keychain shared-group probe sheet.
-    @State private var keychainProbePresented = false
     /// The tutorial doors' state: one door in flight at a time (the
     /// Mac's NIT-6 latch, sheet-local), the spoken outcome, and the
     /// replace confirm's continuation (the alert resolves it).
@@ -363,19 +361,8 @@ struct MobileSettingsView: View {
             }
             .buttonStyle(.plain)
             .padding(.horizontal, 20)
-            // pre-13x batch 0 (Q3): the cross-device keychain probe — a dev
-            // instrument on the spike door's terms (DEBUG, outside the
-            // registry, deleted when batch 2's real item lands).
-            Button {
-                keychainProbePresented = true
-            } label: {
-                Text(tokens.chromeLabel("Keychain probe (pre-13x)"))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.accent)
-            }
-            .buttonStyle(.plain)
-            .padding(.horizontal, 20)
-            .padding(.top, 8)
+            // (The pre-13x batch 0 keychain probe row lived here — deleted
+            // at batch 2a with the real Apple-key item, row 12.)
             #endif
 
             Spacer()
@@ -400,7 +387,6 @@ struct MobileSettingsView: View {
         .onAppear { traceArmed = MobileEditTrace.isArmed }
         #if DEBUG
         .fullScreenCover(isPresented: $spikePresented) { SpikeScreen() }
-        .sheet(isPresented: $keychainProbePresented) { MobileKeychainProbeScreen() }
         .alert(MobileTutorialSeeder.replaceQuestion, isPresented: $confirmPresented) {
             Button("Replace", role: .destructive) {
                 confirmContinuation?.resume(returning: true)

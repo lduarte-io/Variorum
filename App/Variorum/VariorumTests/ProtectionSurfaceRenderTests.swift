@@ -135,29 +135,32 @@ struct ProtectionSurfaceRenderTests {
     /// content view (hosted directly, as its expanded state renders it)
     /// carries the moved sentences. The pin moved with the cheese; it was
     /// never deleted.
-    @Test func theSettingsPaneShowsTheOpenAppIsReadableDisclosure() async {
+    /// pre-13x 2a — THE POSTURE PANE renders copy §1: keystone 1 as the
+    /// lead, the current-state line, BOTH posture cards (name, tag,
+    /// one-line, the six rows), and keystone 4 at the bottom — the named
+    /// non-goal's sentence lives there now (R13p-16's honesty debt,
+    /// carried by the keystone every posture shows). RED ON OLD: the pre-2a
+    /// pane rendered the presets, the picker and the escrow dial, none of
+    /// these sentences.
+    @Test func theSettingsPaneRendersThePostureCopy() async {
         let pane = ProtectionPane(controller: controller(), services: nil)
-        await SurfaceComposition.host(pane, size: NSSize(width: 620, height: 800))
+        await SurfaceComposition.host(pane, size: NSSize(width: 620, height: 1200))
         let shown = SurfaceComposition.text(of: pane.body)
-        // Always visible: the per-mode honesty grammar (R13p-5), the loss
-        // math, the checklist's tier sentence, and the disclosure door.
-        #expect(SurfaceComposition.carries(ProtectionCopy.modeSentence(.auto), in: shown))
-        #expect(SurfaceComposition.carries(
-            ProtectionCopy.lossMath(.auto, escrowOn: true), in: shown))
-        #expect(shown.contains("More about what this protects"),
-                "the ?-door itself must be on the pane")
-        // The disclosure's content, exactly as its expanded state renders.
-        let depth = ModeHonestyDisclosure(mode: .auto)
-        await SurfaceComposition.host(depth, size: NSSize(width: 620, height: 400))
-        let disclosed = SurfaceComposition.text(of: depth.body)
-        #expect(SurfaceComposition.carries(ProtectionCopy.openAppIsReadable, in: disclosed),
-                "the named non-goal left the disclosure")
-        #expect(SurfaceComposition.carries(ProtectionCopy.oneDeviceNote, in: disclosed))
-        // Seventh wave (ii): the demanded arm carries the fallback truth.
-        let demandedDepth = ModeHonestyDisclosure(mode: .biometric)
-        let demandedShown = SurfaceComposition.text(of: demandedDepth.body)
-        #expect(SurfaceComposition.carries(
-            ProtectionShapes.demandedFallbackTruth, in: demandedShown))
+        #expect(SurfaceComposition.carries(ProtectionCopy.keystoneOneMode, in: shown))
+        #expect(SurfaceComposition.carries(ProtectionCopy.currentStateLine(.standard), in: shown))
+        for posture in [Posture.standard, Posture.castle] {
+            #expect(SurfaceComposition.carries(ProtectionCopy.postureName(posture), in: shown))
+            #expect(SurfaceComposition.carries(ProtectionCopy.postureOneLine(posture), in: shown))
+            for row in ProtectionCopy.postureCard(posture) {
+                #expect(SurfaceComposition.carries(row.text, in: shown),
+                        "card row missing: \(posture) — \(row.label)")
+            }
+        }
+        #expect(SurfaceComposition.carries(ProtectionCopy.keystoneOpenMeansReadable, in: shown),
+                "keystone 4 — the one line every posture shows")
+        // Standard shows NO Castle switch (P-2: a switch that acts nowhere).
+        #expect(!SurfaceComposition.carries(ProtectionCopy.alwaysAskLabel, in: shown))
+        #expect(!SurfaceComposition.carries(ProtectionCopy.lockNowLabel, in: shown))
     }
 
     /// **The live checklist is the pane's centerpiece** (item 3's sixth-wave
@@ -170,7 +173,7 @@ struct ProtectionSurfaceRenderTests {
         for row in ProtectionShapes.checklistRows(
             ProtectionLegs(
                 hasPassphraseWrap: false, hasRecoveryWrap: false,
-                escrowVerifiedLanded: nil, storeCustodyGated: false),
+                appleKeyVerified: nil, storeCustodyGated: false),
             mode: .auto
         ) {
             #expect(SurfaceComposition.carries(row.note, in: shown),

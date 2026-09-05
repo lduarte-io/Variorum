@@ -81,6 +81,22 @@ struct VariorumApp: App {
                             services?.stop()
                             services = nil
                         }
+                        // pre-13x 2a (decision 18, row 7): the KEYLESS
+                        // byte-copy of the closed library at lock time when
+                        // a backup is due — the app's own folder only; the
+                        // values are captured (the services are gone by the
+                        // time it runs), never the objects.
+                        if let storeURL = try? AppDatabase.defaultStoreURL(
+                            variant: bootstrap.storeVariant) {
+                            let directory = storeURL.deletingLastPathComponent()
+                                .appendingPathComponent("Backups", isDirectory: true)
+                            bootstrap.lockTimeCopy = {
+                                StoreBackup.performLockTimeCopyIfDue(
+                                    storeURL: storeURL, directory: directory,
+                                    interval: StoreBackup.Configuration().interval,
+                                    defaults: .standard, now: Date())
+                            }
+                        }
                         // 13p one-secret wiring (R13p-4): the vault's
                         // passphrase FOLLOWS into the store wrap; the vault's
                         // twelve words follow too (R1-m3's twin); the store

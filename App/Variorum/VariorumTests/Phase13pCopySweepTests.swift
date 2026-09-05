@@ -5,17 +5,19 @@
 //  Phase 13p, Batch 4 — THE HONEST-COPY SWEEP, made structural.
 //
 //  Batch 2 shipped the Mac's disclosure sentences and pinned the ruled ones
-//  byte-for-byte (knot 8's pair, the per-mode honesty grammar). What was
-//  missing is the sweep's own guarantee: that EVERY mode and EVERY preset
-//  has its sentences at all, that they differ from each other, and that the
-//  ruled non-goal is stated somewhere a reader choosing a mode will meet it.
+//  byte-for-byte (the per-mode honesty grammar). What was missing is the
+//  sweep's own guarantee: that EVERY gate has its sentences at all, that
+//  they differ from each other, and that the ruled non-goal is stated
+//  somewhere a reader choosing a posture will meet it. pre-13x 2a: the
+//  presets and the escrow dial are gone (§13); the two POSTURES speak in
+//  their place (copy §1).
 //
 //  Why that matters more here than in most panes: this is the one surface in
 //  the app whose whole claim is that it says what is actually so. A future
-//  mode added without its disclosure would not look broken — it would look
+//  gate added without its disclosure would not look broken — it would look
 //  finished and say nothing, which is the failure R13p-16 refused in another
 //  form (*"it makes users think privacy is in place that just isn't"*).
-//  These pins fail the day such a mode appears.
+//  These pins fail the day such a gate appears.
 //
 //  Copy TASTE is 13s's; copy PRESENCE is a correctness property, and this is
 //  where it is kept.
@@ -27,11 +29,11 @@ import Testing
 @testable import Variorum
 import VariorumCore
 
-@Suite("13p — the honest-copy sweep (every mode and preset speaks)")
+@Suite("13p — the honest-copy sweep (every gate and posture speaks)")
 struct Phase13pCopySweepTests {
-    /// Every at-open mode has a row label, a what-it-does-not-protect
-    /// sentence, and loss math under BOTH escrow states — all non-empty and
-    /// all distinct from one another.
+    /// Every effective gate has a row label, a what-it-does-not-protect
+    /// sentence, and loss math with and without the Apple copy — all
+    /// non-empty and all distinct from one another.
     @Test func everyModeCarriesItsFullDisclosure() {
         var seenSentences: Set<String> = []
         var seenLabels: Set<String> = []
@@ -54,42 +56,28 @@ struct Phase13pCopySweepTests {
         }
     }
 
-    /// Both presets have a title and a blurb, and the blurbs say different
-    /// things (a preset pair that reads the same is a choice a reader cannot
-    /// make).
-    @Test func bothPresetsSayWhatTheyDo() {
-        let titles = ProtectionPreset.allCases.map(ProtectionCopy.presetTitle)
-        let blurbs = ProtectionPreset.allCases.map(ProtectionCopy.presetBlurb)
-        #expect(Set(titles).count == titles.count)
-        #expect(Set(blurbs).count == blurbs.count)
-        for blurb in blurbs { #expect(blurb.count > 20) }
-    }
-
-    /// The escrow dial states its consequence BOTH ways — never only the
-    /// reassuring one (knot 8's ruled pair is the content; this pin is that
-    /// both arms exist and disagree).
-    @Test func theEscrowDialSpeaksBothWays() {
-        #expect(ProtectionCopy.escrowOn != ProtectionCopy.escrowOff)
-        #expect(ProtectionCopy.escrowOn.contains("iCloud"))
-        #expect(ProtectionCopy.escrowOff.contains("unrecoverable"))
-        // And the honesty riders the dial owes: what it needs to ride —
-        // and, SUPERSESSION (pre-13u ninth wave, memo §4 / R-pre13u-7(b)):
-        // the old `escrowUnderDemandedMode` caveat ("without passing the
-        // lock") described a spare key sitting beside a demanded gate,
-        // a state the escrow/posture coupling now removes — the successor
-        // sentence is her why-the-spare-isn't-offered ruling, pinned here
-        // in its place, never deleted.
-        #expect(ProtectionCopy.escrowNeedsICloudKeychain.contains("nothing for it to ride"))
-        #expect(ProtectionCopy.escrowNotOfferedUnderDemanded.contains(
-            "wouldn't be providing extra protection"))
-        #expect(ProtectionCopy.escrowChoiceKeptNote.contains("returns as you left it"))
+    /// Both POSTURES have a name, a tag and a one-line, and the cards say
+    /// different things (a pair that reads the same is a choice a reader
+    /// cannot make). Every card names who it STOPS and its FLOOR — the two
+    /// honest boundaries the design says must survive re-voicing (§18 v).
+    @Test func bothPosturesSayWhatTheyAre() {
+        let postures: [Posture] = [.standard, .castle]
+        #expect(Set(postures.map(ProtectionCopy.postureName)).count == 2)
+        #expect(Set(postures.map(ProtectionCopy.postureOneLine)).count == 2)
+        for posture in postures {
+            let card = ProtectionCopy.postureCard(posture)
+            #expect(card.contains { $0.label == "Who it stops" && $0.text.contains("the Variorum server — yes") })
+            #expect(card.contains { $0.label == "The floor" })
+        }
+        #expect(ProtectionCopy.postureCard(.castle).contains { $0.text.contains("Nobody can help") },
+                "Castle's floor is said as the sign the lock is real")
+        #expect(ProtectionCopy.postureCard(.standard).contains { $0.text.contains("Keep the words") })
     }
 
     /// **THE NAMED NON-GOAL IS NAMED.** The plan declines exactly one threat
     /// (shape B's — an attacker at an open, unlocked app) and then declined
     /// the per-note curtain that would have implied it was covered. Both
-    /// halves are in the sentence, and the sentence is rendered where a mode
-    /// is chosen.
+    /// halves are in the sentence, and keystone 4 says it in every posture.
     @Test func theOpenAppIsReadableLineStatesTheDecline() {
         let line = ProtectionCopy.openAppIsReadable
         #expect(line.contains("open and unlocked"))
@@ -98,6 +86,7 @@ struct Phase13pCopySweepTests {
                 "R13p-16's decline is stated, not merely absent")
         #expect(line.contains("Locking is how you end that"),
                 "…and the honest answer is offered beside it")
+        #expect(ProtectionCopy.keystoneOpenMeansReadable.contains("Locking is how you end that"))
     }
 
     /// **THE WALK'S CATCH.** The acceptance walk drove a passphrase-
@@ -105,10 +94,6 @@ struct Phase13pCopySweepTests {
     /// gone"* — a cause that cannot exist in that mode, on the one screen
     /// whose whole job is telling a locked-out user the truth about their
     /// own library. The sentence is per-demand now, and this is the pin.
-    ///
-    /// **Red-on-old** (behavioural revert, executed): with the single
-    /// unconditional sentence restored, the passphrase arm names the
-    /// biometry item and this fails.
     @Test func theDeadEndNamesOnlyCausesThatCanExistInItsMode() {
         let underPassphrase = ProtectionCopy.deadEnd(.passphrase)
         #expect(!underPassphrase.contains(ProtectionCopy.biometryName),
@@ -119,20 +104,15 @@ struct Phase13pCopySweepTests {
         #expect(underBiometry.contains(ProtectionCopy.biometryName),
                 "…and where one COULD exist, its absence is the first thing to say")
 
-        // Both roads end at the same two recoveries, named by real file.
         for sentence in [underPassphrase, underBiometry] {
             #expect(sentence.contains(StoreKeyEnvelope.filename))
             #expect(sentence.contains("restore the whole library from a backup"))
         }
     }
 
-    /// The plain-text escape's warning exists and names the trade (R13p-8's
-    /// rider: a scheduled export re-opens the door the encryption closed).
     /// **Ladder R1-n2 — the unforeseen error speaks a sentence, never a
-    /// case name.** `message(for:)`'s default arm was
-    /// `String(describing:)` — a case-name dump on exactly the class of
-    /// error nobody predicted (R94's doctrine, applied to its last arm).
-    /// RED ON OLD: the describing dump contains the error type's name.
+    /// case name.** RED ON OLD: the describing dump contains the error
+    /// type's name.
     @Test func anUnforeseenErrorSpeaksASentenceNeverACaseName() {
         struct UtterlyUnforeseenError: Error {}
         let message = ProtectionCopy.message(for: UtterlyUnforeseenError())

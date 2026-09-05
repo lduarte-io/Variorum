@@ -3132,9 +3132,12 @@ struct TutorialPrivacyChapterTests {
                 #expect(prose.contains(ProtectionCopy.modeLabel(mode)),
                         "the lesson must name the row Settings shows: \(ProtectionCopy.modeLabel(mode))")
             }
-            for preset in ProtectionPreset.allCases {
-                #expect(prose.contains(ProtectionCopy.presetTitle(preset)))
-                #expect(prose.contains(ProtectionCopy.presetBlurb(preset)))
+            // pre-13x 2a: the presets are gone (§13); the two POSTURES are
+            // named by their real words (copy §1) — batch 5's short chapter
+            // re-seeds the whole lesson.
+            for posture in [Posture.standard, Posture.castle] {
+                #expect(prose.contains(ProtectionCopy.postureName(posture)))
+                #expect(prose.contains(ProtectionCopy.postureOneLine(posture)))
             }
             // "saving it in keychain or not" — her own words for the dial.
             #expect(prose.contains("iCloud Keychain"))

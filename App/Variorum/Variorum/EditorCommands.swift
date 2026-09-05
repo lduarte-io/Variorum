@@ -749,16 +749,8 @@ struct EditorCommands: Commands {
                 creationActions()?.restoreSampleLibrary()
             }
             .disabled(!canReachCreationTarget)
-            #if DEBUG
-            Divider()
-            // pre-13x batch 0 (Q3): a DEBUG-only dev instrument, outside the
-            // capability registry by the same rule as the phone's TK2 Spike
-            // door — compiled out of Release; deleted when the design's real
-            // Apple-key item lands (batch 2).
-            Button("Keychain Shared-Group Probe (pre-13x)…") {
-                SharedKeychainGroupProbeDoor.present()
-            }
-            #endif
+            // (The pre-13x batch 0 DEBUG keychain probe door lived here —
+            // deleted at batch 2a with the real Apple-key item, row 12.)
         }
     }
 
