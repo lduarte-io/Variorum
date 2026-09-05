@@ -323,6 +323,10 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
     /// THE PROOF CHECK (the SQL's `sync_key_proof_check` twin): the
     /// presented wire token hashed and compared to the vault's stored
     /// hash; a malformed token refuses; the NULL-hash arm lands the first.
+    /// The ruled determinism (the orchestrator's ruling 5 — the SQL takes
+    /// the row FOR UPDATE from the start on a NULL peek): here the actor's
+    /// serialization IS the row lock — two racing first proofs run one
+    /// after the other, the first lands, the second compares against it.
     private func checkProof(_ keyProof: String, for userID: String) throws {
         guard let presented = KeyProof.hash(ofWireToken: keyProof) else {
             throw SyncError.keyProofRefused

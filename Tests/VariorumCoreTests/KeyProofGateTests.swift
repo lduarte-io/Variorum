@@ -180,6 +180,49 @@ struct KeyProofGateTests {
         #expect(world.server.isEmpty, "the refused insert wrote nothing")
     }
 
+    /// THE NULL-HASH ARM UNDER A RACE (the orchestrator's ruling on 1b's
+    /// question 5): two first proofs racing a NULL-hash vault land EXACTLY
+    /// ONE hash — the first to take the row — and the second call passes
+    /// (the same proof) or refuses (a different one) deterministically
+    /// against what landed; never two hashes, never a deadlock. The fake's
+    /// actor serializes exactly as the SQL's FOR UPDATE from the start does.
+    @Test func twoRacingFirstProofsLandExactlyOneHashAndTheSecondIsDecidedAgainstIt() async throws {
+        for sameProof in [true, false] {
+            let server = FakeSyncServer()
+            let uid = "00000000-aaaa-4bbb-8ccc-00000000a01d"
+            await server.provisionAccount(uid, vaultCorpusKeyID: "her-key", keyProofHash: nil)
+            let her = server.connection(as: uid)
+            let m1 = SymmetricKey(size: .bits256)
+            let p1 = KeyProof.wireToken(master: m1)
+            let m2 = SymmetricKey(size: .bits256)
+            let p2 = sameProof ? p1 : KeyProof.wireToken(master: m2)
+            let first = Task {
+                try await her.pull(since: 0, limit: 1, activeKeyID: "her-key", keyProof: p1, deviceID: "mac")
+            }
+            let second = Task {
+                try await her.pull(since: 0, limit: 1, activeKeyID: "her-key", keyProof: p2, deviceID: "phone")
+            }
+            let results = [await first.result, await second.result]
+            let successes = results.filter { if case .success = $0 { return true } else { return false } }.count
+            let landed = try #require(await server.vaultRow(for: uid)?.keyProofHash, "exactly one hash landed")
+            if sameProof {
+                #expect(successes == 2, "the same proof twice: both pass, one hash")
+                #expect(landed == KeyProof.hash(master: m1))
+            } else {
+                #expect(successes == 1, "different proofs: exactly one lands, the other refuses against it")
+                let winnerIsFirst = landed == KeyProof.hash(master: m1)
+                #expect(winnerIsFirst || landed == KeyProof.hash(master: m2), "the landed hash is one of the two")
+                let winner = winnerIsFirst ? p1 : p2
+                let loser = winnerIsFirst ? p2 : p1
+                _ = try await her.pull(since: 0, limit: 1, activeKeyID: "her-key", keyProof: winner, deviceID: "mac")
+                await #expect(throws: SyncError.keyProofRefused, "the loser stays refused — never a second hash") {
+                    _ = try await her.pull(since: 0, limit: 1, activeKeyID: "her-key", keyProof: loser, deviceID: "phone")
+                }
+                #expect(await server.vaultRow(for: uid)?.keyProofHash == landed, "the landed hash stands")
+            }
+        }
+    }
+
     /// The right `active_key_id` WITHOUT the proof deletes nothing (the
     /// truncate door — the design's §12 letter); with the proof it empties
     /// the partition, and the vault survives either way.

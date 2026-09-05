@@ -83,13 +83,15 @@
 --     signatures are DROPPED FIRST (the 09/10 discipline: an overload left
 --     standing would be a proof-free door beside the new one).
 --   * ONE gate, two helpers: `sync_key_gate(active_key_id, key_proof)`
---     reads the vault row FOR SHARE (decision 31 — a push that passed the
---     old check commits, and takes its seqs, BEFORE any rotation's vault
---     write, never after it), applies the fence, then
---     `sync_key_proof_check(key_proof)` — the constant-time compare and the
---     NULL-hash arm. Both are `variorum_definer`-owned and revoked from
---     every API role (the `sync_table_pk` posture): the definer bodies are
---     their only callers.
+--     peeks the hash unlocked and takes the vault row FOR SHARE (a landed
+--     hash — decision 31: a push that passed the old check commits, and
+--     takes its seqs, BEFORE any rotation's vault write, never after it)
+--     or FOR UPDATE from the start (a NULL hash — the migration arm's
+--     exclusive write, the ruling on 1b's question 5), applies the fence,
+--     then `sync_key_proof_check(key_proof)` — the constant-time compare
+--     and the NULL-hash arm under the lock already held. Both are
+--     `variorum_definer`-owned and revoked from every API role (the
+--     `sync_table_pk` posture): the definer bodies are their only callers.
 --
 -- WHAT DOES NOT CHANGE: the 19 data tables and their policies; `account_purge`
 -- (session-only — deletion is mandated and loud); vault SELECT and INSERT
@@ -221,16 +223,21 @@ create trigger key_vault_require_proof_hash before insert on key_vault
   for each row execute function key_vault_require_proof_hash();
 
 -- ---------------------------------------------------------------------------
--- 4. THE PROOF CHECK — the one place the token is compared. Reads the
---    caller's vault row FOR SHARE (the caller may already hold FOR UPDATE —
---    `key_vault_update` — which is the same transaction's stronger lock),
---    hashes the presented token, and compares in CONSTANT TIME: a fixed
---    64-step loop over the hex digits accumulating XOR into an OR, never
---    short-circuiting (`ascii('')` is 0 past either string's end; the
---    lengths join the accumulator last). A malformed token (not base64)
---    refuses the same way — never a raw decode error. The NULL-hash arm:
---    the FIRST proof presented to a hash-less vault is stored and accepted
---    — the author's existing vault, once.
+-- 4. THE PROOF CHECK — the one place the token is compared. Re-reads the
+--    caller's vault row UNDER THE LOCK THE CALLER ALREADY HOLDS (the gate's
+--    FOR SHARE on a landed hash, or FOR UPDATE on a NULL peek — section 5;
+--    `key_vault_update`'s FOR UPDATE), hashes the presented token, and
+--    compares in CONSTANT TIME: a fixed 64-step loop over the hex digits
+--    accumulating XOR into an OR, never short-circuiting (`ascii('')` is 0
+--    past either string's end; the lengths join the accumulator last). A
+--    malformed token (not base64) refuses the same way — never a raw decode
+--    error. THE NULL-HASH ARM (the orchestrator's ruling on 1b's question
+--    5): the FIRST proof presented to a hash-less vault is stored and
+--    accepted — the author's existing vault, once — and the write is
+--    EXCLUSIVE by construction: a NULL seen here means this transaction
+--    holds the row FOR UPDATE (the gate chose that lock on its unlocked
+--    peek), so a second first-round waited on us and now compares against
+--    what we landed — deterministic, never the deadlock detector.
 -- ---------------------------------------------------------------------------
 
 create or replace function sync_key_proof_check(key_proof text) returns void
@@ -250,8 +257,11 @@ begin
     raise exception 'sync requires an authenticated user';
   end if;
 
+  -- The re-read under the caller's lock (no lock clause of its own — a
+  -- FOR SHARE here would be a no-op for a FOR UPDATE holder and an UPGRADE
+  -- hazard is what the gate's peek exists to avoid).
   select true, key_proof_hash into vault_found, stored_hash
-    from key_vault where user_id = caller for share;
+    from key_vault where user_id = caller;
   if not coalesce(vault_found, false) then
     raise exception 'VARIORUM_STALE_KEY_FENCE: this account''s encryption keys were replaced — the device holds a stale key id; re-enroll before syncing';
   end if;
@@ -266,11 +276,10 @@ begin
   end if;
 
   if stored_hash is null then
-    -- THE MIGRATION ARM (hers only): the first proof lands its hash. The
-    -- share lock upgrades to the row's exclusive lock inside this same
-    -- transaction; two first-rounds racing this arm resolve by the
-    -- deadlock detector aborting one — its next round simply presents the
-    -- proof against the landed hash.
+    -- THE MIGRATION ARM (hers only): the first proof lands its hash under
+    -- the FOR UPDATE this transaction already holds (the gate took it on
+    -- the NULL peek; `key_vault_update` always holds it) — exclusive, so
+    -- exactly one first-round lands a hash and every other compares.
     update key_vault set key_proof_hash = presented_hash where user_id = caller;
     return;
   end if;
@@ -287,13 +296,20 @@ end;
 $$;
 
 -- ---------------------------------------------------------------------------
--- 5. THE GATE — what every data RPC calls first: the vault row read FOR
---    SHARE (decision 31: a data round holds the share lock for its whole
---    transaction, so a rotation's FOR UPDATE write waits for every in-flight
---    round that passed the OLD check — those rows commit, and take their
---    seqs, BELOW the rotation seq, never above it), the 14c fence
---    (unchanged: mismatch OR a missing vault row refuses with the CF-16
---    marker), then the proof.
+-- 5. THE GATE — what every data RPC calls first: THE LOCK, then the 14c
+--    fence (unchanged: mismatch OR a missing vault row refuses with the
+--    CF-16 marker), then the proof. THE LOCK CHOICE (decision 31 + the
+--    ruled NULL-hash arm): an UNLOCKED peek at the proof hash decides which
+--    lock the row takes for this round's whole transaction — a landed hash
+--    takes FOR SHARE (a data round holds it to commit, so a rotation's FOR
+--    UPDATE write waits for every in-flight round that passed the OLD
+--    check: those rows commit, and take their seqs, BELOW the rotation
+--    seq, never above it); a NULL hash (the migration arm — her row, once)
+--    takes FOR UPDATE FROM THE START, so the arm's first write never
+--    upgrades a share lock (two rounds each holding FOR SHARE and each
+--    wanting FOR UPDATE would deadlock — the ruling forbids leaning on the
+--    deadlock detector). A second first-round waits on the first's FOR
+--    UPDATE and then compares against the hash it landed.
 -- ---------------------------------------------------------------------------
 
 create or replace function sync_key_gate(active_key_id text, key_proof text) returns void
@@ -303,17 +319,25 @@ as $$
 declare
   caller uuid;
   fence_key text;
+  peek_hash text;
 begin
   caller := auth.uid();
   if caller is null then
     raise exception 'sync requires an authenticated user';
   end if;
 
+  -- THE LOCK CHOICE: the unlocked peek, then the row locked for the round.
+  select key_proof_hash into peek_hash from key_vault where user_id = caller;
+  if peek_hash is null then
+    select corpus_key_id into fence_key from key_vault where user_id = caller for update;
+  else
+    select corpus_key_id into fence_key from key_vault where user_id = caller for share;
+  end if;
+
   -- THE VAULT-KEY-ID FENCE (THE DESIGN item 2, 14c): the caller's presented
   -- corpus key id must match the account's current key_vault row. A
   -- mismatch — or a missing vault row — refuses the WHOLE round before
   -- any row is touched (the CF-16 replaced state, client-classified).
-  select corpus_key_id into fence_key from key_vault where user_id = caller for share;
   if fence_key is null or fence_key is distinct from active_key_id then
     raise exception 'VARIORUM_STALE_KEY_FENCE: this account''s encryption keys were replaced — the device holds a stale key id; re-enroll before syncing';
   end if;

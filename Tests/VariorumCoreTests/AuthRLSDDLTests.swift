@@ -233,7 +233,9 @@ struct AuthRLSDDLTests {
         }
         let gate = try Self.finalBody(of: "sync_key_gate")
         #expect(gate.contains("select corpus_key_id into fence_key from key_vault where user_id = caller for share;"),
-                "the gate reads the caller's vault key id under a SHARE lock (decision 31)")
+                "the gate reads the caller's vault key id under a SHARE lock (decision 31) — on a landed hash")
+        #expect(gate.contains("select corpus_key_id into fence_key from key_vault where user_id = caller for update;"),
+                "…and FOR UPDATE from the start on a NULL hash (the migration arm, ruling 5)")
         #expect(gate.contains("if fence_key is null or fence_key is distinct from active_key_id then"),
                 "the gate must fence on mismatch AND on a missing vault row")
         #expect(gate.contains(SyncServerRefusalMarker.staleKeyFence),
@@ -1438,8 +1440,10 @@ struct AuthRLSDDLTests {
     /// NULL-hash MIGRATION ARM landing the first proof.
     @Test func theProofCheckIsConstantTimeWithTheMigrationArm() throws {
         let body = try Self.finalBody(of: "sync_key_proof_check")
-        #expect(body.contains("from key_vault where user_id = caller for share;"),
-                "the vault row under a SHARE lock (decision 31)")
+        #expect(body.contains("select true, key_proof_hash into vault_found, stored_hash\n    from key_vault where user_id = caller;"),
+                "the re-read under the lock the CALLER holds — no lock clause of its own (an upgrade under a second share lock would deadlock)")
+        #expect(!body.contains("for share") && !body.contains("for update"),
+                "the proof check takes no lock: the gate (or key_vault_update) chose it")
         #expect(body.contains("encode(sha256(decode(key_proof, 'base64')), 'hex')"),
                 "SHA-256 of the RAW token; the wire carries base64")
         #expect(body.contains("exception when others then") && body.contains("presented_hash := null;"),
@@ -1457,6 +1461,36 @@ struct AuthRLSDDLTests {
                 "the FIRST proof lands its hash — once; the next call compares")
         #expect(body.components(separatedBy: SyncServerRefusalMarker.keyProofRequired).count - 1 == 2,
                 "the malformed arm and the mismatch arm both refuse with the marker")
+    }
+
+    /// THE NULL-HASH ARM TAKES THE ROW FOR UPDATE (the orchestrator's ruling
+    /// on 1b's question 5): the gate PEEKS the hash unlocked and chooses the
+    /// lock — FOR UPDATE from the start on a NULL (the migration arm's
+    /// exclusive write), FOR SHARE on a landed hash — so two racing first
+    /// rounds serialize on the row lock and never on the deadlock detector;
+    /// the proof check's write runs under that held lock and only when the
+    /// re-read still finds NULL.
+    @Test func theNullHashArmTakesTheRowForUpdateFromTheStartNeverByUpgrade() throws {
+        let gate = try Self.finalBody(of: "sync_key_gate")
+        #expect(gate.contains("select key_proof_hash into peek_hash from key_vault where user_id = caller;"),
+                "the unlocked peek decides the lock")
+        let peek = try #require(gate.range(of: "select key_proof_hash into peek_hash"))
+        let forUpdate = try #require(gate.range(of: "if peek_hash is null then\n    select corpus_key_id into fence_key from key_vault where user_id = caller for update;"))
+        let forShare = try #require(gate.range(of: "else\n    select corpus_key_id into fence_key from key_vault where user_id = caller for share;"))
+        let fence = try #require(gate.range(of: "if fence_key is null or fence_key is distinct from active_key_id then"))
+        #expect(peek.lowerBound < forUpdate.lowerBound && forUpdate.lowerBound < forShare.lowerBound
+                    && forShare.lowerBound < fence.lowerBound,
+                "peek → the lock branches → the fence — the lock is taken BEFORE any check, once, for the round")
+        let check = try Self.finalBody(of: "sync_key_proof_check")
+        #expect(check.contains("if stored_hash is null then") && check.contains("update key_vault set key_proof_hash = presented_hash where user_id = caller;"),
+                "the arm's write, only when the re-read under the held lock still finds NULL")
+        #expect(!check.contains("deadlock detector aborting"), "the deadlock detector is no longer the arm's resolution")
+        // `key_vault_update` holds FOR UPDATE before it calls the check —
+        // the same exclusive discipline (pinned in its own test).
+        let update = try Self.finalBody(of: "key_vault_update")
+        let lock = try #require(update.range(of: "for update;"))
+        let call = try #require(update.range(of: "perform sync_key_proof_check(key_proof);"))
+        #expect(lock.lowerBound < call.lowerBound)
     }
 
     /// THE ROTATION'S WRITE (decision 6): version-neutral — the payload
