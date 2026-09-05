@@ -3,6 +3,12 @@
 **Why this exists:** the first build orchestrator reached ~660k tokens with batch 2c running. The author's words at the
 cutover: *"This is an extremely important phase so I'm at loath to lose your experience and context but alas the context
 window is getting full."* This file is that experience, written so a fresh session needs nothing from the dead one.
+**THE SEAM (her ruling at the cutover):** the first orchestrator FINISHES 2c thoroughly AND HANDLES THE WINDOW — the
+deploy, the Mac install, her sign-in, the passphrase confirm, the sanity check, the phone install and its
+re-enrollment — because it holds that context; **the successor starts at BATCH 3** with the window's outcomes recorded
+in §2b below. Her words: *"it might be better if you handle the window because you can deploy it, mac install, sign in,
+passphrase confirm… the phone install and re-enrollment, and then batches 3-5 can cleanly be accomplished by the next
+orchestrator."*
 **The design is SETTLED and clean** (`notes/plans/pre-13x-postures-design.md` — decisions 1–34; nothing provisional);
 **every batch record and every adjudication is in that file's §19**; the history is `pre-13x-design-history.md`
 (Parts I–V — V holds this orchestrator's rulings with the superseded text verbatim).
@@ -42,10 +48,19 @@ window is getting full."* This file is that experience, written so a fresh sessi
 > applications as well"*) behind the A1 backup rail at a zero-instance window; the phone install by `devicectl` (proven
 > this session). Still needing her present: the sign-in on both devices, the one-time passphrase confirms, the
 > twelve-words sanity check, Q3 is DONE.
-> Then continue the batch loop where §18's LIVE STATUS says: adjudicate 2c → U3 closes at THE WINDOW (the deploy
-> checklist §0–§8 + the sitting's sequence in this file §5) → batch 3 → batch 4 → batch 5 → the ladder (Fable reviewers
-> on every round, each walking §3.4; the closing ladder's FIRST reviewer walks *Encryption Explained* and the tutorial
-> chapter sentence by sentence — condition vii) → the two drills → her acceptance walk → the closeout ritual.
+> **You start at BATCH 3.** 2c is closed and adjudicated, and THE WINDOW HAS RUN (the deploy at marker 8, both installs,
+> her migrations, sign-ins and confirms, the sanity check, the phone's re-enrollment) — VERIFY each outcome against
+> §2b of this file and against the mirror (`sync_schema_version()` = 8 through the PAT's read road, or her `!` road)
+> before trusting it; if §2b still reads PENDING anywhere, the window did NOT complete — ask her, never assume. Then:
+> batch 3 (the doors) → batch 4 (the lobby + cross-device) → batch 5 (copy, the tutorial chapter, the book) → the
+> ladder (Fable reviewers on every round, each walking §3.4; the closing ladder's FIRST reviewer walks *Encryption
+> Explained* and the tutorial chapter sentence by sentence — condition vii) → the two drills → her acceptance walk →
+> the closeout ritual. Each brief is written AFTER reading the shipped code the batch assumes, from §4, §5, §7, §12,
+> §15 and the prior records' HANDED FORWARD sections, into the design's §19 (the 2a/2b/2c "REFINED AT THE SEAM"
+> paragraphs are the form).
+> **Her refinement of the adjudication rule (at the cutover, verbatim):** the rule below (§4) holds *"with the exception
+> of if a gap or obvious flaw has made itself clear in the design's own letter"* — a gap or flaw IN the design's letter
+> is never the architect's to close by inference; it goes to her.
 
 ---
 
@@ -80,6 +95,24 @@ window is getting full."* This file is that experience, written so a fresh sessi
   not a proof: the definitive check is the 13l sanity check with her twelve words, which reads the VAULT and so runs
   at the window right after she signs in.
 - **Memory:** `variorum-phase-9-run-state` (the resume map) — refresh it at every state change.
+
+### 2b. THE WINDOW'S OUTCOMES (filled by the first orchestrator at the seam — every line PENDING until it is)
+- 2c: PENDING — closed at `<hash>`; adjudicated at `<hash>`; counts `<core> · <Mac> · <spine> · <phone>`.
+- The deploy: PENDING — `11_pre13x_postures.sql` sent whole at `<time>`; `sync_schema_version()` = 8; 25 vault columns;
+  the six old signatures absent; the sweep every row OK/INFO; the LIVE PATCH PROBE refused (`<status>`); the
+  proof-required probe refused; the pre-deploy snapshot (revision `<n>`, key id `<id>`) recorded.
+- The Mac: PENDING — Release built from `<hash>` (a clean tree), `/Applications/Variorum.app` SHA-256 `<…>` refreshed at
+  a zero-instance window behind the A1 rail (backup `<name>`, integrity ok); her first ready: the migration's six legs
+  (`/usr/bin/log show` lines quoted), the keychain prompt `<seen/not seen>`, sign-in, the confirm, the first round
+  landed the hash (the vault's `key_proof_hash` non-NULL, revision `<n>`), the sanity check with her twelve words:
+  `<verdict>`.
+- The phone: PENDING — Release built from the same tree, installed by `devicectl` over the dev build; the dev folder
+  deleted from the container; her first ready: the migration, sign-in, the re-enrollment by passphrase (corner 47),
+  the move to Castle (Face ID); her first round; `device_cursor` carries both devices.
+- The drills' real-store legs: PENDING — the switch's real timing `<s>`; the 13p migration drill on a byte-copy; the
+  13l restore drill per posture (both need her passphrase).
+- The worktree `~/dev/variorum-phone-q3`: PENDING — removed.
+- Surprises at the window: PENDING — `<none / listed>`.
 
 ---
 
@@ -145,7 +178,11 @@ Every one was found by reading the shipped code before a brief — keep doing it
 
 **The rule this orchestrator applied:** a mechanism FORCED by the design's own letter or by cryptography is the
 architect's (a technical constraint within a ruled design); anything a user SEES, anything the SERVER holds, and any
-CLAIM the copy makes is hers. When in doubt it went to her (six question batches this session). Each ruling is in the
+CLAIM the copy makes is hers. When in doubt it went to her (six question batches this session). **Her refinement at the
+cutover, verbatim:** *"The rule you've applied makes sense, with the exception of if a gap or obvious flaw has made
+itself clear in the design's own letter"* — when the design's LETTER is what has the gap or flaw, it is hers, never
+closed by inference (the twenty findings in §3 that went to her are the worked examples; the ones ruled here were
+mechanisms the letter already implied). Each ruling is in the
 batch's ORCHESTRATOR ADJUDICATION block in §19 with its reasoning; the list:
 
 - **1a:** several fingerprint key files beside a live library resolve by FINGERPRINT (custody's raw key names the file;
@@ -175,6 +212,8 @@ batch's ORCHESTRATOR ADJUDICATION block in §19 with its reasoning; the list:
 ---
 
 ## 5. WHAT REMAINS (the plan from here; §15's batches; each brief written AFTER reading the shipped code)
+
+*(Items 1 and 2 are the FIRST orchestrator's — her ruling at the cutover; the successor begins at item 3.)*
 
 1. **Adjudicate 2c** when it reports: verify (`git log`, HEAD == origin, tree clean, the record's LIVE STATUS every line
    DONE with hashes, the counts against the log), read its QUESTIONS, rule what is yours, bring her what is hers, append
@@ -265,7 +304,11 @@ plan falls outside the guidance.
 
 ---
 
-## 8. OPEN AUTHOR ITEMS (bundle for her next sitting — the window)
+## 8. OPEN AUTHOR ITEMS (bundle for her next sitting — the window; handled by the FIRST orchestrator)
+
+*The sanity check, since she asked what it is: the 13l face under Settings ▸ Encryption — she types her twelve words
+and it tries to unwrap the account's master key from the VAULT, read-only, changing nothing; it proves the words on her
+paper open the current vault (the 1b-found 14c defect's definitive check). It needs a signed-in session.*
 
 1. Sign in on the Mac after the install, before the confirm and the first round; then the twelve-words sanity check.
 2. The login-keychain prompt(s) at the migration's DELETE leg — Always Allow. The dev store's Debug relaunch once (2a's
