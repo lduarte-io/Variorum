@@ -899,3 +899,103 @@ count; the assertion that mis-read it is why the Q2–Q6 flips rode one commit l
 | a per-device stricter gate under a Standard account (hybrids) | 09-03 question (g) | two postures, no hybrids |
 | a silent follow into Castle | 09-03 | the follow types the passphrase once — the new master is wrapped under nothing else (09-04 evening) |
 | `sync_purge_execute` authorized by session + the key-id fence | 13j → 09-04 night | the key id is readable from the vault by any session; the proof gates it (09-04 night) |
+
+
+---
+
+# PART IV — THE SIXTH SITTING (2026-09-04, late night): the sync keys leave the library file; a passphrase change becomes a convenience act
+
+**Her questions:** does taking the sync keys out of backups close the "pull the master from an opened backup" door
+(yes — completely, and out of the FILE closes it for Time Machine and AirDrop too); does enforcing a passphrase change
+on other devices make a convenience act look like security (yes — so Rule 3 and Rule 4 retired, and Rule 1 kept only
+its useful half: the new word works everywhere at once, the old word retires by use); why was the master in the
+library at all (the 09-01 same-machine bypass — closed since by per-store custody + the absent-store route); does a
+restored backup sync automatically in Standard (yes, by enrolling through the iCloud key — Standard's contract).
+**Her rulings:** the sync keys and the device identity live in per-store custody beside the library key, never in the
+file; a copy of the file is writing, never a device; Change Passphrase / Regenerate Words are convenience acts with
+honest copy; Replace All Keys is the security act. **Retired with it:** Rule 3 (the stale copy deleted on learning),
+Rule 4 (a library opened by a retired secret syncs nothing), the standalone device-identity marker (R4's mechanism —
+identity now rides the custody item), the plaintext export's strip rule (nothing in the file to strip), batch 1a's
+"move the keys into `sync_state`" item. **Kept:** the rotations at the switch (anyone in your iCloud could have unwrapped
+the old master from the vault during Standard), R1 (any enrolled device can finish a rotation), R2 (version-neutral
+re-encryption), the follow, the owner distinction, everything else.
+
+## IV.1 The retired §3.3 "Sync keys inside the library" (verbatim)
+
+### 3.3 Sync keys inside the library
+`sync_state` is local-only, never synced, and lives inside the SQLCipher store; `resyncReinitialize` spares its
+non-bookkeeping rows. M, C (+id) and J (+id) land there as base64 rows (`e2ee.master`, `e2ee.corpus`,
+`e2ee.corpus_key_id`, `e2ee.journal_bridge`, `e2ee.journal_bridge_key_id`). `LibraryKeySyncProvider` is the DB-backed
+implementation of the `SyncKeyProviding` seam (synchronous by contract — a cached read refreshed on write; a locked
+library reads as no keys and the engine refuses its round visibly with `SyncError.encryptionKeysUnavailable`).
+**Zero schema, zero lockstep for this piece.** Consequences: one engine read path in both postures; a FRESH library
+has no keys and can only ask (P/W, or — Standard — the iCloud road); `E2EEKeychainStorage`, `E2EELaunchKeyCache`,
+`E2EECustodyStorage`, the CF-12 gate + `SyncGateOptIn` and `DeviceKeySyncProvider` are deleted. **A backup of an
+enrolled library is an enrolled device frozen in time — it carries M and C.** This is why entering Castle rotates
+them (§4). **The plaintext SQLite export NEVER copies `sync_state`, `sync_outbox`, `sync_row_seq`, `_sync_applying`,
+`purge_*`:** it is produced by a keyed `sqlcipher_export` into a plaintext ATTACHed file that receives only the
+synced tables — never copy-then-strip (a stripped copy leaves M in free pages). The synced tables keep their
+`sync_version` and `owner_id` columns so 13x's open door can reconcile a re-opened export (§14.13).
+
+
+
+## IV.2 The retired §3.6 with Rules 1–4 as they stood (verbatim)
+
+### 3.6 The lobby (Castle) — three roads + two rules
+Roads: **Touch ID / Face ID** (the gated item) · **the passphrase** · **the twelve words**. The two secret roads try the
+LOCAL copy first (the offline cache), then — on failure, signed in and online — **the vault road**: derive per the
+vault's descriptor → unwrap M → the key file's master copy → L → open → re-wrap the local P copy + record the
+descriptor and the vault's corpus key id. The pre-unlock network contact is ONE authenticated vault READ (wrapped
+copies only — a session without M can fetch them and nothing else). Derive ONCE when the recorded descriptor equals
+the vault's; start the vault read concurrently with the derivation; progress from ~200 ms; a ~10 s ceiling hands off
+to offline grace (measured: 0.77 s per derivation; 0.05–0.3 s round trip).
+**Rule 1 — a retired passphrase dies when the vault can be reached, but ONLY under the SAME master:** online, if
+the vault's descriptor ≠ the key file's recorded one AND the vault's corpus key id == the recorded one, the typed
+passphrase is verified against the VAULT, never the cache — the old one is refused with *"your passphrase was changed
+on another device; enter the new one."* If the corpus key id DIFFERS, the local copy STANDS as a road (it was never
+rotated on this device), and after unlock the device lands in one of two states, told apart by the OWNER: **same
+owner ⇒ the account's keys were ROTATED (entering Castle, Replace All Keys) ⇒ the FOLLOW** (§7); **different owner ⇒ a
+different vault** (a deleted-then-recreated account; a library moved between accounts) ⇒ *"this account's keys don't
+match this library — re-enroll"* (the enrollment row of §5 re-stamps and `resyncReinitialize`s). **A change on another
+account can never lock a device out of its own library** (pinned).
+**Rule 2 — offline grace, stated:** offline, the cached copy opens; the device catches up at its next connection via
+the post-unlock one-time prompt (*"enter the new passphrase to update this device"* — the device opened by Touch ID
+and never typed anything). Regenerated words take the same road; the local W copy re-lands the first time the words
+are typed anywhere on that device.
+**Rule 3 — a retired secret dies on learning:** the moment a device learns (online) that the passphrase or the words
+changed under the SAME key id, it deletes the stale copy from its key file — no secret is needed to delete. Its roads
+are then Touch ID / Face ID, the unchanged secret's local copy, and the new secret online (through the vault's
+rewritten copy of M and the key file's M copy); the new copy lands the first time the new word is typed there. The
+post-unlock prompt is deferrable on a biometric device and NOT deferrable on an Always-ask device. A device that has
+not yet learned still opens with the old word offline (Rule 2).
+**Rule 4 — a retired secret opens nothing NEW:** the lobby records which road opened the library. If a library was
+opened by a LOCAL passphrase or words copy (offline, or before it learned), and the online reconcile then finds that
+secret retired (descriptor or words copy changed under the same key id), the device enters the un-followed state (§7):
+sync paused, key doors locked, the prompt NOT deferrable, until the current passphrase or the twelve words is typed —
+which also lands the fresh copy. Opened by Touch ID / Face ID: Rule 3's deferrable prompt only. This is what makes a
+restored old backup safe: online, its old key file's copy is refused at the lobby (Rule 1 — it records an old
+descriptor); offline it opens (a backup opens with the passphrase of its day) and then syncs nothing until the
+current secret is typed. Someone holding only the old passphrase and an old backup reads that backup and nothing
+newer, with or without the account password.
+**How the new passphrase opens a locked device:** the master inside the library is ciphertext until the library is
+open, so it cannot help; the new word derives → the vault's M copy → the key file's L-under-M copy → L. Once open, a
+fresh P copy is written. When the device opened by Touch ID first, the same vault unwrap VALIDATES the typed word
+before a copy is written under it — which is why the prompt is online-only.
+
+
+
+## IV.3 The retired §1 decision 10 with the Rule 3 / Rule 4 sentences (verbatim)
+
+10. **Three acts for users, no more:** *Change Passphrase / Regenerate Twelve Words* (a re-wrap of the same keys —
+    for when YOU forgot it or want another; other devices keep syncing); *Replace All Keys* (the switch's key half —
+    for a secret that may have been USED or a copy that got out; four entrances: its own door, the checkbox on the
+    two re-wrap doors, the checkbox on the door for a new passphrase too, and entering Castle); *Delete the account
+    and set sync up again* (the recovery road and the compromised-account road). No standalone library-key door. **A retired secret dies on
+    every device that learns of the change:** on learning (online — the vault's descriptor or words copy changed under
+    the same key id), a device DELETES its stale passphrase or words copy from its key file at once; the prompt lands
+    the new copy when the new word is typed there and is deferrable only where Touch ID / Face ID is enrolled (an
+    Always-ask device has no other offline road, so it is asked then). Offline grace covers ignorance, not deferral. **And a library that was OPENED by a since-retired secret** (offline,
+    from its own or a restored key file's stale copy) **does not sync until the current secret is typed** — it is
+    treated as a device that has not followed (sync paused, key doors locked, the prompt not deferrable); a Touch ID or
+    Face ID open is never affected. Backups are frozen enrolled devices, and "opened by a retired secret" means "not yet
+    re-authorized".
