@@ -316,13 +316,13 @@ descriptor and the vault's corpus key id. The pre-unlock network contact is ONE 
 copies only — a session without M can fetch them and nothing else). Derive ONCE when the recorded descriptor equals
 the vault's; start the vault read concurrently with the derivation; progress from ~200 ms; a ~10 s ceiling hands off
 to the local copies (measured: 0.77 s per derivation; 0.05–0.3 s round trip).
-**Rule 1 — the new word works everywhere; the old word retires by use.** After a passphrase (or words) change on
+**THE VAULT ROAD — the new word works everywhere; the old word retires by use.** After a passphrase (or words) change on
 another device, the NEW word opens this device online at once through the vault road and, on success, re-wraps this
 device's local copy — from then on only the new word opens it here. Until the new word has been used here, the OLD
 word still opens this device from its local copy, online or offline. A one-time notice names the change (device,
 day). A passphrase or words change is a convenience act (§1.10); the security act is Replace All Keys, one tick away
 on the same screen.
-**Rule 2 — the owner distinction.** If the vault's corpus key id DIFFERS from the key file's recorded one, the local
+**THE OWNER DISTINCTION.** If the vault's corpus key id DIFFERS from the key file's recorded one, the local
 copy stands as a road, and after unlock the device lands in one of two states: **same owner ⇒ the account's keys
 were ROTATED (entering Castle, Replace All Keys) ⇒ the FOLLOW** (§7); **different owner ⇒ a different vault** (a
 deleted-then-recreated account; a library moved between accounts) ⇒ *"this account's keys don't match this library —
@@ -424,8 +424,8 @@ library; into Standard silently.
 |---|---|---|---|---|
 | **Set up sync** (first device of an account) | an open library, signed in, no vault | the ceremony: P (verified against the library's own P copy if one exists — one secret) + W: generated and confirmed, ONCE — or, if the library already has twelve words, TYPED (they become the account's) or replaced by new ones (the key file's copy replaced); never a silent reuse | mint M, C, J; wrapped copies of M under P, W, and (Standard) A — A read from iCloud Keychain, minted + written if absent; create the vault with the proof hash; M/C/J into this device's custody; the master copy (+ the iCloud copy in Standard) into the key file; **a library whose rows carry another OWNER's stamp: re-stamp every row + `resyncReinitialize`** (the deleted-then-recreated account; a library from another account) | — |
 | **Enroll** (a device joins an existing vault) | a library (fresh or with content), signed in | Standard: A → the vault's iCloud copy → M, nothing typed (P or W as the alternative). Castle: P or W → the vault → M | M/C/J into this device's custody (a fresh identity on a machine that had none); the master copy into the key file; custody/posture reconciled to the account's — **a Standard-born library (its key file carries an iCloud copy) joining a CASTLE account re-keys itself exactly as §4's step 4** (its pre-sign-in rows ride into the new file; the account's passphrase becomes the library's — the P copy re-wrapped); **another OWNER: re-stamp + `resyncReinitialize`; the SAME owner with a rotated key id: the follow (§7)** | — |
-| **Change passphrase** | an OPEN library; online if enrolled (a server write) | Standard: the current P if known; *forgot it?* → a plain confirm (this device holds the keys). Castle: the current P; *forgot it?* → Touch ID on a gated device, else the twelve words (an always-ask device typed P to open). The words authorize everywhere | a RE-WRAP: M under the new P in the vault (one CAS write under the proof; a fresh KDF salt/descriptor); L under the new P in THIS device's key file. Nothing else — no backup folder, no other device's key file. The checkbox *"Also replace my keys"* runs Replace All Keys | keep syncing (they hold M); the new word opens them at once online (the vault road) and re-wraps their copy on first use; the old word keeps opening them until then; a one-time notice names the change (Rule 1) |
-| **Regenerate twelve words** | same (online if enrolled) | same | the W copies replaced in the vault and this key file; the old words dead the moment the new are confirmed; the same checkbox | the new words work there at once online; their local W copy re-lands when the new words are typed there; the old words keep opening them until then (Rule 1) |
+| **Change passphrase** | an OPEN library; online if enrolled (a server write) | Standard: the current P if known; *forgot it?* → a plain confirm (this device holds the keys). Castle: the current P; *forgot it?* → Touch ID on a gated device, else the twelve words (an always-ask device typed P to open). The words authorize everywhere | a RE-WRAP: M under the new P in the vault (one CAS write under the proof; a fresh KDF salt/descriptor); L under the new P in THIS device's key file. Nothing else — no backup folder, no other device's key file. The checkbox *"Also replace my keys"* runs Replace All Keys | keep syncing (they hold M); the new word opens them at once online (the vault road) and re-wraps their copy on first use; the old word keeps opening them until then; a one-time notice names the change (the vault road) |
+| **Regenerate twelve words** | same (online if enrolled) | same | the W copies replaced in the vault and this key file; the old words dead the moment the new are confirmed; the same checkbox | the new words work there at once online; their local W copy re-lands when the new words are typed there; the old words keep opening them until then (the vault road) |
 | **Standard → Castle** | §4 | §4 | §4 | §7 |
 | **Castle → Standard** | §4 | §4 | §4 | §7 |
 | **Replace All Keys** | an open, ENROLLED library, signed in, online, holding the CURRENT master (the door checks the key file's recorded corpus key id against the vault before offering itself; else *"this account's keys don't match this library"*) | Castle: Touch ID or P (or W). Standard: P if one is set, else a plain confirm | §4's steps 1–4 without the posture change: M′, C′, the vault rewritten under the same posture's wrappers (+ the iCloud copy again in Standard), the proof replaced under the old proof, every row re-pushed under C′, THIS library re-keyed; the checkbox *"Also choose a new passphrase"*; the marker. The server refuses a stale proof regardless of the front check | the same follow as entering Castle: type P or W once, re-key own library, pull |
@@ -587,10 +587,10 @@ phone becomes Castle at its migration (Face ID with passphrase fallback) — say
 - **The key proof:** a session without it cannot push, pull, update the vault, purge or truncate — and CAN fetch the
   vault and CAN delete the whole account; the wrong proof refuses; the NULL-hash first write lands once; a call with
   the old proof after a rotation is refused; the right `active_key_id` without the proof deletes nothing.
-- **Rule 1 by use:** after a change elsewhere, the new word opens a device online at once and re-wraps its copy; the
+- **The vault road, by use:** after a change elsewhere, the new word opens a device online at once and re-wraps its copy; the
   old word opens it until then (online and offline); the notice appears once; a typo never writes a copy (the vault
   unwrap must succeed first).
-- **Rule 2, the owner distinction:** a rotated same-owner account FOLLOWS with an ordinary pull and no re-stamp; a
+- **The owner distinction:** a rotated same-owner account FOLLOWS with an ordinary pull and no re-stamp; a
   foreign owner ADOPTS; a change on another account never locks a device out of its own library.
 - **The master copy:** the current passphrase opens an old backup online (undeleted account); the twelve words open a
   library whose local W copy was never landed.
@@ -720,7 +720,7 @@ turned on sync.
   follow-vs-adopt discriminator); change passphrase + regenerate as re-wraps with their checkboxes; **Replace All
   Keys**; sign out everywhere; deletion by account password (reachable unenrolled); the plaintext export + the
   reconciliation note for 13x; the 12-character floor; the descriptor floor.
-- **4 — lobby + cross-device:** the vault road; Rule 1 (by use) and Rule 2 (the owner distinction); the change
+- **4 — lobby + cross-device:** the vault road (the new word everywhere, the old retiring by use) and the owner distinction; the change
   notice; the follow notices; the phone's faces; the convergence pins of §12 incl. her attacker scenario.
 - **5 — copy + tutorial chapter + *Encryption Explained* (in the seeded-book dedupe) + runbook + parity line + the
   deletions + the privacy-policy brief + the 13y / 13x hand-forwards; the lost-device FAQ entry; the ceremonies'
@@ -804,7 +804,7 @@ tutorial spine is SIX suites in `TutorialWalkTests.swift` addressed by TYPE name
 | 12 | the two DEBUG probe doors DELETED when the real Apple-key item lands | U3 | open |
 | 13 | entering Castle in full: pull to head · M′/C′ · the vault rewrite under the old proof · the in-place re-push behind the fence · the library re-key (export-and-swap) · custody · the marker · the offer; measured first on a byte-copy of her store | U3 | open |
 | 14 | NO backup folder is ever rewritten — the absence pin; the same-fingerprint second look | U3 (the look: U4 → 13x) | open |
-| 15 | the Standard-born-into-Castle enrollment re-key; the follow-vs-adopt discriminator (Rule 1, Enroll, §7) | U4 | open |
+| 15 | the Standard-born-into-Castle enrollment re-key; the follow-vs-adopt discriminator (the owner distinction, Enroll, §7) | U4 | open |
 | 16 | `key_vault_update` may replace the hash under the current proof; `sync_purge_execute` and `account_data_truncate` take the proof | U2 (1b) | open — MUST |
 | 17 | Replace All Keys + its checkboxes; the stale-master front check; the same follow as the switch | U4 | open |
 | 18 | the "Delete backups made before today" offer — the app's own folders; the outside-copies + Recently-Deleted sentences | U3 | open |
@@ -822,7 +822,7 @@ tutorial spine is SIX suites in `TutorialWalkTests.swift` addressed by TYPE name
 | 30 | the device identity rides the sync-key custody item (a copy on a machine with no custody gets a fresh id; Always ask unaffected) on both platforms | U2 (1a) | open |
 | 31 | one Apple-held copy per account — the book's and the waiting state's sentence | U5 | open |
 | 32 | the lost-device FAQ entry; the ceremonies' original animated progress indicator | U5 | open |
-| 33 | Rule 1 by use + the one-time change notice; the un-followed device's state (banner, door lockout, the reused passphrase) | U4 | open |
+| 33 | the vault road by use + the one-time change notice; the un-followed device's state (banner, door lockout, the reused passphrase) | U4 | open |
 
 ### The architect's sign-off conditions (the reasoning is in the history file)
 (i) the key proof ships in this phase's lockstep event; (ii) the descriptor-floor and never-wrap-under-a-network-key
