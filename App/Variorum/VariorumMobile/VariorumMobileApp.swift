@@ -67,7 +67,10 @@ struct VariorumMobileApp: App {
                         let fresh = AppServices(
                             session: session,
                             storeVariant: bootstrap.storeVariant,
-                            backupEnabled: false)
+                            backupEnabled: false,
+                            // The retired-credential sweep — REQUIRED at the
+                            // seam (pre-13x 1a); production names the real one.
+                            legacyCleanup: { LegacyPasteInCleanup.clear() })
                         services = fresh
                         // Phase 13p ladder R1-M2: the phone's lock road
                         // used to skip the ruled teardown entirely —

@@ -95,8 +95,15 @@ final class AppServices {
     /// internal so the wiring tests can drive the production runner path.
     let session: AppSession
     /// The retired-credential sweep (`LegacyPasteInCleanup.clear` in
-    /// production; a spy in the wiring pin): runs at every `start()` off-main
-    /// and on the first real sign-in — see the enum's doc for why both.
+    /// production; a spy in the wiring pins): runs at every REAL-STORE
+    /// `start()` and every REAL-STORE sign-in, off-main, through the ONE
+    /// private `runRetiredCredentialSweep()` (pre-13x batch 1a — the bridge
+    /// retirement's round-3 finding 1: the sign-in occasion used to run
+    /// bare on the MainActor and ungated, so a dev-store sign-in reached
+    /// the login keychain the launch gate exists to fence). REQUIRED at
+    /// this seam so every composition site decides (finding 2 — the
+    /// `makeSyncKeyProvider` precedent): no test world can reach the login
+    /// keychain by a defaulted argument.
     private let legacyCleanup: @Sendable () -> Void
 
     /// 13j ladder B (B3): the LOCAL purge cadence — launch + hourly, each
@@ -134,7 +141,7 @@ final class AppServices {
         makeSyncKeyProvider: (() -> any SyncKeyProviding)? = nil,
         keyVault: KeyVaultClient? = nil,
         makeAccountLifecycle: ((any UserSessionProviding) -> any AccountLifecycleProviding)? = nil,
-        legacyCleanup: @escaping @Sendable () -> Void = { LegacyPasteInCleanup.clear() }
+        legacyCleanup: @escaping @Sendable () -> Void
     ) {
         self.session = session
         self.legacyCleanup = legacyCleanup
@@ -254,20 +261,13 @@ final class AppServices {
                 await self?.variorumSignInChanged(tokens)
             }
         }
-        // The retired-credential sweep, every start, OFF-MAIN (the 13e
-        // class: no Keychain call on the main thread at launch). A persisted
-        // session adopted below never routes through `variorumSignInChanged`,
-        // so without this the bridge's retired Fragments-project item would
-        // outlive every launch of a user who never signs out again
-        // (round-1 MINOR-1; the seam's doc has the whole story.) REAL STORE
-        // ONLY (round-2 N1): a dev-store session — Xcode Run, the test host —
-        // shares the machine's login keychain with the installed Release
-        // build under a different bundle identity, and the retired item
-        // there is the INSTALLED build's; the A4 fence's own seam gates it
-        // (`sync.allowsSync` IS `storeVariant == .real`).
-        if sync.allowsSync {
-            Task.detached(priority: .utility) { [legacyCleanup] in legacyCleanup() }
-        }
+        // The retired-credential sweep, every start (the launch occasion —
+        // a persisted session adopted below never routes through
+        // `variorumSignInChanged`, so without this the bridge's retired
+        // Fragments-project item would outlive every launch of a user who
+        // never signs out again; round-1 MINOR-1). The gate and the
+        // off-main hop live in the one sweep function.
+        runRetiredCredentialSweep()
         // The persisted session from a previous launch.
         if let userID = await auth.currentUserID {
             account.variorum = AccountState.SignedIn(
@@ -292,6 +292,21 @@ final class AppServices {
         backup?.stop()
         localPurgeTask?.cancel()
         localPurgeTask = nil
+    }
+
+    /// THE ONE retired-credential sweep road (pre-13x batch 1a — the bridge
+    /// retirement's round-3 finding 1), serving BOTH occasions: every
+    /// `start()` and every sign-in. REAL STORE ONLY (round-2 N1): a
+    /// dev-store session — Xcode Run, the test host — shares the machine's
+    /// login keychain with the installed Release build under a different
+    /// bundle identity, and the retired item there is the INSTALLED build's;
+    /// the A4 fence's own seam gates it (`sync.allowsSync` IS
+    /// `storeVariant == .real`). OFF-MAIN always (the 13e class: no
+    /// synchronous Keychain call ever runs on the main thread — the two
+    /// `SecItemDelete`s ride a detached utility task).
+    private func runRetiredCredentialSweep() {
+        guard sync.allowsSync else { return }
+        Task.detached(priority: .utility) { [legacyCleanup] in legacyCleanup() }
     }
 
     // MARK: - The Variorum sign-in (Phase 14a: direct — the identity)
@@ -365,7 +380,9 @@ final class AppServices {
             // The paste-in's retirement completes at the first real
             // sign-in: the legacy Keychain items die here (idempotent; the
             // same sweep also runs at every start — see the seam's doc).
-            legacyCleanup()
+            // The SAME gated, off-main road as the launch occasion (pre-13x
+            // 1a): never bare on the MainActor, never on a dev store.
+            runRetiredCredentialSweep()
             await connectSyncIfAllowed()
         } else {
             account.variorum = nil

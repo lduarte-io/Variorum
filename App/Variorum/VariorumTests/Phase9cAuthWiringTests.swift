@@ -379,12 +379,99 @@ struct Phase9cAuthWiringTests {
         }
     }
 
-    /// A Sendable counter for the sweep pin.
+    /// pre-13x batch 1a (the bridge retirement's round-3 finding 1, the
+    /// KnownIssues row it left): the sweep's SIGN-IN occasion is gated on
+    /// `sync.allowsSync` exactly as the launch occasion is. A dev-store
+    /// session that signs in AFTER the services wired `setOnChange` must
+    /// not reach the login keychain either. RED ON OLD: `variorumSignInChanged`
+    /// called `legacyCleanup()` bare — this world's spy counted 1.
+    @Test func aDevStoreSignInAfterWiringNeverRunsTheSweep() async throws {
+        let db = try AppDatabase.inMemory()
+        let authStore = AuthTokensStore.inMemory()
+        let auth = AuthSession(
+            configuration: Self.testAuthConfiguration, store: authStore,
+            http: Self.noNetwork)
+        let sweeps = SweepSpy()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.ownerIdentity = OwnerIdentity { authStore.load()?.userID }
+        } operation: { @MainActor in
+            let services = AppServices(
+                session: AppSession(database: db), storeVariant: .dev,
+                backupEnabled: false,
+                auth: auth,
+                makeSyncTransport: { _ in RecordingSyncTransport() },
+                makeSyncKeyProvider: { AppTestKeyProvider() },
+                legacyCleanup: { sweeps.record() })
+            await services.start()
+            // The sign-in occasion: a session adopted AFTER wiring routes
+            // through `variorumSignInChanged`.
+            await auth.adopt(AuthTokens(
+                accessToken: "access", refreshToken: "refresh",
+                expiresAt: Date(timeIntervalSinceNow: 3600),
+                userID: "owner-dev", email: "dev@example.com"))
+            await settle { services.account.variorum != nil }
+            await Task.detached(priority: .utility) {}.value
+            try await Task.sleep(for: .milliseconds(200))
+            #expect(sweeps.count == 0,
+                    "a dev-store sign-in must never run the retired-credential sweep")
+            services.stop()
+        }
+    }
+
+    /// The same finding's other half: on the REAL store the sign-in
+    /// occasion still sweeps — and OFF-MAIN, the class `KeychainOffMainTests`
+    /// forbids on the main thread. RED ON OLD: the sign-in occasion ran the
+    /// two `SecItemDelete`s synchronously inside `Task { @MainActor … }`, so
+    /// the spy recorded `Thread.isMainThread == true`.
+    @Test func aRealStoreSignInSweepsOffTheMainThread() async throws {
+        let db = try AppDatabase.inMemory()
+        let authStore = AuthTokensStore.inMemory()
+        let auth = AuthSession(
+            configuration: Self.testAuthConfiguration, store: authStore,
+            http: Self.noNetwork)
+        let sweeps = SweepSpy()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.ownerIdentity = OwnerIdentity { authStore.load()?.userID }
+        } operation: { @MainActor in
+            let services = AppServices(
+                session: AppSession(database: db), storeVariant: .real,
+                backupEnabled: false,
+                auth: auth,
+                makeSyncTransport: { _ in RecordingSyncTransport() },
+                makeSyncKeyProvider: { AppTestKeyProvider() },
+                legacyCleanup: { sweeps.record() })
+            await services.start()
+            await settle { sweeps.count >= 1 }  // the launch occasion
+            await auth.adopt(AuthTokens(
+                accessToken: "access", refreshToken: "refresh",
+                expiresAt: Date(timeIntervalSinceNow: 3600),
+                userID: "owner-real", email: "her@example.com"))
+            await settle { sweeps.count >= 2 }
+            #expect(sweeps.count >= 2, "the sign-in occasion sweeps on the real store")
+            #expect(!sweeps.anyOnMainThread,
+                    "every sweep — the sign-in occasion included — lands off the main thread")
+            services.stop()
+        }
+    }
+
+    /// A Sendable counter for the sweep pins — and, since pre-13x 1a, the
+    /// thread each sweep landed on (the off-main half of the sign-in pin).
     private final class SweepSpy: @unchecked Sendable {
         private let lock = NSLock()
         private var _count = 0
+        private var _onMain: [Bool] = []
         var count: Int { lock.withLock { _count } }
-        func record() { lock.withLock { _count += 1 } }
+        var anyOnMainThread: Bool { lock.withLock { _onMain.contains(true) } }
+        func record() {
+            let main = Thread.isMainThread
+            lock.withLock { _count += 1; _onMain.append(main) }
+        }
     }
 
     // MARK: The retirement walk (review focus 4 — "no dead credential

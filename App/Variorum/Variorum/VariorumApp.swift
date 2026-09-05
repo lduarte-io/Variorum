@@ -60,7 +60,10 @@ struct VariorumApp: App {
                             backupEnabled: true,
                             // 13l Act 4 (row 13): the Mac's own restore
                             // recipe, dropped into every backup folder.
-                            backupRunbookText: DataSafetyCopy.runbook)
+                            backupRunbookText: DataSafetyCopy.runbook,
+                            // The retired-credential sweep — REQUIRED at the
+                            // seam (pre-13x 1a); production names the real one.
+                            legacyCleanup: { LegacyPasteInCleanup.clear() })
                         services = fresh
                         // Phase 13p (the re-lock teardown, THE DESIGN's
                         // ruled order): a lock FLUSHES and SAVEPOINTS every

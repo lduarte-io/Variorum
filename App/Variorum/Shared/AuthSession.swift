@@ -159,12 +159,15 @@ nonisolated enum KeychainAuthStorage {
 
 /// The Phase 8 paste-in's Keychain item (its store type was deleted at
 /// Phase 9c Step 5) and, since the bridge's 2026-09-04 retirement, the
-/// retired Fragments-project session item: cleared on TWO occasions — the
-/// first real sign-in (the paste-in's original occasion) and every
-/// `AppServices.start()`, off-main (the retirement's round-1 fix, MINOR-1:
-/// a persisted session adopted at launch never routes through the sign-in
+/// retired Fragments-project session item: cleared on TWO occasions — every
+/// REAL-STORE sign-in (the paste-in's original occasion) and every
+/// REAL-STORE `AppServices.start()`, both off-main through the one private
+/// `runRetiredCredentialSweep()` (the retirement's round-1 fix, MINOR-1: a
+/// persisted session adopted at launch never routes through the sign-in
 /// occasion, and a user who never signs out again would otherwise keep the
-/// bridge's cross-project refresh token in the login keychain forever).
+/// bridge's cross-project refresh token in the login keychain forever; its
+/// round-3 finding 1 made the sign-in occasion gated + off-main too, at
+/// pre-13x batch 1a).
 /// A LOCAL clear only: the Fragments project's session is NOT revoked
 /// server-side by this — Supabase refresh tokens never expire on their own,
 /// they are only ever consumed or revoked — so it stays valid until she

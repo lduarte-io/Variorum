@@ -219,7 +219,11 @@ struct HostedSyncStatusReadTests {
                 makeSyncTransport: { _ in QuietTransport() },
                 makeSyncKeyProvider: { AppTestKeyProvider() },
                 keyVault: keyVault,
-                makeAccountLifecycle: { _ in lifecycle })
+                makeAccountLifecycle: { _ in lifecycle },
+                // pre-13x 1a (the retirement's round-3 finding 2): the seam
+                // is REQUIRED now — this world declares its inertness
+                // instead of inheriting a real login-keychain delete.
+                legacyCleanup: {})
             try await body(services)
         }
     }
