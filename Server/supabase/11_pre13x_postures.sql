@@ -34,7 +34,7 @@
 --     first post-install round). A `BEFORE INSERT` trigger refuses a NULL
 --     hash at vault CREATION — a trigger, never a CHECK, precisely so her
 --     existing row may stay NULL until that round.
---   * THE VAULT'S SIX ADDITIVE COLUMNS (all nullable):
+--   * THE VAULT'S SEVEN ADDITIVE COLUMNS (all nullable):
 --     `master_wrapped_by_apple_held` + `apple_key_id` (Standard's one
 --     Apple-held copy, decision 3); `key_proof_hash`;
 --     `corpus_previous_key_id` + `corpus_previous_wrapped_by_master` (the
@@ -44,7 +44,13 @@
 --     `corpus_key_id` / `corpus_key_wrapped_by_master` pair's shape, never
 --     an id packed inside a value — the orchestrator's ruling on batch 1b's
 --     question 1); `rotation_started_seq` (decision 31 — which key a row
---     is under is told by its `server_seq`).
+--     is under is told by its `server_seq`); `updated_by_device` (decision
+--     34 — batch 2c: the NAME of the device that last wrote the vault, sent
+--     by every `key_vault_update` from its payload, so every notice on
+--     another device renders *[device] on [day]* from it and `updated_at`;
+--     a name, never an id — her call: the real name is what lets a user
+--     spot an act they did not do; one device name per account joins the
+--     disclosure envelope).
 --   * `key_vault_update(payload, expected_revision, key_proof)` — the ONLY
 --     write road into the vault after creation: SECURITY DEFINER,
 --     `variorum_definer`-owned, the row locked FOR UPDATE (decision 31's
@@ -174,12 +180,13 @@ drop function if exists sync_purge_execute(jsonb, text);
 drop function if exists account_data_truncate(text);
 
 -- ---------------------------------------------------------------------------
--- 1. The vault's six additive columns — all nullable (the format version
+-- 1. The vault's seven additive columns — all nullable (the format version
 --    STAYS 1: a row without them decodes as a pre-postures vault; the
 --    author's row is exactly that until her first round lands the hash).
 --    Key material is base64 TEXT as everywhere in this table; the previous
 --    corpus key is an id + a bare wrap, two columns, exactly as the current
---    corpus key is.
+--    corpus key is; `updated_by_device` (decision 34, batch 2c) is the
+--    writing device's NAME — plain text, never key material.
 -- ---------------------------------------------------------------------------
 
 alter table key_vault add column master_wrapped_by_apple_held text;
@@ -188,6 +195,7 @@ alter table key_vault add column key_proof_hash text;
 alter table key_vault add column corpus_previous_key_id text;
 alter table key_vault add column corpus_previous_wrapped_by_master text;
 alter table key_vault add column rotation_started_seq bigint;
+alter table key_vault add column updated_by_device text;
 
 -- ---------------------------------------------------------------------------
 -- 2. THE WRITE ROAD CLOSES (ledger 41): after creation the ONLY write into
@@ -858,7 +866,9 @@ $$;
 --     A previous key travels as its id AND its bare wrap (two columns —
 --     the current key's own shape); one without the other refuses.
 --     `revision`, `rotation_started_seq`, `user_id`, `created_at` and
---     `updated_at` are SERVER-managed — the payload's copies are ignored.
+--     `updated_at` are SERVER-managed — the payload's copies are ignored;
+--     `updated_by_device` (decision 34) comes FROM the payload — the
+--     writing device's own name, which only the client knows.
 --     Returns `{revision, rotation_started_seq}` — the acting device reads
 --     the seq that bounds its re-encryption.
 -- ---------------------------------------------------------------------------
@@ -934,6 +944,7 @@ begin
     corpus_previous_key_id               = incoming_previous_id,
     corpus_previous_wrapped_by_master    = incoming_previous,
     rotation_started_seq                 = next_seq,
+    updated_by_device                    = payload->>'updated_by_device',
     revision                             = expected_revision + 1,
     updated_at                           = now()
   where user_id = caller and revision = expected_revision;

@@ -96,7 +96,7 @@ struct AccountLifecycleTests {
         let vaultClient = KeyVaultClient(
             configuration: KeyVaultClient.Configuration(
                 projectURL: URL(string: "https://vault.test.invalid")!,
-                apiKey: "publishable-test-key"),
+                apiKey: "publishable-test-key", deviceName: "test device"),
             sessionProvider: StaticSessionProvider(
                 session: UserSession(accessToken: "token-1", userID: RekeyWorld.vaultUserID)),
             load: { [weak vault, weak server] request in

@@ -39,7 +39,11 @@ struct KeyVaultClientTests {
         let sample = try sampleFormat()
         try await world.client.createVault(sample.format)
         let fetched = try await world.client.fetchVault()
-        #expect(fetched?.format == sample.format)
+        // pre-13x 2c (decision 34): the write stamped THIS client's device
+        // name into the seventh column; everything cryptographic is exact.
+        var expected = sample.format
+        expected.updatedByDevice = "test device"
+        #expect(fetched?.format == expected)
         // A fresh row carries the CAS token at the column default (R1-2).
         #expect(fetched?.revision == 1)
         // The stored wire row carries the session's user — never a
@@ -69,7 +73,9 @@ struct KeyVaultClientTests {
         try await world.client.updateVault(
             updated, expectedRevision: 1, keyProof: KeyProof.wireToken(master: sample.master))
         let fetched = try await world.client.fetchVault()
-        #expect(fetched?.format == updated)
+        var expected = updated
+        expected.updatedByDevice = "test device"  // decision 34: the writer's name (2c)
+        #expect(fetched?.format == expected)
         #expect(fetched?.format.masterWrappedByRecovery != nil)
         // The CAS token advanced with the write (R1-2).
         #expect(fetched?.revision == 2)
@@ -119,7 +125,7 @@ struct KeyVaultClientTests {
         let recording = KeyVaultClient(
             configuration: KeyVaultClient.Configuration(
                 projectURL: URL(string: "https://vault.test.invalid")!,
-                apiKey: "publishable-test-key"),
+                apiKey: "publishable-test-key", deviceName: "test device"),
             sessionProvider: StaticSessionProvider(
                 session: UserSession(accessToken: "token-1", userID: world.userID)),
             load: { [load = world.server.load] request in
@@ -142,6 +148,12 @@ struct KeyVaultClientTests {
         #expect(body?["key_proof"] as? String == proof, "the proof is a BODY parameter")
         #expect(body?["expected_revision"] as? Int == 1)
         #expect((body?["payload"] as? [String: Any])?["corpus_key_id"] as? String == "corpus-id-1")
+        // Decision 34 (2c): every write stamps THIS device's name into the
+        // seventh column, and the fetched vault reads it back.
+        #expect((body?["payload"] as? [String: Any])?["updated_by_device"] as? String == "test device",
+                "the writing device's NAME rides every vault write")
+        #expect(try await recording.fetchVault()?.format.updatedByDevice == "test device",
+                "the row carries the last writer's name back")
         #expect(world.server.patchCount == 0, "the client never PATCHes")
         #expect(world.server.updateCount == 1)
 
@@ -229,7 +241,7 @@ struct KeyVaultClientTests {
         let client = KeyVaultClient(
             configuration: KeyVaultClient.Configuration(
                 projectURL: URL(string: "https://vault.test.invalid")!,
-                apiKey: "publishable-test-key"),
+                apiKey: "publishable-test-key", deviceName: "test device"),
             sessionProvider: RefreshingProvider(),
             load: server.load)
         // The GET 401s on the stale bearer, retries refreshed, succeeds.

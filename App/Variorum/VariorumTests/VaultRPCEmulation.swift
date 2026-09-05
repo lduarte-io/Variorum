@@ -99,6 +99,10 @@ enum VaultRPCEmulation {
         next["revision"] = expected + 1
         next["rotation_started_seq"] = nextSeq.map { NSNumber(value: $0) } ?? NSNull()
         next["key_proof_hash"] = (payload["key_proof_hash"] as? String) ?? current["key_proof_hash"]
+        // pre-13x 2c (decision 34): the seventh column comes FROM the
+        // payload — the writing device's own name (the RPC's
+        // `updated_by_device = payload->>'updated_by_device'`); absent ⇒ NULL.
+        next["updated_by_device"] = (payload["updated_by_device"] as? String) ?? NSNull()
         next["updated_at"] = ISO8601DateFormatter().string(from: Date())
         guard let encoded = try? JSONSerialization.data(withJSONObject: next) else {
             return Served(status: 400, body: Data())

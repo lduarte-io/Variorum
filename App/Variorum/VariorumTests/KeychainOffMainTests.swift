@@ -292,7 +292,7 @@ private func makeSession(store: DeviceKeyStore, vault: VaultRow?) -> EncryptionS
         KeyVaultClient(
             configuration: KeyVaultClient.Configuration(
                 projectURL: URL(string: "https://vault.test.invalid")!,
-                apiKey: "publishable-test-key"),
+                apiKey: "publishable-test-key", deviceName: "test device"),
             sessionProvider: StaticSessionProvider(
                 session: UserSession(accessToken: "token-1", userID: "user-e2ee")),
             load: vault.load)

@@ -200,7 +200,7 @@ struct HostedSyncStatusReadTests {
         let keyVault = KeyVaultClient(
             configuration: KeyVaultClient.Configuration(
                 projectURL: URL(string: "https://vault.test.invalid")!,
-                apiKey: "publishable-test-key"),
+                apiKey: "publishable-test-key", deviceName: "test device"),
             sessionProvider: auth,
             load: { _ in throw URLError(.cancelled) })
         let store = DeviceKeyStore.inMemory()

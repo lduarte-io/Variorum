@@ -186,7 +186,10 @@ final class AppServices {
             ? KeyVaultClient(
                 configuration: KeyVaultClient.Configuration(
                     projectURL: ProjectConfig.variorumProjectURL,
-                    apiKey: ProjectConfig.variorumPublishableKey),
+                    apiKey: ProjectConfig.variorumPublishableKey,
+                    // pre-13x 2c (decision 34): every vault write names THIS
+                    // device — its own name, never an id.
+                    deviceName: DeviceName.current),
                 sessionProvider: authSession)
             : nil)
         self.keyVault = vaultClient

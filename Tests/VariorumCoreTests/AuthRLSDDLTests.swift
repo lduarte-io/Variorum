@@ -1367,23 +1367,25 @@ struct AuthRLSDDLTests {
                 "account_purge stays session-only and untouched (decision 12)")
     }
 
-    /// The six additive columns, all NULLABLE (the author's row stays
+    /// The seven additive columns, all NULLABLE (the author's row stays
     /// NULL until her first round lands the hash) — the previous corpus key
     /// as its id + its bare wrap, two columns (the orchestrator's ruling on
-    /// 1b's question 1) — and the insert arm is a TRIGGER, never a CHECK,
-    /// for exactly that reason.
-    @Test func theVaultGainsExactlyTheSixPosturesColumnsAllNullable() throws {
+    /// 1b's question 1); `updated_by_device` the seventh (decision 34, batch
+    /// 2c — the writing device's NAME) — and the insert arm is a TRIGGER,
+    /// never a CHECK, for exactly that reason.
+    @Test func theVaultGainsExactlyTheSevenPosturesColumnsAllNullable() throws {
         let sql = Self.strippingComments(try Self.sqlFile("11_pre13x_postures.sql"))
         for (column, type) in [
             ("master_wrapped_by_apple_held", "text"), ("apple_key_id", "text"),
             ("key_proof_hash", "text"), ("corpus_previous_key_id", "text"),
             ("corpus_previous_wrapped_by_master", "text"), ("rotation_started_seq", "bigint"),
+            ("updated_by_device", "text"),
         ] {
             #expect(sql.contains("alter table key_vault add column \(column) \(type);"),
                     "11 must add \(column) \(type), nullable")
         }
-        #expect(sql.components(separatedBy: "alter table key_vault add column").count - 1 == 6,
-                "exactly six additive columns")
+        #expect(sql.components(separatedBy: "alter table key_vault add column").count - 1 == 7,
+                "exactly seven additive columns")
         #expect(!sql.contains("add column key_proof_hash text not null"),
                 "NULLABLE — a NOT NULL would refuse the author's existing row")
         #expect(!sql.lowercased().contains("check (key_proof_hash"),
@@ -1568,10 +1570,14 @@ struct AuthRLSDDLTests {
                        "master_wrapped_by_passphrase", "master_wrapped_by_recovery", "corpus_key_id",
                        "corpus_key_wrapped_by_master", "journal_bridge_key_id",
                        "journal_bridge_key_wrapped_by_master", "master_wrapped_by_apple_held",
-                       "apple_key_id"] {
+                       "apple_key_id", "updated_by_device"] {
             #expect(body.contains("= payload->>'\(column)'") || body.contains("(payload->>'\(column)')::int"),
                     "the WHOLE format is replaced: \(column) comes from the payload")
         }
+        // Decision 34 (2c): the seventh column is written from the payload —
+        // the writing device's own name; never a server guess, never ignored.
+        #expect(body.contains("updated_by_device                    = payload->>'updated_by_device',"),
+                "the seventh column: the writer's name comes FROM the payload")
         #expect(!body.contains("payload->>'revision'") && !body.contains("payload->>'rotation_started_seq'")
                     && !body.contains("payload->>'user_id'") && !body.contains("payload->>'updated_at'"),
                 "server-managed columns never come from the payload")

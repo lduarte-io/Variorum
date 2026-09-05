@@ -104,7 +104,9 @@ enum VaultBootstrapCLI {
         let bootstrap = VaultBootstrap(
             client: KeyVaultClient(
                 configuration: KeyVaultClient.Configuration(
-                    projectURL: projectURL, apiKey: apiKey),
+                    projectURL: projectURL, apiKey: apiKey,
+                    // pre-13x 2c (decision 34): the tool names the Mac it runs on.
+                    deviceName: Host.current().localizedName ?? "vault-bootstrap"),
                 sessionProvider: sessionProvider),
             transport: SupabaseTransport(
                 configuration: SupabaseTransport.Configuration(

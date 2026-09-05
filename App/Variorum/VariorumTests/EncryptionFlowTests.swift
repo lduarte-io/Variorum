@@ -97,7 +97,7 @@ private func makeEncryptionSession(
     let client = KeyVaultClient(
         configuration: KeyVaultClient.Configuration(
             projectURL: URL(string: "https://vault.test.invalid")!,
-            apiKey: "publishable-test-key"),
+            apiKey: "publishable-test-key", deviceName: "test device"),
         sessionProvider: StaticSessionProvider(
             session: UserSession(accessToken: "token-1", userID: "user-e2ee")),
         load: vault.load)
@@ -174,7 +174,7 @@ struct EncryptionFlowTests {
         let client = KeyVaultClient(
             configuration: KeyVaultClient.Configuration(
                 projectURL: URL(string: "https://vault.test.invalid")!,
-                apiKey: "k"),
+                apiKey: "k", deviceName: "test device"),
             sessionProvider: StaticSessionProvider(
                 session: UserSession(accessToken: "t", userID: "u")),
             load: vault.load)
@@ -931,7 +931,7 @@ struct AccountDoorWiringTests {
         let keyVault = KeyVaultClient(
             configuration: KeyVaultClient.Configuration(
                 projectURL: URL(string: "https://vault.test.invalid")!,
-                apiKey: "publishable-test-key"),
+                apiKey: "publishable-test-key", deviceName: "test device"),
             sessionProvider: auth,
             load: vault.load)
         let store = DeviceKeyStore.inMemory()
@@ -1209,7 +1209,7 @@ struct FreshAccountSetupGeneralityTests {
         let client = KeyVaultClient(
             configuration: KeyVaultClient.Configuration(
                 projectURL: URL(string: "https://vault.test.invalid")!,
-                apiKey: "publishable-test-key"),
+                apiKey: "publishable-test-key", deviceName: "test device"),
             sessionProvider: StaticSessionProvider(
                 session: UserSession(accessToken: "t-fresh", userID: userID)),
             load: vault.load)

@@ -77,7 +77,7 @@ struct KeyProofTests {
         // client wrote.
         var json = try JSONSerialization.jsonObject(with: sample.format.encoded()) as! [String: Any]
         for key in ["masterWrappedByAppleHeld", "appleKeyID", "keyProofHash",
-                    "previousCorpusKey", "rotationStartedSeq"] {
+                    "previousCorpusKey", "rotationStartedSeq", "updatedByDevice"] {
             json.removeValue(forKey: key)
         }
         let decoded = try KeyVaultFormat(decoding: try JSONSerialization.data(withJSONObject: json))
@@ -85,25 +85,29 @@ struct KeyProofTests {
         #expect(decoded.keyProofHash == nil)
         #expect(decoded.masterWrappedByAppleHeld == nil && decoded.appleKeyID == nil)
         #expect(decoded.previousCorpusKey == nil && decoded.rotationStartedSeq == nil)
+        #expect(decoded.updatedByDevice == nil, "the seventh column (2c) decodes nil on a pre-postures row")
         #expect(decoded.classKeys == sample.format.classKeys, "everything else is intact")
         // And the wire row's decode does the same over the 08 column set.
         let row = try KeyVaultWireRow(format: sample.format, userID: "u")
         var wire = try JSONSerialization.jsonObject(with: JSONEncoder().encode(row)) as! [String: Any]
         for key in ["master_wrapped_by_apple_held", "apple_key_id", "key_proof_hash",
                     "corpus_previous_key_id", "corpus_previous_wrapped_by_master",
-                    "rotation_started_seq"] {
+                    "rotation_started_seq", "updated_by_device"] {
             wire.removeValue(forKey: key)
         }
         let decodedRow = try JSONDecoder().decode(
             KeyVaultWireRow.self, from: try JSONSerialization.data(withJSONObject: wire))
         #expect(decodedRow.keyProofHash == nil && decodedRow.rotationStartedSeq == nil)
+        #expect(decodedRow.updatedByDevice == nil)
         #expect(try decodedRow.format().keyProofHash == nil)
     }
 
-    /// The six columns round-trip the wire row exactly, and the previous
-    /// key travels as its id in ITS OWN column beside its bare wrap —
-    /// never packed into one value; one column without the other refuses.
-    @Test func theWireRowCarriesTheSixPosturesColumnsAndThePreviousKeysTwoColumns() throws {
+    /// The seven columns round-trip the wire row exactly (the seventh —
+    /// `updated_by_device`, decision 34 / 2c — the writing device's NAME),
+    /// and the previous key travels as its id in ITS OWN column beside its
+    /// bare wrap — never packed into one value; one column without the
+    /// other refuses.
+    @Test func theWireRowCarriesTheSevenPosturesColumnsAndThePreviousKeysTwoColumns() throws {
         let sample = try sampleFormat()
         let apple = SymmetricKey(size: .bits256)
         let previous = SymmetricKey(size: .bits256)
@@ -112,10 +116,13 @@ struct KeyProofTests {
         format = try format.carryingPreviousCorpusKey(
             previous, keyID: "corpus-id-0", masterKey: sample.master)
         format.rotationStartedSeq = 4_242
+        format.updatedByDevice = "Lillian's MacBook Pro"
 
         let row = try KeyVaultWireRow(format: format, userID: "u")
         let json = try JSONSerialization.jsonObject(with: JSONEncoder().encode(row)) as! [String: Any]
         #expect(json["apple_key_id"] as? String == "apple-key-7")
+        #expect(json["updated_by_device"] as? String == "Lillian's MacBook Pro",
+                "the seventh column: a NAME, never an id")
         #expect(json["key_proof_hash"] as? String == KeyProof.hash(master: sample.master))
         #expect((json["master_wrapped_by_apple_held"] as? String).flatMap { Data(base64Encoded: $0) }
                 == format.masterWrappedByAppleHeld)
@@ -127,7 +134,7 @@ struct KeyProofTests {
         #expect(Data(base64Encoded: previousWire) == format.previousCorpusKey?.wrappedByMaster)
 
         let back = try JSONDecoder().decode(KeyVaultWireRow.self, from: JSONEncoder().encode(row)).format()
-        #expect(back == format, "the five columns round-trip exactly")
+        #expect(back == format, "the seven columns round-trip exactly")
         // The roads: the Apple copy opens with A; the previous key opens
         // with the (new) master and returns its id for the AAD.
         #expect(try back.unwrapMaster(withAppleKey: apple) == sample.master)

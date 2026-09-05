@@ -250,6 +250,10 @@ struct SerializerCompletenessTests {
         "corpus_previous_key_id": .id,
         "corpus_previous_wrapped_by_master": .wrappedKey,
         "rotation_started_seq": .bookkeeping,
+        // pre-13x 2c — the SEVENTH column (decision 34): the writing device's
+        // NAME. Plain by nature (never prose the user wrote; a device name);
+        // the disclosure envelope gains one device name per account.
+        "updated_by_device": .bookkeeping,
     ]
 
     @Test func theVaultsColumnsAreClassifiedExactly() throws {
@@ -260,14 +264,14 @@ struct SerializerCompletenessTests {
                 "key_vault carries unclassified column(s) \(vault.subtracting(declared).sorted()) — every vault column takes a side: id / KDF parameter / wrapped key / hash / bookkeeping")
         #expect(declared.subtracting(vault).isEmpty,
                 "the classification names vault column(s) the DDL lacks: \(declared.subtracting(vault).sorted())")
-        // The six postures columns are all present — the additive event
-        // reached the walk; 24 vault columns in all.
+        // The seven postures columns are all present — the additive event
+        // reached the walk; 25 vault columns in all.
         for column in ["master_wrapped_by_apple_held", "apple_key_id", "key_proof_hash",
                        "corpus_previous_key_id", "corpus_previous_wrapped_by_master",
-                       "rotation_started_seq"] {
+                       "rotation_started_seq", "updated_by_device"] {
             #expect(vault.contains(column), "11 must add \(column)")
         }
-        #expect(vault.count == 24)
+        #expect(vault.count == 25)
         // And no class is prose: the enum has no such case — stated so the
         // reader sees the disclosure list's promise where it is kept.
         #expect(Set(Self.keyVaultColumnClasses.values.map(\.rawValue))

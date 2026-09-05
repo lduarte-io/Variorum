@@ -530,7 +530,7 @@ private func vaultClient(_ vault: RecordingVault) -> KeyVaultClient {
     KeyVaultClient(
         configuration: KeyVaultClient.Configuration(
             projectURL: URL(string: "https://vault.test.invalid")!,
-            apiKey: "publishable-test-key"),
+            apiKey: "publishable-test-key", deviceName: "test device"),
         sessionProvider: StaticSessionProvider(
             session: UserSession(accessToken: "token-1", userID: "user-13l")),
         load: vault.load)
@@ -604,7 +604,7 @@ struct SecretCheckTests {
     @Test func anUnreachableServerIsNeverReportedAsAWrongSecret() async {
         let client = KeyVaultClient(
             configuration: KeyVaultClient.Configuration(
-                projectURL: URL(string: "https://vault.test.invalid")!, apiKey: "k"),
+                projectURL: URL(string: "https://vault.test.invalid")!, apiKey: "k", deviceName: "test device"),
             sessionProvider: StaticSessionProvider(
                 session: UserSession(accessToken: "t", userID: "u")),
             load: { _ in throw URLError(.notConnectedToInternet) })

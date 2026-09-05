@@ -75,6 +75,13 @@ public struct KeyVaultFormat: Codable, Equatable, Sendable {
     /// corpus key, every other row under the current. nil outside a
     /// rotation. Never set client-side — the wire row carries it back.
     public var rotationStartedSeq: Int64?
+    /// pre-13x 2c (decision 34): the NAME of the device that last wrote the
+    /// vault — `updated_by_device`, the seventh column. Read back from the
+    /// row so every notice on another device can say *[device] on [day]*
+    /// (with the row's `updated_at`); the CLIENT stamps its own name on
+    /// every write (`KeyVaultClient.Configuration.deviceName`), so a value
+    /// carried here is only ever the LAST writer's. A name, never an id.
+    public var updatedByDevice: String?
 
     /// The previous corpus key as the vault carries it: its id and its
     /// wrap — TWO columns on the wire (`corpus_previous_key_id` +
@@ -160,7 +167,8 @@ public struct KeyVaultFormat: Codable, Equatable, Sendable {
         appleKeyID: String? = nil,
         keyProofHash: String? = nil,
         previousCorpusKey: PreviousCorpusKey? = nil,
-        rotationStartedSeq: Int64? = nil
+        rotationStartedSeq: Int64? = nil,
+        updatedByDevice: String? = nil
     ) {
         self.formatVersion = formatVersion
         self.kdf = kdf
@@ -172,6 +180,7 @@ public struct KeyVaultFormat: Codable, Equatable, Sendable {
         self.keyProofHash = keyProofHash
         self.previousCorpusKey = previousCorpusKey
         self.rotationStartedSeq = rotationStartedSeq
+        self.updatedByDevice = updatedByDevice
     }
 
     // MARK: - pre-13x roads (batch 2 / 3 call them; batch 1b lands the format)

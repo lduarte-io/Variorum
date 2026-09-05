@@ -118,6 +118,9 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
         var previousCorpusKey: String?
         var rotationStartedSeq: Int64?
         var revision: Int = 1
+        /// pre-13x 2c (decision 34): the NAME of the device that last wrote
+        /// the row — written by every `keyVaultUpdate` from its payload.
+        var updatedByDevice: String?
     }
 
     /// One account's world: its partition (the composite-PK twin), its
@@ -499,7 +502,8 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
     func keyVaultUpdate(
         as userID: String, expectedRevision: Int, keyProof: String,
         newCorpusKeyID: String, newKeyProofHash: String?,
-        previousCorpusKeyID: String?, previousCorpusKey: String?
+        previousCorpusKeyID: String?, previousCorpusKey: String?,
+        updatedByDevice: String? = nil
     ) throws -> VaultUpdateReceipt {
         guard var account = accounts[userID] else {
             throw KeyVaultClientError.vaultAbsent
@@ -538,6 +542,9 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
         account.vault.previousCorpusKeyID = previousCorpusKeyID
         account.vault.previousCorpusKey = previousCorpusKey
         account.vault.rotationStartedSeq = nextSeq
+        // Decision 34: the writer's name, from the payload (nil when the
+        // payload carries none — the SQL writes whatever it is handed).
+        account.vault.updatedByDevice = updatedByDevice
         account.vault.revision = expectedRevision + 1
         accounts[userID] = account
         return VaultUpdateReceipt(revision: account.vault.revision, rotationStartedSeq: nextSeq)

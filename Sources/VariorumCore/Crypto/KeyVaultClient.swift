@@ -57,10 +57,21 @@ public actor KeyVaultClient {
         /// The publishable API key (grants nothing by itself; RLS is the
         /// guard).
         public let apiKey: String
+        /// pre-13x 2c (decision 34): THIS DEVICE'S OWN NAME — what every
+        /// vault write stamps into `updated_by_device`, so every OTHER
+        /// device's notice can say *[device] on [day]*. A NAME, never an
+        /// id (`Host.current().localizedName` on the Mac,
+        /// `UIDevice.current.name` on the phone — the app layer's
+        /// `DeviceName.current`). REQUIRED, no default: every composition
+        /// site decides (the `legacyCleanup` precedent) — a defaulted
+        /// placeholder would let production silently degrade the one
+        /// sentence that lets a user spot an act they did not do.
+        public let deviceName: String
 
-        public init(projectURL: URL, apiKey: String) {
+        public init(projectURL: URL, apiKey: String, deviceName: String) {
             self.projectURL = projectURL
             self.apiKey = apiKey
+            self.deviceName = deviceName
         }
     }
 
@@ -154,7 +165,9 @@ public actor KeyVaultClient {
     /// ciphertext its keys guard).
     public func createVault(_ format: KeyVaultFormat) async throws {
         let session = try await sessionProvider.currentSession()
-        let row = try KeyVaultWireRow(format: format, userID: session.userID)
+        var row = try KeyVaultWireRow(format: format, userID: session.userID)
+        // Decision 34: every vault write names the device that made it.
+        row.updatedByDevice = configuration.deviceName
         let body: Data
         do {
             body = try JSONEncoder().encode(row)
@@ -212,7 +225,11 @@ public actor KeyVaultClient {
         _ format: KeyVaultFormat, expectedRevision: Int, keyProof: String
     ) async throws -> UpdateReceipt {
         let session = try await sessionProvider.currentSession()
-        let row = try KeyVaultWireRow(format: format, userID: session.userID)
+        var row = try KeyVaultWireRow(format: format, userID: session.userID)
+        // Decision 34: the writer's own name rides every update — the RPC
+        // writes `updated_by_device` from the payload (never a server
+        // guess: only the client knows its name).
+        row.updatedByDevice = configuration.deviceName
         struct Request: Encodable {
             let payload: KeyVaultWireRow
             let expectedRevision: Int
@@ -400,6 +417,10 @@ struct KeyVaultWireRow: Codable, Equatable {
     /// Server-assigned (`key_vault_update` takes `nextval` with the row
     /// locked); read back, never written by the client.
     var rotationStartedSeq: Int64?
+    /// pre-13x 2c (decision 34) — the seventh column: the writing device's
+    /// NAME, stamped by the client on every write from its configuration
+    /// and written by the RPC from the payload; read back for the notices.
+    var updatedByDevice: String?
 
     enum CodingKeys: String, CodingKey {
         case userID = "user_id"
@@ -425,6 +446,7 @@ struct KeyVaultWireRow: Codable, Equatable {
         case corpusPreviousKeyID = "corpus_previous_key_id"
         case corpusPreviousWrappedByMaster = "corpus_previous_wrapped_by_master"
         case rotationStartedSeq = "rotation_started_seq"
+        case updatedByDevice = "updated_by_device"
     }
 
     /// Hand-written decode for exactly one reason: `revision` defaults to
@@ -465,6 +487,7 @@ struct KeyVaultWireRow: Codable, Equatable {
         corpusPreviousWrappedByMaster = try container.decodeIfPresent(
             String.self, forKey: .corpusPreviousWrappedByMaster)
         rotationStartedSeq = try container.decodeIfPresent(Int64.self, forKey: .rotationStartedSeq)
+        updatedByDevice = try container.decodeIfPresent(String.self, forKey: .updatedByDevice)
     }
 
     /// Format → row. Refuses a format missing either v1 class key — the
@@ -498,6 +521,7 @@ struct KeyVaultWireRow: Codable, Equatable {
         self.corpusPreviousKeyID = format.previousCorpusKey?.keyID
         self.corpusPreviousWrappedByMaster = format.previousCorpusKey?.wrappedByMaster.base64EncodedString()
         self.rotationStartedSeq = format.rotationStartedSeq
+        self.updatedByDevice = format.updatedByDevice
     }
 
     /// Row → format. A newer `format_version` refuses HERE (the client's
@@ -546,7 +570,8 @@ struct KeyVaultWireRow: Codable, Equatable {
             appleKeyID: appleKeyID,
             keyProofHash: keyProofHash,
             previousCorpusKey: try previousCorpusKey(decode: decode),
-            rotationStartedSeq: rotationStartedSeq)
+            rotationStartedSeq: rotationStartedSeq,
+            updatedByDevice: updatedByDevice)
     }
 
     /// The previous key's two columns: both or neither; one without the

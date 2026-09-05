@@ -229,7 +229,8 @@ final class ScriptedVaultServer: @unchecked Sendable {
                 newCorpusKeyID: call.payload.corpusKeyID,
                 newKeyProofHash: call.payload.keyProofHash,
                 previousCorpusKeyID: call.payload.corpusPreviousKeyID,
-                previousCorpusKey: call.payload.corpusPreviousWrappedByMaster)
+                previousCorpusKey: call.payload.corpusPreviousWrappedByMaster,
+                updatedByDevice: call.payload.updatedByDevice)
         } catch KeyVaultClientError.vaultAbsent {
             return refusal(request, marker: SyncServerRefusalMarker.vaultAbsent)
         } catch KeyVaultClientError.keyProofRefused {
@@ -300,7 +301,7 @@ struct VaultTestWorld {
         let client = KeyVaultClient(
             configuration: KeyVaultClient.Configuration(
                 projectURL: URL(string: "https://vault.test.invalid")!,
-                apiKey: "publishable-test-key"),
+                apiKey: "publishable-test-key", deviceName: "test device"),
             sessionProvider: StaticSessionProvider(
                 session: UserSession(accessToken: accessToken, userID: userID)),
             load: server.load)

@@ -347,7 +347,7 @@ struct PostureSwitchTests {
             let emu = EmulatedVault(claimRotationSeq: { await server.claimSeq() })
             let client = KeyVaultClient(
                 configuration: KeyVaultClient.Configuration(
-                    projectURL: URL(string: "https://vault.2b.invalid")!, apiKey: "publishable-test-key"),
+                    projectURL: URL(string: "https://vault.2b.invalid")!, apiKey: "publishable-test-key", deviceName: "test device"),
                 sessionProvider: StaticSessionProvider(
                     session: UserSession(accessToken: "token-2b", userID: "user-2b")),
                 load: emu.load)

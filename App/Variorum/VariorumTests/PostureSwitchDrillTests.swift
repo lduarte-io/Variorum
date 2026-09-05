@@ -168,7 +168,7 @@ struct PostureSwitchDrillTests {
         let emu = EmulatedVault(claimRotationSeq: { await mirror.claimSeq() })
         let vaultClient = KeyVaultClient(
             configuration: KeyVaultClient.Configuration(
-                projectURL: URL(string: "https://vault.2b-drill.invalid")!, apiKey: "publishable-test-key"),
+                projectURL: URL(string: "https://vault.2b-drill.invalid")!, apiKey: "publishable-test-key", deviceName: "test device"),
             sessionProvider: StaticSessionProvider(
                 session: UserSession(accessToken: "token-2b-drill", userID: "user-2b-drill")),
             load: emu.load)

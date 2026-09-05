@@ -37,9 +37,9 @@ fence). Nothing here touches her real STORE — only the mirror and, at step 3 o
 - [ ] **The A1 rail's local half:** a WAL-safe backup of her real store into `Backups/` with
       `PRAGMA integrity_check` = ok (the 13j window's shape: `Backups/variorum-<stamp>-pre-pre13x-window.sqlite`).
       The mirror half is satisfied by the pre-deploy snapshot (step 2) + local-truth repushability (the 14b/14c
-      doctrine): 11 DROPS NO DATA TABLE and REWRITES NO ROW — it adds six nullable columns, replaces functions,
+      doctrine): 11 DROPS NO DATA TABLE and REWRITES NO ROW — it adds seven nullable columns, replaces functions,
       and moves one privilege.
-- [ ] Read `11_pre13x_postures.sql`'s header once more (six columns; the gate's peek-then-lock; the carry-through);
+- [ ] Read `11_pre13x_postures.sql`'s header once more (seven columns — the seventh, `updated_by_device`, is decision 34's, batch 2c; the gate's peek-then-lock; the carry-through);
       confirm the sweep file names every signature 11 creates
       (`AuthRLSDDLTests.thePostDeployGrantSweepIsReadOnlyAndCoversEverything` is the pin).
 
@@ -49,7 +49,7 @@ Record in the batch-2 record, in this order:
 
 - [ ] `select value from sync_meta where key = 'lockstep_version';` → **7**.
 - [ ] Row counts: `container` · `block` · `variant` · `commit_point` · `key_vault` (expect 1).
-- [ ] The vault row's state: `select revision, corpus_key_id from key_vault;` — and confirm the six columns are
+- [ ] The vault row's state: `select revision, corpus_key_id from key_vault;` — and confirm the seven columns are
       ABSENT (`select column_name from information_schema.columns where table_name = 'key_vault';`).
 - [ ] The current function set: `select oid::regprocedure from pg_proc where pronamespace = 'public'::regnamespace
       order by 1;` — the six OLD signatures present (`sync_push(jsonb,text)`, `sync_pull(bigint,text,integer,text)`,
@@ -70,14 +70,17 @@ Record in the batch-2 record, in this order:
 ## 4. VERIFICATION (read-only; all must pass before any install)
 
 - [ ] **The marker:** `select sync_schema_version();` → **8**.
-- [ ] **The six columns:** `select column_name, data_type, is_nullable from information_schema.columns where
+- [ ] **The seven columns:** `select column_name, data_type, is_nullable from information_schema.columns where
       table_name = 'key_vault' and column_name in ('master_wrapped_by_apple_held','apple_key_id','key_proof_hash',
-      'corpus_previous_key_id','corpus_previous_wrapped_by_master','rotation_started_seq');` → six rows, `text` ×5 +
-      `bigint`, all `YES`; `select count(*) from information_schema.columns where table_name = 'key_vault';` → **24**.
+      'corpus_previous_key_id','corpus_previous_wrapped_by_master','rotation_started_seq','updated_by_device');` →
+      seven rows, `text` ×6 + `bigint`, all `YES`; `select count(*) from information_schema.columns where table_name =
+      'key_vault';` → **25**. (The seventh, `updated_by_device`, is decision 34's — batch 2c: the writing device's
+      NAME; her first post-install round's vault write, if any, stamps her Mac's name there.)
 - [ ] **Her vault row untouched and pre-postures:** `select revision, corpus_key_id, key_proof_hash,
-      corpus_previous_key_id, corpus_previous_wrapped_by_master, rotation_started_seq from key_vault;` → the SAME
-      revision and key id as step 2; the four new values NULL (the NULL-hash migration arm is what her first round
-      lands).
+      corpus_previous_key_id, corpus_previous_wrapped_by_master, rotation_started_seq, updated_by_device from
+      key_vault;` → the SAME revision and key id as step 2; the five new values NULL (the NULL-hash migration arm is
+      what her first round lands; `updated_by_device` stays NULL until a vault WRITE — a round alone writes only the
+      hash).
 - [ ] **Every signature:** `select oid::regprocedure from pg_proc where pronamespace = 'public'::regnamespace order
       by 1;` → the six OLD signatures ABSENT; present: `sync_push(jsonb,text,text)`,
       `sync_pull(bigint,text,integer,text,text)`, `sync_horizon(text,text)`, `sync_purge_ledger(bigint,text,text)`,
@@ -172,7 +175,7 @@ before the sitting because the face reads the vault).
 
 ## 8. THE RECORD AT CLOSEOUT
 
-- SyncSpec §12's running record gains the marker 7 → 8 entry (the file, the six columns, the closed write road,
+- SyncSpec §12's running record gains the marker 7 → 8 entry (the file, the seven columns, the closed write road,
   the proof on every mutating RPC and the two read RPCs, the NULL-hash arm's one-time landing on her row, the
   PATCH probe's answer, the sweep's verdict) — the closeout's canon delta (design §17).
 - The batch-2 record carries the window's paragraph in the 13j shape (pre-deploy snapshot · deploy · verification ·
