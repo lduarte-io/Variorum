@@ -352,7 +352,9 @@ opens and reads, but doesn't sync.*)
 your passphrase once to pick up the new ones.* Doors: the same three; the same sub-line.
 **Account moved to Standard (a device that was Castle):** *Your account is back in Standard — set on [device]
 on [day]. This Mac opens silently again; your Apple account holds a key.* Button: *OK*
-**The nudge — covered:** *At least one real way back into your writing exists beyond this Mac.*
+**The nudge — covered:** *At least one real way back into your writing exists beyond this Mac — as far as this Mac
+can tell. Your Apple account's key reaches your other devices only while iCloud Keychain is on.* (macOS cannot
+tell whether iCloud Keychain is on; the sentence says what the Mac can know.)
 **The nudge — exposed (Standard, no Apple key landed, no secrets):** Headline *Right now, only this Mac can
 open your work.* Body: *Your Apple account hasn't been able to take a key yet, no passphrase is set and no
 twelve words are written down — so if this Mac is lost or broken, your writing goes with it. Two minutes
@@ -602,8 +604,9 @@ sign your other devices out on your word. Everything else is yours.*
 
 ## 9. HER MIGRATION'S ONE-TIME MESSAGES (Mac + phone, once each)
 
-- *Variorum now keeps your sync keys inside your encrypted library, and your account is in Castle. Nothing
-  else changed. Confirm your passphrase once to finish.* Button: *Confirm…* · *Later*
+- *Variorum now keeps your sync keys in this Mac's own protected Keychain, beside your library's key — never in
+  the library file — and your account is in Castle. Nothing else changed. Confirm your passphrase once to
+  finish.* Button: *Confirm…* · *Later* (the device word rides the interpolation: *this iPhone's*)
 - After confirm: *Done. This device opens with Touch ID; your passphrase and twelve words are your other
   ways in.*
 

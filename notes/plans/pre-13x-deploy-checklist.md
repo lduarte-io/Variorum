@@ -118,6 +118,14 @@ Record in the batch-2 record, in this order:
       key file to format 2).
 - [ ] The phone build + install (Xcode + her device) and its confirm.
 
+**The migration's prompt (2a's hand-forward):** at the Mac's first ready after the install the §11 migration runs
+off-main; a login-keychain prompt MAY appear at the legacy items' DELETE leg (*"Variorum wants to use your
+confidential information stored in 'io.lduarte.Variorum.e2ee-keys'…"*) — she answers with the login password and
+**Always Allow**; then the one-time *confirm your passphrase* sheet (*Later* is safe at any point; the mark persists
+until confirmed). The DEV store's own migration wants the same prompt answered ONCE on a Debug launch (the dev scope's
+2026-08-31 login-keychain item vs a rebuilt binary) — any time before or at the sitting; the orchestrator then reads
+the `[protection] migration 2a:` lines from `log show`.
+
 ## 6. THE FIRST ROUNDS (the migration arm lands; both devices sync)
 
 - [ ] **Her Mac's first post-install round** presents the proof against her NULL-hash row: the round completes
