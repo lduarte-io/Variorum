@@ -226,7 +226,7 @@ struct VariorumMobileApp: App {
         if let relock { return relock }
         let bootstrap = bootstrap
         let fresh = MobileRelockCoordinator(
-            dials: { bootstrap.gate.dials(bootstrap.storeVariant.rawValue) },
+            dials: { bootstrap.currentDials },  // pre-13x 1a: per store id
             lock: { await bootstrap.lock() })
         relock = fresh
         return fresh

@@ -407,6 +407,13 @@ final class AppBootstrap {
         }
     }
 
+    /// The persisted dials of THIS bootstrap's store, read fresh (pre-13x
+    /// 1a: per store id — the one place a face or a monitor reads the gate's
+    /// dials without knowing the id; the phone's relock coordinator).
+    var currentDials: ProtectionDials {
+        gate.dials(storeVariant.rawValue, currentStoreID())
+    }
+
     /// The store id the dials are keyed by, for THIS bootstrap's store
     /// (pre-13x 1a) — re-read per call, since "Start a New Library"
     /// changes it.
