@@ -5,7 +5,10 @@ custody item — her catch), R5 (both halves), R6, R7 (her words: type the exist
 reuse), R8 (the lost-device FAQ; an original animated progress indicator) and R9 are RULED and folded into the design
 file; R3 is RULED too (her words: "a change should be effective where possible… ggs, go look for a backup") — with the
 Always-ask refinement (asked at learning, no Later) and the un-followed device's state written into §7. **All nine
-recommendations are folded; this review is CLOSED; the design file is the build's sole authority.**
+recommendations are folded; this review is CLOSED; the design file is the build's sole authority.** *(Her restore
+question afterwards earned Rule 4 — a library opened by a since-retired secret syncs nothing until the current one is
+typed — folded the same way; the key doors were made online acts; "the follow" was defined; the passphrase-less
+snapshot was described.)*
 
 **Read as:** a review of `notes/plans/pre-13x-postures-design.md` as it stands, by the architect who sat through every
 sitting, asked to broaden — holistic first, then scenario by scenario, then a verdict. Its purpose is confidence, not

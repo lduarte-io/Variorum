@@ -71,7 +71,11 @@ file is silent, stop and ask.
     every device that learns of the change:** on learning (online — the vault's descriptor or words copy changed under
     the same key id), a device DELETES its stale passphrase or words copy from its key file at once; the prompt lands
     the new copy when the new word is typed there and is deferrable only where Touch ID / Face ID is enrolled (an
-    Always-ask device has no other offline road, so it is asked then). Offline grace covers ignorance, not deferral.
+    Always-ask device has no other offline road, so it is asked then). Offline grace covers ignorance, not deferral. **And a library that was OPENED by a since-retired secret** (offline,
+    from its own or a restored key file's stale copy) **does not sync until the current secret is typed** — it is
+    treated as a device that has not followed (sync paused, key doors locked, the prompt not deferrable); a Touch ID or
+    Face ID open is never affected. Backups are frozen enrolled devices, and "opened by a retired secret" means "not yet
+    re-authorized".
 11. **Backups are never rewritten after they are written** — not at a posture change, a passphrase change or a
     words regeneration. Key files are named by key fingerprint and never overwritten by another key's file. The
     Castle ceremony says, once, that pre-switch backups still open through the Apple account (a limit AND a way back)
@@ -324,6 +328,15 @@ are then Touch ID / Face ID, the unchanged secret's local copy, and the new secr
 rewritten copy of M and the key file's M copy); the new copy lands the first time the new word is typed there. The
 post-unlock prompt is deferrable on a biometric device and NOT deferrable on an Always-ask device. A device that has
 not yet learned still opens with the old word offline (Rule 2).
+**Rule 4 — a retired secret opens nothing NEW:** the lobby records which road opened the library. If a library was
+opened by a LOCAL passphrase or words copy (offline, or before it learned), and the online reconcile then finds that
+secret retired (descriptor or words copy changed under the same key id), the device enters the un-followed state (§7):
+sync paused, key doors locked, the prompt NOT deferrable, until the current passphrase or the twelve words is typed —
+which also lands the fresh copy. Opened by Touch ID / Face ID: Rule 3's deferrable prompt only. This is what makes a
+restored old backup safe: online, its old key file's copy is refused at the lobby (Rule 1 — it records an old
+descriptor); offline it opens (a backup opens with the passphrase of its day) and then syncs nothing until the
+current secret is typed. Someone holding only the old passphrase and an old backup reads that backup and nothing
+newer, with or without the account password.
 **How the new passphrase opens a locked device:** the master inside the library is ciphertext until the library is
 open, so it cannot help; the new word derives → the vault's M copy → the key file's L-under-M copy → L. Once open, a
 fresh P copy is written. When the device opened by Touch ID first, the same vault unwrap VALIDATES the typed word
@@ -450,7 +463,10 @@ the LIVE library's own key file is always current and pairs with every snapshot 
 the library lives on the current passphrase opens every old snapshot of the current key; the restore surface looks for
 a matching-fingerprint key file beside the live library as well as in the backup folder (13x's open door; the 13l
 restore drill). A cold restore elsewhere uses the passphrase of the day, the twelve words, or — a sync user of an
-undeleted account — the master key online. **A snapshot made while a device's key file lacks a passphrase copy** (Rule 3 deleted the stale one and the new word
+undeleted account — the master key online. **A restored snapshot after a passphrase change:** on the same machine, custody opens it (the library key is
+unchanged) and no passphrase is involved; elsewhere, online, the old passphrase is refused at the lobby (Rule 1);
+offline it opens with the passphrase of its day and then behaves as un-followed until the current one is typed (Rule
+4) — the server never holds two passphrases. **A snapshot made while a device's key file lacks a passphrase copy** (Rule 3 deleted the stale one and the new word
 has not been typed there yet) is still made; it opens on that machine by its custody or live key file (the library key
 is unchanged by a passphrase change), and elsewhere by the twelve words or the current passphrase online through the
 master copy. **A Standard-era snapshot keeps its iCloud copy and opens through the Apple
@@ -488,7 +504,8 @@ silent item (a Replace All Keys under Standard, where the key file also gets the
 its own cursor — the re-encrypted rows arrive with their versions UNCHANGED, so it records their seqs and applies
 nothing; its pending outbox rows push under C′ with the new proof and CAS cleanly (their base versions still hold). **No `resyncReinitialize`, no re-stamp: same
 account, same rows.** Until it follows, the device opens and reads and does not sync — stated.
-**A device that has not followed yet (what it looks like):** it opens as it did — silently if it was Standard, by
+**A device that has not followed yet — or that was opened by a since-retired secret (Rule 4) — what it looks like:**
+it opens as it did — silently if it was Standard, by
 Face ID / Touch ID if Castle, or by the unchanged passphrase on an Always-ask device (Rule 1: the local copy stands
 when the key id differs — and a passphrase just typed to open is reused for the follow, never asked twice). Then a
 modal notice (copy §5): *your account moved to Castle* or *your keys were replaced* on [device] on [day] — enter your
@@ -600,6 +617,9 @@ migration (Face ID with passphrase fallback) — say so to her at the batch 2 si
   last writer wins, the other learns.
 - **A snapshot made in the passphrase-less window** opens on its machine by custody / the live key file and elsewhere
   by the words or the master road online.
+- **A retired secret opens nothing new (Rule 4):** an old backup + the retired passphrase + a valid session opens
+  offline, and online pushes and pulls nothing until the current passphrase or the words is typed; the same for
+  regenerated words; a Touch ID open is unaffected; the opener road is recorded at unlock.
 - **A retired secret dies on learning:** a device that learns of a passphrase (or words) change deletes the stale
   copy from its key file before any prompt; the old word no longer opens it offline; Touch ID / the unchanged secret /
   the new word online still do; the new copy lands only after the typed word unwraps the vault's M copy (a typo writes
@@ -815,6 +835,7 @@ tutorial spine is SIX suites in `TutorialWalkTests.swift` addressed by TYPE name
 | 31 | one Apple-held copy per account — the book's and the waiting state's sentence | U5 | open |
 | 32 | the lost-device FAQ entry; the ceremonies' original animated progress indicator | U5 | open |
 | 33 | Rule 3 — a retired secret dies on learning (the stale copy deleted; the prompt's deferral by gate style; the online-only validation); the un-followed device's state (banner, door lockout, the reused passphrase) | U4 | open |
+| 34 | Rule 4 — a library opened by a since-retired secret syncs nothing until the current one is typed (the opener recorded at unlock; the restored-backup pin) | U4 | open |
 
 ### The architect's sign-off conditions (the reasoning is in the history file)
 (i) the key proof ships in this phase's lockstep event; (ii) the descriptor-floor and never-wrap-under-a-network-key

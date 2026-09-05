@@ -265,7 +265,7 @@ Link: *Forgot your current passphrase?*
 - Castle forgot road, Touch ID mode: *Confirm with Touch ID to set a new passphrase.* Always-ask mode: no
   link (you typed it to get in); instead: *Use your twelve words instead.*
 Checkbox: *Also replace my keys — choose this if someone may have USED the old passphrase, or has
-a copy of your library.*
+a copy of your library or a backup.*
 Done: *Your passphrase is changed. Your other devices keep syncing; they'll ask for the new one the next time
 they need a passphrase. The old passphrase now opens nothing for anyone who never used it.*
 
@@ -330,7 +330,9 @@ Later:** *Your passphrase was changed on another device. Enter the new one now �
 while you're offline.* Doors: *Enter…* · *Use my twelve words*. The same two forms for regenerated words (*Your twelve
 words were regenerated on another device…*).
 **Waiting for your passphrase (the persistent banner on a device that has not followed a rotation):** *Sync is paused
-until you enter your passphrase once — your keys were replaced on [device] on [day].* Button: *Enter…* — and on every
+until you enter your passphrase once — your keys were replaced on [device] on [day].* Button: *Enter…* — **the
+retired-opener form (Rule 4):** *Sync is paused — this library was opened with a passphrase that has since been
+changed. Enter your current passphrase or twelve words to continue.* Button: *Enter…* — and on every
 key door meanwhile: *Pick up your new keys first — enter your passphrase.*
 **Account moved to Castle (a device that was Standard):** *Your account is now in Castle — set on [device] on
 [day]. From now on this Mac asks for Touch ID to open your library, with your passphrase as the fallback. Enter your
