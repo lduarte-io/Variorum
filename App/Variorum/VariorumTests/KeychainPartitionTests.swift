@@ -29,8 +29,8 @@ struct KeychainPartitionTests {
              StoreKeyGuardKeychain.gatedQuery(scope: "partition-probe", storeID: "partition-probe-store")),
             ("the LEGACY iCloud escrow (13p R13p-6 — the migration's door only)",
              StoreKeyGuardKeychain.legacyEscrowQuery(storeID: "partition-probe")),
-            ("device-bound session tokens (pre-13x 1a)",
-             KeychainAuthStorage.boundQuery(service: "io.lduarte.Variorum.auth-partition-probe")),
+            ("device-bound session tokens (pre-13x 1a; scoped per store variant at 2c)",
+             KeychainAuthStorage.boundQuery(service: "io.lduarte.Variorum.auth-partition-probe", scope: "partition-probe")),
             ("the iCloud key A (pre-13x 2a)",
              AppleKeyKeychain.query(account: "partition-probe-apple-key")),
         ]

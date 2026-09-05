@@ -77,12 +77,17 @@ nonisolated struct AuthTokensStore: Sendable {
 
     /// One Keychain item per session home (the `service` parameter; the
     /// retired bridge's Fragments-project session had its own — see
-    /// `LegacyPasteInCleanup`).
-    static func keychain(service: String = KeychainAuthStorage.variorumService) -> AuthTokensStore {
+    /// `LegacyPasteInCleanup`) AND per STORE VARIANT (`scope` — pre-13x 2c,
+    /// corner 47: the item's ACCOUNT carries the scope, so a dev-store
+    /// build never adopts the real store's session). REQUIRED, no default:
+    /// a defaulted real scope would be corner 47 itself.
+    static func keychain(
+        service: String = KeychainAuthStorage.variorumService, scope: String
+    ) -> AuthTokensStore {
         AuthTokensStore(
-            load: { KeychainAuthStorage.load(service: service) },
-            save: { KeychainAuthStorage.save($0, service: service) },
-            clear: { KeychainAuthStorage.clear(service: service) })
+            load: { KeychainAuthStorage.load(service: service, scope: scope) },
+            save: { KeychainAuthStorage.save($0, service: service, scope: scope) },
+            clear: { KeychainAuthStorage.clear(service: service, scope: scope) })
     }
 
     static func inMemory(initial: AuthTokens? = nil) -> AuthTokensStore {
@@ -123,6 +128,17 @@ nonisolated struct AuthTokensStore: Sendable {
 /// tokens are returned even when the move is refused. `AfterFirstUnlock`
 /// gave way to `WhenUnlocked…`: a background round after reboot-then-lock
 /// is a refused round (the design's own "a locked device never syncs").
+///
+/// **pre-13x batch 2c — THE iOS KEYCHAIN FENCE (the postures design's corner
+/// 47, found by Q3's early run).** On iOS the Debug (dev) and Release builds
+/// share the bundle id and ONE keychain, and the session's account was
+/// SCOPE-LESS — so the dev build signed in as the author, fetched her vault
+/// and migrated her real master into the dev store's custody. The account
+/// now carries the STORE-VARIANT scope (`<scope>-session-bound`, exactly the
+/// store-key and sync-custody families' own fence): the REAL scope reads the
+/// unscoped `session-bound` (1a's DP item) and the unscoped `session` (9c's
+/// file-based item) ONCE and migrates each by the same TN3137 road; a DEV
+/// scope never reads, saves over, or deletes either — it starts signed out.
 nonisolated enum KeychainAuthStorage {
     /// The Variorum-project session's home.
     static let variorumService = "io.lduarte.Variorum.auth"
@@ -131,67 +147,91 @@ nonisolated enum KeychainAuthStorage {
     /// constant (round-1 NIT-2: two copies of one identity string would let
     /// a drift turn the delete into a silent no-op).
     static let account = "session"
-    /// The BOUND account (pre-13x 1a) — distinct from the legacy one on
-    /// purpose (the store-key family's measured lesson: a plain DP item
-    /// under a SHARED account is matched by a no-flag delete, so the
-    /// legacy sweep would destroy the bound item it just verified).
-    static let boundAccount = "session-bound"
+    /// The 1a BOUND account — UNSCOPED, the corner-47 item: read by the REAL
+    /// scope for migration only, then released. Distinct from the legacy
+    /// file-based one on purpose (the store-key family's measured lesson: a
+    /// plain DP item under a SHARED account is matched by a no-flag delete,
+    /// so the legacy sweep would destroy the bound item it just verified).
+    static let unscopedBoundAccount = "session-bound"
+    /// The one scope whose session may be inherited from the unscoped
+    /// items — the installed Release build's store (`AppDatabase
+    /// .StoreVariant.real`). Every other scope is fenced.
+    static let realScope = AppDatabase.StoreVariant.real.rawValue
 
-    static func load(service: String) -> AuthTokens? {
-        if let bound = read(service: service, bound: true) {
-            sweepLegacyOnce(service: service)
+    /// The BOUND account, PER SCOPE (pre-13x 2c): `<scope>-session-bound`.
+    static func boundAccount(scope: String) -> String { "\(scope)-session-bound" }
+
+    /// Whether `scope` may read and retire the unscoped items — the real
+    /// store only (corner 47's rule, stated once for the pins).
+    static func inheritsUnscopedItems(scope: String) -> Bool { scope == realScope }
+
+    static func load(service: String, scope: String) -> AuthTokens? {
+        if let bound = read(service: service, account: boundAccount(scope: scope), dataProtection: true) {
+            if inheritsUnscopedItems(scope: scope) { sweepUnscopedOnce(service: service) }
             return bound
         }
-        guard let legacy = read(service: service, bound: false) else { return nil }
-        migrateLegacyItem(legacy, service: service)
+        // A dev scope never reads the unscoped items — it starts signed out.
+        guard inheritsUnscopedItems(scope: scope) else { return nil }
+        if let unscopedBound = read(service: service, account: unscopedBoundAccount, dataProtection: true) {
+            migrate(unscopedBound, service: service, scope: scope,
+                    fromAccount: unscopedBoundAccount, dataProtection: true)
+            return unscopedBound
+        }
+        guard let legacy = read(service: service, account: account, dataProtection: false) else { return nil }
+        migrate(legacy, service: service, scope: scope, fromAccount: account, dataProtection: false)
         return legacy
     }
 
     @discardableResult
-    static func save(_ tokens: AuthTokens, service: String) -> Bool {
-        guard add(tokens, service: service) else { return false }
-        // A fresh save supersedes any legacy copy outright.
-        deleteItem(service: service, bound: false)
+    static func save(_ tokens: AuthTokens, service: String, scope: String) -> Bool {
+        guard add(tokens, service: service, scope: scope) else { return false }
+        // A fresh save supersedes any unscoped copy outright — the real
+        // scope's own; a dev scope's save never touches them.
+        if inheritsUnscopedItems(scope: scope) { deleteUnscoped(service: service) }
         return true
     }
 
-    /// Released = gone from BOTH shapes, or never there (17h R3-5's
-    /// semantics; a lingering file-based session would be exactly the copy
-    /// the binding exists to end).
+    /// Released = gone from every shape this scope owns, or never there
+    /// (17h R3-5's semantics; a lingering unscoped session would be exactly
+    /// the copy the binding — and the fence — exist to end). A dev scope
+    /// clears only its own item.
     @discardableResult
-    static func clear(service: String) -> Bool {
-        let bound = deleteItem(service: service, bound: true)
-        let legacy = deleteItem(service: service, bound: false)
-        return bound && legacy
+    static func clear(service: String, scope: String) -> Bool {
+        let own = deleteItem(service: service, account: boundAccount(scope: scope), dataProtection: true)
+        guard inheritsUnscopedItems(scope: scope) else { return own }
+        return own && deleteUnscoped(service: service)
     }
 
     // MARK: - The TN3137 road (write → VERIFY → delete old)
 
-    private static func migrateLegacyItem(_ tokens: AuthTokens, service: String) {
-        guard add(tokens, service: service) else { return }
-        guard read(service: service, bound: true) == tokens else {
-            deleteItem(service: service, bound: true)
+    private static func migrate(
+        _ tokens: AuthTokens, service: String, scope: String,
+        fromAccount: String, dataProtection: Bool
+    ) {
+        guard add(tokens, service: service, scope: scope) else { return }
+        guard read(service: service, account: boundAccount(scope: scope), dataProtection: true) == tokens else {
+            deleteItem(service: service, account: boundAccount(scope: scope), dataProtection: true)
             return
         }
-        deleteItem(service: service, bound: false)
+        deleteItem(service: service, account: fromAccount, dataProtection: dataProtection)
     }
 
-    private static func add(_ tokens: AuthTokens, service: String) -> Bool {
+    private static func add(_ tokens: AuthTokens, service: String, scope: String) -> Bool {
         guard let data = try? JSONEncoder().encode(tokens) else { return false }
-        var attributes = boundQuery(service: service)
+        var attributes = boundQuery(service: service, scope: scope)
         attributes[kSecValueData as String] = data
         attributes[kSecAttrAccessible as String] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
         let status = SecItemAdd(attributes as CFDictionary, nil)
         if status == errSecDuplicateItem {
             let update: [String: Any] = [kSecValueData as String: data]
-            return SecItemUpdate(boundQuery(service: service) as CFDictionary, update as CFDictionary)
+            return SecItemUpdate(boundQuery(service: service, scope: scope) as CFDictionary, update as CFDictionary)
                 == errSecSuccess
         }
         return status == errSecSuccess
     }
 
-    private static func read(service: String, bound: Bool) -> AuthTokens? {
-        var query = bound ? boundQuery(service: service) : legacyQuery(service: service)
+    private static func read(service: String, account: String, dataProtection: Bool) -> AuthTokens? {
+        var query = query(service: service, account: account, dataProtection: dataProtection)
         query[kSecReturnData as String] = true
         query[kSecMatchLimit as String] = kSecMatchLimitOne
         var result: AnyObject?
@@ -202,42 +242,50 @@ nonisolated enum KeychainAuthStorage {
     }
 
     @discardableResult
-    private static func deleteItem(service: String, bound: Bool) -> Bool {
+    private static func deleteItem(service: String, account: String, dataProtection: Bool) -> Bool {
         let status = SecItemDelete(
-            (bound ? boundQuery(service: service) : legacyQuery(service: service)) as CFDictionary)
+            query(service: service, account: account, dataProtection: dataProtection) as CFDictionary)
         return status == errSecSuccess || status == errSecItemNotFound
+    }
+
+    /// Both unscoped shapes released (the real scope's road only).
+    @discardableResult
+    private static func deleteUnscoped(service: String) -> Bool {
+        let bound = deleteItem(service: service, account: unscopedBoundAccount, dataProtection: true)
+        let legacy = deleteItem(service: service, account: account, dataProtection: false)
+        return bound && legacy
     }
 
     /// The bound item's query — DP marker on EVERY verb (the family rule
     /// `KeychainPartitionTests` asserts structurally). Internal for that pin.
-    static func boundQuery(service: String) -> [String: Any] {
-        [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: service,
-            kSecAttrAccount as String: boundAccount,
-        ].merging(KeychainPartition.dataProtection) { a, _ in a }
+    static func boundQuery(service: String, scope: String) -> [String: Any] {
+        query(service: service, account: boundAccount(scope: scope), dataProtection: true)
     }
 
-    /// The 9c-era file-based item's query (read for migration; deleted).
-    private static func legacyQuery(service: String) -> [String: Any] {
-        [
+    /// ONE builder for every account this storage names: the scoped bound
+    /// item and the unscoped 1a item are DP-resident; the 9c file-based
+    /// item is not (its query carries no marker — matching it is what
+    /// migrating it needs).
+    private static func query(service: String, account: String, dataProtection: Bool) -> [String: Any] {
+        let base: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecAttrAccount as String: account,
         ]
+        return dataProtection ? base.merging(KeychainPartition.dataProtection) { a, _ in a } : base
     }
 
-    // MARK: - The once-per-process legacy sweep
+    // MARK: - The once-per-process unscoped sweep (the real scope's)
 
     private static let sweepLock = NSLock()
     nonisolated(unsafe) private static var sweptServices: Set<String> = []
 
-    private static func sweepLegacyOnce(service: String) {
+    private static func sweepUnscopedOnce(service: String) {
         sweepLock.lock()
         let alreadySwept = !sweptServices.insert(service).inserted
         sweepLock.unlock()
         guard !alreadySwept else { return }
-        deleteItem(service: service, bound: false)
+        deleteUnscoped(service: service)
     }
 }
 
@@ -323,7 +371,7 @@ actor AuthSession: UserSessionProviding {
 
     init(
         configuration: AuthConfiguration,
-        store: AuthTokensStore = .keychain(),
+        store: AuthTokensStore,
         expiryMargin: TimeInterval = 60,
         now: @escaping @Sendable () -> Date = { Date() },
         http: (@Sendable (URLRequest) async throws -> (Data, URLResponse))? = nil

@@ -226,6 +226,50 @@ nonisolated enum ProtectionMigration {
     }
 }
 
+// MARK: - The legacy legs' fence (pre-13x 2c — corner 47)
+
+/// THE LEGACY LEGS — the 14b/CF-12 fixed-account sync-key items (leg 1: the
+/// plain item's read + both items' release) and the 13p iCloud escrow item
+/// (leg 2) — exist for ONE store: the author's REAL store, migrated at the
+/// window. They are SCOPE-LESS items, and on iOS the dev build shares the
+/// Release build's keychain — Q3's early run watched the dev store's
+/// migration take her real master into dev-scoped custody and delete the
+/// legacy item (corner 47). So the legs run under the REAL scope ONLY:
+/// `forScope` hands every other scope an INERT set that never touches the
+/// Keychain, and `ProtectionMigration.Leaves.live` composes from it.
+nonisolated struct LegacyLegs: Sendable {
+    /// True ⇒ every closure answers "nothing" without a Keychain call.
+    let isInert: Bool
+    var loadPlainMaterial: @Sendable () -> DeviceKeyMaterial?
+    var deleteItems: @Sendable () -> Bool
+    var loadEscrow: @Sendable (_ storeID: String) -> StoreKey?
+    var removeEscrow: @Sendable (_ storeID: String) -> Bool
+
+    /// The rule, stated once: only the installed build's store inherits
+    /// the scope-less items.
+    static func apply(to scope: String) -> Bool {
+        scope == AppDatabase.StoreVariant.real.rawValue
+    }
+
+    static func forScope(_ scope: String, guardSeam: StoreKeyGuard) -> LegacyLegs {
+        guard apply(to: scope) else { return .inert }
+        return LegacyLegs(
+            isInert: false,
+            loadPlainMaterial: { E2EEKeychainStorage.legacyLoadPlain()?.material },
+            deleteItems: { E2EEKeychainStorage.legacyDelete() },
+            loadEscrow: { guardSeam.loadLegacyEscrow($0) },
+            removeEscrow: { guardSeam.removeLegacyEscrow($0) })
+    }
+
+    /// A dev scope's legs: no 14b past, nothing to read, nothing to release.
+    static let inert = LegacyLegs(
+        isInert: true,
+        loadPlainMaterial: { nil },
+        deleteItems: { false },
+        loadEscrow: { _ in nil },
+        removeEscrow: { _ in false })
+}
+
 // MARK: - The production leaves
 
 nonisolated extension ProtectionMigration.Leaves {
@@ -242,14 +286,17 @@ nonisolated extension ProtectionMigration.Leaves {
         let doneKey = ProtectionDefaults.key(ProtectionMigration.doneLeaf, scope: scope, storeID: storeID)
         let pendingKey = ProtectionDefaults.key(ProtectionMigration.confirmPendingLeaf, scope: scope, storeID: storeID)
         let logger = Logger(subsystem: "io.lduarte.Variorum", category: "protection")
+        // pre-13x 2c (corner 47): the legacy legs run under the REAL scope
+        // only — a dev scope's set is inert and never reaches the Keychain.
+        let legacy = LegacyLegs.forScope(scope, guardSeam: gate.guardFor(scope))
         return ProtectionMigration.Leaves(
             isDone: { defaults().bool(forKey: doneKey) },
             markDone: { defaults().set(true, forKey: doneKey) },
             isConfirmPending: { defaults().bool(forKey: pendingKey) },
             setConfirmPending: { defaults().set($0, forKey: pendingKey) },
-            legacyPlainMaterial: { E2EEKeychainStorage.legacyLoadPlain()?.material },
+            legacyPlainMaterial: legacy.loadPlainMaterial,
             legacyGatedMaterial: { session.takeLegacyMaterial() },
-            deleteLegacyItems: { E2EEKeychainStorage.legacyDelete() },
+            deleteLegacyItems: legacy.deleteItems,
             retireOptIn: { defaults().removeObject(forKey: SyncCustodyMigration.legacyOptInDefaultsKey) },
             syncLeaves: .live(scope: custody),
             session: session,
@@ -263,8 +310,8 @@ nonisolated extension ProtectionMigration.Leaves {
                     try db.execute(sql: "DELETE FROM sync_state WHERE key = 'device_id'")
                 }
             },
-            loadLegacyEscrow: { gate.guardFor(scope).loadLegacyEscrow($0) },
-            removeLegacyEscrow: { gate.guardFor(scope).removeLegacyEscrow($0) },
+            loadLegacyEscrow: legacy.loadEscrow,
+            removeLegacyEscrow: legacy.removeEscrow,
             retireDialKeys: { gate.retireLegacyDials(scope, storeID) },
             setAlwaysAsk: { on in
                 var dials = gate.dials(scope, storeID)

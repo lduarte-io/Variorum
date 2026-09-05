@@ -364,12 +364,14 @@ nonisolated enum StoreKeyGuardKeychain {
            let record = E2EEKeychainStorage.readGated(
                scope: SyncCustodyScope(scope: scope, storeID: storeID), context: context) {
             SyncCustodySession.shared.hold(record)
-        } else if key != nil, E2EEKeychainStorage.legacyGatedItemExists(),
+        } else if key != nil, LegacyLegs.apply(to: scope),
+                  E2EEKeychainStorage.legacyGatedItemExists(),
                   let legacy = E2EEKeychainStorage.legacyReadGated(context: context) {
             // pre-13x 2a (§11): the 14b/CF-12 LEGACY gated item, read under
             // the SAME context (one prompt) and held for the migration at
             // ready — the only road that can read it without a second
-            // prompt.
+            // prompt. pre-13x 2c (corner 47): the REAL scope's road only —
+            // the item is scope-less, and a dev scope has no 14b past.
             SyncCustodySession.shared.holdLegacyMaterial(legacy)
         }
         return key

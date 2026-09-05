@@ -177,7 +177,12 @@ final class AppServices {
         // 13j ladder B (B3): the purge doors' receipts and the local purge
         // road both read this — one truth, the sync session's own.
         session.syncConfigured = { [weak sync = sync] in sync?.isConfigured ?? false }
-        self.auth = auth ?? AuthSession(configuration: ProjectConfig.variorumAuth)
+        // pre-13x 2c (corner 47): the session's Keychain item is SCOPED by
+        // store variant — a dev-store build starts signed out and never
+        // adopts the installed build's session.
+        self.auth = auth ?? AuthSession(
+            configuration: ProjectConfig.variorumAuth,
+            store: .keychain(scope: storeVariant.rawValue))
         // The E2EE flows compose over the SAME auth session the sync
         // transport rides — the vault lives on the account (R-1). One
         // vault client serves the flows AND the 14c account doors.

@@ -436,9 +436,13 @@ final class AppBootstrap {
                 // truth AuthSession.adopt/signOut writes, so sign-in state
                 // reaches Operations' owner_id stamping with no mutable
                 // global and no re-installation.
+                // pre-13x 2c (corner 47): the read is SCOPED by store
+                // variant — a dev store's owner identity is its own
+                // session's, never the installed build's.
+                let sessionScope = storeVariant.rawValue
                 OwnerIdentity.install(OwnerIdentity {
                     KeychainAuthStorage.load(
-                        service: KeychainAuthStorage.variorumService)?.userID
+                        service: KeychainAuthStorage.variorumService, scope: sessionScope)?.userID
                 })
                 installed = true
             }
