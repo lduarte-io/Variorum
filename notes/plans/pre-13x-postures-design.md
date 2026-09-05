@@ -433,7 +433,12 @@ present (`VARIORUM_ROTATION_IN_PROGRESS`), and the doors refuse before asking. *
 and `sync_purge_ledger` take the proof as well — a session without the keys gets nothing from the mirror at all, a seq
 included. **The insert arm:** a `BEFORE INSERT` trigger on `key_vault` rejects a NULL `key_proof_hash` (a CHECK would
 refuse the author's existing row until her first round lands the hash — the NULL-hash arm exists for that row alone).
-`key_vault_update` scopes to `auth.uid()` like the data RPCs (the 14c guard). **The proof is a bearer token,** presented
+`key_vault_update` scopes to `auth.uid()` like the data RPCs (the 14c guard). **The table-level UPDATE road CLOSES with
+it:** the `key_vault_owner_update` policy is DROPPED and UPDATE on `key_vault` is REVOKED from `authenticated` (the
+shipped 14b grant) — otherwise a bare session's PostgREST PATCH is a proof-free write to every vault column, the proof
+hash included, and the proof protects nothing; `variorum_definer` gets the UPDATE grant and a policy of its own (the
+`device_cursor` pattern), so after creation the ONLY write road into the vault is the RPC that checks the proof. A live
+probe at the deploy proves the PATCH refused. **The proof is a bearer token,** presented
 in the request BODY only — never a URL or a header that lands in a gateway log; the server sees it on every call and
 keeps only its hash, so a server compromise or a log capture yields the right to MUTATE the mirror without the right to
 read it — the account-password class, and the privacy brief's disclosure list says so.
@@ -726,6 +731,10 @@ phone becomes Castle at its migration (Face ID with passphrase fallback) — say
   PRESENCE, so the copy's honest sentence is tested, not assumed; entering Castle pins the absence.
 - **The read RPCs and the insert arm:** a session without the proof gets nothing from `sync_horizon` or
   `sync_purge_ledger`; a new vault with a NULL hash is refused at insert; the proof travels in the body only.
+- **The vault's table-level write road is CLOSED:** a session's direct PostgREST PATCH on `key_vault` is refused
+  (permission denied — the DDL pin reads the policy and grant set; the deploy's live probe proves it on the mirror);
+  the only post-creation write is `key_vault_update` under the proof; INSERT (creation) and SELECT (the wrapped copies)
+  stay session-only; DELETE has no road but `account_purge`.
 - The convergence suites gain §7's choreography against the fake server (which enforces the proof, the fence,
   `sync_reencrypt`, the rotation seq and the in-progress refusal). Both drills re-run: the 13p migration drill on a byte-copy of her real store, and the 13l restore
   drill per posture, on both devices.
@@ -901,7 +910,7 @@ tutorial spine is SIX suites in `TutorialWalkTests.swift` addressed by TYPE name
 
 ### LIVE STATUS (flipped in the same commit as each piece; PENDING = unverified)
 - U0 — DONE. U1 — DONE 2026-09-04.
-- **U2 batch 1a — DONE** (`10079de2`; the record + the orchestrator adjudication under §19 BATCH RECORDS). **U2 batch 1b — NEXT** (a fresh Fable implementer; brief §19 1b, extended after the orchestrator read the shipped RPC + vault code). U3 — NOT-STARTED.
+- **U2 batch 1a — DONE** (`10079de2`; the record + the orchestrator adjudication under §19 BATCH RECORDS). **U2 batch 1b — IN PROGRESS** (a fresh Fable implementer; brief §19 1b, extended after the orchestrator read the shipped RPC + vault code; its record under §19 BATCH RECORDS — verify by `git log` before trusting). U3 — NOT-STARTED.
   U4 — NOT-STARTED. U5 — NOT-STARTED.
 
 ### THE LEDGER (every row owned)
@@ -947,6 +956,7 @@ tutorial spine is SIX suites in `TutorialWalkTests.swift` addressed by TYPE name
 | 38 | the proof on `sync_horizon` / `sync_purge_ledger`; the NULL-hash `BEFORE INSERT` arm; `auth.uid()` scope on `key_vault_update`; the proof in the body only | U2 (1b) | open |
 | 39 | one gated read per unlock for the biometric custody item (L, M, C, J, the identity — one Touch ID prompt); a re-minted identity with a non-zero cursor reconciled as a returner | U2 (1a) | open |
 | 40 | the third crash point (between the swap and custody); a CAS refuse at a switch becomes the follow; Macs without Touch ID get Always ask only; the vault-less account's fourth account-password power said in copy | U3 | open |
+| 41 | the vault's table-level UPDATE road CLOSED (drop `key_vault_owner_update`, revoke UPDATE from `authenticated`, the definer grant + policy) — the DDL pin + the deploy's live PATCH probe | U2 (1b) | open — MUST |
 
 ### The architect's sign-off conditions (the reasoning is in the history file)
 (i) the key proof ships in this phase's lockstep event; (ii) the descriptor-floor and never-wrap-under-a-network-key
@@ -1035,12 +1045,32 @@ item. Commit per item, push after each.
    (decision 32); every data RPC (`sync_push`, `sync_pull`, `sync_reencrypt`, `sync_purge_execute`,
    `account_data_truncate`) reads it `FOR SHARE` for the fence + proof check, so no old-key row can commit with a seq
    above the rotation seq. `sync_horizon` and `sync_purge_ledger` take `key_proof` too (a bare session gets nothing).
-   `key_vault_update` scopes to `auth.uid()` (the 14c guard). The proof is a BODY parameter on every RPC. **No RPC
+   `key_vault_update` scopes to `auth.uid()` (the 14c guard). The proof is a BODY parameter on every RPC. **THE VAULT'S
+   TABLE-LEVEL WRITE ROAD CLOSES (found by the orchestrator reading `08_phase14b_lockstep.sql:113-118` — MUST):** DROP
+   POLICY `key_vault_owner_update`; `REVOKE UPDATE ON key_vault FROM authenticated` (keep SELECT + INSERT for the
+   session-only read and create); `GRANT SELECT, UPDATE ON key_vault TO variorum_definer` + a policy in
+   `device_cursor_owner_all`'s shape (`for update using (user_id = auth.uid()) with check (user_id = auth.uid())` —
+   `auth.uid()` reads the caller's claim inside a definer body exactly as the data RPCs rely on); `key_vault_update` and
+   `sync_reencrypt` are OWNED by `variorum_definer` and revoked from `public, anon, service_role`, granted to
+   `authenticated` (10's lines 720–742 are the form); `sync_reencrypt` writes the 18 data tables under the definer
+   policies the data RPCs already use. Pin: the DDL pin (`AuthRLSDDLTests`) asserts the policy set + grants; the deploy's
+   live probe PATCHes the vault with a bare session and expects permission denied. **Shipped facts the file builds on:**
+   the sequence is `sync_server_seq` (`stamp_server_seq()` uses `nextval('sync_server_seq')` — the rotation seq takes
+   the same `nextval`); the re-run guard reads `sync_meta.lockstep_version` and raises `VARIORUM_11_ALREADY_DEPLOYED`
+   (10's guard at its lines 106–112 is the form); the marker bump is `insert into sync_meta … ('lockstep_version','8')`
+   with 10's on-conflict form; the current typed refusals are `VARIORUM_STALE_KEY_FENCE` / `VARIORUM_NO_ENTITLEMENT` —
+   the new ones are `VARIORUM_KEY_PROOF_REQUIRED` and `VARIORUM_ROTATION_IN_PROGRESS`; `sync_horizon` and
+   `sync_purge_ledger` today take `active_key_id` only and are already revoked from `service_role`. **No RPC
    parameter may shadow a column it writes** (the 13j rule). The marker bump is the file's LAST statement.
 3. **The client:** `SyncSchema.lockstepVersion = 8`; `SyncTransport`/`SupabaseTransport` pass `key_proof` from the
    engine's key provider (`SyncEncryptionKeys` gains `keyProof`); `VaultEnrollment`/setup compute and land the hash; `SyncEncryptionKeys` gains
    the previous corpus key (+ id) and the rotation seq so the serializer opens a row by the seq rule (§3.10); the
-   FAKE SERVER enforces the proof, the fence, `sync_reencrypt`, the rotation seq (a push that passed the old check
+   device identity STAYS a provider method (`SyncKeyProviding.deviceIdentity()`, 1a's reading — never a field on the
+   keys value); `SyncTransport`'s `push` / `pull` / `syncHorizon` / `purgeLedger` / `executePurge` (+ truncate) carry
+   the proof beside `activeKeyID` (a REQUIRED parameter, the `activeKeyID` precedent), and `SupabaseTransport`'s request
+   structs encode it as `key_proof`; the shipped `PullRequest` already encodes `for_device`; the
+   FAKE SERVER (`Tests/VariorumCoreTests/Support/FakeSyncServer.swift`, an actor over `SyncTransport` +
+   `SyncPurgeTransport`) enforces the proof, the fence, `sync_reencrypt`, the rotation seq (a push that passed the old check
    lands BELOW the seq — the harness serializes the vault row as the SQL's locks do) and the in-progress refusal
    exactly as the SQL does — pins: a session without the proof cannot push, pull, purge, truncate, read the horizon or
    the purge ledger, or update the vault, CAN fetch it, CAN delete the account; the wrong proof refuses; the NULL-hash
