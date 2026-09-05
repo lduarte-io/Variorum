@@ -17,21 +17,74 @@ public struct DeviceKeyMaterial: Codable, Equatable, Sendable {
     public var corpusKeyID: String
     public var journalBridgeKey: Data
     public var journalBridgeKeyID: String
+    /// pre-13x 2b (decisions 6 / 31 — the 1b hand-forward): while a
+    /// rotation is finishing, the PREVIOUS corpus key, its id, and the
+    /// server's rotation seq ride custody beside the new keys — the seam
+    /// opens a row below the seq under the previous key (`RotationInProgress`),
+    /// and the driver re-encrypts what is left. All three nil outside a
+    /// rotation (a custody blob written before 2b decodes with them nil).
+    /// Dropped together by `clearingPreviousCorpusKey()` at completion.
+    public var previousCorpusKey: Data?
+    public var previousCorpusKeyID: String?
+    public var rotationStartedSeq: Int64?
 
     public init(
         masterKey: Data, corpusKey: Data, corpusKeyID: String,
-        journalBridgeKey: Data, journalBridgeKeyID: String
+        journalBridgeKey: Data, journalBridgeKeyID: String,
+        previousCorpusKey: Data? = nil, previousCorpusKeyID: String? = nil,
+        rotationStartedSeq: Int64? = nil
     ) {
         self.masterKey = masterKey
         self.corpusKey = corpusKey
         self.corpusKeyID = corpusKeyID
         self.journalBridgeKey = journalBridgeKey
         self.journalBridgeKeyID = journalBridgeKeyID
+        self.previousCorpusKey = previousCorpusKey
+        self.previousCorpusKeyID = previousCorpusKeyID
+        self.rotationStartedSeq = rotationStartedSeq
     }
 
     public var masterSymmetricKey: SymmetricKey { SymmetricKey(data: masterKey) }
     public var corpusSymmetricKey: SymmetricKey { SymmetricKey(data: corpusKey) }
     public var journalBridgeSymmetricKey: SymmetricKey { SymmetricKey(data: journalBridgeKey) }
+
+    /// The rotation as the seam needs it — present only when ALL THREE
+    /// fields are (both-or-neither, by construction).
+    public var rotation: RotationInProgress? {
+        guard let previousCorpusKey, let previousCorpusKeyID, let rotationStartedSeq else { return nil }
+        return RotationInProgress(
+            previousCorpusKey: SymmetricKey(data: previousCorpusKey),
+            previousCorpusKeyID: previousCorpusKeyID, startedSeq: rotationStartedSeq)
+    }
+
+    /// The round's keys: the current corpus key, the proof from the
+    /// master, and the rotation while one is finishing.
+    public var syncKeys: SyncEncryptionKeys {
+        SyncEncryptionKeys(
+            corpusKey: corpusSymmetricKey, corpusKeyID: corpusKeyID,
+            keyProof: KeyProof.wireToken(master: masterSymmetricKey),
+            rotation: rotation)
+    }
+
+    /// Carry the previous corpus key for a rotation's duration.
+    public func carryingPreviousCorpusKey(
+        _ key: Data, keyID: String, startedSeq: Int64
+    ) -> DeviceKeyMaterial {
+        var carried = self
+        carried.previousCorpusKey = key
+        carried.previousCorpusKeyID = keyID
+        carried.rotationStartedSeq = startedSeq
+        return carried
+    }
+
+    /// Completion: the previous key, its id and the seq go TOGETHER.
+    public func clearingPreviousCorpusKey() -> DeviceKeyMaterial {
+        var cleared = self
+        cleared.previousCorpusKey = nil
+        cleared.previousCorpusKeyID = nil
+        cleared.rotationStartedSeq = nil
+        return cleared
+    }
 }
 
 /// How a master-unwrapping act is authorized (Round 7's scope addition:

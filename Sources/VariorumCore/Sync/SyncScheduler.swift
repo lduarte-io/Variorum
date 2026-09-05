@@ -224,10 +224,10 @@ public actor SyncScheduler {
         publishStatus()
     }
 
+    /// pre-13x 2b: the engine's own primitive (hoisted — the rotation runner
+    /// gates on the same count).
     private func outboxCount() async throws -> Int {
-        try await database.read { db in
-            try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM sync_outbox") ?? 0
-        }
+        try await engine.outboxCount()
     }
 
     // MARK: - Status observation

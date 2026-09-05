@@ -157,6 +157,25 @@ final class SyncClient {
         }
     }
 
+    /// pre-13x 2b: the engine's named primitive (§4 step 1).
+    @discardableResult
+    func pullToHead(batchSize: Int = 200, maxAttempts: Int = 6) async throws -> SyncEngine.PullReport {
+        try await withDependencies { deps in
+            bind(&deps)
+        } operation: {
+            try await engine(batchSize: batchSize).pullToHead(maxAttempts: maxAttempts)
+        }
+    }
+
+    /// pre-13x 2b: the engine's outbox count (hoisted from the scheduler).
+    func engineOutboxCount() async throws -> Int {
+        try await withDependencies { deps in
+            bind(&deps)
+        } operation: {
+            try await engine().outboxCount()
+        }
+    }
+
     // MARK: State inspection
 
     func outboxCount() throws -> Int {

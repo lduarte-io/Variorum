@@ -826,13 +826,11 @@ nonisolated struct DeviceKeySyncProvider: SyncKeyProviding {
             throw SyncKeyProviderError.notEnrolled
         }
         // pre-13x (decision 12): the key proof, computed on demand from the
-        // master this custody holds — never stored. A rotation in progress
-        // (the previous corpus key + the seq) is batch 2's to fill from the
-        // vault; until then every row opens under the current key.
-        return SyncEncryptionKeys(
-            corpusKey: material.corpusSymmetricKey,
-            corpusKeyID: material.corpusKeyID,
-            keyProof: KeyProof.wireToken(master: material.masterSymmetricKey))
+        // master this custody holds — never stored. 2b: a rotation in
+        // progress (the previous corpus key + its id + the seq, carried in
+        // custody by the runner or the follower) rides to the seam, which
+        // opens a row below the seq under the previous key.
+        return material.syncKeys
     }
 
     func deviceIdentity() throws -> String {

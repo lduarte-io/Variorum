@@ -215,21 +215,25 @@ public struct AccountRekey: Sendable {
 /// surface projects it as the rerun prompt; account deletion clears it
 /// (a purged account owes no completion).
 public enum AccountRekeyMarker {
-    public static let key = "rekey_in_progress"
+    public static let key = RotationMarker.key
 
+    /// pre-13x 2b: the 14c brain's set is a `.vaultWrite` RotationMarker
+    /// (the per-step marker replaces this family; the brain itself retires
+    /// with the runner in the same batch).
     public static func set(_ db: Database) throws {
-        try db.execute(
-            sql: "INSERT OR REPLACE INTO sync_state (key, value) VALUES (?, ?)",
-            arguments: [key, DateFormatter.variorumISO8601.string(from: Date())])
+        try RotationMarker.write(
+            RotationMarker(
+                step: .vaultWrite, entersCastle: false,
+                startedAt: DateFormatter.variorumISO8601.string(from: Date())),
+            db)
     }
 
     public static func clear(_ db: Database) throws {
-        try db.execute(sql: "DELETE FROM sync_state WHERE key = ?", arguments: [key])
+        try RotationMarker.clear(db)
     }
 
     public static func isSet(_ db: Database) throws -> Bool {
-        try String.fetchOne(
-            db, sql: "SELECT value FROM sync_state WHERE key = ?", arguments: [key]) != nil
+        try RotationMarker.isSet(db)
     }
 }
 

@@ -475,6 +475,18 @@ public enum SyncError: Error, Equatable, Sendable {
     /// back is the FOLLOW: enter the passphrase once to pick up the new
     /// keys (the design's §7; the surface's banner is the copy file's).
     case keyProofRefused
+    /// pre-13x 2b (§4 step 1 — the named `pullToHead` primitive): the
+    /// changefeed could not be read to head because a pull kept STALLING
+    /// at a straggler (a row whose referents another device still owes).
+    /// A rotation must not begin over an incomplete picture; the outbox
+    /// and the cursor are untouched, and the next round self-heals when
+    /// the owing device drains.
+    case pullStalled(cursor: Int64)
+    /// pre-13x 2b (§4 step 1): the outbox still holds rows — a rotation
+    /// (or a posture switch) refuses until this device's own writing has
+    /// reached the server, so nothing typed here is ever re-encrypted from
+    /// a stale copy or pushed under a key the fence then refuses.
+    case outboxNotEmpty(pending: Int)
 }
 
 extension SyncError: CustomStringConvertible {
@@ -511,9 +523,19 @@ extension SyncError: CustomStringConvertible {
             return "Sync paused: hosted sync isn't active on this account. Your writing "
                 + "stays safe on this device; sync resumes once the plan is active."
         case .accountRekeyIncomplete:
+            // pre-13x 2b: the per-step rotation marker (`RotationMarker`) —
+            // entering Castle or Replace All Keys started here and has not
+            // finished; the acting device resumes it at the failed step.
             return "Sync paused: replacing this account's encryption keys didn't finish on "
-                + "this device. Run Replace Encryption Keys again (Account → Encryption) to "
-                + "complete it; nothing is lost while paused."
+                + "this device. It resumes from Settings ▸ Protection (or Replace All Keys); "
+                + "nothing is lost while paused."
+        case .pullStalled(let cursor):
+            return "Sync couldn't read everything from the server just now — another "
+                + "device still owes some of it (paused at \(cursor)). Nothing is lost; "
+                + "try again in a moment."
+        case .outboxNotEmpty(let pending):
+            return "This device still has \(pending) change\(pending == 1 ? "" : "s") to "
+                + "send — wait for sync to finish, then try again."
         case .deviceLeftBehindReloadRequired:
             // Her round-10 wording class, verbatim-faithful: "this phone
             // has been away a while — it will reload from your account;
