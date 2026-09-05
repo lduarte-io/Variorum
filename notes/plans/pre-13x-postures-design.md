@@ -1067,3 +1067,51 @@ another session: keep doing that at every batch brief).
 **Every record carries a section ORCHESTRATOR-DECIDED NOTES:** what the orchestrator settled under the mandate without
 the author, listed there so the cold reviewer sees what was decided without her (her instruction, relayed from
 another session).
+
+### BATCH 1a RECORD (the client substrate — the implementer's record; LIVE STATUS first)
+
+#### LIVE STATUS (flipped in the same commit as each piece; PENDING = unverified)
+- **1a.6 the inherited KnownIssues row (the retired-credential sweep's sign-in occasion):** NOT-STARTED — settled: one private `runRetiredCredentialSweep()` (gate on `sync.allowsSync`, `Task.detached(.utility)`) serving both occasions; `legacyCleanup` a REQUIRED init parameter (the `makeSyncKeyProvider` precedent); two spy pins (a `.dev` sign-in after wiring → 0 sweeps; a `.real` sign-in records off-main); the row resolved in KnownIssues when green.
+- **1a.2 the key file, format 2:** NOT-STARTED — settled: `formatVersion = 2`; `master` / `apple` + `appleKeyID` / `vaultKDF` + `vaultCorpusKeyID` (all optional; a format-1 file decodes with them nil — pin); the `masterBox(key:under:)` / `unwrapKey(master:)` and `appleBox(key:under:appleKeyID:)` / `unwrapKey(apple:)` roads + `recordVaultReconciliation`; naming `variorum-keys-<fp16>.json` (`url(besideStore:fingerprint:)`), the legacy `variorum-keys.json` read when no fingerprint file exists (`locate(besideStore:)`); `StoreBackup.copyKeyEnvelope` writes ONLY WHEN ABSENT (never rewrites a backup folder's key file — the brief's last sentence); snapshots `variorum-backup-<stamp>-<fp8>.sqlite`; `existingBackups` / `date(fromBackupURL:)` accept both names.
+- **1a.3 custody per STORE ID:** NOT-STARTED — settled: `StoreKeyCustody.deviceKeychain(scope:storeURL:)` resolves the store id from the key file beside the store (`locate`); accounts `<scope>-<storeID>-bound` / `-biometric` / `-biometric-probe`; the mint road writes the key file (storeID + fingerprint, no wraps) BEFORE the Keychain add; legacy `<scope>-bound` (DP) and `<scope>` (file-based) migrate read → re-add → verify → delete-legacy (pin: once; a second store never collides — red by behavioural revert of the account naming); the gated legacy `<scope>-biometric` migrates at unlock under the evaluated context.
+- **1a.4 device-bound session tokens:** NOT-STARTED — settled: `KeychainAuthStorage` account `session-bound`, DP + `WhenUnlockedThisDeviceOnly`; load reads bound → legacy `session` → migrate → delete legacy; save/clear cover both; `KeychainPartitionTests` extended; a signed-host pin under a throwaway SERVICE.
+- **1a.5 the absent-store route:** NOT-STARTED — settled: `StoreLaunchRoute.libraryMissing(demand:)` replaces `openResettingModeToAuto`; `AppBootstrap.State.libraryMissing(LibraryMissingLobby)`; copy §3 verbatim on both targets; "Start a New Library" sets the old key file aside and mints under a NEW store id; the DIALS are read per store id with a legacy scope-key read-through (see the notes — the design's own end state, pulled in so the new library is not born gated and the restored old one is not born silent); red pin on both targets (no dial write, no open).
+- **1a.1 sync keys + the device identity in per-store custody:** NOT-STARTED — settled: `SyncCustodyRecord { deviceID; material? }` under `<scope>-<storeID>-sync` (bound) / `-sync-biometric` (gated; read under the SAME evaluated `LAContext` as the library key — one prompt) / identity-only bound item + session memory under Always ask; `SyncCustodySession` (the session memory: the record + the DERIVED wrapping key; `drop()` at relock); `SyncEncryptionKeys` gains `deviceID`; the engine's `ensureDeviceID` + the `sync_state.device_id` read deleted (the pull passes the provider's id); `SyncGateOptIn` + `E2EELaunchKeyCache` + the CF-12 toggle/locked faces deleted; `migrateSyncCustodyToStoreScope` behind a seam, unrun; the tripwire refuses mutations under the REAL scopes only.
+- **Gate:** PENDING — core `swift test` full; the touched Mac suites; the spine (72/10); the iOS build.
+
+#### THE SETTLED DESIGN, PER ITEM (what a fresh session builds from)
+*(Each item's mechanism above is the whole of it; the notes below are the readings the brief left to the implementer.)*
+1. **The key file beside the live library is found WITHOUT the key** (the store id must be known before the custody item can be named): `StoreKeyEnvelope.locate(besideStore:)` = the sole `variorum-keys-<fp>.json`, else the legacy `variorum-keys.json`, else nil; SEVERAL fingerprint files beside a live library (a state only batch 2's re-key produces — never 1a) resolve to the most recently modified one. INTERIM, recorded for the architect (a question below).
+2. **The store id is stable across re-keys** (the library's identity, not the key's): every key file of one library carries the same `storeID`; custody items are named by it, so a re-key changes the item's VALUE, never its name.
+3. **`copyKeyEnvelope` never rewrites** — a backup folder's key file is written once, under the source's own name, and left alone thereafter (the brief's "No code path rewrites a backup folder's key file after it is written"). Consequence for batch 5's copy: a snapshot taken after a passphrase change but under the SAME library key opens with the passphrase the folder's key file was FIRST written under (the twelve words and the master copy are unaffected) — §6's "the passphrase you had when it was made" is loose for that corner; noted for the author.
+4. **Dials per store id with a legacy read-through:** `ProtectionDefaults.dials(scope:storeID:)` reads `<scope>.<storeID>.<leaf>` when present, else `<scope>.<leaf>` (her existing dials keep reading exactly what they read); saves write the store-id keys. "Start a New Library" writes the new id's dials as Auto, so the new library opens silently while the old library's lock (its legacy scope key AND its per-store-id custody items) stays untouched — restore the old file and its key file, and it routes to its lobby as before.
+5. **Doors rendered on the libraryMissing face (P-2 — a door that cannot act is not rendered):** *Start a New Library* on both targets; *Restore from a Backup…* on the Mac (reveals the app's Backups folder beside the runbook sentence — the 13l restore is a manual road today) and not on the phone (no restore road exists there); *Open an Existing Library…* on neither (13x's door, unbuilt). The title, body and sub-line render verbatim.
+
+#### ORCHESTRATOR-DECIDED NOTES (settled under the mandate without the author — for the cold reviewer)
+- The biometric custody item is read ONCE per unlock: one `LAContext` evaluation, the library key and the sync record read under it — one Touch ID prompt (§14.41, ledger row 39).
+- The Always-ask session holds the DERIVED wrapping key (never the typed word) for the unlocked session, dropped at relock (decision 10's exception; ledger row 36).
+- A re-minted device identity with a non-zero cursor is reconciled as a purge-ledger RETURNER at its first round, never stranded (§14.37, ledger row 39).
+- The retired-credential sweep's seam (`legacyCleanup`) is REQUIRED at every composition site (the retirement's round-3 finding 2, the `makeSyncKeyProvider` precedent).
+- *(Implementer readings the orchestrator did not pre-settle, listed for the same reader:)* dials per store id with the legacy read-through (note 4 above); the sync custody item under Always ask exists as an IDENTITY-ONLY item (keys in session memory) so an Always-ask library keeps its identity across opens (§12's pin); the tripwire narrowed to the REAL scopes so the per-store E2EE family can be pinned against the real Keychain under throwaway scopes.
+
+#### PINS (each red-on-old; the revert's failing assertion quoted when run)
+PENDING — filled per item as they land.
+
+#### DRILLS RUN
+PENDING.
+
+#### SUITE COUNTS
+PENDING.
+
+#### HANDED FORWARD
+- To 1b: `SyncEncryptionKeys.deviceID` (the key-provider seam's one wire-visible change: the pull's `for_device` now comes from the provider).
+- To batch 2 (unrun hooks): `migrateSyncCustodyToStoreScope`; the store-key and token migrations run implicitly at the first load (TN3137 roads — they are NOT gated behind a seam, since they are the load road's own idempotent healing, exactly `StoreKeyKeychain.load`'s precedent); the key file's `masterBox` / `appleBox` roads unused until enrollment writes them; the dials' legacy read-through retires when §11 "retires the dial keys".
+- To batch 3: the plaintext-export byte-scan half of the "nothing key-shaped" pin (the export does not exist yet; the backup half lands here).
+
+#### MACHINERY NOTES
+- Reverts: **no revert in flight.** Pre-revert copies, when made, live in `App/Variorum/DerivedData/1a-prerevert/` (gitignored, inside the worktree; `App/Variorum/1a-prerevert` is NOT ignored — checked with `git check-ignore`).
+- The orchestrator's rulings commit (`39c5b395`) landed while this session was reading; the tree was clean at this record's first commit.
+
+#### QUESTIONS FOR THE AUTHOR / ARCHITECT
+1. Note 1 above (several fingerprint files beside a live library → newest by modification date) is an interim the lobby's batch will meet at the re-key; is that the rule, or does the re-key set the previous key file aside beside the LIVE library (keeping it only beside snapshots)? 1a produces no such state.
+2. Note 3's copy corner for batch 5.
