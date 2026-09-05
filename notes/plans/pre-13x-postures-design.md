@@ -142,7 +142,9 @@ file is silent, stop and ask.
 31. **Which key a row is under is told by its `server_seq`.** The shipped `e1:` envelope carries no key id and the
     mirror has no per-row key column, so the vault records the rotation: `key_vault_update`, when the payload it lands
     sets a previous corpus key, takes the next value of the server sequence INSIDE its own transaction with the vault
-    row locked and stores it as `rotation_started_seq` (the fifth nullable column); every data RPC reads the vault row
+    row locked and stores it as `rotation_started_seq` (one of SIX nullable columns — `corpus_previous_key_id` names the
+    previous key for the AAD and its twin `corpus_previous_wrapped_by_master` carries it, the existing id/wrap pair's
+    shape; never an id packed inside a value); every data RPC reads the vault row
     under a share lock for its fence and proof checks, so a push that passed the old check commits — and takes its
     seqs — before the vault write, never after. The rule every client applies: a row below the rotation seq is under
     the previous corpus key; every other row is under the current one. What remains is a pull bounded by that seq;
@@ -152,6 +154,9 @@ file is silent, stop and ask.
 32. **One rotation at a time.** Replace All Keys and Use Castle refuse while the vault carries a previous corpus key —
     at the door AND inside `key_vault_update` — with one sentence naming the device, the day and the rows to go; the
     acting device resumes through its marker and never starts a second; any device holding the new master can finish.
+    A re-wrap mid-rotation (a passphrase change, a words regeneration) sends the vault whole and carries the SAME
+    previous key through — that is not a second rotation and is allowed; only a payload setting a DIFFERENT previous
+    key refuses.
 
 ---
 
@@ -419,8 +424,8 @@ for the author's existing vault, closed the moment the hash lands. Vault READ st
 fetch the wrapped copies to obtain M). `account_purge` stays session-only (deletion is mandated and loud).
 **Consequence: the account password alone can sign in, see nothing, push nothing, purge nothing, delete nothing but
 the whole account**; a stolen or cloned session is inert against the corpus; the pull side stops disclosing even the
-structure to a bare session. Cost: five nullable columns on `key_vault` (`master_wrapped_by_apple_held`,
-`apple_key_id`, `key_proof_hash`, `corpus_previous_wrapped_by_master`, `rotation_started_seq`) and a `key_proof` parameter on the RPCs — **ONE §12 lockstep event, marker 7 → 8**,
+structure to a bare session. Cost: six nullable columns on `key_vault` (`master_wrapped_by_apple_held`,
+`apple_key_id`, `key_proof_hash`, `corpus_previous_key_id`, `corpus_previous_wrapped_by_master`, `rotation_started_seq`) and a `key_proof` parameter on the RPCs — **ONE §12 lockstep event, marker 7 → 8**,
 in her deploy window (the 13j choreography). The fake-server harness enforces the proof exactly as the SQL does.
 **Which key a row is under — the rotation seq (decision 31).** `key_vault_update`, when the payload it lands sets a
 previous corpus key, takes `nextval` of the server sequence INSIDE its own transaction with the vault row locked
@@ -436,7 +441,11 @@ rotation at a time (decision 32):** `key_vault_update` refuses a payload that wo
 present (`VARIORUM_ROTATION_IN_PROGRESS`), and the doors refuse before asking. **The read RPCs too:** `sync_horizon`
 and `sync_purge_ledger` take the proof as well — a session without the keys gets nothing from the mirror at all, a seq
 included. **The insert arm:** a `BEFORE INSERT` trigger on `key_vault` rejects a NULL `key_proof_hash` (a CHECK would
-refuse the author's existing row until her first round lands the hash — the NULL-hash arm exists for that row alone).
+refuse the author's existing row until her first round lands the hash — the NULL-hash arm exists for that row alone);
+that arm's first write takes the row `FOR UPDATE` — re-read under the lock, set only if still NULL — so two racing
+first rounds resolve deterministically, never by the deadlock detector. `sync_reencrypt` is entitlement-gated exactly
+as a push (a rotation writes ciphertext, and an unentitled account cannot pull to head, so §4 step 1 refuses first);
+whether a LAPSED account may rotate at all is 13t's product call (a hand-forward).
 `key_vault_update` scopes to `auth.uid()` like the data RPCs (the 14c guard). **The table-level UPDATE road CLOSES with
 it:** the `key_vault_owner_update` policy is DROPPED and UPDATE on `key_vault` is REVOKED from `authenticated` (the
 shipped 14b grant) — otherwise a bare session's PostgREST PATCH is a proof-free write to every vault column, the proof
@@ -727,7 +736,7 @@ phone becomes Castle at its migration (Face ID with passphrase fallback) — say
 - **The rotation seq (decision 31):** a row below the rotation seq decrypts under the previous key and one above it
   under the current; a push that read the old proof and committed before the vault write lands BELOW the seq (the fake
   server serializes the vault row exactly as the SQL's locks do); the remainder pull is bounded by the seq; completion
-  NULLs the previous key AND the seq together; a follower re-downloads the corpus once, seq-recorded only, with zero
+  NULLs the previous key, its id AND the seq together; a follower re-downloads the corpus once, seq-recorded only, with zero
   conflict variants.
 - **One rotation at a time (decision 32):** Replace All Keys and Use Castle refuse while a previous key is present, at
   the door AND at `key_vault_update`; the acting device's marker resumes; a second device holding M′ finishes.
@@ -1033,10 +1042,12 @@ item. Commit per item, push after each.
 
 **1b — the PROTOCOL event (the ONE §12 lockstep, marker 7 → 8; drafted and pinned here, DEPLOYED by her):**
 1. **The vault's additive columns** (§3.10): `master_wrapped_by_apple_held text`, `apple_key_id text`,
-   `key_proof_hash text`, `corpus_previous_wrapped_by_master text`, `rotation_started_seq bigint` (all nullable) in a
-   NEW file `Server/supabase/11_pre13x_postures.sql`; `KeyVaultFormat` gains the optional fields (format version STAYS
-   1 — additive; pin: a format-1 vault without them decodes); `KeyVaultWireRow` maps them; the previous-key field AND
-   the rotation seq are NULL outside a rotation (pin the absence of both, together).
+   `key_proof_hash text`, `corpus_previous_key_id text`, `corpus_previous_wrapped_by_master text`,
+   `rotation_started_seq bigint` (all nullable — SIX; the previous key's id is its own column, the existing id/wrap
+   pair's shape, never packed inside the value) in a NEW file `Server/supabase/11_pre13x_postures.sql`;
+   `KeyVaultFormat` gains the optional fields (format version STAYS 1 — additive; pin: a format-1 vault without them
+   decodes); `KeyVaultWireRow` maps them; the previous key, its id AND the rotation seq are NULL outside a rotation
+   (pin the absence of all three, together).
 2. **The key proof:** `KeyProof.token(master:)` (32 bytes, base64 on the wire); the server stores `SHA-256(token)` hex.
    `sync_push(batch, active_key_id, key_proof)`, `sync_pull(since_seq, active_key_id, max_rows, for_device, key_proof)`,
    `sync_purge_execute(rows, active_key_id, key_proof)`, `account_data_truncate(active_key_id, key_proof)` and the NEW `sync_reencrypt(rows jsonb, active_key_id text,
@@ -1052,8 +1063,9 @@ item. Commit per item, push after each.
    INSERT` trigger rejects a NULL `key_proof_hash` (never a CHECK: the author's existing row stays NULL until her first
    round). **The vault row is the serialization point (decision 31):** `key_vault_update` locks it `FOR UPDATE` and,
    when its payload sets a previous corpus key, stores `nextval` of the server sequence as `rotation_started_seq` in
-   the same transaction — and REFUSES (`VARIORUM_ROTATION_IN_PROGRESS`) when a previous key is already present
-   (decision 32); every data RPC (`sync_push`, `sync_pull`, `sync_reencrypt`, `sync_purge_execute`,
+   the same transaction — and REFUSES (`VARIORUM_ROTATION_IN_PROGRESS`) when a DIFFERENT previous key is already
+   present (decision 32; a re-wrap carrying the SAME previous key through is not a second rotation); the NULL-hash
+   arm's first write re-reads the row `FOR UPDATE` and sets the hash only if still NULL; every data RPC (`sync_push`, `sync_pull`, `sync_reencrypt`, `sync_purge_execute`,
    `account_data_truncate`) reads it `FOR SHARE` for the fence + proof check, so no old-key row can commit with a seq
    above the rotation seq. `sync_horizon` and `sync_purge_ledger` take `key_proof` too (a bare session gets nothing).
    `key_vault_update` scopes to `auth.uid()` (the 14c guard). The proof is a BODY parameter on every RPC. **THE VAULT'S
