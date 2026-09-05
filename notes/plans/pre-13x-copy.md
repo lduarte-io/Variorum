@@ -254,6 +254,7 @@ from another account. Enter your passphrase to connect it; everything here will 
 
 ### Change passphrase
 Title: *Change your encryption passphrase.*
+Offline (enrolled): *Changing your passphrase updates your account's keys on the server, so it needs a connection.*
 Lead: *For when you've forgotten it or want a different one. Your devices keep syncing; the old
 passphrase stops opening anything for anyone who never used it. If someone else may have USED it, tick "Also replace
 my keys" below.*

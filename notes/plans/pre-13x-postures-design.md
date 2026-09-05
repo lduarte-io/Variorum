@@ -58,7 +58,11 @@ file is silent, stop and ask.
    and one of the library key are added under it. Consent sentence + re-auth.
 8. **Posture is the ACCOUNT's** once a vault exists: every device follows. Before sync, each library's posture is its
    own key file's.
-9. **Posture changes re-authenticate in either direction:** Touch ID or the passphrase.
+9. **Posture changes re-authenticate in either direction:** Touch ID or the passphrase. **Every key door is an ONLINE
+   act for an enrolled library** — change passphrase, regenerate words, Replace All Keys, both switches — because each
+   is a server write; offline they refuse with one sentence (a local-only library changes its passphrase offline —
+   nothing is on the server). Two devices changing at once online: the server's CAS accepts the first, the second
+   re-reads and retries on top (the last change wins), and the other device learns on its next open (Rules 1 and 3).
 10. **Three acts for users, no more:** *Change Passphrase / Regenerate Twelve Words* (a re-wrap of the same keys —
     for when YOU forgot it or want another; other devices keep syncing); *Replace All Keys* (the switch's key half —
     for a secret that may have been USED or a copy that got out; four entrances: its own door, the checkbox on the
@@ -160,6 +164,7 @@ readable — that is what open means. Locking is how you end that."* (both).
 | **the device identity** | the `device_id` this machine uses for this library's sync (`device_cursor`, the purge horizon) | a device-only Keychain item per store id, no gate (a marker, not a secret); `sync_state.device_id` follows it; absent ⇒ this machine never opened this library ⇒ a fresh id |
 | **posture** | DERIVED, never a setting: the ACCOUNT is Standard ⇔ the vault has an iCloud copy; a LOCAL-ONLY library is Standard ⇔ its key file has one; an enrolled library's key file must agree with the vault (reconciled at every ready launch/unlock and at enrollment) | nowhere else |
 | Castle's two switches + the idle dial | per device, UserDefaults per store ID | as today |
+| **"the follow"** (a word this file uses throughout) | what a device does when it opens and finds the account's keys or posture changed on another device: picks up the new master and corpus key from the vault (unwrapped with the passphrase or the words), re-keys its own library if it is entering Castle, and resumes syncing — it follows the account into its new state (§7) | — |
 
 "Wrapped under X" = encrypted under X with RFC 3394 `AES.KeyWrap` (as `KeyVaultFormat` and `StoreKeyEnvelope` already
 do); a wrong key REFUSES, never yields bytes. The passphrase copy is the only brute-forceable one (Argon2id, the v1
@@ -415,8 +420,8 @@ library; into Standard silently.
 |---|---|---|---|---|
 | **Set up sync** (first device of an account) | an open library, signed in, no vault | the ceremony: P (verified against the library's own P copy if one exists — one secret) + W: generated and confirmed, ONCE — or, if the library already has twelve words, TYPED (they become the account's) or replaced by new ones (the key file's copy replaced); never a silent reuse | mint M, C, J; wrapped copies of M under P, W, and (Standard) A — A read from iCloud Keychain, minted + written if absent; create the vault with the proof hash; M/C/J into the library; the master copy (+ the iCloud copy in Standard) into the key file; **a library whose rows carry another OWNER's stamp: re-stamp every row + `resyncReinitialize`** (the deleted-then-recreated account; a library from another account) | — |
 | **Enroll** (a device joins an existing vault) | a library (fresh or with content), signed in | Standard: A → the vault's iCloud copy → M, nothing typed (P or W as the alternative). Castle: P or W → the vault → M | M/C/J into the library; the master copy into the key file; custody/posture reconciled to the account's — **a Standard-born library (its key file carries an iCloud copy) joining a CASTLE account re-keys itself exactly as §4's step 4** (its pre-sign-in rows ride into the new file; the account's passphrase becomes the library's — the P copy re-wrapped); **another OWNER: re-stamp + `resyncReinitialize`; the SAME owner with a rotated key id: the follow (§7)** | — |
-| **Change passphrase** | an OPEN library | Standard: the current P if known; *forgot it?* → a plain confirm (this device holds the keys). Castle: the current P; *forgot it?* → Touch ID on a gated device, else the twelve words (an always-ask device typed P to open). The words authorize everywhere | a RE-WRAP: M under the new P in the vault (one CAS write under the proof; a fresh KDF salt/descriptor); L under the new P in THIS device's key file. Nothing else — no backup folder, no other device's key file. The checkbox *"Also replace my keys"* runs Replace All Keys | keep syncing (they hold M); on learning they DELETE the stale copy at once (Rule 3); online their lobby refuses the old word and the new one opens via the vault road; Touch ID devices get the post-unlock prompt (Always-ask devices are asked then); their own key file gains the new copy when the new word is typed there |
-| **Regenerate twelve words** | same | same | the W copies replaced in the vault and this key file; the old words dead the moment the new are confirmed; the same checkbox | on learning they DELETE the stale W copy (Rule 3); their local W copy re-lands when the new words are typed there |
+| **Change passphrase** | an OPEN library; online if enrolled (a server write) | Standard: the current P if known; *forgot it?* → a plain confirm (this device holds the keys). Castle: the current P; *forgot it?* → Touch ID on a gated device, else the twelve words (an always-ask device typed P to open). The words authorize everywhere | a RE-WRAP: M under the new P in the vault (one CAS write under the proof; a fresh KDF salt/descriptor); L under the new P in THIS device's key file. Nothing else — no backup folder, no other device's key file. The checkbox *"Also replace my keys"* runs Replace All Keys | keep syncing (they hold M); on learning they DELETE the stale copy at once (Rule 3); online their lobby refuses the old word and the new one opens via the vault road; Touch ID devices get the post-unlock prompt (Always-ask devices are asked then); their own key file gains the new copy when the new word is typed there |
+| **Regenerate twelve words** | same (online if enrolled) | same | the W copies replaced in the vault and this key file; the old words dead the moment the new are confirmed; the same checkbox | on learning they DELETE the stale W copy (Rule 3); their local W copy re-lands when the new words are typed there |
 | **Standard → Castle** | §4 | §4 | §4 | §7 |
 | **Castle → Standard** | §4 | §4 | §4 | §7 |
 | **Replace All Keys** | an open, ENROLLED library, signed in, online, holding the CURRENT master (the door checks the key file's recorded corpus key id against the vault before offering itself; else *"this account's keys don't match this library"*) | Castle: Touch ID or P (or W). Standard: P if one is set, else a plain confirm | §4's steps 1–4 without the posture change: M′, C′, the vault rewritten under the same posture's wrappers (+ the iCloud copy again in Standard), the proof replaced under the old proof, every row re-pushed under C′, THIS library re-keyed; the checkbox *"Also choose a new passphrase"*; the marker. The server refuses a stale proof regardless of the front check | the same follow as entering Castle: type P or W once, re-key own library, pull |
@@ -445,7 +450,10 @@ the LIVE library's own key file is always current and pairs with every snapshot 
 the library lives on the current passphrase opens every old snapshot of the current key; the restore surface looks for
 a matching-fingerprint key file beside the live library as well as in the backup folder (13x's open door; the 13l
 restore drill). A cold restore elsewhere uses the passphrase of the day, the twelve words, or — a sync user of an
-undeleted account — the master key online. **A Standard-era snapshot keeps its iCloud copy and opens through the Apple
+undeleted account — the master key online. **A snapshot made while a device's key file lacks a passphrase copy** (Rule 3 deleted the stale one and the new word
+has not been typed there yet) is still made; it opens on that machine by its custody or live key file (the library key
+is unchanged by a passphrase change), and elsewhere by the twelve words or the current passphrase online through the
+master copy. **A Standard-era snapshot keeps its iCloud copy and opens through the Apple
 account for as long as it exists;** snapshots made after the switch come from the re-keyed library under the new key
 and its new key file, and carry M′ and C′.
 **The one user sentence:** *"A backup opens with your twelve words — always, unless you regenerated them — or the
@@ -587,6 +595,11 @@ migration (Face ID with passphrase fallback) — say so to her at the batch 2 si
   delete offer removes only the app's own pre-switch snapshots and never a post-switch one; a second key's file never
   replaces the first.
 - **Replace All Keys:** refused twice on a stale master (the front check; the server); the same follow as the switch.
+- **Key doors online:** an enrolled library's change passphrase / regenerate / Replace All Keys / switch refuses
+  offline with the sentence; a local-only library changes its passphrase offline; two online changes at once: CAS,
+  last writer wins, the other learns.
+- **A snapshot made in the passphrase-less window** opens on its machine by custody / the live key file and elsewhere
+  by the words or the master road online.
 - **A retired secret dies on learning:** a device that learns of a passphrase (or words) change deletes the stale
   copy from its key file before any prompt; the old word no longer opens it offline; Touch ID / the unchanged secret /
   the new word online still do; the new copy lands only after the typed word unwraps the vault's M copy (a typo writes
