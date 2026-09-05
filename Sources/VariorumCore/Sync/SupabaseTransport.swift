@@ -26,7 +26,7 @@ import Foundation
 /// only wire mapping and HTTP plumbing. The integration pass against the
 /// real Supabase project is an **author-assist gate** (account, project,
 /// and session are hers).
-public struct SupabaseTransport: SyncTransport, SyncPurgeTransport {
+public struct SupabaseTransport: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
     public struct Configuration: Sendable {
         /// `https://<project>.supabase.co`
         public let projectURL: URL
@@ -73,10 +73,11 @@ public struct SupabaseTransport: SyncTransport, SyncPurgeTransport {
 
     // MARK: - SyncTransport
 
-    public func push(_ batch: [SyncRow], activeKeyID: String) async throws -> [SyncPushOutcome] {
+    public func push(_ batch: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncPushOutcome] {
         let data = try await rpc(
             "sync_push",
-            body: PushRequest(batch: batch.map(PushItem.init), activeKeyID: activeKeyID))
+            body: PushRequest(
+                batch: batch.map(PushItem.init), activeKeyID: activeKeyID, keyProof: keyProof))
         let results = try JSONDecoder().decode([PushResult].self, from: data)
         guard results.count == batch.count else {
             throw SupabaseTransportError.mismatchedResultCount(
@@ -85,12 +86,12 @@ public struct SupabaseTransport: SyncTransport, SyncPurgeTransport {
         return try results.map { try $0.outcome() }
     }
 
-    public func pull(since: Int64, limit: Int, activeKeyID: String, deviceID: String?) async throws -> [SyncPulledRow] {
+    public func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: String, deviceID: String?) async throws -> [SyncPulledRow] {
         let data = try await rpc(
             "sync_pull",
             body: PullRequest(
                 sinceSeq: since, maxRows: limit, activeKeyID: activeKeyID,
-                deviceID: deviceID))
+                keyProof: keyProof, deviceID: deviceID))
         return try JSONDecoder().decode([PulledItem].self, from: data).map(\.pulledRow)
     }
 
@@ -128,9 +129,9 @@ public struct SupabaseTransport: SyncTransport, SyncPurgeTransport {
 
     // MARK: - SyncPurgeTransport (Phase 13j — 10_phase13j_purge.sql)
 
-    public func syncHorizon(activeKeyID: String) async throws -> Int64 {
+    public func syncHorizon(activeKeyID: String, keyProof: String) async throws -> Int64 {
         let data = try await rpc(
-            "sync_horizon", body: PurgeKeyOnlyRequest(activeKeyID: activeKeyID))
+            "sync_horizon", body: PurgeKeyOnlyRequest(activeKeyID: activeKeyID, keyProof: keyProof))
         let body = String(data: data, encoding: .utf8)?
             .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         guard let horizon = Int64(body) else {
@@ -140,10 +141,10 @@ public struct SupabaseTransport: SyncTransport, SyncPurgeTransport {
         return horizon
     }
 
-    public func purgeLedger(since: Int64, activeKeyID: String) async throws -> SyncPurgeLedgerPage {
+    public func purgeLedger(since: Int64, activeKeyID: String, keyProof: String) async throws -> SyncPurgeLedgerPage {
         let data = try await rpc(
             "sync_purge_ledger",
-            body: PurgeLedgerRequest(sinceSeq: since, activeKeyID: activeKeyID))
+            body: PurgeLedgerRequest(sinceSeq: since, activeKeyID: activeKeyID, keyProof: keyProof))
         let decoded = try JSONDecoder().decode(PurgeLedgerResult.self, from: data)
         return SyncPurgeLedgerPage(
             floor: decoded.floor,
@@ -152,12 +153,12 @@ public struct SupabaseTransport: SyncTransport, SyncPurgeTransport {
             })
     }
 
-    public func executePurge(_ rows: [SyncPurgeTarget], activeKeyID: String) async throws -> Int64 {
+    public func executePurge(_ rows: [SyncPurgeTarget], activeKeyID: String, keyProof: String) async throws -> Int64 {
         let data = try await rpc(
             "sync_purge_execute",
             body: PurgeExecuteRequest(
                 rows: rows.map { PurgeExecuteItem(table: $0.table, rowID: $0.rowID) },
-                activeKeyID: activeKeyID))
+                activeKeyID: activeKeyID, keyProof: keyProof))
         let body = String(data: data, encoding: .utf8)?
             .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         guard let seq = Int64(body) else {
@@ -165,6 +166,21 @@ public struct SupabaseTransport: SyncTransport, SyncPurgeTransport {
                 "sync_purge_execute returned '\(body)', not an integer")
         }
         return seq
+    }
+
+    // MARK: - SyncRotationTransport (pre-13x — 11_pre13x_postures.sql)
+
+    public func reencrypt(_ rows: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncReencryptOutcome] {
+        let data = try await rpc(
+            "sync_reencrypt",
+            body: ReencryptRequest(
+                rows: rows.map(ReencryptItem.init), activeKeyID: activeKeyID, keyProof: keyProof))
+        let results = try JSONDecoder().decode([ReencryptResult].self, from: data)
+        guard results.count == rows.count else {
+            throw SupabaseTransportError.mismatchedResultCount(
+                pushed: rows.count, returned: results.count)
+        }
+        return try results.map { try $0.outcome() }
     }
 
     // MARK: - HTTP plumbing
@@ -215,6 +231,12 @@ public struct SupabaseTransport: SyncTransport, SyncPurgeTransport {
         if body.contains(SyncServerRefusalMarker.notEntitled) {
             return SyncError.syncNotEntitled
         }
+        // pre-13x: the key proof's refusal — the account's keys moved
+        // elsewhere (the un-followed state) or this session holds no
+        // master; the round refuses, outbox intact, cursor unmoved.
+        if body.contains(SyncServerRefusalMarker.keyProofRequired) {
+            return SyncError.keyProofRefused
+        }
         return SupabaseTransportError.httpFailure(status: status, body: body)
     }
 
@@ -253,10 +275,13 @@ struct PushRequest: Encodable {
     /// Phase 14c: the vault-key-id fence parameter (09's required
     /// `active_key_id`).
     let activeKeyID: String
+    /// pre-13x: the key proof — a BODY parameter only (11's `key_proof`).
+    let keyProof: String
 
     enum CodingKeys: String, CodingKey {
         case batch
         case activeKeyID = "active_key_id"
+        case keyProof = "key_proof"
     }
 }
 
@@ -317,15 +342,21 @@ struct PushResult: Codable {
 
 struct PurgeKeyOnlyRequest: Encodable {
     let activeKeyID: String
-    enum CodingKeys: String, CodingKey { case activeKeyID = "active_key_id" }
+    let keyProof: String
+    enum CodingKeys: String, CodingKey {
+        case activeKeyID = "active_key_id"
+        case keyProof = "key_proof"
+    }
 }
 
 struct PurgeLedgerRequest: Encodable {
     let sinceSeq: Int64
     let activeKeyID: String
+    let keyProof: String
     enum CodingKeys: String, CodingKey {
         case sinceSeq = "since_seq"
         case activeKeyID = "active_key_id"
+        case keyProof = "key_proof"
     }
 }
 
@@ -356,9 +387,75 @@ struct PurgeExecuteItem: Encodable {
 struct PurgeExecuteRequest: Encodable {
     let rows: [PurgeExecuteItem]
     let activeKeyID: String
+    let keyProof: String
     enum CodingKeys: String, CodingKey {
         case rows
         case activeKeyID = "active_key_id"
+        case keyProof = "key_proof"
+    }
+}
+
+// pre-13x — the re-encryption RPC's wire DTOs (11_pre13x_postures.sql:
+// `sync_reencrypt(rows jsonb, active_key_id text, key_proof text)`; each
+// item `{table, row_id, expected_version, columns}`; each result
+// `{status: replaced|skipped, server_seq?, current_version?}`).
+
+struct ReencryptItem: Encodable {
+    let table: String
+    let rowID: String
+    /// The version the caller pulled the row at — the CAS.
+    let expectedVersion: Int
+    let columns: [String: SyncValue]
+
+    enum CodingKeys: String, CodingKey {
+        case table
+        case rowID = "row_id"
+        case expectedVersion = "expected_version"
+        case columns
+    }
+
+    init(row: SyncRow) {
+        self.table = row.table
+        self.rowID = row.rowID
+        self.expectedVersion = row.syncVersion
+        self.columns = row.columns
+    }
+}
+
+struct ReencryptRequest: Encodable {
+    let rows: [ReencryptItem]
+    let activeKeyID: String
+    let keyProof: String
+    enum CodingKeys: String, CodingKey {
+        case rows
+        case activeKeyID = "active_key_id"
+        case keyProof = "key_proof"
+    }
+}
+
+struct ReencryptResult: Decodable {
+    let status: String
+    let serverSeq: Int64?
+    let currentVersion: Int?
+
+    enum CodingKeys: String, CodingKey {
+        case status
+        case serverSeq = "server_seq"
+        case currentVersion = "current_version"
+    }
+
+    func outcome() throws -> SyncReencryptOutcome {
+        switch status {
+        case "replaced":
+            guard let serverSeq else {
+                throw SupabaseTransportError.malformedResult("replaced without server_seq")
+            }
+            return .replaced(serverSeq: serverSeq)
+        case "skipped":
+            return .skipped(currentVersion: currentVersion)
+        default:
+            throw SupabaseTransportError.malformedResult("unknown status '\(status)'")
+        }
     }
 }
 
@@ -389,6 +486,9 @@ struct PullRequest: Encodable {
     let maxRows: Int
     /// Phase 14c: the vault-key-id fence parameter (both round halves).
     let activeKeyID: String
+    /// pre-13x: the key proof (11's `key_proof` — a body parameter with a
+    /// server-side `default null` that the gate refuses; sent always).
+    let keyProof: String
     /// Phase 13j: the device-cursor report (10's `for_device` parameter —
     /// renamed from `device_id` the day the first live round caught the
     /// 42702 shadow; the standing rule: no RPC parameter shadows a column
@@ -404,6 +504,7 @@ struct PullRequest: Encodable {
         case sinceSeq = "since_seq"
         case maxRows = "max_rows"
         case activeKeyID = "active_key_id"
+        case keyProof = "key_proof"
         case deviceID = "for_device"
     }
 
@@ -412,6 +513,7 @@ struct PullRequest: Encodable {
         try container.encode(sinceSeq, forKey: .sinceSeq)
         try container.encode(maxRows, forKey: .maxRows)
         try container.encode(activeKeyID, forKey: .activeKeyID)
+        try container.encode(keyProof, forKey: .keyProof)
         try container.encode(deviceID, forKey: .deviceID)
     }
 }

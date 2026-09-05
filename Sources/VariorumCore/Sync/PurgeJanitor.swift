@@ -81,8 +81,11 @@ public struct PurgeJanitor: Sendable {
         let rekeyIncomplete = try await database.read { try AccountRekeyMarker.isSet($0) }
         guard !rekeyIncomplete else { throw SyncError.accountRekeyIncomplete }
         let keyID: String
+        let keyProof: String
         do {
-            keyID = try keyProvider.currentKeys().corpusKeyID
+            let keys = try keyProvider.currentKeys()
+            keyID = keys.corpusKeyID
+            keyProof = keys.keyProof
         } catch {
             throw SyncError.encryptionKeysUnavailable
         }
@@ -111,7 +114,7 @@ public struct PurgeJanitor: Sendable {
         // `sync_row_seq`-absent, so no peer ever saw them and there is no
         // one to strand — purge below with no mirror contact at all.
         let cursor = try await database.read { try Self.stateValue($0, "last_server_seq") }
-        let horizon = min(try await transport.syncHorizon(activeKeyID: keyID), cursor)
+        let horizon = min(try await transport.syncHorizon(activeKeyID: keyID, keyProof: keyProof), cursor)
         if horizon <= 0 { report.skippedNoHorizon = true }
 
         // 3. COLLECTION: intent roots (live intents published before the
@@ -173,7 +176,7 @@ public struct PurgeJanitor: Sendable {
                 }
             case .eligibleSynced:
                 let grantedSeq = try await transport.executePurge(
-                    expansion.orderedRows, activeKeyID: keyID)
+                    expansion.orderedRows, activeKeyID: keyID, keyProof: keyProof)
                 let removed: Int = try await database.write { db in
                     try db.execute(sql: "PRAGMA defer_foreign_keys = ON")
                     // Re-expand inside the removal's own transaction (the
@@ -252,8 +255,11 @@ public struct PurgeJanitor: Sendable {
         let rekeyIncomplete = try await database.read { try AccountRekeyMarker.isSet($0) }
         guard !rekeyIncomplete else { throw SyncError.accountRekeyIncomplete }
         let keyID: String
+        let keyProof: String
         do {
-            keyID = try keyProvider.currentKeys().corpusKeyID
+            let keys = try keyProvider.currentKeys()
+            keyID = keys.corpusKeyID
+            keyProof = keys.keyProof
         } catch {
             throw SyncError.encryptionKeysUnavailable
         }
@@ -266,7 +272,7 @@ public struct PurgeJanitor: Sendable {
             (try Self.stateValue(db, "last_purge_seq"),
              try Self.stateValue(db, "purge_floor_acknowledged"))
         }
-        let page = try await transport.purgeLedger(since: scanPoint, activeKeyID: keyID)
+        let page = try await transport.purgeLedger(since: scanPoint, activeKeyID: keyID, keyProof: keyProof)
         if page.floor > scanPoint && page.floor > acknowledgedFloor {
             throw SyncError.deviceLeftBehindReloadRequired(
                 floor: page.floor, scanPoint: scanPoint)
@@ -652,14 +658,17 @@ public struct PurgeJanitor: Sendable {
     /// that cannot occur, recorded in the batch record.)
     public func reonboardFromAccount(using engine: SyncEngine) async throws {
         let keyID: String
+        let keyProof: String
         do {
-            keyID = try keyProvider.currentKeys().corpusKeyID
+            let keys = try keyProvider.currentKeys()
+            keyID = keys.corpusKeyID
+            keyProof = keys.keyProof
         } catch {
             throw SyncError.encryptionKeysUnavailable
         }
         _ = try await engine.push()
         try await engine.resyncReinitialize()
-        let page = try await transport.purgeLedger(since: 0, activeKeyID: keyID)
+        let page = try await transport.purgeLedger(since: 0, activeKeyID: keyID, keyProof: keyProof)
         try await database.write { db in
             try Self.setStateValue(db, "purge_floor_acknowledged", page.floor)
             let scan = try Self.stateValue(db, "last_purge_seq")

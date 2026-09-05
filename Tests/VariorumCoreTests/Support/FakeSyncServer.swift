@@ -49,12 +49,42 @@ import Foundation
 ///    default, emulating the deploy-path seed (her account) and the
 ///    probe-setup grant.
 ///
+/// PRE-13X BATCH 1B — THE POSTURES EVENT (11_pre13x_postures.sql; the
+/// design's §3.10, decisions 12 / 31 / 32). The fake now models the vault
+/// ROW per account (the fence key id · the proof hash · the previous corpus
+/// key · the rotation seq · the revision) and enforces EXACTLY what the SQL
+/// enforces:
+///  - **the key proof** (`gatedAccount`, the SQL's `sync_key_gate` twin):
+///    after the fence, the presented `keyProof` is hashed and compared to
+///    the vault's stored hash — mismatch, absent, or malformed refuses with
+///    `SyncError.keyProofRefused` (the VARIORUM_KEY_PROOF_REQUIRED marker's
+///    classification); the NULL-hash MIGRATION ARM lands the FIRST proof's
+///    hash and accepts it, once. (The compare is a plain `==` here — the
+///    fake is not the security boundary; the SQL's is constant-time and
+///    pinned.) The gate order is the SQL's: fence → proof → entitlement;
+///  - **`keyVaultUpdate`** (the `key_vault_update` RPC's twin): absent
+///    refuses; the proof (the NULL-hash arm included); the revision CAS;
+///    the ROTATION SEQ — the payload SETS a previous key where none stands
+///    ⇒ the next sequence value (the same counter the rows take); the SAME
+///    previous key ⇒ carry-through; a DIFFERENT one while one stands ⇒
+///    `KeyVaultClientError.rotationInProgress` (decision 32); a payload
+///    without one ⇒ both cleared. The actor's serialization stands in for
+///    the SQL's row locks: a push either wholly precedes the vault write
+///    (and its seqs sit BELOW the rotation seq) or wholly follows it (and
+///    is refused by the new proof) — never interleaves (decision 31);
+///  - **`reencrypt`** (the `sync_reencrypt` twin): per row, the payload is
+///    replaced where the version matches — a FRESH seq, the version KEPT;
+///    else `skipped` with the current version;
+///  - **the gated truncate** (`account_data_truncate`'s twin): the right key
+///    id WITHOUT the proof deletes nothing;
+///  - **`purgeAccount` stays session-only** — deletion is mandated and loud.
+///
 /// The single-user suites keep their exact shape: `FakeSyncServer` itself
 /// conforms to `SyncTransport` AS the default account (pre-provisioned
-/// with the suite key world's corpus key id — the fake twin of "setup
-/// wrote the vault before any round ran"); `connection(as:)` hands out
-/// per-account transports for the multi-tenant suites.
-actor FakeSyncServer: SyncTransport, SyncPurgeTransport {
+/// with the suite key world's corpus key id AND proof hash — the fake twin
+/// of "setup wrote the vault before any round ran"); `connection(as:)`
+/// hands out per-account transports for the multi-tenant suites.
+actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
     private struct StoredRow {
         var row: SyncRow          // payload; row.syncVersion == current version
         var serverSeq: Int64      // stamped on every accepted change
@@ -69,17 +99,34 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport {
         var committed: Bool
     }
 
+    /// One account's `key_vault` row as the RPCs read it (pre-13x): the
+    /// fence's comparand, the proof's hash, the rotation bookkeeping, the
+    /// CAS token. The vault's FORMAT (the wrapped keys) lives on the
+    /// `ScriptedVaultServer` — the PostgREST twin — which routes its
+    /// `key_vault_update` through this row so ONE emulation exists.
+    struct VaultRow: Equatable {
+        /// nil = AUTO-ADOPT: the first round's presented key id becomes
+        /// the vault's (the bootstrap-runner latitude — `setVaultKeyAutoAdopt`).
+        var corpusKeyID: String?
+        /// nil = the NULL-hash MIGRATION ARM (the author's existing vault):
+        /// the first proof presented lands its hash and is accepted, once.
+        var keyProofHash: String?
+        /// The previous corpus key's wire value (`<id>:<base64>`) while a
+        /// rotation is finishing — nil otherwise, TOGETHER with the seq.
+        var previousCorpusKey: String?
+        var rotationStartedSeq: Int64?
+        var revision: Int = 1
+    }
+
     /// One account's world: its partition (the composite-PK twin), its
-    /// key_vault corpus key id (the fence's comparand), its entitlement.
+    /// vault row (the fence's comparand + the proof's hash), its entitlement.
     private struct Account {
         /// table → rowID → current state. Rows are never removed BY SYNC —
         /// a tombstone is an ordinary accepted update (S2). Phase 13j's
         /// `executePurge` is the ONE remover, exactly as 10's RPC is on
         /// the real mirror, and every removal leaves a ledger entry.
         var tables: [String: [String: StoredRow]] = [:]
-        /// nil = AUTO-ADOPT: the first round's presented key id becomes
-        /// the vault's (the bootstrap-runner latitude — `setVaultKeyAutoAdopt`).
-        var vaultCorpusKeyID: String?
+        var vault: VaultRow
         var entitled: Bool = true
         /// Phase 13j: the per-device pull cursors (the `device_cursor`
         /// twin) — device id → (last committed seq, seen-at clock tick).
@@ -129,10 +176,14 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport {
     init(visibilityHorizon: Int64 = 0) {
         self.visibilityHorizon = visibilityHorizon
         // The default account is pre-provisioned with the suite key
-        // world's corpus key id — the fake twin of "the vault row exists
-        // before any round" (the real server refuses a vault-less caller
-        // at the fence; here, an unprovisioned USER does the same).
-        accounts[Self.defaultUserID] = Account(vaultCorpusKeyID: SyncTestKeys.corpusKeyID)
+        // world's corpus key id + proof hash — the fake twin of "the vault
+        // row exists before any round" (the real server refuses a
+        // vault-less caller at the fence; here, an unprovisioned USER does
+        // the same).
+        accounts[Self.defaultUserID] = Account(
+            vault: VaultRow(
+                corpusKeyID: SyncTestKeys.corpusKeyID,
+                keyProofHash: SyncTestKeys.keyProofHash))
     }
 
     func setDeployedLockstepVersion(_ version: Int) {
@@ -165,20 +216,35 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport {
     // MARK: Phase 14c — account provisioning (the multi-tenant surface)
 
     /// Provision an account: its key_vault corpus key id (the fence's
-    /// comparand) and its entitlement. The real-world analogue is
-    /// signup + vault setup + the entitlement grant.
+    /// comparand), its proof hash (pre-13x — nil models the author's
+    /// pre-postures row, the NULL-hash arm; every other provisioning names
+    /// the hash its key world proves), and its entitlement. The
+    /// real-world analogue is signup + vault setup + the entitlement grant.
+    /// An account that already exists keeps its partition, cursors and
+    /// ledger — only the vault row (revision 1) and the entitlement reset
+    /// (the `ScriptedVaultServer`'s create lands here for a user whose
+    /// partition may already carry rows).
     func provisionAccount(
-        _ userID: String, vaultCorpusKeyID: String, entitled: Bool = true
+        _ userID: String, vaultCorpusKeyID: String, keyProofHash: String?, entitled: Bool = true
     ) {
-        accounts[userID] = Account(
-            vaultCorpusKeyID: vaultCorpusKeyID, entitled: entitled)
+        var account = accounts[userID] ?? Account(vault: VaultRow())
+        account.vault = VaultRow(corpusKeyID: vaultCorpusKeyID, keyProofHash: keyProofHash)
+        account.entitled = entitled
+        accounts[userID] = account
     }
 
-    /// The re-key act's server half: the account's vault now names a new
-    /// corpus key id (CF-8 writes the NEW vault FIRST — from this moment
-    /// every stale writer is fenced).
-    func setVaultCorpusKeyID(_ keyID: String, for userID: String = FakeSyncServer.defaultUserID) {
-        accounts[userID]?.vaultCorpusKeyID = keyID
+    /// The re-key act's server half, done by hand (the 14c-era hook —
+    /// `AccountRekey`'s real road goes through the `ScriptedVaultServer`):
+    /// the account's vault now names a new corpus key id AND the new
+    /// master's proof hash (a vault rewrite installs both; CF-8 writes the
+    /// NEW vault FIRST — from this moment every stale writer is fenced,
+    /// and every stale proof refused).
+    func setVaultRow(
+        corpusKeyID: String, keyProofHash: String?,
+        for userID: String = FakeSyncServer.defaultUserID
+    ) {
+        accounts[userID]?.vault.corpusKeyID = corpusKeyID
+        accounts[userID]?.vault.keyProofHash = keyProofHash
     }
 
     /// The tier's server half: revoke/grant hosted sync.
@@ -191,11 +257,19 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport {
     /// models "the same act that just WROTE the vault now drains through
     /// it" (the runner's create-vault → reinit → drain sequence, where
     /// the fence's comparand is by construction the key the drain
-    /// presents; the runner's own tests mint real random key material,
-    /// so no fixed id can be pre-provisioned). Fence tests always set an
-    /// explicit id instead — never this.
+    /// presents). The proof hash adopts the same way (the NULL-hash arm).
+    /// Fence and proof tests always set explicit values instead — never
+    /// this. (Since pre-13x 1b the linked `ScriptedVaultServer` provisions
+    /// the account at vault CREATE, so the runner's world no longer needs
+    /// this; kept for any world that composes the fakes apart.)
     func setVaultKeyAutoAdopt(for userID: String = FakeSyncServer.defaultUserID) {
-        accounts[userID]?.vaultCorpusKeyID = nil
+        accounts[userID]?.vault.corpusKeyID = nil
+        accounts[userID]?.vault.keyProofHash = nil
+    }
+
+    /// Test inspection: the account's vault row as the RPCs see it.
+    func vaultRow(for userID: String = FakeSyncServer.defaultUserID) -> VaultRow? {
+        accounts[userID]?.vault
     }
 
     /// A per-account transport handle for the multi-tenant suites — the
@@ -208,14 +282,14 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport {
     // MARK: SyncTransport (the default account — the single-user suites'
     // implicit caller)
 
-    func push(_ batch: [SyncRow], activeKeyID: String) throws -> [SyncPushOutcome] {
-        try push(batch, activeKeyID: activeKeyID, as: Self.defaultUserID)
+    func push(_ batch: [SyncRow], activeKeyID: String, keyProof: String) throws -> [SyncPushOutcome] {
+        try push(batch, activeKeyID: activeKeyID, keyProof: keyProof, as: Self.defaultUserID)
     }
 
-    func pull(since: Int64, limit: Int, activeKeyID: String, deviceID: String?) throws -> [SyncPulledRow] {
+    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: String, deviceID: String?) throws -> [SyncPulledRow] {
         try pull(
-            since: since, limit: limit, activeKeyID: activeKeyID, deviceID: deviceID,
-            as: Self.defaultUserID)
+            since: since, limit: limit, activeKeyID: activeKeyID, keyProof: keyProof,
+            deviceID: deviceID, as: Self.defaultUserID)
     }
 
     func schemaVersion() -> Int {
@@ -224,58 +298,73 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport {
 
     // MARK: SyncPurgeTransport (default account)
 
-    func syncHorizon(activeKeyID: String) throws -> Int64 {
-        try syncHorizon(activeKeyID: activeKeyID, as: Self.defaultUserID)
+    func syncHorizon(activeKeyID: String, keyProof: String) throws -> Int64 {
+        try syncHorizon(activeKeyID: activeKeyID, keyProof: keyProof, as: Self.defaultUserID)
     }
 
-    func purgeLedger(since: Int64, activeKeyID: String) throws -> SyncPurgeLedgerPage {
-        try purgeLedger(since: since, activeKeyID: activeKeyID, as: Self.defaultUserID)
+    func purgeLedger(since: Int64, activeKeyID: String, keyProof: String) throws -> SyncPurgeLedgerPage {
+        try purgeLedger(since: since, activeKeyID: activeKeyID, keyProof: keyProof, as: Self.defaultUserID)
     }
 
-    func executePurge(_ rows: [SyncPurgeTarget], activeKeyID: String) throws -> Int64 {
-        try executePurge(rows, activeKeyID: activeKeyID, as: Self.defaultUserID)
+    func executePurge(_ rows: [SyncPurgeTarget], activeKeyID: String, keyProof: String) throws -> Int64 {
+        try executePurge(rows, activeKeyID: activeKeyID, keyProof: keyProof, as: Self.defaultUserID)
     }
 
-    // MARK: The tenant-scoped halves (the 09 RPC bodies' fake twins)
+    // MARK: SyncRotationTransport (default account)
 
-    /// The round-level gates, in the 09 order: account (auth) → fence →
-    /// entitlement. Any refusal aborts the WHOLE call before any row is
-    /// touched, exactly as the RPC's RAISE does.
-    private func gatedAccount(_ userID: String, activeKeyID: String) throws -> Account {
+    func reencrypt(_ rows: [SyncRow], activeKeyID: String, keyProof: String) throws -> [SyncReencryptOutcome] {
+        try reencrypt(rows, activeKeyID: activeKeyID, keyProof: keyProof, as: Self.defaultUserID)
+    }
+
+    // MARK: The tenant-scoped halves (the RPC bodies' fake twins)
+
+    /// THE PROOF CHECK (the SQL's `sync_key_proof_check` twin): the
+    /// presented wire token hashed and compared to the vault's stored
+    /// hash; a malformed token refuses; the NULL-hash arm lands the first.
+    private func checkProof(_ keyProof: String, for userID: String) throws {
+        guard let presented = KeyProof.hash(ofWireToken: keyProof) else {
+            throw SyncError.keyProofRefused
+        }
+        guard let stored = accounts[userID]?.vault.keyProofHash else {
+            // THE MIGRATION ARM: the first proof lands its hash — once.
+            accounts[userID]?.vault.keyProofHash = presented
+            return
+        }
+        guard stored == presented else { throw SyncError.keyProofRefused }
+    }
+
+    /// The round-level gates, in the SQL's order: account (auth) → fence →
+    /// PROOF → entitlement. Any refusal aborts the WHOLE call before any
+    /// row is touched, exactly as the RPC's RAISE does.
+    private func gatedAccount(_ userID: String, activeKeyID: String, keyProof: String) throws -> Account {
         guard var account = accounts[userID] else {
             // The real server: an authenticated caller with NO key_vault
             // row hits the fence's missing-vault arm. An unprovisioned
             // fake account refuses the same way.
             throw SyncError.encryptionKeysReplaced
         }
-        if account.vaultCorpusKeyID == nil {
+        if account.vault.corpusKeyID == nil {
             // The auto-adopt latitude (`setVaultKeyAutoAdopt`): the vault
             // was just written by this very actor; its id is the one now
             // presented.
-            account.vaultCorpusKeyID = activeKeyID
+            account.vault.corpusKeyID = activeKeyID
             accounts[userID] = account
         }
-        guard account.vaultCorpusKeyID == activeKeyID else {
+        guard account.vault.corpusKeyID == activeKeyID else {
             throw SyncError.encryptionKeysReplaced
         }
-        guard account.entitled else {
+        try checkProof(keyProof, for: userID)
+        guard accounts[userID]!.entitled else {
             throw SyncError.syncNotEntitled
         }
-        return account
+        return accounts[userID]!
     }
 
-    func push(
-        _ batch: [SyncRow], activeKeyID: String, as userID: String
-    ) throws -> [SyncPushOutcome] {
-        _ = try gatedAccount(userID, activeKeyID: activeKeyID)
-        // Client-carried owner guard (the eight), validated for the WHOLE
-        // batch BEFORE any row applies: the RPC's RAISE aborts the whole
-        // transaction, so a partial application here would be emulation
-        // drift. A row that does not carry EXACTLY the caller's own
-        // owner_id refuses the call — another account's uid, a JSON null,
-        // and an absent column alike, which is the real RPC's
-        // `(item->'columns'->>'owner_id') is distinct from caller::text`
-        // read byte for byte (SQL NULL is distinct from any uuid).
+    /// The client-carried owner guard (the RPC's RAISE, whole-batch): a row
+    /// of an owner-carrying table that does not carry EXACTLY the caller's
+    /// own owner_id refuses the call — another account's uid, a JSON null,
+    /// and an absent column alike.
+    private func requireOwnerStamps(_ batch: [SyncRow], as userID: String) throws {
         for incoming in batch {
             guard let table = SyncSchema.table(named: incoming.table),
                   table.plainColumns.contains("owner_id")
@@ -287,6 +376,24 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport {
                     table: incoming.table, rowID: incoming.rowID)
             }
         }
+    }
+
+    /// Wire fidelity (the plan's fake-server-drift risk): real payloads
+    /// cross jsonb, which normalizes scalar types (`.real(0.0)` →
+    /// `.integer(0)`). Round-trip every stored row through JSON so engine
+    /// flows see the same normalization the real mirror would produce.
+    private func normalized(_ row: SyncRow) throws -> SyncRow {
+        try JSONDecoder().decode(SyncRow.self, from: JSONEncoder().encode(row))
+    }
+
+    func push(
+        _ batch: [SyncRow], activeKeyID: String, keyProof: String, as userID: String
+    ) throws -> [SyncPushOutcome] {
+        _ = try gatedAccount(userID, activeKeyID: activeKeyID, keyProof: keyProof)
+        // Validated for the WHOLE batch BEFORE any row applies: the RPC's
+        // RAISE aborts the whole transaction, so a partial application
+        // here would be emulation drift.
+        try requireOwnerStamps(batch, as: userID)
         let heldTransaction = holdingNextPush
         holdingNextPush = false
         return try batch.map { incoming in
@@ -307,25 +414,18 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport {
             seq += 1
             var accepted = incoming
             accepted.syncVersion = currentVersion + 1
-            // Wire fidelity (the plan's fake-server-drift risk): real
-            // payloads cross jsonb, which normalizes scalar types
-            // (`.real(0.0)` → `.integer(0)`). Round-trip every accepted row
-            // through JSON so engine flows see the same normalization the
-            // real mirror would produce.
-            let normalized = try JSONDecoder().decode(
-                SyncRow.self, from: JSONEncoder().encode(accepted))
             accounts[userID]!.tables[incoming.table, default: [:]][incoming.rowID] =
-                StoredRow(row: normalized, serverSeq: seq,
+                StoredRow(row: try normalized(accepted), serverSeq: seq,
                           writtenAt: clock, committed: !heldTransaction)
             return .accepted(newVersion: accepted.syncVersion, serverSeq: seq)
         }
     }
 
     func pull(
-        since: Int64, limit: Int, activeKeyID: String, deviceID: String? = nil,
+        since: Int64, limit: Int, activeKeyID: String, keyProof: String, deviceID: String? = nil,
         as userID: String
     ) throws -> [SyncPulledRow] {
-        let account = try gatedAccount(userID, activeKeyID: activeKeyID)
+        let account = try gatedAccount(userID, activeKeyID: activeKeyID, keyProof: keyProof)
         // Phase 13j — the device-cursor upsert (10's `for_device` arm):
         // monotonic on last_seq, seen-at stamped with the logical clock.
         if let deviceID {
@@ -348,6 +448,86 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport {
                 .map { SyncPulledRow(row: $0.row, serverSeq: $0.serverSeq) })
     }
 
+    // MARK: pre-13x — the rotation's write (the `sync_reencrypt` twin)
+
+    /// Per row: the payload replaced where the version matches — a FRESH
+    /// seq (above the rotation seq), the version KEPT; a moved or absent
+    /// row `skipped` with the server's current version. The push posture
+    /// (the gate + the owner guard); own partition only.
+    func reencrypt(
+        _ rows: [SyncRow], activeKeyID: String, keyProof: String, as userID: String
+    ) throws -> [SyncReencryptOutcome] {
+        _ = try gatedAccount(userID, activeKeyID: activeKeyID, keyProof: keyProof)
+        try requireOwnerStamps(rows, as: userID)
+        return try rows.map { incoming in
+            guard let current = accounts[userID]?.tables[incoming.table]?[incoming.rowID] else {
+                return .skipped(currentVersion: nil)
+            }
+            guard current.row.syncVersion == incoming.syncVersion else {
+                return .skipped(currentVersion: current.row.syncVersion)
+            }
+            seq += 1
+            // The bytes swapped, the version KEPT (never bumped), a fresh
+            // seq stamped.
+            accounts[userID]!.tables[incoming.table, default: [:]][incoming.rowID] =
+                StoredRow(row: try normalized(incoming), serverSeq: seq,
+                          writtenAt: clock, committed: true)
+            return .replaced(serverSeq: seq)
+        }
+    }
+
+    // MARK: pre-13x — the ONE vault write road (the `key_vault_update` twin)
+
+    /// What the RPC returns: the new revision and the rotation seq (nil
+    /// unless this call began a rotation or carried one through).
+    struct VaultUpdateReceipt: Equatable {
+        let revision: Int
+        let rotationStartedSeq: Int64?
+    }
+
+    /// The `key_vault_update` RPC's fake twin, in the SQL's order: absent
+    /// → the proof (the NULL-hash arm included) → the rotation logic
+    /// (decision 32's refusal) → the revision CAS → the write. The row's
+    /// FORMAT columns live on the `ScriptedVaultServer`, which calls this
+    /// FIRST and stores the payload only when it returns.
+    func keyVaultUpdate(
+        as userID: String, expectedRevision: Int, keyProof: String,
+        newCorpusKeyID: String, newKeyProofHash: String?, previousCorpusKey: String?
+    ) throws -> VaultUpdateReceipt {
+        guard var account = accounts[userID] else {
+            throw KeyVaultClientError.vaultAbsent
+        }
+        do {
+            try checkProof(keyProof, for: userID)
+        } catch SyncError.keyProofRefused {
+            throw KeyVaultClientError.keyProofRefused
+        }
+        account = accounts[userID]!
+        let nextSeq: Int64?
+        if previousCorpusKey == nil {
+            nextSeq = nil
+        } else if account.vault.previousCorpusKey == nil {
+            // A rotation begins: the next value of the SAME sequence the
+            // rows take (`nextval('sync_server_seq')`), inside this call.
+            seq += 1
+            nextSeq = seq
+        } else if account.vault.previousCorpusKey == previousCorpusKey {
+            nextSeq = account.vault.rotationStartedSeq
+        } else {
+            throw KeyVaultClientError.rotationInProgress
+        }
+        guard account.vault.revision == expectedRevision else {
+            throw KeyVaultClientError.vaultRevisionConflict
+        }
+        account.vault.corpusKeyID = newCorpusKeyID
+        if let newKeyProofHash { account.vault.keyProofHash = newKeyProofHash }
+        account.vault.previousCorpusKey = previousCorpusKey
+        account.vault.rotationStartedSeq = nextSeq
+        account.vault.revision = expectedRevision + 1
+        accounts[userID] = account
+        return VaultUpdateReceipt(revision: account.vault.revision, rotationStartedSeq: nextSeq)
+    }
+
     // MARK: The purge surface, tenant-scoped (10's three RPC bodies' twins)
 
     /// The 60-day drop-out window (her round-8 ruling), in the fake's
@@ -366,8 +546,8 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport {
         accounts[userID]?.ledgerFloor = floor
     }
 
-    func syncHorizon(activeKeyID: String, as userID: String) throws -> Int64 {
-        let account = try gatedAccount(userID, activeKeyID: activeKeyID)
+    func syncHorizon(activeKeyID: String, keyProof: String, as userID: String) throws -> Int64 {
+        let account = try gatedAccount(userID, activeKeyID: activeKeyID, keyProof: keyProof)
         let live = account.deviceCursors.values
             .filter { $0.seenAt + horizonDropoutTicks > clock }
             .map(\.lastSeq)
@@ -375,9 +555,9 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport {
     }
 
     func purgeLedger(
-        since: Int64, activeKeyID: String, as userID: String
+        since: Int64, activeKeyID: String, keyProof: String, as userID: String
     ) throws -> SyncPurgeLedgerPage {
-        let account = try gatedAccount(userID, activeKeyID: activeKeyID)
+        let account = try gatedAccount(userID, activeKeyID: activeKeyID, keyProof: keyProof)
         let entries = account.purgedRows
             .filter { $0.value > since }
             .map { SyncPurgedRecord(table: $0.key.table, rowID: $0.key.rowID, purgedSeq: $0.value) }
@@ -393,9 +573,9 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport {
     /// original seq, the ON CONFLICT DO NOTHING twin). One granted seq per
     /// call: the purge is one event.
     func executePurge(
-        _ rows: [SyncPurgeTarget], activeKeyID: String, as userID: String
+        _ rows: [SyncPurgeTarget], activeKeyID: String, keyProof: String, as userID: String
     ) throws -> Int64 {
-        _ = try gatedAccount(userID, activeKeyID: activeKeyID)
+        _ = try gatedAccount(userID, activeKeyID: activeKeyID, keyProof: keyProof)
         seq += 1
         let granted = seq
         for target in rows {
@@ -465,10 +645,18 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport {
         accounts[userID]?.tables.values.flatMap { $0.values.map(\.row) } ?? []
     }
 
+    /// One account's stored rows WITH their seqs — the rotation pins read
+    /// which key a row is under by its position (decision 31).
+    func storedRowsWithSeqs(for userID: String = FakeSyncServer.defaultUserID) -> [SyncPulledRow] {
+        (accounts[userID]?.tables.values.flatMap { $0.values } ?? [])
+            .map { SyncPulledRow(row: $0.row, serverSeq: $0.serverSeq) }
+            .sorted { $0.serverSeq < $1.serverSeq }
+    }
+
     // MARK: Phase 14b — wipe-and-repush (ruling R-2)
 
     /// Truncates every stored data row — the fake twin of the gate's
-    /// data-table truncate artifact. Provisioning (vault key ids,
+    /// data-table truncate artifact. Provisioning (vault rows,
     /// entitlement) SURVIVES, exactly as the real truncate never touches
     /// `key_vault` or `entitlement`; the global `server_seq` sequence is
     /// deliberately NOT reset: the ordering authority stays monotonic
@@ -480,18 +668,24 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport {
         }
     }
 
-    /// The account-scoped truncate (CF-8's re-key road, batch 2's RPC):
-    /// one tenant's data rows only.
-    func truncateAccount(_ userID: String) {
+    /// The account-scoped truncate (CF-8's re-key road, 09's
+    /// `account_data_truncate` RPC, pre-13x-gated): one tenant's data rows
+    /// only — through the gate, so the right key id WITHOUT the proof
+    /// deletes nothing. device_cursor and purged_row are untouched (10's
+    /// letter).
+    func truncateAccount(_ userID: String, activeKeyID: String, keyProof: String) throws {
+        _ = try gatedAccount(userID, activeKeyID: activeKeyID, keyProof: keyProof)
         accounts[userID]?.tables = [:]
     }
 
     /// The deletion door's purge (batch 2's `account_purge` RPC, her
     /// Round-5 ruling): the whole account goes — data partition, vault
-    /// key id, entitlement (the real RPC also removes the auth user;
-    /// here the account's disappearance models it). A lingering device's
-    /// next round refuses at the fence's missing-vault arm — the same
-    /// backstop that covers the real world's JWT-until-expiry window.
+    /// row, entitlement (the real RPC also removes the auth user;
+    /// here the account's disappearance models it). SESSION-ONLY: no
+    /// proof, no fence — deletion is mandated and loud (decision 12). A
+    /// lingering device's next round refuses at the fence's missing-vault
+    /// arm — the same backstop that covers the real world's
+    /// JWT-until-expiry window.
     func purgeAccount(_ userID: String) {
         accounts[userID] = nil
     }
@@ -500,34 +694,38 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport {
 /// A device's authenticated handle on the fake server: the same transport
 /// protocol, bound to one account — the fake twin of the JWT the real
 /// transport carries per call.
-struct FakeSyncServerConnection: SyncTransport, SyncPurgeTransport {
+struct FakeSyncServerConnection: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
     let server: FakeSyncServer
     let userID: String
 
-    func push(_ batch: [SyncRow], activeKeyID: String) async throws -> [SyncPushOutcome] {
-        try await server.push(batch, activeKeyID: activeKeyID, as: userID)
+    func push(_ batch: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncPushOutcome] {
+        try await server.push(batch, activeKeyID: activeKeyID, keyProof: keyProof, as: userID)
     }
 
-    func pull(since: Int64, limit: Int, activeKeyID: String, deviceID: String?) async throws -> [SyncPulledRow] {
+    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: String, deviceID: String?) async throws -> [SyncPulledRow] {
         try await server.pull(
-            since: since, limit: limit, activeKeyID: activeKeyID, deviceID: deviceID,
-            as: userID)
+            since: since, limit: limit, activeKeyID: activeKeyID, keyProof: keyProof,
+            deviceID: deviceID, as: userID)
     }
 
     func schemaVersion() async throws -> Int {
         await server.schemaVersion()
     }
 
-    func syncHorizon(activeKeyID: String) async throws -> Int64 {
-        try await server.syncHorizon(activeKeyID: activeKeyID, as: userID)
+    func syncHorizon(activeKeyID: String, keyProof: String) async throws -> Int64 {
+        try await server.syncHorizon(activeKeyID: activeKeyID, keyProof: keyProof, as: userID)
     }
 
-    func purgeLedger(since: Int64, activeKeyID: String) async throws -> SyncPurgeLedgerPage {
-        try await server.purgeLedger(since: since, activeKeyID: activeKeyID, as: userID)
+    func purgeLedger(since: Int64, activeKeyID: String, keyProof: String) async throws -> SyncPurgeLedgerPage {
+        try await server.purgeLedger(since: since, activeKeyID: activeKeyID, keyProof: keyProof, as: userID)
     }
 
-    func executePurge(_ rows: [SyncPurgeTarget], activeKeyID: String) async throws -> Int64 {
-        try await server.executePurge(rows, activeKeyID: activeKeyID, as: userID)
+    func executePurge(_ rows: [SyncPurgeTarget], activeKeyID: String, keyProof: String) async throws -> Int64 {
+        try await server.executePurge(rows, activeKeyID: activeKeyID, keyProof: keyProof, as: userID)
+    }
+
+    func reencrypt(_ rows: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncReencryptOutcome] {
+        try await server.reencrypt(rows, activeKeyID: activeKeyID, keyProof: keyProof, as: userID)
     }
 }
 

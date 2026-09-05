@@ -19,7 +19,11 @@ public protocol AccountLifecycleProviding: Sendable {
     /// matches the account's CURRENT `key_vault` row, which is what makes
     /// the re-key order (new vault FIRST) enforceable — a stale device
     /// cannot empty the account. Returns per-table deleted counts.
-    func truncateAccountData(activeKeyID: String) async throws -> [String: Int]
+    ///
+    /// `keyProof` (pre-13x decision 12): the right `activeKeyID` WITHOUT
+    /// the proof deletes nothing — the server's gate checks the fence,
+    /// then the proof (`SyncError.keyProofRefused` on refusal).
+    func truncateAccountData(activeKeyID: String, keyProof: String) async throws -> [String: Int]
 
     /// The deletion door's purge (09's `account_purge`, her Round-5
     /// ruling): the account's data rows + its `key_vault` row + its
@@ -113,14 +117,20 @@ public struct AccountLifecycleClient: AccountLifecycleProviding {
 
     // MARK: - AccountLifecycleProviding
 
-    public func truncateAccountData(activeKeyID: String) async throws -> [String: Int] {
+    public func truncateAccountData(activeKeyID: String, keyProof: String) async throws -> [String: Int] {
         struct Request: Encodable {
             let activeKeyID: String
-            enum CodingKeys: String, CodingKey { case activeKeyID = "active_key_id" }
+            /// pre-13x: the key proof, a BODY parameter only.
+            let keyProof: String
+            enum CodingKeys: String, CodingKey {
+                case activeKeyID = "active_key_id"
+                case keyProof = "key_proof"
+            }
         }
         let data = try await send(
             method: "POST", path: "rest/v1/rpc/account_data_truncate",
-            query: [], body: try JSONEncoder().encode(Request(activeKeyID: activeKeyID)))
+            query: [],
+            body: try JSONEncoder().encode(Request(activeKeyID: activeKeyID, keyProof: keyProof)))
         do {
             return try JSONDecoder().decode([String: Int].self, from: data)
         } catch {
@@ -188,6 +198,9 @@ public struct AccountLifecycleClient: AccountLifecycleProviding {
         let text = String(data: body, encoding: .utf8) ?? ""
         if text.contains(SyncServerRefusalMarker.staleKeyFence) {
             return SyncError.encryptionKeysReplaced
+        }
+        if text.contains(SyncServerRefusalMarker.keyProofRequired) {
+            return SyncError.keyProofRefused
         }
         return AccountLifecycleError.httpFailure(status: status, body: text)
     }

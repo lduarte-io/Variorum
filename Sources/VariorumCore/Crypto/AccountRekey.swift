@@ -112,11 +112,16 @@ public struct AccountRekey: Sendable {
         }
         let currentKey = try PassphraseKDF.deriveKey(
             passphrase: passphrase, descriptor: fetched.format.kdf)
+        let oldMaster: SymmetricKey
         do {
-            _ = try fetched.format.unwrapMaster(withPassphraseKey: currentKey)
+            oldMaster = try fetched.format.unwrapMaster(withPassphraseKey: currentKey)
         } catch KeyVaultError.unwrapFailed {
             throw VaultEnrollmentError.wrongPassphrase
         }
+        // pre-13x (decision 12): the OLD master's proof authorizes the ONE
+        // vault write that installs the NEW hash; the old proof is refused
+        // from then on. Nothing else of the old key world survives.
+        let oldProof = KeyProof.wireToken(master: oldMaster)
 
         // 1½. THE MARKER (ladder R1-1): persist rekey-in-progress BEFORE
         // anything irreversible. From here until the whole road completes,
@@ -148,7 +153,7 @@ public struct AccountRekey: Sendable {
                 (keyClass: .journalBridge, keyID: journalID, key: journal),
             ],
             kdf: descriptor)
-        try await client.updateVault(format, expectedRevision: fetched.revision)
+        try await client.updateVault(format, expectedRevision: fetched.revision, keyProof: oldProof)
 
         // 3. Custody adoption — before the truncate, so this device is
         // never stale against its own new vault.
@@ -157,8 +162,11 @@ public struct AccountRekey: Sendable {
             journalBridgeKey: journal.data, journalBridgeKeyID: journalID)
         await onNewVaultMaterial?(material)
 
-        // 4. The account-scoped truncate, fenced on the NEW key id.
-        _ = try await lifecycle.truncateAccountData(activeKeyID: corpusID)
+        // 4. The account-scoped truncate, fenced on the NEW key id and
+        // authorized by the NEW proof (the right id without the proof
+        // deletes nothing).
+        let newProof = KeyProof.wireToken(master: master)
+        _ = try await lifecycle.truncateAccountData(activeKeyID: corpusID, keyProof: newProof)
 
         // 5. resyncReinitialize — the proven R-2 client half; the app's
         // scheduler drains the re-enqueued corpus afterwards.
@@ -172,7 +180,8 @@ public struct AccountRekey: Sendable {
                 transport: transport, keyProvider: StaticSyncKeyProvider(
                     keys: SyncEncryptionKeys(
                         corpusKey: material.corpusSymmetricKey,
-                        corpusKeyID: material.corpusKeyID),
+                        corpusKeyID: material.corpusKeyID,
+                        keyProof: newProof),
                     deviceID: deviceID))
             try await engine.resyncReinitialize()
         }

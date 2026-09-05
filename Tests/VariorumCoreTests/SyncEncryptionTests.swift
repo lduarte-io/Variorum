@@ -141,7 +141,7 @@ struct SyncEncryptionTests {
                 "deleted_at": .null,
             ],
             syncVersion: 0)
-        _ = try await server.push([plaintextRow], activeKeyID: SyncTestKeys.corpusKeyID)
+        _ = try await server.push([plaintextRow], activeKeyID: SyncTestKeys.corpusKeyID, keyProof: SyncTestKeys.keyProof)
 
         let outboxBefore = try b.outboxCount()
         await #expect(throws: SyncError.unencryptedValueInEncryptedColumn(
@@ -176,7 +176,7 @@ struct SyncEncryptionTests {
         let one = await server.currentRow(table: "container", rowID: postOne)!
         var two = await server.currentRow(table: "container", rowID: postTwo)!
         two.columns["title"] = one.columns["title"]
-        _ = try await server.push([two], activeKeyID: SyncTestKeys.corpusKeyID)
+        _ = try await server.push([two], activeKeyID: SyncTestKeys.corpusKeyID, keyProof: SyncTestKeys.keyProof)
 
         do {
             _ = try await b.pull()
@@ -230,14 +230,14 @@ actor CountingTransport: SyncTransport {
         self.inner = inner
     }
 
-    func push(_ batch: [SyncRow], activeKeyID: String) async throws -> [SyncPushOutcome] {
+    func push(_ batch: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncPushOutcome] {
         contacts += 1
-        return try await inner.push(batch, activeKeyID: activeKeyID)
+        return try await inner.push(batch, activeKeyID: activeKeyID, keyProof: keyProof)
     }
 
-    func pull(since: Int64, limit: Int, activeKeyID: String, deviceID: String?) async throws -> [SyncPulledRow] {
+    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: String, deviceID: String?) async throws -> [SyncPulledRow] {
         contacts += 1
-        return try await inner.pull(since: since, limit: limit, activeKeyID: activeKeyID, deviceID: deviceID)
+        return try await inner.pull(since: since, limit: limit, activeKeyID: activeKeyID, keyProof: keyProof, deviceID: deviceID)
     }
 
     func schemaVersion() async throws -> Int {

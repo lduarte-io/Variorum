@@ -162,7 +162,7 @@ struct HostedSyncStatusReadTests {
         }
         private let script: Script
         init(_ script: Script) { self.script = script }
-        func truncateAccountData(activeKeyID: String) async throws -> [String: Int] { [:] }
+        func truncateAccountData(activeKeyID: String, keyProof: String) async throws -> [String: Int] { [:] }
         func purgeAccount() async throws -> AccountPurgeReport {
             AccountPurgeReport(dataRows: 0, vaultRows: 0, entitlementRows: 0, authUserRemoved: true)
         }
@@ -175,10 +175,10 @@ struct HostedSyncStatusReadTests {
     }
 
     private actor QuietTransport: SyncTransport {
-        func push(_ batch: [SyncRow], activeKeyID: String) async throws -> [SyncPushOutcome] {
+        func push(_ batch: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncPushOutcome] {
             batch.map { _ in .rejected(current: nil) }
         }
-        func pull(since: Int64, limit: Int, activeKeyID: String, deviceID: String?) async throws -> [SyncPulledRow] { [] }
+        func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: String, deviceID: String?) async throws -> [SyncPulledRow] { [] }
         func schemaVersion() async throws -> Int { SyncSchema.lockstepVersion }
     }
 

@@ -312,7 +312,7 @@ struct PurgeConvergenceTests {
                 db, roots: [SyncPurgeTarget(table: "container", rowID: family.post)]
             ).orderedRows
         }
-        _ = try await server.executePurge(rows, activeKeyID: SyncTestKeys.corpusKeyID)
+        _ = try await server.executePurge(rows, activeKeyID: SyncTestKeys.corpusKeyID, keyProof: SyncTestKeys.keyProof)
         let ledger = await server.purgedLedgerCount()
         #expect(try familyRowCount(a, post: family.post) > 0,
                 "the crash left the local rows standing")
@@ -823,7 +823,7 @@ struct PurgeConvergenceTests {
         try await round(a)
         _ = try await server.executePurge(
             [SyncPurgeTarget(table: "container", rowID: family.post)],
-            activeKeyID: SyncTestKeys.corpusKeyID)
+            activeKeyID: SyncTestKeys.corpusKeyID, keyProof: SyncTestKeys.keyProof)
 
         // The mirror deploys the NEXT lockstep marker: this client is now
         // BEHIND. The standalone pre-pass (the scheduler's pre-round call)

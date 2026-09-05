@@ -142,8 +142,12 @@ public struct SyncEngine: Sendable {
                 // Phase 14c: the round's held key id rides every call — the
                 // server's vault-key-id fence compares it (THE DESIGN 2).
                 let wireChunk = try chunk.map(crypto.encryptForWire)
+                // pre-13x: the key proof rides beside the key id — the
+                // authorization (decision 12); the id stays the honesty
+                // check.
                 let rawOutcomes = try await transport.push(
-                    wireChunk, activeKeyID: crypto.keys.corpusKeyID)
+                    wireChunk, activeKeyID: crypto.keys.corpusKeyID,
+                    keyProof: crypto.keys.keyProof)
                 // THE SEAM, reject-merge half: a reject's `current` row is
                 // opened HERE, before the FK check and the merge — inland
                 // logic sees plaintext only.
@@ -320,6 +324,7 @@ public struct SyncEngine: Sendable {
             // below never commits.
             let window = try await transport.pull(
                 since: fetchCursor, limit: batchSize, activeKeyID: crypto.keys.corpusKeyID,
+                keyProof: crypto.keys.keyProof,
                 deviceID: fetchCursor == since ? deviceID : nil)
             guard !window.isEmpty else { break }
             // THE SEAM, pull half (Phase 14b): every arriving row is opened

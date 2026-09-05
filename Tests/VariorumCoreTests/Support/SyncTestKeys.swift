@@ -15,7 +15,15 @@ import Foundation
 enum SyncTestKeys {
     static let corpusKeyID = "test-corpus-key-0000000000000001"
     static let corpusKey = SymmetricKey(data: Data((0..<32).map { UInt8($0 &+ 0x40) }))
-    static let keys = SyncEncryptionKeys(corpusKey: corpusKey, corpusKeyID: corpusKeyID)
+    /// pre-13x: the suite's fixed MASTER key — the key proof derives from
+    /// it (`KeyProof.wireToken`), and the fake server's default account is
+    /// provisioned with its hash, so every scenario runs with the proof
+    /// presented and checked (the crown's premise, extended).
+    static let masterKey = SymmetricKey(data: Data((0..<32).map { UInt8($0 &+ 0x20) }))
+    static let keyProof = KeyProof.wireToken(master: masterKey)
+    static let keyProofHash = KeyProof.hash(master: masterKey)
+    static let keys = SyncEncryptionKeys(
+        corpusKey: corpusKey, corpusKeyID: corpusKeyID, keyProof: keyProof)
     private static var crypto: SyncPayloadCrypto { SyncPayloadCrypto(keys: keys) }
 
     /// Seal one value exactly as the engine's seam would (AAD-bound to

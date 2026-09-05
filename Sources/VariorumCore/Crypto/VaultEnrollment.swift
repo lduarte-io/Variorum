@@ -178,8 +178,11 @@ public struct VaultEnrollment: Sendable {
         }
         // The update rides THIS fetch's revision token (R1-2): a vault
         // another device moved since the fetch refuses as
-        // `vaultRevisionConflict` — never a silent phrase revert.
-        try await client.updateVault(updated, expectedRevision: fetched.revision)
+        // `vaultRevisionConflict` — never a silent phrase revert. And the
+        // proof (pre-13x): the held master authorizes the write.
+        try await client.updateVault(
+            updated, expectedRevision: fetched.revision,
+            keyProof: KeyProof.wireToken(master: material.masterSymmetricKey))
     }
 
     // MARK: - Change passphrase (Round 7's scope addition)
@@ -228,8 +231,11 @@ public struct VaultEnrollment: Sendable {
         } catch {
             throw KeyVaultError.wrapFailed
         }
-        // CAS-guarded like every vault update (R1-2).
-        try await client.updateVault(updated, expectedRevision: fetched.revision)
+        // CAS-guarded like every vault update (R1-2); the proof from the
+        // master the authorization just unwrapped (pre-13x).
+        try await client.updateVault(
+            updated, expectedRevision: fetched.revision,
+            keyProof: KeyProof.wireToken(master: master))
         return try material(from: vault, master: master)
     }
 
@@ -253,7 +259,9 @@ public struct VaultEnrollment: Sendable {
             masterKey: material.masterSymmetricKey,
             passphraseKey: newKey,
             kdf: descriptor)
-        try await client.updateVault(updated, expectedRevision: fetched.revision)
+        try await client.updateVault(
+            updated, expectedRevision: fetched.revision,
+            keyProof: KeyProof.wireToken(master: material.masterSymmetricKey))
     }
 
     // MARK: - Helpers

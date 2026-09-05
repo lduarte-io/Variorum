@@ -64,14 +64,19 @@ public actor KeyVaultClient {
     /// The HTTP hop, seam-injectable for the no-network suites (the same
     /// discipline as `SupabaseTransport`).
     private let load: @Sendable (URLRequest) async throws -> (Data, URLResponse)
-    /// The `updated_at` stamp's clock (R2-1, decided at 14c batch 2) —
-    /// deliberately NOT `@Dependency(\.date)`: the stamp is display
-    /// bookkeeping only (never ordering — `revision` is the CAS token),
-    /// and a dependency here would force a bound clock onto every
-    /// vault-touching suite across both layers for a value no assertion
-    /// orders by. Grows an init parameter (the AuthSession `now:` shape)
-    /// the day a test needs determinism from it.
-    private let now: @Sendable () -> Date = { Date() }
+
+    /// What `key_vault_update` returns (pre-13x): the row's new revision
+    /// token and — when the payload began a rotation — the server-assigned
+    /// `rotation_started_seq` that bounds the re-encryption (decision 31).
+    public struct UpdateReceipt: Equatable, Sendable {
+        public let revision: Int
+        public let rotationStartedSeq: Int64?
+
+        public init(revision: Int, rotationStartedSeq: Int64?) {
+            self.revision = revision
+            self.rotationStartedSeq = rotationStartedSeq
+        }
+    }
 
     /// Single-flight fetch: concurrent reads coalesce onto one request
     /// (enrollment + a status refresh racing must not double-hit the
@@ -161,58 +166,103 @@ public actor KeyVaultClient {
         } catch KeyVaultClientError.httpFailure(let status, let responseBody) {
             // PostgREST duplicate-key = HTTP 409 (SQLSTATE 23505 in the body).
             if status == 409 { throw KeyVaultClientError.vaultAlreadyExists }
+            // pre-13x: the insert arm — a vault created without its
+            // proof hash is refused by the server's BEFORE INSERT trigger.
+            if responseBody.contains(SyncServerRefusalMarker.keyProofRequired) {
+                throw KeyVaultClientError.keyProofRefused
+            }
             throw KeyVaultClientError.httpFailure(status: status, body: responseBody)
         }
     }
 
-    // MARK: - Update
+    // MARK: - Update (pre-13x: the ONE write road — the `key_vault_update` RPC)
 
     /// Replace the vault row's format fields (change-passphrase re-wraps,
-    /// recovery-wrap addition/replacement) — CAS-guarded (ladder R1-2):
-    /// `expectedRevision` is the token that rode the fetch this update was
-    /// derived from; the PATCH filters `revision=eq.<expectedRevision>` and
-    /// writes `revision = expectedRevision + 1`, so a row another device
-    /// moved in the meantime matches ZERO rows and refuses typed
-    /// (`vaultRevisionConflict` — refetch and re-derive, never blind-retry:
-    /// the worst pre-fix arm was a stale full-row PATCH silently reverting
-    /// a freshly regenerated recovery wrap to the discarded words).
-    /// Refuses when no row exists (`vaultAbsent`) — an update door must
-    /// never invent a vault.
-    public func updateVault(_ format: KeyVaultFormat, expectedRevision: Int) async throws {
+    /// recovery-wrap addition/replacement, the rotation road) through the
+    /// SECURITY DEFINER `key_vault_update(payload, expected_revision,
+    /// key_proof)` RPC — the vault's table-level UPDATE road is CLOSED
+    /// since 11 (a bare session's PATCH is `permission denied`), so this is
+    /// the only write into the vault after creation, and it needs the
+    /// PROOF: `keyProof` is `KeyProof.wireToken(master:)` for the vault's
+    /// CURRENT master (the rotation road: the OLD proof authorizes the one
+    /// write that installs the new hash; the old proof is refused after).
+    ///
+    /// The R1-2 revision CAS now lives INSIDE the RPC: `expectedRevision`
+    /// is the token that rode the fetch this update was derived from; a
+    /// row another device moved refuses typed (`vaultRevisionConflict` —
+    /// refetch and re-derive, never blind-retry). The RPC replaces the
+    /// format columns WHOLE (an absent nullable key ⇒ NULL — the semantics
+    /// this door always claimed; the PATCH road's set-only-present-keys
+    /// let a re-key leave a stale recovery wrap), stamps `updated_at`
+    /// server-side, and takes the rotation seq when the payload sets a
+    /// previous corpus key (decision 31) — refusing a DIFFERENT one while
+    /// one stands (`rotationInProgress`, decision 32). Refuses when no
+    /// row exists (`vaultAbsent`) — an update door must never invent a
+    /// vault; refuses a wrong/absent proof (`keyProofRefused`).
+    ///
+    /// Returns the receipt: the new revision and the rotation seq (nil
+    /// unless this call began a rotation, or carried one through).
+    @discardableResult
+    public func updateVault(
+        _ format: KeyVaultFormat, expectedRevision: Int, keyProof: String
+    ) async throws -> UpdateReceipt {
         let session = try await sessionProvider.currentSession()
-        var row = try KeyVaultWireRow(format: format, userID: session.userID)
-        row.revision = expectedRevision + 1
-        // R2-1's declined one-liner, DECIDED at the 14c vault touch (batch
-        // 2): every update stamps `updated_at` truthfully. The re-key door
-        // replaces the row's ENTIRE contents through this path, so an
-        // insert-time-only stamp would actively mislead ("when were the
-        // keys replaced?" is a real support question at 14c's stranger
-        // scale). Display/bookkeeping data only — never ordering (the CAS
-        // token is `revision`; SyncSpec §9's clock doctrine holds).
-        row.updatedAt = DateFormatter.variorumISO8601.string(from: now())
+        let row = try KeyVaultWireRow(format: format, userID: session.userID)
+        struct Request: Encodable {
+            let payload: KeyVaultWireRow
+            let expectedRevision: Int
+            /// The proof — a BODY parameter only (never a URL, never a header).
+            let keyProof: String
+            enum CodingKeys: String, CodingKey {
+                case payload
+                case expectedRevision = "expected_revision"
+                case keyProof = "key_proof"
+            }
+        }
         let body: Data
         do {
-            body = try JSONEncoder().encode(row)
+            body = try JSONEncoder().encode(
+                Request(payload: row, expectedRevision: expectedRevision, keyProof: keyProof))
         } catch {
             throw KeyVaultClientError.malformedRow(String(describing: error))
         }
-        let (data, _) = try await authorizedRequest(
-            method: "PATCH",
-            path: "rest/v1/key_vault",
-            query: [URLQueryItem(name: "user_id", value: "eq.\(session.userID)"),
-                    URLQueryItem(name: "revision", value: "eq.\(expectedRevision)")],
-            body: body,
-            prefer: "return=representation")
-        // `return=representation` answers with the updated rows; an empty
-        // array means no row matched the filter — either the vault is
-        // absent, or its revision moved under the caller. A fresh read
-        // disambiguates; either answer sends the caller back to CURRENT
-        // state rather than retrying the stale write.
-        let rows = (try? JSONDecoder().decode([KeyVaultWireRow].self, from: data)) ?? []
-        guard !rows.isEmpty else {
-            if try await performFetch() == nil { throw KeyVaultClientError.vaultAbsent }
-            throw KeyVaultClientError.vaultRevisionConflict
+        let data: Data
+        do {
+            (data, _) = try await authorizedRequest(
+                method: "POST",
+                path: "rest/v1/rpc/key_vault_update",
+                query: [],
+                body: body,
+                prefer: nil)
+        } catch KeyVaultClientError.httpFailure(let status, let responseBody) {
+            throw Self.classifiedUpdateFailure(status: status, body: responseBody)
         }
+        struct Receipt: Decodable {
+            let revision: Int
+            let rotationStartedSeq: Int64?
+            enum CodingKeys: String, CodingKey {
+                case revision
+                case rotationStartedSeq = "rotation_started_seq"
+            }
+        }
+        do {
+            let receipt = try JSONDecoder().decode(Receipt.self, from: data)
+            return UpdateReceipt(
+                revision: receipt.revision, rotationStartedSeq: receipt.rotationStartedSeq)
+        } catch {
+            throw KeyVaultClientError.malformedRow(
+                "key_vault_update returned no receipt: \(String(describing: error))")
+        }
+    }
+
+    /// The RPC's typed refusals, classified by marker (the transports'
+    /// discipline: tokens, never sentences).
+    static func classifiedUpdateFailure(status: Int, body: String) -> KeyVaultClientError {
+        if body.contains(SyncServerRefusalMarker.vaultAbsent) { return .vaultAbsent }
+        if body.contains(SyncServerRefusalMarker.vaultRevisionConflict) { return .vaultRevisionConflict }
+        if body.contains(SyncServerRefusalMarker.keyProofRequired) { return .keyProofRefused }
+        if body.contains(SyncServerRefusalMarker.rotationInProgress) { return .rotationInProgress }
+        return .httpFailure(status: status, body: body)
     }
 
     // MARK: - HTTP plumbing (the transports' shape)
@@ -290,6 +340,15 @@ public enum KeyVaultClientError: Error, Equatable, Sendable {
     /// The row's bytes do not decode as a vault row (or a format failed to
     /// encode as one).
     case malformedRow(String)
+    /// pre-13x (decision 12): the server refused the presented key proof
+    /// (wrong, absent, or malformed) — on an update, the account's master
+    /// changed elsewhere (follow first); on a create, the row carried no
+    /// hash (the insert arm).
+    case keyProofRefused
+    /// pre-13x (decision 32): the vault carries a DIFFERENT previous corpus
+    /// key — a rotation started elsewhere is still finishing; let it
+    /// complete (any device holding the new master can) before another.
+    case rotationInProgress
 }
 
 // MARK: - The wire row (1:1 with 08_phase14b_lockstep.sql)

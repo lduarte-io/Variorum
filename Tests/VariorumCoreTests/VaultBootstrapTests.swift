@@ -55,12 +55,11 @@ struct VaultBootstrapTests {
             _ = try ops.newBlock(in: entry.id, text: "The overnight arrangement's words.", at: .end)
 
             let server = FakeSyncServer()
-            // The runner mints/unwraps REAL key material, so the fence's
-            // comparand cannot be pre-provisioned: the auto-adopt latitude
-            // models "the vault this very run just wrote/unwrapped is the
-            // one the drain presents" (see the fake's comment).
-            await server.setVaultKeyAutoAdopt()
-            let vaultWorld = VaultTestWorld()
+            // The runner mints/unwraps REAL key material; the LINKED vault
+            // world (pre-13x) provisions the mirror's fence comparand and
+            // proof hash at vault CREATE — exactly as writing the real row
+            // does — so the drain presents what the vault names.
+            let vaultWorld = VaultTestWorld(syncServer: server)
             let logLines = LockIsolated<[String]>([])
             let bootstrap = VaultBootstrap(
                 client: vaultWorld.client,
@@ -266,7 +265,7 @@ struct VaultBootstrapTests {
         let dropPushCalls: Set<Int>
         let pushCalls = LockIsolated(0)
 
-        func push(_ batch: [SyncRow], activeKeyID: String) async throws -> [SyncPushOutcome] {
+        func push(_ batch: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncPushOutcome] {
             let call = pushCalls.withValue { value -> Int in
                 value += 1
                 return value
@@ -274,11 +273,11 @@ struct VaultBootstrapTests {
             if dropPushCalls.contains(call) {
                 throw URLError(.networkConnectionLost)
             }
-            return try await wrapped.push(batch, activeKeyID: activeKeyID)
+            return try await wrapped.push(batch, activeKeyID: activeKeyID, keyProof: keyProof)
         }
 
-        func pull(since: Int64, limit: Int, activeKeyID: String, deviceID: String?) async throws -> [SyncPulledRow] {
-            try await wrapped.pull(since: since, limit: limit, activeKeyID: activeKeyID, deviceID: deviceID)
+        func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: String, deviceID: String?) async throws -> [SyncPulledRow] {
+            try await wrapped.pull(since: since, limit: limit, activeKeyID: activeKeyID, keyProof: keyProof, deviceID: deviceID)
         }
 
         func schemaVersion() async throws -> Int {

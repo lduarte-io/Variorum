@@ -26,10 +26,45 @@ public struct SyncEncryptionKeys: Sendable {
     /// (`PayloadCipher.Binding`), so a value can never be silently
     /// re-attributed to a different key.
     public let corpusKeyID: String
+    /// pre-13x (decision 12): THE KEY PROOF's wire form —
+    /// `KeyProof.wireToken(master:)`, computed on demand by the holder of
+    /// the master key and presented in the BODY of every mutating RPC and
+    /// the two read RPCs. REQUIRED here (no default — every composition
+    /// site decides): a round without it is refused by the server with
+    /// `SyncError.keyProofRefused`.
+    public let keyProof: String
+    /// pre-13x (decisions 6 / 31): while a rotation is finishing, the
+    /// PREVIOUS corpus key (+ its id) and the server's rotation seq — the
+    /// seam opens a pulled row whose `server_seq` is BELOW the seq under
+    /// the previous key, every other row under the current one. nil
+    /// outside a rotation; one optional so "both or neither" holds by
+    /// construction. Batch 2's driver fills it from the vault.
+    public let rotation: RotationInProgress?
 
-    public init(corpusKey: SymmetricKey, corpusKeyID: String) {
+    public init(
+        corpusKey: SymmetricKey, corpusKeyID: String, keyProof: String,
+        rotation: RotationInProgress? = nil
+    ) {
         self.corpusKey = corpusKey
         self.corpusKeyID = corpusKeyID
+        self.keyProof = keyProof
+        self.rotation = rotation
+    }
+}
+
+/// A rotation in progress, as the seam needs it (the design's §3.10 seq
+/// rule): the previous corpus key with its OWN id (the AAD of a
+/// pre-rotation row was bound to it) and the `rotation_started_seq` the
+/// vault carries.
+public struct RotationInProgress: Sendable {
+    public let previousCorpusKey: SymmetricKey
+    public let previousCorpusKeyID: String
+    public let startedSeq: Int64
+
+    public init(previousCorpusKey: SymmetricKey, previousCorpusKeyID: String, startedSeq: Int64) {
+        self.previousCorpusKey = previousCorpusKey
+        self.previousCorpusKeyID = previousCorpusKeyID
+        self.startedSeq = startedSeq
     }
 }
 
@@ -152,6 +187,23 @@ struct SyncPayloadCrypto: Sendable {
     /// version failures refuse the same way (nothing unauthenticated is
     /// ever applied).
     func decryptFromWire(_ row: SyncRow) throws -> SyncRow {
+        try decryptFromWire(row, key: keys.corpusKey, keyID: keys.corpusKeyID)
+    }
+
+    /// THE SEQ RULE (pre-13x decision 31): a row whose `server_seq` is
+    /// BELOW the rotation seq is under the PREVIOUS corpus key (and its
+    /// AAD names that key's id); every other row is under the current one.
+    /// Outside a rotation there is one key. Every arriving row — the pull
+    /// window and the push-reject's `current` alike — carries its seq, so
+    /// both roads open by this rule.
+    func keyMaterial(forServerSeq seq: Int64) -> (key: SymmetricKey, keyID: String) {
+        if let rotation = keys.rotation, seq < rotation.startedSeq {
+            return (rotation.previousCorpusKey, rotation.previousCorpusKeyID)
+        }
+        return (keys.corpusKey, keys.corpusKeyID)
+    }
+
+    private func decryptFromWire(_ row: SyncRow, key: SymmetricKey, keyID: String) throws -> SyncRow {
         guard let table = SyncSchema.table(named: row.table) else {
             throw SyncError.unknownTable(row.table)
         }
@@ -165,8 +217,8 @@ struct SyncPayloadCrypto: Sendable {
             case .text(let encoded):
                 do {
                     opened.columns[column] = .text(try PayloadCipher.open(
-                        encoded, key: keys.corpusKey,
-                        binding: binding(row, column: column)))
+                        encoded, key: key,
+                        binding: binding(row, column: column, keyID: keyID)))
                 } catch PayloadCipherError.notEncrypted {
                     throw SyncError.unencryptedValueInEncryptedColumn(
                         table: row.table, rowID: row.rowID, column: column)
@@ -186,12 +238,18 @@ struct SyncPayloadCrypto: Sendable {
     }
 
     func decryptFromWire(_ pulled: SyncPulledRow) throws -> SyncPulledRow {
-        SyncPulledRow(row: try decryptFromWire(pulled.row), serverSeq: pulled.serverSeq)
+        let material = keyMaterial(forServerSeq: pulled.serverSeq)
+        return SyncPulledRow(
+            row: try decryptFromWire(pulled.row, key: material.key, keyID: material.keyID),
+            serverSeq: pulled.serverSeq)
     }
 
     private func binding(_ row: SyncRow, column: String) -> PayloadCipher.Binding {
+        binding(row, column: column, keyID: keys.corpusKeyID)
+    }
+
+    private func binding(_ row: SyncRow, column: String, keyID: String) -> PayloadCipher.Binding {
         PayloadCipher.Binding(
-            table: row.table, rowID: row.rowID, column: column,
-            keyID: keys.corpusKeyID)
+            table: row.table, rowID: row.rowID, column: column, keyID: keyID)
     }
 }

@@ -56,14 +56,14 @@ actor FaultInjectingTransport: SyncTransport {
         await server.schemaVersion()
     }
 
-    func push(_ batch: [SyncRow], activeKeyID: String) async throws -> [SyncPushOutcome] {
+    func push(_ batch: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncPushOutcome] {
         pushCalls += 1
 
         if let rows = failNextPushAfterRows {
             failNextPushAfterRows = nil
             // The connection dies mid-drain: only a prefix reaches the
             // server, and the client gets no outcomes at all.
-            _ = try await server.push(Array(batch.prefix(rows)), activeKeyID: activeKeyID)
+            _ = try await server.push(Array(batch.prefix(rows)), activeKeyID: activeKeyID, keyProof: keyProof)
             throw InjectedNetworkFault()
         }
 
@@ -71,11 +71,11 @@ actor FaultInjectingTransport: SyncTransport {
             duplicateNextPushDelivery = false
             // The network delivers the request twice; the first response is
             // lost and the duplicate's response is what arrives.
-            _ = try await server.push(batch, activeKeyID: activeKeyID)
-            return try await server.push(batch, activeKeyID: activeKeyID)
+            _ = try await server.push(batch, activeKeyID: activeKeyID, keyProof: keyProof)
+            return try await server.push(batch, activeKeyID: activeKeyID, keyProof: keyProof)
         }
 
-        let outcomes = try await server.push(batch, activeKeyID: activeKeyID)
+        let outcomes = try await server.push(batch, activeKeyID: activeKeyID, keyProof: keyProof)
 
         if let hook = whilePushInFlight {
             whilePushInFlight = nil
@@ -89,13 +89,13 @@ actor FaultInjectingTransport: SyncTransport {
         return outcomes
     }
 
-    func pull(since: Int64, limit: Int, activeKeyID: String, deviceID: String?) async throws -> [SyncPulledRow] {
+    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: String, deviceID: String?) async throws -> [SyncPulledRow] {
         pullCalls += 1
         if replayNextPull, !lastPullWindow.isEmpty {
             replayNextPull = false
             return lastPullWindow
         }
-        let window = try await server.pull(since: since, limit: limit, activeKeyID: activeKeyID, deviceID: deviceID)
+        let window = try await server.pull(since: since, limit: limit, activeKeyID: activeKeyID, keyProof: keyProof, deviceID: deviceID)
         if !window.isEmpty { lastPullWindow = window }
         return window
     }

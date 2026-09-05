@@ -50,7 +50,16 @@ public protocol SyncTransport: Sendable {
     /// default — wrappers forward, fakes enforce (the schemaVersion
     /// doctrine below): a wrapper that silently dropped the key id would
     /// bypass the fence in every test that composes it.
-    func push(_ batch: [SyncRow], activeKeyID: String) async throws -> [SyncPushOutcome]
+    ///
+    /// `keyProof` (pre-13x, decision 12 — THE KEY PROOF): the wire form of
+    /// `HMAC-SHA256(M, "variorum.key-proof.v1")`, presented in the request
+    /// BODY (never a URL, never a header) and compared server-side against
+    /// the vault's stored hash in constant time. THE PROOF IS THE
+    /// AUTHORIZATION — the key id is readable from the vault by any
+    /// session; the proof is not. A session without it gets
+    /// `SyncError.keyProofRefused` and nothing from the mirror. REQUIRED,
+    /// no default — the `activeKeyID` doctrine exactly.
+    func push(_ batch: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncPushOutcome]
 
     /// Rows changed after `since`, ordered by `server_seq`, at most `limit`.
     /// State-based: each row appears once, in its current state, stamped
@@ -68,7 +77,7 @@ public protocol SyncTransport: Sendable {
     /// forward, fakes record (the schemaVersion doctrine): a wrapper that
     /// silently dropped the device id would starve the horizon in every
     /// test that composes it.
-    func pull(since: Int64, limit: Int, activeKeyID: String, deviceID: String?) async throws -> [SyncPulledRow]
+    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: String, deviceID: String?) async throws -> [SyncPulledRow]
 
     /// The mirror's deployed schema-version marker (SyncSpec §12's
     /// version-check mechanism — shipped with the Phase 11 lockstep event,
@@ -140,15 +149,48 @@ public protocol SyncPurgeTransport: Sendable {
     /// unseen for 60 days leaves the horizon (her round-8 ruling); an
     /// account with no recorded cursors answers 0 — and nothing is ≤ 0,
     /// which is the janitor's safe no-op.
-    func syncHorizon(activeKeyID: String) async throws -> Int64
+    ///
+    /// pre-13x: a READ, and the proof gates it too — a session without
+    /// the keys gets nothing from the mirror, a seq included.
+    func syncHorizon(activeKeyID: String, keyProof: String) async throws -> Int64
 
     /// Ledger entries with `purged_seq > since`, plus the coverage floor.
-    func purgeLedger(since: Int64, activeKeyID: String) async throws -> SyncPurgeLedgerPage
+    /// Proof-gated like the horizon (pre-13x).
+    func purgeLedger(since: Int64, activeKeyID: String, keyProof: String) async throws -> SyncPurgeLedgerPage
 
     /// Executes one family's purge server-side: deletes exactly the named
     /// rows inside the caller's own partition and records every one in the
     /// ledger, ONE transaction (the adjudication's note 1). Idempotent —
     /// a janitor resuming mid-family re-runs it safely. Returns the
     /// granted ledger seq (one per call: the purge is one event).
-    func executePurge(_ rows: [SyncPurgeTarget], activeKeyID: String) async throws -> Int64
+    func executePurge(_ rows: [SyncPurgeTarget], activeKeyID: String, keyProof: String) async throws -> Int64
+}
+
+// MARK: - The rotation surface (pre-13x batch 1b — the design's §3.10,
+// decision 6: version-neutral re-encryption)
+
+/// One row's re-encryption verdict from `sync_reencrypt`, index-aligned
+/// with the sent rows: `replaced` carries the FRESH `server_seq` the
+/// trigger stamped (above the rotation seq — the seq rule then reads the
+/// row under the current key; its `sync_version` is UNBUMPED, so no other
+/// device's offline edit is ever rejected by a rotation and followers
+/// apply nothing); `skipped` carries the server's current version (nil =
+/// the row is gone) — the caller pulls and retries.
+public enum SyncReencryptOutcome: Equatable, Sendable {
+    case replaced(serverSeq: Int64)
+    case skipped(currentVersion: Int?)
+}
+
+/// The rotation transport surface — a SEPARATE protocol (the 13j
+/// `SyncPurgeTransport` precedent): the rotation driver (batch 2) is its
+/// only caller, so the wrapper transports that feed engines never carry a
+/// door they never exercise; the real transport and the fake server
+/// conform. Same doctrine: REQUIRED methods, no defaults.
+public protocol SyncRotationTransport: Sendable {
+    /// Re-encrypt rows in place: each `SyncRow` carries its columns sealed
+    /// under the CURRENT corpus key and, in `syncVersion`, the version the
+    /// caller pulled it at (`expected_version` — the CAS). Own partition
+    /// only; the gate (fence + proof) and the entitlement gate ride it
+    /// exactly as a push's do.
+    func reencrypt(_ rows: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncReencryptOutcome]
 }

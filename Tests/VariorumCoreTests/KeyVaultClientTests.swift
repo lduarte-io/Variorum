@@ -59,12 +59,14 @@ struct KeyVaultClientTests {
         let sample = try sampleFormat()
         // Absent → refuses; nothing invented.
         await #expect(throws: KeyVaultClientError.vaultAbsent) {
-            try await world.client.updateVault(sample.format, expectedRevision: 1)
+            try await world.client.updateVault(
+                sample.format, expectedRevision: 1, keyProof: KeyProof.wireToken(master: sample.master))
         }
         try await world.client.createVault(sample.format)
         let updated = try sample.format.addingRecoveryWrap(
             masterKey: sample.master, recoveryKey: sample.recoveryKey)
-        try await world.client.updateVault(updated, expectedRevision: 1)
+        try await world.client.updateVault(
+            updated, expectedRevision: 1, keyProof: KeyProof.wireToken(master: sample.master))
         let fetched = try await world.client.fetchVault()
         #expect(fetched?.format == updated)
         #expect(fetched?.format.masterWrappedByRecovery != nil)
@@ -83,19 +85,23 @@ struct KeyVaultClientTests {
         // A concurrent writer moves the row: revision 1 → 2.
         let moved = try sample.format.addingRecoveryWrap(
             masterKey: sample.master, recoveryKey: sample.recoveryKey)
-        try await world.client.updateVault(moved, expectedRevision: 1)
+        try await world.client.updateVault(
+            moved, expectedRevision: 1, keyProof: KeyProof.wireToken(master: sample.master))
         let rowBefore = world.server.storedRow(userID: world.userID)
 
         // The stale writer still holds token 1 — refused, nothing written.
         await #expect(throws: KeyVaultClientError.vaultRevisionConflict) {
-            try await world.client.updateVault(sample.format, expectedRevision: 1)
+            try await world.client.updateVault(
+                sample.format, expectedRevision: 1, keyProof: KeyProof.wireToken(master: sample.master))
         }
         #expect(world.server.storedRow(userID: world.userID) == rowBefore,
                 "a refused stale update writes nothing")
         // Refetching yields the current token; the re-derived update lands.
         let current = try #require(try await world.client.fetchVault())
         #expect(current.revision == 2)
-        try await world.client.updateVault(current.format, expectedRevision: current.revision)
+        try await world.client.updateVault(
+            current.format, expectedRevision: current.revision,
+            keyProof: KeyProof.wireToken(master: sample.master))
         #expect(try await world.client.fetchVault()?.revision == 3)
     }
 

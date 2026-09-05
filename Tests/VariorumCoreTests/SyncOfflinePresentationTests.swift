@@ -127,14 +127,14 @@ actor OfflineOrForwardingTransport: SyncTransport {
         self.error = error
     }
 
-    func push(_ batch: [SyncRow], activeKeyID: String) async throws -> [SyncPushOutcome] {
+    func push(_ batch: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncPushOutcome] {
         if let error { throw error }
-        return try await server.push(batch, activeKeyID: activeKeyID)
+        return try await server.push(batch, activeKeyID: activeKeyID, keyProof: keyProof)
     }
 
-    func pull(since: Int64, limit: Int, activeKeyID: String, deviceID: String?) async throws -> [SyncPulledRow] {
+    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: String, deviceID: String?) async throws -> [SyncPulledRow] {
         if let error { throw error }
-        return try await server.pull(since: since, limit: limit, activeKeyID: activeKeyID, deviceID: deviceID)
+        return try await server.pull(since: since, limit: limit, activeKeyID: activeKeyID, keyProof: keyProof, deviceID: deviceID)
     }
 
     func schemaVersion() async throws -> Int {

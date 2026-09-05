@@ -274,7 +274,9 @@ struct VaultEnrollmentTests {
         fromStale.masterWrappedByPassphrase = try AES.KeyWrap.wrap(
             material.masterSymmetricKey, using: newKey)
         await #expect(throws: KeyVaultClientError.vaultRevisionConflict) {
-            try await deviceB.client.updateVault(fromStale, expectedRevision: stale.revision)
+            try await deviceB.client.updateVault(
+                fromStale, expectedRevision: stale.revision,
+                keyProof: KeyProof.wireToken(master: material.masterSymmetricKey))
         }
 
         // The WRITTEN phrase still unwraps; the discarded one stays dead —

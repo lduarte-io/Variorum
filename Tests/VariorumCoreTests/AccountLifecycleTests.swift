@@ -40,7 +40,7 @@ struct AccountLifecycleTests {
             self.events = events
         }
 
-        func truncateAccountData(activeKeyID: String) async throws -> [String: Int] {
+        func truncateAccountData(activeKeyID: String, keyProof: String) async throws -> [String: Int] {
             events.withValue { $0.append("truncate:\(activeKeyID)") }
             if failNextTruncate.withValue({ value -> Bool in
                 defer { value = false }
@@ -48,7 +48,9 @@ struct AccountLifecycleTests {
             }) {
                 throw AccountLifecycleError.httpFailure(status: 503, body: "gateway hiccup")
             }
-            await server.truncateAccount(userID)
+            // Through the fake's GATE (the real RPC's): the right key id
+            // without the proof deletes nothing.
+            try await server.truncateAccount(userID, activeKeyID: activeKeyID, keyProof: keyProof)
             return [:]
         }
 
@@ -73,7 +75,9 @@ struct AccountLifecycleTests {
         let enrollment: VaultEnrollment
         let lifecycle: RecordingLifecycle
         let events: LockIsolated<[String]>
-        static let vaultUserID = "user-rekey-test"
+        /// pre-13x: the vault row and the sync fence are ONE row — the
+        /// vault's user IS the sync fake's default account.
+        static let vaultUserID = FakeSyncServer.defaultUserID
     }
 
     private func makeRekeyWorld() async throws -> RekeyWorld {
@@ -81,14 +85,15 @@ struct AccountLifecycleTests {
         let client = try SyncClient(name: "A1", prefix: "AA", transport: server)
         let db = client.db
         let events = LockIsolated<[String]>([])
-        let vault = ScriptedVaultServer()
-        // The one-Postgres wiring: a successful vault POST/PATCH moves the
-        // sync fence's comparand to the row's corpus key id — exactly what
-        // writing the real key_vault row does — and logs the write for the
-        // ORDER pin. The event's `marker=` suffix records whether the
-        // persisted rekey marker was set AT the write (ladder R1-1: the
-        // brain must set it BEFORE the vault write, so a crash in every
-        // later window leaves it behind).
+        // The one-Postgres wiring (pre-13x: BUILT INTO the linked fakes —
+        // a vault CREATE provisions the mirror's fence comparand + proof
+        // hash, and `key_vault_update` runs on the mirror's vault row):
+        // the loader below only LOGS each successful write for the ORDER
+        // pin. The event's `marker=` suffix records whether the persisted
+        // rekey marker was set AT the write (ladder R1-1: the brain must
+        // set it BEFORE the vault write, so a crash in every later window
+        // leaves it behind).
+        let vault = ScriptedVaultServer(syncServer: server)
         let vaultClient = KeyVaultClient(
             configuration: KeyVaultClient.Configuration(
                 projectURL: URL(string: "https://vault.test.invalid")!,
@@ -98,11 +103,9 @@ struct AccountLifecycleTests {
             load: { [weak vault, weak server] request in
                 guard let vault, let server else { throw URLError(.cancelled) }
                 let response = try await vault.load(request)
-                if let method = request.httpMethod, method == "POST" || method == "PATCH",
+                if let method = request.httpMethod, method == "POST",
                    (response.1 as? HTTPURLResponse).map({ (200..<300).contains($0.statusCode) }) == true,
-                   String(data: response.0, encoding: .utf8) != "[]",
                    let row = vault.storedRow(userID: RekeyWorld.vaultUserID) {
-                    await server.setVaultCorpusKeyID(row.corpusKeyID)
                     let markerSet = (try? await db.read { try AccountRekeyMarker.isSet($0) }) ?? false
                     events.withValue {
                         $0.append("vault-write:\(row.corpusKeyID):marker=\(markerSet ? "set" : "clear")")
@@ -120,7 +123,8 @@ struct AccountLifecycleTests {
 
     private func keys(of material: DeviceKeyMaterial) -> SyncEncryptionKeys {
         SyncEncryptionKeys(
-            corpusKey: material.corpusSymmetricKey, corpusKeyID: material.corpusKeyID)
+            corpusKey: material.corpusSymmetricKey, corpusKeyID: material.corpusKeyID,
+            keyProof: KeyProof.wireToken(master: material.masterSymmetricKey))
     }
 
     /// Drain one client to an empty outbox (pull → push per A3).
@@ -502,7 +506,15 @@ struct AccountLifecycleTests {
             (400, #"{"message":"VARIORUM_STALE_KEY_FENCE: stale key id"}"#)
         }
         await #expect(throws: SyncError.encryptionKeysReplaced) {
-            _ = try await fenced.truncateAccountData(activeKeyID: "old-id")
+            _ = try await fenced.truncateAccountData(activeKeyID: "old-id", keyProof: "proof")
+        }
+        // pre-13x: the proof's refusal classifies into ITS typed error —
+        // the right key id without the proof deletes nothing.
+        let proofless = client { _, _ in
+            (400, #"{"message":"VARIORUM_KEY_PROOF_REQUIRED: no proof"}"#)
+        }
+        await #expect(throws: SyncError.keyProofRefused) {
+            _ = try await proofless.truncateAccountData(activeKeyID: "new-id", keyProof: "")
         }
 
         // ONE 401 refresh-and-retry, then the decoded truncate counts.
@@ -510,7 +522,9 @@ struct AccountLifecycleTests {
             n == 1 ? (401, #"{"message":"JWT expired"}"#)
                    : (200, #"{"container": 3, "variant": 7}"#)
         }
-        let counts = try await retried.truncateAccountData(activeKeyID: "new-id")
+        let counts = try await retried.truncateAccountData(activeKeyID: "new-id", keyProof: "proof")
+        // The proof rides the BODY, never the URL.
+        #expect(calls.value.allSatisfy { !$0.contains("key_proof") })
         #expect(counts == ["container": 3, "variant": 7])
 
         // The purge report decodes 1:1 with 09's jsonb keys.

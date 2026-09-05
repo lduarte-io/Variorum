@@ -108,7 +108,7 @@ public struct RekeyRecencyProbe: Sendable {
         while true {
             let window = try await transport.pull(
                 since: fetchCursor, limit: batchSize,
-                activeKeyID: keys.corpusKeyID, deviceID: nil)
+                activeKeyID: keys.corpusKeyID, keyProof: keys.keyProof, deviceID: nil)
             guard !window.isEmpty else { break }
             for item in window where item.row.table == "container" {
                 // Keep the LAST state seen (state-based feed; a later seq
