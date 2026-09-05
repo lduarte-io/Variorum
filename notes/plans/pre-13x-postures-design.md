@@ -1071,7 +1071,7 @@ another session).
 ### BATCH 1a RECORD (the client substrate — the implementer's record; LIVE STATUS first)
 
 #### LIVE STATUS (flipped in the same commit as each piece; PENDING = unverified)
-- **1a.6 the inherited KnownIssues row (the retired-credential sweep's sign-in occasion):** NOT-STARTED — settled: one private `runRetiredCredentialSweep()` (gate on `sync.allowsSync`, `Task.detached(.utility)`) serving both occasions; `legacyCleanup` a REQUIRED init parameter (the `makeSyncKeyProvider` precedent); two spy pins (a `.dev` sign-in after wiring → 0 sweeps; a `.real` sign-in records off-main); the row resolved in KnownIssues when green.
+- **1a.6 the inherited KnownIssues row (the retired-credential sweep's sign-in occasion):** DONE (`8d9cc250`; the KnownIssues row resolved in the commit that flips this line) — settled: one private `runRetiredCredentialSweep()` (gate on `sync.allowsSync`, `Task.detached(.utility)`) serving both occasions; `legacyCleanup` a REQUIRED init parameter (the `makeSyncKeyProvider` precedent); two spy pins (a `.dev` sign-in after wiring → 0 sweeps; a `.real` sign-in records off-main); the row resolved in KnownIssues when green.
 - **1a.2 the key file, format 2:** NOT-STARTED — settled: `formatVersion = 2`; `master` / `apple` + `appleKeyID` / `vaultKDF` + `vaultCorpusKeyID` (all optional; a format-1 file decodes with them nil — pin); the `masterBox(key:under:)` / `unwrapKey(master:)` and `appleBox(key:under:appleKeyID:)` / `unwrapKey(apple:)` roads + `recordVaultReconciliation`; naming `variorum-keys-<fp16>.json` (`url(besideStore:fingerprint:)`), the legacy `variorum-keys.json` read when no fingerprint file exists (`locate(besideStore:)`); `StoreBackup.copyKeyEnvelope` writes ONLY WHEN ABSENT (never rewrites a backup folder's key file — the brief's last sentence); snapshots `variorum-backup-<stamp>-<fp8>.sqlite`; `existingBackups` / `date(fromBackupURL:)` accept both names.
 - **1a.3 custody per STORE ID:** NOT-STARTED — settled: `StoreKeyCustody.deviceKeychain(scope:storeURL:)` resolves the store id from the key file beside the store (`locate`); accounts `<scope>-<storeID>-bound` / `-biometric` / `-biometric-probe`; the mint road writes the key file (storeID + fingerprint, no wraps) BEFORE the Keychain add; legacy `<scope>-bound` (DP) and `<scope>` (file-based) migrate read → re-add → verify → delete-legacy (pin: once; a second store never collides — red by behavioural revert of the account naming); the gated legacy `<scope>-biometric` migrates at unlock under the evaluated context.
 - **1a.4 device-bound session tokens:** NOT-STARTED — settled: `KeychainAuthStorage` account `session-bound`, DP + `WhenUnlockedThisDeviceOnly`; load reads bound → legacy `session` → migrate → delete legacy; save/clear cover both; `KeychainPartitionTests` extended; a signed-host pin under a throwaway SERVICE.
@@ -1095,7 +1095,7 @@ another session).
 - *(Implementer readings the orchestrator did not pre-settle, listed for the same reader:)* dials per store id with the legacy read-through (note 4 above); the sync custody item under Always ask exists as an IDENTITY-ONLY item (keys in session memory) so an Always-ask library keeps its identity across opens (§12's pin); the tripwire narrowed to the REAL scopes so the per-store E2EE family can be pinned against the real Keychain under throwaway scopes.
 
 #### PINS (each red-on-old; the revert's failing assertion quoted when run)
-PENDING — filled per item as they land.
+- **1a.6** `Phase9cAuthWiringTests.aDevStoreSignInAfterWiringNeverRunsTheSweep` + `.aRealStoreSignInSweepsOffTheMainThread` (`8d9cc250`). Green: `Test run with 20 tests in 3 suites passed` (Phase9cAuthWiringTests · HostedSyncStatusReadTests · AccountDoorWiringTests, 0 skipped). RED by behavioural revert (the sign-in occasion's `runRetiredCredentialSweep()` → the old bare `legacyCleanup()`): `Expectation failed: (sweeps.count → 1) == 0` and `Expectation failed: !(…SweepSpy).anyOnMainThread → true` — `Test run with 14 tests in 1 suite failed … with 2 issues`. The required-seam half is compile-time (every `AppServices(` site names `legacyCleanup:`; the sixth site, `TierAndOnboardingTests.withServices`, now declares `{}`).
 
 #### DRILLS RUN
 PENDING.
@@ -1109,7 +1109,7 @@ PENDING.
 - To batch 3: the plaintext-export byte-scan half of the "nothing key-shaped" pin (the export does not exist yet; the backup half lands here).
 
 #### MACHINERY NOTES
-- Reverts: **no revert in flight.** Pre-revert copies, when made, live in `App/Variorum/DerivedData/1a-prerevert/` (gitignored, inside the worktree; `App/Variorum/1a-prerevert` is NOT ignored — checked with `git check-ignore`).
+- Reverts: **no revert in flight** (1a.6's drill restored by `git checkout --` from `8d9cc250`, `git diff` empty). Pre-revert copies, when made, live in `App/Variorum/DerivedData/1a-prerevert/` (gitignored, inside the worktree; `App/Variorum/1a-prerevert` is NOT ignored — checked with `git check-ignore`).
 - The orchestrator's rulings commit (`39c5b395`) landed while this session was reading; the tree was clean at this record's first commit.
 
 #### QUESTIONS FOR THE AUTHOR / ARCHITECT
