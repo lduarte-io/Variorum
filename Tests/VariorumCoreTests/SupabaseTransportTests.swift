@@ -137,13 +137,13 @@ struct SupabaseTransportTests {
             + "\n"
             + String(contentsOf: root.appendingPathComponent("10_phase13j_purge.sql"), encoding: .utf8))
         // The deployed RPC bodies are the LAST rework in deploy order —
-        // 10's (Phase 13j) since it re-creates both functions (annotated
-        // pin edit, batch 6b: this read was 06's, stale since 09; the
-        // claim — the deployed allowlists carry the whole registry — is
-        // unchanged, and AuthRLSDDLTests' composition pins carry the
-        // deeper body checks).
+        // 11's (pre-13x) since it re-creates both functions with the
+        // key-proof parameter (annotated pin edit, batch 1b: this read was
+        // 10's; the claim — the deployed allowlists carry the whole
+        // registry — is unchanged, and AuthRLSDDLTests' composition pins
+        // carry the deeper body checks).
         let rpc = try strippingComments(String(
-            contentsOf: root.appendingPathComponent("10_phase13j_purge.sql"), encoding: .utf8))
+            contentsOf: root.appendingPathComponent("11_pre13x_postures.sql"), encoding: .utf8))
 
         for table in SyncSchema.tables {
             #expect(schema.contains("create table \(table.name) ("),

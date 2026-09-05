@@ -38,6 +38,15 @@ struct AuthRLSDDLTests {
         "08_phase14b_lockstep.sql",
         "09_phase14c_multitenant.sql",
         "10_phase13j_purge.sql",
+        "11_pre13x_postures.sql",
+    ]
+
+    /// The DATA RPCs — every function 11 re-creates with `key_proof` beside
+    /// `active_key_id` (+ the new re-encryption door). `account_purge` is
+    /// deliberately NOT here: deletion is mandated and loud, session-only.
+    private static let proofGatedFunctions = [
+        "sync_push", "sync_pull", "sync_horizon", "sync_purge_ledger",
+        "sync_purge_execute", "account_data_truncate", "sync_reencrypt",
     ]
 
     /// Which lockstep file BORE each registry table's multi-tenant DDL.
@@ -207,21 +216,33 @@ struct AuthRLSDDLTests {
         }
     }
 
-    /// THE VAULT-KEY-ID FENCE (THE DESIGN item 2): both deployed bodies
-    /// compare the presented active_key_id against the caller's
-    /// key_vault corpus key id and refuse the whole round on mismatch
-    /// OR a missing vault row, with the marker the client classifies
-    /// into the CF-16 replaced state.
-    @Test func bothDeployedRPCBodiesCarryTheVaultKeyIDFence() throws {
-        for function in ["sync_push", "sync_pull"] {
+    /// THE VAULT-KEY-ID FENCE (THE DESIGN item 2) — since pre-13x 11 it
+    /// lives in the ONE gate helper every data body calls first: the gate
+    /// reads the caller's vault row FOR SHARE, compares the presented
+    /// active_key_id against its corpus key id and refuses the whole
+    /// round on mismatch OR a missing vault row, with the marker the
+    /// client classifies into the CF-16 replaced state — then checks the
+    /// proof. Every DATA body carries the call; `account_purge` does not.
+    @Test func everyDeployedDataBodyCallsTheGateAndTheGateCarriesTheFence() throws {
+        for function in Self.proofGatedFunctions {
             let body = try Self.finalBody(of: function)
-            #expect(body.contains("select corpus_key_id into fence_key from key_vault where user_id = caller;"),
-                    "\(function) must read the caller's vault key id")
-            #expect(body.contains("if fence_key is null or fence_key is distinct from active_key_id then"),
-                    "\(function) must fence on mismatch AND on a missing vault row")
-            #expect(body.contains(SyncServerRefusalMarker.staleKeyFence),
-                    "\(function)'s fence refusal must carry the client-classifiable marker")
+            #expect(body.contains("perform sync_key_gate(active_key_id, key_proof);"),
+                    "\(function) must call the gate — the fence + the proof — before any row is touched")
+            #expect(!body.contains("select corpus_key_id into fence_key"),
+                    "\(function) must not inline a second fence beside the gate's")
         }
+        let gate = try Self.finalBody(of: "sync_key_gate")
+        #expect(gate.contains("select corpus_key_id into fence_key from key_vault where user_id = caller for share;"),
+                "the gate reads the caller's vault key id under a SHARE lock (decision 31)")
+        #expect(gate.contains("if fence_key is null or fence_key is distinct from active_key_id then"),
+                "the gate must fence on mismatch AND on a missing vault row")
+        #expect(gate.contains(SyncServerRefusalMarker.staleKeyFence),
+                "the fence refusal must carry the client-classifiable marker")
+        #expect(gate.contains("perform sync_key_proof_check(key_proof);"),
+                "the fence is followed by the proof — the authorization")
+        let purge = try Self.finalBody(of: "account_purge")
+        #expect(!purge.contains("sync_key_gate") && !purge.contains("key_proof"),
+                "account_purge stays session-only — deletion is mandated and loud (decision 12)")
     }
 
     /// THE ENTITLEMENT GATE (THE DESIGN item 5): both deployed bodies
@@ -387,12 +408,11 @@ struct AuthRLSDDLTests {
     @Test func theAccountTruncateDoorIsFencedTenantScopedAndRegistryExact() throws {
         let body = try Self.finalBody(of: "account_data_truncate")
         #expect(body.contains("raise exception 'account acts require an authenticated user'"))
-        #expect(body.contains("select corpus_key_id into fence_key from key_vault where user_id = caller;"),
-                "the truncate must read the caller's vault key id — the fence")
-        #expect(body.contains("if fence_key is null or fence_key is distinct from active_key_id then"),
-                "the truncate must fence on mismatch AND on a missing vault row")
-        #expect(body.contains(SyncServerRefusalMarker.staleKeyFence),
-                "the fence refusal must carry the client-classifiable marker")
+        // pre-13x 11: the fence + the proof ride the ONE gate helper (the
+        // gate's own pin holds the fence's letter); the right
+        // active_key_id WITHOUT the proof deletes nothing.
+        #expect(body.contains("perform sync_key_gate(active_key_id, key_proof);"),
+                "the truncate must call the gate — the fence, then the proof")
         #expect(body.contains("delete from %I where owner_id = $1"),
                 "row deletes, tenant-scoped by the composite identity — never TRUNCATE")
         #expect(!body.lowercased().contains("truncate table"),
@@ -793,23 +813,47 @@ struct AuthRLSDDLTests {
             #expect(sql.contains("('\(table)',"),
                     "the sweep must carry an expectation for \(table)")
         }
-        // 13j (batch 6b): sync_pull's expectation moved to its NEW
-        // signature (10 drops the old overload — a reappearance is the
-        // UNEXPECTED class the sweep exists to catch), and the three
-        // purge functions joined on the account-door posture.
-        for function in ["sync_push(jsonb,text)", "sync_pull(bigint,text,integer,text)",
-                         "account_data_truncate(text)", "account_purge()",
+        // pre-13x 11: every data RPC's expectation moved to its NEW
+        // `key_proof` signature (11 drops the six old overloads — a
+        // reappearance is the UNEXPECTED class the sweep exists to catch),
+        // the two new doors and the two gate helpers joined, and the
+        // vault's policy set + insert trigger + per-role UPDATE privilege
+        // are asserted BY NAME (a count cannot tell the closure from
+        // nothing).
+        for function in ["sync_push(jsonb,text,text)", "sync_pull(bigint,text,integer,text,text)",
+                         "account_data_truncate(text,text)", "account_purge()",
                          "entitlement_set(uuid,text,boolean,timestampwithtimezone,text)",
                          "sync_schema_version()", "sync_table_pk(text)",
-                         "sync_horizon(text)", "sync_purge_ledger(bigint,text)",
-                         "sync_purge_execute(jsonb,text)"] {
+                         "sync_horizon(text,text)", "sync_purge_ledger(bigint,text,text)",
+                         "sync_purge_execute(jsonb,text,text)",
+                         "sync_reencrypt(jsonb,text,text)", "key_vault_update(jsonb,integer,text)",
+                         "sync_key_gate(text,text)", "sync_key_proof_check(text)",
+                         "key_vault_require_proof_hash()"] {
             #expect(sql.contains("('\(function)'"),
                     "the sweep must carry an expectation for \(function)")
         }
+        for old in ["('sync_push(jsonb,text)'", "('sync_pull(bigint,text,integer,text)'",
+                    "('account_data_truncate(text)'", "('sync_horizon(text)'",
+                    "('sync_purge_ledger(bigint,text)'", "('sync_purge_execute(jsonb,text)'"] {
+            #expect(!sql.contains(old),
+                    "the sweep must not EXPECT the dropped overload \(old) — it must surface it as UNEXPECTED")
+        }
+        for policy in ["key_vault_owner_select", "key_vault_owner_insert",
+                       "key_vault_definer_fence_select", "key_vault_definer_update"] {
+            #expect(sql.contains("('\(policy)')"),
+                    "the sweep must expect the vault policy \(policy) by name")
+        }
+        #expect(!sql.contains("('key_vault_owner_update')"),
+                "the dropped PATCH-road policy must never be EXPECTED — it is the UNEXPECTED class")
+        #expect(sql.contains("('privilege:authenticated:UPDATE', false)"),
+                "the sweep must assert the vault's UPDATE privilege is REVOKED from authenticated")
+        #expect(sql.contains("('privilege:variorum_definer:UPDATE', true)"))
+        #expect(sql.contains("('trigger:key_vault_require_proof_hash', true)"))
         // And it must surface an object nobody expected — a lingering old
         // RPC overload is the door this sweep exists to catch.
         #expect(sql.contains("UNEXPECTED FUNCTION"))
         #expect(sql.contains("UNEXPECTED TABLE"))
+        #expect(sql.contains("UNEXPECTED POLICY"))
     }
 
     // MARK: - Header choreography pins (prose, deliberately)
@@ -875,6 +919,22 @@ struct AuthRLSDDLTests {
         #expect(sql09.contains("EXPLICIT GO"))
         #expect(sql09.contains("A1 rail"))
         #expect(sql09.contains("re-pushes"))
+        // 11 (pre-13x): the postures event. Deploy is the ORCHESTRATOR's
+        // window under her standing PRE-AUTHORIZED go (design §16), never a
+        // batch implementer's; scheduled immediately BEFORE batch 2's
+        // migration + both installs (a marker-7 build refuses until then);
+        // the A1 rail; the LIVE PATCH PROBE proves the closed write road.
+        let sql11 = try Self.sqlFile("11_pre13x_postures.sql")
+        #expect(sql11.contains("THE CHOREOGRAPHY"))
+        #expect(sql11.contains("this file runs on the mirror FIRST"))
+        #expect(sql11.contains("SyncSpec §12"))
+        #expect(sql11.contains("ARCHITECT"))
+        #expect(sql11.contains("never a batch implementer"))
+        #expect(sql11.contains("PRE-AUTHORIZED"))
+        #expect(sql11.contains("A1 rail"))
+        #expect(sql11.contains("PHONE"))
+        #expect(sql11.contains("LIVE PATCH PROBE"))
+        #expect(sql11.contains("pre-13x-deploy-checklist.md"))
     }
 
     // MARK: - The key_vault pins (Phase 14b — the vault is ACCOUNT data on
@@ -937,14 +997,18 @@ struct AuthRLSDDLTests {
         // (Phase 14c rework: the deployed bodies now legitimately READ
         // key_vault — the vault-key-id fence — so the pin narrows from
         // "never mentioned" to "never allowlisted, never written".)
-        for function in ["sync_push", "sync_pull"] {
+        // pre-13x 11: the data bodies still never write the vault. The ONE
+        // vault write beside `key_vault_update` is the proof check's
+        // MIGRATION ARM (the first proof landing its hash on a NULL-hash
+        // row) — inside the helper, never in a data body.
+        for function in Self.proofGatedFunctions {
             let body = try Self.finalBody(of: function)
             #expect(!body.contains("'key_vault'"),
                     "\(function)'s allowlist must never carry key_vault")
             #expect(!body.contains("insert into key_vault")
                         && !body.contains("update key_vault")
                         && !body.contains("delete from key_vault"),
-                    "\(function) must never WRITE the vault — the fence only reads it")
+                    "\(function) must never WRITE the vault — the gate reads it")
         }
     }
 
@@ -1162,7 +1226,9 @@ struct AuthRLSDDLTests {
         #expect(body.contains("min(last_seq)"))
         #expect(body.contains("seen_at > now() - interval '60 days'"))
         #expect(body.contains("coalesce"))
-        #expect(body.contains("select corpus_key_id into fence_key from key_vault where user_id = caller;"))
+        // pre-13x 11: a READ RPC, and the proof gates it too — a session
+        // without the keys gets nothing from the mirror, a seq included.
+        #expect(body.contains("perform sync_key_gate(active_key_id, key_proof);"))
         #expect(!body.contains("from entitlement"),
                 "no entitlement gate on purge — data removal is a right")
     }
@@ -1177,6 +1243,8 @@ struct AuthRLSDDLTests {
         #expect(body.contains("'floor', 0"))
         #expect(body.contains("p.purged_seq > since_seq"))
         #expect(body.contains("'purged_seq', p.purged_seq"))
+        #expect(body.contains("perform sync_key_gate(active_key_id, key_proof);"),
+                "pre-13x: the ledger page is proof-gated too")
         #expect(!body.contains("from entitlement"))
     }
 
@@ -1195,7 +1263,7 @@ struct AuthRLSDDLTests {
                 "the ledger upsert is what makes a resumed family purge idempotent")
         #expect(Self.namedArray("allowed", in: body) == Set(SyncSchema.tables.map(\.name)),
                 "the purge door's allowlist drifted from the registry")
-        #expect(body.contains("select corpus_key_id into fence_key from key_vault where user_id = caller;"))
+        #expect(body.contains("perform sync_key_gate(active_key_id, key_proof);"))
         #expect(!body.contains("from entitlement"))
         #expect(!body.lowercased().contains("truncate table"))
     }
@@ -1229,5 +1297,302 @@ struct AuthRLSDDLTests {
         #expect(sql.contains("PRE-AUTHORIZED"))
         #expect(sql.contains("A1 rail"))
         #expect(sql.contains("PHONE"))
+    }
+
+    // MARK: - pre-13x batch 1b: the POSTURES lockstep event (11) pins.
+    // The design (notes/plans/pre-13x-postures-design.md §3.10, decisions
+    // 12 / 31 / 32, ledger 16 / 25 / 29 / 34 / 35 / 38 / 41) is the binding
+    // record; the batch record under its §19 carries the implementer's
+    // readings. The artifact is DRAFTED AND PINNED, NOT DEPLOYED — deploy
+    // is the orchestrator's window under her standing pre-authorization.
+
+    /// 11 takes the 09/10 deploy shape: one transaction, the re-run guard
+    /// before the six destructive drops, the marker bump last inside the
+    /// transaction; the guard keys on evidence only a deployed 11 leaves.
+    @Test func thePosturesEventDeploysAsOneGuardedTransaction() throws {
+        let sql = Self.strippingComments(try Self.sqlFile("11_pre13x_postures.sql"))
+        let problems = Self.deployShapeProblems(strippedSQL: sql)
+        #expect(problems.isEmpty, "11's deploy shape is unsound: \(problems.sorted())")
+        #expect(sql.contains("deployed_marker >= 8 or proof_column_here"))
+        #expect(sql.contains("column_name = 'key_proof_hash'"))
+        #expect(sql.contains("VARIORUM_11_ALREADY_DEPLOYED"))
+        #expect(sql.contains("current_setting('variorum.allow_11_rerun', true)"))
+        #expect(sql.contains("hint    ="), "the refusal carries the operator's next step")
+    }
+
+    /// THE OLD SIGNATURES ARE DROPPED FIRST (the 09/10 discipline): a
+    /// lingering proof-free overload beside the new one would be the exact
+    /// door this event closes. Every new signature carries `key_proof`
+    /// beside `active_key_id`; `account_purge` is never re-created.
+    @Test func thePosturesEventDropsEveryOldSignatureFirstAndCreatesTheNewOnes() throws {
+        let sql = Self.strippingComments(try Self.sqlFile("11_pre13x_postures.sql"))
+        let drops = [
+            "drop function if exists sync_push(jsonb, text);",
+            "drop function if exists sync_pull(bigint, text, int, text);",
+            "drop function if exists sync_horizon(text);",
+            "drop function if exists sync_purge_ledger(bigint, text);",
+            "drop function if exists sync_purge_execute(jsonb, text);",
+            "drop function if exists account_data_truncate(text);",
+        ]
+        let creates = [
+            "create or replace function sync_push(batch jsonb, active_key_id text, key_proof text)",
+            // `key_proof text default null` — forced by Postgres (a defaultless
+            // parameter cannot follow defaulted ones) with the brief's ORDER
+            // kept; the gate refuses a NULL proof with the typed marker.
+            "create or replace function sync_pull(since_seq bigint, active_key_id text, max_rows int default 500, for_device text default null, key_proof text default null)",
+            "create or replace function sync_horizon(active_key_id text, key_proof text)",
+            "create or replace function sync_purge_ledger(since_seq bigint, active_key_id text, key_proof text)",
+            "create or replace function sync_purge_execute(rows jsonb, active_key_id text, key_proof text)",
+            "create or replace function account_data_truncate(active_key_id text, key_proof text)",
+            "create or replace function sync_reencrypt(rows jsonb, active_key_id text, key_proof text)",
+            "create or replace function key_vault_update(payload jsonb, expected_revision int, key_proof text)",
+            "create or replace function sync_key_gate(active_key_id text, key_proof text)",
+            "create or replace function sync_key_proof_check(key_proof text)",
+        ]
+        for drop in drops {
+            #expect(sql.contains(drop), "11 must drop the old overload: \(drop)")
+        }
+        for create in creates {
+            #expect(sql.contains(create), "11 must create: \(create)")
+        }
+        let dropEnds = drops.compactMap { sql.range(of: $0)?.upperBound }
+        let createStarts = creates.compactMap { sql.range(of: $0)?.lowerBound }
+        let lastDrop = try #require(dropEnds.max())
+        let firstCreate = try #require(createStarts.min())
+        #expect(lastDrop < firstCreate,
+                "every OLD signature is dropped BEFORE any new function exists — no window holds both")
+        #expect(!sql.contains("create or replace function account_purge"),
+                "account_purge stays session-only and untouched (decision 12)")
+    }
+
+    /// The five additive columns, all NULLABLE (the author's row stays
+    /// NULL until her first round lands the hash) — and the insert arm is
+    /// a TRIGGER, never a CHECK, for exactly that reason.
+    @Test func theVaultGainsExactlyTheFivePosturesColumnsAllNullable() throws {
+        let sql = Self.strippingComments(try Self.sqlFile("11_pre13x_postures.sql"))
+        for (column, type) in [
+            ("master_wrapped_by_apple_held", "text"), ("apple_key_id", "text"),
+            ("key_proof_hash", "text"), ("corpus_previous_wrapped_by_master", "text"),
+            ("rotation_started_seq", "bigint"),
+        ] {
+            #expect(sql.contains("alter table key_vault add column \(column) \(type);"),
+                    "11 must add \(column) \(type), nullable")
+        }
+        #expect(sql.components(separatedBy: "alter table key_vault add column").count - 1 == 5,
+                "exactly five additive columns")
+        #expect(!sql.contains("add column key_proof_hash text not null"),
+                "NULLABLE — a NOT NULL would refuse the author's existing row")
+        #expect(!sql.lowercased().contains("check (key_proof_hash"),
+                "the insert arm is a TRIGGER, never a CHECK")
+    }
+
+    /// THE VAULT'S TABLE-LEVEL WRITE ROAD CLOSES (ledger 41 — MUST): the
+    /// 08 update policy dropped, UPDATE revoked from `authenticated`, the
+    /// definer role granted SELECT + UPDATE with an update policy in
+    /// `device_cursor_owner_all`'s shape; no grant road back; still no
+    /// delete grant. In deploy order the composition's LAST word on the
+    /// vault's `authenticated` UPDATE is 11's revoke.
+    @Test func theVaultsTableLevelWriteRoadIsClosed() throws {
+        let sql = Self.strippingComments(try Self.sqlFile("11_pre13x_postures.sql"))
+        #expect(sql.contains("drop policy if exists key_vault_owner_update on key_vault;"))
+        #expect(sql.contains("revoke update on key_vault from authenticated;"))
+        #expect(sql.contains("grant select, update on key_vault to variorum_definer;"))
+        #expect(sql.contains("create policy key_vault_definer_update on key_vault"))
+        #expect(sql.contains("for update to variorum_definer"))
+        #expect(sql.contains("using (auth.uid() = user_id) with check (auth.uid() = user_id);"))
+        #expect(!sql.contains("update on key_vault to authenticated"), "no road back")
+        #expect(!sql.contains("delete on key_vault"),
+                "still no delete grant — account_purge is the only removal")
+        let composed = try Self.composedSQL()
+        let grant = try #require(composed.range(
+            of: "grant select, insert, update on key_vault to authenticated;", options: .backwards))
+        let revoke = try #require(composed.range(
+            of: "revoke update on key_vault from authenticated;", options: .backwards))
+        #expect(grant.lowerBound < revoke.lowerBound,
+                "08's grant is superseded by 11's revoke in deploy order")
+    }
+
+    /// THE INSERT ARM: a vault is CREATED with its key-proof hash (a
+    /// `BEFORE INSERT` trigger raising the client-classifiable marker),
+    /// INSERT-only so the migration arm's UPDATE of a NULL hash to its
+    /// first proof still runs.
+    @Test func aVaultIsCreatedWithItsProofHashByTriggerNeverByCheck() throws {
+        let sql = Self.strippingComments(try Self.sqlFile("11_pre13x_postures.sql"))
+        let body = try Self.finalBody(of: "key_vault_require_proof_hash")
+        #expect(body.contains("if new.key_proof_hash is null then"))
+        #expect(body.contains(SyncServerRefusalMarker.keyProofRequired))
+        #expect(body.contains("return new;"))
+        #expect(sql.contains("create trigger key_vault_require_proof_hash before insert on key_vault"))
+        #expect(sql.contains("for each row execute function key_vault_require_proof_hash();"))
+        #expect(!sql.contains("before insert or update on key_vault"),
+                "INSERT only — the migration arm UPDATEs a NULL hash to its first proof")
+    }
+
+    /// THE PROOF CHECK: the vault row read FOR SHARE (decision 31), the
+    /// presented token decoded from base64 and SHA-256'd (the server keeps
+    /// only the hash), compared in CONSTANT TIME — a fixed 64-step loop
+    /// XOR-ing digits into an OR accumulator, never a short-circuiting
+    /// string compare — with a malformed token refusing typed and the
+    /// NULL-hash MIGRATION ARM landing the first proof.
+    @Test func theProofCheckIsConstantTimeWithTheMigrationArm() throws {
+        let body = try Self.finalBody(of: "sync_key_proof_check")
+        #expect(body.contains("from key_vault where user_id = caller for share;"),
+                "the vault row under a SHARE lock (decision 31)")
+        #expect(body.contains("encode(sha256(decode(key_proof, 'base64')), 'hex')"),
+                "SHA-256 of the RAW token; the wire carries base64")
+        #expect(body.contains("exception when others then") && body.contains("presented_hash := null;"),
+                "a malformed token refuses typed, never as a raw decode error")
+        #expect(body.contains("for i in 1..64 loop"), "a FIXED 64-step loop — never short-circuiting")
+        #expect(body.contains("ascii(substr(stored_hash, i, 1)) # ascii(substr(presented_hash, i, 1))"),
+                "XOR per digit, OR-accumulated")
+        #expect(body.contains("if hash_diff <> 0 then"))
+        #expect(!body.contains("stored_hash = presented_hash")
+                    && !body.contains("stored_hash <> presented_hash")
+                    && !body.contains("is distinct from presented_hash"),
+                "never a short-circuiting string compare")
+        #expect(body.contains("if stored_hash is null then"), "the migration arm")
+        #expect(body.contains("update key_vault set key_proof_hash = presented_hash where user_id = caller;"),
+                "the FIRST proof lands its hash — once; the next call compares")
+        #expect(body.components(separatedBy: SyncServerRefusalMarker.keyProofRequired).count - 1 == 2,
+                "the malformed arm and the mismatch arm both refuse with the marker")
+    }
+
+    /// THE ROTATION'S WRITE (decision 6): version-neutral — the payload
+    /// replaced where the version matches, a FRESH seq through the trigger,
+    /// the version KEPT; a moved version SKIPPED with the current one;
+    /// tenant-scoped, registry-exact, the push posture.
+    @Test func theReencryptDoorIsVersionNeutralTenantScopedAndRegistryExact() throws {
+        let body = try Self.finalBody(of: "sync_reencrypt")
+        #expect(body.contains("security definer"))
+        #expect(body.contains("caller := auth.uid();"))
+        #expect(body.contains("perform sync_key_gate(active_key_id, key_proof);"))
+        #expect(body.contains("feature = 'hosted_sync'"),
+                "the push posture: the entitlement gate rides (batch 1b's recorded reading)")
+        #expect(Self.namedArray("allowed", in: body) == Set(SyncSchema.tables.map(\.name)),
+                "the re-encryption door's allowlist drifted from the registry")
+        #expect(Self.namedArray("owner_tables", in: body) == (try Self.ownerCarryingTables()),
+                "the owner guard's table set drifted from the client schema")
+        #expect(body.contains("(item->'columns'->>'owner_id') is distinct from caller"))
+        #expect(body.contains("where t.owner_id = $2 and t.%I = $1 for update"), "tenant-scoped CAS lock")
+        #expect(body.contains("if current_version is null or current_version is distinct from expected_version then"),
+                "a moved (or absent) version is SKIPPED")
+        #expect(body.contains("'status', 'skipped', 'current_version', current_version"))
+        #expect(body.contains("jsonb_build_object('sync_version', current_version, 'owner_id', caller)"),
+                "the version is KEPT — never bumped")
+        #expect(!body.contains("current_version + 1"), "version-neutral: no bump anywhere in the door")
+        #expect(body.contains("delete from %I where owner_id = $2 and %I = $1"))
+        #expect(body.contains("returning server_seq"), "a fresh seq through the trigger — above the rotation seq")
+        #expect(body.contains("'status', 'replaced', 'server_seq', granted_seq"))
+        #expect(!body.contains("purged_row"), "re-encryption never consults or writes the ledger")
+        #expect(!body.lowercased().contains("truncate"))
+    }
+
+    /// THE ONE WRITE ROAD INTO THE VAULT: FOR UPDATE (decision 31's
+    /// serialization point), the CURRENT proof authorizes (the NULL-hash
+    /// arm lands the first), the R1-2 revision CAS inside, the WHOLE format
+    /// replaced from the payload (no stale recovery wrap survives a re-key),
+    /// the hash replaceable, and the rotation seq: `nextval` when a
+    /// previous key is SET where none stands; kept on a carry-through;
+    /// VARIORUM_ROTATION_IN_PROGRESS on a DIFFERENT one (decision 32);
+    /// cleared with the key.
+    @Test func theVaultUpdateDoorLocksForUpdateCASesAndRecordsTheRotationSeq() throws {
+        let body = try Self.finalBody(of: "key_vault_update")
+        #expect(body.contains("security definer"))
+        #expect(body.contains("caller := auth.uid();"), "scoped to the caller — the 14c guard")
+        #expect(body.contains("from key_vault where user_id = caller for update;"),
+                "the serialization point (decision 31)")
+        #expect(body.contains(SyncServerRefusalMarker.vaultAbsent))
+        #expect(body.contains("perform sync_key_proof_check(key_proof);"), "the CURRENT proof authorizes")
+        #expect(body.contains("incoming_previous := payload->>'corpus_previous_wrapped_by_master';"))
+        #expect(body.contains("elsif vault_previous is null then")
+                    && body.contains("next_seq := nextval('sync_server_seq');"),
+                "a rotation begins: nextval INSIDE this transaction, the row locked")
+        #expect(body.contains("elsif incoming_previous = vault_previous then")
+                    && body.contains("next_seq := vault_seq;"),
+                "a carry-through (a re-wrap mid-rotation) keeps the seq")
+        #expect(body.contains(SyncServerRefusalMarker.rotationInProgress),
+                "a DIFFERENT previous key while one stands refuses (decision 32)")
+        #expect(body.contains("if incoming_previous is null then") && body.contains("next_seq := null;"),
+                "clearing the key clears the seq with it")
+        #expect(body.contains("corpus_previous_wrapped_by_master    = incoming_previous,"))
+        #expect(body.contains("rotation_started_seq                 = next_seq,"))
+        #expect(body.contains("where user_id = caller and revision = expected_revision;"), "the CAS inside")
+        #expect(body.contains("revision                             = expected_revision + 1,"))
+        #expect(body.contains(SyncServerRefusalMarker.vaultRevisionConflict))
+        #expect(body.contains("key_proof_hash                       = coalesce(payload->>'key_proof_hash', key_proof_hash),"),
+                "the hash is replaceable under the current proof — never NULLed by omission")
+        #expect(body.contains("updated_at                           = now()"), "stamped server-side")
+        for column in ["format_version", "kdf_algorithm", "kdf_argon2_version", "kdf_memory_kib",
+                       "kdf_iterations", "kdf_parallelism", "kdf_salt", "kdf_output_bytes",
+                       "master_wrapped_by_passphrase", "master_wrapped_by_recovery", "corpus_key_id",
+                       "corpus_key_wrapped_by_master", "journal_bridge_key_id",
+                       "journal_bridge_key_wrapped_by_master", "master_wrapped_by_apple_held",
+                       "apple_key_id"] {
+            #expect(body.contains("= payload->>'\(column)'") || body.contains("(payload->>'\(column)')::int"),
+                    "the WHOLE format is replaced: \(column) comes from the payload")
+        }
+        #expect(!body.contains("payload->>'revision'") && !body.contains("payload->>'rotation_started_seq'")
+                    && !body.contains("payload->>'user_id'") && !body.contains("payload->>'updated_at'"),
+                "server-managed columns never come from the payload")
+        #expect(body.contains("'revision', expected_revision + 1") && body.contains("'rotation_started_seq', next_seq"),
+                "the receipt carries both")
+    }
+
+    /// Ownership + the demotion posture: every data function (the six
+    /// re-created, the two new doors, the two helpers) owned by the
+    /// non-bypass definer role; the sync RPCs keep the 09 posture; the
+    /// doors take the account-door posture; the helpers are reachable by
+    /// NO API role.
+    @Test func thePosturesFunctionsAreDefinerOwnedAndDemoted() throws {
+        let sql = Self.strippingComments(try Self.sqlFile("11_pre13x_postures.sql"))
+        for function in ["sync_key_proof_check(text)", "sync_key_gate(text, text)",
+                         "sync_push(jsonb, text, text)", "sync_pull(bigint, text, int, text, text)",
+                         "sync_horizon(text, text)", "sync_purge_ledger(bigint, text, text)",
+                         "sync_purge_execute(jsonb, text, text)", "account_data_truncate(text, text)",
+                         "sync_reencrypt(jsonb, text, text)", "key_vault_update(jsonb, int, text)"] {
+            #expect(sql.contains("alter function \(function) owner to variorum_definer;"),
+                    "\(function) must be owned by the non-bypass definer role")
+        }
+        #expect(!sql.contains("alter function account_purge"), "the purge keeps postgres — auth-schema DML")
+        #expect(sql.contains("revoke execute on function sync_push(jsonb, text, text) from public, anon;"))
+        #expect(sql.contains("grant execute on function sync_push(jsonb, text, text) to authenticated, service_role;"))
+        #expect(sql.contains("revoke execute on function sync_pull(bigint, text, int, text, text) from public, anon;"))
+        #expect(sql.contains("grant execute on function sync_pull(bigint, text, int, text, text) to authenticated, service_role;"))
+        for door in ["sync_horizon(text, text)", "sync_purge_ledger(bigint, text, text)",
+                     "sync_purge_execute(jsonb, text, text)", "account_data_truncate(text, text)",
+                     "sync_reencrypt(jsonb, text, text)", "key_vault_update(jsonb, int, text)"] {
+            #expect(sql.contains("revoke execute on function \(door) from public, anon, service_role;"),
+                    "\(door) revoked from server machinery by name")
+            #expect(sql.contains("grant execute on function \(door) to authenticated;"))
+            #expect(!sql.contains("grant execute on function \(door) to authenticated, service_role"))
+        }
+        for helper in ["sync_key_proof_check(text)", "sync_key_gate(text, text)"] {
+            #expect(sql.contains("revoke execute on function \(helper) from public, anon, authenticated, service_role;"))
+            #expect(sql.contains("grant execute on function \(helper) to variorum_definer;"))
+            #expect(!sql.contains("grant execute on function \(helper) to authenticated"))
+        }
+        #expect(sql.contains("grant usage, create on schema public to variorum_definer;"))
+        #expect(sql.contains("revoke create on schema public from variorum_definer;"))
+    }
+
+    /// The 13j naming rule: no RPC parameter shadows a column it writes —
+    /// the vault-writing functions' parameters against the vault's columns.
+    @Test func noPosturesParameterShadowsAVaultColumn() throws {
+        let sql = Self.strippingComments(try Self.sqlFile("11_pre13x_postures.sql"))
+        let vaultColumns = Set(SerializerCompletenessTests.keyVaultColumnClasses.keys)
+        for signature in [
+            "key_vault_update(payload jsonb, expected_revision int, key_proof text)",
+            "sync_key_proof_check(key_proof text)",
+            "sync_key_gate(active_key_id text, key_proof text)",
+        ] {
+            #expect(sql.contains(signature))
+            let inside = signature.split(separator: "(")[1].dropLast()
+            let params = inside.split(separator: ",").map {
+                String($0.trimmingCharacters(in: .whitespaces).split(separator: " ")[0])
+            }
+            for param in params {
+                #expect(!vaultColumns.contains(param), "\(param) shadows a key_vault column")
+            }
+        }
     }
 }

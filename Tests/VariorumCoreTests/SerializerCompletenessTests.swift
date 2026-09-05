@@ -209,6 +209,68 @@ struct SerializerCompletenessTests {
         }
     }
 
+    // MARK: - Walk 4 (pre-13x 1b): the vault's columns are CLASSIFIED —
+    // ids / hashes / wrapped keys / KDF parameters / bookkeeping — PLAIN
+    // under E2EE by nature (key material travels WRAPPED; a hash is a
+    // hash), never prose. `key_vault` is a server-only table (never a
+    // payload), so the registry's per-column walk cannot see it; this pin
+    // is its equivalent: every column the deployed DDL gives the vault
+    // takes a declared side here, and a future column that forgets to
+    // fails the build exactly as an unclassified synced column would.
+
+    /// What each vault column IS. Adding a column to the mirror without
+    /// adding it here fails `theVaultsColumnsAreClassifiedExactly`.
+    enum VaultColumnClass: String { case id, kdfParameter, wrappedKey, hash, bookkeeping }
+    static let keyVaultColumnClasses: [String: VaultColumnClass] = [
+        "user_id": .id,
+        "format_version": .bookkeeping,
+        "kdf_algorithm": .kdfParameter,
+        "kdf_argon2_version": .kdfParameter,
+        "kdf_memory_kib": .kdfParameter,
+        "kdf_iterations": .kdfParameter,
+        "kdf_parallelism": .kdfParameter,
+        "kdf_salt": .kdfParameter,
+        "kdf_output_bytes": .kdfParameter,
+        "master_wrapped_by_passphrase": .wrappedKey,
+        "master_wrapped_by_recovery": .wrappedKey,
+        "corpus_key_id": .id,
+        "corpus_key_wrapped_by_master": .wrappedKey,
+        "journal_bridge_key_id": .id,
+        "journal_bridge_key_wrapped_by_master": .wrappedKey,
+        "revision": .bookkeeping,
+        "created_at": .bookkeeping,
+        "updated_at": .bookkeeping,
+        // pre-13x 11 — the five additive columns (design §3.10).
+        "master_wrapped_by_apple_held": .wrappedKey,
+        "apple_key_id": .id,
+        "key_proof_hash": .hash,
+        // The previous corpus key's id rides INSIDE this value before a
+        // `:` (batch 1b's recorded reading) — an id + a wrapped key, both
+        // structure.
+        "corpus_previous_wrapped_by_master": .wrappedKey,
+        "rotation_started_seq": .bookkeeping,
+    ]
+
+    @Test func theVaultsColumnsAreClassifiedExactly() throws {
+        let mirror = try Self.mirrorColumnsFromDDL()
+        let vault = try #require(mirror["key_vault"], "the mirror DDL must carry key_vault")
+        let declared = Set(Self.keyVaultColumnClasses.keys)
+        #expect(vault.subtracting(declared).isEmpty,
+                "key_vault carries unclassified column(s) \(vault.subtracting(declared).sorted()) — every vault column takes a side: id / KDF parameter / wrapped key / hash / bookkeeping")
+        #expect(declared.subtracting(vault).isEmpty,
+                "the classification names vault column(s) the DDL lacks: \(declared.subtracting(vault).sorted())")
+        // The five postures columns are all present — the additive event
+        // reached the walk.
+        for column in ["master_wrapped_by_apple_held", "apple_key_id", "key_proof_hash",
+                       "corpus_previous_wrapped_by_master", "rotation_started_seq"] {
+            #expect(vault.contains(column), "11 must add \(column)")
+        }
+        // And no class is prose: the enum has no such case — stated so the
+        // reader sees the disclosure list's promise where it is kept.
+        #expect(Set(Self.keyVaultColumnClasses.values.map(\.rawValue))
+                    .isSubset(of: ["id", "kdfParameter", "wrappedKey", "hash", "bookkeeping"]))
+    }
+
     /// Parses `Server/supabase/*.sql` (in filename order, mirroring deploy
     /// order): `create table` bodies plus `alter table … add column`
     /// migrations plus — Phase 14c — `drop table`, which RESETS the
@@ -273,8 +335,13 @@ struct SerializerCompletenessTests {
                     currentTable = nil
                     continue
                 }
+                // `references` opens a FK clause continued from the previous
+                // column's line (08's `user_id uuid primary key` +
+                // `references auth.users (id) …`) — never a column (pre-13x
+                // 1b: the vault-column walk is the first to read key_vault).
                 if let first = line.split(separator: " ").first,
-                   !["primary", "foreign", "unique", "check", "constraint"].contains(String(first)) {
+                   !["primary", "foreign", "unique", "check", "constraint", "references"]
+                       .contains(String(first)) {
                     tables[table, default: []].insert(String(first))
                 }
                 continue

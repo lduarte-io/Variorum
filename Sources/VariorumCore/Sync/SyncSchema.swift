@@ -83,11 +83,22 @@ public enum SyncSchema {
     /// the pull-RPC cursor upsert and the push-RPC's typed 'purged'
     /// refusal; mirror DDL 10_phase13j_purge.sql — FINALIZED in batch
     /// 6b, deployed ONLY at the architect's one-window, which bundles
-    /// the Mac + phone refreshes). **Bump this
+    /// the Mac + phone refreshes); version 8 = the pre-13x POSTURES event
+    /// (the design's §3.10, decisions 12 / 31 / 32: the KEY PROOF on every
+    /// mutating RPC and the two read RPCs — `sync_push` / `sync_pull` /
+    /// `sync_horizon` / `sync_purge_ledger` / `sync_purge_execute` /
+    /// `account_data_truncate` gain `key_proof` beside `active_key_id`,
+    /// the OLD signatures dropped first; the NEW `sync_reencrypt`
+    /// (version-neutral re-encryption) and `key_vault_update` (the ONE
+    /// vault write road, the PostgREST PATCH road CLOSED); the vault's
+    /// five nullable columns incl. `rotation_started_seq`; mirror DDL
+    /// 11_pre13x_postures.sql — deploy is the orchestrator's window under
+    /// her standing pre-authorization, immediately before batch 2's
+    /// migration + both installs). **Bump this
     /// constant together with the mirror file's marker in every future
     /// lockstep event** — the DDL pin (`AuthRLSDDLTests`) fails the build
     /// if they drift.
-    public static let lockstepVersion = 7
+    public static let lockstepVersion = 8
     /// The synced tables, in FK-dependency-friendly apply order: parents
     /// before children wherever the graph is acyclic. (`container`⇄`block`⇄
     /// `variant` are mutually circular by design — the apply transaction runs
@@ -372,6 +383,19 @@ public enum SyncServerRefusalMarker {
     /// The tier gate (THE DESIGN item 5): no active hosted_sync
     /// entitlement on the account.
     public static let notEntitled = "VARIORUM_NO_ENTITLEMENT"
+    /// pre-13x (decision 12 — THE KEY PROOF): the presented `key_proof`
+    /// does not hash to the account's `key_vault.key_proof_hash` (or is
+    /// absent / malformed) — a session without the master key gets
+    /// nothing from the mirror. Surfaces as `SyncError.keyProofRefused`.
+    public static let keyProofRequired = "VARIORUM_KEY_PROOF_REQUIRED"
+    /// pre-13x (decision 32 — one rotation at a time): `key_vault_update`
+    /// was asked to set a DIFFERENT previous corpus key while one stands.
+    public static let rotationInProgress = "VARIORUM_ROTATION_IN_PROGRESS"
+    /// pre-13x: `key_vault_update` found no vault row for the caller.
+    public static let vaultAbsent = "VARIORUM_VAULT_ABSENT"
+    /// pre-13x: `key_vault_update`'s revision CAS matched zero rows — the
+    /// vault moved under the caller (ladder R1-2, now inside the RPC).
+    public static let vaultRevisionConflict = "VARIORUM_VAULT_REVISION_CONFLICT"
 }
 
 public enum SyncError: Error, Equatable, Sendable {
@@ -443,6 +467,14 @@ public enum SyncError: Error, Equatable, Sendable {
     /// Unreachable in production until ledger pruning exists (the floor
     /// stays 0); proven against the fake server's settable floor.
     case deviceLeftBehindReloadRequired(floor: Int64, scanPoint: Int64)
+    /// pre-13x (decision 12 — THE KEY PROOF): the server refused this
+    /// device's proof of the master key — the account's keys were
+    /// replaced elsewhere (a rotation this device has not followed), or
+    /// the device holds no master at all. The whole round refuses —
+    /// outbox intact, cursor unmoved (the §12 refusal grammar); the road
+    /// back is the FOLLOW: enter the passphrase once to pick up the new
+    /// keys (the design's §7; the surface's banner is the copy file's).
+    case keyProofRefused
 }
 
 extension SyncError: CustomStringConvertible {
@@ -489,6 +521,12 @@ extension SyncError: CustomStringConvertible {
             return "This device has been away a while — it needs to reload from your "
                 + "account. Anything written here first gets saved up; nothing typed is "
                 + "lost. Nothing syncs until the reload runs."
+        case .keyProofRefused:
+            // The design's §7 un-followed state; the surface's banner
+            // wording is `pre-13x-copy.md`'s (batch 4 renders it) — this
+            // is the engine's own status sentence.
+            return "Sync is paused until you enter your passphrase once — your keys were "
+                + "replaced on another device. Nothing is lost while paused."
         }
     }
 }
