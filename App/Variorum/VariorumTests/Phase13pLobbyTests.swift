@@ -48,11 +48,16 @@ struct StoreLaunchRouteTests {
             == .lobby(demand: .passphrase))
     }
 
-    @Test func aDemandedGateOverAnAbsentStoreResetsToAuto() {
-        // PROVISIONAL (run record): the gate outlived its store.
+    /// pre-13x 1a (§3.7 — RE-RULED from 13p's PROVISIONAL Auto reset): a
+    /// demanded gate over an absent store is the LIBRARY-MISSING route —
+    /// the lock stays. RED ON OLD: `.openResettingModeToAuto`.
+    @Test func aDemandedGateOverAnAbsentStoreIsTheLibraryMissingRoute() {
         #expect(StoreLaunchRoute.resolve(
             dials: ProtectionDials(mode: .passphrase), presence: .absent)
-            == .openResettingModeToAuto)
+            == .libraryMissing(demand: .passphrase))
+        #expect(StoreLaunchRoute.resolve(
+            dials: ProtectionDials(mode: .biometric), presence: .absent)
+            == .libraryMissing(demand: .biometric))
     }
 }
 
@@ -123,8 +128,8 @@ struct Phase13pLobbyTests {
 
         // The unlock road (the production builder over the live sidecar).
         let gate = StoreLaunchGate(
-            dials: { _ in ProtectionDials(mode: .passphrase) },
-            saveDials: { _, _ in },
+            dials: { _, _ in ProtectionDials(mode: .passphrase) },
+            saveDials: { _, _, _ in },
             guardFor: { _ in StoreKeyGuard.inMemory(backing: InMemoryStoreKeyGuardBacking()) },
             loadEnvelope: { try StoreKeyEnvelope.loadCurrent(besideStore: $0) },
             saveEnvelope: { _, _ in },
@@ -192,6 +197,76 @@ struct Phase13pLobbyTests {
             },
             gate: gate)
         return World(bootstrap: bootstrap, backing: backing, openCount: openCount, key: key)
+    }
+
+    /// pre-13x 1a (§3.7 / decision 14) — THE ABSENT-STORE ROUTE NEVER RESETS
+    /// THE LOCK, and "Start a New Library" mints under a NEW store id. RED
+    /// ON OLD (13p's `openResettingModeToAuto`): the route PERSISTED
+    /// `mode = .auto` through `saveDials` and OPENED a pullable library at
+    /// once (`openCount == 1` on the first route, the dials box flipped to
+    /// Auto). Now: the state is `.libraryMissing`, nothing opened, the
+    /// legacy dials untouched; the deliberate act sets the old key file
+    /// aside, writes a fresh one with a NEW store id, gives ONLY that id
+    /// Auto dials, lands the key in the scripted guard, and opens — the old
+    /// library's lock (its legacy dials) still reads demanded.
+    @Test func aDemandedGateOverAnAbsentStoreNeverResetsTheLockAndStartNewMintsAFreshLibrary() async throws {
+        try await withDeps {
+            let dir = try temporaryDirectory()
+            defer { try? FileManager.default.removeItem(at: dir) }
+            let storeURL = dir.appendingPathComponent("variorum.sqlite")
+            // The old library's key file beside the (absent) store.
+            let oldKey = StoreKey.mint()
+            var oldEnvelope = StoreKeyEnvelope()
+            try oldEnvelope.setPassphraseWrap(key: oldKey, passphrase: "sesame", kdf: fastKDF())
+            try oldEnvelope.write(at: oldEnvelope.preferredURL(besideStore: storeURL))
+            let oldStoreID = oldEnvelope.storeID
+
+            let backing = InMemoryStoreKeyGuardBacking()
+            let dialsBox = ScriptedDialsBox(ProtectionDials(mode: .biometric))
+            let envelopeBox = ScriptedEnvelopeBox(oldEnvelope)
+            let gate = StoreLaunchGate.scripted(dials: dialsBox, backing: backing, envelope: envelopeBox)
+            let openCount = LockIsolated(0)
+            let bootstrap = AppBootstrap(
+                testOpener: {
+                    openCount.withValue { $0 += 1 }
+                    return Result { try AppDatabase.onDisk(url: storeURL, key: StoreKey.mint()) }
+                        .mapError { AppDatabase.StoreOpenError(
+                            storePath: storeURL.path, reason: String(describing: $0)) }
+                },
+                gate: gate, testPresence: .absent, testStoreURL: storeURL)
+            await bootstrap.awaitOpen()
+            guard case .libraryMissing(let lobby) = bootstrap.state else {
+                Issue.record("expected .libraryMissing, got \(bootstrap.state)")
+                return
+            }
+            #expect(openCount.value == 0, "nothing opens — no pullable library exists")
+            #expect(dialsBox.value.mode == .biometric, "the lock never resets: no dial write")
+            #expect(dialsBox.perStoreDials(oldStoreID) == nil, "…and no per-store write either")
+            #expect(lobby.demand == .biometric)
+            #expect(backing.auto == nil, "no key was minted into custody")
+
+            // THE DELIBERATE ACT.
+            await lobby.startNewLibrary()
+            #expect(lobby.lastError == nil)
+            await bootstrap.awaitOpen()
+            guard case .ready = bootstrap.state else {
+                Issue.record("expected .ready after Start a New Library, got \(bootstrap.state)")
+                return
+            }
+            #expect(openCount.value == 1, "the fresh library opened once")
+            let fresh = try #require(try StoreKeyEnvelope.loadCurrent(besideStore: storeURL))
+            #expect(fresh.storeID != oldStoreID, "a NEW store id")
+            #expect(fresh.passphrase == nil, "born with no wraps")
+            let minted = try #require(backing.auto)
+            #expect(fresh.keyFingerprint == StoreKeyEnvelope.fingerprint(of: minted),
+                    "the new key file names the minted key")
+            #expect(dialsBox.perStoreDials(fresh.storeID)?.mode == .auto, "the new library is born silent")
+            #expect(dialsBox.value.mode == .biometric,
+                    "the OLD library's lock is untouched — restoring its file routes to its lobby")
+            #expect(envelopeBox.setAsideCount == 1, "the old key file was set aside, never deleted")
+            #expect(try StoreKeyEnvelope.load(at: oldEnvelope.preferredURL(besideStore: storeURL)) == nil
+                    || fresh.storeID != oldStoreID)
+        }
     }
 
     /// P11(a) (pre-13u Act 9), RED-ON-OLD: an UNREADABLE sidecar behind a

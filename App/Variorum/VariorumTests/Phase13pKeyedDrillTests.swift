@@ -62,8 +62,8 @@ struct Phase13pKeyedDrillTests {
     /// pin's pattern): dials scripted, envelope reads honest.
     private func fileGate(dials: ProtectionDials) -> StoreLaunchGate {
         StoreLaunchGate(
-            dials: { _ in dials },
-            saveDials: { _, _ in },
+            dials: { _, _ in dials },
+            saveDials: { _, _, _ in },
             guardFor: { _ in StoreKeyGuard.inMemory(backing: InMemoryStoreKeyGuardBacking()) },
             loadEnvelope: { try StoreKeyEnvelope.loadCurrent(besideStore: $0) },
             saveEnvelope: { try $0.write(at: $0.preferredURL(besideStore: $1)) },
@@ -146,7 +146,7 @@ struct Phase13pKeyedDrillTests {
         let legTwo = try restore("restore-lobby")
         let demandedGate = fileGate(dials: ProtectionDials(mode: .passphrase))
         #expect(StoreLaunchRoute.resolve(
-            dials: demandedGate.dials("drill"),
+            dials: demandedGate.dials("drill", nil),
             presence: StoreFilePresence.classify(at: legTwo))
             == .lobby(demand: .passphrase))
         let lobbyRoad = StoreLobby.envelopeRoad(storeURL: legTwo, gate: demandedGate)

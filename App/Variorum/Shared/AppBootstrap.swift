@@ -60,6 +60,10 @@ final class AppBootstrap {
         /// Phase 13p: a demanded at-open mode over an existing store —
         /// nothing runs until the lobby unlocks.
         case locked(StoreLobby)
+        /// pre-13x 1a (§3.7): a demanded mode over an ABSENT store — the
+        /// three-door face; nothing opened, nothing persisted, the lock
+        /// untouched.
+        case libraryMissing(LibraryMissingLobby)
         case ready(AppSession)
         /// `recovery` (13p ladder R1-M3 — the sidecar-present unlock road):
         /// non-nil exactly when the failure is the encrypted-store-with-
@@ -116,6 +120,13 @@ final class AppBootstrap {
     /// production road's own pins.)
     @ObservationIgnored private let testOpener:
         (@Sendable () -> Result<AppDatabase, AppDatabase.StoreOpenError>)?
+    /// TEST-ONLY (pre-13x 1a): what the route reads as the store's
+    /// presence under a test opener (the default routes as "present" so
+    /// demanded gates are exercisable; `.absent` drives the
+    /// library-missing route), and the SCRATCH store url the route and the
+    /// missing-library act work beside — never the real dev home.
+    @ObservationIgnored private let testPresence: StoreFilePresence
+    @ObservationIgnored private let testStoreURL: URL?
 
     init(
         variant: AppDatabase.StoreVariant = StoreLocation.resolve(),
@@ -124,6 +135,8 @@ final class AppBootstrap {
         storeVariant = variant
         self.gate = gate
         testOpener = nil
+        testPresence = .encryptedOrUnknown
+        testStoreURL = nil
         protection = ProtectionController(configuration: .init(
             scope: variant.rawValue,
             storeURL: try? AppDatabase.defaultStoreURL(variant: variant),
@@ -140,14 +153,18 @@ final class AppBootstrap {
 
     init(
         testOpener: @escaping @Sendable () -> Result<AppDatabase, AppDatabase.StoreOpenError>,
-        gate: StoreLaunchGate = .live
+        gate: StoreLaunchGate = .live,
+        testPresence: StoreFilePresence = .encryptedOrUnknown,
+        testStoreURL: URL? = nil
     ) {
         storeVariant = .dev
         self.gate = gate
         self.testOpener = testOpener
+        self.testPresence = testPresence
+        self.testStoreURL = testStoreURL
         protection = ProtectionController(configuration: .init(
             scope: AppDatabase.StoreVariant.dev.rawValue,
-            storeURL: nil,
+            storeURL: testStoreURL,
             gate: gate,
             isRealVariant: false))
         protection.performLock = { [weak self] in await self?.lock() }
@@ -171,6 +188,8 @@ final class AppBootstrap {
         state = .opening
         let variant = storeVariant
         let testOpener = testOpener
+        let testPresence = testPresence
+        let testStoreURL = testStoreURL
         let gate = gate
         opening = Task { [weak self] in
             // OFF the main actor: routing (a defaults read + a 16-byte
@@ -180,7 +199,8 @@ final class AppBootstrap {
             let outcome = await Task.detached(priority: .userInitiated) {
                 Self.routeAndOpen(
                     variant: variant, gate: gate,
-                    unlockedKey: unlockedKey, testOpener: testOpener)
+                    unlockedKey: unlockedKey, testOpener: testOpener,
+                    testPresence: testPresence, testStoreURL: testStoreURL)
             }.value
             guard let self else { return }
             // …and back, for `install` (a process-global dependency
@@ -192,6 +212,7 @@ final class AppBootstrap {
     private enum OpenOutcome: Sendable {
         case ready(AppDatabase, unlockedKey: StoreKey?)
         case locked(LobbyFacts)
+        case libraryMissing(demand: StoreAtOpenMode, storeURL: URL?)
         case failed(AppDatabase.StoreOpenError, recovery: LobbyFacts?)
     }
 
@@ -206,41 +227,54 @@ final class AppBootstrap {
         var storeURL: URL?
     }
 
+    /// The store id the dials are keyed by (pre-13x 1a): the key file's,
+    /// beside the store, read without the key. nil = no key file (a fresh
+    /// library) or no resolvable path.
+    private nonisolated static func storeID(besideStore storeURL: URL?) -> String? {
+        guard let storeURL else { return nil }
+        if case .known(let id) = StoreIdentity.resolve(besideStore: storeURL) { return id }
+        return nil
+    }
+
     private nonisolated static func routeAndOpen(
         variant: AppDatabase.StoreVariant,
         gate: StoreLaunchGate,
         unlockedKey: StoreKey?,
-        testOpener: (@Sendable () -> Result<AppDatabase, AppDatabase.StoreOpenError>)?
+        testOpener: (@Sendable () -> Result<AppDatabase, AppDatabase.StoreOpenError>)?,
+        testPresence: StoreFilePresence,
+        testStoreURL: URL?
     ) -> OpenOutcome {
         let scope = variant.rawValue
-        let storeURL = try? AppDatabase.defaultStoreURL(variant: variant)
+        // Under a test opener the route works beside the test's SCRATCH url
+        // (nil = none) — never the real dev home.
+        let storeURL = testOpener != nil
+            ? testStoreURL
+            : (try? AppDatabase.defaultStoreURL(variant: variant))
 
         // An unlocked key means the lobby already ran — go straight to the
         // open with that key as custody.
         if unlockedKey == nil {
-            let dials = gate.dials(scope)
+            // pre-13x 1a: the dials are the STORE's (read through to the
+            // scope's legacy keys until the store writes its own).
+            let dials = gate.dials(scope, storeID(besideStore: storeURL))
             // The one pre-unlock file contact: 16 bytes of presence. The
-            // test-opener path has no file of its own — it routes as
-            // "store present" so demanded gates are exercisable.
+            // test-opener path has no file of its own — it routes as the
+            // scripted presence ("present" by default, so demanded gates
+            // are exercisable; `.absent` for the missing-library pins).
             // P13 rider (pre-13u Act 9): a nil URL (`defaultStoreURL()`
             // threw) routes as UNKNOWN, never absent — "we could not even
-            // resolve the path" must not authorize persisting a mode
-            // downgrade to Auto; the open road fails typed on its own.
+            // resolve the path" must not read as a missing library.
             let presence: StoreFilePresence = testOpener != nil
-                ? .encryptedOrUnknown
+                ? testPresence
                 : (storeURL.map(StoreFilePresence.classify(at:)) ?? .encryptedOrUnknown)
             switch StoreLaunchRoute.resolve(dials: dials, presence: presence) {
             case .open:
                 break
-            case .openResettingModeToAuto:
-                // PROVISIONAL (run record): the demanded gate outlived its
-                // store — reset the mode VISIBLY and proceed as a fresh
-                // first launch (its unlock secrets reference a key whose
-                // store is gone; the protection reconcile replaces the
-                // stale envelope on the same launch).
-                var dials = dials
-                dials.mode = .auto
-                gate.saveDials(dials, scope)
+            case .libraryMissing(let demand):
+                // §3.7: THE LOCK STAYS — no dial write, no open, no mint.
+                // The three-door face renders; "Start a New Library" is the
+                // one deliberate act that mints, under a NEW store id.
+                return .libraryMissing(demand: demand, storeURL: storeURL)
             case .lobby(let demand):
                 let guardSeam = gate.guardFor(scope)
                 let reading = gate.readEnvelope(storeURL)
@@ -355,7 +389,7 @@ final class AppBootstrap {
             // failing into the same surface. (The demanded modes' lobby
             // road never lands custody — that is its own law.)
             if let unlockedKey,
-               !gate.dials(storeVariant.rawValue).mode.isDemanded {
+               !gate.dials(storeVariant.rawValue, currentStoreID()).mode.isDemanded {
                 let guardSeam = gate.guardFor(storeVariant.rawValue)
                 Task.detached(priority: .utility) {
                     _ = guardSeam.saveAuto(unlockedKey)
@@ -366,9 +400,33 @@ final class AppBootstrap {
             }
         case .locked(let facts):
             state = .locked(makeLobby(facts))
+        case .libraryMissing(let demand, let storeURL):
+            state = .libraryMissing(makeMissingLobby(demand: demand, storeURL: storeURL))
         case .failed(let error, let recoveryFacts):
             state = .failed(error, recovery: recoveryFacts.map(makeLobby))
         }
+    }
+
+    /// The store id the dials are keyed by, for THIS bootstrap's store
+    /// (pre-13x 1a) — re-read per call, since "Start a New Library"
+    /// changes it.
+    private func currentStoreID() -> String? {
+        let storeURL = testOpener != nil
+            ? testStoreURL
+            : (try? AppDatabase.defaultStoreURL(variant: storeVariant))
+        return Self.storeID(besideStore: storeURL)
+    }
+
+    /// pre-13x 1a (§3.7): the three-door face's brain. Its one built act
+    /// mints a fresh library under a NEW store id through the GATE (the
+    /// guard seam — scripted in tests, the Keychain in production).
+    private func makeMissingLobby(demand: StoreAtOpenMode, storeURL: URL?) -> LibraryMissingLobby {
+        LibraryMissingLobby(
+            demand: demand,
+            storeURL: storeURL,
+            gate: gate,
+            scope: storeVariant.rawValue,
+            begin: { [weak self] in self?.beginOpening() })
     }
 
     private func makeLobby(_ facts: LobbyFacts) -> StoreLobby {
@@ -418,7 +476,7 @@ final class AppBootstrap {
     func lock() async {
         guard case .ready = state, let binding else { return }
         let scope = storeVariant.rawValue
-        let dials = gate.dials(scope)
+        let dials = gate.dials(scope, currentStoreID())
         guard dials.mode.isDemanded else { return }
         await onWillLock?()
         let gate = gate
@@ -510,3 +568,102 @@ private nonisolated func prepareStoreDirectoryProtection(_ storeURL: URL) {
     try? FileManager.default.setAttributes(protection, ofItemAtPath: directory.path)
 }
 #endif
+
+// MARK: - The library-missing lobby (pre-13x 1a — the postures design §3.7)
+
+/// The absent-store route's brain, shared by both faces (the Mac's
+/// `LibraryMissingView`, the phone's `MobileLibraryMissingView`). It holds
+/// NO store: the library file is what is missing. Copy §3 renders verbatim
+/// from `ProtectionCopy.libraryMissing*`.
+///
+/// THE DOORS, per P-2 (a door that cannot act is not rendered): **Start a
+/// New Library** on both targets (built here); **Restore from a Backup…**
+/// on the Mac only, revealing the app's own Backups folder beside the
+/// runbook — the 13l restore is a manual road today — and only when that
+/// folder exists; **Open an Existing Library…** on neither — it is 13x's
+/// door, unbuilt (recorded in the 1a record).
+///
+/// STARTING NEW mints under a NEW STORE ID (decision 13 / §3.7): the old
+/// key file beside the absent store is SET ASIDE (never deleted — its
+/// wraps are the old library's recovery legs), a fresh key + key file are
+/// minted (`StoreIdentity.establish` writes the id and fingerprint before
+/// any custody exists), the new id's dials are written as Auto (the design's
+/// Standard birth — a fresh library is Standard; the OLD library's lock —
+/// its legacy scope dials and its per-store custody items — is untouched,
+/// so restoring the old file routes it to its lobby exactly as before),
+/// the key lands in custody through the gate's guard, and the ordinary
+/// route then opens the fresh library. Nothing here touches the old
+/// library's items: per-store naming makes them unreachable, never gone.
+@MainActor
+@Observable
+final class LibraryMissingLobby {
+    let demand: StoreAtOpenMode
+    /// The absent store's url (nil = no resolvable path: no act can run).
+    let storeURL: URL?
+    private(set) var busy = false
+    var lastError: String?
+
+    private let gate: StoreLaunchGate
+    private let scope: String
+    private let begin: @MainActor () -> Void
+
+    init(
+        demand: StoreAtOpenMode, storeURL: URL?, gate: StoreLaunchGate,
+        scope: String, begin: @escaping @MainActor () -> Void
+    ) {
+        self.demand = demand
+        self.storeURL = storeURL
+        self.gate = gate
+        self.scope = scope
+        self.begin = begin
+    }
+
+    /// The app's own Backups folder beside the (absent) store — the Mac's
+    /// "Restore from a Backup…" reveals it; nil when there is none to show.
+    var backupsFolderURL: URL? {
+        guard let storeURL else { return nil }
+        let folder = storeURL.deletingLastPathComponent()
+            .appendingPathComponent("Backups", isDirectory: true)
+        return FileManager.default.fileExists(atPath: folder.path) ? folder : nil
+    }
+
+    /// The one built act (§3.7): a fresh library under a NEW store id.
+    func startNewLibrary() async {
+        guard !busy, let storeURL else { return }
+        busy = true
+        lastError = nil
+        defer { busy = false }
+        let gate = gate
+        let scope = scope
+        let outcome = await Task.detached(priority: .userInitiated) { () -> String? in
+            // 1. The old library's key file aside (never deleted).
+            gate.setAsideEnvelope(storeURL)
+            // 2. A fresh key + its key file — the NEW store id exists on
+            //    disk before any custody does.
+            let key = StoreKey.mint()
+            let storeID: String
+            do {
+                storeID = try StoreIdentity.establish(besideStore: storeURL, key: key)
+            } catch {
+                return "The new library's key file could not be written beside the library: "
+                    + "\(String(describing: error))"
+            }
+            // 3. The new library is born Standard (silent): its OWN dials,
+            //    Auto — the old library's dials are never written.
+            gate.saveDials(ProtectionDials(), scope, storeID)
+            // 4. Custody, through the gate's guard (the Keychain in
+            //    production; the scripted backing in tests).
+            guard gate.guardFor(scope).saveAuto(key) else {
+                return "The Keychain refused to keep the new library's key — nothing was created."
+            }
+            return nil
+        }.value
+        if let outcome {
+            lastError = outcome
+            return
+        }
+        // 5. The ordinary route: an absent store under Auto dials mints
+        //    and opens the fresh library.
+        begin()
+    }
+}

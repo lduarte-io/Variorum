@@ -118,29 +118,56 @@ nonisolated enum ProtectionDefaults {
         "variorum.protection.\(scope).\(leaf)"
     }
 
+    /// pre-13x 1a: the dials are PER STORE ID (the postures design §3.1 —
+    /// "Castle's two switches + the idle dial: per device, UserDefaults per
+    /// store ID"). nil = the pre-1a per-scope key (the LEGACY shape).
+    static func key(_ leaf: String, scope: String, storeID: String?) -> String {
+        guard let storeID else { return key(leaf, scope: scope) }
+        return "variorum.protection.\(scope).\(storeID).\(leaf)"
+    }
+
     static func dials(scope: String, in defaults: UserDefaults) -> ProtectionDials {
+        dials(scope: scope, storeID: nil, in: defaults)
+    }
+
+    /// The per-store read WITH A LEGACY READ-THROUGH: a store id whose own
+    /// keys have never been written reads the scope's legacy keys — so her
+    /// existing library keeps reading exactly the dials it always had
+    /// (biometric stays biometric), while a library that has written its
+    /// own keys (a NEW library started over an absent store, §3.7) reads
+    /// only those. Batch 2's §11 migration retires the legacy keys.
+    static func dials(scope: String, storeID: String?, in defaults: UserDefaults) -> ProtectionDials {
+        let id: String? = storeID.flatMap { id in
+            defaults.string(forKey: key("mode", scope: scope, storeID: id)) != nil ? id : nil
+        }
         var dials = ProtectionDials()
-        if let raw = defaults.string(forKey: key("mode", scope: scope)),
+        if let raw = defaults.string(forKey: key("mode", scope: scope, storeID: id)),
            let mode = StoreAtOpenMode(rawValue: raw) {
             dials.mode = mode
         }
         // Escrow defaults ON (Standard) — stored as the OFF flag so the
         // absent-key default reads as the preset's ON.
-        dials.escrowOn = !defaults.bool(forKey: key("escrowOff", scope: scope))
+        dials.escrowOn = !defaults.bool(forKey: key("escrowOff", scope: scope, storeID: id))
         dials.relockOnSleepAndScreenLock =
-            defaults.bool(forKey: key("relockOnSleep", scope: scope))
-        let idle = defaults.integer(forKey: key("relockIdleMinutes", scope: scope))
+            defaults.bool(forKey: key("relockOnSleep", scope: scope, storeID: id))
+        let idle = defaults.integer(forKey: key("relockIdleMinutes", scope: scope, storeID: id))
         dials.relockAfterIdleMinutes = idle > 0 ? idle : nil
-        dials.reminderChecksOn = defaults.bool(forKey: key("reminders", scope: scope))
+        dials.reminderChecksOn = defaults.bool(forKey: key("reminders", scope: scope, storeID: id))
         return dials
     }
 
     static func save(_ dials: ProtectionDials, scope: String, in defaults: UserDefaults) {
-        defaults.set(dials.mode.rawValue, forKey: key("mode", scope: scope))
-        defaults.set(!dials.escrowOn, forKey: key("escrowOff", scope: scope))
-        defaults.set(dials.relockOnSleepAndScreenLock, forKey: key("relockOnSleep", scope: scope))
-        defaults.set(dials.relockAfterIdleMinutes ?? 0, forKey: key("relockIdleMinutes", scope: scope))
-        defaults.set(dials.reminderChecksOn, forKey: key("reminders", scope: scope))
+        save(dials, scope: scope, storeID: nil, in: defaults)
+    }
+
+    /// Writes the store's OWN keys (the legacy keys are never written for
+    /// a known store id — the read-through ends for it at its first save).
+    static func save(_ dials: ProtectionDials, scope: String, storeID: String?, in defaults: UserDefaults) {
+        defaults.set(dials.mode.rawValue, forKey: key("mode", scope: scope, storeID: storeID))
+        defaults.set(!dials.escrowOn, forKey: key("escrowOff", scope: scope, storeID: storeID))
+        defaults.set(dials.relockOnSleepAndScreenLock, forKey: key("relockOnSleep", scope: scope, storeID: storeID))
+        defaults.set(dials.relockAfterIdleMinutes ?? 0, forKey: key("relockIdleMinutes", scope: scope, storeID: storeID))
+        defaults.set(dials.reminderChecksOn, forKey: key("reminders", scope: scope, storeID: storeID))
     }
 
     // Stamps (reminder + nudge bookkeeping; device-local like the dials).
@@ -600,6 +627,18 @@ nonisolated enum ProtectionCopy {
     /// is exactly why it was wrong for so long — and exactly why it has to
     /// be right: whoever meets it got here by a road nobody planned, and a
     /// wrong cause sends them hunting for the wrong thing.
+    // MARK: - Library file missing (pre-13x 1a — copy §3, verbatim)
+
+    /// The absent-store route's face (the postures design §3.7 — "the lock
+    /// STAYS"): rendered verbatim from `pre-13x-copy.md` §3.
+    static let libraryMissingTitle = "Your library file is missing."
+    static let libraryMissingBody =
+        "Variorum's library isn't where it was. Your lock hasn't changed."
+    static let libraryMissingRestoreDoor = "Restore from a Backup…"
+    static let libraryMissingOpenDoor = "Open an Existing Library…"
+    static let libraryMissingStartDoor = "Start a New Library"
+    static let libraryMissingStartSubline = "A new library starts empty and has its own key."
+
     static func deadEnd(_ demand: StoreAtOpenMode) -> String {
         let cause: String
         switch demand {

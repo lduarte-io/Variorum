@@ -442,8 +442,8 @@ struct ProtectionSetModeOffMainTests {
         let envelopeBox = ScriptedEnvelopeBox(nil)
         let stamps = ScriptedStampsBox()
         let gate = StoreLaunchGate(
-            dials: { _ in dialsBox.value },
-            saveDials: { new, _ in dialsBox.value = new },
+            dials: { _, _ in dialsBox.value },
+            saveDials: { new, _, _ in dialsBox.value = new },
             guardFor: { _ in recording },
             loadEnvelope: { _ in envelopeBox.value },
             saveEnvelope: { new, _ in envelopeBox.value = new },
@@ -525,8 +525,8 @@ struct ProtectionReconcileOffMainTests {
         let envelopeBox = ScriptedEnvelopeBox(nil)
         let stamps = ScriptedStampsBox()
         let gate = StoreLaunchGate(
-            dials: { _ in dialsBox.value },
-            saveDials: { new, _ in dialsBox.value = new },
+            dials: { _, _ in dialsBox.value },
+            saveDials: { new, _, _ in dialsBox.value = new },
             guardFor: { _ in recording },
             loadEnvelope: { _ in envelopeBox.value },
             saveEnvelope: { new, _ in envelopeBox.value = new },

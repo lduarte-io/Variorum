@@ -148,6 +148,9 @@ struct VariorumApp: App {
                 // Phase 13p: the demanded at-open modes' lobby — no store,
                 // no session, no services until it unlocks (R13p-5).
                 StoreLockView(lobby: lobby)
+            case .libraryMissing(let lobby):
+                // pre-13x 1a (§3.7): the three-door face — the lock stays.
+                LibraryMissingView(lobby: lobby)
             case .failed(let error, let recovery):
                 // 13p ladder R1-M3: `recovery` is the sidecar-present
                 // unlock road — non-nil when the key custody is empty but
@@ -217,6 +220,9 @@ struct VariorumApp: App {
                 // 13p: note windows never outlive a lock (the whole
                 // `.ready` tree tears down); a restored one says so.
                 Text("Variorum is locked — unlock it in the main window.")
+                    .padding(24)
+            case (.libraryMissing, _):
+                Text("\(ProtectionCopy.libraryMissingTitle) See the main window.")
                     .padding(24)
             default:
                 // No note handed over (a restored window whose value did not

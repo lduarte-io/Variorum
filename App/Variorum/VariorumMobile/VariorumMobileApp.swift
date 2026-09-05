@@ -157,6 +157,9 @@ struct VariorumMobileApp: App {
                 // unlock first, never a plaintext side channel); the box's
                 // own worded refusal covers the re-lock seam.
                 MobileStoreLockView(lobby: lobby, tokens: lockedTokens)
+            case .libraryMissing(let lobby):
+                // pre-13x 1a (§3.7): the three-door face — the lock stays.
+                MobileLibraryMissingView(lobby: lobby, tokens: lockedTokens)
             case .failed(let error, let recovery):
                 // 13p ladder R1-M3: `recovery` is the sidecar-present
                 // unlock road — same brain and roads as the Mac's surface.

@@ -347,6 +347,53 @@ struct MobilePhoneLobbyTests {
         }
     }
 
+    /// pre-13x 1a (§3.7) ON THE PHONE — the same brain, the same law: a
+    /// demanded gate over an absent store lands `.libraryMissing`, opens
+    /// nothing, writes no dial; Start a New Library mints under a NEW store
+    /// id with its own Auto dials while the old lock stays. RED ON OLD:
+    /// 13p's route reset the mode to Auto and opened at once.
+    @Test func anAbsentStoreUnderADemandedModeNeverResetsTheLockOnThePhone() async throws {
+        try await withDeps {
+            let dir = try temporaryDirectory()
+            let storeURL = dir.appendingPathComponent("variorum.sqlite")
+            let oldKey = StoreKey.mint()
+            var oldEnvelope = StoreKeyEnvelope()
+            try oldEnvelope.setPassphraseWrap(key: oldKey, passphrase: "sesame", kdf: fastKDF())
+            try oldEnvelope.write(at: oldEnvelope.preferredURL(besideStore: storeURL))
+            let backing = InMemoryStoreKeyGuardBacking(biometryAvailable: true)
+            let dialsBox = ScriptedDialsBox(ProtectionDials(mode: .biometric))
+            let gate = StoreLaunchGate.scripted(
+                dials: dialsBox, backing: backing, envelope: ScriptedEnvelopeBox(oldEnvelope))
+            let openCount = LockIsolated(0)
+            let bootstrap = AppBootstrap(
+                testOpener: {
+                    openCount.withValue { $0 += 1 }
+                    return Result { try AppDatabase.onDisk(url: storeURL, key: StoreKey.mint()) }
+                        .mapError { AppDatabase.StoreOpenError(
+                            storePath: storeURL.path, reason: String(describing: $0)) }
+                },
+                gate: gate, testPresence: .absent, testStoreURL: storeURL)
+            await bootstrap.awaitOpen()
+            guard case .libraryMissing(let lobby) = bootstrap.state else {
+                Issue.record("expected .libraryMissing, got \(bootstrap.state)")
+                return
+            }
+            #expect(openCount.value == 0)
+            #expect(dialsBox.value.mode == .biometric, "the lock never resets")
+            await lobby.startNewLibrary()
+            #expect(lobby.lastError == nil)
+            await bootstrap.awaitOpen()
+            guard case .ready = bootstrap.state else {
+                Issue.record("expected .ready, got \(bootstrap.state)")
+                return
+            }
+            let fresh = try #require(try StoreKeyEnvelope.loadCurrent(besideStore: storeURL))
+            #expect(fresh.storeID != oldEnvelope.storeID, "a NEW store id")
+            #expect(dialsBox.perStoreDials(fresh.storeID)?.mode == .auto)
+            #expect(dialsBox.value.mode == .biometric, "the old library's lock is untouched")
+        }
+    }
+
     /// R13p-14 on the phone: a lock whose key auto-releases at the next
     /// open is theater, and no theater ships.
     @Test func lockNowUnderAutoIsRefusedAsTheater() async throws {

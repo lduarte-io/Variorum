@@ -45,6 +45,19 @@ final class ProtectionController {
         var makeKDF: @Sendable () -> PassphraseKDF.Descriptor = {
             .v1(salt: PassphraseKDF.randomSalt())
         }
+        /// pre-13x 1a: the store id the dials are keyed by — read from the
+        /// key file beside `storeURL` at each dials read/write (it CHANGES
+        /// when a new library is started over an absent store). nil ⇒
+        /// the scope's legacy keys. Injectable for tests; the default
+        /// resolves from `storeURL`.
+        var storeID: (@Sendable () -> String?)? = nil
+
+        func resolvedStoreID() -> String? {
+            if let storeID { return storeID() }
+            guard let storeURL else { return nil }
+            if case .known(let id) = StoreIdentity.resolve(besideStore: storeURL) { return id }
+            return nil
+        }
     }
 
     private let configuration: Configuration
@@ -126,7 +139,7 @@ final class ProtectionController {
     init(configuration: Configuration) {
         self.configuration = configuration
         self.guardSeam = configuration.gate.guardFor(configuration.scope)
-        self.dials = configuration.gate.dials(configuration.scope)
+        self.dials = configuration.gate.dials(configuration.scope, configuration.resolvedStoreID())
         refreshEnvelopeFacts()
     }
 
@@ -657,7 +670,7 @@ final class ProtectionController {
     }
 
     private func persistDials() {
-        gate.saveDials(dials, scope)
+        gate.saveDials(dials, scope, configuration.resolvedStoreID())
     }
 
     // MARK: - The launch reconcile
@@ -669,12 +682,13 @@ final class ProtectionController {
     /// the notice state.
     func reconcile(now: Date = Date()) async {
         // Re-read the persisted dials FIRST (ladder R1-m2's corner): the
-        // launch route can rewrite the stored dials WITHOUT this controller
-        // (`openResettingModeToAuto` writes through the gate off the main
-        // actor), and `canLock` + the panes read THIS observable projection
-        // — a stale projection would render a Lock Now door that `lock()`
-        // then silently refuses (a P-2 violation: a door that cannot act).
-        dials = gate.dials(scope)
+        // launch road can write the stored dials WITHOUT this controller
+        // (pre-13x 1a: "Start a New Library" writes the NEW store id's
+        // dials through the gate before the open), and `canLock` + the
+        // panes read THIS observable projection — a stale projection would
+        // render a Lock Now door that `lock()` then silently refuses (a
+        // P-2 violation: a door that cannot act).
+        dials = gate.dials(scope, configuration.resolvedStoreID())
         if gate.stamp(Self.firstUseStamp, scope) == nil {
             gate.setStamp(now, Self.firstUseStamp, scope)
         }

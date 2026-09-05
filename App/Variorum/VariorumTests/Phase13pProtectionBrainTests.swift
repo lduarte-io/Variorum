@@ -235,3 +235,32 @@ struct StoreKeyGuardBackingTests {
         #expect(guardSeam.loadEscrow("store-b") == b, "per-store items never cross")
     }
 }
+
+/// pre-13x 1a — the dials are PER STORE ID with a legacy read-through
+/// (the postures design §3.1; pulled in by the absent-store route so a new
+/// library is not born gated and a restored old one is not born silent).
+/// RED ON OLD: `ProtectionDefaults` had no store-id form (compile).
+@Suite("pre-13x 1a — the dials per store id, with the legacy read-through")
+struct ProtectionDialsPerStoreTests {
+    @Test func aStoreWithNoKeysOfItsOwnReadsTheLegacyScopeDials() {
+        let defaults = UserDefaults(suiteName: "variorum-1a-dials-\(UUID().uuidString)")!
+        let scope = "probe"
+        ProtectionDefaults.save(ProtectionDials(mode: .biometric, relockOnSleepAndScreenLock: true), scope: scope, in: defaults)
+        let read = ProtectionDefaults.dials(scope: scope, storeID: "store-a", in: defaults)
+        #expect(read.mode == .biometric, "her existing library keeps reading exactly the dials it had")
+        #expect(read.relockOnSleepAndScreenLock)
+    }
+
+    @Test func aStoresOwnSaveEndsTheReadThroughForThatStoreOnly() {
+        let defaults = UserDefaults(suiteName: "variorum-1a-dials-\(UUID().uuidString)")!
+        let scope = "probe"
+        ProtectionDefaults.save(ProtectionDials(mode: .biometric), scope: scope, in: defaults)
+        ProtectionDefaults.save(ProtectionDials(mode: .auto), scope: scope, storeID: "store-new", in: defaults)
+        #expect(ProtectionDefaults.dials(scope: scope, storeID: "store-new", in: defaults).mode == .auto,
+                "the new library reads its own dials")
+        #expect(ProtectionDefaults.dials(scope: scope, storeID: "store-old", in: defaults).mode == .biometric,
+                "another store id still reads through to the legacy dials")
+        #expect(ProtectionDefaults.dials(scope: scope, in: defaults).mode == .biometric,
+                "the legacy keys are never written by a per-store save")
+    }
+}

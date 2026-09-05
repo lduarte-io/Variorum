@@ -24,8 +24,11 @@ import VariorumCore
 /// The injectable launch-protection facts (production reads the real
 /// defaults/Keychain/sidecar; tests script all three).
 nonisolated struct StoreLaunchGate: Sendable {
-    var dials: @Sendable (_ scope: String) -> ProtectionDials
-    var saveDials: @Sendable (ProtectionDials, _ scope: String) -> Void
+    /// pre-13x 1a: the dials are read and written PER STORE ID (the key
+    /// file's; nil = no key file yet → the scope's legacy keys). See
+    /// `ProtectionDefaults.dials(scope:storeID:in:)` for the read-through.
+    var dials: @Sendable (_ scope: String, _ storeID: String?) -> ProtectionDials
+    var saveDials: @Sendable (ProtectionDials, _ scope: String, _ storeID: String?) -> Void
     var guardFor: @Sendable (_ scope: String) -> StoreKeyGuard
     var loadEnvelope: @Sendable (_ storeURL: URL) throws -> StoreKeyEnvelope?
     /// Atomic write of the sidecar beside the store (the controller's
@@ -65,8 +68,8 @@ nonisolated struct StoreLaunchGate: Sendable {
     }
 
     static let live = StoreLaunchGate(
-        dials: { ProtectionDefaults.dials(scope: $0, in: .standard) },
-        saveDials: { ProtectionDefaults.save($0, scope: $1, in: .standard) },
+        dials: { ProtectionDefaults.dials(scope: $0, storeID: $1, in: .standard) },
+        saveDials: { ProtectionDefaults.save($0, scope: $1, storeID: $2, in: .standard) },
         // pre-13x 1a: the guard's items are per STORE ID, read from the key
         // file beside the scope's store home at each act.
         guardFor: { scope in
@@ -109,8 +112,8 @@ nonisolated struct StoreLaunchGate: Sendable {
         stamps: ScriptedStampsBox = ScriptedStampsBox()
     ) -> StoreLaunchGate {
         StoreLaunchGate(
-            dials: { _ in dials.value },
-            saveDials: { new, _ in dials.value = new },
+            dials: { _, storeID in dials.dials(for: storeID) },
+            saveDials: { new, _, storeID in dials.save(new, for: storeID) },
             guardFor: { _ in StoreKeyGuard.inMemory(backing: backing) },
             loadEnvelope: { _ in
                 // P1/P11: the scripted gate can now script UNREADABILITY —
@@ -153,10 +156,27 @@ nonisolated enum EnvelopeReading: Sendable {
 nonisolated final class ScriptedDialsBox: @unchecked Sendable {
     private let lock = NSLock()
     private var stored: ProtectionDials
+    private var perStore: [String: ProtectionDials] = [:]
     init(_ initial: ProtectionDials) { stored = initial }
+    /// The LEGACY (per-scope) dials — what a store id with no keys of its
+    /// own reads through to, exactly as production's read-through.
     var value: ProtectionDials {
         get { lock.lock(); defer { lock.unlock() }; return stored }
         set { lock.lock(); defer { lock.unlock() }; stored = newValue }
+    }
+    /// pre-13x 1a: the per-store dials, scripted like production's
+    /// defaults — a store id that never saved reads the legacy value.
+    func dials(for storeID: String?) -> ProtectionDials {
+        lock.lock(); defer { lock.unlock() }
+        return storeID.flatMap { perStore[$0] } ?? stored
+    }
+    func save(_ new: ProtectionDials, for storeID: String?) {
+        lock.lock(); defer { lock.unlock() }
+        if let storeID { perStore[storeID] = new } else { stored = new }
+    }
+    func perStoreDials(_ storeID: String) -> ProtectionDials? {
+        lock.lock(); defer { lock.unlock() }
+        return perStore[storeID]
     }
 }
 
@@ -198,18 +218,20 @@ nonisolated enum StoreLaunchRoute: Equatable, Sendable {
     case open
     /// A demanded mode over an existing store: stop at the lobby.
     case lobby(demand: StoreAtOpenMode)
-    /// PROVISIONAL (recorded in the run record): a demanded mode over an
-    /// ABSENT store — the store was deleted out from under its gate. A
-    /// gate over nothing guards nothing, and its unlock secrets reference
-    /// a key whose store is gone; the route resets the mode to Auto
-    /// (visibly, via the gate's saveDials) and proceeds as a fresh
-    /// first launch. The alternatives (refuse outright; lobby over an
-    /// empty library) are recorded with it.
-    case openResettingModeToAuto
+    /// pre-13x 1a (the postures design §3.7 / decision 14 — RE-RULED): a
+    /// demanded mode over an ABSENT store — "your library file is missing
+    /// — restore it, open an existing library, or start a new one". THE
+    /// LOCK STAYS: nothing is persisted, nothing opens; starting new is a
+    /// deliberate act that mints under a NEW store id (per-store custody
+    /// leaves the old library's items unreachable, never deleted). This
+    /// replaces 13p's PROVISIONAL `openResettingModeToAuto`, whose silent
+    /// Auto reset + fresh mint was the same-machine bypass the design
+    /// closes (KnownIssues, the Castle-bypass row).
+    case libraryMissing(demand: StoreAtOpenMode)
 
     static func resolve(dials: ProtectionDials, presence: StoreFilePresence) -> StoreLaunchRoute {
         guard dials.mode.isDemanded else { return .open }
-        guard presence != .absent else { return .openResettingModeToAuto }
+        guard presence != .absent else { return .libraryMissing(demand: dials.mode) }
         return .lobby(demand: dials.mode)
     }
 }
