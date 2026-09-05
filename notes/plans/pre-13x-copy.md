@@ -161,16 +161,22 @@ Bullets:
   with your account password — also delete your Stargazing account and set sync up again. That gives your sync
   fresh keys.*
 Button: *Continue*
-**Screen 2 — the passphrase** (only if none is set): 2a's Screen 2, title *Castle needs a passphrase.*
-**Screen 3 — the twelve words** (only if none exist): 2a's Screens 3/3b. If they exist: *You already have
-twelve words. They still open your library.*
+**Screen 2 — the passphrase (always):** none set → 2a's Screen 2, title *Castle needs a passphrase.* One set → Title
+*Enter your passphrase.* Body: *Castle gives your library and your sync new keys, wrapped under your passphrase — so it
+has to be typed here.* Field: Passphrase. Wrong: *That isn't your account's passphrase.* (No forgot road on this
+screen — Change Passphrase, with Touch ID, comes first.)
+**Screen 3 — the twelve words (always):** none yet → 2a's Screens 3/3b. Some exist → Title *Your twelve words.* Body:
+*Castle gives your library and your sync new keys, and your twelve words must open them too. Type the twelve you
+have — or generate new ones, which replace the old everywhere.* Buttons: *Type My Words…* (→ 2a's Screen 3b) ·
+*Generate New Ones* (→ 2a's Screen 3).
 **Screen 4 — the floor, said once**
 Title: *Read this once.*
 Body: *In Castle, nobody can help you if you forget your passphrase and lose your twelve words while no
 enrolled device is left. Not Apple. Not us. There is no reset. That is what makes Castle real — and it's
 why the words go on paper.*
 Checkbox: *I know my passphrase, and my twelve words are written down.*
-Confirmation: Touch ID, or the passphrase.
+Confirmation: the passphrase typed at Screen 2 (checked against your account's copy) — Touch ID cannot make the new
+keys.
 Button: *Enter Castle*
 **During:** *Re-encrypting your library on the server… (N of M)* — then *Giving your library a new key…* — under an
 ORIGINAL animated indicator with movement (a line with a few black dots travelling back and forth, or of that family;
@@ -295,7 +301,9 @@ to go. Any signed-in device that has picked up the new keys can finish it. Try a
 Checkbox: *Also choose a new passphrase*
 Entrances (one mechanism, four doors): this screen; the *"Also replace my keys"* checkbox on Change Passphrase and on
 Regenerate Twelve Words; and entering Castle, which runs it for you.
-Authorization: Castle — Touch ID or the passphrase. Standard — the passphrase if set, else a plain confirm.
+Authorization, both postures: your passphrase typed (checked against your account's copy) and your twelve words typed
+or regenerated (2b's Screen 3) — the new keys must be wrapped under both, and Touch ID can't do that. (Forgot the
+passphrase? Change Passphrase first, with Touch ID.)
 Button: *Replace Keys* · progress line: *Re-encrypting your library on the server… (N of M)*
 Done: *Done. Your other devices will ask for your passphrase the next time they open.*
 

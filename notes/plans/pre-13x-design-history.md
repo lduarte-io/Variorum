@@ -1084,3 +1084,20 @@ adjudication's item 2 closed. Superseded text: decision 11's *"Key files are nam
 overwritten by another key's file"*; §6's *"the key file beside them is named by fingerprint and NEVER overwritten by a
 different key's file — a folder holds one per library key it has ever held"*; the 1a brief's *"Per-fingerprint NAMING
 beside the store and in backup folders"* (beside the store it stands; in folders the rule is per snapshot).
+
+## V.8 The 2b implementer's design fork — RULED (2026-09-05): the two rotation doors take both secrets typed; the vault names the acting device
+The fork: the Touch-ID-only arm of entering Castle / Replace All Keys cannot produce the new keys' wraps (M′ and L′
+under P and W need the secret-derived keys, which are never stored). Offered: type both or regenerate the words
+(recommended) · type the passphrase and always regenerate. **Her ruling, verbatim: *"touchid is enough to reset your
+passphrase, so type both or regenerate words is fine. no need to crowd the screen with also allowing passphrase reset
+there."*** → decision 33; §4's header and §5's Replace All Keys authorization re-worded; copy §2b's Screens 2–4 and
+§4's Replace All Keys authorization re-written (no reset road on the ceremony; Change Passphrase's Touch ID road first).
+Superseded text: §4's *"Touch ID or the passphrase — checked against the vault's current copy — confirms"*; §5's
+*"Castle: Touch ID, or P (or W) verified against the vault's copy… Standard: P if one is set, else a plain confirm"*;
+copy §2b's *"Screen 2 — the passphrase (only if none is set)"*, *"Screen 3 — the twelve words (only if none exist)…
+If they exist: You already have twelve words. They still open your library."*, *"Confirmation: Touch ID, or the
+passphrase."*; copy §4's *"Authorization: Castle — Touch ID or the passphrase. Standard — the passphrase if set, else a
+plain confirm."*
+The device name: the notices' *[device] on [day]* had no column behind it. Offered: a plain `updated_by_device` column
+now, while the lockstep is undeployed (recommended) · anonymous notices. **She chose the column** → decision 34 (the
+seventh vault column; the disclosure envelope gains a device name).
