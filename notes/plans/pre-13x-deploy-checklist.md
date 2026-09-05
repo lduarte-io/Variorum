@@ -127,6 +127,14 @@ until confirmed). The DEV store's own migration wants the same prompt answered O
 the `[protection] migration 2a:` lines from `/usr/bin/log show` — the full path: in her zsh `log` is a BUILTIN, and the
 migration must log at a PERSISTED level (`.notice`; 2b's item 0) for `log show` to read it afterwards.
 
+**Her PHONE at the window (Q3's early run, corner 47):** the Debug (dev) build sits on her iPhone over the Release app
+(same bundle id; the real store's folder + key file untouched). Its migration took the phone's scope-less legacy
+sync-key item into the DEV store's custody, so after the marker-8 Release install her REAL phone store reads as NOT
+enrolled and re-enrolls by her passphrase (the vault road; one typing) — expected, not a defect. Then the orchestrator
+DELETES the dev folder from the container (`devicectl device copy`/`delete` on `Library/Application Support/Variorum-dev`);
+the dev-scoped custody item lingers on the phone (ThisDeviceOnly; never read by the Release build) — recorded. Before
+the install: the 2c build carries the scoped session + the real-scope-only legacy legs, so this cannot recur.
+
 **She is SIGNED OUT of the real store at this writing (her word):** at the window, after the install and the migration's
 run, she SIGNS IN first — the confirm face's vault verify and the first round both need the session — and then runs
 the 13l sanity check with her twelve words (the 1b stale-recovery-wrap defect's definitive check, moved here from
