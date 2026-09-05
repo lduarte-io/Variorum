@@ -595,7 +595,7 @@ struct CrossoverRoundTests {
     }
 
     /// Ladder R1-1: the engine's unfinished-re-key refusal (the persisted
-    /// `AccountRekeyMarker`) presents as its OWN paused row whose one
+    /// `RotationMarker`) presents as its OWN paused row whose one
     /// door reaches the completing surface directly — never the generic
     /// error face (red-on-old: that was the pre-fix presentation), and
     /// never the replaced-keys row, whose re-enroll prescription cannot
@@ -719,8 +719,12 @@ struct AccountLifecycleDoorTests {
     /// CF-8's flow state machine: a successful run lands in
     /// `enrolled(hasRecoveryWrap: false)` — the standing CF-5 MANDATORY
     /// phrase step (the old phrase died with the old master; setup's own
-    /// machinery mints the new one) — with the runner-adopted custody in
-    /// place.
+    /// machinery mints the new one) — with the runner-landed custody in
+    /// place, and the healing hook fired ONCE by the door.
+    /// pre-13x 2b: the runner's CONTRACT changed — the `PostureSwitchRunner`
+    /// lands custody ITSELF (its own custody store) and returns the final
+    /// material; the door fires `onKeysChanged` once after it returns. The
+    /// scripted runner models that: it saves custody and returns.
     @Test func theRekeyDoorLandsInTheMandatoryPhraseStepWithNewCustody() async throws {
         let store = DeviceKeyStore.inMemory()
         let vault = ScriptedVault()
@@ -731,12 +735,7 @@ struct AccountLifecycleDoorTests {
         let fresh = material(7)
         session.rekeyRunner = { passphrase in
             #expect(passphrase == "the-old-passphrase")
-            // The runner's CONTRACT: custody adopted mid-run.
-            // JUSTIFIED EDIT (13e batch 9, B-1): `adoptRekeyedMaterial` is
-            // async now — its custody save hops off the main thread — so
-            // the call IS the MainActor hop. The awaited contract (custody
-            // lands before the runner returns) is byte-unchanged.
-            await session.adoptRekeyedMaterial(fresh)
+            _ = store.save(fresh)  // the runner lands custody itself (2b)
             return fresh
         }
         var healed = 0
@@ -962,39 +961,39 @@ struct AccountDoorWiringTests {
         }
     }
 
-    /// THE REKEY WIRING, end to end through the app seam: the wired
-    /// runner drives the REAL brain — new vault written (new ids), the
-    /// truncate presented the NEW corpus key id, custody adopted mid-run,
-    /// the store fully re-enqueued — and the flow lands in the mandatory
-    /// phrase step. (The bridge-staging leg left with the bridge,
-    /// 2026-09-04.)
-    @Test func theRekeyWiringRunsTheBrainAdoptsCustodyAndReEnqueues() async throws {
+    /// THE REKEY WIRING through the app seam, pre-13x 2b: the 14c brain's
+    /// truncate-and-re-enqueue road is RETIRED (the rotation is in place —
+    /// `PostureSwitchRunner`, composed by the ROOT because it needs the
+    /// bootstrap's re-key road and the protection controller). What
+    /// `AppServices.start()` still wires is the persisted marker's read:
+    /// the door stays honestly dormant until the root hands it the runner,
+    /// the truncate is never called, and a marker in the store projects
+    /// as `rekeyIncomplete` through `refresh()`.
+    @Test func theRekeyDoorStaysDormantUntilTheRootWiresTheRunnerAndTheMarkerReadIsWired() async throws {
         try await withDoorWorld { services, encryption, store, lifecycle, db, _ in
             await encryption.setUp(passphrase: "orchard-lantern-13")
             #expect(encryption.lastError == nil)
             let old = try #require(store.load())
-            // A synced row, pre-re-key.
             _ = try await services.session.runner.run { ops in
                 try ops.createPost(title: "pre-rekey").id
             }
 
+            // No root-wired runner: the door refuses in the dormant grammar
+            // and touches nothing — no truncate, custody unchanged.
             await encryption.rekeyAccount(passphrase: "orchard-lantern-13")
+            #expect(encryption.lastError == "Project keys not configured (ProjectConfig.swift)")
+            #expect(store.load() == old, "custody untouched")
+            #expect(await lifecycle.truncateKeyIDs == [], "the truncate road is retired — never called")
 
-            #expect(encryption.lastError == nil)
-            #expect(encryption.state == .enrolled(hasRecoveryWrap: false),
-                    "the mandatory NEW phrase step follows the re-key")
-            let fresh = try #require(store.load())
-            #expect(fresh.corpusKeyID != old.corpusKeyID, "custody holds the NEW keys")
-            #expect(await lifecycle.truncateKeyIDs == [fresh.corpusKeyID],
-                    "the truncate presented the NEW key id — after the vault write, by the brain's pinned order")
-            let outbox = try #require(try db.doorInt("SELECT COUNT(*) FROM sync_outbox"))
-            let rows = try #require(try db.doorInt(
-                "SELECT (SELECT COUNT(*) FROM container) + (SELECT COUNT(*) FROM block) + (SELECT COUNT(*) FROM variant) + (SELECT COUNT(*) FROM container_block)"))
-            #expect(outbox >= rows, "resyncReinitialize re-enqueued the store")
-            // Ladder R1-1: the completed road left NO rekey-in-progress
-            // residue — marker clear in the real store, banner down.
-            let marker = try await db.read { try AccountRekeyMarker.isSet($0) }
-            #expect(!marker, "a completed re-key clears the persisted marker")
+            // The marker read IS wired: a crashed switch's marker projects.
+            try await db.write { dbi in
+                try RotationMarker.write(
+                    RotationMarker(step: .rekeyLibrary, entersCastle: true, startedAt: "2026-09-05T00:00:00.000Z"), dbi)
+            }
+            await encryption.refresh()
+            #expect(encryption.rekeyIncomplete, "the persisted marker re-speaks the resume road")
+            try await db.write { dbi in try RotationMarker.clear(dbi) }
+            await encryption.refresh()
             #expect(!encryption.rekeyIncomplete)
         }
     }
@@ -1012,7 +1011,10 @@ struct AccountDoorWiringTests {
             #expect(encryption.lastError == nil)
 
             // The crash residue, in the REAL store this world composes over.
-            try await db.write { dbi in try AccountRekeyMarker.set(dbi) }
+            try await db.write { dbi in
+                try RotationMarker.write(
+                    RotationMarker(step: .reencrypt, entersCastle: false, startedAt: "2026-09-05T00:00:00.000Z"), dbi)
+            }
             await encryption.refresh()
             #expect(encryption.rekeyIncomplete,
                     "the wired check reads the real sync_state row — the surface re-speaks the road on relaunch")
@@ -1020,7 +1022,7 @@ struct AccountDoorWiringTests {
             // Deletion clears it: the road no longer exists.
             await services.deleteAccount(passphrase: "orchard-lantern-13")
             #expect(services.account.lastError == nil)
-            let marker = try await db.read { try AccountRekeyMarker.isSet($0) }
+            let marker = try await db.read { try RotationMarker.isSet($0) }
             #expect(!marker, "a purged account owes no re-key completion")
         }
     }

@@ -78,7 +78,7 @@ public struct PurgeJanitor: Sendable {
     @discardableResult
     public func sweep() async throws -> SweepReport {
         // The engine's own preflight discipline, in the engine's order.
-        let rekeyIncomplete = try await database.read { try AccountRekeyMarker.isSet($0) }
+        let rekeyIncomplete = try await database.read { try RotationMarker.isSet($0) }
         guard !rekeyIncomplete else { throw SyncError.accountRekeyIncomplete }
         let keyID: String
         let keyProof: String
@@ -252,7 +252,7 @@ public struct PurgeJanitor: Sendable {
         // — scan point unmoved, nothing dropped. When `sweep()` calls
         // this the checks re-run (one cheap RPC, twice per sweep); the
         // standalone scheduler entry is the one that must never be naked.
-        let rekeyIncomplete = try await database.read { try AccountRekeyMarker.isSet($0) }
+        let rekeyIncomplete = try await database.read { try RotationMarker.isSet($0) }
         guard !rekeyIncomplete else { throw SyncError.accountRekeyIncomplete }
         let keyID: String
         let keyProof: String

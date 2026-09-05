@@ -443,6 +443,11 @@ final class AppBootstrap {
                 installed = true
             }
             state = .ready(AppSession(database: view))
+            // pre-13x 2b: the reconcile's Apple arm reads the persisted
+            // switch marker (a crashed switch pending its resume).
+            protection.readSwitchPending = { [database] in
+                (try? await database.read { try RotationMarker.isSet($0) }) ?? false
+            }
             // 13p: the demanded modes' resident key (nil on the Auto
             // road — its Keychain releases on demand), then the launch
             // reconcile (escrow consistency, first-use stamp, notices) —
@@ -600,6 +605,52 @@ final class AppBootstrap {
             complete: { [weak self] key in
                 self?.beginOpening(unlockedKey: key)
             })
+    }
+
+    // MARK: - pre-13x 2b: THE RE-KEY ROAD (§4 step 4 — "the pool closed
+    // first; off-main")
+
+    /// Re-key the open library: flush and stop (the composition root's
+    /// `onWillLock`), tear the `.ready` tree down (`.opening` renders
+    /// quietly), CLOSE the pool through the binding, run `work` (the
+    /// export-and-swap — `StoreEncryptionMigration.rekey`) off-main, then
+    /// REOPEN under whichever key opens the file now (the new one after
+    /// the swap; the old one if the work threw before it — the file is
+    /// under exactly one, pinned in core) and re-adopt through the same
+    /// binding. `work`'s error rethrows AFTER the reopen, so the app is
+    /// never left without its store. The runner's per-step marker owns the
+    /// resume.
+    func rekeyLibrary(
+        from oldKey: StoreKey, to newKey: StoreKey,
+        work: @escaping @Sendable () throws -> Void
+    ) async throws {
+        guard case .ready = state, let binding else {
+            throw PostureSwitchError.libraryKeyUnavailable
+        }
+        await onWillLock?()
+        state = .opening
+        protection.dropResident()
+        let storeURL = testOpener != nil
+            ? testStoreURL
+            : (try? AppDatabase.defaultStoreURL(variant: storeVariant))
+        let outcome: Result<Void, any Error> = await Task.detached(priority: .userInitiated) {
+            binding.lock()
+            do {
+                try work()
+                return .success(())
+            } catch {
+                return .failure(error)
+            }
+        }.value
+        // Which key opens the file NOW decides the reopen (the probe reads
+        // one page; never a guess).
+        let reopenKey: StoreKey = await Task.detached(priority: .userInitiated) {
+            guard let storeURL else { return oldKey }
+            return StoreEncryptionMigration.opens(storeURL, key: newKey) ? newKey : oldKey
+        }.value
+        beginOpening(unlockedKey: reopenKey)
+        await awaitOpen()
+        if case .failure(let error) = outcome { throw error }
     }
 
     // MARK: - Re-lock (13p — demanded modes only; Lock Now and the

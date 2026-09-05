@@ -112,13 +112,13 @@ final class EncryptionSession {
         + "library's passphrase here (check it under Settings ▸ Protection "
         + "if you're unsure)."
 
-    /// Phase 14c (CF-8): the re-key door's runner, injected by the
-    /// composition root (AppServices wires the real `AccountRekey` brain
-    /// with sync paused around it; nil = the door stays dormant, exactly
-    /// like an unconfigured client). CONTRACT: the runner adopts custody
-    /// mid-run through `adoptRekeyedMaterial` — before its truncate — and
-    /// returns only when the whole road (new vault → truncate →
-    /// resyncReinitialize) has run.
+    /// Phase 14c (CF-8) → pre-13x 2b: the re-key door's runner, injected
+    /// by the composition root — the `PostureSwitchRunner`'s Replace All
+    /// Keys road (the in-place rotation: the vault rewritten under the old
+    /// proof, every row re-encrypted, THIS library re-keyed, custody
+    /// re-saved); nil = the door stays dormant, exactly like an
+    /// unconfigured client. CONTRACT: the runner lands custody itself and
+    /// returns the final material only when the whole road has run.
     var rekeyRunner: ((String) async throws -> DeviceKeyMaterial)?
 
     /// Ladder R1-1: the persisted rekey-in-progress read, injected by the
@@ -126,10 +126,6 @@ final class EncryptionSession {
     /// database — `AccountRekeyMarker`). nil = never set (unconfigured /
     /// tests that predate the marker).
     var rekeyIncompleteCheck: (@Sendable () async -> Bool)?
-    /// T1's guard (pre-13u Act 10 wave 2a — memo §9b): the READ-ONLY
-    /// recency probe the re-key door consults before acting. nil =
-    /// unwired (no sync composition) — the door proceeds as before.
-    var rekeyRecencyProbe: (() async throws -> RekeyRecencyReport)?
     /// Ladder R1-1: true when a re-key started on THIS device and never
     /// completed — the marker survives crash and relaunch, so the surface
     /// re-speaks the rerun road here (the banner + its direct Replace
@@ -307,22 +303,13 @@ final class EncryptionSession {
 
     // MARK: - The re-key door (Phase 14c, CF-8 — THE DESIGN 3)
 
-    /// CF-8: replace the account's encryption keys and re-upload the
-    /// corpus. The heavy lifting and the ORDER OF OPERATIONS live in the
-    /// injected runner (`AccountRekey`, pinned in core); this method is
-    /// the flow's state machine: friction already passed (the surface's
-    /// checkbox), busy handling, the refusal wording, and the landing —
-    /// `enrolled(hasRecoveryWrap: false)`, which IS the standing CF-5
-    /// mandatory-phrase step: the new 12 words are generated, written
-    /// down, and confirmed exactly as at setup. The old phrase died with
-    /// the old master, honestly.
-    /// T1's guard: one recency read before the act. nil = unwired.
-    /// Throws are the CALLER's to word (couldn't-compare, never a block).
-    func assessRekeyRecency() async throws -> RekeyRecencyReport? {
-        guard let rekeyRecencyProbe else { return nil }
-        return try await rekeyRecencyProbe()
-    }
-
+    /// CF-8 → pre-13x 2b: replace the account's encryption keys IN PLACE
+    /// (the runner's road, pinned in core's `CorpusRotationTests`); this
+    /// method is the flow's state machine: friction already passed (the
+    /// surface's checkbox), busy handling, the refusal wording, and the
+    /// landing — `enrolled(hasRecoveryWrap: false)`, the standing CF-5
+    /// mandatory-phrase step (batch 3's door passes the words through the
+    /// runner instead; until then a fresh phrase follows as at setup).
     func rekeyAccount(passphrase: String) async {
         guard let rekeyRunner else {
             lastError = "Project keys not configured (ProjectConfig.swift)"
@@ -334,9 +321,10 @@ final class EncryptionSession {
         defer { busy = false }
         do {
             _ = try await rekeyRunner(passphrase)
-            // Custody was adopted mid-run (the runner's contract); the
-            // fresh vault has no recovery wrap yet — step 4 begins now.
+            // Custody was landed by the runner; the fresh vault has no
+            // recovery wrap yet — step 4 begins now.
             state = .enrolled(hasRecoveryWrap: false)
+            onKeysChanged?()
         } catch {
             // The brain's sequence is not atomic; the honest road back
             // from ANY mid-run failure is running the door again (the

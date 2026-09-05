@@ -215,6 +215,37 @@ struct CorpusRotationTests {
         #expect(try #require(try await world.vault.client.fetchVault()).revision == revisionBefore)
     }
 
+    /// THE WHOLE-REPLACE PIN, ported from the retired 14c brain's suite
+    /// (1b's settled-design note 4 — a real defect the RPC road fixed):
+    /// BEGIN over a vault that HAD a recovery wrap, with no recovery key in
+    /// the secrets, leaves NO stale wrap standing — the old words' wrap of
+    /// the OLD master never survives beside the new class keys, and the
+    /// old words open nothing. With the words in the secrets, the wrap is
+    /// the NEW master under the SAME words.
+    @Test func beginOverAVaultWithARecoveryWrapLeavesNoStaleWrap() async throws {
+        let world = try await makeWorld()
+        let words = try RecoveryPhrase.generate()
+        try await world.vault.enrollment.landRecoveryWrap(words: words, material: world.old)
+        #expect(try await world.vault.enrollment.hasRecoveryWrap() == true, "the pin isn't vacuous")
+
+        let begun = try await CorpusRotation.begin(
+            client: world.vault.client, current: world.old,
+            secrets: try secrets(recoveryWords: nil), appleHeldCopy: nil)
+        let vault = try #require(try await world.vault.client.fetchVault()).format
+        #expect(vault.masterWrappedByRecovery == nil, "no recovery key in the secrets ⇒ NO wrap — never the old one")
+        await #expect(throws: (any Error).self, "the old words open nothing") {
+            _ = try await world.vault.enrollment.enroll(recoveryWords: words)
+        }
+        // Completion, then a rotation WITH the words: the wrap is M″ under them.
+        let cleared = try await CorpusRotation.complete(client: world.vault.client, material: begun.material)
+        let again = try await CorpusRotation.begin(
+            client: world.vault.client, current: cleared,
+            secrets: try secrets(recoveryWords: words), appleHeldCopy: nil)
+        let rewrapped = try #require(try await world.vault.client.fetchVault()).format
+        #expect(try rewrapped.unwrapMaster(withRecoveryKey: try RecoveryPhrase.recoveryWrapKey(words: words)).data
+                == again.material.masterKey, "the same twelve words open the NEW master")
+    }
+
     // MARK: - §4 step 3: THE WALK, and COMPLETION
 
     /// The driver re-encrypts every row below the seq (opened under the

@@ -111,6 +111,32 @@ struct VariorumApp: App {
                             protection: bootstrap.protection,
                             encryption: fresh.encryption,
                             keyVault: fresh.keyVault, auth: fresh.auth)
+                        // pre-13x 2b: THE POSTURE-SWITCH RUNNER — entering
+                        // and leaving Castle, and the in-place Replace All
+                        // Keys the Encryption tab's door now runs. Built
+                        // here because it composes the bootstrap's re-key
+                        // road with the controller's custody and the
+                        // services' vault; the services are read LIVE
+                        // (the reopen rebuilds them).
+                        if let storeURL = try? AppDatabase.defaultStoreURL(
+                            variant: bootstrap.storeVariant) {
+                            let runner = PostureSwitchRunner(leaves: .live(
+                                bootstrap: bootstrap,
+                                protection: bootstrap.protection,
+                                scope: bootstrap.storeVariant.rawValue,
+                                storeURL: storeURL,
+                                database: session.database,
+                                services: { services }))
+                            bootstrap.protection.switchRunner = runner
+                            fresh.encryption.rekeyRunner = { passphrase in
+                                let outcome = try await runner.replaceAllKeys(
+                                    passphrase: passphrase, recoveryWords: nil)
+                                guard let material = outcome.material else {
+                                    throw PostureSwitchError.syncKeysUnavailable
+                                }
+                                return material
+                            }
+                        }
                         await fresh.start()
                         // Pre-13u Act 3: THE SAMPLE LIBRARY — the Sherlock
                         // adventures as a real book, seeded once per store.

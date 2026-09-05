@@ -274,7 +274,10 @@ nonisolated extension ProtectionMigration.Leaves {
             alignCustody: { target in await protection.moveCustodyChanged(to: target) },
             readEnvelope: { gate.readEnvelope(storeURL).envelope },
             saveEnvelope: { try gate.saveEnvelope($0, storeURL ?? URL(fileURLWithPath: "/dev/null")) },
-            log: { logger.info("\($0, privacy: .public)") })
+            // pre-13x 2b (the orchestrator's addition): `notice`, not `info` —
+            // macOS does not persist info-level entries, and the window reads
+            // these lines with `log show` after the fact. Never key material.
+            log: { logger.notice("\($0, privacy: .public)") })
     }
 
     /// The pending-confirm read (the notice's gate), per store id.

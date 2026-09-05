@@ -234,6 +234,25 @@ final class ProtectionController {
         residentKey ?? guardSeam.loadAuto()
     }
 
+    /// pre-13x 2b: the same reading for the posture-switch runner (the
+    /// library key the re-key starts from).
+    func keyInHand() -> StoreKey? { currentKey() }
+
+    // MARK: - pre-13x 2b: the two switches' runner + the pending switch
+
+    /// The posture-switch runner (wired by the composition root; nil ⇒
+    /// the choose doors do not render — P-2).
+    @ObservationIgnored var switchRunner: PostureSwitchRunner?
+    /// True while a switch RUNS on this controller's library — the
+    /// reconcile's Apple arm must not land a copy on the NEW key file
+    /// between the swap and the custody move (the file is Standard-shaped
+    /// for an instant; Castle is what is being entered).
+    var switchInProgress = false
+    /// The persisted marker's read (a switch that crashed mid-road and is
+    /// pending its resume) — the same guard across a relaunch; wired by the
+    /// bootstrap at ready.
+    @ObservationIgnored var readSwitchPending: (@Sendable () async -> Bool)?
+
     private func refreshEnvelopeFacts() {
         let reading = readEnvelope()
         envelopeUnreadable = reading.isUnreadable
@@ -642,7 +661,14 @@ final class ProtectionController {
             vaultReading = reading
         }
         refreshEnvelopeFacts()
-        await reconcileAppleKey()
+        // pre-13x 2b: never land an Apple copy while a switch is in
+        // progress or pending its resume — the key file mid-road is
+        // Standard-shaped for an instant, and Castle is what is being
+        // entered.
+        let markerPending = await readSwitchPending?() ?? false
+        if !switchInProgress && !markerPending {
+            await reconcileAppleKey()
+        }
         refreshNotices(now: now)
     }
 

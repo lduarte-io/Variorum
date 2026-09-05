@@ -449,8 +449,9 @@ public enum SyncError: Error, Equatable, Sendable {
     /// is not).
     case syncNotEntitled
     /// Phase 14c ladder R1-1: a key replacement (CF-8) started on THIS
-    /// device and never completed — the persisted `AccountRekeyMarker`
-    /// survives a crash/relaunch mid-road. The round refuses — outbox
+    /// device and never completed — the persisted per-step `RotationMarker`
+    /// (pre-13x 2b; the 14c `AccountRekeyMarker`'s successor) survives a
+    /// crash/relaunch mid-road. The round refuses — outbox
     /// intact, cursor unmoved — because rounds against a mid-re-key
     /// account can silently strand the hosted copy (a truncated-but-not-
     /// reinitialized mirror reads idle while near-empty; an untruncated

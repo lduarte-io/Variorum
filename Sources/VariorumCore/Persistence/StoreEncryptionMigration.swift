@@ -332,7 +332,7 @@ public enum StoreEncryptionMigration {
     /// validation to the first page read, so the probe READS: a wrong key
     /// throws ("file is not a database"); a right one answers the schema
     /// table's count. Read-only, no migrator, nothing written.
-    static func opens(_ url: URL, key: StoreKey) -> Bool {
+    public static func opens(_ url: URL, key: StoreKey) -> Bool {
         do {
             var configuration = AppDatabase.configuration(key: key)
             configuration.readonly = true

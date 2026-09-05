@@ -230,35 +230,17 @@ final class AppServices {
         encryption.onKeysChanged = { [weak self] in
             self?.sync.triggerSync()
         }
-        // Phase 14c (CF-8): the re-key door's runner — the AccountRekey
-        // brain with the sync chain paused around it (no scheduler may
-        // race the truncate/reinit window; the reconnect afterwards is
-        // the ordinary sign-in composition, which also starts the drain).
+        // pre-13x 2b: the re-key door's runner is the composition ROOT's
+        // (`PostureSwitchRunner` — it needs the bootstrap's re-key road and
+        // the protection controller, which this type does not hold; the
+        // root wires `encryption.rekeyRunner` after building it). The 14c
+        // `AccountRekey` brain and the T1 recency probe's caller retired
+        // with the truncate road. What stays here: the persisted marker's
+        // surface read — refresh() projects the resume prompt from it (the
+        // engine's own rounds refuse on the same `sync_state` key).
         if keyVault != nil {
-            encryption.rekeyRunner = { [weak self] passphrase in
-                guard let self else { throw CancellationError() }
-                return try await self.runAccountRekey(passphrase: passphrase)
-            }
-            // Ladder R1-1: the persisted marker's surface read —
-            // refresh() projects the rerun prompt from it (the engine's
-            // own rounds refuse on the same `sync_state` key).
             encryption.rekeyIncompleteCheck = { [database = session.database] in
-                (try? await database.read { try AccountRekeyMarker.isSet($0) }) ?? false
-            }
-            // T1's guard (Act 10 wave 2a): the READ-ONLY recency probe the
-            // re-key door consults — the ordinary transport + the engine's
-            // own key provider, deviceID nil on every window (no cursor,
-            // no horizon effect; the probe's own doc is the contract).
-            encryption.rekeyRecencyProbe = { [weak self] in
-                guard let self else { throw CancellationError() }
-                let probe = RekeyRecencyProbe(
-                    transport: self.makeSyncTransport(self.auth),
-                    keyProvider: self.makeSyncKeyProvider())
-                return try await withDependencies {
-                    $0.database = self.session.database
-                } operation: {
-                    try await probe.assess()
-                }
+                (try? await database.read { try RotationMarker.isSet($0) }) ?? false
             }
         }
         await auth.setOnChange { [weak self] tokens in
@@ -428,50 +410,8 @@ final class AppServices {
         }
     }
 
-    // MARK: - The account lifecycle doors (Phase 14c batch 2 — CF-8 + deletion)
-
-    /// CF-8's runner (the EncryptionSession door calls this through the
-    /// injected closure): the sync chain STOPS for the whole road — a
-    /// scheduler round racing the truncate/reinit window would push
-    /// against a half-re-keyed account — and the ordinary sign-in
-    /// composition reconnects afterwards, success or failure (the failed
-    /// arm's chain refuses at the fence until the rerun, visibly).
-    private func runAccountRekey(passphrase: String) async throws -> DeviceKeyMaterial {
-        guard let keyVault else { throw CancellationError() }
-        sync.stop()
-        let brain = AccountRekey(
-            client: keyVault,
-            lifecycle: makeAccountLifecycle(auth),
-            transport: makeSyncTransport(auth),
-            database: session.database,
-            // pre-13x 1a: this device's identity, from custody (off-main).
-            deviceID: await encryption.deviceIdentity(),
-            onNewVaultMaterial: { material in
-                // The brain AWAITS this before its truncate — custody
-                // must land before this device's rounds resume. STRONG
-                // capture, deliberately (ladder R1-4): a weak self here
-                // would let a gone AppServices complete this closure
-                // WITHOUT adopting, and the brain would truncate with the
-                // device stale against its own new vault. The closure
-                // lives only for the run (the brain is a local), so the
-                // strong reference makes the adopt-before-truncate
-                // contract structural at zero cycle risk.
-                // 13e batch 9 (B-1): `adoptRekeyedMaterial` is async now
-                // (its Keychain write hops off the main thread), so the
-                // hop to the MainActor is the call itself — and the await
-                // still covers the whole adoption, which is what the
-                // adopt-before-truncate contract needs.
-                await self.encryption.adoptRekeyedMaterial(material)
-            })
-        do {
-            let material = try await brain.run(passphrase: passphrase)
-            await connectSyncIfAllowed()
-            return material
-        } catch {
-            await connectSyncIfAllowed()
-            throw error
-        }
-    }
+    // MARK: - The account lifecycle doors (Phase 14c batch 2 — deletion;
+    // the CF-8 re-key's composition moved to the root at pre-13x 2b)
 
     /// The deletion door (THE DESIGN 4, her Round-5 ruling): purge the
     /// account server-side (passphrase-authorized in the brain; the typed
@@ -497,7 +437,7 @@ final class AppServices {
             // Ladder R1-1: a purged account owes no re-key completion —
             // clear the persisted marker so a future sign-in on this
             // store isn't refused for a road that no longer exists.
-            try? await session.database.write { try AccountRekeyMarker.clear($0) }
+            try? await session.database.write { try RotationMarker.clear($0) }
             // Server side is gone; now the device's custody (CF-11's
             // machinery — the vault it unlocked no longer exists), then
             // the session (sign-out tears the sync chain down through the
