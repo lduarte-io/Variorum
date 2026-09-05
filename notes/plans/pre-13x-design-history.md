@@ -999,3 +999,64 @@ before a copy is written under it — which is why the prompt is online-only.
     treated as a device that has not followed (sync paused, key doors locked, the prompt not deferrable); a Touch ID or
     Face ID open is never affected. Backups are frozen enrolled devices, and "opened by a retired secret" means "not yet
     re-authorized".
+
+# PART V — THE ORCHESTRATOR'S KICKOFF-DAY REVIEW (2026-09-05, the build orchestrator's first act): four rulings
+
+The author's kickoff message asked for exactly this: *"The brief you have is the result of many design sessions, but
+it's possible it is missing a scenario or there's some other issue with it. If you think so, BRING IT UP TO ME!! Do
+not just read that the copy is finished and not tell me about a flaw, vulnerability, or other issue."* The
+orchestrator read the settled design against the shipped code before spawning batch 1a and brought four findings as
+one question-tool batch. Her rulings, in the labels she chose, and what each superseded (verbatim):
+
+## V.1 Replace All Keys in Standard hands the new master to the same iCloud key — RULED "Keep A fixed, fix the copy"
+The finding: in Standard the new master is re-wrapped under the unchanged A (the audit's own A row: "re-minted only
+after an iCloud Keychain reset"), so an intruder who copied A keeps receiving every new master — while the
+compromise rule, the Replace All Keys screen, Chapter 6 and Chapter 7 all told the user Replace All Keys answers
+"someone was inside your Apple account." Offered: re-mint A at Replace All Keys (recommended) · keep A fixed and fix
+the copy · A per Variorum account. **She ruled: keep A fixed, fix the copy.** Landed as decision 30; the copy's
+Replace All Keys body, Chapter 6, Chapter 7, the lost-device FAQ and a new Apple-account FAQ entry re-worded; the
+A-copy-of-M′ PRESENCE after a Standard Replace All Keys pinned so the honest sentence is tested.
+Superseded design text: §3.4's act table, Replace All Keys "when" — *"someone may have USED a secret, or had one of
+your devices unlocked, or (Standard) was in your Apple account"*; §8's rule — *"someone who may HOLD your keys (an
+unlocked enrolled device plus your account password; in Standard, your Apple account) → Replace All Keys"*; the name
+"the three-line compromise rule" (now four lines). Superseded copy: Replace All Keys' *"…or has a copy of your
+library or a backup"* (contradicted Chapter 6's "never the reason on its own"); Chapter 6's and Chapter 7's *"or — in
+Standard — was inside your Apple account"* clauses.
+
+## V.2 Nothing on the wire or in the mirror says which corpus key a row is under — RULED "Rotation start seq in the vault"
+The finding, checked at the code: `PayloadCipher`'s `e1:` envelope is nonce ‖ ciphertext ‖ tag with the key id only
+in the AAD the client must already know; the mirror (`09_phase14c_multitenant.sql`) has no per-row key column, only
+the vault-level `corpus_key_id` fence. §4 step 3, "any enrolled device can finish," the completion check and a
+follower's decrypt all treated "a row still under the old key" as knowable. Offered: a rotation start seq recorded in
+the vault with the vault row locked in every data RPC (recommended) · a per-row `key_id` column on the 18 tables · the
+key id in an `e2:` envelope. **She ruled: the rotation start seq.** Landed as decision 31, the fifth vault column
+`rotation_started_seq`, the `FOR UPDATE` / `FOR SHARE` serialization in §3.10 and the 1b brief, the seq rule in §4
+steps 2–3 and §12, ledger row 34, and the 13y hand-forward (per-tenant seq ⇒ per-tenant rotation seq).
+Superseded text: §3.10's *"four nullable columns"*; §4 step 3's *"every row still under the old key is rewritten"* and
+*"COMPLETE when a device at head sees no row under the previous key, and that device clears the previous key from the
+vault"* (now: below the rotation seq; clears the key AND the seq together).
+
+## V.3 A second rotation before the first finishes would strand rows — RULED "Refuse until complete"
+The finding: the vault carries ONE previous corpus key; a second Replace All Keys or Castle entry mid-rotation drops
+a key that rows still sit under. Offered: refuse until complete (recommended) · chain the previous keys. **She ruled:
+refuse.** Landed as decision 32: the door refusal, the `key_vault_update` refusal (`VARIORUM_ROTATION_IN_PROGRESS`),
+§4 step 1's third refusal condition, §5's Replace All Keys row, the copy's "still finishing" sentence, ledger row 35.
+
+## V.4 An Always-ask device does not "keep syncing" after a passphrase change elsewhere — RULED "Accept + state it"
+The finding: an Always-ask device holds no master key, so opened with a retired word it reads and edits but cannot
+sync until the new word is typed there (decision 10's "other devices keep syncing" was untrue for it); and one that
+unlocks OFFLINE must retain the derived wrapping key in session memory or it never syncs that session once online.
+**She ruled: accept and state it.** Landed as decision 10's exception sentence, §3.3's session-memory rule, §7's
+steps 6–7, the copy's Always-ask banner variant, §12's pins, ledger row 36 and the 1a brief.
+Superseded text: §3.3's *"held in memory for the unlocked session, obtained at unlock from the typed secret through the
+vault when online (offline there is no network to sync with)"* — the derived key's retention was unstated.
+
+## V.5 The orchestrator's notes, folded under the architect mandate (listed to her in the same message; none a product change)
+The proof on `sync_horizon` and `sync_purge_ledger` too · a `BEFORE INSERT` trigger for the NULL hash (never a CHECK)
+· `auth.uid()` scope on `key_vault_update` · the proof as a body parameter, named a bearer token in the privacy brief
+· one gated read per unlock for the biometric custody item · the third crash point (swap → custody) · a CAS refuse at
+a switch becomes the follow · a rotation re-delivers the corpus once per device · Macs without Touch ID get Always ask
+only · Sign Out Everywhere's ≤ 1 h access-token tail · a re-minted identity with a non-zero cursor is a purge-ledger
+returner · the account password's fourth power on a vault-less account (creating the vault) and its copy line ·
+Regenerate's body aligned with the FAQ (a device where the new words were not yet used still takes the old ones) ·
+the lost-device FAQ's Standard line (remove the device from the Apple account). Corners 35–43, ledger rows 37–40.

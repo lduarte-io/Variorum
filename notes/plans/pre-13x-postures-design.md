@@ -75,7 +75,10 @@ file is silent, stop and ask.
     security act**: a re-wrap of the same keys for when YOU forgot the word or want another; other devices keep
     syncing; the new word works on them at once online (through the vault) and each stops taking the old one once the
     new one has been used there; until then a DISMISSABLE banner nudges at every open (a device you hold but have not
-    given the new word to is worth a second look); the copy says so and points a suspected leak at the checkbox.
+    given the new word to is worth a second look); the copy says so and points a suspected leak at the checkbox. **An Always-ask device is the one exception to "keep syncing":** it
+    holds no master key, so opened with a retired word it reads and edits but does NOT sync until the new word is typed
+    there — its banner says so; it keeps the DERIVED wrapping key in session memory (never the typed word) so a vault
+    read after connectivity returns can fetch the master, and a relock drops it.
     **A retired word opens a device you hold but authorizes no key act:** the key doors' passphrase re-auth is checked
     against the SERVER's current copy, never the local key file, so the old word is refused there (Touch ID passes;
     forgot → Touch ID or the words). *Replace All Keys* — the security act (the switch's key half — for a secret that may have been USED
@@ -111,7 +114,7 @@ file is silent, stop and ask.
 22. **The tutorial's "keeping it private" is a SHORT chapter; the full explanation is a second seeded book,
     *Encryption Explained*, which joins the seeded-book dedupe facts so two devices never seed two of it.** Two vocabulary registers: everyday surfaces name no key; the book and the FAQ name every
     key and define "wrapped" on first use; "box" appears in no user text. Every Castle surface that offers Touch ID
-    says where that copy of the key sits. The three-line compromise rule appears in both postures.
+    says where that copy of the key sits. The compromise rule (four lines) appears in both postures.
 23. **Mobile changes inside this phase** (shared faces; the shared keychain access group on both targets).
 24. **Backups may be kept in iCloud Drive** (the offer at the first backup run); the LIVE library never lives there
     (13x guards the one door that could put it there).
@@ -127,6 +130,25 @@ file is silent, stop and ask.
 29. **Not in this phase, owned elsewhere:** pause sync / auto-sync off (18a); "Open a library file…" and the
     iCloud-Drive guard (13x); Keychain Sharing on the App IDs for distribution profiles (13r); 17i (its own entry,
     after).
+30. **Replace All Keys never re-mints the iCloud key.** In Standard the new master is re-wrapped under the SAME A, so
+    someone inside the Apple account is NOT shut out by it — that case is answered by entering Castle (no copy under
+    A) or by Apple's own account security, and every surface that names the case says so: the compromise rule's
+    fourth line, the Replace All Keys screen, Chapters 6 and 7, the lost-device and Apple-account FAQ entries. The
+    presence of the vault's A-wrapped copy of M′ after a Standard Replace All Keys is PINNED, so the honest sentence is
+    tested, never assumed.
+31. **Which key a row is under is told by its `server_seq`.** The shipped `e1:` envelope carries no key id and the
+    mirror has no per-row key column, so the vault records the rotation: `key_vault_update`, when the payload it lands
+    sets a previous corpus key, takes the next value of the server sequence INSIDE its own transaction with the vault
+    row locked and stores it as `rotation_started_seq` (the fifth nullable column); every data RPC reads the vault row
+    under a share lock for its fence and proof checks, so a push that passed the old check commits — and takes its
+    seqs — before the vault write, never after. The rule every client applies: a row below the rotation seq is under
+    the previous corpus key; every other row is under the current one. What remains is a pull bounded by that seq;
+    completion is "no row of mine below it," and the completing write clears the previous key and the seq together.
+    A follower decrypts by the same rule. Every device re-downloads the corpus once per rotation, seq-recorded only.
+    Under 13y's per-tenant sequence the rotation seq is per tenant (a hand-forward).
+32. **One rotation at a time.** Replace All Keys and Use Castle refuse while the vault carries a previous corpus key —
+    at the door AND inside `key_vault_update` — with one sentence naming the device, the day and the rows to go; the
+    acting device resumes through its marker and never starts a second; any device holding the new master can finish.
 
 ---
 
@@ -207,8 +229,11 @@ Touch ID, or the master already in this device's custody reach L and M.
 The master key, the corpus key (+ id), the dormant journal class key (+ id) and the device identity live in this
 device's per-store custody beside the library key — the same item family, the same shape: **Standard:** the silent
 device-only item; **Castle:** the biometric item (`.biometryCurrentSet`); **Always ask:** no item — the sync keys are
-held in memory for the unlocked session, obtained at unlock from the typed secret through the vault when online
-(offline there is no network to sync with). `SyncKeyProviding` reads custody (or the session); a LOCKED library reads
+held in memory for the unlocked session, obtained at unlock from the typed secret through the vault when online; an
+offline unlock keeps the DERIVED wrapping key in session memory (never the typed word) so the vault read runs when
+connectivity returns, and a relock drops it (offline there is no network to sync with; a retired word opens such a
+device but the vault's master copy is under the new one — it reads and edits and does not sync until the new word is
+typed there, decision 10). `SyncKeyProviding` reads custody (or the session); a LOCKED library reads
 as no keys and the engine refuses its round visibly (`SyncError.encryptionKeysUnavailable`). **The library file
 carries writing and local bookkeeping only** (`sync_state`'s cursor, the outbox, `sync_row_seq`, `_sync_applying`,
 `purge_*`) — never a key and never an identity.
@@ -291,12 +316,14 @@ under the master, which old custody still holds. A PASSPHRASE or WORDS change re
 a convenience act: it changes the word that opens the server's copy and this device's key file; a leaked word still
 opens another enrolled device in hand until the new word is used there, and it opens old backups' writing (never their
 sync — copies hold no sync keys). Replace All Keys is the security act: every device re-keys its library as it
-follows, which is what retires an old word everywhere. **So:**
+follows, which is what retires an old word everywhere. **In Standard no rotation shuts out someone inside the Apple
+account** — the new master is re-wrapped under the same A; only entering Castle removes the copy under it, and every
+surface that names the case says so (decision 30). **So:**
 
 | act | what it rotates | other devices | when |
 |---|---|---|---|
 | **Change Passphrase / Regenerate Twelve Words** | nothing — a re-wrap of the same keys under the new word | keep syncing; take the new word at once online; stop taking the old one once the new one is used there | you forgot it or want another — convenience, not security |
-| **Replace All Keys** (= the key half of entering Castle) | the master, the corpus key (every row re-encrypted), and — device by device as each follows — every library key | type the passphrase once, re-key their own library, pull | someone may have USED a secret, or had one of your devices unlocked, or (Standard) was in your Apple account |
+| **Replace All Keys** (= the key half of entering Castle) | the master, the corpus key (every row re-encrypted), and — device by device as each follows — every library key | type the passphrase once, re-key their own library, pull | someone may have USED a secret, or had one of your devices unlocked — NEVER the answer to an Apple-account intruder in Standard (decision 30: the new master is re-wrapped under the same A) |
 | **Delete the account and set sync up again** | everything Replace All Keys does, plus the account, the server copy and the login | join the new account | the recovery road when no enrolled device is left (an old backup + iCloud + a fresh account); a compromised ACCOUNT |
 
 **What each rotation does on the OTHER devices:** the LIBRARY key: nothing (per file) — except that entering Castle
@@ -384,9 +411,28 @@ for the author's existing vault, closed the moment the hash lands. Vault READ st
 fetch the wrapped copies to obtain M). `account_purge` stays session-only (deletion is mandated and loud).
 **Consequence: the account password alone can sign in, see nothing, push nothing, purge nothing, delete nothing but
 the whole account**; a stolen or cloned session is inert against the corpus; the pull side stops disclosing even the
-structure to a bare session. Cost: four nullable columns on `key_vault` (`master_wrapped_by_apple_held`,
-`apple_key_id`, `key_proof_hash`, `corpus_previous_wrapped_by_master`) and a `key_proof` parameter on the RPCs — **ONE §12 lockstep event, marker 7 → 8**,
+structure to a bare session. Cost: five nullable columns on `key_vault` (`master_wrapped_by_apple_held`,
+`apple_key_id`, `key_proof_hash`, `corpus_previous_wrapped_by_master`, `rotation_started_seq`) and a `key_proof` parameter on the RPCs — **ONE §12 lockstep event, marker 7 → 8**,
 in her deploy window (the 13j choreography). The fake-server harness enforces the proof exactly as the SQL does.
+**Which key a row is under — the rotation seq (decision 31).** `key_vault_update`, when the payload it lands sets a
+previous corpus key, takes `nextval` of the server sequence INSIDE its own transaction with the vault row locked
+`FOR UPDATE` and records it as `rotation_started_seq`; `sync_push`, `sync_pull`, `sync_reencrypt`, `sync_purge_execute`
+and `account_data_truncate` read the vault row `FOR SHARE` for their fence and proof checks, so a push that passed the
+old check commits — and takes its seqs — BEFORE the vault write, never after it. The rule every client applies: a row
+whose `server_seq` is below the rotation seq is under the previous corpus key; every other row is under the current
+one. What remains to re-encrypt is a pull bounded by that seq; the rotation is complete when a device at head finds no
+row of its own below it, and that device's clearing write NULLs the previous key and the seq together (pin the absence
+of both outside a rotation). A follower decrypts by the same rule. Every device re-downloads the corpus once per
+rotation, seq-recorded only. Under 13y's per-tenant sequence the rotation seq is per tenant (hand-forward). **One
+rotation at a time (decision 32):** `key_vault_update` refuses a payload that would set a previous key while one is
+present (`VARIORUM_ROTATION_IN_PROGRESS`), and the doors refuse before asking. **The read RPCs too:** `sync_horizon`
+and `sync_purge_ledger` take the proof as well — a session without the keys gets nothing from the mirror at all, a seq
+included. **The insert arm:** a `BEFORE INSERT` trigger on `key_vault` rejects a NULL `key_proof_hash` (a CHECK would
+refuse the author's existing row until her first round lands the hash — the NULL-hash arm exists for that row alone).
+`key_vault_update` scopes to `auth.uid()` like the data RPCs (the 14c guard). **The proof is a bearer token,** presented
+in the request BODY only — never a URL or a header that lands in a gateway log; the server sees it on every call and
+keeps only its hash, so a server compromise or a log capture yields the right to MUTATE the mirror without the right to
+read it — the account-password class, and the privacy brief's disclosure list says so.
 
 ---
 
@@ -395,16 +441,18 @@ in her deploy window (the 13j choreography). The fake-server harness enforces th
 **Standard → Castle (an open library; signed in and online if sync is on; the ceremony: passphrase set if none, twelve
 words generated + confirmed if none, the floor read once; Touch ID or the passphrase — checked against the vault's
 current copy — confirms):**
-1. **Pull to head.** Refuse offline or with a non-empty outbox.
+1. **Pull to head.** Refuse offline, with a non-empty outbox, or while the vault carries a previous corpus key (decision
+   32 — a rotation is still finishing; the sentence names the device, the day and the rows to go).
 2. **Rotate the sync keys** (sync users only): mint M′ and C′; rewrite the vault in ONE `key_vault_update` authorized
    by the OLD proof — M′ under P and under W (no iCloud copy), C′ under M′, **the old C under M′ (the previous corpus
-   key, for the rotation's duration)**, the proof hash replaced, the corpus key id advanced (the fence). M′ and C′ into
+   key, for the rotation's duration)**, the proof hash replaced, the corpus key id advanced (the fence), the rotation seq recorded (decision 31). M′ and C′ into
    this device's custody; the old C kept there as the previous key until step 3 completes.
-3. **Re-encrypt the server copy:** every row still under the old key is rewritten under C′ through `sync_reencrypt` —
-   version-neutral, no truncation; a row whose version moved is pulled and retried; the fence refuses old-key pushes
-   and pulls from then on. **Any device holding M′ can do this work** (it reads old-key rows
-   with the previous corpus key); the rotation is COMPLETE when a device at head sees no row under the previous key,
-   and that device clears the previous key from the vault (a proof-authorized write) and from its custody.
+3. **Re-encrypt the server copy:** every row still under the old key — every row of this account BELOW the rotation
+   seq (decision 31) — is rewritten under C′ through `sync_reencrypt` — version-neutral, no truncation; a row whose
+   version moved is pulled and retried; the fence refuses old-key pushes and pulls from then on. **Any device holding
+   M′ can do this work** (it reads old-key rows with the previous corpus key, told apart by the seq); the rotation is
+   COMPLETE when a device at head sees no row of its own below the rotation seq, and that device clears the previous
+   key AND the seq from the vault (a proof-authorized write) and the previous key from its custody.
 4. **Re-key this library:** export-and-swap on the 13p migration road — `sqlcipher_export()` from the open keyed
    connection into a fresh file under a NEW L with a fresh salt; verify; atomic swap; old `-wal`/`-shm` removed; the
    pool closed first; off-main. A NEW key file under the new fingerprint: L′ under P, W and M′ — no iCloud copy; the
@@ -440,7 +488,7 @@ library; into Standard silently.
 | **Regenerate twelve words** | same (online if enrolled) | same | the W copies replaced in the vault and this key file; the old words dead the moment the new are confirmed; the same checkbox | the new words work there at once online; their local W copy re-lands when the new words are typed there; the old words keep opening them until then (the vault road) |
 | **Standard → Castle** | §4 | §4 | §4 | §7 |
 | **Castle → Standard** | §4 | §4 | §4 | §7 |
-| **Replace All Keys** | an open, ENROLLED library, signed in, online, holding the CURRENT master (the door checks the key file's recorded corpus key id against the vault before offering itself; else *"this account's keys don't match this library"*) | Castle: Touch ID, or P (or W) verified against the vault's copy — a retired word is refused. Standard: P if one is set (the same check), else a plain confirm | §4's steps 1–4 without the posture change: M′, C′, the vault rewritten under the same posture's wrappers (+ the iCloud copy again in Standard), the proof replaced under the old proof, every row re-pushed under C′, THIS library re-keyed; the checkbox *"Also choose a new passphrase"*; the marker. The server refuses a stale proof regardless of the front check | the same follow as entering Castle: type P or W once, re-key own library, pull |
+| **Replace All Keys** | an open, ENROLLED library, signed in, online, holding the CURRENT master (the door checks the key file's recorded corpus key id against the vault before offering itself; else *"this account's keys don't match this library"*); refused while the vault carries a previous corpus key — a rotation still finishing (decision 32) | Castle: Touch ID, or P (or W) verified against the vault's copy — a retired word is refused. Standard: P if one is set (the same check), else a plain confirm | §4's steps 1–4 without the posture change: M′, C′, the vault rewritten under the same posture's wrappers (+ the iCloud copy again in Standard), the proof replaced under the old proof, every row re-pushed under C′, THIS library re-keyed; the checkbox *"Also choose a new passphrase"*; the marker. The server refuses a stale proof regardless of the front check | the same follow as entering Castle: type P or W once, re-key own library, pull |
 | **Delete account** | signed in (enrolled or not) | account password + typed phrase + a FRESH re-authentication | server copy + vault + login gone (`account_purge`); LOCAL COPIES UNTOUCHED; the app signs out; the keys stay in this device's custody; A stays in iCloud | lose sync; keep everything local; a later account adopts them at setup |
 | **Sign out everywhere** | signed in | — (the mitigation for a stolen password or session; `signOut(scope: global)`) | every session revoked; keys untouched | sign in again |
 | **Sign out** | — | — | clears this device's tokens; the keys stay in this device's custody (behind the library key's own gate) | — |
@@ -448,7 +496,10 @@ library; into Standard silently.
 | **Plaintext `.md` export** | — | unchanged (13l; the scheduled insurance opt-in, warned under Castle); not gated in Castle | — | — |
 | **Lock Now / re-lock** | Castle | — | tears down services, drops key material (`StoreBinding.lock`) | — |
 
-**What the account password can do, in BOTH postures:** sign in · delete the account · sign out everywhere · cancel.
+**What the account password can do, in BOTH postures:** sign in · delete the account · sign out everywhere · cancel —
+and, on an account that has never turned on sync, CREATE the vault (racing sync setup). That last is loud and
+survivable: the owner's passphrase never opens a vault someone else made, the Turn On Sync door says so (copy §4), and
+the remedy is deleting the account.
 It can NEVER open a library, read or write the mirror, purge, change a passphrase, change a posture, or export.
 **Its worst case is the loud one — the account deleted — which every local copy survives.**
 
@@ -491,8 +542,11 @@ descriptor ≠ recorded, same corpus key id → a one-time notice (*"your passph
 the new one here the next time you need a passphrase"*) — nothing prompted, nothing deleted. 3. Phone, next open by
 passphrase: the OLD word still opens it (its local copy); the NEW word opens it online via the vault road and re-wraps
 the local copy — from then on only the new word. 4. Phone OFFLINE: the local copy, the old word. 5. Both change at
-once: the vault's CAS refuses the second; it re-reads and retries (the last change wins). The same steps serve Standard
-and a regenerated phrase.
+once: the vault's CAS refuses the second; it re-reads and retries (the last change wins). 6. An Always-ask phone
+(decision 10's exception): opened with the OLD word it reads and edits but does not sync until the NEW word is typed
+there — its banner says so. 7. Two devices SWITCHING posture at once: the second's CAS refuse re-reads — the account
+already moved ⇒ the retry is the follow, never a second rotation. The same steps serve Standard and a regenerated
+phrase.
 **The follow into Castle (after §4 ran on another device, or after Replace All Keys):** (1) the device opens as it did
 (Standard: silently; Castle: Face ID / Touch ID, or the unchanged passphrase on an Always-ask device — reused for the
 follow, never asked twice); (2) at ready it reads the vault: no iCloud copy ⇒ Castle (or the corpus key id ≠ the id
@@ -535,10 +589,11 @@ different owner) and re-enroll (Standard: nothing typed) with re-stamp + `resync
   copy of the key, released only to your fingerprint — never to your login password, never to iCloud; it never leaves
   this Mac; turn Always ask on and no copy exists.* The Standard card carries the mirror sentence (the key lives in
   iCloud Keychain, travels with the Apple account, reachable by Apple's account recovery).
-- **The three-line compromise rule**, both postures: a passphrase or words only SEEN → change / regenerate; a leaked
+- **The compromise rule (four lines)**, both postures: a passphrase or words only SEEN → change / regenerate; a leaked
   session or account password → sign out everywhere; someone who may HOLD your keys (an unlocked enrolled device plus
-  your account password; in Standard, your Apple account) → Replace All Keys; the ACCOUNT itself in someone's hands →
-  delete it and set sync up again.
+  your account password) → Replace All Keys; in Standard, someone inside your Apple account → secure the Apple account
+  with Apple's tools, or enter Castle — Replace All Keys alone does not shut them out there (decision 30); the ACCOUNT
+  itself in someone's hands → delete it and set sync up again.
 - **Tutorial "keeping it private"** → a SHORT chapter (copy §7): both modes E2EE; who holds a key; the two modes; what
   you must keep in each; the open-app sentence; a door to the book. Re-seeded through the seeder's replace door; the
   walk asserts both postures, both floors, keystone 3, keystone 4 and the book's door.
@@ -653,8 +708,22 @@ phone becomes Castle at its migration (Face ID with passphrase fallback) — say
   16-byte salt); the client never wraps M or L under a key received from the network (A is read from iCloud Keychain or
   minted locally; the server supplies only wrapped copies and an `apple_key_id` the client verifies, never adopts); the
   shared access group on both targets (an entitlements pin).
-- The convergence suites gain §7's choreography against the fake server (which enforces the proof, the fence and
-  `sync_reencrypt`). Both drills re-run: the 13p migration drill on a byte-copy of her real store, and the 13l restore
+- **The rotation seq (decision 31):** a row below the rotation seq decrypts under the previous key and one above it
+  under the current; a push that read the old proof and committed before the vault write lands BELOW the seq (the fake
+  server serializes the vault row exactly as the SQL's locks do); the remainder pull is bounded by the seq; completion
+  NULLs the previous key AND the seq together; a follower re-downloads the corpus once, seq-recorded only, with zero
+  conflict variants.
+- **One rotation at a time (decision 32):** Replace All Keys and Use Castle refuse while a previous key is present, at
+  the door AND at `key_vault_update`; the acting device's marker resumes; a second device holding M′ finishes.
+- **Always ask (decision 10's exception):** opened with a retired word it reads and edits and does not sync; the
+  banner names it; an offline unlock followed by connectivity syncs (the derived key in session memory); a relock
+  drops the derived key; the typed word is never retained.
+- **Standard Replace All Keys (decision 30):** the vault's iCloud-wrapped copy of M′ EXISTS after it — pin the
+  PRESENCE, so the copy's honest sentence is tested, not assumed; entering Castle pins the absence.
+- **The read RPCs and the insert arm:** a session without the proof gets nothing from `sync_horizon` or
+  `sync_purge_ledger`; a new vault with a NULL hash is refused at insert; the proof travels in the body only.
+- The convergence suites gain §7's choreography against the fake server (which enforces the proof, the fence,
+  `sync_reencrypt`, the rotation seq and the in-progress refusal). Both drills re-run: the 13p migration drill on a byte-copy of her real store, and the 13l restore
   drill per posture, on both devices.
 
 ## 13. WHAT GETS DELETED
@@ -712,7 +781,21 @@ word just typed to open is reused), with a fresh device identity by construction
 Without the key file nothing opens.
 34. **One Apple-held copy per account:** a device on another Apple ID enrolls by passphrase once (its own key file then
 gets a copy under ITS iCloud key for silent open); the nothing-typed new-device road belongs to the iCloud account that
-turned on sync.
+turned on sync. 35. **Replace All Keys in Standard leaves an Apple-account holder able to unwrap the new master** — the
+copy says so; the remedy is Castle or Apple's account security (decision 30). 36. **Macs without Touch ID** (a Mac mini,
+a closed MacBook on an external keyboard): the Castle ceremony offers Always ask only where `LAContext` reports no
+biometry; an existing biometric item on a lidded MacBook falls to the passphrase road for that open. 37. **A re-minted
+device identity with a non-zero cursor is a RETURNER** to the purge ledger (13j's fence) — reconciled at its first round,
+never stranded. 38. **Sign Out Everywhere revokes refresh tokens;** an access token already issued lives to its expiry
+(≤ 1 h) — inert against the corpus (no proof), able only to read the vault's wrapped copies and to delete the account;
+13y may shorten the lifetime. 39. **A CAS refuse at a posture switch re-reads:** if the account already changed posture,
+the retry is the follow, never a second rotation. 40. **A rotation re-delivers the whole corpus to every device once,**
+seq-recorded only — the pull-to-head memory shape at corpus scale, once per rotation. 41. **The biometric custody item is
+read ONCE per unlock** — L, M, C, J and the device identity in one gated read, one Touch ID prompt. 42. **A third crash
+point is pinned:** between the swap and custody (the silent custody still holds M′; the new key file's master copy
+opens the re-keyed file; the marker resumes at step 5). 43. **The account password's fourth power on a vault-less
+account** is creating the vault (racing sync setup) — loud: the owner's passphrase never opens it, the Turn On Sync door
+says so, and the remedy is deletion.
 
 ## 15. BATCHES (strictly sequential; each red-on-old; the tutorial spine green every batch)
 - **0 — measurements: DONE** (`notes/plans/pre-13x-spike-memo.md`; the facts in §18). **0b — the bridge retirement:
@@ -810,7 +893,7 @@ tutorial spine is SIX suites in `TutorialWalkTests.swift` addressed by TYPE name
 
 ### LIVE STATUS (flipped in the same commit as each piece; PENDING = unverified)
 - U0 — DONE. U1 — DONE 2026-09-04.
-- **U2 batch 1a — NEXT** (a fresh Fable implementer; brief §19). U2 batch 1b — NOT-STARTED. U3 — NOT-STARTED.
+- **U2 batch 1a — IN PROGRESS** (a fresh Fable implementer; brief §19; its record under §19 BATCH RECORDS — verify by `git log` before trusting). U2 batch 1b — NOT-STARTED. U3 — NOT-STARTED.
   U4 — NOT-STARTED. U5 — NOT-STARTED.
 
 ### THE LEDGER (every row owned)
@@ -835,7 +918,7 @@ tutorial spine is SIX suites in `TutorialWalkTests.swift` addressed by TYPE name
 | 17 | Replace All Keys + its checkboxes; the stale-master front check; the same follow as the switch | U4 | open |
 | 18 | the "Delete backups made before today" offer — the app's own folders; the outside-copies + Recently-Deleted sentences | U3 | open |
 | 19 | her attacker scenario in the two-user suite; the no-ownership-change pin | U4 | open |
-| 20 | the where-the-key-sits line on every Castle surface + the Standard mirror + the three-line rule | U5 | open |
+| 20 | the where-the-key-sits line on every Castle surface + the Standard mirror + the compromise rule (four lines) | U5 | open |
 | 21 | *Encryption Explained* seeded + the tutorial's short chapter; the two-register vocabulary rule | U5 | open |
 | 22 | the plaintext-export reconciliation note for 13x (§14.13) | U4 → 13x | open |
 | 23 | the 13y hand-forward (the adopt-road pin under per-tenant seq) + 13x's row updated at closeout | U5 | open |
@@ -849,6 +932,13 @@ tutorial spine is SIX suites in `TutorialWalkTests.swift` addressed by TYPE name
 | 31 | one Apple-held copy per account — the book's and the waiting state's sentence | U5 | open |
 | 32 | the lost-device FAQ entry; the ceremonies' original animated progress indicator | U5 | open |
 | 33 | the vault road by use + the dismissable change banner + the key doors' vault-checked re-auth; the un-followed device's state (banner, door lockout, the reused passphrase) | U4 | open |
+| 34 | the rotation seq (decision 31): the fifth vault column; the vault row locked in every data RPC; the fake server's serialization; the bounded remainder pull; completion clears key + seq together | U2 (1b) → U3 → U4 | open — MUST |
+| 35 | one rotation at a time (decision 32): the door refusal + the `key_vault_update` refusal + the sentence | U2 (1b) → U3 | open |
+| 36 | the Always-ask exception (decision 10): the derived key in session memory; no sync on a retired word; the banner variant | U2 (1a) → U4 | open |
+| 37 | Standard's honest limit (decision 30): the A-copy-of-M′ PRESENCE pin; the compromise rule's fourth line; the Replace All Keys screen, Chapters 6/7, the lost-device and Apple-account FAQ entries | U2 (1b) → U5 | open |
+| 38 | the proof on `sync_horizon` / `sync_purge_ledger`; the NULL-hash `BEFORE INSERT` arm; `auth.uid()` scope on `key_vault_update`; the proof in the body only | U2 (1b) | open |
+| 39 | one gated read per unlock for the biometric custody item (L, M, C, J, the identity — one Touch ID prompt); a re-minted identity with a non-zero cursor reconciled as a returner | U2 (1a) | open |
+| 40 | the third crash point (between the swap and custody); a CAS refuse at a switch becomes the follow; Macs without Touch ID get Always ask only; the vault-less account's fourth account-password power said in copy | U3 | open |
 
 ### The architect's sign-off conditions (the reasoning is in the history file)
 (i) the key proof ships in this phase's lockstep event; (ii) the descriptor-floor and never-wrap-under-a-network-key
@@ -878,8 +968,13 @@ occasion: gate + off-main + a required seam).
 1. **Sync keys in custody, never in the file** (§3.3): reshape `E2EEKeychainStorage` / `E2EECustodyStorage` /
    `DeviceKeySyncProvider` into ONE per-store item family beside the library key's, with the library key's three
    shapes (silent · biometric · none-with-session-memory), the account keyed `<scope>-<storeID>-sync`; it carries M,
-   C (+id), J (+id) and the device identity. `SyncKeyProviding` reads custody (or the session under Always ask),
-   synchronous by contract; a LOCKED library reads as no keys → `SyncError.encryptionKeysUnavailable` (pin).
+   C (+id), J (+id) and the device identity. `SyncKeyProviding` reads custody (or the session under Always ask — which holds the DERIVED wrapping key for the
+   session, never the typed word, so a vault read after an offline unlock can fetch the master when connectivity
+   returns; a relock drops it — pin), synchronous by contract; a LOCKED library reads as no keys →
+   `SyncError.encryptionKeysUnavailable` (pin). The biometric item is read ONCE per unlock — L, M, C, J and the identity
+   in one gated read, one Touch ID prompt (pin: the `LAContext` is evaluated once per unlock). A re-minted identity (a
+   wiped Keychain) with a non-zero `sync_state` cursor is a RETURNER to the purge ledger (13j's fence) — reconciled at
+   its first round, never stranded (pin).
    `sync_state` loses `device_id` (read from custody; a library on a machine with no custody for its store id ⇒ a fresh
    id — pin; `resyncReinitialize` still spares nothing key-shaped because nothing key-shaped is in the file — pin by a
    byte scan of a backup and of the plaintext export). DELETE the CF-12 opt-in gate + `SyncGateOptIn` +
@@ -909,10 +1004,10 @@ item. Commit per item, push after each.
 
 **1b — the PROTOCOL event (the ONE §12 lockstep, marker 7 → 8; drafted and pinned here, DEPLOYED by her):**
 1. **The vault's additive columns** (§3.10): `master_wrapped_by_apple_held text`, `apple_key_id text`,
-   `key_proof_hash text`, `corpus_previous_wrapped_by_master text` (all nullable) in a NEW file
-   `Server/supabase/11_pre13x_postures.sql`; `KeyVaultFormat` gains the three optional fields (format version STAYS 1 —
-   additive; pin: a format-1 vault without them decodes); `KeyVaultWireRow` maps them; the previous-key field is NULL
-   outside a rotation (pin the absence).
+   `key_proof_hash text`, `corpus_previous_wrapped_by_master text`, `rotation_started_seq bigint` (all nullable) in a
+   NEW file `Server/supabase/11_pre13x_postures.sql`; `KeyVaultFormat` gains the optional fields (format version STAYS
+   1 — additive; pin: a format-1 vault without them decodes); `KeyVaultWireRow` maps them; the previous-key field AND
+   the rotation seq are NULL outside a rotation (pin the absence of both, together).
 2. **The key proof:** `KeyProof.token(master:)` (32 bytes, base64 on the wire); the server stores `SHA-256(token)` hex.
    `sync_push(batch, active_key_id, key_proof)`, `sync_pull(since_seq, active_key_id, max_rows, for_device, key_proof)`,
    `sync_purge_execute(rows, active_key_id, key_proof)`, `account_data_truncate(active_key_id, key_proof)` and the NEW `sync_reencrypt(rows jsonb, active_key_id text,
@@ -924,13 +1019,25 @@ item. Commit per item, push after each.
    `key_vault_update(payload jsonb, expected_revision int, key_proof text)` SECURITY DEFINER, `variorum_definer`-owned
    like the data RPCs, carrying the revision CAS inside; it MAY replace `key_proof_hash` when the call carries the
    CURRENT proof (pin: a call with the old proof after a rotation is refused); the client's PostgREST PATCH is replaced
-   by it (`KeyVaultClient.updateVault`); vault CREATE stays a session-only insert that MUST carry the hash. **No RPC
+   by it (`KeyVaultClient.updateVault`); vault CREATE stays a session-only insert that MUST carry the hash — a `BEFORE
+   INSERT` trigger rejects a NULL `key_proof_hash` (never a CHECK: the author's existing row stays NULL until her first
+   round). **The vault row is the serialization point (decision 31):** `key_vault_update` locks it `FOR UPDATE` and,
+   when its payload sets a previous corpus key, stores `nextval` of the server sequence as `rotation_started_seq` in
+   the same transaction — and REFUSES (`VARIORUM_ROTATION_IN_PROGRESS`) when a previous key is already present
+   (decision 32); every data RPC (`sync_push`, `sync_pull`, `sync_reencrypt`, `sync_purge_execute`,
+   `account_data_truncate`) reads it `FOR SHARE` for the fence + proof check, so no old-key row can commit with a seq
+   above the rotation seq. `sync_horizon` and `sync_purge_ledger` take `key_proof` too (a bare session gets nothing).
+   `key_vault_update` scopes to `auth.uid()` (the 14c guard). The proof is a BODY parameter on every RPC. **No RPC
    parameter may shadow a column it writes** (the 13j rule). The marker bump is the file's LAST statement.
 3. **The client:** `SyncSchema.lockstepVersion = 8`; `SyncTransport`/`SupabaseTransport` pass `key_proof` from the
-   engine's key provider (`SyncEncryptionKeys` gains `keyProof`); `VaultEnrollment`/setup compute and land the hash; the
-   FAKE SERVER enforces the proof and the fence exactly as the SQL does — pins: a session without the proof cannot push,
-   pull, purge, truncate or update the vault, CAN fetch it, CAN delete the account; the wrong proof refuses; the
-   NULL-hash first write lands once; the right `active_key_id` without the proof deletes nothing. `AuthRLSDDLTests` pins
+   engine's key provider (`SyncEncryptionKeys` gains `keyProof`); `VaultEnrollment`/setup compute and land the hash; `SyncEncryptionKeys` gains
+   the previous corpus key (+ id) and the rotation seq so the serializer opens a row by the seq rule (§3.10); the
+   FAKE SERVER enforces the proof, the fence, `sync_reencrypt`, the rotation seq (a push that passed the old check
+   lands BELOW the seq — the harness serializes the vault row as the SQL's locks do) and the in-progress refusal
+   exactly as the SQL does — pins: a session without the proof cannot push, pull, purge, truncate, read the horizon or
+   the purge ledger, or update the vault, CAN fetch it, CAN delete the account; the wrong proof refuses; the NULL-hash
+   first write lands once and a NULL-hash INSERT is refused; the right `active_key_id` without the proof deletes
+   nothing; a second rotation while one is open is refused by the harness exactly as by the SQL. `AuthRLSDDLTests` pins
    the DDL ↔ registry ↔ `lockstepVersion` together; `SerializerCompletenessTests` classifies the new columns.
 4. **The deploy checklist** (`notes/plans/pre-13x-deploy-checklist.md`): the 13j choreography — A1 backup rail; run
    `11_…sql` on the mirror at the window — PRE-AUTHORIZED via the stored PAT (her word; the `!` road if the classifier

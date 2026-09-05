@@ -48,6 +48,11 @@ are DONE. **Batch 1a is the next act.** Nothing in the design is provisional.
 the Mac install refresh are PRE-AUTHORIZED via her stored PAT (`.env.supabase.local`; the `!` road if the classifier
 blocks the mutating call); the passphrase confirms and the phone install need her present.
 
+## RULED AT THE BUILD ORCHESTRATOR'S KICKOFF-DAY REVIEW (2026-09-05): four findings brought at her instruction ("BRING IT
+UP TO ME!!"), four rulings landed in the design the same turn — decision 30 (Replace All Keys never re-mints A; the copy
+made honest), decision 31 (the rotation start seq tells the two corpus keys apart — the shipped `e1:` envelope and the
+mirror carry no per-row key id), decision 32 (one rotation at a time), decision 10's Always-ask exception. History Part V.
+
 ## OPEN AUTHOR ITEMS (bundle for her next sitting)
 1. Q3's five values, or her word that the phone leg is skipped (the probe needs only iCloud Keychain on both devices).
 2. The lockstep deploy window (after 1b, before batch 2).
