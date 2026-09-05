@@ -498,6 +498,12 @@ private final class RecordingVault: @unchecked Sendable {
                 url: request.url!, statusCode: status,
                 httpVersion: "HTTP/1.1", headerFields: nil)!)
         }
+        // pre-13x: the ONE vault write road is the RPC; PATCH is refused;
+        // a create carries its proof hash (VaultRPCEmulation — the
+        // core suites' linked ScriptedVaultServer's minimal twin).
+        if let served = VaultRPCEmulation.serveUpdate(request, row: &row) {
+            return response(served.status, served.body)
+        }
         guard request.url?.path.hasSuffix("/rest/v1/key_vault") == true else {
             return response(404)
         }
@@ -506,15 +512,14 @@ private final class RecordingVault: @unchecked Sendable {
             guard let row else { return response(200, Data("[]".utf8)) }
             return response(200, Data("[".utf8) + row + Data("]".utf8))
         case "POST":
+            if let refusal = VaultRPCEmulation.insertRefusal(request.httpBody) {
+                return response(refusal.status, refusal.body)
+            }
             guard row == nil else { return response(409, Data(#"{"code":"23505"}"#.utf8)) }
             row = request.httpBody
             return response(201)
         case "PATCH":
-            guard row != nil, let body = request.httpBody else {
-                return response(200, Data("[]".utf8))
-            }
-            row = body
-            return response(200, Data("[".utf8) + body + Data("]".utf8))
+            return response(VaultRPCEmulation.patchRefused.status, VaultRPCEmulation.patchRefused.body)
         default:
             return response(405)
         }
