@@ -1443,3 +1443,45 @@ readOrMint (mint): id 465c1764-b772-4f48-a6b5-5b5e6ebc4883, 32 bytes: true
 3. **"iCloud Keychain is off" is undetectable (question 3) — ACCEPTED, corner 46:** the covered tier's sentence now hedges in the copy file ("as far as this Mac can tell"); Q3's phone arrival is the only proof.
 4. **The dev store's login-keychain prompt (question 5) — HERS, bundled for the sitting** (the checklist §5 carries it, and the real store's possible prompt at the DELETE leg — Always Allow).
 5. The `Variorum-dev-apple-key` item in her iCloud Keychain (the dev scope's own A) is left as recorded.
+
+### BATCH 2b RECORD (entering and leaving Castle + the rotation runner — the implementer's record; LIVE STATUS first)
+
+#### LIVE STATUS (flipped in the same commit as each piece; PENDING = unverified)
+- **2b.0 item (0) — the corrected copy §9 string + its pin; `Posture.derive`'s corner-45 discriminator + the route's landing-before-deriving + its pin:** NOT-STARTED — settled: `ProtectionCopy.migrationConfirmBody` renders copy §9's corrected sentence verbatim (the device word interpolated); `Posture.derive` gains a `rawKeyCustody` reading (silent · gated · none · unknown) so arm (c)'s no-`apple`-copy case answers Standard-waiting when the raw key sits in the SILENT bound item and Castle only when it is gated or nowhere; `StoreLaunchGate.effectiveGate` tries the Apple landing (`StoreLobby.openWithAppleKey`) before deriving.
+- **2b.1 the core substrate — `DeviceKeyMaterial`'s rotation fields + the provider's `RotationInProgress`; `SyncEngine.pullToHead()` + `outboxCount()` hoisted; the per-STEP `RotationMarker` replacing `AccountRekeyMarker`; the SHARED driver `CorpusRotation` in `Sync/` (the vault-write payload, the bounded remainder walk with a progress callback, the completing write) + its pins:** NOT-STARTED — settled: the driver is productized from `RotationDrill`'s walk; the marker lives in `sync_state` keyed by step with non-secret facts (step · entersCastle · the old and new library-key fingerprints · the new corpus key id); the engine refuses rounds while ANY step is set (the R1-1 doctrine, kept).
+- **2b.2 the keyed → keyed re-key twin `StoreEncryptionMigration.rekey(at:from:to:faultInjector:)` on the same `Step`s + the crash matrix:** NOT-STARTED — settled: the same export · checkpoint · verify · swap road with the source opened KEYED and the temp under the new key + a fresh salt; the injector rides the same seams.
+- **2b.3 the app runner `PostureSwitchRunner` (Shared) with `entersCastle` — steps 1–7; the bootstrap's re-key road (flush → close the pool → swap → reopen under L′); `AccountRekey` + the recency probe's UI caller retired, `EncryptionSession.rekeyAccount` the runner's caller; the fresh snapshot PAIR before the offer; the scheduled `.md` insurance OFF with its notice; the offer over pre-switch PAIRS; leaving Castle:** NOT-STARTED — settled: see THE SETTLED DESIGN below.
+- **2b.4 the ceremony — `PostureSwitchModel` (Shared) over copy §2b / §2c, the vault-checked passphrase re-auth, decision 32's + the offline + the outbox refusals at the door, the Mac sheet + the pane's two doors, the ceremony held on the controller across the reopen:** NOT-STARTED — see QUESTIONS 1 (the Touch-ID-only arm cannot wrap the new keys; built over the typed passphrase; the arm is the architect's).
+- **2b.5 the Mac pins (§12's "Entering Castle" Mac half, "leaves nothing behind", Backups, one rotation at a time):** NOT-STARTED.
+- **2b.6 the drills (the signed host, throwaway scopes; a scratch keyed store seeded with the sample library; a fake-server sibling): Standard → Castle · Castle → Standard · a crash at each of the three seams re-run to completion · the wall time:** NOT-STARTED.
+- **Gate:** NOT-STARTED — core `swift test` full; the touched Mac suites + the ten spine suites; the Mac and iOS targets build. Counts PENDING.
+- **Reverts:** no revert in flight. Pre-revert copies, when made, go to `App/Variorum/DerivedData/2b-prerevert/` (gitignored, inside the worktree); every revert is announced here before it starts and taken from a committed state.
+
+#### THE SETTLED DESIGN, PER ITEM (filled as each lands)
+*(pending)*
+
+#### ORCHESTRATOR-DECIDED NOTES (settled under the mandate without the author — for the cold reviewer)
+- The rotation runner REPLACES `AccountRekey`'s 14c truncate road — in place through `sync_reencrypt`, never truncating; `account_data_truncate` keeps its fence for the headless `vault-bootstrap` tool alone.
+- `pullToHead` + the outbox count are ENGINE primitives (fact iv), never inlined.
+- The keyed → keyed re-key is `StoreEncryptionMigration`'s twin on the same `Step`s (fact iii).
+- The per-step persisted marker on `AccountRekeyMarker`'s pattern, resuming at the failed step.
+- Corner 45's discriminator (a refused Apple landing never makes Castle) and the corrected copy §9 sentence.
+
+#### PINS
+*(pending)*
+
+#### DRILLS RUN
+*(pending)*
+
+#### SUITE COUNTS
+*(pending)*
+
+#### HANDED FORWARD
+*(pending)*
+
+#### MACHINERY NOTES
+- The batch's DerivedData: `App/Variorum/DerivedData/pre13x-b0` (reused); logs beside it as `2b-*.log` (gitignored).
+- No instance of the app was running at this session's start (`pgrep -fl 'Variorum.app/Contents/MacOS'` empty); HEAD `663476a6`, tree clean.
+
+#### QUESTIONS FOR THE AUTHOR / ARCHITECT
+1. **A DESIGN FORK, found reading before building — the Touch-ID-only arm of the two rotation doors cannot produce the new keys' wraps.** Entering Castle (§4 step 2) and Replace All Keys (§5) rewrite the vault with **M′ under P and under W**, and the new key file with **L′ under P and W** — every one of those wraps needs the SECRET-DERIVED key (`PassphraseKDF.deriveKey(P, descriptor)` / `RecoveryPhrase.recoveryWrapKey(W)`), and nothing in custody yields it: the vault holds M under K_P (not K_P), the key file holds L under K_P (not K_P), and decision 3.1 says P and W are NEVER stored. So "Touch ID, or the passphrase — confirms" (copy §2b Screen 4; §4; §5's Castle row for Replace All Keys) and "You already have twelve words. They still open your library." (Screen 3) cannot both hold: with Touch ID alone, M′ cannot be wrapped under P; with the words untyped, M′ cannot be wrapped under W (the vault would lose its recovery wrap — exactly the 14c `AccountRekey` shape the design retires). **Two honest options:** (A) **the ceremony types the passphrase ALWAYS** (Screen 4's confirmation is the passphrase, vault-checked — Touch ID is not sufficient because the new keys must be wrapped under it), and when twelve words EXIST the ceremony reuses 2a's Screen 3 ("Type My Words…" → the same twelve wrap M′ / "Generate New Ones" → fresh words replace them everywhere) instead of "They still open your library" — decision 5's letter ("Turning on sync requires a passphrase AND the twelve words…; so does entering Castle"), §7's follow (which writes only the TYPED secret's copy — the design plainly assumes no derived key is cached), zero new custody; or (B) **the per-store custody item gains the DERIVED wrapping keys** (K_P + its descriptor, K_W) beside M — no new power (M already equals both), validated against the vault's descriptor at use (a change elsewhere ⇒ fall to typing), refreshed whenever a word is typed — which makes Touch ID sufficient but contradicts §7's letter and widens what custody holds. **This batch BUILDS the runner over INPUT secrets** (a `RotationSecrets` value: the passphrase-derived key + its fresh descriptor, and the recovery-derived key or nil), so either answer plugs in without touching the driver, **and builds the ceremony on (A)'s road** (the typed passphrase, vault-checked; the words typed-or-regenerated when they exist) as the PROVISIONAL — the Touch-ID-only confirmation is NOT built. The architect rules before the copy is re-voiced; the recorded consequence under (A): a Castle entry without the words typed regenerates them (the standing CF-5 mandatory step), never silently drops the vault's recovery wrap.
