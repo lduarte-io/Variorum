@@ -44,11 +44,15 @@ are DONE. **Batch 1a is the next act.** Nothing in the design is provisional.
   the suite passphrase since 14b; her Mac's key file has no passphrase copy yet (§11's backfill + the one-time confirm).
 - **Memory:** `variorum-phase-9-run-state` (the resume map).
 
+## RULED AT THE KICKOFF (2026-09-05): ONE phase, drills as gates, the ladder at the end — no split. The lockstep deploy and
+the Mac install refresh are PRE-AUTHORIZED via her stored PAT (`.env.supabase.local`; the `!` road if the classifier
+blocks the mutating call); the passphrase confirms and the phone install need her present.
+
 ## OPEN AUTHOR ITEMS (bundle for her next sitting)
 1. Q3's five values, or her word that the phone leg is skipped (the probe needs only iCloud Keychain on both devices).
 2. The lockstep deploy window (after 1b, before batch 2).
 3. At the batch 2 sitting: her phone's move to Castle; the one-time "confirm your passphrase to finish" on both devices.
-4. The sizing flag: three phase-sized units under one theme — one phase with drills as gates, or a split after U3.
+4. ~~The sizing flag~~ — RULED: one phase.
 5. At closeout: AppSpec §14's delta (incl. the bridge retirement's canon changes applied in place 2026-09-04); the 13y
    and 13x hand-forwards (design §17).
 
