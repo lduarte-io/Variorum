@@ -98,9 +98,23 @@ orchestrator."*
 
 ### 2b. THE WINDOW'S OUTCOMES (filled by the first orchestrator at the seam — every line PENDING until it is)
 - 2c: PENDING — closed at `<hash>`; adjudicated at `<hash>`; counts `<core> · <Mac> · <spine> · <phone>`.
+- **The A1 rail's local half — DONE (her Release app quit by her; zero instances checked):**
+  `Backups/variorum-backup-a1-pre13x-window-20260905T235821Z.{sqlite,sqlite-wal,sqlite-shm,keys.json}` — a byte copy
+  of the closed encrypted store (main 10,571,776 B, sha256 `d567688dd58f0890…`, `cmp` byte-identical to the source;
+  WAL 1,048,576 B; shm 32,768 B; the format-1 key file 519 B). Integrity is the app's own next backup run's to
+  assert (an encrypted store cannot be `PRAGMA`-checked from the CLI without the gated key).
+- **The pre-deploy snapshot — DONE (read-only, through the PAT's query road; the classifier allowed it this time):**
+  *[removed for publication]*
+  phone's dev build recorded — corner 47 confirmed by DATA: the dev build read HER vault); **18** vault columns (25
+  after 11); rows: 208 containers · 4,226 blocks · 4,388 variants · 3,909 commits; the function set: the SIX old
+  signatures present (`sync_push(jsonb,text)`, `sync_pull(bigint,text,integer,text)`, `sync_horizon(text)`,
+  `sync_purge_ledger(bigint,text)`, `sync_purge_execute(jsonb,text)`, `account_data_truncate(text)`) + `account_purge()`,
+  `sync_schema_version()`, `sync_table_pk(text)`. Revision 3 = setup + the recovery wrap + ONE further write whose
+  kind the row does not say — the sanity check with her twelve words at the window is what settles the 1b defect
+  question, exactly as planned.
 - The deploy: PENDING — `11_pre13x_postures.sql` sent whole at `<time>`; `sync_schema_version()` = 8; 25 vault columns;
   the six old signatures absent; the sweep every row OK/INFO; the LIVE PATCH PROBE refused (`<status>`); the
-  proof-required probe refused; the pre-deploy snapshot (revision `<n>`, key id `<id>`) recorded.
+  proof-required probe refused.
 - The Mac: PENDING — Release built from `<hash>` (a clean tree), `/Applications/Variorum.app` SHA-256 `<…>` refreshed at
   a zero-instance window behind the A1 rail (backup `<name>`, integrity ok); her first ready: the migration's six legs
   (`/usr/bin/log show` lines quoted), the keychain prompt `<seen/not seen>`, sign-in, the confirm, the first round
