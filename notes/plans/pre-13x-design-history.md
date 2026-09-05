@@ -1071,3 +1071,5 @@ a token already in hand; 13y's recently-re-authenticated guard closes the deleti
 adopted as standing rules in §19: every batch record carries ORCHESTRATOR-DECIDED NOTES (what was settled without her,
 for the cold reviewer), and every batch brief is written only after the orchestrator has read the shipped code the
 batch's mechanisms assume and checked the design's claims against it (the decision 31 precedent).
+Her confirmation the same day, verbatim: *"both of those are fully accepted, I'll keep the lifetime as is."* — corner
+38 now says the lifetime stays; the 13y "may shorten" clause is gone.

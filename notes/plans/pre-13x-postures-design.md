@@ -791,8 +791,8 @@ never stranded. 38. **Sign Out Everywhere revokes refresh tokens;** an access to
 revocation list, so a global sign-out revokes the refresh tokens and cannot recall a token already in hand) — inert
 against the corpus (no proof), able only to read the vault's wrapped copies and, through a custom client, to call
 `account_purge` — loud and survivable, the disclosed account-password class; ACCEPTED as it stands (her word); 13y's
-recently-re-authenticated-session guard on the destructive RPCs closes the deletion arm, and 13y may shorten the
-lifetime. 39. **A CAS refuse at a posture switch re-reads:** if the account already changed posture,
+recently-re-authenticated-session guard on the destructive RPCs closes the deletion arm; the lifetime stays as it is
+(her word: *"I'll keep the lifetime as is"*). 39. **A CAS refuse at a posture switch re-reads:** if the account already changed posture,
 the retry is the follow, never a second rotation. 40. **A rotation re-delivers the whole corpus to every device once,**
 seq-recorded only — the pull-to-head memory shape at corpus scale, once per rotation. 41. **The biometric custody item is
 read ONCE per unlock** — L, M, C, J and the device identity in one gated read, one Touch ID prompt. 42. **A third crash
