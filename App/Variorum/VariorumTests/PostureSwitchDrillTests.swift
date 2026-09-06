@@ -89,6 +89,9 @@ struct PostureSwitchDrillTests {
         var rowsPushed = 0
         var variantCount = 0
         var sampleVariant: (id: String, text: String)?
+        /// pre-13x 2c: the account's Apple key backing (iCloud Keychain's
+        /// stand-in) — SHARED with the sibling device, as it would be.
+        var appleBacking: InMemoryAppleKeyBacking!
 
         init(scope: String, dir: URL, storeURL: URL, backups: URL, suiteName: String, oldKey: StoreKey,
              apple: AppleKey, binding: StoreBinding, view: AppDatabase, session: SyncCustodySession,
@@ -174,6 +177,16 @@ struct PostureSwitchDrillTests {
             load: emu.load)
         await mirror.attach(vault: vaultClient)
         let material = try await VaultEnrollment(client: vaultClient).setUp(passphrase: "sesame")
+        // STANDARD's steady state (2a): the vault carries the Apple-held copy
+        // of M under this account's A — the same act leaving Castle performs
+        // (`settingAppleHeldCopy` + the proof-carrying update). Without it the
+        // vault is 14b-shaped (P only) and no new device could open it
+        // silently — which is the Standard new-device road drill 1 proves.
+        let minted = try #require(try await vaultClient.fetchVault())
+        try await vaultClient.updateVault(
+            try minted.format.settingAppleHeldCopy(
+                masterKey: material.masterSymmetricKey, appleKey: apple.symmetricKey, appleKeyID: apple.id),
+            expectedRevision: minted.revision, keyProof: KeyProof.wireToken(master: material.masterSymmetricKey))
 
         // The key file FIRST (the custody items are named by its store id).
         let storeID = "drill-\(UUID().uuidString.lowercased())"
@@ -222,6 +235,7 @@ struct PostureSwitchDrillTests {
             protection: protection, storeID: storeID)
         world.oldMaterial = material
         world.words = try RecoveryPhrase.generate()
+        world.appleBacking = appleBacking
 
         // THE SAMPLE LIBRARY, seeded whole, then pushed to the last row.
         let seedClock = ContinuousClock()
@@ -268,6 +282,85 @@ struct PostureSwitchDrillTests {
         #expect(protection.keyInHand() == oldKey, "the silent item holds the library key")
         world.runner = PostureSwitchRunner(leaves: leaves(for: world))
         return world
+    }
+
+    /// pre-13x 2c — THE SIBLING DEVICE (U3's "a Standard sibling device
+    /// following"): a second library on the SAME account — the same vault,
+    /// the same mirror, the same Apple key — pulled to head under the old
+    /// keys, Standard-shaped (its own key file with P + A + M, the silent
+    /// store-key item, the plain sync record with the OLD material) under
+    /// its OWN throwaway scope, with its own controller and runner. It
+    /// follows through the REAL `PostureSwitchRunner.follow`.
+    private func makeSibling(of acting: DrillWorld) async throws -> DrillWorld {
+        let scope = "\(acting.scope)-sib"
+        let dir = acting.dir.appendingPathComponent("sibling", isDirectory: true)
+        let storeURL = dir.appendingPathComponent("library/variorum.sqlite")
+        let backups = dir.appendingPathComponent("library/Backups", isDirectory: true)
+        try FileManager.default.createDirectory(at: backups, withIntermediateDirectories: true)
+        let suiteName = "\(acting.suiteName).sibling"
+        let oldKey = StoreKey.mint()
+        let opened = try AppDatabase.openStore(at: storeURL, custody: .inMemory(initial: oldKey))
+        let (view, binding) = opened.asRebindable()
+        let material: DeviceKeyMaterial = acting.oldMaterial
+
+        let storeID = "drill-sib-\(UUID().uuidString.lowercased())"
+        var envelope = StoreKeyEnvelope(storeID: storeID)
+        try envelope.setPassphraseWrap(key: oldKey, passphrase: "sesame", kdf: fastKDF())
+        try envelope.appleBox(key: oldKey, under: acting.apple.symmetricKey, appleKeyID: acting.apple.id)
+        try envelope.masterBox(key: oldKey, under: material.masterSymmetricKey)
+        try envelope.write(at: envelope.preferredURL(besideStore: storeURL))
+        #expect(StoreKeyCustody.deviceKeychain(scope: scope, storeURL: storeURL).save(oldKey))
+        let session = SyncCustodySession()
+        let keyStore = DeviceKeyStore.keychain(
+            scope: scope, storeURL: storeURL, session: session,
+            defaults: { UserDefaults(suiteName: suiteName)! })
+        #expect(keyStore.save(material), "the sibling's plain sync record holds the OLD material")
+
+        let dials = ScriptedDialsBox(ProtectionDials())
+        let appleBacking: InMemoryAppleKeyBacking = acting.appleBacking
+        let gate = StoreLaunchGate(
+            dials: { _, id in dials.dials(for: id) },
+            saveDials: { new, _, id in dials.save(new, for: id) },
+            legacyMode: { _, _ in nil },
+            retireLegacyDials: { _, _ in },
+            guardFor: { scope in StoreKeyGuard.keychain(scope: scope, storeURL: storeURL) },
+            appleKeyFor: { _ in AppleKeyLeaves.inMemory(backing: appleBacking) },
+            loadEnvelope: { try StoreKeyEnvelope.loadCurrent(besideStore: $0) },
+            saveEnvelope: { try $0.write(at: $0.preferredURL(besideStore: $1)) },
+            setAsideEnvelope: { _ in },
+            stamp: { _, _ in nil },
+            setStamp: { _, _, _ in })
+        let protection = ProtectionController(configuration: .init(
+            scope: scope, storeURL: storeURL, gate: gate, isRealVariant: true,
+            makeKDF: { self.fastKDF() },
+            syncCustodySession: session))
+        let sibling = DrillWorld(
+            scope: scope, dir: dir, storeURL: storeURL, backups: backups, suiteName: suiteName,
+            oldKey: oldKey, apple: acting.apple, binding: binding, view: view, session: session,
+            keyStore: keyStore, vaultClient: acting.vaultClient, vaultEmu: acting.vaultEmu, mirror: acting.mirror,
+            gate: gate, protection: protection, storeID: storeID)
+        sibling.oldMaterial = material
+        sibling.words = acting.words
+        sibling.appleBacking = appleBacking
+        sibling.rowsPushed = acting.rowsPushed
+
+        // Pulled to head under the old keys — the whole corpus.
+        let engine = SyncEngine(transport: acting.mirror, keyProvider: DeviceKeySyncProvider(store: keyStore))
+        let clock = ContinuousClock()
+        var applied = 0, merged = 0
+        let wall = try await clock.measure {
+            try await withDependencies { $0.database = view } operation: {
+                let report = try await engine.pull()
+                applied = report.applied; merged = report.merged
+            }
+        }
+        #expect(applied + merged == acting.rowsPushed,
+                "the sibling holds the whole corpus under the old key: applied \(applied), merged \(merged)")
+        sibling.note("SIBLING (Standard, old keys) pulled to head in \(wall): applied \(applied), merged \(merged)")
+        await protection.reconcile()
+        #expect(protection.posture == .standard)
+        sibling.runner = PostureSwitchRunner(leaves: leaves(for: sibling))
+        return sibling
     }
 
     private func leaves(for world: DrillWorld) -> PostureSwitchRunner.Leaves {
@@ -400,15 +493,29 @@ struct PostureSwitchDrillTests {
         let oldMaterial: DeviceKeyMaterial = world.oldMaterial
         MarkdownInsurance.setEnabled(true, in: UserDefaults(suiteName: world.suiteName)!)
 
-        // The SIBLING: a second library on the old keys, pulled to head.
-        let siblingURL = world.dir.appendingPathComponent("sibling/variorum.sqlite")
-        let sibling = try AppDatabase.openStore(at: siblingURL, custody: .inMemory(initial: .mint()))
-        let siblingOld = SyncEngine(transport: world.mirror, keyProvider: DrillKeyProvider(keys: oldMaterial.syncKeys))
-        try await withDependencies { $0.database = sibling } operation: {
-            let report = try await siblingOld.pull()
+        // ————— U3 DRILL 1: THE STANDARD NEW-DEVICE ROAD (nothing typed) —————
+        // A new device on the account under Standard: the Apple key (iCloud
+        // Keychain) opens the vault's Apple-held copy of M; the class keys
+        // follow; the whole corpus pulls — no passphrase, no words.
+        // (The A half; the enroll half — the vault client's own Apple road
+        // and the device's key file — is batch 3's.)
+        let standardVault = try await world.vault()
+        let appleOpened = try standardVault.format.unwrapMaster(withAppleKey: world.apple.symmetricKey)
+        let newDeviceMaterial = try CorpusRotation.materialFollowing(standardVault.format, master: appleOpened)
+        #expect(newDeviceMaterial.corpusKeyID == oldMaterial.corpusKeyID)
+        let newDeviceURL = world.dir.appendingPathComponent("new-standard-device/variorum.sqlite")
+        let newDevice = try AppDatabase.openStore(at: newDeviceURL, custody: .inMemory(initial: .mint()))
+        let newDeviceEngine = SyncEngine(transport: world.mirror, keyProvider: DrillKeyProvider(keys: newDeviceMaterial.syncKeys))
+        try await withDependencies { $0.database = newDevice } operation: {
+            let report = try await newDeviceEngine.pull()
             #expect(report.applied + report.merged == world.rowsPushed,
-                    "the sibling holds the whole corpus under the old key: applied \(report.applied), merged \(report.merged) (its own seeded settings)")
+                    "the new Standard device applies every row with nothing typed: applied \(report.applied), merged \(report.merged)")
+            world.note("U3 DRILL 1 — STANDARD NEW DEVICE, nothing typed: the Apple key opened the vault's master copy; pulled applied \(report.applied), merged \(report.merged) of \(world.rowsPushed)")
         }
+
+        // ————— U3 DRILL 3's second device: THE SIBLING (Standard, old keys) —————
+        let sibling = try await makeSibling(of: world)
+        defer { sibling.tearDown() }
         // A pre-switch snapshot pair (the app's own) — the offer's subject.
         let drillLeaves = leaves(for: world)
         let preSwitchPair = try #require(await drillLeaves.takeSnapshot())
@@ -425,6 +532,21 @@ struct PostureSwitchDrillTests {
         world.note("STANDARD → CASTLE in \(wall) — \(done.reencrypted) rows re-encrypted; insurance off: \(done.insuranceTurnedOff); pre-switch pairs: \(done.preSwitchSnapshots.map(\.lastPathComponent))")
         try await expectCastleEndState(world, done)
         #expect(done.reencrypted == world.rowsPushed, "one run re-encrypted every row: \(done.reencrypted)")
+        // U3: AN OLD SNAPSHOT CANNOT ENROLL — the pre-switch pair's key file
+        // still opens the OLD snapshot under the old M (backups are never
+        // rewritten), but the old M is dead at the vault: no Apple-held copy
+        // remains, the proof hash is M′'s, and the old keys meet the fence.
+        let castleVault = try await world.vault()
+        #expect(castleVault.format.masterWrappedByAppleHeld == nil, "no Apple-held copy under Castle")
+        #expect(KeyProof.hash(master: oldMaterial.masterSymmetricKey) != castleVault.format.keyProofHash,
+                "the old master fails the vault's proof — an old snapshot's keys enroll nothing")
+        #expect(throws: (any Error).self, "the Apple key opens NO copy of M′") {
+            _ = try castleVault.format.unwrapMaster(withAppleKey: world.apple.symmetricKey)
+        }
+        let oldPairKeyFile = try #require(try StoreKeyEnvelope.load(at: StoreBackup.pairedKeyFile(for: preSwitchPair)))
+        #expect(try oldPairKeyFile.unwrapKey(master: oldMaterial.masterSymmetricKey) == world.oldKey,
+                "the old snapshot pair still opens under the OLD M — never rewritten, never reaching the new keys")
+        world.note("U3 — an old snapshot cannot enroll: the Apple road is closed, the old master fails the proof, the old pair opens only its own bytes")
         #expect(done.insuranceTurnedOff && !MarkdownInsurance.isEnabled(in: UserDefaults(suiteName: world.suiteName)!))
         #expect(done.preSwitchSnapshots == [preSwitchPair], "the offer lists the pre-switch pair only")
         #expect(try Data(contentsOf: preSwitchPair) == preSwitchBytes, "no backup folder rewritten")
@@ -435,24 +557,59 @@ struct PostureSwitchDrillTests {
         #expect(StoreBackup.shortFingerprint(fromBackupURL: fresh) == StoreKeyEnvelope.shortFingerprint(done.newKeyFingerprint))
         #expect(FileManager.default.fileExists(atPath: StoreBackup.pairedKeyFile(for: fresh).path))
 
-        // THE SIBLING on the old keys: refused at the fence; it FOLLOWS by the
-        // passphrase (the vault's M′), then pulls; a FRESH sibling reads the
-        // whole corpus back in the clear under the new keys.
-        try await withDependencies { $0.database = sibling } operation: {
-            await #expect(throws: SyncError.encryptionKeysReplaced, "the sibling's old-key pull is refused") {
+        // ————— U3 DRILL 3 (the sibling) + DRILL 2 (the Castle road, passphrase once) —————
+        // THE SIBLING on the old keys: refused at the fence; it FOLLOWS through
+        // the REAL runner by the passphrase ONCE (§7: M′ from the vault, its
+        // custody replaced, its library re-keyed, custody behind the gate,
+        // pulled to head) — then a FRESH device (the Castle new-device road:
+        // passphrase once, nothing else) reads the whole corpus under C′.
+        let siblingOld = SyncEngine(transport: world.mirror, keyProvider: DeviceKeySyncProvider(store: sibling.keyStore))
+        try await withDependencies { $0.database = sibling.view } operation: {
+            await #expect(throws: SyncError.encryptionKeysReplaced, "the sibling's old-key pull is refused at the fence") {
                 _ = try await siblingOld.pull()
             }
         }
-        let followed = try await VaultEnrollment(client: world.vaultClient).enroll(passphrase: "sesame")
-        #expect(followed.corpusKeyID == done.material?.corpusKeyID && followed.rotation == nil)
-        let siblingNew = SyncEngine(transport: world.mirror, keyProvider: DrillKeyProvider(keys: followed.syncKeys))
-        try await withDependencies { $0.database = sibling } operation: {
-            let report = try await siblingNew.pull()
-            world.note("the followed sibling pulled: applied \(report.applied), merged \(report.merged), cursor \(report.newCursor)")
+        await #expect(throws: VaultEnrollmentError.wrongPassphrase, "a wrong word writes nothing on the sibling") {
+            _ = try await sibling.runner.follow(passphrase: "not-the-passphrase", recoveryWords: nil)
         }
+        #expect(sibling.keyStore.load()?.corpusKeyID == oldMaterial.corpusKeyID, "the sibling's custody unchanged after the refusal")
+        var followOutcome: PostureSwitchRunner.Outcome?
+        let followWall = try await clock.measure {
+            followOutcome = try await sibling.runner.follow(passphrase: "sesame", recoveryWords: nil)
+        }
+        let followedOutcome = try #require(followOutcome)
+        let followed = try #require(followedOutcome.material)
+        sibling.note("U3 DRILL 3 — the SIBLING FOLLOWED (passphrase once) in \(followWall): re-encrypted \(followedOutcome.reencrypted) rows (the acting device had finished the walk); rekeys \(sibling.rekeys); insurance off: \(followedOutcome.insuranceTurnedOff); offer: \(followedOutcome.preSwitchSnapshots.count) pairs")
+        #expect(followedOutcome.entersCastle)
+        #expect(followed.corpusKeyID == done.material?.corpusKeyID && followed.rotation == nil)
+        #expect(followedOutcome.reencrypted == 0, "nothing left to re-encrypt: \(followedOutcome.reencrypted)")
+        #expect(sibling.rekeys == 1, "the sibling's library re-keyed as it followed")
+        #expect(sibling.protection.posture == .castle, "the sibling's posture: \(sibling.protection.posture)")
+        #expect(sibling.silentStoreKey == nil, "the sibling's silent store-key item is gone")
+        #expect(sibling.plainSyncRecord?.material == nil && sibling.plainSyncRecord?.deviceID != nil,
+                "the sibling's sync keys left the plain item; its identity stays")
+        #expect(sibling.session.record?.material?.corpusKeyID == followed.corpusKeyID, "the sibling's session holds M′ / C′")
+        let siblingFile = try #require(try StoreKeyEnvelope.load(
+            at: StoreKeyEnvelope.url(besideStore: sibling.storeURL, fingerprint: followedOutcome.newKeyFingerprint)))
+        #expect(siblingFile.apple == nil, "the sibling's new key file carries no Apple copy")
+        #expect(StoreEncryptionMigration.opens(sibling.storeURL, key: try siblingFile.unwrapKey(passphrase: "sesame")))
+        #expect(!StoreEncryptionMigration.opens(sibling.storeURL, key: sibling.oldKey), "the sibling's old library key opens nothing")
+        #expect(try await sibling.marker() == nil)
+        let siblingNew = SyncEngine(transport: world.mirror, keyProvider: DeviceKeySyncProvider(store: sibling.keyStore))
+        try await withDependencies { $0.database = sibling.view } operation: {
+            let report = try await siblingNew.pull()
+            sibling.note("the followed sibling's next pull: applied \(report.applied), merged \(report.merged), cursor \(report.newCursor)")
+        }
+        let siblingVariants = try await sibling.view.read { db in
+            try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM variant WHERE deleted_at IS NULL") ?? 0
+        }
+        #expect(siblingVariants == world.variantCount, "the sibling kept every take through the follow: \(siblingVariants) of \(world.variantCount)")
+        world.note("U3 DRILL 2 — THE CASTLE NEW-DEVICE ROAD, passphrase once: a fresh device enrolls by the passphrase and pulls the corpus under C′")
         let freshURL = world.dir.appendingPathComponent("fresh/variorum.sqlite")
         let freshStore = try AppDatabase.openStore(at: freshURL, custody: .inMemory(initial: .mint()))
-        let freshEngine = SyncEngine(transport: world.mirror, keyProvider: DrillKeyProvider(keys: followed.syncKeys))
+        let freshEnrolled = try await VaultEnrollment(client: world.vaultClient).enroll(passphrase: "sesame")
+        #expect(freshEnrolled.corpusKeyID == followed.corpusKeyID && freshEnrolled.rotation == nil)
+        let freshEngine = SyncEngine(transport: world.mirror, keyProvider: DrillKeyProvider(keys: freshEnrolled.syncKeys))
         try await withDependencies { $0.database = freshStore } operation: {
             let report = try await freshEngine.pull()
             #expect(report.applied + report.merged == world.rowsPushed,
@@ -493,7 +650,21 @@ struct PostureSwitchDrillTests {
         #expect(world.plainSyncRecord?.material?.corpusKeyID == followed.corpusKeyID, "the plain sync record is back")
         let batchesAfter = await world.mirror.reencryptBatches.count
         #expect(batchesAfter == batchesBefore, "the mirror untouched")
-        world.note("DONE — log lines: \(world.log.value.count)")
+        world.note("U3 DRILL 4 — CASTLE → STANDARD: the Apple-held copies are back, custody silent, nothing rotated")
+
+        // The SIBLING follows into Standard SILENTLY (§7 — nothing typed):
+        // its key file gains the Apple copy, its custody moves silent.
+        let siblingFollowWall = try await clock.measure {
+            try await sibling.runner.followIntoStandard()
+        }
+        sibling.note("the sibling followed into Standard in \(siblingFollowWall)")
+        #expect(sibling.protection.posture == .standard, "the sibling's posture: \(sibling.protection.posture)")
+        let siblingStandardFile = try #require(try StoreKeyEnvelope.loadCurrent(besideStore: sibling.storeURL))
+        #expect(siblingStandardFile.appleKeyID == world.apple.id)
+        #expect(try siblingStandardFile.unwrapKey(apple: world.apple.symmetricKey) == sibling.protection.keyInHand())
+        #expect(sibling.silentStoreKey == sibling.protection.keyInHand(), "the sibling's silent item holds its key again")
+        #expect(sibling.plainSyncRecord?.material?.corpusKeyID == followed.corpusKeyID, "the sibling's plain sync record is back")
+        world.note("DONE — log lines: \(world.log.value.count) (+ \(sibling.log.value.count) sibling lines)")
     }
 
     // MARK: - Drill 2: the three seams
