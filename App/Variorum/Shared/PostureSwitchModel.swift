@@ -124,6 +124,10 @@ final class PostureSwitchModel: Identifiable {
     var runnerPhase: PostureSwitchRunner.Phase { runner.phase }
 
     var vaultConstrains: Bool { vaultTie != nil }
+    private var isResume: Bool {
+        if case .resume = mode { return true }
+        return false
+    }
     /// pre-13x 3b (Replace All Keys' faces): the Standard addendum renders
     /// under a Standard posture; the checkbox hides when a door handed the
     /// new passphrase in (it IS the new one).
@@ -138,6 +142,15 @@ final class PostureSwitchModel: Identifiable {
         guard case .checking = phase else { return }
         busy = true
         defer { busy = false }
+        // pre-13x 4b (§7 — the un-followed device; §12): a follow is owed —
+        // the posture switches and Replace All Keys speak the one sentence
+        // instead of acting (the pane hides these doors too; the model
+        // refuses on its own). The marker's RESUME is exempt: that road IS
+        // the follow when the account moved under a crashed switch.
+        if controller.followPending, !isResume {
+            phase = .failed(ProtectionCopy.pickUpKeysFirst)
+            return
+        }
         do {
             let facts = try await runner.checkDoor()
             self.facts = facts

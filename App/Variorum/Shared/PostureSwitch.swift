@@ -357,8 +357,52 @@ final class PostureSwitchRunner {
             try await writeMarker(RotationMarker(step: .vaultWrite, entersCastle: entersCastle, startedAt: stamp))
             try leaves.injectFault(.beforeVaultWrite)
             let appleHeld: (key: SymmetricKey, id: String)? = entersCastle ? nil : appleHeldCopyForStandard()
-            let begun = try await CorpusRotation.begin(
-                client: vault, current: current, secrets: secrets, appleHeldCopy: appleHeld)
+            let begun: CorpusRotation.Begun
+            do {
+                begun = try await CorpusRotation.begin(
+                    client: vault, current: current, secrets: secrets, appleHeldCopy: appleHeld)
+            } catch let refusal as KeyVaultClientError
+                where refusal == .vaultRevisionConflict || refusal == .keyProofRefused {
+                // pre-13x 4b (corner 39 / ledger 40 — §7 step 7): TWO DEVICES
+                // SWITCHING AT ONCE. The vault refused this device's rotation
+                // because another write landed between the fetch and the
+                // write: the REVISION CAS when that write was a re-wrap (a
+                // passphrase change elsewhere — the hash unchanged), the
+                // PROOF when it was a rotation (the other device's write
+                // replaced the hash, so this device's old proof is refused
+                // before the CAS is even reached — the RPC's order, absent →
+                // proof → rotation → CAS). RE-READ either way: if the
+                // account's corpus key moved under us — the other device
+                // rotated (entered Castle, or replaced the keys) — then THE
+                // RETRY IS THE FOLLOW, never a second rotation: this device
+                // picks the new master up with the passphrase it already
+                // typed for the ceremony, re-keys its own library and pulls;
+                // the vault is not written again. If the key id did NOT move
+                // (a concurrent re-wrap took the revision), the refusal
+                // stands: the marker's resume road restarts the ceremony
+                // (`restartRequired`), where the passphrase is re-verified
+                // against the vault's now-current copy.
+                guard let moved = try await vault.fetchVault(),
+                      moved.format.classKey(for: .corpus)?.keyID != current.corpusKeyID
+                else { throw refusal }
+                leaves.log("posture switch: the vault's CAS refused — the account's keys moved on another device; this device FOLLOWS instead (no second rotation)")
+                // The typed passphrase, verified against the vault's CURRENT
+                // copy (a word the other device also changed refuses here —
+                // the marker's resume road then asks).
+                let unwrapped = try await VaultEnrollment(client: vault).enroll(passphrase: passphrase)
+                try await clearMarker()
+                // The ceremony's words are NOT landed: the other device's
+                // rotation wrapped the vault under ITS words, which may not
+                // be these; the W copy lands when the words are next typed
+                // here (the follow's own rule).
+                let outcome = try await runFollow(
+                    fetched: moved, vault: vault, unwrapped: unwrapped, libraryKey: libraryKey,
+                    keyFile: KeyFileInputs(passphrase: passphrase, kdf: moved.format.kdf, recoveryWords: nil,
+                                           recoveryWrapDigest: moved.format.recoveryWrapDigest),
+                    secretName: "passphrase typed for the ceremony")
+                phase = .done
+                return outcome
+            }
             leaves.log("posture switch: the vault rewritten under the old proof — rotation seq \(begun.receipt.rotationStartedSeq ?? -1)")
             recoveryWrapDigest = begun.format.recoveryWrapDigest
             try leaves.injectFault(.afterVaultWriteBeforeCustody)

@@ -35,9 +35,29 @@ final class EmulatedVault: @unchecked Sendable {
     private let lock = NSLock()
     private var row: Data?
     private let claimRotationSeq: @Sendable () async -> Int64
+    /// pre-13x 4b (§7 steps 5 and 7): a ONE-SHOT hook run INSIDE the next
+    /// `key_vault_update` request, BEFORE its CAS — so another device's
+    /// whole act can land between this device's fetch and its write, and
+    /// the CAS refusal is produced by construction, never by a race the
+    /// scheduler may or may not lose. Consumed before it runs (its own
+    /// vault writes pass through).
+    private var beforeUpdate: (@Sendable () async throws -> Void)?
+    private(set) var updateCount = 0
 
     init(claimRotationSeq: @escaping @Sendable () async -> Int64) {
         self.claimRotationSeq = claimRotationSeq
+    }
+
+    func setBeforeUpdate(_ hook: @escaping @Sendable () async throws -> Void) {
+        lock.withLock { beforeUpdate = hook }
+    }
+
+    private func takeBeforeUpdate() -> (@Sendable () async throws -> Void)? {
+        lock.withLock {
+            let hook = beforeUpdate
+            beforeUpdate = nil
+            return hook
+        }
     }
 
     var load: @Sendable (URLRequest) async throws -> (Data, URLResponse) {
@@ -54,6 +74,8 @@ final class EmulatedVault: @unchecked Sendable {
                 httpVersion: "HTTP/1.1", headerFields: nil)!)
         }
         if request.url?.path.hasSuffix("/rest/v1/rpc/key_vault_update") == true {
+            if let hook = takeBeforeUpdate() { try await hook() }
+            lock.withLock { updateCount += 1 }
             let (served, previousBefore, stored): (VaultRPCEmulation.Served?, String?, Data?) = lock.withLock {
                 let before = row.flatMap {
                     ((try? JSONSerialization.jsonObject(with: $0)) as? [String: Any])?["corpus_previous_key_id"] as? String
@@ -222,6 +244,18 @@ private struct FixedKeyProvider: SyncKeyProviding {
     let keys: SyncEncryptionKeys
     func currentKeys() throws -> SyncEncryptionKeys { keys }
     func deviceIdentity() throws -> String { "device-fixed-2b" }
+}
+
+/// pre-13x 4b.4: a lifecycle that counts purges — the un-followed device's
+/// Delete-account arm (the 3b brain runs whether or not a follow is owed).
+private actor PurgeCountingLifecycle: AccountLifecycleProviding {
+    private(set) var purges = 0
+    func truncateAccountData(activeKeyID: String, keyProof: String) async throws -> [String: Int] { [:] }
+    func purgeAccount() async throws -> AccountPurgeReport {
+        purges += 1
+        return AccountPurgeReport(dataRows: 0, vaultRows: 1, entitlementRows: 1, authUserRemoved: true)
+    }
+    func fetchEntitlements() async throws -> [AccountEntitlement] { [] }
 }
 
 // MARK: - The suite
@@ -448,7 +482,7 @@ struct PostureSwitchTests {
         return world
     }
 
-    private func leaves(for world: World, faultAt: PostureSwitchRunner.FaultPoint? = nil, keyStore: DeviceKeyStore? = nil) -> PostureSwitchRunner.Leaves {
+    private func leaves(for world: World, faultAt: PostureSwitchRunner.FaultPoint? = nil, keyStore: DeviceKeyStore? = nil, vaultOverride: KeyVaultClient? = nil) -> PostureSwitchRunner.Leaves {
         let calls = world.calls
         let backups = world.backups
         let suiteName = world.suiteName
@@ -460,7 +494,7 @@ struct PostureSwitchTests {
             gate: world.gate,
             keyStore: keyStore ?? world.keyStore,
             keyProvider: DeviceKeySyncProvider(store: keyStore ?? world.keyStore),
-            vault: world.vaultClient,
+            vault: vaultOverride ?? world.vaultClient,
             transport: world.mirror,
             signedIn: { signedIn },
             appleKeys: AppleKeyLeaves.inMemory(backing: world.appleBacking),
@@ -1096,9 +1130,15 @@ struct PostureSwitchTests {
         #expect(sibling.keyStore.load()?.corpusKeyID == oldMaterial.corpusKeyID, "custody unchanged")
         #expect(StoreEncryptionMigration.opens(sibling.storeURL, key: sibling.oldKey))
 
+        // pre-13x 4b.3 (the 2c adjudication's item 4; decision 6 per DEVICE):
+        // the FOLLOWER's own scheduled plaintext insurance is ON — it goes
+        // OFF with the notice as it enters Castle.
+        MarkdownInsurance.setEnabled(true, in: sibling.defaults)
         // THE FOLLOW, by the passphrase once.
         let outcome = try await sibling.runner.follow(passphrase: "sesame", recoveryWords: nil)
         #expect(outcome.entersCastle)
+        #expect(outcome.insuranceTurnedOff && !MarkdownInsurance.isEnabled(in: sibling.defaults),
+                "4b.3: the follower's OWN insurance turned OFF with the notice (decision 6 is per device)")
         let material = try #require(outcome.material)
         let vault = try await sibling.vault()
         #expect(vault.format.previousCorpusKey == nil && vault.format.rotationStartedSeq == nil,
@@ -2219,4 +2259,720 @@ struct PostureSwitchTests {
         #expect(try await siblingTwo.marker() == nil)
         _ = client
     }
+    // MARK: - pre-13x 4b: helpers shared by the choreography, the un-followed device, the doors and the posture pins
+
+    /// A sibling's controller composed the app's way: the plain custody
+    /// record (nil material = no keys in hand — Always ask), the session
+    /// (the lobby's hold), the runner, the exact-owner read answering
+    /// "mine", the vault's reading over the SHARED client.
+    private func controller(for world: World, material: DeviceKeyMaterial?, session: SyncCustodySession = SyncCustodySession()) -> ProtectionController {
+        let syncLeaves = RecordingSyncLeaves(plain: SyncCustodyRecord(deviceID: "device-2b", material: material))
+        let controller = ProtectionController(configuration: .init(
+            scope: "Variorum2b", storeURL: world.storeURL, gate: world.gate,
+            isRealVariant: true, makeKDF: { self.fastKDF() },
+            storeID: { (try? StoreKeyEnvelope.loadCurrent(besideStore: world.storeURL))?.storeID },
+            syncCustodyLeaves: { _ in syncLeaves.leaves },
+            syncCustodySession: session))
+        controller.refreshEnvelopeFacts()
+        controller.switchRunner = world.runner
+        controller.foreignOwner = { _ in false }
+        wireVaultReading(controller, client: world.vaultClient)
+        return controller
+    }
+
+    /// The vault's reading as `wireOneSecretHooks.readVaultPosture` fills it.
+    private func wireVaultReading(_ controller: ProtectionController, client: KeyVaultClient?) {
+        controller.readVaultPosture = { [client] in
+            guard let client, let fetched = try? await client.fetchVault() else { return nil }
+            return VaultPostureReading(
+                hasAppleHeldCopy: fetched.format.masterWrappedByAppleHeld != nil,
+                appleKeyID: fetched.format.appleKeyID, passphraseKDF: fetched.format.kdf,
+                hasPassphraseWrap: true, corpusKeyID: fetched.format.classKey(for: .corpus)?.keyID,
+                updatedAt: fetched.updatedAt, updatedByDevice: fetched.format.updatedByDevice,
+                signedInUserID: "user-2b", hasRecoveryWrap: fetched.format.masterWrappedByRecovery != nil,
+                format: fetched.format, recoveryWrapDigest: fetched.format.recoveryWrapDigest)
+        }
+    }
+
+    /// A signed-in auth over an in-memory store whose network is down —
+    /// the 3b doors' shape (sign-out clears locally whatever the logout answers).
+    private func makeAuth() -> AuthSession {
+        AuthSession(
+            configuration: AuthConfiguration(projectURL: URL(string: "https://auth.2b-4b.invalid")!, apiKey: "k"),
+            store: .inMemory(initial: AuthTokens(
+                accessToken: "token-2b", refreshToken: "refresh", expiresAt: Date(timeIntervalSinceNow: 86_400),
+                userID: "user-2b", email: "4b@test.invalid")),
+            http: { _ in throw URLError(.notConnectedToInternet) })
+    }
+
+    /// The lobby's secret road over a world (4a's composition, drill (i)):
+    /// `online` = the vault road over the shared client; the derivation
+    /// count and the held key ride `session`.
+    private func lobbyOpen(_ world: World, _ word: String, online: Bool, session: SyncCustodySession, derivations: LockIsolated<Int>) async -> Result<StoreKey, StoreLobby.Refusal> {
+        derivations.setValue(0)
+        let client = world.vaultClient
+        let road = StoreLobby.envelopeRoad(
+            storeURL: world.storeURL, gate: world.gate, session: session,
+            vaultRoad: online ? LobbyVaultRoad(fetch: { try await client?.fetchVault()?.format }) : nil,
+            derive: { passphrase, descriptor in
+                derivations.withValue { $0 += 1 }
+                return try PassphraseKDF.deriveKey(passphrase: passphrase, descriptor: descriptor)
+            })
+        return await road(.passphrase(word)) { _ in }
+    }
+
+    private func opened(_ result: Result<StoreKey, StoreLobby.Refusal>) -> StoreKey? {
+        if case .success(let key) = result { return key }
+        return nil
+    }
+
+    /// A sibling's key file reconciled against the vault as it stands —
+    /// the landing sites' record (3a/3b), so a change elsewhere is visible.
+    private func reconcileKeyFile(of world: World, to vault: KeyVaultClient.FetchedVault, corpusKeyID: String, passphraseUnderVaultKDF: String? = nil) throws {
+        var file = try #require(try StoreKeyEnvelope.load(at: world.oldKeyFileURL))
+        if let word = passphraseUnderVaultKDF {
+            try file.setPassphraseWrap(key: world.oldKey, passphrase: word, kdf: vault.format.kdf)
+        }
+        try file.recordVaultReconciliation(kdf: vault.format.kdf, corpusKeyID: corpusKeyID, recoveryWrapDigest: vault.format.recoveryWrapDigest)
+        try file.write(at: world.oldKeyFileURL)
+    }
+
+    // MARK: - pre-13x 4b.2: §7's PASSPHRASE-CHANGE CHOREOGRAPHY, steps 1–7 (both Castle)
+
+    /// §7 STEPS 1–4 AND 6 over three Castle devices on one account. (1) The
+    /// Mac re-wraps through the production door — the vault + its OWN key
+    /// file; the phone is untouched and keeps syncing (a re-wrap rotates
+    /// nothing — no fence, no proof refusal). (2) The phone's next open by
+    /// Face ID: the post-unlock reconcile speaks the ONE-TIME notice (4a's
+    /// kind) — nothing prompted, nothing deleted. (4) OFFLINE the OLD word
+    /// opens the phone (its local copy). (3) ONLINE the OLD word still opens
+    /// locally; the NEW word opens through the vault road and re-wraps the
+    /// local copy — from then on only the new word. (6) The ALWAYS-ASK phone
+    /// (decision 10's exception), opened with the OLD word: it reads and
+    /// edits and does NOT sync until the new word is typed there — the
+    /// banner names it; *Enter It Now…* with the new word picks the keys up
+    /// and sync runs. Steps 5 and 7 are the two pins below.
+    @Test func thePassphraseChangeChoreographyStepsOneToFourAndSix() async throws {
+        let mac = try await makeWorld(standard: false)
+        defer { mac.tearDown() }
+        let phone = try await makeWorld(standard: false, sharing: mac)
+        defer { phone.tearDown() }
+        let alwaysAsk = try await makeWorld(standard: false, sharing: mac)
+        defer { alwaysAsk.tearDown() }
+        let client = try #require(mac.vaultClient)
+        let mirror = try #require(mac.mirror)
+        let material = try #require(mac.oldMaterial)
+        let before = try await mac.vault()
+        // Both phones' key files reconciled against the vault as it stood; the
+        // Always-ask phone's P copy under the VAULT's descriptor (the reconciled
+        // steady state — the lobby derives once, §3.6).
+        try reconcileKeyFile(of: phone, to: before, corpusKeyID: material.corpusKeyID)
+        try reconcileKeyFile(of: alwaysAsk, to: before, corpusKeyID: material.corpusKeyID, passphraseUnderVaultKDF: "sesame")
+        let phoneBytesBefore = try Data(contentsOf: phone.oldKeyFileURL)
+        let phoneEngine = SyncEngine(transport: mirror, keyProvider: DeviceKeySyncProvider(store: phone.keyStore))
+        try await withDependencies { $0.database = phone.view } operation: {
+            _ = try await phoneEngine.push(); _ = try await phoneEngine.pull()
+        }
+
+        // ————— (1) THE MAC RE-WRAPS — the vault + its own key file; the phone untouched, still syncing —————
+        let macController = makeController(for: mac)
+        macController.adoptResident(mac.oldKey)
+        let macSession = try wireSession(for: mac, controller: macController)
+        await macSession.refresh()
+        #expect(macSession.state == .enrolled(hasRecoveryWrap: false), "\(macSession.state)")
+        let door = try keyDoor(.changePassphrase, encryption: macSession, tie: vaultTie(client, hasRecoveryWrap: false))
+        await door.start()
+        #expect(door.phase == .authorize, "\(door.phase) \(door.lastError ?? "")")
+        let new = "the-new-word-for-both-12"
+        await door.changePassphrase(current: "sesame", new: new, confirmation: new)
+        try await settle(door)
+        #expect(door.phase == .done, "\(door.phase) \(door.lastError ?? "")")
+        let vault = try await mac.vault()
+        #expect(vault.revision == before.revision + 1 && vault.format.kdf != before.format.kdf, "ONE CAS write under the proof")
+        #expect(vault.format.classKey(for: .corpus)?.keyID == material.corpusKeyID, "a re-wrap rotates NOTHING")
+        let macFile = try #require(try StoreKeyEnvelope.load(at: mac.oldKeyFileURL))
+        #expect(try macFile.unwrapKey(passphrase: new) == mac.oldKey && macFile.passphrase?.kdf == vault.format.kdf && macFile.vaultKDF == vault.format.kdf,
+                "step 1: the Mac's OWN key file re-wrapped under the vault's new descriptor")
+        #expect(try Data(contentsOf: phone.oldKeyFileURL) == phoneBytesBefore, "step 1: the phone's key file untouched")
+        #expect(phone.keyStore.load() == material, "step 1: the phone's custody untouched")
+        try await seedBacklog(phone, count: 1, tag: "phone-after-the-change")
+        try await withDependencies { $0.database = phone.view } operation: {
+            let pushed = try await phoneEngine.push()
+            #expect(pushed.accepted >= 1, "step 1: the phone keeps syncing — no fence, no proof refusal")
+            _ = try await phoneEngine.pull()
+        }
+
+        // ————— (2) THE PHONE's next open by Face ID: the one-time notice; nothing prompted, nothing deleted —————
+        let phoneController = controller(for: phone, material: material)
+        phoneController.adoptResident(phone.oldKey)
+        await phoneController.reconcile()
+        let notice = try #require(phoneController.changeNotice)
+        #expect(notice.kind == .passphraseChangedElsewhere && notice.device == "test device", "step 2: 4a's kind — [device] on [day]")
+        #expect(phoneController.notice == .changedElsewhere(notice) && !phoneController.followPending && phoneController.followNotice == nil,
+                "step 2: a banner, never a follow — sync keeps running")
+        #expect(phoneController.activeFollow == nil, "step 2: nothing prompted")
+        #expect(try Data(contentsOf: phone.oldKeyFileURL) == phoneBytesBefore, "step 2: nothing deleted, nothing rewritten")
+        #expect(StoreKeyEnvelope.keyFileURLs(besideStore: phone.storeURL).count == 1)
+
+        // ————— (4) OFFLINE: the OLD word (the local copy) —————
+        let lobbySession = SyncCustodySession()
+        let derivations = LockIsolated(0)
+        #expect(opened(await lobbyOpen(phone, "sesame", online: false, session: lobbySession, derivations: derivations)) == phone.oldKey,
+                "step 4: offline, the old word opens the phone from its local copy")
+        #expect(derivations.value == 1)
+        #expect(opened(await lobbyOpen(phone, new, online: false, session: lobbySession, derivations: derivations)) == nil,
+                "step 4: offline, the new word cannot open it yet — the local copy is under the old word")
+
+        // ————— (3) ONLINE: the OLD word still opens (locally); the NEW word opens via the vault road and re-wraps; from then on only the new word —————
+        #expect(opened(await lobbyOpen(phone, "sesame", online: true, session: lobbySession, derivations: derivations)) == phone.oldKey,
+                "step 3: the old word opens until the new one has been used here")
+        #expect(derivations.value == 1, "the local copy — the vault never awaited")
+        #expect(opened(await lobbyOpen(phone, new, online: true, session: lobbySession, derivations: derivations)) == phone.oldKey,
+                "step 3: the NEW word opens through the vault's master and the key file's master-wrapped copy")
+        #expect(derivations.value == 2, "the local descriptor, then the vault's")
+        let phoneAfter = try #require(try StoreKeyEnvelope.load(at: phone.oldKeyFileURL))
+        #expect(phoneAfter.passphrase?.kdf == vault.format.kdf && phoneAfter.vaultKDF == vault.format.kdf,
+                "step 3: the local copy re-wrapped under the vault's descriptor")
+        #expect(opened(await lobbyOpen(phone, "sesame", online: true, session: lobbySession, derivations: derivations)) == nil,
+                "step 3: from then on only the new word")
+        #expect(opened(await lobbyOpen(phone, new, online: false, session: lobbySession, derivations: derivations)) == phone.oldKey && derivations.value == 1,
+                "…and the new word is now LOCAL — one derivation, offline")
+        phoneController.refreshEnvelopeFacts()
+        await phoneController.reconcile()
+        #expect(phoneController.changeNotice == nil, "the record agrees with the vault — the banner is gone")
+
+        // ————— (6) THE ALWAYS-ASK PHONE: opened with the OLD word it reads and edits, and does NOT sync until the new word is typed there —————
+        alwaysAsk.keyStore.clear()  // Always ask: no custody item — the sync keys live in the SESSION, filled from the typed word
+        alwaysAsk.alwaysAsk = true
+        let alwaysAskFile = try #require(try StoreKeyEnvelope.load(at: alwaysAsk.oldKeyFileURL))
+        let oldWrapKDF = try #require(alwaysAskFile.passphrase?.kdf)
+        #expect(oldWrapKDF == before.format.kdf && oldWrapKDF != vault.format.kdf, "its local copy is under the RETIRED word's descriptor")
+        // The lobby by the OLD word: the local copy opens; the derived key held for the session under the OLD descriptor.
+        let held = SyncCustodySession()
+        #expect(opened(await lobbyOpen(alwaysAsk, "sesame", online: true, session: held, derivations: derivations)) == alwaysAsk.oldKey,
+                "step 6: the old word opens the Always-ask phone")
+        #expect(held.derivedWrappingKDF == oldWrapKDF)
+        let askController = controller(for: alwaysAsk, material: nil, session: held)
+        askController.adoptResident(alwaysAsk.oldKey)
+        await askController.reconcile()
+        let retired = try #require(askController.alwaysAskRetiredNotice)
+        #expect(retired.kind == .alwaysAskRetiredWord && askController.notice == .alwaysAskRetiredWord(retired),
+                "step 6: the banner — the old one still opens this device, but sync waits")
+        #expect(held.record == nil && alwaysAsk.keyStore.load() == nil, "no sync keys in hand")
+        // Reads and edits… (its OWN notes — it holds no keys, so nothing of
+        // the Mac's has reached it since the change).
+        let seen = try await titles(in: alwaysAsk)
+        for (id, title) in alwaysAsk.seededTitles { #expect(seen[id] == title, "step 6: reads \(id)") }
+        try await seedBacklog(alwaysAsk, count: 1, tag: "typed-on-always-ask")
+        // …and does NOT sync.
+        let askEngine = SyncEngine(transport: mirror, keyProvider: DeviceKeySyncProvider(store: alwaysAsk.keyStore))
+        await #expect(throws: SyncError.encryptionKeysUnavailable, "step 6: no sync until the new word is typed here") {
+            try await withDependencies { $0.database = alwaysAsk.view } operation: { _ = try await askEngine.push() }
+        }
+        // Enter It Now… with the NEW word: the vault's pickup — the keys held, the local copy re-wrapped, sync runs.
+        askController.openFollow()
+        let pickup = try #require(askController.activeFollow)
+        #expect(pickup.isAlwaysAskVariant)
+        pickup.choosePassphrase()
+        await pickup.enter(passphrase: "sesame")
+        #expect(pickup.lastError == ProtectionCopy.passphraseNotTheLibrarys && pickup.phase == .askPassphrase, "the OLD word is refused at the vault")
+        await pickup.enter(passphrase: new)
+        #expect(pickup.phase == .done(insuranceOff: false, hasOffer: false), "\(pickup.phase) \(pickup.lastError ?? "")")
+        #expect(alwaysAsk.keyStore.load()?.corpusKeyID == material.corpusKeyID, "the keys picked up (held for the session)")
+        #expect(askController.alwaysAskRetiredNotice == nil)
+        let askAfter = try #require(try StoreKeyEnvelope.load(at: alwaysAsk.oldKeyFileURL))
+        let askAfterKey = try askAfter.unwrapKey(passphrase: new)
+        #expect(askAfter.passphrase?.kdf == vault.format.kdf && askAfterKey == alwaysAsk.oldKey, "the local copy re-wrapped under the new word")
+        try await withDependencies { $0.database = alwaysAsk.view } operation: {
+            let pushed = try await askEngine.push()
+            #expect(pushed.accepted >= 1, "step 6: sync runs once the new word was typed here")
+        }
+        #expect(alwaysAsk.calls.rekeys == 0 && phone.calls.rekeys == 0 && mac.calls.rekeys == 0, "a re-wrap re-keys nothing anywhere")
+    }
+
+    /// §7 STEP 5 — BOTH DEVICES CHANGE THE PASSPHRASE AT ONCE (decision 9;
+    /// corner 18): device 1's change lands INSIDE device 2's write (the
+    /// emulated vault's one-shot hook — deterministic); the vault's CAS
+    /// refuses device 2 with NOTHING overwritten (its door says so); device
+    /// 2 RE-READS — its retry with the word it typed a moment ago is worded
+    /// RETIRED (the door re-fetched the vault's descriptor on the refusal —
+    /// 4b's one-line mechanism) — and retries by the road that needs no
+    /// current word (Touch ID: the held material): it lands ON TOP — the
+    /// last change wins; device 1 learns at its next open (the notice; the
+    /// vault road at its lobby). RED-ON-OLD: without the re-read the retry
+    /// is worded as a plain wrong word.
+    @Test func bothDevicesChangeThePassphraseAtOnceTheCASRefusesTheSecondAndTheLastChangeWins() async throws {
+        let one = try await makeWorld(standard: false)
+        defer { one.tearDown() }
+        let two = try await makeWorld(standard: false, sharing: one)
+        defer { two.tearDown() }
+        let client = try #require(one.vaultClient)
+        let emu = try #require(one.vaultEmu)
+        let material = try #require(one.oldMaterial)
+        let before = try await one.vault()
+        try reconcileKeyFile(of: one, to: before, corpusKeyID: material.corpusKeyID)
+        try reconcileKeyFile(of: two, to: before, corpusKeyID: material.corpusKeyID)
+        let twoBytesBefore = try Data(contentsOf: two.oldKeyFileURL)
+
+        // Device 2's door, the vault fetched at its threshold.
+        let twoController = controller(for: two, material: material)
+        twoController.adoptResident(two.oldKey)
+        await twoController.reconcile()
+        #expect(twoController.posture == .castle)
+        let twoSession = try wireSession(for: two, controller: twoController)
+        await twoSession.refresh()
+        let twoDoor = try keyDoor(.changePassphrase, encryption: twoSession, tie: vaultTie(client, hasRecoveryWrap: false))
+        await twoDoor.start()
+        #expect(twoDoor.phase == .authorize, "\(twoDoor.phase) \(twoDoor.lastError ?? "")")
+
+        // DEVICE 1's change lands inside device 2's write — between its
+        // fetch and its CAS (device 1's own key file follows, as its door lands it).
+        let p1 = "device-one-new-word-12"
+        let p2 = "device-two-new-word-12"
+        let oneKeyFileURL = one.oldKeyFileURL
+        let oneKey = one.oldKey
+        emu.setBeforeUpdate {
+            _ = try await VaultEnrollment(client: client).changePassphrase(authorizedBy: .passphrase("sesame"), newPassphrase: p1)
+            let landed = try #require(try await client.fetchVault())
+            var file = try #require(try StoreKeyEnvelope.load(at: oneKeyFileURL))
+            try file.setPassphraseWrap(key: oneKey, passphrase: p1, kdf: landed.format.kdf)
+            try file.recordVaultReconciliation(kdf: landed.format.kdf, corpusKeyID: material.corpusKeyID, recoveryWrapDigest: landed.format.recoveryWrapDigest)
+            try file.write(at: oneKeyFileURL)
+        }
+        await twoDoor.changePassphrase(current: "sesame", new: p2, confirmation: p2)
+        #expect(twoDoor.phase == .authorize, "the door stays on its field")
+        #expect(twoDoor.lastError == EncryptionSession.message(for: KeyVaultClientError.vaultRevisionConflict),
+                "step 5: the CAS refused device 2 — 'nothing was overwritten'")
+        let afterOne = try await one.vault()
+        #expect(afterOne.revision == before.revision + 1, "exactly device 1's write landed")
+        #expect((try? await VaultEnrollment(client: client).enroll(passphrase: p1))?.masterKey == material.masterKey, "the vault is under device 1's word")
+        await #expect(throws: VaultEnrollmentError.wrongPassphrase) { _ = try await VaultEnrollment(client: client).enroll(passphrase: p2) }
+        await #expect(throws: VaultEnrollmentError.wrongPassphrase) { _ = try await VaultEnrollment(client: client).enroll(passphrase: "sesame") }
+        #expect(try Data(contentsOf: two.oldKeyFileURL) == twoBytesBefore, "device 2's key file untouched — nothing was overwritten anywhere")
+
+        // Device 2 RE-READS: the word it typed a moment ago is RETIRED now.
+        await twoDoor.changePassphrase(current: "sesame", new: p2, confirmation: p2)
+        #expect(twoDoor.lastError == ProtectionCopy.retiredPassphraseAtDoor,
+                "step 5: after the re-read, the retry with the old word is worded RETIRED (copy §5)")
+        #expect(twoDoor.phase == .authorize)
+        // …and RETRIES by the road that needs no current word — Touch ID, the
+        // held material: it lands ON TOP. The last change wins.
+        twoDoor.forgot()
+        #expect(twoDoor.phase == .forgotBiometric, "Castle + Touch ID: the presence confirm")
+        await twoDoor.resetPassphraseWithBiometrics(new: p2, confirmation: p2)
+        try await settle(twoDoor)
+        #expect(twoDoor.phase == .done, "\(twoDoor.phase) \(twoDoor.lastError ?? "")")
+        let afterTwo = try await one.vault()
+        #expect(afterTwo.revision == before.revision + 2)
+        #expect((try? await VaultEnrollment(client: client).enroll(passphrase: p2))?.masterKey == material.masterKey, "step 5: the LAST change wins — the vault is under device 2's word")
+        await #expect(throws: VaultEnrollmentError.wrongPassphrase) { _ = try await VaultEnrollment(client: client).enroll(passphrase: p1) }
+        #expect(afterTwo.format.classKey(for: .corpus)?.keyID == material.corpusKeyID, "a re-wrap, never a re-key")
+        let twoFile = try #require(try StoreKeyEnvelope.load(at: two.oldKeyFileURL))
+        #expect(try twoFile.unwrapKey(passphrase: p2) == two.oldKey && twoFile.passphrase?.kdf == afterTwo.format.kdf && twoFile.vaultKDF == afterTwo.format.kdf,
+                "device 2's key file under its word with the vault's descriptor")
+
+        // DEVICE 1 LEARNS at its next open: the notice, and the vault road at its lobby.
+        let oneController = controller(for: one, material: material)
+        oneController.adoptResident(one.oldKey)
+        await oneController.reconcile()
+        let learned = try #require(oneController.changeNotice)
+        #expect(learned.kind == .passphraseChangedElsewhere && !oneController.followPending, "step 5: the other device learns — the notice")
+        let session = SyncCustodySession()
+        let derivations = LockIsolated(0)
+        #expect(opened(await lobbyOpen(one, p1, online: false, session: session, derivations: derivations)) == one.oldKey, "its own word still opens it (the local copy)")
+        #expect(opened(await lobbyOpen(one, p2, online: true, session: session, derivations: derivations)) == one.oldKey, "the winning word opens it online through the vault road")
+        let oneAfter = try #require(try StoreKeyEnvelope.load(at: one.oldKeyFileURL))
+        #expect(oneAfter.passphrase?.kdf == afterTwo.format.kdf, "…and re-wraps its copy")
+    }
+
+    /// §7 STEP 7 — TWO DEVICES SWITCHING POSTURE AT ONCE (corner 39; ledger
+    /// 40): both Standard on a Standard account; device B's WHOLE `enterCastle`
+    /// lands inside device A's vault write (the one-shot hook); A's CAS
+    /// refuse RE-READS — the account already moved — and A's road becomes
+    /// THE FOLLOW with the passphrase it typed for the ceremony: no second
+    /// rotation, no vault write of A's own, the vault's corpus key id
+    /// advanced exactly ONCE (B's), A's library re-keyed under B's M′, A's
+    /// old key file retired (a follow), the ceremony's own words NOT landed
+    /// (the vault's are B's). The refusal A meets is the PROOF's (B's
+    /// rotation replaced the hash — the RPC checks the proof before the
+    /// CAS); the CAS is what refuses when only a re-wrap intervened (the
+    /// step-5 pin) — the runner re-reads on either. RED-ON-OLD: the refusal
+    /// propagated, a `.vaultWrite` marker stood, A never entered Castle in
+    /// the act.
+    @Test func twoDevicesSwitchingPostureAtOnceTheSecondsCASRefuseBecomesTheFollow() async throws {
+        let a = try await makeWorld()
+        defer { a.tearDown() }
+        let client = try #require(a.vaultClient)
+        let emu = try #require(a.vaultEmu)
+        let material = try #require(a.oldMaterial)
+        // The account STANDARD-shaped (the 2b world's vault is born without the
+        // Apple-held copy — the 2c drill's fix, the act leaving Castle performs).
+        let born = try await a.vault()
+        try await client.updateVault(
+            try born.format.settingAppleHeldCopy(masterKey: material.masterSymmetricKey, appleKey: a.apple.symmetricKey, appleKeyID: a.apple.id),
+            expectedRevision: born.revision, keyProof: KeyProof.wireToken(master: material.masterSymmetricKey))
+        let b = try await makeWorld(sharing: a)  // built BEFORE any switch (its seed rides the old keys)
+        defer { b.tearDown() }
+        let revisionBefore = try await a.vault().revision
+        let updatesBefore = emu.updateCount
+
+        // B's whole switch lands inside A's vault write.
+        let bOutcome = LockIsolated<PostureSwitchRunner.Outcome?>(nil)
+        emu.setBeforeUpdate {
+            try await Task { @MainActor in
+                let done = try await b.runner.enterCastle(passphrase: "sesame", recoveryWords: b.words)
+                bOutcome.setValue(done)
+            }.value
+        }
+        let aOutcome = try await a.runner.enterCastle(passphrase: "sesame", recoveryWords: a.words)
+        let bDone = try #require(bOutcome.value)
+        let bMaterial = try #require(bDone.material)
+
+        // B ROTATED; A FOLLOWED — the vault moved for ONE rotation, and A never wrote it.
+        let vault = try await a.vault()
+        #expect(vault.format.classKey(for: .corpus)?.keyID == bMaterial.corpusKeyID, "the corpus key id is B's — advanced exactly once")
+        #expect(vault.revision == revisionBefore + 2, "B's begin + B's completion; A wrote nothing")
+        #expect(emu.updateCount == updatesBefore + 3, "B's begin, B's completion, and A's ONE refused attempt")
+        #expect(vault.format.masterWrappedByAppleHeld == nil && vault.format.previousCorpusKey == nil, "Castle, the rotation complete")
+        #expect(aOutcome.entersCastle && aOutcome.reencrypted == 0, "step 7: A's road was the FOLLOW — nothing re-encrypted, no rotation of its own")
+        #expect(aOutcome.material?.corpusKeyID == bMaterial.corpusKeyID && a.keyStore.load()?.masterKey == bMaterial.masterKey, "A holds B's M′ / C′")
+        #expect(try await a.marker() == nil, "no marker left standing")
+        #expect(a.calls.rekeys == 1 && a.calls.custodyTargets.last == .biometric && a.posture == .castle, "A re-keyed its own library and gated custody")
+        let aFile = try a.keyFile(aOutcome.newKeyFingerprint)
+        let aKey = try aFile.unwrapKey(passphrase: "sesame")
+        #expect(StoreEncryptionMigration.opens(a.storeURL, key: aKey) && !StoreEncryptionMigration.opens(a.storeURL, key: a.oldKey))
+        #expect(aFile.passphrase?.kdf == vault.format.kdf && aFile.vaultCorpusKeyID == bMaterial.corpusKeyID && aFile.apple == nil, "A's new key file under the vault's descriptor, no Apple copy")
+        #expect(try aFile.unwrapKey(master: bMaterial.masterSymmetricKey) == aKey, "L′ under B's M′")
+        #expect(aFile.recovery == nil, "the ceremony's words are NOT landed — the vault's words are B's; the W copy lands when the account's words are next typed here")
+        #expect(!FileManager.default.fileExists(atPath: a.oldKeyFileURL.path), "A's road was a follow — its Standard-era key file left the live folder")
+        try await expectCastleEndState(b, bDone)
+        // Both read each other's notes under the one corpus key.
+        let aEngine = SyncEngine(transport: try #require(a.mirror), keyProvider: DeviceKeySyncProvider(store: a.keyStore))
+        try await withDependencies { $0.database = a.view } operation: { _ = try await aEngine.pull() }
+        let seenByA = try await titles(in: a)
+        for (id, title) in b.seededTitles { #expect(seenByA[id] == title, "A reads B's \(id) in the clear") }
+    }
+
+    // MARK: - pre-13x 4b.4: THE UN-FOLLOWED DEVICE — the whole §12 list as ONE pin
+
+    /// THE UN-FOLLOWED DEVICE (§7's "a device that has not followed yet";
+    /// §12): after Castle was entered elsewhere, the sibling — opened by the
+    /// passphrase, so the lobby holds the derived key — learns the follow
+    /// and takes *Later*. Then: it opens and reads, and edits (the row
+    /// queues); sync is refused with BOTH markers (the fence on the old
+    /// custody; the proof on the current key id with the old master) and
+    /// both present as the replaced-keys row; EVERY key door speaks *Pick up
+    /// your new keys first — enter your passphrase.* — the pane's branch
+    /// (`followPending`), the Encryption tab's branch (`.keysReplaced` + the
+    /// follow's door) AND the models themselves (4b's guards); Sign out and
+    /// Delete account work; the notice returns at every open; the
+    /// passphrase typed to open is reused for the follow; a NEW rotation
+    /// while *Later* stands re-asks at once; and, followed, every door opens
+    /// again. RED-ON-OLD: the model guards absent — the change door opened
+    /// its fields (as a local-only door) and the switches ran their checks.
+    @Test func theUnfollowedDeviceOpensReadsAndWaitsWithEveryDoorSpeakingTheSentence() async throws {
+        let acting = try await makeWorld()
+        defer { acting.tearDown() }
+        let sibling = try await makeWorld(sharing: acting)
+        defer { sibling.tearDown() }
+        let client = try #require(acting.vaultClient)
+        let mirror = try #require(acting.mirror)
+        let oldMaterial = try #require(acting.oldMaterial)
+        try await VaultEnrollment(client: client).landRecoveryWrap(words: acting.words, material: oldMaterial)
+        try reconcileKeyFile(of: sibling, to: try await acting.vault(), corpusKeyID: oldMaterial.corpusKeyID)
+        let siblingEngine = SyncEngine(transport: mirror, keyProvider: DeviceKeySyncProvider(store: sibling.keyStore))
+        try await withDependencies { $0.database = sibling.view } operation: { _ = try await siblingEngine.push(); _ = try await siblingEngine.pull() }
+        _ = try await acting.runner.enterCastle(passphrase: "sesame", recoveryWords: acting.words)
+        let vault = try await sibling.vault()
+        let newKeyID = try #require(vault.format.classKey(for: .corpus)?.keyID)
+
+        // The sibling opened BY THE PASSPHRASE: the lobby holds the derived key under the vault's descriptor.
+        let held = SyncCustodySession()
+        held.holdDerivedWrappingKey(try PassphraseKDF.deriveKey(passphrase: "sesame", descriptor: vault.format.kdf), kdf: vault.format.kdf)
+        let controller = controller(for: sibling, material: oldMaterial, session: held)
+        controller.adoptResident(nil)
+        let encryption = try wireSession(for: sibling, controller: controller)
+        encryption.followDoor = { controller.openFollow() }  // the roots' wiring (2c)
+        await controller.reconcile()
+        let owed = try #require(controller.followNotice)
+        #expect(owed.kind == .movedToCastle && controller.followPending)
+        controller.openFollow()
+        try #require(controller.activeFollow).later()
+        controller.closeFollow()
+        #expect(controller.notice == .followWaiting(owed), "Later — the persistent banner")
+
+        // (i) OPENS AND READS — and edits: the row queues.
+        let seen = try await titles(in: sibling)
+        for (id, title) in acting.seededTitles { #expect(seen[id] == title, "reads \(id)") }
+        try await seedBacklog(sibling, count: 1, tag: "typed-while-waiting")
+        #expect(try await outboxCount(sibling) >= 1, "edits queue in the outbox")
+
+        // (ii) SYNC REFUSED — both markers, both the replaced-keys row.
+        let fenced: (any Error)? = await {
+            do { try await withDependencies { $0.database = sibling.view } operation: { _ = try await siblingEngine.pull() }; return nil }
+            catch { return error }
+        }()
+        #expect(fenced as? SyncError == .encryptionKeysReplaced, "the fence's marker — the old custody")
+        let staleProofEngine = SyncEngine(transport: mirror, keyProvider: FixedKeyProvider(keys: SyncEncryptionKeys(
+            corpusKey: oldMaterial.corpusSymmetricKey, corpusKeyID: newKeyID,
+            keyProof: KeyProof.wireToken(master: oldMaterial.masterSymmetricKey))))
+        let refused: (any Error)? = await {
+            do { try await withDependencies { $0.database = sibling.view } operation: { _ = try await staleProofEngine.pull() }; return nil }
+            catch { return error }
+        }()
+        #expect(refused as? SyncError == .keyProofRefused, "the proof's marker — the current id with the old master")
+        for error in [fenced, refused] {
+            let face = SyncRowFace.face(
+                allowsSync: true, isConfigured: true, signedIn: true, isSyncing: false,
+                lastError: String(describing: try #require(error)), lastErrorIsOffline: false)
+            #expect(face.kind == .keysReplaced && face.doors == [SyncRowFace.Door(label: "Re-enroll…", act: .openAccount(.encryption))],
+                    "both markers present as the replaced-keys row (2c's classifier)")
+        }
+        #expect(try await outboxCount(sibling) >= 1, "the queued edit is intact")
+
+        // (iii) EVERY KEY DOOR speaks the sentence.
+        #expect(controller.followPending, "the Protection pane's branch: the posture doors are replaced by the sentence")
+        await encryption.refresh()
+        #expect(encryption.state == .keysReplaced(hasRecoveryWrap: true) && encryption.followDoor != nil,
+                "the Encryption tab's branch: the keys-replaced section — the sentence + the follow's door, no re-wrap doors")
+        let tie = vaultTie(client, hasRecoveryWrap: true)
+        let change = try keyDoor(.changePassphrase, encryption: encryption, tie: tie)
+        await change.start()
+        #expect(change.phase == .failed(ProtectionCopy.pickUpKeysFirst), "change passphrase: \(change.phase)")
+        let regenerate = try keyDoor(.regenerateWords, encryption: encryption, tie: tie)
+        await regenerate.start()
+        #expect(regenerate.phase == .failed(ProtectionCopy.pickUpKeysFirst), "regenerate: \(regenerate.phase)")
+        for mode in [PostureSwitchModel.Mode.replaceKeys, .enter, .leave] {
+            let model = PostureSwitchModel(mode: mode, runner: sibling.runner, controller: controller, vaultTie: tie)
+            await model.start()
+            #expect(model.phase == .failed(ProtectionCopy.pickUpKeysFirst), "\(mode): \(model.phase)")
+        }
+        #expect(try await sibling.marker() == nil && sibling.calls.rekeys == 0 && sibling.keyStore.load()?.corpusKeyID == oldMaterial.corpusKeyID,
+                "nothing acted, nothing moved")
+
+        // (iv) SIGN OUT and DELETE ACCOUNT work (3b's doors — the account's own credential, never a key act).
+        let auth = makeAuth()
+        #expect(await auth.currentUserID == "user-2b")
+        await auth.signOut(scope: .local)
+        #expect(await auth.currentUserID == nil, "sign out works")
+        let lifecycle = PurgeCountingLifecycle()
+        _ = try await AccountDeletion(lifecycle: lifecycle).run()
+        #expect(await lifecycle.purges == 1, "delete account works")
+
+        // (v) THE NOTICE RETURNS AT EVERY OPEN (4a's per-open reset).
+        controller.resetPerOpenDeferrals()
+        controller.refreshNotices()
+        #expect(controller.notice == .follow(owed), "a relock + unlock is an open — the modal notice again")
+
+        // (vi) A PASSPHRASE TYPED TO OPEN IS REUSED FOR THE FOLLOW (4a's held key).
+        controller.openFollow()
+        let reuse = try #require(controller.activeFollow)
+        #expect(reuse.canFollowFromHeldKey, "the word typed at the lobby would run the follow with no second entry")
+        reuse.later()
+        controller.closeFollow()
+        #expect(controller.notice == .followWaiting(owed))
+
+        // (vii) A NEW ROTATION WHILE LATER STANDS RE-ASKS AT ONCE (ledger 35).
+        _ = try await acting.runner.replaceAllKeys(passphrase: "sesame", recoveryWords: acting.words)
+        await controller.reconcile()
+        let reasked = try #require(controller.followNotice)
+        let newestKeyID = try await sibling.vault().format.classKey(for: .corpus)?.keyID
+        #expect(reasked.corpusKeyID != owed.corpusKeyID && reasked.corpusKeyID == newestKeyID, "a NEW key id — the second rotation's")
+        #expect(reasked.kind == .movedToCastle, "still Standard-shaped and the account Castle: the same honest kind, a new id")
+        #expect(controller.notice == .follow(reasked), "Later's banner gives way — the modal notice at once")
+
+        // Followed (the field — the held key is stale after the second rotation), every door opens again.
+        controller.openFollow()
+        let follow = try #require(controller.activeFollow)
+        #expect(!follow.canFollowFromHeldKey, "the held key's descriptor is the first rotation's — asked")
+        follow.choosePassphrase()
+        #expect(follow.phase == .askPassphrase)
+        await follow.enter(passphrase: "sesame")
+        guard case .done = follow.phase else { Issue.record("expected .done, got \(follow.phase) \(follow.lastError ?? "")"); return }
+        #expect(!controller.followPending && sibling.calls.rekeys == 1)
+        await encryption.refresh()
+        #expect(encryption.state == .enrolled(hasRecoveryWrap: true))
+        let changeAgain = try keyDoor(.changePassphrase, encryption: encryption, tie: tie)
+        await changeAgain.start()
+        #expect(changeAgain.phase == .authorize, "followed: the door opens")
+        let replaceAgain = PostureSwitchModel(mode: .replaceKeys, runner: sibling.runner, controller: controller, vaultTie: tie)
+        await replaceAgain.start()
+        #expect(replaceAgain.phase == .explain, "followed: Replace All Keys opens — \(replaceAgain.phase)")
+        try await withDependencies { $0.database = sibling.view } operation: {
+            let report = try await SyncEngine(transport: mirror, keyProvider: DeviceKeySyncProvider(store: sibling.keyStore)).push()
+            #expect(report.accepted >= 1, "the queued edit pushes under C′")
+        }
+    }
+
+    // MARK: - pre-13x 4b.5: KEY DOORS ONLINE
+
+    /// EVERY KEY DOOR OF AN ENROLLED LIBRARY IS AN ONLINE ACT (decision 9;
+    /// §12): over a vault client whose network is DOWN, change passphrase
+    /// and regenerate refuse at their threshold with copy §4's offline
+    /// sentence (the one shared door sentence — regenerate has no line of
+    /// its own), Replace All Keys and both switches refuse at the door
+    /// check with the runner's URLError sentence; nothing is written; the
+    /// same doors OPEN once the network is back. A LOCAL-ONLY library
+    /// changes its passphrase offline against its key file (3b's pin,
+    /// re-asserted in this world). Two online changes at once: the step-5
+    /// pin above.
+    @Test func everyKeyDoorOfAnEnrolledLibraryRefusesOfflineWithTheSentenceAndOpensOnline() async throws {
+        let world = try await makeWorld(standard: false)
+        defer { world.tearDown() }
+        let emu = try #require(world.vaultEmu)
+        let offline = LockIsolated(false)
+        let flaky = KeyVaultClient(
+            configuration: KeyVaultClient.Configuration(
+                projectURL: URL(string: "https://vault.2b.invalid")!, apiKey: "publishable-test-key", deviceName: "test device"),
+            sessionProvider: StaticSessionProvider(session: UserSession(accessToken: "token-2b", userID: "user-2b")),
+            load: { request in
+                if offline.value { throw URLError(.notConnectedToInternet) }
+                return try await emu.load(request)
+            })
+        let controller = makeController(for: world)
+        controller.adoptResident(world.oldKey)
+        wireVaultReading(controller, client: flaky)
+        await controller.reconcile()
+        let encryption = EncryptionSession(store: world.keyStore, client: flaky, signedIn: { true })
+        wireOneSecretHooks(protection: controller, encryption: encryption, keyVault: flaky, auth: makeAuth())
+        await encryption.refresh()
+        #expect(encryption.state == .enrolled(hasRecoveryWrap: false), "\(encryption.state)")
+        let runner = PostureSwitchRunner(leaves: leaves(for: world, vaultOverride: flaky))
+        let tie = vaultTie(flaky, hasRecoveryWrap: false)
+        let bytesBefore = try Data(contentsOf: world.oldKeyFileURL)
+        let revisionBefore = try await world.vault().revision
+
+        offline.setValue(true)
+        let change = try keyDoor(.changePassphrase, encryption: encryption, tie: tie)
+        await change.start()
+        #expect(change.phase == .failed(ProtectionCopy.changePassphraseOffline), "change passphrase offline: \(change.phase)")
+        let regenerate = try keyDoor(.regenerateWords, encryption: encryption, tie: tie)
+        await regenerate.start()
+        #expect(regenerate.phase == .failed(ProtectionCopy.changePassphraseOffline), "regenerate offline: \(regenerate.phase)")
+        let offlineSentence = PostureSwitchModel.message(for: URLError(.notConnectedToInternet))
+        for mode in [PostureSwitchModel.Mode.replaceKeys, .enter, .leave] {
+            let model = PostureSwitchModel(mode: mode, runner: runner, controller: controller, vaultTie: tie)
+            await model.start()
+            #expect(model.phase == .failed(offlineSentence), "\(mode) offline: \(model.phase)")
+        }
+        #expect(try Data(contentsOf: world.oldKeyFileURL) == bytesBefore, "nothing written offline")
+        #expect(try await world.marker() == nil && world.calls.rekeys == 0 && world.calls.custodyTargets.isEmpty)
+
+        offline.setValue(false)
+        #expect(try await world.vault().revision == revisionBefore, "the vault untouched")
+        let changeOnline = try keyDoor(.changePassphrase, encryption: encryption, tie: tie)
+        await changeOnline.start()
+        #expect(changeOnline.phase == .authorize, "online: the fields")
+        let regenerateOnline = try keyDoor(.regenerateWords, encryption: encryption, tie: tie)
+        await regenerateOnline.start()
+        #expect(regenerateOnline.phase == .authorize)
+        let replace = PostureSwitchModel(mode: .replaceKeys, runner: runner, controller: controller, vaultTie: tie)
+        await replace.start()
+        #expect(replace.phase == .explain, "online: Replace All Keys opens — \(replace.phase)")
+        let leave = PostureSwitchModel(mode: .leave, runner: runner, controller: controller, vaultTie: tie)
+        await leave.start()
+        #expect(leave.phase == .leaveConfirm, "online: Use Standard opens — \(leave.phase)")
+
+        // A LOCAL-ONLY library changes its passphrase OFFLINE against its key file.
+        let local = try await makeWorld(enrolled: false, standard: false)
+        defer { local.tearDown() }
+        let localController = makeController(for: local)
+        localController.adoptResident(local.oldKey)
+        let localEncryption = EncryptionSession(store: local.keyStore, client: nil, signedIn: { false })
+        wireOneSecretHooks(protection: localController, encryption: localEncryption, keyVault: nil, auth: makeAuth())
+        await localEncryption.refresh()
+        let localDoor = KeyDoorModel(kind: .changePassphrase, encryption: localEncryption, facts: try #require(localEncryption.keyDoorFacts))
+        await localDoor.start()
+        #expect(localDoor.phase == .authorize && !localDoor.isEnrolledDoor, "a local-only door needs no network")
+        await localDoor.changePassphrase(current: "not the word", new: "a-new-local-word-12", confirmation: "a-new-local-word-12")
+        #expect(localDoor.lastError == ProtectionCopy.message(for: StoreKeyEnvelopeError.wrongPassphrase))
+        await localDoor.changePassphrase(current: "sesame", new: "a-new-local-word-12", confirmation: "a-new-local-word-12")
+        try await settle(localDoor)
+        #expect(localDoor.phase == .done, "\(localDoor.phase) \(localDoor.lastError ?? "")")
+        let localFile = try #require(try StoreKeyEnvelope.loadCurrent(besideStore: local.storeURL))
+        #expect(try localFile.unwrapKey(passphrase: "a-new-local-word-12") == local.oldKey)
+        #expect(throws: StoreKeyEnvelopeError.wrongPassphrase) { _ = try localFile.unwrapKey(passphrase: "sesame") }
+    }
+
+    // MARK: - pre-13x 4b.6: THE POSTURE PINS in the two-device world
+
+    /// (a) A STANDARD device under a CASTLE account owes the posture-mismatch
+    /// follow at ready and, followed, gates at its next open (custody behind
+    /// Touch ID, the posture Castle, the effective gate biometric — 2d's
+    /// road). (b) A CASTLE → STANDARD switch propagates SILENTLY: the acting
+    /// device leaves Castle; a Castle sibling's reconcile runs the follow
+    /// into Standard with nothing typed and no modal — its own Apple copy in
+    /// its key file, custody silent, nothing rotated. (c) An account with NO
+    /// vault makes nothing Castle (corner 26): two local-only libraries, one
+    /// Castle and one Standard, each keep their own posture and nothing is
+    /// written.
+    @Test func thePosturePinsHoldInTheTwoDeviceWorld() async throws {
+        // (a) Standard under Castle ⇒ the mismatch follow ⇒ gated at the next open.
+        let acting = try await makeWorld()
+        defer { acting.tearDown() }
+        let material = try #require(acting.oldMaterial)
+        #expect(try await acting.vault().format.masterWrappedByAppleHeld == nil, "the 2b world's account is Castle-shaped")
+        let standard = try await makeWorld(sharing: acting)
+        defer { standard.tearDown() }
+        let sc = controller(for: standard, material: material)
+        sc.adoptResident(nil)  // the silent road adopted nil: the custody SHAPE is in view
+        await sc.reconcile()
+        let owed = try #require(sc.followNotice)
+        #expect(owed.kind == .castleStillOpensOldWay && sc.posture == .castle, "the account's posture is Castle; this library opened silently")
+        sc.openFollow()
+        let model = try #require(sc.activeFollow)
+        model.choosePassphrase()
+        await model.enter(passphrase: "sesame")
+        guard case .done = model.phase else { Issue.record("expected .done, got \(model.phase) \(model.lastError ?? "")"); return }
+        #expect(standard.calls.custodyTargets == [.biometric] && standard.posture == .castle && standard.calls.rekeys == 1)
+        #expect(StoreAtOpenMode.effective(posture: standard.posture, dials: ProtectionDials()) == .biometric, "(a) gates at its next open")
+        let standardAfter = try #require(try StoreKeyEnvelope.loadCurrent(besideStore: standard.storeURL))
+        #expect(standardAfter.apple == nil, "no Apple copy beside a Castle library")
+        #expect(!sc.followPending)
+
+        // (b) Castle → Standard propagates silently.
+        let castleActing = try await makeWorld(standard: false)
+        defer { castleActing.tearDown() }
+        let castleSibling = try await makeWorld(standard: false, sharing: castleActing)
+        defer { castleSibling.tearDown() }
+        let castleMaterial = try #require(castleActing.oldMaterial)
+        try await castleActing.runner.leaveCastle()
+        let revisionAfterLeaving = try await castleActing.vault().revision
+        let cc = controller(for: castleSibling, material: castleMaterial)
+        cc.adoptResident(castleSibling.oldKey)  // the gated shape
+        cc.followIntoStandardAct = { try await castleSibling.runner.followIntoStandard() }
+        await cc.reconcile()
+        #expect(cc.followNotice == nil && !cc.followPending && cc.activeFollow == nil, "(b) nothing typed, no modal")
+        let movedNotice = try #require(cc.movedToStandardNotice)
+        #expect(cc.notice == .movedToStandard(movedNotice), "the one-time OK")
+        let siblingFile = try #require(try StoreKeyEnvelope.loadCurrent(besideStore: castleSibling.storeURL))
+        let viaOwnApple = try siblingFile.unwrapKey(apple: castleSibling.apple.symmetricKey)
+        #expect(siblingFile.appleKeyID == castleSibling.apple.id && viaOwnApple == castleSibling.oldKey,
+                "(b) its OWN Apple copy, from its own iCloud Keychain")
+        #expect(castleSibling.calls.custodyTargets == [.auto] && castleSibling.posture == .standard && castleSibling.calls.rekeys == 0, "custody silent, nothing rotated")
+        #expect(try await castleActing.vault().revision == revisionAfterLeaving, "no vault write of the sibling's own")
+        #expect(StoreEncryptionMigration.opens(castleSibling.storeURL, key: castleSibling.oldKey), "the library key unchanged")
+
+        // (c) No vault ⇒ nothing Castle.
+        let castleLocal = try await makeWorld(enrolled: false, standard: false)
+        defer { castleLocal.tearDown() }
+        let standardLocal = try await makeWorld(enrolled: false)
+        defer { standardLocal.tearDown() }
+        let standardBytes = try Data(contentsOf: standardLocal.oldKeyFileURL)
+        let sl = makeController(for: standardLocal)
+        sl.adoptResident(nil)
+        sl.readVaultPosture = { nil }
+        await sl.reconcile()
+        #expect(sl.posture == .standard && sl.followNotice == nil && sl.notice != .follow(owed), "(c) a Standard local-only library stays Standard beside a Castle one")
+        #expect(try Data(contentsOf: standardLocal.oldKeyFileURL) == standardBytes, "nothing written")
+        let cl = makeController(for: castleLocal)
+        cl.adoptResident(castleLocal.oldKey)
+        cl.readVaultPosture = { nil }
+        await cl.reconcile()
+        #expect(cl.posture == .castle && cl.followNotice == nil, "(c) the Castle local-only library keeps its own posture — its key file's")
+        let standardFile = try #require(try StoreKeyEnvelope.loadCurrent(besideStore: standardLocal.storeURL))
+        #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: standardFile, rawKeyCustody: .silent, enrolled: false) == .determined(.standard),
+                "(c) with no vault each library's posture is its own key file's (corner 26)")
+    }
 }
+

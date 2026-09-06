@@ -407,4 +407,40 @@ struct LobbyVaultRoadTests {
             #expect(session.derivedWrappingKDF == world.newKDF, "the shared session holds the vault's derivation for the reconcile")
         }
     }
+    /// pre-13x 4b (ledger 59 — 4a's question 6, the one unpinned arm): a
+    /// follow-by-words key file carries NO local passphrase copy (W + the
+    /// master-wrapped copy only). An ABSENT local copy reads as REFUSED: a
+    /// wrong word online under a CHANGED vault descriptor speaks the RETIRED
+    /// sentence (the record differs from the vault's — a change happened
+    /// elsewhere), under an UNCHANGED one the plain sentence; nothing is
+    /// written either way. RED-ON-OLD: a road that treated the absent copy
+    /// as "no road" spoke the no-passphrase sentence (4a's revert A2), and
+    /// one that spoke plainly whenever the copy is absent loses the retired
+    /// discriminator.
+    @Test @MainActor func aWrongWordOverAWordsOnlyKeyFileSpeaksRetiredUnderAChangedVaultAndPlainUnderAnUnchangedOne() async throws {
+        // (a) The vault's descriptor CHANGED since the record (a passphrase
+        //     change elsewhere): RETIRED, nothing written.
+        let changed = try World(landPassphraseCopy: false, landRecoveryCopy: true, enrolled: true,
+                                oldKDF: fastKDF(), newKDF: fastKDF())
+        defer { changed.tearDown() }
+        #expect(try changed.keyFile().passphrase == nil && changed.keyFile().recovery != nil, "a follow-by-words file: W + the master copy, no P copy")
+        #expect(StoreLobby.passphraseRoadExists(try changed.keyFile()), "the passphrase road is still OFFERED (the master copy serves it)")
+        let changedBytes = try changed.keyFileBytes()
+        let retired = try #require(refusal(of: await changed.submit(.passphrase("not either word"), vault: changed.online)))
+        #expect(retired.message == ProtectionCopy.lobbyRetiredPassphrase && !retired.offline, "\(retired.message)")
+        #expect(try changed.keyFileBytes() == changedBytes, "nothing written")
+        #expect(changed.session.derivedWrappingKey == nil)
+        // (b) The record EQUALS the vault's descriptor (nothing changed
+        //     elsewhere): the plain sentence, nothing written.
+        let current = fastKDF()
+        let unchanged = try World(landPassphraseCopy: false, landRecoveryCopy: true, enrolled: true,
+                                  recordedKDF: current, oldKDF: fastKDF(), newKDF: current)
+        defer { unchanged.tearDown() }
+        let unchangedBytes = try unchanged.keyFileBytes()
+        let plain = try #require(refusal(of: await unchanged.submit(.passphrase("not either word"), vault: unchanged.online)))
+        #expect(plain.message == ProtectionCopy.message(for: StoreKeyEnvelopeError.wrongPassphrase) && !plain.offline, "\(plain.message)")
+        #expect(try unchanged.keyFileBytes() == unchangedBytes, "nothing written")
+        // …and the account's word still opens both (the vault road).
+        #expect(key(of: await unchanged.submit(.passphrase("the new word 12"), vault: unchanged.online)) == unchanged.key)
+    }
 }

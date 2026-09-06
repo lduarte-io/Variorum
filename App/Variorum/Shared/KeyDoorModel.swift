@@ -154,6 +154,16 @@ final class KeyDoorModel: Identifiable {
         guard case .checking = phase else { return }
         busy = true
         defer { busy = false }
+        // pre-13x 4b (§7 — the un-followed device; §12): the account's keys
+        // were replaced elsewhere and this device has not followed — every
+        // key door speaks the one sentence instead of acting. The faces gate
+        // this too (the Encryption tab renders the follow's door over this
+        // state); the model refuses on its own so no composition reaches a
+        // re-wrap with a stale master.
+        if case .keysReplaced = encryption.state {
+            phase = .failed(ProtectionCopy.pickUpKeysFirst)
+            return
+        }
         if enrolled {
             do {
                 guard let fetched = try await encryption.fetchVaultFacts() else {
@@ -190,6 +200,16 @@ final class KeyDoorModel: Identifiable {
             await encryption.changePassphrase(authorization: .passphrase(current), newPassphrase: new)
             if let refusal = encryption.lastError {
                 lastError = wordRetiredIfStale(refusal)
+                // pre-13x 4b (§7 step 5; decision 9): the vault's CAS refused
+                // — another device's change landed first, nothing was
+                // overwritten. RE-READ the vault's descriptor now, so the
+                // retry classifies the typed word honestly: the word that
+                // was current a moment ago is worded RETIRED (copy §5) once
+                // the other device's change stands.
+                if refusal == EncryptionSession.message(for: KeyVaultClientError.vaultRevisionConflict),
+                   let refetched = try? await encryption.fetchVaultFacts() {
+                    vaultKDF = refetched.kdf
+                }
                 return
             }
         } else {

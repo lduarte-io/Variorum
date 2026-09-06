@@ -699,11 +699,17 @@ struct PostureSwitchDrillTests {
             _ = try await sibling.runner.follow(passphrase: "not-the-passphrase", recoveryWords: nil)
         }
         #expect(sibling.keyStore.load()?.corpusKeyID == oldMaterial.corpusKeyID, "the sibling's custody unchanged after the refusal")
+        // pre-13x 4b.3 (the 2c adjudication's item 4 — decision 6 per DEVICE):
+        // the sibling's OWN scheduled plaintext insurance is ON before it
+        // follows; the follow turns it OFF with the notice.
+        MarkdownInsurance.setEnabled(true, in: UserDefaults(suiteName: sibling.suiteName)!)
         var followOutcome: PostureSwitchRunner.Outcome?
         let followWall = try await clock.measure {
             followOutcome = try await sibling.runner.follow(passphrase: "sesame", recoveryWords: nil)
         }
         let followedOutcome = try #require(followOutcome)
+        #expect(followedOutcome.insuranceTurnedOff && !MarkdownInsurance.isEnabled(in: UserDefaults(suiteName: sibling.suiteName)!),
+                "4b.3: the FOLLOWER's own insurance turned OFF as it entered Castle")
         let followed = try #require(followedOutcome.material)
         sibling.note("U3 DRILL 3 — the SIBLING FOLLOWED (passphrase once) in \(followWall): re-encrypted \(followedOutcome.reencrypted) rows (the acting device had finished the walk); rekeys \(sibling.rekeys); insurance off: \(followedOutcome.insuranceTurnedOff); offer: \(followedOutcome.preSwitchSnapshots.count) pairs")
         #expect(followedOutcome.entersCastle)
