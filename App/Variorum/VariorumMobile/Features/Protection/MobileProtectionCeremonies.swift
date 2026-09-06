@@ -522,8 +522,9 @@ struct MobileProtectionNoticeBar: View {
         }
     }
 
-    /// Copy §3's sentence with the doors that ACT today — Sign Out inline,
-    /// Settings for the Account section; Connect is batch 3's (P-2).
+    /// Copy §3's sentence with its doors: *Connect…* (pre-13x 3a — the adopt
+    /// road, rendered now that it acts), Sign Out inline, Settings for the
+    /// Account section (Delete lives there).
     private var differentOwnerBar: some View {
         bar {
             Text(ProtectionCopy.keysDontMatchThisLibrary)
@@ -531,6 +532,12 @@ struct MobileProtectionNoticeBar: View {
                 .foregroundStyle(tokens.ink)
                 .fixedSize(horizontal: false, vertical: true)
             HStack(spacing: 16) {
+                if controller.connectAct != nil {
+                    offer(ProtectionCopy.connectDoor) {
+                        controller.openConnect()
+                        controller.activeFollow?.choosePassphrase()
+                    }
+                }
                 offer("Sign Out") { Task { await services?.signOutVariorum() } }
                     .disabled(services == nil)
                 if let openSettings {

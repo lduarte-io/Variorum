@@ -70,6 +70,16 @@ nonisolated struct VaultPostureReading: Equatable, Sendable {
     var format: KeyVaultFormat? = nil
 }
 
+/// pre-13x 3a — what a vault flow hands the key file once M is in custody:
+/// the material, the vault's descriptor, and the secret(s) typed or minted
+/// in the act (nil = not typed here; their local copies land when they are).
+nonisolated struct VaultLanding: Sendable {
+    var material: DeviceKeyMaterial
+    var kdf: PassphraseKDF.Descriptor
+    var passphrase: String?
+    var recoveryWords: [String]?
+}
+
 /// pre-13x 2c — what a device learns at ready about a change made
 /// ELSEWHERE, and the words its notice renders (copy §5).
 nonisolated struct FollowNotice: Equatable, Sendable {
@@ -91,6 +101,12 @@ nonisolated struct FollowNotice: Equatable, Sendable {
         /// Decision 10's exception: an Always-ask device opened with a
         /// word since changed elsewhere — reads and edits, sync waits.
         case alwaysAskRetiredWord
+        /// pre-13x 3a (decision 17; §3.6; copy §3): the rows' owner is not
+        /// the signed-in account — a different vault. The typed secret
+        /// unwraps THIS account's master and the library is ADOPTED (every
+        /// row re-stamped, sync re-initialized, the whole library uploads).
+        /// Never a follow; the third door is Cancel, not Later.
+        case connectLibrary
     }
     var kind: Kind
     /// The device that acted (`updated_by_device`), or "another device".
@@ -109,7 +125,14 @@ nonisolated struct FollowNotice: Equatable, Sendable {
         case .keysReplaced: return ProtectionCopy.followKeysReplaced(device: device, day: day)
         case .movedToStandard: return ProtectionCopy.followMovedToStandard(device: device, day: day)
         case .alwaysAskRetiredWord: return ProtectionCopy.alwaysAskRetiredWord(device: device, day: day)
+        case .connectLibrary: return ProtectionCopy.keysDontMatchThisLibrary
         }
+    }
+    /// The third door under the notice: *Later* for a follow (the
+    /// un-followed state is a legal end), *Cancel* for a Connect (nothing
+    /// is owed — the library stays as it was).
+    var dismissDoor: String {
+        kind == .connectLibrary ? ProtectionCopy.connectCancelDoor : ProtectionCopy.followLaterDoor
     }
     /// The persistent banner after *Later*. The mismatch kind renders its
     /// own sentence again: no keys were replaced and sync is not paused,
@@ -320,9 +343,17 @@ final class ProtectionController {
     /// THE FOLLOW IN PROGRESS, held here like the ceremony so it survives
     /// the re-key's reopen.
     private(set) var activeFollow: PostureFollowModel?
-    /// The store's stamped owner (`Queries.stampedOwnerID`) — wired by the
-    /// bootstrap at ready; nil = no store read wired.
-    @ObservationIgnored var stampedOwnerID: (@Sendable () async -> String?)?
+    /// pre-13x 3a — THE EXACT FOREIGN-OWNER READ (`Queries.foreignOwnerExists`
+    /// — ANY owner-carrying row non-NULL and ≠ the signed-in id; a mixed
+    /// library reads foreign), wired by the bootstrap at ready over the
+    /// store; nil = no store read wired (no verdict). Replaces the 2c
+    /// first-row `stampedOwnerID` read in the verdict.
+    @ObservationIgnored var foreignOwner: (@Sendable (_ signedInUserID: String) async -> Bool)?
+    /// pre-13x 3a — THE ADOPT ROAD's act (`AppServices.connectLibrary`:
+    /// the typed secret unwraps this account's master, every row is
+    /// re-stamped, sync re-initialized, custody + the key file landed),
+    /// wired by the composition root; nil = the Connect door does not act.
+    @ObservationIgnored var connectAct: (@MainActor (_ passphrase: String?, _ recoveryWords: [String]?) async throws -> Void)?
     /// The silent follow into Standard's act — the runner's
     /// `followIntoStandard()`, wired by the composition root; nil = no
     /// runner (the reconcile only records the reading).
@@ -333,6 +364,28 @@ final class ProtectionController {
         let notice = followNotice ?? alwaysAskRetiredNotice
         guard let notice, let switchRunner else { return }
         activeFollow = PostureFollowModel(notice: notice, runner: switchRunner, controller: self)
+    }
+
+    /// pre-13x 3a: the Connect door (copy §3's *Connect…*) — the same
+    /// follow model and sheets over the `.connectLibrary` kind; opens only
+    /// while the rows' owner is not the signed-in account and an act is
+    /// wired (P-2: a door that acts).
+    func openConnect() {
+        guard activeFollow == nil, differentOwner, let switchRunner, connectAct != nil else { return }
+        let notice = FollowNotice(
+            kind: .connectLibrary,
+            device: vaultReading?.updatedByDevice ?? ProtectionCopy.anotherDevice,
+            day: ProtectionCopy.day(from: vaultReading?.updatedAt),
+            vaultKDF: vaultReading?.passphraseKDF, corpusKeyID: vaultReading?.corpusKeyID)
+        activeFollow = PostureFollowModel(notice: notice, runner: switchRunner, controller: self)
+    }
+
+    /// The adopt landed (the model calls this): the rows are this
+    /// account's now; the next reconcile reads the same owner.
+    func connectLanded() {
+        differentOwner = false
+        refreshEnvelopeFacts()
+        refreshNotices()
     }
 
     func closeFollow() {
@@ -377,12 +430,17 @@ final class ProtectionController {
             differentOwner = false
             return
         }
-        // THE OWNER DISTINCTION: the rows' stamp against the signed-in id.
-        if let owner = await stampedOwnerID?(), let user = reading.signedInUserID, owner != user {
+        // THE OWNER DISTINCTION (§3.6; pre-13x 3a — the EXACT read): any
+        // owner-carrying row stamped by another account ⇒ a different vault
+        // ⇒ copy §3's sentence with the Connect door; never a follow
+        // (following would land another account's keys over this library),
+        // and never a write — a change on another account can never lock a
+        // device out of its own library (pinned).
+        if let user = reading.signedInUserID, await foreignOwner?(user) == true {
             differentOwner = true
             followNotice = nil
             alwaysAskRetiredNotice = nil
-            logger.notice("follow: the rows' owner is not the signed-in account — a different vault (the adopt road is batch 3's)")
+            logger.notice("follow: the rows' owner is not the signed-in account — a different vault; the Connect door adopts (decision 17)")
             return
         }
         differentOwner = false
@@ -1144,6 +1202,46 @@ final class ProtectionController {
         }
     }
 
+    /// pre-13x 3a — THE VAULT MATERIAL's LANDING on the key file (§3.5; the
+    /// 2d hand-forward: a master copy without `vaultKDF` reads as the
+    /// migrated-without-descriptor class): after sync setup, an enroll or
+    /// a Connect lands M in custody, the key file gains L under M (the
+    /// master copy — what makes the local secret copies caches) and records
+    /// the vault's descriptor + corpus key id; when the PASSPHRASE was
+    /// typed, the local P copy is re-wrapped under the VAULT's descriptor
+    /// (corner 27 — the account's passphrase becomes the library's; §3.6's
+    /// derive-once) unless it already is; when the WORDS were typed or
+    /// generated here, the W copy lands. Returns the worded refusal.
+    @discardableResult
+    func landVaultMaterial(_ landing: VaultLanding) async -> String? {
+        guard let key = currentKey() else { return Self.keyUnavailable }
+        if let passphrase = landing.passphrase, !passphrase.isEmpty,
+           loadEnvelope()?.passphrase?.kdf != landing.kdf {
+            if let refusal = await reconcilePassphraseWrap(
+                passphrase: passphrase, vaultKDF: landing.kdf,
+                corpusKeyID: landing.material.corpusKeyID) {
+                return refusal
+            }
+        }
+        do {
+            var envelope = try ensuredEnvelope(for: key).envelope
+            try envelope.masterBox(key: key, under: landing.material.masterSymmetricKey)
+            try envelope.recordVaultReconciliation(kdf: landing.kdf, corpusKeyID: landing.material.corpusKeyID)
+            if let words = landing.recoveryWords, !words.isEmpty {
+                try envelope.setRecoveryWrap(key: key, words: words)
+            }
+            try saveEnvelope(envelope)
+            clearMigrationConfirmPending?()
+            migrationConfirmPending = false
+            refreshEnvelopeFacts()
+            refreshNotices()
+            logger.notice("vault material landed on the key file: the master copy + the vault's descriptor and corpus key id\(landing.passphrase != nil ? " + the passphrase copy" : "")\(landing.recoveryWords != nil ? " + the twelve words' copy" : "")")
+            return nil
+        } catch {
+            return ProtectionCopy.message(for: error)
+        }
+    }
+
     /// *Later* — the face is hidden for this launch; the mark stays.
     func deferMigrationConfirm() {
         migrationConfirmDeferredThisLaunch = true
@@ -1393,6 +1491,12 @@ func wireOneSecretHooks(
     }
     encryption.storePassphraseGuard = { passphrase in
         await protection.verifyPassphraseAgainstStore(passphrase)
+    }
+    // pre-13x 3a: the vault material's landing on the key file — the master
+    // copy + the vault's descriptor and corpus key id (+ the typed secret's
+    // copy) after setup / enroll / Connect.
+    encryption.onVaultMaterialLanded = { landing in
+        _ = await protection.landVaultMaterial(landing)
     }
     // pre-13x 2d (decision 35): signed in ⇒ ENROLLED at ready — the vault's
     // word is then the only thing that can make the library Standard.

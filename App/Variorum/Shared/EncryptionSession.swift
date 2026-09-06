@@ -98,6 +98,21 @@ final class EncryptionSession {
     /// closed).
     var onRecoveryPhraseLanded: (([String]) async -> Void)?
 
+    /// pre-13x 3a — the vault material's LANDING on the key file (the
+    /// master copy + the vault's descriptor and corpus key id; the typed
+    /// secret's copy): fired after setup, an enroll and a Connect, once M
+    /// is in custody. Wired by `wireOneSecretHooks` to
+    /// `ProtectionController.landVaultMaterial`.
+    var onVaultMaterialLanded: ((VaultLanding) async -> Void)?
+
+    /// pre-13x 3a (decision 17): the Connect door — opens the controller's
+    /// adopt sheet; wired by the composition root (nil = not rendered, P-2).
+    var connectDoor: (() -> Void)?
+    /// pre-13x 3a: whether the rows' owner is another account (the
+    /// controller's exact verdict) — the Encryption tab renders copy §3's
+    /// sentence + the Connect door over every other arm while true.
+    var libraryOwnerIsForeign: (@MainActor () -> Bool)?
+
     /// Phase 13p Batch 2 (one secret — the GUARDING direction): does this
     /// passphrase match the STORE's own wrap? Consulted before SETUP
     /// mints a vault: nil/absent = nothing to guard; false = refuse — a
@@ -344,6 +359,24 @@ final class EncryptionSession {
         // cleared it (the banner retires); a failed run left it set (the
         // banner joins the thrown-failure message and outlives it).
         rekeyIncomplete = await rekeyIncompleteCheck?() ?? false
+    }
+
+    /// pre-13x 3a — the enroll/Connect landing: custody takes the material
+    /// under the current shape, the state reads enrolled, and the key file
+    /// follows through the landing hook (the master copy + the vault's
+    /// descriptor and corpus key id; the typed secret's copy under the
+    /// VAULT's descriptor — corner 27). Returns the worded refusal.
+    @discardableResult
+    func adoptEnrolledMaterial(
+        _ material: DeviceKeyMaterial, kdf: PassphraseKDF.Descriptor,
+        typedPassphrase: String? = nil, typedWords: [String]? = nil
+    ) async -> String? {
+        await adopt(material)
+        let landing = VaultLanding(
+            material: material, kdf: kdf, passphrase: typedPassphrase, recoveryWords: typedWords)
+        await onVaultMaterialLanded?(landing)
+        await refresh()
+        return lastError
     }
 
     /// The runner's custody adoption point (its contract: called after

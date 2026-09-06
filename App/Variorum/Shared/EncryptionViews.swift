@@ -267,6 +267,11 @@ struct EncryptionView: View {
                 }
                 PageDivider(pageStyle)
             }
+            if encryption.libraryOwnerIsForeign?() == true {
+                // pre-13x 3a (§3.6 / copy §3): the rows' owner is another
+                // account — the sentence with its doors, over every arm.
+                foreignOwnerSection
+            } else {
             switch encryption.state {
             case .unknown:
                 ProgressView().controlSize(.small)
@@ -293,6 +298,7 @@ struct EncryptionView: View {
                     mandatoryPhraseSection
                 }
             }
+            }
 
             if encryption.busy {
                 ProgressView().controlSize(.small)
@@ -305,6 +311,26 @@ struct EncryptionView: View {
             }
         }
         .task { await encryption.refresh() }
+    }
+
+    // MARK: - pre-13x 3a: the rows' owner is another account (copy §3)
+
+    /// Copy §3's sentence with *Connect…* (the adopt road — decision 17) and
+    /// Sign Out; Delete Account… stays the Account tab's one door.
+    @ViewBuilder
+    private var foreignOwnerSection: some View {
+        Text(ProtectionCopy.keysDontMatchThisLibrary)
+            .pageWarning(pageStyle)
+            .fixedSize(horizontal: false, vertical: true)
+        HStack {
+            if let connectDoor = encryption.connectDoor {
+                PageDoor(ProtectionCopy.connectDoor, style: pageStyle) { connectDoor() }
+                    .disabled(encryption.busy)
+            }
+            PageDoor("Sign Out", form: .inlineAct, style: pageStyle) {
+                Task { await services.signOutVariorum() }
+            }
+        }
     }
 
     // MARK: - Setup (first device) — the stepped flow (CF-1/5/6/7/9/10/13)

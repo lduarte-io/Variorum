@@ -312,7 +312,7 @@ struct MobileFollowSheet: View {
                         offer(ProtectionCopy.followEnterDoor) { model.choosePassphrase() }
                         offer(ProtectionCopy.followWordsDoor) { model.chooseWords() }
                         Spacer()
-                        offer(ProtectionCopy.followLaterDoor, quiet: true) { model.later(); onDone() }
+                        offer(model.notice.dismissDoor, quiet: true) { model.later(); onDone() }
                     }
                 case .askPassphrase:
                     prose(model.notice.body)
@@ -323,7 +323,7 @@ struct MobileFollowSheet: View {
                         }
                         offer(ProtectionCopy.followWordsDoor) { model.chooseWords() }
                         Spacer()
-                        offer(ProtectionCopy.followLaterDoor, quiet: true) { model.later(); onDone() }
+                        offer(model.notice.dismissDoor, quiet: true) { model.later(); onDone() }
                     }
                 case .askWords:
                     prose(model.notice.body)
@@ -343,7 +343,7 @@ struct MobileFollowSheet: View {
                         }
                         offer(ProtectionCopy.followEnterDoor) { model.choosePassphrase() }
                         Spacer()
-                        offer(ProtectionCopy.followLaterDoor, quiet: true) { model.later(); onDone() }
+                        offer(model.notice.dismissDoor, quiet: true) { model.later(); onDone() }
                     }
                 case .running:
                     HStack(spacing: 8) {

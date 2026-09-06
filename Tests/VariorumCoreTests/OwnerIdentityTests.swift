@@ -185,6 +185,77 @@ struct OwnerIdentityTests {
         }
     }
 
+    // MARK: pre-13x 3a — the adopt road's two halves (decision 17)
+
+    /// THE EXACT FOREIGN-OWNER READ + THE RE-STAMP: a MIXED library — rows
+    /// born under X beside rows born under Y, tombstones among them, NULLs
+    /// beside — reads FOREIGN to X and to Y alike (any owner-carrying row
+    /// stamped by another account), which `stampedOwnerID`'s first-row read
+    /// misses (it answers X, the signed-in id, for a library that also
+    /// holds Y's rows). `restampOwner(to: Y)` rewrites EVERY owner-carrying
+    /// row — live, tombstoned, NULL — to Y in one transaction, the outbox
+    /// enqueues them, nothing else moves; after it the library reads as
+    /// Y's. Refuses signed out. Inherently red-on-old: neither existed.
+    @Test func aMixedLibraryReadsForeignAndRestampOwnerRewritesEveryOwnerCarryingRow() throws {
+        let x = Self.author
+        let y = "9c0ffee0-bbbb-4bbb-8ccc-000000000002"
+        try withOperations { ops, db in
+            // X's rows (live + tombstoned), Y's rows, and a signed-out NULL.
+            try withDependencies { $0.ownerIdentity = OwnerIdentity { x } } operation: {
+                let mine = try Operations()
+                let post = try mine.createPost(title: "x's post", profile: .blog)
+                _ = try mine.newBlock(in: post.id, text: "x's block", at: .end)
+                let doomed = try mine.createPost(title: "x's doomed")
+                try mine.deleteContainer(doomed.id)
+                _ = try mine.createTag(parent: nil, name: "x-tag")
+            }
+            try withDependencies { $0.ownerIdentity = OwnerIdentity { y } } operation: {
+                let theirs = try Operations()
+                let post = try theirs.createPost(title: "y's post", profile: .blog)
+                _ = try theirs.newBlock(in: post.id, text: "y's block", at: .end)
+            }
+            _ = try ops.createReading(name: "signed-out reading", kind: .curated)
+
+            let (foreignToX, foreignToY, firstRow) = try db.read { d in
+                (try Queries.foreignOwnerExists(d, signedIn: x),
+                 try Queries.foreignOwnerExists(d, signedIn: y),
+                 try Queries.stampedOwnerID(d))
+            }
+            #expect(foreignToX, "Y's rows make it foreign to X")
+            #expect(foreignToY, "X's rows make it foreign to Y")
+            #expect(firstRow == x,
+                    "the first-row read answers X — the signed-in id — for a library that also holds Y's rows (the old verdict's blindness)")
+            try db.clearOutbox()
+
+            #expect(throws: OperationError.noOwnerIdentity) { _ = try ops.restampOwner(to: y) }
+
+            let report = try withDependencies { $0.ownerIdentity = OwnerIdentity { y } } operation: {
+                try Operations().restampOwner(to: y)
+            }
+            #expect(report.total > 0)
+            for table in SyncSchema.tables where table.plainColumns.contains("owner_id") {
+                let notY = try db.fetchInt(
+                    "SELECT COUNT(*) FROM \(table.name) WHERE owner_id IS NULL OR owner_id != ?", [y]) ?? -1
+                #expect(notY == 0, "\(table.name): \(notY) rows not under Y after the re-stamp")
+            }
+            #expect(try db.fetchInt("SELECT COUNT(*) FROM container WHERE deleted_at IS NOT NULL AND owner_id = ?", [y]) == 1,
+                    "X's tombstone re-stamped too — tombstones still sync")
+            let (stillForeignToY, nowForeignToX) = try db.read { d in
+                (try Queries.foreignOwnerExists(d, signedIn: y), try Queries.foreignOwnerExists(d, signedIn: x))
+            }
+            #expect(!stillForeignToY, "the library is Y's now")
+            #expect(nowForeignToX, "…and foreign to X")
+            // The re-stamp PUSHES: every touched row re-enters the outbox.
+            let xPost = try #require(try db.fetchString("SELECT id FROM container WHERE title = 'x''s post'"))
+            #expect(try db.outboxContains("container", xPost))
+            // Idempotent: nothing left to re-stamp.
+            let again = try withDependencies { $0.ownerIdentity = OwnerIdentity { y } } operation: {
+                try Operations().restampOwner(to: y)
+            }
+            #expect(again.total == 0)
+        }
+    }
+
     // MARK: The backfill choreography converges (brief interpretation 3;
     // REWRITTEN at Phase 14c batch 1 to the born-multi-tenant reality)
 

@@ -1003,7 +1003,7 @@ struct MobileFollowDetectionTests {
             syncCustodySession: session))
         controller.adoptResident(key)
         #expect(controller.posture == .castle)
-        controller.stampedOwnerID = { "user-phone" }
+        controller.foreignOwner = { _ in false }
         controller.readVaultPosture = {
             VaultPostureReading(
                 hasAppleHeldCopy: false, appleKeyID: nil, passphraseKDF: fastKDF(), hasPassphraseWrap: true,
@@ -1272,7 +1272,7 @@ struct MobileWindowReplayTests {
                 updatedAt: fetched.updatedAt, updatedByDevice: fetched.format.updatedByDevice,
                 signedInUserID: "user-phone", hasRecoveryWrap: false, format: fetched.format)
         }
-        protection.stampedOwnerID = { "user-phone" }
+        protection.foreignOwner = { _ in false }
         // The runner at the phone's root — the SAME shared composition,
         // over the bootstrap's real re-key road and the controller's real
         // custody move; an inert mirror (nothing to re-encrypt).

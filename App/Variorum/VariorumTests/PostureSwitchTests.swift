@@ -110,6 +110,14 @@ actor EmulatedMirror: SyncTransport, SyncRotationTransport {
         var seq: Int64
     }
 
+    /// pre-13x 3a: the 09 push guard's twin — a pushed row of an
+    /// owner-carrying table must carry EXACTLY this account's `owner_id`
+    /// (the fake server's `requireOwnerStamps`); nil = unchecked (the 2b/2c
+    /// worlds seed owner-less rows and never claim a partition).
+    enum OwnerRefusal: Error, Equatable { case ownerMismatch(table: String, rowID: String) }
+    let ownerID: String?
+    init(ownerID: String? = nil) { self.ownerID = ownerID }
+
     private var rows: [String: Stored] = [:]
     private(set) var seq: Int64 = 0
     private var vault: KeyVaultClient?
@@ -144,8 +152,20 @@ actor EmulatedMirror: SyncTransport, SyncRotationTransport {
         else { throw SyncError.keyProofRefused }
     }
 
+    private func requireOwnerStamps(_ batch: [SyncRow]) throws {
+        guard let ownerID else { return }
+        for incoming in batch {
+            guard let table = SyncSchema.table(named: incoming.table),
+                  table.plainColumns.contains("owner_id") else { continue }
+            guard case .text(let pushed)? = incoming.columns["owner_id"], pushed == ownerID else {
+                throw OwnerRefusal.ownerMismatch(table: incoming.table, rowID: incoming.rowID)
+            }
+        }
+    }
+
     func push(_ batch: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncPushOutcome] {
         try await gate(activeKeyID: activeKeyID, keyProof: keyProof)
+        try requireOwnerStamps(batch)
         pushes += 1
         return batch.map { incoming in
             let key = "\(incoming.table)/\(incoming.rowID)"
@@ -179,6 +199,7 @@ actor EmulatedMirror: SyncTransport, SyncRotationTransport {
 
     func reencrypt(_ incomingRows: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncReencryptOutcome] {
         try await gate(activeKeyID: activeKeyID, keyProof: keyProof)
+        try requireOwnerStamps(incomingRows)
         if crashNextReencrypt {
             crashNextReencrypt = false
             throw URLError(.networkConnectionLost)
@@ -1374,7 +1395,7 @@ struct PostureSwitchTests {
 
         let controller = makeController(for: sibling)
         controller.switchRunner = sibling.runner
-        controller.stampedOwnerID = { nil }
+        controller.foreignOwner = { _ in false }
         controller.readVaultPosture = { [client = sibling.vaultClient] in
             guard let fetched = try? await client?.fetchVault() else { return nil }
             return VaultPostureReading(

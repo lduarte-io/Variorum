@@ -393,8 +393,11 @@ nonisolated extension ProtectionCopy {
     static let keysDontMatchThisLibrary =
         "This account's keys don't match this library. Enter your passphrase to connect it — "
         + "everything in it will upload to this account."
-    /// The Connect door is batch 3's (P-2: not rendered until it acts).
+    /// pre-13x 3a: the Connect door acts (the adopt road — decision 17).
     static let connectDoor = "Connect…"
+    /// The Connect sheet's dismiss door (a plain chrome word — the copy
+    /// file names only *Connect…* for this face; recorded in the 3a record).
+    static let connectCancelDoor = "Cancel"
     static let followDoneBody =
         "Your new keys are in place on this \(deviceName), and sync is back on."
 }

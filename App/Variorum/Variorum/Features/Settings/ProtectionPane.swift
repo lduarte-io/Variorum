@@ -759,9 +759,9 @@ struct ProtectionNoticeBar: View {
         }
     }
 
-    /// Copy §3's keys-don't-match sentence with the doors that ACT today —
-    /// Sign out and the Account sheet (Delete lives there); the Connect
-    /// door is batch 3's (P-2: not rendered until it acts).
+    /// Copy §3's keys-don't-match sentence with its doors: *Connect…* (pre-13x
+    /// 3a — the adopt road, rendered now that it acts), Sign out, and the
+    /// Account sheet (Delete lives there).
     private var differentOwnerBar: some View {
         bar {
             Text(ProtectionCopy.keysDontMatchThisLibrary)
@@ -772,6 +772,13 @@ struct ProtectionNoticeBar: View {
                 .disabled(services == nil)
             Button("Account…") { accountSheetTab = .account }
                 .disabled(services == nil)
+            if controller.connectAct != nil {
+                Button(ProtectionCopy.connectDoor) {
+                    controller.openConnect()
+                    controller.activeFollow?.choosePassphrase()
+                }
+                .keyboardShortcut(.defaultAction)
+            }
         }
     }
 
@@ -801,7 +808,7 @@ struct FollowSheet: View {
                     .font(.callout)
                     .fixedSize(horizontal: false, vertical: true)
                 HStack {
-                    Button(ProtectionCopy.followLaterDoor) { model.later(); onDone() }
+                    Button(model.notice.dismissDoor) { model.later(); onDone() }
                     Spacer()
                     Button(ProtectionCopy.followWordsDoor) { model.chooseWords() }
                     Button(ProtectionCopy.followEnterDoor) { model.choosePassphrase() }
@@ -815,7 +822,7 @@ struct FollowSheet: View {
                 PeekableSecretField(label: ProtectionCopy.passphraseFieldLabel, text: $passphrase)
                     .textFieldStyle(.roundedBorder)
                 HStack {
-                    Button(ProtectionCopy.followLaterDoor) { model.later(); onDone() }
+                    Button(model.notice.dismissDoor) { model.later(); onDone() }
                     Spacer()
                     Button(ProtectionCopy.followWordsDoor) { model.chooseWords() }
                     Button("Enter") { Task { await model.enter(passphrase: passphrase) } }
@@ -833,7 +840,7 @@ struct FollowSheet: View {
                     .privacySensitive()
                     .textFieldStyle(.roundedBorder)
                 HStack {
-                    Button(ProtectionCopy.followLaterDoor) { model.later(); onDone() }
+                    Button(model.notice.dismissDoor) { model.later(); onDone() }
                     Spacer()
                     Button(ProtectionCopy.followEnterDoor) { model.choosePassphrase() }
                     Button("Enter") { Task { await model.enter(wordsText: typedWords) } }

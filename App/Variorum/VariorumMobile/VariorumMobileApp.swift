@@ -130,6 +130,14 @@ struct VariorumMobileApp: App {
                                 try await runner.followIntoStandard()
                             }
                             fresh.encryption.followDoor = { bootstrap.protection.openFollow() }
+                            // pre-13x 3a (decision 17): the Connect door and
+                            // its act — the adopt road over the services.
+                            bootstrap.protection.connectAct = { [weak fresh] passphrase, words in
+                                guard let fresh else { throw ConnectLibraryError.signedOut }
+                                try await fresh.connectLibrary(passphrase: passphrase, recoveryWords: words)
+                            }
+                            fresh.encryption.connectDoor = { bootstrap.protection.openConnect() }
+                            fresh.encryption.libraryOwnerIsForeign = { bootstrap.protection.differentOwner }
                             fresh.encryption.rekeyRunner = { passphrase in
                                 let outcome = try await runner.replaceAllKeys(
                                     passphrase: passphrase, recoveryWords: nil)

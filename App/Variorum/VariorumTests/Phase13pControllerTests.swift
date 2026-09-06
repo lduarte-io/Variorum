@@ -24,6 +24,7 @@
 //
 
 import CryptoKit
+import Dependencies
 import Foundation
 import Testing
 
@@ -813,7 +814,7 @@ struct Phase13pControllerTests {
     @Test func aSilentCustodyLibraryUnderACastleVaultOwesTheFollowIntoCastleAndAGatedOneUnderStandardFollowsSilently() async throws {
         let w = try world(standard: true, enrolled: true)
         #expect(w.controller.libraryKeyCustodyShape == .silent)
-        w.controller.stampedOwnerID = { "user-1" }
+        w.controller.foreignOwner = { _ in false }
         w.controller.readVaultPosture = { [reading = rotatedReading(appleHeld: false, corpusKeyID: "corpus")] in reading }
         let fileBefore = w.envelopeBox.value
         await w.controller.reconcile()
@@ -837,7 +838,7 @@ struct Phase13pControllerTests {
         let agreeing = try world(standard: true, enrolled: true)
         let acts = LockedCounter()
         agreeing.controller.followIntoStandardAct = { acts.increment() }
-        agreeing.controller.stampedOwnerID = { "user-1" }
+        agreeing.controller.foreignOwner = { _ in false }
         agreeing.controller.readVaultPosture = { [reading = rotatedReading(appleHeld: true, corpusKeyID: "corpus")] in reading }
         await agreeing.controller.reconcile()
         #expect(agreeing.controller.followNotice == nil && !agreeing.controller.followPending)
@@ -854,7 +855,7 @@ struct Phase13pControllerTests {
         #expect(gated.controller.libraryKeyCustodyShape == .gatedOrNone)
         let silentActs = LockedCounter()
         gated.controller.followIntoStandardAct = { silentActs.increment() }
-        gated.controller.stampedOwnerID = { "user-1" }
+        gated.controller.foreignOwner = { _ in false }
         gated.controller.readVaultPosture = { [reading = rotatedReading(appleHeld: true, corpusKeyID: "corpus")] in reading }
         await gated.controller.reconcile()
         #expect(silentActs.value == 1, "a stricter gate under a Standard account follows silently (decision 1)")
@@ -863,7 +864,7 @@ struct Phase13pControllerTests {
 
         // A gated shape under a CASTLE vault: the shape agrees — nothing owed.
         let castle = try world(standard: false, enrolled: true)
-        castle.controller.stampedOwnerID = { "user-1" }
+        castle.controller.foreignOwner = { _ in false }
         castle.controller.readVaultPosture = { [reading = rotatedReading(appleHeld: false, corpusKeyID: "corpus")] in reading }
         await castle.controller.reconcile()
         #expect(castle.controller.followNotice == nil && castle.controller.notice != .follow(owed))
@@ -900,6 +901,136 @@ struct Phase13pControllerTests {
         #expect(w.syncLeaves.plainRecord?.deviceID == "device-1", "back to silent: the same identity")
     }
 
+    /// pre-13x 3a (decision 17; ledger 15) — THE CONNECT DOOR over the
+    /// exact verdict: the EXACT read is what the verdict consults (a mixed
+    /// library reads foreign even though its first row is the signed-in
+    /// account's — `foreignOwner` answers true, and the verdict is
+    /// `.differentOwner`); the Connect sheet is the follow model with the
+    /// `.connectLibrary` kind (copy §3's sentence; the third door Cancel,
+    /// which defers nothing); a wrong word refuses in the ACCOUNT's words
+    /// and runs nothing; the right word runs the wired adopt act ONCE with
+    /// the typed secret, the verdict clears, and the next reconcile (the
+    /// rows now this account's) owes nothing. RED ON OLD: the verdict read
+    /// `stampedOwnerID` (the first row — the signed-in id) and said SAME
+    /// OWNER; `openConnect` did not exist.
+    @Test func theExactOwnerReadOwesConnectAndTheConnectSheetRunsTheAdoptOnceAndClears() async throws {
+        let w = try world(enrolled: true)
+        let foreign = LockIsolated(true)  // the exact read: Y's rows exist beside the signed-in X's
+        w.controller.foreignOwner = { _ in foreign.value }
+        w.controller.readVaultPosture = { [reading = rotatedReading(appleHeld: false, corpusKeyID: "corpus")] in reading }
+        await w.controller.reconcile()
+        #expect(w.controller.differentOwner && w.controller.notice == .differentOwner)
+        #expect(w.controller.followNotice == nil, "never a follow over a foreign library")
+
+        // No runner / no act wired: the door does not open (P-2).
+        w.controller.openConnect()
+        #expect(w.controller.activeFollow == nil)
+        let acts = LockIsolated<[(String?, [String]?)]>([])
+        w.controller.connectAct = { passphrase, words in
+            acts.withValue { $0.append((passphrase, words)) }
+            guard passphrase == "account-sesame" || words != nil else { throw VaultEnrollmentError.wrongPassphrase }
+            foreign.setValue(false)  // the rows are this account's now
+        }
+        w.controller.switchRunner = PostureSwitchRunner(leaves: inertLeaves(for: w))
+        w.controller.openConnect()
+        let model = try #require(w.controller.activeFollow)
+        #expect(model.isConnectVariant && model.notice.body == ProtectionCopy.keysDontMatchThisLibrary)
+        #expect(model.notice.dismissDoor == ProtectionCopy.connectCancelDoor)
+        model.later()
+        #expect(model.phase == .closed && w.controller.notice == .differentOwner, "Cancel defers nothing — the verdict stands")
+        w.controller.closeFollow()
+
+        w.controller.openConnect()
+        let again = try #require(w.controller.activeFollow)
+        again.choosePassphrase()
+        await again.enter(passphrase: "not-the-account's")
+        #expect(again.lastError == EncryptionSession.message(for: VaultEnrollmentError.wrongPassphrase), "the ACCOUNT's word, not the library's")
+        #expect(again.phase == .askPassphrase && w.controller.differentOwner)
+        await again.enter(passphrase: "account-sesame")
+        #expect(again.phase == .done(insuranceOff: false, hasOffer: false), "\(again.phase)")
+        #expect(acts.value.count == 2 && acts.value.last?.0 == "account-sesame", "the adopt act ran with the typed secret")
+        #expect(!w.controller.differentOwner && w.controller.notice != .differentOwner, "the verdict cleared and the reconcile agreed")
+    }
+
+    /// pre-13x 3a — THE VAULT MATERIAL's LANDING on the key file (§3.5; the
+    /// 2d hand-forward): after an enroll / setup / Connect, the key file
+    /// gains the MASTER copy (L under M — the vault road, with no visit)
+    /// and records the vault's descriptor + corpus key id (no confirm owed —
+    /// the derived gate reads a recorded descriptor); a TYPED passphrase
+    /// re-wraps the local P copy under the VAULT's descriptor (corner 27 —
+    /// the account's passphrase becomes the library's; §3.6's derive-once)
+    /// unless the copy already sits under it (then no re-derivation); typed
+    /// words land the W copy; a landing with neither leaves the secret
+    /// copies alone. Inherently red-on-old (no landing road existed — the
+    /// 14c enroll wrote a passphrase copy under a FRESH descriptor and no
+    /// master copy, the migrated-without-descriptor class).
+    @Test func landingTheVaultMaterialWritesTheMasterCopyAndReconcilesUnderTheVaultsDescriptor() async throws {
+        let w = try world(standard: true, enrolled: false)
+        let held = material()
+        let vaultKDF = fastKDF()
+        w.controller.isSignedIn = { true }
+        // (a) typed passphrase, no wrap yet: the P copy lands UNDER THE VAULT's descriptor.
+        #expect(await w.controller.landVaultMaterial(VaultLanding(
+            material: held, kdf: vaultKDF, passphrase: "account-sesame", recoveryWords: nil)) == nil)
+        var file = try #require(w.envelopeBox.value)
+        #expect(try file.unwrapKey(master: held.masterSymmetricKey) == w.key, "the master copy opens L")
+        #expect(file.vaultKDF == vaultKDF && file.vaultCorpusKeyID == held.corpusKeyID, "the reconciliation recorded")
+        let openedByAccountWord = try file.unwrapKey(passphrase: "account-sesame")
+        #expect(file.passphrase?.kdf == vaultKDF && openedByAccountWord == w.key,
+                "the P copy under the VAULT's descriptor — the lobby derives once")
+        #expect(file.recovery == nil)
+        #expect(!w.controller.migrationConfirmOwedByDerivation, "a recorded descriptor owes no confirm")
+        // (b) the copy already under the vault's descriptor: no re-derivation (the KDF factory is not consulted).
+        let derivations = LockIsolated(0)
+        let counting = ProtectionController(configuration: .init(
+            scope: "Variorum", storeURL: nil, gate: StoreLaunchGate.scripted(
+                dials: w.dialsBox, backing: w.backing, envelope: w.envelopeBox, stamps: w.stamps, appleKey: w.appleKeys),
+            isRealVariant: true,
+            makeKDF: { derivations.withValue { $0 += 1 }; return PassphraseKDF.Descriptor(
+                algorithm: PassphraseKDF.algorithmArgon2id, argon2Version: 0x13,
+                memoryKiB: 256, iterations: 1, parallelism: 1,
+                salt: PassphraseKDF.randomSalt(), outputBytes: 32) },
+            storeID: { [id = file.storeID] in id },
+            syncCustodyLeaves: { _ in w.syncLeaves.leaves }, syncCustodySession: w.syncSession))
+        counting.adoptResident(nil)
+        let before = file
+        #expect(await counting.landVaultMaterial(VaultLanding(
+            material: held, kdf: vaultKDF, passphrase: "account-sesame", recoveryWords: nil)) == nil)
+        file = try #require(w.envelopeBox.value)
+        #expect(file.passphrase == before.passphrase, "the P copy untouched — derive once")
+        // (c) typed words: the W copy lands beside; nothing else moves.
+        let words = try RecoveryPhrase.generate()
+        #expect(await counting.landVaultMaterial(VaultLanding(
+            material: held, kdf: vaultKDF, passphrase: nil, recoveryWords: words)) == nil)
+        file = try #require(w.envelopeBox.value)
+        #expect(try file.unwrapKey(recoveryWords: words) == w.key, "L under the typed words")
+        #expect(file.passphrase == before.passphrase)
+        // (d) no key in hand refuses in words.
+        let locked = try world(standard: false, enrolled: false)
+        locked.controller.dropResident()
+        locked.backing.gated = nil
+        #expect(await locked.controller.landVaultMaterial(VaultLanding(
+            material: held, kdf: vaultKDF, passphrase: nil, recoveryWords: nil)) == ProtectionController.keyUnavailable)
+    }
+
+    /// The runner a Connect pin needs exists only so the sheet can open —
+    /// the Connect road never touches it.
+    private func inertLeaves(for w: World) -> PostureSwitchRunner.Leaves {
+        PostureSwitchRunner.Leaves(
+            scope: "Variorum", storeURL: URL(fileURLWithPath: "/dev/null"),
+            database: try! AppDatabase.inMemory(), gate: StoreLaunchGate.scripted(
+                dials: w.dialsBox, backing: w.backing, envelope: w.envelopeBox, stamps: w.stamps, appleKey: w.appleKeys),
+            keyStore: .inMemory(), keyProvider: DeviceKeySyncProvider(store: .inMemory()),
+            vault: nil, transport: nil, signedIn: { true },
+            appleKeys: .inMemory(backing: w.appleKeys),
+            libraryKeyInHand: { nil as StoreKey? }, posture: { .standard }, alwaysAsk: { false }, biometryAvailable: { true },
+            moveCustody: { _ in .refused("inert") },
+            rekeyLibrary: { _, _, _ in }, pauseSync: {}, resumeSync: {},
+            takeSnapshot: { nil }, preSwitchSnapshots: { _ in [] }, deleteSnapshotPairs: { _ in 0 },
+            defaults: { UserDefaults(suiteName: "io.lduarte.variorum.tests.3a.inert")! },
+            reconcile: {}, now: { Date() }, log: { _ in })
+    }
+
     // MARK: - pre-13x 2c: THE FOLLOW's detection (§7 / §3.6)
 
     private func rotatedReading(
@@ -920,7 +1051,7 @@ struct Phase13pControllerTests {
     /// compared the key ids — `followNotice` stayed nil.
     @Test func aRotatedVaultUnderTheSameOwnerOwesTheFollowAndLaterLeavesTheBanner() async throws {
         let w = try world(enrolled: true)
-        w.controller.stampedOwnerID = { "user-1" }
+        w.controller.foreignOwner = { _ in false }
         w.controller.readVaultPosture = { [reading = rotatedReading(appleHeld: false)] in reading }
         await w.controller.reconcile()
         let owed = try #require(w.controller.followNotice)
@@ -953,17 +1084,23 @@ struct Phase13pControllerTests {
     /// (following would land another account's keys over this library).
     @Test func aDifferentOwnerSpeaksTheKeysDontMatchSentenceAndOwesNoFollow() async throws {
         let w = try world(enrolled: true)
-        w.controller.stampedOwnerID = { "user-someone-else" }
+        w.controller.foreignOwner = { _ in true }
         w.controller.readVaultPosture = { [reading = rotatedReading(appleHeld: false)] in reading }
+        let fileBefore = w.envelopeBox.value
         await w.controller.reconcile()
         #expect(w.controller.differentOwner)
         #expect(w.controller.notice == .differentOwner)
+        // pre-13x 3a (§12): a change on another account never locks a device
+        // out of its own library — the verdict writes nothing and moves nothing.
+        #expect(w.envelopeBox.value == fileBefore && w.backing.auto == w.key && w.backing.gated == nil,
+                "the key file and custody untouched under a foreign verdict")
+        #expect(w.syncLeaves.plainRecord?.material != nil, "the held sync material stays — nothing is dropped")
         #expect(w.controller.followNotice == nil, "a different vault is the adopt road's (batch 3), never the follow's")
         #expect(!w.controller.followPending)
         #expect(ProtectionCopy.keysDontMatchThisLibrary
                 == "This account's keys don't match this library. Enter your passphrase to connect it — everything in it will upload to this account.")
         // An unstamped library (never synced) has nothing to disagree with.
-        w.controller.stampedOwnerID = { nil }
+        w.controller.foreignOwner = { _ in false }
         await w.controller.reconcile()
         #expect(!w.controller.differentOwner)
         #expect(w.controller.followNotice?.kind == .movedToCastle)
@@ -978,7 +1115,7 @@ struct Phase13pControllerTests {
         let w = try world(standard: false, enrolled: true)
         let acts = LockedCounter()
         w.controller.followIntoStandardAct = { acts.increment() }
-        w.controller.stampedOwnerID = { "user-1" }
+        w.controller.foreignOwner = { _ in false }
         w.controller.readVaultPosture = { [reading = rotatedReading(appleHeld: true, corpusKeyID: "corpus")] in reading }
         await w.controller.reconcile()
         #expect(acts.value == 1, "the silent follow ran")
@@ -993,7 +1130,7 @@ struct Phase13pControllerTests {
         let other = try world(standard: false, enrolled: true)
         let otherActs = LockedCounter()
         other.controller.followIntoStandardAct = { otherActs.increment() }
-        other.controller.stampedOwnerID = { "user-1" }
+        other.controller.foreignOwner = { _ in false }
         other.controller.readVaultPosture = { [reading = rotatedReading(appleHeld: true)] in reading }
         await other.controller.reconcile()
         #expect(otherActs.value == 0, "a rotation is the follow's, never the silent road's")
@@ -1028,7 +1165,7 @@ struct Phase13pControllerTests {
         #expect(filled.controller.effectiveGate == .passphrase)
         #expect(filled.syncSession.record?.material == nil, "Always ask holds nothing before the read")
         filled.syncSession.holdDerivedWrappingKey(derived, kdf: kdf)
-        filled.controller.stampedOwnerID = { "user-1" }
+        filled.controller.foreignOwner = { _ in false }
         filled.controller.readVaultPosture = { [reading] in reading }
         await filled.controller.reconcile()
         #expect(filled.syncSession.record?.material?.corpusKeyID == "corpus-9", "the sync keys are held for the session")
@@ -1039,7 +1176,7 @@ struct Phase13pControllerTests {
         let retired = try world(standard: false, dials: ProtectionDials(alwaysAsk: true))
         retired.syncSession.holdDerivedWrappingKey(
             try PassphraseKDF.deriveKey(passphrase: "old word", descriptor: fastKDF()), kdf: fastKDF())
-        retired.controller.stampedOwnerID = { "user-1" }
+        retired.controller.foreignOwner = { _ in false }
         retired.controller.readVaultPosture = { [reading] in reading }
         await retired.controller.reconcile()
         #expect(retired.syncSession.record?.material == nil)
@@ -1056,7 +1193,7 @@ struct Phase13pControllerTests {
         let rotated = try world(standard: false, dials: ProtectionDials(alwaysAsk: true), key: key, envelope: recorded)
         rotated.syncSession.holdDerivedWrappingKey(
             try PassphraseKDF.deriveKey(passphrase: "sesame", descriptor: fastKDF()), kdf: fastKDF())
-        rotated.controller.stampedOwnerID = { "user-1" }
+        rotated.controller.foreignOwner = { _ in false }
         rotated.controller.readVaultPosture = { [reading] in reading }
         await rotated.controller.reconcile()
         #expect(rotated.controller.followNotice?.kind == .keysReplaced)

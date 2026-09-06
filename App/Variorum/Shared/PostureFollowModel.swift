@@ -61,6 +61,9 @@ final class PostureFollowModel: Identifiable {
 
     var runnerPhase: PostureSwitchRunner.Phase { runner.phase }
     var isAlwaysAskVariant: Bool { notice.kind == .alwaysAskRetiredWord }
+    /// pre-13x 3a: the Connect variant (copy §3) — the adopt road, never a
+    /// follow; its third door is Cancel.
+    var isConnectVariant: Bool { notice.kind == .connectLibrary }
 
     // MARK: - The doors
 
@@ -77,7 +80,8 @@ final class PostureFollowModel: Identifiable {
     /// *Later*: the library opens, reads and edits; sync does not run; the
     /// persistent banner speaks; the notice returns at every open.
     func later() {
-        controller.deferFollow()
+        // A Connect owes nothing: Cancel closes without deferring.
+        if !isConnectVariant { controller.deferFollow() }
         phase = .closed
     }
 
@@ -110,6 +114,17 @@ final class PostureFollowModel: Identifiable {
         controller.switchInProgress = true
         defer { controller.switchInProgress = false }
         do {
+            if isConnectVariant {
+                // THE ADOPT ROAD (decision 17): the typed secret unwraps THIS
+                // account's master; every row re-stamped, sync re-initialized,
+                // custody + the key file landed; the whole library uploads.
+                guard let act = controller.connectAct else { throw PostureSwitchError.syncKeysUnavailable }
+                try await act(passphrase, words)
+                controller.connectLanded()
+                await controller.reconcile()
+                phase = .done(insuranceOff: false, hasOffer: false)
+                return
+            }
             if isAlwaysAskVariant {
                 // The vault road's pickup: the new word opens the vault, the
                 // keys are held for the session, the local copy re-wrapped.
@@ -129,7 +144,10 @@ final class PostureFollowModel: Identifiable {
             controller.followLanded()
             phase = .done(insuranceOff: outcome.insuranceTurnedOff, hasOffer: !outcome.preSwitchSnapshots.isEmpty)
         } catch VaultEnrollmentError.wrongPassphrase {
-            lastError = ProtectionCopy.passphraseNotTheLibrarys
+            // A Connect's word is the ACCOUNT's, not this library's.
+            lastError = isConnectVariant
+                ? EncryptionSession.message(for: VaultEnrollmentError.wrongPassphrase)
+                : ProtectionCopy.passphraseNotTheLibrarys
             phase = passphrase != nil ? .askPassphrase : .askWords
         } catch VaultEnrollmentError.wrongRecoveryPhrase {
             lastError = "Those aren't your account's twelve words."

@@ -104,3 +104,42 @@ extension Operations {
         }
     }
 }
+
+// MARK: - The adopt road's re-stamp (pre-13x 3a — decision 17)
+
+extension Operations {
+    /// pre-13x 3a — THE ADOPT ROAD's re-stamp (the postures design decision
+    /// 17, §5's setup/enroll rows, corner 29/31): a library that last synced
+    /// under ANOTHER account (a deleted-then-recreated account; a library
+    /// moved between accounts) is adopted by the signed-in one — EVERY
+    /// owner-carrying synced row, live AND tombstoned, is re-stamped to
+    /// `owner` in ONE transaction (introspected like `adoptOwnerID`, never a
+    /// hand list). Ordinary UPDATEs — the outbox triggers enqueue every
+    /// touched row (never apply mode); the caller then runs the engine's
+    /// `resyncReinitialize` (versions → 0, `sync_row_seq` cleared, the
+    /// cursor cleared, every row enqueued) so the WHOLE library uploads
+    /// into the new account's partition — the 14c `(owner_id, id)` keys
+    /// let the same ids under X and Y coexist. `adoptOwnerID` fills NULLs
+    /// only and is deliberately not this. Rows already under `owner` are
+    /// left alone (idempotent); `updated_at` and `sync_version` untouched
+    /// (adoption is not an edit; the version is the server's token, reset
+    /// by the re-initialization). Refuses while signed out.
+    @discardableResult
+    public func restampOwner(to owner: String) throws -> OwnerAdoptionReport {
+        guard currentOwnerID() != nil else { throw OperationError.noOwnerIdentity }
+        return try database.write { db in
+            var restamped: [String: Int] = [:]
+            for table in SyncSchema.tables {
+                let columns = try Row.fetchAll(
+                    db, sql: "PRAGMA table_info(\(table.name))")
+                    .map { $0["name"] as String }
+                guard columns.contains("owner_id") else { continue }
+                try db.execute(
+                    sql: "UPDATE \(table.name) SET owner_id = ? WHERE owner_id IS NULL OR owner_id != ?",
+                    arguments: [owner, owner])
+                restamped[table.name] = db.changesCount
+            }
+            return OwnerAdoptionReport(adoptedByTable: restamped)
+        }
+    }
+}

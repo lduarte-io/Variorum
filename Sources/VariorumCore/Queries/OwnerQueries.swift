@@ -20,4 +20,22 @@ extension Queries {
         }
         return nil
     }
+
+    /// pre-13x 3a — THE EXACT FOREIGN-OWNER READ (decision 17; §3.6; ledger
+    /// 15): a library is FOREIGN to the signed-in account when ANY
+    /// owner-carrying synced row's `owner_id` is non-NULL and ≠ `userID` —
+    /// a MIXED library (rows born under Y beside X's) reads foreign, which
+    /// `stampedOwnerID`'s first-row read could miss. Tombstones count: they
+    /// still sync. This is the verdict's read; the adopt road
+    /// (`Operations.restampOwner`) is what makes it false again.
+    public static func foreignOwnerExists(_ db: Database, signedIn userID: String) throws -> Bool {
+        for table in SyncSchema.tables where table.plainColumns.contains("owner_id") {
+            let hit = try Int.fetchOne(
+                db,
+                sql: "SELECT 1 FROM \(table.name) WHERE owner_id IS NOT NULL AND owner_id != ? LIMIT 1",
+                arguments: [userID])
+            if hit != nil { return true }
+        }
+        return false
+    }
 }

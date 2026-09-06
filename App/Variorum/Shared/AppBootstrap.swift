@@ -459,10 +459,11 @@ final class AppBootstrap {
             protection.readSwitchPending = { [database] in
                 (try? await database.read { try RotationMarker.isSet($0) }) ?? false
             }
-            // pre-13x 2c (§3.6 — the owner distinction): the rows' stamped
-            // owner, read at the reconcile against the signed-in user id.
-            protection.stampedOwnerID = { [database] in
-                (try? await database.read { try Queries.stampedOwnerID($0) }) ?? nil
+            // pre-13x 3a (§3.6 — the owner distinction, the EXACT read): any
+            // owner-carrying row stamped by another account, read at the
+            // reconcile against the signed-in user id.
+            protection.foreignOwner = { [database] user in
+                (try? await database.read { try Queries.foreignOwnerExists($0, signedIn: user) }) ?? false
             }
             // 13p: the demanded modes' resident key (nil on the Auto
             // road — its Keychain releases on demand), then the launch

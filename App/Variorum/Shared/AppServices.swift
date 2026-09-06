@@ -418,6 +418,67 @@ final class AppServices {
         }
     }
 
+    // MARK: - pre-13x 3a: THE ADOPT ROAD (decision 17; §3.6; corner 29/31)
+
+    /// CONNECT (copy §3's *Connect…*): a library that last synced under
+    /// ANOTHER account — a deleted-then-recreated account, a library moved
+    /// between accounts — joins THIS one. The typed passphrase or words
+    /// unwrap this account's master (a wrong word refuses before anything
+    /// is written); then `adoptLibrary` re-stamps every owner-carrying row
+    /// and re-initializes sync; custody and the key file land through the
+    /// session's adopt; sync resumes and the WHOLE library uploads into
+    /// this account's partition (corpus-shaped, once — P1's letter; the
+    /// 14c `(owner_id, id)` keys let the same ids under X and Y coexist).
+    /// NO `resyncReinitialize` for a same-owner rotated account — that is
+    /// the follow (§7), never this door.
+    func connectLibrary(passphrase: String?, recoveryWords: [String]?) async throws {
+        guard let keyVault else { throw ConnectLibraryError.unconfigured }
+        guard let userID = await auth.currentUserID else { throw ConnectLibraryError.signedOut }
+        let enrollment = VaultEnrollment(client: keyVault)
+        let material: DeviceKeyMaterial
+        if let passphrase, !passphrase.isEmpty {
+            material = try await enrollment.enroll(passphrase: passphrase)
+        } else if let recoveryWords, !recoveryWords.isEmpty {
+            material = try await enrollment.enroll(recoveryWords: recoveryWords)
+        } else {
+            throw PostureSwitchError.secretRequired
+        }
+        guard let fetched = try await keyVault.fetchVault() else { throw KeyVaultClientError.vaultAbsent }
+        try await adoptLibrary(into: userID)
+        _ = await encryption.adoptEnrolledMaterial(
+            material, kdf: fetched.format.kdf,
+            typedPassphrase: passphrase, typedWords: recoveryWords)
+        await connectSyncIfAllowed()
+    }
+
+    /// The adopt's two writes, shared by Connect and by sync SETUP over a
+    /// foreign-stamped library (copy §2a's *Move It to This Account*): the
+    /// sync chain stopped; every owner-carrying row re-stamped to the
+    /// signed-in id in ONE transaction (`Operations.restampOwner`); the
+    /// engine's `resyncReinitialize` (`sync_version` → 0, `sync_row_seq`
+    /// cleared, the cursor cleared, every row enqueued). The caller
+    /// reconnects the chain.
+    func adoptLibrary(into userID: String) async throws {
+        sync.stop()
+        try await session.runner.run { ops in
+            _ = try ops.restampOwner(to: userID)
+        }
+        let engine = SyncEngine(transport: makeSyncTransport(auth), keyProvider: makeSyncKeyProvider())
+        let database = session.database
+        try await withDependencies { $0.database = database } operation: {
+            try await engine.resyncReinitialize()
+        }
+    }
+
+    /// The signed-in library's owner verdict, read for the setup ceremony's
+    /// pre-Screen-1 confirm (copy §2a): true when ANY owner-carrying row was
+    /// stamped by another account (`Queries.foreignOwnerExists`).
+    func libraryOwnerIsForeign() async -> Bool {
+        guard let userID = await auth.currentUserID else { return false }
+        let database = session.database
+        return (try? await database.read { try Queries.foreignOwnerExists($0, signedIn: userID) }) ?? false
+    }
+
     // MARK: - The account lifecycle doors (Phase 14c batch 2 — deletion;
     // the CF-8 re-key's composition moved to the root at pre-13x 2b)
 
@@ -490,6 +551,19 @@ final class AppServices {
         if case .active = account.hostedSync {
             account.subscriptionNote =
                 "This account has an active hosted-sync plan — cancel it first."
+        }
+    }
+}
+
+/// pre-13x 3a: the Connect door's own refusals (worded by
+/// `EncryptionSession.message(for:)`'s describing arm).
+nonisolated enum ConnectLibraryError: Error, Equatable, Sendable, CustomStringConvertible {
+    case unconfigured
+    case signedOut
+    var description: String {
+        switch self {
+        case .unconfigured: return "Project keys not configured (ProjectConfig.swift)"
+        case .signedOut: return "sign in first"
         }
     }
 }
