@@ -865,7 +865,10 @@ the silent bound item it is Standard-waiting — the reconcile keeps trying to l
 route tries the landing before it derives. 46. **"iCloud Keychain is off" is undetectable on macOS** (a synchronizable
 add succeeds with it off; no toggle API; no arrival notification): the exposed tier fires only when A is UNREADABLE;
 the covered tier's sentence hedges ("as far as this Mac can tell"), and a second device's arrival (Q3) is the only
-proof. 47. **The iOS keychain fence:** on iOS the Debug (dev) and Release builds share the bundle id and ONE keychain, so
+proof. 48. **Every Face ID use on iOS needs `NSFaceIDUsageDescription` in the Info.plist** — without it iOS terminates
+the app at the first prompt (a flicker of the gate, then death; found at the second sitting on her phone, the first
+real Face ID gate this phase ever reached); the key rides both iOS configurations, and the mobile test host pins the
+built Info.plist. 47. **The iOS keychain fence:** on iOS the Debug (dev) and Release builds share the bundle id and ONE keychain, so
 every Keychain item's ACCOUNT carries the store-variant scope — the session and the 14b legacy sync-key item were
 scope-less and the dev build read the real app's; a dev-scope store never reads a scope-less item, and the
 migration's legacy legs run under the real scope only (found by Q3's early run; fixed at 2c).
@@ -903,7 +906,7 @@ on both devices, the
 store and the fake server only.**
 
 ## 16. OPEN
-Nothing in the design. **Ruled at her word (the kickoff evening): ONE phase** — the drills as gates, the ladder at the
+**Two items for the ladder (found at the second sitting — the handoff §2b/§3):** the mobile test host's pin that the built Info.plist carries `NSFaceIDUsageDescription` (corner 48); the phone's device identity CHANGED at the follow (three `device_cursor` rows) — decision 13 says it must not: trace the follow's custody rewrite, pin the identity's persistence, or record it in KnownIssues with an owner. Otherwise nothing in the design. **Ruled at her word (the kickoff evening): ONE phase** — the drills as gates, the ladder at the
 end (13p's shape); no split. **The lockstep deploy (marker 7 → 8) and the refreshed installs are PRE-AUTHORIZED:** her
 PAT is stored (`.env.supabase.local`, the 9c arrangement), so the orchestrator runs the mirror deploy at the window
 without waiting for her at the keyboard (the `!` road if the permission classifier blocks the mutating call — the 13j
@@ -967,7 +970,7 @@ tutorial spine is SIX suites in `TutorialWalkTests.swift` addressed by TYPE name
 
 ### LIVE STATUS (flipped in the same commit as each piece; PENDING = unverified)
 - U0 — DONE. U1 — DONE 2026-09-04.
-- **U2 batch 1a — DONE** (`10079de2`; the record + the orchestrator adjudication under §19 BATCH RECORDS). **U2 batch 1b — DONE** (`12cd1767`; the record + the orchestrator adjudication under §19 BATCH RECORDS; U2 closes at the deploy window with its ONE live round). **U3 batch 2 — BUILT: 2a `4b2eb646` · 2b `67e744d6` · 2c `c7555c2b`, all adjudicated; U3 CLOSES AT THE WINDOW** (the deploy + both installs + her migrations, sign-ins and confirms + the sanity check + the drills' real-store legs — the handoff's §2b is the running record, copied here at the seam). **Batch 2d — DONE (`975bd383`, adjudicated)** — the SECOND SITTING (both installs from 2d's tree; the phone's repair through the follow; the Mac's confirm) closes U3; the two drills are the phase's end. **U4 batch 3 — NEXT after that, the successor orchestrator's** (the handoff's §1 kickoff). U3 — NOT-STARTED.
+- **U2 batch 1a — DONE** (`10079de2`; the record + the orchestrator adjudication under §19 BATCH RECORDS). **U2 batch 1b — DONE** (`12cd1767`; the record + the orchestrator adjudication under §19 BATCH RECORDS; U2 closes at the deploy window with its ONE live round). **U3 batch 2 — BUILT: 2a `4b2eb646` · 2b `67e744d6` · 2c `c7555c2b`, all adjudicated; U3 CLOSES AT THE WINDOW** (the deploy + both installs + her migrations, sign-ins and confirms + the sanity check + the drills' real-store legs — the handoff's §2b is the running record, copied here at the seam). **Batch 2d — DONE (`975bd383`, adjudicated); THE WINDOW + THE SECOND SITTING — DONE: U3 CLOSED** (the deploy at marker 8; both devices on 2d's tree — the phone on `3ed3b182` with the Face ID usage description; her Mac and phone in Castle with one key file each; the record is the handoff's §2b). The two drills are the phase's end. **U4 batch 3 — NEXT, the successor orchestrator's** (the handoff's §1 kickoff). U3 — NOT-STARTED.
   U4 — NOT-STARTED. U5 — NOT-STARTED.
 
 ### THE LEDGER (every row owned)
