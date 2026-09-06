@@ -246,6 +246,33 @@ nonisolated extension ProtectionCopy {
     static let backupsLockTimeCopyLine =
         "When you lock, Variorum also keeps a sealed copy of the library as it was "
         + "— checked the next time you unlock."
+    /// pre-13x 5b (ledger 64 — decision 24; copy §6): THE iCLOUD DRIVE OFFER,
+    /// once, at the first backup run — the title, the body, the addendum by
+    /// posture, the three doors. The Mac only (the phone has no picked-folder
+    /// road).
+    static let iCloudOfferTitle = "Keep a copy of your backups in iCloud Drive?"
+    static let iCloudOfferBody =
+        "Variorum keeps backups beside your library, on this \(deviceName). A copy in "
+        + "iCloud Drive survives the \(deviceName)."
+    static let iCloudOfferStandardAddendum = "Your Apple account then holds both the key and the writing."
+    static let iCloudOfferCastleAddendum = "Backups are encrypted; the copy is safe anywhere."
+    static let iCloudOfferUseDoor = "Use iCloud Drive"
+    static let iCloudOfferChooseDoor = "Choose Another Folder…"
+    static let iCloudOfferNotNowDoor = "Not Now"
+    /// A cancelled picker (iCloud Drive not there, or the user backed out):
+    /// the offer stays open; nothing changed — a chrome line the copy file
+    /// has no sentence for (listed in copy §11 for 13s; the 5b record's
+    /// QUESTIONS).
+    static let iCloudOfferNoFolderPicked = "No folder was chosen, so nothing changed."
+    /// Copy §6's why-not sentence — the FAQ's entry and, when 13x builds the
+    /// picker's refusal of the live library's own folder (ledger 4), that
+    /// refusal's words. A constant so the sentence has ONE home; rendered
+    /// by no surface of this phase (recorded).
+    static let liveLibraryNotInICloudDrive =
+        "Your working library stays on this \(deviceName). iCloud Drive syncs files while "
+        + "they're being written, which can corrupt a live database — backups are complete, "
+        + "sealed copies, which is what a synced folder is good at. To have your writing on "
+        + "every device, use sync."
 
     // MARK: - §9 Her migration's one-time messages (Mac + phone, once each)
 

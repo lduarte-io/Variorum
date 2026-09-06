@@ -155,13 +155,18 @@ enum ExportPanels {
     }
 
     /// Folder chooser for the bulk export.
-    static func chooseFolder(prompt: String) -> URL? {
+    /// `directoryURL` (pre-13x 5b): where the panel OPENS — the iCloud Drive
+    /// offer points it at iCloud Drive's root; the powerbox honors the hint
+    /// and the pick is the sandbox-legal road to a folder outside the
+    /// container. nil = the panel's own default.
+    static func chooseFolder(prompt: String, directoryURL: URL? = nil) -> URL? {
         let panel = NSOpenPanel()
         panel.canChooseFiles = false
         panel.canChooseDirectories = true
         panel.canCreateDirectories = true
         panel.allowsMultipleSelection = false
         panel.prompt = prompt
+        if let directoryURL { panel.directoryURL = directoryURL }
         return panel.runModal() == .OK ? panel.url : nil
     }
 }

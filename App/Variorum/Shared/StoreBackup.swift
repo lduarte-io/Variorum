@@ -94,6 +94,10 @@ final class StoreBackup {
     /// The most recent run this process performed. `nil` until one runs —
     /// the face falls back to the persisted log, which survives relaunch.
     private(set) var lastRun: BackupRunRecord?
+    /// pre-13x 5b (ledger 64): told after EVERY run, on the main actor —
+    /// the iCloud Drive offer's trigger ("at the first backup run"). A
+    /// caller that attaches after a run already landed reads `lastRun`.
+    var onRun: (@MainActor (BackupRunRecord) -> Void)?
 
     init(
         database: AppDatabase,
@@ -164,6 +168,7 @@ final class StoreBackup {
         // primary destination's failure, which is the one that means the
         // mechanism is broken rather than the folder unreachable).
         lastError = record.primary.outcome == .failed ? record.primary.detail : nil
+        onRun?(record)
         return record
     }
 

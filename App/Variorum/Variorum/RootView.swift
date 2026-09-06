@@ -50,6 +50,9 @@ struct RootView: View {
     /// each window observes it for itself, exactly as it does the library.
     @State private var stars: StarsModel
     @State private var paletteOpen = false
+    /// pre-13x 5b (ledger 64): the iCloud Drive offer's brain — made once the
+    /// services exist; nil until then and in harness mounts without services.
+    @State private var iCloudOffer: ICloudDriveOfferModel?
     /// Stage C: a palette/Library block hit lands CARET-PRECISE — the
     /// target block rides beside the selection and seeds the opened
     /// editor's caret (cleared on ordinary navigation).
@@ -211,6 +214,24 @@ struct RootView: View {
                 open(picked, blockID: blockID)
             }
             .environment(theme)
+        }
+        // pre-13x 5b (ledger 64 — decision 24): THE iCLOUD DRIVE OFFER, once,
+        // at the first backup run of this store. Wired when the services
+        // exist; the hook rides every run, and the model re-reads the last
+        // run at attach in case the first one landed before the hook did.
+        .task(id: services != nil) {
+            guard let services, iCloudOffer == nil else { return }
+            let offer = ICloudDriveOfferModel(
+                leaves: .live(services: services, protection: protection))
+            iCloudOffer = offer
+            services.backup?.onRun = { record in offer.consider(after: record) }
+            offer.consider(after: services.backup?.lastRun)
+        }
+        .sheet(isPresented: Binding(
+            get: { iCloudOffer?.isDue ?? false },
+            set: { shown in if !shown { iCloudOffer?.notNow() } })
+        ) {
+            if let iCloudOffer { ICloudDriveOfferSheet(model: iCloudOffer) }
         }
         .onChange(of: router.pendingSelection) { _, pending in
             guard let pending else { return }

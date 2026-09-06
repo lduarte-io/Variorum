@@ -89,6 +89,10 @@ final class AppServices {
     /// The vault client the encryption flows AND the 14c account doors
     /// share (nil = unconfigured project; every door stays dormant).
     let keyVault: KeyVaultClient?
+    /// pre-13x 5b (ledger 64): the store variant these services serve — the
+    /// iCloud Drive offer's mark is scoped by it (a dev-store offer never
+    /// suppresses the real store's).
+    let storeVariant: AppDatabase.StoreVariant
     let account = AccountState()
 
     /// The app session (store + runner) the services compose over —
@@ -198,6 +202,7 @@ final class AppServices {
                 sessionProvider: authSession)
             : nil)
         self.keyVault = vaultClient
+        self.storeVariant = storeVariant
         self.encryption = encryption ?? EncryptionSession(
             store: keyStore,
             client: vaultClient,
