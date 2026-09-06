@@ -3,7 +3,7 @@
 //  Variorum (shared: Mac + Mobile)
 //
 //  Phase 9c, Step 5 — the sign-in surface replacing Phase 8's paste-in
-//  (SyncSetupView, deleted). Functional and unstyled (Phase 13 owns
+//  (the paste-in form, deleted). Functional and unstyled (Phase 13 owns
 //  beauty). One section, one session: the VARIORUM sign-in — the SUITE
 //  account, direct email+password against the Variorum project (Phase
 //  14a, round 0h — the delegated browser flow is retired). The Fragments

@@ -548,15 +548,11 @@ struct Phase9cAuthWiringTests {
             let name = file.lastPathComponent
             #expect(!text.contains("SyncCredentialsStore"),
                     "\(name) still references the retired store")
-            // pre-13x 3a REUSED the name for the sync-setup CEREMONY (copy
-            // §2a — `SyncSetupView.swift` / `SyncSetupModel.swift`, rendered
-            // by the Encryption tab); the retired Phase 8 paste-in form is a
-            // different thing, and its real tell — `SyncCredentialsStore` —
-            // is swept above. Found red at 3b (this suite was outside 3a's
-            // touched set); the exemption names 3a's three files.
-            #expect(!text.contains("SyncSetupView") || name == "SyncStatusViews.swift"
-                    || name == "AuthViews.swift" || name == "SyncSetupView.swift"
-                    || name == "SyncSetupModel.swift" || name == "EncryptionViews.swift",
+            // pre-13x 5a (ledger 55): the sync-setup CEREMONY 3a built under
+            // this retired form's NAME is now `SyncEnrollmentView` /
+            // `SyncEnrollmentModel`, so the sweep runs clean on its own
+            // letter again — no by-name exemption.
+            #expect(!text.contains("SyncSetupView"),
                     "\(name) still references the retired setup form")
             // The old Keychain service string survives in EXACTLY one
             // place: the cleanup that deletes the legacy item at first

@@ -45,7 +45,7 @@ struct EncryptionView: View {
 
     /// pre-13x 3a: the sync-setup ceremony's brain (copy §2a), made when the
     /// account has no vault and the user opens the door; nil = the door.
-    @State private var setup: SyncSetupModel?
+    @State private var setup: SyncEnrollmentModel?
 
     @State private var enrollPassphrase = ""
     @State private var usePhraseInstead = false
@@ -188,7 +188,9 @@ struct EncryptionView: View {
                 Text("Checking this account's encryption state…")
                     .pageSecondary(pageStyle)
             case .signedOut:
-                Text("Sign in first — your encryption vault lives on your account.")
+                // pre-13x 5a: copy §4's signed-out line (the Sign In… door is
+                // the Account tab's, one tab over).
+                Text(ProtectionCopy.signedOutLine)
                     .pageSecondary(pageStyle)
             case .newerFormat:
                 Text("This account's encryption was set up by a newer version of Variorum. Update the app to unlock sync.")
@@ -250,13 +252,13 @@ struct EncryptionView: View {
     @ViewBuilder
     private var setupSection: some View {
         if let setup {
-            SyncSetupView(model: setup, pageStyle: pageStyle) { self.setup = nil }
+            SyncEnrollmentView(model: setup, pageStyle: pageStyle) { self.setup = nil }
         } else {
             Text(ProtectionCopy.syncNotSetUpLine)
                 .pageProse(pageStyle)
             if encryption.storeTie != nil {
                 PageDoor(ProtectionCopy.turnOnSyncDoor, style: pageStyle) {
-                    setup = SyncSetupModel.make(services: services)
+                    setup = SyncEnrollmentModel.make(services: services)
                 }
                 .disabled(encryption.busy)
             } else {

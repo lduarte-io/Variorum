@@ -1,5 +1,5 @@
 //
-//  SyncSetupTests.swift
+//  SyncEnrollmentTests.swift
 //  VariorumTests
 //
 //  pre-13x batch 3a — SYNC SETUP's brain (copy §2a whole; the postures design
@@ -57,7 +57,7 @@ private final class ScriptedVaultDouble: @unchecked Sendable {
 
 @MainActor
 @Suite("pre-13x 3a — sync setup: copy §2a's ceremony over the store tie and the scripted vault")
-struct SyncSetupTests {
+struct SyncEnrollmentTests {
     /// The library's key file as the ceremony sees it: a scripted store.
     @MainActor
     final class ScriptedStore {
@@ -106,7 +106,7 @@ struct SyncSetupTests {
         let apple: InMemoryAppleKeyBacking
         let landings: LockIsolated<[VaultLanding]>
         let adopts: LockIsolated<Int>
-        let model: SyncSetupModel
+        let model: SyncEnrollmentModel
     }
 
     private func makeWorld(
@@ -145,7 +145,7 @@ struct SyncSetupTests {
         let landings = LockIsolated<[VaultLanding]>([])
         encryption.onVaultMaterialLanded = { landing in landings.withValue { $0.append(landing) } }
         let adopts = LockIsolated(0)
-        let model = SyncSetupModel(
+        let model = SyncEnrollmentModel(
             encryption: encryption, tie: scripted.tie,
             foreignOwner: { foreign },
             adopt: { adopts.withValue { $0 += 1 } })

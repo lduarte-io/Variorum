@@ -4,7 +4,7 @@
 //
 //  Phase 8, Step 6 — the one-row functional sync status surface (SyncSpec
 //  §10's "sync status indicator" scope, nothing more). Phase 9c, Step 5:
-//  the paste-in form (SyncSetupView) is DELETED — the row's door is the
+//  the paste-in form is DELETED — the row's door is the
 //  sign-in surface (AccountView), and an unconfigured row means signed
 //  out, not credential-less. Views render state and send actions only;
 //  functional and unstyled (Phase 13 owns beauty).

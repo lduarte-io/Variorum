@@ -1,6 +1,7 @@
 //
-//  SyncSetupView.swift
-//  Variorum (shared: Mac + Mobile — SYNC SETUP's face over `SyncSetupModel`,
+//  SyncEnrollmentView.swift  (pre-13x 5a — renamed from the 3a name, ledger 55: a
+//  NAME collision with the retired Phase 8 paste-in form, never a revival)
+//  Variorum (shared: Mac + Mobile — SYNC SETUP's face over `SyncEnrollmentModel`,
 //  rendered inline by the Encryption tab's `.noVault` arm on both platforms)
 //
 //  pre-13x batch 3a — copy §2a's screens, verbatim through `ProtectionCopy`:
@@ -15,8 +16,8 @@
 import SwiftUI
 import VariorumCore
 
-struct SyncSetupView: View {
-    @Bindable var model: SyncSetupModel
+struct SyncEnrollmentView: View {
+    @Bindable var model: SyncEnrollmentModel
     let pageStyle: SharedPageStyle?
     var onClose: () -> Void
 

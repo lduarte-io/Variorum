@@ -1,7 +1,7 @@
 //
-//  SyncSetupModel.swift
+//  SyncEnrollmentModel.swift  (pre-13x 5a — renamed from the 3a name, ledger 55)
 //  Variorum (shared: Mac + Mobile — SYNC SETUP's brain; the Encryption tab's
-//  `.noVault` arm renders it on both platforms through `SyncSetupView`)
+//  `.noVault` arm renders it on both platforms through `SyncEnrollmentView`)
 //
 //  pre-13x batch 3a — TURNING ON SYNC (copy §2a, verbatim through
 //  `ProtectionCopy`; the postures design decision 5, §5's Set-up-sync row,
@@ -25,7 +25,7 @@ import VariorumCore
 
 @MainActor
 @Observable
-final class SyncSetupModel: Identifiable {
+final class SyncEnrollmentModel: Identifiable {
     enum Phase: Equatable {
         /// Reading the store's facts and the owner verdict.
         case checking
@@ -85,9 +85,9 @@ final class SyncSetupModel: Identifiable {
     /// The production composition: the session's store tie (wired by
     /// `wireOneSecretHooks`), the services' owner verdict and adopt road.
     /// nil while no store tie is wired (an unconfigured composition).
-    static func make(services: AppServices) -> SyncSetupModel? {
+    static func make(services: AppServices) -> SyncEnrollmentModel? {
         guard let tie = services.encryption.storeTie else { return nil }
-        return SyncSetupModel(
+        return SyncEnrollmentModel(
             encryption: services.encryption, tie: tie,
             foreignOwner: { await services.libraryOwnerIsForeign() },
             adopt: { try await services.adoptLibraryAfterSetup() })
