@@ -178,18 +178,17 @@ way. Your encryption passphrase and the 12-word recovery phrase do
 not encrypt anything themselves — they are ways to hand that key
 back to you when this Mac's own Keychain cannot.
 
-So what losing them would cost depends on your at-open mode in
-Settings ▸ Protection. These lists are the app's own — the same ones
-that pane shows, kept current with your dials:
+So what losing them would cost depends on your posture in
+Settings ▸ Protection — Standard or Castle. These are the app's own
+sentences, the same ones that pane's cards show:
 
-- **Open silently (Keychain)** — your ways back in: this Mac (its Keychain holds the key) · your encryption passphrase (if you set one) · your recovery phrase (if you saved it). Forgetting a secret costs nothing while this Mac still works: the
-Keychain opens the library without asking.
-- **Ask for Touch ID** — your ways back in: this Mac's fingerprint/face unlock · your encryption passphrase · your recovery phrase (if saved).
-- **Ask for the passphrase** — your ways back in: your encryption passphrase · your recovery phrase (if saved). In this mode, forgetting your passphrase without the recovery phrase written down IS enough to lose your writing. Nothing on this Mac opens the library silently — that is the point, and that is the price. Keep the twelve words somewhere real.
+- **Standard** — the floor: you lose your writing only if you lose every Apple device, every way Apple offers to recover your account, AND your passphrase and twelve words. Keep the words: they are your way back if your Apple account is ever gone.
+- **Castle** — the floor: lose every enrolled device AND both your passphrase and your twelve words, and your writing is gone. Nobody can help — not Apple, not us. That is the point of Castle, and it's why we ask you to write the words down.
 
-With the iCloud Keychain copy on (Settings ▸ Protection), every list
-above gains one more way back in: the copy in your iCloud Keychain. Losing your writing means losing EVERY way back in at once — any
-single one of them still standing gets you back in.
+Losing your writing means losing EVERY way back in at once — any
+single one of them still standing gets you back in. The whole story
+— every key, where it lives, why an old backup behaves the way it
+does — is the book “Encryption Explained” on your shelf.
 
 **Check before you need to.** Neither secret is used day to day — the
 device unwraps once and remembers — so the first time you type one

@@ -42,15 +42,18 @@ struct ProtectionStatusRow: View {
                         .font(tokens.small)
                         .foregroundStyle(exposed ? tokens.alarm : tokens.muted)
                     VStack(alignment: .leading, spacing: 1) {
-                        Text(tokens.chromeLabel(ProtectionShapes.unchosenIndicatorLabel))
+                        Text(tokens.chromeLabel(ProtectionCopy.postureName(.standard)))
                             .font(tokens.small)
                             .fontWeight(.semibold)
                             .foregroundStyle(tokens.ink)
                             .lineLimit(2)
                             .fixedSize(horizontal: false, vertical: true)
+                        // pre-13x 5a (design §8): the unchosen indicator reads
+                        // "Standard" + the current-state line (copy §1); exposed
+                        // keeps the hardened headline (copy §5).
                         Text(exposed
                              ? ProtectionCopy.exposedNudgeHeadline
-                             : ProtectionShapes.unchosenIndicatorDetail)
+                             : ProtectionCopy.currentStateLine(.standard))
                             .font(tokens.small)
                             .foregroundStyle(exposed ? tokens.alarm : tokens.muted)
                             .lineLimit(3)
@@ -63,8 +66,8 @@ struct ProtectionStatusRow: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .accessibilityLabel(ProtectionShapes.unchosenIndicatorLabel)
-            .help(ProtectionShapes.unchosenIndicatorDetail)
+            .accessibilityLabel(ProtectionCopy.postureName(.standard))
+            .help(ProtectionCopy.currentStateLine(.standard))
         }
     }
 }

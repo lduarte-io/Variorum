@@ -3091,9 +3091,9 @@ private let privacyChapter = "keeping it private"
 /// The DANGER with a chapter like this is drift: a settings pane re-worded at
 /// 13s and a lesson left behind is a lesson that lies about a security
 /// feature — the worst class of stale copy in the app. So the pins below tie
-/// the prose to the app's OWN sentences (`ProtectionCopy` — the same brain the
-/// pane renders and, for the loss math, the same `lossLegs` list). A re-worded
-/// mode label, a renamed preset or a changed chain makes this red rather than
+/// the prose to the app's OWN sentences (`ProtectionCopy` — the copy §7
+/// constants both seeders render, the same brain the pane renders). A
+/// re-worded posture name or a changed floor makes this red rather than
 /// merely wrong.
 ///
 /// It is a CONTRACT suite, not an acts suite, and deliberately so: every act

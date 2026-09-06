@@ -250,25 +250,19 @@ nonisolated enum DataSafetyCopy {
         not encrypt anything themselves — they are ways to hand that key
         back to you when this Mac's own Keychain cannot.
 
-        So what losing them would cost depends on your at-open mode in
-        Settings ▸ Protection. These lists are the app's own — the same ones
-        that pane shows, kept current with your dials:
+        So what losing them would cost depends on your posture in
+        Settings ▸ Protection — Standard or Castle. These are the app's own
+        sentences, the same ones that pane's cards show:
 
-        - **\(ProtectionCopy.modeLabel(.auto))** — your ways back in: \
-        \(ProtectionCopy.lossLegs(.auto, escrowOn: false).joined(separator: " · ")). \
-        Forgetting a secret costs nothing while this Mac still works: the
-        Keychain opens the library without asking.
-        - **\(ProtectionCopy.modeLabel(.biometric))** — your ways back in: \
-        \(ProtectionCopy.lossLegs(.biometric, escrowOn: false).joined(separator: " · ")).
-        - **\(ProtectionCopy.modeLabel(.passphrase))** — your ways back in: \
-        \(ProtectionCopy.lossLegs(.passphrase, escrowOn: false).joined(separator: " · ")). \
-        \(ProtectionCopy.lossMath(.passphrase, escrowOn: false))
+        - **\(ProtectionCopy.postureName(.standard))** — the floor: \
+        \(ProtectionCopy.postureCard(.standard).first { $0.label == "The floor" }?.text ?? "")
+        - **\(ProtectionCopy.postureName(.castle))** — the floor: \
+        \(ProtectionCopy.postureCard(.castle).first { $0.label == "The floor" }?.text ?? "")
 
-        With the iCloud Keychain copy on (Settings ▸ Protection), every list
-        above gains one more way back in: \
-        \(ProtectionCopy.lossLegs(.auto, escrowOn: true).last ?? "the copy in your iCloud Keychain"). \
         Losing your writing means losing EVERY way back in at once — any
-        single one of them still standing gets you back in.
+        single one of them still standing gets you back in. The whole story
+        — every key, where it lives, why an old backup behaves the way it
+        does — is the book “Encryption Explained” on your shelf.
 
         **Check before you need to.** Neither secret is used day to day — the
         device unwraps once and remembers — so the first time you type one

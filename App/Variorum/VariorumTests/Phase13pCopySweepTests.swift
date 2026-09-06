@@ -31,9 +31,10 @@ import VariorumCore
 
 @Suite("13p — the honest-copy sweep (every gate and posture speaks)")
 struct Phase13pCopySweepTests {
-    /// Every effective gate has a row label, a what-it-does-not-protect
-    /// sentence, and loss math with and without the Apple copy — all
-    /// non-empty and all distinct from one another.
+    /// Every effective gate has a row label and a what-it-does-not-protect
+    /// sentence — all non-empty and all distinct from one another. (The
+    /// 13p loss math retired at pre-13x 5a — §13; the posture cards' floors
+    /// are the loss story now, pinned below.)
     @Test func everyModeCarriesItsFullDisclosure() {
         var seenSentences: Set<String> = []
         var seenLabels: Set<String> = []
@@ -46,13 +47,6 @@ struct Phase13pCopySweepTests {
             #expect(sentence.count > 40, "a disclosure that short is not one")
             #expect(seenSentences.insert(sentence).inserted,
                     "two modes claim the same protection")
-
-            for escrow in [true, false] {
-                let math = ProtectionCopy.lossMath(mode, escrowOn: escrow)
-                #expect(math.count > 40)
-                #expect(!ProtectionCopy.lossLegs(mode, escrowOn: escrow).isEmpty,
-                        "every mode has at least one way back in")
-            }
         }
     }
 

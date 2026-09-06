@@ -88,8 +88,9 @@ struct ProtectionTierFaceTests {
         await SurfaceComposition.host(row, size: NSSize(width: 240, height: 80))
         let shown = SurfaceComposition.text(of: row.body)
         // The terminal voice lowercases chrome labels — match caseless.
+        // pre-13x 5a (design §8): the unchosen indicator reads "Standard".
         #expect(shown.lowercased().contains(
-            ProtectionShapes.unchosenIndicatorLabel.lowercased()))
+            ProtectionCopy.postureName(.standard).lowercased()))
         #expect(SurfaceComposition.carries(ProtectionCopy.exposedNudgeHeadline, in: shown),
                 "the exposed detail is the hardened headline")
         #expect(!shown.lowercased().contains("encryption off"),
@@ -102,15 +103,19 @@ struct ProtectionTierFaceTests {
             of: ProtectionStatusRow(
                 controller: chosen, tokens: .fallback(for: .light)).body)
         #expect(!goneShown.lowercased().contains(
-            ProtectionShapes.unchosenIndicatorLabel.lowercased()),
+            ProtectionCopy.postureName(.standard).lowercased()),
                 "a made choice retires the indicator")
     }
 
-    /// The label copy itself holds the memo's line: never "encryption
-    /// off", always the lock-and-keys truth.
-    @Test func theIndicatorCopyNamesTheLockAndKeysNeverEncryptionOff() {
-        #expect(!ProtectionShapes.unchosenIndicatorLabel.lowercased().contains("encryption off"))
-        #expect(ProtectionShapes.unchosenIndicatorDetail.contains("encrypted either way"))
-        #expect(ProtectionShapes.unchosenIndicatorDetail.contains("lock"))
+    /// The indicator's words are the posture's own (copy §1): "Standard"
+    /// and the current-state line — never "encryption off".
+    @Test func theIndicatorCopyIsThePosturesOwnNeverEncryptionOff() async {
+        let (unchosen, _) = makeController()
+        let row = ProtectionStatusRow(controller: unchosen, tokens: .fallback(for: .light))
+        await SurfaceComposition.host(row, size: NSSize(width: 240, height: 80))
+        let shown = SurfaceComposition.text(of: row.body)
+        #expect(!shown.lowercased().contains("encryption off"))
+        #expect(!ProtectionCopy.currentStateLine(.standard).lowercased().contains("encryption off"))
+        #expect(ProtectionCopy.currentStateLine(.standard) == "You're in Standard. Your Apple account holds a key.")
     }
 }

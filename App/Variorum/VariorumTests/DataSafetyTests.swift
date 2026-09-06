@@ -368,43 +368,29 @@ struct DataSafetyRunbookTests {
     }
 
     /// **Ladder R1-M1 — §8 tells the encrypted-era truth, composed from
-    /// the ONE brain.** The shipped RESTORE.md's §8 still claimed *"Your
+    /// the ONE brain.** The shipped RESTORE.md's §8 once claimed *"Your
     /// local store and these backups are NOT encrypted by that key, so
-    /// your writing is still here"* — false since Batch 1 in every mode,
-    /// its conclusion contradicting the ruled loss math under
-    /// passphrase-every-open + escrow-off, and written into every backup
-    /// folder each run. §8 is now COMPOSED from `ProtectionCopy.lossLegs`
-    /// / `lossMath` (never a hand-written parallel claim), and this pin
-    /// holds it there.
-    ///
-    /// RED ON OLD (behavioral revert executed): the old §8 restored, the
-    /// stale-claim guard and every per-mode leg assertion go red.
+    /// your writing is still here"* — false since 13p Batch 1, and written
+    /// into every backup folder each run. pre-13x 5a (§13): the 13p loss
+    /// legs / loss math retired with the at-open presets; §8 is now
+    /// COMPOSED from the posture cards' FLOORS (copy §1 — the same
+    /// sentences the pane's cards show; the two floors of design §1.21),
+    /// and points at *Encryption Explained*. This pin holds it there.
+    /// (5b rewrites the whole runbook per posture on top of this.)
     @Test func sectionEightIsComposedFromTheProtectionBrainAndClaimsNothingStale() {
         let runbook = DataSafetyCopy.runbook
-        // The stale claim is GONE — in either casing, in any wording that
-        // carries its two load-bearing phrases.
         #expect(!runbook.contains("are NOT encrypted by that key"),
                 "the plaintext-era claim must not survive anywhere in the runbook")
         #expect(!runbook.contains("your writing is still here"),
-                "the unconditional conclusion contradicts the ruled loss math")
-        // Every mode's chain, by the app's own words — the same
-        // `lossLegs` list the pane and the tutorial read.
-        for mode in StoreAtOpenMode.allCases {
-            #expect(runbook.contains(ProtectionCopy.modeLabel(mode)),
-                    "§8 names the mode by the row Settings shows: \(ProtectionCopy.modeLabel(mode))")
-            for leg in ProtectionCopy.lossLegs(mode, escrowOn: false) {
-                #expect(runbook.contains(leg),
-                        "§8's \(mode) chain carries the app's own leg: \(leg)")
-            }
+                "the unconditional conclusion contradicts the ruled floors")
+        for posture in [Posture.standard, Posture.castle] {
+            #expect(runbook.contains("**\(ProtectionCopy.postureName(posture))** — the floor:"))
+            let floor = ProtectionCopy.postureCard(posture).first { $0.label == "The floor" }?.text
+            #expect(floor != nil)
+            if let floor { #expect(runbook.contains(floor), "§8 carries the \(posture) floor verbatim from the card") }
         }
-        // The escrow leg (the ON dial's extra way back in), same brain.
-        if let escrowLeg = ProtectionCopy.lossLegs(.auto, escrowOn: true).last {
-            #expect(runbook.contains(escrowLeg))
-        }
-        // And the demanded-mode truth the old conclusion contradicted —
-        // the pane's own sentence, verbatim.
-        #expect(runbook.contains(ProtectionCopy.lossMath(.passphrase, escrowOn: false)),
-                "the passphrase-every-open loss math lands verbatim from the one brain")
+        #expect(runbook.contains("“Encryption Explained”"), "§8 points at the seeded book")
+        #expect(!runbook.contains("at-open mode"), "the retired 13p mode vocabulary is gone from §8")
     }
 
     @Test func theRunbookCoversWhatItsTableOfContentsPromises() {

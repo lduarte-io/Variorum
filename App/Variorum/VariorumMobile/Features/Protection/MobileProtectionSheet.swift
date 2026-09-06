@@ -234,7 +234,7 @@ struct MobileProtectionSheet: View {
             // R-pre13u-4's standing ways-back-in line — the SAME brain as
             // the Mac's checklist, so the two can never disagree.
             prose(ProtectionCopy.waysBackInLine(controller.legs))
-            prose(ProtectionShapes.tierSentence(controller.legs.tier))
+            prose(ProtectionCopy.nudgeSentence(for: controller.legs.tier))
             // Item (h): a phone-only library has ONE enrolled device, so
             // the chain above is shorter than a reader may assume — say so.
             prose(ProtectionCopy.oneDeviceNote)

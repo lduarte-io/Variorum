@@ -578,68 +578,91 @@ nonisolated enum ProtectionCopy {
         }
     }
 
-    /// **THE WAYS BACK IN, AS A LIST — the ONE brain** (13p Batch 4,
-    /// knot 6's letter: the tutorial chapter teaches the loss math and the
-    /// settings pane states it, so the two must not be able to diverge).
-    /// `lossMath` below composes its sentence from exactly these legs, and
-    /// the tutorial spine asserts the chapter names every one of them.
-    ///
-    /// Read it as a chain: every leg listed is a way IN, so losing the
-    /// writing means losing all of them at once. The demanded modes' lists
-    /// are SHORTER by construction (no silently-releasing Keychain item
-    /// exists there — the custody law), which is exactly her non-scary-
-    /// but-serious point.
-    static func lossLegs(_ mode: StoreAtOpenMode, escrowOn: Bool) -> [String] {
-        var legs: [String]
-        switch mode {
-        case .auto:
-            legs = ["this \(deviceName) (its Keychain holds the key)",
-                    "your encryption passphrase (if you set one)",
-                    "your recovery phrase (if you saved it)"]
-        case .biometric:
-            legs = ["this \(deviceName)'s fingerprint/face unlock",
-                    "your encryption passphrase",
-                    "your recovery phrase (if saved)"]
-        case .passphrase:
-            // NO device leg: passphrase mode leaves neither Keychain item
-            // behind, so the typed secret and the twelve words are the
-            // whole same-device story (the custody law, in words).
-            legs = ["your encryption passphrase", "your recovery phrase (if saved)"]
+    // MARK: - pre-13x 5a — the survivors of the retired shapes model (§13)
+    //
+    // The pre-13u shapes brain (the recipes, the need-states, the shapes
+    // tables) and the Settings explainer that rendered it are DELETED; the
+    // 13p per-mode loss chains with them — the book *Encryption Explained*
+    // and the posture cards are the story now. What survives is ONE brain for the nudge's three
+    // sentences by tier (copy §5, verbatim) and the pane's live "ways back
+    // in" checklist (R-pre13u-4's counting of the actual legs — the rows'
+    // key-naming names are 13s's, listed in copy §11).
+
+    /// Copy §5's three nudge lines by tier — the nudge's ONE brain, both
+    /// platforms. "Can't tell" is never dressed as comfort or alarm.
+    static func nudgeSentence(for tier: ProtectionLegs.Tier) -> String {
+        switch tier {
+        case .covered: return coveredNudgeLine
+        case .exposed: return exposedNudgeHeadline + " " + exposedNudgeBody
+        case .unknown: return unknownNudgeLine
         }
-        // pre-13x 2a: `escrowOn` now means "Standard, with the Apple copy"
-        // — under Castle no copy opens with the iCloud key (§3.2), so the
-        // leg is listed only for the silent gate. (This list and `lossMath`
-        // are 13p copy that batch 5's deletions retire; the parameter name
-        // is kept so the runbook and the tutorial compile unchanged.)
-        if escrowOn && !mode.isDemanded {
-            legs.append("the copy in your iCloud Keychain")
-        }
-        return legs
     }
 
-    /// The per-mode loss math (knot 6, her example carried verbatim into
-    /// the demanded modes' sentence: "forgetting the passphrase without
-    /// the phrase written down IS enough"). Composed from `lossLegs`.
-    static func lossMath(_ mode: StoreAtOpenMode, escrowOn: Bool) -> String {
-        let legs = lossLegs(mode, escrowOn: escrowOn).joined(separator: " · ")
+    /// The Apple-key LEG's own three-value truth (T2 applied per leg —
+    /// pre-13x 2a, re-based onto the iCloud key A): a verified copy, a copy
+    /// that is verifiably not landing, a copy this launch hasn't checked.
+    static func appleKeyLegSentence(_ verified: Bool?) -> String {
+        switch verified {
+        case true: return "verified this launch — the iCloud key opens the key file's copy"
+        case false: return "not landing — no copy verifiably opens with the iCloud key"
+        case nil: return "not checked yet this launch"
+        }
+    }
+
+    struct ChecklistRow: Equatable, Sendable {
+        let name: String
+        /// nil = UNKNOWN (T2's three-value truth — never dressed as
+        /// present or absent).
+        let present: Bool?
+        let note: String
+    }
+
+    /// ONE brain for the live checklist (R-pre13u-4's "counting the actual
+    /// legs"). Under `factsUnknown` the caller renders `nudgeSentence(for:
+    /// .unknown)` instead of claiming wrap rows it cannot read — only the
+    /// device row (whose truth is the gate's, not the key file's) survives.
+    static func checklistRows(
+        _ legs: ProtectionLegs, mode: StoreAtOpenMode
+    ) -> [ChecklistRow] {
+        var rows: [ChecklistRow] = []
         switch mode {
         case .auto:
-            return "To lose your writing, ALL of these have to go wrong at once: "
-                + legs + ". Any one of them gets you back in."
+            rows.append(ChecklistRow(
+                name: "This \(deviceName)", present: true,
+                note: "its Keychain opens the library silently"))
         case .biometric:
-            return "Your ways back in: " + legs
-                + ". Lose every one of them and your writing is unrecoverable — by anyone."
+            rows.append(ChecklistRow(
+                name: "This \(deviceName)", present: true,
+                note: "\(biometryName) unlocks it — the "
+                    + "computer password never does"))
         case .passphrase:
-            // The old `escrowOn` arm ("not enough to lose your writing while
-            // the others stand") died with the ninth wave's coupling: a
-            // passphrase-at-every-open library carries NO iCloud spare, so
-            // the short chain below is the only truthful sentence. (Memo §4;
-            // the superseded wording lives in git history.)
-            return "In this mode, forgetting your passphrase without the recovery "
-                + "phrase written down IS enough to lose your writing. Nothing on "
-                + "this \(deviceName) opens the library silently — that is the "
-                + "point, and that is the price. Keep the twelve words somewhere real."
+            rows.append(ChecklistRow(
+                name: "This \(deviceName)", present: false,
+                note: "nothing here opens the library silently — that is "
+                    + "this mode's point"))
         }
+        guard !legs.factsUnknown else { return rows }
+        rows.append(ChecklistRow(
+            name: "Encryption passphrase", present: legs.hasPassphraseWrap,
+            note: legs.hasPassphraseWrap
+                ? "opens any copy, and lets a new device into sync"
+                : "not set"))
+        rows.append(ChecklistRow(
+            name: "Recovery phrase", present: legs.hasRecoveryWrap,
+            note: legs.hasRecoveryWrap
+                ? "the twelve words — the passphrase's twin, on paper"
+                : "not saved"))
+        if mode.isDemanded {
+            rows.append(ChecklistRow(
+                name: "iCloud key", present: false,
+                note: "no copy opens with it in Castle"))
+        } else {
+            rows.append(ChecklistRow(
+                name: "iCloud key",
+                present: legs.appleKeyVerified,
+                note: appleKeyLegSentence(legs.appleKeyVerified)))
+        }
+        return rows
     }
 
     /// **THE NAMED NON-GOAL, said out loud where the reader is choosing**

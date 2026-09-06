@@ -274,20 +274,6 @@ struct ProtectionCopyTests {
         #expect(ProtectionCopy.modeSentence(.passphrase).contains("Nothing opens it silently"))
     }
 
-    /// Knot 6's letter: the demanded-mode short chain is stated — her own
-    /// example ("forgetting the passphrase without the phrase written
-    /// down IS enough") lands in passphrase-mode.
-    @Test func lossMathShortensHonestlyWithTheMode() {
-        let standard = ProtectionCopy.lossMath(.auto, escrowOn: true)
-        #expect(standard.contains("ALL of these have to go wrong at once"))
-        #expect(standard.contains("iCloud"))
-
-        let strictest = ProtectionCopy.lossMath(.passphrase, escrowOn: false)
-        #expect(strictest.contains("IS enough"))
-        #expect(!ProtectionCopy.lossMath(.auto, escrowOn: false).contains("iCloud"),
-                "no Apple copy ⇒ no iCloud leg is claimed")
-    }
-
     /// pre-13x 2a: copy §1's posture words, verbatim — both postures
     /// named, tagged, one-lined, and their six card rows in the copy's
     /// order (a re-derived card would be the almost-true paraphrase the

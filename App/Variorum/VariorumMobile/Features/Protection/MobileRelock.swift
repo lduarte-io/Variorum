@@ -8,12 +8,14 @@
 //  hand-someone-your-phone case — a REAL boundary here, key material
 //  dropped)"*).
 //
-//  THE PLATFORM MAPPING, stated once so nobody re-derives it. The dials
-//  are SHARED (`ProtectionDials`); what each one MEANS is a per-platform
-//  reading, and the phone's is:
+//  THE PLATFORM MAPPING, stated once so nobody re-derives it. The re-lock
+//  rule and the idle dial are SHARED (`ProtectionDials`; pre-13x 2a — the
+//  sleep / screen-lock re-lock is no longer a dial: always on in Castle,
+//  design §1.18); what each one MEANS is a per-platform reading, and the
+//  phone's is:
 //
-//  · `relockOnSleepAndScreenLock` ⇒ **lock when Variorum leaves the
-//    screen.** On the Mac that dial is sleep + screen lock; on the phone,
+//  · The sleep / screen-lock re-lock ⇒ **lock when Variorum leaves the
+//    screen.** On the Mac that rule is sleep + screen lock; on the phone,
 //    backgrounding IS the leaving (MobileSoul §5.1: the app dies without
 //    warning, and `.background` is already this app's ⌘Q — the flush, the
 //    savepoint and the sync round all hang off it). Locking there is a

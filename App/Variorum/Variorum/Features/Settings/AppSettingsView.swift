@@ -51,11 +51,9 @@ struct AppSettingsView: View {
                 ProtectionPane(controller: protection, services: services)
                     .tabItem { Label("Protection", systemImage: "lock.shield") }
             }
-            // pre-13u Act 10 item 3 (seventh wave (iii)): the explainer tab
-            // — the memo brain rendered whole; settings explains AND points
-            // at the field guide's privacy chapter.
-            ProtectionExplainerView()
-                .tabItem { Label("How Protection Works", systemImage: "questionmark.circle") }
+            // (The pre-13u "How Protection Works" explainer tab retired at
+            // pre-13x 5a — §13; the seeded book *Encryption Explained* and
+            // the tutorial's short chapter are the story now.)
             // 13l Act 4 (ledger row 12): backups, their freshness, and what
             // restoring one does — including to things that were deleted.
             DataSafetyPane(services: services, protection: protection)

@@ -1028,6 +1028,52 @@ struct TerminologyPinTests {
     }
 }
 
+/// pre-13x 5a (§13 — the sweep's pin): the names the postures design
+/// DELETED appear in NO shipped source file — the app targets, `Shared/`,
+/// and core — comments included (a comment that still narrates a retired
+/// family as live is the stale-copy class the sweep re-worded). Test
+/// sources are exempt (this file is the pin, and it names them).
+@Suite("Retired names (pre-13x 5a — the §13 sweep)")
+struct RetiredNamesPinTests {
+    /// Composed so this file's own text never trips the walk.
+    private static let retired: [String] = [
+        "Protection" + "Shapes", "Protection" + "ExplainerView",
+        "loss" + "Legs", "loss" + "Math",
+        "SyncGate" + "OptIn", "E2EELaunch" + "KeyCache",
+        "Protection" + "Preset", "openResetting" + "ModeToAuto",
+        "effective" + "EscrowOn", "escrowUnder" + "DemandedMode",
+        "need" + "States", "escrowLeg" + "Sentence", "lockMoment" + "Framing",
+    ]
+
+    @Test func theDeletedNamesAppearInNoShippedSource() throws {
+        let appRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()  // VariorumTests
+            .deletingLastPathComponent()  // App/Variorum
+        let repoRoot = appRoot.deletingLastPathComponent().deletingLastPathComponent()
+        let roots = [
+            appRoot.appendingPathComponent("Shared", isDirectory: true),
+            appRoot.appendingPathComponent("Variorum", isDirectory: true),
+            appRoot.appendingPathComponent("VariorumMobile", isDirectory: true),
+            repoRoot.appendingPathComponent("Sources/VariorumCore", isDirectory: true),
+        ]
+        var walked = 0
+        var offenders: [String] = []
+        for root in roots {
+            #expect(FileManager.default.fileExists(atPath: root.path), "sweep root missing: \(root.lastPathComponent)")
+            let walk = try #require(FileManager.default.enumerator(at: root, includingPropertiesForKeys: nil))
+            for case let url as URL in walk where url.pathExtension == "swift" {
+                walked += 1
+                let text = try String(contentsOf: url, encoding: .utf8)
+                for name in Self.retired where text.contains(name) {
+                    offenders.append("\(url.lastPathComponent): \(name)")
+                }
+            }
+        }
+        #expect(walked > 150, "the walk must actually reach the shipped sources")
+        #expect(offenders.isEmpty, "§13's deleted names survive in shipped source: \(offenders)")
+    }
+}
+
 @MainActor
 @Suite("The locked sync face (Phase 14b, L9)")
 struct SyncLockedFaceTests {

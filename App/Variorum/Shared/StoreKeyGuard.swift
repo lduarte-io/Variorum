@@ -5,11 +5,13 @@
 //  Phase 13p, Batch 2 — the store key's DEVICE custody, whole (the
 //  `DeviceKeyStore` pattern from 14b's EncryptionKeychain, applied to the
 //  store key): the Auto item Batch 1 shipped (via `StoreKeyCustody`), the
-//  `.biometryCurrentSet`-gated item the Biometric mode moves custody
-//  into (R13p-5), the SEPARATE synchronizable escrow item (R13p-6 — no
-//  access control, because Apple does not sync access-controlled items:
-//  the spike's Q3 platform fact, re-confirmed codesigned this batch),
-//  and the presence-confirmation seam the R13p-9 reset door uses.
+//  `.biometryCurrentSet`-gated item Castle moves custody into, and the
+//  presence-confirmation seam the change-passphrase forgot road uses.
+//  pre-13x 5a (§13): the 13p SEPARATE synchronizable escrow item is
+//  RETIRED — the iCloud key A's family (`AppleKeyLeaves`, in iCloud
+//  Keychain under the shared group) replaced it at 2a; what remains of
+//  it here is its service name, read by the migration's DELETE leg only
+//  (`loadLegacyEscrow` / `removeLegacyEscrow`).
 //
 //  THE CUSTODY LAW OF THE MODES (what makes a gate real, R13p-14):
 //  · Auto        ⇒ plain item present;  gated item absent.
@@ -17,13 +19,9 @@
 //                  whose key still releases silently is theater.
 //  · Passphrase  ⇒ NEITHER item exists — the typed passphrase (via the
 //                  envelope's wrap) is the only same-device road.
-//  The escrow item is NEVER an open road: the app never consults it at
-//  open — it exists for RECOVERY on a machine that signed into the same
-//  iCloud (13x's adoption door). Since the ninth wave's escrow/posture
-//  coupling (memo §4) it is no longer orthogonal to the modes: a
-//  DEMANDED mode removes it (the same-machine bypass the old
-//  `escrowUnderDemandedMode` caveat described can no longer exist —
-//  `ProtectionDials.effectiveEscrowOn` is the one rule).
+//  Standard's Apple-held road is the iCloud key A in iCloud Keychain and
+//  the key file's copy under it (design §3.8) — never a raw key item of
+//  its own; Castle carries no such copy (§3.2).
 //
 //  PROMPT DISCIPLINE (the overnight rule, and the standing test rule):
 //  writing the gated item never prompts (delete-then-add — updating an

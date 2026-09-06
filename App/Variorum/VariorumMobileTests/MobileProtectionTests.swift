@@ -609,48 +609,9 @@ struct MobilePhoneProtectionCopyTests {
         #expect(!ProtectionCopy.joinStandardConsent.contains("Mac") && ProtectionCopy.joinStandardConsent.contains("Use Castle…"))
     }
 
-    /// **ONE BRAIN** (knot 6): the settings sentence is composed from
-    /// `lossLegs`, and the tutorial chapter is asserted against the same
-    /// list — so the two cannot state different chains.
-    @Test func theLossMathIsComposedFromTheLegsItNames() {
-        for mode in StoreAtOpenMode.allCases {
-            for escrow in [true, false] {
-                let legs = ProtectionCopy.lossLegs(mode, escrowOn: escrow)
-                let sentence = ProtectionCopy.lossMath(mode, escrowOn: escrow)
-                if mode == .passphrase {
-                    // The one arm that deliberately states the SHORT chain
-                    // as prose (her own example, verbatim) rather than a
-                    // list — and it must not claim an iCloud leg.
-                    // SUPERSESSION (ninth wave, memo §4): this arm now
-                    // covers BOTH escrow values — the escrow/posture
-                    // coupling means a passphrase-at-every-open library
-                    // carries no spare, whatever the stored Auto choice.
-                    #expect(sentence.contains("IS enough"))
-                    #expect(!sentence.contains("iCloud"))
-                    continue
-                }
-                for leg in legs {
-                    #expect(sentence.contains(leg),
-                            "the sentence must name every way back in: \(leg)")
-                }
-                // SUPERSESSION (ninth wave, memo §4 — the coupling): an
-                // iCloud leg is claimed only when the dial is on AND the
-                // posture offers it (demanded modes never do).
-                #expect((escrow && !mode.isDemanded) == sentence.contains("iCloud"),
-                        "an iCloud leg is claimed only when the posture offers one")
-            }
-        }
-    }
-
-    /// The demanded modes' chains really are SHORTER — no silently-
-    /// releasing custody item exists there (the custody law, in words).
-    @Test func theDemandedModesHaveNoSilentDeviceLeg() {
-        let auto = ProtectionCopy.lossLegs(.auto, escrowOn: false)
-        let passphrase = ProtectionCopy.lossLegs(.passphrase, escrowOn: false)
-        #expect(auto.contains { $0.contains("Keychain holds the key") })
-        #expect(passphrase.count < auto.count)
-        #expect(!passphrase.contains { $0.contains("Keychain") })
-    }
+    /// (The 13p loss-math pins retired at pre-13x 5a with `lossLegs` /
+    /// `lossMath` — §13; the posture cards' floors carry the loss story,
+    /// pinned in `thePostureCopyReadsAsThePhones` and the tutorial spine.)
 
     /// **ITEM (h).** A phone-only library has ONE home; the copy says so
     /// rather than letting a list of same-device legs imply a second

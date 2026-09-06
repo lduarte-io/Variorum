@@ -170,7 +170,7 @@ struct ProtectionSurfaceRenderTests {
         let pane = ProtectionPane(controller: controller(), services: nil)
         await SurfaceComposition.host(pane, size: NSSize(width: 620, height: 800))
         let shown = SurfaceComposition.text(of: pane.body)
-        for row in ProtectionShapes.checklistRows(
+        for row in ProtectionCopy.checklistRows(
             ProtectionLegs(
                 hasPassphraseWrap: false, hasRecoveryWrap: false,
                 appleKeyVerified: nil, storeCustodyGated: false),
@@ -181,51 +181,9 @@ struct ProtectionSurfaceRenderTests {
         }
     }
 
-    /// **The explainer renders the memo brain — keystones VERBATIM**
-    /// (§9c item 3: almost-true paraphrase is the named failure mode; this
-    /// pin is the mechanism that catches it). Both halves: the keystone
-    /// CONTENT is byte-exact where the memo ruled words, and the explainer
-    /// SURFACE carries every one of them.
-    @Test func theExplainerCarriesTheKeystonesVerbatim() async {
-        // The ruled words themselves (the render-don't-re-derive floor).
-        #expect(ProtectionShapes.syncSentence ==
-            "Sync brings your writing back to any device — as long as you keep "
-            + "your passphrase or recovery phrase. We can never reset it for "
-            + "you: that's what end-to-end means.")
-        #expect(ProtectionShapes.deviceAsPowerfulAsPassphrase.hasPrefix(
-            "An unlocked, enrolled device is as powerful as your passphrase."))
-        #expect(ProtectionShapes.deviceAsPowerfulAsPassphrase.hasSuffix(
-            "guards this device — your passphrase is what lets a new device in."))
-        #expect(ProtectionShapes.spareKeyIsAKey.contains(
-            "a key — never a backup, never the passphrase"))
-        #expect(ProtectionShapes.spareKeyIsAKey.contains(
-            "It opens copies you already have, nothing more"))
-        #expect(ProtectionShapes.spareKeyIsAKey.contains(
-            "can never pull your writing from the server"))
-        #expect(ProtectionShapes.resetRoad.contains("Passphrase is still the path"))
-        // The ONE LAW's recipe, verbatim from memo §1 (the ladder's F8 found
-        // "+ sync custody" dropped — the one keystone deviation).
-        #expect(ProtectionShapes.oneLaw.contains(
-            "pre-assembled recipe: copy + key + sync custody, kept live"))
-
-        let explainer = ProtectionExplainerView()
-        await SurfaceComposition.host(explainer, size: NSSize(width: 560, height: 460))
-        let shown = SurfaceComposition.text(of: explainer.body)
-        for keystone in [
-            ProtectionShapes.oneLaw,
-            ProtectionShapes.deviceAsPowerfulAsPassphrase,
-            ProtectionShapes.syncSentence,
-            ProtectionShapes.spareKeyIsAKey,
-            ProtectionShapes.resetRoad,
-            ProtectionShapes.compoundWarning,
-            ProtectionShapes.demandedFallbackTruth,
-            ProtectionShapes.newDeviceAdoptCopy,
-            ProtectionShapes.newDeviceSyncEnroll,
-        ] {
-            #expect(SurfaceComposition.carries(keystone, in: shown),
-                    "keystone missing from the explainer: \(keystone.prefix(48))…")
-        }
-    }
+    /// (The pre-13u explainer's keystone pin retired with the explainer at
+    /// pre-13x 5a — §13; the keystones live in `ProtectionCopy` and are
+    /// pinned by `ProtectionCopyTests` and the tutorial spine.)
 
     /// The locked lobby's DEAD END says so instead of rendering an empty room.
     @Test func theLockedLobbyShowsItsDeadEndSentence() async {

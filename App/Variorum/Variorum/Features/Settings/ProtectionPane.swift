@@ -31,10 +31,6 @@ import VariorumCore
 
 struct PassphraseSetSheet: View {
     @Bindable var model: PassphraseSetModel
-    /// Memo §6 — THE LOCK MOMENT: true only when this sheet was summoned
-    /// by a demanded-mode pick (the choice arrives when you reach for the
-    /// lock); the nudge's and the plain set door's summons stay unframed.
-    var lockMoment: Bool = false
     var onDone: () -> Void
 
     @State private var passphrase = ""
@@ -47,14 +43,6 @@ struct PassphraseSetSheet: View {
             case .enterPassphrase:
                 Text("Set your encryption passphrase")
                     .font(.title3.weight(.semibold))
-                if lockMoment {
-                    // The lock-moment ceremony (memo §6): what asking-at-
-                    // open MEANS, said where the lock is being reached for.
-                    Text(ProtectionShapes.lockMomentFraming)
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
                 Text(model.vaultConstrains
                      ? "Your account already has an encryption passphrase, and one "
                        + "passphrase serves both — type that same one here to make it "
@@ -232,13 +220,13 @@ struct ProtectionPane: View {
     // MARK: The live checklist (item 3's centerpiece, re-based on A)
 
     /// The actual legs this device/account has RIGHT NOW — present/absent/
-    /// unknown, truthfully (ONE brain: `ProtectionShapes.checklistRows`,
+    /// unknown, truthfully (ONE brain: `ProtectionCopy.checklistRows`,
     /// which both platforms compose). Under an unreadable sidecar the wrap
     /// rows are withheld and T2's unknown sentence stands in.
     private var checklistSection: some View {
         Section("Ways back in — right now") {
             ForEach(
-                ProtectionShapes.checklistRows(
+                ProtectionCopy.checklistRows(
                     controller.legs, mode: controller.effectiveGate),
                 id: \.name
             ) { row in
@@ -255,7 +243,7 @@ struct ProtectionPane: View {
                     }
                 }
             }
-            Text(ProtectionShapes.tierSentence(controller.legs.tier))
+            Text(ProtectionCopy.nudgeSentence(for: controller.legs.tier))
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)

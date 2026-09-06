@@ -294,9 +294,9 @@ nonisolated enum StoreLaunchRoute: Equatable, Sendable {
     /// LOCK STAYS: nothing is persisted, nothing opens; starting new is a
     /// deliberate act that mints under a NEW store id (per-store custody
     /// leaves the old library's items unreachable, never deleted). This
-    /// replaces 13p's PROVISIONAL `openResettingModeToAuto`, whose silent
-    /// Auto reset + fresh mint was the same-machine bypass the design
-    /// closes (KnownIssues, the Castle-bypass row).
+    /// replaces 13p's PROVISIONAL reset-to-Auto route, whose silent Auto
+    /// reset + fresh mint was the same-machine bypass the design closes
+    /// (KnownIssues, the Castle-bypass row).
     case libraryMissing(demand: StoreAtOpenMode)
 
     /// pre-13x 2a: the route reads the EFFECTIVE gate — derived at the

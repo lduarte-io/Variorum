@@ -32,12 +32,12 @@
 //                            (decision 10).
 //  A copy of the file is writing, never a device: a machine with no
 //  custody for a store id has never opened that library and gets a fresh
-//  identity when it enrolls. The 14b/CF-12 fixed-account items
-//  (`device-keys` / `device-keys-biometric`), the CF-12 opt-in sync gate
-//  (`SyncGateOptIn`) and the once-per-launch cache (`E2EELaunchKeyCache`)
-//  are GONE — custody follows the library key's posture, never a toggle;
-//  `SyncCustodyMigration` (§11, behind a seam, run at batch 2) re-scopes
-//  the legacy items on her two devices.
+//  identity when it enrolls. Custody follows the library key's posture,
+//  never a toggle — the 14b/CF-12 fixed-account items (`device-keys` /
+//  `device-keys-biometric`), the opt-in sync gate and the once-per-launch
+//  key cache of that era are gone (§13); `SyncCustodyMigration` (§11,
+//  behind a seam, run at batch 2) re-scoped the legacy items on her two
+//  devices.
 //
 //  `DeviceKeyStore` is the injectable seam (the AuthTokensStore pattern):
 //  tests script custody AND the session through `InMemoryKeyBacking` — no
@@ -99,7 +99,7 @@ nonisolated struct SyncCustodyScope: Equatable, Sendable {
     var probeAccount: String { "\(gatedAccount)-probe" }
 }
 
-/// THE SESSION MEMORY (replaces `E2EELaunchKeyCache`): what an unlocked
+/// THE SESSION MEMORY (the per-launch key cache of 14b is gone — §13): what an unlocked
 /// session holds that no item does — the record read from the gated item
 /// at the lobby's one Touch ID unlock (Castle), or the record the vault
 /// road handed over (Always ask), and — decision 10's exception — the

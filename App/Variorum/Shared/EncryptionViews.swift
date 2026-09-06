@@ -551,7 +551,7 @@ struct EncryptionView: View {
             .fixedSize(horizontal: false, vertical: true)
         // Her sharpest question's answer, standing where the fact it
         // explains is stated (memo §2's keystone).
-        Text(ProtectionShapes.deviceAsPowerfulAsPassphrase)
+        Text(ProtectionCopy.keystoneUnlockedDevice)
             .pageCaption(pageStyle)
             .fixedSize(horizontal: false, vertical: true)
         if let seconds = encryption.lastKDFSeconds {
