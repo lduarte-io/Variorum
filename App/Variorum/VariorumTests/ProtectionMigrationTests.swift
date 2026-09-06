@@ -336,6 +336,95 @@ struct ProtectionMigrationTests {
         #expect(!alone.masterCopyWritten && local.done)
     }
 
+    /// pre-13x 2d (the brief's item 3) — THE CONFIRM's GATE: her Mac after
+    /// the window — enrolled, the migration DONE, the key file carrying
+    /// the MASTER copy + a passphrase copy but NO recorded vault descriptor
+    /// (the vault was unreachable at the migration's instant; nothing
+    /// re-ran) and the pending mark NEVER set — owes the one-time confirm
+    /// by DERIVATION; *Later* hides it for the launch and the condition
+    /// stands; typing the passphrase lands `vaultKDF` + the reconciled copy
+    /// and the confirm is gone. A library WITHOUT a master copy (a 14c-era
+    /// Encryption-tab enrollee) owes nothing; one whose descriptor is
+    /// recorded owes nothing. RED ON OLD: the confirm showed on the mark
+    /// alone, and the migration's leg 6 set the mark only when the vault
+    /// was reachable — her Mac never saw the sheet and `vaultKDF` never
+    /// landed.
+    @Test func anEnrolledLibraryWithAMasterCopyAndNoRecordedDescriptorOwesTheConfirmByDerivation() async throws {
+        let key = StoreKey.mint()
+        let held = material()
+        var envelope = StoreKeyEnvelope()
+        try envelope.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
+        try envelope.masterBox(key: key, under: held.masterSymmetricKey)
+        #expect(envelope.vaultKDF == nil, "the migration's leg 5 without the vault: no descriptor")
+        let backing = InMemoryStoreKeyGuardBacking(gated: key, biometryAvailable: true, biometricSucceeds: true)
+        let envelopeBox = ScriptedEnvelopeBox(envelope)
+        let gate = StoreLaunchGate.scripted(
+            dials: ScriptedDialsBox(ProtectionDials()), backing: backing, envelope: envelopeBox)
+        let session = SyncCustodySession()
+        session.hold(SyncCustodyRecord(deviceID: "mac-1", material: held))
+        let controller = ProtectionController(configuration: .init(
+            scope: "probe", storeURL: nil, gate: gate, isRealVariant: false,
+            makeKDF: { self.fastKDF() }, storeID: { [id = envelope.storeID] in id },
+            syncCustodySession: session))
+        controller.adoptResident(key)
+        let mark = LockIsolated(false)  // never set — her Mac
+        controller.readMigrationConfirmPending = { mark.value }
+        controller.clearMigrationConfirmPending = { mark.setValue(false) }
+        controller.isSignedIn = { true }
+        controller.readVaultPosture = { nil }
+
+        await controller.reconcile()
+        #expect(controller.migrationConfirmOwedByDerivation)
+        #expect(controller.notice == .migrationConfirm, "the confirm shows by derivation, the mark absent")
+        controller.deferMigrationConfirm()
+        #expect(controller.notice != .migrationConfirm, "Later hides it for this launch")
+        #expect(controller.migrationConfirmOwedByDerivation, "…and the condition stands for the next ready")
+
+        let vaultKDF = fastKDF()
+        #expect(await controller.reconcilePassphraseWrap(
+            passphrase: "sesame", vaultKDF: vaultKDF, corpusKeyID: held.corpusKeyID) == nil)
+        let written = try #require(envelopeBox.value)
+        #expect(written.vaultKDF == vaultKDF && written.passphrase?.kdf == vaultKDF,
+                "typing it lands the descriptor + the reconciled copy")
+        #expect(try written.unwrapKey(passphrase: "sesame") == key)
+        #expect(!controller.migrationConfirmOwedByDerivation)
+        await controller.reconcile()
+        #expect(controller.notice != .migrationConfirm, "the confirm is gone")
+
+        // A 14c-era enrollee: a passphrase copy under a fresh descriptor,
+        // NO master copy — nothing owed (copy §9 is her migration's).
+        var fresh = StoreKeyEnvelope()
+        try fresh.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
+        let enrollee = ProtectionController(configuration: .init(
+            scope: "probe", storeURL: nil, gate: StoreLaunchGate.scripted(
+                dials: ScriptedDialsBox(ProtectionDials()), backing: backing, envelope: ScriptedEnvelopeBox(fresh)),
+            isRealVariant: false, makeKDF: { self.fastKDF() }, storeID: { [id = fresh.storeID] in id },
+            syncCustodySession: session))
+        enrollee.adoptResident(key)
+        enrollee.readMigrationConfirmPending = { false }
+        enrollee.isSignedIn = { true }
+        await enrollee.reconcile()
+        #expect(!enrollee.migrationConfirmOwedByDerivation && enrollee.notice != .migrationConfirm)
+    }
+
+    /// pre-13x 2d: the migration's leg 6 marks the confirm for EVERY
+    /// enrolled library that reached leg 5 (the vault in hand by then,
+    /// after decision 35), and leg 5's line names the passphrase entry as
+    /// where the descriptor lands when it is absent.
+    @Test func theMigrationMarksTheConfirmForEveryEnrolledLibraryAndNamesThePassphraseEntry() async throws {
+        let key = StoreKey.mint()
+        let w = World()
+        w.legacyPlain = material()
+        var envelope = StoreKeyEnvelope()
+        try envelope.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
+        w.envelope = envelope
+        let report = await ProtectionMigration.run(
+            facts: facts(key: key, effective: .auto, vault: false, vaultKDF: fastKDF()), leaves: w.leaves)
+        #expect(report.masterCopyWritten && report.confirmPending && w.confirmPending && w.done)
+        #expect(w.log.contains { $0.contains("+ the vault's descriptor") })
+        #expect(!w.log.contains { $0.contains("next online ready") }, "the retired sentence")
+    }
+
     // MARK: - The one-time confirm face's brain (copy §9)
 
     @Test func theConfirmVerifiesAgainstTheVaultThenReWrapsUnderItsDescriptor() async throws {

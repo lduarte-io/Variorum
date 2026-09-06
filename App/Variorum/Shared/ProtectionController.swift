@@ -558,7 +558,30 @@ final class ProtectionController {
         envelopeUnreadable = reading.isUnreadable
         hasPassphraseWrap = reading.envelope?.passphrase != nil
         hasRecoveryWrap = reading.envelope?.recovery != nil
+        keyFileHasMasterCopy = reading.envelope?.master != nil
+        keyFileVaultKDF = reading.envelope?.vaultKDF
         refreshPosture(keyFile: reading.envelope)
+    }
+
+    /// pre-13x 2d: the key file's master copy (the migration's leg 5 — or a
+    /// follow / switch — wrote it) and the vault descriptor it last
+    /// reconciled against (nil = never; the confirm's derived gate).
+    @ObservationIgnored private var keyFileHasMasterCopy = false
+    @ObservationIgnored private var keyFileVaultKDF: PassphraseKDF.Descriptor?
+
+    /// THE DERIVED CONFIRM GATE (pre-13x 2d — the brief's item 3): an
+    /// ENROLLED library whose key file carries the MASTER copy but NO
+    /// recorded vault descriptor — the migration ran while the vault was
+    /// unreachable (her Mac at the window: "vault descriptor: next online
+    /// ready", which never came) — owes the one-time confirm whether or
+    /// not the migration's mark was set: only a TYPED passphrase can land
+    /// the descriptor (the local copy re-wraps under it). Typing it lands
+    /// `vaultKDF` + the reconciled copy (`reconcilePassphraseWrap`), which
+    /// closes this by itself. NOT every enrolled library with a nil
+    /// descriptor: a 14c-era Encryption-tab enrollee carries no master copy
+    /// and copy §9's sentence is her migration's, not its.
+    var migrationConfirmOwedByDerivation: Bool {
+        enrolled && keyFileHasMasterCopy && keyFileVaultKDF == nil && !envelopeUnreadable
     }
 
     /// THE DERIVATION, applied: the legacy mode (the read-through, until
@@ -1111,7 +1134,9 @@ final class ProtectionController {
     // MARK: - Notices
 
     func refreshNotices(now: Date = Date()) {
-        migrationConfirmPending = readMigrationConfirmPending?() ?? false
+        // pre-13x 2d: the mark (the migration's leg 6) OR the derivation
+        // (the already-migrated class whose descriptor never landed).
+        migrationConfirmPending = (readMigrationConfirmPending?() ?? false) || migrationConfirmOwedByDerivation
         if migrationConfirmPending, !migrationConfirmDeferredThisLaunch {
             notice = .migrationConfirm
             return
