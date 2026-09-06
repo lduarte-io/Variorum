@@ -356,6 +356,10 @@ key door meanwhile: *Pick up your new keys first — enter your passphrase.*
 passphrase once to pick up your new sync keys: they were replaced when Castle was entered, and only your passphrase or
 twelve words open them.* Doors: *Enter Passphrase…* · *Use Twelve Words…* · *Later* (sub-line: *Until then this Mac
 opens and reads, but doesn't sync.*)
+**Account in Castle, this device still opens the old way (the posture-mismatch follow, decision 35 — no keys were
+replaced):** *Your account is in Castle, but this Mac still opens without asking. Enter your passphrase once to move
+this Mac's key behind Touch ID and give your library a fresh key.* Doors: *Enter Passphrase…* · *Use Twelve Words…* ·
+*Later* (sub-line: *Until then this Mac opens and reads as before.*)
 **Keys replaced elsewhere (a device that has not followed yet):** *Your keys were replaced on [device] on [day]. Enter
 your passphrase once to pick up the new ones.* Doors: the same three; the same sub-line.
 **Account moved to Standard (a device that was Castle):** *Your account is back in Standard — set on [device]
