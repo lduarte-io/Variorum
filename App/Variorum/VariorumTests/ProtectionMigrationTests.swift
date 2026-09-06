@@ -175,6 +175,52 @@ struct ProtectionMigrationTests {
         #expect(w.aligned == [.biometric], "nothing re-run")
     }
 
+    /// pre-13x 3a (ledger 43 — THE WINDOW's identity finding): a store that
+    /// carries the 13j engine's `sync_state.device_id` row and NO legacy
+    /// material (corner 47's state — the dev build had taken the scope-less
+    /// item) still has an identity the mirror's `device_cursor` knows. Leg 1
+    /// carries it into the per-store IDENTITY-ONLY bound item and deletes
+    /// the row; a later enroll (`DeviceKeyStore.custody(...).save` — the
+    /// same rule `keychain` composes) KEEPS that id and the provider's
+    /// `deviceIdentity()` returns it. A row-less, material-less library
+    /// keeps "never enrolled — skipped". RED ON OLD: leg 1 skipped the
+    /// material-less store whole — no plain item, the row still present —
+    /// and the enroll minted a FRESH lowercase id (her phone's third
+    /// `device_cursor` row).
+    @Test func aRowOnlyIdentityIsCarriedIntoThePerStoreRecordAndTheEnrollKeepsIt() async throws {
+        let key = StoreKey.mint()
+        let w = World()
+        let seeded = "4D871175-CFBA-4E6A-9D3B-0000ABCDEF01"  // the 13j mint's UPPERCASE shape
+        w.deviceIDRow = seeded
+        w.envelope = StoreKeyEnvelope(formatVersion: StoreKeyEnvelope.formatVersion1, storeID: "store-2a")
+
+        let report = await ProtectionMigration.run(
+            facts: facts(key: key, effective: .auto, vault: nil, signedIn: true), leaves: w.leaves)
+        #expect(w.sync.plainRecord == SyncCustodyRecord(deviceID: seeded, material: nil),
+                "the identity-only item carries EXACTLY the row's value")
+        #expect(w.deviceIDRow == nil, "…and the row is gone")
+        #expect(report.syncCustody == nil, "no material was re-scoped — the carry is its own line")
+        #expect(w.log.contains { $0.contains("identity carried from sync_state (no legacy material)") }, "\(w.log)")
+        #expect(!w.log.contains { $0.contains("never enrolled") })
+
+        // The enroll keeps it: the session's save over the SAME leaves.
+        let store = DeviceKeyStore.custody(leaves: { w.sync.leaves }, shape: { .silent }, session: w.session)
+        let held = material()
+        #expect(store.save(held))
+        #expect(w.sync.plainRecord?.deviceID == seeded, "the enroll kept the carried id — no fresh mint")
+        #expect(w.sync.plainRecord?.material == held)
+        #expect(store.deviceID() == seeded)
+        #expect(try DeviceKeySyncProvider(store: store).deviceIdentity() == seeded, "the pull's `for_device` is the carried id")
+
+        // Row-less AND material-less: today's skip, unchanged.
+        let bare = World()
+        bare.envelope = StoreKeyEnvelope(formatVersion: StoreKeyEnvelope.formatVersion1, storeID: "store-2a")
+        let skipped = await ProtectionMigration.run(
+            facts: facts(key: key, effective: .auto, vault: nil, signedIn: false), leaves: bare.leaves)
+        #expect(skipped.syncCustody == nil && bare.sync.plainRecord == nil)
+        #expect(bare.log.contains { $0.contains("never enrolled") })
+    }
+
     /// THE OWNERSHIP GUARD (R1-m1): a legacy escrow item holding ANOTHER key
     /// is somebody's recovery leg — left, and said so.
     @Test func aForeignLegacyEscrowItemIsLeftAlone() async throws {

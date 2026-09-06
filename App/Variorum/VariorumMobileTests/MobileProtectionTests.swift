@@ -1030,8 +1030,15 @@ struct MobileFollowDetectionTests {
 /// the mirror (the drill asserts it).
 private actor InertTransport: SyncTransport, SyncRotationTransport {
     private(set) var touched = 0
+    /// pre-13x 3a (ledger 43): the `for_device` every pull carried — the
+    /// identity assertion reads it before and after the follow.
+    private(set) var pulledDeviceIDs: [String?] = []
     func push(_ batch: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncPushOutcome] { touched += 1; return [] }
-    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: String, deviceID: String?) async throws -> [SyncPulledRow] { touched += 1; return [] }
+    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: String, deviceID: String?) async throws -> [SyncPulledRow] {
+        touched += 1
+        pulledDeviceIDs.append(deviceID)
+        return []
+    }
     func schemaVersion() async throws -> Int { SyncSchema.lockstepVersion }
     func reencrypt(_ rows: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncReencryptOutcome] { touched += 1; return [] }
 }
@@ -1100,12 +1107,19 @@ struct MobileWindowReplayTests {
 
         // ————— HER PHONE AT THE WINDOW —————
         let phoneKey = StoreKey.mint()
+        let seededDeviceID = "4D871175-CFBA-4E6A-9D3B-0000ABCDEF01"
         do {
             let store = try AppDatabase.onDisk(url: storeURL, key: phoneKey)
             try await store.write { db in
                 try db.execute(
                     sql: "INSERT INTO container (id, kind, title, created_at, updated_at) VALUES (?, 'post', ?, ?, ?)",
                     arguments: ["phone-note", "typed in bed", "2026-09-05T00:00:00Z", "2026-09-05T00:00:00Z"])
+                // pre-13x 3a (ledger 43): the 13j engine's identity row — the
+                // UPPERCASE `UUID().uuidString` mint the mirror's
+                // `device_cursor` knows her phone by.
+                try db.execute(
+                    sql: "INSERT INTO sync_state (key, value) VALUES ('device_id', ?)",
+                    arguments: [seededDeviceID])
             }
             store.asRebindable().binding.lock()
         }
@@ -1154,14 +1168,24 @@ struct MobileWindowReplayTests {
         let done = LockIsolated(false)
         let confirmPending = LockIsolated(false)
         let migrationLog = LockIsolated<[String]>([])
-        bootstrap.makeMigrationLeaves = { _, id in
+        bootstrap.makeMigrationLeaves = { database, id in
             ProtectionMigration.Leaves(
                 isDone: { done.value }, markDone: { done.setValue(true) },
                 isConfirmPending: { confirmPending.value }, setConfirmPending: { confirmPending.setValue($0) },
                 legacyPlainMaterial: { nil }, legacyGatedMaterial: { nil },
                 deleteLegacyItems: { false }, retireOptIn: {},
                 syncLeaves: syncLeaves.leaves, session: session,
-                readDeviceIDRow: { nil }, deleteDeviceIDRow: {},
+                // pre-13x 3a: the REAL row — leg 1's carry reads and deletes it.
+                readDeviceIDRow: {
+                    try? await database.read { db in
+                        try String.fetchOne(db, sql: "SELECT value FROM sync_state WHERE key = 'device_id'")
+                    }
+                },
+                deleteDeviceIDRow: {
+                    _ = try? await database.write { db in
+                        try db.execute(sql: "DELETE FROM sync_state WHERE key = 'device_id'")
+                    }
+                },
                 loadLegacyEscrow: { _ in nil }, removeLegacyEscrow: { _ in false },
                 retireDialKeys: { dials.retireLegacy(for: id) },
                 setAlwaysAsk: { on in var d = dials.dials(for: id); d.alwaysAsk = on; dials.save(d, for: id) },
@@ -1188,6 +1212,16 @@ struct MobileWindowReplayTests {
         #expect(backing.auto == phoneKey && backing.gated == nil, "no custody move")
         #expect(protection.appleKeyVerified == nil, "the Apple arm never ran")
         #expect(protection.notice == nil, "no nudge, no confirm, no follow")
+        // pre-13x 3a (ledger 43): leg 1 carried the 13j identity into the
+        // identity-only item and deleted the row — BEFORE the indeterminate
+        // stop (the carry is leg 1's; legs 3–6 are what wait).
+        #expect(syncLeaves.plainRecord == SyncCustodyRecord(deviceID: seededDeviceID, material: nil),
+                "the identity-only item carries the seeded uppercase id: \(String(describing: syncLeaves.plainRecord))")
+        let rowAfterPass1 = try await appSession.database.read { db in
+            try String.fetchOne(db, sql: "SELECT value FROM sync_state WHERE key = 'device_id'")
+        }
+        #expect(rowAfterPass1 == nil, "the row is gone")
+        #expect(report.lines.contains { $0.contains("identity carried from sync_state") }, "\(report.lines)")
         let names1 = StoreKeyEnvelope.keyFileURLs(besideStore: storeURL).map(\.lastPathComponent)
         print("2d REPLAY| PASS 1 (a session, no custody, the vault unreachable): key file \(stubBytes.count) B before == after; files beside the store: \(names1); custody silent, unmoved; migration: \(report.lines.last ?? "?")")
 
@@ -1206,7 +1240,18 @@ struct MobileWindowReplayTests {
         let material = try await VaultEnrollment(client: client).setUp(passphrase: passphrase)
         let vaultBefore = try #require(try await client.fetchVault())
         #expect(vaultBefore.format.masterWrappedByAppleHeld == nil, "her account: CASTLE-shaped")
-        #expect(syncLeaves.leaves.savePlain(SyncCustodyRecord(deviceID: "phone-id", material: material)))
+        // pre-13x 3a: her Encryption-tab enroll saved through the custody
+        // RULE (`DeviceKeyStore.custody` — what `keychain` composes over the
+        // real Keychain), which keeps the carried identity; the drill's
+        // custody store is THAT rule over the recording leaves, and the
+        // runner below rides the same store.
+        let keyStore = DeviceKeyStore.custody(
+            leaves: { syncLeaves.leaves },
+            shape: { syncLeaves.gatedRecord != nil ? .biometric : .silent },
+            session: session)
+        #expect(keyStore.save(material))
+        #expect(syncLeaves.plainRecord?.deviceID == seededDeviceID, "the enroll KEPT the carried id — no fresh mint")
+        #expect(try DeviceKeySyncProvider(store: keyStore).deviceIdentity() == seededDeviceID)
         syncPresent.setValue(true)
         #expect(await protection.setPassphrase(passphrase) == nil)
         var asLeft = try #require(try StoreKeyEnvelope.loadCurrent(besideStore: storeURL))
@@ -1231,8 +1276,13 @@ struct MobileWindowReplayTests {
         // The runner at the phone's root — the SAME shared composition,
         // over the bootstrap's real re-key road and the controller's real
         // custody move; an inert mirror (nothing to re-encrypt).
-        let keyStore = DeviceKeyStore.inMemory(initial: material)
         let transport = InertTransport()
+        // One pull BEFORE the follow: the `for_device` it carries is the seeded id.
+        try await withDependencies { $0.database = appSession.database } operation: {
+            _ = try await SyncEngine(transport: transport, keyProvider: DeviceKeySyncProvider(store: keyStore)).pull()
+        }
+        let pulledBefore = await transport.pulledDeviceIDs
+        #expect(pulledBefore == [seededDeviceID])
         let runnerLog = LockIsolated<[String]>([])
         let syncCalls = LockIsolated<[String]>([])
         let runner = PostureSwitchRunner(leaves: PostureSwitchRunner.Leaves(
@@ -1294,7 +1344,9 @@ struct MobileWindowReplayTests {
         #expect(newKey != phoneKey, "a NEW library key")
         #expect(backing.auto == nil, "the silent item is gone")
         #expect(syncLeaves.gatedRecord?.material?.corpusKeyID == material.corpusKeyID, "the sync record behind Face ID — the keys unchanged")
-        #expect(syncLeaves.plainRecord?.material == nil && syncLeaves.plainRecord?.deviceID == "phone-id", "the plain item keeps only the identity")
+        #expect(syncLeaves.plainRecord?.material == nil && syncLeaves.plainRecord?.deviceID == seededDeviceID, "the plain item keeps only the identity — the CARRIED one")
+        #expect(syncLeaves.gatedRecord?.deviceID == seededDeviceID, "the gated record carries the same identity (the follow's own carry)")
+        #expect(try DeviceKeySyncProvider(store: keyStore).deviceIdentity() == seededDeviceID)
         #expect(protection.effectiveGate == .biometric && protection.posture == .castle)
         #expect(!protection.followPending && protection.notice != .follow(owed))
         // The new key file: no Apple copy; the vault's descriptor; the old one gone.
@@ -1320,11 +1372,19 @@ struct MobileWindowReplayTests {
         #expect(title == "typed in bed", "her note, whole, under the new key")
         // Nothing rotated: the vault and the mirror untouched; no marker.
         #expect(try await client.fetchVault()?.revision == vaultBefore.revision, "no vault write")
-        #expect(await transport.touched == 0, "the mirror untouched")
+        #expect(await transport.touched == 1, "the mirror untouched by the follow (the one touch is the drill's own pull before it)")
         #expect(keyStore.load()?.corpusKeyID == material.corpusKeyID)
+        // One pull AFTER the follow: the same `for_device` — before == after == the seeded value.
+        try await withDependencies { $0.database = reopened.database } operation: {
+            _ = try await SyncEngine(transport: transport, keyProvider: DeviceKeySyncProvider(store: keyStore)).pull()
+        }
+        let pulledAfter = await transport.pulledDeviceIDs
+        #expect(pulledAfter == [seededDeviceID, seededDeviceID],
+                "the pulled for_device before == after == the seeded uppercase sync_state value: \(pulledAfter)")
         #expect(try await PostureSwitchRunner.pendingMarker(database: reopened.database) == nil)
         #expect(syncCalls.value.contains("resume"))
         let names2 = StoreKeyEnvelope.keyFileURLs(besideStore: storeURL).map(\.lastPathComponent)
-        print("2d REPLAY| THE FOLLOW: \(runnerLog.value.joined(separator: " · ")); custody: gated=\(backing.gated != nil) auto=\(backing.auto != nil) sync-gated=\(syncLeaves.gatedRecord?.material != nil); files beside the store: \(names2); vault revision \(vaultBefore.revision) unchanged; mirror touched 0")
+        print("2d REPLAY| THE FOLLOW: \(runnerLog.value.joined(separator: " · ")); custody: gated=\(backing.gated != nil) auto=\(backing.auto != nil) sync-gated=\(syncLeaves.gatedRecord?.material != nil); files beside the store: \(names2); vault revision \(vaultBefore.revision) unchanged; mirror touched by the follow 0")
+        print("3a REPLAY| IDENTITY: seeded sync_state.device_id \(seededDeviceID) → carried at leg 1 (row deleted) → kept by the enroll → kept by the follow; pulled for_device before/after: \(pulledAfter.map { $0 ?? "nil" })")
     }
 }

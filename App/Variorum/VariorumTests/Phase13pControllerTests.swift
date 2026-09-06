@@ -869,6 +869,37 @@ struct Phase13pControllerTests {
         #expect(castle.controller.followNotice == nil && castle.controller.notice != .follow(owed))
     }
 
+    /// pre-13x 3a (ledger 43 — the follow's own carry, as the REGRESSION
+    /// guard the brief names): the device identity rides every custody
+    /// move — silent → the gate (the identity-only bound item beside the
+    /// gated record), the gate → Always ask (identity-only, the keys in the
+    /// session), a relock (the session dropped), and back to silent — never
+    /// re-minted. Green by construction on this tree (`SyncCustodyTransition
+    /// .move` carries `record.deviceID`; `deviceID()` reads the session,
+    /// then the plain item, and mints only when neither exists); recorded
+    /// as such in the 3a record.
+    @Test func theDeviceIdentityRidesEveryCustodyMoveAndARelock() async throws {
+        let w = try world(standard: true, enrolled: true)
+        #expect(w.syncLeaves.plainRecord?.deviceID == "device-1")
+        #expect(await w.controller.setPassphrase("sesame") == nil)
+        #expect(await w.controller.moveCustody(to: .biometric) == .changed)
+        #expect(w.syncLeaves.gatedRecord?.deviceID == "device-1" && w.syncLeaves.gatedRecord?.material != nil)
+        #expect(w.syncLeaves.plainRecord == SyncCustodyRecord(deviceID: "device-1", material: nil),
+                "the identity-only bound item beside the gated record")
+        #expect(w.syncSession.record?.deviceID == "device-1")
+        #expect(await w.controller.moveCustody(to: .passphrase) == .changed)
+        #expect(w.syncLeaves.gatedRecord == nil)
+        #expect(w.syncLeaves.plainRecord == SyncCustodyRecord(deviceID: "device-1", material: nil))
+        #expect(w.syncSession.record?.deviceID == "device-1", "Always ask: the keys in the session, the identity in the item")
+        // A relock drops the session; the identity stays in the bound item.
+        w.syncSession.drop()
+        #expect(w.syncLeaves.plainRecord?.deviceID == "device-1")
+        let store = DeviceKeyStore.custody(leaves: { w.syncLeaves.leaves }, shape: { .sessionOnly }, session: w.syncSession)
+        #expect(store.deviceID() == "device-1", "the provider reads the carried id — no mint")
+        #expect(await w.controller.moveCustody(to: .auto) == .changed)
+        #expect(w.syncLeaves.plainRecord?.deviceID == "device-1", "back to silent: the same identity")
+    }
+
     // MARK: - pre-13x 2c: THE FOLLOW's detection (§7 / §3.6)
 
     private func rotatedReading(

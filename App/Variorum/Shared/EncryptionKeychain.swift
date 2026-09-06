@@ -322,7 +322,10 @@ nonisolated struct DeviceKeyStore: Sendable {
     /// The production factory: per store (the id read from the key file
     /// beside `storeURL` at each call — nil ⇒ no custody), the shape read
     /// from the store's dials, the session shared with the bootstrap's
-    /// lock road.
+    /// lock road. pre-13x 3a: ONE rule — `custody(leaves:shape:session:)`
+    /// below — composed here over the live Keychain leaves, so a pin can
+    /// drive the SAME save/load/identity semantics over recording leaves
+    /// (the 17h leaves pattern) without a second implementation.
     static func keychain(
         scope: String, storeURL: URL?,
         session: SyncCustodySession = .shared,
@@ -361,13 +364,33 @@ nonisolated struct DeviceKeyStore: Sendable {
                 posture: facts.posture,
                 dials: ProtectionDefaults.dials(scope: scope, storeID: custody.storeID, in: store)))
         }
-        return DeviceKeyStore(
+        return custody(
+            leaves: { custodyScope().map { E2EECustodyLeaves.live(scope: $0) } },
+            shape: { custodyScope().map(shape) ?? .silent },
+            session: session)
+    }
+
+    /// THE RULE, over injectable leaves (pre-13x 3a): the session's record
+    /// first (Castle: filled by the lobby's one gated read / the vault
+    /// road), else the silent item's; a save lands under the CURRENT
+    /// shape keeping the record's identity — the session's, else the bound
+    /// item's (an identity-only item left by the migration's leg 1 or by
+    /// `deviceID()`), else a fresh mint; the forget road keeps the
+    /// identity; `deviceID()` mints into the bound item when the library
+    /// has never had one on this machine. `leaves` returns nil while no
+    /// key file (no store id) exists — no custody can.
+    static func custody(
+        leaves: @escaping @Sendable () -> E2EECustodyLeaves?,
+        shape: @escaping @Sendable () -> SyncCustodyShape,
+        session: SyncCustodySession
+    ) -> DeviceKeyStore {
+        DeviceKeyStore(
             load: {
                 if let held = session.record?.material { return held }
-                guard let custody = custodyScope() else { return nil }
-                switch shape(custody) {
+                guard let leaves = leaves() else { return nil }
+                switch shape() {
                 case .silent:
-                    return E2EEKeychainStorage.load(scope: custody)?.material
+                    return leaves.loadPlain()?.material
                 case .biometric, .sessionOnly:
                     // The gated item is unreadable without a prompt, and the
                     // session-only shape holds no item: locked until the
@@ -377,25 +400,25 @@ nonisolated struct DeviceKeyStore: Sendable {
                 }
             },
             save: { material in
-                guard let custody = custodyScope() else { return false }
+                guard let leaves = leaves() else { return false }
                 let identity = session.record?.deviceID
-                    ?? E2EEKeychainStorage.load(scope: custody)?.deviceID
+                    ?? leaves.loadPlain()?.deviceID
                     ?? UUID().uuidString.lowercased()
                 let record = SyncCustodyRecord(deviceID: identity, material: material)
                 let identityOnly = SyncCustodyRecord(deviceID: identity, material: nil)
-                switch shape(custody) {
+                switch shape() {
                 case .silent:
-                    guard E2EEKeychainStorage.save(record, scope: custody) else { return false }
-                    _ = E2EEKeychainStorage.deleteGatedItem(scope: custody)
+                    guard leaves.savePlain(record) else { return false }
+                    _ = leaves.deleteGated()
                     return true
                 case .biometric:
-                    guard E2EEKeychainStorage.saveGated(record, scope: custody) else { return false }
-                    _ = E2EEKeychainStorage.save(identityOnly, scope: custody)
+                    guard leaves.saveGated(record) else { return false }
+                    _ = leaves.savePlain(identityOnly)
                     session.hold(record)
                     return true
                 case .sessionOnly:
-                    guard E2EEKeychainStorage.save(identityOnly, scope: custody) else { return false }
-                    _ = E2EEKeychainStorage.deleteGatedItem(scope: custody)
+                    guard leaves.savePlain(identityOnly) else { return false }
+                    _ = leaves.deleteGated()
                     session.hold(record)
                     return true
                 }
@@ -403,25 +426,25 @@ nonisolated struct DeviceKeyStore: Sendable {
             clear: {
                 let identity = session.record?.deviceID
                 session.drop()
-                guard let custody = custodyScope() else { return }
-                let kept = identity ?? E2EEKeychainStorage.load(scope: custody)?.deviceID
-                _ = E2EEKeychainStorage.deleteGatedItem(scope: custody)
+                guard let leaves = leaves() else { return }
+                let kept = identity ?? leaves.loadPlain()?.deviceID
+                _ = leaves.deleteGated()
                 if let kept {
-                    _ = E2EEKeychainStorage.save(SyncCustodyRecord(deviceID: kept, material: nil), scope: custody)
+                    _ = leaves.savePlain(SyncCustodyRecord(deviceID: kept, material: nil))
                 } else {
-                    _ = E2EEKeychainStorage.deletePlainItem(scope: custody)
+                    _ = leaves.deletePlain()
                 }
             },
             deviceID: {
                 if let held = session.record?.deviceID { return held }
-                guard let custody = custodyScope() else {
+                guard let leaves = leaves() else {
                     // No key file yet: no custody can exist — a session-only
                     // identity that cannot sync anyway (the keys refuse first).
                     return UUID().uuidString.lowercased()
                 }
-                if let stored = E2EEKeychainStorage.load(scope: custody)?.deviceID { return stored }
+                if let stored = leaves.loadPlain()?.deviceID { return stored }
                 let minted = SyncCustodyRecord.fresh()
-                _ = E2EEKeychainStorage.save(minted, scope: custody)
+                _ = leaves.savePlain(minted)
                 return minted.deviceID
             })
     }

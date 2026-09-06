@@ -166,6 +166,28 @@ nonisolated enum ProtectionMigration {
             report.syncCustody = outcome
             note("migration 2a: sync custody re-scoped → \(outcome) (identity \(deviceID == nil ? "minted" : "from sync_state"))")
             if outcome == .done { await leaves.deleteDeviceIDRow() }
+        } else if let row = await leaves.readDeviceIDRow() {
+            // pre-13x 3a (ledger 43 — THE WINDOW's identity finding): no
+            // legacy MATERIAL, but the store still carries the 13j engine's
+            // `sync_state.device_id` — the identity the mirror's
+            // `device_cursor` knows this library by. Decision 13's premise
+            // ("a machine with no custody for a store id has never opened
+            // that library") is false for exactly this class, and leg 1 is
+            // the one place that source exists: the identity is carried
+            // into the per-store IDENTITY-ONLY bound item (the item that
+            // exists under every shape — §3.3) so a later enroll keeps it
+            // instead of minting a fresh one and stranding the cursor row.
+            // Write, verify by the production read, only then delete the
+            // row (the CustodyHandover discipline). A plain identity-only
+            // record already there is superseded by the row's value — the
+            // row is what the server knows.
+            let record = SyncCustodyRecord(deviceID: row, material: nil)
+            if leaves.syncLeaves.savePlain(record), leaves.syncLeaves.loadPlain() == record {
+                await leaves.deleteDeviceIDRow()
+                note("migration 2a: sync custody — identity carried from sync_state (no legacy material)")
+            } else {
+                note("migration 2a: sync custody — the identity-only item could not be written; the row stays for the next ready")
+            }
         } else {
             note("migration 2a: no legacy sync custody (never enrolled) — skipped")
         }
