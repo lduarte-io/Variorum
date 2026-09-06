@@ -31,6 +31,7 @@
 //  LIVE Face ID walk on her device is a morning act, recorded PENDING.
 //
 
+import CryptoKit
 import Dependencies
 import Foundation
 import GRDB
@@ -597,6 +598,11 @@ struct MobilePhoneProtectionCopyTests {
                 .contains("This iPhone opens silently again"))
         #expect(ProtectionCopy.alwaysAskRetiredWord(device: "Lillian's Mac", day: day)
                 .contains("The old one still opens this iPhone"))
+        // pre-13x 4a: the change notices in the phone's nouns.
+        #expect(ProtectionCopy.passphraseChangedElsewhere(device: "Lillian's Mac", day: day)
+                == "Your passphrase was changed on Lillian's Mac on \(day). Use the new one here when you can — this iPhone still takes the old one until you do.")
+        #expect(ProtectionCopy.wordsRegeneratedElsewhere(device: "Lillian's Mac", day: day)
+                == "Your twelve words were regenerated on Lillian's Mac on \(day). Use the new ones here when you can — this iPhone still takes the old ones until you do.")
         // pre-13x 3a: copy §2d's join face + the (d) consent in the phone's nouns.
         #expect(ProtectionCopy.joinCastleTitle == "Enter your passphrase to join sync.")
         #expect(ProtectionCopy.joinLaterLine == "Sync isn't joined on this iPhone.")
@@ -1057,6 +1063,78 @@ struct MobileFollowDetectionTests {
         #expect(controller.notice == .followWaiting(owed))
         controller.followLanded()
         #expect(!controller.followPending)
+    }
+
+    /// pre-13x 4a (copy §5's first two lines; ledger 33 · 53): the SAME
+    /// shared reconcile composed the phone's way — a Castle phone, material
+    /// in hand, learns at ready that the passphrase was changed elsewhere
+    /// (its key file's recorded descriptor ≠ the vault's) and speaks copy
+    /// §5's sentence in the phone's nouns; never a follow (`followPending`
+    /// false — sync keeps running); the dismiss is per open; the words twin
+    /// rides the recovery-wrap digest; the landing clears it.
+    @Test func aPassphraseChangeElsewhereSpeaksTheChangeNoticeOnThePhoneAndSyncKeepsRunning() async throws {
+        let key = StoreKey.mint()
+        let master = SymmetricKey(data: Data(repeating: 0, count: 32))
+        let oldKDF = fastKDF()
+        let newKDF = fastKDF()
+        let backing = InMemoryStoreKeyGuardBacking(
+            gated: key, biometryAvailable: true, biometricSucceeds: true)
+        var envelope = StoreKeyEnvelope()
+        try envelope.setPassphraseWrap(key: key, passphrase: "sesame", kdf: oldKDF)
+        try envelope.masterBox(key: key, under: master)
+        try envelope.recordVaultReconciliation(kdf: oldKDF, corpusKeyID: "corpus-old", recoveryWrapDigest: "d1")
+        let box = ScriptedEnvelopeBox(envelope)
+        let gate = StoreLaunchGate.scripted(
+            dials: ScriptedDialsBox(ProtectionDials()), backing: backing, envelope: box)
+        let session = SyncCustodySession()
+        session.hold(SyncCustodyRecord(deviceID: "phone-1", material: DeviceKeyMaterial(
+            masterKey: master.withUnsafeBytes { Data($0) },
+            corpusKey: Data(repeating: 1, count: 32), corpusKeyID: "corpus-old",
+            journalBridgeKey: Data(repeating: 2, count: 32), journalBridgeKeyID: "bridge")))
+        let controller = ProtectionController(configuration: .init(
+            scope: "phone-change", storeURL: nil, gate: gate,
+            isRealVariant: false, makeKDF: { fastKDF() },
+            storeID: { [id = envelope.storeID] in id },
+            syncCustodySession: session))
+        controller.adoptResident(key)
+        #expect(controller.posture == .castle)
+        controller.foreignOwner = { _ in false }
+        let reading: @Sendable (PassphraseKDF.Descriptor, String?) -> VaultPostureReading = { kdf, digest in
+            VaultPostureReading(
+                hasAppleHeldCopy: false, appleKeyID: nil, passphraseKDF: kdf, hasPassphraseWrap: true,
+                corpusKeyID: "corpus-old", updatedAt: "2026-09-04T10:00:00Z",
+                updatedByDevice: "Lillian's Mac", signedInUserID: "user-phone", hasRecoveryWrap: true,
+                recoveryWrapDigest: digest)
+        }
+        controller.readVaultPosture = { reading(newKDF, "d1") }
+        await controller.reconcile()
+        let change = try #require(controller.changeNotice)
+        #expect(change.kind == .passphraseChangedElsewhere)
+        #expect(change.body == "Your passphrase was changed on Lillian's Mac on \(change.day). Use the new one here when you can — this iPhone still takes the old one until you do.")
+        #expect(controller.notice == .changedElsewhere(change))
+        #expect(!controller.followPending && controller.followNotice == nil, "sync keeps running — a convenience change")
+        controller.dismissChangeNotice()
+        #expect(controller.notice != .changedElsewhere(change))
+        controller.resetPerOpenDeferrals()
+        controller.refreshNotices()
+        #expect(controller.notice == .changedElsewhere(change), "per open")
+        // The landing under the vault's descriptor clears it.
+        #expect(await controller.reconcilePassphraseWrap(
+            passphrase: "the new word 12", vaultKDF: newKDF, corpusKeyID: "corpus-old", recoveryWrapDigest: "d1") == nil)
+        controller.changeNoticeLanded()
+        await controller.reconcile()
+        #expect(controller.changeNotice == nil)
+        #expect(box.value?.passphrase?.kdf == newKDF && box.value?.vaultKDF == newKDF)
+        // The words twin.
+        controller.readVaultPosture = { reading(newKDF, "d2") }
+        await controller.reconcile()
+        let regenerated = try #require(controller.changeNotice)
+        #expect(regenerated.kind == .wordsRegeneratedElsewhere)
+        #expect(regenerated.body == "Your twelve words were regenerated on Lillian's Mac on \(regenerated.day). Use the new ones here when you can — this iPhone still takes the old ones until you do.")
+        #expect(await controller.landRecoveryWrap(words: try RecoveryPhrase.generate(), recoveryWrapDigest: "d2") == nil)
+        controller.changeNoticeLanded()
+        await controller.reconcile()
+        #expect(controller.changeNotice == nil && box.value?.vaultRecoveryWrapDigest == "d2")
     }
 }
 

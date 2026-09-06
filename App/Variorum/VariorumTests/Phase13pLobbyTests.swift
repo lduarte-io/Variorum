@@ -21,6 +21,7 @@
 //  road runs through the scripted gate (`StoreLaunchGate.scripted`).
 //
 
+import CryptoKit
 import Dependencies
 import Foundation
 import GRDB
@@ -856,5 +857,108 @@ struct Phase13pLobbyTests {
         #expect(session.derivedWrappingKDF == kdf, "the descriptor rides with it — the reconcile compares it with the vault's")
         session.drop()
         #expect(session.derivedWrappingKey == nil && session.derivedWrappingKDF == nil, "a relock drops both")
+    }
+
+    /// pre-13x 4a (the 2c adjudication's item 1 — `Later` IS PER OPEN): under
+    /// Castle a relock + unlock is an open, so the lock road resets every
+    /// per-open deferral — the follow's *Later*, the change notice's
+    /// dismiss, the migration confirm's *Later* — and the modal notice asks
+    /// again at the next unlock. RED ON OLD: the deferrals were per LAUNCH —
+    /// after Later → lock → unlock the persistent banner stood in the
+    /// notice's place.
+    @Test func laterIsPerOpenARelockAndUnlockAsksAgain() async throws {
+        try await withDeps {
+            let dir = try temporaryDirectory()
+            defer { try? FileManager.default.removeItem(at: dir) }
+            let storeURL = dir.appendingPathComponent("store.sqlite")
+            let key = StoreKey.mint()
+            let kdf = fastKDF()
+            var envelope = StoreKeyEnvelope()
+            try envelope.setPassphraseWrap(key: key, passphrase: "sesame", kdf: kdf)
+            try envelope.masterBox(key: key, under: SymmetricKey(data: Data(repeating: 0, count: 32)))
+            try envelope.recordVaultReconciliation(kdf: kdf, corpusKeyID: "corpus-old", recoveryWrapDigest: nil)
+            // On disk beside the store too: the controller's per-store sync
+            // custody resolves the store id from the key file BESIDE the
+            // store (the material-in-hand branch needs it).
+            try envelope.write(at: envelope.preferredURL(besideStore: storeURL))
+            let backing = InMemoryStoreKeyGuardBacking(biometryAvailable: false, biometricSucceeds: false)
+            let gate = StoreLaunchGate.scripted(
+                dials: ScriptedDialsBox(ProtectionDials(alwaysAsk: true)), backing: backing,
+                envelope: ScriptedEnvelopeBox(envelope))
+            let session = SyncCustodySession()
+            let material = DeviceKeyMaterial(
+                masterKey: Data(repeating: 0, count: 32),
+                corpusKey: Data(repeating: 1, count: 32), corpusKeyID: "corpus-old",
+                journalBridgeKey: Data(repeating: 2, count: 32), journalBridgeKeyID: "bridge")
+            let leaves = RecordingSyncLeaves(plain: SyncCustodyRecord(deviceID: "device-later", material: material))
+            let bootstrap = AppBootstrap(
+                testOpener: {
+                    Result { try AppDatabase.onDisk(url: storeURL, key: key) }
+                        .mapError { AppDatabase.StoreOpenError(storePath: storeURL.path, reason: String(describing: $0)) }
+                },
+                gate: gate, testStoreURL: storeURL,
+                syncCustodyLeaves: { _ in leaves.leaves }, syncCustodySession: session)
+            await bootstrap.awaitOpen()
+            guard case .locked(let lobby) = bootstrap.state else { Issue.record("expected .locked, got \(bootstrap.state)"); return }
+            await lobby.unlock(passphrase: "sesame")
+            await bootstrap.awaitOpen()
+            guard case .ready = bootstrap.state else { Issue.record("expected .ready"); return }
+            let protection = bootstrap.protection
+            protection.foreignOwner = { _ in false }
+            let reading: @Sendable (String, PassphraseKDF.Descriptor) -> VaultPostureReading = { corpus, vaultKDF in
+                VaultPostureReading(
+                    hasAppleHeldCopy: false, appleKeyID: nil, passphraseKDF: vaultKDF, hasPassphraseWrap: true,
+                    corpusKeyID: corpus, updatedAt: "2026-09-05T10:00:00Z", updatedByDevice: "Lillian's iPhone",
+                    signedInUserID: "user-later", hasRecoveryWrap: true, recoveryWrapDigest: nil)
+            }
+            // (1) A follow owed (the keys rotated elsewhere): Later → the banner;
+            //     lock → unlock → reconcile ⇒ the modal notice AGAIN.
+            protection.readVaultPosture = { reading("corpus-new", kdf) }
+            await protection.reconcile()
+            let owed = try #require(protection.followNotice)
+            #expect(owed.kind == .keysReplaced && protection.notice == .follow(owed))
+            protection.deferFollow()
+            #expect(protection.notice == .followWaiting(owed), "Later: the persistent banner for this open")
+            await bootstrap.lock()
+            guard case .locked(let second) = bootstrap.state else { Issue.record("expected .locked after Lock Now"); return }
+            await second.unlock(passphrase: "sesame")
+            await bootstrap.awaitOpen()
+            guard case .ready = bootstrap.state else { Issue.record("expected .ready after the second unlock"); return }
+            await protection.reconcile()
+            #expect(protection.notice == .follow(owed), "a relock + unlock is an OPEN — the notice returns")
+
+            // (2) The change notice's dismiss: per open too.
+            protection.followLanded()
+            let staleKDF = fastKDF()
+            protection.readVaultPosture = { reading("corpus-old", staleKDF) }
+            await protection.reconcile()
+            let change = try #require(protection.changeNotice)
+            #expect(change.kind == .passphraseChangedElsewhere && protection.notice == .changedElsewhere(change))
+            protection.dismissChangeNotice()
+            #expect(protection.notice != .changedElsewhere(change))
+            await bootstrap.lock()
+            guard case .locked(let third) = bootstrap.state else { Issue.record("expected .locked"); return }
+            await third.unlock(passphrase: "sesame")
+            await bootstrap.awaitOpen()
+            await protection.reconcile()
+            #expect(protection.notice == .changedElsewhere(change), "the dismissed notice returns at the next open")
+
+            // (3) The migration confirm's Later: per open too.
+            protection.changeNoticeLanded()
+            protection.readVaultPosture = { reading("corpus-old", kdf) }
+            await protection.reconcile()
+            #expect(protection.changeNotice == nil && protection.followNotice == nil)
+            protection.readMigrationConfirmPending = { true }
+            protection.refreshNotices()
+            #expect(protection.notice == .migrationConfirm)
+            protection.deferMigrationConfirm()
+            #expect(protection.notice != .migrationConfirm)
+            await bootstrap.lock()
+            guard case .locked(let fourth) = bootstrap.state else { Issue.record("expected .locked"); return }
+            await fourth.unlock(passphrase: "sesame")
+            await bootstrap.awaitOpen()
+            protection.refreshNotices()
+            #expect(protection.notice == .migrationConfirm, "the confirm's Later is per open — the same class")
+        }
     }
 }

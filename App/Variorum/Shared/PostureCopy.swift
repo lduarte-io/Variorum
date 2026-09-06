@@ -464,6 +464,26 @@ nonisolated extension ProtectionCopy {
     /// The Connect sheet's dismiss door (a plain chrome word — the copy
     /// file names only *Connect…* for this face; recorded in the 3a record).
     static let connectCancelDoor = "Cancel"
+    // MARK: - pre-13x 4a — the change notices (copy §5's first two lines)
+
+    /// Copy §5 — passphrase changed elsewhere (a dismissable banner at every
+    /// open, until the new word has been used here).
+    static func passphraseChangedElsewhere(device: String, day: String) -> String {
+        "Your passphrase was changed on \(device) on \(day). Use the new one here when you can — "
+        + "this \(deviceName) still takes the old one until you do."
+    }
+    /// Copy §5 — "The same for regenerated words (*Your twelve words were
+    /// regenerated on [device] on [day]…*)": the tail is the passphrase
+    /// line's, mirrored for the words (a reading of the copy's ellipsis —
+    /// recorded; 13s re-voices).
+    static func wordsRegeneratedElsewhere(device: String, day: String) -> String {
+        "Your twelve words were regenerated on \(device) on \(day). Use the new ones here when you can — "
+        + "this \(deviceName) still takes the old ones until you do."
+    }
+    /// The change notice's dismiss (copy §5 names *Enter It Now…* · dismiss;
+    /// a chrome word — 13s re-voices).
+    static let changeDismissDoor = "Dismiss"
+
     // MARK: - pre-13x 4a — the lobby's vault road (copy §3) + its chrome
 
     /// Copy §3 — the RETIRED passphrase (online, same account): the local

@@ -779,10 +779,15 @@ final class AppBootstrap {
         }.value
         state = .locked(makeLobby(facts))
         protection.dropResident()
+        // pre-13x 4a (the 2c adjudication's item 1): a relock + unlock is an
+        // OPEN — every per-open deferral (the follow's Later, the migration
+        // confirm's Later, the change notice's dismiss) resets here.
+        protection.resetPerOpenDeferrals()
         // pre-13x 1a: the sync keys held for the unlocked session (the
         // gated record, the Always-ask derived key) go with the library
-        // key — a locked library reads as no keys (pinned).
-        SyncCustodySession.shared.drop()
+        // key — a locked library reads as no keys (pinned). pre-13x 4a: the
+        // CONTROLLER's session (production's `.shared`; a pin's own).
+        protection.syncCustodySession.drop()
         let lockTimeCopy = lockTimeCopy
         _ = await Task.detached(priority: .userInitiated) {
             binding.lock()

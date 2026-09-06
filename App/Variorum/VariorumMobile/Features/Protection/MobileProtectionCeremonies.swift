@@ -246,6 +246,7 @@ struct MobileProtectionNoticeBar: View {
             case .movedToStandard(let moved): movedToStandardBar(moved)
             case .alwaysAskRetiredWord(let retired): alwaysAskRetiredBar(retired)
             case .differentOwner: differentOwnerBar
+            case .changedElsewhere(let change): changedElsewhereBar(change)
             case nil: EmptyView()
             }
         }
@@ -411,6 +412,38 @@ struct MobileProtectionNoticeBar: View {
             HStack(spacing: 16) {
                 offer(ProtectionCopy.followMovedToStandardDoor) { controller.dismissMovedToStandard() }
                 Spacer()
+            }
+        }
+    }
+
+    /// pre-13x 4a (copy §5's first two lines): the passphrase was changed /
+    /// the words were regenerated elsewhere — *Enter It Now…* by kind and a
+    /// dismiss for this open.
+    private func changedElsewhereBar(_ change: FollowNotice) -> some View {
+        bar {
+            Text(change.body)
+                .font(tokens.small)
+                .foregroundStyle(tokens.ink)
+                .fixedSize(horizontal: false, vertical: true)
+            HStack(spacing: 16) {
+                offer(ProtectionCopy.enterItNowDoor) {
+                    controller.openChangeNotice()
+                    if change.kind == .wordsRegeneratedElsewhere {
+                        controller.activeFollow?.chooseWords()
+                    } else {
+                        controller.activeFollow?.choosePassphrase()
+                    }
+                }
+                Spacer()
+                Button {
+                    controller.dismissChangeNotice()
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.faint)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(ProtectionCopy.changeDismissDoor)
             }
         }
     }

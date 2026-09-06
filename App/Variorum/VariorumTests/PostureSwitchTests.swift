@@ -1769,6 +1769,13 @@ struct PostureSwitchTests {
         let material = try #require(acting.oldMaterial)
         let oldWords = acting.words
         try await VaultEnrollment(client: client).landRecoveryWrap(words: oldWords, material: material)
+        // pre-13x 4a: the sibling's key file reconciled under the vault as it
+        // stood — the OLD wrap's digest recorded (the landing sites' record).
+        let vaultBefore = try await acting.vault()
+        var siblingFile = try #require(try StoreKeyEnvelope.load(at: sibling.oldKeyFileURL))
+        try siblingFile.recordVaultReconciliation(
+            kdf: vaultBefore.format.kdf, corpusKeyID: material.corpusKeyID, recoveryWrapDigest: vaultBefore.format.recoveryWrapDigest)
+        try siblingFile.write(at: sibling.oldKeyFileURL)
         let controller = makeController(for: acting)
         let encryption = try wireSession(for: acting, controller: controller)
         await encryption.refresh()
@@ -1800,6 +1807,50 @@ struct PostureSwitchTests {
         let actingFile = try #require(try StoreKeyEnvelope.load(at: acting.oldKeyFileURL))
         #expect(try actingFile.unwrapKey(recoveryWords: fresh) == acting.oldKey)
         #expect(throws: (any Error).self) { _ = try actingFile.unwrapKey(recoveryWords: oldWords) }
+        // pre-13x 4a: the acting key file recorded the NEW wrap's digest through
+        // the phrase-landed hook — it owes itself no notice.
+        let vaultAfter = try await acting.vault()
+        #expect(actingFile.vaultRecoveryWrapDigest == vaultAfter.format.recoveryWrapDigest
+                && vaultAfter.format.recoveryWrapDigest != vaultBefore.format.recoveryWrapDigest)
+
+        // pre-13x 4a DRILL (ii) — THE SIBLING'S NOTICE + DOOR (ledger 53): its
+        // key file recorded the vault's OLD wrap digest; at ready the digest
+        // differs ⇒ the words-regenerated notice (never a follow); *Enter It
+        // Now…* refuses the OLD words and lands the NEW words' local copy
+        // with the vault's digest; the notice clears; nothing re-keyed.
+        let siblingController = makeController(for: sibling)
+        siblingController.switchRunner = sibling.runner
+        siblingController.foreignOwner = { _ in false }
+        siblingController.readVaultPosture = { [client] in
+            guard let fetched = try? await client.fetchVault() else { return nil }
+            return VaultPostureReading(
+                hasAppleHeldCopy: fetched.format.masterWrappedByAppleHeld != nil,
+                appleKeyID: fetched.format.appleKeyID, passphraseKDF: fetched.format.kdf,
+                hasPassphraseWrap: true, corpusKeyID: fetched.format.classKey(for: .corpus)?.keyID,
+                updatedAt: fetched.updatedAt, updatedByDevice: fetched.format.updatedByDevice,
+                signedInUserID: "user-2b", hasRecoveryWrap: fetched.format.masterWrappedByRecovery != nil,
+                format: fetched.format, recoveryWrapDigest: fetched.format.recoveryWrapDigest)
+        }
+        await siblingController.reconcile()
+        let regenerated = try #require(siblingController.changeNotice)
+        #expect(regenerated.kind == .wordsRegeneratedElsewhere && !siblingController.followPending)
+        #expect(siblingController.notice == .changedElsewhere(regenerated))
+        siblingController.openChangeNotice()
+        let siblingModel = try #require(siblingController.activeFollow)
+        siblingModel.chooseWords()
+        #expect(siblingModel.phase == .askWords)
+        await siblingModel.enter(wordsText: oldWords.joined(separator: " "))
+        #expect(siblingModel.lastError == "Those aren't your account's twelve words." && siblingModel.phase == .askWords)
+        await siblingModel.enter(wordsText: fresh.joined(separator: " "))
+        #expect(siblingModel.phase == .closed, "\(siblingModel.phase) \(siblingModel.lastError ?? "")")
+        #expect(siblingController.changeNotice == nil)
+        let siblingLanded = try #require(try StoreKeyEnvelope.load(at: sibling.oldKeyFileURL))
+        let viaFresh = try siblingLanded.unwrapKey(recoveryWords: fresh)
+        #expect(viaFresh == sibling.oldKey, "the NEW words' local copy landed")
+        #expect(siblingLanded.vaultRecoveryWrapDigest == vaultAfter.format.recoveryWrapDigest)
+        #expect(sibling.calls.rekeys == 0 && sibling.keyStore.load()?.corpusKeyID == material.corpusKeyID, "nothing re-keyed")
+        await siblingController.reconcile()
+        #expect(siblingController.changeNotice == nil)
     }
 
     /// REPLACE ALL KEYS THROUGH THE DOOR, THE SIBLING FOLLOWING, A STALE
@@ -1966,5 +2017,197 @@ struct PostureSwitchTests {
         #expect(model.phase == .offer)
         model.keepOldBackups()
         #expect(model.phase == .closed)
+    }
+
+    // MARK: - pre-13x 4a: the change notice's door (ledger 33 · 53) + the follow from the held key (ledger 54)
+
+    /// THE CHANGE NOTICE'S DOOR, over the real runner and the emulated vault
+    /// (copy §5's first line; §7 steps 2–3): the acting device changes its
+    /// passphrase; the sibling — material in hand, its key file recording the
+    /// vault's OLD descriptor — learns at ready that the passphrase was
+    /// changed elsewhere (never a follow: `followPending` false, sync keeps
+    /// running); *Enter It Now…* — a wrong word refuses in the ACCOUNT's
+    /// words; the NEW word lands the sibling's local copy under the vault's
+    /// descriptor; the notice clears; nothing is re-keyed. The dismissal is
+    /// per open (the lock road's reset brings it back).
+    @Test func theSiblingLearnsThePassphraseChangeAtReadyAndEnterItNowLandsTheNewWord() async throws {
+        let acting = try await makeWorld()
+        defer { acting.tearDown() }
+        let sibling = try await makeWorld(sharing: acting)
+        defer { sibling.tearDown() }
+        let client = try #require(acting.vaultClient)
+        let material = try #require(acting.oldMaterial)
+        let before = try await acting.vault()
+        // The sibling's key file reconciled under the vault as it stood (the
+        // landing's record — 3a/3b's sites), so a change elsewhere is visible.
+        var siblingFile = try #require(try StoreKeyEnvelope.load(at: sibling.oldKeyFileURL))
+        try siblingFile.recordVaultReconciliation(
+            kdf: before.format.kdf, corpusKeyID: material.corpusKeyID, recoveryWrapDigest: before.format.recoveryWrapDigest)
+        try siblingFile.write(at: sibling.oldKeyFileURL)
+        // The acting device changes the word (the core act the door runs).
+        let new = "a-new-word-for-both-12"
+        _ = try await VaultEnrollment(client: client).changePassphrase(authorizedBy: .passphrase("sesame"), newPassphrase: new)
+        let vault = try await acting.vault()
+        #expect(vault.format.kdf != before.format.kdf)
+
+        let controller = makeController(for: sibling)
+        controller.switchRunner = sibling.runner
+        controller.foreignOwner = { _ in false }
+        controller.readVaultPosture = { [client] in
+            guard let fetched = try? await client.fetchVault() else { return nil }
+            return VaultPostureReading(
+                hasAppleHeldCopy: fetched.format.masterWrappedByAppleHeld != nil,
+                appleKeyID: fetched.format.appleKeyID, passphraseKDF: fetched.format.kdf,
+                hasPassphraseWrap: true, corpusKeyID: fetched.format.classKey(for: .corpus)?.keyID,
+                updatedAt: fetched.updatedAt, updatedByDevice: fetched.format.updatedByDevice,
+                signedInUserID: "user-2b", hasRecoveryWrap: fetched.format.masterWrappedByRecovery != nil,
+                format: fetched.format, recoveryWrapDigest: fetched.format.recoveryWrapDigest)
+        }
+        await controller.reconcile()
+        let change = try #require(controller.changeNotice)
+        #expect(change.kind == .passphraseChangedElsewhere)
+        #expect(change.device == "test device", "decision 34: the acting device's own name")
+        #expect(controller.notice == .changedElsewhere(change))
+        #expect(!controller.followPending && controller.followNotice == nil, "a convenience change: sync keeps running")
+        controller.dismissChangeNotice()
+        #expect(controller.notice != .changedElsewhere(change))
+        controller.resetPerOpenDeferrals()
+        controller.refreshNotices()
+        #expect(controller.notice == .changedElsewhere(change), "the dismissal is per open")
+
+        // The door.
+        controller.openChangeNotice()
+        let model = try #require(controller.activeFollow)
+        #expect(model.isChangeNoticeVariant && !model.canFollowFromHeldKey)
+        model.choosePassphrase()
+        #expect(model.phase == .askPassphrase)
+        await model.enter(passphrase: "not the new word")
+        #expect(model.lastError == EncryptionSession.message(for: VaultEnrollmentError.wrongPassphrase), "\(model.lastError ?? "nil")")
+        #expect(model.phase == .askPassphrase && controller.changeNotice != nil, "a wrong word refuses in place")
+        let rekeysBefore = sibling.calls.rekeys
+        await model.enter(passphrase: new)
+        #expect(model.phase == .closed, "\(model.phase) \(model.lastError ?? "")")
+        #expect(controller.changeNotice == nil && controller.notice != .changedElsewhere(change))
+        let landed = try #require(try StoreKeyEnvelope.load(at: sibling.oldKeyFileURL))
+        #expect(landed.passphrase?.kdf == vault.format.kdf && landed.vaultKDF == vault.format.kdf,
+                "the sibling's local copy under the vault's descriptor")
+        #expect(try landed.unwrapKey(passphrase: new) == sibling.oldKey)
+        #expect(throws: StoreKeyEnvelopeError.wrongPassphrase) { _ = try landed.unwrapKey(passphrase: "sesame") }
+        #expect(sibling.calls.rekeys == rekeysBefore, "nothing re-keyed — a re-wrap")
+        #expect(sibling.keyStore.load()?.corpusKeyID == material.corpusKeyID, "custody unchanged")
+        await controller.reconcile()
+        #expect(controller.changeNotice == nil, "the record agrees with the vault")
+    }
+
+    /// THE FOLLOW FROM THE WORD JUST TYPED (ledger 54; §7 step 1): the
+    /// sibling opened its lobby by the passphrase, whose derived key sits in
+    /// the session under the VAULT's descriptor; at ready the follow is owed
+    /// (Castle entered elsewhere); *Enter Passphrase…* asks NOTHING — the
+    /// follow runs from the held key: M′ at the vault, the library re-keyed,
+    /// the new key file's P copy under that same derived key with the
+    /// vault's descriptor (the typed word opens it; no W copy). A device
+    /// that opened by Touch ID (no held key) is asked; a stale held key (a
+    /// descriptor that is not the vault's) is asked; a held key under the
+    /// vault's descriptor that does NOT open its master copy (the word was
+    /// changed elsewhere too) falls to the field with nothing re-keyed.
+    @Test func theFollowRunsFromTheWordJustTypedAtTheLobbyAndAsksWithoutAHeldKeyOrUnderAStaleOne() async throws {
+        let acting = try await makeWorld()
+        defer { acting.tearDown() }
+        let sibling = try await makeWorld(sharing: acting)
+        defer { sibling.tearDown() }
+        // The second sibling is made BEFORE the switch (its seed push rides
+        // the old keys; after the switch the fence would refuse it).
+        let siblingTwo = try await makeWorld(sharing: acting)
+        defer { siblingTwo.tearDown() }
+        let client = try #require(acting.vaultClient)
+        let oldMaterial = try #require(acting.oldMaterial)
+        _ = try await acting.runner.enterCastle(passphrase: "sesame", recoveryWords: acting.words)
+        let vault = try await sibling.vault()
+        let newKeyID = try #require(vault.format.classKey(for: .corpus)?.keyID)
+        let vaultReading = VaultPostureReading(
+            hasAppleHeldCopy: vault.format.masterWrappedByAppleHeld != nil,
+            appleKeyID: vault.format.appleKeyID, passphraseKDF: vault.format.kdf,
+            hasPassphraseWrap: true, corpusKeyID: newKeyID,
+            updatedAt: vault.updatedAt, updatedByDevice: vault.format.updatedByDevice,
+            signedInUserID: "user-2b", hasRecoveryWrap: true, format: vault.format,
+            recoveryWrapDigest: vault.format.recoveryWrapDigest)
+        func controller(for world: World, session: SyncCustodySession) -> ProtectionController {
+            let syncLeaves = RecordingSyncLeaves(
+                plain: SyncCustodyRecord(deviceID: "device-2b", material: world.oldMaterial))
+            let controller = ProtectionController(configuration: .init(
+                scope: "Variorum2b", storeURL: world.storeURL, gate: world.gate,
+                isRealVariant: true, makeKDF: { self.fastKDF() },
+                storeID: { (try? StoreKeyEnvelope.loadCurrent(besideStore: world.storeURL))?.storeID },
+                syncCustodyLeaves: { _ in syncLeaves.leaves },
+                syncCustodySession: session))
+            controller.refreshEnvelopeFacts()
+            controller.switchRunner = world.runner
+            controller.foreignOwner = { _ in false }
+            controller.readVaultPosture = { [vaultReading] in vaultReading }
+            return controller
+        }
+
+        // (1) The held key under the VAULT's descriptor: the follow runs with no field.
+        let held = SyncCustodySession()
+        held.holdDerivedWrappingKey(
+            try PassphraseKDF.deriveKey(passphrase: "sesame", descriptor: vault.format.kdf), kdf: vault.format.kdf)
+        let one = controller(for: sibling, session: held)
+        await one.reconcile()
+        let owed = try #require(one.followNotice)
+        #expect(owed.kind == .movedToCastle && owed.vaultKDF == vault.format.kdf)
+        one.openFollow()
+        let model = try #require(one.activeFollow)
+        #expect(model.canFollowFromHeldKey, "the word typed at the lobby is reused — never asked twice")
+        await model.followFromHeldKey()
+        guard case .done = model.phase else { Issue.record("expected .done, got \(model.phase) \(model.lastError ?? "")"); return }
+        #expect(sibling.keyStore.load()?.corpusKeyID == newKeyID, "M′ in custody")
+        #expect(sibling.calls.rekeys == 1, "the library re-keyed as it followed")
+        #expect(!one.followPending)
+        let outcome = try #require(model.outcome)
+        let newFile = try sibling.keyFile(outcome.newKeyFingerprint)
+        #expect(newFile.passphrase?.kdf == vault.format.kdf, "the P copy under the held key's descriptor — the vault's")
+        #expect(newFile.vaultKDF == vault.format.kdf && newFile.vaultCorpusKeyID == newKeyID)
+        #expect(try newFile.unwrapKey(passphrase: "sesame") == sibling.keyInHand, "the typed word opens the new key file")
+        #expect(newFile.recovery == nil, "the W copy lands when the words are next typed")
+        #expect(newFile.apple == nil)
+
+        // (2) A Touch ID / Face ID open held no derived key: the field asks.
+        let two = controller(for: siblingTwo, session: SyncCustodySession())
+        await two.reconcile()
+        #expect(two.followNotice?.kind == .movedToCastle)
+        two.openFollow()
+        let modelTwo = try #require(two.activeFollow)
+        #expect(!modelTwo.canFollowFromHeldKey)
+        modelTwo.choosePassphrase()
+        #expect(modelTwo.phase == .askPassphrase, "no held key — asked as before")
+        #expect(siblingTwo.calls.rekeys == 0)
+
+        // (3) A STALE held key (its descriptor is not the vault's): the field asks.
+        let stale = SyncCustodySession()
+        stale.holdDerivedWrappingKey(try PassphraseKDF.deriveKey(passphrase: "sesame", descriptor: fastKDF()), kdf: fastKDF())
+        let three = controller(for: siblingTwo, session: stale)
+        await three.reconcile()
+        three.openFollow()
+        let modelThree = try #require(three.activeFollow)
+        #expect(!modelThree.canFollowFromHeldKey)
+        modelThree.choosePassphrase()
+        #expect(modelThree.phase == .askPassphrase)
+
+        // (4) The vault's descriptor but the WRONG word (a key that opens the
+        //     local copy of a word since changed): the vault refuses ⇒ the
+        //     field asks; nothing re-keyed, custody unchanged.
+        let wrong = SyncCustodySession()
+        wrong.holdDerivedWrappingKey(
+            try PassphraseKDF.deriveKey(passphrase: "not sesame", descriptor: vault.format.kdf), kdf: vault.format.kdf)
+        let four = controller(for: siblingTwo, session: wrong)
+        await four.reconcile()
+        four.openFollow()
+        let modelFour = try #require(four.activeFollow)
+        #expect(modelFour.canFollowFromHeldKey, "the descriptor matches — the road is tried")
+        await modelFour.followFromHeldKey()
+        #expect(modelFour.phase == .askPassphrase, "the vault refused the held key — the field asks")
+        #expect(siblingTwo.calls.rekeys == 0 && siblingTwo.keyStore.load()?.corpusKeyID == oldMaterial.corpusKeyID)
+        #expect(try await siblingTwo.marker() == nil)
+        _ = client
     }
 }

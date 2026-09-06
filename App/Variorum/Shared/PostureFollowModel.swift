@@ -64,12 +64,57 @@ final class PostureFollowModel: Identifiable {
     /// pre-13x 3a: the Connect variant (copy §3) — the adopt road, never a
     /// follow; its third door is Cancel.
     var isConnectVariant: Bool { notice.kind == .connectLibrary }
+    /// pre-13x 4a: the change notices — the new word verified at the vault
+    /// and its local copy landed; nothing re-keyed, sync never paused.
+    var isChangeNoticeVariant: Bool { notice.isChangeNotice }
+    /// pre-13x 4a (ledger 54): a follow can run from the word just typed at
+    /// the lobby — the session holds a derived key under the VAULT's
+    /// descriptor — so *Enter Passphrase…* asks nothing.
+    var canFollowFromHeldKey: Bool {
+        guard !isConnectVariant, !isAlwaysAskVariant, !isChangeNoticeVariant else { return false }
+        return controller.heldDerivedWrappingKey(under: notice.vaultKDF) != nil
+    }
 
     // MARK: - The doors
 
     func choosePassphrase() {
         guard case .notice = phase else { return }
+        // pre-13x 4a (ledger 54): the word just typed at the lobby is reused
+        // — the follow runs with no field when the held derived key is under
+        // the vault's descriptor; else the field asks as before.
+        if canFollowFromHeldKey {
+            Task { await followFromHeldKey() }
+            return
+        }
         phase = .askPassphrase
+    }
+
+    /// THE FOLLOW FROM THE HELD KEY (ledger 54): M′ by the derived key at the
+    /// vault, the same road as the typed follow; a descriptor that differs
+    /// at the vault (the word was changed elsewhere too) or a key that no
+    /// longer opens it falls to the field (`passphraseRequired`).
+    func followFromHeldKey() async {
+        guard phase == .notice || phase == .askPassphrase, !busy else { return }
+        guard let kdf = notice.vaultKDF, let key = controller.heldDerivedWrappingKey(under: kdf) else {
+            phase = .askPassphrase
+            return
+        }
+        lastError = nil
+        busy = true
+        defer { busy = false }
+        phase = .running
+        controller.switchInProgress = true
+        defer { controller.switchInProgress = false }
+        do {
+            let outcome = try await runner.follow(derivedPassphraseKey: key, kdf: kdf)
+            self.outcome = outcome
+            controller.followLanded()
+            phase = .done(insuranceOff: outcome.insuranceTurnedOff, hasOffer: !outcome.preSwitchSnapshots.isEmpty)
+        } catch PostureSwitchError.passphraseRequired {
+            phase = .askPassphrase
+        } catch {
+            phase = .failed(PostureSwitchModel.message(for: error))
+        }
     }
 
     func chooseWords() {
@@ -80,8 +125,13 @@ final class PostureFollowModel: Identifiable {
     /// *Later*: the library opens, reads and edits; sync does not run; the
     /// persistent banner speaks; the notice returns at every open.
     func later() {
-        // A Connect owes nothing: Cancel closes without deferring.
-        if !isConnectVariant { controller.deferFollow() }
+        // A Connect owes nothing: Cancel closes without deferring; a change
+        // notice's dismiss is per open.
+        if isChangeNoticeVariant {
+            controller.dismissChangeNotice()
+        } else if !isConnectVariant {
+            controller.deferFollow()
+        }
         phase = .closed
     }
 
@@ -125,6 +175,32 @@ final class PostureFollowModel: Identifiable {
                 phase = .done(insuranceOff: false, hasOffer: false)
                 return
             }
+            if isChangeNoticeVariant {
+                // pre-13x 4a — THE CHANGE NOTICE's DOOR: the NEW word verified
+                // at the vault (`pickUpKeys` — the same material re-saved under
+                // the current shape; a wrong word refuses in place), then the
+                // local copy landed under the vault's descriptor / the new
+                // words' copy with the vault's digest; the notice clears.
+                let picked = try await runner.pickUpKeys(passphrase: passphrase, recoveryWords: words)
+                if let passphrase {
+                    if let refusal = await controller.reconcilePassphraseWrap(
+                        passphrase: passphrase, vaultKDF: picked.kdf, corpusKeyID: picked.material.corpusKeyID,
+                        recoveryWrapDigest: picked.recoveryWrapDigest) {
+                        lastError = refusal
+                        phase = .askPassphrase
+                        return
+                    }
+                } else if let words {
+                    if let refusal = await controller.landRecoveryWrap(words: words, recoveryWrapDigest: picked.recoveryWrapDigest) {
+                        lastError = refusal
+                        phase = .askWords
+                        return
+                    }
+                }
+                controller.changeNoticeLanded()
+                phase = .closed
+                return
+            }
             if isAlwaysAskVariant {
                 // The vault road's pickup: the new word opens the vault, the
                 // keys are held for the session, the local copy re-wrapped.
@@ -145,8 +221,9 @@ final class PostureFollowModel: Identifiable {
             controller.followLanded()
             phase = .done(insuranceOff: outcome.insuranceTurnedOff, hasOffer: !outcome.preSwitchSnapshots.isEmpty)
         } catch VaultEnrollmentError.wrongPassphrase {
-            // A Connect's word is the ACCOUNT's, not this library's.
-            lastError = isConnectVariant
+            // A Connect's — and a change notice's — word is the ACCOUNT's,
+            // not this library's.
+            lastError = (isConnectVariant || isChangeNoticeVariant)
                 ? EncryptionSession.message(for: VaultEnrollmentError.wrongPassphrase)
                 : ProtectionCopy.passphraseNotTheLibrarys
             phase = passphrase != nil ? .askPassphrase : .askWords

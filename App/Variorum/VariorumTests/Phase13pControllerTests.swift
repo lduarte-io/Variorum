@@ -1459,6 +1459,103 @@ struct Phase13pControllerTests {
         #expect(rotated.controller.followNotice?.kind == .keysReplaced)
         #expect(rotated.controller.alwaysAskRetiredNotice == nil)
     }
+    // MARK: - pre-13x 4a: THE CHANGE NOTICES ON EVERY GATE (copy §5's first two lines; ledger 33 · 53)
+
+    /// A Touch ID / Face ID device that opened SILENTLY learns at ready
+    /// that the passphrase was changed elsewhere (the key file's recorded
+    /// descriptor ≠ the vault's) — copy §5's sentence with *Enter It Now…*,
+    /// never a follow (sync keeps running); the door's landing
+    /// (`reconcilePassphraseWrap` under the vault's descriptor) clears it;
+    /// a device whose record already agrees owes nothing; the WORDS twin
+    /// (ledger 53) rides the recovery-wrap digest the same way, and a nil
+    /// record is unknown and owes nothing; the dismissal is per OPEN.
+    @Test func aTouchIDDeviceLearnsAChangeElsewhereAtReadyAndTheDoorsLandingClearsIt() async throws {
+        let key = StoreKey.mint()
+        let oldKDF = fastKDF()
+        let newKDF = fastKDF()
+        func file(recordedKDF: PassphraseKDF.Descriptor, digest: String?) throws -> StoreKeyEnvelope {
+            var file = StoreKeyEnvelope()
+            try file.setPassphraseWrap(key: key, passphrase: "sesame", kdf: recordedKDF)
+            try file.masterBox(key: key, under: SymmetricKey(data: material().masterKey))
+            try file.recordVaultReconciliation(kdf: recordedKDF, corpusKeyID: "corpus", recoveryWrapDigest: digest)
+            return file
+        }
+        let reading: @Sendable (PassphraseKDF.Descriptor, String?) -> VaultPostureReading = { kdf, digest in
+            VaultPostureReading(
+                hasAppleHeldCopy: false, appleKeyID: nil, passphraseKDF: kdf, hasPassphraseWrap: true,
+                corpusKeyID: "corpus", updatedAt: "2026-09-04T10:00:00Z",
+                updatedByDevice: "Lillian's iPhone", signedInUserID: "user-1", hasRecoveryWrap: true,
+                recoveryWrapDigest: digest)
+        }
+        // (a) The passphrase was changed elsewhere: a Castle Touch ID device,
+        //     material in hand (the gated item + the session), the ids equal.
+        let w = try world(standard: false, key: key, envelope: try file(recordedKDF: oldKDF, digest: "d1"), enrolled: true)
+        #expect(w.controller.effectiveGate == .biometric)
+        w.controller.foreignOwner = { _ in false }
+        w.controller.readVaultPosture = { reading(newKDF, "d1") }
+        await w.controller.reconcile()
+        let change = try #require(w.controller.changeNotice)
+        #expect(change.kind == .passphraseChangedElsewhere && change.vaultKDF == newKDF)
+        #expect(change.body == "Your passphrase was changed on Lillian's iPhone on \(change.day). Use the new one here when you can — this \(ProtectionCopy.deviceName) still takes the old one until you do.")
+        #expect(w.controller.notice == .changedElsewhere(change))
+        #expect(!w.controller.followPending && w.controller.followNotice == nil, "a convenience change — never a follow; sync keeps running")
+        // Dismiss: gone for this open; the reset (the lock road's) brings it back.
+        w.controller.dismissChangeNotice()
+        #expect(w.controller.notice != .changedElsewhere(change))
+        w.controller.resetPerOpenDeferrals()
+        w.controller.refreshNotices()
+        #expect(w.controller.notice == .changedElsewhere(change), "Later / dismiss is per OPEN")
+        // The door's landing: the NEW word's copy under the vault's descriptor clears it.
+        #expect(await w.controller.reconcilePassphraseWrap(
+            passphrase: "the new word 12", vaultKDF: newKDF, corpusKeyID: "corpus", recoveryWrapDigest: "d1") == nil)
+        w.controller.changeNoticeLanded()
+        #expect(w.controller.changeNotice == nil && w.controller.notice != .changedElsewhere(change))
+        await w.controller.reconcile()
+        #expect(w.controller.changeNotice == nil, "the record agrees with the vault now")
+        let landed = try #require(w.envelopeBox.value)
+        #expect(landed.passphrase?.kdf == newKDF && landed.vaultKDF == newKDF)
+
+        // (b) A device whose record already agrees owes nothing.
+        let agreeing = try world(standard: false, key: key, envelope: try file(recordedKDF: newKDF, digest: "d1"), enrolled: true)
+        agreeing.controller.foreignOwner = { _ in false }
+        agreeing.controller.readVaultPosture = { reading(newKDF, "d1") }
+        await agreeing.controller.reconcile()
+        #expect(agreeing.controller.changeNotice == nil && agreeing.controller.notice != .changedElsewhere(change))
+
+        // (c) THE WORDS TWIN (ledger 53): the recorded digest ≠ the vault's.
+        let words = try world(standard: false, key: key, envelope: try file(recordedKDF: newKDF, digest: "d1"), enrolled: true)
+        words.controller.foreignOwner = { _ in false }
+        words.controller.readVaultPosture = { reading(newKDF, "d2") }
+        await words.controller.reconcile()
+        let regenerated = try #require(words.controller.changeNotice)
+        #expect(regenerated.kind == .wordsRegeneratedElsewhere)
+        #expect(regenerated.body == "Your twelve words were regenerated on Lillian's iPhone on \(regenerated.day). Use the new ones here when you can — this \(ProtectionCopy.deviceName) still takes the old ones until you do.")
+        #expect(words.controller.notice == .changedElsewhere(regenerated) && !words.controller.followPending)
+        // The door's landing: the new words' copy with the vault's digest clears it.
+        let fresh = try RecoveryPhrase.generate()
+        #expect(await words.controller.landRecoveryWrap(words: fresh, recoveryWrapDigest: "d2") == nil)
+        words.controller.changeNoticeLanded()
+        await words.controller.reconcile()
+        #expect(words.controller.changeNotice == nil)
+        #expect(try #require(words.envelopeBox.value).vaultRecoveryWrapDigest == "d2")
+
+        // (d) A nil record is UNKNOWN — owes nothing.
+        let unknown = try world(standard: false, key: key, envelope: try file(recordedKDF: newKDF, digest: nil), enrolled: true)
+        unknown.controller.foreignOwner = { _ in false }
+        unknown.controller.readVaultPosture = { reading(newKDF, "d2") }
+        await unknown.controller.reconcile()
+        #expect(unknown.controller.changeNotice == nil)
+
+        // (e) A ROTATION outranks: a stale record beside a stale corpus id owes the follow, never the change notice.
+        let rotated = try world(standard: false, key: key, envelope: try file(recordedKDF: oldKDF, digest: "d1"), enrolled: true)
+        rotated.controller.foreignOwner = { _ in false }
+        var rotatedReading = reading(newKDF, "d1")
+        rotatedReading.corpusKeyID = "corpus-new"
+        rotated.controller.readVaultPosture = { [rotatedReading] in rotatedReading }
+        await rotated.controller.reconcile()
+        #expect(rotated.controller.followNotice?.kind == .keysReplaced && rotated.controller.changeNotice == nil)
+    }
+
 }
 
 /// A thread-safe counter for the scripted acts above.

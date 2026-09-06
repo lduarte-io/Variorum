@@ -252,6 +252,17 @@ struct ProtectionCopyTests {
         #expect(ProtectionCopy.followLaterSubline == "Until then this \(ProtectionCopy.deviceName) opens and reads, but doesn't sync — and what you write meanwhile stays under the old key until you pick up the new ones.")
         #expect(ProtectionCopy.connectDoneBody == "This library is connected to this account, and everything in it is uploading now.")
         #expect(ProtectionCopy.pickUpKeysFirst == "Pick up your new keys first — enter your passphrase.")
+        // pre-13x 4a: copy §5's first two lines (the change notices) + copy §3's lobby lines.
+        #expect(ProtectionCopy.passphraseChangedElsewhere(device: "Lillian's iPhone", day: day)
+                == "Your passphrase was changed on Lillian's iPhone on \(day). Use the new one here when you can — this \(ProtectionCopy.deviceName) still takes the old one until you do.")
+        #expect(ProtectionCopy.wordsRegeneratedElsewhere(device: "Lillian's iPhone", day: day)
+                == "Your twelve words were regenerated on Lillian's iPhone on \(day). Use the new ones here when you can — this \(ProtectionCopy.deviceName) still takes the old ones until you do.")
+        let changed = FollowNotice(kind: .passphraseChangedElsewhere, device: "Lillian's iPhone", day: day)
+        #expect(changed.isChangeNotice && changed.body == ProtectionCopy.passphraseChangedElsewhere(device: "Lillian's iPhone", day: day)
+                && changed.dismissDoor == ProtectionCopy.changeDismissDoor)
+        #expect(ProtectionCopy.lobbyRetiredPassphrase == "Your passphrase was changed on another device — enter the new one.")
+        #expect(ProtectionCopy.lobbyOfflineNote == "You're offline. If your passphrase was changed on another device recently, the one you had before still works here until you're back online.")
+        #expect(ProtectionCopy.lobbyPhaseLine(.unlocking) == "Unlocking…" && ProtectionCopy.lobbyPhaseLine(.checkingAccount) == "Checking your account…")
         #expect(ProtectionCopy.followEnterDoor == "Enter Passphrase…" && ProtectionCopy.followWordsDoor == "Use Twelve Words…"
                 && ProtectionCopy.followLaterDoor == "Later" && ProtectionCopy.followWaitingDoor == "Enter…"
                 && ProtectionCopy.enterItNowDoor == "Enter It Now…" && ProtectionCopy.followMovedToStandardDoor == "OK")

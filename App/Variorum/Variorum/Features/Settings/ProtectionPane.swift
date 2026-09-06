@@ -520,6 +520,7 @@ struct ProtectionNoticeBar: View {
             case .movedToStandard(let moved): movedToStandardBar(moved)
             case .alwaysAskRetiredWord(let retired): alwaysAskRetiredBar(retired)
             case .differentOwner: differentOwnerBar
+            case .changedElsewhere(let change): changedElsewhereBar(change)
             case nil: EmptyView()
             }
         }
@@ -697,6 +698,34 @@ struct ProtectionNoticeBar: View {
         }
     }
 
+    /// pre-13x 4a (copy §5's first two lines): the passphrase was changed /
+    /// the words were regenerated elsewhere — *Enter It Now…* (the field by
+    /// kind) and a dismiss for this open.
+    private func changedElsewhereBar(_ change: FollowNotice) -> some View {
+        bar {
+            Text(change.body)
+                .font(.callout)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer()
+            Button(ProtectionCopy.enterItNowDoor) {
+                controller.openChangeNotice()
+                if change.kind == .wordsRegeneratedElsewhere {
+                    controller.activeFollow?.chooseWords()
+                } else {
+                    controller.activeFollow?.choosePassphrase()
+                }
+            }
+            Button {
+                controller.dismissChangeNotice()
+            } label: {
+                Image(systemName: "xmark")
+            }
+            .buttonStyle(.plain)
+            .help(ProtectionCopy.changeDismissDoor)
+            .accessibilityLabel(ProtectionCopy.changeDismissDoor)
+        }
+    }
+
     /// Copy §3's keys-don't-match sentence with its doors: *Connect…* (pre-13x
     /// 3a — the adopt road, rendered now that it acts), Sign out, and the
     /// Account sheet (Delete lives there).
@@ -852,6 +881,11 @@ struct FollowSheet: View {
         .padding(24)
         .frame(width: 460)
         .interactiveDismissDisabled(model.phase == .running)
+        // pre-13x 4a: a door that closes the model itself (the change notice's
+        // landing) dismisses the sheet.
+        .onChange(of: model.phase) { _, phase in
+            if phase == .closed { onDone() }
+        }
     }
 
     private var runningLine: String {

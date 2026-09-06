@@ -441,6 +441,11 @@ struct MobileFollowSheet: View {
         }
         .background(tokens.room.ignoresSafeArea())
         .interactiveDismissDisabled(model.phase == .running)
+        // pre-13x 4a: a door that closes the model itself (the change notice's
+        // landing) dismisses the sheet.
+        .onChange(of: model.phase) { _, phase in
+            if phase == .closed { onDone() }
+        }
     }
 
     private var runningLine: String {

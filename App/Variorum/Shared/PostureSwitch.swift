@@ -445,6 +445,63 @@ final class PostureSwitchRunner {
         } else {
             unwrapped = try await enrollment.enroll(recoveryWords: typedWords ?? [])
         }
+        return try await runFollow(
+            fetched: fetched, vault: vault, unwrapped: unwrapped, libraryKey: libraryKey,
+            keyFile: KeyFileInputs(passphrase: typedPassphrase, kdf: fetched.format.kdf, recoveryWords: typedWords,
+                                   recoveryWrapDigest: fetched.format.recoveryWrapDigest),
+            secretName: typedPassphrase != nil ? "passphrase" : "twelve words")
+    }
+
+    /// pre-13x 4a (ledger 54; §7 step 1 — "reused for the follow, never
+    /// asked twice"): THE FOLLOW FROM THE WORD JUST TYPED — the derived
+    /// wrapping key the lobby held for the session, under `kdf`. The vault
+    /// is fetched; its descriptor must be `kdf` (else the word was changed
+    /// elsewhere too — `passphraseRequired`, the field asks) and the key
+    /// must open its master copy (`passphraseRequired` otherwise); then the
+    /// same road as the typed follow, the new key file's P copy = L′ under
+    /// that same derived key with the vault's descriptor (the W copy lands
+    /// when the words are next typed).
+    @discardableResult
+    func follow(derivedPassphraseKey derived: SymmetricKey, kdf: PassphraseKDF.Descriptor) async throws -> Outcome {
+        guard !busy else { throw PostureSwitchError.switchInProgress(.vaultWrite) }
+        if let pending = await pendingMarker() {
+            throw PostureSwitchError.switchInProgress(pending.step)
+        }
+        guard let libraryKey = leaves.libraryKeyInHand() else {
+            throw PostureSwitchError.libraryKeyUnavailable
+        }
+        guard let vault = leaves.vault, leaves.transport != nil, await leaves.signedIn() else {
+            throw PostureSwitchError.syncKeysUnavailable
+        }
+        busy = true
+        defer { busy = false; phase = .idle }
+        phase = .rotatingKeys
+        leaves.pauseSync()
+        guard let fetched = try await vault.fetchVault() else { throw KeyVaultClientError.vaultAbsent }
+        guard fetched.format.kdf == kdf else {
+            leaves.log("follow: the held key's descriptor is not the vault's — the passphrase is asked")
+            throw PostureSwitchError.passphraseRequired
+        }
+        let master: SymmetricKey
+        do {
+            master = try fetched.format.unwrapMaster(withPassphraseKey: derived)
+        } catch {
+            leaves.log("follow: the held key does not open the vault's master copy — the passphrase is asked")
+            throw PostureSwitchError.passphraseRequired
+        }
+        let unwrapped = try CorpusRotation.materialFollowing(fetched.format, master: master)
+        return try await runFollow(
+            fetched: fetched, vault: vault, unwrapped: unwrapped, libraryKey: libraryKey,
+            keyFile: KeyFileInputs(passphrase: nil, passphraseKey: derived, kdf: kdf, recoveryWords: nil,
+                                   recoveryWrapDigest: fetched.format.recoveryWrapDigest),
+            secretName: "passphrase held from the lobby")
+    }
+
+    /// The follow's road after the master is in hand (both entries).
+    private func runFollow(
+        fetched: KeyVaultClient.FetchedVault, vault: KeyVaultClient, unwrapped: DeviceKeyMaterial,
+        libraryKey: StoreKey, keyFile: KeyFileInputs, secretName: String
+    ) async throws -> Outcome {
         let entersCastle = fetched.format.masterWrappedByAppleHeld == nil
         let wasStandardShaped = leaves.gate.readEnvelope(leaves.storeURL).envelope?.apple != nil
         let stamp = DateFormatter.variorumISO8601.string(from: leaves.now())
@@ -463,8 +520,7 @@ final class PostureSwitchRunner {
             leaves.log("follow: the keys are unchanged — the account is \(entersCastle ? "Castle" : "Standard"); the library re-keys and custody moves (no rotation)")
             let outcome = try await rekeyCustodyAndSnapshot(
                 entersCastle: entersCastle, libraryKey: libraryKey,
-                keyFile: KeyFileInputs(passphrase: typedPassphrase, kdf: fetched.format.kdf, recoveryWords: typedWords,
-                                       recoveryWrapDigest: fetched.format.recoveryWrapDigest),
+                keyFile: keyFile,
                 material: held, reencrypted: 0, stamp: stamp,
                 listPreSwitchPairs: entersCastle && wasStandardShaped, follow: true)
             phase = .done
@@ -478,13 +534,12 @@ final class PostureSwitchRunner {
         guard await leaves.keyStore.offMain({ $0.save(following) }) else {
             throw PostureSwitchError.custodyRefused(ProtectionCopy.syncKeysWroteButUnreadable)
         }
-        leaves.log("follow: M′ picked up from the vault by the \(typedPassphrase != nil ? "passphrase" : "twelve words") — \(following.rotation != nil ? "a rotation is still finishing" : "no rows remain")")
+        leaves.log("follow: M′ picked up from the vault by the \(secretName) — \(following.rotation != nil ? "a rotation is still finishing" : "no rows remain")")
         guard let transport = leaves.transport else { throw PostureSwitchError.syncKeysUnavailable }
         let final = try await reencryptAndComplete(vault: vault, transport: transport, material: following)
         let outcome = try await rekeyCustodyAndSnapshot(
             entersCastle: entersCastle, libraryKey: libraryKey,
-            keyFile: KeyFileInputs(passphrase: typedPassphrase, kdf: fetched.format.kdf, recoveryWords: typedWords,
-                                   recoveryWrapDigest: fetched.format.recoveryWrapDigest),
+            keyFile: keyFile,
             material: final.material, reencrypted: final.reencrypted, stamp: stamp,
             listPreSwitchPairs: entersCastle && wasStandardShaped, follow: true)
         _ = oldFingerprint
@@ -611,6 +666,11 @@ final class PostureSwitchRunner {
     /// §3.6) and/or the twelve words in hand. At least one is present.
     nonisolated struct KeyFileInputs: Sendable {
         var passphrase: String?
+        /// pre-13x 4a (ledger 54): a DERIVED key already in hand — the word
+        /// typed at the lobby, derived under `kdf` (the vault's descriptor);
+        /// the new key file's P copy is L′ wrapped under it. Exclusive with
+        /// `passphrase`.
+        var passphraseKey: SymmetricKey? = nil
         var kdf: PassphraseKDF.Descriptor
         var recoveryWords: [String]?
         /// pre-13x 4a (ledger 53): the vault's recovery-wrap digest as
@@ -713,12 +773,18 @@ final class PostureSwitchRunner {
         }
         let kdf = keyFile.kdf
         let passphrase = keyFile.passphrase
+        let passphraseKey = keyFile.passphraseKey
         let recoveryWords = keyFile.recoveryWords
-        guard passphrase != nil || recoveryWords != nil else { throw PostureSwitchError.secretRequired }
+        guard passphrase != nil || passphraseKey != nil || recoveryWords != nil else { throw PostureSwitchError.secretRequired }
         let apple: AppleKey? = entersCastle ? nil : leaves.appleKeys.read()
         let envelope: StoreKeyEnvelope = try await Task.detached(priority: .userInitiated) {
             var envelope = StoreKeyEnvelope(storeID: storeID)
-            if let passphrase {
+            if let passphraseKey {
+                // pre-13x 4a (ledger 54): the derived key in hand — no second
+                // derivation, no second entry; the descriptor is the vault's.
+                let wrap = try StoreKeyEnvelope.makePassphraseWrap(key: newKey, passphraseKey: passphraseKey, kdf: kdf)
+                try envelope.adoptPassphraseWrap(wrap, key: newKey)
+            } else if let passphrase {
                 let wrap = try StoreKeyEnvelope.makePassphraseWrap(key: newKey, passphrase: passphrase, kdf: kdf)
                 try envelope.adoptPassphraseWrap(wrap, key: newKey)
             }

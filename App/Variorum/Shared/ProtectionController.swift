@@ -35,6 +35,7 @@
 //  is exactly what "no second passphrase exists anywhere" forbids).
 //
 
+import CryptoKit
 import Foundation
 import Observation
 import os
@@ -143,6 +144,15 @@ nonisolated struct FollowNotice: Equatable, Sendable {
         /// row re-stamped, sync re-initialized, the whole library uploads).
         /// Never a follow; the third door is Cancel, not Later.
         case connectLibrary
+        /// pre-13x 4a (ledger 33's lobby half; copy §5's first line): the
+        /// passphrase was CHANGED on another device — a convenience act; this
+        /// device keeps syncing and its old word still opens it; *Enter It
+        /// Now…* lands the new word's local copy. Dismissable per open.
+        case passphraseChangedElsewhere
+        /// pre-13x 4a (ledger 53): the twelve words were REGENERATED on
+        /// another device (the vault's recovery-wrap digest moved) — *Enter
+        /// It Now…* lands the new words' local copy. Dismissable per open.
+        case wordsRegeneratedElsewhere
     }
     var kind: Kind
     /// The device that acted (`updated_by_device`), or "another device".
@@ -162,13 +172,20 @@ nonisolated struct FollowNotice: Equatable, Sendable {
         case .movedToStandard: return ProtectionCopy.followMovedToStandard(device: device, day: day)
         case .alwaysAskRetiredWord: return ProtectionCopy.alwaysAskRetiredWord(device: device, day: day)
         case .connectLibrary: return ProtectionCopy.keysDontMatchThisLibrary
+        case .passphraseChangedElsewhere: return ProtectionCopy.passphraseChangedElsewhere(device: device, day: day)
+        case .wordsRegeneratedElsewhere: return ProtectionCopy.wordsRegeneratedElsewhere(device: device, day: day)
         }
     }
+    /// pre-13x 4a: the change notices (a convenience change) and the
+    /// words-typed door.
+    var isChangeNotice: Bool { kind == .passphraseChangedElsewhere || kind == .wordsRegeneratedElsewhere }
     /// The third door under the notice: *Later* for a follow (the
     /// un-followed state is a legal end), *Cancel* for a Connect (nothing
     /// is owed — the library stays as it was).
     var dismissDoor: String {
-        kind == .connectLibrary ? ProtectionCopy.connectCancelDoor : ProtectionCopy.followLaterDoor
+        if kind == .connectLibrary { return ProtectionCopy.connectCancelDoor }
+        if isChangeNotice { return ProtectionCopy.changeDismissDoor }
+        return ProtectionCopy.followLaterDoor
     }
     /// The persistent banner after *Later*. The mismatch kind renders its
     /// own sentence again: no keys were replaced and sync is not paused,
@@ -353,6 +370,11 @@ final class ProtectionController {
         /// account — a different vault; the adopt road is batch 3's, so the
         /// doors that act today are Sign out and the Account sheet.
         case differentOwner
+        /// pre-13x 4a (copy §5's first two lines): the passphrase was changed
+        /// / the words were regenerated elsewhere — a dismissable banner at
+        /// every open until the new word has been used here. Never a
+        /// follow: sync keeps running.
+        case changedElsewhere(FollowNotice)
     }
 
     private(set) var notice: Notice?
@@ -372,6 +394,16 @@ final class ProtectionController {
     private(set) var alwaysAskRetiredNotice: FollowNotice?
     /// The rows' owner is not the signed-in account (copy §3's sentence).
     private(set) var differentOwner = false
+    /// pre-13x 4a: the change notice owed by this device (nil = none) — the
+    /// key file's recorded descriptor ≠ the vault's (the passphrase kind),
+    /// else its recorded recovery-wrap digest ≠ the vault's (the words
+    /// kind); cleared when the new word's copy lands. Separate from
+    /// `followNotice`: `followPending` stays false — a convenience change
+    /// pauses nothing.
+    private(set) var changeNotice: FollowNotice?
+    /// The change notice's dismissal — per OPEN (a relock + unlock asks
+    /// again; a NEW change re-asks at once).
+    @ObservationIgnored private var changeNoticeDismissedThisOpen = false
     /// True while a follow is owed — every key door shows *Pick up your new
     /// keys first* instead of acting (the design's un-followed state).
     var followPending: Bool { followNotice != nil }
@@ -407,6 +439,50 @@ final class ProtectionController {
         let notice = followNotice ?? alwaysAskRetiredNotice
         guard let notice, let switchRunner else { return }
         activeFollow = PostureFollowModel(notice: notice, runner: switchRunner, controller: self)
+    }
+
+    /// pre-13x 4a: the change notice's *Enter It Now…* door — the follow
+    /// model over the change kind (the passphrase field or the words field
+    /// by kind; the vault verifies the NEW word; the local copy lands).
+    func openChangeNotice() {
+        guard activeFollow == nil, let changeNotice, let switchRunner else { return }
+        activeFollow = PostureFollowModel(notice: changeNotice, runner: switchRunner, controller: self)
+    }
+
+    /// The change notice's dismiss — for this OPEN; the notice returns at
+    /// the next open until the new word has been used here.
+    func dismissChangeNotice() {
+        changeNoticeDismissedThisOpen = true
+        refreshNotices()
+    }
+
+    /// The new word's copy landed (the model calls this): the record now
+    /// agrees with the vault; the next reconcile finds nothing to say.
+    func changeNoticeLanded() {
+        changeNotice = nil
+        changeNoticeDismissedThisOpen = false
+        refreshEnvelopeFacts()
+        refreshNotices()
+    }
+
+    /// pre-13x 4a (the 2c adjudication's item 1 — `Later` is per OPEN): the
+    /// lock road resets every per-open deferral — the follow's *Later*, the
+    /// migration confirm's *Later*, the change notice's dismissal — so a
+    /// relock + unlock asks again exactly as a launch does.
+    func resetPerOpenDeferrals() {
+        followDeferredThisLaunch = false
+        migrationConfirmDeferredThisLaunch = false
+        changeNoticeDismissedThisOpen = false
+    }
+
+    /// pre-13x 4a (ledger 54): the derived wrapping key the lobby held for
+    /// this session IF it was derived under `kdf` (the vault's descriptor)
+    /// — the follow runs from it without a second entry; nil otherwise (a
+    /// Touch ID / Face ID open held none; a stale descriptor asks).
+    func heldDerivedWrappingKey(under kdf: PassphraseKDF.Descriptor?) -> SymmetricKey? {
+        guard let kdf, let key = configuration.syncCustodySession.derivedWrappingKey,
+              configuration.syncCustodySession.derivedWrappingKDF == kdf else { return nil }
+        return key
     }
 
     /// pre-13x 3a: the Connect door (copy §3's *Connect…*) — the same
@@ -484,6 +560,7 @@ final class ProtectionController {
             differentOwner = true
             followNotice = nil
             alwaysAskRetiredNotice = nil
+            changeNotice = nil
             logger.notice("follow: the rows' owner is not the signed-in account — a different vault; the Connect door adopts (decision 17)")
             return
         }
@@ -508,6 +585,7 @@ final class ProtectionController {
                 // otherwise the keys were replaced.
                 let kind: FollowNotice.Kind = (!reading.hasAppleHeldCopy && keyFile?.apple != nil)
                     ? .movedToCastle : .keysReplaced
+                changeNotice = nil
                 owe(kind)
                 logger.notice("follow: the account's keys were rotated elsewhere (\(kind == .movedToCastle ? "Castle entered" : "keys replaced", privacy: .public)) — the follow is owed")
                 return
@@ -522,11 +600,27 @@ final class ProtectionController {
             // on its way.
             let shape = libraryKeyCustodyShape
             if !reading.hasAppleHeldCopy, shape == .silent, !switchInProgress {
+                changeNotice = nil
                 owe(.castleStillOpensOldWay)
                 logger.notice("follow: the account is Castle and this library's custody is silent — the follow into Castle is owed (the keys unchanged)")
                 return
             }
             followNotice = nil
+            // pre-13x 4a (§7 steps 2–3; ledger 33 · 53): THE CHANGE NOTICES —
+            // the keys agree and no posture is owed, but a SECRET changed
+            // elsewhere: the key file's recorded descriptor ≠ the vault's
+            // (the passphrase), else its recorded recovery-wrap digest ≠ the
+            // vault's (the words). A device that opened by the NEW word
+            // through the lobby's vault road recorded the vault's on the
+            // way in and owes nothing; a nil record is unknown and owes
+            // nothing. A NEW change (a different notice) re-asks at once
+            // even after a dismissal.
+            let owedChange = Self.changeElsewhere(keyFile: keyFile, reading: reading, device: device, day: day)
+            if owedChange != changeNotice { changeNoticeDismissedThisOpen = false }
+            changeNotice = owedChange
+            if let owedChange {
+                logger.notice("change elsewhere: \(owedChange.kind == .passphraseChangedElsewhere ? "the passphrase was changed" : "the twelve words were regenerated", privacy: .public) on another device — the notice speaks; sync keeps running")
+            }
             // THE FOLLOW INTO STANDARD (silent): the vault carries an Apple-held
             // copy under the SAME key id and this library carries no Apple copy
             // (2c) — or, pre-13x 2d, its custody is GATED or nowhere (the
@@ -572,6 +666,7 @@ final class ProtectionController {
         //  (ii)  a STALE recorded id with no material ⇒ the FOLLOW's notice
         //        for ANY device (the keys were rotated since the snapshot; the
         //        follow's road with the typed secret re-keys the library).
+        changeNotice = nil
         let recorded = keyFile?.vaultCorpusKeyID
         let recordedIsCurrent = recorded == nil || recorded == vaultKeyID
         let session = configuration.syncCustodySession
@@ -642,6 +737,26 @@ final class ProtectionController {
             logger.notice("follow: this library's recorded corpus key id is stale and no custody is in hand — the follow is owed (\(kind == .movedToCastle ? "Castle entered" : "keys replaced", privacy: .public))")
         }
     }
+    /// pre-13x 4a — THE CHANGE DETECTION (one rule, both platforms): the
+    /// passphrase kind when the key file's recorded descriptor exists and is
+    /// not the vault's; else the words kind when both digests exist and
+    /// differ; else nothing (an unknown record owes no notice).
+    nonisolated static func changeElsewhere(
+        keyFile: StoreKeyEnvelope?, reading: VaultPostureReading, device: String, day: String
+    ) -> FollowNotice? {
+        guard let keyFile else { return nil }
+        if let recorded = keyFile.vaultKDF, let vaultKDF = reading.passphraseKDF, recorded != vaultKDF {
+            return FollowNotice(kind: .passphraseChangedElsewhere, device: device, day: day,
+                                vaultKDF: vaultKDF, corpusKeyID: reading.corpusKeyID)
+        }
+        if let recordedDigest = keyFile.vaultRecoveryWrapDigest, let vaultDigest = reading.recoveryWrapDigest,
+           recordedDigest != vaultDigest {
+            return FollowNotice(kind: .wordsRegeneratedElsewhere, device: device, day: day,
+                                vaultKDF: reading.passphraseKDF, corpusKeyID: reading.corpusKeyID)
+        }
+        return nil
+    }
+
     /// §11: the passphrase confirm is pending (set by the migration; read
     /// from the per-store defaults at every reconcile; cleared by the
     /// confirm). *Later* hides the face for this launch only.
@@ -1393,6 +1508,12 @@ final class ProtectionController {
         }
         if let moved = movedToStandardNotice {
             notice = .movedToStandard(moved)
+            return
+        }
+        // pre-13x 4a: the change notices — after the follow family, before
+        // the migration confirm; dismissable per open.
+        if let change = changeNotice, !changeNoticeDismissedThisOpen {
+            notice = .changedElsewhere(change)
             return
         }
         if migrationConfirmPending, !migrationConfirmDeferredThisLaunch {
