@@ -1129,6 +1129,69 @@ struct PostureSwitchTests {
         #expect(seen == "typed-before-following 0", "the sibling's pending row reached the acting device in the clear")
     }
 
+    /// pre-13x 2d (decision 35) — THE NO-ROTATION FOLLOW over the real
+    /// runner: the account is Castle-shaped (the 2b world's vault carries no
+    /// Apple-held copy — the 2c drill record's own finding) while this
+    /// library is Standard-shaped (an `apple` copy in its key file, custody
+    /// silent) and the keys are UNCHANGED. The passphrase, verified against
+    /// the vault's copy (a wrong word writes nothing), takes the road: no
+    /// new master, no marker at `.reencrypt`, no vault write, nothing
+    /// re-encrypted — custody's keys stay; the library is RE-KEYED (a new
+    /// L′), custody moves behind the gate, a NEW key file lands under the
+    /// new fingerprint (L′ under P with the VAULT's descriptor + under M;
+    /// NO `apple` copy; the vault's descriptor and corpus key id recorded),
+    /// and the OLD key file leaves the live folder — A opens no page of the
+    /// re-keyed library. RED ON OLD: the follow walked the rotation road
+    /// against unchanged keys (a redundant custody replacement and a
+    /// `.reencrypt` marker), and the old Standard-era key file stayed
+    /// beside the Castle library.
+    @Test func theMismatchFollowReKeysTheLibraryMovesCustodyBehindTheGateAndRemovesTheOldKeyFile() async throws {
+        let world = try await makeWorld()
+        defer { world.tearDown() }
+        let material = try #require(world.oldMaterial)
+        let mirror = try #require(world.mirror)
+        let vaultBefore = try await world.vault()
+        #expect(vaultBefore.format.masterWrappedByAppleHeld == nil, "the account is Castle-shaped")
+        let oldFile = try #require(try StoreKeyEnvelope.loadCurrent(besideStore: world.storeURL))
+        #expect(oldFile.apple != nil && world.guardBacking.auto == world.oldKey, "this library is Standard-shaped")
+        let oldURL = world.oldKeyFileURL
+        #expect(FileManager.default.fileExists(atPath: oldURL.path))
+
+        // A wrong word writes nothing.
+        await #expect(throws: VaultEnrollmentError.wrongPassphrase) {
+            _ = try await world.runner.follow(passphrase: "not-the-passphrase", recoveryWords: nil)
+        }
+        #expect(world.calls.rekeys == 0 && FileManager.default.fileExists(atPath: oldURL.path))
+        #expect(try await world.marker() == nil)
+
+        let outcome = try await world.runner.follow(passphrase: "sesame", recoveryWords: nil)
+        #expect(outcome.entersCastle && outcome.reencrypted == 0)
+        let held = try #require(world.keyStore.load())
+        #expect(held.corpusKeyID == material.corpusKeyID && held.masterKey == material.masterKey,
+                "custody's keys UNCHANGED — no rotation")
+        #expect(try await world.vault().revision == vaultBefore.revision, "no vault write")
+        #expect(await mirror.reencryptBatches.isEmpty, "nothing re-encrypted")
+        #expect(world.calls.rekeys == 1, "the library RE-KEYED")
+        #expect(world.calls.custodyTargets == [.biometric] && world.posture == .castle, "custody behind the gate")
+        let newFile = try world.keyFile(outcome.newKeyFingerprint)
+        let newKey = try newFile.unwrapKey(passphrase: "sesame")
+        #expect(StoreEncryptionMigration.opens(world.storeURL, key: newKey), "the library is under L′")
+        #expect(!StoreEncryptionMigration.opens(world.storeURL, key: world.oldKey))
+        #expect(newFile.apple == nil && newFile.appleKeyID == nil, "NO Apple copy")
+        #expect(newFile.passphrase?.kdf == vaultBefore.format.kdf, "L′ under P with the VAULT's descriptor")
+        #expect(newFile.vaultKDF == vaultBefore.format.kdf && newFile.vaultCorpusKeyID == material.corpusKeyID,
+                "the descriptor and the corpus key id recorded — no confirm owed")
+        #expect(try newFile.unwrapKey(master: material.masterSymmetricKey) == newKey, "L′ under M")
+        #expect(!FileManager.default.fileExists(atPath: oldURL.path), "the OLD key file REMOVED from the live folder")
+        #expect(try StoreKeyEnvelope.loadCurrent(besideStore: world.storeURL)?.keyFingerprint == outcome.newKeyFingerprint,
+                "locate finds exactly the new file")
+        // A opens NO page of the re-keyed library: the old file's Apple copy
+        // unwraps only the OLD key, which opens nothing now.
+        let viaApple = try oldFile.unwrapKey(apple: world.apple.symmetricKey)
+        #expect(viaApple == world.oldKey && !StoreEncryptionMigration.opens(world.storeURL, key: viaApple))
+        #expect(try await world.marker() == nil && world.calls.resumes >= 1 && world.calls.reconciles >= 1)
+    }
+
     /// A follow by the TWELVE WORDS alone (no passphrase typed): M′ from
     /// the vault's W copy; the new key file carries L′ under W and M′ —
     /// and NO passphrase copy until the passphrase is next typed here.

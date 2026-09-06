@@ -170,7 +170,9 @@ struct Phase13pControllerTests {
             storeID: { [storeID = scriptedEnvelope?.storeID] in storeID },
             syncCustodyLeaves: { _ in syncLeaves.leaves },
             syncCustodySession: syncSession))
-        if !standard { controller.adoptResident(key) }
+        // pre-13x 2d: the bootstrap adopts the unlocked key on every road —
+        // nil on the silent one — so the custody SHAPE is in view (corner 45).
+        controller.adoptResident(standard ? nil : key)
         return World(
             controller: controller, backing: backing, appleKeys: appleKeys,
             syncLeaves: syncLeaves, syncSession: syncSession, dialsBox: dialsBox,
@@ -793,6 +795,76 @@ struct Phase13pControllerTests {
         await byCustody.controller.reconcile()
         #expect(byCustody.controller.postureIndeterminate)
         #expect(byCustody.envelopeBox.value == custodyBefore, "nothing written")
+    }
+
+    // MARK: - pre-13x 2d: THE POSTURE-MISMATCH FOLLOW (decision 35)
+
+    /// THE WINDOW's PHONE, the morning after: the vault says CASTLE (no
+    /// Apple-held copy), the corpus key ids AGREE (nothing was rotated), and
+    /// this library's custody is SILENT — a posture mismatch. The follow
+    /// into Castle is owed (copy §5's *Account moved to Castle*, *[device]
+    /// on [day]* from the vault; *Later* leaves the persistent banner); the
+    /// verdict writes nothing itself. A vault that AGREES with the shape
+    /// owes nothing; a GATED shape under a STANDARD vault takes the silent
+    /// follow into Standard even when the key file already carries an Apple
+    /// copy (2c's trigger) — the SHAPE is the trigger (decision 1). RED ON
+    /// OLD: the follow keyed on the corpus key id alone — a silent-custody
+    /// library under a Castle account stayed silent forever.
+    @Test func aSilentCustodyLibraryUnderACastleVaultOwesTheFollowIntoCastleAndAGatedOneUnderStandardFollowsSilently() async throws {
+        let w = try world(standard: true, enrolled: true)
+        #expect(w.controller.libraryKeyCustodyShape == .silent)
+        w.controller.stampedOwnerID = { "user-1" }
+        w.controller.readVaultPosture = { [reading = rotatedReading(appleHeld: false, corpusKeyID: "corpus")] in reading }
+        let fileBefore = w.envelopeBox.value
+        await w.controller.reconcile()
+        let owed = try #require(w.controller.followNotice)
+        #expect(owed.kind == .movedToCastle, "the account is Castle; this library opened silently")
+        #expect(owed.corpusKeyID == "corpus", "the keys are unchanged — the notice carries the same id")
+        #expect(owed.body.hasPrefix("Your account is now in Castle — set on Lillian's iPhone on \(owed.day)."))
+        #expect(w.controller.notice == .follow(owed) && w.controller.followPending)
+        #expect(w.controller.posture == .castle && !w.controller.postureIndeterminate, "the vault's word DETERMINES")
+        #expect(w.envelopeBox.value == fileBefore, "the verdict writes nothing — the act does")
+        #expect(w.backing.auto == w.key && w.backing.gated == nil, "custody untouched until she types")
+        w.controller.deferFollow()
+        #expect(w.controller.notice == .followWaiting(owed))
+        // The next reconcile with the SAME mismatch keeps Later's banner (no re-ask).
+        await w.controller.reconcile()
+        #expect(w.controller.notice == .followWaiting(owed), "the same mismatch does not re-ask within the launch")
+
+        // The vault AGREEING with the silent shape (Standard, the same id): nothing owed.
+        let agreeing = try world(standard: true, enrolled: true)
+        let acts = LockedCounter()
+        agreeing.controller.followIntoStandardAct = { acts.increment() }
+        agreeing.controller.stampedOwnerID = { "user-1" }
+        agreeing.controller.readVaultPosture = { [reading = rotatedReading(appleHeld: true, corpusKeyID: "corpus")] in reading }
+        await agreeing.controller.reconcile()
+        #expect(agreeing.controller.followNotice == nil && !agreeing.controller.followPending)
+        #expect(acts.value == 0, "Standard-shaped custody under a Standard vault: nothing moves")
+
+        // A GATED shape under a STANDARD vault, the key file ALREADY carrying
+        // an Apple copy (2c's key-file trigger false): the SHAPE triggers the
+        // silent follow into Standard.
+        let key = StoreKey.mint()
+        var gatedFile = StoreKeyEnvelope()
+        try gatedFile.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
+        try gatedFile.appleBox(key: key, under: AppleKey.mint().symmetricKey, appleKeyID: "a-elsewhere")
+        let gated = try world(standard: false, key: key, envelope: gatedFile, enrolled: true)
+        #expect(gated.controller.libraryKeyCustodyShape == .gatedOrNone)
+        let silentActs = LockedCounter()
+        gated.controller.followIntoStandardAct = { silentActs.increment() }
+        gated.controller.stampedOwnerID = { "user-1" }
+        gated.controller.readVaultPosture = { [reading = rotatedReading(appleHeld: true, corpusKeyID: "corpus")] in reading }
+        await gated.controller.reconcile()
+        #expect(silentActs.value == 1, "a stricter gate under a Standard account follows silently (decision 1)")
+        #expect(gated.controller.followNotice == nil)
+        #expect(gated.controller.movedToStandardNotice != nil)
+
+        // A gated shape under a CASTLE vault: the shape agrees — nothing owed.
+        let castle = try world(standard: false, enrolled: true)
+        castle.controller.stampedOwnerID = { "user-1" }
+        castle.controller.readVaultPosture = { [reading = rotatedReading(appleHeld: false, corpusKeyID: "corpus")] in reading }
+        await castle.controller.reconcile()
+        #expect(castle.controller.followNotice == nil && castle.controller.notice != .follow(owed))
     }
 
     // MARK: - pre-13x 2c: THE FOLLOW's detection (§7 / §3.6)

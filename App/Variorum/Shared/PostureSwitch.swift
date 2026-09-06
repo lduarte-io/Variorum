@@ -420,10 +420,33 @@ final class PostureSwitchRunner {
         } else {
             unwrapped = try await enrollment.enroll(recoveryWords: typedWords ?? [])
         }
-        let following = try CorpusRotation.materialFollowing(fetched.format, master: unwrapped.masterSymmetricKey)
         let entersCastle = fetched.format.masterWrappedByAppleHeld == nil
         let wasStandardShaped = leaves.gate.readEnvelope(leaves.storeURL).envelope?.apple != nil
         let stamp = DateFormatter.variorumISO8601.string(from: leaves.now())
+        let oldFingerprint = StoreKeyEnvelope.fingerprint(of: libraryKey)
+        // pre-13x 2d (decision 35) — THE NO-ROTATION ROAD: the account's
+        // keys are UNCHANGED (custody's corpus key id = the vault's, the
+        // same master, no previous key carried) and only the POSTURE moved
+        // — the window's phone: a Castle account, silent custody. The typed
+        // secret was just verified against the vault's copy; the new-master
+        // half (the `.reencrypt` marker, the custody replacement, the walk)
+        // is skipped — custody already holds M and C — and the road goes
+        // straight to 2b's steps 4–6 with the HELD material.
+        let held = await leaves.keyStore.offMain { $0.load() }
+        if let held, held.corpusKeyID == fetched.format.classKey(for: .corpus)?.keyID,
+           held.masterKey == unwrapped.masterKey, fetched.format.previousCorpusKey == nil {
+            leaves.log("follow: the keys are unchanged — the account is \(entersCastle ? "Castle" : "Standard"); the library re-keys and custody moves (no rotation)")
+            let outcome = try await rekeyCustodyAndSnapshot(
+                entersCastle: entersCastle, libraryKey: libraryKey,
+                keyFile: KeyFileInputs(passphrase: typedPassphrase, kdf: fetched.format.kdf, recoveryWords: typedWords),
+                material: held, reencrypted: 0, stamp: stamp,
+                listPreSwitchPairs: entersCastle && wasStandardShaped)
+            if entersCastle { removeRetiredKeyFile(fingerprint: oldFingerprint, keeping: outcome.newKeyFingerprint) }
+            phase = .done
+            leaves.log("follow: done — \(entersCastle ? "Castle" : "Standard"); library key \(outcome.newKeyFingerprint.prefix(8))")
+            return outcome
+        }
+        let following = try CorpusRotation.materialFollowing(fetched.format, master: unwrapped.masterSymmetricKey)
         // The marker FIRST (a crash between here and custody resumes as
         // the follow-by-passphrase arm — the write is on the server).
         try await writeMarker(RotationMarker(step: .reencrypt, entersCastle: entersCastle, startedAt: stamp))
@@ -438,9 +461,31 @@ final class PostureSwitchRunner {
             keyFile: KeyFileInputs(passphrase: typedPassphrase, kdf: fetched.format.kdf, recoveryWords: typedWords),
             material: final.material, reencrypted: final.reencrypted, stamp: stamp,
             listPreSwitchPairs: entersCastle && wasStandardShaped)
+        if entersCastle { removeRetiredKeyFile(fingerprint: oldFingerprint, keeping: outcome.newKeyFingerprint) }
         phase = .done
         leaves.log("follow: done — \(entersCastle ? "Castle" : "Standard"); library key \(outcome.newKeyFingerprint.prefix(8))")
         return outcome
+    }
+
+    /// pre-13x 2d: on EVERY follow under a Castle account the OLD key file
+    /// leaves the live folder — a Standard-era key file (an `apple` copy)
+    /// beside a Castle library is the exposure itself, and a Castle-era one
+    /// opens nothing the re-keyed file holds; the snapshot pairs keep their
+    /// own; `locate` then finds exactly one file. NOT on the ceremony's own
+    /// road (2b's letter: the old file stays there) and not on a marker
+    /// resume of a crashed follow (the marker does not know it was one) —
+    /// the record says so. A legacy-named stub (`variorum-keys.json`,
+    /// wrap-less) is left alone.
+    private func removeRetiredKeyFile(fingerprint: String, keeping newFingerprint: String) {
+        guard fingerprint != newFingerprint else { return }
+        let url = StoreKeyEnvelope.url(besideStore: leaves.storeURL, fingerprint: fingerprint)
+        guard FileManager.default.fileExists(atPath: url.path) else { return }
+        do {
+            try FileManager.default.removeItem(at: url)
+            leaves.log("follow: the old key file removed from the live folder (\(fingerprint.prefix(8)))")
+        } catch {
+            leaves.log("follow: the old key file could not be removed — \(String(describing: error))")
+        }
     }
 
     /// THE ALWAYS-ASK PICKUP (decision 10's exception, 2c): an Always-ask

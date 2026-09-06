@@ -372,25 +372,46 @@ final class ProtectionController {
         let keyFile = loadEnvelope()
         if let custody = heldSyncMaterial() {
             alwaysAskRetiredNotice = nil
+            let previous = followNotice
+            func owe(_ kind: FollowNotice.Kind) {
+                if previous?.kind != kind || previous?.corpusKeyID != vaultKeyID {
+                    followDeferredThisLaunch = false
+                }
+                followNotice = FollowNotice(
+                    kind: kind, device: device, day: day,
+                    vaultKDF: reading.passphraseKDF, corpusKeyID: vaultKeyID)
+            }
             if custody.corpusKeyID != vaultKeyID {
                 // ROTATED, same owner ⇒ the follow. Castle entered elsewhere
                 // and this library still Standard-shaped ⇒ "moved to Castle";
                 // otherwise the keys were replaced.
                 let kind: FollowNotice.Kind = (!reading.hasAppleHeldCopy && keyFile?.apple != nil)
                     ? .movedToCastle : .keysReplaced
-                if followNotice?.kind != kind || followNotice?.corpusKeyID != vaultKeyID {
-                    followDeferredThisLaunch = false
-                }
-                followNotice = FollowNotice(
-                    kind: kind, device: device, day: day,
-                    vaultKDF: reading.passphraseKDF, corpusKeyID: vaultKeyID)
+                owe(kind)
                 logger.notice("follow: the account's keys were rotated elsewhere (\(kind == .movedToCastle ? "Castle entered" : "keys replaced", privacy: .public)) — the follow is owed")
+                return
+            }
+            // pre-13x 2d (decision 35) — THE POSTURE MISMATCH: the key ids
+            // agree, but the custody SHAPE disagrees with the account's
+            // posture. Castle in the vault + the SILENT shape ⇒ the follow
+            // into Castle (the runner's no-rotation road: custody behind the
+            // gate, a new library key, a new key file with no Apple copy,
+            // the old one removed) — the window's phone. Never mid-switch:
+            // the re-key's reopen re-runs this reconcile with custody still
+            // on its way.
+            let shape = libraryKeyCustodyShape
+            if !reading.hasAppleHeldCopy, shape == .silent, !switchInProgress {
+                owe(.movedToCastle)
+                logger.notice("follow: the account is Castle and this library's custody is silent — the follow into Castle is owed (the keys unchanged)")
                 return
             }
             followNotice = nil
             // THE FOLLOW INTO STANDARD (silent): the vault carries an Apple-held
-            // copy under the SAME key id and this library carries no Apple copy.
-            if reading.hasAppleHeldCopy, keyFile?.apple == nil, !switchInProgress,
+            // copy under the SAME key id and this library carries no Apple copy
+            // (2c) — or, pre-13x 2d, its custody is GATED or nowhere (the
+            // shape's mismatch: decision 1's "never a stricter gate under a
+            // Standard account").
+            if reading.hasAppleHeldCopy, keyFile?.apple == nil || shape == .gatedOrNone, !switchInProgress,
                let act = followIntoStandardAct {
                 do {
                     try await act()
