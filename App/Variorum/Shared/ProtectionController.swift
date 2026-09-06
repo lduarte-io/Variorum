@@ -77,6 +77,11 @@ nonisolated struct FollowNotice: Equatable, Sendable {
         /// The account entered Castle on another device; this library was
         /// Standard-shaped — enter the passphrase once (the follow).
         case movedToCastle
+        /// pre-13x 2d (decision 35): the account IS Castle and this
+        /// library still opens the old way — the keys unchanged; the
+        /// passphrase moves the key behind the gate and re-keys the
+        /// library (the no-rotation follow). Copy §5's own sentence.
+        case castleStillOpensOldWay
         /// The account's keys were replaced elsewhere (Replace All Keys, or
         /// Castle entered while this library was already Castle-shaped).
         case keysReplaced
@@ -100,12 +105,26 @@ nonisolated struct FollowNotice: Equatable, Sendable {
     var body: String {
         switch kind {
         case .movedToCastle: return ProtectionCopy.followMovedToCastle(device: device, day: day)
+        case .castleStillOpensOldWay: return ProtectionCopy.followCastleStillOpensOldWay
         case .keysReplaced: return ProtectionCopy.followKeysReplaced(device: device, day: day)
         case .movedToStandard: return ProtectionCopy.followMovedToStandard(device: device, day: day)
         case .alwaysAskRetiredWord: return ProtectionCopy.alwaysAskRetiredWord(device: device, day: day)
         }
     }
-    var waitingBody: String { ProtectionCopy.followWaiting(device: device, day: day) }
+    /// The persistent banner after *Later*. The mismatch kind renders its
+    /// own sentence again: no keys were replaced and sync is not paused,
+    /// so copy §5's waiting line would be untrue for it (recorded).
+    var waitingBody: String {
+        kind == .castleStillOpensOldWay
+            ? ProtectionCopy.followCastleStillOpensOldWay
+            : ProtectionCopy.followWaiting(device: device, day: day)
+    }
+    /// The notice's sub-line under its doors (copy §5, per kind).
+    var laterSubline: String {
+        kind == .castleStillOpensOldWay
+            ? ProtectionCopy.followCastleStillOpensLaterSubline
+            : ProtectionCopy.followLaterSubline
+    }
 }
 
 @MainActor
@@ -401,7 +420,7 @@ final class ProtectionController {
             // on its way.
             let shape = libraryKeyCustodyShape
             if !reading.hasAppleHeldCopy, shape == .silent, !switchInProgress {
-                owe(.movedToCastle)
+                owe(.castleStillOpensOldWay)
                 logger.notice("follow: the account is Castle and this library's custody is silent — the follow into Castle is owed (the keys unchanged)")
                 return
             }

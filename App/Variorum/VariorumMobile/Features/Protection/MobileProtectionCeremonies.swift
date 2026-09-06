@@ -458,7 +458,7 @@ struct MobileProtectionNoticeBar: View {
                 .font(tokens.small)
                 .foregroundStyle(tokens.ink)
                 .fixedSize(horizontal: false, vertical: true)
-            Text(ProtectionCopy.followLaterSubline)
+            Text(follow.laterSubline)
                 .font(tokens.small)
                 .foregroundStyle(tokens.muted)
                 .fixedSize(horizontal: false, vertical: true)

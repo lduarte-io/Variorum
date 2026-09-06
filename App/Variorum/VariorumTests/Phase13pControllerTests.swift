@@ -818,9 +818,11 @@ struct Phase13pControllerTests {
         let fileBefore = w.envelopeBox.value
         await w.controller.reconcile()
         let owed = try #require(w.controller.followNotice)
-        #expect(owed.kind == .movedToCastle, "the account is Castle; this library opened silently")
+        #expect(owed.kind == .castleStillOpensOldWay, "the account is Castle; this library opened silently — its OWN notice (2d.4)")
         #expect(owed.corpusKeyID == "corpus", "the keys are unchanged — the notice carries the same id")
-        #expect(owed.body.hasPrefix("Your account is now in Castle — set on Lillian's iPhone on \(owed.day)."))
+        #expect(owed.body == ProtectionCopy.followCastleStillOpensOldWay, "copy §5's own sentence, never 'keys were replaced'")
+        #expect(owed.laterSubline == ProtectionCopy.followCastleStillOpensLaterSubline)
+        #expect(owed.waitingBody == ProtectionCopy.followCastleStillOpensOldWay)
         #expect(w.controller.notice == .follow(owed) && w.controller.followPending)
         #expect(w.controller.posture == .castle && !w.controller.postureIndeterminate, "the vault's word DETERMINES")
         #expect(w.envelopeBox.value == fileBefore, "the verdict writes nothing — the act does")

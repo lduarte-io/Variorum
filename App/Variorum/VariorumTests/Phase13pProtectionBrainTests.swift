@@ -215,6 +215,15 @@ struct ProtectionCopyTests {
                 == "Your account is now in Castle — set on Lillian's iPhone on \(day). From now on this \(ProtectionCopy.deviceName) asks for \(ProtectionCopy.biometryName) to open your library, with your passphrase as the fallback. Enter your passphrase once to pick up your new sync keys: they were replaced when Castle was entered, and only your passphrase or twelve words open them.")
         #expect(ProtectionCopy.followKeysReplaced(device: "Lillian's iPhone", day: day)
                 == "Your keys were replaced on Lillian's iPhone on \(day). Enter your passphrase once to pick up the new ones.")
+        // pre-13x 2d.4 (the orchestrator's ruling 1): the posture-mismatch follow's OWN sentence.
+        #expect(ProtectionCopy.followCastleStillOpensOldWay
+                == "Your account is in Castle, but this \(ProtectionCopy.deviceName) still opens without asking. Enter your passphrase once to move this \(ProtectionCopy.deviceName)'s key behind \(ProtectionCopy.biometryName) and give your library a fresh key.")
+        #expect(ProtectionCopy.followCastleStillOpensLaterSubline == "Until then this \(ProtectionCopy.deviceName) opens and reads as before.")
+        let mismatch = FollowNotice(kind: .castleStillOpensOldWay, device: "Lillian's iPhone", day: day)
+        #expect(mismatch.body == ProtectionCopy.followCastleStillOpensOldWay && mismatch.laterSubline == ProtectionCopy.followCastleStillOpensLaterSubline)
+        #expect(mismatch.waitingBody == ProtectionCopy.followCastleStillOpensOldWay, "no keys were replaced and sync is not paused — the banner says the same sentence")
+        let rotated = FollowNotice(kind: .movedToCastle, device: "Lillian's iPhone", day: day)
+        #expect(rotated.laterSubline == ProtectionCopy.followLaterSubline && rotated.waitingBody == ProtectionCopy.followWaiting(device: "Lillian's iPhone", day: day))
         #expect(ProtectionCopy.followWaiting(device: "Lillian's iPhone", day: day)
                 == "Sync is paused until you enter your passphrase once — your keys were replaced on Lillian's iPhone on \(day).")
         #expect(ProtectionCopy.followMovedToStandard(device: "Lillian's iPhone", day: day)

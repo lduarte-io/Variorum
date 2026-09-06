@@ -705,7 +705,7 @@ struct ProtectionNoticeBar: View {
                 Text(follow.body)
                     .font(.callout)
                     .fixedSize(horizontal: false, vertical: true)
-                Text(ProtectionCopy.followLaterSubline)
+                Text(follow.laterSubline)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

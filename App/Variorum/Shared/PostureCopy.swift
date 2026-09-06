@@ -350,6 +350,17 @@ nonisolated extension ProtectionCopy {
         + "the fallback. Enter your passphrase once to pick up your new sync keys: they were "
         + "replaced when Castle was entered, and only your passphrase or twelve words open them."
     }
+    // Account in Castle, this device still opens the old way (the
+    // posture-mismatch follow, decision 35 — no keys were replaced; 2d.4,
+    // the orchestrator's ruling 1: its OWN sentence, copy §5)
+    static var followCastleStillOpensOldWay: String {
+        "Your account is in Castle, but this \(deviceName) still opens without asking. Enter your "
+        + "passphrase once to move this \(deviceName)'s key behind \(biometryName) and give your "
+        + "library a fresh key."
+    }
+    static var followCastleStillOpensLaterSubline: String {
+        "Until then this \(deviceName) opens and reads as before."
+    }
     // Keys replaced elsewhere (a device that has not followed yet)
     static func followKeysReplaced(device: String, day: String) -> String {
         "Your keys were replaced on \(device) on \(day). Enter your passphrase once to pick up the new ones."
