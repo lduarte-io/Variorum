@@ -24,6 +24,17 @@
 //  backup writer as a parameter instead (`StoreBackup.Configuration`), so
 //  the machinery stays shared and the words stay the Mac's.
 //
+//  pre-13x batch 5b, item 2 — REWRITTEN PER POSTURE (Standard and Castle):
+//  §1 what protects the writing, by who holds a key; §2 the snapshot PAIRS
+//  (each copy's own key file beside it) and the iCloud Drive offer; §3 + §6
+//  the pair in the recipe and which credential opens which copy; §7 the
+//  lost-device road (Sign Out Everywhere → Replace All Keys → the account
+//  password; Standard's trade; the Apple-account intruder — decision 30;
+//  the compromise rule's four lines); §8 the forgot roads by posture with
+//  the floors still COMPOSED from the posture cards (the 5a pin). Facts
+//  ONLY from `notes/plans/pre-13x-postures-design.md` §1–§7; the in-app
+//  open-a-copy door (13x) and a remaining-rows count are NOT promised.
+//
 //  Voice is PROVISIONAL throughout (13s owns the copy pass). What is fixed
 //  here is MEANING: her clarity mandate, verbatim — *"I feel like we need to
 //  be extremely clear with users about: permanently deleted things stay
@@ -80,28 +91,59 @@ nonisolated enum DataSafetyCopy {
 
         ## 1. What protects your writing, in order
 
+        Two words first, because everything below depends on them. Your
+        library is in one of two modes, chosen in Settings ▸ Protection:
+        **Standard** (the default) or **Castle**. In both, the library file on
+        this Mac is encrypted and sync is end-to-end encrypted — the Variorum
+        server can never read your writing in either mode. The only difference
+        is who holds a key. **In Standard your Apple account holds one:** it
+        lives in iCloud Keychain, travels with your Apple account, and Apple's
+        account recovery can reach it — so this Mac opens your library
+        silently, and so does any Mac signed into your iCloud. **In Castle only
+        you hold the keys:** your passphrase, your twelve words (the recovery
+        phrase you wrote down when you turned on sync or entered Castle), and
+        your enrolled devices behind Touch ID. With sync on you hold the
+        passphrase and the twelve words in Standard too — they are your way
+        back if your Apple account is ever gone.
+
         1. **The store on this Mac.** `variorum.sqlite`, in the app's
-           container. This is the truth; everything else is a copy of it.
+           container — encrypted. This is the truth; everything else is a copy
+           of it. The key that opens it sits in this Mac's Keychain (Standard:
+           silently, after login; Castle: behind Touch ID — or nowhere at all
+           if you chose *Always ask*) and, wrapped, in the small key file
+           beside the library (`variorum-keys-….json`): a copy under your
+           passphrase, one under your twelve words, and — in Standard — one
+           under your Apple account's key. The key file is not secret; holding
+           it opens nothing.
         2. **Backups — frozen copies of that file.** Two destinations: one
-           beside the store, one in a folder you pick. They are frozen, which
-           is the whole point: they do not follow a mistake. Backups are
-           encrypted exactly as your library is, under the same key; copies
-           made before your library was encrypted stay readable plain files
-           until rotation ages them out.
+           beside the store, one in a folder you pick (the first time Variorum
+           backs up, it offers to use iCloud Drive for that folder — a copy
+           there survives the Mac). They are frozen, which is the whole point:
+           they do not follow a mistake. Each copy is encrypted exactly as your
+           library is and carries its own key file beside it, written with it
+           and never rewritten — so a copy opens with the passphrase and twelve
+           words you had the day it was made, and a later change to either
+           never touches an older copy. In Castle, locking your library also
+           leaves a sealed copy of it as it was, when a backup is due; it is
+           checked the next time you unlock.
         3. **Plain-text copies.** Every note as Markdown, into the folder you
            picked — **off unless you turn it on**, now that the library is
            encrypted (a scheduled plain-text copy re-opens the door the
-           encryption closed, so it is an opt-in). When on, these are not a
-           restore road — they carry the words and not the takes, the history
-           or the books — but they are the one copy that stays readable if
-           the library file itself is the problem, and they need no Variorum
-           to open.
+           encryption closed, so it is an opt-in), and turned off again, with
+           a notice, when you enter Castle. When on, these are not a restore
+           road — they carry the words and not the takes, the history or the
+           books — but they are the one copy that stays readable if the
+           library file itself is the problem, and they need no Variorum to
+           open.
         4. **The mirror (sync).** A PEER, not a backup. It converges — which
            means it replicates a deletion or a bad edit at sync speed. It
-           protects you from losing a DEVICE, not from losing writing.
+           protects you from losing a DEVICE, not from losing writing. It holds
+           ciphertext under keys only your devices hold; the server never has
+           a key, and an account that signs in without the keys can neither
+           read nor write it.
         5. **The platform's own backups.** The sync provider keeps 7 days of
-           server backups. They hold ciphertext; without your encryption
-           passphrase they are unreadable, including by them. This is the
+           server backups. They hold ciphertext; without your passphrase or
+           twelve words they are unreadable, including by them. This is the
            net under everything and it is meant to die unused.
 
         The one sentence worth keeping: **backups protect against LOSS; the
@@ -114,7 +156,8 @@ nonisolated enum DataSafetyCopy {
           `~/Library/Containers/io.lduarte.Variorum/Data/Library/Application
           Support/Variorum/Backups/`
           In Finder: Go ▸ Go to Folder… and paste that path.
-        - **In your folder** (once you pick one in Settings ▸ Data Safety):
+        - **In your folder** (once you pick one in Settings ▸ Data Safety, or
+          take the iCloud Drive offer at the first backup):
           `<the folder you picked>/Variorum/Backups/`
         - **The plain-text copies**, in that same picked folder:
           `<the folder you picked>/Variorum/md-exports/`
@@ -126,9 +169,13 @@ nonisolated enum DataSafetyCopy {
           That is the trade this copy exists to make, and it is worth knowing
           you are making it.
 
-        Files are named `variorum-backup-YYYY-MM-DD-HHMMSS.sqlite`, stamped
-        **UTC**, so they sort oldest-to-newest by name. Each is a complete,
-        self-contained database — no companion files are needed.
+        Files are named `variorum-backup-YYYY-MM-DD-HHMMSS-XXXXXXXX.sqlite`,
+        stamped **UTC**, so they sort oldest-to-newest by name; the last eight
+        characters name the key the copy is under. Each is a complete
+        database, and each has its key file beside it,
+        `variorum-backup-YYYY-MM-DD-HHMMSS-XXXXXXXX.keys.json` — keep the pair
+        together: the copy is the writing, the key file is what opens it
+        anywhere but this Mac.
 
         **Retention.** Beside the store: the newest 14. In your folder: the
         14 most recent days that have a copy, plus one copy from each of the
@@ -138,35 +185,55 @@ nonisolated enum DataSafetyCopy {
         stays readable inside these files (see §5).
 
         **Backups only happen while the app is running.** A week the app was
-        closed is a week with no copies. That is why Settings ▸ Data Safety
+        closed is a week with no copies — and in Castle they run while your
+        library is unlocked (at the first unlock of a day that is due), plus
+        the sealed copy a lock leaves. That is why Settings ▸ Data Safety
         leads with the date of the newest copy rather than with a promise.
 
         ## 3. Restoring a backup
 
         **Read §4 first if anything has been deleted since the copy was
-        made.** Then:
+        made.** This recipe is for a copy of this library under its current
+        key — the everyday case. A copy from before you entered Castle or
+        replaced your keys is under a key this Mac no longer holds; it still
+        opens, with its own key file beside it, on a Mac where this library
+        does not live — with the passphrase you had that day, your twelve
+        words, or (a copy made in Standard) your Apple account. Then:
 
         1. **Quit Variorum.** Completely — the store must not be open.
-        2. **Copy the backup you want OUT of its folder**, to the Desktop.
-           Take only the `.sqlite` file. You may see files ending `-wal` or
-           `-shm` beside it: those appear whenever something opens a copy to
-           read it, they carry nothing, and they are not part of the snapshot.
-           Leave them where they are.
+        2. **Copy the pair you want OUT of its folder**, to the Desktop: the
+           `.sqlite` file AND the `.keys.json` beside it with the same name.
+           You may see files ending `-wal` or `-shm` beside them: those appear
+           whenever something opens a copy to read it, they carry nothing, and
+           they are not part of the snapshot. Leave them where they are.
         3. **Move the current store aside — do not delete it.** In
-           `…/Application Support/Variorum/`, rename `variorum.sqlite` to
-           `variorum-before-restore.sqlite`, and move any `variorum.sqlite-wal`
-           and `variorum.sqlite-shm` out with it. Those two files belong to
-           the OLD store; leaving them beside a restored file is the one way
-           to corrupt this.
-        4. **Put the backup in place.** Copy your Desktop copy into that
-           folder and name it exactly `variorum.sqlite`.
-        5. **Open Variorum.** It opens the restored store. Look for something
-           you know should be there before you do anything else.
-        6. **Keep the file you moved aside** until you are sure. It is the
+           `…/Application Support/Variorum/`, make a folder
+           `before-restore` and move into it `variorum.sqlite`, any
+           `variorum.sqlite-wal` and `variorum.sqlite-shm`, and every
+           `variorum-keys….json` there is. The `-wal` and `-shm` files belong
+           to the OLD store; leaving them beside a restored file is the one
+           way to corrupt this.
+        4. **Put the pair in place.** Copy your Desktop copies into that
+           folder: the `.sqlite` named exactly `variorum.sqlite`, its key file
+           named exactly `variorum-keys.json`.
+        5. **Open Variorum.** On this Mac a copy of the same library opens
+           the way your library opens today — silently in Standard, with Touch
+           ID or your passphrase in Castle — because it shares the key this
+           Mac already holds. Anywhere else it opens the way its key file
+           allows: through your Apple account, if the copy was made in
+           Standard and that Mac is signed into your iCloud — nothing typed;
+           otherwise with the passphrase you had the day it was made, or your
+           twelve words. Look for something you know should be there before
+           you do anything else. With sync on, the copy then joins your
+           account again like any device — in Standard on its own, in Castle
+           with the passphrase or words you typed once — and pulls what the
+           server holds.
+        6. **Keep the `before-restore` folder** until you are sure. It is the
            only copy of everything written after the backup.
 
-        If the app does not open, quit it, put `variorum-before-restore.sqlite`
-        back as `variorum.sqlite`, and you are exactly where you started.
+        If the app does not open, quit it, move the `before-restore` files
+        back where they were, take the pair out, and you are exactly where you
+        started.
 
         **Two things that look wrong and are not.** An older backup is brought
         up to the current version the first time it is opened — that is normal
@@ -210,12 +277,12 @@ nonisolated enum DataSafetyCopy {
         and you want everything written since to stay where it is. Do §3
         twice:
 
-        1. Follow §3 steps 1–5 to open the backup. Your real store is safely
-           aside as `variorum-before-restore.sqlite`; nothing is lost.
+        1. Follow §3 steps 1–5 to open the backup — the pair, the key file
+           beside it. Your real store is safely aside in `before-restore`;
+           nothing is lost.
         2. Find what you want and **select and copy the text**.
-        3. Quit Variorum. Put `variorum-before-restore.sqlite` back as
-           `variorum.sqlite` (moving its `-wal`/`-shm` back with it), and move
-           the backup copy out.
+        3. Quit Variorum. Take the pair out, and move the `before-restore`
+           files back where they were (the `-wal`/`-shm` with the store).
         4. Open Variorum — you are exactly where you started — and **paste
            into a new note.**
 
@@ -232,11 +299,41 @@ nonisolated enum DataSafetyCopy {
         - **The mirror is lost or wrong.** Your Mac's store is the truth. The
           mirror is rebuilt by pushing this store back up to it. This has been
           executed live three times (twice at the encryption cutover, once at
-          the multi-tenant rebuild).
-        - **A device is lost.** Sign in on a new one and it fills itself from
-          the mirror; you will need your encryption passphrase, or the 12-word
-          recovery phrase, because the mirror holds ciphertext. This is how the
-          phone was set up.
+          the multi-tenant rebuild). Nothing about your keys changes.
+        - **A device is lost or stolen.** In this order: Settings ▸ Account ▸
+          Sign Out Everywhere, so the device can no longer sync; Settings ▸
+          Encryption ▸ Replace All Keys, so nothing it holds opens anything
+          new — your sync gets a new master key and a new corpus key,
+          everything on the server is re-encrypted from this Mac, this library
+          gets a new key, and each of your other devices asks for your
+          passphrase once and gives its own library a new key; then change
+          your account password. What the lost device can still read: in
+          Castle, nothing — its library is behind its Touch ID or your
+          passphrase. In Standard, whoever can unlock that device can read
+          what was on it — that is Standard's trade — and that device is
+          signed into your Apple account, which holds a key, so also remove it
+          from your Apple account (your Apple ID's device list, or Find My).
+        - **Someone was inside your Apple account, and you're in Standard.**
+          Replace All Keys does not shut them out on its own: your Apple
+          account holds a key to the new keys too. Secure the Apple account
+          with Apple's tools, or enter Castle — Castle gives your library and
+          your sync keys your Apple account never held. Every copy made before
+          that day (Variorum's own, Time Machine, copies elsewhere) still opens
+          through the Apple account; the switch offers to delete Variorum's
+          own, and the rest are yours to delete or keep as a way back.
+        - **Your account itself is in someone's hands.** Delete it (Settings ▸
+          Account — your account password, a typed phrase, and a fresh
+          sign-in) and set sync up again under a new one: every library on
+          your devices stays and uploads to the new account.
+
+        The rule behind all four, once: a passphrase or twelve words merely
+        SEEN — change or regenerate them (your devices keep syncing; the old
+        word stops working on each once you have used the new one there); a
+        leaked account password — Sign Out Everywhere, then change it; someone
+        who may HOLD your keys (an unlocked enrolled device of yours, or a
+        secret that may have been used) — Replace All Keys; in Standard,
+        someone inside your Apple account — Apple's tools, or Castle; the
+        account itself — delete it and set sync up again.
 
         Neither of these is a backup story. If what you lost is *writing*, the
         answer is §3 or §6, not the mirror.
@@ -245,14 +342,28 @@ nonisolated enum DataSafetyCopy {
 
         Since the encryption update this is a question about your LIBRARY,
         not just the mirror: the store on this Mac and every backup above
-        are encrypted under one store key, and the mirror is sealed the same
-        way. Your encryption passphrase and the 12-word recovery phrase do
-        not encrypt anything themselves — they are ways to hand that key
-        back to you when this Mac's own Keychain cannot.
+        are encrypted under one library key, and the mirror is sealed the same
+        way. Your passphrase and your twelve words (the recovery phrase) do
+        not encrypt anything themselves — they are ways to hand a key back to
+        you when this Mac's own Keychain cannot. What forgetting costs depends
+        on your mode:
 
-        So what losing them would cost depends on your posture in
-        Settings ▸ Protection — Standard or Castle. These are the app's own
-        sentences, the same ones that pane's cards show:
+        - **In Standard**, nothing today: your Apple account holds a key, so
+          your library opens silently on this Mac and on any Mac signed into
+          your iCloud, and so does every backup made in Standard. Set a new
+          passphrase whenever you like — Settings ▸ Encryption ▸ Change
+          Passphrase ▸ *Forgot your current passphrase?*: this Mac holds your
+          keys, so it lets you choose a new one.
+        - **In Castle**, any device that still opens your library can set a new
+          passphrase — Settings ▸ Encryption ▸ Change Passphrase ▸ *Forgot your
+          current passphrase?*, confirmed with Touch ID (on a device set to
+          always ask, with your twelve words). If no enrolled device opens,
+          your twelve words open your library and your sync: type them
+          wherever the passphrase is asked. Nothing else opens it, by design —
+          not Apple, not us.
+
+        And the floors — the app's own sentences, the same ones the
+        Protection pane's cards show:
 
         - **\(ProtectionCopy.postureName(.standard))** — the floor: \
         \(ProtectionCopy.postureCard(.standard).first { $0.label == "The floor" }?.text ?? "")
@@ -267,7 +378,7 @@ nonisolated enum DataSafetyCopy {
         **Check before you need to.** Neither secret is used day to day — the
         device unwraps once and remembers — so the first time you type one
         again may be the day it matters. Settings ▸ Protection has a check
-        for exactly that: type the passphrase or the 12 words and Variorum
+        for exactly that: type the passphrase or the twelve words and Variorum
         tries the real unlock, then tells you yes or no. It changes nothing,
         resets nothing, and getting it wrong there costs nothing.
         """
