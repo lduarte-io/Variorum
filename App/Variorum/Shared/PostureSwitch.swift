@@ -95,6 +95,11 @@ nonisolated enum PostureSwitchError: Error, Equatable, Sendable {
     case wrongPosture(Posture)
     /// The re-key road refused (worded).
     case rekeyFailed(String)
+    /// pre-13x 2c: the follow needs a secret — the passphrase or the twelve
+    /// words — and neither was given.
+    case secretRequired
+    /// pre-13x 2c: a fault injected by a test leaf (never production).
+    case injectedFault(PostureSwitchRunner.FaultPoint)
 }
 
 @MainActor
@@ -128,6 +133,26 @@ final class PostureSwitchRunner {
         /// The final custody material (nil for a local-only library).
         var material: DeviceKeyMaterial?
     }
+
+    /// pre-13x 2c (the 2b adjudication's item 6): the seams a scripted
+    /// world can fault, to pin the resume's two arms that no other seam
+    /// reaches — the vault write that never landed (`restartRequired`) and
+    /// the write that landed while custody did not (the follow by the
+    /// passphrase at `.reencrypt`). Production's leaf is inert.
+    nonisolated enum FaultPoint: Equatable, Sendable {
+        /// After the marker at `.vaultWrite` is persisted, BEFORE the vault
+        /// write — the write never lands.
+        case beforeVaultWrite
+        /// After the vault write landed, BEFORE custody takes M′.
+        case afterVaultWriteBeforeCustody
+    }
+
+    /// The drain's bound (the 2b adjudication's item 2 — the architect's
+    /// ruling on 2b's question 2): step 1 pushes until the outbox is
+    /// EMPTY, at most this many rounds, then refuses with the count. A
+    /// device offline for days is not sent away for a scheduler round it
+    /// could run itself; a backlog that outlasts three rounds is told so.
+    nonisolated static let maxDrainRounds = 3
 
     /// The injectable seams (production: `Leaves.live`; the pins: scripted).
     nonisolated struct Leaves: Sendable {
@@ -174,6 +199,9 @@ final class PostureSwitchRunner {
         var reconcile: @MainActor () async -> Void
         var now: @Sendable () -> Date
         var log: @Sendable (String) -> Void
+        /// pre-13x 2c: the fault leaf — inert in production; a pin throws
+        /// at the named point (`PostureSwitchError.injectedFault`).
+        var injectFault: @Sendable (FaultPoint) throws -> Void = { _ in }
     }
 
     private(set) var phase: Phase = .idle
@@ -279,9 +307,19 @@ final class PostureSwitchRunner {
             phase = .pullingToHead
             leaves.pauseSync()
             let engine = SyncEngine(transport: transport, keyProvider: leaves.keyProvider)
-            try await withDatabase { _ = try await engine.push() }
-            try await withDatabase { _ = try await engine.pullToHead() }
-            let pending = try await withDatabase { try await engine.outboxCount() }
+            // THE DRAIN (2c — the 2b adjudication's item 2): push what this
+            // device owes until the outbox is EMPTY, at most `maxDrainRounds`
+            // rounds (each a push then a pull to head — a pull can leave a
+            // merged row enqueued for the next push), then refuse with the
+            // count. One push's `maxPushIterations × batchSize` is not the
+            // measure of what a device owes; three rounds is.
+            var pending = 0
+            for _ in 0..<Self.maxDrainRounds {
+                try await withDatabase { _ = try await engine.push() }
+                try await withDatabase { _ = try await engine.pullToHead() }
+                pending = try await withDatabase { try await engine.outboxCount() }
+                if pending == 0 { break }
+            }
             guard pending == 0 else { throw SyncError.outboxNotEmpty(pending: pending) }
             guard let fetched = try await vault.fetchVault() else { throw KeyVaultClientError.vaultAbsent }
             if let previous = fetched.format.previousCorpusKey {
@@ -294,10 +332,12 @@ final class PostureSwitchRunner {
             // ————— 2. ROTATE THE SYNC KEYS (the marker BEFORE the write) —————
             phase = .rotatingKeys
             try await writeMarker(RotationMarker(step: .vaultWrite, entersCastle: entersCastle, startedAt: stamp))
+            try leaves.injectFault(.beforeVaultWrite)
             let appleHeld: (key: SymmetricKey, id: String)? = entersCastle ? nil : appleHeldCopyForStandard()
             let begun = try await CorpusRotation.begin(
                 client: vault, current: current, secrets: secrets, appleHeldCopy: appleHeld)
             leaves.log("posture switch: the vault rewritten under the old proof — rotation seq \(begun.receipt.rotationStartedSeq ?? -1)")
+            try leaves.injectFault(.afterVaultWriteBeforeCustody)
             guard await leaves.keyStore.offMain({ $0.save(begun.material) }) else {
                 // The vault has moved; this device's custody could not take
                 // M′ — the follow (the passphrase) picks it up at resume.
@@ -315,11 +355,136 @@ final class PostureSwitchRunner {
 
         // ————— 4–6: the library, custody, the snapshot —————
         let outcome = try await rekeyCustodyAndSnapshot(
-            entersCastle: entersCastle, libraryKey: libraryKey, passphrase: passphrase,
-            recoveryWords: recoveryWords, secrets: secrets, material: material,
-            reencrypted: reencrypted, stamp: stamp)
+            entersCastle: entersCastle, libraryKey: libraryKey,
+            keyFile: KeyFileInputs(passphrase: passphrase, kdf: secrets.kdf, recoveryWords: recoveryWords),
+            material: material, reencrypted: reencrypted, stamp: stamp,
+            listPreSwitchPairs: entersCastle)
         phase = .done
         return outcome
+    }
+
+    // MARK: - pre-13x 2c: THE FOLLOW (§7 — the other devices)
+
+    /// THE FOLLOW INTO CASTLE / AFTER REPLACE ALL KEYS (design §7): this
+    /// device opened as it did; at ready the vault said the account's keys
+    /// were rotated (the corpus key id ≠ custody's, the SAME owner); the
+    /// user typed the passphrase or the twelve words ONCE. This road: M′
+    /// from the vault's P (or W) copy — nothing is unwrapped on the server;
+    /// C′ + the previous key and the seq under M′ (`materialFollowing`);
+    /// custody REPLACED under the current shape; the marker at
+    /// `.reencrypt` (a crash resumes exactly as the acting device's would —
+    /// `resume` at `.reencrypt` IS the follow's resume); the walk finished
+    /// and the previous key cleared when rows remain (any M′-holder
+    /// finishes — §4 step 3); then 2b's steps 4–6: a NEW key file (L′
+    /// under the typed secret and M′ — the other secret's local copy lands
+    /// when next typed here; the Apple copy ONLY under a Standard account),
+    /// the export-and-swap, custody behind Touch ID / Face ID or nowhere
+    /// (Castle) or re-saved silent (a Standard account), the fresh pair +
+    /// the insurance OFF (entering Castle); sync resumed — the pull from
+    /// the own cursor: re-encrypted rows arrive seq-recorded only, pending
+    /// outbox rows push under C′. NO `resyncReinitialize`, no re-stamp:
+    /// same account, same rows. `entersCastle` = the account carries no
+    /// Apple-held copy; the OFFER (the app's own pre-switch pairs) is
+    /// listed only when this library was STANDARD-shaped before — a Castle
+    /// follower's old pairs never opened through the Apple account, so the
+    /// copy's sentence would be false there.
+    @discardableResult
+    func follow(passphrase: String?, recoveryWords: [String]?) async throws -> Outcome {
+        guard !busy else { throw PostureSwitchError.switchInProgress(.vaultWrite) }
+        if let pending = await pendingMarker() {
+            throw PostureSwitchError.switchInProgress(pending.step)
+        }
+        guard let libraryKey = leaves.libraryKeyInHand() else {
+            throw PostureSwitchError.libraryKeyUnavailable
+        }
+        guard let vault = leaves.vault, leaves.transport != nil, await leaves.signedIn() else {
+            throw PostureSwitchError.syncKeysUnavailable
+        }
+        let typedPassphrase = (passphrase?.isEmpty == false) ? passphrase : nil
+        let typedWords = (recoveryWords?.isEmpty == false) ? recoveryWords : nil
+        guard typedPassphrase != nil || typedWords != nil else {
+            throw PostureSwitchError.secretRequired
+        }
+        busy = true
+        defer { busy = false; phase = .idle }
+        phase = .rotatingKeys
+        leaves.pauseSync()
+        // M′ from the vault by the typed secret — the enrollment's own
+        // unwrap (a wrong word refuses typed; nothing is written before it
+        // succeeds).
+        guard let fetched = try await vault.fetchVault() else { throw KeyVaultClientError.vaultAbsent }
+        let enrollment = VaultEnrollment(client: vault)
+        let unwrapped: DeviceKeyMaterial
+        if let typedPassphrase {
+            unwrapped = try await enrollment.enroll(passphrase: typedPassphrase)
+        } else {
+            unwrapped = try await enrollment.enroll(recoveryWords: typedWords ?? [])
+        }
+        let following = try CorpusRotation.materialFollowing(fetched.format, master: unwrapped.masterSymmetricKey)
+        let entersCastle = fetched.format.masterWrappedByAppleHeld == nil
+        let wasStandardShaped = leaves.gate.readEnvelope(leaves.storeURL).envelope?.apple != nil
+        let stamp = DateFormatter.variorumISO8601.string(from: leaves.now())
+        // The marker FIRST (a crash between here and custody resumes as
+        // the follow-by-passphrase arm — the write is on the server).
+        try await writeMarker(RotationMarker(step: .reencrypt, entersCastle: entersCastle, startedAt: stamp))
+        guard await leaves.keyStore.offMain({ $0.save(following) }) else {
+            throw PostureSwitchError.custodyRefused(ProtectionCopy.syncKeysWroteButUnreadable)
+        }
+        leaves.log("follow: M′ picked up from the vault by the \(typedPassphrase != nil ? "passphrase" : "twelve words") — \(following.rotation != nil ? "a rotation is still finishing" : "no rows remain")")
+        guard let transport = leaves.transport else { throw PostureSwitchError.syncKeysUnavailable }
+        let final = try await reencryptAndComplete(vault: vault, transport: transport, material: following)
+        let outcome = try await rekeyCustodyAndSnapshot(
+            entersCastle: entersCastle, libraryKey: libraryKey,
+            keyFile: KeyFileInputs(passphrase: typedPassphrase, kdf: fetched.format.kdf, recoveryWords: typedWords),
+            material: final.material, reencrypted: final.reencrypted, stamp: stamp,
+            listPreSwitchPairs: entersCastle && wasStandardShaped)
+        phase = .done
+        leaves.log("follow: done — \(entersCastle ? "Castle" : "Standard"); library key \(outcome.newKeyFingerprint.prefix(8))")
+        return outcome
+    }
+
+    /// THE FOLLOW INTO STANDARD (§7 — silent): the account left Castle on
+    /// another device — the vault gained an Apple-held copy under the SAME
+    /// corpus key id — so this device adds its own iCloud copy to its key
+    /// file (A from its own iCloud Keychain, minted if absent), moves
+    /// custody gated → silent (both items), and re-lock goes off by
+    /// derivation. Nothing typed, nothing rotated, no vault write (the
+    /// acting device made that one), no marker.
+    func followIntoStandard() async throws {
+        guard !busy else { throw PostureSwitchError.switchInProgress(.custody) }
+        guard let libraryKey = leaves.libraryKeyInHand() else {
+            throw PostureSwitchError.libraryKeyUnavailable
+        }
+        busy = true
+        defer { busy = false; phase = .idle }
+        phase = .movingCustody
+        guard let apple = leaves.appleKeys.readOrMint() else {
+            throw PostureSwitchError.appleKeyUnavailable
+        }
+        guard var envelope = leaves.gate.readEnvelope(leaves.storeURL).envelope else {
+            throw StoreKeyEnvelopeError.noPassphraseWrap
+        }
+        try envelope.appleBox(key: libraryKey, under: apple.symmetricKey, appleKeyID: apple.id)
+        try leaves.gate.saveEnvelope(envelope, leaves.storeURL)
+        switch await leaves.moveCustody(.auto) {
+        case .changed: break
+        case .needsPassphrase:
+            throw PostureSwitchError.custodyRefused("The key file carries no passphrase wrap.")
+        case .refused(let message):
+            throw PostureSwitchError.custodyRefused(message)
+        }
+        await leaves.reconcile()
+        phase = .done
+        leaves.log("follow: the account is back in Standard — the Apple copy landed, custody silent")
+    }
+
+    /// What the new key file is wrapped under (2c): the typed passphrase
+    /// with the descriptor the VAULT's copy uses (the lobby derives once —
+    /// §3.6) and/or the twelve words in hand. At least one is present.
+    nonisolated struct KeyFileInputs: Sendable {
+        var passphrase: String?
+        var kdf: PassphraseKDF.Descriptor
+        var recoveryWords: [String]?
     }
 
     /// Steps 3's walk + completion, shared with the resume.
@@ -348,10 +513,14 @@ final class PostureSwitchRunner {
         return (completed, reencrypted)
     }
 
-    /// Steps 4–6 (+ the offer's listing), shared with the resume.
+    /// Steps 4–6 (+ the offer's listing), shared with the resume and the
+    /// follow. `listPreSwitchPairs`: whether the app's own pre-switch pairs
+    /// are offered — only when this library was Standard before (their
+    /// "still open through your Apple account" is true exactly then).
     private func rekeyCustodyAndSnapshot(
-        entersCastle: Bool, libraryKey: StoreKey, passphrase: String, recoveryWords: [String]?,
-        secrets: RotationSecrets, material: DeviceKeyMaterial?, reencrypted: Int, stamp: String
+        entersCastle: Bool, libraryKey: StoreKey, keyFile: KeyFileInputs,
+        material: DeviceKeyMaterial?, reencrypted: Int, stamp: String,
+        listPreSwitchPairs: Bool
     ) async throws -> Outcome {
         // ————— 4. RE-KEY THIS LIBRARY: the NEW key file first, then the swap —————
         phase = .rekeyingLibrary
@@ -362,9 +531,7 @@ final class PostureSwitchRunner {
             step: .rekeyLibrary, entersCastle: entersCastle,
             oldKeyFingerprint: oldFingerprint, newKeyFingerprint: newFingerprint,
             newCorpusKeyID: material?.corpusKeyID, startedAt: stamp))
-        try await writeNewKeyFile(
-            newKey: newKey, entersCastle: entersCastle, passphrase: passphrase,
-            recoveryWords: recoveryWords, secrets: secrets, material: material)
+        try await writeNewKeyFile(newKey: newKey, entersCastle: entersCastle, keyFile: keyFile, material: material)
         try await swapLibrary(from: libraryKey, to: newKey)
         try await writeMarker(RotationMarker(
             step: .custody, entersCastle: entersCastle,
@@ -380,7 +547,8 @@ final class PostureSwitchRunner {
 
         // ————— 6. THE FRESH SNAPSHOT PAIR + the insurance —————
         let (insuranceOff, preSwitch) = await snapshotAndInsurance(
-            entersCastle: entersCastle, newFingerprint: newFingerprint)
+            entersCastle: entersCastle, newFingerprint: newFingerprint,
+            listPreSwitchPairs: listPreSwitchPairs)
         try await clearMarker()
         leaves.resumeSync()
         await leaves.reconcile()
@@ -397,8 +565,7 @@ final class PostureSwitchRunner {
     /// the Apple copy ONLY under Standard's Replace All Keys; the vault's
     /// descriptor + corpus key id recorded. The OLD key file stays.
     private func writeNewKeyFile(
-        newKey: StoreKey, entersCastle: Bool, passphrase: String, recoveryWords: [String]?,
-        secrets: RotationSecrets, material: DeviceKeyMaterial?
+        newKey: StoreKey, entersCastle: Bool, keyFile: KeyFileInputs, material: DeviceKeyMaterial?
     ) async throws {
         let storeURL = leaves.storeURL
         let gate = leaves.gate
@@ -408,12 +575,17 @@ final class PostureSwitchRunner {
         case .none: storeID = UUID().uuidString.lowercased()
         case .unreadable: throw StoreKeyEnvelopeError.unreadable("the current key file cannot be read")
         }
-        let kdf = secrets.kdf
+        let kdf = keyFile.kdf
+        let passphrase = keyFile.passphrase
+        let recoveryWords = keyFile.recoveryWords
+        guard passphrase != nil || recoveryWords != nil else { throw PostureSwitchError.secretRequired }
         let apple: AppleKey? = entersCastle ? nil : leaves.appleKeys.read()
         let envelope: StoreKeyEnvelope = try await Task.detached(priority: .userInitiated) {
             var envelope = StoreKeyEnvelope(storeID: storeID)
-            let wrap = try StoreKeyEnvelope.makePassphraseWrap(key: newKey, passphrase: passphrase, kdf: kdf)
-            try envelope.adoptPassphraseWrap(wrap, key: newKey)
+            if let passphrase {
+                let wrap = try StoreKeyEnvelope.makePassphraseWrap(key: newKey, passphrase: passphrase, kdf: kdf)
+                try envelope.adoptPassphraseWrap(wrap, key: newKey)
+            }
             if let recoveryWords {
                 try envelope.setRecoveryWrap(key: newKey, words: recoveryWords)
             }
@@ -462,7 +634,9 @@ final class PostureSwitchRunner {
         }
     }
 
-    private func snapshotAndInsurance(entersCastle: Bool, newFingerprint: String) async -> (Bool, [URL]) {
+    private func snapshotAndInsurance(
+        entersCastle: Bool, newFingerprint: String, listPreSwitchPairs: Bool
+    ) async -> (Bool, [URL]) {
         phase = .snapshotting
         _ = await leaves.takeSnapshot()
         var insuranceOff = false
@@ -474,7 +648,7 @@ final class PostureSwitchRunner {
                 leaves.log("posture switch: the scheduled plaintext export turned OFF")
             }
         }
-        let preSwitch = entersCastle
+        let preSwitch = listPreSwitchPairs
             ? leaves.preSwitchSnapshots(StoreKeyEnvelope.shortFingerprint(newFingerprint))
             : []
         return (insuranceOff, preSwitch)
@@ -562,12 +736,8 @@ final class PostureSwitchRunner {
         let enrolled = leaves.vault != nil && leaves.transport != nil && signedIn
         var material: DeviceKeyMaterial? = await leaves.keyStore.offMain { $0.load() }
         var reencrypted = 0
-        var secrets: RotationSecrets?
-        if let passphrase, !passphrase.isEmpty {
-            secrets = try await Task.detached(priority: .userInitiated) {
-                try RotationSecrets.derive(passphrase: passphrase, recoveryWords: recoveryWords)
-            }.value
-        }
+        let typedPassphrase = (passphrase?.isEmpty == false) ? passphrase : nil
+        let typedWords = (recoveryWords?.isEmpty == false) ? recoveryWords : nil
 
         switch marker.step {
         case .vaultWrite, .reencrypt:
@@ -583,11 +753,16 @@ final class PostureSwitchRunner {
                 throw PostureSwitchError.restartRequired
             }
             if vaultKeyID != material?.corpusKeyID {
-                // The write landed, custody did not: M′ by the passphrase.
-                guard let passphrase, !passphrase.isEmpty else {
+                // The write landed, custody did not: M′ by the passphrase
+                // (or the twelve words — 2c: the follow's own resume).
+                let master: SymmetricKey
+                if let typedPassphrase {
+                    master = try await VaultEnrollment(client: vault).enroll(passphrase: typedPassphrase).masterSymmetricKey
+                } else if let typedWords {
+                    master = try await VaultEnrollment(client: vault).enroll(recoveryWords: typedWords).masterSymmetricKey
+                } else {
                     throw PostureSwitchError.passphraseRequired
                 }
-                let master = try await VaultEnrollment(client: vault).enroll(passphrase: passphrase).masterSymmetricKey
                 let following = try CorpusRotation.materialFollowing(fetched.format, master: master)
                 guard await leaves.keyStore.offMain({ $0.save(following) }) else {
                     throw PostureSwitchError.custodyRefused(ProtectionCopy.syncKeysWroteButUnreadable)
@@ -604,18 +779,24 @@ final class PostureSwitchRunner {
             material = final.material
             reencrypted = final.reencrypted
             guard let libraryKey = leaves.libraryKeyInHand() else { throw PostureSwitchError.libraryKeyUnavailable }
-            guard let passphrase, let secrets else { throw PostureSwitchError.passphraseRequired }
+            guard typedPassphrase != nil || typedWords != nil else { throw PostureSwitchError.passphraseRequired }
+            // The key file's passphrase copy under the VAULT's descriptor
+            // (the lobby derives once); a resume by words alone lands the
+            // W copy, the P copy landing when the passphrase is next typed.
+            let wasStandardShaped = leaves.gate.readEnvelope(leaves.storeURL).envelope?.apple != nil
             return try await rekeyCustodyAndSnapshot(
-                entersCastle: entersCastle, libraryKey: libraryKey, passphrase: passphrase,
-                recoveryWords: recoveryWords, secrets: secrets, material: material,
-                reencrypted: reencrypted, stamp: marker.startedAt)
+                entersCastle: entersCastle, libraryKey: libraryKey,
+                keyFile: KeyFileInputs(passphrase: typedPassphrase, kdf: fetched.format.kdf, recoveryWords: typedWords),
+                material: material, reencrypted: reencrypted, stamp: marker.startedAt,
+                listPreSwitchPairs: entersCastle && wasStandardShaped)
 
         case .rekeyLibrary:
             // Which side of the swap did the crash leave the file on?
             guard let inHand = leaves.libraryKeyInHand() else { throw PostureSwitchError.libraryKeyUnavailable }
             let newFingerprint = marker.newKeyFingerprint ?? ""
             let (newKey, newEnvelope) = try newKeyFromKeyFile(
-                fingerprint: newFingerprint, material: material, passphrase: passphrase)
+                fingerprint: newFingerprint, material: material, passphrase: typedPassphrase,
+                recoveryWords: typedWords)
             let storeURL = leaves.storeURL
             let fileIsUnderNew = await Task.detached { StoreEncryptionMigration.opens(storeURL, key: newKey) }.value
             if !fileIsUnderNew {
@@ -639,8 +820,14 @@ final class PostureSwitchRunner {
 
         case .snapshot, .offer:
             let newFingerprint = marker.newKeyFingerprint ?? StoreKeyEnvelope.fingerprint(of: leaves.libraryKeyInHand() ?? StoreKey.mint())
+            // The old key file (named by the marker) says whether this
+            // library was Standard-shaped — the offer is honest only then.
+            let oldFile = marker.oldKeyFingerprint.flatMap {
+                try? StoreKeyEnvelope.load(at: StoreKeyEnvelope.url(besideStore: leaves.storeURL, fingerprint: $0))
+            }
             let (insuranceOff, preSwitch) = await snapshotAndInsurance(
-                entersCastle: entersCastle, newFingerprint: newFingerprint)
+                entersCastle: entersCastle, newFingerprint: newFingerprint,
+                listPreSwitchPairs: entersCastle && (oldFile?.apple != nil))
             try await clearMarker()
             leaves.resumeSync()
             await leaves.reconcile()
@@ -653,9 +840,11 @@ final class PostureSwitchRunner {
     }
 
     /// L′ from the NEW key file (named by the marker's fingerprint): the
-    /// master copy under M′ when enrolled, else the passphrase copy.
+    /// master copy under M′ when enrolled, else the passphrase copy, else
+    /// (2c) the twelve words' copy.
     private func newKeyFromKeyFile(
-        fingerprint: String, material: DeviceKeyMaterial?, passphrase: String?
+        fingerprint: String, material: DeviceKeyMaterial?, passphrase: String?,
+        recoveryWords: [String]? = nil
     ) throws -> (StoreKey, StoreKeyEnvelope) {
         let url = StoreKeyEnvelope.url(besideStore: leaves.storeURL, fingerprint: fingerprint)
         guard let envelope = try StoreKeyEnvelope.load(at: url) else {
@@ -664,8 +853,13 @@ final class PostureSwitchRunner {
         if let material, envelope.master != nil {
             return (try envelope.unwrapKey(master: material.masterSymmetricKey), envelope)
         }
-        guard let passphrase, !passphrase.isEmpty else { throw PostureSwitchError.passphraseRequired }
-        return (try envelope.unwrapKey(passphrase: passphrase), envelope)
+        if let passphrase, !passphrase.isEmpty, envelope.passphrase != nil {
+            return (try envelope.unwrapKey(passphrase: passphrase), envelope)
+        }
+        if let recoveryWords, !recoveryWords.isEmpty, envelope.recovery != nil {
+            return (try envelope.unwrapKey(recoveryWords: recoveryWords), envelope)
+        }
+        throw PostureSwitchError.passphraseRequired
     }
 
     // MARK: - Plumbing

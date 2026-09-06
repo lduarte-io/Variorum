@@ -117,9 +117,18 @@ actor EmulatedMirror: SyncTransport, SyncRotationTransport {
     private var crashNextReencrypt = false
     private(set) var pushes = 0
     private(set) var pulls = 0
+    /// pre-13x 2c (the drain bound): a LOCAL write landing DURING the round
+    /// — fired from inside the pull, the mid-round moment — for this many
+    /// pulls (`Int.max` = a writer that never stops).
+    private var onPull: (@Sendable () async throws -> Void)?
+    private var pullsToFire = 0
 
     func attach(vault: KeyVaultClient) { self.vault = vault }
     func setCrashNextReencrypt(_ crash: Bool) { crashNextReencrypt = crash }
+    func setOnPull(times: Int, _ hook: @escaping @Sendable () async throws -> Void) {
+        onPull = hook
+        pullsToFire = times
+    }
     func claimSeq() -> Int64 { seq += 1; return seq }
     func stored() -> [String: Stored] { rows }
 
@@ -155,6 +164,10 @@ actor EmulatedMirror: SyncTransport, SyncRotationTransport {
     func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: String, deviceID: String?) async throws -> [SyncPulledRow] {
         try await gate(activeKeyID: activeKeyID, keyProof: keyProof)
         pulls += 1
+        if pullsToFire > 0, let onPull {
+            if pullsToFire != Int.max { pullsToFire -= 1 }
+            try await onPull()
+        }
         return Array(rows.values
             .filter { $0.seq > since }
             .sorted { $0.seq < $1.seq }
@@ -307,7 +320,13 @@ struct PostureSwitchTests {
     /// file beside it, custody + the vault when `enrolled`, the runner over
     /// scripted leaves. `standard: false` is a CASTLE world (the key file
     /// under P + M, the key gated; no Apple copy anywhere).
-    private func makeWorld(enrolled: Bool = true, standard: Bool = true, biometry: Bool = true) async throws -> World {
+    /// pre-13x 2c: `sharing` builds a SIBLING device — its own scratch store,
+    /// key file, custody and Keychain backings, on the SAME mirror, the same
+    /// vault and the same account (the old material saved into its custody,
+    /// no second setup) — the §7 choreography's second device.
+    private func makeWorld(
+        enrolled: Bool = true, standard: Bool = true, biometry: Bool = true, sharing: World? = nil
+    ) async throws -> World {
         let dir = FileManager.default.temporaryDirectory
             .appendingPathComponent("variorum-2b-switch-\(UUID().uuidString)", isDirectory: true)
         let storeURL = dir.appendingPathComponent("library/variorum.sqlite")
@@ -342,7 +361,11 @@ struct PostureSwitchTests {
         var vaultClient: KeyVaultClient?
         var mirror: EmulatedMirror?
         var material: DeviceKeyMaterial?
-        if enrolled {
+        if let sharing {
+            vaultEmu = sharing.vaultEmu; vaultClient = sharing.vaultClient; mirror = sharing.mirror
+            material = sharing.oldMaterial
+            if let material { #expect(keyStore.save(material)) }
+        } else if enrolled {
             let server = EmulatedMirror()
             let emu = EmulatedVault(claimRotationSeq: { await server.claimSeq() })
             let client = KeyVaultClient(
@@ -404,7 +427,7 @@ struct PostureSwitchTests {
         return world
     }
 
-    private func leaves(for world: World) -> PostureSwitchRunner.Leaves {
+    private func leaves(for world: World, faultAt: PostureSwitchRunner.FaultPoint? = nil) -> PostureSwitchRunner.Leaves {
         let calls = world.calls
         let backups = world.backups
         let suiteName = world.suiteName
@@ -485,7 +508,30 @@ struct PostureSwitchTests {
             defaults: { UserDefaults(suiteName: suiteName)! },
             reconcile: { calls.reconciles += 1 },
             now: { Date(timeIntervalSince1970: 1_788_000_000) },
-            log: { line in calls.log.withValue { $0.append(line) } })
+            log: { line in calls.log.withValue { $0.append(line) } },
+            injectFault: { point in
+                if point == faultAt { throw PostureSwitchError.injectedFault(point) }
+            })
+    }
+
+    /// A world's runner re-composed with ONE scripted fault (2c.1b).
+    private func arm(_ world: World, faultAt: PostureSwitchRunner.FaultPoint?) {
+        world.runner = PostureSwitchRunner(leaves: leaves(for: world, faultAt: faultAt))
+    }
+
+    /// Seed `count` extra notes locally (unpushed) — the outbox's backlog.
+    private func seedBacklog(_ world: World, count: Int, tag: String) async throws {
+        try await world.view.write { db in
+            for index in 0..<count {
+                try db.execute(
+                    sql: "INSERT INTO container (id, kind, title, created_at, updated_at) VALUES (?, 'post', ?, ?, ?)",
+                    arguments: ["\(tag)-\(index)", "\(tag) \(index)", "2026-09-05T00:00:00Z", "2026-09-05T00:00:00Z"])
+            }
+        }
+    }
+
+    private func outboxCount(_ world: World) async throws -> Int {
+        try await world.view.read { db in try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM sync_outbox") ?? 0 }
     }
 
     /// The end state of a completed Standard → Castle switch (shared by the
@@ -857,5 +903,308 @@ struct PostureSwitchTests {
         model.keepOldBackups()
         #expect(model.phase == .closed)
         #expect(world.calls.deletedPairs.value.isEmpty, "Keep Them deletes nothing")
+    }
+
+    // MARK: - pre-13x 2c.1a: THE DRAIN BOUND (the 2b adjudication's item 2)
+
+    /// Step 1 pushes until the outbox is EMPTY — at most three rounds — then
+    /// refuses with the count. ONE engine push already drains a whole quiet
+    /// outbox (every chunk of every row; the "1,000 rows per push" reading
+    /// in 2b's question was wrong about the engine), and every reject the
+    /// merge matrix answers clears or re-pushes within that same push — so
+    /// what a round cannot finish is a LOCAL WRITE LANDING DURING IT (an
+    /// autosave racing the round). One such keystroke is drained by the
+    /// second round; a writer that never stops meets the bound: the third
+    /// round ends with the honest refusal and the count, nothing begun.
+    /// RED ON OLD (2b's single push then refuse): the one-keystroke world
+    /// throws `outboxNotEmpty(pending: 1)` after its one push + pull.
+    @Test func stepOneDrainsTheOutboxBoundedAtThreeRounds() async throws {
+        let world = try await makeWorld()
+        defer { world.tearDown() }
+        let mirror = try #require(world.mirror)
+        // A large quiet backlog beside it — proof that size alone never
+        // needs a second round.
+        try await seedBacklog(world, count: 1_250, tag: "backlog")
+        // ONE keystroke lands mid-round (during the first pull).
+        let view = world.view
+        await mirror.setOnPull(times: 1) {
+            try await view.write { db in
+                try db.execute(
+                    sql: "INSERT INTO container (id, kind, title, created_at, updated_at) VALUES (?, 'post', ?, ?, ?)",
+                    arguments: ["typed-mid-round", "typed mid-round", "2026-09-05T00:00:00Z", "2026-09-05T00:00:00Z"])
+            }
+        }
+        let pushesBefore = await mirror.pushes
+        let outcome = try await world.runner.enterCastle(passphrase: "sesame", recoveryWords: world.words)
+        #expect(outcome.entersCastle)
+        #expect(try await outboxCount(world) == 0, "drained before the vault write — the second round landed the mid-round row")
+        #expect(await mirror.pushes - pushesBefore >= 2, "a second push round ran")
+        let stored = await mirror.stored()
+        #expect(stored.keys.filter { $0.hasPrefix("container/backlog-") }.count == 1_250, "the whole backlog reached the mirror in one push")
+        #expect(stored["container/typed-mid-round"] != nil, "the mid-round row reached the mirror before the vault write")
+
+        // THE BOUND: a writer that never stops — three rounds, then the
+        // refusal names what is left; nothing began.
+        let stuck = try await makeWorld()
+        defer { stuck.tearDown() }
+        let stuckMirror = try #require(stuck.mirror)
+        let stuckView = stuck.view
+        await stuckMirror.setOnPull(times: Int.max) {
+            try await stuckView.write { db in
+                try db.execute(
+                    sql: "INSERT INTO container (id, kind, title, created_at, updated_at) VALUES (?, 'post', ?, ?, ?)",
+                    arguments: [UUID().uuidString, "still typing", "2026-09-05T00:00:00Z", "2026-09-05T00:00:00Z"])
+            }
+        }
+        // (`pullToHead` reads two windows per round — the rows, then the
+        // empty tail — so the writer lands two rows a round; the COUNT is
+        // whatever is left, named honestly.)
+        await #expect("three rounds, then the count") {
+            _ = try await stuck.runner.enterCastle(passphrase: "sesame", recoveryWords: stuck.words)
+        } throws: { error in
+            if case SyncError.outboxNotEmpty(let pending) = error { return pending >= 1 }
+            return false
+        }
+        #expect(try await stuck.marker() == nil, "nothing began")
+        #expect(try await stuck.vault().format.previousCorpusKey == nil, "no vault write")
+        #expect(StoreEncryptionMigration.opens(stuck.storeURL, key: stuck.oldKey), "nothing re-keyed")
+    }
+
+    // MARK: - pre-13x 2c.1b: THE TWO RESUME ARMS (the 2b adjudication's item 6)
+
+    /// Through the fault leaf: (a) the vault write NEVER LANDED — the
+    /// marker at `.vaultWrite`, the vault untouched — so the resume says
+    /// `restartRequired`, clears the marker and re-keys nothing; (b) the
+    /// write LANDED but custody did not — the resume asks for the
+    /// passphrase, then picks M′ up from the vault (the follow's own arm),
+    /// finishes the walk and completes the switch. RED ON OLD: (a) with the
+    /// never-landed branch gone the resume "completes" a rotation that never
+    /// began; (b) with the follow-by-passphrase branch gone the resume runs
+    /// the walk on the OLD material and meets `staleMaster`.
+    @Test func theResumeRestartsWhenTheVaultWriteNeverLandedAndFollowsByThePassphraseWhenCustodyDidNot() async throws {
+        // (a) before the vault write
+        do {
+            let world = try await makeWorld()
+            defer { world.tearDown() }
+            arm(world, faultAt: .beforeVaultWrite)
+            let revisionBefore = try await world.vault().revision
+            await #expect(throws: PostureSwitchError.injectedFault(.beforeVaultWrite)) {
+                _ = try await world.runner.enterCastle(passphrase: "sesame", recoveryWords: world.words)
+            }
+            #expect(try await world.marker()?.step == .vaultWrite)
+            #expect(try await world.vault().revision == revisionBefore, "the write never landed")
+            arm(world, faultAt: nil)
+            await #expect(throws: PostureSwitchError.restartRequired) {
+                _ = try await world.runner.resume(passphrase: nil)
+            }
+            #expect(try await world.marker() == nil, "the marker is cleared — the ceremony starts over")
+            #expect(StoreEncryptionMigration.opens(world.storeURL, key: world.oldKey), "nothing was re-keyed")
+            #expect(world.calls.rekeys == 0 && world.calls.custodyTargets.isEmpty)
+            #expect(world.keyStore.load()?.corpusKeyID == world.oldMaterial?.corpusKeyID, "custody untouched")
+        }
+        // (b) after the vault write, before custody
+        do {
+            let world = try await makeWorld()
+            defer { world.tearDown() }
+            let oldMaterial = try #require(world.oldMaterial)
+            arm(world, faultAt: .afterVaultWriteBeforeCustody)
+            await #expect(throws: PostureSwitchError.injectedFault(.afterVaultWriteBeforeCustody)) {
+                _ = try await world.runner.enterCastle(passphrase: "sesame", recoveryWords: world.words)
+            }
+            #expect(try await world.marker()?.step == .vaultWrite)
+            let vault = try await world.vault()
+            #expect(vault.format.previousCorpusKey != nil, "the write landed: a rotation is open on the server")
+            #expect(vault.format.classKey(for: .corpus)?.keyID != oldMaterial.corpusKeyID)
+            #expect(world.keyStore.load()?.corpusKeyID == oldMaterial.corpusKeyID, "custody still holds the OLD keys")
+            arm(world, faultAt: nil)
+            await #expect(throws: PostureSwitchError.passphraseRequired, "M′ is on the server only — the passphrase is asked") {
+                _ = try await world.runner.resume(passphrase: nil)
+            }
+            let outcome = try await world.runner.resume(passphrase: "sesame", recoveryWords: world.words)
+            try await expectCastleEndState(world, outcome)
+            #expect(outcome.reencrypted >= 3, "the walk ran after the follow-by-passphrase picked M′ up")
+        }
+    }
+
+    // MARK: - pre-13x 2c.1: THE FOLLOW (§7)
+
+    /// The acting device is KILLED after the vault write with every row
+    /// still under the previous key; a STANDARD sibling — opened as it did,
+    /// its old-key round refused at the fence — follows by the passphrase
+    /// ONCE: M′ from the vault, C′ + the previous key under M′, custody
+    /// replaced, the walk FINISHED and the previous key cleared at head,
+    /// its own library re-keyed (L′ under P and M′, no Apple copy, NO W
+    /// copy — the words were not typed), custody behind Touch ID, the offer
+    /// listed (it was Standard-shaped); then it pulls to an IDENTICAL store
+    /// (every note in the clear) and its pending row pushes under C′ with
+    /// CAS. A wrong word lands nothing. Then the killed acting device
+    /// resumes by its passphrase and finds nothing left to re-encrypt.
+    @Test func aStandardSiblingFollowsByThePassphraseFinishesTheRotationAndPullsToAnIdenticalStore() async throws {
+        let acting = try await makeWorld()
+        defer { acting.tearDown() }
+        let sibling = try await makeWorld(sharing: acting)
+        defer { sibling.tearDown() }
+        let mirror = try #require(acting.mirror)
+        let oldMaterial = try #require(acting.oldMaterial)
+        try sibling.addPreSwitchPair()
+        // The sibling's own three notes reach the mirror under the OLD key.
+        let siblingEngine = SyncEngine(transport: mirror, keyProvider: DeviceKeySyncProvider(store: sibling.keyStore))
+        try await withDependencies { $0.database = sibling.view } operation: {
+            _ = try await siblingEngine.push()
+            _ = try await siblingEngine.pull()
+        }
+        // The acting device dies after the vault write.
+        arm(acting, faultAt: .afterVaultWriteBeforeCustody)
+        await #expect(throws: PostureSwitchError.injectedFault(.afterVaultWriteBeforeCustody)) {
+            _ = try await acting.runner.enterCastle(passphrase: "sesame", recoveryWords: acting.words)
+        }
+        let open = try await acting.vault()
+        #expect(open.format.previousCorpusKey != nil && open.format.rotationStartedSeq != nil, "rows still under the previous key")
+
+        // The un-followed sibling: a pending row, a refused round, nothing lost.
+        try await seedBacklog(sibling, count: 1, tag: "typed-before-following")
+        await #expect(throws: SyncError.encryptionKeysReplaced, "the fence refuses the old keys first") {
+            try await withDependencies { $0.database = sibling.view } operation: { _ = try await siblingEngine.pull() }
+        }
+        #expect(try await outboxCount(sibling) >= 1, "the edit queues in the outbox")
+        // M′ lands only after P or W: a wrong word writes nothing.
+        await #expect(throws: VaultEnrollmentError.wrongPassphrase) {
+            _ = try await sibling.runner.follow(passphrase: "not-the-passphrase", recoveryWords: nil)
+        }
+        #expect(try await sibling.marker() == nil)
+        #expect(sibling.keyStore.load()?.corpusKeyID == oldMaterial.corpusKeyID, "custody unchanged")
+        #expect(StoreEncryptionMigration.opens(sibling.storeURL, key: sibling.oldKey))
+
+        // THE FOLLOW, by the passphrase once.
+        let outcome = try await sibling.runner.follow(passphrase: "sesame", recoveryWords: nil)
+        #expect(outcome.entersCastle)
+        let material = try #require(outcome.material)
+        let vault = try await sibling.vault()
+        #expect(vault.format.previousCorpusKey == nil && vault.format.rotationStartedSeq == nil,
+                "the FOLLOWER finished the rotation and cleared the previous key + the seq at head")
+        #expect(material.corpusKeyID == vault.format.classKey(for: .corpus)?.keyID && material.rotation == nil)
+        #expect(sibling.keyStore.load()?.corpusKeyID == material.corpusKeyID, "custody REPLACED")
+        #expect(outcome.reencrypted >= 6, "the follower re-encrypted the acting device's rows and its own")
+        let newFile = try sibling.keyFile(outcome.newKeyFingerprint)
+        let newKey = try newFile.unwrapKey(passphrase: "sesame")
+        #expect(StoreEncryptionMigration.opens(sibling.storeURL, key: newKey), "the sibling's library is under L′")
+        #expect(!StoreEncryptionMigration.opens(sibling.storeURL, key: sibling.oldKey))
+        #expect(newFile.passphrase?.kdf == vault.format.kdf, "L′ under P with the VAULT's descriptor — the lobby derives once")
+        #expect(try newFile.unwrapKey(master: material.masterSymmetricKey) == newKey, "L′ under M′")
+        #expect(newFile.apple == nil && newFile.appleKeyID == nil, "no Apple copy enters Castle")
+        #expect(newFile.recovery == nil, "the words were not typed — the W copy lands when they are")
+        #expect(sibling.calls.custodyTargets.last == .biometric && sibling.posture == .castle)
+        #expect(outcome.preSwitchSnapshots.count == 1, "the offer: it was Standard-shaped, so its old pairs open through the Apple account")
+        #expect(sibling.calls.resumes >= 1, "sync resumed — the pull from the own cursor")
+        #expect(try await sibling.marker() == nil)
+
+        // The pull from the own cursor: every note in the clear, the
+        // pending row pushed under C′, and the acting device reads it back.
+        try await withDependencies { $0.database = sibling.view } operation: {
+            _ = try await siblingEngine.pull()
+            let report = try await siblingEngine.push()
+            #expect(report.accepted >= 1, "the pending row pushes under C′ with CAS")
+        }
+        #expect(try await outboxCount(sibling) == 0)
+        let titles = try await sibling.view.read { db in
+            try Row.fetchAll(db, sql: "SELECT id, title FROM container").reduce(into: [String: String]()) { acc, row in
+                let id: String = row["id"]; let title: String? = row["title"]; acc[id] = title
+            }
+        }
+        for (id, title) in acting.seededTitles {
+            #expect(titles[id] == title, "the follower reads the acting device's \(id) in the clear")
+        }
+        // The killed acting device resumes by its passphrase: nothing is
+        // left below the seq — the follower finished it — and its own
+        // re-key completes.
+        arm(acting, faultAt: nil)
+        let resumed = try await acting.runner.resume(passphrase: "sesame", recoveryWords: acting.words)
+        try await expectCastleEndState(acting, resumed)
+        #expect(resumed.reencrypted == 0, "the follower had already finished the walk")
+        let actingEngine = SyncEngine(transport: mirror, keyProvider: DeviceKeySyncProvider(store: acting.keyStore))
+        try await withDependencies { $0.database = acting.view } operation: { _ = try await actingEngine.pull() }
+        let seen = try await acting.view.read { db in
+            try String.fetchOne(db, sql: "SELECT title FROM container WHERE id = 'typed-before-following-0'")
+        }
+        #expect(seen == "typed-before-following 0", "the sibling's pending row reached the acting device in the clear")
+    }
+
+    /// A follow by the TWELVE WORDS alone (no passphrase typed): M′ from
+    /// the vault's W copy; the new key file carries L′ under W and M′ —
+    /// and NO passphrase copy until the passphrase is next typed here.
+    @Test func aFollowByTheTwelveWordsLandsTheWCopyAndNoPassphraseCopy() async throws {
+        let acting = try await makeWorld()
+        defer { acting.tearDown() }
+        let sibling = try await makeWorld(sharing: acting)
+        defer { sibling.tearDown() }
+        _ = try await acting.runner.enterCastle(passphrase: "sesame", recoveryWords: acting.words)
+        await #expect(throws: PostureSwitchError.secretRequired) {
+            _ = try await sibling.runner.follow(passphrase: nil, recoveryWords: nil)
+        }
+        let outcome = try await sibling.runner.follow(passphrase: nil, recoveryWords: acting.words)
+        let newFile = try sibling.keyFile(outcome.newKeyFingerprint)
+        let newKey = try newFile.unwrapKey(recoveryWords: acting.words)
+        #expect(StoreEncryptionMigration.opens(sibling.storeURL, key: newKey), "L′ under the typed words")
+        #expect(newFile.passphrase == nil, "no passphrase copy — it lands when the passphrase is next typed here")
+        #expect(try newFile.unwrapKey(master: try #require(outcome.material).masterSymmetricKey) == newKey)
+        #expect(sibling.keyStore.load()?.corpusKeyID == (try await sibling.vault()).format.classKey(for: .corpus)?.keyID)
+    }
+
+    /// THE FOLLOW INTO STANDARD is silent: the account left Castle
+    /// elsewhere (the vault gained an Apple-held copy under the SAME corpus
+    /// key id); this Castle device adds its own iCloud copy to its key file
+    /// (A from its own iCloud Keychain), moves custody gated → silent, and
+    /// rotates nothing — no vault write, no marker, nothing typed.
+    @Test func theFollowIntoStandardAddsTheAppleCopyAndMovesCustodySilentRotatingNothing() async throws {
+        let world = try await makeWorld(standard: false)
+        defer { world.tearDown() }
+        let client = try #require(world.vaultClient)
+        let material = try #require(world.oldMaterial)
+        // "Another device" left Castle: the vault gains the Apple-held copy.
+        let otherDevicesApple = AppleKey.mint()
+        let fetched = try await world.vault()
+        try await client.updateVault(
+            try fetched.format.settingAppleHeldCopy(
+                masterKey: material.masterSymmetricKey, appleKey: otherDevicesApple.symmetricKey,
+                appleKeyID: otherDevicesApple.id),
+            expectedRevision: fetched.revision, keyProof: KeyProof.wireToken(master: material.masterSymmetricKey))
+        let revisionAfterTheirWrite = try await world.vault().revision
+
+        try await world.runner.followIntoStandard()
+
+        let keyFile = try #require(try StoreKeyEnvelope.loadCurrent(besideStore: world.storeURL))
+        #expect(keyFile.appleKeyID == world.apple.id, "THIS device's own A, from its own iCloud Keychain")
+        #expect(try keyFile.unwrapKey(apple: world.apple.symmetricKey) == world.oldKey)
+        #expect(world.calls.custodyTargets == [.auto] && world.posture == .standard)
+        #expect(StoreEncryptionMigration.opens(world.storeURL, key: world.oldKey), "nothing rotated")
+        #expect(try await world.vault().revision == revisionAfterTheirWrite, "no vault write of its own")
+        #expect(try await world.marker() == nil)
+    }
+
+    /// A CASTLE follower of Replace All Keys (run elsewhere, still
+    /// finishing): it finishes the walk, re-keys, keeps its Castle gate —
+    /// and lists NO offer: its old pairs never opened through the Apple
+    /// account, so the offer's sentence would be false.
+    @Test func aCastleFollowerOfReplaceAllKeysFinishesTheWalkAndListsNoOffer() async throws {
+        let world = try await makeWorld(standard: false)
+        defer { world.tearDown() }
+        let client = try #require(world.vaultClient)
+        let oldMaterial = try #require(world.oldMaterial)
+        try world.addPreSwitchPair()
+        // "Another device" replaced the keys under Castle and stopped.
+        let secrets = try RotationSecrets.derive(passphrase: "sesame", recoveryWords: world.words, kdf: fastKDF())
+        _ = try await CorpusRotation.begin(client: client, current: oldMaterial, secrets: secrets, appleHeldCopy: nil)
+        #expect(try await world.vault().format.previousCorpusKey != nil)
+
+        let outcome = try await world.runner.follow(passphrase: "sesame", recoveryWords: nil)
+        #expect(outcome.entersCastle, "the account is Castle — the gate stays")
+        #expect(outcome.preSwitchSnapshots.isEmpty, "a Castle follower is offered nothing")
+        #expect(outcome.reencrypted >= 3, "the follower finished the walk")
+        let vault = try await world.vault()
+        #expect(vault.format.previousCorpusKey == nil && vault.format.rotationStartedSeq == nil)
+        #expect(world.calls.custodyTargets.last == .biometric)
+        let newFile = try world.keyFile(outcome.newKeyFingerprint)
+        #expect(newFile.apple == nil)
+        #expect(StoreEncryptionMigration.opens(world.storeURL, key: try newFile.unwrapKey(passphrase: "sesame")))
     }
 }

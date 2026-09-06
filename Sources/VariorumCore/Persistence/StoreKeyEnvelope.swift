@@ -314,6 +314,20 @@ public struct StoreKeyEnvelope: Codable, Equatable, Sendable {
         try requireCurrentFormat()
         guard let wrap = passphrase else { throw StoreKeyEnvelopeError.noPassphraseWrap }
         let wrapKey = try PassphraseKDF.deriveKey(passphrase: typed, descriptor: wrap.kdf)
+        return try unwrapKey(passphraseKey: wrapKey)
+    }
+
+    /// The passphrase road with the DERIVED key already in hand (pre-13x
+    /// 2c, decision 10's Always-ask exception): the lobby derives ONCE under
+    /// the wrap's descriptor, opens the library, and keeps the derived key
+    /// in session memory — never the typed word — so the vault read that
+    /// fills an Always-ask device's sync keys needs no second Argon2id
+    /// pass when the local copy was reconciled against the vault's
+    /// descriptor (§3.6 — "derive once when the recorded descriptor equals
+    /// the vault's"). Same refusal as the typed road.
+    public func unwrapKey(passphraseKey wrapKey: SymmetricKey) throws -> StoreKey {
+        try requireCurrentFormat()
+        guard let wrap = passphrase else { throw StoreKeyEnvelopeError.noPassphraseWrap }
         let unwrapped: SymmetricKey
         do {
             unwrapped = try AES.KeyWrap.unwrap(wrap.wrapped, using: wrapKey)
