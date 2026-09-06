@@ -206,6 +206,12 @@ alter table key_vault add column updated_by_device text;
 
 drop policy if exists key_vault_owner_update on key_vault;
 revoke update on key_vault from authenticated;
+-- The window's sweep (2026-09-06) found `authenticated` still holding DELETE on
+-- key_vault — Supabase's default `grant all` at 08's CREATE, never revoked (08
+-- revoked all from anon only); RLS's missing DELETE policy fenced it. Named
+-- here so a future deploy of this artifact lands the posture directly
+-- (`maintenance/pre13x-window-vault-delete-revoke.sql` was the live repair).
+revoke delete on key_vault from authenticated;
 grant select, update on key_vault to variorum_definer;
 create policy key_vault_definer_update on key_vault
   for update to variorum_definer

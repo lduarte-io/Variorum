@@ -1407,8 +1407,13 @@ struct AuthRLSDDLTests {
         #expect(sql.contains("for update to variorum_definer"))
         #expect(sql.contains("using (auth.uid() = user_id) with check (auth.uid() = user_id);"))
         #expect(!sql.contains("update on key_vault to authenticated"), "no road back")
-        #expect(!sql.contains("delete on key_vault"),
+        #expect(!sql.contains("grant delete on key_vault") && !sql.contains("grant all on key_vault"),
                 "still no delete grant — account_purge is the only removal")
+        // The window's sweep (2026-09-06) found `authenticated` still holding DELETE from
+        // Supabase's default grant at 08's CREATE (RLS's missing DELETE policy fenced it);
+        // 11 names the revoke so a future deploy lands the posture directly.
+        #expect(sql.contains("revoke delete on key_vault from authenticated;"),
+                "the default DELETE grant is revoked by name")
         let composed = try Self.composedSQL()
         let grant = try #require(composed.range(
             of: "grant select, insert, update on key_vault to authenticated;", options: .backwards))

@@ -112,14 +112,31 @@ orchestrator."*
   `sync_schema_version()`, `sync_table_pk(text)`. Revision 3 = setup + the recovery wrap + ONE further write whose
   kind the row does not say — the sanity check with her twelve words at the window is what settles the 1b defect
   question, exactly as planned.
-- The deploy: PENDING — `11_pre13x_postures.sql` sent whole at `<time>`; `sync_schema_version()` = 8; 25 vault columns;
-  the six old signatures absent; the sweep every row OK/INFO; the LIVE PATCH PROBE refused (`<status>`); the
-  proof-required probe refused.
-- The Mac: PENDING — Release built from `<hash>` (a clean tree), `/Applications/Variorum.app` SHA-256 `<…>` refreshed at
-  a zero-instance window behind the A1 rail (backup `<name>`, integrity ok); her first ready: the migration's six legs
-  (`/usr/bin/log show` lines quoted), the keychain prompt `<seen/not seen>`, sign-in, the confirm, the first round
-  landed the hash (the vault's `key_proof_hash` non-NULL, revision `<n>`), the sanity check with her twelve words:
-  `<verdict>`.
+- **The deploy — DONE 2026-09-06T01:09:45Z:** `11_pre13x_postures.sql` (50,946 bytes; `begin;` at line 129, the
+  marker bump the last statement before `commit;`) sent WHOLE in ONE Management-API session → `[]`, HTTP 201 (the
+  classifier allowed the POST). **Verified:** `sync_schema_version()` = **8**; **25** vault columns, the seven named
+  present and nullable (`text` ×6 + `bigint`); her row UNTOUCHED — revision 3, the same corpus key id, hash / previous
+  key / seq / device / apple all NULL; the six OLD signatures ABSENT; present and `variorum_definer`-owned:
+  `sync_push(jsonb,text,text)` · `sync_pull(bigint,text,integer,text,text)` · `sync_horizon(text,text)` ·
+  `sync_purge_ledger(bigint,text,text)` · `sync_purge_execute(jsonb,text,text)` · `account_data_truncate(text,text)` ·
+  `sync_reencrypt(jsonb,text,text)` · `key_vault_update(jsonb,integer,text)` · `sync_key_gate(text,text)` ·
+  `sync_key_proof_check(text)`; `account_purge()`, `sync_schema_version()`, `sync_table_pk(text)` and the trigger
+  function stay `postgres`. **THE LIVE PATCH PROBE:** as role `authenticated` with her claims, `update key_vault …` →
+  **`42501 permission denied for table key_vault`**; her row re-read unchanged. **The grant sweep:** 53 rows — 49 OK,
+  3 INFO, ONE MISMATCH `privilege:authenticated:DELETE` (true, expected false) — Supabase's default `grant all` at
+  08's CREATE, never revoked for `authenticated`, fenced all along by the vault's missing DELETE policy; REPAIRED at
+  01:11:51Z by `maintenance/pre13x-window-vault-delete-revoke.sql` (`revoke delete on key_vault from authenticated`;
+  read back: DELETE false · UPDATE false · SELECT true) and named in 11 itself for future deploys; **the sweep re-run:
+  53 rows — 50 OK, 3 INFO (the three trigger functions' public EXECUTE, the standing INFO class), ZERO mismatches.** **The proof-required probe is DEFERRED until her first round lands the hash** — a probe with a wrong
+  proof as her session BEFORE that would be the NULL-hash arm's FIRST proof and would land the wrong hash on her vault.
+- **The Mac — the install DONE 2026-09-06T01:13:40Z:** Release built from the clean worktree `~/dev/variorum-window`
+  *[removed for publication]*
+  `/Applications/Variorum.app` replaced at a zero-instance window (her app quit by her; `pgrep` empty) behind the A1
+  copy above — SHA-256 `fbd3f4a774d92230…` → `683eb304abbf0f8d…`, `codesign --verify --deep --strict` ok. **Her first
+  ready: PENDING** — the migration's legs (`/usr/bin/log show --last 1h --predicate 'subsystem == "io.lduarte.Variorum"
+  AND category == "protection"'` — now at notice level), the keychain prompt `<seen/not seen>`, sign-in, the confirm,
+  the first round landing the hash (`key_proof_hash` non-NULL, revision `<n>`), the sanity check with her twelve
+  words: `<verdict>`; then the DEFERRED proof-required probe (a wrong proof as her session → `VARIORUM_KEY_PROOF_REQUIRED`).
 - The phone: PENDING — Release built from the same tree, installed by `devicectl` over the dev build; the dev folder
   deleted from the container; her first ready: the migration, sign-in, the re-enrollment by passphrase (corner 47),
   the move to Castle (Face ID); her first round; `device_cursor` carries both devices.
