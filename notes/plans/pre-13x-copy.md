@@ -191,6 +191,8 @@ delete its own backups — Time Machine, copies you made, and anything outside V
 still open the old way. If your backups are in iCloud Drive, iCloud keeps deleted files for 30 days in Recently
 Deleted.* Buttons: *Delete Them* · *Keep Them*
 
+**Done, when another device entered Castle first (the conflict-follow — drafted 2026-09-06 at 4b's adjudication under her overnight mandate; PROVISIONAL, ledger 61; 13s re-voices):** *Another device entered Castle first, so this Mac picked up that device's keys instead. The twelve words shown here are NOT your account's — the account's words are the ones written down on [device].* (*[device]* from the vault's self-reported device name, else *another device*; the device word rides the interpolation.)
+
 ### 2c. Leaving Castle for Standard (Settings ▸ Protection ▸ Use Standard)
 Title: *Back to Standard?*
 Body: *Your Apple account will hold a key to your library again. Anyone fully in your Apple account, or at
