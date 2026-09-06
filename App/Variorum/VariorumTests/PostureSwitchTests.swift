@@ -2158,7 +2158,16 @@ struct PostureSwitchTests {
         one.openFollow()
         let model = try #require(one.activeFollow)
         #expect(model.canFollowFromHeldKey, "the word typed at the lobby is reused — never asked twice")
-        await model.followFromHeldKey()
+        // THE DOOR (copy §5's *Enter Passphrase…*): it asks nothing — the
+        // follow runs from the held key.
+        model.choosePassphrase()
+        #expect(model.phase != .askPassphrase, "no field")
+        for _ in 0..<600 {
+            if case .done = model.phase { break }
+            if case .failed = model.phase { break }
+            if model.phase == .askPassphrase { break }
+            try await Task.sleep(for: .milliseconds(50))
+        }
         guard case .done = model.phase else { Issue.record("expected .done, got \(model.phase) \(model.lastError ?? "")"); return }
         #expect(sibling.keyStore.load()?.corpusKeyID == newKeyID, "M′ in custody")
         #expect(sibling.calls.rekeys == 1, "the library re-keyed as it followed")
