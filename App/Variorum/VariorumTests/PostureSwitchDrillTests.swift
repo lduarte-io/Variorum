@@ -92,6 +92,10 @@ struct PostureSwitchDrillTests {
         /// pre-13x 2c: the account's Apple key backing (iCloud Keychain's
         /// stand-in) — SHARED with the sibling device, as it would be.
         var appleBacking: InMemoryAppleKeyBacking!
+        /// pre-13x 3a: the fresh-device worlds carry the APP seam — the
+        /// session and auth `wireOneSecretHooks` composes at both roots.
+        var encryption: EncryptionSession?
+        var auth: AuthSession?
 
         init(scope: String, dir: URL, storeURL: URL, backups: URL, suiteName: String, oldKey: StoreKey,
              apple: AppleKey, binding: StoreBinding, view: AppDatabase, session: SyncCustodySession,
@@ -363,6 +367,90 @@ struct PostureSwitchDrillTests {
         return sibling
     }
 
+    /// pre-13x 3a — A FRESH DEVICE on the account, composed as the ROOTS
+    /// compose it: a fresh silent library (its own posture Standard — the
+    /// key file carries only the Apple wrap under the account's A, the
+    /// silent store-key item under its OWN throwaway scope, NO sync custody
+    /// item, no passphrase), the real controller, a real `EncryptionSession`
+    /// + `AuthSession` wired through the production `wireOneSecretHooks`,
+    /// the runner over drill leaves, and the (c) join routed to the runner's
+    /// follow exactly as `VariorumApp` routes it. Nothing reconciled yet —
+    /// the drill's first `reconcile()` IS the enroll.
+    private func makeFreshDevice(of acting: DrillWorld, label: String) async throws -> DrillWorld {
+        let scope = "\(acting.scope)-\(label)"
+        let dir = acting.dir.appendingPathComponent(label, isDirectory: true)
+        let storeURL = dir.appendingPathComponent("library/variorum.sqlite")
+        let backups = dir.appendingPathComponent("library/Backups", isDirectory: true)
+        try FileManager.default.createDirectory(at: backups, withIntermediateDirectories: true)
+        let suiteName = "\(acting.suiteName).\(label)"
+        let key = StoreKey.mint()
+        let opened = try AppDatabase.openStore(at: storeURL, custody: .inMemory(initial: key))
+        let (view, binding) = opened.asRebindable()
+
+        let storeID = "drill-\(label)-\(UUID().uuidString.lowercased())"
+        var envelope = StoreKeyEnvelope(storeID: storeID)
+        try envelope.appleBox(key: key, under: acting.apple.symmetricKey, appleKeyID: acting.apple.id)
+        try envelope.write(at: envelope.preferredURL(besideStore: storeURL))
+        #expect(StoreKeyCustody.deviceKeychain(scope: scope, storeURL: storeURL).save(key), "the fresh device's silent item")
+        let session = SyncCustodySession()
+        let keyStore = DeviceKeyStore.keychain(
+            scope: scope, storeURL: storeURL, session: session,
+            defaults: { UserDefaults(suiteName: suiteName)! })
+        #expect(keyStore.load() == nil, "a never-enrolled library holds no sync custody")
+
+        let dials = ScriptedDialsBox(ProtectionDials())
+        let appleBacking: InMemoryAppleKeyBacking = acting.appleBacking
+        let gate = StoreLaunchGate(
+            dials: { _, id in dials.dials(for: id) },
+            saveDials: { new, _, id in dials.save(new, for: id) },
+            legacyMode: { _, _ in nil },
+            retireLegacyDials: { _, _ in },
+            guardFor: { scope in StoreKeyGuard.keychain(scope: scope, storeURL: storeURL) },
+            appleKeyFor: { _ in AppleKeyLeaves.inMemory(backing: appleBacking) },
+            loadEnvelope: { try StoreKeyEnvelope.loadCurrent(besideStore: $0) },
+            saveEnvelope: { try $0.write(at: $0.preferredURL(besideStore: $1)) },
+            setAsideEnvelope: { _ in },
+            stamp: { _, _ in nil },
+            setStamp: { _, _, _ in })
+        let protection = ProtectionController(configuration: .init(
+            scope: scope, storeURL: storeURL, gate: gate, isRealVariant: true,
+            makeKDF: { self.fastKDF() },
+            syncCustodySession: session))
+        let fresh = DrillWorld(
+            scope: scope, dir: dir, storeURL: storeURL, backups: backups, suiteName: suiteName,
+            oldKey: key, apple: acting.apple, binding: binding, view: view, session: session,
+            keyStore: keyStore, vaultClient: acting.vaultClient, vaultEmu: acting.vaultEmu, mirror: acting.mirror,
+            gate: gate, protection: protection, storeID: storeID)
+        fresh.oldMaterial = acting.oldMaterial
+        fresh.words = acting.words
+        fresh.appleBacking = appleBacking
+        fresh.rowsPushed = acting.rowsPushed
+        fresh.variantCount = acting.variantCount
+        fresh.sampleVariant = acting.sampleVariant
+
+        // The app seam, as the roots compose it.
+        let auth = AuthSession(
+            configuration: AuthConfiguration(
+                projectURL: URL(string: "https://auth.2b-drill.invalid")!, apiKey: "publishable-test-key"),
+            store: .inMemory(initial: AuthTokens(
+                accessToken: "token-2b-drill", refreshToken: "refresh-2b-drill",
+                expiresAt: Date(timeIntervalSinceNow: 86_400),
+                userID: "user-2b-drill", email: "drill@test.invalid")),
+            http: { _ in throw URLError(.notConnectedToInternet) })
+        let encryption = EncryptionSession(store: keyStore, client: acting.vaultClient, signedIn: { true })
+        wireOneSecretHooks(protection: protection, encryption: encryption, keyVault: acting.vaultClient, auth: auth)
+        fresh.runner = PostureSwitchRunner(leaves: leaves(for: fresh))
+        let runner: PostureSwitchRunner = fresh.runner
+        protection.switchRunner = runner
+        encryption.joinCastleAct = { passphrase, words in
+            _ = try await runner.follow(passphrase: passphrase, recoveryWords: words)
+        }
+        encryption.joinStandardAct = { try await runner.followIntoStandard() }
+        fresh.encryption = encryption
+        fresh.auth = auth
+        return fresh
+    }
+
     private func leaves(for world: DrillWorld) -> PostureSwitchRunner.Leaves {
         let backups = world.backups
         let suiteName = world.suiteName
@@ -513,6 +601,44 @@ struct PostureSwitchDrillTests {
             world.note("U3 DRILL 1 — STANDARD NEW DEVICE, nothing typed: the Apple key opened the vault's master copy; pulled applied \(report.applied), merged \(report.merged) of \(world.rowsPushed)")
         }
 
+        // ————— U3 DRILL 1's ENROLL HALF (pre-13x 3a — the APP seam, nothing typed) —————
+        // The same road through the production composition: a fresh silent
+        // library under its own throwaway scope, signed in, never enrolled;
+        // its first `reconcile()` reads the vault, A opens the Apple-held
+        // copy, and the session's adopt lands custody (the REAL Keychain
+        // item) + the key file's master copy + the vault's descriptor and
+        // corpus id — no passphrase, no words, no face owed; then it pulls
+        // to head under its own custody.
+        let joiner = try await makeFreshDevice(of: world, label: "standard-joiner")
+        defer { joiner.tearDown() }
+        #expect(joiner.plainSyncRecord == nil, "a never-enrolled library: no custody item at all")
+        let enrollClock = ContinuousClock()
+        let enrollWall = await enrollClock.measure { await joiner.protection.reconcile() }
+        #expect(joiner.protection.enrollReading == nil,
+                "the Standard road ran silently — no face owed: \(String(describing: joiner.protection.enrollReading))")
+        let joinerRecord = try #require(joiner.plainSyncRecord, "custody landed under the throwaway scope")
+        #expect(joinerRecord.material?.corpusKeyID == oldMaterial.corpusKeyID && joinerRecord.material?.masterKey == oldMaterial.masterKey,
+                "custody holds the account's keys")
+        #expect(joinerRecord.deviceID != nil, "the device identity minted beside them")
+        let joinerFile = try #require(try StoreKeyEnvelope.loadCurrent(besideStore: joiner.storeURL))
+        #expect(joinerFile.master != nil, "the key file carries the master copy")
+        #expect(try joinerFile.unwrapKey(master: oldMaterial.masterSymmetricKey) == joiner.oldKey)
+        #expect(joinerFile.vaultCorpusKeyID == oldMaterial.corpusKeyID && joinerFile.vaultKDF == standardVault.format.kdf,
+                "the vault's descriptor + corpus id recorded on the key file")
+        #expect(joinerFile.passphrase == nil, "nothing typed — no passphrase wrap was minted")
+        #expect(joiner.encryption?.state == .enrolled(hasRecoveryWrap: false), "\(String(describing: joiner.encryption?.state))")
+        let joinerEngine = SyncEngine(transport: world.mirror, keyProvider: DeviceKeySyncProvider(store: joiner.keyStore))
+        try await withDependencies { $0.database = joiner.view } operation: {
+            let report = try await joinerEngine.pull()
+            #expect(report.applied + report.merged == world.rowsPushed,
+                    "the enrolled device applies every row under its own custody: applied \(report.applied), merged \(report.merged)")
+            joiner.note("U3 DRILL 1 — THE ENROLL HALF on the app seam: reconcile in \(enrollWall) — A opened the vault's copy; custody (the real item under the throwaway scope) + the key file's master copy + the vault's descriptor and corpus id LANDED, nothing typed, no face owed; pulled applied \(report.applied), merged \(report.merged) of \(world.rowsPushed)")
+        }
+        let joinerVariants = try await joiner.view.read { db in
+            try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM variant WHERE deleted_at IS NULL") ?? 0
+        }
+        #expect(joinerVariants == world.variantCount, "every take arrived on the enrolled device: \(joinerVariants) of \(world.variantCount)")
+
         // ————— U3 DRILL 3's second device: THE SIBLING (Standard, old keys) —————
         let sibling = try await makeSibling(of: world)
         defer { sibling.tearDown() }
@@ -625,6 +751,59 @@ struct PostureSwitchDrillTests {
             }
             #expect(text == sample.text, "a sampled take reads back byte-for-byte under the new corpus key")
         }
+        // ————— U3 DRILL 2's APP SEAM (pre-13x 3a — a fresh silent library joining CASTLE, the passphrase ONCE) —————
+        // The (c) direction through the production composition: the first
+        // reconcile owes the join face (no silent road under a Castle
+        // account); ONE passphrase entry at the Encryption tab's door routes
+        // to the runner's follow — M′ from the vault, custody landed, the
+        // library re-keyed, the key file carrying the master copy + the
+        // vault's descriptor and NO Apple copy, custody behind the gate —
+        // then it pulls the whole corpus under C′.
+        let castleJoiner = try await makeFreshDevice(of: world, label: "castle-joiner")
+        defer { castleJoiner.tearDown() }
+        await castleJoiner.protection.reconcile()
+        #expect(castleJoiner.protection.enrollReading == EnrollFacts(accountPosture: .castle, libraryPosture: .standard, appleState: .notApplicable),
+                "the (c) face owed at ready: \(String(describing: castleJoiner.protection.enrollReading))")
+        #expect(castleJoiner.plainSyncRecord == nil && castleJoiner.session.record == nil, "nothing landed before the word")
+        let castleEncryption = try #require(castleJoiner.encryption)
+        await castleEncryption.enroll(passphrase: "not-the-passphrase")
+        #expect(castleEncryption.lastError != nil && castleJoiner.plainSyncRecord == nil && castleJoiner.session.record == nil,
+                "a wrong word lands nothing: \(castleEncryption.lastError ?? "no refusal")")
+        let joinWall = await clock.measure { await castleEncryption.enroll(passphrase: "sesame") }
+        #expect(castleEncryption.lastError == nil, "\(castleEncryption.lastError ?? "")")
+        #expect(castleJoiner.rekeys == 1, "the fresh library re-keyed as it joined: \(castleJoiner.rekeys)")
+        #expect(castleJoiner.protection.posture == .castle, "the joiner's posture: \(castleJoiner.protection.posture)")
+        #expect(castleJoiner.silentStoreKey == nil, "the joiner's silent item is gone")
+        #expect(castleJoiner.plainSyncRecord?.material == nil && castleJoiner.plainSyncRecord?.deviceID != nil,
+                "the joiner's sync keys never touched the plain item; its identity sits there")
+        #expect(castleJoiner.session.record?.material?.corpusKeyID == followed.corpusKeyID, "the joiner's session holds M′ / C′")
+        let vaultNow = try await world.vault()
+        let castleJoinerFile = try #require(try StoreKeyEnvelope.loadCurrent(besideStore: castleJoiner.storeURL))
+        #expect(castleJoinerFile.apple == nil && castleJoinerFile.appleKeyID == nil, "no Apple copy on a Castle key file")
+        #expect(castleJoinerFile.master != nil && castleJoinerFile.vaultCorpusKeyID == followed.corpusKeyID && castleJoinerFile.vaultKDF == vaultNow.format.kdf,
+                "the master copy + the vault's descriptor and corpus id landed")
+        let castleJoinerKey = try castleJoinerFile.unwrapKey(passphrase: "sesame")
+        #expect(StoreEncryptionMigration.opens(castleJoiner.storeURL, key: castleJoinerKey), "the re-keyed library opens under the passphrase")
+        #expect(try castleJoinerFile.unwrapKey(master: followed.masterSymmetricKey) == castleJoinerKey, "…and under M′")
+        #expect(!StoreEncryptionMigration.opens(castleJoiner.storeURL, key: castleJoiner.oldKey), "the fresh library's old key opens nothing")
+        let castleJoinerEngine = SyncEngine(transport: world.mirror, keyProvider: DeviceKeySyncProvider(store: castleJoiner.keyStore))
+        try await withDependencies { $0.database = castleJoiner.view } operation: {
+            let report = try await castleJoinerEngine.pull()
+            #expect(report.applied + report.merged == world.rowsPushed,
+                    "the joined device applies every row under C′: applied \(report.applied), merged \(report.merged)")
+            castleJoiner.note("U3 DRILL 2 — THE CASTLE NEW-DEVICE ROAD on the app seam, the passphrase ONCE: joined in \(joinWall) (re-keyed \(castleJoiner.rekeys)×); the key file carries the master copy + the vault's descriptor, no Apple copy; custody behind the gate; pulled applied \(report.applied), merged \(report.merged) of \(world.rowsPushed)")
+        }
+        let castleJoinerVariants = try await castleJoiner.view.read { db in
+            try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM variant WHERE deleted_at IS NULL") ?? 0
+        }
+        #expect(castleJoinerVariants == world.variantCount, "every take arrived on the joined device: \(castleJoinerVariants) of \(world.variantCount)")
+        if let sample = world.sampleVariant {
+            let text = try await castleJoiner.view.read { db in
+                try String.fetchOne(db, sql: "SELECT working_text FROM variant WHERE id = ?", arguments: [sample.id])
+            }
+            #expect(text == sample.text, "a sampled take reads back byte-for-byte on the joined device")
+        }
+
         // The offer: Delete Them.
         #expect(world.runner.deletePreSwitchSnapshots(done) == 1)
         #expect(!FileManager.default.fileExists(atPath: preSwitchPair.path))

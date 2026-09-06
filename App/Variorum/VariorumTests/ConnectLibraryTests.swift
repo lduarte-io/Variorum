@@ -23,14 +23,14 @@ import Testing
 import VariorumCore
 @testable import Variorum
 
-private struct FixedKeys: SyncKeyProviding {
+struct FixedKeys: SyncKeyProviding {
     let keys: SyncEncryptionKeys
     let identity: String
     func currentKeys() throws -> SyncEncryptionKeys { keys }
     func deviceIdentity() throws -> String { identity }
 }
 
-private actor QuietLifecycle: AccountLifecycleProviding {
+actor QuietLifecycle: AccountLifecycleProviding {
     func truncateAccountData(activeKeyID: String, keyProof: String) async throws -> [String: Int] { [:] }
     func purgeAccount() async throws -> AccountPurgeReport {
         AccountPurgeReport(dataRows: 0, vaultRows: 0, entitlementRows: 0, authUserRemoved: true)
