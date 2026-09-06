@@ -1018,3 +1018,305 @@ struct MobileFollowDetectionTests {
         #expect(!controller.followPending)
     }
 }
+
+
+// MARK: - pre-13x 2d: THE WINDOW's PHONE, REPLAYED (decision 35 + the posture-mismatch follow)
+
+/// A transport that carries nothing — the no-rotation follow never touches
+/// the mirror (the drill asserts it).
+private actor InertTransport: SyncTransport, SyncRotationTransport {
+    private(set) var touched = 0
+    func push(_ batch: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncPushOutcome] { touched += 1; return [] }
+    func pull(since: Int64, limit: Int, activeKeyID: String, keyProof: String, deviceID: String?) async throws -> [SyncPulledRow] { touched += 1; return [] }
+    func schemaVersion() async throws -> Int { SyncSchema.lockstepVersion }
+    func reencrypt(_ rows: [SyncRow], activeKeyID: String, keyProof: String) async throws -> [SyncReencryptOutcome] { touched += 1; return [] }
+}
+
+/// The sync record's custody leaves, recorded — the Mac suite's
+/// `RecordingSyncLeaves`, on the phone's compiled copy of the shared brain.
+private final class PhoneSyncLeaves: @unchecked Sendable {
+    private let lock = NSLock()
+    private var plain: SyncCustodyRecord?
+    private var gated: SyncCustodyRecord?
+    var plainRecord: SyncCustodyRecord? { lock.lock(); defer { lock.unlock() }; return plain }
+    var gatedRecord: SyncCustodyRecord? { lock.lock(); defer { lock.unlock() }; return gated }
+    var leaves: E2EECustodyLeaves {
+        E2EECustodyLeaves(
+            saveGated: { [self] in lock.lock(); defer { lock.unlock() }; gated = $0; return true },
+            savePlain: { [self] in lock.lock(); defer { lock.unlock() }; plain = $0; return true },
+            loadPlain: { [self] in lock.lock(); defer { lock.unlock() }; return plain },
+            gatedExists: { [self] in lock.lock(); defer { lock.unlock() }; return gated != nil },
+            deletePlain: { [self] in lock.lock(); defer { lock.unlock() }; plain = nil; return true },
+            deleteGated: { [self] in lock.lock(); defer { lock.unlock() }; gated = nil; return true })
+    }
+}
+
+/// THE REPLAY DRILL (the BATCH 2d gate): her phone's EXACT state at the
+/// window — a real keyed store, a format-1 key file holding ONLY
+/// `formatVersion` + `storeID` (79 B on her phone), the raw key in the
+/// SILENT item, a restored session, the migration undone, the vault
+/// UNREACHABLE at ready — through the phone's own bootstrap (the test
+/// opener over the real file; the migration leaves injected, recording;
+/// the real controller). Pass 1, decision 35: the key file's bytes before
+/// == after, no `apple` copy, no custody move, the migration stopped
+/// undone, the library open. Then her phone as the WINDOW's build left it
+/// (the pre-fix Apple arm's `apple` + `appleKeyID`, her passphrase copy,
+/// the plain sync record, the migration marked done) with the vault
+/// readable and CASTLE: the posture-mismatch follow is owed, she types the
+/// passphrase once, and — through the real runner over the bootstrap's
+/// re-key road and the controller's real custody move — the library is
+/// re-keyed, custody sits behind Face ID (both items), a new key file
+/// carries NO `apple` copy and the vault's descriptor, the old key file is
+/// gone, the vault and the mirror untouched. RED ON OLD: pass 1 wrote the
+/// Apple copy of the phone's library key into the key file (the window's
+/// finding); pass 2 owed no follow (the key ids never changed).
+@MainActor
+@Suite("pre-13x 2d phone — the window's phone replayed: indeterminate writes nothing; the mismatch follow repairs it", .serialized)
+struct MobileWindowReplayTests {
+    /// The date/uuid dependencies the app session reads at the re-key's
+    /// reopen (the shared suite's `withDeps`, restated: it is private).
+    private func withDeps<T>(_ body: @MainActor () async throws -> T) async rethrows -> T {
+        try await withDependencies {
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.uuid = .incrementing
+        } operation: { @MainActor in
+            try await body()
+        }
+    }
+
+    @Test func herPhonesExactStateWritesNothingWhileTheVaultIsUnreachableAndThenFollowsIntoCastle() async throws {
+        try await withDeps { try await replay() }
+    }
+
+    private func replay() async throws {
+        let dir = try temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let storeURL = dir.appendingPathComponent("Variorum/variorum.sqlite")
+        try FileManager.default.createDirectory(at: storeURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+
+        // ————— HER PHONE AT THE WINDOW —————
+        let phoneKey = StoreKey.mint()
+        do {
+            let store = try AppDatabase.onDisk(url: storeURL, key: phoneKey)
+            try await store.write { db in
+                try db.execute(
+                    sql: "INSERT INTO container (id, kind, title, created_at, updated_at) VALUES (?, 'post', ?, ?, ?)",
+                    arguments: ["phone-note", "typed in bed", "2026-09-05T00:00:00Z", "2026-09-05T00:00:00Z"])
+            }
+            store.asRebindable().binding.lock()
+        }
+        // The 13p key file: format 1, ONLY formatVersion + storeID.
+        let storeID = "e6194a17-c198-3ca5-b0d5-2d2d2d2d2d2d"
+        let legacyURL = StoreKeyEnvelope.legacyURL(besideStore: storeURL)
+        let stubBytes = Data("{\n  \"formatVersion\" : 1,\n  \"storeID\" : \"\(storeID)\"\n}".utf8)
+        try stubBytes.write(to: legacyURL)
+        let stub = try #require(try StoreKeyEnvelope.loadCurrent(besideStore: storeURL))
+        #expect(stub.formatVersion == 1 && stub.passphrase == nil && stub.recovery == nil && stub.apple == nil && stub.master == nil)
+        // The raw key in the SILENT item; Face ID exists; A readable — the
+        // pre-fix arm WOULD land.
+        let backing = InMemoryStoreKeyGuardBacking(auto: phoneKey, biometryAvailable: true, biometricSucceeds: true)
+        let apple = AppleKey.mint()
+        let appleBacking = InMemoryAppleKeyBacking(key: apple)
+        let dials = ScriptedDialsBox(ProtectionDials())
+        let syncLeaves = PhoneSyncLeaves()
+        let session = SyncCustodySession()
+        let syncPresent = LockIsolated(false)
+        let gate = StoreLaunchGate(
+            dials: { _, id in dials.dials(for: id) },
+            saveDials: { new, _, id in dials.save(new, for: id) },
+            legacyMode: { _, _ in nil },
+            retireLegacyDials: { _, id in dials.retireLegacy(for: id) },
+            guardFor: { _ in StoreKeyGuard.inMemory(backing: backing) },
+            appleKeyFor: { _ in AppleKeyLeaves.inMemory(backing: appleBacking) },
+            loadEnvelope: { try StoreKeyEnvelope.loadCurrent(besideStore: $0) },
+            saveEnvelope: { try $0.write(at: $0.preferredURL(besideStore: $1)) },
+            setAsideEnvelope: { _ in },
+            stamp: { _, _ in nil },
+            setStamp: { _, _, _ in },
+            syncCustodyPresent: { _, _ in syncPresent.value })
+        let currentKey = LockIsolated(phoneKey)
+        let bootstrap = AppBootstrap(
+            testOpener: {
+                let candidate = currentKey.value
+                let key = StoreEncryptionMigration.opens(storeURL, key: candidate) ? candidate : phoneKey
+                return Result { try AppDatabase.onDisk(url: storeURL, key: key) }
+                    .mapError { AppDatabase.StoreOpenError(storePath: storeURL.path, reason: String(describing: $0)) }
+            },
+            gate: gate, testPresence: .encryptedOrUnknown, testStoreURL: storeURL,
+            syncCustodyLeaves: { _ in syncLeaves.leaves }, syncCustodySession: session)
+        let protection = bootstrap.protection
+        protection.isSignedIn = { true }              // the restored session
+        protection.readVaultPosture = { nil }          // the vault UNREACHABLE at this ready
+        let done = LockIsolated(false)
+        let confirmPending = LockIsolated(false)
+        let migrationLog = LockIsolated<[String]>([])
+        bootstrap.makeMigrationLeaves = { _, id in
+            ProtectionMigration.Leaves(
+                isDone: { done.value }, markDone: { done.setValue(true) },
+                isConfirmPending: { confirmPending.value }, setConfirmPending: { confirmPending.setValue($0) },
+                legacyPlainMaterial: { nil }, legacyGatedMaterial: { nil },
+                deleteLegacyItems: { false }, retireOptIn: {},
+                syncLeaves: syncLeaves.leaves, session: session,
+                readDeviceIDRow: { nil }, deleteDeviceIDRow: {},
+                loadLegacyEscrow: { _ in nil }, removeLegacyEscrow: { _ in false },
+                retireDialKeys: { dials.retireLegacy(for: id) },
+                setAlwaysAsk: { on in var d = dials.dials(for: id); d.alwaysAsk = on; dials.save(d, for: id) },
+                alignCustody: { target in await protection.moveCustodyChanged(to: target) },
+                readEnvelope: { gate.readEnvelope(storeURL).envelope },
+                saveEnvelope: { try gate.saveEnvelope($0, storeURL) },
+                log: { line in migrationLog.withValue { $0.append(line) } })
+        }
+        await bootstrap.awaitOpen()
+        guard case .ready(let appSession) = bootstrap.state else {
+            Issue.record("expected .ready, got \(bootstrap.state)")
+            return
+        }
+        await bootstrap.awaitReadyHousekeeping()
+
+        // ————— PASS 1: indeterminate writes NOTHING —————
+        let report = try #require(bootstrap.lastMigrationReport)
+        #expect(try Data(contentsOf: legacyURL) == stubBytes, "the key file's bytes before == after")
+        #expect(StoreKeyEnvelope.keyFileURLs(besideStore: storeURL) == [legacyURL], "no fingerprint-named file appeared — no Apple copy")
+        #expect(!report.dialsRetired && report.custodyAligned == nil && !report.masterCopyWritten && !done.value,
+                "the migration stopped before leg 3, UNDONE: \(report.lines)")
+        #expect(report.lines.contains { $0.contains("indeterminate") })
+        #expect(protection.postureIndeterminate && protection.effectiveGate == .auto, "opens through the custody it has")
+        #expect(backing.auto == phoneKey && backing.gated == nil, "no custody move")
+        #expect(protection.appleKeyVerified == nil, "the Apple arm never ran")
+        #expect(protection.notice == nil, "no nudge, no confirm, no follow")
+        let names1 = StoreKeyEnvelope.keyFileURLs(besideStore: storeURL).map(\.lastPathComponent)
+        print("2d REPLAY| PASS 1 (a session, no custody, the vault unreachable): key file \(stubBytes.count) B before == after; files beside the store: \(names1); custody silent, unmoved; migration: \(report.lines.last ?? "?")")
+
+        // ————— HER PHONE AS THE WINDOW's BUILD LEFT IT —————
+        // She typed the passphrase (the Encryption tab's enroll): the vault's
+        // material in the SILENT sync item, her passphrase copy in the key
+        // file; the pre-fix Apple arm's `apple` + `appleKeyID`; the migration
+        // marked done by that build.
+        let vault = ScriptedVaultResponder()
+        let client = KeyVaultClient(
+            configuration: KeyVaultClient.Configuration(
+                projectURL: URL(string: "https://vault.2d.invalid")!, apiKey: "publishable-test-key", deviceName: "test device"),
+            sessionProvider: StaticSessionProvider(session: UserSession(accessToken: "token-2d", userID: "user-phone")),
+            load: vault.load)
+        let passphrase = "orchard-lantern-13"
+        let material = try await VaultEnrollment(client: client).setUp(passphrase: passphrase)
+        let vaultBefore = try #require(try await client.fetchVault())
+        #expect(vaultBefore.format.masterWrappedByAppleHeld == nil, "her account: CASTLE-shaped")
+        #expect(syncLeaves.leaves.savePlain(SyncCustodyRecord(deviceID: "phone-id", material: material)))
+        syncPresent.setValue(true)
+        #expect(await protection.setPassphrase(passphrase) == nil)
+        var asLeft = try #require(try StoreKeyEnvelope.loadCurrent(besideStore: storeURL))
+        try asLeft.appleBox(key: phoneKey, under: apple.symmetricKey, appleKeyID: apple.id)
+        try asLeft.write(at: asLeft.preferredURL(besideStore: storeURL))
+        let oldURL = asLeft.preferredURL(besideStore: storeURL)
+        #expect(asLeft.apple != nil && asLeft.passphrase != nil && asLeft.master == nil && asLeft.vaultCorpusKeyID == nil,
+                "the window's phone key file: apple + appleKeyID + passphrase, no master, no descriptor")
+        #expect(StoreEncryptionMigration.opens(storeURL, key: try asLeft.unwrapKey(apple: apple.symmetricKey)),
+                "the exposure: A opens her phone's library through the copy the pre-fix arm wrote")
+        done.setValue(true)
+        protection.readVaultPosture = { [client] in
+            guard let fetched = try? await client.fetchVault() else { return nil }
+            return VaultPostureReading(
+                hasAppleHeldCopy: fetched.format.masterWrappedByAppleHeld != nil,
+                appleKeyID: fetched.format.appleKeyID, passphraseKDF: fetched.format.kdf,
+                hasPassphraseWrap: true, corpusKeyID: fetched.format.classKey(for: .corpus)?.keyID,
+                updatedAt: fetched.updatedAt, updatedByDevice: fetched.format.updatedByDevice,
+                signedInUserID: "user-phone", hasRecoveryWrap: false, format: fetched.format)
+        }
+        protection.stampedOwnerID = { "user-phone" }
+        // The runner at the phone's root — the SAME shared composition,
+        // over the bootstrap's real re-key road and the controller's real
+        // custody move; an inert mirror (nothing to re-encrypt).
+        let keyStore = DeviceKeyStore.inMemory(initial: material)
+        let transport = InertTransport()
+        let runnerLog = LockIsolated<[String]>([])
+        let syncCalls = LockIsolated<[String]>([])
+        let runner = PostureSwitchRunner(leaves: PostureSwitchRunner.Leaves(
+            scope: AppDatabase.StoreVariant.dev.rawValue, storeURL: storeURL, database: appSession.database, gate: gate,
+            keyStore: keyStore, keyProvider: DeviceKeySyncProvider(store: keyStore),
+            vault: client, transport: transport, signedIn: { true },
+            appleKeys: AppleKeyLeaves.inMemory(backing: appleBacking),
+            libraryKeyInHand: { protection.keyInHand() },
+            posture: { protection.posture },
+            alwaysAsk: { protection.dials.alwaysAsk },
+            biometryAvailable: { protection.biometryAvailable },
+            moveCustody: { target in await protection.moveCustody(to: target) },
+            rekeyLibrary: { old, new, work in
+                currentKey.setValue(new)
+                try await bootstrap.rekeyLibrary(from: old, to: new, work: work)
+            },
+            pauseSync: { syncCalls.withValue { $0.append("pause") } },
+            resumeSync: { syncCalls.withValue { $0.append("resume") } },
+            takeSnapshot: { nil },
+            preSwitchSnapshots: { _ in [] },
+            deleteSnapshotPairs: { _ in 0 },
+            defaults: { UserDefaults(suiteName: "io.lduarte.variorum.tests.2d.\(UUID().uuidString)")! },
+            reconcile: { await protection.reconcile() },
+            now: { Date() },
+            log: { line in runnerLog.withValue { $0.append(line) } }))
+        protection.switchRunner = runner
+
+        // ————— PASS 2: the next ready with the vault readable — the follow —————
+        await bootstrap.runReadyHousekeeping()
+        let owed = try #require(protection.followNotice)
+        #expect(owed.kind == .movedToCastle, "Castle in the vault, silent custody — the posture mismatch")
+        #expect(owed.corpusKeyID == material.corpusKeyID, "the keys unchanged")
+        #expect(owed.device == "test device")
+        #expect(protection.notice == .follow(owed) && protection.followPending)
+        #expect(protection.posture == .castle && !protection.postureIndeterminate)
+        #expect(try Data(contentsOf: oldURL) == (try Data(contentsOf: oldURL)), "the verdict writes nothing")
+        #expect(backing.auto == phoneKey && backing.gated == nil, "custody untouched until she types")
+        print("2d REPLAY| PASS 2 (the vault readable, CASTLE): the follow owed — \(owed.body)")
+
+        protection.openFollow()
+        let model = try #require(protection.activeFollow)
+        model.choosePassphrase()
+        await model.enter(passphrase: "not-her-passphrase")
+        #expect(model.lastError == ProtectionCopy.passphraseNotTheLibrarys && model.phase == .askPassphrase,
+                "a wrong word writes nothing and asks again")
+        #expect(FileManager.default.fileExists(atPath: oldURL.path) && backing.gated == nil)
+
+        await model.enter(passphrase: passphrase)
+        #expect(model.phase == .done(insuranceOff: false, hasOffer: false), "\(model.phase) — \(runnerLog.value)")
+        await bootstrap.awaitReadyHousekeeping()
+        guard case .ready(let reopened) = bootstrap.state else {
+            Issue.record("expected .ready after the re-key, got \(bootstrap.state)")
+            return
+        }
+
+        // Face ID custody, both items.
+        let newKey = try #require(backing.gated)
+        #expect(newKey != phoneKey, "a NEW library key")
+        #expect(backing.auto == nil, "the silent item is gone")
+        #expect(syncLeaves.gatedRecord?.material?.corpusKeyID == material.corpusKeyID, "the sync record behind Face ID — the keys unchanged")
+        #expect(syncLeaves.plainRecord?.material == nil && syncLeaves.plainRecord?.deviceID == "phone-id", "the plain item keeps only the identity")
+        #expect(protection.effectiveGate == .biometric && protection.posture == .castle)
+        #expect(!protection.followPending && protection.notice != .follow(owed))
+        // The new key file: no Apple copy; the vault's descriptor; the old one gone.
+        let newFile = try #require(try StoreKeyEnvelope.loadCurrent(besideStore: storeURL))
+        #expect(newFile.keyFingerprint == StoreKeyEnvelope.fingerprint(of: newKey))
+        #expect(newFile.apple == nil && newFile.appleKeyID == nil, "NO Apple copy")
+        #expect(newFile.vaultKDF == vaultBefore.format.kdf && newFile.passphrase?.kdf == vaultBefore.format.kdf,
+                "the passphrase copy under the VAULT's descriptor, recorded — no confirm owed")
+        #expect(newFile.vaultCorpusKeyID == material.corpusKeyID)
+        #expect(try newFile.unwrapKey(passphrase: passphrase) == newKey)
+        #expect(try newFile.unwrapKey(master: material.masterSymmetricKey) == newKey)
+        #expect(!FileManager.default.fileExists(atPath: oldURL.path), "the OLD key file gone from the live folder")
+        #expect(!protection.migrationConfirmOwedByDerivation)
+        // The library: under L′, readable, the old key and A open nothing.
+        #expect(StoreEncryptionMigration.opens(storeURL, key: newKey) && !StoreEncryptionMigration.opens(storeURL, key: phoneKey))
+        #expect(!StoreEncryptionMigration.opens(storeURL, key: try asLeft.unwrapKey(apple: apple.symmetricKey)), "A opens NO page of the re-keyed library")
+        let title = try await reopened.database.read { db in
+            try String.fetchOne(db, sql: "SELECT title FROM container WHERE id = 'phone-note'")
+        }
+        #expect(title == "typed in bed", "her note, whole, under the new key")
+        // Nothing rotated: the vault and the mirror untouched; no marker.
+        #expect(try await client.fetchVault()?.revision == vaultBefore.revision, "no vault write")
+        #expect(await transport.touched == 0, "the mirror untouched")
+        #expect(keyStore.load()?.corpusKeyID == material.corpusKeyID)
+        #expect(try await PostureSwitchRunner.pendingMarker(database: reopened.database) == nil)
+        #expect(syncCalls.value.contains("resume"))
+        let names2 = StoreKeyEnvelope.keyFileURLs(besideStore: storeURL).map(\.lastPathComponent)
+        print("2d REPLAY| THE FOLLOW: \(runnerLog.value.joined(separator: " · ")); custody: gated=\(backing.gated != nil) auto=\(backing.auto != nil) sync-gated=\(syncLeaves.gatedRecord?.material != nil); files beside the store: \(names2); vault revision \(vaultBefore.revision) unchanged; mirror touched 0")
+    }
+}

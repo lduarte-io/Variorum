@@ -182,7 +182,12 @@ final class AppBootstrap {
         testOpener: @escaping @Sendable () -> Result<AppDatabase, AppDatabase.StoreOpenError>,
         gate: StoreLaunchGate = .live,
         testPresence: StoreFilePresence = .encryptedOrUnknown,
-        testStoreURL: URL? = nil
+        testStoreURL: URL? = nil,
+        // pre-13x 2d: a pin over a real on-disk store (a store id beside it)
+        // hands the controller ITS sync-custody leaves — else the id
+        // resolves to the live Keychain's per-store items.
+        syncCustodyLeaves: (@Sendable (_ storeID: String) -> E2EECustodyLeaves)? = nil,
+        syncCustodySession: SyncCustodySession = .shared
     ) {
         storeVariant = .dev
         self.gate = gate
@@ -193,7 +198,9 @@ final class AppBootstrap {
             scope: AppDatabase.StoreVariant.dev.rawValue,
             storeURL: testStoreURL,
             gate: gate,
-            isRealVariant: false))
+            isRealVariant: false,
+            syncCustodyLeaves: syncCustodyLeaves,
+            syncCustodySession: syncCustodySession))
         protection.performLock = { [weak self] in await self?.lock() }
         beginOpening()
     }
