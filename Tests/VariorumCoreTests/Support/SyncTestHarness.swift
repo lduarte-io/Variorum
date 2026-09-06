@@ -50,6 +50,11 @@ final class SyncClient {
     /// scenario wires facts in. Mutable so a scenario binds it; the next
     /// engine call carries it.
     var sampleLibraryFacts: SampleLibraryDedupeFacts?
+    /// pre-13x 5a: the engine takes a LIST of facts (one per seeded book);
+    /// the single above stays so every pre-5a scenario rides unmodified, and
+    /// a scenario with a SECOND book appends here — `engine()` composes the
+    /// two into the list exactly as `SyncSession.configure` hands both.
+    var additionalSampleLibraryFacts: [SampleLibraryDedupeFacts] = []
 
     /// `prefix` must be exactly two hex characters (e.g. "AA", "BB") — it
     /// leads every UUID the device mints, so two devices can never collide.
@@ -136,7 +141,7 @@ final class SyncClient {
         SyncEngine(
             transport: transport, batchSize: batchSize, maxPushIterations: maxPushIterations,
             keyProvider: ClientIdentityKeyProvider(inner: keyProvider, deviceID: deviceID),
-            sampleLibraryFacts: sampleLibraryFacts)
+            sampleLibraryFacts: (sampleLibraryFacts.map { [$0] } ?? []) + additionalSampleLibraryFacts)
     }
 
     @discardableResult

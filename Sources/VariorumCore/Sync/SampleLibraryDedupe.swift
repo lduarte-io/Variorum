@@ -135,25 +135,36 @@ extension SyncEngine {
     /// marker read, and — only when the batch applied `post_tag` rows —
     /// one indexed lookup of their tag ids against the reserved path.
     func sampleDedupeOccasion(_ db: Database, touched: TouchedRows) throws -> Bool {
-        guard touched.isPullBatch, let facts = sampleLibraryFacts else { return false }
+        guard touched.isPullBatch, !sampleLibraryFacts.isEmpty else { return false }
         if !touched.readingIDs.isEmpty { return true }
         if try sampleDedupePending(db) { return true }
         guard !touched.appliedPostTagTagIDs.isEmpty else { return false }
+        // pre-13x 5a: ANY seeded book's reserved path among the applied
+        // applications is the occasion (one indexed lookup over the list).
         return try Bool.fetchOne(
             db,
             sql: """
                 SELECT EXISTS (SELECT 1 FROM tag
-                               WHERE path = ? AND id IN (SELECT value FROM json_each(?)))
+                               WHERE path IN (SELECT value FROM json_each(?))
+                                 AND id IN (SELECT value FROM json_each(?)))
                 """,
-            arguments: [facts.tagPath, jsonArray(touched.appliedPostTagTagIDs)]) ?? false
+            arguments: [jsonArray(Set(sampleLibraryFacts.map(\.tagPath))),
+                        jsonArray(touched.appliedPostTagTagIDs)]) ?? false
     }
 
     /// The pass. Fires from `runPostApplyRepairs` on the occasions above;
-    /// the candidate scan is one indexed read, and the expensive work
-    /// (manifest load + per-note classification) runs only when two live
-    /// same-name copies actually coexist.
+    /// the candidate scan is one indexed read PER SEEDED BOOK, and the
+    /// expensive work (manifest load + per-note classification) runs only
+    /// when two live same-name copies actually coexist.
+    ///
+    /// pre-13x 5a: the facts are a LIST (one entry per seeded book). The
+    /// one-shot marker is spent ONCE for the pass, then every book's copies
+    /// are examined by today's rules unchanged; a deferral by any book
+    /// re-arms the marker (its own line below), so the next pull re-runs
+    /// the pass for every book — the deferring book decides then, and a
+    /// book that already decided finds one live copy and returns 0.
     func dedupeSampleLibraryCopies(_ db: Database, touched: TouchedRows) throws -> Int {
-        guard let facts = sampleLibraryFacts else { return 0 }
+        guard !sampleLibraryFacts.isEmpty else { return 0 }
         // ONE-SHOT, spent FIRST (the ladder's R2-3): a pass that runs
         // consumes the marker before it decides anything — including the
         // common convergence, where the other device's retirement arrives
@@ -162,6 +173,17 @@ extension SyncEngine {
         // then opened an apply-mode transaction and every push chunk re-ran
         // the pass, for the life of the store.
         try setSampleDedupePending(db, false)
+        var repairs = 0
+        for facts in sampleLibraryFacts {
+            repairs += try dedupeSampleLibraryCopies(db, facts: facts, touched: touched)
+        }
+        return repairs
+    }
+
+    /// ONE book's pass — the pre-5a body, the facts a parameter.
+    private func dedupeSampleLibraryCopies(
+        _ db: Database, facts: SampleLibraryDedupeFacts, touched: TouchedRows
+    ) throws -> Int {
         // The seeder's own `discover` rule: EXACT live-name match.
         let copies = try String.fetchAll(
             db,

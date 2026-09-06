@@ -39,14 +39,17 @@ public struct SyncEngine: Sendable {
     /// R-pre13u-8) — the `keyProvider` pattern: the identity predicate and
     /// per-note manifest live in app-target code this module cannot see,
     /// so the app layer hands them in at wiring (`SyncSession.configure`,
-    /// shared by both platforms). nil — the default — leaves that repair
+    /// shared by both platforms). EMPTY — the default — leaves that repair
     /// INERT: an engine nobody wired facts into cannot misidentify a book.
-    public let sampleLibraryFacts: SampleLibraryDedupeFacts?
+    /// pre-13x 5a (the batch's one `Sync/` touch, ruled): a LIST — one entry
+    /// per seeded book (Sherlock, *Encryption Explained*); the pass runs per
+    /// entry exactly as it ran for one — no rule or ordering change.
+    public let sampleLibraryFacts: [SampleLibraryDedupeFacts]
 
     public init(
         transport: any SyncTransport, batchSize: Int = 200, maxPushIterations: Int = 5,
         keyProvider: any SyncKeyProviding = UnenrolledKeyProvider(),
-        sampleLibraryFacts: SampleLibraryDedupeFacts? = nil
+        sampleLibraryFacts: [SampleLibraryDedupeFacts] = []
     ) {
         self.transport = transport
         self.batchSize = batchSize

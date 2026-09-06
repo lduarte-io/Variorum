@@ -307,34 +307,45 @@ struct ShellActions {
     /// her own edits to surviving copies are untouched) — so nothing of
     /// hers can be destroyed and no confirm gates the door. Fire-and-DO:
     /// it restores AND opens the book; failures speak.
-    func restoreSampleLibrary() {
+    func restoreSampleLibrary() { restoreSeededBook(.sherlock) }
+
+    /// pre-13x 5a — **Help ▸ Restore “Encryption Explained”**: the second
+    /// seeded book through the same door (design §8: *"restorable from Help
+    /// like the tutorial"*).
+    func restoreEncryptionBook() { restoreSeededBook(.encryptionExplained) }
+
+    /// ONE road for every seeded book (pre-13x 5a generalized Sherlock's):
+    /// mint what is missing, open the book, speak the outcome. The noun in
+    /// the receipt is the book's ("stories" for Sherlock, "chapters" for the
+    /// encryption book).
+    private func restoreSeededBook(_ book: SampleLibrarySeeder.Book) {
+        let noun = book == .sherlock ? "story" : "chapter"
         Task { @MainActor in
             do {
                 let stories = try await Task.detached(priority: .utility) {
-                    try SampleLibrarySeeder.loadStories()
+                    try SampleLibrarySeeder.loadStories(for: book)
                 }.value
                 let existing = try await session.database.read { db in
-                    try SampleLibrarySeeder.discover(db)
+                    try SampleLibrarySeeder.discover(db, book: book)
                 }
                 if existing.isComplete(for: stories.map(\.title)),
                    let bookID = existing.bookID {
                     shell.pendingSelection = .reading(bookID)
                     status.speak(
-                        "The sample library is already whole — "
-                        + "\u{201C}\(SampleLibrarySeeder.bookName)\u{201D} is on your shelf.")
+                        "\u{201C}\(book.name)\u{201D} is already whole — it's on your shelf.")
                     return
                 }
                 let outcome = try await SampleLibrarySeeder.seed(
-                    session: session, stories: stories, existing: existing)
+                    session: session, book: book, stories: stories, existing: existing)
                 if case .seeded(let readingID, let minted) = outcome {
                     shell.pendingSelection = .reading(readingID)
                     status.speak(
-                        "Restored \u{201C}\(SampleLibrarySeeder.bookName)\u{201D} — "
-                        + "\(minted) \(minted == 1 ? "story" : "stories") came back.")
+                        "Restored \u{201C}\(book.name)\u{201D} — "
+                        + "\(minted) \(minted == 1 ? noun : noun + "s") came back.")
                 }
             } catch {
                 status.speak(
-                    "Restoring the sample library failed: "
+                    "Restoring \u{201C}\(book.name)\u{201D} failed: "
                     + OpsRefusalCopy.message(for: error))
             }
         }
@@ -496,7 +507,7 @@ struct ShellActions {
         .saveChoicesAsLens, .toggleSeams, .restoreTutorial,
         // pre-13u Act 10: the sample library's restore, typeable like the
         // tutorial's.
-        .restoreSampleLibrary,
+        .restoreSampleLibrary, .restoreEncryptionBook,
         // The Act 10 correction round (row 15): TAG NOTE, typeable — ⌘⇧I's
         // act (the fold it used to toggle retired with the masthead's second
         // door).
@@ -566,6 +577,7 @@ struct ShellActions {
         case .showNoteVersions: return { dispatch(.showNoteVersions) }
         case .restoreTutorial: return { restoreTutorial() }
         case .restoreSampleLibrary: return { restoreSampleLibrary() }
+        case .restoreEncryptionBook: return { restoreEncryptionBook() }
         default:
             // NIT-1 (Stage 1 ladder): a future `paletteActs` entry without
             // a wired case must never compile into a silent no-op row —

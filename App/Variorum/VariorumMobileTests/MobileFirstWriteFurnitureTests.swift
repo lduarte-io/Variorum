@@ -46,6 +46,16 @@ private final class Marks {
               loadSample: { [self] in sample },
               saveSample: { [self] in sample = $0 })
     }
+    /// pre-13x 5a: the encryption book's OWN mark beside Sherlock's, with
+    /// Sherlock's reading "already seeded" (the half-megabyte parse skipped).
+    var encryptionBook = false
+    var encryptionBookOnly: MobileFirstWriteFurniture.Marks {
+        .init(loadJournal: { [self] in journal },
+              saveJournal: { [self] in journal = $0 },
+              loadSample: { true }, saveSample: { _ in },
+              loadEncryptionBook: { [self] in encryptionBook },
+              saveEncryptionBook: { [self] in encryptionBook = $0 })
+    }
 }
 
 @Suite("The first-write occasion (R-pre13u-1 / R-pre13u-8)")
@@ -344,6 +354,38 @@ struct MobileFirstWriteFurnitureTests {
             #expect(books.contains { $0.name == MobileStarterJournal.bookName },
                     "the starter Journal survived the library's book")
             #expect(books.contains { $0.name == SampleLibrarySeeder.bookName })
+        }
+    }
+
+    // MARK: pre-13x 5a — the second seeded book rides the same occasion
+
+    /// *Encryption Explained* seeds on the phone's first-write occasion
+    /// beside Sherlock, under its OWN mark; an injected Sherlock mark alone
+    /// stands for both (every pin above skips both parses), and the
+    /// encryption book's mark, when injected, is its own.
+    @Test func theOccasionSeedsTheEncryptionBookUnderItsOwnMark() async throws {
+        try await withEditorWorld { session, db in
+            let marks = Marks()
+            let furniture = MobileFirstWriteFurniture(
+                session: session, storeVariant: .dev,
+                marks: marks.encryptionBookOnly)
+            guard case .ran(_, let sample) = await furniture.run() else {
+                Issue.record("expected the occasion to run")
+                return
+            }
+            #expect(sample == .alreadySeeded, "Sherlock's injected mark stands")
+            guard case .seeded(let bookID, let chapters) = furniture.encryptionBookOutcome else {
+                Issue.record("expected the encryption book to seed, got \(String(describing: furniture.encryptionBookOutcome))")
+                return
+            }
+            #expect(chapters == 8 && marks.encryptionBook)
+            let book = try await db.read { db in try Queries.reading(db, id: bookID) }
+            #expect(book?.name == SampleLibraryEncryptionBook.name)
+            // A second occasion with the mark set seeds nothing more.
+            let again = MobileFirstWriteFurniture(
+                session: session, storeVariant: .dev, marks: marks.encryptionBookOnly)
+            _ = await again.run()
+            #expect(again.encryptionBookOutcome == .alreadySeeded)
         }
     }
 }

@@ -186,21 +186,27 @@ struct VariorumApp: App {
                         // book propagated to every device). Idempotent by
                         // construction and resumable, so a re-run after an
                         // unlock — or after a cancelled seed — is safe.
-                        await SampleLibrarySeeder.seedIfNeeded(
-                            session: session,
-                            storeVariant: bootstrap.storeVariant,
-                            gate: SampleLibrarySeeder.SyncGate(
-                                // Captured strongly, deliberately: the
-                                // closures outlive nothing, and a nil'd weak
-                                // reference would read as "no account",
-                                // which is the unsafe direction.
-                                belongsToAnAccount: {
-                                    fresh.sync.isConfigured
-                                        || fresh.account.variorum != nil
-                                },
-                                hasSyncedCleanly: {
-                                    fresh.sync.status.lastSuccessAt != nil
-                                }))
+                        // pre-13x 5a: BOTH seeded books, in order — Sherlock,
+                        // then *Encryption Explained* (its own mark, so an
+                        // existing store seeds only the new one).
+                        for book in SampleLibrarySeeder.Book.all {
+                            await SampleLibrarySeeder.seedIfNeeded(
+                                session: session,
+                                book: book,
+                                storeVariant: bootstrap.storeVariant,
+                                gate: SampleLibrarySeeder.SyncGate(
+                                    // Captured strongly, deliberately: the
+                                    // closures outlive nothing, and a nil'd weak
+                                    // reference would read as "no account",
+                                    // which is the unsafe direction.
+                                    belongsToAnAccount: {
+                                        fresh.sync.isConfigured
+                                            || fresh.account.variorum != nil
+                                    },
+                                    hasSyncedCleanly: {
+                                        fresh.sync.status.lastSuccessAt != nil
+                                    }))
+                        }
                     }
                     // 13p: the calm, dismissible protection notices (the
                     // Standard nudge's two-offer shape + the reminder).

@@ -64,6 +64,10 @@ final class MobileFirstWriteFurniture {
         var saveJournal: ((Bool) -> Void)?
         var loadSample: (() -> Bool)?
         var saveSample: ((Bool) -> Void)?
+        /// pre-13x 5a: *Encryption Explained*'s own mark (nil = the device
+        /// defaults under its own key, beside Sherlock's).
+        var loadEncryptionBook: (() -> Bool)?
+        var saveEncryptionBook: ((Bool) -> Void)?
 
         static let deviceDefaults = Marks()
     }
@@ -93,6 +97,10 @@ final class MobileFirstWriteFurniture {
 
     /// Fact 2, taken at launch and spent at the write. Nil until `prime`.
     private var storeWasEmptyAtLaunch: Bool?
+    /// pre-13x 5a: what the occasion did for *Encryption Explained* — beside
+    /// `Outcome.ran`'s two, not inside it (the phone's pins match that
+    /// case's shape; the second book records its own line).
+    private(set) var encryptionBookOutcome: SampleLibrarySeeder.Outcome?
     /// The one in-flight occasion. Held (rather than a bare bool) so a
     /// second door firing mid-seed joins the first instead of starting a
     /// second, and so a pin can await deterministically what production
@@ -216,6 +224,26 @@ final class MobileFirstWriteFurniture {
                 loadMark: marks.loadSample, saveMark: marks.saveSample,
                 pacing: { await Self.holdWhileWritingLands(session) })
         }.value
+
+        // pre-13x 5a: *Encryption Explained* on the same occasion, the same
+        // gate, its own mark — paced the same way (eight short notes).
+        // An injected SAMPLE mark stands for both books unless the
+        // encryption book's own mark is injected too (production injects
+        // neither — each book reads its own defaults key): a pin that says
+        // "Sherlock is already seeded" to skip the half-megabyte parse skips
+        // this book's eight mints for the same reason.
+        let loadEncryption = marks.loadEncryptionBook ?? marks.loadSample
+        let saveEncryption = marks.saveEncryptionBook ?? (marks.loadEncryptionBook == nil ? marks.saveSample : nil)
+        let encryptionBook = await Task(priority: .utility) { @MainActor in
+            await SampleLibrarySeeder.seedIfNeeded(
+                session: session, book: .encryptionExplained,
+                storeVariant: storeVariant, gate: .unowned,
+                loadMark: loadEncryption, saveMark: saveEncryption,
+                pacing: { await Self.holdWhileWritingLands(session) })
+        }.value
+        encryptionBookOutcome = encryptionBook
+        Self.log.notice(
+            "first write (Encryption Explained): \(String(describing: encryptionBook), privacy: .public)")
 
         return .ran(journal: journal, sample: sample)
     }

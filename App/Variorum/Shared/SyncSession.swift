@@ -106,10 +106,11 @@ final class SyncSession {
         // The sample-library dedupe's facts (pre-13u Act 0, R-pre13u-8):
         // the engine cannot see the seeder, so the identity predicate and
         // per-note manifest are handed in here — the one composition site
-        // both platforms share.
+        // both platforms share. pre-13x 5a: EVERY seeded book's facts
+        // (Sherlock + *Encryption Explained*), a list.
         let engine = SyncEngine(
             transport: transport, keyProvider: keyProvider,
-            sampleLibraryFacts: SampleLibrarySeeder.dedupeFacts())
+            sampleLibraryFacts: SampleLibrarySeeder.allDedupeFacts())
         let janitor = (transport as? any SyncTransport & SyncPurgeTransport)
             .map { PurgeJanitor(transport: $0, keyProvider: keyProvider) }
         let scheduler = SyncScheduler(engine: engine, janitor: janitor)

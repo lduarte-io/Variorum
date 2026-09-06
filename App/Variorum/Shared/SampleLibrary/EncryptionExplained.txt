@@ -1,0 +1,69 @@
+%%% Chapter 1 — What is encrypted, and with what
+
+Your library is one file. Every page of it is encrypted with AES-256 under the library key — a random 256-bit number — and every page carries a check, so a tampered page is noticed. Without the library key the file is noise: to Finder, to Terminal, to Time Machine, to anyone who copies it.
+
+Sync is end-to-end encrypted in both modes. Before any text leaves your device it is encrypted with AES-256-GCM under the corpus key, which only your devices ever hold. The server stores and passes along what it cannot read. What it can see is the shape: that a note exists, when it changed, roughly how much, and how things are ordered — never a word of it.
+
+Your passphrase is never stored anywhere. It is stretched with Argon2id (64 MB of memory, three passes — about a second on a Mac) into a key, and that key wraps other keys. Anyone guessing your passphrase against a stolen copy pays that second per guess, which is why we ask for twelve characters or more.
+
+Your twelve words are a random key written out as words (128 bits — the same standard hardware wallets use). They wrap exactly what your passphrase wraps, so either one opens the same doors.
+
+%%% Chapter 2 — The keys, and where each one lives
+
+The library key. One per library file — your Mac's library and your iPhone's library have different ones. The raw key sits in the device's Keychain: in Standard it is handed to Variorum silently once you have logged in; in Castle it is held by the Mac's security chip and released only to your fingerprint, or kept nowhere at all if you choose Always ask. Beside the library sits the key file, a small text file holding the library key wrapped several ways: under your passphrase, under your twelve words, under the master key, and — in Standard only — under the iCloud key. Anyone can read the key file; it gives them nothing without one of those.
+
+The master key. One per account, made when you turn on sync. Each of your devices keeps it in its own protected Keychain beside the library key — never inside the library file, so never inside any backup or copy of it — and on our server only in wrapped form: under your passphrase, under your twelve words, and — in Standard only — under the iCloud key. The corpus key, which encrypts what leaves your device, is wrapped under the master key. Holding the master key is what earns the right to sync at all: the server asks every device to prove it holds it before it will accept or hand over a single row.
+
+The iCloud key. A random key that Variorum places in your iCloud Keychain the first time a Standard library exists on your Apple account. It syncs to every device signed into your iCloud, Apple's end-to-end encryption protects it in transit, and Apple's account recovery can reach it. By itself it opens nothing: it is only ever what a Standard wrapped copy is wrapped under. Castle leaves it where it is, with nothing current wrapped under it. If one of your devices is signed into a different Apple account, that device's own key file holds its library key wrapped under THAT account's iCloud key too — so that Apple account can open that device's library file, though never your sync: the master key's Apple-held copy is under the Apple account that turned sync on.
+
+Your account password. It signs you in and can delete your account. It wraps nothing and opens nothing.
+
+%%% Chapter 3 — Standard, step by step
+
+The first time Variorum opens, it makes a library key and a key file, places an iCloud key in your iCloud Keychain if one isn't there, and writes a copy of the library key wrapped under it into the key file. From then on your Mac opens the library silently, and any Mac signed into your iCloud can open a copy of it with nothing typed.
+
+Turning on sync asks for a passphrase and shows you twelve words. It makes the master key and the corpus key, sends the master key to our server wrapped three ways — under your passphrase, under your twelve words, under your iCloud key — and keeps the raw master key in this Mac's protected Keychain beside the library key, never in the library file. A new Apple device signs into Variorum, reads the iCloud key, unwraps the master key, and has everything: nothing typed.
+
+So in Standard: anyone fully inside your Apple account can open your library and your sync. Anyone at your unlocked Mac can too, because your Mac opens it silently. That is Standard's trade, and it is the same trade Apple Notes makes.
+
+%%% Chapter 4 — Castle, step by step
+
+Entering Castle does five things. Your library is re-encrypted under a brand-new library key, and the new key file wraps it under your passphrase, your twelve words and the master key only — never under the iCloud key. Your sync gets a new master key too, sent to the server wrapped only under your passphrase and twelve words; the old master key stops being accepted. And a new corpus key: everything on the server is re-encrypted under it from your Mac, so nothing written after today is ever under a key an old copy holds. The copy of the library key your Mac keeps moves behind Touch ID — held by the security chip, released to your fingerprint, never to your login password — or is kept nowhere if you choose Always ask. And your other devices follow: each re-encrypts its own library the same way and asks for your passphrase once to pick up the new sync keys.
+
+After that, three things can open your library: your passphrase, your twelve words, or a device you already enrolled, through its fingerprint. Nothing in iCloud can. Nothing on our server can. Your Mac's login password can't. And nothing can be reset: there is no key anyone else holds. That is the floor, and it is what makes Castle real.
+
+%%% Chapter 5 — Backups, and why an old one behaves the way it does
+
+A backup is a sealed copy of your library file plus its key file as they were that day. It opens with whatever that key file's wrapped copies open under: the passphrase you had then, your twelve words, and — if you were in Standard — your iCloud key. Variorum never changes a backup after it makes it.
+
+Why your iCloud key can still open an old backup after you moved to Castle, but not your library: the old key file holds the old library key wrapped under the iCloud key. Your library now has a new key that was never wrapped that way. The old copy is exactly as private as it was on the day it was made — no more.
+
+Why opening an old backup does not bring sync back on its own: a backup holds your writing and nothing else — no sync keys. To sync again it has to join your account like any device: through your Apple account in Standard, with your passphrase or twelve words in Castle. And entering Castle replaced the keys Standard could reach, so nothing an old copy or an old Apple-account holder could have had opens anything new. Signing in with your account password gets you a session, not a key.
+
+So if you are in Castle, have lost your passphrase and twelve words, and have no enrolled device left: an old Standard backup opened through your Apple account gives you back what you wrote up to that day. To sync again you delete your Stargazing account and set sync up fresh from that copy. Whatever you wrote after the backup, and kept only on the server, is gone. That is Castle's floor, met from the other side.
+
+This is why entering Castle offers to delete the backups Variorum made before that day, and why it tells you about Time Machine and copies you made: those still open the old way, and only you can remove them.
+
+%%% Chapter 6 — Changing things
+
+Changing your passphrase is for when you've forgotten it or want a different one — not a security measure. It re-wraps the same keys under the new word. The library key, the master key, your twelve words and sync are untouched; the new passphrase works on your other devices right away when they're online, and each stops taking the old one once you've used the new one there. If someone may have your passphrase, replace all your keys instead. Old backups keep the passphrase of their day — on the Mac they were made on, the current passphrase still opens them as long as the library key hasn't changed, because the key file beside your library pairs with them.
+
+Regenerating your twelve words re-wraps the same keys under new words. The old words stop opening the server's copy and this device the moment the new ones are confirmed; a device where you haven't used the new words yet still takes the old ones until you do — the same as a passphrase change. If your words were seen, replace all your keys.
+
+Replacing all your keys (Settings ▸ Encryption) is the heavy act: a new master key, a new corpus key with everything on the server re-encrypted under it, and a new library key on each of your devices as they follow — each asks for your passphrase once. Your passphrase and twelve words stay unless you change them too. Use it when someone may have USED a secret of yours, or had one of your devices unlocked: a changed passphrase stops someone who only saw the word; someone who already held your keys is stopped only by new keys. A copy of your library or a backup holds no keys, so it is never the reason on its own. In Standard it does not shut out someone inside your Apple account: the new master key is wrapped under your iCloud key again, and they hold that. For that case, secure your Apple account with Apple's tools — or move to Castle, the one act that takes the Apple-account key away. Entering Castle runs this same act for you.
+
+Switching to Standard wraps the library key and the master key under your iCloud key again. Switching to Castle is Chapter 4.
+
+Deleting your account and setting sync up again is the one act that replaces everything: a new master key, a new corpus key, and your library uploaded fresh. Your libraries on your devices are never touched by it.
+
+%%% Chapter 7 — Who can read what
+
+The Variorum server: never, in either mode. Apple: in Standard, whoever is fully inside your Apple account can open your library and your sync; in Castle, nobody through Apple. Your Mac's login password: in Standard, anyone who can log in as you can open Variorum and read; in Castle, no. Someone holding your passphrase or twelve words: yes, in either mode — those are the keys. Someone at your Mac while Variorum is open and unlocked: yes, in either mode — that is what open means.
+
+If your passphrase or twelve words were only seen, change or regenerate them. If someone may have used them, or had one of your devices unlocked, replace all your keys. If — in Standard — someone was inside your Apple account, secure it with Apple's tools or move to Castle; replacing your keys alone does not shut them out there. If your account password leaked, sign out everywhere and change it. If your account itself may be in someone else's hands, delete it and set sync up again. The device named in a notice is the device's own word for itself; the day is the server's — an act you didn't do is the sign, whatever the name says.
+
+%%% Chapter 8 — What we can and cannot do for you
+
+We cannot read your writing, in either mode. We cannot reset a Castle passphrase — a reset would be a key we hold. We cannot recover your writing if you are in Castle and lose every enrolled device and both secrets. We can see when your devices sync and how much; we cannot see what. We can delete your account on your word, and we can sign your other devices out on your word. Everything else is yours.
+
+When a notice names the device that changed something, that name is what the device calls itself — the day is ours. A name you don't recognize, or an act you didn't do under a name you do, is the sign to replace your keys.

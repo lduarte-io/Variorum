@@ -650,6 +650,9 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     /// (`SampleLibrarySeeder`'s resumable seed) — nothing of hers is ever
     /// deleted, so no confirm gates it.
     case restoreSampleLibrary
+    /// pre-13x 5a: *Encryption Explained*'s restore — the same
+    /// mint-what's-missing door as Sherlock's, for the second seeded book.
+    case restoreEncryptionBook
     // 13l Act 4 (ledger rows 11–12) — Settings ▸ Data Safety's three acts.
     // `.surface` for the `.deleteNow` reason: their target is the pane you
     // are looking at, and their per-gesture conditions (is a folder set? is a

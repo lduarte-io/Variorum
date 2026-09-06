@@ -1432,6 +1432,15 @@ nonisolated enum CapabilityRegistry {
             doors: [.menuBar, .palette],
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "", availability: always),
+        // pre-13x 5a: the second seeded book's restore — the same
+        // mint-what's-missing road (`SampleLibrarySeeder`, per book).
+        Capability(
+            id: .restoreEncryptionBook,
+            verb: "Restore \u{201C}\(SampleLibraryEncryptionBook.name)\u{201D}",
+            scope: .app,
+            doors: [.menuBar, .palette],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "", availability: always),
 
         // MARK: Data safety (13l Act 4 — Settings ▸ Data Safety)
         // The `.deleteNow` shape exactly: `.surface`, app scope, always

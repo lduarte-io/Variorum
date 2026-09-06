@@ -148,4 +148,34 @@ struct SampleLibraryManifestTests {
         ])
         #expect(manifest.noteHashes["Only"] == BridgeHash.body("The text."))
     }
+
+    /// pre-13x 5a: the SECOND seeded book on the phone — the same
+    /// load-bearing pin for *Encryption Explained*: the manifest hashes the
+    /// bundled copy §7b text; the dedupe hashes what the phone's store holds.
+    @Test func theEncryptionBooksManifestMatchesWhatTheSeedActuallyStores() async throws {
+        try await withEditorWorld { session, db in
+            let mark = Mark()
+            let outcome = await SampleLibrarySeeder.seedIfNeeded(
+                session: session, book: .encryptionExplained, storeVariant: .dev,
+                loadMark: mark.load, saveMark: mark.save)
+            guard case .seeded(let bookID, let chapters) = outcome else {
+                Issue.record("expected a seed, got \(outcome)")
+                return
+            }
+            #expect(chapters == 8)
+            let manifest = try SampleLibrarySeeder.manifest(for: .encryptionExplained)
+            #expect(manifest.bookName == SampleLibraryEncryptionBook.name)
+            let verdicts = try await db.read { db -> [(String, Bool)] in
+                try Queries.assembleReading(db, readingID: bookID).map { entry in
+                    let title = entry.title ?? ""
+                    let text = try Queries.renderedText(db, containerID: entry.postID)
+                    return (title, manifest.isPristine(title: title, renderedText: text))
+                }
+            }
+            #expect(verdicts.count == 9, "eight chapters plus the front matter")
+            for (title, pristine) in verdicts {
+                #expect(pristine, "a freshly seeded \"\(title)\" must read as pristine")
+            }
+        }
+    }
 }

@@ -48,4 +48,24 @@ struct SampleLibraryDedupeFactsTests {
         #expect(manifest.isPristine(title: "t", renderedText: sample))
         #expect(manifest.noteHashes["t"] == facts.hash(sample))
     }
+
+    // MARK: - pre-13x 5a: the facts as a LIST — both seeded books
+
+    /// `SyncSession.configure` hands the engine EVERY seeded book's facts,
+    /// in seeding order: Sherlock's first (byte-identical to the single
+    /// facts above), *Encryption Explained*'s second, carrying ITS reserved
+    /// identities and ITS bundled manifest under the one shared recipe.
+    @Test func theListCarriesBothBooksInSeedingOrder() throws {
+        let list = SampleLibrarySeeder.allDedupeFacts()
+        #expect(list.count == SampleLibrarySeeder.Book.all.count && list.count == 2)
+        #expect(list[0].bookName == SampleLibrarySeeder.bookName && list[0].tagPath == SampleLibrarySeeder.tagName)
+        #expect(list[1].bookName == SampleLibraryEncryptionBook.name && list[1].tagPath == SampleLibraryEncryptionBook.tagName)
+        let manifest = try SampleLibrarySeeder.manifest(for: .encryptionExplained)
+        #expect(try list[1].loadNoteHashes() == manifest.noteHashes)
+        #expect(manifest.noteHashes.count == 9, "the front matter plus eight chapters")
+        let sample = "Your library is one file."
+        #expect(list[1].hash(sample) == BridgeHash.body(sample))
+        // The two books' names and paths never collide.
+        #expect(list[0].bookName != list[1].bookName && list[0].tagPath != list[1].tagPath)
+    }
 }

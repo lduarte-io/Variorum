@@ -550,15 +550,26 @@ struct SampleLibraryTests {
     /// named after its note, and the facts carry note titles only.)
     @Test("The shipped seed satisfies the sync dedupe's PRISTINE contract — every leg the classifier reads")
     func theShippedSeedSatisfiesTheDedupesPristineContract() async throws {
+        try await expectPristineContract(book: .sherlock)
+    }
+
+    /// pre-13x 5a: the SECOND seeded book (*Encryption Explained*) satisfies
+    /// the same contract — its facts are the list's second entry.
+    @Test("Encryption Explained's seed satisfies the sync dedupe's PRISTINE contract too")
+    func theEncryptionBookSeedSatisfiesTheDedupesPristineContract() async throws {
+        try await expectPristineContract(book: .encryptionExplained)
+    }
+
+    private func expectPristineContract(book: SampleLibrarySeeder.Book) async throws {
         try await withSampleWorld { session, db in
             let mark = Mark()
             let outcome = await SampleLibrarySeeder.seedIfNeeded(
-                session: session, loadMark: mark.load, saveMark: mark.save)
+                session: session, book: book, loadMark: mark.load, saveMark: mark.save)
             guard case .seeded(let bookID, _) = outcome else {
                 Issue.record("expected a seed, got \(outcome)")
                 return
             }
-            let facts = SampleLibrarySeeder.dedupeFacts()
+            let facts = SampleLibrarySeeder.dedupeFacts(for: book)
             let manifest = try facts.loadNoteHashes()
 
             try await db.read { db in
@@ -693,6 +704,154 @@ struct SampleLibraryTests {
                 }
                 #expect(titles.count == manifest.count)
             }
+        }
+    }
+}
+
+
+// MARK: - pre-13x 5a: the SECOND seeded book — Encryption Explained (copy §7b)
+
+/// *Encryption Explained* rides the seeder generalized to a per-book
+/// description (the postures design §1.22 / §8): one note per chapter in
+/// Chapter 1 → 8 order, the front-matter note the register rule's
+/// definitions, its own reserved name and tag, its OWN defaults mark (so an
+/// existing store whose Sherlock mark is set still seeds this book), the
+/// same resumable seed, the same manifest recipe — and Sherlock's every
+/// value unchanged (every pin above rides unmodified).
+@MainActor
+@Suite("The second seeded book — Encryption Explained (pre-13x 5a)")
+struct EncryptionExplainedSeedTests {
+    @Test("The bundled text is the eight chapters of copy §7b, headed by their chapter titles")
+    func bundledTextIsTheEightChapters() throws {
+        let chapters = try SampleLibrarySeeder.loadStories(for: .encryptionExplained)
+        #expect(chapters.count == 8)
+        #expect(chapters.first?.title == "Chapter 1 — What is encrypted, and with what")
+        #expect(chapters.last?.title == "Chapter 8 — What we can and cannot do for you")
+        #expect(chapters[0].text.hasPrefix("Your library is one file."))
+        // Every chapter paragraph-segments into more than one block.
+        for chapter in chapters {
+            #expect(SegmentationRules.bulkSegments(chapter.text, mode: .paragraph).count >= 2, Comment(rawValue: chapter.title))
+        }
+    }
+
+    @Test("The seed mints the book: eight chapter notes plus the front matter, one chapter each, tagged")
+    func seedMintsTheBook() async throws {
+        try await withSampleWorld { session, db in
+            let mark = Mark()
+            let outcome = await SampleLibrarySeeder.seedIfNeeded(
+                session: session, book: .encryptionExplained, loadMark: mark.load, saveMark: mark.save)
+            guard case .seeded(let bookID, let chapters) = outcome else {
+                Issue.record("expected a seed, got \(outcome)")
+                return
+            }
+            #expect(chapters == 8)
+            #expect(mark.value)
+            try await db.read { db in
+                let book = try #require(try Queries.reading(db, id: bookID))
+                #expect(book.name == SampleLibraryEncryptionBook.name && book.kind == .curated)
+                let sections = try Queries.readingSections(db, readingID: bookID)
+                #expect(sections.count == 9)
+                #expect(sections.first?.name == SampleLibraryEncryptionBook.frontMatterChapter)
+                let entries = try Queries.assembleReading(db, readingID: bookID)
+                #expect(entries.count == 9)
+                #expect(entries.first?.title == SampleLibraryEncryptionBook.frontMatterTitle)
+                #expect(entries[1].title == "Chapter 1 — What is encrypted, and with what")
+                #expect(Set(entries.compactMap(\.sectionPath)).count == 9)
+                let tag = try #require(try Queries.allTags(db).first { $0.path == SampleLibraryEncryptionBook.tagName })
+                #expect(try Queries.everythingTagged(db, tagID: tag.id).postIDs.count == 9)
+                // The Pool stays blank: every note is a member.
+                #expect(try Queries.poolPosts(db, limit: 100).isEmpty)
+                // The book is not an 1892 text: stamped on the ambient clock.
+                #expect(book.createdAt != SampleLibrarySeeder.publicationDate)
+            }
+        }
+    }
+
+    /// The load-bearing pin (the phone's `theManifestMatchesWhatTheSeedActuallyStores`,
+    /// for the second book): the manifest hashes the bundled source; the
+    /// dedupe hashes what the STORE holds; they must agree note by note.
+    @Test("The manifest matches what the seed actually stores, note by note")
+    func theManifestMatchesWhatTheSeedStores() async throws {
+        try await withSampleWorld { session, db in
+            let mark = Mark()
+            let outcome = await SampleLibrarySeeder.seedIfNeeded(
+                session: session, book: .encryptionExplained, loadMark: mark.load, saveMark: mark.save)
+            guard case .seeded(let bookID, _) = outcome else {
+                Issue.record("expected a seed, got \(outcome)")
+                return
+            }
+            let manifest = try SampleLibrarySeeder.manifest(for: .encryptionExplained)
+            #expect(manifest.bookName == SampleLibraryEncryptionBook.name)
+            #expect(manifest.tagName == SampleLibraryEncryptionBook.tagName)
+            #expect(manifest.titles.count == 9)
+            let verdicts = try await db.read { db -> [(String, Bool)] in
+                try Queries.assembleReading(db, readingID: bookID).map { entry in
+                    let title = entry.title ?? ""
+                    let text = try Queries.renderedText(db, containerID: entry.postID)
+                    return (title, manifest.isPristine(title: title, renderedText: text))
+                }
+            }
+            #expect(verdicts.count == 9)
+            for (title, pristine) in verdicts {
+                #expect(pristine, "a freshly seeded \"\(title)\" must read as pristine")
+            }
+        }
+    }
+
+    @Test("Its own mark: a store whose Sherlock mark is set still seeds this book, and only it")
+    func theMarksAreIndependent() async throws {
+        try await withSampleWorld { session, db in
+            let variant = AppDatabase.StoreVariant.real.rawValue
+            #expect(SampleLibrarySeeder.seededDefaultsKey(for: .real) == "SampleLibrarySeeded.\(variant)",
+                    "Sherlock's key is UNCHANGED — an existing store's mark still stands")
+            #expect(SampleLibrarySeeder.seededDefaultsKey(for: .real, book: .encryptionExplained)
+                    == "SampleLibrarySeeded.\(variant).encryption-explained")
+            // An existing store: Sherlock marked (seeded in an earlier build).
+            let sherlockMark = Mark()
+            sherlockMark.value = true
+            let encryptionMark = Mark()
+            for book in SampleLibrarySeeder.Book.all {
+                let mark = book == .sherlock ? sherlockMark : encryptionMark
+                _ = await SampleLibrarySeeder.seedIfNeeded(
+                    session: session, book: book, loadMark: mark.load, saveMark: mark.save)
+            }
+            try await db.read { db in
+                let names = try Queries.readings(db).map(\.name)
+                #expect(!names.contains(SampleLibrarySeeder.bookName), "Sherlock's mark short-circuits")
+                #expect(names.contains(SampleLibraryEncryptionBook.name), "the new book seeds at the next occasion")
+            }
+            #expect(encryptionMark.value)
+        }
+    }
+
+    @Test("Help ▸ Restore for this book re-members the surviving chapters instead of minting twins")
+    func theRestoreRoadReMembersSurvivingChapters() async throws {
+        try await withSampleWorld { session, db in
+            let mark = Mark()
+            let outcome = await SampleLibrarySeeder.seedIfNeeded(
+                session: session, book: .encryptionExplained, loadMark: mark.load, saveMark: mark.save)
+            guard case .seeded(let bookID, _) = outcome else {
+                Issue.record("expected a seed, got \(outcome)")
+                return
+            }
+            let original = try await db.read { db in
+                Set(try Queries.assembleReading(db, readingID: bookID).map(\.postID))
+            }
+            try await session.runner.run { ops in try ops.deleteReading(bookID) }
+            let chapters = try SampleLibrarySeeder.loadStories(for: .encryptionExplained)
+            let existing = try await db.read { db in try SampleLibrarySeeder.discover(db, book: .encryptionExplained) }
+            #expect(existing.bookID == nil && existing.strayNoteIDsByTitle.count == 9)
+            let restored = try await SampleLibrarySeeder.seed(
+                session: session, book: .encryptionExplained, stories: chapters, existing: existing)
+            guard case .seeded(let newBookID, let cameBack) = restored else {
+                Issue.record("expected a restore, got \(restored)")
+                return
+            }
+            #expect(cameBack == 8)
+            let members = try await db.read { db in
+                Set(try Queries.assembleReading(db, readingID: newBookID).map(\.postID))
+            }
+            #expect(members == original, "the SAME notes are the book's members again")
         }
     }
 }

@@ -730,3 +730,153 @@ struct SampleLibraryDedupeRepairTests {
         #expect(try liveCopyIDs(a).count == 2)
     }
 }
+
+// MARK: - pre-13x 5a: the facts as a LIST — a second seeded book (*Encryption Explained*)
+
+/// pre-13x 5a (the batch's one `Sync/` touch, ruled): the engine takes the
+/// dedupe facts as a LIST, one entry per seeded book, and the pass runs per
+/// entry exactly as it ran for one. Two seeded copies of the SECOND book
+/// meeting via sync converge by the same rules — both pristine → the
+/// smaller id; one edited → the edited survives — while a lone copy of the
+/// FIRST book beside them is untouched. RED-ON-OLD: with the single-facts
+/// engine (Sherlock's facts alone) the second book's copies never met a
+/// pass and both stood forever.
+@Suite("Sample-library dedupe — the facts list (pre-13x 5a)")
+struct SampleLibraryDedupeListTests {
+    static let encryptionBookName = "Encryption Explained"
+    static let encryptionTagPath = "encryption explained"
+    static let encryptionNotes: [(title: String, text: String)] = [
+        ("About this book", "Plain credential words, each defined the first time it appears."),
+        ("Chapter 1 — What is encrypted, and with what",
+         "Your library is one file.\n\nSync is end-to-end encrypted in both modes."),
+    ]
+
+    static func encryptionFacts() -> SampleLibraryDedupeFacts {
+        let hashes = Dictionary(
+            uniqueKeysWithValues: encryptionNotes.map { ($0.title, BridgeHash.body($0.text)) })
+        return SampleLibraryDedupeFacts(
+            bookName: encryptionBookName, tagPath: encryptionTagPath,
+            loadNoteHashes: { hashes }, hash: BridgeHash.body(_:))
+    }
+
+    private func pairWithBothBooksFacts() throws -> (a: SyncClient, b: SyncClient, server: FakeSyncServer) {
+        let (a, b, server) = try furniturePair()
+        for client in [a, b] {
+            client.sampleLibraryFacts = SampleLibraryDedupeRepairTests.facts()
+            client.additionalSampleLibraryFacts = [Self.encryptionFacts()]
+        }
+        return (a, b, server)
+    }
+
+    /// Mirrors `SampleLibrarySeeder.seed`'s shape for the second book.
+    @discardableResult
+    private func seedEncryptionCopy(_ client: SyncClient) throws -> (bookID: String, postIDs: [String: String]) {
+        try client.with { ops, _ in
+            let book = try ops.createReading(name: Self.encryptionBookName, kind: .curated, profile: "book")
+            let tag = try ops.createTag(name: Self.encryptionTagPath)
+            var postIDs: [String: String] = [:]
+            for note in Self.encryptionNotes {
+                let section = try ops.createSection(in: book.id, name: note.title)
+                let minted = try ops.importPost(title: note.title, text: note.text, undoLabel: "Sample Library")
+                _ = try ops.addPostToReading(minted.container.id, to: book.id)
+                try ops.assignPostToSection(minted.container.id, in: book.id, section: section.id)
+                _ = try ops.applyTag(tag.id, toPost: minted.container.id)
+                postIDs[note.title] = minted.container.id
+            }
+            return (book.id, postIDs)
+        }
+    }
+
+    /// A lone Sherlock copy (the FIRST book's facts) beside the second book.
+    @discardableResult
+    private func seedSherlockCopy(_ client: SyncClient) throws -> String {
+        try client.with { ops, _ in
+            let book = try ops.createReading(
+                name: SampleLibraryDedupeRepairTests.bookName, kind: .curated, profile: "book")
+            let tag = try ops.createTag(name: SampleLibraryDedupeRepairTests.tagPath)
+            for note in SampleLibraryDedupeRepairTests.notes {
+                let section = try ops.createSection(in: book.id, name: note.title)
+                let minted = try ops.importPost(title: note.title, text: note.text, undoLabel: "Sample Library")
+                _ = try ops.addPostToReading(minted.container.id, to: book.id)
+                try ops.assignPostToSection(minted.container.id, in: book.id, section: section.id)
+                _ = try ops.applyTag(tag.id, toPost: minted.container.id)
+            }
+            return book.id
+        }
+    }
+
+    private func firstVariantID(_ client: SyncClient, postID: String) throws -> String {
+        try client.db.read { db in
+            try String.fetchOne(
+                db,
+                sql: """
+                    SELECT v.id FROM variant v
+                    JOIN container_block cb ON cb.block_id = v.block_id
+                    WHERE cb.container_id = ? AND cb.deleted_at IS NULL AND v.deleted_at IS NULL
+                    ORDER BY cb.position, v.id LIMIT 1
+                    """,
+                arguments: [postID])!
+        }
+    }
+
+    private func liveCopyIDs(_ client: SyncClient, named name: String) throws -> [String] {
+        try client.db.read { db in
+            try String.fetchAll(
+                db, sql: "SELECT id FROM reading WHERE name = ? AND deleted_at IS NULL ORDER BY id",
+                arguments: [name])
+        }
+    }
+
+    @Test func twoPristineCopiesOfTheSecondBookConvergeToTheSmallerIDAndTheFirstBookStands() async throws {
+        let (a, b, server) = try pairWithBothBooksFacts()
+        let sherlock = try seedSherlockCopy(a)
+        let copyA = try seedEncryptionCopy(a)
+        let copyB = try seedEncryptionCopy(b)
+
+        try await a.push()
+        try await b.push()
+        // The arrival batch defers (the book arrived this batch); the empty
+        // window then runs the pass — the one-shot marker's road, unchanged.
+        try await b.pull()
+        #expect(try liveCopyIDs(b, named: Self.encryptionBookName) == [copyA.bookID, copyB.bookID].sorted())
+        try await b.pull()
+        #expect(try liveCopyIDs(b, named: Self.encryptionBookName) == [copyA.bookID],
+                "both pristine → the smaller id keeps; the other's family retires")
+        for (_, postID) in copyB.postIDs {
+            #expect(try b.db.deletedAt("container", postID) != nil)
+            #expect(try b.outboxContains("container", postID))
+        }
+        try await a.pull()
+        try await assertFurnitureConverged(a, b, server)
+        for client in [a, b] {
+            #expect(try liveCopyIDs(client, named: Self.encryptionBookName) == [copyA.bookID])
+            #expect(try liveCopyIDs(client, named: SampleLibraryDedupeRepairTests.bookName) == [sherlock],
+                    "the lone Sherlock copy is untouched by the second book's pass")
+        }
+        let settled = try a.syncedDump()
+        try await syncToQuiescence(a, b, server: server)
+        #expect(try a.syncedDump() == settled)
+    }
+
+    @Test func anEditedCopyOfTheSecondBookSurvivesAndThePristineOneRetires() async throws {
+        let (a, b, server) = try pairWithBothBooksFacts()
+        let copyA = try seedEncryptionCopy(a)
+        let copyB = try seedEncryptionCopy(b)
+        // B (the larger ids) rewrites a chapter — the EDITED copy must keep.
+        let editedPost = copyB.postIDs["Chapter 1 — What is encrypted, and with what"]!
+        let variant = try firstVariantID(b, postID: editedPost)
+        try b.with { ops, _ in
+            try ops.autosave(variant, text: "Rewritten in her own words.", charDelta: 20)
+        }
+        try await a.push()
+        try await b.push()
+        try await b.pull()
+        try await a.pull()
+        try await assertFurnitureConverged(a, b, server)
+        for client in [a, b] {
+            #expect(try liveCopyIDs(client, named: Self.encryptionBookName) == [copyB.bookID],
+                    "the EDITED copy is kept; the pristine one is retired")
+            #expect(try client.db.deletedAt("reading", copyA.bookID) != nil)
+        }
+    }
+}

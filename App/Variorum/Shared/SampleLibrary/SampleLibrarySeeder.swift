@@ -104,6 +104,19 @@
 //  library heals itself at the next occasion instead of standing there
 //  forever.
 //
+//  ── TWO BOOKS, ONE SEEDER (pre-13x batch 5a — design §1.22, copy §7b) ──
+//  *Encryption Explained* — the full story of the two postures, every key
+//  and where it lives — is a SECOND seeded book in Home beside Sherlock and
+//  the tutorial, restorable from Help like both, and a member of the seeded-
+//  book dedupe facts so two devices never seed two of it. It rides this
+//  seeder GENERALIZED to a per-book description (`Book`): Sherlock's values
+//  are `.sherlock` (every reserved identity keeps its name and its value,
+//  so the Mac and phone pins ride unmodified), the encryption book's are
+//  `.encryptionExplained`. The whole machinery — the delimiter parse, the
+//  manifest, the facts, discovery, the resumable seed, the marks — takes
+//  the book; the callers seed both, and the dedupe engine takes the facts
+//  as a LIST (the batch's one `Sync/` touch, ruled).
+//
 //  ── P2, AND THE FIRST-LAUNCH CRITICAL PATH ────────────────────────────
 //  Every write goes through `session.runner` (the serial off-main executor)
 //  and every story is its OWN runner turn, so autosave and anything else
@@ -172,6 +185,71 @@ enum SampleLibrarySeeder {
     /// seed runs on the quiet facade (no undo stack) — the `TutorialSeeder`
     /// and `MobileStarterJournal` precedent.
     nonisolated static let undoLabel = "Sample Library"
+
+    // MARK: - The per-book description (pre-13x 5a — two books, one seeder)
+
+    /// Everything that differs between the seeded books, and nothing that
+    /// does not: the reserved identities discovery finds its objects by, the
+    /// bundled resource, the front-matter note, the defaults mark, and the
+    /// clock the mint runs under. `Equatable` so a pin can name one.
+    nonisolated struct Book: Sendable, Equatable {
+        /// The book's reserved name — EXACT, case-sensitive (discovery's rule;
+        /// a rename is engagement and the copy is hers from then on).
+        var name: String
+        /// The reserved tag path, applied to every note the seed mints.
+        var tagName: String
+        /// The front-matter chapter's name and its note's title + text.
+        var frontMatterChapter: String
+        var frontMatterTitle: String
+        var frontMatterText: String
+        /// The bundled `.txt` resource (`%%% <title>` lines separate the
+        /// notes and are never stored).
+        var resourceName: String
+        /// The `reading.profile` the book is minted with.
+        var profile: String
+        /// The defaults mark's suffix — nil keeps the ORIGINAL key
+        /// (`SampleLibrarySeeded.<variant>`), so an existing store's Sherlock
+        /// mark is honoured and only the new book seeds at the next occasion.
+        var markSuffix: String?
+        /// The clock every write of the seed carries — nil = the ambient
+        /// clock (the tutorial's shape: a book about THIS build lands now).
+        var clock: Date?
+
+        /// *The Adventures of Sherlock Holmes* — pre-13u Act 3's book, its
+        /// values exactly as they shipped.
+        static let sherlock = Book(
+            name: SampleLibrarySeeder.bookName,
+            tagName: SampleLibrarySeeder.tagName,
+            frontMatterChapter: SampleLibrarySeeder.frontMatterChapter,
+            frontMatterTitle: SampleLibrarySeeder.frontMatterTitle,
+            frontMatterText: SampleLibrarySeeder.attributionText,
+            resourceName: SampleLibrarySeeder.resourceName,
+            profile: "book",
+            markSuffix: nil,
+            clock: SampleLibrarySeeder.publicationDate)
+
+        /// *Encryption Explained* — the postures design's second seeded
+        /// book (§1.22; copy §7b VERBATIM in `EncryptionExplained.txt`): one
+        /// note per chapter in Chapter 1 → 8 order, the chapter heading its
+        /// title, the front-matter note the register rule's definitions.
+        /// Its name is the copy's own quoted name (the tutorial's door
+        /// sentence names it); its tag path a top-level sibling of Sherlock's
+        /// and the tutorial's. Stamped at seed time — a book about this
+        /// build is not an 1892 text.
+        static let encryptionExplained = Book(
+            name: SampleLibraryEncryptionBook.name,
+            tagName: SampleLibraryEncryptionBook.tagName,
+            frontMatterChapter: SampleLibraryEncryptionBook.frontMatterChapter,
+            frontMatterTitle: SampleLibraryEncryptionBook.frontMatterTitle,
+            frontMatterText: SampleLibraryEncryptionBook.aboutThisBook,
+            resourceName: SampleLibraryEncryptionBook.resourceName,
+            profile: "book",
+            markSuffix: SampleLibraryEncryptionBook.markSuffix,
+            clock: nil)
+
+        /// Every seeded book, in seeding order.
+        static let all: [Book] = [.sherlock, .encryptionExplained]
+    }
 
     /// **The seed's OWN segmentation, named rather than inherited** (the
     /// pre-13u midpoint review's M1). The stories are hard-unwrapped into
@@ -259,10 +337,11 @@ enum SampleLibrarySeeder {
     }
 
     /// Parses the bundled text. `nonisolated` so callers can run it off the
-    /// main actor — it is ~0.5 MB of string work.
-    nonisolated static func loadStories() throws -> [Story] {
+    /// main actor — it is ~0.5 MB of string work for Sherlock. The
+    /// parameterless form is Sherlock's (every pre-5a caller and pin).
+    nonisolated static func loadStories(for book: Book = .sherlock) throws -> [Story] {
         let bundle = Bundle(for: SampleLibraryBundleAnchor.self)
-        guard let url = bundle.url(forResource: resourceName, withExtension: "txt"),
+        guard let url = bundle.url(forResource: book.resourceName, withExtension: "txt"),
               let raw = try? String(contentsOf: url, encoding: .utf8)
         else { throw LoadError.resourceMissing }
         let stories = parse(raw)
@@ -330,18 +409,18 @@ enum SampleLibrarySeeder {
     /// who left `default_segmentation` alone.
     ///
     /// Pure, so a pin can drive it with a fixture.
-    nonisolated static func manifest(stories: [Story]) -> SampleLibraryManifest {
-        var hashes = [frontMatterTitle: BridgeHash.body(attributionText)]
+    nonisolated static func manifest(book: Book = .sherlock, stories: [Story]) -> SampleLibraryManifest {
+        var hashes = [book.frontMatterTitle: BridgeHash.body(book.frontMatterText)]
         for story in stories { hashes[story.title] = BridgeHash.body(story.text) }
         return SampleLibraryManifest(
-            bookName: bookName, tagName: tagName, noteHashes: hashes)
+            bookName: book.name, tagName: book.tagName, noteHashes: hashes)
     }
 
     /// The manifest for what this build actually ships. ~0.5 MB of string
     /// work plus thirteen hashes — call it off the main actor, as the seed
-    /// does its own parse.
-    nonisolated static func manifest() throws -> SampleLibraryManifest {
-        manifest(stories: try loadStories())
+    /// does its own parse. The parameterless form is Sherlock's.
+    nonisolated static func manifest(for book: Book = .sherlock) throws -> SampleLibraryManifest {
+        manifest(book: book, stories: try loadStories(for: book))
     }
 
     /// **The dedupe repair's injected facts** (pre-13u Act 0, R-pre13u-8):
@@ -354,12 +433,19 @@ enum SampleLibrarySeeder {
     /// recipe rides along as the same function the manifest's own
     /// `isPristine` uses, so the pair can never disagree
     /// (`SampleLibraryDedupeFactsTests` pins the agreement).
-    nonisolated static func dedupeFacts() -> SampleLibraryDedupeFacts {
+    nonisolated static func dedupeFacts(for book: Book = .sherlock) -> SampleLibraryDedupeFacts {
         SampleLibraryDedupeFacts(
-            bookName: bookName,
-            tagPath: tagName,
-            loadNoteHashes: { try manifest().noteHashes },
+            bookName: book.name,
+            tagPath: book.tagName,
+            loadNoteHashes: { try manifest(for: book).noteHashes },
             hash: BridgeHash.body(_:))
+    }
+
+    /// Every seeded book's facts, in seeding order — what `SyncSession.configure`
+    /// hands the engine (pre-13x 5a: the facts became a LIST; the pass runs
+    /// per entry exactly as it ran for one).
+    nonisolated static func allDedupeFacts() -> [SampleLibraryDedupeFacts] {
+        Book.all.map { dedupeFacts(for: $0) }
     }
 
     // MARK: - Discovery (the idempotence guard)
@@ -405,13 +491,13 @@ enum SampleLibrarySeeder {
         }
     }
 
-    nonisolated static func discover(_ db: Database) throws -> Existing {
+    nonisolated static func discover(_ db: Database, book: Book = .sherlock) throws -> Existing {
         var existing = Existing()
         existing.bookID = try Queries.readings(db)
-            .first { $0.name == bookName && $0.deletedAt == nil }?.id
+            .first { $0.name == book.name && $0.deletedAt == nil }?.id
         // The EXACT tag, never the subtree (the tutorial's MINOR-D3 rule):
         // a reader's own `sherlock holmes/…` child is hers.
-        existing.tagID = try Queries.allTags(db).first { $0.path == tagName }?.id
+        existing.tagID = try Queries.allTags(db).first { $0.path == book.tagName }?.id
         if let bookID = existing.bookID {
             existing.presentTitles = Set(
                 try Queries.assembleReading(db, readingID: bookID)
@@ -444,9 +530,11 @@ enum SampleLibrarySeeder {
     /// Debug and Release share a defaults domain, so an unscoped key would
     /// let a dev-store seed suppress the real store's.
     nonisolated static func seededDefaultsKey(
-        for variant: AppDatabase.StoreVariant
+        for variant: AppDatabase.StoreVariant, book: Book = .sherlock
     ) -> String {
-        "SampleLibrarySeeded.\(variant.rawValue)"
+        let base = "SampleLibrarySeeded.\(variant.rawValue)"
+        guard let suffix = book.markSuffix else { return base }
+        return base + "." + suffix
     }
 
     /// What the seed needs to know about sync, and nothing more — the
@@ -508,6 +596,7 @@ enum SampleLibrarySeeder {
     @discardableResult
     static func seedIfNeeded(
         session: AppSession,
+        book: Book = .sherlock,
         storeVariant: AppDatabase.StoreVariant = .real,
         gate: SyncGate = .unowned,
         firstRoundWait: Duration? = nil,
@@ -517,15 +606,16 @@ enum SampleLibrarySeeder {
         pacing: Pacing? = nil
     ) async -> Outcome {
         let outcome = await perform(
-            session: session, storeVariant: storeVariant, gate: gate,
+            session: session, book: book, storeVariant: storeVariant, gate: gate,
             firstRoundWait: firstRoundWait, pollInterval: pollInterval,
             loadMark: loadMark, saveMark: saveMark, pacing: pacing)
-        log.notice("sample library: \(String(describing: outcome), privacy: .public)")
+        log.notice("sample library (\(book.name, privacy: .public)): \(String(describing: outcome), privacy: .public)")
         return outcome
     }
 
     private static func perform(
         session: AppSession,
+        book: Book,
         storeVariant: AppDatabase.StoreVariant,
         gate: SyncGate,
         firstRoundWait: Duration?,
@@ -534,7 +624,7 @@ enum SampleLibrarySeeder {
         saveMark: ((Bool) -> Void)?,
         pacing: Pacing?
     ) async -> Outcome {
-        let key = seededDefaultsKey(for: storeVariant)
+        let key = seededDefaultsKey(for: storeVariant, book: book)
         let load = loadMark ?? { UserDefaults.standard.bool(forKey: key) }
         let save = saveMark ?? { UserDefaults.standard.set($0, forKey: key) }
 
@@ -543,11 +633,11 @@ enum SampleLibrarySeeder {
         do {
             // Off the main thread: half a megabyte of string work.
             let stories = try await Task.detached(priority: .utility) {
-                try loadStories()
+                try loadStories(for: book)
             }.value
             let titles = stories.map(\.title)
 
-            var existing = try await session.database.read { db in try discover(db) }
+            var existing = try await session.database.read { db in try discover(db, book: book) }
             if existing.isComplete(for: titles) {
                 save(true)
                 return .alreadyPresent
@@ -560,7 +650,7 @@ enum SampleLibrarySeeder {
                     poll: pollInterval)
                 else { return .awaitingFirstSync }
                 // Whatever the account holds has landed. Ask again.
-                existing = try await session.database.read { db in try discover(db) }
+                existing = try await session.database.read { db in try discover(db, book: book) }
                 if existing.isComplete(for: titles) {
                     save(true)
                     return .alreadyPresent
@@ -568,7 +658,7 @@ enum SampleLibrarySeeder {
             }
 
             let seeded = try await seed(
-                session: session, stories: stories, existing: existing, pacing: pacing)
+                session: session, book: book, stories: stories, existing: existing, pacing: pacing)
             save(true)
             return seeded
         } catch {
@@ -611,32 +701,34 @@ enum SampleLibrarySeeder {
     /// moves either way.
     @discardableResult
     static func seed(
-        session: AppSession, stories: [Story], existing: Existing,
+        session: AppSession, book: Book = .sherlock, stories: [Story], existing: Existing,
         pacing: Pacing? = nil
     ) async throws -> Outcome {
-        let bookName = Self.bookName
-        let tagName = Self.tagName
-        let frontChapter = Self.frontMatterChapter
-        let frontTitle = Self.frontMatterTitle
-        let frontText = Self.attributionText
+        let bookName = book.name
+        let tagName = book.tagName
+        let frontChapter = book.frontMatterChapter
+        let frontTitle = book.frontMatterTitle
+        let frontText = book.frontMatterText
+        let profile = book.profile
         let label = Self.undoLabel
         let present = existing.presentTitles
         let chapters = existing.chapterIDsByName
         let strays = existing.strayNoteIDsByTitle
 
-        let clock = Self.publicationDate
+        // The book's own clock (Sherlock: 1892 — m6), or the ambient one.
+        let clock = book.clock
 
         // Turn 1: the book, the tag, and the front matter.
         await pacing?()
         let skeleton = try await session.runner.run { _ -> (book: String, tag: String) in
-            try withDependencies { $0.date = .constant(clock) } operation: {
+            try Self.underClock(clock) {
                 let quiet = Operations(undoStack: nil)
                 let bookID: String
                 if let known = existing.bookID {
                     bookID = known
                 } else {
                     bookID = try quiet.createReading(
-                        name: bookName, kind: .curated, profile: "book").id
+                        name: bookName, kind: .curated, profile: profile).id
                 }
                 let tagID = try existing.tagID ?? quiet.createTag(name: tagName).id
                 if !present.contains(frontTitle) {
@@ -661,7 +753,7 @@ enum SampleLibrarySeeder {
             let tagID = skeleton.tag
             let stray = strays[story.title]
             try await session.runner.run { _ in
-                try withDependencies { $0.date = .constant(clock) } operation: {
+                try Self.underClock(clock) {
                     let quiet = Operations(undoStack: nil)
                     // m5, again: a run cancelled between `createSection` and
                     // `importPost` left this story's chapter standing empty.
@@ -675,6 +767,16 @@ enum SampleLibrarySeeder {
             minted += 1
         }
         return .seeded(readingID: skeleton.book, stories: minted)
+    }
+
+    /// The seed's clock scope: a book with a clock of its own mints every
+    /// row under it (Sherlock's m6); a book without one mints on the
+    /// ambient clock (the tutorial's shape).
+    nonisolated private static func underClock<T>(
+        _ clock: Date?, _ body: () throws -> T
+    ) rethrows -> T {
+        guard let clock else { return try body() }
+        return try withDependencies({ $0.date = .constant(clock) }, operation: body)
     }
 
     /// Puts one shipped note into the book: a surviving tagged note is
