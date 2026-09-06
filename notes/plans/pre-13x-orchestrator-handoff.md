@@ -141,7 +141,7 @@ orchestrator."*
   LANDED THE PROOF HASH (`hash_landed = true`, revision 3 unchanged, no rotation, no Apple-held copy, her Mac's cursor
   seen 01:31:12Z). **The one-time confirm sheet did NOT appear** — expected on reflection: its job is to land the
   passphrase copy, and her key file has carried one since 13p; recorded as a copy-and-flow note for the ladder (the
-  sheet's gate should say so, or the descriptor half should land without a sheet). The sanity check: `<her verdict>`. **The DEFERRED proof-required probe — DONE after her hash landed:** as role `authenticated` with
+  sheet's gate should say so, or the descriptor half should land without a sheet). The sanity check: *"That is the right recovery phrase — it unlocked this account's vault. Nothing was changed. The key derivation took 0.17 s on this device."* — CLOSED. **The DEFERRED proof-required probe — DONE after her hash landed:** as role `authenticated` with
   her claims, the right key id and a WRONG proof, `sync_horizon` → **`P0001: VARIORUM_KEY_PROOF_REQUIRED`** (raised in
   `sync_key_proof_check` via `sync_key_gate`); her landed hash unchanged (`bbc279ed…`, revision 3). The mirror side
   of the window is COMPLETE.
@@ -150,8 +150,23 @@ orchestrator."*
   installed by `xcrun devicectl device install app` OVER the dev build (same bundle id); the container listed after the
   install — the real store's `Variorum/` folder + `variorum-keys.json` (79 B, format 1) exactly as before, and the dev
   build's `Variorum-dev/` folder still present (its deletion is NOT possible by `devicectl` — it has no delete verb, and an uninstall would take the whole container with her real store; the folder LINGERS, inert — the Release build never reads the dev scope and the dev key file holds only wrapped copies — recorded here and in the checklist; a future dev launch on the phone meets it under 2c's fence and starts signed out). **Her
-  first ready: PENDING** — the migration (Face ID custody), sign-in, the re-enrollment by passphrase (corner 47's
-  consequence — expected), the move to Castle, her first round; `device_cursor` then carries both devices.
+  first ready — RAN, and FOUND A GAP (the window's one real finding):** she opened the phone → NO Face ID, the library
+  instantly, *sync locked* → typed the passphrase → sync open → STILL no Face ID after a full quit. The phone's real
+  key file afterwards (`variorum-keys-e6194a17c1983ca5.json`, 578 B, format 2): `apple` + `appleKeyID` + `passphrase`
+  + storeID + fingerprint — NO `master`, NO `vaultCorpusKeyID`. So the phone derived STANDARD and 2a's Apple arm
+  LANDED an iCloud copy of her real phone library key (into the key file and an iCloud Keychain item under the real
+  scope) — Standard's shape on a Castle account's library. Cause: the 13p phone key file held NO secrets (79 B:
+  formatVersion + storeID); `Posture.derive`'s order is legacy mode → the vault's word → the key file; at the
+  migration's instant the vault's word was unavailable (the session's scope migration / the network had not answered)
+  and the key-file rule for a secret-less file reads Standard ("a library nobody can re-open by any word must not
+  demand one" — 2a's safety arm, adopted at 2a's adjudication without seeing that an ENROLLED library can be
+  secret-less: her phone exactly). The Standard arm is WRITE-ACTIVE on that reading. The design's letter says an enrolled
+  library must agree with the vault; it never says what to do while the vault cannot be read — A GAP IN THE LETTER →
+  HER RULING (§4's refinement). The follow did not repair it later because 2c's follow keys on the corpus key id (never
+  rotated here), not on a custody-vs-account POSTURE mismatch. **Her ruling and the phone's repair: PENDING (below).**
+  The Mac's `vaultKDF` also did NOT land at the relaunch ("next online ready" unmet — a small defect for the ladder).
+  The sanity check on the Mac: *"That is the right recovery phrase — it unlocked this account's vault. Nothing was
+  changed."* — the 1b/14c stale-wrap question CLOSED.
 - The drills' real-store legs: PENDING — the switch's real timing `<s>`; the 13p migration drill on a byte-copy; the
   13l restore drill per posture (both need her passphrase).
 - The worktree `~/dev/variorum-phone-q3`: PENDING — removed.
