@@ -132,11 +132,16 @@ orchestrator."*
 - **The Mac — the install DONE 2026-09-06T01:13:40Z:** Release built from the clean worktree `~/dev/variorum-window`
   *[removed for publication]*
   `/Applications/Variorum.app` replaced at a zero-instance window (her app quit by her; `pgrep` empty) behind the A1
-  copy above — SHA-256 `fbd3f4a774d92230…` → `683eb304abbf0f8d…`, `codesign --verify --deep --strict` ok. **Her first
-  ready: PENDING** — the migration's legs (`/usr/bin/log show --last 1h --predicate 'subsystem == "io.lduarte.Variorum"
-  AND category == "protection"'` — now at notice level), the keychain prompt `<seen/not seen>`, sign-in, the confirm,
-  the first round landing the hash (`key_proof_hash` non-NULL, revision `<n>`), the sanity check with her twelve
-  words: `<verdict>`; then the DEFERRED proof-required probe (a wrong proof as her session → `VARIORUM_KEY_PROOF_REQUIRED`).
+  copy above — SHA-256 `fbd3f4a774d92230…` → `683eb304abbf0f8d…`, `codesign --verify --deep --strict` ok. **Her first ready — DONE (2026-09-05 19:20 local):** the migration ran on the real store (`854b8c49…`) under
+  biometric, six legs at notice level: `sync custody re-scoped → done (identity from sync_state)` · `no legacy iCloud
+  escrow item` · `dial keys retired to the per-store keys` · `custody already biometric` · `key file gains the master
+  copy + corpus key id (vault descriptor: next online ready)` · `done`; NO keychain prompt seen; the real key file is now
+  format 2, fingerprint-named (`variorum-keys-8e15801e01456477.json`: master · passphrase · recovery · storeID ·
+  vaultCorpusKeyID = her vault's key id; `vaultKDF` lands at the next signed-in ready); she signed in; the first round
+  LANDED THE PROOF HASH (`hash_landed = true`, revision 3 unchanged, no rotation, no Apple-held copy, her Mac's cursor
+  seen 01:31:12Z). **The one-time confirm sheet did NOT appear** — expected on reflection: its job is to land the
+  passphrase copy, and her key file has carried one since 13p; recorded as a copy-and-flow note for the ladder (the
+  sheet's gate should say so, or the descriptor half should land without a sheet). The sanity check: `<her verdict>`.
 - **The phone — the install DONE 2026-09-06 (after the Mac's refresh):** Release built from the same clean worktree
   *[removed for publication]*
   installed by `xcrun devicectl device install app` OVER the dev build (same bundle id); the container listed after the
