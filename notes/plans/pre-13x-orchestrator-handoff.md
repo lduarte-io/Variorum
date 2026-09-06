@@ -137,9 +137,13 @@ orchestrator."*
   AND category == "protection"'` — now at notice level), the keychain prompt `<seen/not seen>`, sign-in, the confirm,
   the first round landing the hash (`key_proof_hash` non-NULL, revision `<n>`), the sanity check with her twelve
   words: `<verdict>`; then the DEFERRED proof-required probe (a wrong proof as her session → `VARIORUM_KEY_PROOF_REQUIRED`).
-- The phone: PENDING — Release built from the same tree, installed by `devicectl` over the dev build; the dev folder
-  deleted from the container; her first ready: the migration, sign-in, the re-enrollment by passphrase (corner 47),
-  the move to Castle (Face ID); her first round; `device_cursor` carries both devices.
+- **The phone — the install DONE 2026-09-06 (after the Mac's refresh):** Release built from the same clean worktree
+  *[removed for publication]*
+  installed by `xcrun devicectl device install app` OVER the dev build (same bundle id); the container listed after the
+  install — the real store's `Variorum/` folder + `variorum-keys.json` (79 B, format 1) exactly as before, and the dev
+  build's `Variorum-dev/` folder still present (its deletion is NOT possible by `devicectl` — it has no delete verb, and an uninstall would take the whole container with her real store; the folder LINGERS, inert — the Release build never reads the dev scope and the dev key file holds only wrapped copies — recorded here and in the checklist; a future dev launch on the phone meets it under 2c's fence and starts signed out). **Her
+  first ready: PENDING** — the migration (Face ID custody), sign-in, the re-enrollment by passphrase (corner 47's
+  consequence — expected), the move to Castle, her first round; `device_cursor` then carries both devices.
 - The drills' real-store legs: PENDING — the switch's real timing `<s>`; the 13p migration drill on a byte-copy; the
   13l restore drill per posture (both need her passphrase).
 - The worktree `~/dev/variorum-phone-q3`: PENDING — removed.
