@@ -173,7 +173,6 @@ struct ProtectionPane: View {
     let services: AppServices?
 
     @State private var setSheetModel: PassphraseSetModel?
-    @State private var resetSheetShown = false
     @State private var reminderCheck: SecretCheckModel?
     /// pre-13x 2b: a switch that did not finish on this device (the marker).
     @State private var pendingSwitch: RotationMarker?
@@ -197,9 +196,6 @@ struct ProtectionPane: View {
         .task { await services?.encryption.refresh() }
         .sheet(item: $setSheetModel) { model in
             PassphraseSetSheet(model: model) { setSheetModel = nil }
-        }
-        .sheet(isPresented: $resetSheetShown) {
-            PassphraseResetSheet(controller: controller) { resetSheetShown = false }
         }
         // pre-13x 2b: THE CEREMONY, held on the controller (it survives the
         // re-key's reopen — this pane does not).
@@ -425,15 +421,22 @@ struct ProtectionPane: View {
                            value: controller.hasPassphraseWrap ? "Set" : "Not set")
             LabeledContent("Twelve words",
                            value: controller.hasRecoveryWrap ? "On file" : "Not saved")
-            HStack {
-                Button(controller.hasPassphraseWrap
-                       ? "Change Passphrase…" : "Set a Passphrase…") {
-                    openSetSheet()
+            // pre-13x 3b (§13): the reset door RETIRED — merged into the
+            // Encryption tab's change-passphrase forgot road; an ENROLLED
+            // library changes its passphrase there (copy §4's home), a
+            // local-only library sets/changes it here.
+            if controller.enrolled, controller.hasPassphraseWrap {
+                Text("Change your passphrase or your twelve words under Account & Encryption.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            } else {
+                HStack {
+                    Button(controller.hasPassphraseWrap
+                           ? "Change Passphrase…" : "Set a Passphrase…") {
+                        openSetSheet()
+                    }
+                    Spacer()
                 }
-                if controller.hasPassphraseWrap {
-                    Button("Forgot It? Reset…") { resetSheetShown = true }
-                }
-                Spacer()
             }
             Text("The passphrase and the twelve words are the ways back into "
                  + "this library when this Mac's Keychain can't help. Nothing "
@@ -488,71 +491,6 @@ struct ProtectionPane: View {
         setSheetModel = PassphraseSetModel(
             controller: controller,
             vaultTie: VaultTie.make(services: services))
-    }
-}
-
-// MARK: - The reset sheet (R13p-9's door — merged into change-passphrase at batch 5)
-
-struct PassphraseResetSheet: View {
-    let controller: ProtectionController
-    var onDone: () -> Void
-
-    @State private var newPassphrase = ""
-    @State private var confirmation = ""
-    @State private var busy = false
-    @State private var error: String?
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text("Reset your encryption passphrase")
-                .font(.title3.weight(.semibold))
-            Text("You don't need the old one — this Mac still holds the key, and "
-                 + "\(ProtectionCopy.biometryName) confirms it's you. The old "
-                 + "passphrase stops working the moment the new one is set.")
-                .font(.callout)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-            PeekableSecretField(label: "New encryption passphrase", text: $newPassphrase)
-                .textFieldStyle(.roundedBorder)
-            PeekableSecretField(label: "Type it again", text: $confirmation)
-                .textFieldStyle(.roundedBorder)
-            if let error {
-                Text(error).font(.callout).alarmVoice()
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            if busy {
-                HStack(spacing: 6) {
-                    ProgressView().controlSize(.small)
-                    Text("Confirming…").font(.caption).foregroundStyle(.secondary)
-                }
-            }
-            HStack {
-                Button("Cancel") { onDone() }
-                Spacer()
-                Button("Reset with \(ProtectionCopy.biometryName)") {
-                    Task { await reset() }
-                }
-                .keyboardShortcut(.defaultAction)
-                .disabled(busy || newPassphrase.isEmpty)
-            }
-        }
-        .padding(24)
-        .frame(width: 440)
-    }
-
-    private func reset() async {
-        error = nil
-        guard newPassphrase == confirmation else {
-            error = "The two entries don't match."
-            return
-        }
-        busy = true
-        defer { busy = false }
-        if let refusal = await controller.resetPassphrase(to: newPassphrase) {
-            error = refusal
-            return
-        }
-        onDone()
     }
 }
 

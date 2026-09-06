@@ -289,10 +289,6 @@ final class ProtectionController {
     /// Wired by AppBootstrap: the lock act (Castle only; the callee
     /// re-checks).
     @ObservationIgnored var performLock: (@MainActor () async -> Void)?
-    /// Wired where a vault is enrolled (AppServices): re-wrap the VAULT
-    /// master under a new passphrase using held material — the reset
-    /// door's vault half. Throws = the reset refuses WHOLE (one secret).
-    @ObservationIgnored var rewrapVaultPassphrase: ((String) async throws -> Void)?
     /// pre-13x 2a: the vault's posture reading (AppServices wires the
     /// fetch: signed in + a vault row ⇒ the reading; else nil). Consulted
     /// by the reconcile — the READ half of "an enrolled library's key file
@@ -918,44 +914,11 @@ final class ProtectionController {
         }.value
     }
 
-    /// THE RESET DOOR (R13p-9): forgot the passphrase — any enrolled
-    /// device re-wraps under a new one after BIOMETRIC confirmation, no
-    /// old passphrase needed. The vault half runs FIRST where wired (one
-    /// secret). Returns the worded refusal, nil = reset landed. (Batch 5
-    /// merges this door into change-passphrase per §13.)
-    @discardableResult
-    func resetPassphrase(to newPassphrase: String) async -> String? {
-        guard !newPassphrase.isEmpty else { return "Type the new passphrase first." }
-        // P2 (pre-13x 2a): the door authorizes from the DISK, never the
-        // cached projection — an unreadable sidecar is named as such even
-        // when the projection last read it whole.
-        refreshEnvelopeFacts()
-        if envelopeUnreadable {
-            return ProtectionCopy.message(for: StoreKeyEnvelopeError.unreadable(""))
-        }
-        guard hasPassphraseWrap else {
-            return "No passphrase is set yet — use Set a Passphrase instead."
-        }
-        guard biometryAvailable else {
-            return "Resetting needs \(ProtectionCopy.biometryName) to confirm it's "
-                + "you. Without it, use your recovery phrase: checking it here proves "
-                + "it still works, and the change-passphrase door accepts it."
-        }
-        guard await guardSeam.confirmPresence(
-            "Confirm it's you to reset your encryption passphrase") else {
-            return "Not confirmed — nothing was changed."
-        }
-        if let rewrapVaultPassphrase {
-            do {
-                try await rewrapVaultPassphrase(newPassphrase)
-            } catch {
-                return "Your account's vault couldn't be moved to the new passphrase "
-                    + "(\(EncryptionSession.message(for: error))) — nothing was changed: "
-                    + "one passphrase serves both, so the reset waits until it can do both."
-            }
-        }
-        return await setPassphrase(newPassphrase)
-    }
+    // pre-13x 3b (§13): THE RESET DOOR (R13p-9) MERGED into change
+    // passphrase's forgot road — `KeyDoorModel` (Shared): Standard's plain
+    // confirm / Castle's Touch ID / Face ID confirm authorize
+    // `EncryptionSession.rewrapPassphrase` from the HELD material, and the
+    // key file's copy follows under the vault's new descriptor.
 
     // MARK: - The recovery phrase (knot 4: generated and shown at the set-screen)
 
@@ -1648,20 +1611,21 @@ func wireOneSecretHooks(
     protection.landEnrollment = { material, kdf in
         await encryption.adoptEnrolledMaterial(material, kdf: kdf)
     }
+    // pre-13x 3b: the two re-wrap doors' facts (copy §4; the reset door's
+    // merge — the forgot road reads the posture and gate here).
+    encryption.keyDoorFacts = KeyDoorFacts(
+        posture: { protection.posture },
+        gate: { protection.effectiveGate },
+        biometryAvailable: { protection.biometryAvailable },
+        keyFileVaultKDF: { protection.keyFileRecordedVaultKDF },
+        confirmPresence: { await protection.confirmPresence($0) },
+        verifyLocalPassphrase: { await protection.verifyPassphraseAgainstStore($0) },
+        verifyLocalWords: { await protection.verifyRecoveryWordsAgainstStore($0) },
+        setLocalPassphrase: { await protection.setPassphrase($0) })
     // pre-13x 2d (decision 35): signed in ⇒ ENROLLED at ready — the vault's
     // word is then the only thing that can make the library Standard.
     protection.isSignedIn = { await auth.currentUserID != nil }
     if let vault = keyVault {
-        protection.rewrapVaultPassphrase = { newPassphrase in
-            // Signed out / no vault row ⇒ no vault half.
-            guard await auth.currentUserID != nil else { return }
-            guard try await vault.fetchVault() != nil else { return }
-            guard let material = await encryption.heldMaterial() else {
-                throw VaultRewrapNeedsUnlockedKeys()
-            }
-            try await VaultEnrollment(client: vault).rewrapPassphrase(
-                material: material, newPassphrase: newPassphrase)
-        }
         protection.readVaultPosture = {
             guard let userID = await auth.currentUserID else { return nil }
             guard let fetched = try? await vault.fetchVault() else { return nil }
@@ -1682,7 +1646,6 @@ func wireOneSecretHooks(
         // Totality (ladder R3-n1): "re-wired per session" must hold for the
         // long-lived controller hooks too — a vault-less composition clears
         // any prior session's closures.
-        protection.rewrapVaultPassphrase = nil
         protection.readVaultPosture = nil
     }
 }

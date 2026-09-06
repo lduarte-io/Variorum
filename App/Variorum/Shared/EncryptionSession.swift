@@ -157,6 +157,11 @@ final class EncryptionSession {
     /// `wordsInHand`: the change and regenerate doors' checkbox hands the
     /// NEW secret over so the ceremony never asks for it again.
     var replaceKeysDoor: ((_ passphraseInHand: String?, _ wordsInHand: [String]?) -> Void)?
+    /// pre-13x 3b: what the two re-wrap doors need from the library's
+    /// controller (the posture and gate their forgot road reads, the
+    /// presence confirm, the local-only roads, the key file's recorded
+    /// descriptor) — wired by `wireOneSecretHooks`; nil = no doors (P-2).
+    var keyDoorFacts: KeyDoorFacts?
 
     /// pre-13x 2c (§7): THE FOLLOW's door — the Encryption tab's
     /// keys-replaced section opens the follow (the controller's
@@ -406,17 +411,13 @@ final class EncryptionSession {
         }
     }
 
-    /// CF-2: REGENERATING the phrase is authorized by the passphrase — the
-    /// same deliberateness class as changing it (an enrolled device already
-    /// holds the keys, so the gate is about deliberateness, and the
-    /// surface's rules read coherent only if replacing the disaster secret
-    /// costs the same proof as the other vault-changing doors). Verifies by
-    /// actually unwrapping master from the vault — never a local compare.
-    func generatePhraseAuthorized(passphrase: String) async -> [String]? {
-        await runFlow { enrollment in
-            _ = try await enrollment.enroll(passphrase: passphrase)
-            return try RecoveryPhrase.generate()
-        }
+    /// pre-13x 3b: the vault's facts a key door reads at its threshold —
+    /// the descriptor (the retired-word classification) and the wrap; nil =
+    /// no vault; a `URLError` is the offline refusal's (decision 9).
+    func fetchVaultFacts() async throws -> (kdf: PassphraseKDF.Descriptor, hasRecoveryWrap: Bool)? {
+        guard let client else { return nil }
+        guard let fetched = try await client.fetchVault() else { return nil }
+        return (fetched.format.kdf, fetched.format.masterWrappedByRecovery != nil)
     }
 
     /// Land the CONFIRMED words as the vault's recovery wrap. `allowReplace`

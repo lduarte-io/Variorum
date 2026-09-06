@@ -57,19 +57,12 @@ struct EncryptionView: View {
     @State private var generatedWords: [String]?
     @State private var confirmEntry = ""
     @State private var confirmMismatch = false
-    /// True while the generate flow is REPLACING an existing wrap (reached
-    /// only through the CF-2 passphrase gate).
+    /// True while the generate flow is REPLACING an existing wrap (the
+    /// mandatory-phrase arm never is; kept for the confirm section's line).
     @State private var replacingWrap = false
-    /// CF-2: the regenerate door's passphrase gate.
-    @State private var showingRegenerate = false
-    @State private var regeneratePassphrase = ""
-
-    @State private var showingChangePassphrase = false
-    @State private var changeCurrent = ""
-    @State private var changeUseRecovery = false
-    @State private var changeRecoveryEntry = ""
-    @State private var changeNew = ""
-    @State private var changeNewConfirm = ""
+    /// pre-13x 3b: the open re-wrap door (copy §4's change passphrase /
+    /// regenerate twelve words) — ONE brain, rendered inline; nil = the doors.
+    @State private var keyDoor: KeyDoorModel?
 
     /// CF-11: the forget door's confirm.
     @State private var showingForgetConfirm = false
@@ -377,7 +370,6 @@ struct EncryptionView: View {
                         generatedWords = nil
                         confirmEntry = ""
                         replacingWrap = false
-                        showingRegenerate = false
                     }
                 }
             }
@@ -558,8 +550,13 @@ struct EncryptionView: View {
 
     @ViewBuilder
     private var enrolledSection: some View {
-        Text("This device holds your encryption keys.")
+        // pre-13x 3b: copy §4's enrolled line + keystone 3.
+        Text(ProtectionCopy.enrolledLine)
             .pageProse(pageStyle)
+            .fixedSize(horizontal: false, vertical: true)
+        Text(ProtectionCopy.keystoneAccountPassword)
+            .pageCaption(pageStyle)
+            .fixedSize(horizontal: false, vertical: true)
         // Her sharpest question's answer, standing where the fact it
         // explains is stated (memo §2's keystone).
         Text(ProtectionShapes.deviceAsPowerfulAsPassphrase)
@@ -570,32 +567,26 @@ struct EncryptionView: View {
             Text(String(format: "Passphrase key derivation took %.2f s on this device.", seconds))
                 .pageCaption(pageStyle)
         }
-        Text("A recovery phrase is on file for this account.")
-            .pageCaption(pageStyle)
 
         PageDivider(pageStyle)
 
-        if let words = generatedWords {
-            PageHeading("Your new recovery phrase — shown once:", style: pageStyle)
-            phraseConfirmSection(words: words, cancellable: true)
-        } else if showingRegenerate {
-            regenerateGateSection
-        } else {
-            PageDoor("Regenerate Recovery Phrase…", form: .inlineAct, style: pageStyle) {
-                showingRegenerate = true
+        // pre-13x 3b (copy §4): the two RE-WRAP doors over ONE brain
+        // (`KeyDoorModel`), rendered inline; P-2 — only when the facts are
+        // wired. The 14b regenerate gate and change-passphrase sections
+        // retired into it; the 13p reset door merged into its forgot road.
+        if let keyDoor {
+            KeyDoorView(model: keyDoor, pageStyle: pageStyle) { self.keyDoor = nil }
+        } else if encryption.keyDoorFacts != nil {
+            HStack {
+                PageDoor("Change Passphrase…", form: .inlineAct, style: pageStyle) {
+                    keyDoor = KeyDoorModel.make(kind: .changePassphrase, services: services)
+                }
+                .disabled(encryption.busy)
+                PageDoor(ProtectionCopy.regenerateWordsDoor, form: .inlineAct, style: pageStyle) {
+                    keyDoor = KeyDoorModel.make(kind: .regenerateWords, services: services)
+                }
+                .disabled(encryption.busy)
             }
-            .disabled(encryption.busy)
-        }
-
-        PageDivider(pageStyle)
-
-        if showingChangePassphrase {
-            changePassphraseSection
-        } else {
-            PageDoor("Change Encryption Passphrase…", form: .inlineAct, style: pageStyle) {
-                showingChangePassphrase = true
-            }
-            .disabled(encryption.busy)
         }
 
         PageDivider(pageStyle)
@@ -688,42 +679,6 @@ struct EncryptionView: View {
         door(passphrase, words)
     }
 
-    // MARK: - Regenerate, behind the passphrase (CF-2)
-
-    @ViewBuilder
-    private var regenerateGateSection: some View {
-        PageHeading("Replace the recovery phrase", style: pageStyle)
-        Text("Your encryption passphrase authorizes a new phrase — the same proof as changing it. The phrase you have now keeps working until the new one is confirmed.")
-            .pageCaption(pageStyle)
-            .fixedSize(horizontal: false, vertical: true)
-        PeekableSecretField(
-            label: "Encryption passphrase", text: $regeneratePassphrase,
-            onSubmit: { regenerateNow() })
-            .pageFieldChrome(pageStyle)
-        HStack {
-            PageDoor("Verify and Generate New Phrase", style: pageStyle) {
-                regenerateNow()
-            }
-            .disabled(encryption.busy || regeneratePassphrase.isEmpty)
-            PageDoor("Cancel", form: .inlineAct, style: pageStyle) {
-                showingRegenerate = false
-                regeneratePassphrase = ""
-            }
-        }
-    }
-
-    private func regenerateNow() {
-        guard !regeneratePassphrase.isEmpty, !encryption.busy else { return }
-        let passphrase = regeneratePassphrase
-        regeneratePassphrase = ""
-        Task {
-            if let words = await encryption.generatePhraseAuthorized(passphrase: passphrase) {
-                replacingWrap = true
-                generatedWords = words
-            }
-        }
-    }
-
     // MARK: - The forget door (CF-11)
 
     @ViewBuilder
@@ -747,65 +702,5 @@ struct EncryptionView: View {
         Text("For handing a device off, or testing your recovery phrase. Your writing on this device and the account vault are untouched.")
             .pageCaption(pageStyle)
             .fixedSize(horizontal: false, vertical: true)
-    }
-
-    // MARK: - Change passphrase (Round 7; CF-3)
-
-    @ViewBuilder
-    private var changePassphraseSection: some View {
-        Text("Change encryption passphrase")
-            .pageProse(pageStyle)
-        if !changeUseRecovery {
-            PeekableSecretField(label: "Current passphrase", text: $changeCurrent)
-                .pageFieldChrome(pageStyle)
-            // CF-3: her live find, verbatim — "it really is very unclear
-            // that it's a button". A real bordered button now (the styled
-            // .bordered arm keeps a visible border too).
-            PageDoor("Forgot it? Authorize with the recovery phrase",
-                     form: .bordered, style: pageStyle) {
-                changeUseRecovery = true
-            }
-        } else {
-            phraseEntryField("The 12 recovery words, separated by spaces", text: $changeRecoveryEntry)
-            PageDoor("Back to current-passphrase entry", form: .bordered,
-                     style: pageStyle) { changeUseRecovery = false }
-        }
-        PeekableSecretField(label: "New passphrase", text: $changeNew)
-            .pageFieldChrome(pageStyle)
-        PeekableSecretField(label: "Repeat the new passphrase", text: $changeNewConfirm)
-            .pageFieldChrome(pageStyle)
-        if !changeNew.isEmpty, changeNew.count < 12 {
-            Text("Short passphrase — under 12 characters is easier to brute-force.")
-                .pageCaptionWarning(pageStyle)
-        }
-        Text("Your recovery phrase keeps working unchanged — the two are independent.")
-            .pageCaption(pageStyle)
-        HStack {
-            PageDoor("Change Passphrase", style: pageStyle) {
-                let authorization: VaultAuthorization = changeUseRecovery
-                    ? .recoveryPhrase(EncryptionSession.words(from: changeRecoveryEntry))
-                    : .passphrase(changeCurrent)
-                let newPassphrase = changeNew
-                changeCurrent = ""
-                changeRecoveryEntry = ""
-                changeNew = ""
-                changeNewConfirm = ""
-                showingChangePassphrase = false
-                Task {
-                    await encryption.changePassphrase(
-                        authorization: authorization, newPassphrase: newPassphrase)
-                }
-            }
-            .disabled(encryption.busy || changeNew.isEmpty
-                      || changeNew != changeNewConfirm
-                      || (changeUseRecovery ? changeRecoveryEntry.isEmpty : changeCurrent.isEmpty))
-            PageDoor("Cancel", form: .inlineAct, style: pageStyle) {
-                showingChangePassphrase = false
-                changeCurrent = ""
-                changeRecoveryEntry = ""
-                changeNew = ""
-                changeNewConfirm = ""
-            }
-        }
     }
 }

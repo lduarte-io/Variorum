@@ -300,28 +300,10 @@ struct CopyFlowRoundTests {
     /// — a wrong passphrase refuses (verified against the vault by a real
     /// unwrap, never a local compare) and mints nothing; the right one
     /// mints 12 words whose confirm still lands through the replace road.
-    @Test func regeneratingThePhraseIsAuthorizedByThePassphrase() async throws {
-        let store = DeviceKeyStore.inMemory()
-        let vault = ScriptedVault()
-        let session = makeEncryptionSession(store: store, vault: vault)
-        await session.setUp(passphrase: passphrase)
-        let first = try #require(session.generatePhrase())
-        await session.landRecoveryWrap(confirmedWords: first, allowReplace: false)
-        #expect(session.state == .enrolled(hasRecoveryWrap: true))
-
-        let refused = await session.generatePhraseAuthorized(passphrase: "not-the-passphrase")
-        #expect(refused == nil, "a wrong passphrase mints nothing")
-        #expect(session.lastError == "Wrong encryption passphrase.")
-
-        let minted = await session.generatePhraseAuthorized(passphrase: passphrase)
-        #expect(minted?.count == 12)
-        #expect(session.lastError == nil)
-
-        await session.landRecoveryWrap(
-            confirmedWords: try #require(minted), allowReplace: true)
-        #expect(session.lastError == nil)
-        #expect(session.state == .enrolled(hasRecoveryWrap: true))
-    }
+    // pre-13x 3b: `generatePhraseAuthorized` RETIRED — regenerating the
+    // twelve words is `KeyDoorModel`'s (copy §4: the same authorization as
+    // change passphrase, the words shown once and confirmed, the wrap
+    // replaced) — pinned in `KeyDoorTests.regenerateAuthorizesLikeChangeShowsTheWordsOnceAndReplacesTheWrap`.
 
     /// **Ladder R1-m3 — the phrase twin (one secret, the phrase's
     /// following direction).** The vault's own recovery-phrase generation

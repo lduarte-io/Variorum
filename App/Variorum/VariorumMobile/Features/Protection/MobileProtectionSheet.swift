@@ -42,7 +42,6 @@ struct MobileProtectionSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var setSheetModel: PassphraseSetModel?
-    @State private var resetPresented = false
     @State private var reminderCheck: SecretCheckModel?
     /// pre-13x 2c: a switch left unfinished (the persisted marker) — the
     /// chooser's door becomes *Finish…* (read per open, like the Mac).
@@ -77,11 +76,6 @@ struct MobileProtectionSheet: View {
         .sheet(item: $setSheetModel) { model in
             MobilePassphraseSetSheet(model: model, tokens: tokens) {
                 setSheetModel = nil
-            }
-        }
-        .sheet(isPresented: $resetPresented) {
-            MobilePassphraseResetSheet(controller: controller, tokens: tokens) {
-                resetPresented = false
             }
         }
         // pre-13x 2c: the ceremony and the follow, held on the controller
@@ -370,11 +364,15 @@ struct MobileProtectionSheet: View {
                       controller.hasPassphraseWrap ? "Set" : "Not set")
             statusRow("Twelve words",
                       controller.hasRecoveryWrap ? "On file" : "Not saved")
-            door(controller.hasPassphraseWrap ? "Change Passphrase…" : "Set a Passphrase…") {
-                openSetSheet()
-            }
-            if controller.hasPassphraseWrap {
-                door("Forgot It? Reset…") { resetPresented = true }
+            // pre-13x 3b (§13): the reset door RETIRED — merged into the
+            // Encryption tab's change-passphrase forgot road; an ENROLLED
+            // library changes its passphrase there (copy §4's home).
+            if controller.enrolled, controller.hasPassphraseWrap {
+                prose("Change your passphrase or your twelve words under Account & Encryption.")
+            } else {
+                door(controller.hasPassphraseWrap ? "Change Passphrase…" : "Set a Passphrase…") {
+                    openSetSheet()
+                }
             }
             prose("The passphrase and the twelve words are the ways back into this "
                   + "library when this iPhone's Keychain can't help. Nothing is sent "

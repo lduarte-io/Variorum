@@ -445,51 +445,11 @@ struct Phase13pControllerTests {
         #expect(w.controller.appleKeyVerified == true)
     }
 
-    // MARK: - THE RESET DOOR (R13p-9)
-
-    /// THE RED PIN: after a biometric-confirmed reset, the OLD passphrase
-    /// must stop unwrapping.
-    @Test func resetRewrapsAndTheOldPassphraseStopsUnwrapping() async throws {
-        let w = try world()
-        _ = await w.controller.setPassphrase("the old one")
-        #expect(await w.controller.resetPassphrase(to: "the new one") == nil)
-        let envelope = try #require(w.envelopeBox.value)
-        #expect(try envelope.unwrapKey(passphrase: "the new one") == w.key)
-        #expect(throws: StoreKeyEnvelopeError.wrongPassphrase) {
-            try envelope.unwrapKey(passphrase: "the old one")
-        }
-    }
-
-    @Test func resetRefusesWithoutBiometricConfirmation() async throws {
-        let w = try world(biometricSucceeds: false)
-        _ = await w.controller.setPassphrase("the old one")
-        let before = w.envelopeBox.value
-        let refusal = await w.controller.resetPassphrase(to: "the new one")
-        #expect(refusal == "Not confirmed — nothing was changed.")
-        #expect(w.envelopeBox.value == before, "a refused reset changes nothing")
-    }
-
-    @Test func resetWithoutBiometryNamesTheRecoveryRoad() async throws {
-        let w = try world(biometryAvailable: false)
-        _ = await w.controller.setPassphrase("the old one")
-        let refusal = await w.controller.resetPassphrase(to: "x")
-        #expect(refusal?.contains("recovery phrase") == true,
-                "no dead ends — the road without Touch ID is named")
-    }
-
-    /// ONE SECRET: where a vault is wired, its half runs FIRST and a
-    /// vault that cannot re-wrap refuses the WHOLE reset.
-    @Test func resetRefusesWholeWhenTheVaultHalfFails() async throws {
-        let w = try world()
-        _ = await w.controller.setPassphrase("the old one")
-        struct VaultDown: Error {}
-        w.controller.rewrapVaultPassphrase = { _ in throw VaultDown() }
-        let refusal = await w.controller.resetPassphrase(to: "the new one")
-        #expect(refusal?.contains("one passphrase serves both") == true)
-        let envelope = try #require(w.envelopeBox.value)
-        #expect(try envelope.unwrapKey(passphrase: "the old one") == w.key,
-                "the old wrap STANDS when the reset refuses")
-    }
+    // MARK: - THE RESET DOOR (R13p-9) — pre-13x 3b: MERGED into change
+    // passphrase's forgot road (`KeyDoorModel`; the pins in `KeyDoorTests`:
+    // the biometric confirm required in Castle, a refused confirm changing
+    // nothing, the words road under Always ask, the vault half's failure
+    // refusing whole). The controller's own `resetPassphrase` retired.
 
     // MARK: - One secret, both directions
 
@@ -641,9 +601,6 @@ struct Phase13pControllerTests {
         #expect(w.envelopeBox.value == before, "nothing was written")
         #expect(await w.controller.generateAndLandRecoveryPhrase() == nil)
         #expect(w.controller.lastError != nil)
-        let reset = await w.controller.resetPassphrase(to: "new one")
-        #expect(reset == ProtectionCopy.message(
-            for: StoreKeyEnvelopeError.unreadable("")))
     }
 
     /// P2, THE RED-ON-OLD PIN: entering a demanded gate is authorized by

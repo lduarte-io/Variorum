@@ -925,6 +925,10 @@ struct MobileOneSecretHooksTests {
         let envelope = try #require(w.envelopeBox.value)
         #expect(try envelope.unwrapKey(passphrase: "winter-harbor-7") == w.key,
                 "the store wrap FOLLOWED the vault's change — one secret, kept")
+        // pre-13x 3b (§3.6): under the VAULT's new descriptor — one derivation.
+        let vaultKDF = try #require(try await w.client.fetchVault()).format.kdf
+        #expect(envelope.passphrase?.kdf == vaultKDF && envelope.vaultKDF == vaultKDF,
+                "the store's copy follows under the vault's own descriptor — the lobby derives once")
         #expect(throws: StoreKeyEnvelopeError.wrongPassphrase) {
             _ = try envelope.unwrapKey(passphrase: self.vaultPassphrase)
         }
@@ -963,7 +967,10 @@ struct MobileOneSecretHooksTests {
         await w.encryption.setUp(passphrase: vaultPassphrase)
         #expect(w.encryption.lastError == nil)
 
-        let refusal = await w.controller.resetPassphrase(to: "fresh-north-22")
+        // pre-13x 3b: the reset door MERGED into change passphrase's forgot
+        // road — the session's `rewrapPassphrase` from the HELD material is
+        // the act (the phone's compiled copy of the shared road).
+        let refusal = await w.encryption.rewrapPassphrase(newPassphrase: "fresh-north-22")
         #expect(refusal == nil, "the reset lands: \(refusal ?? "")")
 
         // The VAULT moved: the new passphrase unwraps it, the retired one
@@ -989,8 +996,8 @@ struct MobileOneSecretHooksTests {
         #expect(w.encryption.lastError == nil)
         await w.encryption.forgetDeviceKeys()
 
-        let refusal = await w.controller.resetPassphrase(to: "fresh-north-22")
-        #expect(refusal?.contains("nothing was changed") == true,
+        let refusal = await w.encryption.rewrapPassphrase(newPassphrase: "fresh-north-22")
+        #expect(refusal?.contains("keys are locked") == true,
                 "the reset refuses WHOLE rather than diverging: \(refusal ?? "nil")")
 
         let envelope = try #require(w.envelopeBox.value)
