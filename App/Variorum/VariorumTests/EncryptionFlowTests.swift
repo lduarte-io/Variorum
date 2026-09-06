@@ -716,66 +716,12 @@ struct AccountLifecycleDoorTests {
             journalBridgeKeyID: "journal-\(seed)")
     }
 
-    /// CF-8's flow state machine: a successful run lands in
-    /// `enrolled(hasRecoveryWrap: false)` — the standing CF-5 MANDATORY
-    /// phrase step (the old phrase died with the old master; setup's own
-    /// machinery mints the new one) — with the runner-landed custody in
-    /// place, and the healing hook fired ONCE by the door.
-    /// pre-13x 2b: the runner's CONTRACT changed — the `PostureSwitchRunner`
-    /// lands custody ITSELF (its own custody store) and returns the final
-    /// material; the door fires `onKeysChanged` once after it returns. The
-    /// scripted runner models that: it saves custody and returns.
-    @Test func theRekeyDoorLandsInTheMandatoryPhraseStepWithNewCustody() async throws {
-        let store = DeviceKeyStore.inMemory()
-        let vault = ScriptedVault()
-        let session = makeEncryptionSession(store: store, vault: vault)
-        await session.setUp(passphrase: "the-old-passphrase")
-        let old = try #require(store.load())
-
-        let fresh = material(7)
-        session.rekeyRunner = { passphrase in
-            #expect(passphrase == "the-old-passphrase")
-            _ = store.save(fresh)  // the runner lands custody itself (2b)
-            return fresh
-        }
-        var healed = 0
-        session.onKeysChanged = { healed += 1 }
-        await session.rekeyAccount(passphrase: "the-old-passphrase")
-
-        #expect(session.lastError == nil)
-        #expect(session.state == .enrolled(hasRecoveryWrap: false),
-                "the landing IS the CF-5 mandatory phrase step — the new 12 words follow")
-        #expect(store.load() == fresh, "custody holds the NEW keys")
-        #expect(store.load() != old)
-        #expect(healed == 1, "adoption fires the healing hook")
-    }
-
-    /// The non-atomic sequence's honest voice: ANY mid-run failure speaks
-    /// the rerun road (the brain's pinned recovery), never a bare error.
-    @Test func aFailedRekeySpeaksTheRerunRoad() async throws {
-        let store = DeviceKeyStore.inMemory()
-        let vault = ScriptedVault()
-        let session = makeEncryptionSession(store: store, vault: vault)
-        await session.setUp(passphrase: "the-old-passphrase")
-
-        session.rekeyRunner = { _ in
-            throw AccountLifecycleError.httpFailure(status: 503, body: "gateway")
-        }
-        await session.rekeyAccount(passphrase: "the-old-passphrase")
-        let error = try #require(session.lastError)
-        #expect(error.contains("run Replace Keys again"),
-                "the rerun road is spoken on every failure")
-        #expect(session.state == .enrolled(hasRecoveryWrap: true),
-                "the state is untouched by the failure (setup's state — born with its wrap — stands)")
-    }
-
-    /// Ladder R1-1: the surface RE-SPEAKS the rerun road across a
-    /// relaunch — refresh() projects the persisted marker through the
-    /// injected read (red-on-old by behavioral revert: without the
-    /// refresh read, `rekeyIncomplete` stays false and the pre-fix
-    /// silence returns — nothing persisted re-spoke the road), a
-    /// completed door run re-reads it clear, and the banner prompt is
-    /// pinned to the fire-and-DO grammar.
+    /// pre-13x 3b: the 2c interim door (`rekeyRunner` / `rekeyAccount` —
+    /// the passphrase alone) RETIRED for copy §4's ceremony on the controller
+    /// (`PostureSwitchModel.Mode.replaceKeys`, pinned in `PostureSwitchTests`).
+    /// What the session still owns: the persisted marker's surface read —
+    /// refresh() projects the rerun prompt (ladder R1-1), and the door
+    /// renders only when the root wired it (P-2).
     @Test func theSurfaceReSpeaksTheRerunRoadFromThePersistedMarker() async throws {
         let store = DeviceKeyStore.inMemory()
         let vault = ScriptedVault()
@@ -789,19 +735,8 @@ struct AccountLifecycleDoorTests {
         await session.refresh()
         #expect(session.rekeyIncomplete,
                 "refresh re-speaks the rerun road from the persisted marker")
-
-        // The completed door clears the marker (the runner models the
-        // brain's clear-at-completion); the session re-reads it.
-        session.rekeyRunner = { _ in
-            markerSet.setValue(false)
-            return DeviceKeyMaterial(
-                masterKey: Data(repeating: 9, count: 32),
-                corpusKey: Data(repeating: 10, count: 32), corpusKeyID: "corpus-new",
-                journalBridgeKey: Data(repeating: 11, count: 32),
-                journalBridgeKeyID: "journal-new")
-        }
-        await session.rekeyAccount(passphrase: "the-old-passphrase")
-        #expect(session.lastError == nil)
+        markerSet.setValue(false)
+        await session.refresh()
         #expect(!session.rekeyIncomplete, "a completed run reads the marker clear")
 
         // The banner prompt: paused + the rerun act + nothing lost.
@@ -813,38 +748,8 @@ struct AccountLifecycleDoorTests {
         #expect(EncryptionView.rekeyIncompleteSignedOutPrompt.contains("Sign in first"))
         #expect(EncryptionView.rekeyIncompleteSignedOutPrompt.contains("didn't finish"))
         #expect(!EncryptionView.rekeyIncompleteSignedOutPrompt.contains("Run Replace Encryption Keys again"))
-    }
-
-    /// Ladder R1-1, the failed arm: a THROWN mid-run failure leaves the
-    /// marker set, and the session's re-read keeps the banner up beside
-    /// the spoken error — the persistent voice outlives the message.
-    @Test func aFailedRekeyKeepsTheBannerUp() async throws {
-        let store = DeviceKeyStore.inMemory()
-        let vault = ScriptedVault()
-        let session = makeEncryptionSession(store: store, vault: vault)
-        await session.setUp(passphrase: "the-old-passphrase")
-
-        let markerSet = LockIsolated(false)
-        session.rekeyIncompleteCheck = { markerSet.value }
-        session.rekeyRunner = { _ in
-            // The brain persists the marker before its vault write; the
-            // failure leaves it set.
-            markerSet.setValue(true)
-            throw AccountLifecycleError.httpFailure(status: 503, body: "gateway")
-        }
-        await session.rekeyAccount(passphrase: "the-old-passphrase")
-        #expect(session.lastError?.contains("run Replace Keys again") == true)
-        #expect(session.rekeyIncomplete,
-                "the failed run's marker projects — the rerun road survives the error message")
-    }
-
-    /// No runner wired (unconfigured project) ⇒ the door refuses in the
-    /// standing dormant grammar, exactly like the other flows.
-    @Test func theRekeyDoorIsDormantWithoutARunner() async throws {
-        let session = makeEncryptionSession(
-            store: .inMemory(), vault: ScriptedVault())
-        await session.rekeyAccount(passphrase: "anything")
-        #expect(session.lastError == "Project keys not configured (ProjectConfig.swift)")
+        // pre-13x 3b (P-2): no root-wired door ⇒ the tab renders none.
+        #expect(session.replaceKeysDoor == nil, "the Replace All Keys door is the root's to wire")
     }
 
     /// THE COPY PINS. Her Round-5 pinned rule (the CF-6 class): the
@@ -867,15 +772,17 @@ struct AccountLifecycleDoorTests {
                 "subscription state warned first — the ruling's letter")
         #expect(AccountView.deleteConfirmationPhrase == "delete my account")
 
-        // The re-key door — the honest warning names the other devices'
-        // fate and the phrase's death (the CF-7 checkbox grammar).
-        #expect(EncryptionView.rekeyExplanation.contains("Every OTHER device will pause syncing"))
-        #expect(EncryptionView.rekeyExplanation.contains("re-enroll"))
-        #expect(EncryptionView.rekeyExplanation.contains(
-            "Your writing on this device is untouched"))
-        #expect(EncryptionView.rekeyExplanation.contains(
-            "current recovery phrase stops working"))
-        #expect(EncryptionView.rekeyUnderstandingCheckbox.contains("I understand"))
+        // pre-13x 3b: Replace All Keys' words are copy §4's (rendered
+        // verbatim by `KeyDoorCopy`) — the honest body names what a copy or
+        // a backup holds (no keys), what the other devices do (ask once),
+        // and old backups' roads; the Standard addendum says decision 30's
+        // limit; the authorization line names decision 33.
+        #expect(ProtectionCopy.replaceKeysBody.contains("A copy of your library or a backup holds no keys"))
+        #expect(ProtectionCopy.replaceKeysBody.contains("Your other devices will each ask for your passphrase once"))
+        #expect(ProtectionCopy.replaceKeysBody.contains("an enrolled device's master key no longer opens them"))
+        #expect(ProtectionCopy.replaceKeysStandardAddendum.contains("doesn't shut out someone inside your Apple account"))
+        #expect(ProtectionCopy.replaceKeysAuthorization.contains("\(ProtectionCopy.biometryName) can't do that"))
+        #expect(ProtectionCopy.replaceKeysDone == "Done. Your other devices will ask for your passphrase the next time they open.")
     }
 }
 
@@ -978,10 +885,9 @@ struct AccountDoorWiringTests {
                 try ops.createPost(title: "pre-rekey").id
             }
 
-            // No root-wired runner: the door refuses in the dormant grammar
-            // and touches nothing — no truncate, custody unchanged.
-            await encryption.rekeyAccount(passphrase: "orchard-lantern-13")
-            #expect(encryption.lastError == "Project keys not configured (ProjectConfig.swift)")
+            // No root-wired door (pre-13x 3b): the tab renders no Replace
+            // All Keys door at all (P-2) — custody untouched, no truncate.
+            #expect(encryption.replaceKeysDoor == nil, "the door is the ROOT's to wire")
             #expect(store.load() == old, "custody untouched")
             #expect(await lifecycle.truncateKeyIDs == [], "the truncate road is retired — never called")
 

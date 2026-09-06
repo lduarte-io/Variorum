@@ -80,10 +80,10 @@ struct EncryptionView: View {
     /// construction.
     @State private var secretCheck: SecretCheckModel
 
-    /// Phase 14c (CF-8): the re-key door's gate.
-    @State private var showingRekey = false
-    @State private var rekeyAcknowledged = false
-    @State private var rekeyPassphrase = ""
+    /// pre-13x 3b: the Account sheet's dismissal — Replace All Keys opens on
+    /// the CONTROLLER (held across the re-key's reopen, 2b's precedent), so
+    /// this sheet closes first and the main window presents the ceremony.
+    @Environment(\.dismiss) private var dismiss
 
     private var encryption: EncryptionSession { services.encryption }
 
@@ -143,21 +143,6 @@ struct EncryptionView: View {
         "Key replacement didn't finish on this device — sync is paused until it completes. "
         + "Sign in first, then run Replace Encryption Keys from this tab; nothing is lost."
 
-    /// Phase 14c (CF-8): the re-key door's explanation — the honest
-    /// warning names what a re-key does to OTHER devices (they land in
-    /// the keys-were-replaced state and re-enroll), what happens to the
-    /// recovery phrase, and that the local copy is untouched.
-    // pre-13x 2b: the truncate-and-re-upload clause corrected — the
-    // rotation is IN PLACE now (every row on the server re-encrypted under
-    // the new keys); batch 3 re-shapes this door to copy §4's Replace All
-    // Keys text whole.
-    static let rekeyExplanation =
-        "Replacing your keys mints a fresh set and re-encrypts everything on the server "
-        + "under them, in place, from this device. Your "
-        + "writing on this device is untouched. Every OTHER device will pause syncing and "
-        + "say its keys were replaced — re-enroll each one with your passphrase. Your "
-        + "current recovery phrase stops working; you'll write down a new one right after."
-
     /// ISO-8601 stamp → a human date ("Aug 28, 2026"); nil in, nil out.
     static func displayDate(_ stamp: String?) -> String? {
         guard let stamp, stamp.count >= 10 else { return nil }
@@ -172,12 +157,6 @@ struct EncryptionView: View {
         display.timeStyle = .none
         return display.string(from: day)
     }
-
-    /// CF-8's understanding checkbox (the CF-7 grammar applied to this
-    /// door — friction per the 14b precedent).
-    static let rekeyUnderstandingCheckbox =
-        "I understand that my other devices pause syncing until I re-enroll them, "
-        + "and that my current recovery phrase stops working"
 
     /// CF-12: per-platform biometric naming — never the WebAuthn credential
     /// word (her terminology ruling; the TerminologyPinTests walk enforces
@@ -632,18 +611,14 @@ struct EncryptionView: View {
 
         PageDivider(pageStyle)
 
-        // Ladder R1-1: while a re-key is owed, the banner at the top
-        // carries this door (and the open flow) — rendering a second
-        // copy here would double the shared showingRekey flow.
-        if !encryption.rekeyIncomplete {
-            if showingRekey {
-                rekeySection
-            } else {
-                PageDoor("Replace Encryption Keys…", form: .inlineAct, style: pageStyle) {
-                    showingRekey = true
-                }
-                .disabled(encryption.busy)
+        // pre-13x 3b (copy §4): REPLACE ALL KEYS — the ceremony on the
+        // controller (P-2: rendered only when the root wired the door);
+        // while a re-key is owed the banner at the top carries the door.
+        if !encryption.rekeyIncomplete, encryption.replaceKeysDoor != nil {
+            PageDoor(ProtectionCopy.replaceKeysOpenDoor, form: .inlineAct, style: pageStyle) {
+                openReplaceKeys(passphrase: nil, words: nil)
             }
+            .disabled(encryption.busy)
 
             PageDivider(pageStyle)
         }
@@ -695,64 +670,22 @@ struct EncryptionView: View {
         Text(Self.rekeyIncompletePrompt)
             .pageCaptionWarning(pageStyle)
             .fixedSize(horizontal: false, vertical: true)
-        if showingRekey {
-            rekeySection
-        } else {
-            PageDoor("Replace Encryption Keys…", form: .inlineAct, style: pageStyle) {
-                showingRekey = true
+        if encryption.replaceKeysDoor != nil {
+            // pre-13x 3b: the same door — the root opens the marker's RESUME
+            // when one is pending (the ceremony's resume road).
+            PageDoor(ProtectionCopy.finishReplacingKeysDoor, form: .inlineAct, style: pageStyle) {
+                openReplaceKeys(passphrase: nil, words: nil)
             }
             .disabled(encryption.busy)
         }
     }
 
-    // MARK: - The re-key door (Phase 14c, CF-8 — THE DESIGN 3)
-
-    /// The user-facing re-key: in-app, no terminal — her CF-8 deferral
-    /// made real. Friction per the 14b grammar: the honest warning, the
-    /// understanding CHECKBOX (the CF-7 precedent), and the passphrase as
-    /// authorization. On success the state lands in the MANDATORY new
-    /// recovery phrase step (CF-5) — the old phrase died with the old
-    /// keys, and setup's own machinery mints the new one.
-    @ViewBuilder
-    private var rekeySection: some View {
-        PageHeading("Replace encryption keys", style: pageStyle)
-        Text(Self.rekeyExplanation)
-            .pageCaptionWarning(pageStyle)
-            .fixedSize(horizontal: false, vertical: true)
-        Toggle(isOn: $rekeyAcknowledged) {
-            Text(Self.rekeyUnderstandingCheckbox)
-                .pageCaptionProminent(pageStyle)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        #if os(macOS)
-        .toggleStyle(.checkbox)
-        #endif
-        PeekableSecretField(label: "Encryption passphrase", text: $rekeyPassphrase)
-            .pageFieldChrome(pageStyle)
-        HStack {
-            PageDoor("Replace Keys", form: .destructive, style: pageStyle) {
-                Task { await confirmRekey() }
-            }
-            .disabled(encryption.busy || rekeyPassphrase.isEmpty || !rekeyAcknowledged)
-            PageDoor("Cancel", form: .inlineAct, style: pageStyle) {
-                showingRekey = false
-                rekeyAcknowledged = false
-                rekeyPassphrase = ""
-            }
-        }
-    }
-
-    /// pre-13x 2b: the T1 recency guard RETIRED with the truncate road it
-    /// guarded — an in-place rotation clobbers nothing on the server, so
-    /// there is no server-ahead copy to warn about. The door acts.
-    private func confirmRekey() async {
-        let passphrase = rekeyPassphrase
-        rekeyPassphrase = ""
-        await encryption.rekeyAccount(passphrase: passphrase)
-        if encryption.lastError == nil {
-            showingRekey = false
-            rekeyAcknowledged = false
-        }
+    /// pre-13x 3b: the Account sheet closes, then the ceremony opens on the
+    /// controller — the main window's bar presents it (both platforms).
+    private func openReplaceKeys(passphrase: String?, words: [String]?) {
+        guard let door = encryption.replaceKeysDoor else { return }
+        dismiss()
+        door(passphrase, words)
     }
 
     // MARK: - Regenerate, behind the passphrase (CF-2)

@@ -1030,12 +1030,31 @@ struct PostureSwitchSheet: View {
     @State private var confirmation = ""
     @State private var typedWords = ""
     @State private var acknowledged = false
+    @State private var newPassphrase = ""
+    @State private var newConfirmation = ""
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             switch model.phase {
             case .checking:
                 title("Checking…")
+            case .explain where model.mode == .replaceKeys:
+                // pre-13x 3b — copy §4's Replace All Keys screen.
+                title(ProtectionCopy.replaceKeysTitle)
+                body(ProtectionCopy.replaceKeysBody)
+                if model.accountPostureIsStandard {
+                    body(ProtectionCopy.replaceKeysStandardAddendum)
+                }
+                if !model.passphraseHandedIn {
+                    Toggle(ProtectionCopy.alsoNewPassphraseCheckbox, isOn: $model.wantsNewPassphrase)
+                        .toggleStyle(.checkbox)
+                }
+                HStack {
+                    Button("Cancel") { onDone() }
+                    Spacer()
+                    Button(ProtectionCopy.enterCastleContinue) { model.continueFromExplain() }
+                        .keyboardShortcut(.defaultAction)
+                }
             case .explain:
                 title(ProtectionCopy.enterCastleTitle)
                 body(ProtectionCopy.enterCastleBody)
@@ -1051,6 +1070,38 @@ struct PostureSwitchSheet: View {
                     Spacer()
                     Button(ProtectionCopy.enterCastleContinue) { model.continueFromExplain() }
                         .keyboardShortcut(.defaultAction)
+                }
+            case .authorize:
+                // pre-13x 3b — the passphrase typed and checked against the
+                // account's copy (copy §4's authorization line; decision 33).
+                title(ProtectionCopy.replaceKeysTitle)
+                body(ProtectionCopy.replaceKeysAuthorization)
+                PeekableSecretField(label: ProtectionCopy.passphraseFieldLabel, text: $passphrase)
+                    .textFieldStyle(.roundedBorder)
+                HStack {
+                    Button("Cancel") { onDone() }
+                    Spacer()
+                    Button(model.wantsNewPassphrase ? ProtectionCopy.enterCastleContinue : ProtectionCopy.replaceKeysDoor) {
+                        Task { await model.authorize(passphrase: passphrase) }
+                    }
+                    .keyboardShortcut(.defaultAction)
+                    .disabled(model.busy || passphrase.isEmpty)
+                }
+            case .newPassphrase:
+                title(ProtectionCopy.setupPassphraseTitle)
+                body(ProtectionCopy.passphraseSubline)
+                PeekableSecretField(label: ProtectionCopy.newPassphraseLabel, text: $newPassphrase)
+                    .textFieldStyle(.roundedBorder)
+                PeekableSecretField(label: ProtectionCopy.confirmNewPassphraseLabel, text: $newConfirmation)
+                    .textFieldStyle(.roundedBorder)
+                HStack {
+                    Button("Cancel") { onDone() }
+                    Spacer()
+                    Button(ProtectionCopy.replaceKeysDoor) {
+                        Task { await model.commitNewPassphrase(newPassphrase, confirmation: newConfirmation) }
+                    }
+                    .keyboardShortcut(.defaultAction)
+                    .disabled(model.busy || newPassphrase.isEmpty)
                 }
             case .setPassphrase:
                 title(ProtectionCopy.castleNeedsPassphraseTitle)
@@ -1148,7 +1199,9 @@ struct PostureSwitchSheet: View {
                     .disabled(model.busy || !acknowledged || (needsPassphrase && passphrase.isEmpty))
                 }
             case .running:
-                title(model.mode == .leave ? ProtectionCopy.leaveCastleTitle : ProtectionCopy.enterCastleTitle)
+                title(model.mode == .leave ? ProtectionCopy.leaveCastleTitle
+                      : model.mode == .replaceKeys ? ProtectionCopy.replaceKeysTitle
+                      : ProtectionCopy.enterCastleTitle)
                 HStack(spacing: 8) {
                     ProgressView().controlSize(.small)
                     Text(runningLine).font(.callout).foregroundStyle(.secondary)
@@ -1157,7 +1210,7 @@ struct PostureSwitchSheet: View {
                     .font(.caption).foregroundStyle(.secondary)
             case .done(let insuranceOff, _):
                 title("Done")
-                body(ProtectionCopy.enteredCastleDone)
+                body(model.mode == .replaceKeys ? ProtectionCopy.replaceKeysDone : ProtectionCopy.enteredCastleDone)
                 if insuranceOff {
                     Text(ProtectionCopy.insuranceTurnedOffNotice)
                         .font(.callout)

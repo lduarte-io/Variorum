@@ -31,6 +31,8 @@ struct MobilePostureSwitchSheet: View {
     @State private var confirmation = ""
     @State private var typedWords = ""
     @State private var acknowledged = false
+    @State private var newPassphrase = ""
+    @State private var newConfirmation = ""
 
     var body: some View {
         ScrollView {
@@ -38,6 +40,49 @@ struct MobilePostureSwitchSheet: View {
                 switch model.phase {
                 case .checking:
                     title("Checking…")
+                case .explain where model.mode == .replaceKeys:
+                    // pre-13x 3b — copy §4's Replace All Keys screen, the
+                    // phone's register (the checkbox as a marked row).
+                    title(ProtectionCopy.replaceKeysTitle)
+                    prose(ProtectionCopy.replaceKeysBody)
+                    if model.accountPostureIsStandard { prose(ProtectionCopy.replaceKeysStandardAddendum) }
+                    if !model.passphraseHandedIn {
+                        Button { model.wantsNewPassphrase.toggle() } label: {
+                            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                                Text(model.wantsNewPassphrase ? "●" : "○")
+                                    .font(tokens.body)
+                                    .foregroundStyle(tokens.accent)
+                                Text(ProtectionCopy.alsoNewPassphraseCheckbox)
+                                    .font(tokens.small)
+                                    .foregroundStyle(tokens.ink)
+                                    .multilineTextAlignment(.leading)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(ProtectionCopy.alsoNewPassphraseCheckbox)
+                        .accessibilityAddTraits(model.wantsNewPassphrase ? .isSelected : [])
+                    }
+                    doors(primary: ProtectionCopy.enterCastleContinue, { model.continueFromExplain() },
+                          quiet: "Cancel", { onDone() })
+                case .authorize:
+                    title(ProtectionCopy.replaceKeysTitle)
+                    prose(ProtectionCopy.replaceKeysAuthorization)
+                    secretField(ProtectionCopy.passphraseFieldLabel, text: $passphrase)
+                    doors(primary: model.wantsNewPassphrase ? ProtectionCopy.enterCastleContinue : ProtectionCopy.replaceKeysDoor, {
+                        Task { await model.authorize(passphrase: passphrase) }
+                    }, primaryEnabled: !model.busy && !passphrase.isEmpty,
+                          quiet: "Cancel", { onDone() })
+                case .newPassphrase:
+                    title(ProtectionCopy.setupPassphraseTitle)
+                    prose(ProtectionCopy.passphraseSubline)
+                    secretField(ProtectionCopy.newPassphraseLabel, text: $newPassphrase)
+                    secretField(ProtectionCopy.confirmNewPassphraseLabel, text: $newConfirmation)
+                    doors(primary: ProtectionCopy.replaceKeysDoor, {
+                        Task { await model.commitNewPassphrase(newPassphrase, confirmation: newConfirmation) }
+                    }, primaryEnabled: !model.busy && !newPassphrase.isEmpty,
+                          quiet: "Cancel", { onDone() })
                 case .explain:
                     title(ProtectionCopy.enterCastleTitle)
                     prose(ProtectionCopy.enterCastleBody)
@@ -119,12 +164,14 @@ struct MobilePostureSwitchSheet: View {
                     }, primaryEnabled: !model.busy && acknowledged && !(needsPassphrase && passphrase.isEmpty),
                           quiet: "Cancel", { onDone() })
                 case .running:
-                    title(model.mode == .leave ? ProtectionCopy.leaveCastleTitle : ProtectionCopy.enterCastleTitle)
+                    title(model.mode == .leave ? ProtectionCopy.leaveCastleTitle
+                          : model.mode == .replaceKeys ? ProtectionCopy.replaceKeysTitle
+                          : ProtectionCopy.enterCastleTitle)
                     running(runningLine)
                     prose("Keep Variorum open. If it quits, the switch picks up where it stopped.")
                 case .done(let insuranceOff, _):
                     title("Done")
-                    prose(ProtectionCopy.enteredCastleDone)
+                    prose(model.mode == .replaceKeys ? ProtectionCopy.replaceKeysDone : ProtectionCopy.enteredCastleDone)
                     if insuranceOff { alarm(ProtectionCopy.insuranceTurnedOffNotice) }
                     doors(primary: "Continue", {
                         model.continueFromDone()

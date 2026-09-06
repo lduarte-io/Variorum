@@ -100,6 +100,11 @@ nonisolated enum PostureSwitchError: Error, Equatable, Sendable {
     case secretRequired
     /// pre-13x 2c: a fault injected by a test leaf (never production).
     case injectedFault(PostureSwitchRunner.FaultPoint)
+    /// pre-13x 3b (ledger 44 — decision 33 at the RUNNER): the vault carries
+    /// a recovery wrap and the rotation was asked to run WITHOUT the twelve
+    /// words — the new keys could not be wrapped under them and the words
+    /// would die silently; refused before anything is written.
+    case wordsRequired
 }
 
 @MainActor
@@ -239,6 +244,14 @@ final class PostureSwitchRunner {
         var rotationInProgress: Bool
         var vaultUpdatedAt: String?
         var vaultHasRecoveryWrap: Bool
+        /// pre-13x 3b: the vault's CURRENT corpus key id — Replace All Keys'
+        /// stale-master front check compares the key file's recorded id
+        /// against it (§5's row: "holding the CURRENT master").
+        var vaultCorpusKeyID: String? = nil
+        /// pre-13x 3b: the vault's passphrase descriptor — a refused
+        /// passphrase at a key door is worded as RETIRED (copy §5) when the
+        /// key file's recorded descriptor no longer matches it.
+        var vaultKDF: PassphraseKDF.Descriptor? = nil
     }
 
     func checkDoor() async throws -> DoorFacts {
@@ -256,7 +269,9 @@ final class PostureSwitchRunner {
             enrolled: true,
             rotationInProgress: fetched.format.previousCorpusKey != nil,
             vaultUpdatedAt: fetched.updatedAt,
-            vaultHasRecoveryWrap: fetched.format.masterWrappedByRecovery != nil)
+            vaultHasRecoveryWrap: fetched.format.masterWrappedByRecovery != nil,
+            vaultCorpusKeyID: fetched.format.classKey(for: .corpus)?.keyID,
+            vaultKDF: fetched.format.kdf)
     }
 
     // MARK: - The two switches + Replace All Keys
@@ -324,6 +339,13 @@ final class PostureSwitchRunner {
             guard let fetched = try await vault.fetchVault() else { throw KeyVaultClientError.vaultAbsent }
             if let previous = fetched.format.previousCorpusKey {
                 throw CorpusRotationError.rotationInProgress(previousKeyID: previous.keyID)
+            }
+            // pre-13x 3b (ledger 44 — decision 33 at the RUNNER): a vault
+            // that carries a recovery wrap is never rewritten without the
+            // twelve words in hand — `CorpusRotation.begin` would mint M′
+            // with NO recovery wrap and the words would die silently.
+            if fetched.format.masterWrappedByRecovery != nil, secrets.recoveryKey == nil {
+                throw PostureSwitchError.wordsRequired
             }
             guard let current = await leaves.keyStore.offMain({ $0.load() }) else {
                 throw PostureSwitchError.syncKeysUnavailable

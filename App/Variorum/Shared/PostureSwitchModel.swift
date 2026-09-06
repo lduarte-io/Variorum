@@ -34,6 +34,13 @@ final class PostureSwitchModel: Identifiable {
         case leave
         /// A switch that did not finish on this device (the marker).
         case resume(RotationMarker)
+        /// pre-13x 3b — REPLACE ALL KEYS (copy §4; decisions 30 · 32 · 33):
+        /// §4's steps 1–4 without the posture change, over the same runner
+        /// road (`replaceAllKeys`); the words through the same brain; the
+        /// passphrase TYPED and vault-verified at `.authorize`; the
+        /// *Also choose a new passphrase* checkbox as a re-wrap on the NEW
+        /// vault after the rotation.
+        case replaceKeys
     }
 
     enum Phase: Equatable {
@@ -52,6 +59,12 @@ final class PostureSwitchModel: Identifiable {
         /// §2b Screen 4: the floor; the passphrase field when it was not
         /// just set.
         case floor(needsPassphrase: Bool)
+        /// pre-13x 3b (Replace All Keys): the passphrase typed and verified
+        /// against the VAULT's copy (copy §4's authorization line).
+        case authorize
+        /// pre-13x 3b (Replace All Keys, the checkbox): the new passphrase
+        /// (≥ 12, matched) — re-wrapped on the new vault after the rotation.
+        case newPassphrase
         /// During (the runner's phase renders as text).
         case running
         /// Done — the notice when the insurance went off; the offer follows
@@ -83,19 +96,39 @@ final class PostureSwitchModel: Identifiable {
     private var facts: PostureSwitchRunner.DoorFacts?
     private var passphraseInHand: String?
     private var wordsInHand: [String]?
+    /// pre-13x 3b: the checkbox's new passphrase (Replace All Keys).
+    private var newPassphraseInHand: String?
     private(set) var outcome: PostureSwitchRunner.Outcome?
+    /// pre-13x 3b: *Also choose a new passphrase* (the face sets it before
+    /// leaving the explain screen; a passphrase handed in from the change
+    /// door already IS the new one, so the face hides the checkbox then).
+    var wantsNewPassphrase = false
 
-    init(mode: Mode, runner: PostureSwitchRunner, controller: ProtectionController, vaultTie: VaultTie?) {
+    /// `passphraseInHand` / `wordsInHand` (pre-13x 3b): the secrets a key
+    /// door hands over when its checkbox opens Replace All Keys — the NEW
+    /// passphrase after a change (the authorize screen is skipped), the NEW
+    /// words after a regeneration (the words screens are skipped).
+    init(
+        mode: Mode, runner: PostureSwitchRunner, controller: ProtectionController, vaultTie: VaultTie?,
+        passphraseInHand: String? = nil, wordsInHand: [String]? = nil
+    ) {
         self.mode = mode
         self.runner = runner
         self.controller = controller
         self.vaultTie = vaultTie
+        self.passphraseInHand = passphraseInHand
+        self.wordsInHand = wordsInHand
     }
 
     /// The runner's progress, for the During line.
     var runnerPhase: PostureSwitchRunner.Phase { runner.phase }
 
     var vaultConstrains: Bool { vaultTie != nil }
+    /// pre-13x 3b (Replace All Keys' faces): the Standard addendum renders
+    /// under a Standard posture; the checkbox hides when a door handed the
+    /// new passphrase in (it IS the new one).
+    var accountPostureIsStandard: Bool { controller.posture == .standard }
+    var passphraseHandedIn: Bool { passphraseInHand != nil }
 
     // MARK: - The door
 
@@ -118,6 +151,21 @@ final class PostureSwitchModel: Identifiable {
             case .enter: phase = .explain
             case .leave: phase = .leaveConfirm
             case .resume: await resume(passphrase: nil)
+            case .replaceKeys:
+                // The front check (§5's row): enrolled; holding the CURRENT
+                // master — the key file's recorded corpus id against the
+                // vault's (a stale one ⇒ *this account's keys don't match
+                // this library*; the follow's door is the notice bar's).
+                guard facts.enrolled else {
+                    phase = .failed(ProtectionCopy.replaceKeysNotEnrolled)
+                    return
+                }
+                if let vaultID = facts.vaultCorpusKeyID, let recorded = controller.keyFileVaultCorpusKeyID,
+                   recorded != vaultID {
+                    phase = .failed(Self.message(for: CorpusRotationError.staleMaster(vaultKeyID: vaultID, heldKeyID: recorded)))
+                    return
+                }
+                phase = .explain
             }
         } catch {
             phase = .failed(Self.message(for: error))
@@ -128,6 +176,12 @@ final class PostureSwitchModel: Identifiable {
 
     func continueFromExplain() {
         guard case .explain = phase else { return }
+        if mode == .replaceKeys {
+            // The words in hand already (a regeneration handed them in) ⇒
+            // straight to the authorization; else the words screens.
+            if wordsInHand != nil { advanceAfterWords() } else { advanceToWords() }
+            return
+        }
         if controller.hasPassphraseWrap {
             advanceToWords()
         } else {
@@ -197,7 +251,24 @@ final class PostureSwitchModel: Identifiable {
         case .confirm(let shown): phase = .wordsConfirm(shown)
         case .done:
             wordsInHand = words.wordsInHand
-            phase = .floor(needsPassphrase: passphraseInHand == nil)
+            if mode == .replaceKeys {
+                advanceAfterWords()
+            } else {
+                phase = .floor(needsPassphrase: passphraseInHand == nil)
+            }
+        }
+    }
+
+    /// pre-13x 3b (Replace All Keys): after the words — the passphrase
+    /// typed at `.authorize` unless a door handed it in; then the new
+    /// passphrase when the checkbox is on; then the act.
+    private func advanceAfterWords() {
+        if passphraseInHand == nil {
+            phase = .authorize
+        } else if wantsNewPassphrase, newPassphraseInHand == nil {
+            phase = .newPassphrase
+        } else {
+            Task { await replaceKeys() }
         }
     }
 
@@ -308,6 +379,81 @@ final class PostureSwitchModel: Identifiable {
         }
     }
 
+    // MARK: - pre-13x 3b: Replace All Keys — the authorization, the new passphrase, the act
+
+    /// Copy §4's authorization: the passphrase TYPED and verified against
+    /// the VAULT's copy — a retired word (the key file's recorded descriptor
+    /// no longer the vault's) is refused with copy §5's sentence.
+    func authorize(passphrase typed: String) async {
+        guard case .authorize = phase, !busy, mode == .replaceKeys else { return }
+        lastError = nil
+        guard !typed.isEmpty else {
+            lastError = ProtectionCopy.message(for: StoreKeyEnvelopeError.emptyPassphrase)
+            return
+        }
+        busy = true
+        defer { busy = false }
+        guard await verifyPassphrase(typed) else {
+            if let recorded = controller.keyFileRecordedVaultKDF, let vaultKDF = facts?.vaultKDF, recorded != vaultKDF {
+                lastError = ProtectionCopy.retiredPassphraseAtDoor
+            }
+            return
+        }
+        passphraseInHand = typed
+        if wantsNewPassphrase {
+            phase = .newPassphrase
+        } else {
+            await replaceKeys()
+        }
+    }
+
+    /// The checkbox's new passphrase (≥ 12, matched); then the act.
+    func commitNewPassphrase(_ new: String, confirmation: String) async {
+        guard case .newPassphrase = phase, !busy, mode == .replaceKeys else { return }
+        lastError = nil
+        guard new.count >= 12 else {
+            lastError = ProtectionCopy.passphraseTooShort
+            return
+        }
+        guard new == confirmation else {
+            lastError = ProtectionCopy.passphraseMismatch
+            return
+        }
+        newPassphraseInHand = new
+        await replaceKeys()
+    }
+
+    /// The act: `runner.replaceAllKeys` (§4's steps 1–4 without the posture
+    /// change — the Apple-held copy kept under Standard, decision 30), then
+    /// the checkbox's re-wrap on the NEW vault under the NEW proof through
+    /// the tie's change-passphrase act (the key file's copy follows under
+    /// the vault's new descriptor through the session's landing).
+    private func replaceKeys() async {
+        guard let passphrase = passphraseInHand else {
+            phase = .authorize
+            return
+        }
+        busy = true
+        defer { busy = false }
+        phase = .running
+        controller.switchInProgress = true
+        defer { controller.switchInProgress = false }
+        do {
+            let outcome = try await runner.replaceAllKeys(passphrase: passphrase, recoveryWords: wordsInHand)
+            self.outcome = outcome
+            if let new = newPassphraseInHand {
+                guard let change = vaultTie?.changePassphrase else {
+                    throw KeyDoorRefusal("The new passphrase couldn't be set here — your keys were replaced; change the passphrase under Account & Encryption.")
+                }
+                try await change(passphrase, new)
+                passphraseInHand = new
+            }
+            phase = .done(insuranceOff: false, hasOffer: false)
+        } catch {
+            phase = .failed(Self.message(for: error))
+        }
+    }
+
     // MARK: - Done → the offer
 
     func continueFromDone() {
@@ -403,6 +549,12 @@ final class PostureSwitchModel: Identifiable {
             return ProtectionCopy.resumeBody
         case PostureSwitchError.nothingToResume:
             return "Nothing is left to finish."
+        case PostureSwitchError.wordsRequired:
+            // pre-13x 3b (ledger 44) — a reading: the copy file has no line
+            // for a road no face can reach; the sentence names the fix.
+            return "Your twelve words are needed to replace your keys — type them, or generate new ones."
+        case let refusal as KeyDoorRefusal:
+            return refusal.description
         case PostureSwitchError.passphraseRequired:
             return ProtectionCopy.resumeNeedsPassphrase
         case PostureSwitchError.restartRequired:

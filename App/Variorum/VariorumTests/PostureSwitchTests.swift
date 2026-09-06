@@ -1416,6 +1416,183 @@ struct PostureSwitchTests {
         #expect(StoreEncryptionMigration.opens(world.storeURL, key: try newFile.unwrapKey(passphrase: "sesame")))
     }
 
+    // MARK: - pre-13x 3b: REPLACE ALL KEYS (copy §4; decisions 30 · 32 · 33; ledger 17 / 37 / 44)
+
+    /// THE RUNNER'S GUARD (ledger 44 — decision 33 at the runner): a vault
+    /// that carries a recovery wrap is never rewritten without the twelve
+    /// words in hand — `run(entersCastle:…)` refuses `recoveryWords: nil`
+    /// typed, before the marker and before the vault write. RED ON OLD: the
+    /// runner minted a wrap-less vault (`beginOverAVaultWithARecoveryWrapLeavesNoStaleWrap`
+    /// pinned that as "no stale wrap" — correct for the 14c road, WRONG for
+    /// decision 33's doors) and the twelve words died silently.
+    @Test func replaceAllKeysRefusesWithoutTheWordsWhenTheVaultCarriesAWrap() async throws {
+        let world = try await makeWorld()
+        defer { world.tearDown() }
+        let client = try #require(world.vaultClient)
+        let material = try #require(world.oldMaterial)
+        try await VaultEnrollment(client: client).landRecoveryWrap(words: world.words, material: material)
+        let before = try await world.vault()
+        #expect(before.format.masterWrappedByRecovery != nil)
+
+        await #expect(throws: PostureSwitchError.wordsRequired) {
+            try await world.runner.replaceAllKeys(passphrase: "sesame", recoveryWords: nil)
+        }
+        let after = try await world.vault()
+        #expect(after.revision == before.revision, "nothing was written")
+        #expect(after.format.masterWrappedByRecovery == before.format.masterWrappedByRecovery,
+                "the twelve words still open the account")
+        #expect(after.format.classKey(for: .corpus)?.keyID == material.corpusKeyID, "no rotation began")
+        #expect(try await world.marker() == nil)
+        #expect(StoreEncryptionMigration.opens(world.storeURL, key: world.oldKey), "the library untouched")
+        #expect(world.keyStore.load() == material)
+        #expect(PostureSwitchModel.message(for: PostureSwitchError.wordsRequired).contains("twelve words"))
+
+        // The same road WITH the words in hand runs (the 2b road, byte-unchanged).
+        let outcome = try await world.runner.replaceAllKeys(passphrase: "sesame", recoveryWords: world.words)
+        #expect(!outcome.entersCastle)
+        let rotated = try await world.vault()
+        #expect(rotated.format.masterWrappedByRecovery != nil, "M′ wrapped under the words in hand")
+        #expect(try rotated.format.unwrapMaster(withRecoveryKey: RecoveryPhrase.recoveryWrapKey(words: world.words))
+                == outcome.material?.masterSymmetricKey, "the SAME twelve words open M′")
+    }
+
+    /// THE CEREMONY (copy §4 whole, `PostureSwitchModel.Mode.replaceKeys`):
+    /// the front check refuses a STALE recorded corpus id with the
+    /// keys-don't-match sentence and runs nothing; then, on the current
+    /// id: explain (the Standard addendum; the *Also choose a new
+    /// passphrase* checkbox) → the existing words typed and checked against
+    /// the VAULT → the passphrase typed and checked against the VAULT — a
+    /// wrong word under a stale recorded descriptor is worded RETIRED (copy
+    /// §5) — → the new passphrase (≥ 12, matched) → the rotation over the
+    /// runner → the re-wrap on the NEW vault under the NEW proof, the key
+    /// file's copy following under the vault's new descriptor → Done, no
+    /// offer. Decision 30's PRESENCE: the vault's Apple-held copy of M′
+    /// EXISTS after a Standard Replace All Keys (the addendum's fact).
+    /// RED ON OLD: no `.replaceKeys` mode existed — the interim door took
+    /// the passphrase alone; the front check and the retired wording are
+    /// new mechanisms.
+    @Test func theReplaceKeysCeremonyWalksCopyFoursOrderRefusesAStaleMasterAndLandsTheNewPassphraseUnderTheNewProof() async throws {
+        let world = try await makeWorld()
+        defer { world.tearDown() }
+        let client = try #require(world.vaultClient)
+        let material = try #require(world.oldMaterial)
+        try await VaultEnrollment(client: client).landRecoveryWrap(words: world.words, material: material)
+        let vaultBefore = try await world.vault()
+        let controller = makeController(for: world)
+
+        // The session + the landing (production's shape: `wireOneSecretHooks`
+        // routes the session's landing to the controller's `landVaultMaterial`).
+        let encryption = EncryptionSession(store: world.keyStore, client: client, signedIn: { true })
+        encryption.onVaultMaterialLanded = { landing in
+            // The scripted custody leaf never moved the guard backing: the
+            // controller must hold L′ (the silent item's key after the
+            // switch) for the landing to write the NEW key file.
+            world.guardBacking.auto = world.keyInHand
+            _ = await controller.landVaultMaterial(landing)
+        }
+        var vaultChecks: [String] = []
+        let tie = VaultTie(
+            hasRecoveryWrap: true,
+            verifyPassphrase: { typed in
+                vaultChecks.append(typed)
+                do { _ = try await VaultEnrollment(client: client).enroll(passphrase: typed); return .match }
+                catch VaultEnrollmentError.wrongPassphrase { return .mismatch("not the account's") }
+                catch { return .couldNotCheck("\(error)") }
+            },
+            verifyRecoveryWords: { text in
+                do { _ = try await VaultEnrollment(client: client).enroll(recoveryWords: EncryptionSession.words(from: text)); return .match }
+                catch VaultEnrollmentError.wrongRecoveryPhrase { return .mismatch("not the account's words") }
+                catch { return .couldNotCheck("\(error)") }
+            },
+            changePassphrase: { current, new in
+                await encryption.changePassphrase(authorization: .passphrase(current), newPassphrase: new)
+                if let refusal = encryption.lastError { throw KeyDoorRefusal(refusal) }
+            })
+
+        // THE FRONT CHECK: the key file records a STALE corpus id.
+        var file = try #require(try StoreKeyEnvelope.loadCurrent(besideStore: world.storeURL))
+        try file.recordVaultReconciliation(kdf: file.passphrase?.kdf, corpusKeyID: "corpus-of-an-older-vault")
+        try file.write(at: file.preferredURL(besideStore: world.storeURL))
+        controller.refreshEnvelopeFacts()
+        let stale = PostureSwitchModel(mode: .replaceKeys, runner: world.runner, controller: controller, vaultTie: tie)
+        await stale.start()
+        #expect(stale.phase == .failed(PostureSwitchModel.message(for: CorpusRotationError.staleMaster(
+            vaultKeyID: material.corpusKeyID, heldKeyID: "corpus-of-an-older-vault"))),
+                "this account's keys don't match this library — nothing runs")
+        let markerAfterStale = try await world.marker()
+        let revisionAfterStale = try await world.vault().revision
+        #expect(markerAfterStale == nil && revisionAfterStale == vaultBefore.revision)
+
+        // The current id, recorded under a descriptor that is NOT the
+        // vault's (the word was changed elsewhere — the retired class).
+        try file.recordVaultReconciliation(kdf: fastKDF(), corpusKeyID: material.corpusKeyID)
+        try file.write(at: file.preferredURL(besideStore: world.storeURL))
+        controller.refreshEnvelopeFacts()
+        let model = PostureSwitchModel(mode: .replaceKeys, runner: world.runner, controller: controller, vaultTie: tie)
+        await model.start()
+        #expect(model.phase == .explain)
+        #expect(model.accountPostureIsStandard && !model.passphraseHandedIn)
+        model.wantsNewPassphrase = true
+        model.continueFromExplain()
+        #expect(model.phase == .wordsExisting, "the vault carries a wrap ⇒ type mine or generate new")
+        model.chooseTypeWords()
+        #expect(model.phase == .wordsType)
+        await model.submitExistingWords(world.words.reversed().joined(separator: " "))
+        #expect(model.lastError != nil && model.phase == .wordsType, "wrong words refused against the vault")
+        await model.submitExistingWords(world.words.joined(separator: " "))
+        #expect(model.phase == .authorize, "the passphrase is typed at the authorization")
+
+        await model.authorize(passphrase: "not-the-passphrase")
+        #expect(model.lastError == ProtectionCopy.retiredPassphraseAtDoor,
+                "a wrong word under a stale recorded descriptor is worded RETIRED (copy §5)")
+        #expect(vaultChecks == ["not-the-passphrase"] && model.phase == .authorize)
+        #expect(try await world.marker() == nil, "nothing ran")
+        await model.authorize(passphrase: "sesame")
+        #expect(model.phase == .newPassphrase, "the checkbox asks for the new passphrase before the act")
+        await model.commitNewPassphrase("short", confirmation: "short")
+        #expect(model.lastError == ProtectionCopy.passphraseTooShort && model.phase == .newPassphrase)
+        await model.commitNewPassphrase("a-brand-new-passphrase-12", confirmation: "a-brand-new-passphrase-13")
+        #expect(model.lastError == ProtectionCopy.passphraseMismatch && model.phase == .newPassphrase)
+        await model.commitNewPassphrase("a-brand-new-passphrase-12", confirmation: "a-brand-new-passphrase-12")
+        #expect(model.phase == .done(insuranceOff: false, hasOffer: false), "\(model.phase)")
+        #expect(!controller.switchInProgress)
+        let outcome = try #require(model.outcome)
+        #expect(!outcome.entersCastle && outcome.preSwitchSnapshots.isEmpty, "no posture change, no offer")
+
+        // The rotation: M′/C′, every row re-encrypted, the library under L′.
+        let vault = try await world.vault()
+        let newMaterial = try #require(outcome.material)
+        #expect(vault.format.classKey(for: .corpus)?.keyID == newMaterial.corpusKeyID)
+        #expect(vault.format.previousCorpusKey == nil && vault.format.rotationStartedSeq == nil)
+        #expect(outcome.reencrypted >= 3)
+        // DECISION 30 — THE PRESENCE PIN: the Apple-held copy of M′ EXISTS
+        // under the SAME A (the addendum's honest sentence, tested).
+        #expect(vault.format.masterWrappedByAppleHeld != nil && vault.format.appleKeyID == world.apple.id)
+        #expect(try vault.format.unwrapMaster(withAppleKey: world.apple.symmetricKey) == newMaterial.masterSymmetricKey)
+        #expect(world.calls.custodyTargets.last == .auto, "custody re-saved silent under Standard")
+        #expect(world.posture == .standard)
+        // THE NEW PASSPHRASE on the NEW vault under the NEW proof: opens M′; the old is refused.
+        let opened = try await VaultEnrollment(client: client).enroll(passphrase: "a-brand-new-passphrase-12")
+        #expect(opened.masterKey == newMaterial.masterKey)
+        await #expect(throws: VaultEnrollmentError.wrongPassphrase) {
+            _ = try await VaultEnrollment(client: client).enroll(passphrase: "sesame")
+        }
+        // THE KEY FILE followed under the VAULT's new descriptor (§3.6 — derive once).
+        let after = try await world.vault()
+        #expect(after.format.keyProofHash == KeyProof.hash(master: newMaterial.masterSymmetricKey), "the proof is M′'s")
+        let newFile = try world.keyFile(outcome.newKeyFingerprint)
+        let newKey = try newFile.unwrapKey(passphrase: "a-brand-new-passphrase-12")
+        #expect(StoreEncryptionMigration.opens(world.storeURL, key: newKey), "L′ under the NEW passphrase")
+        #expect(throws: StoreKeyEnvelopeError.wrongPassphrase) { _ = try newFile.unwrapKey(passphrase: "sesame") }
+        #expect(newFile.passphrase?.kdf == after.format.kdf && newFile.vaultKDF == after.format.kdf,
+                "the local copy is under the vault's descriptor — the lobby derives once")
+        #expect(newFile.vaultCorpusKeyID == newMaterial.corpusKeyID)
+        #expect(newFile.apple != nil && newFile.appleKeyID == world.apple.id, "the Apple copy again under Standard")
+        #expect(try newFile.unwrapKey(recoveryWords: world.words) == newKey, "L′ under the same twelve words")
+        #expect(try after.format.unwrapMaster(withRecoveryKey: RecoveryPhrase.recoveryWrapKey(words: world.words))
+                == newMaterial.masterSymmetricKey)
+    }
+
     // MARK: - pre-13x 2c.1: THE FOLLOW's face over the real runner
 
     /// §7 end to end on the sibling: the controller's reconcile reads the

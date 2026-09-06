@@ -707,10 +707,17 @@ final class ProtectionController {
 
     /// Open a ceremony (Use Castle… · Use Standard · the resume door).
     /// nil runner ⇒ nothing opens (the doors do not render — P-2).
-    func openSwitch(_ mode: PostureSwitchModel.Mode, vaultTie: VaultTie?) {
+    /// pre-13x 3b: `passphraseInHand` / `wordsInHand` — the secrets a key
+    /// door hands to Replace All Keys through its checkbox (the screens
+    /// that would ask again are skipped).
+    func openSwitch(
+        _ mode: PostureSwitchModel.Mode, vaultTie: VaultTie?,
+        passphraseInHand: String? = nil, wordsInHand: [String]? = nil
+    ) {
         guard let switchRunner, activeSwitch == nil else { return }
         activeSwitch = PostureSwitchModel(
-            mode: mode, runner: switchRunner, controller: self, vaultTie: vaultTie)
+            mode: mode, runner: switchRunner, controller: self, vaultTie: vaultTie,
+            passphraseInHand: passphraseInHand, wordsInHand: wordsInHand)
     }
 
     func closeSwitch() {
@@ -899,14 +906,6 @@ final class ProtectionController {
         } catch {
             return ProtectionCopy.message(for: error)
         }
-    }
-
-    /// ONE SECRET, the following direction: the vault's passphrase was
-    /// set/enrolled/changed with `passphrase` — the store wrap follows so
-    /// the two can never diverge. Quiet (a hook, not a surface); a
-    /// failure leaves the old wrap standing and the next hook retries.
-    func followVaultPassphrase(_ passphrase: String) async {
-        _ = await setPassphrase(passphrase)
     }
 
     /// ONE SECRET, the guarding direction: does `passphrase` unwrap the
@@ -1620,9 +1619,6 @@ func wireOneSecretHooks(
     keyVault: KeyVaultClient?,
     auth: AuthSession
 ) {
-    encryption.onPassphraseChanged = { passphrase in
-        await protection.followVaultPassphrase(passphrase)
-    }
     encryption.onRecoveryPhraseLanded = { words in
         _ = await protection.landRecoveryWrap(words: words)
     }

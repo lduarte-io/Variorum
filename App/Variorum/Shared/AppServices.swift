@@ -241,7 +241,7 @@ final class AppServices {
         // pre-13x 2b: the re-key door's runner is the composition ROOT's
         // (`PostureSwitchRunner` — it needs the bootstrap's re-key road and
         // the protection controller, which this type does not hold; the
-        // root wires `encryption.rekeyRunner` after building it). The 14c
+        // root wires `encryption.replaceKeysDoor` after building it — pre-13x 3b). The 14c
         // `AccountRekey` brain and the T1 recency probe's caller retired
         // with the truncate road. What stays here: the persisted marker's
         // surface read — refresh() projects the resume prompt from it (the

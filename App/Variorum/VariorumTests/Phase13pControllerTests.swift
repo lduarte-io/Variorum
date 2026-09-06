@@ -501,14 +501,10 @@ struct Phase13pControllerTests {
         #expect(await w.controller.verifyPassphraseAgainstStore("wrong") == false)
     }
 
-    @Test func followVaultPassphraseLandsTheStoreWrap() async throws {
-        let w = try world()
-        await w.controller.followVaultPassphrase("suite passphrase")
-        let envelope = try #require(w.envelopeBox.value)
-        #expect(try envelope.unwrapKey(passphrase: "suite passphrase") == w.key)
-    }
-
-    // MARK: - The reconcile's foreign sidecar
+    // pre-13x 3b: `followVaultPassphrase` (the 13p fresh-descriptor road)
+    // RETIRED — a passphrase change lands the key file's copy under the
+    // VAULT's descriptor through `landVaultMaterial` (pinned below in
+    // `landingTheVaultMaterialWritesTheMasterCopyAndReconcilesUnderTheVaultsDescriptor`).
 
     @Test func aForeignSidecarIsSetAsideNeverOverwrittenInPlace() async throws {
         let foreignKey = StoreKey.mint()

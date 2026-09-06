@@ -150,13 +150,21 @@ struct VariorumApp: App {
                             }
                             fresh.encryption.joinStandardAct = { try await runner.followIntoStandard() }
                             fresh.encryption.libraryOwnerIsForeign = { bootstrap.protection.differentOwner }
-                            fresh.encryption.rekeyRunner = { passphrase in
-                                let outcome = try await runner.replaceAllKeys(
-                                    passphrase: passphrase, recoveryWords: nil)
-                                guard let material = outcome.material else {
-                                    throw PostureSwitchError.syncKeysUnavailable
+                            // pre-13x 3b (copy §4): REPLACE ALL KEYS — the
+                            // ceremony held on the controller (a pending
+                            // marker opens its resume instead); the change
+                            // and regenerate doors hand their new secret in.
+                            fresh.encryption.replaceKeysDoor = { [weak fresh] passphrase, words in
+                                Task { @MainActor in
+                                    let tie = VaultTie.make(services: fresh)
+                                    if let pending = await runner.pendingMarker() {
+                                        bootstrap.protection.openSwitch(.resume(pending), vaultTie: tie)
+                                    } else {
+                                        bootstrap.protection.openSwitch(
+                                            .replaceKeys, vaultTie: tie,
+                                            passphraseInHand: passphrase, wordsInHand: words)
+                                    }
                                 }
-                                return material
                             }
                         }
                         await fresh.start()

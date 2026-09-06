@@ -81,13 +81,6 @@ final class EncryptionSession {
     /// immediately instead of a stale reading).
     var onKeysChanged: (() -> Void)?
 
-    /// Phase 13p Batch 2 (R13p-4, one secret — the FOLLOWING direction):
-    /// fired with the passphrase after a successful setup, passphrase
-    /// enrollment, or passphrase change — the store-key envelope re-wraps
-    /// under the same passphrase so the two can never diverge. Wired by
-    /// the composition root to `ProtectionController.followVaultPassphrase`.
-    var onPassphraseChanged: ((String) async -> Void)?
-
     /// Phase 13p ladder R1-m3 (one secret — the PHRASE's following
     /// direction, `onPassphraseChanged`'s twin): fired with the twelve
     /// CONFIRMED words after the vault's recovery wrap lands. Wired by the
@@ -155,14 +148,15 @@ final class EncryptionSession {
         + "library's passphrase here (check it under Settings ▸ Protection "
         + "if you're unsure)."
 
-    /// Phase 14c (CF-8) → pre-13x 2b: the re-key door's runner, injected
-    /// by the composition root — the `PostureSwitchRunner`'s Replace All
-    /// Keys road (the in-place rotation: the vault rewritten under the old
-    /// proof, every row re-encrypted, THIS library re-keyed, custody
-    /// re-saved); nil = the door stays dormant, exactly like an
-    /// unconfigured client. CONTRACT: the runner lands custody itself and
-    /// returns the final material only when the whole road has run.
-    var rekeyRunner: ((String) async throws -> DeviceKeyMaterial)?
+    /// pre-13x 3b (copy §4; decisions 30 · 32 · 33): REPLACE ALL KEYS' door
+    /// — opens the ceremony on the controller (`openSwitch(.replaceKeys)`,
+    /// or the marker's resume when one is pending), wired by both roots;
+    /// nil = not rendered (P-2). The 2c interim door (`rekeyRunner` /
+    /// `rekeyAccount` — the passphrase alone, the words dropped) RETIRED
+    /// with the runner's own guard (ledger 44). `passphraseInHand` /
+    /// `wordsInHand`: the change and regenerate doors' checkbox hands the
+    /// NEW secret over so the ceremony never asks for it again.
+    var replaceKeysDoor: ((_ passphraseInHand: String?, _ wordsInHand: [String]?) -> Void)?
 
     /// pre-13x 2c (§7): THE FOLLOW's door — the Encryption tab's
     /// keys-replaced section opens the follow (the controller's
@@ -449,53 +443,43 @@ final class EncryptionSession {
     /// current passphrase OR the recovery phrase; recovery words untouched.
     /// The recovery road also enrolls (the forgot-passphrase path on a
     /// fresh device).
+    /// pre-13x 3b (copy §4; §3.6's derive-once): the key file's P copy
+    /// follows under the SAME descriptor the vault's new wrap uses — the
+    /// vault is re-fetched after the core act and the landing hook re-wraps
+    /// the local copy under it (`reconcilePassphraseWrap`) and records the
+    /// reconciliation; the 13p `onPassphraseChanged` road (a FRESH
+    /// descriptor of the store's own — the lobby derived twice) is retired.
     func changePassphrase(authorization: VaultAuthorization, newPassphrase: String) async {
         await runFlow { enrollment in
             let material = try await enrollment.changePassphrase(
                 authorizedBy: authorization, newPassphrase: newPassphrase)
             await self.adopt(material)
-            let hasRecovery = (try? await enrollment.hasRecoveryWrap()) ?? false
-            self.state = .enrolled(hasRecoveryWrap: hasRecovery)
+            guard let fetched = try await enrollment.client.fetchVault() else { throw KeyVaultClientError.vaultAbsent }
+            self.state = .enrolled(hasRecoveryWrap: fetched.format.masterWrappedByRecovery != nil)
+            await self.onVaultMaterialLanded?(VaultLanding(
+                material: material, kdf: fetched.format.kdf, passphrase: newPassphrase))
         }
-        // 13p one-secret: the store wrap follows the vault's change.
-        if case .enrolled = state { await onPassphraseChanged?(newPassphrase) }
     }
 
-    // MARK: - The re-key door (Phase 14c, CF-8 — THE DESIGN 3)
-
-    /// CF-8 → pre-13x 2b: replace the account's encryption keys IN PLACE
-    /// (the runner's road, pinned in core's `CorpusRotationTests`); this
-    /// method is the flow's state machine: friction already passed (the
-    /// surface's checkbox), busy handling, the refusal wording, and the
-    /// landing — `enrolled(hasRecoveryWrap: false)`, the standing CF-5
-    /// mandatory-phrase step (batch 3's door passes the words through the
-    /// runner instead; until then a fresh phrase follows as at setup).
-    func rekeyAccount(passphrase: String) async {
-        guard let rekeyRunner else {
-            lastError = "Project keys not configured (ProjectConfig.swift)"
-            return
+    /// pre-13x 3b (copy §4's forgot roads; the 13p reset door MERGED here):
+    /// re-wrap the vault's master under a NEW passphrase from this device's
+    /// HELD material — no old passphrase; the authorization is the caller's
+    /// (Touch ID / Face ID under Castle, the plain confirm under Standard).
+    /// The key file's copy follows under the vault's new descriptor exactly
+    /// as `changePassphrase` lands it. Returns the worded refusal.
+    @discardableResult
+    func rewrapPassphrase(newPassphrase: String) async -> String? {
+        guard let material = await store.offMain({ $0.load() }) else {
+            return VaultRewrapNeedsUnlockedKeys().description
         }
-        guard !busy else { return }
-        busy = true
-        lastError = nil
-        defer { busy = false }
-        do {
-            _ = try await rekeyRunner(passphrase)
-            // Custody was landed by the runner; the fresh vault has no
-            // recovery wrap yet — step 4 begins now.
-            state = .enrolled(hasRecoveryWrap: false)
-            onKeysChanged?()
-        } catch {
-            // The brain's sequence is not atomic; the honest road back
-            // from ANY mid-run failure is running the door again (the
-            // rerun is pinned in core). Say so, plus the cause.
-            lastError = "Key replacement didn't finish — nothing is lost; "
-                + "run Replace Keys again to complete it. (\(Self.message(for: error)))"
+        await runFlow { enrollment in
+            try await enrollment.rewrapPassphrase(material: material, newPassphrase: newPassphrase)
+            guard let fetched = try await enrollment.client.fetchVault() else { throw KeyVaultClientError.vaultAbsent }
+            self.state = .enrolled(hasRecoveryWrap: fetched.format.masterWrappedByRecovery != nil)
+            await self.onVaultMaterialLanded?(VaultLanding(
+                material: material, kdf: fetched.format.kdf, passphrase: newPassphrase))
         }
-        // Ladder R1-1: re-read the persisted marker — a completed run
-        // cleared it (the banner retires); a failed run left it set (the
-        // banner joins the thrown-failure message and outlives it).
-        rekeyIncomplete = await rekeyIncompleteCheck?() ?? false
+        return lastError
     }
 
     /// pre-13x 3a — the enroll/Connect landing: custody takes the material

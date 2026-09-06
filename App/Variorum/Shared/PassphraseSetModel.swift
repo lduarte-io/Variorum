@@ -41,10 +41,21 @@ struct VaultTie {
     let hasRecoveryWrap: Bool
     let verifyPassphrase: (String) async -> Verify
     let verifyRecoveryWords: (String) async -> Verify
+    /// pre-13x 3b: the CHANGE-PASSPHRASE act over the account's vault — the
+    /// Replace All Keys ceremony's *Also choose a new passphrase* runs it on
+    /// the NEW vault after the rotation (the current passphrase authorizes;
+    /// the key file's copy follows under the vault's new descriptor through
+    /// the session's landing). nil = no act wired (a scripted tie).
+    var changePassphrase: ((_ current: String, _ new: String) async throws -> Void)? = nil
 
     /// Built from the running services; nil when no vault constrains.
     static func make(services: AppServices?) -> VaultTie? {
         guard let services, let client = services.keyVault else { return nil }
+        let encryption = services.encryption
+        let change: (String, String) async throws -> Void = { current, new in
+            await encryption.changePassphrase(authorization: .passphrase(current), newPassphrase: new)
+            if let refusal = encryption.lastError { throw KeyDoorRefusal(refusal) }
+        }
         switch services.encryption.state {
         case .signedOut, .noVault, .unknown:
             return nil
@@ -88,7 +99,8 @@ struct VaultTie {
                     } catch {
                         return .couldNotCheck(EncryptionSession.message(for: error))
                     }
-                })
+                },
+                changePassphrase: change)
         }
     }
 }
@@ -276,3 +288,10 @@ enum PhraseOffer {
 
 
 extension PassphraseSetModel: Identifiable {}
+
+/// pre-13x 3b: a key door's worded refusal carried as an error (the
+/// session speaks refusals into `lastError`; a ceremony's act needs a throw).
+nonisolated struct KeyDoorRefusal: Error, CustomStringConvertible, Equatable {
+    let description: String
+    init(_ description: String) { self.description = description }
+}
