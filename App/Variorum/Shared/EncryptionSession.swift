@@ -32,6 +32,7 @@
 //  semantics moves: same reads, same writes, same order, same wording.
 //
 
+import CryptoKit
 import Foundation
 import Observation
 import os
@@ -119,6 +120,16 @@ final class EncryptionSession {
     var joinStandardAct: (@MainActor () async throws -> Void)?
     /// The iCloud key as this device reads it (the (d) join's silent road).
     var readAppleKey: (@Sendable () -> AppleKey?)?
+    /// pre-13x 3a — SYNC SETUP's iCloud key: read, else MINTED and written
+    /// (decision 3 — the first Standard library on this iCloud); nil = the
+    /// Keychain refused (the setup refuses rather than birthing a vault
+    /// without its Apple copy — a posture the user never chose).
+    var readOrMintAppleKey: (@Sendable () -> AppleKey?)?
+    /// pre-13x 3a — the STORE's facts and acts the setup ceremony composes
+    /// (the library's passphrase and words, verified against the KEY FILE —
+    /// corner 27; the descriptor the vault is born under — §3.6's
+    /// derive-once). Wired by `wireOneSecretHooks`; nil = no store composed.
+    var storeTie: StoreTie?
     /// The library's own posture (the key-file rule) — the setup ceremony
     /// speaks from it (corner 26).
     var libraryPosture: (@MainActor () -> Posture)?
@@ -233,11 +244,22 @@ final class EncryptionSession {
 
     // MARK: - The flows (each hands custody to the Keychain, then heals sync)
 
-    /// SETUP (first device): create the vault — passphrase wrap ONLY
-    /// (Round 5); the recovery phrase is the flow's own MANDATORY next step
-    /// (CF-5): the resulting `enrolled(hasRecoveryWrap: false)` state IS
-    /// step 4, and the surface cannot complete setup without landing it.
-    func setUp(passphrase: String) async {
+    /// SETUP (the first device of an account — pre-13x 3a, copy §2a; the
+    /// postures design decision 5): ONE core road — the vault BORN with the
+    /// passphrase wrap, the recovery wrap (the twelve words REQUIRED — in
+    /// hand from the ceremony: generated and confirmed, or the library's,
+    /// typed) and, under a STANDARD library, the Apple-held copy of the
+    /// master under the iCloud key (read, else minted; a refused Keychain
+    /// refuses the setup — never a vault born Castle-shaped by accident);
+    /// the vault's passphrase wrap under the KEY FILE's current descriptor
+    /// (derive once); then custody and the key file through the landing.
+    /// The 14b "passphrase wrap only, the wrap lands later" shape retires
+    /// for this door.
+    func setUp(passphrase: String, recoveryWords: [String]) async {
+        guard !recoveryWords.isEmpty else {
+            lastError = EncryptionSession.message(for: RecoveryPhraseError.invalidWordCount(0))
+            return
+        }
         // 13p one-secret guard: a store wrap that this passphrase does
         // NOT open refuses the setup before anything is minted.
         if let storePassphraseGuard,
@@ -245,13 +267,34 @@ final class EncryptionSession {
             lastError = Self.oneSecretMismatchMessage
             return
         }
-        await runFlow { enrollment in
-            let material = try await enrollment.setUp(passphrase: passphrase)
-            await self.adopt(material)
-            self.state = .enrolled(hasRecoveryWrap: false)
+        // The library's OWN posture gives the vault its shape (corner 26).
+        // No posture in view (a store-less composition — no key file, no
+        // Apple leaves wired) ⇒ no Apple road exists and the vault is born
+        // without the copy; a STANDARD library whose A the Keychain will
+        // not hold REFUSES the setup — never a vault born Castle-shaped for
+        // a posture the user never chose.
+        let posture = libraryPosture?()
+        var appleHeld: (key: SymmetricKey, id: String)?
+        if posture == .standard {
+            guard let apple = readOrMintAppleKey?() else {
+                lastError = Self.appleKeyRefusedAtSetup
+                return
+            }
+            appleHeld = (apple.symmetricKey, apple.id)
         }
-        if case .enrolled = state { await onPassphraseChanged?(passphrase) }
+        let kdf = storeTie?.passphraseKDF() ?? .v1(salt: PassphraseKDF.randomSalt())
+        await runFlow { enrollment in
+            let material = try await enrollment.setUp(
+                passphrase: passphrase, recoveryWords: recoveryWords, appleHeldCopy: appleHeld, kdf: kdf)
+            _ = await self.adoptEnrolledMaterial(
+                material, kdf: kdf, typedPassphrase: passphrase, typedWords: recoveryWords, refreshing: false)
+            self.state = .enrolled(hasRecoveryWrap: true)
+        }
     }
+
+    static let appleKeyRefusedAtSetup =
+        "iCloud Keychain wouldn't hold the key on this \(ProtectionCopy.deviceName) — nothing was set up. "
+        + "Turn on iCloud Keychain, or enter Castle first (Settings ▸ Protection) and set sync up there."
 
     /// ENROLLMENT (new device, R-4; copy §2d's Castle road — pre-13x 3a):
     /// passphrase → unwrap → custody under the current shape → the key
@@ -664,4 +707,23 @@ final class EncryptionSession {
     nonisolated static func isRekeyIncompleteError(_ text: String) -> Bool {
         text == SyncError.accountRekeyIncomplete.description
     }
+}
+
+/// pre-13x 3a — THE STORE TIE: what the setup ceremony needs from the
+/// library's key file and controller, as closures (the `VaultTie`
+/// pattern from the other side): the passphrase and words on file, their
+/// verification against the KEY FILE (one secret, corner 27), the set act,
+/// and the passphrase wrap's descriptor (the vault is born under it —
+/// §3.6's derive-once). Wired once by `wireOneSecretHooks`.
+nonisolated struct StoreTie: Sendable {
+    var libraryPosture: @MainActor () -> Posture
+    var hasPassphrase: @MainActor () -> Bool
+    var hasRecoveryWords: @MainActor () -> Bool
+    /// nil = no wrap on file (nothing to verify against).
+    var verifyPassphrase: @MainActor (String) async -> Bool?
+    /// The set act; returns the worded refusal, nil = landed.
+    var setPassphrase: @MainActor (String) async -> String?
+    /// nil = no words on file.
+    var verifyRecoveryWords: @MainActor (String) async -> Bool?
+    var passphraseKDF: @MainActor () -> PassphraseKDF.Descriptor?
 }

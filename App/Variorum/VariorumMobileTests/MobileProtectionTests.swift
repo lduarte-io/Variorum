@@ -878,6 +878,7 @@ struct MobileOneSecretHooksTests {
     @Test func theFactoryWiresTheEnrollHooksAndTheJoinRoutesOnThePhone() async throws {
         let w = world()
         #expect(w.encryption.enrollFacts != nil && w.encryption.readAppleKey != nil && w.encryption.libraryPosture != nil)
+        #expect(w.encryption.storeTie != nil && w.encryption.readOrMintAppleKey != nil, "the setup ceremony's tie is wired on the phone too")
         #expect(w.encryption.onVaultMaterialLanded != nil && w.controller.landEnrollment != nil)
         #expect(w.encryption.libraryPosture?() == .standard, "a fresh silent library reads Standard by its own rule")
         let joins = LockIsolated<[String?]>([])
@@ -929,22 +930,27 @@ struct MobileOneSecretHooksTests {
         }
     }
 
-    /// **The PHRASE (the fourth mechanism):** vault-minted twelve words
+    /// **The PHRASE (the fourth mechanism):** the vault's twelve words
     /// land on the store envelope too, so the one phrase opens the
     /// library as well as the account — on the phone's composition.
+    /// (pre-13x 3a: the SETUP lands the words itself — a vault is never
+    /// born without its recovery wrap — so the words the setup used are
+    /// the ones proven here, and a second landing without `allowReplace`
+    /// is refused as the deliberate step it is.)
     @Test func vaultMintedWordsOpenTheLibraryTooOnThePhone() async throws {
         let w = world()
         #expect(await w.controller.setPassphrase(vaultPassphrase) == nil)
-        await w.encryption.setUp(passphrase: vaultPassphrase)
+        let words = await w.encryption.setUp(passphrase: vaultPassphrase)
         #expect(w.encryption.lastError == nil)
-
-        let words = try #require(w.encryption.generatePhrase())
-        await w.encryption.landRecoveryWrap(confirmedWords: words, allowReplace: false)
-        #expect(w.encryption.lastError == nil)
+        #expect(words.count == 12)
 
         let envelope = try #require(w.envelopeBox.value)
         #expect(try envelope.unwrapKey(recoveryWords: words) == w.key,
                 "the vault's twelve words unwrap the STORE key too")
+
+        let second = try #require(w.encryption.generatePhrase())
+        await w.encryption.landRecoveryWrap(confirmedWords: second, allowReplace: false)
+        #expect(w.encryption.lastError != nil, "replacing the setup's words is a deliberate step (Regenerate), never a quiet overwrite")
     }
 
     /// **The RESET's vault half (pin b, positive arm):** a phone reset

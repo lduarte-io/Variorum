@@ -768,6 +768,12 @@ final class ProtectionController {
     /// pre-13x 3a: the iCloud key as this device can READ it (never minted
     /// here — enrollment needs the one the vault's copy is under).
     nonisolated func readAppleKey() -> AppleKey? { appleKeys.read() }
+    /// pre-13x 3a: sync setup's A — read, else minted (decision 3: the
+    /// first Standard library on this iCloud); nil = the Keychain refused.
+    nonisolated func readOrMintAppleKey() -> AppleKey? { appleKeys.readOrMint() }
+    /// The key file's passphrase-wrap descriptor (the vault is born under
+    /// it — §3.6's derive-once); nil = no wrap on file.
+    var currentPassphraseKDF: PassphraseKDF.Descriptor? { loadEnvelope()?.passphrase?.kdf }
 
     /// The library key's custody SHAPE as this controller knows it without
     /// a Keychain hop (corner 45): after adoption, a resident ⇒ the gated
@@ -1591,7 +1597,17 @@ func wireOneSecretHooks(
     }
     encryption.enrollFacts = { protection.enrollReading }
     encryption.readAppleKey = { protection.readAppleKey() }
+    encryption.readOrMintAppleKey = { protection.readOrMintAppleKey() }
     encryption.libraryPosture = { protection.libraryOwnPosture }
+    // pre-13x 3a: the store tie the setup ceremony composes (copy §2a).
+    encryption.storeTie = StoreTie(
+        libraryPosture: { protection.libraryOwnPosture },
+        hasPassphrase: { protection.hasPassphraseWrap },
+        hasRecoveryWords: { protection.hasRecoveryWrap },
+        verifyPassphrase: { await protection.verifyPassphraseAgainstStore($0) },
+        setPassphrase: { await protection.setPassphrase($0) },
+        verifyRecoveryWords: { await protection.verifyRecoveryWordsAgainstStore($0) },
+        passphraseKDF: { protection.currentPassphraseKDF })
     protection.landEnrollment = { material, kdf in
         await encryption.adoptEnrolledMaterial(material, kdf: kdf)
     }

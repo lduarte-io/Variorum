@@ -117,8 +117,8 @@ struct EncryptionFlowTests {
         await session.setUp(passphrase: "orchard-lantern-13")
 
         #expect(session.lastError == nil)
-        #expect(session.state == .enrolled(hasRecoveryWrap: false),
-                "Round 5: a fresh vault is passphrase-wrap-only — the phrase surface comes next")
+        #expect(session.state == .enrolled(hasRecoveryWrap: true),
+                "pre-13x 3a: a vault is born with its recovery wrap (decision 5) — the 14b phrase-comes-next shape retired")
         #expect(store.load() != nil, "custody landed in the (in-memory) key store")
         #expect(vault.hasRow, "the vault row was created")
         #expect(healed == 1, "landing keys triggers the sync heal exactly once")
@@ -161,12 +161,12 @@ struct EncryptionFlowTests {
 
         await session.setUp(passphrase: "orchard-lantern-13")
         await session.refresh()
-        #expect(session.state == .enrolled(hasRecoveryWrap: false))
+        #expect(session.state == .enrolled(hasRecoveryWrap: true))
 
         // A fresh device against the same vault: not enrolled.
         let other = makeEncryptionSession(store: .inMemory(), vault: vault)
         await other.refresh()
-        #expect(other.state == .notEnrolled(hasRecoveryWrap: false))
+        #expect(other.state == .notEnrolled(hasRecoveryWrap: true))
     }
 
     @Test func signedOutStateBlocksNothingButNamesTheOrder() async throws {
@@ -217,7 +217,7 @@ struct CopyFlowRoundTests {
         #expect(throws: SyncKeyProviderError.notEnrolled) {
             try provider.currentKeys()
         }
-        #expect(session.state == .notEnrolled(hasRecoveryWrap: false),
+        #expect(session.state == .notEnrolled(hasRecoveryWrap: true),
                 "the vault survives — this device just isn't enrolled anymore")
         #expect(healed == 1,
                 "the hook fires so the next round surfaces the locked line NOW, not at the next cadence")
@@ -247,14 +247,14 @@ struct CopyFlowRoundTests {
             try provider.currentKeys()
         }
         await session.refresh()
-        #expect(session.state == .notEnrolled(hasRecoveryWrap: false),
+        #expect(session.state == .notEnrolled(hasRecoveryWrap: true),
                 "before the unlock the surface offers the roads, never a false enrolled")
 
         backing.simulateUnlock()  // the lobby's one Touch ID read
         #expect(store.load() != nil, "unlocked for the rest of the launch")
         #expect(throws: Never.self) { try provider.currentKeys() }
         await session.refresh()
-        #expect(session.state == .enrolled(hasRecoveryWrap: false))
+        #expect(session.state == .enrolled(hasRecoveryWrap: true))
         #expect(try provider.deviceIdentity() == backing.deviceID,
                 "the identity rides the same custody")
     }
@@ -340,7 +340,6 @@ struct CopyFlowRoundTests {
         let store = DeviceKeyStore.inMemory()
         let vault = ScriptedVault()
         let session = makeEncryptionSession(store: store, vault: vault)
-        await session.setUp(passphrase: passphrase)
 
         // The store side, composed as VariorumApp composes it: a real
         // ProtectionController over a scripted gate whose envelope box we
@@ -359,15 +358,20 @@ struct CopyFlowRoundTests {
                     memoryKiB: 256, iterations: 1, parallelism: 1,
                     salt: PassphraseKDF.randomSalt(), outputBytes: 32)
             }))
+        // pre-13x 3a: the SETUP lands the words itself (a vault is never
+        // born without its recovery wrap), and the follow into the store
+        // envelope rides the production composition — `onVaultMaterialLanded`
+        // → `landVaultMaterial`, whose words' copy is the twin. A second
+        // phrase without `allowReplace` is refused as the deliberate step.
         let followed = LockIsolated<[String]>([])
-        session.onRecoveryPhraseLanded = { words in
-            followed.setValue(words)
-            _ = await controller.landRecoveryWrap(words: words)
+        session.onVaultMaterialLanded = { landing in
+            followed.setValue(landing.recoveryWords ?? [])
+            _ = await controller.landVaultMaterial(landing)
         }
 
-        let words = try #require(session.generatePhrase())
-        await session.landRecoveryWrap(confirmedWords: words, allowReplace: false)
+        let words = await session.setUp(passphrase: passphrase)
         #expect(session.lastError == nil)
+        #expect(words.count == 12)
         #expect(followed.value == words,
                 "the twin hands the SAME twelve words to the store side")
         let envelope = try #require(envelopeBox.value,
@@ -415,37 +419,14 @@ struct CopyFlowRoundTests {
         let provider = DeviceKeySyncProvider(store: store)
         #expect(try provider.currentKeys().corpusKeyID == fresh.corpusKeyID,
                 "sync serves the NEW key, never the orphaned one")
-        #expect(session.state == .enrolled(hasRecoveryWrap: false),
+        #expect(session.state == .enrolled(hasRecoveryWrap: true),
                 "the mandatory phrase step follows, exactly as for any fresh vault")
     }
 
-    /// CF-1/5/7: the stepped setup flow's gates — the passphrase step
-    /// requires a matched non-empty entry, the warning step refuses to
-    /// advance without HER checkbox, and the checkbox's label is her exact
-    /// sentence.
-    @Test func theSetupStepsRefuseToAdvanceWithoutTheirGates() {
-        #expect(!EncryptionSetupRules.canLeavePassphraseStep(passphrase: "", confirm: ""))
-        #expect(!EncryptionSetupRules.canLeavePassphraseStep(passphrase: "a", confirm: "b"))
-        #expect(EncryptionSetupRules.canLeavePassphraseStep(passphrase: "a", confirm: "a"))
-
-        #expect(!EncryptionSetupRules.canLeaveWarningStep(acknowledged: false),
-                "CF-7: the warning step refuses to advance without the checkbox")
-        #expect(EncryptionSetupRules.canLeaveWarningStep(acknowledged: true))
-
-        #expect(EncryptionView.understandingCheckbox
-                == "I understand that if I lose my recovery phrase and my passphrase, "
-                + "that I will not be able to recover anything from sync or add new devices",
-                "her exact sentence IS the checkbox copy")
-    }
-
-    /// CF-6's pin: the warning says the LOCAL copy survives (her find: "it
-    /// seems like your local copy will be destroyed with the current
-    /// phrasing") — while keeping the honest unrecoverable-by-design core.
-    @Test func theWarningCopyCarriesTheLocalCopyClarification() {
-        #expect(EncryptionView.setupWarning.contains(
-            "the writing already on your devices stays readable"))
-        #expect(EncryptionView.setupWarning.contains("Variorum cannot reset it"),
-                "the honest core survives the clarification")
+    /// CF-13's pin survives the 14b setup flow's retirement (pre-13x 3a —
+    /// copy §2a's ceremony replaced the stepped flow, its gates and its
+    /// checkbox): the whole phrase is the secret, said where the words show.
+    @Test func theWholePhraseIsTheSecretLineSurvives() {
         #expect(EncryptionView.wholePhraseIsTheSecret.contains("no single word is a password"),
                 "CF-13: the whole phrase is the secret")
     }
@@ -481,7 +462,7 @@ struct CrossoverRoundTests {
 
         let session = makeEncryptionSession(store: store, vault: freshVault)
         await session.refresh()
-        #expect(session.state == .keysReplaced(hasRecoveryWrap: false),
+        #expect(session.state == .keysReplaced(hasRecoveryWrap: true),
                 "CF-16: stale custody against a re-keyed vault projects REPLACED — never a false 'enrolled'")
         #expect(store.load() == stale,
                 "the projection alone touches nothing — custody is replaced only by the re-enroll save")
@@ -503,19 +484,19 @@ struct CrossoverRoundTests {
 
         let session = makeEncryptionSession(store: store, vault: freshVault)
         await session.refresh()
-        #expect(session.state == .keysReplaced(hasRecoveryWrap: false))
+        #expect(session.state == .keysReplaced(hasRecoveryWrap: true))
 
         await session.enroll(passphrase: "the-new-passphrase")
         #expect(session.lastError == nil)
         let fresh = try #require(store.load())
         #expect(fresh != stale, "the enroll save overwrites the stale custody wholesale")
         #expect(fresh.corpusKeyID != stale.corpusKeyID)
-        #expect(session.state == .enrolled(hasRecoveryWrap: false))
+        #expect(session.state == .enrolled(hasRecoveryWrap: true))
         let provider = DeviceKeySyncProvider(store: store)
         #expect(try provider.currentKeys().corpusKeyID == fresh.corpusKeyID,
                 "sync serves the NEW key, never the orphaned one")
         await session.refresh()
-        #expect(session.state == .enrolled(hasRecoveryWrap: false),
+        #expect(session.state == .enrolled(hasRecoveryWrap: true),
                 "a fresh projection agrees — the ids match again")
     }
 
@@ -784,8 +765,8 @@ struct AccountLifecycleDoorTests {
         let error = try #require(session.lastError)
         #expect(error.contains("run Replace Keys again"),
                 "the rerun road is spoken on every failure")
-        #expect(session.state == .enrolled(hasRecoveryWrap: false),
-                "the state is untouched by the failure (setup's step-4 state stands)")
+        #expect(session.state == .enrolled(hasRecoveryWrap: true),
+                "the state is untouched by the failure (setup's state — born with its wrap — stands)")
     }
 
     /// Ladder R1-1: the surface RE-SPEAKS the rerun road across a
@@ -1248,30 +1229,20 @@ struct FreshAccountSetupGeneralityTests {
         #expect(first.state == .noVault,
                 "a fresh account with no vault row is offered SETUP — the same door as hers")
 
-        // The stepped flow's gates (CF-1/5/7) are pure rules — identical
-        // for every account by construction; walked as the view walks them.
-        #expect(!EncryptionSetupRules.canLeavePassphraseStep(
-            passphrase: "meadow-lantern-9", confirm: "meadow-lantern-typo"))
-        #expect(EncryptionSetupRules.canLeavePassphraseStep(
-            passphrase: "meadow-lantern-9", confirm: "meadow-lantern-9"))
-        #expect(!EncryptionSetupRules.canLeaveWarningStep(acknowledged: false),
-                "her checkbox sentence gates the stranger exactly as it gated her")
-        #expect(EncryptionSetupRules.canLeaveWarningStep(acknowledged: true))
-
-        await first.setUp(passphrase: "meadow-lantern-9")
-        #expect(first.lastError == nil)
-        #expect(first.state == .enrolled(hasRecoveryWrap: false),
-                "the landing IS the CF-5 MANDATORY step 4 — for a stranger exactly as for her")
-        #expect(vault.hasRow, "the stranger's vault row was created")
-        #expect(firstStore.load() != nil, "custody landed")
-
-        // Step 4: generate → (write down) → confirm-by-re-entry lands the wrap.
-        let words = try #require(first.generatePhrase())
-        #expect(words.count == 12)
-        await first.landRecoveryWrap(confirmedWords: words, allowReplace: false)
+        // pre-13x 3a (copy §2a): the setup door takes the twelve words — the
+        // vault is BORN with its recovery wrap, for a stranger exactly as
+        // for her (decision 5's letter, account-agnostic).
+        let words = try RecoveryPhrase.generate()
+        await first.setUp(passphrase: "meadow-lantern-9", recoveryWords: words)
         #expect(first.lastError == nil)
         #expect(first.state == .enrolled(hasRecoveryWrap: true),
-                "setup completes only WITH the phrase — CF-5's letter, account-agnostic")
+                "one row: the passphrase wrap AND the recovery wrap at birth")
+        #expect(vault.hasRow, "the stranger's vault row was created")
+        #expect(firstStore.load() != nil, "custody landed")
+        // Words are REQUIRED: a wordless setup refuses before anything is minted.
+        let wordless = session(userID: userID + "-wordless", store: .inMemory(), vault: ScriptedVault())
+        await wordless.setUp(passphrase: "meadow-lantern-9", recoveryWords: [])
+        #expect(wordless.lastError != nil && wordless.state != .enrolled(hasRecoveryWrap: true))
 
         // A second device of the SAME fresh account: ordinary enrollment.
         let secondStore = DeviceKeyStore.inMemory()

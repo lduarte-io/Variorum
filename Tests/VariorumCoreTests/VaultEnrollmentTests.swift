@@ -30,6 +30,46 @@ struct VaultEnrollmentTests {
         #expect(UUID(uuidString: material.corpusKeyID) != nil)
     }
 
+    /// pre-13x 3a — SYNC SETUP's one row: the vault is BORN with the
+    /// passphrase wrap, the recovery wrap and (Standard) the Apple-held copy
+    /// — every road opens the same master; the proof hash landed; the
+    /// passphrase wrap under the descriptor the caller passed (derive-once
+    /// at birth); a Castle-born library's vault carries NO Apple copy (pin
+    /// the absence). Inherently red-on-old: the 14b create was passphrase-
+    /// only and the wrap landed later.
+    @Test func setUpBornWithEveryWrapInOneRow() async throws {
+        let world = VaultTestWorld()
+        let words = try RecoveryPhrase.generate()
+        let apple = SymmetricKey(size: .bits256)
+        let kdf = PassphraseKDF.Descriptor.v1(salt: PassphraseKDF.randomSalt())
+        let material = try await world.enrollment.setUp(
+            passphrase: "orchard-lantern-13", recoveryWords: words,
+            appleHeldCopy: (key: apple, id: "apple-1"), kdf: kdf)
+        let vault = try #require(try await world.client.fetchVault()).format
+        #expect(vault.masterWrappedByRecovery != nil && vault.masterWrappedByAppleHeld != nil && vault.appleKeyID == "apple-1")
+        #expect(vault.keyProofHash == KeyProof.hash(master: material.masterSymmetricKey))
+        #expect(vault.kdf == kdf, "the caller's descriptor is the vault's")
+        let byWords = try vault.unwrapMaster(withRecoveryKey: try RecoveryPhrase.recoveryWrapKey(words: words))
+        let byApple = try vault.unwrapMaster(withAppleKey: apple)
+        let byPassphrase = try vault.unwrapMaster(withPassphraseKey: try PassphraseKDF.deriveKey(passphrase: "orchard-lantern-13", descriptor: kdf))
+        #expect(byWords.data == material.masterKey && byApple.data == material.masterKey && byPassphrase.data == material.masterKey)
+        // A second device enrolls by the words at once — no later landing.
+        let enrolled = try await world.enrollment.enroll(recoveryWords: words)
+        #expect(enrolled == material)
+        // Castle-born: no Apple copy.
+        let castle = VaultTestWorld()
+        _ = try await castle.enrollment.setUp(
+            passphrase: "orchard-lantern-13", recoveryWords: words, appleHeldCopy: nil)
+        let castleVault = try #require(try await castle.client.fetchVault()).format
+        #expect(castleVault.masterWrappedByAppleHeld == nil && castleVault.appleKeyID == nil, "a Castle library's vault carries no Apple-held copy")
+        #expect(castleVault.masterWrappedByRecovery != nil)
+        // Malformed words refuse before any server contact.
+        await #expect(throws: RecoveryPhraseError.self) {
+            _ = try await VaultTestWorld().enrollment.setUp(
+                passphrase: "orchard-lantern-13", recoveryWords: ["only", "three", "words"], appleHeldCopy: nil)
+        }
+    }
+
     @Test func setUpRefusesWhenAVaultAlreadyExists() async throws {
         let world = VaultTestWorld()
         _ = try await world.enrollment.setUp(passphrase: "orchard-lantern-13")

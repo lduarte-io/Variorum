@@ -168,34 +168,50 @@ final class PostureSwitchModel: Identifiable {
         advanceToWords()
     }
 
-    // MARK: - §2b Screen 3: the twelve words
+    // MARK: - §2b Screen 3: the twelve words (the shared brain — pre-13x 3a)
 
     private var wordsExist: Bool {
         controller.hasRecoveryWrap || (vaultTie?.hasRecoveryWrap ?? false)
             || (facts?.vaultHasRecoveryWrap ?? false)
     }
 
+    /// The ONE words brain both ceremonies compose (`WordsCeremony`); this
+    /// model mirrors its step into its own phases.
+    private var words: WordsCeremony?
+
     private func advanceToWords() {
-        if wordsExist {
-            phase = .wordsExisting
-        } else {
-            generateWords()
+        do {
+            words = try WordsCeremony(wordsExist: wordsExist)
+            mirrorWords()
+        } catch {
+            phase = .failed(Self.message(for: error))
+        }
+    }
+
+    private func mirrorWords() {
+        guard let words else { return }
+        switch words.step {
+        case .existing: phase = .wordsExisting
+        case .typeExisting: phase = .wordsType
+        case .show(let shown): phase = .wordsShow(shown)
+        case .confirm(let shown): phase = .wordsConfirm(shown)
+        case .done:
+            wordsInHand = words.wordsInHand
+            phase = .floor(needsPassphrase: passphraseInHand == nil)
         }
     }
 
     func chooseTypeWords() {
         guard case .wordsExisting = phase else { return }
-        phase = .wordsType
+        words?.chooseTypeMine()
+        mirrorWords()
     }
 
     func chooseGenerateNewWords() {
         guard case .wordsExisting = phase else { return }
-        generateWords()
-    }
-
-    private func generateWords() {
         do {
-            phase = .wordsShow(try RecoveryPhrase.generate())
+            try words?.chooseGenerateNew()
+            mirrorWords()
         } catch {
             phase = .failed(Self.message(for: error))
         }
@@ -204,31 +220,22 @@ final class PostureSwitchModel: Identifiable {
     /// The existing words, typed — verified against the VAULT when
     /// enrolled, else against this library's key file.
     func submitExistingWords(_ typed: String) async {
-        guard case .wordsType = phase, !busy else { return }
+        guard case .wordsType = phase, !busy, let words else { return }
         lastError = nil
-        let words = EncryptionSession.words(from: typed)
-        do {
-            _ = try RecoveryPhrase.recoveryWrapKey(words: words)
-        } catch {
-            lastError = EncryptionSession.message(for: error)
-            return
-        }
         busy = true
         defer { busy = false }
-        if let vaultTie, vaultTie.hasRecoveryWrap {
-            switch await vaultTie.verifyRecoveryWords(typed) {
-            case .match: break
-            case .mismatch(let message): lastError = message; return
-            case .couldNotCheck(let reason):
-                lastError = "Couldn't check the words against your account (\(reason))."
-                return
+        let ok = await words.submitExisting(typed) { text in
+            if let vaultTie, vaultTie.hasRecoveryWrap {
+                return await vaultTie.verifyRecoveryWords(text)
             }
-        } else if let local = await controller.verifyRecoveryWordsAgainstStore(typed), !local {
-            lastError = ProtectionCopy.message(for: StoreKeyEnvelopeError.wrongRecoveryPhrase)
-            return
+            switch await controller.verifyRecoveryWordsAgainstStore(text) {
+            case true?: return .match
+            case false?: return .mismatch(ProtectionCopy.message(for: StoreKeyEnvelopeError.wrongRecoveryPhrase))
+            case nil: return .match
+            }
         }
-        wordsInHand = words
-        phase = .floor(needsPassphrase: passphraseInHand == nil)
+        guard ok else { lastError = words.lastError; return }
+        mirrorWords()
     }
 
     func markWordsCopied() {
@@ -236,25 +243,17 @@ final class PostureSwitchModel: Identifiable {
     }
 
     func acknowledgeWordsWritten() {
-        guard case .wordsShow(let words) = phase else { return }
-        phase = .wordsConfirm(words)
+        guard case .wordsShow = phase else { return }
+        words?.acknowledgeWritten()
+        mirrorWords()
     }
 
     /// Screen 3b: the re-entry must be the shown words, exactly.
     func confirmWords(_ typed: String) {
-        guard case .wordsConfirm(let words) = phase else { return }
+        guard case .wordsConfirm = phase, let words else { return }
         lastError = nil
-        let entered = EncryptionSession.words(from: typed).map { $0.lowercased() }
-        guard entered.count == 12 else {
-            lastError = EncryptionSession.message(for: RecoveryPhraseError.invalidWordCount(entered.count))
-            return
-        }
-        guard entered == words.map({ $0.lowercased() }) else {
-            lastError = ProtectionCopy.wordsMismatch
-            return
-        }
-        wordsInHand = words
-        phase = .floor(needsPassphrase: passphraseInHand == nil)
+        guard words.confirm(typed) else { lastError = words.lastError; return }
+        mirrorWords()
     }
 
     // MARK: - §2b Screen 4: the floor, and the act

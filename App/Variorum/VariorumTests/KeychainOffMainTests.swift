@@ -341,7 +341,7 @@ struct EncryptionCustodyThreadTests {
         await session.setUp(passphrase: "orchard-lantern-13")
 
         #expect(session.lastError == nil)
-        #expect(session.state == .enrolled(hasRecoveryWrap: false))
+        #expect(session.state == .enrolled(hasRecoveryWrap: true))  // pre-13x 3a: born with its wrap
         // pre-13x 1a: the CF-12 gate consult is gone with the gate — the
         // flow's ONE custody write, off-main.
         #expect(log.names == ["save"], "the flow's one custody write")
@@ -362,7 +362,7 @@ struct EncryptionCustodyThreadTests {
 
         await session.refresh()
 
-        #expect(session.state == .enrolled(hasRecoveryWrap: false),
+        #expect(session.state == .enrolled(hasRecoveryWrap: true),
                 "the projection is byte-unchanged — only the thread moved")
         #expect(log.names == ["load"], "the one custody read (pre-13x 1a: the gate probe is gone)")
         #expect(log.anyOnMainThread == false)

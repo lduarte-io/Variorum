@@ -547,11 +547,9 @@ struct SecretCheckTests {
         let vault = RecordingVault()
         let session = EncryptionSession(
             store: .inMemory(), client: vaultClient(vault), signedIn: { true })
-        await session.setUp(passphrase: passphrase)
-        #expect(session.lastError == nil)
-        let words = try #require(session.generatePhrase())
-        await session.landRecoveryWrap(confirmedWords: words, allowReplace: false)
-        #expect(session.lastError == nil)
+        // pre-13x 3a: the setup door lands the words itself (one row).
+        let words = await session.setUp(passphrase: passphrase)
+        #expect(session.lastError == nil && words.count == 12)
         return (vault, words)
     }
 

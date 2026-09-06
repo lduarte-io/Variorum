@@ -159,6 +159,53 @@ public struct VaultEnrollment: Sendable {
             journalBridgeKey: journal.data, journalBridgeKeyID: journalID)
     }
 
+    /// pre-13x 3a — SYNC SETUP's ONE road (the postures design decision 5,
+    /// §5's Set-up-sync row, corner 26): the vault is BORN with its
+    /// passphrase wrap, its recovery wrap (the twelve words in hand —
+    /// generated + confirmed, or typed and verified against the library's
+    /// key file) and, under a STANDARD library, the Apple-held copy of the
+    /// master under the iCloud key — ONE row, the proof hash included. The
+    /// 14b "passphrase wrap only, the wrap lands later" shape retires for
+    /// this door (`landRecoveryWrap`'s add arm stays for the regenerate
+    /// door and the store-side follow). `kdf` is the passphrase wrap's
+    /// descriptor — the app passes the key file's current one so the
+    /// vault's M-wrap and the file's L-wrap share one derivation (§3.6's
+    /// derive-once at birth); a fresh v1 descriptor by default.
+    public func setUp(
+        passphrase: String, recoveryWords: [String],
+        appleHeldCopy: (key: SymmetricKey, id: String)?,
+        kdf: PassphraseKDF.Descriptor = .v1(salt: PassphraseKDF.randomSalt())
+    ) async throws -> DeviceKeyMaterial {
+        guard !passphrase.isEmpty else { throw VaultEnrollmentError.emptyPassphrase }
+        let recoveryKey = try RecoveryPhrase.recoveryWrapKey(words: recoveryWords)
+        if try await client.fetchVault() != nil {
+            throw KeyVaultClientError.vaultAlreadyExists
+        }
+        let master = SymmetricKey(size: .bits256)
+        let corpus = SymmetricKey(size: .bits256)
+        let journal = SymmetricKey(size: .bits256)
+        let corpusID = UUID().uuidString.lowercased()
+        let journalID = UUID().uuidString.lowercased()
+        let passphraseKey = try measuredDerive(passphrase: passphrase, descriptor: kdf)
+        var format = try KeyVaultFormat.create(
+            masterKey: master,
+            passphraseKey: passphraseKey,
+            recoveryKey: recoveryKey,
+            classKeys: [
+                (keyClass: .corpus, keyID: corpusID, key: corpus),
+                (keyClass: .journalBridge, keyID: journalID, key: journal),
+            ],
+            kdf: kdf)
+        if let appleHeldCopy {
+            format = try format.settingAppleHeldCopy(
+                masterKey: master, appleKey: appleHeldCopy.key, appleKeyID: appleHeldCopy.id)
+        }
+        try await client.createVault(format)
+        return DeviceKeyMaterial(
+            masterKey: master.data, corpusKey: corpus.data, corpusKeyID: corpusID,
+            journalBridgeKey: journal.data, journalBridgeKeyID: journalID)
+    }
+
     // MARK: - Enrollment (new device — R-4: passphrase entry is v1's road)
 
     /// Sign-in → type the passphrase → unwrap master → class keys. A wrong

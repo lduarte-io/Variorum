@@ -470,6 +470,15 @@ final class AppServices {
         }
     }
 
+    /// SYNC SETUP over a foreign-stamped library (copy §2a's *Move It to
+    /// This Account*): the same two writes right after the create — the
+    /// material was just minted, so no enroll — then the chain reconnects.
+    func adoptLibraryAfterSetup() async throws {
+        guard let userID = await auth.currentUserID else { throw ConnectLibraryError.signedOut }
+        try await adoptLibrary(into: userID)
+        await connectSyncIfAllowed()
+    }
+
     /// The signed-in library's owner verdict, read for the setup ceremony's
     /// pre-Screen-1 confirm (copy §2a): true when ANY owner-carrying row was
     /// stamped by another account (`Queries.foreignOwnerExists`).

@@ -174,6 +174,44 @@ nonisolated extension ProtectionCopy {
         + "can't hand over the key. Enter your passphrase or twelve words once; "
         + "after that this \(deviceName) opens on its own."
 
+    // MARK: - §2a Turning on sync (pre-13x 3a, verbatim)
+
+    /// Copy §4: signed in, no sync yet.
+    static let syncNotSetUpLine = "Sync isn't set up on this account."
+    static let turnOnSyncDoor = "Turn On Sync…"
+    // Screen 1 — what sync needs
+    static let setupNeedsTitle = "Sync needs two things you keep."
+    static let setupNeedsBody =
+        "Sync is end-to-end encrypted: the Variorum server stores your writing in a form it can't "
+        + "read. To make that true, your account needs a passphrase and twelve words that only you have."
+    static let setupNeedsBullets: [String] = [
+        "Your passphrase lets a new device into your sync.",
+        "Your twelve words do the same, and are your way back if you forget the passphrase.",
+    ]
+    static let setupStandardAddendum =
+        "You're in Standard, so day to day your Apple account handles this for you and you won't type "
+        + "either one. Keep them anyway: if your Apple account is ever gone, they are the only way back "
+        + "to your writing."
+    static let setupCastleAddendum =
+        "You're in Castle, so these two are the only ways into your writing besides your enrolled "
+        + "devices. Nobody can reset them — not Apple, not us."
+    static let setupContinue = "Continue"
+    // Screen 2 — the passphrase (the field labels, sub-line and refusals are §2b's, shared)
+    static let setupPassphraseTitle = "Choose your encryption passphrase."
+    // Screen 4 — done
+    static let setupDoneStandard =
+        "Sync is on. Your Apple account holds a key, so your other Apple devices will join with nothing "
+        + "typed. Your passphrase and twelve words are your way back if your Apple account is ever gone."
+    static let setupDoneCastle =
+        "Sync is on. Your other devices will ask for your passphrase or twelve words, once. Nothing "
+        + "else opens your writing."
+    static let setupDoneDoor = "Done"
+    // If this library once synced under another account (before Screen 1)
+    static let setupMoveSentence =
+        "This library last synced under a different account. Turning on sync here moves it to this "
+        + "account and uploads everything in it. Your other account isn't changed."
+    static let setupMoveDoor = "Move It to This Account"
+
     // MARK: - §2d The new device joining — Castle (pre-13x 3a, verbatim)
 
     static let joinCastleTitle = "Enter your passphrase to join sync."

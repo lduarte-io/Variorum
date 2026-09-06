@@ -36,20 +36,6 @@
 import SwiftUI
 import VariorumCore
 
-/// The stepped setup flow's advance rules (CF-1/5/7) — pure, pinned by
-/// tests; the view holds the step @State and consults these, so the gates
-/// can never quietly soften.
-nonisolated enum EncryptionSetupRules {
-    static func canLeavePassphraseStep(passphrase: String, confirm: String) -> Bool {
-        !passphrase.isEmpty && passphrase == confirm
-    }
-
-    /// CF-7: the warning step refuses to advance without her checkbox.
-    static func canLeaveWarningStep(acknowledged: Bool) -> Bool {
-        acknowledged
-    }
-}
-
 struct EncryptionView: View {
     let services: AppServices
     /// D1: the phone's styling seam (nil on the Mac ALWAYS — the
@@ -57,17 +43,9 @@ struct EncryptionView: View {
     /// in this file is phone-only by construction).
     @Environment(\.sharedPageStyle) private var pageStyle
 
-    /// CF-1: the setup flow's position (steps 1–3; step 4 — the mandatory
-    /// recovery phrase — is the `enrolled(hasRecoveryWrap: false)` state
-    /// itself, so it can never be skipped or lost to a relaunch).
-    private enum SetupStep {
-        case passphrase, warning, create
-    }
-    @State private var setupStep: SetupStep = .passphrase
-    @State private var setupPassphrase = ""
-    @State private var setupConfirm = ""
-    /// CF-7: the understanding checkbox's state.
-    @State private var acknowledged = false
+    /// pre-13x 3a: the sync-setup ceremony's brain (copy §2a), made when the
+    /// account has no vault and the user opens the door; nil = the door.
+    @State private var setup: SyncSetupModel?
 
     @State private var enrollPassphrase = ""
     @State private var usePhraseInstead = false
@@ -118,38 +96,6 @@ struct EncryptionView: View {
     }
 
     // MARK: - The copy (GATE RATIFY / her walk — the record carries these)
-
-    /// CF-10: the first-experience framing — what E2EE IS, before any
-    /// secret is chosen.
-    static let setupIntro =
-        "End-to-end encryption means your writing is sealed on this device before it syncs — "
-        + "the server only ever stores sealed text it cannot read. Two secrets can unseal it: "
-        + "the passphrase you choose now, and a 12-word recovery phrase you'll write down in a "
-        + "moment. Variorum holds neither."
-
-    /// THE ONE HONEST WARNING (setup step 2) — unrecoverable-by-design is
-    /// its core, with CF-6's clarification: the LOCAL copy survives; what's
-    /// lost is the synced copy and new-device enrollment.
-    static let setupWarning =
-        "This passphrase is not your account password, and it is never sent anywhere. "
-        + "Variorum cannot reset it and cannot read your writing without it — there is no "
-        + "“forgot passphrase” email, by design. If you lose both the passphrase and your "
-        + "12-word recovery phrase, the synced copy is unreadable forever and no new device "
-        + "can be added — the writing already on your devices stays readable and stays yours."
-
-    /// CF-7 — HER EXACT SENTENCE, the mandatory checkbox's label.
-    static let understandingCheckbox =
-        "I understand that if I lose my recovery phrase and my passphrase, "
-        + "that I will not be able to recover anything from sync or add new devices"
-
-    static let passphraseRecommendation =
-        "Use a long passphrase: four or more random words, or 16+ mixed characters — and "
-        + "never a password you use anywhere else."
-
-    /// CF-9: the storage recommendation, hers near-verbatim.
-    static let storageAdvice =
-        "Store them like they matter: on paper or in a password manager. Keep two copies of "
-        + "the passphrase and two copies of the recovery phrase, stored separately."
 
     /// CF-13: the whole phrase is the secret.
     static let wholePhraseIsTheSecret =
@@ -333,84 +279,25 @@ struct EncryptionView: View {
         }
     }
 
-    // MARK: - Setup (first device) — the stepped flow (CF-1/5/6/7/9/10/13)
+    // MARK: - Setup (the first device of an account) — copy §2a (pre-13x 3a)
 
+    /// Copy §4's signed-in-no-sync line with *Turn On Sync…*; the ceremony
+    /// renders inline once opened (both platforms — the ONE brain).
     @ViewBuilder
     private var setupSection: some View {
-        switch setupStep {
-        case .passphrase:
-            PageHeading("Step 1 of 4 — Choose your encryption passphrase", style: pageStyle)
-            Text(Self.setupIntro)
-                .pageCaption(pageStyle)
-                .fixedSize(horizontal: false, vertical: true)
-            // The SYNC-SIGNUP ceremony (memo §6): which deal is being
-            // chosen, said before any secret is typed — the ratified tier
-            // sentence + the device keystone, verbatim from the brain.
-            Text(ProtectionShapes.syncSignupFraming)
-                .pageCaption(pageStyle)
-                .fixedSize(horizontal: false, vertical: true)
-            PeekableSecretField(label: "Encryption passphrase", text: $setupPassphrase)
-                .pageFieldChrome(pageStyle)
-            PeekableSecretField(label: "Repeat the passphrase", text: $setupConfirm)
-                .pageFieldChrome(pageStyle)
-            if !setupPassphrase.isEmpty, setupPassphrase.count < 12 {
-                Text("Short passphrase — under 12 characters is easier to brute-force.")
-                    .pageCaptionWarning(pageStyle)
-            }
-            Text(Self.passphraseRecommendation)
-                .pageCaption(pageStyle)
-                .fixedSize(horizontal: false, vertical: true)
-            if !setupConfirm.isEmpty, setupPassphrase != setupConfirm {
-                Text("The two entries don't match yet.")
+        if let setup {
+            SyncSetupView(model: setup, pageStyle: pageStyle) { self.setup = nil }
+        } else {
+            Text(ProtectionCopy.syncNotSetUpLine)
+                .pageProse(pageStyle)
+            if encryption.storeTie != nil {
+                PageDoor(ProtectionCopy.turnOnSyncDoor, style: pageStyle) {
+                    setup = SyncSetupModel.make(services: services)
+                }
+                .disabled(encryption.busy)
+            } else {
+                Text("Sync setup isn't available in this build.")
                     .pageCaption(pageStyle)
-            }
-            PageDoor("Continue", style: pageStyle) { setupStep = .warning }
-                .disabled(!EncryptionSetupRules.canLeavePassphraseStep(
-                    passphrase: setupPassphrase, confirm: setupConfirm))
-        case .warning:
-            PageHeading("Step 2 of 4 — What the secrets mean", style: pageStyle)
-            Text(Self.setupWarning)
-                .pageCaptionWarning(pageStyle)
-                .fixedSize(horizontal: false, vertical: true)
-            Text(Self.storageAdvice)
-                .pageCaption(pageStyle)
-                .fixedSize(horizontal: false, vertical: true)
-            Toggle(isOn: $acknowledged) {
-                Text(Self.understandingCheckbox)
-                    .pageCaptionProminent(pageStyle)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            #if os(macOS)
-            .toggleStyle(.checkbox)
-            #endif
-            HStack {
-                PageDoor("Back", form: .inlineAct, style: pageStyle) {
-                    setupStep = .passphrase
-                }
-                PageDoor("Continue", style: pageStyle) { setupStep = .create }
-                    .disabled(!EncryptionSetupRules.canLeaveWarningStep(
-                        acknowledged: acknowledged))
-            }
-        case .create:
-            PageHeading("Step 3 of 4 — Create your encrypted vault", style: pageStyle)
-            Text("Your vault is created on your account, and this device holds its keys. The last step — your recovery phrase — comes right after.")
-                .pageCaption(pageStyle)
-                .fixedSize(horizontal: false, vertical: true)
-            HStack {
-                PageDoor("Back", form: .inlineAct, style: pageStyle) {
-                    setupStep = .warning
-                }
-                PageDoor("Create Encrypted Vault", style: pageStyle) {
-                    let passphrase = setupPassphrase
-                    Task {
-                        await encryption.setUp(passphrase: passphrase)
-                        if encryption.lastError == nil {
-                            setupPassphrase = ""
-                            setupConfirm = ""
-                        }
-                    }
-                }
-                .disabled(encryption.busy || setupPassphrase.isEmpty)
             }
         }
     }
