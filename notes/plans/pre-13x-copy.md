@@ -633,6 +633,20 @@ ours. A name you don't recognize, or an act you didn't do under a name you do, i
   added 2026-09-06 — ledger 48.)*
 - **Does Castle on my Mac make my iPhone Castle?** *Once sync is on, yes — Castle belongs to your account and every
   device follows. Before sync, each library has its own mode; your iPhone learns the account's mode when it joins.*
+- **Can my library live in iCloud Drive?** *Your working library stays on this Mac. iCloud Drive syncs files while
+  they're being written, which can corrupt a live database — backups are complete, sealed copies, which is what a
+  synced folder is good at. To have your writing on every device, use sync.* *(Drafted 2026-09-06 at 5b — the entry
+  §6's why-not sentence names as "the FAQ"; the sentence is §6's verbatim. Backups MAY live there: the offer at the
+  first backup run, decision 24, built at 5b. The picker's refusal of the live library's own folder is 13x's — until
+  then the sentence is advice.)*
+
+*(A build-vs-copy note recorded 2026-09-06 at 5b, item 3 — NOT a rewrite of her entries: the *Moving to a new Mac*
+and *Restoring a backup* entries name an in-app OPEN-A-COPY door — "open a copy of your library from your backup
+folder", "open a backup", "File ▸ Open Library" — which is 13x's (`notes/FuturePhases.md`'s 13x row; design §18
+ledger 5) and does not exist in the build. The road that exists is the restore recipe the app drops into every
+backup folder as `RESTORE.md` (the runbook's §3 and §6: quit, move the current library aside, put the copy in its
+place, open) — it ends where the entries say: the restored copy opens by its key file's roads and then enrolls. The
+outbound FAQ brief flags those three sentences ⚠ NOT YET BUILT; the words are hers / 13s's.)*
 
 ---
 
