@@ -23,6 +23,7 @@
 //  LocalAuthentication, no prompts, anywhere.
 //
 
+import CryptoKit
 import Foundation
 import Testing
 
@@ -726,4 +727,175 @@ struct Phase13pControllerTests {
         #expect(try envelope.unwrapKey(recoveryWords: words) == key)
         #expect(try envelope.unwrapKey(passphrase: "sesame") == key)
     }
+
+    // MARK: - pre-13x 2c: THE FOLLOW's detection (§7 / §3.6)
+
+    private func rotatedReading(
+        appleHeld: Bool, corpusKeyID: String = "corpus-2", user: String = "user-1"
+    ) -> VaultPostureReading {
+        VaultPostureReading(
+            hasAppleHeldCopy: appleHeld, appleKeyID: appleHeld ? "a" : nil,
+            passphraseKDF: fastKDF(), hasPassphraseWrap: true,
+            corpusKeyID: corpusKeyID, updatedAt: "2026-09-04T10:00:00Z",
+            updatedByDevice: "Lillian's iPhone", signedInUserID: user, hasRecoveryWrap: true)
+    }
+
+    /// §7: a Standard device whose account entered Castle elsewhere — the
+    /// vault's corpus key id ≠ custody's under the SAME owner ⇒ the follow is
+    /// owed; the notice names *[device] on [day]* (decision 34); *Later*
+    /// leaves the persistent banner; the landing clears it. RED-ON-OLD: the
+    /// reconcile READ the vault (2a) and derived the posture, but no verdict
+    /// compared the key ids — `followNotice` stayed nil.
+    @Test func aRotatedVaultUnderTheSameOwnerOwesTheFollowAndLaterLeavesTheBanner() async throws {
+        let w = try world(enrolled: true)
+        w.controller.stampedOwnerID = { "user-1" }
+        w.controller.readVaultPosture = { [reading = rotatedReading(appleHeld: false)] in reading }
+        await w.controller.reconcile()
+        let owed = try #require(w.controller.followNotice)
+        #expect(owed.kind == .movedToCastle, "Castle entered elsewhere, this library still Standard-shaped")
+        #expect(owed.device == "Lillian's iPhone")
+        #expect(owed.day == ProtectionCopy.day(from: "2026-09-04T10:00:00Z"))
+        #expect(owed.body.hasPrefix("Your account is now in Castle — set on Lillian's iPhone on \(owed.day)."))
+        #expect(w.controller.notice == .follow(owed))
+        #expect(w.controller.followPending, "every key door says pick up your new keys first")
+        #expect(!w.controller.differentOwner)
+
+        w.controller.deferFollow()
+        #expect(w.controller.notice == .followWaiting(owed), "Later ⇒ the persistent banner")
+        #expect(owed.waitingBody == "Sync is paused until you enter your passphrase once — your keys were replaced on Lillian's iPhone on \(owed.day).")
+
+        w.controller.followLanded()
+        #expect(!w.controller.followPending)
+        #expect(w.controller.notice != .followWaiting(owed) && w.controller.notice != .follow(owed))
+
+        // Replace All Keys elsewhere (the vault still Standard-shaped) ⇒ the keys-replaced notice.
+        w.controller.readVaultPosture = { [reading = rotatedReading(appleHeld: true)] in reading }
+        await w.controller.reconcile()
+        #expect(w.controller.followNotice?.kind == .keysReplaced)
+        #expect(w.controller.followNotice?.body == "Your keys were replaced on Lillian's iPhone on \(owed.day). Enter your passphrase once to pick up the new ones.")
+        #expect(w.controller.notice == .follow(w.controller.followNotice!), "a NEW rotation asks again even after Later")
+    }
+
+    /// §3.6 — THE OWNER DISTINCTION: the rows' `owner_id` stamp is not the
+    /// signed-in account ⇒ copy §3's keys-don't-match sentence, NO follow
+    /// (following would land another account's keys over this library).
+    @Test func aDifferentOwnerSpeaksTheKeysDontMatchSentenceAndOwesNoFollow() async throws {
+        let w = try world(enrolled: true)
+        w.controller.stampedOwnerID = { "user-someone-else" }
+        w.controller.readVaultPosture = { [reading = rotatedReading(appleHeld: false)] in reading }
+        await w.controller.reconcile()
+        #expect(w.controller.differentOwner)
+        #expect(w.controller.notice == .differentOwner)
+        #expect(w.controller.followNotice == nil, "a different vault is the adopt road's (batch 3), never the follow's")
+        #expect(!w.controller.followPending)
+        #expect(ProtectionCopy.keysDontMatchThisLibrary
+                == "This account's keys don't match this library. Enter your passphrase to connect it — everything in it will upload to this account.")
+        // An unstamped library (never synced) has nothing to disagree with.
+        w.controller.stampedOwnerID = { nil }
+        await w.controller.reconcile()
+        #expect(!w.controller.differentOwner)
+        #expect(w.controller.followNotice?.kind == .movedToCastle)
+    }
+
+    /// §7 — the follow INTO Standard is silent: the vault carries an
+    /// Apple-held copy under the SAME corpus key id and this Castle-shaped
+    /// library carries none ⇒ the wired act runs once and the one-time
+    /// notice speaks; under a DIFFERENT key id the act never runs (the
+    /// follow is owed instead). RED-ON-OLD: the act was never called.
+    @Test func theFollowIntoStandardRunsSilentlyWhenTheVaultCarriesAnAppleCopyUnderTheSameKey() async throws {
+        let w = try world(standard: false, enrolled: true)
+        let acts = LockedCounter()
+        w.controller.followIntoStandardAct = { acts.increment() }
+        w.controller.stampedOwnerID = { "user-1" }
+        w.controller.readVaultPosture = { [reading = rotatedReading(appleHeld: true, corpusKeyID: "corpus")] in reading }
+        await w.controller.reconcile()
+        #expect(acts.value == 1, "the silent follow ran")
+        #expect(w.controller.followNotice == nil)
+        let moved = try #require(w.controller.movedToStandardNotice)
+        #expect(w.controller.notice == .movedToStandard(moved))
+        #expect(moved.body.hasPrefix("Your account is back in Standard — set on Lillian's iPhone on \(moved.day)."))
+        w.controller.dismissMovedToStandard()
+        #expect(w.controller.movedToStandardNotice == nil)
+
+        // A rotated vault with an Apple copy ⇒ keys replaced (the follow), the silent act untouched.
+        let other = try world(standard: false, enrolled: true)
+        let otherActs = LockedCounter()
+        other.controller.followIntoStandardAct = { otherActs.increment() }
+        other.controller.stampedOwnerID = { "user-1" }
+        other.controller.readVaultPosture = { [reading = rotatedReading(appleHeld: true)] in reading }
+        await other.controller.reconcile()
+        #expect(otherActs.value == 0, "a rotation is the follow's, never the silent road's")
+        #expect(other.controller.followNotice?.kind == .keysReplaced)
+    }
+
+    /// Decision 10's exception (§3.6): an Always-ask device holds no sync
+    /// keys before the vault read — the DERIVED key the lobby held opens the
+    /// vault's master copy when the descriptors agree (the session fills,
+    /// silently); a retired word (descriptors differ, the key file's recorded
+    /// corpus id = the vault's) speaks the Always-ask banner; a rotation
+    /// (recorded id ≠ the vault's) owes the follow. RED-ON-OLD: the session
+    /// never filled and neither notice existed.
+    @Test func anAlwaysAskDevicesHeldDerivedKeyFillsTheSessionOrTheRetiredWordBannerSpeaks() async throws {
+        let kdf = fastKDF()
+        let derived = try PassphraseKDF.deriveKey(passphrase: "sesame", descriptor: kdf)
+        let master = SymmetricKey(size: .bits256)
+        let corpus = SymmetricKey(size: .bits256)
+        let format = try KeyVaultFormat.create(
+            masterKey: master, passphraseKey: derived, recoveryKey: nil,
+            classKeys: [(keyClass: .corpus, keyID: "corpus-9", key: corpus),
+                        (keyClass: .journalBridge, keyID: "bridge-9", key: SymmetricKey(size: .bits256))],
+            kdf: kdf)
+        var reading = VaultPostureReading(
+            hasAppleHeldCopy: false, appleKeyID: nil, passphraseKDF: kdf, hasPassphraseWrap: true,
+            corpusKeyID: "corpus-9", updatedAt: "2026-09-04T10:00:00Z",
+            updatedByDevice: "Lillian's iPhone", signedInUserID: "user-1", hasRecoveryWrap: false)
+        reading.format = format
+
+        // (a) the held derived key opens the vault ⇒ the session fills.
+        let filled = try world(standard: false, dials: ProtectionDials(alwaysAsk: true))
+        #expect(filled.controller.effectiveGate == .passphrase)
+        #expect(filled.syncSession.record?.material == nil, "Always ask holds nothing before the read")
+        filled.syncSession.holdDerivedWrappingKey(derived, kdf: kdf)
+        filled.controller.stampedOwnerID = { "user-1" }
+        filled.controller.readVaultPosture = { [reading] in reading }
+        await filled.controller.reconcile()
+        #expect(filled.syncSession.record?.material?.corpusKeyID == "corpus-9", "the sync keys are held for the session")
+        #expect(filled.syncSession.record?.material?.masterKey == master.withUnsafeBytes { Data($0) })
+        #expect(filled.controller.followNotice == nil && filled.controller.alwaysAskRetiredNotice == nil)
+
+        // (b) the word was CHANGED elsewhere: a derived key under another descriptor.
+        let retired = try world(standard: false, dials: ProtectionDials(alwaysAsk: true))
+        retired.syncSession.holdDerivedWrappingKey(
+            try PassphraseKDF.deriveKey(passphrase: "old word", descriptor: fastKDF()), kdf: fastKDF())
+        retired.controller.stampedOwnerID = { "user-1" }
+        retired.controller.readVaultPosture = { [reading] in reading }
+        await retired.controller.reconcile()
+        #expect(retired.syncSession.record?.material == nil)
+        let banner = try #require(retired.controller.alwaysAskRetiredNotice)
+        #expect(retired.controller.notice == .alwaysAskRetiredWord(banner))
+        #expect(banner.body == "Your passphrase was changed on Lillian's iPhone on \(banner.day). The old one still opens this \(ProtectionCopy.deviceName), but sync waits until you enter the new one here.")
+        #expect(!retired.controller.followPending, "sync waits, but no rotation is owed")
+
+        // (c) the key file recorded ANOTHER corpus id: the account rotated ⇒ the follow.
+        var recorded = StoreKeyEnvelope()
+        let key = StoreKey.mint()
+        try recorded.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
+        try recorded.recordVaultReconciliation(kdf: fastKDF(), corpusKeyID: "corpus-old")
+        let rotated = try world(standard: false, dials: ProtectionDials(alwaysAsk: true), key: key, envelope: recorded)
+        rotated.syncSession.holdDerivedWrappingKey(
+            try PassphraseKDF.deriveKey(passphrase: "sesame", descriptor: fastKDF()), kdf: fastKDF())
+        rotated.controller.stampedOwnerID = { "user-1" }
+        rotated.controller.readVaultPosture = { [reading] in reading }
+        await rotated.controller.reconcile()
+        #expect(rotated.controller.followNotice?.kind == .keysReplaced)
+        #expect(rotated.controller.alwaysAskRetiredNotice == nil)
+    }
+}
+
+/// A thread-safe counter for the scripted acts above.
+final class LockedCounter: @unchecked Sendable {
+    private let lock = NSLock()
+    private var count = 0
+    var value: Int { lock.lock(); defer { lock.unlock() }; return count }
+    func increment() { lock.lock(); count += 1; lock.unlock() }
 }

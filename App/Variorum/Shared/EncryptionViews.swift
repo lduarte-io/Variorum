@@ -525,10 +525,22 @@ struct EncryptionView: View {
         Text(Self.keysReplacedExplanation)
             .pageWarning(pageStyle)
             .fixedSize(horizontal: false, vertical: true)
-        Text("The keys this device holds were replaced after it enrolled — sync stays paused until you re-enroll; nothing is lost while paused.")
-            .pageCaption(pageStyle)
-            .fixedSize(horizontal: false, vertical: true)
-        unlockRoads(offerPhraseRoad: hasRecoveryWrap)
+        if let followDoor = encryption.followDoor {
+            // pre-13x 2c (§7): the un-followed state — every key door says
+            // *pick up your new keys first*, and the one door is the FOLLOW
+            // (M′ from the vault, custody replaced, the library re-keyed,
+            // custody behind the gate), never the bare 14c re-enroll.
+            Text(ProtectionCopy.pickUpKeysFirst)
+                .pageCaption(pageStyle)
+                .fixedSize(horizontal: false, vertical: true)
+            PageDoor(ProtectionCopy.followEnterDoor, style: pageStyle) { followDoor() }
+                .disabled(encryption.busy)
+        } else {
+            Text("The keys this device holds were replaced after it enrolled — sync stays paused until you re-enroll; nothing is lost while paused.")
+                .pageCaption(pageStyle)
+                .fixedSize(horizontal: false, vertical: true)
+            unlockRoads(offerPhraseRoad: hasRecoveryWrap)
+        }
     }
 
     @ViewBuilder

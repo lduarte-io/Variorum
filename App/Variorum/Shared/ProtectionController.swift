@@ -54,6 +54,58 @@ nonisolated struct VaultPostureReading: Equatable, Sendable {
     /// it) and whether a passphrase wrap exists (the confirm's gate).
     var passphraseKDF: PassphraseKDF.Descriptor? = nil
     var hasPassphraseWrap: Bool = false
+    /// pre-13x 2c — THE FOLLOW's facts (design §7): the vault's CURRENT
+    /// corpus key id (custody's must agree — else the account's keys were
+    /// rotated); the row's `updated_at` and `updated_by_device` (decision
+    /// 34 — *[device] on [day]* on every notice); the signed-in user id (the
+    /// owner distinction, §3.6 — the rows' `owner_id` stamp must be this);
+    /// whether a recovery wrap exists; and the fetched FORMAT (wrapped
+    /// copies only) so an Always-ask device's held derived key can open the
+    /// master copy without a second derivation.
+    var corpusKeyID: String? = nil
+    var updatedAt: String? = nil
+    var updatedByDevice: String? = nil
+    var signedInUserID: String? = nil
+    var hasRecoveryWrap: Bool = false
+    var format: KeyVaultFormat? = nil
+}
+
+/// pre-13x 2c — what a device learns at ready about a change made
+/// ELSEWHERE, and the words its notice renders (copy §5).
+nonisolated struct FollowNotice: Equatable, Sendable {
+    enum Kind: Equatable, Sendable {
+        /// The account entered Castle on another device; this library was
+        /// Standard-shaped — enter the passphrase once (the follow).
+        case movedToCastle
+        /// The account's keys were replaced elsewhere (Replace All Keys, or
+        /// Castle entered while this library was already Castle-shaped).
+        case keysReplaced
+        /// The account left Castle elsewhere — this device followed
+        /// silently; one-time, dismissed with OK.
+        case movedToStandard
+        /// Decision 10's exception: an Always-ask device opened with a
+        /// word since changed elsewhere — reads and edits, sync waits.
+        case alwaysAskRetiredWord
+    }
+    var kind: Kind
+    /// The device that acted (`updated_by_device`), or "another device".
+    var device: String
+    /// The day (`updated_at`), rendered.
+    var day: String
+    /// The vault's descriptor + corpus key id at the reading — the
+    /// Always-ask pickup re-wraps the local copy under them.
+    var vaultKDF: PassphraseKDF.Descriptor? = nil
+    var corpusKeyID: String? = nil
+
+    var body: String {
+        switch kind {
+        case .movedToCastle: return ProtectionCopy.followMovedToCastle(device: device, day: day)
+        case .keysReplaced: return ProtectionCopy.followKeysReplaced(device: device, day: day)
+        case .movedToStandard: return ProtectionCopy.followMovedToStandard(device: device, day: day)
+        case .alwaysAskRetiredWord: return ProtectionCopy.alwaysAskRetiredWord(device: device, day: day)
+        }
+    }
+    var waitingBody: String { ProtectionCopy.followWaiting(device: device, day: day) }
 }
 
 @MainActor
@@ -185,9 +237,178 @@ final class ProtectionController {
         /// pre-13x 2a (§11): her migration's one-time face (copy §9) —
         /// *"Confirm your passphrase once to finish."*
         case migrationConfirm
+        /// pre-13x 2c (§7): the account changed elsewhere — enter the
+        /// passphrase or the words once (the modal notice; *Later* allowed).
+        case follow(FollowNotice)
+        /// pre-13x 2c: *Later* was taken — the PERSISTENT banner (copy §5
+        /// "Waiting for your passphrase"); the notice returns at every open.
+        case followWaiting(FollowNotice)
+        /// pre-13x 2c: the silent follow into Standard ran — one-time, OK.
+        case movedToStandard(FollowNotice)
+        /// pre-13x 2c (decision 10's exception): the Always-ask banner
+        /// variant — the old word opened this device, sync waits.
+        case alwaysAskRetiredWord(FollowNotice)
+        /// pre-13x 2c (§3.6, copy §3): the rows' owner is NOT the signed-in
+        /// account — a different vault; the adopt road is batch 3's, so the
+        /// doors that act today are Sign out and the Account sheet.
+        case differentOwner
     }
 
     private(set) var notice: Notice?
+
+    // MARK: - pre-13x 2c: THE FOLLOW's state (§7)
+
+    /// The follow owed by this device (nil = none): set by the reconcile
+    /// when the vault's corpus key id ≠ custody's under the SAME owner;
+    /// cleared when the follow lands (the next reconcile finds them equal).
+    private(set) var followNotice: FollowNotice?
+    /// *Later*: the modal notice hides for THIS launch and the persistent
+    /// banner speaks instead; a new launch asks again.
+    @ObservationIgnored private var followDeferredThisLaunch = false
+    /// The silent follow into Standard ran this launch — its one-time OK.
+    private(set) var movedToStandardNotice: FollowNotice?
+    /// The Always-ask banner variant (decision 10's exception).
+    private(set) var alwaysAskRetiredNotice: FollowNotice?
+    /// The rows' owner is not the signed-in account (copy §3's sentence).
+    private(set) var differentOwner = false
+    /// True while a follow is owed — every key door shows *Pick up your new
+    /// keys first* instead of acting (the design's un-followed state).
+    var followPending: Bool { followNotice != nil }
+    /// THE FOLLOW IN PROGRESS, held here like the ceremony so it survives
+    /// the re-key's reopen.
+    private(set) var activeFollow: PostureFollowModel?
+    /// The store's stamped owner (`Queries.stampedOwnerID`) — wired by the
+    /// bootstrap at ready; nil = no store read wired.
+    @ObservationIgnored var stampedOwnerID: (@Sendable () async -> String?)?
+    /// The silent follow into Standard's act — the runner's
+    /// `followIntoStandard()`, wired by the composition root; nil = no
+    /// runner (the reconcile only records the reading).
+    @ObservationIgnored var followIntoStandardAct: (@MainActor () async throws -> Void)?
+
+    func openFollow() {
+        guard activeFollow == nil else { return }
+        let notice = followNotice ?? alwaysAskRetiredNotice
+        guard let notice, let switchRunner else { return }
+        activeFollow = PostureFollowModel(notice: notice, runner: switchRunner, controller: self)
+    }
+
+    func closeFollow() {
+        activeFollow = nil
+        refreshEnvelopeFacts()
+        refreshNotices()
+    }
+
+    /// *Later* — the modal notice hides for this launch; the persistent
+    /// banner stands; the notice returns at the next open.
+    func deferFollow() {
+        followDeferredThisLaunch = true
+        refreshNotices()
+    }
+
+    func dismissMovedToStandard() {
+        movedToStandardNotice = nil
+        refreshNotices()
+    }
+
+    /// The follow landed (the model calls this): the owed follow is gone
+    /// until the next reconcile says otherwise.
+    func followLanded() {
+        followNotice = nil
+        alwaysAskRetiredNotice = nil
+        followDeferredThisLaunch = false
+        refreshEnvelopeFacts()
+        refreshNotices()
+    }
+
+    /// The material this device holds for its sync — the session's (Castle,
+    /// unlocked) or the silent item's (Standard); nil = none in hand.
+    private func heldSyncMaterial() -> DeviceKeyMaterial? {
+        configuration.syncCustodySession.record?.material
+            ?? configuration.resolvedSyncLeaves()?.loadPlain()?.material
+    }
+
+    /// THE FOLLOW's DETECTION (§7 / §3.6 — the reconcile's READ half made
+    /// into a verdict): from the vault's word and this device's custody.
+    private func reconcileFollow(_ reading: VaultPostureReading?) async {
+        guard let reading, let vaultKeyID = reading.corpusKeyID else {
+            differentOwner = false
+            return
+        }
+        // THE OWNER DISTINCTION: the rows' stamp against the signed-in id.
+        if let owner = await stampedOwnerID?(), let user = reading.signedInUserID, owner != user {
+            differentOwner = true
+            followNotice = nil
+            alwaysAskRetiredNotice = nil
+            logger.notice("follow: the rows' owner is not the signed-in account — a different vault (the adopt road is batch 3's)")
+            return
+        }
+        differentOwner = false
+        let device = reading.updatedByDevice ?? ProtectionCopy.anotherDevice
+        let day = ProtectionCopy.day(from: reading.updatedAt)
+        let keyFile = loadEnvelope()
+        if let custody = heldSyncMaterial() {
+            alwaysAskRetiredNotice = nil
+            if custody.corpusKeyID != vaultKeyID {
+                // ROTATED, same owner ⇒ the follow. Castle entered elsewhere
+                // and this library still Standard-shaped ⇒ "moved to Castle";
+                // otherwise the keys were replaced.
+                let kind: FollowNotice.Kind = (!reading.hasAppleHeldCopy && keyFile?.apple != nil)
+                    ? .movedToCastle : .keysReplaced
+                if followNotice?.kind != kind || followNotice?.corpusKeyID != vaultKeyID {
+                    followDeferredThisLaunch = false
+                }
+                followNotice = FollowNotice(
+                    kind: kind, device: device, day: day,
+                    vaultKDF: reading.passphraseKDF, corpusKeyID: vaultKeyID)
+                logger.notice("follow: the account's keys were rotated elsewhere (\(kind == .movedToCastle ? "Castle entered" : "keys replaced", privacy: .public)) — the follow is owed")
+                return
+            }
+            followNotice = nil
+            // THE FOLLOW INTO STANDARD (silent): the vault carries an Apple-held
+            // copy under the SAME key id and this library carries no Apple copy.
+            if reading.hasAppleHeldCopy, keyFile?.apple == nil, !switchInProgress,
+               let act = followIntoStandardAct {
+                do {
+                    try await act()
+                    movedToStandardNotice = FollowNotice(kind: .movedToStandard, device: device, day: day)
+                    logger.notice("follow: the account is back in Standard — followed silently")
+                } catch {
+                    logger.notice("follow into Standard refused: \(String(describing: error), privacy: .public) — the next ready retries")
+                }
+            }
+            return
+        }
+        // NO MATERIAL IN HAND: an Always-ask device before its vault read
+        // (decision 10's exception). The held derived key opens the vault's
+        // master copy when the descriptors agree — the session fills and
+        // the device syncs; the vault's key id ≠ the key file's recorded id
+        // ⇒ ROTATED ⇒ the follow; else the word was CHANGED elsewhere ⇒
+        // the banner variant (reads and edits, sync waits).
+        guard effectiveGate == .passphrase, let format = reading.format else { return }
+        let session = configuration.syncCustodySession
+        if let derived = session.derivedWrappingKey, session.derivedWrappingKDF == format.kdf,
+           let master = try? format.unwrapMaster(withPassphraseKey: derived),
+           let material = try? CorpusRotation.materialFollowing(format, master: master) {
+            let identity = configuration.resolvedSyncLeaves()?.loadPlain()?.deviceID
+                ?? UUID().uuidString.lowercased()
+            session.hold(SyncCustodyRecord(deviceID: identity, material: material))
+            alwaysAskRetiredNotice = nil
+            followNotice = nil
+            logger.notice("follow: the Always-ask session's derived key opened the vault — sync keys held for the session")
+            return
+        }
+        if let recorded = keyFile?.vaultCorpusKeyID, recorded != vaultKeyID {
+            let kind: FollowNotice.Kind = (!reading.hasAppleHeldCopy && keyFile?.apple != nil)
+                ? .movedToCastle : .keysReplaced
+            followNotice = FollowNotice(kind: kind, device: device, day: day,
+                                        vaultKDF: reading.passphraseKDF, corpusKeyID: vaultKeyID)
+            alwaysAskRetiredNotice = nil
+        } else {
+            alwaysAskRetiredNotice = FollowNotice(
+                kind: .alwaysAskRetiredWord, device: device, day: day,
+                vaultKDF: reading.passphraseKDF, corpusKeyID: vaultKeyID)
+        }
+    }
     /// §11: the passphrase confirm is pending (set by the migration; read
     /// from the per-store defaults at every reconcile; cleared by the
     /// confirm). *Later* hides the face for this launch only.
@@ -691,9 +912,16 @@ final class ProtectionController {
         }
         // The vault's word (decision 8) — one authenticated read, when a
         // vault is reachable; nil leaves the last reading standing.
+        var freshReading: VaultPostureReading?
         if let readVaultPosture, let reading = await readVaultPosture() {
             vaultReading = reading
+            freshReading = reading
         }
+        refreshEnvelopeFacts()
+        // pre-13x 2c (§7): the follow's verdict from the vault's word and
+        // this device's custody — the notice, the silent follow into
+        // Standard, the Always-ask session's fill, the owner distinction.
+        await reconcileFollow(freshReading)
         refreshEnvelopeFacts()
         // pre-13x 2b: never land an Apple copy while a switch is in
         // progress or pending its resume — the key file mid-road is
@@ -820,6 +1048,24 @@ final class ProtectionController {
         migrationConfirmPending = readMigrationConfirmPending?() ?? false
         if migrationConfirmPending, !migrationConfirmDeferredThisLaunch {
             notice = .migrationConfirm
+            return
+        }
+        // pre-13x 2c (§7): the follow family outranks the reminder and the
+        // nudge — a device whose sync is paused says so first.
+        if differentOwner {
+            notice = .differentOwner
+            return
+        }
+        if let follow = followNotice {
+            notice = followDeferredThisLaunch ? .followWaiting(follow) : .follow(follow)
+            return
+        }
+        if let retired = alwaysAskRetiredNotice {
+            notice = .alwaysAskRetiredWord(retired)
+            return
+        }
+        if let moved = movedToStandardNotice {
+            notice = .movedToStandard(moved)
             return
         }
         // The reminder: always on in Castle (§13 — the dial is gone; the
@@ -1044,13 +1290,20 @@ func wireOneSecretHooks(
                 material: material, newPassphrase: newPassphrase)
         }
         protection.readVaultPosture = {
-            guard await auth.currentUserID != nil else { return nil }
+            guard let userID = await auth.currentUserID else { return nil }
             guard let fetched = try? await vault.fetchVault() else { return nil }
             return VaultPostureReading(
                 hasAppleHeldCopy: fetched.format.masterWrappedByAppleHeld != nil,
                 appleKeyID: fetched.format.appleKeyID,
                 passphraseKDF: fetched.format.kdf,
-                hasPassphraseWrap: true)
+                hasPassphraseWrap: true,
+                // pre-13x 2c: the follow's facts (§7; decision 34).
+                corpusKeyID: fetched.format.classKey(for: .corpus)?.keyID,
+                updatedAt: fetched.updatedAt,
+                updatedByDevice: fetched.format.updatedByDevice,
+                signedInUserID: userID,
+                hasRecoveryWrap: fetched.format.masterWrappedByRecovery != nil,
+                format: fetched.format)
         }
     } else {
         // Totality (ladder R3-n1): "re-wired per session" must hold for the

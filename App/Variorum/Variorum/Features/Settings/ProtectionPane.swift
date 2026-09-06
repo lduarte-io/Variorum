@@ -209,6 +209,14 @@ struct ProtectionPane: View {
         ) { model in
             PostureSwitchSheet(model: model) { controller.closeSwitch() }
         }
+        // pre-13x 2c: the follow, opened from the pane's notice bar or the
+        // Encryption tab, held on the controller like the ceremony.
+        .sheet(item: Binding(
+            get: { controller.activeFollow },
+            set: { if $0 == nil { controller.closeFollow() } })
+        ) { model in
+            FollowSheet(model: model) { controller.closeFollow() }
+        }
     }
 
     // MARK: The lead (keystone 1) + the current-state line
@@ -286,7 +294,15 @@ struct ProtectionPane: View {
             // ceremony follows). Rendered only when a runner is wired
             // (P-2); a switch that crashed mid-road offers its resume
             // instead of a second start.
-            if controller.switchRunner != nil {
+            if controller.followPending {
+                // pre-13x 2c (§7): a follow is owed — every key door speaks
+                // the one sentence instead of acting; the follow's door
+                // lives in the notice bar and the Encryption tab.
+                Text(ProtectionCopy.pickUpKeysFirst)
+                    .font(.caption)
+                    .alarmVoice()
+                    .fixedSize(horizontal: false, vertical: true)
+            } else if controller.switchRunner != nil {
                 HStack {
                     if let pending = pendingSwitch {
                         Button(pending.entersCastle
@@ -551,12 +567,21 @@ struct ProtectionNoticeBar: View {
     @State private var migrationConfirm: MigrationConfirmModel?
     @Environment(\.openSettings) private var openSettings
 
+    /// pre-13x 2c: the Account sheet, opened from the different-owner
+    /// notice (Sign out acts inline; Delete lives on the Account tab).
+    @State private var accountSheetTab: AccountTab?
+
     var body: some View {
         Group {
             switch controller.notice {
             case .nudge: nudgeBar
             case .reminderDue: reminderBar
             case .migrationConfirm: migrationBar
+            case .follow(let follow): followBar(follow)
+            case .followWaiting(let follow): followWaitingBar(follow)
+            case .movedToStandard(let moved): movedToStandardBar(moved)
+            case .alwaysAskRetiredWord(let retired): alwaysAskRetiredBar(retired)
+            case .differentOwner: differentOwnerBar
             case nil: EmptyView()
             }
         }
@@ -565,6 +590,15 @@ struct ProtectionNoticeBar: View {
         }
         .sheet(item: $migrationConfirm) { model in
             MigrationConfirmSheet(model: model) { migrationConfirm = nil }
+        }
+        .sheet(item: Binding(
+            get: { controller.activeFollow },
+            set: { if $0 == nil { controller.closeFollow() } })
+        ) { model in
+            FollowSheet(model: model) { controller.closeFollow() }
+        }
+        .sheet(item: $accountSheetTab) { tab in
+            if let services { AccountView(services: services, initialTab: tab) }
         }
         .sheet(isPresented: Binding(
             get: { phraseWords != nil }, set: { if !$0 { phraseWords = nil } })
@@ -661,12 +695,232 @@ struct ProtectionNoticeBar: View {
         }
     }
 
+    // MARK: pre-13x 2c — THE FOLLOW's notices (copy §5, verbatim)
+
+    /// Account moved to Castle / Keys replaced elsewhere — the notice with
+    /// its three doors; *Later* takes the un-followed state.
+    private func followBar(_ follow: FollowNotice) -> some View {
+        bar {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(follow.body)
+                    .font(.callout)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(ProtectionCopy.followLaterSubline)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+            Button(ProtectionCopy.followEnterDoor) {
+                controller.openFollow()
+                controller.activeFollow?.choosePassphrase()
+            }
+            Button(ProtectionCopy.followWordsDoor) {
+                controller.openFollow()
+                controller.activeFollow?.chooseWords()
+            }
+            Button(ProtectionCopy.followLaterDoor) { controller.deferFollow() }
+        }
+    }
+
+    /// Waiting for your passphrase — the PERSISTENT banner after *Later*.
+    private func followWaitingBar(_ follow: FollowNotice) -> some View {
+        bar {
+            Text(follow.waitingBody)
+                .font(.callout)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer()
+            Button(ProtectionCopy.followWaitingDoor) {
+                controller.openFollow()
+                controller.activeFollow?.choosePassphrase()
+            }
+        }
+    }
+
+    private func movedToStandardBar(_ moved: FollowNotice) -> some View {
+        bar {
+            Text(moved.body)
+                .font(.callout)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer()
+            Button(ProtectionCopy.followMovedToStandardDoor) { controller.dismissMovedToStandard() }
+        }
+    }
+
+    private func alwaysAskRetiredBar(_ retired: FollowNotice) -> some View {
+        bar {
+            Text(retired.body)
+                .font(.callout)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer()
+            Button(ProtectionCopy.enterItNowDoor) {
+                controller.openFollow()
+                controller.activeFollow?.choosePassphrase()
+            }
+        }
+    }
+
+    /// Copy §3's keys-don't-match sentence with the doors that ACT today —
+    /// Sign out and the Account sheet (Delete lives there); the Connect
+    /// door is batch 3's (P-2: not rendered until it acts).
+    private var differentOwnerBar: some View {
+        bar {
+            Text(ProtectionCopy.keysDontMatchThisLibrary)
+                .font(.callout)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer()
+            Button("Sign Out") { Task { await services?.signOutVariorum() } }
+                .disabled(services == nil)
+            Button("Account…") { accountSheetTab = .account }
+                .disabled(services == nil)
+        }
+    }
+
     private func bar<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
         HStack(spacing: 10) { content() }
             .padding(.horizontal, 14)
             .padding(.vertical, 8)
             .background(.bar)
             .overlay(alignment: .top) { Divider() }
+    }
+}
+
+// MARK: - pre-13x 2c: THE FOLLOW's Mac face (copy §5 → the act → Done)
+
+struct FollowSheet: View {
+    @Bindable var model: PostureFollowModel
+    var onDone: () -> Void
+
+    @State private var passphrase = ""
+    @State private var typedWords = ""
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            switch model.phase {
+            case .notice:
+                Text(model.notice.body)
+                    .font(.callout)
+                    .fixedSize(horizontal: false, vertical: true)
+                HStack {
+                    Button(ProtectionCopy.followLaterDoor) { model.later(); onDone() }
+                    Spacer()
+                    Button(ProtectionCopy.followWordsDoor) { model.chooseWords() }
+                    Button(ProtectionCopy.followEnterDoor) { model.choosePassphrase() }
+                        .keyboardShortcut(.defaultAction)
+                }
+            case .askPassphrase:
+                Text(model.notice.body)
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                PeekableSecretField(label: ProtectionCopy.passphraseFieldLabel, text: $passphrase)
+                    .textFieldStyle(.roundedBorder)
+                HStack {
+                    Button(ProtectionCopy.followLaterDoor) { model.later(); onDone() }
+                    Spacer()
+                    Button(ProtectionCopy.followWordsDoor) { model.chooseWords() }
+                    Button("Enter") { Task { await model.enter(passphrase: passphrase) } }
+                        .keyboardShortcut(.defaultAction)
+                        .disabled(model.busy || passphrase.isEmpty)
+                }
+            case .askWords:
+                Text(model.notice.body)
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                TextField("The 12 words, separated by spaces", text: $typedWords, axis: .vertical)
+                    .lineLimit(3, reservesSpace: true)
+                    .autocorrectionDisabled()
+                    .privacySensitive()
+                    .textFieldStyle(.roundedBorder)
+                HStack {
+                    Button(ProtectionCopy.followLaterDoor) { model.later(); onDone() }
+                    Spacer()
+                    Button(ProtectionCopy.followEnterDoor) { model.choosePassphrase() }
+                    Button("Enter") { Task { await model.enter(wordsText: typedWords) } }
+                        .keyboardShortcut(.defaultAction)
+                        .disabled(model.busy || typedWords.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+            case .running:
+                HStack(spacing: 8) {
+                    ProgressView().controlSize(.small)
+                    Text(runningLine).font(.callout).foregroundStyle(.secondary)
+                }
+                Text("Keep Variorum open. If it quits, the follow picks up where it stopped.")
+                    .font(.caption).foregroundStyle(.secondary)
+            case .done(let insuranceOff, _):
+                Text(ProtectionCopy.followDoneBody)
+                    .font(.callout)
+                    .fixedSize(horizontal: false, vertical: true)
+                if insuranceOff {
+                    Text(ProtectionCopy.insuranceTurnedOffNotice)
+                        .font(.callout)
+                        .alarmVoice()
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                HStack {
+                    Spacer()
+                    Button("Continue") {
+                        model.continueFromDone()
+                        if model.phase == .closed { onDone() }
+                    }
+                    .keyboardShortcut(.defaultAction)
+                }
+            case .offer:
+                Text(ProtectionCopy.deleteOldBackupsTitle).font(.title3.weight(.semibold))
+                Text(ProtectionCopy.deleteOldBackupsBody)
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                HStack {
+                    Button(ProtectionCopy.keepOldBackupsDoor) { model.keepOldBackups(); onDone() }
+                        .keyboardShortcut(.cancelAction)
+                    Spacer()
+                    Button(ProtectionCopy.deleteOldBackupsDoor, role: .destructive) {
+                        model.deleteOldBackups()
+                        onDone()
+                    }
+                }
+            case .failed(let sentence):
+                Text("Nothing was changed.").font(.title3.weight(.semibold))
+                Text(sentence)
+                    .font(.callout)
+                    .alarmVoice()
+                    .fixedSize(horizontal: false, vertical: true)
+                HStack { Spacer(); Button("Close") { onDone() }.keyboardShortcut(.defaultAction) }
+            case .closed:
+                EmptyView()
+            }
+            if model.busy, model.phase != .running {
+                HStack(spacing: 6) {
+                    ProgressView().controlSize(.small)
+                    Text("Working…").font(.caption).foregroundStyle(.secondary)
+                }
+            }
+            if let error = model.lastError {
+                Text(error)
+                    .font(.callout)
+                    .alarmVoice()
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(24)
+        .frame(width: 460)
+        .interactiveDismissDisabled(model.phase == .running)
+    }
+
+    private var runningLine: String {
+        switch model.runnerPhase {
+        case .reencrypting(let done, let total):
+            return ProtectionCopy.reencryptingLine(done: done, total: total)
+        case .rekeyingLibrary, .movingCustody, .snapshotting:
+            return ProtectionCopy.rekeyingLibraryLine
+        case .rotatingKeys:
+            return "Picking up your new keys…"
+        case .pullingToHead:
+            return "Catching up with the server…"
+        case .idle, .done:
+            return "Working…"
+        }
     }
 }
 

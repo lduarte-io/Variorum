@@ -113,6 +113,11 @@ nonisolated final class SyncCustodySession: @unchecked Sendable {
     private let lock = NSLock()
     private var storedRecord: SyncCustodyRecord?
     private var storedDerivedKey: SymmetricKey?
+    /// pre-13x 2c: the DESCRIPTOR the held derived key was derived under —
+    /// the reconcile compares it with the vault's to know whether the key
+    /// opens the vault's master copy (§3.6: derive once when the recorded
+    /// descriptor equals the vault's) or the word was retired elsewhere.
+    private var storedDerivedKDF: PassphraseKDF.Descriptor?
     /// pre-13x 2a (§11): the 14b/CF-12 LEGACY GATED item's material, read
     /// under the lobby's one evaluated context at unlock and held here
     /// until the migration consumes it (`takeLegacyMaterial`); a relock
@@ -149,9 +154,15 @@ nonisolated final class SyncCustodySession: @unchecked Sendable {
         storedRecord = record
     }
 
-    func holdDerivedWrappingKey(_ key: SymmetricKey) {
+    func holdDerivedWrappingKey(_ key: SymmetricKey, kdf: PassphraseKDF.Descriptor? = nil) {
         lock.lock(); defer { lock.unlock() }
         storedDerivedKey = key
+        storedDerivedKDF = kdf
+    }
+
+    var derivedWrappingKDF: PassphraseKDF.Descriptor? {
+        lock.lock(); defer { lock.unlock() }
+        return storedDerivedKDF
     }
 
     /// Relock: everything the session held is gone (pinned).
@@ -159,6 +170,7 @@ nonisolated final class SyncCustodySession: @unchecked Sendable {
         lock.lock(); defer { lock.unlock() }
         storedRecord = nil
         storedDerivedKey = nil
+        storedDerivedKDF = nil
         storedLegacyMaterial = nil
     }
 }

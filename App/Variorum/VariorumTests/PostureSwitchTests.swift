@@ -1207,4 +1207,78 @@ struct PostureSwitchTests {
         #expect(newFile.apple == nil)
         #expect(StoreEncryptionMigration.opens(world.storeURL, key: try newFile.unwrapKey(passphrase: "sesame")))
     }
+
+    // MARK: - pre-13x 2c.1: THE FOLLOW's face over the real runner
+
+    /// §7 end to end on the sibling: the controller's reconcile reads the
+    /// vault (the acting device entered Castle) and owes the follow with
+    /// *[device] on [day]*; *Later* leaves the un-followed state (the
+    /// persistent banner, every key door's sentence, no marker, custody
+    /// unchanged); the reopened notice's typed passphrase walks
+    /// `runner.follow` — M′ in custody, the library re-keyed, the offer for
+    /// the pre-switch pair — and the controller's follow is no longer owed.
+    /// RED-ON-OLD: no verdict, no model — the sibling's only road was the
+    /// 14c bare re-enroll.
+    @Test func theFollowModelWalksTheNoticeToTheActAndLaterLeavesTheUnfollowedState() async throws {
+        let acting = try await makeWorld()
+        defer { acting.tearDown() }
+        let sibling = try await makeWorld(sharing: acting)
+        defer { sibling.tearDown() }
+        let oldMaterial = try #require(acting.oldMaterial)
+        try sibling.addPreSwitchPair()
+        _ = try await acting.runner.enterCastle(passphrase: "sesame", recoveryWords: acting.words)
+        let vault = try await sibling.vault()
+        let newKeyID = try #require(vault.format.classKey(for: .corpus)?.keyID)
+        #expect(newKeyID != oldMaterial.corpusKeyID)
+
+        let controller = makeController(for: sibling)
+        controller.switchRunner = sibling.runner
+        controller.stampedOwnerID = { nil }
+        controller.readVaultPosture = { [client = sibling.vaultClient] in
+            guard let fetched = try? await client?.fetchVault() else { return nil }
+            return VaultPostureReading(
+                hasAppleHeldCopy: fetched.format.masterWrappedByAppleHeld != nil,
+                appleKeyID: fetched.format.appleKeyID, passphraseKDF: fetched.format.kdf,
+                hasPassphraseWrap: true, corpusKeyID: fetched.format.classKey(for: .corpus)?.keyID,
+                updatedAt: fetched.updatedAt, updatedByDevice: fetched.format.updatedByDevice,
+                signedInUserID: "user-2b", hasRecoveryWrap: true, format: fetched.format)
+        }
+        await controller.reconcile()
+        let owed = try #require(controller.followNotice)
+        #expect(owed.kind == .movedToCastle)
+        #expect(owed.device == "test device", "decision 34: the acting device's own name rides the notice")
+        #expect(controller.notice == .follow(owed))
+
+        // Later: the un-followed state.
+        controller.openFollow()
+        let first = try #require(controller.activeFollow)
+        first.later()
+        controller.closeFollow()
+        #expect(controller.notice == .followWaiting(owed), "the persistent banner")
+        #expect(controller.followPending, "every key door: pick up your new keys first")
+        #expect(try await sibling.marker() == nil)
+        #expect(sibling.keyStore.load()?.corpusKeyID == oldMaterial.corpusKeyID, "custody unchanged")
+
+        // The banner's Enter…: the typed passphrase walks the follow.
+        controller.openFollow()
+        let model = try #require(controller.activeFollow)
+        model.choosePassphrase()
+        #expect(model.phase == .askPassphrase)
+        await model.enter(passphrase: "not-the-passphrase")
+        #expect(model.lastError == ProtectionCopy.passphraseNotTheLibrarys)
+        #expect(model.phase == .askPassphrase, "a wrong word writes nothing and asks again")
+        let insuranceWasOn = MarkdownInsurance.isEnabled(in: sibling.defaults)
+        await model.enter(passphrase: "sesame")
+        #expect(model.phase == .done(insuranceOff: insuranceWasOn, hasOffer: true),
+                "Done reports the insurance flip only when the follower had it on")
+        #expect(sibling.keyStore.load()?.corpusKeyID == newKeyID, "M′ in custody")
+        #expect(sibling.calls.rekeys == 1, "the library re-keyed as it followed")
+        #expect(try await sibling.marker() == nil)
+        #expect(!controller.followPending, "the follow is no longer owed")
+        #expect(controller.notice != .followWaiting(owed) && controller.notice != .follow(owed))
+        model.continueFromDone()
+        #expect(model.phase == .offer)
+        model.keepOldBackups()
+        #expect(model.phase == .closed)
+    }
 }

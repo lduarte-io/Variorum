@@ -128,6 +128,13 @@ struct VariorumApp: App {
                                 database: session.database,
                                 services: { services }))
                             bootstrap.protection.switchRunner = runner
+                            // pre-13x 2c (§7): the silent follow into Standard
+                            // and the Encryption tab's follow door ride the
+                            // same runner.
+                            bootstrap.protection.followIntoStandardAct = {
+                                try await runner.followIntoStandard()
+                            }
+                            fresh.encryption.followDoor = { bootstrap.protection.openFollow() }
                             fresh.encryption.rekeyRunner = { passphrase in
                                 let outcome = try await runner.replaceAllKeys(
                                     passphrase: passphrase, recoveryWords: nil)

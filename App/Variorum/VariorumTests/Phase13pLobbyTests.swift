@@ -749,4 +749,51 @@ struct Phase13pLobbyTests {
             }
         }
     }
+
+    /// pre-13x 2c (decision 10's Always-ask exception, §3.6): the lobby's
+    /// passphrase road holds the DERIVED wrapping key and its descriptor in
+    /// the custody session — never the typed word — so the ready-time vault
+    /// read can fill an Always-ask device's sync keys without a second
+    /// derivation; a refused word holds nothing. RED-ON-OLD: the road
+    /// unwrapped and returned the key, and the session stayed empty.
+    @Test func theLobbysPassphraseRoadHoldsTheDerivedKeyAndItsDescriptorForTheSession() async throws {
+        let dir = try temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let storeURL = dir.appendingPathComponent("variorum.sqlite")
+        let key = StoreKey.mint()
+        let kdf = fastKDF()
+        var envelope = StoreKeyEnvelope()
+        try envelope.setPassphraseWrap(key: key, passphrase: "open sesame", kdf: kdf)
+        try envelope.write(at: envelope.preferredURL(besideStore: storeURL))
+        let gate = StoreLaunchGate(
+            dials: { _, _ in ProtectionDials(alwaysAsk: true) },
+            saveDials: { _, _, _ in },
+            legacyMode: { _, _ in nil },
+            retireLegacyDials: { _, _ in },
+            guardFor: { _ in StoreKeyGuard.inMemory(backing: InMemoryStoreKeyGuardBacking()) },
+            appleKeyFor: { _ in AppleKeyLeaves.inMemory(backing: InMemoryAppleKeyBacking()) },
+            loadEnvelope: { try StoreKeyEnvelope.loadCurrent(besideStore: $0) },
+            saveEnvelope: { _, _ in },
+            setAsideEnvelope: { _ in },
+            stamp: { _, _ in nil },
+            setStamp: { _, _, _ in })
+        let session = SyncCustodySession()
+        let road = StoreLobby.envelopeRoad(storeURL: storeURL, gate: gate, session: session)
+
+        guard case .failure = await road(.passphrase("wrong")) else {
+            Issue.record("a wrong passphrase must refuse"); return
+        }
+        #expect(session.derivedWrappingKey == nil, "a refused word holds nothing")
+
+        guard case .success(let unlocked) = await road(.passphrase("open sesame")) else {
+            Issue.record("the right passphrase must unwrap"); return
+        }
+        #expect(unlocked == key)
+        let held = try #require(session.derivedWrappingKey)
+        #expect(held == (try PassphraseKDF.deriveKey(passphrase: "open sesame", descriptor: kdf)),
+                "the held key is the derivation under the key file's own descriptor")
+        #expect(session.derivedWrappingKDF == kdf, "the descriptor rides with it — the reconcile compares it with the vault's")
+        session.drop()
+        #expect(session.derivedWrappingKey == nil && session.derivedWrappingKDF == nil, "a relock drops both")
+    }
 }

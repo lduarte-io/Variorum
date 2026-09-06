@@ -149,6 +149,29 @@ struct ProtectionDialsTests {
 
 @Suite("13p — the ruled copy (the honesty grammar)")
 struct ProtectionCopyTests {
+    /// pre-13x 2c: copy §5's follow notices render VERBATIM with the device
+    /// nouns interpolated and *[device] on [day]* from the vault's row.
+    @Test func theFollowNoticesRenderCopyFiveVerbatim() {
+        let day = ProtectionCopy.day(from: "2026-09-04T10:00:00Z")
+        #expect(day == ProtectionCopy.day(from: "2026-09-04"), "the day, never the time")
+        #expect(ProtectionCopy.day(from: nil) == "an earlier day")
+        #expect(ProtectionCopy.followMovedToCastle(device: "Lillian's iPhone", day: day)
+                == "Your account is now in Castle — set on Lillian's iPhone on \(day). From now on this \(ProtectionCopy.deviceName) asks for \(ProtectionCopy.biometryName) to open your library, with your passphrase as the fallback. Enter your passphrase once to pick up your new sync keys: they were replaced when Castle was entered, and only your passphrase or twelve words open them.")
+        #expect(ProtectionCopy.followKeysReplaced(device: "Lillian's iPhone", day: day)
+                == "Your keys were replaced on Lillian's iPhone on \(day). Enter your passphrase once to pick up the new ones.")
+        #expect(ProtectionCopy.followWaiting(device: "Lillian's iPhone", day: day)
+                == "Sync is paused until you enter your passphrase once — your keys were replaced on Lillian's iPhone on \(day).")
+        #expect(ProtectionCopy.followMovedToStandard(device: "Lillian's iPhone", day: day)
+                == "Your account is back in Standard — set on Lillian's iPhone on \(day). This \(ProtectionCopy.deviceName) opens silently again; your Apple account holds a key.")
+        #expect(ProtectionCopy.alwaysAskRetiredWord(device: "Lillian's iPhone", day: day)
+                == "Your passphrase was changed on Lillian's iPhone on \(day). The old one still opens this \(ProtectionCopy.deviceName), but sync waits until you enter the new one here.")
+        #expect(ProtectionCopy.followLaterSubline == "Until then this \(ProtectionCopy.deviceName) opens and reads, but doesn't sync.")
+        #expect(ProtectionCopy.pickUpKeysFirst == "Pick up your new keys first — enter your passphrase.")
+        #expect(ProtectionCopy.followEnterDoor == "Enter Passphrase…" && ProtectionCopy.followWordsDoor == "Use Twelve Words…"
+                && ProtectionCopy.followLaterDoor == "Later" && ProtectionCopy.followWaitingDoor == "Enter…"
+                && ProtectionCopy.enterItNowDoor == "Enter It Now…" && ProtectionCopy.followMovedToStandardDoor == "OK")
+    }
+
     @Test func everyModeSaysWhatItDoesNotProtect() {
         #expect(ProtectionCopy.modeSentence(.auto).contains("anyone who can use this Mac"))
         #expect(ProtectionCopy.modeSentence(.biometric).contains("login password can NOT"))

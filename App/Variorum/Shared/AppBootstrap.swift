@@ -452,6 +452,11 @@ final class AppBootstrap {
             protection.readSwitchPending = { [database] in
                 (try? await database.read { try RotationMarker.isSet($0) }) ?? false
             }
+            // pre-13x 2c (§3.6 — the owner distinction): the rows' stamped
+            // owner, read at the reconcile against the signed-in user id.
+            protection.stampedOwnerID = { [database] in
+                (try? await database.read { try Queries.stampedOwnerID($0) }) ?? nil
+            }
             // 13p: the demanded modes' resident key (nil on the Auto
             // road — its Keychain releases on demand), then the launch
             // reconcile (escrow consistency, first-use stamp, notices) —

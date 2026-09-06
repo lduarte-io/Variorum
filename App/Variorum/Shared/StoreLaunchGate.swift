@@ -610,7 +610,7 @@ final class StoreLobby {
     /// derivation), word every refusal. Shared by the bootstrap and the
     /// tests that want the real road over a scripted gate.
     nonisolated static func envelopeRoad(
-        storeURL: URL, gate: StoreLaunchGate
+        storeURL: URL, gate: StoreLaunchGate, session: SyncCustodySession = .shared
     ) -> @Sendable (Secret) async -> Result<StoreKey, StoreLobby.Refusal> {
         { secret in
             await Task.detached(priority: .userInitiated) {
@@ -620,7 +620,20 @@ final class StoreLobby {
                     }
                     switch secret {
                     case .passphrase(let typed):
-                        return .success(try envelope.unwrapKey(passphrase: typed))
+                        // pre-13x 2c (decision 10's Always-ask exception): the
+                        // DERIVED wrapping key — never the typed word — is
+                        // held in session memory with its descriptor, so the
+                        // ready-time vault read can fill an Always-ask
+                        // device's sync keys without a second derivation
+                        // (§3.6 — derive once when the recorded descriptor
+                        // equals the vault's); a relock drops it (1a's pin).
+                        guard let wrap = envelope.passphrase else {
+                            throw StoreKeyEnvelopeError.noPassphraseWrap
+                        }
+                        let derived = try PassphraseKDF.deriveKey(passphrase: typed, descriptor: wrap.kdf)
+                        let key = try envelope.unwrapKey(passphraseKey: derived)
+                        session.holdDerivedWrappingKey(derived, kdf: wrap.kdf)
+                        return .success(key)
                     case .recoveryText(let text):
                         let words = EncryptionSession.words(from: text)
                         return .success(try envelope.unwrapKey(recoveryWords: words))

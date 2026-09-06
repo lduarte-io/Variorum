@@ -111,7 +111,11 @@ nonisolated struct SyncRowFace: Equatable {
                 ])
             }
             if EncryptionSession.isPayloadCryptoError(error)
-                || EncryptionSession.isKeysReplacedError(error) {
+                || EncryptionSession.isKeysReplacedError(error)
+                || EncryptionSession.isKeyProofRefusedError(error) {
+                // pre-13x 2c: the un-followed state (§7) — the fence's
+                // refusal and the proof's alike; the door reaches the
+                // Encryption tab, where the follow's door stands.
                 // CF-16: after a re-key, a stale device's rounds fail —
                 // since Phase 14c at the server's vault-key-id fence
                 // (BEFORE any poison push), and as payload-crypto

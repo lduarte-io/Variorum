@@ -573,6 +573,25 @@ struct CrossoverRoundTests {
                 "the fence's row door opens the Encryption tab directly — CF-16's one act")
     }
 
+    /// pre-13x 2c (§7): the KEY PROOF's refusal (`SyncError.keyProofRefused`)
+    /// is the same un-followed state as the fence's — its own classifier,
+    /// disjoint from the others, presenting as the replaced-keys row whose
+    /// door reaches the Encryption tab (where the follow's door stands).
+    /// RED-ON-OLD: the proof refusal fell to the generic error face.
+    @Test func theKeyProofRefusalPresentsAsTheReplacedRow() {
+        let proof = String(describing: SyncError.keyProofRefused)
+        #expect(EncryptionSession.isKeyProofRefusedError(proof))
+        #expect(!EncryptionSession.isKeyProofRefusedError(String(describing: SyncError.encryptionKeysReplaced)))
+        #expect(!EncryptionSession.isKeysReplacedError(proof), "two classifiers, one state — disjoint")
+        #expect(!EncryptionSession.isPayloadCryptoError(proof))
+        #expect(!EncryptionSession.isKeysLockedError(proof))
+        let face = SyncRowFace.face(
+            allowsSync: true, isConfigured: true, signedIn: true,
+            isSyncing: false, lastError: proof, lastErrorIsOffline: false)
+        #expect(face.kind == .keysReplaced)
+        #expect(face.doors == [SyncRowFace.Door(label: "Re-enroll…", act: .openAccount(.encryption))])
+    }
+
     /// CF-16 (the classifier's face) + the ruled copy: a payload-crypto
     /// refusal presents as the replaced-keys row with ONE door opening the
     /// Encryption tab, and the surface's headline is the ruled sentence

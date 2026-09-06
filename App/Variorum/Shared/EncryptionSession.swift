@@ -121,6 +121,14 @@ final class EncryptionSession {
     /// returns the final material only when the whole road has run.
     var rekeyRunner: ((String) async throws -> DeviceKeyMaterial)?
 
+    /// pre-13x 2c (§7): THE FOLLOW's door — the Encryption tab's
+    /// keys-replaced section opens the follow (the controller's
+    /// `openFollow`) instead of the 14c bare re-enroll, which would land M′
+    /// WITHOUT the rotation, the re-key and the custody move the design
+    /// requires. Wired by the composition root; nil = no runner (the old
+    /// roads render, as in tests and unconfigured builds).
+    var followDoor: (() -> Void)?
+
     /// Ladder R1-1: the persisted rekey-in-progress read, injected by the
     /// composition root (a local `sync_state` read through the app's
     /// database — `AccountRekeyMarker`). nil = never set (unconfigured /
@@ -503,6 +511,16 @@ final class EncryptionSession {
     /// poison push instead of after a failed decrypt.
     nonisolated static func isKeysReplacedError(_ text: String) -> Bool {
         text == SyncError.encryptionKeysReplaced.description
+    }
+
+    /// pre-13x 2c — the key proof's refusal (`SyncError.keyProofRefused`):
+    /// the SAME un-followed state as the fence's refusal (the server checks
+    /// the fence first, so an un-followed device meets the fence; the proof
+    /// refusal is a device presenting the current key id with a stale
+    /// master) — both present as the replaced-keys row whose door is the
+    /// follow.
+    nonisolated static func isKeyProofRefusedError(_ text: String) -> Bool {
+        text == SyncError.keyProofRefused.description
     }
 
     /// Ladder R1-1 — the unfinished-re-key classifier: true exactly for

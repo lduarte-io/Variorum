@@ -443,6 +443,43 @@ final class PostureSwitchRunner {
         return outcome
     }
 
+    /// THE ALWAYS-ASK PICKUP (decision 10's exception, 2c): an Always-ask
+    /// device opened with a word since CHANGED elsewhere holds no sync keys
+    /// — the new word unwraps the vault's master, the class keys (and any
+    /// rotation in flight) are HELD FOR THE SESSION through the store's own
+    /// save (the session-only shape keeps them in memory), and the caller
+    /// re-wraps the local passphrase copy under the vault's descriptor.
+    /// Nothing is re-keyed — the library key never moved. Returns the
+    /// material and the vault's descriptor.
+    func pickUpKeys(passphrase: String?, recoveryWords: [String]?) async throws
+        -> (material: DeviceKeyMaterial, kdf: PassphraseKDF.Descriptor) {
+        guard !busy else { throw PostureSwitchError.switchInProgress(.vaultWrite) }
+        guard let vault = leaves.vault, await leaves.signedIn() else {
+            throw PostureSwitchError.syncKeysUnavailable
+        }
+        busy = true
+        defer { busy = false; phase = .idle }
+        phase = .rotatingKeys
+        guard let fetched = try await vault.fetchVault() else { throw KeyVaultClientError.vaultAbsent }
+        let enrollment = VaultEnrollment(client: vault)
+        let unwrapped: DeviceKeyMaterial
+        if let passphrase, !passphrase.isEmpty {
+            unwrapped = try await enrollment.enroll(passphrase: passphrase)
+        } else if let recoveryWords, !recoveryWords.isEmpty {
+            unwrapped = try await enrollment.enroll(recoveryWords: recoveryWords)
+        } else {
+            throw PostureSwitchError.secretRequired
+        }
+        let following = try CorpusRotation.materialFollowing(fetched.format, master: unwrapped.masterSymmetricKey)
+        guard await leaves.keyStore.offMain({ $0.save(following) }) else {
+            throw PostureSwitchError.custodyRefused(ProtectionCopy.syncKeysWroteButUnreadable)
+        }
+        leaves.resumeSync()
+        phase = .done
+        leaves.log("follow: the new word opened the vault — sync keys held for this session")
+        return (following, fetched.format.kdf)
+    }
+
     /// THE FOLLOW INTO STANDARD (§7 — silent): the account left Castle on
     /// another device — the vault gained an Apple-held copy under the SAME
     /// corpus key id — so this device adds its own iCloud copy to its key

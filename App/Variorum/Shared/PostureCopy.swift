@@ -321,3 +321,69 @@ nonisolated extension ProtectionCopy {
         + "completes. Nothing is lost; finishing picks up exactly where it stopped."
     static let resumeNeedsPassphrase = "Enter your passphrase to finish."
 }
+
+// MARK: - pre-13x 2c — THE FOLLOW'S NOTICES (copy §5, verbatim; the device
+// nouns interpolated; *[device] on [day]* from the vault's
+// `updated_by_device` + `updated_at`) and copy §3's keys-don't-match line.
+
+nonisolated extension ProtectionCopy {
+    /// ISO-8601 stamp → "Sep 5, 2026"; nil in ⇒ the honest fallback.
+    static func day(from stamp: String?) -> String {
+        guard let stamp, stamp.count >= 10 else { return "an earlier day" }
+        let parser = DateFormatter()
+        parser.locale = Locale(identifier: "en_US_POSIX")
+        parser.dateFormat = "yyyy-MM-dd"
+        guard let day = parser.date(from: String(stamp.prefix(10))) else { return String(stamp.prefix(10)) }
+        let display = DateFormatter()
+        display.dateStyle = .medium
+        display.timeStyle = .none
+        return display.string(from: day)
+    }
+
+    /// The device word when the vault carries no name (a pre-2c writer).
+    static let anotherDevice = "another device"
+
+    // Account moved to Castle (a device that was Standard)
+    static func followMovedToCastle(device: String, day: String) -> String {
+        "Your account is now in Castle — set on \(device) on \(day). From now on this "
+        + "\(deviceName) asks for \(biometryName) to open your library, with your passphrase as "
+        + "the fallback. Enter your passphrase once to pick up your new sync keys: they were "
+        + "replaced when Castle was entered, and only your passphrase or twelve words open them."
+    }
+    // Keys replaced elsewhere (a device that has not followed yet)
+    static func followKeysReplaced(device: String, day: String) -> String {
+        "Your keys were replaced on \(device) on \(day). Enter your passphrase once to pick up the new ones."
+    }
+    static let followEnterDoor = "Enter Passphrase…"
+    static let followWordsDoor = "Use Twelve Words…"
+    static let followLaterDoor = "Later"
+    static let followLaterSubline = "Until then this \(deviceName) opens and reads, but doesn't sync."
+    // Waiting for your passphrase (the persistent banner)
+    static func followWaiting(device: String, day: String) -> String {
+        "Sync is paused until you enter your passphrase once — your keys were replaced on "
+        + "\(device) on \(day)."
+    }
+    static let followWaitingDoor = "Enter…"
+    /// On every key door meanwhile.
+    static let pickUpKeysFirst = "Pick up your new keys first — enter your passphrase."
+    // Account moved to Standard (a device that was Castle)
+    static func followMovedToStandard(device: String, day: String) -> String {
+        "Your account is back in Standard — set on \(device) on \(day). This \(deviceName) "
+        + "opens silently again; your Apple account holds a key."
+    }
+    static let followMovedToStandardDoor = "OK"
+    // The Always-ask variant (decision 10's exception)
+    static func alwaysAskRetiredWord(device: String, day: String) -> String {
+        "Your passphrase was changed on \(device) on \(day). The old one still opens this "
+        + "\(deviceName), but sync waits until you enter the new one here."
+    }
+    static let enterItNowDoor = "Enter It Now…"
+    // Copy §3 — after unlock, keys don't match the account (a different owner)
+    static let keysDontMatchThisLibrary =
+        "This account's keys don't match this library. Enter your passphrase to connect it — "
+        + "everything in it will upload to this account."
+    /// The Connect door is batch 3's (P-2: not rendered until it acts).
+    static let connectDoor = "Connect…"
+    static let followDoneBody =
+        "Your new keys are in place on this \(deviceName), and sync is back on."
+}
