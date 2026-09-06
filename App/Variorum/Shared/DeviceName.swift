@@ -20,14 +20,14 @@ nonisolated enum DeviceName {
     /// The device's own user-facing name: `Host.current().localizedName` on
     /// the Mac ("Lillian's MacBook Pro"), `UIDevice.current.name` on the
     /// phone. Never empty — an OS that answers nothing gets the platform
-    /// noun, so a notice still reads as a sentence.
+    /// noun (`ProtectionCopy.deviceName`, the ONE word source the parity
+    /// C5 sweep allows), so a notice still reads as a sentence.
     static var current: String {
         #if os(iOS)
         let name = MainActor.assumeIsolated { UIDevice.current.name }
-        return name.isEmpty ? "this iPhone" : name
         #else
         let name = Host.current().localizedName ?? ""
-        return name.isEmpty ? "this Mac" : name
         #endif
+        return name.isEmpty ? "this \(ProtectionCopy.deviceName)" : name
     }
 }

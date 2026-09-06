@@ -163,8 +163,20 @@ struct StoreKeyEnvelopeTests {
         var words = try RecoveryPhrase.generate()
         try envelope.setRecoveryWrap(key: key, words: words)
         // A swapped word breaks the built-in checksum — the refusal names
-        // the typo class, never a generic "wrong phrase".
-        words[0] = words[0] == "abandon" ? "ability" : "abandon"
+        // the typo class, never a generic "wrong phrase". The checksum is
+        // FOUR bits, so one substituted word still passes it 1 time in 16
+        // (pre-13x 2c found this pin red at those odds in a full run —
+        // `wrongRecoveryPhrase` from the unwrap that then ran); substitute
+        // word by word until the checksum actually breaks (12 misses in a
+        // row: 16^-12), so the pin asserts the typo class it names.
+        for index in words.indices {
+            var candidate = words
+            candidate[index] = candidate[index] == "abandon" ? "ability" : "abandon"
+            if (try? RecoveryPhrase.recoveryWrapKey(words: candidate)) == nil {
+                words = candidate
+                break
+            }
+        }
         do {
             _ = try envelope.unwrapKey(recoveryWords: words)
             Issue.record("a checksum-breaking typo must refuse")
