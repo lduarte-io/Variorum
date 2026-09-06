@@ -292,8 +292,11 @@ Body: *Use this if someone may have used your passphrase or twelve words, or had
 copy of your library or a backup holds no keys, so it is never the reason on its own. Your sync gets a new master key
 and a new corpus key, everything on the server is re-encrypted from this Mac, and this library gets a new key. Your
 other devices will each ask for your passphrase once, then give their own libraries new keys. Your passphrase and
-twelve words stay the same unless you change them below. Old backups keep their old keys and open exactly as they do
-now.*
+twelve words stay the same unless you change them below. Old backups keep their old keys: they still open with the
+passphrase you had when they were made, with your twelve words (unless you regenerate them), and — if they were made
+in Standard — through your Apple account; an enrolled device's master key no longer opens them, because that key is
+replaced.* *(Precised 2026-09-06 at the successor's kickoff — ledger 50(a), her ruling: the master-copy road to a
+pre-rotation backup closes with the rotation; the old sentence's "exactly as they do now" over-claimed it.)*
 Standard addendum: *In Standard this doesn't shut out someone inside your Apple account — your Apple account holds a
 key to the new keys too. For that, secure your Apple account with Apple's tools, or move to Castle.*
 Still finishing (either door, any device): *A key replacement started on [device] on [day] is still finishing — N rows
@@ -355,11 +358,15 @@ key door meanwhile: *Pick up your new keys first — enter your passphrase.*
 [day]. From now on this Mac asks for Touch ID to open your library, with your passphrase as the fallback. Enter your
 passphrase once to pick up your new sync keys: they were replaced when Castle was entered, and only your passphrase or
 twelve words open them.* Doors: *Enter Passphrase…* · *Use Twelve Words…* · *Later* (sub-line: *Until then this Mac
-opens and reads, but doesn't sync.*)
+opens and reads, but doesn't sync — and what you write meanwhile stays under the old key until you pick up the new
+ones.*)
 **Account in Castle, this device still opens the old way (the posture-mismatch follow, decision 35 — no keys were
 replaced):** *Your account is in Castle, but this Mac still opens without asking. Enter your passphrase once to move
 this Mac's key behind Touch ID and give your library a fresh key.* Doors: *Enter Passphrase…* · *Use Twelve Words…* ·
-*Later* (sub-line: *Until then this Mac opens and reads as before.*)
+*Later* (sub-line: *Until then this Mac opens and reads as before — what you write meanwhile stays under the old key
+until you enter your passphrase.*) *(Both Later sub-lines precised 2026-09-06 — ledger 50(b), her ruling: writing made
+after Later sits under the OLD library key, Apple-openable on a Standard-shaped device, until the follow; the rendered
+strings and their pins follow at batch 4.)*
 **Keys replaced elsewhere (a device that has not followed yet):** *Your keys were replaced on [device] on [day]. Enter
 your passphrase once to pick up the new ones.* Doors: the same three; the same sub-line.
 **Account moved to Standard (a device that was Castle):** *Your account is back in Standard — set on [device]
@@ -462,7 +469,11 @@ server asks every device to prove it holds it before it will accept or hand over
 *The iCloud key. A random key that Variorum places in your iCloud Keychain the first time a Standard library exists
 on your Apple account. It syncs to every device signed into your iCloud, Apple's end-to-end encryption protects it in
 transit, and Apple's account recovery can reach it. By itself it opens nothing: it is only ever what a Standard
-wrapped copy is wrapped under. Castle leaves it where it is, with nothing current wrapped under it.*
+wrapped copy is wrapped under. Castle leaves it where it is, with nothing current wrapped under it. If one of your
+devices is signed into a different Apple account, that device's own key file holds its library key wrapped under THAT
+account's iCloud key too — so that Apple account can open that device's library file, though never your sync: the
+master key's Apple-held copy is under the Apple account that turned sync on.* *(The last sentence added 2026-09-06 —
+ledger 48, her ruling; 13s re-voices.)*
 *Your account password. It signs you in and can delete your account. It wraps nothing and opens nothing.*
 
 **Chapter 3 — Standard, step by step**
@@ -544,13 +555,18 @@ that is what open means.*
 one of your devices unlocked, replace all your keys. If — in Standard — someone was inside your Apple account, secure
 it with Apple's tools or move to Castle; replacing your keys alone does not shut them out there. If your account
 password leaked, sign out everywhere and change it. If your account itself
-may be in someone else's hands, delete it and set sync up again.*
+may be in someone else's hands, delete it and set sync up again. The device named in a notice is the device's own word
+for itself; the day is the server's — an act you didn't do is the sign, whatever the name says.*
 
 **Chapter 8 — What we can and cannot do for you**
 *We cannot read your writing, in either mode. We cannot reset a Castle passphrase — a reset would be a key we
 hold. We cannot recover your writing if you are in Castle and lose every enrolled device and both secrets. We can
 see when your devices sync and how much; we cannot see what. We can delete your account on your word, and we can
 sign your other devices out on your word. Everything else is yours.*
+*When a notice names the device that changed something, that name is what the device calls itself — the day is
+ours. A name you don't recognize, or an act you didn't do under a name you do, is the sign to replace your keys.*
+*(The last paragraph added 2026-09-06 — ledger 49, her ruling: `updated_by_device` is the writing client's own word;
+13s re-voices.)*
 ---
 
 ## 8. THE HELP GUIDE / WEBSITE FAQ (for the stargazing.tech agent; detail the tutorial deliberately leaves out)
@@ -608,7 +624,9 @@ sign your other devices out on your word. Everything else is yours.*
   your Apple account, which holds a key, so also remove it from your Apple account (your Apple ID's device list, or
   Find My).*
 - **My other device uses a different Apple ID.** *Sync still works — that device types your passphrase once to join,
-  then opens on its own. The nothing-typed road is for devices signed into the Apple account that turned on sync.*
+  then opens on its own. The nothing-typed road is for devices signed into the Apple account that turned on sync. In
+  Standard, that device's own library then also opens through the Apple account it is signed into.* *(The last sentence
+  added 2026-09-06 — ledger 48.)*
 - **Does Castle on my Mac make my iPhone Castle?** *Once sync is on, yes — Castle belongs to your account and every
   device follows. Before sync, each library has its own mode; your iPhone learns the account's mode when it joins.*
 
