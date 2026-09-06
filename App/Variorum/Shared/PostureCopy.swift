@@ -418,7 +418,8 @@ nonisolated extension ProtectionCopy {
         + "library a fresh key."
     }
     static var followCastleStillOpensLaterSubline: String {
-        "Until then this \(deviceName) opens and reads as before."
+        "Until then this \(deviceName) opens and reads as before — what you write meanwhile "
+        + "stays under the old key until you enter your passphrase."
     }
     // Keys replaced elsewhere (a device that has not followed yet)
     static func followKeysReplaced(device: String, day: String) -> String {
@@ -427,7 +428,13 @@ nonisolated extension ProtectionCopy {
     static let followEnterDoor = "Enter Passphrase…"
     static let followWordsDoor = "Use Twelve Words…"
     static let followLaterDoor = "Later"
-    static let followLaterSubline = "Until then this \(deviceName) opens and reads, but doesn't sync."
+    /// pre-13x 4a (ledger 50(b), her ruling 2026-09-06): the sub-line names
+    /// what happens to writing made after *Later* — it sits under the OLD
+    /// library key until the follow (Apple-openable on a Standard-shaped
+    /// device). Copy §5 as precised, verbatim.
+    static let followLaterSubline =
+        "Until then this \(deviceName) opens and reads, but doesn't sync — and what you write "
+        + "meanwhile stays under the old key until you pick up the new ones."
     // Waiting for your passphrase (the persistent banner)
     static func followWaiting(device: String, day: String) -> String {
         "Sync is paused until you enter your passphrase once — your keys were replaced on "
@@ -459,4 +466,8 @@ nonisolated extension ProtectionCopy {
     static let connectCancelDoor = "Cancel"
     static let followDoneBody =
         "Your new keys are in place on this \(deviceName), and sync is back on."
+    /// pre-13x 4a — Connect's done line (copy §3, drafted at 3a's adjudication;
+    /// the Connect kind rendered `followDoneBody` until now).
+    static let connectDoneBody =
+        "This library is connected to this account, and everything in it is uploading now."
 }

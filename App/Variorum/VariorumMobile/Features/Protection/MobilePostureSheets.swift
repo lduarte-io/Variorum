@@ -399,7 +399,8 @@ struct MobileFollowSheet: View {
                     }
                     prose("Keep Variorum open. If it quits, the follow picks up where it stopped.")
                 case .done(let insuranceOff, _):
-                    prose(ProtectionCopy.followDoneBody, ink: true)
+                    // pre-13x 4a: Connect's own done line (copy §3).
+                    prose(model.isConnectVariant ? ProtectionCopy.connectDoneBody : ProtectionCopy.followDoneBody, ink: true)
                     if insuranceOff { alarm(ProtectionCopy.insuranceTurnedOffNotice) }
                     HStack { offer("Continue") {
                         model.continueFromDone()

@@ -587,11 +587,12 @@ struct MobilePhoneProtectionCopyTests {
         #expect(moved.contains("set on Lillian's Mac on \(day)"))
         #expect(moved.contains("this iPhone asks for Face ID to open your library"))
         #expect(!moved.contains("Touch ID") && !moved.contains("this Mac"))
-        #expect(ProtectionCopy.followLaterSubline == "Until then this iPhone opens and reads, but doesn't sync.")
+        #expect(ProtectionCopy.followLaterSubline == "Until then this iPhone opens and reads, but doesn't sync — and what you write meanwhile stays under the old key until you pick up the new ones.")
+        #expect(ProtectionCopy.connectDoneBody == "This library is connected to this account, and everything in it is uploading now.")
         // pre-13x 2d.4: the posture-mismatch follow's own sentence, in the phone's nouns.
         #expect(ProtectionCopy.followCastleStillOpensOldWay
                 == "Your account is in Castle, but this iPhone still opens without asking. Enter your passphrase once to move this iPhone's key behind Face ID and give your library a fresh key.")
-        #expect(ProtectionCopy.followCastleStillOpensLaterSubline == "Until then this iPhone opens and reads as before.")
+        #expect(ProtectionCopy.followCastleStillOpensLaterSubline == "Until then this iPhone opens and reads as before — what you write meanwhile stays under the old key until you enter your passphrase.")
         #expect(ProtectionCopy.followMovedToStandard(device: "Lillian's Mac", day: day)
                 .contains("This iPhone opens silently again"))
         #expect(ProtectionCopy.alwaysAskRetiredWord(device: "Lillian's Mac", day: day)

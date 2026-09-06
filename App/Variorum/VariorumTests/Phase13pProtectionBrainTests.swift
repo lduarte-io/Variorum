@@ -236,7 +236,7 @@ struct ProtectionCopyTests {
         // pre-13x 2d.4 (the orchestrator's ruling 1): the posture-mismatch follow's OWN sentence.
         #expect(ProtectionCopy.followCastleStillOpensOldWay
                 == "Your account is in Castle, but this \(ProtectionCopy.deviceName) still opens without asking. Enter your passphrase once to move this \(ProtectionCopy.deviceName)'s key behind \(ProtectionCopy.biometryName) and give your library a fresh key.")
-        #expect(ProtectionCopy.followCastleStillOpensLaterSubline == "Until then this \(ProtectionCopy.deviceName) opens and reads as before.")
+        #expect(ProtectionCopy.followCastleStillOpensLaterSubline == "Until then this \(ProtectionCopy.deviceName) opens and reads as before — what you write meanwhile stays under the old key until you enter your passphrase.")
         let mismatch = FollowNotice(kind: .castleStillOpensOldWay, device: "Lillian's iPhone", day: day)
         #expect(mismatch.body == ProtectionCopy.followCastleStillOpensOldWay && mismatch.laterSubline == ProtectionCopy.followCastleStillOpensLaterSubline)
         #expect(mismatch.waitingBody == ProtectionCopy.followCastleStillOpensOldWay, "no keys were replaced and sync is not paused — the banner says the same sentence")
@@ -248,7 +248,9 @@ struct ProtectionCopyTests {
                 == "Your account is back in Standard — set on Lillian's iPhone on \(day). This \(ProtectionCopy.deviceName) opens silently again; your Apple account holds a key.")
         #expect(ProtectionCopy.alwaysAskRetiredWord(device: "Lillian's iPhone", day: day)
                 == "Your passphrase was changed on Lillian's iPhone on \(day). The old one still opens this \(ProtectionCopy.deviceName), but sync waits until you enter the new one here.")
-        #expect(ProtectionCopy.followLaterSubline == "Until then this \(ProtectionCopy.deviceName) opens and reads, but doesn't sync.")
+        // pre-13x 4a (ledger 50(b)): the two Later sub-lines as precised 2026-09-06; Connect's done line (copy §3).
+        #expect(ProtectionCopy.followLaterSubline == "Until then this \(ProtectionCopy.deviceName) opens and reads, but doesn't sync — and what you write meanwhile stays under the old key until you pick up the new ones.")
+        #expect(ProtectionCopy.connectDoneBody == "This library is connected to this account, and everything in it is uploading now.")
         #expect(ProtectionCopy.pickUpKeysFirst == "Pick up your new keys first — enter your passphrase.")
         #expect(ProtectionCopy.followEnterDoor == "Enter Passphrase…" && ProtectionCopy.followWordsDoor == "Use Twelve Words…"
                 && ProtectionCopy.followLaterDoor == "Later" && ProtectionCopy.followWaitingDoor == "Enter…"

@@ -793,7 +793,8 @@ struct FollowSheet: View {
                 Text("Keep Variorum open. If it quits, the follow picks up where it stopped.")
                     .font(.caption).foregroundStyle(.secondary)
             case .done(let insuranceOff, _):
-                Text(ProtectionCopy.followDoneBody)
+                // pre-13x 4a: Connect's own done line (copy §3).
+                Text(model.isConnectVariant ? ProtectionCopy.connectDoneBody : ProtectionCopy.followDoneBody)
                     .font(.callout)
                     .fixedSize(horizontal: false, vertical: true)
                 if insuranceOff {
