@@ -3104,6 +3104,14 @@ private let privacyChapter = "keeping it private"
 @MainActor
 @Suite("Tutorial contract — keeping it private")
 struct TutorialPrivacyChapterTests {
+    /// The two-register rule (copy §7b's head; design §1.22): the everyday
+    /// surfaces and the tutorial name no key-family internals. ONE list,
+    /// both platforms (the phone's twin reads the same words).
+    static var forbiddenRegisterWords: Regex<Substring> {
+        /\b(?:box|boxes|vault|vaults|escrow|escrowed|kdf|token|tokens|session|sessions|rls)\b/
+            .ignoresCase().wordBoundaryKind(.simple)
+    }
+
     @Test func theChapterIsTwoLessonsInTheRightPlace() {
         let index = try? #require(
             TutorialSeeder.plan.firstIndex { $0.chapter == privacyChapter })
@@ -3114,79 +3122,54 @@ struct TutorialPrivacyChapterTests {
             #expect(index == places + 1,
                     "the recovery map raises the question this chapter answers")
         }
+        // pre-13x 5a: copy §7's two lessons, by the copy's own titles.
         #expect(TutorialSeeder.plan.first { $0.chapter == privacyChapter }?.lessons
-            == ["your library is encrypted", "what you'd have to lose"],
+            == [ProtectionCopy.privacyLessonOneTitle, ProtectionCopy.privacyLessonTwoTitle],
                 "SHORT, as she ruled — two lessons")
     }
 
-    /// Every option Settings ▸ Protection offers is named in the lesson, in
-    /// the app's own words: the three at-open modes, both presets, the escrow
-    /// dial, the reset road, and the lock act's own sentence.
-    @Test func theOptionsLessonNamesEveryDialByItsRealWords() async throws {
+    /// **RENDER, DON'T RE-DERIVE** (pre-13x 5a): each lesson's prose is copy
+    /// §7's paragraphs VERBATIM — the copy constants both seeders render —
+    /// and the chapter says exactly what copy §7's parenthetical promises:
+    /// both modes, both floors, keystone 3, keystone 4, and the book's door.
+    @Test func theChapterRendersCopySevenVerbatimAndNamesBothModesBothFloorsTheKeystonesAndTheBooksDoor() async throws {
         try await withTutorialWorld { _, db, bookID in
-            let prose = try await db.read { db in
+            let one = try await db.read { db in
                 try Queries.renderedText(
-                    db, containerID: lessonID(db, bookID: bookID, "your library is encrypted"))
+                    db, containerID: lessonID(db, bookID: bookID, ProtectionCopy.privacyLessonOneTitle))
             }
-            for mode in StoreAtOpenMode.allCases {
-                #expect(prose.contains(ProtectionCopy.modeLabel(mode)),
-                        "the lesson must name the row Settings shows: \(ProtectionCopy.modeLabel(mode))")
+            let two = try await db.read { db in
+                try Queries.renderedText(
+                    db, containerID: lessonID(db, bookID: bookID, ProtectionCopy.privacyLessonTwoTitle))
             }
-            // pre-13x 2a: the presets are gone (§13); the two POSTURES are
-            // named by their real words (copy §1) — batch 5's short chapter
-            // re-seeds the whole lesson.
+            for paragraph in ProtectionCopy.privacyLessonOneParagraphs {
+                #expect(one.contains(paragraph), "lesson 1 carries the copy's paragraph verbatim")
+            }
+            for paragraph in ProtectionCopy.privacyLessonTwoParagraphs {
+                #expect(two.contains(paragraph), "lesson 2 carries the copy's paragraph verbatim")
+            }
+            // Keystone 3, verbatim; keystone 4 rides a sentence that lowercases
+            // its first word ("…changes: while Variorum is open…").
+            #expect(one.contains(ProtectionCopy.keystoneAccountPassword))
+            #expect(one.lowercased().contains(ProtectionCopy.keystoneOpenMeansReadable.lowercased()))
+            #expect(one.contains("who holds a key"))
+            // Both modes by their real words; both floors; the Castle keystone's
+            // second clause; the book's door by the seeded book's own name.
             for posture in [Posture.standard, Posture.castle] {
-                #expect(prose.contains(ProtectionCopy.postureName(posture)))
-                #expect(prose.contains(ProtectionCopy.postureOneLine(posture)))
+                #expect(two.contains(ProtectionCopy.postureName(posture)))
             }
-            // "saving it in keychain or not" — her own words for the dial.
-            #expect(prose.contains("iCloud Keychain"))
-            // "what you need to reset it" — the door, and the fact that makes
-            // forgetting survivable.
-            #expect(prose.contains("Forgot It? Reset"))
-            #expect(prose.contains("do not need the old passphrase".uppercased())
-                || prose.contains("DO NOT NEED THE OLD PASSPHRASE"))
-            // The recovery phrase's one moment.
-            #expect(prose.contains("twelve words"))
-            #expect(prose.contains("shown once"))
-            // The lock act, in the sentence the pane itself renders.
-            #expect(prose.contains(ProtectionCopy.lockNowSentence))
-            #expect(prose.contains("theater"),
-                    "R13p-14's rule is part of the teaching, not a footnote")
-            // Ladder R1-m4: the noise claim carries the R13p-15 age-out
-            // disclosure — pre-encryption backups stay readable until
-            // rotation expires them, and a chapter about a security
-            // feature must not read better than the truth.
-            #expect(prose.contains(
-                "before the encryption arrived stay readable plain files"),
-                "the honest tail clause on the what-comes-out-is-noise sentence")
-        }
-    }
-
-    /// **ONE BRAIN.** The chain the lesson teaches is the chain the pane
-    /// states — every leg of `lossLegs`, verbatim — so the tutorial and the
-    /// settings copy cannot diverge (knot 6's letter).
-    @Test func theLossLessonNamesEveryLegTheAppNames() async throws {
-        try await withTutorialWorld { _, db, bookID in
-            let prose = try await db.read { db in
-                try Queries.renderedText(
-                    db, containerID: lessonID(db, bookID: bookID, "what you'd have to lose"))
+            #expect(two.contains(ProtectionCopy.privacyStandardFloorSentence))
+            #expect(two.contains(ProtectionCopy.privacyCastleFloorSentence))
+            #expect(two.contains("your passphrase is what lets a new device in"))
+            #expect(two.contains(ProtectionCopy.privacyBookDoorSentence))
+            #expect(two.contains(SampleLibraryEncryptionBook.name))
+            // The retired 13p dials lesson is gone: no reset door, no presets.
+            #expect(!one.contains("Forgot It? Reset") && !two.contains("Forgot It? Reset"))
+            // The two-register rule over the rendered chapter.
+            for prose in [one, two] {
+                #expect(!prose.contains(Self.forbiddenRegisterWords),
+                        "the tutorial names no key-family internal: \(prose.prefix(80))…")
             }
-            for leg in ProtectionCopy.lossLegs(.auto, escrowOn: true) {
-                #expect(prose.contains(leg),
-                        "the everyday chain's legs come from the app's own list: \(leg)")
-            }
-            // The shorter chain, her own example carried into the lesson.
-            #expect(prose.contains("IS enough to lose your writing"))
-            // The one-device fact, in the sentence the pane renders.
-            #expect(prose.contains(ProtectionCopy.oneDeviceNote))
-            // "there's an option for a plaintext backup if they want" — named
-            // by the toggle's real words, and honest about its default.
-            #expect(prose.contains("Keep a weekly plain-text copy of every note"))
-            #expect(prose.contains("OFF by default"))
-            // Non-scary but serious: the chapter offers the reader something
-            // to do rather than only something to fear.
-            #expect(prose.contains("PRACTICE"))
         }
     }
 }

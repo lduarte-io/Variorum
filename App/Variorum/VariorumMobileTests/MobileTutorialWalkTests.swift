@@ -1286,42 +1286,46 @@ struct MobileTutorialLibraryWalkTests {
 @MainActor
 @Suite("Mobile tutorial walk — keeping it private")
 struct MobilePocketGuidePrivacyTests {
-    @Test func theChapterIsOneLessonAtTheEnd() {
-        #expect(MobileTutorialSeeder.plan.last?.chapter == "keeping it private")
-        #expect(MobileTutorialSeeder.plan.last?.lessons == ["your library is encrypted"])
+    /// The two-register rule (copy §7b's head; design §1.22) — the Mac's
+    /// twin reads the same list.
+    static var forbiddenRegisterWords: Regex<Substring> {
+        /\b(?:box|boxes|vault|vaults|escrow|escrowed|kdf|token|tokens|session|sessions|rls)\b/
+            .ignoresCase().wordBoundaryKind(.simple)
     }
 
-    @Test func theLessonNamesTheDoorsAndTheChainInTheAppsOwnWords() async throws {
+    @Test func theChapterIsOneLessonAtTheEnd() {
+        #expect(MobileTutorialSeeder.plan.last?.chapter == "keeping it private")
+        #expect(MobileTutorialSeeder.plan.last?.lessons == [ProtectionCopy.privacyLessonOneTitle])
+    }
+
+    /// pre-13x 5a — RENDER, DON'T RE-DERIVE: the phone's one lesson carries
+    /// BOTH of copy §7's lessons' paragraphs verbatim in the phone's nouns,
+    /// and says what the copy's parenthetical promises: both modes, both
+    /// floors, keystone 3, keystone 4, and the book's door.
+    @Test func theLessonRendersCopySevenInThePhonesNouns() async throws {
         try await withPocketGuideWorld { _, db, bookID in
             let prose = try await db.read { db in
                 try Queries.renderedText(
-                    db, containerID: lessonID(db, bookID: bookID, "your library is encrypted"))
+                    db, containerID: lessonID(db, bookID: bookID, ProtectionCopy.privacyLessonOneTitle))
             }
-            // The door a reader is sent to, by the word the sheet wears.
-            #expect(prose.contains(MobileProtectionSheet.doorTitle))
-            // All three at-open rows, as Settings shows them on the phone.
-            for mode in StoreAtOpenMode.allCases {
-                #expect(prose.contains(ProtectionCopy.modeLabel(mode)))
+            for paragraph in ProtectionCopy.privacyLessonOneParagraphs + ProtectionCopy.privacyLessonTwoParagraphs {
+                #expect(prose.contains(paragraph), "the lesson carries the copy's paragraph verbatim")
             }
-            // The ruled fallback chain: the passcode is NEVER a road in.
-            #expect(prose.contains(ProtectionCopy.credentialName))
-            #expect(prose.contains("can NOT open it"))
-            #expect(prose.contains(ProtectionCopy.biometryName))
-            // The one moment the twelve words exist, and the reset road.
-            #expect(prose.contains("twelve words"))
-            #expect(prose.contains("no old passphrase needed"))
-            // The honest arithmetic, in her own non-scary-but-serious shape.
-            #expect(prose.contains("IS enough to lose your writing"))
-            #expect(prose.contains(ProtectionCopy.oneDeviceNote))
-            // Ladder R2-n1: the noise claim's one honest exception — a
-            // DEVICE backup (iCloud, or one made on a computer) taken
-            // before the first keyed open holds the plaintext store, and
-            // the lesson says so instead of overclaiming.
-            #expect(prose.contains("taken before the encryption arrived"))
-            #expect(prose.contains("still holds the plain library"))
-            // …and nothing in it names the Mac (the no-redirect principle —
-            // this lesson is a phone-only reader's whole story).
-            #expect(!prose.contains("Mac"))
+            #expect(prose.contains(ProtectionCopy.keystoneAccountPassword))
+            #expect(prose.lowercased().contains(ProtectionCopy.keystoneOpenMeansReadable.lowercased()))
+            for posture in [Posture.standard, Posture.castle] {
+                #expect(prose.contains(ProtectionCopy.postureName(posture)))
+            }
+            #expect(prose.contains(ProtectionCopy.privacyStandardFloorSentence))
+            #expect(prose.contains(ProtectionCopy.privacyCastleFloorSentence))
+            #expect(prose.contains(ProtectionCopy.privacyBookDoorSentence))
+            // The phone's nouns, and nothing names the Mac (the no-redirect
+            // principle — a phone-only reader's whole story).
+            #expect(prose.contains("Face ID opens this iPhone for you"))
+            #expect(prose.contains("at your unlocked iPhone"))
+            #expect(!prose.contains("Mac") && !prose.contains("Touch ID"))
+            #expect(!prose.contains("no old passphrase needed"), "the retired reset road is gone")
+            #expect(!prose.contains(Self.forbiddenRegisterWords))
         }
     }
 }

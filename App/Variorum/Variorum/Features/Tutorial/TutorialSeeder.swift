@@ -119,12 +119,15 @@ enum TutorialSeeder {
         // would it take to lose it for good". Two lessons — SHORT, as she
         // ruled.
         //
-        // The loss-math lesson names the legs the SETTINGS pane names,
-        // because they come from one brain (`ProtectionCopy.lossLegs`);
-        // the walk asserts exactly that, so the chapter cannot drift away
-        // from the app's own sentences.
+        // pre-13x 5a (copy §7 — the postures design §1.22): the SHORT
+        // chapter re-seeded as copy §7's two lessons, VERBATIM from the copy
+        // constants both seeders render (`ProtectionCopy.privacyLesson…`);
+        // the walk asserts copy §7's own parenthetical — both modes, both
+        // floors, keystone 3, keystone 4, and the book's door — so the
+        // chapter cannot drift from the copy file's facts. The full story
+        // is the seeded book *Encryption Explained*.
         ("keeping it private",
-         ["your library is encrypted", "what you'd have to lose"]),
+         [ProtectionCopy.privacyLessonOneTitle, ProtectionCopy.privacyLessonTwoTitle]),
         ("ways of looking", ["read", "lenses", "compare & versions",
                              "blocks \u{B7} canvas"]),
         ("the library of things", ["comments & tags", "books & the shelf",
@@ -1204,138 +1207,19 @@ enum TutorialSeeder {
 
         // ————————————————————————— keeping it private —————————————————————
         //
-        // PHASE 13p, knot 6 — her ruled short chapter. Two lessons: what
-        // the encryption IS and which dials Settings offers, then the
-        // honest arithmetic of losing it, per mode, plus the one plain-text
-        // door. Non-scary, serious, and stated in the app's OWN sentences:
-        // the loss-math lesson names exactly the legs `ProtectionCopy`
-        // names, and the walk asserts that, so a re-worded pane cannot
-        // leave the lesson lying.
+        // pre-13x 5a — copy §7's SHORT chapter (the postures design §1.22 /
+        // §8): two lessons, their paragraphs VERBATIM from the copy
+        // constants (`PostureCopy.swift`), the device nouns interpolated.
+        // What's true in every mode; Standard and Castle and what you must
+        // keep in each; the open-app sentence; the door to the seeded book
+        // *Encryption Explained*, which carries the whole story. The 13p
+        // dials lesson and its loss-math composition retired with the
+        // presets, the escrow dial and the reset door they described (§13).
 
-        _ = try lesson(privacy, "your library is encrypted", [
-            // Ladder R1-m4: the honest tail clause — the R13p-15 ruled
-            // age-out means backups made BEFORE the encryption arrived sit
-            // readable in the backup folders until rotation expires them
-            // (~6 weeks), and a lesson claiming pure noise during that
-            // window would overclaim about a security feature.
-            "Everything in this app is encrypted where it lives. Not a switch "
-            + "you turned on: the library file itself is ciphertext, always, "
-            + "and it can only be read with a key this app holds. Copy the "
-            + "file, take the drive, open the backup folder \u{2014} what "
-            + "comes out is noise. (One honest footnote: backups made "
-            + "before the encryption arrived stay readable plain files "
-            + "until rotation ages them out.) That is the floor under every "
-            + "other page of this book.",
-
-            "What you CHOOSE is how the key is handed over when Variorum "
-            + "opens. Settings \u{25B8} Protection offers three. "
-            + "\u{201C}\(ProtectionCopy.modeLabel(.auto))\u{201D} \u{2014} this "
-            + "Mac's Keychain releases the key and the app just opens; the "
-            + "disk is protected, but anyone who can use this Mac as you can "
-            + "read. \u{201C}\(ProtectionCopy.modeLabel(.biometric))\u{201D} "
-            + "\u{2014} it asks every single time, and your login password "
-            + "can NOT open it; if the fingerprint won't take, the fallback "
-            + "is your passphrase. "
-            + "\u{201C}\(ProtectionCopy.modeLabel(.passphrase))\u{201D} "
-            + "\u{2014} you type it at every open, and nothing on this Mac "
-            + "opens the library silently.",
-
-            // pre-13x 2a: the presets are gone (§13) — the two POSTURES
-            // stand where they stood (copy §1's names and one-lines; the
-            // SHORT chapter of copy §7 is batch 5's re-seed).
-            "Two postures decide who holds a key. "
-            + "\u{201C}\(ProtectionCopy.postureName(.standard))\u{201D}: "
-            + "\(ProtectionCopy.postureOneLine(.standard)) "
-            + "\u{201C}\(ProtectionCopy.postureName(.castle))\u{201D}: "
-            + "\(ProtectionCopy.postureOneLine(.castle)) The posture is never "
-            + "a switch you set by hand \u{2014} it is what exists: whether "
-            + "your Apple account holds a key to a copy.",
-
-            // pre-13u ninth wave (memo §4 + §1's corollary): the coupling
-            // truth + spare-key-is-a-key, taught where the dial is taught.
-            "One dial decides whether a SPARE key exists — and it follows "
-            + "the mode. With the spare on, a copy of your key rides your "
-            + "iCloud Keychain: signing into iCloud on a new device can "
-            + "open a copy of your library. The spare is a key — never a "
-            + "backup, never the passphrase — and it can never pull your "
-            + "writing from the server. The asking modes don't offer it at "
-            + "all: anyone who has your computer password has your iCloud, "
-            + "so a spare there would be a way around the gate you just "
-            + "asked for. Your choice comes back when you return to "
-            + "opening silently.",
-
-            "The passphrase is set in that same pane \u{2014} and the moment "
-            + "you set one, your recovery phrase (twelve words) appears on "
-            + "that same screen. It is shown once. Write it down somewhere "
-            + "real. AND YOU DO NOT NEED THE OLD PASSPHRASE TO CHANGE IT: "
-            + "\u{201C}Forgot It? Reset\u{2026}\u{201D} re-wraps the key "
-            + "under a new one after Touch ID confirms it's you. The key "
-            + "itself never changes; only what wraps it does. That is why "
-            + "forgetting is survivable.",
-
-            "Under the two asking modes, Variorum can also lock while you "
-            + "are away \u{2014} on sleep, on screen lock, after idle \u{2014} "
-            + "and \u{2303}\u{2318}L does it right now. "
-            + "\(ProtectionCopy.lockNowSentence) Under "
-            + "\u{201C}\(ProtectionCopy.modeLabel(.auto))\u{201D} there is "
-            + "deliberately no lock at all: a lock whose key re-releases at "
-            + "the next open protects nothing, and this app would rather "
-            + "offer you nothing than offer you theater.",
-        ])
-
-        _ = try lesson(privacy, "what you'd have to lose", [
-            "Encryption cuts both ways, so here is the arithmetic \u{2014} "
-            + "plainly, once, so that none of it is a surprise on a bad day.",
-
-            "On the everyday setting these are your ways back in: "
-            + ProtectionCopy.lossLegs(.auto, escrowOn: true)
-                .joined(separator: " \u{B7} ")
-            + ". ALL of them have to go wrong at once for your writing to be "
-            + "gone \u{2014} any single one of them gets you back in. That is "
-            + "a long chain on purpose.",
-
-            "Turn the dials up and the chain gets SHORTER, deliberately. "
-            + "Asking for the passphrase at every open means nothing on this "
-            + "device opens the library silently \u{2014} and the iCloud "
-            + "spare isn't kept in that shape \u{2014} so forgetting your "
-            + "passphrase without the twelve words written down IS enough "
-            + "to lose your writing. That is not a flaw in the setting; it "
-            + "is the setting, and it is the right one for some people. "
-            + "Settings \u{25B8} Protection leads with your ways back in, "
-            + "kept current as you move the dials.",
-
-            // pre-13u ninth wave: the sync leg + the ratified tier
-            // sentence (VERBATIM from the one brain) + the recipes in one
-            // breath — prose-lite, the memo's teaching aligned here.
-            "If sync is on, the chain grows its longest link: sign into "
-            + "your account on any device, type your passphrase (or the "
-            + "twelve words), and everything comes back, current. "
-            + ProtectionShapes.syncSentence
-            + " And the recipes read one way everywhere: any copy of your "
-            + "library opens with any one key; an unlocked, enrolled "
-            + "device is as powerful as your passphrase; your iCloud "
-            + "password alone opens nothing.",
-
-            "Notice what that list does not contain: another computer. "
-            + "\(ProtectionCopy.oneDeviceNote)",
-
-            "There is exactly one deliberate way out of all this, and it is "
-            + "yours to open. Settings \u{25B8} Data Safety offers "
-            + "\u{201C}Keep a weekly plain-text copy of every note\u{201D}: "
-            + "every note as ordinary Markdown, in the folder you picked, "
-            + "readable by anything. It is OFF by default now that the "
-            + "library is encrypted \u{2014} because it re-opens the door the "
-            + "encryption closed \u{2014} and it is offered honestly rather "
-            + "than hidden, because some people want exactly that and it is "
-            + "their writing.",
-
-            "PRACTICE: open Settings \u{25B8} Protection and read the two "
-            + "sentences under the mode you are on. The first says what that "
-            + "mode protects and what it does not; the second is the chain "
-            + "above, kept current with your own dials. If either one ever "
-            + "reads better than the truth, that is a bug \u{2014} this app's "
-            + "whole claim here is that it says what is actually so.",
-        ])
+        _ = try lesson(privacy, ProtectionCopy.privacyLessonOneTitle,
+                       ProtectionCopy.privacyLessonOneParagraphs)
+        _ = try lesson(privacy, ProtectionCopy.privacyLessonTwoTitle,
+                       ProtectionCopy.privacyLessonTwoParagraphs)
 
         // ——————————————————————————— ways of looking ———————————————————————
 

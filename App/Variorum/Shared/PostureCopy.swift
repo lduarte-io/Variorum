@@ -510,3 +510,50 @@ nonisolated extension ProtectionCopy {
     static let connectDoneBody =
         "This library is connected to this account, and everything in it is uploading now."
 }
+
+// MARK: - pre-13x 5a — THE TUTORIAL'S SHORT CHAPTER (copy §7, verbatim; the
+// device nouns interpolated) + the encryption book's name. Both seeders
+// render these; the spine's pins quote them (render, don't re-derive).
+
+nonisolated extension ProtectionCopy {
+    /// The book the chapter's last paragraph points at — copy §7's quoted
+    /// name, which is the seeded book's reserved name.
+    static let encryptionBookName = SampleLibraryEncryptionBook.name
+
+    /// Lesson 1 — What's true in every mode.
+    static let privacyLessonOneTitle = "What's true in every mode"
+    static let privacyLessonOneParagraphs: [String] = [
+        "Your library is encrypted on disk: the file Variorum writes is unreadable without its key — "
+        + "to Finder, to Terminal, to a backup drive, to anyone who copies it. Sync is end-to-end "
+        + "encrypted: everything is encrypted on your device before it leaves, and the Variorum server "
+        + "stores what it can never read. Both modes are like this. What differs between them is only "
+        + "who holds a key.",
+        keystoneAccountPassword,
+        "And one thing no setting changes: while Variorum is open and unlocked, everything in it is "
+        + "readable — that is what open means. Locking is how you end that.",
+    ]
+
+    /// Lesson 2 — Standard and Castle: what you must keep.
+    static let privacyLessonTwoTitle = "Standard and Castle: what you must keep"
+    static let privacyLessonTwoParagraphs: [String] = [
+        "Standard is the default. Your Apple account holds a key. Keep: your Apple account, and — if "
+        + "you use sync — your passphrase and twelve words, in case your Apple account is ever gone. "
+        + "Anyone who can open Variorum as you, at your unlocked \(deviceName) or fully inside your "
+        + "Apple account, can read.",
+        "Castle means only you hold the keys. Keep: your passphrase and your twelve words. "
+        + "\(biometryName) opens this \(deviceName) for you; your passphrase is what lets a new device "
+        + "in. Lose every enrolled device and both secrets, and your writing is gone — nobody can help. "
+        + "That is the point.",
+        "The whole story — every key, where it lives, what happens when you switch, why an old backup "
+        + "behaves the way it does — is in the book \u{201C}\(encryptionBookName)\u{201D} on this shelf.",
+    ]
+    /// The two floors, as the chapter states them (copy §7's parenthetical
+    /// names them; the pins quote these, never a re-typed sentence).
+    static let privacyStandardFloorSentence =
+        "Keep: your Apple account, and — if you use sync — your passphrase and twelve words, in case "
+        + "your Apple account is ever gone."
+    static let privacyCastleFloorSentence =
+        "Lose every enrolled device and both secrets, and your writing is gone — nobody can help."
+    static let privacyBookDoorSentence =
+        "is in the book \u{201C}\(encryptionBookName)\u{201D} on this shelf."
+}

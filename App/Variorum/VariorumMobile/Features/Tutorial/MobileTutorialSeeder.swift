@@ -84,7 +84,11 @@ enum MobileTutorialSeeder {
         // ▸ Protection screen states the per-mode sentence, the chain and
         // the one-device fact live, so the lesson's job is to send the
         // reader there knowing what they will find.
-        ("keeping it private", ["your library is encrypted"]),
+        // pre-13x 5a: the lesson is copy §7's two lessons' paragraphs under
+        // the copy's first title — ONE lesson, the phone's nouns; the door
+        // to the seeded book *Encryption Explained* (in Home on the phone
+        // too) carries the whole story.
+        ("keeping it private", [ProtectionCopy.privacyLessonOneTitle]),
     ]
 
     // MARK: - Discovery (reads — the doomed set for a wholesale replace)
@@ -644,53 +648,16 @@ enum MobileTutorialSeeder {
         ])
 
         // ————————————————————————— keeping it private ————————————————————
+        //
+        // pre-13x 5a — copy §7's SHORT chapter in the phone's one-lesson
+        // edition: both lessons' paragraphs VERBATIM from the copy constants
+        // (`PostureCopy.swift`), the phone's nouns riding the interpolation
+        // (iPhone · Face ID), under the copy's first title. The 13p dials
+        // lesson retired with the presets and the reset door it described.
 
-        _ = try lesson(privacy, "your library is encrypted", [
-            // Ladder R2-n1: the noise claim carries its one honest
-            // exception — a DEVICE backup (iCloud Backup, or one made on
-            // a computer) taken before the first keyed open holds the
-            // plain library file, and no later encryption reaches back
-            // into it (the R13p-15 age-out doctrine, the phone's edition).
-            "Everything you write here is encrypted where it lives. Not a "
-            + "switch you turned on: the library file on this "
-            + "\(ProtectionCopy.deviceName) is ciphertext, always. Whatever "
-            + "reaches the disk, a backup, or a stolen phone is noise "
-            + "without the key — with one honest exception: a device "
-            + "backup, in iCloud or made on a computer, taken before the "
-            + "encryption arrived still holds the plain library until a "
-            + "newer backup replaces it.",
-
-            "Settings \u{25B8} \(MobileProtectionSheet.doorTitle) is where "
-            + "you decide how that key is handed over when the app opens. "
-            + "\u{201C}\(ProtectionCopy.modeLabel(.auto))\u{201D} just "
-            + "opens \u{2014} the disk is protected, but anyone holding "
-            + "this \(ProtectionCopy.deviceName) unlocked can read. "
-            + "\u{201C}\(ProtectionCopy.modeLabel(.biometric))\u{201D} "
-            + "asks every time, and your "
-            + "\(ProtectionCopy.credentialName) can NOT open it \u{2014} "
-            + "if \(ProtectionCopy.biometryName) won't take, the fallback "
-            + "is your passphrase. "
-            + "\u{201C}\(ProtectionCopy.modeLabel(.passphrase))\u{201D} "
-            + "asks for that passphrase itself, every time. Under the two "
-            + "asking modes the library can also lock when you leave the "
-            + "app, which is the answer to handing someone your phone.",
-
-            "Set a passphrase there and your recovery phrase \u{2014} "
-            + "twelve words \u{2014} appears on the same screen, once. "
-            + "Write it down somewhere real. Forgetting the passphrase "
-            + "later is survivable: the reset door re-wraps the key under a "
-            + "new one after \(ProtectionCopy.biometryName) confirms it's "
-            + "you, with no old passphrase needed.",
-
-            "And read the two sentences under whichever mode you are on. "
-            + "The first says what it protects and what it does not; the "
-            + "second lists every way back into your library, and it gets "
-            + "SHORTER as you turn the dials up \u{2014} on the strictest "
-            + "setting, forgetting your passphrase without the twelve words "
-            + "written down IS enough to lose your writing. That is the "
-            + "trade, stated plainly rather than hidden. "
-            + "\(ProtectionCopy.oneDeviceNote)",
-        ])
+        _ = try lesson(privacy, ProtectionCopy.privacyLessonOneTitle,
+                       ProtectionCopy.privacyLessonOneParagraphs
+                       + ProtectionCopy.privacyLessonTwoParagraphs)
 
         // The bookless practice note ("getting around" points at it):
         // the Library's bookless filter — the Pool's phone home — gets a
