@@ -26,10 +26,11 @@ orchestrator."*
 > `notes/plans/pre-13x-deploy-checklist.md`; `notes/plans/pre-13x-orchestrator-handoff.md` (this file) WHOLE. Do NOT read
 > `pre-13x-design-history.md` or `pre-13x-design-review.md` to decide anything — history; open them only for a WHY, and
 > if the design file is silent on a mechanism, STOP and ask the author rather than infer.
-> Then VERIFY, never trust: `git log --oneline -30`, `git status`, the design's §18 LIVE STATUS against the batch
-> records' hashes, the counts against the records; whether batch 2c has CLOSED (its record's LIVE STATUS every line
-> DONE; HEAD == origin/main; tree clean) or is still running (`ListAgents`; a live agent gets a MESSAGE, never a twin);
-> the mirror is at marker 7 (NOT deployed — `sync_schema_version()` = 7 until the window).
+> Then VERIFY, never trust: `git log --oneline -40`, `git status`, the design's §18 LIVE STATUS against the batch
+> records' hashes, the counts against the records; no agent is running (`ListAgents`);
+> the mirror is at marker **8** (DEPLOYED at the window — verify through the PAT's read road: `sync_schema_version()` = 8,
+> 25 vault columns, her vault row's `key_proof_hash` non-NULL); batches 2c AND 2d are CLOSED and adjudicated (2d = the
+> window's fix, decision 35); THE WINDOW AND ITS SECOND SITTING HAVE RUN — §2b below is their record.
 > Her standing instructions, verbatim and binding: *"it's possible it is missing a scenario or there's some other issue
 > with it. If you think so, BRING IT UP TO ME!! Do not just read that the copy is finished and not tell me about a flaw,
 > vulnerability, or other issue."* — you bring flaws and gaps to her; you NEVER redesign the system on your own
@@ -68,32 +69,28 @@ orchestrator."*
 
 - **Batches:** 0 DONE · 0b DONE (the bridge retired) · **1a DONE** (`10079de2`; adjudicated `2c06c981`) · **1b DONE**
   (`12cd1767`; adjudicated `820b407e`; the fix pass `8d09a30b`…`12cd1767`) · **2a DONE** (`4b2eb646`; adjudicated
-  `663476a6`) · **2b DONE** (`67e744d6`; adjudicated `8af417a9`) · **2c RUNNING at the cutover** (a fresh Fable
-  implementer on the REFINED 2c brief — §19 BATCH 2, "2c — REFINED AT 2b's SEAM"; its record under BATCH RECORDS). The
-  last orchestrator commit: `9820d54c` (the checklist's phone note); 2c's commits follow it — `git log` is the truth.
-- **Counts at 2b's gate:** core 1440/157 · the Mac gate run 308/51 · the spine 72/10 · phone suites green on the
-  `iPhone 17 Pro, OS 26.2` simulator · Mac + iOS targets build. The baseline before the phase: core 1391/152 · Mac
+  `663476a6`) · **2b DONE** (`67e744d6`; adjudicated `8af417a9`) · **2c DONE** (`c7555c2b`; adjudicated `d2094840`) ·
+  **2d DONE — the window's fix, decision 35** (`975bd383` + the fix pass; adjudicated `a29a2e0f`) · **THE WINDOW + THE
+  SECOND SITTING DONE** (§2b). U3 is CLOSED. **U4 batch 3 is NEXT** — `git log` is the truth.
+- **Counts at 2d's gate (the latest):** core 1440/157 · the Mac gate run 264/36 · the spine 72/10 · the phone bundle
+  611/99 (the standing `MobileTrashTests` known-issue pair) · Mac + iOS targets build. The baseline before the phase: core 1391/152 · Mac
   2094/378 (the full Mac suite; the gate runs are subsets by suite type).
-- **The mirror:** marker 7. `Server/supabase/11_pre13x_postures.sql` is DRAFTED and pinned (seven vault columns once 2c
-  lands `updated_by_device`; the proof on every RPC; the closed vault write road; `sync_reencrypt`; the rotation seq;
-  the marker `'8'` last). **NOT DEPLOYED.** The deploy is the window's — immediately before the batch 2 sitting's
-  installs, never earlier (a marker-8 client visibly refuses a marker-7 mirror; her installed Release app is marker 7).
-- **Her devices:** Mac — the Release app at marker 7, **SIGNED OUT of the real store** (her word); Biometric mode; the
-  real key file format 1 (`passphrase` + `recovery` wraps; no master copy until §11's backfill). Phone — the DEV-STORE
-  DEBUG BUILD from the pinned worktree `~/dev/variorum-phone-q3` (at `e9e27adb`) is installed OVER the Release app
-  (same bundle id `io.lduarte.VariorumMobile`; the container survived — the real store's `Library/Application
-  Support/Variorum/` folder + `variorum-keys.json` dated the 3rd, untouched); its dev store (`Variorum-dev/`) holds a
-  format-2 key file with the Mac's dev A AND a `master` copy — corner 47 (below). The worktree stays until the window
-  (delete it after: `git worktree remove ~/dev/variorum-phone-q3`).
+- **The mirror:** marker **8** — `11_pre13x_postures.sql` DEPLOYED and verified at the window (§2b), one leftover DELETE
+  grant repaired by `maintenance/pre13x-window-vault-delete-revoke.sql` (and named in 11); the SyncSpec §12
+  running-record entry (marker 7 → 8) is the CLOSEOUT's to write (design §17).
+- **Her devices (after the second sitting):** Mac — `/Applications/Variorum.app` from 2d's tree (`975bd383`,
+  `76d11d4d…`), Castle / Touch ID, signed in, migrated, the proof landed, the key file format 2 with the master copy AND
+  the vault descriptor (the confirm sheet ran). Phone — the Release build from `3ed3b182` (2d + the Face ID usage
+  description), Castle / Face ID, ONE key file (`variorum-keys-3ec9c96ec93ccc6d.json`: master · passphrase · storeID ·
+  vaultCorpusKeyID · vaultKDF; NO `apple` copy), the store re-keyed at the follow; the dev-build's `Variorum-dev/`
+  folder lingers in the container (inert; §2b). The three worktrees are REMOVED.
 - **The dev store on the Mac** (`~/Library/Containers/io.lduarte.Variorum.debug/Data/Library/Application Support/Variorum-dev/`):
-  ciphertext; a format-2 key file with the dev A (`appleKeyID 765a12c5-c633-4a30-8a30-a4da3383a640`); the §11
-  migration NOT done there (the `migrated2a` defaults key absent) — her login-keychain prompt was answered, but no
-  launch followed on a build that logs at a persisted level; re-launch the Debug app once after 2c lands and read
-  `/usr/bin/log show --info --predicate 'subsystem == "io.lduarte.Variorum" AND category == "protection"'`.
-- **Her live vault:** read as UNAFFECTED by the 1b-found stale-recovery-wrap defect (the 14b drill deleted and re-created
-  it fresh with new words on 2026-08-04; no live run of the 14c re-key door on her account is recorded) — a record,
-  not a proof: the definitive check is the 13l sanity check with her twelve words, which reads the VAULT and so runs
-  at the window right after she signs in.
+  ciphertext; a format-2 key file with the dev A (`appleKeyID 765a12c5…`); its own §11 migration NOT done (the
+  `migrated2a` key absent) — a Debug launch (Xcode ⌘R) once, with her login-keychain password at the prompt, runs it;
+  read `/usr/bin/log show --predicate 'subsystem == "io.lduarte.Variorum" AND category == "protection"'` (notice level
+  since 2b). Not urgent; the dev store is the proving ground only.
+- **Her live vault:** the 1b-found stale-recovery-wrap question is CLOSED — the sanity check with her twelve words at
+  the window: *"That is the right recovery phrase — it unlocked this account's vault. Nothing was changed."*
 - **Memory:** `variorum-phase-9-run-state` (the resume map) — refresh it at every state change.
 
 ### 2b. THE WINDOW'S OUTCOMES (filled by the first orchestrator at the seam — every line PENDING until it is)
@@ -163,7 +160,26 @@ orchestrator."*
   secret-less: her phone exactly). The Standard arm is WRITE-ACTIVE on that reading. The design's letter says an enrolled
   library must agree with the vault; it never says what to do while the vault cannot be read — A GAP IN THE LETTER →
   HER RULING (§4's refinement). The follow did not repair it later because 2c's follow keys on the corpus key id (never
-  rotated here), not on a custody-vs-account POSTURE mismatch. **Her rulings: decision 35 (indeterminate writes nothing; the follow fires on a posture mismatch); the repair THROUGH the fix — batch 2d (the design's §19) builds it, then a SECOND SITTING repairs the phone via the follow (one passphrase entry; Face ID from then on) and lands the Mac's confirm; the drills' real-store legs ride that sitting.**
+  rotated here), not on a custody-vs-account POSTURE mismatch. **Her rulings: decision 35; the repair THROUGH the fix — batch 2d built it. THE SECOND SITTING (2026-09-06, ~03:25–03:40Z):**
+  the Mac refreshed from 2d's tree at a zero-instance window (`683eb304…` → `76d11d4d…`, codesign ok, 03:25:45Z); she
+  relaunched signed in → the one-time confirm sheet APPEARED (the corrected §9 sentence) → her passphrase → the key file
+  gained `vaultKDF` (verified). The phone's Release build installed (03:25:53Z) → at first open the posture-mismatch
+  notice → her passphrase once → the follow ran: custody behind Face ID, the store RE-KEYED (fingerprint `3ec9c96e…`,
+  the sqlite rewritten), ONE key file in the container (master · passphrase · storeID · vaultCorpusKeyID · vaultKDF —
+  NO `apple` copy), the old fingerprint file AND the 79 B legacy stub GONE (verified from the container). **THEN A
+  CRASH at every reopen** — a flicker of the Face ID screen, then death: the iOS target had NO `NSFaceIDUsageDescription`
+  (nowhere in the project; her phone had never reached Face ID before tonight, so no drill or simulator run hit it —
+  iOS terminates an app that invokes Face ID without the string). FIXED at `3ed3b182` (`INFOPLIST_KEY_NSFaceIDUsageDescription
+  = "Unlock your Variorum library"` on both iOS configurations; the built Info.plist verified), rebuilt, reinstalled
+  03:36:03Z → **Face ID gates the open; the library opens** (her word: "it worked with faceid now… that was the
+  reason"). The vault after both devices' rounds: revision 3, the proof landed, no rotation, Castle, marker 8.
+  **ONE OBSERVATION for the ladder:** `device_cursor` holds THREE rows (`4D871175`@02:07Z · `3D4D5F8A`@03:29Z ·
+  `53536eb5`@03:38Z) — the phone's identity CHANGED at the follow (its pre-follow id last seen 02:07Z; a new id after the
+  03:36Z build's first round), which decision 13 says must not happen (the identity is the machine's; a re-key changes
+  the custody item's VALUE, never its name — 1a's note 2); harmless in effect (the abandoned cursor drops out at the
+  60-day horizon; the returner rule covers the new id) but a defect candidate: the follow's custody rewrite should CARRY
+  the identity — trace and pin at the ladder or batch 3. The Mac's id is stable (`3D4D5F8A`). The three worktrees
+  (`~/dev/variorum-phone-q3`, `~/dev/variorum-window`, `~/dev/variorum-sitting2`) REMOVED. **U3 IS CLOSED.**
   The Mac's `vaultKDF` also did NOT land at the relaunch ("next online ready" unmet — a small defect for the ladder).
   The sanity check on the Mac: *"That is the right recovery phrase — it unlocked this account's vault. Nothing was
   changed."* — the 1b/14c stale-wrap question CLOSED.
@@ -229,6 +245,14 @@ Every one was found by reading the shipped code before a brief — keep doing it
     scope, pinned.
 20. **The NULL-hash migration arm's race** (two first rounds) resolved by the deadlock detector. → Exclusive from the
     start (`FOR UPDATE` on a NULL hash — the implementer's sounder mechanism adopted over the ruling's letter).
+21. **The window's own finding — decision 35** (§2b): a secret-less enrolled library derived Standard while the vault
+    was unread and the Apple arm WROTE an iCloud copy; and the reconcile had NO re-run caller after the initial ready
+    (the "next online ready" never came) — 2d fixed both (`PostureReading.indeterminate`; `runReadyHousekeeping`).
+22. **The second sitting's finding — `NSFaceIDUsageDescription` was absent from the iOS target**, so the first real Face
+    ID gate crashed the phone at every open; fixed at `3ed3b182`. A pin in the mobile test host (the built Info.plist
+    carries the key) is the LADDER's — write it before the ladder runs.
+23. **The phone's device identity changed at the follow** (three `device_cursor` rows) — a decision-13 defect candidate;
+    the ladder's or batch 3's (trace `follow`'s custody rewrite; pin the identity's persistence across a follow).
 
 ---
 
@@ -271,7 +295,7 @@ batch's ORCHESTRATOR ADJUDICATION block in §19 with its reasoning; the list:
 
 ## 5. WHAT REMAINS (the plan from here; §15's batches; each brief written AFTER reading the shipped code)
 
-*(Items 1 and 2 are the FIRST orchestrator's — her ruling at the cutover; the successor begins at item 3.)*
+*(Items 1 and 2 are DONE — the first orchestrator's; the successor begins at item 3. The window's outcomes are §2b.)*
 
 1. **Adjudicate 2c** when it reports: verify (`git log`, HEAD == origin, tree clean, the record's LIVE STATUS every line
    DONE with hashes, the counts against the log), read its QUESTIONS, rule what is yours, bring her what is hers, append

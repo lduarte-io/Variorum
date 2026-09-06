@@ -1,5 +1,11 @@
 # pre-13x — THE DEPLOY CHECKLIST (the ONE §12 lockstep event, marker 7 → 8)
 
+**EXECUTED 2026-09-06 (the first build orchestrator): the deploy at 01:09:45Z, every verification passed, the sweep's one
+leftover DELETE grant repaired (`maintenance/pre13x-window-vault-delete-revoke.sql`), both installs, her migrations,
+sign-in, confirm, the sanity check, the phone's follow into Castle (+ the Face ID usage-description fix at `3ed3b182`).
+The running record is `notes/plans/pre-13x-orchestrator-handoff.md` §2b; §8 below (the SyncSpec §12 running-record
+entry) is the CLOSEOUT's.**
+
 *Batch 1b's deliverable (design §19 1b item 4; §3.10; §16's pre-authorization). Written as a checklist the
 ORCHESTRATOR executes at the window — never a batch implementer. The artifact is
 `Server/supabase/11_pre13x_postures.sql`; its pins are `AuthRLSDDLTests` (the 11 block), the grant sweep is
