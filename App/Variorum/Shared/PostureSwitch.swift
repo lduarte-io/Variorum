@@ -214,6 +214,11 @@ final class PostureSwitchRunner {
         /// pre-13x 2c: the fault leaf — inert in production; a pin throws
         /// at the named point (`PostureSwitchError.injectedFault`).
         var injectFault: @Sendable (FaultPoint) throws -> Void = { _ in }
+        /// pre-13x 5b (ledger 67): THIS device's own name — the same name the
+        /// vault client stamps into `updated_by_device` on every write
+        /// (`AppServices` hands `DeviceName.current` to the client). The
+        /// resume's discriminator reads the vault's last writer against it.
+        var deviceName: @Sendable () -> String = { DeviceName.current }
     }
 
     private(set) var phase: Phase = .idle
@@ -1010,6 +1015,32 @@ final class PostureSwitchRunner {
                 try await clearMarker()
                 throw PostureSwitchError.restartRequired
             }
+            // pre-13x 5b (ledger 67 — 5a's question 10, the orchestrator's
+            // ruling): a marker at `.vaultWrite` with the vault's corpus key
+            // id MOVED is one of TWO stories — this device's own write landed
+            // (custody did not — the arm below), or this device's write NEVER
+            // landed and ANOTHER device's rotation did meanwhile (a ceremony
+            // killed before its vault write; the other device entered Castle
+            // or replaced the keys). Key material cannot tell them apart (a
+            // never-landed write left nothing behind). The vault's own
+            // `updated_by_device` can: a name other than this device's means
+            // the account moved under us — M1's corner by another road, so
+            // THE RESUME IS THE FOLLOW: the words this ceremony showed are NOT
+            // the account's and are not landed, and the Done says so (copy
+            // §2b, ledger 61). A `.reencrypt` marker is never this case (it
+            // is written only after this device's own write and custody).
+            // Recorded corner: this device's write landed AND a follower
+            // finished the rotation (its clearing write stamps ITS name)
+            // before the resume — reads as another device's rotation; the
+            // false-alarm direction, chosen over the vacuous-promise one.
+            let byAnotherDevice: Bool = {
+                guard marker.step == .vaultWrite, vaultKeyID != material?.corpusKeyID,
+                      let writer = fetched.format.updatedByDevice else { return false }
+                return writer != leaves.deviceName()
+            }()
+            if byAnotherDevice {
+                leaves.log("posture switch: resume — the account's keys moved under a marker written before this device's own vault write (\(fetched.format.updatedByDevice ?? "another device") rotated them); this device FOLLOWS instead (no second rotation; the ceremony's words are not landed)")
+            }
             if vaultKeyID != material?.corpusKeyID {
                 // The write landed, custody did not: M′ by the passphrase
                 // (or the twelve words — 2c: the follow's own resume).
@@ -1042,12 +1073,22 @@ final class PostureSwitchRunner {
             // (the lobby derives once); a resume by words alone lands the
             // W copy, the P copy landing when the passphrase is next typed.
             let wasStandardShaped = leaves.gate.readEnvelope(leaves.storeURL).envelope?.apple != nil
-            return try await rekeyCustodyAndSnapshot(
+            var outcome = try await rekeyCustodyAndSnapshot(
                 entersCastle: entersCastle, libraryKey: libraryKey,
-                keyFile: KeyFileInputs(passphrase: typedPassphrase, kdf: fetched.format.kdf, recoveryWords: typedWords,
+                // The ceremony's words are NOT landed when another device's
+                // rotation is what this resume picked up (M1's rule): the
+                // account's words are the other device's; the W copy lands
+                // when they are next typed here.
+                keyFile: KeyFileInputs(passphrase: typedPassphrase, kdf: fetched.format.kdf,
+                                       recoveryWords: byAnotherDevice ? nil : typedWords,
                                        recoveryWrapDigest: fetched.format.recoveryWrapDigest),
                 material: material, reencrypted: reencrypted, stamp: marker.startedAt,
-                listPreSwitchPairs: entersCastle && wasStandardShaped, follow: marker.isFollow)
+                listPreSwitchPairs: entersCastle && wasStandardShaped, follow: marker.isFollow || byAnotherDevice)
+            if byAnotherDevice {
+                outcome.followedAnotherDevicesSwitch = true
+                outcome.otherDeviceName = fetched.format.updatedByDevice
+            }
+            return outcome
 
         case .rekeyLibrary:
             // Which side of the swap did the crash leave the file on?
@@ -1237,6 +1278,9 @@ extension PostureSwitchRunner.Leaves {
             defaults: { .standard },
             reconcile: { await protection.reconcile() },
             now: { Date() },
-            log: { logger.notice("\($0, privacy: .public)") })
+            log: { logger.notice("\($0, privacy: .public)") },
+            // pre-13x 5b (ledger 67): the name the vault client stamps —
+            // `AppServices` hands the same `DeviceName.current` to it.
+            deviceName: { DeviceName.current })
     }
 }

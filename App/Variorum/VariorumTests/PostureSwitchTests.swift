@@ -309,6 +309,9 @@ struct PostureSwitchTests {
         var titlesBeforeSwitch: [String: SyncValue] = [:]
         var runner: PostureSwitchRunner!
         var words: [String] = []
+        /// pre-13x 5b (ledger 67): this device's own name — what its vault
+        /// client stamps and what its runner reads the vault's writer against.
+        var deviceName = "test device"
 
         init(dir: URL, storeURL: URL, backups: URL, oldKey: StoreKey, apple: AppleKey,
              binding: StoreBinding, view: AppDatabase, keyStore: DeviceKeyStore,
@@ -380,7 +383,11 @@ struct PostureSwitchTests {
     /// vault and the same account (the old material saved into its custody,
     /// no second setup) — the §7 choreography's second device.
     private func makeWorld(
-        enrolled: Bool = true, standard: Bool = true, biometry: Bool = true, sharing: World? = nil
+        enrolled: Bool = true, standard: Bool = true, biometry: Bool = true, sharing: World? = nil,
+        // pre-13x 5b (ledger 67): a SIBLING with its OWN vault client under its
+        // own name, so the vault's `updated_by_device` tells the two apart
+        // (the shared client stamps every write "test device").
+        deviceName: String = "test device"
     ) async throws -> World {
         let dir = FileManager.default.temporaryDirectory
             .appendingPathComponent("variorum-2b-switch-\(UUID().uuidString)", isDirectory: true)
@@ -418,6 +425,14 @@ struct PostureSwitchTests {
         var material: DeviceKeyMaterial?
         if let sharing {
             vaultEmu = sharing.vaultEmu; vaultClient = sharing.vaultClient; mirror = sharing.mirror
+            if deviceName != "test device", let emu = sharing.vaultEmu {
+                vaultClient = KeyVaultClient(
+                    configuration: KeyVaultClient.Configuration(
+                        projectURL: URL(string: "https://vault.2b.invalid")!, apiKey: "publishable-test-key", deviceName: deviceName),
+                    sessionProvider: StaticSessionProvider(
+                        session: UserSession(accessToken: "token-2b", userID: "user-2b")),
+                    load: emu.load)
+            }
             material = sharing.oldMaterial
             if let material { #expect(keyStore.save(material)) }
         } else if enrolled {
@@ -455,6 +470,7 @@ struct PostureSwitchTests {
             posture: standard ? .standard : .castle)
         world.oldMaterial = material
         world.words = try RecoveryPhrase.generate()
+        world.deviceName = deviceName
 
         // Three notes, pushed under the OLD corpus key.
         let stamp = "2026-09-05T00:00:00Z"
@@ -487,6 +503,7 @@ struct PostureSwitchTests {
         let backups = world.backups
         let suiteName = world.suiteName
         let signedIn = world.vaultClient != nil
+        let deviceName = world.deviceName
         return PostureSwitchRunner.Leaves(
             scope: "Variorum2b",
             storeURL: world.storeURL,
@@ -566,7 +583,8 @@ struct PostureSwitchTests {
             log: { line in calls.log.withValue { $0.append(line) } },
             injectFault: { point in
                 if point == faultAt { throw PostureSwitchError.injectedFault(point) }
-            })
+            },
+            deviceName: { deviceName })
     }
 
     /// A world's runner re-composed with ONE scripted fault (2c.1b).
@@ -2659,6 +2677,69 @@ struct PostureSwitchTests {
         try await withDependencies { $0.database = a.view } operation: { _ = try await aEngine.pull() }
         let seenByA = try await titles(in: a)
         for (id, title) in b.seededTitles { #expect(seenByA[id] == title, "A reads B's \(id) in the clear") }
+    }
+
+    // MARK: - pre-13x 5b.0(c): THE RESUME ROAD'S FLAG (ledger 67)
+
+    /// LEDGER 67 — the conflict-follow by the RESUME road: A's ceremony is
+    /// KILLED before its vault write (the marker at `.vaultWrite`, the vault
+    /// untouched); B — a sibling with its OWN vault client, so its writes
+    /// stamp "sibling device" — enters Castle whole meanwhile; A relaunches
+    /// and resumes by its passphrase (the resume door passes no words).
+    /// The vault's corpus key id has MOVED, so the resume's arm picks M′ up
+    /// from the vault — and because the vault's last writer is not this
+    /// device, the road is THE FOLLOW: no second rotation, the ceremony's
+    /// words NOT landed (the account's words are B's), and the outcome
+    /// carries the flag + B's name so the ceremony's Done speaks copy §2b's
+    /// conflict sentence, never the ordinary Done. A ends in Castle under
+    /// B's keys with its old key file retired. The CONTROL is the standing
+    /// pin (b) above: a resume after THIS device's own landed write (the
+    /// vault's writer is this device) speaks the ordinary Done. RED-ON-OLD:
+    /// the discriminator absent — A's resume landed the ceremony's words as
+    /// a W copy and told the user the ordinary Done (5a's tree).
+    @Test func aCeremonyKilledBeforeItsVaultWriteResumesIntoAnotherDevicesSwitchAsTheFollowAndSaysSo() async throws {
+        let a = try await makeWorld()
+        defer { a.tearDown() }
+        let b = try await makeWorld(sharing: a, deviceName: "sibling device")  // built BEFORE any switch
+        defer { b.tearDown() }
+        let revisionBefore = try await a.vault().revision
+        arm(a, faultAt: .beforeVaultWrite)
+        await #expect(throws: PostureSwitchError.injectedFault(.beforeVaultWrite)) {
+            _ = try await a.runner.enterCastle(passphrase: "sesame", recoveryWords: a.words)
+        }
+        #expect(try await a.marker()?.step == .vaultWrite)
+        #expect(try await a.vault().revision == revisionBefore, "A's write never landed")
+
+        // B's whole switch lands while A is down.
+        let bDone = try await b.runner.enterCastle(passphrase: "sesame", recoveryWords: b.words)
+        try await expectCastleEndState(b, bDone)
+        let bMaterial = try #require(bDone.material)
+        #expect(try await a.vault().format.updatedByDevice == "sibling device", "the vault names B as its last writer")
+
+        // A resumes by the passphrase alone — the resume door's shape.
+        arm(a, faultAt: nil)
+        let outcome = try await a.runner.resume(passphrase: "sesame")
+        #expect(outcome.followedAnotherDevicesSwitch && outcome.otherDeviceName == "sibling device",
+                "the resume's road was the FOLLOW into B's switch, naming the vault's writer: \(outcome)")
+        #expect(ProtectionCopy.castleDoneBody(outcome) == ProtectionCopy.enteredCastleAfterAnotherDevice(device: "sibling device"))
+        #expect(ProtectionCopy.castleDoneBody(outcome) != ProtectionCopy.enteredCastleDone,
+                "not the ordinary Done — the words A's ceremony showed are not the account's")
+        // A rotated nothing: the vault's key id is B's, advanced exactly once.
+        let vault = try await a.vault()
+        #expect(vault.format.classKey(for: .corpus)?.keyID == bMaterial.corpusKeyID)
+        #expect(outcome.entersCastle && outcome.reencrypted == 0, "nothing left to re-encrypt — B finished its own rotation")
+        #expect(outcome.material?.corpusKeyID == bMaterial.corpusKeyID && a.keyStore.load()?.masterKey == bMaterial.masterKey, "A holds B's M′ / C′")
+        #expect(try await a.marker() == nil, "no marker left standing")
+        #expect(a.calls.rekeys == 1 && a.calls.custodyTargets.last == .biometric && a.posture == .castle, "A re-keyed its own library and gated custody")
+        let aFile = try a.keyFile(outcome.newKeyFingerprint)
+        let aKey = try aFile.unwrapKey(passphrase: "sesame")
+        #expect(StoreEncryptionMigration.opens(a.storeURL, key: aKey) && !StoreEncryptionMigration.opens(a.storeURL, key: a.oldKey))
+        #expect(aFile.apple == nil && aFile.vaultCorpusKeyID == bMaterial.corpusKeyID, "A's new key file: no Apple copy, under the vault's key id")
+        #expect(try aFile.unwrapKey(master: bMaterial.masterSymmetricKey) == aKey, "L′ under B's M′")
+        #expect(aFile.recovery == nil, "the ceremony's words are NOT landed — the account's words are B's")
+        #expect(!FileManager.default.fileExists(atPath: a.oldKeyFileURL.path), "the road was a follow — A's Standard-era key file left the live folder")
+        // The winner's Done is the ordinary one.
+        #expect(!bDone.followedAnotherDevicesSwitch && ProtectionCopy.castleDoneBody(bDone) == ProtectionCopy.enteredCastleDone)
     }
 
     // MARK: - pre-13x 4b.4: THE UN-FOLLOWED DEVICE — the whole §12 list as ONE pin
