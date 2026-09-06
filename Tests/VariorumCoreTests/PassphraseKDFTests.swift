@@ -180,6 +180,27 @@ struct PassphraseKDFTests {
         }
     }
 
+    /// pre-13x 3b (the postures design §12; sign-off condition ii): THE
+    /// DESCRIPTOR FLOOR ON READ — 19 MiB, two passes, a 16-byte salt; the
+    /// v1 default clears it; each dimension below it refuses typed.
+    @Test func theProductionFloorIsNineteenMiBTwoPassesAndASixteenByteSalt() throws {
+        let floor = PassphraseKDF.Floor.production
+        #expect(floor.memoryKiB == 19 * 1024 && floor.iterations == 2 && floor.saltBytes == 16)
+        try PassphraseKDF.Descriptor.v1(salt: PassphraseKDF.randomSalt()).validateFloor(floor)
+        var memory = PassphraseKDF.Descriptor.v1(salt: PassphraseKDF.randomSalt())
+        memory.memoryKiB = 19 * 1024 - 1
+        #expect(throws: PassphraseKDFError.self) { try memory.validateFloor(floor) }
+        var passes = PassphraseKDF.Descriptor.v1(salt: PassphraseKDF.randomSalt())
+        passes.iterations = 1
+        #expect(throws: PassphraseKDFError.self) { try passes.validateFloor(floor) }
+        let salt = PassphraseKDF.Descriptor.v1(salt: Data(repeating: 7, count: 15))
+        #expect(throws: PassphraseKDFError.self) { try salt.validateFloor(floor) }
+        // The test host's relaxed floor is a DEBUG-only reading of the
+        // process; the production floor is the constant every Release build
+        // compiles in (a compile-time fact, recorded here).
+        #expect(PassphraseKDF.Floor.relaxedForTests.memoryKiB < floor.memoryKiB)
+    }
+
     @Test func outOfRangeParametersRefuse() {
         // Empty salt, zero iterations, zero memory, oversized output —
         // each refuses with a typed error, never reaching the C call.

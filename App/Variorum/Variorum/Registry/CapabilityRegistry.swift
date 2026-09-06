@@ -1456,6 +1456,15 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: nil,
             unavailableNote: "There is no second backup folder to stop copying to.",
             availability: always),
+        // pre-13x 3b (decision 15; copy §4): the decrypted export — the
+        // passphrase (Castle, or Standard with one set) and a chosen
+        // destination are the pane's own conditions.
+        Capability(
+            id: .exportPlaintextLibrary, verb: "Choose Where…", scope: .app,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: nil,
+            unavailableNote: "The unencrypted export lives in Settings ▸ Data Safety.",
+            availability: always),
     ]
 
     // MARK: - Lookup

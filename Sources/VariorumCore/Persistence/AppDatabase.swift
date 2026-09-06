@@ -193,6 +193,13 @@ public struct AppDatabase: Sendable {
         try await currentWriter().write(updates)
     }
 
+    /// pre-13x 3b: a write OUTSIDE a transaction — SQLite refuses `ATTACH`
+    /// inside one, and the plaintext export attaches its destination
+    /// (`StorePlaintextExport`). The caller owns its own atomicity.
+    public func writeWithoutTransaction<T>(_ updates: (Database) throws -> T) throws -> T {
+        try currentWriter().writeWithoutTransaction(updates)
+    }
+
     // MARK: - Backup (Phase 8, A1)
 
     /// One consistent cold copy of the store at `url`, via SQLite's backup

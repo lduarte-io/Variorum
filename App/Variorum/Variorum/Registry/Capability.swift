@@ -668,4 +668,12 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // ("I forgot to press it for a month" is the failure this phase exists
     // to kill). Recorded so the omission reads as a decision, not a gap.
     case backUpNow, chooseBackupFolder, forgetBackupFolder
+    /// pre-13x 3b (the postures design decision 15; copy §4): the decrypted
+    /// `.sqlite` export — the one deliberate unencrypted escape besides the
+    /// `.md` export; behind the passphrase (Castle, or Standard with one
+    /// set); a user-chosen destination, never the backups folder, never
+    /// scheduled. `.surface` like its three siblings above, for the same
+    /// reasons — and never a palette door: an act that writes the whole
+    /// library readable is not one to reach by a keystroke.
+    case exportPlaintextLibrary
 }

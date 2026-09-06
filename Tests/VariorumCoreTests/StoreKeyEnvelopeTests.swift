@@ -17,6 +17,43 @@ import Testing
 
 @testable import VariorumCore
 
+@Suite("pre-13x 3b — the descriptor floor on the key file's passphrase roads")
+struct StoreKeyEnvelopeFloorTests {
+    /// A key file whose passphrase wrap carries a BELOW-FLOOR descriptor is
+    /// refused at both passphrase roads BEFORE any derivation runs — the
+    /// descriptor here asks for 4 GiB of memory in ONE pass: a derivation
+    /// would take seconds or die; the refusal is instant. The relaxed floor
+    /// (the test host's) opens the same file, which is how the suites' fast
+    /// wraps keep working. RED ON OLD: the tampered descriptor was derived
+    /// as written.
+    @Test func aWrapBelowTheFloorRefusesBeforeDerivingAtBothPassphraseRoads() throws {
+        let key = StoreKey.mint()
+        let cheap = PassphraseKDF.Descriptor(
+            algorithm: PassphraseKDF.algorithmArgon2id, argon2Version: 0x13,
+            memoryKiB: 256, iterations: 1, parallelism: 1,
+            salt: PassphraseKDF.randomSalt(), outputBytes: 32)
+        var envelope = StoreKeyEnvelope()
+        try envelope.setPassphraseWrap(key: key, passphrase: "sesame", kdf: cheap)
+        // The same wrap re-labelled with a monstrous, still-below-floor descriptor.
+        var tampered = envelope
+        var monstrous = cheap
+        monstrous.memoryKiB = 4 * 1024 * 1024
+        tampered.passphrase = StoreKeyEnvelope.PassphraseWrap(kdf: monstrous, wrapped: envelope.passphrase!.wrapped)
+        let start = ContinuousClock.now
+        #expect(throws: PassphraseKDFError.self) {
+            _ = try tampered.unwrapKey(passphrase: "sesame", floor: .production)
+        }
+        #expect(ContinuousClock.now - start < .seconds(1), "refused before any derivation")
+        #expect(throws: PassphraseKDFError.self) {
+            _ = try tampered.unwrapKey(passphraseKey: SymmetricKey(size: .bits256), floor: .production)
+        }
+        #expect(throws: PassphraseKDFError.self) {
+            _ = try envelope.unwrapKey(passphrase: "sesame", floor: .production)
+        }
+        #expect(try envelope.unwrapKey(passphrase: "sesame", floor: .relaxedForTests) == key)
+    }
+}
+
 @Suite("Phase 13p — the vault's held-master passphrase re-wrap (R13p-9's vault half)")
 struct VaultRewrapFormatTests {
     @Test func rewrapMovesThePassphraseAndNothingElse() throws {

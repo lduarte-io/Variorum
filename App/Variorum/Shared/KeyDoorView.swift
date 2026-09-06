@@ -4,7 +4,7 @@
 //
 //  pre-13x batch 3b — copy §4's *Change passphrase* and *Regenerate twelve
 //  words*, rendered inline in the Encryption tab's enrolled section on both
-//  platforms over the shared `KeyDoorModel` (the `SyncSetupView` precedent —
+//  platforms over the shared `KeyDoorModel` (the sync-setup face's precedent —
 //  a re-wrap never re-keys the library, so no reopen tears the sheet down).
 //  Functional and unstyled; 13s re-voices.
 //

@@ -305,10 +305,17 @@ struct SignUpPresentationTests {
             body: #"{"code":422,"error_code":"user_already_exists","msg":"User already registered"}"#)
         #expect(ErrorPresentation.signUpFailureMessage(exists)
                 == ErrorPresentation.signUpExistsMessage)
+        // pre-13x 3b (decision 25; copy §4): the server's two refusals in
+        // copy's words — the length floor and the leaked-password refusal.
         let weak = AuthSessionError.endpointFailure(
             status: 422,
-            body: #"{"code":422,"error_code":"weak_password","msg":"Password should be at least 6 characters."}"#)
-        #expect(ErrorPresentation.signUpFailureMessage(weak).contains("too short or too weak"))
+            body: #"{"code":422,"error_code":"weak_password","msg":"Password should be at least 12 characters.","weak_password":{"reasons":["length"]}}"#)
+        #expect(ErrorPresentation.signUpFailureMessage(weak) == ProtectionCopy.signupPasswordTooShort)
+        let pwned = AuthSessionError.endpointFailure(
+            status: 422,
+            body: #"{"code":422,"error_code":"weak_password","msg":"Password is known to be weak and easy to guess, please choose a different one.","weak_password":{"reasons":["pwned"]}}"#)
+        #expect(ErrorPresentation.signUpFailureMessage(pwned) == ProtectionCopy.signupPasswordBreached)
+        #expect(AccountView.passwordFloor == 12 && ProtectionCopy.signupPasswordFloorHint == "At least 12 characters.")
         let rate = AuthSessionError.endpointFailure(
             status: 429,
             body: #"{"code":429,"error_code":"over_email_send_rate_limit","msg":"For security purposes, you can only request this once every 60 seconds"}"#)

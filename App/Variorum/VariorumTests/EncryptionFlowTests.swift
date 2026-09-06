@@ -740,19 +740,21 @@ struct AccountLifecycleDoorTests {
     /// a re-key does to OTHER devices (the CF-16 replaced state +
     /// re-enroll) and to the recovery phrase.
     @Test func theDoorCopySaysTheLocalCopySurvivesAndNamesTheConsequences() {
-        // The deletion door — her pinned rule, byte-anchored.
+        // The deletion door — her pinned rule, byte-anchored (pre-13x 3b:
+        // copy §4's body — the local copy survives, in its words).
         #expect(AccountView.deleteAccountExplanation.contains(
-            "The writing on this device stays on this device"),
+            "every library stays, and still opens exactly as it does today"),
             "HER PINNED RULE: the deletion copy says the local copy survives")
         #expect(AccountView.deleteAccountExplanation.contains(
-            "anything on your other devices stays there too"))
+            "Nothing on this \(ProtectionCopy.deviceName) or your other devices is touched"))
         #expect(AccountView.deleteAccountExplanation.contains(
-            "Only the account and its synced copy are deleted"))
-        #expect(AccountView.deleteAccountExplanation.contains("permanently"),
-                "the consequence is named honestly beside the survival")
+            "its sync copy on our server, and its keys are deleted"),
+            "the consequence is named honestly beside the survival")
         #expect(AccountView.deleteSubscriptionAdvisory.contains("cancel it first"),
                 "subscription state warned first — the ruling's letter")
-        #expect(AccountView.deleteConfirmationPhrase == "delete my account")
+        #expect(AccountView.deleteConfirmationPhrase == "DELETE MY ACCOUNT")
+        #expect(AccountView.phraseMatches("delete my account ") && !AccountView.phraseMatches("delete account"))
+        #expect(ProtectionCopy.deleteAccountReauthLine == "Enter your account password to continue.")
 
         // pre-13x 3b: Replace All Keys' words are copy §4's (rendered
         // verbatim by `KeyDoorCopy`) — the honest body names what a copy or
@@ -806,12 +808,34 @@ struct AccountDoorWiringTests {
     ) async throws {
         let db = try AppDatabase.inMemory()
         let authStore = AuthTokensStore.inMemory()
+        // pre-13x 3b: the auth answers the deletion door's re-authentication
+        // (the password grant — the right account password gets a fresh
+        // pair, a wrong one the credentials refusal) and the revocations;
+        // everything else stays "no network".
+        let routed: @Sendable (URLRequest) async throws -> (Data, URLResponse) = { request in
+            func response(_ status: Int, _ body: String = "") -> (Data, URLResponse) {
+                (Data(body.utf8), HTTPURLResponse(url: request.url!, statusCode: status, httpVersion: nil, headerFields: nil)!)
+            }
+            let url = request.url!.absoluteString
+            if url.contains("grant_type=password") {
+                let body = request.httpBody.flatMap { try? JSONDecoder().decode([String: String].self, from: $0) }
+                if body?["password"] == "right-account-password" {
+                    return response(200, """
+                        {"access_token": "fresh-access", "refresh_token": "fresh-refresh", "expires_in": 3600,
+                         "user": {"id": "user-door", "email": "door@example.com"}}
+                        """)
+                }
+                return response(400, #"{"error":"invalid_grant","error_description":"Invalid login credentials"}"#)
+            }
+            if url.contains("/auth/v1/logout") { return response(204) }
+            throw AuthSessionError.malformedResponse("no network")
+        }
         let auth = AuthSession(
             configuration: AuthConfiguration(
                 projectURL: URL(string: "https://variorum-project.test.invalid")!,
                 apiKey: "publishable"),
             store: authStore,
-            http: { _ in throw AuthSessionError.malformedResponse("no network") })
+            http: routed)
         await auth.adopt(AuthTokens(
             accessToken: "access", refreshToken: "refresh",
             expiresAt: Date().addingTimeInterval(3600),
@@ -908,41 +932,44 @@ struct AccountDoorWiringTests {
                     "the wired check reads the real sync_state row — the surface re-speaks the road on relaunch")
 
             // Deletion clears it: the road no longer exists.
-            await services.deleteAccount(passphrase: "orchard-lantern-13")
+            await services.deleteAccount(accountPassword: "right-account-password")
             #expect(services.account.lastError == nil)
             let marker = try await db.read { try RotationMarker.isSet($0) }
             #expect(!marker, "a purged account owes no re-key completion")
         }
     }
 
-    /// THE DELETION WIRING: the purge runs only under the verified
-    /// passphrase; success clears custody (the CF-11 machinery) and signs
-    /// out; refusal touches NOTHING local — the wrong-passphrase arm is
-    /// the order's own proof (server first, local after).
-    @Test func theDeletionWiringPurgesThenForgetsThenSignsOut() async throws {
+    /// THE DELETION WIRING (pre-13x 3b — decision 16; copy §4): the purge
+    /// runs only after the ACCOUNT PASSWORD's fresh re-authentication; a
+    /// wrong password refuses with copy's line and purges NOTHING; success
+    /// purges, KEEPS custody (every library stays and opens as it did — the
+    /// keys sit dead server-side), and signs out; the local STORE survives.
+    /// RED ON OLD: the encryption passphrase authorized (keystone 3's
+    /// breach) and the road CLEARED custody (`forgetDeviceKeys`).
+    @Test func theDeletionWiringVerifiesTheAccountPasswordPurgesKeepsCustodyAndSignsOut() async throws {
         try await withDoorWorld { services, encryption, store, lifecycle, db, auth in
             await encryption.setUp(passphrase: "orchard-lantern-13")
-            #expect(store.load() != nil)
+            let custody = try #require(store.load())
             let signedInBefore = await auth.currentUserID
             #expect(signedInBefore != nil)
 
-            // The wrong-passphrase arm: nothing server-side, nothing local.
-            await services.deleteAccount(passphrase: "not-the-passphrase")
-            #expect(services.account.lastError == "Wrong encryption passphrase.")
-            #expect(await lifecycle.purgeCalls == 0, "no purge without authorization")
-            #expect(store.load() != nil, "custody untouched by a refused deletion")
+            // The wrong ACCOUNT password: nothing server-side, nothing local.
+            await services.deleteAccount(accountPassword: "not-the-account-password")
+            #expect(services.account.lastError == ProtectionCopy.deleteAccountWrongPassword)
+            #expect(await lifecycle.purgeCalls == 0, "no purge without the re-authentication")
+            #expect(store.load() == custody, "custody untouched by a refused deletion")
             let stillSignedIn = await auth.currentUserID
             #expect(stillSignedIn != nil, "still signed in")
 
-            // The real arm: purge → forget → sign-out. The local STORE
-            // survives (her pinned rule made mechanical).
+            // The real arm: re-auth → purge → sign-out. Custody KEPT; the
+            // local STORE survives (her pinned rule made mechanical).
             let postID = try await services.session.runner.run { ops in
                 try ops.createPost(title: "survives deletion").id
             }
-            await services.deleteAccount(passphrase: "orchard-lantern-13")
-            #expect(services.account.lastError == nil)
+            await services.deleteAccount(accountPassword: "right-account-password")
+            #expect(services.account.lastError == nil, "\(services.account.lastError ?? "")")
             #expect(await lifecycle.purgeCalls == 1)
-            #expect(store.load() == nil, "device custody cleared through the forget machinery")
+            #expect(store.load() == custody, "custody KEPT — the keys stay on the device, dead server-side (copy §4)")
             let signedOut = await auth.currentUserID
             #expect(signedOut == nil, "signed out")
             #expect(try db.doorString(

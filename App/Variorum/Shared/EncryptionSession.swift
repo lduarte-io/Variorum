@@ -520,12 +520,12 @@ final class EncryptionSession {
 
     // MARK: - Device custody doors (CF-11 · CF-12)
 
-    /// CF-11's act (behind the surface's confirmed destructive door):
-    /// custody, the launch cache, and the biometric gate all go — the
-    /// account vault is untouched, so re-enrolling by passphrase or
-    /// recovery phrase restores this device. Fires the keys hook so the
-    /// engine's next round refuses VISIBLY right away: the sync face
-    /// returns to its locked line, never a stale "synced" reading.
+    /// CF-11's act — pre-13x 3b (§13; decision 25): NO USER DOOR any more.
+    /// The forget door FOLDED into Sign out (which keeps the keys in
+    /// custody — copy §4's *Your library and its keys stay on this
+    /// [device]*); account deletion keeps custody too (the keys sit dead
+    /// server-side). The mechanism stays for the custody rule's pins: the
+    /// MATERIAL goes from every item and the session, the identity stays.
     func forgetDeviceKeys() async {
         await store.offMain { $0.clear() }
         onKeysChanged?()

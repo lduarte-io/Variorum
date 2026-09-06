@@ -525,8 +525,11 @@ struct KeyVaultWireRow: Codable, Equatable {
     }
 
     /// Row → format. A newer `format_version` refuses HERE (the client's
-    /// refuse-by-version, L8); bad base64 refuses as malformed.
-    func format() throws -> KeyVaultFormat {
+    /// refuse-by-version, L8); bad base64 refuses as malformed; pre-13x 3b:
+    /// a descriptor below the floor refuses HERE too — before any
+    /// derivation could run on it (a compromised server cannot hand this
+    /// client a cheap KDF).
+    func format(floor: PassphraseKDF.Floor = PassphraseKDF.floor) throws -> KeyVaultFormat {
         guard formatVersion <= KeyVaultFormat.currentFormatVersion else {
             throw KeyVaultClientError.unsupportedFormatVersion(formatVersion)
         }
@@ -536,16 +539,18 @@ struct KeyVaultWireRow: Codable, Equatable {
             }
             return data
         }
+        let kdf = PassphraseKDF.Descriptor(
+            algorithm: kdfAlgorithm,
+            argon2Version: kdfArgon2Version,
+            memoryKiB: kdfMemoryKiB,
+            iterations: kdfIterations,
+            parallelism: kdfParallelism,
+            salt: try decode(kdfSalt, field: "kdf_salt"),
+            outputBytes: kdfOutputBytes)
+        try kdf.validateFloor(floor)
         return KeyVaultFormat(
             formatVersion: formatVersion,
-            kdf: PassphraseKDF.Descriptor(
-                algorithm: kdfAlgorithm,
-                argon2Version: kdfArgon2Version,
-                memoryKiB: kdfMemoryKiB,
-                iterations: kdfIterations,
-                parallelism: kdfParallelism,
-                salt: try decode(kdfSalt, field: "kdf_salt"),
-                outputBytes: kdfOutputBytes),
+            kdf: kdf,
             masterWrappedByPassphrase: try decode(
                 masterWrappedByPassphrase, field: "master_wrapped_by_passphrase"),
             masterWrappedByRecovery: try masterWrappedByRecovery.map {

@@ -64,9 +64,6 @@ struct EncryptionView: View {
     /// regenerate twelve words) — ONE brain, rendered inline; nil = the doors.
     @State private var keyDoor: KeyDoorModel?
 
-    /// CF-11: the forget door's confirm.
-    @State private var showingForgetConfirm = false
-
     /// 13l Act 5 (row 18): the sanity check's own model — the vault client
     /// straight from the composition root, never through
     /// `EncryptionSession`, whose flows all adopt custody. Read-only by
@@ -112,11 +109,6 @@ struct EncryptionView: View {
     /// your passphrase to re-enroll.").
     static let keysReplacedExplanation =
         "This account's encryption keys were replaced. Enter your passphrase to re-enroll."
-
-    /// CF-11: the forget door's confirm message.
-    static let forgetExplanation =
-        "Sync on this device stops until you unlock again with your encryption passphrase "
-        + "or recovery phrase. Nothing is deleted from this device or your account."
 
     /// Ladder R1-1: the persisted-marker banner's prompt — a re-key
     /// started on this device and never completed (a crash or a mid-run
@@ -615,10 +607,6 @@ struct EncryptionView: View {
         }
 
         disclosureSection
-
-        PageDivider(pageStyle)
-
-        forgetSection
     }
 
     /// The server-visibility disclosure. nil arm: the pre-D1 construction
@@ -677,30 +665,5 @@ struct EncryptionView: View {
         guard let door = encryption.replaceKeysDoor else { return }
         dismiss()
         door(passphrase, words)
-    }
-
-    // MARK: - The forget door (CF-11)
-
-    @ViewBuilder
-    private var forgetSection: some View {
-        PageDoor("Forget Encryption Keys on This Device…", form: .destructive,
-                 style: pageStyle) {
-            showingForgetConfirm = true
-        }
-        .disabled(encryption.busy)
-        .confirmationDialog(
-            "Forget the encryption keys on this device?",
-            isPresented: $showingForgetConfirm
-        ) {
-            Button("Forget Keys", role: .destructive) {
-                Task { await encryption.forgetDeviceKeys() }
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text(Self.forgetExplanation)
-        }
-        Text("For handing a device off, or testing your recovery phrase. Your writing on this device and the account vault are untouched.")
-            .pageCaption(pageStyle)
-            .fixedSize(horizontal: false, vertical: true)
     }
 }

@@ -310,11 +310,14 @@ public struct StoreKeyEnvelope: Codable, Equatable, Sendable {
     /// The passphrase road. RFC 3394 authenticates: a wrong passphrase
     /// cannot unwrap — it refuses (`wrongPassphrase`), never yields
     /// garbage key bytes. As heavy as the set (the KDF); off-main.
-    public func unwrapKey(passphrase typed: String) throws -> StoreKey {
+    /// pre-13x 3b: the wrap's descriptor is checked against the floor
+    /// BEFORE the derivation (a tampered key file cannot make the KDF cheap).
+    public func unwrapKey(passphrase typed: String, floor: PassphraseKDF.Floor = PassphraseKDF.floor) throws -> StoreKey {
         try requireCurrentFormat()
         guard let wrap = passphrase else { throw StoreKeyEnvelopeError.noPassphraseWrap }
+        try wrap.kdf.validateFloor(floor)
         let wrapKey = try PassphraseKDF.deriveKey(passphrase: typed, descriptor: wrap.kdf)
-        return try unwrapKey(passphraseKey: wrapKey)
+        return try unwrapKey(passphraseKey: wrapKey, floor: floor)
     }
 
     /// The passphrase road with the DERIVED key already in hand (pre-13x
@@ -325,9 +328,10 @@ public struct StoreKeyEnvelope: Codable, Equatable, Sendable {
     /// pass when the local copy was reconciled against the vault's
     /// descriptor (§3.6 — "derive once when the recorded descriptor equals
     /// the vault's"). Same refusal as the typed road.
-    public func unwrapKey(passphraseKey wrapKey: SymmetricKey) throws -> StoreKey {
+    public func unwrapKey(passphraseKey wrapKey: SymmetricKey, floor: PassphraseKDF.Floor = PassphraseKDF.floor) throws -> StoreKey {
         try requireCurrentFormat()
         guard let wrap = passphrase else { throw StoreKeyEnvelopeError.noPassphraseWrap }
+        try wrap.kdf.validateFloor(floor)
         let unwrapped: SymmetricKey
         do {
             unwrapped = try AES.KeyWrap.unwrap(wrap.wrapped, using: wrapKey)

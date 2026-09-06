@@ -106,9 +106,19 @@ enum ErrorPresentation {
                     return "The server couldn't send a confirmation email to that address — "
                         + "email delivery isn't fully set up yet. Try again later."
                 }
+                // pre-13x 3b (decision 25; copy §4): the SERVER's two
+                // refusals rendered — leaked-password protection (GoTrue's
+                // `weak_password` with the `pwned` reason / its sentence)
+                // as the breach line; the length floor as the 12-character
+                // line (the client's floor is first; this is the belt).
+                if lowered.contains("pwned")
+                    || lowered.contains("known to be weak")
+                    || lowered.contains("data breach") {
+                    return ProtectionCopy.signupPasswordBreached
+                }
                 if lowered.contains("weak_password")
                     || lowered.contains("password should be") {
-                    return "That password is too short or too weak for the server — try a longer one."
+                    return ProtectionCopy.signupPasswordTooShort
                 }
                 if status == 429 || lowered.contains("rate limit")
                     || lowered.contains("rate_limit") {

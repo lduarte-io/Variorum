@@ -142,41 +142,22 @@ struct AccountLifecycleTests {
 
     // MARK: - Account deletion (L5)
 
-    /// The deletion brain's authorization: a WRONG passphrase refuses and
-    /// the purge is NEVER called (red-on-old by behavioral revert:
-    /// removing the unwrap check purges anyway); the right passphrase
-    /// authorizes and the purge runs.
-    @Test func theDeletionDoorIsAuthorizedByThePassphraseBeforeThePurge() async throws {
-        let world = try await makeRekeyWorld()
-        _ = try await world.enrollment.setUp(passphrase: Self.passphrase)
-        let deletion = AccountDeletion(client: world.vaultClient, lifecycle: world.lifecycle)
+    /// pre-13x 3b (decision 16 — keystone 3): the deletion brain takes NO
+    /// encryption passphrase and NO vault client — the account password's
+    /// fresh re-authentication is the APP's friction; the brain's one act is
+    /// the purge on the session, the same for an enrolled account and a
+    /// vault-less one (the 14c PROVISIONAL dissolved). RED ON OLD: the brain
+    /// demanded the encryption passphrase (a key act authorizing a
+    /// non-key act) and refused a vault-holding account without it.
+    @Test func theDeletionBrainPurgesOnTheSessionAloneEnrolledOrNot() async throws {
+        let enrolledWorld = try await makeRekeyWorld()
+        _ = try await enrolledWorld.enrollment.setUp(passphrase: Self.passphrase)
+        let report = try await AccountDeletion(lifecycle: enrolledWorld.lifecycle).run()
+        #expect(enrolledWorld.lifecycle.purgeCalls.value == 1 && report.authUserRemoved)
 
-        await #expect(throws: VaultEnrollmentError.wrongPassphrase) {
-            try await deletion.run(passphrase: "not-the-passphrase")
-        }
-        #expect(world.lifecycle.purgeCalls.value == 0,
-                "a refused authorization must never reach the purge")
-        await #expect(throws: VaultEnrollmentError.emptyPassphrase) {
-            try await deletion.run(passphrase: nil)
-        }
-        #expect(world.lifecycle.purgeCalls.value == 0,
-                "a vault-holding account requires the passphrase — nil is not an arm")
-
-        let report = try await deletion.run(passphrase: Self.passphrase)
-        #expect(world.lifecycle.purgeCalls.value == 1)
-        #expect(report.authUserRemoved)
-    }
-
-    /// PROVISIONAL (recorded): a VAULT-LESS account deletes on the typed
-    /// confirmation + session alone — no passphrase exists to demand, and
-    /// refusing would deny the deletion right to exactly the accounts
-    /// with nothing synced.
-    @Test func aVaultlessAccountDeletesWithoutAPassphrase() async throws {
-        let world = try await makeRekeyWorld()  // no setUp — no vault
-        let deletion = AccountDeletion(client: world.vaultClient, lifecycle: world.lifecycle)
-        let report = try await deletion.run(passphrase: nil)
-        #expect(world.lifecycle.purgeCalls.value == 1)
-        #expect(report.authUserRemoved)
+        let bare = try await makeRekeyWorld()  // no setUp — no vault
+        _ = try await AccountDeletion(lifecycle: bare.lifecycle).run()
+        #expect(bare.lifecycle.purgeCalls.value == 1)
     }
 
     /// The post-purge backstop: a LINGERING device (the real world's

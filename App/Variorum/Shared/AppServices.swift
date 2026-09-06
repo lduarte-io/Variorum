@@ -367,6 +367,13 @@ final class AppServices {
         await auth.signOut()
     }
 
+    /// pre-13x 3b (decision 20; copy §4): SIGN OUT EVERYWHERE — every session
+    /// of the account revoked (`scope=global`), this one included; the keys
+    /// in custody untouched (the local clear is the ordinary sign-out's).
+    func signOutEverywhere() async {
+        await auth.signOut(scope: .global)
+    }
+
     private func variorumSignInChanged(_ tokens: AuthTokens?) async {
         if let tokens {
             account.variorum = AccountState.SignedIn(
@@ -491,15 +498,17 @@ final class AppServices {
     // MARK: - The account lifecycle doors (Phase 14c batch 2 — deletion;
     // the CF-8 re-key's composition moved to the root at pre-13x 2b)
 
-    /// The deletion door (THE DESIGN 4, her Round-5 ruling): purge the
-    /// account server-side (passphrase-authorized in the brain; the typed
-    /// confirmation is the surface's), then the LOCAL after-acts — device
-    /// custody cleared through the CF-11 forget machinery, then sign-out.
-    /// The local STORE is deliberately untouched: the local copy
-    /// survives, exactly her pinned rule, and the signed-out state reads
-    /// as normal (the standing v1 principle).
-    func deleteAccount(passphrase: String?) async {
-        guard let keyVault else {
+    /// The deletion door (pre-13x 3b — decision 16; copy §4): the ACCOUNT
+    /// password typed and verified by a fresh re-authentication (the grant's
+    /// pair discarded and revoked), the typed phrase being the surface's;
+    /// then the purge (`AccountDeletion` — the session alone authorizes the
+    /// server act; the vault dies whole); then the LOCAL after-acts: the
+    /// persisted marker cleared, sign-out. **Custody is KEPT** (copy §4:
+    /// *every library stays, and still opens exactly as it does today* —
+    /// the keys sit dead server-side; A stays in iCloud; a later account
+    /// adopts the library at setup). The local STORE is untouched.
+    func deleteAccount(accountPassword: String) async {
+        guard keyVault != nil else {
             account.lastError = "Project keys not configured (ProjectConfig.swift)"
             return
         }
@@ -509,21 +518,25 @@ final class AppServices {
         defer { account.busy = false }
         sync.stop()
         do {
-            let deletion = AccountDeletion(
-                client: keyVault, lifecycle: makeAccountLifecycle(auth))
-            _ = try await deletion.run(passphrase: passphrase)
+            guard try await auth.verifyPassword(accountPassword) else {
+                account.lastError = ProtectionCopy.deleteAccountWrongPassword
+                await connectSyncIfAllowed()
+                return
+            }
+            let deletion = AccountDeletion(lifecycle: makeAccountLifecycle(auth))
+            _ = try await deletion.run()
             // Ladder R1-1: a purged account owes no re-key completion —
             // clear the persisted marker so a future sign-in on this
             // store isn't refused for a road that no longer exists.
             try? await session.database.write { try RotationMarker.clear($0) }
-            // Server side is gone; now the device's custody (CF-11's
-            // machinery — the vault it unlocked no longer exists), then
-            // the session (sign-out tears the sync chain down through the
-            // ordinary onChange road).
-            await encryption.forgetDeviceKeys()
+            // The server side is gone; custody STAYS (decision 16 / copy §4);
+            // the session goes (sign-out tears the sync chain down through
+            // the ordinary onChange road).
             await auth.signOut()
         } catch {
-            account.lastError = EncryptionSession.message(for: error)
+            account.lastError = error is URLError
+                ? "Couldn't reach the server — check your connection and try again."
+                : EncryptionSession.message(for: error)
             // The account survives a refused deletion — reconnect the
             // chain the door paused.
             await connectSyncIfAllowed()

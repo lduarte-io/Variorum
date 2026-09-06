@@ -71,6 +71,35 @@ struct KeyProofTests {
 
     /// A pre-postures row (format 1, none of the five keys) DECODES with the
     /// fields nil — the author's existing vault until her first round.
+    /// pre-13x 3b (§12): a vault row whose descriptor sits BELOW the floor
+    /// refuses at decode (`KeyVaultWireRow.format`) — before any derivation
+    /// could run on it; a compromised server cannot hand this client a cheap
+    /// KDF. The relaxed floor decodes the same row (the test host's).
+    @Test func aVaultRowBelowTheFloorRefusesAtDecodeBeforeAnyDerivation() throws {
+        let cheap = PassphraseKDF.Descriptor(
+            algorithm: PassphraseKDF.algorithmArgon2id, argon2Version: 0x13,
+            memoryKiB: 256, iterations: 1, parallelism: 1,
+            salt: PassphraseKDF.randomSalt(), outputBytes: 32)
+        let format = try KeyVaultFormat.create(
+            masterKey: SymmetricKey(size: .bits256), passphraseKey: SymmetricKey(size: .bits256),
+            recoveryKey: nil,
+            classKeys: [(keyClass: .corpus, keyID: "c", key: SymmetricKey(size: .bits256)),
+                        (keyClass: .journalBridge, keyID: "j", key: SymmetricKey(size: .bits256))],
+            kdf: cheap)
+        let row = try KeyVaultWireRow(format: format, userID: "u")
+        #expect(throws: PassphraseKDFError.self) { _ = try row.format(floor: .production) }
+        #expect(try row.format(floor: .relaxedForTests).kdf == cheap)
+        let sound = try KeyVaultWireRow(
+            format: try KeyVaultFormat.create(
+                masterKey: SymmetricKey(size: .bits256), passphraseKey: SymmetricKey(size: .bits256),
+                recoveryKey: nil,
+                classKeys: [(keyClass: .corpus, keyID: "c", key: SymmetricKey(size: .bits256)),
+                            (keyClass: .journalBridge, keyID: "j", key: SymmetricKey(size: .bits256))],
+                kdf: .v1(salt: PassphraseKDF.randomSalt())),
+            userID: "u")
+        _ = try sound.format(floor: .production)
+    }
+
     @Test func aPrePosturesFormatOneVaultDecodesWithTheFieldsNil() throws {
         let sample = try sampleFormat()
         // Strip the five keys from the encoded JSON — the row a 14b-era

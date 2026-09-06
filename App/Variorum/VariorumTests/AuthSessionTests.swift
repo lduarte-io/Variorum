@@ -354,6 +354,67 @@ struct AuthSessionTests {
         #expect(await session.isSignedIn == false)
     }
 
+    // MARK: pre-13x 3b — Sign out everywhere (decision 20) + the account password's re-auth (decision 16)
+
+    /// `signOut(scope: .global)` rides the logout endpoint's `scope=global`
+    /// (every session of the account); the plain sign-out rides `local`;
+    /// the local clear is the same either way. RED ON OLD: no scope on the
+    /// request — a "sign out everywhere" that signed out this device only.
+    @Test func signOutEverywhereRidesTheGlobalScopeAndClearsLocallyLikeTheOrdinarySignOut() async throws {
+        let endpoint = ScriptedEndpoint([(204, ""), (204, "")])
+        let store = AuthTokensStore.inMemory(initial: Self.tokens())
+        let session = AuthSession(configuration: Self.configuration, store: store, http: endpoint.loader())
+        await session.signOut(scope: .global)
+        let global = try #require(endpoint.requests.first)
+        #expect(global.url?.path.hasSuffix("/auth/v1/logout") == true)
+        #expect(global.url?.query?.contains("scope=global") == true, "\(global.url?.absoluteString ?? "")")
+        #expect(global.value(forHTTPHeaderField: "Authorization") == "Bearer access-1")
+        let signedInAfter = await session.isSignedIn
+        #expect(store.load() == nil && signedInAfter == false)
+
+        let again = AuthSession(
+            configuration: Self.configuration, store: AuthTokensStore.inMemory(initial: Self.tokens()), http: endpoint.loader())
+        await again.signOut()
+        #expect(endpoint.requests.last?.url?.query?.contains("scope=local") == true, "the ordinary sign-out is this device's")
+    }
+
+    /// `verifyPassword` runs the password grant for the signed-in email and
+    /// DISCARDS its pair: the session in memory and the Keychain stay what
+    /// they were, the fresh session is revoked at once (a local logout on
+    /// the fresh access token), the credentials refusal answers false, and
+    /// any other failure throws — never "wrong password".
+    @Test func verifyPasswordDiscardsAndRevokesTheFreshPairAndAnswersFalseOnTheCredentialsRefusal() async throws {
+        let endpoint = ScriptedEndpoint([
+            (200, """
+                {"access_token": "fresh-access", "refresh_token": "fresh-refresh", "expires_in": 3600,
+                 *[removed for publication]*
+                """),
+            (204, ""),
+            (400, #"{"error":"invalid_grant","error_description":"Invalid login credentials"}"#),
+            (500, "boom"),
+        ])
+        let store = AuthTokensStore.inMemory(initial: Self.tokens())
+        let session = AuthSession(configuration: Self.configuration, store: store, http: endpoint.loader())
+
+        #expect(try await session.verifyPassword("the-account-password") == true)
+        let grant = try #require(endpoint.requests.first)
+        #expect(grant.url?.query?.contains("grant_type=password") == true)
+        let body = try #require(grant.httpBody.flatMap { try? JSONDecoder().decode([String: String].self, from: $0) })
+        #expect(body["email"] == "author@example.com" && body["password"] == "the-account-password")
+        let revoke = try #require(endpoint.requests.dropFirst().first)
+        #expect(revoke.url?.path.hasSuffix("/auth/v1/logout") == true
+                && revoke.value(forHTTPHeaderField: "Authorization") == "Bearer fresh-access",
+                "the fresh pair is revoked, never adopted")
+        #expect(store.load() == Self.tokens(), "the persisted session is untouched")
+        let live = try await session.currentSession()
+        #expect(live.accessToken == "access-1", "the live session is untouched")
+
+        #expect(try await session.verifyPassword("wrong") == false)
+        await #expect(throws: AuthSessionError.self) {
+            _ = try await session.verifyPassword("anything")
+        }
+    }
+
     // MARK: Persistence + sign-out
 
     @Test func persistenceRoundTripsAcrossSessionInstances() async throws {

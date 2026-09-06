@@ -498,26 +498,78 @@ actor AuthSession: UserSessionProviding {
         onChange?(newTokens)
     }
 
+    /// pre-13x 3b (decision 20; corner 38): the logout endpoint's scope —
+    /// `local` revokes THIS session; `global` revokes every session of the
+    /// account (the mitigation for a stolen password or session; an access
+    /// token already issued lives to its expiry — accepted by her).
+    nonisolated enum SignOutScope: String, Sendable {
+        case local
+        case global
+    }
+
     /// Best-effort server-side logout, unconditional local clear. The only
-    /// path that destroys a session.
-    func signOut() async {
+    /// path that destroys a session. `scope: .global` = Sign Out Everywhere.
+    func signOut(scope: SignOutScope = .local) async {
         // 13e batch 9 (B-1): a sign-out before anything read the store must
         // still log the PERSISTED session out server-side — so consult it
         // first, exactly as the eager load used to guarantee.
         ensureLoadedFromStore()
         if let tokens {
-            var request = URLRequest(
-                url: configuration.projectURL.appendingPathComponent("auth/v1/logout"))
-            request.httpMethod = "POST"
-            request.setValue(configuration.apiKey, forHTTPHeaderField: "apikey")
-            request.setValue("Bearer \(tokens.accessToken)", forHTTPHeaderField: "Authorization")
-            _ = try? await http(request)
+            _ = try? await http(Self.logoutRequest(
+                configuration: configuration, accessToken: tokens.accessToken, scope: scope))
         }
         tokens = nil
         refreshTask?.cancel()
         refreshTask = nil
         store.clear()
         onChange?(nil)
+    }
+
+    /// The logout request: `POST /auth/v1/logout?scope=<scope>` — the
+    /// endpoint's documented enum (global · local · others).
+    nonisolated private static func logoutRequest(
+        configuration: AuthConfiguration, accessToken: String, scope: SignOutScope
+    ) -> URLRequest {
+        var components = URLComponents(
+            url: configuration.projectURL.appendingPathComponent("auth/v1/logout"),
+            resolvingAgainstBaseURL: false)!
+        components.queryItems = [URLQueryItem(name: "scope", value: scope.rawValue)]
+        var request = URLRequest(url: components.url!)
+        request.httpMethod = "POST"
+        request.setValue(configuration.apiKey, forHTTPHeaderField: "apikey")
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        return request
+    }
+
+    // MARK: pre-13x 3b — the account password's fresh re-authentication (decision 16)
+
+    /// Whether `password` is the signed-in account's password — the password
+    /// grant against the account's email, its outcome DISCARDED: the fresh
+    /// token pair is never adopted (nothing re-fires the sign-in wiring
+    /// mid-deletion) and its session is revoked right away (a best-effort
+    /// local logout on the fresh access token), so no discarded refresh
+    /// token lingers. `false` on the grant's credentials refusal; any other
+    /// failure throws (offline, the server down — never "wrong password").
+    func verifyPassword(_ password: String) async throws -> Bool {
+        ensureLoadedFromStore()
+        guard let email = tokens?.email, !email.isEmpty else {
+            throw AuthSessionError.malformedResponse("the signed-in session carries no email to re-authenticate")
+        }
+        do {
+            let fresh = try await tokenRequest(
+                grantType: "password", body: ["email": email, "password": password])
+            _ = try? await http(Self.logoutRequest(
+                configuration: configuration, accessToken: fresh.accessToken, scope: .local))
+            return true
+        } catch AuthSessionError.endpointFailure(let status, let body) {
+            let lowered = body.lowercased()
+            if status == 400 || status == 401,
+               lowered.contains("invalid_grant") || lowered.contains("invalid_credentials")
+                   || lowered.contains("invalid login credentials") {
+                return false
+            }
+            throw AuthSessionError.endpointFailure(status: status, body: body)
+        }
     }
 
     // MARK: UserSessionProviding (the Step 2 seam)

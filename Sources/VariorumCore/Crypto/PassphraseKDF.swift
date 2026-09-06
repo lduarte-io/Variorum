@@ -83,6 +83,54 @@ public enum PassphraseKDF {
         }
     }
 
+    /// pre-13x 3b (the postures design §12; the architect's sign-off
+    /// condition ii) — THE DESCRIPTOR FLOOR ON READ: every descriptor read
+    /// from a vault row or a key file's wrap is checked against this floor
+    /// BEFORE any derivation, so a downgraded descriptor — from a
+    /// compromised server, or a tampered key file — can never make the
+    /// passphrase wrap cheap to brute-force. The OWASP Argon2id floor the
+    /// v1 default exceeds: 19 MiB, two passes, a 16-byte salt.
+    public struct Floor: Equatable, Sendable {
+        public var memoryKiB: Int
+        public var iterations: Int
+        public var saltBytes: Int
+
+        public init(memoryKiB: Int, iterations: Int, saltBytes: Int) {
+            self.memoryKiB = memoryKiB
+            self.iterations = iterations
+            self.saltBytes = saltBytes
+        }
+
+        /// The production floor — what every read site consults in a
+        /// Release build and in any non-test process.
+        public static let production = Floor(memoryKiB: 19 * 1024, iterations: 2, saltBytes: 16)
+        /// The TEST HOST's floor (the fast-KDF convention: m = 256 KiB, one
+        /// pass) — never compiled into a Release build (`#if DEBUG`), and
+        /// in a Debug build armed only when the process is a test host,
+        /// exactly as the app's `KeychainTestTripwire` decides (the 3b
+        /// record's question 1 — the architect's call).
+        public static let relaxedForTests = Floor(memoryKiB: 8, iterations: 1, saltBytes: 8)
+    }
+
+    /// The floor the read sites consult (see `Floor`).
+    public static let floor: Floor = {
+        #if DEBUG
+        // The XCTest markers (Xcode's runners) — and, for SwiftPM's
+        // Swift-Testing runner (`swiftpm-testing-helper`: no XCTest class,
+        // no environment marker, no NSBundle for the test bundle — probed
+        // at 3b), the `.xctest` bundle path it is launched with.
+        let env = ProcessInfo.processInfo.environment
+        let testHost = env["XCTestConfigurationFilePath"] != nil
+            || env["XCTestSessionIdentifier"] != nil
+            || env["XCTestBundlePath"] != nil
+            || NSClassFromString("XCTestCase") != nil
+            || CommandLine.arguments.contains { $0.contains(".xctest") }
+        return testHost ? .relaxedForTests : .production
+        #else
+        return .production
+        #endif
+    }()
+
     /// A fresh random 16-byte salt for a new descriptor (CSPRNG via
     /// CryptoKit — key-material randomness deliberately does NOT flow
     /// through the seedable `@Dependency` generator; tests exercise the
@@ -138,6 +186,27 @@ public enum PassphraseKDF {
     }
 }
 
+extension PassphraseKDF.Descriptor {
+    /// pre-13x 3b: refuse a descriptor below `floor` — called by every
+    /// READ site before any derivation (`KeyVaultWireRow.format`, the key
+    /// file's passphrase roads). Never called on a descriptor this build
+    /// MINTS (the v1 default is above the floor by construction).
+    public func validateFloor(_ floor: PassphraseKDF.Floor = PassphraseKDF.floor) throws {
+        guard memoryKiB >= floor.memoryKiB else {
+            throw PassphraseKDFError.belowFloor(
+                "memory \(memoryKiB) KiB is below the floor of \(floor.memoryKiB) KiB")
+        }
+        guard iterations >= floor.iterations else {
+            throw PassphraseKDFError.belowFloor(
+                "\(iterations) pass(es) is below the floor of \(floor.iterations)")
+        }
+        guard salt.count >= floor.saltBytes else {
+            throw PassphraseKDFError.belowFloor(
+                "a \(salt.count)-byte salt is below the floor of \(floor.saltBytes) bytes")
+        }
+    }
+}
+
 /// Typed refusals — a KDF problem must speak, never crash and never
 /// silently derive a wrong key.
 public enum PassphraseKDFError: Error, Equatable, Sendable {
@@ -148,4 +217,7 @@ public enum PassphraseKDFError: Error, Equatable, Sendable {
     case unsupportedParameters(String)
     /// The vendored Argon2 call itself refused (its error message carried).
     case derivationFailed(code: Int, message: String)
+    /// pre-13x 3b: a descriptor READ from a vault row or a key file sits
+    /// below the floor — a downgraded KDF is refused before any derivation.
+    case belowFloor(String)
 }

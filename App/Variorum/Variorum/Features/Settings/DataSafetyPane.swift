@@ -22,6 +22,7 @@
 //  way") lives here, beside the copies it is about.
 //
 
+import AppKit
 import SwiftUI
 import VariorumCore
 
@@ -33,10 +34,16 @@ struct DataSafetyPane: View {
     let protection: ProtectionController?
     @State private var model: DataSafetyModel
 
-    /// P-1: the three acts this surface renders, declared once and walked.
+    /// P-1: the four acts this surface renders, declared once and walked
+    /// (pre-13x 3b: the decrypted export joins).
     static let surfaceCapabilities: [CapabilityID] = [
-        .backUpNow, .chooseBackupFolder, .forgetBackupFolder,
+        .backUpNow, .chooseBackupFolder, .forgetBackupFolder, .exportPlaintextLibrary,
     ]
+
+    /// pre-13x 3b (copy §4): the decrypted export's brain, made when the door
+    /// opens; nil = the door.
+    @State private var plaintextExport: PlaintextExportModel?
+    @State private var exportPassphrase = ""
 
     init(services: AppServices?, protection: ProtectionController? = nil) {
         self.services = services
@@ -56,6 +63,7 @@ struct DataSafetyPane: View {
                 copiesSection
                 folderSection
                 exportsSection
+                plaintextExportSection
                 syncSection
                 restoreSection
                 logSection
@@ -208,6 +216,131 @@ struct DataSafetyPane: View {
                     .foregroundStyle(.secondary)
             }
         }
+    }
+
+    // MARK: - The decrypted export (pre-13x 3b — decision 15; copy §4)
+
+    /// Copy §4's *Export an unencrypted copy of your library.* — the
+    /// authorization by posture (Castle: the passphrase, vault-verified when
+    /// enrolled, else the key file's; Standard: the passphrase if set, else
+    /// *Export* directly), a chosen destination (never the backups folder),
+    /// the export off the main actor. Rendered only when the controller and
+    /// the store are composed (P-2).
+    @ViewBuilder
+    private var plaintextExportSection: some View {
+        if let protection, let services {
+            Section(ProtectionCopy.exportPlaintextTitle) {
+                Text(ProtectionCopy.exportPlaintextBody)
+                    .font(.callout)
+                    .alarmVoice()
+                    .fixedSize(horizontal: false, vertical: true)
+                if let export = plaintextExport {
+                    switch export.phase {
+                    case .authorize(let needsPassphrase):
+                        if needsPassphrase {
+                            Text(ProtectionCopy.exportPlaintextAuthorize)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            PeekableSecretField(label: ProtectionCopy.passphraseFieldLabel, text: $exportPassphrase)
+                                .textFieldStyle(.roundedBorder)
+                        }
+                        HStack {
+                            Button(needsPassphrase ? ProtectionCopy.exportPlaintextChooseDoor : ProtectionCopy.exportPlaintextPlainDoor) {
+                                let typed = exportPassphrase
+                                exportPassphrase = ""
+                                Task {
+                                    await export.authorize(passphrase: needsPassphrase ? typed : nil)
+                                    if case .choosing = export.phase { await chooseExportDestination(export) }
+                                }
+                            }
+                            .disabled(export.busy || (needsPassphrase && exportPassphrase.isEmpty))
+                            Button("Cancel") { plaintextExport = nil; exportPassphrase = "" }
+                            Spacer()
+                        }
+                    case .choosing:
+                        HStack {
+                            Button(ProtectionCopy.exportPlaintextChooseDoor) {
+                                Task { await chooseExportDestination(export) }
+                            }
+                            .disabled(export.busy)
+                            Button("Cancel") { plaintextExport = nil }
+                            Spacer()
+                        }
+                    case .exporting:
+                        HStack(spacing: 6) {
+                            ProgressView().controlSize(.small)
+                            Text("Writing the unencrypted copy…").font(.caption).foregroundStyle(.secondary)
+                        }
+                    case .done(let path):
+                        Text("Written: \(path)").font(.caption).foregroundStyle(.secondary)
+                        Button("Close") { plaintextExport = nil }
+                    case .failed(let sentence):
+                        Text(sentence).font(.caption).alarmVoice()
+                            .fixedSize(horizontal: false, vertical: true)
+                        Button("Close") { plaintextExport = nil }
+                    }
+                    if let error = export.lastError {
+                        Text(error).font(.caption).alarmVoice()
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                } else {
+                    Button(CapabilityRegistry.capability(.exportPlaintextLibrary).verb) {
+                        plaintextExport = PlaintextExportModel(facts: exportFacts(protection: protection, services: services))
+                    }
+                    .disabled(model.busy)
+                }
+            }
+        }
+    }
+
+    /// The facts the export composes: the posture and passphrase from the
+    /// controller; the verification through the VAULT when enrolled (the
+    /// tie's read-only check), else the key file's own copy; the refused
+    /// folders (the app's own backups, beside the library and in the picked
+    /// second folder); the export over the session's database, off-main.
+    private func exportFacts(protection: ProtectionController, services: AppServices) -> PlaintextExportModel.Facts {
+        let tie = VaultTie.make(services: services)
+        let enrolled: Bool = {
+            if case .enrolled = services.encryption.state { return true }
+            return false
+        }()
+        let database = services.session.database
+        return PlaintextExportModel.Facts(
+            posture: { protection.posture },
+            hasPassphrase: { protection.hasPassphraseWrap },
+            verifyPassphrase: { typed in
+                if enrolled, let tie { return await tie.verifyPassphrase(typed) }
+                switch await protection.verifyPassphraseAgainstStore(typed) {
+                case true?: return .match
+                case false?: return .mismatch(ProtectionCopy.message(for: StoreKeyEnvelopeError.wrongPassphrase))
+                case nil: return .couldNotCheck("no passphrase is set on this library")
+                }
+            },
+            refusedFolders: {
+                var folders: [URL] = []
+                if let backup = services.backup { folders.append(backup.directory) }
+                if let resolved = BackupDestination.resolve(in: .standard) {
+                    folders.append(BackupDestination.variorumFolder(in: resolved.picked))
+                }
+                return folders
+            },
+            export: { destination in
+                try await Task.detached(priority: .userInitiated) {
+                    try StorePlaintextExport.export(from: database, to: destination)
+                }.value
+            })
+    }
+
+    /// The save panel: a user-chosen destination, defaulting away from the
+    /// backups folder; the model refuses one inside it.
+    @MainActor
+    private func chooseExportDestination(_ export: PlaintextExportModel) async {
+        let panel = NSSavePanel()
+        panel.nameFieldStringValue = "Variorum-unencrypted.sqlite"
+        panel.canCreateDirectories = true
+        panel.title = ProtectionCopy.exportPlaintextTitle
+        guard await panel.begin() == .OK, let url = panel.url else { return }
+        await export.export(to: url)
     }
 
     // MARK: - Syncing (13l Act 5, row 17 — evidence only, no doors)

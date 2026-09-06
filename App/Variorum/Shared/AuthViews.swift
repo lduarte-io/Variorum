@@ -47,23 +47,23 @@ struct AccountView: View {
     @State private var signUpEmail = ""
     @State private var signUpPassword = ""
     @State private var signUpConfirm = ""
-    /// Phase 14c: the deletion door's friction state (her Round-5 ruling).
+    /// Phase 14c: the deletion door's friction state (her Round-5 ruling);
+    /// pre-13x 3b (decision 16): the ACCOUNT password + the typed phrase.
     @State private var showingDeleteAccount = false
     @State private var deleteConfirmationEntry = ""
-    @State private var deletePassphrase = ""
+    @State private var deleteAccountPassword = ""
+    /// pre-13x 3b (copy §4): the two sign-out confirms.
+    @State private var confirmingSignOut = false
+    @State private var confirmingSignOutEverywhere = false
     @FocusState private var focus: Field?
 
-    // MARK: Phase 14c — the deletion door's copy (THE DESIGN 4)
+    // MARK: Phase 14c — the deletion door's copy (THE DESIGN 4) → pre-13x 3b (copy §4)
 
     /// HER PINNED COPY RULE (Round 5, the CF-6 class — her question was
     /// "this won't delete the user's work locally, right?"): the door
-    /// MUST say the local copy survives. Byte-pinned.
-    static let deleteAccountExplanation =
-        "Deleting your account immediately and permanently removes the synced copy of "
-        + "your writing, your encryption vault, and the account itself from the server. "
-        + "The writing on this device stays on this device and keeps working — and "
-        + "anything on your other devices stays there too. Only the account and its "
-        + "synced copy are deleted."
+    /// MUST say the local copy survives. pre-13x 3b: copy §4's body, verbatim
+    /// (*every library stays, and still opens exactly as it does today*).
+    static let deleteAccountExplanation = ProtectionCopy.deleteAccountBody
 
     /// The static cancel-first advisory (subscription state warned FIRST —
     /// the ruling's letter; the entitlement read strengthens it when it
@@ -74,8 +74,9 @@ struct AccountView: View {
 
     /// The typed confirmation naming the consequence (her ruling's first
     /// friction layer; the button stays dead until this exact phrase is
-    /// typed).
-    static let deleteConfirmationPhrase = "delete my account"
+    /// typed) — pre-13x 3b: copy §4's *DELETE MY ACCOUNT*, compared
+    /// case-insensitively.
+    static let deleteConfirmationPhrase = ProtectionCopy.deleteAccountTypedPhrase
 
     // MARK: Phase 14c batch 3 — the sign-up face's copy (THE DESIGN 6)
 
@@ -103,12 +104,18 @@ struct AccountView: View {
 
     /// The create act's gate: both password entries must agree — the typo
     /// class is real here (a mistyped password locks a stranger out until
-    /// a reset email, and the pre-SMTP mailer is tightly capped).
+    /// a reset email, and the pre-SMTP mailer is tightly capped) — and
+    /// pre-13x 3b (decision 25): at least 12 characters, the client's floor
+    /// first; the server's `password_min_length` is the belt.
     private var canSignUp: Bool {
         ProjectConfig.variorumConfigured && !services.account.busy
             && !signUpEmail.isEmpty && !signUpPassword.isEmpty
+            && signUpPassword.count >= AccountView.passwordFloor
             && signUpPassword == signUpConfirm
     }
+
+    /// pre-13x 3b (decision 25): the account-password floor, in characters.
+    static let passwordFloor = 12
 
     /// One door for the button AND the fields' Return key (the 9c sitting,
     /// 2026-07-11: Return in these fields was a silent no-op — the form
@@ -238,8 +245,25 @@ struct AccountView: View {
                 Text("Signed in\(signedIn.email.map { " as \($0)" } ?? "")")
                     .pageProse(pageStyle)
                 Spacer()
+                // pre-13x 3b (copy §4): both sign-outs behind a confirm — the
+                // forget door (CF-11) folded into Sign out: the keys stay.
                 PageDoor("Sign out", form: .inlineAct, style: pageStyle) {
-                    Task { await services.signOutVariorum() }
+                    confirmingSignOut = true
+                }
+                .confirmationDialog(ProtectionCopy.signOutTitle, isPresented: $confirmingSignOut, titleVisibility: .visible) {
+                    Button(ProtectionCopy.signOutDoor) { Task { await services.signOutVariorum() } }
+                    Button("Cancel", role: .cancel) {}
+                } message: {
+                    Text(ProtectionCopy.signOutBody)
+                }
+                PageDoor(ProtectionCopy.signOutEverywhereDoor + "…", form: .inlineAct, style: pageStyle) {
+                    confirmingSignOutEverywhere = true
+                }
+                .confirmationDialog(ProtectionCopy.signOutEverywhereTitle, isPresented: $confirmingSignOutEverywhere, titleVisibility: .visible) {
+                    Button(ProtectionCopy.signOutEverywhereDoor, role: .destructive) { Task { await services.signOutEverywhere() } }
+                    Button("Cancel", role: .cancel) {}
+                } message: {
+                    Text(ProtectionCopy.signOutEverywhereBody)
                 }
             }
             Text("Sync runs under this account; everything you write is owned by it.")
@@ -329,6 +353,15 @@ struct AccountView: View {
             .focused($focus, equals: .signUpConfirm)
             .onSubmit { signUp() }
             .pageFieldChrome(pageStyle)
+        // pre-13x 3b (decision 25; copy §4): the floor's hint, and the
+        // refusal while the entry is short.
+        if !signUpPassword.isEmpty, signUpPassword.count < AccountView.passwordFloor {
+            Text(ProtectionCopy.signupPasswordTooShort)
+                .pageCaptionWarning(pageStyle)
+        } else {
+            Text(ProtectionCopy.signupPasswordFloorHint)
+                .pageCaption(pageStyle)
+        }
         if !signUpConfirm.isEmpty && signUpPassword != signUpConfirm {
             Text("The two password entries don't match yet.")
                 .pageCaptionWarning(pageStyle)
@@ -345,17 +378,16 @@ struct AccountView: View {
             .fixedSize(horizontal: false, vertical: true)
     }
 
-    // MARK: Phase 14c — the deletion door (THE DESIGN 4, her Round-5 ruling)
+    // MARK: Phase 14c — the deletion door → pre-13x 3b (decision 16; copy §4)
 
-    /// Immediate hard purge behind real friction: the honest consequence
-    /// copy (the local copy SURVIVES — her pinned rule), the subscription
-    /// warning first, the TYPED confirmation naming the consequence, and
-    /// the encryption passphrase as authorization (verified by a real
-    /// vault unwrap in the brain; a vault-less account needs none — the
-    /// PROVISIONAL arm, so the field's caption says when it applies).
+    /// Immediate hard purge behind real friction: copy §4's body (the local
+    /// copy SURVIVES — her pinned rule), the subscription warning, the
+    /// ACCOUNT password (verified by a fresh re-authentication — keystone
+    /// 3: it never touches the keys), and the TYPED phrase naming the
+    /// consequence. Reachable signed-in whether enrolled or not.
     @ViewBuilder
     private var deleteAccountSection: some View {
-        PageHeading("Delete this account", style: pageStyle)
+        PageHeading(ProtectionCopy.deleteAccountTitle, style: pageStyle)
         Text(Self.deleteAccountExplanation)
             .pageCaptionWarning(pageStyle)
             .fixedSize(horizontal: false, vertical: true)
@@ -367,33 +399,38 @@ struct AccountView: View {
                 .pageCaptionWarning(pageStyle)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        TextField("Type “\(Self.deleteConfirmationPhrase)” to continue", text: $deleteConfirmationEntry)
+        Text(ProtectionCopy.deleteAccountReauthLine)
+            .pageCaption(pageStyle)
+        SecureField("Account password", text: $deleteAccountPassword)
+            .textContentType(.password)
+            .pageFieldChrome(pageStyle)
+        Text(ProtectionCopy.deleteAccountTypedLine)
+            .pageCaption(pageStyle)
+        TextField(ProtectionCopy.deleteAccountTypedPhrase, text: $deleteConfirmationEntry)
             .autocorrectionDisabled()
             .pageFieldChrome(pageStyle)
-        PeekableSecretField(
-            label: "Encryption passphrase (if encryption is set up)",
-            text: $deletePassphrase)
-            .pageFieldChrome(pageStyle)
         HStack {
-            PageDoor("Delete Account Permanently", form: .destructive, style: pageStyle) {
-                let passphrase = deletePassphrase
-                deletePassphrase = ""
+            PageDoor(ProtectionCopy.deleteAccountDoor, form: .destructive, style: pageStyle) {
+                let password = deleteAccountPassword
+                deleteAccountPassword = ""
                 deleteConfirmationEntry = ""
                 showingDeleteAccount = false
-                Task {
-                    await services.deleteAccount(
-                        passphrase: passphrase.isEmpty ? nil : passphrase)
-                }
+                Task { await services.deleteAccount(accountPassword: password) }
             }
-            .disabled(services.account.busy
-                      || deleteConfirmationEntry.lowercased()
-                          .trimmingCharacters(in: .whitespaces) != Self.deleteConfirmationPhrase)
+            .disabled(services.account.busy || deleteAccountPassword.isEmpty
+                      || !AccountView.phraseMatches(deleteConfirmationEntry))
             PageDoor("Cancel", form: .inlineAct, style: pageStyle) {
                 showingDeleteAccount = false
                 deleteConfirmationEntry = ""
-                deletePassphrase = ""
+                deleteAccountPassword = ""
             }
         }
+    }
+
+    /// The typed phrase, exact but case-insensitive, whitespace-trimmed.
+    static func phraseMatches(_ entry: String) -> Bool {
+        entry.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            == deleteConfirmationPhrase.lowercased()
     }
 
     /// An email entry field: autocorrect and (on the phone) auto-capitals
