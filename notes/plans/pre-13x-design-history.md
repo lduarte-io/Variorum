@@ -1101,3 +1101,17 @@ plain confirm."*
 The device name: the notices' *[device] on [day]* had no column behind it. Offered: a plain `updated_by_device` column
 now, while the lockstep is undeployed (recommended) · anonymous notices. **She chose the column** → decision 34 (the
 seventh vault column; the disclosure envelope gains a device name).
+
+## V.9 THE WINDOW's finding (2026-09-05/06) — RULED: decision 35 (indeterminate writes nothing; the follow fires on a posture mismatch)
+At her phone's first ready on the marker-8 build, no Face ID appeared and the phone's new key file carried an `apple`
+copy: the migration derived STANDARD (the 13p phone key file held no secrets; the vault's word was unavailable at that
+instant; 2a's safety arm read a secret-less file as Standard) and the Apple arm WROTE an iCloud copy of her real phone
+library key on a Castle account's library; 2c's follow, keyed on the corpus key id, never repaired it. Brought to her
+as a gap in the design's own letter (her cutover refinement). **Her rulings, verbatim:** the rule — *"Indeterminate: no
+writes (Recommended)"*; the repair — *"is the follow shaped fix batch good to have anyway? i'm fine with either solution,
+i'd like to do the most useful one - if we need this fix we can do it, if it's better to try out use castle i can do
+that."* The orchestrator's answer: the fix is needed regardless (the letter's own pin "a Standard phone under a Castle
+account gates at its next open" has no trigger without it; batch 3's Standard-born-into-Castle enrollment needs the
+same), so batch 2d builds it and her phone is repaired THROUGH it — which also drills the follow into Castle on real
+devices. Superseded text: 2a's settled-design note 1(d) as adopted ("NO SECRETS AT ALL ⇒ Standard — the safety arm")
+now applies to the LOCAL-ONLY library only; an enrolled library waits for the vault.

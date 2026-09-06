@@ -163,7 +163,7 @@ orchestrator."*
   secret-less: her phone exactly). The Standard arm is WRITE-ACTIVE on that reading. The design's letter says an enrolled
   library must agree with the vault; it never says what to do while the vault cannot be read — A GAP IN THE LETTER →
   HER RULING (§4's refinement). The follow did not repair it later because 2c's follow keys on the corpus key id (never
-  rotated here), not on a custody-vs-account POSTURE mismatch. **Her ruling and the phone's repair: PENDING (below).**
+  rotated here), not on a custody-vs-account POSTURE mismatch. **Her rulings: decision 35 (indeterminate writes nothing; the follow fires on a posture mismatch); the repair THROUGH the fix — batch 2d (the design's §19) builds it, then a SECOND SITTING repairs the phone via the follow (one passphrase entry; Face ID from then on) and lands the Mac's confirm; the drills' real-store legs ride that sitting.**
   The Mac's `vaultKDF` also did NOT land at the relaunch ("next online ready" unmet — a small defect for the ladder).
   The sanity check on the Mac: *"That is the right recovery phrase — it unlocked this account's vault. Nothing was
   changed."* — the 1b/14c stale-wrap question CLOSED.
