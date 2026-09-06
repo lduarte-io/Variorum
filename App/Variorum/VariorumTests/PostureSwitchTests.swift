@@ -1655,9 +1655,9 @@ struct PostureSwitchTests {
     /// opens the SAME master for the sibling and the OLD refuses; the keys
     /// never changed — the sibling's custody, library and rounds are
     /// untouched, no fence; the acting key file's copy followed under the
-    /// vault's new descriptor. RECORDED (batch 4's vault road): the sibling's
-    /// own key file keeps its copy under the OLD word — its lobby still opens
-    /// by the old word offline until that road lands.
+    /// vault's new descriptor. pre-13x 4a (drill (i)): the sibling's LOBBY —
+    /// the old word offline, the new word online through the vault road
+    /// (its local copy re-wrapped), the new word offline, the old refused.
     @Test func changingThePassphraseOnOneDeviceRetiresTheOldWordAtTheVaultForItsSibling() async throws {
         let acting = try await makeWorld()
         defer { acting.tearDown() }
@@ -1699,10 +1699,54 @@ struct PostureSwitchTests {
         }
         let seen = try await titles(in: sibling)
         for (id, title) in acting.seededTitles { #expect(seen[id] == title, "the sibling still reads \(id) in the clear") }
-        // RECORDED: the sibling's own copy stays under the OLD word until batch 4's vault road.
-        let siblingFile = try #require(try StoreKeyEnvelope.load(at: sibling.oldKeyFileURL))
-        #expect(try siblingFile.unwrapKey(passphrase: "sesame") == sibling.oldKey)
-        #expect(throws: StoreKeyEnvelopeError.wrongPassphrase) { _ = try siblingFile.unwrapKey(passphrase: new) }
+        // pre-13x 4a DRILL (i) — THE SIBLING'S LOBBY (3b's recorded gap, closed
+        // by the vault road, §3.6): its key file still holds the P copy under
+        // the OLD word — the old word opens it OFFLINE (the local copy); the
+        // NEW word opens it ONLINE through the vault (the sibling's wrap
+        // descriptor ≠ the vault's ⇒ two derivations) and re-wraps the local
+        // copy under the vault's descriptor; the new word then opens it
+        // OFFLINE (one derivation); the old word is refused everywhere.
+        let siblingBefore = try #require(try StoreKeyEnvelope.load(at: sibling.oldKeyFileURL))
+        #expect(try siblingBefore.unwrapKey(passphrase: "sesame") == sibling.oldKey)
+        #expect(throws: StoreKeyEnvelopeError.wrongPassphrase) { _ = try siblingBefore.unwrapKey(passphrase: new) }
+        let lobbySession = SyncCustodySession()
+        let derivations = LockIsolated(0)
+        let siblingStoreURL = sibling.storeURL
+        let siblingGate = sibling.gate
+        func open(_ word: String, online: Bool) async -> Result<StoreKey, StoreLobby.Refusal> {
+            derivations.setValue(0)
+            let road = StoreLobby.envelopeRoad(
+                storeURL: siblingStoreURL, gate: siblingGate, session: lobbySession,
+                vaultRoad: online ? LobbyVaultRoad(fetch: { try await client.fetchVault()?.format }) : nil,
+                derive: { passphrase, descriptor in
+                    derivations.withValue { $0 += 1 }
+                    return try PassphraseKDF.deriveKey(passphrase: passphrase, descriptor: descriptor)
+                })
+            return await road(.passphrase(word)) { _ in }
+        }
+        guard case .success(let byOldOffline) = await open("sesame", online: false) else {
+            Issue.record("the OLD word must open the sibling OFFLINE (the local copy)"); return
+        }
+        #expect(byOldOffline == sibling.oldKey && derivations.value == 1)
+        guard case .success(let byNewOnline) = await open(new, online: true) else {
+            Issue.record("the NEW word must open the sibling ONLINE (the vault road)"); return
+        }
+        #expect(byNewOnline == sibling.oldKey, "L through the vault's master and the key file's master-wrapped copy")
+        #expect(derivations.value == 2, "the local descriptor, then the vault's — the descriptors differ")
+        let siblingAfter = try #require(try StoreKeyEnvelope.load(at: sibling.oldKeyFileURL))
+        #expect(siblingAfter.passphrase?.kdf == vault.format.kdf && siblingAfter.vaultKDF == vault.format.kdf,
+                "the sibling's local copy re-wrapped under the vault's descriptor by the vault road")
+        #expect(try siblingAfter.unwrapKey(passphrase: new) == sibling.oldKey)
+        #expect(throws: StoreKeyEnvelopeError.wrongPassphrase) { _ = try siblingAfter.unwrapKey(passphrase: "sesame") }
+        #expect(lobbySession.derivedWrappingKDF == vault.format.kdf, "the held key is the vault's derivation")
+        guard case .success(let byNewOffline) = await open(new, online: false) else {
+            Issue.record("the NEW word must open the sibling OFFLINE now (its local copy is new)"); return
+        }
+        #expect(byNewOffline == sibling.oldKey && derivations.value == 1, "one derivation — the local copy")
+        guard case .failure(let refused) = await open("sesame", online: true) else {
+            Issue.record("the OLD word must refuse now"); return
+        }
+        #expect(refused.message == ProtectionCopy.message(for: StoreKeyEnvelopeError.wrongPassphrase) && !refused.offline)
         // The acting key file followed: L under the NEW word with the VAULT's descriptor (no re-key — the same fingerprint).
         let actingFile = try #require(try StoreKeyEnvelope.load(at: acting.oldKeyFileURL))
         #expect(try actingFile.unwrapKey(passphrase: new) == acting.oldKey)
