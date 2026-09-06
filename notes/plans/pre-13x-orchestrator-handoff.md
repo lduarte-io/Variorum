@@ -141,7 +141,10 @@ orchestrator."*
   LANDED THE PROOF HASH (`hash_landed = true`, revision 3 unchanged, no rotation, no Apple-held copy, her Mac's cursor
   seen 01:31:12Z). **The one-time confirm sheet did NOT appear** — expected on reflection: its job is to land the
   passphrase copy, and her key file has carried one since 13p; recorded as a copy-and-flow note for the ladder (the
-  sheet's gate should say so, or the descriptor half should land without a sheet). The sanity check: `<her verdict>`.
+  sheet's gate should say so, or the descriptor half should land without a sheet). The sanity check: `<her verdict>`. **The DEFERRED proof-required probe — DONE after her hash landed:** as role `authenticated` with
+  her claims, the right key id and a WRONG proof, `sync_horizon` → **`P0001: VARIORUM_KEY_PROOF_REQUIRED`** (raised in
+  `sync_key_proof_check` via `sync_key_gate`); her landed hash unchanged (`bbc279ed…`, revision 3). The mirror side
+  of the window is COMPLETE.
 - **The phone — the install DONE 2026-09-06 (after the Mac's refresh):** Release built from the same clean worktree
   *[removed for publication]*
   installed by `xcrun devicectl device install app` OVER the dev build (same bundle id); the container listed after the
