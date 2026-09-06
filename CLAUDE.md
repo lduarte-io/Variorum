@@ -10,8 +10,8 @@ These documents define **Variorum**. When implementing, refactoring, or making d
 - App Spec: @notes/AppSpec.md
 - System Mental Model: @notes/OverallModel.md
 - Sync Architecture: @notes/SyncSpec.md
-- Detailed Build Plan: @notes/DetailedPlanForPhases.md
-- Known Issues & Tech Debt: @notes/KnownIssuesAndTechDebt.md
+- Detailed Build Plan: `notes/DetailedPlanForPhases.md` — **NOT auto-loaded** (author ruling 2026-09-06, the context-load trim: ~28k tokens every session and subagent were paying for a file only kickoffs and closeouts use); orchestrators/coordinators read it explicitly at kickoff and closeout, as the preflight list below already requires.
+- Known Issues & Tech Debt: `notes/KnownIssuesAndTechDebt.md` — **NOT auto-loaded** (same ruling, ~12k tokens); read it explicitly whenever a session adds, resolves or re-owns a row, and at every kickoff preflight.
 - TextKit 2 build companion (editor phases): @notes/TEXTKIT2_NOTES.md
 
 Original source material (requirements verbatim, original spec, design rationale, chat transcript) is preserved in `notes/source/` — history, not truth.
@@ -174,4 +174,4 @@ xcodebuild clean -scheme Variorum
 - **Deployment targets: macOS 26 / iOS 26** (author decision 2026-07-06: no older-OS support). Build SDK and runtime OS now match, so no availability-gating for Tahoe APIs.
 - TextKit 2 behavior remains version- and point-release-gated: re-verify editor milestones after each macOS point update per the matrix in @notes/TEXTKIT2_NOTES.md §5.
 - If the author's help is needed (Xcode GUI steps, signing, Supabase setup, a device test, an adjudication call), pause and ask rather than working around it.
-- **Session resiliency (author-instructed 2026-08-31, after the pre-13u overnight run survived four agent deaths, a harness restart and a system crash with zero commits lost): `notes/SessionResiliencyProtocol.md` binds every orchestrator and implementer session — the checkpoint protocol (commit per piece, a LIVE STATUS record from the first commit, push after each, synchronous foreground waits only) and the recovery protocol (verify git before concluding loss; uncommitted edits survive deaths and are adopted; resume by message, else a fresh continuation briefed from the record). Read it at every kickoff and at any limit warning.**
+- **Session resiliency (author-instructed 2026-08-31, after the pre-13u overnight run survived four agent deaths, a harness restart and a system crash with zero commits lost): `notes/SessionResiliencyProtocol.md` binds every orchestrator and implementer session — the checkpoint protocol (commit per piece, a LIVE STATUS record from the first commit, push after each, synchronous foreground waits only) and the recovery protocol (verify git before concluding loss; uncommitted edits survive deaths and are adopted; resume by message, else a fresh continuation briefed from the record). The ORCHESTRATOR reads it at every kickoff and at any limit warning; implementer briefs RESTATE the checkpoint rules in their own text instead of sending the implementer to the file (author ruling 2026-09-06 — the recovery half only matters at a death, which is the orchestrator's to run).**
