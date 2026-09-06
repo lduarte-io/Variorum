@@ -145,6 +145,11 @@ struct VariorumApp: App {
                             }
                         }
                         await fresh.start()
+                        // pre-13x 2d (decision 35): THE NEXT READY — the
+                        // vault hook is wired and the session restored
+                        // now, so the migration-if-undone + the reconcile
+                        // run again; the ready road's run had neither.
+                        await bootstrap.runReadyHousekeeping()
                         // Pre-13u Act 3: THE SAMPLE LIBRARY — the Sherlock
                         // adventures as a real book, seeded once per store.
                         // Her ruling is default-on in every reader's store,

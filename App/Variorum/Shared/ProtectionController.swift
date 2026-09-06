@@ -161,7 +161,15 @@ final class ProtectionController {
     private(set) var dials: ProtectionDials
     /// THE POSTURE (derived — never written): `refreshPosture` re-derives
     /// it from the legacy mode, the vault's last reading and the key file.
+    /// pre-13x 2d: the posture the device ACTS as — under an indeterminate
+    /// reading (decision 35), its custody shape's.
     private(set) var posture: Posture = .standard
+    /// pre-13x 2d (decision 35): THE READING — determined, or
+    /// INDETERMINATE for an enrolled library whose vault has not answered.
+    /// Every posture-driven WRITE consults `postureReading.determined`;
+    /// the faces may say so.
+    private(set) var postureReading: PostureReading = .determined(.standard)
+    var postureIndeterminate: Bool { postureReading.isIndeterminate }
     /// The vault's word, as last read (nil = no vault reachable).
     private(set) var vaultReading: VaultPostureReading?
     /// THE EFFECTIVE GATE — what the routes, the lobby and the custody law
@@ -221,6 +229,22 @@ final class ProtectionController {
     /// must agree with the vault"; the acts on a disagreement are 2c's
     /// (the follow) and batch 3's (the adopt).
     @ObservationIgnored var readVaultPosture: (@Sendable () async -> VaultPostureReading?)?
+    /// pre-13x 2d (decision 35): whether a signed-in session exists
+    /// (AppServices wires `auth.currentUserID != nil`) — with the sync
+    /// custody's presence, what makes a library ENROLLED at ready. nil =
+    /// no auth composed (the reading falls to custody alone).
+    @ObservationIgnored var isSignedIn: (@Sendable () async -> Bool)?
+    /// The enrollment facts as read at the last reconcile (a session
+    /// restored or a custody item landing changes them at the NEXT ready).
+    @ObservationIgnored private var signedInAtReady = false
+    @ObservationIgnored private var syncCustodyPresentAtReady = false
+    /// ENROLLED (decision 35): signed in, or sync custody held — the
+    /// session's record (a Castle unlock), the silent item, or the gated
+    /// item's presence as read at the last reconcile.
+    var enrolled: Bool {
+        signedInAtReady || syncCustodyPresentAtReady
+            || configuration.syncCustodySession.record != nil
+    }
     /// pre-13x 2a: the idle clock's stamp — when Variorum was last USED
     /// (decision 18). The Mac's event monitor and the became-active hook
     /// stamp it; `relockIfIdle` reads it.
@@ -525,17 +549,21 @@ final class ProtectionController {
     /// item; before adoption the shape is unknown (the route derives with
     /// the real presence reads).
     private func refreshPosture(keyFile: StoreKeyEnvelope?) {
-        let custody: RawKeyCustody
-        if residentAdopted {
-            custody = residentKey != nil ? .gatedOrNone : .silent
-        } else {
-            custody = .unknown
-        }
-        posture = Posture.derive(
+        postureReading = Posture.derive(
             legacyMode: gate.legacyMode(scope, configuration.resolvedStoreID()),
             vaultHasAppleHeldCopy: vaultReading?.hasAppleHeldCopy,
             keyFile: keyFile,
-            rawKeyCustody: custody)
+            rawKeyCustody: libraryKeyCustodyShape,
+            enrolled: enrolled)
+        posture = postureReading.acting
+    }
+
+    /// The library key's custody SHAPE as this controller knows it without
+    /// a Keychain hop (corner 45): after adoption, a resident ⇒ the gated
+    /// item or nowhere, none ⇒ the silent item; before adoption, unknown.
+    var libraryKeyCustodyShape: RawKeyCustody {
+        guard residentAdopted else { return .unknown }
+        return residentKey != nil ? .gatedOrNone : .silent
     }
 
     /// Set once the bootstrap has handed the unlocked key over (nil under
@@ -910,6 +938,16 @@ final class ProtectionController {
         if gate.stamp(Self.firstUseStamp, scope) == nil {
             gate.setStamp(now, Self.firstUseStamp, scope)
         }
+        // pre-13x 2d (decision 35): ENROLLED? — the session (when an auth
+        // is composed) and the per-store sync custody's presence, read
+        // ONCE per ready, off the main actor (the silent item's
+        // non-prompting read; the gated item's probe).
+        signedInAtReady = await isSignedIn?() ?? false
+        let leaves = configuration.resolvedSyncLeaves()
+        syncCustodyPresentAtReady = await Task.detached(priority: .userInitiated) {
+            guard let leaves else { return false }
+            return leaves.loadPlain()?.material != nil || leaves.gatedExists()
+        }.value
         // The vault's word (decision 8) — one authenticated read, when a
         // vault is reachable; nil leaves the last reading standing.
         var freshReading: VaultPostureReading?
@@ -941,7 +979,14 @@ final class ProtectionController {
     /// A is never touched (§14.5). Off-main (the guard-seam and Keychain
     /// work); the projections land back on the MainActor.
     private func reconcileAppleKey() async {
-        guard posture == .standard else {
+        // pre-13x 2d (decision 35): INDETERMINATE writes nothing — no A
+        // read or minted, no copy landed; `appleKeyVerified` stays what it
+        // was (the probe's honest unknown). The next ready retries.
+        guard let determined = postureReading.determined else {
+            logger.notice("apple key reconcile: the posture is indeterminate (enrolled, the vault unread) — nothing written; the next ready retries")
+            return
+        }
+        guard determined == .standard else {
             appleKeyVerified = false
             appleKeyLandingFailed = false
             return
@@ -1081,7 +1126,10 @@ final class ProtectionController {
         }
         // P1/P11: while the sidecar is unreadable the wrap facts are
         // UNKNOWN — a nudge claiming "no passphrase" would be a false steer.
-        if !envelopeUnreadable, posture == .standard, StandardNudgePolicy.isEligible(
+        // pre-13x 2d (decision 35): the exposed nudge is a DETERMINED
+        // Standard's — an enrolled library whose vault has not answered is
+        // not "only this device can open your work".
+        if !envelopeUnreadable, postureReading.determined == .standard, StandardNudgePolicy.isEligible(
             now: now,
             firstUseAt: gate.stamp(Self.firstUseStamp, scope),
             dismissedForever: gate.stamp(Self.nudgeDismissedStamp, scope) != nil,
@@ -1278,6 +1326,9 @@ func wireOneSecretHooks(
     encryption.storePassphraseGuard = { passphrase in
         await protection.verifyPassphraseAgainstStore(passphrase)
     }
+    // pre-13x 2d (decision 35): signed in ⇒ ENROLLED at ready — the vault's
+    // word is then the only thing that can make the library Standard.
+    protection.isSignedIn = { await auth.currentUserID != nil }
     if let vault = keyVault {
         protection.rewrapVaultPassphrase = { newPassphrase in
             // Signed out / no vault row ⇒ no vault half.

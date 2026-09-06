@@ -49,6 +49,14 @@ nonisolated struct StoreLaunchGate: Sendable {
     /// Reminder/nudge stamps (device-local, per scope).
     var stamp: @Sendable (_ leaf: String, _ scope: String) -> Date?
     var setStamp: @Sendable (Date?, _ leaf: String, _ scope: String) -> Void
+    /// pre-13x 2d (decision 35): whether this store's per-store SYNC
+    /// CUSTODY exists on this device — the silent item readable or the
+    /// gated item's non-prompting probe — read by PRESENCE at the route
+    /// (no session object, no network there). "Enrolled" at the route IS
+    /// this; an enrolled library's posture is INDETERMINATE until the
+    /// vault answers, and the route opens it through the custody shape it
+    /// has. Defaulted inert for the scripted worlds that never enroll.
+    var syncCustodyPresent: @Sendable (_ scope: String, _ storeID: String) -> Bool = { _, _ in false }
 
     /// The ONE tri-state sidecar read (pre-13u Act 9, P1/P11 — 17a's
     /// shared root cause). `StoreKeyEnvelope.load` throws `.unreadable`
@@ -102,7 +110,14 @@ nonisolated struct StoreLaunchGate: Sendable {
             try? FileManager.default.moveItem(at: url, to: aside)
         },
         stamp: { ProtectionDefaults.date($0, scope: $1, in: .standard) },
-        setStamp: { ProtectionDefaults.setDate($0, $1, scope: $2, in: .standard) })
+        setStamp: { ProtectionDefaults.setDate($0, $1, scope: $2, in: .standard) },
+        // pre-13x 2d: the per-store sync custody's presence — the silent
+        // item's non-prompting read, else the gated item's probe.
+        syncCustodyPresent: { scope, storeID in
+            let custody = SyncCustodyScope(scope: scope, storeID: storeID)
+            return E2EEKeychainStorage.load(scope: custody) != nil
+                || E2EEKeychainStorage.gatedItemExists(scope: custody)
+        })
 
     /// A scripted gate for tests: fixed dials + an in-memory guard + an
     /// in-memory envelope box.
@@ -111,11 +126,13 @@ nonisolated struct StoreLaunchGate: Sendable {
         backing: InMemoryStoreKeyGuardBacking,
         envelope: StoreKeyEnvelope? = nil,
         legacyMode: StoreAtOpenMode? = nil,
-        appleKey: InMemoryAppleKeyBacking = InMemoryAppleKeyBacking()
+        appleKey: InMemoryAppleKeyBacking = InMemoryAppleKeyBacking(),
+        syncCustodyPresent: (@Sendable (_ scope: String, _ storeID: String) -> Bool)? = nil
     ) -> StoreLaunchGate {
         scripted(
             dials: ScriptedDialsBox(dials, legacyMode: legacyMode), backing: backing,
-            envelope: ScriptedEnvelopeBox(envelope), appleKey: appleKey)
+            envelope: ScriptedEnvelopeBox(envelope), appleKey: appleKey,
+            syncCustodyPresent: syncCustodyPresent)
     }
 
     /// The fully-scripted form: live boxes so tests observe writes.
@@ -124,7 +141,8 @@ nonisolated struct StoreLaunchGate: Sendable {
         backing: InMemoryStoreKeyGuardBacking,
         envelope: ScriptedEnvelopeBox,
         stamps: ScriptedStampsBox = ScriptedStampsBox(),
-        appleKey: InMemoryAppleKeyBacking = InMemoryAppleKeyBacking()
+        appleKey: InMemoryAppleKeyBacking = InMemoryAppleKeyBacking(),
+        syncCustodyPresent: (@Sendable (_ scope: String, _ storeID: String) -> Bool)? = nil
     ) -> StoreLaunchGate {
         StoreLaunchGate(
             dials: { _, storeID in dials.dials(for: storeID) },
@@ -149,7 +167,10 @@ nonisolated struct StoreLaunchGate: Sendable {
                 envelope.value = nil
             },
             stamp: { leaf, _ in stamps.value[leaf] },
-            setStamp: { date, leaf, _ in stamps.value[leaf] = date })
+            setStamp: { date, leaf, _ in stamps.value[leaf] = date },
+            // pre-13x 2d: the scripted sync custody presence (nil = never
+            // enrolled — the pre-2d worlds' reading, unchanged).
+            syncCustodyPresent: syncCustodyPresent ?? { _, _ in false })
     }
 }
 
@@ -300,12 +321,21 @@ nonisolated struct RoutePostureFacts: Sendable {
     /// gated item's non-prompting probe); `.unknown` where a caller cannot
     /// read custody.
     var rawKeyCustody: RawKeyCustody = .unknown
+    /// pre-13x 2d (decision 35): whether the per-store sync custody EXISTS
+    /// — the route's reading of "enrolled". REQUIRED: every site decides.
+    var enrolled: Bool
 
-    var posture: Posture {
+    /// The reading (no vault word exists at the route): an enrolled
+    /// library is INDETERMINATE and acts as its custody shape; a
+    /// local-only one is the legacy mode's or the key file's.
+    var reading: PostureReading {
         Posture.derive(
             legacyMode: legacyMode, vaultHasAppleHeldCopy: nil, keyFile: keyFile,
-            rawKeyCustody: rawKeyCustody)
+            rawKeyCustody: rawKeyCustody, enrolled: enrolled)
     }
+
+    /// What the route ACTS as.
+    var posture: Posture { reading.acting }
 }
 
 nonisolated extension StoreLaunchGate {
@@ -323,11 +353,17 @@ nonisolated extension StoreLaunchGate {
     /// in the silent item) whose A is readable now gets its copy landed
     /// here, so the one route between a refused landing and the next
     /// ready reads Standard by the copy itself, not only by the shape.
+    ///
+    /// pre-13x 2d (decision 35): an ENROLLED library — its per-store sync
+    /// custody present — is INDETERMINATE at the route (no vault word can
+    /// exist here) and opens through the custody shape it has; the
+    /// landing above is a posture-driven WRITE, so it is skipped for it.
     func effectiveGate(scope: String, storeID: String?, storeURL: URL?) -> StoreAtOpenMode {
         let guardSeam = guardFor(scope)
         let custody = rawKeyCustody(guardSeam: guardSeam)
+        let enrolled = storeID.map { syncCustodyPresent(scope, $0) } ?? false
         var reading = readEnvelope(storeURL)
-        if custody == .silent, let storeURL, let envelope = reading.envelope,
+        if !enrolled, custody == .silent, let storeURL, let envelope = reading.envelope,
            envelope.apple == nil, envelope.passphrase != nil,
            let key = guardSeam.loadAuto(), envelope.belongs(to: key),
            let apple = appleKeyFor(scope).read() {
@@ -340,8 +376,9 @@ nonisolated extension StoreLaunchGate {
         let facts = RoutePostureFacts(
             legacyMode: legacyMode(scope, storeID),
             keyFile: reading.envelope,
-            rawKeyCustody: custody)
-        return StoreAtOpenMode.effective(posture: facts.posture, dials: dials(scope, storeID))
+            rawKeyCustody: custody,
+            enrolled: enrolled)
+        return StoreAtOpenMode.effective(reading: facts.reading, dials: dials(scope, storeID))
     }
 
     /// The raw key's custody shape by PRESENCE (corner 45): the silent

@@ -135,6 +135,67 @@ struct StoreLaunchRouteTests {
             envelope: ScriptedEnvelopeBox(waiting), appleKey: InMemoryAppleKeyBacking())
         #expect(castleGate.effectiveGate(scope: "route", storeID: waiting.storeID, storeURL: storeURL) == .biometric)
     }
+
+    /// DECISION 35 AT THE ROUTE (pre-13x 2d): an ENROLLED library — its
+    /// per-store sync custody PRESENT — is INDETERMINATE at the route (no
+    /// vault word can exist before any network contact), so it opens
+    /// through the custody shape it has and the route's Apple landing (a
+    /// posture-driven write) does NOT fire even with A readable: the key
+    /// file's bytes before == after. The silent shape routes to the open
+    /// road; the gated shape to the lobby; the legacy stored mode never
+    /// overrides it. With the custody ABSENT, 2b's landing runs as before.
+    /// RED ON OLD: the route derived Standard from the wraps alone and
+    /// landed the Apple copy on an enrolled library whose account may be
+    /// Castle.
+    @Test func anEnrolledLibraryIsIndeterminateAtTheRouteAndTheLandingWaits() throws {
+        let dir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("variorum-2d-route-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let storeURL = dir.appendingPathComponent("variorum.sqlite")
+        let key = StoreKey.mint()
+        let kdf = PassphraseKDF.Descriptor(
+            algorithm: PassphraseKDF.algorithmArgon2id, argon2Version: 0x13,
+            memoryKiB: 256, iterations: 1, parallelism: 1,
+            salt: PassphraseKDF.randomSalt(), outputBytes: 32)
+        var waiting = StoreKeyEnvelope()
+        try waiting.setPassphraseWrap(key: key, passphrase: "sesame", kdf: kdf)
+        let envelopeBox = ScriptedEnvelopeBox(waiting)
+        let apple = AppleKey.mint()
+        let silent = InMemoryStoreKeyGuardBacking(auto: key)
+        let enrolledGate = StoreLaunchGate.scripted(
+            dials: ScriptedDialsBox(ProtectionDials()), backing: silent,
+            envelope: envelopeBox, appleKey: InMemoryAppleKeyBacking(key: apple),
+            syncCustodyPresent: { _, _ in true })
+
+        #expect(enrolledGate.effectiveGate(scope: "route", storeID: waiting.storeID, storeURL: storeURL) == .auto,
+                "the silent shape: the open road")
+        #expect(envelopeBox.value == waiting, "the key file's bytes before == after — the landing waits for the vault's word")
+        #expect(envelopeBox.value?.apple == nil)
+
+        // The legacy stored mode never overrides an enrolled library.
+        let legacyGate = StoreLaunchGate.scripted(
+            dials: ScriptedDialsBox(ProtectionDials(), legacyMode: .biometric), backing: silent,
+            envelope: envelopeBox, appleKey: InMemoryAppleKeyBacking(key: apple),
+            syncCustodyPresent: { _, _ in true })
+        #expect(legacyGate.effectiveGate(scope: "route", storeID: waiting.storeID, storeURL: storeURL) == .auto,
+                "the gate the device HAD is the custody shape it has")
+
+        // The gated shape: the lobby (Face ID / Touch ID by the default style).
+        let gatedGate = StoreLaunchGate.scripted(
+            dials: ScriptedDialsBox(ProtectionDials()), backing: InMemoryStoreKeyGuardBacking(gated: key),
+            envelope: ScriptedEnvelopeBox(waiting), appleKey: InMemoryAppleKeyBacking(key: apple),
+            syncCustodyPresent: { _, _ in true })
+        #expect(gatedGate.effectiveGate(scope: "route", storeID: waiting.storeID, storeURL: storeURL) == .biometric)
+
+        // Custody ABSENT (a local-only library): 2b's landing runs as before.
+        let localBox = ScriptedEnvelopeBox(waiting)
+        let localGate = StoreLaunchGate.scripted(
+            dials: ScriptedDialsBox(ProtectionDials()), backing: silent,
+            envelope: localBox, appleKey: InMemoryAppleKeyBacking(key: apple))
+        #expect(localGate.effectiveGate(scope: "route", storeID: waiting.storeID, storeURL: storeURL) == .auto)
+        #expect(localBox.value?.appleKeyID == apple.id, "2b item (0), unchanged for a library nobody enrolled")
+    }
 }
 
 @MainActor
@@ -344,9 +405,9 @@ struct Phase13pLobbyTests {
             #expect(fresh.keyFingerprint == StoreKeyEnvelope.fingerprint(of: minted),
                     "the new key file names the minted key")
             #expect(dialsBox.perStoreDials(fresh.storeID) != nil, "the new library writes its own dials")
-            #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: fresh) == .standard,
+            #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: fresh, enrolled: false) == .determined(.standard),
                     "the new library is born Standard (silent)")
-            #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: oldEnvelope) == .castle,
+            #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: oldEnvelope, enrolled: false) == .determined(.castle),
                     "the OLD library's lock is untouched — restoring its file routes to its lobby")
             #expect(envelopeBox.setAsideCount == 1, "the old key file was set aside, never deleted")
             #expect(try StoreKeyEnvelope.load(at: oldEnvelope.preferredURL(besideStore: storeURL)) == nil

@@ -346,11 +346,17 @@ nonisolated struct DeviceKeyStore: Sendable {
             let rawKeyCustody: RawKeyCustody =
                 StoreKeyCustody.deviceKeychain(scope: scope, storeID: custody.storeID).load() != nil
                 ? .silent : .gatedOrNone
+            // pre-13x 2d: `enrolled: false` DELIBERATELY — this is the sync
+            // custody's own shape reading (which item holds the record),
+            // and the key-file rule and the custody shape agree in every
+            // steady state; "enrolled by custody presence" here would read
+            // the store's own items to decide which of them to read.
             let facts = RoutePostureFacts(
                 legacyMode: ProtectionDefaults.legacyMode(
                     scope: scope, storeID: custody.storeID, in: store),
                 keyFile: storeURL.flatMap { try? StoreKeyEnvelope.loadCurrent(besideStore: $0) },
-                rawKeyCustody: rawKeyCustody)
+                rawKeyCustody: rawKeyCustody,
+                enrolled: false)
             return SyncCustodyShape(mode: StoreAtOpenMode.effective(
                 posture: facts.posture,
                 dials: ProtectionDefaults.dials(scope: scope, storeID: custody.storeID, in: store)))

@@ -140,6 +140,11 @@ struct VariorumMobileApp: App {
                             }
                         }
                         await fresh.start()
+                        // pre-13x 2d (decision 35): THE NEXT READY — the
+                        // vault hook is wired and the session restored
+                        // now, so the migration-if-undone + the reconcile
+                        // run again; the ready road's run had neither.
+                        await bootstrap.runReadyHousekeeping()
                         // Pre-13u Act 0 — R-pre13u-1: **NOTHING IS SEEDED
                         // HERE ANY MORE.** The launch used to mint the
                         // starter Journal (R27b, batch 5) behind a sync

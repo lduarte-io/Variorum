@@ -37,6 +37,7 @@ struct ProtectionDialsTests {
     /// brief's pin): the vault's word when enrolled; the key file's Apple
     /// copy when local-only. RED ON OLD by construction (`Posture` and the
     /// derivation do not exist on the pre-2a tree; the mode was stored).
+    /// pre-13x 2d: the answer is a `PostureReading`; `enrolled` is required.
     @Test func postureDerivesFromTheVaultWhenEnrolledAndTheKeyFileWhenLocalOnly() throws {
         let key = StoreKey.mint()
         var castleFile = StoreKeyEnvelope()
@@ -45,27 +46,79 @@ struct ProtectionDialsTests {
         try standardFile.appleBox(key: key, under: AppleKey.mint().symmetricKey, appleKeyID: "a-1")
 
         // Enrolled: the vault's word outranks the key file (decision 8).
-        #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: true, keyFile: castleFile) == .standard)
-        #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: false, keyFile: standardFile) == .castle)
+        #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: true, keyFile: castleFile, enrolled: true) == .determined(.standard))
+        #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: false, keyFile: standardFile, enrolled: true) == .determined(.castle))
         // Local-only: the key file's Apple copy.
-        #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: standardFile) == .standard)
-        #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: castleFile) == .castle)
+        #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: standardFile, enrolled: false) == .determined(.standard))
+        #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: castleFile, enrolled: false) == .determined(.castle))
         // No key file at all: born Standard (§14.26).
-        #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: nil) == .standard)
+        #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: nil, enrolled: false) == .determined(.standard))
     }
 
     /// The safety arm: a key file with NO passphrase wrap and no Apple copy
     /// is a Standard library whose Apple copy has not landed — entering
     /// Castle requires a passphrase (decision 5), so such a library cannot
     /// have entered it; reading it as Castle would lock a fresh user behind
-    /// a lobby with no road.
+    /// a lobby with no road. pre-13x 2d: reached only with NO session and
+    /// NO custody — the enrolled arm below catches her phone first.
     @Test func aKeyFileWithNoSecretsAndNoAppleCopyIsStandardNeverALock() throws {
         let key = StoreKey.mint()
         let stub = StoreKeyEnvelope(keyFingerprint: StoreKeyEnvelope.fingerprint(of: key))
-        #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: stub) == .standard)
+        #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: stub, enrolled: false) == .determined(.standard))
         var wordsOnly = stub
         try wordsOnly.setRecoveryWrap(key: key, words: try RecoveryPhrase.generate())
-        #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: wordsOnly) == .standard)
+        #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: wordsOnly, enrolled: false) == .determined(.standard))
+    }
+
+    /// DECISION 35 (pre-13x 2d — the window's finding): an ENROLLED library
+    /// whose vault has not answered is INDETERMINATE, carrying the posture
+    /// its custody SHAPE reads as — her phone's secret-less format-1 key
+    /// file with the raw key in the silent item reads as an indeterminate
+    /// Standard-shaped library, NEVER a determined Standard (the safety arm
+    /// is for a library nobody is signed into); a gated shape carries
+    /// Castle; an unreadable shape carries the key file's rule. The vault's
+    /// word, once in hand, DETERMINES — and outranks the legacy mode: it
+    /// is a fact about the gate the device had, already honored by the
+    /// custody shape. RED ON OLD: arm 3's secret-less file read as a
+    /// determined Standard whatever the session held (the window's phone),
+    /// and the legacy Auto outranked a Castle vault.
+    @Test func anEnrolledLibraryWhoseVaultHasNotAnsweredIsIndeterminateAndActsAsItsCustodyShape() throws {
+        let key = StoreKey.mint()
+        let secretless = StoreKeyEnvelope(formatVersion: StoreKeyEnvelope.formatVersion1, storeID: "phone-store")
+        // Her phone at the window: enrolled (a session), no secrets, the silent item.
+        #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: secretless,
+                               rawKeyCustody: .silent, enrolled: true) == .indeterminate(shape: .standard))
+        let reading = Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: secretless,
+                                     rawKeyCustody: .silent, enrolled: true)
+        #expect(reading.isIndeterminate && reading.determined == nil && reading.acting == .standard)
+        #expect(StoreAtOpenMode.effective(reading: reading, dials: ProtectionDials()) == .auto,
+                "the device opens through the custody it HAS")
+        // The same library, not enrolled: the safety arm, a determined Standard.
+        #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: secretless,
+                               rawKeyCustody: .silent, enrolled: false) == .determined(.standard))
+        // A gated shape carries Castle; an unreadable shape the key file's rule.
+        var castleFile = StoreKeyEnvelope()
+        try castleFile.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
+        #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: castleFile,
+                               rawKeyCustody: .gatedOrNone, enrolled: true) == .indeterminate(shape: .castle))
+        #expect(StoreAtOpenMode.effective(
+            reading: .indeterminate(shape: .castle), dials: ProtectionDials(alwaysAsk: true)) == .passphrase)
+        #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: castleFile,
+                               rawKeyCustody: .unknown, enrolled: true) == .indeterminate(shape: .castle))
+        var standardFile = castleFile
+        try standardFile.appleBox(key: key, under: AppleKey.mint().symmetricKey, appleKeyID: "a-1")
+        #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: standardFile,
+                               rawKeyCustody: .unknown, enrolled: true) == .indeterminate(shape: .standard))
+        // The legacy stored mode never overrides an enrolled library.
+        #expect(Posture.derive(legacyMode: .auto, vaultHasAppleHeldCopy: nil, keyFile: castleFile,
+                               rawKeyCustody: .gatedOrNone, enrolled: true) == .indeterminate(shape: .castle))
+        #expect(Posture.derive(legacyMode: .biometric, vaultHasAppleHeldCopy: nil, keyFile: secretless,
+                               rawKeyCustody: .silent, enrolled: true) == .indeterminate(shape: .standard))
+        // The vault's word determines, and outranks the legacy mode.
+        #expect(Posture.derive(legacyMode: .auto, vaultHasAppleHeldCopy: false, keyFile: secretless,
+                               rawKeyCustody: .silent, enrolled: true) == .determined(.castle))
+        #expect(Posture.derive(legacyMode: .passphrase, vaultHasAppleHeldCopy: true, keyFile: nil,
+                               enrolled: true) == .determined(.standard))
     }
 
     /// CORNER 45 (pre-13x 2b item (0); the 2a adjudication's ruling 2): a
@@ -80,34 +133,37 @@ struct ProtectionDialsTests {
         var waiting = StoreKeyEnvelope()
         try waiting.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
         #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: waiting,
-                               rawKeyCustody: .silent) == .standard,
+                               rawKeyCustody: .silent, enrolled: false) == .determined(.standard),
                 "the raw key in the silent item: Standard-waiting, whatever the wraps say")
         #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: waiting,
-                               rawKeyCustody: .gatedOrNone) == .castle,
+                               rawKeyCustody: .gatedOrNone, enrolled: false) == .determined(.castle),
                 "the raw key behind Touch ID or nowhere: Castle was entered")
         #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: waiting,
-                               rawKeyCustody: .unknown) == .castle,
+                               rawKeyCustody: .unknown, enrolled: false) == .determined(.castle),
                 "a caller that cannot read custody keeps the older reading")
         // The shape never overrides the vault (decision 8) or an Apple copy.
         #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: false, keyFile: waiting,
-                               rawKeyCustody: .silent) == .castle)
+                               rawKeyCustody: .silent, enrolled: true) == .determined(.castle))
         var landed = waiting
         try landed.appleBox(key: key, under: AppleKey.mint().symmetricKey, appleKeyID: "a")
         #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: landed,
-                               rawKeyCustody: .gatedOrNone) == .standard)
+                               rawKeyCustody: .gatedOrNone, enrolled: false) == .determined(.standard))
     }
 
     /// The pre-2a read-through (§11 retires it): the 13p-era stored mode
-    /// decides until the migration runs — her Mac (Biometric) routes to
-    /// its lobby, her phone (silent) opens silently once more.
+    /// decides for a library that is NOT enrolled until the migration runs
+    /// — her Mac (Biometric) routes to its lobby. pre-13x 2d (decision 35):
+    /// for an ENROLLED library the legacy mode never decides — see the
+    /// decision-35 pin above; the two old expectations that let it outrank
+    /// a vault word moved there with the opposite answer.
     @Test func theLegacyModeReadsThroughUntilTheMigrationRetiresIt() throws {
         let key = StoreKey.mint()
         var castleFile = StoreKeyEnvelope()
         try castleFile.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
-        #expect(Posture.derive(legacyMode: .auto, vaultHasAppleHeldCopy: false, keyFile: castleFile) == .standard,
-                "a silent 13p-era store opens silently until its migration reads the vault")
-        #expect(Posture.derive(legacyMode: .biometric, vaultHasAppleHeldCopy: nil, keyFile: nil) == .castle)
-        #expect(Posture.derive(legacyMode: .passphrase, vaultHasAppleHeldCopy: true, keyFile: nil) == .castle)
+        #expect(Posture.derive(legacyMode: .auto, vaultHasAppleHeldCopy: nil, keyFile: castleFile, enrolled: false) == .determined(.standard),
+                "a silent 13p-era local-only store opens silently until its migration retires the keys")
+        #expect(Posture.derive(legacyMode: .biometric, vaultHasAppleHeldCopy: nil, keyFile: nil, enrolled: false) == .determined(.castle))
+        #expect(Posture.derive(legacyMode: .passphrase, vaultHasAppleHeldCopy: nil, keyFile: castleFile, enrolled: false) == .determined(.castle))
     }
 
     /// THE EFFECTIVE GATE (the brief's fact i): Standard ⇒ silent; Castle

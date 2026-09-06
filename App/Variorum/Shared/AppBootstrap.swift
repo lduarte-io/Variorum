@@ -479,12 +479,11 @@ final class AppBootstrap {
             // — before the reconcile, never before unlock — then the
             // reconcile (the launch housekeeping, the Apple arm, the
             // notices). The test-opener road runs it only when a test
-            // injected leaves.
-            Task { [weak self, weak protection] in
-                await self?.runMigrationIfNeeded(database: database, unlockedKey: unlockedKey)
-                if self?.testOpener == nil || self?.makeMigrationLeaves != nil {
-                    await protection?.reconcile()
-                }
+            // injected leaves. pre-13x 2d: ONE act, `runReadyHousekeeping`,
+            // which the roots call AGAIN once the vault hook is wired and
+            // the session restored — decision 35's "next ready".
+            readyHousekeeping = Task<Void, Never> { [weak self] in
+                await self?.readyHousekeepingBody(database: database, unlockedKey: unlockedKey)
             }
             // pre-13x 2a: the idle clock starts at ready (decision 18 —
             // time since Variorum was last used).
@@ -499,6 +498,41 @@ final class AppBootstrap {
             state = .libraryMissing(makeMissingLobby(demand: demand, storeURL: storeURL))
         case .failed(let error, let recoveryFacts):
             state = .failed(error, recovery: recoveryFacts.map(makeLobby))
+        }
+    }
+
+    /// pre-13x 2d (decision 35) — THE READY ACT, whole: the §11 migration
+    /// if it is not done (it stays undone while an enrolled library's
+    /// vault is unread), then the reconcile (the vault's word, the follow's
+    /// verdict, the Apple arm, the notices). The ready road runs it; the
+    /// composition roots run it AGAIN after `wireOneSecretHooks` and
+    /// `services.start()` — the vault readable, the session restored —
+    /// which is what "retries at the next ready" means in-process (before
+    /// 2d the ready road was the only caller, and it ran before the hooks
+    /// existed: the window's "vault descriptor: next online ready" that
+    /// never came). Awaitable, so a pin can wait for the ready-time run.
+    @ObservationIgnored private(set) var readyHousekeeping: Task<Void, Never>?
+
+    func runReadyHousekeeping() async {
+        guard case .ready(let session) = state else { return }
+        await readyHousekeeping?.value
+        let unlocked = protection.keyInHand()
+        let task = Task<Void, Never> { [weak self] in
+            await self?.readyHousekeepingBody(database: session.database, unlockedKey: unlocked)
+        }
+        readyHousekeeping = task
+        await task.value
+    }
+
+    /// The pin's door: wait for the run the ready road started.
+    func awaitReadyHousekeeping() async {
+        await readyHousekeeping?.value
+    }
+
+    private func readyHousekeepingBody(database: AppDatabase, unlockedKey: StoreKey?) async {
+        await runMigrationIfNeeded(database: database, unlockedKey: unlockedKey)
+        if testOpener == nil || makeMigrationLeaves != nil {
+            await protection.reconcile()
         }
     }
 
@@ -520,21 +554,22 @@ final class AppBootstrap {
         let storeURL = testOpener != nil
             ? testStoreURL
             : (try? AppDatabase.defaultStoreURL(variant: storeVariant))
+        _ = storeURL
         let effectiveGate = currentEffectiveGate
         let reading = await protection.readVaultPosture?()
-        let keyFile = gate.readEnvelope(storeURL).envelope
-        let posture = Posture.derive(
-            legacyMode: nil, vaultHasAppleHeldCopy: reading?.hasAppleHeldCopy, keyFile: keyFile,
-            // corner 45: an unlocked key arrived through a demanded gate;
-            // none ⇒ the silent item opened the library.
-            rawKeyCustody: unlockedKey != nil ? .gatedOrNone : .silent)
-        let targetGate = StoreAtOpenMode.effective(posture: posture, dials: gate.dials(scope, storeID))
+        // pre-13x 2d (decision 35): the posture is derived INSIDE the run,
+        // after leg 1 knows whether the library holds sync custody; the
+        // bootstrap hands in the raw facts — the session, the vault's word,
+        // the gate style — never a target it derived without them.
+        let signedIn = await protection.isSignedIn?() ?? false
         let facts = ProtectionMigration.Facts(
             scope: scope, storeID: storeID, key: key,
-            effectiveGate: effectiveGate, targetGate: targetGate,
+            effectiveGate: effectiveGate,
+            signedIn: signedIn,
+            vaultHasAppleHeldCopy: reading?.hasAppleHeldCopy,
+            alwaysAsk: gate.dials(scope, storeID).alwaysAsk,
             biometryAvailable: guardSeam.biometryAvailable(),
-            vaultKDF: reading?.passphraseKDF,
-            vaultHasPassphraseWrap: reading?.hasPassphraseWrap ?? false)
+            vaultKDF: reading?.passphraseKDF)
         lastMigrationReport = await ProtectionMigration.run(facts: facts, leaves: leaves)
     }
 

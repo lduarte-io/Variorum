@@ -29,29 +29,42 @@ nonisolated enum Posture: String, Sendable, Codable {
     case standard
     case castle
 
-    /// THE ONE DERIVATION (pinned from both sources). In order:
+    /// THE ONE DERIVATION (pinned from both sources). In order — the
+    /// precedence pre-13x 2d (decision 35) settled, superseding 2a's:
     ///
-    /// 1. **The pre-2a read-through** (`legacyMode` — the 13p-era stored
-    ///    at-open mode, present only until §11's migration retires the
-    ///    dial keys for the store): Auto ⇒ Standard, a demanded mode ⇒
-    ///    Castle. Her Mac (Biometric) routes to its lobby exactly as
-    ///    before; her phone (silent) opens silently ONCE more, and the
-    ///    migration at that ready reads the vault, moves custody behind
-    ///    Face ID and retires the keys — §11's "her phone becomes Castle
-    ///    at its migration". A 13p-era Auto library with a passphrase set
-    ///    keeps opening silently and the migration writes its Apple copy.
-    /// 2. **An enrolled library follows the account** (decision 8): the
-    ///    vault's word — an Apple-held copy of the master ⇒ Standard, none
-    ///    ⇒ Castle. (Reconciled against the key file at every ready; a
-    ///    disagreement is the follow — 2c's — or the adopt road — batch 3's.)
-    /// 3. **A local-only library is its key file's**: an `apple` copy ⇒
+    /// 1. **The vault's word, when in hand** (decision 8: every device
+    ///    follows the account): an Apple-held copy of the master ⇒
+    ///    Standard, none ⇒ Castle. A vault word means the account exists,
+    ///    so it outranks the legacy mode too. (Reconciled against the key
+    ///    file and the custody SHAPE at every ready; a disagreement is the
+    ///    follow — 2c's, widened at 2d to a POSTURE mismatch — or the adopt
+    ///    road — batch 3's.)
+    /// 2. **An ENROLLED library whose vault has not answered is
+    ///    INDETERMINATE** (decision 35 — the window's finding): signed in
+    ///    or holding sync custody, the vault's word is the ONLY thing that
+    ///    can make it Standard, so while that word is out of reach (offline,
+    ///    a session not yet restored, a slow ready) the reading carries the
+    ///    posture the custody SHAPE reads as — the silent item ⇒ Standard,
+    ///    the gated item or nowhere ⇒ Castle, an unreadable shape ⇒ the key
+    ///    file's rule below — and that is what the routes and the gate ACT
+    ///    on ("opens through the custody it has"); every posture-driven
+    ///    WRITE waits for a determined reading. The legacy stored mode
+    ///    NEVER overrides an enrolled library: it is a fact about the gate
+    ///    the device had, already honored by the existing custody shape.
+    /// 3. **The pre-2a read-through** for a library that is NOT enrolled
+    ///    (`legacyMode` — the 13p-era stored at-open mode, present only
+    ///    until §11's migration retires the dial keys for the store): Auto
+    ///    ⇒ Standard, a demanded mode ⇒ Castle.
+    /// 4. **A local-only library is its key file's**: an `apple` copy ⇒
     ///    Standard; none ⇒ Castle — EXCEPT a key file carrying no
     ///    passphrase wrap either, which is Standard: entering Castle
     ///    requires a passphrase and the twelve words (decision 5), so a
     ///    library that has never had a passphrase cannot have entered it;
     ///    what it is is a Standard library whose Apple copy has not landed
-    ///    (the exposed nudge's state, §14.20), never a lock.
-    /// 4. No key file at all ⇒ a fresh library, born Standard (§14.26).
+    ///    (the exposed nudge's state, §14.20), never a lock. THE SAFETY ARM
+    ///    is reached only with NO session and NO custody (arm 2 catches an
+    ///    enrolled secret-less library first — her phone at the window).
+    /// 5. No key file at all ⇒ a fresh library, born Standard (§14.26).
     ///
     /// **Corner 45 (pre-13x 2b item (0); the 2a adjudication's ruling 2 —
     /// a refused Apple landing never makes Castle):** Castle is ENTERED,
@@ -62,17 +75,30 @@ nonisolated enum Posture: String, Sendable, Codable {
     /// bound item it is Standard-waiting (the reconcile keeps trying to
     /// land A; the exposed nudge speaks), never a lock. The custody SHAPE
     /// tells the two apart by presence alone, no unlock. A caller that
-    /// cannot read custody passes `.unknown` and gets arm 3's older
+    /// cannot read custody passes `.unknown` and gets arm 4's older
     /// reading (a passphrase wrap ⇒ Castle), so nothing regresses where
     /// the shape is not in view.
+    ///
+    /// `enrolled` is REQUIRED (the `legacyCleanup` precedent — every call
+    /// site decides): at the ROUTE it is the per-store sync custody's
+    /// PRESENCE; at ready it is signed-in OR sync custody held.
     static func derive(
         legacyMode: StoreAtOpenMode?,
         vaultHasAppleHeldCopy: Bool?,
         keyFile: StoreKeyEnvelope?,
-        rawKeyCustody: RawKeyCustody = .unknown
-    ) -> Posture {
-        if let legacyMode { return legacyMode.isDemanded ? .castle : .standard }
-        if let vaultHasAppleHeldCopy { return vaultHasAppleHeldCopy ? .standard : .castle }
+        rawKeyCustody: RawKeyCustody = .unknown,
+        enrolled: Bool
+    ) -> PostureReading {
+        if let vaultHasAppleHeldCopy { return .determined(vaultHasAppleHeldCopy ? .standard : .castle) }
+        if enrolled {
+            return .indeterminate(shape: shapeReading(keyFile: keyFile, rawKeyCustody: rawKeyCustody))
+        }
+        if let legacyMode { return .determined(legacyMode.isDemanded ? .castle : .standard) }
+        return .determined(localReading(keyFile: keyFile, rawKeyCustody: rawKeyCustody))
+    }
+
+    /// Arms 4–5: the local-only rule, corner 45 included.
+    private static func localReading(keyFile: StoreKeyEnvelope?, rawKeyCustody: RawKeyCustody) -> Posture {
         guard let keyFile else { return .standard }
         if keyFile.apple != nil { return .standard }
         guard keyFile.passphrase != nil else { return .standard }
@@ -81,6 +107,44 @@ nonisolated enum Posture: String, Sendable, Codable {
         case .gatedOrNone, .unknown: return .castle
         }
     }
+
+    /// Arm 2's carried posture: what the custody SHAPE reads as — the
+    /// device opens through the custody it HAS (decision 35).
+    private static func shapeReading(keyFile: StoreKeyEnvelope?, rawKeyCustody: RawKeyCustody) -> Posture {
+        switch rawKeyCustody {
+        case .silent: return .standard
+        case .gatedOrNone: return .castle
+        case .unknown: return localReading(keyFile: keyFile, rawKeyCustody: .unknown)
+        }
+    }
+}
+
+/// THE DERIVATION's answer (pre-13x 2d, decision 35): a DETERMINED posture,
+/// or — an enrolled library whose vault has not answered — INDETERMINATE,
+/// carrying the posture its custody SHAPE reads as. The routes, the gate
+/// and the faces act on `acting`; every posture-DRIVEN write (the Apple
+/// arm, custody alignment, key-file changes, the legacy-key retirement)
+/// requires `determined`, and an indeterminate reading writes NOTHING and
+/// retries at the next ready.
+nonisolated enum PostureReading: Equatable, Sendable {
+    case determined(Posture)
+    case indeterminate(shape: Posture)
+
+    /// What the device ACTS as right now (the gate, the faces).
+    var acting: Posture {
+        switch self {
+        case .determined(let posture): return posture
+        case .indeterminate(let shape): return shape
+        }
+    }
+
+    /// The posture a WRITE may act on; nil while indeterminate.
+    var determined: Posture? {
+        if case .determined(let posture) = self { return posture }
+        return nil
+    }
+
+    var isIndeterminate: Bool { determined == nil }
 }
 
 /// WHERE THE RAW LIBRARY KEY SITS on this device (pre-13x 2b, corner 45) —
@@ -127,6 +191,12 @@ nonisolated enum StoreAtOpenMode: String, CaseIterable, Sendable, Codable {
         case .standard: return .auto
         case .castle: return dials.alwaysAsk ? .passphrase : .biometric
         }
+    }
+
+    /// pre-13x 2d (decision 35): the gate acts on the reading's ACTING
+    /// posture — under an indeterminate reading, the custody shape's.
+    static func effective(reading: PostureReading, dials: ProtectionDials) -> StoreAtOpenMode {
+        effective(posture: reading.acting, dials: dials)
     }
 }
 

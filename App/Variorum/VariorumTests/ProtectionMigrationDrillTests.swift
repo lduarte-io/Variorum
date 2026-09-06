@@ -237,9 +237,10 @@ struct ProtectionMigrationDrillTests {
         let vaultKDF = fastKDF()
         let facts = ProtectionMigration.Facts(
             scope: scope, storeID: storeID, key: key,
-            effectiveGate: controller.effectiveGate, targetGate: .biometric,
+            effectiveGate: controller.effectiveGate,
+            signedIn: true, vaultHasAppleHeldCopy: false, alwaysAsk: false,
             biometryAvailable: controller.biometryAvailable,
-            vaultKDF: vaultKDF, vaultHasPassphraseWrap: true)
+            vaultKDF: vaultKDF)
         let report = await ProtectionMigration.run(facts: facts, leaves: leaves)
         let log = logBox.value
         for line in log { print("MIGRATION-DRILL| \(line)") }

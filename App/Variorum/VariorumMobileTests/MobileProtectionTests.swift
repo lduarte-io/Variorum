@@ -394,9 +394,9 @@ struct MobilePhoneLobbyTests {
             }
             let fresh = try #require(try StoreKeyEnvelope.loadCurrent(besideStore: storeURL))
             #expect(fresh.storeID != oldEnvelope.storeID, "a NEW store id")
-            #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: fresh) == .standard,
+            #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: fresh, enrolled: false) == .determined(.standard),
                     "the new library is born Standard")
-            #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: oldEnvelope) == .castle,
+            #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: oldEnvelope, enrolled: false) == .determined(.castle),
                     "the old library's lock is untouched")
         }
     }

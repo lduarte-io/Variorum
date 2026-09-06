@@ -56,8 +56,10 @@ struct ProtectionMigrationTests {
         /// Which Keychain-class leaves ran on the MAIN thread (the
         /// KeychainOffMain law's pin).
         var onMain: [String] = []
-        let sync = RecordingSyncLeaves()
+        let sync: RecordingSyncLeaves
         let session = SyncCustodySession()
+
+        init(sync: RecordingSyncLeaves = RecordingSyncLeaves()) { self.sync = sync }
 
         func with<T>(_ body: () -> T) -> T { lock.lock(); defer { lock.unlock() }; return body() }
 
@@ -92,14 +94,18 @@ struct ProtectionMigrationTests {
         }
     }
 
+    /// pre-13x 2d (decision 35): the facts are the RAW ones — the session,
+    /// the vault's word (`vault`: false = Castle, true = Standard, nil =
+    /// unread), the gate style — and the run derives the target itself.
     private func facts(
-        key: StoreKey, effective: StoreAtOpenMode = .auto, target: StoreAtOpenMode = .biometric,
-        biometry: Bool = true, vaultKDF: PassphraseKDF.Descriptor? = nil, vaultPassphrase: Bool = true
+        key: StoreKey, effective: StoreAtOpenMode = .auto, vault: Bool? = false,
+        signedIn: Bool = true, alwaysAsk: Bool = false,
+        biometry: Bool = true, vaultKDF: PassphraseKDF.Descriptor? = nil
     ) -> ProtectionMigration.Facts {
         ProtectionMigration.Facts(
             scope: "probe", storeID: "store-2a", key: key, effectiveGate: effective,
-            targetGate: target, biometryAvailable: biometry, vaultKDF: vaultKDF,
-            vaultHasPassphraseWrap: vaultPassphrase)
+            signedIn: signedIn, vaultHasAppleHeldCopy: vault, alwaysAsk: alwaysAsk,
+            biometryAvailable: biometry, vaultKDF: vaultKDF)
     }
 
     /// HER PHONE'S SHAPE: a 14b plain item + a `sync_state.device_id` row +
@@ -119,7 +125,7 @@ struct ProtectionMigrationTests {
         let vaultKDF = fastKDF()
 
         let report = await ProtectionMigration.run(
-            facts: facts(key: key, effective: .auto, target: .biometric, vaultKDF: vaultKDF),
+            facts: facts(key: key, effective: .auto, vault: false, vaultKDF: vaultKDF),
             leaves: w.leaves)
 
         #expect(report.syncCustody == .done, "the sync custody re-scoped under the SILENT shape (the gate the route used)")
@@ -177,7 +183,7 @@ struct ProtectionMigrationTests {
         w.escrow["store-2a"] = StoreKey.mint()
         w.envelope = StoreKeyEnvelope()
         let report = await ProtectionMigration.run(
-            facts: facts(key: key, effective: .biometric, target: .biometric, vaultPassphrase: false),
+            facts: facts(key: key, effective: .biometric, vault: false),
             leaves: w.leaves)
         #expect(report.escrowLeftForeign)
         #expect(!report.escrowRemoved)
@@ -197,7 +203,7 @@ struct ProtectionMigrationTests {
         try envelope.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
         w.envelope = envelope
         let report = await ProtectionMigration.run(
-            facts: facts(key: key, effective: .biometric, target: .biometric), leaves: w.leaves)
+            facts: facts(key: key, effective: .biometric, vault: false), leaves: w.leaves)
         #expect(report.syncCustody == .done)
         #expect(w.sync.gatedRecord?.material == held, "the material behind the gate")
         #expect(w.sync.plainRecord?.material == nil, "the plain item is identity-only")
@@ -215,7 +221,7 @@ struct ProtectionMigrationTests {
         w.legacyPlain = material()
         w.envelope = StoreKeyEnvelope()
         let report = await ProtectionMigration.run(
-            facts: facts(key: key, effective: .auto, target: .biometric, biometry: false), leaves: w.leaves)
+            facts: facts(key: key, effective: .auto, vault: false, biometry: false), leaves: w.leaves)
         #expect(w.alwaysAsk)
         #expect(w.aligned == [.passphrase])
         #expect(report.custodyAligned == .passphrase)
@@ -243,7 +249,7 @@ struct ProtectionMigrationTests {
         let w = World()
         w.envelope = StoreKeyEnvelope()
         let report = await ProtectionMigration.run(
-            facts: facts(key: key, effective: .auto, target: .auto, vaultPassphrase: false), leaves: w.leaves)
+            facts: facts(key: key, effective: .auto, vault: nil, signedIn: false), leaves: w.leaves)
         #expect(report.syncCustody == nil)
         #expect(report.dialsRetired)
         #expect(!report.masterCopyWritten && !report.confirmPending)
@@ -265,6 +271,69 @@ struct ProtectionMigrationTests {
         _ = await ProtectionMigration.run(facts: facts(key: key), leaves: w.leaves)
         #expect(w.onMain.isEmpty, "Keychain-class leaves ran on main: \(w.onMain)")
         #expect(w.legacyDeleted, "…and the run did run")
+    }
+
+    /// DECISION 35 (pre-13x 2d): an ENROLLED library whose vault is unread
+    /// at its migration — her phone's 14b plain item + a session, a
+    /// secret-less format-1 key file, the vault's word unavailable at that
+    /// instant — runs legs 1–2 (the custody re-scoped under the shape it
+    /// HAS; the escrow), then STOPS before leg 3 with one line and WITHOUT
+    /// marking done: no dial-key retirement, no custody move, no key-file
+    /// write, no confirm. The next ready, with the vault's word (Castle),
+    /// runs legs 3–6 — her phone becomes Face ID THEN. Enrolled by custody
+    /// alone reads the same; a library with NO session and NO custody keeps
+    /// 2a's safety arm and finishes. RED ON OLD: the bootstrap derived a
+    /// determined Standard from the secret-less file and the run aligned
+    /// nothing, wrote nothing it should not, and marked itself DONE — the
+    /// phone's repair could never come through the migration again.
+    @Test func anEnrolledLibraryWhoseVaultIsUnreadStopsBeforeLegThreeUndoneAndTheNextReadyFinishes() async throws {
+        let key = StoreKey.mint()
+        let w = World()
+        w.legacyPlain = material()
+        w.deviceIDRow = "phone-device-id"
+        let secretless = StoreKeyEnvelope(formatVersion: StoreKeyEnvelope.formatVersion1, storeID: "store-2a")
+        w.envelope = secretless
+
+        let first = await ProtectionMigration.run(
+            facts: facts(key: key, effective: .auto, vault: nil, signedIn: true), leaves: w.leaves)
+        #expect(first.syncCustody == .done, "leg 1: the custody re-scoped under the shape it has (silent)")
+        #expect(w.sync.plainRecord?.material != nil)
+        #expect(!first.dialsRetired && !w.dialsRetired, "the legacy-key retirement WAITS")
+        #expect(w.aligned.isEmpty && first.custodyAligned == nil, "no custody move")
+        #expect(!first.masterCopyWritten && w.envelope == secretless, "the key file untouched")
+        #expect(!first.confirmPending && !w.confirmPending)
+        #expect(!w.done, "UNDONE — the next ready retries")
+        #expect(w.log.contains { $0.contains("indeterminate") && $0.contains("the run stays undone") },
+                "one honest line: \(w.log)")
+
+        // The next ready — the vault's word CASTLE: legs 3–6 run.
+        let vaultKDF = fastKDF()
+        let second = await ProtectionMigration.run(
+            facts: facts(key: key, effective: .auto, vault: false, signedIn: true, vaultKDF: vaultKDF),
+            leaves: w.leaves)
+        #expect(second.lines.contains { $0.contains("already per store — skipped") }, "leg 1 idempotent")
+        #expect(second.dialsRetired && w.dialsRetired)
+        #expect(w.aligned == [.biometric] && second.custodyAligned == .biometric, "her phone becomes Face ID with the vault's word")
+        #expect(second.masterCopyWritten && w.envelope?.vaultKDF == vaultKDF)
+        #expect(second.confirmPending && w.confirmPending)
+        #expect(w.done)
+
+        // Enrolled by CUSTODY alone (no session): indeterminate too.
+        let byCustody = World(sync: RecordingSyncLeaves(
+            plain: SyncCustodyRecord(deviceID: "d", material: material())))
+        byCustody.envelope = secretless
+        let custody = await ProtectionMigration.run(
+            facts: facts(key: key, effective: .auto, vault: nil, signedIn: false), leaves: byCustody.leaves)
+        #expect(!byCustody.done && byCustody.aligned.isEmpty && !custody.dialsRetired)
+
+        // NO session, NO custody, no secrets: 2a's safety arm — determined
+        // Standard, the run finishes (nothing to align: silent stays silent).
+        let local = World()
+        local.envelope = secretless
+        let alone = await ProtectionMigration.run(
+            facts: facts(key: key, effective: .auto, vault: nil, signedIn: false), leaves: local.leaves)
+        #expect(alone.dialsRetired && local.aligned.isEmpty && alone.custodyAligned == .auto)
+        #expect(!alone.masterCopyWritten && local.done)
     }
 
     // MARK: - The one-time confirm face's brain (copy §9)

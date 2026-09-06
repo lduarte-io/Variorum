@@ -27,6 +27,13 @@
 //   4. custody ALIGNED to the derived posture (her Mac: the biometric item,
 //      as it is; her phone: silent → Face ID — "her phone becomes Castle
 //      at its migration"); a Mac without biometry takes Always ask;
+//      pre-13x 2d (decision 35): the posture is derived HERE, after leg 1
+//      knows whether the library is enrolled — signed in or holding sync
+//      custody (legacy or per-store) — and an ENROLLED library whose vault
+//      has not answered is INDETERMINATE: the run stops before leg 3 with
+//      one line and WITHOUT marking done (legs 3–6 are posture-driven
+//      writes — the retirement, the alignment, the key file, the confirm),
+//      so the next ready with the vault's word runs them;
 //   5. the key file's MASTER copy + the corpus key id from HELD material
 //      (no visit, no typing — this alone gives the vault road), and the
 //      vault's KDF descriptor when the vault was reachable;
@@ -67,14 +74,19 @@ nonisolated enum ProtectionMigration {
         /// The library key's custody shape NOW (the derived gate the route
         /// used).
         var effectiveGate: StoreAtOpenMode
-        /// The posture the migration ALIGNS custody to (derived at ready —
-        /// the vault's word when reachable, else the key file's).
-        var targetGate: StoreAtOpenMode
+        /// pre-13x 2d (decision 35): whether a signed-in session exists —
+        /// with the sync custody leg 1 finds, what makes the library
+        /// ENROLLED (the vault's word is then the only Standard).
+        var signedIn: Bool
+        /// The vault's word, when reachable: an Apple-held copy of the
+        /// master ⇒ Standard, none ⇒ Castle; nil = unread this ready.
+        var vaultHasAppleHeldCopy: Bool?
+        /// Castle's gate style on this device (the dials' `alwaysAsk`).
+        var alwaysAsk: Bool
         var biometryAvailable: Bool
         /// The vault, if reachable: its KDF descriptor (the key file records
-        /// it) and whether it holds a passphrase wrap (the confirm's gate).
+        /// it).
         var vaultKDF: PassphraseKDF.Descriptor?
-        var vaultHasPassphraseWrap: Bool
     }
 
     /// The seams (production: `Leaves.live`; the pins: recorders).
@@ -171,13 +183,35 @@ nonisolated enum ProtectionMigration {
             note("migration 2a: no legacy iCloud escrow item")
         }
 
+        // pre-13x 2d (decision 35): THE POSTURE, derived here — enrolled =
+        // signed in OR sync custody held (the material leg 1 found or
+        // re-scoped, the session's, the per-store items'); an enrolled
+        // library with the vault unread is INDETERMINATE and the run stops
+        // HERE, undone: legs 3–6 are posture-driven writes.
+        let enrolled = facts.signedIn
+            || leaves.session.record?.material != nil
+            || leaves.syncLeaves.loadPlain()?.material != nil
+            || leaves.syncLeaves.gatedExists()
+        let reading = Posture.derive(
+            legacyMode: nil,
+            vaultHasAppleHeldCopy: facts.vaultHasAppleHeldCopy,
+            keyFile: leaves.readEnvelope(),
+            rawKeyCustody: facts.effectiveGate.isDemanded ? .gatedOrNone : .silent,
+            enrolled: enrolled)
+        guard let posture = reading.determined else {
+            note("migration 2a: the posture is indeterminate (enrolled, the vault unread) — legs 3–6 wait for the next ready; the run stays undone")
+            return report
+        }
+        let derivedTarget = StoreAtOpenMode.effective(
+            posture: posture, dials: ProtectionDials(alwaysAsk: facts.alwaysAsk))
+
         // 3. THE DIAL KEYS retired (the read-through ends for this store).
         leaves.retireDialKeys()
         report.dialsRetired = true
         note("migration 2a: dial keys retired to the per-store keys")
 
         // 4. CUSTODY ALIGNED to the derived posture.
-        var target = facts.targetGate
+        var target = derivedTarget
         if target == .biometric, !facts.biometryAvailable {
             target = .passphrase
             leaves.setAlwaysAsk(true)
@@ -205,17 +239,24 @@ nonisolated enum ProtectionMigration {
                     kdf: facts.vaultKDF ?? envelope.vaultKDF, corpusKeyID: material.corpusKeyID)
                 try leaves.saveEnvelope(envelope)
                 report.masterCopyWritten = true
-                note("migration 2a: key file gains the master copy + corpus key id\(facts.vaultKDF == nil ? " (vault descriptor: next online ready)" : " + the vault's descriptor")")
+                // pre-13x 2d: the descriptor lands only when the passphrase
+                // is TYPED (the confirm's re-wrap) — the line says so. After
+                // decision 35 an enrolled library reaches this leg only with
+                // the vault's word in hand, so the nil arm speaks for the
+                // already-migrated class alone (the record says so too).
+                note("migration 2a: key file gains the master copy + corpus key id\(facts.vaultKDF == nil ? " (vault descriptor: at the next passphrase entry)" : " + the vault's descriptor")")
             } catch {
                 note("migration 2a: key file write refused — \(String(describing: error)); the next ready retries")
                 return report
             }
-            // 6. THE PASSPHRASE CONFIRM (copy §9), once, for an enrolled library.
-            if facts.vaultHasPassphraseWrap {
-                leaves.setConfirmPending(true)
-                report.confirmPending = true
-                note("migration 2a: passphrase confirm pending (the one-time face)")
-            }
+            // 6. THE PASSPHRASE CONFIRM (copy §9), once, for an enrolled
+            //    library — pre-13x 2d: EVERY enrolled library that reached
+            //    leg 5 (the confirm re-wraps the local copy under the
+            //    vault's descriptor and records it; that is owed whether the
+            //    vault was reachable at this instant or not).
+            leaves.setConfirmPending(true)
+            report.confirmPending = true
+            note("migration 2a: passphrase confirm pending (the one-time face)")
         } else {
             note("migration 2a: no sync material — the key file keeps no master copy (local-only)")
         }

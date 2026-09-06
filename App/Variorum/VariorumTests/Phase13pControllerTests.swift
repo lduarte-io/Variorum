@@ -728,6 +728,73 @@ struct Phase13pControllerTests {
         #expect(try envelope.unwrapKey(passphrase: "sesame") == key)
     }
 
+    // MARK: - pre-13x 2d: DECISION 35 — indeterminate writes nothing
+
+    /// HER PHONE AT THE WINDOW, REPLAYED: a format-1 key file holding ONLY
+    /// `formatVersion` + `storeID` (79 bytes, no secrets), the raw key in
+    /// the SILENT item, a signed-in session, no sync custody yet, and a
+    /// vault read that FAILS at ready (the session's scope migration / the
+    /// network not yet answered). Decision 35: the library is ENROLLED
+    /// (signed in), so its posture is INDETERMINATE until the vault
+    /// answers — it opens through the custody it has (silent ⇒ `.auto`)
+    /// and WRITES NOTHING: no Apple copy landed, no A minted, no custody
+    /// move, no key-file change; the exposed nudge stays quiet. With the
+    /// vault readable and STANDARD the Apple arm lands exactly as 2a built
+    /// it; a library nobody is signed into keeps 2a's safety arm.
+    /// RED ON OLD: `Posture.derive` read the secret-less file as a
+    /// determined Standard and the Apple arm wrote `apple` + `appleKeyID`
+    /// into it — the iCloud copy of her real phone library key on a Castle
+    /// account's library.
+    @Test func herPhoneReplayedAnEnrolledSecretlessLibraryWithTheVaultUnreadWritesNothing() async throws {
+        let key = StoreKey.mint()
+        let secretless = StoreKeyEnvelope(
+            formatVersion: StoreKeyEnvelope.formatVersion1, storeID: "e6194a17-her-phone")
+        let w = try world(standard: true, key: key, envelope: secretless)
+        w.controller.isSignedIn = { true }
+        w.controller.readVaultPosture = { nil }  // the vault unreachable at this ready
+        let before = w.envelopeBox.value
+        #expect(w.appleKeys.key != nil, "A is readable — the arm WOULD land if it ran")
+
+        await w.controller.reconcile()
+
+        #expect(w.envelopeBox.value == before, "the key file's bytes before == after")
+        #expect(w.envelopeBox.value?.apple == nil && w.envelopeBox.value?.appleKeyID == nil,
+                "no Apple copy landed on a library whose account may be Castle")
+        #expect(w.controller.postureIndeterminate, "enrolled, the vault unread ⇒ indeterminate")
+        #expect(w.controller.posture == .standard && w.controller.effectiveGate == .auto,
+                "…and it opens through the custody it HAS (the silent item)")
+        #expect(w.controller.appleKeyVerified == nil, "the Apple arm never ran")
+        #expect(w.backing.auto == key && w.backing.gated == nil, "no custody move")
+        #expect(w.controller.notice == nil, "no exposed nudge for an enrolled library")
+
+        // The vault readable and STANDARD: 2a's Apple arm lands, unchanged.
+        let appleID = w.appleKeys.key?.id
+        w.controller.readVaultPosture = { VaultPostureReading(hasAppleHeldCopy: true, appleKeyID: appleID) }
+        await w.controller.reconcile()
+        #expect(!w.controller.postureIndeterminate && w.controller.posture == .standard)
+        #expect(w.envelopeBox.value?.appleKeyID == appleID, "the Apple copy landed as 2a built it")
+        #expect(w.controller.appleKeyVerified == true)
+
+        // The same file with NO session and NO custody: 2a's safety arm — a
+        // determined Standard whose Apple copy lands (nobody can re-open it
+        // by any word; the exposed nudge's state).
+        let local = try world(standard: true, envelope: StoreKeyEnvelope(
+            formatVersion: StoreKeyEnvelope.formatVersion1, storeID: "local-only"))
+        local.controller.readVaultPosture = { nil }
+        await local.controller.reconcile()
+        #expect(!local.controller.postureIndeterminate && local.controller.posture == .standard)
+        #expect(local.envelopeBox.value?.apple != nil, "2a's arm lands for a library nobody is signed into")
+
+        // Enrolled by CUSTODY alone (no session hook): indeterminate too.
+        let byCustody = try world(standard: true, envelope: StoreKeyEnvelope(
+            formatVersion: StoreKeyEnvelope.formatVersion1, storeID: "custody-only"), enrolled: true)
+        byCustody.controller.readVaultPosture = { nil }
+        let custodyBefore = byCustody.envelopeBox.value
+        await byCustody.controller.reconcile()
+        #expect(byCustody.controller.postureIndeterminate)
+        #expect(byCustody.envelopeBox.value == custodyBefore, "nothing written")
+    }
+
     // MARK: - pre-13x 2c: THE FOLLOW's detection (§7 / §3.6)
 
     private func rotatedReading(
