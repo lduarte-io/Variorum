@@ -578,6 +578,22 @@ struct MobilePhoneProtectionCopyTests {
         #expect(!unreadable.contains("Touch ID"))
     }
 
+    /// pre-13x 2c: copy §5's follow notices on the phone — the SAME shared
+    /// strings the Mac shows, with the phone's nouns (*this iPhone asks for
+    /// Face ID*), and the Always-ask / leaving doors name Face ID.
+    @Test func theFollowNoticesNameThePhoneAndFaceID() {
+        let day = ProtectionCopy.day(from: "2026-09-04T10:00:00Z")
+        let moved = ProtectionCopy.followMovedToCastle(device: "Lillian's Mac", day: day)
+        #expect(moved.contains("set on Lillian's Mac on \(day)"))
+        #expect(moved.contains("this iPhone asks for Face ID to open your library"))
+        #expect(!moved.contains("Touch ID") && !moved.contains("this Mac"))
+        #expect(ProtectionCopy.followLaterSubline == "Until then this iPhone opens and reads, but doesn't sync.")
+        #expect(ProtectionCopy.followMovedToStandard(device: "Lillian's Mac", day: day)
+                .contains("This iPhone opens silently again"))
+        #expect(ProtectionCopy.alwaysAskRetiredWord(device: "Lillian's Mac", day: day)
+                .contains("The old one still opens this iPhone"))
+    }
+
     /// **ONE BRAIN** (knot 6): the settings sentence is composed from
     /// `lossLegs`, and the tutorial chapter is asserted against the same
     /// list — so the two cannot state different chains.
@@ -950,5 +966,55 @@ struct MobileOneSecretHooksTests {
         #expect(throws: StoreKeyEnvelopeError.wrongPassphrase) {
             _ = try envelope.unwrapKey(passphrase: "fresh-north-22")
         }
+    }
+}
+
+// MARK: - pre-13x 2c: THE FOLLOW's verdict on the phone (§7)
+
+@MainActor
+@Suite("pre-13x 2c phone — the follow is owed from the vault's word, spoken with the phone's nouns")
+struct MobileFollowDetectionTests {
+    /// The SAME shared reconcile the Mac pins (`Phase13pControllerTests`),
+    /// composed the phone's way: a Castle phone whose account replaced its
+    /// keys elsewhere owes the follow; the notice carries *[device] on
+    /// [day]* (decision 34) in the phone's words; *Later* leaves the
+    /// persistent banner and the key doors' sentence; the landing clears it.
+    @Test func aRotatedVaultOwesTheFollowOnThePhoneAndLaterLeavesTheBanner() async throws {
+        let key = StoreKey.mint()
+        let backing = InMemoryStoreKeyGuardBacking(
+            gated: key, biometryAvailable: true, biometricSucceeds: true)
+        var envelope = StoreKeyEnvelope()
+        try envelope.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
+        let gate = StoreLaunchGate.scripted(
+            dials: ScriptedDialsBox(ProtectionDials()), backing: backing,
+            envelope: ScriptedEnvelopeBox(envelope))
+        let session = SyncCustodySession()
+        session.hold(SyncCustodyRecord(deviceID: "phone-1", material: DeviceKeyMaterial(
+            masterKey: Data(repeating: 0, count: 32),
+            corpusKey: Data(repeating: 1, count: 32), corpusKeyID: "corpus-old",
+            journalBridgeKey: Data(repeating: 2, count: 32), journalBridgeKeyID: "bridge")))
+        let controller = ProtectionController(configuration: .init(
+            scope: "phone-follow", storeURL: nil, gate: gate,
+            isRealVariant: false, makeKDF: { fastKDF() },
+            syncCustodySession: session))
+        controller.adoptResident(key)
+        #expect(controller.posture == .castle)
+        controller.stampedOwnerID = { "user-phone" }
+        controller.readVaultPosture = {
+            VaultPostureReading(
+                hasAppleHeldCopy: false, appleKeyID: nil, passphraseKDF: fastKDF(), hasPassphraseWrap: true,
+                corpusKeyID: "corpus-new", updatedAt: "2026-09-04T10:00:00Z",
+                updatedByDevice: "Lillian's Mac", signedInUserID: "user-phone", hasRecoveryWrap: true)
+        }
+        await controller.reconcile()
+        let owed = try #require(controller.followNotice)
+        #expect(owed.kind == .keysReplaced, "a Castle-shaped phone whose keys were replaced elsewhere")
+        #expect(owed.body == "Your keys were replaced on Lillian's Mac on \(owed.day). Enter your passphrase once to pick up the new ones.")
+        #expect(controller.notice == .follow(owed))
+        #expect(controller.followPending)
+        controller.deferFollow()
+        #expect(controller.notice == .followWaiting(owed))
+        controller.followLanded()
+        #expect(!controller.followPending)
     }
 }

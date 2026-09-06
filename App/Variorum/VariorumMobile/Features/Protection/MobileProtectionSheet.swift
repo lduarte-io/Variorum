@@ -44,6 +44,9 @@ struct MobileProtectionSheet: View {
     @State private var setSheetModel: PassphraseSetModel?
     @State private var resetPresented = false
     @State private var reminderCheck: SecretCheckModel?
+    /// pre-13x 2c: a switch left unfinished (the persisted marker) — the
+    /// chooser's door becomes *Finish…* (read per open, like the Mac).
+    @State private var pendingSwitch: RotationMarker?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -81,7 +84,24 @@ struct MobileProtectionSheet: View {
                 resetPresented = false
             }
         }
+        // pre-13x 2c: the ceremony and the follow, held on the controller
+        // (they survive the re-key's reopen), faced for the phone.
+        .sheet(item: Binding(
+            get: { controller.activeSwitch },
+            set: { if $0 == nil { controller.closeSwitch() } })
+        ) { model in
+            MobilePostureSwitchSheet(model: model, tokens: tokens) { controller.closeSwitch() }
+        }
+        .sheet(item: Binding(
+            get: { controller.activeFollow },
+            set: { if $0 == nil { controller.closeFollow() } })
+        ) { model in
+            MobileFollowSheet(model: model, tokens: tokens) { controller.closeFollow() }
+        }
         .task { await services?.encryption.refresh() }
+        .task(id: controller.activeSwitch?.id) {
+            pendingSwitch = await controller.switchRunner?.pendingMarker()
+        }
     }
 
     // MARK: - Chrome
@@ -240,7 +260,30 @@ struct MobileProtectionSheet: View {
             ForEach([Posture.standard, Posture.castle], id: \.self) { posture in
                 postureCard(posture)
             }
-            // The choose doors are batch 2b's (P-2).
+            // pre-13x 2c: THE CHOOSE DOORS (copy §1's Use Castle… / Use
+            // Standard; a switch left unfinished shows Finish…) — rendered
+            // only when the runner is wired (P-2: a door that acts), and
+            // replaced by the one sentence while a follow is owed.
+            if controller.followPending {
+                alarm(ProtectionCopy.pickUpKeysFirst)
+            } else if controller.switchRunner != nil {
+                if let pending = pendingSwitch {
+                    door(pending.entersCastle
+                         ? ProtectionCopy.finishEnteringCastleDoor
+                         : ProtectionCopy.finishReplacingKeysDoor) {
+                        controller.openSwitch(.resume(pending), vaultTie: VaultTie.make(services: services))
+                    }
+                    alarm(ProtectionCopy.resumeBody)
+                } else if controller.posture == .standard {
+                    door(ProtectionCopy.useCastleDoor) {
+                        controller.openSwitch(.enter, vaultTie: VaultTie.make(services: services))
+                    }
+                } else {
+                    door(ProtectionCopy.useStandardDoor) {
+                        controller.openSwitch(.leave, vaultTie: VaultTie.make(services: services))
+                    }
+                }
+            }
         }
     }
 

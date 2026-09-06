@@ -147,7 +147,8 @@ struct MobileShellView: View {
             if let protection = bootstrap?.protection {
                 MobileProtectionNoticeBar(
                     controller: protection, services: services, tokens: tokens,
-                    openProtection: { protectionPresented = true })
+                    openProtection: { protectionPresented = true },
+                    openSettings: { settingsPresented = true })
             }
         }
         .sheet(isPresented: $settingsPresented) {

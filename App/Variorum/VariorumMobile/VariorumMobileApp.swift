@@ -109,6 +109,36 @@ struct VariorumMobileApp: App {
                             protection: bootstrap.protection,
                             encryption: fresh.encryption,
                             keyVault: fresh.keyVault, auth: fresh.auth)
+                        // pre-13x 2c (2b's runner at the PHONE'S root): the
+                        // posture switch — entering and leaving Castle, the
+                        // in-place Replace All Keys — the silent follow into
+                        // Standard, and the Encryption tab's follow door,
+                        // over the SAME shared runner the Mac wires (the
+                        // phone is a first-class birthplace of Castle, §9).
+                        // The services are read LIVE (the reopen rebuilds).
+                        if let storeURL = try? AppDatabase.defaultStoreURL(
+                            variant: bootstrap.storeVariant) {
+                            let runner = PostureSwitchRunner(leaves: .live(
+                                bootstrap: bootstrap,
+                                protection: bootstrap.protection,
+                                scope: bootstrap.storeVariant.rawValue,
+                                storeURL: storeURL,
+                                database: session.database,
+                                services: { services }))
+                            bootstrap.protection.switchRunner = runner
+                            bootstrap.protection.followIntoStandardAct = {
+                                try await runner.followIntoStandard()
+                            }
+                            fresh.encryption.followDoor = { bootstrap.protection.openFollow() }
+                            fresh.encryption.rekeyRunner = { passphrase in
+                                let outcome = try await runner.replaceAllKeys(
+                                    passphrase: passphrase, recoveryWords: nil)
+                                guard let material = outcome.material else {
+                                    throw PostureSwitchError.syncKeysUnavailable
+                                }
+                                return material
+                            }
+                        }
                         await fresh.start()
                         // Pre-13u Act 0 — R-pre13u-1: **NOTHING IS SEEDED
                         // HERE ANY MORE.** The launch used to mint the

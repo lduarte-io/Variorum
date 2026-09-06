@@ -322,6 +322,9 @@ struct MobileProtectionNoticeBar: View {
     /// wires it (Settings is a sheet, so the bar cannot present it itself
     /// without stacking two sheets on one presenter).
     var openProtection: (() -> Void)?
+    /// pre-13x 2c: Settings (the Account section — Sign Out / Delete) from
+    /// the different-owner notice; the shell wires it the same way.
+    var openSettings: (() -> Void)?
 
     var body: some View {
         Group {
@@ -329,8 +332,19 @@ struct MobileProtectionNoticeBar: View {
             case .nudge: nudgeBar
             case .reminderDue: reminderBar
             case .migrationConfirm: migrationBar
+            case .follow(let follow): followBar(follow)
+            case .followWaiting(let follow): followWaitingBar(follow)
+            case .movedToStandard(let moved): movedToStandardBar(moved)
+            case .alwaysAskRetiredWord(let retired): alwaysAskRetiredBar(retired)
+            case .differentOwner: differentOwnerBar
             case nil: EmptyView()
             }
+        }
+        .sheet(item: Binding(
+            get: { controller.activeFollow },
+            set: { if $0 == nil { controller.closeFollow() } })
+        ) { model in
+            MobileFollowSheet(model: model, tokens: tokens) { controller.closeFollow() }
         }
         .sheet(item: $setSheetModel) { model in
             MobilePassphraseSetSheet(model: model, tokens: tokens) { setSheetModel = nil }
@@ -432,6 +446,97 @@ struct MobileProtectionNoticeBar: View {
                 offer(ProtectionCopy.migrationLaterDoor, quiet: true) {
                     controller.deferMigrationConfirm()
                 }
+            }
+        }
+    }
+
+    // MARK: pre-13x 2c — THE FOLLOW's notices (copy §5, the phone's nouns)
+
+    private func followBar(_ follow: FollowNotice) -> some View {
+        bar {
+            Text(follow.body)
+                .font(tokens.small)
+                .foregroundStyle(tokens.ink)
+                .fixedSize(horizontal: false, vertical: true)
+            Text(ProtectionCopy.followLaterSubline)
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
+                .fixedSize(horizontal: false, vertical: true)
+            HStack(spacing: 16) {
+                offer(ProtectionCopy.followEnterDoor) {
+                    controller.openFollow()
+                    controller.activeFollow?.choosePassphrase()
+                }
+                offer(ProtectionCopy.followWordsDoor) {
+                    controller.openFollow()
+                    controller.activeFollow?.chooseWords()
+                }
+                Spacer()
+                offer(ProtectionCopy.followLaterDoor, quiet: true) { controller.deferFollow() }
+            }
+        }
+    }
+
+    private func followWaitingBar(_ follow: FollowNotice) -> some View {
+        bar {
+            Text(follow.waitingBody)
+                .font(tokens.small)
+                .foregroundStyle(tokens.ink)
+                .fixedSize(horizontal: false, vertical: true)
+            HStack(spacing: 16) {
+                offer(ProtectionCopy.followWaitingDoor) {
+                    controller.openFollow()
+                    controller.activeFollow?.choosePassphrase()
+                }
+                Spacer()
+            }
+        }
+    }
+
+    private func movedToStandardBar(_ moved: FollowNotice) -> some View {
+        bar {
+            Text(moved.body)
+                .font(tokens.small)
+                .foregroundStyle(tokens.ink)
+                .fixedSize(horizontal: false, vertical: true)
+            HStack(spacing: 16) {
+                offer(ProtectionCopy.followMovedToStandardDoor) { controller.dismissMovedToStandard() }
+                Spacer()
+            }
+        }
+    }
+
+    private func alwaysAskRetiredBar(_ retired: FollowNotice) -> some View {
+        bar {
+            Text(retired.body)
+                .font(tokens.small)
+                .foregroundStyle(tokens.ink)
+                .fixedSize(horizontal: false, vertical: true)
+            HStack(spacing: 16) {
+                offer(ProtectionCopy.enterItNowDoor) {
+                    controller.openFollow()
+                    controller.activeFollow?.choosePassphrase()
+                }
+                Spacer()
+            }
+        }
+    }
+
+    /// Copy §3's sentence with the doors that ACT today — Sign Out inline,
+    /// Settings for the Account section; Connect is batch 3's (P-2).
+    private var differentOwnerBar: some View {
+        bar {
+            Text(ProtectionCopy.keysDontMatchThisLibrary)
+                .font(tokens.small)
+                .foregroundStyle(tokens.ink)
+                .fixedSize(horizontal: false, vertical: true)
+            HStack(spacing: 16) {
+                offer("Sign Out") { Task { await services?.signOutVariorum() } }
+                    .disabled(services == nil)
+                if let openSettings {
+                    offer("Settings…", quiet: true) { openSettings() }
+                }
+                Spacer()
             }
         }
     }
