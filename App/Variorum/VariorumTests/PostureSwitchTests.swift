@@ -1593,6 +1593,263 @@ struct PostureSwitchTests {
                 == newMaterial.masterSymmetricKey)
     }
 
+    // MARK: - pre-13x 3b item 8: THE CROSS-DEVICE DRILLS (the 2b world + a sibling; the doors over production wiring)
+
+    /// The production wiring over the 2b world's controller
+    /// (`wireOneSecretHooks`): the session's landings reach the controller,
+    /// so the key file follows exactly as it does in the app.
+    private func wireSession(for world: World, controller: ProtectionController) throws -> EncryptionSession {
+        let client = try #require(world.vaultClient)
+        let encryption = EncryptionSession(store: world.keyStore, client: client, signedIn: { true })
+        let auth = AuthSession(
+            configuration: AuthConfiguration(projectURL: URL(string: "https://auth.2b-drills.invalid")!, apiKey: "k"),
+            store: .inMemory(initial: AuthTokens(
+                accessToken: "token-2b", refreshToken: "refresh", expiresAt: Date(timeIntervalSinceNow: 86_400),
+                userID: "user-2b", email: "drills@test.invalid")),
+            http: { _ in throw URLError(.notConnectedToInternet) })
+        wireOneSecretHooks(protection: controller, encryption: encryption, keyVault: client, auth: auth)
+        return encryption
+    }
+
+    private func vaultTie(_ client: KeyVaultClient, hasRecoveryWrap: Bool) -> VaultTie {
+        VaultTie(
+            hasRecoveryWrap: hasRecoveryWrap,
+            verifyPassphrase: { typed in
+                do { _ = try await VaultEnrollment(client: client).enroll(passphrase: typed); return .match }
+                catch VaultEnrollmentError.wrongPassphrase { return .mismatch("not the account's") }
+                catch { return .couldNotCheck("\(error)") }
+            },
+            verifyRecoveryWords: { text in
+                do { _ = try await VaultEnrollment(client: client).enroll(recoveryWords: EncryptionSession.words(from: text)); return .match }
+                catch VaultEnrollmentError.wrongRecoveryPhrase { return .mismatch("not the account's words") }
+                catch { return .couldNotCheck("\(error)") }
+            })
+    }
+
+    private func keyDoor(_ kind: KeyDoorModel.Kind, encryption: EncryptionSession, tie: VaultTie) throws -> KeyDoorModel {
+        let facts = try #require(encryption.keyDoorFacts, "wired by wireOneSecretHooks")
+        return KeyDoorModel(
+            kind: kind, encryption: encryption, facts: facts,
+            verifyVaultPassphrase: tie.verifyPassphrase, verifyVaultWords: tie.verifyRecoveryWords)
+    }
+
+    private func settle(_ door: KeyDoorModel) async throws {
+        for _ in 0..<200 {
+            switch door.phase {
+            case .done, .failed, .closed: return
+            default: try await Task.sleep(for: .milliseconds(50))
+            }
+        }
+    }
+
+    private func titles(in world: World) async throws -> [String: String] {
+        try await world.view.read { db in
+            try Row.fetchAll(db, sql: "SELECT id, title FROM container").reduce(into: [String: String]()) { acc, row in
+                let id: String = row["id"]; let title: String? = row["title"]; acc[id] = title
+            }
+        }
+    }
+
+    /// CHANGE PASSPHRASE ACROSS TWO DEVICES (copy §4; §3.6): the acting
+    /// device changes the word through the door; at the vault the NEW word
+    /// opens the SAME master for the sibling and the OLD refuses; the keys
+    /// never changed — the sibling's custody, library and rounds are
+    /// untouched, no fence; the acting key file's copy followed under the
+    /// vault's new descriptor. RECORDED (batch 4's vault road): the sibling's
+    /// own key file keeps its copy under the OLD word — its lobby still opens
+    /// by the old word offline until that road lands.
+    @Test func changingThePassphraseOnOneDeviceRetiresTheOldWordAtTheVaultForItsSibling() async throws {
+        let acting = try await makeWorld()
+        defer { acting.tearDown() }
+        let sibling = try await makeWorld(sharing: acting)
+        defer { sibling.tearDown() }
+        let client = try #require(acting.vaultClient)
+        let mirror = try #require(acting.mirror)
+        let material = try #require(acting.oldMaterial)
+        let controller = makeController(for: acting)
+        let encryption = try wireSession(for: acting, controller: controller)
+        await encryption.refresh()
+        #expect(encryption.state == .enrolled(hasRecoveryWrap: false), "\(encryption.state)")
+        let door = try keyDoor(.changePassphrase, encryption: encryption, tie: vaultTie(client, hasRecoveryWrap: false))
+        await door.start()
+        #expect(door.phase == .authorize && door.isEnrolledDoor, "\(door.phase) \(door.lastError ?? "")")
+        let new = "a-new-word-for-both-12"
+        await door.changePassphrase(current: "not-the-word", new: new, confirmation: new)
+        #expect(door.lastError != nil && door.phase == .authorize, "a wrong current word refuses against the vault")
+        let revisionBefore = try await acting.vault().revision
+        await door.changePassphrase(current: "sesame", new: new, confirmation: new)
+        try await settle(door)
+        #expect(door.phase == .done, "\(door.phase) \(door.lastError ?? "")")
+        let vault = try await acting.vault()
+        #expect(vault.revision != revisionBefore)
+
+        // THE SIBLING at the vault: the NEW word opens the SAME master; the OLD refuses.
+        let opened = try await VaultEnrollment(client: client).enroll(passphrase: new)
+        #expect(opened.masterKey == material.masterKey && opened.corpusKeyID == material.corpusKeyID, "a re-wrap, never a re-key")
+        await #expect(throws: VaultEnrollmentError.wrongPassphrase) {
+            _ = try await VaultEnrollment(client: client).enroll(passphrase: "sesame")
+        }
+        // The keys never changed: the sibling's custody, library and rounds untouched — no fence.
+        #expect(sibling.keyStore.load()?.corpusKeyID == material.corpusKeyID)
+        #expect(StoreEncryptionMigration.opens(sibling.storeURL, key: sibling.oldKey))
+        let siblingEngine = SyncEngine(transport: mirror, keyProvider: DeviceKeySyncProvider(store: sibling.keyStore))
+        try await withDependencies { $0.database = sibling.view } operation: {
+            _ = try await siblingEngine.pull()
+            _ = try await siblingEngine.push()
+        }
+        let seen = try await titles(in: sibling)
+        for (id, title) in acting.seededTitles { #expect(seen[id] == title, "the sibling still reads \(id) in the clear") }
+        // RECORDED: the sibling's own copy stays under the OLD word until batch 4's vault road.
+        let siblingFile = try #require(try StoreKeyEnvelope.load(at: sibling.oldKeyFileURL))
+        #expect(try siblingFile.unwrapKey(passphrase: "sesame") == sibling.oldKey)
+        #expect(throws: StoreKeyEnvelopeError.wrongPassphrase) { _ = try siblingFile.unwrapKey(passphrase: new) }
+        // The acting key file followed: L under the NEW word with the VAULT's descriptor (no re-key — the same fingerprint).
+        let actingFile = try #require(try StoreKeyEnvelope.load(at: acting.oldKeyFileURL))
+        #expect(try actingFile.unwrapKey(passphrase: new) == acting.oldKey)
+        #expect(throws: StoreKeyEnvelopeError.wrongPassphrase) { _ = try actingFile.unwrapKey(passphrase: "sesame") }
+        #expect(actingFile.passphrase?.kdf == vault.format.kdf && actingFile.vaultKDF == vault.format.kdf,
+                "the local copy under the vault's descriptor — the lobby derives once")
+    }
+
+    /// REGENERATE ACROSS TWO DEVICES (copy §4): the acting device replaces
+    /// the vault's recovery wrap through the door; the NEW words enroll the
+    /// sibling and the OLD refuse at the vault; the passphrase wrap is
+    /// untouched (independent wraps); no re-key, so the sibling has nothing
+    /// to follow; the acting key file's W copy followed the same words.
+    @Test func regeneratingTheWordsOnOneDeviceRetiresTheOldWordsAtTheVaultForItsSibling() async throws {
+        let acting = try await makeWorld()
+        defer { acting.tearDown() }
+        let sibling = try await makeWorld(sharing: acting)
+        defer { sibling.tearDown() }
+        let client = try #require(acting.vaultClient)
+        let material = try #require(acting.oldMaterial)
+        let oldWords = acting.words
+        try await VaultEnrollment(client: client).landRecoveryWrap(words: oldWords, material: material)
+        let controller = makeController(for: acting)
+        let encryption = try wireSession(for: acting, controller: controller)
+        await encryption.refresh()
+        let door = try keyDoor(.regenerateWords, encryption: encryption, tie: vaultTie(client, hasRecoveryWrap: true))
+        await door.start()
+        #expect(door.phase == .authorize, "\(door.phase) \(door.lastError ?? "")")
+        await door.authorizeRegenerate(current: "sesame")
+        guard case .wordsShow(let fresh) = door.phase else {
+            Issue.record("the fresh words are shown once: \(door.phase) \(door.lastError ?? "")")
+            return
+        }
+        #expect(fresh.count == 12 && fresh != oldWords)
+        door.acknowledgeWordsWritten()
+        door.confirmWords(fresh.joined(separator: " "))
+        try await settle(door)
+        #expect(door.phase == .done, "\(door.phase) \(door.lastError ?? "")")
+
+        // THE SIBLING at the vault.
+        let opened = try await VaultEnrollment(client: client).enroll(recoveryWords: fresh)
+        #expect(opened.masterKey == material.masterKey)
+        await #expect(throws: VaultEnrollmentError.wrongRecoveryPhrase) {
+            _ = try await VaultEnrollment(client: client).enroll(recoveryWords: oldWords)
+        }
+        let byWord = try await VaultEnrollment(client: client).enroll(passphrase: "sesame")
+        #expect(byWord.masterKey == material.masterKey, "the passphrase wrap is untouched — independent wraps")
+        #expect(sibling.keyStore.load()?.corpusKeyID == material.corpusKeyID, "no re-key — nothing to follow")
+        #expect(try await sibling.vault().format.previousCorpusKey == nil)
+        // The acting key file's W copy followed the same words (one secret).
+        let actingFile = try #require(try StoreKeyEnvelope.load(at: acting.oldKeyFileURL))
+        #expect(try actingFile.unwrapKey(recoveryWords: fresh) == acting.oldKey)
+        #expect(throws: (any Error).self) { _ = try actingFile.unwrapKey(recoveryWords: oldWords) }
+    }
+
+    /// REPLACE ALL KEYS THROUGH THE DOOR, THE SIBLING FOLLOWING, A STALE
+    /// COPY REFUSED (copy §4; §4 steps 1–4; §12): the acting device walks the
+    /// ceremony's door (no new passphrase); a copy of its key file + custody
+    /// taken BEFORE the act opens no page of the re-keyed library and its
+    /// sync keys are refused at the mirror; the sibling — that stale-custody
+    /// device until it follows — is fenced with a pending row, follows by
+    /// the passphrase under Standard (no gate; the Apple copy again), pulls
+    /// to an identical store, and its pending row reaches the acting device.
+    @Test func replaceAllKeysThroughTheDoorIsFollowedByTheSiblingAndAStaleCopyOpensNothing() async throws {
+        let acting = try await makeWorld()
+        defer { acting.tearDown() }
+        let sibling = try await makeWorld(sharing: acting)
+        defer { sibling.tearDown() }
+        let client = try #require(acting.vaultClient)
+        let mirror = try #require(acting.mirror)
+        let oldMaterial = try #require(acting.oldMaterial)
+        try await VaultEnrollment(client: client).landRecoveryWrap(words: acting.words, material: oldMaterial)
+        let siblingEngine = SyncEngine(transport: mirror, keyProvider: DeviceKeySyncProvider(store: sibling.keyStore))
+        try await withDependencies { $0.database = sibling.view } operation: {
+            _ = try await siblingEngine.push()
+            _ = try await siblingEngine.pull()
+        }
+        // THE STALE COPY: the acting key file + its custody, as a backup made before the act holds them.
+        let staleFile = try #require(try StoreKeyEnvelope.load(at: acting.oldKeyFileURL))
+        let staleCustody = DeviceKeyStore.inMemory()
+        #expect(staleCustody.save(oldMaterial))
+
+        // THE DOOR on the acting device.
+        let controller = makeController(for: acting)
+        let model = PostureSwitchModel(
+            mode: .replaceKeys, runner: acting.runner, controller: controller,
+            vaultTie: vaultTie(client, hasRecoveryWrap: true))
+        await model.start()
+        #expect(model.phase == .explain, "\(model.phase)")
+        model.continueFromExplain()
+        #expect(model.phase == .wordsExisting)
+        model.chooseTypeWords()
+        await model.submitExistingWords(acting.words.joined(separator: " "))
+        #expect(model.phase == .authorize, "\(model.phase) \(model.lastError ?? "")")
+        await model.authorize(passphrase: "sesame")
+        #expect(model.phase == .done(insuranceOff: false, hasOffer: false), "\(model.phase) \(model.lastError ?? "")")
+        let outcome = try #require(model.outcome)
+        let newMaterial = try #require(outcome.material)
+        #expect(!outcome.entersCastle && acting.posture == .standard && acting.calls.custodyTargets.last == .auto)
+        let newFile = try acting.keyFile(outcome.newKeyFingerprint)
+        let newKey = try newFile.unwrapKey(passphrase: "sesame")
+        #expect(StoreEncryptionMigration.opens(acting.storeURL, key: newKey) && newFile.apple != nil)
+
+        // THE STALE COPY: its L (through A) opens no page; its sync keys are refused at the mirror.
+        let staleKey = try staleFile.unwrapKey(apple: acting.apple.symmetricKey)
+        #expect(staleKey == acting.oldKey && !StoreEncryptionMigration.opens(acting.storeURL, key: staleKey),
+                "§12: a copy of the key file from before the act + the Apple-held key opens nothing")
+        let staleEngine = SyncEngine(transport: mirror, keyProvider: DeviceKeySyncProvider(store: staleCustody))
+        await #expect(throws: SyncError.encryptionKeysReplaced, "the stale custody's keys are fenced") {
+            try await withDependencies { $0.database = sibling.view } operation: { _ = try await staleEngine.pull() }
+        }
+
+        // THE SIBLING: fenced with a pending row; then the follow under Standard.
+        try await seedBacklog(sibling, count: 1, tag: "typed-before-following")
+        await #expect(throws: SyncError.encryptionKeysReplaced) {
+            try await withDependencies { $0.database = sibling.view } operation: { _ = try await siblingEngine.pull() }
+        }
+        #expect(try await outboxCount(sibling) >= 1)
+        let followed = try await sibling.runner.follow(passphrase: "sesame", recoveryWords: nil)
+        #expect(!followed.entersCastle, "the account stays Standard")
+        let material = try #require(followed.material)
+        #expect(material.corpusKeyID == newMaterial.corpusKeyID && sibling.keyStore.load()?.corpusKeyID == newMaterial.corpusKeyID)
+        let vault = try await sibling.vault()
+        #expect(vault.format.previousCorpusKey == nil && vault.format.rotationStartedSeq == nil)
+        #expect(sibling.calls.custodyTargets.last == .auto && sibling.posture == .standard, "no gate under Standard")
+        let siblingFile = try sibling.keyFile(followed.newKeyFingerprint)
+        let siblingKey = try siblingFile.unwrapKey(passphrase: "sesame")
+        #expect(StoreEncryptionMigration.opens(sibling.storeURL, key: siblingKey))
+        #expect(!StoreEncryptionMigration.opens(sibling.storeURL, key: sibling.oldKey))
+        #expect(siblingFile.apple != nil && siblingFile.appleKeyID == sibling.apple.id, "the Apple copy again under Standard")
+        #expect(try siblingFile.unwrapKey(master: material.masterSymmetricKey) == siblingKey)
+        // The rounds: the pending row lands; both stores read every note in the clear.
+        try await withDependencies { $0.database = sibling.view } operation: {
+            _ = try await siblingEngine.pull()
+            _ = try await siblingEngine.push()
+        }
+        #expect(try await outboxCount(sibling) == 0)
+        let seen = try await titles(in: sibling)
+        for (id, title) in acting.seededTitles { #expect(seen[id] == title, "the follower reads \(id) in the clear") }
+        let actingEngine = SyncEngine(transport: mirror, keyProvider: DeviceKeySyncProvider(store: acting.keyStore))
+        try await withDependencies { $0.database = acting.view } operation: { _ = try await actingEngine.pull() }
+        let landed = try await acting.view.read { db in
+            try String.fetchOne(db, sql: "SELECT title FROM container WHERE id = 'typed-before-following-0'")
+        }
+        #expect(landed == "typed-before-following 0", "the sibling's pending row reached the acting device in the clear")
+    }
+
     // MARK: - pre-13x 2c.1: THE FOLLOW's face over the real runner
 
     /// §7 end to end on the sibling: the controller's reconcile reads the
