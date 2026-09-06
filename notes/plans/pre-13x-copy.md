@@ -348,8 +348,8 @@ Button: *Choose Where…*
 
 **Passphrase changed elsewhere (a dismissable banner at every open, until the new word has been used here):** *Your
 passphrase was changed on [device] on [day]. Use the new one here when you can — this Mac still takes the old one until
-you do.* Buttons: *Enter It Now…* · dismiss. The same for regenerated words (*Your twelve words were regenerated on
-[device] on [day]…*). On an Always-ask device: *Your passphrase was changed on [device] on [day]. The old one still
+you do.* Buttons: *Enter It Now…* · dismiss. The same for regenerated words — the full line, drafted 2026-09-06 at 4a's adjudication as the passphrase line's mirror (4a renders it; 13s re-voices): *Your twelve words were regenerated on
+[device] on [day]. Use the new ones here when you can — this Mac still takes the old ones until you do.* On an Always-ask device: *Your passphrase was changed on [device] on [day]. The old one still
 opens this Mac, but sync waits until you enter the new one here.* Button: *Enter It Now…*
 **A retired passphrase at a key door (Change Passphrase's current-passphrase field, Replace All Keys, the posture
 switches):** *That's a passphrase you've since changed. Enter the current one — or use Touch ID, or your twelve words.*
