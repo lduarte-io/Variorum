@@ -1013,6 +1013,133 @@ struct Phase13pControllerTests {
             material: held, kdf: vaultKDF, passphrase: nil, recoveryWords: nil)) == ProtectionController.keyUnavailable)
     }
 
+    /// pre-13x 3a — ENROLL's FOUR DIRECTIONS at the reconcile (design §5's
+    /// Enroll row; copy §2d): a signed-in library with NO sync custody and
+    /// no enrollment signature on its key file (no master copy, no recorded
+    /// corpus key id). (a) Standard library + Standard account + the iCloud
+    /// key matching the vault's copy: the SILENT road — A opens the vault's
+    /// master, the class keys follow, custody and the key file land through
+    /// the wired adopt, nothing typed, no face (`enrollReading` nil). A
+    /// absent ⇒ the waiting face's facts; A under another Apple ID ⇒ the
+    /// different-Apple-ID facts; a Standard library under a CASTLE account ⇒
+    /// (c)'s facts (the re-key sentence); a Castle-born library under a
+    /// STANDARD account ⇒ (d)'s facts (consent first — NOTHING lands
+    /// silently); Castle under Castle ⇒ (b)'s facts. RED ON OLD: no arm
+    /// existed — a Standard library on a Standard account landed nothing at
+    /// ready and stayed on the 14c "type the passphrase" face; no facts.
+    @Test func enrollsFourDirectionsAtTheReconcileAndTheStandardRoadLandsWithNothingTyped() async throws {
+        let kdf = fastKDF()
+        let master = SymmetricKey(size: .bits256)
+        func vault(appleUnder apple: AppleKey?) throws -> KeyVaultFormat {
+            var format = try KeyVaultFormat.create(
+                masterKey: master, passphraseKey: try PassphraseKDF.deriveKey(passphrase: "account-sesame", descriptor: kdf),
+                recoveryKey: nil,
+                classKeys: [(keyClass: .corpus, keyID: "corpus-a", key: SymmetricKey(size: .bits256)),
+                            (keyClass: .journalBridge, keyID: "bridge-a", key: SymmetricKey(size: .bits256))],
+                kdf: kdf)
+            if let apple {
+                format = try format.settingAppleHeldCopy(masterKey: master, appleKey: apple.symmetricKey, appleKeyID: apple.id)
+            }
+            return format
+        }
+        func reading(_ format: KeyVaultFormat, appleKeyID: String? = nil) -> VaultPostureReading {
+            VaultPostureReading(
+                hasAppleHeldCopy: format.masterWrappedByAppleHeld != nil, appleKeyID: appleKeyID ?? format.appleKeyID,
+                passphraseKDF: kdf, hasPassphraseWrap: true, corpusKeyID: "corpus-a",
+                updatedAt: "2026-09-05T10:00:00Z", updatedByDevice: "Lillian's Mac",
+                signedInUserID: "user-1", hasRecoveryWrap: false, format: format)
+        }
+
+        // (a) THE SILENT ROAD.
+        let a = try world(standard: true, enrolled: false)
+        let apple = try #require(a.appleKeys.key)
+        let standardVault = try vault(appleUnder: apple)
+        let landed = LockIsolated<[(DeviceKeyMaterial, PassphraseKDF.Descriptor)]>([])
+        a.controller.isSignedIn = { true }
+        a.controller.foreignOwner = { _ in false }
+        a.controller.readVaultPosture = { [r = reading(standardVault)] in r }
+        a.controller.landEnrollment = { material, kdf in landed.withValue { $0.append((material, kdf)) }; return true }
+        await a.controller.reconcile()
+        #expect(landed.value.count == 1, "the silent road landed once")
+        #expect(landed.value.first?.0.corpusKeyID == "corpus-a" && landed.value.first?.0.masterKey == master.withUnsafeBytes { Data($0) },
+                "the vault's master and class keys, opened by A")
+        #expect(landed.value.first?.1 == kdf, "the vault's descriptor rides to the key file")
+        #expect(a.controller.enrollReading == nil, "no face is owed")
+        #expect(a.controller.followNotice == nil && !a.controller.differentOwner)
+
+        // A absent ⇒ the waiting face; nothing lands.
+        let waiting = try world(standard: true, enrolled: false)
+        waiting.appleKeys.key = nil
+        let waitingLanded = LockedCounter()
+        waiting.controller.isSignedIn = { true }
+        waiting.controller.foreignOwner = { _ in false }
+        waiting.controller.readVaultPosture = { [r = reading(standardVault)] in r }
+        waiting.controller.landEnrollment = { _, _ in waitingLanded.increment(); return true }
+        await waiting.controller.reconcile()
+        #expect(waiting.controller.enrollReading == EnrollFacts(accountPosture: .standard, libraryPosture: .standard, appleState: .absent))
+        #expect(waitingLanded.value == 0)
+
+        // A under another Apple ID ⇒ the different-Apple-ID face; nothing lands.
+        let other = try world(standard: true, enrolled: false)
+        let otherLanded = LockedCounter()
+        other.controller.isSignedIn = { true }
+        other.controller.foreignOwner = { _ in false }
+        other.controller.readVaultPosture = { [r = reading(standardVault, appleKeyID: "someone-elses-apple-id")] in r }
+        other.controller.landEnrollment = { _, _ in otherLanded.increment(); return true }
+        await other.controller.reconcile()
+        #expect(other.controller.enrollReading?.appleState == .differentAppleID)
+        #expect(otherLanded.value == 0)
+
+        // (c) a Standard library under a CASTLE account ⇒ the re-key sentence's facts; nothing lands.
+        let castleVault = try vault(appleUnder: nil)
+        let c = try world(standard: true, enrolled: false)
+        let cLanded = LockedCounter()
+        c.controller.isSignedIn = { true }
+        c.controller.foreignOwner = { _ in false }
+        c.controller.readVaultPosture = { [r = reading(castleVault)] in r }
+        c.controller.landEnrollment = { _, _ in cLanded.increment(); return true }
+        await c.controller.reconcile()
+        let cFacts = try #require(c.controller.enrollReading)
+        #expect(cFacts.standardBornJoinsCastle && cFacts.appleState == .notApplicable)
+        #expect(cLanded.value == 0 && c.controller.followNotice == nil, "no follow is owed to a never-enrolled library")
+
+        // (d) a Castle-born library under a STANDARD account ⇒ consent first; NOTHING lands silently.
+        let d = try world(standard: false, enrolled: false)
+        d.appleKeys.key = apple
+        let dLanded = LockedCounter()
+        d.controller.isSignedIn = { true }
+        d.controller.foreignOwner = { _ in false }
+        d.controller.readVaultPosture = { [r = reading(standardVault)] in r }
+        d.controller.landEnrollment = { _, _ in dLanded.increment(); return true }
+        await d.controller.reconcile()
+        let dFacts = try #require(d.controller.enrollReading)
+        #expect(dFacts.castleBornJoinsStandard && dFacts.appleState == .matched)
+        #expect(dLanded.value == 0, "consent before anything moves — decision 1 with corner 6")
+        #expect(d.backing.gated == d.key && d.backing.auto == nil, "custody untouched")
+
+        // (b) Castle under Castle ⇒ the plain roads' facts.
+        let b = try world(standard: false, enrolled: false)
+        b.controller.isSignedIn = { true }
+        b.controller.foreignOwner = { _ in false }
+        b.controller.readVaultPosture = { [r = reading(castleVault)] in r }
+        await b.controller.reconcile()
+        #expect(b.controller.enrollReading == EnrollFacts(accountPosture: .castle, libraryPosture: .castle, appleState: .notApplicable))
+
+        // An ENROLLED library (the key file carries the master copy) with no
+        // custody item at ready is never the enroll block's: no facts.
+        var enrolledFile = StoreKeyEnvelope()
+        let enrolledKey = StoreKey.mint()
+        try enrolledFile.setPassphraseWrap(key: enrolledKey, passphrase: "sesame", kdf: fastKDF())
+        try enrolledFile.masterBox(key: enrolledKey, under: master)
+        try enrolledFile.recordVaultReconciliation(kdf: kdf, corpusKeyID: "corpus-a")
+        let enrolled = try world(standard: false, dials: ProtectionDials(alwaysAsk: true), key: enrolledKey, envelope: enrolledFile)
+        enrolled.controller.isSignedIn = { true }
+        enrolled.controller.foreignOwner = { _ in false }
+        enrolled.controller.readVaultPosture = { [r = reading(castleVault)] in r }
+        await enrolled.controller.reconcile()
+        #expect(enrolled.controller.enrollReading == nil, "an enrolled Always-ask library before its vault read is 2c's arm, not an enroll")
+    }
+
     /// The runner a Connect pin needs exists only so the sheet can open —
     /// the Connect road never touches it.
     private func inertLeaves(for w: World) -> PostureSwitchRunner.Leaves {
@@ -1160,8 +1287,21 @@ struct Phase13pControllerTests {
             updatedByDevice: "Lillian's iPhone", signedInUserID: "user-1", hasRecoveryWrap: false)
         reading.format = format
 
+        // pre-13x 3a: an ENROLLED Always-ask library carries the key file's
+        // master copy + the recorded corpus key id (the migration's leg 5 /
+        // the landing) — the enrollment signature the enroll block reads;
+        // a bare envelope reads as NEVER ENROLLED now (copy §2d's face).
+        func enrolledFile(recordedID: String) throws -> (StoreKey, StoreKeyEnvelope) {
+            let key = StoreKey.mint()
+            var file = StoreKeyEnvelope()
+            try file.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
+            try file.masterBox(key: key, under: master)
+            try file.recordVaultReconciliation(kdf: kdf, corpusKeyID: recordedID)
+            return (key, file)
+        }
         // (a) the held derived key opens the vault ⇒ the session fills.
-        let filled = try world(standard: false, dials: ProtectionDials(alwaysAsk: true))
+        let (filledKey, filledFile) = try enrolledFile(recordedID: "corpus-9")
+        let filled = try world(standard: false, dials: ProtectionDials(alwaysAsk: true), key: filledKey, envelope: filledFile)
         #expect(filled.controller.effectiveGate == .passphrase)
         #expect(filled.syncSession.record?.material == nil, "Always ask holds nothing before the read")
         filled.syncSession.holdDerivedWrappingKey(derived, kdf: kdf)
@@ -1173,7 +1313,8 @@ struct Phase13pControllerTests {
         #expect(filled.controller.followNotice == nil && filled.controller.alwaysAskRetiredNotice == nil)
 
         // (b) the word was CHANGED elsewhere: a derived key under another descriptor.
-        let retired = try world(standard: false, dials: ProtectionDials(alwaysAsk: true))
+        let (retiredKey, retiredFile) = try enrolledFile(recordedID: "corpus-9")
+        let retired = try world(standard: false, dials: ProtectionDials(alwaysAsk: true), key: retiredKey, envelope: retiredFile)
         retired.syncSession.holdDerivedWrappingKey(
             try PassphraseKDF.deriveKey(passphrase: "old word", descriptor: fastKDF()), kdf: fastKDF())
         retired.controller.foreignOwner = { _ in false }
@@ -1189,6 +1330,7 @@ struct Phase13pControllerTests {
         var recorded = StoreKeyEnvelope()
         let key = StoreKey.mint()
         try recorded.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
+        try recorded.masterBox(key: key, under: SymmetricKey(size: .bits256))
         try recorded.recordVaultReconciliation(kdf: fastKDF(), corpusKeyID: "corpus-old")
         let rotated = try world(standard: false, dials: ProtectionDials(alwaysAsk: true), key: key, envelope: recorded)
         rotated.syncSession.holdDerivedWrappingKey(

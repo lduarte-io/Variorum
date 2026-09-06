@@ -207,6 +207,24 @@ struct ProtectionDialsTests {
 struct ProtectionCopyTests {
     /// pre-13x 2c: copy §5's follow notices render VERBATIM with the device
     /// nouns interpolated and *[device] on [day]* from the vault's row.
+    /// pre-13x 3a — copy §2d's Castle join face + the (d) consent
+    /// (PROVISIONAL, ledger 46), verbatim; the device noun interpolated.
+    @Test func theEnrollFacesRenderCopyTwoDVerbatim() {
+        #expect(ProtectionCopy.joinCastleTitle == "Enter your passphrase to join sync.")
+        #expect(ProtectionCopy.joinWordsDoor == "Use my twelve words instead.")
+        #expect(ProtectionCopy.joinCastleRekeysSentence
+                == "This account is in Castle, so this library gets a new key as it joins. Everything you wrote here stays.")
+        #expect(ProtectionCopy.joinStandardConsent
+                == "This account is in Standard, so this library will open silently from now on and your Apple account will hold a key to it. To keep only-you keys for the whole account, enter Castle instead — Settings ▸ Protection ▸ Use Castle…")
+        #expect(ProtectionCopy.joinDoor == "Join" && ProtectionCopy.joinCancelDoor == "Cancel")
+        #expect(ProtectionCopy.joinLaterLine == "Sync isn't joined on this \(ProtectionCopy.deviceName).")
+        #expect(ProtectionCopy.connectCancelDoor == "Cancel")
+        // The Connect notice: copy §3's sentence; its third door is Cancel, a follow's is Later.
+        let connect = FollowNotice(kind: .connectLibrary, device: "another device", day: "an earlier day")
+        #expect(connect.body == ProtectionCopy.keysDontMatchThisLibrary && connect.dismissDoor == "Cancel")
+        #expect(FollowNotice(kind: .keysReplaced, device: "d", day: "y").dismissDoor == ProtectionCopy.followLaterDoor)
+    }
+
     @Test func theFollowNoticesRenderCopyFiveVerbatim() {
         let day = ProtectionCopy.day(from: "2026-09-04T10:00:00Z")
         #expect(day == ProtectionCopy.day(from: "2026-09-04"), "the day, never the time")

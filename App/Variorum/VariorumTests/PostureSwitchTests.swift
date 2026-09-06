@@ -1230,6 +1230,52 @@ struct PostureSwitchTests {
         #expect(try await world.marker() == nil && world.calls.resumes >= 1 && world.calls.reconciles >= 1)
     }
 
+    /// pre-13x 3a — ENROLL (c) IS THE FOLLOW (the orchestrator's reading):
+    /// a Standard-born library (its key file carries the iCloud copy) that
+    /// has NEVER enrolled — no custody, no master copy — joins a CASTLE
+    /// account through `runner.follow` with the typed passphrase: M from
+    /// the vault lands in custody, the library is RE-KEYED (its old key had
+    /// an iCloud copy), a NEW key file lands under the new fingerprint with
+    /// the master copy, the vault's descriptor and NO Apple copy, custody
+    /// goes behind the gate, the old key file leaves the live folder, the
+    /// app's own pre-switch pairs are offered, the vault and the mirror are
+    /// untouched. Green by construction on this tree (the runner's rotation
+    /// road with no custody held is exactly this) — the composition pin the
+    /// session's routing (`EnrollDirectionsTests`) relies on; recorded.
+    @Test func aStandardBornLibraryWithNoCustodyJoinsCastleThroughTheFollow() async throws {
+        let world = try await makeWorld()
+        defer { world.tearDown() }
+        let material = try #require(world.oldMaterial)
+        let mirror = try #require(world.mirror)
+        let vaultBefore = try await world.vault()
+        #expect(vaultBefore.format.masterWrappedByAppleHeld == nil, "the account is Castle-shaped")
+        // Never enrolled here: no custody, and a key file with P + the Apple copy only.
+        world.keyStore.clear()
+        var file = try #require(try StoreKeyEnvelope.loadCurrent(besideStore: world.storeURL))
+        file.master = nil
+        try file.write(at: file.preferredURL(besideStore: world.storeURL))
+        let oldURL = world.oldKeyFileURL
+        try world.addPreSwitchPair()
+        #expect(world.keyStore.load() == nil)
+
+        let outcome = try await world.runner.follow(passphrase: "sesame", recoveryWords: nil)
+        #expect(outcome.entersCastle && outcome.reencrypted == 0)
+        let held = try #require(world.keyStore.load())
+        #expect(held.masterKey == material.masterKey && held.corpusKeyID == material.corpusKeyID, "M from the vault, in custody")
+        #expect(world.calls.rekeys == 1 && world.calls.custodyTargets == [.biometric] && world.posture == .castle)
+        let newFile = try world.keyFile(outcome.newKeyFingerprint)
+        let newKey = try newFile.unwrapKey(passphrase: "sesame")
+        #expect(StoreEncryptionMigration.opens(world.storeURL, key: newKey) && !StoreEncryptionMigration.opens(world.storeURL, key: world.oldKey))
+        #expect(newFile.apple == nil && newFile.master != nil && newFile.vaultKDF == vaultBefore.format.kdf
+                && newFile.vaultCorpusKeyID == material.corpusKeyID, "the joined library's key file")
+        #expect(try newFile.unwrapKey(master: material.masterSymmetricKey) == newKey)
+        #expect(!FileManager.default.fileExists(atPath: oldURL.path), "the Standard-era key file left the live folder")
+        #expect(outcome.preSwitchSnapshots.count == 1, "its old pairs opened through the Apple account — offered")
+        let batches = await mirror.reencryptBatches
+        #expect(try await world.vault().revision == vaultBefore.revision && batches.isEmpty, "nothing rotated")
+        #expect(try await world.marker() == nil)
+    }
+
     /// pre-13x 2d.4 (the orchestrator's ruling 3): a FOLLOW killed after the
     /// re-key and before the old key files' removal — the marker at
     /// `.rekeyLibrary`, flagged as a follow — RESUMES and still retires

@@ -529,13 +529,84 @@ struct EncryptionView: View {
 
     // MARK: - Enrollment (new device) + the shared unlock roads (CF-3)
 
+    /// pre-13x 3a — ENROLL's faces (copy §2d) by the controller's facts: the
+    /// Standard waiting face (the silent road lands at the next ready; the
+    /// roads beside it); Castle's title + roads; (c) the re-key sentence
+    /// under the title; (d) the consent with Join / Cancel. Without facts
+    /// (no controller wired) the 14b generic face stands.
     @ViewBuilder
     private func enrollmentSection(hasRecoveryWrap: Bool) -> some View {
-        Text("Unlock sync on this device")
-            .pageProse(pageStyle)
-        Text("Enter your encryption passphrase to unwrap this account's keys.")
-            .pageCaption(pageStyle)
-        unlockRoads(offerPhraseRoad: hasRecoveryWrap)
+        if let facts = encryption.enrollFacts?() {
+            if facts.castleBornJoinsStandard {
+                joinStandardSection(facts: facts, hasRecoveryWrap: hasRecoveryWrap)
+            } else if facts.accountPosture == .standard {
+                Text(ProtectionCopy.waitingTitle)
+                    .pageProse(pageStyle)
+                Text(ProtectionCopy.waitingBody)
+                    .pageCaption(pageStyle)
+                    .fixedSize(horizontal: false, vertical: true)
+                if facts.appleState == .differentAppleID {
+                    Text(ProtectionCopy.waitingDifferentAppleID)
+                        .pageCaption(pageStyle)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                unlockRoads(offerPhraseRoad: hasRecoveryWrap, joining: true)
+            } else {
+                Text(ProtectionCopy.joinCastleTitle)
+                    .pageProse(pageStyle)
+                if facts.standardBornJoinsCastle {
+                    Text(ProtectionCopy.joinCastleRekeysSentence)
+                        .pageCaption(pageStyle)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                unlockRoads(offerPhraseRoad: hasRecoveryWrap, joining: true)
+            }
+        } else {
+            Text("Unlock sync on this device")
+                .pageProse(pageStyle)
+            Text("Enter your encryption passphrase to unwrap this account's keys.")
+                .pageCaption(pageStyle)
+            unlockRoads(offerPhraseRoad: hasRecoveryWrap)
+        }
+    }
+
+    /// (d): the consent sentence (PROVISIONAL words — ledger 46) with Join /
+    /// Cancel; A opens the vault's copy when it is the one, else the roads
+    /// (typed) run the same join. After Cancel: one line and a re-offer door.
+    @ViewBuilder
+    private func joinStandardSection(facts: EnrollFacts, hasRecoveryWrap: Bool) -> some View {
+        if encryption.declinedStandardJoin {
+            Text(ProtectionCopy.joinLaterLine)
+                .pageCaption(pageStyle)
+            PageDoor(ProtectionCopy.joinReofferDoor, form: .inlineAct, style: pageStyle) {
+                encryption.declinedStandardJoin = false
+            }
+        } else {
+            Text(ProtectionCopy.joinStandardConsent)
+                .pageWarning(pageStyle)
+                .fixedSize(horizontal: false, vertical: true)
+            if facts.appleState == .matched {
+                HStack {
+                    PageDoor(ProtectionCopy.joinDoor, style: pageStyle) {
+                        Task { await encryption.joinStandard() }
+                    }
+                    .disabled(encryption.busy)
+                    PageDoor(ProtectionCopy.joinCancelDoor, form: .inlineAct, style: pageStyle) {
+                        encryption.declineStandardJoin()
+                    }
+                }
+            } else {
+                if facts.appleState == .differentAppleID {
+                    Text(ProtectionCopy.waitingDifferentAppleID)
+                        .pageCaption(pageStyle)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                unlockRoads(offerPhraseRoad: hasRecoveryWrap, joining: true, joinsStandard: true)
+                PageDoor(ProtectionCopy.joinCancelDoor, form: .inlineAct, style: pageStyle) {
+                    encryption.declineStandardJoin()
+                }
+            }
+        }
     }
 
     /// CF-12: custody exists here but this launch hasn't unlocked — the
@@ -569,28 +640,35 @@ struct EncryptionView: View {
         }
     }
 
+    /// `joining` (pre-13x 3a): copy §2d's doors — *Join* and *Use my twelve
+    /// words instead.*; `joinsStandard` routes the typed secret through the
+    /// (d) join (custody, then the follow into Standard).
     @ViewBuilder
-    private func unlockRoads(offerPhraseRoad: Bool) -> some View {
+    private func unlockRoads(offerPhraseRoad: Bool, joining: Bool = false, joinsStandard: Bool = false) -> some View {
         if !usePhraseInstead {
             PeekableSecretField(
                 label: "Encryption passphrase", text: $enrollPassphrase,
-                onSubmit: { enrollNow() })
+                onSubmit: { enrollNow(joinsStandard: joinsStandard) })
                 .pageFieldChrome(pageStyle)
-            PageDoor("Unlock", style: pageStyle) { enrollNow() }
+            PageDoor(joining ? ProtectionCopy.joinDoor : "Unlock", style: pageStyle) { enrollNow(joinsStandard: joinsStandard) }
                 .disabled(encryption.busy || enrollPassphrase.isEmpty)
             if offerPhraseRoad {
                 // CF-3: the reveal is a real, visibly-bordered button —
                 // never something that reads as static hint text (the
                 // styled .bordered arm keeps a visible border too).
-                PageDoor("Use my recovery phrase instead", form: .bordered,
+                PageDoor(joining ? ProtectionCopy.joinWordsDoor : "Use my recovery phrase instead", form: .bordered,
                          style: pageStyle) { usePhraseInstead = true }
             }
         } else {
             phraseEntryField("The 12 recovery words, separated by spaces", text: $phraseEntry)
-            PageDoor("Unlock with Recovery Phrase", style: pageStyle) {
+            PageDoor(joining ? ProtectionCopy.joinDoor : "Unlock with Recovery Phrase", style: pageStyle) {
                 let entry = phraseEntry
                 phraseEntry = ""
-                Task { await encryption.enroll(recoveryWordsText: entry) }
+                if joinsStandard {
+                    Task { await encryption.joinStandard(typedWords: EncryptionSession.words(from: entry)) }
+                } else {
+                    Task { await encryption.enroll(recoveryWordsText: entry) }
+                }
             }
             .disabled(encryption.busy || phraseEntry.isEmpty)
             PageDoor("Back to passphrase entry", form: .bordered, style: pageStyle) {
@@ -599,11 +677,15 @@ struct EncryptionView: View {
         }
     }
 
-    private func enrollNow() {
+    private func enrollNow(joinsStandard: Bool = false) {
         guard !enrollPassphrase.isEmpty, !encryption.busy else { return }
         let passphrase = enrollPassphrase
         enrollPassphrase = ""
-        Task { await encryption.enroll(passphrase: passphrase) }
+        if joinsStandard {
+            Task { await encryption.joinStandard(typedPassphrase: passphrase) }
+        } else {
+            Task { await encryption.enroll(passphrase: passphrase) }
+        }
     }
 
     // MARK: - Enrolled (custody + the doors)

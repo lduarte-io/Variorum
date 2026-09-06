@@ -142,6 +142,13 @@ struct VariorumApp: App {
                                 try await fresh.connectLibrary(passphrase: passphrase, recoveryWords: words)
                             }
                             fresh.encryption.connectDoor = { bootstrap.protection.openConnect() }
+                            // pre-13x 3a (copy §2d): enroll's two directed
+                            // joins ride the same runner — (c) the follow
+                            // with the typed secret; (d) the follow into Standard.
+                            fresh.encryption.joinCastleAct = { passphrase, words in
+                                _ = try await runner.follow(passphrase: passphrase, recoveryWords: words)
+                            }
+                            fresh.encryption.joinStandardAct = { try await runner.followIntoStandard() }
                             fresh.encryption.libraryOwnerIsForeign = { bootstrap.protection.differentOwner }
                             fresh.encryption.rekeyRunner = { passphrase in
                                 let outcome = try await runner.replaceAllKeys(

@@ -80,6 +80,34 @@ nonisolated struct VaultLanding: Sendable {
     var recoveryWords: [String]?
 }
 
+/// pre-13x 3a — ENROLL's four directions (design §5's Enroll row; copy §2d):
+/// what a signed-in library with NO sync custody learns at ready from the
+/// vault's word, the library's OWN posture (the key-file rule) and the
+/// iCloud key. The Encryption tab renders its face from these; the silent
+/// Standard road (a) needs no face and lands at the reconcile itself.
+nonisolated struct EnrollFacts: Equatable, Sendable {
+    enum AppleState: Equatable, Sendable {
+        /// A readable and the vault's copy is under it — the silent road.
+        case matched
+        /// A not (yet) readable — copy §2d's waiting face.
+        case absent
+        /// A readable but the vault's copy is under another Apple ID's.
+        case differentAppleID
+        /// The account is Castle — no Apple road exists.
+        case notApplicable
+    }
+    var accountPosture: Posture
+    var libraryPosture: Posture
+    var appleState: AppleState
+
+    /// (c): a Standard-born library joining a CASTLE account re-keys as it
+    /// joins — the follow's road with the secret just typed.
+    var standardBornJoinsCastle: Bool { accountPosture == .castle && libraryPosture == .standard }
+    /// (d): a Castle-born library joining a STANDARD account drops its gate
+    /// behind one consent sentence.
+    var castleBornJoinsStandard: Bool { accountPosture == .standard && libraryPosture == .castle }
+}
+
 /// pre-13x 2c — what a device learns at ready about a change made
 /// ELSEWHERE, and the words its notice renders (copy §5).
 nonisolated struct FollowNotice: Equatable, Sendable {
@@ -349,6 +377,14 @@ final class ProtectionController {
     /// store; nil = no store read wired (no verdict). Replaces the 2c
     /// first-row `stampedOwnerID` read in the verdict.
     @ObservationIgnored var foreignOwner: (@Sendable (_ signedInUserID: String) async -> Bool)?
+    /// pre-13x 3a — ENROLL's facts as read at the last reconcile (nil = not
+    /// a signed-in, custody-less library, or the silent road landed).
+    private(set) var enrollReading: EnrollFacts?
+    /// pre-13x 3a — the silent Standard road's landing (`EncryptionSession
+    /// .adoptEnrolledMaterial` — custody under the current shape + the key
+    /// file through the landing hook + the refresh), wired by the roots;
+    /// nil = the reconcile records the facts and lands nothing.
+    @ObservationIgnored var landEnrollment: (@MainActor (DeviceKeyMaterial, PassphraseKDF.Descriptor) async -> Bool)?
     /// pre-13x 3a — THE ADOPT ROAD's act (`AppServices.connectLibrary`:
     /// the typed secret unwraps this account's master, every row is
     /// re-stamped, sync re-initialized, custody + the key file landed),
@@ -428,6 +464,7 @@ final class ProtectionController {
     private func reconcileFollow(_ reading: VaultPostureReading?) async {
         guard let reading, let vaultKeyID = reading.corpusKeyID else {
             differentOwner = false
+            enrollReading = nil
             return
         }
         // THE OWNER DISTINCTION (§3.6; pre-13x 3a — the EXACT read): any
@@ -500,12 +537,48 @@ final class ProtectionController {
             }
             return
         }
-        // NO MATERIAL IN HAND: an Always-ask device before its vault read
-        // (decision 10's exception). The held derived key opens the vault's
-        // master copy when the descriptors agree — the session fills and
-        // the device syncs; the vault's key id ≠ the key file's recorded id
-        // ⇒ ROTATED ⇒ the follow; else the word was CHANGED elsewhere ⇒
-        // the banner variant (reads and edits, sync waits).
+        // NO MATERIAL IN HAND. pre-13x 3a — a library NEVER ENROLLED here
+        // (no key file master copy, no recorded corpus key id, no custody
+        // item) under a signed-in session: ENROLL's four directions (design
+        // §5's Enroll row; copy §2d) from the account's posture and the
+        // library's OWN. (a) Standard/Standard with A matching the vault's
+        // copy: the silent road — A opens the vault's master, the class
+        // keys follow, custody and the key file land through the session's
+        // adopt, nothing typed, nothing shown. Every other direction is a
+        // FACE on the Encryption tab (the roads, the re-key sentence, or the
+        // consent) — recorded here, acted on there.
+        let neverEnrolled = keyFile?.master == nil && keyFile?.vaultCorpusKeyID == nil
+        if neverEnrolled, !syncCustodyPresentAtReady, reading.signedInUserID != nil, let format = reading.format {
+            let library = libraryOwnPosture
+            let account: Posture = reading.hasAppleHeldCopy ? .standard : .castle
+            var appleState: EnrollFacts.AppleState = .notApplicable
+            var apple: AppleKey?
+            if account == .standard {
+                apple = appleKeys.read()
+                appleState = apple == nil ? .absent : (apple?.id == reading.appleKeyID ? .matched : .differentAppleID)
+            }
+            if library == .standard, account == .standard, appleState == .matched, let apple, let landEnrollment,
+               let master = try? format.unwrapMaster(withAppleKey: apple.symmetricKey),
+               let material = try? CorpusRotation.materialFollowing(format, master: master) {
+                if await landEnrollment(material, format.kdf) {
+                    syncCustodyPresentAtReady = true
+                    enrollReading = nil
+                    logger.notice("enroll: the Standard road — the iCloud key opened the vault's master copy; custody and the key file landed, nothing typed")
+                    return
+                }
+                logger.notice("enroll: the Standard road — custody refused the keys; the next ready retries")
+            }
+            enrollReading = EnrollFacts(accountPosture: account, libraryPosture: library, appleState: appleState)
+            logger.notice("enroll: owed — account \(account == .standard ? "Standard" : "Castle", privacy: .public), library \(library == .standard ? "Standard" : "Castle", privacy: .public), Apple key \(String(describing: appleState), privacy: .public)")
+            return
+        }
+        enrollReading = nil
+        // An Always-ask device before its vault read (decision 10's
+        // exception). The held derived key opens the vault's master copy
+        // when the descriptors agree — the session fills and the device
+        // syncs; the vault's key id ≠ the key file's recorded id ⇒ ROTATED
+        // ⇒ the follow; else the word was CHANGED elsewhere ⇒ the banner
+        // variant (reads and edits, sync waits).
         guard effectiveGate == .passphrase, let format = reading.format else { return }
         let session = configuration.syncCustodySession
         if let derived = session.derivedWrappingKey, session.derivedWrappingKDF == format.kdf,
@@ -678,6 +751,23 @@ final class ProtectionController {
             enrolled: enrolled)
         posture = postureReading.acting
     }
+
+    /// pre-13x 3a — THE LIBRARY's OWN posture (corner 26/27: before sync
+    /// each library's posture is its key file's): the local rule alone —
+    /// the Apple copy, the wraps, the raw key's custody shape — never the
+    /// vault's word and never the enrolled/indeterminate reading. What the
+    /// setup ceremony speaks from (the first device gives the vault its
+    /// shape) and what enroll's four directions compare against the
+    /// account's.
+    var libraryOwnPosture: Posture {
+        Posture.derive(
+            legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: loadEnvelope(),
+            rawKeyCustody: libraryKeyCustodyShape, enrolled: false).acting
+    }
+
+    /// pre-13x 3a: the iCloud key as this device can READ it (never minted
+    /// here — enrollment needs the one the vault's copy is under).
+    nonisolated func readAppleKey() -> AppleKey? { appleKeys.read() }
 
     /// The library key's custody SHAPE as this controller knows it without
     /// a Keychain hop (corner 45): after adoption, a resident ⇒ the gated
@@ -1494,9 +1584,16 @@ func wireOneSecretHooks(
     }
     // pre-13x 3a: the vault material's landing on the key file — the master
     // copy + the vault's descriptor and corpus key id (+ the typed secret's
-    // copy) after setup / enroll / Connect.
+    // copy) after setup / enroll / Connect; enroll's facts for the tab's
+    // face; the iCloud key as this device reads it (the (d) join's road).
     encryption.onVaultMaterialLanded = { landing in
         _ = await protection.landVaultMaterial(landing)
+    }
+    encryption.enrollFacts = { protection.enrollReading }
+    encryption.readAppleKey = { protection.readAppleKey() }
+    encryption.libraryPosture = { protection.libraryOwnPosture }
+    protection.landEnrollment = { material, kdf in
+        await encryption.adoptEnrolledMaterial(material, kdf: kdf)
     }
     // pre-13x 2d (decision 35): signed in ⇒ ENROLLED at ready — the vault's
     // word is then the only thing that can make the library Standard.

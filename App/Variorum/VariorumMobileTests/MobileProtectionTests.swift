@@ -596,6 +596,10 @@ struct MobilePhoneProtectionCopyTests {
                 .contains("This iPhone opens silently again"))
         #expect(ProtectionCopy.alwaysAskRetiredWord(device: "Lillian's Mac", day: day)
                 .contains("The old one still opens this iPhone"))
+        // pre-13x 3a: copy §2d's join face + the (d) consent in the phone's nouns.
+        #expect(ProtectionCopy.joinCastleTitle == "Enter your passphrase to join sync.")
+        #expect(ProtectionCopy.joinLaterLine == "Sync isn't joined on this iPhone.")
+        #expect(!ProtectionCopy.joinStandardConsent.contains("Mac") && ProtectionCopy.joinStandardConsent.contains("Use Castle…"))
     }
 
     /// **ONE BRAIN** (knot 6): the settings sentence is composed from
@@ -864,6 +868,25 @@ struct MobileOneSecretHooksTests {
         return World(
             controller: controller, encryption: encryption, vault: vault,
             client: client, envelopeBox: envelopeBox, backing: backing, key: key)
+    }
+
+    /// pre-13x 3a: the factory wires the enroll/landing hooks on the phone
+    /// too (`enrollFacts`, `readAppleKey`, `libraryPosture`,
+    /// `onVaultMaterialLanded`, the controller's `landEnrollment`), and the
+    /// shared session routes a Standard-born library's Castle join to the
+    /// wired act — the phone's compiled copy of the ONE brain.
+    @Test func theFactoryWiresTheEnrollHooksAndTheJoinRoutesOnThePhone() async throws {
+        let w = world()
+        #expect(w.encryption.enrollFacts != nil && w.encryption.readAppleKey != nil && w.encryption.libraryPosture != nil)
+        #expect(w.encryption.onVaultMaterialLanded != nil && w.controller.landEnrollment != nil)
+        #expect(w.encryption.libraryPosture?() == .standard, "a fresh silent library reads Standard by its own rule")
+        let joins = LockIsolated<[String?]>([])
+        w.encryption.enrollFacts = { EnrollFacts(accountPosture: .castle, libraryPosture: .standard, appleState: .notApplicable) }
+        w.encryption.joinCastleAct = { passphrase, _ in joins.withValue { $0.append(passphrase) } }
+        await w.encryption.enroll(passphrase: "orchard-lantern-13")
+        #expect(joins.value == ["orchard-lantern-13"], "the Castle join's road, with the typed passphrase")
+        w.encryption.declineStandardJoin()
+        #expect(w.encryption.declinedStandardJoin)
     }
 
     /// **The GUARD (pin c):** a store-passphrase mismatch refuses vault

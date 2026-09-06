@@ -108,6 +108,23 @@ final class EncryptionSession {
     /// pre-13x 3a (decision 17): the Connect door — opens the controller's
     /// adopt sheet; wired by the composition root (nil = not rendered, P-2).
     var connectDoor: (() -> Void)?
+    /// pre-13x 3a — ENROLL's facts (the controller's reading at the last
+    /// reconcile; nil = no face owed) and the two acts the tab's faces run:
+    /// (c) a Standard-born library joining Castle RE-KEYS as it joins — the
+    /// runner's follow with the typed secret (wired by the roots); (d) a
+    /// Castle-born library joining Standard drops its gate after consent —
+    /// the runner's follow into Standard (wired by the roots).
+    var enrollFacts: (@MainActor () -> EnrollFacts?)?
+    var joinCastleAct: (@MainActor (_ passphrase: String?, _ recoveryWords: [String]?) async throws -> Void)?
+    var joinStandardAct: (@MainActor () async throws -> Void)?
+    /// The iCloud key as this device reads it (the (d) join's silent road).
+    var readAppleKey: (@Sendable () -> AppleKey?)?
+    /// The library's own posture (the key-file rule) — the setup ceremony
+    /// speaks from it (corner 26).
+    var libraryPosture: (@MainActor () -> Posture)?
+    /// (d)'s *Cancel*: the consent declined for this process — the library
+    /// stays unenrolled and Castle-shaped; the tab re-offers behind a door.
+    var declinedStandardJoin = false
     /// pre-13x 3a: whether the rows' owner is another account (the
     /// controller's exact verdict) — the Encryption tab renders copy §3's
     /// sentence + the Connect door over every other arm while true.
@@ -236,29 +253,106 @@ final class EncryptionSession {
         if case .enrolled = state { await onPassphraseChanged?(passphrase) }
     }
 
-    /// ENROLLMENT (new device, R-4): passphrase → unwrap → Keychain. Under
-    /// the biometric gate this is also the fallback road (CF-12): the save
-    /// keeps the gate on and unlocks the launch.
+    /// ENROLLMENT (new device, R-4; copy §2d's Castle road — pre-13x 3a):
+    /// passphrase → unwrap → custody under the current shape → the key
+    /// file's master copy + the vault's descriptor, the P copy re-wrapped
+    /// under the VAULT's descriptor (corner 27 — the account's passphrase
+    /// becomes the library's; §3.6's derive-once) through the landing hook.
+    /// A Standard-born library joining a CASTLE account takes (c)'s road
+    /// instead — `joinCastle` — the tab routes by the facts.
     func enroll(passphrase: String) async {
+        if enrollFacts?()?.standardBornJoinsCastle == true, joinCastleAct != nil {
+            await joinCastle(passphrase: passphrase, recoveryWords: nil)
+            return
+        }
         await runFlow { enrollment in
             let material = try await enrollment.enroll(passphrase: passphrase)
-            await self.adopt(material)
-            let hasRecovery = (try? await enrollment.hasRecoveryWrap()) ?? false
+            guard let fetched = try await enrollment.client.fetchVault() else { throw KeyVaultClientError.vaultAbsent }
+            _ = await self.adoptEnrolledMaterial(material, kdf: fetched.format.kdf, typedPassphrase: passphrase, refreshing: false)
+            let hasRecovery = fetched.format.masterWrappedByRecovery != nil
             self.state = .enrolled(hasRecoveryWrap: hasRecovery)
         }
-        // 13p one-secret: this device just PROVED the vault passphrase —
-        // the store wrap follows, so the same secret opens the library.
-        if case .enrolled = state { await onPassphraseChanged?(passphrase) }
     }
 
-    /// The disaster road: the 12 written words alone unwrap this device.
+    /// The disaster road: the 12 written words alone unwrap this device
+    /// (pre-13x 3a: the W copy lands on the key file beside the master copy).
     func enroll(recoveryWordsText: String) async {
         let words = Self.words(from: recoveryWordsText)
+        if enrollFacts?()?.standardBornJoinsCastle == true, joinCastleAct != nil {
+            do { _ = try RecoveryPhrase.recoveryWrapKey(words: words) } catch { lastError = Self.message(for: error); return }
+            await joinCastle(passphrase: nil, recoveryWords: words)
+            return
+        }
         await runFlow { enrollment in
             let material = try await enrollment.enroll(recoveryWords: words)
-            await self.adopt(material)
+            guard let fetched = try await enrollment.client.fetchVault() else { throw KeyVaultClientError.vaultAbsent }
+            _ = await self.adoptEnrolledMaterial(material, kdf: fetched.format.kdf, typedWords: words, refreshing: false)
             self.state = .enrolled(hasRecoveryWrap: true)
         }
+    }
+
+    // MARK: - pre-13x 3a: the two directed joins (copy §2d; design §5's Enroll row)
+
+    /// (c) A STANDARD-BORN library joining a CASTLE account: the follow's
+    /// road with the secret just typed — M from the vault, custody, the
+    /// library RE-KEYED (its old key file carried an iCloud copy), custody
+    /// behind the gate, the old key file retired. Reuse, never a copy: the
+    /// runner's `follow` IS this act.
+    func joinCastle(passphrase: String?, recoveryWords: [String]?) async {
+        guard let joinCastleAct else {
+            lastError = "Project keys not configured (ProjectConfig.swift)"
+            return
+        }
+        guard !busy else { return }
+        busy = true
+        lastError = nil
+        defer { busy = false }
+        do {
+            try await joinCastleAct(passphrase, recoveryWords)
+        } catch {
+            lastError = Self.message(for: error)
+        }
+        await refresh()
+    }
+
+    /// (d) A CASTLE-BORN library joining a STANDARD account, after the
+    /// consent sentence (decision 1 — never a stricter gate under a Standard
+    /// account; corner 6): M by the iCloud key when it is the one the vault's
+    /// copy is under (nothing typed), else by the typed secret; custody
+    /// under the CURRENT shape + the key file's master copy; then the
+    /// runner's follow into Standard (the key file's Apple copy under THIS
+    /// device's A, custody → silent, re-lock off by derivation).
+    func joinStandard(typedPassphrase: String? = nil, typedWords: [String]? = nil) async {
+        guard let joinStandardAct else {
+            lastError = "Project keys not configured (ProjectConfig.swift)"
+            return
+        }
+        let joined = await runFlow { enrollment in
+            guard let fetched = try await enrollment.client.fetchVault() else { throw KeyVaultClientError.vaultAbsent }
+            let format = fetched.format
+            let material: DeviceKeyMaterial
+            if let apple = self.readAppleKey?(), apple.id == format.appleKeyID,
+               let master = try? format.unwrapMaster(withAppleKey: apple.symmetricKey) {
+                material = try CorpusRotation.materialFollowing(format, master: master)
+            } else if let typedPassphrase, !typedPassphrase.isEmpty {
+                material = try await enrollment.enroll(passphrase: typedPassphrase)
+            } else if let typedWords, !typedWords.isEmpty {
+                material = try await enrollment.enroll(recoveryWords: typedWords)
+            } else {
+                throw PostureSwitchError.secretRequired
+            }
+            _ = await self.adoptEnrolledMaterial(
+                material, kdf: format.kdf, typedPassphrase: typedPassphrase, typedWords: typedWords, refreshing: false)
+            try await joinStandardAct()
+            self.declinedStandardJoin = false
+        }
+        _ = joined
+        await refresh()
+    }
+
+    /// (d)'s *Cancel*: nothing moves; the tab re-offers behind a door.
+    func declineStandardJoin() {
+        declinedStandardJoin = true
     }
 
     /// Mint 12 fresh words (pure — nothing lands until the CONFIRMED
@@ -369,14 +463,19 @@ final class EncryptionSession {
     @discardableResult
     func adoptEnrolledMaterial(
         _ material: DeviceKeyMaterial, kdf: PassphraseKDF.Descriptor,
-        typedPassphrase: String? = nil, typedWords: [String]? = nil
-    ) async -> String? {
-        await adopt(material)
+        typedPassphrase: String? = nil, typedWords: [String]? = nil,
+        refreshing: Bool = true
+    ) async -> Bool {
+        let took = await store.offMain { $0.save(material) }
+        if !took {
+            lastError = "The device Keychain refused to store the keys — sync will ask again next launch."
+        }
+        onKeysChanged?()
         let landing = VaultLanding(
             material: material, kdf: kdf, passphrase: typedPassphrase, recoveryWords: typedWords)
         await onVaultMaterialLanded?(landing)
-        await refresh()
-        return lastError
+        if refreshing { await refresh() }
+        return took
     }
 
     /// The runner's custody adoption point (its contract: called after

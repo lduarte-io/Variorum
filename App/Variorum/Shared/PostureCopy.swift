@@ -174,6 +174,27 @@ nonisolated extension ProtectionCopy {
         + "can't hand over the key. Enter your passphrase or twelve words once; "
         + "after that this \(deviceName) opens on its own."
 
+    // MARK: - §2d The new device joining — Castle (pre-13x 3a, verbatim)
+
+    static let joinCastleTitle = "Enter your passphrase to join sync."
+    static let joinWordsDoor = "Use my twelve words instead."
+    /// Castle, and this library was in Standard (one sentence under the title).
+    static let joinCastleRekeysSentence =
+        "This account is in Castle, so this library gets a new key as it joins. Everything you wrote here stays."
+    /// A Castle-born library joining a STANDARD account (decision 1 + corner
+    /// 6 — consent at enrollment): the PROVISIONAL string the orchestrator
+    /// supplied (ledger 46 — her words replace it).
+    static let joinStandardConsent =
+        "This account is in Standard, so this library will open silently from now on and your Apple "
+        + "account will hold a key to it. To keep only-you keys for the whole account, enter Castle "
+        + "instead — Settings ▸ Protection ▸ Use Castle…"
+    static let joinDoor = "Join"
+    static let joinCancelDoor = "Cancel"
+    /// After Cancel: the library stays unenrolled and Castle-shaped; one
+    /// door re-offers the consent (a reading — the copy file has no line).
+    static let joinLaterLine = "Sync isn't joined on this \(deviceName)."
+    static let joinReofferDoor = "Join This Account's Sync…"
+
     // MARK: - §6 Settings ▸ Backups
 
     static let backupsStandardSentence =
