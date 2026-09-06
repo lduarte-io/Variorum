@@ -101,6 +101,16 @@ struct DataSafetyPane: View {
                  + "matter more than the schedule does.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
+            // pre-13x 5a (design §8 — the Backups tab: §6's sentence per
+            // posture, copy §6 verbatim): what opens a backup.
+            if let protection {
+                Text(protection.posture == .castle
+                     ? ProtectionCopy.backupsCastleSentence
+                     : ProtectionCopy.backupsStandardSentence)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             if let note = model.note {
                 Text(note).font(.caption).foregroundStyle(.secondary)
             }

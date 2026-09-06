@@ -1160,3 +1160,54 @@ struct MobileNoRedirectSweepTests {
         return literals
     }
 }
+
+/// pre-13x 5a — THE TWO-REGISTER RULE on the phone (the Mac's
+/// `CopyRegisterPinTests` twin; ONE forbidden list): no user-facing string
+/// of the phone's protection faces or the Shared copy homes names a
+/// key-family internal (*box · vault · escrow · KDF · token · session ·
+/// RLS*). The same string-literal extractor, the same exemptions (14b-era
+/// sentences copy §11 routes to 13s).
+@Suite("The two-register rule on the phone (pre-13x 5a)")
+struct MobileCopyRegisterSweepTests {
+    private static var forbidden: Regex<Substring> {
+        /\b(?:box|boxes|vault|vaults|escrow|escrowed|kdf|token|tokens|session|sessions|rls)\b/
+            .ignoresCase().wordBoundaryKind(.simple)
+    }
+    private static let exemptLiterals: Set<String> = [
+        "That recovery phrase doesn't unlock this account's vault.",
+        "No encryption vault exists for this account yet — run setup first.",
+        "This account already has an encryption vault — enroll with its passphrase instead.",
+        "The vault just changed on another device — nothing was overwritten. Try again from the current state.",
+        "Passphrase KDF derivation: (seconds, format: .fixed(precision: 3)) s on this device",  // a logger line, never a face
+    ]
+
+    @Test func noUserFacingProtectionStringNamesAKeyFamilyInternal() throws {
+        let appRoot = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()  // VariorumMobileTests
+            .deletingLastPathComponent()  // App/Variorum
+        var files: [URL] = [
+            "Shared/StoreProtection.swift", "Shared/PostureCopy.swift", "Shared/KeyDoorCopy.swift",
+            "Shared/SampleLibrary/SampleLibraryEncryptionBook.swift",
+            "Shared/EncryptionViews.swift", "Shared/KeyDoorView.swift", "Shared/KeyDoorModel.swift",
+            "Shared/PostureSwitchModel.swift", "Shared/PostureFollowModel.swift",
+            "Shared/SyncEnrollmentView.swift", "Shared/SyncEnrollmentModel.swift",
+            "Shared/EncryptionSession.swift",
+        ].map { appRoot.appendingPathComponent($0) }
+        let faces = appRoot.appendingPathComponent("VariorumMobile/Features/Protection", isDirectory: true)
+        let walk = try #require(FileManager.default.enumerator(at: faces, includingPropertiesForKeys: nil))
+        for case let url as URL in walk where url.pathExtension == "swift" { files.append(url) }
+        var offenders: [String] = []
+        var literals = 0
+        for url in files {
+            #expect(FileManager.default.fileExists(atPath: url.path), "copy home missing: \(url.lastPathComponent)")
+            let source = try String(contentsOf: url, encoding: .utf8)
+            for literal in MobileNoRedirectSweepTests.stringLiteralContents(of: source) {
+                literals += 1
+                guard literal.contains(Self.forbidden), !Self.exemptLiterals.contains(literal) else { continue }
+                offenders.append("\(url.lastPathComponent): \"\(literal.prefix(90))\"")
+            }
+        }
+        #expect(literals > 300)
+        #expect(offenders.isEmpty, "the two-register rule on the phone: \(offenders)")
+    }
+}

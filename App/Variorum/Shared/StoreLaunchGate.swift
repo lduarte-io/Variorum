@@ -618,9 +618,11 @@ final class StoreLobby {
         lastError = nil
         defer { busy = false }
         guard let key = await gatedRoad() else {
+            // pre-13x 5a: copy §3's line (the device's gate word); the no-road
+            // arm has no copy line (listed in copy §11).
             lastError = passphraseOffered
-                ? "Biometric unlock didn't go through — enter your encryption passphrase instead."
-                : "Biometric unlock didn't go through. Try again."
+                ? ProtectionCopy.lobbyBiometryFailed
+                : "\(ProtectionCopy.biometryName) didn't go through. Try again."
             return
         }
         complete(key)

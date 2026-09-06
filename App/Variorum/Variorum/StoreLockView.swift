@@ -204,7 +204,7 @@ struct StoreLockView: View {
                 }
                 .buttonStyle(CalmButtonStyle(tokens: tokens))
             } else if lobby.demand == .biometric && lobby.biometryOffered && !passphraseRevealed {
-                Button("Use your encryption passphrase instead") {
+                Button(ProtectionCopy.lobbyPassphraseInsteadDoor) {
                     passphraseRevealed = true
                 }
                 .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
@@ -245,7 +245,7 @@ struct StoreLockView: View {
                 .padding(.top, 6)
             } label: {
                 Text(lobby.isWaitingForICloudKeychain
-                     ? ProtectionCopy.waitingWordsDoor : "Forgot your passphrase?")
+                     ? ProtectionCopy.waitingWordsDoor : ProtectionCopy.lobbyWordsDoor)
                     .font(tokens.small)
                     .foregroundStyle(tokens.muted)
                     .lineLimit(1)

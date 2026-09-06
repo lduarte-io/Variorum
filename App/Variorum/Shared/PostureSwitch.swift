@@ -137,6 +137,13 @@ final class PostureSwitchRunner {
         var reencrypted: Int
         /// The final custody material (nil for a local-only library).
         var material: DeviceKeyMaterial?
+        /// pre-13x 5a (ledger 61 — PROVISIONAL, the orchestrator's judgment
+        /// under her mandate): the ceremony's road became the FOLLOW — another
+        /// device's switch landed first (§7 step 7, M1) — so the twelve words
+        /// this ceremony showed are NOT the account's; the Done says so (copy
+        /// §2b), naming `otherDeviceName` from the vault's `updated_by_device`.
+        var followedAnotherDevicesSwitch: Bool = false
+        var otherDeviceName: String? = nil
     }
 
     /// pre-13x 2c (the 2b adjudication's item 6): the seams a scripted
@@ -395,11 +402,15 @@ final class PostureSwitchRunner {
                 // rotation wrapped the vault under ITS words, which may not
                 // be these; the W copy lands when the words are next typed
                 // here (the follow's own rule).
-                let outcome = try await runFollow(
+                var outcome = try await runFollow(
                     fetched: moved, vault: vault, unwrapped: unwrapped, libraryKey: libraryKey,
                     keyFile: KeyFileInputs(passphrase: passphrase, kdf: moved.format.kdf, recoveryWords: nil,
                                            recoveryWrapDigest: moved.format.recoveryWrapDigest),
                     secretName: "passphrase typed for the ceremony")
+                // pre-13x 5a (ledger 61): the ceremony's Done must say the
+                // words it showed are not the account's — the winner's are.
+                outcome.followedAnotherDevicesSwitch = true
+                outcome.otherDeviceName = moved.format.updatedByDevice
                 phase = .done
                 return outcome
             }

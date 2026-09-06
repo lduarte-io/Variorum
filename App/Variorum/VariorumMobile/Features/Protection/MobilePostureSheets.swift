@@ -171,7 +171,8 @@ struct MobilePostureSwitchSheet: View {
                     prose("Keep Variorum open. If it quits, the switch picks up where it stopped.")
                 case .done(let insuranceOff, _):
                     title("Done")
-                    prose(model.mode == .replaceKeys ? ProtectionCopy.replaceKeysDone : ProtectionCopy.enteredCastleDone)
+                    // pre-13x 5a (ledger 61): the conflict-follow's own Done (copy §2b).
+                    prose(model.mode == .replaceKeys ? ProtectionCopy.replaceKeysDone : ProtectionCopy.castleDoneBody(model.outcome))
                     if insuranceOff { alarm(ProtectionCopy.insuranceTurnedOffNotice) }
                     doors(primary: "Continue", {
                         model.continueFromDone()

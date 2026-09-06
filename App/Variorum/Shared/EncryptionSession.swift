@@ -633,7 +633,8 @@ final class EncryptionSession {
         case VaultEnrollmentError.emptyPassphrase:
             return "The passphrase can't be empty."
         case RecoveryPhraseError.checksumMismatch:
-            return "That phrase has a typo somewhere — its built-in check failed. Compare it word by word with what you wrote down."
+            // pre-13x 5a: copy §2a's line, verbatim.
+            return "That's not quite the phrase — one of the twelve words is off. Compare it with what you wrote down."
         case RecoveryPhraseError.unknownWord(let word):
             return "“\(word)” isn't a recovery-phrase word — check its spelling."
         case RecoveryPhraseError.invalidWordCount(let count):

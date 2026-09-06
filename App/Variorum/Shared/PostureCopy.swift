@@ -557,3 +557,40 @@ nonisolated extension ProtectionCopy {
     static let privacyBookDoorSentence =
         "is in the book \u{201C}\(encryptionBookName)\u{201D} on this shelf."
 }
+
+// MARK: - pre-13x 5a — THE COPY RECONCILIATION's re-renders (copy §3 · §4 ·
+// §2b's conflict-follow Done — ledger 61), verbatim; the device nouns
+// interpolated.
+
+nonisolated extension ProtectionCopy {
+    // §3 The lobby — the roads beneath the prompt.
+    /// Beneath the Touch ID / Face ID prompt: the passphrase road's word.
+    static let lobbyPassphraseInsteadDoor = "Use your passphrase instead"
+    /// Beneath either prompt: the twelve words' road.
+    static let lobbyWordsDoor = "Use your twelve words"
+    /// Touch ID failed (copy §3, the device's gate word).
+    static let lobbyBiometryFailed =
+        "\(biometryName) didn't go through — enter your encryption passphrase instead."
+
+    // §4 Settings ▸ Account & Encryption — signed out.
+    static let signedOutLine =
+        "Sign in to sync your library across your devices. Sync is end-to-end encrypted."
+    static let signInDoor = "Sign In…"
+
+    // §2b Done, when another device entered Castle first (the conflict-follow —
+    // ledger 61, PROVISIONAL; 13s re-voices): *[device]* from the vault's
+    // self-reported device name, else *another device*.
+    static func enteredCastleAfterAnotherDevice(device: String?) -> String {
+        "Another device entered Castle first, so this \(deviceName) picked up that device's keys "
+        + "instead. The twelve words shown here are NOT your account's — the account's words are "
+        + "the ones written down on \(device ?? anotherDevice)."
+    }
+
+    /// ONE brain for the Castle ceremony's Done on both platforms: copy
+    /// §2b's conflict-follow sentence when the runner's road became the
+    /// follow (`Outcome.followedAnotherDevicesSwitch`), else the ordinary Done.
+    static func castleDoneBody(_ outcome: PostureSwitchRunner.Outcome?) -> String {
+        guard let outcome, outcome.followedAnotherDevicesSwitch else { return enteredCastleDone }
+        return enteredCastleAfterAnotherDevice(device: outcome.otherDeviceName)
+    }
+}

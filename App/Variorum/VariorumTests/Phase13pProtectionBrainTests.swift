@@ -225,6 +225,44 @@ struct ProtectionCopyTests {
         #expect(FollowNotice(kind: .keysReplaced, device: "d", day: "y").dismissDoor == ProtectionCopy.followLaterDoor)
     }
 
+    /// pre-13x 5a — the copy reconciliation's re-renders, verbatim: copy §3's
+    /// lobby roads + the Touch ID failure, copy §2a's three twelve-words
+    /// refusals (one wording at the lobby and the ceremony), copy §4's
+    /// signed-out line, copy §6's backup sentences, copy §2b's
+    /// conflict-follow Done (ledger 61) through the one brain.
+    @MainActor
+    @Test func theReconciledStringsRenderTheCopyVerbatim() {
+        #expect(ProtectionCopy.lobbyPassphraseInsteadDoor == "Use your passphrase instead")
+        #expect(ProtectionCopy.lobbyWordsDoor == "Use your twelve words")
+        #expect(ProtectionCopy.lobbyBiometryFailed
+                == "\(ProtectionCopy.biometryName) didn't go through — enter your encryption passphrase instead.")
+        #expect(ProtectionCopy.message(for: RecoveryPhraseError.invalidWordCount(11))
+                == "A recovery phrase is exactly 12 words — you entered 11.")
+        #expect(ProtectionCopy.message(for: RecoveryPhraseError.unknownWord("zebra"))
+                == "\u{201C}zebra\u{201D} isn't a recovery-phrase word — check its spelling.")
+        #expect(ProtectionCopy.message(for: RecoveryPhraseError.checksumMismatch)
+                == "That's not quite the phrase — one of the twelve words is off. Compare it with what you wrote down.")
+        #expect(EncryptionSession.message(for: RecoveryPhraseError.checksumMismatch)
+                == ProtectionCopy.message(for: RecoveryPhraseError.checksumMismatch), "one wording for the twelve words' refusals")
+        #expect(EncryptionSession.message(for: RecoveryPhraseError.invalidWordCount(11))
+                == ProtectionCopy.message(for: RecoveryPhraseError.invalidWordCount(11)))
+        #expect(EncryptionSession.message(for: RecoveryPhraseError.unknownWord("zebra"))
+                == ProtectionCopy.message(for: RecoveryPhraseError.unknownWord("zebra")))
+        #expect(ProtectionCopy.signedOutLine == "Sign in to sync your library across your devices. Sync is end-to-end encrypted.")
+        #expect(ProtectionCopy.backupsStandardSentence
+                == "A backup opens through your Apple account — or with your passphrase or twelve words.")
+        #expect(ProtectionCopy.backupsCastleSentence
+                == "A backup opens with your twelve words — always, unless you regenerated them — or with the passphrase you had when it was made. Backups made while you were in Standard also open through your Apple account. Backups run while your library is open.")
+        #expect(ProtectionCopy.enteredCastleAfterAnotherDevice(device: "Lillian's iPhone")
+                == "Another device entered Castle first, so this \(ProtectionCopy.deviceName) picked up that device's keys instead. The twelve words shown here are NOT your account's — the account's words are the ones written down on Lillian's iPhone.")
+        #expect(ProtectionCopy.enteredCastleAfterAnotherDevice(device: nil).hasSuffix("written down on another device."))
+        #expect(ProtectionCopy.castleDoneBody(nil) == ProtectionCopy.enteredCastleDone)
+        // The nudge's three lines by tier — the one brain that survived §13.
+        #expect(ProtectionCopy.nudgeSentence(for: .covered) == ProtectionCopy.coveredNudgeLine)
+        #expect(ProtectionCopy.nudgeSentence(for: .exposed) == ProtectionCopy.exposedNudgeHeadline + " " + ProtectionCopy.exposedNudgeBody)
+        #expect(ProtectionCopy.nudgeSentence(for: .unknown) == ProtectionCopy.unknownNudgeLine)
+    }
+
     @Test func theFollowNoticesRenderCopyFiveVerbatim() {
         let day = ProtectionCopy.day(from: "2026-09-04T10:00:00Z")
         #expect(day == ProtectionCopy.day(from: "2026-09-04"), "the day, never the time")

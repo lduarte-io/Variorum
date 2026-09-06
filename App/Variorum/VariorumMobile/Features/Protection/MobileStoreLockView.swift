@@ -162,7 +162,7 @@ struct MobileStoreLockView: View {
                 } label: {
                     Text(tokens.chromeLabel(lobby.isWaitingForICloudKeychain
                                             ? ProtectionCopy.waitingWordsDoor
-                                            : "Forgot your passphrase?"))
+                                            : ProtectionCopy.lobbyWordsDoor))
                         .font(tokens.small)
                         .foregroundStyle(tokens.accent)
                 }

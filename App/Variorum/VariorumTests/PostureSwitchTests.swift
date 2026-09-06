@@ -2645,6 +2645,14 @@ struct PostureSwitchTests {
         #expect(try aFile.unwrapKey(master: bMaterial.masterSymmetricKey) == aKey, "L′ under B's M′")
         #expect(aFile.recovery == nil, "the ceremony's words are NOT landed — the vault's words are B's; the W copy lands when the account's words are next typed here")
         #expect(!FileManager.default.fileExists(atPath: a.oldKeyFileURL.path), "A's road was a follow — its Standard-era key file left the live folder")
+        // pre-13x 5a (ledger 61 — PROVISIONAL): the LOSING ceremony's Done is
+        // copy §2b's conflict-follow sentence naming the device the vault
+        // records, never the ordinary Done; the winner's is the ordinary one.
+        #expect(aOutcome.followedAnotherDevicesSwitch && aOutcome.otherDeviceName == "test device",
+                "A's outcome says its road became the follow, naming the vault's device")
+        #expect(ProtectionCopy.castleDoneBody(aOutcome) == ProtectionCopy.enteredCastleAfterAnotherDevice(device: "test device"))
+        #expect(ProtectionCopy.castleDoneBody(aOutcome) != ProtectionCopy.enteredCastleDone, "not the ordinary Done — the words shown were not the account's")
+        #expect(!bDone.followedAnotherDevicesSwitch && ProtectionCopy.castleDoneBody(bDone) == ProtectionCopy.enteredCastleDone)
         try await expectCastleEndState(b, bDone)
         // Both read each other's notes under the one corpus key.
         let aEngine = SyncEngine(transport: try #require(a.mirror), keyProvider: DeviceKeySyncProvider(store: a.keyStore))

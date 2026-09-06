@@ -540,7 +540,7 @@ struct Phase13pLobbyTests {
             #expect(lobby.passphraseOffered, "the fallback renders beside the gate")
             await lobby.unlockWithBiometrics()
             #expect(lobby.lastError ==
-                "Biometric unlock didn't go through — enter your encryption passphrase instead.",
+                ProtectionCopy.lobbyBiometryFailed,
                 "the fallback is the PASSPHRASE, never the device password (R13p-5)")
 
             // And the biometric road itself, scripted to succeed:

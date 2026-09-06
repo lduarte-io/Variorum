@@ -1171,7 +1171,9 @@ struct PostureSwitchSheet: View {
                     .font(.caption).foregroundStyle(.secondary)
             case .done(let insuranceOff, _):
                 title("Done")
-                body(model.mode == .replaceKeys ? ProtectionCopy.replaceKeysDone : ProtectionCopy.enteredCastleDone)
+                // pre-13x 5a (ledger 61): the conflict-follow's own Done when the
+                // ceremony became the follow (copy §2b), else the ordinary one.
+                body(model.mode == .replaceKeys ? ProtectionCopy.replaceKeysDone : ProtectionCopy.castleDoneBody(model.outcome))
                 if insuranceOff {
                     Text(ProtectionCopy.insuranceTurnedOffNotice)
                         .font(.callout)

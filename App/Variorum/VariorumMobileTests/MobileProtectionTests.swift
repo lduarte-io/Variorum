@@ -582,6 +582,17 @@ struct MobilePhoneProtectionCopyTests {
     /// pre-13x 2c: copy §5's follow notices on the phone — the SAME shared
     /// strings the Mac shows, with the phone's nouns (*this iPhone asks for
     /// Face ID*), and the Always-ask / leaving doors name Face ID.
+    /// pre-13x 5a — the reconciliation's re-renders in the phone's nouns.
+    @Test func theReconciledStringsNameThePhone() {
+        #expect(ProtectionCopy.lobbyBiometryFailed == "Face ID didn't go through — enter your encryption passphrase instead.")
+        #expect(ProtectionCopy.lobbyWordsDoor == "Use your twelve words")
+        #expect(ProtectionCopy.enteredCastleAfterAnotherDevice(device: "Lillian's Mac")
+                .hasPrefix("Another device entered Castle first, so this iPhone picked up that device's keys instead."))
+        #expect(ProtectionCopy.castleDoneBody(nil) == ProtectionCopy.enteredCastleDone)
+        #expect(ProtectionCopy.message(for: RecoveryPhraseError.invalidWordCount(13))
+                == "A recovery phrase is exactly 12 words — you entered 13.")
+    }
+
     @Test func theFollowNoticesNameThePhoneAndFaceID() {
         let day = ProtectionCopy.day(from: "2026-09-04T10:00:00Z")
         let moved = ProtectionCopy.followMovedToCastle(device: "Lillian's Mac", day: day)

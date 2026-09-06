@@ -864,13 +864,15 @@ nonisolated enum ProtectionCopy {
             return "This library's key file exists but can't be read. Restore "
                 + "\(StoreKeyEnvelope.filename) from a backup folder, or unlock "
                 + "with \(biometryName) if it's offered."
+        // pre-13x 5a: copy §2a's three lines, verbatim (one wording for the
+        // twelve words' three refusals, at the lobby as at the ceremony).
         case RecoveryPhraseError.checksumMismatch:
             return "That's not quite the phrase — one of the twelve words is off. "
-                + "Check them against what you wrote down."
+                + "Compare it with what you wrote down."
         case let RecoveryPhraseError.unknownWord(word):
-            return "“\(word)” isn't a recovery word — check that one."
+            return "\u{201C}\(word)\u{201D} isn't a recovery-phrase word — check its spelling."
         case RecoveryPhraseError.invalidWordCount(let count):
-            return "A recovery phrase is exactly 12 words — that was \(count)."
+            return "A recovery phrase is exactly 12 words — you entered \(count)."
         default:
             // R94's floor for the unforeseen (ladder R1-n2): the old
             // `String(describing:)` arm was a case-name dump — not a
