@@ -263,8 +263,8 @@ delete the account and set sync up again.* Doors: *Enter Passphrase…* · *Use 
 **Enrolled:** *Sync is on. This Mac keeps your sync keys in its own protected Keychain, beside your library's key.*
 Line: keystone 3.
 **Keys don't match (re-enroll):** *This account's keys changed since this Mac joined — or this library came
-from another account. Enter your passphrase to connect it; everything here will upload.* Standard addendum:
-*Or wait a moment — your Apple account can hand over the key.*
+from another account. Enter your passphrase to connect it; everything here will upload.* ~~Standard addendum:
+*Or wait a moment — your Apple account can hand over the key.*~~ *(PRECISED 2026-09-06 at 5a's adjudication — ledger 66: the addendum is RETIRED — her 2026-09-05 ruling has the Standard follow ask the passphrase once (`39c5b395`); this label's sentence conflated two states: the foreign-owner ADOPT road renders §3's Connect sentence, and the UN-FOLLOWED device's headline is* **This account's keys changed since this Mac joined. Enter your passphrase to pick up the new ones.** *— rendered at 5b on the keys-replaced section.)*
 **Waiting for iCloud Keychain:** as 2d.
 
 ### Change passphrase
@@ -397,7 +397,7 @@ Mac account can unlock with Touch ID.*
 **Castle sentence:** *A backup opens with your twelve words — always, unless you regenerated them — or with
 the passphrase you had when it was made. Backups made while you were in Standard also open through your Apple
 account. Backups run while your library is open.*
-**Lock-time copy line (Castle, if built):** *When you lock, Variorum also keeps a sealed copy of the library
+**Lock-time copy line (Castle — BUILT at 2a, row 7; rendered at 5b, ledger 68):** *When you lock, Variorum also keeps a sealed copy of the library
 as it was — checked the next time you unlock.*
 **The iCloud Drive offer (once, at the first backup run):** Title *Keep a copy of your backups in iCloud
 Drive?* Body: *Variorum keeps backups beside your library, on this Mac. A copy in iCloud Drive survives the
@@ -690,6 +690,6 @@ and — new — nothing at all to a session that lacks the keys.
 | *You're in Standard.* · *Your Apple account holds a key again. Nothing else changed.* | `MobilePostureSheets` (the leave-Castle Done on the phone) | §2c has no Done line |
 | *Keep Variorum open. If it quits, the switch/follow picks up where it stopped.* · *Nothing was changed.* · *Confirm with Touch ID* · *Set Passphrase* · *Cancel* | both platforms' switch and follow sheets | chrome; §2b names *During* lines only |
 | *Restore “Encryption Explained”* · *“Encryption Explained” is already whole — it's on your shelf.* · *Restored “Encryption Explained” — N chapters came back.* | `CapabilityRegistry` / `ShellActions.restoreSeededBook` (the Mac's Help door for the seeded book, 5a) | the door's receipts, on Sherlock's shape |
-| *A key replacement started on [device] on [day] is still finishing. Any signed-in device that has picked up the new keys can finish it. Try again after.* | `ProtectionCopy.rotationStillFinishing(device:day:)` | §4's line says *— N rows to go*; the code has no count (see the 5a record's QUESTIONS) |
+| *A key replacement started on [device] on [day] is still finishing. Any signed-in device that has picked up the new keys can finish it. Try again after.* | `ProtectionCopy.rotationStillFinishing(device:day:)` | §4's line says **(the row count REMOVED 2026-09-06 at 5a's adjudication — ledger 65: the code has no count; an 18a candidate)**; the code has no count (see the 5a record's QUESTIONS) |
 
 *(Not listed: every string that renders a copy line verbatim — those are pinned by `ProtectionCopyTests` / `MobilePhoneProtectionCopyTests` and need no re-voice beyond the file's own.)*
