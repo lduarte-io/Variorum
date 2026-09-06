@@ -117,11 +117,17 @@ public struct RotationMarker: Codable, Equatable, Sendable {
     /// The device word + day the notices name (display only — never
     /// ordering). ISO-8601.
     public var startedAt: String
+    /// pre-13x 2d.4 (the orchestrator's ruling 3): this road is a FOLLOW —
+    /// a resume from any step still retires the old key files at its end
+    /// (the exposure's closure cannot depend on the process surviving).
+    /// Optional so a marker written before the flag decodes (nil = not a
+    /// follow — the ceremony's road, which keeps its old file by 2b).
+    public var follow: Bool?
 
     public init(
         step: Step, entersCastle: Bool,
         oldKeyFingerprint: String? = nil, newKeyFingerprint: String? = nil,
-        newCorpusKeyID: String? = nil, startedAt: String
+        newCorpusKeyID: String? = nil, startedAt: String, follow: Bool? = nil
     ) {
         self.step = step
         self.entersCastle = entersCastle
@@ -129,7 +135,11 @@ public struct RotationMarker: Codable, Equatable, Sendable {
         self.newKeyFingerprint = newKeyFingerprint
         self.newCorpusKeyID = newCorpusKeyID
         self.startedAt = startedAt
+        self.follow = follow
     }
+
+    /// Whether this marker's road is a follow (the flag, defaulted).
+    public var isFollow: Bool { follow == true }
 
     /// SyncSpec §3's documented local-only key (the 14c marker's, kept).
     public static let key = "rekey_in_progress"

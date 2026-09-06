@@ -440,8 +440,7 @@ final class PostureSwitchRunner {
                 entersCastle: entersCastle, libraryKey: libraryKey,
                 keyFile: KeyFileInputs(passphrase: typedPassphrase, kdf: fetched.format.kdf, recoveryWords: typedWords),
                 material: held, reencrypted: 0, stamp: stamp,
-                listPreSwitchPairs: entersCastle && wasStandardShaped)
-            if entersCastle { removeRetiredKeyFile(fingerprint: oldFingerprint, keeping: outcome.newKeyFingerprint) }
+                listPreSwitchPairs: entersCastle && wasStandardShaped, follow: true)
             phase = .done
             leaves.log("follow: done — \(entersCastle ? "Castle" : "Standard"); library key \(outcome.newKeyFingerprint.prefix(8))")
             return outcome
@@ -449,7 +448,7 @@ final class PostureSwitchRunner {
         let following = try CorpusRotation.materialFollowing(fetched.format, master: unwrapped.masterSymmetricKey)
         // The marker FIRST (a crash between here and custody resumes as
         // the follow-by-passphrase arm — the write is on the server).
-        try await writeMarker(RotationMarker(step: .reencrypt, entersCastle: entersCastle, startedAt: stamp))
+        try await writeMarker(RotationMarker(step: .reencrypt, entersCastle: entersCastle, startedAt: stamp, follow: true))
         guard await leaves.keyStore.offMain({ $0.save(following) }) else {
             throw PostureSwitchError.custodyRefused(ProtectionCopy.syncKeysWroteButUnreadable)
         }
@@ -460,31 +459,51 @@ final class PostureSwitchRunner {
             entersCastle: entersCastle, libraryKey: libraryKey,
             keyFile: KeyFileInputs(passphrase: typedPassphrase, kdf: fetched.format.kdf, recoveryWords: typedWords),
             material: final.material, reencrypted: final.reencrypted, stamp: stamp,
-            listPreSwitchPairs: entersCastle && wasStandardShaped)
-        if entersCastle { removeRetiredKeyFile(fingerprint: oldFingerprint, keeping: outcome.newKeyFingerprint) }
+            listPreSwitchPairs: entersCastle && wasStandardShaped, follow: true)
+        _ = oldFingerprint
         phase = .done
         leaves.log("follow: done — \(entersCastle ? "Castle" : "Standard"); library key \(outcome.newKeyFingerprint.prefix(8))")
         return outcome
     }
 
-    /// pre-13x 2d: on EVERY follow under a Castle account the OLD key file
-    /// leaves the live folder — a Standard-era key file (an `apple` copy)
-    /// beside a Castle library is the exposure itself, and a Castle-era one
-    /// opens nothing the re-keyed file holds; the snapshot pairs keep their
-    /// own; `locate` then finds exactly one file. NOT on the ceremony's own
-    /// road (2b's letter: the old file stays there) and not on a marker
-    /// resume of a crashed follow (the marker does not know it was one) —
-    /// the record says so. A legacy-named stub (`variorum-keys.json`,
-    /// wrap-less) is left alone.
-    private func removeRetiredKeyFile(fingerprint: String, keeping newFingerprint: String) {
-        guard fingerprint != newFingerprint else { return }
-        let url = StoreKeyEnvelope.url(besideStore: leaves.storeURL, fingerprint: fingerprint)
-        guard FileManager.default.fileExists(atPath: url.path) else { return }
+    /// pre-13x 2d: on EVERY follow under a Castle account the OLD key
+    /// files leave the live folder — a Standard-era key file (an `apple`
+    /// copy) beside a Castle library is the exposure itself, and a
+    /// Castle-era one opens nothing the re-keyed file holds; the snapshot
+    /// pairs keep their own; `locate` then finds exactly one file. 2d.4
+    /// (the orchestrator's rulings 3 and 5): the removal runs INSIDE the
+    /// marker's span (before it clears) and on the marker's RESUME road,
+    /// so a follow killed after the re-key still closes the exposure; and
+    /// the legacy-named WRAP-LESS stub (`variorum-keys.json` — the 13p
+    /// format-1 file holding only `formatVersion` + `storeID`; it serves
+    /// no snapshot and opens nothing) goes with it, while a format-1 file
+    /// WITH wraps stays (it may serve legacy snapshots — §6). Not on the
+    /// ceremony's own road (2b's letter: the old file stays there).
+    private func retireOldKeyFiles(oldFingerprint: String?, keeping newFingerprint: String) {
+        if let oldFingerprint, oldFingerprint != newFingerprint {
+            let url = StoreKeyEnvelope.url(besideStore: leaves.storeURL, fingerprint: oldFingerprint)
+            if FileManager.default.fileExists(atPath: url.path) {
+                do {
+                    try FileManager.default.removeItem(at: url)
+                    leaves.log("follow: the old key file removed from the live folder (\(oldFingerprint.prefix(8)))")
+                } catch {
+                    leaves.log("follow: the old key file could not be removed — \(String(describing: error))")
+                }
+            }
+        }
+        let legacy = StoreKeyEnvelope.legacyURL(besideStore: leaves.storeURL)
+        guard FileManager.default.fileExists(atPath: legacy.path) else { return }
+        guard let stub = try? StoreKeyEnvelope.load(at: legacy),
+              stub.passphrase == nil, stub.recovery == nil, stub.apple == nil, stub.master == nil
+        else {
+            leaves.log("follow: a legacy-named key file with wraps stays beside the library (it may serve legacy snapshots)")
+            return
+        }
         do {
-            try FileManager.default.removeItem(at: url)
-            leaves.log("follow: the old key file removed from the live folder (\(fingerprint.prefix(8)))")
+            try FileManager.default.removeItem(at: legacy)
+            leaves.log("follow: the wrap-less legacy stub removed from the live folder")
         } catch {
-            leaves.log("follow: the old key file could not be removed — \(String(describing: error))")
+            leaves.log("follow: the legacy stub could not be removed — \(String(describing: error))")
         }
     }
 
@@ -602,35 +621,40 @@ final class PostureSwitchRunner {
     private func rekeyCustodyAndSnapshot(
         entersCastle: Bool, libraryKey: StoreKey, keyFile: KeyFileInputs,
         material: DeviceKeyMaterial?, reencrypted: Int, stamp: String,
-        listPreSwitchPairs: Bool
+        listPreSwitchPairs: Bool, follow: Bool = false
     ) async throws -> Outcome {
         // ————— 4. RE-KEY THIS LIBRARY: the NEW key file first, then the swap —————
         phase = .rekeyingLibrary
         let newKey = StoreKey.mint()
         let oldFingerprint = StoreKeyEnvelope.fingerprint(of: libraryKey)
         let newFingerprint = StoreKeyEnvelope.fingerprint(of: newKey)
+        let followFlag: Bool? = follow ? true : nil
         try await writeMarker(RotationMarker(
             step: .rekeyLibrary, entersCastle: entersCastle,
             oldKeyFingerprint: oldFingerprint, newKeyFingerprint: newFingerprint,
-            newCorpusKeyID: material?.corpusKeyID, startedAt: stamp))
+            newCorpusKeyID: material?.corpusKeyID, startedAt: stamp, follow: followFlag))
         try await writeNewKeyFile(newKey: newKey, entersCastle: entersCastle, keyFile: keyFile, material: material)
         try await swapLibrary(from: libraryKey, to: newKey)
         try await writeMarker(RotationMarker(
             step: .custody, entersCastle: entersCastle,
             oldKeyFingerprint: oldFingerprint, newKeyFingerprint: newFingerprint,
-            newCorpusKeyID: material?.corpusKeyID, startedAt: stamp))
+            newCorpusKeyID: material?.corpusKeyID, startedAt: stamp, follow: followFlag))
 
         // ————— 5. CUSTODY (both items) —————
         try await moveCustodyForSwitch(entersCastle: entersCastle)
         try await writeMarker(RotationMarker(
             step: .snapshot, entersCastle: entersCastle,
             oldKeyFingerprint: oldFingerprint, newKeyFingerprint: newFingerprint,
-            newCorpusKeyID: material?.corpusKeyID, startedAt: stamp))
+            newCorpusKeyID: material?.corpusKeyID, startedAt: stamp, follow: followFlag))
 
         // ————— 6. THE FRESH SNAPSHOT PAIR + the insurance —————
         let (insuranceOff, preSwitch) = await snapshotAndInsurance(
             entersCastle: entersCastle, newFingerprint: newFingerprint,
             listPreSwitchPairs: listPreSwitchPairs)
+        // pre-13x 2d.4: a follow under a Castle account retires the old
+        // key files INSIDE the marker's span — a crash here resumes at
+        // `.snapshot` and does the same before clearing.
+        if follow, entersCastle { retireOldKeyFiles(oldFingerprint: oldFingerprint, keeping: newFingerprint) }
         try await clearMarker()
         leaves.resumeSync()
         await leaves.reconcile()
@@ -870,7 +894,7 @@ final class PostureSwitchRunner {
                 entersCastle: entersCastle, libraryKey: libraryKey,
                 keyFile: KeyFileInputs(passphrase: typedPassphrase, kdf: fetched.format.kdf, recoveryWords: typedWords),
                 material: material, reencrypted: reencrypted, stamp: marker.startedAt,
-                listPreSwitchPairs: entersCastle && wasStandardShaped)
+                listPreSwitchPairs: entersCastle && wasStandardShaped, follow: marker.isFollow)
 
         case .rekeyLibrary:
             // Which side of the swap did the crash leave the file on?
@@ -910,6 +934,12 @@ final class PostureSwitchRunner {
             let (insuranceOff, preSwitch) = await snapshotAndInsurance(
                 entersCastle: entersCastle, newFingerprint: newFingerprint,
                 listPreSwitchPairs: entersCastle && (oldFile?.apple != nil))
+            // pre-13x 2d.4 (ruling 3): a resumed FOLLOW still retires the old
+            // key files — the exposure's closure never depends on the
+            // process having survived.
+            if marker.isFollow, entersCastle {
+                retireOldKeyFiles(oldFingerprint: marker.oldKeyFingerprint, keeping: newFingerprint)
+            }
             try await clearMarker()
             leaves.resumeSync()
             await leaves.reconcile()

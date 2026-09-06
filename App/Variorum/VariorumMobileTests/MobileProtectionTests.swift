@@ -588,6 +588,10 @@ struct MobilePhoneProtectionCopyTests {
         #expect(moved.contains("this iPhone asks for Face ID to open your library"))
         #expect(!moved.contains("Touch ID") && !moved.contains("this Mac"))
         #expect(ProtectionCopy.followLaterSubline == "Until then this iPhone opens and reads, but doesn't sync.")
+        // pre-13x 2d.4: the posture-mismatch follow's own sentence, in the phone's nouns.
+        #expect(ProtectionCopy.followCastleStillOpensOldWay
+                == "Your account is in Castle, but this iPhone still opens without asking. Enter your passphrase once to move this iPhone's key behind Face ID and give your library a fresh key.")
+        #expect(ProtectionCopy.followCastleStillOpensLaterSubline == "Until then this iPhone opens and reads as before.")
         #expect(ProtectionCopy.followMovedToStandard(device: "Lillian's Mac", day: day)
                 .contains("This iPhone opens silently again"))
         #expect(ProtectionCopy.alwaysAskRetiredWord(device: "Lillian's Mac", day: day)
@@ -1259,7 +1263,8 @@ struct MobileWindowReplayTests {
         // ————— PASS 2: the next ready with the vault readable — the follow —————
         await bootstrap.runReadyHousekeeping()
         let owed = try #require(protection.followNotice)
-        #expect(owed.kind == .movedToCastle, "Castle in the vault, silent custody — the posture mismatch")
+        #expect(owed.kind == .castleStillOpensOldWay, "Castle in the vault, silent custody — the posture mismatch")
+        #expect(owed.body == "Your account is in Castle, but this iPhone still opens without asking. Enter your passphrase once to move this iPhone's key behind Face ID and give your library a fresh key.")
         #expect(owed.corpusKeyID == material.corpusKeyID, "the keys unchanged")
         #expect(owed.device == "test device")
         #expect(protection.notice == .follow(owed) && protection.followPending)
@@ -1302,6 +1307,9 @@ struct MobileWindowReplayTests {
         #expect(try newFile.unwrapKey(passphrase: passphrase) == newKey)
         #expect(try newFile.unwrapKey(master: material.masterSymmetricKey) == newKey)
         #expect(!FileManager.default.fileExists(atPath: oldURL.path), "the OLD key file gone from the live folder")
+        #expect(!FileManager.default.fileExists(atPath: legacyURL.path), "the wrap-less 79 B stub gone too (2d.4, ruling 5)")
+        #expect(StoreKeyEnvelope.keyFileURLs(besideStore: storeURL).map(\.lastPathComponent) == [newFile.preferredURL(besideStore: storeURL).lastPathComponent],
+                "exactly ONE key file beside her library")
         #expect(!protection.migrationConfirmOwedByDerivation)
         // The library: under L′, readable, the old key and A open nothing.
         #expect(StoreEncryptionMigration.opens(storeURL, key: newKey) && !StoreEncryptionMigration.opens(storeURL, key: phoneKey))

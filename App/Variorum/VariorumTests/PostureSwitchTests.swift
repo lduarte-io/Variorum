@@ -1175,9 +1175,14 @@ struct PostureSwitchTests {
         #expect(world.calls.rekeys == 0 && FileManager.default.fileExists(atPath: oldURL.path))
         #expect(try await world.marker() == nil)
 
+        // The wrap-less legacy stub beside the library (her phone's 79 B file).
+        let stubURL = StoreKeyEnvelope.legacyURL(besideStore: world.storeURL)
+        try Data("{\n  \"formatVersion\" : 1,\n  \"storeID\" : \"\(oldFile.storeID)\"\n}".utf8).write(to: stubURL)
+
         let outcome = try await runner.follow(passphrase: "sesame", recoveryWords: nil)
         #expect(outcome.entersCastle && outcome.reencrypted == 0)
         #expect(saves.value == 0, "custody never re-saved — the new-master half was skipped")
+        #expect(!FileManager.default.fileExists(atPath: stubURL.path), "the wrap-less legacy stub removed too (2d.4, ruling 5)")
         let held = try #require(world.keyStore.load())
         #expect(held.corpusKeyID == material.corpusKeyID && held.masterKey == material.masterKey,
                 "custody's keys UNCHANGED — no rotation")
@@ -1202,6 +1207,67 @@ struct PostureSwitchTests {
         let viaApple = try oldFile.unwrapKey(apple: world.apple.symmetricKey)
         #expect(viaApple == world.oldKey && !StoreEncryptionMigration.opens(world.storeURL, key: viaApple))
         #expect(try await world.marker() == nil && world.calls.resumes >= 1 && world.calls.reconciles >= 1)
+    }
+
+    /// pre-13x 2d.4 (the orchestrator's ruling 3): a FOLLOW killed after the
+    /// re-key and before the old key files' removal — the marker at
+    /// `.rekeyLibrary`, flagged as a follow — RESUMES and still retires
+    /// them: the old fingerprint-named file AND the wrap-less legacy stub
+    /// are gone at the end, custody behind the gate, the marker clear. The
+    /// exposure's closure never depends on the process surviving. RED ON
+    /// OLD: the removal ran after the road returned, and the marker's
+    /// resume did not know it was a follow — the Standard-era key file
+    /// stayed beside the Castle library after a crash.
+    @Test func aFollowKilledAfterTheReKeyResumesAndStillRetiresTheOldKeyFiles() async throws {
+        let world = try await makeWorld()
+        defer { world.tearDown() }
+        let oldFile = try #require(try StoreKeyEnvelope.loadCurrent(besideStore: world.storeURL))
+        let oldURL = world.oldKeyFileURL
+        let stubURL = StoreKeyEnvelope.legacyURL(besideStore: world.storeURL)
+        try Data("{\n  \"formatVersion\" : 1,\n  \"storeID\" : \"\(oldFile.storeID)\"\n}".utf8).write(to: stubURL)
+
+        world.calls.rekeyFault = .afterWork  // the swap landed; the process dies before custody
+        await #expect(throws: URLError.self) {
+            _ = try await world.runner.follow(passphrase: "sesame", recoveryWords: nil)
+        }
+        let marker = try #require(try await world.marker())
+        #expect(marker.step == .rekeyLibrary && marker.isFollow, "the marker knows this road is a follow")
+        #expect(FileManager.default.fileExists(atPath: oldURL.path) && FileManager.default.fileExists(atPath: stubURL.path),
+                "killed before the removal: both old files still there")
+        #expect(!StoreEncryptionMigration.opens(world.storeURL, key: world.oldKey), "…and the library already under L′")
+
+        let outcome = try await world.runner.resume(passphrase: nil)
+        #expect(outcome.entersCastle)
+        #expect(world.calls.custodyTargets == [.biometric] && world.posture == .castle)
+        #expect(try await world.marker() == nil)
+        #expect(!FileManager.default.fileExists(atPath: oldURL.path), "the resumed follow retired the old key file")
+        #expect(!FileManager.default.fileExists(atPath: stubURL.path), "…and the wrap-less stub")
+        #expect(try StoreKeyEnvelope.loadCurrent(besideStore: world.storeURL)?.keyFingerprint == outcome.newKeyFingerprint)
+        #expect(StoreKeyEnvelope.keyFileURLs(besideStore: world.storeURL).count == 1, "exactly one key file beside the library")
+    }
+
+    /// pre-13x 2d.4 (ruling 5's other half): a legacy-named format-1 key
+    /// file WITH wraps is NOT a stub — it may serve legacy snapshots (§6) —
+    /// and stays byte-identical through the follow while the old
+    /// fingerprint-named file goes. RED ON OLD (batch C4): a removal keyed
+    /// on the legacy NAME alone took it.
+    @Test func aWrappedLegacyKeyFileStaysAtTheFollow() async throws {
+        let world = try await makeWorld()
+        defer { world.tearDown() }
+        let oldFile = try #require(try StoreKeyEnvelope.loadCurrent(besideStore: world.storeURL))
+        var wrapped = StoreKeyEnvelope(storeID: oldFile.storeID)
+        try wrapped.setPassphraseWrap(key: world.oldKey, passphrase: "an older word", kdf: fastKDF())
+        wrapped.formatVersion = StoreKeyEnvelope.formatVersion1
+        let legacyURL = StoreKeyEnvelope.legacyURL(besideStore: world.storeURL)
+        try wrapped.write(at: legacyURL)
+        let bytesBefore = try Data(contentsOf: legacyURL)
+
+        let outcome = try await world.runner.follow(passphrase: "sesame", recoveryWords: nil)
+        #expect(outcome.entersCastle)
+        #expect(!FileManager.default.fileExists(atPath: world.oldKeyFileURL.path), "the old fingerprint-named file goes")
+        #expect(try Data(contentsOf: legacyURL) == bytesBefore, "a legacy file WITH wraps stays, byte-identical")
+        #expect(try StoreKeyEnvelope.loadCurrent(besideStore: world.storeURL)?.keyFingerprint == outcome.newKeyFingerprint,
+                "…and `locate` still prefers the fingerprinted file")
     }
 
     /// A follow by the TWELVE WORDS alone (no passphrase typed): M′ from
