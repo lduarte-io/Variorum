@@ -1137,12 +1137,11 @@ final class ProtectionController {
         // pre-13x 2d: the mark (the migration's leg 6) OR the derivation
         // (the already-migrated class whose descriptor never landed).
         migrationConfirmPending = (readMigrationConfirmPending?() ?? false) || migrationConfirmOwedByDerivation
-        if migrationConfirmPending, !migrationConfirmDeferredThisLaunch {
-            notice = .migrationConfirm
-            return
-        }
         // pre-13x 2c (§7): the follow family outranks the reminder and the
-        // nudge — a device whose sync is paused says so first.
+        // nudge — a device whose sync is paused says so first. pre-13x 2d:
+        // it outranks the migration confirm too — a follow's new key file
+        // lands the descriptor the confirm exists to land (revert batch B
+        // showed the two competing on a follow-owing library).
         if differentOwner {
             notice = .differentOwner
             return
@@ -1157,6 +1156,10 @@ final class ProtectionController {
         }
         if let moved = movedToStandardNotice {
             notice = .movedToStandard(moved)
+            return
+        }
+        if migrationConfirmPending, !migrationConfirmDeferredThisLaunch {
+            notice = .migrationConfirm
             return
         }
         // The reminder: always on in Castle (§13 — the dial is gone; the

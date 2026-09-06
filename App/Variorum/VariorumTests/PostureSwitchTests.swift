@@ -427,7 +427,7 @@ struct PostureSwitchTests {
         return world
     }
 
-    private func leaves(for world: World, faultAt: PostureSwitchRunner.FaultPoint? = nil) -> PostureSwitchRunner.Leaves {
+    private func leaves(for world: World, faultAt: PostureSwitchRunner.FaultPoint? = nil, keyStore: DeviceKeyStore? = nil) -> PostureSwitchRunner.Leaves {
         let calls = world.calls
         let backups = world.backups
         let suiteName = world.suiteName
@@ -437,8 +437,8 @@ struct PostureSwitchTests {
             storeURL: world.storeURL,
             database: world.view,
             gate: world.gate,
-            keyStore: world.keyStore,
-            keyProvider: DeviceKeySyncProvider(store: world.keyStore),
+            keyStore: keyStore ?? world.keyStore,
+            keyProvider: DeviceKeySyncProvider(store: keyStore ?? world.keyStore),
             vault: world.vaultClient,
             transport: world.mirror,
             signedIn: { signedIn },
@@ -1157,15 +1157,27 @@ struct PostureSwitchTests {
         let oldURL = world.oldKeyFileURL
         #expect(FileManager.default.fileExists(atPath: oldURL.path))
 
+        // The runner over a COUNTING custody store: the no-rotation road
+        // never re-saves custody (the rotation road saves twice).
+        let saves = LockIsolated(0)
+        let store = world.keyStore
+        let counting = DeviceKeyStore(
+            load: { store.load() },
+            save: { saves.withValue { $0 += 1 }; return store.save($0) },
+            clear: { store.clear() },
+            deviceID: { store.deviceID() })
+        let runner = PostureSwitchRunner(leaves: leaves(for: world, keyStore: counting))
+
         // A wrong word writes nothing.
         await #expect(throws: VaultEnrollmentError.wrongPassphrase) {
-            _ = try await world.runner.follow(passphrase: "not-the-passphrase", recoveryWords: nil)
+            _ = try await runner.follow(passphrase: "not-the-passphrase", recoveryWords: nil)
         }
         #expect(world.calls.rekeys == 0 && FileManager.default.fileExists(atPath: oldURL.path))
         #expect(try await world.marker() == nil)
 
-        let outcome = try await world.runner.follow(passphrase: "sesame", recoveryWords: nil)
+        let outcome = try await runner.follow(passphrase: "sesame", recoveryWords: nil)
         #expect(outcome.entersCastle && outcome.reencrypted == 0)
+        #expect(saves.value == 0, "custody never re-saved — the new-master half was skipped")
         let held = try #require(world.keyStore.load())
         #expect(held.corpusKeyID == material.corpusKeyID && held.masterKey == material.masterKey,
                 "custody's keys UNCHANGED — no rotation")
