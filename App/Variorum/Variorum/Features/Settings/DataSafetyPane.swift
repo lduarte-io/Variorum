@@ -102,14 +102,11 @@ struct DataSafetyPane: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
             // pre-13x 5a (design §8 — the Backups tab: §6's sentence per
-            // posture, copy §6 verbatim): what opens a backup.
+            // posture, copy §6 verbatim): what opens a backup. pre-13x 5b
+            // (ledger 68): + the lock-time copy line under Castle — a named
+            // sub-view so a pin can host it alone.
             if let protection {
-                Text(protection.posture == .castle
-                     ? ProtectionCopy.backupsCastleSentence
-                     : ProtectionCopy.backupsStandardSentence)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
+                BackupsPostureLines(posture: protection.posture)
             }
             if let note = model.note {
                 Text(note).font(.caption).foregroundStyle(.secondary)
@@ -494,6 +491,30 @@ struct DataSafetyPane: View {
             parts.append("back to \(oldest.formatted(date: .abbreviated, time: .omitted))")
         }
         return parts.joined(separator: " · ")
+    }
+}
+
+/// pre-13x 5a/5b — copy §6 on the Backups tab: the per-posture sentence
+/// (what opens a backup) and, under Castle, the lock-time copy line (ledger
+/// 68 — row 7's keyless byte-copy at lock, BUILT at 2a and unrendered until
+/// 5b). A view of its own so `DataSafetyFacesTests` hosts it directly (the
+/// pane's copies section composes only with a wired backup).
+struct BackupsPostureLines: View {
+    let posture: Posture
+
+    var body: some View {
+        Text(posture == .castle
+             ? ProtectionCopy.backupsCastleSentence
+             : ProtectionCopy.backupsStandardSentence)
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
+        if posture == .castle {
+            Text(ProtectionCopy.backupsLockTimeCopyLine)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
     }
 }
 

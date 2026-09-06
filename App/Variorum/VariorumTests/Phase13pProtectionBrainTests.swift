@@ -253,6 +253,13 @@ struct ProtectionCopyTests {
                 == "A backup opens through your Apple account — or with your passphrase or twelve words.")
         #expect(ProtectionCopy.backupsCastleSentence
                 == "A backup opens with your twelve words — always, unless you regenerated them — or with the passphrase you had when it was made. Backups made while you were in Standard also open through your Apple account. Backups run while your library is open.")
+        // pre-13x 5b (ledger 68): copy §6's lock-time copy line, rendered under
+        // Castle on the Backups tab (row 7's feature, built at 2a).
+        #expect(ProtectionCopy.backupsLockTimeCopyLine
+                == "When you lock, Variorum also keeps a sealed copy of the library as it was — checked the next time you unlock.")
+        // pre-13x 5b (ledger 66): copy §4's precised un-followed headline.
+        #expect(ProtectionCopy.keysReplacedHeadline
+                == "This account's keys changed since this \(ProtectionCopy.deviceName) joined. Enter your passphrase to pick up the new ones.")
         #expect(ProtectionCopy.enteredCastleAfterAnotherDevice(device: "Lillian's iPhone")
                 == "Another device entered Castle first, so this \(ProtectionCopy.deviceName) picked up that device's keys instead. The twelve words shown here are NOT your account's — the account's words are the ones written down on Lillian's iPhone.")
         #expect(ProtectionCopy.enteredCastleAfterAnotherDevice(device: nil).hasSuffix("written down on another device."))

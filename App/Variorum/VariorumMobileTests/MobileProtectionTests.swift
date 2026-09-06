@@ -591,6 +591,11 @@ struct MobilePhoneProtectionCopyTests {
         #expect(ProtectionCopy.castleDoneBody(nil) == ProtectionCopy.enteredCastleDone)
         #expect(ProtectionCopy.message(for: RecoveryPhraseError.invalidWordCount(13))
                 == "A recovery phrase is exactly 12 words — you entered 13.")
+        // pre-13x 5b (ledger 66): the un-followed headline in the phone's nouns,
+        // and the shared Encryption tab renders it through the one constant.
+        #expect(ProtectionCopy.keysReplacedHeadline
+                == "This account's keys changed since this iPhone joined. Enter your passphrase to pick up the new ones.")
+        #expect(EncryptionView.keysReplacedExplanation == ProtectionCopy.keysReplacedHeadline)
     }
 
     @Test func theFollowNoticesNameThePhoneAndFaceID() {

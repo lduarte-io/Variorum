@@ -142,6 +142,28 @@ struct ProtectionSurfaceRenderTests {
     /// carried by the keystone every posture shows). RED ON OLD: the pre-2a
     /// pane rendered the presets, the picker and the escrow dial, none of
     /// these sentences.
+    /// pre-13x 5b (ledger 68 — copy §6): THE BACKUPS TAB's posture lines —
+    /// the per-posture sentence (5a), and under Castle the lock-time copy
+    /// line (row 7's keyless byte-copy at lock, built at 2a, unrendered
+    /// until 5b). Hosted as the named sub-view the pane composes (its copies
+    /// section renders only over a wired backup). The Standard arm carries
+    /// the Standard sentence and NOT the lock-time line — the copy's own
+    /// placement.
+    @Test func theBackupsTabSaysWhatOpensABackupAndUnderCastleTheLockTimeCopy() async {
+        let castle = BackupsPostureLines(posture: .castle)
+        await SurfaceComposition.host(castle, size: NSSize(width: 520, height: 200))
+        let castleShown = SurfaceComposition.text(of: castle.body)
+        #expect(SurfaceComposition.carries(ProtectionCopy.backupsCastleSentence, in: castleShown))
+        #expect(SurfaceComposition.carries(ProtectionCopy.backupsLockTimeCopyLine, in: castleShown),
+                "under Castle the lock-time copy line renders beside the per-posture sentence")
+        let standard = BackupsPostureLines(posture: .standard)
+        await SurfaceComposition.host(standard, size: NSSize(width: 520, height: 200))
+        let standardShown = SurfaceComposition.text(of: standard.body)
+        #expect(SurfaceComposition.carries(ProtectionCopy.backupsStandardSentence, in: standardShown))
+        #expect(!SurfaceComposition.carries(ProtectionCopy.backupsLockTimeCopyLine, in: standardShown),
+                "Standard keeps no lock-time copy — the line is Castle's alone")
+    }
+
     @Test func theSettingsPaneRendersThePostureCopy() async {
         let pane = ProtectionPane(controller: controller(), services: nil)
         await SurfaceComposition.host(pane, size: NSSize(width: 620, height: 1200))

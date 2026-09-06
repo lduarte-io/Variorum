@@ -571,9 +571,13 @@ struct CrossoverRoundTests {
         #expect(face.doors == [SyncRowFace.Door(
             label: "Re-enroll…", act: .openAccount(.encryption))],
                 "the replaced row's one door opens the Encryption tab directly")
-        #expect(EncryptionView.keysReplacedExplanation
-                == "This account's encryption keys were replaced. Enter your passphrase to re-enroll.",
-                "the ruled copy shape, byte-exact")
+        // pre-13x 5b (ledger 66): the headline is copy §4's precised sentence
+        // for the un-followed device, rendered through the one copy constant.
+        #expect(EncryptionView.keysReplacedExplanation == ProtectionCopy.keysReplacedHeadline,
+                "the surface renders the copy constant, never a re-typed sentence")
+        #expect(ProtectionCopy.keysReplacedHeadline
+                == "This account's keys changed since this Mac joined. Enter your passphrase to pick up the new ones.",
+                "copy §4's precised sentence, byte-exact")
     }
 
     /// Ladder R1-1: the engine's unfinished-re-key refusal (the persisted

@@ -104,11 +104,12 @@ struct EncryptionView: View {
         + "settings switches. Sealed words plus visible shape is what lets sync work "
         + "without trusting the server."
 
-    /// CF-16: the replaced state's headline — the ruled copy shape,
-    /// byte-pinned ("This account's encryption keys were replaced. Enter
-    /// your passphrase to re-enroll.").
-    static let keysReplacedExplanation =
-        "This account's encryption keys were replaced. Enter your passphrase to re-enroll."
+    /// CF-16's replaced state's headline — pre-13x 5b (ledger 66): copy §4's
+    /// precised sentence for the UN-FOLLOWED device, through the one copy
+    /// constant (the device word by platform); 14b's *"…Enter your
+    /// passphrase to re-enroll."* retired with the re-enroll framing (the
+    /// door beneath is the follow).
+    static let keysReplacedExplanation = ProtectionCopy.keysReplacedHeadline
 
     /// Ladder R1-1: the persisted-marker banner's prompt — a re-key
     /// started on this device and never completed (a crash or a mid-run

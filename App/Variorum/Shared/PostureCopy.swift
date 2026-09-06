@@ -455,6 +455,16 @@ nonisolated extension ProtectionCopy {
         + "\(deviceName), but sync waits until you enter the new one here."
     }
     static let enterItNowDoor = "Enter It Now…"
+    /// pre-13x 5b (ledger 66 — copy §4, precised 2026-09-06 at 5a's
+    /// adjudication): THE UN-FOLLOWED DEVICE's headline on the Encryption
+    /// tab — the account's keys were replaced elsewhere and this device has
+    /// not picked them up; the one door beneath it is the FOLLOW. Copy §4's
+    /// Standard addendum (*your Apple account can hand over the key*) is
+    /// RETIRED and rendered nowhere: the Standard follow after Replace All
+    /// Keys asks the passphrase once (her 2026-09-05 ruling).
+    static let keysReplacedHeadline =
+        "This account's keys changed since this \(deviceName) joined. Enter your passphrase "
+        + "to pick up the new ones."
     // Copy §3 — after unlock, keys don't match the account (a different owner)
     static let keysDontMatchThisLibrary =
         "This account's keys don't match this library. Enter your passphrase to connect it — "
