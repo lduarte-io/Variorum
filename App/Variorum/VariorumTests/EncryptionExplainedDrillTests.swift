@@ -58,9 +58,9 @@ struct EncryptionExplainedDrillTests {
 
     /// The Mac's launch shape, headless: the tutorial (the seed road Help ▸
     /// Restore Tutorial takes), then both books — in seeding order.
-    private func seedEverything(_ session: AppSession) async throws -> [SampleLibrarySeeder.Book: String] {
+    private func seedEverything(_ session: AppSession) async throws -> [String: String] {
         _ = try await TutorialSeeder.restore(session: session)
-        var books: [SampleLibrarySeeder.Book: String] = [:]
+        var books: [String: String] = [:]  // keyed by the book's reserved name
         for book in SampleLibrarySeeder.Book.all {
             let mark = DrillMark()
             let outcome = await SampleLibrarySeeder.seedIfNeeded(
@@ -69,7 +69,7 @@ struct EncryptionExplainedDrillTests {
                 Issue.record("expected \(book.name) to seed, got \(outcome)")
                 continue
             }
-            books[book] = bookID
+            books[book.name] = bookID
         }
         return books
     }
@@ -98,13 +98,19 @@ struct EncryptionExplainedDrillTests {
             #expect(chapterLessons == [ProtectionCopy.privacyLessonOneTitle, ProtectionCopy.privacyLessonTwoTitle])
 
             // THE BOOK: nine notes, Chapter 1 first after the front matter.
-            let encryption = try #require(books[.encryptionExplained])
+            let encryption = try #require(books[SampleLibraryEncryptionBook.name])
             let entries = try await db.read { db in try Queries.assembleReading(db, readingID: encryption) }
             #expect(entries.count == 9)
             #expect(entries.first?.title == SampleLibraryEncryptionBook.frontMatterTitle)
             #expect(entries[1].title == "Chapter 1 — What is encrypted, and with what")
-            // The Pool stays blank: every seeded note is a member of a book.
-            #expect(try await db.read { db in try Queries.poolPosts(db, limit: 100) }.isEmpty)
+            // No seeded note of the two books is bookless (the tutorial's own
+            // scraps lesson mints a bookless practice note by design, so the
+            // Pool is not blank on a store that holds the field guide).
+            let bookless = try await db.read { db in Set(try Queries.poolPosts(db, limit: 200).map(\.postID)) }
+            #expect(entries.allSatisfy { !bookless.contains($0.postID) }, "every chapter note is a member of its book")
+            let sherlock = try #require(books[SampleLibrarySeeder.bookName])
+            let sherlockEntries = try await db.read { db in try Queries.assembleReading(db, readingID: sherlock) }
+            #expect(sherlockEntries.count == 13 && sherlockEntries.allSatisfy { !bookless.contains($0.postID) })
 
             // HELP ▸ RESTORE TUTORIAL's road (the door's own two steps —
             // discover, then the wholesale replace) re-seeds the chapter and
