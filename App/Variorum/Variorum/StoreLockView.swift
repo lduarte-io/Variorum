@@ -117,7 +117,7 @@ struct StoreLockView: View {
                     .fixedSize(horizontal: false, vertical: true)
                 if !lobby.differentAppleID {
                     HStack(spacing: 6) {
-                        ProgressView().controlSize(.small)
+                        TravellingDotsIndicator(ink: tokens.muted)
                         Text("Checking iCloud Keychain…")
                             .font(tokens.small)
                             .foregroundStyle(tokens.muted)
@@ -165,7 +165,8 @@ struct StoreLockView: View {
             // account…*) from ~200 ms into a submit.
             if lobby.busy, lobby.showsProgress {
                 HStack(spacing: 6) {
-                    ProgressView().controlSize(.small)
+                    // pre-13x 5b (ledger 32): the ceremonies' original indicator.
+                    TravellingDotsIndicator(ink: tokens.muted)
                     Text(ProtectionCopy.lobbyPhaseLine(lobby.phase))
                         .font(tokens.small)
                         .foregroundStyle(tokens.muted)

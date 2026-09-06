@@ -170,7 +170,7 @@ struct KeyDoorView: View {
                 EmptyView()
             }
             if model.busy {
-                ProgressView().controlSize(.small)
+                TravellingDotsIndicator(pageStyle: pageStyle)
             }
             if let error = model.lastError {
                 Text(error)

@@ -185,7 +185,7 @@ struct EncryptionView: View {
             } else {
             switch encryption.state {
             case .unknown:
-                ProgressView().controlSize(.small)
+                TravellingDotsIndicator(pageStyle: pageStyle)
                 Text("Checking this account's encryption state…")
                     .pageSecondary(pageStyle)
             case .signedOut:
@@ -214,7 +214,8 @@ struct EncryptionView: View {
             }
 
             if encryption.busy {
-                ProgressView().controlSize(.small)
+                // pre-13x 5b (ledger 32): the ceremonies' original indicator.
+                TravellingDotsIndicator(pageStyle: pageStyle)
             }
             if let error = encryption.lastError {
                 Text(error).pageCaptionError(pageStyle)

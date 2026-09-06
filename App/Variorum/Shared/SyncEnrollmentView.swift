@@ -29,7 +29,7 @@ struct SyncEnrollmentView: View {
         VStack(alignment: .leading, spacing: 14) {
             switch model.phase {
             case .checking:
-                ProgressView().controlSize(.small)
+                TravellingDotsIndicator(pageStyle: pageStyle)
             case .confirmMove:
                 Text(ProtectionCopy.setupMoveSentence)
                     .pageWarning(pageStyle)
@@ -121,7 +121,7 @@ struct SyncEnrollmentView: View {
                     .disabled(model.busy || typedWords.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             case .creating:
                 HStack(spacing: 8) {
-                    ProgressView().controlSize(.small)
+                    TravellingDotsIndicator(pageStyle: pageStyle)
                     Text("Turning on sync…").pageCaption(pageStyle)
                 }
             case .done(let posture):

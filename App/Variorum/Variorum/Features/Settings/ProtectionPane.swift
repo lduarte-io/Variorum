@@ -125,7 +125,7 @@ struct PassphraseSetSheet: View {
             }
             if model.busy {
                 HStack(spacing: 6) {
-                    ProgressView().controlSize(.small)
+                    TravellingDotsIndicator(ink: .secondary)
                     Text("Working…").font(.caption).foregroundStyle(.secondary)
                 }
             }
@@ -804,7 +804,7 @@ struct FollowSheet: View {
                 }
             case .running:
                 HStack(spacing: 8) {
-                    ProgressView().controlSize(.small)
+                    TravellingDotsIndicator(ink: .secondary)
                     Text(runningLine).font(.callout).foregroundStyle(.secondary)
                 }
                 Text("Keep Variorum open. If it quits, the follow picks up where it stopped.")
@@ -855,7 +855,7 @@ struct FollowSheet: View {
             }
             if model.busy, model.phase != .running {
                 HStack(spacing: 6) {
-                    ProgressView().controlSize(.small)
+                    TravellingDotsIndicator(ink: .secondary)
                     Text("Working…").font(.caption).foregroundStyle(.secondary)
                 }
             }
@@ -921,7 +921,7 @@ struct MigrationConfirmSheet: View {
                 }
                 if model.busy {
                     HStack(spacing: 6) {
-                        ProgressView().controlSize(.small)
+                        TravellingDotsIndicator(ink: .secondary)
                         Text("Confirming…").font(.caption).foregroundStyle(.secondary)
                     }
                 }
@@ -1164,7 +1164,7 @@ struct PostureSwitchSheet: View {
                       : model.mode == .replaceKeys ? ProtectionCopy.replaceKeysTitle
                       : ProtectionCopy.enterCastleTitle)
                 HStack(spacing: 8) {
-                    ProgressView().controlSize(.small)
+                    TravellingDotsIndicator(ink: .secondary)
                     Text(runningLine).font(.callout).foregroundStyle(.secondary)
                 }
                 Text("Keep Variorum open. If it quits, the switch picks up where it stopped.")
@@ -1242,7 +1242,7 @@ struct PostureSwitchSheet: View {
             }
             if model.busy, model.phase != .running {
                 HStack(spacing: 6) {
-                    ProgressView().controlSize(.small)
+                    TravellingDotsIndicator(ink: .secondary)
                     Text("Working…").font(.caption).foregroundStyle(.secondary)
                 }
             }

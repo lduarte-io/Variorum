@@ -308,7 +308,7 @@ struct MobilePostureSwitchSheet: View {
 
     private func running(_ line: String) -> some View {
         HStack(spacing: 8) {
-            ProgressView().controlSize(.small)
+            TravellingDotsIndicator(ink: tokens.muted)
             Text(line).font(tokens.small).foregroundStyle(tokens.muted)
         }
     }
@@ -395,7 +395,7 @@ struct MobileFollowSheet: View {
                     }
                 case .running:
                     HStack(spacing: 8) {
-                        ProgressView().controlSize(.small)
+                        TravellingDotsIndicator(ink: tokens.muted)
                         Text(runningLine).font(tokens.small).foregroundStyle(tokens.muted)
                     }
                     prose("Keep Variorum open. If it quits, the follow picks up where it stopped.")
@@ -432,7 +432,7 @@ struct MobileFollowSheet: View {
                 }
                 if model.busy, model.phase != .running {
                     HStack(spacing: 8) {
-                        ProgressView().controlSize(.small)
+                        TravellingDotsIndicator(ink: tokens.muted)
                         Text("Working…").font(tokens.small).foregroundStyle(tokens.muted)
                     }
                 }

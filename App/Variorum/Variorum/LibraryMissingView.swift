@@ -80,7 +80,7 @@ struct LibraryMissingView: View {
             }
             if lobby.busy {
                 HStack(spacing: 6) {
-                    ProgressView().controlSize(.small)
+                    TravellingDotsIndicator(ink: tokens.muted)
                     Text("Starting…")
                         .font(tokens.small)
                         .foregroundStyle(tokens.muted)

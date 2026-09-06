@@ -48,7 +48,7 @@ struct MobilePassphraseSetSheet: View {
                 }
                 if model.busy {
                     HStack(spacing: 6) {
-                        ProgressView()
+                        TravellingDotsIndicator(ink: tokens.muted)
                         Text(tokens.chromeLabel("Working…"))
                             .font(tokens.small)
                             .foregroundStyle(tokens.muted)

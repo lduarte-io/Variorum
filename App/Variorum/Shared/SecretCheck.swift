@@ -277,7 +277,7 @@ struct SecretCheckSection: View {
         .disabled(model.checking || entry.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
         if model.checking {
             HStack(spacing: 6) {
-                ProgressView().controlSize(.small)
+                TravellingDotsIndicator(pageStyle: pageStyle)
                 Text("Checking…").pageCaption(pageStyle)
             }
         }

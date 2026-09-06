@@ -68,7 +68,7 @@ struct MobileLibraryMissingView: View {
                 }
                 if lobby.busy {
                     HStack(spacing: 6) {
-                        ProgressView()
+                        TravellingDotsIndicator(ink: tokens.muted)
                         Text(tokens.chromeLabel("Starting…"))
                             .font(tokens.small)
                             .foregroundStyle(tokens.muted)
