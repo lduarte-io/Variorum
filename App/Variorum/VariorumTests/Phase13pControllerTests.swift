@@ -1125,8 +1125,13 @@ struct Phase13pControllerTests {
         await b.controller.reconcile()
         #expect(b.controller.enrollReading == EnrollFacts(accountPosture: .castle, libraryPosture: .castle, appleState: .notApplicable))
 
-        // An ENROLLED library (the key file carries the master copy) with no
-        // custody item at ready is never the enroll block's: no facts.
+        // pre-13x 3b (ledger 52 — the orchestrator's correction): a library
+        // whose key file carries a master copy and the CURRENT recorded id,
+        // with no custody in hand and no derived key held (opened by the
+        // words, or a scripted controller with no lobby), is the enroll
+        // block's too — Castle under Castle ⇒ the tab's passphrase door.
+        // (3a read it as "enrolled once ⇒ no facts"; that excluded restored
+        // copies, which §3.8 / §6 / §7 say enroll.)
         var enrolledFile = StoreKeyEnvelope()
         let enrolledKey = StoreKey.mint()
         try enrolledFile.setPassphraseWrap(key: enrolledKey, passphrase: "sesame", kdf: fastKDF())
@@ -1137,7 +1142,162 @@ struct Phase13pControllerTests {
         enrolled.controller.foreignOwner = { _ in false }
         enrolled.controller.readVaultPosture = { [r = reading(castleVault)] in r }
         await enrolled.controller.reconcile()
-        #expect(enrolled.controller.enrollReading == nil, "an enrolled Always-ask library before its vault read is 2c's arm, not an enroll")
+        #expect(enrolled.controller.enrollReading == EnrollFacts(accountPosture: .castle, libraryPosture: .castle, appleState: .notApplicable),
+                "a current recorded id with nothing in hand is an enroll — the passphrase door, never silence")
+        #expect(enrolled.controller.followNotice == nil && enrolled.controller.alwaysAskRetiredNotice == nil)
+    }
+
+    // MARK: - pre-13x 3b: THE RESTORED-COPY ENROLL (ledger 52)
+
+    /// A RESTORED Standard snapshot — a master copy and the CURRENT recorded
+    /// corpus id in its key file, no custody on this machine, A matched —
+    /// enrolls SILENTLY at ready (the vault's master opened by A; the
+    /// landing rewrites the master copy + the reconciliation); the same
+    /// snapshot with a STALE recorded id owes the FOLLOW's notice — for any
+    /// device, not only an Always-ask one. RED ON OLD (3a): the "never
+    /// enrolled" gate (no master copy AND no recorded id) skipped the
+    /// restored copy — nothing landed, no face owed — and the stale id's
+    /// tail sat behind `effectiveGate == .passphrase`, which a silent
+    /// Standard device never has.
+    @Test func aRestoredSnapshotWithTheCurrentIdEnrollsSilentlyAndAStaleIdOwesTheFollow() async throws {
+        let kdf = fastKDF()
+        let master = SymmetricKey(size: .bits256)
+        let apple = AppleKey.mint()
+        func vault(appleUnder apple: AppleKey?) throws -> KeyVaultFormat {
+            var format = try KeyVaultFormat.create(
+                masterKey: master, passphraseKey: try PassphraseKDF.deriveKey(passphrase: "sesame", descriptor: kdf),
+                recoveryKey: nil,
+                classKeys: [(keyClass: .corpus, keyID: "corpus-now", key: SymmetricKey(size: .bits256)),
+                            (keyClass: .journalBridge, keyID: "bridge-now", key: SymmetricKey(size: .bits256))],
+                kdf: kdf)
+            if let apple {
+                format = try format.settingAppleHeldCopy(masterKey: master, appleKey: apple.symmetricKey, appleKeyID: apple.id)
+            }
+            return format
+        }
+        func reading(_ format: KeyVaultFormat) -> VaultPostureReading {
+            VaultPostureReading(
+                hasAppleHeldCopy: format.masterWrappedByAppleHeld != nil, appleKeyID: format.appleKeyID,
+                passphraseKDF: kdf, hasPassphraseWrap: true, corpusKeyID: "corpus-now",
+                updatedAt: "2026-09-06T10:00:00Z", updatedByDevice: "Lillian's Mac",
+                signedInUserID: "user-1", hasRecoveryWrap: true, format: format)
+        }
+        /// The snapshot's key file: the Apple copy (Standard-era), the master
+        /// copy, the passphrase copy, and the recorded id the snapshot had.
+        func snapshotFile(recordedID: String) throws -> (StoreKey, StoreKeyEnvelope) {
+            let key = StoreKey.mint()
+            var file = StoreKeyEnvelope()
+            try file.setPassphraseWrap(key: key, passphrase: "sesame", kdf: kdf)
+            try file.appleBox(key: key, under: apple.symmetricKey, appleKeyID: apple.id)
+            try file.masterBox(key: key, under: master)
+            try file.recordVaultReconciliation(kdf: kdf, corpusKeyID: recordedID)
+            return (key, file)
+        }
+
+        // (i) the current id ⇒ the silent Standard road lands ONCE.
+        let standardVault = try vault(appleUnder: apple)
+        let (currentKey, currentFile) = try snapshotFile(recordedID: "corpus-now")
+        let restored = try world(standard: true, key: currentKey, envelope: currentFile)
+        restored.appleKeys.key = apple
+        let landed = LockIsolated<[(DeviceKeyMaterial, PassphraseKDF.Descriptor)]>([])
+        restored.controller.isSignedIn = { true }
+        restored.controller.foreignOwner = { _ in false }
+        restored.controller.readVaultPosture = { [r = reading(standardVault)] in r }
+        restored.controller.landEnrollment = { material, kdf in landed.withValue { $0.append((material, kdf)) }; return true }
+        await restored.controller.reconcile()
+        #expect(landed.value.count == 1, "a restored Standard snapshot enrolls with nothing typed")
+        #expect(landed.value.first?.0.corpusKeyID == "corpus-now"
+                && landed.value.first?.0.masterKey == master.withUnsafeBytes { Data($0) })
+        #expect(landed.value.first?.1 == kdf)
+        #expect(restored.controller.enrollReading == nil && restored.controller.followNotice == nil)
+
+        // (ii) a STALE recorded id under a Standard vault ⇒ the follow (keys replaced), on a SILENT device.
+        let (staleKey, staleFile) = try snapshotFile(recordedID: "corpus-of-the-snapshot")
+        let stale = try world(standard: true, key: staleKey, envelope: staleFile)
+        stale.appleKeys.key = apple
+        let staleLanded = LockedCounter()
+        stale.controller.isSignedIn = { true }
+        stale.controller.foreignOwner = { _ in false }
+        stale.controller.readVaultPosture = { [r = reading(standardVault)] in r }
+        stale.controller.landEnrollment = { _, _ in staleLanded.increment(); return true }
+        await stale.controller.reconcile()
+        #expect(stale.controller.effectiveGate == .auto, "a silent Standard device — never the Always-ask gate")
+        let owed = try #require(stale.controller.followNotice)
+        #expect(owed.kind == .keysReplaced && owed.corpusKeyID == "corpus-now" && owed.device == "Lillian's Mac")
+        #expect(staleLanded.value == 0, "a stale id never enrolls bare — the follow's road re-keys")
+        #expect(stale.controller.enrollReading == nil)
+
+        // (ii) the same, under a CASTLE vault while the file still carries an Apple copy ⇒ "moved to Castle".
+        let castleVault = try vault(appleUnder: nil)
+        let (movedKey, movedFile) = try snapshotFile(recordedID: "corpus-of-the-snapshot")
+        let moved = try world(standard: true, key: movedKey, envelope: movedFile)
+        moved.controller.isSignedIn = { true }
+        moved.controller.foreignOwner = { _ in false }
+        moved.controller.readVaultPosture = { [r = reading(castleVault)] in r }
+        await moved.controller.reconcile()
+        #expect(moved.controller.followNotice?.kind == .movedToCastle)
+    }
+
+    /// A RESTORED Castle copy opened by the PASSPHRASE on a Touch ID device:
+    /// the lobby held the DERIVED key (every passphrase unlock does), its
+    /// descriptor equals the vault's, the recorded id is the vault's — the
+    /// material lands under the CURRENT shape through `landEnrollment`
+    /// (the gated item + the identity item + the session), with no second
+    /// entry; a derived key under ANOTHER descriptor with the current id ⇒
+    /// the retired-word banner, on this gate too. RED ON OLD (2c/3a): the
+    /// fill ran only under `effectiveGate == .passphrase` and only into the
+    /// session — a Touch ID device landed nothing and kept the face owed.
+    @Test func aRestoredCastleCopyOpenedByThePassphraseLandsCustodyUnderTheGateWithNoSecondEntry() async throws {
+        let kdf = fastKDF()
+        let derived = try PassphraseKDF.deriveKey(passphrase: "sesame", descriptor: kdf)
+        let master = SymmetricKey(size: .bits256)
+        let format = try KeyVaultFormat.create(
+            masterKey: master, passphraseKey: derived, recoveryKey: nil,
+            classKeys: [(keyClass: .corpus, keyID: "corpus-c", key: SymmetricKey(size: .bits256)),
+                        (keyClass: .journalBridge, keyID: "bridge-c", key: SymmetricKey(size: .bits256))],
+            kdf: kdf)
+        var reading = VaultPostureReading(
+            hasAppleHeldCopy: false, appleKeyID: nil, passphraseKDF: kdf, hasPassphraseWrap: true,
+            corpusKeyID: "corpus-c", updatedAt: "2026-09-06T10:00:00Z",
+            updatedByDevice: "Lillian's iPhone", signedInUserID: "user-1", hasRecoveryWrap: true)
+        reading.format = format
+        func copyFile() throws -> (StoreKey, StoreKeyEnvelope) {
+            let key = StoreKey.mint()
+            var file = StoreKeyEnvelope()
+            try file.setPassphraseWrap(key: key, passphrase: "sesame", kdf: kdf)
+            try file.masterBox(key: key, under: master)
+            try file.recordVaultReconciliation(kdf: kdf, corpusKeyID: "corpus-c")
+            return (key, file)
+        }
+
+        let (key, file) = try copyFile()
+        let w = try world(standard: false, key: key, envelope: file)
+        #expect(w.controller.effectiveGate == .biometric, "a Touch ID device, not Always ask")
+        w.syncSession.holdDerivedWrappingKey(derived, kdf: kdf)  // the lobby's passphrase road
+        let landed = LockIsolated<[(DeviceKeyMaterial, PassphraseKDF.Descriptor)]>([])
+        w.controller.isSignedIn = { true }
+        w.controller.foreignOwner = { _ in false }
+        w.controller.readVaultPosture = { [reading] in reading }
+        w.controller.landEnrollment = { material, kdf in landed.withValue { $0.append((material, kdf)) }; return true }
+        await w.controller.reconcile()
+        #expect(landed.value.count == 1, "the derived key opened the vault — landed under the current shape, nothing typed again")
+        #expect(landed.value.first?.0.corpusKeyID == "corpus-c" && landed.value.first?.1 == kdf)
+        #expect(w.controller.enrollReading == nil && w.controller.followNotice == nil
+                && w.controller.alwaysAskRetiredNotice == nil)
+
+        // The word was CHANGED elsewhere: a derived key under another descriptor ⇒ the banner, this gate too.
+        let (retiredKey, retiredFile) = try copyFile()
+        let retired = try world(standard: false, key: retiredKey, envelope: retiredFile)
+        retired.syncSession.holdDerivedWrappingKey(
+            try PassphraseKDF.deriveKey(passphrase: "old word", descriptor: fastKDF()), kdf: fastKDF())
+        let retiredLanded = LockedCounter()
+        retired.controller.isSignedIn = { true }
+        retired.controller.foreignOwner = { _ in false }
+        retired.controller.readVaultPosture = { [reading] in reading }
+        retired.controller.landEnrollment = { _, _ in retiredLanded.increment(); return true }
+        await retired.controller.reconcile()
+        #expect(retired.controller.alwaysAskRetiredNotice?.kind == .alwaysAskRetiredWord)
+        #expect(retiredLanded.value == 0 && retired.controller.enrollReading == nil)
     }
 
     /// The runner a Connect pin needs exists only so the sheet can open —
@@ -1289,8 +1449,9 @@ struct Phase13pControllerTests {
 
         // pre-13x 3a: an ENROLLED Always-ask library carries the key file's
         // master copy + the recorded corpus key id (the migration's leg 5 /
-        // the landing) — the enrollment signature the enroll block reads;
-        // a bare envelope reads as NEVER ENROLLED now (copy §2d's face).
+        // the landing). pre-13x 3b (ledger 52): the retired-word banner
+        // needs that signature (the recorded id IS the vault's — a word
+        // changed elsewhere); the fill in (a) does not.
         func enrolledFile(recordedID: String) throws -> (StoreKey, StoreKeyEnvelope) {
             let key = StoreKey.mint()
             var file = StoreKeyEnvelope()
@@ -1300,7 +1461,11 @@ struct Phase13pControllerTests {
             return (key, file)
         }
         // (a) the held derived key opens the vault ⇒ the session fills.
-        let (filledKey, filledFile) = try enrolledFile(recordedID: "corpus-9")
+        // pre-13x 3b (ledger 52): the BARE shape again — no master copy, no
+        // recorded id — the fill never needed 3a's enrollment signature.
+        let filledKey = StoreKey.mint()
+        var filledFile = StoreKeyEnvelope()
+        try filledFile.setPassphraseWrap(key: filledKey, passphrase: "sesame", kdf: fastKDF())
         let filled = try world(standard: false, dials: ProtectionDials(alwaysAsk: true), key: filledKey, envelope: filledFile)
         #expect(filled.controller.effectiveGate == .passphrase)
         #expect(filled.syncSession.record?.material == nil, "Always ask holds nothing before the read")

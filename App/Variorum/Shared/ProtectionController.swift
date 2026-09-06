@@ -537,18 +537,71 @@ final class ProtectionController {
             }
             return
         }
-        // NO MATERIAL IN HAND. pre-13x 3a — a library NEVER ENROLLED here
-        // (no key file master copy, no recorded corpus key id, no custody
-        // item) under a signed-in session: ENROLL's four directions (design
-        // §5's Enroll row; copy §2d) from the account's posture and the
-        // library's OWN. (a) Standard/Standard with A matching the vault's
-        // copy: the silent road — A opens the vault's master, the class
-        // keys follow, custody and the key file land through the session's
-        // adopt, nothing typed, nothing shown. Every other direction is a
-        // FACE on the Encryption tab (the roads, the re-key sentence, or the
-        // consent) — recorded here, acted on there.
-        let neverEnrolled = keyFile?.master == nil && keyFile?.vaultCorpusKeyID == nil
-        if neverEnrolled, !syncCustodyPresentAtReady, reading.signedInUserID != nil, let format = reading.format {
+        // NO MATERIAL IN HAND (pre-13x 3b, ledger 52 — the orchestrator's
+        // correction of 3a's "never enrolled" discriminator, which excluded
+        // the class the design names in §3.8, §6 and §7: a RESTORED or
+        // COPIED library — a master copy and a recorded corpus id in its key
+        // file, no custody on this machine — must enroll like any other).
+        // THE THREE RULES, in order:
+        //  (iii) THE DERIVED-KEY FILL, ANY GATE: the lobby's passphrase road
+        //        holds the DERIVED key on every passphrase unlock; when its
+        //        descriptor equals the vault's and the recorded corpus id is
+        //        nil or the vault's, the vault's master copy opens and the
+        //        material lands under the CURRENT shape through the wired
+        //        `landEnrollment` (a Touch ID / Face ID device's gated item +
+        //        the identity-only plain item + the session; Always ask keeps
+        //        the session-only hold) — a Castle copy opened by the
+        //        passphrase enrolls with the word just typed, no second entry.
+        //        A composition with no landing wired keeps 2c's session hold.
+        //   (b)  decision 10's exception: a derived key held under ANOTHER
+        //        descriptor while the recorded id IS the vault's ⇒ the word
+        //        was changed elsewhere ⇒ the retired-word banner (reads and
+        //        edits; sync waits for the new word).
+        //   (i)  ENROLL's four directions for ANY library with no custody
+        //        material in hand whose recorded id is nil or the vault's —
+        //        the silent Standard road (A opens the vault's master; custody
+        //        and the key file land through the session's adopt, nothing
+        //        typed) or the FACTS for the Encryption tab.
+        //  (ii)  a STALE recorded id with no material ⇒ the FOLLOW's notice
+        //        for ANY device (the keys were rotated since the snapshot; the
+        //        follow's road with the typed secret re-keys the library).
+        let recorded = keyFile?.vaultCorpusKeyID
+        let recordedIsCurrent = recorded == nil || recorded == vaultKeyID
+        let session = configuration.syncCustodySession
+        if recordedIsCurrent, let format = reading.format,
+           let derived = session.derivedWrappingKey, session.derivedWrappingKDF == format.kdf,
+           let master = try? format.unwrapMaster(withPassphraseKey: derived),
+           let material = try? CorpusRotation.materialFollowing(format, master: master) {
+            alwaysAskRetiredNotice = nil
+            followNotice = nil
+            enrollReading = nil
+            if let landEnrollment {
+                if await landEnrollment(material, format.kdf) {
+                    syncCustodyPresentAtReady = true
+                    logger.notice("enroll: the typed passphrase's derived key opened the vault's master copy — custody and the key file landed under the current shape, nothing typed again")
+                    return
+                }
+                logger.notice("enroll: custody refused the derived-key landing — the sync keys are held for this session; the next ready retries")
+            }
+            let identity = configuration.resolvedSyncLeaves()?.loadPlain()?.deviceID
+                ?? UUID().uuidString.lowercased()
+            session.hold(SyncCustodyRecord(deviceID: identity, material: material))
+            logger.notice("follow: the session's derived key opened the vault — sync keys held for the session")
+            return
+        }
+        if let recorded, recorded == vaultKeyID, let format = reading.format,
+           session.derivedWrappingKey != nil, session.derivedWrappingKDF != format.kdf {
+            enrollReading = nil
+            followNotice = nil
+            alwaysAskRetiredNotice = FollowNotice(
+                kind: .alwaysAskRetiredWord, device: device, day: day,
+                vaultKDF: reading.passphraseKDF, corpusKeyID: vaultKeyID)
+            logger.notice("follow: the passphrase was changed elsewhere — this device's copy is under the retired word; the banner speaks")
+            return
+        }
+        if recordedIsCurrent, !syncCustodyPresentAtReady, reading.signedInUserID != nil, let format = reading.format {
+            alwaysAskRetiredNotice = nil
+            followNotice = nil
             let library = libraryOwnPosture
             let account: Posture = reading.hasAppleHeldCopy ? .standard : .castle
             var appleState: EnrollFacts.AppleState = .notApplicable
@@ -573,35 +626,13 @@ final class ProtectionController {
             return
         }
         enrollReading = nil
-        // An Always-ask device before its vault read (decision 10's
-        // exception). The held derived key opens the vault's master copy
-        // when the descriptors agree — the session fills and the device
-        // syncs; the vault's key id ≠ the key file's recorded id ⇒ ROTATED
-        // ⇒ the follow; else the word was CHANGED elsewhere ⇒ the banner
-        // variant (reads and edits, sync waits).
-        guard effectiveGate == .passphrase, let format = reading.format else { return }
-        let session = configuration.syncCustodySession
-        if let derived = session.derivedWrappingKey, session.derivedWrappingKDF == format.kdf,
-           let master = try? format.unwrapMaster(withPassphraseKey: derived),
-           let material = try? CorpusRotation.materialFollowing(format, master: master) {
-            let identity = configuration.resolvedSyncLeaves()?.loadPlain()?.deviceID
-                ?? UUID().uuidString.lowercased()
-            session.hold(SyncCustodyRecord(deviceID: identity, material: material))
-            alwaysAskRetiredNotice = nil
-            followNotice = nil
-            logger.notice("follow: the Always-ask session's derived key opened the vault — sync keys held for the session")
-            return
-        }
-        if let recorded = keyFile?.vaultCorpusKeyID, recorded != vaultKeyID {
+        if let recorded, recorded != vaultKeyID {
             let kind: FollowNotice.Kind = (!reading.hasAppleHeldCopy && keyFile?.apple != nil)
                 ? .movedToCastle : .keysReplaced
             followNotice = FollowNotice(kind: kind, device: device, day: day,
                                         vaultKDF: reading.passphraseKDF, corpusKeyID: vaultKeyID)
             alwaysAskRetiredNotice = nil
-        } else {
-            alwaysAskRetiredNotice = FollowNotice(
-                kind: .alwaysAskRetiredWord, device: device, day: day,
-                vaultKDF: reading.passphraseKDF, corpusKeyID: vaultKeyID)
+            logger.notice("follow: this library's recorded corpus key id is stale and no custody is in hand — the follow is owed (\(kind == .movedToCastle ? "Castle entered" : "keys replaced", privacy: .public))")
         }
     }
     /// §11: the passphrase confirm is pending (set by the migration; read
@@ -710,6 +741,7 @@ final class ProtectionController {
         hasRecoveryWrap = reading.envelope?.recovery != nil
         keyFileHasMasterCopy = reading.envelope?.master != nil
         keyFileVaultKDF = reading.envelope?.vaultKDF
+        keyFileVaultCorpusKeyID = reading.envelope?.vaultCorpusKeyID
         refreshPosture(keyFile: reading.envelope)
     }
 
@@ -718,6 +750,15 @@ final class ProtectionController {
     /// reconciled against (nil = never; the confirm's derived gate).
     @ObservationIgnored private var keyFileHasMasterCopy = false
     @ObservationIgnored private var keyFileVaultKDF: PassphraseKDF.Descriptor?
+    /// pre-13x 3b: the vault corpus key id the key file last reconciled
+    /// against (nil = never) — Replace All Keys' stale-master front check
+    /// reads it against the vault's (§5's row; decision 30's "holding the
+    /// CURRENT master").
+    @ObservationIgnored private(set) var keyFileVaultCorpusKeyID: String?
+    /// pre-13x 3b: the descriptor the key file's passphrase copy was last
+    /// reconciled against (nil = never) — the change-passphrase door reads
+    /// it against the vault's to word a RETIRED passphrase (copy §5).
+    var keyFileRecordedVaultKDF: PassphraseKDF.Descriptor? { keyFileVaultKDF }
 
     /// THE DERIVED CONFIRM GATE (pre-13x 2d — the brief's item 3): an
     /// ENROLLED library whose key file carries the MASTER copy but NO
