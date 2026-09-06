@@ -231,7 +231,9 @@ new one.*
 changed on another device recently, the one you had before still works here until you're back online.*
 **After unlock, keys don't match the account (a library from another account or a deleted one):** *This
 account's keys don't match this library. Enter your passphrase to connect it — everything in it will
-upload to this account.* Button: *Connect…*
+upload to this account.* Button: *Connect…* **Connect's done line** *(drafted 2026-09-06 at 3a's adjudication — its
+question 7; the copy had none; batch 4 renders it as `connectDoneBody`; 13s re-voices)*: *This library is connected
+to this account, and everything in it is uploading now.*
 **Dead end (no Touch ID item, no passphrase or words on file — practically unreachable):** *No way to
 unlock this library exists on this Mac: its Touch ID item is gone, and no passphrase or twelve words are on
 file beside the library. Restore the key file from a backup folder, or restore the whole library from a
