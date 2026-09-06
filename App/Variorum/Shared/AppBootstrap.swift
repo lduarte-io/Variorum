@@ -88,6 +88,11 @@ final class AppBootstrap {
     /// The launch-protection facts (13p) — real defaults/Keychain/sidecar
     /// in production, scripted in tests.
     @ObservationIgnored let gate: StoreLaunchGate
+    /// pre-13x 4a (§3.6 / corner 17): the lobby's vault road — ONE
+    /// authenticated vault read composed from the scoped token store alone
+    /// (production `LobbyVaultRoad.live(scope:)`; nil = unconfigured, or a
+    /// test world without one — the local copies are the only roads).
+    @ObservationIgnored let lobbyVaultRoad: LobbyVaultRoad?
     /// The protection brain (13p Batch 2): dials, custody acts, notices,
     /// the reset door, and — on the Mac — the re-lock monitors. Owned
     /// here because the bootstrap is where the unlocked key passes
@@ -143,6 +148,7 @@ final class AppBootstrap {
         testOpener = nil
         testPresence = .encryptedOrUnknown
         testStoreURL = nil
+        lobbyVaultRoad = LobbyVaultRoad.live(scope: variant.rawValue)
         protection = ProtectionController(configuration: .init(
             scope: variant.rawValue,
             storeURL: try? AppDatabase.defaultStoreURL(variant: variant),
@@ -187,13 +193,16 @@ final class AppBootstrap {
         // hands the controller ITS sync-custody leaves — else the id
         // resolves to the live Keychain's per-store items.
         syncCustodyLeaves: (@Sendable (_ storeID: String) -> E2EECustodyLeaves)? = nil,
-        syncCustodySession: SyncCustodySession = .shared
+        syncCustodySession: SyncCustodySession = .shared,
+        // pre-13x 4a: a scripted vault road for the lobby's pins (nil = none).
+        lobbyVaultRoad: LobbyVaultRoad? = nil
     ) {
         storeVariant = .dev
         self.gate = gate
         self.testOpener = testOpener
         self.testPresence = testPresence
         self.testStoreURL = testStoreURL
+        self.lobbyVaultRoad = lobbyVaultRoad
         protection = ProtectionController(configuration: .init(
             scope: AppDatabase.StoreVariant.dev.rawValue,
             storeURL: testStoreURL,
@@ -262,6 +271,15 @@ final class AppBootstrap {
         /// the true cause instead of "no passphrase … is on file".
         var envelopeUnreadable: Bool = false
         var storeURL: URL?
+
+        /// pre-13x 4a: the secret roads' existence is the lobby's rule
+        /// (`StoreLobby.passphraseRoadExists` / `recoveryRoadExists`).
+        nonisolated static func passphraseRoadExists(_ envelope: StoreKeyEnvelope?) -> Bool {
+            StoreLobby.passphraseRoadExists(envelope)
+        }
+        nonisolated static func recoveryRoadExists(_ envelope: StoreKeyEnvelope?) -> Bool {
+            StoreLobby.recoveryRoadExists(envelope)
+        }
     }
 
     /// The store id the dials are keyed by (pre-13x 1a): the key file's,
@@ -337,8 +355,8 @@ final class AppBootstrap {
                                 kind: .waitingForICloudKeychain(differentAppleID: different),
                                 demand: .auto,
                                 biometryOffered: false,
-                                passphraseOffered: reading.envelope?.passphrase != nil,
-                                recoveryOffered: reading.envelope?.recovery != nil,
+                                passphraseOffered: LobbyFacts.passphraseRoadExists(reading.envelope),
+                                recoveryOffered: LobbyFacts.recoveryRoadExists(reading.envelope),
                                 envelopeUnreadable: reading.isUnreadable,
                                 storeURL: storeURL))
                         }
@@ -355,8 +373,8 @@ final class AppBootstrap {
                 return .locked(LobbyFacts(
                     demand: demand,
                     biometryOffered: demand == .biometric && guardSeam.gatedItemExists(),
-                    passphraseOffered: reading.envelope?.passphrase != nil,
-                    recoveryOffered: reading.envelope?.recovery != nil,
+                    passphraseOffered: LobbyFacts.passphraseRoadExists(reading.envelope),
+                    recoveryOffered: LobbyFacts.recoveryRoadExists(reading.envelope),
                     envelopeUnreadable: reading.isUnreadable,
                     storeURL: storeURL))
             }
@@ -577,7 +595,8 @@ final class AppBootstrap {
             vaultHasAppleHeldCopy: reading?.hasAppleHeldCopy,
             alwaysAsk: gate.dials(scope, storeID).alwaysAsk,
             biometryAvailable: guardSeam.biometryAvailable(),
-            vaultKDF: reading?.passphraseKDF)
+            vaultKDF: reading?.passphraseKDF,
+            vaultRecoveryWrapDigest: reading?.recoveryWrapDigest)
         lastMigrationReport = await ProtectionMigration.run(facts: facts, leaves: leaves)
     }
 
@@ -640,7 +659,12 @@ final class AppBootstrap {
         let scope = storeVariant.rawValue
         let guardSeam = gate.guardFor(scope)
         let storeURL = facts.storeURL ?? URL(fileURLWithPath: "/dev/null")
-        let envelopeRoad = StoreLobby.envelopeRoad(storeURL: storeURL, gate: gate)
+        // pre-13x 4a: the local copies first, then the vault road (§3.6) —
+        // the derived key of the successful road held in the SHARED session
+        // the reconcile reads at ready.
+        let envelopeRoad = StoreLobby.envelopeRoad(
+            storeURL: storeURL, gate: gate, session: protection.syncCustodySession,
+            vaultRoad: lobbyVaultRoad)
         let waiting: Bool
         if case .waitingForICloudKeychain = facts.kind { waiting = true } else { waiting = false }
         return StoreLobby(
@@ -651,7 +675,7 @@ final class AppBootstrap {
             recoveryOffered: facts.recoveryOffered,
             envelopeUnreadable: facts.envelopeUnreadable,
             gatedRoad: { await guardSeam.unlockGated() },
-            envelopeRoad: envelopeRoad,
+            phasedRoad: envelopeRoad,
             // pre-13x 2a: the waiting kind re-probes the Apple road.
             appleRoad: waiting ? StoreLobby.appleRoad(scope: scope, storeURL: storeURL, gate: gate) : nil,
             complete: { [weak self] key in
@@ -748,8 +772,8 @@ final class AppBootstrap {
             return LobbyFacts(
                 demand: demand,
                 biometryOffered: demand == .biometric && guardSeam.gatedItemExists(),
-                passphraseOffered: reading.envelope?.passphrase != nil,
-                recoveryOffered: reading.envelope?.recovery != nil,
+                passphraseOffered: LobbyFacts.passphraseRoadExists(reading.envelope),
+                recoveryOffered: LobbyFacts.recoveryRoadExists(reading.envelope),
                 envelopeUnreadable: reading.isUnreadable,
                 storeURL: storeURL)
         }.value

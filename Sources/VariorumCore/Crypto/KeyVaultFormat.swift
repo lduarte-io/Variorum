@@ -372,6 +372,12 @@ public struct KeyVaultFormat: Codable, Equatable, Sendable {
         return try Self.unwrap(wrapped, using: key)
     }
 
+    /// pre-13x 4a (ledger 53): the NON-SECRET digest of the recovery wrap's
+    /// bytes — what a key file records at every reconciliation, so a
+    /// device can tell at ready that the twelve words were regenerated
+    /// elsewhere without holding either set. nil when no wrap exists.
+    public var recoveryWrapDigest: String? { RecoveryWrapDigest.hex(of: masterWrappedByRecovery) }
+
     /// The stored entry for a class, if any.
     public func classKey(for keyClass: VaultKeyClass) -> WrappedClassKey? {
         classKeys.first { $0.keyClass == keyClass }
@@ -423,6 +429,18 @@ public struct KeyVaultFormat: Codable, Equatable, Sendable {
         } catch {
             throw KeyVaultError.unwrapFailed
         }
+    }
+}
+
+/// pre-13x 4a (ledger 53): the recovery wrap's digest — SHA-256 over the
+/// wrap's bytes, hex. A wrap is ciphertext (M under the words' key), so
+/// its digest reveals nothing about either; two wraps of the same M under
+/// the same words are byte-identical (RFC 3394 is deterministic), so the
+/// digest changes exactly when the words or the master do.
+public enum RecoveryWrapDigest {
+    public static func hex(of wrap: Data?) -> String? {
+        guard let wrap else { return nil }
+        return SHA256.hash(data: wrap).map { String(format: "%02x", $0) }.joined()
     }
 }
 

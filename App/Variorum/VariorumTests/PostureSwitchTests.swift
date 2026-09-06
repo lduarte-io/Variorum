@@ -1511,7 +1511,7 @@ struct PostureSwitchTests {
 
         // THE FRONT CHECK: the key file records a STALE corpus id.
         var file = try #require(try StoreKeyEnvelope.loadCurrent(besideStore: world.storeURL))
-        try file.recordVaultReconciliation(kdf: file.passphrase?.kdf, corpusKeyID: "corpus-of-an-older-vault")
+        try file.recordVaultReconciliation(kdf: file.passphrase?.kdf, corpusKeyID: "corpus-of-an-older-vault", recoveryWrapDigest: nil)
         try file.write(at: file.preferredURL(besideStore: world.storeURL))
         controller.refreshEnvelopeFacts()
         let stale = PostureSwitchModel(mode: .replaceKeys, runner: world.runner, controller: controller, vaultTie: tie)
@@ -1525,7 +1525,7 @@ struct PostureSwitchTests {
 
         // The current id, recorded under a descriptor that is NOT the
         // vault's (the word was changed elsewhere — the retired class).
-        try file.recordVaultReconciliation(kdf: fastKDF(), corpusKeyID: material.corpusKeyID)
+        try file.recordVaultReconciliation(kdf: fastKDF(), corpusKeyID: material.corpusKeyID, recoveryWrapDigest: nil)
         try file.write(at: file.preferredURL(besideStore: world.storeURL))
         controller.refreshEnvelopeFacts()
         let model = PostureSwitchModel(mode: .replaceKeys, runner: world.runner, controller: controller, vaultTie: tie)

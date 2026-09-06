@@ -315,6 +315,7 @@ final class PostureSwitchRunner {
         }.value
         var material: DeviceKeyMaterial?
         var reencrypted = 0
+        var recoveryWrapDigest: String?
         let stamp = DateFormatter.variorumISO8601.string(from: leaves.now())
 
         if enrolled, let vault = leaves.vault, let transport = leaves.transport {
@@ -359,6 +360,7 @@ final class PostureSwitchRunner {
             let begun = try await CorpusRotation.begin(
                 client: vault, current: current, secrets: secrets, appleHeldCopy: appleHeld)
             leaves.log("posture switch: the vault rewritten under the old proof — rotation seq \(begun.receipt.rotationStartedSeq ?? -1)")
+            recoveryWrapDigest = begun.format.recoveryWrapDigest
             try leaves.injectFault(.afterVaultWriteBeforeCustody)
             guard await leaves.keyStore.offMain({ $0.save(begun.material) }) else {
                 // The vault has moved; this device's custody could not take
@@ -378,7 +380,8 @@ final class PostureSwitchRunner {
         // ————— 4–6: the library, custody, the snapshot —————
         let outcome = try await rekeyCustodyAndSnapshot(
             entersCastle: entersCastle, libraryKey: libraryKey,
-            keyFile: KeyFileInputs(passphrase: passphrase, kdf: secrets.kdf, recoveryWords: recoveryWords),
+            keyFile: KeyFileInputs(passphrase: passphrase, kdf: secrets.kdf, recoveryWords: recoveryWords,
+                                   recoveryWrapDigest: recoveryWrapDigest),
             material: material, reencrypted: reencrypted, stamp: stamp,
             listPreSwitchPairs: entersCastle)
         phase = .done
@@ -460,7 +463,8 @@ final class PostureSwitchRunner {
             leaves.log("follow: the keys are unchanged — the account is \(entersCastle ? "Castle" : "Standard"); the library re-keys and custody moves (no rotation)")
             let outcome = try await rekeyCustodyAndSnapshot(
                 entersCastle: entersCastle, libraryKey: libraryKey,
-                keyFile: KeyFileInputs(passphrase: typedPassphrase, kdf: fetched.format.kdf, recoveryWords: typedWords),
+                keyFile: KeyFileInputs(passphrase: typedPassphrase, kdf: fetched.format.kdf, recoveryWords: typedWords,
+                                       recoveryWrapDigest: fetched.format.recoveryWrapDigest),
                 material: held, reencrypted: 0, stamp: stamp,
                 listPreSwitchPairs: entersCastle && wasStandardShaped, follow: true)
             phase = .done
@@ -479,7 +483,8 @@ final class PostureSwitchRunner {
         let final = try await reencryptAndComplete(vault: vault, transport: transport, material: following)
         let outcome = try await rekeyCustodyAndSnapshot(
             entersCastle: entersCastle, libraryKey: libraryKey,
-            keyFile: KeyFileInputs(passphrase: typedPassphrase, kdf: fetched.format.kdf, recoveryWords: typedWords),
+            keyFile: KeyFileInputs(passphrase: typedPassphrase, kdf: fetched.format.kdf, recoveryWords: typedWords,
+                                   recoveryWrapDigest: fetched.format.recoveryWrapDigest),
             material: final.material, reencrypted: final.reencrypted, stamp: stamp,
             listPreSwitchPairs: entersCastle && wasStandardShaped, follow: true)
         _ = oldFingerprint
@@ -538,7 +543,7 @@ final class PostureSwitchRunner {
     /// Nothing is re-keyed — the library key never moved. Returns the
     /// material and the vault's descriptor.
     func pickUpKeys(passphrase: String?, recoveryWords: [String]?) async throws
-        -> (material: DeviceKeyMaterial, kdf: PassphraseKDF.Descriptor) {
+        -> (material: DeviceKeyMaterial, kdf: PassphraseKDF.Descriptor, recoveryWrapDigest: String?) {
         guard !busy else { throw PostureSwitchError.switchInProgress(.vaultWrite) }
         guard let vault = leaves.vault, await leaves.signedIn() else {
             throw PostureSwitchError.syncKeysUnavailable
@@ -563,7 +568,7 @@ final class PostureSwitchRunner {
         leaves.resumeSync()
         phase = .done
         leaves.log("follow: the new word opened the vault — sync keys held for this session")
-        return (following, fetched.format.kdf)
+        return (following, fetched.format.kdf, fetched.format.recoveryWrapDigest)
     }
 
     /// THE FOLLOW INTO STANDARD (§7 — silent): the account left Castle on
@@ -608,6 +613,9 @@ final class PostureSwitchRunner {
         var passphrase: String?
         var kdf: PassphraseKDF.Descriptor
         var recoveryWords: [String]?
+        /// pre-13x 4a (ledger 53): the vault's recovery-wrap digest as
+        /// fetched — recorded with the descriptor and the corpus key id.
+        var recoveryWrapDigest: String?
     }
 
     /// Steps 3's walk + completion, shared with the resume.
@@ -719,7 +727,8 @@ final class PostureSwitchRunner {
             }
             if let material {
                 try envelope.masterBox(key: newKey, under: material.masterSymmetricKey)
-                try envelope.recordVaultReconciliation(kdf: kdf, corpusKeyID: material.corpusKeyID)
+                try envelope.recordVaultReconciliation(
+                    kdf: kdf, corpusKeyID: material.corpusKeyID, recoveryWrapDigest: keyFile.recoveryWrapDigest)
             }
             if let apple {
                 try envelope.appleBox(key: newKey, under: apple.symmetricKey, appleKeyID: apple.id)
@@ -914,7 +923,8 @@ final class PostureSwitchRunner {
             let wasStandardShaped = leaves.gate.readEnvelope(leaves.storeURL).envelope?.apple != nil
             return try await rekeyCustodyAndSnapshot(
                 entersCastle: entersCastle, libraryKey: libraryKey,
-                keyFile: KeyFileInputs(passphrase: typedPassphrase, kdf: fetched.format.kdf, recoveryWords: typedWords),
+                keyFile: KeyFileInputs(passphrase: typedPassphrase, kdf: fetched.format.kdf, recoveryWords: typedWords,
+                                       recoveryWrapDigest: fetched.format.recoveryWrapDigest),
                 material: material, reencrypted: reencrypted, stamp: marker.startedAt,
                 listPreSwitchPairs: entersCastle && wasStandardShaped, follow: marker.isFollow)
 

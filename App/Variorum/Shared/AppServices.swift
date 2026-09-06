@@ -453,7 +453,7 @@ final class AppServices {
         guard let fetched = try await keyVault.fetchVault() else { throw KeyVaultClientError.vaultAbsent }
         try await adoptLibrary(into: userID)
         _ = await encryption.adoptEnrolledMaterial(
-            material, kdf: fetched.format.kdf,
+            material, kdf: fetched.format.kdf, recoveryWrapDigest: fetched.format.recoveryWrapDigest,
             typedPassphrase: passphrase, typedWords: recoveryWords)
         await connectSyncIfAllowed()
     }

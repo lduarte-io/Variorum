@@ -87,6 +87,9 @@ nonisolated enum ProtectionMigration {
         /// The vault, if reachable: its KDF descriptor (the key file records
         /// it).
         var vaultKDF: PassphraseKDF.Descriptor?
+        /// pre-13x 4a (ledger 53): the vault's recovery-wrap digest, if
+        /// reachable (recorded beside the descriptor at leg 5).
+        var vaultRecoveryWrapDigest: String? = nil
     }
 
     /// The seams (production: `Leaves.live`; the pins: recorders).
@@ -258,7 +261,8 @@ nonisolated enum ProtectionMigration {
                     try envelope.masterBox(key: facts.key, under: material.masterSymmetricKey)
                 }
                 try envelope.recordVaultReconciliation(
-                    kdf: facts.vaultKDF ?? envelope.vaultKDF, corpusKeyID: material.corpusKeyID)
+                    kdf: facts.vaultKDF ?? envelope.vaultKDF, corpusKeyID: material.corpusKeyID,
+                    recoveryWrapDigest: facts.vaultRecoveryWrapDigest ?? envelope.vaultRecoveryWrapDigest)
                 try leaves.saveEnvelope(envelope)
                 report.masterCopyWritten = true
                 // pre-13x 2d: the descriptor lands only when the passphrase
@@ -413,11 +417,11 @@ extension MigrationConfirmModel {
                 guard let fetched = try await keyVault.fetchVault() else {
                     throw KeyVaultClientError.vaultAbsent
                 }
-                return (fetched.format.kdf, material.corpusKeyID)
+                return (fetched.format.kdf, material.corpusKeyID, fetched.format.recoveryWrapDigest)
             },
-            rewrap: { passphrase, kdf, corpusKeyID in
+            rewrap: { passphrase, kdf, corpusKeyID, digest in
                 await controller.reconcilePassphraseWrap(
-                    passphrase: passphrase, vaultKDF: kdf, corpusKeyID: corpusKeyID)
+                    passphrase: passphrase, vaultKDF: kdf, corpusKeyID: corpusKeyID, recoveryWrapDigest: digest)
             },
             clearPending: { [weak controller] in
                 Task { @MainActor in controller?.clearMigrationConfirmPending?() }
@@ -445,13 +449,15 @@ final class MigrationConfirmModel {
     /// Verifies the passphrase against the vault; returns the vault's KDF
     /// descriptor and corpus key id on success. Wired by the composition
     /// (`VaultEnrollment.enroll` — the real unwrap, off the main actor).
-    private let verify: @Sendable (String) async throws -> (kdf: PassphraseKDF.Descriptor, corpusKeyID: String)
-    private let rewrap: @MainActor (String, PassphraseKDF.Descriptor, String) async -> String?
+    /// pre-13x 4a (ledger 53): the verify hands the vault's recovery-wrap
+    /// digest over too; the re-wrap records it beside the descriptor.
+    private let verify: @Sendable (String) async throws -> (kdf: PassphraseKDF.Descriptor, corpusKeyID: String, recoveryWrapDigest: String?)
+    private let rewrap: @MainActor (String, PassphraseKDF.Descriptor, String, String?) async -> String?
     private let clearPending: @Sendable () -> Void
 
     init(
-        verify: @escaping @Sendable (String) async throws -> (kdf: PassphraseKDF.Descriptor, corpusKeyID: String),
-        rewrap: @escaping @MainActor (String, PassphraseKDF.Descriptor, String) async -> String?,
+        verify: @escaping @Sendable (String) async throws -> (kdf: PassphraseKDF.Descriptor, corpusKeyID: String, recoveryWrapDigest: String?),
+        rewrap: @escaping @MainActor (String, PassphraseKDF.Descriptor, String, String?) async -> String?,
         clearPending: @escaping @Sendable () -> Void
     ) {
         self.verify = verify
@@ -466,7 +472,7 @@ final class MigrationConfirmModel {
         defer { busy = false }
         do {
             let vault = try await verify(passphrase)
-            if let refusal = await rewrap(passphrase, vault.kdf, vault.corpusKeyID) {
+            if let refusal = await rewrap(passphrase, vault.kdf, vault.corpusKeyID, vault.recoveryWrapDigest) {
                 lastError = refusal
                 return
             }

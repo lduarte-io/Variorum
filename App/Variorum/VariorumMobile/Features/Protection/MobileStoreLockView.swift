@@ -75,10 +75,20 @@ struct MobileStoreLockView: View {
                         .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                if lobby.busy {
+                // pre-13x 4a (copy §3): the offline note, small, after a
+                // submit whose vault read failed — never before one.
+                if lobby.showsOfflineNote {
+                    Text(ProtectionCopy.lobbyOfflineNote)
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.muted)
+                        .multilineTextAlignment(.center)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                // pre-13x 4a: the phase line from ~200 ms into a submit.
+                if lobby.busy, lobby.showsProgress {
                     HStack(spacing: 6) {
                         ProgressView()
-                        Text(tokens.chromeLabel("Unlocking…"))
+                        Text(tokens.chromeLabel(ProtectionCopy.lobbyPhaseLine(lobby.phase)))
                             .font(tokens.small)
                             .foregroundStyle(tokens.muted)
                     }

@@ -1089,7 +1089,7 @@ struct Phase13pControllerTests {
         let enrolledKey = StoreKey.mint()
         try enrolledFile.setPassphraseWrap(key: enrolledKey, passphrase: "sesame", kdf: fastKDF())
         try enrolledFile.masterBox(key: enrolledKey, under: master)
-        try enrolledFile.recordVaultReconciliation(kdf: kdf, corpusKeyID: "corpus-a")
+        try enrolledFile.recordVaultReconciliation(kdf: kdf, corpusKeyID: "corpus-a", recoveryWrapDigest: nil)
         let enrolled = try world(standard: false, dials: ProtectionDials(alwaysAsk: true), key: enrolledKey, envelope: enrolledFile)
         enrolled.controller.isSignedIn = { true }
         enrolled.controller.foreignOwner = { _ in false }
@@ -1143,7 +1143,7 @@ struct Phase13pControllerTests {
             try file.setPassphraseWrap(key: key, passphrase: "sesame", kdf: kdf)
             try file.appleBox(key: key, under: apple.symmetricKey, appleKeyID: apple.id)
             try file.masterBox(key: key, under: master)
-            try file.recordVaultReconciliation(kdf: kdf, corpusKeyID: recordedID)
+            try file.recordVaultReconciliation(kdf: kdf, corpusKeyID: recordedID, recoveryWrapDigest: nil)
             return (key, file)
         }
 
@@ -1219,7 +1219,7 @@ struct Phase13pControllerTests {
             var file = StoreKeyEnvelope()
             try file.setPassphraseWrap(key: key, passphrase: "sesame", kdf: kdf)
             try file.masterBox(key: key, under: master)
-            try file.recordVaultReconciliation(kdf: kdf, corpusKeyID: "corpus-c")
+            try file.recordVaultReconciliation(kdf: kdf, corpusKeyID: "corpus-c", recoveryWrapDigest: nil)
             return (key, file)
         }
 
@@ -1410,7 +1410,7 @@ struct Phase13pControllerTests {
             var file = StoreKeyEnvelope()
             try file.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
             try file.masterBox(key: key, under: master)
-            try file.recordVaultReconciliation(kdf: kdf, corpusKeyID: recordedID)
+            try file.recordVaultReconciliation(kdf: kdf, corpusKeyID: recordedID, recoveryWrapDigest: nil)
             return (key, file)
         }
         // (a) the held derived key opens the vault ⇒ the session fills.
@@ -1449,7 +1449,7 @@ struct Phase13pControllerTests {
         let key = StoreKey.mint()
         try recorded.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
         try recorded.masterBox(key: key, under: SymmetricKey(size: .bits256))
-        try recorded.recordVaultReconciliation(kdf: fastKDF(), corpusKeyID: "corpus-old")
+        try recorded.recordVaultReconciliation(kdf: fastKDF(), corpusKeyID: "corpus-old", recoveryWrapDigest: nil)
         let rotated = try world(standard: false, dials: ProtectionDials(alwaysAsk: true), key: key, envelope: recorded)
         rotated.syncSession.holdDerivedWrappingKey(
             try PassphraseKDF.deriveKey(passphrase: "sesame", descriptor: fastKDF()), kdf: fastKDF())

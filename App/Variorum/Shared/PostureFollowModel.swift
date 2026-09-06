@@ -131,7 +131,8 @@ final class PostureFollowModel: Identifiable {
                 let picked = try await runner.pickUpKeys(passphrase: passphrase, recoveryWords: words)
                 if let passphrase {
                     if let refusal = await controller.reconcilePassphraseWrap(
-                        passphrase: passphrase, vaultKDF: picked.kdf, corpusKeyID: picked.material.corpusKeyID) {
+                        passphrase: passphrase, vaultKDF: picked.kdf, corpusKeyID: picked.material.corpusKeyID,
+                        recoveryWrapDigest: picked.recoveryWrapDigest) {
                         lastError = refusal
                     }
                 }

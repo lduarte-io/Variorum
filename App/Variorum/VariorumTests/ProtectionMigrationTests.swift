@@ -428,7 +428,7 @@ struct ProtectionMigrationTests {
 
         let vaultKDF = fastKDF()
         #expect(await controller.reconcilePassphraseWrap(
-            passphrase: "sesame", vaultKDF: vaultKDF, corpusKeyID: held.corpusKeyID) == nil)
+            passphrase: "sesame", vaultKDF: vaultKDF, corpusKeyID: held.corpusKeyID, recoveryWrapDigest: nil) == nil)
         let written = try #require(envelopeBox.value)
         #expect(written.vaultKDF == vaultKDF && written.passphrase?.kdf == vaultKDF,
                 "typing it lands the descriptor + the reconciled copy")
@@ -475,15 +475,15 @@ struct ProtectionMigrationTests {
 
     @Test func theConfirmVerifiesAgainstTheVaultThenReWrapsUnderItsDescriptor() async throws {
         let vaultKDF = fastKDF()
-        let rewraps = LockIsolated<[(String, PassphraseKDF.Descriptor, String)]>([])
+        let rewraps = LockIsolated<[(String, PassphraseKDF.Descriptor, String, String?)]>([])
         let cleared = LockIsolated(false)
         let model = MigrationConfirmModel(
             verify: { passphrase in
                 guard passphrase == "sesame" else { throw VaultEnrollmentError.wrongPassphrase }
-                return (vaultKDF, "corpus-7")
+                return (vaultKDF, "corpus-7", "digest-7")
             },
-            rewrap: { passphrase, kdf, corpusKeyID in
-                rewraps.withValue { $0.append((passphrase, kdf, corpusKeyID)) }
+            rewrap: { passphrase, kdf, corpusKeyID, digest in
+                rewraps.withValue { $0.append((passphrase, kdf, corpusKeyID, digest)) }
                 return nil
             },
             clearPending: { cleared.setValue(true) })
@@ -498,6 +498,7 @@ struct ProtectionMigrationTests {
         #expect(rewraps.value.count == 1)
         #expect(rewraps.value.first?.1 == vaultKDF, "re-wrapped under the VAULT's descriptor")
         #expect(rewraps.value.first?.2 == "corpus-7")
+        #expect(rewraps.value.first?.3 == "digest-7", "pre-13x 4a: the vault's recovery-wrap digest rides the re-wrap")
         #expect(cleared.value && model.done)
     }
 
@@ -528,7 +529,7 @@ struct ProtectionMigrationTests {
 
         let vaultKDF = fastKDF()
         #expect(await controller.reconcilePassphraseWrap(
-            passphrase: "sesame", vaultKDF: vaultKDF, corpusKeyID: "corpus-7") == nil)
+            passphrase: "sesame", vaultKDF: vaultKDF, corpusKeyID: "corpus-7", recoveryWrapDigest: nil) == nil)
         let written = try #require(envelopeBox.value)
         #expect(written.passphrase?.kdf == vaultKDF, "the local copy is under the VAULT's descriptor now")
         #expect(try written.unwrapKey(passphrase: "sesame") == key)

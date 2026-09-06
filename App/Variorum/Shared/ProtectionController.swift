@@ -68,6 +68,10 @@ nonisolated struct VaultPostureReading: Equatable, Sendable {
     var signedInUserID: String? = nil
     var hasRecoveryWrap: Bool = false
     var format: KeyVaultFormat? = nil
+    /// pre-13x 4a (ledger 53): the vault's recovery-wrap digest — the key
+    /// file's recorded one must agree, else the words were regenerated
+    /// elsewhere (the change notice's words twin).
+    var recoveryWrapDigest: String? = nil
 }
 
 /// pre-13x 3a — what a vault flow hands the key file once M is in custody:
@@ -78,6 +82,10 @@ nonisolated struct VaultLanding: Sendable {
     var kdf: PassphraseKDF.Descriptor
     var passphrase: String?
     var recoveryWords: [String]?
+    /// pre-13x 4a (ledger 53): the fetched vault's recovery-wrap digest,
+    /// recorded with the descriptor and the corpus key id (nil = the vault
+    /// carries no wrap, or the flow had no fetched vault in hand).
+    var recoveryWrapDigest: String? = nil
 }
 
 /// pre-13x 3a — ENROLL's four directions (design §5's Enroll row; copy §2d):
@@ -221,6 +229,9 @@ final class ProtectionController {
     }
 
     private let configuration: Configuration
+    /// pre-13x 4a: the session memory this controller reads (the lobby's
+    /// road holds the derived key in it; a relock drops it).
+    var syncCustodySession: SyncCustodySession { configuration.syncCustodySession }
     private let guardSeam: StoreKeyGuard
     private let appleKeys: AppleKeyLeaves
     private let logger = Logger(subsystem: "io.lduarte.Variorum", category: "protection")
@@ -946,12 +957,17 @@ final class ProtectionController {
 
     /// Land TYPED words as the store's recovery wrap — the road for a
     /// vault-enrolled user whose twelve words already exist (one secret).
+    /// pre-13x 4a (ledger 53): `recoveryWrapDigest` — the VAULT's wrap's
+    /// digest as fetched after the land (nil = no vault in hand) — is
+    /// recorded beside the copy, so the device that regenerated its own
+    /// words never owes itself the words-regenerated notice.
     @discardableResult
-    func landRecoveryWrap(words: [String]) async -> String? {
+    func landRecoveryWrap(words: [String], recoveryWrapDigest: String?) async -> String? {
         guard let key = currentKey() else { return Self.keyUnavailable }
         do {
             var envelope = try ensuredEnvelope(for: key).envelope
             try envelope.setRecoveryWrap(key: key, words: words)
+            if let recoveryWrapDigest { try envelope.recordVaultRecoveryWrapDigest(recoveryWrapDigest) }
             try saveEnvelope(envelope)
             refreshEnvelopeFacts()
             refreshNotices()
@@ -1279,7 +1295,8 @@ final class ProtectionController {
     /// lobby's vault road then derives once. Returns the worded refusal.
     @discardableResult
     func reconcilePassphraseWrap(
-        passphrase: String, vaultKDF: PassphraseKDF.Descriptor, corpusKeyID: String
+        passphrase: String, vaultKDF: PassphraseKDF.Descriptor, corpusKeyID: String,
+        recoveryWrapDigest: String?
     ) async -> String? {
         guard !passphrase.isEmpty else { return "Type the passphrase first." }
         guard let key = currentKey() else { return Self.keyUnavailable }
@@ -1289,7 +1306,8 @@ final class ProtectionController {
             }.value
             var envelope = try ensuredEnvelope(for: key).envelope
             try envelope.adoptPassphraseWrap(wrap, key: key)
-            try envelope.recordVaultReconciliation(kdf: vaultKDF, corpusKeyID: corpusKeyID)
+            try envelope.recordVaultReconciliation(
+                kdf: vaultKDF, corpusKeyID: corpusKeyID, recoveryWrapDigest: recoveryWrapDigest)
             try saveEnvelope(envelope)
             clearMigrationConfirmPending?()
             migrationConfirmPending = false
@@ -1318,14 +1336,17 @@ final class ProtectionController {
            loadEnvelope()?.passphrase?.kdf != landing.kdf {
             if let refusal = await reconcilePassphraseWrap(
                 passphrase: passphrase, vaultKDF: landing.kdf,
-                corpusKeyID: landing.material.corpusKeyID) {
+                corpusKeyID: landing.material.corpusKeyID,
+                recoveryWrapDigest: landing.recoveryWrapDigest) {
                 return refusal
             }
         }
         do {
             var envelope = try ensuredEnvelope(for: key).envelope
             try envelope.masterBox(key: key, under: landing.material.masterSymmetricKey)
-            try envelope.recordVaultReconciliation(kdf: landing.kdf, corpusKeyID: landing.material.corpusKeyID)
+            try envelope.recordVaultReconciliation(
+                kdf: landing.kdf, corpusKeyID: landing.material.corpusKeyID,
+                recoveryWrapDigest: landing.recoveryWrapDigest)
             if let words = landing.recoveryWords, !words.isEmpty {
                 try envelope.setRecoveryWrap(key: key, words: words)
             }
@@ -1582,8 +1603,10 @@ func wireOneSecretHooks(
     keyVault: KeyVaultClient?,
     auth: AuthSession
 ) {
-    encryption.onRecoveryPhraseLanded = { words in
-        _ = await protection.landRecoveryWrap(words: words)
+    // pre-13x 4a (ledger 53): the vault's recovery-wrap digest rides the
+    // landing so the acting device records the words it just regenerated.
+    encryption.onRecoveryPhraseLanded = { words, digest in
+        _ = await protection.landRecoveryWrap(words: words, recoveryWrapDigest: digest)
     }
     encryption.storePassphraseGuard = { passphrase in
         await protection.verifyPassphraseAgainstStore(passphrase)
@@ -1609,7 +1632,8 @@ func wireOneSecretHooks(
         verifyRecoveryWords: { await protection.verifyRecoveryWordsAgainstStore($0) },
         passphraseKDF: { protection.currentPassphraseKDF })
     protection.landEnrollment = { material, kdf in
-        await encryption.adoptEnrolledMaterial(material, kdf: kdf)
+        await encryption.adoptEnrolledMaterial(
+            material, kdf: kdf, recoveryWrapDigest: protection.vaultReading?.recoveryWrapDigest)
     }
     // pre-13x 3b: the two re-wrap doors' facts (copy §4; the reset door's
     // merge — the forgot road reads the posture and gate here).
@@ -1640,7 +1664,8 @@ func wireOneSecretHooks(
                 updatedByDevice: fetched.format.updatedByDevice,
                 signedInUserID: userID,
                 hasRecoveryWrap: fetched.format.masterWrappedByRecovery != nil,
-                format: fetched.format)
+                format: fetched.format,
+                recoveryWrapDigest: fetched.format.recoveryWrapDigest)
         }
     } else {
         // Totality (ladder R3-n1): "re-wired per session" must hold for the

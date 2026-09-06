@@ -17,6 +17,7 @@
 //  behind a demanded route).
 //
 
+import CryptoKit
 import Foundation
 import Observation
 import VariorumCore
@@ -434,6 +435,28 @@ final class StoreLobby {
     private(set) var busy = false
     var lastError: String?
 
+    /// pre-13x 4a (§3.6): what the lobby is doing while busy — the faces
+    /// render the line (*Unlocking… / Checking your account…*); the vault
+    /// road reports `.checkingAccount` only when it is actually awaited
+    /// (after a local refusal, signed in).
+    nonisolated enum Phase: Equatable, Sendable {
+        case idle
+        case unlocking
+        case checkingAccount
+    }
+    private(set) var phase: Phase = .idle
+    /// The progress row shows from ~200 ms into a submit (`progressDelay`),
+    /// never at once — a local unlock is usually under that.
+    private(set) var showsProgress = false
+    /// pre-13x 4a (copy §3's offline note): rendered small beneath the
+    /// roads AFTER a submit in this lobby whose vault read failed with a
+    /// transport error (or ran past the ceiling) — the lobby knows it is
+    /// offline only by trying; never before a submit. Cleared by the next
+    /// submit.
+    private(set) var showsOfflineNote = false
+    private let progressDelay: Duration
+    @ObservationIgnored private var progressTask: Task<Void, Never>?
+
     /// True when no road exists at all — the honest dead-end sentence
     /// renders instead of doors (practically unreachable through the
     /// mode-transition choreography, which refuses to enter a demanded
@@ -453,7 +476,9 @@ final class StoreLobby {
 
     // The roads (injected).
     private let gatedRoad: @Sendable () async -> StoreKey?
-    private let envelopeRoad: @Sendable (Secret) async -> Result<StoreKey, StoreLobby.Refusal>
+    /// The envelope road with its PHASE report (pre-13x 4a): the road calls
+    /// the report when it starts awaiting the vault; the lobby renders it.
+    private let envelopeRoad: @Sendable (Secret, @escaping @Sendable (Phase) -> Void) async -> Result<StoreKey, StoreLobby.Refusal>
     /// pre-13x 2a: the Apple road (the waiting kind only) — A from iCloud
     /// Keychain → the key file's Apple copy → the key; nil while A has not
     /// arrived (or is not this library's). Polled by `beginWaiting`.
@@ -471,12 +496,15 @@ final class StoreLobby {
         case recoveryText(String)
     }
 
-    /// A worded refusal (the roads never surface raw errors).
+    /// A worded refusal (the roads never surface raw errors). pre-13x 4a:
+    /// `offline` — the vault road could not be reached (a transport error
+    /// or the ceiling), so copy §3's offline note is honest.
     nonisolated struct Refusal: Error, Sendable {
         let message: String
+        var offline: Bool = false
     }
 
-    init(
+    convenience init(
         kind: Kind = .castle,
         demand: StoreAtOpenMode,
         biometryOffered: Bool,
@@ -486,6 +514,30 @@ final class StoreLobby {
         gatedRoad: @escaping @Sendable () async -> StoreKey?,
         envelopeRoad: @escaping @Sendable (Secret) async -> Result<StoreKey, StoreLobby.Refusal>,
         appleRoad: (@Sendable () async -> StoreKey?)? = nil,
+        progressDelay: Duration = .milliseconds(200),
+        complete: @escaping @MainActor (StoreKey) -> Void
+    ) {
+        self.init(
+            kind: kind, demand: demand, biometryOffered: biometryOffered,
+            passphraseOffered: passphraseOffered, recoveryOffered: recoveryOffered,
+            envelopeUnreadable: envelopeUnreadable, gatedRoad: gatedRoad,
+            phasedRoad: { secret, _ in await envelopeRoad(secret) },
+            appleRoad: appleRoad, progressDelay: progressDelay, complete: complete)
+    }
+
+    /// pre-13x 4a: the road that REPORTS its phase (the vault road's
+    /// *Checking your account…*) — the bootstrap's composition.
+    init(
+        kind: Kind = .castle,
+        demand: StoreAtOpenMode,
+        biometryOffered: Bool,
+        passphraseOffered: Bool,
+        recoveryOffered: Bool,
+        envelopeUnreadable: Bool = false,
+        gatedRoad: @escaping @Sendable () async -> StoreKey?,
+        phasedRoad: @escaping @Sendable (Secret, @escaping @Sendable (Phase) -> Void) async -> Result<StoreKey, StoreLobby.Refusal>,
+        appleRoad: (@Sendable () async -> StoreKey?)? = nil,
+        progressDelay: Duration = .milliseconds(200),
         complete: @escaping @MainActor (StoreKey) -> Void
     ) {
         self.kind = kind
@@ -495,9 +547,22 @@ final class StoreLobby {
         self.recoveryOffered = recoveryOffered
         self.envelopeUnreadable = envelopeUnreadable
         self.gatedRoad = gatedRoad
-        self.envelopeRoad = envelopeRoad
+        self.envelopeRoad = phasedRoad
         self.appleRoad = appleRoad
+        self.progressDelay = progressDelay
         self.complete = complete
+    }
+
+    /// pre-13x 4a (§3.5 / §3.6): a secret road exists when its LOCAL copy
+    /// does — or when the key file carries a master-wrapped copy of the
+    /// library key, which the vault road opens by the account's copy of
+    /// that secret (the twelve words open a library whose local W copy
+    /// never landed; the current passphrase opens an old backup online).
+    nonisolated static func passphraseRoadExists(_ envelope: StoreKeyEnvelope?) -> Bool {
+        envelope?.passphrase != nil || envelope?.master != nil
+    }
+    nonisolated static func recoveryRoadExists(_ envelope: StoreKeyEnvelope?) -> Bool {
+        envelope?.recovery != nil || envelope?.master != nil
     }
 
     /// Whether this is Standard's waiting state.
@@ -582,13 +647,40 @@ final class StoreLobby {
         guard !busy else { return }
         busy = true
         lastError = nil
-        defer { busy = false }
-        switch await envelopeRoad(secret) {
+        showsOfflineNote = false
+        phase = .unlocking
+        beginProgressTimer()
+        defer {
+            busy = false
+            phase = .idle
+            progressTask?.cancel()
+            progressTask = nil
+            showsProgress = false
+        }
+        let result = await envelopeRoad(secret) { [weak self] reported in
+            Task { @MainActor [weak self] in
+                guard let self, self.busy else { return }
+                self.phase = reported
+            }
+        }
+        switch result {
         case .success(let key):
             stopWaiting()
             complete(key)
         case .failure(let refusal):
             lastError = refusal.message
+            showsOfflineNote = refusal.offline
+        }
+    }
+
+    /// The progress row from ~`progressDelay` into a submit.
+    private func beginProgressTimer() {
+        progressTask?.cancel()
+        let delay = progressDelay
+        progressTask = Task { @MainActor [weak self] in
+            try? await Task.sleep(for: delay)
+            guard !Task.isCancelled, let self, self.busy else { return }
+            self.showsProgress = true
         }
     }
 
@@ -642,43 +734,240 @@ final class StoreLobby {
 
     // MARK: - The roads' production builder
 
-    /// Builds the envelope road for a store at `storeURL`: load the
-    /// sidecar, run the heavy unwrap OFF the main actor (the Argon2id
-    /// derivation), word every refusal. Shared by the bootstrap and the
-    /// tests that want the real road over a scripted gate.
+    /// Builds the envelope road for a store at `storeURL` — the LOCAL
+    /// copies only (no vault road): the sidecar loaded, the heavy unwrap
+    /// OFF the main actor (the Argon2id derivation), every refusal worded.
+    /// Kept for the compositions and pins that want the local road alone;
+    /// the bootstrap composes the phased road below with the vault road.
     nonisolated static func envelopeRoad(
         storeURL: URL, gate: StoreLaunchGate, session: SyncCustodySession = .shared
     ) -> @Sendable (Secret) async -> Result<StoreKey, StoreLobby.Refusal> {
-        { secret in
+        let phased = envelopeRoad(storeURL: storeURL, gate: gate, session: session, vaultRoad: nil)
+        return { secret in await phased(secret) { _ in } }
+    }
+
+    /// pre-13x 4a — THE ENVELOPE ROAD WITH THE VAULT ROAD (design §3.6;
+    /// ledger 10). The two secret roads try the LOCAL copy first, then — on
+    /// a refusal, signed in and online — the vault: derive per the vault's
+    /// descriptor → unwrap the master → the key file's master-wrapped copy
+    /// of the library key → L → a fresh local copy under the typed word
+    /// with the vault's descriptor (+ the reconciliation recorded) — written
+    /// only AFTER the vault unwrap and the master-copy unwrap succeeded, so
+    /// a typo writes nothing. The vault READ starts concurrently with the
+    /// local derivation (`async let`-shaped: a detached task) and is
+    /// cancelled when the local copy opens; a local refusal awaits it under
+    /// `ceiling` (~10 s), past which the local verdict stands with the
+    /// offline note. The derivation runs ONCE when the local wrap's
+    /// descriptor equals the vault's (the derived key is reused). The
+    /// derived key of the SUCCESSFUL road is held for the session under
+    /// ITS descriptor — the vault's when the vault opened — so the ready
+    /// reconcile's derived-key rule lands custody with no second entry.
+    /// `derive` is injectable so a pin can count derivations.
+    nonisolated static func envelopeRoad(
+        storeURL: URL, gate: StoreLaunchGate, session: SyncCustodySession = .shared,
+        vaultRoad: LobbyVaultRoad?, ceiling: Duration = .seconds(10),
+        derive: @escaping @Sendable (String, PassphraseKDF.Descriptor) throws -> SymmetricKey = {
+            try PassphraseKDF.deriveKey(passphrase: $0, descriptor: $1)
+        }
+    ) -> @Sendable (Secret, @escaping @Sendable (Phase) -> Void) async -> Result<StoreKey, StoreLobby.Refusal> {
+        { secret, report in
             await Task.detached(priority: .userInitiated) {
-                do {
-                    guard let envelope = try gate.loadEnvelope(storeURL) else {
-                        throw StoreKeyEnvelopeError.noPassphraseWrap
-                    }
-                    switch secret {
-                    case .passphrase(let typed):
-                        // pre-13x 2c (decision 10's Always-ask exception): the
-                        // DERIVED wrapping key — never the typed word — is
-                        // held in session memory with its descriptor, so the
-                        // ready-time vault read can fill an Always-ask
-                        // device's sync keys without a second derivation
-                        // (§3.6 — derive once when the recorded descriptor
-                        // equals the vault's); a relock drops it (1a's pin).
-                        guard let wrap = envelope.passphrase else {
-                            throw StoreKeyEnvelopeError.noPassphraseWrap
-                        }
-                        let derived = try PassphraseKDF.deriveKey(passphrase: typed, descriptor: wrap.kdf)
-                        let key = try envelope.unwrapKey(passphraseKey: derived)
-                        session.holdDerivedWrappingKey(derived, kdf: wrap.kdf)
-                        return .success(key)
-                    case .recoveryText(let text):
-                        let words = EncryptionSession.words(from: text)
-                        return .success(try envelope.unwrapKey(recoveryWords: words))
-                    }
-                } catch {
-                    return .failure(Refusal(message: ProtectionCopy.message(for: error)))
-                }
+                await Self.runEnvelopeRoad(
+                    secret: secret, storeURL: storeURL, gate: gate, session: session,
+                    vaultRoad: vaultRoad, ceiling: ceiling, derive: derive, report: report)
             }.value
+        }
+    }
+
+    /// The vault read ran past the ceiling.
+    nonisolated struct VaultReadTimedOut: Error {}
+
+    private nonisolated static func runEnvelopeRoad(
+        secret: Secret, storeURL: URL, gate: StoreLaunchGate, session: SyncCustodySession,
+        vaultRoad: LobbyVaultRoad?, ceiling: Duration,
+        derive: @Sendable (String, PassphraseKDF.Descriptor) throws -> SymmetricKey,
+        report: @Sendable (Phase) -> Void
+    ) async -> Result<StoreKey, StoreLobby.Refusal> {
+        // 1. The key file — the one thing every road needs.
+        let envelope: StoreKeyEnvelope
+        do {
+            guard let loaded = try gate.loadEnvelope(storeURL) else {
+                return .failure(Refusal(message: ProtectionCopy.message(for: StoreKeyEnvelopeError.noPassphraseWrap)))
+            }
+            envelope = loaded
+        } catch {
+            return .failure(Refusal(message: ProtectionCopy.message(for: error)))
+        }
+        // 2. The vault read, started NOW — concurrently with the local
+        //    derivation (corner 17: the ONE pre-unlock network contact).
+        //    Only a key file carrying a master-wrapped copy has any use for
+        //    it; a road without one never touches the network.
+        var vaultFetch: Task<KeyVaultFormat?, Error>?
+        if let vaultRoad, envelope.master != nil {
+            vaultFetch = Task.detached(priority: .userInitiated) { try await vaultRoad.fetch() }
+        }
+
+        switch secret {
+        case .passphrase(let typed):
+            // 3. THE LOCAL COPY FIRST.
+            var local: (key: SymmetricKey, kdf: PassphraseKDF.Descriptor)?
+            let localRefusal: any Error
+            do {
+                guard let wrap = envelope.passphrase else { throw StoreKeyEnvelopeError.noPassphraseWrap }
+                // The floor BEFORE the derivation (3b — a tampered key file
+                // cannot make the KDF cheap).
+                try wrap.kdf.validateFloor(PassphraseKDF.floor)
+                let derived = try derive(typed, wrap.kdf)
+                local = (derived, wrap.kdf)
+                let key = try envelope.unwrapKey(passphraseKey: derived)
+                vaultFetch?.cancel()
+                // pre-13x 2c (decision 10's Always-ask exception): the
+                // DERIVED wrapping key — never the typed word — is held in
+                // session memory with its descriptor (§3.6 — derive once when
+                // the recorded descriptor equals the vault's); a relock
+                // drops it (1a's pin).
+                session.holdDerivedWrappingKey(derived, kdf: wrap.kdf)
+                return .success(key)
+            } catch {
+                localRefusal = error
+            }
+            // 4. THE VAULT ROAD — signed in and online.
+            let localMessage = ProtectionCopy.message(
+                for: vaultFetch != nil && isAbsentWrap(localRefusal) ? StoreKeyEnvelopeError.wrongPassphrase : localRefusal)
+            guard let vaultFetch else { return .failure(Refusal(message: localMessage)) }
+            report(.checkingAccount)
+            let format: KeyVaultFormat?
+            do {
+                format = try await awaitWithin(ceiling, vaultFetch)
+            } catch {
+                // A transport failure or the ceiling: the local verdict, and
+                // copy §3's offline note (the lobby knows only by trying).
+                return .failure(Refusal(message: localMessage, offline: true))
+            }
+            guard let format else { return .failure(Refusal(message: localMessage)) }  // signed out / no vault
+            // Derive ONCE when the local wrap's descriptor is the vault's
+            // (the key already in hand IS the vault's derivation).
+            let derivedVault: SymmetricKey
+            do {
+                if let local, local.kdf == format.kdf {
+                    derivedVault = local.key
+                } else {
+                    derivedVault = try derive(typed, format.kdf)
+                }
+            } catch {
+                return .failure(Refusal(message: localMessage))
+            }
+            guard let master = try? format.unwrapMaster(withPassphraseKey: derivedVault) else {
+                // The vault refused too. RETIRED (copy §3) only when the key
+                // file's recorded descriptor is no longer the vault's — a
+                // change happened elsewhere, and the typed word is neither
+                // the old (it would have opened locally) nor the new.
+                let retired = envelope.vaultKDF != nil && envelope.vaultKDF != format.kdf
+                return .failure(Refusal(message: retired ? ProtectionCopy.lobbyRetiredPassphrase : localMessage))
+            }
+            guard let key = try? envelope.unwrapKey(master: master) else {
+                // The vault opened but the key file's master-wrapped copy is
+                // not under this account's master (§3.6's owner distinction —
+                // another account's vault): this library is not opened by
+                // that word.
+                return .failure(Refusal(message: localMessage))
+            }
+            // 5. THE FRESH LOCAL COPY — after the vault unwrap AND the
+            //    master-copy unwrap succeeded, never before (a typo writes
+            //    nothing). The next open by this word is LOCAL: one derivation.
+            var updated = envelope
+            if let wrap = try? StoreKeyEnvelope.makePassphraseWrap(key: key, passphraseKey: derivedVault, kdf: format.kdf) {
+                do {
+                    try updated.adoptPassphraseWrap(wrap, key: key)
+                    try updated.recordVaultReconciliation(
+                        kdf: format.kdf, corpusKeyID: format.classKey(for: .corpus)?.keyID,
+                        recoveryWrapDigest: format.recoveryWrapDigest)
+                    try gate.saveEnvelope(updated, storeURL)
+                } catch {
+                    // The open stands; the next open by this word derives twice
+                    // (the ready reconcile's landing re-wraps it).
+                }
+            }
+            session.holdDerivedWrappingKey(derivedVault, kdf: format.kdf)
+            return .success(key)
+
+        case .recoveryText(let text):
+            let words = EncryptionSession.words(from: text)
+            // A malformed phrase (checksum, unknown word, the count) is the
+            // phrase's own refusal — no copy and no vault can change it.
+            let recoveryKey: SymmetricKey
+            do {
+                recoveryKey = try RecoveryPhrase.recoveryWrapKey(words: words)
+            } catch {
+                vaultFetch?.cancel()
+                return .failure(Refusal(message: ProtectionCopy.message(for: error)))
+            }
+            let localRefusal: any Error
+            do {
+                let key = try envelope.unwrapKey(recoveryWords: words)
+                vaultFetch?.cancel()
+                return .success(key)
+            } catch {
+                localRefusal = error
+            }
+            let localMessage = ProtectionCopy.message(
+                for: vaultFetch != nil && isAbsentWrap(localRefusal) ? StoreKeyEnvelopeError.wrongRecoveryPhrase : localRefusal)
+            guard let vaultFetch else { return .failure(Refusal(message: localMessage)) }
+            report(.checkingAccount)
+            let format: KeyVaultFormat?
+            do {
+                format = try await awaitWithin(ceiling, vaultFetch)
+            } catch {
+                return .failure(Refusal(message: localMessage, offline: true))
+            }
+            guard let format,
+                  let master = try? format.unwrapMaster(withRecoveryKey: recoveryKey),
+                  let key = try? envelope.unwrapKey(master: master)
+            else { return .failure(Refusal(message: localMessage)) }
+            // The W copy landed locally (§12: the twelve words open a library
+            // whose local W copy was never landed) + the vault's wrap digest;
+            // the P copy's record is untouched (a passphrase change elsewhere
+            // still speaks at ready).
+            var updated = envelope
+            do {
+                try updated.setRecoveryWrap(key: key, words: words)
+                try updated.recordVaultRecoveryWrapDigest(format.recoveryWrapDigest)
+                try gate.saveEnvelope(updated, storeURL)
+            } catch {
+                // The open stands; the copy lands at the next words entry.
+            }
+            return .success(key)
+        }
+    }
+
+    private nonisolated static func isAbsentWrap(_ error: any Error) -> Bool {
+        switch error {
+        case StoreKeyEnvelopeError.noPassphraseWrap, StoreKeyEnvelopeError.noRecoveryWrap: return true
+        default: return false
+        }
+    }
+
+    /// The vault read under the ceiling: the first of the two to finish
+    /// wins; past the ceiling the read is cancelled and the caller keeps the
+    /// local verdict (the vault road is online by nature).
+    private nonisolated static func awaitWithin(
+        _ ceiling: Duration, _ fetch: Task<KeyVaultFormat?, Error>
+    ) async throws -> KeyVaultFormat? {
+        try await withThrowingTaskGroup(of: KeyVaultFormat?.self) { group in
+            group.addTask { try await fetch.value }
+            group.addTask {
+                try await Task.sleep(for: ceiling)
+                throw VaultReadTimedOut()
+            }
+            do {
+                let first = try await group.next() ?? nil
+                group.cancelAll()
+                return first
+            } catch {
+                fetch.cancel()
+                group.cancelAll()
+                throw error
+            }
         }
     }
 }

@@ -92,6 +92,14 @@ public struct StoreKeyEnvelope: Codable, Equatable, Sendable {
     /// owner distinction: a differing id after unlock is the follow or the
     /// adopt road).
     public var vaultCorpusKeyID: String?
+    /// FORMAT 2 — pre-13x 4a (ledger 53): a NON-SECRET digest (SHA-256 hex,
+    /// `RecoveryWrapDigest.hex`) of the vault's recovery wrap the local W
+    /// copy was last reconciled against; a difference at ready means the
+    /// twelve words were regenerated elsewhere (the words twin of
+    /// `vaultKDF`). nil = unknown — a file written before 4a, or a vault
+    /// with no recovery wrap yet — and owes no notice. Additive optional:
+    /// a file without it decodes nil.
+    public var vaultRecoveryWrapDigest: String?
 
     public struct PassphraseWrap: Codable, Equatable, Sendable {
         /// The versioned KDF parameters this wrap's key was derived with
@@ -116,7 +124,8 @@ public struct StoreKeyEnvelope: Codable, Equatable, Sendable {
         apple: Data? = nil,
         appleKeyID: String? = nil,
         vaultKDF: PassphraseKDF.Descriptor? = nil,
-        vaultCorpusKeyID: String? = nil
+        vaultCorpusKeyID: String? = nil,
+        vaultRecoveryWrapDigest: String? = nil
     ) {
         self.formatVersion = formatVersion
         self.storeID = storeID
@@ -128,6 +137,7 @@ public struct StoreKeyEnvelope: Codable, Equatable, Sendable {
         self.appleKeyID = appleKeyID
         self.vaultKDF = vaultKDF
         self.vaultCorpusKeyID = vaultCorpusKeyID
+        self.vaultRecoveryWrapDigest = vaultRecoveryWrapDigest
     }
 
     /// The first 8 hex characters of the fingerprint — what a snapshot's
@@ -185,6 +195,23 @@ public struct StoreKeyEnvelope: Codable, Equatable, Sendable {
         do {
             let wrapped = try AES.KeyWrap.wrap(
                 SymmetricKey(data: key.data), using: wrapKey)
+            return PassphraseWrap(kdf: kdf, wrapped: wrapped)
+        } catch {
+            throw StoreKeyEnvelopeError.wrapFailed
+        }
+    }
+
+    /// pre-13x 4a (ledger 54): the wrap from a DERIVED key already in hand —
+    /// the lobby derived the typed word under the vault's descriptor and
+    /// the follow writes the new key file's P copy under that SAME key
+    /// with that descriptor, so the word is never asked twice and the next
+    /// open derives once. `kdf` MUST be the descriptor `passphraseKey` was
+    /// derived under (the caller's contract — the descriptor is truth).
+    public static func makePassphraseWrap(
+        key: StoreKey, passphraseKey: SymmetricKey, kdf: PassphraseKDF.Descriptor
+    ) throws -> PassphraseWrap {
+        do {
+            let wrapped = try AES.KeyWrap.wrap(SymmetricKey(data: key.data), using: passphraseKey)
             return PassphraseWrap(kdf: kdf, wrapped: wrapped)
         } catch {
             throw StoreKeyEnvelopeError.wrapFailed
@@ -294,14 +321,28 @@ public struct StoreKeyEnvelope: Codable, Equatable, Sendable {
         formatVersion = Self.currentFormatVersion
     }
 
-    /// Record what the local passphrase copy was last reconciled against
-    /// (§3.6): the vault's descriptor and corpus key id.
+    /// Record what the local copies were last reconciled against (§3.6):
+    /// the vault's descriptor and corpus key id — and, pre-13x 4a (ledger
+    /// 53), the digest of its recovery wrap (`KeyVaultFormat
+    /// .recoveryWrapDigest`; nil = the vault carries none, or the caller
+    /// has no fetched vault in hand — REQUIRED so every landing site
+    /// decides, the `legacyCleanup` precedent).
     public mutating func recordVaultReconciliation(
-        kdf: PassphraseKDF.Descriptor?, corpusKeyID: String?
+        kdf: PassphraseKDF.Descriptor?, corpusKeyID: String?, recoveryWrapDigest: String?
     ) throws {
         try requireCurrentFormat()
         vaultKDF = kdf
         vaultCorpusKeyID = corpusKeyID
+        vaultRecoveryWrapDigest = recoveryWrapDigest
+        formatVersion = Self.currentFormatVersion
+    }
+
+    /// pre-13x 4a: the digest ALONE — the words road's landing (the W copy
+    /// re-landed under the vault's current words; the P copy's record is
+    /// untouched, so a passphrase change elsewhere still speaks).
+    public mutating func recordVaultRecoveryWrapDigest(_ digest: String?) throws {
+        try requireCurrentFormat()
+        vaultRecoveryWrapDigest = digest
         formatVersion = Self.currentFormatVersion
     }
 

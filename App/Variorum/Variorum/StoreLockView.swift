@@ -151,10 +151,22 @@ struct StoreLockView: View {
                     .lineLimit(6)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            if lobby.busy {
+            // pre-13x 4a (copy §3): the offline note, small, after a submit
+            // whose vault read failed — never before one.
+            if lobby.showsOfflineNote {
+                Text(ProtectionCopy.lobbyOfflineNote)
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(4)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            // pre-13x 4a: the phase line (*Unlocking… / Checking your
+            // account…*) from ~200 ms into a submit.
+            if lobby.busy, lobby.showsProgress {
                 HStack(spacing: 6) {
                     ProgressView().controlSize(.small)
-                    Text("Unlocking…")
+                    Text(ProtectionCopy.lobbyPhaseLine(lobby.phase))
                         .font(tokens.small)
                         .foregroundStyle(tokens.muted)
                         .lineLimit(1)

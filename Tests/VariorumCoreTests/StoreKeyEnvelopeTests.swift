@@ -381,9 +381,55 @@ struct StoreKeyEnvelopeFormat2Tests {
     @Test func theVaultReconciliationIsRecorded() throws {
         var envelope = StoreKeyEnvelope()
         let kdf = fastKDF()
-        try envelope.recordVaultReconciliation(kdf: kdf, corpusKeyID: "corpus-9")
+        try envelope.recordVaultReconciliation(kdf: kdf, corpusKeyID: "corpus-9", recoveryWrapDigest: "ab12")
         #expect(envelope.vaultKDF == kdf)
         #expect(envelope.vaultCorpusKeyID == "corpus-9")
+        #expect(envelope.vaultRecoveryWrapDigest == "ab12")
+        try envelope.recordVaultRecoveryWrapDigest("cd34")
+        #expect(envelope.vaultRecoveryWrapDigest == "cd34" && envelope.vaultKDF == kdf, "the digest alone moves")
+    }
+
+    /// pre-13x 4a (ledger 53): the recovery-wrap digest is a format-2
+    /// ADDITIVE optional — a file written without it decodes nil (unknown,
+    /// owes no notice); a recorded one round-trips through the file; the
+    /// digest is SHA-256 hex of the wrap's bytes and nil for no wrap.
+    @Test func theRecoveryWrapDigestIsAdditiveAndRoundTrips() throws {
+        let dir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("variorum-4a-digest-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let url = dir.appendingPathComponent("variorum-keys.json")
+        let wrap = Data((0..<40).map { UInt8($0) })
+        let digest = try #require(RecoveryWrapDigest.hex(of: wrap))
+        #expect(digest.count == 64 && digest.allSatisfy(\.isHexDigit))
+        #expect(RecoveryWrapDigest.hex(of: nil) == nil)
+        #expect(RecoveryWrapDigest.hex(of: wrap) == digest, "deterministic")
+        var envelope = StoreKeyEnvelope()
+        try envelope.recordVaultReconciliation(kdf: fastKDF(), corpusKeyID: "corpus-1", recoveryWrapDigest: digest)
+        try envelope.write(at: url)
+        let back = try #require(try StoreKeyEnvelope.load(at: url))
+        #expect(back.vaultRecoveryWrapDigest == digest)
+        // A pre-4a file: the same JSON without the field decodes nil.
+        var json = try #require(try JSONSerialization.jsonObject(with: Data(contentsOf: url)) as? [String: Any])
+        json.removeValue(forKey: "vaultRecoveryWrapDigest")
+        try JSONSerialization.data(withJSONObject: json).write(to: url)
+        let older = try #require(try StoreKeyEnvelope.load(at: url))
+        #expect(older.vaultRecoveryWrapDigest == nil && older.vaultCorpusKeyID == "corpus-1")
+    }
+
+    /// pre-13x 4a (ledger 54): a passphrase wrap made from a DERIVED key
+    /// under a descriptor opens under the TYPED word — the follow's new key
+    /// file from the word typed at the lobby, never asked twice.
+    @Test func aWrapFromADerivedKeyOpensUnderTheTypedWord() throws {
+        let key = StoreKey.mint()
+        let kdf = fastKDF()
+        let derived = try PassphraseKDF.deriveKey(passphrase: "typed once", descriptor: kdf)
+        let wrap = try StoreKeyEnvelope.makePassphraseWrap(key: key, passphraseKey: derived, kdf: kdf)
+        var envelope = StoreKeyEnvelope()
+        try envelope.adoptPassphraseWrap(wrap, key: key)
+        #expect(try envelope.unwrapKey(passphrase: "typed once") == key)
+        #expect(try envelope.unwrapKey(passphraseKey: derived) == key)
+        #expect(throws: StoreKeyEnvelopeError.wrongPassphrase) { _ = try envelope.unwrapKey(passphrase: "typed twice") }
     }
 
     /// Naming: `variorum-keys-<fp16>.json`; the legacy name parses to no

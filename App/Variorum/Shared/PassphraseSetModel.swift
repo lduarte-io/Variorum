@@ -47,6 +47,11 @@ struct VaultTie {
     /// the key file's copy follows under the vault's new descriptor through
     /// the session's landing). nil = no act wired (a scripted tie).
     var changePassphrase: ((_ current: String, _ new: String) async throws -> Void)? = nil
+    /// pre-13x 4a (ledger 53): the vault's CURRENT recovery-wrap digest (one
+    /// authenticated read; nil = unreadable / no wrap) — the phrase step
+    /// records it beside the W copy it lands, so a device that typed the
+    /// account's words never owes itself the words-regenerated notice.
+    var readRecoveryWrapDigest: (() async -> String?)? = nil
 
     /// Built from the running services; nil when no vault constrains.
     static func make(services: AppServices?) -> VaultTie? {
@@ -100,7 +105,8 @@ struct VaultTie {
                         return .couldNotCheck(EncryptionSession.message(for: error))
                     }
                 },
-                changePassphrase: change)
+                changePassphrase: change,
+                readRecoveryWrapDigest: { (try? await client.fetchVault())?.format.recoveryWrapDigest })
         }
     }
 }
@@ -224,8 +230,11 @@ final class PassphraseSetModel {
                 return
             }
         }
+        // pre-13x 4a (ledger 53): the words were verified against the vault
+        // above — record the vault's wrap digest beside the copy.
+        let digest = await vaultTie?.readRecoveryWrapDigest?()
         if let refusal = await controller.landRecoveryWrap(
-            words: EncryptionSession.words(from: typed)) {
+            words: EncryptionSession.words(from: typed), recoveryWrapDigest: digest) {
             lastError = refusal
             return
         }

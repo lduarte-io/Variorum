@@ -90,7 +90,9 @@ final class EncryptionSession {
     /// flow held "the" twelve words that opened the account but not the
     /// library (the recorded Batch-2 phrase-divergence corner's mirror,
     /// closed).
-    var onRecoveryPhraseLanded: (([String]) async -> Void)?
+    /// pre-13x 4a (ledger 53): the second argument is the VAULT's
+    /// recovery-wrap digest as fetched after the land (nil = unreadable).
+    var onRecoveryPhraseLanded: ((_ words: [String], _ recoveryWrapDigest: String?) async -> Void)?
 
     /// pre-13x 3a — the vault material's LANDING on the key file (the
     /// master copy + the vault's descriptor and corpus key id; the typed
@@ -285,8 +287,12 @@ final class EncryptionSession {
         await runFlow { enrollment in
             let material = try await enrollment.setUp(
                 passphrase: passphrase, recoveryWords: recoveryWords, appleHeldCopy: appleHeld, kdf: kdf)
+            // pre-13x 4a: the vault as born — its recovery-wrap digest rides
+            // the key file's record (the words twin of the descriptor).
+            let born = try await enrollment.client.fetchVault()
             _ = await self.adoptEnrolledMaterial(
-                material, kdf: kdf, typedPassphrase: passphrase, typedWords: recoveryWords, refreshing: false)
+                material, kdf: kdf, recoveryWrapDigest: born?.format.recoveryWrapDigest,
+                typedPassphrase: passphrase, typedWords: recoveryWords, refreshing: false)
             self.state = .enrolled(hasRecoveryWrap: true)
         }
     }
@@ -310,7 +316,9 @@ final class EncryptionSession {
         await runFlow { enrollment in
             let material = try await enrollment.enroll(passphrase: passphrase)
             guard let fetched = try await enrollment.client.fetchVault() else { throw KeyVaultClientError.vaultAbsent }
-            _ = await self.adoptEnrolledMaterial(material, kdf: fetched.format.kdf, typedPassphrase: passphrase, refreshing: false)
+            _ = await self.adoptEnrolledMaterial(
+                material, kdf: fetched.format.kdf, recoveryWrapDigest: fetched.format.recoveryWrapDigest,
+                typedPassphrase: passphrase, refreshing: false)
             let hasRecovery = fetched.format.masterWrappedByRecovery != nil
             self.state = .enrolled(hasRecoveryWrap: hasRecovery)
         }
@@ -328,7 +336,9 @@ final class EncryptionSession {
         await runFlow { enrollment in
             let material = try await enrollment.enroll(recoveryWords: words)
             guard let fetched = try await enrollment.client.fetchVault() else { throw KeyVaultClientError.vaultAbsent }
-            _ = await self.adoptEnrolledMaterial(material, kdf: fetched.format.kdf, typedWords: words, refreshing: false)
+            _ = await self.adoptEnrolledMaterial(
+                material, kdf: fetched.format.kdf, recoveryWrapDigest: fetched.format.recoveryWrapDigest,
+                typedWords: words, refreshing: false)
             self.state = .enrolled(hasRecoveryWrap: true)
         }
     }
@@ -384,7 +394,8 @@ final class EncryptionSession {
                 throw PostureSwitchError.secretRequired
             }
             _ = await self.adoptEnrolledMaterial(
-                material, kdf: format.kdf, typedPassphrase: typedPassphrase, typedWords: typedWords, refreshing: false)
+                material, kdf: format.kdf, recoveryWrapDigest: format.recoveryWrapDigest,
+                typedPassphrase: typedPassphrase, typedWords: typedWords, refreshing: false)
             try await joinStandardAct()
             self.declinedStandardJoin = false
         }
@@ -429,15 +440,18 @@ final class EncryptionSession {
             lastError = "This device holds no keys — unlock with your passphrase first."
             return
         }
-        let landed = await runFlow { enrollment in
+        let landed: String?? = await runFlow { enrollment in
             try await enrollment.landRecoveryWrap(
                 words: confirmedWords, material: material, allowReplace: allowReplace)
             self.state = .enrolled(hasRecoveryWrap: true)
+            // pre-13x 4a (ledger 53): the vault's wrap as it now stands —
+            // its digest rides the store's landing.
+            return try? await enrollment.client.fetchVault()?.format.recoveryWrapDigest
         }
         // 13p ladder R1-m3 (one secret): the store wrap follows the SAME
         // words — only on a land that actually happened (`runFlow` returns
         // nil on refusal, so a rejected replace fires nothing).
-        if landed != nil { await onRecoveryPhraseLanded?(confirmedWords) }
+        if let landed { await onRecoveryPhraseLanded?(confirmedWords, landed ?? nil) }
     }
 
     /// CHANGE PASSPHRASE (Round 7's scope addition): authorized by the
@@ -458,7 +472,8 @@ final class EncryptionSession {
             guard let fetched = try await enrollment.client.fetchVault() else { throw KeyVaultClientError.vaultAbsent }
             self.state = .enrolled(hasRecoveryWrap: fetched.format.masterWrappedByRecovery != nil)
             await self.onVaultMaterialLanded?(VaultLanding(
-                material: material, kdf: fetched.format.kdf, passphrase: newPassphrase))
+                material: material, kdf: fetched.format.kdf, passphrase: newPassphrase,
+                recoveryWrapDigest: fetched.format.recoveryWrapDigest))
         }
     }
 
@@ -478,7 +493,8 @@ final class EncryptionSession {
             guard let fetched = try await enrollment.client.fetchVault() else { throw KeyVaultClientError.vaultAbsent }
             self.state = .enrolled(hasRecoveryWrap: fetched.format.masterWrappedByRecovery != nil)
             await self.onVaultMaterialLanded?(VaultLanding(
-                material: material, kdf: fetched.format.kdf, passphrase: newPassphrase))
+                material: material, kdf: fetched.format.kdf, passphrase: newPassphrase,
+                recoveryWrapDigest: fetched.format.recoveryWrapDigest))
         }
         return lastError
     }
@@ -488,9 +504,13 @@ final class EncryptionSession {
     /// follows through the landing hook (the master copy + the vault's
     /// descriptor and corpus key id; the typed secret's copy under the
     /// VAULT's descriptor — corner 27). Returns the worded refusal.
+    /// pre-13x 4a (ledger 53): `recoveryWrapDigest` — the fetched vault's
+    /// recovery-wrap digest, recorded on the key file beside the descriptor
+    /// (REQUIRED: every landing site decides; nil = no wrap / no vault).
     @discardableResult
     func adoptEnrolledMaterial(
         _ material: DeviceKeyMaterial, kdf: PassphraseKDF.Descriptor,
+        recoveryWrapDigest: String?,
         typedPassphrase: String? = nil, typedWords: [String]? = nil,
         refreshing: Bool = true
     ) async -> Bool {
@@ -500,7 +520,8 @@ final class EncryptionSession {
         }
         onKeysChanged?()
         let landing = VaultLanding(
-            material: material, kdf: kdf, passphrase: typedPassphrase, recoveryWords: typedWords)
+            material: material, kdf: kdf, passphrase: typedPassphrase, recoveryWords: typedWords,
+            recoveryWrapDigest: recoveryWrapDigest)
         await onVaultMaterialLanded?(landing)
         if refreshing { await refresh() }
         return took

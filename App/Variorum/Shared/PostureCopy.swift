@@ -464,6 +464,25 @@ nonisolated extension ProtectionCopy {
     /// The Connect sheet's dismiss door (a plain chrome word — the copy
     /// file names only *Connect…* for this face; recorded in the 3a record).
     static let connectCancelDoor = "Cancel"
+    // MARK: - pre-13x 4a — the lobby's vault road (copy §3) + its chrome
+
+    /// Copy §3 — the RETIRED passphrase (online, same account): the local
+    /// copy refused, the vault refused, and the key file's recorded
+    /// descriptor is no longer the vault's.
+    static let lobbyRetiredPassphrase = "Your passphrase was changed on another device — enter the new one."
+    /// Copy §3 — the offline note (shown small when the vault can't be
+    /// reached), after a submit whose vault read failed.
+    static let lobbyOfflineNote =
+        "You're offline. If your passphrase was changed on another device recently, the one you had "
+        + "before still works here until you're back online."
+    /// The lobby's progress line per phase (chrome; 13s re-voices).
+    static func lobbyPhaseLine(_ phase: StoreLobby.Phase) -> String {
+        switch phase {
+        case .idle, .unlocking: return "Unlocking…"
+        case .checkingAccount: return "Checking your account…"
+        }
+    }
+
     static let followDoneBody =
         "Your new keys are in place on this \(deviceName), and sync is back on."
     /// pre-13x 4a — Connect's done line (copy §3, drafted at 3a's adjudication;
