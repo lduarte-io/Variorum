@@ -94,7 +94,7 @@ orchestrator."*
 - **Memory:** `variorum-phase-9-run-state` (the resume map) — refresh it at every state change.
 
 ### 2b. THE WINDOW'S OUTCOMES (filled by the first orchestrator at the seam — every line PENDING until it is)
-- 2c: PENDING — closed at `<hash>`; adjudicated at `<hash>`; counts `<core> · <Mac> · <spine> · <phone>`.
+- 2c: DONE — closed at `c7555c2b`; adjudicated at `d2094840`; counts core 1440/157 · Mac 239/33 · spine 72/10 · phone 610/98 (her clarification at the successor's kickoff, 2026-09-06 — this line had been left as stale bookkeeping).
 - **The A1 rail's local half — DONE (her Release app quit by her; zero instances checked):**
   `Backups/variorum-backup-a1-pre13x-window-20260905T235821Z.{sqlite,sqlite-wal,sqlite-shm,keys.json}` — a byte copy
   of the closed encrypted store (main 10,571,776 B, sha256 `d567688dd58f0890…`, `cmp` byte-identical to the source;
@@ -183,10 +183,9 @@ orchestrator."*
   The Mac's `vaultKDF` also did NOT land at the relaunch ("next online ready" unmet — a small defect for the ladder).
   The sanity check on the Mac: *"That is the right recovery phrase — it unlocked this account's vault. Nothing was
   changed."* — the 1b/14c stale-wrap question CLOSED.
-- The drills' real-store legs: PENDING — the switch's real timing `<s>`; the 13p migration drill on a byte-copy; the
-  13l restore drill per posture (both need her passphrase).
-- The worktree `~/dev/variorum-phone-q3`: PENDING — removed.
-- Surprises at the window: PENDING — `<none / listed>`.
+- The drills' real-store legs: NOT THE WINDOW'S — the PHASE'S END per design §15 (her clarification, 2026-09-06): the 13p migration drill on a byte-copy and the 13l restore drill per posture, with her passphrase, after the ladder; the switch's real timing is satisfied by 2b's sample-library drill (the 2d adjudication, item 3).
+- The worktrees: REMOVED (all three; `git worktree list` at the successor's kickoff shows `main` and the mobile worktree only).
+- Surprises at the window: THREE, recorded in the phone paragraph above — the missing `NSFaceIDUsageDescription`; the identity change (TRACED by the successor 2026-09-06: the mint happened at the WINDOW's leg-1 skip under corner 47, not at the follow — the design §19 BATCH 3 brief's headnote); the Mac's confirm sheet not appearing at first (the derived gate, 2d.3).
 
 ---
 
@@ -252,7 +251,7 @@ Every one was found by reading the shipped code before a brief — keep doing it
     ID gate crashed the phone at every open; fixed at `3ed3b182`. A pin in the mobile test host (the built Info.plist
     carries the key) is the LADDER's — write it before the ladder runs.
 23. **The phone's device identity changed at the follow** (three `device_cursor` rows) — a decision-13 defect candidate;
-    the ladder's or batch 3's (trace `follow`'s custody rewrite; pin the identity's persistence across a follow).
+    the ladder's or batch 3's (trace `follow`'s custody rewrite; pin the identity's persistence across a follow). **TRACED 2026-09-06 by the successor: the follow's rewrite carries the identity correctly; the re-mint happened at the WINDOW — `ProtectionMigration` leg 1 skips the identity carry when no legacy MATERIAL exists (corner 47 had removed it), so her enroll minted fresh and the 13j id stayed orphaned in `sync_state`. Batch 3a item 0 (ledger 43).**
 
 ---
 
