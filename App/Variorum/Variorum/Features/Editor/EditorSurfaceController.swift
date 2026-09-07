@@ -1608,38 +1608,44 @@ final class EditorSurfaceController {
                     + "(\(TrayPath.originalsPath); ⌥⌘Z undoes).")
     }
 
-    /// The two blocks' takes as the SURFACE shows them now — what the sheet's
-    /// "＋ pairs with →" marks must still match at confirm (R2-2).
-    private func renderedIDs(of state: MergeCeremonyState) -> (first: String?, second: String?) {
-        (model.index.entries.first { $0.blockID == state.firstBlockID }?.variantID,
-         model.index.entries.first { $0.blockID == state.secondBlockID }?.variantID)
-    }
-
     private enum MergeSheetDrift { case current, refreshed, failed }
 
     /// **The PAIR sheet's ONE drift check, both branches** (the W confirm's
     /// discipline; widened at the 18f ladder round 2, R2-2). The sheet may
     /// have sat open while a sync round landed — a take's text, the fan's
     /// size, OR which take a block SHOWS. Any of the three refreshes the
-    /// ceremony onto the current store and surface (pairings and carries kept
-    /// by identity, the shown pair re-marked) and the author reviews again;
+    /// ceremony onto the current store (pairings and carries kept by
+    /// identity, the shown pair re-marked) and the author reviews again;
     /// nothing is joined from what she wasn't shown. Before this the pairing
     /// branch checked texts and count, the preset branches checked nothing,
     /// and a pure chosen re-point — every text and count unchanged — escaped
     /// both.
+    ///
+    /// **The shown pair is read from the STORE, in the same read as the fans**
+    /// (the implementer's round-2 raise): "Only the two shown" joins through
+    /// `ops.merge`, which resolves each side from the store's chosen, and the
+    /// projection only ever LAGS the store — so a re-point landed in the store
+    /// and not yet adopted by the surface passed a projection-side compare and
+    /// joined a take the sheet never showed. One resolution rule
+    /// (`Queries.renderPost`, pinned equivalent to `Operations.renderedVariant`),
+    /// one truth for both roads.
     private func refreshMergeSheetIfDrifted(_ state: MergeCeremonyState) async -> MergeSheetDrift {
         do {
-            let (firstFan, secondFan) = try await model.session.database.read {
-                db -> ([Variant], [Variant]) in
-                (try Queries.blockFan(db, blockID: state.firstBlockID)
-                    .filter { $0.deletedAt == nil && $0.status == .active },
-                 try Queries.blockFan(db, blockID: state.secondBlockID)
-                    .filter { $0.deletedAt == nil && $0.status == .active })
+            let (firstFan, secondFan, rendered) = try await model.session.database.read {
+                [postID = model.postID] db
+                -> ([Variant], [Variant], (first: String?, second: String?)) in
+                let slots = try Queries.renderPost(db, containerID: postID)
+                return (
+                    try Queries.blockFan(db, blockID: state.firstBlockID)
+                        .filter { $0.deletedAt == nil && $0.status == .active },
+                    try Queries.blockFan(db, blockID: state.secondBlockID)
+                        .filter { $0.deletedAt == nil && $0.status == .active },
+                    (slots.first { $0.blockID == state.firstBlockID }?.variantID,
+                     slots.first { $0.blockID == state.secondBlockID }?.variantID))
             }
             let snapshot = Dictionary(uniqueKeysWithValues:
                 (state.firstTakes + state.secondTakes).map { ($0.id, $0.variant.workingText) })
             let current = firstFan + secondFan
-            let rendered = renderedIDs(of: state)
             let drifted = current.count != snapshot.count
                 || current.contains { snapshot[$0.id] != $0.workingText }
                 || rendered.first != state.firstRenderedID
@@ -1657,9 +1663,9 @@ final class EditorSurfaceController {
     /// Rebuilds the ceremony over the CURRENT fans: carries survive by
     /// take identity, pairings survive where BOTH sides still live, joins
     /// are kept (the author chose them), previews re-derive from the new
-    /// texts, and the shown pair is re-marked from the surface (R2-2). The
-    /// author reviews and confirms again — nothing is joined from a drifted
-    /// snapshot.
+    /// texts, and the shown pair is re-marked from the STORE's rendered takes
+    /// (R2-2; the raise). The author reviews and confirms again — nothing is
+    /// joined from a drifted snapshot.
     private func refreshMergeCeremony(
         from state: MergeCeremonyState, firstFan: [Variant], secondFan: [Variant],
         rendered: (first: String?, second: String?)

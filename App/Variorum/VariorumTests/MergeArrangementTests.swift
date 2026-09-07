@@ -418,6 +418,51 @@ struct MergeArrangementTests {
         }
     }
 
+    /// **The raise's pin (18f ladder round 2, the implementer's sanity pass —
+    /// RED ON `6e14e9e8`).** R2-2's check compared the PROJECTION's rendered
+    /// ids against the sheet's, but "Only the two shown" joins through
+    /// `ops.merge`, which resolves each side from the STORE's chosen — and
+    /// between a store write and the observation's delivery the two disagree.
+    /// A chosen re-point landed in the store with the surface not yet caught
+    /// up passed the check and joined a take the sheet never showed. The check
+    /// reads the store's rendered pair now (the one truth both roads act on).
+    @Test func aChosenRePointInTheStoreButNotYetOnTheSurfaceStillRefreshes() async throws {
+        try await withEditor(seedBlocks: ["Alpha one.", "Beta two."]) { h in
+            let slots = try h.storeSlots()
+            let head = try #require(slots[0].variantID)
+            let spare = try h.session.operations.branchVariant(slots[0].blockID, from: head)
+            try h.session.operations.autosave(spare.id, text: "Alpha spare.", charDelta: 0)
+            try h.reload()
+
+            selectAcross(h, 0, 1)
+            await h.model.invokeGesture(.mergeBlocks, ceremony: true)
+            #expect(h.model.mergeCeremony?.firstRenderedID == head)
+            h.model.setMergeArrangement(.onlyTheShownOnes)
+
+            // The re-point lands in the STORE; the surface has NOT adopted it
+            // yet (no reload — the sub-delivery window).
+            try h.session.operations.chooseVariant(slots[0].blockID, variantID: spare.id)
+            #expect(h.model.index.entries[0].variantID == head,
+                    "non-vacuity: the surface still shows the head")
+            #expect(try h.storeSlots()[0].variantID == spare.id,
+                    "non-vacuity: the store already renders the spare")
+
+            await h.model.confirmMergeCeremony()
+            #expect(try h.storeSlots().count == 2, "nothing joined from a pair she was not shown")
+            let refreshed = try #require(h.model.mergeCeremony, "the sheet refreshed")
+            #expect(refreshed.firstRenderedID == spare.id, "re-marked from the store's truth")
+            #expect(refreshed.arrangement == .onlyTheShownOnes)
+
+            // The surface catches up; confirming the refreshed sheet joins
+            // what it shows — the plain road, the head left in lineage.
+            try h.reload()
+            await h.model.confirmMergeCeremony()
+            let landed = try h.storeSlots()
+            #expect(landed.map(\.text) == ["Alpha spare. Beta two."])
+            #expect(try fan(h, landed[0].blockID).count == 1, "only the shown ones came")
+        }
+    }
+
     // MARK: - The sentence
 
     @Test func theSentenceUnderTheMergeRowSaysWhatComesAlong() {
