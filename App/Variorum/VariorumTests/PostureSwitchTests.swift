@@ -1089,12 +1089,56 @@ struct PostureSwitchTests {
         #expect(world.calls.custodyTargets.isEmpty)
 
         // The ceremony: the door refuses with copy §4's sentence BEFORE any screen asks.
+        // F2 (MINOR-4): the sentence names the vault's writer — here the
+        // world's own client ("test device") began the rotation.
         let controller = makeController(for: world)
         let model = PostureSwitchModel(mode: .enter, runner: world.runner, controller: controller, vaultTie: nil)
         await model.start()
+        #expect(facts.updatedByDevice == "test device")
         let expected = ProtectionCopy.rotationStillFinishing(
-            device: "another device", day: EncryptionView.displayDate(facts.vaultUpdatedAt) ?? "an earlier day")
+            device: "test device", day: EncryptionView.displayDate(facts.vaultUpdatedAt) ?? "an earlier day")
         #expect(model.phase == .failed(expected))
+    }
+
+    /// pre-13x ladder round 1, F2 (MINOR-4 — decision 34) — RED ON OLD: the
+    /// still-finishing sentence always said "another device" (`DoorFacts`
+    /// carried no `updatedByDevice`), though the column was ruled so the
+    /// notice could NAME the device ("the real name is what lets a user
+    /// spot an act they did not do"). A SIBLING under its own name begins
+    /// a rotation; this device's door — and the mid-run refusal — name it.
+    @Test func theStillFinishingRefusalNamesTheDeviceThatStartedTheRotation() async throws {
+        let world = try await makeWorld()
+        defer { world.tearDown() }
+        let sibling = try await makeWorld(sharing: world, deviceName: "Lillian's iPhone")
+        defer { sibling.tearDown() }
+        let siblingClient = try #require(sibling.vaultClient)
+        let oldMaterial = try #require(world.oldMaterial)
+        let secrets = try RotationSecrets.derive(passphrase: "sesame", recoveryWords: nil, kdf: fastKDF())
+        let begun = try await CorpusRotation.begin(client: siblingClient, current: oldMaterial, secrets: secrets, appleHeldCopy: nil)
+        // This device followed (the mid-rotation material) and asks for a switch of its own.
+        let vault = try await world.vault()
+        #expect(vault.format.updatedByDevice == "Lillian's iPhone", "the vault names its writer")
+        #expect(world.keyStore.save(try CorpusRotation.materialFollowing(vault.format, master: begun.material.masterSymmetricKey)))
+
+        let facts = try await world.runner.checkDoor()
+        #expect(facts.rotationInProgress && facts.updatedByDevice == "Lillian's iPhone", "the door's facts carry the name")
+        let day = EncryptionView.displayDate(facts.vaultUpdatedAt) ?? "an earlier day"
+        let named = ProtectionCopy.rotationStillFinishing(device: "Lillian's iPhone", day: day)
+        #expect(named.hasPrefix("A key replacement started on Lillian's iPhone on "))
+
+        // The door (copy §4's sentence, the device named) — both ceremonies.
+        let controller = makeController(for: world)
+        let enter = PostureSwitchModel(mode: .enter, runner: world.runner, controller: controller, vaultTie: nil)
+        await enter.start()
+        #expect(enter.phase == .failed(named), "\(enter.phase)")
+        let replace = PostureSwitchModel(mode: .replaceKeys, runner: world.runner, controller: controller, vaultTie: nil)
+        await replace.start()
+        #expect(replace.phase == .failed(named))
+        // The mid-run arm: the runner's own re-read refuses with the same named sentence.
+        await #expect(throws: CorpusRotationError.rotationInProgress(previousKeyID: oldMaterial.corpusKeyID)) {
+            _ = try await world.runner.enterCastle(passphrase: "sesame", recoveryWords: world.words)
+        }
+        #expect(try await world.marker() == nil)
     }
 
     /// pre-13x ladder round 1, F2 (MAJOR-1) — RED ON OLD: every refusal

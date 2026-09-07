@@ -155,9 +155,7 @@ final class PostureSwitchModel: Identifiable {
             let facts = try await runner.checkDoor()
             self.facts = facts
             if facts.rotationInProgress {
-                phase = .failed(ProtectionCopy.rotationStillFinishing(
-                    device: "another device",
-                    day: EncryptionView.displayDate(facts.vaultUpdatedAt) ?? "an earlier day"))
+                phase = .failed(stillFinishingSentence)
                 return
             }
             switch mode {
@@ -181,7 +179,7 @@ final class PostureSwitchModel: Identifiable {
                 phase = .explain
             }
         } catch {
-            phase = .failed(Self.message(for: error))
+            phase = .failed(wording(for: error))
         }
     }
 
@@ -251,7 +249,7 @@ final class PostureSwitchModel: Identifiable {
             words = try WordsCeremony(wordsExist: wordsExist)
             mirrorWords()
         } catch {
-            phase = .failed(Self.message(for: error))
+            phase = .failed(wording(for: error))
         }
     }
 
@@ -297,7 +295,7 @@ final class PostureSwitchModel: Identifiable {
             try words?.chooseGenerateNew()
             mirrorWords()
         } catch {
-            phase = .failed(Self.message(for: error))
+            phase = .failed(wording(for: error))
         }
     }
 
@@ -368,7 +366,7 @@ final class PostureSwitchModel: Identifiable {
             self.outcome = outcome
             phase = .done(insuranceOff: outcome.insuranceTurnedOff, hasOffer: !outcome.preSwitchSnapshots.isEmpty)
         } catch {
-            phase = .failed(Self.message(for: error))
+            phase = .failed(wording(for: error))
         }
     }
 
@@ -463,7 +461,7 @@ final class PostureSwitchModel: Identifiable {
             }
             phase = .done(insuranceOff: false, hasOffer: false)
         } catch {
-            phase = .failed(Self.message(for: error))
+            phase = .failed(wording(for: error))
         }
     }
 
@@ -513,7 +511,7 @@ final class PostureSwitchModel: Identifiable {
             try await runner.leaveCastle()
             phase = .leftCastle
         } catch {
-            phase = .failed(Self.message(for: error))
+            phase = .failed(wording(for: error))
         }
     }
 
@@ -535,7 +533,7 @@ final class PostureSwitchModel: Identifiable {
             // The vault write never landed: the ceremony starts over.
             phase = .explain
         } catch {
-            phase = .failed(Self.message(for: error))
+            phase = .failed(wording(for: error))
         }
     }
 
@@ -545,10 +543,31 @@ final class PostureSwitchModel: Identifiable {
 
     // MARK: - Wording (every refusal speaks — the R94 doctrine)
 
+    /// pre-13x ladder round 1, F2 (MINOR-4 — decision 34): copy §4's
+    /// still-finishing sentence names the device that started the
+    /// rotation and the vault's day, both from the door check's facts —
+    /// before F2 it always said "another device", the one sentence the
+    /// `updated_by_device` column was ruled for.
+    private var stillFinishingSentence: String {
+        ProtectionCopy.rotationStillFinishing(
+            device: facts?.updatedByDevice ?? ProtectionCopy.anotherDevice,
+            day: EncryptionView.displayDate(facts?.vaultUpdatedAt) ?? "an earlier day")
+    }
+
+    /// The instance wording: a rotation refused MID-RUN (the runner's own
+    /// re-read at step 1) speaks the same named sentence from the facts the
+    /// door read moments before; everything else is the static table.
+    private func wording(for error: any Error) -> String {
+        if case CorpusRotationError.rotationInProgress = error { return stillFinishingSentence }
+        return Self.message(for: error)
+    }
+
     static func message(for error: any Error) -> String {
         switch error {
         case CorpusRotationError.rotationInProgress:
-            return ProtectionCopy.rotationStillFinishing(device: "another device", day: "an earlier day")
+            // The static fallback (no facts in hand — `PostureFollowModel`'s
+            // road); the ceremony's instance wording names the device.
+            return ProtectionCopy.rotationStillFinishing(device: ProtectionCopy.anotherDevice, day: "an earlier day")
         case CorpusRotationError.completionRefused, CorpusRotationError.walkDidNotConverge:
             // pre-13x ladder round 1, F1 (BLOCKER-1): the server would not
             // clear the previous key over a row this device could not see

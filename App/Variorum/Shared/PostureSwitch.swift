@@ -318,6 +318,11 @@ final class PostureSwitchRunner {
         var enrolled: Bool
         var rotationInProgress: Bool
         var vaultUpdatedAt: String?
+        /// pre-13x ladder round 1, F2 (MINOR-4 — decision 34): the device
+        /// that last wrote the vault (`updated_by_device`), so copy §4's
+        /// still-finishing sentence names it — the one sentence the column
+        /// was ruled for. nil ⇒ "another device".
+        var updatedByDevice: String? = nil
         var vaultHasRecoveryWrap: Bool
         /// pre-13x 3b: the vault's CURRENT corpus key id — Replace All Keys'
         /// stale-master front check compares the key file's recorded id
@@ -344,6 +349,7 @@ final class PostureSwitchRunner {
             enrolled: true,
             rotationInProgress: fetched.format.previousCorpusKey != nil,
             vaultUpdatedAt: fetched.updatedAt,
+            updatedByDevice: fetched.format.updatedByDevice,
             vaultHasRecoveryWrap: fetched.format.masterWrappedByRecovery != nil,
             vaultCorpusKeyID: fetched.format.classKey(for: .corpus)?.keyID,
             vaultKDF: fetched.format.kdf)
