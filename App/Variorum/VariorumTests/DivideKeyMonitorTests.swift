@@ -179,6 +179,36 @@ struct DivideKeyMonitorTests {
         }
     }
 
+    /// **The implementer's sanity-pass raise (18f round 1) — RED ON `50d47d85`:**
+    /// once the ceremony has CLOSED (Cancel, ⎋, a landed confirm set
+    /// `state = nil`) the sheet's view may still be mounted — SwiftUI's
+    /// dismissal animation, or a host that never unmounts it — and its
+    /// `state` falls back to the PRESENTED snapshot. A stepped chord then
+    /// resolved against that snapshot, `ceremony.placeCut` no-opped on its
+    /// nil guard, and `stepCut` still answered `true`: the key was swallowed
+    /// doing nothing. Batch 1's monitor carried `ceremony.state != nil` as
+    /// its first line; the scoped monitor carries it again.
+    @Test func aKeyAfterTheCeremonyClosedIsNotTheSheets() async throws {
+        try await withEditor(seedBlocks: ["First alpha. First omega."]) { h in
+            let (window, hosting, ceremony) = try await openSheet(h)
+            defer { window.orderOut(nil); window.close() }
+            let monitor = try #require(findMonitor(in: hosting))
+            #expect(monitor.handleKeyDown(try key(124, for: window)) == true,
+                    "non-vacuity: while the ceremony is open the sheet's → is its own")
+
+            ceremony.cancel()
+            #expect(ceremony.state == nil, "non-vacuity: the ceremony is closed")
+            await settle(window, hosting, turns: 2)
+            #expect(monitor.isWatching, "non-vacuity: the view is still mounted and watching")
+
+            #expect(monitor.handleKeyDown(try key(124, for: window)) == false,
+                    "a → after the ceremony closed is nobody's to swallow")
+            #expect(monitor.handleKeyDown(try key(123, for: window)) == false)
+            #expect(monitor.handleKeyDown(try key(48, for: window)) == false, "…nor ⇥")
+            #expect(ceremony.state == nil, "…and nothing reopened")
+        }
+    }
+
     /// The monitor leaves with its view: once the sheet is out of its window
     /// nothing is watching — the lifecycle `PageTurnKeyMonitor` established.
     @Test func theMonitorLeavesWithItsWindow() async throws {

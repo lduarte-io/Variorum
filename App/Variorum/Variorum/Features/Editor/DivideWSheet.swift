@@ -296,6 +296,13 @@ struct DivideWSheet: View {
     /// True = handled (the event is swallowed). Reads the same brains the
     /// `.onKeyPress` road does, so the two cannot answer differently.
     private func handleKeyEvent(_ event: NSEvent) -> Bool {
+        // A CLOSED ceremony owns no key (the implementer's sanity-pass raise,
+        // 18f round 1): between `state = nil` and the sheet's dismissal the
+        // view is still mounted and `state` falls back to the presented
+        // snapshot — a chord would resolve against it, no-op in the
+        // ceremony's own nil guard, and be swallowed for nothing. Batch 1's
+        // monitor carried this line first; so does this one.
+        guard ceremony.state != nil else { return false }
         guard event.modifierFlags.intersection([.command, .control]).isEmpty else { return false }
         switch event.keyCode {
         case 48:  // ⇥
