@@ -434,13 +434,18 @@ enum TutorialSeeder {
 
             // 13b 4D (N34 — S4-14): the opt-in one_block face gets a
             // sentence where crystallization is taught.
-            "Inside a block, Return is just a newline — a block can hold several "
-            + "paragraphs if you paste or merge them into one. Block boundaries "
-            + "only ever change when you ask (divide, merge, extract — the "
-            + "structure chapter). Prefer to place every boundary yourself? The "
-            + "bottom bar's \u{201C}newlines make blocks\u{201D} switch turns the automatic "
-            + "minting off for one note — then typing and pasting stay inside "
-            + "the block, and only Divide or New Block Below make new ones.",
+            "Return makes a block WHEREVER your cursor is: at the end of a "
+            + "paragraph, a new empty block below it; in the middle of one, a "
+            + "divide at the cursor. Shift-Return is the newline that stays "
+            + "INSIDE a block — a blank line in the same paragraph — and a "
+            + "block can hold several paragraphs that way, or by paste or "
+            + "merge. Otherwise boundaries only ever change when you ask "
+            + "(divide, merge, extract — the structure chapter). Prefer to "
+            + "place every boundary yourself? The bottom bar's "
+            + "\u{201C}newlines make blocks\u{201D} switch turns it off for one note "
+            + "— then Return is just a newline again, typing and pasting stay "
+            + "inside the block, and only Divide or New Block Below make new "
+            + "ones.",
 
             "Boundaries are invisible at rest, on purpose: a note reads as calm, "
             + "seamless prose. When you want to see the seams, press \u{2318}\u{21E7}B — "

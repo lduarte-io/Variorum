@@ -32,9 +32,9 @@ nonisolated enum SegmentationFaceCopy {
         + "won't make new blocks; Divide (⌘⇧D) or New Block Below (⌘⇧⏎) split "
         + "deliberately. Existing blocks are untouched."
     static let mintOnNote =
-        "Newlines make blocks again in this note — each finished paragraph "
-        + "becomes its own block as you type past it, and pasted paragraphs "
-        + "arrive as blocks. Existing blocks are untouched."
+        "Newlines make blocks again in this note — Return makes a block "
+        + "wherever the cursor is, and pasted paragraphs arrive as blocks. "
+        + "Existing blocks are untouched."
 
     /// 13d batch 4 (A16): the note a post speaks when it is turned back ON
     /// and the DOCUMENT-GLOBAL default is itself `one_block`. Turning the
@@ -59,8 +59,10 @@ nonisolated enum SegmentationFaceCopy {
 
     /// The chip's hover help (both bars).
     static let help =
-        "ON (the standard): each finished paragraph becomes its own block as "
-        + "you type past it; pasted paragraphs arrive as blocks. OFF (opt-in): "
+        "ON (the standard): Return makes a block wherever the cursor is — a "
+        + "new block below at a paragraph's end, a divide inside its text — "
+        + "and pasted paragraphs arrive as blocks; ⇧⏎ stays a newline inside "
+        + "the block. OFF (opt-in): "
         + "newlines stay INSIDE the block — typing and pasting never make "
         + "blocks in this note; Divide (⌘⇧D) or New Block Below (⌘⇧⏎) split "
         + "deliberately. Governs future entry only — existing blocks never "
@@ -80,8 +82,8 @@ nonisolated enum SegmentationFaceCopy {
 
     static let globalHelp =
         "The default for every note that has no setting of its own. ON (the "
-        + "standard): a finished paragraph becomes its own block as you type "
-        + "past it, and pasted paragraphs arrive as blocks. OFF: newlines "
+        + "standard): Return makes a block wherever the cursor is, and "
+        + "pasted paragraphs arrive as blocks. OFF: newlines "
         + "stay inside the block everywhere — Divide (⌘⇧D) or New Block "
         + "Below (⌘⇧⏎) split deliberately. Governs future entry only; "
         + "existing blocks never re-segment, and a note with its own setting "
