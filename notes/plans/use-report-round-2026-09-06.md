@@ -933,8 +933,8 @@ Both arms land in their own commit AHEAD of the code that uses them, each with a
 | 2 | Shared: `KeepOnTopDivide` (+ the `keepBelow` sibling) in `App/Variorum/Shared/` | **DONE** (this row's commit) — no Xcode project change needed: `Shared/` is a `PBXFileSystemSynchronizedRootGroup` already in BOTH the `Variorum` and `VariorumMobile` targets (`project.pbxproj:83–87`, `:182–184`, `:252–255`), so a new file there is reachable from the phone by construction |
 | 3 | Mac: both doors swapped, the receipt re-worded, `FannedDefaults.swift`'s header rewritten, the J4 pins rewritten | **DONE** (this row's commit) — `FannedDefaultsTests` · `FannedDefaultsBoardTests` · `TakesDivideTests` **58 tests / 3 suites green**; revert A's red run recorded below |
 | 4 | Phone: `MobileStructural`'s fanned path flipped, header updated, its pins re-pointed | **DONE** (this row's commit) — `generic/platform=iOS` build SUCCEEDED; `MobileStructuralTests` + `MobileWholeBlockDeleteTests` on the `iPhone 17 Pro` simulator **34 tests / 2 suites green** |
-| 5 | The walk (dev-store Debug, `18c-1/` captures) | NOT-STARTED |
-| 6 | Close: the suites, the dispositions, QUESTIONS #91 | NOT-STARTED |
+| 5 | The walk (dev-store Debug, `18c-1/` captures) | **DONE** (this row's commit) — both Mac doors walked by hand on `io.lduarte.Variorum.debug`; nine captures listed below |
+| 6 | Close: the suites, the dispositions, QUESTIONS #91 | **DONE** (this row's commit) — #91 logged at `b495b305`; the closing suites below |
 
 **The red-on-old runs (piece 1, by behavioural revert on the committed tree at `0b57614f`; the tree was
 clean before each and `git checkout --` restored it after):**
@@ -970,3 +970,103 @@ before it was started, per the trap; restored with `git checkout --` on exactly 
   red-on-old is the COPY's own change: the retired `divided(duplicated:)` always ended *"…rode whole onto
   each. Extra copies are quick to delete"*, which the pin's `!spoken.contains("quick to delete")` rejects by
   construction. Not a hollow pin — a pin whose subject is the sentence, not the shape.
+
+**THE WALK (the acceptance gate — USE, on the DEV-STORE Debug build `io.lduarte.Variorum.debug`, launched
+from `~/Library/Developer/Xcode/DerivedData/Variorum-dnpxwqhpxdqrdjbunktnzoahckpd/Build/Products/Debug/`;
+her `/Applications` app was never launched and `pgrep -fl 'Variorum.app/Contents/MacOS'` showed zero
+instances before and after — my own instance quit with ⌘Q at the end). Driven with `cliclick` + `Tools/WalkKit`.**
+
+The note: a fresh ⌘N note, two typed paragraphs; block 1 given THREE takes on the Takes board (the chosen
+one plus "TAKE TWO: the morning came grey…" and "TAKE THREE: cold light, a locked river…").
+
+1. **Write's instant divide, caret mid-take** (⌘⇧D's door — block ▾ ▸ Divide, with the caret between the two
+   sentences of block 1). Result on screen: the top block reads *"The morning was cold and bright."* and keeps
+   the **⑂3** badge; the new block below reads *"The river had not yet thawed."* with no badge; the caret lands
+   at the second successor's start (the bar reads `block 2/3`). The receipt is her sentence, verbatim:
+   **"Block divided — the take you were in split across both blocks; 2 other takes stayed on the first. ⌥⌘Z undoes."**
+   Expanding the fans shows the top block carrying *the cut first half (chosen) · TAKE TWO whole · TAKE THREE whole*,
+   and the bottom block carrying its half ALONE. **This is the row.**
+2. **The undo entry keeps its word:** the Edit menu reads **"Undo Divide  ⌥⌘Z"** (not "Undo Divide into
+   Variants"), and one ⌥⌘Z put the original block back whole with its ⑂3 fan intact.
+3. **The Takes board's divide from a NON-CHOSEN pane** (the QUESTIONS #91 case, walked deliberately): with the
+   caret in TAKE THREE's pane, ⌘⇧D left the top block carrying THREE takes — the original chosen take whole,
+   TAKE TWO whole, and the divided take's first half **chosen** — and the bottom block carrying the divided
+   take's remainder alone, ringed. The page therefore shows the take she divided, on both sides. That is #91's
+   built option (a) in use.
+
+**Captures** (`notes/plans/use-report-2026-09-06-screens/18c-1/`, gitignored):
+`01-before-takes-board-three-takes.png` · `02-before-write-caret-mid-block.png` · `03-the-divide-door.png` ·
+`04-after-divide-write-and-receipt.png` · `05-after-divide-takes-board-expanded.png` ·
+`06-the-edit-menu-reads-undo-divide.png` · `07-one-undo-puts-the-block-back.png` ·
+`08-before-board-divide-from-a-non-chosen-take.png` · `09-after-board-divide-from-a-non-chosen-take.png`
+
+**THE CLOSING SUITES (all run at the END, on the final tree):**
+
+- core `swift test` → **`Test run with 1462 tests in 160 suites passed after 50.532 seconds.`**
+  *(the round's baseline was 1460/160 at `f402ccce`; +2 are this batch's two core pins.)*
+- Mac, ONE `xcodebuild test-without-building` run — the three touched suites plus the ten `Tutorial*` spine
+  types (`TutorialBookShapeTests · TutorialDoorTests · TutorialWritingActsTests · TutorialTakesActsTests ·
+  TutorialStructureActsTests · TutorialLookingActsTests · TutorialLibraryActsTests · TutorialDeletionActsTests ·
+  TutorialWherePlacesActsTests · TutorialPrivacyChapterTests`) → **`Test run with 129 tests in 13 suites passed
+  after 27.573 seconds.`** Thirteen suites for thirteen `-only-testing` types: nothing was silently dropped.
+- iOS `xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS' build` → **BUILD SUCCEEDED.**
+- phone, `MobileStructuralTests` + `MobileWholeBlockDeleteTests` on the `iPhone 17 Pro` simulator →
+  **`Test run with 34 tests in 2 suites passed after 0.782 seconds.`**
+
+**DISPOSITIONS (the ledger rows this batch owns):**
+
+- **Row 2 — "if you divide, the takes should automatically stay on the top block" (U-2, HERS/ruled) — FIXED.**
+  Built as the `KeepOnTopDivide` composition over `Operations.divideW`, on Write, the Takes board and the phone.
+  Its pins: `aFannedDivideKeepsTheTakesOnTheTopBlock` · `theOtherTakesRideWholeOntoTheTopBlockWithTheirLabels` ·
+  `theKeepOnTopDivideIsOneStructuralUndoEntry` · `theDivideReceiptTellsTheKeepOnTopTruth` ·
+  `aFiveTakeBlockKeepsFourTakesOnTheTopBlock` · `anEmptyOtherTakeStaysOnTheOriginalAndTheReceiptSaysSo` ·
+  `aLockedTakeDoesNotRefuseTheKeepOnTopDivide` · `theReleasedOriginalIsStillPlaceable` ·
+  `theCompositionParksEveryOtherTakeAtItsEnd` · `theCompositionLeavesAnEmptyTakeUnparkedAndCountsIt` ·
+  `theCompositionRefusesWhenTheDisplayedTakeIsGone` · `theBoardsDivideDoorKeepsTheTakesOnTop` ·
+  `theBoardsDivideFromANonChosenPaneStillShowsThatTake` · `divideOnAFannedBlockKeepsTheTakesOnTop` (phone) ·
+  `divideOnAFannedBlockWithUnmappableTakesStillDivides` · `divideOnAPeekedBlockCutsThePeekedTake` ·
+  `fannedDivideCarriesUnflushedTypingThroughTheFlush` · core `divideWAParkedTakeKeepsItsName` ·
+  `divideWAnchorsTheChosenOnTheDisplayedTakeWhenNamed`. Red-on-old runs recorded above; walked and captured.
+- **Row 28 — the bar reading "block 3/3" at what looks like the end — RECORDED, unchanged.** It closes with
+  batch 2 (the typing model), exactly as the ledger says; nothing here touched it.
+
+**RETIRED PINS (named, with the ruling beside each — never deleted silently). All are rewrites of the same
+subject to U-2's premise, not deletions of coverage:**
+
+| Retired name | Its premise | Ruling | Replaced by |
+|---|---|---|---|
+| `aFannedDivideDuplicatesInsteadOfOpeningTheCeremony` | every other take copied onto BOTH successors | U-2 | `aFannedDivideKeepsTheTakesOnTheTopBlock` |
+| `theDuplicatedTakesLandOnBothSuccessorsWithTheirLabels` | the duplicate lands twice | U-2 | `theOtherTakesRideWholeOntoTheTopBlockWithTheirLabels` |
+| `theDuplicatingDivideIsOneStructuralUndoEntry` | the duplicate shape's undo | U-2 | `theKeepOnTopDivideIsOneStructuralUndoEntry` (+ the exact-row redo) |
+| `theDivideReceiptTellsTheDuplicateShapeTruth` | *"…rode whole onto each. Extra copies are quick to delete"* | U-2 | `theDivideReceiptTellsTheKeepOnTopTruth` |
+| `aLockedTakeDoesNotRefuseTheDuplicatingDivide` | a locked CHOSEN take on the duplicate road | U-2 | `aLockedTakeDoesNotRefuseTheKeepOnTopDivide` (now covers a locked take that PARKS too) |
+| `theBoardsDivideDoorDuplicatesByDefault` | the board's duplicate default | U-2 | `theBoardsDivideDoorKeepsTheTakesOnTop` |
+| `divideOnAFannedBlockLandsTheDuplicateShape` (phone) | the phone's duplicate shape | U-2 (her follow-up) | `divideOnAFannedBlockKeepsTheTakesOnTop` |
+| *(kept by name, expectations rewritten)* `divideOnAFannedBlockWithUnmappableTakesStillDivides` · `divideOnAPeekedBlockCutsThePeekedTake` · `fannedDivideCarriesUnflushedTypingThroughTheFlush` · `TakesDivideTests.theForkIsReadFromTheStoreNotTheFrozenProjection` | their subjects (no-mapping, peek-awareness, the flush, the store-read fork) outlive the flip | U-2 | same names, keep-on-top expectations |
+
+Nothing was DISMISSED AS HOLLOW: this batch is a ruled default change, not a bug hunt, and every rewritten
+pin went red under the recorded reverts.
+
+**CANON DELTA, DRAFTED FOR THE ROUND'S CLOSEOUT (not applied here — §5.1 says the closeout owns it):**
+
+1. **AppSpec §9, `divideDuplicating`'s paragraph** gains: *"**SUPERSEDED AS THE DEFAULT (author ruling U-2,
+   2026-09-06, the use-report round): a fanned block now divides KEEP-ON-TOP on BOTH platforms** — the
+   displayed take is cut into B and C and every OTHER active take rides WHOLE onto B, composed from `divideW`'s
+   parking rule (`KeepOnTopDivide`, `App/Variorum/Shared/`). `divideDuplicating` stays in core, unchanged, as
+   18f's third preset ('copy the takes to both'); U-5's second preset is the same composition's `keepBelow`."*
+2. **AppSpec §9, `divideW`'s paragraph** gains the two arms this batch added: a parked (whole-ride) take
+   **keeps its label** — the rule already stated for `divideDuplicating`'s duplicates and `mergeCeremony`'s
+   carries, and silent here since 13b Stage 4 — and an optional `displayedVariantID` anchors each side's
+   chosen/default on the take the author was working in when the caller can name it (nil keeps A's rendered
+   take; the ceremony passes nil). QUESTIONS **#91** carries the second as PROVISIONAL.
+3. **The MOBILE PARITY LINE is owed by the round's closeout, and this batch is its subject:** the phone's
+   fanned divide flipped in lockstep with the Mac (her follow-up ruling), so `notes/MobileSoul.md`'s ledger
+   needs no "the phone owes a version of this" row for 18c batch 1 — the phone shipped it in the same commit.
+   Say that explicitly rather than omitting the line.
+
+**PROVISIONAL, for her ratify list:** QUESTIONS **#91** (what the top block renders when the divided take was
+not the take the block was showing — built as option (a), the shipped guarantee preserved).
+
+**NOT DONE, restated at the close:** everything in the record's first line, plus — no canon file edited (the
+delta above is drafted for the closeout), no `notes/MobileSoul.md` edit, no KnownIssues row opened (nothing
+was deferred out of this batch), no Release build and no `/Applications` refresh.
