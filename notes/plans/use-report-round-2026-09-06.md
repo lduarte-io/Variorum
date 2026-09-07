@@ -683,10 +683,17 @@ setting round-trips; the read tiers' pins unchanged; the phone's suite untouched
 > file; commit and push. Run the baselines yourself (core `swift test`, the Mac suite, the tutorial spine,
 > the iOS build) and record them — the plan's numbers are the last recorded finals, not yours.
 >
-> **CAST:** Opus implements EVERY batch (her word); you are Fable; cold reviewers per the plan — **Fable on
-> 18c, 18f, 17o batch b, 18e**; Opus on 17o c/d/e and 18d — `notes/REVIEW_PROMPT.md` verbatim, a fresh
-> reviewer per round, the ladder's three-round cap, every finding dispositioned in this file. The
-> hallucination guard binds: pin before fix; a pin green on both sides dismisses the finding.
+> **CAST — SPAWN BY AGENT TYPE, NOT BY BARE MODEL (her effort ruling, 2026-09-07):** the three definitions
+> in `.claude/agents/` carry the model AND the reasoning effort, and they supersede the architect-phase
+> skill's "general-purpose + `model:`" line for this round. Every implementer is
+> `subagent_type: "opus-implementer"` (Opus, **xhigh**). Cold reviewers: `subagent_type: "fable-reviewer"`
+> (Fable, **xhigh**) on **18c, 18f, 17o batch b, 18e** — the cross-model flow: the reviewer makes the final
+> call on disputes and implements its confirmed fixes itself; `subagent_type: "opus-reviewer"` (Opus,
+> **xhigh**, the same-model flow — you arbitrate, the implementer fixes) on 17o c/d/e and 18d. You, the
+> orchestrator, run at the session's **high**; a bare spawn (a Sonnet lookup helper) follows the session.
+> `notes/REVIEW_PROMPT.md` verbatim, a fresh reviewer per round, the ladder's three-round cap, every
+> finding dispositioned in this file. The hallucination guard binds: pin before fix; a pin green on both
+> sides dismisses the finding. Never two agents at once.
 >
 > **ORDER:** 18c (batch 1 the keep-on-top composition + the phone's flip → batch 2 Return makes blocks →
 > batch 3 make every newline a block) → 18f (batch 1 names/doors/presets/end slot → batch 2 the face to
@@ -743,6 +750,12 @@ bundles it for her — the standing PROVISIONAL rule. It never re-opens U-1…U-
   that final walk.
 - **The standing-17 rules** (`phase-17-standing-fixes.md`): pin before fix; measure before believing a
   number; no product invention; schema commits alone.
+- **The cast's effort levels (her ruling, 2026-09-07 — the definitions live in `.claude/agents/`):**
+  `opus-implementer` = Opus at xhigh; `fable-reviewer` = Fable at xhigh; `opus-reviewer` = Opus at xhigh;
+  the orchestrator session itself runs at high, and any bare spawn follows the session (a Fable
+  implementer, when a future round wants one, is spawned bare and so runs at the orchestrator's high —
+  her "let it follow the orchestrator level"). The frontmatter `effort` key overrides the session setting
+  (Claude Code's subagents documentation, checked 2026-09-07).
 - **The lean orchestrator:** briefs by pointer (file:line from this plan), never whole-file reads; records
   appended here per batch (brief → record → dispositions); the ladder's findings and dispositions here;
   a handoff to a successor orchestrator at ~500k tokens (`notes/SessionResiliencyProtocol.md` — the
