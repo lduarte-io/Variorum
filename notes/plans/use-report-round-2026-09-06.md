@@ -1123,8 +1123,9 @@ refresh. *(Filled in further at close.)*
 |---|---|---|
 | 1 | `TypedReturn` — the pure decision (`App/Variorum/Shared/EditorBrain/TypedReturn.swift`) + the key intercept + the two doors | **IN-PROGRESS** — code landed and building; pure suite `TypedReturnTests` **13 / 1 green** |
 | 2 | The real-key pins: the nine §5.1 pins, the retirements, the rebuilt tail pins | **DONE (253548fd)** — the four suites **41 / 4 green**; revert R1 run and recorded below (twelve red) |
-| 3 | The walk (dev-store Debug, `18c-2/` captures) | **IN-PROGRESS** |
-| 4 | Close: the suites, the dispositions (rows 1 · 28), the closeout deltas | **NOT-STARTED** |
+| 3 | The walk (dev-store Debug, `18c-2/` captures) + the copy that narrated the old model | **DONE (e2d1e699)** — thirteen captures listed below; the tutorial's "blocks & typing" card and the chip's ON copy corrected |
+| 4 | The two 13k list pins the ruling re-points | **DONE (0e4b61ca)** — `ListContinuationTests` + `NestedListDoorTests` **17 / 2 green** |
+| 5 | Close: the suites, the dispositions (rows 1 · 28), QUESTIONS #92, the closeout deltas | **DONE** (this row's commit) |
 
 **THE DESIGN AS BUILT (the decisions §5.1 left to the implementer, each named):**
 
@@ -1183,6 +1184,176 @@ tail road) · every `TypedReturnTests` case (the pure decision has no key to rev
 pins (they no longer reach the tail through the key, which is the point of rebuilding them).
 
 **RESTORED:** the four suites → **`Test run with 41 tests in 4 suites passed after 1.254 seconds.`**
+
+**THE WALK (the acceptance gate — USE, on the DEV-STORE Debug build `io.lduarte.Variorum.debug`, launched
+from `~/Library/Developer/Xcode/DerivedData/Variorum-dnpxwqhpxdqrdjbunktnzoahckpd/Build/Products/Debug/`;
+her `/Applications` app was never launched — `pgrep -fl 'Variorum.app/Contents/MacOS'` showed ZERO
+instances before, during and after, and my own instance quit with ⌘Q at the end). Driven with `cliclick`
++ `Tools/WalkKit`. ONE VOICE (Terminal): the Return key has no face of its own — it changes what the
+STORE holds and what the bar counts, and both voices render the same blocks — so a second voice would
+capture the same two facts in different type.**
+
+*(A tooling note for the next walker, cost me twenty minutes: `cliclick kp:return` does NOT reach this
+app — its `t:` typing does, but the Return keypress never arrives. `osascript … key code 36` does. Every
+Return below is that.)*
+
+1. **A fresh note, three paragraphs typed** (⌘N, then P1 ⏎ P2 ⏎ P3 and a pause): three blocks, the bar
+   reading `block 3/3`. **The fresh-note tail road is untouched** — this is crystallization doing exactly
+   what it always did, which is the half of §5.1 that says so. `01`
+2. **HER ROW.** The caret clicked to the END of block 2 (bar: `block 2/3` — `02`), ⏎, then typing:
+   *"Inserted between, by the key."* stands as a NEW BLOCK between paragraph two and paragraph three, and
+   the bar reads **`block 3/4`** — honestly, which is ledger row 28 closing by construction. `03`
+3. **The divide.** The caret clicked INSIDE block 2 (mid-word, after "Paragra"), ⏎ → the block became
+   **"Paragraph" / "two is the middle one."** with the caret at the second half's START and the bar at
+   `block 3/5`. The cut landed on the WORD EDGE, not mid-word — S4-22's floor, through the one snapping
+   rule, with no second snap. `04` · `05`
+4. **HER S1 SCENARIO, end to end.** ⏎ at the end of the last block → `block 6/6` and **no open tail**; a
+   3 s pause (the idle clock's window) → nothing minted, nothing to mint; a click at the end of the last
+   line → into the empty block; ⏎ → **nothing** (no second empty block); typing → the words landed in
+   that block, NOT appended to "Paragraph three is the last." `06`
+5. **⇧⏎ mid-block** → a second line INSIDE the same paragraph; the bar stayed `block 4/6`. A15 untouched.
+   `07`
+6. **A list.** ⏎ on a texted item continued the list (13k K5, in the same block); a second ⏎ on the empty
+   item ENDED the list and made the block — the bar going from `open tail` to **`block 11/11`**, which is
+   the empty-tail arm closing behind it. `08` · `09`
+7. **The chip OFF** (the `aa` row's *newlines make blocks: on* → *off*, with its own spoken consequence):
+   ⏎ inside block 1 typed a content newline and the count stayed `block 1/11`. Chip back ON afterwards.
+   `10` · `11`
+8. **Typing with ZERO delay after the key** (the structural flight's editing window — my own worry, since
+   `runStructural` disables editing for the flight): `IMMEDIATELY-AFTER-THE-KEY` landed COMPLETE in the
+   new block. Nothing was dropped at `cliclick`'s typing speed. Measured, not reasoned. `12`
+9. The note whole at the end. `13`
+
+**Captures** (`notes/plans/use-report-2026-09-06-screens/18c-2/`, gitignored):
+`01-three-blocks-typed.png` · `02-caret-at-end-of-block-2-bar-2of3.png` ·
+`03-new-block-between-and-typed.png` · `04-caret-inside-block-2-before-divide.png` ·
+`05-divide-at-the-caret.png` · `06-her-S1-scenario-end-of-note.png` ·
+`07-shift-return-is-a-blank-line-in-the-paragraph.png` · `08-list-continues-on-return.png` ·
+`09-empty-item-ends-the-list.png` · `10-the-chip-on.png` · `11-the-chip-off-return-is-content.png` ·
+`12-typing-immediately-after-the-key.png` · `13-the-walked-note-whole.png`
+
+**NOT WALKED, and why:** the FANNED arm (⏎ inside a block that carries takes → batch 1's keep-on-top
+road). It is pinned end-to-end through the real key (`aFannedBlocksKeyDivideKeepsTheTakesOnTop`: four
+blocks, the top one carrying the other take whole, the bottom one its half alone), and the door it
+reaches is byte-for-byte the door batch 1 walked by hand three hours earlier (R-1's captures 01–07). A
+second hand-walk of the same road would have proved the same thing twice.
+
+**THE CLOSING SUITES (all run at the END, on the final tree):**
+
+- core `swift test` → **`Test run with 1462 tests in 160 suites passed after 49.561 seconds.`**
+  *(unchanged from batch 1's close — this batch touches no core file.)*
+- Mac, ONE `xcodebuild test` run of the touched suites plus the ten `Tutorial*` spine types →
+  **`Test run with 327 tests in 40 suites passed after 34.502 seconds.`** Forty suites for forty
+  `-only-testing` type names: nothing was silently dropped. The forty: `TypedReturnTests` ·
+  `TypedReturnKeyTests` · `ReturnKeyTraceTests` · `SoftNewlineTests` · `NewBlockShortcutTests` ·
+  `GlobalSegmentationFaceTests` · `ParagraphGapTests` · `SeamEditHappyPathTests` ·
+  `SeamEditFallbackTests` · `SeamEditNonSeamGeometryTests` · `SeamEditRetainedByteTests` ·
+  `EditorSessionTests` · `ReviewRoundFixTests` · `CommitFlowTests` · `FanFlowTests` ·
+  `CrystallizationPlannerTests` · `CrystallizationReconcilerTests` · `ArmedEditTests` ·
+  `MacEditRoutingTests` · `MacEditRoutingCrashTests` · `BlockRangeIndexTests` ·
+  `BoundaryFluidityTests` · `GestureSoakTests` · `IdentityProjectionAuditWalkTests` ·
+  `MacIdentityAuditWiringTests` · `FannedDefaultsTests` · `FannedDefaultsBoardTests` ·
+  `ListContinuationTests` · `NestedListDoorTests` · `EditorDocumentTests` + the spine's ten.
+  *(The first run of this set was RED in two — the two 13k list pins the ruling re-points; they are in
+  the retired list below and were fixed before this run.)*
+- iOS `xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS' build` → **BUILD SUCCEEDED.**
+  (`Shared/EditorBrain/TypedReturn.swift` is a new file in a target-shared folder — the phone compiles it
+  and calls nothing in it; its Return model is the mobile catch-up's.)
+
+**DISPOSITIONS (the ledger rows this batch owns):**
+
+- **Row 1 — *"newlines to make new blocks is NOT working properly at all… I was writing in Write, but in
+  the middle of Write"* (U-1, HERS/ruled) — FIXED.** Built as the key intercept over the pure
+  `TypedReturn.act`, dispatching to the two shipped structural doors. Its pins:
+  `theEndOfAMiddleBlockMakesTheBlockBelowAndTypingLandsInIt` · `insideABlocksTextTheKeyDividesAtTheCaret` ·
+  `aFannedBlocksKeyDivideKeepsTheTakesOnTop` · `theLastBlocksEndMakesABlockAndNoTailOpens` ·
+  `twoQuickReturnsMakeOneEmptyBlockNotTwo` · `theEmptyBlockStaysWhenSheWalksAway` ·
+  `softReturnMidBlockIsStillContent` · `theChipOffKeepsTheKeyAsContentInTheMiddleToo` ·
+  `aListItemsReturnContinuesTheListAndTheEmptyItemEndsItAndMakesTheBlock` ·
+  `herS1ScenarioMakesABlockAndNeverALooseNewline` · `theEmptyTailTrapClosesAndMakesABlock` ·
+  `theStartOfABlockPushesItDownWithAnEmptyBlockAbove` · `aFreshNoteStillCrystallizesAsSheTypes` · the
+  thirteen pure `TypedReturnTests` · `neitherKeyOpensTheTailAtTheDocumentEndAnyMore` ·
+  `theTailStillOpensFromANewlineArrivingAsText` · `softThenPlainReturnBehaveAsTwoDifferentKeys` ·
+  `anEmptyListItemExitsTheListAndThenTheKeyMakesTheBlock` · `plainProseSeesNoListLeadAndTakesTheKeysOwnRoad`.
+  Red-on-old recorded above; walked and captured.
+- **Row 28 — the bar reading "block 3/3" while the page looks like the end of the note — CLOSED BY
+  CONSTRUCTION, verified in the walk.** A new block is a real block, so the count has nothing to lie
+  about: the bar read `2/3` → `3/4` → `3/5` → `5/5` → `6/6` → `4/6` → `11/11` → `12/12` through the walk,
+  and the one place it still says `open tail` is a tail that really is open (a fresh note's, step 1).
+
+**RETIRED AND REBUILT PINS (named, with the ruling beside each — never a silent deletion):**
+
+| Retired name | Its premise | Ruling | Replaced by |
+|---|---|---|---|
+| `writeMidBlockKeepsBothReturnsInsideTheBlock` (the ⏎ half) | mid-block, BOTH keys leave the newline inside the block | U-1 | `writeMidBlockKeepsTheSoftReturnInsideTheBlock` (⇧⏎ only — A15's half stands) + `insideABlocksTextTheKeyDividesAtTheCaret` |
+| `onlyPlainReturnOpensTheTailAtTheDocumentEnd` | ⏎ at the document end opens the tail (the ratified Phase 7 gesture, kept by A15) | U-1 | `neitherKeyOpensTheTailAtTheDocumentEndAnyMore` + `theTailStillOpensFromANewlineArrivingAsText` (the tail region itself is NOT retired — it opens from a newline arriving as TEXT, and a fresh note is still all tail) |
+| `softThenPlainReturnBehaveAsTwoDifferentKeys` (kept by name) | rider 3's flag-clears proof, whose second half was "⏎ still opens the tail" | U-1 | same name, the second half now "⏎ makes a block" |
+| `shiftReturnInATailMintsAndStaysAndMatchesTheIdleMintPath` · `shiftReturnMidTailLandsTheNewlineAtTheCaretNotTheEnd` · `aWhitespaceOnlyTailTakesTheOrdinaryPath` · `undoAfterASoftReturnMintMatchesTheIdleMintExactly` (all kept by name) | each OPENED its tail with the plain key | U-1 | same names, same assertions; the tail is opened by `openTailAsPastedText` — a newline arriving as text, the only road left to it |
+| `anEmptyListItemExitsTheListWithoutMakingALine` | the empty item's ⏎ ends the list and NOTHING else | U-1 (§5.1's "ends the list AND makes the block") | `anEmptyListItemExitsTheListAndThenTheKeyMakesTheBlock` — the lead still goes, no newline is still typed, and the block below is the new half |
+| `plainProseIsUnaffected` | on prose the key is "the keystroke it always was" — a content newline | U-1 | `plainProseSeesNoListLeadAndTakesTheKeysOwnRoad` — the list door still never fires on prose; what the key then does is the divide |
+
+**GREEN ON BOTH SIDES BY DESIGN (not hollow — they pin the half the ruling does NOT change):**
+`softReturnMidBlockIsStillContent` · `theChipOffKeepsTheKeyAsContentInTheMiddleToo` ·
+`aFreshNoteStillCrystallizesAsSheTypes` · every `TypedReturnTests` case · the four rebuilt B2 tail pins ·
+`writeUnderOneBlockKeepsBothReturnsAsContent` · `aTakePaneKeepsBothReturnsInTheTake` (a take pane is a
+different class and never sees this intercept). **Nothing was DISMISSED AS HOLLOW:** this batch is a
+ruled typing-model change, and every pin whose subject the ruling moves went red under revert R1.
+
+**PROVISIONAL, for her ratify list: QUESTIONS #92** — the typed Return's three unruled edges: (a) a
+non-empty SELECTION + Return is not this gesture (the K5 precedent); (b) a block with no legal interior
+cut gets the divide door's spoken refusal (S4-22's word-edge floor); (c) the EMPTY open tail — §5.1's
+letter says the tail road is unchanged and its own pin (9) requires a block, and the two are reconciled
+by mintability (a tail with text still crystallizes; an EMPTY one, which plans nothing, is the trap
+§4.1 traced). Each is one line to change.
+
+**RESIDUALS — recorded, not fixed (none is a regression this batch introduced; each is newly COMMON
+because the ruling makes the structural door an everyday key):**
+
+1. **⌘Z no longer reaches across a paragraph break in Write.** Every structural rewrite clears the text
+   undo stack — the standing directive, stated at its own line (`EditorSurfaceController`'s
+   `applyDifferentialStructural`: *"text-undo clears on EVERY structural rewrite — offsets after the seam
+   shifted; a stale replay is the corruption class regardless of rewrite strategy"*), and now a Return
+   travels it. Traced by reading, not measured. Owner: the 13u1 seam work (relaxing it is a corruption-
+   class judgment, not a batch-2 call).
+2. **An empty block made by ⏎ has no ⌥⌘Z.** `Operations.newBlock` registers no structural undo entry
+   (`Operations+Block.swift:27`) — pre-existing for ⌘⇧⏎, newly common here. Nothing is lost (the block is
+   empty and seam-backspace removes it via the A7 carve), and U-19 (2) says it stays; but "undo that" is
+   the reflex. Owner: 18c's closeout or a 17 entry, at her word.
+3. **A list typed at the note's very END still runs through the tail**, so its items become blocks by
+   crystallization rather than by the key, and an empty item there ends the list without making a block
+   (the tail is mintable, so §5.1's tail rule holds). Seen in the walk (step 6's first half) and
+   deliberately left: it is the tail road, which this batch does not touch.
+4. **A structural flight disables editing while it lands.** No keystroke was lost at the walk's typing
+   speed (step 8), but the window is real and is now on the hottest key in the app. Worth one measured
+   look in the 18c ladder if the reviewer wants it.
+
+**CANON + COPY DELTAS, DRAFTED FOR THE LETTER'S CLOSEOUT (not applied here — the letter owns them):**
+
+1. **AppSpec §7's segmentation-trigger paragraph** gains the U-1 supersession: *"**SUPERSEDED IN WRITE ON
+   THE MAC (author ruling U-1, 2026-09-06, the use-report round's 18c): with the chip ON, the Return KEY
+   makes a block wherever the caret is** — an empty block below at a block's end, a divide at the caret
+   inside its text, an empty block above at its start, nothing in an empty block. Type-time
+   crystallization is untouched and is still how a fresh note's paragraphs are born (a note with no
+   blocks is all tail); what the key no longer does is open the tail. ⇧⏎ (13d A15) is the newline that
+   stays inside the block. The phone's Return model is unchanged — the mobile catch-up's."*
+2. **Beside QUESTIONS #12 (the k−1 spacing rule)**: the typed-run half narrows to ⇧⏎ — U-19 (3),
+   ratified. PASTED runs keep the rule unchanged, and the chip OFF returns the whole note to
+   Return-as-content.
+3. **The field guide** (`TutorialSeeder`'s "blocks & typing", second card) is ALREADY corrected in this
+   batch — it said *"Inside a block, Return is just a newline"*, which the ruling retires. The closeout
+   should list it as a field-guide delta. The chip's own ON copy (`SegmentationFaceCopy.mintOnNote` ·
+   `help` · `globalHelp`) is corrected with it, for the same reason: prose that contradicts the shipped
+   surface is a regression (`TypingErgonomicsTests`' own doctrine).
+4. **The MOBILE PARITY LINE this batch owes** (`notes/MobileSoul.md`, at the round's closeout): *"18c
+   batch 2 — the Mac's Return key makes a block wherever the caret is (U-1). The phone owes a version of
+   this; its Return model is unchanged and the shared brain it will need (`TypedReturn.act`) already
+   compiles into the phone's target, uncalled."*
+
+**NOT DONE, restated at the close:** everything in the record's first line, plus — no canon file edited
+(the deltas above are drafted for the closeout), no `notes/MobileSoul.md` edit, no KnownIssues row opened
+(the four residuals are recorded here with owners named; none was deferred out of this batch as work),
+the fanned arm pinned but not hand-walked (said above, with its reason), and no measurement of the
+flight's editing window beyond the walk's own typing.
 
 7. **A block with no interior word edge** (a one-word block, caret inside it) reaches the divide door and
    gets that door's own refusal, spoken — S4-22's word-edge floor forbids the mid-word cut, and typing a
