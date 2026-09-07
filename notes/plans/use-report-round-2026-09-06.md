@@ -1832,3 +1832,116 @@ which `SegmentationFaceCopy.note(asked:effectivelyMints:)` speaks from the Takes
 - **The six commits, in order:** `8fd3a881` (R1-1) · `de495585` (R1-4 + R1-5) · `50e32cd7` (R1-3, with R1-4's line-end refinement) · `ebd0659d` (R1-2) · `da8e3817` (R1-6 + R1-7 + R1-8) · `1238c5bc` (QUESTIONS #94). Every behavioural fix went red under its named revert on the committed tree and the tree was restored with `git checkout --` each time; nothing in `Sources/VariorumCore/Sync/`, nothing in `BlockRangeIndex`'s regions or verdict (R1-1 READS the verdict through a new predicate; it changes no line of it).
 - **Files touched:** `App/Variorum/Variorum/Features/Editor/EditorTextView.swift` · `…/Editor/EditorViewModel.swift` · `…/Editor/EditorSurfaceController.swift` · `App/Variorum/Shared/EditorBrain/TypedReturn.swift` · `…/Editor/FannedDefaults.swift` (comments) · `App/Variorum/VariorumMobile/Features/Write/MobileStructural.swift` (comment) · `App/Variorum/Variorum/Registry/OpsRefusalCopy.swift` (copy) · `Sources/VariorumCore/Domain/NewlineSplitting.swift` (comment) · `App/Variorum/VariorumTests/ReturnKeyTraceTests.swift` · `…/TypedReturnTests.swift` · `…/WalkBuildRoundTests.swift` · `notes/QUESTIONS.md` · this file.
 - **Deliberately NOT done, said rather than skipped:** no hand-walk on the dev-store build — every fix is pinned through the REAL key path (the same harness the batches' own pins use); the orchestrator may want the implementer's sanity pass to include one walk of the list-at-the-end road (type a list at a note's end; ⏎⏎; type) since that is the road her step 6 captured going wrong. The quiet-machine flight window was not measured separately (R1-2's held-writer pin is the deterministic form of the same mechanism, and the fix removes the window rather than shrinking it). No canon file edited: the closeout deltas this pass owes the letter are (i) §5.1/R-2's "unreachable from a typed ⏎" sentence replaced by "the plain key never opens the tail, and the list door no longer does either" and (ii) #94 on the ratify list beside #91–#93. No Release build, no `/Applications` refresh, no `MobileSoul` edit, no KnownIssues row (nothing deferred out of this pass).
+
+#### IMPLEMENTER'S SANITY PASS (18c round 1)
+
+*Opus, the batches' implementer, over `db8b44c4..9bee1fb1` (six fix commits). Read-only on code — I traced
+every mechanism against the tree and walked the one road the coordinator named on the dev-store Debug
+build (rebuilt first; `io.lduarte.Variorum.debug`, `pgrep` clean before and after, `/Applications` never
+launched, my instance quit with ⌘Q). **Eight items: 7 CLEAR · 1 RAISED** (R1-2's replay ordering — a
+refinement of the fix, not a regression against the pre-fix tree; reproduced twice in the walk).*
+
+**R1-1 (the list continuation's soft road) — CLEAR, and confirmed in use.** `onNewlineWouldOpenTail` →
+`EditorViewModel.typedNewlineWouldOpenTail()` asks `index.verdict(replacing: selection,
+replacementIsSingleNewline: true, …) == .openTail` — a NON-MUTATING call on a value type, reading the
+caret's own selection; nothing is written and `BlockRangeIndex` is untouched, so the door and the verdict
+cannot drift (the fix's own claim, verified). **Inside a PASTED tail it correctly does not hold:** the
+range is contained in the tail region, so `verdict` answers `.tail`, the predicate is false, and the
+continuation types its plain newline into the tail exactly as before — B2's mint is not triggered, which
+is the narrow-condition rationale kept. Under `one_block` the predicate is false too (the `.openTail`
+branch excludes it), so the chip-off note is byte-unchanged. **Walk (captures 01–03):** at a note's END,
+`- milk` ⏎ showed `- milk` / `- |` with the bar reading **`block 3/3`** — where my batch-2 walk's capture
+08 read **`open tail`** at the same keystroke; `eggs` ⏎ kept it at `block 3/3`; a click on the `- eggs`
+line reads `block 3/4` — **both items in ONE block**, the mid-note shape at the end of the note.
+
+**R1-2 (deferred-and-replayed keystrokes) — RAISED (one item), with everything else CLEAR.**
+
+*CLEAR on the interactions asked about:* **⇧⏎** replays correctly — the stash holds the NSEvent and the
+replay re-enters `keyDown`, which re-applies `isSoftNewlineKey` → `withSoftNewline`, so a deferred soft
+return is still a soft return. **The list door** never interacts with the stash: `.continueList`'s soft
+road and `.ordinary`'s content road claim nothing, so no deferral is armed and the newline is synchronous.
+**Marked text/IME:** `claimTypedReturn` still refuses under `hasMarkedText()`, so a Return mid-composition
+arms nothing; a MENU flight during a composition now defers its keys instead of dropping them, which is
+strictly better than before (the only residual is that replayed events carry their original timestamps —
+theoretical, and the alternative is the drop the finding exists to end). **Key equivalents** are untouched
+(`performKeyEquivalent` precedes `keyDown`). **A flight that REFUSES drains, never holds:** the early
+`guard !structuralInFlight` return in `runStructural` happens BEFORE `beginDeferringKeystrokes()` (nothing
+armed), and every other road — an op error, a dirty-flush refusal, a planner `.refusal`, the empty block's
+`.nothing`, a `.content` re-derivation — is covered either by `runStructural`'s `defer` or by
+`runTypedReturnAct`'s. I found no path that arms without a replay. **Walk (capture 04):** ⏎ at the end of
+block 1 followed ~1 ms later (both statements in ONE `osascript`) by twenty characters → the whole string
+landed COMPLETE in the block the key made, in order — the misplacement the rider traced is gone in use.
+
+***RAISED — the outer replay CLEARS a deferral a replayed ⏎ just re-armed, and the surviving window
+REORDERS the keystroke.*** `EditorTextView.replayDeferredKeystrokes()` sets `isDeferringKeystrokes = false`
+UNCONDITIONALLY before it drains
+(`App/Variorum/Variorum/Features/Editor/EditorTextView.swift:126–133`), and
+`EditorSurfaceController.runTypedReturnAct`'s `defer { model.textView?.replayDeferredKeystrokes() }`
+(`:846`) runs AFTER `runStructural`'s own defer (`:2417`) has already replayed. So when a stashed ⏎ is
+replayed, it claims → `EditorViewModel.runTypedReturn` calls `beginDeferringKeystrokes()` for the CHAINED
+act (`:1539`) → the inner replay loop finishes → and the outer defer immediately clears that arming with
+an empty stash. From there until the chained act's own `runStructural` re-arms, keys are NOT stashed:
+they type into the surface the pending act is about to restructure, and the act then re-derives against
+them. **Observed twice in the walk** (captures 05 · 06): ⏎ ⏎ + text in one `osascript` (three statements,
+~1 ms apart) came out as **⏎ · text · ⏎** — the text in the block the FIRST return made and an EMPTY
+block after it, `block 4/7` then `block 6/9` — where the same rig with a single ⏎ (capture 04) preserved
+order exactly, and the pinned `twoQuickReturnsMakeOneEmptyBlockNotTwo` (⏎⏎ with nothing following) is
+green. The alternative explanation — the letters overtaking the second Return in delivery — is discounted:
+the events come FIFO from one process, and probe 04 through the same rig kept its order.
+**Severity, honestly:** strictly better than the pre-fix tree (there the same burst DROPPED characters);
+what remains is an ordering artifact of the fix's own seam, in a window of one task hop. **Shape offered,
+the reviewer's call:** give the flag a generation — `beginDeferringKeystrokes()` bumps a counter,
+`replayDeferredKeystrokes(from:)` clears only if the counter is unchanged — or have `runTypedReturnAct`'s
+defer replay only on the roads that never reach a flight (`.content`/`.nothing`/a planner refusal), which
+is what its own comment says it is for. A pin: the claim-gap pin's shape with TWO real ⏎ events and a
+character, asserting `["alpha", "x"]` and ONE new block rather than two.
+
+**R1-3 (the exit's retraction) — CLEAR, and confirmed in use.** `retractListContinuationNewline`
+(`EditorViewModel.swift:1548–1590`) is correctly fenced: it runs through the ordinary editing path (the
+`closeEmptyTailSeparator` shape), refuses unless the caret sits at its ENTRY's end (the walk over
+`index.entries` returns early otherwise, and a caret in the TAIL matches no entry at all, so a tail
+newline is never retracted), requires the character behind the caret to be `\n`, and requires the line
+before it to satisfy `MarkdownSyntax.isListLead` — so U-19 (2)'s blank line and A11's k−1 seam are both
+out of reach, as its two green-on-both guards assert. It runs before the act is read, and the act then
+finds the caret at the previous list line's END, which R1-4's narrowing deliberately leaves to the
+ordinary rules. **Walk (capture 03):** the empty item's ⏎ ended the list at `- eggs` with NO blank line
+after it and the caret in a new block; the prose typed next landed there; the bar read `block 4/4`.
+
+**R1-4 (a caret inside a list line is the list door's) — CLEAR.** `TypedReturn.act`'s guard sits AFTER the
+leading-whitespace rule and BEFORE the trailing one, so a list line's very START still pushes the
+paragraph down and its END still falls through — which is exactly what the exit road needs.
+`lineRange(of:at:)` is O(line) and correct at both boundaries (offset 0 → start 0; a caret just after a
+newline → that line's start). `MarkdownSyntax.isListLead` is a whole-line predicate (indent + `"- "`), so
+checkboxes are covered and a bare `"-"` is not — consistent with the door's own vocabulary. The pure and
+real-key pins pin the four positions.
+
+**R1-5 (leading whitespace mirrors trailing) — CLEAR, with one observation for the record.** The prefix
+test subsumes the old `intra == 0` branch, and caret 3 of `"  hello"` still divides. **Observation, not a
+raise:** because the leading test now runs FIRST, a block whose text is ENTIRELY whitespace flips from
+`.emptyBlock(.below)` to `.emptyBlock(.above)` at its end — nothing else changes, no pin covers that
+shape, and an all-whitespace block is nearly unreachable (crystallization trims; a whitespace-only tail
+never mints). Recorded so the flip is not discovered as a surprise.
+
+**R1-6 (`NewlineSplitting`'s header) — CLEAR.** I re-traced the counter-example: `"one\n  \ntwo"` cut at
+the run's start gives `("one\n", "two")` — the two spaces gone, one newline kept by k−1 — which is what
+the new sentence now says, and the `"\n"`-only note matches `breaks`' own scanner against
+`seamTrimmedHalves`' `Character.isNewline` count.
+
+**R1-7 (stale `Shared/` pointers) — CLEAR.** All three swept, the rider's `FannedDefaults.swift:17`
+included; `KeepOnTopDivide.swift` is in `Sources/VariorumCore/Domain/` and no other file names the old
+path (grep clean).
+
+**R1-8 (the chip's ON copy) — CLEAR.** `help`, `mintOnNote` and `globalHelp` all carry "in Write", `help`
+adds the take-pane sentence, and `help` still contains `⌘⇧⏎` — the string
+`NewBlockShortcutTests.theRetiredKeyIsGoneFromTheCopyThatNamesTheDoor` asserts — so the copy pin's
+premise survives the edit.
+
+**QUESTIONS #94 — CLEAR.** Both edges carry their options, the pins by name and the "restoration, not a
+new behaviour" reading; the free-number line advanced to #95.
+
+**THE WALK — captures** (`notes/plans/use-report-2026-09-06-screens/18c-ladder/`, gitignored):
+`01-list-continued-at-the-note-end.png` · `02-two-items-one-block.png` ·
+`03-empty-item-ends-the-list-and-makes-the-block.png` · `04-fast-typing-right-after-the-key.png` ·
+`05-two-fast-returns-then-typing.png` · `06-two-fast-returns-repeat.png` ·
+`07-the-walked-note-whole.png`. One voice (Terminal): the Return key has no face of its own — the
+evidence is the blocks and the bar's count, which both voices render identically.
