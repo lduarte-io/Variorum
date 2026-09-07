@@ -18,6 +18,14 @@ go ahead and commit these files, if you commit just these specific files, it sho
 
 *Part 2's three images were pasted into the chat, not saved to the Desktop; they are described in the manifest below as images 14–16.*
 
+## Part 3 — her rulings at the mockup approval and the last five answers, 2026-09-07 (verbatim)
+
+I like your mockups, I approve of them. the only comment I have is that if you're merging several notes together you should be given the choice of bringing every take or only the currently shown ones, but i don't want a super complex ceremony for merging multiple blocks together. what is the versions refusal on a blockless note question? i'd rather just answer all the questions now. and yes, the book's right gutter will retire entirely once the bar moves left. also, i think the fade will look weird if they're 100% the color of the paper because the spacing will look odd, so maybe just render them faintly, at a grey or lower opacity or something. what's the empty block rule? i want to just answer these questions so I can get this started
+
+1 - a is good. 2 - a, the eager deleting of whitespace has already been an annoyance and we won't reintroduce it with paragraphs disappearing. 3 - shift return is good for a blank line within a paragraph, and users can also turn off newlines make blocks if they want, right? 4. confirmed. 5. confirmed. also, there's one other issue that is similar to the carat placement, but when you are within a block and then click go to write, you also end up with your carat at the start of the block rather than where you were within it, which is annoying on long blocks. if this issue is very difficult to fix for some reason or messes with the scrolling / layout, I want you to let me know. If you think it can be fixed and won't cause other issues, please add it to the plan.
+
+*(The five numbered answers map to the plan's §7 questions as they stood at that moment: 1 versions on a blockless note; 2 Return's empty block; 3 blank lines by Shift-Return; 4 lists under "make every newline a block"; 5 the ring preference's reach.)*
+
 ## Image manifest (her filenames; the folder is `notes/plans/use-report-2026-09-06-screens/author/`)
 
 | file | what it shows | ledger row(s) in the plan |

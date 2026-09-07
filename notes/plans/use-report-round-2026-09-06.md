@@ -102,6 +102,19 @@ and feeling great after the various rounds of changes."*
   the color of the paper because the spacing will look odd, so maybe just render them faintly, at a grey or
   lower opacity or something."* → outside the caret's span the markers render in the marker color at a low
   opacity (a faint grey), inside it at full; never invisible.
+- **U-19 — THE LAST FIVE, ANSWERED (2026-09-07, the third message; EVERYTHING IS NOW SETTLED):** (1) versions
+  on a blockless note — *"a is good"* → mint the empty first block and link at once; (2) Return's empty block —
+  *"a, the eager deleting of whitespace has already been an annoyance and we won't reintroduce it with
+  paragraphs disappearing"* → an abandoned empty block STAYS as an empty paragraph, never auto-removed;
+  (3) *"shift return is good for a blank line within a paragraph, and users can also turn off newlines make
+  blocks if they want, right?"* → yes: the chip OFF (`one_block` for that note) makes Return content again,
+  as today; the k−1 typed-blank-line rule narrows to ⇧⏎; (4) lists stay whole under "make every newline a
+  block" — *"confirmed"*; (5) the ring preference governs every live pane — *"confirmed"*.
+- **U-20 — EVERY DOOR INTO WRITE LANDS AT THE CARET, NOT THE BLOCK'S START (2026-09-07, the third message).**
+  *"when you are within a block and then click go to write, you also end up with your caret at the start of
+  the block rather than where you were within it, which is annoying on long blocks."* → Row 42; the same
+  mechanism as row 7 (the current-block memory carries no offset), the same additive fix, in 17o batch b.
+  Her condition — tell her if it is hard or disturbs scrolling/layout — is answered in that row: it is not.
 - **U-15 — THE PUNCHLIST** (rows 6–33 of the ledger, her words there) and the follow-up's small ones:
   the tag field collapses after use (*"if there's a tag already applied this new tag template shouldn't
   just sit here by default, it should collapse after you click out of it"*); the divider's white top
@@ -187,6 +200,7 @@ whole. Image numbers are the report's manifest.
 | 39 | follow-up: "you can't tag snippets but there's a tag on there" | Snippets area | Block tags ARE the model's (`block_tag`; "block-level tags primarily serve the pool"); the card menu has "Tags…" (`SnippetsCopy.tagsRow`, `BlocksAreaView.swift:511–513` → `BlockTagAssignmentSheet`, `BlockTagViews.swift:68`) — so a door exists; the tag she saw was the tutorial's seeded one. Trace where she looked for the door (the pool EDITOR's masthead has no `#`?) and make the door findable where the tag shows | 17o · e | TRACED (Opus only) |
 | 40 | follow-up: the tag field should collapse after clicking out; the `#` reopens it (image 15) | Masthead `#` door | `MastheadTagCluster.swift` — the inline field (`:222`) stays open while `fieldOpen`; trace what flips it closed (submit? focus loss?) — her rule: focus loss with a tag already applied collapses it | 17o · d | TRACED |
 | 41 | follow-up: the sidebar/editor divider is white for a bit at the top (image 16) | `ShellSplit` divider | The divider `Rectangle` spans the HStack; the window's toolbar band above the detail (`VariorumApp.swift:255–286`, `.unifiedCompact`; `RootView.swift:174–201`) is where the short white segment sits — the sidebar column's top row starts under the band while the line does not; trace which view paints white there | 17o · d | TRACED |
+| 42 | third message: "when you are within a block and then click go to write, you also end up with your caret at the start of the block rather than where you were within it" | Every door into Write (Takes' live pane, Read's edit pane, the Library's Open, the bar's doors) | Row 7's mechanism exactly: `FocusedBlock` carries block + variant and NO offset (`BlockHistoryPane.swift:131–135`), so `bareArrivalLanding` (`EditorViewModel.swift:1729–1734`) can only land at the block's first character. **Her condition answered:** the fix is additive (an optional offset on the fact, reported by whichever surface holds a caret, clamped to the block's current length on arrival), the scroll uses the existing exact jump (`JumpPrimitive`, the Phase 6 hybrid road), the layout is untouched, and surfaces without a caret (Blocks' rows, the outline's cards) simply report nil and land at the start as today — no risk beyond a pin's reach. Folded into batch b's one fix | 17o · b | TRACED |
 
 ## 4. The traces (the architect's read — by reading, never by running; the pin decides)
 
@@ -325,16 +339,16 @@ keeps the takes on top on both platforms; a note written with the chip off is re
   intercept (`.continueList`, `MarkdownActs.swift:388` — list continuation) runs FIRST and keeps its
   behavior: inside a list, Return continues the list; a second Return on an empty item ends the list AND
   makes the block (the two intercepts compose in that order; pin it).
-- **The empty-block question (PROVISIONAL → QUESTIONS for her ratify list):** a Return she then abandons
-  leaves an empty block. **(ii, recommended first build)** it stays — an empty paragraph, as in every
-  editor; seam-backspace removes it (the A7 carve, `deleteBlock(requiring: .emptyWithNothingUnshown)`);
-  Blocks/Index show it as "(empty block)". **(i, follow-on if empties annoy her)** an empty block minted by
-  Return that loses the caret with no text, no take, no comment is removed quietly through the SAME
-  precondition — a tombstone (30-day, tray-visible) by the 13j doctrine; a purge would need her ruling.
-  Never (iii) a positional open gap in the index — that is seam surgery, 13u1's.
-- **The k−1 spacing rule (QUESTIONS #12, 2026-07-12) narrows by consequence:** typed newline runs no
-  longer reach the tail, so "typed blank lines persist as content" now holds only for ⇧⏎ inside a block;
-  pasted runs keep the rule unchanged. Recorded as a supersession for her ratification, never silently.
+- **The empty block — RULED (U-19 (2)):** a Return she then abandons leaves an empty block, and **it
+  STAYS** — an empty paragraph, as in every editor; seam-backspace removes it (the A7 carve,
+  `deleteBlock(requiring: .emptyWithNothingUnshown)`); Blocks/Index show it as "(empty block)". **Never
+  auto-removed** — her words: *"the eager deleting of whitespace has already been an annoyance and we
+  won't reintroduce it with paragraphs disappearing."* No quiet-removal follow-on; never a positional open
+  gap in the index (seam surgery, 13u1's).
+- **The k−1 spacing rule (QUESTIONS #12, 2026-07-12) narrows — RATIFIED (U-19 (3)):** typed newline runs no
+  longer reach the tail, so a blank line INSIDE a paragraph is ⇧⏎ (⇧⏎ twice for a blank line); pasted runs
+  keep the rule unchanged; the chip OFF returns the whole note to Return-as-content. The closeout records
+  the supersession in AppSpec §7's segmentation-trigger paragraph and beside #12.
 - **Pins that must go RED on old and green after** (`ReturnKeyTraceTests`' real-key harness): (1) seed
   `["alpha","beta","gamma"]`, caret at the end of "beta", ⏎, type "new" → `["alpha","beta","new","gamma"]`
   (the middle case — her scenario); (2) caret inside "beta" after "be", ⏎ → `["alpha","be","ta","gamma"]`
@@ -459,7 +473,10 @@ this section is what it does.
 **Goal.** Every defect row FIXED with its pin, or DISMISSED AS HOLLOW, or DEFERRED with an owner — each
 batch walked by its implementer on the dev-store Debug build, captured, before its record closes.
 
-**Batch b — the landing family.** Rows 7 · 8 · 20 per §4.2. Files: `BlockHistoryPane.swift:131`
+**Batch b — the landing family.** Rows 7 · 8 · 20 · 42 per §4.2 — ONE rule: **every door into Write
+lands at the remembered caret offset inside the current block, from whichever surface remembered it** (a
+live take pane, Read's edit pane, Write itself before a mode switch, the Library's Open); surfaces with no
+caret report nil and land at the block's start as today. Files: `BlockHistoryPane.swift:131`
 (`FocusedBlock`), `CurrentBlockMemory.swift`, `CommandRouter.noteFocusedBlock` (`:126`), `EditorViewModel`
 (`:1702–1707`, `:1729`, `:1743–1770`, `:2544`), `TakesViewModel.swift:521`, `TakesChoreographer.swift:159–176`,
 `TakesBoardView.swift` (the article, `:503–560`), `JumpPrimitive.swift`. The Act 10 "one current block" pins
@@ -503,11 +520,12 @@ indicator setting cycled through all three. **Review: Opus** (Fable if the pane'
 - (13) headers inside a padded group pad `rowPadding` only (row 13's mechanism); one leading edge for a
   header and its rows' text; the header gains air above the first row's wash (a 30-pt pitch for the header
   row, the text bottom-aligned with ~6 pt below); "this note" ↔ Write, "Open" ↔ the tabs. Geometry pin.
-- (17)+(27) `markPostsAsVersions` on a blockless post — **PROVISIONAL, her call (§7 Q3):** (a, recommended)
-  mint the blockless post's first block (empty) in the same transaction and anchor on it — the link exists
-  at once; (b) refuse in words with a door. Either way Compare stops speaking the raw error:
+- (17)+(27) `markPostsAsVersions` on a blockless post — **RULED (U-19 (1), "a is good"):** mint the
+  blockless post's first block (empty) in the same transaction and anchor the `version_of` edge on it —
+  the link exists at once; the empty block is an ordinary block (U-19 (2)). Compare stops speaking the raw error:
   `VersionActs.words` gains the case; Compare's door uses it (the J8 copy-truth pin). Pins: (a) → the edge
-  exists, `versionPeerPosts` finds the peer; the wording pin. KnownIssues row 31's text amended if (a).
+  exists, `versionPeerPosts` finds the peer, the minted block has one live empty variant; the wording
+  pin. KnownIssues row 31's text amended (a blockless post now gains its anchor block at the link).
 - (18)+(19) §4.3's observation; pins there.
 - (21) the chapter count and the ⋯ share ONE trailing column (`menuIndicator(.hidden)` on the row menu, or
   a fixed trailing column both rows use); pin: trailing edges equal.
@@ -687,9 +705,9 @@ setting round-trips; the read tiers' pins unchanged; the phone's suite untouched
 > TEXTKIT2 §3; `runStructural` is the one structural door; never touch `BlockRangeIndex`'s regions); no
 > commit trailer lines (her 2026-09-04 rule); zero `Sources/VariorumCore/Sync/`, zero lockstep.
 >
-> **HER OPEN QUESTIONS are §7 of the plan** — three remain (the versions shape; the gutter's retirement;
-> the phone's default flip timing is settled — same batch). Bundle anything new for one sitting; never
-> decide product in a batch.
+> **HER QUESTIONS ARE ALL SETTLED — §1's U-1…U-20 and §7 are the record; there is NO opening sitting.**
+> Anything genuinely new that a batch cannot decide from the spec goes to QUESTIONS and is bundled for
+> her; never decide product in a batch, and never re-open what §1 settles.
 >
 > **AT EACH LETTER'S CLOSE:** dispositions per row; the suites green (+ the iOS build for 18c/18e/anything
 > in `Shared/`); the canon deltas the plan drafted, applied exactly as ruled (18c: AppSpec §9's divide
@@ -702,22 +720,19 @@ setting round-trips; the read tiers' pins unchanged; the phone's suite untouched
 > in order), the `/Applications` refresh after the last walk at a zero-instance window with the A1 backup
 > first, push.
 
-## 7. Her remaining questions (bundle for one sitting; everything else in §1 is settled)
+## 7. Her questions — ALL SETTLED (the record; no opening sitting is owed)
 
-*(Settled 2026-09-07 at the mockup approval: the gutter retires entirely — U-17; the fade is faint — U-18;
-the N-way merge's two choices — U-16.)*
+- 2026-09-07, at the mockup approval: the mockups APPROVED; the N-way merge's two choices (U-16); the
+  gutter retires entirely (U-17); the fade is faint (U-18).
+- 2026-09-07, the third message (U-19): versions on a blockless note → mint the first block and link;
+  Return's empty block → stays, never auto-removed; blank lines → ⇧⏎, the chip OFF restores
+  Return-as-content; lists stay whole under "make every newline a block"; the ring preference governs
+  every live pane. Plus U-20: every door into Write lands at the caret offset (row 42).
+- Still the 13u2 kickoff's, not hers: whether row 11 closes 13u2 item 13.
 
-1. **The versions refusal on a blockless note (row 17):** mint the empty first block and link at once
-   (recommended), or a legible refusal with a door?
-2. **Return's empty block (18c batch 2):** the first build leaves an abandoned empty block as an empty
-   paragraph (recommended); the quiet-removal follow-on if it annoys you.
-3. **Blank lines by Shift-Return:** with Return making blocks, a double Return no longer types a blank
-   line inside a paragraph; ⇧⏎ does (the k−1 typed-blank-line rule narrows to ⇧⏎; pasted text unchanged) —
-   ratify.
-4. **"Make every newline a block" and lists:** a single newline between two list lines is NOT a break
-   (lists stay whole) — ratify.
-5. **The ring setting's reach:** every live pane (Takes, Lenses, Compare, Canvas, Read-edit) — yes?
-6. **The 13u2 handover:** row 11 likely closes 13u2 item 13 — the 13u2 kickoff's call; nothing needed now.
+A batch that believes it has found a NEW product question writes it to `notes/QUESTIONS.md` (the next free
+number) with 2–3 options, implements the most spec-defensible one marked PROVISIONAL, and the round
+bundles it for her — the standing PROVISIONAL rule. It never re-opens U-1…U-20.
 
 ## 8. Process (binding on every batch)
 
