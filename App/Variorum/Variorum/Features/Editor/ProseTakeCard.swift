@@ -57,9 +57,13 @@ nonisolated enum CeremonyCardCopy {
         marked: Bool, isEmpty: Bool, cut: Int?,
         parkedAtEnd: Bool, parkedAtStart: Bool
     ) -> CeremonyDestination {
+        // "Copy takes to both" FIRST (18f ladder R1-5): `divideDuplicating`
+        // duplicates every other active take, an EMPTY one included, so the
+        // emptiness rule below — which is about a take that cannot be CUT —
+        // must not speak for a take that is never cut at all.
+        if arrangement == .copyToBoth, !isSeed, marked { return .both }
         if isEmpty { return marked && arrangement == .perTake ? .empty : .original }
         guard marked else { return .original }
-        if arrangement == .copyToBoth, !isSeed { return .both }
         if parkedAtEnd { return .top }
         if parkedAtStart { return .bottom }
         return cut == nil ? .unplaced : .split
@@ -83,7 +87,11 @@ nonisolated enum CeremonyCardCopy {
         case .both:
             return "Not cut — this whole take rides onto BOTH blocks"
         case .original:
-            return "Not cut — stays whole on the original block, in lineage"
+            // 13f W10a's answer, where she is looking (18f ladder R1-4 — the
+            // mockup's own words; batch 2's card had dropped the path to
+            // the footer's resting line alone): the original is never lost,
+            // and the row names where it went.
+            return "Not cut — stays on the original block, in \(TrayPath.originalsPath)"
         case .unplaced:
             return "Place the \u{2702} — drag it, click between words, or \u{2190}/\u{2192}"
         case .empty:

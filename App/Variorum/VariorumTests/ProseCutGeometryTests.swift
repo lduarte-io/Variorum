@@ -264,7 +264,34 @@ struct CeremonyCardCopyTests {
                 "the mockup's own sentence, in counts")
         #expect(CeremonyCardCopy.status(.split, words: (1, 9))
             .contains("1 word above"), "singular is spoken")
-        #expect(CeremonyCardCopy.status(.original, words: nil).contains("lineage"))
+        // 18f ladder R1-4 (fable-reviewer): the unchecked take's line names
+        // the ROAD (13f W10a, the mockup's own words) — not merely "lineage".
+        #expect(CeremonyCardCopy.status(.original, words: nil).contains(TrayPath.originalsPath))
+    }
+
+    /// **18f ladder round 1, R1-4 — RED ON OLD** (the card stashed): the
+    /// unchecked take's status line carries 13f W10a's answer — WHERE the
+    /// original block goes — as mockup figure A's second state does, and as
+    /// the retired `uncheckedRowNote` did with no caller to speak it.
+    @Test func theUncheckedCardNamesTheRoadTheOriginalTakes() {
+        let line = CeremonyCardCopy.status(.original, words: nil)
+        #expect(line.contains(TrayPath.originalsPath), "the road, on the row: \(line)")
+        #expect(line.lowercased().contains("not cut"))
+        #expect(CeremonyCardCopy.footerNote(.original) == "original block · lineage",
+                "the footer keeps the mockup's short form")
+    }
+
+    /// **18f ladder round 1, R1-5 — RED ON OLD** (the card stashed): an EMPTY
+    /// other take under "Copy takes to both" rides onto BOTH successors —
+    /// `divideDuplicating` duplicates every other active take with no
+    /// emptiness filter — and the card says so instead of "stays on the
+    /// original". Under "Choose per take…" an empty take is still `.empty`
+    /// (it cannot be CUT), and under a parking preset still `.original`.
+    @Test func anEmptyTakeUnderCopyToBothRidesOntoBoth() {
+        #expect(destination(.copyToBoth, marked: true, isEmpty: true, cut: nil) == .both)
+        #expect(CeremonyCardCopy.status(.both, words: nil).contains("BOTH blocks"))
+        #expect(destination(.perTake, isEmpty: true, cut: nil) == .empty)
+        #expect(destination(.keepOnTop, marked: false, isEmpty: true, cut: nil) == .original)
     }
 
     /// The footer's swatches say the same thing the status line does — one

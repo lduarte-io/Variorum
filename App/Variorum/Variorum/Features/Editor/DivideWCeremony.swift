@@ -490,27 +490,10 @@ final class DivideWCeremony {
         }
     }
 
-    /// The per-row line under a take that a PRESET placed — what happens to
-    /// THIS take, where she is looking (the 13f W10a doctrine).
-    nonisolated static func presetRowNote(
-        _ arrangement: Arrangement, isSeed: Bool, isEmpty: Bool
-    ) -> String? {
-        guard !isSeed else { return nil }
-        switch arrangement {
-        case .keepOnTop:
-            return isEmpty
-                ? "Empty — it can't be placed, so it stays whole on the original block."
-                : "\u{2702} at the end — this whole take stays on the top block."
-        case .keepOnBottom:
-            return isEmpty
-                ? "Empty — it can't be placed, so it stays whole on the original block."
-                : "\u{2702} at the start — this whole take stays on the bottom block."
-        case .copyToBoth:
-            return "Not cut — this whole take rides onto BOTH blocks."
-        case .perTake:
-            return nil
-        }
-    }
+    // (`presetRowNote` — 18f batch 1's per-row line under a preset-placed take
+    // — RETIRED at the 18f ladder, R1-4: batch 2's card speaks every row's
+    // destination through `CeremonyCardCopy.status`, and a second home of the
+    // same sentences with no caller is how copy drifts.)
 
     // MARK: - Placement
 
@@ -656,12 +639,9 @@ final class DivideWCeremony {
             + "keeps and releases to \(TrayPath.originalsPathWithDoor)."
     }
 
-    /// The per-row caption under an unchecked take — the same answer where
-    /// she was actually looking when she asked.
-    nonisolated static var uncheckedRowNote: String {
-        "Not cut — stays whole on the original block, which waits in "
-            + "\(TrayPath.originalsPath)."
-    }
+    // (`uncheckedRowNote` — the caption under an unchecked take — RETIRED with
+    // `presetRowNote` at the 18f ladder, R1-4; the card's `.original` status
+    // line is the ONE home and names the same road.)
 
     /// The completion's destination sentence — pure, so the copy is pinned
     /// rather than read off a screenshot. `nil` when every take was checked:

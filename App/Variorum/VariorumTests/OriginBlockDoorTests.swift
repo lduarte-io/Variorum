@@ -56,7 +56,10 @@ struct OriginBlockDoorTests {
     @Test func theCeremonyCopyNamesTheRecoverySurface() {
         #expect(DivideWCeremony.checklistExplainer.contains(TrayPath.originalsPath),
                 "the explainer names the full path, section included")
-        #expect(DivideWCeremony.uncheckedRowNote.contains(TrayPath.originalsPath),
+        // 18f ladder R1-4 (fable-reviewer): the caption's ONE home is the
+        // card's status line now (`uncheckedRowNote` was retired — it had no
+        // caller after batch 2's card, and this pin was green over it).
+        #expect(CeremonyCardCopy.status(.original, words: nil).contains(TrayPath.originalsPath),
                 "so does the caption under the unchecked take she is looking at")
         // 13j J6: the name is the DOOR's own — the tray panel's title and
         // its section header read the same constants the sentence does, so

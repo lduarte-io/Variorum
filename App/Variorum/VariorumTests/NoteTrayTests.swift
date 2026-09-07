@@ -410,7 +410,8 @@ struct NoteTrayTests {
     @Test func noShippedCopyStillPointsAtTheRemovedUnplacedListing() {
         let lines = [
             DivideWCeremony.checklistExplainer,
-            DivideWCeremony.uncheckedRowNote,
+            // 18f ladder R1-4: the unchecked take's caption lives on the card.
+            CeremonyCardCopy.status(.original, words: nil),
             DivideWCeremony.releasedOriginalNote(uncheckedTakes: 2) ?? "",
             CapabilityRegistry.capability(.showOriginBlock).unavailableNote,
             HelperCheatSheet.summary,
