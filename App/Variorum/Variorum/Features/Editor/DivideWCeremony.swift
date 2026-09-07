@@ -50,7 +50,22 @@ protocol DivideWCeremonyHost: AnyObject {
     /// Runs the divide through the host's own structural door. Returns
     /// whether it LANDED — the sheet dismisses only then, so a refusal
     /// keeps the ceremony and its cuts for the author.
-    func runDivideW(blockID: String, cuts: [String: Int]) async -> Bool
+    ///
+    /// `displayedVariantID` is the SEED take — the one the author was
+    /// working in when the divide was invoked — and it anchors both
+    /// successors' chosen/default (18c batch 1's additive `divideW` arm;
+    /// QUESTIONS #91). Nil-or-not-in-`cuts` keeps A's rendered take, so an
+    /// unchecked seed falls back to today's behaviour by construction.
+    func runDivideW(
+        blockID: String, cuts: [String: Int], displayedVariantID: String?
+    ) async -> Bool
+    /// The THIRD preset's road (U-5: "all takes go on both"), which is the
+    /// shipped `Operations.divideDuplicating` — not a `divideW`
+    /// arrangement, because "ride whole onto BOTH successors" is not
+    /// something a per-take cut can say. Same contract: true = landed.
+    func runDivideDuplicating(
+        blockID: String, displayedVariantID: String, cut: Int
+    ) async -> Bool
     func speakCeremonyStatus(_ message: String)
     /// A REFUSAL, in the host's own refusal voice — Write beeps because
     /// Write's structural refusals beep; a board speaks because its
@@ -74,6 +89,44 @@ final class DivideWCeremony {
     /// touched; confirm funnels back through the host's structural door.
     var state: State?
 
+    /// **THE ARRANGEMENT ROW** (her ruling U-5, 2026-09-06, verbatim: *"the
+    /// phone should offer three options … 1. all takes stay with the top
+    /// block 2. all takes stay with the bottom block 3. all takes go on
+    /// both. I think those options should feel easily available in the
+    /// divide ceremony for ease and the custom selector should be something
+    /// you really have to choose to do."* — the Mac's sheet gets the same
+    /// row, mockup figure A).
+    ///
+    /// The order is fixed by ruling, and `keepOnTop` is SELECTED ON OPEN
+    /// because it is her U-2 default — so confirming the sheet unchanged
+    /// reproduces the instant divide byte-for-byte (pinned).
+    ///
+    /// Three of the four are ARRANGEMENTS of arguments to shipped
+    /// operations, not new ones: top and bottom are `KeepOnTopDivide`'s two
+    /// compositions over `divideW`'s parking rule (S4-22), and "copy to
+    /// both" is `divideDuplicating` (13j J4's retired default, kept in core
+    /// for exactly this). Only `perTake` is the hand-placement surface the
+    /// sheet has always been.
+    enum Arrangement: String, CaseIterable, Equatable, Sendable, Identifiable {
+        case keepOnTop, keepOnBottom, copyToBoth, perTake
+        var id: String { rawValue }
+
+        /// The chip's word — the mockup's, shortened only where the row
+        /// would not otherwise fit at the sheet's width.
+        var title: String {
+            switch self {
+            case .keepOnTop: "Keep takes on the top block"
+            case .keepOnBottom: "Keep takes on the bottom block"
+            case .copyToBoth: "Copy takes to both"
+            case .perTake: "Choose per take…"
+            }
+        }
+
+        /// True where the takes are shown but not individually chosen — the
+        /// checkbox appears only in "Choose per take" (mockup A's caption).
+        var isPreset: Bool { self != .perTake }
+    }
+
     struct State: Equatable, Identifiable {
         let blockID: String
         /// The SEED take — the one the author was looking at when the
@@ -82,7 +135,28 @@ final class DivideWCeremony {
         /// propagates from THIS take's text.
         let activeVariantID: String?
         var takes: [WTake]
+        /// Which of U-5's four the sheet is showing. `keepOnTop` on open.
+        var arrangement: Arrangement = .keepOnTop
         var id: String { blockID }
+
+        /// The take the gesture was placed in — the one that actually
+        /// splits under every preset.
+        var seedTake: WTake? {
+            takes.first { $0.id == activeVariantID }
+        }
+
+        /// The other live active takes, i.e. what an arrangement arranges.
+        var otherTakes: [WTake] {
+            takes.filter { $0.id != activeVariantID }
+        }
+
+        /// Takes a preset cannot place: an EMPTY take has no legal cut at
+        /// all (0 and its end coincide), so it cannot park and stays on the
+        /// original block in lineage — `KeepOnTopDivide.unparkable`'s own
+        /// rule, read off the same fact.
+        var unparkableTakes: [WTake] {
+            otherTakes.filter { $0.variant.workingText.isEmpty }
+        }
 
         /// Confirm gates on the WHOLE rule, with the reason spoken (13b 4A,
         /// the architect's precision): every marked take placed, AND each
@@ -90,7 +164,15 @@ final class DivideWCeremony {
         /// take parks at one end, the other block would be takeless (I10).
         /// nil = confirmable. The op's `divideSideWouldBeEmpty` is the belt
         /// behind this gate.
+        ///
+        /// **Under a PRESET the whole arrangement is placed for her**, so
+        /// the only thing left to gate is the seed take's own ✂: unplaced,
+        /// or parked at the end that would leave a successor takeless. Each
+        /// preset's guard is the operation's own refusal (`divideW`'s
+        /// `divideSideWouldBeEmpty`, `divideDuplicating`'s `invalidCut`)
+        /// said before the fact rather than after it.
         var confirmBlocker: String? {
+            guard arrangement == .perTake else { return presetBlocker }
             let marked = takes.filter(\.marked)
             if marked.isEmpty {
                 return "Check at least one take to carry the cut through."
@@ -105,6 +187,31 @@ final class DivideWCeremony {
                 return "Every checked take rides whole into the second block — the first block would be born without a take. Split at least one, or park one at its end."
             }
             return nil
+        }
+
+        private var presetBlocker: String? {
+            guard let seed = seedTake else {
+                return "This block's takes changed — try the divide again."
+            }
+            guard seed.cut != nil else {
+                return "Place the \u{2702} in the take you're dividing — drag it, "
+                    + "click a spot, or use \u{2190}/\u{2192}."
+            }
+            switch arrangement {
+            case .copyToBoth where seed.parkedAtEnd || seed.parkedAtStart:
+                return "Copying the takes to both blocks needs a cut INSIDE this take — "
+                    + "move the \u{2702} off the end."
+            case .keepOnTop where seed.parkedAtEnd:
+                return "The \u{2702} is at this take's very end and every other take stays "
+                    + "on the top block — the bottom block would be born without a take. "
+                    + "Move the \u{2702} into the text."
+            case .keepOnBottom where seed.parkedAtStart:
+                return "The \u{2702} is at this take's very start and every other take goes "
+                    + "to the bottom block — the top block would be born without a take. "
+                    + "Move the \u{2702} into the text."
+            default:
+                return nil
+            }
         }
 
         var canConfirm: Bool { confirmBlocker == nil }
@@ -139,7 +246,9 @@ final class DivideWCeremony {
         /// The take's text as the alternating slot/token sequence the sheet
         /// draws. Also derived once here, for the same reason.
         let flow: [WCutPlacement.FlowItem]
-        var id: String { variant.id }
+        /// `nonisolated` for the same reason `init` is: the arrangement brain
+        /// (`arranged`) runs off the main actor when the ceremony opens.
+        nonisolated var id: String { variant.id }
 
         /// ONE derivation per take: the legal cuts, the strong subset and the
         /// draw/hit-test flow all come from the take's text here, at
@@ -200,24 +309,27 @@ final class DivideWCeremony {
             // and the propagated proposals — is real O(text) work per take, so
             // it runs OFF the main actor (QoL round L1). Opening the ceremony
             // on four long takes must never block the UI on scanning.
+            // U-3/U-5: the sheet OPENS arranged — every take checked and the
+            // non-seed ✂ parked at the END, because that is what her default
+            // preset (keep on top) means. `CutPropagation`'s proposal is
+            // therefore no longer the opening position on this road; it
+            // survives where it still answers a real question — re-seeding a
+            // take whose text drifted under an open sheet (`refresh`), and
+            // Make Block's cross-take mapping.
             let takes = await Task.detached(priority: .userInitiated) {
-                liveActive.map { variant in
-                    WTake(
-                        variant: variant,
-                        marked: variant.id == seedTake.id,
-                        cut: variant.id == seedTake.id
-                            ? seedCut
-                            : seedCut.flatMap {
-                                CutPropagation.propose(
-                                    activeCut: $0,
-                                    activeText: seedTake.workingText,
-                                    targetText: variant.workingText)
-                            },
-                        text: variant.workingText)
-                }
+                Self.arranged(
+                    liveActive.map { variant in
+                        WTake(
+                            variant: variant,
+                            marked: variant.id == seedTake.id,
+                            cut: variant.id == seedTake.id ? seedCut : nil,
+                            text: variant.workingText)
+                    },
+                    as: .keepOnTop, seedID: seedTake.id)
             }.value
             state = State(
-                blockID: blockID, activeVariantID: seedTake.id, takes: takes)
+                blockID: blockID, activeVariantID: seedTake.id, takes: takes,
+                arrangement: .keepOnTop)
         } catch {
             host.speakCeremonyError(error)
         }
@@ -231,6 +343,144 @@ final class DivideWCeremony {
     nonisolated static func legalCutPositions(of text: String) -> [Int] {
         guard !text.isEmpty else { return [] }
         return BoundarySnapping.boundaries(in: text, granularity: .word)
+    }
+
+    // MARK: - The arrangement (U-5 / U-3)
+
+    /// **Applies an arrangement to a fan — the ONE seeding brain.**
+    ///
+    /// The two parking presets go THROUGH `KeepOnTopDivide` rather than
+    /// re-deriving its arithmetic, which is what makes "confirming the sheet
+    /// unchanged reproduces the instant divide byte-for-byte" true by
+    /// construction instead of by a pin's hope (the composition is the
+    /// instant default's own; two homes of one rule is how a rule drifts —
+    /// that file's own words).
+    ///
+    /// The SEED take is never re-placed: its ✂ is the gesture's, and hers
+    /// once she moves it, so switching presets rearranges the OTHERS around
+    /// it. `copyToBoth` gives the others no ✂ at all — they are not cut,
+    /// they are duplicated — and `perTake` fills any unplaced ✂ with the
+    /// take's END, which IS her U-3 default ("should automatically have the
+    /// scissors at the end") and leaves a hand-placed cut alone.
+    ///
+    /// An EMPTY take can never be placed (`legalCutPositions` is empty), so
+    /// the parking presets leave it unmarked — it stays on the original
+    /// block in lineage, exactly as `KeepOnTopDivide.unparkable` reports it
+    /// for the instant road.
+    nonisolated static func arranged(
+        _ takes: [WTake], as arrangement: Arrangement, seedID: String?
+    ) -> [WTake] {
+        switch arrangement {
+        case .keepOnTop, .keepOnBottom:
+            let seedCut = takes.first { $0.id == seedID }?.cut
+            let fan = takes.map(\.variant)
+            // The seed's own cut rides through `compose` untouched, so the
+            // placeholder used when it is still unplaced never reaches a
+            // take: only the OTHERS' parking is read off the composition.
+            let composition = arrangement == .keepOnTop
+                ? KeepOnTopDivide.compose(displayedID: seedID, cut: seedCut ?? 0, fan: fan)
+                : KeepOnTopDivide.compose(keepBelow: seedID, cut: seedCut ?? 0, fan: fan)
+            guard let composition else { return takes }
+            return takes.map { take in
+                var next = take
+                if take.id == seedID {
+                    next.marked = true
+                } else if let cut = composition.cuts[take.id] {
+                    next.marked = true
+                    next.cut = cut
+                } else {
+                    next.marked = false
+                    next.cut = nil
+                }
+                return next
+            }
+        case .copyToBoth:
+            return takes.map { take in
+                var next = take
+                next.marked = true
+                if take.id != seedID { next.cut = nil }
+                return next
+            }
+        case .perTake:
+            return takes.map { take in
+                var next = take
+                guard take.id != seedID else {
+                    next.marked = true
+                    return next
+                }
+                let end = take.variant.workingText.utf16.count
+                guard end > 0 else { return next }
+                next.marked = true
+                if next.cut == nil { next.cut = end }
+                return next
+            }
+        }
+    }
+
+    /// Switches the row. Nothing is written to the store — the sheet has
+    /// touched no rows since 13b 4A and still doesn't.
+    func setArrangement(_ arrangement: Arrangement) {
+        guard var current = state, current.arrangement != arrangement else { return }
+        current.arrangement = arrangement
+        current.takes = Self.arranged(
+            current.takes, as: arrangement, seedID: current.activeVariantID)
+        state = current
+    }
+
+    /// **The one sentence under the row** — the mockup's, in counts, a pure
+    /// function of the state so it is pinned rather than read off a
+    /// screenshot (the `FannedDefaultsCopy` doctrine: a sentence may only
+    /// claim what the operation will actually do).
+    nonisolated static func arrangementSentence(
+        _ arrangement: Arrangement, others: Int, unparkable: Int
+    ) -> String {
+        func takes(_ n: Int) -> String { n == 1 ? "1 other take" : "\(n) other takes" }
+        let stranded = unparkable == 0
+            ? ""
+            : (unparkable == 1
+                ? " 1 empty take can't be placed and stays with the original block."
+                : " \(unparkable) empty takes can't be placed and stay with the original block.")
+        switch arrangement {
+        case .keepOnTop:
+            return "The take you were in splits at the \u{2702}. \(takes(others)) stay whole "
+                + "on the top block; the bottom block starts with one take.\(stranded) "
+                + "Reversible — \u{2325}\u{2318}Z."
+        case .keepOnBottom:
+            return "The take you were in splits at the \u{2702}. \(takes(others)) stay whole "
+                + "on the bottom block; the top block starts with one take.\(stranded) "
+                + "Reversible — \u{2325}\u{2318}Z."
+        case .copyToBoth:
+            return "The take you were in splits at the \u{2702}. \(takes(others)) ride whole "
+                + "onto BOTH blocks — the extra copies are quick to delete. "
+                + "Reversible — \u{2325}\u{2318}Z."
+        case .perTake:
+            return "Each \u{2702} splits its take; \u{2702} at the very END keeps the whole "
+                + "take on the top block, at the very START on the bottom. An unchecked "
+                + "take is not cut and stays on the original block, in lineage. "
+                + "\u{21E5} moves between takes."
+        }
+    }
+
+    /// The per-row line under a take that a PRESET placed — what happens to
+    /// THIS take, where she is looking (the 13f W10a doctrine).
+    nonisolated static func presetRowNote(
+        _ arrangement: Arrangement, isSeed: Bool, isEmpty: Bool
+    ) -> String? {
+        guard !isSeed else { return nil }
+        switch arrangement {
+        case .keepOnTop:
+            return isEmpty
+                ? "Empty — it can't be placed, so it stays whole on the original block."
+                : "\u{2702} at the end — this whole take stays on the top block."
+        case .keepOnBottom:
+            return isEmpty
+                ? "Empty — it can't be placed, so it stays whole on the original block."
+                : "\u{2702} at the start — this whole take stays on the bottom block."
+        case .copyToBoth:
+            return "Not cut — this whole take rides onto BOTH blocks."
+        case .perTake:
+            return nil
+        }
     }
 
     // MARK: - Placement
@@ -287,6 +537,8 @@ final class DivideWCeremony {
         }
         let cuts = current.markedCuts
         let blockID = current.blockID
+        let arrangement = current.arrangement
+        let seedID = current.activeVariantID
         // The sheet may have sat open while a sync round landed edits to
         // the takes (review round 2, MINOR): cuts were placed against the
         // SNAPSHOT texts, and cutting the current store at those offsets
@@ -318,7 +570,31 @@ final class DivideWCeremony {
         // needs op-level expected-text preconditions (a core change this
         // phase has no cause to make); the cut stays well-formed,
         // recoverable by undo, and the window is delivery-cadence narrow.
-        let landed = await host.runDivideW(blockID: blockID, cuts: cuts)
+        // The confirm ROAD is the arrangement's own operation (U-5): the two
+        // parking presets and the hand-placed sheet are all `divideW`
+        // arrangements, while "copy takes to both" is `divideDuplicating` —
+        // riding whole onto BOTH successors is not something a per-take cut
+        // can express, which is exactly why 13j's retired default stayed in
+        // core.
+        //
+        // The SEED rides as `displayedVariantID` on every `divideW` road, so
+        // both successors show the take she was working in (18c batch 1's
+        // arm; QUESTIONS #91's built answer, applied at the sheet's confirm
+        // for the same reason it is applied at the instant door). An
+        // unchecked seed is not in `cuts` and the op falls back to A's
+        // rendered take by construction.
+        let landed: Bool
+        if arrangement == .copyToBoth {
+            guard let seedID, let seedCut = current.seedTake?.cut else {
+                host.speakCeremonyStatus(FannedDefaultsCopy.takesChangedDivide)
+                return
+            }
+            landed = await host.runDivideDuplicating(
+                blockID: blockID, displayedVariantID: seedID, cut: seedCut)
+        } else {
+            landed = await host.runDivideW(
+                blockID: blockID, cuts: cuts, displayedVariantID: seedID)
+        }
         // The sheet dismisses only when the cut LANDED — a refusal (busy
         // door, op error) keeps the ceremony and its cuts for the author.
         if landed {
@@ -414,8 +690,14 @@ final class DivideWCeremony {
                 cut: cut,
                 text: variant.workingText)
         }
+        // The ARRANGEMENT survives a drift refresh — she chose it, and a
+        // preset re-places every ✂ over the refreshed texts anyway (which is
+        // the honest answer: a preset is a rule, not a set of positions).
         state = State(
-            blockID: current.blockID, activeVariantID: seedCurrent.id, takes: takes)
+            blockID: current.blockID, activeVariantID: seedCurrent.id,
+            takes: Self.arranged(
+                takes, as: current.arrangement, seedID: seedCurrent.id),
+            arrangement: current.arrangement)
         host.speakCeremonyStatus("This block's takes changed while the sheet was open — the cuts were re-proposed; review before dividing.")
     }
 }

@@ -2224,13 +2224,41 @@ extension TakesViewModel: DivideWCeremonyHost {
     /// Write's (the ceremony's pre-await guard reads the latch and this
     /// takes it afterwards, so there is no self-refusal). The ring goes to
     /// the FIRST successor, mirroring Write's caret rule for the W confirm.
-    func runDivideW(blockID: String, cuts: [String: Int]) async -> Bool {
+    func runDivideW(
+        blockID: String, cuts: [String: Int], displayedVariantID: String?
+    ) async -> Bool {
         structuralInFlight = true
         defer { structuralInFlight = false }
         status = nil
         do {
             let result: Operations.DivideWResult = try await session.runner.run { ops in
-                try ops.divideW(blockID, cuts: cuts)
+                try ops.divideW(
+                    blockID, cuts: cuts, displayedVariantID: displayedVariantID)
+            }
+            if let landing = result.first.variants.first {
+                choreography.parkFocus(onVariant: landing.id)
+            }
+            status = .receipt("Divided into takes — ⌥⌘Z undoes it.")
+            return true
+        } catch {
+            status = .refusal(Self.message(for: error))
+            return false
+        }
+    }
+
+    /// U-5's third preset on the board — the same flight, the same ring
+    /// rule, the shipped `divideDuplicating`.
+    func runDivideDuplicating(
+        blockID: String, displayedVariantID: String, cut: Int
+    ) async -> Bool {
+        structuralInFlight = true
+        defer { structuralInFlight = false }
+        status = nil
+        do {
+            let result: Operations.DivideDuplicatingResult
+                = try await session.runner.run { ops in
+                try ops.divideDuplicating(
+                    blockID, displayedVariantID: displayedVariantID, cut: cut)
             }
             if let landing = result.first.variants.first {
                 choreography.parkFocus(onVariant: landing.id)

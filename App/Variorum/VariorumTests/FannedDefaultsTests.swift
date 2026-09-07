@@ -821,6 +821,31 @@ struct FannedDefaultsBoardTests {
         }
     }
 
+    /// **18f batch 1 (U-3/U-5):** the board mounts the SAME sheet, so it
+    /// mounts the same arrangement row — kept on top, every take checked, the
+    /// non-seed ✂ at the end. R118's rule read at the sheet: no surface is
+    /// behind another.
+    @Test func theBoardsCeremonyOpensOnTheArrangementRow() async throws {
+        try await withBoard(seedBlocks: ["Alpha one. Alpha two."]) { board in
+            let slot = try #require(try board.slots().first)
+            let chosen = try #require(slot.variantID)
+            let spare = try board.session.operations.branchVariant(
+                slot.blockID, from: chosen)
+            try board.session.operations.autosave(
+                spare.id, text: "Beta one. Beta two.", charDelta: 0)
+            try board.reload()
+            board.focus(blockID: slot.blockID, variantID: chosen, caret: 11)
+
+            await board.model.structure.divideFocused(ceremony: true)
+
+            let state = try #require(board.model.ceremony.state)
+            #expect(state.arrangement == .keepOnTop)
+            #expect(state.takes.allSatisfy { $0.marked }, "U-3 on the board too")
+            #expect(state.otherTakes.allSatisfy { $0.parkedAtEnd })
+            #expect(state.confirmBlocker == nil)
+        }
+    }
+
     /// The board's divide door flips with Write's — 13d Batch 3 made divide
     /// native here, and a native door that kept the OLD default would be
     /// exactly the two-answers-for-one-gesture class the registry exists to

@@ -339,6 +339,12 @@ struct TakesDivideTests {
         }
     }
 
+    /// **A JUSTIFIED EDIT (18f batch 1, U-5), claim intact.** I10-at-birth is
+    /// still the subject; what changed is that the sheet now opens on an
+    /// ARRANGEMENT, so the same refusal is spoken twice — once in the
+    /// preset's words (the bottom block would be takeless) and once in the
+    /// hand-placed sheet's (the second block). Both arms are pinned, because
+    /// both are roads she can take.
     @Test func theCeremonyRefusesToConfirmWhileEveryCheckedTakeParksTheSameWay() async throws {
         // I10-at-birth, at the new mount: the sheet's own gate, unchanged
         // by the move (the op's `divideSideWouldBeEmpty` is the belt).
@@ -357,7 +363,14 @@ struct TakesDivideTests {
 
             #expect(board.model.divideWCeremony?.canConfirm == false)
             #expect(board.model.divideWCeremony?.confirmBlocker?
-                .contains("second block would be born without a take") == true)
+                .contains("bottom block would be born without a take") == true,
+                "the keep-on-top preset's own words for the same I10 refusal")
+
+            board.model.ceremony.setArrangement(.perTake)
+            #expect(board.model.divideWCeremony?.canConfirm == false)
+            #expect(board.model.divideWCeremony?.confirmBlocker?
+                .contains("second block would be born without a take") == true,
+                "and the hand-placed sheet's, unchanged")
         }
     }
 

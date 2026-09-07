@@ -64,28 +64,51 @@ struct DivideWSheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Divide choosing takes").font(.headline)
-            // L2 (QoL round 2026-07-29), her words: *"it's not really clear to
-            // me what selecting the take button below is supposed to do? just
-            // split that take as well?"* — yes, exactly, and the surface never
-            // said so. These two sentences are the two halves of what a check
-            // MEANS; the per-row captions repeat them where she is looking.
-            // 13f W10a (her sitting question): the line said an unchecked take
-            // "stays whole on the original" and stopped there — *"but how do I
-            // even see the original one?"* It now NAMES where the original
-            // goes, in the merge ceremony's own established grammar (that
-            // sheet has always spelled this road out for its stay-behind
-            // takes; the divide's half of the same sentence was simply
-            // missing). `RecoveryPath` is the shared name.
-            Text(.init(DivideWCeremony.checklistExplainer))
+
+            // **THE ARRANGEMENT ROW** (her ruling U-5, mockup figure A): the
+            // FIRST control, four options in the ruled order, "keep on top"
+            // selected on open. Batch 1 gives it its brains and its words on
+            // today's controls (`VoicedChip` is the chrome vocabulary, P-8);
+            // batch 2 gives it the mockup's face.
+            arrangementRow
+
+            Text(DivideWCeremony.arrangementSentence(
+                state.arrangement,
+                others: state.otherTakes.count,
+                unparkable: state.unparkableTakes.count))
                 .font(.caption)
                 .foregroundStyle(.secondary)
-                .lineLimit(6)
-                .fixedSize(horizontal: false, vertical: true)
-            Text("Place a cut by dragging the \u{2702}, clicking between words, or \u{2190}/\u{2192} (\u{2325} by sentence, \u{21E5} moves between takes). Park it at a take's very end to send that whole take into the first block, at its start for the second. **\u{203A}** marks the take the arrow keys are aimed at. The divide is reversible (\u{2325}\u{2318}Z).")
-                .font(.caption)
-                .foregroundStyle(.tertiary)
                 .lineLimit(4)
                 .fixedSize(horizontal: false, vertical: true)
+
+            if state.arrangement == .perTake {
+                // L2 (QoL round 2026-07-29), her words: *"it's not really clear to
+                // me what selecting the take button below is supposed to do? just
+                // split that take as well?"* — yes, exactly, and the surface never
+                // said so. These two sentences are the two halves of what a check
+                // MEANS; the per-row captions repeat them where she is looking.
+                // 13f W10a (her sitting question): the line said an unchecked take
+                // "stays whole on the original" and stopped there — *"but how do I
+                // even see the original one?"* It now NAMES where the original
+                // goes, in the merge ceremony's own established grammar (that
+                // sheet has always spelled this road out for its stay-behind
+                // takes; the divide's half of the same sentence was simply
+                // missing). `RecoveryPath` is the shared name.
+                //
+                // U-5 folds both explainers behind "Choose per take…": under a
+                // preset there is no checklist to explain, and the one sentence
+                // above says what will happen instead.
+                Text(.init(DivideWCeremony.checklistExplainer))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(6)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text("Place a cut by dragging the \u{2702}, clicking between words, or \u{2190}/\u{2192} (\u{2325} by sentence, \u{21E5} moves between takes). Park it at a take's very end to send that whole take into the first block, at its start for the second. **\u{203A}** marks the take the arrow keys are aimed at. The divide is reversible (\u{2325}\u{2318}Z).")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+                    .lineLimit(4)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {
@@ -115,7 +138,9 @@ struct DivideWSheet: View {
             }
         }
         .padding(12)
-        .frame(minWidth: 560)
+        // The row of four needs the width; the FACE (and the real sizing to
+        // the window) is batch 2's.
+        .frame(minWidth: 720)
         .focusable()
         .focused($keyboardFocused)
         .onKeyPress(phases: .down) { handleKey($0) }
@@ -125,56 +150,113 @@ struct DivideWSheet: View {
         }
     }
 
+    // MARK: - The arrangement row (U-5)
+
+    private var arrangementRow: some View {
+        HStack(spacing: 8) {
+            ForEach(DivideWCeremony.Arrangement.allCases) { option in
+                VoicedChip(
+                    tokens: tokens, text: option.title,
+                    on: state.arrangement == option
+                ) {
+                    ceremony.setArrangement(option)
+                    activeTakeID = state.activeVariantID
+                }
+                .help(option == .perTake
+                    ? "Check the takes to cut and place each \u{2702} yourself"
+                    : DivideWCeremony.arrangementSentence(
+                        option, others: state.otherTakes.count,
+                        unparkable: state.unparkableTakes.count))
+            }
+            Spacer(minLength: 0)
+        }
+    }
+
     // MARK: - Rows
 
     @ViewBuilder
     private func takeRow(_ take: DivideWCeremony.WTake) -> some View {
+        let header = HStack(spacing: 6) {
+            if take.marked, take.id == activeTakeID, state.arrangement == .perTake {
+                // The keyboard's active-take marker (the › idiom).
+                Text("›").font(.caption).foregroundStyle(tokens.accent)
+            }
+            Text(take.variant.label ?? "take")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            if take.id == state.activeVariantID {
+                Text("shown here").font(.caption2).foregroundStyle(.tertiary)
+            }
+            if take.variant.locked {
+                Text("locked").font(.caption2).foregroundStyle(.tertiary)
+            }
+        }
         VStack(alignment: .leading, spacing: 4) {
-            Toggle(isOn: Binding(
-                get: { take.marked },
-                set: { _ in
-                    ceremony.toggleTake(take.id)
-                    if activeTakeID == take.id { activeTakeID = nil }
-                })
-            ) {
-                HStack(spacing: 6) {
-                    if take.marked, take.id == activeTakeID {
-                        // The keyboard's active-take marker (the › idiom).
-                        Text("›").font(.caption).foregroundStyle(tokens.accent)
-                    }
-                    Text(take.variant.label ?? "take")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    if take.id == state.activeVariantID {
-                        Text("shown here").font(.caption2).foregroundStyle(.tertiary)
-                    }
-                    if take.variant.locked {
-                        Text("locked").font(.caption2).foregroundStyle(.tertiary)
-                    }
-                }
+            // U-5 / mockup A's caption: **the checkbox appears only in
+            // "Choose per take"** — under a preset the arrangement is the
+            // choice, and a checkbox there would offer a second, conflicting
+            // one.
+            if state.arrangement == .perTake {
+                Toggle(isOn: Binding(
+                    get: { take.marked },
+                    set: { _ in
+                        ceremony.toggleTake(take.id)
+                        if activeTakeID == take.id { activeTakeID = nil }
+                    })
+                ) { header }
+            } else {
+                header
             }
 
-            if take.marked {
+            if let note = DivideWCeremony.presetRowNote(
+                state.arrangement,
+                isSeed: take.id == state.activeVariantID,
+                isEmpty: take.variant.workingText.isEmpty) {
+                Text(note)
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            if take.marked, take.cut != nil || state.arrangement == .perTake {
                 if take.boundaries.isEmpty {
                     Text("This take is empty — there's no cut to place. Uncheck it (it stays on the original block).")
                         .font(.caption2)
                         .foregroundStyle(.orange)
                         .lineLimit(2)
                 } else {
+                    // Mockup A's own rule: under a PRESET the columns only
+                    // SHOW what will happen — the hand-placement surface is
+                    // what "Choose per take…" turns them into. The SEED take
+                    // stays placeable on every road: its ✂ is the gesture's
+                    // and hers to adjust, and every preset splits exactly
+                    // there.
                     WCutFlow(
                         take: take,
                         tokens: tokens,
+                        placeable: state.arrangement == .perTake
+                            || take.id == state.activeVariantID,
                         place: { placeCut(takeID: take.id, cut: $0) })
-                    placementNote(take)
+                    // Under a PRESET the row's own note already said where
+                    // this take goes; the placement note is the hand-placed
+                    // sheet's voice and would say it a second time.
+                    if state.arrangement == .perTake || take.id == state.activeVariantID {
+                        placementNote(take)
+                    }
                 }
             } else {
                 // 13f W10a: the per-row caption names the destination too —
-                // it is where she was actually looking when she asked.
-                Text(DivideWCeremony.uncheckedRowNote)
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
-                    .lineLimit(2)
-                    .fixedSize(horizontal: false, vertical: true)
+                // it is where she was actually looking when she asked. Under a
+                // PRESET the destination is the preset's, not "the original
+                // block", so `presetRowNote` above has already said it.
+                if state.arrangement == .perTake {
+                    Text(DivideWCeremony.uncheckedRowNote)
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 Text(take.variant.workingText)
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -190,6 +272,10 @@ struct DivideWSheet: View {
             // fire-and-DO class (P-2), and plausibly why the checkbox and the
             // \u{203A} marker read as one control to her. A checked row keeps
             // its existing aim-the-arrows behaviour.
+            //
+            // U-5: only under "Choose per take". A preset OWNS every mark, so
+            // a row click there would silently contradict the row of four.
+            guard state.arrangement == .perTake else { return }
             activeTakeID = ceremony.rowTapped(take.id)
         }
     }
@@ -224,9 +310,16 @@ struct DivideWSheet: View {
     // MARK: - Keyboard (←/→ word · ⌥←/→ sentence · ⇥ takes)
 
     private func handleKey(_ press: KeyPress) -> KeyPress.Result {
-        let markedIDs = state.takes.filter(\.marked).map(\.id)
+        // Under a PRESET only the seed take's ✂ is hers to move (mockup A:
+        // the other columns only show), so the arrow keys aim there and ⇥ —
+        // which exists to walk between hand-placed takes — has nothing to
+        // walk.
+        let markedIDs = state.arrangement == .perTake
+            ? state.takes.filter(\.marked).map(\.id)
+            : [state.activeVariantID].compactMap { $0 }
         switch press.key {
         case .tab:
+            guard state.arrangement == .perTake else { return .ignored }
             guard let next = WCutPlacement.nextTake(
                 after: activeTakeID, in: markedIDs,
                 forward: !press.modifiers.contains(.shift))
@@ -290,6 +383,10 @@ struct DivideWSheet: View {
 private struct WCutFlow: View {
     let take: DivideWCeremony.WTake
     let tokens: VoiceTokens
+    /// False = SHOW-ONLY (mockup A: under a preset the columns show what
+    /// will happen; the drag is not attached at all, so there is no
+    /// affordance that looks live and isn't).
+    var placeable = true
     let place: (Int) -> Void
 
     @State private var geometry = CutFlowGeometry()
@@ -349,10 +446,12 @@ private struct WCutFlow: View {
         .gesture(
             DragGesture(minimumDistance: 0)
                 .onChanged { drag in
-                    guard let nearest = geometry.nearestSlot(to: drag.location),
+                    guard placeable,
+                          let nearest = geometry.nearestSlot(to: drag.location),
                           nearest != take.cut else { return }
                     place(nearest)
-                })
+                },
+            including: placeable ? .all : .subviews)
         .padding(6)
         .background(RoundedRectangle(cornerRadius: 4).fill(tokens.wash.opacity(0.35)))
         .accessibilityElement()

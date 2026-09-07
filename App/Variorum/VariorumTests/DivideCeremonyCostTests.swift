@@ -351,9 +351,19 @@ struct DivideCeremonyRowTapTests {
     /// HER RULING: clicking an UNCHECKED take's row checks it. Reverting the
     /// rule restores the swallowed click — the shipped behaviour, where the
     /// gesture did nothing whatsoever.
+    ///
+    /// **A JUSTIFIED EDIT (18f batch 1, U-3/U-5), claim intact.** The RULE is
+    /// untouched; only its setup moved, because U-3 retires the premise the
+    /// pin used to lean on — the sheet no longer opens with anything
+    /// unchecked. An unchecked take is now something she MAKES, under "Choose
+    /// per take…", which is exactly where the row click matters.
     @Test func clickingAnUncheckedRowChecksIt() async throws {
         try await withEditor(seedBlocks: ["First alpha. First omega."]) { h in
             let ceremony = try await openCeremony(h)
+            ceremony.setArrangement(.perTake)
+            let other = try #require(
+                ceremony.state?.takes.first { $0.id != ceremony.state?.activeVariantID })
+            ceremony.toggleTake(other.id)
             let unchecked = try #require(ceremony.state?.takes.first { !$0.marked })
 
             let aimed = ceremony.rowTapped(unchecked.id)

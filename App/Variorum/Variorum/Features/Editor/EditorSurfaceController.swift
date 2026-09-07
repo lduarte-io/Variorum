@@ -2639,9 +2639,26 @@ extension EditorSurfaceController: DivideWCeremonyHost {
     /// The confirm's act: `runStructural` exactly as before — seam nil, so
     /// the W confirm re-renders fully from the store (the permanent shape
     /// for ceremonial acts; author, 2026-07-07).
-    func runDivideW(blockID: String, cuts: [String: Int]) async -> Bool {
+    func runDivideW(
+        blockID: String, cuts: [String: Int], displayedVariantID: String?
+    ) async -> Bool {
         await runStructural { ops in
-            let result = try ops.divideW(blockID, cuts: cuts)
+            let result = try ops.divideW(
+                blockID, cuts: cuts, displayedVariantID: displayedVariantID)
+            return StructuralOutcome(
+                caretBlockID: result.first.block.id, caretOffset: 0, seam: nil)
+        }
+    }
+
+    /// U-5's third preset, on the same terms: `runStructural`, seam nil, the
+    /// caret at the FIRST successor's start (the W confirm's own rule, which
+    /// this shares because it is the same sheet's confirm).
+    func runDivideDuplicating(
+        blockID: String, displayedVariantID: String, cut: Int
+    ) async -> Bool {
+        await runStructural { ops in
+            let result = try ops.divideDuplicating(
+                blockID, displayedVariantID: displayedVariantID, cut: cut)
             return StructuralOutcome(
                 caretBlockID: result.first.block.id, caretOffset: 0, seam: nil)
         }

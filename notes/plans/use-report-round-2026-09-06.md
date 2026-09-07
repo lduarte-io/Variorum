@@ -2328,9 +2328,60 @@ built (`KeepOnTopDivide` is CONSUMED, not modified); no Release build and no `/A
 | 1 | Row 3's three §4.4 pins, written BEFORE any fix (`CutFlowEndSlotTests`) | **DONE (a7559b91)** — all three green on the pre-fix tree; the remaining candidate is face-level (piece 6's walk) |
 | 2 | Names (U-4) — the verbs, the sheet titles, every UI "ceremony" string, the field guide | **DONE** (this row's commit) — the word leaves every UI string; 5 pins rewritten; 130/10 green |
 | 3 | Doors — the registry declarations + the three bars' buttons | **NOT-STARTED** |
-| 4 | The divide sheet's arrangement row (U-5/U-3) + the confirm roads | **NOT-STARTED** |
+| 4 | The divide sheet's arrangement row (U-5/U-3) + the confirm roads | **DONE** (this row's commit) — the row, the seeding through `KeepOnTopDivide`, the three confirm roads, the sentence; 106/10 green |
 | 5 | The merge sheet's row + the N-way's two choices (U-16) | **NOT-STARTED** |
 | 6 | The walk (dev-store Debug, `18f-1/` captures) + close | **NOT-STARTED** |
+
+**Piece 4 — THE DIVIDE SHEET'S ARRANGEMENT ROW (U-5 · U-3).** `DivideWCeremony.Arrangement`
+(`keepOnTop · keepOnBottom · copyToBoth · perTake`, the ruled order) on `State`; the sheet's FIRST
+control is the row of four (`VoicedChip`, the chrome vocabulary — batch 2 gives it the mockup's face),
+`keepOnTop` selected on open.
+
+- **ONE seeding brain, and it CONSUMES the instant default's.** `DivideWCeremony.arranged(_:as:seedID:)`
+  routes the two parking presets THROUGH `KeepOnTopDivide.compose` / `compose(keepBelow:)` rather than
+  re-deriving their arithmetic, so "the sheet's preset produces the same cuts dict as the instant
+  divide, byte-for-byte" is true by construction. The SEED take is never re-placed (its ✂ is the
+  gesture's, and hers once she moves it); `copyToBoth` gives the others no ✂ at all (they are duplicated,
+  not cut); `perTake` fills any unplaced ✂ with the take's END — which IS U-3 — and leaves a hand-placed
+  cut alone. An EMPTY take stays unmarked under a preset (it cannot park), matching
+  `KeepOnTopDivide.unparkable` exactly.
+- **`open` no longer seeds from `CutPropagation`** (the brief's "the proposal survives ONLY as the ⌥←/→
+  strong step, never the default position"). It survives where it still answers a real question: the
+  drift `refresh`'s re-seed of a take whose text moved under an open sheet, and Make Block's cross-take
+  mapping. The arrangement SURVIVES a drift refresh and re-places every ✂ over the refreshed texts.
+- **Confirm roads:** `keepOnTop` / `keepOnBottom` / `perTake` → `divideW(cuts:displayedVariantID:)`;
+  `copyToBoth` → `divideDuplicating(displayedVariantID:cut:)`. The host protocol gained
+  `runDivideDuplicating(blockID:displayedVariantID:cut:)` and `runDivideW` gained the anchor; BOTH hosts
+  (`EditorSurfaceController`, `TakesViewModel`) conform.
+- **A DECLARED CALL (it rides QUESTIONS #91, which already asks this exact question at the instant
+  door):** the sheet's confirm passes the SEED as `displayedVariantID` on every `divideW` road, including
+  "Choose per take…". Before, the ceremony passed nil and both successors anchored on A's RENDERED take —
+  identical in Write, but on the Takes board the seed is whatever pane the caret is in, so a hand-placed
+  divide could leave B rendering another take whole beside C's tail of the divided one. `divideW` ignores
+  an anchor that is not among `cuts`, so an UNCHECKED seed falls back to today's behaviour by
+  construction. Same question, same built answer, one road.
+- **Faces (mechanics only, per the brief's "restructure the controls, do not restyle"):** the checkbox
+  and both explainers appear only under "Choose per take…" (mockup A's caption); a preset's rows carry
+  `presetRowNote` instead; under a preset the non-seed flows are SHOW-ONLY (mockup A: *"the columns below
+  only show what will happen"*) — the drag is not attached, so nothing looks live that isn't — while the
+  SEED's flow stays placeable on every road; the row click (`rowTapped`) and ⇥ are `perTake`-only, since a
+  preset owns every mark; `minWidth` 560 → 720 so the row of four fits.
+- **The one sentence under the row** is `DivideWCeremony.arrangementSentence` — pure, in counts, the
+  mockup's own words, pinned character-for-character.
+
+Pins: `App/Variorum/VariorumTests/DivideArrangementTests.swift` (8) + one added to `FannedDefaultsBoardTests`
+(`theBoardsCeremonyOpensOnTheArrangementRow` — R118 at the sheet). The two that carry the brief's named
+promise: `theKeepOnTopPresetsCutsAreTheInstantDefaultsOwnComposition` (the cuts dict IS
+`KeepOnTopDivide.compose`'s) and `confirmingTheSheetUnchangedReproducesTheInstantDivide` (two identical
+fixtures, one through ⌘⇧D and one through the sheet confirmed unchanged, compared on texts · fan sizes ·
+labels · which take is chosen on each side).
+
+TWO EXISTING PINS EDITED, each a JUSTIFIED EDIT with its claim intact and its ruling beside it:
+`DivideCeremonyRowTapTests.clickingAnUncheckedRowChecksIt` (U-3 retires its SETUP — nothing opens
+unchecked any more — so it unchecks a take under "Choose per take…" first; the rule it pins is
+untouched) and `TakesDivideTests.theCeremonyRefusesToConfirmWhileEveryCheckedTakeParksTheSameWay` (U-5
+means the same I10-at-birth refusal is spoken in two voices — the preset's and the hand-placed sheet's —
+and the pin now holds BOTH arms).
 
 **Piece 1 — ROW 3, the end slot: §4.4's three links, pinned in order, ALL GREEN on the pre-fix tree.**
 `App/Variorum/VariorumTests/CutFlowEndSlotTests.swift` (4 tests, 1 suite, green at
