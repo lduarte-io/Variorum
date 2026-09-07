@@ -358,7 +358,17 @@ struct ListContinuationTests {
     /// DISCRIMINATING REVERT (verified): make the `.exitList` arm fall
     /// through to `ordinary()` and this test fails with `"- milk\n- \n"` —
     /// the empty item survives and the list never ends.
-    @Test func anEmptyListItemExitsTheListWithoutMakingALine() async throws {
+    ///
+    /// **RE-POINTED (18c batch 2, her U-1): the exit now composes with the
+    /// key's own act** — the lead goes, no newline is typed, and THEN the
+    /// Return makes the block it makes anywhere else (the caret sits at the
+    /// block's end once the lead is gone). The pin was
+    /// `anEmptyListItemExitsTheListWithoutMakingALine`; the "line" it
+    /// defends — no newline inside the block — is untouched, and the block
+    /// below is the new half. §5.1: *"a second ⏎ on the empty item ends the
+    /// list AND makes the block (the two intercepts compose in that
+    /// order)."*
+    @Test func anEmptyListItemExitsTheListAndThenTheKeyMakesTheBlock() async throws {
         try await withEditor(seedBlocks: ["- milk\n- "]) { h in
             let hosted = Self.host(try #require(h.textView.enclosingScrollView))
             defer { hosted.teardown() }
@@ -369,8 +379,10 @@ struct ListContinuationTests {
                 with: Self.returnEvent(shift: false, windowNumber: hosted.window.windowNumber))
             await h.flush()
 
-            #expect(h.documentText == "- milk\n")
-            #expect(try h.storeSlots().map(\.text) == ["- milk\n"])
+            #expect(try h.storeSlots().map(\.text) == ["- milk\n", ""],
+                    "the lead went, no newline was typed, and the block below is U-1's")
+            #expect(h.model.caretBlockID == h.model.index.entries[1].blockID)
+            #expect(!h.model.hasOpenTail)
         }
     }
 
@@ -493,10 +505,13 @@ struct ListContinuationTests {
         }
     }
 
-    /// Ordinary prose is untouched — the door only ever fires on a list
-    /// line, which is what keeps ⏎ the keystroke it always was everywhere
-    /// else in the app.
-    @Test func plainProseIsUnaffected() async throws {
+    /// Ordinary prose sees NO LIST DOOR — that is what this pin defends, and
+    /// it is untouched. **RE-POINTED (18c batch 2, her U-1):** what the key
+    /// then does on plain prose is no longer a content newline but the
+    /// ruling's own act — a divide at the caret, through the one snapping
+    /// rule. No lead is inserted anywhere, which is the list door's whole
+    /// claim here.
+    @Test func plainProseSeesNoListLeadAndTakesTheKeysOwnRoad() async throws {
         try await withEditor(seedBlocks: ["alpha beta"]) { h in
             let hosted = Self.host(try #require(h.textView.enclosingScrollView))
             defer { hosted.teardown() }
@@ -507,8 +522,9 @@ struct ListContinuationTests {
                 with: Self.returnEvent(shift: false, windowNumber: hosted.window.windowNumber))
             await h.flush()
 
-            #expect(h.documentText == "alpha\n beta")
-            #expect(try h.storeSlots().map(\.text) == ["alpha\n beta"])
+            let stored = try h.storeSlots().map(\.text)
+            #expect(stored == ["alpha", "beta"], "U-1's divide, and no bullet in sight")
+            #expect(!h.documentText.contains("- "))
         }
     }
 
