@@ -1156,6 +1156,13 @@ refresh. *(Filled in further at close.)*
 6. **A non-empty selection is NOT this gesture** (the K5 precedent in `MarkdownActs.listReturn`, for its
    reason: the ruling is about a caret, and replacing a span is a different gesture) — recorded, not
    invented.
+**THE RED-ON-OLD RUN — NAMED BEFORE IT IS STARTED (the trap's rule).** Tree `253548fd`, clean. **Revert
+R1:** `EditorTextView.claimTypedReturn()` returns `false` unconditionally (its two guards and the
+`onTypedReturn` call commented out) — the ONE behavioural revert that puts the whole ruling back on the
+shipped model: the key falls through to `super.insertNewline` and takes the content / open-tail roads
+again, with every other line of the batch (the pure brain, the doors, the seam) left exactly as landed.
+Restored with `git checkout --` on that one file. The run's output is recorded below.
+
 7. **A block with no interior word edge** (a one-word block, caret inside it) reaches the divide door and
    gets that door's own refusal, spoken — S4-22's word-edge floor forbids the mid-word cut, and typing a
    content newline instead would silently re-open the k−1 class the ruling closes.
