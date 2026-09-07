@@ -192,52 +192,7 @@ extension Operations {
     @discardableResult
     public func divide(_ blockID: String, cut: Int) throws -> DivideResult {
         let (result, sourcePreImage): (DivideResult, TextPreImage) =
-            try database.write { db in
-                let context = try placedContext(db, blockID: blockID)
-                let activeVariants = try Int.fetchOne(
-                    db,
-                    sql: """
-                        SELECT COUNT(*) FROM variant
-                        WHERE block_id = ? AND deleted_at IS NULL AND status = 'active'
-                        """,
-                    arguments: [blockID]) ?? 0
-                guard activeVariants == 1 else {
-                    throw OperationError.fannedBlock(id: blockID)
-                }
-                try ensureEditable(context.rendered)
-
-                let text = context.rendered.workingText
-                guard let halves = BoundarySnapping.seamTrimmedHalves(text, cutAtUTF16: cut),
-                      !halves.first.isEmpty, !halves.second.isEmpty
-                else { throw OperationError.invalidCut(variantID: context.rendered.id, cut: cut) }
-
-                let now = date.now
-                var source = context.rendered
-                source.workingText = halves.first
-                source.updatedAt = now
-                try source.update(db)
-
-                let minted = try mintBlock(
-                    db, text: halves.second, in: context.container.id,
-                    at: .after(blockID),
-                    presentation: context.block.presentation, now: now)
-                let edge = try insertLineageEdge(
-                    db, from: minted.block.id, to: blockID, originOp: "divide", now: now)
-                // Phase 13 (A2) travel: both halves were the block's content
-                // — A keeps its comments, C gets copies.
-                try copyLiveComments(db, from: blockID, to: minted.block.id, now: now)
-                try registerTextChange(
-                    db, blockID: blockID, charDelta: text.count - halves.first.count,
-                    forceMajorRevision: false, now: now)
-
-                return (
-                    DivideResult(
-                        block: minted.block, variant: minted.variant,
-                        placement: minted.placement, edge: edge),
-                    TextPreImage(
-                        variantID: context.rendered.id, text: text, postOpText: halves.first)
-                )
-            }
+            try database.write { db in try divideRows(db, blockID: blockID, cut: cut) }
         undoStack?.register(
             label: "Divide",
             inverse: {
@@ -255,6 +210,61 @@ extension Operations {
             // A12: the source buffer this undo would restore.
             insuring: [sourcePreImage])
         return result
+    }
+
+    /// `divide`'s ROWS, inside a caller's transaction (18c batch 3 — the 3C
+    /// parity refactor). `divide` above is this plus its undo registration;
+    /// `splitBlockAtNewlines` composes several of these into ONE transaction
+    /// and ONE undo entry, which is only possible if the body is separable
+    /// from the `database.write` that wraps it. Behaviour is byte-unchanged —
+    /// the whole body moved, nothing in it did.
+    func divideRows(
+        _ db: Database, blockID: String, cut: Int
+    ) throws -> (result: DivideResult, preImage: TextPreImage) {
+        let context = try placedContext(db, blockID: blockID)
+        let activeVariants = try Int.fetchOne(
+            db,
+            sql: """
+                SELECT COUNT(*) FROM variant
+                WHERE block_id = ? AND deleted_at IS NULL AND status = 'active'
+                """,
+            arguments: [blockID]) ?? 0
+        guard activeVariants == 1 else {
+            throw OperationError.fannedBlock(id: blockID)
+        }
+        try ensureEditable(context.rendered)
+
+        let text = context.rendered.workingText
+        guard let halves = BoundarySnapping.seamTrimmedHalves(text, cutAtUTF16: cut),
+              !halves.first.isEmpty, !halves.second.isEmpty
+        else { throw OperationError.invalidCut(variantID: context.rendered.id, cut: cut) }
+
+        let now = date.now
+        var source = context.rendered
+        source.workingText = halves.first
+        source.updatedAt = now
+        try source.update(db)
+
+        let minted = try mintBlock(
+            db, text: halves.second, in: context.container.id,
+            at: .after(blockID),
+            presentation: context.block.presentation, now: now)
+        let edge = try insertLineageEdge(
+            db, from: minted.block.id, to: blockID, originOp: "divide", now: now)
+        // Phase 13 (A2) travel: both halves were the block's content
+        // — A keeps its comments, C gets copies.
+        try copyLiveComments(db, from: blockID, to: minted.block.id, now: now)
+        try registerTextChange(
+            db, blockID: blockID, charDelta: text.count - halves.first.count,
+            forceMajorRevision: false, now: now)
+
+        return (
+            DivideResult(
+                block: minted.block, variant: minted.variant,
+                placement: minted.placement, edge: edge),
+            TextPreImage(
+                variantID: context.rendered.id, text: text, postOpText: halves.first)
+        )
     }
 
     // MARK: - Divide, multi-variant (W — the one ceremony)
@@ -339,124 +349,8 @@ extension Operations {
         _ blockID: String, cuts: [String: Int], displayedVariantID: String? = nil
     ) throws -> DivideWResult {
         let result: DivideWResult = try database.write { db in
-            let context = try placedContext(db, blockID: blockID)
-            guard !cuts.isEmpty else {
-                throw OperationError.noMarkedVariants(blockID: blockID)
-            }
-            for variantID in cuts.keys.sorted() {
-                let variant = try liveVariant(db, variantID)
-                guard variant.blockId == blockID else {
-                    throw OperationError.variantNotFound(id: variantID)
-                }
-                guard variant.status == .active else {
-                    throw OperationError.archivedVariant(id: variantID)
-                }
-            }
-
-            let fan = try Variant.fetchAll(
-                db,
-                sql: """
-                    SELECT * FROM variant
-                    WHERE block_id = ? AND deleted_at IS NULL AND status = 'active'
-                    ORDER BY fan_position, id
-                    """,
-                arguments: [blockID])
-            let marked = fan.filter { cuts.keys.contains($0.id) }
-            // Each side's (text, source, label) triples in fan order. A
-            // split take contributes to both; a parked take (S4-22) to
-            // exactly one — its WHOLE text, verbatim (no seam, nothing
-            // trimmed) and under its own NAME, because a whole-take ride
-            // keeps its name. A cut half rides as a fresh unlabeled text.
-            var firstSide: [(text: String, sourceID: String, label: String?)] = []
-            var secondSide: [(text: String, sourceID: String, label: String?)] = []
-            for variant in marked {
-                let cut = cuts[variant.id] ?? 0
-                let length = variant.workingText.utf16.count
-                if length > 0, cut == length {
-                    firstSide.append((variant.workingText, variant.id, variant.label))
-                } else if length > 0, cut == 0 {
-                    secondSide.append((variant.workingText, variant.id, variant.label))
-                } else if let pair = BoundarySnapping.seamTrimmedHalves(
-                        variant.workingText, cutAtUTF16: cut),
-                    !pair.first.isEmpty, !pair.second.isEmpty {
-                    firstSide.append((pair.first, variant.id, nil))
-                    secondSide.append((pair.second, variant.id, nil))
-                } else {
-                    throw OperationError.invalidCut(variantID: variant.id, cut: cut)
-                }
-            }
-            // The parking guard (I10 by construction): each successor must
-            // be born with at least one take.
-            guard !firstSide.isEmpty, !secondSide.isEmpty else {
-                throw OperationError.divideSideWouldBeEmpty(blockID: blockID)
-            }
-
-            let now = date.now
-
-            // Release A's placement; A itself is preserved whole. The
-            // release stamps last_container_id like deleteBlock does — a
-            // released block deleted later must still know its last home
-            // (tray + restoreBlock semantics; Phase 3 review finding).
-            var released = context.placement
-            released.deletedAt = now
-            released.updatedAt = now
-            try released.update(db)
-            var sourceBlock = context.block
-            sourceBlock.lastContainerId = context.container.id
-            sourceBlock.updatedAt = now
-            try sourceBlock.update(db)
-
-            // B then C stand exactly where A stood.
-            let containerID = context.container.id
-            func neighbor(_ aggregate: String, _ comparison: String) throws -> String? {
-                try String.fetchOne(
-                    db,
-                    sql: """
-                        SELECT \(aggregate)(position) FROM container_block
-                        WHERE container_id = ? AND deleted_at IS NULL AND position \(comparison) ?
-                        """,
-                    arguments: [containerID, context.placement.position])
-            }
-            let follower = try neighbor("MIN", ">")
-            let positionB = FractionalIndex.between(try neighbor("MAX", "<"), follower)
-            let positionC = FractionalIndex.between(positionB, follower)
-
-            // Defaults and chosen, PER SIDE (parking makes the two fans
-            // independently populated): the ANCHOR take's half/copy where it
-            // contributes to this successor, else the side's first
-            // contributing take with chosen left NULL — the standing
-            // rendered-unmarked rule, applied per side. The anchor is A's
-            // rendered take unless the caller named the take the author was
-            // actually in (`displayedVariantID`; an id outside `cuts` is not
-            // a contributor and so cannot anchor — it falls back).
-            let anchorID = displayedVariantID.flatMap { cuts.keys.contains($0) ? $0 : nil }
-                ?? context.rendered.id
-            var successors: [FanHalf] = []
-            for (side, position) in [(firstSide, positionB), (secondSide, positionC)] {
-                let renderedIndex = side.firstIndex { $0.sourceID == anchorID }
-                let minted = try mintFanBlock(
-                    db, texts: side.map(\.text), in: containerID,
-                    position: position,
-                    defaultIndex: renderedIndex ?? 0, chosenIndex: renderedIndex,
-                    presentation: context.block.presentation,
-                    labels: side.map(\.label), now: now)
-                let edge = try insertLineageEdge(
-                    db, from: minted.block.id, to: blockID, originOp: "divide", now: now)
-                // Phase 13 (A2) travel: the W's copies land on BOTH
-                // successors; A — preserved whole — keeps its originals.
-                try copyLiveComments(db, from: blockID, to: minted.block.id, now: now)
-                successors.append(FanHalf(
-                    block: minted.block, variants: minted.variants,
-                    sourceVariantIDs: side.map(\.sourceID),
-                    placement: minted.placement, edge: edge))
-            }
-
-            try touchContainer(db, containerID, now: now)
-
-            return DivideWResult(
-                first: successors[0], second: successors[1],
-                markedSourceIDs: marked.map(\.id),
-                releasedPlacementID: context.placement.id)
+            try divideWRows(
+                db, blockID: blockID, cuts: cuts, displayedVariantID: displayedVariantID)
         }
         undoStack?.register(
             label: "Divide into Variants",
@@ -479,6 +373,135 @@ extension Operations {
                     releasingPlacementRows: [result.releasedPlacementID])
             })
         return result
+    }
+
+    /// `divideW`'s ROWS, inside a caller's transaction (18c batch 3 — the
+    /// same 3C parity refactor as `divideRows`, for the same reason: the
+    /// newline repair opens a fanned block with THIS and then splits the
+    /// second successor in place, and "one transaction per block" means the
+    /// two must share one. Behaviour byte-unchanged.
+    func divideWRows(
+        _ db: Database, blockID: String, cuts: [String: Int],
+        displayedVariantID: String? = nil
+    ) throws -> DivideWResult {
+        let context = try placedContext(db, blockID: blockID)
+        guard !cuts.isEmpty else {
+            throw OperationError.noMarkedVariants(blockID: blockID)
+        }
+        for variantID in cuts.keys.sorted() {
+            let variant = try liveVariant(db, variantID)
+            guard variant.blockId == blockID else {
+                throw OperationError.variantNotFound(id: variantID)
+            }
+            guard variant.status == .active else {
+                throw OperationError.archivedVariant(id: variantID)
+            }
+        }
+
+        let fan = try Variant.fetchAll(
+            db,
+            sql: """
+                SELECT * FROM variant
+                WHERE block_id = ? AND deleted_at IS NULL AND status = 'active'
+                ORDER BY fan_position, id
+                """,
+            arguments: [blockID])
+        let marked = fan.filter { cuts.keys.contains($0.id) }
+        // Each side's (text, source, label) triples in fan order. A
+        // split take contributes to both; a parked take (S4-22) to
+        // exactly one — its WHOLE text, verbatim (no seam, nothing
+        // trimmed) and under its own NAME, because a whole-take ride
+        // keeps its name. A cut half rides as a fresh unlabeled text.
+        var firstSide: [(text: String, sourceID: String, label: String?)] = []
+        var secondSide: [(text: String, sourceID: String, label: String?)] = []
+        for variant in marked {
+            let cut = cuts[variant.id] ?? 0
+            let length = variant.workingText.utf16.count
+            if length > 0, cut == length {
+                firstSide.append((variant.workingText, variant.id, variant.label))
+            } else if length > 0, cut == 0 {
+                secondSide.append((variant.workingText, variant.id, variant.label))
+            } else if let pair = BoundarySnapping.seamTrimmedHalves(
+                    variant.workingText, cutAtUTF16: cut),
+                !pair.first.isEmpty, !pair.second.isEmpty {
+                firstSide.append((pair.first, variant.id, nil))
+                secondSide.append((pair.second, variant.id, nil))
+            } else {
+                throw OperationError.invalidCut(variantID: variant.id, cut: cut)
+            }
+        }
+        // The parking guard (I10 by construction): each successor must
+        // be born with at least one take.
+        guard !firstSide.isEmpty, !secondSide.isEmpty else {
+            throw OperationError.divideSideWouldBeEmpty(blockID: blockID)
+        }
+
+        let now = date.now
+
+        // Release A's placement; A itself is preserved whole. The
+        // release stamps last_container_id like deleteBlock does — a
+        // released block deleted later must still know its last home
+        // (tray + restoreBlock semantics; Phase 3 review finding).
+        var released = context.placement
+        released.deletedAt = now
+        released.updatedAt = now
+        try released.update(db)
+        var sourceBlock = context.block
+        sourceBlock.lastContainerId = context.container.id
+        sourceBlock.updatedAt = now
+        try sourceBlock.update(db)
+
+        // B then C stand exactly where A stood.
+        let containerID = context.container.id
+        func neighbor(_ aggregate: String, _ comparison: String) throws -> String? {
+            try String.fetchOne(
+                db,
+                sql: """
+                    SELECT \(aggregate)(position) FROM container_block
+                    WHERE container_id = ? AND deleted_at IS NULL AND position \(comparison) ?
+                    """,
+                arguments: [containerID, context.placement.position])
+        }
+        let follower = try neighbor("MIN", ">")
+        let positionB = FractionalIndex.between(try neighbor("MAX", "<"), follower)
+        let positionC = FractionalIndex.between(positionB, follower)
+
+        // Defaults and chosen, PER SIDE (parking makes the two fans
+        // independently populated): the ANCHOR take's half/copy where it
+        // contributes to this successor, else the side's first
+        // contributing take with chosen left NULL — the standing
+        // rendered-unmarked rule, applied per side. The anchor is A's
+        // rendered take unless the caller named the take the author was
+        // actually in (`displayedVariantID`; an id outside `cuts` is not
+        // a contributor and so cannot anchor — it falls back).
+        let anchorID = displayedVariantID.flatMap { cuts.keys.contains($0) ? $0 : nil }
+            ?? context.rendered.id
+        var successors: [FanHalf] = []
+        for (side, position) in [(firstSide, positionB), (secondSide, positionC)] {
+            let renderedIndex = side.firstIndex { $0.sourceID == anchorID }
+            let minted = try mintFanBlock(
+                db, texts: side.map(\.text), in: containerID,
+                position: position,
+                defaultIndex: renderedIndex ?? 0, chosenIndex: renderedIndex,
+                presentation: context.block.presentation,
+                labels: side.map(\.label), now: now)
+            let edge = try insertLineageEdge(
+                db, from: minted.block.id, to: blockID, originOp: "divide", now: now)
+            // Phase 13 (A2) travel: the W's copies land on BOTH
+            // successors; A — preserved whole — keeps its originals.
+            try copyLiveComments(db, from: blockID, to: minted.block.id, now: now)
+            successors.append(FanHalf(
+                block: minted.block, variants: minted.variants,
+                sourceVariantIDs: side.map(\.sourceID),
+                placement: minted.placement, edge: edge))
+        }
+
+        try touchContainer(db, containerID, now: now)
+
+        return DivideWResult(
+            first: successors[0], second: successors[1],
+            markedSourceIDs: marked.map(\.id),
+            releasedPlacementID: context.placement.id)
     }
 
     // MARK: - Divide, duplicate shape (the fanned DEFAULT — Q-M2, author ruling 2026-08-03)
