@@ -2369,3 +2369,18 @@ The two implementer readings — the identity as a provider METHOD; the dials pe
 | NIT-N8 | `appleKeyWaiting` has no face — a same-account device waiting under lag gets the pane's EXPOSED nudge while the enroll face's `.absent` sentence is the honest one. | **ADOPTED as a small face:** the pane renders copy §3's *Standard, waiting* sentence while `appleKeyWaiting` (the exposed nudge withheld); pin. 13s re-voices. | **F3** |
 
 **F3's list (one session, a fresh Fable):** MINOR-N1 (A) · MINOR-N2 · MINOR-N3 · MINOR-N4 (1) · NIT-N5 · NIT-N6 · NIT-N8 · the three copy follow-ups from F2's adjudication (the Done's Touch ID tail; the PHONE's Castle Done on `.notKept`; the Replace All Keys refusal re-drafted — copy §11's rows re-synced). No round 3 (no new BLOCKER/MAJOR); F3's fixes ride their red-on-old pins and the gate; the drills session follows from F3's tree.
+
+#### FIX SESSION F3 (after round 2) — MINOR-N1 (A) · N2 · N3 · N4 (1) · NIT-N5 · N6 · N8 + the three copy follow-ups (a fresh Fable, 2026-09-07, under her overnight mandate; the record opened with its first commit)
+
+##### LIVE STATUS (flipped in the same commit as each piece; PENDING = unverified)
+- **Reverts:** NO REVERT IN FLIGHT. Pre-revert copies, when made, go to `App/Variorum/DerivedData/F3-prerevert/` (gitignored, inside the worktree — `git check-ignore -v` answered `.gitignore:7:DerivedData/` at this record's first commit); every revert is announced HERE before it starts and taken from a COMMITTED state; restored by `git checkout --` run from the REPO ROOT (F1's and F2's recorded slip — never after a `cd`), with `git diff` empty and `cmp` byte-identical to the copy before "restored" is written. If a later session reads "reverts starting" here with no "restored" after it, check `git diff` first: an uncommitted diff in the mechanism files is a revert in flight — restore it from git, never adopt it.
+- **1. MINOR-N1 (A) — the heal keys on `read()` only:** BUILT (this record's first commit) — `ProtectionController.readAppleKeyForReconcile` now calls `read()` FIRST and `readOrMint()` only when that answered nil and minting is allowed, and `AppleKeyReconcileRead` carries `minted`; the heal's condition gains `!read.minted` (the refined rule (c)'s letter — proof of a same-account duplicate is a DIFFERENT id READ, never a key minted); a mint under a file that records the vault's id logs its own line (the file's copy only; the vault's copy stays under the recorded id — sync setup, leaving Castle or a Standard Replace All Keys re-land it; the deliberate re-link door is hers, QUESTIONS #90); the heal's log line re-worded ("iCloud Keychain now READS X — the key this device minted was replaced under it, which only the same Apple account can do", where it said "resolved by iCloud"). Pin: `Phase13pControllerTests.aMintNeverHealsTheVaultEvenWhenTheFileRecordsTheVaultsId` (recorded == the vault's `a1-the-accounts`, `read()` nil, M in hand ⇒ A′ minted, the FILE copy under it, `healed == []`, verified, not waiting). Green: `F3-mac-item1.log` **45 / 1** (Phase13pControllerTests: F2's 44 + 1). RED-ON-OLD: PENDING (R1 next).
+- **2. MINOR-N2 — the road-local pause:** PENDING.
+- **3. MINOR-N3 — the silent ensure declines on the mark / the tombstone:** PENDING.
+- **4. MINOR-N4 (1) — the (b) refusal moved to the door:** PENDING.
+- **5. NIT-N5 — the horizon wait exempt from `maxPasses`:** PENDING.
+- **6. NIT-N6 — the phone's restore row worded; the unreachable arm dropped:** PENDING.
+- **7. NIT-N8 — the pane's waiting sentence:** PENDING.
+- **8. The three copy follow-ups (F2's adjudication, items 1–3):** PENDING.
+- **THE GATE:** PENDING.
+*[removed for publication]*

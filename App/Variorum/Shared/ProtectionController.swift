@@ -1371,6 +1371,18 @@ final class ProtectionController {
     ///      the file's copy. A device whose recorded id is not the vault's
     ///      never writes the vault — it re-lands its own file copy under
     ///      what it reads, as before.
+    ///      pre-13x ladder round 2, F3 (MINOR-N1 — option A, the rule's
+    ///      LETTER): the proof is a key READ, never a key MINTED. A device
+    ///      holding M whose file records the vault's id and whose Keychain
+    ///      reads NOTHING (a same-account Keychain reset — or the device
+    ///      signed into ANOTHER Apple ID, which the client cannot tell
+    ///      apart) mints A′ for ITS OWN file only; the vault's copy stays
+    ///      under the recorded id (orphaned after a reset until sync setup,
+    ///      leaving Castle or a Standard Replace All Keys re-lands it — the
+    ///      deliberate re-link door is hers, QUESTIONS #90). Before F3 the
+    ///      heal was handed `readOrMint()`'s result, so a mint re-homed the
+    ///      account's Apple-held copy silently under whatever Apple account
+    ///      this device now held.
     private func reconcileAppleKey() async {
         // pre-13x 2d (decision 35): INDETERMINATE writes nothing — no A
         // read or minted, no copy landed; `appleKeyVerified` stays what it
@@ -1417,10 +1429,14 @@ final class ProtectionController {
         }
         appleKeyWaiting = false
         // F2 (MAJOR-3 c): the proof of a same-account duplicate, read from
-        // the key file BEFORE anything re-lands it.
-        if let vaultAppleKeyID, holdsMaster,
+        // the key file BEFORE anything re-lands it. F3 (MINOR-N1): a key
+        // MINTED this pass is no proof — the heal keys on a READ alone.
+        if let vaultAppleKeyID, holdsMaster, read.minted, read.envelope.appleKeyID == vaultAppleKeyID {
+            logger.notice("apple key reconcile: iCloud Keychain read no key; this device holds the master and minted \(apple.id.prefix(8), privacy: .public) for ITS OWN key file — the vault's Apple-held copy stays under the recorded \(vaultAppleKeyID.prefix(8), privacy: .public) (a mint proves no same-account duplicate; sync setup, leaving Castle or a Standard Replace All Keys re-lands it)")
+        }
+        if let vaultAppleKeyID, holdsMaster, !read.minted,
            read.envelope.appleKeyID == vaultAppleKeyID, apple.id != vaultAppleKeyID {
-            logger.notice("apple key reconcile: this device's key file records the vault's iCloud key (\(vaultAppleKeyID.prefix(8), privacy: .public)) but iCloud Keychain now holds \(apple.id.prefix(8), privacy: .public) — a same-account duplicate resolved by iCloud; re-landing the vault's copy first")
+            logger.notice("apple key reconcile: this device's key file records the vault's iCloud key (\(vaultAppleKeyID.prefix(8), privacy: .public)) but iCloud Keychain now READS \(apple.id.prefix(8), privacy: .public) — the key this device minted was replaced under it, which only the same Apple account can do; re-landing the vault's copy first")
             guard let healAppleHeldCopy, await healAppleHeldCopy(apple) else {
                 // The vault write did not land (offline; no road wired):
                 // the file's copy stays under the recorded id so the proof
@@ -1453,12 +1469,14 @@ final class ProtectionController {
     /// F2: what the off-main read learned — the key in hand, the key file,
     /// the iCloud key as read (or minted, when minting is allowed), and
     /// whether a nil A means WAITING (minting disallowed) rather than a
-    /// refused write.
+    /// refused write. F3 (MINOR-N1): whether `apple` was MINTED this pass
+    /// — a mint lands this device's FILE copy only, never the vault's.
     nonisolated struct AppleKeyReconcileRead: Sendable {
         var key: StoreKey
         var envelope: StoreKeyEnvelope
         var apple: AppleKey?
         var waiting: Bool
+        var minted: Bool = false
     }
 
     nonisolated private static func readAppleKeyForReconcile(
@@ -1472,10 +1490,15 @@ final class ProtectionController {
         else { return nil }
         // A: read — or minted, ONLY when this device may (the first
         // Standard library on this iCloud; a device holding the master).
-        let apple = mintAllowed ? appleKeys.readOrMint() : appleKeys.read()
+        // F3 (MINOR-N1): the read and the mint are told apart — the heal
+        // keys on a READ alone (a mint proves nothing about the account's
+        // copy), so `readOrMint` runs only after `read` answered nil.
+        let readBack = appleKeys.read()
+        let apple = readBack ?? (mintAllowed ? appleKeys.readOrMint() : nil)
         return AppleKeyReconcileRead(
             key: key, envelope: ensured.envelope, apple: apple,
-            waiting: apple == nil && !mintAllowed)
+            waiting: apple == nil && !mintAllowed,
+            minted: readBack == nil && apple != nil)
     }
 
     nonisolated private static func landAppleCopyOffMain(

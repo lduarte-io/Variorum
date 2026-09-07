@@ -582,6 +582,36 @@ struct Phase13pControllerTests {
         #expect(w.controller.appleKeyVerified == true)
     }
 
+    /// pre-13x ladder round 2, F3 (MINOR-N1 — option A, the refined rule
+    /// (c)'s LETTER): a MINT is never proof. This device's key file records
+    /// the vault's id (it established the account's A, or landed under it),
+    /// it holds M, and iCloud Keychain now READS NOTHING (a same-account
+    /// Keychain reset — or the device signed into ANOTHER Apple ID, which
+    /// the client cannot tell apart): it mints A′ for ITS OWN file only;
+    /// the vault's Apple-held copy is NEVER re-landed from a mint. RED ON
+    /// OLD: the heal was handed the minted key and re-homed the account's
+    /// copy under it — silently, under whichever Apple account this device
+    /// now held (Ch.2 s25 false in that corner).
+    @Test func aMintNeverHealsTheVaultEvenWhenTheFileRecordsTheVaultsId() async throws {
+        let key = StoreKey.mint()
+        var envelope = StoreKeyEnvelope()
+        try envelope.setAppleWrappedCopy(key: key, under: AppleKey.mint().symmetricKey, appleKeyID: "a1-the-accounts")
+        let w = try world(standard: true, key: key, envelope: envelope, enrolled: true)
+        w.appleKeys.key = nil  // the Keychain reads nothing: a reset, or another Apple ID
+        let healed = LockIsolated<[String]>([])
+        w.controller.isSignedIn = { true }
+        w.controller.foreignOwner = { _ in false }
+        w.controller.readVaultPosture = { [r = try self.standardReading(appleKeyID: "a1-the-accounts")] in r }
+        w.controller.healAppleHeldCopy = { apple in healed.withValue { $0.append(apple.id) }; return true }
+        await w.controller.reconcile()
+        let minted = try #require(w.appleKeys.key, "holding M and reading nothing, the device mints A′")
+        #expect(minted.id != "a1-the-accounts")
+        #expect(healed.value.isEmpty, "the vault's copy is NEVER written from a mint — a mint proves no same-account duplicate")
+        #expect(w.envelopeBox.value?.appleKeyID == minted.id, "ITS OWN file copy under the mint")
+        #expect(try w.envelopeBox.value?.unwrapKey(apple: minted.symmetricKey) == key)
+        #expect(w.controller.appleKeyVerified == true && !w.controller.appleKeyWaiting)
+    }
+
     // MARK: - THE RESET DOOR (R13p-9) — pre-13x 3b: MERGED into change
     // passphrase's forgot road (`KeyDoorModel`; the pins in `KeyDoorTests`:
     // the biometric confirm required in Castle, a refused confirm changing
