@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Variorum — mockups: Divide choosing takes · Merge choosing takes · the sidebar's note box · This Note's Tray</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --paper:#F7F3EC; --card:#FFFDF9; --wash:#ECE6DC; --line:#E3DCD1; --faintline:#EEE8DE;
+    --ink:#2B2622; --muted:#7F756C; --faint:#B3AA9F; --accent:#3D6A9E; --accent-wash:#E4ECF5;
+    --chosen:#4C8A3F; --chosen-wash:#EAF2E6; --ring:#B5773E; --warn:#B26A2C;
+    --top:#EAF1E8; --bottom:#F1EBE1; --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    --sans:-apple-system,"SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:#EFEAE2;color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.45}
+  main{max-width:1240px;margin:0 auto;padding:36px 28px 80px}
+  h1{font-family:var(--serif);font-weight:600;font-size:28px;margin:0 0 6px}
+  .lede{color:var(--muted);margin:0 0 34px;max-width:900px}
+  h2{font-family:var(--serif);font-weight:600;font-size:22px;margin:52px 0 8px}
+  h2 small{font-family:var(--sans);font-weight:400;font-size:13px;color:var(--muted);margin-left:10px}
+  .note{color:var(--muted);font-size:13px;max-width:900px;margin:0 0 18px}
+  .note b{color:var(--ink);font-weight:600}
+  .caption{font-size:12px;color:var(--muted);margin:10px 2px 0}
+  .figure{margin:0 0 26px}
+  kbd{font-family:var(--sans);font-size:11px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 4px;background:#fff;color:var(--muted)}
+
+  /* ---------- the sheet (Divide choosing takes) ---------- */
+  .sheet{background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:0 18px 50px rgba(40,30,20,.14);padding:22px 26px 18px;width:1120px;max-width:100%}
+  .sheet-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:14px}
+  .sheet-title{font-family:var(--serif);font-size:22px;font-weight:600}
+  .sheet-sub{color:var(--muted);font-size:13px}
+  .sheet-sub .sep{margin:0 8px;color:var(--faint)}
+  .help-dot{width:22px;height:22px;border:1px solid var(--line);border-radius:6px;display:inline-grid;place-items:center;color:var(--muted);font-size:12px;background:var(--card)}
+
+  .arrange{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px}
+  .opt{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:9px 12px;cursor:default}
+  .opt .t{font-weight:600;font-size:13px}
+  .opt .d{font-size:12px;color:var(--muted);margin-top:2px}
+  .opt.sel{border-color:var(--accent);background:var(--accent-wash);box-shadow:inset 0 0 0 1px var(--accent)}
+  .opt.custom{border-style:dashed}
+  .arrange-line{font-size:12.5px;color:var(--muted);margin:0 2px 16px}
+  .arrange-line b{color:var(--ink);font-weight:600}
+
+  .takes{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .take{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;min-height:300px}
+  .take.seed{border-color:#CDB89C}
+  .take-head{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--faintline);background:#FBF8F2}
+  .take-head .name{font-weight:600;font-size:13px}
+  .badge{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:0 6px;background:#fff}
+  .badge.shown{color:var(--accent);border-color:#BFD0E4;background:var(--accent-wash)}
+  .badge.chosen{color:var(--chosen);border-color:#C8DBC1;background:var(--chosen-wash)}
+  .take-head .spacer{flex:1}
+  .chk{width:15px;height:15px;border:1px solid #9A9088;border-radius:4px;background:#fff;display:inline-grid;place-items:center;font-size:11px;color:#fff}
+  .chk.on{background:var(--accent);border-color:var(--accent)}
+  .status{font-size:12px;color:var(--muted);padding:8px 12px 0}
+  .status b{color:var(--ink);font-weight:600}
+  .status .cut-glyph{color:var(--ring)}
+  .prose{font-family:var(--serif);font-size:15px;line-height:1.55;padding:8px 12px 14px;overflow:auto;max-height:260px}
+  .prose p{margin:0 0 .6em}
+  .half-top{background:var(--top);box-decoration-break:clone;-webkit-box-decoration-break:clone;padding:1px 0}
+  .half-bottom{background:var(--bottom);box-decoration-break:clone;-webkit-box-decoration-break:clone;padding:1px 0}
+  .cut{position:relative;display:inline-block;width:0;height:1em;vertical-align:-0.15em;overflow:visible}
+  .cut::before{content:"";position:absolute;left:-0.5px;top:-0.15em;width:1.5px;height:1.3em;background:var(--ring);border-radius:1px}
+  .cut::after{content:"✂";position:absolute;left:-6px;top:-0.62em;font-size:10.5px;line-height:1;color:var(--ring);background:var(--card);padding:0 1px;border-radius:3px;font-family:var(--sans)}
+  .take-foot{margin-top:auto;display:flex;gap:10px;align-items:center;padding:8px 12px;border-top:1px solid var(--faintline);font-size:11.5px;color:var(--muted)}
+  .swatch{display:inline-block;width:10px;height:10px;border-radius:2px;vertical-align:-1px;margin-right:4px;border:1px solid rgba(0,0,0,.06)}
+  .sw-top{background:var(--top)} .sw-bottom{background:var(--bottom)}
+
+  .sheet-foot{display:flex;align-items:center;justify-content:space-between;margin-top:16px;padding-top:12px;border-top:1px solid var(--faintline)}
+  .sheet-foot .rev{font-size:12px;color:var(--muted)}
+  .btn{font-size:13px;border:1px solid var(--line);border-radius:7px;padding:6px 14px;background:var(--card);color:var(--ink)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+  .btn.quiet{border-color:transparent;background:transparent;color:var(--muted)}
+  .btns{display:flex;gap:8px;align-items:center}
+  .blocker{font-size:12px;color:var(--warn)}
+
+  /* keyboard legend (folded) */
+  .legend{font-size:12px;color:var(--muted);border:1px dashed var(--line);border-radius:8px;padding:8px 12px;margin-top:12px;background:#FBF8F2}
+
+  /* ---------- merge sheet ---------- */
+  .merge-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px}
+  .mini-take{border:1px solid var(--line);border-radius:8px;background:var(--card);padding:8px 10px;margin-bottom:8px;font-family:var(--serif);font-size:14px;line-height:1.45}
+  .mini-take .h{font-family:var(--sans);font-size:11.5px;color:var(--muted);margin-bottom:4px;display:flex;gap:6px;align-items:center}
+  .pair{color:var(--accent);font-weight:600}
+  .carry{color:var(--muted)}
+
+  /* ---------- sidebar note box ---------- */
+  .sidebars{display:grid;grid-template-columns:repeat(3,230px);gap:34px;align-items:start}
+  .sidebar{width:230px;background:var(--paper);border:1px solid var(--line);border-right:1px solid var(--line);border-radius:10px;padding:14px 12px 16px;position:relative}
+  .sb-top .row{display:flex;align-items:center;gap:9px;height:30px;padding:0 8px;color:var(--muted);font-size:14px}
+  .sb-top .row .ic{width:16px;height:14px;border:1.5px solid var(--faint);border-radius:3px;opacity:.8}
+  .sb-sep{height:1px;background:var(--line);margin:12px 8px}
+  .sb-head{font-size:12px;color:var(--accent);padding:0 8px;height:26px;display:flex;align-items:flex-end;padding-bottom:6px}
+  .sb-row{display:flex;align-items:center;justify-content:space-between;height:30px;padding:0 8px;border-radius:6px;color:var(--muted);font-size:14px}
+  .sb-row.sel{background:var(--wash);color:var(--accent);font-weight:600}
+  .sb-row .k{font-size:11px;color:var(--faint)}
+  .box{border:1px solid var(--line);border-radius:8px;background:var(--card);height:266px;padding:8px 8px 8px;display:flex;flex-direction:column;position:relative}
+  .box .bh{font-size:12px;color:var(--accent);padding:0 0 6px}
+  .box .title{font-family:var(--serif);font-size:15px;font-weight:600;line-height:1.25;color:var(--ink)}
+  .box .where{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .box .facts{font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .box .empty{margin:auto 0;text-align:center;color:var(--faint);font-size:13px;padding:0 6px}
+  .box .empty .h{font-size:14px;color:var(--muted);margin-bottom:4px}
+  .box .rows{margin-top:6px;display:grid;grid-template-columns:1fr 1fr;gap:4px}
+  .box .r{height:26px;border:1px solid var(--line);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--ink);background:#fff}
+  .box .r.wide{grid-column:1/-1;justify-content:space-between;padding:0 8px}
+  .box .r.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+  .box .r .chev{color:var(--faint);font-size:10px;margin-left:4px}
+  .box .foot{margin-top:auto;display:flex;justify-content:space-between;font-size:11px;color:var(--muted);padding-top:6px;border-top:1px solid var(--faintline)}
+  .box .door{margin-top:auto;height:28px;border-radius:6px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:600}
+  .box .live{position:absolute;right:8px;top:8px;font-size:10.5px;color:var(--ring);border:1px solid #E0C7AE;border-radius:4px;padding:0 5px;background:#FBF3EA}
+  .rail-measure{position:absolute;left:-26px;top:0;height:100%;border-left:1px solid var(--accent);border-top:1px solid var(--accent);border-bottom:1px solid var(--accent);width:8px}
+  .rail-measure span{position:absolute;left:-118px;top:50%;transform:translateY(-50%) rotate(-90deg);transform-origin:center;font-size:10.5px;color:var(--accent);white-space:nowrap;width:220px;text-align:center}
+  .state-label{font-size:12px;color:var(--muted);margin:0 0 8px 2px}
+  .state-label b{color:var(--ink)}
+
+  /* ---------- tray ---------- */
+  .tray{width:420px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px 16px 18px}
+  .tray-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .tray-head .t{font-family:var(--serif);font-size:20px;font-weight:600}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--card)}
+  .seg span{padding:6px 12px;font-size:13px;color:var(--muted);border-right:1px solid var(--line)}
+  .seg span:last-child{border-right:0}
+  .seg span.on{background:var(--accent-wash);color:var(--accent);font-weight:600}
+  .seg span .n{font-size:11px;color:var(--faint);margin-left:5px}
+  .seg span.on .n{color:var(--accent)}
+  .chips{display:flex;gap:6px;margin:10px 0 6px}
+  .chip{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:2px 10px;color:var(--muted);background:var(--card)}
+  .chip.on{border-color:var(--accent);color:var(--accent);background:var(--accent-wash)}
+  .tray .ex{font-size:12px;color:var(--muted);margin:0 0 10px}
+  .tcard{border:1px solid var(--line);border-radius:9px;background:var(--card);padding:10px 12px;margin-bottom:8px}
+  .tcard .kind{font-size:10.5px;color:var(--faint);text-transform:uppercase;letter-spacing:.04em}
+  .tcard .txt{font-family:var(--serif);font-size:15px;margin:2px 0 6px;color:var(--ink)}
+  .tcard .meta{display:flex;align-items:center;gap:12px;font-size:12px;color:var(--muted)}
+  .tcard .meta .sp{flex:1}
+  .tcard .b{font-size:12px;border:1px solid var(--line);border-radius:6px;padding:3px 9px;background:#fff;color:var(--accent);font-weight:600}
+  .tcard .b.q{color:var(--muted);font-weight:400}
+  .tray .empty{color:var(--muted);font-size:13px;padding:18px 6px;text-align:center;border:1px dashed var(--line);border-radius:9px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:start}
+</style>
+</head>
+<body>
+<main>
+  <h1>Four mockups for the use-report round</h1>
+  <p class="lede">Static states, side by side, in the Study voice's grammar (paper, serif prose, blue accent, the brown ring). Each figure is the shape the plan describes; the captions name what is fixed by ruling and what is the implementer's latitude. Nothing here is a pixel spec — spacing follows the app's own tokens and the pre-13u mockup style guide.</p>
+
+  <!-- ================================================================ A -->
+  <h2>A · Divide choosing takes <small>replaces "Divide with Ceremony…" everywhere — the sheet is now the ONE door for every arrangement</small></h2>
+  <p class="note"><b>What changed and why.</b> The arrangement is chosen FIRST, in one row of four, and the default is your ruling — <b>keep the takes on the top block</b>. Choosing a preset places every ✂ for you; the columns below only <i>show</i> what will happen. Only the fourth option, "Choose per take", turns the columns into the hand-placement surface (checkboxes, draggable ✂, ⇥ between takes). The prose reads as prose: no gaps between words — the ✂ is drawn <i>over</i> the inter-word gap and the layout never moves when it does. Takes sit side by side (up to three columns; each column scrolls on its own beyond that) — no more scrolling a stack to find the second take.</p>
+
+  <div class="figure">
+    <div class="sheet">
+      <div class="sheet-head">
+        <div>
+          <div class="sheet-title">Divide choosing takes</div>
+          <div class="sheet-sub">block 4 of 8<span class="sep">·</span>3 takes<span class="sep">·</span>cut where you clicked</div>
+        </div>
+        <div class="help-dot" title="Keyboard: ←/→ step the ✂ a word · ⌥←/→ a sentence · ⇥ next take · ⏎ divide · ⎋ cancel">?</div>
+      </div>
+
+      <div class="arrange">
+        <div class="opt sel"><div class="t">Keep takes on the top block</div><div class="d">the take you were in splits; the others stay whole on top</div></div>
+        <div class="opt"><div class="t">Keep takes on the bottom block</div><div class="d">the mirror — the others stay whole below</div></div>
+        <div class="opt"><div class="t">Copy takes to both</div><div class="d">every other take rides whole onto both halves</div></div>
+        <div class="opt custom"><div class="t">Choose per take…</div><div class="d">check, place, park — the full ceremony</div></div>
+      </div>
+      <div class="arrange-line">The take you were in splits at the ✂. <b>2 other takes</b> stay whole on the <b>top</b> block; the bottom block starts with one take. Reversible — <kbd>⌥⌘Z</kbd>.</div>
+
+      <div class="takes">
+        <div class="take seed">
+          <div class="take-head"><span class="name">take</span><span class="badge shown">shown here</span><span class="badge chosen">✓ chosen</span><span class="spacer"></span></div>
+          <div class="status"><span class="cut-glyph">✂</span> <b>splits here</b> — 41 words above, 38 below</div>
+          *[removed for publication]*
+          <div class="take-foot"><span><i class="swatch sw-top"></i>top block</span><span><i class="swatch sw-bottom"></i>bottom block</span></div>
+        </div>
+        <div class="take">
+          <div class="take-head"><span class="name">take 2</span><span class="spacer"></span></div>
+          <div class="status"><span class="cut-glyph">✂</span> at the end — <b>this whole take stays on the top block</b></div>
+          *[removed for publication]*
+          <div class="take-foot"><span><i class="swatch sw-top"></i>top block · whole</span></div>
+        </div>
+        <div class="take">
+          <div class="take-head"><span class="name">take 3</span><span class="badge">locked</span><span class="spacer"></span></div>
+          <div class="status"><span class="cut-glyph">✂</span> at the end — <b>this whole take stays on the top block</b></div>
+          *[removed for publication]*
+          <div class="take-foot"><span><i class="swatch sw-top"></i>top block · whole</span></div>
+        </div>
+      </div>
+
+      <div class="sheet-foot">
+        <div class="rev">The original block stays whole in Block History → Came from.</div>
+        <div class="btns"><button class="btn">Cancel</button><button class="btn primary">Divide</button></div>
+      </div>
+    </div>
+    <p class="caption">Fixed by ruling: the four options and their order; "keep on top" selected on open; every take checked; non-seed ✂ parked at the end; the sentence under the row says exactly what will happen, in counts. Implementer's latitude: column widths, the tint of the two halves, whether the ✂ glyph rides above or on the line.</p>
+  </div>
+
+  <div class="figure">
+    <div class="sheet" style="width:1120px">
+      <div class="sheet-head">
+        <div>
+          <div class="sheet-title">Divide choosing takes</div>
+          <div class="sheet-sub">block 4 of 8<span class="sep">·</span>3 takes<span class="sep">·</span><span style="color:var(--accent)">choosing per take</span></div>
+        </div>
+        <div class="help-dot">?</div>
+      </div>
+      <div class="arrange">
+        <div class="opt"><div class="t">Keep takes on the top block</div><div class="d">the take you were in splits; the others stay whole on top</div></div>
+        <div class="opt"><div class="t">Keep takes on the bottom block</div><div class="d">the mirror — the others stay whole below</div></div>
+        <div class="opt"><div class="t">Copy takes to both</div><div class="d">every other take rides whole onto both halves</div></div>
+        <div class="opt custom sel"><div class="t">Choose per take…</div><div class="d">check, place, park — the full ceremony</div></div>
+      </div>
+      <div class="arrange-line">Each ✂ splits its take; ✂ at the very <b>end</b> keeps the whole take on top, at the very <b>start</b> on the bottom. An unchecked take is not cut and stays on the original block, in lineage. <kbd>⇥</kbd> moves between takes.</div>
+      <div class="takes">
+        <div class="take seed">
+          <div class="take-head"><span class="chk on">✓</span><span class="name">take</span><span class="badge shown">shown here</span><span class="spacer"></span><span class="badge" style="color:var(--accent);border-color:#BFD0E4">› arrows aim here</span></div>
+          <div class="status"><span class="cut-glyph">✂</span> <b>splits here</b> — drag it, click between words, or <kbd>←</kbd>/<kbd>→</kbd></div>
+          *[removed for publication]*
+          <div class="take-foot"><span><i class="swatch sw-top"></i>top</span><span><i class="swatch sw-bottom"></i>bottom</span></div>
+        </div>
+        <div class="take">
+          <div class="take-head"><span class="chk on">✓</span><span class="name">take 2</span><span class="spacer"></span></div>
+          <div class="status"><span class="cut-glyph">✂</span> at the <b>start</b> — this whole take goes to the bottom block</div>
+          *[removed for publication]*
+          <div class="take-foot"><span><i class="swatch sw-bottom"></i>bottom block · whole</span></div>
+        </div>
+        <div class="take" style="opacity:.75">
+          <div class="take-head"><span class="chk"></span><span class="name">take 3</span><span class="badge">locked</span><span class="spacer"></span></div>
+          <div class="status">not cut — <b>stays on the original block</b>, in Block History → Came from</div>
+          *[removed for publication]*
+          <div class="take-foot"><span>original block · lineage</span></div>
+        </div>
+      </div>
+      <div class="sheet-foot">
+        <div class="blocker">—</div>
+        <div class="btns"><button class="btn">Cancel</button><button class="btn primary">Divide</button></div>
+      </div>
+      <div class="legend"><b>Keyboard</b> (folded behind the <b>?</b>): <kbd>←</kbd>/<kbd>→</kbd> step the aimed take's ✂ one word · <kbd>⌥←</kbd>/<kbd>⌥→</kbd> a sentence, a newline, or the ends · <kbd>⇥</kbd>/<kbd>⇧⇥</kbd> aim the next/previous checked take · <kbd>space</kbd> check/uncheck the aimed take · <kbd>⏎</kbd> Divide · <kbd>⎋</kbd> Cancel. The confirm blocker ("every checked take rides whole into the first block — the second block would be born without a take…") appears in the footer's left slot, in the warning color, only when it applies.</div>
+    </div>
+    <p class="caption">"Choose per take" is the existing ceremony's whole vocabulary — checklist, parking at both ends, the ⇥ family, the confirm gate — on the new prose surface. The unchecked take dims and its footer names where it goes. This is the option you "really have to choose to do".</p>
+  </div>
+
+  <!-- ================================================================ B -->
+  <h2>B · Merge choosing takes <small>a real button beside "Merge Blocks", not only ⌥⌘⇧M — the same arrangement row</small></h2>
+  <p class="note"><b>What changed.</b> The name (the sheet was "Merge blocks — pair their takes"); a visible door (the block ▾ menu and the Blocks workbench's bulk bar get "Merge choosing takes…" beside "Merge Blocks"); and the same first-row grammar as divide, so the two ceremonies read as one family. The default remains your carry-all ruling.</p>
+  <div class="figure">
+    <div class="sheet" style="width:900px">
+      <div class="sheet-head">
+        <div><div class="sheet-title">Merge choosing takes</div><div class="sheet-sub">blocks 4 and 5<span class="sep">·</span>2 + 3 takes</div></div>
+        <div class="help-dot">?</div>
+      </div>
+      <div class="arrange" style="grid-template-columns:repeat(3,1fr)">
+        <div class="opt sel"><div class="t">Bring every take</div><div class="d">the two shown join; every other take comes along whole</div></div>
+        <div class="opt"><div class="t">Only the two shown</div><div class="d">the others stay with their original blocks, in lineage</div></div>
+        <div class="opt custom"><div class="t">Pair by hand…</div><div class="d">＋ pairings, carries, and the join per pair</div></div>
+      </div>
+      <div class="arrange-line">The two takes you were looking at join with a space. <b>3 other takes</b> come along whole onto the merged block. Reversible — <kbd>⌥⌘Z</kbd>.</div>
+      <div class="merge-cols">
+        <div>
+          *[removed for publication]*
+          *[removed for publication]*
+        </div>
+        <div>
+          *[removed for publication]*
+          *[removed for publication]*
+          *[removed for publication]*
+        </div>
+      </div>
+      <div class="sheet-foot"><div class="rev">Both original blocks stay whole in Block History → Came from.</div><div class="btns"><button class="btn">Cancel</button><button class="btn primary">Merge</button></div></div>
+    </div>
+    <p class="caption">Only the header, the name, the arrangement row and the door are new; "Pair by hand" is the shipped pairing ceremony (S4-23) restyled onto this surface. The phone's parity row: the three presets, the same words.</p>
+  </div>
+
+  <!-- ================================================================ C -->
+  <h2>C · The sidebar's note box <small>a book in an editing mode — the box stands where the "this note" rail stands for a note, at the rail's exact height</small></h2>
+  <p class="note"><b>What it is.</b> When a BOOK is open in Outline, Index or Book (never Read), the sidebar shows this box instead of the mode rail. It holds the focused note's controls — the same bar that floated at the right — plus what is worth knowing about the note without leaving the sidebar. Three states, left to right: nothing selected · a note selected but not live · a note live under the caret. The box never changes height between states, so the Open strip below it never jumps. The right gutter and the floating card retire.</p>
+  <div class="sidebars">
+    <div>
+      <div class="state-label"><b>1 · no note selected</b> — the book is open, nothing clicked</div>
+      <div class="sidebar">
+        <div class="sb-top">
+          <div class="row"><i class="ic"></i>Shelf</div><div class="row"><i class="ic"></i>Library</div><div class="row"><i class="ic"></i>Pool</div><div class="row"><i class="ic"></i>Snippets</div><div class="row"><i class="ic"></i>Archived</div>
+        </div>
+        <div class="sb-sep"></div>
+        <div class="box">
+          <div class="rail-measure"><span>same height as the "this note" rail</span></div>
+          <div class="bh">this note</div>
+          <div class="empty"><div class="h">no note selected</div>click a note in the book to see its controls here</div>
+        </div>
+        <div class="sb-sep"></div>
+        <div class="sb-head">Open</div>
+        <div class="sb-row sel"><span>Journal</span><span class="k">⌘⇧1 ✕</span></div>
+        <div class="sb-row"><span>The Boscombe Val…</span><span class="k">⌘⇧2 ✕</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="state-label"><b>2 · selected, not live</b> — a row was clicked; the note is expanded, read-cheap</div>
+      <div class="sidebar">
+        <div class="sb-top">
+          <div class="row"><i class="ic"></i>Shelf</div><div class="row"><i class="ic"></i>Library</div><div class="row"><i class="ic"></i>Pool</div><div class="row"><i class="ic"></i>Snippets</div><div class="row"><i class="ic"></i>Archived</div>
+        </div>
+        <div class="sb-sep"></div>
+        <div class="box">
+          <div class="bh">this note</div>
+          <div class="title">The Five Orange Pips</div>
+          <div class="where">chapter 2 · 5 of 12 in this book</div>
+          <div class="facts">3,214 words · 41 blocks<br>⑂ takes on 2 blocks<br>edited Sep 4 · saved Sep 2</div>
+          <div class="door">edit here ⏎</div>
+        </div>
+        <div class="sb-sep"></div>
+        <div class="sb-head">Open</div>
+        <div class="sb-row sel"><span>The Adventures of S…</span><span class="k">⌘⇧1 ✕</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="state-label"><b>3 · live</b> — the caret is in the note; the bar lives here now</div>
+      <div class="sidebar">
+        <div class="sb-top">
+          <div class="row"><i class="ic"></i>Shelf</div><div class="row"><i class="ic"></i>Library</div><div class="row"><i class="ic"></i>Pool</div><div class="row"><i class="ic"></i>Snippets</div><div class="row"><i class="ic"></i>Archived</div>
+        </div>
+        <div class="sb-sep"></div>
+        <div class="box">
+          <span class="live">editing</span>
+          <div class="bh">this note</div>
+          <div class="title">The Five Orange Pips</div>
+          <div class="where">chapter 2 · 5 of 12 · block 3 of 41</div>
+          <div class="rows">
+            <div class="r">block <span class="chev">▾</span></div>
+            <div class="r">Takes</div>
+            <div class="r primary">commit ⌘S</div>
+            <div class="r">history</div>
+            <div class="r">note <span class="chev">▾</span></div>
+            <div class="r">comments</div>
+            <div class="r wide"><span>Aa · newlines make blocks</span><span style="color:var(--accent)">on</span></div>
+          </div>
+          <div class="foot"><span>112w block · 3,214w note</span><span>?</span></div>
+        </div>
+        <div class="sb-sep"></div>
+        <div class="sb-head">Open</div>
+        <div class="sb-row sel"><span>The Adventures of S…</span><span class="k">⌘⇧1 ✕</span></div>
+      </div>
+    </div>
+  </div>
+  <p class="caption">Fixed by ruling: the box stands in the rail's place at the rail's height; "no note selected" when nothing is focused; the bar's controls live here in the editing modes; the floating card and the right gutter's bar retire. Architect's shape for the two other states: the SELECTED note's identity and facts (title · chapter · position · words · blocks · takes · edited/saved) with one door into editing; the LIVE state keeps the identity line and adds the bar as a two-column grid at the sidebar's pitch, the word count as the footer. The block ▾ and note ▾ menus are today's menus unchanged. Implementer's latitude: the facts' exact lines, the two-column vs one-column rows if the width argues.</p>
+
+  <!-- ================================================================ D -->
+  <h2>D · This Note's Tray, reorganized <small>Leaving vs Archived at the top; blocks vs takes as a filter under each</small></h2>
+  <p class="note"><b>What changed.</b> One top-level choice — <b>Leaving</b> (on the 30-day clock) or <b>Archived</b> (kept, no clock) — carries its count. Under it, one filter row — <b>all · blocks · takes</b> — so "6 deleted takes" is no longer a fold you have to find under the block cards. The explainer shrinks to one line per view; the cards name their kind. Put back / Delete Now stay exactly where they were.</p>
+  <div class="two">
+    <div class="tray">
+      <div class="tray-head"><div class="t">This Note's Tray</div><button class="btn">Close</button></div>
+      <div class="seg"><span class="on">Leaving<span class="n">7</span></span><span>Archived<span class="n">0</span></span></div>
+      <div class="chips"><span class="chip on">all</span><span class="chip">blocks · 1</span><span class="chip">takes · 6</span></div>
+      <p class="ex">On the 30-day clock. Put back keeps a row; Delete Now ends its days early.</p>
+      <div class="tcard"><div class="kind">block</div><div class="txt" style="color:var(--muted)">(empty block)</div><div class="meta"><span>deleted Sep 7</span><span>30 days left</span><span class="sp"></span><span class="b">Put back</span></div></div>
+      *[removed for publication]*
+      *[removed for publication]*
+      <div class="caption" style="margin-top:4px">… 4 more takes</div>
+    </div>
+    <div class="tray">
+      <div class="tray-head"><div class="t">This Note's Tray</div><button class="btn">Close</button></div>
+      <div class="seg"><span>Leaving<span class="n">7</span></span><span class="on">Archived<span class="n">0</span></span></div>
+      <div class="chips"><span class="chip on">all</span><span class="chip">blocks</span><span class="chip">takes</span></div>
+      <p class="ex">Kept, no clock. Archiving a block or a take keeps it here with no countdown.</p>
+      <div class="empty">Nothing archived from this note.</div>
+    </div>
+  </div>
+  <p class="caption">Fixed by ruling: Leaving/Archived top-level with the block/take filter under each. Architect's shape: the filter is one row shared by both views (its counts follow the view), the kind label on every card, the explainer one line. The originals "riding a family's countdown" (the leaving section's third population) are blocks and show under blocks with their stranded-clock line, unchanged.</p>
+</main>
+</body>
+</html>
