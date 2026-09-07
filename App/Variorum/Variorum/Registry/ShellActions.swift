@@ -322,32 +322,39 @@ struct ShellActions {
         let noun = book == .sherlock ? "story" : "chapter"
         Task { @MainActor in
             do {
-                let stories = try await Task.detached(priority: .utility) {
-                    try SampleLibrarySeeder.loadStories(for: book)
-                }.value
-                let existing = try await session.database.read { db in
-                    try SampleLibrarySeeder.discover(db, book: book)
-                }
-                if existing.isComplete(for: stories.map(\.title)),
-                   let bookID = existing.bookID {
+                // F2 (MINOR-8): the brain hoisted to `SeededBookRestore`
+                // (Shared) — the phone's restore row and the tutorial door's
+                // ensure ride the same road; this face composes the receipt.
+                switch try await SeededBookRestore.restore(session: session, book: book) {
+                case .alreadyWhole(let bookID):
                     shell.pendingSelection = .reading(bookID)
                     status.speak(
                         "\u{201C}\(book.name)\u{201D} is already whole — it's on your shelf.")
-                    return
-                }
-                let outcome = try await SampleLibrarySeeder.seed(
-                    session: session, book: book, stories: stories, existing: existing)
-                if case .seeded(let readingID, let minted) = outcome {
+                case .restored(let readingID, let minted):
                     shell.pendingSelection = .reading(readingID)
                     status.speak(
                         "Restored \u{201C}\(book.name)\u{201D} — "
                         + "\(minted) \(minted == 1 ? noun : noun + "s") came back.")
+                case .refused(let why):
+                    status.speak("Restoring \u{201C}\(book.name)\u{201D} failed: \(why)")
                 }
             } catch {
                 status.speak(
                     "Restoring \u{201C}\(book.name)\u{201D} failed: "
                     + OpsRefusalCopy.message(for: error))
             }
+        }
+    }
+
+    /// F2 (MINOR-8): the tutorial door's silent ensure of *Encryption
+    /// Explained* — the restore road, receipt-less on success.
+    private static func ensureEncryptionBook(session: AppSession, status: StatusCenter) async {
+        do {
+            _ = try await SeededBookRestore.restore(session: session, book: .encryptionExplained)
+        } catch {
+            status.speak(
+                "The tutorial opened, but \u{201C}\(SampleLibrarySeeder.Book.encryptionExplained.name)\u{201D} "
+                + "could not be restored beside it: " + OpsRefusalCopy.message(for: error))
         }
     }
 
@@ -374,6 +381,14 @@ struct ShellActions {
                     return
                 }
                 shell.pendingSelection = .reading(bookID)
+                // pre-13x ladder round 1, F2 (MINOR-8): Lesson 2's last
+                // paragraph points at *Encryption Explained* "on this shelf"
+                // — a signed-in-never-synced store seeds neither book (ledger
+                // 70's gate, which stays), so the door that opens the
+                // tutorial makes the sentence true by the restore road:
+                // mint what is missing, touch nothing of hers, say nothing
+                // on success; a failure speaks beside the opened tutorial.
+                await Self.ensureEncryptionBook(session: session, status: status)
             } catch {
                 status.speak("Opening the tutorial failed: \(OpsRefusalCopy.message(for: error))")
             }

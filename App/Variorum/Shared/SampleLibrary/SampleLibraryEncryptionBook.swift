@@ -41,8 +41,9 @@ nonisolated enum SampleLibraryEncryptionBook {
     static let markSuffix = "encryption-explained"
 
     /// The front-matter note: copy §7b's register rule, the definitions half
-    /// (verbatim), then the tag sentence (true on both platforms — the
-    /// phone has no restore door for seeded books, so no restore promise).
+    /// (verbatim), then the tag sentence (true on both platforms; since the
+    /// ladder's F2 both platforms also restore the book — the Mac from
+    /// Help, the phone from Settings — but the note makes no restore promise).
     static let aboutThisBook = """
         This book uses plain credential words, each defined the first time it \
         appears: encrypted (scrambled so that only a key unscrambles it) \u{B7} key \
