@@ -1,5 +1,7 @@
 # Phase 13u — Feel & Polish (EXECUTION PLAN)
 
+> **KICKOFF — 13u1, THE EDITOR SEAM (written 2026-09-07 at the pre-13x closeout; the master plan's pointer names this phase NEXT).** A fresh session's first act is EXECUTING THIS FILE'S SPLIT (the banner below): `phase-13u1-editor-seam.md` takes items 5 · 7 · 8 (+ the O(N²) family and the 2026-08-30 sweep fold at this file's end) and item 12's decision; `phase-13u2-feel.md` · `phase-13u3-faces.md` · `phase-13u4-restyle-and-dark-mode.md` take the rest per the master plan's RE-SPLIT block (R-cor-12). Then the ONE shared kickoff sitting with the author rules both halves' interrelated items (4 with 13, 5 with 12, 9 for both platforms — mobile IN the sitting, MobileSoul §6). Read first: `CLAUDE.md`; this file whole; the master plan's `### 13u` section; `notes/plans/mobile-round-2-orchestrator-handoff.md` §5 (the overlap); `notes/KnownIssuesAndTechDebt.md`'s `planVisibleTakeEdit` row and M12; TEXTKIT2_NOTES §3. Cast: decided at the kickoff (CLAUDE.md's model policy). Do NOT build before the sitting rules item 5's semantics — they are the phase's centerpiece and hers.
+
 > **⚠️ SPLIT BANNER (2026-08-26, the launch-strategy sitting — read
 > this before the plan body).** The author SPLIT this row into TWO
 > phases: **13u1 — the editor seam** (items 5, 7, 8, 9, 12) and

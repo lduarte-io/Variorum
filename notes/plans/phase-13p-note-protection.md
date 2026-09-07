@@ -88,6 +88,7 @@ provisional; the kickoff sitting rules only the OPEN KNOTS section.
   passphrase and the SAME BIP-39 recovery phrase as 14b's vault. No second
   passphrase exists anywhere in the design.
 - **R13p-5 — Three at-open modes, as a setting**: **Auto** (Keychain
+  **⚠️ SUPERSEDED at pre-13x (2026-09-07; design §1): the three at-open modes are no longer a SETTING — the POSTURE (derived from the vault: Standard / Castle) + the gate style (silent · Touch ID · Always ask) replace it; the login password stays out of every chain (kept).**
   releases the key silently), **Biometric** (`.biometryCurrentSet`-gated
   Keychain item — the login password can NOT release it; fallback is the
   PASSPHRASE, never the device password), **Passphrase-every-open**. Her
@@ -98,11 +99,13 @@ provisional; the kickoff sitting rules only the OPEN KNOTS section.
   can just stop working"*) is answered by the passphrase fallback, not by
   the device password.
 - **R13p-6 — iCloud Keychain escrow is a dial.** A SEPARATE synchronizable
+  **⚠️ SUPERSEDED at pre-13x (2026-09-07): the escrow DIAL is gone — Standard IS the Apple-held key `A` in the shared iCloud Keychain group with wrapped copies of the library key and the master under it; Castle has none; no separate synchronizable item.**
   Keychain item carries a wrapped key copy (it cannot be the biometric-
   gated item — Apple does not sync access-controlled items). ON in the
   Standard preset, OFF in Locked-down. The setting's wording states the
   trust honestly in one sentence each way.
 - **R13p-7 — Two presets, dials underneath**: **Standard** (auto open,
+  **⚠️ SUPERSEDED at pre-13x (2026-09-07): the two PRESETS and the individually-adjustable dials are gone — two postures, one switch each way, Castle's few switches shown only in Castle.**
   escrow on, recovery phrase generated and nudged) and **Locked-down**
   (biometric or passphrase at open, re-lock policy, escrow off, reminder
   checks on). Her framing: *"the settings should be easy for the normies
@@ -128,6 +131,7 @@ provisional; the kickoff sitting rules only the OPEN KNOTS section.
   sentence). The 13l unit was built grep-able for exactly this
   moment (`MarkdownInsurance`).
 - **R13p-9 — Reminder checks + the reset door.** Periodic, dismissible
+  **⚠️ SUPERSEDED IN PART at pre-13x (2026-09-07): the reminder checks stay (a Castle brain, always on); the RESET door as a separate door is MERGED into change passphrase's forgot road, verified at the vault when enrolled.**
   "do you still remember your passphrase?" checks (her ask, the 1Password
   pattern), and the forgot-passphrase RESET door: any enrolled device
   re-wraps the key under a new passphrase after biometric confirmation —

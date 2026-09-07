@@ -1,3 +1,5 @@
+> **PHASE CLOSED 2026-09-07** — this handoff is history; the author handoff is `notes/handoffs/pre-13x-handoff.md`, the record `notes/plans/pre-13x-postures-design.md`.
+
 # pre-13x — ORCHESTRATOR HANDOFF #2 (mid-phase cutover, 2026-09-05; the build half is under way)
 
 **Why this exists:** the first build orchestrator reached ~660k tokens with batch 2c running. The author's words at the

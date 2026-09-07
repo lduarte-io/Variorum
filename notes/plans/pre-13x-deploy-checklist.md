@@ -196,3 +196,6 @@ before the sitting because the face reads the vault).
 - [x] **Verification DONE 2026-09-06 — `guard_deployed` true · owner variorum_definer · anon false · authenticated true · service_role false · the marker 8.** (read-only; the queries at the file's end): `guard_deployed` = **true** · `owner` = **variorum_definer** · `anon_execute` = **false** · `authenticated_execute` = **true** · `service_role_execute` = **false** · `select value from sync_meta where key = 'lockstep_version'` → **8**.
 - [x] DONE 2026-09-06 — 53 rows, 50 OK · 3 INFO, zero mismatches. Run the grant sweep once more (`maintenance/14c-post-deploy-grant-sweep.sql`) — every row OK/INFO; the function's ACL is unchanged by a `create or replace`.
 - [ ] **What a refusal looks like in use, if you ever meet it:** the ceremony says *The server is still settling a few rows written just before the switch…* (PROVISIONAL wording, copy §11), sync stays paused, and *Finish Entering Castle…* (Settings ▸ Protection) re-walks and finishes. Nothing is lost by it. On the un-refreshed (old) build the same refusal reads as a raw server message; the same door finishes it.
+
+## 10. CLOSED 2026-09-07
+The phase closed; the mirror at marker 8 with the completion guard; the remaining boxes (the refreshed installs, ledger 51's drill) are the author handoff's checklist.
