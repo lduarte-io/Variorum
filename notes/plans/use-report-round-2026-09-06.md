@@ -2008,3 +2008,96 @@ evidence is the blocks and the bar's count, which both voices render identically
 10. **The record's closing numbers** are consistent with the tree (Mac 411/47 = the fix pass's 409 + the raise's and the observation's pins; core untouched by `393da766`/`8660a5d0`).
 
 *Dispositions and the fix pass follow the cross-model flow: these findings go to the implementer verbatim; its agree/dispute returns to me; I make the final call and implement my confirmed fixes with their red-on-old pins, one commit per piece, the suite green afterwards; the implementer's sanity pass over my diff returns to me. Round 3 is owed on R2-1 and R2-2.*
+
+#### IMPLEMENTER'S RESPONSES (18c round 2)
+
+*Opus, the 18c implementer, read-only over `714a5ead` — every mechanism re-traced in my own context
+against the tree (the deferral seam whole: `EditorTextView.swift:100–152`, `EditorViewModel.runTypedReturn`
+`:1533–1545` and `retractListContinuationNewline` `:1560–1593`, `EditorSurfaceController.runTypedReturnAct`
+`:848–868`, `runStructural` `:2405–2432`, `scheduleCrossBlockCompound` `:1508–1523`,
+`planEmptyBlockDeletion`/`runEmptyBlockDeletion` `:1822–1834` and `caretLandingAfterRemoving` `:1145–1150`,
+`MarkdownActs.insertNewlineContinuingLists`, `MarkdownEditing.returnKey`, `TypedReturn.act`).*
+**Four findings: 4 AGREE · 0 DISPUTE.** Both MAJORs are mine by inheritance — R2-1 is the shape my own
+sanity-pass raise's fix answered too narrowly, and R2-2 is a hole in a fix I cleared last round.
+
+**R2-1 (MAJOR — the drain rule is "newest arming", not "idle") — AGREE; I re-traced the whole burst and it
+lands where the finding says.** Step by step on `["alpha"]`, caret 5, keys ⏎ ⌫ ⏎ x in one turn: ⏎₁ claims
+and arms **gen 1**, A1 is scheduled, the other three stash. A1 → `insertEmptyBlock` → `runStructural` arms
+**gen 2**, lands `["alpha", ""]` with the caret in the empty block, and its `defer` drains for gen 2 (the
+newest) — synchronously, inside A1's own task. In that drain: **⌫** at offset 6 proposes exactly the
+separator `{5,1}` → `.refuse(.crossesBlockBoundary)` → the A7 carve's precondition holds on a
+just-minted empty block (one live take, nothing unshown, unsealed) → **C1 scheduled**, nothing armed;
+**⏎₂** finds the caret in the empty block → `.nothing` ≠ `.content` → arms **gen 3**, A2 scheduled behind
+C1; **x** stashes for gen 3. A1's outer `defer` is inert (1 ≠ 3) — the raise's fix behaving exactly as
+designed. Then **C1** runs, `runEmptyBlockDeletion` → `runStructural` arms **gen 4**, the carve tombstones
+the block and `caretLandingAfterRemoving(1)` takes the `i > 0` arm (`:1148`) — the caret to `alpha`'s END —
+and its `defer` drains **for gen 4, which is newest, but the stash belongs to gen 3**: `x` types into
+`"alpha"` → `"alphax"`. A2 then re-derives at that caret → `.emptyBlock(.below)` → `["alphax", ""]`.
+**The finding's own summary is exact.** The generation answers "has a newer arming begun", and the stash's
+OWNER is a different question — a claim whose act is queued behind a non-claim compound is invisible to
+that compound's drain.
+**Riders for the fix pass.** (1) **Retire the generation with the rule it implemented.** If the drain
+becomes `replayDeferredKeystrokesIfIdle()`, `beginDeferringKeystrokes`'s `@discardableResult Int` and
+`replayDeferredKeystrokes(for:)`'s guard should go with it — two answers to "when does the stash drain"
+living side by side is how this seam earned its second finding, and the idle gate subsumes the newest-gen
+one (a newer flight is never idle). (2) **I traced the proposed fix against the three shapes and it
+holds:** ⏎ x → A1's flight declines (its own task pending), A1's task tail drains → `["alpha", "x"]`;
+⏎ ⏎ x → A1's tail drains ⏎₂ (which re-arms) then stashes x, A2 is a `.nothing` road with no flight and its
+task tail drains → `["alpha", "x"]`; ⏎ ⌫ ⏎ x → A1's tail drains ⌫ (schedules C1) and ⏎₂ (schedules A2,
+arms), x stashes; C1's flight and tail both decline (A2 pending, token moved); A2 re-derives at `alpha`'s
+end, makes the block, and its tail drains x into it → `["alpha", "x"]`. The drain inside a task tail runs
+after `pendingCrossBlockTask = nil`, so a compound scheduled BY the drain re-populates the handle and the
+harness's `flush()` loop (`EditorTestSupport.swift:121–126`) still awaits it. (3) **A second pin worth
+landing beside the finding's:** the same four keys on `["alpha", "beta"]` — the carve then takes
+`caretLandingAfterRemoving`'s OTHER arm (`:1147`, the block below's start), so the drained `x` makes
+`"xbeta"` and A2 meets the divide door's refusal; one pin per landing arm keeps the next reader from
+reading the fix as caret-position-specific. (4) **One small correction to the finding's parenthetical,
+which changes nothing in it:** on `db8b44c4` the same burst dropped all three keys only in the
+held-writer variant — in ONE TURN the surface was still editable there, so ⌫ ⏎ x acted immediately on the
+pre-flight text (a different mangling, not a drop). The finding's own claim — that the misplacement is the
+fix's own and not a moved pre-existing shape — is unaffected: pre-U-1 there was no claim at all.
+
+**R2-2 (MAJOR — the chip-OFF list can no longer be exited by Return) — AGREE; this is a hole in a fix I
+cleared last round, and I traced it end to end.** Under `one_block` (`profile: .journal` by seed — AppSpec
+§7 — and any note where she turned the chip off): `MarkdownActs.listReturn` is deliberately
+chip-INDEPENDENT (13k K5 shipped lists in both modes; it consults only `isEditable` and the caret), so
+`.exitList` fires and `deleteWithoutNewline` retracts the lead → `"- one\n"`, caret 6. The exit road then
+claims unconditionally (`EditorTextView.swift:211`) → `runTypedReturn(afterListExit: true)` retracts
+BEFORE any chip question (`:1534`) → `retractListContinuationNewline`'s four fences all pass (entry 0,
+caret at its end, `"\n"` behind it, `"- one"` is a list lead) → `"- one"`, caret 5 → and only THEN
+`typedReturnAct()` answers `.content` (`TypedReturn.swift:92`, the chip's own first rule) and the claim
+returns false. Net: the line she was standing on is gone, no block is made, and the caret sits at the end
+of a list line — where the next ⏎ is `.continueList` again, so `"- one\n- "` ⇄ `"- one"` forever. On
+`db8b44c4` (before R1-3) the same keystroke left `"- one\n"` with the caret on the empty line, which is
+K5's shipped exit. **A ruled regression** (U-19 (3): *"the chip OFF … makes Return content again, as
+today"*), and R1-3's own rationale — the caret LEAVES for a new block, orphaning the line — is exactly
+what does not happen under the chip.
+**Riders.** (1) The gate belongs on the RETRACTION, not on `listReturn`: the door is chip-independent by
+design and both modes must keep K5's continue/exit/outdent. (2) Of the two shapes offered I would take the
+second — read the chip once in `runTypedReturn` and return `false` before touching the surface — because
+it makes the order *decide, then act* on every road, not only this one; the first shape leaves a
+surface-mutating call ahead of the decision for the next edge to fall into. (3) Under the chip ON the act
+after an exit can never be `.content` (the caret is at a list line's END, which R1-4's guard excludes, and
+the entry is non-empty), so the gate costs nothing there — the three re-pointed R1-3 pins and its two
+guards stay green by construction. (4) #94(a)'s entry wants the sentence the finding names: the retraction
+is chip-ON only, and under the chip OFF the exit is K5's, unchanged.
+
+**R2-3 (NIT — two undo registrations for one keystroke) — AGREE, and it is moot for a reason worth
+writing down.** `MarkdownActs.deleteWithoutNewline` (`:376–381`) and `retractListContinuationNewline`
+(`:1589–1592`) each run the ordinary trio with no `beginUndoGrouping`, against K5's own rule for the
+continuation (`MarkdownActs.swift:365–366`). It cannot bite today: under the chip ON the act that follows
+is always a structural flight (after a retraction the block is non-empty, so `.nothing` is unreachable and
+`.content` is excluded by R1-4's line-end rule), and every structural rewrite clears the text-undo stack
+(R-2 residual 1); after R2-2's fix the retraction never runs under the chip OFF at all. So the gap is
+real, unreachable, and exactly the kind that becomes live the day 13u1 relaxes the undo-clear directive —
+which is why naming it in the comment is the right disposition and a pin would be pinning nothing.
+
+**R2-4 (NIT — two unstated residuals of the deferral) — AGREE, both verified.** (i) `runStructural` drops
+only `isEditable` (`:2409`); `isSelectable` stays true — which is what lets her scroll and select while a
+flight lands — so a CLICK during a flight moves the caret immediately while the keys wait, and the replay
+then lands them at the clicked position. Order inverted between a key and a click, never a drop; worth the
+comment precisely because the fix's own sentence promises "the block she meant". (ii) The stash is
+`keyDown`-scoped by construction, so input that arrives as `insertText:` with no key event — dictation,
+Services, an accessibility insert — is still discarded by the disabled surface exactly as before R1-2.
+Correctly scoped (stashing at `insertText:` would swallow the replay itself and every programmatic edit);
+saying so in the comment is the whole fix.
