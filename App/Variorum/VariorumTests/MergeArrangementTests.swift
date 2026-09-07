@@ -90,6 +90,29 @@ struct MergeArrangementTests {
                 == [.bringEveryTake, .onlyTheShownOnes, .pairByHand])
             #expect(state.otherTakes == 1, "the spare, counted for the sentence")
             #expect(state.confirmBlocker == nil, "a preset is confirmable as it stands")
+            // 18f ladder R1-12: "Alpha one." + "Beta two." — no edge carries
+            // whitespace, so the canon join is a space and the sentence says
+            // so; a head ending in a space would read "join directly".
+            #expect(state.canonJoin == .space)
+            #expect(state.arrangementSentence.contains("join with a space"))
+        }
+    }
+
+    /// The sentence follows the operation's join, read off the shown takes'
+    /// STORED texts (18f ladder R1-12): a head that already ends in a space
+    /// joins directly, and the row says so.
+    @Test func thePairSentenceReadsTheCanonJoinOffTheShownTakes() async throws {
+        try await withEditor(seedBlocks: ["Alpha one. ", "Beta two."]) { h in
+            let slots = try h.storeSlots()
+            _ = try h.session.operations.branchVariant(
+                slots[1].blockID, from: try #require(slots[1].variantID))
+            try h.reload()
+            selectAcross(h, 0, 1)
+            await h.model.invokeGesture(.mergeBlocks, ceremony: true)
+            let state = try #require(h.model.mergeCeremony)
+            #expect(state.canonJoin == .nothing, "non-vacuity: the head ends in a space")
+            #expect(state.arrangementSentence.contains("join directly"))
+            #expect(!state.arrangementSentence.contains("join with a space"))
         }
     }
 
@@ -364,6 +387,15 @@ struct MergeArrangementTests {
             .bringEveryTake, blocks: 4, otherTakes: 2)
         #expect(runEvery.contains("The 4 takes you were looking at join in order."))
 
+        // 18f ladder R1-12: the pair's join word is the operation's, not the
+        // mockup's — `MergeJoin.canon` answers `.nothing` when an edge already
+        // carries whitespace.
+        let direct = MergeArrangementCopy.sentence(
+            .bringEveryTake, blocks: 2, otherTakes: 1, join: .nothing)
+        #expect(direct.contains("The two takes you were looking at join directly."))
+        let newline = MergeArrangementCopy.sentence(
+            .onlyTheShownOnes, blocks: 2, otherTakes: 0, join: .newline)
+        #expect(newline.contains("join on a new line"))
         #expect(MergeArrangement.offered(blocks: 2).count == 3)
         #expect(MergeArrangement.offered(blocks: 3) == [.bringEveryTake, .onlyTheShownOnes])
         #expect(MergeArrangement.onlyTheShownOnes.title(blocks: 2) == "Only the two shown")

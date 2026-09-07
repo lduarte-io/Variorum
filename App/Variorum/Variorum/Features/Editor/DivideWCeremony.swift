@@ -258,16 +258,18 @@ final class DivideWCeremony {
         /// PER SLOT per body pass, and ~2 per candidate per drag sample, which
         /// is the beachball she reported.
         let strongBoundaries: Set<Int>
-        /// The take's text as the alternating slot/token sequence the sheet
-        /// draws. Also derived once here, for the same reason.
-        let flow: [WCutPlacement.FlowItem]
+        // (`flow` — the take as the retired token flow's slot/token sequence
+        // — left this struct at the 18f ladder, R1-10: batch 2's prose card
+        // reads no flow, so deriving one per take at open fed nothing but a
+        // pin's non-vacuity measure; the pure `WCutPlacement.flowItems` stays
+        // for the pins that read it directly.)
         /// `nonisolated` for the same reason `init` is: the arrangement brain
         /// (`arranged`) runs off the main actor when the ceremony opens.
         nonisolated var id: String { variant.id }
 
-        /// ONE derivation per take: the legal cuts, the strong subset and the
-        /// draw/hit-test flow all come from the take's text here, at
-        /// construction, and nothing downstream re-derives them.
+        /// ONE derivation per take: the legal cuts and the strong subset come
+        /// from the take's text here, at construction, and nothing downstream
+        /// re-derives them.
         /// `nonisolated` so `open`'s derivation can run OFF the main actor —
         /// the whole point of doing it once per take is that the gesture never
         /// blocks the UI on scanning.
@@ -281,7 +283,6 @@ final class DivideWCeremony {
                 BoundarySnapping.boundaries(in: text, granularity: .sentence))
             self.strongBoundaries = strong.intersection(boundaries)
                 .union([0, text.utf16.count].filter { boundaries.contains($0) })
-            self.flow = WCutPlacement.flowItems(text: text, boundaries: boundaries)
         }
 
         /// Parking (S4-22 ruling 2): at the very end ⇒ the whole take

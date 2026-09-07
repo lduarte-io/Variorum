@@ -478,6 +478,9 @@ struct TakesBoardView: View {
             }
         }
         .help(MergeArrangementCopy.bannerHelp(blocks: blocks))
+        // One enablement rule for the pair of merge doors (18f ladder R1-7):
+        // its neighbour "Merge Selected Blocks" disables below two picks.
+        .disabled(picked < 2)
     }
 
     private func styleOption(_ name: String, _ style: FanStyle) -> some View {

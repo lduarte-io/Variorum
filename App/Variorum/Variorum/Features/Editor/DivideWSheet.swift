@@ -158,7 +158,11 @@ struct DivideWSheet: View {
     private var facts: [String] {
         [
             state.takes.count == 1 ? "1 take" : "\(state.takes.count) takes",
-            state.arrangement == .perTake ? "choosing per take" : "cut where you clicked",
+            state.arrangement == .perTake
+                ? "choosing per take"
+                // A one-word seed take opens with NO cut (the board's road;
+                // 18f ladder R1-11) — the line must not claim one.
+                : (state.seedTake?.cut == nil ? "place the \u{2702} first" : "cut where you clicked"),
         ]
     }
 
@@ -494,6 +498,6 @@ struct CeremonyKeyMonitor: NSViewRepresentable {
 // deleted: `CutFlowEndSlotTests` is ledger row 3's evidence that the three
 // §4.4 links are SOUND, and evidence is not something a face rebuild gets to
 // throw away (the batch-2 brief's own instruction). `WCutPlacement.flowItems`
-// keeps being derived per take for the same reason — the drift pin
-// (`aDriftRefreshWithTheSameTokenCountRedrawsTheFlow`) reads `WTake.flow` as
-// its non-vacuity measure.
+// is the pure brain those pins call directly; the per-take copy the ceremony
+// used to derive at open (`WTake.flow`) left with the 18f ladder (R1-10) —
+// nothing in production read it.

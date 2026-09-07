@@ -1202,9 +1202,18 @@ final class EditorSurfaceController {
         var offeredArrangements: [MergeArrangement] {
             MergeArrangement.offered(blocks: max(2, blockIDs.count))
         }
+        /// The pair's canon join on the two SHOWN takes' stored texts — what
+        /// both preset roads will actually join with (18f ladder R1-12).
+        var canonJoin: MergeJoin {
+            guard let head = firstTakes.first(where: { $0.id == firstRenderedID })?.variant,
+                  let tail = secondTakes.first(where: { $0.id == secondRenderedID })?.variant
+            else { return .space }
+            return MergeJoin.canon(head: head.workingText, tail: tail.workingText)
+        }
         var arrangementSentence: String {
             MergeArrangementCopy.sentence(
-                arrangement, blocks: max(2, blockIDs.count), otherTakes: otherTakes)
+                arrangement, blocks: max(2, blockIDs.count), otherTakes: otherTakes,
+                join: canonJoin)
         }
 
         func take(_ id: String) -> MergeTake? {

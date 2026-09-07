@@ -452,6 +452,8 @@ struct BlocksWorkbenchView: View {
                 }
             }
             .help(MergeArrangementCopy.bannerHelp(blocks: max(3, model.picked.count)))
+            // One enablement rule for the pair of merge doors (18f ladder R1-7).
+            .disabled(model.picked.count < 2)
             // 18c batch 3 (her U-6): the newline repair over the picked
             // blocks — the bulk half of the note ▾ button.
             Button(tokens.chromeLabel(SplitAtNewlinesCopy.bulkDoor)) {

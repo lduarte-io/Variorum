@@ -154,7 +154,8 @@ struct MergeCeremonySheet: View {
                     model.setMergeArrangement(option)
                 }
                 .help(MergeArrangementCopy.sentence(
-                    option, blocks: blocks, otherTakes: state.otherTakes))
+                    option, blocks: blocks, otherTakes: state.otherTakes,
+                    join: state.canonJoin))
             }
         }
     }

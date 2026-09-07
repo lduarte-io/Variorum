@@ -2239,7 +2239,9 @@ extension TakesViewModel: DivideWCeremonyHost {
             if let landing = result.second.variants.first {
                 choreography.parkFocus(onVariant: landing.id)
             }
-            status = .receipt("Divided into takes — ⌥⌘Z undoes it.")
+            // The instant road's own zero-count receipt (18f ladder R1-9 —
+            // "Divided into takes" was the RETIRED sheet title, U-4).
+            status = .receipt(FannedDefaultsCopy.divided(kept: 0))
             return true
         } catch {
             status = .refusal(Self.message(for: error))
@@ -2264,7 +2266,7 @@ extension TakesViewModel: DivideWCeremonyHost {
             if let landing = result.second.variants.first {
                 choreography.parkFocus(onVariant: landing.id)
             }
-            status = .receipt("Divided into takes — ⌥⌘Z undoes it.")
+            status = .receipt(FannedDefaultsCopy.divided(kept: 0))
             return true
         } catch {
             status = .refusal(Self.message(for: error))

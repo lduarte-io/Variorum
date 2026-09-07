@@ -197,8 +197,12 @@ struct DivideCeremonyCostTests {
             let (window, ceremony, _) = try await mountCeremony(h)
             defer { window.orderOut(nil); window.close() }
             let take = try #require(ceremony.state?.takes.first)
+            // (18f ladder R1-10: the take no longer carries a flow; the pure
+            // brain derives one here for the retired renderer's pin.)
             let geometry = CutFlowGeometry.make(
-                flow: take.flow, strong: take.strongBoundaries,
+                flow: WCutPlacement.flowItems(
+                    text: take.variant.workingText, boundaries: take.boundaries),
+                strong: take.strongBoundaries,
                 width: 600, font: .systemFont(ofSize: 13))
 
             BoundaryScanCount.reset()
@@ -270,7 +274,13 @@ struct DivideCeremonyCostTests {
                 "the refresh kept the ceremony open on the same takes")
             #expect(refreshed.variant.workingText.contains("OMEGA"),
                     "non-vacuity: the drift refresh really re-read the store")
-            #expect(refreshed.flow.count == seed.flow.count,
+            // (18f ladder R1-10: the token count is measured by the pure
+            // brain, not read off the take — `WTake.flow` retired.)
+            @MainActor func tokens(_ take: DivideWCeremony.WTake) -> Int {
+                WCutPlacement.flowItems(
+                    text: take.variant.workingText, boundaries: take.boundaries).count
+            }
+            #expect(tokens(refreshed) == tokens(seed),
                     "non-vacuity: the token count is preserved — a count-keyed rebuild sees nothing")
             #expect(CutFlowRealization.rebuilds > before,
                     """
@@ -414,7 +424,7 @@ struct DivideCeremonyCostTests {
 
             let state = try #require(h.model.divideWCeremony)
             #expect(state.takes.count == 4)
-            let derived = !state.takes.contains { $0.boundaries.isEmpty || $0.flow.isEmpty }
+            let derived = !state.takes.contains { $0.boundaries.isEmpty || $0.strongBoundaries.isEmpty }
             #expect(derived, "every take's geometry inputs were derived once, at open")
             #expect(mainThreadScans <= 2,
                     """

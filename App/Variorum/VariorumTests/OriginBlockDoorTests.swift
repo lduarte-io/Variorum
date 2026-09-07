@@ -155,8 +155,11 @@ struct OriginBlockDoorTests {
             await board.model.ceremony.confirm()
 
             let status = try #require(board.model.statusMessage)
-            #expect(status == "Divided into takes — \u{2325}\u{2318}Z undoes it.",
-                    "the ratified completion, unchanged")
+            // 18f ladder R1-9: the receipt no longer echoes the retired sheet
+            // title ("Divide into takes", U-4); it is the divide receipt's
+            // own zero-count line.
+            #expect(status == FannedDefaultsCopy.divided(kept: 0),
+                    "the completion, in the receipt's one home")
         }
     }
 

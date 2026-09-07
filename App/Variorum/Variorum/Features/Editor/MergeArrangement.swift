@@ -84,12 +84,23 @@ nonisolated enum MergeArrangement: String, CaseIterable, Equatable, Sendable, Id
 nonisolated enum MergeArrangementCopy {
     /// `otherTakes` is what would come along BEYOND the shown ones: the sum
     /// over the run of (live active takes − 1).
+    /// `join` is the pair's CANON join (`MergeJoin.canon` on the two shown
+    /// takes' texts — 18f ladder R1-12: "join with a space" was the mockup's
+    /// sentence, and the operation answers `.nothing` when an edge already
+    /// carries whitespace). A run joins "in order"; the join word is the
+    /// pair's alone.
     static func sentence(
-        _ arrangement: MergeArrangement, blocks: Int, otherTakes: Int
+        _ arrangement: MergeArrangement, blocks: Int, otherTakes: Int,
+        join: MergeJoin = .space
     ) -> String {
+        let joined = switch join {
+        case .space: "join with a space"
+        case .newline: "join on a new line"
+        case .nothing: "join directly"
+        }
         let shown = blocks > 2
             ? "The \(blocks) takes you were looking at join in order."
-            : "The two takes you were looking at join with a space."
+            : "The two takes you were looking at \(joined)."
         // The verb follows the count (18f ladder R1-3): "1 other take comes".
         let takes = otherTakes == 1 ? "1 other take" : "\(otherTakes) other takes"
         let one = otherTakes == 1
