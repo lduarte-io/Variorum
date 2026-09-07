@@ -1115,13 +1115,17 @@ no lockstep, nothing in `CrossBlockEditPlanner`, the O(N²) family, `BlockRangeI
 regions, not the verdict, not the A7 carve) or the churn pair (the 13u fence), **zero core change**
 (`Sources/VariorumCore/` is untouched — `InsertPosition.before` already existed, so the START arm needed no
 addition), no change to the phone, no quick-entry-bar change, no Release build and no `/Applications`
-refresh. *(Filled in further at close.)*
+refresh. Also NOT done, decided and said rather than skipped: no hand-walk of the FANNED arm (pinned
+through the real key; the door is batch 1's own, walked three hours earlier), no canon file edited (the
+deltas are drafted at the end for the letter's closeout), no `notes/MobileSoul.md` edit, no KnownIssues
+row (the four residuals are recorded with owners), and no measurement of the structural flight's
+editing window beyond the walk's own typing.
 
 **Pieces**
 
 | # | Piece | State |
 |---|---|---|
-| 1 | `TypedReturn` — the pure decision (`App/Variorum/Shared/EditorBrain/TypedReturn.swift`) + the key intercept + the two doors | **IN-PROGRESS** — code landed and building; pure suite `TypedReturnTests` **13 / 1 green** |
+| 1 | `TypedReturn` — the pure decision (`App/Variorum/Shared/EditorBrain/TypedReturn.swift`) + the key intercept + the two doors | **DONE (79b334ab)** — pure suite `TypedReturnTests` **13 / 1 green** |
 | 2 | The real-key pins: the nine §5.1 pins, the retirements, the rebuilt tail pins | **DONE (253548fd)** — the four suites **41 / 4 green**; revert R1 run and recorded below (twelve red) |
 | 3 | The walk (dev-store Debug, `18c-2/` captures) + the copy that narrated the old model | **DONE (e2d1e699)** — thirteen captures listed below; the tutorial's "blocks & typing" card and the chip's ON copy corrected |
 | 4 | The two 13k list pins the ruling re-points | **DONE (0e4b61ca)** — `ListContinuationTests` + `NestedListDoorTests` **17 / 2 green** |
