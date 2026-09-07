@@ -946,3 +946,27 @@ clean before each and `git checkout --` restored it after):**
   pre-fix expression). `swift test --filter divideWAnchorsTheChosenOnTheDisplayedTakeWhenNamed`
   → **`Test run with 1 test in 1 suite failed after 0.027 seconds with 4 issues.`**
 - Restored: `swift test --filter StructuralDivideTests` → **29 tests / 1 suite passed**.
+
+**The red-on-old run (pieces 3 · 4 — REVERT A, on the committed tree at `c275ad53`+`9aa710fa`; named here
+before it was started, per the trap; restored with `git checkout --` on exactly the three door files):**
+
+- **Revert A** — all three doors' `ops.divideW(cuts:displayedVariantID:)` swapped back to
+  `ops.divideDuplicating(blockID, displayedVariantID:, cut:)` (`EditorSurfaceController.runKeepOnTopDivide`,
+  `TakesStructureController.runKeepOnTopDivide` — its result annotation with it —
+  `MobileStructural.divide(atSurfaceCaret:)`). Everything else, the receipt copy included, left as landed.
+- Mac: `FannedDefaultsTests` + `FannedDefaultsBoardTests` + `TakesDivideTests` →
+  **`Test run with 58 tests in 3 suites failed after 1.171 seconds with 11 issues.`** RED, by name:
+  `aFannedDivideKeepsTheTakesOnTheTopBlock` · `theOtherTakesRideWholeOntoTheTopBlockWithTheirLabels` ·
+  `theKeepOnTopDivideIsOneStructuralUndoEntry` · `aFiveTakeBlockKeepsFourTakesOnTheTopBlock` ·
+  `anEmptyOtherTakeStaysOnTheOriginalAndTheReceiptSaysSo` · `theBoardsDivideDoorKeepsTheTakesOnTop` ·
+  `theBoardsDivideFromANonChosenPaneStillShowsThatTake` · `TakesDivideTests.theForkIsReadFromTheStoreNotTheFrozenProjection`.
+- Phone: `MobileStructuralTests` → **`Test run with 18 tests in 1 suite failed after 0.553 seconds with 5 issues.`**
+  RED, by name: `divideOnAFannedBlockKeepsTheTakesOnTop` ·
+  `divideOnAFannedBlockWithUnmappableTakesStillDivides` · `divideOnAPeekedBlockCutsThePeekedTake` ·
+  `fannedDivideCarriesUnflushedTypingThroughTheFlush`.
+- Restored: Mac **58 / 3 green**, phone **18 / 1 green**.
+- **Stated honestly:** `theDivideReceiptTellsTheKeepOnTopTruth` stayed GREEN under revert A, because that
+  revert leaves the new copy in place and the count (`first.variants.count - 1`) is 2 either way. Its
+  red-on-old is the COPY's own change: the retired `divided(duplicated:)` always ended *"…rode whole onto
+  each. Extra copies are quick to delete"*, which the pin's `!spoken.contains("quick to delete")` rejects by
+  construction. Not a hollow pin — a pin whose subject is the sentence, not the shape.
