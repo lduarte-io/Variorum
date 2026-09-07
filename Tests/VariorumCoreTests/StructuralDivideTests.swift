@@ -509,6 +509,70 @@ struct StructuralDivideTests {
         }
     }
 
+    // MARK: The keep-on-top default's two demands on parking (18c batch 1, U-2)
+
+    /// **RED-ON-OLD.** A parked take is a WHOLE-TAKE RIDE, and a whole-take
+    /// ride keeps its name — §9's own rule for `divideDuplicating`'s
+    /// duplicates ("labels copied — a whole-take ride keeps its name, the
+    /// merge-carry precedent") and for `mergeCeremony`'s carries. `divideW`
+    /// minted every successor take label-less, which was invisible while
+    /// parking was a rare deliberate act inside the ceremony and becomes a
+    /// silent loss the moment keep-on-top parks EVERY other take at EVERY
+    /// fanned divide. The CUT HALVES stay unlabeled, exactly as before —
+    /// they are fresh texts, not rides.
+    @Test func divideWAParkedTakeKeepsItsName() throws {
+        try withOperations { ops, db in
+            let world = try WWorld(ops)
+            try ops.setTakeLabel(world.v2, label: "the spare")
+            let result = try ops.divideW(world.a.block.id, cuts: [
+                world.v1: 11,   // split
+                world.v2: 11,   // parked at its end — rides whole into B
+            ])
+
+            #expect(result.first.variants.map(\.label) == [nil, "the spare"],
+                    "the ride keeps its name; the cut half stays unlabeled")
+            #expect(result.second.variants.map(\.label) == [nil])
+            // Stored, not merely returned.
+            #expect(try db.fetchString(
+                "SELECT label FROM variant WHERE id = ?",
+                [result.first.variants[1].id]) == "the spare")
+            // A is preserved whole — the original take keeps its own name.
+            #expect(try db.fetchString(
+                "SELECT label FROM variant WHERE id = ?", [world.v2]) == "the spare")
+        }
+    }
+
+    /// **RED-ON-OLD.** Each side's chosen/default anchors on A's RENDERED
+    /// take, which is right for the ceremony (the sheet opens on what the
+    /// block shows) and wrong for a caller that can name the take the author
+    /// was actually in — the Takes board's caret sits in ANY take's pane,
+    /// and the phone's PEEK displays a take that is not the chosen one.
+    /// Composed into keep-on-top unchanged, B would render the OTHER take
+    /// whole while C rendered the divided take's tail. `displayedVariantID`
+    /// lets the caller say; nil keeps `context.rendered`
+    /// (`divideWParkedRenderedTakeStillAnchorsItsSide` holds that half).
+    @Test func divideWAnchorsTheChosenOnTheDisplayedTakeWhenNamed() throws {
+        try withOperations { ops, db in
+            let world = try WWorld(ops)
+            // Keep-on-top with the caret in V3: V3 splits, V1 (the rendered
+            // take) and V2 park at their ends and ride whole into B.
+            let result = try ops.divideW(
+                world.a.block.id,
+                cuts: [world.v1: 21, world.v2: 11, world.v3: 13],
+                displayedVariantID: world.v3)
+
+            #expect(result.first.variants.map(\.workingText)
+                == ["One alpha. One omega.", "Two intact.", "Three start."])
+            #expect(result.second.variants.map(\.workingText) == ["Three end."])
+            #expect(result.first.placement.chosenVariantId == result.first.variants[2].id,
+                    "B shows the first half of the take she divided")
+            #expect(result.first.block.defaultVariantId == result.first.variants[2].id)
+            #expect(result.second.placement.chosenVariantId == result.second.variants[0].id)
+            #expect(try db.read { try ops.renderedVariant($0, blockID: result.first.block.id) }
+                .workingText == "Three start.")
+        }
+    }
+
     @Test func divideWParkingCopiesVerbatimIncludingTrailingNewlines() throws {
         // Parking has no seam, so nothing trims — trailing newlines are
         // meaningful stored spacing (the 2026-07-12 ruling) and ride whole.

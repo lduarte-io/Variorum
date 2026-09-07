@@ -315,9 +315,29 @@ extension Operations {
     /// semantics: an EMPTY take's cut refuses (`invalidCut` — 0 and the
     /// end coincide, so which block gets the blank would be a guess), and
     /// every-take-parked-at-one-end refuses (`divideSideWouldBeEmpty` —
-    /// the other successor would violate I10 at birth).
+    /// the other successor would violate I10 at birth). **A parked take
+    /// KEEPS ITS NAME** (18c batch 1): a whole-take ride carries its label
+    /// exactly as `divideDuplicating`'s duplicates and `mergeCeremony`'s
+    /// carries do — the same rule, stated once for every ride in §9. The
+    /// CUT HALVES stay unlabeled and parentless, as they always have: they
+    /// are fresh texts, not rides.
+    ///
+    /// **`displayedVariantID` — who anchors each side's chosen/default**
+    /// (18c batch 1, the keep-on-top default; QUESTIONS #91, PROVISIONAL).
+    /// By default the anchor is A's RENDERED take, which is right for the
+    /// ceremony — its sheet opens on what the block shows. A caller that
+    /// knows the author was working in a DIFFERENT take (the Takes board's
+    /// caret sits in any take's pane; the phone's peek displays a take that
+    /// is not the chosen one) names it here, and each successor then shows
+    /// that take's contribution where it has one — which is what today's
+    /// fanned default (`divideDuplicating`) has always guaranteed, and what
+    /// keeps a keep-on-top divide from leaving B rendering another take
+    /// whole beside C's tail of the divided one. Nil, or an id that is not
+    /// among `cuts`, keeps `context.rendered` byte-for-byte.
     @discardableResult
-    public func divideW(_ blockID: String, cuts: [String: Int]) throws -> DivideWResult {
+    public func divideW(
+        _ blockID: String, cuts: [String: Int], displayedVariantID: String? = nil
+    ) throws -> DivideWResult {
         let result: DivideWResult = try database.write { db in
             let context = try placedContext(db, blockID: blockID)
             guard !cuts.isEmpty else {
@@ -342,23 +362,25 @@ extension Operations {
                     """,
                 arguments: [blockID])
             let marked = fan.filter { cuts.keys.contains($0.id) }
-            // Each side's (text, source) pairs in fan order. A split take
-            // contributes to both; a parked take (S4-22) to exactly one —
-            // its WHOLE text, verbatim (no seam, nothing trimmed).
-            var firstSide: [(text: String, sourceID: String)] = []
-            var secondSide: [(text: String, sourceID: String)] = []
+            // Each side's (text, source, label) triples in fan order. A
+            // split take contributes to both; a parked take (S4-22) to
+            // exactly one — its WHOLE text, verbatim (no seam, nothing
+            // trimmed) and under its own NAME, because a whole-take ride
+            // keeps its name. A cut half rides as a fresh unlabeled text.
+            var firstSide: [(text: String, sourceID: String, label: String?)] = []
+            var secondSide: [(text: String, sourceID: String, label: String?)] = []
             for variant in marked {
                 let cut = cuts[variant.id] ?? 0
                 let length = variant.workingText.utf16.count
                 if length > 0, cut == length {
-                    firstSide.append((variant.workingText, variant.id))
+                    firstSide.append((variant.workingText, variant.id, variant.label))
                 } else if length > 0, cut == 0 {
-                    secondSide.append((variant.workingText, variant.id))
+                    secondSide.append((variant.workingText, variant.id, variant.label))
                 } else if let pair = BoundarySnapping.seamTrimmedHalves(
                         variant.workingText, cutAtUTF16: cut),
                     !pair.first.isEmpty, !pair.second.isEmpty {
-                    firstSide.append((pair.first, variant.id))
-                    secondSide.append((pair.second, variant.id))
+                    firstSide.append((pair.first, variant.id, nil))
+                    secondSide.append((pair.second, variant.id, nil))
                 } else {
                     throw OperationError.invalidCut(variantID: variant.id, cut: cut)
                 }
@@ -400,18 +422,24 @@ extension Operations {
             let positionC = FractionalIndex.between(positionB, follower)
 
             // Defaults and chosen, PER SIDE (parking makes the two fans
-            // independently populated): the rendered variant's half/copy
-            // where it contributes to this successor, else the side's first
+            // independently populated): the ANCHOR take's half/copy where it
+            // contributes to this successor, else the side's first
             // contributing take with chosen left NULL — the standing
-            // rendered-unmarked rule, applied per side.
+            // rendered-unmarked rule, applied per side. The anchor is A's
+            // rendered take unless the caller named the take the author was
+            // actually in (`displayedVariantID`; an id outside `cuts` is not
+            // a contributor and so cannot anchor — it falls back).
+            let anchorID = displayedVariantID.flatMap { cuts.keys.contains($0) ? $0 : nil }
+                ?? context.rendered.id
             var successors: [FanHalf] = []
             for (side, position) in [(firstSide, positionB), (secondSide, positionC)] {
-                let renderedIndex = side.firstIndex { $0.sourceID == context.rendered.id }
+                let renderedIndex = side.firstIndex { $0.sourceID == anchorID }
                 let minted = try mintFanBlock(
                     db, texts: side.map(\.text), in: containerID,
                     position: position,
                     defaultIndex: renderedIndex ?? 0, chosenIndex: renderedIndex,
-                    presentation: context.block.presentation, now: now)
+                    presentation: context.block.presentation,
+                    labels: side.map(\.label), now: now)
                 let edge = try insertLineageEdge(
                     db, from: minted.block.id, to: blockID, originOp: "divide", now: now)
                 // Phase 13 (A2) travel: the W's copies land on BOTH

@@ -890,4 +890,48 @@ images 14–16 (pasted in chat) described there.
 
 ### R-1 · RECORD (the implementer writes here from its first commit)
 
-*(empty until the implementer's first commit)*
+**NOT DONE in this batch (the record's first line, per the brief's item 9):** no Return-key work (batch 2),
+no `splitBlockAtNewlines` (batch 3), no sheet/preset UI and no "ceremony"-string renaming (18f), nothing in
+`Sources/VariorumCore/Sync/`, no schema, no lockstep, nothing in `BlockRangeIndex` / `EditorTextView` / the
+13u fence's family, no Release build and no `/Applications` refresh. Row 28 stays RECORDED (it closes with
+batch 2). *(Filled in further at close.)*
+
+**THE ONE DEVIATION FROM THE BRIEF, declared up front (the brief's "zero core change is the design; if you
+believe the op must change, stop and record why before touching it"):** `Operations.divideW` is changed —
+ADDITIVELY, both arms defaulting to today's behaviour byte-for-byte — for two reasons found by reading the
+op against the composition, both of which would otherwise be SILENT LOSSES on the new default:
+
+1. **A parked take arrived NAMELESS.** `divideW` mints its successors through `mintFanBlock` with no
+   `labels:` argument (`Operations+Structural.swift:410–414` on the old tree), so every take is born with
+   `label = nil`. That was invisible while the ceremony was divideW's only caller and every parked take was
+   a rare deliberate act; under keep-on-top EVERY other take parks on B at EVERY fanned divide, so a take
+   she named ("the spare") would lose its name on the most ordinary gesture. The canon rule everywhere else
+   in §9 is explicit — `divideDuplicating`: *"labels copied — a whole-take ride keeps its name, the
+   merge-carry precedent"*; `mergeCeremony`'s carries do the same. divideW's paragraph is SILENT, which is
+   an omission at 13b Stage 4 (parking arrived; labels were never threaded), not a decision. The fix belongs
+   in the op because 18f's "all takes stay with the top block" preset parks takes through this same door.
+   **Split halves stay unlabeled, exactly as today** (they are fresh texts, the W's own rule).
+2. **The successors stopped showing the take she divided when it was not the block's rendered take.**
+   `divideW` anchors each side's chosen/default on `context.rendered` (A's chosen variant). On Write that IS
+   the displayed take, so nothing changes there; on the Takes board (the caret sits in ANY take's pane —
+   `seedTakeForDivide`) and on the phone (a PEEKED take is the displayed one), it is not. Composed
+   unchanged, keep-on-top would have made B render the OTHER take whole while C rendered the divided take's
+   second half — the note reading the paragraph whole and then its tail again. Today's default on both
+   platforms (`divideDuplicating`) guarantees "each successor shows your cut halves", and U-2 changes only
+   WHERE THE OTHER TAKES GO. So `divideW` gains `displayedVariantID: String? = nil`; nil keeps
+   `context.rendered` (the ceremony passes nil and is untouched). **This edge is also logged as
+   `notes/QUESTIONS.md` #91, PROVISIONAL**, because "what does the top block render when you divided a take
+   it was not showing" is product-flavoured and hers to settle.
+
+Both arms land in their own commit AHEAD of the code that uses them, each with a red-on-old core pin.
+
+**Pieces**
+
+| # | Piece | State |
+|---|---|---|
+| 1 | Core: `divideW` — parked takes keep their names; optional `displayedVariantID` anchor | **DONE** (hash in the next row's commit) — pins `divideWAParkedTakeKeepsItsName` · `divideWAnchorsTheChosenOnTheDisplayedTakeWhenNamed` in `Tests/VariorumCoreTests/StructuralDivideTests.swift`; divide-family core suites **69 / 5 green**; the red-on-old reverts run next |
+| 2 | Shared: `KeepOnTopDivide` (+ the `keepBelow` sibling) in `App/Variorum/Shared/` | NOT-STARTED |
+| 3 | Mac: both doors swapped, the receipt re-worded, `FannedDefaults.swift`'s header rewritten, the J4 pins rewritten | NOT-STARTED |
+| 4 | Phone: `MobileStructural`'s fanned path flipped, header updated, its pins re-pointed | NOT-STARTED |
+| 5 | The walk (dev-store Debug, `18c-1/` captures) | NOT-STARTED |
+| 6 | Close: the suites, the dispositions, QUESTIONS #91 | NOT-STARTED |
