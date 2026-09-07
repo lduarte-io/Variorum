@@ -105,6 +105,24 @@ struct TypedReturnTests {
             == .divideAtCaret(entryIndex: 0, blockID: "a"))
     }
 
+    /// **The sanity pass's observation on R1-5, pinned (red-on-old):** a
+    /// block that is nothing but whitespace — ⏎, two spaces, ⏎ — has no text
+    /// to stand before, so past its first offset the key makes the block
+    /// BELOW, exactly as before R1-5; the prefix rule alone had flipped every
+    /// caret of it to `.above`. Its first offset still pushes down (U-1's
+    /// letter for a block's start).
+    @Test func aWhitespaceOnlyBlockStillMakesTheBlockBelow() {
+        let index = BlockRangeIndex(slots: [slot("a", text: "   ")], tail: nil)
+        for caret in 1...3 {
+            #expect(act(index, caret: caret, texts: ["   "])
+                == .emptyBlock(edge: .below, entryIndex: 0, blockID: "a",
+                               closingEmptyTail: false))
+        }
+        #expect(act(index, caret: 0, texts: ["   "])
+            == .emptyBlock(edge: .above, entryIndex: 0, blockID: "a",
+                           closingEmptyTail: false))
+    }
+
     /// **18c ladder round 1, R1-4 (red-on-old; PROVISIONAL, QUESTIONS #94):**
     /// a caret INSIDE a list item is the list door's, so the key stays
     /// content and the list block stays whole — the shipped K5 shape, which

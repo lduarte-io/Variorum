@@ -124,6 +124,17 @@ nonisolated enum TypedReturn {
                 if entry.length == 0 { return .nothing }
                 let text = textAt(i) as NSString
                 let clamped = min(intra, text.length)
+                // A block that is NOTHING but whitespace has no text to
+                // stand before: past its first offset the key makes the
+                // block BELOW, as it did before R1-5 (the sanity pass's
+                // observation — the prefix rule below would otherwise push
+                // it down from every caret; reachable in two keystrokes:
+                // ⏎, two spaces, ⏎).
+                if clamped > 0, (text as String).allSatisfy(\.isWhitespace) {
+                    return .emptyBlock(
+                        edge: .below, entryIndex: i, blockID: entry.blockID,
+                        closingEmptyTail: false)
+                }
                 // "Before any text" (§5.1) — nothing but whitespace between
                 // the block's start and the caret; the mirror of the
                 // trailing rule below (18c ladder round 1, R1-5: a caret
