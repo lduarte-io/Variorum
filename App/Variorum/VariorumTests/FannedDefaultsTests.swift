@@ -2,19 +2,37 @@
 //  FannedDefaultsTests.swift
 //  VariorumTests
 //
-//  13j batch 4 (J4 / J4b) — **THE FLIPPED FANNED DEFAULTS.** Two author
-//  rulings, one suite: dividing a fanned block DUPLICATES (her Q-M2 shape,
-//  2026-08-03) and merging a fanned pair CARRIES ALL (2026-08-09); both
-//  ceremonies survive behind ⌥⌘⇧D / ⌥⌘⇧M, byte-unchanged.
+//  **THE FANNED DEFAULTS.** Dividing a fanned block KEEPS THE TAKES ON THE
+//  TOP BLOCK (her ruling U-2, 2026-09-06 — the use-report round's 18c batch
+//  1) and merging a fanned pair CARRIES ALL (2026-08-09); both ceremonies
+//  survive behind ⌥⌘⇧D / ⌥⌘⇧M, byte-unchanged.
+//
+//  **THE DIVIDE PINS' PREMISE CHANGED, and the old ones are named rather
+//  than deleted** (18c batch 1). These four held 13j J4's DUPLICATE shape
+//  (her Q-M2 ruling, 2026-08-03: every other take copied onto BOTH
+//  successors, "quick to delete"), which U-2 retires in her own words: *"I
+//  know I said that should be the default, but I honestly believe now that
+//  if you divide, the takes should automatically stay on the top block that
+//  you divided."*
+//
+//  - `aFannedDivideDuplicatesInsteadOfOpeningTheCeremony`
+//        → `aFannedDivideKeepsTheTakesOnTheTopBlock`
+//  - `theDuplicatedTakesLandOnBothSuccessorsWithTheirLabels`
+//        → `theOtherTakesRideWholeOntoTheTopBlockWithTheirLabels`
+//  - `theDuplicatingDivideIsOneStructuralUndoEntry`
+//        → `theKeepOnTopDivideIsOneStructuralUndoEntry`
+//  - `theDivideReceiptTellsTheDuplicateShapeTruth`
+//        → `theDivideReceiptTellsTheKeepOnTopTruth`
 //
 //  RED-ON-OLD (behavioral revert, run and recorded in the batch record):
 //
-//  - **Revert A** — `applyStructural`'s `.divideW` arm back to opening the
-//    ceremony unconditionally (`await openDivideWCeremony(...)`, no
-//    `ceremony` branch). RED: `aFannedDivideDuplicatesInsteadOfOpeningTheCeremony`,
-//    `theDuplicatedTakesLandOnBothSuccessorsWithTheirLabels`,
-//    `theDuplicatingDivideIsOneStructuralUndoEntry`,
-//    `theDivideReceiptTellsTheDuplicateShapeTruth`.
+//  - **Revert A** — both keep-on-top doors' `ops.divideW(cuts:)` swapped
+//    back to `ops.divideDuplicating(blockID, displayedVariantID:, cut:)`
+//    (`EditorSurfaceController.runKeepOnTopDivide`,
+//    `TakesStructureController.runKeepOnTopDivide`; the surrounding code is
+//    shape-compatible, so the swap is one call each). RED: every renamed
+//    pin above, `theCompositionParksEveryOtherTakeAtItsEnd`'s store half,
+//    `theBoardsDivideDoorKeepsTheTakesOnTop`.
 //  - **Revert B** — `.merge`'s arm back to `openMergeCeremony` on any fan.
 //    RED: `aFannedMergeCarriesEveryTakeOntoTheMergedBlock`,
 //    `theCarriedTakesKeepTheirTextAndLabels`,
@@ -67,12 +85,14 @@ struct FannedDefaultsTests {
         }
     }
 
-    // MARK: - J4: the divide default
+    // MARK: - U-2: the divide default keeps the takes on the top block
 
-    /// THE J4 pin (red-on-old, revert A): ⌘⇧D on a fanned block no longer
-    /// opens a sheet — it mints the duplicate shape, one gesture, no
-    /// ceremony state anywhere.
-    @Test func aFannedDivideDuplicatesInsteadOfOpeningTheCeremony() async throws {
+    /// THE U-2 pin (red-on-old, revert A) — the rewrite of J4's
+    /// `aFannedDivideDuplicatesInsteadOfOpeningTheCeremony`, whose premise
+    /// (every other take copied onto BOTH successors) her 2026-09-06 ruling
+    /// retires: ⌘⇧D on a fanned block still opens no sheet, and now the
+    /// other takes STAY ON THE FIRST BLOCK.
+    @Test func aFannedDivideKeepsTheTakesOnTheTopBlock() async throws {
         try await withEditor(seedBlocks: ["Alpha one. Alpha two."]) { h in
             let slot = try #require(try h.storeSlots().first)
             _ = try h.session.operations.branchVariant(slot.blockID, from: slot.variantID!)
@@ -86,17 +106,21 @@ struct FannedDefaultsTests {
             #expect(after.count == 2, "two blocks stand where one stood")
             #expect(after.allSatisfy { $0.blockID != slot.blockID },
                     "A is released preserved — both successors are fresh blocks")
-            // Each successor: its cut half FIRST (chosen), then the duplicate.
+            // The page reads exactly as it did, split in two: each successor
+            // renders its half of the take she was in.
             #expect(after[0].text == "Alpha one.")
             #expect(after[1].text == "Alpha two.")
-            for successor in after {
-                #expect(successor.activeVariantCount == 2,
-                        "the other take rode whole onto this successor")
-            }
+            #expect(after[0].activeVariantCount == 2,
+                    "the top block: her cut half plus the other take, whole")
+            #expect(after[1].activeVariantCount == 1,
+                    "the bottom block carries the second half ALONE — no copies")
         }
     }
 
-    @Test func theDuplicatedTakesLandOnBothSuccessorsWithTheirLabels() async throws {
+    /// The rewrite of `theDuplicatedTakesLandOnBothSuccessorsWithTheirLabels`.
+    /// A whole-take ride still keeps its name (the rule survived the flip);
+    /// what changed is that it rides ONCE, onto the top block.
+    @Test func theOtherTakesRideWholeOntoTheTopBlockWithTheirLabels() async throws {
         try await withEditor(seedBlocks: ["Alpha one. Alpha two."]) { h in
             let slot = try #require(try h.storeSlots().first)
             let other = try h.session.operations.branchVariant(
@@ -111,13 +135,17 @@ struct FannedDefaultsTests {
             await h.model.invokeGesture(.divideAtCursor)
 
             let after = try h.storeSlots()
-            for successor in after {
-                let takes = try fan(h, successor.blockID)
-                let duplicate = try #require(takes.first { $0.workingText == otherText })
-                #expect(duplicate.label == "the spare", "a whole-take ride keeps its name")
-                #expect(duplicate.id != other.id, "a COPY — the source take stays on A")
-                #expect(!duplicate.locked, "copies are never born locked")
-            }
+            let top = try fan(h, after[0].blockID)
+            #expect(top.map(\.workingText) == ["Alpha one.", otherText],
+                    "the cut half leads; the other take follows it whole")
+            let ride = try #require(top.first { $0.workingText == otherText })
+            #expect(ride.label == "the spare", "a whole-take ride keeps its name")
+            #expect(ride.id != other.id, "a COPY — the source take stays on A")
+            #expect(!ride.locked, "copies are never born locked")
+
+            let bottom = try fan(h, after[1].blockID)
+            #expect(bottom.map(\.workingText) == ["Alpha two."],
+                    "nothing followed the second half")
             // A itself is preserved WHOLE, off-stage, with its own takes.
             let sourceTakes = try fan(h, slot.blockID)
             #expect(sourceTakes.count == 2, "the original keeps every take it had")
@@ -125,7 +153,11 @@ struct FannedDefaultsTests {
         }
     }
 
-    @Test func theDuplicatingDivideIsOneStructuralUndoEntry() async throws {
+    /// The rewrite of `theDuplicatingDivideIsOneStructuralUndoEntry`. The
+    /// entry is still ONE and still reads "Divide" — the composition wraps
+    /// `divideW` (whose own label names the ceremony) in a one-leg compound
+    /// so the Edit menu keeps its word.
+    @Test func theKeepOnTopDivideIsOneStructuralUndoEntry() async throws {
         try await withEditor(seedBlocks: ["Alpha one. Alpha two."]) { h in
             let slot = try #require(try h.storeSlots().first)
             _ = try h.session.operations.branchVariant(slot.blockID, from: slot.variantID!)
@@ -141,11 +173,23 @@ struct FannedDefaultsTests {
             #expect(back.count == 1, "one ⌥⌘Z puts the block back")
             #expect(back[0].blockID == slot.blockID, "and it is the ORIGINAL block")
             #expect(back[0].activeVariantCount == 2, "with its fan intact")
+
+            // …and the exact-row redo puts the successors back as they were
+            // (the 13c rule: `register(redo:)` is required, and a compound
+            // is redoable only when every leg is).
+            _ = try h.session.undoStack.redo(with: h.session.operations)
+            let again = try h.storeSlots()
+            #expect(again.count == 2)
+            #expect(again.map(\.text) == ["Alpha one.", "Alpha two."])
+            #expect(again.map(\.activeVariantCount) == [2, 1])
         }
     }
 
     /// The receipt may only claim what the operation did (the J8 doctrine).
-    @Test func theDivideReceiptTellsTheDuplicateShapeTruth() async throws {
+    /// The rewrite of `theDivideReceiptTellsTheDuplicateShapeTruth`: the old
+    /// sentence promised copies on each side and named her "quick to delete"
+    /// consequence, which after U-2 would be a lie.
+    @Test func theDivideReceiptTellsTheKeepOnTopTruth() async throws {
         try await withEditor(seedBlocks: ["Alpha one. Alpha two."]) { h in
             let slot = try #require(try h.storeSlots().first)
             _ = try h.session.operations.branchVariant(slot.blockID, from: slot.variantID!)
@@ -156,9 +200,71 @@ struct FannedDefaultsTests {
             await h.model.invokeGesture(.divideAtCursor)
 
             let spoken = try #require(h.model.statusMessage)
-            #expect(spoken == FannedDefaultsCopy.divided(duplicated: 2))
-            #expect(spoken.contains("2 other takes"), "it counts what actually rode")
-            #expect(spoken.contains("quick to delete"), "her own words for the consequence")
+            #expect(spoken == FannedDefaultsCopy.divided(kept: 2))
+            #expect(spoken.contains("2 other takes stayed on the first"),
+                    "it counts what actually rode, and says where")
+            #expect(!spoken.contains("quick to delete"),
+                    "the duplicate shape's consequence is gone with the shape")
+        }
+    }
+
+    /// The matrix's wide end: five takes, four of them riding — and the
+    /// top block's fan is A's OWN fan order with the divided take swapped
+    /// for its first half (the W's letter: contributors are collected in
+    /// fan order). The rendered take is still hers wherever it sits.
+    @Test func aFiveTakeBlockKeepsFourTakesOnTheTopBlock() async throws {
+        try await withEditor(seedBlocks: ["Alpha one. Alpha two."]) { h in
+            let slot = try #require(try h.storeSlots().first)
+            let chosen = try #require(slot.variantID)
+            for i in 1...4 {
+                let take = try h.session.operations.branchVariant(slot.blockID, from: chosen)
+                let text = "Take number \(i) entirely."
+                try h.session.operations.autosave(
+                    take.id, text: text, charDelta: text.count)
+            }
+            let sourceFan = try fan(h, slot.blockID)
+            #expect(sourceFan.count == 5)
+            try h.reload()
+
+            caret(h, entry: 0, offset: 11)
+            await h.model.invokeGesture(.divideAtCursor)
+
+            let after = try h.storeSlots()
+            #expect(after.map(\.activeVariantCount) == [5, 1])
+            #expect(after.map(\.text) == ["Alpha one.", "Alpha two."],
+                    "the page reads as it did, split in two")
+            #expect(try fan(h, after[0].blockID).map(\.workingText)
+                == sourceFan.map { $0.id == chosen ? "Alpha one." : $0.workingText },
+                    "A's own fan order, the divided take swapped for its first half")
+            #expect(try fan(h, after[1].blockID).map(\.workingText) == ["Alpha two."])
+            #expect(h.model.statusMessage == FannedDefaultsCopy.divided(kept: 4))
+        }
+    }
+
+    /// An EMPTY other take has no legal cut at all (0 and its end coincide,
+    /// and `divideW` refuses that as `invalidCut`), so it cannot park: it
+    /// stays on the released original with the archived takes — and the
+    /// receipt SAYS SO rather than letting a take vanish from her page
+    /// without a word.
+    @Test func anEmptyOtherTakeStaysOnTheOriginalAndTheReceiptSaysSo() async throws {
+        try await withEditor(seedBlocks: ["Alpha one. Alpha two."]) { h in
+            let slot = try #require(try h.storeSlots().first)
+            let blank = try h.session.operations.branchVariant(
+                slot.blockID, from: slot.variantID!)
+            try h.session.operations.autosave(blank.id, text: "", charDelta: -21)
+            try h.reload()
+
+            caret(h, entry: 0, offset: 11)
+            await h.model.invokeGesture(.divideAtCursor)
+
+            let after = try h.storeSlots()
+            #expect(after.count == 2, "the divide still happened")
+            #expect(after.map(\.activeVariantCount) == [1, 1],
+                    "the blank take rode nowhere")
+            #expect(try fan(h, slot.blockID).contains { $0.id == blank.id },
+                    "it stayed on the original, preserved whole")
+            #expect(h.model.statusMessage
+                == FannedDefaultsCopy.divided(kept: 0, stayedBehind: 1))
         }
     }
 
@@ -183,13 +289,19 @@ struct FannedDefaultsTests {
     /// A LOCKED take does not refuse the fanned default: the op COPIES
     /// texts and never edits a buffer (the W's own rule, and the ceremony's
     /// reason for allowing locks). The plain in-place divide still refuses a
-    /// lock, which is why this is worth stating rather than assuming.
-    @Test func aLockedTakeDoesNotRefuseTheDuplicatingDivide() async throws {
+    /// lock, which is why this is worth stating rather than assuming. The
+    /// rewrite of `aLockedTakeDoesNotRefuseTheDuplicatingDivide` — with the
+    /// other half stated too, since under keep-on-top a locked OTHER take is
+    /// the one that has to PARK.
+    @Test func aLockedTakeDoesNotRefuseTheKeepOnTopDivide() async throws {
         try await withEditor(seedBlocks: ["Alpha one. Alpha two."]) { h in
             let slot = try #require(try h.storeSlots().first)
             let chosen = try #require(slot.variantID)
-            _ = try h.session.operations.branchVariant(slot.blockID, from: chosen)
+            let other = try h.session.operations.branchVariant(slot.blockID, from: chosen)
+            try h.session.operations.autosave(
+                other.id, text: "A locked spare take.", charDelta: 20)
             try h.session.operations.lockVariant(chosen)
+            try h.session.operations.lockVariant(other.id)
             try h.reload()
 
             caret(h, entry: 0, offset: 11)
@@ -198,8 +310,91 @@ struct FannedDefaultsTests {
             let after = try h.storeSlots()
             #expect(after.count == 2, "the copy road does not care about the lock")
             #expect(after.map(\.text) == ["Alpha one.", "Alpha two."])
+            #expect(try fan(h, after[0].blockID).map(\.workingText)
+                == ["Alpha one.", "A locked spare take."],
+                    "a locked take parks like any other — its buffer is copied, never edited")
             #expect(after.allSatisfy { !$0.variantLocked },
                     "and the halves are not born locked")
+            #expect(try fan(h, after[0].blockID).allSatisfy { !$0.locked },
+                    "nor is the parked copy")
+        }
+    }
+
+    /// A is released PRESERVED WHOLE, so re-pointing at it is the way back
+    /// that does not go through undo (AppSpec §9's `placeBlock`, the W
+    /// resolution's own reversibility).
+    @Test func theReleasedOriginalIsStillPlaceable() async throws {
+        try await withEditor(seedBlocks: ["Alpha one. Alpha two."]) { h in
+            let slot = try #require(try h.storeSlots().first)
+            _ = try h.session.operations.branchVariant(slot.blockID, from: slot.variantID!)
+            try h.reload()
+
+            caret(h, entry: 0, offset: 11)
+            await h.model.invokeGesture(.divideAtCursor)
+
+            let post = try #require(h.model.postID)
+            _ = try h.session.operations.placeBlock(slot.blockID, in: post, at: .end)
+            let after = try h.storeSlots()
+            #expect(after.count == 3)
+            #expect(after.contains { $0.blockID == slot.blockID },
+                    "the original stands again, with its whole fan")
+            #expect(try fan(h, slot.blockID).count == 2)
+        }
+    }
+
+    // MARK: - The keep-on-top composition, pure
+
+    @Test func theCompositionParksEveryOtherTakeAtItsEnd() async throws {
+        try await withEditor(seedBlocks: ["Alpha one. Alpha two."]) { h in
+            let slot = try #require(try h.storeSlots().first)
+            let chosen = try #require(slot.variantID)
+            let other = try h.session.operations.branchVariant(slot.blockID, from: chosen)
+            try h.session.operations.autosave(
+                other.id, text: "Twelve chars", charDelta: 12)
+            let live = try fan(h, slot.blockID)
+
+            let composition = try #require(KeepOnTopDivide.compose(
+                displayedID: chosen, cut: 11, fan: live))
+            #expect(composition.cuts == [chosen: 11, other.id: 12],
+                    "the displayed take's snapped cut; every other take at its own end")
+            #expect(composition.displayedID == chosen)
+            #expect(composition.parked == 1)
+            #expect(composition.unparkable.isEmpty)
+
+            // The mirror preset (U-5's second): they follow the BOTTOM block.
+            let below = try #require(KeepOnTopDivide.compose(
+                keepBelow: chosen, cut: 11, fan: live))
+            #expect(below.cuts == [chosen: 11, other.id: 0])
+        }
+    }
+
+    @Test func theCompositionLeavesAnEmptyTakeUnparkedAndCountsIt() async throws {
+        try await withEditor(seedBlocks: ["Alpha one. Alpha two."]) { h in
+            let slot = try #require(try h.storeSlots().first)
+            let chosen = try #require(slot.variantID)
+            let blank = try h.session.operations.branchVariant(slot.blockID, from: chosen)
+            try h.session.operations.autosave(blank.id, text: "", charDelta: -21)
+            let live = try fan(h, slot.blockID)
+
+            let composition = try #require(KeepOnTopDivide.compose(
+                displayedID: chosen, cut: 11, fan: live))
+            #expect(composition.cuts == [chosen: 11], "the blank take is not marked")
+            #expect(composition.unparkable == [blank.id])
+            #expect(composition.parked == 0)
+        }
+    }
+
+    @Test func theCompositionRefusesWhenTheDisplayedTakeIsGone() async throws {
+        try await withEditor(seedBlocks: ["Alpha one. Alpha two."]) { h in
+            let slot = try #require(try h.storeSlots().first)
+            _ = try h.session.operations.branchVariant(
+                slot.blockID, from: slot.variantID!)
+            let live = try fan(h, slot.blockID)
+
+            #expect(KeepOnTopDivide.compose(
+                displayedID: "vanished", cut: 11, fan: live) == nil,
+                    "the F-3 guard: a fallback would divide a take she was never in")
+            #expect(KeepOnTopDivide.compose(displayedID: nil, cut: 11, fan: live) == nil)
         }
     }
 
@@ -629,8 +824,9 @@ struct FannedDefaultsBoardTests {
     /// The board's divide door flips with Write's — 13d Batch 3 made divide
     /// native here, and a native door that kept the OLD default would be
     /// exactly the two-answers-for-one-gesture class the registry exists to
-    /// kill.
-    @Test func theBoardsDivideDoorDuplicatesByDefault() async throws {
+    /// kill. (The rewrite of `theBoardsDivideDoorDuplicatesByDefault`, whose
+    /// premise U-2 retires.)
+    @Test func theBoardsDivideDoorKeepsTheTakesOnTop() async throws {
         try await withBoard(seedBlocks: ["Alpha one. Alpha two."]) { board in
             let slot = try #require(try board.slots().first)
             let chosen = try #require(slot.variantID)
@@ -645,10 +841,40 @@ struct FannedDefaultsBoardTests {
             let after = try board.slots()
             #expect(after.count == 2)
             #expect(after.map(\.text) == ["Alpha one.", "Alpha two."])
-            #expect(after.allSatisfy { $0.activeVariantCount == 2 },
-                    "the other take rode whole onto both successors")
+            #expect(after.map(\.activeVariantCount) == [2, 1],
+                    "the other take rode whole onto the TOP block, and only there")
             #expect(board.session.commandRouter.pendingWriteIntent == nil,
                     "and it happened HERE — no mode switch")
+        }
+    }
+
+    /// **The board's own reason for `displayedVariantID`** (QUESTIONS #91):
+    /// the caret here sits in ANY take's pane, so the take she divided is
+    /// often not the block's chosen one. Both successors must still SHOW the
+    /// take she was in — which is what the shipped default has always done —
+    /// or the top block would render the other take whole beside the bottom
+    /// block's tail of this one.
+    @Test func theBoardsDivideFromANonChosenPaneStillShowsThatTake() async throws {
+        try await withBoard(seedBlocks: ["Alpha one. Alpha two."]) { board in
+            let slot = try #require(try board.slots().first)
+            let chosen = try #require(slot.variantID)
+            let spare = try board.session.operations.branchVariant(
+                slot.blockID, from: chosen)
+            try board.session.operations.autosave(
+                spare.id, text: "Spare one. Spare two.", charDelta: 21)
+            try board.reload()
+
+            board.focus(blockID: slot.blockID, variantID: spare.id, caret: 11)
+            await board.model.divideFocused()
+            try board.reload()
+
+            let after = try board.slots()
+            #expect(after.map(\.text) == ["Spare one.", "Spare two."],
+                    "the page shows the halves of the take she divided")
+            #expect(try board.fan(after[0].blockID).map(\.workingText)
+                == ["Alpha one. Alpha two.", "Spare one."],
+                    "the chosen take rode whole onto the top block, behind her half")
+            #expect(after.map(\.activeVariantCount) == [2, 1])
         }
     }
 

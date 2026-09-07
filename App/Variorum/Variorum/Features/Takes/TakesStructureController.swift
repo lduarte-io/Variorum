@@ -281,13 +281,14 @@ final class TakesStructureController {
             model.structuralInFlight = false
         case .divideW(_, let blockID, let activeCut):
             guard ceremony else {
-                // **13j J4 — the flipped default.** `prepareDivide` has
-                // already flushed and read the live fan from the STORE, and
-                // `seedTakeID` is verified to be in it, so the duplicating
-                // divide has everything it needs and no second read.
-                await runDuplicatingDivide(
+                // **THE DEFAULT — KEEP ON TOP (her ruling U-2), superseding
+                // 13j J4.** `prepareDivide` has already flushed and read the
+                // live ACTIVE fan from the STORE, and `seedTakeID` is
+                // verified to be in it, so the composition has everything it
+                // needs and there is no second read.
+                await runKeepOnTopDivide(
                     blockID: blockID, displayedVariantID: prepared.seedTakeID,
-                    activeCut: activeCut)
+                    fan: prepared.liveActiveFan, activeCut: activeCut)
                 model.structuralInFlight = false
                 return
             }
@@ -312,10 +313,14 @@ final class TakesStructureController {
     }
 
     /// Flush, read the fan from the STORE, and plan. Returns nil having
-    /// SPOKEN when it cannot get that far.
+    /// SPOKEN when it cannot get that far. The live ACTIVE fan rides back
+    /// with the plan because the keep-on-top composition needs exactly the
+    /// set this function already read — a second read would be a second
+    /// truth (and the fan could move between them).
     private func prepareDivide(
         slot: Queries.RenderedBlock, seed: (variantID: String, caret: Int)
-    ) async -> (plan: StructuralGesturePlanner.Plan, seedTakeID: String)? {
+    ) async -> (plan: StructuralGesturePlanner.Plan, seedTakeID: String,
+                liveActiveFan: [Variant])? {
         // Flush FIRST: the op validates against the store, and the plan
         // snaps against what she SEES — after the flush those are the same
         // text. A refused flush keeps its text pending (Phase 7 MAJOR 1)
@@ -352,7 +357,7 @@ final class TakesStructureController {
             .divideAtCursor,
             selection: NSRange(location: seed.caret, length: 0),
             world: divideWorld(slot: slot, take: seedTake, arity: liveActive.count))
-        return (plan, seedTake.id)
+        return (plan, seedTake.id, liveActive)
     }
 
     /// The take the caret is in, and where the caret is within it. The
@@ -415,13 +420,20 @@ final class TakesStructureController {
         }
     }
 
-    /// **13j J4's road on this board** — the duplicate-shape divide (her
-    /// Q-M2 ruling). The seed take's halves lead B and C; every other active
-    /// take is duplicated whole onto both; A is released preserved. Same op,
-    /// same receipt words and same ring rule as Write's road (the successor
-    /// leads), because two doors on one act share the copy or they drift.
-    private func runDuplicatingDivide(
-        blockID: String, displayedVariantID: String, activeCut: Int?
+    /// **U-2's road on this board** — the keep-on-top divide (2026-09-06,
+    /// superseding 13j J4's duplicate shape here too). The seed take's
+    /// halves lead B and C; every other active take rides WHOLE onto B; A is
+    /// released preserved. Same composition, same receipt words and same
+    /// ring rule as Write's road (the second successor leads), because two
+    /// doors on one act share the brain and the copy or they drift.
+    ///
+    /// The seed take here is the take the CARET is in, which on this board
+    /// is often not the block's chosen one — so the composition's
+    /// `displayedID` rides into `divideW` as the anchor for both successors'
+    /// chosen/default (QUESTIONS #91). Without it B would render the chosen
+    /// take whole beside C's tail of the one she actually divided.
+    private func runKeepOnTopDivide(
+        blockID: String, displayedVariantID: String, fan: [Variant], activeCut: Int?
     ) async {
         guard let cut = activeCut else {
             // A one-word seed take has no interior cut — Write's answer,
@@ -430,18 +442,35 @@ final class TakesStructureController {
                 + " Divide with Ceremony (⌥⌘⇧D) can send a whole take to one side.")
             return
         }
+        guard let composition = KeepOnTopDivide.compose(
+            displayedID: displayedVariantID, cut: cut, fan: fan)
+        else {
+            // `prepareDivide` already verified the seed against this same
+            // live fan, so this is belt-and-braces — and it speaks Write's
+            // F-3 sentence rather than inventing a second one.
+            model.speak(FannedDefaultsCopy.takesChangedDivide)
+            return
+        }
         model.setStatus(nil)
         do {
-            let result: Operations.DivideDuplicatingResult
+            let stack = model.session.undoStack
+            let result: Operations.DivideWResult
                 = try await model.session.runner.run { ops in
-                try ops.divideDuplicating(
-                    blockID, displayedVariantID: displayedVariantID, cut: cut)
+                // One leg, one entry — and the entry keeps reading "Divide"
+                // (divideW's own label names the ceremony). Write's road
+                // does exactly the same.
+                try stack.withCompound(label: "Divide", operations: ops) {
+                    try ops.divideW(
+                        blockID, cuts: composition.cuts,
+                        displayedVariantID: composition.displayedID)
+                }
             }
             // The ring goes to the SECOND successor's leading take — Write's
             // caret rule for this shape, in this board's vocabulary.
             model.choreography.parkFocus(onVariant: result.second.variants[0].id)
             model.setStatus(FannedDefaultsCopy.divided(
-                duplicated: max(0, result.first.variants.count - 1)))
+                kept: max(0, result.first.variants.count - 1),
+                stayedBehind: composition.unparkable.count))
         } catch {
             model.setRefusal(TakesViewModel.message(for: error))
         }

@@ -397,21 +397,22 @@ struct TakesDivideTests {
 
             await board.model.divideFocused()
 
-            // 13j J4 — A JUSTIFIED EDIT that STRENGTHENS this pin. Its claim
-            // is unchanged and is the one that matters: the fork is read from
+            // 13j J4 — A JUSTIFIED EDIT that STRENGTHENS this pin, re-aimed
+            // at 18c batch 1's keep-on-top shape (U-2). Its claim is
+            // unchanged and is the one that matters: the fork is read from
             // the STORE, never from the frozen projection. Before the flip
             // the evidence was "a sheet opened"; now the fanned road ACTS, so
-            // the evidence is the act itself — the DUPLICATE shape (two fresh
-            // blocks, each carrying the arrived take) rather than the plain
+            // the evidence is the act itself — A RELEASED and the arrived
+            // take riding whole onto the top block, rather than the plain
             // divide the stale fan would have produced (which would have kept
             // this block's identity and left it holding one take).
             #expect(board.model.divideWCeremony == nil, "the default road acts, it does not ask")
             let after = try board.slots()
             #expect(after.count == 2)
             #expect(after.allSatisfy { $0.blockID != slot.blockID },
-                    "A was released whole — the duplicating divide, not the plain one")
-            #expect(after.allSatisfy { $0.activeVariantCount == 2 },
-                    "the take the projection could not see rode onto BOTH successors")
+                    "A was released whole — the fanned road, not the plain one")
+            #expect(after.map(\.activeVariantCount) == [2, 1],
+                    "the take the projection could not see rode onto the TOP block")
         }
     }
 

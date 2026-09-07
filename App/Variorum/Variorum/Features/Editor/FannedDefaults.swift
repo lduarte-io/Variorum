@@ -2,31 +2,43 @@
 //  FannedDefaults.swift
 //  Variorum (Mac)
 //
-//  13j batch 4 (J4 / J4b) — **THE FANNED DEFAULTS.** Two author rulings,
-//  one shape: dividing or merging a block that carries a fan no longer
-//  opens a ceremony by default. It DUPLICATES.
+//  **THE FANNED DEFAULTS.** Dividing or merging a block that carries a fan
+//  does not open a ceremony by default; both ceremonies survive as
+//  deliberate doors.
 //
-//  - **Divide (Q-M2, her 2026-08-03 gate ruling; the Mac half is 13j's):**
-//    the displayed take is cut into B and C and every OTHER active take is
-//    duplicated WHOLE onto both — "those takes are quick to delete… this is
-//    quicker than dividing, realizing that you lost something you want, and
-//    going on some kind of hunt for it." The core op
-//    (`Operations.divideDuplicating`) shipped at mobile parity Stage A and
-//    has been DORMANT on the Mac since; this batch is its routing.
-//  - **Merge (her 2026-08-09 ruling at the parity chain's close):** the Mac
-//    adopts the CARRY-ALL merge — ONE pairing of the two displayed takes
-//    plus every other active take carried whole — composed from the Mac's
-//    own `Operations.mergeCeremony` (S4-23), ZERO core change. The phone's
-//    parity-C5 implementation is the reference shape.
+//  - **Divide — KEEP ON TOP (her ruling U-2, 2026-09-06; the use-report
+//    round's 18c batch 1).** Her words: *"I know I said that should be the
+//    default, but I honestly believe now that if you divide, the takes
+//    should automatically stay on the top block that you divided."* Her
+//    follow-up the next night: *"the phone divide should update to match
+//    this default divide behavior."* The displayed take is cut into B and C
+//    and every OTHER active take rides WHOLE onto B — composed from
+//    `Operations.divideW`'s own parking rule (S4-22) by `KeepOnTopDivide`
+//    in `Shared/`, so both platforms and all three Mac doors share one
+//    brain. **This SUPERSEDES the 13j J4 duplicate default** (Q-M2, her
+//    2026-08-03 gate ruling: the other takes were duplicated onto BOTH
+//    successors, "those takes are quick to delete"), on the Mac AND on the
+//    phone. `Operations.divideDuplicating` stays in core, unchanged, as
+//    18f's third preset ("copy the takes to both"); U-5's second preset
+//    (they follow the bottom block) is `KeepOnTopDivide.compose(keepBelow:)`.
+//  - **Merge (her 2026-08-09 ruling at the parity chain's close) — J4b's
+//    half, UNTOUCHED by U-2:** the Mac adopts the CARRY-ALL merge — ONE
+//    pairing of the two displayed takes plus every other active take
+//    carried whole — composed from the Mac's own `Operations.mergeCeremony`
+//    (S4-23), ZERO core change. The phone's parity-C5 implementation is the
+//    reference shape.
 //
 //  Both ceremonies survive as DELIBERATE doors (⌥⌘⇧D / ⌥⌘⇧M — her round-4
 //  ruling: "never only a buried menu item"), byte-unchanged behind them.
 //
-//  This file is the pure half: the carry-all composition and every word the
-//  two roads speak. No AppKit, no store, no view model — so the composition
-//  is unit-testable and the copy has ONE home (the `BlockSelectionCopy` /
-//  `TrayPath` pattern), which is what keeps two surfaces from wording one
-//  act two ways.
+//  This file is the pure half: the carry-all MERGE composition and every
+//  word the two roads speak. No AppKit, no store, no view model — so the
+//  composition is unit-testable and the copy has ONE home (the
+//  `BlockSelectionCopy` / `TrayPath` pattern), which is what keeps two
+//  surfaces from wording one act two ways. The divide's composition lives
+//  one level up in `Shared/KeepOnTopDivide.swift` because the phone calls it
+//  too; its receipt still speaks from here, since only the Mac speaks one
+//  (the phone's divide reports an Undo action and no sentence — M20).
 //
 
 import Foundation
@@ -157,18 +169,33 @@ nonisolated enum CarryAllMerge {
 nonisolated enum FannedDefaultsCopy {
     // MARK: Receipts
 
-    /// The duplicate-shape divide's receipt. `duplicated` is read from the
-    /// op's OWN result inside the flight (the 13e batch-3 rule for receipts
-    /// that count rows), never re-derived from a projection beside it.
+    /// The keep-on-top divide's receipt (U-2, 2026-09-06 — it SUPERSEDES
+    /// J4's duplicate-shape sentence, which promised copies on both sides).
+    /// `kept` is read from the op's OWN result inside the flight (the 13e
+    /// batch-3 rule for receipts that count rows), never re-derived from a
+    /// projection beside it; `stayedBehind` comes from the composition,
+    /// which is the only thing that knows a take could not park.
     ///
-    /// Her accepted consequence is stated calmly and in her own words: a
-    /// duplicated take chosen on both successors reads twice, and the extras
-    /// are "quick to delete".
-    static func divided(duplicated: Int) -> String {
-        guard duplicated > 0 else { return "Block divided — ⌥⌘Z undoes it." }
-        let takes = duplicated == 1 ? "1 other take" : "\(duplicated) other takes"
-        return "Block divided — the take you were in split across both blocks, and "
-            + "\(takes) rode whole onto each. Extra copies are quick to delete; ⌥⌘Z undoes."
+    /// An EMPTY take has no legal cut (0 and its end coincide), so it stays
+    /// on the original block in lineage with the archived takes. That is
+    /// rare and never silent: a take that stopped following the block she
+    /// divided is exactly what the J8 copy-truth doctrine says a receipt
+    /// must be able to name.
+    static func divided(kept: Int, stayedBehind: Int = 0) -> String {
+        guard kept > 0 || stayedBehind > 0 else { return "Block divided — ⌥⌘Z undoes it." }
+        var clauses: [String] = []
+        if kept > 0 {
+            clauses.append(kept == 1
+                ? "1 other take stayed on the first"
+                : "\(kept) other takes stayed on the first")
+        }
+        if stayedBehind > 0 {
+            clauses.append(stayedBehind == 1
+                ? "1 empty take stayed with the original block"
+                : "\(stayedBehind) empty takes stayed with the original block")
+        }
+        return "Block divided — the take you were in split across both blocks; "
+            + clauses.joined(separator: ", and ") + ". ⌥⌘Z undoes."
     }
 
     /// The carry-all merge's receipt. `carried` counts what LANDED on the

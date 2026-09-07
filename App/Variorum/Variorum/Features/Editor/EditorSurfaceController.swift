@@ -210,10 +210,11 @@ final class EditorSurfaceController {
                 // 13j J4: this is now the ⌥⌘⇧D door's road, not ⌘⇧D's.
                 await openDivideWCeremony(blockID: blockID, activeCut: activeCut)
             } else {
-                // 13j J4 — **THE FLIPPED DEFAULT** (her Q-M2 ruling): the
+                // **THE DEFAULT — KEEP ON TOP** (her ruling U-2,
+                // 2026-09-06, superseding 13j J4's duplicate shape): the
                 // displayed take is cut across B and C and every other take
-                // duplicates whole onto both.
-                await runDuplicatingDivide(
+                // rides WHOLE onto the top block.
+                await runKeepOnTopDivide(
                     entryIndex: i, blockID: blockID, activeCut: activeCut)
             }
 
@@ -413,11 +414,20 @@ final class EditorSurfaceController {
         }
     }
 
-    /// **J4's road: the duplicate-shape divide.** The displayed take's halves
-    /// seed B and C; every other active take is duplicated WHOLE onto both;
-    /// A is released preserved. The operation does all of that
-    /// (`divideDuplicating`, shipped at mobile parity Stage A and dormant on
-    /// the Mac until now) — this is the routing, the receipt and the guards.
+    /// **U-2's road: the keep-on-top divide** (2026-09-06 — it SUPERSEDES
+    /// J4's duplicate-shape road here). The displayed take's halves seed B
+    /// and C; every OTHER active take rides WHOLE onto B — the top block,
+    /// the one she divided; A is released preserved. `Operations.divideW`
+    /// does all of that through S4-22's parking rule, and
+    /// `KeepOnTopDivide.compose` is the one arrangement of its arguments
+    /// that says so — this is the routing, the receipt and the guards.
+    ///
+    /// The undo entry is wrapped in a `withCompound(label: "Divide")` for
+    /// ONE reason: divideW's own entry is labelled "Divide into Variants"
+    /// (the ceremony's name, correct while the ceremony was its only
+    /// caller), and the Edit menu must keep reading **Undo Divide** for the
+    /// everyday gesture. One leg in, one entry out — the compound's inverse
+    /// and its exact-row redo are the op's own.
     ///
     /// **The fork is read from the STORE, never from the projection** (the
     /// 13d ruled discipline; `openMergeCeremony`'s own words: "the threshold
@@ -425,7 +435,7 @@ final class EditorSurfaceController {
     /// ever did for the ceremony: the ceremony's stale-projection fallback
     /// merely showed a sheet, while acting on a stale "fanned" would RELEASE
     /// A instead of keeping it — a different outcome, not a different view.
-    private func runDuplicatingDivide(
+    private func runKeepOnTopDivide(
         entryIndex i: Int, blockID: String, activeCut: Int?
     ) async {
         guard let cut = activeCut else {
@@ -472,10 +482,13 @@ final class EditorSurfaceController {
             await runPlainDivide(entryIndex: i, blockID: blockID, cut: cut)
             return
         }
-        guard let displayedID, fan.contains(where: { $0.id == displayedID }) else {
-            // The F-3 guard (13d cold review): the take the caret was in has
-            // vanished from the live fan. A fallback would divide a take she
-            // was never in, at an offset from the one that died.
+        guard let composition = KeepOnTopDivide.compose(
+            displayedID: displayedID, cut: cut, fan: fan)
+        else {
+            // The F-3 guard (13d cold review), now the composition's own:
+            // the take the caret was in has vanished from the live fan. A
+            // fallback would divide a take she was never in, at an offset
+            // from the one that died.
             model.showStatus(FannedDefaultsCopy.takesChangedDivide)
             return
         }
@@ -483,9 +496,13 @@ final class EditorSurfaceController {
             visiblySnap(NSRange(
                 location: model.index.range(ofEntryAt: j).location + cut, length: 0))
         }
+        let stack = model.session.undoStack
         _ = await runStructural { ops in
-            let result = try ops.divideDuplicating(
-                blockID, displayedVariantID: displayedID, cut: cut)
+            let result = try stack.withCompound(label: "Divide", operations: ops) {
+                try ops.divideW(
+                    blockID, cuts: composition.cuts,
+                    displayedVariantID: composition.displayedID)
+            }
             // seam nil: A vanishes and TWO fresh blocks stand where it stood,
             // which no seam vocabulary describes — the ceremonial full
             // re-render, exactly as the W confirm takes.
@@ -494,9 +511,11 @@ final class EditorSurfaceController {
                 seam: nil,
                 // The count comes from the op's OWN result inside the flight
                 // (13e batch 3's receipt rule), never from a projection read
-                // taken beside the write.
+                // taken beside the write: B's fan is the split first half
+                // plus every take that rode whole.
                 note: FannedDefaultsCopy.divided(
-                    duplicated: max(0, result.first.variants.count - 1)))
+                    kept: max(0, result.first.variants.count - 1),
+                    stayedBehind: composition.unparkable.count))
         }
     }
 
