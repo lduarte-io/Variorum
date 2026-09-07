@@ -1165,7 +1165,7 @@ final class EditorSurfaceController {
         /// two arrangements and never the pairing surface, so `firstTakes` /
         /// `secondTakes` / `pairings` stay empty on that arm and the pair's
         /// whole state machine below is untouched by it.
-        var blockIDs: [String] = []
+        var blockIDs: [String]
         // (`entryIndices` — the run's OPEN-time entry indices, kept for the
         // confirm roads' caret arithmetic — left this state at the 18f ladder,
         // R1-2: a sheet sits open while the surface re-tiles, so every road
@@ -1173,17 +1173,17 @@ final class EditorSurfaceController {
         /// Live active takes across the run BEYOND the shown one per block —
         /// what "bring every take" would bring. Read at open; the sentence's
         /// only input.
-        var otherTakes: Int = 0
+        var otherTakes: Int
         /// **The run's blocks, for the sheet to SHOW** (18f batch 2, mockup
         /// figure B's amendment: over a run *"the columns become one list of
         /// the run's blocks with their shown takes marked"*). DISPLAY ONLY and
         /// additive — every confirm road reads the store afresh and none of
         /// them looks at this; it exists so the run's sheet can show what it
         /// is about to join instead of only counting it.
-        var runBlocks: [MergeRunBlock] = []
+        var runBlocks: [MergeRunBlock]
         /// Which of U-5/U-16's options the row is on. `bringEveryTake` on
         /// open — her J4b default, so ⏎ still reproduces the everyday merge.
-        var arrangement: MergeArrangement = .bringEveryTake
+        var arrangement: MergeArrangement
         /// The rendered take of each side at open time — the default
         /// pre-pairing's parts (S4-23 ruling 4: ⏎ = today's exact outcome
         /// when no session join memory is set; a remembered join seeds the
@@ -1195,6 +1195,36 @@ final class EditorSurfaceController {
         /// Ordered — sheet order IS the operation's pairing order (the
         /// chosen rule's fallback reads it).
         var pairings: [MergePairingDraft]
+
+        /// **EVERY field, NO defaults — deliberately** (18f ladder round 2,
+        /// R2-1, the implementer's rider adopted). Batch 1 added `blockIDs`,
+        /// `otherTakes`, `runBlocks` and `arrangement` with property defaults
+        /// and updated two of the three construction sites; Swift's memberwise
+        /// init let the third (`refreshMergeCeremony`) omit all four SILENTLY
+        /// — no diagnostic — so a drift refresh under "Pair by hand…" flipped
+        /// the sheet to "Bring every take", emptied the run's ids (and with
+        /// them R1-2's presence guard) and said "There are no other takes to
+        /// bring" about a fanned pair. With this initializer a construction
+        /// site that forgets a field fails to compile instead.
+        init(
+            firstBlockID: String, secondBlockID: String, blockIDs: [String],
+            otherTakes: Int, runBlocks: [MergeRunBlock], arrangement: MergeArrangement,
+            firstRenderedID: String?, secondRenderedID: String?,
+            firstTakes: [MergeTake], secondTakes: [MergeTake], pairings: [MergePairingDraft]
+        ) {
+            self.firstBlockID = firstBlockID
+            self.secondBlockID = secondBlockID
+            self.blockIDs = blockIDs
+            self.otherTakes = otherTakes
+            self.runBlocks = runBlocks
+            self.arrangement = arrangement
+            self.firstRenderedID = firstRenderedID
+            self.secondRenderedID = secondRenderedID
+            self.firstTakes = firstTakes
+            self.secondTakes = secondTakes
+            self.pairings = pairings
+        }
+
         var id: String { blockIDs.joined(separator: "+") }
 
         /// U-16's fork: three or more blocks get two choices and no pairing.
@@ -1306,6 +1336,7 @@ final class EditorSurfaceController {
                 firstBlockID: leadingID, secondBlockID: trailingID,
                 blockIDs: [leadingID, trailingID],
                 otherTakes: max(0, firstFan.count - 1) + max(0, secondFan.count - 1),
+                runBlocks: [],
                 arrangement: .bringEveryTake,
                 firstRenderedID: firstRenderedID, secondRenderedID: secondRenderedID,
                 firstTakes: firstFan.map { MergeTake(variant: $0) },
@@ -1472,7 +1503,12 @@ final class EditorSurfaceController {
             // time; a block no longer on the surface dismisses the sheet in
             // the refresh road's own voice, rows untouched — the same answer
             // `refreshMergeCeremony` gives when a side dissolves.
-            guard state.blockIDs.allSatisfy({ entryIndex(of: $0) != nil }) else {
+            // Non-vacuous by construction (18f ladder round 2, R2-1): an
+            // EMPTY `blockIDs` must refuse too, never pass — the refreshed
+            // state used to arrive here with none and this guard said yes.
+            guard !state.blockIDs.isEmpty,
+                  state.blockIDs.allSatisfy({ entryIndex(of: $0) != nil })
+            else {
                 mergeCeremony = nil
                 model.showStatus(FannedDefaultsCopy.blocksChangedMerge)
                 return
@@ -1585,8 +1621,16 @@ final class EditorSurfaceController {
             return
         }
         let carried = Set(state.carriedIDs)
+        // The row she chose, the run's ids and the sheet's identity SURVIVE
+        // the refresh (18f ladder round 2, R2-1 — the divide refresh's own
+        // rule, `DivideWCeremony.refresh`, applied here at last); the count
+        // is re-read off the fresh fans, since that is what changed.
         var next = MergeCeremonyState(
             firstBlockID: state.firstBlockID, secondBlockID: state.secondBlockID,
+            blockIDs: state.blockIDs,
+            otherTakes: max(0, firstFan.count - 1) + max(0, secondFan.count - 1),
+            runBlocks: state.runBlocks,
+            arrangement: state.arrangement,
             firstRenderedID: state.firstRenderedID,
             secondRenderedID: state.secondRenderedID,
             firstTakes: firstFan.map { MergeTake(variant: $0, carried: carried.contains($0.id)) },

@@ -324,6 +324,7 @@ struct MergeCeremonySheetTests {
             // S4-23 claim below is unchanged and is reached by the option that
             // opens the surface it describes.
             h.model.setMergeArrangement(.pairByHand)
+            let before = try #require(h.model.mergeCeremony)
 
             // The world moves while the sheet is open.
             try await h.session.runner.run { ops in
@@ -338,11 +339,76 @@ struct MergeCeremonySheetTests {
             #expect(state.take(spare.id)?.variant.workingText == "Moved under the sheet.")
             #expect(state.pairings.count == 1, "pairings survive by identity")
             #expect(h.model.statusMessage?.contains("changed while the sheet was open") == true)
+            // **18f ladder round 2, R2-1 (fable-reviewer) — RED ON `5c848a79`:**
+            // the refresh rebuilt the state through the memberwise init and
+            // dropped the row she chose, the run's ids and the count — so the
+            // sheet flipped to "Bring every take", said "There are no other
+            // takes to bring" about a fanned pair, and re-presented under a
+            // new identity. The refresh carries all four now.
+            #expect(state.arrangement == .pairByHand, "the refresh keeps the row she chose")
+            #expect(state.blockIDs == [slots[0].blockID, slots[1].blockID], "…and the run's ids")
+            #expect(state.otherTakes == 1, "…and the count (\(state.otherTakes))")
+            #expect(state.id == before.id, "…and the sheet's identity — a new id re-presents it")
 
             // Confirming the refreshed sheet lands.
             await h.model.confirmMergeCeremony()
             let landed = try h.storeSlots()
             #expect(landed.count == 1)
+        }
+    }
+
+    /// **18f ladder round 2, R2-1 (fable-reviewer) — RED ON `5c848a79`, the
+    /// behavioural half.** A drift refresh under "Pair by hand…" used to flip
+    /// the state to "Bring every take" (the memberwise init's default), so the
+    /// second ⏎ ran the CARRY-ALL where she had placed her own pairing — the
+    /// pin above could not see it because its one pairing IS the carry-all's
+    /// pair. Here her pairing is the head with the SPARE: on the fixed tree
+    /// the merged block carries exactly that one joined take and the rendered
+    /// tail stays in lineage; on old the carry-all minted head + tail joined
+    /// WITH the spare carried (two takes).
+    @Test func aDriftRefreshUnderPairByHandKeepsHerPairingsOnHerRoad() async throws {
+        try await withEditor(seedBlocks: ["Alpha one.", "Beta two."]) { h in
+            let slots = try h.storeSlots()
+            let tail = try #require(slots[1].variantID)
+            let spare = try h.session.operations.branchVariant(slots[1].blockID, from: tail)
+            try h.session.operations.autosave(spare.id, text: "Spare take.", charDelta: 0)
+            try h.reload()
+
+            selectAcross(h, 0, 1)
+            await h.model.invokeGesture(.mergeBlocks, ceremony: true)
+            let opened = try #require(h.model.mergeCeremony)
+            let head = try #require(opened.firstRenderedID)
+            h.model.setMergeArrangement(.pairByHand)
+            // HER pairing: the head with the spare, not the rendered tail.
+            for pairing in opened.pairings { h.model.removeMergePairing(pairing.id) }
+            h.model.pairMergeTakes(firstID: head, secondID: spare.id)
+            #expect(h.model.mergeCeremony?.pairings.map(\.secondVariantID) == [spare.id],
+                    "non-vacuity: the pairing is hers, not the pre-pair")
+
+            // The world moves: the rendered TAIL's text changes under the sheet.
+            try await h.session.runner.run { ops in
+                try ops.autosave(tail, text: "Beta two, moved.", charDelta: 0)
+            }
+            await h.model.confirmMergeCeremony()
+
+            let refreshed = try #require(h.model.mergeCeremony, "refreshed, not joined")
+            #expect(try h.storeSlots().count == 2, "nothing was joined from a drifted snapshot")
+            #expect(refreshed.arrangement == .pairByHand, "the refresh keeps the row she chose")
+            #expect(refreshed.pairings.map(\.secondVariantID) == [spare.id],
+                    "her pairing survives the refresh by identity")
+
+            // Confirming the refreshed sheet runs HER road.
+            await h.model.confirmMergeCeremony()
+            let landed = try h.storeSlots()
+            #expect(landed.count == 1, "the pair merged")
+            let fan = try await h.database.read { db in
+                try Queries.blockFan(db, blockID: landed[0].blockID)
+                    .filter { $0.deletedAt == nil && $0.status == .active }
+            }
+            #expect(fan.map(\.workingText) == ["Alpha one. Spare take."],
+                    "ONE joined take, hers — on old the carry-all's two: \(fan.map(\.workingText))")
+            #expect(h.model.statusMessage?.contains("1 take stays with the released blocks") == true,
+                    "the rendered tail stayed in lineage, and the sheet said so: \(h.model.statusMessage ?? "nil")")
         }
     }
 }
