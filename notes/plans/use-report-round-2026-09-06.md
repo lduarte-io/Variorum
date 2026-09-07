@@ -90,6 +90,18 @@ and feeling great after the various rounds of changes."*
   defects and handle the coding"* · *"I want to use a classic /architect-phase style of running this, I
   don't want the orchestrator's context window to become bloated and I don't need the orchestrator to
   verify everything"* · on the snippets editor: *"only opus to fix this item."*
+- **U-16 — MERGING SEVERAL BLOCKS: TWO CHOICES, NO CEREMONY (2026-09-07, at the mockup approval).** *"if
+  you're merging several notes together you should be given the choice of bringing every take or only the
+  currently shown ones, but i don't want a super complex ceremony for merging multiple blocks together."*
+  → A merge over a run of THREE OR MORE blocks offers exactly two options — Bring every take · Only the
+  shown ones — and never the pairing surface (§5.2). The mockups (figures A–D) are APPROVED with this one
+  amendment: *"I like your mockups, I approve of them."*
+- **U-17 — THE BOOK'S RIGHT GUTTER RETIRES ENTIRELY** once the bar moves into the sidebar box (her answer to
+  the open question; the unfocused rows' facts line goes with it — state 2 of the box carries the facts).
+- **U-18 — FADED MARKS ARE FAINT, NEVER PAPER-COLORED.** *"i think the fade will look weird if they're 100%
+  the color of the paper because the spacing will look odd, so maybe just render them faintly, at a grey or
+  lower opacity or something."* → outside the caret's span the markers render in the marker color at a low
+  opacity (a faint grey), inside it at full; never invisible.
 - **U-15 — THE PUNCHLIST** (rows 6–33 of the ledger, her words there) and the follow-up's small ones:
   the tag field collapses after use (*"if there's a tag already applied this new tag template shouldn't
   just sit here by default, it should collapse after you click out of it"*); the divider's white top
@@ -396,6 +408,13 @@ this section is what it does.
   never the default position. `DivideWCeremony.State` (`:177–215`) gains the preset + seeds all marked.
 - **The merge sheet's row:** **Bring every take** (selected — the carry-all default) · **Only the two
   shown** (plain pair; the others stay in lineage) · **Pair by hand…** (the shipped S4-23 pairing UI).
+  **Over a run of THREE OR MORE blocks (U-16):** the same door shows TWO options only — **Bring every
+  take** (the shipped carry-all chain, `CarryAllMerge` link by link) · **Only the shown ones** (the plain
+  `merge` chain, every other take left with its released block in lineage) — and no "Pair by hand"; the
+  standing `mergeCeremonyIsPairwise` refusal (`FannedDefaultsCopy`) retires in favor of this two-option
+  sheet. The sentence under the row counts what comes along. Pins: the run's two roads produce the
+  carry-all chain's rows and the plain chain's rows respectively; the pairing surface never mounts for
+  a run.
 - **The end slot (row 3):** §4.4's pins in order; fix the link that reds.
 - **The phone's parity row (write it into `notes/MobileSoul.md` at the close):** the phone's fanned divide
   offers the three presets as a bottom sheet of three plain rows in the same words, with "Choose per
@@ -535,10 +554,11 @@ one she saw. Pins: the pool/landing pin (§4.5); the door's presence. **Review: 
      the chip, as the vertical bar composes them today); the footer: *"112w block · 3,214w note"* (the
      `WordTargetFace`) and `?`. The block ▾ and note ▾ menus are TODAY's menus unchanged
      (`CommitBar.blockMenu`, `noteMenu`); every row is the same act the bar performs now.
-- **What retires.** The right gutter's BAR (`EditorView(barPlacement: .side)`'s `CommitBar(axis: .vertical)`,
-  `EditorView.swift:113–125`) and the paged mode's floating card. **Her call (§7 Q2):** whether the
-  unfocused rows' details line in the gutter (Act 10 row 13's calm facts) retires too — the architect's
-  recommendation is YES (state 2 carries the facts now; the prose recentres on the full width) — or stays.
+- **What retires (U-17, settled).** The right gutter ENTIRELY — the bar (`EditorView(barPlacement: .side)`'s
+  `CommitBar(axis: .vertical)`, `EditorView.swift:113–125`), the unfocused rows' details line (Act 10 row
+  13's facts — state 2 of the box carries them now), and the paged mode's floating card. The prose
+  recentres on the full width; `BookView.outlineGutterSpacing` / `outlineFocusedRowWidth` and the
+  `.side` placement go with it (dead code removed, not parked).
 - **Architecture (the P39 refinement, CLAUDE.md):** the sidebar never constructs or holds the book's
   `EditorViewModel`. `RootView` composes: the book publishes `selectedPostID` / `liveFocusedPostID` (its
   own model already has them) and the live editor registers with the router as every detail does
@@ -584,15 +604,17 @@ Pins: a memory read back after re-init; the width-mismatch refusal; a shorter me
 
 ### 5.5 — 18e · markdown marks faded (U-11)
 
-**Her lean, verbatim:** *"I think fading them is a good start I suppose."* **Ruled first form: FADE.**
+**Her lean, verbatim:** *"I think fading them is a good start I suppose."* **Ruled first form: FADE — and
+FAINT, never paper-colored (U-18):** outside the caret's span the markers render in the marker color at a
+low opacity (start at ~35 %; the implementer tunes by eye in both voices and both appearances, and
+records the number), inside the span at full. Her reason: an invisible mark leaves spacing that "will look
+odd"; a faint one reads as a deliberate whisper.
 
 **What the two forms are (her question, answered here so the record holds it):** today
 `MarkdownFaceCore.restyle` colors every span's markers in the muted marker color on the storage
 (`:183–194`) — the `**`, `_`, `~~`, backticks and link brackets are always visible. **FADE:** the markers
 render in the paper color (invisible against the page, or at a whisper of alpha) everywhere EXCEPT the span
-the caret is in or the selection touches, where they show in the marker color — you see `**bold**` only
-while you are inside it. Nothing moves: the marks still take their width, so a faded `**` leaves a small
-gap of paper where it sits; caret math, identity ranges, the widening rule are all untouched; TK2-safe;
+the caret is in or the selection touches, where they show in the marker color — you see `**bold**` at full strength only while you are inside it. Nothing moves: the marks still take their width, faint but present (U-18 — never paper-colored); caret math, identity ranges, the widening rule are all untouched; TK2-safe;
 cost ∝ the edit plus two lines on a caret move. **COLLAPSE:** the markers take NO width outside the caret's
 span (a zero-advance font or negative kern), so `**bold**` reads as `bold` with no gap — and the width
 comes BACK when the caret enters the span, so the text after it shifts right by the marks' width as you
@@ -682,13 +704,16 @@ setting round-trips; the read tiers' pins unchanged; the phone's suite untouched
 
 ## 7. Her remaining questions (bundle for one sitting; everything else in §1 is settled)
 
+*(Settled 2026-09-07 at the mockup approval: the gutter retires entirely — U-17; the fade is faint — U-18;
+the N-way merge's two choices — U-16.)*
+
 1. **The versions refusal on a blockless note (row 17):** mint the empty first block and link at once
    (recommended), or a legible refusal with a door?
-2. **The book's right gutter:** with the bar gone to the sidebar box, does the unfocused rows' facts line
-   retire too (recommended — state 2 of the box carries the facts) or stay beside the prose?
-3. **Return's empty block (18c batch 2):** the first build leaves an abandoned empty block as an empty
-   paragraph (recommended); the quiet-removal follow-on if it annoys you. And the k−1 typed-blank-line rule
-   narrowing to ⇧⏎ — ratify.
+2. **Return's empty block (18c batch 2):** the first build leaves an abandoned empty block as an empty
+   paragraph (recommended); the quiet-removal follow-on if it annoys you.
+3. **Blank lines by Shift-Return:** with Return making blocks, a double Return no longer types a blank
+   line inside a paragraph; ⇧⏎ does (the k−1 typed-blank-line rule narrows to ⇧⏎; pasted text unchanged) —
+   ratify.
 4. **"Make every newline a block" and lists:** a single newline between two list lines is NOT a break
    (lists stay whole) — ratify.
 5. **The ring setting's reach:** every live pane (Takes, Lenses, Compare, Canvas, Read-edit) — yes?
