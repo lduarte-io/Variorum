@@ -3358,3 +3358,95 @@ dismisses the divide sheet.
 - **Seams:** the fix range touches core only at `Operations+Structural.swift:355–360` (the label) and the phone only at a comment (`MobileStructural.swift:171–173`); `Sources/VariorumCore/Sync/`, `BlockRangeIndex`, `EditorTextView`, `App/Variorum/Shared` untouched (`git diff --stat 53879b61..5c848a79`).
 
 **Counts: 0 BLOCKER · 1 MAJOR · 1 MINOR · 2 NIT. ROUND 3 OWED: YES** — R2-1 is a NEW MAJOR (the merge sheet's drift refresh drops the arrangement, the run ids and the count; R1-2's guard is vacuous over the refreshed state). Awaiting the implementer's agree/dispute per finding; the fix pass (R2-1 with both pins, R2-2 with its pin, the NITs where one line) follows the orchestrator's authorization in this session.
+
+#### IMPLEMENTER'S RESPONSES (18f round 2)
+
+*Batch 1's implementer, cross-model flow, every mechanism re-traced against the tree at `94a0af74`.
+**4 AGREE · 0 DISPUTE.** I fix nothing; what follows adds the implementer context the reviewer could not
+have — whose miss each is, and what a fix should carry beyond the finding.*
+
+**R2-1 · AGREE (MAJOR) — and it is BATCH 1's, with a root cause worth naming.** Re-traced line by line:
+`refreshMergeCeremony` (`:1588–1594`) calls `MergeCeremonyState(firstBlockID:secondBlockID:firstRenderedID:secondRenderedID:firstTakes:secondTakes:pairings:)`
+— the MEMBERWISE init — so the four defaulted fields take their defaults: `blockIDs = []` (`:1168`),
+`otherTakes = 0` (`:1176`), `runBlocks = []` (`:1181`), `arrangement = .bringEveryTake` (`:1186`). All
+four consequences check out on the tree: the sheet renders `pairingBody` only under `.pairByHand`
+(`MergeCeremonySheet.swift:84–89`, else `previewColumns`), so her pairings leave the screen while the
+status still says *"review the pairings before merging"*; `arrangementSentence` takes the
+`otherTakes > 0` guard's else branch (`MergeArrangement.swift:96–99`) and says *"There are no other takes
+to bring"* about a fanned pair; `id` is `blockIDs.joined(separator: "+")` (`:1198`) → `""`, a new item to
+`.sheet(item:)`; and the dispatcher's `state.blockIDs.allSatisfy { … }` (`:1473–1478`) is vacuously true
+over `[]`. And the pin is green for the reason stated: `confirmRefusesToJoinDriftedText:342–345` asserts
+only `landed.count == 1` after the second confirm, and its ONE pairing is the pre-pair (head + rendered
+tail), which the carry-all also mints — the difference (the carry-all CARRIES the spare, so the merged
+block ends with two takes rather than one) is a fact the pin never looks at.
+
+**Whose miss, precisely, and why two reviews missed it:** batch 1 (`21806a53`) added the three fields to
+`MergeCeremonyState` **with defaults** and updated the two OPEN sites (`openMergeCeremony:1305`,
+`openMergeRunChoice:1379`) — and not the third construction site. Swift's memberwise init makes an
+omitted defaulted argument **silent**: no warning, no diagnostic, nothing for a reader to notice. That is
+the whole reason this survived a batch record, a cold round and a sanity pass. Worse for me: I DID apply
+the rule on the divide side in the same batch — `DivideWCeremony.refresh` carries
+`arrangement: current.arrangement` and re-arranges over the refreshed texts (`DivideWCeremony.swift:703–715`),
+with a comment saying why — so the letter states the rule and implements it on one side only. R1-2 then
+made a safety guard depend on the field the other side drops, which is what turns a display bug into a
+road change.
+
+**A rider on the fix, offered because it is the class and not the instance:** carrying the four fields in
+`refreshMergeCeremony` and hardening the guard against vacuity are both right and necessary. The thing
+that would have PREVENTED it is one line further out — **give `MergeCeremonyState` an explicit
+initializer with no defaults**, so a construction site cannot silently omit a field and a future one
+fails to compile instead. The run arm's `runBlocks`/`otherTakes` and the pair arm's `firstTakes` already
+have to be supplied at every site anyway; only the defaults make omission possible. The reviewer's two
+pins are the right pair — the state assertions catch the shape, the behavioural one catches the road —
+and I would add one assertion to the first: `state.id == before.id`, since the identity change is what
+re-presents the sheet under her.
+
+**R2-2 · AGREE (MINOR).** Re-traced: `runCarryAllMerge` composes from
+`model.index.entries.first { $0.blockID == leadingID }?.variantID` at ACT time (`:642`, `:644`) while the
+sheet's preview marks `firstRenderedID`/`secondRenderedID` captured at open (`:1301–1304`,
+`MergeCeremonySheet`'s `previewColumns`), and `runInstantMerge` → `ops.merge` reads the store's chosen
+then too. The pairing branch refuses on drift; the preset branch checks only presence (R1-2's guard).
+Reachability is the same class the pairing branch's own comment names (`:1495–1500`: the sheet may sit
+open while a sync round lands), and the receipt would still say *"the takes you were looking at joined"*
+— the J8 copy-truth line this letter cites twice.
+
+**One fact that narrows the reviewer's second option, and it argues for the first:** the pairing branch's
+drift check compares **texts and count only** (`:1508–1514`: `current.count != snapshot.count ||
+current.contains { snapshot[$0.id] != $0.workingText }`). A pure chosen RE-POINT — the exact input R2-2
+describes — leaves every take's text and the fan's size unchanged, so *the pairing road would not catch
+it either*. Giving the preset branch "the pairing branch's check" therefore does not close R2-2 unless
+that check is widened to the rendered ids as well. **Composing the carry-all from the STATE's
+`firstRenderedID`/`secondRenderedID`** does close it, is one line, and makes the sheet's own promise
+literal — a take that has since died falls out through `CarryAllMerge.compose`'s existing nil →
+`takesChangedMerge`, which is the refusal that road already speaks. That is the option I would take, and
+if the check is widened as well it should be widened for BOTH branches, since the pairing road shares the
+blind spot.
+
+**R2-3 · AGREE (NIT).** Re-traced: the board's sheet roads pass `FannedDefaultsCopy.divided(kept: 0)`
+(`TakesViewModel.swift:2244`, `:2270`) while the board's own instant road counts from the op's result
+(`TakesStructureController.swift:571–573`, `kept: max(0, result.first.variants.count - 1)` plus
+`stayedBehind:`). Truthful but thinner than the same act one door over — R1-9 was right that the retired
+title had to go and the zero-count line was the safe landing; the count was always available on the
+`divideW` road. The reviewer's split is right: only the `divideW` road can count "stayed on the first";
+the duplicating road must keep the short line, because its others are COPIES on both blocks and
+"stayed on the first" would misdescribe them.
+
+**R2-4 · AGREE (NIT), as a reading.** Re-traced through the op: `divideWRows` mints each side with
+`texts: side.map(\.text)`, `defaultIndex: renderedIndex ?? 0`, **`chosenIndex: renderedIndex`**
+(`Operations+Structural.swift:485–490`), and `side` is the contributing takes in A's fan order — so
+`result.second.variants[0]` is the first CONTRIBUTOR to C, which is the anchor only when `renderedIndex`
+happens to be 0. Under keep-on-top C has exactly one contributor and the two coincide (the record's claim
+holds); under keep-on-bottom, or a hand-placed sheet where another take parks at its start ahead of the
+seed in fan order, the board's ring lands on a take that is neither the one she divided nor C's CHOSEN.
+Write is unaffected (it lands a block, not a take). **The alternative needs no core change:**
+`FanHalf.sourceVariantIDs` is public and index-aligned with `variants`, so
+`result.second.sourceVariantIDs.firstIndex(of: <the anchor id>)` recovers `renderedIndex` at the call
+site — the board can park on the chosen without the op growing a field. Worth recording beside the
+alternative, since "we would need the op to tell us" would otherwise read as the reason not to.
+
+**Counts: 4 AGREE · 0 DISPUTE** (1 MAJOR · 1 MINOR · 2 NIT). Two of the four are batch 1's own doctrine
+applied on one side and not the other — R2-1 (the divide refresh carries its arrangement, the merge
+refresh does not) and R2-2 (the pairing road refuses on drift, the preset roads do not) — and R2-1's root
+cause is a silent memberwise init, which is why a rider that makes the omission a compile error is worth
+more than the instance fix. Nothing here turns on undefined product behaviour, so nothing goes to
+QUESTIONS; R2-4 is a reading for R1-13's PROVISIONAL at the closeout.
