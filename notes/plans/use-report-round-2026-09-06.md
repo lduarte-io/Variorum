@@ -1439,13 +1439,20 @@ keep-on-top arrangement, and a CORE operation cannot import the app — so the c
 for a ruled rule (the drift class this repo names by hand every time it appears) or one home every
 caller can reach. The file's header states the move and its reason.
 
-**THE TWO BEHAVIOURAL REVERTS, named before they were started (the trap's rule; tree `<piece-3 commit>`,
-clean, restored with `git checkout --`). The op is NEW, so the suite lands WITH it rather than red-on-old
-(the brief's item 3) — these reverts exist to prove the suite is not hollow:**
+**THE TWO BEHAVIOURAL REVERTS, named before they were started (the trap's rule; tree `c6baef3b`, clean,
+restored with `git checkout --` after each). The op is NEW, so the suite lands WITH it rather than
+red-on-old (the brief's item 3) — these reverts exist to prove the suite is not hollow:**
 
 - **Revert S1** — `NewlineSplitting.breaks`' list exception removed (the `continue` deleted, so an
-  adjacent pair of list leads breaks like any other pair). Expected red: the two pure list pins and the
-  operation's `aListStaysWholeInsideItsOwnBlock`.
-- **Revert S2** — `splitBlockAtNewlines` registers per LEG instead of once (the single `register` call
-  replaced by letting `divideRows`/`divideWRows`' public wrappers do it — modelled by registering one
-  entry per minted block). Expected red: the three undo/redo pins.
+  adjacent pair of list leads breaks like any other pair). **RED, 6 issues across 4 pins:**
+  `adjacentListLinesAreNotABreak` (2) · `aNestedListStaysWholeToo` · `aListKeepsItsProseNeighboursAtArmsLength`
+  (`[10, 16, 22]` where the rule says `[10, 22]`) · the operation's `aListStaysWholeInsideItsOwnBlock`
+  (**5 blocks where U-19 (4) says 3**).
+- **Revert S2** — `splitBlockAtNewlines` registers one entry per LEG instead of one per block.
+  **RED, 6 issues across 2 pins:** `oneUndoPutsTheWholeBlockBackAndRedoSplitsItAgainExactRow`
+  (`stack.depth → 2`, and one ⌥⌘Z leaves the note half-split) ·
+  `oneUndoOfAFannedSplitRestoresAWholeWithItsFan` (`stack.depth → 3`).
+  **Stated honestly: `aWholeNoteSplitsUnderOneCompoundUndoEntry` stayed GREEN** under S2 — `withCompound`
+  folds however many legs it collects into ONE entry, so the note-wide door's promise survives the per-leg
+  shape. That pin's subject is the compound, not the op's own arity; the two pins above are the op's.
+- **Restored:** the two suites → **31 tests / 2 suites passed**.
