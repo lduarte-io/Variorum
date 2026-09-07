@@ -2123,3 +2123,85 @@ saying so in the comment is the whole fix.
 - **Files touched:** `App/Variorum/Variorum/Features/Editor/EditorTextView.swift` · `…/Editor/EditorSurfaceController.swift` · `…/Editor/EditorViewModel.swift` · `App/Variorum/VariorumTests/ReturnKeyTraceTests.swift` · `notes/QUESTIONS.md` · this file.
 - **Deliberately NOT done, said rather than skipped:** no hand-walk on the dev-store build (both fixes are pinned through the REAL key path, the same harness the batches' and round 1's pins use; the implementer's sanity pass may walk ⏎ ⌫ ⏎ x into a busy writer and a journal note's list exit if it wants use-evidence). No canon file edited; the letter's closeout deltas this pass adds are (i) the field-guide/§5.1 sentence that the exit's retraction is chip-ON only, and (ii) nothing else — #94 already carries R1-3/R1-4. No KnownIssues row (nothing deferred out). No Release build, no `/Applications` refresh.
 - **For the orchestrator:** the implementer's sanity pass over `4b8720b2..HEAD` comes next; anything it raises returns to me for the final word. Round 3 (a fresh reviewer, the ladder's cap) is owed on the two MAJORs and should look hardest at the idle gate's two call sites (`runStructural`'s `defer` · the compound chain's tail) and at `runTypedReturn`'s decide-then-act order.
+
+#### IMPLEMENTER'S SANITY PASS (18c round 2)
+
+*Opus, the 18c implementer, over `4b8720b2..dfc195c6` (`0ce1040f` · `722b2109`). Read-only on code; every
+mechanism re-traced in my own context, and the three shapes the coordinator named walked on the dev-store
+Debug build (rebuilt first; `io.lduarte.Variorum.debug`, `pgrep` clean before and after, `/Applications`
+never launched, my instance quit with ⌘Q). **Four items: 4 CLEAR · 0 RAISED.** Two observations recorded
+inside the items, neither worth a finding.*
+
+**R2-1 (the idle gate) — CLEAR. I went looking for a stranded stash and could not build one.** The
+armings are exactly two and each is inseparable from a drainer: the CLAIM
+(`EditorViewModel.swift:1548`) arms and on the very next line schedules
+(`scheduleTypedReturn` → `scheduleCrossBlockCompound`), whose task tail runs the gate for whichever task
+is last in the chain (`EditorSurfaceController.swift:1517–1525`); a FLIGHT (`:2430`) installs its `defer`
+— which ends in the gate (`:2447`) — before its first `await`. The two gate conditions are exact
+complements, so a decline at one site is a promise from the other: a flight declines only while the chain
+is non-empty (and that chain's last tail drains), a tail declines only while a flight is up (and that
+flight's defer drains). I traced both interleavings — flight-finishes-first and tail-runs-first — and each
+ends in a drain.
+*The specific roads asked about:* **a refused flight** — `runStructural`'s `guard !structuralInFlight`
+returns BEFORE the arming (`:2422` vs `:2430`), so it arms nothing, and the enclosing act's claim is
+drained by the chain tail (I traced the case where the OTHER flight is a menu act: whichever of the two
+finishes last finds the surface idle). **A thrown compound** — the scheduled bodies are `async -> Void`
+and catch their own errors (`runStructural` returns `false` on a throw), so no body can skip its tail;
+nothing anywhere cancels `pendingCrossBlockTask` (grep: assigned `:1509`, cleared `:1517`, read
+`EditorViewModel.swift:554/557` and forwarded `:1703` — no `.cancel()`), so a scheduled tail always runs.
+**Events stashed with no flight ever pending** — they drain on the queued act's own turn, never wait for
+the next key: the `.content` / `.nothing` / spoken-refusal roads have no flight, and the tail (which
+round 1's now-deleted `runTypedReturnAct` defer used to stand in for) runs for every scheduled body. I
+traced `.nothing` explicitly — ⏎ in an empty block claims, arms, schedules, does nothing, and its tail
+clears the handle and drains.
+*Two observations, recorded rather than raised:* (i) the gate reads `pendingCrossBlockTask`, the handle
+EVERY keystroke compound shares (the seam merges, the whole-block delete, the cross-block and
+visible-take edits, `runSoftNewlineInTail`) — so an unrelated compound queued for its own reason holds
+the stash until it completes. That is the rule's intent (idle means the chain is empty) and is bounded by
+that compound's own life; worth knowing when reading the gate. (ii) The tail drains AFTER
+`pendingCrossBlockTask = nil`, so a compound scheduled BY the drain captures `previous == nil` and does
+not await the task whose tail is running — harmless (the tail is synchronous, so the new task cannot
+start until it returns) and the harness's `flush()` loop follows the re-populated handle.
+
+**R2-2 (decide, then act) — CLEAR, including the timing question.** The guard is the FIRST statement of
+`runTypedReturn` (`EditorViewModel.swift:1544`), ahead of both the retraction and the act, so under
+`one_block` nothing touches the surface — which is what makes the chip-OFF exit K5's again. **The chip
+read's timing vs the claim:** it reads `header?.effectiveSegmentation`, the same source and the same
+value `TypedReturn.act` consults (`TypedReturn.swift:92`), synchronously at the keystroke — one source,
+no window between them, and the guard's outcome is behaviourally identical to the `.content` road it
+short-circuits, so no other caret position changes. *Observation, not a raise:* if the chip were toggled
+BETWEEN the claim and the act's turn, the act re-derives `.content` and does nothing while the keystroke
+was already consumed — one lost newline in a window no hand can hit (a chip toggle between a keystroke
+and the next main-actor turn); the same class as any re-derivation, and the re-derivation is the design.
+
+**R2-3 (the two undo registrations) — CLEAR.** The paragraph landed on `retractListContinuationNewline`
+with the unreachability spelled out (a flight always follows a retraction; the flight clears the stack;
+after R2-2 the retraction never runs chip-OFF) and names the day it goes live (13u1 relaxing the
+undo-clear directive). Comment-only, as dispositioned.
+
+**R2-4 (the deferral's two residuals) — CLEAR.** Both are in the seam's rewritten doc comment
+(`EditorTextView.swift:100–130`): the click-during-a-flight order inversion (`isSelectable` stays true —
+verified, only `isEditable` drops at `:2426`) and the `insertText:`-only input still discarded, with the
+reason the stash is `keyDown`-scoped. Accurate as written.
+
+**THE WALK (dev-store Debug; ~30–80 ms between `osascript` statements, so it exercises the SEQUENCE on a
+real surface — the same-turn timing is the pins' job, and they are the deterministic evidence):**
+
+- **(a) The chip OFF, a real journal note (⌘J).** The `aa` row read **`newlines make blocks: off`** by
+  seed. `- one` ⏎ continued the list in the same block (`- one` / `- |`); ⏎ on the empty item **ended the
+  list as K5 shipped** — the lead gone, **the empty LINE still there with the caret on it**, nothing
+  deleted; a further ⏎ and prose stayed in the SAME block (`block 1/1`, reading `- one` / blank /
+  `prose in the journal, same block`). No re-entry, no vanished line — the ⇄ loop is gone. `08` · `09`
+- **(b) The burst ⏎ ⌫ ⏎ x on a chip-ON note** at the end of `A paragraph to burst after.`: the paragraph
+  is **intact** and the `x` stands **alone in the block the second ⏎ made** (`block 2/2`), with the
+  carve's own toast — *"Empty block deleted — ⌥⌘Z undoes it."* — proving the seam compound really ran
+  inside the burst. The round-1 shape would have read `…burst after.x` plus an empty block. `10`
+- **(c) ⏎⏎ + text** (round 1's raise): ONE new block holding `ordered`, the caret at its end, no stray
+  empty block (`block 3/3`) — where my round-1 sanity walk of the same rig produced text-then-an-empty-
+  block. The replacement rule keeps the raise's fix. `11`
+- The note whole at the end. `12`
+
+**Captures** (`notes/plans/use-report-2026-09-06-screens/18c-ladder/`, gitignored, new filenames):
+`08-chip-off-journal-list-exit.png` · `09-chip-off-no-re-entry-prose-follows.png` ·
+`10-burst-return-delete-return-x.png` · `11-two-fast-returns-still-ordered.png` ·
+`12-the-round-2-walked-note.png`.
