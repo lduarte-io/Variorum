@@ -1122,8 +1122,8 @@ refresh. *(Filled in further at close.)*
 | # | Piece | State |
 |---|---|---|
 | 1 | `TypedReturn` — the pure decision (`App/Variorum/Shared/EditorBrain/TypedReturn.swift`) + the key intercept + the two doors | **IN-PROGRESS** — code landed and building; pure suite `TypedReturnTests` **13 / 1 green** |
-| 2 | The real-key pins: the nine §5.1 pins, the retirements, the rebuilt tail pins | **IN-PROGRESS** — `TypedReturnKeyTests` **13 / 1 green**, `ReturnKeyTraceTests` + `SoftNewlineTests` **15 / 2 green** after the rewrites; the red-on-old revert run is next (PENDING) |
-| 3 | The walk (dev-store Debug, `18c-2/` captures) | **NOT-STARTED** |
+| 2 | The real-key pins: the nine §5.1 pins, the retirements, the rebuilt tail pins | **DONE (253548fd)** — the four suites **41 / 4 green**; revert R1 run and recorded below (twelve red) |
+| 3 | The walk (dev-store Debug, `18c-2/` captures) | **IN-PROGRESS** |
 | 4 | Close: the suites, the dispositions (rows 1 · 28), the closeout deltas | **NOT-STARTED** |
 
 **THE DESIGN AS BUILT (the decisions §5.1 left to the implementer, each named):**
@@ -1161,7 +1161,28 @@ R1:** `EditorTextView.claimTypedReturn()` returns `false` unconditionally (its t
 `onTypedReturn` call commented out) — the ONE behavioural revert that puts the whole ruling back on the
 shipped model: the key falls through to `super.insertNewline` and takes the content / open-tail roads
 again, with every other line of the batch (the pure brain, the doors, the seam) left exactly as landed.
-Restored with `git checkout --` on that one file. The run's output is recorded below.
+Restored with `git checkout --` on that one file.
+
+**THE RUN (revert R1 in place; the four suites, `xcodebuild test`):** **TWELVE pins RED**, by name —
+`theEndOfAMiddleBlockMakesTheBlockBelowAndTypingLandsInIt` (the store read `["alpha", "beta\n", "gamma"]`
+— the newline she typed became content of "beta", which IS her row) · `insideABlocksTextTheKeyDividesAtTheCaret`
+(no divide; `undoStack.topLabel → nil`) · `aFannedBlocksKeyDivideKeepsTheTakesOnTop` (the block stayed one
+block, `"Beta one.\n Beta two."`) · `theLastBlocksEndMakesABlockAndNoTailOpens` (`hasOpenTail → true` — the
+retired gesture) · `twoQuickReturnsMakeOneEmptyBlockNotTwo` · `theEmptyBlockStaysWhenSheWalksAway`
+(*red by CRASH, honestly recorded: with no block minted, the pin's own `range(ofEntryAt: 2)` trips the
+index's `preconditionFailure` and takes the worker with it — a failure, not a pass*) ·
+`aListItemsReturnContinuesTheListAndTheEmptyItemEndsItAndMakesTheBlock` (the list half green on both
+sides — 13k K5 is untouched — the block half red) · `herS1ScenarioMakesABlockAndNeverALooseNewline` ·
+`theEmptyTailTrapClosesAndMakesABlock` · `theStartOfABlockPushesItDownWithAnEmptyBlockAbove` ·
+`neitherKeyOpensTheTailAtTheDocumentEndAnyMore` · `softThenPlainReturnBehaveAsTwoDifferentKeys`.
+
+**GREEN ON BOTH SIDES, deliberately and named as such** (they pin what the ruling does NOT change, so a
+hollow-pin reading would be a misreading): `softReturnMidBlockIsStillContent` (A15) ·
+`theChipOffKeepsTheKeyAsContentInTheMiddleToo` (U-19 (3)) · `aFreshNoteStillCrystallizesAsSheTypes` (the
+tail road) · every `TypedReturnTests` case (the pure decision has no key to revert) · the rebuilt B2 tail
+pins (they no longer reach the tail through the key, which is the point of rebuilding them).
+
+**RESTORED:** the four suites → **`Test run with 41 tests in 4 suites passed after 1.254 seconds.`**
 
 7. **A block with no interior word edge** (a one-word block, caret inside it) reaches the divide door and
    gets that door's own refusal, spoken — S4-22's word-edge floor forbids the mid-word cut, and typing a
