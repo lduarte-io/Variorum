@@ -1151,8 +1151,8 @@ final class TakesViewModel {
 
     /// Her A18's merge over the ⌘-click selection — the structure
     /// controller's (13e round A, A-2).
-    func mergeSelectedBlocks() async {
-        await structure.mergeSelectedBlocks()
+    func mergeSelectedBlocks(bringEveryTake: Bool = true) async {
+        await structure.mergeSelectedBlocks(bringEveryTake: bringEveryTake)
     }
 
     /// Her A17's multi-delete over the same selection — the controller's.

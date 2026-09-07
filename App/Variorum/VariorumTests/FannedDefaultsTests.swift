@@ -539,7 +539,39 @@ struct FannedDefaultsTests {
         }
     }
 
-    @Test func theMergeCeremonyDoorOnAChainRefusesAndNamesTheChainRoad() async throws {
+    /// **RETIRED AND REPLACED (18f batch 1, her U-16).** The pin was
+    /// `theMergeCeremonyDoorOnAChainRefusesAndNamesTheChainRoad`, whose
+    /// premise — that a run of three or more has no ceremony to open — her
+    /// ruling retires: *"if you're merging several notes together you should
+    /// be given the choice of bringing every take or only the currently shown
+    /// ones, but i don't want a super complex ceremony."* The door now ASKS,
+    /// with exactly two options and no pairing surface.
+    @Test func theMergeCeremonyDoorOnAChainOffersTwoChoicesAndNoPairing() async throws {
+        try await withEditor(seedBlocks: ["Alpha one.", "Beta two.", "Gamma three."]) { h in
+            let slots = try h.storeSlots()
+            _ = try h.session.operations.branchVariant(
+                slots[1].blockID, from: try #require(slots[1].variantID))
+            try h.reload()
+
+            selectAcross(h, 0, 2)
+            await h.model.invokeGesture(.mergeBlocks, ceremony: true)
+
+            let state = try #require(h.model.mergeCeremony, "the door asks now")
+            #expect(state.isRun)
+            #expect(state.blockIDs.count == 3)
+            #expect(state.arrangement == .bringEveryTake, "the carry-all default is selected")
+            #expect(state.offeredArrangements == [.bringEveryTake, .onlyTheShownOnes],
+                    "U-16: two options, and never the pairing surface")
+            #expect(state.firstTakes.isEmpty && state.secondTakes.isEmpty,
+                    "…so the pairing columns carry nothing at all")
+            #expect(state.otherTakes == 1, "the spare take, counted for the sentence")
+            do { let n = try h.storeSlots().count; #expect(n == 3, "opening touched no rows") }
+        }
+    }
+
+    /// A run with NO fan anywhere has one answer, not two — the door speaks
+    /// the standing needs-a-fan refusal rather than asking.
+    @Test func theMergeCeremonyDoorOnAFanlessChainStillRefuses() async throws {
         try await withEditor(seedBlocks: ["Alpha one.", "Beta two.", "Gamma three."]) { h in
             selectAcross(h, 0, 2)
             await h.model.invokeGesture(.mergeBlocks, ceremony: true)
@@ -547,8 +579,7 @@ struct FannedDefaultsTests {
             #expect(h.model.mergeCeremony == nil)
             do { let n = try h.storeSlots().count; #expect(n == 3, "nothing was merged") }
             let spoken = try #require(h.model.statusMessage)
-            #expect(spoken == FannedDefaultsCopy.mergeCeremonyIsPairwise(blocks: 3))
-            #expect(spoken.contains("⌘⇧M"), "it names the road that takes the run")
+            #expect(spoken == FannedDefaultsCopy.mergeCeremonyNeedsAFan)
         }
     }
 
@@ -713,14 +744,24 @@ struct FannedDefaultsTests {
 
     // MARK: - The registry (P-1): both doors declared, keyed and rendered
 
+    /// **A JUSTIFIED EDIT (18f batch 1, her U-4), claim widened not weakened.**
+    /// Her round-4 binding (menu · context menu · palette · the chord) is
+    /// unchanged and still asserted; what U-4 adds is *"should be a BUTTON,
+    /// not just a shortcut"* — so divide's summoned door joins the bottom
+    /// bar's block ▾ group beside its plain twin, and merge's joins that AND
+    /// the two bulk bars' `.surface` rows beside Merge Selected Blocks.
     @Test func bothCeremonyDoorsAreDeclaredWithTheirThreeDoorsAndKeys() {
-        for (id, label) in [
-            (CapabilityID.divideWithCeremony, "⌥⌘⇧D"),
-            (CapabilityID.mergeWithCeremony, "⌥⌘⇧M"),
+        for (id, label, doors) in [
+            (CapabilityID.divideWithCeremony, "⌥⌘⇧D",
+             Set<Capability.Door>([.menuBar, .contextMenu, .bottomBar, .palette])),
+            (CapabilityID.mergeWithCeremony, "⌥⌘⇧M",
+             Set<Capability.Door>([.menuBar, .contextMenu, .bottomBar, .surface, .palette])),
         ] {
             let capability = CapabilityRegistry.capability(id)
-            #expect(capability.doors == [.menuBar, .contextMenu, .palette],
-                    "\(id): her round-4 binding — menu, context menu AND palette")
+            #expect(capability.doors == doors,
+                    "\(id): her round-4 binding plus U-4's button doors")
+            #expect(capability.doors.isSuperset(of: [.menuBar, .contextMenu, .palette]),
+                    "\(id): round-4's three are still there")
             #expect(capability.shortcutLabel == label)
             #expect(EditorCommands.keyEquivalent(for: id) != nil,
                     "\(id)'s declared chord is wired in the one place keys collide")

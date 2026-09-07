@@ -391,7 +391,12 @@ final class BlockTOCViewModel {
     /// contiguity, `CarryAllMerge`'s composition, the one refusal copy);
     /// adjacency, fans and the displayed take are read FROM THE STORE —
     /// a projection is a selection aid, never an authorization.
-    func mergePicked() async {
+    ///
+    /// **18f batch 1 (her U-16):** the bulk bar's second door names the ROAD —
+    /// bring every take (the carry-all chain) or only the shown ones (the
+    /// plain chain). One chain body serves both (`MergeChainRun`), shared with
+    /// Write and the Takes board.
+    func mergePicked(bringEveryTake: Bool = true) async {
         let pickedSet = picked.picked
         guard pickedSet.count >= 2 else {
             speak("\u{2318}-click a second block first — merge joins the blocks you pick.")
@@ -436,46 +441,24 @@ final class BlockTOCViewModel {
             uniqueKeysWithValues: chain.map { id in
                 (id, slots.first { $0.blockID == id }?.variantID)
             })
-        guard CarryAllMerge.chainComposes(order: chain, fans: fans, displayed: displayed)
-        else {
+        // The A5 validation is the CARRY-ALL road's; the plain road depends
+        // on no displayed-take resolution and cannot suffer that race.
+        if bringEveryTake,
+           !CarryAllMerge.chainComposes(order: chain, fans: fans, displayed: displayed) {
             speak(FannedDefaultsCopy.takesChangedMerge)
             return
         }
         statusMessage = nil
         do {
             let stack = session.undoStack
-            let carried: Int = try await session.runner.run { ops in
+            let landing: MergeChainRun.Landing = try await session.runner.run { ops in
                 try stack.withCompound(label: "Merge Blocks", operations: ops) {
-                    var mergedID = chain[0]
-                    var leadingFan = fans[chain[0]] ?? []
-                    var leadingDisplayedID = displayed[chain[0]] ?? nil
-                    var takesOnMerged = leadingFan.count
-                    for next in chain.dropFirst() {
-                        let trailingFan = fans[next] ?? []
-                        if leadingFan.count > 1 || trailingFan.count > 1,
-                           let composition = CarryAllMerge.compose(
-                            leadingDisplayedID: leadingDisplayedID, leadingFan: leadingFan,
-                            trailingDisplayedID: displayed[next] ?? nil,
-                            trailingFan: trailingFan) {
-                            let result = try ops.mergeCeremony(
-                                mergedID, next,
-                                pairings: [composition.pairing], carries: composition.carries)
-                            let joined = CarryAllMerge.joinedTake(of: result)
-                            mergedID = result.block.id
-                            leadingFan = result.variants
-                            leadingDisplayedID = joined?.id
-                            takesOnMerged = result.variants.count
-                        } else {
-                            let result = try ops.merge(mergedID, next)
-                            mergedID = result.block.id
-                            leadingFan = [result.variant]
-                            leadingDisplayedID = result.variant.id
-                            takesOnMerged = 1
-                        }
-                    }
-                    return max(0, takesOnMerged - 1)
+                    try MergeChainRun.run(
+                        ops, order: chain, fans: fans, displayed: displayed,
+                        bringEveryTake: bringEveryTake)
                 }
             }
+            let carried = max(0, landing.takesOnMerged - 1)
             picked.clear()
             speak(FannedDefaultsCopy.mergedChain(blocks: chain.count, carried: carried))
         } catch {

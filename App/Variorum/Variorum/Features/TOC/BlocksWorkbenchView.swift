@@ -117,6 +117,8 @@ struct BlocksWorkbenchView: View {
     /// declared ids, rendered here as the workbench's bulk doors).
     static let surfaceCapabilities: [CapabilityID] = [
         .archiveBlock, .deleteBlock, .mergeSelectedBlocks, .deleteSelectedBlocks,
+        // 18f batch 1 (her U-4/U-16): the picked run's two roads, beside Merge.
+        .mergeWithCeremony,
         // 18c batch 3 (her U-6): the bulk bar's newline repair.
         .splitSelectedBlocksAtNewlines,
     ]
@@ -433,6 +435,23 @@ struct BlocksWorkbenchView: View {
             .disabled(model.picked.count < 2)
             .help("Join the picked blocks into one, left to right — every take rides "
                 + "along (the carry-all chain); the originals wait in lineage")
+            // 18f batch 1 (U-4/U-16): the same two roads, in this bar's own
+            // `VoicedMenu` idiom (its neighbours "tag ▾" and "move out ▾").
+            VoicedMenu(
+                tokens: tokens,
+                label: CapabilityRegistry.capability(.mergeWithCeremony).verb,
+                role: .quiet
+            ) {
+                ForEach(MergeArrangement.offered(blocks: max(3, model.picked.count))) { option in
+                    Button(option.title(blocks: max(3, model.picked.count))) {
+                        Task {
+                            await model.mergePicked(
+                                bringEveryTake: option == .bringEveryTake)
+                        }
+                    }
+                }
+            }
+            .help(MergeArrangementCopy.bannerHelp(blocks: max(3, model.picked.count)))
             // 18c batch 3 (her U-6): the newline repair over the picked
             // blocks — the bulk half of the note ▾ button.
             Button(tokens.chromeLabel(SplitAtNewlinesCopy.bulkDoor)) {

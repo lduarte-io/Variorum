@@ -107,6 +107,9 @@ struct CommitBar: View {
         [
             .commitTake, .sealPost, .blockComments, .divide, .extract, .makeBlock,
             .merge, .showTakes,
+            // 18f batch 1 (her U-4): the two summoned doors, each beside its
+            // plain twin in the block ▾ group.
+            .divideWithCeremony, .mergeWithCeremony,
             .insertBlockBelow,  // 13b 4D (N28/S4-13): editor parity — Write's bar door
             .deleteBlock,  // 13c 1B (A8): the delete door beside the insert door
             .archiveBlock,  // the post-13l polish round (row 14 / F1): its twin
@@ -493,9 +496,18 @@ struct CommitBar: View {
     private var blockMenu: some View {
         VoicedMenu(tokens: tokens, label: "block") {
             Button("Divide") { model.divideAtCursor() }
+            // 18f batch 1 (U-4): *"should be a button, not just a shortcut."*
+            // Titles come from the registry with their chords, so a re-picked
+            // key moves in one place.
+            Button(CapabilityRegistry.capability(.divideWithCeremony).menuTitle()) {
+                model.divideAtCursorWithCeremony()
+            }
             Button("Extract") { model.extractSelection() }
             Button("Make Block") { model.makeBlockFromSelection() }
             Button("Merge") { model.mergeBlocks() }
+            Button(CapabilityRegistry.capability(.mergeWithCeremony).menuTitle()) {
+                model.mergeBlocksWithCeremony()
+            }
             Divider()
             Button("＋ New block below this one (⌘⇧⏎)") {
                 Task { await model.insertBlockBelowCaret() }

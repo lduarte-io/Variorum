@@ -61,6 +61,9 @@ struct TakesBoardView: View {
     /// selection banner (E3/A18).
     static let surfaceCapabilities: [CapabilityID] = [
         .unarchiveTake, .moveTakeEarlier, .moveTakeLater, .mergeSelectedBlocks,
+        // 18f batch 1 (her U-4/U-16): "Merge choosing takes…" beside Merge —
+        // the two roads over the SAME picked run, never the pairing surface.
+        .mergeWithCeremony,
         // The post-13l polish round (row 14 / F1): the archived card's own
         // Delete, declared where it is rendered.
         .deleteTake,
@@ -454,6 +457,29 @@ struct TakesBoardView: View {
         .padding(.vertical, 6)
     }
 
+    /// 18f batch 1 (U-4/U-16): the picked run's two roads. Its own function
+    /// because the banner's `HStack` had already reached the type checker's
+    /// patience (a compile error, not a preference).
+    @ViewBuilder
+    private func mergeRoadsMenu(picked: Int) -> some View {
+        let blocks = max(3, picked)
+        VoicedMenu(
+            tokens: tokens,
+            label: CapabilityRegistry.capability(.mergeWithCeremony).verb,
+            role: .quiet
+        ) {
+            ForEach(MergeArrangement.offered(blocks: blocks)) { option in
+                Button(option.title(blocks: blocks)) {
+                    Task {
+                        await model.mergeSelectedBlocks(
+                            bringEveryTake: option == .bringEveryTake)
+                    }
+                }
+            }
+        }
+        .help(MergeArrangementCopy.bannerHelp(blocks: blocks))
+    }
+
     private func styleOption(_ name: String, _ style: FanStyle) -> some View {
         Button(name) { Task { await model.setFanStyle(style) } }
     }
@@ -479,6 +505,11 @@ struct TakesBoardView: View {
                 .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary, font: tokens.mono))
                 .disabled(picked.count < 2)
                 .help("Join the picked blocks into one — neighbours only; ⌥⌘Z undoes it")
+                // 18f batch 1 (U-4: *"should be a button, not just a
+                // shortcut"*; U-16: two choices over a run, never a pairing
+                // surface). The picked run's own door, in this bar's own
+                // vocabulary — the same `VoicedMenu` idiom its neighbours use.
+                mergeRoadsMenu(picked: picked.count)
                 // 13e E2 (her A17): the delete door, beside merge, over the
                 // one selection. Never disabled — one pick is a legitimate
                 // delete, so the button either acts or delivers the ops

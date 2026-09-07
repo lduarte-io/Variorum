@@ -182,9 +182,17 @@ nonisolated enum CapabilityRegistry {
         // so an unfanned target gets the operation-shaped refusal at the
         // door (`FannedDefaultsCopy.divideCeremonyNeedsAFan`) — the
         // `.showOriginBlock` split, P-2.
+        // 18f batch 1 (her U-4, verbatim: *"'divide choosing takes' should
+        // replace 'divide ceremony', since it's clearer. same with merge -
+        // should be a BUTTON, not just a shortcut"*): the two summoned doors
+        // join their plain twins in the bottom bar's block ▾ group, and the
+        // merge one joins the two bulk bars' `.surface` rows beside Merge
+        // Selected Blocks. A door she can only reach by remembering a
+        // four-key chord is the discoverability class 13g's helper guard was
+        // built for; this is the same lesson one level down.
         Capability(
             id: .divideWithCeremony, verb: "Divide choosing takes…", scope: .block,
-            doors: [.menuBar, .contextMenu, .palette],
+            doors: [.menuBar, .contextMenu, .bottomBar, .palette],
             shortcutLabel: "⌥⌘⇧D", takesAccess: .native,
             unavailableNote: "Dividing happens inside a note — open one first.",
             availability: divideAvailability),
@@ -212,7 +220,7 @@ nonisolated enum CapabilityRegistry {
         // from a board carries the pair there exactly as ⌘⇧M always has.
         Capability(
             id: .mergeWithCeremony, verb: "Merge choosing takes…", scope: .block,
-            doors: [.menuBar, .contextMenu, .palette],
+            doors: [.menuBar, .contextMenu, .bottomBar, .surface, .palette],
             shortcutLabel: "⌥⌘⇧M", takesAccess: .moveAndExecute,
             unavailableNote: "Merging happens inside a note — open one first.",
             availability: structural),

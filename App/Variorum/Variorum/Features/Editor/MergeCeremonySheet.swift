@@ -46,46 +46,29 @@ struct MergeCeremonySheet: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Merge choosing takes").font(.headline)
-            Text("A ＋ pairs one take from each block into a joined take on the merged block (click a take on each side to place it). \u{201C}Carry\u{201D} rides a take over whole, unjoined. Anything unpaired and uncarried stays with the released blocks in lineage — ⌥⌘Z undoes the whole merge.")
+
+            // **THE ARRANGEMENT ROW** (her U-5's merge half; U-16 whole): the
+            // FIRST control, in the divide sheet's own grammar — three options
+            // for a pair, TWO for a run of three or more, and the pairing
+            // surface only behind "Pair by hand…". Batch 1 gives it its brains
+            // and its words on today's controls (`VoicedChip` is the chrome
+            // vocabulary, P-8); batch 2 gives it the mockup's face.
+            arrangementRow
+
+            Text(state.arrangementSentence)
                 .font(.caption)
                 .foregroundStyle(.secondary)
-                .lineLimit(5)
+                .lineLimit(4)
                 .fixedSize(horizontal: false, vertical: true)
 
-            ScrollView {
-                VStack(alignment: .leading, spacing: 10) {
-                    if !state.pairings.isEmpty {
-                        Text("Pairings").font(.caption).foregroundStyle(.secondary)
-                        ForEach(state.pairings) { pairing in
-                            pairingRow(pairing)
-                        }
-                    }
-                    HStack(alignment: .top, spacing: 12) {
-                        takeColumn(
-                            title: "First block's takes",
-                            takes: state.unpairedFirst,
-                            selected: selectedFirst,
-                            select: { selectFirst($0) })
-                        Divider()
-                        takeColumn(
-                            title: "Second block's takes",
-                            takes: state.unpairedSecond,
-                            selected: selectedSecond,
-                            select: { selectSecond($0) })
-                    }
-                    if state.stayBehindCount > 0 {
-                        Text(state.stayBehindCount == 1
-                            ? "1 unpaired take will stay with its released block in lineage (\(TrayPath.originalsPath))."
-                            : "\(state.stayBehindCount) unpaired takes will stay with their released blocks in lineage (\(TrayPath.originalsPath)).")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(3)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                }
-                .padding(.vertical, 4)
+            if state.arrangement == .pairByHand {
+                Text("A ＋ pairs one take from each block into a joined take on the merged block (click a take on each side to place it). \u{201C}Carry\u{201D} rides a take over whole, unjoined. Anything unpaired and uncarried stays with the released blocks in lineage — ⌥⌘Z undoes the whole merge.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(5)
+                    .fixedSize(horizontal: false, vertical: true)
+                pairingBody
             }
-            .frame(minHeight: 240, maxHeight: 440)
 
             if let blocker = state.confirmBlocker {
                 Text(blocker)
@@ -105,7 +88,66 @@ struct MergeCeremonySheet: View {
             }
         }
         .padding(12)
-        .frame(minWidth: 620)
+        // The row needs the width; the FACE is batch 2's.
+        .frame(minWidth: 720)
+    }
+
+    // MARK: - The arrangement row (U-5 · U-16)
+
+    private var arrangementRow: some View {
+        HStack(spacing: 8) {
+            ForEach(state.offeredArrangements) { option in
+                VoicedChip(
+                    tokens: tokens, text: option.title(blocks: max(2, state.blockIDs.count)),
+                    on: state.arrangement == option
+                ) {
+                    model.setMergeArrangement(option)
+                }
+                .help(MergeArrangementCopy.sentence(
+                    option, blocks: max(2, state.blockIDs.count),
+                    otherTakes: state.otherTakes))
+            }
+            Spacer(minLength: 0)
+        }
+    }
+
+    // MARK: - The hand-placed sheet (S4-23, byte-unchanged behind its option)
+
+    private var pairingBody: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 10) {
+                if !state.pairings.isEmpty {
+                    Text("Pairings").font(.caption).foregroundStyle(.secondary)
+                    ForEach(state.pairings) { pairing in
+                        pairingRow(pairing)
+                    }
+                }
+                HStack(alignment: .top, spacing: 12) {
+                    takeColumn(
+                        title: "First block's takes",
+                        takes: state.unpairedFirst,
+                        selected: selectedFirst,
+                        select: { selectFirst($0) })
+                    Divider()
+                    takeColumn(
+                        title: "Second block's takes",
+                        takes: state.unpairedSecond,
+                        selected: selectedSecond,
+                        select: { selectSecond($0) })
+                }
+                if state.stayBehindCount > 0 {
+                    Text(state.stayBehindCount == 1
+                        ? "1 unpaired take will stay with its released block in lineage (\(TrayPath.originalsPath))."
+                        : "\(state.stayBehindCount) unpaired takes will stay with their released blocks in lineage (\(TrayPath.originalsPath)).")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(3)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .padding(.vertical, 4)
+        }
+        .frame(minHeight: 240, maxHeight: 440)
     }
 
     // MARK: - Pairing rows

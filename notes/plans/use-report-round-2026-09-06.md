@@ -2327,10 +2327,58 @@ built (`KeepOnTopDivide` is CONSUMED, not modified); no Release build and no `/A
 |---|---|---|
 | 1 | Row 3's three §4.4 pins, written BEFORE any fix (`CutFlowEndSlotTests`) | **DONE (a7559b91)** — all three green on the pre-fix tree; the remaining candidate is face-level (piece 6's walk) |
 | 2 | Names (U-4) — the verbs, the sheet titles, every UI "ceremony" string, the field guide | **DONE** (this row's commit) — the word leaves every UI string; 5 pins rewritten; 130/10 green |
-| 3 | Doors — the registry declarations + the three bars' buttons | **NOT-STARTED** |
+| 3 | Doors — the registry declarations + the three bars' buttons | **DONE** (this row's commit) — `.bottomBar` for both, `.surface` for merge; the registry walk green |
 | 4 | The divide sheet's arrangement row (U-5/U-3) + the confirm roads | **DONE** (this row's commit) — the row, the seeding through `KeepOnTopDivide`, the three confirm roads, the sentence; 106/10 green |
-| 5 | The merge sheet's row + the N-way's two choices (U-16) | **NOT-STARTED** |
+| 5 | The merge sheet's row + the N-way's two choices (U-16) | **DONE** (this row's commit) — three options for a pair, two for a run, `mergeCeremonyIsPairwise` retired; 108/8 green |
 | 6 | The walk (dev-store Debug, `18f-1/` captures) + close | **NOT-STARTED** |
+
+**Pieces 3 + 5 — THE MERGE'S ARRANGEMENT ROW (U-5's merge half · U-16) AND THE DOORS (U-4).**
+
+- **`MergeArrangement`** (`bringEveryTake · onlyTheShownOnes · pairByHand`) + `MergeArrangementCopy` +
+  **`MergeChainRun`** in `App/Variorum/Variorum/Features/Editor/MergeArrangement.swift` — pure,
+  `nonisolated`, one home for the row's words and the chain's body. `offered(blocks:)` is U-16's fork:
+  three for a pair, **two for a run of three or more, never the pairing surface**.
+- **`MergeChainRun.run` replaces THREE copies of the chain loop** (Write's `runMergeChain`, the Takes
+  board's `mergeSelectedBlocks`, the workbench's `mergePicked`). U-16 gives every one of them a second
+  road (plain links), and three copies of a two-road loop is three chances to disagree; each caller now
+  does only what it does with the landing (Write moves a caret, the board parks a ring, the workbench
+  speaks). The A5 pre-compound validation is gated to the CARRY-ALL road — the plain road resolves no
+  displayed take and cannot suffer that race.
+- **Write's sheet** (`MergeCeremonyState` + `MergeCeremonySheet`): the arrangement row is the first
+  control, `bringEveryTake` selected on open (her J4b default, so ⏎ still reproduces ⌘⇧M); the pairing
+  columns, their explainer and the S4-23 confirm are byte-unchanged BEHIND `pairByHand`; the state gained
+  `blockIDs` / `entryIndices` / `otherTakes` / `arrangement`, and `confirmMergeCeremony` became a
+  DISPATCHER onto the surface's own standing roads (carry-all · instant · chain), each of which flushes,
+  guards and speaks for itself. `runCarryAllMerge` and `runMergeChain` now return whether they landed, so
+  the sheet still dismisses only on landing.
+- **The RUN arm (U-16):** `.mergeChain` with `ceremony: true` opens the two-option sheet instead of
+  refusing. **`FannedDefaultsCopy.mergeCeremonyIsPairwise` is RETIRED** (its text kept as a comment naming
+  the ruling) — the door asks instead of saying no. A run with NO fan anywhere still refuses
+  (`mergeCeremonyNeedsAFan`): both roads are byte-identically `merge` there, so there is nothing to ask.
+- **The doors (U-4, *"should be a button, not just a shortcut"*):** the registry gains `.bottomBar` on
+  `.divideWithCeremony` and `.bottomBar` + `.surface` on `.mergeWithCeremony`; Write's `block ▾` group
+  renders both rows (titles from the registry, so a re-picked chord moves in one place); the Takes board's
+  ⌘-click banner and the Blocks workbench's bulk bar render the merge one. The registry walk stays green
+  (`theBottomBarsRenderExactlyTheDeclaredBarDoors`, `theSurfacesRenderExactlyTheDeclaredSurfaceActs`).
+- **QUESTIONS #95, PROVISIONAL — the two bulk bars offer the TWO run options at every pick size**, and the
+  pairing surface stays on the doors that have always carried it (⌥⌘⇧M, the menu bar, the block context
+  menu, ⌘K, and now Write's `block ▾` row). The bars' act IS the picked-run act, and a door that grew a
+  third option only when the pick happened to be two would answer one gesture two ways. Options (b) a
+  visible carry into Write for a pair and (c) extracting the merge state machine behind a host protocol
+  (the 13d `DivideWCeremony` precedent — a batch of its own) are written up for her.
+
+Pins: `App/Variorum/VariorumTests/MergeArrangementTests.swift` (8), the two road-equivalence ones written
+as comparisons against the SHIPPED roads on identical fixtures (`bringEveryTakeOnARunIsTheCarryAllChain`
+vs ⌘⇧M's chain; `onlyTheShownOnesOnARunIsThePlainChain` vs the same run merged link-by-link through plain
+`ops.merge`), plus `thePairingSurfaceNeverMountsForARun` and `eitherRunRoadIsOneUndoEntry`.
+
+RETIRED / EDITED PINS, each with its ruling:
+
+| Pin | Its premise | Ruling | Now |
+|---|---|---|---|
+| `theMergeCeremonyDoorOnAChainRefusesAndNamesTheChainRoad` | a run of 3+ has no ceremony to open, so ⌥⌘⇧D refuses | **U-16** | RETIRED → `theMergeCeremonyDoorOnAChainOffersTwoChoicesAndNoPairing` (+ the new `theMergeCeremonyDoorOnAFanlessChainStillRefuses`, which keeps the refusal where it is still true) |
+| `bothCeremonyDoorsAreDeclaredWithTheirThreeDoorsAndKeys` | the doors are exactly menu · context · palette | **U-4** | kept by name, door sets widened, and round-4's three still asserted as a superset |
+| `confirmingThePrePairedSheetReproducesTheInstantOutcome` · `theSessionRemembersTheLastConfirmedJoin` · `pairingMutationsKeepArityAndCarryExclusive` · `confirmRefusesToJoinDriftedText` | the sheet IS the pairing surface | **U-5** | kept by name and claim; each names the road with one `setMergeArrangement(.pairByHand)` line |
 
 **Piece 4 — THE DIVIDE SHEET'S ARRANGEMENT ROW (U-5 · U-3).** `DivideWCeremony.Arrangement`
 (`keepOnTop · keepOnBottom · copyToBoth · perTake`, the ruled order) on `State`; the sheet's FIRST

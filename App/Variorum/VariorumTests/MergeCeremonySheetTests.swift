@@ -97,6 +97,13 @@ struct MergeCeremonySheetTests {
             selectAcross(h, 0, 1)
             await h.model.invokeGesture(.mergeBlocks, ceremony: true)
             #expect(h.model.mergeCeremony != nil)
+            // **A JUSTIFIED EDIT (18f batch 1, U-5/U-16), claim intact.** The
+            // PAIRING sheet is what this pin is about, and U-5 moved it behind
+            // its own option: "Merge choosing takes…" now opens on the row,
+            // with "Bring every take" selected. One line names the road; every
+            // S4-23 claim below is unchanged and is reached by the option that
+            // opens the surface it describes.
+            h.model.setMergeArrangement(.pairByHand)
             await h.model.confirmMergeCeremony()
 
             #expect(h.model.mergeCeremony == nil, "the sheet dismisses on landing")
@@ -212,6 +219,13 @@ struct MergeCeremonySheetTests {
 
             selectAcross(h, 0, 1)
             await h.model.invokeGesture(.mergeBlocks, ceremony: true)
+            // **A JUSTIFIED EDIT (18f batch 1, U-5/U-16), claim intact.** The
+            // PAIRING sheet is what this pin is about, and U-5 moved it behind
+            // its own option: "Merge choosing takes…" now opens on the row,
+            // with "Bring every take" selected. One line names the road; every
+            // S4-23 claim below is unchanged and is reached by the option that
+            // opens the surface it describes.
+            h.model.setMergeArrangement(.pairByHand)
             let state = try #require(h.model.mergeCeremony)
             h.model.setMergeJoin(pairingID: state.pairings[0].id, join: .newline)
             await h.model.confirmMergeCeremony()
@@ -227,6 +241,7 @@ struct MergeCeremonySheetTests {
             let count = h.model.index.entries.count
             selectAcross(h, count - 2, count - 1)
             await h.model.invokeGesture(.mergeBlocks, ceremony: true)
+            h.model.setMergeArrangement(.pairByHand)
             let next = try #require(h.model.mergeCeremony)
             #expect(next.pairings[0].join == .newline,
                     "the last confirmed choice seeds the next sheet")
@@ -245,6 +260,13 @@ struct MergeCeremonySheetTests {
 
             selectAcross(h, 0, 1)
             await h.model.invokeGesture(.mergeBlocks, ceremony: true)
+            // **A JUSTIFIED EDIT (18f batch 1, U-5/U-16), claim intact.** The
+            // PAIRING sheet is what this pin is about, and U-5 moved it behind
+            // its own option: "Merge choosing takes…" now opens on the row,
+            // with "Bring every take" selected. One line names the road; every
+            // S4-23 claim below is unchanged and is reached by the option that
+            // opens the surface it describes.
+            h.model.setMergeArrangement(.pairByHand)
             var state = try #require(h.model.mergeCeremony)
             #expect(state.pairings.count == 1)
 
@@ -295,6 +317,13 @@ struct MergeCeremonySheetTests {
             selectAcross(h, 0, 1)
             await h.model.invokeGesture(.mergeBlocks, ceremony: true)
             #expect(h.model.mergeCeremony != nil)
+            // **A JUSTIFIED EDIT (18f batch 1, U-5/U-16), claim intact.** The
+            // PAIRING sheet is what this pin is about, and U-5 moved it behind
+            // its own option: "Merge choosing takes…" now opens on the row,
+            // with "Bring every take" selected. One line names the road; every
+            // S4-23 claim below is unchanged and is reached by the option that
+            // opens the surface it describes.
+            h.model.setMergeArrangement(.pairByHand)
 
             // The world moves while the sheet is open.
             try await h.session.runner.run { ops in

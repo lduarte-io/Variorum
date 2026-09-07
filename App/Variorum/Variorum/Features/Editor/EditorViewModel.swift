@@ -1661,6 +1661,10 @@ final class EditorViewModel {
     func extractSelection() { performGesture(.extractSelection) }
     func makeBlockFromSelection() { performGesture(.makeBlockFromSelection) }
     func mergeBlocks() { performGesture(.mergeBlocks) }
+    // 18f batch 1 (U-4): the two SUMMONED doors, so the bottom bar's block ▾
+    // rows land the same act ⌥⌘⇧D / ⌥⌘⇧M land — one body, however many doors.
+    func divideAtCursorWithCeremony() { performGesture(.divideAtCursor, ceremony: true) }
+    func mergeBlocksWithCeremony() { performGesture(.mergeBlocks, ceremony: true) }
 
     private func performGesture(
         _ command: StructuralGesturePlanner.Command, ceremony: Bool = false
@@ -2027,6 +2031,11 @@ final class EditorViewModel {
 
     func removeMergePairing(_ pairingID: String) {
         structural.removeMergePairing(pairingID)
+    }
+
+    /// 18f batch 1 (U-5/U-16): the merge row's forward.
+    func setMergeArrangement(_ arrangement: MergeArrangement) {
+        structural.setMergeArrangement(arrangement)
     }
 
     func setMergeJoin(pairingID: String, join: MergeJoin) {

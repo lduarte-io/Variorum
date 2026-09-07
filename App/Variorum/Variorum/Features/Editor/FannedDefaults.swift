@@ -250,12 +250,14 @@ nonisolated enum FannedDefaultsCopy {
         "These blocks have one take each — ⌘⇧M joins them. Merge choosing takes is "
         + "for arranging the takes when either side has a fan."
 
-    /// ⌥⌘⇧M over a run of three or more. The pairing ceremony is pairwise by
-    /// construction (S4-23), so this names the road that takes the run.
-    static func mergeCeremonyIsPairwise(blocks: Int) -> String {
-        "The merge ceremony pairs TWO blocks — this selection covers \(blocks). "
-            + "⌘⇧M merges the whole run, carrying every take along."
-    }
+    // (`mergeCeremonyIsPairwise` — "the merge ceremony pairs TWO blocks …
+    // ⌘⇧M merges the whole run" — RETIRED at 18f batch 1 by her ruling U-16:
+    // *"if you're merging several notes together you should be given the
+    // choice of bringing every take or only the currently shown ones."* The
+    // door over a run of three or more no longer refuses; it asks the two
+    // questions (`MergeArrangement.offered(blocks:)`) and runs the chain
+    // either way. A refusal that could only ever say no is the P-2 class the
+    // registry exists to kill, and this was the last one in this file.)
 
     /// Either fanned road, where the store moved under the gesture (the F-3
     /// guard class: the take she was looking at is gone from the live fan).

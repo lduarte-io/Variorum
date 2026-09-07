@@ -330,11 +330,15 @@ final class EditorSurfaceController {
 
         case .mergeChain(let indices, let blockIDs):
             guard !ceremony else {
-                // The pairing ceremony is PAIRWISE by construction (S4-23) —
-                // it has two columns. A run of three or more has no ceremony
-                // to open, so the door says so and names the one that acts.
-                model.refuseFeedback(
-                    FannedDefaultsCopy.mergeCeremonyIsPairwise(blocks: blockIDs.count))
+                // **U-16, 2026-09-07:** *"if you're merging several notes
+                // together you should be given the choice of bringing every
+                // take or only the currently shown ones, but i don't want a
+                // super complex ceremony for merging multiple blocks
+                // together."* The pairing ceremony IS pairwise by
+                // construction (S4-23) and stays so; what retires is the
+                // refusal that used to stand here — the door asks the two
+                // questions instead of saying no.
+                await openMergeRunChoice(indices: indices, blockIDs: blockIDs)
                 return
             }
             await runMergeChain(indices: indices, blockIDs: blockIDs)
@@ -600,28 +604,28 @@ final class EditorSurfaceController {
     /// takes plus every other active take carried whole, composed from this
     /// app's own `mergeCeremony` — zero core change, and the instant no-fan
     /// merge above stays byte-unchanged behind its own threshold.
+    @discardableResult
     private func runCarryAllMerge(
         leadingIndex: Int, trailingIndex: Int, leadingID: String, trailingID: String
-    ) async {
+    ) async -> Bool {
         await model.autosave.flushNow()
         guard !model.autosave.isDirty else {
             model.showStatus("Unsaved changes couldn't be written — resolve that first, then retry.")
-            return
+            return false
         }
         let fans: (leading: [Variant], trailing: [Variant])
         do {
             fans = try await liveActiveFans(leadingID, trailingID)
         } catch {
             model.showOperationError(error)
-            return
+            return false
         }
         guard fans.leading.count > 1 || fans.trailing.count > 1 else {
             // The store says unfanned — the instant merge, byte-unchanged
             // (the ceremony door's own fallthrough, one road over).
-            await runInstantMerge(
+            return await runInstantMerge(
                 leadingIndex: leadingIndex, trailingIndex: trailingIndex,
                 leadingID: leadingID, trailingID: trailingID)
-            return
         }
         guard let composition = CarryAllMerge.compose(
             leadingDisplayedID: model.index.entries.first { $0.blockID == leadingID }?.variantID,
@@ -630,11 +634,11 @@ final class EditorSurfaceController {
             trailingFan: fans.trailing)
         else {
             model.showStatus(FannedDefaultsCopy.takesChangedMerge)
-            return
+            return false
         }
         let trailingLength = trailingIndex < model.index.entries.count
             ? model.index.entries[trailingIndex].length : 0
-        _ = await runStructural { ops in
+        return await runStructural { ops in
             let result = try ops.mergeCeremony(
                 leadingID, trailingID,
                 pairings: [composition.pairing], carries: composition.carries)
@@ -665,13 +669,16 @@ final class EditorSurfaceController {
     /// whole and never receives the other blocks' text, so in a chain the
     /// alternates end up standing alone beside a fully-joined chosen take —
     /// the pair road's own consequence, applied twice ("quick to delete").
-    private func runMergeChain(indices: ClosedRange<Int>, blockIDs: [String]) async {
+    @discardableResult
+    private func runMergeChain(
+        indices: ClosedRange<Int>, blockIDs: [String], bringEveryTake: Bool = true
+    ) async -> Bool {
         let leadingLength = indices.lowerBound < model.index.entries.count
             ? model.index.entries[indices.lowerBound].length : 0
         await model.autosave.flushNow()
         guard !model.autosave.isDirty else {
             model.showStatus("Unsaved changes couldn't be written — resolve that first, then retry.")
-            return
+            return false
         }
         let fans: [String: [Variant]]
         do {
@@ -685,7 +692,7 @@ final class EditorSurfaceController {
             }
         } catch {
             model.showOperationError(error)
-            return
+            return false
         }
         let displayed = Dictionary(
             uniqueKeysWithValues: model.index.entries
@@ -696,57 +703,32 @@ final class EditorSurfaceController {
         // to plain `merge` inside it, folding that fan to lineage with no
         // speech. The whole run refuses up front (nothing touched), the
         // pair road's own words.
-        guard CarryAllMerge.chainComposes(
-            order: blockIDs, fans: fans, displayed: displayed)
-        else {
+        // The A5 validation is the CARRY-ALL road's: the plain road joins the
+        // shown takes and depends on no displayed-take resolution, so gating
+        // it on this would refuse a race it cannot suffer.
+        if bringEveryTake, !CarryAllMerge.chainComposes(
+            order: blockIDs, fans: fans, displayed: displayed) {
             model.showStatus(FannedDefaultsCopy.takesChangedMerge)
-            return
+            return false
         }
         let stack = model.session.undoStack
-        _ = await runStructural { ops in
+        return await runStructural { ops in
             try stack.withCompound(label: "Merge Blocks", operations: ops) {
-                var mergedID = blockIDs[0]
-                var leadingFan = fans[blockIDs[0]] ?? []
-                var leadingDisplayedID = displayed[blockIDs[0]] ?? nil
-                var mergedLength = 0
-                // What LANDED on the merged block, counted from the ops'
-                // own answers — so a link that fell to the plain road
-                // (genuinely unfanned, or a take that vanished under the
-                // gesture) can never inflate the receipt.
-                var takesOnMerged = leadingFan.count
-                for nextID in blockIDs.dropFirst() {
-                    let trailingFan = fans[nextID] ?? []
-                    if leadingFan.count > 1 || trailingFan.count > 1,
-                       let composition = CarryAllMerge.compose(
-                        leadingDisplayedID: leadingDisplayedID, leadingFan: leadingFan,
-                        trailingDisplayedID: displayed[nextID] ?? nil,
-                        trailingFan: trailingFan) {
-                        let result = try ops.mergeCeremony(
-                            mergedID, nextID,
-                            pairings: [composition.pairing], carries: composition.carries)
-                        let joined = CarryAllMerge.joinedTake(of: result)
-                        mergedID = result.block.id
-                        leadingFan = result.variants
-                        leadingDisplayedID = joined?.id
-                        mergedLength = joined?.workingText.utf16.count ?? 0
-                        takesOnMerged = result.variants.count
-                    } else {
-                        let result = try ops.merge(mergedID, nextID)
-                        mergedID = result.block.id
-                        leadingFan = [result.variant]
-                        leadingDisplayedID = result.variant.id
-                        mergedLength = result.variant.workingText.utf16.count
-                        takesOnMerged = 1
-                    }
-                }
+                // ONE chain body, three surfaces (`MergeChainRun`): what
+                // LANDED is counted from the ops' own answers, so a link that
+                // fell to the plain road can never inflate the receipt.
+                let landing = try MergeChainRun.run(
+                    ops, order: blockIDs, fans: fans, displayed: displayed,
+                    bringEveryTake: bringEveryTake)
                 // Caret at the FIRST join (merge keeps the leading text
                 // verbatim, so the leading length still addresses it).
                 return StructuralOutcome(
-                    caretBlockID: mergedID,
-                    caretOffset: min(leadingLength, mergedLength),
+                    caretBlockID: landing.blockID,
+                    caretOffset: min(leadingLength, landing.mergedTextLength),
                     seam: nil,
                     note: FannedDefaultsCopy.mergedChain(
-                        blocks: blockIDs.count, carried: max(0, takesOnMerged - 1)))
+                        blocks: blockIDs.count,
+                        carried: max(0, landing.takesOnMerged - 1)))
             }
         }
     }
@@ -1158,6 +1140,22 @@ final class EditorSurfaceController {
     struct MergeCeremonyState: Equatable, Identifiable {
         let firstBlockID: String
         let secondBlockID: String
+        /// **The whole RUN** (18f batch 1, her U-16): two ids for a pair,
+        /// three or more when a selection covered a run. A run offers exactly
+        /// two arrangements and never the pairing surface, so `firstTakes` /
+        /// `secondTakes` / `pairings` stay empty on that arm and the pair's
+        /// whole state machine below is untouched by it.
+        var blockIDs: [String] = []
+        /// The run's entry indices, for the caret arithmetic the confirm
+        /// roads take (the pair's own two indices, or the chain's range).
+        var entryIndices: ClosedRange<Int> = 0...0
+        /// Live active takes across the run BEYOND the shown one per block —
+        /// what "bring every take" would bring. Read at open; the sentence's
+        /// only input.
+        var otherTakes: Int = 0
+        /// Which of U-5/U-16's options the row is on. `bringEveryTake` on
+        /// open — her J4b default, so ⏎ still reproduces the everyday merge.
+        var arrangement: MergeArrangement = .bringEveryTake
         /// The rendered take of each side at open time — the default
         /// pre-pairing's parts (S4-23 ruling 4: ⏎ = today's exact outcome
         /// when no session join memory is set; a remembered join seeds the
@@ -1169,7 +1167,17 @@ final class EditorSurfaceController {
         /// Ordered — sheet order IS the operation's pairing order (the
         /// chosen rule's fallback reads it).
         var pairings: [MergePairingDraft]
-        var id: String { firstBlockID + "+" + secondBlockID }
+        var id: String { blockIDs.joined(separator: "+") }
+
+        /// U-16's fork: three or more blocks get two choices and no pairing.
+        var isRun: Bool { blockIDs.count > 2 }
+        var offeredArrangements: [MergeArrangement] {
+            MergeArrangement.offered(blocks: max(2, blockIDs.count))
+        }
+        var arrangementSentence: String {
+            MergeArrangementCopy.sentence(
+                arrangement, blocks: max(2, blockIDs.count), otherTakes: otherTakes)
+        }
 
         func take(_ id: String) -> MergeTake? {
             firstTakes.first { $0.id == id } ?? secondTakes.first { $0.id == id }
@@ -1197,6 +1205,9 @@ final class EditorSurfaceController {
         /// architect's precision): the merged block must receive at least
         /// one take. The op's `mergedBlockWouldHaveNoTake` is the belt.
         var confirmBlocker: String? {
+            // The two preset roads place everything themselves — the only
+            // gate left is the hand-placed sheet's own I10-at-birth rule.
+            guard arrangement == .pairByHand else { return nil }
             if pairings.isEmpty && carriedIDs.isEmpty {
                 return "Nothing would land on the merged block — pair takes with ＋, or check “carry” on at least one."
             }
@@ -1251,6 +1262,10 @@ final class EditorSurfaceController {
                 .first { $0.blockID == trailingID }?.variantID
             var state = MergeCeremonyState(
                 firstBlockID: leadingID, secondBlockID: trailingID,
+                blockIDs: [leadingID, trailingID],
+                entryIndices: min(leadingIndex, trailingIndex)...max(leadingIndex, trailingIndex),
+                otherTakes: max(0, firstFan.count - 1) + max(0, secondFan.count - 1),
+                arrangement: .bringEveryTake,
                 firstRenderedID: firstRenderedID, secondRenderedID: secondRenderedID,
                 firstTakes: firstFan.map { MergeTake(variant: $0) },
                 secondTakes: secondFan.map { MergeTake(variant: $0) },
@@ -1272,6 +1287,62 @@ final class EditorSurfaceController {
         } catch {
             model.showOperationError(error)
         }
+    }
+
+    /// **U-16's two-option door over a RUN of three or more.** No columns,
+    /// no pairing, no per-take state — the sheet asks the one question her
+    /// ruling names and the confirm runs the chain either way. Opening
+    /// touches no rows (the ceremony's standing contract), and the fans are
+    /// read from the STORE for the sentence's count exactly as every fanned
+    /// road on this surface reads them.
+    ///
+    /// A run with NO fan anywhere has nothing to choose between — both roads
+    /// are byte-identically `merge` — so the door speaks the pair's own
+    /// needs-a-fan refusal rather than asking a question with one answer.
+    private func openMergeRunChoice(
+        indices: ClosedRange<Int>, blockIDs: [String]
+    ) async {
+        await model.autosave.flushNow()
+        guard !model.autosave.isDirty else {
+            model.showStatus("Unsaved changes couldn't be written — resolve that first, then retry.")
+            return
+        }
+        let fans: [String: [Variant]]
+        do {
+            fans = try await model.session.database.read { db in
+                var result: [String: [Variant]] = [:]
+                for id in blockIDs {
+                    result[id] = try Queries.blockFan(db, blockID: id)
+                        .filter { $0.deletedAt == nil && $0.status == .active }
+                }
+                return result
+            }
+        } catch {
+            model.showOperationError(error)
+            return
+        }
+        let others = blockIDs.reduce(0) { $0 + max(0, (fans[$1]?.count ?? 1) - 1) }
+        guard others > 0 else {
+            model.refuseFeedback(FannedDefaultsCopy.mergeCeremonyNeedsAFan)
+            return
+        }
+        mergeCeremony = MergeCeremonyState(
+            firstBlockID: blockIDs[0], secondBlockID: blockIDs[1],
+            blockIDs: blockIDs, entryIndices: indices, otherTakes: others,
+            arrangement: .bringEveryTake,
+            firstRenderedID: nil, secondRenderedID: nil,
+            firstTakes: [], secondTakes: [], pairings: [])
+    }
+
+    /// Switches the merge row. Nothing is written — the sheet has touched no
+    /// rows since 13b 4B and still doesn't.
+    func setMergeArrangement(_ arrangement: MergeArrangement) {
+        guard var state = mergeCeremony,
+              state.offeredArrangements.contains(arrangement),
+              state.arrangement != arrangement
+        else { return }
+        state.arrangement = arrangement
+        mergeCeremony = state
     }
 
     /// Places a ＋ between two takes (one from each column). A newly paired
@@ -1329,12 +1400,39 @@ final class EditorSurfaceController {
         mergeCeremony = nil
     }
 
+    /// **The confirm DISPATCHER** (18f batch 1): the row chose the road.
+    /// "Bring every take" and "only the shown ones" are the surface's own
+    /// standing roads — the carry-all and the plain merge, pair or chain —
+    /// each of which flushes, reads the store, guards and speaks for itself;
+    /// "pair by hand" is the shipped S4-23 confirm below, byte-unchanged. The
+    /// sheet dismisses only when the act LANDED, on every road.
     func confirmMergeCeremony() async {
         guard let state = mergeCeremony, state.canConfirm else { return }
         // The one-flight door, checked synchronously BEFORE any await (the
         // W confirm's discipline): refuse visibly and KEEP the ceremony.
         guard !structuralInFlight else {
             model.refuseFeedback("Another structural change is still landing.")
+            return
+        }
+        guard state.arrangement == .pairByHand else {
+            let bringEvery = state.arrangement == .bringEveryTake
+            let landed: Bool
+            if state.isRun {
+                landed = await runMergeChain(
+                    indices: state.entryIndices, blockIDs: state.blockIDs,
+                    bringEveryTake: bringEvery)
+            } else if bringEvery {
+                landed = await runCarryAllMerge(
+                    leadingIndex: state.entryIndices.lowerBound,
+                    trailingIndex: state.entryIndices.upperBound,
+                    leadingID: state.firstBlockID, trailingID: state.secondBlockID)
+            } else {
+                landed = await runInstantMerge(
+                    leadingIndex: state.entryIndices.lowerBound,
+                    trailingIndex: state.entryIndices.upperBound,
+                    leadingID: state.firstBlockID, trailingID: state.secondBlockID)
+            }
+            if landed { mergeCeremony = nil }
             return
         }
         // The sheet may have sat open while a sync round landed edits (the

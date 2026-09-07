@@ -734,7 +734,12 @@ final class TakesStructureController {
     ///
     /// Adjacency, order and the fans are read FROM THE STORE, never from the
     /// frozen projection: a wrong pair would merge blocks she never picked.
-    func mergeSelectedBlocks() async {
+    ///
+    /// **18f batch 1 (her U-16):** the banner's second door names the ROAD —
+    /// bring every take (the carry-all chain, the default this door has run
+    /// since J4b) or only the shown ones (the plain chain). One chain body
+    /// serves both (`MergeChainRun`), shared with Write and the workbench.
+    func mergeSelectedBlocks(bringEveryTake: Bool = true) async {
         guard !model.structuralInFlight else {
             model.speak("Another structural change is still landing.")
             return
@@ -808,8 +813,10 @@ final class TakesStructureController {
         // its slots fresh, so the residual reachability here is the
         // archived-default sync-race class rather than the frozen
         // projection; the guard is the same either way.)
-        guard CarryAllMerge.chainComposes(order: chain, fans: fans, displayed: displayed)
-        else {
+        // The A5 validation is the CARRY-ALL road's; the plain road depends
+        // on no displayed-take resolution and cannot suffer that race.
+        if bringEveryTake,
+           !CarryAllMerge.chainComposes(order: chain, fans: fans, displayed: displayed) {
             model.speak(FannedDefaultsCopy.takesChangedMerge)
             return
         }
@@ -818,46 +825,18 @@ final class TakesStructureController {
         model.setStatus(nil)
         do {
             let stack = model.session.undoStack
-            let landing: (blockID: String, variantID: String, takes: Int)
+            let landing: MergeChainRun.Landing
                 = try await model.session.runner.run { ops in
                 try stack.withCompound(label: "Merge Blocks", operations: ops) {
-                    var mergedID = chain[0]
-                    var mergedVariantID = ""
-                    var leadingFan = fans[chain[0]] ?? []
-                    var leadingDisplayedID = displayed[chain[0]] ?? nil
-                    var takesOnMerged = leadingFan.count
-                    for next in chain.dropFirst() {
-                        let trailingFan = fans[next] ?? []
-                        if leadingFan.count > 1 || trailingFan.count > 1,
-                           let composition = CarryAllMerge.compose(
-                            leadingDisplayedID: leadingDisplayedID, leadingFan: leadingFan,
-                            trailingDisplayedID: displayed[next] ?? nil,
-                            trailingFan: trailingFan) {
-                            let result = try ops.mergeCeremony(
-                                mergedID, next,
-                                pairings: [composition.pairing], carries: composition.carries)
-                            let joined = CarryAllMerge.joinedTake(of: result)
-                            mergedID = result.block.id
-                            mergedVariantID = joined?.id ?? result.variants[0].id
-                            leadingFan = result.variants
-                            leadingDisplayedID = joined?.id
-                            takesOnMerged = result.variants.count
-                        } else {
-                            let result = try ops.merge(mergedID, next)
-                            mergedID = result.block.id
-                            mergedVariantID = result.variant.id
-                            leadingFan = [result.variant]
-                            leadingDisplayedID = result.variant.id
-                            takesOnMerged = 1
-                        }
-                    }
-                    return (mergedID, mergedVariantID, takesOnMerged)
+                    try MergeChainRun.run(
+                        ops, order: chain, fans: fans, displayed: displayed,
+                        bringEveryTake: bringEveryTake)
                 }
             }
             model.clearMergeSelection()
             model.choreography.parkFocus(onVariant: landing.variantID)
             model.speak(FannedDefaultsCopy.mergedChain(
-                blocks: chain.count, carried: max(0, landing.takes - 1)))
+                blocks: chain.count, carried: max(0, landing.takesOnMerged - 1)))
         } catch {
             // Ladder round 2 (R2-2): the read-to-write race — a pick that
             // died or moved between the existence read above and
