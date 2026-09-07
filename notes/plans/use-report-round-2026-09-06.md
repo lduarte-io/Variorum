@@ -1398,8 +1398,11 @@ flight's editing window beyond the walk's own typing.
 **NOT DONE in this batch (the record's first line, per the brief's item 9):** no Return-key work (batch 2,
 closed), no sheet/preset/renaming work (18f), nothing in `Sources/VariorumCore/Sync/`, no schema, no
 lockstep, nothing in `BlockRangeIndex` / `CrossBlockEditPlanner` / the 13u fence's family, no phone door
-(the parity row is stated at the close), no Release build and no `/Applications` refresh. *(Filled in
-further at close.)*
+(the parity row is stated at the close), no Release build and no `/Applications` refresh. Also NOT done,
+decided and said rather than skipped: no hand-walk of the Takes bar's two rows or the board's banner
+button (pinned; the reason is at the walk's end), no canon file edited (the deltas are drafted at the end
+for the letter's closeout), no `notes/MobileSoul.md` edit, no KnownIssues row (the three residuals are
+recorded with owners or as hers), and no measurement of the repair's cost on a long note.
 
 **TWO DECLARED DEVIATIONS FROM §5.1 BATCH 3's LETTER, stated up front (the R-1 precedent):**
 
@@ -1438,7 +1441,7 @@ looked like for `deleteBlock` · `archiveBlock` · `deleteSelectedBlocks`.
 | 3 | Core: `KeepOnTopDivide` moved into the Domain (public, call sites unchanged) + `splitBlockAtNewlines` + `StructuralSplitAtNewlinesTests` | **DONE (this row's commit)** — `StructuralSplitAtNewlinesTests` **19 / 1 green**; core `swift test` **1493 / 162 green**; the two reverts run and recorded below |
 | 4 | Mac: the doors, the registry declarations, the receipt copy + their pins | **DONE (495c67bc)** — `SplitAtNewlinesDoorTests` **11 / 1 green**; `CapabilityRegistryTests` **23 / 1 green**; iOS build SUCCEEDED |
 | 5 | The walk (dev-store Debug, `18c-3/` captures) | **DONE (this row's commit)** — seventeen captures, both voices; listed below |
-| 6 | Close: the suites, row 37's disposition, QUESTIONS #93, the parity line | IN-PROGRESS |
+| 6 | Close: the suites, row 37's disposition, QUESTIONS #93, the parity line | **DONE** (this row's commit) — #93 logged at `57dcd0e5`; the closing suites below |
 
 **A THIRD DEVIATION, declared with piece 3 (a MOVE, not a change):** `KeepOnTopDivide` left
 `App/Variorum/Shared/` for `Sources/VariorumCore/Domain/` and became `public`. Nothing inside it
@@ -1519,3 +1522,104 @@ three takes, each carrying all three paragraphs; block 2 one take).
 SAME acts through the same view-model doors the workbench and Write walks just exercised, rendered from
 the same registry declarations, and the pins hold the declared ⇔ rendered tables for both bars. A third
 hand-walk of one act's fourth and fifth renderer would prove the same thing a third time.
+
+**THE CLOSING SUITES (all run at the END, on the final tree):**
+
+- core `swift test` → **`Test run with 1493 tests in 162 suites passed after 51.063 seconds.`**
+  *(the batch-2 close was 1462/160; +31 tests +2 suites are this batch's `NewlineSplittingTests` (12) and
+  `StructuralSplitAtNewlinesTests` (19).)*
+- Mac, ONE `xcodebuild test` run — the eight touched suites plus the ten `Tutorial*` spine types →
+  **`Test run with 183 tests in 18 suites passed after 30.424 seconds.`** Eighteen suites for eighteen
+  `-only-testing` type names: nothing was silently dropped. The eighteen: `SplitAtNewlinesDoorTests` ·
+  `CapabilityRegistryTests` · `FannedDefaultsTests` · `FannedDefaultsBoardTests` · `TakesDivideTests` ·
+  `BlocksWorkbenchFaceTests` · `BlockTOCTests` · `EditorDocumentTests` + the spine's ten
+  (`TutorialBookShapeTests · TutorialDoorTests · TutorialWritingActsTests · TutorialTakesActsTests ·
+  TutorialStructureActsTests · TutorialLookingActsTests · TutorialLibraryActsTests ·
+  TutorialDeletionActsTests · TutorialWherePlacesActsTests · TutorialPrivacyChapterTests`).
+- iOS `xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS' build` → **BUILD SUCCEEDED.**
+- phone, `MobileStructuralTests` on the `iPhone 17 Pro` simulator →
+  **`Test run with 18 tests in 1 suite passed after 0.541 seconds.`** *(run because `KeepOnTopDivide`
+  MOVED into core this batch and this suite is one of its callers — the move is source-compatible and the
+  phone's own fanned-divide pins are unchanged.)*
+
+**DISPOSITIONS (the ledger rows this batch owns):**
+
+- **Row 37 — *"make all newlines blocks" (takes stay with the top paragraph)* (U-6, HERS/ruled) — FIXED.**
+  Built as `Operations.splitBlockAtNewlines` over the pure `NewlineSplitting.breaks`, composing the
+  standing `divide` and the keep-on-top `divideW` inside ONE transaction per block with ONE undo entry and
+  its exact-row redo; five doors (both bars' `note ▾` and `block ▾`, both bulk bars) run it through one
+  receipt. Its pins: `oneParagraphHasNoBreak` · `aSingleNewlineBetweenProseIsABreak` ·
+  `aRunOfNewlinesIsOneBreakAndCarriesItsWholeRun` · `aBlankLineCarryingSpacesIsStillOneBreak` ·
+  `leadingAndTrailingBlankLinesAreNeverBreaks` · `adjacentListLinesAreNotABreak` ·
+  `aNestedListStaysWholeToo` · `aListKeepsItsProseNeighboursAtArmsLength` ·
+  `aBlankLineInsideAListIsStillABreak` · `aLineThatOnlyLooksLikeAListStillBreaks` ·
+  `offsetsAreUTF16AndSurviveAstralCharacters` · `everyBreakIsALegalCutForTheOneCutBrain` ·
+  `aThreeParagraphBlockBecomesThreeBlocksInOrderKeepingAsIdentity` ·
+  `everyMintedBlockCarriesItsLineageEdgeAndAsPresentation` · `splittingAtABlankLineKeepsHerSpacingExactly` ·
+  `aListStaysWholeInsideItsOwnBlock` · `aBlockWithNoBreakIsANoOpDownToTheOutboxRow` ·
+  `aBlockThatIsAllBlankLinesIsANoOp` · `aFannedBlockLeavesEveryTakeOnTheTopParagraph` ·
+  `aRiddenTakeKeepsItsName` · `anEmptyOtherTakeStaysOnTheOriginalAndIsCounted` ·
+  `onlyTheDisplayedTakesNewlinesDecideTheBreaks` ·
+  `theChosenTakeIsTheOneThatSplitsEvenWhenItIsNotTheFirst` · `aSealedPostRefusesTheWholeSplit` ·
+  `aLockedSingleTakeRefusesAndLeavesNoHalfSplit` · `anUnplacedBlockRefuses` ·
+  `oneUndoPutsTheWholeBlockBackAndRedoSplitsItAgainExactRow` ·
+  `oneUndoOfAFannedSplitRestoresAWholeWithItsFan` · `aWholeNoteSplitsUnderOneCompoundUndoEntry` ·
+  `everyRowItWritesIsAnOrdinaryOutboxedRow` · `theSuccessorsGetCopiesOfTheBlocksComments` ·
+  `theNoteDoorSplitsEveryBlockAndSpeaksTheCount` · `theWholeNoteRepairIsOneUndoEntry` ·
+  `theReceiptNamesTheTakesThatStayedOnTop` · `aNoteWithNothingToRepairRefusesAndChangesNothing` ·
+  `aSealedNoteRefusesThroughTheOperation` · `theCaretLandsInTheFirstSuccessorOfTheBlockItWasIn` ·
+  `theBlockDoorSplitsOnlyTheCaretBlock` · `theBlockDoorOnAWholeBlockSaysSoAndWritesNothing` ·
+  `theReceiptOnlyClaimsWhatTheResultsHold` · `theThreeActsAreDeclaredWithTheirDoors` ·
+  `bothBarsRenderTheTwoMenuDoors`. The two reverts are recorded above; walked and captured.
+
+**RETIRED PINS: NONE.** Nothing this batch built replaces a shipped behaviour — `splitBlockAtNewlines` is
+a new operation, `divideRows`/`divideWRows` are the same bodies moved, and `KeepOnTopDivide` moved without
+changing a line. Every existing suite that touches this code is unmodified and green.
+
+**NOTHING WAS DISMISSED AS HOLLOW:** this batch is a ruled feature, not a bug hunt, and the two named
+reverts put the break rule and the one-entry undo red.
+
+**RESIDUALS — recorded, not fixed:**
+
+1. **A note carrying one LOCKED take cannot be repaired by the note-wide door at all.** The compound is
+   all-or-nothing (the shipped bulk grammar), so `divide`'s `ensureEditable` refusal on one block rolls
+   the whole repair back. Traced by reading and pinned at the operation
+   (`aLockedSingleTakeRefusesAndLeavesNoHalfSplit`), not measured in use. It is QUESTIONS **#93(c)**, hers
+   to soften; no owner opened.
+2. **A break immediately before an INDENTED list line loses that line's indent** — `seamTrimmedHalves`
+   trims the seam's leading whitespace, which plain ⌘⇧D has always done. Needs a list whose FIRST line is
+   nested; recorded in #93's own corner rather than fixed, because the fix would change every divide
+   door's trim.
+3. **The receipt counts only blocks that actually split.** "5 blocks from 2 blocks" in a note of seven
+   says what the act did, not what the note now holds. Deliberate (the 13e rule: count from the
+   operation's own result) and pinned; stated because a reader could expect the note's total.
+
+**CANON DELTA, DRAFTED FOR THE LETTER'S CLOSEOUT (not applied here — §5.1 says the closeout owns it):**
+
+1. **AppSpec §9 gains `splitBlockAtNewlines`** beside the divide family: *"**splitBlockAtNewlines(block)**
+   (author ruling U-6, 2026-09-06, the use-report round's 18c) — the repair for a note written with the
+   newlines chip OFF: the block's DISPLAYED take breaks at its newline runs (`NewlineSplitting.breaks`;
+   a run of exactly one newline between two LIST-LEAD lines is not a break — U-19 (4), PROVISIONAL,
+   QUESTIONS #93) and the pieces become blocks in order, in ONE transaction with ONE structural undo entry
+   and its exact-row redo. A single-take block takes successive in-place `divide`s (A keeps its identity as
+   the first paragraph); a FANNED block takes a keep-on-top `divideW` at the first break — the top
+   paragraph carries every other take WHOLE, her words — and the second successor then splits in place.
+   The seam trim is the ONE cut brain's, so the k−1 spacing rule (A11) rides unchanged and the page reads
+   byte-identically. A block with no break is a no-op that writes nothing; a sealed post refuses through
+   `placedContext`. Doors: both bars' `note ▾` (the whole note, one `withCompound`) and `block ▾`, and both
+   selection banners."*
+2. **`KeepOnTopDivide` moved** from `App/Variorum/Shared/` to `Sources/VariorumCore/Domain/` and is public
+   — worth a line wherever batch 1's delta names its home, since the core operation is its fourth caller.
+3. **The MOBILE PARITY LINE this batch owes** (`notes/MobileSoul.md`, at the round's closeout): *"18c batch
+   3 — the Mac gained 'Make every newline a block' (U-6): a core operation (`splitBlockAtNewlines`, which
+   the phone's target already compiles) behind five Mac doors. The phone owes a version of the DOOR; the
+   brain is shared and needs nothing."*
+
+**PROVISIONAL, for her ratify list:** QUESTIONS **#93** — (a) the list exception's exact predicate;
+(b) the blank line (the k−1 rule kept, against §5.1's parenthetical); (c) the bulk doors' all-or-nothing.
+
+**NOT DONE, restated at the close:** everything in the record's first line, plus — no canon file edited
+(the delta above is drafted for the closeout), no `notes/MobileSoul.md` edit, no KnownIssues row opened
+(the three residuals are recorded here; none was deferred out of this batch as work), the Takes bar's and
+the board's renderers pinned but not hand-walked (said above, with the reason), and no measurement of the
+repair's cost on a long note beyond the walk's own five-block one.
