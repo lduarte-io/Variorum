@@ -118,9 +118,13 @@ public struct RotationMarker: Codable, Equatable, Sendable {
     /// `rekeyLibrary`, nil before.
     public var oldKeyFingerprint: String?
     public var newKeyFingerprint: String?
-    /// The corpus key id the vault write advanced to (set at `vaultWrite`,
-    /// before the write) — the resume compares it with the vault's to tell
-    /// whether the write landed.
+    /// The corpus key id the vault write advances to — stamped at
+    /// `vaultWrite` BEFORE the write (F1, ledger 69: `CorpusRotation.prepare`
+    /// mints it first) — so the resume tells EXACTLY whether the write that
+    /// landed was this device's own (the vault's id equals it) or another
+    /// device's rotation (it does not). Carried by every later step. nil
+    /// on a marker written before F1 (the resume then falls back to the 5b
+    /// device-name reading).
     public var newCorpusKeyID: String?
     /// The device word + day the notices name (display only — never
     /// ordering). ISO-8601.
@@ -291,36 +295,37 @@ public struct CorpusRotation: Sendable {
         self.horizonWait = horizonWait
     }
 
-    // MARK: - BEGIN (§4 step 2)
+    // MARK: - BEGIN (§4 step 2) — the mint, then the write
 
-    /// The vault write that starts a rotation, authorized by the OLD proof.
-    /// Refuses at the door (decision 32) while the vault carries a previous
-    /// corpus key, and (corner 30) when the vault's current corpus key id is
-    /// not the one `current` holds — the account moved elsewhere; follow
-    /// first. `appleHeldCopy` non-nil keeps the Apple-held copy of M′ (the
-    /// vault's `master_wrapped_by_apple_held` — Standard's Replace All Keys;
-    /// decision 30's pinned PRESENCE); nil writes none (entering Castle —
-    /// the pinned ABSENCE).
-    public static func begin(
-        client: KeyVaultClient,
+    /// pre-13x ladder round 1, F1 (ledger 69): THE MINT, SPLIT FROM THE
+    /// WRITE. What `begin` used to do inside one call is now two: `prepare`
+    /// mints M′, C′ (+ J′) and their ids and builds the vault format — NO
+    /// network, nothing written — so the caller can persist the NEW corpus
+    /// key id in its marker BEFORE the write; `begin(client:current:
+    /// prepared:)` then fetches, checks the door and writes. The resume of
+    /// a `.vaultWrite` marker compares the vault's current corpus key id
+    /// with the id the marker stamped: equal ⇒ this device's own write
+    /// landed (custody did not); different ⇒ another device's rotation —
+    /// exact, where the vault's `updated_by_device` could only guess (a
+    /// follower's clearing write stamps ITS name over a landed write of
+    /// ours — 5b's recorded corner). `Prepared` carries key material and
+    /// is never persisted; a caller holds it for the span of one begin.
+    public struct Prepared: Sendable {
+        /// The new corpus key's id — what the marker stamps before the write.
+        public let corpusKeyID: String
+        let format: KeyVaultFormat
+        let material: DeviceKeyMaterial
+    }
+
+    /// Mint the new keys and build the format `begin` will write. Pure of
+    /// the network; `appleHeldCopy` non-nil keeps the Apple-held copy of M′
+    /// (Standard's Replace All Keys — decision 30's pinned PRESENCE); nil
+    /// writes none (entering Castle — the pinned ABSENCE).
+    public static func prepare(
         current: DeviceKeyMaterial,
         secrets: RotationSecrets,
         appleHeldCopy: (key: SymmetricKey, id: String)?
-    ) async throws -> Begun {
-        guard let fetched = try await client.fetchVault() else {
-            throw KeyVaultClientError.vaultAbsent
-        }
-        if let previous = fetched.format.previousCorpusKey {
-            throw CorpusRotationError.rotationInProgress(previousKeyID: previous.keyID)
-        }
-        let vaultKeyID = fetched.format.classKey(for: .corpus)?.keyID ?? ""
-        guard vaultKeyID == current.corpusKeyID else {
-            throw CorpusRotationError.staleMaster(vaultKeyID: vaultKeyID, heldKeyID: current.corpusKeyID)
-        }
-        // The OLD master's proof authorizes the ONE write that installs
-        // the new hash (decision 12); the old proof is refused from then on.
-        let oldProof = KeyProof.wireToken(master: current.masterSymmetricKey)
-
+    ) throws -> Prepared {
         let master = SymmetricKey(size: .bits256)
         let corpus = SymmetricKey(size: .bits256)
         let journal = SymmetricKey(size: .bits256)
@@ -343,17 +348,60 @@ public struct CorpusRotation: Sendable {
             format = try format.settingAppleHeldCopy(
                 masterKey: master, appleKey: appleHeldCopy.key, appleKeyID: appleHeldCopy.id)
         }
+        let material = DeviceKeyMaterial(
+            masterKey: master.data, corpusKey: corpus.data, corpusKeyID: corpusID,
+            journalBridgeKey: journal.data, journalBridgeKeyID: journalID)
+        return Prepared(corpusKeyID: corpusID, format: format, material: material)
+    }
+
+    /// The vault write that starts a rotation, authorized by the OLD proof,
+    /// over keys `prepare` minted. Refuses at the door (decision 32) while
+    /// the vault carries a previous corpus key, and (corner 30) when the
+    /// vault's current corpus key id is not the one `current` holds — the
+    /// account moved elsewhere; follow first. Returns the material to land
+    /// in custody (M′ / C′ / J′ + the previous key and the seq read back
+    /// off the receipt).
+    public static func begin(
+        client: KeyVaultClient,
+        current: DeviceKeyMaterial,
+        prepared: Prepared
+    ) async throws -> Begun {
+        guard let fetched = try await client.fetchVault() else {
+            throw KeyVaultClientError.vaultAbsent
+        }
+        if let previous = fetched.format.previousCorpusKey {
+            throw CorpusRotationError.rotationInProgress(previousKeyID: previous.keyID)
+        }
+        let vaultKeyID = fetched.format.classKey(for: .corpus)?.keyID ?? ""
+        guard vaultKeyID == current.corpusKeyID else {
+            throw CorpusRotationError.staleMaster(vaultKeyID: vaultKeyID, heldKeyID: current.corpusKeyID)
+        }
+        // The OLD master's proof authorizes the ONE write that installs
+        // the new hash (decision 12); the old proof is refused from then on.
+        let oldProof = KeyProof.wireToken(master: current.masterSymmetricKey)
+        var format = prepared.format
         let receipt = try await client.updateVault(
             format, expectedRevision: fetched.revision, keyProof: oldProof)
         guard let seq = receipt.rotationStartedSeq else {
             throw CorpusRotationError.noRotationSeq
         }
         format.rotationStartedSeq = seq
-        let material = DeviceKeyMaterial(
-            masterKey: master.data, corpusKey: corpus.data, corpusKeyID: corpusID,
-            journalBridgeKey: journal.data, journalBridgeKeyID: journalID
-        ).carryingPreviousCorpusKey(current.corpusKey, keyID: current.corpusKeyID, startedSeq: seq)
+        let material = prepared.material.carryingPreviousCorpusKey(
+            current.corpusKey, keyID: current.corpusKeyID, startedSeq: seq)
         return Begun(material: material, format: format, receipt: receipt)
+    }
+
+    /// The one-call shape: `prepare` then `begin` — for callers with no
+    /// marker to stamp between the two (the core pins, the attacker world).
+    public static func begin(
+        client: KeyVaultClient,
+        current: DeviceKeyMaterial,
+        secrets: RotationSecrets,
+        appleHeldCopy: (key: SymmetricKey, id: String)?
+    ) async throws -> Begun {
+        try await begin(
+            client: client, current: current,
+            prepared: try prepare(current: current, secrets: secrets, appleHeldCopy: appleHeldCopy))
     }
 
     // MARK: - THE FOLLOWER'S KEY READ (§7 step 3; 2c calls it)

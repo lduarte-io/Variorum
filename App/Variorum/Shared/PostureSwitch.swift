@@ -382,13 +382,18 @@ final class PostureSwitchRunner {
 
             // ————— 2. ROTATE THE SYNC KEYS (the marker BEFORE the write) —————
             phase = .rotatingKeys
-            try await writeMarker(RotationMarker(step: .vaultWrite, entersCastle: entersCastle, startedAt: stamp))
-            try leaves.injectFault(.beforeVaultWrite)
+            // F1 (ledger 69): the mint FIRST, so the marker carries the NEW
+            // corpus key id before anything is written — the resume's exact
+            // discriminator (own write landed ⇔ the vault's id is this one).
             let appleHeld: (key: SymmetricKey, id: String)? = entersCastle ? nil : appleHeldCopyForStandard()
+            let prepared = try CorpusRotation.prepare(current: current, secrets: secrets, appleHeldCopy: appleHeld)
+            try await writeMarker(RotationMarker(
+                step: .vaultWrite, entersCastle: entersCastle,
+                newCorpusKeyID: prepared.corpusKeyID, startedAt: stamp))
+            try leaves.injectFault(.beforeVaultWrite)
             let begun: CorpusRotation.Begun
             do {
-                begun = try await CorpusRotation.begin(
-                    client: vault, current: current, secrets: secrets, appleHeldCopy: appleHeld)
+                begun = try await CorpusRotation.begin(client: vault, current: current, prepared: prepared)
             } catch let refusal as KeyVaultClientError
                 where refusal == .vaultRevisionConflict || refusal == .keyProofRefused {
                 // pre-13x 4b (corner 39 / ledger 40 — §7 step 7): TWO DEVICES
@@ -443,7 +448,9 @@ final class PostureSwitchRunner {
                 // M′ — the follow (the passphrase) picks it up at resume.
                 throw PostureSwitchError.custodyRefused(ProtectionCopy.syncKeysWroteButUnreadable)
             }
-            try await writeMarker(RotationMarker(step: .reencrypt, entersCastle: entersCastle, startedAt: stamp))
+            try await writeMarker(RotationMarker(
+                step: .reencrypt, entersCastle: entersCastle,
+                newCorpusKeyID: begun.material.corpusKeyID, startedAt: stamp))
 
             // ————— 3. RE-ENCRYPT THE SERVER COPY —————
             let final = try await reencryptAndComplete(vault: vault, transport: transport, material: begun.material)
@@ -1060,31 +1067,35 @@ final class PostureSwitchRunner {
                 try await clearMarker()
                 throw PostureSwitchError.restartRequired
             }
-            // pre-13x 5b (ledger 67 — 5a's question 10, the orchestrator's
-            // ruling): a marker at `.vaultWrite` with the vault's corpus key
-            // id MOVED is one of TWO stories — this device's own write landed
-            // (custody did not — the arm below), or this device's write NEVER
-            // landed and ANOTHER device's rotation did meanwhile (a ceremony
-            // killed before its vault write; the other device entered Castle
-            // or replaced the keys). Key material cannot tell them apart (a
-            // never-landed write left nothing behind). The vault's own
-            // `updated_by_device` can: a name other than this device's means
-            // the account moved under us — M1's corner by another road, so
-            // THE RESUME IS THE FOLLOW: the words this ceremony showed are NOT
-            // the account's and are not landed, and the Done says so (copy
-            // §2b, ledger 61). A `.reencrypt` marker is never this case (it
-            // is written only after this device's own write and custody).
-            // Recorded corner: this device's write landed AND a follower
-            // finished the rotation (its clearing write stamps ITS name)
-            // before the resume — reads as another device's rotation; the
-            // false-alarm direction, chosen over the vacuous-promise one.
+            // pre-13x 5b (ledger 67) → F1 (ledger 69, THE EXACT DISCRIMINATOR):
+            // a marker at `.vaultWrite` with the vault's corpus key id MOVED is
+            // one of TWO stories — this device's own write landed (custody did
+            // not — the arm below), or this device's write NEVER landed and
+            // ANOTHER device's rotation did meanwhile (a ceremony killed before
+            // its vault write; the other device entered Castle or replaced the
+            // keys). The marker now carries the NEW corpus key id, stamped
+            // BEFORE the write (`CorpusRotation.prepare`): the vault's id EQUAL
+            // to it ⇒ our own write landed — the ceremony's words ARE the
+            // account's, no flag; DIFFERENT ⇒ another device's rotation ⇒ THE
+            // RESUME IS THE FOLLOW: the words this ceremony showed are NOT the
+            // account's and are not landed, and the Done says so (copy §2b,
+            // ledger 61). 5b's device-name reading (`updated_by_device` ≠ this
+            // device) survives ONLY as the fallback for a marker written before
+            // F1 (no id stamped) — it misread the recorded corner (our write
+            // landed, a FOLLOWER finished and stamped its own name). A
+            // `.reencrypt` marker is never this case (written only after this
+            // device's own write and custody). `updated_by_device` now only
+            // NAMES the sentence.
             let byAnotherDevice: Bool = {
-                guard marker.step == .vaultWrite, vaultKeyID != material?.corpusKeyID,
-                      let writer = fetched.format.updatedByDevice else { return false }
+                guard marker.step == .vaultWrite, vaultKeyID != material?.corpusKeyID else { return false }
+                if let stamped = marker.newCorpusKeyID { return vaultKeyID != stamped }
+                guard let writer = fetched.format.updatedByDevice else { return false }
                 return writer != leaves.deviceName()
             }()
             if byAnotherDevice {
-                leaves.log("posture switch: resume — the account's keys moved under a marker written before this device's own vault write (\(fetched.format.updatedByDevice ?? "another device") rotated them); this device FOLLOWS instead (no second rotation; the ceremony's words are not landed)")
+                leaves.log("posture switch: resume — the account's keys moved under a marker written before this device's own vault write (the vault's corpus key id is not the one this ceremony minted; \(fetched.format.updatedByDevice ?? "another device") rotated them); this device FOLLOWS instead (no second rotation; the ceremony's words are not landed)")
+            } else if marker.step == .vaultWrite, vaultKeyID != material?.corpusKeyID {
+                leaves.log("posture switch: resume — this device's own vault write landed (the vault's corpus key id is the one this ceremony minted); custody picks M′ up by the typed secret")
             }
             if vaultKeyID != material?.corpusKeyID {
                 // The write landed, custody did not: M′ by the passphrase

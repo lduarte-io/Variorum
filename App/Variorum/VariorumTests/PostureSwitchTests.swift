@@ -2863,22 +2863,28 @@ struct PostureSwitchTests {
 
     // MARK: - pre-13x 5b.0(c): THE RESUME ROAD'S FLAG (ledger 67)
 
-    /// LEDGER 67 — the conflict-follow by the RESUME road: A's ceremony is
-    /// KILLED before its vault write (the marker at `.vaultWrite`, the vault
-    /// untouched); B — a sibling with its OWN vault client, so its writes
-    /// stamp "sibling device" — enters Castle whole meanwhile; A relaunches
-    /// and resumes by its passphrase (the resume door passes no words).
-    /// The vault's corpus key id has MOVED, so the resume's arm picks M′ up
-    /// from the vault — and because the vault's last writer is not this
-    /// device, the road is THE FOLLOW: no second rotation, the ceremony's
-    /// words NOT landed (the account's words are B's), and the outcome
-    /// carries the flag + B's name so the ceremony's Done speaks copy §2b's
-    /// conflict sentence, never the ordinary Done. A ends in Castle under
-    /// B's keys with its old key file retired. The CONTROL is the standing
-    /// pin (b) above: a resume after THIS device's own landed write (the
-    /// vault's writer is this device) speaks the ordinary Done. RED-ON-OLD:
-    /// the discriminator absent — A's resume landed the ceremony's words as
-    /// a W copy and told the user the ordinary Done (5a's tree).
+    /// LEDGER 67 → 69 — the conflict-follow by the RESUME road: A's ceremony
+    /// is KILLED before its vault write (the marker at `.vaultWrite`, the
+    /// vault untouched); B — a sibling with its OWN vault client, so its
+    /// writes stamp "sibling device" — enters Castle whole meanwhile; A
+    /// relaunches and resumes by its passphrase (the resume door passes no
+    /// words). The vault's corpus key id has MOVED, so the resume's arm
+    /// picks M′ up from the vault — and because the vault's id is NOT the
+    /// one A's marker stamped before its write (F1, ledger 69: the exact
+    /// discriminator — `CorpusRotation.prepare` mints the id first), the
+    /// road is THE FOLLOW: no second rotation, the ceremony's words NOT
+    /// landed (the account's words are B's), and the outcome carries the
+    /// flag + B's name (the vault's `updated_by_device` — now only the
+    /// sentence's NAME) so the ceremony's Done speaks copy §2b's conflict
+    /// sentence, never the ordinary Done. A ends in Castle under B's keys
+    /// with its old key file retired. The CONTROLS: the standing pin (b)
+    /// above (a resume after THIS device's own landed write, no follower)
+    /// and `aCeremonyWhoseOwnWriteLandedResumesAsItselfAfterAFollowerFinished
+    /// AndSpeaksTheOrdinaryDone` (5b's recorded corner, now exact). RED-ON-
+    /// OLD (5b): the discriminator absent — A's resume landed the ceremony's
+    /// words and told the user the ordinary Done; (F1) the id stamped ⇒ this
+    /// pin holds under both readings (B's name ≠ A's AND B's id ≠ A's
+    /// marker's) — the corner pin is what tells the two readings apart.
     @Test func aCeremonyKilledBeforeItsVaultWriteResumesIntoAnotherDevicesSwitchAsTheFollowAndSaysSo() async throws {
         let a = try await makeWorld()
         defer { a.tearDown() }
@@ -2889,14 +2895,17 @@ struct PostureSwitchTests {
         await #expect(throws: PostureSwitchError.injectedFault(.beforeVaultWrite)) {
             _ = try await a.runner.enterCastle(passphrase: "sesame", recoveryWords: a.words)
         }
-        #expect(try await a.marker()?.step == .vaultWrite)
+        let aMarker = try #require(try await a.marker())
+        #expect(aMarker.step == .vaultWrite)
+        #expect(aMarker.newCorpusKeyID != nil, "F1: the marker carries the id the ceremony minted BEFORE its write")
         #expect(try await a.vault().revision == revisionBefore, "A's write never landed")
 
         // B's whole switch lands while A is down.
         let bDone = try await b.runner.enterCastle(passphrase: "sesame", recoveryWords: b.words)
         try await expectCastleEndState(b, bDone)
         let bMaterial = try #require(bDone.material)
-        #expect(try await a.vault().format.updatedByDevice == "sibling device", "the vault names B as its last writer")
+        #expect(bMaterial.corpusKeyID != aMarker.newCorpusKeyID, "the vault's id is B's, not the one A's marker stamped — the exact reading")
+        #expect(try await a.vault().format.updatedByDevice == "sibling device", "the vault names B as its last writer (the sentence's name)")
 
         // A resumes by the passphrase alone — the resume door's shape.
         arm(a, faultAt: nil)
@@ -2922,6 +2931,66 @@ struct PostureSwitchTests {
         #expect(!FileManager.default.fileExists(atPath: a.oldKeyFileURL.path), "the road was a follow — A's Standard-era key file left the live folder")
         // The winner's Done is the ordinary one.
         #expect(!bDone.followedAnotherDevicesSwitch && ProtectionCopy.castleDoneBody(bDone) == ProtectionCopy.enteredCastleDone)
+    }
+
+    /// LEDGER 69 — 5b's RECORDED CORNER, made exact (F1): A's ceremony's
+    /// vault write LANDED (the marker at `.vaultWrite` stamped with the id
+    /// it minted; custody never took M′ — the fault after the write); a
+    /// FOLLOWER (B, its own vault client named "sibling device") finished
+    /// the rotation by the passphrase — its clearing write stamps ITS name
+    /// on the vault; then A resumes with its passphrase and its words. The
+    /// vault's corpus key id IS the one A's marker stamped, so this is A's
+    /// OWN switch: the ORDINARY Done, no flag, no other device named, and
+    /// the ceremony's twelve words LANDED on A's new key file (they are the
+    /// account's — B followed under them). RED-ON-OLD (behavioural revert:
+    /// the 5b device-name reading — `updated_by_device` ≠ this device ⇒
+    /// "another device rotated"): A was told the conflict-follow sentence
+    /// over words that WERE the account's, and its words were not landed.
+    @Test func aCeremonyWhoseOwnWriteLandedResumesAsItselfAfterAFollowerFinishedAndSpeaksTheOrdinaryDone() async throws {
+        let a = try await makeWorld()
+        defer { a.tearDown() }
+        let b = try await makeWorld(sharing: a, deviceName: "sibling device")  // built BEFORE any switch
+        defer { b.tearDown() }
+        let oldMaterial = try #require(a.oldMaterial)
+        arm(a, faultAt: .afterVaultWriteBeforeCustody)
+        await #expect(throws: PostureSwitchError.injectedFault(.afterVaultWriteBeforeCustody)) {
+            _ = try await a.runner.enterCastle(passphrase: "sesame", recoveryWords: a.words)
+        }
+        let aMarker = try #require(try await a.marker())
+        #expect(aMarker.step == .vaultWrite)
+        let landed = try await a.vault()
+        let stamped = try #require(aMarker.newCorpusKeyID, "F1: the id minted before the write rides the marker")
+        #expect(landed.format.classKey(for: .corpus)?.keyID == stamped, "A's write LANDED under the id its marker stamped")
+        #expect(landed.format.previousCorpusKey != nil, "the rotation is open on the server")
+        #expect(a.keyStore.load()?.corpusKeyID == oldMaterial.corpusKeyID, "custody never took M′")
+
+        // THE FOLLOWER finishes the rotation while A is down — its clearing
+        // write stamps "sibling device" on the vault.
+        let followed = try await b.runner.follow(passphrase: "sesame", recoveryWords: nil)
+        #expect(followed.entersCastle && followed.reencrypted >= 3)
+        let afterFollow = try await a.vault()
+        #expect(afterFollow.format.previousCorpusKey == nil && afterFollow.format.rotationStartedSeq == nil,
+                "the follower cleared the previous key + the seq at head")
+        #expect(afterFollow.format.updatedByDevice == "sibling device", "the vault's LAST writer is the follower — 5b's reading would call this another device's rotation")
+        #expect(afterFollow.format.classKey(for: .corpus)?.keyID == stamped, "…but the corpus key id is still the one A minted")
+
+        // A resumes with its passphrase and its words: ITS OWN switch.
+        arm(a, faultAt: nil)
+        let outcome = try await a.runner.resume(passphrase: "sesame", recoveryWords: a.words)
+        #expect(!outcome.followedAnotherDevicesSwitch && outcome.otherDeviceName == nil,
+                "the vault's id is the one this ceremony minted — no follow, no flag: \(outcome)")
+        #expect(ProtectionCopy.castleDoneBody(outcome) == ProtectionCopy.enteredCastleDone, "the ORDINARY Done")
+        #expect(ProtectionCopy.castleDoneBody(outcome) != ProtectionCopy.enteredCastleAfterAnotherDevice(device: "sibling device"))
+        try await expectCastleEndState(a, outcome)
+        #expect(outcome.reencrypted == 0, "the follower had finished the walk")
+        #expect(outcome.material?.corpusKeyID == stamped && a.keyStore.load()?.corpusKeyID == stamped)
+        let aFile = try a.keyFile(outcome.newKeyFingerprint)
+        let aKey = try aFile.unwrapKey(passphrase: "sesame")
+        #expect(aFile.recovery != nil, "the ceremony's words ARE the account's — landed on the new key file")
+        #expect(try aFile.unwrapKey(recoveryWords: a.words) == aKey)
+        #expect(FileManager.default.fileExists(atPath: a.oldKeyFileURL.path),
+                "the ceremony's own road keeps its old key file beside old snapshots (2b's letter — not a follow)")
+        #expect(a.calls.log.value.contains { $0.contains("this device's own vault write landed") }, "the runner said which story it read")
     }
 
     // MARK: - pre-13x 4b.4: THE UN-FOLLOWED DEVICE — the whole §12 list as ONE pin
