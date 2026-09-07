@@ -3173,3 +3173,137 @@ QUESTIONS; R1-8 and R1-13 are readings for the closeout rather than defects.
 **Files touched by the pass:** `Features/Editor/{EditorSurfaceController,DivideWSheet,DivideWCeremony,MergeArrangement,MergeCeremonySheet,ProseTakeCard,FannedDefaults}.swift` · `Features/Takes/{TakesViewModel,TakesBoardView}.swift` · `Features/TOC/BlocksWorkbenchView.swift` · `Sources/VariorumCore/Operations/Operations+Structural.swift` (the label) · `VariorumMobile/Features/Write/MobileStructural.swift` (a comment) · tests: `DivideKeyMonitorTests.swift` (new) · `MergeArrangementTests` · `DivideArrangementTests` · `ProseCutGeometryTests` · `OriginBlockDoorTests` · `NoteTrayTests` · `BoundaryFluidityTests` · `DivideCeremonyCostTests` · `StructuralGestureTests` · core `StructuralDivideTests` · `RedoStackTests`.
 
 **For the implementer's sanity pass:** the shape changes worth its context — the merge roads' signatures (ids only; `MergeCeremonyState.entryIndices` gone), `CeremonyKeyMonitor` as the sheet's `.background`, `WTake.flow` gone, the sheet's caret at the second successor, and `divideW`'s label.
+
+#### IMPLEMENTER'S SANITY PASS (18f round 1)
+
+*Batch 1's implementer over `53879b61..50d47d85` (eight commits), read against the tree rather than the
+dispositions, plus ONE walk on the dev-store Debug build. **12 CLEAR · 1 RAISED.** Read-only on code.*
+
+**R1-1 · CLEAR, with ONE RAISE inside it.** The scoping is right and it is the app's own shape:
+`CeremonyKeyMonitor.MonitorView.viewDidMoveToWindow` removes-then-installs (so a re-parent cannot
+double-install), `handleKeyDown` compares `event.windowNumber == window.windowNumber` —
+`PaneFocusCatcher`'s test, for its recorded reason — and `dismantleNSView` removes on teardown; ⌘/⌃ are
+refused at the top of `handleKeyEvent`; `stepCut` now returns `false` when the ✂ cannot move, so → at a
+take's end is passed on rather than eaten. **Lifecycle, walked:** after Cancel (⎋) and after a confirm,
+eight and six ⇧→ presses in the editor extended a real selection — no monitor survives either dismissal
+road (captures `04`, `05`).
+**RAISED · [NIT-sized, one line] · `DivideWSheet.swift:294–306` (`handleKeyEvent`) — the
+`ceremony.state != nil` guard the batch-1 monitor carried is gone, and nothing replaced it.**
+`handleKeyDown` guards the WINDOW only; `DivideWSheet.state` is `ceremony.state ?? presented`, so between
+`state = nil` (Cancel, ⎋, a landed confirm) and SwiftUI finishing the sheet's dismissal animation, a
+←/→/⇥ resolves against the PRESENTED snapshot, `stepCut` finds a take with boundaries, `placeCut` no-ops
+inside `ceremony.placeCut`'s own nil guard — and `stepCut` still answers `true`, so the key is SWALLOWED
+and does nothing. Narrow (a chord inside the dismissal animation — my walk's presses were ~1.5 s later
+and reached the editor), and it costs nothing to close: `guard ceremony.state != nil else { return false }`
+at the top of `handleKeyEvent`, which also restores the old monitor's own first line.
+**One walk FACT the fix pass should have, not a raise:** raising another of the app's windows while the
+divide sheet is up **DISMISSES the sheet** (capture `03`: the sheet is gone and the note untouched, i.e.
+a cancel, not a confirm — reproduced three times, twice via `AXRaise` and once by opening Quick Note from
+the File menu). So R1-1's narrative road — "she clicks into note window B and presses →" — self-closes on
+this build, and the walk could not demonstrate the old bug end-to-end. **The fix is right regardless:** a
+process-wide monitor also sees keys aimed at panels the sheet does not own — I hit exactly that by
+accident mid-walk, when the macOS Character Viewer opened over the sheet and took the arrows. Nothing in
+the app cancels the ceremony on resign-key (`grep`: `ceremony.cancel()` has exactly one caller, the
+sheet's own Cancel), so the dismissal is `.sheet(item:)` presentation behaviour, untouched by batch 1,
+batch 2 and this pass alike — recorded for the closeout, owner unassigned, as a thing SHE would feel
+(a half-arranged ceremony lost to a glance at another window).
+
+**R1-2 · CLEAR.** `entryIndex(of:)` resolves by block id at act time on all three roads
+(`runInstantMerge:387–392`, `runCarryAllMerge:650–655`, `runMergeChain:691–696`), the dispatcher gates on
+`state.blockIDs.allSatisfy { entryIndex(of: $0) != nil }` before any of them (`:1473–1478`), and
+`entryIndices` is gone from `MergeCeremonyState` — so no caller can hand a stale index in. The
+seam-backspace caller (`:2086`) was updated with them. **The run's ORDER after a reorder, which I traced
+because the dispatcher's guard checks presence and not adjacency:** `blockIDs` is still the open-time
+order, but `Operations.merge` validates adjacency itself
+(`Operations+Structural.swift:894–900`, `blocksNotAdjacent`), so a reorder under an open sheet meets a
+typed refusal through `runStructural`'s error road with nothing landed — and for a run, `withCompound`
+rolls back the whole chain atomically. It refuses honestly rather than joining in an order she no longer
+sees; recorded so the next reader knows it was checked and not overlooked.
+
+**R1-3 · CLEAR, and walked.** The singular conjugates ("1 other take stays whole…"), the two parking
+presets count what PARKS (`others − unparkable`) while copy-to-both keeps the fan's count, and the
+all-empty case says what each block starts with instead of counting zero. The three pins that certified
+the defects are re-pointed and the sheet showed the corrected sentence in use ("2 other takes stay whole
+on the top block", two non-empty others — capture `01`).
+
+**R1-4 · CLEAR, and walked.** `CeremonyCardCopy.status(.original)` now reads *"Not cut — stays on the
+original block, in Block History → Came from"* — the mockup's own words, the 13f W10a answer back on the
+row; the unchecked card showed exactly that in the walk (capture `02`). `presetRowNote` /
+`uncheckedRowNote` are gone (`grep`: no definitions left) and `OriginBlockDoorTests` / `NoteTrayTests`
+point at the live home, so the vacuity is closed at both ends.
+
+**R1-5 · CLEAR** (by reading; not walked — it needs an empty take in the fan). The `.copyToBoth` rule now
+runs BEFORE the emptiness rule and carries `marked`, so an empty other take answers `.both` where
+`divideDuplicating` actually puts it, and `.perTake` still answers `.empty` (the sheet's own "uncheck it"
+road) — I re-checked the op has no emptiness filter (`Operations+Structural.swift:594–598`, `:640`).
+
+**R1-6 · CLEAR.** The pin drives `.onlyTheShownOnes` before confirming — the road where takes DO stay
+behind and `speakAboutMergedFans` names the path — with its comment updated; the claim is intact.
+`BoundaryFluidityTests` ran green here in an eight-suite check (71 tests / 8 suites) before the walk.
+
+**R1-7 · CLEAR.** Both bars' merge menus carry `.disabled(picked < 2)` beside their neighbour's; one rule
+for the pair.
+
+**R1-8 · CLEAR** — confirmed as a reading, not fixed, with my reason recorded. Nothing to add.
+
+**R1-9 · CLEAR, and walked — including the label's REACH, which I traced because a core label change can
+leak.** The board's two receipts read `FannedDefaultsCopy.divided(kept: 0)` (which claims nothing it did
+not do). For the undo label I checked every `divideW` caller: Write's instant road and the board's wrap in
+`withCompound(label: "Divide")`, the phone's in the same, and the two cross-block Make Block calls
+(`EditorSurfaceController.swift:1807`, `:1823`) sit inside `withCompound(label: "Make Block")` — so
+"Divide choosing takes" surfaces only after the summoned door, which is the intent. The Edit menu read
+**"Undo Divide choosing takes"** in the walk, and undid the sheet's divide cleanly.
+
+**R1-10 · CLEAR.** `WTake.flow` is gone and `grep` finds no production reader of the token flow;
+`WCutPlacement.flowItems` survives as the pure brain the row-3 pins and the cost suite call directly.
+
+**R1-11 · CLEAR, and walked.** `facts` reads the seed's cut (`state.seedTake?.cut == nil ? "place the ✂
+first" : "cut where you clicked"`); the header showed "3 takes · cut where you clicked" with a cut placed
+and "3 takes · choosing per take" under the hand-placed road (captures `01`, `02`).
+
+**R1-12 · CLEAR, and walked.** `MergeCeremonyState.canonJoin` reads the two SHOWN takes' stored texts
+through `MergeJoin.canon` and the sentence takes it; the pair sheet read "join with a space" on a head
+ending in "." — the canon answer for that pair (capture `06`).
+
+**R1-13 · CLEAR, and walked — this is the one I checked hardest against batch 1's pins.** Both sheet
+roads land `result.second.block.id` and the board parks its ring on `result.second.variants.first`. After
+the sheet's confirm, six ⇧→ selected "Nobody" — the caret was at the BOTTOM block's start, where ⌘⇧D
+lands it (capture `05`). Batch 1's equivalence pin
+(`confirmingTheSheetUnchangedReproducesTheInstantDivide`) now captures the instant caret and asserts the
+sheet matches it, with a non-vacuity assertion that ⌘⇧D really lands at entry 1; `DivideWCeremonyTests`'
+"B's start" line is the only other pin that asserted the old landing and it is edited with its ruling. I
+grepped for further `result.first`-caret assertions and found none. The PROVISIONAL framing is right —
+it is a landing choice, and #96 is the honest home for it at the closeout.
+
+**THE WALK** (dev-store Debug at `50d47d85`, `io.lduarte.Variorum.debug`; `pgrep -fl` showed zero
+instances before and after, and every instance seen carried the DerivedData Debug path — her
+`/Applications` app was never launched). Fixture: the field guide's three-take lesson block; the store was
+left exactly as found (both acts undone through the Edit menu, the second reading **"Undo Divide choosing
+takes"**).
+
+1. **Row 3 stays fixed.** Sheet open → "Choose per take…" → a checkbox click (the control that used to
+   kill the keys) → three ← moved the seed's ✂ from "dawn.|Nobody" to "ferry|crossed" (status "2 words
+   above, 10 below"). `02`.
+2. **The second window.** Raising the app's other window dismissed the sheet (three times) — the fact
+   above; the guard itself is pinned headlessly by `DivideKeyMonitorTests` driving the real body with a
+   foreign window number. `03`.
+3. **Cancel leaves nothing behind.** ⎋ → eight ⇧→ in the editor extended a selection. `04`.
+4. **Confirm leaves nothing behind, and R1-13's caret.** ⏎ → the divide landed, six ⇧→ selected "Nobody"
+   from the bottom block's start. `05`.
+5. **Merge choosing takes on a pair** → the row of three, the canon-join sentence, the pre-paired and
+   carried cards → ⏎ → the merged block carries ⑂3 and the caret sat exactly at the join. `06`, `07`.
+
+**Captures** (`notes/plans/use-report-2026-09-06-screens/18f-ladder/`, gitignored):
+`01-sheet-open-choose-per-take.png` · `02-row3-still-fixed-arrows-after-a-checkbox-click.png` ·
+`03-raising-another-window-dismisses-the-sheet.png` ·
+`04-after-cancel-the-editor-keys-are-its-own.png` ·
+`05-R1-13-caret-lands-in-the-bottom-block-and-keys-are-the-editors.png` ·
+`06-merge-choosing-takes-pair.png` · `07-merge-confirm-caret-at-the-join.png`.
+
+**Suites I ran here** (a check, not a re-run of the pass's closing set): `DivideKeyMonitorTests` ·
+`DivideArrangementTests` · `MergeArrangementTests` · `CeremonyCardCopyTests` · `BoundaryFluidityTests` ·
+`DivideWCeremonyTests` · `OriginBlockDoorTests` · `ProseCutGeometryTests` → **71 tests / 8 suites green.**
+
+**Count: 12 CLEAR · 1 RAISED** (R1-1's dropped `ceremony.state != nil` guard — one line, the reviewer's
+call). Plus one walk fact for the closeout, caused by none of the three sessions: another window's raise
+dismisses the divide sheet.
