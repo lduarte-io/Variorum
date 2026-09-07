@@ -168,14 +168,19 @@ struct ProseCutGeometryTests {
 
         #expect(!halves.top.isEmpty && !halves.bottom.isEmpty,
                 "an interior cut tints both halves")
+        // A tint band sits inside its line's box (the box carries the air
+        // above the glyphs where the ✂ rides), so "same row" is containment.
+        func sameRow(_ rect: CGRect) -> Bool {
+            rect.minY >= mark.minY - 0.01 && rect.maxY <= mark.maxY + 0.01
+        }
         for rect in halves.top {
-            let sameRow = abs(rect.midY - mark.midY) < 1
-            #expect(rect.maxY <= mark.minY + 0.01 || (sameRow && rect.maxX <= mark.midX + 0.6),
+            #expect(rect.maxY <= mark.minY + 0.01
+                || (sameRow(rect) && rect.maxX <= mark.midX + 0.6),
                     "a top rect is above the mark, or left of it on its own row")
         }
         for rect in halves.bottom {
-            let sameRow = abs(rect.midY - mark.midY) < 1
-            #expect(rect.minY >= mark.maxY - 0.01 || (sameRow && rect.minX >= mark.midX - 0.6),
+            #expect(rect.minY >= mark.maxY - 0.01
+                || (sameRow(rect) && rect.minX >= mark.midX - 0.6),
                     "a bottom rect is below the mark, or right of it on its own row")
         }
         // No cut placed ⇒ no tint at all (an unplaced take is not half-anything).

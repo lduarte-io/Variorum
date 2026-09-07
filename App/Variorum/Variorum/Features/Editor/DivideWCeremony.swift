@@ -122,6 +122,21 @@ final class DivideWCeremony {
             }
         }
 
+        /// **The option card's one line** (18f batch 2, mockup figure A —
+        /// ADDITIVE: a display string beside `title`, so the row's whole
+        /// voice stays in one home). The mockup's own words, with one
+        /// deliberate departure: its "check, place, park — the full ceremony"
+        /// would put the word U-4 removed from every UI string back on the
+        /// sheet that ruling renamed.
+        var detail: String {
+            switch self {
+            case .keepOnTop: "the take you were in splits; the others stay whole on top"
+            case .keepOnBottom: "the mirror — the others stay whole below"
+            case .copyToBoth: "every other take rides whole onto both halves"
+            case .perTake: "check, place and park each \u{2702} yourself"
+            }
+        }
+
         /// True where the takes are shown but not individually chosen — the
         /// checkbox appears only in "Choose per take" (mockup A's caption).
         var isPreset: Bool { self != .perTake }

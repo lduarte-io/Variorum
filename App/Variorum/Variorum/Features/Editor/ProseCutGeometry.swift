@@ -61,6 +61,9 @@ struct ProseCutGeometry {
         let height: CGFloat
         /// The baseline's offset from `origin.y`.
         let baseline: CGFloat
+        /// Where the line's GLYPHS start inside its band — the air above them
+        /// is where the ✂ glyph rides (see `markGlyphAir`).
+        let textTop: CGFloat
         /// The drawn width of the line's glyphs.
         let width: CGFloat
         let line: CTLine
@@ -82,6 +85,17 @@ struct ProseCutGeometry {
     /// line height — the mockup's 1.55 leading, minus what the font already
     /// carries.
     static let lineGapFactor: CGFloat = 0.26
+
+    /// **The air above every line, where the ✂ glyph rides.** The mockup
+    /// draws the glyph over the line's top edge (its `.cut::after`), and prose
+    /// at 1.55 leading is what gives it room; without this the glyph lands in
+    /// the middle of the line above (walked, 18f batch 2's first look).
+    ///
+    /// It lives in the LAYOUT rather than in the drawing so the marks, the
+    /// drawing and the pointer keep ONE coordinate space — an offset applied
+    /// at draw time only would have to be subtracted again at hit-test time,
+    /// which is the two-mechanisms class this file exists to avoid.
+    static let markGlyphAir: CGFloat = 13
 
     // MARK: - Making it
 
@@ -106,8 +120,9 @@ struct ProseCutGeometry {
         let descent = -font.descender
         let leading = font.leading
         let bandHeight = (ascent + descent + leading).rounded(.up)
-        let lineHeight = (bandHeight * (1 + lineGapFactor)).rounded(.up)
-        let baseline = ((lineHeight - bandHeight) / 2 + ascent).rounded()
+        let air = max((bandHeight * lineGapFactor).rounded(), markGlyphAir)
+        let lineHeight = bandHeight + air
+        let baseline = (air + ascent).rounded()
 
         var y: CGFloat = 0
         var widest: CGFloat = 0
@@ -140,7 +155,7 @@ struct ProseCutGeometry {
                 let drawn = CGFloat(CTLineGetTypographicBounds(line, nil, nil, nil))
                 geometry.lines.append(Line(
                     range: range, origin: CGPoint(x: 0, y: y), height: lineHeight,
-                    baseline: baseline, width: drawn, line: line))
+                    baseline: baseline, textTop: air, width: drawn, line: line))
                 widest = max(widest, drawn)
                 y += lineHeight
                 start = range.location + range.length
@@ -154,7 +169,7 @@ struct ProseCutGeometry {
                 geometry.lines.append(Line(
                     range: NSRange(location: geometry.textLength, length: 0),
                     origin: CGPoint(x: 0, y: y), height: lineHeight,
-                    baseline: baseline, width: 0, line: line))
+                    baseline: baseline, textTop: air, width: 0, line: line))
                 y += lineHeight
                 break
             }
@@ -253,8 +268,8 @@ struct ProseCutGeometry {
         var bottom: [CGRect] = []
         for line in lines {
             let band = CGRect(
-                x: line.origin.x, y: line.origin.y,
-                width: max(line.width, 1), height: line.height)
+                x: line.origin.x, y: line.origin.y + line.textTop,
+                width: max(line.width, 1), height: line.height - line.textTop)
             if line.range.upperBound <= cut {
                 top.append(band)
             } else if line.range.location >= cut {

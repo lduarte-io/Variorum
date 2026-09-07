@@ -15,6 +15,16 @@
 //  whole duration. The sheet is ordinary SwiftUI — never the live TK2
 //  editor.
 //
+//  **18f batch 2 — THE FACE, rebuilt to mockup figure A** (the 2026-09-06
+//  use-report round; her ledger row 5: *"so ugly with the spacing between the
+//  words, the way that you have to scroll to get the different takes, just
+//  overall"*). The mechanics are batch 1's and are untouched: the arrangement
+//  brains, the seeding, the confirm roads, the key monitor's four chords. What
+//  changed is everything you look at — the header with its folded `?`, the
+//  row of four as option cards, the takes SIDE BY SIDE as prose cards
+//  (`ProseTakeCard` over `ProseCutGeometry`, replacing the token flow), and
+//  one footer holding the blocker slot and the resting line.
+//
 
 import AppKit
 import SwiftUI
@@ -30,9 +40,12 @@ import VariorumCore
 /// by the scan assertions plus the one-brain geometry; the vacuous
 /// assertions are gone.
 ///
-/// `rebuilds` is real: `WCutFlow.rebuild()` bumps it in production code, and
-/// the F-2 pin uses it to prove a drift refresh re-derives the drawn
-/// geometry (the count-preserving staleness class).
+/// `rebuilds` is real: the take card's `rebuild()` bumps it in production code
+/// (18f batch 2: `ProseTakeCard`, where `WCutFlow` used to), and the F-2 pin
+/// uses it to prove a drift refresh re-derives the drawn geometry (the
+/// count-preserving staleness class). Batch 2 makes it a STRICTER instrument:
+/// the prose layout keys on the take's TEXT, so a token-count-preserving edit
+/// rebuilds by construction.
 @MainActor
 enum CutFlowRealization {
     static var rebuilds = 0
@@ -64,86 +77,68 @@ struct DivideWSheet: View {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
     }
 
+    /// The prose face the cards draw in — the VOICE's own body font (SF Mono
+    /// for terminal, Iowan Old Style for study), through the one resolution
+    /// every text surface in the app reads.
+    private var proseFont: NSFont {
+        EditorTypography.resolve(
+            voice: themeStore?.settings.voice ?? .terminal, inlineComments: false
+        ).font
+    }
+
+    /// The seed FIRST (§5.2: "the seed first, emphasized by a warmer
+    /// border") — the take the gesture was placed in leads the row, and the
+    /// others keep their fan order behind it. ⇥ walks this same order, so
+    /// what the eye reads and what the key does are one sequence.
+    private var displayTakes: [DivideWCeremony.WTake] {
+        var takes = state.takes
+        guard let seed = state.activeVariantID,
+              let i = takes.firstIndex(where: { $0.id == seed }), i != 0
+        else { return takes }
+        let lead = takes.remove(at: i)
+        takes.insert(lead, at: 0)
+        return takes
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Divide choosing takes").font(.headline)
+        VStack(alignment: .leading, spacing: 14) {
+            CeremonySheetHeader(
+                tokens: tokens, title: "Divide choosing takes",
+                facts: facts, help: helpLines)
 
             // **THE ARRANGEMENT ROW** (her ruling U-5, mockup figure A): the
             // FIRST control, four options in the ruled order, "keep on top"
-            // selected on open. Batch 1 gives it its brains and its words on
-            // today's controls (`VoicedChip` is the chrome vocabulary, P-8);
-            // batch 2 gives it the mockup's face.
+            // selected on open. Batch 1 gave it its brains and its words;
+            // this is the mockup's face over them.
             arrangementRow
 
             Text(DivideWCeremony.arrangementSentence(
                 state.arrangement,
                 others: state.otherTakes.count,
                 unparkable: state.unparkableTakes.count))
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .font(tokens.small)
+                .foregroundStyle(tokens.muted)
                 .lineLimit(4)
                 .fixedSize(horizontal: false, vertical: true)
 
-            if state.arrangement == .perTake {
-                // L2 (QoL round 2026-07-29), her words: *"it's not really clear to
-                // me what selecting the take button below is supposed to do? just
-                // split that take as well?"* — yes, exactly, and the surface never
-                // said so. These two sentences are the two halves of what a check
-                // MEANS; the per-row captions repeat them where she is looking.
-                // 13f W10a (her sitting question): the line said an unchecked take
-                // "stays whole on the original" and stopped there — *"but how do I
-                // even see the original one?"* It now NAMES where the original
-                // goes, in the merge ceremony's own established grammar (that
-                // sheet has always spelled this road out for its stay-behind
-                // takes; the divide's half of the same sentence was simply
-                // missing). `RecoveryPath` is the shared name.
-                //
-                // U-5 folds both explainers behind "Choose per take…": under a
-                // preset there is no checklist to explain, and the one sentence
-                // above says what will happen instead.
-                Text(.init(DivideWCeremony.checklistExplainer))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(6)
-                    .fixedSize(horizontal: false, vertical: true)
-                Text("Place a cut by dragging the \u{2702}, clicking between words, or \u{2190}/\u{2192} (\u{2325} by sentence, \u{21E5} moves between takes). Park it at a take's very end to send that whole take into the first block, at its start for the second. **\u{203A}** marks the take the arrow keys are aimed at. The divide is reversible (\u{2325}\u{2318}Z).")
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
-                    .lineLimit(4)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
+            takesArea
 
-            ScrollView {
-                VStack(alignment: .leading, spacing: 10) {
-                    ForEach(state.takes) { take in
-                        takeRow(take)
-                    }
-                }
-                .padding(.vertical, 4)
-            }
-            .frame(minHeight: 240, maxHeight: 420)
-
-            if let blocker = state.confirmBlocker {
-                Text(blocker)
-                    .font(.caption)
-                    .foregroundStyle(.orange)
-                    .lineLimit(3)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-
-            HStack {
-                Button("Cancel") { ceremony.cancel() }
-                    .keyboardShortcut(.cancelAction)
-                Spacer()
-                Button("Divide") { Task { await ceremony.confirm() } }
-                    .keyboardShortcut(.defaultAction)
-                    .disabled(!state.canConfirm)
-            }
+            CeremonySheetFooter(
+                tokens: tokens,
+                blocker: state.confirmBlocker,
+                restingLine: CeremonyCardCopy.divideRestingLine,
+                confirmTitle: "Divide",
+                canConfirm: state.canConfirm,
+                cancel: { ceremony.cancel() },
+                confirm: { Task { await ceremony.confirm() } })
         }
-        .padding(12)
-        // The row of four needs the width; the FACE (and the real sizing to
-        // the window) is batch 2's.
-        .frame(minWidth: 720)
+        .padding(20)
+        .background(tokens.room)
+        // Side by side needs the width, and the sheet sizes to the window
+        // (§5.2 — "a large sheet; minWidth ~900").
+        .frame(
+            minWidth: 900, idealWidth: 1120, maxWidth: 1400,
+            minHeight: 520, idealHeight: 660, maxHeight: 900)
         .focusable()
         .focused($keyboardFocused)
         .onKeyPress(phases: .down) { handleKey($0) }
@@ -153,6 +148,96 @@ struct DivideWSheet: View {
             installKeyMonitor()
         }
         .onDisappear { removeKeyMonitor() }
+    }
+
+    /// The header's quiet facts line. *(Mockup figure A opens with "block 4
+    /// of 8" — DELIBERATELY not built: this sheet mounts on three surfaces
+    /// (Write, the takes board, the lenses board) and only Write knows a
+    /// block's position in its note, so the number would either be absent on
+    /// two of them or ride a new field on the ceremony's state, which is
+    /// mechanics — batch 1's, and closed.)*
+    private var facts: [String] {
+        [
+            state.takes.count == 1 ? "1 take" : "\(state.takes.count) takes",
+            state.arrangement == .perTake ? "choosing per take" : "cut where you clicked",
+        ]
+    }
+
+    /// **The explainers, FOLDED** (§5.2). The shipped sheet stacked both of
+    /// these above the takes; they live behind the `?` now, beside the
+    /// keyboard legend — which names ONLY the chords the sheet actually
+    /// answers (the four the key monitor handles, plus ⏎/⎋).
+    private var helpLines: [String] {
+        [
+            DivideWCeremony.checklistExplainer,
+            "**Keyboard** — \u{2190}/\u{2192} step the aimed take's \u{2702} one word · "
+                + "\u{2325}\u{2190}/\u{2325}\u{2192} a sentence, a newline, or the ends · "
+                + "\u{21E5}/\u{21E7}\u{21E5} aim the next/previous checked take · "
+                + "\u{23CE} Divide · \u{238B} Cancel.",
+        ]
+    }
+
+    // MARK: - The takes, SIDE BY SIDE (§5.2 — never a stack to scroll)
+
+    /// Up to three columns at the sheet's width; a fourth take starts a
+    /// second row of the same equal columns, and each card's own prose
+    /// scrolls inside it — so the second take is never something you scroll
+    /// a stack to find.
+    private var takesArea: some View {
+        ScrollView(.vertical) {
+            LazyVGrid(columns: columns, alignment: .leading, spacing: 14) {
+                ForEach(displayTakes) { take in
+                    card(take)
+                }
+            }
+            .padding(.vertical, 1)
+        }
+        .frame(minHeight: 300, maxHeight: 520)
+    }
+
+    private var columns: [GridItem] {
+        Array(
+            repeating: GridItem(.flexible(minimum: 210), spacing: 14, alignment: .top),
+            count: min(3, max(1, state.takes.count)))
+    }
+
+    private func card(_ take: DivideWCeremony.WTake) -> some View {
+        ProseTakeCard(
+            take: take,
+            tokens: tokens,
+            font: proseFont,
+            arrangement: state.arrangement,
+            ordinal: (state.takes.firstIndex { $0.id == take.id } ?? 0) + 1,
+            isSeed: take.id == state.activeVariantID,
+            isAimed: state.arrangement == .perTake && take.marked
+                && take.id == activeTakeID,
+            // Mockup A's own rule: under a PRESET the columns only SHOW what
+            // will happen — the hand-placement surface is what "Choose per
+            // take…" turns them into. The SEED take stays placeable on every
+            // road: its ✂ is the gesture's and hers to adjust, and every
+            // preset splits exactly there.
+            placeable: state.arrangement == .perTake
+                || take.id == state.activeVariantID,
+            // U-5 / mockup A's caption: **the checkbox appears only in
+            // "Choose per take"** — under a preset the arrangement is the
+            // choice, and a checkbox there would offer a second, conflicting
+            // one.
+            showsCheckbox: state.arrangement == .perTake,
+            toggle: {
+                ceremony.toggleTake(take.id)
+                if activeTakeID == take.id { activeTakeID = nil }
+            },
+            place: { placeCut(takeID: take.id, cut: $0) },
+            aim: {
+                // HER RULING (2026-07-29, selection: "Check it"): clicking an
+                // UNCHECKED take's card checks it and aims the arrows there.
+                // U-5: only under "Choose per take" — a preset OWNS every
+                // mark, so a card click there would silently contradict the
+                // row of four.
+                guard state.arrangement == .perTake else { return }
+                activeTakeID = ceremony.rowTapped(take.id)
+            })
+        .frame(minHeight: 240)
     }
 
     // MARK: - The keyboard's focus (LEDGER ROW 3 — her *"the scissors
@@ -222,158 +307,34 @@ struct DivideWSheet: View {
 
     // MARK: - The arrangement row (U-5)
 
+    /// The row of four, in the ruled order, as the mockup's option cards —
+    /// each with its title and the one line that says what it does. The
+    /// fourth wears a dashed border: her *"the custom selector should be
+    /// something you really have to choose to do"*, said in the border.
     private var arrangementRow: some View {
-        HStack(spacing: 8) {
+        LazyVGrid(
+            columns: Array(
+                repeating: GridItem(.flexible(), spacing: 8, alignment: .top),
+                count: 4),
+            alignment: .leading, spacing: 8
+        ) {
             ForEach(DivideWCeremony.Arrangement.allCases) { option in
-                VoicedChip(
-                    tokens: tokens, text: option.title,
-                    on: state.arrangement == option
+                ArrangementOptionCard(
+                    tokens: tokens,
+                    title: option.title,
+                    detail: option.detail,
+                    selected: state.arrangement == option,
+                    deliberate: option == .perTake
                 ) {
                     ceremony.setArrangement(option)
                     activeTakeID = state.activeVariantID
                 }
-                // ROW 3: the sheet's placement keys live on the container's
-                // focus, and a control that TAKES first responder on click
-                // silently ends them. These act; they never need focus.
-                .focusable(false)
                 .help(option == .perTake
                     ? "Check the takes to cut and place each \u{2702} yourself"
                     : DivideWCeremony.arrangementSentence(
                         option, others: state.otherTakes.count,
                         unparkable: state.unparkableTakes.count))
             }
-            Spacer(minLength: 0)
-        }
-    }
-
-    // MARK: - Rows
-
-    @ViewBuilder
-    private func takeRow(_ take: DivideWCeremony.WTake) -> some View {
-        let header = HStack(spacing: 6) {
-            if take.marked, take.id == activeTakeID, state.arrangement == .perTake {
-                // The keyboard's active-take marker (the › idiom).
-                Text("›").font(.caption).foregroundStyle(tokens.accent)
-            }
-            Text(take.variant.label ?? "take")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            if take.id == state.activeVariantID {
-                Text("shown here").font(.caption2).foregroundStyle(.tertiary)
-            }
-            if take.variant.locked {
-                Text("locked").font(.caption2).foregroundStyle(.tertiary)
-            }
-        }
-        VStack(alignment: .leading, spacing: 4) {
-            // U-5 / mockup A's caption: **the checkbox appears only in
-            // "Choose per take"** — under a preset the arrangement is the
-            // choice, and a checkbox there would offer a second, conflicting
-            // one.
-            if state.arrangement == .perTake {
-                Toggle(isOn: Binding(
-                    get: { take.marked },
-                    set: { _ in
-                        ceremony.toggleTake(take.id)
-                        if activeTakeID == take.id { activeTakeID = nil }
-                    })
-                ) { header }
-                // ROW 3, the same rule as the chips: the checkbox acts, and
-                // taking first responder from the sheet is all it did besides.
-                .focusable(false)
-            } else {
-                header
-            }
-
-            if let note = DivideWCeremony.presetRowNote(
-                state.arrangement,
-                isSeed: take.id == state.activeVariantID,
-                isEmpty: take.variant.workingText.isEmpty) {
-                Text(note)
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
-                    .lineLimit(2)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-
-            if take.marked, take.cut != nil || state.arrangement == .perTake {
-                if take.boundaries.isEmpty {
-                    Text("This take is empty — there's no cut to place. Uncheck it (it stays on the original block).")
-                        .font(.caption2)
-                        .foregroundStyle(.orange)
-                        .lineLimit(2)
-                } else {
-                    // Mockup A's own rule: under a PRESET the columns only
-                    // SHOW what will happen — the hand-placement surface is
-                    // what "Choose per take…" turns them into. The SEED take
-                    // stays placeable on every road: its ✂ is the gesture's
-                    // and hers to adjust, and every preset splits exactly
-                    // there.
-                    WCutFlow(
-                        take: take,
-                        tokens: tokens,
-                        placeable: state.arrangement == .perTake
-                            || take.id == state.activeVariantID,
-                        place: { placeCut(takeID: take.id, cut: $0) })
-                    // Under a PRESET the row's own note already said where
-                    // this take goes; the placement note is the hand-placed
-                    // sheet's voice and would say it a second time.
-                    if state.arrangement == .perTake || take.id == state.activeVariantID {
-                        placementNote(take)
-                    }
-                }
-            } else {
-                // 13f W10a: the per-row caption names the destination too —
-                // it is where she was actually looking when she asked. Under a
-                // PRESET the destination is the preset's, not "the original
-                // block", so `presetRowNote` above has already said it.
-                if state.arrangement == .perTake {
-                    Text(DivideWCeremony.uncheckedRowNote)
-                        .font(.caption2)
-                        .foregroundStyle(.tertiary)
-                        .lineLimit(2)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                Text(take.variant.workingText)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(2)
-            }
-        }
-        .padding(.vertical, 2)
-        .contentShape(Rectangle())
-        .onTapGesture {
-            // HER RULING (2026-07-29, selection: "Check it"): clicking an
-            // UNCHECKED take's row checks it and aims the arrows there. It
-            // used to do nothing at all — a silent dead click, the
-            // fire-and-DO class (P-2), and plausibly why the checkbox and the
-            // \u{203A} marker read as one control to her. A checked row keeps
-            // its existing aim-the-arrows behaviour.
-            //
-            // U-5: only under "Choose per take". A preset OWNS every mark, so
-            // a row click there would silently contradict the row of four.
-            guard state.arrangement == .perTake else { return }
-            activeTakeID = ceremony.rowTapped(take.id)
-        }
-    }
-
-    @ViewBuilder
-    private func placementNote(_ take: DivideWCeremony.WTake) -> some View {
-        if take.parkedAtEnd {
-            Text("✂ parked at the end — this whole take rides into the first block.")
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-                .lineLimit(2)
-        } else if take.parkedAtStart {
-            Text("✂ parked at the start — this whole take rides into the second block.")
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-                .lineLimit(2)
-        } else if take.cut == nil {
-            Text("Place the cut: drag the ✂ in, click between words, or press ←/→.")
-                .font(.caption2)
-                .foregroundStyle(.orange)
-                .lineLimit(2)
         }
     }
 
@@ -405,7 +366,7 @@ struct DivideWSheet: View {
     /// exists to walk between hand-placed takes — has nothing to walk.
     private var aimableTakeIDs: [String] {
         state.arrangement == .perTake
-            ? state.takes.filter { $0.marked }.map(\.id)
+            ? displayTakes.filter { $0.marked }.map(\.id)
             : [state.activeVariantID].compactMap { $0 }
     }
 
@@ -442,130 +403,26 @@ struct DivideWSheet: View {
     }
 }
 
-// MARK: - The cut flow (DRAWN, not built — QoL round 2026-07-29, L1)
-
-/// A marked take's text as a wrapping flow of word tokens with a placeable
-/// slot at every legal cut position — the ✂ sits at the current cut, slots
-/// click to jump, and a drag glides the ✂ between word edges (nearest slot,
-/// row-first, with a small extra catch for sentence/newline slots — the gentle
-/// settle's visual half).
-///
-/// **It DRAWS the flow instead of building one, and that is the L1 fix.** The
-/// shipped version realized a `Button` + `ZStack` + hover tracker + `help` +
-/// `GeometryReader` per legal cut position and a `Text` per word — measured at
-/// 2,766 view elements for three 400-word takes, each measured twice per
-/// layout pass, with a `PreferenceKey` round-trip writing `@State` from inside
-/// layout (the publish-during-update class, P-8) — and on top of that it
-/// re-ran a full sentence scan of the take's text once PER SLOT, because
-/// `strongSlots` was a computed property read inside the `ForEach`. Measured:
-/// 4,149 scans and 6.3 s for ONE mount, 1,383 scans and 8.7 s for ONE click;
-/// at her real scale (four 3,000-word takes) a single click did not complete
-/// inside a 600-second test timeout. That is the spinning rainbow she
-/// reported.
-///
-/// Now: one `Canvas`, one `CutFlowGeometry` cached per (take, width), and the
-/// pointer resolving against the same frames the drawing uses — one brain, so
-/// drawing and hit-testing cannot disagree, which the three-mechanism version
-/// could never promise.
-private struct WCutFlow: View {
-    let take: DivideWCeremony.WTake
-    let tokens: VoiceTokens
-    /// False = SHOW-ONLY (mockup A: under a preset the columns show what
-    /// will happen; the drag is not attached at all, so there is no
-    /// affordance that looks live and isn't).
-    var placeable = true
-    let place: (Int) -> Void
-
-    @State private var geometry = CutFlowGeometry()
-    @State private var width: CGFloat = 0
-
-    private static let flowFont = NSFont.preferredFont(forTextStyle: .callout)
-
-    var body: some View {
-        Canvas(opaque: false) { context, _ in
-            for token in geometry.tokens {
-                context.draw(
-                    Text(token.text).font(.callout).foregroundStyle(tokens.ink),
-                    at: CGPoint(x: token.frame.minX, y: token.frame.midY),
-                    anchor: .leading)
-            }
-            // 13f W9 — HER RULING (2026-07-30): *"I also think we don't need
-            // all those lines to show where you can cut - I feel like it's
-            // pretty clear that it only jumps to in between words."* The tick
-            // mark at every legal cut position is gone, and the hover
-            // highlight with it (it was one of those lines, thickened).
-            //
-            // RENDERING ONLY. The slots still exist in the geometry and still
-            // do all their work: `slotWidth` is what puts the gap between two
-            // words (so the flow's wrap arithmetic and every cached layout are
-            // byte-unchanged), `nearestSlot` still resolves clicks and drags
-            // against the same frames, `isStrong` still gives sentence ends and
-            // newlines their extra catch, and `slotFrame(for:)` still places
-            // the ✂. Snap rule, keyboard steps, parking and checkbox semantics
-            // are all untouched — their pins run unmodified.
-            if let cut = take.cut, let frame = geometry.slotFrame(for: cut) {
-                context.draw(
-                    Text("✂").font(.system(size: 13)).foregroundStyle(tokens.accent),
-                    at: CGPoint(x: frame.midX, y: frame.midY),
-                    anchor: .center)
-            }
-        }
-        .frame(height: max(geometry.size.height, CutFlowGeometry.slotHeight))
-        .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { newWidth in
-            guard abs(newWidth - width) > 0.5 else { return }
-            width = newWidth
-            rebuild()
-        }
-        .onChange(of: take.id) { rebuild() }
-        // The WHOLE flow, not its count (cold review F-2, pin-verified red on
-        // the count key): a confirm-time drift refresh rebuilds this take
-        // from CHANGED store text under the SAME id, and a token-count-
-        // preserving edit left the Canvas drawing the OLD words while cuts
-        // and clicks resolved against them. `FlowItem` is `Equatable`; the
-        // comparison is O(tokens) per change — no text scan.
-        .onChange(of: take.flow) { rebuild() }
-        // 13f W9: `onContinuousHover` went with the ticks — its ONLY consumer
-        // was the hovered tick's highlight, and a hover tracker that changes
-        // nothing on screen is state churn per mouse move (13d judgment call
-        // 1's dead-code class). Clicking and dragging are unaffected: both
-        // resolve through `nearestSlot` on the gesture below, which never read
-        // the hover.
-        .gesture(
-            DragGesture(minimumDistance: 0)
-                .onChanged { drag in
-                    guard placeable,
-                          let nearest = geometry.nearestSlot(to: drag.location),
-                          nearest != take.cut else { return }
-                    place(nearest)
-                },
-            including: placeable ? .all : .subviews)
-        .padding(6)
-        .background(RoundedRectangle(cornerRadius: 4).fill(tokens.wash.opacity(0.35)))
-        .accessibilityElement()
-        .accessibilityLabel(Text(take.variant.label ?? "take"))
-        .accessibilityValue(Text(accessibilityValue))
-        .accessibilityHint(Text("Drag, click, or use the arrow keys to move the cut."))
-    }
-
-    /// The minimal accessibility story the ruling asked for "if cheap": one
-    /// element per take, naming it and where its cut sits. **Recorded known
-    /// limitation:** a drawn flow cannot expose a slot per cut position as its
-    /// own element, and three thousand of them would not be usable if it did —
-    /// the keyboard family (←/→, ⌥←/→, ⇥) is the accessible placement path.
-    private var accessibilityValue: String {
-        guard let cut = take.cut else { return "no cut placed" }
-        if take.parkedAtEnd { return "whole take goes to the first block" }
-        if take.parkedAtStart { return "whole take goes to the second block" }
-        let index = take.boundaries.firstIndex(of: cut).map { $0 + 1 } ?? 0
-        return "cut at position \(index) of \(take.boundaries.count)"
-    }
-
-    private func rebuild() {
-        #if DEBUG
-        CutFlowRealization.rebuilds += 1
-        #endif
-        geometry = CutFlowGeometry.make(
-            flow: take.flow, strong: take.strongBoundaries,
-            width: width, font: Self.flowFont)
-    }
-}
+// MARK: - The retired token flow (18f batch 2)
+//
+// `WCutFlow` — the take drawn as word tokens with a FIXED 9-pt slot between
+// every pair of them — is RETIRED here, and its retirement IS her ledger row
+// 5: *"so ugly with the spacing between the words"*. Every legal cut occupied
+// real width, so the prose could never read as prose.
+//
+// What replaces it keeps the whole architecture that flow was rebuilt into at
+// L1 and only changes what is laid out: `ProseTakeCard` draws ONE Canvas from
+// ONE cached geometry (`ProseCutGeometry`), and the pointer resolves against
+// the same frames the drawing uses — through `CutFlowGeometry.nearestSlot`
+// itself, so the snapping rule stayed one function with its own pins.
+//
+// `CutFlowGeometry` therefore survives as the SNAPPING BRAIN: its
+// `nearestSlot` runs in production on every click and drag (fed prose-placed
+// marks instead of flow slots), and its `make` — the token flow's wrap
+// arithmetic — is now read by the pins alone, deliberately kept rather than
+// deleted: `CutFlowEndSlotTests` is ledger row 3's evidence that the three
+// §4.4 links are SOUND, and evidence is not something a face rebuild gets to
+// throw away (the batch-2 brief's own instruction). `WCutPlacement.flowItems`
+// keeps being derived per take for the same reason — the drift pin
+// (`aDriftRefreshWithTheSameTokenCountRedrawsTheFlow`) reads `WTake.flow` as
+// its non-vacuity measure.
