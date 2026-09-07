@@ -1395,4 +1395,38 @@ flight's editing window beyond the walk's own typing.
 
 ### R-3 · RECORD (the implementer writes here from its first commit)
 
-*(empty until the implementer's first commit)*
+**NOT DONE in this batch (the record's first line, per the brief's item 9):** no Return-key work (batch 2,
+closed), no sheet/preset/renaming work (18f), nothing in `Sources/VariorumCore/Sync/`, no schema, no
+lockstep, nothing in `BlockRangeIndex` / `CrossBlockEditPlanner` / the 13u fence's family, no phone door
+(the parity row is stated at the close), no Release build and no `/Applications` refresh. *(Filled in
+further at close.)*
+
+**TWO DECLARED DEVIATIONS FROM §5.1 BATCH 3's LETTER, stated up front (the R-1 precedent):**
+
+1. **Blank lines do NOT "vanish into separators" — the ONE cut brain's k−1 rule stands.** §5.1's
+   parenthetical says *"blank lines vanish into separators (they were content; the separator renders the
+   paragraph break)"*. Composing `divide`, as the same section instructs, routes every seam through
+   `BoundarySnapping.seamTrimmedHalves`, which since her **A11 ruling** (13d sitting 2026-07-28 — her own
+   report that dividing on an empty line put the blank line NOWHERE) stores **k−1 newlines on the
+   preceding half**: `"one\n\ntwo"` becomes `"one\n"` + `"two"`, and the editor's separator re-creates the
+   last, so the page reads byte-identically. Three reasons to keep it: A11 is hers; U-19 (2) is hers
+   (*"the eager deleting of whitespace has already been an annoyance and we won't reintroduce it"*); and a
+   repair that disagreed with dividing by hand at the same seam would give one gesture two answers — the
+   class S4-22 closed. Pinned (`splittingAtABlankLineKeepsHerSpacingExactly`), and carried to her as
+   QUESTIONS **#93(b)**.
+2. **The Blocks workbench's bulk door does NOT run through `runStructural`.** The brief says all three
+   doors do; `runStructural` is the WRITE editor's surface-rewrite door, and the workbench is a mode with
+   no attached Write editor (`BlockTOCViewModel.mergePicked` / `deletePicked` run `session.runner.run` +
+   `withCompound` for exactly that reason). The two EDITOR doors — note ▾ and block ▾ — do run through
+   `runStructural` with `seam: nil`, as ruled.
+
+**Pieces**
+
+| # | Piece | State |
+|---|---|---|
+| 1 | Domain: `NewlineSplitting.breaks(in:)` — the break rule + the list exception | **DONE (this row's commit)** — `NewlineSplittingTests` **12 / 1 green** |
+| 2 | Core: `divide` / `divideW` bodies factored into `db`-taking internals (the 3C parity refactor, existing suites unmodified) | NOT-STARTED |
+| 3 | Core: `splitBlockAtNewlines` + `StructuralSplitAtNewlinesTests` | NOT-STARTED |
+| 4 | Mac: the three doors, the registry declarations, the receipt copy + their pins | NOT-STARTED |
+| 5 | The walk (dev-store Debug, `18c-3/` captures) | NOT-STARTED |
+| 6 | Close: the suites, row 37's disposition, QUESTIONS #93, the parity line | NOT-STARTED |
