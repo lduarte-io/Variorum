@@ -682,6 +682,168 @@ extension Operations {
         return result
     }
 
+    // MARK: - Split at newlines (the repair — U-6, 2026-09-06)
+
+    public struct SplitAtNewlinesResult: Equatable, Sendable {
+        /// The blocks the source became, in reading order. Exactly
+        /// `[blockID]` when the block was already one paragraph — the no-op,
+        /// which writes nothing at all.
+        public let blockIDs: [String]
+        /// How many OTHER takes rode WHOLE onto the first block (the
+        /// keep-on-top arm; 0 for a single-take block). *"The top paragraph
+        /// is a block with all the takes"* — her words.
+        public let takesKeptOnTop: Int
+        /// Live active takes that could not park and stayed on the released
+        /// original in lineage: an EMPTY take has no legal cut at all
+        /// (`divideW` refuses it as `invalidCut`), so it keeps the archived
+        /// takes company on A. Counted, never swallowed — a take that
+        /// stopped following the block she split is exactly what the J8
+        /// copy-truth doctrine says a receipt must be able to name.
+        public let takesLeftBehind: Int
+
+        /// True when the block was already one paragraph.
+        public var isNoOp: Bool { blockIDs.count < 2 }
+        public var blocksMade: Int { blockIDs.count }
+    }
+
+    /// **"Make every newline a block" — the repair** (author ruling **U-6**,
+    /// 2026-09-06, the use-report round's 18c; her words: *"a 'make all
+    /// newlines blocks' button… that automatically just leaves any take at
+    /// the top paragraph of its block (aka, if you had a multi paragraph
+    /// block now the top paragraph is a block with all the takes)"*). Her
+    /// reason: a note written with the newlines chip OFF is one block per
+    /// several paragraphs, and repairing it by hand was *"a lot of divides to
+    /// run"* — and, under the superseded duplicate default, deleting an extra
+    /// take between each.
+    ///
+    /// **ONE transaction, ONE undo entry per block.** The breaks come from
+    /// the block's DISPLAYED take (`NewlineSplitting.breaks`, U-19 (4)'s list
+    /// exception included); every cut then goes through the standing
+    /// operations, so nothing here is a second implementation of a divide:
+    ///
+    /// - **Single-take block:** successive in-place `divide`s at each break.
+    ///   A keeps its identity as the first paragraph (the everyday shape), so
+    ///   its name, comments, presentation, tags and history stay where they
+    ///   were and only the later paragraphs are minted.
+    /// - **Fanned block:** the FIRST break is a keep-on-top `divideW` — the
+    ///   displayed take cut there, every other take parked at its END
+    ///   (`KeepOnTopDivide`, the same brain the three divide doors compose
+    ///   through) — so B is paragraph 1 carrying every take, and C is the
+    ///   rest as one take; C then splits in place at the remaining breaks. A
+    ///   is released to lineage PRESERVED WHOLE, exactly as any W does.
+    ///
+    /// **Her spacing survives.** The seam trim is the ONE cut brain's
+    /// (`BoundarySnapping.seamTrimmedHalves`), so a run of k newlines leaves
+    /// k−1 on the preceding block and the rendering join re-creates the last
+    /// — her A11 ruling, and the page reads byte-identically after the
+    /// repair. This is deliberately NOT a re-segmentation: splitting at a
+    /// blank line here does exactly what dividing there by hand does, because
+    /// it IS dividing there.
+    ///
+    /// A block with **no break is a no-op**: nothing is read but the context,
+    /// nothing is written, no touch, no churn, no outbox row, no undo entry.
+    /// A **sealed** post refuses through `placedContext` like every
+    /// structural op; a single-take block whose one take is **locked**
+    /// refuses through `divide`'s own `ensureEditable` (the fanned arm copies
+    /// buffers and so tolerates locks, exactly as `divideW` always has).
+    @discardableResult
+    public func splitBlockAtNewlines(_ blockID: String) throws -> SplitAtNewlinesResult {
+        struct Landing {
+            var result: SplitAtNewlinesResult
+            var preImages: [TextPreImage] = []
+            var minted: [MintedPreImage] = []
+            var released: [String] = []
+        }
+
+        let landing: Landing = try database.write { db in
+            let context = try placedContext(db, blockID: blockID)
+            guard !NewlineSplitting.breaks(in: context.rendered.workingText).isEmpty else {
+                return Landing(result: SplitAtNewlinesResult(
+                    blockIDs: [blockID], takesKeptOnTop: 0, takesLeftBehind: 0))
+            }
+            let fan = try Variant.fetchAll(
+                db,
+                sql: """
+                    SELECT * FROM variant
+                    WHERE block_id = ? AND deleted_at IS NULL AND status = 'active'
+                    ORDER BY fan_position, id
+                    """,
+                arguments: [blockID])
+
+            var blockIDs: [String] = []
+            var preImages: [TextPreImage] = []
+            var minted: [MintedPreImage] = []
+            var released: [String] = []
+            var keptOnTop = 0
+            var leftBehind = 0
+            var cursorID = blockID
+            var cursorText = context.rendered.workingText
+
+            if fan.count > 1 {
+                // The fanned first break, through the ONE keep-on-top brain.
+                let cut = NewlineSplitting.breaks(in: cursorText)[0].lowerBound
+                guard let composition = KeepOnTopDivide.compose(
+                    displayedID: context.rendered.id, cut: cut, fan: fan)
+                else { throw OperationError.variantNotFound(id: context.rendered.id) }
+                let w = try divideWRows(
+                    db, blockID: blockID, cuts: composition.cuts,
+                    displayedVariantID: composition.displayedID)
+                blockIDs.append(w.first.block.id)
+                minted.append(.init(w.first.block.id, w.first.variants))
+                minted.append(.init(w.second.block.id, w.second.variants))
+                released.append(w.releasedPlacementID)
+                keptOnTop = max(0, w.first.variants.count - 1)
+                leftBehind = composition.unparkable.count
+                cursorID = w.second.block.id
+                cursorText = try renderedVariant(db, blockID: cursorID).workingText
+            }
+            blockIDs.append(cursorID)
+
+            while let brk = NewlineSplitting.breaks(in: cursorText).first {
+                let divided = try divideRows(db, blockID: cursorID, cut: brk.lowerBound)
+                preImages.append(divided.preImage)
+                minted.append(.init(divided.result.block.id, [divided.result.variant]))
+                cursorID = divided.result.block.id
+                cursorText = divided.result.variant.workingText
+                blockIDs.append(cursorID)
+            }
+
+            return Landing(
+                result: SplitAtNewlinesResult(
+                    blockIDs: blockIDs, takesKeptOnTop: keptOnTop,
+                    takesLeftBehind: leftBehind),
+                preImages: preImages, minted: minted, released: released)
+        }
+
+        guard !landing.result.isNoOp else { return landing.result }
+        // ONE entry for the whole block, both halves from the SAME do-time
+        // pre-images (the 13c rule — `redo:` is required, never defaulted).
+        // Order matters and `revertStructural` already has it right: the
+        // buffers go back BEFORE the mints are tombstoned, so every minted
+        // block is back at its birth text when its tombstone lands and none
+        // of them is mistaken for author work and stamped into the tray.
+        let preImages = landing.preImages
+        let minted = landing.minted
+        let released = landing.released
+        undoStack?.register(
+            label: "Split at Newlines",
+            inverse: {
+                try $0.revertStructural(
+                    restoringTexts: preImages,
+                    tombstoningBlocks: minted,
+                    revivingPlacementRows: released)
+            },
+            redo: {
+                try $0.reapplyStructural(
+                    restoringTexts: preImages,
+                    untombstoningBlocks: minted,
+                    releasingPlacementRows: released)
+            },
+            // A12: the buffers this undo would restore.
+            insuring: preImages)
+        return landing.result
+    }
+
     // MARK: - Merge (mirrors W)
 
     public struct MergeResult: Equatable, Sendable {

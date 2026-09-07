@@ -1424,9 +1424,28 @@ further at close.)*
 
 | # | Piece | State |
 |---|---|---|
-| 1 | Domain: `NewlineSplitting.breaks(in:)` — the break rule + the list exception | **DONE (this row's commit)** — `NewlineSplittingTests` **12 / 1 green** |
-| 2 | Core: `divide` / `divideW` bodies factored into `db`-taking internals (the 3C parity refactor, existing suites unmodified) | NOT-STARTED |
-| 3 | Core: `splitBlockAtNewlines` + `StructuralSplitAtNewlinesTests` | NOT-STARTED |
-| 4 | Mac: the three doors, the registry declarations, the receipt copy + their pins | NOT-STARTED |
+| 1 | Domain: `NewlineSplitting.breaks(in:)` — the break rule + the list exception | **DONE (cf4f155b)** — `NewlineSplittingTests` **12 / 1 green** |
+| 2 | Core: `divide` / `divideW` bodies factored into `db`-taking internals (the 3C parity refactor, existing suites unmodified) | **DONE (af12b339)** — divide family **48 / 4 green**; core `swift test` **1474 / 161 green** |
+| 3 | Core: `KeepOnTopDivide` moved into the Domain (public, call sites unchanged) + `splitBlockAtNewlines` + `StructuralSplitAtNewlinesTests` | **DONE (this row's commit)** — `StructuralSplitAtNewlinesTests` **19 / 1 green**; core `swift test` **1493 / 162 green**; the two reverts run and recorded below |
+| 4 | Mac: the three doors, the registry declarations, the receipt copy + their pins | IN-PROGRESS |
 | 5 | The walk (dev-store Debug, `18c-3/` captures) | NOT-STARTED |
 | 6 | Close: the suites, row 37's disposition, QUESTIONS #93, the parity line | NOT-STARTED |
+
+**A THIRD DEVIATION, declared with piece 3 (a MOVE, not a change):** `KeepOnTopDivide` left
+`App/Variorum/Shared/` for `Sources/VariorumCore/Domain/` and became `public`. Nothing inside it
+changed and no call site changed a character (the three app doors and both test suites name it
+unqualified and already `import VariorumCore`). **Why:** `splitBlockAtNewlines`'s fanned arm IS the
+keep-on-top arrangement, and a CORE operation cannot import the app — so the choice was a second home
+for a ruled rule (the drift class this repo names by hand every time it appears) or one home every
+caller can reach. The file's header states the move and its reason.
+
+**THE TWO BEHAVIOURAL REVERTS, named before they were started (the trap's rule; tree `<piece-3 commit>`,
+clean, restored with `git checkout --`). The op is NEW, so the suite lands WITH it rather than red-on-old
+(the brief's item 3) — these reverts exist to prove the suite is not hollow:**
+
+- **Revert S1** — `NewlineSplitting.breaks`' list exception removed (the `continue` deleted, so an
+  adjacent pair of list leads breaks like any other pair). Expected red: the two pure list pins and the
+  operation's `aListStaysWholeInsideItsOwnBlock`.
+- **Revert S2** — `splitBlockAtNewlines` registers per LEG instead of once (the single `register` call
+  replaced by letting `divideRows`/`divideWRows`' public wrappers do it — modelled by registering one
+  entry per minted block). Expected red: the three undo/redo pins.
