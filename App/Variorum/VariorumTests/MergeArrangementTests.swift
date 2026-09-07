@@ -348,10 +348,17 @@ struct MergeArrangementTests {
         #expect(pairEvery.contains("The two takes you were looking at join with a space."))
         #expect(pairEvery.contains("3 other takes come along whole"))
 
+        // 18f ladder R1-3 (fable-reviewer): the singular is CONJUGATED (this
+        // pin used to certify "1 other take stay").
         let pairShown = MergeArrangementCopy.sentence(
             .onlyTheShownOnes, blocks: 2, otherTakes: 1)
-        #expect(pairShown.contains("1 other take stay"))
+        #expect(pairShown.contains("1 other take stays with the released blocks"),
+                "singular, conjugated: \(pairShown)")
         #expect(pairShown.contains(TrayPath.originalsPath), "the lineage road, named")
+        let pairEveryOne = MergeArrangementCopy.sentence(
+            .bringEveryTake, blocks: 2, otherTakes: 1)
+        #expect(pairEveryOne.contains("1 other take comes along whole"),
+                "singular, conjugated: \(pairEveryOne)")
 
         let runEvery = MergeArrangementCopy.sentence(
             .bringEveryTake, blocks: 4, otherTakes: 2)

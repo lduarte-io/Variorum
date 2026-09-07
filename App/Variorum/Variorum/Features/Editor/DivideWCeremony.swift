@@ -446,6 +446,13 @@ final class DivideWCeremony {
     /// function of the state so it is pinned rather than read off a
     /// screenshot (the `FannedDefaultsCopy` doctrine: a sentence may only
     /// claim what the operation will actually do).
+    ///
+    /// **18f ladder round 1, R1-3 (fable-reviewer):** the two parking presets
+    /// count the takes that PARK — `others` less the empty ones, which
+    /// `KeepOnTopDivide.unparkable` leaves on the original and `stranded`
+    /// already names (the fan's count double-counted them); and the verb
+    /// follows the count ("1 other take stays"). Copy-to-both keeps the
+    /// fan's count: `divideDuplicating` duplicates an empty take too.
     nonisolated static func arrangementSentence(
         _ arrangement: Arrangement, others: Int, unparkable: Int
     ) -> String {
@@ -455,19 +462,26 @@ final class DivideWCeremony {
             : (unparkable == 1
                 ? " 1 empty take can't be placed and stays with the original block."
                 : " \(unparkable) empty takes can't be placed and stay with the original block.")
+        let parked = max(0, others - unparkable)
+        func parking(on side: String, theOther: String) -> String {
+            parked == 0
+                ? "Each new block starts with one take."
+                : "\(takes(parked)) \(parked == 1 ? "stays" : "stay") whole on the \(side) block; "
+                    + "the \(theOther) block starts with one take."
+        }
         switch arrangement {
         case .keepOnTop:
-            return "The take you were in splits at the \u{2702}. \(takes(others)) stay whole "
-                + "on the top block; the bottom block starts with one take.\(stranded) "
+            return "The take you were in splits at the \u{2702}. "
+                + "\(parking(on: "top", theOther: "bottom"))\(stranded) "
                 + "Reversible — \u{2325}\u{2318}Z."
         case .keepOnBottom:
-            return "The take you were in splits at the \u{2702}. \(takes(others)) stay whole "
-                + "on the bottom block; the top block starts with one take.\(stranded) "
+            return "The take you were in splits at the \u{2702}. "
+                + "\(parking(on: "bottom", theOther: "top"))\(stranded) "
                 + "Reversible — \u{2325}\u{2318}Z."
         case .copyToBoth:
-            return "The take you were in splits at the \u{2702}. \(takes(others)) ride whole "
-                + "onto BOTH blocks — the extra copies are quick to delete. "
-                + "Reversible — \u{2325}\u{2318}Z."
+            return "The take you were in splits at the \u{2702}. \(takes(others)) "
+                + "\(others == 1 ? "rides" : "ride") whole onto BOTH blocks — the extra copies "
+                + "are quick to delete. Reversible — \u{2325}\u{2318}Z."
         case .perTake:
             return "Each \u{2702} splits its take; \u{2702} at the very END keeps the whole "
                 + "take on the top block, at the very START on the bottom. An unchecked "

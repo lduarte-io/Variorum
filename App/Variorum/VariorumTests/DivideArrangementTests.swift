@@ -271,8 +271,13 @@ struct DivideArrangementTests {
             let sentence = DivideWCeremony.arrangementSentence(
                 .keepOnTop, others: state.otherTakes.count,
                 unparkable: state.unparkableTakes.count)
-            #expect(sentence.contains("2 other takes"))
-            #expect(sentence.contains("top block"))
+            // 18f ladder R1-3 (fable-reviewer): the PARKED count — the fan
+            // has two other takes, but the empty one cannot park and the
+            // sentence already says so; this pin used to certify the double
+            // count ("2 other takes stay whole … 1 empty take can't be placed").
+            #expect(sentence.contains("1 other take stays whole on the top block"),
+                    "the parked count, not the fan's: \(sentence)")
+            #expect(!sentence.contains("2 other takes"))
             #expect(sentence.contains("1 empty take can't be placed"))
         }
     }
@@ -285,11 +290,24 @@ struct DivideArrangementTests {
                 + "on the top block; the bottom block starts with one take. "
                 + "Reversible — \u{2325}\u{2318}Z.",
                 "the mockup's own sentence")
+        // 18f ladder R1-3 (fable-reviewer): the singular is CONJUGATED — this
+        // pin used to certify "1 other take stay whole", which every two-take
+        // divide showed her (the J8 doctrine's own failure mode: a pin that
+        // certifies copy instead of checking it).
         let bottom = DivideWCeremony.arrangementSentence(.keepOnBottom, others: 1, unparkable: 0)
-        #expect(bottom.contains("1 other take stay"), "singular counts")
-        #expect(bottom.contains("bottom block"))
+        #expect(bottom.contains("1 other take stays whole on the bottom block"),
+                "singular counts, conjugated: \(bottom)")
         let both = DivideWCeremony.arrangementSentence(.copyToBoth, others: 3, unparkable: 0)
         #expect(both.contains("3 other takes ride whole onto BOTH blocks"))
+        let bothOne = DivideWCeremony.arrangementSentence(.copyToBoth, others: 1, unparkable: 0)
+        #expect(bothOne.contains("1 other take rides whole onto BOTH blocks"),
+                "copy-to-both keeps the fan's count — an empty take is duplicated too")
+        // Every other take empty: nothing parks, and the sentence says what
+        // each block starts with instead of counting zero takes.
+        let allEmpty = DivideWCeremony.arrangementSentence(.keepOnTop, others: 1, unparkable: 1)
+        #expect(allEmpty.contains("Each new block starts with one take."))
+        #expect(allEmpty.contains("1 empty take can't be placed"))
+        #expect(!allEmpty.contains("0 other takes"))
         let hand = DivideWCeremony.arrangementSentence(.perTake, others: 3, unparkable: 0)
         #expect(hand.contains("An unchecked take is not cut"),
                 "the hand-placement surface says its own rule instead of counts")

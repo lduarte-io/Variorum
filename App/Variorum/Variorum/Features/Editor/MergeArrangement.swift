@@ -90,20 +90,22 @@ nonisolated enum MergeArrangementCopy {
         let shown = blocks > 2
             ? "The \(blocks) takes you were looking at join in order."
             : "The two takes you were looking at join with a space."
+        // The verb follows the count (18f ladder R1-3): "1 other take comes".
         let takes = otherTakes == 1 ? "1 other take" : "\(otherTakes) other takes"
+        let one = otherTakes == 1
         switch arrangement {
         case .bringEveryTake:
             guard otherTakes > 0 else {
                 return "\(shown) There are no other takes to bring. "
                     + "Reversible — \u{2325}\u{2318}Z."
             }
-            return "\(shown) \(takes) come along whole onto the merged block. "
+            return "\(shown) \(takes) \(one ? "comes" : "come") along whole onto the merged block. "
                 + "Reversible — \u{2325}\u{2318}Z."
         case .onlyTheShownOnes:
             guard otherTakes > 0 else {
                 return "\(shown) There are no other takes. Reversible — \u{2325}\u{2318}Z."
             }
-            return "\(shown) \(takes) stay with the released blocks in lineage "
+            return "\(shown) \(takes) \(one ? "stays" : "stay") with the released blocks in lineage "
                 + "(\(TrayPath.originalsPath)). Reversible — \u{2325}\u{2318}Z."
         case .pairByHand:
             return "Place a \u{FF0B} between one take on each side to mint a joined take, "
