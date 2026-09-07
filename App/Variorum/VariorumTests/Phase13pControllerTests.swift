@@ -489,11 +489,18 @@ struct Phase13pControllerTests {
         #expect(w.controller.appleKeyVerified == false && !w.controller.appleKeyLandingFailed,
                 "not landed, not refused — waiting")
         #expect(w.controller.enrollReading?.appleState == .absent, "the waiting face speaks (its passphrase doors act)")
+        // F3 (NIT-N8): a device merely WAITING is not EXPOSED — the legs'
+        // tier says so, and the nudge brain speaks copy §2d's waiting line
+        // (before F3 the tier read `.exposed` and the pane told a device
+        // whose key was on its way to write its words down as if unguarded).
+        #expect(w.controller.legs.appleKeyWaiting && w.controller.legs.tier == .waiting, "\(w.controller.legs.tier)")
+        #expect(ProtectionCopy.nudgeSentence(for: w.controller.legs.tier) == ProtectionCopy.waitingTitle + " " + ProtectionCopy.waitingBody)
         // The next ready with A₁ landed: the silent road, nothing minted.
         let arrived = AppleKey(id: "a1-the-accounts", key: AppleKey.mint().key)
         w.appleKeys.key = arrived
         await w.controller.reconcile()
         #expect(w.appleKeys.key == arrived && !w.controller.appleKeyWaiting)
+        #expect(w.controller.legs.tier != .waiting, "landed: no longer waiting")
     }
 
     /// (a) A device HOLDING the master (it enrolled by a typed secret) that

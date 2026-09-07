@@ -33,7 +33,8 @@ struct ProtectionStatusRow: View {
 
     var body: some View {
         if unchosen {
-            let exposed = controller.legs.tier == .exposed
+            let tier = controller.legs.tier
+            let exposed = tier == .exposed
             Button {
                 openSettings()
             } label: {
@@ -50,10 +51,14 @@ struct ProtectionStatusRow: View {
                             .fixedSize(horizontal: false, vertical: true)
                         // pre-13x 5a (design §8): the unchosen indicator reads
                         // "Standard" + the current-state line (copy §1); exposed
-                        // keeps the hardened headline (copy §5).
+                        // keeps the hardened headline (copy §5); F3 (NIT-N8): a
+                        // device waiting for the account's iCloud key reads copy
+                        // §2d's waiting title — never the exposed headline.
                         Text(exposed
                              ? ProtectionCopy.exposedNudgeHeadline
-                             : ProtectionCopy.currentStateLine(.standard))
+                             : tier == .waiting
+                                 ? ProtectionCopy.waitingTitle
+                                 : ProtectionCopy.currentStateLine(.standard))
                             .font(tokens.small)
                             .foregroundStyle(exposed ? tokens.alarm : tokens.muted)
                             .lineLimit(3)

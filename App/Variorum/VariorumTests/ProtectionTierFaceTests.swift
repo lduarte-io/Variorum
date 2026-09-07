@@ -62,6 +62,61 @@ struct ProtectionTierFaceTests {
                 "…never the gentle sentence beside it")
     }
 
+    /// pre-13x ladder round 2, F3 (NIT-N8) — RED ON OLD: a device WAITING
+    /// for the account's iCloud key under propagation lag (F2's MAJOR-3
+    /// (a): no master, nothing minted) read `appleKeyVerified == false` on
+    /// the pane's legs and was spoken to as EXPOSED — told to write its
+    /// words down as if its key were unguarded. Copy §2d's waiting
+    /// sentence renders in the hardened nudge's place, on the notice bar
+    /// and the unchosen indicator; the exposed headline never.
+    @Test func aWaitingDeviceHearsTheWaitingSentenceNotTheExposedNudge() async throws {
+        let stamps = ScriptedStampsBox()
+        stamps.value[ProtectionController.firstUseStamp] =
+            Date(timeIntervalSinceNow: -3 * 24 * 60 * 60)
+        let key = StoreKey.mint()
+        var envelope = StoreKeyEnvelope()
+        try envelope.setAppleWrappedCopy(key: key, under: AppleKey.mint().symmetricKey, appleKeyID: "a0-this-files")
+        let backing = InMemoryStoreKeyGuardBacking(auto: key, biometryAvailable: true, biometricSucceeds: true)
+        let appleKeys = InMemoryAppleKeyBacking(key: nil)  // the account's A₁ has not arrived here
+        let gate = StoreLaunchGate.scripted(
+            dials: ScriptedDialsBox(ProtectionDials()), backing: backing,
+            envelope: ScriptedEnvelopeBox(envelope), stamps: stamps, appleKey: appleKeys)
+        let syncLeaves = RecordingSyncLeaves(
+            plain: SyncCustodyRecord(deviceID: "device-1", material: nil), gated: nil)
+        let controller = ProtectionController(configuration: .init(
+            scope: "Variorum", storeURL: nil, gate: gate, isRealVariant: true,
+            makeKDF: { PassphraseKDF.Descriptor(
+                algorithm: PassphraseKDF.algorithmArgon2id, argon2Version: 0x13,
+                memoryKiB: 256, iterations: 1, parallelism: 1,
+                salt: PassphraseKDF.randomSalt(), outputBytes: 32) },
+            storeID: { [storeID = envelope.storeID] in storeID },
+            syncCustodyLeaves: { _ in syncLeaves.leaves },
+            syncCustodySession: SyncCustodySession()))
+        controller.adoptResident(nil)
+        controller.isSignedIn = { true }
+        controller.foreignOwner = { _ in false }
+        controller.readVaultPosture = { VaultPostureReading(hasAppleHeldCopy: true, appleKeyID: "a1-the-accounts") }
+        controller.landEnrollment = { _, _ in false }
+        await controller.reconcile()
+        #expect(controller.appleKeyWaiting && controller.legs.tier == .waiting, "\(controller.legs.tier)")
+        controller.refreshNotices()
+        #expect(controller.notice == .nudge)
+
+        let bar = ProtectionNoticeBar(controller: controller, services: nil)
+        await SurfaceComposition.host(bar, size: NSSize(width: 900, height: 120))
+        let shown = SurfaceComposition.text(of: bar.body)
+        #expect(SurfaceComposition.carries(ProtectionCopy.waitingTitle, in: shown), "the waiting sentence renders on the bar")
+        #expect(SurfaceComposition.carries(ProtectionCopy.waitingBody, in: shown))
+        #expect(!SurfaceComposition.carries(ProtectionCopy.exposedNudgeHeadline, in: shown),
+                "never the exposed headline for a device merely waiting")
+
+        let row = ProtectionStatusRow(controller: controller, tokens: .fallback(for: .light))
+        await SurfaceComposition.host(row, size: NSSize(width: 240, height: 80))
+        let rowShown = SurfaceComposition.text(of: row.body)
+        #expect(SurfaceComposition.carries(ProtectionCopy.waitingTitle, in: rowShown), "the indicator too")
+        #expect(!SurfaceComposition.carries(ProtectionCopy.exposedNudgeHeadline, in: rowShown))
+    }
+
     /// A COVERED nudge (a secret still to offer, but a real leg exists)
     /// keeps the gentle two-offer copy.
     @Test func aCoveredNudgeKeepsTheGentleCopy() async {

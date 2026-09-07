@@ -314,7 +314,8 @@ final class ProtectionController {
             hasRecoveryWrap: hasRecoveryWrap,
             appleKeyVerified: appleKeyVerified,
             storeCustodyGated: effectiveGate == .biometric,
-            factsUnknown: envelopeUnreadable)
+            factsUnknown: envelopeUnreadable,
+            appleKeyWaiting: appleKeyWaiting)
     }
 
     /// The resident key under the DEMANDED gates (adopted at unlock,

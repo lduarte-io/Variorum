@@ -541,14 +541,26 @@ struct ProtectionNoticeBar: View {
     /// the recovery phrase either way. pre-13x 2a: the EXPOSED tier
     /// renders copy §5's nudge (Standard, no Apple key landed, no secrets).
     private var nudgeBar: some View {
-        let exposed = controller.legs.tier == .exposed
+        let tier = controller.legs.tier
+        // F3 (NIT-N8): a device WAITING for the account's iCloud key is not
+        // exposed — copy §2d's waiting title + body render in the hardened
+        // nudge's place (the two offers stand: the passphrase and the
+        // words are the doors that continue now).
+        let headline = switch tier {
+        case .exposed: ProtectionCopy.exposedNudgeHeadline
+        case .waiting: ProtectionCopy.waitingTitle
+        case .covered, .unknown: ProtectionCopy.nudgeHeadline
+        }
+        let body = switch tier {
+        case .exposed: ProtectionCopy.exposedNudgeBody
+        case .waiting: ProtectionCopy.waitingBody
+        case .covered, .unknown: ProtectionCopy.nudgeBody
+        }
         return bar {
             VStack(alignment: .leading, spacing: 2) {
-                Text(exposed ? ProtectionCopy.exposedNudgeHeadline
-                             : ProtectionCopy.nudgeHeadline)
+                Text(headline)
                     .font(.callout.weight(.semibold))
-                Text(exposed ? ProtectionCopy.exposedNudgeBody
-                             : ProtectionCopy.nudgeBody)
+                Text(body)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)

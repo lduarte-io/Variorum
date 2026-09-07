@@ -468,6 +468,12 @@ nonisolated struct ProtectionLegs: Equatable, Sendable {
     /// True while the sidecar is present-but-unreadable (P1/P11): the
     /// wrap facts are UNKNOWN, and no tier may be claimed from unknowns.
     var factsUnknown: Bool = false
+    /// pre-13x ladder round 2, F3 (NIT-N8): the Apple arm is WAITING — the
+    /// account's vault names an iCloud key this device cannot read yet and
+    /// it holds no master, so nothing is minted (F2's MAJOR-3 (a)); the
+    /// next ready re-reads. A device merely waiting is NOT exposed: it must
+    /// not be told to write its words down as if its key were unguarded.
+    var appleKeyWaiting: Bool = false
 
     enum Tier: Equatable, Sendable {
         /// Any real leg exists — today's gentle nudge and cadence stand.
@@ -479,12 +485,17 @@ nonisolated struct ProtectionLegs: Equatable, Sendable {
         /// The sidecar is unreadable — nothing honest can be claimed;
         /// the nudge stays quiet (the P1/P11 suppression).
         case unknown
+        /// F3 (NIT-N8): no leg yet, but the account's iCloud key is on its
+        /// way (propagation lag; the same Apple account) — copy §2d's
+        /// *Standard, waiting* sentence renders in the exposed nudge's
+        /// place; its doors (the passphrase, the twelve words) act.
+        case waiting
     }
 
     var tier: Tier {
         if factsUnknown { return .unknown }
-        return (hasPassphraseWrap || hasRecoveryWrap || appleKeyVerified == true)
-            ? .covered : .exposed
+        if hasPassphraseWrap || hasRecoveryWrap || appleKeyVerified == true { return .covered }
+        return appleKeyWaiting ? .waiting : .exposed
     }
 }
 
@@ -502,11 +513,16 @@ nonisolated enum ProtectionCopy {
     static let deviceName = "iPhone"
     static let biometryName = "Face ID"
     static let credentialName = "passcode"
+    /// F3 (the F2 adjudication's copy follow-up 3): the device word with
+    /// its article, for a sentence that names ANOTHER device of the kind
+    /// ("from an iPhone that is" / "from a Mac that is").
+    static let deviceNameWithArticle = "an iPhone"
     #else
     static let deviceName = "Mac"
     static let biometryName = "Touch ID"
 
     static let credentialName = "login password"
+    static let deviceNameWithArticle = "a Mac"
     #endif
 
     /// 13p-fix ladder R2-2 (moved here at R3-2, so BOTH surfaces can say
@@ -595,6 +611,9 @@ nonisolated enum ProtectionCopy {
         case .covered: return coveredNudgeLine
         case .exposed: return exposedNudgeHeadline + " " + exposedNudgeBody
         case .unknown: return unknownNudgeLine
+        // F3 (NIT-N8): copy §2d's *Standard, waiting* title + body — the
+        // lobby's own waiting sentence, in the exposed nudge's place.
+        case .waiting: return waitingTitle + " " + waitingBody
         }
     }
 
