@@ -929,9 +929,20 @@ Both arms land in their own commit AHEAD of the code that uses them, each with a
 
 | # | Piece | State |
 |---|---|---|
-| 1 | Core: `divideW` — parked takes keep their names; optional `displayedVariantID` anchor | **DONE** (hash in the next row's commit) — pins `divideWAParkedTakeKeepsItsName` · `divideWAnchorsTheChosenOnTheDisplayedTakeWhenNamed` in `Tests/VariorumCoreTests/StructuralDivideTests.swift`; divide-family core suites **69 / 5 green**; the red-on-old reverts run next |
-| 2 | Shared: `KeepOnTopDivide` (+ the `keepBelow` sibling) in `App/Variorum/Shared/` | NOT-STARTED |
+| 1 | Core: `divideW` — parked takes keep their names; optional `displayedVariantID` anchor | **DONE (0b57614f)** — pins `divideWAParkedTakeKeepsItsName` · `divideWAnchorsTheChosenOnTheDisplayedTakeWhenNamed` (`Tests/VariorumCoreTests/StructuralDivideTests.swift`); divide-family core suites **69 tests / 5 suites green**; both reds run and recorded below |
+| 2 | Shared: `KeepOnTopDivide` (+ the `keepBelow` sibling) in `App/Variorum/Shared/` | **DONE** (this row's commit) — no Xcode project change needed: `Shared/` is a `PBXFileSystemSynchronizedRootGroup` already in BOTH the `Variorum` and `VariorumMobile` targets (`project.pbxproj:83–87`, `:182–184`, `:252–255`), so a new file there is reachable from the phone by construction |
 | 3 | Mac: both doors swapped, the receipt re-worded, `FannedDefaults.swift`'s header rewritten, the J4 pins rewritten | NOT-STARTED |
 | 4 | Phone: `MobileStructural`'s fanned path flipped, header updated, its pins re-pointed | NOT-STARTED |
 | 5 | The walk (dev-store Debug, `18c-1/` captures) | NOT-STARTED |
 | 6 | Close: the suites, the dispositions, QUESTIONS #91 | NOT-STARTED |
+
+**The red-on-old runs (piece 1, by behavioural revert on the committed tree at `0b57614f`; the tree was
+clean before each and `git checkout --` restored it after):**
+
+- **Revert 1** — `Operations+Structural.swift:442`, the `labels: side.map(\.label),` argument dropped from
+  `divideW`'s `mintFanBlock` call (the pre-fix line). `swift test --filter divideWAParkedTakeKeepsItsName`
+  → **`Test run with 1 test in 1 suite failed after 0.027 seconds with 2 issues.`**
+- **Revert 2** — `Operations+Structural.swift:432`, `anchorID` forced back to `context.rendered.id` (the
+  pre-fix expression). `swift test --filter divideWAnchorsTheChosenOnTheDisplayedTakeWhenNamed`
+  → **`Test run with 1 test in 1 suite failed after 0.027 seconds with 4 issues.`**
+- Restored: `swift test --filter StructuralDivideTests` → **29 tests / 1 suite passed**.
