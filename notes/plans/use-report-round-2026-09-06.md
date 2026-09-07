@@ -2991,3 +2991,152 @@ doors were not re-walked (they open the same two-option menu batch 1 captured, n
 - **The green claims located and re-run:** `DivideArrangementTests` (8) · `MergeArrangementTests` (8) · `ProseCutGeometryTests` (9) · `CeremonyCardCopyTests` (4) · `CutFlowEndSlotTests` (4) · `MergeCeremonySheetTests` · `FannedDefaultsTests` · `OriginBlockDoorTests` · `DivideCeremonyCostTests` → `✔ 89 tests in 9 suites`; plus `MergeSelectionTests · BoardDeliveryPolicyTests · FanReorderDoorTests · BoardMergeDiagnosisTests · TakeCardMenuTitleTests · BoardDeleteRollbackTests · BoardDeleteRedoSurvivalTests · EditorWindowSmokeTests · GestureSoakTests · NoteTrayTests · DivideWCeremonyTests · MergeGestureTests · TakesDivideTests · CapabilityRegistryTests · UndoHintAndRefusalTests` green, `BoundaryFluidityTests` red (R1-6).
 
 **Counts: 0 BLOCKER · 2 MAJOR · 4 MINOR · 7 NIT.** Awaiting the implementer's agree/dispute per finding; the fix pass (R1-1 … R1-6, each with its pin; the NITs by the reviewer where one line, else the closeout's) follows the orchestrator's authorization in this session.
+
+#### IMPLEMENTER'S RESPONSES (18f round 1)
+
+*Batch 1's implementer, answering per finding under the cross-model flow. Every mechanism re-traced
+against the tree at `2ac7bd79` (not against the record) before answering; where a finding lands on batch
+2's face I traced that too, as the coordinator asked. **13 AGREE · 0 DISPUTE.** I fix nothing; what
+follows adds only the implementer context the reviewer could not have — why a thing was built the way it
+was, and what a fix must not undo.*
+
+**R1-1 · AGREE (MAJOR).** Re-traced: `NSEvent.addLocalMonitorForEvents(matching: .keyDown)` sees every
+key event this PROCESS dequeues; `installKeyMonitor` (`DivideWSheet.swift:280–286`) guards only
+`ceremony.state != nil`, and `handleKeyEvent` (`:294–306`) returns the step's own answer, which for ←/→
+under a preset is ALWAYS `true` — `stepCut` (`:384–403`) answers `true` even when the cut does not move
+(`else { activeTakeID = takeID }`), so the event is swallowed at every boundary, including the ends. The
+app really does have the other windows named (`VariorumApp.swift:47`, `:295`, `:331`, `:351`, `:357`),
+and both cited precedents are as quoted (`PageTurnKeys.swift:88–98` guards `event.window === window`;
+`Workspace/PaneFocusCatcher.swift:113–124` compares `event.windowNumber == window.windowNumber` with its
+recorded reason). **Two things the fix must carry, from the walk that produced this monitor** (the record's
+piece 6): (a) it exists because THREE focus roads were tried and all three stayed deaf — plain assignment,
+a same-turn `@FocusState` bounce, a next-turn bounce, plus `.focusable(false)` on the chips and the
+checkbox — so the replacement must keep working while an AppKit control inside the `ScrollView` holds
+first responder, which a `viewDidMoveToWindow`-installed monitor does and a focus re-arm does not; and
+(b) `windowNumber`, not `event.window`, is the right comparison for exactly `PaneFocusCatcher`'s recorded
+reason, which is what makes the pin's second window drivable at all. I would add one thing to the fix's
+scope, from the same trace: **the swallow should follow the STEP, not the aim** — `stepCut` answering
+`true` when nothing moved is what makes ←/→ eaten at a take's ends even in the sheet's own window, and it
+is one `return next != nil && next != take.cut` away.
+
+**R1-2 · AGREE (MAJOR).** Re-traced: `entryIndices` is captured at open (`:1282`,
+`min(leading, trailing)...max(leading, trailing)`) and the dispatcher (`:1445–1464`) hands it to all three
+roads unchanged; `runInstantMerge` (`:379`) subscripts `model.index.entries[trailingIndex]` with NO bound
+— it traps. `runCarryAllMerge` (`:639`) and `runMergeChain` (`:676`) do carry the
+`index < count ? … : 0` guard, so they miss the trap and keep the stale length, exactly as described.
+**The framing is right and it is mine:** before this letter `runInstantMerge`'s only callers ran within a
+bounded turn of their plan — `applyStructural`'s `.merge` case, and `openMergeCeremony`'s fallthrough
+(after one flush and one read); U-5's row made it the confirm of a sheet that can sit open indefinitely,
+which is what turned a latent shape into a reachable one. The reachability is real on both roads the
+reviewer names: a sync apply re-renders the index under an open sheet, and menu key equivalents stay live
+under a window-modal sheet — the note `DivideWCeremony.swift:45–48` makes for its own busy-door guard. The
+rule broken is the one this file states two hundred lines away (`runPlainDivide`, `:404–411`:
+*"Re-resolved by BLOCK ID … an index taken before a suspension can address a re-tiled surface"*); I
+applied it to the divide roads in batch 1 and did not apply it to the merge dispatcher I added. The fix's
+shape — re-resolve `state.blockIDs` at confirm, refuse in the refresh road's own voice when a block is
+gone, and harden `runInstantMerge` to resolve by ID — is the right one, and hardening the callee is what
+keeps a future caller from re-earning the trap.
+
+**R1-3 · AGREE (MINOR).** Re-traced both brains. `DivideWCeremony.arrangementSentence` (`:449–477`):
+`takes(1)` is `"1 other take"` and the clause is `" stay whole"` → *"1 other take stay whole"* on every
+two-take fan; `others` is `State.otherTakes.count`, which counts the unparkable, so with one empty other
+take the sentence claims two stay whole on the top block and then says one of them cannot be placed —
+false by one. `MergeArrangementCopy.sentence` (`:87–107`) has the same singular defect twice
+(*"1 other take come along whole"*, *"1 other take stay with the released blocks"*). **And I pinned all
+three:** `DivideArrangementTests.swift:289` (`"1 other take stay"`, commented "singular counts" —
+which is precisely the J8 failure the doctrine names, a pin that certifies the copy instead of checking
+it), `:274` (`"2 other takes"` with `unparkable: 1`), `MergeArrangementTests.swift:276`. The proposed
+split is also right in its one subtle half: **copy-to-both must keep `others`** — I verified
+`Operations.divideDuplicating` (`Operations+Structural.swift:594–598`) fetches every other live ACTIVE
+take with no emptiness filter and `:640` mints `[half] + others.map(\.workingText)` on both successors,
+so an empty take genuinely does ride onto both there.
+
+**R1-4 · AGREE (MINOR).** Re-traced against the mockup and the tree. The mockup's own words are
+`not cut — <b>stays on the original block</b>, in Block History → Came from` with the footer
+`original block · lineage` (grepped from the HTML); the card says
+`"Not cut — stays whole on the original block, in lineage"` (`ProseTakeCard.swift:85–86`) plus that same
+footer — the PATH is gone from the row, which is the half 13f W10a put there. And the vacuity is exactly
+as described: `grep` finds **zero** production callers of `DivideWCeremony.presetRowNote` and
+`uncheckedRowNote` — definitions plus `OriginBlockDoorTests.swift:59` and `NoteTrayTests.swift:413`,
+both still asserting `uncheckedRowNote.contains(TrayPath.originalsPath)`. **This is the seam between the
+two batches and my record is now wrong about it:** batch 1's record names `presetRowNote` as a live copy
+home ("a preset's rows carry `presetRowNote` instead"), and batch 2's card superseded it without the
+record being corrected — the fix pass should say so wherever it lands, because a future reader following
+R-4's record would go looking for a caller that no longer exists. The card as the ONE home is the right
+resolution.
+
+**R1-5 · AGREE (MINOR).** Re-traced: `CeremonyCardCopy.destination` (`ProseTakeCard.swift:60–62`) tests
+`isEmpty` FIRST and answers `.original` for any arrangement but `.perTake`; `arranged(.copyToBoth)`
+(`DivideWCeremony.swift:412–418`) marks every take including an empty one; and `divideDuplicating` does
+duplicate it onto both (verified above, R1-3). So the row's sentence and the card beneath it say opposite
+things about the same take — the exact contradiction `ProseCutGeometryTests`' "a card can never claim two
+destinations" was written to prevent. Ordering the `.copyToBoth` rule before the emptiness rule is the
+one-line fix and it does not disturb `.perTake`, where `.empty` is still the honest answer (the sheet's
+own "uncheck it" road).
+
+**R1-6 · AGREE (MINOR) — and it is BATCH 1's, not batch 2's.** Re-ran it here:
+`BoundaryFluidityTests.mergeOnFannedBlocksSpeaksAboutTheFan` fails at `:398` on
+`.contains("Block History → Came from")`, with the carry-all receipt in hand. The premise moved at batch 1
+piece 5 (`21806a53`): the pin drives `.mergeBlocks, ceremony: true` and confirms immediately, and U-5's row
+made the sheet open on "Bring every take", whose confirm is the carry-all road — whose receipt correctly
+does NOT name the lineage path, because nothing goes to lineage there. Batch 2 touched neither the road nor
+the receipt. The proposed edit is the right one and keeps the claim exactly: `setMergeArrangement(.onlyTheShownOnes)`
+before the confirm puts the pin on the road where takes DO stay behind, which is the road
+`speakAboutMergedFans` (`EditorSurfaceController.swift:358–370`) speaks for. **The process point is
+correct and it is my miss:** my closing run named 36 suite TYPES and batch 2's named 30, and neither
+included `BoundaryFluidityTests` — the 18c ladder's runs did (47 types), which is why it was green three
+times before and red after. The letter's close should run the FULL Mac suite once; hand-picked lists
+cannot see a suite whose premise a ruling moved.
+
+**R1-7 · AGREE (NIT).** Re-traced: on the board, `Button(CapabilityRegistry.capability(.mergeSelectedBlocks).verb)`
+carries `.disabled(picked.count < 2)` while `mergeRoadsMenu` beside it carries none; the workbench has the
+same pair. Both roads speak a real refusal for one pick (`mergeSelectedBlocks` / `mergePicked`: *"⌘-click a
+second block first"*), so P-2 holds either way and this is posture only — but two doors onto one act
+should not disagree about their own enablement. Either rule is fine by me; I have no reading to add.
+
+**R1-8 · AGREE (NIT), as a recorded reading.** Re-traced: `arranged(.perTake)` (`:419–431`) fills only a
+NIL cut, so entering "Choose per take…" from "Keep takes on the bottom block" leaves the non-seed ✂ at the
+START — §5.2's letter says the checklist reveals them "at the end", and my pin
+(`choosePerTakeRevealsTheChecklistAtTheEnds`) only exercises the top→perTake road. **My reason for building
+it this way, for her to weigh:** the alternative — re-placing every ✂ at the END on entry — would silently
+throw away the arrangement she was just looking at the moment she asks to adjust it by hand, which reads as
+the sheet arguing with her; U-3's "the scissors at the end" is about what the sheet OPENS as, and it does.
+Recorded, not fixed, is the right disposition.
+
+**R1-9 · AGREE (NIT).** Re-traced: `TakesViewModel.swift:2241` and `:2266` both speak
+`"Divided into takes — ⌥⌘Z undoes it."` — the retired sheet title inside a receipt, which my U-4 sweep
+looked for as a UI STRING containing "ceremony" and so could not see. The undo label is as described:
+`runDivideW` (`:2768–2777`) is unwrapped, so the Edit menu reads `divideW`'s own "Divide into Variants",
+while the instant road wraps as "Divide" (`:428–431`) — I confirmed the menu text by hand during the walk
+(the record's step 2 quotes it). Both are copy for the closeout's list.
+
+**R1-10 · AGREE (NIT).** Re-traced: after batch 2 retired `WCutFlow`, `grep` finds no non-comment reader of
+`WTake.flow` in `Features/Editor` — `ProseCutGeometry.swift:200` builds a `CutFlowGeometry` of its own, not
+the take's flow — so `WCutPlacement.flowItems` runs per take at open purely to feed the drift pin's
+`onChange` measure. P1 is unharmed (once per take, detached, cached), so this is cleanliness; the pin can
+key on the take's TEXT, which is the fact it actually cares about.
+
+**R1-11 · AGREE (NIT).** Re-traced: `facts` (`DivideWSheet.swift:159–164`) answers "cut where you clicked"
+for every arrangement but `.perTake`, with no reference to the seed's cut — and the seed's cut IS nil on
+the board's one-word-take road (`open(seedCut: nil)`), where the card simultaneously says "Place the ✂".
+Copy.
+
+**R1-12 · AGREE (NIT).** Re-traced: `MergeJoin.canon` (`Domain/MergeJoin.swift:27–31`) answers `.nothing`
+whenever either edge already carries whitespace or a side is empty, and both preset roads join by canon —
+so "join with a space" is the mockup's sentence rather than always the operation's. The state holds both
+rendered takes, so reading the canon join is available without a new fact. Corner-sized and correct.
+
+**R1-13 · AGREE (NIT).** Re-traced: `runDivideW` lands the caret at `result.first.block.id` (`:2775` — the
+W confirm's 2026-07-07 rule, which I preserved deliberately) while `runKeepOnTopDivide` lands it at
+`result.second.block.id` (`:514`). **My claim is narrower than the finding implies and I want that on the
+record either way:** the batch's promise was scoped to the ROWS — the pin
+(`confirmingTheSheetUnchangedReproducesTheInstantDivide`) compares texts, fan sizes, labels and which take
+is chosen, and never the caret — so nothing pinned is false. But "reproduces the instant divide" reads
+wider than that in the record's prose, and one act landing the caret in two places by which door opened it
+is a real difference she would feel. A closeout choice, correctly raised.
+
+**Counts: 13 AGREE · 0 DISPUTE** (2 MAJOR · 4 MINOR · 7 NIT). Two of the six substantive findings are
+squarely batch 1's own doctrine applied everywhere but where I added a caller (R1-2's resolve-by-ID rule,
+R1-6's full-suite discipline), and one — R1-3 — is a pin that certified copy instead of checking it, which
+is the J8 doctrine's own failure mode. Nothing here turns on undefined product behavior, so nothing goes to
+QUESTIONS; R1-8 and R1-13 are readings for the closeout rather than defects.
