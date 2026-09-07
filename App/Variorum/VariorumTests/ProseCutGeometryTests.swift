@@ -221,3 +221,88 @@ struct ProseCutGeometryTests {
         #expect(prose.markFrame(at: 0) == nil)
     }
 }
+
+/// **The card's ONE status line, and the destination it names** (§5.2: *"one
+/// status line per take"*). Pure copy over a pure rule, pinned rather than
+/// read off a screenshot — `FannedDefaultsCopy`'s doctrine: a sentence may
+/// only claim what the operation will actually do.
+@MainActor
+@Suite("The ceremony card's status line (18f batch 2)")
+struct CeremonyCardCopyTests {
+    private func destination(
+        _ arrangement: DivideWCeremony.Arrangement, isSeed: Bool = false,
+        marked: Bool = true, isEmpty: Bool = false, cut: Int? = 5,
+        parkedAtEnd: Bool = false, parkedAtStart: Bool = false
+    ) -> CeremonyDestination {
+        CeremonyCardCopy.destination(
+            arrangement: arrangement, isSeed: isSeed, marked: marked,
+            isEmpty: isEmpty, cut: cut, parkedAtEnd: parkedAtEnd,
+            parkedAtStart: parkedAtStart)
+    }
+
+    /// The seed splits under every arrangement; a parked ✂ names the block the
+    /// whole take rides to, in the ruled direction (S4-22: end ⇒ the FIRST
+    /// block, start ⇒ the second).
+    @Test func theStatusLineNamesWhereEachTakeGoes() {
+        #expect(destination(.keepOnTop, isSeed: true) == .split)
+        #expect(destination(.perTake, parkedAtEnd: true) == .top)
+        #expect(destination(.perTake, cut: 0, parkedAtStart: true) == .bottom)
+        #expect(destination(.copyToBoth) == .both, "a non-seed take under copy-to-both")
+        #expect(destination(.copyToBoth, isSeed: true) == .split, "…but the seed still splits")
+        #expect(destination(.perTake, marked: false) == .original)
+        #expect(destination(.perTake, cut: nil) == .unplaced)
+        #expect(destination(.perTake, isEmpty: true) == .empty)
+        #expect(destination(.keepOnTop, isEmpty: true) == .original,
+                "an empty take under a preset can't be placed, so it stays behind")
+
+        #expect(CeremonyCardCopy.status(.top, words: nil)
+            .contains("stays on the top block"))
+        #expect(CeremonyCardCopy.status(.bottom, words: nil)
+            .contains("goes to the bottom block"))
+        #expect(CeremonyCardCopy.status(.split, words: (41, 38))
+            == "\u{2702} splits here — 41 words above, 38 below",
+                "the mockup's own sentence, in counts")
+        #expect(CeremonyCardCopy.status(.split, words: (1, 9))
+            .contains("1 word above"), "singular is spoken")
+        #expect(CeremonyCardCopy.status(.original, words: nil).contains("lineage"))
+    }
+
+    /// The footer's swatches say the same thing the status line does — one
+    /// answer, two voices, so a card can never claim two destinations.
+    @Test func theFooterAgreesWithTheStatusLine() {
+        #expect(CeremonyCardCopy.footer(.split).count == 2)
+        #expect(CeremonyCardCopy.footer(.top) == ["top block · whole"])
+        #expect(CeremonyCardCopy.footer(.bottom) == ["bottom block · whole"])
+        #expect(CeremonyCardCopy.footer(.both).count == 2)
+        #expect(CeremonyCardCopy.footer(.original).isEmpty)
+        #expect(CeremonyCardCopy.footerNote(.original) == "original block · lineage")
+        #expect(CeremonyCardCopy.footerNote(.split) == nil)
+    }
+
+    /// The two sheets' resting lines name the canon path the originals go to
+    /// (13f W10a's promise; `TrayPath.originalsPath` is the one home).
+    @Test func theRestingLinesNameTheCanonPath() {
+        #expect(CeremonyCardCopy.divideRestingLine.contains(TrayPath.originalsPath))
+        #expect(CeremonyCardCopy.mergeRestingLine(blocks: 2).contains("Both original blocks"))
+        #expect(CeremonyCardCopy.mergeRestingLine(blocks: 4)
+            .contains(TrayPath.originalsPath))
+    }
+
+    /// The option cards' one-liners exist for every option of both rows, and
+    /// **the word U-4 removed is in none of them** (batch 1 took "ceremony"
+    /// out of every UI string; the mockup's own text for the fourth option
+    /// still carried it).
+    @Test func everyOptionCardHasALineAndNoneSaysCeremony() {
+        for option in DivideWCeremony.Arrangement.allCases {
+            #expect(!option.detail.isEmpty)
+            #expect(!option.detail.lowercased().contains("ceremony"))
+            #expect(!option.title.lowercased().contains("ceremony"))
+        }
+        for option in MergeArrangement.allCases {
+            for blocks in [2, 4] {
+                #expect(!option.detail(blocks: blocks).isEmpty)
+                #expect(!option.detail(blocks: blocks).lowercased().contains("ceremony"))
+            }
+        }
+    }
+}

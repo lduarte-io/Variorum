@@ -281,6 +281,111 @@ struct DivideCeremonyCostTests {
         }
     }
 
+    /// **18f batch 2 — THE FACE'S PERFORMANCE BAR, at her scale** (§5.2:
+    /// *"four 3,000-word takes: one mount + one click well under a second"*).
+    ///
+    /// The rebuilt card lays its prose out with Core Text instead of drawing a
+    /// token flow, and the whole point of doing it once per (take, width) is
+    /// that neither mounting the sheet nor moving the ✂ may cost anything she
+    /// can feel. The numbers below INCLUDE the harness's own fixed settle
+    /// sleeps (~120 ms per settle), so the bar is deliberately conservative —
+    /// and the shipped pre-L1 sheet never completed one click at this fixture
+    /// inside a 600-second test timeout.
+    @Test func mountingAndPlacingAtHerScaleStayWellUnderASecond() async throws {
+        try await withEditor(seedBlocks: [longTake(0)]) { h in
+            let (window, ceremony, state) = try await mountCeremony(h)
+            defer { window.orderOut(nil); window.close() }
+
+            let mountStarted = ContinuousClock.now
+            let hosting = await mountSheet(window, ceremony, state)
+            let mountMs = milliseconds(since: mountStarted)
+            print("18f-2 mount (4 x 3,000-word takes): \(String(format: "%.1f", mountMs)) ms")
+
+            let take = try #require(ceremony.state?.takes.first)
+            let target = try #require(take.boundaries.dropFirst(40).first)
+            let clickStarted = ContinuousClock.now
+            ceremony.placeCut(takeID: take.id, cut: target)
+            hosting.needsLayout = true
+            await settle(window, hosting)
+            let clickMs = milliseconds(since: clickStarted)
+            print("18f-2 place: \(String(format: "%.1f", clickMs)) ms")
+
+            #expect(ceremony.state?.takes.first?.cut == target, "the cut really moved")
+            #expect(mountMs < 1000,
+                    "mounting the rebuilt sheet at her scale (\(mountMs) ms)")
+            #expect(clickMs < 1000,
+                    "placing a cut at her scale (\(clickMs) ms)")
+        }
+    }
+
+    /// **18f batch 2 — THE GEOMETRY PIN, at the face** (§5.2: *"the ✂ overlay
+    /// never changes the take's line count"*). Placing a cut must not re-lay
+    /// any prose out and must not move the sheet by a point: the layout is a
+    /// pure function of (text, width, font), and the ✂ is an overlay.
+    ///
+    /// `CutFlowRealization.rebuilds` is the instrument (production-bumped in
+    /// the card's `rebuild()`), and the mount assertion is its non-vacuity.
+    @Test func placingACutNeitherRelaysTheProseNorMovesTheSheet() async throws {
+        try await withEditor(seedBlocks: ["First alpha. First omega, and a longer tail of words here."]) { h in
+            let slots = try h.storeSlots()
+            let first = try #require(slots.first)
+            let second = try h.session.operations.branchVariant(
+                first.blockID, from: try #require(first.variantID))
+            try h.session.operations.autosave(
+                second.id, text: "A wholly different second take of this block, also long enough to wrap.",
+                charDelta: 0)
+            try h.reload()
+            h.textView.setSelectedRange(NSRange(location: 15, length: 0))
+            h.model.updateCaretContext()
+            await h.model.invokeGesture(.divideAtCursor, ceremony: true)
+            let state = try #require(h.model.divideWCeremony)
+            let ceremony = h.model.divideWCeremonyController
+
+            let window = NSWindow(
+                contentRect: NSRect(x: 0, y: 0, width: 960, height: 700),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer { window.orderOut(nil); window.close() }
+            let hosting = NSHostingView(
+                rootView: DivideWSheet(ceremony: ceremony, presented: state))
+            hosting.frame = NSRect(x: 0, y: 0, width: 960, height: 700)
+            window.contentView = hosting
+            await settle(window, hosting)
+
+            let rebuiltOnMount = CutFlowRealization.rebuilds
+            #expect(rebuiltOnMount > 0, "the instrument's own non-vacuity")
+            let heightBefore = hosting.fittingSize.height
+
+            let take = try #require(ceremony.state?.takes.first { $0.marked })
+            let target = try #require(
+                take.boundaries.first { $0 != take.cut && $0 != 0 })
+            ceremony.placeCut(takeID: take.id, cut: target)
+            hosting.needsLayout = true
+            await settle(window, hosting)
+
+            #expect(ceremony.state?.takes.first { $0.id == take.id }?.cut == target,
+                    "non-vacuity: the ✂ really moved")
+            #expect(CutFlowRealization.rebuilds == rebuiltOnMount,
+                    """
+                    moving the ✂ re-laid no prose out \
+                    (\(CutFlowRealization.rebuilds - rebuiltOnMount) rebuild(s)) — \
+                    the cut is not an input to the layout
+                    """)
+            #expect(abs(hosting.fittingSize.height - heightBefore) < 0.5,
+                    """
+                    …and the sheet did not move (\(heightBefore) → \
+                    \(hosting.fittingSize.height)) — the shipped flow gave the \
+                    cut's own slot real width
+                    """)
+        }
+    }
+
+    private func milliseconds(since started: ContinuousClock.Instant) -> Double {
+        let elapsed = started.duration(to: .now)
+        return Double(elapsed.components.seconds) * 1000
+            + Double(elapsed.components.attoseconds) / 1e15
+    }
+
     /// **The open budget.** Deriving each take's boundaries, strong set and
     /// flow is real work and is done ONCE per take — off the main thread, so
     /// the gesture never blocks the UI on it.

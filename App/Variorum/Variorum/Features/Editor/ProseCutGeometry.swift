@@ -176,14 +176,28 @@ struct ProseCutGeometry {
         }
 
         geometry.size = CGSize(width: min(widest, width), height: y)
-        geometry.flow = CutFlowGeometry(
-            tokens: [],
-            slots: boundaries.compactMap { boundary in
-                guard let point = geometry.markFrame(at: boundary) else { return nil }
-                return CutFlowGeometry.Slot(
-                    boundary: boundary, frame: point, isStrong: strong.contains(boundary))
-            },
-            size: geometry.size)
+        // **The marks, in ONE pass.** Both lists are ascending, so the lines
+        // and the boundaries walk together: a boundary at a line's end belongs
+        // to the NEXT line (a caret's own rule), and the text's very end has no
+        // next line, so it sits at the last line's trailing edge — which is the
+        // end-parking slot ledger row 3 is about. (Per-boundary line LOOKUP was
+        // the first cut of this and cost 1.37 s to mount her four 3,000-word
+        // takes: ~24,000 boundaries times a linear scan of ~600 lines each.)
+        var slots: [CutFlowGeometry.Slot] = []
+        slots.reserveCapacity(boundaries.count)
+        var index = 0
+        for boundary in boundaries {
+            while index + 1 < geometry.lines.count,
+                  boundary >= geometry.lines[index].range.upperBound {
+                index += 1
+            }
+            let line = geometry.lines[index]
+            slots.append(CutFlowGeometry.Slot(
+                boundary: boundary,
+                frame: geometry.frame(of: boundary, on: line),
+                isStrong: strong.contains(boundary)))
+        }
+        geometry.flow = CutFlowGeometry(tokens: [], slots: slots, size: geometry.size)
         return geometry
     }
 
@@ -203,22 +217,19 @@ struct ProseCutGeometry {
 
     // MARK: - Reading it
 
-    /// The line a cut at `boundary` belongs to: the line containing it, and
-    /// for the text's very end (and for a boundary at a soft-wrap point that
-    /// no line contains) the last line that reaches it.
+    /// The line a cut at `boundary` belongs to — a BINARY search over the
+    /// ascending line ranges (the same rule the one-pass placement above
+    /// walks: a boundary at a line's end belongs to the next line, and the
+    /// text's very end to the last line).
     func lineIndex(for boundary: Int) -> Int? {
         guard !lines.isEmpty else { return nil }
-        for (i, line) in lines.enumerated()
-        where boundary >= line.range.location && boundary < line.range.upperBound {
-            return i
+        var low = 0
+        var high = lines.count - 1
+        while low < high {
+            let mid = (low + high) / 2
+            if boundary >= lines[mid].range.upperBound { low = mid + 1 } else { high = mid }
         }
-        // The end of the text, or the end of the last line before a
-        // paragraph break — the mark belongs to the line that ends there.
-        for (i, line) in lines.enumerated().reversed()
-        where boundary >= line.range.location && boundary <= line.range.upperBound {
-            return i
-        }
-        return boundary <= lines[0].range.location ? 0 : lines.count - 1
+        return low
     }
 
     /// Where the ✂ mark sits for `boundary` — a hairline-wide frame spanning
@@ -226,7 +237,10 @@ struct ProseCutGeometry {
     /// mark is drawn OVER the prose and owns no layout.
     func markFrame(at boundary: Int) -> CGRect? {
         guard let i = lineIndex(for: boundary) else { return nil }
-        let line = lines[i]
+        return frame(of: boundary, on: lines[i])
+    }
+
+    private func frame(of boundary: Int, on line: Line) -> CGRect {
         let clamped = min(max(boundary, line.range.location), line.range.upperBound)
         var x = CGFloat(CTLineGetOffsetForStringIndex(line.line, clamped, nil))
         // A boundary that lands past this line's drawn glyphs (a trailing

@@ -2682,6 +2682,6 @@ refresh. *(Filled in further at close.)*
 |---|---|---|
 | 1 | `ProseCutGeometry` — the take's text laid out as PROSE (Core Text), the ✂ as a zero-width mark, snapping through `CutFlowGeometry.nearestSlot` | **DONE (34ddf1e9)** — 9 pins green |
 | 2 | The divide sheet's face — the header, the arrangement option cards, the prose take cards, the columns, the folded explainers, the footer | **DONE (1b47f861)** |
-| 3 | The merge sheet's face — the same header/row grammar, the pairing columns restyled, the run's block list (figure B) | **IN-PROGRESS** |
-| 4 | The face-level pins — the performance bar at her scale, the layout-stability pin | **NOT-STARTED** |
+| 3 | The merge sheet's face — the same header/row grammar, the pairing columns restyled, the run's block list (figure B) | **DONE (68d4e037)** |
+| 4 | The face-level pins — the performance bar at her scale, the layout-stability pin, the card's copy | **IN-PROGRESS** |
 | 5 | The walk (both voices, `18f-2/` captures) + the mockup comparison + close | **NOT-STARTED** |
