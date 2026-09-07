@@ -83,11 +83,51 @@ final class EditorTextView: NSTextView, MarkdownFormattable {
     }
 
     override func keyDown(with event: NSEvent) {
+        // 18c ladder round 1, R1-2: a key pressed while a structural act
+        // is pending or landing is kept, never handed to a surface that
+        // would discard it (see `beginDeferringKeystrokes`).
+        if isDeferringKeystrokes {
+            deferredKeyEvents.append(event)
+            return
+        }
         guard Self.isSoftNewlineKey(event) else {
             super.keyDown(with: event)
             return
         }
         withSoftNewline { super.keyDown(with: event) }
+    }
+
+    // MARK: - 18c ladder round 1, R1-2: keystrokes during a flight are deferred, never dropped
+
+    /// TRUE while a structural flight is landing, or a typed Return's act
+    /// is still waiting for its turn. `keyDown` then stashes every key
+    /// event instead of handing it to AppKit — which, against the surface a
+    /// flight disables, DISCARDS it (a silent drop on the app's hottest
+    /// key, now that ⏎ is a structural act: the 18c ladder's R1-2) and, in
+    /// the gap between the key's claim and the act's own turn, would land
+    /// it in the block the caret is about to leave (a silent MISPLACEMENT —
+    /// the implementer's rider on the same finding). Armed at the claim
+    /// (`EditorViewModel.runTypedReturn`) and at every flight's start
+    /// (`EditorSurfaceController.runStructural`); cleared and REPLAYED when
+    /// the act is done, so a character lands at the landed caret — the
+    /// block she meant — and a replayed ⏎ claims and chains exactly as a
+    /// typed one. Key equivalents route through `performKeyEquivalent` and
+    /// never come this way. Never sticky: the one clearer is the replay.
+    private(set) var isDeferringKeystrokes = false
+    private var deferredKeyEvents: [NSEvent] = []
+
+    func beginDeferringKeystrokes() { isDeferringKeystrokes = true }
+
+    /// Clears the flag FIRST (so the replay is not itself stashed), then
+    /// replays the stash in order through the ordinary `keyDown` road. A
+    /// replayed key that arms a new act stashes whatever follows it for
+    /// that act — `keyDown` reads the flag per event, by construction.
+    func replayDeferredKeystrokes() {
+        isDeferringKeystrokes = false
+        guard !deferredKeyEvents.isEmpty else { return }
+        let events = deferredKeyEvents
+        deferredKeyEvents.removeAll()
+        for event in events { keyDown(with: event) }
     }
 
     /// **13k K5 — ⏎ continues a list.** The keystroke itself is untouched:

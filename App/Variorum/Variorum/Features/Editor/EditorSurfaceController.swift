@@ -843,6 +843,11 @@ final class EditorSurfaceController {
     /// sealed note, a locked take, a block with no interior word edge — is
     /// that door's own, spoken in its own words.
     private func runTypedReturnAct() async {
+        // 18c ladder round 1, R1-2: whatever road the act takes — a flight
+        // (which replays in its own defer), a spoken refusal, the empty
+        // block's no-op — the keys stashed since the claim are replayed
+        // when it is done. This catches the roads that never reach a flight.
+        defer { model.textView?.replayDeferredKeystrokes() }
         switch model.typedReturnAct() {
         case .content, .nothing:
             // `.nothing` is the empty block's ruled no-op (U-19 (2)):
@@ -2395,6 +2400,11 @@ final class EditorSurfaceController {
         // and the rewrite. idleMintTail's own guard is the second door.
         model.holdTailIdleClock()
         model.textView?.isEditable = false
+        // 18c ladder round 1, R1-2: keystrokes during the flight are
+        // DEFERRED, never dropped — AppKit discards typed input to the
+        // disabled surface, and with ⏎ a structural act this window sat on
+        // the hottest key in the app.
+        model.textView?.beginDeferringKeystrokes()
         defer {
             structuralInFlight = false
             model.textView?.isEditable = model.header.map { !$0.locked } ?? false
@@ -2404,6 +2414,9 @@ final class EditorSurfaceController {
             // A projection deferred during the flight applies now (round 3
             // NIT: deliveries defer while a flight is up).
             model.applyPendingIfClean()
+            // …and the keys she typed meanwhile land now, at the landed
+            // caret — LAST, once the surface is settled (R1-2).
+            model.textView?.replayDeferredKeystrokes()
         }
         await model.autosave.flushNow()
         guard !model.autosave.isDirty else {

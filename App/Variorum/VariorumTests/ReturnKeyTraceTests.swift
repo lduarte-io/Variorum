@@ -595,6 +595,75 @@ struct TypedReturnKeyTests {
         }
     }
 
+    /// A real character key event through `keyDown` — the road a typist's
+    /// next letter takes (never `insertText`, which would bypass the key).
+    /// `interpretKeyEvents` reads the characters, not the code.
+    private func characterKey(_ h: EditorHarness, _ window: NSWindow, _ character: String) {
+        let event = NSEvent.keyEvent(
+            with: .keyDown, location: .zero, modifierFlags: [], timestamp: 0,
+            windowNumber: window.windowNumber, context: nil,
+            characters: character, charactersIgnoringModifiers: character,
+            isARepeat: false, keyCode: 7)!
+        h.textView.keyDown(with: event)
+    }
+
+    // MARK: 18c ladder round 1, R1-2 — keys typed around the act are never lost
+
+    /// **RED-ON-OLD (the implementer's rider):** a key pressed in the gap
+    /// between the Return's claim and the act's own turn found the surface
+    /// still editable and landed in the block the caret was about to leave
+    /// (`["alphax", ""]` — a silent misplacement). It now waits for the act
+    /// and lands in the block the key made.
+    @Test func aKeystrokeInTheClaimGapLandsInTheBlockTheKeyMade() async throws {
+        try await withEditor(seedBlocks: ["alpha"]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+
+            caret(h, entry: 0, offset: 5)
+            returnKey(h, window.window)
+            characterKey(h, window.window, "x")  // the same turn: the act has not run yet
+            await h.flush()
+
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "x"],
+                    "the letter followed the key into the new block")
+            #expect(h.model.caretBlockID == h.model.index.entries[1].blockID)
+        }
+    }
+
+    /// **RED-ON-OLD (the finding itself):** a key pressed while the act's
+    /// flight is up — the surface disabled, the flight waiting on the
+    /// writer queue — was DISCARDED by AppKit (`["alpha", ""]`, the `x`
+    /// gone). The writer is held here so the window is deterministic; on
+    /// her machine it is whatever a busy writer (an autosave of a large
+    /// buffer, a sync pull's one-transaction apply) makes it.
+    @Test func aKeystrokeDuringTheFlightIsDeferredNeverDropped() async throws {
+        try await withEditor(seedBlocks: ["alpha"]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+
+            caret(h, entry: 0, offset: 5)
+            let database = h.database
+            let hold = Task.detached {
+                try database.write { _ in Thread.sleep(forTimeInterval: 0.4) }
+            }
+            try await Task.sleep(for: .milliseconds(30))  // let the hold take the writer
+            returnKey(h, window.window)
+            var spins = 0
+            while !h.model.structuralInFlight, spins < 3000 {
+                spins += 1
+                await Task.yield()
+                try await Task.sleep(for: .milliseconds(1))
+            }
+            #expect(h.model.structuralInFlight, "the flight is up, waiting on the writer")
+            characterKey(h, window.window, "x")
+            try await hold.value
+            await h.flush()
+
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "x"],
+                    "typed during the flight, landed after it — never dropped")
+        }
+    }
+
     // MARK: (1) her scenario — the end of a MIDDLE block
 
     /// The row itself: paragraphs above and below, the caret at the end of

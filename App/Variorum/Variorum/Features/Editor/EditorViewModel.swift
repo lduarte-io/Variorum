@@ -1533,6 +1533,12 @@ final class EditorViewModel {
     func runTypedReturn(afterListExit: Bool = false) -> Bool {
         if afterListExit { retractListContinuationNewline() }
         guard typedReturnAct() != .content else { return false }
+        // 18c ladder round 1, R1-2: from this claim until the act has
+        // landed, every key event is stashed and replayed at the landed
+        // caret — the claim-to-turn gap would otherwise put a character
+        // into the block the caret is about to leave, and the flight itself
+        // would drop it against the disabled surface.
+        textView?.beginDeferringKeystrokes()
         structural.scheduleTypedReturn()
         return true
     }
