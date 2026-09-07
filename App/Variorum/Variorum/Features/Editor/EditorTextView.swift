@@ -91,11 +91,22 @@ final class EditorTextView: NSTextView, MarkdownFormattable {
     }
 
     /// **13k K5 — ⏎ continues a list.** The keystroke itself is untouched:
-    /// `super.insertNewline` runs exactly as it always did (so the open-tail
-    /// gesture at the document end, `one_block`'s newlines-don't-mint, the
-    /// idle-mint and every refusal see the same single `"\n"`), and the lead
-    /// is a second ordinary insertion afterwards — see
-    /// `MarkdownActs.insertNewlineContinuingLists`.
+    /// `super.insertNewline` runs exactly as it always did (so `one_block`'s
+    /// newlines-don't-mint, the idle-mint and every refusal see the same
+    /// single `"\n"`), and the lead is a second ordinary insertion
+    /// afterwards — see `MarkdownActs.insertNewlineContinuingLists`.
+    /// **One exception since the 18c ladder (round 1, R1-1):** at the exact
+    /// document end that plain newline was the ratified OPEN-TAIL gesture,
+    /// and it stayed reachable through this door after U-1 retired it from
+    /// the key — a list typed at a note's end went into the tail and
+    /// crystallized one block per item. The continuation now asks the model
+    /// whether its newline would open the tail (`onNewlineWouldOpenTail` —
+    /// `BlockRangeIndex.verdict`'s own answer) and, where it would, types it
+    /// through the soft road instead, so the newline is the last block's
+    /// content and the lead follows it there: K5's "in the same block" at
+    /// the end too. Inside a PASTED tail nothing changes (a list continued
+    /// there stays tail text; the soft road would have minted it — B2 —
+    /// which nobody asked for).
     ///
     /// **⇧⏎ is excluded, deliberately.** A15 ruled it a DIFFERENT gesture (a
     /// newline that always lands inside a real block), it is the one AppKit
@@ -127,6 +138,13 @@ final class EditorTextView: NSTextView, MarkdownFormattable {
             // Only where the list door had nothing to say (its own arms
             // already own the key, and a bullet's ⏎ must never restructure).
             if case .ordinary = list, self.claimTypedReturn() { return }
+            // 18c ladder R1-1: a continuation's newline never opens the
+            // tail — at the document end it takes the soft road and stays
+            // in the block (see the K5 note above).
+            if case .continueList = list, self.onNewlineWouldOpenTail?() == true {
+                self.withSoftNewline { super.insertNewline(sender) }
+                return
+            }
             super.insertNewline(sender)
         }
         if case .exitList = list { _ = claimTypedReturn() }
@@ -136,6 +154,14 @@ final class EditorTextView: NSTextView, MarkdownFormattable {
     /// nil (a bare surface, a harness that attaches no model) means the key
     /// is never claimed and every existing behaviour stands.
     var onTypedReturn: (() -> Bool)?
+
+    /// **18c ladder R1-1:** TRUE when a plain newline typed at the caret
+    /// would OPEN THE TAIL — set by `EditorViewModel.attach`; nil means "it
+    /// would not" (a bare surface has no tail to open). Asked by the list
+    /// door before its continuation's newline lands, and answered by
+    /// `BlockRangeIndex.verdict` itself, so the door and the verdict can
+    /// never disagree about when the gesture would fire.
+    var onNewlineWouldOpenTail: (() -> Bool)?
 
     /// True when the Return key became a structural act (no newline typed).
     /// Marked text is an in-progress input-method composition — ⏎ there

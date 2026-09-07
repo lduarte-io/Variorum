@@ -383,6 +383,11 @@ final class EditorViewModel {
         // from this point, so the detail editor, the inline book editor and
         // every harness that attaches a real text view get ONE wiring.
         textView.onTypedReturn = { [weak self] in self?.runTypedReturn() ?? false }
+        // 18c ladder R1-1: the list door's continuation asks before its
+        // newline lands whether that newline would open the tail.
+        textView.onNewlineWouldOpenTail = { [weak self] in
+            self?.typedNewlineWouldOpenTail() ?? false
+        }
         // 13j J7 (her ruling): ⌘Z / ⌘⇧Z with nothing left in the TEXT stack
         // point at the structural one — spoken, never a key stolen.
         textView.onTextUndoUnavailable = { [weak self] in self?.speakUndoHint(.undo) }
@@ -1527,6 +1532,23 @@ final class EditorViewModel {
         guard typedReturnAct() != .content else { return false }
         structural.scheduleTypedReturn()
         return true
+    }
+
+    /// **18c ladder R1-1 — the ONE tail-opening predicate, asked before a
+    /// newline lands.** `BlockRangeIndex.verdict`'s own answer for a single
+    /// plain newline at the caret: TRUE exactly when that newline would be
+    /// the ratified open-tail gesture (the document end, no tail, a
+    /// segmenting note). The list door consults it so its continuation can
+    /// take the soft road there instead of opening the tail U-1 retired
+    /// from the key; asking the verdict rather than restating its condition
+    /// keeps the door and the verdict one rule.
+    func typedNewlineWouldOpenTail() -> Bool {
+        guard let textView else { return false }
+        let selection = textView.selectedRange()
+        guard selection.length == 0, selection.location != NSNotFound else { return false }
+        return index.verdict(
+            replacing: selection, replacementIsSingleNewline: true,
+            segmentation: header?.effectiveSegmentation ?? .paragraph) == .openTail
     }
 
     /// Closes an EMPTY open tail by deleting its separator through the

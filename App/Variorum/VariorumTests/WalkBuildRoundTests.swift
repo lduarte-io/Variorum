@@ -314,9 +314,10 @@ struct ListContinuationTests {
     /// insertion from `MarkdownActs.insertNewlineContinuingLists` and this
     /// test fails with `"- milk\n"` — the newline lands, the lead does not.
     @Test func aTextedBulletMintsTheNextLead() async throws {
-        // MID-BLOCK deliberately (the document end is its own pin below, and
-        // there the tail gesture owns the keystroke): one block whose text
-        // already carries a second line, caret at the end of the first.
+        // MID-BLOCK deliberately (the document end is its own pin below —
+        // since the 18c ladder's R1-1 it too stays in the block): one block
+        // whose text already carries a second line, caret at the end of the
+        // first.
         try await withEditor(seedBlocks: ["- milk\nsecond"]) { h in
             let hosted = Self.host(try #require(h.textView.enclosingScrollView))
             defer { hosted.teardown() }
@@ -386,12 +387,22 @@ struct ListContinuationTests {
         }
     }
 
-    /// **The ratified gesture is BYTE-UNTOUCHED.** ⏎ at the exact document
-    /// end still opens the tail (Phase 7's ruling) — and because the lead is
-    /// a second, ordinary insertion at the caret the newline left, it lands
-    /// in the tail as ordinary tail text rather than changing what the
-    /// keystroke meant.
-    @Test func theDocumentEndTailGestureStillFiresAndTheLeadLandsInTheTail() async throws {
+    /// **RETIRED BY NAME (18c ladder round 1, R1-1 — under her U-1):** this
+    /// was `theDocumentEndTailGestureStillFiresAndTheLeadLandsInTheTail`,
+    /// K5's pin that ⏎ at the exact document end "still opens the tail
+    /// (Phase 7's ruling)" with the lead landing in the tail. U-1 retired
+    /// that gesture from the key, and this door was the one road that still
+    /// reached it — a list typed at a note's end went into the tail and
+    /// crystallized ONE BLOCK PER ITEM, while the same list mid-note stayed
+    /// one block. The continuation's newline now takes the soft road there:
+    /// it lands as the last block's CONTENT, the lead follows it inside the
+    /// block, and the list stays whole at the end exactly as it does in the
+    /// middle (K5's own "in the same block").
+    ///
+    /// RED-ON-OLD (behavioural revert, recorded in the ladder record): drop
+    /// the `.continueList` soft-road branch from `EditorTextView.insertNewline`
+    /// and the first half fails with `hasOpenTail == true`.
+    @Test func aListContinuationAtTheDocumentEndStaysInTheBlock() async throws {
         try await withEditor(seedBlocks: ["- milk"]) { h in
             let hosted = Self.host(try #require(h.textView.enclosingScrollView))
             defer { hosted.teardown() }
@@ -401,12 +412,23 @@ struct ListContinuationTests {
             h.textView.setSelectedRange(NSRange(location: end, length: 0))
             h.textView.keyDown(
                 with: Self.returnEvent(shift: false, windowNumber: hosted.window.windowNumber))
+            await h.flush()
 
-            #expect(h.model.hasOpenTail, "the ratified open-tail gesture still fires")
+            #expect(!h.model.hasOpenTail, "U-1: no key opens the tail — the list door included")
             #expect(h.model.index.entries.count == 1)
             #expect(h.documentText == "- milk\n- ")
-            // Surface-only: nothing minted, exactly as before.
-            #expect(try h.storeSlots().map(\.text) == ["- milk"])
+            #expect(try h.storeSlots().map(\.text) == ["- milk\n- "],
+                    "the newline and the lead are the block's content (I4), stored")
+
+            // …and the list keeps growing in that one block: the next item's
+            // ⏎ is an ordinary mid-block continuation, no tail, no mint.
+            h.textView.insertText("eggs", replacementRange: h.textView.selectedRange())
+            h.textView.keyDown(
+                with: Self.returnEvent(shift: false, windowNumber: hosted.window.windowNumber))
+            await h.flush()
+            #expect(!h.model.hasOpenTail)
+            #expect(h.model.index.entries.count == 1, "one block per LIST, never per item")
+            #expect(try h.storeSlots().map(\.text) == ["- milk\n- eggs\n- "])
         }
     }
 
