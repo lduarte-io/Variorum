@@ -239,6 +239,10 @@ final class ScriptedVaultServer: @unchecked Sendable {
             return refusal(request, marker: SyncServerRefusalMarker.rotationInProgress)
         } catch KeyVaultClientError.vaultRevisionConflict {
             return refusal(request, marker: SyncServerRefusalMarker.vaultRevisionConflict)
+        } catch KeyVaultClientError.rotationRowsRemain {
+            // F1 (BLOCKER-1): the completion guard's refusal, served as
+            // PostgREST serves the RAISE — the client classifies by marker.
+            return refusal(request, marker: SyncServerRefusalMarker.rotationRowsRemain)
         } catch FakeSyncServerError.previousKeyHalfMissing {
             return response(request, 400, body: Data(
                 #"{"code":"P0001","message":"a previous corpus key travels as its id AND its wrap"}"#.utf8))

@@ -406,6 +406,14 @@ nonisolated extension ProtectionCopy {
         "Entering Castle didn't finish on this \(deviceName) — sync is paused until it "
         + "completes. Nothing is lost; finishing picks up exactly where it stopped."
     static let resumeNeedsPassphrase = "Enter your passphrase to finish."
+    /// pre-13x ladder round 1, F1 (BLOCKER-1) — PROVISIONAL (copy §11): the
+    /// server refused to clear the previous corpus key three times because a
+    /// row written just before the switch was still hidden from this
+    /// device's pulls; nothing is lost, the marker stays, the resume door
+    /// re-walks. 13s re-voices.
+    static let rotationRowsStillSettling =
+        "The server is still settling a few rows written just before the switch. Nothing is lost — "
+        + "sync stays paused; finish from Settings ▸ Protection in a moment, and it picks up exactly where it stopped."
 }
 
 // MARK: - pre-13x 2c — THE FOLLOW'S NOTICES (copy §5, verbatim; the device

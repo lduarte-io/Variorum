@@ -219,7 +219,23 @@ final class PostureSwitchRunner {
         /// (`AppServices` hands `DeviceName.current` to the client). The
         /// resume's discriminator reads the vault's last writer against it.
         var deviceName: @Sendable () -> String = { DeviceName.current }
+        /// pre-13x ladder round 1, F1 (BLOCKER-1): the walk's WAIT PAST THE
+        /// A5 VISIBILITY HORIZON, run once at its first empty window
+        /// (`CorpusRotation.horizonWait`). Production sleeps 2.5 s; the pins
+        /// advance the emulated mirror's clock — or nothing, to prove the
+        /// server's completion guard and the runner's re-walk alone.
+        var horizonWait: @Sendable () async throws -> Void = {
+            try await Task.sleep(for: CorpusRotation.productionHorizonWait)
+        }
     }
+
+    /// pre-13x ladder round 1, F1 (BLOCKER-1): how many times the clearing
+    /// write may be REFUSED (`rotationRowsRemain` — a ciphertext row of the
+    /// account still below the seq, hidden from this device's pulls) before
+    /// the runner stops re-walking and refuses honestly: the marker stays at
+    /// `.reencrypt`, sync stays paused, the resume re-walks. Three tries =
+    /// two re-walks, each preceded by the wait past the horizon.
+    nonisolated static let maxCompletionTries = 3
 
     private(set) var phase: Phase = .idle
     private(set) var busy = false
@@ -738,7 +754,15 @@ final class PostureSwitchRunner {
         var recoveryWrapDigest: String?
     }
 
-    /// Steps 3's walk + completion, shared with the resume.
+    /// Steps 3's walk + completion, shared with the resume and the follow.
+    /// pre-13x ladder round 1, F1 (BLOCKER-1): the walk waits past the A5
+    /// visibility horizon before it decides it is done (`horizonWait`),
+    /// and a clearing write the SERVER refuses (`rotationRowsRemain` — a
+    /// ciphertext row of the account still below the seq that this
+    /// device's pulls could not see) RE-WALKS and completes again, at most
+    /// `maxCompletionTries` times; then the honest refusal
+    /// (`CorpusRotationError.completionRefused`) with the marker still at
+    /// `.reencrypt` — nothing lost, sync paused, the resume re-walks.
     private func reencryptAndComplete(
         vault: KeyVaultClient, transport: any SyncTransport & SyncRotationTransport,
         material: DeviceKeyMaterial
@@ -750,13 +774,34 @@ final class PostureSwitchRunner {
                 Task { @MainActor [weak self] in
                     self?.phase = .reencrypting(done: progress.reencrypted, total: progress.total)
                 }
-            })
+            },
+            horizonWait: leaves.horizonWait)
         var reencrypted = 0
         if material.rotation != nil {
             let report = try await driver.reencryptRemainder(material: material)
             reencrypted = report.replaced
         }
-        let completed = try await CorpusRotation.complete(client: vault, material: material)
+        var tries = 0
+        let completed: DeviceKeyMaterial
+        while true {
+            tries += 1
+            do {
+                completed = try await CorpusRotation.complete(client: vault, material: material)
+                break
+            } catch KeyVaultClientError.rotationRowsRemain {
+                // A row this device's pulls could not see yet is still under
+                // the previous key. Never clear over it: walk again (the
+                // wait past the horizon rides every walk), then complete.
+                guard material.rotation != nil else { throw KeyVaultClientError.rotationRowsRemain }
+                guard tries < Self.maxCompletionTries else {
+                    leaves.log("posture switch: the server refused to clear the previous key \(tries) times — a row is still under it; the marker stays at .reencrypt, the resume re-walks")
+                    throw CorpusRotationError.completionRefused(tries: tries)
+                }
+                leaves.log("posture switch: the server refused to clear the previous key (a row still below the seq) — re-walking (try \(tries + 1) of \(Self.maxCompletionTries))")
+                let report = try await driver.reencryptRemainder(material: material)
+                reencrypted += report.replaced
+            }
+        }
         guard await leaves.keyStore.offMain({ $0.save(completed) }) else {
             throw PostureSwitchError.custodyRefused(ProtectionCopy.syncKeysWroteButUnreadable)
         }

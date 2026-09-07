@@ -549,6 +549,12 @@ final class PostureSwitchModel: Identifiable {
         switch error {
         case CorpusRotationError.rotationInProgress:
             return ProtectionCopy.rotationStillFinishing(device: "another device", day: "an earlier day")
+        case CorpusRotationError.completionRefused, CorpusRotationError.walkDidNotConverge:
+            // pre-13x ladder round 1, F1 (BLOCKER-1): the server would not
+            // clear the previous key over a row this device could not see
+            // yet — the marker stays, the resume re-walks. PROVISIONAL
+            // wording (copy §11); the fact is the design's.
+            return ProtectionCopy.rotationRowsStillSettling
         case CorpusRotationError.staleMaster:
             return "This account's keys changed since this \(ProtectionCopy.deviceName) joined — "
                 + "pick up your new keys first (enter your passphrase under Account & Encryption)."

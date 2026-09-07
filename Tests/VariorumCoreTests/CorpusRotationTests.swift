@@ -56,6 +56,12 @@ struct CorpusRotationTests {
         return client
     }
 
+    /// F1: the driver's wait past the A5 horizon, as the pins inject it —
+    /// time passes on the FAKE's clock (production sleeps 2.5 s).
+    private func timePasses(on server: FakeSyncServer) -> @Sendable () async throws -> Void {
+        { await server.advanceClock(by: 2) }
+    }
+
     private func conflictVariants(_ client: SyncClient) throws -> Int {
         try client.db.fetchInt(
             "SELECT COUNT(*) FROM variant WHERE label = 'conflict' AND deleted_at IS NULL") ?? 0
@@ -299,7 +305,8 @@ struct CorpusRotationTests {
         let driver = CorpusRotation(
             transport: SeamTransport(server: world.server, afterFirstReencrypt: .advanceClock(2)),
             batchSize: 4,
-            progress: { p in progress.withValue { $0.append(p) } })
+            progress: { p in progress.withValue { $0.append(p) } },
+            horizonWait: timePasses(on: world.server))
         let report = try await driver.reencryptRemainder(material: begun.material)
         #expect(report.replaced == rowsBelow, "every row below the seq re-encrypted exactly once — the late one too")
         #expect(report.skipped == 0)
@@ -361,6 +368,203 @@ struct CorpusRotationTests {
                 == "Old-key prose, first block — B's offline edit.")
     }
 
+    /// pre-13x ladder round 1, F1 — BLOCKER-1, THE REVIEWER'S RED PIN: the
+    /// walk world WITHOUT any clock advance between passes — a LATE row
+    /// committed under the old proof just before the vault write (below
+    /// the seq) and still inside the A5 visibility window while the walk
+    /// runs; the transport is the PLAIN fake (no seam). Time passes ONCE,
+    /// where production sleeps: the driver's injected `horizonWait`
+    /// advances the fake's clock at the walk's first empty window, and the
+    /// pull that follows finds the straggler. Then completion, and a
+    /// sibling pulling to head after it OPENS EVERY ROW. RED ON OLD
+    /// (behavioural revert: the wait removed — the walk returning at its
+    /// first empty window — and the fake's completion guard removed): the
+    /// straggler stays under the previous key, completion deletes that key
+    /// everywhere, and the sibling's pull THROWS at decrypt — the wedged
+    /// changefeed the reviewer traced.
+    @Test func aRowHiddenByTheVisibilityWindowIsReencryptedBeforeCompletionAndEveryLaterPullOpens() async throws {
+        let world = try await makeWorld(visibilityHorizon: 2)
+        let a = try client("A", prefix: "AA", world: world, material: world.old)
+        try a.with { ops, _ in
+            let post = try ops.createPost(title: "before the rotation", profile: .blog)
+            for i in 0..<3 {
+                _ = try ops.newBlock(in: post.id, text: "Old-key prose, block \(i).", at: .end)
+            }
+        }
+        _ = try await a.push()
+        await world.server.advanceClock(by: 2)  // the corpus becomes visible
+        // THE STRAGGLER: a note typed a second before the switch — pushed
+        // under the OLD proof, so below the coming rotation seq, and inside
+        // the visibility window for the whole of a fast walk.
+        try a.with { ops, _ in _ = try ops.createPost(title: "typed a second before the switch", profile: .journal) }
+        _ = try await a.push()
+        let stragglerID = try #require(try a.db.fetchString(
+            "SELECT id FROM container WHERE title = ?", ["typed a second before the switch"]))
+
+        let begun = try await CorpusRotation.begin(
+            client: world.vault.client, current: world.old, secrets: try secrets(), appleHeldCopy: nil)
+        let rotationSeq = try #require(begun.receipt.rotationStartedSeq)
+        let rowsBelow = await world.server.storedRowsWithSeqs().filter { $0.serverSeq < rotationSeq }.count
+        #expect(rowsBelow >= 5)
+        #expect(await world.server.ciphertextRowsBelow(rotationSeq) >= 5, "the straggler's row carries ciphertext (a title)")
+
+        // THE WALK over the PLAIN transport: no seam advances the clock
+        // between passes — only the wait past the horizon does, once.
+        let waits = LockIsolated(0)
+        let server = world.server
+        let driver = CorpusRotation(
+            transport: server, batchSize: 4,
+            horizonWait: {
+                waits.withValue { $0 += 1 }
+                await server.advanceClock(by: 2)
+            })
+        let report = try await driver.reencryptRemainder(material: begun.material)
+        #expect(waits.value == 1, "the wait past the horizon runs exactly once — at the first empty window")
+        #expect(report.replaced == rowsBelow, "every row below the seq re-encrypted — the straggler too: \(report)")
+        #expect(report.passes == 4, "a pass that re-encrypted · the first empty window (then the wait) · the pass that found the straggler · the empty window that ends the walk")
+        #expect(await world.server.ciphertextRowsBelow(rotationSeq) == 0)
+        #expect(try #require(await world.server.currentSeq(table: "container", rowID: stragglerID)) > rotationSeq,
+                "the straggler was re-stamped above the seq")
+
+        // COMPLETION — the guard finds nothing below the seq.
+        let completed = try await CorpusRotation.complete(client: world.vault.client, material: begun.material)
+        #expect(completed.rotation == nil)
+        #expect(await world.server.vaultRow()?.previousCorpusKeyID == nil)
+
+        // A SIBLING following AFTER completion (no previous key anywhere)
+        // pulls to head — every row opens; the straggler is in the clear.
+        await world.server.advanceClock(by: 2)
+        let after = try #require(try await world.vault.client.fetchVault()).format
+        let followerMaster = try await world.vault.enrollment.enroll(passphrase: Self.passphrase).masterSymmetricKey
+        let following = try CorpusRotation.materialFollowing(after, master: followerMaster)
+        #expect(following.rotation == nil)
+        let b = try client("B", prefix: "BB", world: world, material: following, clockOffset: 977, seed: 2)
+        let pulled = try await b.pull()
+        #expect(pulled.applied > 0 && !pulled.stalled, "the sibling's pull opens every row — nothing is left under a key nobody holds")
+        #expect(try b.db.fetchString("SELECT title FROM container WHERE id = ?", [stragglerID])
+                == "typed a second before the switch", "the straggler reads in the clear on the sibling")
+        a.keyProvider = FixedSyncKeyProvider(keys: completed.syncKeys)
+        _ = try await a.pull()
+        #expect(try a.syncedDump() == b.syncedDump())
+    }
+
+    /// F1 — THE SERVER's COMPLETION GUARD (the structural half; the fake
+    /// server's twin of the maintenance artifact): a walk whose wait does
+    /// NOT let time pass (the straggler stays hidden) leaves one
+    /// ciphertext row below the seq; the clearing write is REFUSED
+    /// (`rotationRowsRemain`) and clears nothing; once time passes a
+    /// re-walk finds the row and completion succeeds. RED ON OLD
+    /// (behavioural revert: the fake's guard removed): the first completion
+    /// SUCCEEDS with the ciphertext straggler orphaned.
+    @Test func completionIsRefusedWhileACiphertextRowStillSitsBelowTheSeq() async throws {
+        let world = try await makeWorld(visibilityHorizon: 2)
+        let a = try client("A", prefix: "AA", world: world, material: world.old)
+        try a.with { ops, _ in
+            let post = try ops.createPost(title: "before the rotation", profile: .blog)
+            _ = try ops.newBlock(in: post.id, text: "Old-key prose.", at: .end)
+        }
+        _ = try await a.push()
+        await world.server.advanceClock(by: 2)
+        // A CIPHERTEXT straggler (a note — its title is sealed), committed
+        // just before the switch and hidden by the window during the walk.
+        try a.with { ops, _ in _ = try ops.createPost(title: "the ciphertext straggler", profile: .journal) }
+        _ = try await a.push()
+
+        let begun = try await CorpusRotation.begin(
+            client: world.vault.client, current: world.old, secrets: try secrets(), appleHeldCopy: nil)
+        let rotationSeq = try #require(begun.receipt.rotationStartedSeq)
+        let rowsBelow = await world.server.storedRowsWithSeqs().filter { $0.serverSeq < rotationSeq }.count
+        #expect(await world.server.ciphertextRowsBelow(rotationSeq) >= 3)
+
+        // A walk in which time does NOT pass: the straggler stays hidden.
+        let server = world.server
+        let frozen = CorpusRotation(transport: server, batchSize: 4, horizonWait: {})
+        let first = try await frozen.reencryptRemainder(material: begun.material)
+        #expect(first.replaced == rowsBelow - 1, "everything visible was re-encrypted; the hidden straggler was not")
+        #expect(await world.server.ciphertextRowsBelow(rotationSeq) == 1, "one ciphertext row still below the seq")
+
+        // COMPLETION REFUSED — and nothing cleared.
+        let revisionBefore = try #require(try await world.vault.client.fetchVault()).revision
+        await #expect(throws: KeyVaultClientError.rotationRowsRemain, "the server refuses to clear a key a row is still under") {
+            _ = try await CorpusRotation.complete(client: world.vault.client, material: begun.material)
+        }
+        let still = try #require(try await world.vault.client.fetchVault())
+        #expect(still.revision == revisionBefore, "a refused completion writes nothing")
+        #expect(still.format.previousCorpusKey?.keyID == world.old.corpusKeyID && still.format.rotationStartedSeq == rotationSeq)
+        let row = try #require(await world.server.vaultRow())
+        #expect(row.previousCorpusKeyID == world.old.corpusKeyID && row.rotationStartedSeq == rotationSeq)
+
+        // Time passes; the re-walk finds the straggler; completion succeeds.
+        await world.server.advanceClock(by: 2)
+        let again = try await frozen.reencryptRemainder(material: begun.material)
+        #expect(again.replaced == 1, "the re-walk found exactly what the window had hidden: \(again)")
+        #expect(await world.server.ciphertextRowsBelow(rotationSeq) == 0)
+        let completed = try await CorpusRotation.complete(client: world.vault.client, material: begun.material)
+        #expect(completed.rotation == nil)
+        let clearedRow = try #require(await world.server.vaultRow())
+        #expect(clearedRow.previousCorpusKeyID == nil && clearedRow.rotationStartedSeq == nil,
+                "completion clears key + id + seq together once nothing ciphertext remains below")
+    }
+
+    /// F1 — THE ORCHESTRATOR'S QUALIFICATION, pinned: a straggler in an
+    /// ALL-PLAIN table (no encrypted column — a row under no key) NEVER
+    /// holds a completion. The walk that could not see it completes; the
+    /// row sits below the seq through completion and still opens for every
+    /// device (the seam returns a plain-table row untouched). Not a red-on-
+    /// old pin — a fence on the guard's shape (counting every table would
+    /// refuse THIS completion forever on a row with nothing at stake).
+    @Test func aStragglerInAnAllPlainTableNeverHoldsACompletion() async throws {
+        let world = try await makeWorld(visibilityHorizon: 2)
+        let a = try client("A", prefix: "AA", world: world, material: world.old)
+        try a.with { ops, _ in
+            let post = try ops.createPost(title: "before the rotation", profile: .blog)
+            _ = try ops.newBlock(in: post.id, text: "Old-key prose.", at: .end)
+        }
+        _ = try await a.push()
+        await world.server.advanceClock(by: 2)
+        // The PLAIN straggler: a purge intent — ids and enums only.
+        let plainRow = SyncRow(
+            table: "purge_intent", rowID: "pi-straggler",
+            columns: [
+                "id": .text("pi-straggler"), "owner_id": .text(FakeSyncServer.defaultUserID),
+                "table_name": .text("container"), "row_id": .text("gone"),
+                "requested_at": .text(Fixture.now), "created_at": .text(Fixture.now),
+                "updated_at": .text(Fixture.now), "deleted_at": .null,
+            ],
+            syncVersion: 0)
+        _ = try await world.server.push(
+            [plainRow], activeKeyID: world.old.corpusKeyID, keyProof: world.old.syncKeys.keyProof)
+        #expect(SyncSchema.table(named: "purge_intent")?.encryptedColumns.isEmpty == true, "the pin's premise")
+
+        let begun = try await CorpusRotation.begin(
+            client: world.vault.client, current: world.old, secrets: try secrets(), appleHeldCopy: nil)
+        let rotationSeq = try #require(begun.receipt.rotationStartedSeq)
+        let plainSeqBefore = try #require(await world.server.currentSeq(table: "purge_intent", rowID: "pi-straggler"))
+        #expect(plainSeqBefore < rotationSeq)
+
+        // The frozen walk cannot see the plain row; completion SUCCEEDS.
+        let server = world.server
+        let frozen = CorpusRotation(transport: server, batchSize: 4, horizonWait: {})
+        _ = try await frozen.reencryptRemainder(material: begun.material)
+        #expect(await world.server.ciphertextRowsBelow(rotationSeq) == 0, "nothing ciphertext is below the seq")
+        let completed = try await CorpusRotation.complete(client: world.vault.client, material: begun.material)
+        #expect(completed.rotation == nil)
+        #expect(await world.server.vaultRow()?.previousCorpusKeyID == nil)
+        #expect(try #require(await world.server.currentSeq(table: "purge_intent", rowID: "pi-straggler")) == plainSeqBefore,
+                "the plain row sat below the seq through completion — it held nothing")
+
+        // Every device opens it: a plain row is under no key.
+        await world.server.advanceClock(by: 2)
+        let seam = SyncPayloadCrypto(keys: completed.syncKeys)
+        let stored = try #require(await world.server.storedRowsWithSeqs().first { $0.row.rowID == "pi-straggler" })
+        #expect((try? seam.decryptFromWire(stored)) != nil)
+        a.keyProvider = FixedSyncKeyProvider(keys: completed.syncKeys)
+        let pulled = try await a.pull()
+        #expect(!pulled.stalled)
+        #expect(try a.db.fetchString("SELECT row_id FROM purge_intent WHERE id = 'pi-straggler'") == "gone",
+                "the plain straggler reads on the device")
+    }
+
     /// ANY ENROLLED DEVICE CAN FINISH A ROTATION (decision 6; §12): the
     /// acting device is lost right after the vault write with every row
     /// still under the previous key; a FOLLOWER reads M′ by the passphrase,
@@ -394,7 +598,7 @@ struct CorpusRotationTests {
 
         // A FOLLOWER finishes: the walk + completion at head.
         let follower = try CorpusRotation.materialFollowing(vaultMid, master: newMaster)
-        let report = try await CorpusRotation(transport: world.server, batchSize: 3)
+        let report = try await CorpusRotation(transport: world.server, batchSize: 3, horizonWait: timePasses(on: world.server))
             .reencryptRemainder(material: follower)
         #expect(report.replaced > 0)
         let remaining = await world.server.storedRowsWithSeqs().filter { $0.serverSeq < seq }
@@ -433,7 +637,7 @@ struct CorpusRotationTests {
 
         // The crash: one batch lands, then the process dies.
         let crashing = SeamTransport(server: world.server, afterFirstReencrypt: .crash)
-        let first = CorpusRotation(transport: crashing, batchSize: 4)
+        let first = CorpusRotation(transport: crashing, batchSize: 4, horizonWait: timePasses(on: world.server))
         await #expect(throws: SeamTransport.SimulatedCrash.self) {
             _ = try await first.reencryptRemainder(material: begun.material)
         }
@@ -444,7 +648,7 @@ struct CorpusRotationTests {
 
         // THE RESUME: the walk re-runs over the plain transport (the marker
         // says `.reencrypt`; the material is custody's) and finishes.
-        let resumed = try await CorpusRotation(transport: world.server, batchSize: 4)
+        let resumed = try await CorpusRotation(transport: world.server, batchSize: 4, horizonWait: timePasses(on: world.server))
             .reencryptRemainder(material: begun.material)
         #expect(resumed.replaced == total - landedFirst, "exactly what was left — nothing re-encrypted twice")
         #expect(await world.server.storedRowsWithSeqs().allSatisfy { $0.serverSeq > seq })

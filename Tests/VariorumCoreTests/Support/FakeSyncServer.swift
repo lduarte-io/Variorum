@@ -520,6 +520,21 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
         }
         let nextSeq: Int64?
         if previousCorpusKey == nil {
+            // pre-13x ladder round 1, F1 (BLOCKER-1) — THE COMPLETION GUARD,
+            // the maintenance artifact's twin: clearing a standing previous
+            // key is refused while any row of the caller's partition in a
+            // table that CARRIES CIPHERTEXT still sits below the rotation
+            // seq (a straggler the visibility window hid from the walk).
+            // Every stored row counts, committed or held — the SQL's FOR
+            // UPDATE waits for every in-flight old-proof push to commit
+            // before the clearing write runs, so its count is over committed
+            // rows that include them. All-plain tables are excluded (their
+            // rows are under no key).
+            if account.vault.previousCorpusKey != nil,
+               let startedSeq = account.vault.rotationStartedSeq,
+               rowsBelow(startedSeq, in: account) > 0 {
+                throw KeyVaultClientError.rotationRowsRemain
+            }
             nextSeq = nil
         } else if account.vault.previousCorpusKey == nil {
             // A rotation begins: the next value of the SAME sequence the
@@ -548,6 +563,21 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
         account.vault.revision = expectedRevision + 1
         accounts[userID] = account
         return VaultUpdateReceipt(revision: account.vault.revision, rotationStartedSeq: nextSeq)
+    }
+
+    /// The guard's count: rows of the ciphertext-carrying tables (the
+    /// registry's `tablesCarryingCiphertext` — the SQL's list is pinned
+    /// equal to it) with a seq below the rotation seq, in one partition.
+    private func rowsBelow(_ seq: Int64, in account: Account) -> Int {
+        SyncSchema.tablesCarryingCiphertext.reduce(0) { count, table in
+            count + (account.tables[table.name]?.values.filter { $0.serverSeq < seq }.count ?? 0)
+        }
+    }
+
+    /// Test inspection (F1): how many ciphertext-carrying rows of an
+    /// account still sit below a seq — what the guard would count.
+    func ciphertextRowsBelow(_ seq: Int64, for userID: String = FakeSyncServer.defaultUserID) -> Int {
+        accounts[userID].map { rowsBelow(seq, in: $0) } ?? 0
     }
 
     // MARK: The purge surface, tenant-scoped (10's three RPC bodies' twins)

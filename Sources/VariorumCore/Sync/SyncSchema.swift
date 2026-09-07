@@ -270,6 +270,20 @@ public enum SyncSchema {
         byName[name]
     }
 
+    /// pre-13x ladder round 1, F1 (BLOCKER-1): the tables that CARRY
+    /// CIPHERTEXT — at least one encrypted-classified column. The rotation's
+    /// completion guard (`key_vault_update`'s clearing arm, the fake's
+    /// twin, the Mac emulation) counts rows of THESE tables only below the
+    /// rotation seq: an all-plain row under the "previous key" is under no
+    /// key at all (the seam returns a plain-table row untouched), so its
+    /// visibility inside the A5 window must never hold a completion
+    /// hostage; a ciphertext row left below the seq is the wedged
+    /// changefeed. The maintenance SQL's list is pinned equal to this one
+    /// (`AuthRLSDDLTests`).
+    public static var tablesCarryingCiphertext: [SyncTable] {
+        tables.filter { !$0.encryptedColumns.isEmpty }
+    }
+
     // MARK: Column catalog (the payload-to-SQL injection guard)
 
     private static let catalogLock = NSLock()
@@ -396,6 +410,14 @@ public enum SyncServerRefusalMarker {
     /// pre-13x: `key_vault_update`'s revision CAS matched zero rows — the
     /// vault moved under the caller (ladder R1-2, now inside the RPC).
     public static let vaultRevisionConflict = "VARIORUM_VAULT_REVISION_CONFLICT"
+    /// pre-13x ladder round 1, F1 (BLOCKER-1): `key_vault_update` was asked
+    /// to CLEAR the previous corpus key while a row of the caller's
+    /// partition in a table that carries ciphertext still sits BELOW the
+    /// rotation seq — a straggler the A5 visibility window hid from the
+    /// walk. Completion is "no row of mine below it" (decision 31): the
+    /// server refuses, the client re-walks. Deployed by the maintenance
+    /// artifact `maintenance/pre13x-ladder-rotation-clearing-guard.sql`.
+    public static let rotationRowsRemain = "VARIORUM_ROTATION_ROWS_REMAIN"
 }
 
 public enum SyncError: Error, Equatable, Sendable {

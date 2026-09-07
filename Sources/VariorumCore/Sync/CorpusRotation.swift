@@ -28,12 +28,20 @@ import GRDB
 //     previous key by the seq rule, re-sealed under C′ at the version it
 //     was pulled at, and handed to `sync_reencrypt`; a row whose version
 //     moved is skipped (it is already above the seq under C′); the walk
-//     repeats until a pull finds NO row below the seq (the second pass
-//     catches the A5 visibility window's stragglers). Progress is reported
-//     as N of M for the ceremony's text.
+//     repeats until a pull finds NO row below the seq — and at the FIRST
+//     empty window it WAITS PAST THE A5 VISIBILITY HORIZON and pulls once
+//     more (the ladder's BLOCKER-1: a push that passed the old gate commits
+//     below the seq but stays invisible to pulls for ≤ 2 s; a walk that
+//     returned at its first empty window inside that window left the row
+//     under a key completion then deleted everywhere — a permanently
+//     wedged changefeed). Progress is reported as N of M for the
+//     ceremony's text.
 //   COMPLETION: one `key_vault_update` under the CURRENT proof clearing the
 //     previous key, its id AND the seq together; the caller drops the
-//     previous key from custody.
+//     previous key from custody. The SERVER refuses the clearing write
+//     (`VARIORUM_ROTATION_ROWS_REMAIN`) while any ciphertext-carrying row of
+//     the account still sits below the seq — the client wait is the
+//     insurance, the server guard the structure; the caller re-walks.
 // Any enrolled device can run THE WALK and COMPLETION: a follower reads M′
 // from the vault by the passphrase (`materialFollowing`), C′ and the
 // previous key under M′, and finishes what the acting device started.
@@ -203,8 +211,17 @@ public enum CorpusRotationError: Error, Equatable, Sendable {
     case noRotationInMaterial
     /// The walk never reached an empty window within its pass budget — a
     /// row below the seq kept refusing (`skipped` on every pass); nothing is
-    /// lost, the resume retries.
+    /// lost, the resume retries. Also the runner's honest refusal when the
+    /// server's completion guard refused three walks in a row (F1):
+    /// `remaining` is what the last pull below the seq counted.
     case walkDidNotConverge(remaining: Int)
+    /// pre-13x ladder round 1, F1 (BLOCKER-1): the server refused the
+    /// clearing write `tries` times in a row (`rotationRowsRemain` — a
+    /// ciphertext row of the account still below the seq that this
+    /// device's pulls could not see, even after the wait past the
+    /// horizon). Nothing is lost and nothing was cleared: the marker stays
+    /// at `.reencrypt`, sync stays paused, the resume re-walks.
+    case completionRefused(tries: Int)
 }
 
 /// THE SHARED DRIVER.
@@ -246,16 +263,32 @@ public struct CorpusRotation: Sendable {
     public var maxPasses: Int
     /// N of M, after every batch.
     public var progress: (@Sendable (Progress) -> Void)?
+    /// pre-13x ladder round 1, F1 (BLOCKER-1): THE WAIT PAST THE A5
+    /// VISIBILITY HORIZON — run ONCE, at the walk's first empty window,
+    /// before the pull that decides the walk is done. Production sleeps
+    /// `Self.productionHorizonWait` (the mirror hides a row for 2 s after
+    /// its write; 2.5 s covers it with margin); the pins inject the fake
+    /// server's clock (`advanceClock`) — or nothing, to prove the server's
+    /// guard alone. Injectable, never a hidden `Task.sleep` inside the
+    /// loop, so the walk's timing is a fact a test can state.
+    public var horizonWait: @Sendable () async throws -> Void
+
+    /// The production wait: the mirror's `interval '2 seconds'` plus margin.
+    public static let productionHorizonWait: Duration = .milliseconds(2500)
 
     public init(
         transport: any SyncTransport & SyncRotationTransport,
         batchSize: Int = 200, maxPasses: Int = 8,
-        progress: (@Sendable (Progress) -> Void)? = nil
+        progress: (@Sendable (Progress) -> Void)? = nil,
+        horizonWait: @escaping @Sendable () async throws -> Void = {
+            try await Task.sleep(for: CorpusRotation.productionHorizonWait)
+        }
     ) {
         self.transport = transport
         self.batchSize = batchSize
         self.maxPasses = maxPasses
         self.progress = progress
+        self.horizonWait = horizonWait
     }
 
     // MARK: - BEGIN (§4 step 2)
@@ -357,10 +390,15 @@ public struct CorpusRotation: Sendable {
     // MARK: - THE WALK (§4 step 3)
 
     /// Re-encrypt every row of this account below the rotation seq under
-    /// the current corpus key; ends when a pull finds none. Any device
-    /// holding M′ (the material's `rotation` present) can run it; a crash
-    /// mid-walk re-runs to completion — rows already replaced sit above the
-    /// seq and are simply not found again.
+    /// the current corpus key; ends when a pull finds none — AFTER waiting
+    /// past the A5 visibility horizon once (F1, BLOCKER-1: every row that
+    /// can sit below the seq committed BEFORE the vault write, so one wait
+    /// after the first empty window makes every straggler visible to the
+    /// pull that follows; a row found then is re-encrypted and the next
+    /// empty window ends the walk). Any device holding M′ (the material's
+    /// `rotation` present) can run it; a crash mid-walk re-runs to
+    /// completion — rows already replaced sit above the seq and are simply
+    /// not found again.
     @discardableResult
     public func reencryptRemainder(material: DeviceKeyMaterial) async throws -> WalkReport {
         guard let rotation = material.rotation else {
@@ -371,6 +409,7 @@ public struct CorpusRotation: Sendable {
         var report = WalkReport()
         var total: Int?
         var reencrypted = 0
+        var waitedPastHorizon = false
         while report.passes < maxPasses {
             report.passes += 1
             let below = try await pullBelow(seq: rotation.startedSeq, keys: keys)
@@ -379,6 +418,14 @@ public struct CorpusRotation: Sendable {
                 progress?(Progress(reencrypted: 0, total: below.count))
             }
             guard !below.isEmpty else {
+                if !waitedPastHorizon {
+                    // The first empty window: a row committed just before
+                    // the vault write may still be inside the visibility
+                    // window. Let it pass, then pull once more.
+                    waitedPastHorizon = true
+                    try await horizonWait()
+                    continue
+                }
                 progress?(Progress(reencrypted: reencrypted, total: max(total ?? 0, reencrypted)))
                 return report
             }
@@ -440,7 +487,11 @@ public struct CorpusRotation: Sendable {
     /// material with the previous key dropped — what the caller lands in
     /// custody. Refuses when the vault has moved to another corpus key
     /// (a second rotation elsewhere — impossible while ours stands, but
-    /// stated). Idempotent: a vault already clear stays clear.
+    /// stated). Idempotent: a vault already clear stays clear. The SERVER
+    /// refuses the write with `KeyVaultClientError.rotationRowsRemain`
+    /// while a ciphertext-carrying row of the account still sits below the
+    /// seq (F1, BLOCKER-1) — the caller re-walks and calls again; nothing
+    /// is cleared by a refused call.
     public static func complete(
         client: KeyVaultClient, material: DeviceKeyMaterial
     ) async throws -> DeviceKeyMaterial {

@@ -66,6 +66,52 @@ struct AuthRLSDDLTests {
             .joined(separator: "\n")
     }
 
+    /// pre-13x ladder round 1, F1 (BLOCKER-1): the MAINTENANCE OVERLAY the
+    /// author deploys AFTER 11 — a body-only repair to `key_vault_update`
+    /// (the completion guard). Not a lockstep file (the marker stays 8),
+    /// so it is not in `lockstepFiles`; the pins that read what the
+    /// deployed server RUNS for that function read it through
+    /// `deployedBody(of:)`, which lays it over the composition.
+    private static let ladderOverlayFile = "maintenance/pre13x-ladder-rotation-clearing-guard.sql"
+
+    /// The two fenced F1 regions of the overlay (the declarations and the
+    /// clause) — what the overlay ADDS to 11's body, and nothing else.
+    private static let overlayFenceOpen = "-- >>> F1 GUARD"
+    private static let overlayFenceClose = "-- <<< F1 GUARD"
+
+    /// The overlay's text with every fenced F1 region removed — what must
+    /// equal 11's own text for the function it replaces.
+    private static func overlayWithoutFences(_ sql: String) -> String {
+        var out = ""
+        var inside = false
+        for line in sql.split(separator: "\n", omittingEmptySubsequences: false) {
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            if trimmed.hasPrefix(overlayFenceOpen) { inside = true; continue }
+            if trimmed.hasPrefix(overlayFenceClose) { inside = false; continue }
+            if !inside { out += line + "\n" }
+        }
+        return out
+    }
+
+    /// The body a text runs for `functionName`: the LAST `create or replace
+    /// function <name>` in it, up to its terminating `$$;`.
+    private static func lastBody(of functionName: String, in sql: String) -> String? {
+        let marker = "create or replace function \(functionName)"
+        guard let start = sql.range(of: marker, options: .backwards),
+              let end = sql.range(of: "$$;", range: start.upperBound..<sql.endIndex)
+        else { return nil }
+        return String(sql[start.lowerBound..<end.upperBound])
+    }
+
+    /// What the deployed server RUNS for `functionName` once the ladder
+    /// overlay is deployed after 11: the overlay's body where it carries
+    /// one, else the composition's.
+    private static func deployedBody(of functionName: String) throws -> String {
+        let overlay = strippingComments(try sqlFile(ladderOverlayFile))
+        if let body = lastBody(of: functionName, in: overlay) { return body }
+        return try finalBody(of: functionName)
+    }
+
     /// The body the deployed server actually runs: the LAST
     /// `create or replace function <name>` in deploy order, up to its
     /// terminating `$$;`.
@@ -1539,7 +1585,35 @@ struct AuthRLSDDLTests {
     /// VARIORUM_ROTATION_IN_PROGRESS on a DIFFERENT one (decision 32);
     /// cleared with the key.
     @Test func theVaultUpdateDoorLocksForUpdateCASesAndRecordsTheRotationSeq() throws {
-        let body = try Self.finalBody(of: "key_vault_update")
+        // 11's own body, and the body the server RUNS once the ladder's
+        // overlay is deployed over it (F1, BLOCKER-1) — every clause below
+        // holds of both; the overlay adds exactly one more (the last
+        // assertions), pinned line for line against 11 by the sibling
+        // `theClearingGuardOverlayIsElevensBodyPlusOneClause`.
+        for body in [try Self.finalBody(of: "key_vault_update"), try Self.deployedBody(of: "key_vault_update")] {
+            try Self.expectVaultUpdateDoor(body)
+        }
+        let deployed = try Self.deployedBody(of: "key_vault_update")
+        #expect(deployed.contains(SyncServerRefusalMarker.rotationRowsRemain),
+                "F1 (BLOCKER-1): completion is 'no row of mine below it' — the clearing arm refuses while one remains")
+        #expect(deployed.contains("if vault_previous is not null then")
+                    && deployed.contains("foreach rows_below_tbl in array ciphertext_tables loop")
+                    && deployed.contains("'select count(*) from %I t where t.owner_id = $1 and t.server_seq < $2'")
+                    && deployed.contains("into rows_below using caller, vault_seq;")
+                    && deployed.contains("if rows_below > 0 then"),
+                "the guard counts the CALLER's rows below the rotation seq, per ciphertext-carrying table, only while a previous key stands")
+        // The clause sits INSIDE the clearing arm, BEFORE the seq clears —
+        // a refused completion clears nothing.
+        let arm = try #require(deployed.range(of: "if incoming_previous is null then"))
+        let guardSite = try #require(deployed.range(of: SyncServerRefusalMarker.rotationRowsRemain))
+        let clearSite = try #require(deployed.range(of: "next_seq := null;"))
+        #expect(arm.lowerBound < guardSite.lowerBound && guardSite.lowerBound < clearSite.lowerBound,
+                "the guard runs in the clearing arm before the seq is nulled")
+    }
+
+    /// The one write road's clauses, as a sentence about a BODY (11's, and
+    /// the ladder overlay's — F1).
+    private static func expectVaultUpdateDoor(_ body: String) throws {
         #expect(body.contains("security definer"))
         #expect(body.contains("caller := auth.uid();"), "scoped to the caller — the 14c guard")
         #expect(body.contains("from key_vault where user_id = caller for update;"),
@@ -1588,6 +1662,93 @@ struct AuthRLSDDLTests {
                 "server-managed columns never come from the payload")
         #expect(body.contains("'revision', expected_revision + 1") && body.contains("'rotation_started_seq', next_seq"),
                 "the receipt carries both")
+    }
+
+    /// pre-13x ladder round 1, F1 (BLOCKER-1) — THE MAINTENANCE OVERLAY IS
+    /// 11's BODY PLUS ONE CLAUSE: with its two fenced F1 regions removed,
+    /// the overlay's `key_vault_update` (signature and body) EQUALS 11's
+    /// section-13 text line for line — so the repair can never quietly
+    /// re-shape the door; it carries the re-run guard, re-owns and
+    /// re-grants exactly as 11 does, names the finding in its header, and
+    /// never touches the lockstep marker (a stricter refusal is additive —
+    /// SyncSpec §12's letter; the marker stays 8).
+    @Test func theClearingGuardOverlayIsElevensBodyPlusOneClause() throws {
+        let raw = try Self.sqlFile(Self.ladderOverlayFile)
+        #expect(raw.contains("BLOCKER-1") && raw.contains("notes/plans/pre-13x-ladder-round-1.md"),
+                "the header names the finding it repairs")
+        #expect(raw.components(separatedBy: Self.overlayFenceOpen).count == 4
+                    && raw.components(separatedBy: Self.overlayFenceClose).count == 4,
+                "exactly three fenced F1 regions: the re-run guard, the declarations, the clause")
+        // The body, minus the fences, IS 11's.
+        let stripped11 = Self.strippingComments(try Self.sqlFile("11_pre13x_postures.sql"))
+        let body11 = try #require(Self.lastBody(of: "key_vault_update", in: stripped11))
+        let overlayMinusFences = Self.strippingComments(Self.overlayWithoutFences(raw))
+        let overlayBody = try #require(Self.lastBody(of: "key_vault_update", in: overlayMinusFences))
+        let lines11 = body11.split(separator: "\n", omittingEmptySubsequences: false)
+            .map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+        let overlayLines = overlayBody.split(separator: "\n", omittingEmptySubsequences: false)
+            .map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+        #expect(overlayLines == lines11,
+                "the overlay's key_vault_update, fences removed, is 11's line for line (signature included)")
+        #expect(overlayLines.first == "create or replace function key_vault_update(payload jsonb, expected_revision int, key_proof text) returns jsonb",
+                "the SAME signature — a body change only")
+        // The deployed body (fences kept) carries the guard; 11's does not.
+        #expect(!body11.contains(SyncServerRefusalMarker.rotationRowsRemain), "11 itself is untouched")
+        #expect(try Self.deployedBody(of: "key_vault_update").contains(SyncServerRefusalMarker.rotationRowsRemain))
+        // The re-run guard: refuses below marker 8 and a second deploy.
+        #expect(raw.contains("VARIORUM_CLEARING_GUARD_NEEDS_11") && raw.contains("if deployed_marker < 8 then"))
+        #expect(raw.contains("VARIORUM_CLEARING_GUARD_ALREADY_DEPLOYED")
+                    && raw.contains("like '%VARIORUM_ROTATION_ROWS_REMAIN%'"))
+        // Ownership + the posture, 11's own statements for this function.
+        let overlay = Self.strippingComments(raw)
+        for statement in [
+            "grant usage, create on schema public to variorum_definer;",
+            "alter function key_vault_update(jsonb, int, text) owner to variorum_definer;",
+            "revoke create on schema public from variorum_definer;",
+            "revoke execute on function key_vault_update(jsonb, int, text) from public, anon, service_role;",
+            "grant execute on function key_vault_update(jsonb, int, text) to authenticated;",
+        ] {
+            #expect(overlay.contains(statement), "the overlay re-owns and re-grants as 11 does: \(statement)")
+        }
+        #expect(!overlay.contains("lockstep_version', '") && !overlay.contains("insert into sync_meta"),
+                "no marker bump — the repair is body-only and additive")
+        #expect(!overlay.contains("drop function"), "a replace, never a drop — the signature never leaves the mirror")
+        // One transaction.
+        #expect(overlay.contains("begin;") && overlay.contains("commit;"))
+    }
+
+    /// F1 (BLOCKER-1) — THE GUARD'S TABLE LIST IS THE REGISTRY'S: the
+    /// overlay's `ciphertext_tables` array EQUALS the set of registry tables
+    /// with at least one encrypted column (`SyncSchema
+    /// .tablesCarryingCiphertext`) — never an all-plain table (which would
+    /// make the guard refuse a completion over rows under no key), never a
+    /// ciphertext table missing (which would let a straggler through). A
+    /// future encrypted column on a plain table fails HERE.
+    @Test func theClearingGuardCountsExactlyTheTablesThatCarryCiphertext() throws {
+        let overlay = Self.strippingComments(try Self.sqlFile(Self.ladderOverlayFile))
+        let open = try #require(overlay.range(of: "ciphertext_tables constant text[] := array["))
+        let close = try #require(overlay.range(of: "];", range: open.upperBound..<overlay.endIndex))
+        let listed = Set(
+            overlay[open.upperBound..<close.lowerBound]
+                .split(whereSeparator: { $0 == "," || $0.isNewline })
+                .map { $0.trimmingCharacters(in: .whitespaces).trimmingCharacters(in: CharacterSet(charactersIn: "'")) }
+                .filter { !$0.isEmpty })
+        let registry = Set(SyncSchema.tablesCarryingCiphertext.map(\.name))
+        #expect(listed == registry, "the SQL's list is the registry's ciphertext-carrying tables: \(listed.symmetricDifference(registry))")
+        #expect(!registry.isEmpty && registry.count < SyncSchema.tables.count,
+                "the pin isn't vacuous: some tables carry ciphertext, some carry none")
+        // Every listed table is one `sync_reencrypt` re-stamps (11's allowed list).
+        let reencrypt = try Self.finalBody(of: "sync_reencrypt")
+        for table in listed {
+            #expect(reencrypt.contains("'\(table)'"), "\(table) is a table the walk can re-stamp above the seq")
+        }
+        // The all-plain tables are the complement, by name.
+        let plain = Set(SyncSchema.tables.map(\.name)).subtracting(registry)
+        #expect(plain.contains("purge_intent") && plain.contains("edge") && plain.contains("setting"),
+                "the orchestrator's named exclusions are plain-only in the registry")
+        for table in plain {
+            #expect(!listed.contains(table), "\(table) carries no ciphertext and must not hold a completion")
+        }
     }
 
     /// Ownership + the demotion posture: every data function (the six

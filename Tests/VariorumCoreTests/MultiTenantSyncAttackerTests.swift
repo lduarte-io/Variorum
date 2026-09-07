@@ -197,7 +197,11 @@ extension MultiTenantSyncTests {
                 MultiTenantSyncTests.switchKeepsAppleHeldCopy ? (appleKey, appleKeyID) : nil
             let begun = try await CorpusRotation.begin(
                 client: aVaultClient, current: material, secrets: secrets, appleHeldCopy: appleHeld)
-            let walk = try await CorpusRotation(transport: server).reencryptRemainder(material: begun.material)
+            // F1: the walk's wait past the horizon lets time pass on the
+            // fake's clock (production sleeps 2.5 s).
+            let mirror = server
+            let walk = try await CorpusRotation(transport: server, horizonWait: { await mirror.advanceClock(by: 2) })
+                .reencryptRemainder(material: begun.material)
             let completed = try await CorpusRotation.complete(client: aVaultClient, material: begun.material)
             // Step 4: the pool closed, the file re-keyed, a NEW key file.
             let (_, binding) = client.db.asRebindable()

@@ -284,6 +284,7 @@ public actor KeyVaultClient {
         if body.contains(SyncServerRefusalMarker.vaultRevisionConflict) { return .vaultRevisionConflict }
         if body.contains(SyncServerRefusalMarker.keyProofRequired) { return .keyProofRefused }
         if body.contains(SyncServerRefusalMarker.rotationInProgress) { return .rotationInProgress }
+        if body.contains(SyncServerRefusalMarker.rotationRowsRemain) { return .rotationRowsRemain }
         return .httpFailure(status: status, body: body)
     }
 
@@ -371,6 +372,12 @@ public enum KeyVaultClientError: Error, Equatable, Sendable {
     /// key — a rotation started elsewhere is still finishing; let it
     /// complete (any device holding the new master can) before another.
     case rotationInProgress
+    /// pre-13x ladder round 1, F1 (BLOCKER-1): the clearing write was
+    /// refused because a row of the account in a table that carries
+    /// ciphertext still sits BELOW the rotation seq — a straggler the A5
+    /// visibility window hid from the walk. Nothing was cleared; the caller
+    /// re-walks (any device holding M′ can) and completes again.
+    case rotationRowsRemain
 }
 
 // MARK: - The wire row (1:1 with 08_phase14b_lockstep.sql)

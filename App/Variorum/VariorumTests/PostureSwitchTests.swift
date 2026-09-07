@@ -35,6 +35,12 @@ final class EmulatedVault: @unchecked Sendable {
     private let lock = NSLock()
     private var row: Data?
     private let claimRotationSeq: @Sendable () async -> Int64
+    /// pre-13x ladder round 1, F1 (BLOCKER-1): THE COMPLETION GUARD's twin
+    /// — asked, on a clearing write over a standing previous key, whether
+    /// any ciphertext-carrying row of the mirror still sits below the
+    /// rotation seq; true ⇒ the RPC refuses `VARIORUM_ROTATION_ROWS_REMAIN`
+    /// and writes nothing (the maintenance artifact's letter).
+    private let rowsRemainBelow: @Sendable (Int64) async -> Bool
     /// pre-13x 4b (§7 steps 5 and 7): a ONE-SHOT hook run INSIDE the next
     /// `key_vault_update` request, BEFORE its CAS — so another device's
     /// whole act can land between this device's fetch and its write, and
@@ -44,8 +50,12 @@ final class EmulatedVault: @unchecked Sendable {
     private var beforeUpdate: (@Sendable () async throws -> Void)?
     private(set) var updateCount = 0
 
-    init(claimRotationSeq: @escaping @Sendable () async -> Int64) {
+    init(
+        claimRotationSeq: @escaping @Sendable () async -> Int64,
+        rowsRemainBelow: @escaping @Sendable (Int64) async -> Bool = { _ in false }
+    ) {
         self.claimRotationSeq = claimRotationSeq
+        self.rowsRemainBelow = rowsRemainBelow
     }
 
     func setBeforeUpdate(_ hook: @escaping @Sendable () async throws -> Void) {
@@ -76,6 +86,27 @@ final class EmulatedVault: @unchecked Sendable {
         if request.url?.path.hasSuffix("/rest/v1/rpc/key_vault_update") == true {
             if let hook = takeBeforeUpdate() { try await hook() }
             lock.withLock { updateCount += 1 }
+            // F1 (BLOCKER-1): the completion guard — a payload that CLEARS
+            // the previous key while the row carries one is refused while
+            // a ciphertext row still sits below the rotation seq. Read
+            // before the RPC body runs (the SQL checks under the row lock,
+            // before its update); nothing is written on a refusal.
+            let clearing: Int64? = lock.withLock {
+                guard let body = request.httpBody,
+                      let call = (try? JSONSerialization.jsonObject(with: body)) as? [String: Any],
+                      let payload = call["payload"] as? [String: Any],
+                      payload["corpus_previous_key_id"] == nil,
+                      let stored = row,
+                      let current = (try? JSONSerialization.jsonObject(with: stored)) as? [String: Any],
+                      current["corpus_previous_key_id"] is String,
+                      let seq = current["rotation_started_seq"] as? NSNumber
+                else { return nil }
+                return seq.int64Value
+            }
+            if let seq = clearing, await rowsRemainBelow(seq) {
+                return response(400, Data(
+                    #"{"code":"P0001","message":"\#(SyncServerRefusalMarker.rotationRowsRemain): refused by the mirror"}"#.utf8))
+            }
             let (served, previousBefore, stored): (VaultRPCEmulation.Served?, String?, Data?) = lock.withLock {
                 let before = row.flatMap {
                     ((try? JSONSerialization.jsonObject(with: $0)) as? [String: Any])?["corpus_previous_key_id"] as? String
@@ -130,6 +161,10 @@ actor EmulatedMirror: SyncTransport, SyncRotationTransport {
     struct Stored: Equatable {
         var row: SyncRow
         var seq: Int64
+        /// F1: the logical-clock tick the row was written at — the A5
+        /// visibility horizon is measured against it (the fake server's
+        /// `writtenAt`; the mirror's `server_written_at`).
+        var writtenAt: Int64 = 0
     }
 
     /// pre-13x 3a: the 09 push guard's twin — a pushed row of an
@@ -138,7 +173,19 @@ actor EmulatedMirror: SyncTransport, SyncRotationTransport {
     /// worlds seed owner-less rows and never claim a partition).
     enum OwnerRefusal: Error, Equatable { case ownerMismatch(table: String, rowID: String) }
     let ownerID: String?
-    init(ownerID: String? = nil) { self.ownerID = ownerID }
+    /// F1 (BLOCKER-1): rows written within the last `visibilityHorizon`
+    /// ticks are never served by a pull (the mirror's `interval '2
+    /// seconds'`; the fake server's model). 0 = no window (every standing
+    /// world); the straggler pins set 2 and let the clock advance where
+    /// production sleeps.
+    let visibilityHorizon: Int64
+    private var clock: Int64 = 0
+    init(ownerID: String? = nil, visibilityHorizon: Int64 = 0) {
+        self.ownerID = ownerID
+        self.visibilityHorizon = visibilityHorizon
+    }
+
+    func advanceClock(by ticks: Int64) { clock += ticks }
 
     private var rows: [String: Stored] = [:]
     private(set) var seq: Int64 = 0
@@ -161,6 +208,14 @@ actor EmulatedMirror: SyncTransport, SyncRotationTransport {
     }
     func claimSeq() -> Int64 { seq += 1; return seq }
     func stored() -> [String: Stored] { rows }
+
+    /// F1: what the completion guard counts — rows of the ciphertext-
+    /// carrying tables (the registry's `tablesCarryingCiphertext`) below
+    /// the rotation seq, visible or not.
+    func ciphertextRowsBelow(_ rotationSeq: Int64) -> Int {
+        let ciphertext = Set(SyncSchema.tablesCarryingCiphertext.map(\.name))
+        return rows.values.filter { ciphertext.contains($0.row.table) && $0.seq < rotationSeq }.count
+    }
 
     private func gate(activeKeyID: String, keyProof: String) async throws {
         guard let vault, let fetched = try await vault.fetchVault() else {
@@ -198,7 +253,7 @@ actor EmulatedMirror: SyncTransport, SyncRotationTransport {
             seq += 1
             var accepted = incoming
             accepted.syncVersion = currentVersion + 1
-            rows[key] = Stored(row: accepted, seq: seq)
+            rows[key] = Stored(row: accepted, seq: seq, writtenAt: clock)
             return .accepted(newVersion: accepted.syncVersion, serverSeq: seq)
         }
     }
@@ -211,7 +266,7 @@ actor EmulatedMirror: SyncTransport, SyncRotationTransport {
             try await onPull()
         }
         return Array(rows.values
-            .filter { $0.seq > since }
+            .filter { $0.seq > since && $0.writtenAt <= clock - visibilityHorizon }
             .sorted { $0.seq < $1.seq }
             .prefix(limit)
             .map { SyncPulledRow(row: $0.row, serverSeq: $0.seq) })
@@ -234,7 +289,7 @@ actor EmulatedMirror: SyncTransport, SyncRotationTransport {
                 return .skipped(currentVersion: current.row.syncVersion)
             }
             seq += 1
-            rows[key] = Stored(row: incoming, seq: seq)
+            rows[key] = Stored(row: incoming, seq: seq, writtenAt: clock)
             return .replaced(serverSeq: seq)
         }
     }
@@ -312,6 +367,11 @@ struct PostureSwitchTests {
         /// pre-13x 5b (ledger 67): this device's own name — what its vault
         /// client stamps and what its runner reads the vault's writer against.
         var deviceName = "test device"
+        /// F1 (BLOCKER-1): the walk's wait past the A5 horizon, as this world
+        /// injects it — time passes on the EMULATED mirror's clock (production
+        /// sleeps 2.5 s). A pin replaces it (a frozen clock, a counting wait)
+        /// and the leaves read it lazily, so no re-arm is needed.
+        var horizonWait: @Sendable () async throws -> Void = {}
 
         init(dir: URL, storeURL: URL, backups: URL, oldKey: StoreKey, apple: AppleKey,
              binding: StoreBinding, view: AppDatabase, keyStore: DeviceKeyStore,
@@ -387,7 +447,10 @@ struct PostureSwitchTests {
         // pre-13x 5b (ledger 67): a SIBLING with its OWN vault client under its
         // own name, so the vault's `updated_by_device` tells the two apart
         // (the shared client stamps every write "test device").
-        deviceName: String = "test device"
+        deviceName: String = "test device",
+        // F1 (BLOCKER-1): the emulated mirror's A5 visibility window, in
+        // logical ticks (0 = none — every standing world).
+        mirrorHorizon: Int64 = 0
     ) async throws -> World {
         let dir = FileManager.default.temporaryDirectory
             .appendingPathComponent("variorum-2b-switch-\(UUID().uuidString)", isDirectory: true)
@@ -436,8 +499,12 @@ struct PostureSwitchTests {
             material = sharing.oldMaterial
             if let material { #expect(keyStore.save(material)) }
         } else if enrolled {
-            let server = EmulatedMirror()
-            let emu = EmulatedVault(claimRotationSeq: { await server.claimSeq() })
+            let server = EmulatedMirror(visibilityHorizon: mirrorHorizon)
+            // F1: the vault's completion guard reads the mirror — the one
+            // emulation the SQL's FOR UPDATE + count make on Postgres.
+            let emu = EmulatedVault(
+                claimRotationSeq: { await server.claimSeq() },
+                rowsRemainBelow: { seq in await server.ciphertextRowsBelow(seq) > 0 })
             let client = KeyVaultClient(
                 configuration: KeyVaultClient.Configuration(
                     projectURL: URL(string: "https://vault.2b.invalid")!, apiKey: "publishable-test-key", deviceName: "test device"),
@@ -471,6 +538,10 @@ struct PostureSwitchTests {
         world.oldMaterial = material
         world.words = try RecoveryPhrase.generate()
         world.deviceName = deviceName
+        // F1: where production sleeps past the horizon, this world lets
+        // time pass on the mirror's clock.
+        let mirrorForWait = mirror
+        world.horizonWait = { await mirrorForWait?.advanceClock(by: max(mirrorHorizon, 1)) }
 
         // Three notes, pushed under the OLD corpus key.
         let stamp = "2026-09-05T00:00:00Z"
@@ -584,7 +655,11 @@ struct PostureSwitchTests {
             injectFault: { point in
                 if point == faultAt { throw PostureSwitchError.injectedFault(point) }
             },
-            deviceName: { deviceName })
+            deviceName: { deviceName },
+            horizonWait: {
+                let wait = await MainActor.run { world.horizonWait }
+                try await wait()
+            })
     }
 
     /// A world's runner re-composed with ONE scripted fault (2c.1b).
@@ -820,6 +895,113 @@ struct PostureSwitchTests {
             try await expectCastleEndState(world, outcome)
             #expect(world.calls.custodyTargets == [.biometric])
         }
+    }
+
+    // MARK: - pre-13x ladder round 1, F1 — BLOCKER-1 at the runner
+
+    /// F1 (BLOCKER-1) — THE RUNNER RE-WALKS ON THE SERVER's REFUSAL: a note
+    /// pushed a second before the switch sits below the rotation seq but
+    /// inside the mirror's visibility window; the ceremony's FIRST walk
+    /// cannot see it (this pin's wait lets NO time pass the first time),
+    /// so the clearing write is REFUSED (`VARIORUM_ROTATION_ROWS_REMAIN`)
+    /// — and the runner walks again (the wait now lets time pass), finds
+    /// the row, and completes: Castle's end state whole, every row above
+    /// the seq, the refused write counted and nothing cleared by it. RED
+    /// ON OLD (behavioural revert: the runner's re-walk removed — the
+    /// refusal propagates): the ceremony THROWS the server's refusal with
+    /// the marker at `.reencrypt`.
+    @Test func aStragglerHiddenFromTheFirstWalkRefusesCompletionAndTheRunnerReWalksToCastle() async throws {
+        let world = try await makeWorld(mirrorHorizon: 2)
+        defer { world.tearDown() }
+        let mirror = try #require(world.mirror)
+        let emu = try #require(world.vaultEmu)
+        await mirror.advanceClock(by: 2)  // the seed is visible
+        // THE STRAGGLER: pushed under the old keys, written NOW — inside
+        // the window for the ceremony's whole first walk.
+        try await seedBacklog(world, count: 1, tag: "typed-a-second-before")
+        let engine = SyncEngine(transport: mirror, keyProvider: DeviceKeySyncProvider(store: world.keyStore))
+        try await withDependencies { $0.database = world.view } operation: { _ = try await engine.push() }
+        let stragglerSeq = try #require(await mirror.stored()["container/typed-a-second-before-0"]?.seq)
+        // The wait: NO time passes the first time (the first walk ends
+        // blind), then time passes — production's sleep, made a fact.
+        let waits = LockIsolated(0)
+        world.horizonWait = {
+            let n = waits.withValue { $0 += 1; return $0 }
+            if n >= 2 { await mirror.advanceClock(by: 2) }
+        }
+        let updatesBefore = emu.updateCount
+        // Every row on the mirror was pushed under the old keys — all of
+        // them sit below the coming seq (the seeds, the store's seeded
+        // settings, the straggler); the walk re-stamps each exactly once.
+        let rowsBefore = await mirror.stored().count
+
+        let outcome = try await world.runner.enterCastle(passphrase: "sesame", recoveryWords: world.words)
+        try await expectCastleEndState(world, outcome)
+        #expect(outcome.reencrypted == rowsBefore, "every row below the seq, the straggler included: \(outcome.reencrypted) of \(rowsBefore)")
+        #expect(waits.value >= 2, "the first walk waited blind, the re-walk's wait let time pass")
+        #expect(emu.updateCount == updatesBefore + 3, "begin · the REFUSED clearing write · the accepted one")
+        #expect(try #require(await mirror.stored()["container/typed-a-second-before-0"]?.seq) > stragglerSeq,
+                "the straggler was re-stamped above the seq")
+        #expect(world.calls.log.value.contains { $0.contains("re-walking (try 2 of 3)") },
+                "the runner said what it did")
+        // Every row opens under the completed keys through the production
+        // road — the engine's pull over the re-keyed custody, once the
+        // re-stamped rows leave the window: the wedged changefeed cannot
+        // happen.
+        await mirror.advanceClock(by: 2)
+        let after = SyncEngine(transport: mirror, keyProvider: DeviceKeySyncProvider(store: world.keyStore))
+        let pulled = try await withDependencies { $0.database = world.view } operation: { try await after.pull() }
+        #expect(!pulled.stalled && pulled.newCursor >= stragglerSeq, "the pull reached head past the re-stamped rows: \(pulled)")
+    }
+
+    /// F1 (BLOCKER-1) — THE BOUND, then the honest refusal: a wait that
+    /// NEVER lets time pass (the straggler stays hidden) meets the
+    /// server's refusal three times; the runner stops with
+    /// `CorpusRotationError.completionRefused(tries: 3)` — the marker at
+    /// `.reencrypt`, custody holding M′ + the previous key, the vault
+    /// still carrying it (nothing cleared, nothing lost), the sentence
+    /// worded — and the RESUME, once time passes, re-walks and finishes.
+    @Test func threeRefusedCompletionsEndInTheHonestRefusalAndTheResumeFinishesOnceTimePasses() async throws {
+        let world = try await makeWorld(mirrorHorizon: 2)
+        defer { world.tearDown() }
+        let mirror = try #require(world.mirror)
+        let emu = try #require(world.vaultEmu)
+        let oldMaterial = try #require(world.oldMaterial)
+        await mirror.advanceClock(by: 2)
+        try await seedBacklog(world, count: 1, tag: "typed-a-second-before")
+        let engine = SyncEngine(transport: mirror, keyProvider: DeviceKeySyncProvider(store: world.keyStore))
+        try await withDependencies { $0.database = world.view } operation: { _ = try await engine.push() }
+        world.horizonWait = {}  // frozen: the straggler never becomes visible
+        let updatesBefore = emu.updateCount
+
+        await #expect(throws: CorpusRotationError.completionRefused(tries: PostureSwitchRunner.maxCompletionTries)) {
+            _ = try await world.runner.enterCastle(passphrase: "sesame", recoveryWords: world.words)
+        }
+        #expect(emu.updateCount == updatesBefore + 1 + PostureSwitchRunner.maxCompletionTries,
+                "begin, then three refused clearing writes")
+        #expect(try await world.marker()?.step == .reencrypt, "the marker stays — the resume re-walks")
+        let held = try #require(world.keyStore.load())
+        #expect(held.rotation != nil && held.corpusKeyID != oldMaterial.corpusKeyID, "custody holds M′ and the previous key")
+        let vault = try await world.vault()
+        #expect(vault.format.previousCorpusKey?.keyID == oldMaterial.corpusKeyID && vault.format.rotationStartedSeq != nil,
+                "the vault still carries the previous key + the seq — nothing was cleared")
+        let rotationSeq = try #require(vault.format.rotationStartedSeq)
+        #expect(await mirror.ciphertextRowsBelow(rotationSeq) == 1, "the straggler is still below the seq, under a key everyone still holds")
+        #expect(StoreEncryptionMigration.opens(world.storeURL, key: world.oldKey), "the library was not re-keyed")
+        #expect(world.calls.rekeys == 0 && world.calls.custodyTargets.isEmpty)
+        #expect(PostureSwitchModel.message(for: CorpusRotationError.completionRefused(tries: 3))
+                == ProtectionCopy.rotationRowsStillSettling, "the refusal speaks")
+        // Rounds refuse while the marker stands (nothing pushes a stale row).
+        await #expect(throws: SyncError.accountRekeyIncomplete) {
+            try await withDependencies { $0.database = world.view } operation: { _ = try await engine.pull() }
+        }
+
+        // Time passes; the resume re-walks and finishes.
+        world.horizonWait = { await mirror.advanceClock(by: 2) }
+        let resumed = try await world.runner.resume(passphrase: "sesame", recoveryWords: world.words)
+        try await expectCastleEndState(world, resumed)
+        #expect(resumed.reencrypted == 1, "the resume re-encrypted exactly the straggler")
+        #expect(await mirror.ciphertextRowsBelow(rotationSeq) == 0)
     }
 
     // MARK: - Decision 32 at the door
