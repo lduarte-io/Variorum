@@ -263,4 +263,9 @@ nonisolated enum FannedDefaultsCopy {
     /// guard class: the take she was looking at is gone from the live fan).
     static let takesChangedDivide = "This block's takes changed — try the divide again."
     static let takesChangedMerge = "These blocks' takes changed — try the merge again."
+    /// A merge road reached with a block no longer on the surface (18f ladder
+    /// R1-2 — the sheet sat open while the projection re-tiled; the entries
+    /// are resolved by id at act time and this is the refusal when one is
+    /// gone). Same grammar as the two above: nothing touched, try again.
+    static let blocksChangedMerge = "These blocks changed — try the merge again."
 }

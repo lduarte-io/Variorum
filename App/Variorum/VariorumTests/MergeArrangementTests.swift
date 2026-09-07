@@ -263,6 +263,83 @@ struct MergeArrangementTests {
         }
     }
 
+    // MARK: - 18f ladder round 1, R1-2 (fable-reviewer): the roads resolve by id
+
+    /// **RED ON OLD — verified on the pre-fix tree** (the production edit
+    /// stashed, this pin run alone): the preset roads acted on the entry
+    /// indices captured when the sheet OPENED, and `runInstantMerge` read the
+    /// trailing block's length from that stale index — so once the surface
+    /// re-tiled under the open sheet, "Only the two shown" placed the caret
+    /// by the WRONG entry's length (here: 11, the block below the pair,
+    /// instead of 10) and reported a seam at the wrong entry. Every merge
+    /// road now resolves its entries by BLOCK ID at act time (`runPlainDivide`'s
+    /// rule, applied to the merge family).
+    @Test func confirmingAPresetAfterTheSurfaceRetiledActsByBlockID() async throws {
+        try await withEditor(
+            seedBlocks: ["Alpha one.", "Beta two.", "Gamma three.", "Delta four."]
+        ) { h in
+            let slots = try h.storeSlots()
+            let spare = try h.session.operations.branchVariant(
+                slots[2].blockID, from: try #require(slots[2].variantID))
+            try h.session.operations.autosave(
+                spare.id, text: "The spare take.", charDelta: 0)
+            try h.reload()
+
+            selectAcross(h, 1, 2)
+            await h.model.invokeGesture(.mergeBlocks, ceremony: true)
+            let state = try #require(h.model.mergeCeremony)
+            #expect(state.blockIDs == [slots[1].blockID, slots[2].blockID])
+
+            // The surface re-tiles under the open sheet: the block ABOVE the
+            // pair goes, and every entry index the sheet opened with is now
+            // one too high.
+            try h.session.operations.deleteBlock(slots[0].blockID)
+            try h.reload()
+            #expect(h.model.index.entries.count == 3,
+                    "non-vacuity: the pair's entries moved by one")
+
+            h.model.setMergeArrangement(.onlyTheShownOnes)
+            await h.model.confirmMergeCeremony()
+            #expect(h.model.mergeCeremony == nil, "it landed")
+            let merged = try h.storeSlots()
+            #expect(merged.map(\.text) == ["Beta two. Gamma three.", "Delta four."],
+                    "the PAIR merged — by id, not by the open-time index")
+            // The caret sits at the JOIN, right where the trailing half
+            // begins — the trailing block's own length, resolved by id.
+            let join = h.model.index.range(ofEntryAt: 0).location
+                + "Beta two. ".utf16.count
+            #expect(h.textView.selectedRange() == NSRange(location: join, length: 0),
+                    "caret at the join (\(h.textView.selectedRange()) vs \(join))")
+        }
+    }
+
+    /// The shape her report's mechanism actually reaches — a two-block note
+    /// whose leading block dies while the sheet is up. On the pre-fix tree
+    /// this TRAPS (`entries[1]` on a one-entry index), which is why the pin
+    /// above, not this one, is the red-on-old evidence. Now: the sheet
+    /// dismisses in the refresh road's own voice and nothing is touched.
+    @Test func confirmingAPresetAfterAPairBlockDiedRefusesInsteadOfTrapping() async throws {
+        try await withEditor(seedBlocks: ["Alpha one.", "Beta two."]) { h in
+            let slots = try h.storeSlots()
+            _ = try h.session.operations.branchVariant(
+                slots[1].blockID, from: try #require(slots[1].variantID))
+            try h.reload()
+            selectAcross(h, 0, 1)
+            await h.model.invokeGesture(.mergeBlocks, ceremony: true)
+            #expect(h.model.mergeCeremony != nil)
+
+            try h.session.operations.deleteBlock(slots[0].blockID)
+            try h.reload()
+            #expect(h.model.index.entries.count == 1, "non-vacuity: the leading block is gone")
+
+            h.model.setMergeArrangement(.onlyTheShownOnes)
+            await h.model.confirmMergeCeremony()
+            #expect(h.model.mergeCeremony == nil, "the sheet dismisses — its blocks are not there")
+            #expect(h.model.statusMessage == FannedDefaultsCopy.blocksChangedMerge)
+            #expect(try h.storeSlots().map(\.text) == ["Beta two."], "nothing was merged")
+        }
+    }
+
     // MARK: - The sentence
 
     @Test func theSentenceUnderTheMergeRowSaysWhatComesAlong() {

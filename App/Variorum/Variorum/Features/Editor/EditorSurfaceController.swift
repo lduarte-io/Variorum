@@ -298,17 +298,11 @@ final class EditorSurfaceController {
                     model.refuseFeedback(FannedDefaultsCopy.mergeCeremonyNeedsAFan)
                     return
                 }
-                await openMergeCeremony(
-                    leadingIndex: leadingIndex, trailingIndex: trailingIndex,
-                    leadingID: leadingID, trailingID: trailingID)
+                await openMergeCeremony(leadingID: leadingID, trailingID: trailingID)
             } else if leadingArity > 1 || trailingArity > 1 {
-                await runCarryAllMerge(
-                    leadingIndex: leadingIndex, trailingIndex: trailingIndex,
-                    leadingID: leadingID, trailingID: trailingID)
+                await runCarryAllMerge(leadingID: leadingID, trailingID: trailingID)
             } else {
-                await runInstantMerge(
-                    leadingIndex: leadingIndex, trailingIndex: trailingIndex,
-                    leadingID: leadingID, trailingID: trailingID)
+                await runInstantMerge(leadingID: leadingID, trailingID: trailingID)
             }
 
         case .makeBlockAcrossBlocks(let indices, let blockIDs, let startCut, let endCut):
@@ -328,7 +322,7 @@ final class EditorSurfaceController {
                 firstEdge: edgeSnapshot(indices.lowerBound),
                 lastEdge: edgeSnapshot(indices.upperBound))
 
-        case .mergeChain(let indices, let blockIDs):
+        case .mergeChain(_, let blockIDs):
             guard !ceremony else {
                 // **U-16, 2026-09-07:** *"if you're merging several notes
                 // together you should be given the choice of bringing every
@@ -338,10 +332,10 @@ final class EditorSurfaceController {
                 // construction (S4-23) and stays so; what retires is the
                 // refusal that used to stand here — the door asks the two
                 // questions instead of saying no.
-                await openMergeRunChoice(indices: indices, blockIDs: blockIDs)
+                await openMergeRunChoice(blockIDs: blockIDs)
                 return
             }
-            await runMergeChain(indices: indices, blockIDs: blockIDs)
+            await runMergeChain(blockIDs: blockIDs)
         }
     }
 
@@ -369,13 +363,34 @@ final class EditorSurfaceController {
                     + "(\(TrayPath.originalsPath); ⌥⌘Z undoes).")
     }
 
+    /// The entry of `blockID` on the CURRENT surface, or nil when it is no
+    /// longer tiled there. **18f ladder round 1, R1-2 (fable-reviewer):** the
+    /// three merge roads read their lengths and seams through this, by block
+    /// id, AT ACT TIME — never from an index a caller captured earlier.
+    /// `runPlainDivide`'s rule ("an index taken before a suspension can
+    /// address a re-tiled surface"), applied to the merge family: U-5's row
+    /// made these roads the CONFIRM of a sheet that can sit open while the
+    /// projection re-renders under it (a sync apply; a menu chord that stays
+    /// live beneath a window-modal sheet), and `runInstantMerge` subscripted
+    /// the projection with the open-time index unguarded — a trap on a
+    /// two-block note, a mis-landed caret and a refused seam elsewhere.
+    private func entryIndex(of blockID: String) -> Int? {
+        model.index.entries.firstIndex { $0.blockID == blockID }
+    }
+
     /// The everyday instant merge — today's exact `.merge` body, byte-
     /// unchanged (13b 4B moved it behind the ceremony threshold; unfanned
-    /// pairs and the stale-projection fallthrough land here).
+    /// pairs and the stale-projection fallthrough land here). Entries are
+    /// resolved by id here (R1-2); a block gone from the surface refuses in
+    /// the refresh road's own voice and touches nothing.
     @discardableResult
-    private func runInstantMerge(
-        leadingIndex: Int, trailingIndex: Int, leadingID: String, trailingID: String
-    ) async -> Bool {
+    private func runInstantMerge(leadingID: String, trailingID: String) async -> Bool {
+        guard let leadingIndex = entryIndex(of: leadingID),
+              let trailingIndex = entryIndex(of: trailingID)
+        else {
+            model.showStatus(FannedDefaultsCopy.blocksChangedMerge)
+            return false
+        }
         let trailingLength = model.index.entries[trailingIndex].length
         // #11c (the sitting ruling, 2026-07-13): merge on fanned blocks
         // SPEAKS about what it does to the fan.
@@ -605,9 +620,7 @@ final class EditorSurfaceController {
     /// app's own `mergeCeremony` — zero core change, and the instant no-fan
     /// merge above stays byte-unchanged behind its own threshold.
     @discardableResult
-    private func runCarryAllMerge(
-        leadingIndex: Int, trailingIndex: Int, leadingID: String, trailingID: String
-    ) async -> Bool {
+    private func runCarryAllMerge(leadingID: String, trailingID: String) async -> Bool {
         await model.autosave.flushNow()
         guard !model.autosave.isDirty else {
             model.showStatus("Unsaved changes couldn't be written — resolve that first, then retry.")
@@ -623,9 +636,7 @@ final class EditorSurfaceController {
         guard fans.leading.count > 1 || fans.trailing.count > 1 else {
             // The store says unfanned — the instant merge, byte-unchanged
             // (the ceremony door's own fallthrough, one road over).
-            return await runInstantMerge(
-                leadingIndex: leadingIndex, trailingIndex: trailingIndex,
-                leadingID: leadingID, trailingID: trailingID)
+            return await runInstantMerge(leadingID: leadingID, trailingID: trailingID)
         }
         guard let composition = CarryAllMerge.compose(
             leadingDisplayedID: model.index.entries.first { $0.blockID == leadingID }?.variantID,
@@ -636,8 +647,14 @@ final class EditorSurfaceController {
             model.showStatus(FannedDefaultsCopy.takesChangedMerge)
             return false
         }
-        let trailingLength = trailingIndex < model.index.entries.count
-            ? model.index.entries[trailingIndex].length : 0
+        // By id, at act time (R1-2) — the length that places the caret at
+        // the join must be the trailing block's, not whatever entry the
+        // open-time index pointed at.
+        guard let trailingIndex = entryIndex(of: trailingID) else {
+            model.showStatus(FannedDefaultsCopy.blocksChangedMerge)
+            return false
+        }
+        let trailingLength = model.index.entries[trailingIndex].length
         return await runStructural { ops in
             let result = try ops.mergeCeremony(
                 leadingID, trailingID,
@@ -670,11 +687,14 @@ final class EditorSurfaceController {
     /// alternates end up standing alone beside a fully-joined chosen take —
     /// the pair road's own consequence, applied twice ("quick to delete").
     @discardableResult
-    private func runMergeChain(
-        indices: ClosedRange<Int>, blockIDs: [String], bringEveryTake: Bool = true
-    ) async -> Bool {
-        let leadingLength = indices.lowerBound < model.index.entries.count
-            ? model.index.entries[indices.lowerBound].length : 0
+    private func runMergeChain(blockIDs: [String], bringEveryTake: Bool = true) async -> Bool {
+        // By id, at act time (R1-2): the run's leading block, wherever the
+        // surface tiles it now.
+        guard let first = blockIDs.first, let leadingIndex = entryIndex(of: first) else {
+            model.showStatus(FannedDefaultsCopy.blocksChangedMerge)
+            return false
+        }
+        let leadingLength = model.index.entries[leadingIndex].length
         await model.autosave.flushNow()
         guard !model.autosave.isDirty else {
             model.showStatus("Unsaved changes couldn't be written — resolve that first, then retry.")
@@ -1146,9 +1166,10 @@ final class EditorSurfaceController {
         /// `secondTakes` / `pairings` stay empty on that arm and the pair's
         /// whole state machine below is untouched by it.
         var blockIDs: [String] = []
-        /// The run's entry indices, for the caret arithmetic the confirm
-        /// roads take (the pair's own two indices, or the chain's range).
-        var entryIndices: ClosedRange<Int> = 0...0
+        // (`entryIndices` — the run's OPEN-time entry indices, kept for the
+        // confirm roads' caret arithmetic — left this state at the 18f ladder,
+        // R1-2: a sheet sits open while the surface re-tiles, so every road
+        // now resolves its entries by block id at act time.)
         /// Live active takes across the run BEYOND the shown one per block —
         /// what "bring every take" would bring. Read at open; the sentence's
         /// only input.
@@ -1254,9 +1275,7 @@ final class EditorSurfaceController {
     /// If the true fans turn out unfanned (the slots' arity was a stale
     /// projection), the instant path runs instead — the threshold rule
     /// reads truth, not the projection.
-    private func openMergeCeremony(
-        leadingIndex: Int, trailingIndex: Int, leadingID: String, trailingID: String
-    ) async {
+    private func openMergeCeremony(leadingID: String, trailingID: String) async {
         await model.autosave.flushNow()
         guard !model.autosave.isDirty else {
             model.showStatus("Unsaved changes couldn't be written — resolve that first, then retry.")
@@ -1267,9 +1286,7 @@ final class EditorSurfaceController {
             // batch 2 — ONE fan rule, one place (#34's point 2).
             let (firstFan, secondFan) = try await liveActiveFans(leadingID, trailingID)
             guard firstFan.count > 1 || secondFan.count > 1 else {
-                await runInstantMerge(
-                    leadingIndex: leadingIndex, trailingIndex: trailingIndex,
-                    leadingID: leadingID, trailingID: trailingID)
+                await runInstantMerge(leadingID: leadingID, trailingID: trailingID)
                 return
             }
             let firstRenderedID = model.index.entries
@@ -1279,7 +1296,6 @@ final class EditorSurfaceController {
             var state = MergeCeremonyState(
                 firstBlockID: leadingID, secondBlockID: trailingID,
                 blockIDs: [leadingID, trailingID],
-                entryIndices: min(leadingIndex, trailingIndex)...max(leadingIndex, trailingIndex),
                 otherTakes: max(0, firstFan.count - 1) + max(0, secondFan.count - 1),
                 arrangement: .bringEveryTake,
                 firstRenderedID: firstRenderedID, secondRenderedID: secondRenderedID,
@@ -1315,9 +1331,7 @@ final class EditorSurfaceController {
     /// A run with NO fan anywhere has nothing to choose between — both roads
     /// are byte-identically `merge` — so the door speaks the pair's own
     /// needs-a-fan refusal rather than asking a question with one answer.
-    private func openMergeRunChoice(
-        indices: ClosedRange<Int>, blockIDs: [String]
-    ) async {
+    private func openMergeRunChoice(blockIDs: [String]) async {
         await model.autosave.flushNow()
         guard !model.autosave.isDirty else {
             model.showStatus("Unsaved changes couldn't be written — resolve that first, then retry.")
@@ -1355,7 +1369,7 @@ final class EditorSurfaceController {
         }
         mergeCeremony = MergeCeremonyState(
             firstBlockID: blockIDs[0], secondBlockID: blockIDs[1],
-            blockIDs: blockIDs, entryIndices: indices, otherTakes: others,
+            blockIDs: blockIDs, otherTakes: others,
             runBlocks: shown,
             arrangement: .bringEveryTake,
             firstRenderedID: nil, secondRenderedID: nil,
@@ -1443,21 +1457,27 @@ final class EditorSurfaceController {
             return
         }
         guard state.arrangement == .pairByHand else {
+            // 18f ladder R1-2: the sheet may have sat open while the surface
+            // re-tiled under it (the pairing road's drift class, one level
+            // up). The roads below resolve every entry BY BLOCK ID at act
+            // time; a block no longer on the surface dismisses the sheet in
+            // the refresh road's own voice, rows untouched — the same answer
+            // `refreshMergeCeremony` gives when a side dissolves.
+            guard state.blockIDs.allSatisfy({ entryIndex(of: $0) != nil }) else {
+                mergeCeremony = nil
+                model.showStatus(FannedDefaultsCopy.blocksChangedMerge)
+                return
+            }
             let bringEvery = state.arrangement == .bringEveryTake
             let landed: Bool
             if state.isRun {
                 landed = await runMergeChain(
-                    indices: state.entryIndices, blockIDs: state.blockIDs,
-                    bringEveryTake: bringEvery)
+                    blockIDs: state.blockIDs, bringEveryTake: bringEvery)
             } else if bringEvery {
                 landed = await runCarryAllMerge(
-                    leadingIndex: state.entryIndices.lowerBound,
-                    trailingIndex: state.entryIndices.upperBound,
                     leadingID: state.firstBlockID, trailingID: state.secondBlockID)
             } else {
                 landed = await runInstantMerge(
-                    leadingIndex: state.entryIndices.lowerBound,
-                    trailingIndex: state.entryIndices.upperBound,
                     leadingID: state.firstBlockID, trailingID: state.secondBlockID)
             }
             if landed { mergeCeremony = nil }
@@ -2057,7 +2077,6 @@ final class EditorSurfaceController {
             return
         }
         let landed = await runInstantMerge(
-            leadingIndex: plan.leadingIndex, trailingIndex: plan.trailingIndex,
             leadingID: plan.leadingBlockID, trailingID: plan.trailingBlockID)
         if landed {
             // Load-bearing, not chatter (A7's carve set the shape): a
