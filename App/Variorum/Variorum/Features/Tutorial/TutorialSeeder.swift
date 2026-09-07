@@ -72,7 +72,7 @@ enum TutorialSeeder {
         // text LOOKS like, so it belongs after blocks and before takes.
         ("writing", ["blocks & typing", "shaping blocks", "formatting"]),
         ("takes", ["your first take", "choosing & the board", "keeping takes safe"]),
-        ("structure", ["divide", "the take ceremony", "extract & make block",
+        ("structure", ["divide", "divide choosing takes", "extract & make block",
                        "merge", "the two undos"]),
         // 13j J10 — **THE DELETION CHAPTER** (her instruction, verbatim:
         // *"the tutorial also needs to be updated more throughly in 13j to
@@ -430,7 +430,7 @@ enum TutorialSeeder {
             + "permanent identity. You never manage them while drafting: switch to "
             + "Write (\u{2318}1), click at the very end of this note, and type a few "
             + "paragraphs. Each paragraph quietly becomes its own block as you "
-            + "type past it. No gesture, no ceremony.",
+            + "type past it. No gesture, nothing to ask for.",
 
             // 13b 4D (N34 — S4-14): the opt-in one_block face gets a
             // sentence where crystallization is taught.
@@ -661,10 +661,11 @@ enum TutorialSeeder {
             // divide on a block that already has takes.
             "If the block has SEVERAL takes, \u{2318}\u{21E7}D still just cuts: the take "
             + "you're LOOKING at splits across the two new blocks, and every other "
-            + "take is copied onto both of them whole. Nothing goes missing and "
-            + "there's nothing to hunt for — the extra copies are quick to delete. "
-            + "When you'd rather place a cut in each take by hand, that's the "
-            + "ceremony, \u{2325}\u{2318}\u{21E7}D, and it has the next lesson to itself.",
+            + "take stays WHOLE on the first block — the one you divided. Nothing "
+            + "goes missing and there's nothing to hunt for. When you'd rather send "
+            + "them somewhere else, or place a cut in each take by hand, that's "
+            + "Divide choosing takes, \u{2325}\u{2318}\u{21E7}D, and it has the next lesson "
+            + "to itself.",
 
             "From Takes, divide acts RIGHT THERE — press \u{2318}\u{21E7}D, or Divide "
             + "in the bottom bar's block \u{25BE} group, and the block you're in is "
@@ -676,26 +677,29 @@ enum TutorialSeeder {
             + "The undo chapter has the whole story.",
         ])
 
-        let ceremony = try lesson(structure, "the take ceremony", [
+        let ceremony = try lesson(structure, "divide choosing takes", [
             // 13j J4: the ceremony is SUMMONED now, not the default. Her
             // ruling flipped ⌘⇧D on a fanned block to the duplicating shape;
             // this lesson teaches the door that still asks take by take.
             "Dividing a fanned block raises a real question: each take is a "
-            + "different text, so where does each one get cut? \u{2318}\u{21E7}D answers "
-            + "it the quick way — cut the take you're looking at, copy the rest "
-            + "onto both halves. When the answer matters, ask for the ceremony "
-            + "instead: \u{2325}\u{2318}\u{21E7}D lays every take out in one sheet and lets you "
-            + "place each cut yourself.",
+            + "different text, so where does each one go? \u{2318}\u{21E7}D answers it the "
+            + "quick way — cut the take you're looking at, leave the rest whole on "
+            + "the first block. When the answer matters, ask for the choice "
+            + "instead: \u{2325}\u{2318}\u{21E7}D lays every take out in one sheet and asks "
+            + "where they should go.",
 
             // 13b 4A: the sheet shows every checked take at once, the ✂
             // drags between word edges, keyboard placement, and PARKING.
             "The block below carries three takes, staged for it. Put your cursor "
-            + "mid-block and press \u{2325}\u{2318}\u{21E7}D. The sheet titled \u{201C}Divide into takes\u{201D} "
-            + "shows every take with a checkbox, each checked take's text laid "
-            + "out with a ✂ you can place anywhere between words: drag it, "
-            + "click a spot, or use \u{2190}/\u{2192} (\u{2325} jumps by sentence, \u{21E5} moves "
-            + "between takes). Your cut is pre-placed where it could be "
-            + "matched. Leave the third take UNCHECKED before you confirm.",
+            + "mid-block and press \u{2325}\u{2318}\u{21E7}D. The sheet titled \u{201C}Divide choosing "
+            + "takes\u{201D} opens on a row of four: keep the takes on the top block "
+            + "(the everyday answer, already chosen), keep them on the bottom, copy "
+            + "them to both — or \u{201C}Choose per take\u{2026}\u{201D}, which is the one you "
+            + "really have to ask for. Pick that fourth one: every take gets a "
+            + "checkbox and its text laid out with a ✂ you can place anywhere "
+            + "between words — drag it, click a spot, or use \u{2190}/\u{2192} (\u{2325} jumps "
+            + "by sentence, \u{21E5} moves between takes). Leave the third take "
+            + "UNCHECKED before you confirm.",
 
             "The ferry crossed at dawn. Nobody on board spoke about the storm.",
 
@@ -720,7 +724,7 @@ enum TutorialSeeder {
             // nearest word edge and the late-start refusal class is gone.
             // The prose re-widens honestly.
             "Extract pulls a span at a block's EDGE out into its own block — "
-            + "zero ceremony, the source block keeps its identity and all its "
+            + "no fuss at all: the source block keeps its identity and all its "
             + "takes. Select from anywhere in this paragraph to its end and "
             + "press \u{2318}\u{21E7}E (the selection's edges snap to the nearest word "
             + "edge, settling gently onto sentence ends) — and this closing "
@@ -762,9 +766,11 @@ enum TutorialSeeder {
             + "the two takes you were looking at join, and every other take "
             + "rides onto the merged block whole. Nothing is left behind to "
             + "hunt for, and the extra copies are quick to delete. To choose "
-            + "by hand instead, use Merge with Ceremony (\u{2325}\u{2318}\u{21E7}M): both "
-            + "blocks' takes side by side, pre-paired with the two you were "
-            + "looking at — press \u{23CE} and you get exactly the everyday join. "
+            + "instead, use Merge choosing takes (\u{2325}\u{2318}\u{21E7}M): it asks first — "
+            + "bring every take (the everyday answer, already chosen), only the two "
+            + "you were looking at, or pair by hand — which opens pre-paired with "
+            + "the two takes you were looking at, so \u{23CE} still gives you "
+            + "exactly the everyday join. "
             + "Pair takes with \u{FF0B} and the merged block gets one joined take "
             + "per pairing (divide a two-take block, pair 1+1 and 2+2, and it "
             + "comes back whole); check \u{201C}carry\u{201D} to ride a take over "
@@ -772,19 +778,21 @@ enum TutorialSeeder {
             + "nothing. Takes are never multiplied combinatorially: pairing is "
             + "choosing by hand.",
 
-            "In the ceremony, whatever you leave unpaired stays with the "
+            "When you pair by hand, whatever you leave unpaired stays with the "
             + "released blocks in lineage — the app names the road, and "
             + "\u{2325}\u{2318}Z brings the sources back, takes and all, from either "
-            + "road. The block below carries a spare take so you can watch "
-            + "both: \u{2318}\u{21E7}M brings the spare along, \u{2325}\u{2318}\u{21E7}M opens the "
-            + "ceremony with the takes laid out for pairing.",
+            + "road. Merging THREE or more blocks at once asks the same question "
+            + "with two answers only — every take, or only the shown ones — and "
+            + "never opens the pairing surface. The block below carries a spare "
+            + "take so you can watch both: \u{2318}\u{21E7}M brings the spare along, "
+            + "\u{2325}\u{2318}\u{21E7}M asks where the takes should go.",
 
             "This block has a second take — merge me upward and my spare comes "
-            + "along whole; with \u{2325}\u{2318}\u{21E7}M the ceremony opens instead, my "
-            + "takes laid out for pairing.",
+            + "along whole; with \u{2325}\u{2318}\u{21E7}M you are asked first, my takes "
+            + "laid out for pairing if you want them.",
         ])
         try take(on: merging.blocks[6],
-            "The spare take: I come along whole on an ordinary merge — or pair me, carry me, or leave me in lineage when you open the ceremony. Undo brings me home either way.")
+            "The spare take: I come along whole on an ordinary merge — or pair me, carry me, or leave me in lineage when you choose by hand. Undo brings me home either way.")
 
         _ = try lesson(structure, "the two undos", [
             "Variorum keeps two undo stacks, deliberately separate. \u{2318}Z is TEXT "

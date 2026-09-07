@@ -444,7 +444,7 @@ final class EditorSurfaceController {
             // `.nothingToDo`), plus the door that CAN act on it: parking a
             // whole take at one end is the ceremony's vocabulary (S4-22).
             model.refuseFeedback(RefusalCopy.message(for: .nothingToDo)
-                + " Divide with Ceremony (⌥⌘⇧D) can send a whole take to one side.")
+                + " Divide choosing takes (⌥⌘⇧D) can send a whole take to one side.")
             return
         }
         // The take she is looking at: Write's full-document editor shows the
@@ -1713,7 +1713,7 @@ final class EditorSurfaceController {
                     await openDivideWCeremony(blockID: blockID, activeCut: activeCut)
                     model.showTransientStatus(
                         "One of this block's takes needs its cut placed by hand — "
-                        + "finish the take ceremony, then run Make Block from Selection again.")
+                        + "finish Divide choosing takes, then run Make Block from Selection again.")
                     return nil
                 }
                 cuts[take.id] = mapped

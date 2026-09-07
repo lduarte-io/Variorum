@@ -724,8 +724,8 @@ struct FannedDefaultsTests {
             #expect(capability.shortcutLabel == label)
             #expect(EditorCommands.keyEquivalent(for: id) != nil,
                     "\(id)'s declared chord is wired in the one place keys collide")
-            #expect(capability.verb.hasSuffix("with Ceremony…"),
-                    "\(id) reads as a summoned option, ellipsis and all")
+            #expect(capability.verb.hasSuffix("choosing takes…"),
+                    "\(id) reads as a summoned option, ellipsis and all (U-4, 2026-09-06)")
         }
         // The ceremony acts plan through their twins and diverge at the door.
         #expect(EditorViewModel.plannerCommand(for: .divideWithCeremony) == .divideAtCursor)

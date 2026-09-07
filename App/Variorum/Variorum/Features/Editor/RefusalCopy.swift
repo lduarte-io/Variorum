@@ -28,7 +28,7 @@ nonisolated enum RefusalCopy {
         case .middleSpanNeedsMakeBlock:
             "Extract takes a span at the block's start or end. For a middle span, use Make Block from Selection."
         case .fannedMiddleSpan:
-            "This block has other takes, and they carry no cut marks — use Divide Block at Cursor to open the take ceremony instead."
+            "This block has other takes, and they carry no cut marks — divide at the cursor (⌘⇧D), or Divide choosing takes (⌥⌘⇧D) to place a cut in each take."
         case .notASeam:
             "To merge, put the caret at a block seam or select across the blocks to join."
         case .nothingToDo:

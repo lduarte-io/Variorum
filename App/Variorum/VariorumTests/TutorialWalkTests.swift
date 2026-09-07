@@ -226,7 +226,7 @@ struct TutorialBookShapeTests {
                     "the paged-rail lesson has four takes to page")
 
             // The ceremony's three takes.
-            let ceremony = try await db.read { try lessonID($0, bookID: bookID, "the take ceremony") }
+            let ceremony = try await db.read { try lessonID($0, bookID: bookID, "divide choosing takes") }
             let ceremonyProjection = try await projection(db, ceremony)
             let ferry = try #require(ceremonyProjection.slots.first {
                 $0.text?.contains("The ferry crossed at dawn") == true
@@ -1222,7 +1222,7 @@ struct TutorialStructureActsTests {
 
     @Test func theCeremonyCutsCheckedTakesAndTheUncheckedStays() async throws {
         try await withTutorialWorld { session, db, bookID in
-            let lesson = try await db.read { try lessonID($0, bookID: bookID, "the take ceremony") }
+            let lesson = try await db.read { try lessonID($0, bookID: bookID, "divide choosing takes") }
             let before = try await projection(db, lesson)
             let ferry = try #require(before.slots.first {
                 $0.text?.contains("The ferry crossed at dawn") == true
@@ -1277,7 +1277,7 @@ struct TutorialStructureActsTests {
         // whose ✂ sits at its very end doesn't split; the whole take rides
         // into the first block and has no say in the second.
         try await withTutorialWorld { session, db, bookID in
-            let lesson = try await db.read { try lessonID($0, bookID: bookID, "the take ceremony") }
+            let lesson = try await db.read { try lessonID($0, bookID: bookID, "divide choosing takes") }
             let before = try await projection(db, lesson)
             let ferry = try #require(before.slots.first {
                 $0.text?.contains("The ferry crossed at dawn") == true
@@ -1453,7 +1453,7 @@ struct TutorialStructureActsTests {
             // summoned ⌥⌘⇧M door. The locator is now the door's own name,
             // and both promised words are asserted exactly as before.
             let ceremonyProse = try #require(before.slots.first {
-                $0.text?.contains("Merge with Ceremony") == true
+                $0.text?.contains("Merge choosing takes") == true
             }).text ?? ""
             #expect(ceremonyProse.contains("pre-paired"), "⏎ = the everyday join, promised")
             #expect(ceremonyProse.contains("carry"), "the carry option, promised")

@@ -45,7 +45,7 @@ struct MergeCeremonySheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Merge blocks — pair their takes").font(.headline)
+            Text("Merge choosing takes").font(.headline)
             Text("A ＋ pairs one take from each block into a joined take on the merged block (click a take on each side to place it). \u{201C}Carry\u{201D} rides a take over whole, unjoined. Anything unpaired and uncarried stays with the released blocks in lineage — ⌥⌘Z undoes the whole merge.")
                 .font(.caption)
                 .foregroundStyle(.secondary)

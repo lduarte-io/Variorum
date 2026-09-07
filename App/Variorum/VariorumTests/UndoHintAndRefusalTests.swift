@@ -329,7 +329,7 @@ struct UndoHintAndRefusalTests {
         #expect(!road.contains("to pair the takes yourself"),
                 "⌘⇧M does not pair any more — hand-pairing is the ceremony's")
         #expect(road.contains("brings every take along"))
-        #expect(road.contains("Merge with Ceremony (⌥⌘⇧M)"))
+        #expect(road.contains("Merge choosing takes (⌥⌘⇧M)"))
         #expect(road.hasSuffix(FannedDefaultsCopy.fanFoldRoads),
                 "one home: the diagnosis speaks the shared roads sentence")
         #expect(EditorSurfaceController.seamFanRefusal(leading: 2, trailing: 1)

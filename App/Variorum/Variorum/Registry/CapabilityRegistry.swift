@@ -183,7 +183,7 @@ nonisolated enum CapabilityRegistry {
         // door (`FannedDefaultsCopy.divideCeremonyNeedsAFan`) — the
         // `.showOriginBlock` split, P-2.
         Capability(
-            id: .divideWithCeremony, verb: "Divide with Ceremony…", scope: .block,
+            id: .divideWithCeremony, verb: "Divide choosing takes…", scope: .block,
             doors: [.menuBar, .contextMenu, .palette],
             shortcutLabel: "⌥⌘⇧D", takesAccess: .native,
             unavailableNote: "Dividing happens inside a note — open one first.",
@@ -211,7 +211,7 @@ nonisolated enum CapabilityRegistry {
         // access: the PAIRING sheet mounts in Write alone, so summoning it
         // from a board carries the pair there exactly as ⌘⇧M always has.
         Capability(
-            id: .mergeWithCeremony, verb: "Merge with Ceremony…", scope: .block,
+            id: .mergeWithCeremony, verb: "Merge choosing takes…", scope: .block,
             doors: [.menuBar, .contextMenu, .palette],
             shortcutLabel: "⌥⌘⇧M", takesAccess: .moveAndExecute,
             unavailableNote: "Merging happens inside a note — open one first.",

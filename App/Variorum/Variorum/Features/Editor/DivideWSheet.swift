@@ -63,7 +63,7 @@ struct DivideWSheet: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Divide into takes").font(.headline)
+            Text("Divide choosing takes").font(.headline)
             // L2 (QoL round 2026-07-29), her words: *"it's not really clear to
             // me what selecting the take button below is supposed to do? just
             // split that take as well?"* — yes, exactly, and the surface never

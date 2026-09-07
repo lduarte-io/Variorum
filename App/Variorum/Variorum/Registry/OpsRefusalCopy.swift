@@ -391,7 +391,8 @@ nonisolated enum OpsRefusalCopy {
             // in that window refuses HERE. It dumped the raw enum before.
             case .fannedBlock:
                 return "This block has more than one take now — divide it again "
-                    + "and the take ceremony will open, so each take gets its own cut."
+                    + "and the take you're in splits while the others stay on the "
+                    + "first block (⌥⌘⇧D arranges them differently)."
             // 13f batch 6 (W4): the star cap, refusing honestly rather than
             // evicting her oldest star. The refusal NAMES the road, which
             // is the whole reason the cap is a refusal and not a silent

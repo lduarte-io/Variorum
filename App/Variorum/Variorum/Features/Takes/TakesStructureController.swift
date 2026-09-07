@@ -539,7 +539,7 @@ final class TakesStructureController {
             // A one-word seed take has no interior cut — Write's answer,
             // verbatim (the ceremony's parking is the road for that).
             model.speak(RefusalCopy.message(for: .nothingToDo)
-                + " Divide with Ceremony (⌥⌘⇧D) can send a whole take to one side.")
+                + " Divide choosing takes (⌥⌘⇧D) can send a whole take to one side.")
             return
         }
         guard let composition = KeepOnTopDivide.compose(

@@ -389,10 +389,10 @@ struct DivideExtractGestureTests {
             // below is untouched: every row stays ENABLED and a refused one
             // speaks.
             #expect(items.map(\.title) == [
-                "Divide Block at Cursor", "Divide with Ceremony… (⌥⌘⇧D)",
+                "Divide Block at Cursor", "Divide choosing takes… (⌥⌘⇧D)",
                 "Extract Selection",
                 "Make Block from Selection", "Merge Blocks",
-                "Merge with Ceremony… (⌥⌘⇧M)",
+                "Merge choosing takes… (⌥⌘⇧M)",
                 "Delete in Every Take", "Show Takes", "Archive Block",
                 "Delete Block",
             ])

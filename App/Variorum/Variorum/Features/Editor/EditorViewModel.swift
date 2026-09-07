@@ -3247,7 +3247,7 @@ final class EditorViewModel {
             // 13d Batch 3: the same refusal Write can reach when a take
             // lands between the plan and the operation (R1-3's
             // every-refusal-readable class).
-            return "This block has more than one take now — divide it again and the take ceremony will open, so each take gets its own cut."
+            return "This block has more than one take now — divide it again and the take you're in splits while the others stay on the first block (⌥⌘⇧D arranges them differently)."
         case .divideSideWouldBeEmpty:
             return "Every checked take is parked at the same end — one of the two new blocks would have no takes. Split at least one take, or park one at the other end."
         case .mergedBlockWouldHaveNoTake:

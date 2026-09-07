@@ -233,7 +233,7 @@ nonisolated enum FannedDefaultsCopy {
     /// compose around this constant, and the pin holds them to it.
     static let fanFoldRoads =
         "Merge Blocks (⌘⇧M) joins them and "
-        + "brings every take along; Merge with Ceremony (⌥⌘⇧M) pairs the takes yourself."
+        + "brings every take along; Merge choosing takes (⌥⌘⇧M) lets you arrange them yourself."
 
     // MARK: The ceremony doors' honest refusals
 
@@ -242,13 +242,13 @@ nonisolated enum FannedDefaultsCopy {
     /// door speaks its real reason and names the door that CAN (P-2: a real
     /// refusal, never a lecture that redirects to nothing).
     static let divideCeremonyNeedsAFan =
-        "This block has one take — ⌘⇧D divides it in place. The ceremony is for "
-        + "placing a cut in each take of a fan."
+        "This block has one take — ⌘⇧D divides it in place. Divide choosing takes is "
+        + "for arranging a fan's takes across the two new blocks."
 
     /// ⌥⌘⇧M where neither block carries a fan.
     static let mergeCeremonyNeedsAFan =
-        "These blocks have one take each — ⌘⇧M joins them. The ceremony is for "
-        + "pairing takes by hand when either side has a fan."
+        "These blocks have one take each — ⌘⇧M joins them. Merge choosing takes is "
+        + "for arranging the takes when either side has a fan."
 
     /// ⌥⌘⇧M over a run of three or more. The pairing ceremony is pairwise by
     /// construction (S4-23), so this names the road that takes the run.

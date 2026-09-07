@@ -2325,8 +2325,8 @@ built (`KeepOnTopDivide` is CONSUMED, not modified); no Release build and no `/A
 
 | # | Piece | State |
 |---|---|---|
-| 1 | Row 3's three §4.4 pins, written BEFORE any fix (`CutFlowEndSlotTests`) | **IN-PROGRESS** |
-| 2 | Names (U-4) — the verbs, the sheet titles, every UI "ceremony" string, the field guide | **NOT-STARTED** |
+| 1 | Row 3's three §4.4 pins, written BEFORE any fix (`CutFlowEndSlotTests`) | **DONE (a7559b91)** — all three green on the pre-fix tree; the remaining candidate is face-level (piece 6's walk) |
+| 2 | Names (U-4) — the verbs, the sheet titles, every UI "ceremony" string, the field guide | **DONE** (this row's commit) — the word leaves every UI string; 5 pins rewritten; 130/10 green |
 | 3 | Doors — the registry declarations + the three bars' buttons | **NOT-STARTED** |
 | 4 | The divide sheet's arrangement row (U-5/U-3) + the confirm roads | **NOT-STARTED** |
 | 5 | The merge sheet's row + the N-way's two choices (U-16) | **NOT-STARTED** |
