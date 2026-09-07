@@ -843,11 +843,17 @@ final class EditorSurfaceController {
     /// sealed note, a locked take, a block with no interior word edge — is
     /// that door's own, spoken in its own words.
     private func runTypedReturnAct() async {
-        // 18c ladder round 1, R1-2: whatever road the act takes — a flight
-        // (which replays in its own defer), a spoken refusal, the empty
-        // block's no-op — the keys stashed since the claim are replayed
-        // when it is done. This catches the roads that never reach a flight.
-        defer { model.textView?.replayDeferredKeystrokes() }
+        // 18c ladder round 1, R1-2: whatever road the act takes — a spoken
+        // refusal, the empty block's no-op, a `.content` re-derivation —
+        // the keys stashed since the CLAIM are replayed when it is done.
+        // The claim's arming is the newest generation at this point (every
+        // key since was stashed, never claimed); a flight arms a NEWER one
+        // and replays in its own defer, which makes this replay a no-op on
+        // that road — exactly the roads that never reach a flight, and no
+        // other (the sanity-pass raise: an unconditional replay here drained
+        // a chained act's stash early and reordered ⏎ ⏎ text).
+        let deferral = model.textView?.deferralGeneration ?? 0
+        defer { model.textView?.replayDeferredKeystrokes(for: deferral) }
         switch model.typedReturnAct() {
         case .content, .nothing:
             // `.nothing` is the empty block's ruled no-op (U-19 (2)):
@@ -2403,8 +2409,9 @@ final class EditorSurfaceController {
         // 18c ladder round 1, R1-2: keystrokes during the flight are
         // DEFERRED, never dropped — AppKit discards typed input to the
         // disabled surface, and with ⏎ a structural act this window sat on
-        // the hottest key in the app.
-        model.textView?.beginDeferringKeystrokes()
+        // the hottest key in the app. The flight OWNS this arming (its
+        // generation): a typed act's own replay below defers to it.
+        let deferral = model.textView?.beginDeferringKeystrokes() ?? 0
         defer {
             structuralInFlight = false
             model.textView?.isEditable = model.header.map { !$0.locked } ?? false
@@ -2415,8 +2422,9 @@ final class EditorSurfaceController {
             // NIT: deliveries defer while a flight is up).
             model.applyPendingIfClean()
             // …and the keys she typed meanwhile land now, at the landed
-            // caret — LAST, once the surface is settled (R1-2).
-            model.textView?.replayDeferredKeystrokes()
+            // caret — LAST, once the surface is settled (R1-2). A replayed
+            // ⏎ that re-arms for a chained act keeps what follows it.
+            model.textView?.replayDeferredKeystrokes(for: deferral)
         }
         await model.autosave.flushNow()
         guard !model.autosave.isDirty else {

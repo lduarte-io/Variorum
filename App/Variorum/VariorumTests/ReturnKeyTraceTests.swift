@@ -630,6 +630,33 @@ struct TypedReturnKeyTests {
         }
     }
 
+    /// **RED-ON-OLD (the implementer's sanity-pass raise on R1-2):** two
+    /// fast Returns and then text. The first's flight replays the second,
+    /// which claims and re-arms for its chained act, and the text behind it
+    /// is stashed for THAT act — but the first act's own replay then cleared
+    /// that arming and drained the text early, so the chained act
+    /// re-derived against the moved caret and minted an empty block after
+    /// the text (`["alpha", "x", ""]`; reproduced twice on the dev-store
+    /// build). An arming now names its owner and a replay acts only for
+    /// the newest: the text lands in the one block the Returns made.
+    @Test func twoFastReturnsThenTypingLandTheTextInTheOneBlockTheyMade() async throws {
+        try await withEditor(seedBlocks: ["alpha"]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+
+            caret(h, entry: 0, offset: 5)
+            returnKey(h, window.window)
+            returnKey(h, window.window)
+            characterKey(h, window.window, "x")  // all three in one turn
+            await h.flush()
+
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "x"],
+                    "⏎ ⏎ x: one new block, the text in it, nothing after it")
+            #expect(h.model.index.entries.count == 2)
+            #expect(h.model.caretBlockID == h.model.index.entries[1].blockID)
+        }
+    }
+
     /// **RED-ON-OLD (the finding itself):** a key pressed while the act's
     /// flight is up — the surface disabled, the flight waiting on the
     /// writer queue — was DISCARDED by AppKit (`["alpha", ""]`, the `x`

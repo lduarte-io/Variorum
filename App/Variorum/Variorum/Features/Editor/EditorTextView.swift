@@ -113,16 +113,35 @@ final class EditorTextView: NSTextView, MarkdownFormattable {
     /// block she meant — and a replayed ⏎ claims and chains exactly as a
     /// typed one. Key equivalents route through `performKeyEquivalent` and
     /// never come this way. Never sticky: the one clearer is the replay.
+    ///
+    /// **Every arming has an OWNER — its generation** (the implementer's
+    /// sanity-pass raise, 18c ladder round 1): a replayed ⏎ inside a drain
+    /// claims and re-arms for the act it chains, and the keys behind it are
+    /// stashed for THAT act; an older owner's replay must then do nothing,
+    /// or it drains the newer act's stash early and the act re-derives
+    /// against text it was meant to precede (⏎ ⏎ text came out as ⏎ · text
+    /// · ⏎ — an empty block after the text). `beginDeferringKeystrokes`
+    /// returns the generation it armed; `replayDeferredKeystrokes(for:)`
+    /// acts only for the newest one.
     private(set) var isDeferringKeystrokes = false
     private var deferredKeyEvents: [NSEvent] = []
+    private(set) var deferralGeneration = 0
 
-    func beginDeferringKeystrokes() { isDeferringKeystrokes = true }
+    @discardableResult
+    func beginDeferringKeystrokes() -> Int {
+        isDeferringKeystrokes = true
+        deferralGeneration += 1
+        return deferralGeneration
+    }
 
-    /// Clears the flag FIRST (so the replay is not itself stashed), then
-    /// replays the stash in order through the ordinary `keyDown` road. A
-    /// replayed key that arms a new act stashes whatever follows it for
-    /// that act — `keyDown` reads the flag per event, by construction.
-    func replayDeferredKeystrokes() {
+    /// Replays for the arming `generation` names, and only if it is still
+    /// the newest — a newer owner keeps the stash. Clears the flag FIRST (so
+    /// the replay is not itself stashed), then replays in order through the
+    /// ordinary `keyDown` road. A replayed key that arms a new act stashes
+    /// whatever follows it for that act — `keyDown` reads the flag per
+    /// event, by construction.
+    func replayDeferredKeystrokes(for generation: Int) {
+        guard generation == deferralGeneration else { return }
         isDeferringKeystrokes = false
         guard !deferredKeyEvents.isEmpty else { return }
         let events = deferredKeyEvents
