@@ -790,10 +790,104 @@ images 14–16 (pasted in chat) described there.
 
 ## LIVE STATUS
 
-*(The orchestrator writes here from the first commit: the letter and batch in flight, the last commit,
-what is verified, what is next. Empty until kickoff.)*
+*(The orchestrator's transcript-proof state — flipped in the same commit as every piece. A fresh session with only the repo continues the round from here.)*
+
+- **Orchestrator:** the Fable session spawned 2026-09-07 (the overnight run; her kickoff message is §6's text plus her chat framing: "use the fable cold review judiciously and at the end, and cold review with Opus when you feel the need … you'll be using your own judgement on issues and recording those judgement calls for me to review in the morning"). Her app is CLOSED (zero instances at open — verified `pgrep`); the machine is author-free for walks.
+- **First acts:** preflight reading DONE (CLAUDE.md + canon · this plan whole · her three messages · the mockup's four figures, read as text — the Chrome extension was not connected, so the figures were read from the HTML's own prose and captions, which name every ruled element · the three agent definitions · the standing-fixes file · the master plan's pointer/table/`### 13u` · the 13u plan's fold + addenda · act10 §2b · the sizing guidance · the resiliency protocol · the pre-13x handoff · KnownIssues' flake/anchor/rig rows). The 2026-09-07 mechanical acts VERIFIED by grep (register row 17o · Phase 18 row · phase-table row `use-report` · running-order row 3c · the Current-phase pointer · `.gitignore` line 29). Constitution copied below. Baselines: PENDING (running).
+- **Baselines (this session's own runs, tree `f402ccce`):** core `swift test` — PENDING · Mac full suite (`-only-testing:VariorumTests`) — PENDING · the tutorial spine (the ten `Tutorial*Tests` types) — PENDING (inside the full run; counted per suite) · iOS `generic/platform=iOS` build — PENDING. Marker 8 (pre-13x), zero schema this round.
+- **In flight:** nothing spawned yet. **Next:** 18c batch 1 (the keep-on-top composition + the phone's flip) — brief in Records, then `opus-implementer`.
+- **Orchestrator's judgment calls for her morning (each also recorded where it happened):** *(none yet)*
 
 ## Records
 
-*(The P-1…P-9 constitution first; then batch briefs, batch records, ladder findings and dispositions,
-in run order.)*
+### R-0 · The constitution (copied verbatim from `.claude/skills/architect-phase/SKILL.md`, which preserves it byte-verbatim from `notes/plans/phase-13b-make-it-work.md`; BINDING on every batch of this round)
+
+#### The architectural rules (the 13b constitution, P-1…P-9 — PRESERVED BYTE-VERBATIM from `notes/plans/phase-13b-make-it-work.md`; phase-specific names inside them — D3/D4, Stage 0/1, `TakesViewModel` — are the rules' provenance and worked examples, kept as written; the rules themselves are general and BINDING in every phase this skill runs)
+
+- **P-1 — One capability registry.** Every user-facing act is declared
+  exactly once: verb, scope (block/take/post/book), per-mode availability
+  rule, its doors (menu / context / bar / shortcut / palette), and its
+  refusal copy. Surfaces render their doors FROM the registry; gating is
+  data, never per-view if-statements. A registry-walk test asserts every
+  declared door exists and every rendered door is declared. This kills the
+  D3/D4 class structurally — the capability matrix stays green by
+  construction instead of by audit.
+- **P-2 — Fire-and-DO (R115).** A rendered door either performs the act —
+  including any mode-switch choreography, done visibly for the user — or
+  delivers the operations layer's real refusal. A door that can never act in
+  its context isn't rendered. Lecture-and-redirect is retired.
+- **P-3 — One text surface, one liveness authority.** ONE TK2 surface
+  component (live + read modes; one measurement brain — the width-gated
+  remeasure; the shared canary) that every pane composes; the live editor
+  core's identity machinery (`BlockRangeIndex`, crystallization) becomes its
+  live mode, not a sibling implementation. "What text does this pane show,
+  and is it live" is answered by ONE pure, unit-tested authority
+  (`PaneTextAuthority`); views never re-derive it. Its invariants stated as
+  code: exactly one live pane; the live pane is buffer-authoritative; read
+  panes are projection-authoritative once caught up.
+- **P-4 — Broadcasts carry signals, never decisions.** NotificationCenter
+  may announce that something happened (mode changed, post opened); no
+  listener derives business state or availability from a broadcast, and no
+  flow's correctness depends on broadcast ordering. Cross-feature flows
+  route through composition. (Stage 0's survey enumerates today's
+  notification bus; Stage 1 disciplines it.)
+- **P-5 — The friction doctrine (R116).** Repeated pushback against a rule
+  marks an under-architected feature. The response is never another patch:
+  write the feature's DESIGN MEMO — intended behavior whole, edge cases
+  enumerated on paper, refusal wordings, undo story — get the author's
+  rulings on the product-flavored edges, then build to the memo. Happy path
+  ships first, but the edges are *decided at design time*, not discovered by
+  the author. First two memos owed: **merge** and **the W ceremony**.
+- **P-6 — The tutorial is the executable spec (R113).** The guided tutorial
+  flow is the contract for every happy path. It stays green — automated
+  where the harness allows, screenshot-walked otherwise — and any change
+  that breaks a tutorial step is a regression by definition.
+- **P-7 — Find bugs before she does.** Every layer keeps a proactive
+  harness: the ops-layer soaks (exist), the board/view-model invariant soak
+  (Stage 1), the registry walk (P-1), the per-batch scripted screenshot
+  walkthrough. Red-on-old stays absolute: no bug-class fix without a pin
+  that fails on the pre-fix code.
+- **P-8 — Standing law, consolidated.** P1–P3 performance invariants bind
+  the rebuilt layer exactly as they bind the substrate (invalidation ∝
+  realized rows; one live editor; virtualized long views). Overlays, never
+  rendering attributes. Chrome `fixedSize` texts always carry a `lineLimit`
+  (the b6dae25 class). `Theme/VoiceControls.swift` is THE chrome vocabulary.
+  Complexity lives in the store; restraint lives in the UI.
+- **P-9 — No god objects in the frontend either.** A view model mixing
+  board layout, text authority, and gesture routing splits by concern
+  (`TakesViewModel` at 890 lines is the standing counterexample). Same
+  hygiene rule as the substrate, applied where it was being waived.
+
+*(Batch briefs, batch records, ladder findings and dispositions follow, in run order: R-1 = 18c batch 1, …)*
+
+---
+
+### R-1 · 18c batch 1 — BRIEF (the keep-on-top composition + the phone's flip) — written by the orchestrator 2026-09-07
+
+**Spawn:** `opus-implementer`. **Review after:** `fable-reviewer` (a default's meaning changes on both platforms). **One acceptance unit:** the fanned-divide DEFAULT on both platforms (an operations/composition unit: the state-transition pins are the evidence, plus one walk of the Mac's instant divide on a fanned block).
+
+**Read first, yourself, in this order:** `CLAUDE.md` and the canon it loads (the divide taxonomy: AppSpec §9 `divide` / `divideW` / `divideDuplicating`, OverallModel §7); this file §0, §1 (U-2 — the ruling you build; U-5 names the two other presets), §2 (the 13u fence), §3 rows 2 · 28, §5.1 **Batch 1** whole (the design), §8 (process), §9 (traps), R-0 (the constitution); then the code the pointers below name.
+
+**The design is §5.1 Batch 1, verbatim-binding.** Pointers, corrected against the tree at `f402ccce` (the plan's §3 row 2 says `FannedDefaults.swift:38` sits in `App/Variorum/Shared/` — it does NOT: it is `App/Variorum/Variorum/Features/Editor/FannedDefaults.swift`, Mac-only, and `CarryAllMerge` (`:46`) is the PATTERN to copy, not the neighbour to sit beside):
+- The core op you compose over: `Operations.divideW(_:cuts:)` — `Sources/VariorumCore/Operations/Operations+Structural.swift:320` (its doc comment `:281–319` states the parking rule you rely on: a cut at a take's very END rides the whole take into B; `invalidCut` on an empty take; `divideSideWouldBeEmpty`). **Zero core change** is the design; if you believe the op must change, stop and record why before touching it.
+- The new pure composition: `KeepOnTopDivide` (and its `keepBelow` sibling) in **`App/Variorum/Shared/`** (a target-shared, `nonisolated`, store-free file the phone can call — `LandingTarget.swift` there is a precedent of a shared pure file; check the Xcode project's target membership for that folder and match it). Signature per §5.1: `compose(displayedID:cut:fan:) -> [String: Int]?` over the block's live ACTIVE fan (archived takes stay on A exactly as today); an EMPTY other take is left out of the dict (it cannot park) and reported so the receipt can count it. `divideDuplicating` stays in core, untouched, as the "copy takes to both" preset (18f's).
+- The Mac's two doors: `EditorSurfaceController.runDuplicatingDivide` (`App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift:419–500` — keep its store-read fork, the F-3 guard, the flush-first, `runStructural` with `seam: nil` and the caret at the SECOND successor's start; swap the op for `ops.divideW(blockID, cuts: composition)`; the count from the op's OWN result — `DivideWResult.first.variants` minus the split half) and `TakesStructureController` (`App/Variorum/Variorum/Features/Takes/TakesStructureController.swift:~425–450`, the same swap; the ring parks on the second successor's leading take as today). The refusal strings at both doors that name "Divide with Ceremony (⌥⌘⇧D)" stay as they are — 18f renames them.
+- The receipt: `FannedDefaultsCopy.divided(…)` (`FannedDefaults.swift:167`) re-worded to the keep-on-top truth — §5.1's sentence: *"Block divided — the take you were in split across both blocks; N other takes stayed on the first. ⌥⌘Z undoes."* (an empty take that stayed on A is named when it happens; 0 others → the short form). The file's header comment (`:1–30`) is rewritten to the 2026-09-06 ruling (U-2 supersedes J4 on both platforms; J4's merge half is untouched).
+- **The phone's flip, same batch:** `App/Variorum/VariorumMobile/Features/Write/MobileStructural.swift:150–170` (the fanned path) calls the shared composition + `ops.divideW`; its header comment (`:1–40`) updated; the phone's caret rule (`runDivide` lands at the LEADING successor's start) unchanged. Its pins: `App/Variorum/VariorumMobileTests/MobileStructuralTests.swift` (grep `divideDuplicating`) re-pointed to the new shape.
+- **The pins (Mac):** `App/Variorum/VariorumTests/FannedDefaultsTests.swift` — `aFannedDivideDuplicatesInsteadOfOpeningTheCeremony` (`:75`), `theDuplicatedTakesLandOnBothSuccessorsWithTheirLabels` (`:99`), `theDuplicatingDivideIsOneStructuralUndoEntry` (`:128`), `theDivideReceiptTellsTheDuplicateShapeTruth` (`:148`), `aLockedTakeDoesNotRefuseTheDuplicatingDivide` (`:187`) are the J4 pins whose PREMISE the ruling retires — rewrite each to the keep-on-top truth (name the old pin and the ruling in the record; never delete silently); `anUnfannedDivideIsUntouched` (`:167`) and the ceremony-door pins (`:208–240`) ride unmodified. New: the composition's matrix (2 / 3 / 5 takes; an empty other take stays on A and is counted; a locked other take parks — `divideW` copies buffers), B's fan = the split first half (chosen) + every other take whole in fan order, C's fan = the split second half alone (chosen), A released preserved whole and `placeBlock`-reversible, ONE undo entry with the exact-row redo. `TakesDivideTests.swift` if it asserts the duplicate shape. **Red-on-old:** every rewritten pin must FAIL on `f402ccce` (the duplicate shape) and pass after — record the red run's line.
+- **What you do NOT do:** no Return-key work (batch 2), no `splitBlockAtNewlines` (batch 3), no sheet/preset UI (18f), no renaming of "ceremony" strings (18f), nothing in `Sources/VariorumCore/Sync/`, no schema, no lockstep, nothing in `BlockRangeIndex`/`EditorTextView` (the 13u fence). If the phone's target membership for `Shared/` makes the composition unreachable without a project change, make the minimal project change and say so in the record — never a second copy of the brain.
+
+**The rules you work under (restated here; they bind):**
+1. **Checkpoint protocol:** commit per coherent piece with a message that says what landed; `git pull --rebase` then push after EVERY commit; keep **R-1 · RECORD** (below) current from your first commit — per-piece `DONE (hash)` · `IN-PROGRESS — what remains` · `NOT-STARTED`; every unverified claim marked PENDING and flipped when the run completes; synchronous foreground waits only (poll a log with a `grep -q` loop — never end a turn to wait on a background build); one agent at a time — you spawn nothing (one Sonnet lookup for an external fact is the sole exception, read-only).
+2. **One surface per session.** If a second acceptance unit appears in your way, stop, write the record, hand off.
+3. **Pin before fix; red-on-old for every bug-class row; a pin green on both sides dismisses the row as hollow** (record it, do not fix it). This batch is a ruled default change, so its evidence is the rewritten pins reddening on the old tree plus the walk.
+4. **The acceptance gate is USE:** walk the Mac's instant divide on a fanned block (three takes; the caret mid-take; ⏎ is NOT the door yet — use the divide door: Divide in the block ▾ menu or its shortcut) on the DEV-STORE Debug build (`io.lduarte.Variorum.debug` — Xcode's scheme run / `xcodebuild -scheme Variorum -configuration Debug build` product; `cliclick` + `Tools/WalkKit/` — read its README; NEVER `/Applications/Variorum.app`), capture the before, the receipt, and the Takes board after (B carries the others, C one take) into `notes/plans/use-report-2026-09-06-screens/18c-1/` (gitignored — list the filenames in the record). The phone's half closes on its pins + the iOS build (the simulator suite `VariorumMobileTests` on `iPhone 17 Pro` if it runs within your session; else the build + the touched suite, and say which).
+5. **No product invention.** A decision the spec and §1 do not make → `notes/QUESTIONS.md` **#91** (the next free number; #90 is pre-13x's) with 2–3 options, the most spec-defensible built and marked PROVISIONAL, said so in the record. Never re-open U-1…U-20.
+6. **The 13u fence** (§2): nothing in `CrossBlockEditPlanner`, the O(N²) family, `BlockRangeIndex`'s regions.
+7. **No `Co-Authored-By` / `Claude-Session` trailer lines** on commits; never rewrite history.
+8. **Environment traps (pre-13x §18, verbatim-faithful):** instance checks via `pgrep -fl 'Variorum.app/Contents/MacOS'` discriminated by PATH; her real-store app is closed tonight — if one appears, NEVER quit/kill it; no Release builds, no `/Applications` refresh (the orchestrator's, at the round's end); core tests via `swift test` from the repo root; Mac app tests from `App/Variorum/` with suite-level `-only-testing:VariorumTests/<SuiteTypeName>` only (TYPE names — a name matching nothing is silently dropped; read the `Test run with N tests in M suites` line and the `skipped:` lines), args passed as a zsh array; `xcodebuild build-for-testing` compiles without the runner; NEVER add a custom build configuration; zsh `pipestatus`; scratch and screenshots in gitignored dirs inside the worktree; never `git checkout` over uncommitted work; commit before any behavioral revert and name the revert state in the record before starting it; the A1 backup rail before ANY touch of the real store (you have no reason to touch it).
+9. **Close honestly:** at the END run `swift test` (core), the touched Mac suites + the ten `Tutorial*Tests` spine types in ONE `xcodebuild test` run (`TutorialBookShapeTests · TutorialDoorTests · TutorialWritingActsTests · TutorialTakesActsTests · TutorialStructureActsTests · TutorialLookingActsTests · TutorialLibraryActsTests · TutorialDeletionActsTests · TutorialWherePlacesActsTests · TutorialPrivacyChapterTests`), the iOS build (`xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS' build`) and the phone's touched suite; every row dispositioned (rows 2 · 28 are yours — 28 is RECORDED, it closes with batch 2); the retired-pin list with the ruling beside each; the captures listed; anything NOT done as the record's first line. Your final message to the orchestrator is a POINTER to the record, not the only copy.
+
+### R-1 · RECORD (the implementer writes here from its first commit)
+
+*(empty until the implementer's first commit)*
