@@ -607,6 +607,17 @@ struct TypedReturnKeyTests {
         h.textView.keyDown(with: event)
     }
 
+    /// A real Delete key event through `keyDown` (`\u{7F}` — the standard
+    /// key binding's `deleteBackward:`), the road a seam backspace takes.
+    private func deleteKey(_ h: EditorHarness, _ window: NSWindow) {
+        let event = NSEvent.keyEvent(
+            with: .keyDown, location: .zero, modifierFlags: [], timestamp: 0,
+            windowNumber: window.windowNumber, context: nil,
+            characters: "\u{7F}", charactersIgnoringModifiers: "\u{7F}",
+            isARepeat: false, keyCode: 51)!
+        h.textView.keyDown(with: event)
+    }
+
     // MARK: 18c ladder round 1, R1-2 — keys typed around the act are never lost
 
     /// **RED-ON-OLD (the implementer's rider):** a key pressed in the gap
@@ -688,6 +699,63 @@ struct TypedReturnKeyTests {
 
             #expect(try h.storeSlots().map(\.text) == ["alpha", "x"],
                     "typed during the flight, landed after it — never dropped")
+        }
+    }
+
+    // MARK: 18c ladder round 2, R2-1 — the stash drains when the surface is IDLE, never "at the newest arming"
+
+    /// **RED-ON-OLD (round 2, R2-1):** ⏎ ⌫ ⏎ x in one burst — the keys a
+    /// "wrong break, redo it" typist sends into a busy writer. The first
+    /// act's flight replayed the other three; the ⌫ scheduled the seam
+    /// carve, the second ⏎ claimed an act queued BEHIND it, and the carve's
+    /// own flight then drained the `x` before that act had run — the letter
+    /// landed in `alpha` (`["alphax", ""]`). The stash now drains only when
+    /// nothing is in flight and nothing is queued, so the `x` waits for the
+    /// ⏎ it followed. The expected store is what typing the same four keys
+    /// SLOWLY yields: a block, its removal, a block, the letter in it.
+    @Test func aBurstWithASeamBackspaceKeepsTheTextBehindTheReturnItFollowed() async throws {
+        try await withEditor(seedBlocks: ["alpha"]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+
+            caret(h, entry: 0, offset: 5)
+            returnKey(h, window.window)
+            deleteKey(h, window.window)
+            returnKey(h, window.window)
+            characterKey(h, window.window, "x")  // all four in one turn
+            await h.flush()
+
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "x"],
+                    "⏎ ⌫ ⏎ x: a block, its removal, a block, the letter in it")
+            #expect(h.model.index.entries.count == 2)
+            #expect(h.model.caretBlockID == h.model.index.entries[1].blockID)
+        }
+    }
+
+    /// **RED-ON-OLD (round 2, R2-1 — the carve's OTHER landing arm, the
+    /// implementer's rider):** with a block below, the seam carve lands the
+    /// caret at `beta`'s START, so the early-drained `x` read `"xbeta"` and
+    /// the queued act then met the divide door's refusal (`["alpha",
+    /// "xbeta"]`). One pin per landing arm, so the fix is never read as
+    /// caret-position-specific. Typed slowly: ⏎ makes the block between, ⌫
+    /// carves it (the caret to `beta`'s start), ⏎ at `beta`'s start pushes
+    /// it down with an empty block above, `x` lands in `beta`.
+    @Test func aBurstWithASeamBackspaceHoldsWhenTheCarveLandsBelow() async throws {
+        try await withEditor(seedBlocks: ["alpha", "beta"]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+
+            caret(h, entry: 0, offset: 5)
+            returnKey(h, window.window)
+            deleteKey(h, window.window)
+            returnKey(h, window.window)
+            characterKey(h, window.window, "x")  // all four in one turn
+            await h.flush()
+
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "", "xbeta"],
+                    "the second ⏎ at beta's start pushes it down; the x lands in beta")
+            #expect(h.model.index.entries.count == 3)
+            #expect(h.model.caretBlockID == h.model.index.entries[2].blockID)
         }
     }
 

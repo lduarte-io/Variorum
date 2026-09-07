@@ -108,40 +108,49 @@ final class EditorTextView: NSTextView, MarkdownFormattable {
     /// it in the block the caret is about to leave (a silent MISPLACEMENT —
     /// the implementer's rider on the same finding). Armed at the claim
     /// (`EditorViewModel.runTypedReturn`) and at every flight's start
-    /// (`EditorSurfaceController.runStructural`); cleared and REPLAYED when
-    /// the act is done, so a character lands at the landed caret — the
-    /// block she meant — and a replayed ⏎ claims and chains exactly as a
-    /// typed one. Key equivalents route through `performKeyEquivalent` and
-    /// never come this way. Never sticky: the one clearer is the replay.
+    /// (`EditorSurfaceController.runStructural`); cleared and REPLAYED once
+    /// the surface is IDLE again, so a character lands at the landed caret —
+    /// the block she meant — and a replayed ⏎ claims and chains exactly as
+    /// a typed one. Key equivalents route through `performKeyEquivalent`
+    /// and never come this way. Never sticky: the one clearer is the replay.
     ///
-    /// **Every arming has an OWNER — its generation** (the implementer's
-    /// sanity-pass raise, 18c ladder round 1): a replayed ⏎ inside a drain
-    /// claims and re-arms for the act it chains, and the keys behind it are
-    /// stashed for THAT act; an older owner's replay must then do nothing,
-    /// or it drains the newer act's stash early and the act re-derives
-    /// against text it was meant to precede (⏎ ⏎ text came out as ⏎ · text
-    /// · ⏎ — an empty block after the text). `beginDeferringKeystrokes`
-    /// returns the generation it armed; `replayDeferredKeystrokes(for:)`
-    /// acts only for the newest one.
+    /// **WHEN the stash drains is not this view's to decide** (18c ladder
+    /// round 2, R2-1). It has exactly one owner —
+    /// `EditorSurfaceController.replayDeferredKeystrokesIfIdle()` — and one
+    /// rule: no structural flight is up AND no keystroke compound is queued
+    /// (`pendingCrossBlockTask == nil`). Round 1 drained at the end of the
+    /// NEWEST arming (a generation token), which answered "has a newer
+    /// flight begun" and not "is anything still queued": a seam ⌫ replayed
+    /// inside a drain schedules its compound, the ⏎ behind it claims an act
+    /// queued BEHIND that compound, and the compound's own flight then
+    /// drained the keys typed after the ⏎ before the ⏎ had acted — ⏎ ⌫ ⏎ x
+    /// on `alpha` read `["alphax", ""]`. The generation went with the rule
+    /// it implemented: two answers to one question living side by side is
+    /// how this seam earned its second finding, and the idle gate subsumes
+    /// the newest-arming one (a newer flight is never idle).
+    ///
+    /// **Two residuals, stated (R2-4):** a CLICK during a flight moves the
+    /// caret at once (`isSelectable` stays true — she can scroll and select
+    /// while a flight lands) while the keys wait, so the replayed keys land
+    /// at the clicked position: the order of a key and a click inverts,
+    /// never a drop. And input that arrives as `insertText:` with no key
+    /// event — dictation, Services, an accessibility insert — is still
+    /// discarded by the disabled surface exactly as before R1-2; the stash
+    /// is `keyDown`-scoped by construction (stashing at `insertText:` would
+    /// swallow the replay itself and every programmatic edit).
     private(set) var isDeferringKeystrokes = false
     private var deferredKeyEvents: [NSEvent] = []
-    private(set) var deferralGeneration = 0
 
-    @discardableResult
-    func beginDeferringKeystrokes() -> Int {
+    func beginDeferringKeystrokes() {
         isDeferringKeystrokes = true
-        deferralGeneration += 1
-        return deferralGeneration
     }
 
-    /// Replays for the arming `generation` names, and only if it is still
-    /// the newest — a newer owner keeps the stash. Clears the flag FIRST (so
-    /// the replay is not itself stashed), then replays in order through the
-    /// ordinary `keyDown` road. A replayed key that arms a new act stashes
-    /// whatever follows it for that act — `keyDown` reads the flag per
-    /// event, by construction.
-    func replayDeferredKeystrokes(for generation: Int) {
-        guard generation == deferralGeneration else { return }
+    /// Clears the flag FIRST (so the replay is not itself stashed), then
+    /// replays in order through the ordinary `keyDown` road. A replayed key
+    /// that arms a new act stashes whatever follows it for that act —
+    /// `keyDown` reads the flag per event, by construction. Called ONLY from
+    /// the controller's idle gate; nothing else may drain.
+    func replayDeferredKeystrokes() {
         isDeferringKeystrokes = false
         guard !deferredKeyEvents.isEmpty else { return }
         let events = deferredKeyEvents

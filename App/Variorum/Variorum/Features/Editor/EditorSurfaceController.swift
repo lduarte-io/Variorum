@@ -843,17 +843,14 @@ final class EditorSurfaceController {
     /// sealed note, a locked take, a block with no interior word edge — is
     /// that door's own, spoken in its own words.
     private func runTypedReturnAct() async {
-        // 18c ladder round 1, R1-2: whatever road the act takes — a spoken
-        // refusal, the empty block's no-op, a `.content` re-derivation —
-        // the keys stashed since the CLAIM are replayed when it is done.
-        // The claim's arming is the newest generation at this point (every
-        // key since was stashed, never claimed); a flight arms a NEWER one
-        // and replays in its own defer, which makes this replay a no-op on
-        // that road — exactly the roads that never reach a flight, and no
-        // other (the sanity-pass raise: an unconditional replay here drained
-        // a chained act's stash early and reordered ⏎ ⏎ text).
-        let deferral = model.textView?.deferralGeneration ?? 0
-        defer { model.textView?.replayDeferredKeystrokes(for: deferral) }
+        // 18c ladder round 2, R2-1: NO replay here. Whatever road the act
+        // takes — a flight, a spoken refusal, the empty block's no-op, a
+        // `.content` re-derivation — the keys stashed since the CLAIM drain
+        // from the ONE idle gate (`replayDeferredKeystrokesIfIdle`), which
+        // the compound chain's tail runs once this act was the last thing
+        // queued and nothing is in flight. (Round 1 replayed here for the
+        // claim's own generation; a compound queued AHEAD of this act by a
+        // replayed seam ⌫ drained the act's keys first — see the gate.)
         switch model.typedReturnAct() {
         case .content, .nothing:
             // `.nothing` is the empty block's ruled no-op (U-19 (2)):
@@ -1518,8 +1515,29 @@ final class EditorSurfaceController {
             // true state instead of a stale completed Task.
             if let self, self.pendingCrossBlockToken == token {
                 self.pendingCrossBlockTask = nil
+                // 18c ladder round 2, R2-1: the chain just emptied — the
+                // keys stashed for whatever it carried (a typed Return's
+                // act; a compound a replayed key scheduled) drain now, on
+                // the surface every queued act has landed on. A key the
+                // drain replays may schedule again; the handle then
+                // re-populates and the next tail drains for it.
+                self.replayDeferredKeystrokesIfIdle()
             }
         }
+    }
+
+    /// **THE ONE DRAIN RULE for deferred keystrokes (18c ladder round 2,
+    /// R2-1): the surface is IDLE** — no structural flight is up and no
+    /// keystroke compound is queued. Called from a flight's `defer` and from
+    /// the compound chain's tail; whichever of the two finds the surface
+    /// idle drains and the other declines, so a replay can never land on a
+    /// disabled surface, nor ahead of an act still waiting its turn behind a
+    /// compound the drain itself scheduled (`EditorTextView.
+    /// beginDeferringKeystrokes` carries the whole story, and the round-1
+    /// generation token this replaces).
+    func replayDeferredKeystrokesIfIdle() {
+        guard !structuralInFlight, pendingCrossBlockTask == nil else { return }
+        model.textView?.replayDeferredKeystrokes()
     }
 
     /// The confirm's executor: divide the FIRST block at the snapped start
@@ -2409,9 +2427,8 @@ final class EditorSurfaceController {
         // 18c ladder round 1, R1-2: keystrokes during the flight are
         // DEFERRED, never dropped — AppKit discards typed input to the
         // disabled surface, and with ⏎ a structural act this window sat on
-        // the hottest key in the app. The flight OWNS this arming (its
-        // generation): a typed act's own replay below defers to it.
-        let deferral = model.textView?.beginDeferringKeystrokes() ?? 0
+        // the hottest key in the app.
+        model.textView?.beginDeferringKeystrokes()
         defer {
             structuralInFlight = false
             model.textView?.isEditable = model.header.map { !$0.locked } ?? false
@@ -2422,9 +2439,12 @@ final class EditorSurfaceController {
             // NIT: deliveries defer while a flight is up).
             model.applyPendingIfClean()
             // …and the keys she typed meanwhile land now, at the landed
-            // caret — LAST, once the surface is settled (R1-2). A replayed
-            // ⏎ that re-arms for a chained act keeps what follows it.
-            model.textView?.replayDeferredKeystrokes(for: deferral)
+            // caret — LAST, once the surface is settled (R1-2), and ONLY if
+            // nothing is still queued behind this flight (round 2, R2-1: a
+            // queued act's keys are its own; the chain's tail drains them).
+            // A replayed ⏎ that re-arms for a chained act keeps what
+            // follows it.
+            replayDeferredKeystrokesIfIdle()
         }
         await model.autosave.flushNow()
         guard !model.autosave.isDirty else {
