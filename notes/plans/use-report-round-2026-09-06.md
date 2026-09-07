@@ -1437,8 +1437,8 @@ looked like for `deleteBlock` · `archiveBlock` · `deleteSelectedBlocks`.
 | 2 | Core: `divide` / `divideW` bodies factored into `db`-taking internals (the 3C parity refactor, existing suites unmodified) | **DONE (af12b339)** — divide family **48 / 4 green**; core `swift test` **1474 / 161 green** |
 | 3 | Core: `KeepOnTopDivide` moved into the Domain (public, call sites unchanged) + `splitBlockAtNewlines` + `StructuralSplitAtNewlinesTests` | **DONE (this row's commit)** — `StructuralSplitAtNewlinesTests` **19 / 1 green**; core `swift test` **1493 / 162 green**; the two reverts run and recorded below |
 | 4 | Mac: the doors, the registry declarations, the receipt copy + their pins | **DONE (495c67bc)** — `SplitAtNewlinesDoorTests` **11 / 1 green**; `CapabilityRegistryTests` **23 / 1 green**; iOS build SUCCEEDED |
-| 5 | The walk (dev-store Debug, `18c-3/` captures) | IN-PROGRESS |
-| 6 | Close: the suites, row 37's disposition, QUESTIONS #93, the parity line | NOT-STARTED |
+| 5 | The walk (dev-store Debug, `18c-3/` captures) | **DONE (this row's commit)** — seventeen captures, both voices; listed below |
+| 6 | Close: the suites, row 37's disposition, QUESTIONS #93, the parity line | IN-PROGRESS |
 
 **A THIRD DEVIATION, declared with piece 3 (a MOVE, not a change):** `KeepOnTopDivide` left
 `App/Variorum/Shared/` for `Sources/VariorumCore/Domain/` and became `public`. Nothing inside it
@@ -1465,3 +1465,57 @@ red-on-old (the brief's item 3) — these reverts exist to prove the suite is no
   folds however many legs it collects into ONE entry, so the note-wide door's promise survives the per-leg
   shape. That pin's subject is the compound, not the op's own arity; the two pins above are the op's.
 - **Restored:** the two suites → **31 tests / 2 suites passed**.
+
+**THE WALK (the acceptance gate — USE, on the DEV-STORE Debug build `io.lduarte.Variorum.debug`, launched
+from `~/Library/Developer/Xcode/DerivedData/Variorum-dnpxwqhpxdqrdjbunktnzoahckpd/Build/Products/Debug/`;
+her `/Applications` app was never launched — `pgrep -fl 'Variorum.app/Contents/MacOS'` showed ZERO
+instances before and after, and my own instance quit with ⌘Q at the end). Driven with `cliclick` +
+`Tools/WalkKit`. BOTH VOICES: the doors and the receipt have a face, so Study gets its own pass.**
+
+*(The batch-2 tooling note holds: `cliclick kp:return` does not reach this app; `osascript … key code 36`
+does. Every Return below is that. New for the next walker: `sips --cropOffset` takes `y x`, not `x y` —
+read the whole `w0.png` instead.)*
+
+**Her scenario, built the way she wrote hers:** a fresh ⌘N note with the newlines chip turned **OFF**
+(so Return is content, exactly as in the note she was repairing) — block 1 typed as THREE paragraphs,
+then ⌘⇧⏎ and block 2 typed as TWO. Block 1 given three takes with ⌘T. `01` · `02` (the fans expanded:
+three takes, each carrying all three paragraphs; block 2 one take).
+
+1. **THE DOOR.** Write's `note ▾` carries **"Make every newline a block"** between *Versions…* and
+   *Seal*. `03`
+2. **HER ROW.** One press → the receipt reads **"5 blocks from 2 blocks — every take stayed with its top
+   paragraph. ⌥⌘Z undoes."**, the bar reads `block 1/5`, the ⑂3 badge sits on the FIRST block, and the
+   page reads byte-identically. `04`
+3. **HER SENTENCE, on the board.** The top block carries THREE takes — the chosen one is *"Winter came
+   early that year and stayed."* (paragraph 1) and the other two are the whole three paragraphs, WHOLE —
+   and the four blocks after it carry one take each. *"If you had a multi paragraph block now the top
+   paragraph is a block with all the takes."* `05`
+4. **ONE ⌥⌘Z.** The Edit menu reads **"Undo Split at Newlines"** (checked by name through System Events),
+   and one press put the whole note back: two blocks, block 1 with its ⑂3 fan intact. `06` Redo
+   (⇧⌥⌘Z) put all five back, exact-row. `07`
+5. **The block ▾ door.** *"Split this block at its newlines"* sits under *＋ New block below this one*;
+   run on block 2 it gave **"2 blocks from 1 block. ⌥⌘Z undoes."** and left block 1 alone (`block 2/3`).
+   `08` · `09`
+6. **The honest no-op.** The same door on a block that is already one paragraph: **"This block is already
+   one paragraph."** — a refusal, and nothing written (the count stayed `2/3`). `10`
+7. **The Blocks workbench's bulk bar** carries **split at newlines** between *merge selected bl…* and
+   *tag ▾*; over one picked block it gave **"3 blocks from 1 block — every take stayed with its top
+   paragraph. ⌥⌘Z undoes."** `11` · `12`
+8. **THE SECOND VOICE (Study).** The same `note ▾` row in the serif/paper voice, and the same receipt.
+   `13` · `14`
+9. **U-19 (4) IN USE — the list stays whole.** A second note, chip off: a prose lead, a three-item list,
+   a prose closing line, all one block. The repair gave **"3 blocks from 1 block."** — the intro, THE
+   WHOLE LIST AS ONE BLOCK, and the closing line, confirmed row-by-row in the workbench. `15` · `16` · `17`
+
+**Captures** (`notes/plans/use-report-2026-09-06-screens/18c-3/`, gitignored):
+`01-before-takes-board-three-takes.png` · `02-before-fans-expanded.png` · `03-the-note-menu-door.png` ·
+`04-after-the-repair-write-and-receipt.png` · `05-after-the-repair-takes-board-expanded.png` ·
+`06-one-undo-restores-everything.png` · `07-redo-splits-it-again.png` · `08-the-block-menu-door.png` ·
+`09-after-the-block-door.png` · `10-the-honest-no-op-refusal.png` · `11-the-workbench-bulk-bar.png` ·
+`12-after-the-bulk-door.png` · `13-study-voice-the-note-menu-door.png` · `14-study-voice-the-receipt.png` ·
+`15-a-list-inside-one-block.png` · `16-the-list-stayed-whole.png` · `17-the-list-is-one-block.png`
+
+**NOT WALKED, and why:** the Takes bar's two menu rows and the Takes board's banner button. They are the
+SAME acts through the same view-model doors the workbench and Write walks just exercised, rendered from
+the same registry declarations, and the pins hold the declared ⇔ rendered tables for both bars. A third
+hand-walk of one act's fourth and fifth renderer would prove the same thing a third time.
