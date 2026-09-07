@@ -3700,4 +3700,48 @@ store's chosen while the drift check compares the projection's; the reviewer's c
 
 ### R-6 · RECORD (the implementer writes here from its first commit)
 
-*(empty until the implementer's first commit)*
+**LIVE STATUS — 17o batch b (opus-implementer, opened 2026-09-08 at `6d301624`).**
+
+**NOT DONE YET (this line is the record's first, per rule 9 — it is rewritten at the close):** everything
+below marked NOT-STARTED or IN-PROGRESS; the walk; the closing suites.
+
+- **Orientation — DONE.** Read in my own context, in the brief's order: `CLAUDE.md` and the canon it
+  auto-loads (CoreDescription · OverallModel · AppSpec · SyncSpec · TEXTKIT2_NOTES — §2 the viewport/
+  scroll-to-location risk, §3's macOS-26 widening rule, AppSpec §4's P1–P3); this plan's §0, §1 (U-20 ·
+  U-14 · the whole ruling list), §2's 13u fence, §3's ledger (rows 7 · 8 · 20 · 42 read whole, plus their
+  neighbours), §4.2 (the landing family's trace), §5.3 **Batch b** verbatim, §8, §9, §10, R-0 (the P-1…P-9
+  constitution), the R-6 brief; `notes/plans/phase-17-standing-fixes.md`'s "Standing rules for every
+  entry" + the 17o register row; `notes/plans/act10-correction-round.md`'s row 39 (+ row 49), batch C's
+  record and its named brains (`CurrentBlockMemory`, `LandingTarget`, the `CurrentBlockContinuityTests`
+  rig). Then the code: `BlockHistoryPane.swift`'s `FocusedBlock` · `CurrentBlockMemory.swift` ·
+  `CommandRouter.swift` (`focusedBlock`, `noteFocusedBlock`, `currentBlock(for:)`, `registerDetail`) ·
+  `EditorViewModel.swift` (the projection arm at `:664`, `applyFocusSeeds`/`bareArrivalLanding`/
+  `applyWriteIntent`, `updateCaretContext`) · `JumpPrimitive.swift` whole · `PostDetailView.jump(to:)` ·
+  `EditorView.swift`'s `caretSeed` · `BlocksWorkbenchView.swift` (`onJump`, the row's report) ·
+  `TakesViewModel.focus`/`notePaneSelection` · `TakesChoreographer.consumeLandings` · `TakesShared.swift`'s
+  `onSelectionChange` · `TakesBoardView.singleColumnArticle` + the fan strips' `.scrollPosition` ·
+  `WriteTakesPanel`'s "Open Takes mode" · `ReadModeView.select`/`openInEdit` · `ReadEditPane` ·
+  `PaneSurface.swift`'s coordinator (`noteLiveness`, `applyCaretToEndIfRequested`,
+  `textViewDidChangeSelection`) · `Capability.swift`'s `WriteIntent` · the pin suites named in the brief.
+  Tree clean at `6d301624`, `main` == `origin/main`, zero app instances (`pgrep`).
+
+- **POINTER CORRECTION (recorded before any code moves).** The brief's Blocks → Write road is drifted:
+  `BlocksWorkbenchView.onJump` does NOT mint a `WriteIntent`. Its consumer is
+  `PostDetailView.jump(to:)` (`:673–685`), which reads the block's start offset off `BlockRangeIndex`,
+  sets `@State pendingCaret`, and re-`.id`s the `EditorView` — so the road is `EditorView(caretSeed:)` →
+  `EditorViewModel.pendingCaretSeed` → the `applyFocusSeeds` seed arm (`:1820–1826`), which sets the
+  selection, claims first responder, and **never scrolls**. That IS row 20's mechanism, one road over from
+  where the brief pointed. `applyWriteIntent` (`:1908`) has the same hole and is the OTHER door
+  (Takes/Lenses fire-and-DO), so both consume the one reveal. Read's `onJump` and the Index column's
+  "Jump to block in Write" share `jump(to:)`, so they are fixed by the same line.
+
+**Pieces (checkpoint order):**
+
+1. the fact + the memory + the router + the three reporters — **NOT-STARTED**
+2. Write's landing consumes the offset and reveals through `JumpPrimitive` — **NOT-STARTED**
+3. Blocks → Write reveals (row 20) — **NOT-STARTED**
+4. the Takes board's article scrolls to the landed slot (row 8) — **NOT-STARTED**
+5. the walk + captures + the closing suites — **NOT-STARTED**
+
+**Rows:** 7 · 8 · 20 · 42 — all OPEN.
+
