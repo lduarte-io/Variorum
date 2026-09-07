@@ -1122,7 +1122,7 @@ refresh. *(Filled in further at close.)*
 | # | Piece | State |
 |---|---|---|
 | 1 | `TypedReturn` — the pure decision (`App/Variorum/Shared/EditorBrain/TypedReturn.swift`) + the key intercept + the two doors | **IN-PROGRESS** — code landed and building; pure suite `TypedReturnTests` **13 / 1 green** |
-| 2 | The real-key pins: the nine §5.1 pins, the retirements, the rebuilt tail pins | **NOT-STARTED** |
+| 2 | The real-key pins: the nine §5.1 pins, the retirements, the rebuilt tail pins | **IN-PROGRESS** — `TypedReturnKeyTests` **13 / 1 green**, `ReturnKeyTraceTests` + `SoftNewlineTests` **15 / 2 green** after the rewrites; the red-on-old revert run is next (PENDING) |
 | 3 | The walk (dev-store Debug, `18c-2/` captures) | **NOT-STARTED** |
 | 4 | Close: the suites, the dispositions (rows 1 · 28), the closeout deltas | **NOT-STARTED** |
 

@@ -133,39 +133,45 @@ struct ReturnKeyTraceTests {
 
     // MARK: - (a) Write, mid-block
 
-    /// Both keys type a newline that STAYS in the block (I4 — internal
-    /// newlines are content). Nothing to build for A15 here.
-    @Test func writeMidBlockKeepsBothReturnsInsideTheBlock() async throws {
-        for shift in [false, true] {
-            try await withEditor(seedBlocks: ["alpha beta", "gamma"]) { h in
-                let hosted = Self.host(try #require(h.textView.enclosingScrollView))
-                defer { hosted.teardown() }
-                hosted.window.makeFirstResponder(h.textView)
+    /// **RETIRED HALF (18c batch 2, her U-1):** this pin used to run BOTH
+    /// keys through the loop and assert that both left the newline inside
+    /// the block. The plain-⏎ half is gone with the ruling — *"I want it to
+    /// work on newlines even when you're in the middle of write"* — and now
+    /// lives, inverted, in `TypedReturnKeyTests`
+    /// (`insideABlocksTextTheKeyDividesAtTheCaret`). What A15 ruled is
+    /// untouched and is what remains here: **⇧⏎ types a newline that STAYS
+    /// in the block** (I4 — internal newlines are content).
+    @Test func writeMidBlockKeepsTheSoftReturnInsideTheBlock() async throws {
+        try await withEditor(seedBlocks: ["alpha beta", "gamma"]) { h in
+            let hosted = Self.host(try #require(h.textView.enclosingScrollView))
+            defer { hosted.teardown() }
+            hosted.window.makeFirstResponder(h.textView)
 
-                h.textView.setSelectedRange(NSRange(location: 5, length: 0))
-                h.textView.keyDown(
-                    with: Self.returnEvent(shift: shift, windowNumber: hosted.window.windowNumber))
-                await h.flush()
+            h.textView.setSelectedRange(NSRange(location: 5, length: 0))
+            h.textView.keyDown(
+                with: Self.returnEvent(shift: true, windowNumber: hosted.window.windowNumber))
+            await h.flush()
 
-                let blocks = try h.storeSlots().map(\.text)
-                #expect(blocks == ["alpha\n beta", "gamma"])
-                #expect(h.model.index.entries.count == 2)
-                #expect(!h.model.hasOpenTail)
-            }
+            let blocks = try h.storeSlots().map(\.text)
+            #expect(blocks == ["alpha\n beta", "gamma"])
+            #expect(h.model.index.entries.count == 2)
+            #expect(!h.model.hasOpenTail)
         }
     }
 
     // MARK: - (b) Write, at the document end in PARAGRAPH mode
 
-    /// THE ONE CONTEXT THE BUILD CHANGED. Before A15 both keys opened the
-    /// tail here (the ratified Phase 7 gesture — "Enter at the exact
-    /// document end is the gesture that opens the tail"), and this pin
-    /// asserted exactly that; the ruled build split them, so it now
-    /// asserts the split. **⏎ still opens the tail — untouched** — and
-    /// ⇧⏎ declines it, which is B1. Recorded as a RULED FLIP, not a bug
-    /// fix; the flip's own end-to-end behaviour is `SoftNewlineTests`'.
-    @Test func onlyPlainReturnOpensTheTailAtTheDocumentEnd() async throws {
-        // ⏎: the ratified gesture, byte-unchanged.
+    /// **THE CONTEXT THIS FILE HAS NOW WATCHED CHANGE TWICE.** Phase 7
+    /// ratified "⏎ at the exact document end opens the tail"; A15 split the
+    /// two keys and left ⏎'s half of that gesture standing (the pin was
+    /// `onlyPlainReturnOpensTheTailAtTheDocumentEnd`); **U-1 retires it
+    /// outright — the key makes a BLOCK here, and no tail opens at all.**
+    ///
+    /// Both halves are asserted together because the pair is the point:
+    /// neither key opens a tail any more, for opposite reasons (⏎ is
+    /// structural now; ⇧⏎ was ruled content by A15).
+    @Test func neitherKeyOpensTheTailAtTheDocumentEndAnyMore() async throws {
+        // ⏎: U-1 — a real block below, minted, with the caret in it.
         try await withEditor(seedBlocks: ["alpha"]) { h in
             let hosted = Self.host(try #require(h.textView.enclosingScrollView))
             defer { hosted.teardown() }
@@ -175,12 +181,11 @@ struct ReturnKeyTraceTests {
             h.textView.setSelectedRange(NSRange(location: end, length: 0))
             h.textView.keyDown(
                 with: Self.returnEvent(shift: false, windowNumber: hosted.window.windowNumber))
+            await h.flush()
 
-            #expect(h.model.hasOpenTail)
-            #expect(h.model.index.entries.count == 1)
-            // Nothing minted yet — the tail is surface-only.
-            let stored = try h.storeSlots().map(\.text)
-            #expect(stored == ["alpha"])
+            #expect(!h.model.hasOpenTail, "U-1: the tail gesture is retired from the key")
+            #expect(h.model.index.entries.count == 2)
+            #expect(try h.storeSlots().map(\.text) == ["alpha", ""])
         }
         // ⇧⏎: no tail; the newline is the last block's content (A15/B1).
         try await withEditor(seedBlocks: ["alpha"]) { h in
@@ -197,6 +202,22 @@ struct ReturnKeyTraceTests {
             #expect(!h.model.hasOpenTail)
             let stored = try h.storeSlots().map(\.text)
             #expect(stored == ["alpha\n"])
+        }
+    }
+
+    /// …and the tail region itself is NOT retired: it still opens from a
+    /// newline arriving as TEXT — a paste or a drop of a bare newline at the
+    /// document end — which is the road `BlockRangeIndex`'s `.openTail` arm
+    /// and every crystallization pin below now travel. (A fresh note with no
+    /// blocks is the other tail there has ever been, and it is untouched.)
+    @Test func theTailStillOpensFromANewlineArrivingAsText() async throws {
+        try await withEditor(seedBlocks: ["alpha"]) { h in
+            h.type("\n", at: (h.documentText as NSString).length)
+            #expect(h.model.hasOpenTail)
+            #expect(h.model.index.entries.count == 1)
+            // Nothing minted yet — the tail is surface-only.
+            let stored = try h.storeSlots().map(\.text)
+            #expect(stored == ["alpha"])
         }
     }
 
@@ -271,6 +292,16 @@ struct SoftNewlineTests {
             with: ReturnKeyTraceTests.returnEvent(shift: false, windowNumber: window.windowNumber))
     }
 
+    /// **Opens the tail the one way that survives U-1** (18c batch 2): a
+    /// newline arriving as TEXT — a paste or a drop of a bare newline at the
+    /// document end — never the key, which now makes a block there. Every B2
+    /// pin below used `plainReturn` for this and is REBUILT on this helper;
+    /// the behaviour they pin (⇧⏎ inside an open tail) is unchanged, only
+    /// the way the tail comes to exist is.
+    private func openTailAsPastedText(_ h: EditorHarness) {
+        h.type("\n", at: (h.documentText as NSString).length)
+    }
+
     // MARK: B1 — the exact document end, no open tail
 
     /// ⇧⏎ at the document end lands the newline INSIDE the last block, no
@@ -297,6 +328,9 @@ struct SoftNewlineTests {
 
     /// Rider 3's two-keys pin: the flag is per-keystroke and self-clearing,
     /// so ⇧⏎ then plain ⏎ behave as two different keys in the same breath.
+    /// **RE-POINTED (18c batch 2, U-1):** the second key's proof used to be
+    /// "⏎ still opens the tail"; it is now "⏎ makes a block" — the same
+    /// question (did the flag stick?) asked of the key's current meaning.
     @Test func softThenPlainReturnBehaveAsTwoDifferentKeys() async throws {
         try await withEditor(seedBlocks: ["alpha"]) { h in
             let hosted = ReturnKeyTraceTests.host(try #require(h.textView.enclosingScrollView))
@@ -308,12 +342,14 @@ struct SoftNewlineTests {
             softReturn(h, window: hosted.window)
             #expect(!h.model.hasOpenTail, "⇧⏎ stayed in the block")
             #expect(!h.textView.isSoftNewline, "the flag cleared with the keystroke")
+            await h.flush()
+            #expect(try h.storeSlots().map(\.text) == ["alpha\n"],
+                    "the soft newline is the block's content")
 
             plainReturn(h, window: hosted.window)
-            #expect(h.model.hasOpenTail, "⏎ still opens the tail — nothing stuck")
             await h.flush()
-            let stored = try h.storeSlots().map(\.text)
-            #expect(stored == ["alpha\n"], "the soft newline is the block's content")
+            #expect(!h.model.hasOpenTail, "…and the plain key makes a block — nothing stuck")
+            #expect(try h.storeSlots().map(\.text) == ["alpha\n", ""])
         }
     }
 
@@ -382,9 +418,7 @@ struct SoftNewlineTests {
             defer { hosted.teardown() }
             hosted.window.makeFirstResponder(h.textView)
 
-            h.textView.setSelectedRange(
-                NSRange(location: (h.documentText as NSString).length, length: 0))
-            plainReturn(h, window: hosted.window)   // opens the tail
+            openTailAsPastedText(h)
             h.textView.insertText("beta", replacementRange: h.textView.selectedRange())
             #expect(h.model.hasOpenTail)
 
@@ -402,9 +436,7 @@ struct SoftNewlineTests {
             defer { hosted.teardown() }
             hosted.window.makeFirstResponder(h.textView)
 
-            h.textView.setSelectedRange(
-                NSRange(location: (h.documentText as NSString).length, length: 0))
-            plainReturn(h, window: hosted.window)
+            openTailAsPastedText(h)
             h.textView.insertText("beta", replacementRange: h.textView.selectedRange())
             h.model.idleMintTail()
             await h.flush()
@@ -439,9 +471,7 @@ struct SoftNewlineTests {
             defer { hosted.teardown() }
             hosted.window.makeFirstResponder(h.textView)
 
-            h.textView.setSelectedRange(
-                NSRange(location: (h.documentText as NSString).length, length: 0))
-            plainReturn(h, window: hosted.window)   // opens the tail
+            openTailAsPastedText(h)
             h.textView.insertText("beta more", replacementRange: h.textView.selectedRange())
             #expect(h.model.hasOpenTail)
 
@@ -468,9 +498,7 @@ struct SoftNewlineTests {
             defer { hosted.teardown() }
             hosted.window.makeFirstResponder(h.textView)
 
-            h.textView.setSelectedRange(
-                NSRange(location: (h.documentText as NSString).length, length: 0))
-            plainReturn(h, window: hosted.window)  // an EMPTY open tail
+            openTailAsPastedText(h)  // an EMPTY open tail
             #expect(h.model.hasOpenTail)
             #expect(!h.model.mintableTail, "nothing mintable — the never-mints class")
 
@@ -495,9 +523,7 @@ struct SoftNewlineTests {
                 let hosted = ReturnKeyTraceTests.host(try #require(h.textView.enclosingScrollView))
                 defer { hosted.teardown() }
                 hosted.window.makeFirstResponder(h.textView)
-                h.textView.setSelectedRange(
-                    NSRange(location: (h.documentText as NSString).length, length: 0))
-                plainReturn(h, window: hosted.window)
+                openTailAsPastedText(h)
                 h.textView.insertText("beta", replacementRange: h.textView.selectedRange())
                 softReturn(h, window: hosted.window)
                 await h.flush()
@@ -509,9 +535,7 @@ struct SoftNewlineTests {
                 let hosted = ReturnKeyTraceTests.host(try #require(h.textView.enclosingScrollView))
                 defer { hosted.teardown() }
                 hosted.window.makeFirstResponder(h.textView)
-                h.textView.setSelectedRange(
-                    NSRange(location: (h.documentText as NSString).length, length: 0))
-                plainReturn(h, window: hosted.window)
+                openTailAsPastedText(h)
                 h.textView.insertText("beta", replacementRange: h.textView.selectedRange())
                 h.model.idleMintTail()
                 await h.flush()
@@ -529,5 +553,369 @@ struct SoftNewlineTests {
         // after either road. The record states exactly this and no more.
         #expect(soft.depth == 0)
         #expect(soft.label == nil)
+    }
+}
+
+// MARK: - U-1 BUILT (18c batch 2): the Return key makes a block, anywhere
+
+/// **HER ROW (the round's ledger row 1), in one sentence:** *"newlines to
+/// make new blocks is NOT working properly at all… I was writing in Write,
+/// but in the middle of Write, so I had paragraphs above and below. I want
+/// it to work on newlines even when you're in the middle of write."*
+///
+/// These are the nine pins §5.1 of `notes/plans/use-report-round-2026-09-06.md`
+/// names, driven as REAL KEY EVENTS through AppKit's interpretation path —
+/// the same harness the A15 trace above uses, for the same reason: the whole
+/// question is what the KEY does. Every one of them fails on the pre-batch
+/// tree (the red-on-old runs are recorded in the batch record, R-2).
+@MainActor
+@Suite("U-1 — the Return key makes a block (18c batch 2)", .serialized)
+struct TypedReturnKeyTests {
+    private func hosted(_ h: EditorHarness) throws -> (window: NSWindow, teardown: () -> Void) {
+        let hosted = ReturnKeyTraceTests.host(try #require(h.textView.enclosingScrollView))
+        hosted.window.makeFirstResponder(h.textView)
+        return hosted
+    }
+
+    private func caret(_ h: EditorHarness, entry i: Int, offset: Int) {
+        h.textView.setSelectedRange(
+            NSRange(location: h.model.index.range(ofEntryAt: i).location + offset, length: 0))
+        h.model.updateCaretContext()
+    }
+
+    private func returnKey(_ h: EditorHarness, _ window: NSWindow, shift: Bool = false) {
+        h.textView.keyDown(
+            with: ReturnKeyTraceTests.returnEvent(shift: shift, windowNumber: window.windowNumber))
+    }
+
+    private func fan(_ h: EditorHarness, _ blockID: String) throws -> [Variant] {
+        try h.database.read { db in
+            try Queries.blockFan(db, blockID: blockID)
+                .filter { $0.deletedAt == nil && $0.status == .active }
+        }
+    }
+
+    // MARK: (1) her scenario — the end of a MIDDLE block
+
+    /// The row itself: paragraphs above and below, the caret at the end of
+    /// the middle one, ⏎, type — and the words land in a NEW BLOCK between
+    /// them, where the shipped model could only ever have added a newline to
+    /// "beta" (it had no position but the note's very end).
+    @Test func theEndOfAMiddleBlockMakesTheBlockBelowAndTypingLandsInIt() async throws {
+        try await withEditor(seedBlocks: ["alpha", "beta", "gamma"]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+
+            caret(h, entry: 1, offset: 4)
+            returnKey(h, window.window)
+            await h.flush()
+            h.textView.insertText("new", replacementRange: h.textView.selectedRange())
+            await h.flush()
+
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "beta", "new", "gamma"])
+            #expect(!h.model.hasOpenTail)
+            #expect(h.model.caretBlockID == h.model.index.entries[2].blockID,
+                    "the caret went into the block the key made")
+        }
+    }
+
+    // MARK: (2) inside a block's text — the divide
+
+    /// Inside the text the key DIVIDES at the caret, through the one
+    /// snapping rule the planner already applies (S4-22), and the caret
+    /// lands at the second half's start — "the paragraph I just started".
+    ///
+    /// **The seed is two words, deliberately.** §5.1 sketched this pin as
+    /// `["alpha","beta","gamma"]` cut inside "beta" into `"be"`/`"ta"`; that
+    /// cut is MID-WORD, which S4-22's word-edge floor forbids and the one
+    /// snap brain would never place. Cutting at a word edge is the same pin
+    /// with a legal cut — see the record's note.
+    @Test func insideABlocksTextTheKeyDividesAtTheCaret() async throws {
+        try await withEditor(seedBlocks: ["alpha", "beta gamma", "delta"]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+
+            caret(h, entry: 1, offset: 4)  // "beta| gamma"
+            returnKey(h, window.window)
+            await h.flush()
+
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "beta", "gamma", "delta"])
+            #expect(h.textView.selectedRange().location
+                        == h.model.index.range(ofEntryAt: 2).location,
+                    "the caret is at the second half's start")
+            #expect(h.session.undoStack.topLabel == "Divide",
+                    "…and ⌥⌘Z offers the divide back")
+        }
+    }
+
+    // MARK: (3) a fanned block — the keep-on-top default (18c batch 1)
+
+    /// The key's divide is the SAME divide the door runs, so a fanned block
+    /// takes batch 1's keep-on-top road: the take she is in splits across
+    /// both blocks and every other take rides WHOLE onto the top one.
+    @Test func aFannedBlocksKeyDivideKeepsTheTakesOnTop() async throws {
+        try await withEditor(
+            seedBlocks: ["alpha", "Beta one. Beta two.", "gamma"]
+        ) { h in
+            let slots = try h.storeSlots()
+            let middle = slots[1]
+            let other = try h.session.operations.branchVariant(
+                middle.blockID, from: try #require(middle.variantID))
+            let otherText = "A wholly different middle paragraph."
+            try h.session.operations.autosave(
+                other.id, text: otherText, charDelta: otherText.count)
+            try h.reload()
+
+            let window = try hosted(h)
+            defer { window.teardown() }
+            caret(h, entry: 1, offset: 9)  // "Beta one.| Beta two."
+            returnKey(h, window.window)
+            await h.flush()
+
+            let after = try h.storeSlots()
+            #expect(after.map(\.text) == ["alpha", "Beta one.", "Beta two.", "gamma"])
+            let topFan = try fan(h, after[1].blockID).map(\.workingText)
+            let bottomFan = try fan(h, after[2].blockID).map(\.workingText)
+            #expect(topFan == ["Beta one.", otherText],
+                    "the top block keeps the other take, whole")
+            #expect(bottomFan == ["Beta two."],
+                    "the bottom block carries its half alone")
+        }
+    }
+
+    // MARK: (4) the last block's end
+
+    @Test func theLastBlocksEndMakesABlockAndNoTailOpens() async throws {
+        try await withEditor(seedBlocks: ["alpha", "beta"]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+
+            caret(h, entry: 1, offset: 4)
+            returnKey(h, window.window)
+            await h.flush()
+
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "beta", ""])
+            #expect(!h.model.hasOpenTail, "the tail road is retired from the key")
+            #expect(h.model.index.entries.count == 3)
+        }
+    }
+
+    // MARK: (5) the empty block — U-19 (2)
+
+    /// Two Returns in one breath make ONE empty block: the act re-derives on
+    /// its own turn, so the second one sees the block the first one made and
+    /// takes the ruled no-op there (*"we won't reintroduce it with
+    /// paragraphs disappearing"* cuts both ways — nothing vanishes, and
+    /// nothing piles up). This is also the compose-not-race pin.
+    @Test func twoQuickReturnsMakeOneEmptyBlockNotTwo() async throws {
+        try await withEditor(seedBlocks: ["alpha", "gamma"]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+
+            caret(h, entry: 0, offset: 5)
+            returnKey(h, window.window)
+            returnKey(h, window.window)
+            await h.flush()
+
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "", "gamma"])
+            #expect(h.model.caretBlockID == h.model.index.entries[1].blockID)
+        }
+    }
+
+    /// …and the empty block she leaves behind STAYS (U-19 (2)) — nothing
+    /// sweeps it, on the key or afterwards.
+    @Test func theEmptyBlockStaysWhenSheWalksAway() async throws {
+        try await withEditor(seedBlocks: ["alpha", "gamma"]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+
+            caret(h, entry: 0, offset: 5)
+            returnKey(h, window.window)
+            await h.flush()
+            caret(h, entry: 2, offset: 0)   // she goes elsewhere
+            h.model.idleMintTail()
+            await h.flush()
+
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "", "gamma"])
+        }
+    }
+
+    // MARK: (6) ⇧⏎ — content, always (A15 stands)
+
+    /// A15's ruling is untouched by U-1: mid-block, ⇧⏎ is the blank line
+    /// inside the paragraph (her U-19 (3): *"shift return is good for a
+    /// blank line within a paragraph"*).
+    @Test func softReturnMidBlockIsStillContent() async throws {
+        try await withEditor(seedBlocks: ["alpha beta", "gamma"]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+
+            caret(h, entry: 0, offset: 5)
+            returnKey(h, window.window, shift: true)
+            await h.flush()
+
+            #expect(try h.storeSlots().map(\.text) == ["alpha\n beta", "gamma"])
+        }
+    }
+
+    // MARK: (7) the chip OFF
+
+    /// Her U-19 (3), answered: *"users can also turn off newlines make
+    /// blocks if they want, right?"* — under `one_block` the key is content
+    /// again, in the middle of the note exactly as at its end.
+    @Test func theChipOffKeepsTheKeyAsContentInTheMiddleToo() async throws {
+        try await withEditor(profile: .journal, seedBlocks: ["alpha beta", "gamma"]) { h in
+            #expect(h.model.header?.effectiveSegmentation == .oneBlock)
+            let window = try hosted(h)
+            defer { window.teardown() }
+
+            caret(h, entry: 0, offset: 5)
+            returnKey(h, window.window)
+            await h.flush()
+
+            #expect(try h.storeSlots().map(\.text) == ["alpha\n beta", "gamma"])
+            #expect(h.model.index.entries.count == 2)
+        }
+    }
+
+    // MARK: (8) lists — 13k K5 keeps the key, and the exit composes
+
+    /// Inside a list ⏎ continues the list (lists stay whole — her U-19 (4));
+    /// a second ⏎ on the now-empty item ends the list AND makes the block.
+    /// The two intercepts compose in that order.
+    @Test func aListItemsReturnContinuesTheListAndTheEmptyItemEndsItAndMakesTheBlock()
+        async throws
+    {
+        try await withEditor(seedBlocks: ["- one", "gamma"]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+
+            caret(h, entry: 0, offset: 5)
+            returnKey(h, window.window)
+            await h.flush()
+            #expect(try h.storeSlots().map(\.text) == ["- one\n- ", "gamma"],
+                    "13k K5: the list continued, in the same block")
+            #expect(h.model.index.entries.count == 2)
+
+            returnKey(h, window.window)
+            await h.flush()
+            #expect(try h.storeSlots().map(\.text) == ["- one\n", "", "gamma"],
+                    "the empty item ended the list AND the key made the block")
+            #expect(h.model.caretBlockID == h.model.index.entries[1].blockID)
+        }
+    }
+
+    // MARK: (9) her S1 scenario
+
+    /// *⏎, pause, click at the end of the last line, ⏎, type.* Every step
+    /// ends with a real block and never a loose newline: the first key makes
+    /// the block, the pause has no tail left to mint, the second key finds
+    /// an empty block and does nothing, and the words land in that block —
+    /// never appended to "beta", never "several new lines".
+    @Test func herS1ScenarioMakesABlockAndNeverALooseNewline() async throws {
+        try await withEditor(seedBlocks: ["alpha", "beta"]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+
+            caret(h, entry: 1, offset: 4)
+            returnKey(h, window.window)
+            await h.flush()
+            #expect(!h.model.hasOpenTail)
+
+            h.model.idleMintTail()          // the 2 s clock: nothing to mint
+            await h.flush()
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "beta", ""])
+
+            // The click at the end of the last line.
+            h.textView.setSelectedRange(
+                NSRange(location: (h.documentText as NSString).length, length: 0))
+            h.model.updateCaretContext()
+            returnKey(h, window.window)
+            await h.flush()
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "beta", ""],
+                    "no second empty block")
+
+            h.textView.insertText("new", replacementRange: h.textView.selectedRange())
+            await h.flush()
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "beta", "new"])
+            #expect(!h.model.hasOpenTail)
+        }
+    }
+
+    /// **THE TRAP (§4.1) — the same scenario when an EMPTY TAIL is the state
+    /// she comes back to.** The idle mint leaves one behind (it mints the
+    /// paragraph and keeps the run's last newline open), the tail road plans
+    /// nothing over `""`, and the shipped key answered it with the k−1
+    /// attachment — a newline on the END of "beta", her image 4. The act
+    /// closes that render artifact and makes the block instead.
+    @Test func theEmptyTailTrapClosesAndMakesABlock() async throws {
+        try await withEditor(seedBlocks: ["alpha"]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+
+            // The state she reported: a paragraph typed at the end, ⏎, a
+            // pause — reproduced with the newline arriving as text, which is
+            // the only road left to the tail.
+            h.type("\n", at: (h.documentText as NSString).length)
+            h.textView.insertText("beta", replacementRange: h.textView.selectedRange())
+            h.type("\n", at: (h.documentText as NSString).length)
+            h.model.idleMintTail()
+            await h.flush()
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "beta"])
+            #expect(h.model.hasOpenTail && h.model.index.tailLength == 0,
+                    "the empty tail the trap lives in")
+
+            h.textView.setSelectedRange(
+                NSRange(location: (h.documentText as NSString).length, length: 0))
+            returnKey(h, window.window)
+            await h.flush()
+
+            #expect(!h.model.hasOpenTail, "the render artifact is gone")
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "beta", ""],
+                    "and a real block stands where the newline used to go")
+            h.textView.insertText("gamma", replacementRange: h.textView.selectedRange())
+            await h.flush()
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "beta", "gamma"])
+        }
+    }
+
+    // MARK: The start of a block — "push this paragraph down"
+
+    /// §5.1's choice, taken as its first option: an empty block ABOVE, the
+    /// caret staying in the text block.
+    @Test func theStartOfABlockPushesItDownWithAnEmptyBlockAbove() async throws {
+        try await withEditor(seedBlocks: ["alpha", "beta"]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+
+            caret(h, entry: 1, offset: 0)
+            returnKey(h, window.window)
+            await h.flush()
+
+            #expect(try h.storeSlots().map(\.text) == ["alpha", "", "beta"])
+            #expect(h.model.caretBlockID == h.model.index.entries[2].blockID,
+                    "the caret stays with her paragraph")
+        }
+    }
+
+    // MARK: A fresh note is all tail — untouched
+
+    /// The one place the tail still does the work: a note with no blocks
+    /// yet. Typing paragraphs there crystallizes exactly as it always did —
+    /// the same promise by the other road.
+    @Test func aFreshNoteStillCrystallizesAsSheTypes() async throws {
+        try await withEditor { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+
+            h.textView.insertText("alpha", replacementRange: h.textView.selectedRange())
+            returnKey(h, window.window)
+            h.textView.insertText("beta", replacementRange: h.textView.selectedRange())
+            await h.flush()
+
+            #expect(try h.storeSlots().map(\.text) == ["alpha"],
+                    "the finished paragraph crystallized as she typed past it")
+            #expect(h.model.hasOpenTail, "…and the one she is typing is still the tail")
+        }
     }
 }
