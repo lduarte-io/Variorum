@@ -1081,6 +1081,15 @@ struct MobileNoRedirectSweepTests {
         // is exempt — a sentence naming the Mac still trips.
         let exempt: [(file: String, literal: String)] = [
             (file: "StoreProtection.swift", literal: "Mac"),
+            // pre-13x ladder round 2, F3 (the F2 adjudication's copy
+            // follow-up 3): `ProtectionCopy.deviceNameWithArticle`'s macOS
+            // arm — the bare noun with its article ("a Mac"), in the SAME
+            // `#if os(macOS)` block as the exempted "Mac", for the one
+            // sentence that names ANOTHER device of the kind ("run Replace
+            // All Keys from a Mac that is"); the phone renders "an iPhone"
+            // through the same sentence. Exactly this walk's own caveat,
+            // exempted explicitly rather than by narrowing the walk.
+            (file: "StoreProtection.swift", literal: "a Mac"),
         ]
         var walked = 0
         var offenders: [String] = []

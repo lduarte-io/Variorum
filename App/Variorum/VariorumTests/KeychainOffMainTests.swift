@@ -546,8 +546,12 @@ struct ProtectionReconcileOffMainTests {
         // then A read-or-minted — all off-main, and the Apple copy really
         // lands and VERIFIES (the thread moved, never the meaning).
         await controller.reconcile()
-        #expect(log.names == ["loadAuto", "appleReadOrMint"],
-                "the key read, then the A read-or-mint — then the key file's copy, verified by read-back")
+        // pre-13x ladder round 2, F3 (MINOR-N1): the arm READS first and
+        // mints only after a nil read (the heal keys on a read, never a
+        // mint) — one more off-main call in the sequence; the mechanism
+        // this pin exists for is the next line: none of them on main.
+        #expect(log.names == ["loadAuto", "appleRead", "appleReadOrMint"],
+                "the key read, then A read, then read-or-minted — then the key file's copy, verified by read-back")
         #expect(log.anyOnMainThread == false,
                 "ZERO synchronous SecItem calls on the main thread: \(log.calls)")
         let minted = try #require(appleBacking.key, "A was minted for the first Standard library")
