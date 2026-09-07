@@ -886,6 +886,28 @@ struct AccountDoorWiringTests {
     /// the door stays honestly dormant until the root hands it the runner,
     /// the truncate is never called, and a marker in the store projects
     /// as `rekeyIncomplete` through `refresh()`.
+    /// pre-13x ladder round 1, F2 (MAJOR-1) — THE PRODUCTION LEAF's SHAPE:
+    /// `AppServices.resumeSync()` RECONNECTS a chain the ceremony stopped
+    /// (`connectSyncIfAllowed`'s road — the deletion door's own refusal
+    /// shape) and only TRIGGERS a live one (the re-key's reopen already
+    /// rebuilt and connected the services). Before F2 the leaf was
+    /// `sync.triggerSync()` — `guard let scheduler else { return }` — a
+    /// no-op after `stop()`.
+    @Test func theCeremoniesResumeLeafReconnectsAStoppedChainAndLeavesALiveOneAlone() async throws {
+        try await withDoorWorld { services, _, _, _, _, _ in
+            #expect(services.sync.isConfigured, "signed in at start ⇒ the chain is composed")
+            // The ceremony's pause.
+            services.sync.stop()
+            #expect(!services.sync.isConfigured)
+            // The leaf: reconnect.
+            await services.resumeSync()
+            #expect(services.sync.isConfigured, "a stopped chain is RECONNECTED, not merely triggered")
+            // A live chain: a trigger only — the session object stays configured.
+            await services.resumeSync()
+            #expect(services.sync.isConfigured)
+        }
+    }
+
     @Test func theRekeyDoorStaysDormantUntilTheRootWiresTheRunnerAndTheMarkerReadIsWired() async throws {
         try await withDoorWorld { services, encryption, store, lifecycle, db, _ in
             await encryption.setUp(passphrase: "orchard-lantern-13")

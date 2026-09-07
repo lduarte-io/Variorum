@@ -413,6 +413,25 @@ final class AppServices {
         sync.triggerSync()
     }
 
+    /// pre-13x ladder round 1, F2 (MAJOR-1): THE CEREMONIES' RESUME LEAF
+    /// (`PostureSwitchRunner.Leaves.resumeSync` in production). The
+    /// ceremonies pause the chain with `sync.stop()` — the scheduler
+    /// retired — so a resume must RECONNECT it (`connectSyncIfAllowed`'s
+    /// shape, `deleteAccount`'s own refusal road) rather than trigger a
+    /// round on a session that has nothing to run one with. When the chain
+    /// is already live — the re-key's reopen rebuilt these services and
+    /// `start()` connected them — a bare trigger is all that is owed; a
+    /// second `configure` would only drain and replace a working chain.
+    /// Before F2 the leaf was `sync.triggerSync()`: a no-op after `stop()`,
+    /// so every refusal before the reopen left sync dead for the session.
+    func resumeSync() async {
+        if sync.isConfigured {
+            sync.triggerSync()
+        } else {
+            await connectSyncIfAllowed()
+        }
+    }
+
     /// Step 4's backfill, at sign-in and at every signed-in launch:
     /// idempotent (NULL owners only), and self-healing for rows that
     /// arrived unowned from a not-yet-updated device. Failure surfaces on

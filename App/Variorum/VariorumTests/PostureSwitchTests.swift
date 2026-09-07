@@ -990,6 +990,11 @@ struct PostureSwitchTests {
         #expect(world.calls.rekeys == 0 && world.calls.custodyTargets.isEmpty)
         #expect(PostureSwitchModel.message(for: CorpusRotationError.completionRefused(tries: 3))
                 == ProtectionCopy.rotationRowsStillSettling, "the refusal speaks")
+        // F2 (MAJOR-1, F1's hand-forward): the honest refusal is an EXIT —
+        // the chain this ceremony paused is resumed (the rounds then refuse
+        // on the marker, honestly, instead of never running at all).
+        #expect(world.calls.resumes == world.calls.pauses && world.calls.pauses == 1,
+                "the completionRefused exit resumes the sync it paused")
         // Rounds refuse while the marker stands (nothing pushes a stale row).
         await #expect(throws: SyncError.accountRekeyIncomplete) {
             try await withDependencies { $0.database = world.view } operation: { _ = try await engine.pull() }
@@ -1044,6 +1049,56 @@ struct PostureSwitchTests {
         let expected = ProtectionCopy.rotationStillFinishing(
             device: "another device", day: EncryptionView.displayDate(facts.vaultUpdatedAt) ?? "an earlier day")
         #expect(model.phase == .failed(expected))
+    }
+
+    /// pre-13x ladder round 1, F2 (MAJOR-1) — RED ON OLD: every refusal
+    /// AFTER the pause left the chain stopped — `resumeSync` rode the
+    /// success roads only, and the production leaf was a bare trigger (a
+    /// no-op on a stopped session). Three refusal roads, each an exit:
+    /// the fence at the drain (`encryptionKeysReplaced`), decision 32's
+    /// door refusal (`rotationInProgress`) and the follow's wrong word
+    /// (`wrongPassphrase`); the derived-key follow's descriptor refusal
+    /// (`passphraseRequired`) rides too. After each, `resumes == pauses`.
+    @Test func aRefusedCeremonyResumesTheSyncItPausedOnEveryExit() async throws {
+        let world = try await makeWorld()
+        defer { world.tearDown() }
+        let client = try #require(world.vaultClient)
+        let oldMaterial = try #require(world.oldMaterial)
+        let secrets = try RotationSecrets.derive(passphrase: "sesame", recoveryWords: nil, kdf: fastKDF())
+        let begun = try await CorpusRotation.begin(client: client, current: oldMaterial, secrets: secrets, appleHeldCopy: nil)
+        let vaultBefore = try await world.vault()
+
+        // Exit 1 — the fence refuses the drain (still on the old keys).
+        await #expect(throws: SyncError.encryptionKeysReplaced) {
+            _ = try await world.runner.enterCastle(passphrase: "sesame", recoveryWords: world.words)
+        }
+        #expect(world.calls.pauses == 1)
+        #expect(world.calls.resumes == world.calls.pauses, "exit 1: the chain paused for the drain is resumed")
+
+        // Exit 2 — decision 32 at the door (the vault carries a previous key).
+        let following = try CorpusRotation.materialFollowing(vaultBefore.format, master: begun.material.masterSymmetricKey)
+        #expect(world.keyStore.save(following))
+        await #expect(throws: CorpusRotationError.rotationInProgress(previousKeyID: oldMaterial.corpusKeyID)) {
+            _ = try await world.runner.enterCastle(passphrase: "sesame", recoveryWords: world.words)
+        }
+        #expect(world.calls.pauses == 2)
+        #expect(world.calls.resumes == world.calls.pauses, "exit 2: the door refusal resumes")
+
+        // Exit 3 — the follow's wrong word refuses at the vault (nothing written).
+        await #expect(throws: VaultEnrollmentError.wrongPassphrase) {
+            _ = try await world.runner.follow(passphrase: "not-the-word", recoveryWords: nil)
+        }
+        #expect(world.calls.pauses == 3)
+        #expect(world.calls.resumes == world.calls.pauses, "exit 3: the follow's refusal resumes")
+
+        // Exit 4 — the derived-key follow whose descriptor is not the vault's.
+        await #expect(throws: PostureSwitchError.passphraseRequired) {
+            _ = try await world.runner.follow(
+                derivedPassphraseKey: SymmetricKey(size: .bits256), kdf: fastKDF())
+        }
+        #expect(world.calls.pauses == 4)
+        #expect(world.calls.resumes == world.calls.pauses, "exit 4: the derived follow's refusal resumes")
+        #expect(try await world.marker() == nil, "no road wrote a marker")
     }
 
     // MARK: - Leaving Castle

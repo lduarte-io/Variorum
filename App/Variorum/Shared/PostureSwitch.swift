@@ -197,7 +197,14 @@ final class PostureSwitchRunner {
         /// the pins.
         var rekeyLibrary: @MainActor (_ old: StoreKey, _ new: StoreKey, _ work: @escaping @Sendable () throws -> Void) async throws -> Void
         var pauseSync: @MainActor () -> Void
-        var resumeSync: @MainActor () -> Void
+        /// pre-13x ladder round 1, F2 (MAJOR-1): the RESUME leaf RECONNECTS a
+        /// stopped chain (production: `AppServices.resumeSync()` —
+        /// `connectSyncIfAllowed`'s shape when the session is stopped, a bare
+        /// trigger when the re-key's reopen already rebuilt and connected the
+        /// services). The runner balances it against `pauseSync` on EVERY
+        /// exit of a ceremony road — success, refusal, failure — so a refused
+        /// switch can never leave sync dead for the session.
+        var resumeSync: @MainActor () async -> Void
         /// The fresh snapshot pair under the CURRENT key (nil = this
         /// platform keeps no backups).
         var takeSnapshot: @MainActor () async -> URL?
@@ -239,6 +246,15 @@ final class PostureSwitchRunner {
 
     private(set) var phase: Phase = .idle
     private(set) var busy = false
+    /// pre-13x ladder round 1, F2 (MAJOR-1): whether THIS runner paused the
+    /// sync chain and has not yet resumed it. `pauseSyncForCeremony` sets
+    /// it once per road; `resumeSyncIfPaused` clears it on every exit that
+    /// throws; the success roads resume where they end. Before F2 the
+    /// resume rode the success roads only, and the production leaf was a
+    /// bare trigger — a no-op on a stopped session — so `outboxNotEmpty`,
+    /// `rotationInProgress`, `wordsRequired`, a vault refusal or a wrong
+    /// follow passphrase left sync dead until relaunch.
+    private var syncPaused = false
     private let leaves: Leaves
     private let logger = Logger(subsystem: "io.lduarte.Variorum", category: "protection")
 
@@ -325,6 +341,50 @@ final class PostureSwitchRunner {
     }
 
     private func run(entersCastle: Bool, passphrase: String, recoveryWords: [String]?) async throws -> Outcome {
+        try await balancingSync {
+            try await runCeremony(entersCastle: entersCastle, passphrase: passphrase, recoveryWords: recoveryWords)
+        }
+    }
+
+    // MARK: - pre-13x ladder round 1, F2 (MAJOR-1): the pause is BALANCED
+
+    /// Pause the sync chain for a ceremony road — once per road.
+    private func pauseSyncForCeremony() {
+        guard !syncPaused else { return }
+        syncPaused = true
+        leaves.pauseSync()
+    }
+
+    /// Resume the chain this runner paused — a no-op when it paused nothing
+    /// (a refusal before the pause; the resume road, which never pauses).
+    private func resumeSyncIfPaused() async {
+        guard syncPaused else { return }
+        syncPaused = false
+        await leaves.resumeSync()
+    }
+
+    /// The success roads' resume: unconditional — the marker is gone and
+    /// sync belongs back on whether this road paused it (the ceremony) or a
+    /// crash did (the resume road: the chain was never paused by this
+    /// process, but the reconnect is what "sync is back on" means).
+    private func resumeSyncAtEnd() async {
+        syncPaused = false
+        await leaves.resumeSync()
+    }
+
+    /// Run a road and resume the chain on EVERY throw; the success roads
+    /// resume where they end (`rekeyCustodyAndSnapshot`, the resume's
+    /// last arm, `pickUpKeys`).
+    private func balancingSync<T>(_ body: () async throws -> T) async throws -> T {
+        do {
+            return try await body()
+        } catch {
+            await resumeSyncIfPaused()
+            throw error
+        }
+    }
+
+    private func runCeremony(entersCastle: Bool, passphrase: String, recoveryWords: [String]?) async throws -> Outcome {
         guard !busy else { throw PostureSwitchError.switchInProgress(.vaultWrite) }
         if let pending = await pendingMarker() {
             throw PostureSwitchError.switchInProgress(pending.step)
@@ -349,7 +409,7 @@ final class PostureSwitchRunner {
         if enrolled, let vault = leaves.vault, let transport = leaves.transport {
             // ————— 1. PULL TO HEAD (the three refusals) —————
             phase = .pullingToHead
-            leaves.pauseSync()
+            pauseSyncForCeremony()
             let engine = SyncEngine(transport: transport, keyProvider: leaves.keyProvider)
             // THE DRAIN (2c — the 2b adjudication's item 2): push what this
             // device owes until the outbox is EMPTY, at most `maxDrainRounds`
@@ -498,6 +558,12 @@ final class PostureSwitchRunner {
     /// copy's sentence would be false there.
     @discardableResult
     func follow(passphrase: String?, recoveryWords: [String]?) async throws -> Outcome {
+        try await balancingSync {
+            try await followTyped(passphrase: passphrase, recoveryWords: recoveryWords)
+        }
+    }
+
+    private func followTyped(passphrase: String?, recoveryWords: [String]?) async throws -> Outcome {
         guard !busy else { throw PostureSwitchError.switchInProgress(.vaultWrite) }
         if let pending = await pendingMarker() {
             throw PostureSwitchError.switchInProgress(pending.step)
@@ -516,7 +582,7 @@ final class PostureSwitchRunner {
         busy = true
         defer { busy = false; phase = .idle }
         phase = .rotatingKeys
-        leaves.pauseSync()
+        pauseSyncForCeremony()
         // M′ from the vault by the typed secret — the enrollment's own
         // unwrap (a wrong word refuses typed; nothing is written before it
         // succeeds).
@@ -546,6 +612,12 @@ final class PostureSwitchRunner {
     /// when the words are next typed).
     @discardableResult
     func follow(derivedPassphraseKey derived: SymmetricKey, kdf: PassphraseKDF.Descriptor) async throws -> Outcome {
+        try await balancingSync {
+            try await followDerived(passphraseKey: derived, kdf: kdf)
+        }
+    }
+
+    private func followDerived(passphraseKey derived: SymmetricKey, kdf: PassphraseKDF.Descriptor) async throws -> Outcome {
         guard !busy else { throw PostureSwitchError.switchInProgress(.vaultWrite) }
         if let pending = await pendingMarker() {
             throw PostureSwitchError.switchInProgress(pending.step)
@@ -559,7 +631,7 @@ final class PostureSwitchRunner {
         busy = true
         defer { busy = false; phase = .idle }
         phase = .rotatingKeys
-        leaves.pauseSync()
+        pauseSyncForCeremony()
         guard let fetched = try await vault.fetchVault() else { throw KeyVaultClientError.vaultAbsent }
         guard fetched.format.kdf == kdf else {
             leaves.log("follow: the held key's descriptor is not the vault's — the passphrase is asked")
@@ -703,7 +775,7 @@ final class PostureSwitchRunner {
         guard await leaves.keyStore.offMain({ $0.save(following) }) else {
             throw PostureSwitchError.custodyRefused(ProtectionCopy.syncKeysWroteButUnreadable)
         }
-        leaves.resumeSync()
+        await resumeSyncAtEnd()
         phase = .done
         leaves.log("follow: the new word opened the vault — sync keys held for this session")
         return (following, fetched.format.kdf, fetched.format.recoveryWrapDigest)
@@ -858,7 +930,7 @@ final class PostureSwitchRunner {
         // `.snapshot` and does the same before clearing.
         if follow, entersCastle { retireOldKeyFiles(oldFingerprint: oldFingerprint, keeping: newFingerprint) }
         try await clearMarker()
-        leaves.resumeSync()
+        await resumeSyncAtEnd()
         await leaves.reconcile()
         leaves.log("posture switch: \(entersCastle ? "Castle entered" : "keys replaced") — library key \(newFingerprint.prefix(8))")
         return Outcome(
@@ -1191,7 +1263,7 @@ final class PostureSwitchRunner {
                 retireOldKeyFiles(oldFingerprint: marker.oldKeyFingerprint, keeping: newFingerprint)
             }
             try await clearMarker()
-            leaves.resumeSync()
+            await resumeSyncAtEnd()
             await leaves.reconcile()
             phase = .done
             return Outcome(
@@ -1301,7 +1373,12 @@ extension PostureSwitchRunner.Leaves {
                 try await bootstrap.rekeyLibrary(from: old, to: new, work: work)
             },
             pauseSync: { services()?.sync.stop() },
-            resumeSync: { services()?.sync.triggerSync() },
+            // F2 (MAJOR-1): RECONNECT, never a bare trigger — see
+            // `AppServices.resumeSync()`. `services()` is read LIVE: after a
+            // successful re-key the reopen has retired the old services
+            // (nil here — the fresh ones connect in their own `start()`) or
+            // already rebuilt them (a trigger).
+            resumeSync: { await services()?.resumeSync() },
             takeSnapshot: {
                 guard let backup = services()?.backup else { return nil }
                 let record = await backup.backUpNow()

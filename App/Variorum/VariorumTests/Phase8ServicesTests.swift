@@ -532,6 +532,46 @@ struct SyncSessionFenceTests {
             session.stop()
         }
     }
+
+    /// pre-13x ladder round 1, F2 (MAJOR-1) — THE MECHANISM PIN: `stop()`
+    /// retires the scheduler, so a later `triggerSync()` runs NOTHING (the
+    /// pre-F2 resume leaf's exact no-op — a refused ceremony left sync dead
+    /// for the session); the resume road is a RE-CONFIGURE, after which a
+    /// trigger runs a round again.
+    @Test func aStoppedSessionRunsNothingOnTriggerAndTheReconnectRoadRunsARoundAgain() async throws {
+        let db = try AppDatabase.inMemory()
+        let session = SyncSession(database: db, allowsSync: true)
+        let spy = RecordingTransport()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+        } operation: { @MainActor in
+            await session.configure(transport: spy, keyProvider: AppTestKeyProvider())
+            #expect(session.isConfigured)
+            // The ceremony's pause.
+            session.stop()
+            #expect(!session.isConfigured, "stop() retires the chain")
+            // The pre-F2 resume leaf: a bare trigger.
+            session.triggerSync()
+            for _ in 0..<50 {
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(2))
+            }
+            #expect(await spy.calls == 0, "a trigger after stop() runs no round — the no-op MAJOR-1 traced")
+            // The F2 resume road: reconnect, then trigger.
+            await session.configure(transport: spy, keyProvider: AppTestKeyProvider())
+            #expect(session.isConfigured)
+            session.triggerSync()
+            for _ in 0..<2000 {
+                if await spy.calls > 0 { break }
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(1))
+            }
+            #expect(await spy.calls > 0, "the reconnected chain runs a round")
+            session.stop()
+        }
+    }
 }
 
 // MARK: - Review round 1: the sweep mark's variant scoping + error posture
