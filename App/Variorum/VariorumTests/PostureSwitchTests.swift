@@ -375,6 +375,10 @@ struct PostureSwitchTests {
         /// Backups folder, a WAL that would not drain) — the leaf answers
         /// `.failed` and writes nothing.
         var snapshotFails = false
+        /// F3 (MINOR-N2): a hook run INSIDE the `pauseSync` leaf — the one
+        /// moment a pin can schedule a second road on the shared runner
+        /// while the first holds the pause (its `busy` already set).
+        var onPause: (@MainActor () -> Void)?
 
         init(dir: URL, storeURL: URL, backups: URL, oldKey: StoreKey, apple: AppleKey,
              binding: StoreBinding, view: AppDatabase, keyStore: DeviceKeyStore,
@@ -620,7 +624,7 @@ struct PostureSwitchTests {
                     throw URLError(.cancelled)
                 }
             },
-            pauseSync: { calls.pauses += 1 },
+            pauseSync: { calls.pauses += 1; world.onPause?() },
             resumeSync: { calls.resumes += 1 },
             takeSnapshot: {
                 guard let key = world.keyInHand else { return .failed }
@@ -1223,6 +1227,43 @@ struct PostureSwitchTests {
         #expect(world.calls.pauses == 4)
         #expect(world.calls.resumes == world.calls.pauses, "exit 4: the derived follow's refusal resumes")
         #expect(try await world.marker() == nil, "no road wrote a marker")
+    }
+
+    /// pre-13x ladder round 2, F3 (MINOR-N2) — RED ON OLD: the pause flag
+    /// was INSTANCE-scoped while the balance is ROAD-scoped, so a second
+    /// road refused `switchInProgress` mid-ceremony (the `busy` guard —
+    /// exactly the case it exists for) saw the flag road 1 had set and
+    /// RECONNECTED the chain out from under road 1's drain. Here road 1
+    /// (entering Castle) pauses; at that very pause a second `follow` is
+    /// scheduled on the shared runner; it runs at road 1's next suspension
+    /// (the drain's first push), is refused at the guard, and must resume
+    /// NOTHING — the one resume is road 1's own, at its end.
+    @Test func aSecondRoadRefusedMidCeremonyNeverResumesTheFirstRoadsPause() async throws {
+        let world = try await makeWorld()
+        defer { world.tearDown() }
+        let secondRoadError = LockIsolated<(any Error)?>(nil)
+        let resumesWhenRefused = LockIsolated<Int?>(nil)
+        let secondRoad = LockIsolated<Task<Void, Never>?>(nil)
+        world.onPause = {
+            secondRoad.setValue(Task { @MainActor in
+                do {
+                    _ = try await world.runner.follow(passphrase: "sesame", recoveryWords: nil)
+                } catch {
+                    let resumesNow = world.calls.resumes  // bound first: `setValue` takes a @Sendable autoclosure
+                    secondRoadError.setValue(error)
+                    resumesWhenRefused.setValue(resumesNow)
+                }
+            })
+        }
+        let outcome = try await world.runner.enterCastle(passphrase: "sesame", recoveryWords: world.words)
+        #expect(outcome.entersCastle)
+        await secondRoad.value?.value
+        guard let refusal = secondRoadError.value, case PostureSwitchError.switchInProgress = refusal else {
+            Issue.record("the second road is refused at the guard: \(String(describing: secondRoadError.value))")
+            return
+        }
+        #expect(resumesWhenRefused.value == 0, "the refused second road resumed NOTHING — the pause is road 1's to balance")
+        #expect(world.calls.pauses == 1 && world.calls.resumes == 1, "one pause, one resume — road 1's own, at its end")
     }
 
     // MARK: - Leaving Castle

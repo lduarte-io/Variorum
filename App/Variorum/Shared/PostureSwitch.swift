@@ -288,14 +288,19 @@ final class PostureSwitchRunner {
     private(set) var phase: Phase = .idle
     private(set) var busy = false
     /// pre-13x ladder round 1, F2 (MAJOR-1): whether THIS runner paused the
-    /// sync chain and has not yet resumed it. `pauseSyncForCeremony` sets
-    /// it once per road; `resumeSyncIfPaused` clears it on every exit that
-    /// throws; the success roads resume where they end. Before F2 the
+    /// sync chain and has not yet resumed it — and WHICH ROAD did (pre-13x
+    /// ladder round 2, F3 — MINOR-N2). `pauseSyncForCeremony` records the
+    /// road once; `resumeSyncIfPaused(by:)` clears it on a throw of THAT
+    /// road only; the success roads resume where they end. Before F2 the
     /// resume rode the success roads only, and the production leaf was a
     /// bare trigger — a no-op on a stopped session — so `outboxNotEmpty`,
     /// `rotationInProgress`, `wordsRequired`, a vault refusal or a wrong
-    /// follow passphrase left sync dead until relaunch.
-    private var syncPaused = false
+    /// follow passphrase left sync dead until relaunch. Before F3 the flag
+    /// was a Bool on the INSTANCE while the balance is ROAD-scoped: a
+    /// second road refused `switchInProgress` mid-ceremony (the `busy`
+    /// guard — exactly the case it exists for) saw the flag road 1 had set
+    /// and RECONNECTED the chain out from under road 1's drain.
+    private var pausedByRoad: UUID?
     private let leaves: Leaves
     private let logger = Logger(subsystem: "io.lduarte.Variorum", category: "protection")
 
@@ -388,25 +393,29 @@ final class PostureSwitchRunner {
     }
 
     private func run(entersCastle: Bool, passphrase: String, recoveryWords: [String]?) async throws -> Outcome {
-        try await balancingSync {
-            try await runCeremony(entersCastle: entersCastle, passphrase: passphrase, recoveryWords: recoveryWords)
+        try await balancingSync { road in
+            try await runCeremony(road: road, entersCastle: entersCastle, passphrase: passphrase, recoveryWords: recoveryWords)
         }
     }
 
-    // MARK: - pre-13x ladder round 1, F2 (MAJOR-1): the pause is BALANCED
+    // MARK: - pre-13x ladder round 1, F2 (MAJOR-1): the pause is BALANCED — per ROAD (F3, MINOR-N2)
 
-    /// Pause the sync chain for a ceremony road — once per road.
-    private func pauseSyncForCeremony() {
-        guard !syncPaused else { return }
-        syncPaused = true
+    /// Pause the sync chain for a ceremony road — once; the road that
+    /// paused is the one that resumes on a throw (a second road that meets
+    /// the `busy` guard while this one holds the pause never pauses, so it
+    /// never resumes either).
+    private func pauseSyncForCeremony(_ road: UUID) {
+        guard pausedByRoad == nil else { return }
+        pausedByRoad = road
         leaves.pauseSync()
     }
 
-    /// Resume the chain this runner paused — a no-op when it paused nothing
-    /// (a refusal before the pause; the resume road, which never pauses).
-    private func resumeSyncIfPaused() async {
-        guard syncPaused else { return }
-        syncPaused = false
+    /// Resume the chain THIS road paused — a no-op when it paused nothing
+    /// (a refusal before the pause; a refusal at the `busy` guard while
+    /// another road holds the pause; the resume road, which never pauses).
+    private func resumeSyncIfPaused(by road: UUID) async {
+        guard pausedByRoad == road else { return }
+        pausedByRoad = nil
         await leaves.resumeSync()
     }
 
@@ -415,23 +424,24 @@ final class PostureSwitchRunner {
     /// crash did (the resume road: the chain was never paused by this
     /// process, but the reconnect is what "sync is back on" means).
     private func resumeSyncAtEnd() async {
-        syncPaused = false
+        pausedByRoad = nil
         await leaves.resumeSync()
     }
 
-    /// Run a road and resume the chain on EVERY throw; the success roads
-    /// resume where they end (`rekeyCustodyAndSnapshot`, the resume's
-    /// last arm, `pickUpKeys`).
-    private func balancingSync<T>(_ body: () async throws -> T) async throws -> T {
+    /// Run a road under its own token and resume the chain on EVERY throw
+    /// of that road; the success roads resume where they end
+    /// (`rekeyCustodyAndSnapshot`, the resume's last arm, `pickUpKeys`).
+    private func balancingSync<T>(_ body: (UUID) async throws -> T) async throws -> T {
+        let road = UUID()
         do {
-            return try await body()
+            return try await body(road)
         } catch {
-            await resumeSyncIfPaused()
+            await resumeSyncIfPaused(by: road)
             throw error
         }
     }
 
-    private func runCeremony(entersCastle: Bool, passphrase: String, recoveryWords: [String]?) async throws -> Outcome {
+    private func runCeremony(road: UUID, entersCastle: Bool, passphrase: String, recoveryWords: [String]?) async throws -> Outcome {
         guard !busy else { throw PostureSwitchError.switchInProgress(.vaultWrite) }
         if let pending = await pendingMarker() {
             throw PostureSwitchError.switchInProgress(pending.step)
@@ -456,7 +466,7 @@ final class PostureSwitchRunner {
         if enrolled, let vault = leaves.vault, let transport = leaves.transport {
             // ————— 1. PULL TO HEAD (the three refusals) —————
             phase = .pullingToHead
-            pauseSyncForCeremony()
+            pauseSyncForCeremony(road)
             let engine = leaves.drainEngine(transport: transport)
             // THE DRAIN (2c — the 2b adjudication's item 2): push what this
             // device owes until the outbox is EMPTY, at most `maxDrainRounds`
@@ -608,12 +618,12 @@ final class PostureSwitchRunner {
     /// copy's sentence would be false there.
     @discardableResult
     func follow(passphrase: String?, recoveryWords: [String]?) async throws -> Outcome {
-        try await balancingSync {
-            try await followTyped(passphrase: passphrase, recoveryWords: recoveryWords)
+        try await balancingSync { road in
+            try await followTyped(road: road, passphrase: passphrase, recoveryWords: recoveryWords)
         }
     }
 
-    private func followTyped(passphrase: String?, recoveryWords: [String]?) async throws -> Outcome {
+    private func followTyped(road: UUID, passphrase: String?, recoveryWords: [String]?) async throws -> Outcome {
         guard !busy else { throw PostureSwitchError.switchInProgress(.vaultWrite) }
         if let pending = await pendingMarker() {
             throw PostureSwitchError.switchInProgress(pending.step)
@@ -632,7 +642,7 @@ final class PostureSwitchRunner {
         busy = true
         defer { busy = false; phase = .idle }
         phase = .rotatingKeys
-        pauseSyncForCeremony()
+        pauseSyncForCeremony(road)
         // M′ from the vault by the typed secret — the enrollment's own
         // unwrap (a wrong word refuses typed; nothing is written before it
         // succeeds).
@@ -662,12 +672,12 @@ final class PostureSwitchRunner {
     /// when the words are next typed).
     @discardableResult
     func follow(derivedPassphraseKey derived: SymmetricKey, kdf: PassphraseKDF.Descriptor) async throws -> Outcome {
-        try await balancingSync {
-            try await followDerived(passphraseKey: derived, kdf: kdf)
+        try await balancingSync { road in
+            try await followDerived(road: road, passphraseKey: derived, kdf: kdf)
         }
     }
 
-    private func followDerived(passphraseKey derived: SymmetricKey, kdf: PassphraseKDF.Descriptor) async throws -> Outcome {
+    private func followDerived(road: UUID, passphraseKey derived: SymmetricKey, kdf: PassphraseKDF.Descriptor) async throws -> Outcome {
         guard !busy else { throw PostureSwitchError.switchInProgress(.vaultWrite) }
         if let pending = await pendingMarker() {
             throw PostureSwitchError.switchInProgress(pending.step)
@@ -681,7 +691,7 @@ final class PostureSwitchRunner {
         busy = true
         defer { busy = false; phase = .idle }
         phase = .rotatingKeys
-        pauseSyncForCeremony()
+        pauseSyncForCeremony(road)
         guard let fetched = try await vault.fetchVault() else { throw KeyVaultClientError.vaultAbsent }
         guard fetched.format.kdf == kdf else {
             leaves.log("follow: the held key's descriptor is not the vault's — the passphrase is asked")
