@@ -62,7 +62,7 @@ fix-phase step opens the sequence:
 
 > **⚠️ AMENDED 2026-09-01:** the pre-13u round (done) is followed by **the Act 10 correction round (DONE 2026-09-02)**
 > (`notes/plans/act10-correction-round.md` — her same-morning ruling) → **`pre-13x` — Postures & recovery**
-> (+ 17i inside it — **DONE 2026-09-07**) → **13u1** → **13u2** → **13i** → **13o** → **13r** → **13x** → **13y** → **13s** →
+> (+ 17i inside it — **DONE 2026-09-07**) → **13u1** → **17m (the Re-link-your-Apple-account door — PRE-RELEASE, her ruling 2026-09-07; runs anywhere before 🚀)** → **13u2** → **13i** → **13o** → **13r** → **13x** → **13y** → **13s** →
 > 🚀. Record: `notes/plans/pre-13x-postures-design.md`.
 
 Fix work is `notes/plans/phase-17-standing-fixes.md`'s, not this document's, per the same-day
