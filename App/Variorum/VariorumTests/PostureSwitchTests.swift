@@ -1054,6 +1054,40 @@ struct PostureSwitchTests {
         #expect(await mirror.ciphertextRowsBelow(rotationSeq) == 0)
     }
 
+    // MARK: - pre-13x ladder round 1, F2 (MINOR-5): the drain engine's dedupe facts
+
+    /// THE COMPOSITION PIN, two halves: the drain's engine takes the LEAVES'
+    /// facts (behavioural — before F2 it built `SyncEngine(transport:key
+    /// Provider:)` bare, an inert empty list), and the PRODUCTION leaves
+    /// carry every seeded book's facts — the same list `SyncSession.
+    /// configure` hands the regular engine (a grep pin over the one
+    /// composition line, the `TravellingDotsIndicator` precedent; the live
+    /// leaves compose over a bootstrap this suite does not build).
+    @Test func theDrainEngineTakesTheLeavesDedupeFactsAndTheLiveLeavesCarryEverySeededBooks() async throws {
+        let world = try await makeWorld()
+        defer { world.tearDown() }
+        let mirror = try #require(world.mirror)
+        var scripted = leaves(for: world)
+        #expect(scripted.drainEngine(transport: mirror).sampleLibraryFacts.isEmpty, "the scripted world's leaves are inert")
+        scripted.sampleLibraryFacts = SampleLibrarySeeder.allDedupeFacts()
+        let engine = scripted.drainEngine(transport: mirror)
+        #expect(engine.sampleLibraryFacts.map(\.bookName) == SampleLibrarySeeder.Book.all.map(\.name),
+                "the drain engine carries exactly the leaves' facts, in order")
+        #expect(engine.sampleLibraryFacts.count == 2, "Sherlock + Encryption Explained")
+
+        // The production composition: `Leaves.live` hands `allDedupeFacts()`.
+        let source = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("Shared/PostureSwitch.swift")
+        let text = try String(contentsOf: source, encoding: .utf8)
+        let live = try #require(text.range(of: "static func live("))
+        let body = text[live.lowerBound...]
+        #expect(body.contains("sampleLibraryFacts: SampleLibrarySeeder.allDedupeFacts()"),
+                "the live leaves compose the seeded books' facts exactly as SyncSession.configure does")
+        #expect(text.contains("let engine = leaves.drainEngine(transport: transport)"),
+                "the drain builds its engine through the leaves, never bare")
+    }
+
     // MARK: - Decision 32 at the door
 
     @Test func aRotationStillFinishingOnAnotherDeviceRefusesAtTheDoorAndChangesNothing() async throws {

@@ -205,6 +205,16 @@ final class PostureSwitchRunner {
         /// This device's sync custody (nil material = not enrolled).
         var keyStore: DeviceKeyStore
         var keyProvider: any SyncKeyProviding
+        /// pre-13x ladder round 1, F2 (MINOR-5): the seeded books' dedupe
+        /// facts (`SampleLibrarySeeder.allDedupeFacts()` in production —
+        /// the SAME list `SyncSession.configure` hands the regular engine),
+        /// so the ceremony's drain engine arms the dedupe's one-shot marker
+        /// when a seeded book's `reading` row lands during its pull to head.
+        /// Before F2 the drain built `SyncEngine(transport:keyProvider:)`
+        /// bare: an empty list is inert, the occasion was never recorded,
+        /// and the regular engine never saw that arrival again (the cursor
+        /// had moved). Empty in the scripted worlds.
+        var sampleLibraryFacts: [SampleLibraryDedupeFacts] = []
         /// nil = no vault client composed (unconfigured / local-only).
         var vault: KeyVaultClient?
         var transport: (any SyncTransport & SyncRotationTransport)?
@@ -447,7 +457,7 @@ final class PostureSwitchRunner {
             // ————— 1. PULL TO HEAD (the three refusals) —————
             phase = .pullingToHead
             pauseSyncForCeremony()
-            let engine = SyncEngine(transport: transport, keyProvider: leaves.keyProvider)
+            let engine = leaves.drainEngine(transport: transport)
             // THE DRAIN (2c — the 2b adjudication's item 2): push what this
             // device owes until the outbox is EMPTY, at most `maxDrainRounds`
             // rounds (each a push then a pull to head — a pull can leave a
@@ -700,7 +710,6 @@ final class PostureSwitchRunner {
         let entersCastle = fetched.format.masterWrappedByAppleHeld == nil
         let wasStandardShaped = leaves.gate.readEnvelope(leaves.storeURL).envelope?.apple != nil
         let stamp = DateFormatter.variorumISO8601.string(from: leaves.now())
-        let oldFingerprint = StoreKeyEnvelope.fingerprint(of: libraryKey)
         // pre-13x 2d (decision 35) — THE NO-ROTATION ROAD: the account's
         // keys are UNCHANGED (custody's corpus key id = the vault's, the
         // same master, no previous key carried) and only the POSTURE moved
@@ -737,7 +746,6 @@ final class PostureSwitchRunner {
             keyFile: keyFile,
             material: final.material, reencrypted: final.reencrypted, stamp: stamp,
             listPreSwitchPairs: entersCastle && wasStandardShaped, follow: true)
-        _ = oldFingerprint
         phase = .done
         leaves.log("follow: done — \(entersCastle ? "Castle" : "Standard"); library key \(outcome.newKeyFingerprint.prefix(8))")
         return outcome
@@ -1312,7 +1320,21 @@ final class PostureSwitchRunner {
             fallthrough
 
         case .snapshot, .offer:
-            let newFingerprint = marker.newKeyFingerprint ?? StoreKeyEnvelope.fingerprint(of: leaves.libraryKeyInHand() ?? StoreKey.mint())
+            // pre-13x ladder round 1, F2 (NIT-3): a marker at `.snapshot` /
+            // `.offer` ALWAYS carries the new key's fingerprint — it is
+            // written at `.rekeyLibrary` and rides every `advanced(to:)`
+            // after it — so the fallback is UNREACHABLE by construction; it
+            // used to mint a throwaway key for a fingerprint. Now: the key
+            // in hand's fingerprint (the reopen adopted L′), else the
+            // honest refusal — never a key that never existed.
+            let newFingerprint: String
+            if let stamped = marker.newKeyFingerprint {
+                newFingerprint = stamped
+            } else if let inHand = leaves.libraryKeyInHand() {
+                newFingerprint = StoreKeyEnvelope.fingerprint(of: inHand)
+            } else {
+                throw PostureSwitchError.libraryKeyUnavailable
+            }
             // The old key file (named by the marker) says whether this
             // library was Standard-shaped — the offer is honest only then.
             let oldFile = marker.oldKeyFingerprint.flatMap {
@@ -1422,6 +1444,8 @@ extension PostureSwitchRunner.Leaves {
             gate: bootstrap.gate,
             keyStore: keyStore,
             keyProvider: DeviceKeySyncProvider(store: keyStore),
+            // F2 (MINOR-5): the same facts the regular engine carries.
+            sampleLibraryFacts: SampleLibrarySeeder.allDedupeFacts(),
             vault: current?.keyVault,
             transport: transport,
             signedIn: { [current] in
@@ -1483,5 +1507,16 @@ extension PostureSwitchRunner.Leaves {
             // pre-13x 5b (ledger 67): the name the vault client stamps —
             // `AppServices` hands the same `DeviceName.current` to it.
             deviceName: { DeviceName.current })
+    }
+}
+
+extension PostureSwitchRunner.Leaves {
+    /// pre-13x ladder round 1, F2 (MINOR-5): THE DRAIN's engine — the
+    /// ceremony's own `SyncEngine` over the leaves' transport, key provider
+    /// AND the seeded books' dedupe facts (the `SyncSession.configure`
+    /// composition, mirrored here so a second engine never silently drops
+    /// a repair the design says every pull carries).
+    nonisolated func drainEngine(transport: any SyncTransport) -> SyncEngine {
+        SyncEngine(transport: transport, keyProvider: keyProvider, sampleLibraryFacts: sampleLibraryFacts)
     }
 }
