@@ -339,13 +339,14 @@ struct ShellActions {
                     status.speak(
                         "Restored \u{201C}\(book.name)\u{201D} — "
                         + "\(minted) \(minted == 1 ? noun : noun + "s") came back.")
-                case .refused(let why):
-                    status.speak("Restoring \u{201C}\(book.name)\u{201D} failed: \(why)")
                 }
             } catch {
+                // F3 (NIT-N6): the road's own words on the face; the raw
+                // error in the log.
+                Self.log.error("restore \(book.name, privacy: .public) failed: \(String(describing: error), privacy: .public)")
                 status.speak(
                     "Restoring \u{201C}\(book.name)\u{201D} failed: "
-                    + OpsRefusalCopy.message(for: error))
+                    + SeededBookRestore.failureLine(for: error))
             }
         }
     }
@@ -368,9 +369,10 @@ struct ShellActions {
                 break
             }
         } catch {
+            Self.log.error("tutorial door: ensuring \(book.name, privacy: .public) failed: \(String(describing: error), privacy: .public)")
             status.speak(
-                "The tutorial opened, but \u{201C}\(SampleLibrarySeeder.Book.encryptionExplained.name)\u{201D} "
-                + "could not be restored beside it: " + OpsRefusalCopy.message(for: error))
+                "The tutorial opened, but \u{201C}\(book.name)\u{201D} "
+                + "could not be restored beside it: " + SeededBookRestore.failureLine(for: error))
         }
     }
 

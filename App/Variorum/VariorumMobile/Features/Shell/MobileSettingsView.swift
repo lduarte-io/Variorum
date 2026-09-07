@@ -593,11 +593,11 @@ extension MobileSettingsView {
                 bookRestoreNote = "\u{201C}\(book.name)\u{201D} is already whole — it's on your shelf."
             case .restored(_, let minted):
                 bookRestoreNote = "Restored \u{201C}\(book.name)\u{201D} — \(minted) \(minted == 1 ? "chapter" : "chapters") came back."
-            case .refused(let why):
-                bookRestoreNote = "Restoring \u{201C}\(book.name)\u{201D} failed: \(why)"
             }
         } catch {
-            bookRestoreNote = "Restoring \u{201C}\(book.name)\u{201D} failed: \(String(describing: error))"
+            // pre-13x ladder round 2, F3 (NIT-N6): words on the face, never
+            // a raw description — the road's ONE brain, as on the Mac.
+            bookRestoreNote = "Restoring \u{201C}\(book.name)\u{201D} failed: " + SeededBookRestore.failureLine(for: error)
         }
     }
 }

@@ -63,8 +63,31 @@ nonisolated enum SeededBookRestore {
         /// The book and/or its missing notes were minted (the count is the
         /// seeder's — stories, or chapters).
         case restored(readingID: String, minted: Int)
-        /// The seed reported something other than a mint (recorded, spoken).
-        case refused(String)
+        // (pre-13x ladder round 2, F3 — NIT-N6: the `.refused(String)` arm
+        // is GONE — `seed` answers `Seeded` by type, so there was nothing
+        // for it to carry but a raw enum dump, and no face may speak one.)
+    }
+
+    /// F3 (NIT-N6): the road's failures IN WORDS — ONE brain for its three
+    /// faces (the Mac's Help ▸ Restore door and tutorial ensure, the
+    /// phone's Settings row), never `String(describing:)` on a production
+    /// face. The raw error is the caller's to LOG, not to show. (The Mac's
+    /// `OpsRefusalCopy` stays Mac-local by the recorded rule — it carries
+    /// Mac chords and Mac-only copy homes a shared home must not hold — so
+    /// the road words its own error classes here, on both platforms.)
+    static func failureLine(for error: any Error) -> String {
+        switch error {
+        case SampleLibrarySeeder.LoadError.resourceMissing, SampleLibrarySeeder.LoadError.noStories:
+            return "This build is missing the book's text — nothing was restored."
+        case is CancellationError:
+            return "It was stopped before it finished — what came back stays; try again."
+        case OperationError.duplicateBookName(let existing):
+            return BookNameCopy.refusal(existing: existing)
+        case is OperationError:
+            return "The library refused a change partway — what was already restored stays; try again in a moment."
+        default:
+            return "The library couldn't be written to — nothing else was touched; try again in a moment."
+        }
     }
 
     /// Discover, then mint what is missing. Throws the seeder's own errors
@@ -80,11 +103,8 @@ nonisolated enum SeededBookRestore {
         if existing.isComplete(for: stories.map(\.title)), let bookID = existing.bookID {
             return .alreadyWhole(readingID: bookID)
         }
-        let outcome = try await SampleLibrarySeeder.seed(
+        let seeded = try await SampleLibrarySeeder.seed(
             session: session, book: book, stories: stories, existing: existing)
-        if case .seeded(let readingID, let minted) = outcome {
-            return .restored(readingID: readingID, minted: minted)
-        }
-        return .refused(String(describing: outcome))
+        return .restored(readingID: seeded.readingID, minted: seeded.minted)
     }
 }

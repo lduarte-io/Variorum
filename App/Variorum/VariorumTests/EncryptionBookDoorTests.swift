@@ -181,6 +181,19 @@ struct EncryptionBookDoorTests {
             #expect(minted == 8, "eight chapters")
             let second = try await SeededBookRestore.restore(session: session, book: .encryptionExplained)
             #expect(second == .alreadyWhole(readingID: readingID))
+            // F3 (NIT-N6): the road's failures speak words on every face —
+            // never a raw enum description (the Act 10 round's dump class).
+            let cases: [(any Error, String)] = [
+                (SampleLibrarySeeder.LoadError.resourceMissing, "resourceMissing"),
+                (CancellationError(), "CancellationError"),
+                (OperationError.readingNotFound(id: "a-book-id"), "readingNotFound"),
+            ]
+            for (error, name) in cases {
+                let line = SeededBookRestore.failureLine(for: error)
+                #expect(!line.contains(name) && line.hasSuffix("."), "\(name) → \(line)")
+            }
+            #expect(SeededBookRestore.failureLine(for: OperationError.duplicateBookName(name: "Encryption Explained"))
+                    == BookNameCopy.refusal(existing: "Encryption Explained"), "the one home for her duplicate-name ruling")
             // Delete one chapter: the restore brings that one back.
             let chapterID = try await db.read { db in
                 try Queries.assembleReading(db, readingID: readingID).first { $0.title == "Chapter 5 — Backups, and why an old one behaves the way it does" }?.postID

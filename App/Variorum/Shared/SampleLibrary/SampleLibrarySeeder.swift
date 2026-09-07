@@ -668,7 +668,7 @@ enum SampleLibrarySeeder {
             let seeded = try await seed(
                 session: session, book: book, stories: stories, existing: existing, pacing: pacing)
             save(true)
-            return seeded
+            return .seeded(readingID: seeded.readingID, stories: seeded.minted)
         } catch {
             return .refused(String(describing: error))
         }
@@ -707,11 +707,21 @@ enum SampleLibrarySeeder {
     /// whose notes say 1892 and whose book says today would be incoherent,
     /// and books sort by NAME (`Queries.readings`), so nothing on the shelf
     /// moves either way.
+    /// What `seed` minted — the book (existing or fresh) and the count of
+    /// notes minted. pre-13x ladder round 2, F3 (NIT-N6): `seed` used to
+    /// answer the launch seeder's whole `Outcome` though it could only ever
+    /// return `.seeded`, so every caller carried an unreachable arm (the
+    /// restore road's dumped it raw); now it answers what it did, by type.
+    struct Seeded: Equatable, Sendable {
+        var readingID: String
+        var minted: Int
+    }
+
     @discardableResult
     static func seed(
         session: AppSession, book: Book = .sherlock, stories: [Story], existing: Existing,
         pacing: Pacing? = nil
-    ) async throws -> Outcome {
+    ) async throws -> Seeded {
         let bookName = book.name
         let tagName = book.tagName
         let frontChapter = book.frontMatterChapter
@@ -774,7 +784,7 @@ enum SampleLibrarySeeder {
             }
             minted += 1
         }
-        return .seeded(readingID: skeleton.book, stories: minted)
+        return Seeded(readingID: skeleton.book, minted: minted)
     }
 
     /// The seed's clock scope: a book with a clock of its own mints every

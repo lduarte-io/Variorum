@@ -488,10 +488,8 @@ struct SampleLibraryTests {
                     "…but all thirteen notes survive, found by the reserved tag")
             let restored = try await SampleLibrarySeeder.seed(
                 session: session, stories: stories, existing: existing)
-            guard case .seeded(let newBookID, let cameBack) = restored else {
-                Issue.record("expected a restore, got \(restored)")
-                return
-            }
+            let newBookID = restored.readingID
+            let cameBack = restored.minted
             #expect(cameBack == 12, "every story came back — by membership, not by mint")
 
             let facts = try await db.read { db -> (notes: Int, members: Set<String>, chapters: Int) in
@@ -843,10 +841,8 @@ struct EncryptionExplainedSeedTests {
             #expect(existing.bookID == nil && existing.strayNoteIDsByTitle.count == 9)
             let restored = try await SampleLibrarySeeder.seed(
                 session: session, book: .encryptionExplained, stories: chapters, existing: existing)
-            guard case .seeded(let newBookID, let cameBack) = restored else {
-                Issue.record("expected a restore, got \(restored)")
-                return
-            }
+            let newBookID = restored.readingID
+            let cameBack = restored.minted
             #expect(cameBack == 8)
             let members = try await db.read { db in
                 Set(try Queries.assembleReading(db, readingID: newBookID).map(\.postID))

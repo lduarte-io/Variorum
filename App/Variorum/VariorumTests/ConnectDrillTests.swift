@@ -100,10 +100,7 @@ struct ConnectDrillTests {
                 let stories = try SampleLibrarySeeder.loadStories()
                 let result = try await SampleLibrarySeeder.seed(
                     session: appSession, stories: stories, existing: SampleLibrarySeeder.Existing())
-                guard case .seeded = result else {
-                    Issue.record("the sample library did not seed: \(result)")
-                    return
-                }
+                #expect(result.minted > 0, "the sample library seeded: \(result)")
             }
         }
         let variantCount = try await liveVariants(library)

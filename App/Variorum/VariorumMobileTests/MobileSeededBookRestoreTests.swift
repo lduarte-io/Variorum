@@ -42,4 +42,21 @@ struct MobileSeededBookRestoreTests {
                     == .restored(readingID: readingID, minted: 1))
         }
     }
+
+    /// pre-13x ladder round 2, F3 (NIT-N6): the phone's restore row renders
+    /// the road's ONE failure brain — words, never `String(describing:)`
+    /// (before F3 the row dumped the raw description on every build).
+    @Test func theRestoreRowsFailuresSpeakWordsNeverARawDescription() {
+        let cases: [(any Error, String)] = [
+            (SampleLibrarySeeder.LoadError.resourceMissing, "resourceMissing"),
+            (CancellationError(), "CancellationError"),
+            (OperationError.readingNotFound(id: "a-book-id"), "readingNotFound"),
+        ]
+        for (error, name) in cases {
+            let line = SeededBookRestore.failureLine(for: error)
+            #expect(!line.contains(name) && line.hasSuffix("."), "\(name) → \(line)")
+        }
+        #expect(SeededBookRestore.failureLine(for: OperationError.duplicateBookName(name: "Encryption Explained"))
+                == BookNameCopy.refusal(existing: "Encryption Explained"))
+    }
 }
