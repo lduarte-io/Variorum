@@ -448,6 +448,36 @@ struct CorpusRotationTests {
         #expect(try a.syncedDump() == b.syncedDump())
     }
 
+    /// pre-13x ladder round 2, F3 (NIT-N5) — RED ON OLD: the wait past the
+    /// horizon CONSUMED a pass of the `maxPasses` budget — an empty window
+    /// at exactly the last budgeted pass waited, continued, and the loop
+    /// exited into `walkDidNotConverge(remaining: 0)`: an honest-sounding
+    /// refusal over nothing remaining (the resume then re-walked). The
+    /// smallest world that reaches it: a corpus done in ONE working pass
+    /// under a budget of TWO — pass 2 is the first empty window. Now the
+    /// budget counts working passes only; the report still counts pulls.
+    @Test func theWaitPastTheHorizonSpendsNoPassOfTheBudget() async throws {
+        let world = try await makeWorld()
+        let a = try client("A", prefix: "AA", world: world, material: world.old)
+        try a.with { ops, _ in
+            let post = try ops.createPost(title: "before the rotation", profile: .blog)
+            _ = try ops.newBlock(in: post.id, text: "Old-key prose.", at: .end)
+        }
+        _ = try await a.push()
+        let begun = try await CorpusRotation.begin(
+            client: world.vault.client, current: world.old, secrets: try secrets(), appleHeldCopy: nil)
+        let rotationSeq = try #require(begun.receipt.rotationStartedSeq)
+        let waits = LockIsolated(0)
+        let driver = CorpusRotation(
+            transport: world.server, batchSize: 100, maxPasses: 2,
+            horizonWait: { waits.withValue { $0 += 1 } })
+        let report = try await driver.reencryptRemainder(material: begun.material)
+        #expect(waits.value == 1, "the wait ran once, at the first empty window")
+        #expect(report.passes == 3, "the working pass · the first empty window (then the wait) · the empty window that ends the walk — three pulls, ONE pass of budget")
+        #expect(report.replaced >= 3 && report.skipped == 0)
+        #expect(await world.server.ciphertextRowsBelow(rotationSeq) == 0)
+    }
+
     /// F1 — THE SERVER's COMPLETION GUARD (the structural half; the fake
     /// server's twin of the maintenance artifact): a walk whose wait does
     /// NOT let time pass (the straggler stays hidden) leaves one

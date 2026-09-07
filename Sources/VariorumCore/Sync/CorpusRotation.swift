@@ -261,9 +261,13 @@ public struct CorpusRotation: Sendable {
     public let transport: any SyncTransport & SyncRotationTransport
     /// Rows per pull window / re-encrypt batch (transport granularity).
     public var batchSize: Int
-    /// The bound on passes over the remainder (each pass ends at an empty
-    /// window or re-encrypts what it found; the second pass exists for the
-    /// A5 visibility window).
+    /// The bound on WORKING passes over the remainder — passes that found
+    /// rows below the seq and re-encrypted them. The empty windows are not
+    /// spent against it: neither the first (which waits past the A5
+    /// visibility horizon and looks again) nor the one that ends the walk
+    /// (pre-13x ladder round 2, F3 — NIT-N5: before F3 the wait's re-pull
+    /// counted, so an empty window at exactly the last budgeted pass waited,
+    /// continued and exited into `walkDidNotConverge(remaining: 0)`).
     public var maxPasses: Int
     /// N of M, after every batch.
     public var progress: (@Sendable (Progress) -> Void)?
@@ -458,7 +462,12 @@ public struct CorpusRotation: Sendable {
         var total: Int?
         var reencrypted = 0
         var waitedPastHorizon = false
-        while report.passes < maxPasses {
+        // F3 (NIT-N5): the budget counts WORKING passes — `report.passes`
+        // still counts every pull (the report's honesty), but an empty
+        // window costs nothing, so the wait's re-pull can never be the
+        // pass that exhausts the budget.
+        var workingPasses = 0
+        while workingPasses < maxPasses {
             report.passes += 1
             let below = try await pullBelow(seq: rotation.startedSeq, keys: keys)
             if total == nil {
@@ -477,6 +486,7 @@ public struct CorpusRotation: Sendable {
                 progress?(Progress(reencrypted: reencrypted, total: max(total ?? 0, reencrypted)))
                 return report
             }
+            workingPasses += 1
             // M grows to what later passes find (the visibility window's
             // stragglers) — N never exceeds M on the ceremony's line.
             total = max(total ?? 0, reencrypted + below.count)
