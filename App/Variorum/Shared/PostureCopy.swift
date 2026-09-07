@@ -169,10 +169,15 @@ nonisolated extension ProtectionCopy {
     static let waitingWordsDoor = "Enter Twelve Words…"
     /// Rendered when iCloud Keychain holds an Apple key that is NOT the
     /// one this library's key file was written under.
+    /// pre-13x ladder round 1, F2 (MAJOR-3 d) — HEDGED, PROVISIONAL (copy
+    /// §2d + §11; 13s re-voices): the client cannot tell a different Apple
+    /// account from the same account under propagation lag (no iCloud
+    /// identity is stored), so the sentence covers both.
     static let waitingDifferentAppleID =
-        "This \(deviceName)'s Apple account isn't the one that set up sync, so it "
-        + "can't hand over the key. Enter your passphrase or twelve words once; "
-        + "after that this \(deviceName) opens on its own."
+        "This \(deviceName)'s Apple account doesn't hold the key that set up sync — "
+        + "if it's the same Apple account, the key may still be arriving. Enter your "
+        + "passphrase or twelve words once to continue now; after that this "
+        + "\(deviceName) opens on its own."
 
     // MARK: - §2a Turning on sync (pre-13x 3a, verbatim)
 
@@ -400,6 +405,14 @@ nonisolated extension ProtectionCopy {
         + "your Apple account, or at your unlocked \(deviceName), can then read your "
         + "writing. Your other devices will open silently again the next time they open."
     static let leaveCastleDoor = "Use Standard"
+
+    /// pre-13x ladder round 1, F2 (MAJOR-3 b) — PROVISIONAL (copy §4 + §11;
+    /// 13s re-voices): Replace All Keys under Standard refused because the
+    /// iCloud key the vault's copy is under is not readable here (or the
+    /// one read is another Apple account's) — decision 30 never re-mints it.
+    static let replaceKeysAppleKeyUnreachable =
+        "Your Apple account's key isn't reachable on this \(deviceName) right now — "
+        + "wait a moment and try again, or enter your passphrase."
 
     // §4 — still finishing (decision 32), at either door
     static func rotationStillFinishing(device: String, day: String) -> String {

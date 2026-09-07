@@ -91,6 +91,12 @@ nonisolated enum PostureSwitchError: Error, Equatable, Sendable {
     case custodyRefused(String)
     /// Leaving Castle: iCloud Keychain would not hold the key.
     case appleKeyUnavailable
+    /// pre-13x ladder round 1, F2 (MAJOR-3 b — decision 30's letter):
+    /// Replace All Keys under Standard keeps the Apple-held copy under the
+    /// SAME iCloud key, so that key must be READABLE here and be the
+    /// vault's — never minted, never another Apple account's. Refused
+    /// before the marker and before any write (copy §4's PROVISIONAL line).
+    case appleKeyUnreachable
     /// The act does not apply to the current posture.
     case wrongPosture(Posture)
     /// The re-key road refused (worded).
@@ -470,7 +476,10 @@ final class PostureSwitchRunner {
             // F1 (ledger 69): the mint FIRST, so the marker carries the NEW
             // corpus key id before anything is written — the resume's exact
             // discriminator (own write landed ⇔ the vault's id is this one).
-            let appleHeld: (key: SymmetricKey, id: String)? = entersCastle ? nil : appleHeldCopyForStandard()
+            // F2 (MAJOR-3 b): the Apple-held copy kept under the SAME A —
+            // read, never minted; refused when unreadable or not the vault's.
+            let appleHeld: (key: SymmetricKey, id: String)? = entersCastle
+                ? nil : try appleHeldCopyForStandard(keptUnder: fetched)
             let prepared = try CorpusRotation.prepare(current: current, secrets: secrets, appleHeldCopy: appleHeld)
             try await writeMarker(RotationMarker(
                 step: .vaultWrite, entersCastle: entersCastle,
@@ -1076,9 +1085,25 @@ final class PostureSwitchRunner {
     }
 
     /// The Apple-held copy KEPT under Standard's Replace All Keys (decision
-    /// 30) — A read from iCloud Keychain (never adopted from the wire).
-    private func appleHeldCopyForStandard() -> (key: SymmetricKey, id: String)? {
-        guard leaves.posture() == .standard, let apple = leaves.appleKeys.readOrMint() else { return nil }
+    /// 30) — A READ from iCloud Keychain (never adopted from the wire, and
+    /// — F2, MAJOR-3 b — never MINTED here: before F2 this was `readOrMint`,
+    /// so a Standard Replace All Keys with A momentarily unreadable minted a
+    /// second A and wrapped M′ under it, against decision 30's own words).
+    /// When the vault names an id, the key read must BE that id: a
+    /// different Apple ID's device could only hand M′ to the wrong Apple
+    /// account's key. Either miss refuses (`appleKeyUnreachable`).
+    private func appleHeldCopyForStandard(
+        keptUnder fetched: KeyVaultClient.FetchedVault
+    ) throws -> (key: SymmetricKey, id: String)? {
+        guard leaves.posture() == .standard else { return nil }
+        guard let apple = leaves.appleKeys.read() else {
+            leaves.log("posture switch: Replace All Keys under Standard — the iCloud key is not readable here; refused before any write")
+            throw PostureSwitchError.appleKeyUnreachable
+        }
+        if let vaultID = fetched.format.appleKeyID, vaultID != apple.id {
+            leaves.log("posture switch: Replace All Keys under Standard — the iCloud key read here (\(apple.id.prefix(8))) is not the account's (\(vaultID.prefix(8))); refused before any write")
+            throw PostureSwitchError.appleKeyUnreachable
+        }
         return (apple.symmetricKey, apple.id)
     }
 

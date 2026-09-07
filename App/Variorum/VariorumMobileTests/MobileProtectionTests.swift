@@ -589,6 +589,15 @@ struct MobilePhoneProtectionCopyTests {
         #expect(ProtectionCopy.enteredCastleAfterAnotherDevice(device: "Lillian's Mac")
                 .hasPrefix("Another device entered Castle first, so this iPhone picked up that device's keys instead."))
         #expect(ProtectionCopy.castleDoneBody(nil) == ProtectionCopy.enteredCastleDone)
+        // pre-13x ladder round 1, F2: the three PROVISIONAL lines in the
+        // phone's nouns — the hedged different-Apple-ID sentence (MAJOR-3 d),
+        // Replace All Keys' Apple-key refusal (MAJOR-3 b), the could-not-back-up Done (MAJOR-2).
+        #expect(ProtectionCopy.waitingDifferentAppleID
+                == "This iPhone's Apple account doesn't hold the key that set up sync — if it's the same Apple account, the key may still be arriving. Enter your passphrase or twelve words once to continue now; after that this iPhone opens on its own.")
+        #expect(ProtectionCopy.replaceKeysAppleKeyUnreachable
+                == "Your Apple account's key isn't reachable on this iPhone right now — wait a moment and try again, or enter your passphrase.")
+        #expect(ProtectionCopy.enteredCastleWithoutFreshBackup
+                == "You're in Castle. A fresh backup could not be made just now — check your Backups folder; your earlier backups are untouched.")
         #expect(ProtectionCopy.message(for: RecoveryPhraseError.invalidWordCount(13))
                 == "A recovery phrase is exactly 12 words — you entered 13.")
         // pre-13x 5b (ledger 66): the un-followed headline in the phone's nouns,

@@ -126,6 +126,41 @@ struct EncryptionFlowTests {
                 "L12: the flow measures and surfaces its KDF derivation duration")
     }
 
+    /// pre-13x ladder round 1, F2 (MAJOR-3 c — the heal's write): the
+    /// session re-lands the vault's Apple-held copy of the master under the
+    /// key it is handed, in ONE proof-authorized write from this device's
+    /// custody — `leaveCastle`'s shape; the vault's copy then opens M under
+    /// that key. Without custody or a vault it writes nothing and says so.
+    @Test func relandingTheAppleHeldCopyWritesTheVaultUnderTheHandedKeyFromThisDevicesCustody() async throws {
+        let store = DeviceKeyStore.inMemory()
+        let vault = ScriptedVault()
+        let session = makeEncryptionSession(store: store, vault: vault)
+        await session.setUp(passphrase: "orchard-lantern-13")
+        let material = try #require(store.load())
+        let client = KeyVaultClient(
+            configuration: KeyVaultClient.Configuration(
+                projectURL: URL(string: "https://vault.test.invalid")!,
+                apiKey: "publishable-test-key", deviceName: "test device"),
+            sessionProvider: StaticSessionProvider(
+                session: UserSession(accessToken: "token-1", userID: "user-e2ee")),
+            load: vault.load)
+        let born = try #require(try await client.fetchVault())
+        #expect(born.format.masterWrappedByAppleHeld == nil, "born without an Apple copy (no Apple leaves wired here)")
+
+        let apple = AppleKey.mint()
+        #expect(await session.relandAppleHeldCopy(under: apple), "the write lands")
+        let healed = try #require(try await client.fetchVault())
+        #expect(healed.revision == born.revision + 1, "ONE vault write")
+        #expect(healed.format.appleKeyID == apple.id)
+        #expect(try healed.format.unwrapMaster(withAppleKey: apple.symmetricKey) == material.masterSymmetricKey,
+                "the vault's copy opens M under the handed key")
+
+        // No custody ⇒ nothing written.
+        let empty = makeEncryptionSession(store: DeviceKeyStore.inMemory(), vault: vault)
+        #expect(await empty.relandAppleHeldCopy(under: AppleKey.mint()) == false)
+        #expect(try await client.fetchVault()?.revision == healed.revision)
+    }
+
     @Test func aWrongPassphraseSpeaksAndLandsNothing() async throws {
         let firstStore = DeviceKeyStore.inMemory()
         let vault = ScriptedVault()

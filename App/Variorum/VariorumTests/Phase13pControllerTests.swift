@@ -445,6 +445,143 @@ struct Phase13pControllerTests {
         #expect(w.controller.appleKeyVerified == true)
     }
 
+    // MARK: - pre-13x ladder round 1, F2 (MAJOR-3 as REFINED): the iCloud key
+    // is minted only by a device holding the master; the heal on proof
+
+    /// A Standard vault reading for the Apple-arm pins: the account's copy
+    /// is under `appleKeyID`; a corpus key id that matches nothing recorded
+    /// keeps the follow road quiet.
+    private func standardReading(appleKeyID: String) throws -> VaultPostureReading {
+        let kdf = fastKDF()
+        let master = SymmetricKey(size: .bits256)
+        var format = try KeyVaultFormat.create(
+            masterKey: master,
+            passphraseKey: try PassphraseKDF.deriveKey(passphrase: "account-sesame", descriptor: kdf),
+            recoveryKey: nil,
+            classKeys: [(keyClass: .corpus, keyID: "corpus-f2", key: SymmetricKey(size: .bits256)),
+                        (keyClass: .journalBridge, keyID: "bridge-f2", key: SymmetricKey(size: .bits256))],
+            kdf: kdf)
+        // The account's copy under A₁ — whose BYTES this device never holds.
+        format = try format.settingAppleHeldCopy(
+            masterKey: master, appleKey: SymmetricKey(size: .bits256), appleKeyID: appleKeyID)
+        return VaultPostureReading(
+            hasAppleHeldCopy: true, appleKeyID: appleKeyID,
+            passphraseKDF: kdf, hasPassphraseWrap: true,
+            corpusKeyID: "corpus-f2", updatedAt: "2026-09-06T00:00:00Z",
+            updatedByDevice: "Lillian's Mac", signedInUserID: "user-1",
+            hasRecoveryWrap: false, format: format)
+    }
+
+    /// (a) RED ON OLD: a signed-in library under a Standard vault naming A₁,
+    /// A not readable here, NO master in hand ⇒ nothing is minted — the arm
+    /// WAITS (before F2 `readOrMint` minted A₂ beside the account's A₁ under
+    /// propagation lag, and iCloud kept one of the two).
+    @Test func aStandardVaultNamingAKeyThisDeviceCannotReadMintsNothingWithoutTheMaster() async throws {
+        let w = try world(standard: true, enrolled: false)
+        w.appleKeys.key = nil  // propagation lag: the account's A₁ has not arrived
+        w.controller.isSignedIn = { true }
+        w.controller.foreignOwner = { _ in false }
+        w.controller.readVaultPosture = { [r = try self.standardReading(appleKeyID: "a1-the-accounts")] in r }
+        w.controller.landEnrollment = { _, _ in false }
+        await w.controller.reconcile()
+        #expect(w.appleKeys.key == nil, "NOTHING minted — a mint here would duplicate the account's iCloud key")
+        #expect(w.controller.appleKeyWaiting, "the arm waits")
+        #expect(w.controller.appleKeyVerified == false && !w.controller.appleKeyLandingFailed,
+                "not landed, not refused — waiting")
+        #expect(w.controller.enrollReading?.appleState == .absent, "the waiting face speaks (its passphrase doors act)")
+        // The next ready with A₁ landed: the silent road, nothing minted.
+        let arrived = AppleKey(id: "a1-the-accounts", key: AppleKey.mint().key)
+        w.appleKeys.key = arrived
+        await w.controller.reconcile()
+        #expect(w.appleKeys.key == arrived && !w.controller.appleKeyWaiting)
+    }
+
+    /// (a) A device HOLDING the master (it enrolled by a typed secret) that
+    /// still reads no A mints one and lands ITS OWN FILE's copy under it —
+    /// the vault's copy untouched (a different Apple ID's device keeps the
+    /// account's vault under the first Apple ID's A — corner 34).
+    @Test func aDeviceHoldingTheMasterMintsAndLandsItsOwnFileCopyLeavingTheVaultsCopyAlone() async throws {
+        let w = try world(standard: true, enrolled: true)
+        w.appleKeys.key = nil
+        let healed = LockIsolated<[String]>([])
+        w.controller.isSignedIn = { true }
+        w.controller.foreignOwner = { _ in false }
+        w.controller.readVaultPosture = { [r = try self.standardReading(appleKeyID: "a1-the-accounts")] in r }
+        w.controller.healAppleHeldCopy = { apple in healed.withValue { $0.append(apple.id) }; return true }
+        await w.controller.reconcile()
+        let minted = try #require(w.appleKeys.key, "holding M, the device mints its A")
+        #expect(minted.id != "a1-the-accounts")
+        #expect(w.envelopeBox.value?.appleKeyID == minted.id, "ITS file copy under the minted key")
+        #expect(try w.envelopeBox.value?.unwrapKey(apple: minted.symmetricKey) == w.key)
+        #expect(healed.value.isEmpty, "the vault's copy is NEVER written from a mint")
+        #expect(w.controller.appleKeyVerified == true && !w.controller.appleKeyWaiting)
+    }
+
+    /// (c) THE HEAL, on proof: this device's key file records the vault's
+    /// id AND iCloud Keychain now hands back a different key — only the
+    /// same Apple account can have replaced the key this device minted —
+    /// so, holding M, the vault's copy is re-landed FIRST under the
+    /// readable A, then the file's copy. RED ON OLD: the file re-landed and
+    /// the vault's copy stayed under a key iCloud no longer holds.
+    @Test func aSameAccountDuplicateIsHealedOnProofVaultFirstThenTheFile() async throws {
+        let key = StoreKey.mint()
+        var envelope = StoreKeyEnvelope()
+        try envelope.setAppleWrappedCopy(key: key, under: AppleKey.mint().symmetricKey, appleKeyID: "a1-the-accounts")
+        let w = try world(standard: true, key: key, envelope: envelope, enrolled: true)
+        let replacedByICloud = AppleKey.mint()  // A₂ — what the Keychain now holds
+        w.appleKeys.key = replacedByICloud
+        let healed = LockIsolated<[String]>([])
+        let fileAtHeal = LockIsolated<String?>(nil)
+        w.controller.isSignedIn = { true }
+        w.controller.foreignOwner = { _ in false }
+        w.controller.readVaultPosture = { [r = try self.standardReading(appleKeyID: "a1-the-accounts")] in r }
+        w.controller.healAppleHeldCopy = { [box = w.envelopeBox] apple in
+            healed.withValue { $0.append(apple.id) }
+            fileAtHeal.setValue(box.value?.appleKeyID)  // the file's copy at the moment of the vault write
+            return true
+        }
+        await w.controller.reconcile()
+        #expect(healed.value == [replacedByICloud.id], "ONE proof-authorized vault write, under the readable A")
+        #expect(fileAtHeal.value == "a1-the-accounts", "the vault FIRST — the file still recorded the old id at the write")
+        #expect(w.envelopeBox.value?.appleKeyID == replacedByICloud.id, "then the file's copy under A₂")
+        #expect(try w.envelopeBox.value?.unwrapKey(apple: replacedByICloud.symmetricKey) == key)
+        #expect(w.controller.appleKeyVerified == true)
+
+        // A refused vault write leaves the file's copy as recorded — the
+        // proof survives for the next ready (offline: the heal retries).
+        let offline = try world(standard: true, key: key, envelope: envelope, enrolled: true)
+        offline.appleKeys.key = replacedByICloud
+        offline.controller.isSignedIn = { true }
+        offline.controller.foreignOwner = { _ in false }
+        offline.controller.readVaultPosture = { [r = try self.standardReading(appleKeyID: "a1-the-accounts")] in r }
+        offline.controller.healAppleHeldCopy = { _ in false }
+        await offline.controller.reconcile()
+        #expect(offline.envelopeBox.value?.appleKeyID == "a1-the-accounts", "the file's copy is left as recorded")
+        #expect(offline.controller.appleKeyVerified == false && !offline.controller.appleKeyLandingFailed)
+    }
+
+    /// (c) NO proof ⇒ no vault write: a device whose recorded id is NOT the
+    /// vault's (a different Apple ID's device — corner 34; or a file
+    /// already re-landed) re-lands only its own file copy under what it
+    /// reads, as before, and never touches the account's Apple-held copy.
+    @Test func aRecordedIdThatIsNotTheVaultsNeverWritesTheVault() async throws {
+        let key = StoreKey.mint()
+        var envelope = StoreKeyEnvelope()
+        try envelope.setAppleWrappedCopy(key: key, under: AppleKey.mint().symmetricKey, appleKeyID: "a0-this-devices-old")
+        let w = try world(standard: true, key: key, envelope: envelope, enrolled: true)
+        let mine = AppleKey.mint()
+        w.appleKeys.key = mine
+        let healed = LockedCounter()
+        w.controller.isSignedIn = { true }
+        w.controller.foreignOwner = { _ in false }
+        w.controller.readVaultPosture = { [r = try self.standardReading(appleKeyID: "a1-the-accounts")] in r }
+        w.controller.healAppleHeldCopy = { _ in healed.increment(); return true }
+        await w.controller.reconcile()
+        #expect(healed.value == 0, "no proof of a same-account duplicate — the vault is never written")
+        #expect(w.envelopeBox.value?.appleKeyID == mine.id, "its own file copy under what it reads")
+        #expect(w.controller.appleKeyVerified == true)
+    }
+
     // MARK: - THE RESET DOOR (R13p-9) — pre-13x 3b: MERGED into change
     // passphrase's forgot road (`KeyDoorModel`; the pins in `KeyDoorTests`:
     // the biometric confirm required in Castle, a refused confirm changing

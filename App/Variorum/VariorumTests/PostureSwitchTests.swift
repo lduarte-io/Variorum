@@ -1796,6 +1796,57 @@ struct PostureSwitchTests {
                 == outcome.material?.masterSymmetricKey, "the SAME twelve words open M′")
     }
 
+    /// pre-13x ladder round 1, F2 (MAJOR-3 b — decision 30's letter) — RED ON
+    /// OLD: `appleHeldCopyForStandard` used `readOrMint()`, so a Standard
+    /// Replace All Keys with A momentarily unreadable MINTED a second A and
+    /// wrapped M′ under it. Now the copy is kept under the key READ here and
+    /// only when it is the vault's; either miss refuses before the marker
+    /// and before any write, and the chain it paused is resumed (MAJOR-1).
+    @Test func replaceAllKeysUnderStandardRefusesWhenTheAppleKeyIsUnreadableOrAnotherAccountsAndNeverMints() async throws {
+        let world = try await makeWorld()
+        defer { world.tearDown() }
+        let client = try #require(world.vaultClient)
+        let material = try #require(world.oldMaterial)
+        // The account's Apple-held copy under THIS device's A (sync setup's shape).
+        let fetched = try await world.vault()
+        try await client.updateVault(
+            try fetched.format.settingAppleHeldCopy(
+                masterKey: material.masterSymmetricKey, appleKey: world.apple.symmetricKey, appleKeyID: world.apple.id),
+            expectedRevision: fetched.revision, keyProof: KeyProof.wireToken(master: material.masterSymmetricKey))
+        let before = try await world.vault()
+
+        // (1) A unreadable here (propagation lag; iCloud Keychain off).
+        world.appleBacking.key = nil
+        await #expect(throws: PostureSwitchError.appleKeyUnreachable) {
+            _ = try await world.runner.replaceAllKeys(passphrase: "sesame", recoveryWords: world.words)
+        }
+        #expect(world.appleBacking.key == nil, "NOTHING minted — decision 30: never re-mints the iCloud key")
+        let afterOne = try await world.vault()
+        #expect(afterOne.revision == before.revision && afterOne.format.appleKeyID == world.apple.id, "no vault write")
+        #expect(try await world.marker() == nil && world.calls.rekeys == 0)
+        #expect(world.keyStore.load() == material, "custody untouched")
+        #expect(world.calls.resumes == world.calls.pauses, "the refusal resumes the chain it paused")
+
+        // (2) A readable but ANOTHER Apple account's (not the vault's id).
+        world.appleBacking.key = AppleKey.mint()
+        await #expect(throws: PostureSwitchError.appleKeyUnreachable) {
+            _ = try await world.runner.replaceAllKeys(passphrase: "sesame", recoveryWords: world.words)
+        }
+        let afterTwo = try await world.vault()
+        #expect(afterTwo.revision == before.revision && afterTwo.format.appleKeyID == world.apple.id, "no vault write")
+        #expect(try await world.marker() == nil)
+        #expect(PostureSwitchModel.message(for: PostureSwitchError.appleKeyUnreachable)
+                == ProtectionCopy.replaceKeysAppleKeyUnreachable, "the refusal speaks copy §4's line")
+
+        // (3) The account's own A readable: the rotation runs and the copy
+        // stays under the SAME A (decision 30's presence pin, re-run).
+        world.appleBacking.key = world.apple
+        let outcome = try await world.runner.replaceAllKeys(passphrase: "sesame", recoveryWords: world.words)
+        let rotated = try await world.vault()
+        #expect(rotated.format.appleKeyID == world.apple.id && rotated.format.masterWrappedByAppleHeld != nil)
+        #expect(try rotated.format.unwrapMaster(withAppleKey: world.apple.symmetricKey) == outcome.material?.masterSymmetricKey)
+    }
+
     /// THE CEREMONY (copy §4 whole, `PostureSwitchModel.Mode.replaceKeys`):
     /// the front check refuses a STALE recorded corpus id with the
     /// keys-don't-match sentence and runs nothing; then, on the current

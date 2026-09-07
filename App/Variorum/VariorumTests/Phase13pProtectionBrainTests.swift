@@ -264,6 +264,18 @@ struct ProtectionCopyTests {
                 == "Another device entered Castle first, so this \(ProtectionCopy.deviceName) picked up that device's keys instead. The twelve words shown here are NOT your account's — the account's words are the ones written down on Lillian's iPhone.")
         #expect(ProtectionCopy.enteredCastleAfterAnotherDevice(device: nil).hasSuffix("written down on another device."))
         #expect(ProtectionCopy.castleDoneBody(nil) == ProtectionCopy.enteredCastleDone)
+        // pre-13x ladder round 1, F2 (MAJOR-3 d): the different-Apple-ID
+        // sentence HEDGED — the client cannot tell another Apple account
+        // from the same one under propagation lag (copy §2d, PROVISIONAL).
+        #expect(ProtectionCopy.waitingDifferentAppleID
+                == "This \(ProtectionCopy.deviceName)'s Apple account doesn't hold the key that set up sync — if it's the same Apple account, the key may still be arriving. Enter your passphrase or twelve words once to continue now; after that this \(ProtectionCopy.deviceName) opens on its own.")
+        // F2 (MAJOR-3 b): Replace All Keys' refusal when the account's iCloud
+        // key is not readable here (copy §4, PROVISIONAL).
+        #expect(ProtectionCopy.replaceKeysAppleKeyUnreachable
+                == "Your Apple account's key isn't reachable on this \(ProtectionCopy.deviceName) right now — wait a moment and try again, or enter your passphrase.")
+        // F2 (MAJOR-2): the Done when the fresh backup could not be made (copy §2b, PROVISIONAL).
+        #expect(ProtectionCopy.enteredCastleWithoutFreshBackup
+                == "You're in Castle. A fresh backup could not be made just now — check your Backups folder; your earlier backups are untouched.")
         // The nudge's three lines by tier — the one brain that survived §13.
         #expect(ProtectionCopy.nudgeSentence(for: .covered) == ProtectionCopy.coveredNudgeLine)
         #expect(ProtectionCopy.nudgeSentence(for: .exposed) == ProtectionCopy.exposedNudgeHeadline + " " + ProtectionCopy.exposedNudgeBody)

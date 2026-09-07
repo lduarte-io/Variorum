@@ -584,6 +584,9 @@ final class PostureSwitchModel: Identifiable {
         case PostureSwitchError.appleKeyUnavailable:
             return "iCloud Keychain wouldn't hold the key on this \(ProtectionCopy.deviceName) — "
                 + "nothing was changed."
+        case PostureSwitchError.appleKeyUnreachable:
+            // pre-13x ladder round 1, F2 (MAJOR-3 b): copy §4's PROVISIONAL line.
+            return ProtectionCopy.replaceKeysAppleKeyUnreachable
         case PostureSwitchError.wrongPosture:
             return "That switch doesn't apply right now."
         case VaultEnrollmentError.wrongPassphrase:

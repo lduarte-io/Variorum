@@ -297,6 +297,14 @@ final class ProtectionController {
     /// key file's copy) was refused — the pane says so instead of letting
     /// the posture imply a copy that does not exist.
     private(set) var appleKeyLandingFailed = false
+    /// pre-13x ladder round 1, F2 (MAJOR-3 as refined): the Apple arm is
+    /// WAITING — the account's vault names an iCloud key this device cannot
+    /// read yet and this device holds no master, so nothing is minted (a
+    /// mint here would duplicate A under propagation lag); the enroll
+    /// road's waiting face (`EnrollFacts.AppleState.absent`) speaks, and
+    /// the next ready re-reads. Distinct from `appleKeyLandingFailed`: no
+    /// write was refused.
+    private(set) var appleKeyWaiting = false
 
     /// R-pre13u-4: the ONE nudge brain's inputs, projected (both
     /// platforms' faces read THIS; the tier can never diverge).
@@ -424,6 +432,17 @@ final class ProtectionController {
     /// file through the landing hook + the refresh), wired by the roots;
     /// nil = the reconcile records the facts and lands nothing.
     @ObservationIgnored var landEnrollment: (@MainActor (DeviceKeyMaterial, PassphraseKDF.Descriptor) async -> Bool)?
+    /// pre-13x ladder round 1, F2 (MAJOR-3 (c) — THE HEAL): re-land the
+    /// vault's Apple-held copy of the master under the iCloud key this
+    /// device NOW reads, in one proof-authorized write (`leaveCastle`'s
+    /// shape; production `EncryptionSession.relandAppleHeldCopy`). Called
+    /// ONLY on proof of a same-account duplicate — this device's own key
+    /// file records the vault's `apple_key_id` AND iCloud Keychain now
+    /// hands back a different id: only the same Apple account can replace
+    /// the key this device minted. Returns whether the vault write landed;
+    /// on false the key file's copy is left under the recorded id so the
+    /// proof survives for the next ready.
+    @ObservationIgnored var healAppleHeldCopy: (@MainActor (AppleKey) async -> Bool)?
     /// pre-13x 3a — THE ADOPT ROAD's act (`AppServices.connectLibrary`:
     /// the typed secret unwraps this account's master, every row is
     /// re-stamped, sync re-initialized, custody + the key file landed),
@@ -1329,6 +1348,29 @@ final class ProtectionController {
     /// unwraps to the key in hand. Under Castle: no copy opens with A, and
     /// A is never touched (§14.5). Off-main (the guard-seam and Keychain
     /// work); the projections land back on the MainActor.
+    ///
+    /// pre-13x ladder round 1, F2 (MAJOR-3 AS REFINED — the orchestrator's
+    /// rules, which need no iCloud-account identity):
+    ///  (a) MINT only from a device that HOLDS M. A signed-in library whose
+    ///      vault names an `apple_key_id` this device cannot read, with no
+    ///      sync custody in hand, WAITS (`appleKeyWaiting`; the enroll
+    ///      road's waiting face) — before F2 it minted A₂ beside the
+    ///      account's A₁ under propagation lag, iCloud kept one, and the
+    ///      vault's copy stayed under the other forever. A device holding
+    ///      M (the first Standard device at sync setup; a device that
+    ///      enrolled by a typed secret and still reads no A; a device
+    ///      leaving Castle) mints and lands ITS OWN FILE's copy — never
+    ///      the vault's (a different Apple ID's device keeps the account's
+    ///      vault under the first Apple ID's A — corner 34).
+    ///  (c) HEAL only on proof of a same-account duplicate: the key file's
+    ///      recorded `appleKeyID` EQUALS the vault's AND `read()` returns
+    ///      a DIFFERENT id ⇒ this device's own iCloud Keychain replaced
+    ///      the key it minted, which only the same Apple account can do
+    ///      ⇒ holding M, the vault's copy is re-landed under the readable
+    ///      A FIRST (one proof-authorized write, `healAppleHeldCopy`), then
+    ///      the file's copy. A device whose recorded id is not the vault's
+    ///      never writes the vault — it re-lands its own file copy under
+    ///      what it reads, as before.
     private func reconcileAppleKey() async {
         // pre-13x 2d (decision 35): INDETERMINATE writes nothing — no A
         // read or minted, no copy landed; `appleKeyVerified` stays what it
@@ -1340,6 +1382,7 @@ final class ProtectionController {
         guard determined == .standard else {
             appleKeyVerified = false
             appleKeyLandingFailed = false
+            appleKeyWaiting = false
             return
         }
         let resident = residentKey
@@ -1347,16 +1390,55 @@ final class ProtectionController {
         let guardSeam = self.guardSeam
         let appleKeys = self.appleKeys
         let storeURL = configuration.storeURL
-        let outcome = await Task.detached(priority: .userInitiated) {
-            Self.reconcileAppleKeyOffMain(
+        // F2 (MAJOR-3 a): the account's Apple-held copy names an id; this
+        // device holds the master iff sync custody is in hand at this ready.
+        let vaultAppleKeyID = vaultReading?.appleKeyID
+        let holdsMaster = syncCustodyPresentAtReady
+        let mintAllowed = vaultAppleKeyID == nil || holdsMaster
+        let read = await Task.detached(priority: .userInitiated) {
+            Self.readAppleKeyForReconcile(
                 residentKey: resident, gate: gate, guardSeam: guardSeam,
-                appleKeys: appleKeys, storeURL: storeURL)
+                appleKeys: appleKeys, storeURL: storeURL, mintAllowed: mintAllowed)
         }.value
-        if let outcome {
-            appleKeyVerified = outcome.verified
-            appleKeyLandingFailed = outcome.landingFailed
-            logger.info("apple key reconcile: verified \(String(describing: outcome.verified), privacy: .public) · wrote this pass: \(outcome.wrotePass, privacy: .public) · landing failed: \(outcome.landingFailed, privacy: .public)")
+        guard let read else { return }
+        guard let apple = read.apple else {
+            appleKeyVerified = false
+            if read.waiting {
+                appleKeyLandingFailed = false
+                appleKeyWaiting = true
+                logger.notice("apple key reconcile: the account's iCloud key (\(vaultAppleKeyID?.prefix(8) ?? "?", privacy: .public)) is not readable here and this device holds no master — nothing minted; waiting (the passphrase door acts)")
+            } else {
+                appleKeyLandingFailed = true
+                appleKeyWaiting = false
+                logger.info("apple key reconcile: verified false · wrote this pass: false · landing failed: true")
+            }
+            refreshEnvelopeFacts()
+            return
         }
+        appleKeyWaiting = false
+        // F2 (MAJOR-3 c): the proof of a same-account duplicate, read from
+        // the key file BEFORE anything re-lands it.
+        if let vaultAppleKeyID, holdsMaster,
+           read.envelope.appleKeyID == vaultAppleKeyID, apple.id != vaultAppleKeyID {
+            logger.notice("apple key reconcile: this device's key file records the vault's iCloud key (\(vaultAppleKeyID.prefix(8), privacy: .public)) but iCloud Keychain now holds \(apple.id.prefix(8), privacy: .public) — a same-account duplicate resolved by iCloud; re-landing the vault's copy first")
+            guard let healAppleHeldCopy, await healAppleHeldCopy(apple) else {
+                // The vault write did not land (offline; no road wired):
+                // the file's copy stays under the recorded id so the proof
+                // survives for the next ready; this A opens no copy yet.
+                appleKeyVerified = false
+                appleKeyLandingFailed = false
+                logger.notice("apple key reconcile: the vault's Apple-held copy could not be re-landed — the key file's copy is left as recorded; the next ready retries")
+                refreshEnvelopeFacts()
+                return
+            }
+        }
+        let outcome = await Task.detached(priority: .userInitiated) {
+            Self.landAppleCopyOffMain(
+                key: read.key, envelope: read.envelope, apple: apple, gate: gate, storeURL: storeURL)
+        }.value
+        appleKeyVerified = outcome.verified
+        appleKeyLandingFailed = outcome.landingFailed
+        logger.info("apple key reconcile: verified \(String(describing: outcome.verified), privacy: .public) · wrote this pass: \(outcome.wrotePass, privacy: .public) · landing failed: \(outcome.landingFailed, privacy: .public)")
         // The arm can mint/save the envelope; the projection follows the
         // disk it just changed (the P2 doctrine).
         refreshEnvelopeFacts()
@@ -1368,20 +1450,38 @@ final class ProtectionController {
         var wrotePass: Bool = false
     }
 
-    nonisolated private static func reconcileAppleKeyOffMain(
+    /// F2: what the off-main read learned — the key in hand, the key file,
+    /// the iCloud key as read (or minted, when minting is allowed), and
+    /// whether a nil A means WAITING (minting disallowed) rather than a
+    /// refused write.
+    nonisolated struct AppleKeyReconcileRead: Sendable {
+        var key: StoreKey
+        var envelope: StoreKeyEnvelope
+        var apple: AppleKey?
+        var waiting: Bool
+    }
+
+    nonisolated private static func readAppleKeyForReconcile(
         residentKey: StoreKey?, gate: StoreLaunchGate, guardSeam: StoreKeyGuard,
-        appleKeys: AppleKeyLeaves, storeURL: URL?
-    ) -> AppleKeyReconcileOutcome? {
+        appleKeys: AppleKeyLeaves, storeURL: URL?, mintAllowed: Bool
+    ) -> AppleKeyReconcileRead? {
         guard let key = residentKey ?? guardSeam.loadAuto() else { return nil }
         // P1: an unreadable sidecar SKIPS the arm whole — nothing is ever
         // written over a file that may hold intact wraps.
         guard let ensured = try? ensuredEnvelope(for: key, gate: gate, storeURL: storeURL)
         else { return nil }
-        var envelope = ensured.envelope
-        // A: read, else minted (the first Standard library on this iCloud).
-        guard let apple = appleKeys.readOrMint() else {
-            return AppleKeyReconcileOutcome(verified: false, landingFailed: true)
-        }
+        // A: read — or minted, ONLY when this device may (the first
+        // Standard library on this iCloud; a device holding the master).
+        let apple = mintAllowed ? appleKeys.readOrMint() : appleKeys.read()
+        return AppleKeyReconcileRead(
+            key: key, envelope: ensured.envelope, apple: apple,
+            waiting: apple == nil && !mintAllowed)
+    }
+
+    nonisolated private static func landAppleCopyOffMain(
+        key: StoreKey, envelope: StoreKeyEnvelope, apple: AppleKey, gate: StoreLaunchGate, storeURL: URL?
+    ) -> AppleKeyReconcileOutcome {
+        var envelope = envelope
         // The steady state: the copy is under THIS A and opens.
         if envelope.appleKeyID == apple.id,
            (try? envelope.unwrapKey(apple: apple.symmetricKey)) == key {
@@ -1755,6 +1855,11 @@ func wireOneSecretHooks(
     protection.landEnrollment = { material, kdf in
         await encryption.adoptEnrolledMaterial(
             material, kdf: kdf, recoveryWrapDigest: protection.vaultReading?.recoveryWrapDigest)
+    }
+    // pre-13x ladder round 1, F2 (MAJOR-3 c): the heal's vault write — the
+    // session holds the client and this device's custody (M).
+    protection.healAppleHeldCopy = { apple in
+        await encryption.relandAppleHeldCopy(under: apple)
     }
     // pre-13x 3b: the two re-wrap doors' facts (copy §4; the reset door's
     // merge — the forgot road reads the posture and gate here).

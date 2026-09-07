@@ -422,6 +422,30 @@ final class EncryptionSession {
         }
     }
 
+    /// pre-13x ladder round 1, F2 (MAJOR-3 c — THE HEAL's write): re-land
+    /// the vault's Apple-held copy of the master under `apple` in ONE
+    /// proof-authorized write — `leaveCastle`'s shape: the master from this
+    /// device's custody, `settingAppleHeldCopy`, the CAS on the fetched
+    /// revision, the proof of the master this device holds. Called by the
+    /// controller only on proof of a same-account duplicate (its rule);
+    /// this method verifies nothing about the id — it writes what it is
+    /// handed under the proof it holds. Returns whether the write landed.
+    func relandAppleHeldCopy(under apple: AppleKey) async -> Bool {
+        guard let client else { return false }
+        guard let material = await store.offMain({ $0.load() }) else { return false }
+        do {
+            guard let fetched = try await client.fetchVault() else { return false }
+            let updated = try fetched.format.settingAppleHeldCopy(
+                masterKey: material.masterSymmetricKey, appleKey: apple.symmetricKey, appleKeyID: apple.id)
+            try await client.updateVault(
+                updated, expectedRevision: fetched.revision,
+                keyProof: KeyProof.wireToken(master: material.masterSymmetricKey))
+            return true
+        } catch {
+            return false
+        }
+    }
+
     /// pre-13x 3b: the vault's facts a key door reads at its threshold —
     /// the descriptor (the retired-word classification) and the wrap; nil =
     /// no vault; a `URLError` is the offline refusal's (decision 9).
