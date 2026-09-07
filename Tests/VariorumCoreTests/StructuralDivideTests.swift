@@ -435,7 +435,7 @@ struct StructuralDivideTests {
             #expect(try db.fetchInt("SELECT COUNT(*) FROM edge") == 0)
             #expect(try db.deletedAt("container_block", world.a.placement.id) == nil)
             #expect(stack.topLabel != "Divide")
-            #expect(stack.topLabel != "Divide into Variants")
+            #expect(stack.topLabel != "Divide choosing takes")
         }
     }
 
@@ -604,7 +604,7 @@ struct StructuralDivideTests {
             }
             #expect(try db.fetchInt("SELECT COUNT(*) FROM edge") == 0)
             #expect(try db.deletedAt("container_block", world.a.placement.id) == nil)
-            #expect(stack.topLabel != "Divide into Variants")
+            #expect(stack.topLabel != "Divide choosing takes")
         }
     }
 
@@ -666,9 +666,10 @@ struct StructuralDivideTests {
             let placementBefore = try db.snapshotRow("container_block", world.a.placement.id)
 
             let result = try ops.divideW(world.a.block.id, cuts: [world.v1: 11, world.v3: 13])
-            // The W ceremony's own label (Phase 9: the Edit menu reads
-            // "Undo Divide into Variants" — plan Step 6).
-            #expect(stack.topLabel == "Divide into Variants")
+            // The W ceremony's own label — the summoned door's name since
+            // U-4 (Phase 9's "Divide into Variants" renamed at the 18f
+            // ladder, R1-9): the Edit menu reads "Undo Divide choosing takes".
+            #expect(stack.topLabel == "Divide choosing takes")
 
             try stack.undo(with: ops)
 

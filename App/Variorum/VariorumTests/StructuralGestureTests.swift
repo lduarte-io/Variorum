@@ -749,7 +749,7 @@ struct DivideWCeremonyTests {
             // JUSTIFIED EDIT — this read "B's start", the sheet's former rule).
             #expect(h.textView.selectedRange()
                 == NSRange(location: h.model.index.range(ofEntryAt: 1).location, length: 0))
-            #expect(h.session.undoStack.topLabel == "Divide into Variants")
+            #expect(h.session.undoStack.topLabel == "Divide choosing takes")
             #expect(h.model.divideWCeremony == nil)
             _ = v1
         }
@@ -777,7 +777,7 @@ struct DivideWCeremonyTests {
 
             let stack = h.session.undoStack
             let label = try await h.session.runner.run { ops in try stack.undo(with: ops) }
-            #expect(label == "Divide into Variants")
+            #expect(label == "Divide choosing takes")
             try h.reload()
 
             let restored = try h.storeSlots().map(\.text)

@@ -442,10 +442,10 @@ final class EditorSurfaceController {
     /// that says so — this is the routing, the receipt and the guards.
     ///
     /// The undo entry is wrapped in a `withCompound(label: "Divide")` for
-    /// ONE reason: divideW's own entry is labelled "Divide into Variants"
-    /// (the ceremony's name, correct while the ceremony was its only
-    /// caller), and the Edit menu must keep reading **Undo Divide** for the
-    /// everyday gesture. One leg in, one entry out — the compound's inverse
+    /// ONE reason: divideW's own entry is labelled "Divide choosing takes"
+    /// (the summoned door's name — correct while that door is its only
+    /// unwrapped caller), and the Edit menu must keep reading **Undo Divide**
+    /// for the everyday gesture. One leg in, one entry out — the compound's inverse
     /// and its exact-row redo are the op's own.
     ///
     /// **The fork is read from the STORE, never from the projection** (the

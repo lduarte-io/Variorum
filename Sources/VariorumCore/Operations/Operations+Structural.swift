@@ -352,8 +352,12 @@ extension Operations {
             try divideWRows(
                 db, blockID: blockID, cuts: cuts, displayedVariantID: displayedVariantID)
         }
+        // The label is the summoned door's own name (U-4, 2026-09-06; renamed
+        // at the 18f ladder, R1-9): every OTHER caller wraps this op in a
+        // compound labelled "Divide", so this is what the Edit menu reads
+        // after "Divide choosing takes…" alone.
         undoStack?.register(
-            label: "Divide into Variants",
+            label: "Divide choosing takes",
             inverse: {
                 try $0.revertStructural(
                     restoringTexts: [],

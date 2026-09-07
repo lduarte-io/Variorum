@@ -119,7 +119,7 @@ struct RedoStackTests {
             try stack.undo(with: ops)
             #expect(try liveBlockOrder(db, in: post.id) == [a.block.id])
 
-            #expect(try stack.redo(with: ops) == "Divide into Variants")
+            #expect(try stack.redo(with: ops) == "Divide choosing takes")
             #expect(try liveBlockOrder(db, in: post.id) == expected)
             // The whole fan came back with the block — the cascade victims
             // carry the stamp the inverse wrote, so the flip finds them.

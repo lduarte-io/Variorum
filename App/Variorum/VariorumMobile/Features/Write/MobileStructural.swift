@@ -169,8 +169,8 @@ final class MobileStructuralController {
             return
         }
         // ONE undo entry, still labelled "Divide": divideW's own label
-        // names the ceremony ("Divide into Variants"), and the phone's undo
-        // door reads the label out loud.
+        // names the summoned door ("Divide choosing takes"), and the phone's
+        // undo door reads the label out loud.
         let stack = session.undoStack
         await runDivide(blockID: blockID) { ops in
             try stack.withCompound(label: "Divide", operations: ops) {
