@@ -1153,6 +1153,13 @@ final class EditorSurfaceController {
         /// what "bring every take" would bring. Read at open; the sentence's
         /// only input.
         var otherTakes: Int = 0
+        /// **The run's blocks, for the sheet to SHOW** (18f batch 2, mockup
+        /// figure B's amendment: over a run *"the columns become one list of
+        /// the run's blocks with their shown takes marked"*). DISPLAY ONLY and
+        /// additive — every confirm road reads the store afresh and none of
+        /// them looks at this; it exists so the run's sheet can show what it
+        /// is about to join instead of only counting it.
+        var runBlocks: [MergeRunBlock] = []
         /// Which of U-5/U-16's options the row is on. `bringEveryTake` on
         /// open — her J4b default, so ⏎ still reproduces the everyday merge.
         var arrangement: MergeArrangement = .bringEveryTake
@@ -1215,6 +1222,15 @@ final class EditorSurfaceController {
         }
 
         var canConfirm: Bool { confirmBlocker == nil }
+    }
+
+    /// One block of a RUN, as the sheet shows it (18f batch 2): the take that
+    /// is currently shown there, and how many takes the block carries.
+    struct MergeRunBlock: Equatable, Identifiable {
+        let blockID: String
+        let shownText: String
+        let takeCount: Int
+        var id: String { blockID }
     }
 
     struct MergeTake: Equatable, Identifiable {
@@ -1326,9 +1342,21 @@ final class EditorSurfaceController {
             model.refuseFeedback(FannedDefaultsCopy.mergeCeremonyNeedsAFan)
             return
         }
+        // The run's blocks as the sheet SHOWS them (18f batch 2, figure B's
+        // amendment) — display only, read from the same fans the count came
+        // from, with each block's currently-shown take named by the index.
+        let shown = blockIDs.map { id in
+            let fan = fans[id] ?? []
+            let displayed = model.index.entries.first { $0.blockID == id }?.variantID
+            let take = fan.first { $0.id == displayed } ?? fan.first
+            return MergeRunBlock(
+                blockID: id, shownText: take?.workingText ?? "",
+                takeCount: max(1, fan.count))
+        }
         mergeCeremony = MergeCeremonyState(
             firstBlockID: blockIDs[0], secondBlockID: blockIDs[1],
             blockIDs: blockIDs, entryIndices: indices, otherTakes: others,
+            runBlocks: shown,
             arrangement: .bringEveryTake,
             firstRenderedID: nil, secondRenderedID: nil,
             firstTakes: [], secondTakes: [], pairings: [])

@@ -61,6 +61,22 @@ nonisolated enum MergeArrangement: String, CaseIterable, Equatable, Sendable, Id
         case .pairByHand: "Pair by hand…"
         }
     }
+
+    /// **The option card's one line** (18f batch 2, mockup figure B —
+    /// ADDITIVE: a display string beside `title`, so the row's whole voice
+    /// stays in one home, exactly as the divide row's `detail` does).
+    func detail(blocks: Int) -> String {
+        switch self {
+        case .bringEveryTake:
+            blocks > 2
+                ? "the shown takes join in order; every other take comes along whole"
+                : "the two shown join; every other take comes along whole"
+        case .onlyTheShownOnes:
+            "the others stay with their original blocks, in lineage"
+        case .pairByHand:
+            "\u{FF0B} pairings, carries, and the join per pair"
+        }
+    }
 }
 
 /// The one sentence under the merge row — the mockup's, in counts, pure so it
