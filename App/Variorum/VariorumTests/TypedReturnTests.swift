@@ -121,6 +121,17 @@ struct TypedReturnTests {
         #expect(act(index, caret: 0, texts: [text])
             == .emptyBlock(edge: .above, entryIndex: 0, blockID: "a",
                            closingEmptyTail: false), "the block's start still pushes down")
+        // The line's END is the list door's own position (continue / exit),
+        // and the one way this act is reached there is the exit road with
+        // the lead already gone (R1-3) — whose next word must be the block,
+        // never a newline: with prose below it divides, at the block's end
+        // it makes the block below.
+        #expect(act(index, caret: 9, texts: [text])
+            == .divideAtCaret(entryIndex: 0, blockID: "a"), "a list line's end is not content")
+        let last = BlockRangeIndex(slots: [slot("a", text: "- one")], tail: nil)
+        #expect(act(last, caret: 5, texts: ["- one"])
+            == .emptyBlock(edge: .below, entryIndex: 0, blockID: "a",
+                           closingEmptyTail: false))
     }
 
     // MARK: - The empty block (U-19 (2))

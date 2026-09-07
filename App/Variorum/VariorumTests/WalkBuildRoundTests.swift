@@ -380,8 +380,11 @@ struct ListContinuationTests {
                 with: Self.returnEvent(shift: false, windowNumber: hosted.window.windowNumber))
             await h.flush()
 
-            #expect(try h.storeSlots().map(\.text) == ["- milk\n", ""],
-                    "the lead went, no newline was typed, and the block below is U-1's")
+            // 18c ladder round 1, R1-3 (PROVISIONAL #94): the continuation's
+            // own newline goes with the lead when the item was the block's
+            // last line — the batch-2 shape was `["- milk\n", ""]`.
+            #expect(try h.storeSlots().map(\.text) == ["- milk", ""],
+                    "the lead and its newline went, none was typed, and the block below is U-1's")
             #expect(h.model.caretBlockID == h.model.index.entries[1].blockID)
             #expect(!h.model.hasOpenTail)
         }
@@ -717,7 +720,15 @@ struct NestedListDoorTests {
             press()
             #expect(h.documentText == "- milk\n  - almond\n- ", "outdent first")
             press()
-            #expect(h.documentText == "- milk\n  - almond\n", "then exit")
+            // RE-POINTED (18c ladder round 1, R1-3 — PROVISIONAL #94): the
+            // exit retracts the continuation's own newline with the lead
+            // when the item was the block's last line (the batch-2 shape
+            // here was `"- milk\n  - almond\n"`), and U-1's key then makes
+            // the block below.
+            #expect(h.documentText == "- milk\n  - almond", "then exit — its newline with it")
+            await h.flush()
+            #expect(try h.storeSlots().map(\.text) == ["- milk\n  - almond", ""],
+                    "…and the key made the block below")
         }
     }
 

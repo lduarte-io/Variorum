@@ -147,13 +147,18 @@ final class EditorTextView: NSTextView, MarkdownFormattable {
             }
             super.insertNewline(sender)
         }
-        if case .exitList = list { _ = claimTypedReturn() }
+        // The exit says so: the model may retract the continuation's own
+        // newline before it decides (18c ladder R1-3, PROVISIONAL #94).
+        if case .exitList = list { _ = claimTypedReturn(afterListExit: true) }
     }
 
     /// **U-1's act, claimed at the key** — set by `EditorViewModel.attach`;
     /// nil (a bare surface, a harness that attaches no model) means the key
-    /// is never claimed and every existing behaviour stands.
-    var onTypedReturn: (() -> Bool)?
+    /// is never claimed and every existing behaviour stands. The argument
+    /// is TRUE when the list door has just retracted an empty item's lead
+    /// (`.exitList`) — the one composition in which the key arrives with a
+    /// newline of the door's own making behind the caret.
+    var onTypedReturn: ((_ afterListExit: Bool) -> Bool)?
 
     /// **18c ladder R1-1:** TRUE when a plain newline typed at the caret
     /// would OPEN THE TAIL — set by `EditorViewModel.attach`; nil means "it
@@ -168,9 +173,9 @@ final class EditorTextView: NSTextView, MarkdownFormattable {
     /// commits the composition and is not this gesture; a non-editable
     /// surface (a sealed note) has no gesture at all, and its refusal is
     /// the seal's, spoken where the seal speaks.
-    private func claimTypedReturn() -> Bool {
+    private func claimTypedReturn(afterListExit: Bool = false) -> Bool {
         guard isEditable, !hasMarkedText() else { return false }
-        return onTypedReturn?() ?? false
+        return onTypedReturn?(afterListExit) ?? false
     }
 
     /// **13k K8 — Tab indents a list line, ⇧Tab outdents it** (her ruling +

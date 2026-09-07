@@ -382,7 +382,9 @@ final class EditorViewModel {
         // reason the block pick above states — the model owns the surface
         // from this point, so the detail editor, the inline book editor and
         // every harness that attaches a real text view get ONE wiring.
-        textView.onTypedReturn = { [weak self] in self?.runTypedReturn() ?? false }
+        textView.onTypedReturn = { [weak self] afterListExit in
+            self?.runTypedReturn(afterListExit: afterListExit) ?? false
+        }
         // 18c ladder R1-1: the list door's continuation asks before its
         // newline lands whether that newline would open the tail.
         textView.onNewlineWouldOpenTail = { [weak self] in
@@ -1528,10 +1530,60 @@ final class EditorViewModel {
     /// turn through the deferred-keystroke seam — chained, so two fast
     /// Returns compose instead of racing — and it RE-DERIVES the decision
     /// there against the surface the previous one left behind.
-    func runTypedReturn() -> Bool {
+    func runTypedReturn(afterListExit: Bool = false) -> Bool {
+        if afterListExit { retractListContinuationNewline() }
         guard typedReturnAct() != .content else { return false }
         structural.scheduleTypedReturn()
         return true
+    }
+
+    /// **18c ladder round 1, R1-3 (PROVISIONAL — QUESTIONS #94):** when an
+    /// EMPTY list item's ⏎ has just retracted its lead (`.exitList`) and
+    /// that item was the block's LAST line, the newline the continuation
+    /// typed one keystroke earlier goes with it — through the ordinary
+    /// editing path — so ⏎⏎ after a list ends the block at its last item
+    /// exactly as ⏎ ends a prose paragraph, and no blank last line is left
+    /// behind. Only the continuation's OWN newline is retracted: the line
+    /// before it must itself be a list line (a continuation always follows
+    /// one), so a blank line she typed above the item (U-19 (2)) is never
+    /// touched, and an item mid-block keeps the seam's k−1 spacing (A11).
+    /// A RESTORATION of the gesture's pre-U-1 shape, not a new behaviour:
+    /// K5 left the caret ON that line, where prose continued in the same
+    /// block; U-1 moves it into a new block, which is what turned the line
+    /// into a leftover.
+    private func retractListContinuationNewline() {
+        guard let textView else { return }
+        let selection = textView.selectedRange()
+        guard selection.length == 0, selection.location != NSNotFound,
+              selection.location > 0
+        else { return }
+        let caret = selection.location
+        // The caret's entry (never the tail), and the caret must sit at its
+        // END — the item was the block's last line.
+        var location = 0
+        var entryStart: Int?
+        for entry in index.entries {
+            if caret >= location, caret <= location + entry.length {
+                guard caret == location + entry.length else { return }
+                entryStart = location
+                break
+            }
+            location += entry.length + 1
+        }
+        guard let entryStart, caret - 1 >= entryStart else { return }
+        let text = textView.string as NSString
+        guard text.character(at: caret - 1) == 0x0A else { return }
+        let previous = text.range(
+            of: "\n", options: .backwards,
+            range: NSRange(location: entryStart, length: caret - 1 - entryStart))
+        let previousStart = previous.location == NSNotFound ? entryStart : previous.location + 1
+        let previousLine = text.substring(
+            with: NSRange(location: previousStart, length: caret - 1 - previousStart))
+        guard MarkdownSyntax.isListLead(previousLine) else { return }
+        let range = NSRange(location: caret - 1, length: 1)
+        guard textView.shouldChangeText(in: range, replacementString: "") else { return }
+        textView.replaceCharacters(in: range, with: "")
+        textView.didChangeText()
     }
 
     /// **18c ladder R1-1 — the ONE tail-opening predicate, asked before a

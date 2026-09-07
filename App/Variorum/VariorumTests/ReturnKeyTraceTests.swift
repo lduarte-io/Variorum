@@ -783,6 +783,13 @@ struct TypedReturnKeyTests {
     /// Inside a list ⏎ continues the list (lists stay whole — her U-19 (4));
     /// a second ⏎ on the now-empty item ends the list AND makes the block.
     /// The two intercepts compose in that order.
+    ///
+    /// **RE-POINTED (18c ladder round 1, R1-3 — PROVISIONAL, QUESTIONS
+    /// #94):** the exit retracts the continuation's OWN newline with the
+    /// lead when the empty item was the block's last line, so the list
+    /// block ends at `"- one"` and ⏎⏎ after a list reads exactly like ⏎⏎
+    /// after prose — no blank last line left behind. Red-on-old: the batch-2
+    /// shape was `["- one\n", "", "gamma"]`.
     @Test func aListItemsReturnContinuesTheListAndTheEmptyItemEndsItAndMakesTheBlock()
         async throws
     {
@@ -799,9 +806,45 @@ struct TypedReturnKeyTests {
 
             returnKey(h, window.window)
             await h.flush()
-            #expect(try h.storeSlots().map(\.text) == ["- one\n", "", "gamma"],
-                    "the empty item ended the list AND the key made the block")
+            #expect(try h.storeSlots().map(\.text) == ["- one", "", "gamma"],
+                    "the empty item ended the list — its newline with it — AND the key made the block")
             #expect(h.model.caretBlockID == h.model.index.entries[1].blockID)
+        }
+    }
+
+    /// **GREEN ON BOTH SIDES, deliberately (R1-3's guard):** an empty item
+    /// exited MID-block is not the block's last line, so nothing is
+    /// retracted and the key's divide keeps the seam's k−1 spacing (A11) —
+    /// the retraction is scoped to the case U-1 orphaned, never to a seam
+    /// dividing by hand already owns.
+    @Test func anEmptyItemExitedMidBlockKeepsTheSeamsSpacing() async throws {
+        try await withEditor(seedBlocks: ["- a\n- \nmore"]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+
+            caret(h, entry: 0, offset: 6)  // after the empty item's "- "
+            returnKey(h, window.window)
+            await h.flush()
+
+            #expect(try h.storeSlots().map(\.text) == ["- a\n", "more"],
+                    "the lead went, the divide ran, and the run's k−1 newline stayed")
+        }
+    }
+
+    /// **GREEN ON BOTH SIDES, deliberately (R1-3's other guard):** only the
+    /// continuation's own newline is retracted — the line before it must be
+    /// a list line. A blank line SHE put above the item stays (U-19 (2)).
+    @Test func theExitNeverRetractsABlankLineSheTyped() async throws {
+        try await withEditor(seedBlocks: ["- a\n\n- "]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+
+            caret(h, entry: 0, offset: 8)  // after the empty item's "- "
+            returnKey(h, window.window)
+            await h.flush()
+
+            #expect(try h.storeSlots().map(\.text) == ["- a\n\n", ""],
+                    "her blank line is hers; the block below is the key's")
         }
     }
 

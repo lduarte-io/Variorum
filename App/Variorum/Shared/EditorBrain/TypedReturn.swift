@@ -135,17 +135,23 @@ nonisolated enum TypedReturn {
                         edge: .above, entryIndex: i, blockID: entry.blockID,
                         closingEmptyTail: false)
                 }
-                // A caret ANYWHERE on a LIST LINE is the list door's (18c
-                // ladder round 1, R1-4 — PROVISIONAL, QUESTIONS #94): the
-                // door itself claims only the line's END (continue / exit),
-                // so a mid-item ⏎ reached this act and DIVIDED the list
-                // block — the second half losing its bullet, the list no
-                // longer one block. §5.1's letter is "inside a list, Return
-                // continues the list … keeps its behavior", and the shipped
-                // K5 behaviour mid-item was a content newline; this restores
-                // it (the block stays whole). Whether a mid-item ⏎ should
+                // A caret on a LIST LINE, anywhere but its END, is the list
+                // door's (18c ladder round 1, R1-4 — PROVISIONAL, QUESTIONS
+                // #94): the door itself claims only the line's end
+                // (continue / exit / outdent), so a mid-item ⏎ reached this
+                // act and DIVIDED the list block — the second half losing
+                // its bullet, the list no longer one block. §5.1's letter is
+                // "inside a list, Return continues the list … keeps its
+                // behavior", and the shipped K5 behaviour mid-item was a
+                // content newline; this restores it (the block stays
+                // whole). The line's END is deliberately excluded: the only
+                // way this act is reached there is the exit road (an empty
+                // item's lead retracted, R1-3), whose next word must be the
+                // block below, never a newline. Whether a mid-item ⏎ should
                 // instead split the ITEM into two bullets is hers (#94).
-                if MarkdownSyntax.isListLead(Self.line(of: text, at: clamped)) {
+                let line = Self.lineRange(of: text, at: clamped)
+                if clamped < line.upperBound,
+                   MarkdownSyntax.isListLead(text.substring(with: line)) {
                     return .content
                 }
                 // "At the end" ignores trailing whitespace (§5.1): what
@@ -165,13 +171,13 @@ nonisolated enum TypedReturn {
 
     /// The line `offset` sits on, terminator excluded — O(line), read from
     /// the one entry the act already holds (P1).
-    private static func line(of text: NSString, at offset: Int) -> String {
+    static func lineRange(of text: NSString, at offset: Int) -> NSRange {
         let before = text.range(
             of: "\n", options: .backwards, range: NSRange(location: 0, length: offset))
         let start = before.location == NSNotFound ? 0 : before.location + 1
         let after = text.range(
             of: "\n", range: NSRange(location: offset, length: text.length - offset))
         let end = after.location == NSNotFound ? text.length : after.location
-        return text.substring(with: NSRange(location: start, length: end - start))
+        return NSRange(location: start, length: end - start)
     }
 }
