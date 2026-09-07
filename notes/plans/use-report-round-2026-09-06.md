@@ -2507,3 +2507,129 @@ remaining candidate is face-level and is settled by the WALK (piece 6) — the r
 sheet and send a real drag into a nested `Canvas` (KnownIssues row 43). Recorded, not fixed on
 suspicion.
 
+---
+
+**DISPOSITIONS (the ledger rows this batch owns):**
+
+- **Row 3 — *"the scissors couldn't be placed at the end of the block"* — FIXED, by USE.** §4.4's three
+  named brains were pinned FIRST and all three passed (`CutFlowEndSlotTests`, 4 tests: the end is always
+  legal whatever the take ends with · the end slot is laid inside the flow's own size when the LAST line
+  is the widest · a point right of the last token resolves to it · → walks to the end and parks), and a
+  probe with HER OWN take text at both the sheet's minimum width and her window's said the same. They are
+  recorded as SOUND, not fixed on suspicion. The real mechanism is one level up and was found by walking:
+  the sheet's placement keys died after the first click on any control in it (`@FocusState` armed once in
+  `onAppear`; controls take first responder). FIXED by a sheet-scoped key monitor; red and green captured
+  (`07-…RED…`, `06-…GREEN…`). The pure pins stay and 18f batch 2 inherits them unchanged.
+- **Row 4 — *"Takes should automatically be selected … and should automatically have the scissors at the
+  end"* (U-3, HERS/ruled) — FIXED.** Pins: `theSheetOpensKeptOnTopWithEveryTakeCheckedAndTheScissorsAtTheEnd`
+  · `choosePerTakeRevealsTheChecklistAtTheEnds` · `theBoardsCeremonyOpensOnTheArrangementRow` ·
+  `theCeremonyOpensArrangedWithTheSeedsOwnCut`. Walked (`02`, `05`).
+- **Row 35 — the NAMES and the DOORS (U-4, HERS/ruled) — FIXED.** "Divide choosing takes…" /
+  "Merge choosing takes…" everywhere, the word "ceremony" gone from every UI string, and merge is a BUTTON:
+  the registry gains `.bottomBar` on both and `.surface` on merge; Write's `block ▾` renders both rows and
+  the two bulk bars render merge's two roads. Pins: `bothCeremonyDoorsAreDeclaredWithTheirThreeDoorsAndKeys`
+  (widened) · the registry walk's four door tables · `StructuralGestureTests`' menu titles ·
+  `UndoHintAndRefusalTests`' fan-fold road · the tutorial spine's lesson id. Walked (`01`, `11`, `13`).
+- **Row 36 — the three presets easy, the custom selector deliberate (U-5, HERS/ruled) — FIXED** on the Mac,
+  both sheets. Pins: `DivideArrangementTests` (8) + `MergeArrangementTests` (8). **The phone's parity row is
+  written below and is NOT built here** (the brief's own fence). Walked (`02`–`05`, `11`–`14`).
+- **U-16 (the merge over three or more) — FIXED** as part of row 36's letter: two options, never the
+  pairing surface; `mergeCeremonyIsPairwise` retired. Pins: `theMergeCeremonyDoorOnAChainOffersTwoChoicesAndNoPairing`
+  · `thePairingSurfaceNeverMountsForARun` · `bringEveryTakeOnARunIsTheCarryAllChain` ·
+  `onlyTheShownOnesOnARunIsThePlainChain` · `eitherRunRoadIsOneUndoEntry`. Walked (`13`, `14`, `15`).
+
+**NOTHING WAS DISMISSED AS HOLLOW.** Row 3's three §4.4 pins pass on both sides, which is why they are
+recorded as *sound brains* rather than as a fix; the row itself is a real defect, traced and fixed
+elsewhere, with red-on-old evidence in the form the rig allows for a face (KnownIssues row 43).
+
+**RETIRED AND REWRITTEN PINS — the complete list, with the ruling beside each. None was deleted
+silently; every one keeps its claim or names its replacement.**
+
+| Pin | Its premise | Ruling | Now |
+|---|---|---|---|
+| `theMergeCeremonyDoorOnAChainRefusesAndNamesTheChainRoad` | a run of 3+ has no ceremony, so ⌥⌘⇧M refuses | **U-16** | RETIRED → `theMergeCeremonyDoorOnAChainOffersTwoChoicesAndNoPairing`, plus the new `theMergeCeremonyDoorOnAFanlessChainStillRefuses` keeping the refusal where it is still true |
+| `theCeremonyPreMarksTheActiveTakeAndSeedsProposals` | only the seed is marked; `CutPropagation` seeds the rest | **U-3** | RETIRED → `theCeremonyOpensArrangedWithTheSeedsOwnCut` (the seed's own cut and the other's legal set survive verbatim) |
+| `noUniqueMatchLeavesTheTakeUnseededAndGatesConfirm` | an unrelated take opens with NO cut | **U-3** | RETIRED → `anUnrelatedTakeStillParksAndCanBePlacedByHand` (the uncheck road and the hand placement survive) |
+| `bothCeremonyDoorsAreDeclaredWithTheirThreeDoorsAndKeys` | the doors are exactly menu · context · palette | **U-4** | kept by name, door sets WIDENED, round-4's three still asserted as a superset |
+| `clickingAnUncheckedRowChecksIt` | the sheet opens with something unchecked | **U-3** | kept by name and claim; it now unchecks a take under "Choose per take…" first |
+| `theCeremonyRefusesToConfirmWhileEveryCheckedTakeParksTheSameWay` (board) | one I10 refusal, one voice | **U-5** | kept by name; BOTH voices pinned (the preset's and the hand-placed sheet's) |
+| `confirmPassesExactlyTheMarkedCutsToTheOp` · `allTakesParkedAtOneEndGateConfirmWithHonestCopy` · `confirmWithAParkedTakeRidesItWholeIntoOneSuccessor` | the take must be MARKED by hand and its cut propagated | **U-3 · U-5** | kept by name and claim; each names its road (`setArrangement(.perTake)`) or drops a call the ruling now makes for it |
+| `confirmingThePrePairedSheetReproducesTheInstantOutcome` · `theSessionRemembersTheLastConfirmedJoin` · `pairingMutationsKeepArityAndCarryExclusive` · `confirmRefusesToJoinDriftedText` | the merge sheet IS the pairing surface | **U-5** | kept by name and claim; each names the road with one `setMergeArrangement(.pairByHand)` line |
+| `everyRefusalReasonHasHonestCopy` (the fanned-middle-span clause) | the refusal names "Divide Block at Cursor" as the ceremony's door | **U-4** (+ 18c's keep-on-top) | kept by name; the clause now names "Divide choosing takes" |
+| `theMergeCeremonyDoorOnAChain…`'s copy home `FannedDefaultsCopy.mergeCeremonyIsPairwise` | a refusal that could only say no | **U-16** | RETIRED from the file, its text kept as a comment naming the ruling |
+
+**THE FIELD GUIDE'S CHANGED LESSONS (her one restore act at the round's end — titles first):**
+
+- **`structure` ▸ "the take ceremony" → RENAMED "divide choosing takes"**, and both of its cards rewritten
+  (the opening question now asks *where the takes go*, not only where each is cut; the walkthrough card
+  describes the row of four and sends her to "Choose per take…").
+- **`structure` ▸ "divide"** — the fanned card: the takes now stay WHOLE on the first block (18c's U-2
+  truth, which the guide still promised the other way), and it names Divide choosing takes.
+- **`structure` ▸ "merge"** — two cards: the ceremony sentence becomes the arrangement row (with
+  "pre-paired" kept where it is still true), and the pairing card gains U-16's two-option sentence for a
+  run of three or more; the staged spare take's own line re-words.
+- **`writing` ▸ "blocks & typing"** — *"No gesture, no ceremony."* → *"No gesture, nothing to ask for."*
+- **`structure` ▸ "extract & make block"** — *"zero ceremony"* → *"no fuss at all"*.
+- Beside the guide: the ⌘/ helper's two Structure rows and its **"divide / the take ceremony" dictionary
+  entry → "divide / divide choosing takes"** (rewritten to keep-on-top and the four options), and its
+  merge entry's ceremony sentence.
+
+**THE PHONE'S PARITY ROW (for the round's MOBILE PARITY LINE — written here, NOT built, per the brief):**
+
+> **18f batch 1 — the ceremonies' names and the divide arrangement (U-4 · U-5 · U-16). OWED by the phone.**
+> The Mac's fanned divide now asks first, in a row of four. The phone owes the same question in its own
+> shape: **the three presets as a bottom sheet of three plain rows in the same words — "Keep takes on the
+> top block" · "Keep takes on the bottom block" · "Copy takes to both" — with "Choose per take…" a quieter
+> fourth row**, and the phone NEVER gets the hand-placement surface (her 2026-08-03 mobile-gate rule: the
+> ceremonies need no mobile replication). Her own note — *"not sure how to not make it crowded"* — is
+> answered by ONE sheet and no inline controls. The brains are already shared and store-free
+> (`KeepOnTopDivide` in core Domain; `Operations.divideDuplicating` in core), so the phone's work is the
+> face and the door. The NAMES are owed too wherever the phone speaks them. Built at the mobile catch-up.
+
+**PROVISIONAL, for her ratify list:** QUESTIONS **#95** — the two bulk bars offer the TWO run options at
+every pick size, and the pairing surface stays on the doors that have always carried it. Options (b) a
+visible carry into Write for a pair and (c) extracting the merge state machine behind a host protocol (the
+13d `DivideWCeremony` precedent — a batch of its own) are written up for her. **Riding #91:** the sheet's
+confirm passes the SEED as `divideW`'s anchor on every road, including "Choose per take…" — the same
+question #91 already asks at the instant door, given the same built answer.
+
+**CANON DELTA, DRAFTED FOR THE LETTER'S CLOSEOUT (not applied here — the closeout owns it):**
+
+1. **AppSpec §9, `divideW`'s W bullet** gains: the CEREMONY it names is now **"Divide choosing takes"**
+   (U-4), and its sheet asks the arrangement FIRST — keep the takes on the top block (her U-2 default,
+   selected on open) · keep them on the bottom (`KeepOnTopDivide.compose(keepBelow:)`) · copy them to both
+   (`divideDuplicating`) · choose per take (the shipped hand-placement surface). Zero new operation; the
+   presets are arrangements of shipped arguments.
+2. **AppSpec §9, `mergeCeremony`'s paragraph** gains: the ceremony is **"Merge choosing takes"** and asks
+   the arrangement first — bring every take (the J4b carry-all, selected on open) · only the shown ones
+   (plain `merge`) · pair by hand (S4-23, byte-unchanged). **Over a run of THREE OR MORE (her U-16) the door
+   offers exactly the first two and never mounts the pairing surface**; the standing pairwise REFUSAL is
+   retired.
+3. **AppSpec §12's Phase-13 surfaces paragraph** — wherever the two sheets are named, the names change.
+
+**NOT DONE, restated at the close:** everything in the record's first line, plus — no canon file edited
+(the delta above is drafted for the closeout); no `notes/MobileSoul.md` edit (the parity row's text is
+above, for the round's ONE line); no KnownIssues row opened (nothing was deferred out of this batch); no
+Release build and no `/Applications` refresh; the Takes board's banner door rendered and declared but
+captured only through the workbench's identical menu.
+
+**THE CLOSING SUITES (all run at the END, on the final tree):**
+
+- core `swift test` → **`Test run with 1493 tests in 162 suites passed after 50.464 seconds.`**
+  *(the letter's baseline was 1493/162 at 18c's close — this batch touched no core code.)*
+- Mac, ONE `xcodebuild test` run over 36 suite TYPES — the divide family (`CutFlowEndSlotTests` ·
+  `DivideArrangementTests` · `DivideCeremonyCostTests` · `DivideCeremonyRowTapTests` · `WCutPlacementTests` ·
+  `CutPropagationTests` · `TakesDivideTests` · `DivideWCeremonyTests`), the merge family
+  (`MergeArrangementTests` · `MergeCeremonySheetTests` · `SeamMergeTests` · `MergeGestureTests`), both
+  fanned-defaults suites, `CapabilityRegistryTests`, the structural-gesture suites
+  (`StructuralRewriteDoorTests` · `DivideExtractGestureTests` · `MakeBlockGestureTests` ·
+  `DropAndRefusalCopyTests` · `DifferentialApplyTests` · `ReviewRound1/2/3FixTests`),
+  `UndoHintAndRefusalTests`, both workbench suites, and the ten `Tutorial*` spine types →
+  **`Test run with 295 tests in 36 suites passed after 35.670 seconds.`** Thirty-six suites for
+  thirty-six `-only-testing` TYPE names: nothing was silently dropped. *(Recorded for the next session:
+  `StructuralGestureTests` and `DoorSetTests` are FILE names, not suite types — naming them drops them
+  silently, which the first run of this set did.)*
+- iOS `xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS' build` → **BUILD SUCCEEDED**,
+  with `git diff --stat HEAD -- App/Variorum/Shared App/Variorum/VariorumMobile App/Variorum/VariorumMobileTests Sources/VariorumCore`
+  **EMPTY** — the phone, the shared folder and the core are untouched by construction, not by hope.
+
