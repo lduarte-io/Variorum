@@ -537,6 +537,14 @@ enum SampleLibrarySeeder {
         return base + "." + suffix
     }
 
+    /// pre-13x ladder round 2, F3 (MINOR-N3): this device's per-book seeded
+    /// mark, as the launch seeder reads it (production's `loadMark`) — and
+    /// the tutorial door's SILENT ensure reads the same mark as the reader's
+    /// standing decision ("deleted ⇒ never re-seeded", `Outcome.alreadySeeded`).
+    nonisolated static func isMarkedSeeded(storeVariant: AppDatabase.StoreVariant, book: Book) -> Bool {
+        UserDefaults.standard.bool(forKey: seededDefaultsKey(for: storeVariant, book: book))
+    }
+
     /// What the seed needs to know about sync, and nothing more — the
     /// starter journal's gate, same two facts, same injection shape.
     struct SyncGate {
@@ -625,7 +633,7 @@ enum SampleLibrarySeeder {
         pacing: Pacing?
     ) async -> Outcome {
         let key = seededDefaultsKey(for: storeVariant, book: book)
-        let load = loadMark ?? { UserDefaults.standard.bool(forKey: key) }
+        let load = loadMark ?? { isMarkedSeeded(storeVariant: storeVariant, book: book) }
         let save = saveMark ?? { UserDefaults.standard.set($0, forKey: key) }
 
         guard !load() else { return .alreadySeeded }

@@ -471,7 +471,7 @@ final class AppBootstrap {
                 })
                 installed = true
             }
-            state = .ready(AppSession(database: view))
+            state = .ready(AppSession(database: view, storeVariant: storeVariant))
             // pre-13x 2b: the reconcile's Apple arm reads the persisted
             // switch marker (a crashed switch pending its resume).
             protection.readSwitchPending = { [database] in

@@ -143,6 +143,20 @@ extension Queries {
             sql: "SELECT * FROM reading WHERE deleted_at IS NULL ORDER BY name, id")
     }
 
+    /// pre-13x ladder round 2, F3 (MINOR-N3): whether a book of this EXACT
+    /// name was ever deleted — ANY tombstoned `reading` row, regardless of
+    /// the Trash's 30-day window or a purge intent (a Delete Now is the
+    /// reader's word too). The seeded books' SILENT ensure (the tutorial
+    /// door) reads it as the reader's decision and declines; the explicit
+    /// restore doors are asks and do not. A physically purged row leaves no
+    /// tombstone — the seeding device's own mark is the other evidence.
+    public static func readingTombstoneExists(_ db: Database, name: String) throws -> Bool {
+        try Bool.fetchOne(
+            db,
+            sql: "SELECT EXISTS(SELECT 1 FROM reading WHERE name = ? AND deleted_at IS NOT NULL)",
+            arguments: [name]) ?? false
+    }
+
     /// The deleted-books recovery surface (13b Stage 4, 4F — N37/S4-28.2:
     /// `restoreReading`'s listing; the `deletedPosts` parallel): tombstoned
     /// readings, newest deletion first. Soft-delete is the only delete

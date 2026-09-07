@@ -37,6 +37,18 @@ final class UndoMenuState {
 @MainActor
 final class AppSession {
     let database: AppDatabase
+    /// pre-13x ladder round 2, F3 (MINOR-N3): which store this session
+    /// serves — the seeded books' per-variant marks are read against it
+    /// (Debug and Release share a defaults domain, so an unscoped read would
+    /// let the dev store's mark answer for the real one). The bootstrap
+    /// hands its variant; a headless session (the pins) defaults to `.real`.
+    let storeVariant: AppDatabase.StoreVariant
+    /// F3 (MINOR-N3): the seeded books' per-book mark on THIS device, as the
+    /// tutorial door's SILENT ensure reads it — the production leaf reads
+    /// `SampleLibrarySeeder.isMarkedSeeded` for `storeVariant`; a pin
+    /// injects its own, so no headless run ever reads the test host's
+    /// defaults (a domain the real app shares).
+    @ObservationIgnored var seededBookMarkIsSet: @MainActor (SampleLibrarySeeder.Book) -> Bool
 
     /// **The READ-side clock** (13j J1 — the 30-day Trash window).
     ///
@@ -521,10 +533,14 @@ final class AppSession {
     }
     #endif
 
-    init(database: AppDatabase) {
+    init(database: AppDatabase, storeVariant: AppDatabase.StoreVariant = .real) {
         @Dependency(\.date) var date
         self.clock = date
         self.database = database
+        self.storeVariant = storeVariant
+        self.seededBookMarkIsSet = { book in
+            SampleLibrarySeeder.isMarkedSeeded(storeVariant: storeVariant, book: book)
+        }
         let undo = UndoStack()
         self.undoStack = undo
         let ops = Operations(undoStack: undo)

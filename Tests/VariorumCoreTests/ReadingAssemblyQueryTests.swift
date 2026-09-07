@@ -58,6 +58,31 @@ struct ReadingAssemblyQueryTests {
         }
     }
 
+    /// pre-13x ladder round 2, F3 (MINOR-N3): the seeded books' silent
+    /// ensure reads a book's tombstone as the reader's decision — any
+    /// tombstoned row of the exact name, whatever its age; a live book, a
+    /// restored one and a name never seen answer false.
+    @Test func readingTombstoneExistsReadsTheExactNameAcrossAnyAge() throws {
+        try withOperations { ops, db in
+            let live = try ops.createReading(name: "Encryption Explained", kind: .curated)
+            #expect(try db.read { try Queries.readingTombstoneExists($0, name: "Encryption Explained") } == false)
+            #expect(try db.read { try Queries.readingTombstoneExists($0, name: "never seen") } == false)
+            try ops.deleteReading(live.id)
+            #expect(try db.read { try Queries.readingTombstoneExists($0, name: "Encryption Explained") } == true)
+            #expect(try db.read { try Queries.readingTombstoneExists($0, name: "encryption explained") } == false,
+                    "the EXACT name — the seeder's own discovery rule")
+            // A tombstone older than the Trash's window still answers (a purge
+            // intent or the window's edge is not the reader's word being taken back).
+            try db.write { db in
+                try db.execute(sql: "UPDATE reading SET deleted_at = '2020-01-01T00:00:00.000Z' WHERE id = ?", arguments: [live.id])
+            }
+            #expect(try db.read { try Queries.readingTombstoneExists($0, name: "Encryption Explained") } == true)
+            try ops.restoreReading(live.id)
+            #expect(try db.read { try Queries.readingTombstoneExists($0, name: "Encryption Explained") } == false,
+                    "a restored book took the deletion back")
+        }
+    }
+
     @Test func callerLimitWindowsTheAssemblyAndMaxPostsStillWins() throws {
         // Phase 10 (additive): a held observation windows its standing
         // fetch (the observeLibrary discipline — the book view's bound).

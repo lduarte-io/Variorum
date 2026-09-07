@@ -13,12 +13,16 @@
 
 import AppKit
 import Foundation
+import os
 import VariorumCore
 
 @MainActor
 struct ShellActions {
     let session: AppSession
     let shell: ShellRouter
+    /// F3 (MINOR-N3): the tutorial door's one quiet line when its silent
+    /// ensure declines — silence on a screen, never silence in the log.
+    private static let log = Logger(subsystem: "io.lduarte.Variorum", category: "tutorial")
 
     private var router: CommandRouter { session.commandRouter }
     private var status: StatusCenter { session.status }
@@ -347,10 +351,22 @@ struct ShellActions {
     }
 
     /// F2 (MINOR-8): the tutorial door's silent ensure of *Encryption
-    /// Explained* — the restore road, receipt-less on success.
+    /// Explained* — the restore road, receipt-less on success. F3 (the
+    /// round-2 ladder's MINOR-N3): silent means NOT AN ASK — it declines
+    /// where the reader's decision is on record (this device's seeded
+    /// mark; a tombstoned reading of the name), and the explicit Help ▸
+    /// Restore door keeps minting.
     private static func ensureEncryptionBook(session: AppSession, status: StatusCenter) async {
+        let book = SampleLibrarySeeder.Book.encryptionExplained
         do {
-            _ = try await SeededBookRestore.restore(session: session, book: .encryptionExplained)
+            switch try await SeededBookRestore.ensure(
+                session: session, book: book, markIsSet: { session.seededBookMarkIsSet(book) })
+            {
+            case .declined(let why):
+                Self.log.notice("tutorial door: \(book.name, privacy: .public) not ensured — \(String(describing: why), privacy: .public); Help ▸ Restore still mints it")
+            case .ensured:
+                break
+            }
         } catch {
             status.speak(
                 "The tutorial opened, but \u{201C}\(SampleLibrarySeeder.Book.encryptionExplained.name)\u{201D} "
