@@ -510,7 +510,7 @@ And nothing can be reset: there is no key anyone else holds. That is the floor, 
 **Chapter 5 — Backups, and why an old one behaves the way it does**
 *A backup is a sealed copy of your library file plus its key file as they were that day. It opens with whatever
 that key file's wrapped copies open under: the passphrase you had then, your twelve words, and — if you were in
-Standard — your iCloud key. Variorum never changes a backup after it makes it.*
+Standard — your iCloud key. Variorum never rewrites a backup after it makes it; old ones are pruned on a schedule.*
 *Why your iCloud key can still open an old backup after you moved to Castle, but not your library: the old key
 file holds the old library key wrapped under the iCloud key. Your library now has a new key that was never wrapped
 that way. The old copy is exactly as private as it was on the day it was made — no more.*
