@@ -2667,4 +2667,21 @@ captured only through the workbench's identical menu.
 
 ### R-5 · RECORD (the implementer writes here from its first commit)
 
-*(empty until the implementer's first commit)*
+**NOT DONE in this batch (the record's first line, per the brief's item 9):** no MECHANICS change — the
+brains (`DivideWCeremony`'s state machine, arrangements, seeding and confirm roads; `MergeArrangement`;
+`MergeChainRun`; `WCutPlacement`; the key monitor's four chords; the doors; the names) keep their
+behaviour byte-for-byte, and every edit to them is ADDITIVE and named below; no core
+(`Sources/VariorumCore/`); no `Sync/`; no `BlockRangeIndex` / `EditorTextView` / the 13u fence's family;
+no phone and no `Shared/` change; no schema, no lockstep; no change to the Takes board's pane grammar
+(`PaneSurface` is untouched — the card here is the SHEET's); no Release build and no `/Applications`
+refresh. *(Filled in further at close.)*
+
+**Pieces**
+
+| # | Piece | State |
+|---|---|---|
+| 1 | `ProseCutGeometry` — the take's text laid out as PROSE (Core Text), the ✂ as a zero-width mark, snapping through `CutFlowGeometry.nearestSlot` | **IN-PROGRESS** |
+| 2 | The divide sheet's face — the header, the arrangement option cards, the prose take cards, the columns, the folded explainers, the footer | **NOT-STARTED** |
+| 3 | The merge sheet's face — the same header/row grammar, the pairing columns restyled, the run's block list (figure B) | **NOT-STARTED** |
+| 4 | The face-level pins — the performance bar at her scale, the layout-stability pin | **NOT-STARTED** |
+| 5 | The walk (both voices, `18f-2/` captures) + the mockup comparison + close | **NOT-STARTED** |
