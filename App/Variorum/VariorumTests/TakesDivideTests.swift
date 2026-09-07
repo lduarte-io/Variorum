@@ -312,6 +312,51 @@ struct TakesDivideTests {
         }
     }
 
+    /// **18f ladder round 2, R2-4 (fable-reviewer) — RED ON `16f1cf76`.**
+    /// R1-13's one caret rule, made literal on the board: after the sheet's
+    /// confirm the ring lands on the SECOND successor's CHOSEN take — the
+    /// anchor's half, the take she divided — not on `variants[0]`, which is
+    /// only the first CONTRIBUTOR in fan order. Under keep-on-top the two
+    /// coincide (C has one take); under keep-on-bottom with the seed second
+    /// in the fan, C reads [the first take whole, the seed's tail] and the
+    /// ring used to land on the whole take she never touched.
+    @Test func theRingLandsOnTheSecondSuccessorsChosenTakeNotItsFirstContributor() async throws {
+        try await withBoard(seedBlocks: ["Alpha beta. Gamma delta."]) { board in
+            let slot = try #require(try board.slots().first)
+            let chosen = try #require(slot.variantID)
+            // The seed is the SECOND take in fan order.
+            let seed = try board.session.operations.branchVariant(slot.blockID, from: chosen)
+            try board.reload()
+
+            board.focus(blockID: slot.blockID, variantID: seed.id, caret: 11)
+            await board.model.divideFocused(ceremony: true)
+            #expect(board.model.divideWCeremony?.activeVariantID == seed.id,
+                    "non-vacuity: the seed is the fan's second take")
+            board.model.ceremony.setArrangement(.keepOnBottom)
+            #expect(board.model.divideWCeremony?.canConfirm == true)
+
+            await board.model.ceremony.confirm()
+            try board.reload()
+
+            let slots = try board.slots()
+            #expect(slots.count == 2, "the W's two successors")
+            let second = slots[1]
+            let fan = try await board.database.read { db in
+                try Queries.blockFan(db, blockID: second.blockID)
+                    .filter { $0.deletedAt == nil && $0.status == .active }
+            }
+            #expect(fan.count == 2, "non-vacuity: C carries the whole first take AND the seed's tail")
+            let rendered = try #require(second.variantID)
+            #expect(fan.first?.id != rendered,
+                    "non-vacuity: C's chosen take is NOT its first in fan order")
+            #expect(fan.first { $0.id == rendered }?.workingText == "Gamma delta.",
+                    "C's chosen is the seed's tail — the take she divided")
+            #expect(board.model.focusedPane?.blockID == second.blockID)
+            #expect(board.model.focusedPane?.variantID == rendered,
+                    "the ring lands on C's chosen take (\(board.model.focusedPane?.variantID ?? "nil") vs \(rendered))")
+        }
+    }
+
     @Test func confirmingTheCeremonyDividesTheTakesFromTheBoard() async throws {
         try await withBoard(seedBlocks: ["Alpha beta. Gamma delta."]) { board in
             let slot = try #require(try board.slots().first)

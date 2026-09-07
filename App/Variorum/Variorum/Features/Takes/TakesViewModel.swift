@@ -2220,11 +2220,25 @@ extension TakesViewModel: DivideWCeremonyHost {
 
     var structuralFlightInProgress: Bool { structuralInFlight }
 
+    /// **The take a fresh successor RENDERS** — the op's own answer (the
+    /// placement's chosen, else the block's default; `mintFanBlock` sets both
+    /// from the anchor's index). This is where the ring lands after the
+    /// sheet's confirm (18f ladder round 2, R2-4 — R1-13's one caret rule
+    /// made literal: C's CHOSEN, the take she divided). It is also the ONLY
+    /// take the ring CAN land on: `parkFocus` is consumed by matching a slot's
+    /// rendered take, so parking on `variants[0]` — the first contributor in
+    /// fan order — silently parked nowhere whenever another take stood ahead
+    /// of the seed's half (keep-on-bottom with the seed second in the fan).
+    private static func renderedTakeID(of half: Operations.FanHalf) -> String? {
+        half.placement.chosenVariantId ?? half.block.defaultVariantId ?? half.variants.first?.id
+    }
+
     /// The confirm's act — its OWN flight, exactly as `runStructural` is
     /// Write's (the ceremony's pre-await guard reads the latch and this
     /// takes it afterwards, so there is no self-refusal). The ring goes to
-    /// the SECOND successor's leading take — the board's instant road's own
-    /// rule, and Write's for every divide shape since the 18f ladder (R1-13).
+    /// the SECOND successor's rendered take — the board's instant road's own
+    /// rule, and Write's for every divide shape since the 18f ladder (R1-13;
+    /// R2-4 for which take).
     func runDivideW(
         blockID: String, cuts: [String: Int], displayedVariantID: String?
     ) async -> Bool {
@@ -2236,8 +2250,8 @@ extension TakesViewModel: DivideWCeremonyHost {
                 try ops.divideW(
                     blockID, cuts: cuts, displayedVariantID: displayedVariantID)
             }
-            if let landing = result.second.variants.first {
-                choreography.parkFocus(onVariant: landing.id)
+            if let landing = Self.renderedTakeID(of: result.second) {
+                choreography.parkFocus(onVariant: landing)
             }
             // The receipt counts what rode onto the first block from the op's
             // own result — the board's instant road's rule (18f ladder R1-9
@@ -2266,8 +2280,8 @@ extension TakesViewModel: DivideWCeremonyHost {
                 try ops.divideDuplicating(
                     blockID, displayedVariantID: displayedVariantID, cut: cut)
             }
-            if let landing = result.second.variants.first {
-                choreography.parkFocus(onVariant: landing.id)
+            if let landing = Self.renderedTakeID(of: result.second) {
+                choreography.parkFocus(onVariant: landing)
             }
             status = .receipt(FannedDefaultsCopy.divided(kept: 0))
             return true
