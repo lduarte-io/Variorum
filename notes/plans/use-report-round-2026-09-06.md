@@ -1,4 +1,4 @@
-# The 2026-09-06 use-report round — 17l · 18c · 18d · 18e · 18f (EXECUTION PLAN, v2)
+# The 2026-09-06 use-report round — 17o · 18c · 18d · 18e · 18f (EXECUTION PLAN, v2)
 
 **STATUS: READY TO KICK OFF (v2, 2026-09-07 — solidified at her follow-up; v1 was the read-only draft
 of the same night).** Runs NEXT, before 13u (her sequencing). **Run shape, her ruling:** a classic
@@ -13,8 +13,9 @@ figures: Divide choosing takes · Merge choosing takes · the sidebar's note box
 `notes/author-reports/2026-09-06-use-report.md`, both verbatim, with the image manifest (twelve files
 in the untracked `notes/plans/use-report-2026-09-06-screens/author/`, three more pasted in chat and
 described there). **Kickoff's first mechanical acts:** add the `.gitignore` line for the screens folder
-(the per-round pattern, `.gitignore:13–28`); claim the letters — **17l** in
-`notes/plans/phase-17-standing-fixes.md`'s allocation register, **18c · 18d · 18e · 18f** in the master
+(the per-round pattern, `.gitignore:13–28`); claim the letters — **17o** in
+`notes/plans/phase-17-standing-fixes.md`'s allocation register (17l · 17m · 17n were claimed by pre-13x's
+closeout on 2026-09-07 — v1 of this file said 17l; the letter moved, nothing else did), **18c · 18d · 18e · 18f** in the master
 plan's Phase 18 row — each pointing HERE; set the master plan's running-order row; commit.
 
 ---
@@ -31,7 +32,7 @@ added the next night (the tray, the sidebar's note box, the ceremonies' names an
 "make every newline a block", the snippets editor). This round takes all of it, **grouped by kind and
 by seam** into five letters run as one round: **18c** Return makes blocks (the typing model — her
 biggest pain, first) · **18f** Divide choosing takes / Merge choosing takes (the ceremonies rebuilt to
-the mockup) · **17l** the defects · **18d** the sidebar's note box, the tray, the outline's room · **18e**
+the mockup) · **17o** the defects · **18d** the sidebar's note box, the tray, the outline's room · **18e**
 markdown marks faded. Her line to keep in view: *"overall I have to emphasize that the app is looking
 and feeling great after the various rounds of changes."*
 
@@ -102,10 +103,10 @@ and feeling great after the various rounds of changes."*
 
 - **Five letters, why.** CLAUDE.md's rule splits fixes (17) from product (18) — her R-cor-13. The
   typing model (18c), the ceremonies (18f), the sidebar box + tray + room (18d) and the markdown setting
-  (18e) change what the app IS; the rest are defects (17l). Letters are allocation order. **Running order:
-  18c → 18f → 17l → 18d → 18e** — her two named pains first; 18e is the most separable (she may hold it).
+  (18e) change what the app IS; the rest are defects (17o). Letters are allocation order. **Running order:
+  18c → 18f → 17o → 18d → 18e** — her two named pains first; 18e is the most separable (she may hold it).
 - **Sizing (`notes/PhaseSizingGuidance.md`), stated:** 18c is one phase-sized unit (the typing model)
-  plus a composition and a bulk op; 18f one (the sheet rebuilt) plus naming; 17l ~24 defect rows in
+  plus a composition and a bulk op; 18f one (the sheet rebuilt) plus naming; 17o ~24 defect rows in
   four one-surface batches; 18d two phase-sized units under one theme (the box; the room + memory) plus
   the tray — AT the line; 18e one. One implementer session per batch; a session that finds a second unit
   hands off with a record.
@@ -138,28 +139,28 @@ whole. Image numbers are the report's manifest.
 | 3 | "the scissors couldn't be placed at the end of the block" | Ceremony placement | The end IS legal by design (`DivideWCeremony.legalCutPositions`, `:231–234`; `WTake.parkedAtEnd`, `:165`; `flowItems` ends with `.slot(end)`) — three downstream candidates, §4.4 | 18f · 1 | TRACED |
 | 4 | "Takes should automatically be selected… and should automatically have the scissors at the end" | Ceremony defaults | `DivideWCeremony.State` seeds only the seed take marked (`:207`), others unmarked with a propagated cut. U-3 | 18f · 1 | HERS (ruled) |
 | 5 | "so ugly with the spacing between the words, the way that you have to scroll to get the different takes, just overall" (image 5) | Ceremony face | The token flow's FIXED 9-pt slot between every word (`CutFlowGeometry.slotWidth`, `:44`); a 240–420-pt scrolling stack (`DivideWSheet.swift:90–98`); system fonts, stacked explainers. Rebuilt to mockup figure A — §5.2 | 18f · 2 | HERS (mockup) |
-| 6 | "the take mode always shows a ring… it doesn't follow the preference" | Every pane host | `PaneSurface.swift:705–711` strokes `tokens.ring` whenever `isLive`, reading no setting; Write honors `EditingIndicatorStyle` (`BlockDecor.swift:507–531`; `Enums.swift:86`) | 17l · c | TRACED |
-| 7 | "switching from takes to write doesn't leave you where your cursor was" | Takes → Write | `FocusedBlock` has no caret offset (`BlockHistoryPane.swift:131–135`); `CurrentBlockMemory` persists "block\|variant" (`:44`); Write lands at the block START (`EditorViewModel.bareArrivalLanding`, `:1729–1734`) | 17l · b | TRACED |
-| 8 | "open takes mode in write from the takes menu is also not automatically navigating you to where the take is" | Fan panel → Takes | `WriteTakesPanel.swift:68–76` posts `.bloom` + switches; `TakesChoreographer.consumeLandings` (`:159–176`) blooms + focuses but the article never SCROLLS (no scroll-to in the single column; only the fan strips page, `TakesBoardView.swift:1001/:1055`) | 17l · b | TRACED |
-| 9 | "the hitbox for adjusting the size of the left bar… too small… sometimes the I looking pointer" | `ShellSplit` divider | A 1-pt line with a 9-pt grip as an OVERLAY (`ShellSplit.swift:97–110`); the detail is the next HStack sibling above the grip's right half, so hover/drag reach ~half of it and the editor's I-beam wins | 17l · d | TRACED |
-| 10 | (image 1) "Fill code … From Messages" appears when the title is clicked | Masthead title | The field's PROMPT is the note's date — all digits (`PostDetailView.swift:588`); hypothesis: AppKit's one-time-code AutoFill heuristic reads a digit prompt as a code field. Lookup + fix §5.3 (d) | 17l · d | OPEN (hypothesis) |
-| 11 | punchlist 1: title left-aligned from "in no book", at least as long as today's centered measure | Masthead title | Act 10 rows 4/19 (`PostDetailView.swift:592–594, 625`). U-8 | 17l · d | HERS (ruled) |
-| 12 | punchlist 2: "When you click on the title the placeholder text shifts upwards" | Masthead title | Two faces (`Text` `:601`, `TextField(prompt)` `:588`) share a measure, not a height/baseline | 17l · d | TRACED |
-| 13 | punchlist 3 + follow-up: "'This note' is misaligned from write, takes…; Open… from the tabs"; "the highlight… is very close to touching… the items in that pane should all be aligned" | Sidebar headers | `header()` pads `groupPadding + rowPadding` = 20 (`SidebarView.swift:298–303`) and sits INSIDE `railGroup`/`openGroup`, which already pad `groupPadding` (`:483`, `:544`) → the header lands 12 pt inboard of the row text (`rowChrome`'s inset is `rowPadding`, `:330–342`). The header's `.frame(height: 22, alignment: .bottomLeading)` leaves no air above the first row's wash | 17l · d | TRACED |
-| 14 | punchlist 11: "the chosen green line doesn't go all the way down" (image 6) | Takes stack | `TakeCardFrame` draws the 3-pt bar as an HStack SIBLING of the pane (`TakesBoardView.swift:1360–1378`); the pane's height publishes asynchronously, so the bar can size against a stale height. Fix: an `.overlay(alignment: .leading)` of the card | 17l · c | TRACED |
-| 15 | punchlist 10: "you should be able to make a first block there" (image 3) | Takes/Lenses empty state | "＋ new block" exists (`TakesBoardView.swift:535` → `addBlockAtEnd` → `TakesStructureController.swift:74`) but is gated `!slots.isEmpty` (`:530`); Lenses mirrors (`LensesBoardView.swift:469`) | 17l · c | TRACED |
-| 16 | punchlist 13: "delete a lot of text from a take… empty gap… until you switch modes" | Take pane height | `PaneSurface` re-converges only on an occasion (`reconvergeIfDiverged`, `:1146–1156`; the coalesced sink `:1031–1047`); after a large deletion TK2's estimate may lag the measure (TEXTKIT2 §2) and nothing re-measures until remount. A 13u2 item-1 member, built here | 17l · c | TRACED |
-| 17 | punchlist 12: "you can't mark two posts as versions if one has no blocks yet" (image 2) | Compare | `markPostsAsVersions` anchors on each post's FIRST block (`Operations+Versions.swift:100–125`; KnownIssues row 31) → `postHasNoBlocks`; Compare dumps the RAW error (`VersionActs.swift:96` words the restore road only) | 17l · d | TRACED (shape PROVISIONAL) |
-| 18 | punchlist 14: "renaming a note won't rename it on the sidebar until you click on something else" (image 9) | Open strip | `WorkspaceModel.resolveTitles` is a ONE-SHOT read re-run only when `titleSubjectsKey` changes (`SidebarView.swift:259–260`; `WorkspaceModel.swift:382–446`) | 17l · d | TRACED |
-| 19 | punchlist 15: "changing date… doesn't change its auto display name" (image 11) | Masthead title | `PostTitleLabel.refresh()` is a one-shot `.task(id: postID)` (`PostDetailView.swift:646–657`); `updateEntryDate` never re-runs it (`Queries.noteDisplayTitle`, `TakesQueries.swift:195`). Same class as 18 — one fix (§4.3) | 17l · d | TRACED |
-| 20 | punchlist 8: "Opening in write from blocks puts your cursor in the right place but doesn't move you there" | Blocks → Write | `BlocksWorkbenchView.swift:877` (`onJump`) → a `WriteIntent`; `applyWriteIntent` (`:1743+`) sets the selection and (verify) does not scroll; the arrival road (`:1702–1707`) uses `scrollRangeToVisible`, which lands short on TK2 before layout — `JumpPrimitive.jump` (`JumpPrimitive.swift:102`) is the exact road | 17l · b | TRACED |
-| 21 | punchlist 5: "the number of notes per chapter should be better aligned with the ... menu" (image 7) | Book Index column | The count is a trailing `Text` (`BookIndexView.swift:352–354`); the note row's `Menu("⋯")` (`:521–525`) carries a disclosure chevron, so ⋯ sits inboard of the count | 17l · d | TRACED |
+| 6 | "the take mode always shows a ring… it doesn't follow the preference" | Every pane host | `PaneSurface.swift:705–711` strokes `tokens.ring` whenever `isLive`, reading no setting; Write honors `EditingIndicatorStyle` (`BlockDecor.swift:507–531`; `Enums.swift:86`) | 17o · c | TRACED |
+| 7 | "switching from takes to write doesn't leave you where your cursor was" | Takes → Write | `FocusedBlock` has no caret offset (`BlockHistoryPane.swift:131–135`); `CurrentBlockMemory` persists "block\|variant" (`:44`); Write lands at the block START (`EditorViewModel.bareArrivalLanding`, `:1729–1734`) | 17o · b | TRACED |
+| 8 | "open takes mode in write from the takes menu is also not automatically navigating you to where the take is" | Fan panel → Takes | `WriteTakesPanel.swift:68–76` posts `.bloom` + switches; `TakesChoreographer.consumeLandings` (`:159–176`) blooms + focuses but the article never SCROLLS (no scroll-to in the single column; only the fan strips page, `TakesBoardView.swift:1001/:1055`) | 17o · b | TRACED |
+| 9 | "the hitbox for adjusting the size of the left bar… too small… sometimes the I looking pointer" | `ShellSplit` divider | A 1-pt line with a 9-pt grip as an OVERLAY (`ShellSplit.swift:97–110`); the detail is the next HStack sibling above the grip's right half, so hover/drag reach ~half of it and the editor's I-beam wins | 17o · d | TRACED |
+| 10 | (image 1) "Fill code … From Messages" appears when the title is clicked | Masthead title | The field's PROMPT is the note's date — all digits (`PostDetailView.swift:588`); hypothesis: AppKit's one-time-code AutoFill heuristic reads a digit prompt as a code field. Lookup + fix §5.3 (d) | 17o · d | OPEN (hypothesis) |
+| 11 | punchlist 1: title left-aligned from "in no book", at least as long as today's centered measure | Masthead title | Act 10 rows 4/19 (`PostDetailView.swift:592–594, 625`). U-8 | 17o · d | HERS (ruled) |
+| 12 | punchlist 2: "When you click on the title the placeholder text shifts upwards" | Masthead title | Two faces (`Text` `:601`, `TextField(prompt)` `:588`) share a measure, not a height/baseline | 17o · d | TRACED |
+| 13 | punchlist 3 + follow-up: "'This note' is misaligned from write, takes…; Open… from the tabs"; "the highlight… is very close to touching… the items in that pane should all be aligned" | Sidebar headers | `header()` pads `groupPadding + rowPadding` = 20 (`SidebarView.swift:298–303`) and sits INSIDE `railGroup`/`openGroup`, which already pad `groupPadding` (`:483`, `:544`) → the header lands 12 pt inboard of the row text (`rowChrome`'s inset is `rowPadding`, `:330–342`). The header's `.frame(height: 22, alignment: .bottomLeading)` leaves no air above the first row's wash | 17o · d | TRACED |
+| 14 | punchlist 11: "the chosen green line doesn't go all the way down" (image 6) | Takes stack | `TakeCardFrame` draws the 3-pt bar as an HStack SIBLING of the pane (`TakesBoardView.swift:1360–1378`); the pane's height publishes asynchronously, so the bar can size against a stale height. Fix: an `.overlay(alignment: .leading)` of the card | 17o · c | TRACED |
+| 15 | punchlist 10: "you should be able to make a first block there" (image 3) | Takes/Lenses empty state | "＋ new block" exists (`TakesBoardView.swift:535` → `addBlockAtEnd` → `TakesStructureController.swift:74`) but is gated `!slots.isEmpty` (`:530`); Lenses mirrors (`LensesBoardView.swift:469`) | 17o · c | TRACED |
+| 16 | punchlist 13: "delete a lot of text from a take… empty gap… until you switch modes" | Take pane height | `PaneSurface` re-converges only on an occasion (`reconvergeIfDiverged`, `:1146–1156`; the coalesced sink `:1031–1047`); after a large deletion TK2's estimate may lag the measure (TEXTKIT2 §2) and nothing re-measures until remount. A 13u2 item-1 member, built here | 17o · c | TRACED |
+| 17 | punchlist 12: "you can't mark two posts as versions if one has no blocks yet" (image 2) | Compare | `markPostsAsVersions` anchors on each post's FIRST block (`Operations+Versions.swift:100–125`; KnownIssues row 31) → `postHasNoBlocks`; Compare dumps the RAW error (`VersionActs.swift:96` words the restore road only) | 17o · d | TRACED (shape PROVISIONAL) |
+| 18 | punchlist 14: "renaming a note won't rename it on the sidebar until you click on something else" (image 9) | Open strip | `WorkspaceModel.resolveTitles` is a ONE-SHOT read re-run only when `titleSubjectsKey` changes (`SidebarView.swift:259–260`; `WorkspaceModel.swift:382–446`) | 17o · d | TRACED |
+| 19 | punchlist 15: "changing date… doesn't change its auto display name" (image 11) | Masthead title | `PostTitleLabel.refresh()` is a one-shot `.task(id: postID)` (`PostDetailView.swift:646–657`); `updateEntryDate` never re-runs it (`Queries.noteDisplayTitle`, `TakesQueries.swift:195`). Same class as 18 — one fix (§4.3) | 17o · d | TRACED |
+| 20 | punchlist 8: "Opening in write from blocks puts your cursor in the right place but doesn't move you there" | Blocks → Write | `BlocksWorkbenchView.swift:877` (`onJump`) → a `WriteIntent`; `applyWriteIntent` (`:1743+`) sets the selection and (verify) does not scroll; the arrival road (`:1702–1707`) uses `scrollRangeToVisible`, which lands short on TK2 before layout — `JumpPrimitive.jump` (`JumpPrimitive.swift:102`) is the exact road | 17o · b | TRACED |
+| 21 | punchlist 5: "the number of notes per chapter should be better aligned with the ... menu" (image 7) | Book Index column | The count is a trailing `Text` (`BookIndexView.swift:352–354`); the note row's `Menu("⋯")` (`:521–525`) carries a disclosure chevron, so ⋯ sits inboard of the count | 17o · d | TRACED |
 | 22 | punchlist 4: the outline's spacing; the chapter panel draggable | Book navigator | `BookView.navigator` rows in `VStack(spacing: 2)` (`:368–373`); fixed `.frame(width: 190)` (`:645`). U-13 | 18d · 3 | HERS (ruled) |
 | 23 | punchlist 6: the block menu into a sidebar box, the rail's height, "no note selected" (image 10) | Book editing modes + sidebar | The bar rides a 190-pt right gutter in Outline (`EditorView.swift:113–125`; `BookView.swift:1597–1615`) and floats at the right in the paged Book mode; the sidebar shows no rail for a book (`SidebarView.railGroup`, `:453`). U-10; design §5.4; mockup figure C | 18d · 1 | HERS (ruled) |
 | 24 | punchlist 7: a setting to hide markdown marks unless editing them | Live editor (shared brain) | `MarkdownFaceCore` colors markers `palette.marker` on the storage (`:183–194`); the read tiers already hide them (`FlowParagraph.swift:86`). U-11: fade first — §5.5 | 18e | HERS (ruled) |
 | 25 | punchlist 9: remember note lengths | Book Outline surfaces | `BookViewModel.rememberedSurfaceSizes` session-only (`:389–395`); `SurfaceSizeMemory` likewise (`StableSurface.swift:25–32`). U-12 | 18d · 4 | HERS (ruled) |
 | 26 | punchlist 16: the Read contents column adjustable (image 12) | Note Read | `ReadModeView.swift:140` `.frame(width: NoteIndexColumn.width)` = 340 fixed (`NoteIndexColumn.swift:38`); `SideColumn` exists for TRAILING panels only. U-13 | 18d · 3 | HERS (ruled) |
-| 27 | (from 17) Compare speaks a raw `OperationError` | Compare | see 17 | 17l · d | TRACED |
+| 27 | (from 17) Compare speaks a raw `OperationError` | Compare | see 17 | 17o · d | TRACED |
 | 28 | (from 1) the bar reads "block 3/3" while the page looks like the end of the note | Write's bottom bar | A face consequence of the tail model; 18c's model makes the bar honest by construction (a new block is a real block) | 18c · 2 | RECORDED |
 | 29 | "selecting a sentence and trying to delete it and it rejecting due to blocks" (image 8) | Cross-block delete | 13u1 item 5 — fenced | — | DEFERRED (13u1) |
 | 30 | (from 23) the paged Book mode's floating card | Book paged mode | the same re-home | 18d · 1 | HERS (ruled) |
@@ -170,10 +171,10 @@ whole. Image numbers are the report's manifest.
 | 35 | follow-up: "divide choosing takes" replaces "divide ceremony"; "merge choosing takes" a BUTTON | Names + doors | Verbs at `CapabilityRegistry.swift:186` ("Divide with Ceremony…") and `:214` ("Merge with Ceremony…"); sheet titles `DivideWSheet.swift:66` ("Divide into takes"), `MergeCeremonySheet.swift:48` ("Merge blocks — pair their takes"); the merge ceremony has NO menu button today — ⌥⌘⇧M only (the block ▾ menu at `CommitBar.swift:492–507` lists Divide/Extract/Make Block/Merge/New block below/Delete). Tutorial + helper strings (`TutorialSeeder.swift:688`, `HelperView.swift:300`) | 18f · 1 | HERS (ruled) |
 | 36 | follow-up: the three presets easy, custom deliberate; the phone offers the three | Both ceremonies | Mockup figures A/B; the phone's face is a parity row (§5.2) | 18f · 2 (+ mobile row) | HERS (ruled) |
 | 37 | follow-up: "make all newlines blocks" (takes stay with the top paragraph) | Note ▾ / block ▾ menus | No such op exists; composable from `divide` (single-take, in place) and the keep-on-top `divideW` composition inside one `withCompound` (`UndoStack.swift:190`) — §5.1 (3) | 18c · 3 | HERS (ruled) |
-| 38 | follow-up: the snippets editor opens "a whole note… but not even the snippet that i right clicked on" (image 15's context) | Snippets area | `BlocksAreaView.swift:508–510`: the card's "Open in the Snippets editor" calls `openPool(area.activePool.id)` — the ACTIVE group's pool (the default "Snippets" when browsing all groups), NOT `item.poolID` (her snippet lives in the tutorial's "tutorial scraps" pool, `TutorialSeeder.swift:41`) — and lands on no block (`RootView.swift:671` → `openHere(.pool(id))`). The header's "open as editor" (`:223`) is the same call, correctly scoped to the active group | 17l · e | TRACED (**Opus only**, her word) |
-| 39 | follow-up: "you can't tag snippets but there's a tag on there" | Snippets area | Block tags ARE the model's (`block_tag`; "block-level tags primarily serve the pool"); the card menu has "Tags…" (`SnippetsCopy.tagsRow`, `BlocksAreaView.swift:511–513` → `BlockTagAssignmentSheet`, `BlockTagViews.swift:68`) — so a door exists; the tag she saw was the tutorial's seeded one. Trace where she looked for the door (the pool EDITOR's masthead has no `#`?) and make the door findable where the tag shows | 17l · e | TRACED (Opus only) |
-| 40 | follow-up: the tag field should collapse after clicking out; the `#` reopens it (image 15) | Masthead `#` door | `MastheadTagCluster.swift` — the inline field (`:222`) stays open while `fieldOpen`; trace what flips it closed (submit? focus loss?) — her rule: focus loss with a tag already applied collapses it | 17l · d | TRACED |
-| 41 | follow-up: the sidebar/editor divider is white for a bit at the top (image 16) | `ShellSplit` divider | The divider `Rectangle` spans the HStack; the window's toolbar band above the detail (`VariorumApp.swift:255–286`, `.unifiedCompact`; `RootView.swift:174–201`) is where the short white segment sits — the sidebar column's top row starts under the band while the line does not; trace which view paints white there | 17l · d | TRACED |
+| 38 | follow-up: the snippets editor opens "a whole note… but not even the snippet that i right clicked on" (image 15's context) | Snippets area | `BlocksAreaView.swift:508–510`: the card's "Open in the Snippets editor" calls `openPool(area.activePool.id)` — the ACTIVE group's pool (the default "Snippets" when browsing all groups), NOT `item.poolID` (her snippet lives in the tutorial's "tutorial scraps" pool, `TutorialSeeder.swift:41`) — and lands on no block (`RootView.swift:671` → `openHere(.pool(id))`). The header's "open as editor" (`:223`) is the same call, correctly scoped to the active group | 17o · e | TRACED (**Opus only**, her word) |
+| 39 | follow-up: "you can't tag snippets but there's a tag on there" | Snippets area | Block tags ARE the model's (`block_tag`; "block-level tags primarily serve the pool"); the card menu has "Tags…" (`SnippetsCopy.tagsRow`, `BlocksAreaView.swift:511–513` → `BlockTagAssignmentSheet`, `BlockTagViews.swift:68`) — so a door exists; the tag she saw was the tutorial's seeded one. Trace where she looked for the door (the pool EDITOR's masthead has no `#`?) and make the door findable where the tag shows | 17o · e | TRACED (Opus only) |
+| 40 | follow-up: the tag field should collapse after clicking out; the `#` reopens it (image 15) | Masthead `#` door | `MastheadTagCluster.swift` — the inline field (`:222`) stays open while `fieldOpen`; trace what flips it closed (submit? focus loss?) — her rule: focus loss with a tag already applied collapses it | 17o · d | TRACED |
+| 41 | follow-up: the sidebar/editor divider is white for a bit at the top (image 16) | `ShellSplit` divider | The divider `Rectangle` spans the HStack; the window's toolbar band above the detail (`VariorumApp.swift:255–286`, `.unifiedCompact`; `RootView.swift:174–201`) is where the short white segment sits — the sidebar column's top row starts under the band while the line does not; trace which view paints white there | 17o · d | TRACED |
 
 ## 4. The traces (the architect's read — by reading, never by running; the pin decides)
 
@@ -434,7 +435,7 @@ this section is what it does.
   split, confirm, ⌥⌘Z — captured both voices; her acceptance at the end.
 - **Review: Fable** (a structural door's face). Implementer Opus.
 
-### 5.3 — 17l · the evening's defects (FIXES; the standing-17 discipline; four one-surface batches)
+### 5.3 — 17o · the evening's defects (FIXES; the standing-17 discipline; four one-surface batches)
 
 **Goal.** Every defect row FIXED with its pin, or DISMISSED AS HOLLOW, or DEFERRED with an owner — each
 batch walked by its implementer on the dev-store Debug build, captured, before its record closes.
@@ -615,7 +616,7 @@ setting round-trips; the read tiers' pins unchanged; the phone's suite untouched
 
 ## 6. THE KICKOFF PROMPT (paste-ready — the same text she was given in chat)
 
-> You are the **Fable orchestrator** for **the 2026-09-06 use-report round — 17l · 18c · 18d · 18e · 18f**,
+> You are the **Fable orchestrator** for **the 2026-09-06 use-report round — 17o · 18c · 18d · 18e · 18f**,
 > run in the classic `/architect-phase` shape: you hold the architect mandate over the author's rulings,
 > you spawn a FRESH Opus implementer session per batch, you keep repo-first records, you run the review
 > ladder, and you bundle her questions. **You stay lean:** you do not read source files whole (briefs point
@@ -637,19 +638,19 @@ setting round-trips; the read tiers' pins unchanged; the phone's suite untouched
 > Copy the P-1…P-9 constitution into this file's Records section verbatim, as every architect-phase does.
 >
 > **FIRST MECHANICAL ACTS:** the `.gitignore` line for `notes/plans/use-report-2026-09-06-screens/`; claim
-> **17l** in the standing-fixes register and **18c · 18d · 18e · 18f** in the master plan's Phase 18 row,
+> **17o** in the standing-fixes register and **18c · 18d · 18e · 18f** in the master plan's Phase 18 row,
 > each pointing at this plan; the master plan's running-order row; a LIVE STATUS block at the end of this
 > file; commit and push. Run the baselines yourself (core `swift test`, the Mac suite, the tutorial spine,
 > the iOS build) and record them — the plan's numbers are the last recorded finals, not yours.
 >
 > **CAST:** Opus implements EVERY batch (her word); you are Fable; cold reviewers per the plan — **Fable on
-> 18c, 18f, 17l batch b, 18e**; Opus on 17l c/d/e and 18d — `notes/REVIEW_PROMPT.md` verbatim, a fresh
+> 18c, 18f, 17o batch b, 18e**; Opus on 17o c/d/e and 18d — `notes/REVIEW_PROMPT.md` verbatim, a fresh
 > reviewer per round, the ladder's three-round cap, every finding dispositioned in this file. The
 > hallucination guard binds: pin before fix; a pin green on both sides dismisses the finding.
 >
 > **ORDER:** 18c (batch 1 the keep-on-top composition + the phone's flip → batch 2 Return makes blocks →
 > batch 3 make every newline a block) → 18f (batch 1 names/doors/presets/end slot → batch 2 the face to
-> mockup A/B) → 17l (b landing family → c Takes faces → d chrome singles → e Snippets, Opus only) → 18d
+> mockup A/B) → 17o (b landing family → c Takes faces → d chrome singles → e Snippets, Opus only) → 18d
 > (1 the note box to mockup C → 2 the tray to mockup D → 3 the outline's room → 4 remembered lengths) →
 > 18e (fade). Each LETTER closes on its own dispositions before the next opens; she may hold 18e.
 >
@@ -659,7 +660,7 @@ setting round-trips; the read tiers' pins unchanged; the phone's suite untouched
 > (`io.lduarte.Variorum.debug`, `cliclick` + `Tools/WalkKit/`, never `/Applications`), capture per row to
 > `notes/plans/use-report-2026-09-06-screens/<letter-batch>/`; red-on-old for every bug-class row; no
 > product invention (a decision the spec does not make → QUESTIONS, the next free number — #90 is
-> `pre-13x`'s); the 13u fence; for 18c and 17l-b the seam rules (the identity oracle runs per keystroke in
+> `pre-13x`'s); the 13u fence; for 18c and 17o-b the seam rules (the identity oracle runs per keystroke in
 > DEBUG and kills the process on identity corruption; clamp any attribute stamp to the verdict's range —
 > TEXTKIT2 §3; `runStructural` is the one structural door; never touch `BlockRangeIndex`'s regions); no
 > commit trailer lines (her 2026-09-04 rule); zero `Sources/VariorumCore/Sync/`, zero lockstep.
@@ -671,7 +672,7 @@ setting round-trips; the read tiers' pins unchanged; the phone's suite untouched
 > **AT EACH LETTER'S CLOSE:** dispositions per row; the suites green (+ the iOS build for 18c/18e/anything
 > in `Shared/`); the canon deltas the plan drafted, applied exactly as ruled (18c: AppSpec §9's divide
 > default + §7's segmentation-trigger paragraph; 18f: the ceremony names; 18e: §12's formatting sentence);
-> for 17l a dispositions block copied into the standing-fixes file. **AT THE ROUND'S CLOSE:** the standing
+> for 17o a dispositions block copied into the standing-fixes file. **AT THE ROUND'S CLOSE:** the standing
 > ritual whole — master plan pointer + closeout paragraph (the previous archived), QUESTIONS' ratify list,
 > the MOBILE PARITY LINE in `notes/MobileSoul.md` (the divide presets sheet, the reveal brain, the offset
 > landing, the indicator rule), the author handoff `notes/handoffs/use-report-round-2026-09-06-handoff.md`
@@ -728,7 +729,7 @@ setting round-trips; the read tiers' pins unchanged; the phone's suite untouched
 
 **Each letter:** every row it owns dispositioned (FIXED with its named pin · DISMISSED AS HOLLOW · DEFERRED
 with an owner); the ladder complete or capped with its residue recorded; the suites green; the walks
-captured; the canon deltas applied exactly as ruled; 17l's dispositions block copied into the
+captured; the canon deltas applied exactly as ruled; 17o's dispositions block copied into the
 standing-fixes file. **The round:** the master plan's pointer and running order moved on; the 17 register
 and the 18 row updated; QUESTIONS' ratify list (the PROVISIONALs: the versions shape · the empty-block
 rule and the k−1 narrowing · the list exception · the gutter's retirement); the MOBILE PARITY LINE; the
