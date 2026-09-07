@@ -225,7 +225,10 @@ struct MergeCeremonySheet: View {
                                 ? "\(block.takeCount) takes — all coming along"
                                 : "\(block.takeCount) takes — only this one comes"),
                         roleIsAccent: false,
-                        shown: true,
+                        // No "shown here" badge in the run list: every row IS
+                        // the block's shown take, so the badge would say the
+                        // same thing three times (walked, 18f batch 2).
+                        shown: false,
                         locked: false,
                         text: block.shownText,
                         dimmed: false)

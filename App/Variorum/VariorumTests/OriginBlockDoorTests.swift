@@ -103,8 +103,24 @@ struct OriginBlockDoorTests {
             board.focus(blockID: slot.blockID, variantID: chosen, caret: 11)
             await board.model.divideFocused(ceremony: true)
             let ceremony = try #require(board.model.divideWCeremony)
-            #expect(ceremony.takes.count(where: { !$0.marked }) == 2,
-                    "the seed take alone is checked — two ride the original away")
+            // **A JUSTIFIED EDIT (18f batch 2), the CLAIM intact.** Her U-3
+            // ruling (batch 1) retired this pin's SETUP: the sheet opens with
+            // every take CHECKED, so "the seed take alone is checked" is no
+            // longer a state the ceremony can be in. Two takes riding the
+            // original away is now something she MAKES, under "Choose per
+            // take…" — which is exactly where the sentence this pin is about
+            // still has work to do. *(Red on the 18f batch 1 tree too,
+            // verified by running this suite at `a990ccbd`: batch 1's closing
+            // run did not include this suite.)*
+            board.model.ceremony.setArrangement(.perTake)
+            let opened = try #require(board.model.divideWCeremony)
+            for take in opened.takes where take.id != chosen {
+                board.model.ceremony.toggleTake(take.id)
+            }
+            let arranged = try #require(board.model.divideWCeremony)
+            #expect(arranged.takes.count(where: { !$0.marked }) == 2,
+                    "two takes are unchecked — they ride the original away")
+            _ = ceremony
 
             await board.model.ceremony.confirm()
             let status = try #require(board.model.statusMessage)
@@ -126,9 +142,13 @@ struct OriginBlockDoorTests {
             board.focus(blockID: slot.blockID, variantID: chosen, caret: 11)
             await board.model.divideFocused(ceremony: true)
             let ceremony = try #require(board.model.divideWCeremony)
-            let second = try #require(ceremony.takes.first { $0.id != chosen })
-            board.model.ceremony.toggleTake(second.id)
-            board.model.ceremony.placeCut(takeID: second.id, cut: 11)
+            // **A JUSTIFIED EDIT (18f batch 2), the CLAIM intact.** U-3 makes
+            // "every take checked" the OPENING state rather than something
+            // the pin has to construct, so the construction goes: the sheet
+            // opens keep-on-top with the second take parked at its end, and
+            // confirming there is precisely "nothing was left uncut".
+            #expect(ceremony.takes.count(where: { !$0.marked }) == 0,
+                    "U-3: the sheet opens with every take checked")
             await board.model.ceremony.confirm()
 
             let status = try #require(board.model.statusMessage)

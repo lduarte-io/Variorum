@@ -803,7 +803,7 @@ images 14–16 (pasted in chat) described there.
 - **18c ladder round 3 — COMPLETE at `b00694ac` (the cap):** 0 · 0 · 1 MINOR (R3-1 → KnownIssues, owner 13u1) · 2 NIT (comments, fixed in the closeout commit); no fix pass owed; the two MAJOR fixes verified red-on-old on the real pre-fix code.
 - **18c — LETTER CLOSED** (the CLOSEOUT section below the round-3 findings): canon deltas applied (AppSpec §7 + §9, QUESTIONS #12), KnownIssues +2 rows (13u1), the field-guide delta listed, #91–#94 on the ratify list.
 - **18f batch 1 — CLOSED at `9e96617b`** (R-4's record + adjudication J11–J13; rows 3 · 4 · 35 · 36 + U-16 FIXED; QUESTIONS #95 PROVISIONAL; five field-guide lessons renamed/rewritten).
-- **In flight:** 18f batch 2 (THE FACE — the divide sheet to mockup figure A, the merge sheet's grammar to B) — `opus-implementer` on the R-5 brief. **Next:** the 18f Fable ladder over batches 1+2 (`db02623a..`), the letter's close (the ceremony names' canon delta — AppSpec §9's `divideW`/`mergeCeremony` paragraphs and §12's takes-presentations line name the sheets), then 17o (R-6 · R-7 · R-8 drafted).
+- **18f batch 2 — RECORD CLOSED by the implementer** (R-5's record: pieces 1–5, rows 5 · 36 + U-16's face FIXED, 21 captures in `18f-2/` both voices, four walk-found defects fixed, two inherited-red `OriginBlockDoorTests` pins verified red at `a990ccbd` and fixed; core 1493/162 · Mac 296/30 · iOS build green; no QUESTIONS opened). Awaiting the orchestrator's verification. **Next:** the 18f Fable ladder over batches 1+2 (`db02623a..`), the letter's close (the ceremony names' canon delta — AppSpec §9's `divideW`/`mergeCeremony` paragraphs and §12's takes-presentations line name the sheets), then 17o (R-6 · R-7 · R-8 drafted).
 - **Ladder cadence (orchestrator's judgment, for her morning):** ONE Fable ladder per LETTER over the combined diff (18c after batch 3), not one per batch — her "use the fable cold review judiciously and at the end" + the skill's one-ladder-per-stage rule; 17o's Opus reviews likewise per letter unless a batch's diff argues for its own round.
 - **Orchestrator's judgment calls for her morning (each also recorded where it happened):** (J1) one ladder per letter, above; (J2) R-1's core deviation accepted — `divideW`'s two additive arms (parked takes keep their labels; the optional displayed-take anchor, QUESTIONS #91). (J3–J5) R-2's three: the intercept at `insertNewline`; START → an empty block above; the empty tail closes and mints (#92(c)). Residual 2 of R-2 (no ⌥⌘Z for a ⏎-made empty block — `newBlock` is not on §9's structural-undo list) is HERS: extend the list or open a 17 entry. (J6–J9) R-3's: blank lines keep the k−1 rule (#93(b)); the bulk doors' road; the five-renderer door expansion; `KeepOnTopDivide` moved into core. (J10) the 18c ladder's two MINORs (R1-3 the exit's trailing newline; R1-4 the mid-item ⏎) BUILT as option (a) PROVISIONAL — each a restoration of the pre-U-1 list shape — under QUESTIONS #94. (J11–J13) 18f batch 1's: row 3's mechanism was the sheet's dead keys after a click (a key monitor, walked not pinned); #95 the bulk bars' two options at every pick size; the seed anchors every sheet road (rides #91).
 
@@ -2683,5 +2683,248 @@ refresh. *(Filled in further at close.)*
 | 1 | `ProseCutGeometry` — the take's text laid out as PROSE (Core Text), the ✂ as a zero-width mark, snapping through `CutFlowGeometry.nearestSlot` | **DONE (34ddf1e9)** — 9 pins green |
 | 2 | The divide sheet's face — the header, the arrangement option cards, the prose take cards, the columns, the folded explainers, the footer | **DONE (1b47f861)** |
 | 3 | The merge sheet's face — the same header/row grammar, the pairing columns restyled, the run's block list (figure B) | **DONE (68d4e037)** |
-| 4 | The face-level pins — the performance bar at her scale, the layout-stability pin, the card's copy | **IN-PROGRESS** |
-| 5 | The walk (both voices, `18f-2/` captures) + the mockup comparison + close | **NOT-STARTED** |
+| 4 | The face-level pins — the performance bar at her scale, the layout-stability pin, the card's copy | **DONE (ad4e3f07)** |
+| 5 | The walk (both voices, 21 captures in `18f-2/`) + the mockup comparison + close | **DONE** (this row's commit) |
+
+**Piece 1 — `ProseCutGeometry`: THE TAKE, AS PROSE.**
+
+Her row 5 names three things and this file answers the first: *"the spacing between the words"*. The
+shipped face drew each take as a TOKEN FLOW — a word, a fixed **9-pt slot**, a word, a slot
+(`CutFlowGeometry.slotWidth`) — so every legal cut position occupied real width and the prose could
+never read as prose. `ProseCutGeometry` lays the take out with **Core Text** instead (one paragraph at
+a time, so a take's own newlines survive as content — I4), places the legal cuts as **zero-width
+marks**, and the ✂ is drawn OVER the inter-word gap rather than occupying one. **The cut is not an
+input to the layout**, so placing or moving it cannot move a word.
+
+- **ONE snapping brain, literally.** The marks are handed to **`CutFlowGeometry.nearestSlot`** — row
+  first, then distance, strong slots pull — so the rule `CutFlowEndSlotTests` pins stays one function
+  in one place rather than a second implementation that has to agree with the first. That is also why
+  `CutFlowGeometry` survives (below).
+- **No TextKit anywhere near it** (TEXTKIT2 §4): a sheet is chrome, and this is a measurement. Core
+  Text, drawn into one `Canvas` — the L1 architecture kept, with a different thing laid out.
+- **The air above every line (`markGlyphAir`) is part of the LAYOUT, not the drawing** — the ✂ glyph
+  rides in it (the mockup's `.cut::after`). Found by walking: at the shipped leading the glyph landed
+  in the middle of the line above. An offset applied at draw time only would have to be subtracted
+  again at hit-test time, which is the two-mechanisms class the file exists to avoid.
+- **The marks are placed in ONE pass beside the lines** and `lineIndex(for:)` is a binary search. The
+  first cut looked each boundary's line up linearly and measured **1,374 ms** to mount her four
+  3,000-word takes; the pin below is what caught it (258 ms now).
+
+Pins: `ProseCutGeometryTests` (9). The natural-spacing one is **RED on the shipped renderer by
+construction and non-vacuous**: it asserts the prose's width against the font's own measure AND prints
+`CutFlowGeometry`'s width for the same sentence beside it.
+
+**Piece 2 — THE DIVIDE SHEET, to mockup figure A.**
+
+- **`CeremonySheetChrome`** — the two ceremonies' ONE vocabulary (figure B's note: *"the same
+  first-row grammar as divide, so the two ceremonies read as one family"*): the header (title · a
+  quiet facts line · the folded `?`), `ArrangementOptionCard` (title + the mockup's one-line
+  description; selected = accent border + wash; **the deliberate option wears a dashed border** — her
+  *"something you really have to choose to do"*, said in the border), `CeremonySheetFooter` (the
+  confirm blocker in the LEFT slot in the ALARM voice when it applies, the resting line when it does
+  not, then Cancel/confirm in `CalmButtonStyle`), the badge, and the two half-tint swatches. Built on
+  `CalmGrammar` + `VoiceTokens` throughout — no literal colour anywhere in the batch (P-8).
+- **`ProseTakeCard`** — one card per take: the header (the checkbox ONLY under "Choose per take…",
+  the `›` aim marker, the name, `shown here` / `locked`), **ONE status line**
+  (*"✂ splits here — 41 words above, 38 below"*, or where the whole take is going when the ✂ parks),
+  the prose over `ProseCutGeometry` with the two halves tinted around the ✂, and a footer naming the
+  destination with the tints' own swatches. An unchecked take dims and its footer says
+  *"original block · lineage"*; the seed wears a warmer border and leads the row.
+- **The sheet**: takes SIDE BY SIDE in up to three equal columns (a fourth starts a second row of the
+  same columns and each card's prose scrolls inside itself — never a stack you scroll to find take 2);
+  `minWidth` 900 / ideal 1120; the two long explainers folded behind the `?` beside a keyboard legend
+  that names **only the chords the sheet actually answers** (copy truth: the monitor's four, plus ⏎/⎋
+  — the mockup's legend also lists `space`, which nothing implements).
+- **`WCutFlow` is RETIRED as the rendering** — its retirement IS row 5. **`CutFlowGeometry` stays a
+  production brain** (its `nearestSlot` resolves every click and drag) with its pins unmodified, and
+  its `make` stays for `CutFlowEndSlotTests`, which is **row 3's evidence** that the three §4.4 links
+  are sound — evidence a face rebuild does not get to throw away (the brief's own instruction).
+  `WCutPlacement.flowItems` keeps being derived per take for the same reason: the drift pin reads
+  `WTake.flow` as its non-vacuity measure.
+
+**Piece 3 — THE MERGE SHEET, to mockup figure B.** The same chrome, so the two sheets read as one
+family. Under a PRESET the columns SHOW what will happen (figure A's rule applied here): the two shown
+takes marked *"＋ pairs with →"* / *"← ＋"*, the rest *"carried whole"* or *"stays in lineage"* (dimmed
+under "Only the two shown"); nothing is placeable, because the row already made the choice. Under
+"Pair by hand…" they are the shipped S4-23 surface — click to pair, the join picker, the joined
+preview, carry checkboxes, the stay-behind line — **behaviour byte-unchanged**, restyled onto the card
+grammar. Over a RUN of three or more (her U-16) they become ONE list of the run's blocks with their
+shown takes marked, which is figure B's amendment.
+
+**Piece 4 — THE FACE'S PINS.** `mountingAndPlacingAtHerScaleStayWellUnderASecond` (four 3,000-word
+takes: mount **258 ms**, one click **168 ms**, both INCLUDING the harness's ~120 ms of settle sleeps) ·
+`placingACutNeitherRelaysTheProseNorMovesTheSheet` (**zero** rebuilds on a cut placement and the
+sheet's fitting height unmoved — the geometry pin at the face) · `CeremonyCardCopyTests` (the
+destination rule, both resting lines, and **no option card says "ceremony"** — U-4's sweep, which the
+mockup's own fourth-option text would have undone).
+
+**ADDITIVE EDITS TO BATCH 1's FILES — the complete list, each display-only:**
+
+| Where | What | Why it is not a mechanics change |
+|---|---|---|
+| `DivideWCeremony.Arrangement.detail` | the option card's one line | a display string beside `title`, so the row's whole voice keeps ONE home |
+| `MergeArrangement.detail(blocks:)` | the same, for the merge row | the same argument, the same file |
+| `MergeCeremonyState.runBlocks` + `MergeRunBlock` | the run's blocks as the sheet SHOWS them (figure B's amendment) | populated where `openMergeRunChoice` already read the fans; **no confirm road reads it** — they all re-read the store |
+| `DivideWSheet.aimableTakeIDs` | follows the DISPLAY order (seed first) | ⇥ walks what the eye reads; `WCutPlacement.nextTake` is untouched |
+
+Everything else in the mechanics — the state machine, `arranged`, the seeding, the confirm roads, the
+doors, the names, the key monitor's four chords — is byte-unchanged.
+
+**Piece 5 — THE WALK (the acceptance gate — USE), BOTH VOICES.**
+
+Walked by hand on the DEV-STORE Debug build (`io.lduarte.Variorum.debug`, launched from
+`…/DerivedData/…/Build/Products/Debug/`) with `cliclick` + `Tools/WalkKit`. Her `/Applications` app was
+never launched; every instance check (`pgrep -fl 'Variorum.app/Contents/MacOS'`) showed only
+DerivedData Debug paths, and my instances were quit at the end (**zero at close**). The fixture: the
+field guide's own three-take lesson block ("The ferry crossed at dawn…"), the same one batch 1 walked.
+
+**FOUR DEFECTS THE WALK FOUND AND FIXED** (each invisible to every pin — this is what the gate is for):
+
+1. **The prose was clipped and the card had a hole under it.** The footer carried
+   `.frame(maxHeight: .infinity, alignment: .bottom)`, so the FOOTER was the greedy view and the prose
+   scroll view was squeezed to a minimum with empty space below it. Fixed with a `Spacer` between them.
+2. **The ✂ glyph landed in the middle of the line above** (it rode 10 pt above its own line, and the
+   shipped leading left only ~4 pt of air). Fixed in the LAYOUT — `markGlyphAir`, above.
+3. **The facts line read "3 takes/cut where you clicked"** — it joined on the VOICE's own path
+   separator, which is `/` in Terminal. Always the middle dot now.
+4. **Every card was named "take"** — unlabelled takes now read *"take"* · *"take 2"* · *"take 3"* by
+   fan position, which is the mockup's own naming. *(Two smaller ones the same way: "Copy takes to
+   both" truncated its footer swatch labels at a three-column width, and the run list wore a redundant
+   "shown here" badge on every row.)*
+
+**THE CAPTURES** (`notes/plans/use-report-2026-09-06-screens/18f-2/`, gitignored — 21 files):
+`01-divide-keep-on-top-terminal.png` (figure A's first state: the row of four, keep-on-top selected,
+the sentence in counts, three prose cards side by side, the ✂ at both other takes' ends) ·
+`02-divide-keep-on-bottom-terminal.png` (the mirror — the ✂ at the STARTS, the whole-take tint, the
+sentence re-counted) · `03-divide-copy-to-both-terminal.png` (*"Not cut — this whole take rides onto
+BOTH blocks"*, no ✂, both swatches) · `04-divide-choose-per-take-terminal.png` (the checkboxes appear,
+every take checked — U-3 — and the `›` aim marker on the seed) ·
+`05-divide-per-take-unchecked-take-dims.png` (figure A's second state: the dimmed card, *"Not cut —
+stays whole on the original block, in lineage"*, footer *"original block · lineage"*) ·
+`06-divide-click-between-words.png` (a click at a word gap lands the ✂ there; *"8 words above, 5
+below"*) · `07-divide-drag-the-scissors.png` (a drag glides it; *"11 words above, 2 below"*) ·
+`08-divide-arrow-steps-the-cut.png` (→ walks it to the END and parks — **row 3's road on the new
+face**) · `09-divide-tab-aims-the-next-take.png` (⇥ moves the aim) — **6–9 together are the key
+monitor still working after clicks on the new controls, which is batch 1's row-3 fix surviving the
+rebuild** · `10-divide-the-folded-help.png` (the `?` popover: the checklist explainer + the keyboard
+legend) · `11-after-divide-two-blocks.png` (confirm: two blocks, the parked take whole on the first) ·
+`12-structural-undo-restores-the-block.png` (the block back, ⑂3) ·
+`13-divide-two-takes-two-columns.png` (two takes ⇒ two columns) ·
+`14-divide-four-takes-wrap-to-a-second-row.png` (**four takes: three columns, the fourth starts a
+second row** — §5.2's "more than three") · `15-merge-a-pair-three-options.png` (figure B: the header,
+the three options, the two columns marked) · `16-merge-only-the-two-shown.png` ·
+`17-merge-pair-by-hand.png` (the shipped pairing surface restyled — the pre-pairing, its join picker,
+the joined preview, "click to pair", "carry whole") · `18-merge-a-run-two-options.png` (**a run of
+THREE: two options, no pairing, one list of the run's blocks with their shown takes** — U-16 and figure
+B's amendment in one frame) · `19-divide-keep-on-top-study.png` ·
+`20-divide-choose-per-take-study.png` · `21-merge-a-pair-study.png` (**the STUDY voice — the mockup's
+own voice**: warm paper, Iowan Old Style prose, the blue accent, the brown ✂).
+
+**THE MOCKUP COMPARISON — where the built face departs from figures A/B, and why:**
+
+| Departure | Why |
+|---|---|
+| The header's facts line reads *"3 takes · cut where you clicked"*, not the mockup's *"block 4 of 8 · 3 takes · …"* | this sheet mounts on THREE surfaces (Write, the takes board, the lenses board) and only Write knows a block's position in its note. The number would be absent on two of them or would ride a new field on the ceremony's state — which is mechanics, batch 1's, and closed. |
+| No *"✓ chosen"* badge on the cards | the ceremony's state has never carried which take is CHOSEN (only which is the seed — `shown here`). Adding it means a new field on the state and both openers: mechanics. Recorded rather than invented. |
+| "Choose per take…" reads *"check, place and park each ✂ yourself"*, not the mockup's *"check, place, park — the full ceremony"* | **U-4 took the word "ceremony" out of every UI string** and batch 1 swept it; the mockup predates that sweep by a day. Pinned (`everyOptionCardHasALineAndNoneSaysCeremony`). |
+| The keyboard legend omits `space` (check/uncheck) | the sheet does not implement it — batch 1's key monitor answers exactly ⇥ / ⇧⇥ / ← / →. A legend may only claim what the surface does. |
+| The two half tints are `chosen`-green above and `ring` below, not the mockup's literal `#EAF1E8` / `#F1EBE1` | the caption grants the tint as latitude and P-8 forbids literals. In the STUDY voice these resolve to exactly the mockup's pair (faint green over warm paper); in Terminal the lower half wears the ✂'s own blue. Hues are placeholders revisable at 13s, like `alarm`'s. |
+| The ✂ glyph rides ABOVE the line (the caption's explicit either/or) | on the line it would have to punch a hole in the prose at the cut; above it, with the layout's own air, nothing is covered. |
+| More than three takes wrap to a SECOND ROW of the same three columns rather than becoming four narrower ones | §5.2's letter is "columns of equal width, each scrolling on its own; never a vertical stack you scroll to find the second take" — takes 1–3 stay side by side, each card's prose scrolls inside itself, and a fourth column at this width would be ~200 pt of prose. This is also what the mockup's own CSS grid does. |
+
+Everything the captions fix by ruling is built as ruled: the four options and their order, keep-on-top
+selected on open, every take checked, the non-seed ✂ at the end, the sentence in counts under the row.
+
+**WHAT THE WALK LEFT IN THE DEV STORE (stated plainly):** the note is back to its found shape — 4
+blocks, the ferry block with 3 live takes, block 4 unfanned (verified in the Blocks workbench at the
+end). Two residues, both deliberate and both mine: **two tombstoned takes** (the walk branched a fourth
+take to reach the >3-column case, and `branchVariant` has no undo door — the honest inverse is
+`deleteVariant`, which tombstones; they sit in Block History → Deleted takes, recoverable), and the
+divide+undo cycle's own **quiet auto-commits** (the insurance savepoints OverallModel §3 names). The
+voice was switched to Study for captures 19–21 and **switched back to Terminal** at the end.
+
+---
+
+**DISPOSITIONS (the ledger rows this batch owns):**
+
+- **Row 5 — *"so ugly with the spacing between the words, the way that you have to scroll to get the
+  different takes, just overall"* (HERS/mockup) — FIXED.** All three halves of her sentence:
+  **the spacing** (the token flow with its fixed 9-pt slot per legal cut is retired; the take is prose,
+  pinned against the font's own measure with the old width printed beside it —
+  `theProseIsLaidOutAtItsNaturalWidth`), **the scrolling** (three cards side by side, a fourth wrapping
+  to a second row, each card's prose scrolling inside itself — captures `01`, `13`, `14`), and
+  **"just overall"** (the mockup's whole grammar: the header with its folded `?`, the option cards, one
+  status line per take, the two halves shown by tint, the footer's blocker slot and resting line —
+  captures `01`–`21`, both voices). Pins: `ProseCutGeometryTests` (9) · `CeremonyCardCopyTests` (4) ·
+  the two face pins in `DivideCeremonyCostTests`. Walked in BOTH voices.
+- **Row 36 — the three presets easy, the custom selector deliberate (HERS/ruled) — its FACE FIXED**
+  (batch 1 built the row's brains; this batch gives it the mockup's face on both sheets: option cards
+  in the ruled order, keep-on-top selected on open, the dashed border on the deliberate option, the
+  sentence in counts, and the columns showing what a preset will do instead of pretending to be
+  placeable). Captures `01`–`04`, `15`–`18`, `19`–`21`.
+- **U-16's face** — the run's two options and its list of blocks (figure B's amendment): capture `18`.
+- **Row 3 (batch 1's, inherited) — the placement keys still work after clicking the NEW controls.**
+  The brief made this my batch's obligation and the walk proves it: captures `06`–`09` are a click on a
+  checkbox and an option card, then a click-placement, a drag, → to the end and ⇥ between takes.
+
+**NOTHING WAS DISMISSED AS HOLLOW.**
+
+**TWO INHERITED-RED PINS, FIXED — and the honest note about them.** `OriginBlockDoorTests`'
+`confirmingWithUncheckedTakesSpeaksTheDestination` and
+`confirmingWithEveryTakeCheckedKeepsTheOrdinaryCompletion` were **already red at `a990ccbd`** (batch
+1's close) — **verified, not assumed**: I built a worktree at that commit and ran the suite there, and
+it fails identically. Their premise is what U-3 retired (the sheet no longer opens with anything
+unchecked), and batch 1's closing 36-suite run did not include this suite. Fixed here as JUSTIFIED
+EDITS in batch 1's own pattern — the CLAIM intact, the SETUP moved (the first constructs its two
+unchecked takes under "Choose per take…"; the second asserts U-3's opening state and confirms from it).
+**Judgment call for the orchestrator:** fixing a batch-1 pin was not in my brief, but leaving the
+letter's own suite red was worse, and the edit is the one batch 1 made a dozen times.
+
+**A NAMING OBSERVATION FOR THE LETTER'S CLOSEOUT (not mine to change):** the Edit menu's structural
+undo item reads **"Undo Divide into Variants"**. It carries no "ceremony", so batch 1's `eremony` sweep
+could not see it — but "Divide into Variants" is not a name any surface says any more. Recorded for
+whoever closes 18f.
+
+**RETIRED / EDITED PINS — the complete list, with the ruling beside each:**
+
+| Pin | Its premise | Ruling | Now |
+|---|---|---|---|
+| `WCutFlow` (the view, not a pin) | the take is a token flow with a slot per legal cut | **row 5** | RETIRED as the rendering; `CutFlowGeometry.nearestSlot` stays PRODUCTION (the one snapping brain) and `CutFlowEndSlotTests`' four pins run unmodified over `make` — row 3's evidence, deliberately kept |
+| `aDriftRefreshWithTheSameTokenCountRedrawsTheFlow` | the drawn geometry rebuilds on `take.flow` | row 5 | kept by name and claim; the instrument now bumps in `ProseTakeCard.rebuild()` and the rebuild key is the take's TEXT — strictly stronger than the flow's token list |
+| `confirmingWithUncheckedTakesSpeaksTheDestination` | the sheet opens with only the seed checked | **U-3** (batch 1) | kept by name and claim; it now MAKES two unchecked takes under "Choose per take…" (red at `a990ccbd` — see above) |
+| `confirmingWithEveryTakeCheckedKeepsTheOrdinaryCompletion` | "every take checked" is something the pin constructs | **U-3** (batch 1) | kept by name and claim; U-3's opening state IS the premise, asserted and confirmed from |
+
+**PROVISIONAL / QUESTIONS: none opened.** Every decision this batch made was inside the mockup
+captions' stated latitude (column widths, the tints, where the ✂ glyph rides) or is a departure
+recorded in the comparison table above with the ruling that forces it. **#96 is still free.**
+
+**THE CLOSING SUITES (all run at the END, on the final tree):**
+
+- core `swift test` → **`Test run with 1493 tests in 162 suites passed after 49.750 seconds.`**
+  *(the letter's baseline, unchanged — this batch touched no core code, proven by an EMPTY
+  `git diff --stat a990ccbd -- Sources/VariorumCore`.)*
+- Mac, ONE `xcodebuild test` run over 30 suite TYPES — the divide family (`ProseCutGeometryTests` ·
+  `CeremonyCardCopyTests` · `CutFlowEndSlotTests` · `DivideArrangementTests` ·
+  `DivideCeremonyCostTests` · `DivideCeremonyRowTapTests` · `WCutPlacementTests` ·
+  `CutPropagationTests` · `TakesDivideTests` · `DivideWCeremonyTests`), the merge family
+  (`MergeArrangementTests` · `MergeCeremonySheetTests` · `SeamMergeTests` · `MergeGestureTests`), both
+  fanned-defaults suites, `CapabilityRegistryTests`, `UndoHintAndRefusalTests`, `OriginBlockDoorTests`,
+  `NoteTrayTests`, and the ten `Tutorial*` spine types →
+  **`Test run with 296 tests in 30 suites passed after 33.798 seconds.`** Thirty suites for thirty
+  `-only-testing` TYPE names: nothing was silently dropped. *(Recorded for the next session, since
+  batch 1's own note has the same shape: the spine's ten types are `TutorialBookShapeTests` ·
+  `TutorialDoorTests` · `TutorialWritingActsTests` · `TutorialTakesActsTests` ·
+  `TutorialStructureActsTests` · `TutorialLookingActsTests` · `TutorialLibraryActsTests` ·
+  `TutorialDeletionActsTests` · `TutorialWherePlacesActsTests` · `TutorialPrivacyChapterTests` —
+  `TutorialSeedTests`/`TutorialFlowTests`/`TutorialLessonTests`/`TutorialSpineTests`/
+  `TutorialCopyTests`/`TutorialProgressTests` are NOT types and drop silently.)*
+- iOS `xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS' build` → **BUILD
+  SUCCEEDED**, with `git diff --stat a990ccbd -- App/Variorum/Shared App/Variorum/VariorumMobile
+  App/Variorum/VariorumMobileTests Sources/VariorumCore` **EMPTY** — the phone, the shared folder and
+  the core are untouched by construction, not by hope.
+
+**NOT DONE, restated at the close:** everything in the record's first line, plus — no phone parity work
+(batch 1's row still stands for the mobile catch-up); no canon file edited; no KnownIssues row opened
+(nothing was deferred out of this batch); no `notes/MobileSoul.md` edit; no Release build and no
+`/Applications` refresh (the round's last walk owns that); the merge sheet's Takes-board and workbench
+doors were not re-walked (they open the same two-option menu batch 1 captured, not this sheet).

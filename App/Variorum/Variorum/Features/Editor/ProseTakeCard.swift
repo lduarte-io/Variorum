@@ -115,7 +115,10 @@ nonisolated enum CeremonyCardCopy {
         case .split: return ["top block", "bottom block"]
         case .top: return ["top block · whole"]
         case .bottom: return ["bottom block · whole"]
-        case .both: return ["top block · whole", "bottom block · whole"]
+        // Two swatches, no "· whole" on either: the status line above already
+        // says the whole take rides onto both, and the longer pair truncated
+        // at a three-column card's width (walked, 18f batch 2).
+        case .both: return ["top block", "bottom block"]
         case .original, .empty: return []
         case .unplaced: return []
         }
