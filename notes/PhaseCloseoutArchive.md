@@ -8,6 +8,9 @@
 
 ## The pointer thread (superseded "Current phase" pointers)
 
+**→ pre-13x — POSTURES & RECOVERY — CLOSED 2026-09-07: A USER HOLDS THE WHOLE ENCRYPTION STORY IN ONE SENTENCE, AND THE CODE KEEPS EVERY WORD OF IT.**
+*[removed for publication]*
+
 **→ PHASE 14D CLOSED 2026-08-16 — the Fragments batch, the bridge
 resumption, AND the release-readiness operationalia are ALL DONE (her
 mid-phase scope widening: "everything gets done and is working and

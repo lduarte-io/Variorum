@@ -12,11 +12,7 @@ figures: Divide choosing takes · Merge choosing takes · the sidebar's note box
 **Sources:** her report of 2026-09-06 and her follow-up of 2026-09-07 —
 `notes/author-reports/2026-09-06-use-report.md`, both verbatim, with the image manifest (twelve files
 in the untracked `notes/plans/use-report-2026-09-06-screens/author/`, three more pasted in chat and
-described there). **Kickoff's first mechanical acts:** add the `.gitignore` line for the screens folder
-(the per-round pattern, `.gitignore:13–28`); claim the letters — **17o** in
-`notes/plans/phase-17-standing-fixes.md`'s allocation register (17l · 17m · 17n were claimed by pre-13x's
-closeout on 2026-09-07 — v1 of this file said 17l; the letter moved, nothing else did), **18c · 18d · 18e · 18f** in the master
-plan's Phase 18 row — each pointing HERE; set the master plan's running-order row; commit.
+described there). **The kickoff's mechanical acts were DONE on 2026-09-07 by the planning session, once `pre-13x` closed:** the `.gitignore` line for the screens folder; **17o** claimed in `notes/plans/phase-17-standing-fixes.md`'s register with its entry section (17l · 17m · 17n are pre-13x's closeout entries — v1 of this file said 17l); **18c · 18d · 18e · 18f** on the master plan's Phase 18 row; the round's own row in the phase table and running-order row 3c; the master plan's Current-phase pointer (the pre-13x closed pointer moved to the archive's thread). What remains for the orchestrator's first act: the LIVE STATUS block at the end of this file, its own baseline runs, and the first commit.
 
 ---
 
@@ -677,11 +673,7 @@ setting round-trips; the read tiers' pins unchanged; the phone's suite untouched
 > `notes/KnownIssuesAndTechDebt.md` (rows 27–28 flake rules; row 31 the version anchor; row 43 the rig).
 > Copy the P-1…P-9 constitution into this file's Records section verbatim, as every architect-phase does.
 >
-> **FIRST MECHANICAL ACTS:** the `.gitignore` line for `notes/plans/use-report-2026-09-06-screens/`; claim
-> **17o** in the standing-fixes register and **18c · 18d · 18e · 18f** in the master plan's Phase 18 row,
-> each pointing at this plan; the master plan's running-order row; a LIVE STATUS block at the end of this
-> file; commit and push. Run the baselines yourself (core `swift test`, the Mac suite, the tutorial spine,
-> the iOS build) and record them — the plan's numbers are the last recorded finals, not yours.
+> **FIRST ACTS (the register, the 18 row, the phase-table and running-order rows, the pointer and the `.gitignore` line were all written on 2026-09-07 before you were spawned — verify them with one grep, do not redo them):** write the LIVE STATUS block at the end of this file; copy the P-1…P-9 constitution into Records; run the baselines yourself (core `swift test`, the Mac suite, the tutorial spine, the iOS build) and record them — the plan's numbers are the last recorded finals, not yours; commit and push.
 >
 > **CAST — SPAWN BY AGENT TYPE, NOT BY BARE MODEL (her effort ruling, 2026-09-07):** the three definitions
 > in `.claude/agents/` carry the model AND the reasoning effort, and they supersede the architect-phase
