@@ -2239,9 +2239,12 @@ extension TakesViewModel: DivideWCeremonyHost {
             if let landing = result.second.variants.first {
                 choreography.parkFocus(onVariant: landing.id)
             }
-            // The instant road's own zero-count receipt (18f ladder R1-9 —
-            // "Divided into takes" was the RETIRED sheet title, U-4).
-            status = .receipt(FannedDefaultsCopy.divided(kept: 0))
+            // The receipt counts what rode onto the first block from the op's
+            // own result — the board's instant road's rule (18f ladder R1-9
+            // retired the sheet-title echo; round 2's R2-3 gives the line the
+            // count it always had in hand).
+            status = .receipt(FannedDefaultsCopy.divided(
+                kept: max(0, result.first.variants.count - 1)))
             return true
         } catch {
             status = .refusal(Self.message(for: error))

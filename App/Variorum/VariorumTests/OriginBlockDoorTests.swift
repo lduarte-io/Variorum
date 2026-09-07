@@ -157,9 +157,14 @@ struct OriginBlockDoorTests {
             let status = try #require(board.model.statusMessage)
             // 18f ladder R1-9: the receipt no longer echoes the retired sheet
             // title ("Divide into takes", U-4); it is the divide receipt's
-            // own zero-count line.
-            #expect(status == FannedDefaultsCopy.divided(kept: 0),
-                    "the completion, in the receipt's one home")
+            // own line — and since round 2's R2-3 it COUNTS: keep-on-top
+            // parked the second take at its end, so one other take stayed on
+            // the first block, and the receipt says so (the board's instant
+            // road's own rule). The claim — no "uncut takes" note, because
+            // nothing was left uncut — is unchanged.
+            #expect(status == FannedDefaultsCopy.divided(kept: 1),
+                    "the completion, in the receipt's one home: \(status)")
+            #expect(!status.contains("uncut"), "nothing was left uncut, so no destination note")
         }
     }
 
