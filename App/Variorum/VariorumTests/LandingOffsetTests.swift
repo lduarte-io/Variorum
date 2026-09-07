@@ -193,50 +193,21 @@ struct LandingOffsetTests {
         return found
     }
 
-    /// The laid-out line's top for a UTF-16 offset, in the text view's own
-    /// coordinates — the same geometry `JumpPrimitive` steers (fragment frame
-    /// + the container origin), so the pin measures what the primitive moves.
-    /// TK2 only: no `.layoutManager`, no TK1 API (TEXTKIT2 §4).
-    static func lineTop(ofOffset offset: Int, in textView: NSTextView) -> Double? {
-        guard let layoutManager = textView.textLayoutManager,
-              let contentManager = layoutManager.textContentManager
-        else { return nil }
-        let length = contentManager.offset(
-            from: contentManager.documentRange.location,
-            to: contentManager.documentRange.endLocation)
-        let clamped = min(max(0, offset), length)
-        guard let target = contentManager.location(
-            contentManager.documentRange.location, offsetBy: clamped)
-        else { return nil }
-        var top: Double?
-        layoutManager.enumerateTextLayoutFragments(
-            from: target, options: [.ensuresLayout]
-        ) { fragment in
-            let fragmentTop = Double(fragment.layoutFragmentFrame.minY)
-            let fragmentStart = contentManager.offset(
-                from: contentManager.documentRange.location,
-                to: fragment.rangeInElement.location)
-            let lines = fragment.textLineFragments
-            if let i = FragmentLines.lineIndex(
-                atLocalOffset: max(0, clamped - fragmentStart),
-                lineRanges: lines.map(\.characterRange)) {
-                top = fragmentTop + Double(lines[i].typographicBounds.minY)
-            } else {
-                top = fragmentTop
-            }
-            return false
-        }
-        guard let top else { return nil }
-        return top + Double(textView.textContainerOrigin.y)
-    }
-
-    @Test func aSeededCaretFarDownALongNoteArrivesInsideTheVisibleRect() async throws {
+    /// The 250-paragraph world, mounted: a real detail `EditorView` seeded at
+    /// `entryIndex`'s block start — exactly what `PostDetailView.jump(to:)`
+    /// hands it from the Blocks workbench's Open in Write. Reports the caret's
+    /// laid-out line top and the scroll view's visible rect once the arrival
+    /// has settled.
+    private static func mountedLongNote(
+        seed entryIndex: Int, rng: UInt64,
+        _ body: @MainActor (_ caretTop: Double, _ visible: NSRect) throws -> Void
+    ) async throws {
         let db = try AppDatabase.inMemory()
         try await withDependencies {
             $0.database = db
             $0.uuid = .incrementing
             $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
-            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 20))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: rng))
         } operation: { @MainActor in
             let session = AppSession(database: db)
             let post = try session.operations.createPost(title: "the long note")
@@ -246,26 +217,20 @@ struct LandingOffsetTests {
                     text: "Paragraph \(i): a sentence of the story, long enough to read as prose "
                         + "and to take a line or two of the column at this width.")
             }
-            let slots = try await db.read { [id = post.id] db in
-                try Queries.renderPost(db, containerID: id)
+            let postID = post.id
+            session.commandRouter.forgetCurrentBlock(for: postID)
+            let slots = try await db.read { db in
+                try Queries.renderPost(db, containerID: postID)
             }
             let index = BlockRangeIndex(slots: slots, tail: nil)
-            // Block 200's start — the "far block" the workbench's Open in
-            // Write hands to `PostDetailView.jump(to:)`, which is exactly the
-            // `caretSeed` this mount receives.
-            let seed = index.range(ofEntryAt: 199).location
+            let seed = index.range(ofEntryAt: entryIndex).location
 
             let window = NSWindow(
                 contentRect: NSRect(x: 80, y: 80, width: 1100, height: 750),
                 styleMask: [.titled], backing: .buffered, defer: false)
             window.isReleasedWhenClosed = false
-            defer {
-                window.orderOut(nil)
-                window.close()
-                session.commandRouter.forgetCurrentBlock(for: post.id)
-            }
             let hosting = NSHostingView(
-                rootView: EditorView(session: session, postID: post.id, caretSeed: seed)
+                rootView: EditorView(session: session, postID: postID, caretSeed: seed)
                     .environment(ThemeStore(session: session)))
             hosting.frame = NSRect(x: 0, y: 0, width: 1100, height: 750)
             window.contentView = hosting
@@ -277,21 +242,40 @@ struct LandingOffsetTests {
                 }
                 return view.string.count >= index.documentLength
                     && view.selectedRange().location == seed
-            }, "the seeded caret lands in block 200")
+            }, "the seeded caret lands in the target block")
             let editor = try #require(Self.views(EditorTextView.self, in: hosting).first)
             let scrollView = try #require(editor.enclosingScrollView)
-            // Let the reveal settle (the arrival's own next-turn retry runs).
+            // Let the arrival's post-layout reveal settle.
             _ = await Self.settle(window, hosting, timeout: 2) { false }
-
             let caretTop = try #require(
-                Self.lineTop(ofOffset: seed, in: editor), "the caret's line is laid out")
+                JumpPrimitive.lineTop(ofOffset: seed, in: editor), "the caret's line is laid out")
             let visible = scrollView.contentView.bounds
-            print("[17o b row 20] caret line top \(caretTop) · visible "
-                + "\(visible.minY)…\(visible.maxY) · document \(editor.frame.height)")
+            try body(caretTop, visible)
+            window.orderOut(nil)
+            window.close()
+            session.commandRouter.forgetCurrentBlock(for: postID)
+        }
+    }
+
+    @Test func aSeededCaretFarDownALongNoteArrivesInsideTheVisibleRect() async throws {
+        try await Self.mountedLongNote(seed: 199, rng: 20) { caretTop, visible in
+            print("[17o b row 20] caret line top \(caretTop) · visible \(visible.minY)…\(visible.maxY)")
             #expect(caretTop >= Double(visible.minY) - 1,
-                    "the caret's line is not above the viewport (\(caretTop) vs \(visible.minY))")
+                    "the caret's line is not above the viewport: \(caretTop) vs \(visible.minY)")
             #expect(caretTop <= Double(visible.maxY) - 1,
                     "the caret's line is ON SCREEN, not thousands of points below the viewport: \(caretTop) vs \(visible.maxY)")
+        }
+    }
+
+    /// The guard's other half: a landing the page can ALREADY see moves
+    /// nothing. "Reveal" means make visible, never "move" — without this a
+    /// bare arrival would haul the caret's line to the viewport top on every
+    /// ⌘2-then-⌘1, which is a lurch she never asked for.
+    @Test func aSeededCaretTheViewportAlreadyShowsDoesNotScrollThePage() async throws {
+        try await Self.mountedLongNote(seed: 1, rng: 21) { caretTop, visible in
+            print("[17o b guard] caret line top \(caretTop) · visible \(visible.minY)…\(visible.maxY)")
+            #expect(visible.minY == 0, "the page never scrolled: \(visible.minY)")
+            #expect(caretTop <= Double(visible.maxY) - 1, "…and the caret is on screen anyway")
         }
     }
 }

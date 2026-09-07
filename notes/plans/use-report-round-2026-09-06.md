@@ -3739,11 +3739,11 @@ below marked NOT-STARTED or IN-PROGRESS; the walk; the closing suites.
 
 1. the fact + the memory + the router + the reporters — **DONE (hash next)**
 2. Write's landing consumes the offset and reveals through `JumpPrimitive` — **DONE (hash next)**
-3. Blocks → Write reveals (row 20) — **IN-PROGRESS** (pinned, red measured, fix next)
+3. Blocks → Write reveals (row 20) — **DONE (hash next)**
 4. the Takes board's article scrolls to the landed slot (row 8) — **NOT-STARTED**
 5. the walk + captures + the closing suites — **NOT-STARTED**
 
-**Rows:** 7 · 42 — **FIXED** (pieces 1+2, pin below) · 8 · 20 — OPEN.
+**Rows:** 7 · 20 · 42 — **FIXED** (pins below) · 8 — OPEN.
 
 **RED ON OLD, measured before a line moved** (`scratchpad/red-1.log`, tree `35c11948`):
 
@@ -3807,10 +3807,45 @@ and the memory persists per note into `UserDefaults.standard`, so one suite's ca
 suite's remembered offset and its whole-fact equality read `utf16Offset: 0` — the order-dependence the
 Act 10 batch-G record already names, widened by one field. The pin's assertion is untouched.
 
+**PIECE 3 — the reveal (DONE; row 20).**
+
+- **ONE reveal for every landing in Write** — `EditorViewModel.revealLanding(_:textView:)`, consumed by
+  all three arms of `applyFocusSeeds`: the bare arrival, the `pendingCaretSeed` arm (the Blocks
+  workbench's Open in Write, the Index column's "Jump to block in Write", Read's `onJump`, the canvas
+  card's — all of them `PostDetailView.jump(to:)`), and `applyWriteIntent` (the fire-and-DO landing,
+  which had the same hole: a follow-up gesture that runs off-screen is a gesture she cannot see happen).
+- **It is PARKED, not performed on the spot — and that is the finding of this piece.** The first cut
+  jumped inline and measured `caret line top 6937 · visible 24.0…743.0`: at landing time
+  `setSurfaceContent` has just replaced the storage, the text view's FRAME is still the pre-fill height,
+  so `JumpPrimitive`'s scroll range (`docHeight − viewport`) is a couple of dozen points and the
+  correction loop clamps there. The reveal is therefore spent at the **N14 layout-settle hop**
+  (`overlayLayoutDidSettle`'s async turn — the same post-layout occasion the badge/decor family already
+  waits for, and the first moment the frame is honest). Safe by construction: every caller sits inside
+  `applyFocusSeeds`, which runs only on the INITIAL RENDER, so a geometry generation always bumps first
+  and the hop always arrives. **After: `caret line top 6944 · visible 6944.1…7663.1`** — the landing is
+  pixel-exact at the viewport top, the Phase 6 memo's promise.
+- **The reveal is GUARDED, and this is a judgment call worth her eye (J-note below):** a caret already
+  inside the visible rect scrolls nothing. Reveal means *make visible*, never *move* — without it a bare
+  arrival would haul the caret's line to the viewport top on every ⌘2-then-⌘1, overriding the scroll
+  anchor `renderFull` had just restored. Pinned both ways (block 200 → the page jumps and lands exact;
+  block 2 → `visible.minY == 0`, the page never moves). The reveal also abandons itself if the caret has
+  moved since it was parked — a second jump must never yank her away from a place she chose.
+- `JumpPrimitive` gains **`lineTop(ofOffset:in:)`** — the geometry the jump itself steers (fragment frame
+  + container origin), so "is it on screen?" and "put it on screen" can never disagree. The pin reads the
+  same function rather than a copy of it.
+
+**MACHINERY HONESTY:** the two mounted landing pins, written as near-identical `@MainActor`
+`withDependencies` closures, **crashed swift-frontend** in the `SendNonSendable` SIL pass (Xcode 26,
+`swift-version 6`; `scratchpad/suite-3.log` has the backtrace). Factoring the world into one private
+helper (`mountedLongNote(seed:rng:_:)`) compiles and runs; nothing about the pins' assertions changed.
+Recorded so the next session that meets it knows the shape, not just the crash.
+
 **Suites green at this commit** (`scratchpad/suite-2.log`, ONE run, 16 `-only-testing` type names →
 `Test run with 96 tests in 16 suites`): `LandingOffsetTests` (3 of 4 — the row-20 pin is piece 3's, still
 red by design) · `CurrentBlockContinuityTests` · `BlockHistoryPaneTests` · `BlockHistoryHostTests` ·
 `ReadModeTests` · `LibraryPanelHostTests` · `ReadLandingTests` · `ReadArrivalMeasureTests` ·
 `BookOutlineLandingTests` · `CanvasArrivalTests` · `StructuralUndoTests` · `JumpCorrectionLoopTests` ·
 `BlocksArrivalMeasureTests` · `BlocksWorkbenchFaceTests` · `EditorSessionTests` · `TakesBoardTests`.
+**Re-run after piece 3** (`scratchpad/suite-4.log`, 18 names → `Test run with 108 tests in 18 suites
+passed`, adding `FragmentLinesTests` · `EditorProjectionEngineTests`): all green.
 

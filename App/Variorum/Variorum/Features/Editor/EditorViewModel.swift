@@ -1823,6 +1823,18 @@ final class EditorViewModel {
             textView.setSelectedRange(NSRange(location: clamped, length: 0))
             textView.window?.makeFirstResponder(textView)
             updateCaretContext()
+            // 17o batch b (ledger row 20, her words: *"Opening in write from
+            // blocks puts your cursor in the right place but doesn't move you
+            // there"*). This arm — the Blocks workbench's Open in Write, the
+            // Index column's "Jump to block in Write", Read's `onJump`, the
+            // canvas card's — placed the caret and never revealed it: on a
+            // 250-paragraph note the caret's line measured y 6930 with the
+            // viewport at 0…719. The reveal is `JumpPrimitive`, the Phase 6
+            // hybrid jump (TEXTKIT2 §2): TK2 has not laid the document out at
+            // this moment, so the primitive's single-fragment `ensuresLayout`
+            // is exactly what makes the landing exact — and it is the only
+            // ensureLayout this road performs (P1).
+            revealLanding(clamped, textView: textView)
             caretClaimed = true
         }
         if let fanBlock = pendingFanSeed {
@@ -1882,8 +1894,7 @@ final class EditorViewModel {
                 // proportional estimate, forces layout of the ONE target
                 // fragment, and corrects — bounded, and the only ensureLayout
                 // this target performs (P1; TEXTKIT2 §2).
-                JumpPrimitive.jump(
-                    toOffset: landing, textView: textView, scrollView: scrollView)
+                revealLanding(landing, textView: textView)
             }
             updateCaretContext()
             let claim = { [weak textView, weak self] in
@@ -1896,6 +1907,51 @@ final class EditorViewModel {
                 Task { @MainActor in _ = claim() }
             }
         }
+    }
+
+    /// **The ONE reveal for every landing in Write** (17o batch b): the Phase
+    /// 6 hybrid jump, never `scrollRangeToVisible` — on TK2 a landing runs
+    /// before the document below the viewport is laid out, so the caret-reveal
+    /// scroll steers by a height ESTIMATE and lands short (measured: a caret
+    /// 6,211 pt below the viewport on a 250-paragraph note). The DETAIL editor
+    /// only: the inline book/pool editor scrolls inside its host's scroll view
+    /// and has none of its own, and `JumpPrimitive` refuses a nil one anyway.
+    private func revealLanding(_ offset: Int, textView: NSTextView) {
+        guard scrollView != nil else { return }
+        // PARKED, never performed here — measured, which is why: at the moment
+        // a landing runs, `setSurfaceContent` has just replaced the storage and
+        // the text view's FRAME is still the pre-fill height, so
+        // `JumpPrimitive`'s scroll range (`docHeight − viewport`) is a couple of
+        // dozen points and the correction loop clamps there. (The first cut
+        // jumped here and left the caret 6,213 pt below the viewport with the
+        // page scrolled by 24.) Every caller of this is inside
+        // `applyFocusSeeds`, which runs on the INITIAL RENDER — so a geometry
+        // generation always bumps first and the N14 layout-settle hop always
+        // arrives. That hop is the first moment the frame is honest, and it is
+        // where the reveal is spent.
+        pendingRevealOffset = offset
+    }
+
+    /// The landing waiting for the post-layout settle (above). Cleared the
+    /// moment it is spent, and abandoned if the caret has since moved — a
+    /// second jump must never yank her away from a place she chose.
+    @ObservationIgnored private var pendingRevealOffset: Int?
+
+    private func consumePendingReveal() {
+        guard let offset = pendingRevealOffset else { return }
+        pendingRevealOffset = nil
+        guard let textView, let scrollView,
+              textView.selectedRange().location == offset else { return }
+        // Already on screen — the restored scroll anchor put her there, which
+        // is the ordinary case for a mode round trip. Leave the page alone:
+        // REVEAL means make visible, never "move". (Without this a bare
+        // arrival would haul the caret's line to the viewport top on every
+        // ⌘2-then-⌘1, a lurch nobody asked for.)
+        if let top = JumpPrimitive.lineTop(ofOffset: offset, in: textView) {
+            let visible = scrollView.contentView.bounds
+            if top >= Double(visible.minY), top <= Double(visible.maxY) - 1 { return }
+        }
+        JumpPrimitive.jump(toOffset: offset, textView: textView, scrollView: scrollView)
     }
 
     /// The bare arrival's landing offset (rows 39/49): this post's current
@@ -1947,6 +2003,10 @@ final class EditorViewModel {
         textView.setSelectedRange(NSRange(location: location, length: length))
         textView.window?.makeFirstResponder(textView)
         updateCaretContext()
+        // 17o batch b (row 20's class, one door over): the fire-and-DO landing
+        // placed the caret and never revealed it either — a follow-up gesture
+        // that runs off-screen is a gesture she cannot see happen.
+        revealLanding(location, textView: textView)
         guard let followUp = intent.followUp else { return }
         pendingIntentTask = Task { [weak self] in
             guard let self else { return }
@@ -2793,6 +2853,9 @@ final class EditorViewModel {
             guard let self else { return }
             overlaySettleScheduled = false
             overlayGenerationDelivered = generation
+            // 17o batch b (row 20): the arriving landing's second, exact jump
+            // — this hop is the first moment the document's frame is honest.
+            consumePendingReveal()
             // A generation bumped between schedule and run re-arms on its
             // own draw pass — delivered records what this refresh SAW.
             refreshBadges()

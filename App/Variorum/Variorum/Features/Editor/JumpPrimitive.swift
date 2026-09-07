@@ -92,6 +92,49 @@ nonisolated enum FragmentLines {
 
 @MainActor
 enum JumpPrimitive {
+    /// **Where the line containing `offset` sits**, in the text view's own
+    /// coordinates (the fragment frame plus the container origin — the exact
+    /// geometry `jump` steers, so a caller asking "is it on screen?" and the
+    /// jump that answers "put it on screen" can never disagree). Lays out the
+    /// ONE target fragment, like `jump` (P1); nil when the geometry is
+    /// unavailable.
+    ///
+    /// 17o batch b: the landing reveal's guard reads this — a caret already
+    /// inside the visible rect must not be "revealed", because moving a page
+    /// she can already see is exactly the lurch a reveal is meant to avoid.
+    static func lineTop(ofOffset offset: Int, in textView: NSTextView) -> Double? {
+        guard let layoutManager = textView.textLayoutManager,
+              let contentManager = layoutManager.textContentManager
+        else { return nil }
+        let length = contentManager.offset(
+            from: contentManager.documentRange.location,
+            to: contentManager.documentRange.endLocation)
+        let clamped = min(max(0, offset), length)
+        guard let target = contentManager.location(
+            contentManager.documentRange.location, offsetBy: clamped)
+        else { return nil }
+        var top: Double?
+        layoutManager.enumerateTextLayoutFragments(
+            from: target, options: [.ensuresLayout]
+        ) { fragment in
+            let fragmentTop = Double(fragment.layoutFragmentFrame.minY)
+            let fragmentStart = contentManager.offset(
+                from: contentManager.documentRange.location,
+                to: fragment.rangeInElement.location)
+            let lines = fragment.textLineFragments
+            if let i = FragmentLines.lineIndex(
+                atLocalOffset: max(0, clamped - fragmentStart),
+                lineRanges: lines.map(\.characterRange)) {
+                top = fragmentTop + Double(lines[i].typographicBounds.minY)
+            } else {
+                top = fragmentTop
+            }
+            return false
+        }
+        guard let top else { return nil }
+        return top + Double(textView.textContainerOrigin.y)
+    }
+
     /// Lands the LINE containing `offset` (UTF-16) at the viewport top.
     ///
     /// 13c 1A (A4): this was "lands the FRAGMENT", which for a block taller
