@@ -680,11 +680,12 @@ final class EditorSurfaceController {
     /// under the caret block (`newBlock(at: .after(...))` — the ops layer's
     /// fractional index places it) and the caret lands in it. Runs through
     /// `runStructural` — the one structural door: one flight at a time,
-    /// flush-first, store-led rewrite (seam nil ⇒ the ceremonial full
-    /// re-render; no seam vocabulary exists for an insert), caret by
-    /// identity. A sealed post refuses through the op, spoken.
+    /// flush-first, store-led rewrite, caret by identity. A sealed post
+    /// refuses through the op, spoken.
     func insertBlockBelowCaret() async {
-        guard let blockID = model.caretBlockID else {
+        guard let blockID = model.caretBlockID,
+              let i = model.index.entries.firstIndex(where: { $0.blockID == blockID })
+        else {
             // Fire-and-speak (no silent door): the open tail / empty post
             // cases say what makes blocks there instead of guessing a
             // position.
@@ -693,12 +694,89 @@ final class EditorSurfaceController {
                 : "Put the caret in a block first — the new block lands right below it.")
             return
         }
-        let landed = await runStructural { [postID = model.postID] ops in
-            let result = try ops.newBlock(in: postID, text: "", at: .after(blockID))
-            return StructuralOutcome(
-                caretBlockID: result.block.id, caretOffset: 0, seam: nil)
-        }
+        let landed = await insertEmptyBlock(edge: .below, entryIndex: i, blockID: blockID)
         if landed { model.showStatus("New block added below — type away.") }
+    }
+
+    /// **The one body behind BOTH doors onto "an empty block beside this
+    /// one"** — ⌘⇧⏎'s menu act above and U-1's typed Return below (the
+    /// standing rule from 13e/13j: two doors on one act share the body or
+    /// they drift).
+    ///
+    /// **The seam is stated, and that is the P1 half of 18c batch 2.** An
+    /// insert used to re-render the whole surface from the store (`seam:
+    /// nil`), which was free while this was a menu gesture and would not be
+    /// once every paragraph break travels it: a full `materialize` +
+    /// `setSurfaceContent` per Return is cost ∝ document, exactly what P1
+    /// forbids for a keystroke. The seam vocabulary describes SURFACE
+    /// SHAPE, not which operation ran, and both shapes here already exist
+    /// in it as their degenerate cases — an empty block after entry i is a
+    /// divide whose second half is empty; an empty block before it is a
+    /// prefix extract whose extracted text is empty. `StructuralSeamEdit`'s
+    /// three guard layers verify that shape against the fresh projection
+    /// and refuse to a full re-render when it does not hold, and the DEBUG
+    /// oracle re-checks the landed surface against the store, so the
+    /// cheaper road cannot land a wrong one.
+    ///
+    /// The caret: BELOW puts it in the new empty block ("the paragraph I
+    /// just started"); ABOVE leaves it in the text block, which is what
+    /// "push this paragraph down" means (§5.1).
+    @discardableResult
+    func insertEmptyBlock(
+        edge: TypedReturn.Edge, entryIndex i: Int, blockID: String
+    ) async -> Bool {
+        await runStructural { [postID = model.postID] ops in
+            switch edge {
+            case .below:
+                let result = try ops.newBlock(in: postID, text: "", at: .after(blockID))
+                return StructuralOutcome(
+                    caretBlockID: result.block.id, caretOffset: 0,
+                    seam: .divide(
+                        entryIndex: i, sourceID: blockID, successorID: result.block.id))
+            case .above:
+                let result = try ops.newBlock(in: postID, text: "", at: .before(blockID))
+                return StructuralOutcome(
+                    caretBlockID: blockID, caretOffset: 0,
+                    seam: .extract(
+                        entryIndex: i, edge: .prefix,
+                        sourceID: blockID, extractedID: result.block.id))
+            }
+        }
+    }
+
+    // MARK: - 18c batch 2 (U-1): the typed Return's act
+
+    /// Schedules U-1's act for the next main-actor turn through the
+    /// deferred-keystroke seam below. The seam's NAME is the class it was
+    /// built for (#11a's merge-then-edit); what it IS, and why this rides
+    /// it, is "a keystroke whose act runs on the next turn, CHAINED so two
+    /// fast keystrokes compose instead of racing, and awaitable by teardown
+    /// and by tests".
+    func scheduleTypedReturn() {
+        scheduleCrossBlockCompound { [weak self] in await self?.runTypedReturnAct() }
+    }
+
+    /// **The dispatch — and it re-derives.** The key answered "mine?" a turn
+    /// ago against the surface as it then was; the act reads the decision
+    /// again HERE, so a second Return pressed inside the first one's flight
+    /// acts on the block the first one made (⏎⏎ = a new block, then nothing
+    /// — never two blocks from one intent, never a divide at an offset that
+    /// has moved). Nothing here edits a row: every arm dispatches to a door
+    /// that already runs through `runStructural`, and every refusal — a
+    /// sealed note, a locked take, a block with no interior word edge — is
+    /// that door's own, spoken in its own words.
+    private func runTypedReturnAct() async {
+        switch model.typedReturnAct() {
+        case .content, .nothing:
+            // `.nothing` is the empty block's ruled no-op (U-19 (2)):
+            // consumed, deliberately not spoken.
+            return
+        case .divideAtCaret:
+            await invokeGesture(.divideAtCursor)
+        case .emptyBlock(let edge, let entryIndex, let blockID, let closingEmptyTail):
+            if closingEmptyTail { model.closeEmptyTailSeparator() }
+            await insertEmptyBlock(edge: edge, entryIndex: entryIndex, blockID: blockID)
+        }
     }
 
     // MARK: - Take ↔ block structure (13e batch 3 — her A20/A21, AR-1)

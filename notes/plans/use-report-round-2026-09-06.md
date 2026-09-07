@@ -1109,4 +1109,53 @@ was deferred out of this batch), no Release build and no `/Applications` refresh
 
 ### R-2 · RECORD (the implementer writes here from its first commit)
 
-*(empty until the implementer's first commit)*
+**NOT DONE in this batch (the record's first line, per the brief's item 9):** no "make every newline a
+block" (batch 3), no sheet/preset/renaming work (18f), nothing in `Sources/VariorumCore/Sync/`, no schema,
+no lockstep, nothing in `CrossBlockEditPlanner`, the O(N²) family, `BlockRangeIndex` (not one line — not the
+regions, not the verdict, not the A7 carve) or the churn pair (the 13u fence), **zero core change**
+(`Sources/VariorumCore/` is untouched — `InsertPosition.before` already existed, so the START arm needed no
+addition), no change to the phone, no quick-entry-bar change, no Release build and no `/Applications`
+refresh. *(Filled in further at close.)*
+
+**Pieces**
+
+| # | Piece | State |
+|---|---|---|
+| 1 | `TypedReturn` — the pure decision (`App/Variorum/Shared/EditorBrain/TypedReturn.swift`) + the key intercept + the two doors | **IN-PROGRESS** — code landed and building; pure suite `TypedReturnTests` **13 / 1 green** |
+| 2 | The real-key pins: the nine §5.1 pins, the retirements, the rebuilt tail pins | **NOT-STARTED** |
+| 3 | The walk (dev-store Debug, `18c-2/` captures) | **NOT-STARTED** |
+| 4 | Close: the suites, the dispositions (rows 1 · 28), the closeout deltas | **NOT-STARTED** |
+
+**THE DESIGN AS BUILT (the decisions §5.1 left to the implementer, each named):**
+
+1. **The intercept sits at `EditorTextView.insertNewline(_:)`**, not `keyDown` — the one selector both
+   Return and ⇧⏎ reach (the A15 trace's own finding), so the existing soft-newline guard stays the first
+   word and the list door keeps its place. **The claim is refused for a non-editable surface (a sealed
+   note) and while MARKED TEXT is up** (an IME composition's ⏎ commits the composition — it is not this
+   gesture).
+2. **The decision is a PURE function** (`TypedReturn.act`) because it is consulted TWICE per keystroke: at
+   the key, to answer "is this mine?" (which decides whether a newline is typed at all), and again at the
+   act's own main-actor turn, where it is RE-DERIVED against the surface the previous act left behind. Two
+   fast Returns therefore compose (⏎⏎ = a new block, then the empty block's ruled no-op) instead of racing
+   a stale offset into a divide. The act rides the deferred-keystroke seam (`scheduleCrossBlockCompound` —
+   chained and awaitable; its NAME is the class it was built for, the comment says so at the call site).
+3. **Return at the START of a block: an empty block ABOVE, the caret staying in the text block** (§5.1's
+   first option — "push this paragraph down"). The seam did not argue: `Operations.InsertPosition.before`
+   already exists, so this is zero core change.
+4. **The tail's road is kept, with ONE narrowing that pin (9) forces.** A note with no blocks is all tail
+   and its paragraphs still crystallize (untouched); a tail WITH TEXT still crystallizes (untouched); an
+   **EMPTY** open tail — what the idle mint leaves behind after ⏎-then-pause, where the tail road plans
+   nothing at all — is the trap §4.1 traced as her *"several new lines"*, so the act closes that render
+   artifact (the shipped `.closeTail` verdict, through the ordinary editing path, no store write) and mints
+   the block. Without this the batch would have left her S1 scenario exactly as she reported it.
+5. **The insert states its SEAM** (`.divide` for below, `.extract(.prefix)` for above — the degenerate
+   shapes of both, which `StructuralSeamEdit`'s three guard layers and the DEBUG oracle verify): an insert
+   used to re-render the whole surface from the store, free for a menu act and cost ∝ document for a
+   keystroke, which is what P1 forbids. `insertBlockBelowCaret` (⌘⇧⏎) now shares that one body, so the two
+   doors cannot drift.
+6. **A non-empty selection is NOT this gesture** (the K5 precedent in `MarkdownActs.listReturn`, for its
+   reason: the ruling is about a caret, and replacing a span is a different gesture) — recorded, not
+   invented.
+7. **A block with no interior word edge** (a one-word block, caret inside it) reaches the divide door and
+   gets that door's own refusal, spoken — S4-22's word-edge floor forbids the mid-word cut, and typing a
+   content newline instead would silently re-open the k−1 class the ruling closes.

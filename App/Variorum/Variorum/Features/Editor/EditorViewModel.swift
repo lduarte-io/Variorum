@@ -378,6 +378,11 @@ final class EditorViewModel {
             self?.pickBlock(atOffset: offset, extending: extending) ?? false
         }
         textView.onPlainClick = { [weak self] in self?.clearBlockSelection() }
+        // 18c batch 2 (her U-1): the Return key's act. Wired HERE for the
+        // reason the block pick above states — the model owns the surface
+        // from this point, so the detail editor, the inline book editor and
+        // every harness that attaches a real text view get ONE wiring.
+        textView.onTypedReturn = { [weak self] in self?.runTypedReturn() ?? false }
         // 13j J7 (her ruling): ⌘Z / ⌘⇧Z with nothing left in the TEXT stack
         // point at the structural one — spoken, never a key stolen.
         textView.onTextUndoUnavailable = { [weak self] in self?.speakUndoHint(.undo) }
@@ -1492,6 +1497,60 @@ final class EditorViewModel {
                 guard let self, i >= 0, i < index.entries.count else { return "" }
                 return viewText(index.range(ofEntryAt: i))
             })
+    }
+
+    // MARK: - 18c batch 2 (U-1): the Return key makes a block, anywhere
+
+    /// The typed Return's act over the LIVE surface — the pure decision
+    /// (`TypedReturn.act`) with this model's caret, tiling, chip and text.
+    /// `textAt` reads the view, lazily and for the caret's entry only, so a
+    /// keystroke costs one block's text and never the document (P1) — the
+    /// `gestureWorld` shape exactly.
+    func typedReturnAct() -> TypedReturn.Act {
+        guard let textView else { return .content }
+        return TypedReturn.act(
+            selection: textView.selectedRange(),
+            index: index,
+            segmentation: header?.effectiveSegmentation ?? .paragraph,
+            textAt: { [weak self] i in
+                guard let self, i >= 0, i < index.entries.count else { return "" }
+                return viewText(index.range(ofEntryAt: i))
+            })
+    }
+
+    /// The key's own answer: TRUE when the Return became a structural act
+    /// (so no newline is typed). The act itself runs on the next main-actor
+    /// turn through the deferred-keystroke seam — chained, so two fast
+    /// Returns compose instead of racing — and it RE-DERIVES the decision
+    /// there against the surface the previous one left behind.
+    func runTypedReturn() -> Bool {
+        guard typedReturnAct() != .content else { return false }
+        structural.scheduleTypedReturn()
+        return true
+    }
+
+    /// Closes an EMPTY open tail by deleting its separator through the
+    /// ORDINARY editing path (`BlockRangeIndex.Verdict.closeTail` — "no
+    /// block text is touched, only the render artifact goes", and no store
+    /// write happens because the tail was never a block).
+    ///
+    /// This is the trap §4.1 of the use-report round traced: the idle mint
+    /// leaves an empty tail open, the tail road plans nothing over `""`, and
+    /// a Return there produced her "several new lines". U-1's act closes it
+    /// and mints the block instead. The shape is `MarkdownActs`'
+    /// `deleteWithoutNewline`: `shouldChangeText` → `replaceCharacters` →
+    /// `didChangeText`, so the index, autosave and every refusal see an
+    /// ordinary edit with no new refusal code.
+    func closeEmptyTailSeparator() {
+        guard let textView, index.tailLength == 0,
+              let separator = index.tailSeparatorOffset
+        else { return }
+        let range = NSRange(location: separator, length: 1)
+        guard range.upperBound <= (textView.string as NSString).length,
+              textView.shouldChangeText(in: range, replacementString: "")
+        else { return }
+        textView.replaceCharacters(in: range, with: "")
+        textView.didChangeText()
     }
 
     // The three doors' entry points (menu bar, context menu, shortcut all

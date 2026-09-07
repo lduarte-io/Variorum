@@ -102,14 +102,49 @@ final class EditorTextView: NSTextView, MarkdownFormattable {
     /// cannot tell apart on its own, and a soft break inside a list item is
     /// exactly where a second bullet would be wrong. Its behaviour stays
     /// byte-identical.
+    ///
+    /// **18c batch 2 (U-1) — and now the key MAKES A BLOCK.** Her ruling:
+    /// *"I want it to work on newlines even when you're in the middle of
+    /// write."* The decision (`TypedReturn.act`) is taken HERE, before any
+    /// byte moves, from the caret's block and offset; where it claims the
+    /// key no newline is typed at all and the act runs through the ordinary
+    /// structural doors. Where it does not — ⇧⏎, the chip off, a selection,
+    /// a note still all tail, a caret in a tail with text in it — `super`
+    /// runs and the keystroke is exactly the key it has always been.
+    ///
+    /// **Order of the two intercepts, pinned:** 13k's list door runs FIRST
+    /// and keeps the key wherever it acts (inside a list ⏎ continues it,
+    /// ⇥-level empty items outdent), so lists stay whole (U-19 (4)). The one
+    /// composition is `.exitList`: an empty item's ⏎ ends the list AND then
+    /// makes the block.
     override func insertNewline(_ sender: Any?) {
         guard !isSoftNewline else {
             super.insertNewline(sender)
             return
         }
+        let list = MarkdownActs.listReturn(in: self)
         MarkdownActs.insertNewlineContinuingLists(in: self) {
+            // Only where the list door had nothing to say (its own arms
+            // already own the key, and a bullet's ⏎ must never restructure).
+            if case .ordinary = list, self.claimTypedReturn() { return }
             super.insertNewline(sender)
         }
+        if case .exitList = list { _ = claimTypedReturn() }
+    }
+
+    /// **U-1's act, claimed at the key** — set by `EditorViewModel.attach`;
+    /// nil (a bare surface, a harness that attaches no model) means the key
+    /// is never claimed and every existing behaviour stands.
+    var onTypedReturn: (() -> Bool)?
+
+    /// True when the Return key became a structural act (no newline typed).
+    /// Marked text is an in-progress input-method composition — ⏎ there
+    /// commits the composition and is not this gesture; a non-editable
+    /// surface (a sealed note) has no gesture at all, and its refusal is
+    /// the seal's, spoken where the seal speaks.
+    private func claimTypedReturn() -> Bool {
+        guard isEditable, !hasMarkedText() else { return false }
+        return onTypedReturn?() ?? false
     }
 
     /// **13k K8 — Tab indents a list line, ⇧Tab outdents it** (her ruling +
