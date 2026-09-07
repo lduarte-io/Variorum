@@ -53,6 +53,17 @@ struct MobileSettingsView: View {
     /// arming after a relaunch.
     @State private var traceArmed = false
     @State private var tracePresented = false
+    /// pre-13x ladder round 1, F2 (MINOR-8 — PROVISIONAL placement): the
+    /// restore row for *Encryption Explained* — the phone's first restore
+    /// door for a seeded book, over the SHARED `SeededBookRestore` (the
+    /// Mac's Help ▸ Restore brain): a signed-in-never-synced store seeds
+    /// neither book (ledger 70's gate), and the tutorial's Lesson 2 names
+    /// the book "on this shelf". Available in every build (the DEBUG-only
+    /// tutorial doors below are the dev store's); the mobile row re-places
+    /// it if the Settings surface wants it elsewhere. One door in flight
+    /// at a time; the note speaks the outcome.
+    @State private var bookRestoreInFlight = false
+    @State private var bookRestoreNote: String?
     #if DEBUG
     @State private var spikePresented = false
     /// The tutorial doors' state: one door in flight at a time (the
@@ -365,6 +376,31 @@ struct MobileSettingsView: View {
             // at batch 2a with the real Apple-key item, row 12.)
             #endif
 
+            // pre-13x ladder round 1, F2 (MINOR-8): restore the seeded book
+            // the tutorial names — every build; the shared restore road.
+            Divider()
+                .overlay(tokens.line)
+                .padding(.vertical, 14)
+            Button {
+                Task { await restoreEncryptionBookDoor() }
+            } label: {
+                Text(tokens.chromeLabel("Restore \u{201C}\(SampleLibrarySeeder.Book.encryptionExplained.name)\u{201D}"))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.accent)
+            }
+            .buttonStyle(.plain)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 4)
+            .disabled(bookRestoreInFlight)
+            .accessibilityLabel("Restore the book Encryption Explained")
+            if let bookRestoreNote {
+                Text(tokens.chromeLabel(bookRestoreNote))
+                    .font(tokens.small)
+                    .foregroundStyle(tokens.muted)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 2)
+            }
+
             Spacer()
         }
         .background(tokens.room.ignoresSafeArea())
@@ -538,5 +574,30 @@ struct MobileSettingsView: View {
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+}
+
+
+extension MobileSettingsView {
+    /// F2 (MINOR-8): the book's restore row — the shared road, the receipt
+    /// in the row's note (the Mac's receipts, in the phone's chrome).
+    @MainActor
+    fileprivate func restoreEncryptionBookDoor() async {
+        guard !bookRestoreInFlight else { return }
+        bookRestoreInFlight = true
+        defer { bookRestoreInFlight = false }
+        let book = SampleLibrarySeeder.Book.encryptionExplained
+        do {
+            switch try await SeededBookRestore.restore(session: session, book: book) {
+            case .alreadyWhole:
+                bookRestoreNote = "\u{201C}\(book.name)\u{201D} is already whole — it's on your shelf."
+            case .restored(_, let minted):
+                bookRestoreNote = "Restored \u{201C}\(book.name)\u{201D} — \(minted) \(minted == 1 ? "chapter" : "chapters") came back."
+            case .refused(let why):
+                bookRestoreNote = "Restoring \u{201C}\(book.name)\u{201D} failed: \(why)"
+            }
+        } catch {
+            bookRestoreNote = "Restoring \u{201C}\(book.name)\u{201D} failed: \(String(describing: error))"
+        }
     }
 }
