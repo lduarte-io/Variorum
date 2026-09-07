@@ -2465,3 +2465,28 @@ Run 2026-09-07 ~01:31–01:36 by the DRILLS session (a fresh Fable; no code writ
 *[removed for publication]*
 
 **What the closeout wrote (this commit):** the master plan (the pointer, the phase row, the closeout-log paragraph — the Act 10 pointer and paragraph rolled to `notes/PhaseCloseoutArchive.md`); AppSpec §14's delta (the Act 10 delta rolled to `notes/AppSpecDeltaArchive.md`) + §7's `sync_state` note; SyncSpec §3's per-store-custody sentence + §12's marker-8 record; the 13p constitution's R13p-5/6/7/9 banners; the four KnownIssues rows resolved (the E2EE custody item's class · Castle bypassed by moving the store · the copy's two promised roads · every other device under a retired passphrase); this ledger's lagging rows flipped (the ladder's MINOR-1) and §3.4/§3.5/§4's old-key-file sentences re-based (MINOR-3); the 13y row's NIT-4 note; QUESTIONS #90; the 13u1 kickoff message at the top of `notes/plans/phase-13u-feel-and-polish.md`; the mid-phase handoff and the deploy checklist closed; the closeout worksheet deleted; `notes/handoffs/pre-13x-handoff.md` written. **MOBILE PARITY LINE:** PL-20 (5b). **Hand-forwards:** 13x (the export's reconciliation cases, the same-fingerprint second look, the same-Mac older-key restore), 13y (the adopt-road shapes under per-tenant seq; the re-auth doors; NIT-4), 13s (copy §11), 18a (a remaining-rows count; the seeder's gate), 18b (restore across devices), Phase 12 (the poison-row sub-case under the completion guard), Phase 17 (the seeder's discover-then-mint race — a new entry), the mobile row (the phone's restore-row placement; the plaintext-export door). **Her acts in the morning:** the handoff's checklist.
+
+### CONSIDERATIONS AT THE CLOSEOUT (the orchestrator's, 2026-09-07 ~02:30, at her instruction — *"add all the flaws and considerations to a particular item"*; each has an owner; nothing here is unowned)
+
+1. **The key proof is a STATIC bearer secret** (§3.10): identical on every request, in every RPC body; the server stores its hash but receives the value; an operator-side retention of request bodies holds mutating access forever (integrity/availability, never confidentiality). → **13y** (a per-request challenge at its lockstep event; the row carries it).
+2. **The A5 visibility horizon lives in two constants** (the server's 2 s in `sync_pull`; the client's 2.5 s in `CorpusRotation.horizonWait`); a drift reopens BLOCKER-1's class. → **13y** (one source of truth; the row carries it).
+3. **The salt-reuse fix must stay scoped** to the passphrase wrap (never the recovery wrap). → **17l item 6** (the scope line written).
+4. **The encryption passphrase has no strength floor** (the 12-character floor is the account password's); a stolen backup + key file is an offline target at a modest KDF cost. → **17n** (a 12-character floor at every setting door).
+5. **Standard's honest limit holds only while the copy keeps saying it.** → **13s** (the row's instruction: never soften it).
+6. **The orphaned Apple-held copy** after an iCloud Keychain reset or an Apple-ID switch. → **17m** (the Re-link door, pre-release).
+7. **The poison-row class under the completion guard** — a user has no door out of a "still finishing" rotation held open by an undecryptable row. → **Phase 12** (park-and-heal; the plan's note).
+8. **`updated_by_device` is self-reported** (ledger 49 — disclosed in the book and the privacy brief; the day is the server's). → recorded; no action.
+*[removed for publication]*
+
+**Stress-test questions for an independent agent (hers to hand over; each names where to look — a good answer cites the pin or the code):**
+1. The key proof rides every RPC body. Enumerate everything server-side that could retain it. What can an operator holding it do, and what can't they? (§3.10; `11_pre13x_postures.sql`; `KeyProofGateTests`)
+2. An attacker holds a Standard-era snapshot pair, the Apple-held key, the account password and the old master; the owner then enters Castle. Walk the nine arms in `MultiTenantSyncAttackerTests` and find a tenth. (§14.29)
+3. A row pushed under the old proof one second before a rotation: trace it through `sync_pull`'s 2-second horizon, the walk and the deployed completion guard. Where would a second horizon, or a clock skew, reopen it? (THE LADDER, BLOCKER-1; `CorpusRotationTests`)
+4. Two devices change the passphrase within the same second; two devices enter Castle within the same second. Which device's words are the account's, and does every device's Done say so? (§7; `PostureSwitchTests`' choreography pins; ledger 61/67/69)
+5. The recovery-wrap digest is a non-secret in the key file. What does it reveal, and can a forged digest make a device land the wrong words or skip a notice? (ledger 53; `StoreKeyEnvelope.vaultRecoveryWrapDigest`)
+6. Reset iCloud Keychain on a Standard account with three devices. Which devices still open silently, which fall to the passphrase, and does any device ever write the vault without consent? (MAJOR-3 REFINED; MINOR-N1; 17m)
+7. Move the library file aside on a Castle Mac while signed in. Prove the fresh library cannot sync without a typed secret. (§3.7; the KnownIssues row resolved at 1a/2a/3a)
+8. Restore a backup taken before a Replace All Keys on the same Mac. Which credential opens it, and does the custody item for the current key ever get used on the older file? (§6; 5b's question 6; 13x's row)
+9. A device wiped and restored from Time Machine: what custody survives, what identity does it present, and can it be mistaken for the old device? (§3.3 decision 13; `ThisDeviceOnly`)
+10. Brute-force the encryption passphrase against a stolen key file at the shipped KDF floor. At what passphrase length is the cost real? (`PassphraseKDF.Floor`; 17n)
+
