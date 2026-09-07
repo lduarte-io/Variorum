@@ -1,6 +1,6 @@
 # The use-report round — ORCHESTRATOR HANDOFF (the first orchestrator → its successor)
 
-*Written 2026-09-08 by the Fable orchestrator that ran the round from its kickoff (2026-09-07 evening) through the close of 18f, at ~650k tokens of context — the ~500k guideline plus the "finish the stage you are in" clarification (the 18f ladder was mid-run when the author asked). The two-document form: this ROLE handoff + the paste-ready kickoff at its end. The ONE running record is `notes/plans/use-report-round-2026-09-06.md` (LIVE STATUS at its end; Records R-0 … R-5, the two letters' ladder sections and CLOSEOUT sections). Verify, never trust: every claim below is checkable against git and that file.*
+*Written 2026-09-08 by the Fable orchestrator that ran the round from its kickoff (2026-09-07 evening) through the close of 18f, at ~660k tokens of context — the ~500k guideline plus the "finish the stage you are in" clarification (the 18f ladder was mid-run when the author asked). The two-document form: this ROLE handoff + the paste-ready kickoff at its end. The ONE running record is `notes/plans/use-report-round-2026-09-06.md` (LIVE STATUS at its end; Records R-0 … R-5, the two letters' ladder sections and CLOSEOUT sections). Verify, never trust: every claim below is checkable against git and that file.*
 
 ## 1. Your role, as amended by the run
 
@@ -17,11 +17,11 @@ The architect/orchestrator of `.claude/skills/architect-phase/SKILL.md` under th
 ## 2. State at cutover (verify)
 
 - **18c — CLOSED** (`db02623a`): three batches, a three-round Fable ladder, canon deltas applied (AppSpec §7 + §9, QUESTIONS #12), KnownIssues +2 rows (13u1), QUESTIONS #91–#94 PROVISIONAL. CLOSEOUT section in the plan.
-- **18f — PENDING(state at the seam: CLOSED at PENDING(hash) / or: ladder round 3 …)**: two batches (R-4 mechanics, R-5 the face), ladder round 1 (2 MAJOR · 4 MINOR · 7 NIT, 12 fixed + the raise), round 2 (1 MAJOR · 1 MINOR · 2 NIT → PENDING), round 3 PENDING. Canon deltas: `notes/plans/use-report-round-briefs/apply-18f-deltas.py` (run from the repo root; then delete the script). QUESTIONS #95 PROVISIONAL; R1-13's one-caret-rule PROVISIONAL (write it as #96 at the close if the reviewer did not). The field-guide lessons changed (R-4's list + 18c's) are the handoff's restore note.
-- **17o · 18d · 18e — NOT STARTED.** Their briefs are PRE-DRAFTED in `notes/plans/use-report-round-briefs/` (R-6…R-14; README says how to use them): append each to the plan's Records at its seam after re-verifying pointers, spawn `opus-implementer` on it. The 17o dispositions block is copied into `notes/plans/phase-17-standing-fixes.md`'s 17o entry at that letter's close.
+- **18f — CLOSED** (the closeout commit after `212cdbf3`; the last code commit `d9c25f6e`): two batches (R-4 mechanics, R-5 the face), ladder round 1 (2 MAJOR · 4 MINOR · 7 NIT — 12 fixed + the raise), round 2 (1 MAJOR · 1 MINOR · 2 NIT — all fixed + the raise), round 3 (0 · 0 · 5 MINOR · 4 NIT; no fix pass; R3-1…R3-4 → ledger rows 43–46 routed into **17o batch d** — the R-8 brief already carries them; R3-5 + the NITs → a KnownIssues row, owner 13u2). Canon deltas APPLIED (AppSpec §9 ×2, §12); QUESTIONS #95 + #96 PROVISIONAL; the field-guide list is in the 18f CLOSEOUT section — **row 44 (the deleting chapter's stale ⌘⇧D lesson) must land before her restore act**.
+- **17o · 18d · 18e — NOT STARTED.** Their briefs are PRE-DRAFTED in `notes/plans/use-report-round-briefs/` (R-6…R-14; README says how to use them; the delta script for 18f was run and removed): append each to the plan's Records at its seam after re-verifying pointers, spawn `opus-implementer` on it. The 17o dispositions block is copied into `notes/plans/phase-17-standing-fixes.md`'s 17o entry at that letter's close.
 - **Baselines** at `f402ccce`: core 1460/160 · Mac full 2234/397 (two load-flakes green isolated) · spine green · iOS build green. Latest: core 1493/162 · Mac full 2338/406 at `50d47d85`.
 - **Her rulings received in chat during the run (recorded as J16 in LIVE STATUS):** the ceremony sheet dismissing when another window is raised is FINE — "it's just cancelled" (no rows touched until confirm) — accepted behaviour, no entry.
-- **Judgment calls J1–J16** are in LIVE STATUS with pointers to where each happened; QUESTIONS #91–#95 (+#96 if written) are the ratify list so far.
+- **Judgment calls J1–J17** are in LIVE STATUS with pointers to where each happened; QUESTIONS #91–#96 are the ratify list so far.
 
 ## 3. What the round still owes (in order)
 
