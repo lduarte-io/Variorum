@@ -2223,7 +2223,8 @@ extension TakesViewModel: DivideWCeremonyHost {
     /// The confirm's act — its OWN flight, exactly as `runStructural` is
     /// Write's (the ceremony's pre-await guard reads the latch and this
     /// takes it afterwards, so there is no self-refusal). The ring goes to
-    /// the FIRST successor, mirroring Write's caret rule for the W confirm.
+    /// the SECOND successor's leading take — the board's instant road's own
+    /// rule, and Write's for every divide shape since the 18f ladder (R1-13).
     func runDivideW(
         blockID: String, cuts: [String: Int], displayedVariantID: String?
     ) async -> Bool {
@@ -2235,7 +2236,7 @@ extension TakesViewModel: DivideWCeremonyHost {
                 try ops.divideW(
                     blockID, cuts: cuts, displayedVariantID: displayedVariantID)
             }
-            if let landing = result.first.variants.first {
+            if let landing = result.second.variants.first {
                 choreography.parkFocus(onVariant: landing.id)
             }
             status = .receipt("Divided into takes — ⌥⌘Z undoes it.")
@@ -2260,7 +2261,7 @@ extension TakesViewModel: DivideWCeremonyHost {
                 try ops.divideDuplicating(
                     blockID, displayedVariantID: displayedVariantID, cut: cut)
             }
-            if let landing = result.first.variants.first {
+            if let landing = result.second.variants.first {
                 choreography.parkFocus(onVariant: landing.id)
             }
             status = .receipt("Divided into takes — ⌥⌘Z undoes it.")

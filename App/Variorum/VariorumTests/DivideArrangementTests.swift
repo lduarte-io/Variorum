@@ -140,12 +140,16 @@ struct DivideArrangementTests {
         }
 
         var instant: [[String]] = []
+        var instantCaret = NSRange(location: NSNotFound, length: 0)
         try await withEditor(seedBlocks: ["Alpha one. Alpha two."]) { h in
             _ = try fanned(h, others: ["Beta one. Beta two."])
             caret(h, entry: 0, offset: 11)
             await h.model.invokeGesture(.divideAtCursor)
             #expect(h.model.divideWCeremony == nil, "the instant door asks nothing")
             instant = try shape(h)
+            instantCaret = h.textView.selectedRange()
+            #expect(instantCaret.location == h.model.index.range(ofEntryAt: 1).location,
+                    "non-vacuity: ⌘⇧D lands the caret at the bottom block's start")
         }
 
         try await withEditor(seedBlocks: ["Alpha one. Alpha two."]) { h in
@@ -158,6 +162,13 @@ struct DivideArrangementTests {
             let viaSheet = try shape(h)
             #expect(viaSheet == instant,
                     "confirming the sheet unchanged IS the instant divide")
+            // 18f ladder R1-13 (fable-reviewer) — RED ON OLD (the controller
+            // stashed): the same act landed the caret in two places by which
+            // door opened it (the sheet at the TOP block's start, ⌘⇧D at the
+            // bottom's). ONE rule now: the bottom block's start, the cut's own
+            // position.
+            #expect(h.textView.selectedRange() == instantCaret,
+                    "…and lands the caret where ⌘⇧D lands it (\(h.textView.selectedRange()) vs \(instantCaret))")
         }
         #expect(instant.count == 2, "non-vacuity: the fixture really divided")
         #expect(instant[0].count == 2, "…the top block kept the other take")

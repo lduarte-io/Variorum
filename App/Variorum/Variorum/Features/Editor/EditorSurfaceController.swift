@@ -2784,6 +2784,14 @@ extension EditorSurfaceController: DivideWCeremonyHost {
     /// The confirm's act: `runStructural` exactly as before — seam nil, so
     /// the W confirm re-renders fully from the store (the permanent shape
     /// for ceremonial acts; author, 2026-07-07).
+    ///
+    /// **ONE caret rule for both divide shapes (18f ladder round 1, R1-13 —
+    /// fable-reviewer, on the orchestrator's steer; PROVISIONAL):** the caret
+    /// lands at the SECOND successor's start — where ⌘⇧D lands it
+    /// (`runKeepOnTopDivide`), the cut's own position. The sheet used to
+    /// land it at the FIRST successor's start, so "confirming the sheet
+    /// unchanged reproduces the instant divide" was true of the rows and not
+    /// of where she found herself afterwards.
     func runDivideW(
         blockID: String, cuts: [String: Int], displayedVariantID: String?
     ) async -> Bool {
@@ -2791,13 +2799,12 @@ extension EditorSurfaceController: DivideWCeremonyHost {
             let result = try ops.divideW(
                 blockID, cuts: cuts, displayedVariantID: displayedVariantID)
             return StructuralOutcome(
-                caretBlockID: result.first.block.id, caretOffset: 0, seam: nil)
+                caretBlockID: result.second.block.id, caretOffset: 0, seam: nil)
         }
     }
 
     /// U-5's third preset, on the same terms: `runStructural`, seam nil, the
-    /// caret at the FIRST successor's start (the W confirm's own rule, which
-    /// this shares because it is the same sheet's confirm).
+    /// caret at the second successor's start (the one rule above).
     func runDivideDuplicating(
         blockID: String, displayedVariantID: String, cut: Int
     ) async -> Bool {
@@ -2805,7 +2812,7 @@ extension EditorSurfaceController: DivideWCeremonyHost {
             let result = try ops.divideDuplicating(
                 blockID, displayedVariantID: displayedVariantID, cut: cut)
             return StructuralOutcome(
-                caretBlockID: result.first.block.id, caretOffset: 0, seam: nil)
+                caretBlockID: result.second.block.id, caretOffset: 0, seam: nil)
         }
     }
 

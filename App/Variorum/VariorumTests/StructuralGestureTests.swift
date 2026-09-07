@@ -744,8 +744,11 @@ struct DivideWCeremonyTests {
             // first halves on B in fan order, second halves on C.
             #expect(fanTexts[0] == ["First alpha.", "Intro pad. First alpha."])
             #expect(fanTexts[1] == ["First omega.", "First omega."])
-            // Caret by identity: B's start.
-            #expect(h.textView.selectedRange() == NSRange(location: 0, length: 0))
+            // Caret by identity: C's start — the cut's own position, the one
+            // rule every divide shape lands on since the 18f ladder (R1-13; a
+            // JUSTIFIED EDIT — this read "B's start", the sheet's former rule).
+            #expect(h.textView.selectedRange()
+                == NSRange(location: h.model.index.range(ofEntryAt: 1).location, length: 0))
             #expect(h.session.undoStack.topLabel == "Divide into Variants")
             #expect(h.model.divideWCeremony == nil)
             _ = v1
