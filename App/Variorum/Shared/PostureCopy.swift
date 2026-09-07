@@ -385,9 +385,22 @@ nonisolated extension ProtectionCopy {
     /// 13s re-voices): the Done when step 6's fresh snapshot could NOT be
     /// written — the ordinary line's "A fresh backup was made under it"
     /// would be untrue, and no offer is made over the earlier backups.
+    /// F3 (the F2 adjudication's copy follow-up 1): the ordinary Done's
+    /// Touch ID / other-devices tail RESTORED — it states a fact the user
+    /// needs on every Castle Done (copy §2b, PROVISIONAL; 13s re-voices).
     static let enteredCastleWithoutFreshBackup =
         "You're in Castle. A fresh backup could not be made just now — check your "
-        + "Backups folder; your earlier backups are untouched."
+        + "Backups folder; your earlier backups are untouched. This \(deviceName) asks for "
+        + "\(biometryName) from now on; your other devices will ask the next time they open."
+    /// F3 (the F2 adjudication's copy follow-up 2 — a condition-(vii)
+    /// defect F2 found): the Done on a device that KEEPS NO BACKUPS (the
+    /// phone — `FreshSnapshot.notKept`): the ordinary Done WITHOUT its
+    /// backup sentence, which was untrue there (copy §2b, PROVISIONAL;
+    /// 13s re-voices).
+    static let enteredCastleWithoutBackupClaim =
+        "You're in Castle. Your library has a new key that your Apple account never "
+        + "held. This \(deviceName) asks for \(biometryName) from now on; your other "
+        + "devices will ask the next time they open."
     static let deleteOldBackupsTitle = "Delete the backups Variorum made before today?"
     static let deleteOldBackupsBody =
         "They still open through your Apple account, and they always will. Deleting "
@@ -410,9 +423,16 @@ nonisolated extension ProtectionCopy {
     /// 13s re-voices): Replace All Keys under Standard refused because the
     /// iCloud key the vault's copy is under is not readable here (or the
     /// one read is another Apple account's) — decision 30 never re-mints it.
+    /// F3 (the F2 adjudication's copy follow-up 3): RE-DRAFTED — the door
+    /// already takes the passphrase, so "or enter your passphrase" pointed
+    /// at no door, and waiting cannot help a different Apple ID's device
+    /// (copy §4's re-draft, PROVISIONAL; 13s re-voices). Rendered at the
+    /// DOOR since F3's MINOR-N4 (and by the runner's step-2 belt).
     static let replaceKeysAppleKeyUnreachable =
-        "Your Apple account's key isn't reachable on this \(deviceName) right now — "
-        + "wait a moment and try again, or enter your passphrase."
+        "Your Apple account's key isn't reachable on this \(deviceName). If this "
+        + "\(deviceName) is signed into the Apple account that set up sync, wait a "
+        + "moment and try again; if it isn't, run Replace All Keys from "
+        + "\(deviceNameWithArticle) that is."
 
     // §4 — still finishing (decision 32), at either door
     static func rotationStillFinishing(device: String, day: String) -> String {
@@ -655,13 +675,19 @@ nonisolated extension ProtectionCopy {
     /// §2b's conflict-follow sentence when the runner's road became the
     /// follow (`Outcome.followedAnotherDevicesSwitch`), else the ordinary Done.
     /// F2 (MAJOR-2): a FAILED fresh snapshot renders the could-not-back-up
-    /// line (`.notKept` — the phone — renders the ordinary Done as before).
+    /// line. F3 (F2's adjudication, item 2): `.notKept` — a device that
+    /// keeps no backups, the phone — renders the ordinary Done WITHOUT its
+    /// backup sentence; before F3 the phone claimed "A fresh backup was
+    /// made under it" over a backup it never makes.
     static func castleDoneBody(_ outcome: PostureSwitchRunner.Outcome?) -> String {
         guard let outcome else { return enteredCastleDone }
         if outcome.followedAnotherDevicesSwitch {
             return enteredCastleAfterAnotherDevice(device: outcome.otherDeviceName)
         }
-        if case .failed = outcome.freshSnapshot { return enteredCastleWithoutFreshBackup }
-        return enteredCastleDone
+        switch outcome.freshSnapshot {
+        case .failed: return enteredCastleWithoutFreshBackup
+        case .notKept: return enteredCastleWithoutBackupClaim
+        case .written: return enteredCastleDone
+        }
     }
 }

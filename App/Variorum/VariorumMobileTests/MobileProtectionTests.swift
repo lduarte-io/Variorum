@@ -594,10 +594,23 @@ struct MobilePhoneProtectionCopyTests {
         // Replace All Keys' Apple-key refusal (MAJOR-3 b), the could-not-back-up Done (MAJOR-2).
         #expect(ProtectionCopy.waitingDifferentAppleID
                 == "This iPhone's Apple account doesn't hold the key that set up sync — if it's the same Apple account, the key may still be arriving. Enter your passphrase or twelve words once to continue now; after that this iPhone opens on its own.")
+        // F3 (F2's adjudication, items 1–3): the re-drafted refusal (its
+        // article rides the phone's noun), the could-not-back-up Done WITH
+        // its Face ID tail, and the phone's own Castle Done on `.notKept` —
+        // the phone keeps no backups, so its Done claims none.
         #expect(ProtectionCopy.replaceKeysAppleKeyUnreachable
-                == "Your Apple account's key isn't reachable on this iPhone right now — wait a moment and try again, or enter your passphrase.")
+                == "Your Apple account's key isn't reachable on this iPhone. If this iPhone is signed into the Apple account that set up sync, wait a moment and try again; if it isn't, run Replace All Keys from an iPhone that is.")
         #expect(ProtectionCopy.enteredCastleWithoutFreshBackup
-                == "You're in Castle. A fresh backup could not be made just now — check your Backups folder; your earlier backups are untouched.")
+                == "You're in Castle. A fresh backup could not be made just now — check your Backups folder; your earlier backups are untouched. This iPhone asks for Face ID from now on; your other devices will ask the next time they open.")
+        let notKept = PostureSwitchRunner.Outcome(
+            entersCastle: true, newKeyFingerprint: "fp", insuranceTurnedOff: false,
+            preSwitchSnapshots: [], freshSnapshot: .notKept, reencrypted: 0, material: nil)
+        #expect(ProtectionCopy.castleDoneBody(notKept)
+                == "You're in Castle. Your library has a new key that your Apple account never held. This iPhone asks for Face ID from now on; your other devices will ask the next time they open.")
+        #expect(!ProtectionCopy.castleDoneBody(notKept).contains("backup"), "the phone's Done claims no backup it never makes")
+        // F3 (NIT-N8): the waiting tier's sentence, in the exposed nudge's place.
+        #expect(ProtectionCopy.nudgeSentence(for: .waiting) == ProtectionCopy.waitingTitle + " " + ProtectionCopy.waitingBody)
+        #expect(ProtectionCopy.nudgeSentence(for: .waiting).hasPrefix("Getting your key from iCloud Keychain…"))
         #expect(ProtectionCopy.message(for: RecoveryPhraseError.invalidWordCount(13))
                 == "A recovery phrase is exactly 12 words — you entered 13.")
         // pre-13x 5b (ledger 66): the un-followed headline in the phone's nouns,

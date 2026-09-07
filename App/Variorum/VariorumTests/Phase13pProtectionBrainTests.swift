@@ -270,16 +270,37 @@ struct ProtectionCopyTests {
         #expect(ProtectionCopy.waitingDifferentAppleID
                 == "This \(ProtectionCopy.deviceName)'s Apple account doesn't hold the key that set up sync — if it's the same Apple account, the key may still be arriving. Enter your passphrase or twelve words once to continue now; after that this \(ProtectionCopy.deviceName) opens on its own.")
         // F2 (MAJOR-3 b): Replace All Keys' refusal when the account's iCloud
-        // key is not readable here (copy §4, PROVISIONAL).
+        // key is not readable here (copy §4) — RE-DRAFTED at F2's adjudication,
+        // rendered at F3 (PROVISIONAL; the door already takes the passphrase).
         #expect(ProtectionCopy.replaceKeysAppleKeyUnreachable
-                == "Your Apple account's key isn't reachable on this \(ProtectionCopy.deviceName) right now — wait a moment and try again, or enter your passphrase.")
-        // F2 (MAJOR-2): the Done when the fresh backup could not be made (copy §2b, PROVISIONAL).
+                == "Your Apple account's key isn't reachable on this \(ProtectionCopy.deviceName). If this \(ProtectionCopy.deviceName) is signed into the Apple account that set up sync, wait a moment and try again; if it isn't, run Replace All Keys from a \(ProtectionCopy.deviceName) that is.")
+        #expect(ProtectionCopy.deviceNameWithArticle == "a Mac")
+        // F2 (MAJOR-2): the Done when the fresh backup could not be made (copy
+        // §2b, PROVISIONAL) — WITH the Touch ID / other-devices tail (F3, F2's
+        // adjudication item 1: the tail states a fact every Castle Done owes).
         #expect(ProtectionCopy.enteredCastleWithoutFreshBackup
-                == "You're in Castle. A fresh backup could not be made just now — check your Backups folder; your earlier backups are untouched.")
-        // The nudge's three lines by tier — the one brain that survived §13.
+                == "You're in Castle. A fresh backup could not be made just now — check your Backups folder; your earlier backups are untouched. This \(ProtectionCopy.deviceName) asks for \(ProtectionCopy.biometryName) from now on; your other devices will ask the next time they open.")
+        // F3 (F2's adjudication item 2): the Done on a device that keeps no
+        // backups (`.notKept`) claims none; `.failed` and `.written` as before.
+        #expect(ProtectionCopy.enteredCastleWithoutBackupClaim
+                == "You're in Castle. Your library has a new key that your Apple account never held. This \(ProtectionCopy.deviceName) asks for \(ProtectionCopy.biometryName) from now on; your other devices will ask the next time they open.")
+        func outcome(_ snapshot: PostureSwitchRunner.FreshSnapshot) -> PostureSwitchRunner.Outcome {
+            PostureSwitchRunner.Outcome(
+                entersCastle: true, newKeyFingerprint: "fp", insuranceTurnedOff: false,
+                preSwitchSnapshots: [], freshSnapshot: snapshot, reencrypted: 0, material: nil)
+        }
+        #expect(ProtectionCopy.castleDoneBody(outcome(.notKept)) == ProtectionCopy.enteredCastleWithoutBackupClaim)
+        #expect(ProtectionCopy.castleDoneBody(outcome(.failed)) == ProtectionCopy.enteredCastleWithoutFreshBackup)
+        #expect(ProtectionCopy.castleDoneBody(outcome(.written(URL(fileURLWithPath: "/dev/null")))) == ProtectionCopy.enteredCastleDone)
+        #expect(!ProtectionCopy.castleDoneBody(outcome(.notKept)).contains("backup"), "no backup claim where none is kept")
+        // The nudge's lines by tier — the one brain that survived §13; F3
+        // (NIT-N8): the WAITING tier speaks copy §2d's waiting title + body.
         #expect(ProtectionCopy.nudgeSentence(for: .covered) == ProtectionCopy.coveredNudgeLine)
         #expect(ProtectionCopy.nudgeSentence(for: .exposed) == ProtectionCopy.exposedNudgeHeadline + " " + ProtectionCopy.exposedNudgeBody)
         #expect(ProtectionCopy.nudgeSentence(for: .unknown) == ProtectionCopy.unknownNudgeLine)
+        #expect(ProtectionCopy.nudgeSentence(for: .waiting) == ProtectionCopy.waitingTitle + " " + ProtectionCopy.waitingBody)
+        #expect(ProtectionCopy.nudgeSentence(for: .waiting)
+                == "Getting your key from iCloud Keychain… This usually takes a moment and can take longer. You can also enter your passphrase or twelve words instead.")
     }
 
     @Test func theFollowNoticesRenderCopyFiveVerbatim() {
