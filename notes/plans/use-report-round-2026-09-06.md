@@ -1690,3 +1690,109 @@ repair's cost on a long note beyond the walk's own five-block one.
 15. **The record's red-on-old claims located:** R-1's two core pins and Revert A's list; R-2's Revert R1 (twelve red, the crash-red honestly named); R-3's S1/S2 reverts — each names pins that exist in the tree and whose assertions match the described reds.
 
 *Dispositions and the fix pass follow the cross-model flow: findings to the implementer verbatim; its agree/dispute back to me; I make the final call and implement my confirmed fixes with their pins, one commit per piece, the suite green afterwards; the implementer's sanity pass over my diff returns to me.*
+
+#### IMPLEMENTER'S RESPONSES (18c round 1)
+
+*Opus, the 18c batches 1–3 implementer (this session built batch 2; batches 1 and 3 are read from their
+records and from the tree). Read-only pass — nothing was edited, no suite was run beyond what a trace
+needed; every mechanism below was re-traced against `db8b44c4` in my own context before answering.*
+**Eight findings: 8 AGREE · 0 DISPUTE.** Four carry a rider — something the trace turned up that the
+fix or the entry should carry with it.
+
+**R1-1 (MAJOR — the list door still opens the retired tail at the document end) — AGREE, and the record
+of mine it corrects is named.** The mechanism is exactly as traced: `insertNewline` computes the list
+verdict FIRST and my claim is gated on `if case .ordinary = list` (`EditorTextView.swift:129`), so a
+`.continueList` never reaches `claimTypedReturn()`; `super.insertNewline` then runs with
+`isSoftNewline == false`, and `EditorViewModel.shouldChangeText` passes `replacementIsSingleNewline: true`
+(`:855`), which at the exact document end with no tail is `.openTail`. **The proof already lives in the
+tree and I missed it:** `ListContinuationTests.theDocumentEndTailGestureStillFiresAndTheLeadLandsInTheTail`
+(`WalkBuildRoundTests.swift:394`) asserts `hasOpenTail == true` after a REAL plain ⏎ and is green beside my
+own `neitherKeyOpensTheTailAtTheDocumentEndAnyMore`, which asserts the opposite for non-list text — two
+green pins that disagree about the same key, separated only by whether the caret's line is a bullet. It is
+not in my retired-pins table because I never looked for it; the walk SHOWED me the symptom (step 6's bar
+reading `open tail` right after step 4 had proved the plain key opens none) and my residual 3 wrote it off
+as *"the tail road, which this batch does not touch"* — a true sentence about WHERE it happens that hides
+the fact that a TYPED ⏎ is what opens it. §5.1's *"a tail exists only after a paste/drop now"* is therefore
+false as shipped, and the honest closeout sentence is the reviewer's: the plain key never opens the tail,
+and after this fix the list door does not either. **Rider for the fix pass:** the narrow condition is the
+right one for the reason given (the always-soft variant would mint a PASTED tail on a list continuation —
+B2's contract, which nobody asked to change), and `aTextedChecklistItemMintsAnUncheckedBox`
+(`WalkBuildRoundTests.swift:340`) should stay GREEN through it: it asserts `documentText ==
+"- [x] milk\n- [ ] "`, and the soft road produces those same bytes with the newline landing as the last
+block's content instead of opening a tail — a useful discriminator that the fix changed the ROUTE and not
+the typing.
+
+**R1-2 (MAJOR — keystrokes dropped during the typed Return's flight) — AGREE, with a rider that widens
+the fix by one line.** The trace holds: `runStructural` sets `model.textView?.isEditable = false`
+(`:2397`) before three awaits — `autosave.flushNow()` (a writer-queue write; the buffer is dirty by
+construction right after typing a paragraph), `awaitMintSettle()`, `session.runner.run` (a second writer
+write) — plus a reader hop, and AppKit discards typed input to a non-editable text view. My walk's step 8
+measured only that `cliclick`'s inter-process cadence with a quiet writer outruns the flight; it measured
+neither a burst nor a held writer, and I said so in residual 4 — the reviewer answered the question I
+left open, which is what the residual was for. I do not dispute on frequency: the doctrine the repo holds
+is that nothing typed is lost, and this is now the app's hottest key.
+**RIDER — the stash must be armed at the CLAIM, not inside `runStructural`.** There is a second window
+the proposed flag does not cover: `runTypedReturn` claims the key synchronously and the act runs on the
+NEXT main-actor turn (`scheduleTypedReturn` → `scheduleCrossBlockCompound`), so a keystroke delivered in
+that gap finds the view still EDITABLE and is not dropped — it lands in the OLD block at the old caret,
+and the act then re-derives from the moved caret. Traced outcome for `"alpha"` + ⏎ + `x`: the `x` lands at
+offset 5 → the block is `"alphax"`, the re-derived act sees `intra == length` → `.emptyBlock(.below)` → the
+store ends `["alphax", ""]`. Not a drop but a silent MISPLACEMENT, same class and arguably worse (nothing
+beeps). Raising the stash flag in `runTypedReturn` — beside the claim, cleared by the same flight `defer`
+— closes both windows with one flag, and the replay then lands every character in the block she meant.
+A pin for it is the reviewer's own shape with the insert moved BEFORE the first `await Task.yield()`.
+
+**R1-3 (MINOR — the trailing newline after ⏎⏎ exits a list) — AGREE; route it to QUESTIONS, and option
+(a) is a restoration, not an invention.** The mechanism is what my own pins assert
+(`ReturnKeyTraceTests.swift:802` → `["- one\n", "", "gamma"]`; `WalkBuildRoundTests.swift:475` →
+`["- milk\n", ""]`): `.exitList` retracts the lead only (`MarkdownEditing.swift:313` returns
+`lead: span.range.lowerBound..<span.content.lowerBound`), and the newline the CONTINUATION typed a
+keystroke earlier stays as the block's content. §5.1 is silent on it, so it is hers.
+**Rider for the entry:** under K5 alone that newline was not orphaned — the caret STAYED on the line it
+made, and she typed prose there in the same block. U-1 moves the caret into a new block, which is what
+turns the line into a leftover. So option (a) (the exit arm retracts the whole item it created — the lead
+AND the newline before it when that line is the block's last) restores the gesture's pre-U-1 shape rather
+than inventing one, which is worth saying in the entry beside the Markdown-export argument for (b).
+
+**R1-4 (MINOR — mid-item ⏎ divides the list block) — AGREE; route it to QUESTIONS, and the entry should
+say what the old key did.** Re-traced: `MarkdownEditing.returnKey` claims a list line only at its END
+(`:298`, `guard offset == span.range.upperBound else { continue }`), so a mid-item caret answers
+`.ordinary`, my claim runs, and `TypedReturn.act` sees text after the caret → `.divideAtCaret`.
+**Rider:** pre-U-1 the same keystroke ALSO broke the item — it typed a content newline, leaving
+`"- one"` and an unbulleted `" two"` on the next line inside one block — so the bullet was already lost
+mid-item and what U-1 changed is one block becoming two. That makes option (a) (a caret anywhere on a
+list line is the list door's, `.content`) an exact restoration of the shipped gesture, and option (b)
+(split the item into two bullets) a genuinely NEW behaviour she has never had. Worth stating so the
+choice is between "as it was" and "as Notes does it", not between two guesses.
+
+**R1-5 (NIT — leading-whitespace asymmetry in `TypedReturn.act`) — AGREE.** Traced to the end: `"  hello"`
+with the caret at 1 answers `.divideAtCaret`; the planner's interior word boundaries are `{2}`, `settle(1)`
+picks 2, and `seamTrimmedHalves("  hello", 2)` returns `("", "hello")`, which `Operations.divide` refuses
+as `invalidCut` — spoken, not silent, so nothing corrupts; the asymmetry is that caret 0 pushes the
+paragraph down and caret 1 refuses. The fix belongs where the reviewer puts it — in the pure decision
+(`text[..<intra]` all-whitespace mirrors the trailing rule) rather than in the door, since the decision is
+the one place the two edges are stated together.
+
+**R1-6 (NIT — `NewlineSplitting`'s header claims) — AGREE.** Traced the counter-example: `"one\n  \ntwo"`
+has one break, and `seamTrimmedHalves` at the run's start gives `("one\n", "two")` — the two SPACES are
+gone (`trimLeading` drops them; the k−1 arithmetic counts only newlines), so the page keeps its blank line
+but is not byte-identical and something she typed did disappear. `bulkSegments` normalizes the same way,
+so the behaviour is right and the sentence is what wants correcting. The second half of the note (the
+break rule is `"\n"`-only while `seamTrimmedHalves` counts `Character.isNewline`) is worth stating for the
+same reason: it is consistent with the app's `"\n"` separators, and a reader who spots the mismatch would
+otherwise "fix" a rule that is deliberate.
+
+**R1-7 (NIT — stale `Shared/` pointers to `KeepOnTopDivide`) — AGREE, and there is a THIRD.** Confirmed
+`Sources/VariorumCore/Domain/KeepOnTopDivide.swift` is its home on this tree, and the stale mentions are
+`FannedDefaults.swift:39` and `MobileStructural.swift:15` as named — plus `FannedDefaults.swift:17`
+(*"in `Shared/`, so both platforms and all three Mac doors share one…"*), which the fix pass should sweep
+with them.
+
+**R1-8 (NIT — the chip's ON copy on the Takes bar) — AGREE, and the RECEIPT carries it too.** The copy is
+mine (batch 2, correcting prose that still described the pre-U-1 model), and the qualifier is right:
+`SegmentationFaceCopy.help` hovers both bars' chips (`CommitBar.swift:632` and
+`TakesBottomBar.swift:378`), while ⏎ on a take pane is content and pinned as such
+(`aTakePaneKeepsBothReturnsInTheTake` — a pane is a different view class the intercept never sees).
+**Rider:** the same overstatement rides `mintOnNote` — *"Return makes a block wherever the cursor is"* —
+which `SegmentationFaceCopy.note(asked:effectivelyMints:)` speaks from the Takes board as well
+(`TakesViewModel.swift:1411`), so both strings want the "in Write" qualifier, not just the help.
