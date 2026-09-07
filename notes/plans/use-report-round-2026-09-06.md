@@ -1420,6 +1420,15 @@ further at close.)*
    `withCompound` for exactly that reason). The two EDITOR doors — note ▾ and block ▾ — do run through
    `runStructural` with `seam: nil`, as ruled.
 
+**AN EXPANSION BEYOND THE BRIEF'S THREE DOORS, and why it is the same unit rather than a second one:**
+the brief points at Write's `CommitBar` alone, and a door that only Write's bar carries for an act the
+Takes board can perform IS *"Write privileged over Takes"* — R118's own words, and R6-2's one-grammar
+rule (*"both bars lose it together"*, *"in the same commit"*) is the shipped discipline for exactly this.
+So the note ▾ and block ▾ rows land on **both bars**, and the bulk verb lands on **both selection
+banners** (the Blocks workbench's, which the brief names, and the Takes board's beside it). Same act,
+same copy, same compound — five renderers of three declarations, which is what the door grammar already
+looked like for `deleteBlock` · `archiveBlock` · `deleteSelectedBlocks`.
+
 **Pieces**
 
 | # | Piece | State |
@@ -1427,8 +1436,8 @@ further at close.)*
 | 1 | Domain: `NewlineSplitting.breaks(in:)` — the break rule + the list exception | **DONE (cf4f155b)** — `NewlineSplittingTests` **12 / 1 green** |
 | 2 | Core: `divide` / `divideW` bodies factored into `db`-taking internals (the 3C parity refactor, existing suites unmodified) | **DONE (af12b339)** — divide family **48 / 4 green**; core `swift test` **1474 / 161 green** |
 | 3 | Core: `KeepOnTopDivide` moved into the Domain (public, call sites unchanged) + `splitBlockAtNewlines` + `StructuralSplitAtNewlinesTests` | **DONE (this row's commit)** — `StructuralSplitAtNewlinesTests` **19 / 1 green**; core `swift test` **1493 / 162 green**; the two reverts run and recorded below |
-| 4 | Mac: the three doors, the registry declarations, the receipt copy + their pins | IN-PROGRESS |
-| 5 | The walk (dev-store Debug, `18c-3/` captures) | NOT-STARTED |
+| 4 | Mac: the doors, the registry declarations, the receipt copy + their pins | **DONE (495c67bc)** — `SplitAtNewlinesDoorTests` **11 / 1 green**; `CapabilityRegistryTests` **23 / 1 green**; iOS build SUCCEEDED |
+| 5 | The walk (dev-store Debug, `18c-3/` captures) | IN-PROGRESS |
 | 6 | Close: the suites, row 37's disposition, QUESTIONS #93, the parity line | NOT-STARTED |
 
 **A THIRD DEVIATION, declared with piece 3 (a MOVE, not a change):** `KeepOnTopDivide` left
