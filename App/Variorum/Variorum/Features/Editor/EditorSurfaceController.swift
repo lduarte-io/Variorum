@@ -619,8 +619,16 @@ final class EditorSurfaceController {
     /// takes plus every other active take carried whole, composed from this
     /// app's own `mergeCeremony` — zero core change, and the instant no-fan
     /// merge above stays byte-unchanged behind its own threshold.
+    ///
+    /// `leadingDisplayedID` / `trailingDisplayedID`: the pair to join. Nil
+    /// (⌘⇧M, the seam) = whatever the surface shows at act time; the sheet's
+    /// preset road passes the takes it SHOWED as the pair (18f ladder round
+    /// 2, R2-2), so what she was shown is what joins.
     @discardableResult
-    private func runCarryAllMerge(leadingID: String, trailingID: String) async -> Bool {
+    private func runCarryAllMerge(
+        leadingID: String, trailingID: String,
+        leadingDisplayedID: String? = nil, trailingDisplayedID: String? = nil
+    ) async -> Bool {
         await model.autosave.flushNow()
         guard !model.autosave.isDirty else {
             model.showStatus("Unsaved changes couldn't be written — resolve that first, then retry.")
@@ -639,9 +647,11 @@ final class EditorSurfaceController {
             return await runInstantMerge(leadingID: leadingID, trailingID: trailingID)
         }
         guard let composition = CarryAllMerge.compose(
-            leadingDisplayedID: model.index.entries.first { $0.blockID == leadingID }?.variantID,
+            leadingDisplayedID: leadingDisplayedID
+                ?? model.index.entries.first { $0.blockID == leadingID }?.variantID,
             leadingFan: fans.leading,
-            trailingDisplayedID: model.index.entries.first { $0.blockID == trailingID }?.variantID,
+            trailingDisplayedID: trailingDisplayedID
+                ?? model.index.entries.first { $0.blockID == trailingID }?.variantID,
             trailingFan: fans.trailing)
         else {
             model.showStatus(FannedDefaultsCopy.takesChangedMerge)
@@ -1513,14 +1523,29 @@ final class EditorSurfaceController {
                 model.showStatus(FannedDefaultsCopy.blocksChangedMerge)
                 return
             }
+            // A PAIR's preset roads confirm what the sheet SHOWED (18f ladder
+            // round 2, R2-2): the same drift check the pairing branch runs,
+            // widened to the shown pair — a chosen re-point under the open
+            // sheet refreshes it onto what the surface shows now, for her to
+            // review, instead of joining a pair she was never shown. A run has
+            // no shown pair to hold to; its roads read the store afresh.
+            if !state.isRun {
+                guard await refreshMergeSheetIfDrifted(state) == .current else { return }
+            }
             let bringEvery = state.arrangement == .bringEveryTake
             let landed: Bool
             if state.isRun {
                 landed = await runMergeChain(
                     blockIDs: state.blockIDs, bringEveryTake: bringEvery)
             } else if bringEvery {
+                // Composed from the STATE's rendered ids — the promise the
+                // sheet's "＋ pairs with →" makes, literal by construction (a
+                // shown take that has since died falls out through the
+                // composition's own nil → `takesChangedMerge`).
                 landed = await runCarryAllMerge(
-                    leadingID: state.firstBlockID, trailingID: state.secondBlockID)
+                    leadingID: state.firstBlockID, trailingID: state.secondBlockID,
+                    leadingDisplayedID: state.firstRenderedID,
+                    trailingDisplayedID: state.secondRenderedID)
             } else {
                 landed = await runInstantMerge(
                     leadingID: state.firstBlockID, trailingID: state.secondBlockID)
@@ -1530,31 +1555,12 @@ final class EditorSurfaceController {
         }
         // The sheet may have sat open while a sync round landed edits (the
         // W confirm's drift class): the previews and the canon-default
-        // joins were derived from SNAPSHOT texts. Verify both fans against
-        // the CURRENT store first; on any drift, refresh the ceremony
-        // (pairings and carries kept by take identity, previews re-derived)
-        // instead of confirming what the author wasn't shown.
-        do {
-            let (firstFan, secondFan) = try await model.session.database.read {
-                db -> ([Variant], [Variant]) in
-                (try Queries.blockFan(db, blockID: state.firstBlockID)
-                    .filter { $0.deletedAt == nil && $0.status == .active },
-                 try Queries.blockFan(db, blockID: state.secondBlockID)
-                    .filter { $0.deletedAt == nil && $0.status == .active })
-            }
-            let snapshot = Dictionary(uniqueKeysWithValues:
-                (state.firstTakes + state.secondTakes).map { ($0.id, $0.variant.workingText) })
-            let current = firstFan + secondFan
-            let drifted = current.count != snapshot.count
-                || current.contains { snapshot[$0.id] != $0.workingText }
-            if drifted {
-                refreshMergeCeremony(from: state, firstFan: firstFan, secondFan: secondFan)
-                return
-            }
-        } catch {
-            model.showOperationError(error)
-            return
-        }
+        // joins were derived from SNAPSHOT texts. Verify both fans — and the
+        // shown pair — against the CURRENT store and surface first; on any
+        // drift, refresh the ceremony (pairings and carries kept by take
+        // identity, previews re-derived) instead of confirming what the
+        // author wasn't shown.
+        guard await refreshMergeSheetIfDrifted(state) == .current else { return }
         let pairings = state.pairings.map {
             Operations.MergePairing(
                 firstVariantID: $0.firstVariantID,
@@ -1602,13 +1608,61 @@ final class EditorSurfaceController {
                     + "(\(TrayPath.originalsPath); ⌥⌘Z undoes).")
     }
 
+    /// The two blocks' takes as the SURFACE shows them now — what the sheet's
+    /// "＋ pairs with →" marks must still match at confirm (R2-2).
+    private func renderedIDs(of state: MergeCeremonyState) -> (first: String?, second: String?) {
+        (model.index.entries.first { $0.blockID == state.firstBlockID }?.variantID,
+         model.index.entries.first { $0.blockID == state.secondBlockID }?.variantID)
+    }
+
+    private enum MergeSheetDrift { case current, refreshed, failed }
+
+    /// **The PAIR sheet's ONE drift check, both branches** (the W confirm's
+    /// discipline; widened at the 18f ladder round 2, R2-2). The sheet may
+    /// have sat open while a sync round landed — a take's text, the fan's
+    /// size, OR which take a block SHOWS. Any of the three refreshes the
+    /// ceremony onto the current store and surface (pairings and carries kept
+    /// by identity, the shown pair re-marked) and the author reviews again;
+    /// nothing is joined from what she wasn't shown. Before this the pairing
+    /// branch checked texts and count, the preset branches checked nothing,
+    /// and a pure chosen re-point — every text and count unchanged — escaped
+    /// both.
+    private func refreshMergeSheetIfDrifted(_ state: MergeCeremonyState) async -> MergeSheetDrift {
+        do {
+            let (firstFan, secondFan) = try await model.session.database.read {
+                db -> ([Variant], [Variant]) in
+                (try Queries.blockFan(db, blockID: state.firstBlockID)
+                    .filter { $0.deletedAt == nil && $0.status == .active },
+                 try Queries.blockFan(db, blockID: state.secondBlockID)
+                    .filter { $0.deletedAt == nil && $0.status == .active })
+            }
+            let snapshot = Dictionary(uniqueKeysWithValues:
+                (state.firstTakes + state.secondTakes).map { ($0.id, $0.variant.workingText) })
+            let current = firstFan + secondFan
+            let rendered = renderedIDs(of: state)
+            let drifted = current.count != snapshot.count
+                || current.contains { snapshot[$0.id] != $0.workingText }
+                || rendered.first != state.firstRenderedID
+                || rendered.second != state.secondRenderedID
+            guard drifted else { return .current }
+            refreshMergeCeremony(
+                from: state, firstFan: firstFan, secondFan: secondFan, rendered: rendered)
+            return .refreshed
+        } catch {
+            model.showOperationError(error)
+            return .failed
+        }
+    }
+
     /// Rebuilds the ceremony over the CURRENT fans: carries survive by
     /// take identity, pairings survive where BOTH sides still live, joins
     /// are kept (the author chose them), previews re-derive from the new
-    /// texts. The author reviews and confirms again — nothing is joined
-    /// from a drifted snapshot.
+    /// texts, and the shown pair is re-marked from the surface (R2-2). The
+    /// author reviews and confirms again — nothing is joined from a drifted
+    /// snapshot.
     private func refreshMergeCeremony(
-        from state: MergeCeremonyState, firstFan: [Variant], secondFan: [Variant]
+        from state: MergeCeremonyState, firstFan: [Variant], secondFan: [Variant],
+        rendered: (first: String?, second: String?)
     ) {
         guard !firstFan.isEmpty, !secondFan.isEmpty,
               firstFan.count > 1 || secondFan.count > 1
@@ -1631,8 +1685,8 @@ final class EditorSurfaceController {
             otherTakes: max(0, firstFan.count - 1) + max(0, secondFan.count - 1),
             runBlocks: state.runBlocks,
             arrangement: state.arrangement,
-            firstRenderedID: state.firstRenderedID,
-            secondRenderedID: state.secondRenderedID,
+            firstRenderedID: rendered.first,
+            secondRenderedID: rendered.second,
             firstTakes: firstFan.map { MergeTake(variant: $0, carried: carried.contains($0.id)) },
             secondTakes: secondFan.map { MergeTake(variant: $0, carried: carried.contains($0.id)) },
             pairings: [])
@@ -1642,7 +1696,9 @@ final class EditorSurfaceController {
             firstIDs.contains($0.firstVariantID) && secondIDs.contains($0.secondVariantID)
         }
         mergeCeremony = next
-        model.showStatus("The takes changed while the sheet was open — review the pairings before merging.")
+        model.showStatus(state.arrangement == .pairByHand
+            ? "The takes changed while the sheet was open — review the pairings before merging."
+            : "The takes changed while the sheet was open — review before merging.")
     }
 
     /// What a structural operation reports back to the rewrite path: where

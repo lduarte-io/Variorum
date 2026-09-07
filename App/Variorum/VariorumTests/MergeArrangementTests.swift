@@ -363,6 +363,61 @@ struct MergeArrangementTests {
         }
     }
 
+    // MARK: - 18f ladder round 2, R2-2 (fable-reviewer): the preset roads confirm what the sheet SHOWED
+
+    /// **RED ON `19fceb17`.** The sheet marks the two takes it opened on as
+    /// the pair that joins (`firstRenderedID`/`secondRenderedID`, *"＋ pairs
+    /// with →"*), but the preset roads used to compose from whatever the
+    /// SURFACE showed at act time — so a chosen re-point landing under the
+    /// open sheet (a sync apply) joined a pair she was never shown, and the
+    /// receipt still said "the takes you were looking at joined". The pairing
+    /// road's drift check could not see it either: it compared texts and
+    /// count only. Now BOTH branches treat a re-pointed shown take as drift
+    /// — the sheet refreshes onto what the surface shows, she reviews, and
+    /// the confirm joins exactly that; the carry-all composes from the
+    /// state's own rendered ids rather than re-reading the projection.
+    @Test func aChosenRePointUnderTheOpenSheetRefreshesInsteadOfJoiningWhatSheWasNotShown() async throws {
+        try await withEditor(seedBlocks: ["Alpha one.", "Beta two."]) { h in
+            let slots = try h.storeSlots()
+            let head = try #require(slots[0].variantID)
+            let spare = try h.session.operations.branchVariant(slots[0].blockID, from: head)
+            try h.session.operations.autosave(spare.id, text: "Alpha spare.", charDelta: 0)
+            try h.reload()
+
+            selectAcross(h, 0, 1)
+            await h.model.invokeGesture(.mergeBlocks, ceremony: true)
+            let opened = try #require(h.model.mergeCeremony)
+            #expect(opened.arrangement == .bringEveryTake)
+            #expect(opened.firstRenderedID == head, "non-vacuity: the sheet marks the head as shown")
+
+            // A sync apply re-points the leading block's chosen take under
+            // the open sheet; the surface adopts it.
+            try h.session.operations.chooseVariant(slots[0].blockID, variantID: spare.id)
+            try h.reload()
+            #expect(h.model.index.entries[0].variantID == spare.id,
+                    "non-vacuity: the surface now shows the spare")
+
+            await h.model.confirmMergeCeremony()
+            // Refreshed, not joined: what the sheet showed is no longer what
+            // the surface shows.
+            #expect(try h.storeSlots().count == 2, "nothing joined from a pair she was not shown")
+            let refreshed = try #require(h.model.mergeCeremony, "the sheet refreshed")
+            #expect(refreshed.firstRenderedID == spare.id, "the sheet now marks what the surface shows")
+            #expect(refreshed.arrangement == .bringEveryTake, "the row she chose survives")
+            #expect(h.model.statusMessage?.contains("changed while the sheet was open") == true,
+                    "\(h.model.statusMessage ?? "nil")")
+
+            // Confirming the refreshed sheet joins exactly what it shows.
+            await h.model.confirmMergeCeremony()
+            let landed = try h.storeSlots()
+            #expect(landed.count == 1, "the pair merged")
+            let merged = try fan(h, landed[0].blockID)
+            #expect(merged.first { $0.id == landed[0].variantID }?.workingText == "Alpha spare. Beta two.",
+                    "the shown pair joined")
+            #expect(merged.count == 2, "the head came along whole")
+        }
+    }
+
     // MARK: - The sentence
 
     @Test func theSentenceUnderTheMergeRowSaysWhatComesAlong() {
