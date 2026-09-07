@@ -2314,4 +2314,46 @@ real surface — the same-turn timing is the pins' job, and they are the determi
 
 ### R-4 · RECORD (the implementer writes here from its first commit)
 
-*(empty until the implementer's first commit)*
+**NOT DONE in this batch (the record's first line, per the brief's item 9):** no restyle, no prose face,
+no side-by-side columns, no character hit-testing (all batch 2's); no phone door and no
+`VariorumMobile` change; nothing in `Sources/VariorumCore/Sync/`; no schema, no lockstep; nothing in
+`BlockRangeIndex` / `EditorTextView` / the 13u fence's family; no change to the instant defaults 18c
+built (`KeepOnTopDivide` is CONSUMED, not modified); no Release build and no `/Applications` refresh.
+*(Filled in further at close.)*
+
+**Pieces**
+
+| # | Piece | State |
+|---|---|---|
+| 1 | Row 3's three §4.4 pins, written BEFORE any fix (`CutFlowEndSlotTests`) | **IN-PROGRESS** |
+| 2 | Names (U-4) — the verbs, the sheet titles, every UI "ceremony" string, the field guide | **NOT-STARTED** |
+| 3 | Doors — the registry declarations + the three bars' buttons | **NOT-STARTED** |
+| 4 | The divide sheet's arrangement row (U-5/U-3) + the confirm roads | **NOT-STARTED** |
+| 5 | The merge sheet's row + the N-way's two choices (U-16) | **NOT-STARTED** |
+| 6 | The walk (dev-store Debug, `18f-1/` captures) + close | **NOT-STARTED** |
+
+**Piece 1 — ROW 3, the end slot: §4.4's three links, pinned in order, ALL GREEN on the pre-fix tree.**
+`App/Variorum/VariorumTests/CutFlowEndSlotTests.swift` (4 tests, 1 suite, green at
+`-only-testing:VariorumTests/CutFlowEndSlotTests`):
+
+- **(i) `theEndOfATakeIsALegalCutPosition` — PASSES.** `legalCutPositions(of: "Alpha beta.")` contains
+  11, and the end survives every ending shape (terminator · trailing space · trailing newline · one
+  word); the empty take is the one deliberate exception. `BoundarySnapping.boundaries` seeds its set
+  with `[0, text.utf16.count]` before any scanner runs, so the end can never be dropped.
+- **(ii) `theEndSlotIsLaidOutInsideTheFlowsOwnSize` — PASSES.** At a wrapping width whose LAST line is
+  the widest (asserted in the pin, so it cannot go vacuous), the end slot's frame sits inside
+  `geometry.size` in both axes. `size.width = min(widest, width)` cannot clip it: a slot is only ever
+  placed at `x == 0` or where `x + slotWidth <= width`, and `widest` is taken after the end slot.
+- **(iii) `aPointRightOfTheLastTokenResolvesToTheEndSlot` — PASSES.** Just past the end slot, far right
+  of the row, and below the row all resolve to the end.
+- Plus `steppingForwardReachesTheEndAndParksThere` (the keyboard road): → walks to the end and parks.
+
+**Probed with HER OWN take text** (from `…-screens/author/cantputdividescissorsatendanditssouglyandhardtoworkwith.png`
+— the second, checked take) at both the sheet's minimum width (536) and her window's (1030): the end
+slot exists (boundary 356, frame `(374, 44, 9, 18)` at 1030), and `nearestSlot` answers 356 for every
+point right of it on that row (+0, +5, +50, +300 pt). The pure brains are SOUND. Per the brief's
+"if all three pass, the fault is `WCutFlow`'s gesture wiring (`DivideWSheet.swift:290–356`)", row 3's
+remaining candidate is face-level and is settled by the WALK (piece 6) — the rig cannot mount a whole
+sheet and send a real drag into a nested `Canvas` (KnownIssues row 43). Recorded, not fixed on
+suspicion.
+
