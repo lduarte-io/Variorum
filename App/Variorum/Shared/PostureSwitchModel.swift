@@ -176,6 +176,18 @@ final class PostureSwitchModel: Identifiable {
                     phase = .failed(Self.message(for: CorpusRotationError.staleMaster(vaultKeyID: vaultID, heldKeyID: recorded)))
                     return
                 }
+                // pre-13x ladder round 2, F3 (MINOR-N4): MAJOR-3 (b)'s refusal
+                // AT THE DOOR — decision 32's pattern. Under Standard the
+                // account's iCloud key must be readable here and be the
+                // vault's (decision 30: the new master is re-wrapped under
+                // the SAME A, never a minted one); before F3 this fired at
+                // step 2, after Screens 2–4, and *Generate New Ones* had
+                // then shown twelve words that opened nothing. The runner's
+                // own check stays as the belt.
+                if facts.appleKeyReadable == false {
+                    phase = .failed(ProtectionCopy.replaceKeysAppleKeyUnreachable)
+                    return
+                }
                 phase = .explain
             }
         } catch {

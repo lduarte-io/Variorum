@@ -1966,6 +1966,64 @@ struct PostureSwitchTests {
         #expect(try rotated.format.unwrapMaster(withAppleKey: world.apple.symmetricKey) == outcome.material?.masterSymmetricKey)
     }
 
+    /// pre-13x ladder round 2, F3 (MINOR-N4) — RED ON OLD: MAJOR-3 (b)'s
+    /// refusal fired at STEP 2 of the run, after Screens 2–4 — with
+    /// *Generate New Ones* the twelve words she had just written down opened
+    /// NOTHING (never landed) and the `.failed` sentence said nothing of it.
+    /// Now the DOOR reads A (decision 32's pattern — `DoorFacts
+    /// .appleKeyReadable`) and refuses before any screen; the account's own
+    /// A opens onto the explain screen; under Castle no Apple copy is owed
+    /// and the fact is nil. The runner's step-2 check stays as the belt
+    /// (the pin above).
+    @Test func replaceAllKeysRefusesAnUnreachableAppleKeyAtTheDoorBeforeAnyScreen() async throws {
+        let world = try await makeWorld()
+        defer { world.tearDown() }
+        let client = try #require(world.vaultClient)
+        let material = try #require(world.oldMaterial)
+        let fetched = try await world.vault()
+        try await client.updateVault(
+            try fetched.format.settingAppleHeldCopy(
+                masterKey: material.masterSymmetricKey, appleKey: world.apple.symmetricKey, appleKeyID: world.apple.id),
+            expectedRevision: fetched.revision, keyProof: KeyProof.wireToken(master: material.masterSymmetricKey))
+        let before = try await world.vault()
+        let controller = makeController(for: world)
+
+        // (1) A unreadable here (propagation lag; iCloud Keychain off): the
+        // door refuses with copy §4's sentence — no screen, nothing run.
+        world.appleBacking.key = nil
+        let factsUnreadable = try await world.runner.checkDoor()
+        #expect(factsUnreadable.appleKeyReadable == false)
+        let unreachable = PostureSwitchModel(mode: .replaceKeys, runner: world.runner, controller: controller, vaultTie: nil)
+        await unreachable.start()
+        #expect(unreachable.phase == .failed(ProtectionCopy.replaceKeysAppleKeyUnreachable), "\(unreachable.phase)")
+        #expect(world.appleBacking.key == nil, "nothing minted")
+        let markerAfterOne = try await world.marker()
+        let revisionAfterOne = try await world.vault().revision
+        #expect(markerAfterOne == nil && revisionAfterOne == before.revision, "nothing ran")
+
+        // (2) A readable but ANOTHER Apple account's: the same door refusal.
+        world.appleBacking.key = AppleKey.mint()
+        let factsOther = try await world.runner.checkDoor()
+        #expect(factsOther.appleKeyReadable == false)
+        let other = PostureSwitchModel(mode: .replaceKeys, runner: world.runner, controller: controller, vaultTie: nil)
+        await other.start()
+        #expect(other.phase == .failed(ProtectionCopy.replaceKeysAppleKeyUnreachable))
+
+        // (3) The account's own A: the door opens onto the explain screen.
+        world.appleBacking.key = world.apple
+        let factsOwn = try await world.runner.checkDoor()
+        #expect(factsOwn.appleKeyReadable == true)
+        let open = PostureSwitchModel(mode: .replaceKeys, runner: world.runner, controller: controller, vaultTie: nil)
+        await open.start()
+        #expect(open.phase == .explain)
+
+        // Under Castle the fact is nil — no Apple-held copy is owed there.
+        let castle = try await makeWorld(standard: false)
+        defer { castle.tearDown() }
+        let castleFacts = try await castle.runner.checkDoor()
+        #expect(castleFacts.appleKeyReadable == nil)
+    }
+
     /// THE CEREMONY (copy §4 whole, `PostureSwitchModel.Mode.replaceKeys`):
     /// the front check refuses a STALE recorded corpus id with the
     /// keys-don't-match sentence and runs nothing; then, on the current

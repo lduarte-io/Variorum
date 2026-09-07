@@ -347,6 +347,25 @@ final class PostureSwitchRunner {
         /// passphrase at a key door is worded as RETIRED (copy §5) when the
         /// key file's recorded descriptor no longer matches it.
         var vaultKDF: PassphraseKDF.Descriptor? = nil
+        /// pre-13x ladder round 2, F3 (MINOR-N4 — decision 32's door
+        /// pattern applied to MAJOR-3 (b)): under a STANDARD posture,
+        /// whether the account's iCloud key is READABLE here and IS the
+        /// vault's (nil under Castle — no Apple-held copy is owed there).
+        /// Replace All Keys refuses AT THE DOOR on `false`, before any
+        /// screen — before F3 the refusal fired at step 2, after the words
+        /// screens, and regenerated words then opened nothing, unsaid. The
+        /// runner's own step-2 check (`appleHeldCopyForStandard`) stays as
+        /// the belt.
+        var appleKeyReadable: Bool? = nil
+    }
+
+    /// F3 (MINOR-N4): the door-time reading of what the belt enforces at
+    /// step 2 — A READ (never minted), and the vault's id when it names one.
+    private func appleKeyReadable(keptUnder fetched: KeyVaultClient.FetchedVault) -> Bool? {
+        guard leaves.posture() == .standard else { return nil }
+        guard let apple = leaves.appleKeys.read() else { return false }
+        if let vaultID = fetched.format.appleKeyID, vaultID != apple.id { return false }
+        return true
     }
 
     func checkDoor() async throws -> DoorFacts {
@@ -367,7 +386,8 @@ final class PostureSwitchRunner {
             updatedByDevice: fetched.format.updatedByDevice,
             vaultHasRecoveryWrap: fetched.format.masterWrappedByRecovery != nil,
             vaultCorpusKeyID: fetched.format.classKey(for: .corpus)?.keyID,
-            vaultKDF: fetched.format.kdf)
+            vaultKDF: fetched.format.kdf,
+            appleKeyReadable: appleKeyReadable(keptUnder: fetched))
     }
 
     // MARK: - The two switches + Replace All Keys
