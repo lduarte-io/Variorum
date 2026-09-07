@@ -653,7 +653,15 @@ struct DivideWCeremonyTests {
         return (slots[0].variantID!, v2.id)
     }
 
-    @Test func theCeremonyPreMarksTheActiveTakeAndSeedsProposals() async throws {
+    /// **A JUSTIFIED EDIT (18f batch 1, U-3/U-5).** Its old name was
+    /// `theCeremonyPreMarksTheActiveTakeAndSeedsProposals`, and BOTH halves of
+    /// that premise are retired by ruling: *"Takes should automatically be
+    /// selected … and should automatically have the scissors at the end"*
+    /// (U-3), so nothing opens unmarked, and the opening arrangement — not
+    /// `CutPropagation` — places every other ✂. What survives unchanged is
+    /// the SEED's own cut (the gesture's, snapped) and the other take's legal
+    /// set, including the position propagation used to propose.
+    @Test func theCeremonyOpensArrangedWithTheSeedsOwnCut() async throws {
         try await withEditor(seedBlocks: ["First alpha. First omega."]) { h in
             let (v1, v2) = try await openCeremony(h)
             let state = try #require(h.model.divideWCeremony)
@@ -663,28 +671,42 @@ struct DivideWCeremonyTests {
             #expect(activeTake.cut == 13)  // the gesture's snapped cut
 
             let otherTake = try #require(state.takes.first { $0.id == v2 })
-            #expect(!otherTake.marked, "only the active take is pre-marked")
-            #expect(otherTake.cut == 24, "string-context match, snapped to a legal boundary")
-            #expect(otherTake.boundaries.contains(24))
+            #expect(otherTake.marked, "U-3: every take is checked on open")
+            #expect(otherTake.cut == otherTake.variant.workingText.utf16.count,
+                    "U-3: …with its ✂ parked at the END")
+            #expect(otherTake.parkedAtEnd)
+            #expect(otherTake.boundaries.contains(24),
+                    "the propagated position is still a legal one to place by hand")
         }
     }
 
-    @Test func noUniqueMatchLeavesTheTakeUnseededAndGatesConfirm() async throws {
+    /// **A JUSTIFIED EDIT (18f batch 1, U-3).** Its old name was
+    /// `noUniqueMatchLeavesTheTakeUnseededAndGatesConfirm`, whose premise —
+    /// that a take sharing no context with the seed opens with NO cut — the
+    /// ruling retires: the arrangement places every ✂, so a wholly unrelated
+    /// take parks at its end like any other and the sheet is confirmable as
+    /// it stands. What survives is the rest of the road: unchecking under
+    /// "Choose per take…" leaves the take on the original block, and a hand
+    /// placement anywhere in its legal set is accepted.
+    @Test func anUnrelatedTakeStillParksAndCanBePlacedByHand() async throws {
         try await withEditor(seedBlocks: ["First alpha. First omega."]) { h in
-            // v2 shares no context with the active cut: no proposal.
             let (v1, v2) = try await openCeremony(
                 h, v2Text: "Wholly different words. Nothing shared.")
             var state = try #require(h.model.divideWCeremony)
             let otherTake = try #require(state.takes.first { $0.id == v2 })
-            #expect(otherTake.cut == nil, "zero matches: unseeded, never a guess")
+            #expect(otherTake.parkedAtEnd, "no context to match, and none needed")
+            #expect(state.canConfirm, "the arrangement placed everything")
 
-            // Marking the unseeded take gates Confirm until a cut is placed.
-            #expect(state.canConfirm)  // active take alone, cut in place
+            h.model.divideWCeremonyController.setArrangement(.perTake)
             h.model.toggleWTake(v2)
             state = try #require(h.model.divideWCeremony)
-            #expect(!state.canConfirm, "a marked take without a cut blocks Confirm")
+            #expect(state.takes.first { $0.id == v2 }?.marked == false)
+            #expect(state.canConfirm, "the seed alone still divides")
+
+            h.model.toggleWTake(v2)
             h.model.placeWCut(takeID: v2, cut: 24)  // after "Wholly different words. "
             state = try #require(h.model.divideWCeremony)
+            #expect(state.takes.first { $0.id == v2 }?.cut == 24)
             #expect(state.canConfirm)
             _ = v1
         }
@@ -693,7 +715,11 @@ struct DivideWCeremonyTests {
     @Test func confirmPassesExactlyTheMarkedCutsToTheOp() async throws {
         try await withEditor(seedBlocks: ["First alpha. First omega."]) { h in
             let (v1, v2) = try await openCeremony(h)
-            h.model.toggleWTake(v2)  // mark the second take; its cut is the proposal (24)
+            // 18f batch 1 (U-3/U-5): the take arrives CHECKED and parked; this
+            // pin is about the cuts the op receives, so it places the one it
+            // has always placed (24) by hand under "Choose per take…".
+            h.model.divideWCeremonyController.setArrangement(.perTake)
+            h.model.placeWCut(takeID: v2, cut: 24)
             await h.model.confirmDivideWCeremony()
 
             // The op received {v1: 13, v2: 24}: B's fan = first halves in
@@ -794,7 +820,10 @@ struct DivideWCeremonyTests {
         // divideSideWouldBeEmpty is the belt behind this gate).
         try await withEditor(seedBlocks: ["First alpha. First omega."]) { h in
             let (v1, v2) = try await openCeremony(h)
-            h.model.toggleWTake(v2)                  // mark; proposal 24
+            // 18f batch 1 (U-5): this pin is the HAND-PLACED sheet's own I10
+            // gate, so it names that road; the preset's voice for the same
+            // refusal is pinned in `DivideArrangementTests`.
+            h.model.divideWCeremonyController.setArrangement(.perTake)
             h.model.placeWCut(takeID: v1, cut: 25)   // park at the end
             h.model.placeWCut(takeID: v2, cut: 36)   // park at the end
             var state = try #require(h.model.divideWCeremony)
@@ -821,8 +850,9 @@ struct DivideWCeremonyTests {
         // whole take rides into B; C carries only v1's ending.
         try await withEditor(seedBlocks: ["First alpha. First omega."]) { h in
             let (v1, v2) = try await openCeremony(h)
-            h.model.toggleWTake(v2)
-            h.model.placeWCut(takeID: v2, cut: 36)   // park v2 at its end
+            // 18f batch 1 (U-3): v2 arrives checked and parked at its end —
+            // which IS this pin's setup, now reached by the ruling instead of
+            // by two calls.
             let state = try #require(h.model.divideWCeremony)
             #expect(state.canConfirm)
             await h.model.confirmDivideWCeremony()
@@ -919,7 +949,7 @@ struct DropAndRefusalCopyTests {
         let crossBlock = RefusalCopy.message(for: .crossBlockSpan)
         #expect(crossBlock.contains("Divide") && crossBlock.contains("merge"),
                 "cross-block names the divide-then-merge workaround")
-        #expect(RefusalCopy.message(for: .fannedMiddleSpan).contains("Divide Block at Cursor"),
+        #expect(RefusalCopy.message(for: .fannedMiddleSpan).contains("Divide choosing takes"),
                 "fanned middle span points at the W ceremony's door")
         #expect(RefusalCopy.message(for: .middleSpanNeedsMakeBlock).contains("Make Block"),
                 "extract's middle-span refusal points at the composed gesture")

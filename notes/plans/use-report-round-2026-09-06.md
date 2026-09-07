@@ -2330,7 +2330,7 @@ built (`KeepOnTopDivide` is CONSUMED, not modified); no Release build and no `/A
 | 3 | Doors — the registry declarations + the three bars' buttons | **DONE** (this row's commit) — `.bottomBar` for both, `.surface` for merge; the registry walk green |
 | 4 | The divide sheet's arrangement row (U-5/U-3) + the confirm roads | **DONE** (this row's commit) — the row, the seeding through `KeepOnTopDivide`, the three confirm roads, the sentence; 106/10 green |
 | 5 | The merge sheet's row + the N-way's two choices (U-16) | **DONE** (this row's commit) — three options for a pair, two for a run, `mergeCeremonyIsPairwise` retired; 108/8 green |
-| 6 | The walk (dev-store Debug, `18f-1/` captures) + close | **NOT-STARTED** |
+| 6 | The walk (dev-store Debug, `18f-1/` captures) + close | **DONE** (this row's commit) — 14 captures; row 3 traced, red-captured, FIXED, green-captured |
 
 **Pieces 3 + 5 — THE MERGE'S ARRANGEMENT ROW (U-5's merge half · U-16) AND THE DOORS (U-4).**
 
@@ -2430,6 +2430,57 @@ unchecked any more — so it unchecks a take under "Choose per take…" first; t
 untouched) and `TakesDivideTests.theCeremonyRefusesToConfirmWhileEveryCheckedTakeParksTheSameWay` (U-5
 means the same I10-at-birth refusal is spoken in two voices — the preset's and the hand-placed sheet's —
 and the pin now holds BOTH arms).
+
+**Piece 6 — THE WALK (the acceptance gate — USE), and ROW 3's FIX.**
+
+Walked by hand on the DEV-STORE Debug build (`io.lduarte.Variorum.debug`, launched from
+`…/DerivedData/Variorum-dnpxwqhpxdqrdjbunktnzoahckpd/Build/Products/Debug/`) with `cliclick` +
+`Tools/WalkKit`. Her `/Applications` app was never launched; every instance check
+(`pgrep -fl 'Variorum.app/Contents/MacOS'`) showed only DerivedData Debug paths, and my instances were
+quit at the end (zero at close). The fixture: the field guide's own three-take lesson block ("The ferry
+crossed at dawn…"), and the store was left exactly as found (both acts undone).
+
+**ROW 3 — THE MECHANISM, FOUND BY USE.** With §4.4's three brains green, the fault was where the plan
+predicted: the sheet's gesture wiring. `DivideWSheet` armed its `@FocusState keyboardFocused` exactly
+ONCE, in `onAppear`, and every control inside it takes first responder when clicked — so **←/→, ⌥←/→
+and ⇥ were dead for the rest of the sheet's life after the first click on a control.** Her own session
+made that click unavoidable: the lesson (and the sheet's own copy) tells you to uncheck a take before
+confirming. What was left was dragging a ✂ into a 9-pt slot in a flow whose glyph overlaps its
+neighbours — which is exactly *"the scissors couldn't be placed at the end of the block"*. **The
+click/drag road to the end always worked** (walked: a click right of the last word parks the ✂ and the
+row says so), which is why the pure pins could never have caught this.
+
+**Three focus roads were tried and all three stayed deaf** (each walked): assigning
+`keyboardFocused = true` (a no-op — `@FocusState` publishes edges), bouncing it false→true in the same
+turn, bouncing it a runloop turn later; `.focusable(false)` on the chips and the checkbox did not stop
+them taking first responder either. **The fix is a local key MONITOR** installed only while the sheet is
+on screen (it is window-modal, so that is exactly its scope), acting on the four placement chords and
+returning every other event untouched; `.onKeyPress` stays on the container as the ordinary road, and
+both roads call the same two brains (`stepCut`, `stepTake`) so they cannot answer differently.
+RED and GREEN both captured.
+
+**THE CAPTURES** (`notes/plans/use-report-2026-09-06-screens/18f-1/`, gitignored):
+`01-block-menu-both-new-rows.png` (Write's `block ▾`: "Divide choosing takes… (⌥⌘⇧D)" beside Divide,
+"Merge choosing takes… (⌥⌘⇧M)" beside Merge) · `02-divide-sheet-keep-on-top-default.png` (the row of
+four, keep-on-top selected, the mockup's sentence in counts, every take checked, the ✂ visible at both
+other takes' ENDS — U-3 and U-5 in one frame) · `03-divide-sheet-keep-on-bottom.png` ·
+`04-divide-sheet-copy-to-both.png` ("Not cut — this whole take rides onto BOTH blocks") ·
+`05-divide-sheet-choose-per-take.png` (the checklist appears, every take checked, ✂ at the ends) ·
+`06-ROW3-GREEN-arrow-keys-park-the-seed-at-the-end-after-a-checkbox-click.png` ·
+`07-ROW3-RED-keyboard-dead-after-a-checkbox-click.png` · `09-after-confirm-choose-per-take.png` ·
+`10-one-structural-undo-puts-the-block-back.png` · `11-merge-choosing-takes-a-pair-three-options.png` ·
+`12-merge-pair-by-hand-reveals-the-shipped-pairing-surface.png` ·
+`13-blocks-bulk-bar-merge-choosing-takes-two-roads.png` (a run of THREE: *Bring every take* · *Only the
+shown ones*, no pairing — U-16) · `14-after-only-the-shown-ones-plain-chain.png` (one block, no takes
+badge — the spares stayed in lineage) · `15-one-undo-restores-the-run.png`.
+
+**Walked but NOT captured separately:** the Takes board's ⌘-click banner door. It renders the identical
+`mergeRoadsMenu` and its declaration is held by the registry walk
+(`theSurfacesRenderExactlyTheDeclaredSurfaceActs`); the workbench's is the one captured.
+
+**A note for the field-guide restore:** the dev store still carries the PRE-rename tutorial (the seeder
+runs once), so the outline read "the take ceremony" during the walk. Her restore act at the round's end
+is what re-seeds the new lesson titles.
 
 **Piece 1 — ROW 3, the end slot: §4.4's three links, pinned in order, ALL GREEN on the pre-fix tree.**
 `App/Variorum/VariorumTests/CutFlowEndSlotTests.swift` (4 tests, 1 suite, green at

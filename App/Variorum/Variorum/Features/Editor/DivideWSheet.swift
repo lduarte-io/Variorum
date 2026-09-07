@@ -16,6 +16,7 @@
 //  editor.
 //
 
+import AppKit
 import SwiftUI
 import VariorumCore
 
@@ -52,6 +53,8 @@ struct DivideWSheet: View {
     @Environment(\.colorScheme) private var scheme
     @State private var activeTakeID: String?
     @FocusState private var keyboardFocused: Bool
+    /// Ledger row 3's fix — see `installKeyMonitor`.
+    @State private var keyMonitor: Any?
 
     private var state: DivideWCeremony.State {
         ceremony.state ?? presented
@@ -147,6 +150,73 @@ struct DivideWSheet: View {
         .onAppear {
             activeTakeID = state.activeVariantID
             keyboardFocused = true
+            installKeyMonitor()
+        }
+        .onDisappear { removeKeyMonitor() }
+    }
+
+    // MARK: - The keyboard's focus (LEDGER ROW 3 — her *"the scissors
+    // couldn't be placed at the end of the block"*)
+
+    /// **Re-arm the sheet's key focus after ANY control interaction.**
+    ///
+    /// Traced by USE on the dev-store build (18f batch 1's walk, captured):
+    /// the sheet armed `keyboardFocused` exactly once, in `onAppear`, and
+    /// every control inside it — a take's checkbox `Toggle`, and now the
+    /// arrangement chips — takes first responder when clicked. The
+    /// `.focusable()` container never took it back, so ←/→, ⌥←/→ and ⇥ were
+    /// DEAD for the rest of the sheet's life after the first click on a
+    /// control. Her own session made that click unavoidable: the lesson (and
+    /// the sheet's own copy) tells you to uncheck a take before confirming.
+    /// What was left was dragging a ✂ into a 9-pt slot in a flow whose glyph
+    /// overlaps its neighbours — which is exactly "couldn't be placed at the
+    /// end".
+    ///
+    /// The three pure brains §4.4 named are all sound and pinned
+    /// (`CutFlowEndSlotTests`): the end is legal, it is laid inside the
+    /// flow, and a point right of the last token resolves to it. The fault
+    /// was one level up, in the gesture wiring, as the plan predicted it
+    /// would be if those three passed.
+    /// **THE FIX, and why it is a key MONITOR rather than a focus re-arm.**
+    /// Three focus roads were tried on the dev-store build and all three
+    /// stayed deaf: assigning `keyboardFocused = true` (a no-op — `@FocusState`
+    /// publishes edges), bouncing it false→true in the same turn, and bouncing
+    /// it a runloop turn later; `.focusable(false)` on the controls did not
+    /// stop them taking first responder either. SwiftUI would not hand the
+    /// container's focus back while an AppKit control inside a `ScrollView`
+    /// held it.
+    ///
+    /// So the placement keys stop depending on focus at all. The monitor is
+    /// installed only while THIS sheet is on screen (it is window-modal, so
+    /// that is exactly its scope), acts only on the four placement chords,
+    /// and returns every other event untouched — nothing else in the app can
+    /// see a difference. `.onKeyPress` stays on the container as the ordinary
+    /// road; the monitor is what makes it survive her first click.
+    private func installKeyMonitor() {
+        guard keyMonitor == nil else { return }
+        keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+            guard ceremony.state != nil else { return event }
+            return handleKeyEvent(event) ? nil : event
+        }
+    }
+
+    private func removeKeyMonitor() {
+        if let keyMonitor { NSEvent.removeMonitor(keyMonitor) }
+        keyMonitor = nil
+    }
+
+    /// True = handled (the event is swallowed). Reads the same brains the
+    /// `.onKeyPress` road does, so the two cannot answer differently.
+    private func handleKeyEvent(_ event: NSEvent) -> Bool {
+        switch event.keyCode {
+        case 48:  // ⇥
+            return stepTake(forward: !event.modifierFlags.contains(.shift))
+        case 123:  // ←
+            return stepCut(forward: false, bySentence: event.modifierFlags.contains(.option))
+        case 124:  // →
+            return stepCut(forward: true, bySentence: event.modifierFlags.contains(.option))
+        default:
+            return false
         }
     }
 
@@ -162,6 +232,10 @@ struct DivideWSheet: View {
                     ceremony.setArrangement(option)
                     activeTakeID = state.activeVariantID
                 }
+                // ROW 3: the sheet's placement keys live on the container's
+                // focus, and a control that TAKES first responder on click
+                // silently ends them. These act; they never need focus.
+                .focusable(false)
                 .help(option == .perTake
                     ? "Check the takes to cut and place each \u{2702} yourself"
                     : DivideWCeremony.arrangementSentence(
@@ -204,6 +278,9 @@ struct DivideWSheet: View {
                         if activeTakeID == take.id { activeTakeID = nil }
                     })
                 ) { header }
+                // ROW 3, the same rule as the chips: the checkbox acts, and
+                // taking first responder from the sheet is all it did besides.
+                .focusable(false)
             } else {
                 header
             }
@@ -310,48 +387,58 @@ struct DivideWSheet: View {
     // MARK: - Keyboard (←/→ word · ⌥←/→ sentence · ⇥ takes)
 
     private func handleKey(_ press: KeyPress) -> KeyPress.Result {
-        // Under a PRESET only the seed take's ✂ is hers to move (mockup A:
-        // the other columns only show), so the arrow keys aim there and ⇥ —
-        // which exists to walk between hand-placed takes — has nothing to
-        // walk.
-        let markedIDs = state.arrangement == .perTake
-            ? state.takes.filter(\.marked).map(\.id)
-            : [state.activeVariantID].compactMap { $0 }
         switch press.key {
         case .tab:
-            guard state.arrangement == .perTake else { return .ignored }
-            guard let next = WCutPlacement.nextTake(
-                after: activeTakeID, in: markedIDs,
-                forward: !press.modifiers.contains(.shift))
-            else { return .ignored }
-            activeTakeID = next
-            return .handled
+            return stepTake(forward: !press.modifiers.contains(.shift))
+                ? .handled : .ignored
         case .leftArrow, .rightArrow:
-            let forward = press.key == .rightArrow
-            // The active take, or the first checked one if none is active.
-            guard let takeID = (activeTakeID.flatMap { markedIDs.contains($0) ? $0 : nil })
-                    ?? markedIDs.first,
-                  let take = state.takes.first(where: { $0.id == takeID }),
-                  !take.boundaries.isEmpty
-            else { return .ignored }
-            let next: Int?
-            if press.modifiers.contains(.option) {
-                next = WCutPlacement.sentenceStep(
-                    from: take.cut, strong: take.strongBoundaries,
-                    boundaries: take.boundaries, forward: forward)
-            } else {
-                next = WCutPlacement.wordStep(
-                    from: take.cut, boundaries: take.boundaries, forward: forward)
-            }
-            if let next, next != take.cut {
-                placeCut(takeID: takeID, cut: next)
-            } else {
-                activeTakeID = takeID
-            }
-            return .handled
+            return stepCut(
+                forward: press.key == .rightArrow,
+                bySentence: press.modifiers.contains(.option)) ? .handled : .ignored
         default:
             return .ignored
         }
+    }
+
+    /// Under a PRESET only the seed take's ✂ is hers to move (mockup A: the
+    /// other columns only show), so the arrow keys aim there and ⇥ — which
+    /// exists to walk between hand-placed takes — has nothing to walk.
+    private var aimableTakeIDs: [String] {
+        state.arrangement == .perTake
+            ? state.takes.filter { $0.marked }.map(\.id)
+            : [state.activeVariantID].compactMap { $0 }
+    }
+
+    @discardableResult
+    private func stepTake(forward: Bool) -> Bool {
+        guard state.arrangement == .perTake,
+              let next = WCutPlacement.nextTake(
+                after: activeTakeID, in: aimableTakeIDs, forward: forward)
+        else { return false }
+        activeTakeID = next
+        return true
+    }
+
+    @discardableResult
+    private func stepCut(forward: Bool, bySentence: Bool) -> Bool {
+        let ids = aimableTakeIDs
+        // The active take, or the first checked one if none is active.
+        guard let takeID = (activeTakeID.flatMap { ids.contains($0) ? $0 : nil }) ?? ids.first,
+              let take = state.takes.first(where: { $0.id == takeID }),
+              !take.boundaries.isEmpty
+        else { return false }
+        let next = bySentence
+            ? WCutPlacement.sentenceStep(
+                from: take.cut, strong: take.strongBoundaries,
+                boundaries: take.boundaries, forward: forward)
+            : WCutPlacement.wordStep(
+                from: take.cut, boundaries: take.boundaries, forward: forward)
+        if let next, next != take.cut {
+            placeCut(takeID: takeID, cut: next)
+        } else {
+            activeTakeID = takeID
+        }
+        return true
     }
 }
 
