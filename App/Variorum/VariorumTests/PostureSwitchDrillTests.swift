@@ -502,7 +502,7 @@ struct PostureSwitchDrillTests {
             pauseSync: { world.pauses += 1 },
             resumeSync: { world.resumes += 1 },
             takeSnapshot: {
-                guard let key = protection.keyInHand() else { return nil }
+                guard let key = protection.keyInHand() else { return .failed }
                 let fp8 = StoreKeyEnvelope.shortFingerprint(StoreKeyEnvelope.fingerprint(of: key))
                 let formatter = DateFormatter()
                 formatter.locale = Locale(identifier: "en_US_POSIX")
@@ -514,11 +514,11 @@ struct PostureSwitchDrillTests {
                     try world.view.backup(to: url)
                 } catch {
                     world.note("snapshot failed: \(error)")
-                    return nil
+                    return .failed
                 }
                 StoreBackup.writeSnapshotKeyFile(for: url, from: StoreKeyEnvelope.locate(besideStore: world.storeURL))
                 world.note("snapshot pair written: \(url.lastPathComponent)")
-                return url
+                return .written(url)
             },
             preSwitchSnapshots: { keep in pairs(keep) },
             deleteSnapshotPairs: { urls in
@@ -644,7 +644,12 @@ struct PostureSwitchDrillTests {
         defer { sibling.tearDown() }
         // A pre-switch snapshot pair (the app's own) — the offer's subject.
         let drillLeaves = leaves(for: world)
-        let preSwitchPair = try #require(await drillLeaves.takeSnapshot())
+        // F2 (MAJOR-2): the leaf answers the pair's fate; the drill needs the written URL.
+        let preSwitchPair: URL
+        if case .written(let url) = await drillLeaves.takeSnapshot() { preSwitchPair = url } else {
+            Issue.record("the pre-switch snapshot pair was not written")
+            return
+        }
         let preSwitchBytes = try Data(contentsOf: preSwitchPair)
         let preSwitchPairKeyBytes = try Data(contentsOf: StoreBackup.pairedKeyFile(for: preSwitchPair))
 

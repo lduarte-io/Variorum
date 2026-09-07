@@ -371,6 +371,10 @@ struct PostureSwitchTests {
         /// sleeps 2.5 s). A pin replaces it (a frozen clock, a counting wait)
         /// and the leaves read it lazily, so no re-arm is needed.
         var horizonWait: @Sendable () async throws -> Void = {}
+        /// F2 (MAJOR-2): the scripted fresh snapshot FAILS (an unwritable
+        /// Backups folder, a WAL that would not drain) — the leaf answers
+        /// `.failed` and writes nothing.
+        var snapshotFails = false
 
         init(dir: URL, storeURL: URL, backups: URL, oldKey: StoreKey, apple: AppleKey,
              binding: StoreBinding, view: AppDatabase, keyStore: DeviceKeyStore,
@@ -619,13 +623,14 @@ struct PostureSwitchTests {
             pauseSync: { calls.pauses += 1 },
             resumeSync: { calls.resumes += 1 },
             takeSnapshot: {
-                guard let key = world.keyInHand else { return nil }
+                guard let key = world.keyInHand else { return .failed }
+                if world.snapshotFails { return .failed }
                 let fp8 = StoreKeyEnvelope.shortFingerprint(StoreKeyEnvelope.fingerprint(of: key))
                 let n = calls.snapshotsTaken.withValue { $0 += 1; return $0 }
                 let url = backups.appendingPathComponent("variorum-backup-\(fp8)-\(n).sqlite")
                 try? FileManager.default.copyItem(at: world.storeURL, to: url)
                 try? Data("fresh key file".utf8).write(to: World.pairKeyFile(url))
-                return url
+                return .written(url)
             },
             preSwitchSnapshots: { keep in
                 calls.listedAfterSnapshot.setValue(calls.snapshotsTaken.value > 0)
@@ -796,6 +801,47 @@ struct PostureSwitchTests {
         #expect(!FileManager.default.fileExists(atPath: world.pairKeyFile(oldPair).path), "the pair goes together")
         #expect(FileManager.default.fileExists(atPath: fresh[0].path), "the fresh pair survives the offer")
         #expect(world.calls.pauses == 1)
+    }
+
+    /// pre-13x ladder round 1, F2 (MAJOR-2) — RED ON OLD: the runner
+    /// discarded `takeSnapshot()`'s answer, listed the pre-switch pairs
+    /// regardless, and the Done said "A fresh backup was made under it" —
+    /// so an unwritable Backups folder offered the deletion of the only
+    /// snapshots that existed, with the sentence's assurance. Now: a FAILED
+    /// fresh snapshot lists nothing (no offer), the outcome says so, and the
+    /// Done renders copy §2b's could-not-back-up line; the old pair's bytes
+    /// are untouched and the offer's act removes nothing.
+    @Test func aFailedFreshSnapshotMakesNoOfferAndTheDoneSaysSo() async throws {
+        let world = try await makeWorld()
+        defer { world.tearDown() }
+        let oldPair = try world.addPreSwitchPair()
+        let oldPairBytes = try Data(contentsOf: oldPair)
+        world.snapshotFails = true
+
+        let outcome = try await world.runner.enterCastle(passphrase: "sesame", recoveryWords: world.words)
+        #expect(outcome.entersCastle && outcome.freshSnapshot == .failed)
+        #expect(outcome.preSwitchSnapshots == [], "no fresh pair ⇒ no offer over the old ones")
+        #expect(world.calls.snapshotsTaken.value == 0, "nothing was written")
+        let oldPairBytesAfter = try Data(contentsOf: oldPair)
+        #expect(FileManager.default.fileExists(atPath: oldPair.path) && oldPairBytesAfter == oldPairBytes,
+                "the earlier backup is untouched")
+        #expect(world.runner.deletePreSwitchSnapshots(outcome) == 0, "the offer's act has nothing to remove")
+        #expect(FileManager.default.fileExists(atPath: oldPair.path))
+        #expect(ProtectionCopy.castleDoneBody(outcome) == ProtectionCopy.enteredCastleWithoutFreshBackup,
+                "the Done claims no backup")
+        #expect(!ProtectionCopy.castleDoneBody(outcome).contains("A fresh backup was made"))
+        // Everything else of the switch stands: the library under L′, the marker gone.
+        #expect(!StoreEncryptionMigration.opens(world.storeURL, key: world.oldKey))
+        #expect(try await world.marker() == nil)
+
+        // The ordinary road, for contrast: a written pair lists the old one and speaks the ordinary Done.
+        let written = try await makeWorld()
+        defer { written.tearDown() }
+        let writtenOldPair = try written.addPreSwitchPair()
+        let writtenOutcome = try await written.runner.enterCastle(passphrase: "sesame", recoveryWords: written.words)
+        if case .written = writtenOutcome.freshSnapshot {} else { Issue.record("the fresh pair was written") }
+        #expect(writtenOutcome.preSwitchSnapshots == [writtenOldPair])
+        #expect(ProtectionCopy.castleDoneBody(writtenOutcome) == ProtectionCopy.enteredCastleDone)
     }
 
     @Test func aLocalOnlyLibraryTakesStepsFourToSevenOnlyAndItsResumeNeedsThePassphrase() async throws {

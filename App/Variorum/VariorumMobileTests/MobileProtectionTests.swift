@@ -1393,7 +1393,7 @@ struct MobileWindowReplayTests {
             },
             pauseSync: { syncCalls.withValue { $0.append("pause") } },
             resumeSync: { syncCalls.withValue { $0.append("resume") } },
-            takeSnapshot: { nil },
+            takeSnapshot: { .notKept },
             preSwitchSnapshots: { _ in [] },
             deleteSnapshotPairs: { _ in 0 },
             defaults: { UserDefaults(suiteName: "io.lduarte.variorum.tests.2d.\(UUID().uuidString)")! },

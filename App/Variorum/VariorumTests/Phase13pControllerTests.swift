@@ -1266,7 +1266,7 @@ struct Phase13pControllerTests {
             libraryKeyInHand: { nil as StoreKey? }, posture: { .standard }, alwaysAsk: { false }, biometryAvailable: { true },
             moveCustody: { _ in .refused("inert") },
             rekeyLibrary: { _, _, _ in }, pauseSync: {}, resumeSync: {},
-            takeSnapshot: { nil }, preSwitchSnapshots: { _ in [] }, deleteSnapshotPairs: { _ in 0 },
+            takeSnapshot: { .notKept }, preSwitchSnapshots: { _ in [] }, deleteSnapshotPairs: { _ in 0 },
             defaults: { UserDefaults(suiteName: "io.lduarte.variorum.tests.3a.inert")! },
             reconcile: {}, now: { Date() }, log: { _ in })
     }

@@ -132,7 +132,16 @@ final class PostureSwitchRunner {
         var insuranceTurnedOff: Bool
         /// The app's own PRE-switch snapshot pairs (the `.sqlite` URLs; the
         /// pair goes with each) — the offer's subject; empty ⇒ no offer.
+        /// pre-13x ladder round 1, F2 (MAJOR-2): listed ONLY when the fresh
+        /// pair under the new key was WRITTEN — an offer to delete every
+        /// pre-switch backup with no fresh one beside them would be an
+        /// offer to delete the only backups that exist.
         var preSwitchSnapshots: [URL]
+        /// pre-13x ladder round 1, F2 (MAJOR-2): what step 6's fresh
+        /// snapshot did — the Done reads it (copy §2b's ordinary line claims
+        /// "A fresh backup was made under it"; a FAILED snapshot renders the
+        /// PROVISIONAL could-not-back-up line instead).
+        var freshSnapshot: FreshSnapshot = .notKept
         /// Rows re-encrypted on the server (0 for a local-only library).
         var reencrypted: Int
         /// The final custody material (nil for a local-only library).
@@ -157,6 +166,20 @@ final class PostureSwitchRunner {
         case beforeVaultWrite
         /// After the vault write landed, BEFORE custody takes M′.
         case afterVaultWriteBeforeCustody
+    }
+
+    /// pre-13x ladder round 1, F2 (MAJOR-2): step 6's fresh snapshot, as the
+    /// leaf reports it — WRITTEN (the pair's `.sqlite` URL), FAILED (this
+    /// platform keeps backups and the run did not write one: an unwritable
+    /// folder, a WAL that would not drain, any `performRun` failure), or
+    /// NOT KEPT (this platform keeps no backups at all — the phone; nothing
+    /// failed, nothing exists). Before F2 the leaf answered `URL?` and the
+    /// runner discarded it, so a failed snapshot was indistinguishable from
+    /// a platform without backups and the offer was made regardless.
+    nonisolated enum FreshSnapshot: Equatable, Sendable {
+        case written(URL)
+        case failed
+        case notKept
     }
 
     /// The drain's bound (the 2b adjudication's item 2 — the architect's
@@ -205,9 +228,11 @@ final class PostureSwitchRunner {
         /// exit of a ceremony road — success, refusal, failure — so a refused
         /// switch can never leave sync dead for the session.
         var resumeSync: @MainActor () async -> Void
-        /// The fresh snapshot pair under the CURRENT key (nil = this
-        /// platform keeps no backups).
-        var takeSnapshot: @MainActor () async -> URL?
+        /// The fresh snapshot pair under the CURRENT key — `.written(url)`,
+        /// `.failed` (a backup platform whose run did not write), or
+        /// `.notKept` (this platform keeps no backups). F2 (MAJOR-2): the
+        /// runner READS the answer now.
+        var takeSnapshot: @MainActor () async -> FreshSnapshot
         /// The app's own snapshot pairs whose fingerprint is NOT `keep` —
         /// every folder Variorum writes into.
         var preSwitchSnapshots: @Sendable (_ keep: String) -> [URL]
@@ -922,7 +947,7 @@ final class PostureSwitchRunner {
             newCorpusKeyID: material?.corpusKeyID, startedAt: stamp, follow: followFlag))
 
         // ————— 6. THE FRESH SNAPSHOT PAIR + the insurance —————
-        let (insuranceOff, preSwitch) = await snapshotAndInsurance(
+        let (insuranceOff, preSwitch, snapshot) = await snapshotAndInsurance(
             entersCastle: entersCastle, newFingerprint: newFingerprint,
             listPreSwitchPairs: listPreSwitchPairs)
         // pre-13x 2d.4: a follow under a Castle account retires the old
@@ -935,7 +960,7 @@ final class PostureSwitchRunner {
         leaves.log("posture switch: \(entersCastle ? "Castle entered" : "keys replaced") — library key \(newFingerprint.prefix(8))")
         return Outcome(
             entersCastle: entersCastle, newKeyFingerprint: newFingerprint,
-            insuranceTurnedOff: insuranceOff, preSwitchSnapshots: preSwitch,
+            insuranceTurnedOff: insuranceOff, preSwitchSnapshots: preSwitch, freshSnapshot: snapshot,
             reencrypted: reencrypted, material: material)
     }
 
@@ -1023,9 +1048,17 @@ final class PostureSwitchRunner {
 
     private func snapshotAndInsurance(
         entersCastle: Bool, newFingerprint: String, listPreSwitchPairs: Bool
-    ) async -> (Bool, [URL]) {
+    ) async -> (insuranceOff: Bool, preSwitch: [URL], snapshot: FreshSnapshot) {
         phase = .snapshotting
-        _ = await leaves.takeSnapshot()
+        // F2 (MAJOR-2): the fresh pair's fate is READ, not discarded — the
+        // offer below lists the pre-switch pairs only over a WRITTEN one
+        // (design §4 step 6: "BEFORE anything is offered for deletion";
+        // §12: "a snapshot under the new key exists before the delete
+        // offer" — exists, not merely attempted).
+        let snapshot = await leaves.takeSnapshot()
+        if case .failed = snapshot {
+            leaves.log("posture switch: the fresh snapshot could NOT be written — no offer; the earlier backups stay untouched")
+        }
         var insuranceOff = false
         if entersCastle {
             let defaults = leaves.defaults()
@@ -1035,10 +1068,11 @@ final class PostureSwitchRunner {
                 leaves.log("posture switch: the scheduled plaintext export turned OFF")
             }
         }
-        let preSwitch = listPreSwitchPairs
-            ? leaves.preSwitchSnapshots(StoreKeyEnvelope.shortFingerprint(newFingerprint))
-            : []
-        return (insuranceOff, preSwitch)
+        var preSwitch: [URL] = []
+        if listPreSwitchPairs, case .written = snapshot {
+            preSwitch = leaves.preSwitchSnapshots(StoreKeyEnvelope.shortFingerprint(newFingerprint))
+        }
+        return (insuranceOff, preSwitch, snapshot)
     }
 
     /// The Apple-held copy KEPT under Standard's Replace All Keys (decision
@@ -1253,7 +1287,7 @@ final class PostureSwitchRunner {
             let oldFile = marker.oldKeyFingerprint.flatMap {
                 try? StoreKeyEnvelope.load(at: StoreKeyEnvelope.url(besideStore: leaves.storeURL, fingerprint: $0))
             }
-            let (insuranceOff, preSwitch) = await snapshotAndInsurance(
+            let (insuranceOff, preSwitch, snapshot) = await snapshotAndInsurance(
                 entersCastle: entersCastle, newFingerprint: newFingerprint,
                 listPreSwitchPairs: entersCastle && (oldFile?.apple != nil))
             // pre-13x 2d.4 (ruling 3): a resumed FOLLOW still retires the old
@@ -1268,7 +1302,7 @@ final class PostureSwitchRunner {
             phase = .done
             return Outcome(
                 entersCastle: entersCastle, newKeyFingerprint: newFingerprint,
-                insuranceTurnedOff: insuranceOff, preSwitchSnapshots: preSwitch,
+                insuranceTurnedOff: insuranceOff, preSwitchSnapshots: preSwitch, freshSnapshot: snapshot,
                 reencrypted: reencrypted, material: material)
         }
     }
@@ -1380,10 +1414,13 @@ extension PostureSwitchRunner.Leaves {
             // already rebuilt them (a trigger).
             resumeSync: { await services()?.resumeSync() },
             takeSnapshot: {
-                guard let backup = services()?.backup else { return nil }
+                // F2 (MAJOR-2): three answers — no backups on this platform
+                // (the phone: `AppServices.backup` is nil), a run that did
+                // not write, a written pair.
+                guard let backup = services()?.backup else { return .notKept }
                 let record = await backup.backUpNow()
-                guard record.primary.outcome == .written, let name = record.primary.file else { return nil }
-                return backup.directory.appendingPathComponent(name)
+                guard record.primary.outcome == .written, let name = record.primary.file else { return .failed }
+                return .written(backup.directory.appendingPathComponent(name))
             },
             preSwitchSnapshots: { keep in
                 var found = pairs(containerBackups, keep)
