@@ -805,6 +805,27 @@ struct TypedReturnKeyTests {
         }
     }
 
+    /// **18c ladder round 1, R1-4 (red-on-old; PROVISIONAL, QUESTIONS #94):**
+    /// ⏎ in the MIDDLE of a list item is a content newline and the list
+    /// block stays whole — the shipped K5 shape restored. Before the fix the
+    /// key divided the block here (`["- one", "two"]`), the second half
+    /// bulletless.
+    @Test func aCaretInsideAListItemKeepsTheKeyAsContentAndTheListWhole() async throws {
+        try await withEditor(seedBlocks: ["- one two", "gamma"]) { h in
+            let window = try hosted(h)
+            defer { window.teardown() }
+
+            caret(h, entry: 0, offset: 5)  // "- one| two"
+            returnKey(h, window.window)
+            await h.flush()
+
+            #expect(try h.storeSlots().map(\.text) == ["- one\n two", "gamma"],
+                    "content, in the same block — the list is still one block")
+            #expect(h.model.index.entries.count == 2)
+            #expect(h.session.undoStack.depth == 0, "no structural act ran")
+        }
+    }
+
     // MARK: (9) her S1 scenario
 
     /// *⏎, pause, click at the end of the last line, ⏎, type.* Every step

@@ -87,6 +87,42 @@ struct TypedReturnTests {
             == .divideAtCaret(entryIndex: 0, blockID: "a"))
     }
 
+    /// **18c ladder round 1, R1-5 (red-on-old):** leading whitespace is the
+    /// mirror of trailing whitespace — a caret anywhere inside a block's
+    /// leading run is "before any text" and pushes the paragraph down,
+    /// exactly as the block's first offset does. Before the fix caret 1 and
+    /// 2 answered `.divideAtCaret`, and the one cut brain then refused the
+    /// cut whose first half trims to nothing.
+    @Test func leadingWhitespaceStillCountsAsTheStart() {
+        let index = BlockRangeIndex(slots: [slot("a", text: "  hello")], tail: nil)
+        for caret in 0...2 {
+            #expect(act(index, caret: caret, texts: ["  hello"])
+                == .emptyBlock(edge: .above, entryIndex: 0, blockID: "a",
+                               closingEmptyTail: false))
+        }
+        // …and one character later there IS text before the caret.
+        #expect(act(index, caret: 3, texts: ["  hello"])
+            == .divideAtCaret(entryIndex: 0, blockID: "a"))
+    }
+
+    /// **18c ladder round 1, R1-4 (red-on-old; PROVISIONAL, QUESTIONS #94):**
+    /// a caret INSIDE a list item is the list door's, so the key stays
+    /// content and the list block stays whole — the shipped K5 shape, which
+    /// U-1's divide had silently replaced mid-item (the second half lost its
+    /// bullet; one list became two blocks). The prose line of the same block
+    /// still divides; the block's very start still pushes down.
+    @Test func aCaretInsideAListLineIsTheListDoorsAndStaysContent() {
+        let text = "- one two\nprose after"
+        let index = BlockRangeIndex(slots: [slot("a", text: text)], tail: nil)
+        #expect(act(index, caret: 5, texts: [text]) == .content, "mid-item: content")
+        #expect(act(index, caret: 2, texts: [text]) == .content, "inside the lead: content")
+        #expect(act(index, caret: 16, texts: [text])
+            == .divideAtCaret(entryIndex: 0, blockID: "a"), "the prose line still divides")
+        #expect(act(index, caret: 0, texts: [text])
+            == .emptyBlock(edge: .above, entryIndex: 0, blockID: "a",
+                           closingEmptyTail: false), "the block's start still pushes down")
+    }
+
     // MARK: - The empty block (U-19 (2))
 
     /// An abandoned empty block STAYS, and a Return in it makes no second
