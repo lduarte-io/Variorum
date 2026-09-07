@@ -38,8 +38,20 @@ import Foundation
 /// - **The k−1 spacing rule rides for free** (her A11 ruling, 13d): a run of
 ///   k newlines leaves k−1 on the preceding half as content and the editor's
 ///   separator re-creates the last, so `"one\n\ntwo"` becomes the blocks
-///   `"one\n"` and `"two"` and the page reads byte-identically. Nothing she
-///   typed disappears — U-19 (2)'s standing instruction.
+///   `"one\n"` and `"two"` and the page reads byte-identically for every
+///   PURE-newline run — U-19 (2)'s standing instruction. **Stated exactly
+///   (18c ladder round 1, R1-6):** a blank line carrying stray horizontal
+///   whitespace (`"one\n  \ntwo"`) is one break whose seam trim drops the
+///   spaces — `seamTrimmedHalves` trims both sides of the cut and counts only
+///   newlines — so the page keeps its blank line but those spaces are gone.
+///   That is `bulkSegments`' own normalization (`"A\n \nB"` renders back as
+///   `"A\n\nB"`) and the right rule; it is just not "byte-identical".
+/// - **Newlines here are `"\n"` only** — the separator the whole editor
+///   brain uses (`BlockRangeIndex`, `crystallizedBoundary`) — while the cut
+///   brain's k−1 count reads `Character.isNewline`. Consistent by design (a
+///   Control-Return's U+2028 is content everywhere in this app, never a
+///   block boundary); stated so the mismatch is not "fixed" into a break
+///   the rest of the brain would not recognize.
 public enum NewlineSplitting {
     /// The separator runs, ascending, that `splitBlockAtNewlines` cuts at.
     /// Offsets are UTF-16 (the app's one offset unit); each range spans from

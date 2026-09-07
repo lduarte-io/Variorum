@@ -12,7 +12,8 @@
 //  this door shipped with, which had itself superseded M10's
 //  auto-proceed/refuse pair): single-take divide is the everyday
 //  in-place op; a FANNED block divides through the SHARED composition
-//  `KeepOnTopDivide` (in `Shared/`, the Mac's three doors' brain too)
+//  `KeepOnTopDivide` (core Domain — `Sources/VariorumCore/Domain/`; the
+//  Mac's three doors' and the newline repair's brain too)
 //  and `Operations.divideW`'s parking rule — the DISPLAYED (peek-aware)
 //  take is cut into B and C, and every OTHER active take rides WHOLE
 //  onto B, the top block. Still no `CutPropagation`, no unique-match

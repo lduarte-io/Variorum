@@ -14,8 +14,10 @@
 //    this default divide behavior."* The displayed take is cut into B and C
 //    and every OTHER active take rides WHOLE onto B — composed from
 //    `Operations.divideW`'s own parking rule (S4-22) by `KeepOnTopDivide`
-//    in `Shared/`, so both platforms and all three Mac doors share one
-//    brain. **This SUPERSEDES the 13j J4 duplicate default** (Q-M2, her
+//    in the core Domain (`Sources/VariorumCore/Domain/`, moved there at 18c
+//    batch 3 so `splitBlockAtNewlines` can call it too), so both platforms,
+//    all three Mac doors and the newline repair share one brain. **This
+//    SUPERSEDES the 13j J4 duplicate default** (Q-M2, her
 //    2026-08-03 gate ruling: the other takes were duplicated onto BOTH
 //    successors, "those takes are quick to delete"), on the Mac AND on the
 //    phone. `Operations.divideDuplicating` stays in core, unchanged, as
@@ -36,9 +38,10 @@
 //  composition is unit-testable and the copy has ONE home (the
 //  `BlockSelectionCopy` / `TrayPath` pattern), which is what keeps two
 //  surfaces from wording one act two ways. The divide's composition lives
-//  one level up in `Shared/KeepOnTopDivide.swift` because the phone calls it
-//  too; its receipt still speaks from here, since only the Mac speaks one
-//  (the phone's divide reports an Undo action and no sentence — M20).
+//  in the core Domain (`Sources/VariorumCore/Domain/KeepOnTopDivide.swift`)
+//  because the phone AND a core operation call it; its receipt still speaks
+//  from here, since only the Mac speaks one (the phone's divide reports an
+//  Undo action and no sentence — M20).
 //
 
 import Foundation
