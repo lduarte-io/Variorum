@@ -137,7 +137,12 @@ final class EditorTextView: NSTextView, MarkdownFormattable {
     /// event — dictation, Services, an accessibility insert — is still
     /// discarded by the disabled surface exactly as before R1-2; the stash
     /// is `keyDown`-scoped by construction (stashing at `insertText:` would
-    /// swallow the replay itself and every programmatic edit).
+    /// swallow the replay itself and every programmatic edit). Third, KEY
+    /// EQUIVALENTS (⌘V, ⌘Z, the menu chords) route through
+    /// `performKeyEquivalent`, never `keyDown`, so they are neither stashed
+    /// nor replayed — a ⌘V during a flight acts (or is refused) at once,
+    /// ahead of the keys waiting behind the ⏎; do not stash them (a
+    /// replayed chord would re-run a menu act at the landed caret).
     private(set) var isDeferringKeystrokes = false
     private var deferredKeyEvents: [NSEvent] = []
 

@@ -648,8 +648,11 @@ struct TypedReturnKeyTests {
     /// that arming and drained the text early, so the chained act
     /// re-derived against the moved caret and minted an empty block after
     /// the text (`["alpha", "x", ""]`; reproduced twice on the dev-store
-    /// build). An arming now names its owner and a replay acts only for
-    /// the newest: the text lands in the one block the Returns made.
+    /// build). Under the ONE idle-gated drain (`replayDeferredKeystrokesIfIdle`,
+    /// round 2's R2-1 — the generation token it replaced is gone): the
+    /// first act's tail drains ⏎₂, which claims and re-arms; ⏎₂'s own tail
+    /// drains the text once no flight is pending — so the text lands in the
+    /// one block the Returns made.
     @Test func twoFastReturnsThenTypingLandTheTextInTheOneBlockTheyMade() async throws {
         try await withEditor(seedBlocks: ["alpha"]) { h in
             let window = try hosted(h)
