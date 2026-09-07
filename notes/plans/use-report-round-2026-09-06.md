@@ -932,7 +932,7 @@ Both arms land in their own commit AHEAD of the code that uses them, each with a
 | 1 | Core: `divideW` — parked takes keep their names; optional `displayedVariantID` anchor | **DONE (0b57614f)** — pins `divideWAParkedTakeKeepsItsName` · `divideWAnchorsTheChosenOnTheDisplayedTakeWhenNamed` (`Tests/VariorumCoreTests/StructuralDivideTests.swift`); divide-family core suites **69 tests / 5 suites green**; both reds run and recorded below |
 | 2 | Shared: `KeepOnTopDivide` (+ the `keepBelow` sibling) in `App/Variorum/Shared/` | **DONE** (this row's commit) — no Xcode project change needed: `Shared/` is a `PBXFileSystemSynchronizedRootGroup` already in BOTH the `Variorum` and `VariorumMobile` targets (`project.pbxproj:83–87`, `:182–184`, `:252–255`), so a new file there is reachable from the phone by construction |
 | 3 | Mac: both doors swapped, the receipt re-worded, `FannedDefaults.swift`'s header rewritten, the J4 pins rewritten | **DONE** (this row's commit) — `FannedDefaultsTests` · `FannedDefaultsBoardTests` · `TakesDivideTests` **58 tests / 3 suites green**; revert A's red run recorded below |
-| 4 | Phone: `MobileStructural`'s fanned path flipped, header updated, its pins re-pointed | **IN-PROGRESS** — code written, the iOS build and `MobileStructuralTests` PENDING |
+| 4 | Phone: `MobileStructural`'s fanned path flipped, header updated, its pins re-pointed | **DONE** (this row's commit) — `generic/platform=iOS` build SUCCEEDED; `MobileStructuralTests` + `MobileWholeBlockDeleteTests` on the `iPhone 17 Pro` simulator **34 tests / 2 suites green** |
 | 5 | The walk (dev-store Debug, `18c-1/` captures) | NOT-STARTED |
 | 6 | Close: the suites, the dispositions, QUESTIONS #91 | NOT-STARTED |
 

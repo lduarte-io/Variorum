@@ -3,14 +3,28 @@
 //  VariorumMobileTests
 //
 //  Mobile Stage 4, batch 1 (M10) — the divide/merge doors; the fanned
-//  divide re-ruled at the gate (Q-M2, parity batch A2): a fanned block
-//  divides through the shared duplicate-shape op — displayed take cut,
-//  every other active take duplicated whole onto both successors — and
-//  the old auto-proceed/refuse pair is retired (a sanctioned pin flip
-//  riding her ruling). Store-byte checks throughout (the ops are the
-//  tested substrate; these pins hold the DOOR's routing, gating, and
-//  refusal shapes). Plus the S3 round-2 NIT's pin (the loadOnce
-//  cancellation filter).
+//  divide re-ruled TWICE, each time riding a ruling of hers. At the
+//  mobile gate (Q-M2, parity batch A2) the old auto-proceed/refuse pair
+//  gave way to the duplicate shape; at the 2026-09-06 use-report round
+//  (**U-2**, 18c batch 1) the duplicate shape gives way to **KEEP ON
+//  TOP** — the displayed take is cut, and every other active take rides
+//  WHOLE onto the top block through the shared `KeepOnTopDivide`
+//  composition and `Operations.divideW`. Her follow-up is what brought
+//  the phone along: *"the phone divide should update to match this
+//  default divide behavior."*
+//
+//  The three fanned-divide pins below carry the NEW premise; their old
+//  names are kept here rather than deleted silently —
+//  `divideOnAFannedBlockLandsTheDuplicateShape` →
+//  `divideOnAFannedBlockKeepsTheTakesOnTop`;
+//  `divideOnAFannedBlockWithUnmappableTakesStillDivides` and
+//  `divideOnAPeekedBlockCutsThePeekedTake` keep their names (their
+//  subjects — no-mapping and peek-awareness — outlive the flip) with
+//  their expectations rewritten; `fannedDivideCarriesUnflushedTypingThroughTheFlush`
+//  likewise. Store-byte checks throughout (the ops are the tested
+//  substrate; these pins hold the DOOR's routing, gating, and refusal
+//  shapes). Plus the S3 round-2 NIT's pin (the loadOnce cancellation
+//  filter).
 //
 
 import Foundation
@@ -175,9 +189,9 @@ struct MobileStructuralTests {
         }
     }
 
-    // MARK: Divide on a fanned block (Q-M2 — the duplicate shape, parity A2)
+    // MARK: Divide on a fanned block (U-2 — keep on top, 18c batch 1)
 
-    @Test func divideOnAFannedBlockLandsTheDuplicateShape() async throws {
+    @Test func divideOnAFannedBlockKeepsTheTakesOnTop() async throws {
         try await withEditorWorld { session, db in
             let seed = try await seedProsePost(
                 session,
@@ -193,9 +207,10 @@ struct MobileStructuralTests {
             let (model, _) = makeEditor(session, postID: seed.postID)
             await model.loadOnce()
 
-            // Her ruling's letter: the DISPLAYED take is cut at "Different"
-            // (offset 34); the other take is DUPLICATED WHOLE onto both
-            // successors — no CutPropagation, no unique-match gate.
+            // Her ruling's letter (U-2): the DISPLAYED take is cut at
+            // "Different" (offset 34); the other take rides WHOLE onto the
+            // TOP block and nowhere else — no CutPropagation, no
+            // unique-match gate, and no copy on the second successor.
             await model.structural.divide(atSurfaceCaret: 34)
             #expect(model.statusMessage == nil)
 
@@ -210,23 +225,22 @@ struct MobileStructuralTests {
                 "Same beginning of the block here. Different ending number two!",
             ])
             // B: the cut first half leading, the other take whole behind
-            // it; C: the second half leading, the same duplicate behind.
+            // it; C: the second half, ALONE.
             #expect(try await activeFanTexts(db, blockID: placements[0]) == [
                 "Same beginning of the block here.",
                 "Same beginning of the block here. Different ending number two!",
             ])
-            #expect(try await activeFanTexts(db, blockID: placements[1]) == [
-                "Different ending number one.",
-                "Same beginning of the block here. Different ending number two!",
-            ])
+            #expect(try await activeFanTexts(db, blockID: placements[1])
+                == ["Different ending number one."])
             #expect(model.index.entries.count == 2)
         }
     }
 
-    /// The ruled FLIP pin (Q-M2 supersedes M10's refusal): the exact
-    /// fixture that used to refuse toward the Mac's ceremony — no shared
-    /// context anywhere near the cut, so no take mapped — now divides
-    /// with the duplicate shape. No refusal on this road names any
+    /// The ruled FLIP pin (Q-M2 superseded M10's refusal; U-2 now sets
+    /// the shape): the exact fixture that used to refuse toward the Mac's
+    /// ceremony — no shared context anywhere near the cut, so no take
+    /// mapped — divides without mapping anything, the other take riding
+    /// whole onto the top block. No refusal on this road names any
     /// platform anymore.
     @Test func divideOnAFannedBlockWithUnmappableTakesStillDivides() async throws {
         try await withEditorWorld { session, db in
@@ -254,17 +268,18 @@ struct MobileStructuralTests {
                 "Shared start.",
                 "Entirely different words in this take.",
             ])
-            #expect(try await activeFanTexts(db, blockID: placements[1]) == [
-                "Unique tail one.",
-                "Entirely different words in this take.",
-            ])
+            #expect(try await activeFanTexts(db, blockID: placements[1])
+                == ["Unique tail one."])
         }
     }
 
     /// The peek-aware half of the door's contract: a PEEKED take is the
     /// displayed take, so the cut lands in ITS text and the previously
-    /// chosen take rides whole onto both successors as a duplicate — and
-    /// each successor's chosen is its cut half.
+    /// chosen take rides whole onto the TOP block — and each successor's
+    /// chosen is still its cut half, which under keep-on-top is exactly
+    /// what `divideW`'s new `displayedVariantID` anchor buys (QUESTIONS
+    /// #91): without it the top block would render the chosen take whole
+    /// beside the bottom block's tail of the peeked one.
     @Test func divideOnAPeekedBlockCutsThePeekedTake() async throws {
         try await withEditorWorld { session, db in
             let seed = try await seedProsePost(
@@ -294,11 +309,12 @@ struct MobileStructuralTests {
             #expect(!placements.contains(seed.blockA))
             #expect(try await activeFanTexts(db, blockID: seed.blockA)
                 == ["Chosen words entirely here.", "Peeked take other words."])
-            // The PEEKED take was cut; the chosen take duplicated whole.
+            // The PEEKED take was cut; the chosen take rode whole onto the
+            // top block, in FAN ORDER (it leads — it comes first in A's fan).
             #expect(try await activeFanTexts(db, blockID: placements[0])
-                == ["Peeked take", "Chosen words entirely here."])
+                == ["Chosen words entirely here.", "Peeked take"])
             #expect(try await activeFanTexts(db, blockID: placements[1])
-                == ["other words.", "Chosen words entirely here."])
+                == ["other words."])
             // Each successor's chosen is its cut half (the op's rule) —
             // what she was looking at is what each new block shows.
             for (blockID, half) in [(placements[0], "Peeked take"),
@@ -345,7 +361,7 @@ struct MobileStructuralTests {
             #expect(try await activeFanTexts(db, blockID: placements[0])
                 == ["Alpha beta.", "The other way entirely."])
             #expect(try await activeFanTexts(db, blockID: placements[1])
-                == ["Gamma delta. Typed tail.", "The other way entirely."])
+                == ["Gamma delta. Typed tail."])
         }
     }
 

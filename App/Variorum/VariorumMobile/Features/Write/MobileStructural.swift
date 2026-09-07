@@ -6,17 +6,20 @@
 //  the phone's divide/merge doors. A sibling type beside the takes
 //  controllers (the S1 NIT-3 law); the VM routes thinly.
 //
-//  DIVIDE (Q-M2 — her duplicate-shape ruling, 2026-08-03 gate sitting;
-//  SUPERSEDES M10's auto-proceed/refuse pair): single-take divide is
-//  the everyday in-place op; a FANNED block divides through the shared
-//  `Operations.divideDuplicating` — the DISPLAYED (peek-aware) take is
-//  cut into B and C, and every OTHER active take is duplicated WHOLE
-//  onto both successors. No `CutPropagation`, no unique-match gate, no
-//  refusal naming any platform ("it sidesteps smart divide rules
-//  entirely - the takes that you aren't dividing are just duplicated,
-//  one per each block"). The cut snaps through the ONE snap brain
-//  (`StructuralGesturePlanner.snapToInteriorBoundary` — the ruled word
-//  rule with the gentle settle, S4-22's letter).
+//  DIVIDE — **KEEP ON TOP** (her ruling U-2, 2026-09-06, and her
+//  follow-up the next night: *"the phone divide should update to match
+//  this default divide behavior"*; SUPERSEDES the Q-M2 duplicate shape
+//  this door shipped with, which had itself superseded M10's
+//  auto-proceed/refuse pair): single-take divide is the everyday
+//  in-place op; a FANNED block divides through the SHARED composition
+//  `KeepOnTopDivide` (in `Shared/`, the Mac's three doors' brain too)
+//  and `Operations.divideW`'s parking rule — the DISPLAYED (peek-aware)
+//  take is cut into B and C, and every OTHER active take rides WHOLE
+//  onto B, the top block. Still no `CutPropagation`, no unique-match
+//  gate, no refusal naming any platform. An EMPTY other take cannot
+//  park and stays on the released original in lineage. The cut snaps
+//  through the ONE snap brain (`StructuralGesturePlanner.snapToInteriorBoundary`
+//  — the ruled word rule with the gentle settle, S4-22's letter).
 //
 //  MERGE (re-ruled at parity C5 — the CARRY-ALL, her workaround
 //  doctrine; SUPERSEDES M10's refuse-to-the-ceremony): instant
@@ -29,8 +32,9 @@
 //  M10's silently-dropping-her-options concern dissolves by
 //  construction — NOTHING is dropped; every take survives on the merged
 //  block, visible under the ⑂ badge. Archived takes stay with the
-//  released sources in lineage (the divideDuplicating parallel; the
-//  core refuses archived carries by design). The fan check reads the
+//  released sources in lineage (the divide's parallel — the keep-on-top
+//  composition marks only the live ACTIVE fan; the core refuses
+//  archived carries by design). The fan check reads the
 //  STORE, never the projection (the 13d ruled discipline: a plan-time
 //  arity is an enablement hint, never an authorization).
 //
@@ -148,21 +152,31 @@ final class MobileStructuralController {
             return
         }
 
-        // The fanned path (Q-M2, her duplicate-shape ruling — the ruled
-        // DEFAULT): the DISPLAYED (peek-aware) take is cut; every other
-        // active take duplicates WHOLE onto both successors through the
-        // shared core op. The displayed take must still BE in the live
-        // fan (the Takes board's F-3 guard — a fallback would divide a
-        // take she was never in).
-        guard let displayedID = fresh.variantID,
-              active.contains(where: { $0.id == displayedID })
+        // The fanned path — **KEEP ON TOP** (her ruling U-2, 2026-09-06;
+        // her follow-up made it the phone's too: *"the phone divide should
+        // update to match this default divide behavior"*). The DISPLAYED
+        // (peek-aware) take is cut; every other active take rides WHOLE
+        // onto the TOP block, through the shared composition and
+        // `Operations.divideW`'s parking rule. The displayed take must
+        // still BE in the live fan (the Takes board's F-3 guard — a
+        // fallback would divide a take she was never in), which is what
+        // `compose` returning nil means.
+        guard let composition = KeepOnTopDivide.compose(
+            displayedID: fresh.variantID, cut: cut, fan: active)
         else {
             model.report("This block's takes changed — try the divide again.")
             return
         }
+        // ONE undo entry, still labelled "Divide": divideW's own label
+        // names the ceremony ("Divide into Variants"), and the phone's undo
+        // door reads the label out loud.
+        let stack = session.undoStack
         await runDivide(blockID: blockID) { ops in
-            try ops.divideDuplicating(
-                blockID, displayedVariantID: displayedID, cut: cut).first.block.id
+            try stack.withCompound(label: "Divide", operations: ops) {
+                try ops.divideW(
+                    blockID, cuts: composition.cuts,
+                    displayedVariantID: composition.displayedID).first.block.id
+            }
         }
     }
 

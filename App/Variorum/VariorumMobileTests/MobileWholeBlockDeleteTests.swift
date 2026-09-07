@@ -626,8 +626,10 @@ struct MobileWholeBlockDeleteTests {
             let post = try await session.runner.run { ops -> String in
                 let post = try ops.createPost(title: "stranded", profile: .blog)
                 let made = try ops.newBlock(in: post.id, text: "Alpha beta gamma.", at: .end)
-                // A fan, so the divide takes the duplicate-shape road that
-                // PRESERVES the original whole (her Q-M2 ruling).
+                // A fan, and the op called DIRECTLY: any fanned divide road
+                // PRESERVES the original whole, which is all this fixture
+                // needs. (The DOOR's road is keep-on-top since U-2; this op
+                // stays in core as 18f's "copy the takes to both" preset.)
                 _ = try ops.newBlankVariant(made.block.id)
                 _ = try ops.divideDuplicating(
                     made.block.id, displayedVariantID: made.variant.id, cut: 6)
