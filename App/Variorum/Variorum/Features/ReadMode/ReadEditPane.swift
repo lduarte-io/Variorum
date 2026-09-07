@@ -142,7 +142,15 @@ private struct ReadEditBlock: View {
                         model.paneEdited(
                             variantID: variantID,
                             oldText: row.text ?? "", newText: newText)
-                    })
+                    },
+                    onSelectionChange: { range in
+                        // 17o batch b (U-20): this pane's caret is the note's
+                        // current-block offset — Write lands there next.
+                        model.notePaneCaret(
+                            blockID: row.blockID, variantID: variantID,
+                            offset: range.location)
+                    },
+                    caretOnGoingLive: model.caretLanding(forVariant: variantID))
                     .padding(.horizontal, 6)
                     .padding(.vertical, 4)
                     .overlay(RoundedRectangle(cornerRadius: 8).stroke(tokens.ring, lineWidth: 1))

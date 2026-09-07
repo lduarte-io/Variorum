@@ -58,7 +58,11 @@ final class CommandRouter {
         // remembered current block (the Act 10 correction round, row 39 —
         // one current block per note, kept across mounts), or nothing. The
         // same note re-registering keeps it — a remount is not a caret move.
-        if activePostID != postID { focusedBlock = currentBlocks.current(for: postID) }
+        if activePostID != postID {
+            let restored = currentBlocks.current(for: postID)
+            focusedBlockIdentity = restored
+            focusedOffset = restored?.utf16Offset
+        }
         activePostID = postID
         activeMode = mode
         self.applyMode = applyMode
@@ -105,7 +109,8 @@ final class CommandRouter {
         pendingWriteIntent = nil
         pendingTakesLanding = nil
         pendingTrayRequest = nil
-        focusedBlock = nil
+        focusedBlockIdentity = nil
+        focusedOffset = nil
     }
 
     // MARK: - Where the caret is (the post-13l polish round, ledger row 33)
@@ -118,24 +123,57 @@ final class CommandRouter {
     /// Observable, because the door has to APPEAR when she clicks into another
     /// block; cheap, because the surfaces report only when the block CHANGES,
     /// so a caret walking inside one paragraph writes nothing at all.
-    private(set) var focusedBlock: FocusedBlock?
+    ///
+    /// **The caret's OFFSET inside the block rides beside the identity, never
+    /// in it** (17o batch b, her ruling U-20). It has to be fresh at caret
+    /// rate — she types, then switches to Write and expects to be where she
+    /// was — and it must wake nobody at caret rate, because the one view that
+    /// registers a `body` dependency here (the Block History pane's jump
+    /// door) would then re-render on every keystroke, which is precisely the
+    /// cost the paragraph above exists to refuse. So the offset is stored
+    /// `@ObservationIgnored` and this READ merges the two: one truth, one
+    /// value, and the cadence of the signal unmoved.
+    var focusedBlock: FocusedBlock? {
+        guard var fact = focusedBlockIdentity else { return nil }
+        fact.utf16Offset = focusedOffset
+        return fact
+    }
+
+    /// The observed half — assigned only when the BLOCK (or its take) changes.
+    private var focusedBlockIdentity: FocusedBlock?
+    /// The caret-rate half — read at a landing, watched by nobody.
+    @ObservationIgnored private var focusedOffset: Int?
 
     /// A mounted writing surface reports where its caret is. Ignored for any
     /// note other than the one on screen — a background pane's caret is not
     /// "the block you're in" for the panel beside the foreground one.
-    func noteFocusedBlock(_ blockID: String?, variantID: String?, postID: String) {
+    ///
+    /// `utf16Offset` is nil for a surface that holds no caret (Blocks' row,
+    /// the outline's card) — nil is UNKNOWN, not zero, and the memory's own
+    /// rule keeps a known offset for the same block rather than erasing it.
+    func noteFocusedBlock(
+        _ blockID: String?, variantID: String?, postID: String, utf16Offset: Int? = nil
+    ) {
         guard activePostID == postID else { return }
         guard let blockID else {
-            focusedBlock = nil
+            focusedBlockIdentity = nil
+            focusedOffset = nil
             return
         }
-        let fact = FocusedBlock(postID: postID, blockID: blockID, variantID: variantID)
-        guard focusedBlock != fact else { return }  // assign only on a real change
-        focusedBlock = fact
+        let fact = FocusedBlock(
+            postID: postID, blockID: blockID, variantID: variantID, utf16Offset: utf16Offset)
         // Row 39: the fact is remembered for its note — every reporter
         // (Write's caret, the boards' ring, Read's selection, Blocks' row)
-        // feeds the one memory through this door, nothing else.
+        // feeds the one memory through this door, nothing else. The memory
+        // takes EVERY report, offset included; the observed identity below
+        // takes only the ones that move the block.
         currentBlocks.remember(fact)
+        focusedOffset = currentBlocks.current(for: postID)?.utf16Offset
+        guard focusedBlockIdentity?.blockID != blockID
+            || focusedBlockIdentity?.variantID != variantID
+            || focusedBlockIdentity?.postID != postID
+        else { return }  // assign only on a real change
+        focusedBlockIdentity = fact
     }
 
     // MARK: - The current block, remembered per note (the correction round, row 39)
@@ -146,7 +184,8 @@ final class CommandRouter {
 
     /// Where she last was in a note — mounted or not. The Library's Open
     /// door (batch E) lands here; a mode entering a mounted note reads the
-    /// live `focusedBlock`, which this seeded.
+    /// live `focusedBlock`, which this seeded. Both carry the caret's offset
+    /// (17o batch b): the live fact merges it on read, the memory persists it.
     func currentBlock(for postID: String) -> FocusedBlock? {
         if let fact = focusedBlock, fact.postID == postID { return fact }
         return currentBlocks.current(for: postID)
@@ -155,7 +194,10 @@ final class CommandRouter {
     /// A pin's reset (or a deleted note): the memory for one note goes.
     func forgetCurrentBlock(for postID: String) {
         currentBlocks.forget(postID: postID)
-        if focusedBlock?.postID == postID { focusedBlock = nil }
+        if focusedBlockIdentity?.postID == postID {
+            focusedBlockIdentity = nil
+            focusedOffset = nil
+        }
     }
 
     /// The detail reports its mode truth (its own `@State` changed).

@@ -203,16 +203,23 @@ struct CurrentBlockContinuityTests {
             #expect(await Self.settle(window, hosting) { BlocksWorkbenchOracle.focusedBlockID == blocks[1] },
                     "Blocks focuses block 2's row")
 
-            // 5. WRITE again: the caret is back in block 2 (at its start) —
-            //    not at the document's end (row 49), not at block 1.
+            // 5. WRITE again: the caret is back WHERE IT WAS in block 2 —
+            //    not at the document's end (row 49), not at block 1, and (the
+            //    2026-09-06 use-report round, her ruling U-20 + ledger rows 7
+            //    and 42) not at the block's START either: *"you also end up
+            //    with your caret at the start of the block rather than where
+            //    you were within it, which is annoying on long blocks"*. The
+            //    caret went in at +6 above; +6 is where it comes back. This
+            //    ONE expectation is what the ruling moved in this Act 10 pin;
+            //    every other step rides unmodified.
             #expect(router.requestMode(.write, postID: post.id))
             #expect(await Self.settle(window, hosting) {
                 guard let view = Self.views(EditorTextView.self, in: hosting).first,
                       view.string.count >= index.documentLength else { return false }
-                return view.selectedRange().location == blockTwoRange.location
-            }, "Write re-enters with the caret in block 2 — the round trip closes")
+                return view.selectedRange().location == blockTwoRange.location + 6
+            }, "Write re-enters with the caret where it was in block 2 — the round trip closes")
             let back = try #require(Self.views(EditorTextView.self, in: hosting).first)
-            #expect(back.selectedRange().location == blockTwoRange.location)
+            #expect(back.selectedRange().location == blockTwoRange.location + 6)
             #expect(router.focusedBlock?.blockID == blocks[1])
             #expect(router.currentBlock(for: post.id)?.blockID == blocks[1],
                     "and the memory holds it for the next mount")

@@ -1873,7 +1873,17 @@ final class EditorViewModel {
             let landing = bareArrivalLanding(fact: arrivalFact)
             textView.setSelectedRange(NSRange(location: landing, length: 0))
             if landing > 0 {
-                textView.scrollRangeToVisible(NSRange(location: landing, length: 0))
+                // 17o batch b (rows 20/42): the REVEAL is the Phase 6 hybrid
+                // jump, never `scrollRangeToVisible` — on TK2 the reveal runs
+                // before the document below the viewport is laid out, so it
+                // steers by the height ESTIMATE and lands short (measured on
+                // a 250-paragraph note: the caret's line at y 6930 with the
+                // viewport at 0…719). `JumpPrimitive` scrolls to a
+                // proportional estimate, forces layout of the ONE target
+                // fragment, and corrects — bounded, and the only ensureLayout
+                // this target performs (P1; TEXTKIT2 §2).
+                JumpPrimitive.jump(
+                    toOffset: landing, textView: textView, scrollView: scrollView)
             }
             updateCaretContext()
             let claim = { [weak textView, weak self] in
@@ -1888,14 +1898,26 @@ final class EditorViewModel {
         }
     }
 
-    /// The bare arrival's landing offset (rows 39/49): the start of this
-    /// post's current block — the fact as it stood BEFORE the arrival's own
-    /// fill — when the index knows it, else 0. Pure over the index.
+    /// The bare arrival's landing offset (rows 39/49): this post's current
+    /// block — the fact as it stood BEFORE the arrival's own fill — when the
+    /// index knows it, else 0. Pure over the index.
+    ///
+    /// **17o batch b (her ruling U-20):** the landing is the block's start
+    /// PLUS the remembered caret offset — *"when you are within a block and
+    /// then click go to write, you also end up with your caret at the start
+    /// of the block rather than where you were within it, which is annoying
+    /// on long blocks"*. The offset is clamped to the block's CURRENT length,
+    /// because the block may have shrunk since she left it (another take
+    /// chosen, a sync arrival), and a landing past its end would put her in
+    /// the next block — the one thing worse than the start. No offset (a
+    /// surface that holds no caret) is the block's start, exactly as before.
     func bareArrivalLanding(fact: FocusedBlock?) -> Int {
         guard let fact, fact.postID == postID,
               let i = index.entries.firstIndex(where: { $0.blockID == fact.blockID })
         else { return 0 }
-        return min(index.range(ofEntryAt: i).location, max(0, index.documentLength))
+        let range = index.range(ofEntryAt: i)
+        let offset = min(max(0, fact.utf16Offset ?? 0), range.length)
+        return min(range.location + offset, max(0, index.documentLength))
     }
 
     /// The choreography's Write half: land the caret/selection (clamped to
@@ -2682,10 +2704,14 @@ final class EditorViewModel {
         caretOrdinal = nil
         caretBlockWordCount = nil
         blockCount = index.entries.count
+        // 17o batch b (U-20): where the caret sits INSIDE its block — what
+        // every door into Write lands at when she comes back.
+        var caretOffsetInBlock: Int?
         for (i, entry) in index.entries.enumerated() {
             if caret >= location, caret <= location + entry.length {
                 caretBlockID = entry.blockID
                 caretVariantID = entry.variantID
+                caretOffsetInBlock = caret - location
                 // 9d: the user-facing block number — derived from current
                 // order at read time, never stored (the stable ID remains
                 // the identity; this is a handle for a human).
@@ -2718,13 +2744,16 @@ final class EditorViewModel {
             refreshDecorations()
         }
         // Ledger row 33 — the Block History pane's jump door reads this fact.
-        // Reported on a BLOCK change only, in the same guard the decor pass
-        // uses and for the same reason: a caret walking inside one paragraph
-        // must cost nothing anywhere.
-        if caretBlockID != previousCaretBlock {
-            session.commandRouter.noteFocusedBlock(
-                caretBlockID, variantID: caretVariantID, postID: postID)
-        }
+        // 17o batch b (her ruling U-20): the report now rides EVERY caret
+        // move, not only a block change, because the OFFSET is what a door
+        // into Write lands at and an offset stale by one paragraph of typing
+        // is the defect. The row-33 cheapness is unmoved and is now the
+        // router's: it keeps the offset `@ObservationIgnored` beside the
+        // observed identity, so a caret walking inside one paragraph still
+        // wakes nobody (`CommandRouter.focusedBlock`).
+        session.commandRouter.noteFocusedBlock(
+            caretBlockID, variantID: caretVariantID, postID: postID,
+            utf16Offset: caretOffsetInBlock)
     }
 
     // MARK: - The overlay layout-settle trigger (N14, 13b Stage 3F)

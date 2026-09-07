@@ -632,6 +632,14 @@ struct PaneSurfaceView: View {
     /// 13b 1b: the live pane's selection, reported as it changes — the
     /// fire-and-DO choreography carries it into Write.
     var onSelectionChange: ((NSRange) -> Void)?
+    /// 17o batch b (her ruling U-20): where the caret goes when this pane
+    /// TAKES THE RING — the note's remembered place inside that block, so a
+    /// mode switch keeps her where she was instead of dropping her at the
+    /// take's first character (and so the report the pane makes on going live
+    /// is that same place, never the end of the text AppKit left the
+    /// selection at). nil = leave the selection alone (a click brought its
+    /// own place; a pane the note has no memory of starts where it starts).
+    var caretOnGoingLive: Int?
     /// 13b 1b (AD-4): the pane's Variorum context-menu items.
     var menuItems: (() -> [PaneTextView.MenuItemSpec])?
     /// QoL batch 2 (L3/L4 — the RULED measurement seam): the pane's
@@ -689,7 +697,8 @@ struct PaneSurfaceView: View {
                 spellcheck: spellcheck, paragraphGap: paragraphGap,
                 onFocusRequest: onFocusRequest, onEdit: onEdit,
                 onCommandClick: onCommandClick,
-                onSelectionChange: onSelectionChange, menuItems: menuItems,
+                onSelectionChange: onSelectionChange,
+                caretOnGoingLive: caretOnGoingLive, menuItems: menuItems,
                 onMeasuredHeight: onMeasuredHeight,
                 caretToEndToken: caretToEndToken)
                 // EXACT height, not a floor (13b 3F, AD-7): an
@@ -730,6 +739,8 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
     var onEdit: ((String) -> Void)?
     var onCommandClick: ((Bool) -> Bool)?
     var onSelectionChange: ((NSRange) -> Void)?
+    /// The landing place a pane adopts on going live (17o batch b).
+    var caretOnGoingLive: Int?
     var menuItems: (() -> [PaneTextView.MenuItemSpec])?
     var onMeasuredHeight: ((CGFloat) -> Void)?
     var caretToEndToken: Int = 0
@@ -767,6 +778,7 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         context.coordinator.onCommandClick = onCommandClick
         context.coordinator.onFocusRequest = onFocusRequest
         context.coordinator.onSelectionChange = onSelectionChange
+        context.coordinator.caretOnGoingLive = caretOnGoingLive
         view.variorumMenu = menuItems
         applyStyle(to: view)
         applyIdentity(to: view)
@@ -793,6 +805,7 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         context.coordinator.onFocusRequest = onFocusRequest
         context.coordinator.onSelectionChange = onSelectionChange
         context.coordinator.onMeasuredHeight = onMeasuredHeight
+        context.coordinator.caretOnGoingLive = caretOnGoingLive
         view.variorumMenu = menuItems
         view.isEditable = isLive
         context.coordinator.noteLiveness(isLive)
@@ -891,6 +904,10 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         /// 13e E3: the composition's ⌘-click claim (her A18's selection).
         var onCommandClick: ((Bool) -> Bool)?
         var onSelectionChange: ((NSRange) -> Void)?
+        /// 17o batch b: the place this pane's caret takes when it goes live
+        /// (nil = leave the selection where it is). Refreshed on every render
+        /// so the transition below acts on the current memory.
+        var caretOnGoingLive: Int?
         /// QoL batch 2 (L3/L4): the composer's measured-height sink.
         var onMeasuredHeight: ((CGFloat) -> Void)?
         private weak var view: PaneTextView?
@@ -915,6 +932,18 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
             // updates cost nothing.
             if live != was { view?.fireConvergenceOccasion() }
             guard live, !was, let view else { return }
+            // 17o batch b (U-20): the ring arrives WHERE SHE WAS. Placed
+            // before the responder claim, so the claim's own selection
+            // notification reports this place — the note's one caret — rather
+            // than the end of the text the read pane's `string` set left it
+            // at (measured: a take pane going live reported its block's END,
+            // which then became the note's remembered offset and landed Write
+            // at the end of the paragraph she was standing in the middle of).
+            if let landing = caretOnGoingLive {
+                let length = (view.string as NSString).length
+                view.setSelectedRange(
+                    NSRange(location: min(max(0, landing), length), length: 0))
+            }
             if let window = view.window {
                 window.makeFirstResponder(view)
             } else {

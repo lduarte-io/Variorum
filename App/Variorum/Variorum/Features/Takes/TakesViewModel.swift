@@ -515,6 +515,11 @@ final class TakesViewModel {
     // MARK: - Focus (the ONE live editor migrates)
 
     func focus(_ pane: PaneKey) {
+        // 17o batch b (U-20): armed BEFORE the report, because the report
+        // itself is what makes this block current — read after it, the
+        // memory would answer about the pane we are about to open rather
+        // than the place she is coming from.
+        armPaneCaretLanding(for: pane)
         // Ledger row 33 — the boards' half of "the block you're in", reported
         // at the ONE authority door (P-3), so Takes and Lenses both feed the
         // Block History pane's jump without a second liveness mechanism.
@@ -555,6 +560,36 @@ final class TakesViewModel {
         caretToEndVariantID = pane.variantID
         caretToEndCounter += 1
         focus(pane)
+        // The room asked for the END explicitly (13f W7's A22) — the note's
+        // remembered place does not get a say here.
+        paneCaretLanding = nil
+    }
+
+    // MARK: - Where a pane's caret lands when it takes the ring (17o batch b)
+
+    /// The note's remembered caret place, for the ONE pane about to go live.
+    /// `@ObservationIgnored` on purpose: it is read at the render the ring
+    /// move already caused, never watched — a caret place is data, not a
+    /// signal (the argument in full is on `CommandRouter.focusedBlock`).
+    @ObservationIgnored private var paneCaretLanding: (variantID: String, offset: Int)?
+
+    /// Arms the landing when — and only when — the pane taking the ring is
+    /// the note's CURRENT block. A click into another block brought its own
+    /// place with it and must keep it.
+    private func armPaneCaretLanding(for pane: PaneKey) {
+        guard let fact = session.commandRouter.currentBlock(for: postID),
+              fact.blockID == pane.blockID, let offset = fact.utf16Offset
+        else {
+            paneCaretLanding = nil
+            return
+        }
+        paneCaretLanding = (variantID: pane.variantID, offset: offset)
+    }
+
+    /// What a pane rendering `variantID` is handed. nil for every pane the
+    /// landing did not name, so nothing else on the board ever sees a change.
+    func caretLanding(forVariant variantID: String) -> Int? {
+        paneCaretLanding?.variantID == variantID ? paneCaretLanding?.offset : nil
     }
 
     /// What a pane rendering `variantID` is handed. Zero for every pane the
@@ -1704,6 +1739,15 @@ final class TakesViewModel {
 
     func notePaneSelection(variantID: String, range: NSRange) {
         choreography.notePaneSelection(variantID: variantID, range: range)
+        // 17o batch b (her ruling U-20): the LIVE pane's caret is the note's
+        // current-block offset — so switching back to Write lands where she
+        // was in the take, not at its first character. The live pane only:
+        // a read pane's selection is not a caret (P-3's line), and reporting
+        // one would hand a landing a place she never stood.
+        guard let pane = focusedPane, pane.variantID == variantID else { return }
+        session.commandRouter.noteFocusedBlock(
+            pane.blockID, variantID: variantID, postID: postID,
+            utf16Offset: range.location)
     }
 
     /// True on the PRIMARY takes board only (never the Write panel's
@@ -1736,6 +1780,10 @@ final class TakesViewModel {
     /// call. Internal for the choreographer; everything else focuses
     /// through `focus(_:)`.
     func landAuthorityFocus(_ pane: PaneKey) {
+        // 17o batch b (U-20): the N9 landing enters the note's current block
+        // — and enters it WHERE SHE WAS. (This door deliberately does not
+        // report the fact; it is landing ON the fact.)
+        armPaneCaretLanding(for: pane)
         authority.focus(pane)
     }
 

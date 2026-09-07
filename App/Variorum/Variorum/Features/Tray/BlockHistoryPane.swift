@@ -127,11 +127,22 @@ nonisolated struct BlockHistoryRequest: Identifiable, Hashable, Sendable {
 ///
 /// Reported only when the block CHANGES, which is what keeps it cheap: a
 /// caret walking within one paragraph writes nothing, so nothing observing it
-/// re-renders at keystroke rate.
+/// re-renders at keystroke rate. **`utf16Offset` is the exception, and it is
+/// deliberately not a signal** (the 2026-09-06 use-report round, 17o batch b —
+/// her ruling U-20): the caret's place INSIDE the block is data a landing
+/// READS at the moment it lands, never something a view watches, so the
+/// router keeps it beside the observed identity rather than in it
+/// (`CommandRouter.focusedBlock` has the whole argument).
 nonisolated struct FocusedBlock: Hashable, Sendable {
     let postID: String
     let blockID: String
     var variantID: String?
+    /// **Where the caret was inside the block, UTF-16** — nil means UNKNOWN
+    /// (a surface that holds no caret: Blocks' row, the outline's card, an
+    /// old two-field memory), which every landing spells "the block's start".
+    /// Zero is a real place, not unknown. `LandingTarget.utf16Offset` is the
+    /// same idea one door over — the name is shared on purpose.
+    var utf16Offset: Int?
 }
 
 @MainActor

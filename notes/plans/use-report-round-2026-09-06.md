@@ -3737,11 +3737,80 @@ below marked NOT-STARTED or IN-PROGRESS; the walk; the closing suites.
 
 **Pieces (checkpoint order):**
 
-1. the fact + the memory + the router + the three reporters — **NOT-STARTED**
-2. Write's landing consumes the offset and reveals through `JumpPrimitive` — **NOT-STARTED**
-3. Blocks → Write reveals (row 20) — **NOT-STARTED**
+1. the fact + the memory + the router + the reporters — **DONE (hash next)**
+2. Write's landing consumes the offset and reveals through `JumpPrimitive` — **DONE (hash next)**
+3. Blocks → Write reveals (row 20) — **IN-PROGRESS** (pinned, red measured, fix next)
 4. the Takes board's article scrolls to the landed slot (row 8) — **NOT-STARTED**
 5. the walk + captures + the closing suites — **NOT-STARTED**
 
-**Rows:** 7 · 8 · 20 · 42 — all OPEN.
+**Rows:** 7 · 42 — **FIXED** (pieces 1+2, pin below) · 8 · 20 — OPEN.
+
+**RED ON OLD, measured before a line moved** (`scratchpad/red-1.log`, tree `35c11948`):
+
+- **rows 7 · 42** — `CurrentBlockContinuityTests.theCurrentBlockFollowsHerWriteTakesReadBlocksWrite`
+  with its step 5 moved to the ruling's answer (the caret went into block 2 at **+6**; +6 is where it
+  must come back): `(back.selectedRange().location → 59) == (blockTwoRange.location + 6 → 65)` —
+  **Write re-entered at the block's START**, her complaint exactly, in the Act 10 rig.
+- **row 20** — `LandingOffsetTests.aSeededCaretFarDownALongNoteArrivesInsideTheVisibleRect`, a
+  250-paragraph note seeded at block 200's start (the workbench's Open-in-Write offset):
+  `caret line top 6930.1 · visible 0.0…719.0 · document 9366.5` — **the caret sat 6,211 pt below the
+  screen**. "puts your cursor in the right place but doesn't move you there", measured.
+
+**PIECE 1 — the fact, the memory, the router, the reporters (DONE).**
+
+- `FocusedBlock` gains `utf16Offset: Int?` (`BlockHistoryPane.swift`) — **nil is UNKNOWN, never zero**;
+  the name is `LandingTarget`'s on purpose.
+- `CurrentBlockMemory` persists `blockID|variantID|utf16Offset`; a two-field string written before this
+  batch reads back with a nil offset (the behaviour it had when it was written). **`remember`'s nil rule:
+  a report with no offset for the SAME block keeps what is known** — Blocks' focused row and the
+  outline's card hold no caret, and letting them erase her place would land her at the top of the
+  paragraph she was standing in the middle of, which is the whole complaint. A report for ANOTHER block
+  resets it.
+- **`CommandRouter`: the offset rides BESIDE the observed identity, never in it.** `focusedBlock` is now
+  a computed read that merges a `private` observed `focusedBlockIdentity` (assigned only when the block
+  or its take changes — row 33's cadence, unmoved) with an `@ObservationIgnored` `focusedOffset`
+  (rewritten on every report). **Why:** the offset must be fresh at caret rate, and the one view that
+  registers a `body` dependency on this fact (the Block History pane's jump door) must not re-render on
+  every keystroke — which is the cost row 33's own comment exists to refuse. One value, one truth, two
+  lifetimes. `noteFocusedBlock` gains `utf16Offset: Int? = nil`; `registerDetail`'s restore, the
+  teardown and `forgetCurrentBlock` move both halves together.
+- **Reporters:** Write's `updateCaretContext` now reports on EVERY caret move (the block-change guard is
+  retired *for the report* — an offset stale by one paragraph of typing is the defect; the decor pass
+  keeps its own guard); `TakesViewModel.notePaneSelection` reports the LIVE pane's caret (the live pane
+  only — a read pane's selection is not a caret, P-3's line); Read's `edit` pane gains
+  `onSelectionChange` → `BlockTOCViewModel.notePaneCaret`. Blocks' row and the Library's Open report nil
+  and land at the start, as today.
+- **THE TRACE THIS BATCH FOUND, AND ITS FIX (measured, not read):** with only the above, the round trip
+  landed at **113 — the block's END**. A probe named the culprit: *a take pane going live reports its
+  block's END* (`[probe] TAKES pane reports offset 54`), because a read pane's `view.string = text` had
+  left AppKit's selection there and the ring's responder claim reported it. That report became the
+  note's remembered offset. The honest answer is the brief's own walk step (*"→ Takes → the live pane's
+  caret is there"*): **a pane going live LANDS at the note's remembered place.** `PaneSurfaceView`/its
+  representable/its coordinator gain `caretOnGoingLive: Int?`, applied on the live TRANSITION
+  (`noteLiveness`'s existing one-shot occasion) and **before** the responder claim, so the pane's own
+  report is that place. Armed by the models at the focus door — `TakesViewModel.armPaneCaretLanding`
+  (both `focus` and the N9 `landAuthorityFocus`; the room's `focusWithCaretAtEnd` clears it — the END was
+  asked for explicitly) and `BlockTOCViewModel.makeLive` — and **only for the note's CURRENT block**, so
+  a click into another block keeps the place the click brought. Read at render through
+  `caretLanding(forVariant:)`, `@ObservationIgnored`: a caret place is data, not a signal.
+
+**PIECE 2 — Write's landing (DONE).** `bareArrivalLanding(fact:)` = the block's start + the remembered
+offset, clamped to the block's CURRENT length (it may have shrunk while she was away; landing past its
+end would put her in the next block — worse than the start) and to the document; a nil offset is the
+block's start, unchanged. The bare arrival's reveal is **`JumpPrimitive.jump`**, not
+`scrollRangeToVisible` (TEXTKIT2 §2 / the Phase 6 hybrid road), with the arrival's next-turn responder
+retry kept.
+
+**One neighbouring pin edited, justified:** `BlockHistoryPaneTests.withNote` now forgets its note's
+current-block memory on entry and exit. Every world mints the SAME post id (`.incrementing` from zero)
+and the memory persists per note into `UserDefaults.standard`, so one suite's caret arrived as this
+suite's remembered offset and its whole-fact equality read `utf16Offset: 0` — the order-dependence the
+Act 10 batch-G record already names, widened by one field. The pin's assertion is untouched.
+
+**Suites green at this commit** (`scratchpad/suite-2.log`, ONE run, 16 `-only-testing` type names →
+`Test run with 96 tests in 16 suites`): `LandingOffsetTests` (3 of 4 — the row-20 pin is piece 3's, still
+red by design) · `CurrentBlockContinuityTests` · `BlockHistoryPaneTests` · `BlockHistoryHostTests` ·
+`ReadModeTests` · `LibraryPanelHostTests` · `ReadLandingTests` · `ReadArrivalMeasureTests` ·
+`BookOutlineLandingTests` · `CanvasArrivalTests` · `StructuralUndoTests` · `JumpCorrectionLoopTests` ·
+`BlocksArrivalMeasureTests` · `BlocksWorkbenchFaceTests` · `EditorSessionTests` · `TakesBoardTests`.
 

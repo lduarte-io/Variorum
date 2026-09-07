@@ -233,6 +233,10 @@ final class BlockTOCViewModel {
     func makeLive(_ blockID: String, variantID: String) {
         let key = PaneTextAuthority.PaneKey(
             columnID: "toc", blockID: blockID, variantID: variantID)
+        // 17o batch b (U-20): the pane enters the note's current block where
+        // she was — armed before the focus, and only for that block (a click
+        // into another block brought its own place).
+        armPaneCaretLanding(blockID: blockID, variantID: variantID)
         switch authority.focus(key) {
         case .unchanged:
             return
@@ -241,6 +245,37 @@ final class BlockTOCViewModel {
             // buffer overlay keeps the just-blurred row current meanwhile.
             Task { await autosave.flushNow() }
         }
+    }
+
+    /// The note's remembered caret place, for the ONE pane about to go live
+    /// (17o batch b). `@ObservationIgnored`: read at the render the ring move
+    /// already caused, never watched.
+    @ObservationIgnored private var paneCaretLanding: (variantID: String, offset: Int)?
+
+    private func armPaneCaretLanding(blockID: String, variantID: String) {
+        guard let fact = session.commandRouter.currentBlock(for: postID),
+              fact.blockID == blockID, let offset = fact.utf16Offset
+        else {
+            paneCaretLanding = nil
+            return
+        }
+        paneCaretLanding = (variantID: variantID, offset: offset)
+    }
+
+    /// What a pane rendering `variantID` is handed on going live.
+    func caretLanding(forVariant variantID: String) -> Int? {
+        paneCaretLanding?.variantID == variantID ? paneCaretLanding?.offset : nil
+    }
+
+    /// 17o batch b (her ruling U-20): Read's `edit` face holds a real caret
+    /// in its ONE live pane, so it reports where that caret is — the same
+    /// door Write's editor and the Takes board's live pane report through.
+    /// The live pane only (P-3's line: a read pane's selection is not a
+    /// caret), and the host's own block report stays the block's.
+    func notePaneCaret(blockID: String, variantID: String, offset: Int) {
+        guard authority.livePane?.variantID == variantID else { return }
+        session.commandRouter.noteFocusedBlock(
+            blockID, variantID: variantID, postID: postID, utf16Offset: offset)
     }
 
     func paneEdited(variantID: String, oldText: String, newText: String) {

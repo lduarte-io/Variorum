@@ -60,6 +60,9 @@ struct TakesCellView: View {
                     // fire-and-DO landing brings into Write.
                     model.notePaneSelection(variantID: resolved.variantID, range: range)
                 },
+                // 17o batch b (U-20): a pane taking the ring enters the note's
+                // current block WHERE SHE WAS.
+                caretOnGoingLive: model.caretLanding(forVariant: resolved.variantID),
                 menuItems: { menuSpecs(resolved: resolved) },
                 caretToEndToken: caretToEndToken)
                 .background(tinted ? tokens.accent.opacity(0.12) : Color.clear)
