@@ -380,9 +380,18 @@ struct BoundaryFluidityTests {
             // belongs, and that is exactly what this test drives.
             await harness.model.invokeGesture(.mergeBlocks, ceremony: true)
 
-            // The ceremony opened (no rows touched yet); ⏎ = the old
-            // instant outcome.
+            // The ceremony opened (no rows touched yet).
             #expect(harness.model.mergeCeremony != nil)
+            // **A JUSTIFIED EDIT (18f ladder round 1, R1-6 — fable-reviewer),
+            // claim intact.** U-5's row (18f batch 1) opens the sheet on "Bring
+            // every take", whose confirm is the carry-all road — where NOTHING
+            // goes to lineage, so its receipt rightly names no road. This pin
+            // is about the road where takes DO stay behind, so it names it:
+            // "Only the two shown" is the plain merge, and its speech is the
+            // lineage sentence this pin has always held. (The suite went red
+            // at batch 1 piece 5 and neither 18f closing run named it — the
+            // J14 class, recorded in the ladder's dispositions.)
+            harness.model.setMergeArrangement(.onlyTheShownOnes)
             await harness.model.confirmMergeCeremony()
 
             let slots = try await harness.database.read { [postID = harness.postID] db in
