@@ -701,6 +701,12 @@ extension Operations {
         /// copy-truth doctrine says a receipt must be able to name.
         public let takesLeftBehind: Int
 
+        public init(blockIDs: [String], takesKeptOnTop: Int, takesLeftBehind: Int) {
+            self.blockIDs = blockIDs
+            self.takesKeptOnTop = takesKeptOnTop
+            self.takesLeftBehind = takesLeftBehind
+        }
+
         /// True when the block was already one paragraph.
         public var isNoOp: Bool { blockIDs.count < 2 }
         public var blocksMade: Int { blockIDs.count }

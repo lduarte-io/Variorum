@@ -530,6 +530,35 @@ final class BlockTOCViewModel {
         }
     }
 
+    /// **The newline repair over the picked blocks** (18c batch 3 — her
+    /// U-6). The 13e E2 compound shape, exactly as `deletePicked`: ONE
+    /// entry, all-or-nothing, the receipt counted from the operations' own
+    /// results. A picked block that is already one paragraph is a no-op leg
+    /// — it writes nothing and is not counted.
+    func splitPickedAtNewlines() async {
+        let pickedSet = picked.picked
+        guard !pickedSet.isEmpty else { return }
+        await autosave.flushNow()
+        let order = rows.map(\.blockID)
+        let chain = pickedSet.subtracting(order).sorted()
+            + order.filter { pickedSet.contains($0) }
+        statusMessage = nil
+        do {
+            let stack = session.undoStack
+            let results: [Operations.SplitAtNewlinesResult] = try await session.runner
+                .run { ops in
+                    try stack.withCompound(label: "Split at Newlines", operations: ops) {
+                        try chain.map { try ops.splitBlockAtNewlines($0) }
+                    }
+                }
+            picked.clear()
+            statusMessage = SplitAtNewlinesCopy.receipt(
+                results, whenNothingSplit: SplitAtNewlinesCopy.pickedAlreadyWhole)
+        } catch {
+            statusMessage = OpsRefusalCopy.message(for: error)
+        }
+    }
+
     /// Bulk tag — one existing tag to every picked block, already-tagged
     /// rows skipping quietly (the standing batch semantics).
     func tagPicked(_ tagID: String) async {

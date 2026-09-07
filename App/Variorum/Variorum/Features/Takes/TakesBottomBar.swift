@@ -59,6 +59,8 @@ struct TakesBottomBar: View {
             // time controls, in `note ▾` — Write's bar's pair, here too
             // (R118's letter: no surface is privileged).
             .saveNoteVersion, .showNoteVersions,
+            // 18c batch 3 (her U-6): Write's bar's two rows, here too.
+            .splitEveryNewlineIntoBlocks, .splitBlockAtNewlines,
         ]
         // 13k K7: the formatting toolbar rides BOTH bars — the acts are
         // `takesAccess: .native`, so Write must not be the only surface with
@@ -136,6 +138,11 @@ struct TakesBottomBar: View {
                 // mints right under the block you're in and its pane takes
                 // the ring. The Takes trap's second half closes here.
                 Task { await model.insertBlockBelowFocused() }
+            }
+            // 18c batch 3 (her U-6): Write's bar's row, here too — R6-2's one
+            // grammar and R118's letter, in the same commit.
+            Button(SplitAtNewlinesCopy.blockDoor) {
+                Task { await model.splitFocusedBlockAtNewlines() }
             }
             // Ledger row 14 (F1): Write's bar's row, here too — and it
             // finishes the sentence her 13c A8 report started, quoted right
@@ -390,6 +397,11 @@ struct TakesBottomBar: View {
                 Task { await model.saveNoteVersion() }
             }
             Button(VersionsPath.menuLabel) { model.requestNoteVersions() }
+            Divider()
+            // 18c batch 3 (her U-6): Write's bar's row, in Takes too.
+            Button(SplitAtNewlinesCopy.noteDoor) {
+                Task { await model.splitEveryNewlineIntoBlocks() }
+            }
             Divider()
             Button(model.projection.sealed ? "Unseal" : "Seal") {
                 Task { await model.toggleSeal() }

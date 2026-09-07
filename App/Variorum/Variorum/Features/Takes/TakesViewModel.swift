@@ -1611,6 +1611,20 @@ final class TakesViewModel {
         await structure.archiveFocusedBlock()
     }
 
+    /// 18c batch 3 (her U-6) — the board's three doors onto the newline
+    /// repair, forwarded (the machinery is the controller's).
+    func splitEveryNewlineIntoBlocks() async {
+        await structure.splitEveryNewlineIntoBlocks()
+    }
+
+    func splitFocusedBlockAtNewlines() async {
+        await structure.splitFocusedBlockAtNewlines()
+    }
+
+    func splitSelectedBlocksAtNewlines() async {
+        await structure.splitSelectedBlocksAtNewlines()
+    }
+
     /// The routed comments door (⌘⇧' — the bars' block menu made
     /// keyboard-reachable): the bar presents the sheet for this target.
     struct CommentsRequest: Identifiable, Equatable {

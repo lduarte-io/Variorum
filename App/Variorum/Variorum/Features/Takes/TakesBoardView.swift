@@ -66,6 +66,8 @@ struct TakesBoardView: View {
         .deleteTake,
         // 13e E2 (A17): the same banner offers the delete door.
         .deleteSelectedBlocks,
+        // 18c batch 3 (her U-6): …and the newline repair over that selection.
+        .splitSelectedBlocksAtNewlines,
     ]
 
     /// Batch 14 (her image-#9 report — TWO live rings): the fan CARDS pane
@@ -486,6 +488,14 @@ struct TakesBoardView: View {
                 }
                 .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                 .help(BlockSelectionCopy.deleteHelp)
+                // 18c batch 3 (her U-6): the newline repair over the same
+                // selection — the workbench's bulk bar carries it too, and
+                // one grammar means both banners do.
+                Button(SplitAtNewlinesCopy.bulkDoor) {
+                    Task { await model.splitSelectedBlocksAtNewlines() }
+                }
+                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+                .help(SplitAtNewlinesCopy.blockHelp)
                 Button(tokens.chromeLabel("clear")) { model.clearMergeSelection() }
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
                     .help("Unpick every block")

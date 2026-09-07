@@ -507,6 +507,15 @@ nonisolated enum CapabilityID: String, CaseIterable, Sendable {
     // surfaces that can carry one (Write's editor, the Takes board), which
     // is why its availability is the take family's rather than the board's.
     case deleteSelectedBlocks
+    // 18c batch 3 (her U-6, 2026-09-06, verbatim: "a 'make all newlines
+    // blocks' button… that automatically just leaves any take at the top
+    // paragraph of its block"). THREE acts, not one flag, for the
+    // `deleteBlock` / `deleteSelectedBlocks` reason — they address three
+    // different things and each must be able to say so: the whole NOTE, the
+    // block you are standing in, and the blocks you picked.
+    case splitEveryNewlineIntoBlocks
+    case splitBlockAtNewlines
+    case splitSelectedBlocksAtNewlines
     // 13e E6 (her A21, verbatim: "keyboard shortcut for copying all takes
     // together to clipboard, or turning all takes into their own blocks").
     // The CLIPBOARD half: the block's whole fan as text, in the app's OWN

@@ -464,3 +464,71 @@ nonisolated enum OpsRefusalCopy {
         return String(describing: error)
     }
 }
+
+// MARK: - "Make every newline a block" (18c batch 3 — her U-6)
+
+/// Every sentence the newline repair speaks. ONE home, beside its
+/// neighbours, because FIVE doors say it — Write's two bar menus, the Takes
+/// bar's two, and the two bulk bars — and a receipt worded five ways is how
+/// copy drifts (`FannedDefaultsCopy`'s own reason).
+///
+/// **The J8 copy-truth doctrine binds every line here:** the counts come
+/// from the operation's OWN results (the 13e receipt rule), the takes clause
+/// appears only when takes actually rode, and a note where nothing split
+/// gets a real refusal rather than a lecture (P-2).
+nonisolated enum SplitAtNewlinesCopy {
+    /// The verb, in her words — the note ▾ row.
+    static let noteDoor = "Make every newline a block"
+    /// The block ▾ row.
+    static let blockDoor = "Split this block at its newlines"
+    /// The bulk bars' compact label.
+    static let bulkDoor = "split at newlines"
+
+    static let noteHelp =
+        "Every paragraph in this note becomes its own block — the takes on a "
+        + "multi-paragraph block stay with its TOP paragraph. Lists stay whole. "
+        + "\u{2325}\u{2318}Z undoes the whole thing."
+    static let blockHelp =
+        "This block's paragraphs become their own blocks — its takes stay with "
+        + "the top one. \u{2325}\u{2318}Z undoes."
+
+    /// **THE RECEIPT.** `made` and `from` are the operation's own numbers:
+    /// how many blocks came out, and how many blocks went in — counting ONLY
+    /// the blocks that actually had a newline to split at, because a block
+    /// that was already one paragraph was not acted on.
+    static func split(made: Int, from: Int, takesKept: Int, takesLeftBehind: Int = 0) -> String {
+        var sentence = "\(made) blocks from \(from == 1 ? "1 block" : "\(from) blocks")"
+        if takesKept > 0 {
+            sentence += " — every take stayed with its top paragraph"
+        }
+        if takesLeftBehind > 0 {
+            sentence += takesLeftBehind == 1
+                ? "; 1 empty take stayed with the original block"
+                : "; \(takesLeftBehind) empty takes stayed with the original block"
+        }
+        return sentence + ". \u{2325}\u{2318}Z undoes."
+    }
+
+    /// **The ONE arithmetic every door speaks through** — handed the
+    /// operation's own results and nothing else, so no surface can count a
+    /// receipt its own way (13e's rule, and the reason the five doors share
+    /// this file). Blocks that were already one paragraph are not counted:
+    /// they were not acted on.
+    static func receipt(
+        _ results: [Operations.SplitAtNewlinesResult], whenNothingSplit: String
+    ) -> String {
+        let acted = results.filter { !$0.isNoOp }
+        guard !acted.isEmpty else { return whenNothingSplit }
+        return split(
+            made: acted.reduce(0) { $0 + $1.blocksMade },
+            from: acted.count,
+            takesKept: acted.reduce(0) { $0 + $1.takesKeptOnTop },
+            takesLeftBehind: acted.reduce(0) { $0 + $1.takesLeftBehind })
+    }
+
+    /// The honest no-op — a REFUSAL that says what is already true, never a
+    /// lecture that redirects to nothing (P-2).
+    static let noteAlreadyWhole = "Every block is already one paragraph."
+    static let blockAlreadyWhole = "This block is already one paragraph."
+    static let pickedAlreadyWhole = "Every picked block is already one paragraph."
+}

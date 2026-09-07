@@ -128,6 +128,8 @@ struct CommitBar: View {
             // grain pairing with commit/history one line up IS the teaching
             // moment her G4 chapter names.
             .saveNoteVersion, .showNoteVersions,
+            // 18c batch 3 (her U-6): the note ▾ row and the block ▾ row.
+            .splitEveryNewlineIntoBlocks, .splitBlockAtNewlines,
         ]
         // 13k K7: the formatting toolbar's own eight, from ITS table (the
         // cluster is rendered here, so its doors are declared here).
@@ -498,6 +500,12 @@ struct CommitBar: View {
             Button("＋ New block below this one (⌘⇧⏎)") {
                 Task { await model.insertBlockBelowCaret() }
             }
+            // 18c batch 3 (her U-6): the block-sized half of the newline
+            // repair, beside the block mints because that is what it does —
+            // it turns this block's paragraphs into blocks.
+            Button(SplitAtNewlinesCopy.blockDoor) {
+                Task { await model.splitCaretBlockAtNewlines() }
+            }
             // Ledger row 14 (F1): the kept road, beside the clocked one and
             // BEFORE it — the order the menu bar's Block menu and the block
             // context menu already use, so the three doors read alike.
@@ -509,7 +517,8 @@ struct CommitBar: View {
             }
         }
         .help("Everything block-scoped: divide, extract, make block, merge, "
-            + "the two block mints, and the two ways to set a block aside")
+            + "the two block mints, splitting this block at its newlines, and "
+            + "the two ways to set a block aside")
     }
 
     /// The flat row's note half: `note ▾`, comments, the newlines chip — and
@@ -557,7 +566,8 @@ struct CommitBar: View {
         VoicedMenu(tokens: tokens, label: "note") {
             noteMenuItems
         }
-        .help("The note itself: its seal and its date (its tray is the tray "
+        .help("The note itself: its versions, its seal, its date, and the "
+            + "repair that makes every newline a block (its tray is the tray "
             + "icon at the top of the note; a block's savepoints are the "
             + "history door beside commit)")
     }
@@ -588,6 +598,13 @@ struct CommitBar: View {
                 Task { await model.saveNoteVersion() }
             }
             Button(VersionsPath.menuLabel) { model.requestNoteVersions() }
+            Divider()
+            // 18c batch 3 — **HER U-6's own button**, in the menu that IS the
+            // note: every paragraph in this note becomes its own block, the
+            // takes staying with their top paragraph. One ⌥⌘Z undoes it.
+            Button(SplitAtNewlinesCopy.noteDoor) {
+                Task { await model.splitEveryNewlineIntoBlocks() }
+            }
             Divider()
             Button(model.header?.locked == true ? "Unseal" : "Seal") {
                 model.toggleSeal()

@@ -117,6 +117,8 @@ struct BlocksWorkbenchView: View {
     /// declared ids, rendered here as the workbench's bulk doors).
     static let surfaceCapabilities: [CapabilityID] = [
         .archiveBlock, .deleteBlock, .mergeSelectedBlocks, .deleteSelectedBlocks,
+        // 18c batch 3 (her U-6): the bulk bar's newline repair.
+        .splitSelectedBlocksAtNewlines,
     ]
 
     /// The remembered split (row 18) — a workbench posture, not a per-note
@@ -431,6 +433,13 @@ struct BlocksWorkbenchView: View {
             .disabled(model.picked.count < 2)
             .help("Join the picked blocks into one, left to right — every take rides "
                 + "along (the carry-all chain); the originals wait in lineage")
+            // 18c batch 3 (her U-6): the newline repair over the picked
+            // blocks — the bulk half of the note ▾ button.
+            Button(tokens.chromeLabel(SplitAtNewlinesCopy.bulkDoor)) {
+                Task { await model.splitPickedAtNewlines() }
+            }
+            .buttonStyle(CalmButtonStyle(tokens: tokens, compact: true))
+            .help(SplitAtNewlinesCopy.blockHelp)
             VoicedMenu(tokens: tokens, label: "tag ▾", role: .quiet) {
                 ForEach(allTags, id: \.id) { tag in
                     Button(tag.path) { Task { await model.tagPicked(tag.id) } }

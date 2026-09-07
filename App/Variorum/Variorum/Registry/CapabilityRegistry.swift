@@ -482,6 +482,41 @@ nonisolated enum CapabilityRegistry {
             shortcutLabel: nil, takesAccess: .native,
             unavailableNote: BlockSelectionCopy.nothingPicked,
             availability: takeFamily),
+        // 18c batch 3 — **HER U-6**, verbatim: *"a 'make all newlines blocks'
+        // button… that automatically just leaves any take at the top
+        // paragraph of its block (aka, if you had a multi paragraph block now
+        // the top paragraph is a block with all the takes)."* Her reason: a
+        // note written with the newlines chip OFF meant *"a lot of divides to
+        // run."*
+        //
+        // THREE declarations rather than one act with a target flag, the
+        // `deleteBlock` / `deleteSelectedBlocks` split for its reason: the
+        // whole NOTE, the block you stand in, and the blocks you picked are
+        // three different things to point at, and one declaration could not
+        // carry three unavailable-notes. No shortcut on any of them: this is
+        // a deliberate repair, not daily chrome (her not-daily-chrome
+        // criterion, 13j round 4).
+        Capability(
+            id: .splitEveryNewlineIntoBlocks, verb: "Make Every Newline a Block",
+            scope: .post,
+            doors: [.bottomBar],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "Open a note first — this repairs the note you're in.",
+            availability: noteScoped),
+        Capability(
+            id: .splitBlockAtNewlines, verb: "Split This Block at Its Newlines",
+            scope: .block,
+            doors: [.bottomBar],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: "Blocks live inside a note — open one first.",
+            availability: takeFamily),  // the one named rule, not a copy
+        Capability(
+            id: .splitSelectedBlocksAtNewlines, verb: "Split at Newlines",
+            scope: .block,
+            doors: [.surface],
+            shortcutLabel: nil, takesAccess: .native,
+            unavailableNote: BlockSelectionCopy.nothingPicked,
+            availability: takeFamily),  // `deleteSelectedBlocks`' own rule
         // 13e E6 (her A21's clipboard half, verbatim: *"keyboard shortcut for
         // copying all takes together to clipboard"*). TAKE scope, native
         // wherever takes are: the target is the block you are in (the caret

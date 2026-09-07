@@ -519,6 +519,83 @@ final class EditorSurfaceController {
         }
     }
 
+    // MARK: - "Make every newline a block" (18c batch 3 — her U-6)
+
+    /// **The NOTE's repair** (her U-6: *"a 'make all newlines blocks'
+    /// button"*). Every block of the note through `splitBlockAtNewlines`,
+    /// inside ONE `withCompound` — so the whole repair is ONE ⌥⌘Z, which is
+    /// the point of a button that replaces *"a lot of divides to run"*.
+    ///
+    /// The order comes from the STORE, not from the index (the 13d
+    /// discipline: a projection names targets, it never authorizes); each
+    /// block is addressed by ID, so the blocks the earlier legs mint cannot
+    /// disturb the later ones. `seam: nil` — many blocks vanish and many
+    /// stand where they stood, which no seam vocabulary describes; the
+    /// ceremonial full re-render is exactly the W confirm's road, and this
+    /// is a summoned menu act, not a keystroke.
+    ///
+    /// The caret lands in the FIRST successor of the block it was in, so she
+    /// stays where she was reading.
+    func splitEveryNewlineIntoBlocks() async {
+        await model.autosave.flushNow()
+        guard !model.autosave.isDirty else {
+            model.showStatus("Unsaved changes couldn't be written — resolve that first, then retry.")
+            return
+        }
+        let slots: [Queries.RenderedBlock]
+        do {
+            slots = try await model.session.database.read { [postID = model.postID] db in
+                try Queries.renderPost(db, containerID: postID)
+            }
+        } catch {
+            model.showOperationError(error)
+            return
+        }
+        // A real refusal rather than a flight that rewrites the surface to
+        // say nothing happened (P-2). The store still decides — the op
+        // re-reads every block and no-ops on its own — this only keeps the
+        // door from disabling the editor for a repair with nothing to do.
+        guard slots.contains(where: { !NewlineSplitting.breaks(in: $0.text ?? "").isEmpty })
+        else {
+            model.refuseFeedback(SplitAtNewlinesCopy.noteAlreadyWhole)
+            return
+        }
+        let order = slots.map(\.blockID)
+        let caretBlockID = model.caretBlockID
+        let stack = model.session.undoStack
+        _ = await runStructural { ops in
+            let results = try stack.withCompound(
+                label: "Split at Newlines", operations: ops
+            ) {
+                try order.map { try ops.splitBlockAtNewlines($0) }
+            }
+            let landing = zip(order, results).first { $0.0 == caretBlockID }?.1.blockIDs.first
+            return StructuralOutcome(
+                caretBlockID: landing ?? caretBlockID ?? order[0],
+                caretOffset: 0, seam: nil,
+                note: SplitAtNewlinesCopy.receipt(
+                    results, whenNothingSplit: SplitAtNewlinesCopy.noteAlreadyWhole))
+        }
+    }
+
+    /// **One block's repair** — the block ▾ row. No compound: the operation
+    /// registers exactly one entry for the block it splits.
+    func splitCaretBlockAtNewlines() async {
+        guard let blockID = model.caretBlockID else {
+            model.refuseFeedback(model.index.entries.isEmpty
+                ? "No blocks yet — type on the page and each finished paragraph becomes one."
+                : "Put the caret in a block first — this splits the block you're in.")
+            return
+        }
+        _ = await runStructural { ops in
+            let result = try ops.splitBlockAtNewlines(blockID)
+            return StructuralOutcome(
+                caretBlockID: result.blockIDs.first ?? blockID, caretOffset: 0, seam: nil,
+                note: SplitAtNewlinesCopy.receipt(
+                    [result], whenNothingSplit: SplitAtNewlinesCopy.blockAlreadyWhole))
+        }
+    }
+
     /// **J4b's road: the carry-all merge.** ONE pairing of the two displayed
     /// takes plus every other active take carried whole, composed from this
     /// app's own `mergeCeremony` — zero core change, and the instant no-fan

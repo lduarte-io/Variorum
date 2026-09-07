@@ -179,6 +179,106 @@ final class TakesStructureController {
         }
     }
 
+    // MARK: - "Make every newline a block" (18c batch 3 — her U-6)
+
+    /// **The NOTE's repair, on the boards** — Write's `note ▾` row, here
+    /// too (R6-2's one grammar, R118's letter: no surface is privileged).
+    /// One `withCompound` over every block, so the whole repair is ONE ⌥⌘Z.
+    func splitEveryNewlineIntoBlocks() async {
+        guard !model.structuralInFlight else {
+            model.speak("Another structural change is still landing.")
+            return
+        }
+        guard await model.flushPendingText() else { return }
+        let slots: [Queries.RenderedBlock]
+        do {
+            slots = try await model.session.database.read { [postID = model.postID] db in
+                try Queries.renderPost(db, containerID: postID)
+            }
+        } catch {
+            model.setRefusal(TakesViewModel.message(for: error))
+            return
+        }
+        guard slots.contains(where: { !NewlineSplitting.breaks(in: $0.text ?? "").isEmpty })
+        else {
+            model.speak(SplitAtNewlinesCopy.noteAlreadyWhole)
+            return
+        }
+        await runSplit(over: slots.map(\.blockID),
+                       whenNothingSplit: SplitAtNewlinesCopy.noteAlreadyWhole)
+    }
+
+    /// **One block's repair** — the board's `block ▾` row, on the block you
+    /// are standing in (`deleteFocusedBlock`'s own target rule).
+    func splitFocusedBlockAtNewlines() async {
+        guard let slot = model.commandTargetSlot else {
+            model.speak("Click into a block first — this splits the block you're in.")
+            return
+        }
+        guard !model.structuralInFlight else {
+            model.speak("Another structural change is still landing.")
+            return
+        }
+        guard await model.flushPendingText() else { return }
+        await runSplit(over: [slot.blockID],
+                       whenNothingSplit: SplitAtNewlinesCopy.blockAlreadyWhole)
+    }
+
+    /// **The picked blocks' repair** — the selection banner's row, beside
+    /// merge and delete (13e E2/E3's own selection).
+    func splitSelectedBlocksAtNewlines() async {
+        guard !model.structuralInFlight else {
+            model.speak("Another structural change is still landing.")
+            return
+        }
+        let picked = model.board.mergeSelection
+        guard !picked.isEmpty else {
+            model.speak(BlockSelectionCopy.nothingPicked)
+            return
+        }
+        guard await model.flushPendingText() else { return }
+        let order: [String]
+        do {
+            order = try await model.session.database.read { [postID = model.postID] db in
+                try Queries.renderPost(db, containerID: postID).map(\.blockID)
+            }
+        } catch {
+            model.setRefusal(TakesViewModel.message(for: error))
+            return
+        }
+        // The `deleteSelectedBlocks` chain rule, unchanged: a pick the post
+        // no longer holds rides at the FRONT so the operation meets it before
+        // any survivor's leg lands, and the compound's atomic rollback covers
+        // the true race.
+        let chain = picked.subtracting(order).sorted() + order.filter { picked.contains($0) }
+        await runSplit(over: chain, whenNothingSplit: SplitAtNewlinesCopy.pickedAlreadyWhole,
+                       clearingSelection: true)
+    }
+
+    /// The one body all three board doors run — one compound, one receipt,
+    /// counted from the operation's own results.
+    private func runSplit(
+        over blockIDs: [String], whenNothingSplit: String, clearingSelection: Bool = false
+    ) async {
+        model.structuralInFlight = true
+        defer { model.structuralInFlight = false }
+        model.setStatus(nil)
+        do {
+            let stack = model.session.undoStack
+            let results: [Operations.SplitAtNewlinesResult] = try await model.session.runner
+                .run { ops in
+                    try stack.withCompound(label: "Split at Newlines", operations: ops) {
+                        try blockIDs.map { try ops.splitBlockAtNewlines($0) }
+                    }
+                }
+            if clearingSelection { model.clearMergeSelection() }
+            model.setStatus(SplitAtNewlinesCopy.receipt(
+                results, whenNothingSplit: whenNothingSplit))
+        } catch {
+            model.setRefusal(TakesViewModel.message(for: error))
+        }
+    }
+
     /// 13b 4C (S4-2d, the lenses half): block drag-reorder on the board —
     /// ONE post, ONE order, so every column moves together BY CONSTRUCTION
     /// (columns render `projection.slots` order; no column holds an order

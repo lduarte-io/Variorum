@@ -1866,6 +1866,17 @@ final class EditorViewModel {
         await structural.insertBlockBelowCaret()
     }
 
+    /// 18c batch 3 (her U-6) — the two Write-bar doors onto the newline
+    /// repair, forwarded (the machinery lives in `EditorSurfaceController`,
+    /// the one structural door).
+    func splitEveryNewlineIntoBlocks() async {
+        await structural.splitEveryNewlineIntoBlocks()
+    }
+
+    func splitCaretBlockAtNewlines() async {
+        await structural.splitCaretBlockAtNewlines()
+    }
+
     /// The add-block door's Write half: the caret jumps to the document's
     /// end — typing there births blocks (crystallization; blocks are born
     /// by typing in Write).
