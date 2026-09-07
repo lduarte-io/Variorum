@@ -755,7 +755,9 @@ struct TypedReturnKeyTests {
             #expect(try h.storeSlots().map(\.text) == ["alpha", "", "xbeta"],
                     "the second ⏎ at beta's start pushes it down; the x lands in beta")
             #expect(h.model.index.entries.count == 3)
-            #expect(h.model.caretBlockID == h.model.index.entries[2].blockID)
+            // `last`, not `[2]`: under the revert there are two entries and
+            // a pin must FAIL there, never take the runner down with it.
+            #expect(h.model.caretBlockID == h.model.index.entries.last?.blockID)
         }
     }
 
@@ -939,6 +941,33 @@ struct TypedReturnKeyTests {
 
             #expect(try h.storeSlots().map(\.text) == ["alpha\n beta", "gamma"])
             #expect(h.model.index.entries.count == 2)
+        }
+    }
+
+    /// **18c ladder round 2, R2-2 (red-on-old):** under the chip OFF the
+    /// exit is 13k K5's, unchanged — the lead goes, no newline is typed or
+    /// retracted, and she stays on the empty line to write prose. R1-3's
+    /// retraction ran here BEFORE the chip was consulted and deleted that
+    /// line (`["- one"]`), leaving ⏎ unable to end a list at all: the next
+    /// ⏎, at the item's end, continued it again. Every journal note seeds
+    /// `one_block`, so this was the daily surface.
+    @Test func theChipOffKeepsTheListExitAsK5Shipped() async throws {
+        try await withEditor(profile: .journal, seedBlocks: ["- one\n- "]) { h in
+            #expect(h.model.header?.effectiveSegmentation == .oneBlock)
+            let window = try hosted(h)
+            defer { window.teardown() }
+
+            caret(h, entry: 0, offset: 8)  // after the empty item's "- "
+            returnKey(h, window.window)
+            await h.flush()
+
+            #expect(try h.storeSlots().map(\.text) == ["- one\n"],
+                    "the lead went and nothing else — K5's exit under the chip OFF")
+            #expect(h.model.index.entries.count == 1)
+            #expect(!h.model.hasOpenTail)
+            #expect(h.textView.selectedRange() == NSRange(location: 6, length: 0),
+                    "she stays on the empty line the exit left")
+            #expect(h.session.undoStack.depth == 0, "no structural act ran")
         }
     }
 

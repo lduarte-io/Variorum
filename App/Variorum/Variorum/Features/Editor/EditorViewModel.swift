@@ -1531,6 +1531,17 @@ final class EditorViewModel {
     /// Returns compose instead of racing — and it RE-DERIVES the decision
     /// there against the surface the previous one left behind.
     func runTypedReturn(afterListExit: Bool = false) -> Bool {
+        // 18c ladder round 2, R2-2: DECIDE, THEN ACT. The chip's answer is
+        // read once, before anything touches the surface — under `one_block`
+        // the key is content again (U-19 (3)) and the exit is 13k K5's,
+        // unchanged: the lead goes and she stays on the empty line. The
+        // retraction below exists because U-1 moves the caret INTO a new
+        // block and orphans that line; under the chip nothing moves her, so
+        // retracting there deleted the line she stood on and left ⏎ unable
+        // to end a list at all (`"- one\n- "` ⇄ `"- one"`, forever — every
+        // journal note, which seeds `one_block`). No other road may mutate
+        // ahead of this guard.
+        guard header?.effectiveSegmentation != .oneBlock else { return false }
         if afterListExit { retractListContinuationNewline() }
         guard typedReturnAct() != .content else { return false }
         // 18c ladder round 1, R1-2: from this claim until the act has
@@ -1556,7 +1567,18 @@ final class EditorViewModel {
     /// A RESTORATION of the gesture's pre-U-1 shape, not a new behaviour:
     /// K5 left the caret ON that line, where prose continued in the same
     /// block; U-1 moves it into a new block, which is what turned the line
-    /// into a leftover.
+    /// into a leftover. **Chip ON only** (round 2, R2-2 — the guard sits in
+    /// `runTypedReturn`, ahead of this call).
+    ///
+    /// **A gap, named (18c ladder round 2, R2-3):** this deletion and the
+    /// exit's own lead deletion (`MarkdownActs.deleteWithoutNewline`) are
+    /// two text-undo registrations for one keystroke, against K5's
+    /// one-group rule for the continuation. Unreachable today — the act
+    /// that follows a retraction is always a structural flight (the block
+    /// is non-empty, so `.nothing` is unreachable, and R1-4's line-end rule
+    /// excludes `.content`), and every structural rewrite clears the
+    /// text-undo stack (R-2 residual 1) — and live the day 13u1 relaxes
+    /// that directive: group the two then.
     private func retractListContinuationNewline() {
         guard let textView else { return }
         let selection = textView.selectedRange()
