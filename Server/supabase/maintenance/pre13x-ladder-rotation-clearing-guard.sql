@@ -19,10 +19,15 @@
 -- CIPHERTEXT, still sits below the rotation seq. The server sees every COMMITTED row regardless of the horizon, and
 -- every in-flight old-proof push holds FOR SHARE on the vault row, so after the FOR UPDATE is acquired the count is
 -- EXACT: a row below the seq is a row the walk has not re-encrypted (every re-encrypted row was re-stamped ABOVE the
--- seq by `sync_reencrypt`). ALL-PLAIN TABLES ARE EXCLUDED — the orchestrator's qualification: a row with no
--- encrypted column is under no key at all (the client seam returns it untouched), so holding a completion hostage
--- to its visibility would protect nothing; the list below is pinned EQUAL to the client registry's set of tables
--- with at least one encrypted column (`AuthRLSDDLTests`), so a future encrypted column cannot escape the guard.
+-- seq by `sync_reencrypt`). THE COUNT IS OVER ROWS THAT CARRY CIPHERTEXT — a row of an encrypted table with at
+-- least one of its encrypted columns NOT NULL (the `e1:` values; the orchestrator's qualification, refined at the
+-- author's question "is there a guarantee the horizon always clears?"): a row with no encrypted column, or with
+-- every encrypted column NULL (a block with no name and no presentation), is under no key at all (the client seam
+-- returns it untouched), so holding a completion hostage to its visibility would protect nothing — and a guard
+-- that counted it could refuse FOREVER over a row no walk needs to touch. The client walk re-seals and re-stamps
+-- EVERY row below the seq (it never skips one), so what it touches is a superset of what this guard counts: the two
+-- agree by construction. The per-table column map below is pinned EQUAL to the client registry's encrypted
+-- columns (`AuthRLSDDLTests`), so a future encrypted column cannot escape the guard.
 --
 -- WHAT THIS IS, and IS NOT: a BODY change to `key_vault_update` — the SAME signature, the SAME body as
 -- `11_pre13x_postures.sql` section 13 plus ONE clause in the `incoming_previous is null` arm (pinned line for line:
@@ -92,14 +97,25 @@ declare
   next_seq bigint;
   updated_rows int;
   -- >>> F1 GUARD (the completion guard's declarations)
-  -- THE TABLES THAT CARRY CIPHERTEXT — every registry table with at least
-  -- one encrypted-classified column (the client's `SyncSchema
-  -- .tablesCarryingCiphertext`; pinned equal by `AuthRLSDDLTests`). An
-  -- all-plain table's rows are under no key and never hold a completion.
-  ciphertext_tables constant text[] := array[
-    'container', 'block', 'variant', 'commit_point', 'tag',
-    'reading', 'reading_section', 'reference', 'lens', 'block_comment'];
+  -- THE ENCRYPTED COLUMNS, PER TABLE — every registry table with at least
+  -- one encrypted-classified column and exactly those columns (the client's
+  -- `SyncTable.encryptedColumns`; pinned equal by `AuthRLSDDLTests`). A row
+  -- CARRIES CIPHERTEXT when at least one of them is NOT NULL; a row with
+  -- none is under no key and never holds a completion.
+  ciphertext_columns constant jsonb := '{
+    "container": ["title", "floating_notes"],
+    "block": ["name", "presentation"],
+    "variant": ["working_text", "label"],
+    "commit_point": ["text", "message"],
+    "tag": ["name", "path"],
+    "reading": ["name", "query_spec"],
+    "reading_section": ["name"],
+    "reference": ["name", "url", "view_state"],
+    "lens": ["name"],
+    "block_comment": ["text"]
+  }'::jsonb;
   rows_below_tbl text;
+  rows_below_cols text;
   rows_below bigint;
   -- <<< F1 GUARD
 begin
@@ -126,20 +142,25 @@ begin
     -- >>> F1 GUARD (the clause)
     -- THE COMPLETION GUARD (the ladder's BLOCKER-1; decision 31's letter —
     -- "no row of mine below it"): clearing a STANDING previous key is
-    -- refused while any row of the caller's partition in a table that
-    -- carries ciphertext still sits below the rotation seq. Exact here:
-    -- the row is locked FOR UPDATE, so every in-flight old-proof push
-    -- (FOR SHARE) has committed, and the count reads committed rows
-    -- regardless of `sync_pull`'s visibility horizon. The caller re-walks
-    -- (any device holding the new master can) and clears again.
+    -- refused while any row of the caller's partition that CARRIES
+    -- CIPHERTEXT (at least one encrypted column not null) still sits below
+    -- the rotation seq. Exact here: the row is locked FOR UPDATE, so every
+    -- in-flight old-proof push (FOR SHARE) has committed, and the count
+    -- reads committed rows regardless of `sync_pull`'s visibility horizon;
+    -- and every such row is one the client walk re-stamps, so the refusal
+    -- can never outlast a walk that saw it. The caller re-walks (any device
+    -- holding the new master can) and clears again.
     if vault_previous is not null then
-      foreach rows_below_tbl in array ciphertext_tables loop
+      for rows_below_tbl in select jsonb_object_keys(ciphertext_columns) loop
+        select string_agg(format('t.%I is not null', c.col), ' or ')
+          into rows_below_cols
+          from jsonb_array_elements_text(ciphertext_columns->rows_below_tbl) as c(col);
         execute format(
-          'select count(*) from %I t where t.owner_id = $1 and t.server_seq < $2',
-          rows_below_tbl)
+          'select count(*) from %I t where t.owner_id = $1 and t.server_seq < $2 and (%s)',
+          rows_below_tbl, rows_below_cols)
           into rows_below using caller, vault_seq;
         if rows_below > 0 then
-          raise exception 'VARIORUM_ROTATION_ROWS_REMAIN: % row(s) of % are still under the previous corpus key — re-encrypt the remainder before clearing it',
+          raise exception 'VARIORUM_ROTATION_ROWS_REMAIN: % row(s) of % still carry ciphertext under the previous corpus key — re-encrypt the remainder before clearing it',
             rows_below, rows_below_tbl;
         end if;
       end loop;

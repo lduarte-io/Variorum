@@ -138,7 +138,7 @@ struct Phase13pControllerTests {
         if scriptedEnvelope == nil {
             var fresh = StoreKeyEnvelope()
             if standard {
-                try fresh.appleBox(key: key, under: apple.symmetricKey, appleKeyID: apple.id)
+                try fresh.setAppleWrappedCopy(key: key, under: apple.symmetricKey, appleKeyID: apple.id)
             } else {
                 try fresh.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
             }
@@ -437,7 +437,7 @@ struct Phase13pControllerTests {
     @Test func anAppleCopyUnderAnotherIDIsReLandedUnderThisDevicesA() async throws {
         let key = StoreKey.mint()
         var envelope = StoreKeyEnvelope()
-        try envelope.appleBox(key: key, under: AppleKey.mint().symmetricKey, appleKeyID: "someone-elses")
+        try envelope.setAppleWrappedCopy(key: key, under: AppleKey.mint().symmetricKey, appleKeyID: "someone-elses")
         let w = try world(key: key, envelope: envelope)
         await w.controller.reconcile()
         let mine = try #require(w.appleKeys.key)
@@ -803,7 +803,7 @@ struct Phase13pControllerTests {
         let key = StoreKey.mint()
         var gatedFile = StoreKeyEnvelope()
         try gatedFile.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
-        try gatedFile.appleBox(key: key, under: AppleKey.mint().symmetricKey, appleKeyID: "a-elsewhere")
+        try gatedFile.setAppleWrappedCopy(key: key, under: AppleKey.mint().symmetricKey, appleKeyID: "a-elsewhere")
         let gated = try world(standard: false, key: key, envelope: gatedFile, enrolled: true)
         #expect(gated.controller.libraryKeyCustodyShape == .gatedOrNone)
         let silentActs = LockedCounter()
@@ -1088,7 +1088,7 @@ struct Phase13pControllerTests {
         var enrolledFile = StoreKeyEnvelope()
         let enrolledKey = StoreKey.mint()
         try enrolledFile.setPassphraseWrap(key: enrolledKey, passphrase: "sesame", kdf: fastKDF())
-        try enrolledFile.masterBox(key: enrolledKey, under: master)
+        try enrolledFile.setMasterWrappedCopy(key: enrolledKey, under: master)
         try enrolledFile.recordVaultReconciliation(kdf: kdf, corpusKeyID: "corpus-a", recoveryWrapDigest: nil)
         let enrolled = try world(standard: false, dials: ProtectionDials(alwaysAsk: true), key: enrolledKey, envelope: enrolledFile)
         enrolled.controller.isSignedIn = { true }
@@ -1141,8 +1141,8 @@ struct Phase13pControllerTests {
             let key = StoreKey.mint()
             var file = StoreKeyEnvelope()
             try file.setPassphraseWrap(key: key, passphrase: "sesame", kdf: kdf)
-            try file.appleBox(key: key, under: apple.symmetricKey, appleKeyID: apple.id)
-            try file.masterBox(key: key, under: master)
+            try file.setAppleWrappedCopy(key: key, under: apple.symmetricKey, appleKeyID: apple.id)
+            try file.setMasterWrappedCopy(key: key, under: master)
             try file.recordVaultReconciliation(kdf: kdf, corpusKeyID: recordedID, recoveryWrapDigest: nil)
             return (key, file)
         }
@@ -1218,7 +1218,7 @@ struct Phase13pControllerTests {
             let key = StoreKey.mint()
             var file = StoreKeyEnvelope()
             try file.setPassphraseWrap(key: key, passphrase: "sesame", kdf: kdf)
-            try file.masterBox(key: key, under: master)
+            try file.setMasterWrappedCopy(key: key, under: master)
             try file.recordVaultReconciliation(kdf: kdf, corpusKeyID: "corpus-c", recoveryWrapDigest: nil)
             return (key, file)
         }
@@ -1409,7 +1409,7 @@ struct Phase13pControllerTests {
             let key = StoreKey.mint()
             var file = StoreKeyEnvelope()
             try file.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
-            try file.masterBox(key: key, under: master)
+            try file.setMasterWrappedCopy(key: key, under: master)
             try file.recordVaultReconciliation(kdf: kdf, corpusKeyID: recordedID, recoveryWrapDigest: nil)
             return (key, file)
         }
@@ -1448,7 +1448,7 @@ struct Phase13pControllerTests {
         var recorded = StoreKeyEnvelope()
         let key = StoreKey.mint()
         try recorded.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
-        try recorded.masterBox(key: key, under: SymmetricKey(size: .bits256))
+        try recorded.setMasterWrappedCopy(key: key, under: SymmetricKey(size: .bits256))
         try recorded.recordVaultReconciliation(kdf: fastKDF(), corpusKeyID: "corpus-old", recoveryWrapDigest: nil)
         let rotated = try world(standard: false, dials: ProtectionDials(alwaysAsk: true), key: key, envelope: recorded)
         rotated.syncSession.holdDerivedWrappingKey(
@@ -1476,7 +1476,7 @@ struct Phase13pControllerTests {
         func file(recordedKDF: PassphraseKDF.Descriptor, digest: String?) throws -> StoreKeyEnvelope {
             var file = StoreKeyEnvelope()
             try file.setPassphraseWrap(key: key, passphrase: "sesame", kdf: recordedKDF)
-            try file.masterBox(key: key, under: SymmetricKey(data: material().masterKey))
+            try file.setMasterWrappedCopy(key: key, under: SymmetricKey(data: material().masterKey))
             try file.recordVaultReconciliation(kdf: recordedKDF, corpusKeyID: "corpus", recoveryWrapDigest: digest)
             return file
         }

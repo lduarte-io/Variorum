@@ -65,7 +65,7 @@ struct MobileLobbyVaultRoadTests {
             // under the OLD descriptor, the master-wrapped copy of the library key.
             var envelope = StoreKeyEnvelope()
             try envelope.setPassphraseWrap(key: key, passphrase: "the old word 12", kdf: oldKDF)
-            try envelope.masterBox(key: key, under: master)
+            try envelope.setMasterWrappedCopy(key: key, under: master)
             try envelope.recordVaultReconciliation(kdf: oldKDF, corpusKeyID: "corpus-4a", recoveryWrapDigest: nil)
             let box = ScriptedEnvelopeBox(envelope)
             // Castle, Always ask (no biometry on the scripted device).

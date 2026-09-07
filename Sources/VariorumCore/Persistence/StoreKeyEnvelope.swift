@@ -249,7 +249,7 @@ public struct StoreKeyEnvelope: Codable, Equatable, Sendable {
     /// master copy is what makes both local secret copies caches"). Lands
     /// at enrollment / sync setup (batch 3); an enrolled device that holds
     /// the master can add it with no visit. Replaces wholesale.
-    public mutating func masterBox(key: StoreKey, under master: SymmetricKey) throws {
+    public mutating func setMasterWrappedCopy(key: StoreKey, under master: SymmetricKey) throws {
         try requireCurrentFormat()
         do {
             self.master = try AES.KeyWrap.wrap(SymmetricKey(data: key.data), using: master)
@@ -265,7 +265,7 @@ public struct StoreKeyEnvelope: Codable, Equatable, Sendable {
     /// road, batch 4) opens the library key. RFC 3394 refuses a wrong key.
     public func unwrapKey(master: SymmetricKey) throws -> StoreKey {
         try requireCurrentFormat()
-        guard let blob = self.master else { throw StoreKeyEnvelopeError.noMasterBox }
+        guard let blob = self.master else { throw StoreKeyEnvelopeError.noMasterWrappedCopy }
         let unwrapped: SymmetricKey
         do {
             unwrapped = try AES.KeyWrap.unwrap(blob, using: master)
@@ -281,8 +281,8 @@ public struct StoreKeyEnvelope: Codable, Equatable, Sendable {
     /// Wrap the library key under the iCloud key A (Standard's silent
     /// road, §3.8). `appleKeyID` names which A — the vault carries the
     /// same id and the client verifies it. Replaces wholesale; ABSENT in
-    /// Castle (`removeAppleBox` at the switch — batch 2).
-    public mutating func appleBox(
+    /// Castle (`removeAppleWrappedCopy` at the switch — batch 2).
+    public mutating func setAppleWrappedCopy(
         key: StoreKey, under apple: SymmetricKey, appleKeyID: String
     ) throws {
         try requireCurrentFormat()
@@ -299,7 +299,7 @@ public struct StoreKeyEnvelope: Codable, Equatable, Sendable {
     /// The iCloud road. RFC 3394 refuses a wrong key.
     public func unwrapKey(apple: SymmetricKey) throws -> StoreKey {
         try requireCurrentFormat()
-        guard let blob = self.apple else { throw StoreKeyEnvelopeError.noAppleBox }
+        guard let blob = self.apple else { throw StoreKeyEnvelopeError.noAppleWrappedCopy }
         let unwrapped: SymmetricKey
         do {
             unwrapped = try AES.KeyWrap.unwrap(blob, using: apple)
@@ -314,7 +314,7 @@ public struct StoreKeyEnvelope: Codable, Equatable, Sendable {
 
     /// Entering Castle: the iCloud copy goes (the key itself stays in
     /// iCloud Keychain — §14.5); the other copies are untouched.
-    public mutating func removeAppleBox() throws {
+    public mutating func removeAppleWrappedCopy() throws {
         try requireCurrentFormat()
         apple = nil
         appleKeyID = nil
@@ -541,13 +541,13 @@ public enum StoreKeyEnvelopeError: Error, Equatable, Sendable {
     case wrongRecoveryPhrase
     /// FORMAT 2 (pre-13x 1a): no master copy exists in this file (a
     /// local-only library, or a format-1 file).
-    case noMasterBox
+    case noMasterWrappedCopy
     /// The given master does not unwrap the master copy (a different
     /// account's master, or a tampered blob).
     case wrongMasterKey
     /// No iCloud copy exists in this file (Castle, a local-only library
     /// before its first Standard launch, or a format-1 file).
-    case noAppleBox
+    case noAppleWrappedCopy
     /// The given iCloud key does not unwrap the iCloud copy.
     case wrongAppleKey
     /// An empty passphrase is never legal (the 14b floor, kept).

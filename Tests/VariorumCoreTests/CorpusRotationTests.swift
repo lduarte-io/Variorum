@@ -565,6 +565,133 @@ struct CorpusRotationTests {
                 "the plain straggler reads on the device")
     }
 
+    /// F1 — THE COORDINATOR'S REFINEMENT (a): a row of an ENCRYPTED table
+    /// whose encrypted columns are ALL NULL (a block with no name and no
+    /// presentation) carries no ciphertext — it is under no key — so a
+    /// straggler of that shape, hidden from the walk, NEVER holds a
+    /// completion (a guard that counted it could refuse forever over a row
+    /// nothing needs to touch). The walk, when it does see such a row,
+    /// re-stamps it like any other (the walk never skips) — the two halves
+    /// agree by construction.
+    @Test func aStragglerWithEveryEncryptedColumnNullNeverHoldsACompletion() async throws {
+        let world = try await makeWorld(visibilityHorizon: 2)
+        let a = try client("A", prefix: "AA", world: world, material: world.old)
+        try a.with { ops, _ in
+            let post = try ops.createPost(title: "before the rotation", profile: .blog)
+            _ = try ops.newBlock(in: post.id, text: "Old-key prose.", at: .end)
+        }
+        _ = try await a.push()
+        await world.server.advanceClock(by: 2)
+        // The blank straggler: a `block` row — an encrypted TABLE — with
+        // `name` and `presentation` NULL, pushed just before the switch.
+        _ = try await world.server.push(
+            [blockRow(id: "blank-block", lastContainer: nil)],
+            activeKeyID: world.old.corpusKeyID, keyProof: world.old.syncKeys.keyProof)
+        #expect(SyncSchema.table(named: "block")?.encryptedColumns.isEmpty == false, "the pin's premise: block is an encrypted table")
+        let blankSeqBefore = try #require(await world.server.currentSeq(table: "block", rowID: "blank-block"))
+
+        let begun = try await CorpusRotation.begin(
+            client: world.vault.client, current: world.old, secrets: try secrets(), appleHeldCopy: nil)
+        let rotationSeq = try #require(begun.receipt.rotationStartedSeq)
+        #expect(blankSeqBefore < rotationSeq)
+
+        // The frozen walk cannot see it; completion SUCCEEDS — the row
+        // carries no ciphertext.
+        let server = world.server
+        let frozen = CorpusRotation(transport: server, batchSize: 4, horizonWait: {})
+        _ = try await frozen.reencryptRemainder(material: begun.material)
+        #expect(await world.server.ciphertextRowsBelow(rotationSeq) == 0, "an all-NULL row is not counted")
+        let completed = try await CorpusRotation.complete(client: world.vault.client, material: begun.material)
+        #expect(completed.rotation == nil)
+        #expect(await world.server.vaultRow()?.previousCorpusKeyID == nil)
+        #expect(try #require(await world.server.currentSeq(table: "block", rowID: "blank-block")) == blankSeqBefore,
+                "the blank row sat below the seq through completion — it held nothing")
+        // …and opens for a device under the completed keys.
+        await world.server.advanceClock(by: 2)
+        a.keyProvider = FixedSyncKeyProvider(keys: completed.syncKeys)
+        let pulled = try await a.pull()
+        #expect(!pulled.stalled)
+        #expect(try a.db.fetchInt("SELECT COUNT(*) FROM block WHERE id = 'blank-block'") == 1, "the blank block reads on the device")
+    }
+
+    /// F1 — THE COORDINATOR'S REFINEMENT (b): A POISON ROW — ciphertext the
+    /// client cannot open under EITHER key (sealed under a key this account
+    /// never held; the Phase-12 poison-row class) — sits below the seq. The
+    /// walk THROWS at it (nothing is re-sealed by guesswork); completion is
+    /// REFUSED (the row carries ciphertext below the seq) and clears NOTHING:
+    /// the previous key stays in the vault and in custody, every old-key
+    /// row stays readable by the seq rule on every device (a follower picks
+    /// the previous key up from the vault), and the second-rotation door
+    /// refuses (decision 32) — the honest STILL-FINISHING state, never a
+    /// cleared key. The release valve is the purge road: removing the
+    /// unreadable row from the partition (`sync_purge_execute`) lets the
+    /// next walk find nothing and completion clear.
+    @Test func aPoisonRowLeavesTheRotationStillFinishingWithThePreviousKeyRetainedUntilItIsPurged() async throws {
+        let world = try await makeWorld()
+        let a = try client("A", prefix: "AA", world: world, material: world.old)
+        try a.with { ops, _ in
+            let post = try ops.createPost(title: "before the rotation", profile: .blog)
+            _ = try ops.newBlock(in: post.id, text: "Old-key prose the fleet keeps reading.", at: .end)
+        }
+        _ = try await a.push()
+        // THE POISON: a container whose title is sealed under the SUITE's
+        // fixed test key (`SyncTestKeys`) — not this account's corpus key —
+        // pushed under the account's old proof, so it sits below the seq.
+        _ = try await world.server.push(
+            [try containerRow(id: "poison", title: "sealed under a key nobody here holds")],
+            activeKeyID: world.old.corpusKeyID, keyProof: world.old.syncKeys.keyProof)
+        let oldSeam = SyncPayloadCrypto(keys: world.old.syncKeys)
+        let poisonStored = try #require(await world.server.storedRowsWithSeqs().first { $0.row.rowID == "poison" })
+        #expect((try? oldSeam.decryptFromWire(poisonStored)) == nil, "the pin's premise: the old key does not open it either")
+
+        let begun = try await CorpusRotation.begin(
+            client: world.vault.client, current: world.old, secrets: try secrets(), appleHeldCopy: nil)
+        let rotationSeq = try #require(begun.receipt.rotationStartedSeq)
+        let server = world.server
+        let driver = CorpusRotation(transport: server, batchSize: 4, horizonWait: timePasses(on: server))
+        // THE WALK THROWS at the poison row — nothing is re-sealed by guesswork.
+        await #expect(throws: (any Error).self, "the walk refuses at a row it cannot open") {
+            _ = try await driver.reencryptRemainder(material: begun.material)
+        }
+        #expect(await world.server.ciphertextRowsBelow(rotationSeq) >= 1, "the poison row (at least) is still below the seq")
+
+        // COMPLETION REFUSED — the previous key RETAINED everywhere.
+        await #expect(throws: KeyVaultClientError.rotationRowsRemain) {
+            _ = try await CorpusRotation.complete(client: world.vault.client, material: begun.material)
+        }
+        let vault = try #require(try await world.vault.client.fetchVault()).format
+        #expect(vault.previousCorpusKey?.keyID == world.old.corpusKeyID && vault.rotationStartedSeq == rotationSeq,
+                "the vault still carries the previous key + the seq")
+        #expect(begun.material.rotation != nil, "custody's material still carries the previous key")
+        // Every OLD-key row stays readable by the seq rule — on the acting
+        // device and on a follower that picks the previous key up from the vault.
+        let followerMaster = try await world.vault.enrollment.enroll(passphrase: Self.passphrase).masterSymmetricKey
+        let following = try CorpusRotation.materialFollowing(vault, master: followerMaster)
+        #expect(following.rotation?.startedSeq == rotationSeq, "a follower carries the previous key + the seq")
+        let followerSeam = SyncPayloadCrypto(keys: following.syncKeys)
+        for stored in await world.server.storedRowsWithSeqs() where stored.row.rowID != "poison" && stored.serverSeq < rotationSeq {
+            #expect((try? followerSeam.decryptFromWire(stored)) != nil, "\(stored.row.table)/\(stored.row.rowID) reads under the retained previous key")
+        }
+        // The second-rotation door refuses (decision 32) — never a cleared key.
+        await #expect(throws: CorpusRotationError.rotationInProgress(previousKeyID: world.old.corpusKeyID)) {
+            _ = try await CorpusRotation.begin(
+                client: world.vault.client, current: begun.material, secrets: try secrets(), appleHeldCopy: nil)
+        }
+
+        // THE RELEASE VALVE: the purge road removes the unreadable row from
+        // the partition; the next walk finds nothing and completion clears.
+        let purged = try await world.server.executePurge(
+            [SyncPurgeTarget(table: "container", rowID: "poison")],
+            activeKeyID: begun.material.corpusKeyID, keyProof: begun.material.syncKeys.keyProof)
+        #expect(purged > 0)
+        let report = try await driver.reencryptRemainder(material: begun.material)
+        #expect(report.replaced >= 0)
+        #expect(await world.server.ciphertextRowsBelow(rotationSeq) == 0)
+        let completed = try await CorpusRotation.complete(client: world.vault.client, material: begun.material)
+        #expect(completed.rotation == nil)
+        #expect(await world.server.vaultRow()?.previousCorpusKeyID == nil, "cleared once nothing unreadable remains")
+    }
+
     /// ANY ENROLLED DEVICE CAN FINISH A ROTATION (decision 6; §12): the
     /// acting device is lost right after the vault write with every row
     /// still under the previous key; a FOLLOWER reads M′ by the passphrase,

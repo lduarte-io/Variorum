@@ -258,7 +258,7 @@ nonisolated enum ProtectionMigration {
            var envelope = leaves.readEnvelope() {
             do {
                 if envelope.master == nil {
-                    try envelope.masterBox(key: facts.key, under: material.masterSymmetricKey)
+                    try envelope.setMasterWrappedCopy(key: facts.key, under: material.masterSymmetricKey)
                 }
                 try envelope.recordVaultReconciliation(
                     kdf: facts.vaultKDF ?? envelope.vaultKDF, corpusKeyID: material.corpusKeyID,

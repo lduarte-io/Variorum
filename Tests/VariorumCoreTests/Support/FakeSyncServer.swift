@@ -528,8 +528,9 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
             // Every stored row counts, committed or held — the SQL's FOR
             // UPDATE waits for every in-flight old-proof push to commit
             // before the clearing write runs, so its count is over committed
-            // rows that include them. All-plain tables are excluded (their
-            // rows are under no key).
+            // rows that include them. Only rows that CARRY ciphertext count
+            // (at least one encrypted column not null) — an all-plain
+            // table's rows and an all-NULL row are under no key.
             if account.vault.previousCorpusKey != nil,
                let startedSeq = account.vault.rotationStartedSeq,
                rowsBelow(startedSeq, in: account) > 0 {
@@ -565,12 +566,14 @@ actor FakeSyncServer: SyncTransport, SyncPurgeTransport, SyncRotationTransport {
         return VaultUpdateReceipt(revision: account.vault.revision, rotationStartedSeq: nextSeq)
     }
 
-    /// The guard's count: rows of the ciphertext-carrying tables (the
-    /// registry's `tablesCarryingCiphertext` — the SQL's list is pinned
-    /// equal to it) with a seq below the rotation seq, in one partition.
+    /// The guard's count: rows that CARRY CIPHERTEXT (`SyncSchema
+    /// .rowCarriesCiphertext` — at least one encrypted column not null; the
+    /// SQL's per-table `is not null` predicate is pinned equal to the
+    /// registry's columns) with a seq below the rotation seq, in one
+    /// partition. A row with every encrypted column NULL never counts.
     private func rowsBelow(_ seq: Int64, in account: Account) -> Int {
-        SyncSchema.tablesCarryingCiphertext.reduce(0) { count, table in
-            count + (account.tables[table.name]?.values.filter { $0.serverSeq < seq }.count ?? 0)
+        account.tables.values.reduce(0) { count, rows in
+            count + rows.values.filter { $0.serverSeq < seq && SyncSchema.rowCarriesCiphertext($0.row) }.count
         }
     }
 

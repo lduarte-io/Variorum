@@ -284,6 +284,24 @@ public enum SyncSchema {
         tables.filter { !$0.encryptedColumns.isEmpty }
     }
 
+    /// F1 (the coordinator's refinement — "is there a guarantee the horizon
+    /// always clears?"): whether ONE ROW carries ciphertext — at least one
+    /// of its table's encrypted columns is NOT NULL (an `e1:` value). A row
+    /// of an encrypted table whose encrypted columns are all NULL (a block
+    /// with no name and no presentation) is under no key: the seam opens it
+    /// untouched under either key, so the completion guard never counts it
+    /// — the guard counts exactly the rows the walk must re-seal, which are
+    /// a subset of the rows the walk re-stamps (it re-stamps every row
+    /// below the seq, this one included). The maintenance SQL's per-table
+    /// predicate (`t.<col> is not null or …`) is this function's letter.
+    public static func rowCarriesCiphertext(_ row: SyncRow) -> Bool {
+        guard let table = table(named: row.table) else { return false }
+        return table.encryptedColumns.contains { column in
+            if case .text? = row.columns[column] { return true }
+            return false
+        }
+    }
+
     // MARK: Column catalog (the payload-to-SQL injection guard)
 
     private static let catalogLock = NSLock()

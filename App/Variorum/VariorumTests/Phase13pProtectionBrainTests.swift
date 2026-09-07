@@ -43,7 +43,7 @@ struct ProtectionDialsTests {
         var castleFile = StoreKeyEnvelope()
         try castleFile.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
         var standardFile = castleFile
-        try standardFile.appleBox(key: key, under: AppleKey.mint().symmetricKey, appleKeyID: "a-1")
+        try standardFile.setAppleWrappedCopy(key: key, under: AppleKey.mint().symmetricKey, appleKeyID: "a-1")
 
         // Enrolled: the vault's word outranks the key file (decision 8).
         #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: true, keyFile: castleFile, enrolled: true) == .determined(.standard))
@@ -106,7 +106,7 @@ struct ProtectionDialsTests {
         #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: castleFile,
                                rawKeyCustody: .unknown, enrolled: true) == .indeterminate(shape: .castle))
         var standardFile = castleFile
-        try standardFile.appleBox(key: key, under: AppleKey.mint().symmetricKey, appleKeyID: "a-1")
+        try standardFile.setAppleWrappedCopy(key: key, under: AppleKey.mint().symmetricKey, appleKeyID: "a-1")
         #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: standardFile,
                                rawKeyCustody: .unknown, enrolled: true) == .indeterminate(shape: .standard))
         // The legacy stored mode never overrides an enrolled library.
@@ -145,7 +145,7 @@ struct ProtectionDialsTests {
         #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: false, keyFile: waiting,
                                rawKeyCustody: .silent, enrolled: true) == .determined(.castle))
         var landed = waiting
-        try landed.appleBox(key: key, under: AppleKey.mint().symmetricKey, appleKeyID: "a")
+        try landed.setAppleWrappedCopy(key: key, under: AppleKey.mint().symmetricKey, appleKeyID: "a")
         #expect(Posture.derive(legacyMode: nil, vaultHasAppleHeldCopy: nil, keyFile: landed,
                                rawKeyCustody: .gatedOrNone, enrolled: false) == .determined(.standard))
     }

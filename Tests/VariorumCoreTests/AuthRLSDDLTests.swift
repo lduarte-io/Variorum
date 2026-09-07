@@ -1597,11 +1597,12 @@ struct AuthRLSDDLTests {
         #expect(deployed.contains(SyncServerRefusalMarker.rotationRowsRemain),
                 "F1 (BLOCKER-1): completion is 'no row of mine below it' — the clearing arm refuses while one remains")
         #expect(deployed.contains("if vault_previous is not null then")
-                    && deployed.contains("foreach rows_below_tbl in array ciphertext_tables loop")
-                    && deployed.contains("'select count(*) from %I t where t.owner_id = $1 and t.server_seq < $2'")
+                    && deployed.contains("for rows_below_tbl in select jsonb_object_keys(ciphertext_columns) loop")
+                    && deployed.contains("select string_agg(format('t.%I is not null', c.col), ' or ')")
+                    && deployed.contains("'select count(*) from %I t where t.owner_id = $1 and t.server_seq < $2 and (%s)'")
                     && deployed.contains("into rows_below using caller, vault_seq;")
                     && deployed.contains("if rows_below > 0 then"),
-                "the guard counts the CALLER's rows below the rotation seq, per ciphertext-carrying table, only while a previous key stands")
+                "the guard counts the CALLER's rows below the rotation seq that CARRY ciphertext (an encrypted column not null), per encrypted table, only while a previous key stands")
         // The clause sits INSIDE the clearing arm, BEFORE the seq clears —
         // a refused completion clears nothing.
         let arm = try #require(deployed.range(of: "if incoming_previous is null then"))
@@ -1717,38 +1718,51 @@ struct AuthRLSDDLTests {
         #expect(overlay.contains("begin;") && overlay.contains("commit;"))
     }
 
-    /// F1 (BLOCKER-1) — THE GUARD'S TABLE LIST IS THE REGISTRY'S: the
-    /// overlay's `ciphertext_tables` array EQUALS the set of registry tables
-    /// with at least one encrypted column (`SyncSchema
+    /// F1 (BLOCKER-1) — THE GUARD'S COLUMN MAP IS THE REGISTRY'S: the
+    /// overlay's `ciphertext_columns` jsonb EQUALS, table by table, the
+    /// registry's `encryptedColumns` for every table that has any (`SyncSchema
     /// .tablesCarryingCiphertext`) — never an all-plain table (which would
     /// make the guard refuse a completion over rows under no key), never a
-    /// ciphertext table missing (which would let a straggler through). A
-    /// future encrypted column on a plain table fails HERE.
+    /// ciphertext table or column missing (which would let a straggler
+    /// through), never an extra column (which would count plain values as
+    /// ciphertext). The predicate — at least one of those columns NOT NULL —
+    /// is `SyncSchema.rowCarriesCiphertext`'s letter. A future encrypted
+    /// column fails HERE.
     @Test func theClearingGuardCountsExactlyTheTablesThatCarryCiphertext() throws {
         let overlay = Self.strippingComments(try Self.sqlFile(Self.ladderOverlayFile))
-        let open = try #require(overlay.range(of: "ciphertext_tables constant text[] := array["))
-        let close = try #require(overlay.range(of: "];", range: open.upperBound..<overlay.endIndex))
-        let listed = Set(
-            overlay[open.upperBound..<close.lowerBound]
-                .split(whereSeparator: { $0 == "," || $0.isNewline })
-                .map { $0.trimmingCharacters(in: .whitespaces).trimmingCharacters(in: CharacterSet(charactersIn: "'")) }
-                .filter { !$0.isEmpty })
-        let registry = Set(SyncSchema.tablesCarryingCiphertext.map(\.name))
-        #expect(listed == registry, "the SQL's list is the registry's ciphertext-carrying tables: \(listed.symmetricDifference(registry))")
+        let open = try #require(overlay.range(of: "ciphertext_columns constant jsonb := '"))
+        let close = try #require(overlay.range(of: "'::jsonb;", range: open.upperBound..<overlay.endIndex))
+        let json = String(overlay[open.upperBound..<close.lowerBound])
+        let decoded = try #require(try JSONSerialization.jsonObject(with: Data(json.utf8)) as? [String: [String]])
+        let listed = decoded.mapValues { Set($0) }
+        let registry = Dictionary(uniqueKeysWithValues: SyncSchema.tablesCarryingCiphertext.map { ($0.name, $0.encryptedColumns) })
+        #expect(listed == registry, "the SQL's map is the registry's encrypted columns per table: SQL \(listed) vs registry \(registry)")
         #expect(!registry.isEmpty && registry.count < SyncSchema.tables.count,
                 "the pin isn't vacuous: some tables carry ciphertext, some carry none")
+        // The predicate reads those columns and nothing else.
+        #expect(overlay.contains("format('t.%I is not null', c.col)") && overlay.contains("' or '"),
+                "a row carries ciphertext when at least one of its encrypted columns is not null")
         // Every listed table is one `sync_reencrypt` re-stamps (11's allowed list).
         let reencrypt = try Self.finalBody(of: "sync_reencrypt")
-        for table in listed {
+        for table in listed.keys {
             #expect(reencrypt.contains("'\(table)'"), "\(table) is a table the walk can re-stamp above the seq")
         }
         // The all-plain tables are the complement, by name.
-        let plain = Set(SyncSchema.tables.map(\.name)).subtracting(registry)
+        let plain = Set(SyncSchema.tables.map(\.name)).subtracting(registry.keys)
         #expect(plain.contains("purge_intent") && plain.contains("edge") && plain.contains("setting"),
                 "the orchestrator's named exclusions are plain-only in the registry")
         for table in plain {
-            #expect(!listed.contains(table), "\(table) carries no ciphertext and must not hold a completion")
+            #expect(listed[table] == nil, "\(table) carries no ciphertext and must not hold a completion")
         }
+        // The client predicate agrees with the map: a row with every encrypted
+        // column NULL carries no ciphertext; one `e1:` value does.
+        let blank = SyncRow(table: "block", rowID: "b", columns: ["id": .text("b"), "name": .null, "presentation": .null], syncVersion: 0)
+        #expect(!SyncSchema.rowCarriesCiphertext(blank))
+        var named = blank
+        named.columns["name"] = .text("e1:sealed")
+        #expect(SyncSchema.rowCarriesCiphertext(named))
+        #expect(!SyncSchema.rowCarriesCiphertext(SyncRow(table: "edge", rowID: "e", columns: ["id": .text("e"), "type": .text("derived_from")], syncVersion: 0)),
+                "a plain table's row never carries ciphertext")
     }
 
     /// Ownership + the demotion posture: every data function (the six

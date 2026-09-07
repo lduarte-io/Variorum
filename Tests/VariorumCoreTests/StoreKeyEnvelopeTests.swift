@@ -337,8 +337,8 @@ struct StoreKeyEnvelopeFormat2Tests {
         #expect(read.apple == nil && read.appleKeyID == nil, "no iCloud copy")
         #expect(read.vaultKDF == nil && read.vaultCorpusKeyID == nil, "unknown descriptor")
         #expect(try read.unwrapKey(passphrase: "pp") == key, "the passphrase road is untouched")
-        #expect(throws: StoreKeyEnvelopeError.noMasterBox) { _ = try read.unwrapKey(master: SymmetricKey(size: .bits256)) }
-        #expect(throws: StoreKeyEnvelopeError.noAppleBox) { _ = try read.unwrapKey(apple: SymmetricKey(size: .bits256)) }
+        #expect(throws: StoreKeyEnvelopeError.noMasterWrappedCopy) { _ = try read.unwrapKey(master: SymmetricKey(size: .bits256)) }
+        #expect(throws: StoreKeyEnvelopeError.noAppleWrappedCopy) { _ = try read.unwrapKey(apple: SymmetricKey(size: .bits256)) }
     }
 
     /// A wrap landing on a format-1 envelope writes it as format 2.
@@ -354,7 +354,7 @@ struct StoreKeyEnvelopeFormat2Tests {
         let key = StoreKey.mint()
         let master = SymmetricKey(size: .bits256)
         var envelope = StoreKeyEnvelope()
-        try envelope.masterBox(key: key, under: master)
+        try envelope.setMasterWrappedCopy(key: key, under: master)
         #expect(envelope.master != nil)
         #expect(envelope.keyFingerprint == StoreKeyEnvelope.fingerprint(of: key))
         #expect(try envelope.unwrapKey(master: master) == key)
@@ -367,15 +367,15 @@ struct StoreKeyEnvelopeFormat2Tests {
         let key = StoreKey.mint()
         let apple = SymmetricKey(size: .bits256)
         var envelope = StoreKeyEnvelope()
-        try envelope.appleBox(key: key, under: apple, appleKeyID: "apple-key-1")
+        try envelope.setAppleWrappedCopy(key: key, under: apple, appleKeyID: "apple-key-1")
         #expect(envelope.appleKeyID == "apple-key-1")
         #expect(try envelope.unwrapKey(apple: apple) == key)
         #expect(throws: StoreKeyEnvelopeError.wrongAppleKey) {
             _ = try envelope.unwrapKey(apple: SymmetricKey(size: .bits256))
         }
-        try envelope.removeAppleBox()
+        try envelope.removeAppleWrappedCopy()
         #expect(envelope.apple == nil && envelope.appleKeyID == nil, "Castle: no iCloud copy")
-        #expect(throws: StoreKeyEnvelopeError.noAppleBox) { _ = try envelope.unwrapKey(apple: apple) }
+        #expect(throws: StoreKeyEnvelopeError.noAppleWrappedCopy) { _ = try envelope.unwrapKey(apple: apple) }
     }
 
     @Test func theVaultReconciliationIsRecorded() throws {

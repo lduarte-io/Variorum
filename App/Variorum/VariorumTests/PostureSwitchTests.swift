@@ -209,12 +209,11 @@ actor EmulatedMirror: SyncTransport, SyncRotationTransport {
     func claimSeq() -> Int64 { seq += 1; return seq }
     func stored() -> [String: Stored] { rows }
 
-    /// F1: what the completion guard counts — rows of the ciphertext-
-    /// carrying tables (the registry's `tablesCarryingCiphertext`) below
-    /// the rotation seq, visible or not.
+    /// F1: what the completion guard counts — rows that CARRY ciphertext
+    /// (`SyncSchema.rowCarriesCiphertext`: at least one encrypted column not
+    /// null) below the rotation seq, visible or not.
     func ciphertextRowsBelow(_ rotationSeq: Int64) -> Int {
-        let ciphertext = Set(SyncSchema.tablesCarryingCiphertext.map(\.name))
-        return rows.values.filter { ciphertext.contains($0.row.table) && $0.seq < rotationSeq }.count
+        rows.values.filter { $0.seq < rotationSeq && SyncSchema.rowCarriesCiphertext($0.row) }.count
     }
 
     private func gate(activeKeyID: String, keyProof: String) async throws {
@@ -522,10 +521,10 @@ struct PostureSwitchTests {
         var envelope = StoreKeyEnvelope(storeID: "store-2b-\(UUID().uuidString.prefix(8))")
         try envelope.setPassphraseWrap(key: oldKey, passphrase: "sesame", kdf: fastKDF())
         if standard {
-            try envelope.appleBox(key: oldKey, under: apple.symmetricKey, appleKeyID: apple.id)
+            try envelope.setAppleWrappedCopy(key: oldKey, under: apple.symmetricKey, appleKeyID: apple.id)
         }
         if let material {
-            try envelope.masterBox(key: oldKey, under: material.masterSymmetricKey)
+            try envelope.setMasterWrappedCopy(key: oldKey, under: material.masterSymmetricKey)
         }
         try envelope.write(at: envelope.preferredURL(besideStore: storeURL))
 

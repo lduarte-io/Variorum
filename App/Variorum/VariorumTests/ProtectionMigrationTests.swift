@@ -400,7 +400,7 @@ struct ProtectionMigrationTests {
         let held = material()
         var envelope = StoreKeyEnvelope()
         try envelope.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
-        try envelope.masterBox(key: key, under: held.masterSymmetricKey)
+        try envelope.setMasterWrappedCopy(key: key, under: held.masterSymmetricKey)
         #expect(envelope.vaultKDF == nil, "the migration's leg 5 without the vault: no descriptor")
         let backing = InMemoryStoreKeyGuardBacking(gated: key, biometryAvailable: true, biometricSucceeds: true)
         let envelopeBox = ScriptedEnvelopeBox(envelope)

@@ -45,7 +45,7 @@ struct CustodyReleaseTests {
         let key = StoreKey.mint()
         let apple = AppleKey.mint()
         var envelope = StoreKeyEnvelope()
-        try envelope.appleBox(key: key, under: apple.symmetricKey, appleKeyID: apple.id)
+        try envelope.setAppleWrappedCopy(key: key, under: apple.symmetricKey, appleKeyID: apple.id)
         let backing = InMemoryStoreKeyGuardBacking(
             auto: key, biometryAvailable: true, biometricSucceeds: true)
         let gate = StoreLaunchGate.scripted(

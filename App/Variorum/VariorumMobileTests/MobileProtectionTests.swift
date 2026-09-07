@@ -1058,7 +1058,7 @@ struct MobileFollowDetectionTests {
             gated: key, biometryAvailable: true, biometricSucceeds: true)
         var envelope = StoreKeyEnvelope()
         try envelope.setPassphraseWrap(key: key, passphrase: "sesame", kdf: oldKDF)
-        try envelope.masterBox(key: key, under: master)
+        try envelope.setMasterWrappedCopy(key: key, under: master)
         try envelope.recordVaultReconciliation(kdf: oldKDF, corpusKeyID: "corpus-old", recoveryWrapDigest: "d1")
         let box = ScriptedEnvelopeBox(envelope)
         let gate = StoreLaunchGate.scripted(
@@ -1347,7 +1347,7 @@ struct MobileWindowReplayTests {
         syncPresent.setValue(true)
         #expect(await protection.setPassphrase(passphrase) == nil)
         var asLeft = try #require(try StoreKeyEnvelope.loadCurrent(besideStore: storeURL))
-        try asLeft.appleBox(key: phoneKey, under: apple.symmetricKey, appleKeyID: apple.id)
+        try asLeft.setAppleWrappedCopy(key: phoneKey, under: apple.symmetricKey, appleKeyID: apple.id)
         try asLeft.write(at: asLeft.preferredURL(besideStore: storeURL))
         let oldURL = asLeft.preferredURL(besideStore: storeURL)
         #expect(asLeft.apple != nil && asLeft.passphrase != nil && asLeft.master == nil && asLeft.vaultCorpusKeyID == nil,

@@ -123,8 +123,8 @@ extension MultiTenantSyncTests {
             var keyFile = StoreKeyEnvelope()
             try keyFile.setPassphraseWrap(key: libraryKey, passphrase: Self.passphrase, kdf: kdf)
             try keyFile.setRecoveryWrap(key: libraryKey, words: words)
-            try keyFile.masterBox(key: libraryKey, under: material.masterSymmetricKey)
-            try keyFile.appleBox(key: libraryKey, under: appleKey, appleKeyID: appleKeyID)
+            try keyFile.setMasterWrappedCopy(key: libraryKey, under: material.masterSymmetricKey)
+            try keyFile.setAppleWrappedCopy(key: libraryKey, under: appleKey, appleKeyID: appleKeyID)
             try keyFile.recordVaultReconciliation(
                 kdf: kdf, corpusKeyID: material.corpusKeyID, recoveryWrapDigest: fetched.format.recoveryWrapDigest)
             try keyFile.write(at: keyFile.preferredURL(besideStore: storeURL))
@@ -213,7 +213,7 @@ extension MultiTenantSyncTests {
             var keyFile = StoreKeyEnvelope(storeID: storeID)
             try keyFile.setPassphraseWrap(key: newKey, passphrase: Self.passphrase, kdf: secrets.kdf)
             try keyFile.setRecoveryWrap(key: newKey, words: words)
-            try keyFile.masterBox(key: newKey, under: completed.masterSymmetricKey)
+            try keyFile.setMasterWrappedCopy(key: newKey, under: completed.masterSymmetricKey)
             try keyFile.recordVaultReconciliation(
                 kdf: secrets.kdf, corpusKeyID: completed.corpusKeyID, recoveryWrapDigest: fetched.format.recoveryWrapDigest)
             try keyFile.write(at: keyFile.preferredURL(besideStore: storeURL))

@@ -104,7 +104,7 @@ struct KeyDoorTests {
             var envelope = StoreKeyEnvelope()
             try envelope.setPassphraseWrap(key: key, passphrase: KeyDoorTests.passphrase, kdf: fastKDF)
             if standard {
-                try envelope.appleBox(key: key, under: apple.symmetricKey, appleKeyID: apple.id)
+                try envelope.setAppleWrappedCopy(key: key, under: apple.symmetricKey, appleKeyID: apple.id)
             }
             envelopeBox = ScriptedEnvelopeBox(envelope)
             backing = InMemoryStoreKeyGuardBacking(

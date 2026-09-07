@@ -79,7 +79,7 @@ struct LobbyVaultRoadTests {
             if landRecoveryCopy {
                 try envelope.setRecoveryWrap(key: key, words: words)
             }
-            try envelope.masterBox(key: key, under: master)
+            try envelope.setMasterWrappedCopy(key: key, under: master)
             try envelope.recordVaultReconciliation(
                 kdf: recordedKDF ?? oldKDF, corpusKeyID: Self.corpusKeyID, recoveryWrapDigest: format.recoveryWrapDigest)
             try envelope.write(at: envelope.preferredURL(besideStore: storeURL))

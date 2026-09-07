@@ -449,7 +449,7 @@ struct ProtectionSetModeOffMainTests {
         // authorization reads it; the posture stays Standard throughout,
         // the moves being the primitive 2b's switches call.
         var envelope = StoreKeyEnvelope()
-        try envelope.appleBox(key: key, under: apple.symmetricKey, appleKeyID: apple.id)
+        try envelope.setAppleWrappedCopy(key: key, under: apple.symmetricKey, appleKeyID: apple.id)
         let envelopeBox = ScriptedEnvelopeBox(envelope)
         let stamps = ScriptedStampsBox()
         let gate = StoreLaunchGate(
@@ -557,7 +557,7 @@ struct ProtectionReconcileOffMainTests {
 
         // CASTLE: no A touch at all (§14.5), the leg reads false.
         var castle = try #require(envelopeBox.value)
-        try castle.removeAppleBox()
+        try castle.removeAppleWrappedCopy()
         try castle.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
         envelopeBox.value = castle
         log.reset()

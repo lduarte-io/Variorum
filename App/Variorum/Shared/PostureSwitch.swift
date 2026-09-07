@@ -730,7 +730,7 @@ final class PostureSwitchRunner {
         guard var envelope = leaves.gate.readEnvelope(leaves.storeURL).envelope else {
             throw StoreKeyEnvelopeError.noPassphraseWrap
         }
-        try envelope.appleBox(key: libraryKey, under: apple.symmetricKey, appleKeyID: apple.id)
+        try envelope.setAppleWrappedCopy(key: libraryKey, under: apple.symmetricKey, appleKeyID: apple.id)
         try leaves.gate.saveEnvelope(envelope, leaves.storeURL)
         switch await leaves.moveCustody(.auto) {
         case .changed: break
@@ -904,12 +904,12 @@ final class PostureSwitchRunner {
                 try envelope.setRecoveryWrap(key: newKey, words: recoveryWords)
             }
             if let material {
-                try envelope.masterBox(key: newKey, under: material.masterSymmetricKey)
+                try envelope.setMasterWrappedCopy(key: newKey, under: material.masterSymmetricKey)
                 try envelope.recordVaultReconciliation(
                     kdf: kdf, corpusKeyID: material.corpusKeyID, recoveryWrapDigest: keyFile.recoveryWrapDigest)
             }
             if let apple {
-                try envelope.appleBox(key: newKey, under: apple.symmetricKey, appleKeyID: apple.id)
+                try envelope.setAppleWrappedCopy(key: newKey, under: apple.symmetricKey, appleKeyID: apple.id)
             }
             return envelope
         }.value
@@ -1019,7 +1019,7 @@ final class PostureSwitchRunner {
         guard var envelope = leaves.gate.readEnvelope(leaves.storeURL).envelope else {
             throw StoreKeyEnvelopeError.noPassphraseWrap
         }
-        try envelope.appleBox(key: libraryKey, under: apple.symmetricKey, appleKeyID: apple.id)
+        try envelope.setAppleWrappedCopy(key: libraryKey, under: apple.symmetricKey, appleKeyID: apple.id)
         try leaves.gate.saveEnvelope(envelope, leaves.storeURL)
         // Custody: gated → plain, both items.
         phase = .movingCustody

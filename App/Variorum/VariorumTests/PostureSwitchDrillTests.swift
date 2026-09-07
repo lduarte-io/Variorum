@@ -196,8 +196,8 @@ struct PostureSwitchDrillTests {
         let storeID = "drill-\(UUID().uuidString.lowercased())"
         var envelope = StoreKeyEnvelope(storeID: storeID)
         try envelope.setPassphraseWrap(key: oldKey, passphrase: "sesame", kdf: fastKDF())
-        try envelope.appleBox(key: oldKey, under: apple.symmetricKey, appleKeyID: apple.id)
-        try envelope.masterBox(key: oldKey, under: material.masterSymmetricKey)
+        try envelope.setAppleWrappedCopy(key: oldKey, under: apple.symmetricKey, appleKeyID: apple.id)
+        try envelope.setMasterWrappedCopy(key: oldKey, under: material.masterSymmetricKey)
         try envelope.write(at: envelope.preferredURL(besideStore: storeURL))
 
         // REAL custody under the throwaway scope: the silent store-key item,
@@ -310,8 +310,8 @@ struct PostureSwitchDrillTests {
         let storeID = "drill-sib-\(UUID().uuidString.lowercased())"
         var envelope = StoreKeyEnvelope(storeID: storeID)
         try envelope.setPassphraseWrap(key: oldKey, passphrase: "sesame", kdf: fastKDF())
-        try envelope.appleBox(key: oldKey, under: acting.apple.symmetricKey, appleKeyID: acting.apple.id)
-        try envelope.masterBox(key: oldKey, under: material.masterSymmetricKey)
+        try envelope.setAppleWrappedCopy(key: oldKey, under: acting.apple.symmetricKey, appleKeyID: acting.apple.id)
+        try envelope.setMasterWrappedCopy(key: oldKey, under: material.masterSymmetricKey)
         try envelope.write(at: envelope.preferredURL(besideStore: storeURL))
         #expect(StoreKeyCustody.deviceKeychain(scope: scope, storeURL: storeURL).save(oldKey))
         let session = SyncCustodySession()
@@ -389,7 +389,7 @@ struct PostureSwitchDrillTests {
 
         let storeID = "drill-\(label)-\(UUID().uuidString.lowercased())"
         var envelope = StoreKeyEnvelope(storeID: storeID)
-        try envelope.appleBox(key: key, under: acting.apple.symmetricKey, appleKeyID: acting.apple.id)
+        try envelope.setAppleWrappedCopy(key: key, under: acting.apple.symmetricKey, appleKeyID: acting.apple.id)
         try envelope.write(at: envelope.preferredURL(besideStore: storeURL))
         #expect(StoreKeyCustody.deviceKeychain(scope: scope, storeURL: storeURL).save(key), "the fresh device's silent item")
         let session = SyncCustodySession()

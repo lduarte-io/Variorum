@@ -1388,7 +1388,7 @@ final class ProtectionController {
             return AppleKeyReconcileOutcome(verified: true, landingFailed: false)
         }
         do {
-            try envelope.appleBox(key: key, under: apple.symmetricKey, appleKeyID: apple.id)
+            try envelope.setAppleWrappedCopy(key: key, under: apple.symmetricKey, appleKeyID: apple.id)
             try gate.saveEnvelope(envelope, storeURL ?? URL(fileURLWithPath: "/dev/null"))
         } catch {
             return AppleKeyReconcileOutcome(verified: false, landingFailed: true, wrotePass: true)
@@ -1458,7 +1458,7 @@ final class ProtectionController {
         }
         do {
             var envelope = try ensuredEnvelope(for: key).envelope
-            try envelope.masterBox(key: key, under: landing.material.masterSymmetricKey)
+            try envelope.setMasterWrappedCopy(key: key, under: landing.material.masterSymmetricKey)
             try envelope.recordVaultReconciliation(
                 kdf: landing.kdf, corpusKeyID: landing.material.corpusKeyID,
                 recoveryWrapDigest: landing.recoveryWrapDigest)

@@ -72,7 +72,7 @@ struct StoreLaunchRouteTests {
         var castle = StoreKeyEnvelope()
         try castle.setPassphraseWrap(key: key, passphrase: "sesame", kdf: kdf)
         var standard = castle
-        try standard.appleBox(key: key, under: AppleKey.mint().symmetricKey, appleKeyID: "a")
+        try standard.setAppleWrappedCopy(key: key, under: AppleKey.mint().symmetricKey, appleKeyID: "a")
         func gate(_ envelope: StoreKeyEnvelope?, dials: ProtectionDials, legacy: StoreAtOpenMode? = nil) -> StoreAtOpenMode {
             StoreLaunchGate.scripted(
                 dials: dials, backing: InMemoryStoreKeyGuardBacking(), envelope: envelope,
@@ -571,7 +571,7 @@ struct Phase13pLobbyTests {
             let apple = AppleKey.mint()
             var envelope = StoreKeyEnvelope()
             try envelope.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
-            try envelope.appleBox(key: key, under: apple.symmetricKey, appleKeyID: apple.id)
+            try envelope.setAppleWrappedCopy(key: key, under: apple.symmetricKey, appleKeyID: apple.id)
             let backing = InMemoryStoreKeyGuardBacking()  // NO bound item
             let gate = StoreLaunchGate.scripted(
                 dials: ProtectionDials(), backing: backing, envelope: envelope,
@@ -616,7 +616,7 @@ struct Phase13pLobbyTests {
             let apple = AppleKey.mint()
             var envelope = StoreKeyEnvelope()
             try envelope.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
-            try envelope.appleBox(key: key, under: apple.symmetricKey, appleKeyID: apple.id)
+            try envelope.setAppleWrappedCopy(key: key, under: apple.symmetricKey, appleKeyID: apple.id)
             let backing = InMemoryStoreKeyGuardBacking()
             let appleKeys = InMemoryAppleKeyBacking()  // A NOT here yet
             let gate = StoreLaunchGate.scripted(
@@ -705,7 +705,7 @@ struct Phase13pLobbyTests {
             let key = StoreKey.mint()
             var envelope = StoreKeyEnvelope()
             try envelope.setPassphraseWrap(key: key, passphrase: "sesame", kdf: fastKDF())
-            try envelope.appleBox(key: key, under: AppleKey.mint().symmetricKey, appleKeyID: "the-other-mac")
+            try envelope.setAppleWrappedCopy(key: key, under: AppleKey.mint().symmetricKey, appleKeyID: "the-other-mac")
             let backing = InMemoryStoreKeyGuardBacking()
             let gate = StoreLaunchGate.scripted(
                 dials: ProtectionDials(), backing: backing, envelope: envelope,
@@ -759,7 +759,7 @@ struct Phase13pLobbyTests {
                 firedDown.setValue(true)
             }
             var standardFile = try #require(world.bootstrap.gate.readEnvelope(nil).envelope)
-            try standardFile.appleBox(key: world.key, under: AppleKey.mint().symmetricKey, appleKeyID: "a")
+            try standardFile.setAppleWrappedCopy(key: world.key, under: AppleKey.mint().symmetricKey, appleKeyID: "a")
             try world.bootstrap.gate.saveEnvelope(standardFile, URL(fileURLWithPath: "/dev/null"))
             await protection.reconcile()
             #expect(protection.posture == .standard)
@@ -775,7 +775,7 @@ struct Phase13pLobbyTests {
                 firedUp.setValue(true)
             }
             var castleFile = try #require(world.bootstrap.gate.readEnvelope(nil).envelope)
-            try castleFile.removeAppleBox()
+            try castleFile.removeAppleWrappedCopy()
             try world.bootstrap.gate.saveEnvelope(castleFile, URL(fileURLWithPath: "/dev/null"))
             await protection.reconcile()
             #expect(protection.posture == .castle)
@@ -875,7 +875,7 @@ struct Phase13pLobbyTests {
             let kdf = fastKDF()
             var envelope = StoreKeyEnvelope()
             try envelope.setPassphraseWrap(key: key, passphrase: "sesame", kdf: kdf)
-            try envelope.masterBox(key: key, under: SymmetricKey(data: Data(repeating: 0, count: 32)))
+            try envelope.setMasterWrappedCopy(key: key, under: SymmetricKey(data: Data(repeating: 0, count: 32)))
             try envelope.recordVaultReconciliation(kdf: kdf, corpusKeyID: "corpus-old", recoveryWrapDigest: nil)
             // On disk beside the store too: the controller's per-store sync
             // custody resolves the store id from the key file BESIDE the

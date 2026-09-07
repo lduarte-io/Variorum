@@ -369,7 +369,7 @@ nonisolated extension StoreLaunchGate {
            let key = guardSeam.loadAuto(), envelope.belongs(to: key),
            let apple = appleKeyFor(scope).read() {
             var landed = envelope
-            if (try? landed.appleBox(key: key, under: apple.symmetricKey, appleKeyID: apple.id)) != nil,
+            if (try? landed.setAppleWrappedCopy(key: key, under: apple.symmetricKey, appleKeyID: apple.id)) != nil,
                (try? saveEnvelope(landed, storeURL)) != nil {
                 reading = .loaded(landed)
             }
