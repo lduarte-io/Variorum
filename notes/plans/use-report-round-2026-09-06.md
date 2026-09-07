@@ -3471,3 +3471,113 @@ QUESTIONS; R2-4 is a reading for R1-13's PROVISIONAL at the closeout.
 **Files touched by the pass:** `App/Variorum/Variorum/Features/Editor/EditorSurfaceController.swift` (`MergeCeremonyState`'s explicit init; `refreshMergeCeremony` carrying the row/ids/count and re-marking the shown pair; `refreshMergeSheetIfDrifted` + `renderedIDs(of:)`; the dispatcher's guard and its drift call; `runCarryAllMerge`'s displayed-id parameters) · `App/Variorum/Variorum/Features/Takes/TakesViewModel.swift` (`renderedTakeID(of:)`; both sheet roads' landing; the `divideW` receipt's count) · tests: `MergeCeremonySheetTests` · `MergeArrangementTests` · `TakesDivideTests` · `OriginBlockDoorTests`.
 
 **For the implementer's sanity pass:** the shape changes worth its context — `MergeCeremonyState` no longer has a memberwise init (every site names all eleven fields); the pair sheet's confirm runs ONE drift check on both branches and that check now includes the shown pair (a chosen re-point refreshes rather than joins); `runCarryAllMerge` takes optional displayed ids; the board parks the ring on the successor's rendered take via the op's placement/default. Then round 3 (fresh, the cap) over the letter's fixes.
+
+#### IMPLEMENTER'S SANITY PASS (18f round 2)
+
+*Batch 1's implementer over `875a9516..6e14e9e8` (four fix commits), read against the tree plus ONE walk on
+the dev-store Debug build. **3 CLEAR · 1 RAISED.** Read-only on code; zero instances at close; the
+walk's two acts undone, so the dev store is as found.*
+
+**R2-1 · CLEAR, on all four of the coordinator's checks.** `MergeCeremonyState` now carries an explicit
+eleven-field initializer with the property defaults removed (`:1208–1234`), so an omission is a compile
+error rather than a silent default — the rider adopted as written. **I grepped every construction site
+and read each:** there are exactly THREE, all in this file — `openMergeCeremony:1345` (`blockIDs: [leading,
+trailing]`, the counted `otherTakes`, `runBlocks: []`, `.bringEveryTake`, both rendered ids, the two fans,
+no pairings), `openMergeRunChoice:1420` (the run's ids, its `others` count, the built `runBlocks`,
+`.bringEveryTake`, rendered ids nil, empty takes/pairings — right for an arm with no shown pair) and
+`refreshMergeCeremony:1682` (carries `blockIDs`, `arrangement` and `runBlocks` from the state,
+re-reads `otherTakes` off the fresh fans, and takes the rendered ids from the surface). All three name all
+eleven fields; the tree compiles and the twelve letter suites ran green here (150 tests / 12 suites).
+**The empty-run guard's copy:** the added `!state.blockIDs.isEmpty` falls into the same
+`FannedDefaultsCopy.blocksChangedMerge` — *"These blocks changed — try the merge again."* — which is
+honest, and the guard is now **unreachable by construction** (no site can produce an empty `blockIDs`),
+which is the right kind of belt: it costs nothing and it cannot be re-earned silently.
+**Walked (captures `08`–`10`):** the sheet on a fanned pair → "Pair by hand…" → the default pairing
+REMOVED (the confirm blocker fired honestly: *"Nothing would land on the merged block — pair takes with ＋,
+or check 'carry' on at least one."*, Merge disabled) → HER pairing placed (the first block's **take 2**
+with the second block's take — deliberately not the default pair) → ⏎ → the merged block reads
+*"At dawn the ferry crossed. … Confirm makes two blocks: …"* with **no fan badge**: ONE take, hers, and
+the unpaired takes stayed with the released blocks. That is R2-1's whole subject demonstrated positively —
+the road she chose is the road that ran.
+
+**R2-2 · CLEAR, with ONE RAISE beside it.** The check is one function for both branches
+(`refreshMergeSheetIfDrifted:1621–1656`), widened to a take's text, the fan's size and **which take a
+block shows** (`renderedIDs(of:)`), and `runCarryAllMerge` now takes the state's rendered ids
+(`:625–631`, `:650–655`) so the carry-all joins exactly what the sheet marked.
+**False positives — the coordinator's question, traced:** both halves of the check are scoped to the
+PAIR's two blocks only (`renderedIDs` reads those two entries; the fan reads are `blockFan` per block), so
+an unrelated edit anywhere else in the note — a divide, a merge, a sync apply on another block — changes
+neither input and cannot refresh the sheet under her hands. The one input that moves without her is a
+chosen re-point or an edit on THESE two blocks, which is exactly what the check is for. *(One cosmetic
+consequence, not a raise: when a block leaves the surface entirely, the preset branch answers
+`blocksChangedMerge` and the pairing branch answers the refresh's own "These blocks' takes changed — try
+the merge again." — two sentences for one event, depending on the row.)*
+**RAISED · [NIT-sized] · `EditorSurfaceController.swift:1531–1541` — the promise is closed on the
+carry-all road and still open on "Only the two shown".** `runInstantMerge` takes no displayed ids: it
+calls `ops.merge`, which resolves each side through `placedContext`'s `context.rendered` — the **STORE's**
+`chosen_variant_id`. The new drift check compares the **PROJECTION's** rendered ids
+(`model.index.entries[…].variantID`) against the state's. Between a store write and the ValueObservation's
+delivery those two disagree, so a chosen re-point that has landed in the store but not yet in the
+projection passes the check and `ops.merge` joins a take the sheet never showed — under a row whose own
+words are *"the others stay with their original blocks"* and a receipt that says *"the takes you were
+looking at joined"*. Narrower than R2-2's own input (that one needed the projection to have adopted the
+re-point; this needs the sub-delivery window), and it is the same promise half-kept. **Cheapest close, no
+new round trip:** the drift check already opens a `database.read` for both fans — read the two blocks'
+CHOSEN there too and compare against the state's rendered ids, which closes it for both roads at once.
+*(The alternative — routing "only the two shown" through `mergeCeremony` with one explicit pairing and no
+carries — is literal but costs the road its "Merge" undo label and its `speakAboutMergedFans` receipt, so
+I would not take it.)*
+
+**R2-3 · CLEAR, and walked.** `TakesViewModel.runDivideW` counts
+`kept: max(0, result.first.variants.count - 1)` from the op's own result while the duplicating road keeps
+the short line — the split the reviewer named, and the reason holds (copies on both blocks are not
+"stayed on the first"). The board's toast in the walk read, verbatim: **"Block divided — the take you were
+in split across both blocks; 2 other takes stayed on the first. ⌥⌘Z undoes."** (capture `12`).
+
+**R2-4 · CLEAR, and walked — including the check against batch 1's divide pins.** `renderedTakeID(of:)`
+(`TakesViewModel.swift:2223–2235`) reads `placement.chosenVariantId ?? block.defaultVariantId ??
+variants.first?.id`, and `divideWRows` sets BOTH from the anchor's index (`chosenIndex: renderedIndex`,
+`defaultIndex: renderedIndex ?? 0`, `Operations+Structural.swift:485–490`), so the chain is exact and its
+last fallback covers the one shape where the anchor contributes to only one side (a seed parked at its
+end). **Batch 1's divide pins are untouched by it:** the
+`theCeremonyOpensArrangedWithTheSeedsOwnCut` family asserts the sheet's OPENING state and never the ring;
+`theBoardsCeremonyOpensOnTheArrangementRow` likewise; the only ring assertions on the board are
+`TakesDivideTests:257` (the instant road, block-level — unchanged) and R2-4's own new pin, which carries
+three non-vacuity assertions (C really has two takes, C's chosen is really not its first in fan order, and
+that chosen is really the seed's tail). **Walked (captures `11`, `12`):** on the Takes board, the caret in
+a NON-chosen pane (the third take), Block ▸ "Divide choosing takes…" → the sheet opened with **take 3**
+as "shown here" → ⏎ → the bottom block carries the seed's tail and **the ring is on that pane** — the
+bottom block's chosen take, the take she divided.
+
+**THE WALK** (dev-store Debug at `6e14e9e8`, `io.lduarte.Variorum.debug`; `pgrep -fl` showed zero
+instances before and after, every instance seen carried the DerivedData Debug path, her `/Applications`
+app never launched). Fixture: the field guide's three-take lesson block; both acts undone through the
+Edit menu at the end (the labels read *"Undo Merge Takes"* and *"Undo Divide choosing takes"*).
+
+1. **Merge choosing takes on a fanned pair → "Pair by hand…" → her own pairing → confirm.** The default
+   pairing removed (blocker honest, Merge disabled), take 2 paired with the second block's take, ⏎ → ONE
+   take on the merged block reading HER pairing, the rest in lineage. `08`, `09`, `10`.
+2. **The board's Divide choosing takes from a NON-chosen pane → confirm.** The sheet seeded on take 3; the
+   ring landed on the bottom block's chosen take (the seed's tail); the receipt counted the two takes that
+   stayed on the first. `11`, `12`.
+
+**Captures** (`notes/plans/use-report-2026-09-06-screens/18f-ladder/`, gitignored — new names, added to
+round 1's seven): `08-merge-pair-by-hand-before-her-pairing.png` ·
+`09-merge-her-own-pairing-placed.png` · `10-merge-her-pairing-landed.png` ·
+`11-board-divide-choosing-takes-from-a-non-chosen-pane.png` ·
+`12-board-ring-on-the-bottom-blocks-chosen-take.png`.
+
+**One walk observation for the closeout, not a raise and not this pass's doing:** the Takes board's bottom
+bar has no "Divide choosing takes…" row — `.divideWithCeremony`'s `.bottomBar` door is rendered by
+`CommitBar` alone, and the registry walk asserts the UNION of the two bars, so this is declared-and-
+rendered exactly as designed. On the board the sheet is reached by ⌥⌘⇧D, the menu bar's Block menu (which
+I used) and ⌘K. Worth one line in the closeout only because U-4's own words were *"should be a button, not
+just a shortcut"* and the board's bar is one bar where the button is not.
+
+**Suites I ran here** (a check, not a re-run of the pass's closing set): `MergeCeremonySheetTests` ·
+`MergeArrangementTests` · `TakesDivideTests` · `OriginBlockDoorTests` · `FannedDefaultsTests` ·
+`FannedDefaultsBoardTests` · `DivideArrangementTests` · `BoundaryFluidityTests` · `SeamMergeTests` ·
+`MergeGestureTests` · `DivideKeyMonitorTests` · `DivideWCeremonyTests` → **150 tests / 12 suites green.**
+
+**Count: 3 CLEAR · 1 RAISED** (R2-2's other half — "Only the two shown" still resolves its pair from the
+store's chosen while the drift check compares the projection's; the reviewer's call, one read away).
