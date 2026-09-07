@@ -66,8 +66,6 @@ struct DivideWSheet: View {
     @Environment(\.colorScheme) private var scheme
     @State private var activeTakeID: String?
     @FocusState private var keyboardFocused: Bool
-    /// Ledger row 3's fix — see `installKeyMonitor`.
-    @State private var keyMonitor: Any?
 
     private var state: DivideWCeremony.State {
         ceremony.state ?? presented
@@ -142,12 +140,13 @@ struct DivideWSheet: View {
         .focusable()
         .focused($keyboardFocused)
         .onKeyPress(phases: .down) { handleKey($0) }
+        // Ledger row 3's fix, scoped to THIS sheet's window (18f ladder
+        // R1-1) — see `CeremonyKeyMonitor` below.
+        .background(CeremonyKeyMonitor { handleKeyEvent($0) })
         .onAppear {
             activeTakeID = state.activeVariantID
             keyboardFocused = true
-            installKeyMonitor()
         }
-        .onDisappear { removeKeyMonitor() }
     }
 
     /// The header's quiet facts line. *(Mockup figure A opens with "block 4
@@ -271,28 +270,29 @@ struct DivideWSheet: View {
     /// container's focus back while an AppKit control inside a `ScrollView`
     /// held it.
     ///
-    /// So the placement keys stop depending on focus at all. The monitor is
-    /// installed only while THIS sheet is on screen (it is window-modal, so
-    /// that is exactly its scope), acts only on the four placement chords,
-    /// and returns every other event untouched — nothing else in the app can
-    /// see a difference. `.onKeyPress` stays on the container as the ordinary
-    /// road; the monitor is what makes it survive her first click.
-    private func installKeyMonitor() {
-        guard keyMonitor == nil else { return }
-        keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-            guard ceremony.state != nil else { return event }
-            return handleKeyEvent(event) ? nil : event
-        }
-    }
-
-    private func removeKeyMonitor() {
-        if let keyMonitor { NSEvent.removeMonitor(keyMonitor) }
-        keyMonitor = nil
-    }
-
+    /// So the placement keys stop depending on focus at all. The monitor
+    /// (`CeremonyKeyMonitor`, below) is installed while THIS sheet is in a
+    /// window, acts only on the four placement chords, and returns every
+    /// other event untouched. `.onKeyPress` stays on the container as the
+    /// ordinary road; the monitor is what makes it survive her first click.
+    ///
+    /// **18f ladder round 1, R1-1 (fable-reviewer) — scoped to the sheet's
+    /// WINDOW.** Batch 1 installed the monitor from `onAppear` with one
+    /// guard, `ceremony.state != nil` — but a local monitor sees every key
+    /// the PROCESS dequeues, and the sheet is modal for ONE window while the
+    /// app has others with live editors (a note in its own window, Quick
+    /// Note). ⇥/←/→ typed there were eaten and moved the ✂ here. The door
+    /// is now the app's own shape for this (`PageTurnKeyMonitor`), owned by
+    /// a view that lives in the sheet's window and answers only that window's
+    /// keys, by number. Two hygiene rules ride with it, both from the same
+    /// trace: a ⌘ or ⌃ chord is never the sheet's, and the swallow follows
+    /// the STEP — a key that cannot move the ✂ (→ at a take's end) is passed
+    /// on, not eaten.
+    ///
     /// True = handled (the event is swallowed). Reads the same brains the
     /// `.onKeyPress` road does, so the two cannot answer differently.
     private func handleKeyEvent(_ event: NSEvent) -> Bool {
+        guard event.modifierFlags.intersection([.command, .control]).isEmpty else { return false }
         switch event.keyCode {
         case 48:  // ⇥
             return stepTake(forward: !event.modifierFlags.contains(.shift))
@@ -380,6 +380,9 @@ struct DivideWSheet: View {
         return true
     }
 
+    /// True = the ✂ MOVED (R1-1's rider: the swallow follows the step, so a
+    /// key that cannot move it — → at a take's very end — is not eaten). The
+    /// aim still settles on the take either way.
     @discardableResult
     private func stepCut(forward: Bool, bySentence: Bool) -> Bool {
         let ids = aimableTakeIDs
@@ -394,12 +397,80 @@ struct DivideWSheet: View {
                 boundaries: take.boundaries, forward: forward)
             : WCutPlacement.wordStep(
                 from: take.cut, boundaries: take.boundaries, forward: forward)
-        if let next, next != take.cut {
-            placeCut(takeID: takeID, cut: next)
-        } else {
+        guard let next, next != take.cut else {
             activeTakeID = takeID
+            return false
         }
+        placeCut(takeID: takeID, cut: next)
         return true
+    }
+}
+
+// MARK: - The placement keys' door (ledger row 3 · 18f ladder R1-1)
+
+/// A zero-size-by-purpose view that owns a local `keyDown` monitor for the
+/// WINDOW it lives in, for as long as it lives there — `PageTurnKeyMonitor`'s
+/// shape (the Act 10 correction round, R1-5), with `PaneFocusCatcher`'s
+/// window test: BY NUMBER, because `event.window` answers nil for a window
+/// with no device, which is every window a test builds and never orders in.
+/// Why the sheet needs a monitor at all is `DivideWSheet.handleKeyEvent`'s
+/// story (the controls inside a `ScrollView` take first responder and no
+/// focus road gives it back); why it must be window-scoped is R1-1's.
+struct CeremonyKeyMonitor: NSViewRepresentable {
+    /// True = the key was the sheet's and is consumed; false = untouched.
+    let onKeyDown: (NSEvent) -> Bool
+
+    func makeNSView(context: Context) -> MonitorView {
+        let view = MonitorView()
+        view.onKeyDown = onKeyDown
+        return view
+    }
+
+    func updateNSView(_ nsView: MonitorView, context: Context) {
+        nsView.onKeyDown = onKeyDown
+    }
+
+    static func dismantleNSView(_ nsView: MonitorView, coordinator: ()) {
+        nsView.remove()
+    }
+
+    final class MonitorView: NSView {
+        var onKeyDown: ((NSEvent) -> Bool)?
+        private var monitor: Any?
+
+        /// The observation seam a pin asserts beside the body: is the
+        /// monitor actually installed?
+        var isWatching: Bool { monitor != nil }
+
+        override var isFlipped: Bool { true }
+        /// Never a hit-test target: the click belongs to whatever is above.
+        override func hitTest(_ point: NSPoint) -> NSView? { nil }
+
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            remove()
+            guard window != nil else { return }
+            monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+                guard let self, self.handleKeyDown(event) else { return event }
+                return nil  // consumed: the ✂ moved, or the aim did
+            }
+        }
+
+        /// The body, exposed so a pin can drive the real decision with a real
+        /// event carrying a real window number. A key for any OTHER window is
+        /// never the sheet's.
+        func handleKeyDown(_ event: NSEvent) -> Bool {
+            guard let window, event.windowNumber == window.windowNumber else { return false }
+            return onKeyDown?(event) ?? false
+        }
+
+        func remove() {
+            if let monitor { NSEvent.removeMonitor(monitor) }
+            monitor = nil
+        }
+        // (No `deinit`: the view leaves its window before it dies, and
+        // `viewDidMoveToWindow` — called then with a nil window — removes the
+        // monitor; a nonisolated deinit may not touch it.)
     }
 }
 
