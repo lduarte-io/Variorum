@@ -455,4 +455,87 @@ struct LandingOffsetTests {
             #expect(caretTop <= Double(visible.maxY) - 1, "…and the caret is on screen anyway")
         }
     }
+
+    // MARK: - 4. A landing at the NOTE'S END the viewport already shows (the ladder's round 2, R2-1)
+
+    /// 17o batch b's ladder, round 2 — R2-1 (MAJOR). The bare arrival's
+    /// landing is the document's END whenever the caret was remembered at the
+    /// end of the last block (the ordinary "I stopped typing, then ⌘2, then
+    /// ⌘1"). TK2 enumerates NO layout fragment from the document's end
+    /// location, so `JumpPrimitive.lineSpan` answered nil there, the reveal's
+    /// visibility guard was skipped, and `jump` — running the same
+    /// enumeration — could not correct: the page sat at the clamped
+    /// proportional estimate, `maxScroll`, the last line at the viewport top
+    /// with the typewriter room below. On a three-block note that is the
+    /// whole note scrolled off but its last line. Red on the pre-fix tree:
+    /// `span nil`, `visible.minY 72.0` (docHeight 791, room 702, the text at
+    /// 0…89). Now both functions resolve the end to the last line, so J18(2)'s
+    /// rule — nothing moves when the caret is already on screen — reaches the
+    /// one offset it could never see.
+    @Test func aBareArrivalAtTheNotesEndTheViewportAlreadyShowsDoesNotScrollThePage() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 41))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let post = try session.operations.createPost(title: "a short note")
+            var last: (block: String, variant: String)?
+            for i in 1...3 {
+                let minted = try session.operations.newBlock(
+                    in: post.id,
+                    text: "Paragraph \(i): a short line of prose, the whole note fits on one screen.")
+                last = (minted.block.id, minted.variant.id)
+            }
+            let target = try #require(last)
+            let postID = post.id
+            let router = session.commandRouter
+            router.forgetCurrentBlock(for: postID)
+            defer { router.forgetCurrentBlock(for: postID) }
+            let slots = try await db.read { db in try Queries.renderPost(db, containerID: postID) }
+            let index = BlockRangeIndex(slots: slots, tail: nil)
+            let lastRange = index.range(ofEntryAt: 2)
+            #expect(lastRange.location + lastRange.length == index.documentLength,
+                    "no open tail: the last block's end IS the document's end")
+            // The memory: she was at the very END of the last block — the
+            // commonest resting place after writing — so the bare arrival's
+            // landing is the document's end.
+            let token = router.registerDetail(postID: postID, mode: .write) { _ in }
+            defer { router.unregisterDetail(token) }
+            router.noteFocusedBlock(
+                target.block, variantID: target.variant, postID: postID,
+                utf16Offset: lastRange.length)
+
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 1100, height: 750),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            let hosting = NSHostingView(
+                rootView: EditorView(session: session, postID: postID, caretSeed: nil)
+                    .environment(ThemeStore(session: session)))
+            hosting.frame = NSRect(x: 0, y: 0, width: 1100, height: 750)
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            #expect(await Self.settle(window, hosting) {
+                guard let view = Self.views(EditorTextView.self, in: hosting).first else { return false }
+                return view.string.count >= index.documentLength
+                    && view.selectedRange().location == index.documentLength
+            }, "the bare arrival lands at the note's end")
+            let editor = try #require(Self.views(EditorTextView.self, in: hosting).first)
+            let scrollView = try #require(editor.enclosingScrollView)
+            // Let the arrival's post-layout reveal settle.
+            _ = await Self.settle(window, hosting, timeout: 2) { false }
+            let visible = scrollView.contentView.bounds
+            let span = JumpPrimitive.lineSpan(ofOffset: index.documentLength, in: editor)
+            print("[17o b R2-1] visible \(visible.minY)…\(visible.maxY) · docHeight \(editor.frame.height) · room \(editor.typewriterRoom) · span \(String(describing: span))")
+            #expect(span != nil,
+                    "the note's end has a line — the last line of the last block (red-on-old: nil)")
+            #expect(visible.minY == 0,
+                    "a short note whose end is already on screen never scrolls on arrival (red-on-old: moved to maxScroll — \(visible.minY))")
+            window.orderOut(nil)
+            window.close()
+        }
+    }
 }

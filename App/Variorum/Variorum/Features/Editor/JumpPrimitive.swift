@@ -120,8 +120,18 @@ enum JumpPrimitive {
             from: contentManager.documentRange.location,
             to: contentManager.documentRange.endLocation)
         let clamped = min(max(0, offset), length)
+        // 17o batch b's ladder, round 2 — R2-1: the document's END location
+        // is inside no element's range, so enumerating FROM it yields no
+        // fragment at all — and a landing at the note's end (the caret
+        // resting where she stopped typing, then ⌘2 → ⌘1) is the ordinary
+        // case, not a corner. Enumerate from the character before it; the
+        // LOCAL offset below stays `clamped`, whose past-the-last-range rule
+        // (`FragmentLines.lineIndex`) resolves to the LAST line, never the
+        // one before. (Measured: `span nil` at the end of a 250-paragraph
+        // note, the visibility guard skipped, the page hauled to maxScroll.)
+        let probe = clamped == length && length > 0 ? clamped - 1 : clamped
         guard let target = contentManager.location(
-            contentManager.documentRange.location, offsetBy: clamped)
+            contentManager.documentRange.location, offsetBy: probe)
         else { return nil }
         var span: (top: Double, bottom: Double)?
         layoutManager.enumerateTextLayoutFragments(
@@ -188,8 +198,15 @@ enum JumpPrimitive {
             to: contentManager.documentRange.endLocation)
         guard docLength > 0 else { return }
         let clamped = min(max(0, offset), docLength)
+        // R2-1: the same end-of-document rule as `lineSpan` (`docLength > 0`
+        // is guarded above). Without it the closure's enumeration yields
+        // nothing, the loop bails AFTER its first scroll, and the page sits
+        // at the clamped proportional estimate — `maxScroll`, which with the
+        // typewriter room is "the last line at the viewport top": on a short
+        // note the whole note scrolled off but its last line.
+        let probe = clamped == docLength ? clamped - 1 : clamped
         guard let target = contentManager.location(
-            contentManager.documentRange.location, offsetBy: clamped)
+            contentManager.documentRange.location, offsetBy: probe)
         else { return }
 
         func scroll(to y: Double) {
