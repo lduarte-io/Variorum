@@ -9540,3 +9540,34 @@ after 77.568 seconds.`** — 49 suites for 49 requested types, no `skipped:` lin
 `swift test` and no iOS build are owed and none was run. Captures 17–19 added to
 `notes/plans/use-report-2026-09-06-screens/18d-3/`.
 
+
+#### 18d round 2 — fixes (batch 1)
+
+*(the batch-1 implementer, resumed; ONE finding — MINOR-4, CONFIRMED. FIXED.)*
+
+**MINOR-4 — FIXED (`PENDING`). The reviewer is right that round 1 relocated the coupling instead of
+reversing it, and the fix is the file's address.** `SidebarLayout` is a `nonisolated enum` of constants
+and pure functions over `Foundation` alone, and its readers stopped being one feature's the moment the
+note box was born: `Core/Views/SidebarNoteBox` reads its grammar numbers, `groupHeaderHeight` and
+`railGroupHeight`. MINOR-7 moved the three grammar numbers out of `SidebarView` into that brain — one
+step in the right direction, and it left the shared-chrome home still reading a `Features/Library/`
+type, which is exactly what the comment MINOR-7 wrote forbids. **The file is hoisted to
+`Core/Views/SidebarLayout.swift`** (the placement rule in the direction it is written: components, and
+the brains they read, move UP; a feature is never reached down into). **Not one line of the brain
+changed** — `git diff` reports the move as a pure rename, and the only edit in the file is its header
+naming its new home, why it moved, and **its consumers, grepped**: `Core/Views/SidebarNoteBox` ·
+`Features/Library/SidebarView` · the pins `ShellChromeTests` · `NoteBoxTests` · `NoteBoxMountTests`,
+plus one doc reference in `Features/BookView/BookView.swift`. All same-module, so no import moved and
+no call site changed. The box's own comment now says the move is finished rather than half-made.
+
+**No red-on-old pin, and I say so rather than let the ladder call it hollow** — this is an
+architectural finding whose traced degradation is the coupling itself (a Library edit able to move a
+shared component silently, with no signal to a reader in `Core/Views`). The proof available is that the
+budget pins rode UNMODIFIED: `ShellChromeTests` + `SidebarLayoutTests` are byte-untouched and green,
+which is what says an address moved and no number did.
+
+**CLOSING RUN (this tree, ONE `xcodebuild test`):** `ShellChromeTests` · `SidebarLayoutTests` ·
+`OneTimeCodeAutoFillTests` (the file's own budget pins), the batch's six box suites, and the ten
+`Tutorial*` spine types — **`Test run with 108 tests in 19 suites passed after 31.349 seconds`**, zero
+issues, zero `skipped:` lines. Zero `Sources/`, zero `Sync/`, zero schema, zero `App/Variorum/Shared/`,
+no editor-lifecycle change — so no `swift test` and no iOS build is owed, and none was run.

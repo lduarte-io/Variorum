@@ -1,6 +1,21 @@
 //
 //  SidebarLayout.swift
-//  Variorum (Mac)
+//  Variorum (Mac) — Core/Views (the shared Mac-chrome home)
+//
+//  **HOISTED from `Features/Library/` at the 18d ladder's round-2 MINOR-4.**
+//  It is a pure layout brain — a `nonisolated enum` of constants and pure
+//  functions over `Foundation` alone — and its readers are no longer one
+//  feature's: `Core/Views/SidebarNoteBox` reads its grammar numbers, its
+//  header height and `railGroupHeight`. Round 1's MINOR-7 moved the three
+//  grammar numbers OUT of `SidebarView` into this brain, which reversed the
+//  coupling one step and left it standing: the shared-chrome home was still
+//  reading a `Features/Library/` type, which is the direction the placement
+//  rule forbids (components — and the brains they read — move UP; a feature
+//  is never reached down into). The file's address is the whole fix; not a
+//  line of it changed. **Its consumers, all same-module:**
+//  `Core/Views/SidebarNoteBox`, `Features/Library/SidebarView`, and the pins
+//  `ShellChromeTests` · `NoteBoxTests` · `NoteBoxMountTests` (plus one doc
+//  reference in `Features/BookView/BookView.swift`).
 //
 //  The Act 10 correction round, batch A (rows 2 + 3) — the sidebar column's
 //  DECISIONS, as pure functions (the bottom bar's `CommitBar.usesTwoRows`

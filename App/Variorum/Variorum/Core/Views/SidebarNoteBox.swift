@@ -62,8 +62,9 @@ struct SidebarNoteBox: View {
     /// applied to a bordered box.
     ///
     /// The numbers come from `SidebarLayout` — the column's layout BRAIN,
-    /// not the column's view (the 18d ladder's MINOR-7: the shared-chrome
-    /// home never reaches down into a feature).
+    /// not the column's view (the 18d ladder's MINOR-7), and that brain
+    /// lives HERE in `Core/Views/` since round 2's MINOR-4 finished the
+    /// move: the shared-chrome home reads no `Features/` type at all.
     static let inset: CGFloat = SidebarLayout.rowPadding - 1
     private static let corner: CGFloat = 8
 
