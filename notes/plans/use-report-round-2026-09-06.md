@@ -7903,7 +7903,27 @@ in the writing flow.
 
 ### R-12 · RECORD (the implementer writes here from its first commit)
 
-**NOT DONE (the record's FIRST LINE) — PENDING while the batch runs; rewritten honestly at the close.**
+**NOT DONE (the record's FIRST LINE, honest and final).** Four things, each named with its reason.
+**(a) Nothing about what any of the three columns LISTS changed** — the brief's own fence. The navigator
+still lists chapters and notes by wave 2c's rules (row 8's collapse included), the index column still
+lists what `BookIndexColumn.rows` says, the Read column still lists `NoteIndexOutline`'s outline.
+**(b) The drag→store half of "remembered" is pinned by the WALK, not by a unit test** — the pins drive
+UserDefaults → mount → drawn width, and `SideColumn`'s two gesture lines that write the store are the
+gap. Closed by measurement instead: the walk dragged each column and read the value back out of
+`defaults read io.lduarte.Variorum.debug` (320 · 430 · 600), then quit and relaunched and the navigator
+came back at 320. The real-click rig cannot synthesize a SwiftUI `DragGesture` inside a mounted surface
+(KnownIssues row 43's family), which is why this is a walk claim. **(c) No `layoutPriority` was added,
+moved or removed anywhere** — 18d batch 1's finding is respected by construction (the mode's body goes
+into the content slot unwrapped) and its pin `outlineProseSitsOnWritesOwnMeasure` rides green.
+**(d) Zero `Sources/`, zero `Sync/`, zero schema, nothing in `BlockRangeIndex`/`EditorTextView`, no
+`App/Variorum/Shared/`** — `git diff --name-only bb276070..HEAD` names five app files, one test file,
+this plan and `notes/QUESTIONS.md`. So no `swift test` and no iOS build are owed, and none was run.
+
+**One departure from the brief's letter, declared for the reviewer: a THIRD consumer** (piece C2 below).
+The brief's gate says *"drag the book navigator wider and narrower in Outline and Index"*, and in Index
+the navigator does not stand — the index column does, and it truncated the same chapter names. It became
+the same column. That is U-13's letter applied to the other place the panel lives, not a second
+acceptance unit: no new mechanism, no new brain, no new question, one call site.
 
 **The batch:** ONE acceptance unit — the leading-edge side column, built once in `Core/Views`, and its
 two consumers (the book navigator; the note Read tab's contents column). Rows 22 · 26 · 33.
@@ -7915,8 +7935,8 @@ two consumers (the book navigator; the note Read tab's contents column). Rows 22
 | A | the width brain's LEADING mirror + `SideColumn`'s `edge`/`maximum`; the pure pins | **DONE** (`b72d23f9`) |
 | B | the book navigator becomes the leading column (remembered width; the row pitch) | **DONE** (`6350758e`) · red-on-old MEASURED |
 | C | the note Read contents column becomes it (remembered width) | **DONE** (`d0817ec1`) · red-on-old MEASURED |
-| C2 | the book's OTHER chapter panel — Index's column — becomes it (the walk's finding) | **DONE** (this commit) |
-| D | the walk on the dev-store Debug build, both voices; captures | IN-PROGRESS (captures 01–05 taken) |
+| C2 | the book's OTHER chapter panel — Index's column — becomes it (the walk's finding) | **DONE** (`a10a09a9`) · red-on-old MEASURED |
+| D | the walk on the dev-store Debug build, both voices; 13 captures | **DONE** (this commit) |
 
 **Piece A, what landed.** `SideColumnLayout` gained `draggedWidthFromLeading` — the mirror, in the ONE
 width brain, so R1-7's past-the-edge floor could not be re-derived (or forgotten) at a call site — and
@@ -8010,3 +8030,110 @@ what they needed. Recorded because the same trap is waiting for the next mounted
 from past one edge to past the other, at both hosts' clamps — not a second table of numbers) ·
 `aLeadingDragPastTheEdgeMeansTheMinimumNeverTheIdeal` (R1-7's floor, mirrored) ·
 `aHostsOwnCeilingClampsTheRememberedWidth`. Run with `SideColumnTests`: **6 tests in 2 suites passed**.
+
+#### R-12 · THE WALK (the acceptance gate: USE, on the DEV-STORE Debug build `io.lduarte.Variorum.debug`)
+
+Driven with `cliclick` + `Tools/WalkKit/` on the Debug build at
+`App/Variorum/DerivedData/18d3/…/Debug/Variorum.app` — never `/Applications`; `pgrep -fl
+'Variorum.app/Contents/MacOS'` ran first and found none of hers, and the only instance quit at the end
+was mine, by pid. Captures (gitignored) in `notes/plans/use-report-2026-09-06-screens/18d-3/`. The book
+is Sherlock — thirteen chapters, the exact book her U-13 sentence is about.
+
+**What the walk proved, in points read off the screen** (window 1728 wide, sidebar 231, so a column's
+width is the boundary's screen x minus 231):
+
+- **The navigator drags, both ways, and stops where it should.** Default **190** (capture 01, nothing
+  moved on open) → dragged to **329** (02: every chapter title reads whole — *"The Adventure of the
+  Engineer's Thumb"*, *"The Adventure of the Copper Beeches"* — where 01 shows *"The Adventure of the
+  En…"*) → pointer dragged to local 529 and the column stopped at **360**, its ceiling (03) → pointer
+  dragged back to local 69 and it stopped at **190**, its floor, WITHOUT snapping wide (04 — the R1-7
+  mirror doing its job, which is the whole reason the floor lives in the brain).
+- **The chapters have room.** In 01 the chapter rows sit 50 pt apart (30 of row + 20 of group gap)
+  where the pre-fix tree measured 14 pt of row and 2 pt of gap (the red-on-old numbers above).
+- **It is remembered across a real quit and relaunch.** Dragged to **320**; `defaults read
+  io.lduarte.Variorum.debug bookNavigatorWidth` → `320`; ⌘Q; relaunch; the book reopened with the
+  navigator at **320** (06). *(An earlier attempt read 190 after a relaunch — a drag whose press had
+  missed the 9-pt grip, so nothing was ever written; the store showed no key at all. Re-run properly,
+  with the value verified in `defaults` before the quit, it came back. Recorded because a reader
+  should not have to wonder why the first attempt is not in the captures.)*
+- **THE FINDING (capture 05).** Switching to Index, the navigator correctly stepped aside — and the
+  panel standing in its place, `BookIndexView`'s own fixed 300-pt column, truncated the same names hers
+  did (*"The Adventure of the Engineer's T…"*, *"The Adventure of the Noble Bachel…"*). That is piece
+  C2's whole reason. After it: default **300** (07) → dragged to **430** (08), every name whole — and
+  `defaults` showed `bookIndexColumnWidth = 430` beside `bookNavigatorWidth = 320`, the two memories
+  separate exactly as designed (QUESTIONS #101(a)).
+- **Read's contents column, her second sentence.** At the shipped **340** every row truncates (09: *"To
+  Sherlock Holmes s…"*, *"One night—it was on…"*, *"“Wedlock suits you,”…"*). Dragged to **600** (10) the
+  rows read whole sentences: *"To Sherlock Holmes she is always _the_ woman."*, *"I had seen little of
+  Holmes lately."*, *"His manner was not effusive."* — her *"horizontally limited and not changable"*,
+  answered.
+- **Both voices.** The Study captures are 01–10; the voice was switched in Settings and the three
+  surfaces re-walked in Terminal: Read at its remembered 600 (11), Outline's navigator at its
+  remembered 320 (12), Index's panel at its remembered 430 (13). The widths survived the voice change,
+  and the mono voice is exactly where the extra room earns its keep.
+
+| Capture | What it shows |
+|---|---|
+| `01-study-outline-navigator-default.png` | Sherlock in Outline, nothing remembered — the shipped 190, the chapters at the new pitch |
+| `02-study-outline-navigator-dragged-wider.png` | dragged to 329 — every chapter title whole |
+| `03-study-outline-navigator-at-its-ceiling.png` | the pointer past 360; the column stops at 360 |
+| `04-study-outline-navigator-dragged-narrow-to-its-floor.png` | the pointer at local 69; the column stops at 190 and does NOT snap wide |
+| `05-study-index-the-navigator-steps-aside.png` | **the finding** — Index's own fixed 300-pt panel, truncating the same names |
+| `06-study-outline-after-relaunch-the-width-came-back.png` | ⌘Q → relaunch → the navigator at the 320 she left |
+| `07-study-index-chapter-panel-default-300.png` | Index's panel after C2 — the shipped 300, nothing moved |
+| `08-study-index-chapter-panel-dragged-wider.png` | dragged to 430 — every chapter name whole; the navigator still at 320 |
+| `09-study-read-contents-column-default-340.png` | Read's contents column at 340 — her truncation, verbatim |
+| `10-study-read-contents-column-dragged-wider-no-truncation.png` | dragged to 600 — whole first sentences |
+| `11-terminal-read-contents-column-wide.png` | the Terminal voice, Read's column at its remembered 600 |
+| `12-terminal-outline-navigator-wide-remembered.png` | the Terminal voice, the navigator at its remembered 320 |
+| `13-terminal-index-chapter-panel-wide-remembered.png` | the Terminal voice, Index's panel at its remembered 430 |
+
+#### R-12 · CLOSING RUNS
+
+- **Mac, ONE `xcodebuild test` run** — the 30 suite types the diff can reach (every suite that mounts
+  `BookView`, `BookIndexView` or `ReadModeView`; every consumer of `SideColumn`, `NoteIndexColumn`,
+  `BookIndexColumn` and the three oracles; plus the chrome-fit family the navigator's width could move:
+  `ChromeMinHeightTests` · `SidebarLayoutTests` · `ShellChromeTests`) **plus the ten `Tutorial*Tests`
+  spine types**: **`✔ Test run with 231 tests in 40 suites passed after 72.990 seconds.`** — 40 suites
+  for 40 requested types, so none was silently dropped; no `skipped:` line.
+- **Core: NOT run, because core is NOT touched** (`git diff --name-only bb276070..HEAD` names no
+  `Sources/` file). **iOS: NOT built, because `App/Variorum/Shared/` is NOT touched** — the same diff.
+- Two inherited pins this batch could have broken, named because they are the ones that would have
+  caught it: `OutlineWritingSurfaceTests.outlineProseSitsOnWritesOwnMeasure` (batch 1's
+  `layoutPriority` finding) and `BookOrderConversionTests.theNavigatorsChromeStaysInsideItsColumn` (the
+  b6dae25 chrome-containment class, now over a column that can be 190 OR 360 wide). Both green.
+
+#### R-12 · DISPOSITIONS
+
+- **Ledger row 33 — "the leading-edge draggable seam is needed twice (22 · 26); build the LEADING
+  variant of `SideColumn` once; both consume it" — FIXED.** Built as ONE component with an `edge`
+  rather than a second struct (the reason is at the code and in the piece-A note above), with the drag
+  arithmetic mirrored inside the one width brain. Pins: `theLeadingDragMirrorsTheTrailingOneAboutTheColumn`
+  (the relation, over a stride of pointer positions past both edges, at both hosts' clamps) ·
+  `aLeadingDragPastTheEdgeMeansTheMinimumNeverTheIdeal` (R1-7's floor, mirrored) ·
+  `aHostsOwnCeilingClampsTheRememberedWidth`. The shipped `SideColumnTests` ride **unmodified** — the
+  brief's own condition, verified by running them beside the new ones in every run of this batch.
+- **Ledger row 22 — "the outline's spacing; the chapter panel draggable" (her U-13 first sentence) —
+  FIXED.** Pins: `theNavigatorsChaptersHaveRoom` (**red on old**: chapter rows 14 pt against 30, note
+  rows 14 against 24, the gap between groups 2 against 20) · `theNavigatorIsTheWidthSheLeftItAtAcrossARemount`
+  (**red on old**: a stored 300 and a stored 900 both drew 190). Evidence of its kind: the walk,
+  captures 01–04 · 06 · 12, both voices, with the quit-and-relaunch measured.
+- **Ledger row 26 — "the Read contents column adjustable" (her U-13 second sentence) — FIXED.** Pin:
+  `theReadContentsColumnIsTheWidthSheLeftItAtAcrossARemount` (**red on old**: a stored 480 and a stored
+  80 both drew 340). Evidence: captures 09 → 10 (her truncation, then whole sentences) and 11.
+- **Nothing DISMISSED AS HOLLOW.** All three rows are ruled design rows, not bug claims; their evidence
+  is the geometry oracle and the walk, exactly as the brief's rule 3 provides for. What DID pass on both
+  sides — each width pin's *"nothing remembered"* arm — is recorded above as the no-change guarantee it
+  is, not as a hollow claim.
+- **Nothing DEFERRED out of these rows.** The one addition (piece C2, Index's panel) is inside the
+  ruling, not a deferral; the one product edge the ruling does not settle is **QUESTIONS #101**
+  (PROVISIONAL, both parts: the two book panels keep separate memories; all three widths are one
+  posture rather than per-book/per-note).
+- **New material recorded, with a suggested owner, NOT a deferral of these rows:** the three DEBUG
+  geometry oracles were single statics and Swift Testing runs SUITES in parallel — a book mounted by
+  another suite landed in mine (measured). Fixed inside this batch for the oracles it touched (keyed by
+  id + the live uuid generator in this suite's harnesses). **The same trap is unexamined in the other
+  singleton oracles** (`MastheadGeometry`, `TakeCardGeometry`, `CompareGeometry`, `LensesGeometry`,
+  `SidebarGeometry`, `BlocksWorkbenchOracle`, …): a KnownIssues row under 13u2's harness family, or a
+  17 entry at her word, if the 18d ladder confirms it is worth a sweep.
+
