@@ -9102,4 +9102,270 @@ schema.
 
 ### 18d LADDER — ROUND 2 FINDINGS (opus-reviewer, fresh)
 
-*(the reviewer writes here — a real pass over round 1's fixes and what they touched, anchored on the round-1 findings, arbitration and the four fix passes above; severity-ranked, the REVIEW_PROMPT format, then the clean bill)*
+Cold pass over `git diff ce6eb9cb..ecacfa42` — the four 18d batches AND round 1's four fix passes
+(batch 2 `0fc42660..627fde0b` · batch 3 `2f76f45a..6f0ed2b4` · batch 1 `0a1d823f..e93429c8` ·
+batch 4 `1a1bea5c..ecacfa42`) — read against `CLAUDE.md`, `notes/AppSpec.md` (§9 · §12),
+`notes/OverallModel.md` (I1–I10 · P1–P3 · S1–S5), `notes/SyncSpec.md`, `notes/KnownIssuesAndTechDebt.md`,
+this file's §1 (U-9 · U-10 · U-12 · U-13 · U-17), §3 rows 22 · 23 · 25 · 26 · 30 · 33 · 34, §5.4,
+R-0, the briefs R-10…R-13 with their RECORDs and ADJUDICATIONs (J33–J42), QUESTIONS #99–#101, and the
+round-1 findings + arbitration + the four fix records above. Read myself, in this session; three
+targeted suites RUN here rather than trusted (results in the clean bill).
+
+#### THE SCOPE CALL, FIRST
+
+**Still Opus. The diff does not touch the editor seam proper.** The only `Sources/` files in the whole
+range are the additive `Queries/NoteStamps.swift` and its test (`git diff --name-only ce6eb9cb..ecacfa42
+-- Sources/ Tests/`); `Sources/VariorumCore/Sync/` is untouched; no schema, no migration, no lockstep
+event. The one `EditorViewModel` change in the range is still exactly J34's two guarded assignments
+(`:527–529` in `teardown`, `:2856–2863` in `updateCaretContext` — I read the whole file diff), and the
+fix passes touch no mount, no `BlockRangeIndex`, no `EditorTextView`, no `PaneTextAuthority`, no
+custody, no default's meaning. Round 1's scope call holds unchanged.
+
+#### Findings, severity-ranked
+
+**[MAJOR-1] · `App/Variorum/Variorum/Theme/EditorTypography.swift:71–74, 207–212` · MINOR-2's fix is
+defeated by its own SECOND adoption door, inside exactly the window the guard was built for — and the
+record's residual sentence is therefore not true on that path.** The fix's guard is
+`EditorTypography.isAdopted`, whose doc says it tells "whether `current` is the STORE's answer or still
+the compile-time default". Two doors set it: `ThemeStore.start`'s landing (correct), and
+`NSTextView.applyVoiceChrome`, which calls `EditorTypography.adopt(chrome.typography)` on the argument
+its host hands it. **Both hosts build that argument from the store's UNLANDED value:**
+`EditorView.swift:72–74` and `ReadTier/ReadPostView.swift:47–49` are both
+`themeStore?.settings ?? Queries.ThemeSettings()`, and `ThemeStore.settings` is initialised to
+`Queries.ThemeSettings()` (`ThemeStore.swift:21`), whose `voice` is `.terminal`
+(`Sources/VariorumCore/Queries/AppearanceQueries.swift:14`) — the exact compile-time guess. The store's
+own value arrives from an async `AsyncValueObservation` started by `RootView`'s `.task`
+(`RootView.swift:326`). **Mechanism, traced:** launch in Study with a text surface materializing in the
+first pass (a restored Write note, or the Outline's read-cheap `ReadPostView` rows, which call
+`applyVoiceChrome` at `ReadPostView.swift:152`) → `applyChrome` runs before the observation returns →
+`adopt(terminal)` → `isAdopted = true` and `EditorTypography.fingerprint` is non-nil and WRONG → the
+`guard let stamp` at `SurfaceSizeMemory.swift:180` no longer drops → `remember` stamps the session
+record with the guessed voice and OVERWRITES the record `record(_:)` just loaded from disk
+(`:223–233`), which is precisely the clobber the fix's second half exists to make impossible. The
+disk half is reachable too, on the flow's own immediate-persist road:
+`ReadingFlowView.swift:919–923` calls `memory.remember(...)` and then `settledHere()` →
+`memory.persist(...)` **in the same turn**, so a guessed stamp is written straight over her record with
+no settle interval to save it. **The honest bound:** which of two async reads wins is a race, so I
+cannot promise the bad order on every launch — but a guard whose correctness depends on winning a race
+is not a guard, and the batch-4 record's own residual (*"the window is now bounded by the theme's own
+DB read … nothing can be written under a guess inside it"*) states the opposite of what this door
+allows. The batch's walk cannot distinguish the two doors: she opened the Sherlock book by hand,
+seconds after launch, by which time either door had adopted. **Pin (RED on the tree as it stands):** in
+`SurfaceSizeMemoryTests`, seed her Study record; put the process global in the unadopted state
+(`EditorTypography.isAdopted = false`, restored in a `defer` as the sibling pin already does); apply the
+chrome an unlanded store hands out — `EditorTextView.makeInlineEditor().applyVoiceChrome(
+EditorSurfaceChrome(tokens: Queries.ThemeSettings(), dark: false))`; then `remember` + `persist` a size
+and assert her record survives in memory and on disk. Red today (adopted with a Terminal stamp, her
+record gone — the `aReportBeforeTheVoiceIsKnownNeitherStampsNorClobbers` first half, reached through a
+production door); green once the latch is fixed. **Fix:** let `applyVoiceChrome` keep writing
+`EditorTypography.current` (surfaces still agree) but NOT set `isAdopted` — adoption belongs to the
+settings' one authority, which is what the fix's own doc says — or carry an `authoritative` flag on
+`EditorSurfaceChrome`, set only when the store has landed, and adopt on that. Whichever is chosen, the
+residual paragraph in the batch-4 record should be re-worded to what remains true.
+
+**[MINOR-1] · `App/Variorum/Variorum/RootView.swift:629–649` · the FOURTH seam still carries ledger
+row 9's exact shape, and it is now the ONE remaining copy — recorded in a plan file with two candidate
+owners and entered under neither.** `paneDivider` is still a 1-pt `Rectangle` with a **9-pt
+`.overlay`** grip, `NSCursor.push()`/`pop()` on `.onHover`, and **no `.zIndex`**, inside the pane row's
+`ForEach` (`:608–616`) where `paneHost` (`:652`) is the divider's later HStack sibling and therefore hit-tests
+above the grip's right half — over a live editor's I-beam, which is her sentence verbatim (*"the hitbox
+… too small … sometimes the I looking pointer"*). MAJOR-2's fix makes this cheap and makes it visible:
+`SeamGrip` exists, both other hosts consume it, and `SeamGrip`'s own frame is the same 1 pt this row's
+width math already subtracts (`RootView.swift:607`), so the conversion is layout-neutral — the only new
+claim is the `.zIndex(1)` the batch-3 record was right to call a decision. **What makes it a finding
+rather than an inherited hazard:** batch 3 recorded it (*"a KnownIssues row under 13u2's chrome family,
+or a 17 entry at her word"*) and J42 handed the call to this round, and I checked —
+`notes/KnownIssuesAndTechDebt.md` has no row for it, so a known defect currently has no owner, which
+CLAUDE.md's tracking rule forbids ("no new entry without naming the owner… If nothing owns it, fix it
+now instead"). **Not MAJOR:** it is pre-existing, outside this diff's own edits, and unlike batch 3's
+three boundaries it was not minted here. **Pin (red on old, the shape MAJOR-2's took):** instrument
+`paneDivider` to report its grip's frame and assert grip ≥ 12 pt, centred on the line within 0.5, and
+reaching more than 4 pt past it on BOTH sides — red today (9 pt, and it does not reach the pane side).
+**Fix:** either the three-line conversion to `SeamGrip` + `.zIndex(1)` on the divider inside the
+`ForEach`, or a KnownIssues row naming its owner. Both are legitimate; leaving it in a ladder record is
+not.
+
+**[MINOR-2] · `App/Variorum/Variorum/Core/Views/SeamGrip.swift:113–127` · MAJOR-2's new DEBUG oracle is
+keyed by the surface FAMILY, not by the subject — the round-1 MINOR-3 class, reintroduced by the fix,
+with a doc that says it was avoided.** `SideColumnGeometry`'s comment reads *"Keyed by the column's
+`widthKey`, because Swift Testing runs SUITES in parallel and a second column mounted elsewhere would
+land in the same statics — the lesson 18d batch 3 measured on its own geometry oracles."* But
+`widthKey` is a per-HOST `@AppStorage` constant, not a subject: `BookNavigatorLayout.widthKey =
+"bookNavigatorWidth"` (`BookView.swift:1727`), `BookIndexColumn.widthKey = "bookIndexColumnWidth"`
+(`BookIndexView.swift:78`), `ReadModeView.indexColumnWidthKey` — so **every** book navigator, in every
+suite and every window, writes the same two entries. Contrast the oracles batch 3 actually keyed by
+subject and which this fix sits beside: `BookIndexGeometry.columnFrames[book.readingID]`,
+`ReadModeOracle.indexColumnFrames[postID]`. **Mechanism:**
+`OutlineRoomTests.theLeadingSeamsGripIsWideCentredAndReachesIntoBothSides` resets, mounts its own book,
+then reads `gripFrames["bookNavigatorWidth"]` and `lineFrames["bookNavigatorWidth"]`. A navigator
+mounted concurrently by any other suite can supply either rectangle — both directions are real: if it
+supplies both, the pin passes about someone else's window (round 1's *"a green pin that proved
+nothing"*); if it supplies one, `abs(grip.midX - line.midX) <= 0.5` compares two different windows and
+goes SPURIOUSLY RED. **No red-on-old pin applies** — this is harness hygiene, not product behaviour,
+and I label it so rather than let the ladder call it hollow. **Fix:** give `SideColumn` a `subjectKey`
+exactly as batch 1 gave `SidebarNoteBox` one (the host passes its book/post id) and key the two
+dictionaries `"\(widthKey)|\(subjectKey)"`; the two pins then mint live uuids as batch 1's and 3's do.
+It also belongs in J41's owed oracle-sweep row.
+
+**[MINOR-3] · `Core/Views/SurfaceSizeMemory.swift:195–197` + `Registry/CommandRouter.swift:224–232` ·
+NIT-3's premise correction is right, and the fix landed on a door production never walks — but both
+comments now read as if it does.** I re-ran the grep rather than trusting the record:
+`grep -rn "forgetCurrentBlock\|currentBlocks.forget" App/Variorum` returns the declaration
+(`CommandRouter.swift:233`), the new doc reference in `SurfaceSizeMemory`, and **35 call sites, every
+one of them in `VariorumTests/`** — the record's correction is exact. What follows from it is not
+recorded: `SurfaceSizeMemory.forgetPersisted` is now wired to a door with no production caller, so
+NIT-3's underlying observation is still TRUE after the fix — deleting or purging a note evicts neither
+`currentBlock.<id>` nor `surfaceSize.<family>.<id>`, and both sets of keys outlive the note forever.
+Meanwhile the code says the opposite: `SurfaceSizeMemory`'s doc calls it *"the door the app itself walks
+through when a note's memories go"*, and `CommandRouter`'s says *"One occasion, every memory"* — the
+J8 copy-truth class that round 1's own MINOR-6 was about. **No bug pin is owed for the doc half; the
+leak half is pinnable** (delete a note through its real door and assert the `surfaceSize.*` keys are
+gone — red today) if the fix is chosen over the record. **Fix:** one clause at both comments saying
+this door is a pin's reset today and that no production road calls it, plus either a KnownIssues row
+with an owner or a line at the real occasion (`deleteContainer`'s door, or 13j's purge janitor, where
+the note's other per-note keys would want the same eviction).
+
+**[MINOR-4] · `Core/Views/SidebarNoteBox.swift:63, 146` · MINOR-7's fix relocated the coupling rather
+than reversing it: `Core/Views/` still reaches down into `Features/Library/`.** The three grammar
+numbers moved from `SidebarView` into `SidebarLayout` — but `SidebarLayout` lives at
+`App/Variorum/Variorum/Features/Library/SidebarLayout.swift`, so the box (in the shared-chrome home)
+still reads a `Features/Library/` type, exactly the direction its own new comment now forbids in
+writing: *"the shared-chrome home never reaches down into a feature."* The traced degradation is
+round 1's unchanged — a Library edit can still move a shared component silently, and a reader in
+`Core/Views` has no signal — and it was already true before this batch (the box read
+`SidebarLayout.groupHeaderHeight`/`railGroupHeight`), which is why the relocation did not move it. **No
+pin applies** (architectural). **Fix, one file move:** `SidebarLayout` is a `nonisolated enum` of pure
+numbers and pure functions importing only `Foundation` — hoist the file to `Core/Views/` (the hoist rule
+in the direction it is written), or take round 1's other option and move `SidebarNoteBox` into
+`Features/Library/`, whose sidebar is its only renderer.
+
+**[NIT-1] · `Core/Views/SideColumn.swift:191–195` · the `.zIndex(1)` on the TRAILING edge is a
+hit-geometry change to five shipped panels, neither walked nor pinned.** The confirmed finding and the
+fix's three re-walked drags were all about the LEADING seams; the fix put `.zIndex(1)` on both edges.
+On a trailing column the divider is drawn before the panel, so its grip's right half used to be dead
+and is now live — a 7-pt strip at the LEADING edge of the note's inspector panels (tray, Block History,
+Versions, references, scraps — `PostDetailView.swift:193`) and the canvas tray
+(`CanvasView.swift:1055`) now belongs to the seam. I looked for harm and did not find it by reading
+(the tray's own content sits inside 12 pt of padding, and 7 < 12), so this is recorded rather than
+raised: the next walk of a trailing panel should press its left edge once. Widening the grip from 9 to
+14 pt also puts the leading columns' overlay scrollbar under the grip's panel-side half — the same
+accepted consequence the shell's seam has shipped with since 17o batch d, noted so it is not
+rediscovered as new.
+
+**[NIT-2] · `VariorumTests/SurfaceSizeMemoryTests.swift:417–447` ·
+`theTypographyIsAdoptedWhereTheSettingsLandNotWhereAViewNoticesThem` writes two process globals for the
+length of a real `ThemeStore` observation.** It sets `EditorTypography.current` and `isAdopted`, starts
+a store, and spins a 5-second `while` — during which any concurrently mounted surface in another suite
+both READS those globals (and so draws in whichever voice this test last set) and can itself call
+`adopt` through `applyVoiceChrome`, moving them under the loop. The `defer` restores what it found, so
+nothing leaks past the test, but the window is real. Same family as round 1's MINOR-3; harness hygiene,
+no red-on-old pin. It rides in J41's owed sweep row rather than needing its own fix pass.
+
+#### Considered and cleared (traced, so the next reader does not re-raise them)
+
+- **The extraction did not change either seam's hit geometry.** `ShellSplit.dividerWidth` and
+  `gripWidth` now forward to `SeamGrip.lineWidth`/`width` — still 1 and 14 (`ShellSplit.swift:58, 72`);
+  `SeamGrip`'s body is the shell's old shape byte-for-byte (a ZStack of the line and a 14-pt clear
+  `contentShape` grip, the whole thing framed at the LINE's width so the grip overhangs and still
+  hit-tests, `.pointerStyle(.columnResize)`, the drag in the host's named space); the row-41
+  `ignoresSafeArea` half rides on `lineRunsUnderTheTopBand: true` for the shell and false everywhere
+  else. On the LEADING edge the divider already outranked the panel (a later sibling), so the new
+  `.zIndex(1)` changes only the content-side half — which is the half the batch's three drags pressed
+  at boundary + 4 pt.
+- **`editing`'s multi-window hazard is not new, and 13f closes it.** `EditorRouter` is app-scoped, and
+  `editing` is claimed by any editor that computes a caret context — including the projection appliers
+  (`EditorSurfaceController.applyDifferential:122`, `:178`), which run on a background note's external
+  edit and not only on a click. That would matter if two live editors could coexist; `PaneMount.kind(of:
+  focused:windowIsKey:)` (`RootView.swift:659`) is the one fork that says exactly one pane in
+  exactly one KEY window mounts a live surface, and `teardown()` clears both fields. So `editing` moves
+  where `active` moves, and no door acquires a cross-window reach it did not have.
+- **The fallback to `active` does not reopen the blank-bar road at the box.** `RootView.swift:574`
+  reads `session.editorRouter.editing` alone — never `editingOrActive` — so the box still refuses to
+  build a bar from the Outline's shadow, which was the walk's original finding. `editingOrActive` is
+  read only by the two caret doors, where the fallback's stated purpose (a freshly attached editor that
+  has not yet reported a caret is the only editor there is) is exactly right.
+- **The two `active` readers the KnownIssues row calls correct really are correct.**
+  `writeEditorOwnsScrollView` (`AppSession.swift:575`) gates the find family on the editor owning a
+  scroll view; the Outline's REAL editor is itself an inline editor attached with `scrollView: nil`, so
+  the shadow and the real editor answer that gate identically and no door is disabled that should be
+  enabled. `writeEditorAttached` asks the attachment question `active` is the right field for. And the
+  sweep is complete: grep shows the only remaining production `editorRouter.active` readers are
+  `MacWillLock:48`, `VariorumAppDelegate:63` and those two gates — exactly the four the row enumerates.
+- **MINOR-4's restoration is faithful and the cross-branch claim is real.** Each of the three constants
+  is byte-identical to its `ce6eb9cb` value (diffed one at a time), and in `~/dev/variorum-mobile` on
+  `mobile` (read-only, nothing touched) `MobileNoteTray.swift:114, 115, 579, 584` and that branch's
+  `TrayPanel.swift:117, 118, 809` consume all three, plus `trayLeavingExplainer(home)` at `:116` —
+  which still exists here with the shrunk text, so the compile break is closed and only the copy
+  regression remains for the MOBILE PARITY LINE.
+- **`persist` cannot rewrite a loaded record by itself.** `record(_:)` seeds `written[key]` with the
+  stored string, so a `persist` with no intervening `remember` short-circuits at `:190`. MAJOR-1 above
+  is about `remember` being re-enabled under a guess, not about `persist` drifting.
+- **NIT-2's fix loses nothing.** `select(view:)`/`select(kind:)` (`TrayPanel.swift:328–336`) do nothing
+  but assign and call `remember()`, so setting the two fields directly in the reveal arm is exactly the
+  landing-without-remembering §5.4 asks for.
+- **MAJOR-1's rewritten lesson is TRUE of the shipped control.** The tray really does render two tabs
+  each carrying its count (`TrayPanel.viewChoice:856–875`, including a zero) with the shared
+  `all · blocks · takes` filter under them, and all six seeder routings now quote
+  `TrayPath.archivedTab`/`leavingTab` and `RecoveryCopy.trayFilterAll/Blocks/Takes`, so the next rename
+  reaches the field guide instead of being swept again.
+
+#### CLEAN BILL — load-bearing things I checked myself and found solid
+
+- **`ShellChromeTests` still proves the shell's seam over the extracted component — RUN here, not
+  trusted:** `xcodebuild test -only-testing:VariorumTests/ShellChromeTests` →
+  `✔ Test run with 5 tests in 1 suite passed after 0.553 seconds`, including
+  `theSeamsGripIsWideCentredAndReachesIntoBothSides` (grip ≥ 12, centred within 0.5, reaching > 4 pt
+  past the line on both sides, height ≥ 100). The file is untouched by the fix pass
+  (`git diff --stat 86f01d64..ecacfa42` — `ShellChromeTests.swift` absent), which is the honest proof
+  the extraction changed nothing for the shell. `ShellGeometry`'s two frames are still published, now
+  through `SeamGrip`'s callbacks.
+- **The leading seam's own pin and MINOR-5's floors — RUN here:**
+  `-only-testing:VariorumTests/OutlineRoomTests -only-testing:VariorumTests/SurfaceSizeMemoryTests` →
+  `✔ Test run with 18 tests in 2 suites passed after 7.889 seconds`, with MINOR-5's numbers printed by
+  the pin itself: `[18d MINOR-5] Index panel at its floor: leftmost ink 15.0 pt` and
+  `Read column at its floor: leftmost ink 20.0 pt`. The HOLLOW call is right, and the record's proof
+  that the oracle has teeth (ink at x = 0.0 with the floor dropped to 110, the panel drawn 195 because
+  a frame centres what it cannot shrink) is the b6dae25 class made visible in one number.
+- **MINOR-1's pin — RUN here and read line by line:**
+  `-only-testing:VariorumTests/NoteBoxCompositionTests -only-testing:VariorumTests/NoteBoxGeometryTests`
+  → `✔ Test run with 6 tests in 2 suites passed after 2.630 seconds`, including
+  `theCaretDoorsActOnTheEditorSheIsWritingInNotTheLastToAttach`. **The reproduction is faithful to the
+  app's shadow:** the KnownIssues trace says a second `InlineEditorSurface` for the same post attaches
+  ~60 ms after the real one, never receives a projection, and takes `active`; the pin builds a second
+  `EditorViewModel` for the same post, attaches a text view, and asserts `active === shadow` and
+  `shadow.caretBlockID == nil` — the same three facts, in the same order (the real editor has already
+  claimed `editing` through its projection). That a hosted mount cannot grow the real shadow is stated
+  at the pin and was measured (the first cut was green on both sides and is recorded as such), which is
+  the hallucination guard applied to the reviewer's own prediction.
+- **The two caret doors read the right field and say why.** `EditorCommands.swift:554–569` and
+  `ShellActions.swift:246–252` both go through `editingOrActive`, each carrying the P-2 sentence;
+  `EditorRouter.swift:16–63` states the rule once, at `active`, in the form the finding asked for
+  (`active` = attachment, `editing` = the caret, `editingOrActive` = what a caret door reads).
+- **MINOR-3's keying is right where it was applied.** `SidebarGeometry.noteBoxFrames` /
+  `noteBoxHeaderFrames` / `noteBoxFaces` are keyed by the box's subject (`RootView.swift:579` passes the
+  report's `readingID`) and `CommitBarGeometry.mounted` by the bar's post with a `mounted(_:post:)`
+  reader — so the U-17 retirement pin (`mounted["horizontal"] == 0`, the one that was red at 3 issues)
+  can no longer be turned red by any concurrently mounted editor. `rowFrame`'s staying a singleton is
+  scoped and stated at the code.
+- **MINOR-7's numbers moved and did not change.** `SidebarLayout.groupPadding/rowPadding/headerAir` are
+  12 / 8 / 6, `SidebarView`'s copies are private computed aliases, and the `ShellChromeTests` budget
+  pins rode unmodified — which is the proof the addresses moved and the arithmetic did not.
+- **The `isAdopted` guard is otherwise correctly placed.** `ThemeStore.start` adopts at `settings =
+  value` (`:44–45`), which really is the only landing there is — the loop runs for the app's lifetime
+  and never returns, so the batch's sharpening of the arbitration's wording is correct, and the fix now
+  fires for every arrival including one that equals the compile-time default (the old `.onChange` road's
+  second hole). `EditorTypography.fingerprint` answering `String?` propagates correctly:
+  `SurfaceSizeMemory.size` compares `String == String?`, so a nil stamp refuses rather than matching.
+  MAJOR-1 is about the second door, not this one.
+- **Nothing in the fix passes reaches the store, the wire or a default.** File list checked: the four
+  passes touch `Shared/RecoveryCopy.swift`, ten `Variorum/` files, seven test files, `KnownIssues` and
+  this plan — zero `Sources/`, zero `Sync/`, zero schema, zero migration, no lockstep event owed. The
+  three column widths, the two surface-size key spaces and the tray's view memory are all UserDefaults
+  view state (S1–S5 untouched, CLAUDE.md's "UI state is a projection").
+- **P1/P3 hold in the fixed code.** `NoteBoxFactsModel.load` is still one `.task(id:)` read whose cost
+  is ∝ the note's own blocks (`Queries.renderPost` + `Queries.noteStamps`), with the reason it is not a
+  `ValueObservation` written at the head; the fix passes added no per-frame query, and `SeamGrip`'s two
+  `onGeometryChange` reporters are the same two the shell already had.
+- **The obligations round 1 named are still tracked, not lost.** The AppSpec §12 delta (Outline's right
+  gutter as a DETAILS GUTTER, now false) and the round's MOBILE PARITY LINE — which MINOR-4 gives its
+  content — are both carried in §10 and in R-10/R-11's own closeout sections.
