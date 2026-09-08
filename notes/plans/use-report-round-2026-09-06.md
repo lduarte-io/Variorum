@@ -5741,11 +5741,27 @@ about pixels rather than about a picture, it is **pixel-probed**, not eyeballed.
 
 **LIVE STATUS — 17o batch e (opus-implementer, opened 2026-09-08 at `c248eb01`).**
 
-**WHAT I HAVE NOT DONE (the record's first line, per rule 9) — PENDING, kept honest as I go.**
-At this checkpoint: the pins are not written, the walk is not run, the closing suites have not run.
-What I will deliberately NOT touch in this batch, stated up front: `Sources/` (core), `Sync/`, schema,
-`App/Variorum/Shared/`, `BlockRangeIndex`/`EditorTextView`, the Snippets GROUPS model, and any
-post-tag machinery on pools (a pool wears none — the brief's fence).
+**WHAT I DID NOT DO (the record's first line, per rule 9).** Nothing in the batch is left open: rows
+38 and 39 are both FIXED, red-on-old measured, walked in both voices and captured. What I deliberately
+did NOT touch, proven by `git diff --stat c248eb01..HEAD` (four app files, one test file, this plan —
+565 insertions): `Sources/` (core — zero lines), `Sync/`, schema, `App/Variorum/Shared/`,
+`BlockRangeIndex`/`EditorTextView`, `PoolDetailView`'s landing road (reused, not edited — the probe's
+edit was reverted), the Snippets GROUPS model, and any post-tag machinery on pools (a pool wears none —
+the brief's fence). Because core and `Shared/` are untouched, rule 9's `swift test` and iOS-build
+triggers did not fire; the Mac run below covers the whole diff.
+
+**Three things I found and did NOT fix, for the reviewer and their owners rather than folded in:**
+**(a)** `RootView.opener` (`openHere`) never clears `blockTarget` while `RootView.open(_:blockID:)`
+does — so any door that goes through `openHere` into a container that is ALREADY the parked target
+re-lands a stale block. This batch removed the Snippets area's exposure by routing both its doors
+through `open`, but the Library's, the palette's and the recovery surface's `openHere` doors keep it;
+it is one line (`blockTarget = nil` inside `adopt`) and it is not this surface, so it is not mine.
+**(b)** `BlockTagAssignmentSheet` is the ONE tag sheet three surfaces render (Snippets, the scraps
+panel, canvas cards) and it is still unvoiced — system `.headline`/`List`/`Toggle`, no `VoiceTokens` —
+so it looks the same in both voices while everything around it changes. Cosmetic, cross-surface, and a
+13u2 restyle item, not a defect this batch owns. **(c)** its title says *"Tags for block …"* — the
+model term on a face — but the sheet is shared with non-snippet surfaces where "block" is the right
+word, so the K5 vocabulary rule does not obviously bite; recorded, not changed.
 
 - **Orientation — DONE.** Read in my own context, in the brief's order: `CLAUDE.md` and the canon it
   auto-loads (CoreDescription — the inspiration pool; OverallModel §2/§4/§7; AppSpec §7 `block_tag`
@@ -5788,16 +5804,13 @@ card's **`#path` chips**. Which of the two she saw is settled at the walk and re
 
 **Pieces (checkpoint order):**
 
-1. the door's decision made explicit + both card doors + RootView + the copy (row 38) — **DONE
-   (`PENDING-HASH`)**
-2. the tag chip becomes the door + the sheet's stale empty-state copy (row 39) — **DONE
-   (`PENDING-HASH`)**
-3. the pins (the brain, the landing mount, the copy) — **DONE (`PENDING-HASH`)**
-4. the red-on-old by behavioral revert on the committed tree — **DONE (`PENDING-HASH`)**
+1. the door's decision made explicit + both card doors + RootView + the copy (row 38) — **DONE (`ac821f69`)**
+2. the tag chip becomes the door + the sheet's stale empty-state copy (row 39) — **DONE (`ac821f69`)**
+3. the pins (the brain, the landing mount, the copy) — **DONE (`a55f24c6`)**
+4. the red-on-old by behavioral revert on the committed tree — **DONE (`74ac3be7`)**
 5. **row 39's other half, found BY the walk** — the tag filter's empty case names the door — **DONE
-   (`PENDING-HASH`)**
-6. the walk + captures + the closing suites — **IN PROGRESS** (rows 38 walked in both voices; row 39's
-   chip door and the filter's new words still to capture; the closing suites not run)
+   (`9ad840af`)**
+6. the walk + captures + the closing suites — **DONE (this commit)**
 
 **What landed in pieces 1 + 2:**
 
@@ -5889,3 +5902,75 @@ bulk tag menu's own empty case already uses two screens away in the same file, w
 guide words it (*"right-click a scrap row … and Tags… opens its tag sheet"*). No new act, no new
 surface, no invention — an existing control made honest (the J8 copy-truth doctrine this round runs on).
 Pinned: `theTagFilterNamesTheDoorWhenNothingIsTagged`.
+
+---
+
+### R-9 · THE WALK (the acceptance gate: USE, on the dev-store Debug build `io.lduarte.Variorum.debug`)
+
+Driven with `cliclick` + `Tools/WalkKit/` on the Debug build only, from a Debug rebuild of the clean
+committed tree (the probe binary was replaced first — checked by its mtime, not assumed);
+`/Applications/Variorum.app` never launched and her real store never touched
+(`pgrep -fl 'Variorum.app/Contents/MacOS'` clean at open, between the two instances, and at close).
+Captures in `notes/plans/use-report-2026-09-06-screens/17o-e/` (gitignored). **The dev store reproduced
+her situation exactly**: Snippets browsing "all snippets", 5 snippets in 3 groups — the seeded default
+"Snippets" (1, minted first, therefore the ACTIVE pool), "field guide" (2), "tutorial scraps" (2).
+
+| Row | What was done, and what was seen | Captures |
+|---|---|---|
+| 38 | **Study.** Right-clicked the tutorial-scraps card while "all snippets" was the scope: the row now reads **"Open this snippet in its editor"**. Clicking it opened **tutorial scraps** — its two snippets, not the default group's one — with the CLICKED snippet ringed and the bar reading **block 2/2**. | `walk-01`, `walk-02`, `walk-03` |
+| 38 | **The control, in the same session:** the header's *open as editor* on the same scope opened the DEFAULT "Snippets" group — one block, no ring, block 1/1. **That is exactly what her card door used to do**, so the two captures are the before and the after side by side, and they also prove the scope door kept its meaning. | `walk-04` |
+| 38 | **Terminal.** DOUBLE-CLICKED a *field guide* card (a third group, neither active nor the one above): the **field guide** group opened, caret in the clicked snippet, **block 2/2**. Both card doors, both voices, three different groups. | `walk-05`, `walk-06` |
+| 39 | **The finding.** No snippet on the page wears a tag chip; the tag-shaped thing is the toolrow's FILTER, and opened on an untagged listing it offered exactly one row, "tag: any" — a dead control. **This is what she saw.** | `walk-07` (pre-fix) |
+| 39 | **Terminal.** The filter now reads `tag: any` + the quiet row *"no snippet here wears a tag yet — right-click one ▸ Tags…"*. | `walk-08` |
+| 39 | **Terminal.** ⋯ ▸ Tags… → toggled `walked` → Done: the `#walked` chip appeared on the card. **Clicking the chip opened that block's tag sheet** with `walked` checked — the card was not selected and no editor opened. | `walk-09`, `walk-10` |
+| 39 | **Study.** With a tag present the filter lists `#walked` (the explainer correctly absent); the chip is a door here too; unchecking `walked` restored the store and the filter went back to naming the door. | `walk-11`, `walk-12`, `walk-13` |
+
+**The store was left as it was found** — the one tag applied during the walk was removed in the same
+walk (`walk-13` shows the chip gone).
+
+### R-9 · CLOSING RUNS
+
+- **Mac, ONE run, 28 suites named, 28 suites reported — `Test run with 146 tests in 28 suites passed`**
+  (no `skipped:` line, so no type name was silently dropped). The set: the three new Snippets-door
+  suites · the four standing Snippets suites (`SnippetsVocabularyTests · SnippetFilterTests ·
+  SnippetsGroupDoorsTests · SnippetGroupTrashTests`) · the suites over the files this batch touched
+  (`CapabilityRegistryTests` — the registry walk over `BlocksAreaView.surfaceCapabilities`;
+  `CanvasAndPoolTests · PoolCardPreviewTests · BlockTOCTests · NoteTagDeclarationTests ·
+  LibraryTagFaceTests`; `RootView`'s `PaneMountTests · PaneSplitDoorTests · PaneUnmountTests ·
+  AscentRoutingTests · ShellChromeTests`) · and the **ten `Tutorial*` spine types**.
+- **Core `swift test`: NOT RUN, and rule 9 says not to** — `Sources/` is untouched (zero lines,
+  `git diff --stat`). **iOS build: NOT RUN, same rule** — `App/Variorum/Shared/` is untouched.
+
+### R-9 · DISPOSITIONS
+
+- **Row 38 — FIXED.** Pins: `SnippetOpenTargetTests.aCardsDoorNamesItsOwnGroupAndTheSnippetClicked`
+  (+ `theHeadersScopeDoorOpensTheGroupBeingBrowsedWithNoLanding`,
+  `theOpenRowNamesTheSnippetAndNotAContainerItCannotPromise`) and
+  `SnippetsLandingTests.openingAGroupAtANamedSnippetLandsTheCaretInIt`. Red-on-old: probe 1 → **4
+  issues**, probe 2 → **1 issue**. Walked in both voices through both card doors, with the header's
+  scope door as the control (`walk-02`…`walk-06`).
+- **Row 39 — FIXED, in two halves, the second one the walk's.** (i) the `#path` chip on a card is the
+  tag door — evidence is the WALK (`walk-09`…`walk-12`), which is this row's proper class: it is a
+  findability row, and a SwiftUI `.plain` button inside a card cannot be counted from a mount (the
+  `MastheadTagDoorTests` finding). (ii) the tag filter's empty case names the real door — pinned
+  (`theTagFilterNamesTheDoorWhenNothingIsTagged`), walked in both voices (`walk-08`, `walk-13`).
+  **The brief's question, answered: the tag she saw on her snippet was NOT the tutorial's seeded one.**
+  The tutorial seeds no block tags at all (every `applyTag` there is `toPost:`), and no snippet on a
+  fresh store wears a chip — what is "on there" is the FILTER.
+- **Row 39's rider — FIXED.** The tag sheet's empty state no longer sends her to a sidebar section
+  retired at R52. Pin `theSheetSendsHerWhereTagsActuallyLive`; red-on-old probe 3 → **2 issues**.
+- **Nothing DISMISSED AS HOLLOW; nothing DEFERRED.** The three notes under the record's first line are
+  observations for the reviewer, not deferred rows of this batch.
+
+**Captures (13, in `notes/plans/use-report-2026-09-06-screens/17o-e/`, gitignored):**
+`walk-01-snippets-all-groups` · `walk-02-card-menu-tutorial-scraps` · `walk-03-lands-in-tutorial-scraps`
+· `walk-04-header-scope-door-default-group` · `walk-05-terminal-snippets` ·
+`walk-06-terminal-doubleclick-field-guide` · `walk-07-tag-filter-menu-empty` ·
+`walk-08-terminal-tag-filter-names-the-door` · `walk-09-terminal-chip-on-card` ·
+`walk-10-terminal-chip-opens-the-tag-sheet` · `walk-11-study-tag-filter-names-the-door` ·
+`walk-12-study-chip-opens-the-tag-sheet` · `walk-13-study-tag-filter-empty-names-the-door`.
+
+**QUESTIONS: nothing new.** No decision here turned on undefined product behaviour — row 38 is a plain
+defect against §4.5's traced mechanism, and row 39's two halves are AppSpec §7's own rule ("block-level
+tags primarily serve the pool") made findable, in idioms already shipped on this same surface. Nothing
+in U-1…U-20 was re-opened.
