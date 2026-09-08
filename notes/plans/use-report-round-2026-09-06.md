@@ -6178,3 +6178,110 @@ should reach it — which means the interesting question is whether it does, and
 not a read. **Unresolvable read-only, outside batch c's four rows, and I will not invent a mechanism
 for it:** it belongs in `KnownIssuesAndTechDebt.md` with owner 13u2 (the pane family), exactly as J24
 anticipated, and its evidence class is a walk.
+
+#### Considered and cleared (traced, so the next reader does not re-raise them)
+
+- **The grip now hit-tests 7 pt into the detail (`ShellSplit.swift:99–101`, `.zIndex(1)` + a 14-pt
+  `contentShape`), so those points no longer reach the editor.** That is the fix she asked for, and I
+  looked for a victim: the sidebar side is unaffected in practice (a row's text starts 20 pt in —
+  `groupPadding` 12 + `rowPadding` 8), and the detail side is margin in every mode (R9's sacred
+  margins). Not a finding; noted because it IS a behaviour change no pin holds.
+- **Row 40's focus-loss collapse cannot eat a click on a tag suggestion.** The comment's claim (*"a
+  suggestion row is a plain `Button`, which does not take the keyboard on macOS"*) is load-bearing —
+  but it is load-bearing already: the suggestion overlay has always been gated `if focused`
+  (`MastheadTagCluster.swift:266`), so a focus-stealing click would have dismissed the list before
+  the button fired on the pre-fix tree too. The new road adds no failure mode of its own.
+- **`TakesEmptyState.newBlockVerb` skips `tokens.chromeLabel` while the line and the write verb take
+  it.** No-op in both voices: `chromeLabel` only lowercases, and in Terminal
+  (`Shared/Theme/VoiceTokens.swift:148–150`), and the constant is already lowercase.
+- **The sidebar `header()`'s leading edge moved 12 pt.** Safe because all three call sites sit inside
+  a `.padding(.horizontal, groupPadding)` group (`SidebarView.swift:400/:405`, `:487/:474`,
+  `:566/:588`); a header outside one would now under-pad, which is worth knowing when 18d's note box
+  inherits the rule.
+- **`markPostsAsVersions` now writes rows but still registers no undo entry, and `unmark` leaves the
+  minted block.** Ruled: U-19 (1) mints, U-19 (2) says an abandoned empty block stays; the op's new
+  doc states both consequences explicitly. Not drift.
+- **`TakeCardGeometry` cannot tell a chosen bar from the `Color.clear` one every other card draws**,
+  so the row-14 board pin is true by construction post-fix. It was still RED pre-fix (the sibling
+  shape sized every bar against a stale height), so it is a real red-on-old pin; the record already
+  says the synthetic arm is green on both sides.
+
+#### CLEAN BILL — load-bearing things I checked myself and found solid
+
+- **Row 10's external fact — the one claim in this diff I could not settle from the repo — HOLDS.**
+  One Sonnet lookup (the CLAUDE.md exception, read-only): the key
+  `NSAutoFillRequiresTextContentTypeForOneTimeCodeOnMac` is real and has its own Apple page, its
+  abstract reads *"A Boolean value that indicates whether text fields receive AutoFill of one-time
+  codes only if they adopt the suitable content type"* (so `<true/>`, not the string "YES" — which
+  the pin asserts as an `NSNumber`), it is macOS 26's, and the permissive default is corroborated by
+  Apple's own AutoFill engineer: *"macOS Tahoe brings AutoFill of one-time codes from Messages and
+  Mail to **all** Mac apps … without text field content type annotations."* **The record's refutation
+  of the digit-prompt hypothesis is correct, and the fix is the documented opt-out** — not a guess.
+- **Every one of the twenty claimed pins exists in the tree** (grepped by name, each located in a
+  real file: `ShellChromeTests` ×3, `MastheadLayoutTests` ×3, `MastheadTagDoorTests`,
+  `WorkspaceNavigationTests`, `BookIndexEditingTests`, `CompareBoardTests`, `OriginBlockDoorTests`,
+  `CapabilityRegistryTests`, `FannedDefaultsTests`, `TutorialWalkTests`, `LandingOffsetTests`,
+  `TakePaneMeasureTests`, `SnippetsDoorsTests`, `VersionOperationsTests`, `TagTimelineQueryTests`),
+  and I read the assertions of the load-bearing ones rather than trusting the record's summary. I did
+  NOT re-run the suites (read-only review; the standing "never run the full suite at the start").
+- **The batch-b ladder's pins ride unmodified, verified by diff and not by claim.**
+  `CurrentBlockContinuityTests` has no hunk at all; `PaneSurfaceTests` has **zero removed lines**
+  (additions only, beside the landing API rather than through it); `LandingOffsetTests`' only removals
+  are the three teardown statements moved verbatim into a `defer` (the cap's R3-3), with every
+  existing assertion — the anchor pin's included — byte-unchanged.
+- **The retired centering pin is genuinely DELETED, not weakened.**
+  `theTitleBlockCentersOnTheMastheadInEveryMode` survives only as a word inside the new pin's doc
+  (`MastheadLayoutTests.swift:51`); no `@Test` by that name exists. J27's claim holds.
+- **Row 6's "every host, through the ONE component" is true by grep, not by audit.** There are
+  exactly TEN `PaneSurfaceView(` construction sites in the app, and all ten are in this diff carrying
+  `indicator:` (`BlocksWorkbenchView:863`, `CompareBoardView:1556` + `:1625`, `TakesShared:157`,
+  `TakesBoardView:1292` + `:1550`, `CanvasView:814`, `WriteTakesPanel:206`, `ReadEditPane:140`,
+  `BookIndexView:703`). The three hosts that kept their own frame consume `PaneDecoration.hostRing`
+  rather than a second rule, and no `tokens.ring` reference survives on a live-pane frame.
+- **`PaneDecoration.resolve` preserves the shipped look exactly where it must**, case by case: at
+  rest `(tokens == nil ? grey hairline : .clear, 0.5)` and live-`.outline` `(tokens?.ring ??
+  accentColor, 1.5)` are byte-for-byte the old `strokeColor` + `isLive ? 1.5 : 0.5`. Only `.off` and
+  `.background` are new, which is exactly U-7's scope, and the corner radius kept its `tokens == nil
+  ? 3 : 6` rule.
+- **The wash cannot paint a row that is not live.** `ReadEditPane`'s pane is constructed only inside
+  `if isLive` (`ReadEditPane.swift:133–140`, `isLive` at `:133`), so `.background`'s fill follows the
+  one live pane, not the column.
+- **Row 14 moves no content.** The bar's old 3-pt HStack column is replaced by `.padding(.leading, 3)`
+  beside the existing `.padding(.horizontal, 7)`, so the content's leading edge is 10 pt before and
+  after; the bar is still inside the same `clipShape`.
+- **Row 43's receipt is right on every road that reaches it**, checked against all four sheet
+  arrangements rather than the one the record names: keep-on-top (seed in both halves, others in
+  `first` only → `kept = N−1`); keep-on-bottom (others in `second` only → `kept = 0`, the R1-9 zero
+  line, which claims nothing); the seed parked at its START (`seedSplit == false` → zero line);
+  per-take hand cuts (a take cut mid-block sits in both and is correctly NOT counted as "stayed
+  whole"). "Copy takes to both" never reaches this road at all — it has its own
+  `runDivideDuplicating` with `kept: 0` (`TakesViewModel.swift:2360–2383`).
+- **The core versions op is transaction-shaped and sync-shaped.** One `database.write`; the anchor
+  mint goes through the shared `mintBlock` (`Operations+Structural.swift:1296`), so the block/variant
+  FK circle, `default_variant_id`, the placement's `chosen_variant_id` and the fractional position are
+  the ordinary ones and I10 holds on an empty buffer; `ensureUnlocked` fires BEFORE the mint, so a
+  sealed post refuses with nothing minted (the pin asserts exactly that); `touchContainer` stamps
+  `last_touched_at` without churn per AppSpec §9's structural rule; both-blockless mints two anchors
+  in one transaction; a self-link still refuses through `insertVersionOfEdge` after the second
+  `anchorBlock` resolves to the first's block, and the whole thing rolls back. No new writes outside
+  the ops layer, no schema, no trigger.
+- **Rows 18/19's held observations are viewport-shaped, which is the thing that could have gone
+  wrong.** `AppDatabase.observe` applies `.removeDuplicates()` itself
+  (`Sources/VariorumCore/Persistence/AppDatabase.swift:266–269`), so the doc's claim is real; the
+  strip's fetch is one indexed row per on-screen subject and the tag branch now reads the bounded
+  `Queries.tagPaths(_:ids:)` instead of `allTags`, with the core commit landing alone ahead of its
+  face; both observers hold the last names on a failed read instead of blanking. The `.task(id:
+  titleSubjectsKey)` key is unchanged, so the restart discipline is the shipped one.
+- **`Queries.tagPaths` is a correct bounded twin**: live-only, `IN (…)` over the named ids, empty-in
+  → empty-out without a query, missing/tombstoned ids simply absent (which is what the chrome's
+  per-kind fallback already handles).
+- **Row 47's fix is strictly the ruled widening.** `bareArrivalLanding` is now
+  `rememberedArrivalLanding(fact:) ?? 0` — same signature, same value, so batch b's pins on it ride —
+  and the reveal tests REMEMBERED rather than `> 0`, which adds exactly the remembered-0 case and
+  excludes the nothing-remembered default. The reveal's own visibility guard is intact
+  (`EditorViewModel.swift:2015–2032`: the line already on screen returns without moving the page), so
+  a remembered 0 the viewport shows still lurches nothing.
+- **Nothing in the diff is reachable from the phone.** `App/Variorum/Shared/` has an empty diff
+  across all three batches, and the one core change (`markPostsAsVersions`) has no mobile caller
+  (`VersionActs` is unused on iOS; the phone has no versions door) — so the round's mobile-parity line
+  owes nothing from batches c/d/e beyond the one batch c already recorded (the pane's indicator mark).
