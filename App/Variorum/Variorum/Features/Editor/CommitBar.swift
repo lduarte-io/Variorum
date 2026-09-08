@@ -226,7 +226,6 @@ struct CommitBar: View {
                 boxCell(commentsDoor)
             }
             formattingWideRow
-            Spacer(minLength: 4)
             boxFooter
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -265,7 +264,13 @@ struct CommitBar: View {
             .contentShape(Rectangle())
     }
 
-    nonisolated static let boxCellHeight: CGFloat = 26
+    /// The mockup's `.box .r` is 26; the walk measured the TERMINAL voice's
+    /// two-line identity line pushing the footer past the box's floor at the
+    /// default sidebar width (its monospace runs wider than Study's), so the
+    /// cell is 24 — the implementer's latitude figure C's caption names, and
+    /// two points a voice cannot see against a footer she would have had to
+    /// scroll for.
+    nonisolated static let boxCellHeight: CGFloat = 24
 
 #if DEBUG
     nonisolated static func name(of axis: Axis) -> String {

@@ -264,6 +264,7 @@ struct BookIndexView<Masthead: View>: View {
         .onDisappear {
             edit.teardown()
             model.noteIndexLive(nil)
+            model.noteIndexSelection(nil)
         }
     }
 
@@ -297,6 +298,11 @@ struct BookIndexView<Masthead: View>: View {
             columnTarget = postID
         }
         if report { model.noteIndexAnchor(postID) }
+        // 18d batch 1: the sidebar note box's question is a different one —
+        // "is a note selected right now" — and the ARRIVAL's own seed
+        // answers it yes while deliberately writing no carry anchor. So the
+        // selection is reported every time, `report` or not.
+        model.noteIndexSelection(postID)
     }
 
     // MARK: The column

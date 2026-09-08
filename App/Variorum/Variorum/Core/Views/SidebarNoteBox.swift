@@ -76,8 +76,6 @@ struct SidebarNoteBox: View {
                     case .selected:
                         identityBlock
                         factsBlock
-                        Spacer(minLength: 6)
-                        editDoor
                     case .live:
                         identityBlock
                         if let bar {
@@ -95,6 +93,10 @@ struct SidebarNoteBox: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
             .scrollBounceBehavior(.basedOnSize)
+            // The door sits at the box's BOTTOM (figure C's `margin-top:
+            // auto`), OUTSIDE the scroll: it is the state's one act and it
+            // must never scroll out of reach under a long title.
+            if case .selected = state { editDoor }
             }
         }
         .padding(Self.inset)
@@ -183,7 +185,7 @@ struct SidebarNoteBox: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.bottom, 6)
+            .padding(.bottom, 4)
         }
     }
 

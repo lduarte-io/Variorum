@@ -672,7 +672,7 @@ struct BookView: View {
             mode: structure.mode,
             focusedPostID: model.focusedPostID,
             spreadPostIDs: model.spreadEntries.map(\.postID),
-            indexPostID: model.indexAnchorPostID)
+            indexPostID: model.indexSelectedPostID)
         let live = BookNoteBox.livePost(
             mode: structure.mode,
             liveFocusedPostID: model.liveFocusedPostID,

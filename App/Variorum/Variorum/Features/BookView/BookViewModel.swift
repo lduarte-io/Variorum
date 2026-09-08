@@ -514,6 +514,21 @@ final class BookViewModel {
         indexAnchorPostID = postID
     }
 
+    /// **The index column's SELECTION** (18d batch 1 — the walk's second
+    /// finding). Deliberately NOT `indexAnchorPostID`: that one is W21's
+    /// CARRY ("if you clicked over to another mode, where would you land"),
+    /// and the index writes it only on a selection SHE makes — the arrival's
+    /// own seed passes `report: false`, so a book opened straight into Index
+    /// has a highlighted row, a scrolled pane, and a nil anchor. The box's
+    /// question is "is a note selected right now", which the seeded row
+    /// answers yes to; so it gets its own report and the carry's cadence is
+    /// untouched.
+    private(set) var indexSelectedPostID: String?
+
+    func noteIndexSelection(_ postID: String?) {
+        indexSelectedPostID = postID
+    }
+
     /// **The index's LIVE note** (18d batch 1): the note whose block the
     /// index's one live pane is in, reported the same way its selection is.
     /// Index mounts no full-document editor by design — it is a projection
