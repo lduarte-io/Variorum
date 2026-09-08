@@ -26,7 +26,7 @@ import VariorumCore
 @testable import Variorum
 
 @MainActor
-@Suite("The masthead title centers in every mode (correction round, rows 4/19)", .serialized)
+@Suite("The masthead title LEADS in every mode (17o batch d, row 11 — her U-8)", .serialized)
 struct MastheadLayoutTests {
     private func pump(_ seconds: TimeInterval = 0.03) {
         RunLoop.main.run(until: Date().addingTimeInterval(seconds))
@@ -47,68 +47,99 @@ struct MastheadLayoutTests {
         }
     }
 
-    @Test func theTitleBlockCentersOnTheMastheadInEveryMode() async throws {
-        let db = try AppDatabase.inMemory()
-        let start = Date(timeIntervalSince1970: 1_782_864_000)
-        let tick = LockIsolated(0)
-        try await withDependencies {
-            $0.database = db
-            $0.uuid = .incrementing
-            $0.date = DateGenerator {
-                let seconds = tick.withValue { value -> Int in
-                    defer { value += 1 }
-                    return value
-                }
-                return start.addingTimeInterval(Double(seconds))
-            }
-            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 4))
-        } operation: { @MainActor in
-            let session = AppSession(database: db)
-            let post = try session.operations.createPost(title: "a centered title")
-            _ = try session.operations.newBlock(in: post.id, text: "a block, so every mode can host.")
-            _ = try session.operations.newBlock(in: post.id, text: "and a second one.")
-            UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(post.id)")
-
-            let window = NSWindow(
-                contentRect: NSRect(x: 80, y: 80, width: 1100, height: 750),
-                styleMask: [.titled], backing: .buffered, defer: false)
-            window.isReleasedWhenClosed = false
-            defer {
-                window.orderOut(nil)
-                window.close()
-                UserDefaults.standard.removeObject(forKey: "postMode.\(post.id)")
-            }
-            let hosting = NSHostingView(
-                rootView: PostDetailView(session: session, postID: post.id)
-                    .environment(ThemeStore(session: session)))
-            hosting.frame = NSRect(x: 0, y: 0, width: 1100, height: 750)
-            window.contentView = hosting
-            window.makeKeyAndOrderFront(nil)
-            await settle(window, hosting, until: {
-                session.commandRouter.activePostID == post.id
-            })
-
-            // The oracle is STICKY across modes deliberately: a geometry
-            // report fires only when the geometry CHANGES, and a masthead
-            // that stays put across a mode switch reports nothing new —
-            // which is itself the claim (one layout for every mode). A mode
-            // that moved the title would re-report, and the read below
-            // would see it.
-            for mode in PostMode.allCases {
-                #expect(session.commandRouter.requestMode(mode, postID: post.id))
-                await settle(window, hosting, until: {
-                    session.commandRouter.activeMode == mode
-                })
-                await settle(window, hosting, until: { false }, maxTurns: 6)
+    /// **U-8, in every mode** (17o batch d, ledger row 11) — the REWRITE of
+    /// `theTitleBlockCentersOnTheMastheadInEveryMode`. Her ruling, verbatim:
+    /// *"it should be aligned to the left again so it starts where 'in no
+    /// book' is, and it should be able to extend at least as far as the
+    /// middle centered title can extend right now to support longer
+    /// titles."* This SUPERSEDES the Act 10 correction round's rows 4/19,
+    /// whose claim (the title's midX on the masthead's midX) was the thing
+    /// she asked to undo — so the claim is replaced, not merely relaxed:
+    ///
+    /// 1. the title's band STARTS at row two's leading edge (the path chip's
+    ///    — "where 'in no book' is"), in every mode;
+    /// 2. it REACHES at least as far right as the centered title could
+    ///    (the old measure was 380 centered on the masthead, so `centre +
+    ///    190`), in every mode;
+    /// 3. and row 80's rule survives its parent: it still ends clear of the
+    ///    icon row.
+    ///
+    /// RED ON OLD: the title band was centered behind the two insets, so its
+    /// minX sat ~112 pt right of the chip's 0 in every mode.
+    @Test func theTitleLeadsWithRowTwoAndReachesPastTheOldCenteredMeasure() async throws {
+        for voice in [ThemeVoice.terminal, .study] {
+            try await withMountedDetail(
+                width: 1100,
+                title: "The Boscombe Valley Mystery",
+                tags: [], voice: voice
+            ) { session, post, _, _ in
                 #if DEBUG
-                let title = try #require(MastheadGeometry.titleMidX, "the masthead reported its title in \(mode.rawValue)")
-                let content = try #require(MastheadGeometry.contentMidX, "…and its own width")
-                #expect(abs(title - content) <= 1,
-                        "in \(mode.rawValue) the title block's midX (\(title)) sits on the masthead's midX (\(content)) within 1 pt")
+                for mode in PostMode.allCases {
+                    #expect(session.commandRouter.requestMode(mode, postID: post))
+                    await settle(until: { session.commandRouter.activeMode == mode })
+                    await settle(until: { false }, maxTurns: 6)
+                    let title = try #require(MastheadGeometry.titleFrame,
+                                             "the masthead reported its title in \(mode.rawValue)")
+                    let chip = try #require(MastheadGeometry.pathChipFrame,
+                                            "…and row two reported its leading chip")
+                    let icons = try #require(MastheadGeometry.iconRowFrame)
+                    let centre = try #require(MastheadGeometry.contentMidX)
+                    #expect(abs(title.minX - chip.minX) <= 1,
+                            "\(voice) \(mode.rawValue): title starts at \(title.minX), chip at \(chip.minX)")
+                    #expect(title.maxX >= centre + 190 - 1,
+                            "\(voice) \(mode.rawValue): reach \(title.maxX) vs centre \(centre) + 190")
+                    #expect(title.maxX + MastheadTitleInsets.gap <= icons.minX + 0.5,
+                            "\(voice) \(mode.rawValue): title ends \(title.maxX), icons begin \(icons.minX)")
+                }
                 #endif
             }
         }
     }
+
+    /// **Row 12 — the placeholder no longer shifts when she clicks.** The two
+    /// faces (`Text` and `TextField`) shared a max WIDTH and nothing else, so
+    /// the field's taller intrinsic height moved the words the moment the
+    /// title went editable. They now share ONE BOX. RED ON OLD: the field's
+    /// frame sat above the label's by the difference in their heights.
+    @Test func bothTitleFacesShareOneBoxSoNothingShiftsOnClick() async throws {
+        for voice in [ThemeVoice.terminal, .study] {
+            try await withMountedDetail(
+                width: 1100, title: "", tags: [], voice: voice
+            ) { session, _, _, _ in
+                #if DEBUG
+                await settle(until: { MastheadGeometry.titleFrame != nil })
+                await settle(until: { false }, maxTurns: 6)
+                let resting = try #require(MastheadGeometry.titleFrame)
+                _ = session
+
+                MastheadGeometry.titleFrame = nil
+                MastheadGeometry.titleFieldFrame = nil
+                PostDetailOracle.beginTitleEditing?()
+                await settle(until: { MastheadGeometry.titleFieldFrame != nil })
+                await settle(until: { false }, maxTurns: 8)
+                let editing = try #require(MastheadGeometry.titleFieldFrame,
+                                           "(\(voice)) the editing face reported its frame")
+                #expect(abs(editing.midY - resting.midY) <= 0.5,
+                        "(\(voice)) one baseline: field \(editing) vs label \(resting)")
+                #expect(abs(editing.minX - resting.minX) <= 0.5,
+                        "(\(voice)) and one leading edge")
+                #expect(abs(editing.height - resting.height) <= 0.5,
+                        "(\(voice)) and one height")
+                #endif
+            }
+        }
+    }
+
+    // **RETIRED (17o batch d, row 11): `theTitleBlockCentersOnTheMastheadIn
+    // EveryMode`.** Its claim — the title block's midX on the masthead's
+    // midX in all eight modes — is precisely what her ruling U-8 undid
+    // (*"it should be aligned to the left again"*), so it is REPLACED, not
+    // relaxed: `theTitleLeadsWithRowTwoAndReachesPastTheOldCenteredMeasure`
+    // above holds the same eight modes to the new rule, in both voices, and
+    // carries the same "never under the icons" clause the old pin's sibling
+    // (row 80) contributed. Deleting rather than loosening is the point: a
+    // pin kept alive with its assertion weakened would have gone on claiming
+    // the masthead was inspected when nothing was being asserted.
 
     // MARK: - Row 58: the second row never collides
 
@@ -221,9 +252,9 @@ struct MastheadLayoutTests {
                 #expect(card.minX >= -0.5 && card.maxX <= width + 0.5,
                         "(\(voice)) card \(id) \(card) stays inside the masthead (0…\(width))")
             }
-            let titleClosed = try #require(MastheadGeometry.titleMidX)
-            #expect(abs(titleClosed - width / 2) <= 1,
-                    "(\(voice)) the title stays centered with five tags (closed): \(titleClosed) vs \(width / 2)")
+            let titleClosed = try #require(MastheadGeometry.titleFrame)
+            #expect(abs(titleClosed.minX - chip.minX) <= 1,
+                    "\(voice), five tags: title \(titleClosed.minX) vs chip \(chip.minX)")
 
             // ⌘⇧I's road opens the field.
             #expect(session.commandRouter.requestTagField(), "the router reaches this masthead's field")
@@ -240,33 +271,31 @@ struct MastheadLayoutTests {
             let chipOpen = try #require(MastheadGeometry.pathChipFrame)
             #expect(abs(chipOpen.minX - chip.minX) <= 0.5 && abs(chipOpen.minY - chip.minY) <= 0.5,
                     "(\(voice)) opening the field moved nothing: the chip stayed at \(chip.origin), now \(chipOpen.origin)")
-            let titleOpen = try #require(MastheadGeometry.titleMidX)
-            #expect(abs(titleOpen - width / 2) <= 1,
-                    "(\(voice)) the title stays centered with the field open: \(titleOpen) vs \(width / 2)")
+            let titleOpen = try #require(MastheadGeometry.titleFrame)
+            #expect(abs(titleOpen.minX - chip.minX) <= 1,
+                    "(\(voice)) …and with the tag field open: \(titleOpen.minX) vs \(chip.minX)")
             #endif
         }
     }
 
     // MARK: - The Act 10 correction round, batch G — rows 80 and 59
 
-    /// **Row 80's rule, pure.** F's walk at a ~950-pt window with an
-    /// inspector open (the masthead ~270 pt) found the title TOUCHING the
-    /// tray icon: the symmetric inset was capped by the 240-pt floor on
-    /// both sides, so the trailing inset shrank under the icon row's width.
-    /// Now the trailing inset always keeps the icons clear and the floor is
-    /// spent on the leading side; below floor + icons the title yields.
-    @Test func theTitleInsetsKeepTheIconsClearAndSpendTheFloorOnTheLeadingSide() {
-        let icons: CGFloat = 100
-        let wide = MastheadTitleInsets.insets(mastheadWidth: 680, iconRowWidth: icons, floor: 240)
-        #expect(wide.leading == 112 && wide.trailing == 112, "the standing widths: symmetric, as before")
-        let narrow = MastheadTitleInsets.insets(mastheadWidth: 400, iconRowWidth: icons, floor: 240)
-        #expect(narrow.trailing == 112, "the trailing inset never shrinks under the icons")
-        #expect(narrow.leading == 48, "the floor is spent on the leading side (400 − 240 − 112)")
-        #expect(400 - narrow.leading - narrow.trailing == 240, "the title keeps its floor while it can")
-        let tight = MastheadTitleInsets.insets(mastheadWidth: 270, iconRowWidth: icons, floor: 240)
-        #expect(tight.leading == 0 && tight.trailing == 112, "narrower than floor + icons: the title yields, the icons stay clear")
-        let unmeasured = MastheadTitleInsets.insets(mastheadWidth: 0, iconRowWidth: icons, floor: 240)
-        #expect(unmeasured.leading == 112 && unmeasured.trailing == 112, "the first pass: symmetric")
+    /// **Row 80's rule, pure — REWRITTEN to U-8** (17o batch d, row 11).
+    /// F's walk at a ~950-pt window with an inspector open (the masthead
+    /// ~270 pt) found the CENTERED title touching the tray icon, because the
+    /// symmetric inset was capped by the 240-pt line floor on both sides.
+    /// Her ruling retires the centering, and the floor retires with it: a
+    /// leading title has no second inset to be squeezed by. What survives is
+    /// the half that was never about centering — **the trailing inset always
+    /// keeps the icon row clear, gap included**, at every width, and below
+    /// that the title truncates rather than run under the icons.
+    @Test func theTitlesTrailingInsetAlwaysKeepsTheIconRowClear() {
+        #expect(MastheadTitleInsets.trailingInset(iconRowWidth: 100) == 112)
+        #expect(MastheadTitleInsets.trailingInset(iconRowWidth: 0) == MastheadTitleInsets.gap,
+                "no icons still means the row's gap, so the words never touch the edge")
+        // It cannot depend on the masthead's width — that dependence WAS the
+        // floor, and the floor is what the ruling retired.
+        #expect(MastheadTitleInsets.trailingInset(iconRowWidth: 240) == 252)
     }
 
     /// **Row 80 in geometry.** The real detail mounted at 340 pt (the
@@ -280,7 +309,7 @@ struct MastheadLayoutTests {
         try await withMountedDetail(
             width: 340, title: "The Boscombe Valley Mystery — a title long enough to truncate here",
             tags: []
-        ) { _, _ in
+        ) { _, _, _, _ in
             #if DEBUG
             await settle(until: {
                 MastheadGeometry.titleFrame != nil && MastheadGeometry.iconRowFrame != nil
@@ -302,7 +331,7 @@ struct MastheadLayoutTests {
     /// two points from the ＃. RED ON OLD: the door's frame was the ~10-pt
     /// symbol plus 3 × 2 pt of padding.
     @Test func theTagDoorsHitTargetIsTheRowsHeightNotTheGlyphs() async throws {
-        try await withMountedDetail(width: 1100, title: "a note with a tag", tags: ["walked"]) { _, _ in
+        try await withMountedDetail(width: 1100, title: "a note with a tag", tags: ["walked"]) { _, _, _, _ in
             #if DEBUG
             await settle(until: { MastheadGeometry.doorFrame != nil })
             await settle(until: { false }, maxTurns: 6)
@@ -356,7 +385,7 @@ struct MastheadLayoutTests {
             try await withMountedDetail(
                 width: width, title: "The Boscombe Valley Mystery", tags: tags,
                 book: "the adventures of sherlock holmes", voice: voice
-            ) { _, _ in
+            ) { _, _, _, _ in
                 #if DEBUG
                 await settle(until: {
                     MastheadGeometry.pathChipFrame != nil
@@ -391,7 +420,7 @@ struct MastheadLayoutTests {
     private func withMountedDetail(
         width: CGFloat, title: String, tags: [String], book: String? = nil,
         voice: ThemeVoice = .terminal,
-        _ body: @MainActor (NSWindow, NSView) async throws -> Void
+        _ body: @MainActor (AppSession, String, NSWindow, NSView) async throws -> Void
     ) async throws {
         let db = try AppDatabase.inMemory()
         let start = Date(timeIntervalSince1970: 1_782_864_000)
@@ -452,7 +481,7 @@ struct MastheadLayoutTests {
             await settle(window, hosting, until: {
                 session.commandRouter.activePostID == post.id
             })
-            try await body(window, hosting)
+            try await body(session, post.id, window, hosting)
         }
     }
 }

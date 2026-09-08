@@ -162,21 +162,18 @@ struct PostDetailView: View {
     /// The icon row's measured width — the TITLE row's symmetric inset, so
     /// the centered title never runs under the icons (rows 4/19, row 55).
     @State private var mastheadIconRowWidth: CGFloat = 0
-    /// The masthead's own width — the inset's floor reads it.
+    /// The masthead's own width — measured for the DEBUG oracle's reach
+    /// check and row two's width-aware layout.
     @State private var mastheadWidth: CGFloat = 0
-    /// The centered title never shrinks below this, whatever shares its row.
-    private let mastheadLineFloor: CGFloat = 240
     /// Row 58: the least room between the path chip and the tag cluster on
     /// the masthead's second row.
     static let rowTwoGap: CGFloat = 16
 
-    /// The title row's two insets (row 80 — `MastheadTitleInsets`, the pure
-    /// rule): the trailing one ALWAYS keeps the icon row's width clear, the
-    /// leading one is what the floor spends when the masthead is narrow.
-    private var titleInsets: (leading: CGFloat, trailing: CGFloat) {
-        MastheadTitleInsets.insets(
-            mastheadWidth: mastheadWidth, iconRowWidth: mastheadIconRowWidth,
-            floor: mastheadLineFloor)
+    /// The title row's trailing inset (row 80's rule, kept under U-8): it
+    /// ALWAYS keeps the icon row's width clear. There is no leading inset —
+    /// the title leads (row 11).
+    private var titleTrailingInset: CGFloat {
+        MastheadTitleInsets.trailingInset(iconRowWidth: mastheadIconRowWidth)
     }
     /// The masthead's own coordinate space (the DEBUG oracle reads the
     /// title's midX in it against the masthead's midX).
@@ -238,21 +235,21 @@ struct PostDetailView: View {
                 ZStack(alignment: .top) {
                     // Sitting 9 (R67): the post's NAME, prominent — click
                     // to rename right here.
-                    // Row 80 (the correction round, batch G — F's walk at a
-                    // ~950-pt window with an inspector open: the title
-                    // touched the tray icon): the two insets are ASYMMETRIC
-                    // once the masthead is too narrow for the floor AND the
-                    // icons. The old symmetric inset was capped by the
-                    // 240-pt floor on BOTH sides, so at ~270 pt the trailing
-                    // inset shrank to ~15 and the title ran under the icon
-                    // row. Now the trailing inset always keeps the icons
-                    // clear; the floor spends the LEADING inset instead, and
-                    // below floor + icons the title yields to `…` — legal;
-                    // a title under the icons is not.
+                    // Row 11 (her U-8, 17o batch d): the title LEADS — no
+                    // leading inset at all, so its band starts exactly where
+                    // row two's path chip does ("where 'in no book' is"), and
+                    // it runs right until the icons' gap, further than the
+                    // old 380-pt centered measure could reach.
+                    // Row 80 (the correction round, batch G) SURVIVES its
+                    // parent: the trailing inset always keeps the icon row
+                    // clear — F's walk found the centered title touching the
+                    // tray icon at a ~270-pt masthead, and a title under the
+                    // icons is a defect under either rule. Below the icons'
+                    // width the title yields to `…`, which is what row 80
+                    // already ruled legal.
                     PostTitleLabel(session: session, postID: postID, tokens: tokens)
                         .frame(maxWidth: .infinity)
-                        .padding(.leading, titleInsets.leading)
-                        .padding(.trailing, titleInsets.trailing)
+                        .padding(.trailing, titleTrailingInset)
                     HStack(alignment: .top, spacing: 0) {
                         Spacer(minLength: 0)
                         HStack(alignment: .firstTextBaseline, spacing: 2) {
@@ -592,11 +589,53 @@ struct PostDetailView: View {
         @State private var draft = ""
         @FocusState private var fieldFocused: Bool
 
-        /// One measure for both faces — the field must not resize the
-        /// masthead when it appears.
-        private let measure: CGFloat = 380
-
         var body: some View {
+            // **ONE BOX for both faces** (17o batch d, rows 11 + 12).
+            //
+            // Row 11 (her U-8): the title LEADS. The box takes the whole
+            // title band — which now starts at the masthead's leading edge,
+            // exactly where row two's path chip starts, because the leading
+            // inset is zero — and runs right until the icon row's gap. The
+            // old 380-pt `measure` centered in that band is retired with the
+            // centering it served: *"it should be able to extend at least as
+            // far as the middle centered title can extend right now."*
+            //
+            // Row 12: the placeholder used to shift when she clicked. The
+            // two faces shared a max WIDTH and nothing else, so the field's
+            // own intrinsic height changed the row the moment the title went
+            // editable. Now a HIDDEN copy of the label, at the title's own
+            // font, defines the box — and the live face is drawn inside it
+            // as an overlay, which by construction cannot resize its parent
+            // and is handed exactly that box to fill. Sizing this way rather
+            // than from a constant is deliberate: the title font differs per
+            // voice (19-pt monospaced in Terminal, 21-pt Iowan in Study) and
+            // SwiftUI's `Font` will not tell anyone its line height.
+            Text(displayed.isEmpty ? DisplayTitle.placeholder : displayed)
+                .font(tokens.title)
+                .lineLimit(1)
+                .hidden()
+                .accessibilityHidden(true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                #if DEBUG
+                // The oracle reads the BAND now, not the words: under U-8
+                // "where the title starts" and "how far it can reach" are
+                // both questions about the box the words are given.
+                .onGeometryChange(for: CGRect.self) {
+                    $0.frame(in: .named(PostDetailView.mastheadSpace))
+                } action: {
+                    MastheadGeometry.titleMidX = $0.midX
+                    MastheadGeometry.titleFrame = $0
+                }
+                #endif
+                .overlay(alignment: .leading) { face }
+                .task(id: postID) { await refresh() }
+                #if DEBUG
+                .onAppear { PostDetailOracle.beginTitleEditing = { beginEditing() } }
+                #endif
+        }
+
+        @ViewBuilder
+        private var face: some View {
             Group {
                 if editing {
                     TextField(displayed, text: $draft)
@@ -604,9 +643,9 @@ struct PostDetailView: View {
                         .font(tokens.title)
                         .foregroundStyle(tokens.ink)
                         .lineLimit(1)
-                        .multilineTextAlignment(.center)
+                        .multilineTextAlignment(.leading)
                         .focused($fieldFocused)
-                        .frame(maxWidth: measure, alignment: .center)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
                         .onSubmit { rename() }
                         .onExitCommand { cancel() }
                         .onChange(of: fieldFocused) { _, focused in
@@ -615,6 +654,15 @@ struct PostDetailView: View {
                             // is lost" posture, at chrome scale).
                             if !focused, editing { rename() }
                         }
+                        #if DEBUG
+                        // Row 12's oracle: the EDITING face's frame, in the
+                        // same space the resting face reports in.
+                        .onGeometryChange(for: CGRect.self) {
+                            $0.frame(in: .named(PostDetailView.mastheadSpace))
+                        } action: {
+                            MastheadGeometry.titleFieldFrame = $0
+                        }
+                        #endif
                         .task { fieldFocused = true }
                 } else {
                     Text(displayed)
@@ -623,27 +671,21 @@ struct PostDetailView: View {
                         .lineLimit(1)
                         .truncationMode(.tail)
                         #if DEBUG
-                        // The oracle reads the TEXT's own frame (not its
-                        // measure, which centers whatever its content does):
-                        // where the words actually sit — its midX for the
-                        // centering pins (rows 4/19), the whole frame for
-                        // row 80's "never under the icons".
+                        // Row 12's other half: the RESTING face's own frame,
+                        // to compare against the editing face's.
                         .onGeometryChange(for: CGRect.self) {
                             $0.frame(in: .named(PostDetailView.mastheadSpace))
                         } action: {
-                            MastheadGeometry.titleMidX = $0.midX
-                            MastheadGeometry.titleFrame = $0
+                            MastheadGeometry.titleLabelFrame = $0
                         }
                         #endif
-                        // Rows 4/19: the title CENTERS in its measure (it used
-                        // to lead), so the block reads centered over the page.
-                        .frame(maxWidth: measure, alignment: .center)
+                        // U-8: it LEADS, and fills the band it is given.
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
                         .contentShape(Rectangle())
                         .onTapGesture { beginEditing() }
                         .help("The note's name — click to rename it right here")
                 }
             }
-            .task(id: postID) { await refresh() }
         }
 
         private func beginEditing() {
@@ -734,14 +776,22 @@ nonisolated enum MastheadTitleInsets {
     /// The room between the title's band and the icon row.
     static let gap: CGFloat = 12
 
-    static func insets(
-        mastheadWidth: CGFloat, iconRowWidth: CGFloat, floor: CGFloat
-    ) -> (leading: CGFloat, trailing: CGFloat) {
-        let wanted = iconRowWidth + gap
-        // Unmeasured (the first pass): symmetric, as it always was.
-        guard mastheadWidth > 0 else { return (wanted, wanted) }
-        let leading = min(wanted, max(0, mastheadWidth - floor - wanted))
-        return (leading, wanted)
+    /// **U-8 (17o batch d, row 11): the title LEADS**, so there is no
+    /// leading inset left to compute — its band starts at the masthead's own
+    /// leading edge, which is where row two's path chip starts.
+    ///
+    /// Row 80's rule outlives the centering it was written for: the trailing
+    /// inset ALWAYS keeps the icon row clear, gap included. A title under
+    /// the icons was the defect then and would be the defect now; what the
+    /// ruling changed is where the title spends the room it has.
+    ///
+    /// The 240-pt line floor retires WITH the centering. It existed to stop
+    /// a centered band collapsing between two symmetric insets; a leading
+    /// title has no second inset to be squeezed by, and at a narrow masthead
+    /// it simply truncates at the icons — which is the same yield row 80
+    /// already ruled legal.
+    static func trailingInset(iconRowWidth: CGFloat) -> CGFloat {
+        iconRowWidth + gap
     }
 }
 
@@ -773,6 +823,10 @@ extension View {
 @MainActor
 enum PostDetailOracle {
     static var inspectorPanel: PostDetailView.InspectorPanel?
+    /// Row 12 (17o batch d): the title's own "click to rename" door, so a
+    /// pin can put the masthead into its editing face and read both frames
+    /// without simulating an AppKit click into a hosted `TextField`.
+    static var beginTitleEditing: (@MainActor () -> Void)?
     /// Row 74: OUR divider's frame in the side column's space — reported in
     /// every window state, nil while no panel stands.
     static var sideColumnDividerFrame: CGRect?
@@ -795,6 +849,12 @@ enum MastheadGeometry {
     /// masthead's space — "the title never runs under the icons" is a
     /// claim about two rectangles.
     static var titleFrame: CGRect?
+    /// Row 12 (17o batch d): the EDITING face's frame, in the same space —
+    /// "the placeholder shifts upwards when you click the title" is a claim
+    /// about two rectangles, exactly as row 80's is.
+    static var titleFieldFrame: CGRect?
+    /// …and the RESTING face's, so row 12 compares like with like.
+    static var titleLabelFrame: CGRect?
     static var iconRowFrame: CGRect?
     /// Row 59: the ＃ door's frame — its hit target.
     static var doorFrame: CGRect?
@@ -822,6 +882,8 @@ enum MastheadGeometry {
     static func resetTitleRow() {
         titleMidX = nil
         titleFrame = nil
+        titleFieldFrame = nil
+        titleLabelFrame = nil
         iconRowFrame = nil
     }
 }
