@@ -5249,8 +5249,8 @@ clean.**
 
 ### R-8 · RECORD (the implementer writes here from its first commit)
 
-**NOT DONE (the record's first line, kept current):** at this checkpoint — rows 9 · 10 · 11 · 12 ·
-13 · 17 · 18 · 19 · 21 · 27 · 40 · 41; the walk; the closing suites. Nothing outside the seventeen rows was touched: zero
+**NOT DONE (the record's first line, kept current):** at this checkpoint — rows 9 · 13 · 18 · 19 ·
+21 · 40 · 41; the walk; the closing suites. Nothing outside the seventeen rows was touched: zero
 `Sources/VariorumCore/Sync/`, zero schema, no 18d work, no editor-seam change beyond row 47's one
 condition in `applyFocusSeeds` (flagged seam-adjacent below for the c/d/e reviewer).
 
@@ -5260,15 +5260,15 @@ column · Compare's one door — plus the two ladders' routed residue (rows 43�
 | Row | What it is | Status | Pin |
 |---|---|---|---|
 | 9 | the divider's grip is too small / the I-beam wins | NOT-STARTED | — |
-| 10 | the Messages fill-code popover on the title | NOT-STARTED | — |
-| 11 | the title LEADS (U-8) | NOT-STARTED | — |
-| 12 | the placeholder shifts up on click | NOT-STARTED | — |
+| 10 | the Messages fill-code popover on the title | **DONE** (`11314949`) — hypothesis REFUTED | `theBundleRequiresAnExplicitContentTypeForOneTimeCodes` |
+| 11 | the title LEADS (U-8) | **DONE** (`5ce18072`) | `theTitleLeadsWithRowTwoAndReachesPastTheOldCenteredMeasure` |
+| 12 | the placeholder shifts up on click | **DONE** (`5ce18072`) | `bothTitleFacesShareOneBoxSoNothingShiftsOnClick` |
 | 13 | the sidebar headers' alignment + air | NOT-STARTED | — |
-| 17 | versions on a blockless note (core; U-19 (1)) | NOT-STARTED | — |
+| 17 | versions on a blockless note (core; U-19 (1)) | **DONE** (`9e75ded9` core, alone) | `aBlocklessPostGainsAnEmptyAnchorBlockAndTheLinkLands` |
 | 18 | a rename doesn't reach the open strip | NOT-STARTED | — |
 | 19 | a date change doesn't reach the masthead title | NOT-STARTED | — |
 | 21 | the Index count ↔ ⋯ trailing edges | NOT-STARTED | — |
-| 27 | Compare speaks the raw `OperationError` | NOT-STARTED | — |
+| 27 | Compare speaks the raw `OperationError` | **DONE** (`c96a5410`) | `theVersionsDoorSpeaksInWordsAndLinksABlocklessNote` |
 | 40 | the tag field collapses on focus loss | NOT-STARTED | — |
 | 41 | the divider's white top | NOT-STARTED | — |
 | 43 | the Takes board's sheet receipt count | **DONE** (`45cdfdef`) | `aSeedParkedAtItsStartDoesNotGetTheSplitAcrossBothReceipt` |
@@ -5383,3 +5383,110 @@ leak the memory into `UserDefaults.standard`.
 
 **Suites green at this commit:** `LandingOffsetTests · CurrentBlockContinuityTests ·
 JumpCorrectionLoopTests · ScrollAnchorTests · PaneSurfaceTests · TakesLandingTests` — **44 / 6**.
+
+#### Rows 17 + 27 — FIXED (the CORE change committed alone, `9e75ded9`, ahead of its face)
+
+**Row 17, traced myself.** `markPostsAsVersions` resolves each post's FIRST live block and mints the
+`version_of` edge between them; a blockless post had nothing to anchor on, so it threw
+`postHasNoBlocks` — on a note she had only just made. **Fix (U-19 (1), "a is good"):** the anchor is
+MINTED in the same transaction — one ordinary block, one live EMPTY take, placed at the end. Nothing is
+special-cased: it is the block a note's first Return would have made, and U-19 (2) governs it from then
+on, so `unmarkPostsAsVersions` removes the LINK and leaves the block standing.
+
+**Two consequences I decided and record as decisions, not omissions.** (a) The mint stamps
+`last_touched_at` and never churn — AppSpec §9's structural rule, because a block appearing in the note
+is restructuring it and restructuring must never reshuffle the meaningful sort. (b) It refuses under a
+SEALED post, since minting a block is exactly what the seal freezes; the LINK itself stays free under a
+seal, like tagging and adding to a reading, so a sealed post that HAS blocks marks as a version exactly
+as before. No undo entry: `markPostsAsVersions` is the tags/locks class and its own inverse door is the
+recovery.
+
+**Pins:** `VersionOperationsTests.aBlocklessPostGainsAnEmptyAnchorBlockAndTheLinkLands` — RED on
+`3730f39c` with `postHasNoBlocks`; it holds the minted block's shape, both-sides-blockless, the recovery
+door leaving the block, and the touch-without-churn stamps. Beside it
+`.theAnchorMintIsGatedByTheSealButTheLinkItselfIsNot`. The old suite's blockless-refusal clause is a
+JUSTIFIED EDIT — its claim is what the ruling replaced. **`swift test` at that commit: 1495 / 162.**
+
+**Row 27 — and a FINDING against the brief's designed shape.** The brief said *"`VersionActs.words`
+gains the case; Compare's door uses it"*. `VersionActs.words` already HAS a `postHasNoBlocks` sentence,
+it belongs to the note-MOMENTS family ("nothing in this note to save a version of yet"), and Compare's
+peer door has never routed through it — it routes through `OpsRefusalCopy.message`, whose `default:`
+printed `Refused: <enum>`. And after row 17 that error cannot arise on the link road at all. So the
+live raw-error surface is a DIFFERENT one: **`postsAlreadyVersionLinked`** — pressing the row twice
+printed the enum WITH BOTH POST UUIDs. Its inverse (`versionLinkNotFound`) has spoken since Sitting 9;
+this was that pair's missing half. Both it and `postHasNoBlocks` (for the surviving copy roads — "make
+outline note", duplicate-as-version) are worded in `OpsRefusalCopy`. `VersionActs` is untouched.
+
+**Pin:** `CompareBoardTests.theVersionsDoorSpeaksInWordsAndLinksABlocklessNote` — both halves end to end
+through the real door. RED on `9e75ded9` with 3 issues (the raw dump). Its row-17 half re-measured by a
+**revert probe of the core file on the committed tree** (`git checkout 3730f39c -- Operations+Versions
+.swift`): red with the link absent and no block minted; restored and green. 23 / 2.
+
+#### Row 10 — FIXED · **THE HYPOTHESIS WAS WRONG, and that is the row's finding**
+
+The trace guessed the title field's all-digit prompt (the note's date) made AppKit read it as a
+verification-code field. **It does not.** One Sonnet lookup (the CLAUDE.md exception, read-only):
+on macOS 26 the "Fill code · From Messages" suggestion is **time-and-focus based and content-agnostic**
+— Apple's documentation of the opt-out key states every text-input-capable field in every Mac app is
+eligible while Messages or Mail has detected a one-time code, a field has focus, and under three
+minutes have passed (hence the same popover reported over spreadsheet cells and terminal emulators).
+No documented signal reads a placeholder. **So the brief's API-free fallback — the date as a `Text`
+behind an empty-prompt field — would have changed nothing.** There is no per-field opt-out.
+
+**Fix:** the one documented opt-out, `NSAutoFillRequiresTextContentTypeForOneTimeCodeOnMac` (macOS 26+,
+default NO). With it YES only a field annotated `.textContentType(.oneTimeCode)` is offered the
+suggestion; Variorum annotates that nowhere, and credential AutoFill (`.password` / `.newPassword` /
+`.username` in the auth views) is a separate mechanism, untouched.
+
+**MEASURED, because the delivery road is not obvious:** an `INFOPLIST_KEY_<name>` build setting for
+this key is **silently dropped** — Xcode's generated-plist road only carries key names it knows
+(verified absent from the built bundle). The target therefore gains a PARTIAL `Info.plist` that Xcode
+merges its generated keys over (`GENERATE_INFOPLIST_FILE` stays YES). Verified by diffing the built
+bundle's key set against the installed Release bundle: **a strict superset — no generated key lost.**
+
+**Pins:** `OneTimeCodeAutoFillTests.theBundleRequiresAnExplicitContentTypeForOneTimeCodes` (red before
+the plist; it pins the value's TYPE too, since a string "YES" is not what the system reads) and
+`.noFieldInTheAppClaimsToBeAOneTimeCodeField`, which states the key's one cost — a code field added
+later must be annotated. **Not walkable by me: triggering a fresh SMS code is hers.**
+
+#### Rows 11 + 12 — FIXED · **the Act 10 rows-4/19 supersession, drafted below**
+
+**Row 11 (U-8).** The title's leading inset is gone, so its band starts exactly where row two's path
+chip does, and runs right until the icon row's gap — further than the retired 380-pt centered measure
+could reach (measured at a 1100-pt window: the band now ends ~788 where the centered words ended 700.5,
+against the 739 her "at least as far" asks for). **Row 80's rule outlives the centering it was written
+for** — the trailing inset still always keeps the icons clear, and below that the title truncates,
+which row 80 already ruled legal. The 240-pt line floor retires WITH the centering: a leading title has
+no second inset to be squeezed by, so `MastheadTitleInsets.insets(mastheadWidth:iconRowWidth:floor:)`
+becomes `trailingInset(iconRowWidth:)` rather than keeping two dead parameters.
+
+**Row 12.** The two faces shared a max WIDTH and nothing else, so the field's own intrinsic height
+changed the row the moment the title went editable. They now share ONE BOX: a hidden copy of the label
+at the title's font defines it, and the live face is drawn inside as an overlay — which by construction
+cannot resize its parent and is handed exactly that box to fill. Sized from a hidden `Text` rather than
+a constant deliberately: the title font differs per voice (19-pt monospaced · 21-pt Iowan) and SwiftUI
+will not tell anyone a `Font`'s line height.
+
+**Pins (both new, both voices, all seven modes):**
+`theTitleLeadsWithRowTwoAndReachesPastTheOldCenteredMeasure` — RED on `11314949` with **28 issues** (the
+band's minX 189.5 pt right of the chip's; reach 700.5 where 739 was owed);
+`bothTitleFacesShareOneBoxSoNothingShiftsOnClick` — RED with **3** (minX 131 pt apart, heights 1.0 pt
+apart), driven through a DEBUG door on the title's own click-to-rename so no AppKit click is simulated.
+
+**THE SUPERSESSION, delivered as a DELETION:** `theTitleBlockCentersOnTheMastheadInEveryMode` is
+RETIRED, not loosened — its claim (the title's midX on the masthead's midX in eight modes) is precisely
+what she asked to undo, and a pin kept alive with a weakened assertion goes on looking like coverage.
+Its eight-mode sweep and its never-under-the-icons clause both live on in the new pin. Row 58's two
+"title stays centered" clauses are rewritten to the leading rule; row 80's pure pin to the trailing
+inset alone.
+
+**Draft delta line for `notes/plans/act10-correction-round.md` (the orchestrator applies at the letter's
+close):**
+
+> **Rows 4 · 19 — SUPERSEDED 2026-09-08 by her ruling U-8** (the use-report round, 17o batch d, ledger
+> row 11; `5ce18072`). The centered title is retired: the title LEADS, its band starting at row two's
+> path-chip edge and running right to the icon row's gap. Row 4/19's *defect* is not re-opened — an
+> asymmetric masthead was the complaint, and a leading title on the same edge as row two answers it the
+> way she asked. What survives of batch A's work is row 80's clause (the title never runs under the
+> icons), now carried by `theTitleLeadsWithRowTwoAndReachesPastTheOldCenteredMeasure`;
+> `theTitleBlockCentersOnTheMastheadInEveryMode` is deleted rather than weakened.
