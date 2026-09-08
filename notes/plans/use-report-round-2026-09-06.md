@@ -8172,8 +8172,13 @@ width is the boundary's screen x minus 231):
 
 ### R-13 · RECORD (the implementer writes here from its first commit)
 
-**NOT DONE (the record's first line, per rule 9):** nothing yet — the walk, the pins and the closing
-runs are PENDING at this commit. This line is rewritten at the close with whatever was genuinely left.
+**NOT DONE (the record's first line, per rule 9):** one thing, named and argued rather than skipped —
+**`BookView.surfacePlaceholder` still stands on a remembered height without comparing its WIDTH.** The
+walk found it (the first frame after a relaunch is the placeholder's, not the reservation's); the code
+now says so where it happens; the reasoning for leaving it — a mismatched memory is a far better guess
+than the 800-pt fallback, and the RESERVATION, where a wrong width would really hurt, refuses correctly
+and is pinned twice — is in "the finding the walk turned up" below. Everything else the brief named is
+done: the store, both consumers, six pins, the walk in both voices, the closing run.
 
 **One acceptance unit:** ONE local-only memory (`SurfaceSizeMemory`, now persisted) and its TWO
 consumers (the book Outline's expanded notes; the Read ▸ Scroll flow's stories). Row 25 · U-12.
@@ -8259,5 +8264,109 @@ dropped every remembered story on a voice switch that moved nothing on that page
   so the pin passed a full second before anything was written and then read the stale `120` back. It
   now waits on the DISK. Had it not been run in both directions the batch would have shipped a pin
   that could not fail.
-- **PIECE C — the walk on the dev-store Debug build + captures. NOT-STARTED.**
-- **PIECE D — the closing runs + dispositions. NOT-STARTED.**
+- **PIECE C — the walk + two code-truth comments. DONE (PENDING_C).** The walk is below; the two
+  comments are `BookView.surfacePlaceholder` (what it checks and what it deliberately does not — the
+  finding below) and `FlowHeightEstimate.fingerprint` (the maintenance rule: it is a compile-time
+  constant because the page's metrics are; the note's own Read mode HAS a runtime `Aa −/Aa +` dial
+  (`readModeTypeScale`) and that surface composes no `StableSurface`, so if such a dial ever reaches
+  this page the fingerprint must become a function of it in the same edit).
+- **PIECE D — the closing run. DONE (PENDING_C).** ONE `xcodebuild test` run, 26 suite types — the
+  touched Mac suites (`SurfaceSizeMemoryTests · StableSurfaceTests · ReadingFlowEstimateTests ·
+  ReadingFlowEstimateMeasureTests · ReadingFlowLandingTests · BookOutlineRowsTests ·
+  BookOutlineLandingTests · BookOutlineFacesTests · BookViewTests · BookFocusFoldTests ·
+  OutlineWritingSurfaceTests · SpreadBookViewTests · BookRedesignMountTests · NoteBoxGeometryTests ·
+  NoteBoxCompositionTests · OutlineRoomTests`) plus the ten `Tutorial*` spine types:
+  **`Test run with 152 tests in 26 suites passed`**, zero `skipped:` lines (every named type matched).
+  No core run and no iOS build are owed: `Sources/` and `App/Variorum/Shared/` are both untouched
+  (`git diff --stat` is eight files, all under `App/Variorum/Variorum/` and `App/Variorum/VariorumTests/`).
+
+#### THE WALK (the acceptance gate: USE, on the DEV-STORE Debug build `io.lduarte.Variorum.debug`)
+
+No `/Applications/Variorum.app` instance existed at any point (`pgrep -fl 'Variorum.app/Contents/MacOS'`
+checked before every launch and after every quit; only ever my own PID). Captures in
+`notes/plans/use-report-2026-09-06-screens/18d-4/` (gitignored). The book is the seeded Sherlock library
+(13 notes, 105,335 w) — the one the sample library exists to be walked on.
+
+1. **The memory is written by real reading.** Terminal · book Outline · expand "A Scandal in Bohemia"
+   (20 993 pt of prose) → six seconds later `defaults read io.lduarte.Variorum.debug` shows
+   `surfaceSize.outline.4EBE2134-… = "696.0|20993.0|.AppleSystemUIFontMonospaced-Regular-14-7"` — the
+   designed shape exactly, from one real settle. **Capture 01.**
+2. **Reading on accumulates them.** "expand all", then scrolled through the book with pauses → **ten**
+   records, every one a real measured height (13 786 · 15 907 · 16 916 · 17 754 · 19 468 · 19 957 ·
+   19 995 · 20 993 · 21 655 · and the short "About this book" at 231). **Capture 03** + the listing
+   `03-defaults-after-reading.txt`.
+3. **A relaunch reads them back, and the first frame stands on what it read — proved by planting.**
+   Quit; wrote `696.0|1500.0|<terminal stamp>` for the SHORT note (real height 231) with the app down;
+   relaunched; opened the book; expanded that note; captured at once → the note's row holds **1500 pt**:
+   its text has not even arrived and the next chapter heading is pushed off screen (**capture 04**).
+   Four seconds later the settle has adopted the real size: the row is 231 pt, "a scandal in bohemia",
+   "the red-headed league" and "a case of identity" are all back on screen (**capture 05**), **and the
+   disk now reads `696.0|231.0|…`** — read, honored, corrected, written back, in one gesture.
+   The mirror, at a value that fits on screen: planted `696.0|120.0`, relaunched, expanded → the row
+   stands at ~120 pt and the WHOLE BOOK is visible under it (**capture 06**). A memory that survives
+   the quit is doing the layout of the first frame; nothing else in the app produces that picture.
+4. **The typography refusal, end to end.** Switched the voice to Study in Settings; quit; re-planted the
+   same `696.0|120.0|<TERMINAL stamp>`; relaunched; expanded → the row does **not** stand at 120: the
+   record is refused and the note falls back to the unmeasured height, so nothing is visible below it
+   (**capture 07**). It then settles and the disk takes a **Study-stamped** record —
+   `696.0|290.0|IowanOldStyle-Roman-16-8` — 290 pt where Terminal measured 231, which is precisely why
+   the stamp exists. **Capture 08** is the settled Study Outline. (Both voices walked; the surface has
+   no face of its own — it is a reservation — so the face in the captures is the note's prose, in both.)
+5. **The second consumer.** Book ▸ **Read ▸ Scroll** in Study → `surfaceSize.flow.…` records appear in
+   their OWN key space, at the page's own width and stamp: `600.0|20071.0|page-16-13-6` and
+   `600.0|233.0|page-16-13-6`. The SAME note therefore holds two records that never meet —
+   `outline 696|290|IowanOldStyle-Roman-16-8` and `flow 600|233|page-16-13-6` — which is the whole
+   reason the key spaces and the two fingerprints are separate. **Capture 09** + `09-defaults-both-key-spaces.txt`.
+6. The dev store was left as found: the voice restored to Terminal, my instance quit, zero instances running.
+
+**Captures (9 images + 2 defaults listings):** `01-terminal-outline-first-open-settled.png` ·
+`02-terminal-relaunch-warm-first-frame.png` · `03-terminal-outline-read-through-ten-memories.png` +
+`03-defaults-after-reading.txt` · `04-terminal-planted-memory-honored-first-frame.png` ·
+`05-terminal-settle-corrects-and-rewrites.png` · `06-terminal-memory-shapes-the-first-frame.png` ·
+`07-study-typography-refusal-first-frame.png` · `08-study-settled-after-refusal.png` ·
+`09-study-read-scroll-flow-second-consumer.png` + `09-defaults-both-key-spaces.txt`.
+*(Capture 02 — the warm relaunch's first frame — is kept for the record but proved NOTHING on its own:
+the same picture appears with and without a memory, because at that instant the row is a `surfacePlaceholder`
+whose fallback height (800) is also off-screen. Steps 3–4 are the discriminating evidence; 02 is listed
+honestly as the attempt that did not decide.)*
+
+#### The finding the walk turned up (recorded, not fixed — and why)
+
+**`BookView.surfacePlaceholder` reads the memory's HEIGHT and does not compare its WIDTH**
+(`BookView.swift`, the `surfacePlaceholder` property). The walk made this visible: the height an
+expanded note holds in the first frames after a relaunch comes from the PLACEHOLDER (the row starts
+`nearViewport == false`), not from `StableSurface`'s reservation — so the width refusal I pinned governs
+the reservation, while the first frame stands on the record's height whatever width it was taken at.
+**Left as it is, deliberately, and now said out loud in the code:**
+- A placeholder is a GUESS, and the alternative when it refuses is `unmeasuredSurfaceHeight` (800 pt).
+  A 20 000-pt note measured at 696 pt is ~28 000 at 500 pt — the mismatched memory is wrong by the width
+  ratio; the fallback is wrong by twenty-five times. Refusing would make the guess strictly worse.
+- The place a wrong width must never be believed is the RESERVATION, and it refuses there
+  (`stableSurfaceWidthTolerance`, ladder R1-1) — pinned twice in this batch, once on a persisted record.
+- The record's TYPOGRAPHY *is* checked for the placeholder (`SurfaceSizeMemory.size` refuses a foreign
+  stamp), because there the fallback is the honest answer: another voice's height is not a better guess,
+  it is a different note. Walk step 4 shows exactly that fallback happening.
+- The asymmetry is PRE-EXISTING (the Outline's placeholder never compared width; the flow's one brain,
+  `FlowHeightEstimate.honestHeight`, does — R2-1 — because the flow HAS an estimate to fall back to and
+  the Outline has none). Persistence makes it reachable across launches as well as across a mid-session
+  resize. If the ladder wants it closed, the honest shape is a width for the Outline column reported ONCE
+  by the column (never per row — that is a geometry observer per row, P1/P3) and consulted here; it is a
+  small change and I did not make it, because on the argument above it would degrade the guess.
+
+#### Dispositions
+
+- **Row 25 — "punchlist 9: remember note lengths" (U-12) — FIXED.** Pins:
+  `SurfaceSizeMemoryTests.aSettledSizeIsReadBackByAFreshMemoryAndRefusedUnderAnotherTypography` (the round
+  trip + the stamp refusal) · `.theTypographyStampSeparatesTheTwoVoices` · `.geometryCadenceNeverWritesAndASettledSizeWritesOnce`
+  (the cadence, counted) · `.aPersistedMemoryIsCorrectedByTheSettleInBothDirections(stored:)` (400 and 120,
+  mounted through the real `StableSurface`) · `.aPersistedMemoryAtAnotherWidthReservesNothing` ·
+  `.theTwoKeySpacesNeverMeetAndAnUnreadableRecordIsSimplyNoMemory`. Walk: steps 1–5, nine captures.
+  Not a bug-class row (`HERS (ruled)`), so no red-on-old is owed; the pre-fix behaviour is quoted from
+  the diff above and pin 1 states it beside the new one.
+- **DEFERRED — none.** **DISMISSED AS HOLLOW — none.**
+- **PROVISIONAL — none, and no QUESTIONS entry is owed.** Everything decided here was decided by §5.4's
+  own text (UserDefaults unless the count argues; the record's shape; the settle as the write occasion)
+  or by what the code actually contains (there is no font-size setting, so the stamp is the resolved
+  typography). The one judgment the brief did not make — TWO fingerprints rather than one app-wide one —
+  is argued in the record above and is a code decision, not a product one: it changes no behaviour the
+  author can name, only which memories survive a voice switch.

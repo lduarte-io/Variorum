@@ -684,6 +684,14 @@ nonisolated enum FlowHeightEstimate {
     /// story on a voice switch that moved nothing on this page). It exists
     /// so that if the page's own type ever moves, the memories taken under
     /// the old one are refused rather than reserved.
+    ///
+    /// **The maintenance rule it carries:** this is a COMPILE-TIME constant
+    /// because the page's metrics are constants. The note's own Read mode has
+    /// a runtime type-size dial (`readModeTypeScale`, its "Aa − / Aa +") and
+    /// that surface is a different one — it composes no `StableSurface`. If a
+    /// dial like it ever reaches THIS page, this must become a function of it
+    /// in the same edit, or every remembered story height silently outlives
+    /// the size it was measured at.
     static let fingerprint = "page-\(Int(fontSize))-\(Int(paragraphGap))-\(Int(lineSpacing))"
 
     /// Does a REMEMBERED size apply at this column width? Ladder R2-1 —

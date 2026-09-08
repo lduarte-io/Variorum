@@ -1942,6 +1942,22 @@ private struct OutlinePostRow: View {
     /// The far expanded row's stand-in: exactly the surface's remembered
     /// height (so the column's geometry is what it will be when the row
     /// nears), or the unmeasured fallback.
+    /// **What this reads, and what it deliberately does NOT check (18d batch
+    /// 4).** The memory is now persisted, so this — the FAR row's stand-in,
+    /// and therefore the height an expanded note holds in the first frames
+    /// after a relaunch — can stand on a record written at another window
+    /// width. It does so on purpose. The record's TYPOGRAPHY is checked for
+    /// it (`SurfaceSizeMemory.size` refuses a record stamped under another
+    /// voice, so a Study launch falls back to the unmeasured height), but its
+    /// WIDTH is not, because a placeholder is a GUESS and a note's height
+    /// measured at 696 pt is a far better guess for the same note at 500 pt
+    /// than `unmeasuredSurfaceHeight` — off by the width ratio rather than by
+    /// twenty-five times. The place a wrong width must never be believed is
+    /// the RESERVATION, and `StableSurface.reserved` refuses it there
+    /// (`stableSurfaceWidthTolerance`, ladder R1-1 — pinned twice, once on a
+    /// persisted record). The reading flow makes the same split for the same
+    /// reason through one brain (`FlowHeightEstimate.honestHeight`, R2-1),
+    /// where it has an estimate to fall back to and the Outline has none.
     private var surfacePlaceholder: some View {
         Color.clear
             .frame(height: model.rememberedSurfaceSize(entry.postID)?.height
