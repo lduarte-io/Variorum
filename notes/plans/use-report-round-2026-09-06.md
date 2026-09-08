@@ -6080,3 +6080,101 @@ pattern) read from a `PaneMountTests`-shaped mount: open note X at block B throu
 navigate to Y through `openHere`, return to X through `openHere`, and assert `target(for: X) == nil`
 (and, on the same mount, that the editor's landing is the remembered caret, not B). Red today at the
 first assertion.
+
+---
+
+**[MINOR] · `App/Variorum/Variorum/Surface/PaneSurface.swift:96–100` · the new per-fragment walk is
+justified by a sentence that is false for half the brain's call sites — two of them are WHOLE-POST
+surfaces, one of them per-keystroke.**
+
+*Mechanism.* The doc argues P1 holds *"for the reason this file already states: a pane's document is
+ONE take by construction, so the bound is the unit on screen."* By grep, `PaneMeasurement.height` has
+four production call sites, and only two are panes: `PaneSurface.swift:1241` and `:1440`. The other
+two are full-POST documents — `Features/ReadTier/ReadPostViewModel.swift:263` (the read tier's
+`remeasure`, one post) and `Features/Editor/EditorView.swift:559` (`InlineEditorSurface`'s
+`remeasure`, the book-view inline editor), and the second one is wired to
+`NSTextStorage.didProcessEditing` (`:539–549`), i.e. it runs **once per keystroke**. The old body read
+one property after `ensureLayout`; the new one reads a frame per fragment, so the added work at those
+two sites is O(fragments in the post) per edit — by the batch's own numbers ≈ 0.4 µs/fragment
+(0.58 ms vs 0.41 ms at 400 fragments). This is not a NEW P1 class (the old `ensureLayout(for:
+documentRange)` was already document-scaled there, and `InlineEditorSurface`'s per-edit remeasure is
+a recorded measured cost) — it is an amplification of one on a typing path, plus a justification that
+tells the next reader the site set is something it is not.
+
+*No red-on-old pin exists for this and I say so* — nothing behaves wrongly; the traced degradation is
+the per-keystroke cost at `EditorView.swift:559` and the false premise in the comment. Fix: state the
+true call-site set (two panes, two whole-post surfaces) and hand 13u2 the measured question the record
+already opens (*"the full-document EDITOR … was NOT examined"*) with these two sites named.
+
+---
+
+**[MINOR] · `App/Variorum/Variorum/Features/Library/SidebarLayout.swift:44–53` · the constant row 13
+unified is explained by arithmetic row 13 retired.**
+
+`fixedChromeHeight`'s doc still reads *"each a 22-pt header and a 19-pt separator … 14 (top) + 3 × 22
++ 3 × 19 + 96 … = 233"* while `groupHeaderHeight` two lines below is now **30** (`:63`), so the value
+is 257. Row 13's whole stated point is that the header's drawn height and the height the column
+budgets *"can never drift apart — the drift would be silent"*; the paragraph that teaches the budget
+now names the retired number, which is the same silent-drift hazard one layer up. The test beside it
+was correctly rewritten to compute from the constants (`ShellChromeTests` `theChromeCountsOnlyThe
+HeadedGroupsPresent`), so only the prose is stale. Doc-class: no pin, and none is owed.
+
+---
+
+**[MINOR] · `App/Variorum/Variorum/Features/Takes/PostDetailView.swift:167` + `:322` ·
+`mastheadWidth` is now write-only state, and its doc claims two readers it does not have.**
+
+Row 11 removed `titleInsets`, which was `mastheadWidth`'s only reader. By grep the identifier now
+appears exactly twice in the whole app: the `@State` declaration (`:167`) and the
+`.onGeometryChange` that writes it (`:322`). Its rewritten doc says it is *"measured for the DEBUG
+oracle's reach check and row two's width-aware layout"* — the DEBUG oracle reads the title BAND's
+frame (`MastheadGeometry.titleFrame`, written in `PostTitleLabel`), not this, and row two computes
+from its own layout; neither reads it. Traced degradation: every masthead width change writes
+`@State` on `PostDetailView` and invalidates its body for a value nothing consumes — and row 9 has
+just made the sidebar seam far easier to grab, so a resize drag now runs that invalidation
+continuously. Fix: delete the state and its `onGeometryChange`, or, if the oracle is wanted, make it
+write `MastheadGeometry` under `#if DEBUG` and say so. No pin (dead state); the mechanism is the grep.
+
+---
+
+**[NIT] · `App/Variorum/Variorum/Features/Takes/TakesShared.swift:102` · a second chrome
+`fixedSize()` with no `lineLimit` (P-8's b6dae25 class).**
+
+The empty state's `＋ new block` button carries `.fixedSize()` with no `lineLimit`, which the
+constitution's P-8 forbids without exception (*"Chrome `fixedSize` texts always carry a
+`lineLimit`"*). In fairness it copies `TakesBoardView.swift:582–594`'s article door byte-for-byte,
+which has the same gap — so this doubles an existing exception rather than opening a class, and the
+label is a short constant. `.lineLimit(1)` on both closes it.
+
+---
+
+**[NIT] · `Sources/VariorumCore/Operations/Operations+Versions.swift:133–147` · the anchor rule is
+typed a second time beside a shared helper that documents itself as this exact rule made shared, and
+the two copies disagree.**
+
+`anchorBlock` inlines `SELECT block_id FROM container_block WHERE container_id = ? AND deleted_at IS
+NULL ORDER BY position, id LIMIT 1`, while
+`Operations+NoteVersions.swift:322–333`'s `firstLivePlacedBlock` says of itself: *"the `version_of`
+anchor's own rule (`markPostsAsVersions`' `firstBlock`, made shared rather than typed a second
+time)"* — and JOINs `block` on liveness, which the inline copy does not. The divergence is
+PRE-EXISTING (the pre-fix `firstBlock` had it too), and I could not turn it into a defect:
+`Queries.versionPeerPosts` (`Sources/VariorumCore/Queries/Lineage.swift:206–229`) is equally
+permissive about block liveness, so the doubly-raced live-placement-over-dead-block state does not
+produce an invisible link. What is left is that the batch rewrote this exact function, renamed it, and
+left the "made shared" claim next door false. Consume the helper, or correct its sentence.
+
+---
+
+**[NIT · RECORDED, not a finding of this diff] · ⌘A inside a live take pane (the R-7 record's
+observation (c), which the adjudication asked me to trace).** What I can rule out by reading: nothing
+in the app intercepts the chord — `keyboardShortcut("a", …)` appears once and it is ⇧⌘A
+(`EditorCommands.swift:516`); no `CommandGroup(replacing: .pasteboard)`/`.textEditing` removes the
+standard Edit menu (the only pasteboard hook is `CommandGroup(after: .pasteboard)`,
+`EditorCommands.swift:382`); `PaneTextView` overrides neither `selectAll(_:)` nor
+`performKeyEquivalent`, and its only `keyDown` override passes everything but the soft-newline key
+straight to `super` (`PaneSurface.swift:380–388`); and the pane is `isSelectable = true` in every
+mode (`:611`), so `selectAll:` validates. So if the pane holds first responder the menu's Select All
+should reach it — which means the interesting question is whether it does, and that is a measurement,
+not a read. **Unresolvable read-only, outside batch c's four rows, and I will not invent a mechanism
+for it:** it belongs in `KnownIssuesAndTechDebt.md` with owner 13u2 (the pane family), exactly as J24
+anticipated, and its evidence class is a walk.
