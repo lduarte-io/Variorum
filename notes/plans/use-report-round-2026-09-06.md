@@ -7434,12 +7434,19 @@ mode's bar-in-the-page).
 | E | the retirement (the gutter · `.side` · the paged mode) + the click-out | **DONE** (`cb4c4669`) |
 | F | the walk, both voices, every state in every mode; captures | NOT STARTED |
 
-**REVERT PROBE IN FLIGHT (named before it runs, per the checkpoint rule).** The tree is committed at
-`ffef837d`; two behavioural reverts follow, each restored by `git checkout --` from the repo root with
-`git diff --stat` verified empty afterwards. **Probe 1 (the height claim):** the box's frame dropped so
-it sizes to its content — the geometry oracle must go red on the DIFFERENCE, not on absence. **Probe 2
-(the existence + the retirement):** the sidebar's box branch removed and `.inSidebarBox` made to render
-the bottom bar again — the composition pin and the retirement pin must go red.
+#### THE PINS, AND THEIR RED (both probes run on the committed tree `ffef837d`, restored by `git checkout --`, `git diff --stat` empty after each)
+
+| Pin | Holds | Red-on-old, measured |
+|---|---|---|
+| `NoteBoxGeometryTests.theBoxStandsAtTheRailsExactHeightInEveryStateAndBothVoices` | **THE ORACLE** — the box's DRAWN height == the rail group's DRAWN height, in all three states, in both voices | **Probe 1 (drift): 6 issues.** With the column's frame dropped the box sizes to its content and every state is a different height: terminal **110 · 208 · 178** against the rail's **240**; study **110 · 186 · 156**. That difference IS the defect her ruling forbids — the Open strip below moving as the box changes state. **Probe 2 (absence): 2 issues** — `noteBoxFrame → nil`: before this batch the column drew nothing at all where the rail stands |
+| `NoteBoxGeometryTests.theBoxesHeaderSitsOnTheColumnsOneLeftEdge` | the box's header words start on the column's one row-text edge (row 13's rule, applied to a bordered box) | probe 2: `noteBoxHeaderFrame → nil` |
+| `NoteBoxCompositionTests.aBookOpeningPutsTheBoxOnTheColumnSayingNoNoteSelected` | **the whole road** — book publishes → `RootView` composes → the sidebar renders; the empty face is on screen; at the rail's height | probe 1: 130.0 pt off; probe 2: `noteBoxFrame → nil` |
+| `NoteBoxCompositionTests.theBookPublishesItsNoteAndTheIdentityTheNavigatorHolds` | empty → live → empty as she focuses and clicks out; title · chapter · 1 of 3 | `onNoteBox` did not exist |
+| `NoteBoxCompositionTests.theBooksEditingSurfacesMountNoBarOfTheirOwn` | **U-17** — Outline's focused row and the paged Book mode's page mount ZERO bars | **probe 2: 3 issues** — `mounted["horizontal"] → 1` in Outline AND in the spread, and `rowFrame → (12.0, 6.0, 299.0, 18.0)`: a bar really did draw in the page |
+| `NoteBoxStateTests` ×3 · `BookNoteBoxSubjectTests` ×5 · `NoteBoxHeightTests` ×2 · `NoteBoxCopyTests` ×5 | the brains (piece B) | new surface — stated in the file |
+| `NoteStampsTests` ×5 (core) | the facts line's one read (piece A) | the query did not exist |
+
+**Totals so far: 21 Mac tests / 6 suites green, 5 core tests / 1 suite green.**
 
 #### Piece B — the brains, before any pixel
 
