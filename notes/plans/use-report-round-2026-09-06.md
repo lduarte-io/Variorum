@@ -5249,9 +5249,17 @@ clean.**
 
 ### R-8 · RECORD (the implementer writes here from its first commit)
 
-**NOT DONE (the record's first line, kept current):** at this checkpoint — row 41 (it needs the
-running app: no test window carries the window's toolbar band, so its trace and its capture-diff are
-the walk's); the walk; the closing suites. Nothing outside the seventeen rows was touched: zero
+**NOT DONE (the record's FIRST LINE, honest and final).** Two things, both named with their reason:
+**(a) Row 10 was not walked** — triggering a fresh SMS one-time code is hers, and the brief said so;
+the bundle key is pinned (including its TYPE) and the built plist verified a strict superset of the
+installed one. **(b) Rows 17 + 27 were not walked end to end** — Compare's "+ choose a note" chooser
+would not take the rig's typed input (cliclick mangled it into `😭thr w` and ⌘A/delete did not reach
+the sheet's field), which is §9's own recorded rig limit ("the real-click rig cannot mount a WHOLE
+surface — pin mechanisms, walk faces"). Their mechanism is pinned END TO END through the real door
+(`theVersionsDoorSpeaksInWordsAndLinksABlocklessNote`) with the core half's red re-measured by a revert
+probe. **Row 46's help sentence** is a `.help()` tooltip and is pinned rather than captured. Everything
+else in the batch is walked and captured below. Nothing outside the seventeen rows was touched: zero
+`Sources/VariorumCore/Sync/`, zero schema, no 18d work. Nothing outside the seventeen rows was touched: zero
 `Sources/VariorumCore/Sync/`, zero schema, no 18d work, no editor-seam change beyond row 47's one
 condition in `applyFocusSeeds` (flagged seam-adjacent below for the c/d/e reviewer).
 
@@ -5271,7 +5279,7 @@ column · Compare's one door — plus the two ladders' routed residue (rows 43�
 | 21 | the Index count ↔ ⋯ trailing edges | **DONE** (`5f845f9e`) | `theChapterCountAndTheRowMenuEndInOneTrailingColumn` |
 | 27 | Compare speaks the raw `OperationError` | **DONE** (`c96a5410`) | `theVersionsDoorSpeaksInWordsAndLinksABlocklessNote` |
 | 40 | the tag field collapses on focus loss | **DONE** (`d78c54c5`) | `theFieldCollapsesOnFocusLossOnceTheNoteCarriesATag` |
-| 41 | the divider's white top | NOT-STARTED | — |
+| 41 | the divider's white top | **DONE** (`c5603da6`) | capture-diff (measured, both voices) |
 | 43 | the Takes board's sheet receipt count | **DONE** (`45cdfdef`) | `aSeedParkedAtItsStartDoesNotGetTheSplitAcrossBothReceipt` |
 | 44 | the field guide's deleting chapter still teaches ⌘⇧D's retired default | **DONE** (`0f9496cd`) | `theDeletingChaptersDivideLessonTeachesKeepOnTop` |
 | 45 | the Takes/Lenses bar's `block ▾` lacks the two ceremony rows | **DONE** (`df75906b`) | `theBoardsStructuralGroupRendersEveryStructuralAct` |
@@ -5595,3 +5603,98 @@ in-place revert to the overlay shape: grip `(206.0, 52.0, 9.0, 792.0)` against a
 points wide, reaching only the sidebar side. Green at `(203.5, 52.0, 14.0, 792.0)`, seven points into
 each side. **The z-order and cursor halves are the walk's, and say so here:** a pushed `NSCursor`
 against a text view's cursor rects is not something a mounted view can be asked about.
+
+**AND THE WALK FOUND MY FIRST FIX'S CURSOR HALF DOES NOT WORK** (`9bee2a16`). Three cuts, each captured
+on the running build, all kept in the file's own comment so the next reader does not repeat them:
+(1) `.onHover` + `NSCursor.push()` — the I-beam wins back on every mouse-moved event (captured, four
+points from the seam); (2) an AppKit representable owning a cursor rect and a `.cursorUpdate` tracking
+area — with `hitTest` nil the I-beam STILL won (a view outside the hit-test chain gets neither), and
+taking the hits and the drag produced the plain ARROW, never the resize cursor, because `NSHostingView`
+manages the pointer for its own subtree; (3) **SwiftUI's own `.pointerStyle(.columnResize)`** (macOS 15+,
+target 26) — captured showing the column-resize pointer exactly where the I-beam used to win. The DRAG
+stays SwiftUI's; re-walked after the rewrite, a drag started five points INSIDE the detail moved the
+seam from 300 pt to 230 pt (pixel-probed x 600 → 460).
+
+**A build-log finding carried in that commit:** the row-10 partial plist had joined the synchronized
+source folder's Copy Bundle Resources phase and Xcode warned the target was copying its own Info.plist
+into Resources. Moved to `App/Variorum/VariorumInfo.plist`; verified after — zero warnings, the key
+still `true` in the built bundle, no stray `Resources/Info.plist`.
+
+#### Row 41 — FIXED · **traced by MEASUREMENT, because no test window has a toolbar band**
+
+**Traced myself, on the dev-store Debug build.** At the seam's x the window is pure white
+`(255,255,255)` from y = 0 to y ≈ 79 px (2× — about 40 pt), while the sidebar's ground `(246,246,241)`
+and the detail's `(251,251,247)` are BOTH painted to y = 0. Nothing paints white there: the line was
+simply ABSENT. The two columns' backgrounds run under the window's toolbar band, as backgrounds do; the
+divider is a laid-out view inside the safe area, so it began below the band and the window's own white
+showed through the 1-pt gap between the two grounds.
+
+**Fix:** the LINE ignores the top container safe area, so it runs the height the grounds run. The GRIP
+deliberately does not — a resize drag under the toolbar band would be a new gesture, not a fix.
+
+**Evidence is the capture-diff the brief offers** (a geometry oracle cannot see it: the test window
+carries no toolbar). Re-measured after the rebuild — Terminal: `(228,228,221)` from y ≈ 10 down, where
+it was `(255,255,255)` to y = 79. **Study, separately measured:** `(227,221,209)` — Study's own `line`
+— from y = 8 down. Captures `41-seam-before/after-terminal.png` + crops.
+
+---
+
+### R-8 · THE WALK (the acceptance gate: USE, on the dev-store Debug build `io.lduarte.Variorum.debug`)
+
+Driven with `cliclick` + `Tools/WalkKit/` on the Debug build only; `/Applications/Variorum.app` never
+launched and her real store never touched (`pgrep -fl 'Variorum.app/Contents/MacOS'` clean at open and
+at close). Captures in `notes/plans/use-report-2026-09-06-screens/17o-d/` (gitignored). Where a claim is
+about pixels rather than about a picture, it is **pixel-probed**, not eyeballed.
+
+| Row | What was done, and what was seen | Captures |
+|---|---|---|
+| 9 | A drag STARTED FIVE POINTS INSIDE THE DETAIL — the half that was completely dead — moved the seam (pixel-probed x 600 → 460). The pointer inside the grip captured as the **column-resize** cursor where the I-beam used to win; the I-beam and the plain-arrow failures of cuts 1 and 2 captured too | `walk-12`, `walk-13`, `walk-14` |
+| 10 | **NOT WALKED — hers.** A fresh SMS one-time code cannot be triggered from here | — |
+| 11 | The title's leading edge sits exactly on the path chip's, in **both voices** — Terminal `2026-09-08` / `~/journal` both at x 57; Study both at x 76 | `walk-06`, `walk-33` |
+| 12 | Clicking the title: the words do not move. Terminal glyph rows 162…235 at rest vs 164…235 editing (the bottoms identical; the 2-px top is the caret in the scan band). Study visibly identical, same leading edge and baseline | `walk-03`, `walk-04`, `walk-35` |
+| 13 | "this note" ↔ Write and "Open" ↔ the tabs, on ONE edge, with air before the first wash — **both voices** (Study's empty selection marker makes it the cleanest demonstration: header and rows both at x 41) | `walk-29`, `walk-34` |
+| 17 · 27 | **NOT WALKED end to end** — Compare's chooser would not take the rig's typed input (see the record's first line). Compare on a blockless note reached and captured | `walk-30`, `walk-31` |
+| 18 | Renamed the note to "Boscombe Notes" in the masthead field; the Open strip's row read "boscombe notes" IMMEDIATELY, with nothing else clicked. Clearing the title live-reverted it to the date the same way | `walk-07`, `walk-09` |
+| 19 | Changed the entry date 2026-09-08 → 2026-09-22 through note ▾ ▸ Date; the masthead's derived title followed at once, no re-open | `walk-10`, `walk-11` |
+| 21 | The book Index: the chapter counts and the note rows' ⋯ end in one column, down the whole column | `walk-23`, and again in `walk-26`'s filter |
+| 40 | ＃ → typed `walked` → ⏎: the tag applied and the field **collapsed**, leaving the chip and the ＃ | `walk-05`, `walk-06` |
+| 41 | Pixel-probed at the seam's x, before and after, in **both voices** (see the row above) | `41-seam-*` |
+| 43 | Three takes; ⌥⌘⇧D; ← to park the SEED's ✂ at its very start under keep-on-top ("this whole take goes to the bottom block"); confirm → the receipt read **"Block divided — ⌥⌘Z undoes it."** Before the fix that shape claimed a split and one take, both false | `walk-18`, `walk-19`, `walk-20` |
+| 44 | Help ▸ Restore Tutorial… ▸ **Replace**, then the lesson: *"the take you are looking at splits across two new blocks, and the other take stays whole on the first block."* **The walk also PROVED the sequencing claim:** before the restore the same lesson still read "copied whole onto both" — the words live in the seeder, so a store seeded earlier keeps the old lesson until her one restore act | `walk-26`, `walk-27` |
+| 45 | The Takes bar's `block ▾`: **Divide choosing takes… (⌥⌘⇧D)** beside Divide and **Merge choosing takes… (⌥⌘⇧M)** beside Merge | `walk-16` |
+| 46 | The bar's Divide help is a `.help()` tooltip — pinned, not capturable | — |
+| 47 | An arrival-scroll behaviour with no visible chrome; pinned with the cap's own numbers | — |
+
+---
+
+### R-8 · CLOSING RUNS
+
+- **Core:** `swift test` → **1496 tests in 162 suites**, green (1495 at the versions commit; +1 for the
+  bounded tag query's pin).
+- **Mac:** ONE `xcodebuild test` over **36 suite TYPES** — the batch's touched suites plus the ten
+  `Tutorial*Tests` spine types — → **`✔ Test run with 313 tests in 36 suites passed`**. Thirty-six
+  names, thirty-six suites, **zero `skipped:` lines**.
+- **iOS:** `xcodebuild -scheme VariorumMobile … build` → **BUILD SUCCEEDED**, zero errors (owed because
+  `VersionActs` lives in `App/Variorum/Shared/`; in the end that file was NOT changed — see row 27 —
+  but `VariorumCore`'s versions op was, and the phone builds on it).
+- No `Co-Authored-By` / `Claude-Session` trailer on any commit; no history rewritten; every `git add`
+  path-scoped; pushed after every commit.
+
+### R-8 · CANON DELTAS OWED (drafted here; the orchestrator applies at the letter's close)
+
+1. **`notes/plans/act10-correction-round.md` rows 4 · 19** — the supersession text is drafted above,
+   under rows 11 + 12.
+2. **`notes/KnownIssuesAndTechDebt.md`, the row "A note's saved VERSIONS ride a BLOCK-level anchor…"** —
+   amend with: *"AMENDED 2026-09-08 (17o batch d, ledger row 17; her ruling U-19 (1)): a BLOCKLESS post
+   no longer refuses the link — `markPostsAsVersions` mints its anchor block (one ordinary block, one
+   live empty take) in the same transaction, stamping `last_touched_at` without churn and refusing under
+   a seal. The row's standing point is unchanged: the anchor is still a block-level edge on the FIRST
+   block pair (QUESTIONS #19's PROVISIONAL), and the peer traversal still matches any live `version_of`
+   edge between the posts' placed blocks."*
+3. **No `TEXTKIT2_NOTES.md` delta from this batch** (the two macOS-26 findings here are AppKit chrome,
+   not TextKit): recorded instead as the row-9 comment block in `ShellSplit.swift` (an
+   `NSViewRepresentable`'s cursor rects and tracking areas do not outrank `NSHostingView`'s own pointer
+   management; `.pointerStyle` is the road) and the row-10 comment in `VariorumInfo.plist` (an
+   `INFOPLIST_KEY_<name>` build setting is silently dropped for a key Xcode does not know).
+4. **QUESTIONS: nothing new.** No row here turned on undefined product behaviour — every decision is
+   traceable to U-8, U-15, U-19 (1)/(2), or a ruled/shipped fallback (row 43's zero line is R1-9's).
