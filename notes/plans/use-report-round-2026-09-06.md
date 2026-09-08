@@ -5249,8 +5249,9 @@ clean.**
 
 ### R-8 · RECORD (the implementer writes here from its first commit)
 
-**NOT DONE (the record's first line, kept current):** at this checkpoint — rows 9 · 13 · 18 · 19 ·
-21 · 40 · 41; the walk; the closing suites. Nothing outside the seventeen rows was touched: zero
+**NOT DONE (the record's first line, kept current):** at this checkpoint — row 41 (it needs the
+running app: no test window carries the window's toolbar band, so its trace and its capture-diff are
+the walk's); the walk; the closing suites. Nothing outside the seventeen rows was touched: zero
 `Sources/VariorumCore/Sync/`, zero schema, no 18d work, no editor-seam change beyond row 47's one
 condition in `applyFocusSeeds` (flagged seam-adjacent below for the c/d/e reviewer).
 
@@ -5259,17 +5260,17 @@ column · Compare's one door — plus the two ladders' routed residue (rows 43�
 
 | Row | What it is | Status | Pin |
 |---|---|---|---|
-| 9 | the divider's grip is too small / the I-beam wins | NOT-STARTED | — |
+| 9 | the divider's grip is too small / the I-beam wins | **DONE** (`b55afba4`) | `theSeamsGripIsWideCentredAndReachesIntoBothSides` |
 | 10 | the Messages fill-code popover on the title | **DONE** (`11314949`) — hypothesis REFUTED | `theBundleRequiresAnExplicitContentTypeForOneTimeCodes` |
 | 11 | the title LEADS (U-8) | **DONE** (`5ce18072`) | `theTitleLeadsWithRowTwoAndReachesPastTheOldCenteredMeasure` |
 | 12 | the placeholder shifts up on click | **DONE** (`5ce18072`) | `bothTitleFacesShareOneBoxSoNothingShiftsOnClick` |
-| 13 | the sidebar headers' alignment + air | NOT-STARTED | — |
+| 13 | the sidebar headers' alignment + air | **DONE** (`1b60bf3f`) | `theSidebarHeadersSitOnTheirRowsEdgeWithAirBeforeTheWash` |
 | 17 | versions on a blockless note (core; U-19 (1)) | **DONE** (`9e75ded9` core, alone) | `aBlocklessPostGainsAnEmptyAnchorBlockAndTheLinkLands` |
-| 18 | a rename doesn't reach the open strip | NOT-STARTED | — |
-| 19 | a date change doesn't reach the masthead title | NOT-STARTED | — |
-| 21 | the Index count ↔ ⋯ trailing edges | NOT-STARTED | — |
+| 18 | a rename doesn't reach the open strip | **DONE** (`c9dea8f4`, core `e2413e0b`) | `renamingANoteMovesTheOpenStripsNameWithNoClick` |
+| 19 | a date change doesn't reach the masthead title | **DONE** (`c9dea8f4`) | `aDateChangeMovesTheMastheadsDerivedTitleWithNoReopen` |
+| 21 | the Index count ↔ ⋯ trailing edges | **DONE** (`5f845f9e`) | `theChapterCountAndTheRowMenuEndInOneTrailingColumn` |
 | 27 | Compare speaks the raw `OperationError` | **DONE** (`c96a5410`) | `theVersionsDoorSpeaksInWordsAndLinksABlocklessNote` |
-| 40 | the tag field collapses on focus loss | NOT-STARTED | — |
+| 40 | the tag field collapses on focus loss | **DONE** (`d78c54c5`) | `theFieldCollapsesOnFocusLossOnceTheNoteCarriesATag` |
 | 41 | the divider's white top | NOT-STARTED | — |
 | 43 | the Takes board's sheet receipt count | **DONE** (`45cdfdef`) | `aSeedParkedAtItsStartDoesNotGetTheSplitAcrossBothReceipt` |
 | 44 | the field guide's deleting chapter still teaches ⌘⇧D's retired default | **DONE** (`0f9496cd`) | `theDeletingChaptersDivideLessonTeachesKeepOnTop` |
@@ -5490,3 +5491,107 @@ close):**
 > way she asked. What survives of batch A's work is row 80's clause (the title never runs under the
 > icons), now carried by `theTitleLeadsWithRowTwoAndReachesPastTheOldCenteredMeasure`;
 > `theTitleBlockCentersOnTheMastheadInEveryMode` is deleted rather than weakened.
+
+#### Rows 18 + 19 — FIXED (with a CORE addition committed alone first, `e2413e0b`)
+
+**Traced myself.** One defect twice. `WorkspaceModel.resolveTitles` re-read only when
+`titleSubjectsKey` changed — the SET of things on screen or its order, which a rename does not touch;
+`PostTitleLabel.refresh()` was a one-shot `.task(id: postID)` that `setEntryDate` — the very input the
+derived name is built from — could never reach. Both are now the same fetch, HELD: the open set for the
+strip, the one note for the masthead. Every door that writes a name moves the chrome by itself,
+**including a rename arriving on a sync pull**, which no one-shot could ever see. The masthead field's
+own write drops its follow-up re-read: one road, not two.
+
+**The bound, and why it needed a core addition.** `AppDatabase.observe`'s own doc rule is that a held
+observation's fetch must be viewport-shaped, because it re-runs on every `container` write (autosave
+stamps land there). `resolveTitles`' tag branch read `allTags` — fine at navigation rate, corpus-shaped
+under an observation. So `Queries.tagPaths(_:ids:)` was added FIRST, in its own core commit
+(`e2413e0b`, pin `tagPathsReadsOnlyTheNamedTagsAndSkipsTheDead`), and the strip now reads one indexed
+row per subject and the paths of the tags actually on screen. `resolveTitles` survives as the one-shot.
+
+**Pins, both red on `e2413e0b`:** `WorkspaceModelTests.renamingANoteMovesTheOpenStripsNameWithNoClick`
+— 3 issues (the label stayed "The Long Way Home" through a rename, a date change and a book rename
+beside it), driven through the ordinary operations with the strip's own task running and nothing
+clicked; `MastheadLayoutTests.aDateChangeMovesTheMastheadsDerivedTitleWithNoReopen` — 2 issues (the
+masthead kept showing 2026-06-30 after the entry date moved to 2026-03-04). **20 / 2**, with
+WorkspaceNaming · OpenNotes · NavigationHistory · NavigationDoors · ShellChrome · SidebarLayout ·
+MastheadTagDoor **33 / 7** beside them.
+
+#### Row 40 — FIXED
+
+**Traced myself.** `TagInlineField` had NO focus-loss road at all: only ⎋ (`onExitCommand`) and the ＃
+closed it, so the empty template sat in the masthead beside her tags until she went back for it. **Fix:**
+the field reports resigning the keyboard and the CLUSTER decides, because only it knows whether the note
+carries a tag. With a tag applied, focus loss collapses it — and a completed ⏎ apply collapses it too,
+which retires the shipped *"the field stays out after an apply, so several tags go on in one breath"*:
+that sitting-open is exactly what she asked to stop, and the ＃ is one key away. A note with NO tags
+keeps its field on the first click (§5.3's recorded reading of her already-tagged wording). A suggestion
+row is a plain `Button`, which does not take the keyboard on macOS, so the report cannot fire under a
+click on the list below.
+
+**Pin (red-on-old):** `MastheadTagDoorTests.theFieldCollapsesOnFocusLossOnceTheNoteCarriesATag` — both
+halves through a real mount, resigning first responder for the click-out. RED on `c9dea8f4`. **14 / 2.**
+
+#### Row 21 — FIXED · **the first pin was HOLLOW, and that is recorded**
+
+**Traced myself.** A borderless `Menu` draws a disclosure chevron and reserves room for it INSIDE its
+own control, so the ⋯ sat several points inboard of the chapter count above it. **Fix:** the indicator
+hidden, and both rows ending in one named trailing column (`BookIndexColumn.trailingColumn` = 22).
+
+**The hollow first pin, kept as the record's warning:** comparing the two views' trailing EDGES passes
+on both trees — measured, count `maxX` 282.0 and menu `maxX` 282.0 before the fix — because the chevron
+lives inside the menu's box, so the boxes always ended together and only the glyph sat inboard. Under
+the standing rule that would have dismissed the row as hollow; the row is not hollow, the CLAIM was.
+The claim that can see it is the control's WIDTH: **28.0 pt with the chevron, 15.0 pt after**, inside a
+22-pt column.
+
+**Pin:** `BookIndexEditingTests.theChapterCountAndTheRowMenuEndInOneTrailingColumn` — red under an
+in-place revert of `.menuIndicator(.hidden)`; the trailing-edge equality rides beside it as the guard it
+honestly is. Pinned there rather than in `BookIndexColumnTests` (which the brief names) because that
+suite is pure column logic with no mount. **10 / 2.**
+
+#### Row 13 — FIXED · **and the column's fit math had to follow**
+
+**Traced myself.** Two mechanisms in one function. `header()` padded `groupPadding + rowPadding` while
+sitting INSIDE groups that already pad `groupPadding`, so its words landed 12 pt inboard of the rows
+beside them (measured: 32.0 against 20.0). And its 22-pt box with the text bottom-aligned and nothing
+under it left the words touching the first row's wash (measured gap: **0.0**). **Fix:** a header inside
+a padded group pads `rowPadding` only — exactly the edge `rowChrome` gives its content — and its row is
+the column's own 30-pt pitch with 6 pt below the words.
+
+**The consequence I chased rather than left:** `SidebarLayout.groupHeaderHeight` (22) is what the column
+BUDGETS per headed group in its compress-or-not math. A header drawn at 30 against a budget of 22
+under-counts the chrome by 24 pt at three groups — a column that fails to compress when it should, and
+silently. The constant moves to 30 and `SidebarView.headerHeight` READS it, so the two can never drift.
+`fewRowsNeverCompressInAShortWindow` is a justified edit with its claim intact (it described "five areas
+alone" while taking the default three headed groups, and passed on 17 pt of slack the growth consumed;
+the combination it asserted is unreachable — a rail alone is seven rows).
+
+**Pin (red-on-old):** `ShellChromeTests.theSidebarHeadersSitOnTheirRowsEdgeWithAirBeforeTheWash` — BOTH
+headed groups through a real `RootView` mount, since the defect was one rule wrong in one place and
+would return the same way. RED with **4 issues** (12.0 pt of misalignment and 0.0 pt of air, twice);
+green at 20.0/20.0 and 6.0. **21 / 3.**
+
+**Coordination kept for 18d batch 1:** `SidebarGeometry.railGroupHeight` still publishes the rail
+group's measured height, and the header rule above is the one its note box inherits.
+
+#### Row 9 — FIXED (the geometry pinned; the z-order and the cursor are the walk's)
+
+**Traced myself — three mechanisms, not one.** (1) The grip was a 9-pt `.overlay` on the 1-pt line, so
+it was not a layout participant and had no frame of its own. (2) The detail is the HStack's NEXT
+sibling, so it drew and hit-tested AFTER the divider and took every point right of the line — about four
+points were reachable, on the sidebar side only. (3) The cursor came from `.onHover` +
+`NSCursor.push()`, which loses to the text view's own cursor rects the moment the mouse moves inside the
+grip — that is her *"sometimes the I looking pointer"* — and the push/pop pair could be left unbalanced
+besides.
+
+**Fix:** the grip is a ZStack SIBLING of the line at 14 pt, centred on the seam; the divider carries
+`.zIndex(1)` so the seam hit-tests above the detail; and the cursor comes from an AppKit cursor rect
+plus a `.cursorUpdate` tracking area (`SeamCursor`), whose view returns nil from `hitTest` so clicks and
+the SwiftUI drag pass through untouched. Nothing is pushed, so nothing can be unbalanced.
+
+**Pin (red-on-old):** `ShellChromeTests.theSeamsGripIsWideCentredAndReachesIntoBothSides` — RED under an
+in-place revert to the overlay shape: grip `(206.0, 52.0, 9.0, 792.0)` against a line at x 210 — nine
+points wide, reaching only the sidebar side. Green at `(203.5, 52.0, 14.0, 792.0)`, seven points into
+each side. **The z-order and cursor halves are the walk's, and say so here:** a pushed `NSCursor`
+against a text view's cursor rects is not something a mounted view can be asked about.
