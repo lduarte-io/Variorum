@@ -4647,3 +4647,104 @@ gestures that I had not seen; routing it into #97's text rather than deciding it
 
 **Counts after the pass:** 1 MAJOR fixed with its red-on-old pin · 3 NIT fixed (one with a pure guard pin). **Open for the implementer's sanity pass:** nothing beyond the diff itself; round 3 follows per the ladder (R2-1 is a new MAJOR inside round 1's fixes).
 
+#### 17o batch b round 2 — the implementer's sanity pass
+
+*One pass over `010a62a9..46a630fc` with the batch's context, then the four roads walked on the
+dev-store Debug build rebuilt at `46a630fc`. **No code or test file touched; the plan is the only file
+this edits.** **4 CLEAR · 1 RAISED** (the raise is a NEW observation — the thing round 1 handed me
+"unverified in the app" — not a finding flipped; it returns to the reviewer for the final word).*
+
+**Environment:** `io.lduarte.Variorum.debug` (`…/Variorum-dnpxwqhpxdqrdjbunktnzoahckpd/…/Debug/
+Variorum.app`, built 20:42), `pgrep -fl 'Variorum.app/Contents/MacOS'` clean at open and at close; her
+`/Applications` build never running, never touched. **Zero store mutations this pass** — the short-note
+road used the SEALED tutorial note "the seal" (three blocks, read-only, so the caret can be placed and
+nothing can be typed), and every other road was caret placement and mode switches.
+
+**Per fix:**
+
+- **R2-1 (the document's end resolves to the last line) — CLEAR.** The diff is rider 1 exactly: a
+  `probe` that steps back one character ONLY when `clamped == length` (`JumpPrimitive.swift:123–133` in
+  `lineSpan`, `:201–208` in `jump`), while the value handed to
+  `FragmentLines.lineIndex(atLocalOffset:)` stays `clamped` at both sites — so the past-the-last-range
+  rule resolves to the LAST line, and every offset that is not the end enumerates from exactly where it
+  did before (byte-identical). `jump`'s guard is `clamped == docLength` alone, which is safe because
+  `guard docLength > 0` precedes it (`:196`), and the comment says so. `lineTop` inherits by delegation.
+  The `else` arm for a fragment with no line fragments is untouched. **Rider 2 recorded in the
+  disposition as asked; rider 3 (the room's 17-pt shortfall) correctly left alone.**
+  **On the blast radius, re-checked against every caller and with one correction to my own round-2
+  reasoning:** the pure `JumpCorrectionLoop` is untouched (the fix is inside `jump`'s closure, not
+  `run`); the three test call sites still target block starts mid-document; and the anchor callers —
+  here I was slightly too strong. I wrote that a `topVisibleOffset()` value "equals `documentLength`
+  only for an empty document". A document ending in a newline can have a trailing EMPTY line fragment
+  whose start IS `documentLength`, and the typewriter room makes it reachable at the viewport top — so
+  `renderFull`'s restore and `restoreTopVisibleOffset` CAN pass the end. The correction does not change
+  the verdict: on that road the old code clamped to `maxScroll` and the new code converges on the last
+  line, which is the same place said exactly rather than approximately. No hole either way, and the
+  reviewer's closing set covered the consumer suites.
+- **R2-2 (the flag's doc) — CLEAR.** `PaneSurface.swift:230–238` now says when it is spent (the next
+  transition or live render of THIS pane) and names the workbench's locked-take pane as the case that
+  keeps it, with why that is harmless. **My rider was adopted:** the workbench panel's own comment
+  (`BlocksWorkbenchView.swift:865–873`) no longer claims "the same rule as every other pane host" — it
+  names `PaneCaretLanding.entering` and `.leave` for any other block. Both comments now match the code.
+- **R2-3 (#97's (a)) — CLEAR.** The paragraph quotes what exists: `PaneSurface.swift`'s `noteLiveness`
+  applying the `PaneCaretLanding` a host passes as `PaneSurfaceView.caretOnGoingLive`, `.end` for the
+  room, and `PaneCaretLanding.entering` named as *the* line a ruling for (b) flips. **My rider adopted**
+  — the parameter's type is named, with "an `Int?` until the sanity pass's RAISE-2 retyped it", so a
+  reader who greps either name lands on the code.
+- **R2-4 (one entry rule) — CLEAR, and behaviour-identical, which is the part worth stating.**
+  `PaneCaretLanding.entering(_:block:)` (`PaneSurface.swift:647–661`) returns nil for a nil fact or a
+  different block; both models `.map` that into their tuple, so `paneCaretLanding` stays nil in exactly
+  the cases it did before and `caretLanding(forVariant:)` still answers `.leave` — the refactor cannot
+  move a landing. **Both my riders adopted:** the force-unwrap is gone from both reads
+  (`.map { … } ?? .leave`), and the helper takes the FACT rather than the router, so it is pure and the
+  guard pin can drive it without a session. Walked anyway (road 4), because a refactor of the entry rule
+  is exactly where RAISE-1's report road could have been disturbed — it was not.
+
+**RAISED — 1 (returned to the reviewer; I fixed nothing).**
+
+- **RAISE-M1 · the COLD-MOUNT SAVED-ANCHOR RESTORE DOES NOT RESTORE — verified in USE, which is what
+  round 1 asked this pass to find out.** The round-1 reviewer dismissed R1-6 as hollow and handed
+  forward an observation it could only measure in the rig: *"the cold-mount SAVED-ANCHOR restore itself
+  lands at 24 pt … if the app's width-reflow restore does not heal it on a first layout, the session
+  scroll anchor is effectively unrestored on every cold mount — a mode switch mints one."* **It is
+  unrestored, and the app shows it.** The probe (capture `M08`): Boscombe, the caret at block 168's
+  start, the page scrolled by hand so that block sat comfortably MID-viewport and plainly visible → ⌘2 →
+  ⌘1 → the page came back with block 168 at the very TOP. If the anchor had restored, the reveal's own
+  guard would have found the caret's line inside the visible rect and moved nothing — which is precisely
+  what the SHORT note does (`M03`, where the whole three-block note fits and nothing scrolls). So on a
+  cold mount the restore contributes nothing and the reveal decides the page alone.
+  **What she feels:** every ⌘2 → ⌘1 in a long note re-tops the page on the caret's block instead of
+  returning to the view she left; and with the caret at the END of a note that is the last line at the
+  top of an otherwise empty screen (`M06` — correct behaviour from the reveal's side, since the caret
+  really was off screen, and unchanged by R2-1's fix, which only stopped the SHORT-note catastrophe).
+  **Mechanism (file:line):** `EditorSurfaceController.renderFull` takes `let anchor =
+  model.topVisibleOffset()` BEFORE the fill and restores through `JumpPrimitive.jump` after it
+  (`:145`, `:156–162`); on a cold mount `topVisibleOffset()` is nil (nothing laid out yet) so the
+  `else` branch uses `editorRouter.scrollAnchors[postID]` — and the jump that consumes it runs against
+  the pre-fill frame, whose `maxScroll` is a couple of dozen points, exactly the clamp this batch
+  measured for the reveal and answered with the N14 settle hop (`EditorViewModel.revealLanding`,
+  `:1932–1943`). The anchor restore has no such hop. **Pin that would show it:** the R1-6 scaffolding
+  the round-1 reviewer already wrote, inverted — a session anchor seeded at a far block, a bare arrival
+  with NO remembered caret (so the reveal never fires), then `scrollView.contentView.bounds.minY ==
+  <that block's line top>` (red today at ~24). **Not mine to fix and not this batch's row:** the
+  reviewer routed the class to 13u2 item 1, and I agree — but it is now verified rather than suspected,
+  and it has a visible consequence on this batch's own arrival, so it wants a written owner rather than
+  words in a dismissal. **The product-flavoured half is hers, not ours:** even with the anchor fixed,
+  "a mode round trip lands the caret's line at the viewport TOP when it is off screen" is
+  `JumpPrimitive`'s deliberate shape (right for row 20's Blocks jump, which she asked for); whether a
+  mode ROUND TRIP should instead reveal minimally is a question for QUESTIONS, not a call either of us
+  should make inside a ladder.
+
+**THE WALK (dev-store Debug at `46a630fc`; captures in
+`notes/plans/use-report-2026-09-06-screens/17o-b-ladder/`, gitignored — one voice, Terminal).**
+
+| # | Road | What happened | Verdict | Captures |
+|---|---|---|---|---|
+| 1 | "the seal" — a THREE-block note: caret at the very end of the last block → ⌘2 → ⌘1 | **the note did not scroll off** — all three blocks visible from the first line, the caret in block 3/3. (The page differs from before the round trip by ~23 pt: the anchor restore landing the FIRST line flush at the viewport top, not the reveal — had the reveal fired, only the last line would show) | **R2-1 CLEAR** | `M01` · `M02` · `M03` |
+| 2 | Boscombe (215 blocks): ⌘↓ to the note's end (block 215/215, caret after "…upon their past.") → ⌘2 → ⌘1 | the last line visible with the caret in it, the page sane — the reveal converged on it instead of clamping at `maxScroll`. It sits at the viewport TOP with the room below, which is the reveal's shape and the anchor's absence, not R2-1's doing (see RAISE-M1) | **R2-1 CLEAR** | `M04` · `M05` · `M06` |
+| 3 | Blocks ▸ filter "Ballarat" ▸ double-click block **168** → Write | the paragraph lands **at the viewport top**, caret at its start — the far jump is still exact after the end-of-document change | **no regression** | `M07` |
+| 4 | Takes: click into a NOT-live pane (block 170) at "vagueness \|to the definite conception" → ⌘1 | Write landed at **"vagueness \|to"** — the clicked place, through the refactored entry rule | **RAISE-1 still holds** | `M09` · `M10` |
+| — | *(the anchor probe behind RAISE-M1)* block 168 mid-viewport and visible → ⌘2 → ⌘1 | the page re-topped on block 168 — the restore contributed nothing | **RAISE-M1** | `M08` |
+
+**Counts: 4 CLEAR · 1 RAISED.** Nothing was implemented in this pass; the tree is untouched by it.
+
