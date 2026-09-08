@@ -315,6 +315,12 @@ struct BlocksWorkbenchFaceTests {
             (frames.last?.midX).map { abs($0 - (total - 320)) < 6 } ?? false
         }, "the seam laid out at \(total - 320) (the default 320-pt panel) — got \(String(describing: frames.last))")
         let seam = try #require(frames.last)
+        // The round-end Fable pass, MINOR-3: the reported frame is the
+        // GRIP's, and it is row 9's reachable target — not the 9-pt overlay
+        // this seam kept after the shell, `SideColumn` and the pane row had
+        // shed it. RED ON OLD: 9.0.
+        #expect(seam.width >= SeamGrip.width - 0.5,
+                "the workbench seam's grip is the shared seam's width, not the old 9: \(seam.width)")
         #expect(UserDefaults.standard.object(forKey: BlocksWorkbenchView.panelWidthKey) == nil,
                 "nothing remembered yet — the default rules")
 

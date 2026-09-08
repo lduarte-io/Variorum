@@ -235,7 +235,13 @@ struct BlocksWorkbenchView: View {
             HStack(spacing: 0) {
                 listColumn
                 if let row = focusedFacts, !inspectorOpen {
+                    // Row 9's part the HOST owns (the round-end Fable pass,
+                    // MINOR-3): the panel is the divider's later HStack
+                    // sibling and hit-tests above it, which is why the grip's
+                    // panel-side half was dead here — the fifth copy of the
+                    // shape the shell, `SideColumn` and the pane row had shed.
                     divider
+                        .zIndex(1)
                     WorkbenchInfoPanel(
                         session: session, model: model, tokens: tokens,
                         indicator: indicator,
@@ -700,51 +706,46 @@ struct BlocksWorkbenchView: View {
 
 // MARK: - The seam (row 18 — the pane row's grammar)
 
-/// One honest line, and the drag under it: a 1 pt `line`, a 9 pt invisible
-/// grip, the resize cursor on hover (`RootView.paneDivider`, `ShellSplit`'s
-/// divider — the same seam everywhere). The drag proposes `total − x` as
-/// the panel's width, clamped by `BlocksWorkbenchLayout`; the binding is
-/// the workbench's remembered width. Internal so the pin can mount it
-/// alone in a real window and drag it for real.
+/// One honest line, and the grip over it — **the shared seam** (`SeamGrip`,
+/// `Core/Views`: a 1-pt line, a 14-pt grip centred on it, the resize pointer
+/// inside it). The drag proposes `total − x` as the panel's width, clamped
+/// by `BlocksWorkbenchLayout`; the binding is the workbench's remembered
+/// width. Internal so the pin can mount it alone in a real window and drag
+/// it for real.
+///
+/// **The FIFTH copy of ledger row 9's shape, converted at the round-end
+/// Fable pass (MINOR-3).** It was a 9-pt `.overlay` with `NSCursor.push()`
+/// on `.onHover` and no `zIndex` — born at batch C, the very grammar
+/// `SideColumn` then copied — and it survived the shell's fix (17o batch d),
+/// `SideColumn`'s (18d's ladder) and the pane row's (18d round 2) because
+/// every sweep searched for the FIX's vocabulary rather than the defect's
+/// shape (`frame(width: 9)` found it in one grep). The host puts
+/// `.zIndex(1)` on it; the arithmetic stays here.
 struct WorkbenchSeam: View {
     let tokens: VoiceTokens
     let spaceName: String
     let totalWidth: CGFloat
     @Binding var panelWidth: Double
-    /// A pin's own frame reporter (the seam's frame in `spaceName`) — nil in
+    /// A pin's own frame reporter (the GRIP's frame in `spaceName`) — nil in
     /// the app. Its own closure rather than the shared static oracle, because
     /// suites run in parallel and a workbench mounted by another suite writes
-    /// the static too (the full-suite run caught a stale frame).
+    /// the static too (the full-suite run caught a stale frame — the lesson
+    /// `SeamGeometry` later learned as its subject key).
     var onFrame: ((CGRect) -> Void)? = nil
 
     var body: some View {
-        Rectangle()
-            .fill(tokens.line)
-            .frame(width: 1)
-            .overlay {
-                Rectangle()
-                    .fill(Color.clear)
-                    .frame(width: 9)
-                    .contentShape(Rectangle())
-                    .gesture(
-                        DragGesture(coordinateSpace: .named(spaceName))
-                            .onChanged { value in
-                                guard totalWidth > 0 else { return }
-                                panelWidth = BlocksWorkbenchLayout.panelWidth(
-                                    proposed: Double(totalWidth - value.location.x),
-                                    total: Double(totalWidth))
-                            })
-                    .onHover { inside in
-                        if inside { NSCursor.resizeLeftRight.push() } else { NSCursor.pop() }
-                    }
-                    .blocksWorkbenchProbe(.divider)
-                    .onGeometryChange(for: CGRect.self) {
-                        $0.frame(in: .named(spaceName))
-                    } action: { frame in
-                        onFrame?(frame)
-                    }
-            }
-            .help("Drag to give the block panel more or less room")
+        SeamGrip(
+            tokens: tokens,
+            space: spaceName,
+            onDrag: { location in
+                guard totalWidth > 0 else { return }
+                panelWidth = BlocksWorkbenchLayout.panelWidth(
+                    proposed: Double(totalWidth - location.x),
+                    total: Double(totalWidth))
+            },
+            help: "Drag to give the block panel more or less room",
+            frameSpace: .named(spaceName),
+            onGripFrame: { frame in onFrame?(frame) })
     }
 }
 
@@ -1054,7 +1055,9 @@ private struct FlowLayoutLite: Layout {
 /// stores the frames is DEBUG-only.
 enum BlocksWorkbenchProbeSlot: Hashable {
     case row(String)
-    case divider
+    // (`.divider` RETIRED at the round-end Fable pass, MINOR-3: it wrote
+    //  `BlocksWorkbenchOracle.dividerFrame`, which nothing read; the seam's
+    //  frame reaches a pin through `WorkbenchSeam.onFrame`, its own closure.)
 }
 
 extension View {
@@ -1074,7 +1077,6 @@ extension View {
                 if BlocksWorkbenchOracle.firstRowPaintedAt == nil {
                     BlocksWorkbenchOracle.firstRowPaintedAt = Date()
                 }
-            case .divider: BlocksWorkbenchOracle.dividerFrame = frame
             }
         }
         #else
@@ -1093,7 +1095,6 @@ enum BlocksWorkbenchOracle {
     static var focusedBlockID: String?
     static var panelMounted = false
     static var rowFrames: [String: CGRect] = [:]
-    static var dividerFrame: CGRect?
     /// Row 83: when the list's first row was laid out (the arrival's
     /// first painted row) — nil until then.
     static var firstRowPaintedAt: Date?
@@ -1102,7 +1103,6 @@ enum BlocksWorkbenchOracle {
         focusedBlockID = nil
         panelMounted = false
         rowFrames = [:]
-        dividerFrame = nil
         firstRowPaintedAt = nil
     }
 }
