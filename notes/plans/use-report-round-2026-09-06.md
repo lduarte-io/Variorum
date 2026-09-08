@@ -7428,7 +7428,7 @@ mode's bar-in-the-page).
 | Piece | What it is | Status |
 |---|---|---|
 | A | the core read behind the facts line (`Queries.noteStamps`) | **DONE** (`e6b4148c`) |
-| B | the pure brains: the box's state rule, its copy, the rail-height measurement | **DONE** (`PENDING-B`) |
+| B | the pure brains: the box's state rule, its copy, the rail-height measurement | **DONE** (`9b5028d5`) |
 | C | the box VIEW + the sidebar's slot + the geometry oracle + the fit math | NOT STARTED |
 | D | the book publishes its subject; `RootView` composes; the facts model | NOT STARTED |
 | E | the retirement (the gutter · `.side` · the paged mode) + the click-out | NOT STARTED |
