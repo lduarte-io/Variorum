@@ -517,6 +517,21 @@ struct PostDetailView: View {
         .onChange(of: mode) { _, new in
             UserDefaults.standard.set(new.rawValue, forKey: "postMode.\(postID)")
             session.commandRouter.noteMode(new)
+            // 17o batch b's ladder, R1-1 (BLOCKER): the caret seed is
+            // ONE-SHOT. `jump(to:)` set `pendingCaret` and nothing cleared
+            // it, so every later mount of Write in the same note visit
+            // re-ran `EditorView.init` → `pendingCaretSeed` on a fresh
+            // model, re-landed at the jump's block START, claimed the caret
+            // (so the bare arrival never read the memory) and reported
+            // offset 0 into it — U-20's complaint one gesture after row
+            // 20's own door, and the Act 10 "one current block" rule broken
+            // with it. Cleared HERE, on LEAVING Write, and nowhere else:
+            // the Write branch is out of the tree at this moment, so the
+            // `.id` that carries the seed changes with nothing mounted
+            // under it; clearing while IN Write (say, where the seed is
+            // consumed) would change that `.id` under a mounted editor and
+            // remount it mid-visit, re-running the arrival.
+            if new != .write { pendingCaret = nil }
             // Row 29 (her words: "the block history tab stays open as you
             // move to other modes which looks bad and is confusing"): the
             // pane is SCOPED to the mode that asked — a mode switch CLOSES
