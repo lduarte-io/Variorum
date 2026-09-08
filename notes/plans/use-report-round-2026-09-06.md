@@ -9001,3 +9001,100 @@ door and export suites the MINOR-1 change reaches (`CapabilityRegistryTests` · 
 `Tutorial*` spine types — **`Test run with 310 tests in 52 suites passed after 78.687 seconds`**, zero
 issues, zero `skipped:` lines. Core untouched this pass (no `Sources/` change), so no `swift test` and
 no iOS build is owed; zero `Sync/`, zero schema, no editor-lifecycle change.
+
+#### 18d round 1 — fixes (batch 4)
+
+*(the batch-4 implementer, resumed; TWO findings — MINOR-2 · NIT-3. One is CONFIRMED and fixed as
+arbitrated; the other's PREMISE is corrected by grep and then fixed in the direction its underlying
+observation actually points. Code + pins at `1a1bea5c`; the record here.)*
+
+**MINOR-2 (a Study cold launch refuses the persisted memories until the theme lands) — CONFIRMED and
+FIXED at `1a1bea5c`.** I traced it myself before touching anything, and the trace is slightly sharper
+than the finding: `ThemeStore.start()` never RETURNS (it is an `AsyncValueObservation` loop for the app's
+lifetime), so "adoption at `theme.start()`'s completion" has no such moment — the settings LAND at
+`settings = value` inside the loop, once per arrival, and that is the only honest adoption point. The
+old road was `RootView`'s `.onChange(of: theme.settings)`: a VIEW noticing, which is (a) one SwiftUI
+update cycle later than the landing, (b) conditional on the loaded value DIFFERING from the compile-time
+default — a store whose settings equal the default never fires it at all — and (c) absent entirely in any
+host that runs the store without that view. **The fix, in three parts:**
+- `EditorTypography` gains the one adoption door — `adopt(_ resolved:)` / `adopt(_ settings:)` and the
+  `isAdopted` flag — and `applyVoiceChrome` routes through it (a surface taking a real voice IS an
+  adoption). `RootView` keeps the markdown palette, which depends on the color SCHEME too and so is
+  genuinely a view's question; its typography line is gone with a comment saying where it went.
+- `ThemeStore.start` adopts at the landing. The store is the theme's authority; the adoption belongs to
+  it, and it now happens for every arrival including the first, whatever the value equals.
+- `EditorTypography.fingerprint` is `String?`, **nil until the voice is known**, and
+  `SurfaceSizeMemory.remember` DROPS a report with no stamp. This is the finding's second half — the one
+  that could destroy something rather than merely delay it: a geometry report in the window stamped the
+  session record with the leading voice, overwriting the record loaded from disk, and the settle a second
+  later wrote that guess over the height she measured in her own voice. Losing one early report costs
+  nothing (the surface reports again as it loads; the settle decides in any case).
+
+**Pins (both new, in `SurfaceSizeMemoryTests`):**
+`theTypographyIsAdoptedWhereTheSettingsLandNotWhereAViewNoticesThem` — forces a known ADOPTED Terminal
+state (so its failure cannot be an accident of whatever a parallel suite left in the process global —
+batch 1's MINOR-3 class), writes `setThemeVoice(.study)`, runs `ThemeStore.start` in a task, waits for
+the value to land, and asserts `EditorTypography.current == resolve(voice: .study, …)`; it restores what
+it found. `aReportBeforeTheVoiceIsKnownNeitherStampsNorClobbers` — pure, its own defaults suite: the
+first half REPRODUCES the old mechanism (a wrong-but-present stamp replaces her record and the settle
+writes the guess to disk — green on both trees, it is the trace), the second half is the pin (with no
+stamp, the report is dropped and her record survives the window in the very memory that saw it).
+
+**NIT-3 (`SurfaceSizeMemory.forget` unwired) — the PREMISE is FALSE; fixed anyway, in the direction the
+underlying observation points. `1a1bea5c`.** The finding's argument is an asymmetry with a precedent:
+*"its stated precedent, `CurrentBlockMemory`, is evicted from production code (`CommandRouter.swift:225`)"*.
+`:225` is the body of `CommandRouter.forgetCurrentBlock`, and **`forgetCurrentBlock` has no production
+caller either** — `grep -rn "forgetCurrentBlock\|currentBlocks.forget"` over `App/Variorum` returns the
+declaration plus **35 call sites, every one of them a test**, which is exactly what that method's own doc
+names first (*"A pin's reset (or a deleted note)"*). So the two memories were in identical states and
+wiring only mine would have CREATED the asymmetry the finding wanted removed. What the observation IS
+right about survives the correction: a deleted note's keys outlive it, in both memories. **So the fix
+goes at the shared occasion, not at my memory alone:** the new static `SurfaceSizeMemory.forgetPersisted(_:defaults:)`
+drops a note's records in EVERY key space (`Namespace` is now `CaseIterable`, so a future key space is
+covered by construction), and `CommandRouter.forgetCurrentBlock` — the app's one "this note's memories
+go" door — calls it beside `currentBlocks.forget`. Static because the instances live on per-book
+`BookViewModel`s the router cannot reach, and because the disk is the part that outlives the note: a live
+model's session record for a note that no longer exists is asked for by nobody and dies with the model.
+One occasion, every per-note memory; the next one is a line there, not a new eviction road. The instance
+`forget` stays with its callers (the pins) named at the code.
+**Pin:** `theNotesEvictionDoorDropsEveryKeySpacesRecord` — through the real router door, asserting both
+`surfaceSize.outline.<id>` and `surfaceSize.flow.<id>` are gone.
+
+**RED-ON-OLD — one revert probe, on the committed tree (`1a1bea5c`), all three lines at once.** Reverted:
+`ThemeStore`'s `EditorTypography.adopt(value)`; `remember`'s `guard let stamp` (restored to stamping
+whatever the closure gives); `CommandRouter`'s `SurfaceSizeMemory.forgetPersisted(postID)`. Result —
+**`Test run with 9 tests in 1 suite failed … with 6 issues`: all three new pins red (2 issues each), all
+six pre-existing pins green**, a clean targeted probe:
+- `theTypographyIsAdoptedWhereTheSettingsLandNotWhereAViewNoticesThem` — *"(study → `.AppleSystemUIFontMonospaced-Regular-14-7`) != (terminalStamp → `.AppleSystemUIFontMonospaced-Regular-14-7`)"* and the `Resolved` compare naming Iowan 16 pt against the monospace 14 pt: the store landed Study and the global never moved.
+- `aReportBeforeTheVoiceIsKnownNeitherStampsNorClobbers` — *"(unknowing.size(\"p1\") → nil) == (hers → (696.0, 20993.0))"*: her record was clobbered by the stamped report, in memory and on disk.
+- `theNotesEvictionDoorDropsEveryKeySpacesRecord` — both defaults keys still present after the door ran.
+Restored with `git checkout --` on the three files; `git status` clean before the walk.
+
+**THE WALK (MINOR-2's, on the dev-store Debug build `io.lduarte.Variorum.debug`; zero instances before
+and after, only ever my own PID).** Rebuilt Debug with the fix. Set the voice to **Study** in Settings,
+quit, and planted a **Study-stamped** small record with the app down —
+`surfaceSize.outline.D5AA052C-… = "696.0|120.0|IowanOldStyle-Roman-16-8"` — then relaunched cold in Study,
+opened the Sherlock book and expanded that note. **The first frame honours it:** the row holds its short
+reservation and *A Scandal in Bohemia · The Red-Headed League · A Case of Identity · The Boscombe Valley
+Mystery · The Five Orange Pips* are all on screen — the same picture the Terminal walk produced at
+capture 06, now in the voice that used to be refused. Four seconds later the settle had corrected the
+disk to the true Study measure (`696.0|290.0|IowanOldStyle-Roman-16-8`). **Capture
+`10-study-cold-launch-honours-her-record.png`.** Its complement is already on file: capture 07 is a Study
+launch with a TERMINAL-stamped record, which must still refuse — and does. Dev store left as found (voice
+restored to Terminal, my instance quit).
+
+**Residual, named rather than left implied.** The adoption window is now bounded by the theme's own DB
+read, not by a SwiftUI update cycle, and nothing can be written under a guess inside it — but the window
+is not zero: a row realizing before the settings query returns still reads an unadopted typography and
+gets no reservation. Closing it entirely means caching the last adopted voice outside the store (a
+`surfaceSize.stamp`-shaped local key seeded at first use), which adds a second source of truth for the
+voice and a stale-for-one-launch failure mode. I did not build it — the arbitration asked for the
+adoption and the no-clobber, and this is the shape a follow-up would take if she ever sees the window.
+
+**CLOSING RUN — ONE `xcodebuild test`, 32 suite types:** batch 4's own sixteen (the memory, the surface,
+the flow, the Outline and the note box), the theme/typography and router suites this pass reaches
+(`EditorTypographyTests · BlockDecorGeometryTests · MarkdownFaceTests · CurrentBlockContinuityTests ·
+CommandRouterTests · LandingOffsetTests`), and the ten `Tutorial*` spine types —
+**`Test run with 203 tests in 32 suites passed after 131.223 seconds`**, zero issues, zero `skipped:`
+lines. Zero `Sources/` (so no `swift test` and no iOS build owed), zero `Shared/`, zero `Sync/`, zero
+schema.
