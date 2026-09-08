@@ -20,7 +20,12 @@
 	     Xcode merges its generated keys over these, because the
 	     INFOPLIST_KEY_* build-setting road only carries key names Xcode
 	     itself knows (measured: the setting was silently dropped from the
-	     built bundle). -->
+	     built bundle).
+
+	     It sits BESIDE the synchronized source folder rather than inside
+	     it: a plist under `Variorum/` joins that group's Copy Bundle
+	     Resources phase automatically and Xcode warns that the target is
+	     copying its own Info.plist into Resources. -->
 	<key>NSAutoFillRequiresTextContentTypeForOneTimeCodeOnMac</key>
 	<true/>
 </dict>

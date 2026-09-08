@@ -136,7 +136,10 @@ struct ShellSplit<Sidebar: View, Detail: View>: View {
                 .fill(Color.clear)
                 .frame(width: Self.gripWidth)
                 .contentShape(Rectangle())
-                .overlay { SeamCursor() }
+                // Row 9's cursor half, THE THIRD ATTEMPT and the one that
+                // works — see `SeamGrip`'s retired doc below for the two
+                // that did not.
+                .pointerStyle(.columnResize)
                 .gesture(
                     DragGesture(coordinateSpace: .named(Self.splitSpace))
                         .onChanged { value in
@@ -158,40 +161,36 @@ struct ShellSplit<Sidebar: View, Detail: View>: View {
     }
 }
 
-/// **The seam's cursor, from AppKit** (17o batch d, row 9). SwiftUI's
-/// `.onHover` + `NSCursor.push()` is the wrong tool over a text view: the
-/// window's cursor-rect machinery re-sets the cursor on every mouse-moved
-/// event from the view under the pointer, so the editor's I-beam wins back
-/// the moment she moves inside the grip — her *"sometimes the I looking
-/// pointer"*. A cursor RECT plus a `.cursorUpdate` tracking area speak the
-/// same language AppKit does. `hitTest` returns nil so the view is
-/// transparent to clicks and SwiftUI's drag gesture is untouched.
-private struct SeamCursor: NSViewRepresentable {
-    func makeNSView(context: Context) -> NSView { SeamCursorView() }
-    func updateNSView(_ view: NSView, context: Context) {}
-
-    private final class SeamCursorView: NSView {
-        override func hitTest(_ point: NSPoint) -> NSView? { nil }
-
-        override func resetCursorRects() {
-            discardCursorRects()
-            addCursorRect(bounds, cursor: .resizeLeftRight)
-        }
-
-        override func updateTrackingAreas() {
-            super.updateTrackingAreas()
-            for area in trackingAreas { removeTrackingArea(area) }
-            addTrackingArea(NSTrackingArea(
-                rect: .zero,
-                options: [.cursorUpdate, .activeInKeyWindow, .inVisibleRect],
-                owner: self))
-        }
-
-        override func cursorUpdate(with event: NSEvent) {
-            NSCursor.resizeLeftRight.set()
-        }
-    }
-}
+// ── ROW 9's CURSOR: TWO MEASURED FAILURES, THEN THE SUPPORTED API ──────
+//
+// The pointer inside the grip is its own problem, and it took three cuts to
+// land. Each was WALKED on the dev-store Debug build and captured, because
+// no mounted view can be asked what the pointer looks like.
+//
+//  1. SwiftUI `.onHover` + `NSCursor.push()` (the shipped road): the
+//     window's cursor-rect machinery re-sets the pointer from the view under
+//     it on every mouse-moved event, so the editor's I-beam won back the
+//     moment she moved inside the grip — her *"sometimes the I looking
+//     pointer"*. Captured: an I-beam four points from the seam.
+//  2. An AppKit `NSViewRepresentable` owning a cursor RECT and a
+//     `.cursorUpdate` tracking area, first with `hitTest` returning nil (so
+//     clicks passed to SwiftUI's drag) and then taking the hits and the drag
+//     itself. Captured both ways: with `hitTest` nil the I-beam still won —
+//     a view outside the hit-test chain gets neither its cursor rect
+//     honoured nor its tracking area's `cursorUpdate`; taking the hits got
+//     rid of the I-beam and produced the plain ARROW, never the resize
+//     cursor. `NSHostingView` manages the pointer for its own subtree, and
+//     a representable's cursor rects do not outrank it.
+//  3. **SwiftUI's own `.pointerStyle(.columnResize)`** (macOS 15+; the
+//     deployment target is 26): the supported way to say this inside a
+//     SwiftUI hierarchy, and the one the hosting view honours. Nothing is
+//     pushed or popped, so nothing can be left unbalanced — which was the
+//     other half of what was wrong with (1).
+//
+// The DRAG stays SwiftUI's, because it was never the broken part: with the
+// divider at `.zIndex(1)` the gesture reaches the whole grip, walked by
+// dragging from four points INSIDE the detail — the half that was dead
+// before — and watching the seam follow.
 
 #if DEBUG
 /// Row 9's oracle: the seam's line and its grip, in the window's own space —
