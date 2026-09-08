@@ -14,6 +14,7 @@
 //
 
 import Foundation
+import GRDB  // the held title observation reads a `Database`
 import Observation
 import VariorumCore
 
@@ -402,48 +403,98 @@ final class WorkspaceModel {
     /// the reader pool; the assignment lands back here). The shipped
     /// `PostTitleLabel` precedent: chrome titles are one-shot reads keyed on
     /// what they show, never a held observation per row.
+    /// **The names on screen, LIVE** (17o batch d, ledger row 18; §4.3's one
+    /// fix). Her words: *"renaming a note won't rename it on the sidebar
+    /// until you click on something else."* This used to be a one-shot read
+    /// keyed on `titleSubjectsKey` — which changes when the SET of things on
+    /// screen or its order changes, and a rename changes neither, so the
+    /// strip kept the old name until the next navigation. The same fetch is
+    /// now HELD, so the write itself moves the name — and a rename arriving
+    /// from a sync pull lands the same way, which a one-shot never could.
+    ///
+    /// The fetch stays bounded by what is on screen — one indexed row per
+    /// subject, and `Queries.tagPaths` rather than the whole taxonomy —
+    /// because a held observation re-runs on every `container` write
+    /// (autosave stamps land there) and `AppDatabase.observe`'s own rule is
+    /// that its fetch must be viewport-shaped. `removeDuplicates` keeps the
+    /// UI still while nothing it shows has changed.
+    ///
+    /// The caller keys its `.task` on `titleSubjectsKey` exactly as before,
+    /// so the observation restarts when the subjects change; nothing else
+    /// about the strip's road moves.
+    func observeTitles(session: AppSession) async {
+        let subjects = titleSubjects
+        guard !subjects.isEmpty else {
+            titles = [:]
+            return
+        }
+        do {
+            for try await resolved in session.database.observe({ db in
+                try Self.readTitles(db, subjects: subjects)
+            }) {
+                titles = resolved
+            }
+        } catch is CancellationError {
+        } catch {
+            // A failed read leaves the last names standing rather than
+            // blanking the strip — the chrome's posture everywhere else.
+        }
+    }
+
+    /// The ONE-SHOT read, kept for callers that want a single resolution.
     func resolveTitles(session: AppSession) async {
         let subjects = titleSubjects
         guard !subjects.isEmpty else {
             titles = [:]
             return
         }
-        let resolved = try? await session.database.read { db -> [String: String] in
-            var out: [String: String] = [:]
-            var tagPaths: [String: String]?
-            for subject in subjects {
-                switch subject {
-                case .post(let id):
-                    // 13g batch 7 (R6-3): the map carries the DISPLAY name,
-                    // so the pane line, the back chip, the Open strip and a
-                    // star all say the same thing without re-deriving it.
-                    // `WorkspaceNaming`'s per-kind fallbacks stay for the one
-                    // case they were always for — an id that resolves to no
-                    // row at all.
-                    if let title = try Queries.noteDisplayTitle(db, id: id) { out[id] = title }
-                case .pool(let id):
-                    // 13k K2: a nameless pool reads as the day it was
-                    // created, so the pane line, the back chip and the Open
-                    // strip say what the Blocks area's picker says.
-                    if let title = try Queries.poolDisplayTitle(db, id: id) { out[id] = title }
-                case .reading(let id):
-                    if let reading = try Queries.reading(db, id: id) { out[id] = reading.name }
-                case .tag(let id):
-                    // Fetched at most once, and only when a tag is actually
-                    // on screen (the FolderView precedent's query).
-                    if tagPaths == nil {
-                        tagPaths = Dictionary(
-                            try Queries.allTags(db).map { ($0.id, $0.path) },
-                            uniquingKeysWith: { first, _ in first })
-                    }
-                    if let path = tagPaths?[id] { out[id] = path }
-                case .shelf, .library, .poolPosts, .blocks, .archived, .recovery:
-                    break  // these name themselves (WorkspaceNaming)
+        titles = (try? await session.database.read { db in
+            try Self.readTitles(db, subjects: subjects)
+        }) ?? [:]
+    }
+
+    /// One read for every name on screen (P2 — off the main thread through
+    /// the reader pool; the assignment lands back on the model).
+    nonisolated static func readTitles(
+        _ db: Database, subjects: [SidebarSelection]
+    ) throws -> [String: String] {
+        var out: [String: String] = [:]
+        var tagPaths: [String: String]?
+        for subject in subjects {
+            switch subject {
+            case .post(let id):
+                // 13g batch 7 (R6-3): the map carries the DISPLAY name,
+                // so the pane line, the back chip, the Open strip and a
+                // star all say the same thing without re-deriving it.
+                // `WorkspaceNaming`'s per-kind fallbacks stay for the one
+                // case they were always for — an id that resolves to no
+                // row at all.
+                if let title = try Queries.noteDisplayTitle(db, id: id) { out[id] = title }
+            case .pool(let id):
+                // 13k K2: a nameless pool reads as the day it was
+                // created, so the pane line, the back chip and the Open
+                // strip say what the Blocks area's picker says.
+                if let title = try Queries.poolDisplayTitle(db, id: id) { out[id] = title }
+            case .reading(let id):
+                if let reading = try Queries.reading(db, id: id) { out[id] = reading.name }
+            case .tag(let id):
+                // Fetched at most once, and only for the tags actually
+                // on screen — `tagPaths`, not the whole taxonomy, so the
+                // held observation's fetch stays viewport-shaped
+                // (17o batch d, row 18).
+                if tagPaths == nil {
+                    tagPaths = try Queries.tagPaths(
+                        db,
+                        ids: subjects.compactMap {
+                            if case .tag(let id) = $0 { return id } else { return nil }
+                        })
                 }
+                if let path = tagPaths?[id] { out[id] = path }
+            case .shelf, .library, .poolPosts, .blocks, .archived, .recovery:
+                break  // these name themselves (WorkspaceNaming)
             }
-            return out
         }
-        titles = resolved ?? [:]
+        return out
     }
 
     // MARK: - Naming (the views' one call)

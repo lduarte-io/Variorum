@@ -628,7 +628,7 @@ struct PostDetailView: View {
                 }
                 #endif
                 .overlay(alignment: .leading) { face }
-                .task(id: postID) { await refresh() }
+                .task(id: postID) { await watch() }
                 #if DEBUG
                 .onAppear { PostDetailOracle.beginTitleEditing = { beginEditing() } }
                 #endif
@@ -702,15 +702,46 @@ struct PostDetailView: View {
             draft = title
         }
 
-        private func refresh() async {
-            let read = try? await session.database.read { [postID] db in
-                (stored: try Queries.containerTitle(db, id: postID),
-                 shown: try Queries.noteDisplayTitle(db, id: postID))
+        /// What the masthead reads: the STORED title (what the rename field
+        /// edits and what a no-op rename compares against) and the DISPLAY
+        /// name (the stored title, else the note's date, from core's one
+        /// display brain).
+        nonisolated struct TitleRead: Equatable, Sendable {
+            let stored: String
+            let shown: String
+        }
+
+        /// **Row 19 (17o batch d): the title is a HELD read, not a one-shot.**
+        /// Her words: *"changing the date of a note doesn't change its auto
+        /// display name."* `refresh()` ran once per note (`.task(id: postID)`)
+        /// and never again, so `setEntryDate` — which is what the derived name
+        /// is BUILT from — moved the store and left the words alone until the
+        /// note was re-opened. Row 18's fix, one note wide: the same read,
+        /// held, so every door that writes this note's name (the field here,
+        /// the sidebar's rename, the date picker, a sync pull) moves the
+        /// masthead by itself. The fetch is one indexed row; `removeDuplicates`
+        /// keeps the view still while nothing shown has changed.
+        private func watch() async {
+            do {
+                for try await read in session.database.observe({ [postID] db in
+                    TitleRead(
+                        stored: try Queries.containerTitle(db, id: postID) ?? "",
+                        // A note that is gone keeps the placeholder rather
+                        // than going blank — the chrome's own fallback.
+                        shown: try Queries.noteDisplayTitle(db, id: postID)
+                            ?? DisplayTitle.placeholder)
+                }) {
+                    title = read.stored
+                    displayed = read.shown
+                    #if DEBUG
+                    PostDetailOracle.titleShown = displayed
+                    #endif
+                }
+            } catch is CancellationError {
+            } catch {
+                // The last name stands; the chrome never blanks on a failed
+                // read (the strip's posture, one note wide).
             }
-            title = read?.stored ?? ""
-            // A note that is gone keeps the placeholder rather than going
-            // blank — the chrome's own fallback, as everywhere else.
-            displayed = read?.shown ?? DisplayTitle.placeholder
         }
 
         private func rename() {
@@ -719,10 +750,12 @@ struct PostDetailView: View {
             let name = draft.trimmingCharacters(in: .whitespaces)
             guard name != title else { return }
             Task {
+                // No re-read here: the held observation (row 19) delivers the
+                // committed name, so the field's own write and every other
+                // door move the masthead by exactly one road.
                 try? await session.runner.run { [postID] ops in
                     try ops.renameContainer(postID, title: name.isEmpty ? nil : name)
                 }
-                await refresh()
             }
         }
     }
@@ -827,6 +860,10 @@ enum PostDetailOracle {
     /// pin can put the masthead into its editing face and read both frames
     /// without simulating an AppKit click into a hosted `TextField`.
     static var beginTitleEditing: (@MainActor () -> Void)?
+    /// Row 19 (17o batch d): the words the masthead is SHOWING — so "a date
+    /// change doesn't change the auto display name" is a claim about the
+    /// rendered title rather than about the store it is derived from.
+    static var titleShown: String?
     /// Row 74: OUR divider's frame in the side column's space — reported in
     /// every window state, nil while no panel stands.
     static var sideColumnDividerFrame: CGRect?

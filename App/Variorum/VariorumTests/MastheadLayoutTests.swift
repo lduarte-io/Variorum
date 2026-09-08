@@ -141,6 +141,45 @@ struct MastheadLayoutTests {
     // pin kept alive with its assertion weakened would have gone on claiming
     // the masthead was inspected when nothing was being asserted.
 
+    /// **Row 19 — "changing the date of a note doesn't change its auto
+    /// display name."** `PostTitleLabel.refresh()` was a one-shot
+    /// `.task(id: postID)`: it read the stored title and the derived display
+    /// name once per note and never again, so `setEntryDate` — which is what
+    /// the derived name is built FROM — moved the store and left the words
+    /// alone until the note was re-opened. Same fix as row 18, one note wide.
+    ///
+    /// RED ON OLD: the masthead keeps showing the created-at date after the
+    /// entry date moves.
+    @Test func aDateChangeMovesTheMastheadsDerivedTitleWithNoReopen() async throws {
+        try await withMountedDetail(width: 1100, title: "", tags: []) { session, post, _, _ in
+            #if DEBUG
+            await settle(until: { PostDetailOracle.titleShown != nil })
+            let before = try #require(PostDetailOracle.titleShown)
+            #expect(!before.isEmpty, "an untitled note shows its date")
+
+            try await session.runner.run { ops in
+                try ops.setEntryDate(post, entryDate: "2026-03-04")
+            }
+            let owed = try await session.database.read {
+                try Queries.noteDisplayTitle($0, id: post)
+            }
+            let wanted = try #require(owed)
+            #expect(wanted != before, "the store really moved")
+            await settle(until: { PostDetailOracle.titleShown == wanted })
+            #expect(PostDetailOracle.titleShown == wanted,
+                    "the masthead followed with no re-open: showing \(PostDetailOracle.titleShown ?? "nil")")
+
+            // …and a rename lands on the same read, so the two doors that
+            // write this note's name share one observation.
+            try await session.runner.run { ops in
+                try ops.renameContainer(post, title: "A Study in Scarlet")
+            }
+            await settle(until: { PostDetailOracle.titleShown == "A Study in Scarlet" })
+            #expect(PostDetailOracle.titleShown == "A Study in Scarlet")
+            #endif
+        }
+    }
+
     // MARK: - Row 58: the second row never collides
 
     /// Row 58 (the orchestrator's walk of batch A): on a note with several

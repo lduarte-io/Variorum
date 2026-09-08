@@ -251,13 +251,15 @@ struct SidebarView: View {
         // Row 24 (the sidebar half): the rail fades in and out with the
         // note — the groups below it slide, nothing snaps.
         .animation(.easeInOut(duration: 0.22), value: railPostID)
-        // The strip's names, resolved for exactly what is on screen and
-        // re-read whenever that set or its ORDER changes — which is every
-        // navigation (the shipped `PostTitleLabel` precedent: chrome titles
-        // are one-shot reads keyed on what they show, never a held
-        // observation per row).
+        // The strip's names, HELD for exactly what is on screen (17o batch
+        // d, ledger row 18 — her *"renaming a note won't rename it on the
+        // sidebar until you click on something else"*). The key still names
+        // the subjects, so the observation restarts on every navigation; a
+        // RENAME changes no key, which is precisely why the one-shot could
+        // not see it. The fetch is bounded by the subjects, so this stays a
+        // viewport-shaped observation and not a corpus-shaped one.
         .task(id: workspace.titleSubjectsKey) {
-            await workspace.resolveTitles(session: session)
+            await workspace.observeTitles(session: session)
         }
         // The library import door (Phase 11b, B2): drop `.md`/plain text
         // anywhere on the sidebar → new post(s). The Blocks rows carry

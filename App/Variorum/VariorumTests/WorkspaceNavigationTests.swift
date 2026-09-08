@@ -484,6 +484,81 @@ struct WorkspaceModelTests {
                     "the chip names the book she came from")
         }
     }
+
+    /// **Row 18 — "renaming a note won't rename it on the sidebar until you
+    /// click on something else."** `resolveTitles` was a ONE-SHOT read keyed
+    /// on `titleSubjectsKey`, which changes only when the SET of things on
+    /// screen (or its order) changes — so a rename of a note already in the
+    /// strip changed no key and the strip kept the old name until the next
+    /// navigation. §4.3's one fix: the same fetch, held as a bounded
+    /// observation, so the write itself moves the name.
+    ///
+    /// The pin renames through the ordinary operation with the strip's task
+    /// running, and waits for the map — no click, no re-visit. RED ON OLD:
+    /// the label stays at the old title until `resolveTitles` is called again
+    /// by hand.
+    @Test func renamingANoteMovesTheOpenStripsNameWithNoClick() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 18))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let (post, book) = try await session.runner.run { ops in
+                (try ops.createPost(title: "The Long Way Home"),
+                 try ops.createReading(name: "Field Notes", kind: .curated))
+            }
+            let workspace = WorkspaceModel()
+            workspace.visit(.reading(book.id))
+            workspace.visit(.post(post.id))
+
+            let watching = Task { await workspace.observeTitles(session: session) }
+            defer { watching.cancel() }
+            await poll { workspace.label(for: .post(post.id)) == "The Long Way Home" }
+            #expect(workspace.label(for: .post(post.id)) == "The Long Way Home")
+
+            try await session.runner.run { [id = post.id] ops in
+                try ops.renameContainer(id, title: "The Boscombe Valley Mystery")
+            }
+            await poll { workspace.label(for: .post(post.id)) == "The Boscombe Valley Mystery" }
+            #expect(workspace.label(for: .post(post.id)) == "The Boscombe Valley Mystery",
+                    "the write moved the name, with nothing clicked")
+
+            // A note whose title is CLEARED falls back to its date, from the
+            // one display brain — the derived half of the same read.
+            try await session.runner.run { [id = post.id] ops in
+                try ops.renameContainer(id, title: nil)
+                try ops.setEntryDate(id, entryDate: "2026-03-04")
+            }
+            let dated = try await db.read { [id = post.id] in
+                try Queries.noteDisplayTitle($0, id: id)
+            } ?? ""
+            await poll { workspace.label(for: .post(post.id)) == dated }
+            #expect(workspace.label(for: .post(post.id)) == dated,
+                    "and a DATE change moves it too — the strip's row 19")
+
+            // A book renamed beside it moves the same way (one observation,
+            // every kind on screen — the fix is not note-only by accident).
+            try await session.runner.run { [id = book.id] ops in
+                try ops.renameReading(id, name: "Case Notes")
+            }
+            await poll { workspace.label(for: .reading(book.id)) == "Case Notes" }
+            #expect(workspace.label(for: .reading(book.id)) == "Case Notes")
+        }
+    }
+}
+
+@MainActor
+private func poll(
+    _ predicate: @MainActor () -> Bool, timeout: TimeInterval = 5
+) async {
+    let deadline = Date().addingTimeInterval(timeout)
+    while !predicate(), Date() < deadline {
+        await Task.yield()
+        try? await Task.sleep(for: .milliseconds(10))
+    }
 }
 
 // MARK: - The doors (registry + shell routing)
