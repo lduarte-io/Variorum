@@ -470,15 +470,12 @@ struct LensesBoardView: View {
     @ViewBuilder
     private var content: some View {
         if model.projection.slots.isEmpty {
-            VStack(spacing: 8) {
-                Text(tokens.chromeLabel("Nothing here yet — blocks are born by typing."))
-                    .font(tokens.body)
-                    .foregroundStyle(tokens.muted)
-                Button(tokens.chromeLabel("Start writing (Write mode)")) {
-                    session.commandRouter.requestMode(.write, postID: postID)
-                }
-                .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary, font: tokens.mono))
-            }
+            // 17o batch c (row 15): the same face Takes shows — the first
+            // block is made here too.
+            TakesEmptyStateView(
+                tokens: tokens,
+                onNewBlock: { Task { await model.addBlockAtEnd() } },
+                onWrite: { session.commandRouter.requestMode(.write, postID: postID) })
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             // 4C (S4-10): the dashed waiting column sits beside a lone

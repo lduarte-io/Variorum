@@ -4860,8 +4860,8 @@ restyle beyond the four rows.
 
 1. row 16 — the pane's stale height after a big deletion — **DONE (`3c6bcbb6`)**
 2. row 6 — the ring follows the indicator setting, everywhere, through the ONE component — **DONE (`d6ab4b40`)**
-3. row 14 — the chosen bar runs the card's full height — **DONE (this commit)**
-4. row 15 — "＋ new block" in the EMPTY state of Takes and Lenses — **NOT STARTED**
+3. row 14 — the chosen bar runs the card's full height — **DONE (`97fe2dfa`)**
+4. row 15 — "＋ new block" in the EMPTY state of Takes and Lenses — **DONE (this commit)**
 5. the walk (both voices, the setting cycled) + captures + the closing suites — **NOT STARTED**
 
 ---
@@ -5030,6 +5030,51 @@ short, which is her report exactly.
 `…theChosenBarRunsTheWholeHeightOfALongCard` (the law). Suites at this commit:
 `TakesCardHeightTests` · `WriteTakesPanelTests` · `TakesBoardTests` · `TakesPresentationTests` ·
 `TakesBoardSoakTests` — **38/5 green** (`WriteTakesPanel` composes `TakeCardFrame` too).
+
+---
+
+#### ROW 15 — THE FIRST BLOCK CAN BE MADE WHERE SHE WAS LOOKING
+
+**Her punchlist 10, verbatim:** *"you should be able to make a first block there"* (image 3 —
+`cantstartintakes.png`, which I read: an empty note in Takes, slot-split style, offering the line
+*"Nothing here yet — blocks are born by typing."* and exactly one door, *"Start writing (Write mode)"*).
+
+**The traced mechanism:** the empty state of BOTH takes-shaped boards rendered one door — into Write —
+and the article's own `＋ new block` door was gated on `!slots.isEmpty` (`TakesBoardView`), so it
+appeared only once a block already existed. The CAPABILITY was never missing: `.addBlockAtEnd` is native
+to the take family (`CapabilityRegistry`, availability `takeFamily`, which does not look at the block
+count) and it is already on the bottom bar and the menu bar. What was missing is the DOOR on the surface
+she was looking at — a P-2 shape: the one place a first block is wanted was the one place it could not
+be made.
+
+**The fix:** ONE shared face, `TakesEmptyStateView` in `TakesShared.swift` (that file's stated purpose —
+the grammar both boards share, in one home, so two empty states can never drift). It renders
+`TakesEmptyState.doors == [.newBlock, .write]`: the new-block door leads, wearing the SAME dashed
+grammar the article's end-of-note door already wears (so the act reads as the one she knows), with
+"Start writing (Write mode)" beside it, byte-unchanged in style. Both boards compose it; neither keeps a
+copy.
+
+**Copy truth (J8's rule).** The old line *"Nothing here yet — blocks are born by typing."* stopped being
+the whole truth the moment a door here mints one, so it now reads **"Nothing here yet — make the first
+block here, or start writing."**
+
+**The act is the existing road, with no new mechanism:** the door calls `model.addBlockAtEnd()`, whose
+second half already parks focus (`TakesChoreographer.parkFocus`) so the minted pane takes the ring when
+its slot arrives — P3's ONE live pane through `PaneTextAuthority`, exactly as the brief requires. The
+minted block is legal EMPTY (I10: one live variant, empty text), and 18c's Return rule makes it an
+ordinary block from the first keystroke.
+
+**Pins** (`TakesEmptyStateTests`, a new suite):
+`theTakesBoardOffersAFirstBlockOnAnEmptyNote` · `theLensesBoardOffersAFirstBlockOnAnEmptyNote` — the
+REAL boards mounted on a blockless note, reading a DEBUG door oracle (`TakesEmptyStateDoors`, the
+`LensesGeometry` pattern) because a SwiftUI button on a whole board is not an `NSView` a pin can find and
+the real-click rig cannot mount a board (KnownIssues' rig row; "pin mechanisms, walk faces") ·
+`bothBoardsRenderTheOneDoorList` · `theDoorMintsTheFirstBlockAndItsPaneTakesTheRing` (the act at the
+model: one block, one live EMPTY variant, and the ring on its pane).
+**RED-ON-OLD proved by behavioral revert** (the new-block door filtered out of the rendered list, in
+place): **2 issues** — both boards recorded `[write]` and failed `.contains(.newBlock)`. Green again on
+restore. Suites at this commit: `TakesEmptyStateTests` · `TakesBoardTests` · `LensesReorderTests` ·
+`TakesArticleRenderTests` — **23/4 green**.
 
 **A trap I hit, recorded so the next session does not** (§8's own warning, *"never `git checkout` over
 uncommitted work"*): after the row-6 revert probe I restored three files with `git checkout --`, which

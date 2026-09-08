@@ -557,17 +557,14 @@ struct TakesBoardView: View {
             ScrollViewReader { column in
             ScrollView {
                 if model.projection.slots.isEmpty {
-                    // Batch 6: an empty post must never be a dead end — blocks
-                    // are born by TYPING, and Write is where typing lives.
-                    VStack(spacing: 8) {
-                        Text(tokens.chromeLabel("Nothing here yet — blocks are born by typing."))
-                            .font(tokens.body)
-                            .foregroundStyle(tokens.muted)
-                        Button(tokens.chromeLabel("Start writing (Write mode)")) {
-                            session.commandRouter.requestMode(.write, postID: postID)
-                        }
-                        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary, font: tokens.mono))
-                    }
+                    // Batch 6: an empty post must never be a dead end.
+                    // 17o batch c (row 15, her punchlist 10): and the first
+                    // block can be MADE here — one shared face with Lenses,
+                    // so the two boards can never answer her differently.
+                    TakesEmptyStateView(
+                        tokens: tokens,
+                        onNewBlock: { Task { await model.addBlockAtEnd() } },
+                        onWrite: { session.commandRouter.requestMode(.write, postID: postID) })
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 60)
                 }

@@ -22,6 +22,109 @@ struct TakesDiffPresentation: Identifiable {
     let id = UUID()
 }
 
+/// **The empty note's face on the takes-shaped boards** (17o batch c,
+/// ledger row 15 — her punchlist 10: *"you should be able to make a first
+/// block there"*, image 3).
+///
+/// Both boards showed exactly one door out of an empty note — "Start
+/// writing (Write mode)" — and the article's own `＋ new block` door was
+/// gated on `!slots.isEmpty`, i.e. it appeared only once a block already
+/// existed. So the ONE surface where a first block is wanted was the one
+/// place it could not be made. The capability itself was never missing
+/// (`.addBlockAtEnd` is native to the take family and is on the bottom bar
+/// and the menu); the DOOR here was.
+///
+/// The face is shared rather than copied because both boards owe her the
+/// same answer, and two copies of an empty state is how they drift.
+enum TakesEmptyState {
+    enum Door: Hashable {
+        case newBlock
+        case write
+    }
+
+    /// What both boards render, in this order. A board that renders
+    /// something else is the drift this enum exists to prevent.
+    static let doors: [Door] = [.newBlock, .write]
+
+    /// J8's copy-truth: the old line ("blocks are born by typing") stopped
+    /// being the whole truth the moment a door here mints one.
+    static let line = "Nothing here yet — make the first block here, or start writing."
+    static let newBlockVerb = "＋ new block"
+    static let newBlockHelp =
+        "The note's first block, right here — it takes the ring, so you can type into it"
+    static let writeVerb = "Start writing (Write mode)"
+}
+
+#if DEBUG
+/// The row-15 door oracle: which doors the empty state actually RENDERED.
+/// A pin resets it, mounts a board on an empty note, and reads it — the
+/// only way to assert a SwiftUI door's presence on a whole board, whose
+/// buttons are not `NSView`s (KnownIssues' rig row; the `LensesGeometry`
+/// DEBUG pattern).
+@MainActor
+enum TakesEmptyStateDoors {
+    static var rendered: Set<TakesEmptyState.Door> = []
+
+    static func record(_ door: TakesEmptyState.Door) { rendered.insert(door) }
+
+    static func reset() { rendered = [] }
+}
+#endif
+
+/// The empty note's card — the line and its doors, one face for Takes and
+/// Lenses. The board supplies the acts and its own framing.
+struct TakesEmptyStateView: View {
+    let tokens: VoiceTokens
+    let onNewBlock: () -> Void
+    let onWrite: () -> Void
+
+    var body: some View {
+        VStack(spacing: 8) {
+            Text(tokens.chromeLabel(TakesEmptyState.line))
+                .font(tokens.body)
+                .foregroundStyle(tokens.muted)
+            ForEach(TakesEmptyState.doors, id: \.self) { door in
+                switch door {
+                case .newBlock:
+                    // The same dashed grammar the article's end-of-note door
+                    // wears, so the act reads as the one she already knows.
+                    Button(TakesEmptyState.newBlockVerb, action: onNewBlock)
+                        .buttonStyle(.plain)
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.muted)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 7)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6)
+                                .stroke(
+                                    tokens.faint,
+                                    style: StrokeStyle(lineWidth: 1, dash: [4, 3])))
+                        .fixedSize()
+                        .help(TakesEmptyState.newBlockHelp)
+                        .recordEmptyStateDoor(.newBlock)
+                case .write:
+                    Button(tokens.chromeLabel(TakesEmptyState.writeVerb), action: onWrite)
+                        .buttonStyle(
+                            VoicedButtonStyle(tokens: tokens, role: .primary, font: tokens.mono))
+                        .recordEmptyStateDoor(.write)
+                }
+            }
+        }
+    }
+}
+
+extension View {
+    /// The DEBUG oracle write (a no-op outside DEBUG).
+    @ViewBuilder
+    func recordEmptyStateDoor(_ door: TakesEmptyState.Door) -> some View {
+        #if DEBUG
+        self.onAppear { TakesEmptyStateDoors.record(door) }
+        #else
+        self
+        #endif
+    }
+}
+
 /// One cell: the column's resolved take for a slot. Rendering + gestures
 /// only — every rule lives in the model.
 struct TakesCellView: View {
