@@ -41,7 +41,9 @@ struct LandingOffsetTests {
     // MARK: - 1. The memory (pure)
 
     @Test func theMemoryRoundTripsTheCaretOffsetAndReadsOldTwoFieldFactsAsUnknown() {
-        let defaults = UserDefaults(suiteName: "landing-offset-\(UUID().uuidString)")!
+        let suite = "landing-offset-\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        defer { defaults.removePersistentDomain(forName: suite) }  // R1-8: no orphan plist per run
         var memory = CurrentBlockMemory()
 
         // An OLD memory — written before this batch, two fields — reads as an
@@ -114,7 +116,17 @@ struct LandingOffsetTests {
             let token = router.registerDetail(postID: "p1", mode: .write) { _ in }
             router.noteFocusedBlock("b1", variantID: "v1", postID: "p1", utf16Offset: 0)
             #expect(router.focusedBlock?.utf16Offset == 0)
+            // The ladder's R1-10 — the CADENCE itself, pinned (J18(1)'s
+            // load-bearing claim): a same-block report at another offset
+            // wakes NO observer of `focusedBlock`…
+            let wakes = LockIsolated(0)
+            withObservationTracking {
+                _ = router.focusedBlock
+            } onChange: {
+                wakes.withValue { $0 += 1 }
+            }
             router.noteFocusedBlock("b1", variantID: "v1", postID: "p1", utf16Offset: 312)
+            #expect(wakes.value == 0, "a caret walking inside one block wakes nobody")
             #expect(router.focusedBlock == FocusedBlock(
                 postID: "p1", blockID: "b1", variantID: "v1", utf16Offset: 312),
                     "the caret walked inside the block and the fact says so")
@@ -128,6 +140,20 @@ struct LandingOffsetTests {
             #expect(router.currentBlock(for: "p1")?.utf16Offset == 312)
             let again = router.registerDetail(postID: "p1", mode: .takes) { _ in }
             #expect(router.focusedBlock?.utf16Offset == 312, "restored with the mount")
+            // …and a BLOCK change DOES wake it (R1-10's positive arm — a
+            // router that notified nobody at all would pass the negative).
+            // Relative: the first tracker above is one-shot and fired at the
+            // unregister's identity → nil, which is itself a real change.
+            let before = wakes.value
+            withObservationTracking {
+                _ = router.focusedBlock
+            } onChange: {
+                wakes.withValue { $0 += 1 }
+            }
+            router.noteFocusedBlock("b2", variantID: "v2", postID: "p1", utf16Offset: 0)
+            #expect(wakes.value == before + 1, "a block change wakes the observer")
+            #expect(router.focusedBlock == FocusedBlock(
+                postID: "p1", blockID: "b2", variantID: "v2", utf16Offset: 0))
             router.unregisterDetail(again)
         }
     }

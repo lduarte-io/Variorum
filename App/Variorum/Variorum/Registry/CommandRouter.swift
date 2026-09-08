@@ -64,8 +64,13 @@ final class CommandRouter {
             // written at block changes and here).
             if let leaving = activePostID { currentBlocks.persist(postID: leaving) }
             let restored = currentBlocks.current(for: postID)
-            focusedBlockIdentity = restored
             focusedOffset = restored?.utf16Offset
+            // R1-9: the observed half carries NO offset — the caret-rate half
+            // above is the only home, so the two lifetimes cannot be confused.
+            // (Order is load-bearing: the offset is read off `restored` first.)
+            var identity = restored
+            identity?.utf16Offset = nil
+            focusedBlockIdentity = identity
         }
         activePostID = postID
         activeMode = mode
@@ -181,7 +186,9 @@ final class CommandRouter {
             || focusedBlockIdentity?.variantID != variantID
             || focusedBlockIdentity?.postID != postID
         else { return }  // assign only on a real change
-        focusedBlockIdentity = fact
+        var identity = fact
+        identity.utf16Offset = nil  // R1-9: the observed half never carries the offset
+        focusedBlockIdentity = identity
     }
 
     // MARK: - The current block, remembered per note (the correction round, row 39)
