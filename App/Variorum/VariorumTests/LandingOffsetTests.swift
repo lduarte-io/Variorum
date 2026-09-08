@@ -538,4 +538,120 @@ struct LandingOffsetTests {
             window.close()
         }
     }
+
+    // MARK: - 5. The cold mount restores the session scroll anchor (the ladder's round 2, RAISE-M1)
+
+    /// The 250-paragraph world mounted as a BARE arrival (no seed) with a
+    /// session scroll anchor at `anchorEntry`'s start and, when `memoryEntry`
+    /// is given, a remembered caret at that block's start + `memoryOffset`.
+    /// Hands the body the anchor offset, the caret offset (or -1), the editor
+    /// and the visible rect once the arrival and its settle hop are done.
+    /// (Ints and views only — the SendNonSendable crash the batch's record
+    /// names bites richer shapes.)
+    private static func mountedLongNoteWithAnchor(
+        anchorEntry: Int, memoryEntry: Int, memoryOffset: Int, rng: UInt64,
+        _ body: @MainActor (_ anchor: Int, _ caret: Int, _ editor: EditorTextView, _ visible: NSRect) throws -> Void
+    ) async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: rng))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let post = try session.operations.createPost(title: "the long note")
+            var blocks: [String] = []
+            var variants: [String] = []
+            for i in 1...250 {
+                let m = try session.operations.newBlock(
+                    in: post.id,
+                    text: "Paragraph \(i): a sentence of the story, long enough to read as prose "
+                        + "and to take a line or two of the column at this width.")
+                blocks.append(m.block.id)
+                variants.append(m.variant.id)
+            }
+            let postID = post.id
+            session.commandRouter.forgetCurrentBlock(for: postID)
+            let slots = try await db.read { db in try Queries.renderPost(db, containerID: postID) }
+            let index = BlockRangeIndex(slots: slots, tail: nil)
+            let anchor = index.range(ofEntryAt: anchorEntry).location
+            let caret = memoryEntry >= 0 ? index.range(ofEntryAt: memoryEntry).location + memoryOffset : -1
+            // The session anchor she left with — the line at the viewport top
+            // (a block's start is a line start).
+            session.editorRouter.scrollAnchors[postID] = anchor
+            let token = session.commandRouter.registerDetail(postID: postID, mode: .write) { _ in }
+            if memoryEntry >= 0 {
+                session.commandRouter.noteFocusedBlock(
+                    blocks[memoryEntry], variantID: variants[memoryEntry],
+                    postID: postID, utf16Offset: memoryOffset)
+            }
+
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 1100, height: 750),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            let hosting = NSHostingView(
+                rootView: EditorView(session: session, postID: postID, caretSeed: nil)
+                    .environment(ThemeStore(session: session)))
+            hosting.frame = NSRect(x: 0, y: 0, width: 1100, height: 750)
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            #expect(await Self.settle(window, hosting) {
+                guard let view = Self.views(EditorTextView.self, in: hosting).first else { return false }
+                return view.string.count >= index.documentLength
+            }, "the arrival fills the editor")
+            let editor = try #require(Self.views(EditorTextView.self, in: hosting).first)
+            let scrollView = try #require(editor.enclosingScrollView)
+            // Let the arrival's settle hop (the anchor, then the reveal) land.
+            _ = await Self.settle(window, hosting, timeout: 2) { false }
+            try body(anchor, caret, editor, scrollView.contentView.bounds)
+            window.orderOut(nil)
+            window.close()
+            session.commandRouter.unregisterDetail(token)
+            session.editorRouter.scrollAnchors[postID] = nil
+            session.commandRouter.forgetCurrentBlock(for: postID)
+        }
+    }
+
+    /// The round-2 sanity pass's RAISE-M1, verified in use (capture M08):
+    /// `renderFull` restored the session anchor through `JumpPrimitive.jump`
+    /// against the PRE-FILL frame, whose `maxScroll` is a couple of dozen
+    /// points — the very clamp the batch measured for the reveal and answered
+    /// with the N14 settle hop — so on every cold mount (a mode switch mints
+    /// one) the anchor contributed nothing and the page sat at ~24 pt. Now
+    /// the cold mount PARKS the restore for the same hop, generation-stamped
+    /// like the reveal. Red on the pre-fix tree: `visible.minY` ≈ 24 where
+    /// the anchor's line top (thousands of points down) was owed.
+    @Test func aColdMountRestoresTheSessionScrollAnchorAtTheSettleHop() async throws {
+        try await Self.mountedLongNoteWithAnchor(
+            anchorEntry: 199, memoryEntry: -1, memoryOffset: 0, rng: 51
+        ) { anchor, _, editor, visible in
+            let anchorTop = try #require(JumpPrimitive.lineTop(ofOffset: anchor, in: editor))
+            print("[17o b RAISE-M1] anchor line top \(anchorTop) · visible \(visible.minY)…\(visible.maxY)")
+            #expect(abs(Double(visible.minY) - anchorTop) <= 1,
+                    "the page comes back to the anchor she left (red-on-old: ~24, the pre-fill clamp): \(visible.minY) vs \(anchorTop)")
+        }
+    }
+
+    /// The same raise's felt half — her row 7's "doesn't leave you where you
+    /// were", the PAGE's half: a mode round trip whose remembered caret is
+    /// INSIDE the view she left returns to that view and moves nothing
+    /// (the reveal's guard finds the caret on screen once the anchor is
+    /// restored). Red on the pre-fix tree: the anchor clamped, the caret's
+    /// block was off screen, and the reveal re-topped the page on it.
+    @Test func aModeRoundTripReturnsToTheViewSheLeftWhenTheCaretIsInsideIt() async throws {
+        try await Self.mountedLongNoteWithAnchor(
+            anchorEntry: 199, memoryEntry: 202, memoryOffset: 5, rng: 52
+        ) { anchor, caret, editor, visible in
+            let anchorTop = try #require(JumpPrimitive.lineTop(ofOffset: anchor, in: editor))
+            #expect(editor.selectedRange().location == caret, "the bare arrival landed at the remembered place")
+            let caretSpan = try #require(JumpPrimitive.lineSpan(ofOffset: caret, in: editor))
+            print("[17o b RAISE-M1 round trip] anchor top \(anchorTop) · caret line \(caretSpan.top)…\(caretSpan.bottom) · visible \(visible.minY)…\(visible.maxY)")
+            #expect(abs(Double(visible.minY) - anchorTop) <= 1,
+                    "the view she left, not the caret's line re-topped (red-on-old: \(visible.minY) == the caret's line top \(caretSpan.top))")
+            #expect(caretSpan.top >= Double(visible.minY) - 1 && caretSpan.bottom <= Double(visible.maxY) + 1,
+                    "…and the caret is on screen in it")
+        }
+    }
 }

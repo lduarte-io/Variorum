@@ -258,7 +258,10 @@ final class EditorViewModel {
     @ObservationIgnored private var bulkPending = false
     @ObservationIgnored private var pendingProjection: [Queries.RenderedBlock]?
     @ObservationIgnored private var forceFullRender = false
-    @ObservationIgnored private var loaded = false
+    /// `private(set)`: `EditorSurfaceController.renderFull` reads it to tell
+    /// the COLD mount (the initial render — the frame is still the pre-fill
+    /// height) from a warm re-render (the ladder's round 2, RAISE-M1).
+    @ObservationIgnored private(set) var loaded = false
     /// The store→surface rewrite door (13b Stage 3, N10): the structural
     /// gesture-execution band + the projection executors live in
     /// `EditorSurfaceController` — a sibling under the Editor feature,
@@ -1950,6 +1953,42 @@ final class EditorViewModel {
     /// OLDER generation is not the one the park is waiting for.
     @ObservationIgnored private var pendingRevealGeneration = 0
 
+    // MARK: - The session scroll anchor's restore, parked for the same hop (round 2, RAISE-M1)
+
+    /// **The cold mount's anchor restore waits for the settle hop too** (the
+    /// ladder's round 2, RAISE-M1 — verified in use: block 168 mid-viewport
+    /// → ⌘2 → ⌘1 → the page re-topped on block 168). `renderFull` restored
+    /// `editorRouter.scrollAnchors[postID]` through `JumpPrimitive.jump`
+    /// against the PRE-FILL frame, whose `maxScroll` is a couple of dozen
+    /// points — the very clamp the batch measured for the reveal and
+    /// answered with the hop — so on every cold mount (a mode switch mints
+    /// one) the anchor contributed nothing and the reveal decided the page
+    /// alone. Parked here by `renderFull` on the initial render only (a warm
+    /// re-render's frame is honest and its immediate restore is unchanged),
+    /// stamped with the geometry generation like the reveal, and consumed in
+    /// the hop BEFORE the reveal — so the reveal's guard then finds a caret
+    /// inside the view she left and moves nothing (her row 7's page half).
+    /// QUESTIONS #98 carries the product edge (the caret OFF the restored
+    /// view: the top landing, built PROVISIONAL).
+    func parkAnchorRestore(_ offset: Int) {
+        guard scrollView != nil else { return }  // the inline editors scroll in their host
+        pendingAnchorRestore = offset
+        pendingAnchorGeneration = overlayGeometryGeneration
+    }
+
+    @ObservationIgnored private(set) var pendingAnchorRestore: Int?  // read by the RAISE-M1 pins' kin
+    @ObservationIgnored private var pendingAnchorGeneration = 0
+
+    private func consumePendingAnchorRestore(deliveredBy generation: Int) {
+        guard let offset = pendingAnchorRestore else { return }
+        guard generation >= pendingAnchorGeneration else { return }  // a stale hop leaves it (R1-5's rule)
+        pendingAnchorRestore = nil
+        guard let textView, let scrollView else { return }
+        JumpPrimitive.jump(
+            toOffset: min(offset, max(0, index.documentLength)),
+            textView: textView, scrollView: scrollView)
+    }
+
     private func consumePendingReveal(deliveredBy generation: Int) {
         guard let offset = pendingRevealOffset else { return }
         // R1-5: a stale hop LEAVES the park — the honest one is guaranteed
@@ -2879,7 +2918,10 @@ final class EditorViewModel {
             overlayGenerationDelivered = generation
             // 17o batch b (row 20): the arriving landing's second, exact jump
             // — this hop is the first moment the document's frame is honest
-            // (for the generation this hop saw — R1-5).
+            // (for the generation this hop saw — R1-5). Round 2, RAISE-M1:
+            // the session anchor lands FIRST, so the reveal's guard judges
+            // "already on screen" against the view she left.
+            consumePendingAnchorRestore(deliveredBy: generation)
             consumePendingReveal(deliveredBy: generation)
             // A generation bumped between schedule and run re-arms on its
             // own draw pass — delivered records what this refresh SAW.

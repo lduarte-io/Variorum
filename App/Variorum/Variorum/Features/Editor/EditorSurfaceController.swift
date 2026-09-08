@@ -157,9 +157,23 @@ final class EditorSurfaceController {
                 toOffset: min(anchor, max(0, model.index.documentLength)),
                 textView: textView, scrollView: model.scrollView)
         } else if let saved = model.session.editorRouter.scrollAnchors[model.postID] {
-            JumpPrimitive.jump(
-                toOffset: min(saved, max(0, model.index.documentLength)),
-                textView: textView, scrollView: model.scrollView)
+            if model.loaded {
+                // A warm re-render whose live anchor came back nil (the page
+                // scrolled into the typewriter room): the frame is honest —
+                // restore now, as always.
+                JumpPrimitive.jump(
+                    toOffset: min(saved, max(0, model.index.documentLength)),
+                    textView: textView, scrollView: model.scrollView)
+            } else {
+                // The COLD mount (17o batch b's ladder, round 2 — RAISE-M1):
+                // the storage was just replaced and the text view's frame is
+                // still the pre-fill height, so a jump here clamps at
+                // `maxScroll` ≈ a couple of dozen points and the anchor is
+                // never restored — every mode round trip re-topped the page
+                // on the caret's block. Park it for the N14 settle hop, the
+                // first moment the frame is honest (the reveal's own road).
+                model.parkAnchorRestore(saved)
+            }
         }
         model.updateCaretContext()
         model.refreshBadges()
