@@ -727,4 +727,115 @@ extension TakePaneMeasureTests {
         #expect(edits.value == 0,
                 "same-ink updateNSView passes made ZERO storage edits (counted \(edits.value)) — on pre-A47c code every pass re-attributed the whole storage through the textColor setter")
     }
+
+    // MARK: - 17o batch c, ledger row 16 — the stale height after a big deletion
+
+    /// Her punchlist 13, verbatim: *"delete a lot of text from a take…
+    /// empty gap… until you switch modes"*.
+    ///
+    /// **The traced mechanism, measured before it was believed** (the
+    /// standing-17 rule; the probe's numbers are in the batch record):
+    /// `NSTextLayoutManager.usageBoundsForTextContainer` is a HIGH-WATER
+    /// MARK for its container's life on macOS 26. A 30-line pane measured
+    /// 1223 pt; deleting 25 of those lines through the real responder path
+    /// left the property at 1189 and it stayed there for six main-queue
+    /// turns — so the five-line take kept a 1201-pt frame with ~1000 pt of
+    /// dead gap under it until a remount minted a fresh container, which is
+    /// exactly "until you switch modes". Neither the `ensureLayout(for:
+    /// documentRange)` the measurement already ran nor an explicit
+    /// `invalidateLayout` ahead of it moves the property (both measured).
+    ///
+    /// RED ON THE PRE-FIX TREE: the pane's frame stands at 1201 for five
+    /// lines of prose. GREEN with `PaneMeasurement` reading the laid-out
+    /// fragments' own bottom, which tracks the text both ways (198 after
+    /// the deletion, 608 after ten lines were typed back).
+    ///
+    /// Driven through the real edit path — select, `deleteBackward` — so
+    /// this is a pin on her experience, not on our arithmetic.
+    @Test func aPaneThatLosesMostOfItsTextShrinksWithinOneTurn() {
+        let lines = (1...30).map {
+            "Line \($0) of honest prose that keeps flowing along the measured line and wraps."
+        }
+        let host = NSHostingController(
+            rootView: PaneSurfaceView(text: lines.joined(separator: "\n"), isLive: true)
+                .frame(width: 400))
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 420, height: 1400),
+            styleMask: [.borderless], backing: .buffered, defer: false)
+        window.contentViewController = host
+        host.view.frame = NSRect(x: 0, y: 0, width: 420, height: 1400)
+        defer { window.contentViewController = nil }
+        func findPane(_ view: NSView) -> PaneTextView? {
+            if let pane = view as? PaneTextView { return pane }
+            for sub in view.subviews { if let found = findPane(sub) { return found } }
+            return nil
+        }
+        for _ in 0..<6 { host.view.layoutSubtreeIfNeeded(); pumpMain(0.04) }
+        guard let pane = findPane(host.view) else {
+            Issue.record("no pane mounted")
+            return
+        }
+        let tall = pane.bounds.height
+        #expect(tall > 900, "non-vacuity: thirty lines really are tall (\(tall))")
+
+        // The real gesture: select everything after line 5 and delete it.
+        let keepLength = (lines.prefix(5).joined(separator: "\n") as NSString).length
+        let whole = (pane.string as NSString).length
+        pane.setSelectedRange(NSRange(location: keepLength, length: whole - keepLength))
+        pane.deleteBackward(nil)
+        #expect(pane.string.components(separatedBy: "\n").count == 5,
+                "non-vacuity: the deletion landed (\(pane.string.components(separatedBy: "\n").count) lines)")
+
+        // ONE main-queue turn — her words are "until you switch modes",
+        // so the pane owes her the shrink without one.
+        pumpMain(0.05)
+        host.view.layoutSubtreeIfNeeded()
+        let short = pane.bounds.height
+        #expect(short < tall / 3,
+                "five lines of prose frame short (\(short)) instead of keeping the thirty-line height (\(tall)) — the empty gap")
+
+        // And BACK: the height is not a one-way ratchet in the other
+        // direction either (the property it replaced was).
+        pane.setSelectedRange(NSRange(location: (pane.string as NSString).length, length: 0))
+        pane.insertText(
+            "\n" + lines.suffix(10).joined(separator: "\n"),
+            replacementRange: pane.selectedRange())
+        pumpMain(0.05)
+        host.view.layoutSubtreeIfNeeded()
+        #expect(pane.bounds.height > short + 200,
+                "fifteen lines stand taller than five (\(pane.bounds.height) vs \(short))")
+    }
+
+    /// The measurement's own contract, stated where a future reader will
+    /// look for it: at steady state the fragments' bottom and the old
+    /// property agree, so nothing that was converged moved when row 16's
+    /// fix landed. GREEN on both sides deliberately — it is the
+    /// no-regression half of row 16, not its pin.
+    @Test func aFreshPanesMeasurementIsUnchangedByRow16sFix() throws {
+        for text in ["", "hello", "hello\n", "hello\n\n\n\nhi there",
+                     (1...30).map { "Line \($0) of prose." }.joined(separator: "\n")] {
+            let host = NSHostingController(
+                rootView: PaneSurfaceView(text: text, isLive: false).frame(width: 400))
+            let window = NSWindow(
+                contentRect: NSRect(x: 0, y: 0, width: 420, height: 1400),
+                styleMask: [.borderless], backing: .buffered, defer: false)
+            window.contentViewController = host
+            host.view.frame = NSRect(x: 0, y: 0, width: 420, height: 1400)
+            for _ in 0..<6 { host.view.layoutSubtreeIfNeeded(); pumpMain(0.04) }
+            func findPane(_ view: NSView) -> PaneTextView? {
+                if let pane = view as? PaneTextView { return pane }
+                for sub in view.subviews { if let found = findPane(sub) { return found } }
+                return nil
+            }
+            let pane = try #require(findPane(host.view))
+            let layout = try #require(pane.textLayoutManager)
+            layout.ensureLayout(for: layout.documentRange)
+            let property = layout.usageBoundsForTextContainer.height
+                + pane.textContainerInset.height * 2
+            #expect(abs(PaneMeasurement.height(of: pane) - max(property, 0)) < 0.5
+                    || text.isEmpty,
+                    "a fresh pane measures the same as it always did (\(PaneMeasurement.height(of: pane)) vs \(property)) for \(text.debugDescription)")
+            window.contentViewController = nil
+        }
+    }
 }

@@ -60,9 +60,53 @@ enum PaneMeasurement {
     /// from here; a divergent private copy is the batch-12 bug class.
     static func height(of view: NSTextView) -> CGFloat {
         guard let layoutManager = view.textLayoutManager else { return 0 }
-        layoutManager.ensureLayout(for: layoutManager.documentRange)
-        return layoutManager.usageBoundsForTextContainer.height
-            + view.textContainerInset.height * 2
+        return extent(of: layoutManager) + view.textContainerInset.height * 2
+    }
+
+    /// The laid-out text's own bottom — **deliberately not
+    /// `usageBoundsForTextContainer`** (17o batch c, ledger row 16; her
+    /// punchlist 13: *"delete a lot of text from a take… empty gap… until
+    /// you switch modes"*).
+    ///
+    /// **MEASURED, not assumed** (the standing "measure before believing a
+    /// number" rule; probe numbers in the batch record): on macOS 26,
+    /// `usageBoundsForTextContainer` is a **HIGH-WATER MARK for the
+    /// container's life**. A 30-line pane measured 1223; deleting 25 of
+    /// those lines through the real edit path left the property at 1189
+    /// and it stayed there for six main-queue turns — so a five-line take
+    /// kept a 1201-pt frame and ~1000 pt of dead gap, exactly her report,
+    /// until a remount built a fresh container. `ensureLayout(for:
+    /// documentRange)` was already run on every measurement and does not
+    /// move it; an explicit `invalidateLayout(for: documentRange)` ahead of
+    /// it does not move it either (both measured). What tracks the text in
+    /// BOTH directions is the fragments' own geometry: after the same
+    /// deletion the last fragment's bottom read 198, and after typing ten
+    /// lines back it read 608, while the property sat at 1189 throughout.
+    ///
+    /// At steady state the two agree EXACTLY — empty, one line, a trailing
+    /// newline, two trailing newlines, blank lines between paragraphs, one
+    /// long wrapping line, 30 lines and 400 lines all measured identical —
+    /// so no converged pane's height moves by a point. The one shape that
+    /// differs is the EMPTY document, which lays out no fragment at all
+    /// while the property still reports one empty line's 17 pt; the
+    /// fallback below keeps that shipped number, so an empty block's pane
+    /// (18c's Return rule mints them; row 15's first block is one) is
+    /// unchanged.
+    ///
+    /// Cost: `.ensuresLayout` does the layout the old call did, and the
+    /// added work is one frame read per fragment — measured 0.58 ms vs
+    /// 0.41 ms on a 400-line / 16,393-pt pane, 0.12 ms at 30 lines. P1
+    /// holds for the reason this file already states: a pane's document is
+    /// ONE take by construction, so the bound is the unit on screen.
+    private static func extent(of layoutManager: NSTextLayoutManager) -> CGFloat {
+        var bottom: CGFloat?
+        layoutManager.enumerateTextLayoutFragments(
+            from: nil, options: [.ensuresLayout]
+        ) { fragment in
+            bottom = max(bottom ?? 0, fragment.layoutFragmentFrame.maxY)
+            return true
+        }
+        return bottom ?? layoutManager.usageBoundsForTextContainer.height
     }
 }
 

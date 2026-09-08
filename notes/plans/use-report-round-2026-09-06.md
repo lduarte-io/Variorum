@@ -4831,4 +4831,99 @@ nothing can be typed), and every other road was caret placement and mode switche
 
 ### R-7 · RECORD (the implementer writes here from its first commit)
 
-*(empty until the implementer's first commit)*
+**LIVE STATUS — 17o batch c (opus-implementer, opened 2026-09-08 at `e6441686`).**
+
+**WHAT I DID NOT DO (the record's first line, per rule 9).** IN PROGRESS — this line is rewritten at the
+close. So far: zero `Sources/` (core), zero `Sync/`, zero schema, zero `App/Variorum/Shared/`, no
+`PaneTextAuthority` code, no `BlockRangeIndex`, no `BlockDecor` change (read as the reference only), no
+restyle beyond the four rows.
+
+- **Orientation — DONE.** Read in my own context, in the brief's order: `CLAUDE.md` and the canon it
+  auto-loads (CoreDescription · OverallModel — §4's I10 and §5's P1–P3 · AppSpec — §12's takes
+  presentations and the R14/R22 indicator setting · SyncSpec · TEXTKIT2_NOTES §2 the viewport/height
+  risk and §3's rendering-attribute rules); this plan's §0, §1 (U-7 verbatim · U-19 (5) · U-14), §2's
+  13u fence, §3's ledger rows 6 · 14 · 15 · 16 (plus 32's deferral), §5.3 **Batch c** whole, §8, §9,
+  §10, R-0's P-1…P-9 constitution, the R-7 brief; `notes/plans/phase-17-standing-fixes.md`'s standing
+  rules + the allocation register. Then the code: `Surface/PaneSurface.swift` whole (the measurement
+  brain, `PanePublisher`, the coordinator, `PaneCaretLanding` and the batch-b landing API — which rides
+  UNMODIFIED), `Features/Editor/BlockDecor.swift` (`EditorAppearance` — THE appearance-push pattern —
+  and `renderIndicator`'s three-way rule at `:513–535`, the reference behaviour), `Theme/ThemeStore.swift`,
+  `Features/Settings/AppSettingsView.swift:126`, `Sources/VariorumCore/Models/Enums.swift:86`
+  (`EditingIndicatorStyle`), every `PaneSurfaceView(` construction site (ten sites in eight files),
+  `TakesShared.TakesCellView`, `TakesBoardView`'s `TakeCardFrame` + `takeMiniPane` + `CollapsibleTakeCard`
+  + `singleColumnArticle`, `LensesBoardView`'s `content`, `TakesStructureController.addBlockAtEnd`,
+  `Registry/CapabilityRegistry.swift`'s `.addBlockAtEnd` + `takeFamily`, and the pin harnesses
+  (`PaneSurfaceTests`, `TakePaneMeasureTests`, `TakesCardHeightTests`'s `withBoard`, `LensesGeometry`'s
+  DEBUG probe pattern). Tree clean at `e6441686`, `main` == `origin/main`, zero app instances (`pgrep`).
+
+**Pieces (checkpoint order):**
+
+1. row 16 — the pane's stale height after a big deletion — **DONE (this commit)**
+2. row 6 — the ring follows the indicator setting, everywhere, through the ONE component — **NOT STARTED**
+3. row 14 — the chosen bar runs the card's full height — **NOT STARTED**
+4. row 15 — "＋ new block" in the EMPTY state of Takes and Lenses — **NOT STARTED**
+5. the walk (both voices, the setting cycled) + captures + the closing suites — **NOT STARTED**
+
+---
+
+#### ROW 16 — MEASURED FIRST, AND IT IS REAL (not hollow)
+
+The brief said *"TRACE FIRST — measure before believing"*, and the measurement **changed the fix**. The
+brief's proposed remedy — *"run `ensureLayout(for: documentRange)` on the PANE after a SHRINKING edit
+then remeasure"* — **is already what the shipped code does on every measurement**
+(`PaneMeasurement.height` called it before reading), and it does **not** fix the row. Recorded because
+the next reader would otherwise repeat the guess.
+
+**The probe** (a live pane, 400 pt wide, 30 lines of prose; lines 6–30 deleted through the real
+responder path — select + `deleteBackward`):
+
+| turn | text | `usageBoundsForTextContainer` | `PaneMeasurement.height` | the pane's frame |
+|---|---|---|---|---|
+| mounted | 30 lines | 1223.0 | 1235.0 | 1235.0 |
+| after the delete | 5 lines | 1189.0 | 1201.0 | 1235.0 |
+| +1 turn … +6 turns | 5 lines | **1189.0 (unmoved)** | **1201.0 (unmoved)** | **1201.0 (unmoved)** |
+
+So a five-line take kept a **1201-pt frame** — ~1000 pt of dead gap under it — and no number moved for
+six main-queue turns. That is her *"empty gap… until you switch modes"* exactly: only a remount (a mode
+switch) mints a fresh text container, and a fresh container starts its high-water mark over.
+
+**The mechanism, named:** on macOS 26 `NSTextLayoutManager.usageBoundsForTextContainer` is a **HIGH-WATER
+MARK for its container's life** — it grows and never shrinks. Two remedies were measured and BOTH
+failed: the `ensureLayout(for: documentRange)` already in the measurement (1189 → 1189), and an explicit
+`invalidateLayout(for: documentRange)` ahead of it (1189 → 1189). What tracks the text is the fragments'
+own geometry: after the same deletion the last laid-out fragment's bottom read **198.0**, and after ten
+lines were typed back it read **608.0**, while the property sat at 1189 throughout — so the ratchet is
+one-way in BOTH senses (a pane that shrank could not grow back to an honest number either).
+
+**The fix (ONE place — the one measurement brain, P-3):** `PaneMeasurement` reads the laid-out
+fragments' own bottom instead of the property, falling back to the property when a document lays out no
+fragment at all (the EMPTY document — the only shape where the two differ).
+
+**Why it moves no converged pane by a point** — measured at steady state on eight shapes:
+
+| shape | property | fragments |
+|---|---|---|
+| empty | 17.0 | 0.0 → falls back to 17.0 |
+| one line | 17.0 | 17.0 |
+| trailing newline | 41.0 | 41.0 |
+| two trailing newlines | 58.0 | 58.0 |
+| blank lines between paragraphs | 113.0 | 113.0 |
+| one long wrapping line | 340.0 | 340.0 |
+| 30 lines | 1223.0 | 1223.0 |
+| 400 lines | 16393.0 | 16393.0 |
+
+**Cost (P1, measured):** 0.58 ms vs 0.41 ms per measurement on a 400-line / 16,393-pt pane; 0.12 ms at
+30 lines. `.ensuresLayout` does the layout the old call did; the added work is one frame read per
+fragment, and a pane's document is ONE take by construction — the bound is the unit on screen, which is
+the same P1 argument `PaneSurface.swift` already makes in its header for full-document `ensureLayout`.
+
+**The pin:** `TakePaneMeasureTests.aPaneThatLosesMostOfItsTextShrinksWithinOneTurn` — mounts a live
+30-line pane, deletes 25 lines through the responder path, and asserts the frame falls below a third of
+its old height within ONE main-queue turn (plus a regrow arm, and two non-vacuity assertions). Beside it,
+`aFreshPanesMeasurementIsUnchangedByRow16sFix` states the no-regression half (green on both sides
+deliberately — it is not the pin). Red-on-old by behavioral revert: **PENDING (next commit).**
+
+**For 13u2's kickoff (row 32, the general pane-stability trace — this row is item 1's member):** the
+high-water mark above is a *class*, not a one-off. Anything in the app that sizes from
+`usageBoundsForTextContainer` inherits it; the full-document EDITOR is the other surface kind and was
+NOT examined here (out of this batch's one surface). 13u2 should start from that question.
