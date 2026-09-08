@@ -5792,7 +5792,7 @@ card's **`#path` chips**. Which of the two she saw is settled at the walk and re
    (`PENDING-HASH`)**
 2. the tag chip becomes the door + the sheet's stale empty-state copy (row 39) — **DONE
    (`PENDING-HASH`)**
-3. the pins (the brain, the landing mount, the copy) — **NOT STARTED**
+3. the pins (the brain, the landing mount, the copy) — **DONE (`PENDING-HASH`)**
 4. the red-on-old by behavioral revert on the committed tree — **NOT STARTED**
 5. the walk + captures + the closing suites — **NOT STARTED**
 
@@ -5819,3 +5819,31 @@ card's **`#path` chips**. Which of the two she saw is settled at the walk and re
   "No tags yet — make one in Settings ▸ Tags.", the Blocks workbench's wording.
 
 Mac Debug build green after pieces 1 + 2.
+
+**The pins (piece 3) — `App/Variorum/VariorumTests/SnippetsDoorsTests.swift`, three suites, 6 tests:**
+
+- `SnippetOpenTargetTests.aCardsDoorNamesItsOwnGroupAndTheSnippetClicked` — **her exact shape**: the
+  seeded default group minted first, the tutorial's after, the rail on "all snippets" (so `activePool`
+  IS the default — asserted, so the trace is in the pin), a card in the tutorial's group. The card's
+  target is the tutorial's group + the clicked block, and is asserted `!=` the pre-fix answer (the
+  active group, no landing) in the same test, so a revert cannot read as a pass.
+- `…theHeadersScopeDoorOpensTheGroupBeingBrowsedWithNoLanding` — the scope door keeps its meaning and
+  follows the rail.
+- `…theOpenRowNamesTheSnippetAndNotAContainerItCannotPromise` — the copy half, plus the item-17
+  vocabulary sweep re-run over `allStrings` with the two new strings in it.
+- `SnippetsLandingTests.openingAGroupAtANamedSnippetLandsTheCaretInIt` — **end to end through the real
+  editor**: a group of three snippets mounted as `PoolDetailView`, once with the third snippet named
+  (the caret lands at its start, `EditorTextView.selectedRange().location == range(ofEntryAt: 2).location`)
+  and once without (it does not) — the road the fixed card door now hands its landing to, and the
+  second arm is literally what she saw from every card door.
+- `SnippetTagDoorTests.theSurfaceDeclaresTheBlockTagActAndTheChipCarriesItsWords` — the act is declared
+  by this surface (P-1) and the chip carries its own words. *That the chip IS a button is held by the
+  WALK, not by a test:* an `NSHostingView` exposes no accessibility children to a direct tree walk (the
+  `MastheadTagDoorTests` finding, recorded there), so a SwiftUI `.plain` button inside a card cannot be
+  counted from a mount. Row 39 is a findability row, whose evidence class is the walk (rule 3).
+- `…theSheetSendsHerWhereTagsActuallyLive` — the rider's red-on-old string pin (the copy hoisted to
+  `BlockTagCopy.noTagsYet` so a pin can hold it).
+
+Run: `SnippetOpenTargetTests · SnippetsLandingTests · SnippetTagDoorTests · SnippetsVocabularyTests ·
+SnippetFilterTests · SnippetsGroupDoorsTests` — **15 tests in 6 suites passed** (no suite silently
+dropped; the type names checked against the `Test run with N tests in M suites` line).

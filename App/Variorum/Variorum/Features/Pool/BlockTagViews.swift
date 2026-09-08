@@ -14,6 +14,13 @@ import Observation
 import SwiftUI
 import VariorumCore
 
+/// The block-tag sheet's own words (17o batch e, row 39's rider — named so
+/// a pin can hold them: the empty state pointed at *"the sidebar's Tags
+/// section"*, a room gone since R52 moved tag management into Settings).
+nonisolated enum BlockTagCopy {
+    static let noTagsYet = "No tags yet \u{2014} make one in Settings \u{25B8} Tags."
+}
+
 @MainActor
 @Observable
 final class BlockTagAssignmentViewModel {
@@ -88,7 +95,7 @@ struct BlockTagAssignmentSheet: View {
                 // section since R52 moved tag management into Settings — a
                 // door that names a room that is not there is worse than no
                 // sentence at all. Worded as the Blocks workbench's twin.
-                Text("No tags yet — make one in Settings \u{25B8} Tags.")
+                Text(BlockTagCopy.noTagsYet)
                     .foregroundStyle(.secondary)
             }
             List(model.allTags, id: \.id) { tag in
