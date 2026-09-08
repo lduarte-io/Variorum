@@ -62,12 +62,20 @@ nonisolated enum EditorTypography {
     /// Settable rather than `private(set)` so a pin can put the process
     /// global back where it found it — this value is shared across Swift
     /// Testing's parallel suites (batch 1's MINOR-3 class).
+    ///
+    /// It is false in a host that never starts a `ThemeStore` (a preview, a
+    /// mounted pin), and that is correct rather than unfortunate: such a host
+    /// has no voice of hers to be right about, so its surface sizes are not
+    /// worth recording either. The memory is simply inert there.
     nonisolated(unsafe) static var isAdopted = false
 
-    /// The one adoption door: `ThemeStore` calls it where a settings value
-    /// LANDS, and `applyVoiceChrome` calls it when a surface takes a real
-    /// voice. Both were already writing `current`; what they now also say is
-    /// that the answer is no longer a guess.
+    /// **The one adoption door, and it has exactly one caller:
+    /// `ThemeStore.start`, where a settings value LANDS.** Round 2's MAJOR-1
+    /// is why that is stated as a rule rather than left as a fact: for one
+    /// round `applyVoiceChrome` called this too, with a chrome its hosts had
+    /// built from the store's un-answered placeholder, and the latch made the
+    /// guess indistinguishable from her answer. Anything that only DRAWS
+    /// writes `current` directly; only the settings' authority adopts.
     static func adopt(_ resolved: Resolved) {
         current = resolved
         isAdopted = true
@@ -207,10 +215,20 @@ extension NSTextView {
     /// warns about; decorations stay overlays.
     func applyVoiceChrome(_ chrome: EditorSurfaceChrome) {
         // The one global typography updates FIRST so every subsequent
-        // surface write (materialization, differential) agrees. Through
-        // `adopt` since the 18d ladder's MINOR-2: a surface taking a real
-        // voice is an adoption, not a guess.
-        EditorTypography.adopt(chrome.typography)
+        // surface write (materialization, differential) agrees.
+        //
+        // **It writes `current` and does NOT adopt** (18d ladder round 2,
+        // MAJOR-1 — this line called `adopt` for one round and that was the
+        // bug). Both hosts build this chrome from `themeStore?.settings ??
+        // Queries.ThemeSettings()`, and a `ThemeStore` that has not answered
+        // yet HOLDS that same placeholder — so a surface materializing before
+        // the observation returns handed this door the compile-time Terminal
+        // guess, `adopt` latched `isAdopted` on it, and the guess became
+        // indistinguishable from her answer. Drawing in the wrong voice for a
+        // few frames is harmless and self-correcting (the chrome re-applies);
+        // RECORDING in the wrong voice is not, which is the whole reason
+        // adoption belongs to the settings' one authority.
+        EditorTypography.current = chrome.typography
         // 13g batch 2 (L7): the markdown face's two colors ride the same
         // resolution — one voice, one dimmed marker, everywhere.
         MarkdownStyling.palette = MarkdownStyling.Palette(tokens: chrome.tokens)

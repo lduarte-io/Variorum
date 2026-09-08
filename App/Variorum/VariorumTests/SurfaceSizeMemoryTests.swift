@@ -170,11 +170,15 @@ struct SurfaceSizeMemoryTests {
             EditorTypography.current = restore
             EditorTypography.isAdopted = wasAdopted
         }
+        // Round 2, NIT-2: the window in which this process global is not
+        // what the app left it is ONE statement long — captured, put back,
+        // and only then asserted (a concurrently mounting surface in another
+        // suite reads these).
         EditorTypography.isAdopted = false
-        #expect(EditorTypography.fingerprint == nil,
-                "an unadopted typography names no voice")
-        EditorTypography.adopt(study)
-        #expect(EditorTypography.fingerprint != nil)
+        let unadopted = EditorTypography.fingerprint
+        EditorTypography.current = restore
+        EditorTypography.isAdopted = wasAdopted
+        #expect(unadopted == nil, "an unadopted typography names no voice")
     }
 
     // MARK: - 2. The write cadence
@@ -431,17 +435,25 @@ struct SurfaceSizeMemoryTests {
             let task = Task { await store.start() }
             defer { task.cancel() }
 
-            let deadline = Date().addingTimeInterval(5)
+            // Round 2, NIT-2: the process globals this pin moves are shared
+            // across Swift Testing's parallel suites, so the window is kept
+            // as small as the mechanism allows — a 2 s bound on an in-memory
+            // store's single read, and the answer CAPTURED and the globals
+            // put back before anything is asserted.
+            let deadline = Date().addingTimeInterval(2)
             while Date() < deadline, store.settings.voice != .study {
                 try? await Task.sleep(for: .milliseconds(10))
             }
-            #expect(store.settings.voice == .study, "the settings landed")
-
+            let landed = store.settings.voice
             let study = EditorTypography.fingerprint
+            let adopted = EditorTypography.current
+            EditorTypography.current = restore
+            EditorTypography.isAdopted = wasAdopted
+
+            #expect(landed == .study, "the settings landed")
             #expect(study != terminalStamp,
                     "the landing adopted the voice: \(String(describing: study))")
-            #expect(EditorTypography.current
-                        == EditorTypography.resolve(voice: .study, inlineComments: false),
+            #expect(adopted == EditorTypography.resolve(voice: .study, inlineComments: false),
                     "…and it is exactly the Study resolution, not merely a different one")
         }
     }
@@ -490,7 +502,11 @@ struct SurfaceSizeMemoryTests {
         stamp.value = nil                              // the voice has not landed
         let unknowing = SurfaceSizeMemory(
             .outline, defaults: defaults, fingerprint: { stamp.value })
-        #expect(unknowing.size("p1") == nil, "no stamp to compare — no answer")
+        // Round 2's MAJOR-1 refined this half: an unverifiable record is
+        // still ANSWERED (a guess beats the unmeasured fallback, and refusing
+        // it is what MINOR-2 was raised about). What the window forbids is
+        // WRITING one.
+        #expect(unknowing.size("p1") == hers, "the record is a guess, and a guess is answered")
         unknowing.remember("p1", CGSize(width: 696, height: 40))
         unknowing.persist("p1")
         stamp.value = study                            // the settings land
@@ -530,6 +546,136 @@ struct SurfaceSizeMemoryTests {
             #expect(UserDefaults.standard.string(
                 forKey: SurfaceSizeMemory.key(.flow, postID)) == nil,
                     "…and the flow's")
+        }
+    }
+
+    // MARK: - 8. Round 2's MAJOR-1: the SECOND adoption door is closed
+
+    /// **RED ON `ecacfa42`.** Round 1 gave `SurfaceSizeMemory` a guard —
+    /// no stamp, no record — and then defeated it one door over:
+    /// `applyVoiceChrome` called `EditorTypography.adopt`, and BOTH its hosts
+    /// build that chrome from `themeStore?.settings ?? Queries.ThemeSettings()`,
+    /// which is the compile-time Terminal placeholder both when there is no
+    /// store AND while a real store has not answered. So a surface
+    /// materializing in Study before the theme landed latched `isAdopted` on
+    /// the guess, `fingerprint` went non-nil-and-wrong, and the guard stopped
+    /// guarding.
+    ///
+    /// The pin reaches it through the PRODUCTION door — a real
+    /// `EditorTextView` taking the chrome an un-answered store hands out —
+    /// and then does what the flow's empty-read road does: `remember` and
+    /// `persist` in the same turn, with no settle interval standing between a
+    /// wrong stamp and the disk.
+    @Test func aSurfaceTakingChromeBeforeTheVoiceLandsCannotRecordUnderTheGuess() {
+        let suiteName = "surface-size-\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let restore = EditorTypography.current
+        let wasAdopted = EditorTypography.isAdopted
+        defer {
+            EditorTypography.current = restore
+            EditorTypography.isAdopted = wasAdopted
+        }
+
+        // Her record, written in her own voice by a previous launch. The
+        // stamp is INJECTED, not read from the process global — round 2's
+        // NIT-2: this suite touches that global for exactly as long as the
+        // claim requires and no longer.
+        let herStamp = "IowanOldStyle-Roman-16-8"
+        let hers = CGSize(width: 696, height: 20993)
+        let seed = SurfaceSizeMemory(.outline, defaults: defaults, fingerprint: { herStamp })
+        seed.remember("p1", hers)
+        seed.persist("p1")
+
+        // Everything the production door needs, built BEFORE the window.
+        let textView = EditorTextView.makeInlineEditor()
+        let unlanded = EditorSurfaceChrome(tokens: Queries.ThemeSettings(), dark: false)
+
+        // THE WINDOW — one call long. The voice is not known; a surface
+        // materializes and takes the chrome an UN-ANSWERED store hands out
+        // (`ThemeStore.settings` IS `Queries.ThemeSettings()` until its
+        // observation returns, which is also the hosts' own `?? ` fallback).
+        EditorTypography.isAdopted = false
+        textView.applyVoiceChrome(unlanded)
+        let latched = EditorTypography.isAdopted
+        EditorTypography.current = restore
+        EditorTypography.isAdopted = wasAdopted
+        #expect(latched == false,
+                "drawing is not adopting — only the settings' authority adopts")
+
+        // What that used to cost, replayed on an injected unknown stamp: the
+        // memory wired as `BookViewModel` wires it, then the flow's own
+        // same-turn road (`remember` then `persist`, no settle between).
+        let stamp = Stamp()
+        stamp.value = nil
+        let live = SurfaceSizeMemory(.outline, defaults: defaults, fingerprint: { stamp.value })
+        #expect(live.size("p1") == hers,
+                "her record is answered as a guess — refusing it is MINOR-2's own complaint")
+        live.remember("p1", CGSize(width: 696, height: 40))
+        live.persist("p1")
+
+        stamp.value = herStamp
+        #expect(live.size("p1") == hers, "her record survived the surface's guess")
+        #expect(SurfaceSizeMemory(.outline, defaults: defaults, fingerprint: { herStamp })
+                    .size("p1") == hers, "…and on disk")
+    }
+
+    // MARK: - 9. Round 2's MINOR-3: the door the app really walks
+
+    /// **RED ON `ecacfa42`.** Round 1 wired `forgetPersisted` to
+    /// `CommandRouter.forgetCurrentBlock`, whose only callers were pins, and
+    /// then said in two comments that the app walked it. J43's trace found
+    /// the one production occasion where a note's per-note view state should
+    /// die: the Mac's **Delete Now on a note** — the purge, not the delete,
+    /// because a deleted note is in the Trash and Put back must find her
+    /// caret and her lengths where she left them.
+    ///
+    /// The pin drives the real door end to end: a real note, deleted, listed
+    /// in the Trash, confirmed through `RecoveryViewModel.confirmPendingPurge`
+    /// — and asserts both per-note memories go with it.
+    @Test func deleteNowOnANoteTakesItsPerNoteMemoriesWithIt() async throws {
+        try await withEditor(seedBlocks: ["Alpha one.", "Beta two."]) { editor in
+            let postID = editor.postID
+            defer { SurfaceSizeMemory.forgetPersisted(postID) }
+
+            // She read this note: a current block and both surface records.
+            var blocks = CurrentBlockMemory()
+            blocks.remember(
+                FocusedBlock(
+                    postID: postID,
+                    blockID: try #require(editor.model.slots.first?.blockID),
+                    variantID: nil, utf16Offset: 12))
+            blocks.persist(postID: postID)
+            let outline = SurfaceSizeMemory(.outline, fingerprint: { "t" })
+            let flow = SurfaceSizeMemory(.flow, fingerprint: { "t" })
+            outline.remember(postID, CGSize(width: 696, height: 20993))
+            outline.persist(postID)
+            flow.remember(postID, CGSize(width: 600, height: 20071))
+            flow.persist(postID)
+            #expect(UserDefaults.standard.string(
+                forKey: SurfaceSizeMemory.key(.outline, postID)) != nil)
+
+            // The note goes to the Trash, and then for good.
+            try await editor.session.runner.run { (ops: Operations) in
+                try ops.deleteContainer(postID)
+            }
+            let rows: [Queries.TrashItem] = try await editor.database.read { db in
+                try Queries.trash(db, now: harnessNow)
+            }
+            let note = try #require(rows.first { $0.kind == .note && !$0.isVersion })
+            let model = RecoveryViewModel(session: editor.session)
+            model.requestDeleteNow(note)
+            await model.confirmPendingPurge(try #require(model.pendingConfirm))
+            #expect(model.lastError == nil, "the purge went through: \(String(describing: model.lastError))")
+
+            #expect(UserDefaults.standard.string(
+                forKey: SurfaceSizeMemory.key(.outline, postID)) == nil,
+                    "the Outline's record went with the note")
+            #expect(UserDefaults.standard.string(
+                forKey: SurfaceSizeMemory.key(.flow, postID)) == nil, "…and the flow's")
+            #expect(UserDefaults.standard.string(
+                forKey: CurrentBlockMemory.key(postID)) == nil,
+                    "…and the current block, through the same one door")
         }
     }
 }

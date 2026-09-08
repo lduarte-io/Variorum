@@ -158,9 +158,25 @@ final class SurfaceSizeMemory {
     /// The remembered size of a surface, if one applies HERE — the session's
     /// record first, the persisted one behind it, and either only when it
     /// was taken under the typography now in force.
+    /// **READ and WRITE part company while the voice is unknown** (18d ladder
+    /// round 2, MAJOR-1 — and it is what round 1's MINOR-2 asked for in the
+    /// first place). With no stamp there is nothing to compare, and the two
+    /// halves want opposite answers:
+    /// - **Reading answers anyway.** An unverifiable record is a GUESS, and a
+    ///   guess from her last session is the best height available — refusing
+    ///   it hands the row the unmeasured fallback, which IS the picture
+    ///   MINOR-2 was raised about, and (measured, at `BookOutlineLandingTests`)
+    ///   is what leaves a re-realized story's editor standing at 24 pt. The
+    ///   reservation is honest about being provisional in any case: the settle
+    ///   adopts the real size a second later, whatever the memory claimed.
+    ///   Same doctrine as the width in `BookView.surfacePlaceholder`.
+    /// - **Writing does not.** A record is a CLAIM about which type a height
+    ///   was measured in, and a claim made under a guess outlives the guess.
+    ///   See `remember` and `persist`.
     func size(_ key: String) -> CGSize? {
-        guard let record = record(key), record.fingerprint == fingerprint() else { return nil }
-        return record.size
+        guard let record = record(key) else { return nil }
+        guard let stamp = fingerprint() else { return record.size }
+        return record.fingerprint == stamp ? record.size : nil
     }
 
     /// A surface reported its size — geometry cadence, session only. The
@@ -184,7 +200,19 @@ final class SurfaceSizeMemory {
 
     /// The surface SETTLED (`StableSurface`'s own announcement): write what
     /// the session holds, unless the disk already says it.
+    ///
+    /// **Nothing is written while the voice is unknown** (18d ladder round 2,
+    /// MAJOR-1). `remember`'s guard already makes this true by construction —
+    /// with no report taken, `records` holds either nothing or the record
+    /// loaded from disk, which the `written` cache would decline to re-write —
+    /// but the promise is the one the round-1 record made out loud, and a
+    /// promise that holds only as an emergent property of two other rules is
+    /// one refactor away from being false. The flow's road is why it matters:
+    /// `FlowStoryRow`'s empty-read branch calls `remember` and then
+    /// `settledHere()` → `persist` in the SAME turn, so there is no settle
+    /// interval standing between a wrong stamp and the disk.
     func persist(_ key: String) {
+        guard fingerprint() != nil else { return }
         guard let namespace, let record = records[key] else { return }
         let encoded = record.encoded
         guard written[key] != encoded else { return }
@@ -192,9 +220,18 @@ final class SurfaceSizeMemory {
         defaults.set(encoded, forKey: Self.key(namespace, key))
     }
 
-    /// Drop a note's PERSISTED records in every key space — the door the
-    /// app itself walks through when a note's memories go
-    /// (`CommandRouter.forgetCurrentBlock`, beside `CurrentBlockMemory`'s).
+    /// Drop a note's PERSISTED records in every key space, through
+    /// `CommandRouter.forgetCurrentBlock` beside `CurrentBlockMemory`'s.
+    ///
+    /// **What walks that door** (18d ladder round 2, MINOR-3 — round 1 wired
+    /// this to a door with no production caller at all and then said the app
+    /// walked it, which was the copy-truth class): ONE production occasion,
+    /// traced under J43 — the Mac's **Delete Now** on a note
+    /// (`RecoveryViewModel.forgetLocalMemories`), which is the point of no
+    /// return. Not `deleteContainer`: a deleted note is in the Trash and Put
+    /// back must find her caret and her lengths where she left them. Every
+    /// other caller is a pin's reset. Empty Trash is the recorded, accepted
+    /// leak — its targets are minted inside the shared act and never returned.
     ///
     /// Static because the instances live on per-book `BookViewModel`s the
     /// router cannot reach, and because the disk is the part that outlives

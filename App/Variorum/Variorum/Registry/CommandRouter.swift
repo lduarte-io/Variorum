@@ -228,8 +228,16 @@ final class CommandRouter {
     /// models this router cannot reach — so the door drops their PERSISTED
     /// records here, which is the part that would otherwise outlive the note
     /// (`SurfaceSizeMemory.forgetPersisted` says why the session halves need
-    /// no reaching). One occasion, every memory: adding the next per-note
+    /// no reaching). **One door, every memory** — adding the next per-note
     /// memory beside them is a line here, not a new eviction road.
+    ///
+    /// **Who walks it** (round 2's MINOR-3 corrected round 1's claim): the
+    /// Mac's Delete Now on a note (`RecoveryViewModel.confirmPendingPurge` →
+    /// `forgetLocalMemories`), which is the purge, not the delete — a deleted
+    /// note is in the Trash and Put back must find her caret where she left
+    /// it. Every other caller is a pin's reset. What this door does NOT
+    /// reach — Empty Trash's targets, and a note never purged at all — is the
+    /// accepted leak the KnownIssues row names at its own arithmetic.
     func forgetCurrentBlock(for postID: String) {
         currentBlocks.forget(postID: postID)
         SurfaceSizeMemory.forgetPersisted(postID)

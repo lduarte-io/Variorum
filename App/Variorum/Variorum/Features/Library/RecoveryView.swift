@@ -448,12 +448,36 @@ final class RecoveryViewModel {
         receipt = nil
         do {
             receipt = try await TrashPurge.confirm(session: session, confirm)
+            forgetLocalMemories(of: confirm)
         } catch let error as OperationError {
             lastError = TrayRefusalCopy.message(for: error)
         } catch {
             // A1-MINOR-2 (13l Act 1): the other raw dump on this surface.
             lastError = DeletionRefusal.fallback(error)
         }
+    }
+
+    /// **The one production occasion where a note's per-note VIEW STATE
+    /// should die** (18d ladder round 2, MINOR-3 — traced under J43 rather
+    /// than assumed). Not `deleteContainer`: a deleted note is in the Trash
+    /// and Put back must find her caret and her remembered lengths exactly
+    /// where she left them. The point of no return is the PURGE, and this is
+    /// its Mac door. Local-only keys, so the eviction is local too — the act
+    /// itself stays the shared one, untouched.
+    ///
+    /// **Delete Now only, and deliberately.** The id is in hand there. Empty
+    /// Trash's targets are re-read INSIDE the shared act at act time (its own
+    /// rule — a confirm is a pause, the listing is a projection) and are not
+    /// returned, so covering it would mean a fourth read racing the act's
+    /// third to decide what to forget. Those keys are the accepted,
+    /// arithmetic-bounded leak the KnownIssues row names (~40 bytes a key;
+    /// `defaults delete` ends it), not a silent gap.
+    private func forgetLocalMemories(of confirm: PurgeConfirm) {
+        guard case .deleteNow(let item, _) = confirm,
+              item.kind == .note, !item.isVersion
+        else { return }
+        // One call, every per-note memory — the router's door is the list.
+        session.commandRouter.forgetCurrentBlock(for: item.id)
     }
 
     /// **Put back — one verb, each kind's own road** (13j J1). Every road
