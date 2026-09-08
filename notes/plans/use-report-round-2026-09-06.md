@@ -5793,7 +5793,7 @@ card's **`#path` chips**. Which of the two she saw is settled at the walk and re
 2. the tag chip becomes the door + the sheet's stale empty-state copy (row 39) — **DONE
    (`PENDING-HASH`)**
 3. the pins (the brain, the landing mount, the copy) — **DONE (`PENDING-HASH`)**
-4. the red-on-old by behavioral revert on the committed tree — **NOT STARTED**
+4. the red-on-old by behavioral revert on the committed tree — **DONE (`PENDING-HASH`)**
 5. the walk + captures + the closing suites — **NOT STARTED**
 
 **What landed in pieces 1 + 2:**
@@ -5847,3 +5847,27 @@ Mac Debug build green after pieces 1 + 2.
 Run: `SnippetOpenTargetTests · SnippetsLandingTests · SnippetTagDoorTests · SnippetsVocabularyTests ·
 SnippetFilterTests · SnippetsGroupDoorsTests` — **15 tests in 6 suites passed** (no suite silently
 dropped; the type names checked against the `Test run with N tests in M suites` line).
+
+**PIECE 4 — THE RED-ON-OLD, BY BEHAVIORAL REVERT on the committed tree `a55f24c6`** (the house method,
+batch b's own — each probe armed in place, run, then `git checkout --`'d; the tree was clean and
+committed before every one, and clean after):
+
+- **Probe 1 — the door's decision put back** (`SnippetOpenTarget.card` returns the pre-fix answer: the
+  ACTIVE group, which in the pin's fixture is the seeded default, and NO landing): **4 issues in 1
+  test** — `target.poolID → "pool-default"` vs `"pool-tutorial"`; `target.blockID → nil` vs `"b-hers"`;
+  the `!=`-the-pre-fix-answer arm; and the same-group card losing its landing. That is row 38's whole
+  mechanism, red.
+- **Probe 2 — the landing road turned off** (`PoolDetailView`'s `.onAppear` returns before computing
+  the block's surface offset): **1 issue** — the mount pin's settle never sees the caret at the third
+  snippet's start (8.2 s to the timeout). The end-to-end pin has teeth.
+- **Probe 3 — the sheet's shipped string restored** (`"…create one in the sidebar's Tags section."`):
+  **2 issues** — the "sidebar" arm and the "Settings" arm. Genuinely red on the shipped tree; the one
+  string in this batch that was wrong on its own, not by wiring.
+- **Probe 4 — the pre-fix WIRING restored** (both card doors back to
+  `if let pool = area.activePool { openSnippet(.group(pool)) }`, the brain untouched): **6 tests, 3
+  suites, ALL GREEN.** Recorded as the honest boundary, not hidden: *the pins hold the DECISION and the
+  ROAD; they do not hold the view's wiring of the two together.* A SwiftUI context-menu row and a
+  double-click cannot be fired from a test, and an `NSHostingView` exposes no accessibility children to
+  a direct tree walk (the `MastheadTagDoorTests` finding). **That inch is closed by the WALK below**,
+  which uses the real doors on the real build — which is exactly why this round's acceptance gate is
+  USE and not a pin (§5.3, rule 4).
