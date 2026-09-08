@@ -7912,9 +7912,9 @@ two consumers (the book navigator; the note Read tab's contents column). Rows 22
 
 | Piece | What it is | Status |
 |---|---|---|
-| A | the width brain's LEADING mirror + `SideColumn`'s `edge`/`maximum`; the pure pins | **DONE** (this commit) |
-| B | the book navigator becomes the leading column (remembered width; the row pitch) | **DONE** (this commit) · red-on-old PENDING |
-| C | the note Read contents column becomes it (remembered width) | **DONE** (this commit) · red-on-old PENDING |
+| A | the width brain's LEADING mirror + `SideColumn`'s `edge`/`maximum`; the pure pins | **DONE** (`b72d23f9`) |
+| B | the book navigator becomes the leading column (remembered width; the row pitch) | **DONE** (`6350758e`) · red-on-old MEASURED |
+| C | the note Read contents column becomes it (remembered width) | **DONE** (`d0817ec1`) · red-on-old MEASURED |
 | D | the walk on the dev-store Debug build, both voices; captures | NOT-STARTED |
 
 **Piece A, what landed.** `SideColumnLayout` gained `draggedWidthFromLeading` — the mirror, in the ONE
@@ -7962,6 +7962,24 @@ posture for every note, beside `readModeOutlineShown`, local-only and never sync
 about what the column LISTS. **Pin:** `theReadContentsColumnIsTheWidthSheLeftItAtAcrossARemount` (the
 shipped 340 with nothing remembered · a stored 480 back on a fresh mount · a stored 80 held at the
 floor), reading `ReadModeOracle.indexColumnFrame` — the rectangle, never the constant.
+
+#### RED ON OLD — measured, in a scratch worktree at `d0817ec1` with the three behavioural lines reverted
+
+The worktree kept piece A (a new pure function cannot be red on a tree that lacks it) and put back
+exactly the three lines the batch replaced: the navigator's `VStack(spacing: 2)` with no row heights,
+its `.frame(width: 190)`, and Read's `.frame(width: NoteIndexColumn.width)`. **11 issues in 3 tests**,
+and the numbers ARE her complaint:
+
+- `theNavigatorsChaptersHaveRoom` — **7 issues**: every chapter row drew **14.0 pt** (against 30), every
+  note row **14.0 pt** (against 24), and the gap between one chapter's group and the next was **2.0 pt**
+  (against 20). *"The chapters feel too tightly clustered"*, in points.
+- `theNavigatorIsTheWidthSheLeftItAtAcrossARemount` — **2 issues**: a stored 300 drew **190**, a stored
+  900 drew **190** (against the navigator's 360 ceiling).
+- `theReadContentsColumnIsTheWidthSheLeftItAtAcrossARemount` — **2 issues**: a stored 480 drew **340**, a
+  stored 80 drew **340** (against the 240 floor).
+- **What passed on BOTH sides, deliberately and by design:** each pin's *"nothing remembered"* arm — the
+  navigator opens at 190 and Read's column at 340 whatever else changed. That is the no-change
+  guarantee, not a hollow claim: the day she updates, nothing moves until she drags.
 
 **Piece A's pins** (`App/Variorum/VariorumTests/OutlineRoomTests.swift`):
 `theLeadingDragMirrorsTheTrailingOneAboutTheColumn` (the relation, over a stride of pointer positions
