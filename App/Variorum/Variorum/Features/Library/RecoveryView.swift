@@ -472,6 +472,15 @@ final class RecoveryViewModel {
     /// third to decide what to forget. Those keys are the accepted,
     /// arithmetic-bounded leak the KnownIssues row names (~40 bytes a key;
     /// `defaults delete` ends it), not a silent gap.
+    ///
+    /// **Why `!item.isVersion` (the round-end Fable pass, NIT-2):** the guard
+    /// states an INTENT, not a prevented loss. A saved moment is not a note
+    /// whose view state exists — its one home is Note ▸ Versions, which mounts
+    /// no caret-reporting surface and no `StableSurface`, and it rides no book
+    /// — so no `currentBlock.<id>` or `surfaceSize.*.<id>` can ever be written
+    /// under a version's id; evicting would remove nothing. A PROMOTED version
+    /// is a note again, reads `isVersion == false` at delete time, and IS
+    /// evicted here like any other.
     private func forgetLocalMemories(of confirm: PurgeConfirm) {
         guard case .deleteNow(let item, _) = confirm,
               item.kind == .note, !item.isVersion
