@@ -9545,7 +9545,7 @@ after 77.568 seconds.`** — 49 suites for 49 requested types, no `skipped:` lin
 
 *(the batch-1 implementer, resumed; ONE finding — MINOR-4, CONFIRMED. FIXED.)*
 
-**MINOR-4 — FIXED (`PENDING`). The reviewer is right that round 1 relocated the coupling instead of
+**MINOR-4 — FIXED (`4e3aca85`). The reviewer is right that round 1 relocated the coupling instead of
 reversing it, and the fix is the file's address.** `SidebarLayout` is a `nonisolated enum` of constants
 and pure functions over `Foundation` alone, and its readers stopped being one feature's the moment the
 note box was born: `Core/Views/SidebarNoteBox` reads its grammar numbers, `groupHeaderHeight` and
