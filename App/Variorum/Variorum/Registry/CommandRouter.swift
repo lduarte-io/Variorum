@@ -199,6 +199,20 @@ final class CommandRouter {
         return currentBlocks.current(for: postID)
     }
 
+    /// **The leaving door the app itself walks through** (17o batch b's
+    /// ladder, R1-4): the persisted copy is written at a block/take change
+    /// and when the note leaves the screen — `registerDetail` on a note
+    /// change, `unregisterDetail` on the detail's disappear — and NEITHER
+    /// runs at app termination (`onDisappear` never fires when the process
+    /// exits), so after ⌘Q the persisted offset was the block's ENTRY
+    /// offset, never where she left. The quit door
+    /// (`applicationShouldTerminate`, both branches) and the lock door
+    /// (`macWillLock`) call this before they reply. Idempotent; a hard kill
+    /// remains the only road that can lose the walk inside one block.
+    func persistCurrentBlocks() {
+        if let active = activePostID { currentBlocks.persist(postID: active) }
+    }
+
     /// A pin's reset (or a deleted note): the memory for one note goes.
     func forgetCurrentBlock(for postID: String) {
         currentBlocks.forget(postID: postID)

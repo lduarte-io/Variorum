@@ -51,6 +51,11 @@ final class VariorumAppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        // 17o batch b's ladder, R1-4: the caret place the session dict
+        // holds is written NOW — synchronously, ahead of both branches —
+        // because no view disappears when the process exits, so the
+        // router's own leaving door (`unregisterDetail`) never runs at ⌘Q.
+        session?.commandRouter.persistCurrentBlocks()
         // Phase 11 (review round 1, MINOR 2): the focused editor is no
         // longer the only surface holding a debounced buffer — the takes
         // board's panes and the TOC's expanded block register their

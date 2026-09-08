@@ -132,6 +132,61 @@ struct LandingOffsetTests {
         }
     }
 
+    // MARK: - 1b. The persisted copy at QUIT and at LOCK (the ladder's R1-4)
+
+    /// 17o batch b's ladder, round 1 — R1-4 (MAJOR). Piece 5a made the
+    /// persisted copy write only at a block/take change and "when the note
+    /// leaves the screen" — `registerDetail` (a note change) and
+    /// `unregisterDetail` (`onDisappear`). Neither runs at app termination:
+    /// `applicationShouldTerminate` awaited the editors and replied, and
+    /// `onDisappear` never fires when the process exits — so after ⌘Q the
+    /// persisted offset was the block's ENTRY offset, never where she left
+    /// (the record's capture 11 was written by the pre-5a binary's per-report
+    /// write; the final binary only read it). The quit door and the lock
+    /// door (`macWillLock`, the same leave-the-note event) both persist now.
+    /// Red on the pre-fix tree at both doors: the fresh memory reads 3.
+    @Test func theQuitAndLockDoorsPersistTheCaretPlaceTheSessionDictHolds() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let router = session.commandRouter
+            defer { router.forgetCurrentBlock(for: "p1") }
+            let token = router.registerDetail(postID: "p1", mode: .write) { _ in }
+            defer { router.unregisterDetail(token) }
+            // The block change writes the persisted copy (offset 3 — the
+            // ENTRY offset); the walk inside the block does not (by design,
+            // piece 5a).
+            router.noteFocusedBlock("b1", variantID: "v1", postID: "p1", utf16Offset: 3)
+            router.noteFocusedBlock("b1", variantID: "v1", postID: "p1", utf16Offset: 55)
+            #expect(CurrentBlockMemory().current(for: "p1")?.utf16Offset == 3,
+                    "the persisted copy lags the walk until a leaving door writes it")
+
+            // THE QUIT DOOR — the real delegate method, nothing pending, so
+            // the reply is the synchronous `.terminateNow` (the test host is
+            // never asked to terminate: `.terminateLater`'s Task would call
+            // `NSApp.reply(toApplicationShouldTerminate:)`).
+            #expect(session.editorRouter.active == nil)
+            #expect(session.quitFinalize.isEmpty)
+            let delegate = VariorumAppDelegate()
+            delegate.session = session
+            let reply = delegate.applicationShouldTerminate(NSApp)
+            #expect(reply == .terminateNow, "nothing pending ⇒ the synchronous branch")
+            #expect(CurrentBlockMemory().current(for: "p1")?.utf16Offset == 55,
+                    "⌘Q persists where she left (red-on-old: 3, the entry offset)")
+
+            // THE LOCK DOOR — `macWillLock`'s road, the same leave-the-note event.
+            router.noteFocusedBlock("b1", variantID: "v1", postID: "p1", utf16Offset: 72)
+            #expect(CurrentBlockMemory().current(for: "p1")?.utf16Offset == 55)
+            await macWillLock(session: session, stopServices: {})()
+            #expect(CurrentBlockMemory().current(for: "p1")?.utf16Offset == 72,
+                    "locking the store persists where she left (red-on-old: 55)")
+        }
+    }
+
     // MARK: - 2. The bare arrival's landing (pure over the index)
 
     @Test func theBareArrivalLandsAtTheBlocksStartPlusTheRememberedOffsetClamped() async throws {

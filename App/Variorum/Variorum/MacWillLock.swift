@@ -41,6 +41,10 @@ func macWillLock(
     stopServices: @escaping @MainActor () -> Void
 ) -> @MainActor () async -> Void {
     {
+        // 17o batch b's ladder, R1-4: locking the store is a leave-the-note
+        // event of the quit door's kind — the caret place is written first,
+        // synchronously, like the quit door does.
+        session.commandRouter.persistCurrentBlocks()
         if let pending = session.editorRouter.active?.finalizeWork() {
             await pending.value
         }
