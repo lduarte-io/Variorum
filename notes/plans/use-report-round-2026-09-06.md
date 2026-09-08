@@ -3740,11 +3740,40 @@ below marked NOT-STARTED or IN-PROGRESS; the walk; the closing suites.
 1. the fact + the memory + the router + the reporters — **DONE (hash next)**
 2. Write's landing consumes the offset and reveals through `JumpPrimitive` — **DONE (hash next)**
 3. Blocks → Write reveals (row 20) — **DONE (hash next)**
-4. the Takes board's article scrolls to the landed slot (row 8) — **DONE (hash next)**; its red-on-old
-   is a BEHAVIORAL REVERT, run next (the mechanism is new API, so no pin could compile on the old tree)
-5. the walk + captures + the closing suites — **NOT-STARTED**
+4. the Takes board's article scrolls to the landed slot (row 8) — **DONE (`68632d31`)**
+5. the walk + captures + the closing suites — **IN-PROGRESS**
 
-**Rows:** 7 · 20 · 42 — **FIXED** (pins below) · 8 — **FIXED**, red-on-old PENDING (the revert).
+**Rows:** 7 · 8 · 20 · 42 — all **FIXED**, each red-on-old measured (below).
+
+**THE COMBINED RED-ON-OLD — VERIFIED BY BEHAVIORAL REVERT** (from the committed state `68632d31`, the
+six mechanisms turned off IN PLACE — the memory's third field and its nil-keeps rule; the router's
+carry; the pane's caret-on-going-live; the choreographer's two `landArticle` calls;
+`bareArrivalLanding`'s offset; the parked reveal — log `scratchpad/revert-red.log`):
+**17 issues in 6 tests**, by name —
+
+- `theMemoryRoundTripsTheCaretOffsetAndReadsOldTwoFieldFactsAsUnknown` — **4 issues** (the offset does
+  not round-trip; a nil report erases a known place; zero is lost).
+- `theRouterCarriesTheOffsetWithoutMovingTheObservedIdentity` — **5 issues** (every read answers nil,
+  live and remembered).
+- `theBareArrivalLandsAtTheBlocksStartPlusTheRememberedOffsetClamped` — **2 issues** (the offset arm and
+  the clamp arm; the no-offset arms stayed green, which is the point — nothing that landed at the start
+  before lands anywhere else now).
+- `aSeededCaretFarDownALongNoteArrivesInsideTheVisibleRect` — **1 issue**: `caret line top 6930 · visible
+  0.0…719.0` (row 20).
+- `theCurrentBlockFollowsHerWriteTakesReadBlocksWrite` — **2 issues**: `back.selectedRange().location →
+  59` where the ruling says 65 (rows 7 · 42).
+- `theBloomLandingAlsoAsksTheArticleToScrollToThatSlot` + `theNineLandingOnTheCurrentBlockAsksTheArticle
+  ToScrollThere` — **3 issues**: `articleLanding → nil` on both, and the ⌘2 pane handed no caret place
+  (row 8).
+
+**Honest about one pin:** `aSeededCaretTheViewportAlreadyShowsDoesNotScrollThePage` stayed GREEN under
+the revert, correctly — it asserts that nothing moves, which the old code also satisfied. It is a
+GUARD against this batch's own mechanism over-reaching, not a red-on-old pin, and it is counted as such.
+`theFallThroughLandingAsksForNoScrollAtAll` is the same class.
+
+**Restored** by `git checkout --` of the five files **from the repo root** (the recorded batch-C/D trap:
+the same command run from `App/Variorum` matches nothing); `git diff --stat` empty, `grep REVERT` over
+`App/Variorum/Variorum/` finds only two unrelated historical comments. **No revert is in flight.**
 
 **RED ON OLD, measured before a line moved** (`scratchpad/red-1.log`, tree `35c11948`):
 
