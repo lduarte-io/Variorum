@@ -7661,9 +7661,9 @@ recovery/purge op was touched). The walk is PENDING at this line.
 |---|---|
 | the pure brain (`TrayFilter`/`TrayFilterFace`/`TrayViewMemory`) + the copy + the panel rebuilt + the migrated pins | DONE (this commit) |
 | the red-on-old probe of the fold pin, in a scratch worktree at `30f99fd0` | DONE — both claims RED (below) |
-| the walk on the dev-store Debug build, both voices, 8 captures | NOT-STARTED |
-| QUESTIONS #100 (the archived explainer's departure from figure D's caption) | NOT-STARTED |
-| the closing runs (the touched Mac suites + the ten `Tutorial*Tests` spine types, ONE run) | NOT-STARTED |
+| the walk on the dev-store Debug build, both voices, 11 captures | DONE (below) |
+| QUESTIONS #100 (the archived explainer's departure from figure D's caption) | DONE (`afa81c41`) |
+| the closing runs (the touched Mac suites + the ten `Tutorial*Tests` spine types, ONE run) | IN-PROGRESS |
 
 **What landed in this commit (the surface, whole):**
 
@@ -7740,3 +7740,56 @@ it compiles there: **`✘ Test run with 1 test in 1 suite failed after 0.254 sec
   the fold and not a broken fixture. The old dump also shows what the reorganization removed: two
   `Variorum.CalmSectionHeader`s stacked in one `LazyVStack`, with the takes' `ForEach` inside an
   `Optional<TupleView<…>>` behind the disclosure Button.
+
+### R-11 · THE WALK (the acceptance gate: USE, on the DEV-STORE Debug build `io.lduarte.Variorum.debug`)
+
+Built to `App/Variorum/DerivedData/18d2/…/Debug/Variorum.app` and launched with `open -n`; `pgrep -fl
+'Variorum.app/Contents/MacOS'` showed no instance before and only mine (pid 8240) during; her
+`/Applications` build was never running and never touched; my instance quit with ⌘Q at the end
+(`(no instances)`). Driven with `cliclick` + `Tools/WalkKit/capture-windows.swift`.
+
+**The fixture, made through the app's own doors** (nothing written to the store by hand): a new note
+(the Shelf's quick-entry bar) typed into four blocks; **⌘K → Delete Block** on one; the bottom bar's
+`block ▾` → **Archive Block** on another; Write's takes panel (`Takes` in the bar) → **+ new take
+(branch)** then its card's `⋯` → **Delete this take**, twice. So the note carried: 1 deleted block ·
+2 deleted takes · 1 archived block — the three leaving populations' first two and the archived one.
+*(A preserved original riding a family's countdown — the third leaving population — is not in this
+fixture; it is unchanged code on an unchanged query, and the pins cover its cell of the matrix.)*
+
+**Captures** (in `notes/plans/use-report-2026-09-06-screens/18d-2/`, gitignored):
+
+| # | file | what it shows |
+|---|---|---|
+| 01 | `01-study-leaving-all.png` | **Figure D's left panel, built.** `This Note's Tray` · Close; the segment **Leaving 3** (washed, accented) · **Archived 1**; the chips **all** (on) · **blocks · 1** · **takes · 2**; the one-line explainer; a `block` card (`the block that will be deleted` · `deleted Sep 8, 2026` · `30 days left` · Put back) and two `take · in the block whose take will be deleted` cards (Put back · Delete Now) |
+| 02 | `02-study-leaving-blocks.png` | the **blocks** chip: the block card alone; the two takes gone; the tab counts unmoved (`Leaving 3` · `Archived 1`) — the filter narrows the list, never the view's size |
+| 03 | `03-study-leaving-takes.png` | the **takes** chip: the two take cards alone — **the rows the retired fold hid** |
+| 04 | `04-study-archived-takes-filter-carried.png` | **the ONE filter row, shared**: switching to **Archived 1** KEEPS the takes chip, whose count drops away (archived holds no takes), and the cell says where they do live — *"Takes aren't archived here — an archived take stays with its block, under Archived takes in Block History."* |
+| 05 | `05-study-archived-all.png` | Archived · all: the archived block card, `archived Sep 8, 2026` · **`kept — no clock`** (the promise, in the slot the countdown uses) |
+| 06 | `06-study-put-back-receipt.png` | **Put back, once**: the block returns to the note (visible in Write behind the panel), the receipt *"Put back where it was."* in the RECEIPT voice (muted, not the alarm), `Archived 0`, and the empty line *"Nothing archived from this note."* |
+| 07 | `07-study-delete-now-confirm.png` | **Delete Now, once**: the confirm, byte-unchanged — *"Delete this take for good? It skips the rest of its 30 days — there's no putting it back."* · Delete for Good · Cancel |
+| 08 | `08-study-delete-now-done.png` | confirmed: the receipt *"The take is gone from the app now — the app's own cleanup removes the bytes."*, and **the counts follow the rows live** — `Leaving 2`, `takes · 1` |
+| 09 | `09-terminal-leaving-all.png` | **the Terminal voice**: mono, chrome lowercased by the voice's own rule — `this note's tray` · `leaving 2` · `archived 0` · `all` `blocks · 1` `takes · 1`, the explainer and both kind labels lowercased with it |
+| 10 | `10-terminal-archived-empty.png` | Terminal · Archived · all: the archived explainer and `nothing archived from this note.` |
+| 11 | `11-terminal-reopened-remembers-archived.png` | **the session memory in USE**: Close, then re-open from the ⌫ badge — the panel comes back on **archived · all**, where it was left |
+
+**Against figure D, honestly:**
+
+- **What matches:** the top-level segment with its counts (including a ZERO count, which the mockup
+  shows and which answers before she clicks); one filter row under it, shared by both views, its counts
+  following the view; `all` carrying no count while a kind chip carries its own only when it has one —
+  exactly how the mockup draws the empty view; the one-line explainer per view; the kind label on every
+  card; the stamp/clock/verb line and Put back / Delete Now unmoved.
+- **Three departures, recorded not invented:**
+  **(a)** the **kind label is not UPPERCASED** — the mockup's `.kind` is CSS `text-transform:uppercase`,
+  and case in this app is the VOICE's (Terminal lowercases all chrome, Study does not). An uppercase
+  kind label would be a new idiom in both voices; the label ships in the faint small register, which is
+  the mockup's other two properties.
+  **(b)** the segment's halves are **full width**, not the mockup's inline pill — the panel is an
+  inspector column at 280 pt and a generous target is C-7's standing rule.
+  **(c)** on a take row the **stamp truncates** (`deleted Sep 8, 20…` in Study, `deleted s…` in
+  Terminal) while the clock never does — that is row 63's shipped two-slot rule, not new: the lead is
+  the truncatable slot, the clock is the uncompressible one, and the take row carries two buttons. The
+  kind label moving the block's name UP off that line gave the lead MORE room than it had, not less.
+- **QUESTIONS #100** is the fourth, and it is written up rather than papered over: figure D's caption
+  says the archived view keeps *"a block or a take"*; the tray's archived population is blocks, so the
+  line says block (capture 04's empty cell is where the takes' real home is named).
