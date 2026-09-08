@@ -57,6 +57,105 @@ struct VersionOperationsTests {
         }
     }
 
+    /// **U-19 (1), her word: a note with no blocks yet can be marked as a
+    /// version** (ledger row 17; the use report's punchlist 12, image 2).
+    /// The post-level link rides a block-level edge (I8 + the schema's
+    /// letter), so a blockless post had nothing to anchor on and the op
+    /// refused with `postHasNoBlocks` — on a note she had only just made.
+    /// It now mints the anchor: ONE ordinary block, ONE live empty take
+    /// (I10 satisfied — "live" is about the row, not the characters), placed
+    /// at the end, in the SAME transaction as the edge, so the link exists
+    /// the moment she asks for it. Nothing about the block is special: the
+    /// link's own recovery door removes the LINK and leaves it standing,
+    /// which is U-19 (2)'s rule (an empty block stays as an empty paragraph)
+    /// applied to a block this op happens to have made.
+    @Test func aBlocklessPostGainsAnEmptyAnchorBlockAndTheLinkLands() throws {
+        try withOperations { ops, db in
+            let a = try ops.createPost(title: "the essay", profile: .blog)
+            let aFirst = try ops.newBlock(in: a.id, text: "A first.", at: .end).block
+            let fresh = try ops.createPost(title: "the fresh note", profile: .blog)
+            #expect(try db.read { try Queries.renderPost($0, containerID: fresh.id) }.isEmpty,
+                    "it really has no blocks — the shape that used to refuse")
+
+            let edge = try ops.markPostsAsVersions(a.id, fresh.id)
+
+            let slots = try db.read { try Queries.renderPost($0, containerID: fresh.id) }
+            #expect(slots.count == 1, "exactly one block was minted, not two")
+            let minted = try #require(slots.first)
+            #expect(minted.text == "", "an EMPTY block — U-19 (1)'s letter")
+            #expect(minted.activeVariantCount == 1, "one live take on it (I10)")
+            #expect(minted.variantID != nil, "and the slot renders it, so it is an ordinary block")
+
+            #expect(Set([edge.sourceBlockId, edge.targetBlockId])
+                    == Set([aFirst.id, minted.blockID]),
+                    "the edge anchors on the block it just minted")
+            let (peersA, peersFresh) = try db.read { database in
+                (try Queries.versionPeerPosts(database, of: a.id),
+                 try Queries.versionPeerPosts(database, of: fresh.id))
+            }
+            #expect(peersA == [fresh.id], "the peer traversal finds it at once")
+            #expect(peersFresh == [a.id])
+
+            // BOTH sides blockless: two anchors, one edge, no refusal.
+            let one = try ops.createPost(title: "one", profile: .blog)
+            let two = try ops.createPost(title: "two", profile: .blog)
+            _ = try ops.markPostsAsVersions(one.id, two.id)
+            for post in [one, two] {
+                let made = try db.read { try Queries.renderPost($0, containerID: post.id) }
+                #expect(made.count == 1 && made[0].text == "")
+            }
+            #expect(try db.read { try Queries.versionPeerPosts($0, of: one.id) } == [two.id])
+
+            // The link's recovery door is unchanged and leaves the block —
+            // U-19 (2): an empty block is never auto-removed.
+            try ops.unmarkPostsAsVersions(a.id, fresh.id)
+            #expect(try db.read { try Queries.versionPeerPosts($0, of: a.id) }.isEmpty)
+            #expect(try db.read { try Queries.renderPost($0, containerID: fresh.id) }.count == 1,
+                    "the block she can now type in stays")
+
+            // The mint is restructuring, not authoring: `last_touched_at`
+            // stamps, churn does not (AppSpec §9's structural rule).
+            let row = try db.read { database in
+                try Row.fetchOne(
+                    database,
+                    sql: "SELECT last_touched_at, churn_accumulator, last_major_revision_at "
+                        + "FROM container WHERE id = ?",
+                    arguments: [fresh.id])
+            }
+            let touched: String? = try #require(row)["last_touched_at"]
+            #expect(touched != nil, "a block appeared in the note")
+            #expect((try #require(row)["churn_accumulator"] as Double) == 0)
+            let major: String? = try #require(row)["last_major_revision_at"]
+            #expect(major == nil, "and the meaningful sort is not reshuffled")
+        }
+    }
+
+    /// A SEALED blockless post refuses, because minting a block is exactly
+    /// what the seal freezes (the everything-under-the-post letter). The
+    /// LINK itself stays free under a seal — a sealed post with blocks marks
+    /// as a version like any other, the way tagging and adding to a book do.
+    @Test func theAnchorMintIsGatedByTheSealButTheLinkItselfIsNot() throws {
+        try withOperations { ops, db in
+            let sealedBlockless = try ops.createPost(title: "sealed, empty", profile: .blog)
+            try ops.lockPost(sealedBlockless.id)
+            let other = try ops.createPost(title: "the other", profile: .blog)
+            _ = try ops.newBlock(in: other.id, text: "Something.", at: .end)
+            #expect(throws: OperationError.lockedPost(id: sealedBlockless.id)) {
+                _ = try ops.markPostsAsVersions(sealedBlockless.id, other.id)
+            }
+            #expect(try db.read { try Queries.renderPost($0, containerID: sealedBlockless.id) }
+                        .isEmpty,
+                    "and nothing was minted on the way to the refusal")
+
+            let sealedWithBlocks = try ops.createPost(title: "sealed, written", profile: .blog)
+            _ = try ops.newBlock(in: sealedWithBlocks.id, text: "Finished.", at: .end)
+            try ops.lockPost(sealedWithBlocks.id)
+            _ = try ops.markPostsAsVersions(sealedWithBlocks.id, other.id)
+            #expect(try db.read { try Queries.versionPeerPosts($0, of: sealedWithBlocks.id) }
+                    == [other.id], "the seal freezes authoring, not linking")
+        }
+    }
+
     @Test func markPostsAsVersionsAnchorsTheFirstBlocksAndThePeerTraversalFindsThem() throws {
         try withOperations { ops, db in
             let a = try ops.createPost(title: "article v1", profile: .blog)
@@ -80,10 +179,11 @@ struct VersionOperationsTests {
                 _ = try ops.markPostsAsVersions(a.id, b.id)
             }
 
-            let empty = try ops.createPost(title: "blockless", profile: .blog)
-            #expect(throws: OperationError.postHasNoBlocks(id: empty.id)) {
-                _ = try ops.markPostsAsVersions(a.id, empty.id)
-            }
+            // **A JUSTIFIED EDIT (17o batch d, ledger row 17), the claim
+            // REPLACED by her ruling U-19 (1):** a blockless post used to
+            // refuse the link; it now GAINS its anchor block. The whole
+            // shape is pinned in
+            // `aBlocklessPostGainsAnEmptyAnchorBlockAndTheLinkLands` below.
 
             // Sitting 9 (R60/R68): UNMARK removes every cross-post link —
             // the peers stop seeing each other; re-marking works fresh;

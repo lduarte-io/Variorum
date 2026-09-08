@@ -95,31 +95,60 @@ extension Operations {
     /// QUESTIONS #19; the peer traversal `Queries.versionPeerPosts` matches
     /// ANY live version_of edge between the posts' placed blocks, so the
     /// relationship survives later restructuring of everything but the
-    /// anchor pair). Refuses when either post is blockless or the posts are
-    /// already linked.
+    /// anchor pair). Refuses when the posts are already linked.
+    ///
+    /// **A BLOCKLESS POST GAINS ITS ANCHOR BLOCK** (her ruling U-19 (1),
+    /// 2026-09-06, verbatim *"a is good"*; ledger row 17). It used to refuse
+    /// with `postHasNoBlocks` — the link had nothing to ride, so a note she
+    /// had only just made could not be marked as a version of anything, and
+    /// Compare had no answer but the raw error. The anchor is now MINTED, in
+    /// this same transaction: one ordinary block with one live EMPTY take
+    /// (I10 holds — "live" is about the variant row, not its characters),
+    /// placed at the end of the note. Nothing about the block is
+    /// special-cased: it is the block a note's first Return would have made,
+    /// and U-19 (2)'s rule governs it from then on — an abandoned empty
+    /// block STAYS as an empty paragraph, never auto-removed — so
+    /// `unmarkPostsAsVersions` (the tags/locks recovery class) removes the
+    /// LINK and leaves the block for her to type into or delete, exactly as
+    /// it would any other empty block.
+    ///
+    /// Two consequences, both deliberate. The mint stamps `last_touched_at`
+    /// and never churn: AppSpec §9's structural rule — a block appearing in
+    /// the note is restructuring it, and restructuring must never reshuffle
+    /// the meaningful sort. And it refuses under a SEALED post, since
+    /// minting a block is precisely the kind of act the seal freezes
+    /// (the everything-UNDER-the-post letter). The LINK itself stays free
+    /// under a seal, like tagging and adding to a reading — only a post that
+    /// needs a block minted is gated, so a sealed post that HAS blocks marks
+    /// as a version exactly as it always has.
     @discardableResult
     public func markPostsAsVersions(_ postAID: String, _ postBID: String) throws -> Edge {
         try database.write { db in
-            _ = try livePost(db, postAID)
-            _ = try livePost(db, postBID)
+            let postA = try livePost(db, postAID)
+            let postB = try livePost(db, postBID)
             if try Queries.versionPeerPosts(db, of: postAID).contains(postBID) {
                 throw OperationError.postsAlreadyVersionLinked(a: postAID, b: postBID)
             }
-            func firstBlock(_ postID: String) throws -> String {
-                guard let id = try String.fetchOne(
+            let now = date.now
+            func anchorBlock(_ post: Container) throws -> String {
+                if let id = try String.fetchOne(
                     db,
                     sql: """
                         SELECT block_id FROM container_block
                         WHERE container_id = ? AND deleted_at IS NULL
                         ORDER BY position, id LIMIT 1
                         """,
-                    arguments: [postID])
-                else { throw OperationError.postHasNoBlocks(id: postID) }
-                return id
+                    arguments: [post.id]) {
+                    return id
+                }
+                try ensureUnlocked(post)
+                let minted = try mintBlock(db, text: "", in: post.id, at: .end, now: now)
+                try touchContainer(db, post.id, now: now)
+                return minted.block.id
             }
             return try insertVersionOfEdge(
-                db, try firstBlock(postAID), try firstBlock(postBID),
-                originOp: "manual", now: date.now)
+                db, try anchorBlock(postA), try anchorBlock(postB),
+                originOp: "manual", now: now)
         }
     }
 
