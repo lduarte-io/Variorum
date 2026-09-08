@@ -7650,10 +7650,18 @@ take and on any block; a deleted block's moments leave the note's stamp with the
 
 ### R-11 · RECORD (the implementer writes here from its first commit)
 
-**WHAT I HAVE NOT DONE (the record's first line, kept honest as the batch runs):** nothing outside the
-tray panel — no `Sources/VariorumCore/`, no `Sync/`, no schema, no change to WHAT the tray holds (the
-three leaving populations and the archived population are the same rows from the same queries, and no
-recovery/purge op was touched). The walk is PENDING at this line.
+**WHAT I DID NOT DO (the record's first line, honest at the close):** nothing outside the tray panel —
+**zero `Sources/`** (verified: `git diff --name-only 30f99fd0..HEAD | grep ^Sources/` is empty), no
+`Sync/`, no schema, no migration, no operation, no query; and **no change to WHAT the tray holds** —
+its three leaving populations and its archived population are the same rows from the same queries, and
+Put back / Delete Now / their receipts / their refusals / the purge confirm are byte-unchanged.
+Specifically NOT done, and named so nobody assumes it: **(1)** the archived view does NOT grow archived
+takes (figure D's caption implies it; the brief fences it; QUESTIONS #100 (b) writes it up as its own
+acceptance unit); **(2)** the walk's fixture carries no PRESERVED ORIGINAL riding a family's countdown
+— the third leaving population is unchanged code on an unchanged query and is covered by the matrix
+pin's `stranded` arm, not by a capture; **(3)** no install refresh (the round's rule: it follows her
+last walk); **(4)** the two chrome oddities I met while BUILDING the fixture are recorded below as
+observations, not fixed — they are not this surface.
 
 **LIVE STATUS**
 
@@ -7663,7 +7671,8 @@ recovery/purge op was touched). The walk is PENDING at this line.
 | the red-on-old probe of the fold pin, in a scratch worktree at `30f99fd0` | DONE — both claims RED (below) |
 | the walk on the dev-store Debug build, both voices, 11 captures | DONE (below) |
 | QUESTIONS #100 (the archived explainer's departure from figure D's caption) | DONE (`afa81c41`) |
-| the closing runs (the touched Mac suites + the ten `Tutorial*Tests` spine types, ONE run) | IN-PROGRESS |
+| the closing runs (the touched Mac suites + the ten `Tutorial*Tests` spine types, ONE run) + the iOS build | DONE — 309/32 green · iOS BUILD SUCCEEDED |
+| the record closed (dispositions, observations, the canon note) | DONE (this commit) |
 
 **What landed in this commit (the surface, whole):**
 
@@ -7793,3 +7802,67 @@ fixture; it is unchanged code on an unchanged query, and the pins cover its cell
 - **QUESTIONS #100** is the fourth, and it is written up rather than papered over: figure D's caption
   says the archived view keeps *"a block or a take"*; the tray's archived population is blocks, so the
   line says block (capture 04's empty cell is where the takes' real home is named).
+
+**TWO OBSERVATIONS FROM THE WALK, recorded and NOT fixed** (met while building the fixture; neither is
+this surface, neither is regressed by this batch):
+
+1. **`.deleteTake`'s `.contextMenu` door does not render on the Takes BOARD's cards.** The registry
+   declares `.deleteTake` with `doors: [.contextMenu, .surface]` (`CapabilityRegistry.swift:427`), and
+   `TakesShared.swift:276` builds the row as a `PaneTextView.MenuItemSpec`; right-clicking a board card
+   in every style I tried (stack — live and collapsed, carousel — live and not) produced only AppKit's
+   own text menu. The act IS reachable — Write's takes panel carries `Archive · Label · Lock · Delete`
+   on each card's `⋯`, which is the door I used — so nothing is lost, and the registry walk is
+   satisfied by the UNION of renderers. Whether the board is meant to be one of them is a question for
+   whoever owns the board (a 13u2 / 17-entry candidate); I did not touch it.
+2. **Typing fast into a fresh note races the block-crystallization**, so ⏎-separated paragraphs typed
+   at `cliclick` speed landed as `"…archivedtray"` / `"…deletedwalk"` (the Return acted at a caret the
+   next characters had already moved past). It is a walk-rig artifact at machine typing speed, not a
+   report of hers; I repaired the text by hand and moved on. Noted only so a future walker types with
+   waits between ⏎ and the next word.
+
+### R-11 · CLOSING RUNS
+
+- **Mac, ONE `xcodebuild test` run** — the 22 suite types the diff touches (`TrayFilterTests` ·
+  `TrayPanelShapeTests` · `TrayPanelMoveTests` · `NoteTrayTests` · `TrashSurfaceTests` ·
+  `TrashPoolHonestyTests` · `RecoveryExplainerTests` · `RecoveryDoorsTests` · `BlockHistoryPaneTests` ·
+  `BlockHistoryHostTests` · `IAAndTrashShapeTests` · `ChromeMinHeightTests` · `CapabilityRegistryTests` ·
+  `OriginBlockDoorTests` · `SideColumnTests` · `UndoHintAndRefusalTests` · `MergeArrangementTests` ·
+  `MergeCeremonySheetTests` · `CeremonyCardCopyTests` · `NoteVersionsPaneTests` · `ProseCutGeometryTests` ·
+  `BoundaryFluidityTests`) plus the **ten `Tutorial*Tests` spine types**:
+  **`✔ Test run with 309 tests in 32 suites passed after 34.873 seconds.`** — 32 suites for 32 requested
+  types, so none was silently dropped; no `skipped:` line.
+- **iOS: `** BUILD SUCCEEDED **`** (`-scheme VariorumMobile`, iPhone 17 Pro simulator) — owed because
+  `App/Variorum/Shared/` was touched. The two shared files stay platform-neutral by construction: the
+  Mac-only `TrayView`/`TrayKind` enums never enter `RecoveryCopy` (the words take a `String`; the enum
+  switch lives in the Mac's `TrayFilterFace`), and `trayViewMemory` sits inside `AppSession`'s existing
+  `#if os(macOS)` block beside `mergeJoinMemory`.
+- **Core: NOT run, because core is NOT touched** — `git diff --name-only 30f99fd0..HEAD` names no
+  `Sources/` file. `swift build` was run once at the start of the batch (`Build complete!`) and nothing
+  in the package changed after it.
+
+### R-11 · DISPOSITIONS
+
+- **Ledger row 34 — "the tray reorganized" (image 14; U-9; mockup figure D) — FIXED.** Pins:
+  `TrayFilterTests.theFilterChoosesTheSameRowsTheTrayHasAlwaysHeld` (the six-cell matrix) ·
+  `…everyCountIsExactlyWhatItsCellRenders` (the counts, defined as the rows) ·
+  `…theControlSaysWhatFigureDSays` (both tabs, the chip labels, both explainers, six distinct empty
+  lines, the kind labels) · `…theRevealNamesTheViewThatHoldsIt` ·
+  **`…theFoldIsGoneAndTheTakesRenderWithTheBlocks`** (the face pin, **measured RED on `30f99fd0`** in a
+  scratch worktree — both of its claims) · `…theLastViewAndFilterAreRememberedForTheSession`; plus the
+  migrated `TrayPanelShapeTests.everySectionRendersUnclippedComposition` (no `List`, no
+  `DisclosureGroup`, no `"1 deleted take"`, the archived block under the other tab). Evidence of its
+  kind: the walk above, 11 captures, both voices, compared against figure D departure by departure.
+- **No other ledger row was in this batch's scope**, and none was touched. Nothing DISMISSED AS HOLLOW
+  (the row is a ruled design row, not a bug claim — its evidence is the walk and the geometry of the
+  control, exactly as the brief's rule 3 provides for). Nothing DEFERRED out of the row: the two
+  observations above are new material, recorded with a suggested owner, not deferrals of row 34.
+
+### R-11 · CANON NOTE OWED AT 18d's CLOSE (drafted here; the orchestrator applies)
+
+AppSpec §12's Phase-13-surfaces paragraph names the recovery family only in passing, and the tray's own
+shape is not spelled there — so **no AppSpec edit is owed by this batch**. What IS owed, if the
+orchestrator wants the letter's canon complete, is one clause wherever 18d's deltas are collected:
+*"This Note's Tray is chosen by two top-level views — Leaving · Archived — with one shared blocks/takes
+filter under them (U-9, mockup figure D); the takes fold is retired."* The 13j deletion doctrine is
+untouched and needs no re-statement: Delete Now still lives on a take in this trash surface only, never
+in the writing flow.
