@@ -168,6 +168,75 @@ struct OriginBlockDoorTests {
         }
     }
 
+    /// **The sheet's receipt may only claim the shape the op produced**
+    /// (ledger row 43; the 18f ladder's R3-1, J8). The count arrived from
+    /// the INSTANT road's arithmetic — `first.variants.count - 1`, which
+    /// assumes exactly one seed-half sits in the first block. The sheet is
+    /// not so bounded: keep-on-top with the ✂ at the seed's very START
+    /// parks the seed WHOLE into the second block, so nothing "split across
+    /// both blocks" and TWO other takes stayed on the first, while the
+    /// receipt read *"1 other take stayed on the first"*. The op's own
+    /// `FanHalf.sourceVariantIDs` names the shape exactly.
+    @Test func aSeedParkedAtItsStartDoesNotGetTheSplitAcrossBothReceipt() async throws {
+        try await withBoard(seedBlocks: ["Alpha beta. Gamma delta."]) { board in
+            let slot = try #require(try board.slots().first)
+            let chosen = try #require(slot.variantID)
+            _ = try board.session.operations.branchVariant(slot.blockID, from: chosen)
+            _ = try board.session.operations.branchVariant(slot.blockID, from: chosen)
+            try board.reload()
+
+            board.focus(blockID: slot.blockID, variantID: chosen, caret: 11)
+            await board.model.divideFocused(ceremony: true)
+            let opened = try #require(board.model.divideWCeremony)
+            #expect(opened.takes.count == 3)
+            #expect(opened.arrangement == .keepOnTop, "U-3/U-5: the opening preset")
+
+            // The seed's ✂ to its very start — a legal placement under
+            // keep-on-top (`presetBlocker` blocks only `parkedAtEnd`): the
+            // seed rides WHOLE into the bottom block, the other two onto
+            // the top.
+            board.model.ceremony.placeCut(takeID: chosen, cut: 0)
+            let placed = try #require(board.model.divideWCeremony)
+            #expect(placed.seedTake?.parkedAtStart == true)
+
+            await board.model.ceremony.confirm()
+            let status = try #require(board.model.statusMessage)
+            #expect(!status.contains("split across both"),
+                    "the seed did not split: \(status)")
+            #expect(!status.contains("stayed on the first"),
+                    "and the count that rode with it is not this sentence's: \(status)")
+            #expect(status == FannedDefaultsCopy.divided(kept: 0),
+                    "R1-9's deliberate line, which claims nothing: \(status)")
+
+            // The store says what really happened, so the receipt's silence
+            // is silence about a real shape and not a missed count.
+            let after = try board.slots()
+            #expect(after.map(\.activeVariantCount) == [2, 1])
+        }
+    }
+
+    /// The shape the sentence WAS written for still speaks its count: the
+    /// seed cut mid-block under keep-on-top, two takes riding whole onto the
+    /// first — the `sourceVariantIDs` road agrees with the arithmetic
+    /// exactly where the arithmetic was right.
+    @Test func aSeedCutMidBlockStillCountsWhatRodeOntoTheFirst() async throws {
+        try await withBoard(seedBlocks: ["Alpha beta. Gamma delta."]) { board in
+            let slot = try #require(try board.slots().first)
+            let chosen = try #require(slot.variantID)
+            _ = try board.session.operations.branchVariant(slot.blockID, from: chosen)
+            _ = try board.session.operations.branchVariant(slot.blockID, from: chosen)
+            try board.reload()
+
+            board.focus(blockID: slot.blockID, variantID: chosen, caret: 11)
+            await board.model.divideFocused(ceremony: true)
+            await board.model.ceremony.confirm()
+
+            let status = try #require(board.model.statusMessage)
+            #expect(status == FannedDefaultsCopy.divided(kept: 2), "\(status)")
+            #expect(try board.slots().map(\.activeVariantCount) == [3, 1])
+        }
+    }
+
     // MARK: - W10b: the door, and only where it can act
 
     @Test func theRegistryDeclaresTheDoorAsABlockScopedContextAct() {

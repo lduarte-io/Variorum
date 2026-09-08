@@ -2326,12 +2326,30 @@ extension TakesViewModel: DivideWCeremonyHost {
             if let landing = Self.renderedTakeID(of: result.second) {
                 choreography.parkFocus(onVariant: landing)
             }
-            // The receipt counts what rode onto the first block from the op's
-            // own result — the board's instant road's rule (18f ladder R1-9
-            // retired the sheet-title echo; round 2's R2-3 gives the line the
-            // count it always had in hand).
+            // The receipt counts from the OP's OWN result — and from the
+            // part of it that names the shape (18f ladder R3-1, ledger row
+            // 43). `first.variants.count - 1` is the INSTANT road's
+            // arithmetic: it assumes exactly one seed-half sits in `first`,
+            // which `KeepOnTopDivide.compose` guarantees there and this road
+            // does not. The sheet may park the seed at its very START
+            // (keep-on-top with the ✂ at 0 — legal; `presetBlocker` blocks
+            // only `parkedAtEnd`), and under "Choose per take…" any take may
+            // be cut by hand. `FanHalf.sourceVariantIDs` is index-aligned
+            // with `variants`, so the two claims are readable exactly: a
+            // take RODE WHOLE onto the first block iff its source id is in
+            // `first` and not in `second`, and "the take you were in split
+            // across both blocks" is true iff the seed is in both. When it
+            // is not, the line falls back to R1-9's deliberate zero form,
+            // which claims nothing — better a receipt that says less than
+            // one that describes a shape it cannot say (J8).
+            let rodeOntoFirst = Set(result.first.sourceVariantIDs)
+                .subtracting(result.second.sourceVariantIDs)
+            let seedSplit = displayedVariantID.map {
+                result.first.sourceVariantIDs.contains($0)
+                    && result.second.sourceVariantIDs.contains($0)
+            } ?? false
             status = .receipt(FannedDefaultsCopy.divided(
-                kept: max(0, result.first.variants.count - 1)))
+                kept: seedSplit ? rodeOntoFirst.count : 0))
             return true
         } catch {
             status = .refusal(Self.message(for: error))
