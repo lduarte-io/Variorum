@@ -43,6 +43,10 @@ struct TakesBottomBar: View {
         [
             .newTake, .blankTake, .blankTakeAsChosen, .addBlockAtEnd, .blockComments,
             .commitTake, .sealPost, .divide, .extract, .makeBlock, .merge,
+            // 18f ladder R3-3 (ledger row 45): U-4's "a button, not just a
+            // shortcut" delivered on the BOARDS too — both ceremony rows sit
+            // beside their plain twins in the block ▾ group.
+            .divideWithCeremony, .mergeWithCeremony,
             .labelTake,  // 13b Stage 3, 3D (N6): the block menu's label door
             .insertBlockBelow,  // 13b 4D (N28/S4-13): the block menu's insert door
             .deleteBlock,  // 13c 1B (A8): the block menu's delete door
@@ -70,13 +74,27 @@ struct TakesBottomBar: View {
 
     /// The structural doors the bar renders (registry-walk-asserted: the
     /// bottomBar-doored structural set, in gesture order).
-    static let structuralBar: [(title: String, act: StructuralAct, help: String)] = [
+    ///
+    /// 18f ladder R3-3 / ledger row 45 — **every `StructuralAct` has a row
+    /// here**, pinned exhaustively over the enum
+    /// (`theBoardsStructuralGroupRendersEveryStructuralAct`). The two
+    /// ceremony doors were declared `.bottomBar` at 18f batch 1 and rendered
+    /// in `CommitBar` alone; the registry walk asserts the UNION of the two
+    /// bars, so nothing could see the gap — U-4's *"a button, not just a
+    /// shortcut"* was half-delivered on the boards. Titles come from the
+    /// registry with their chords, exactly as `CommitBar` takes them, so a
+    /// re-picked key moves in one place.
+    static var structuralBar: [(title: String, act: StructuralAct, help: String)] {
+        [
         // 13j J4/J4b: both helps say what the flipped defaults actually do —
         // copy naming a behaviour the app no longer has is the J8 class.
         ("Divide", .divide,
          "Cut the block you're in at your cursor, right here — on a block with "
          + "several takes the take you're looking at is cut and the rest are "
          + "copied whole onto both halves (⌥⌘⇧D to place each cut by hand)"),
+        (CapabilityRegistry.capability(.divideWithCeremony).menuTitle(), .divideWithCeremony,
+         "Lay every take out in one sheet and say where each one goes — right "
+         + "here, without leaving Takes"),
         ("Extract", .extract,
          "Pull your selected span out into its own block — in Write, carried there for you"),
         ("Make Block", .makeBlock,
@@ -84,7 +102,11 @@ struct TakesBottomBar: View {
         ("Merge", .merge,
          "Join the block you're in with the one above it, bringing every take "
          + "along — in Write, carried there for you (⌥⌘⇧M to pair takes by hand)"),
-    ]
+        (CapabilityRegistry.capability(.mergeWithCeremony).menuTitle(), .mergeWithCeremony,
+         "Choose what the merged block keeps — every take, only the ones you "
+         + "were looking at, or takes paired by hand — in Write, carried there for you"),
+        ]
+    }
 
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)

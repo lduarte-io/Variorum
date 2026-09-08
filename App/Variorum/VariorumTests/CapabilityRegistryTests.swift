@@ -235,6 +235,22 @@ struct CapabilityRegistryTests {
         #expect(rendered == CapabilityRegistry.doored(.bottomBar))
     }
 
+    /// **PER BAR, not the union** (ledger row 45; the 18f ladder's R3-3).
+    /// The walk above asserts the UNION of the two bars, so `CommitBar`
+    /// alone satisfied `.bottomBar` on both ceremonies while the boards'
+    /// `block \u{25BE}` group rendered neither — U-4's *"a button, not just
+    /// a shortcut"* was half-delivered and no test could see it. The guard
+    /// is exhaustive over the act enum rather than a hand-listed set, so a
+    /// future structural act cannot repeat the omission: **every**
+    /// `StructuralAct` has a row in the board's group.
+    @Test func theBoardsStructuralGroupRendersEveryStructuralAct() {
+        #expect(Set(TakesBottomBar.structuralBar.map(\.act))
+                == Set(StructuralAct.allCases))
+        #expect(Set(TakesBottomBar.renderedCapabilities)
+                .isSuperset(of: [.divideWithCeremony, .mergeWithCeremony]),
+                "declared where they are rendered")
+    }
+
     /// 13f batch 6 (W5): the MENU-BAR EXTRA's door table — the status item
     /// that reaches her from any app (her round-14.1 ruling). Same
     /// declared ⇔ rendered assertion as the four routed tables, so a row
