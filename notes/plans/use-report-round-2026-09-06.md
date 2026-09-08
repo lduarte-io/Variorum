@@ -7913,7 +7913,7 @@ two consumers (the book navigator; the note Read tab's contents column). Rows 22
 | Piece | What it is | Status |
 |---|---|---|
 | A | the width brain's LEADING mirror + `SideColumn`'s `edge`/`maximum`; the pure pins | **DONE** (this commit) |
-| B | the book navigator becomes the leading column (remembered width; the row pitch) | NOT-STARTED |
+| B | the book navigator becomes the leading column (remembered width; the row pitch) | **DONE** (this commit) · red-on-old PENDING |
 | C | the note Read contents column becomes it (remembered width) | NOT-STARTED |
 | D | the walk on the dev-store Debug build, both voices; captures | NOT-STARTED |
 
@@ -7929,6 +7929,30 @@ other. One deliberate change to the shipped rule: the UNMEASURED first pass now 
 floor and ceiling (it returned the raw `wanted`), so a stored width wider than a host allows never draws
 for a frame; the shipped `SideColumnTests` assert two unmeasured cases and both are inside [280, 640],
 so they ride unmodified — verified, not assumed.
+
+**Piece B, what landed.** `BookView.body` is the leading `SideColumn` — its `shown` is wave 2c's own
+rule unchanged (`structure.mode != .index`), its panel is the navigator, its content is the mode's body
+with NOTHING wrapped around it (18d batch 1's closing-suite finding: Outline's prose column claims
+Write's measure by `layoutPriority` inside that body, and a container of ours would take it back — the
+inherited `outlineProseSitsOnWritesOwnMeasure` rides green). The navigator lost `.frame(width: 190)`;
+its width is 190 … 360, remembered under `bookNavigatorWidth` (ONE posture for every book, the
+`readModeOutlineShown` class — local-only, never synced). The rows: each GROUP is its own stack (a
+chapter row and the notes under it touching, because they belong together), groups stand apart by the
+mockup's `.sb-group` gap (20), chapter rows draw at 30 and note rows at 24 — the sidebar's generous and
+compact pitches as the REFERENCE, restated in `BookNavigatorLayout` rather than read from
+`SidebarLayout`, because the sidebar's numbers are a pitch that COMPRESSES with its column's height and
+this column never compresses (documented at the code: same value, same reason, not one truth two places
+read).
+
+**Piece B's pins:** `theNavigatorsChaptersHaveRoom` (a mounted chaptered book — every chapter row's and
+note row's drawn height, and the measured gap between one group and the next) ·
+`theNavigatorIsTheWidthSheLeftItAtAcrossARemount` (nothing remembered ⇒ exactly the shipped 190, so
+nothing moves until she drags; a stored 300 read back on a FRESH mount; a stored 900 clamped by the
+navigator's own 360, not the note panels' 640). Both read RECTANGLES from a DEBUG oracle
+(`BookOutlineGeometry.navigatorFrame` / `navigatorChapterRows` / `navigatorNoteRows`), never the
+constants. Suites at this commit: **71 tests in 14 suites** — the pins plus every suite that mounts
+`BookView`, `SideColumnTests`, and the two inherited geometry pins this batch could have broken
+(`outlineProseSitsOnWritesOwnMeasure` · `theNavigatorsChromeStaysInsideItsColumn`).
 
 **Piece A's pins** (`App/Variorum/VariorumTests/OutlineRoomTests.swift`):
 `theLeadingDragMirrorsTheTrailingOneAboutTheColumn` (the relation, over a stride of pointer positions

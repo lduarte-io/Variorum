@@ -118,17 +118,31 @@ struct BookView: View {
     //  recorded as HELD, now answered).)
 
     var body: some View {
-        HStack(spacing: 0) {
-            // Wave 2c (item 18, W8-5): in INDEX the minimal navigator steps
-            // aside — the index column IS the outline pane grown up, and it
-            // carries the same masthead so no chrome is lost. The minimal
-            // pane stays beside every other mode (her sharpening: "i do
-            // like the more minimal outline to go along with the current
-            // modes").
-            if structure.mode != .index {
-                navigator
-                Divider().overlay(tokens.line)
-            }
+        // **18d batch 3 (her U-13): the navigator is the shared LEADING side
+        // column** — *"the panel with the chapter names should also be
+        // draggable to be a bit bigger."* It was an `HStack` of a 190-pt slab,
+        // a `Divider` and the mode; it is the same three things, drawn by
+        // `SideColumn` so the boundary carries the drag grammar (the 9-pt
+        // grip, the resize cursor, our own line in every window state) and
+        // the width she chooses is remembered. `shown` keeps wave 2c's rule
+        // exactly: in INDEX the minimal navigator steps aside — the index
+        // column IS the outline pane grown up, and it carries the same
+        // masthead so no chrome is lost. The minimal pane stays beside every
+        // other mode (her sharpening: "i do like the more minimal outline to
+        // go along with the current modes").
+        SideColumn(
+            tokens: tokens,
+            shown: structure.mode != .index,
+            widthKey: BookNavigatorLayout.widthKey,
+            edge: .leading,
+            ideal: BookNavigatorLayout.idealWidth,
+            minimum: BookNavigatorLayout.minimumWidth,
+            maximum: BookNavigatorLayout.maximumWidth
+        ) {
+            // The mode's own body. Nothing wraps it: Outline's prose column
+            // claims Write's measure by `layoutPriority` INSIDE this body
+            // (18d batch 1's closing-suite finding), and a container of ours
+            // around it would take that measure back.
             switch structure.mode {
             case .index:
                 BookIndexView(
@@ -178,6 +192,8 @@ struct BookView: View {
                     pagedRead
                 }
             }
+        } panel: {
+            navigator
         }
         .background(tokens.surface)
         // 13c 2D (A31): the assembly's ORDER is a task input, so changing
@@ -384,8 +400,17 @@ struct BookView: View {
             VStack(alignment: .leading, spacing: 6) {
                 bookMasthead
                 ScrollView {
-                    VStack(alignment: .leading, spacing: 2) {
+                    // **18d batch 3 (her U-13): the chapters have room.** The
+                    // list was one `VStack(spacing: 2)` of text-height rows, so
+                    // a book of chapters read as a solid block of words —
+                    // *"the chapters feel too tightly clustered."* Now each
+                    // GROUP is its own stack (its chapter row and the notes
+                    // under it, touching, because they belong together) and the
+                    // groups stand apart by the mockup's own group gap; the
+                    // rows themselves carry the sidebar's generous pitch.
+                    VStack(alignment: .leading, spacing: BookNavigatorLayout.groupSpacing) {
                         ForEach(structure.grouped(entries: model.entries), id: \.section?.id) { group in
+                          VStack(alignment: .leading, spacing: BookNavigatorLayout.rowSpacing) {
                             if let section = group.section {
                                 // R19's insertion bar: the drop target
                                 // shows exactly where the chapter lands.
@@ -438,8 +463,15 @@ struct BookView: View {
                                     // LABEL's shape; a frame + contentShape
                                     // outside the button widened the
                                     // hover/menu shape only).
-                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    //
+                                    // 18d batch 3: at the generous pitch, and
+                                    // the taller row is a bigger target too.
+                                    .frame(
+                                        maxWidth: .infinity,
+                                        minHeight: BookNavigatorLayout.chapterRowHeight,
+                                        alignment: .leading)
                                     .contentShape(Rectangle())
+                                    .navigatorRowFrame(section.id, chapter: true)
                                 }
                                 .buttonStyle(.plain)
                                 .contextMenu {
@@ -466,6 +498,9 @@ struct BookView: View {
                                 Text(tokens.chromeLabel("unfiled"))
                                     .font(tokens.small.weight(.semibold))
                                     .foregroundStyle(tokens.muted)
+                                    .frame(
+                                        minHeight: BookNavigatorLayout.chapterRowHeight,
+                                        alignment: .leading)
                             }
                             // The top-level outline: posts; clicking one
                             // opens it in the CURRENT editor (R43 — no
@@ -508,9 +543,18 @@ struct BookView: View {
                                     }
                                     .padding(.leading, group.section != nil ? 10 : 0)
                                     // The whole row is the target — inside
-                                    // the label (see the chapter row).
-                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    // the label (see the chapter row). 18d
+                                    // batch 3: a note row nests UNDER its
+                                    // chapter, so it takes the column's
+                                    // compact pitch rather than the chapter's
+                                    // generous one — the step between them is
+                                    // the hierarchy, drawn.
+                                    .frame(
+                                        maxWidth: .infinity,
+                                        minHeight: BookNavigatorLayout.noteRowHeight,
+                                        alignment: .leading)
                                     .contentShape(Rectangle())
+                                    .navigatorRowFrame(entry.postID, chapter: false)
                                 }
                                 .buttonStyle(.plain)
                                 .contextMenu {
@@ -541,6 +585,7 @@ struct BookView: View {
                                     }
                                 }
                             }
+                          }
                         }
                         // The end drop zone: drag a chapter past the last
                         // one to land it at the end (R19). 13f W11a: taller,
@@ -656,8 +701,16 @@ struct BookView: View {
                 }
             }
             .padding(12)
-            .frame(width: 190)
+            // 18d batch 3: NO fixed width any more — `SideColumn` gives the
+            // panel the width she dragged (190 … 360, remembered).
+            .frame(maxWidth: .infinity, alignment: .leading)
             .background(tokens.room)
+            .onGeometryChange(for: CGSize.self) { $0.size } action: { size in
+                #if DEBUG
+                BookOutlineGeometry.navigatorFrame = CGRect(origin: .zero, size: size)
+                #endif
+            }
+            .coordinateSpace(name: BookNavigatorLayout.space)
         }
     }
 
@@ -1632,8 +1685,77 @@ enum BookOutlineGeometry {
     /// The pending landing's report sequence (id · top · hop) — what a pin
     /// prints when a landing does not converge.
     static var trace: [String] = []
+    /// **18d batch 3 (her U-13): what the NAVIGATOR actually drew** — the
+    /// column's own rect, and each chapter/note row's rect in the
+    /// navigator's own named space. "The chapters have room" and "the
+    /// column is the width she dragged" are claims about rectangles, so
+    /// the pins read rectangles rather than the constants below.
+    static var navigatorFrame: CGRect?
+    static var navigatorChapterRows: [String: CGRect] = [:]
+    static var navigatorNoteRows: [String: CGRect] = [:]
+
+    static func resetNavigator() {
+        navigatorFrame = nil
+        navigatorChapterRows = [:]
+        navigatorNoteRows = [:]
+    }
 }
 #endif
+
+/// **THE NAVIGATOR'S ROOM** (18d batch 3, her U-13: *"the chapters feel too
+/// tightly clustered and the panel with the chapter names should also be
+/// draggable to be a bit bigger"*).
+///
+/// The pitch numbers take the SIDEBAR's as their reference — the mockup's
+/// `.sb-row` grammar, 5 px of padding around a 13 pt line, which
+/// `SidebarLayout.generousRowHeight`/`compactRowHeight` round to 30 and 24 —
+/// and the group gap is the mockup's own `.sb-group { margin-bottom: 20px }`.
+/// They are stated HERE rather than read from `SidebarLayout` deliberately:
+/// the sidebar's numbers are a pitch that COMPRESSES with its column's
+/// height, and this column never compresses, so the two are the same value
+/// for the same reason and not one truth two places read (a change to the
+/// sidebar's compression must not silently retune the book's navigator).
+nonisolated enum BookNavigatorLayout {
+    /// One posture for every book, like `readModeOutlineShown` — the width
+    /// she settles on is how she wants to read books, not a fact about one.
+    static let widthKey = "bookNavigatorWidth"
+    static let space = "book-navigator"
+    /// Where it starts: exactly the slab's shipped width, so nothing moves
+    /// until she drags it.
+    static let idealWidth: CGFloat = 190
+    static let minimumWidth: CGFloat = 190
+    /// *"a bit bigger"* — a chapter list dragged half the window wide is not
+    /// a chapter list; the note's panels keep the brain's own 640.
+    static let maximumWidth: CGFloat = 360
+    static let chapterRowHeight: CGFloat = 30
+    static let noteRowHeight: CGFloat = 24
+    /// Inside a group the rows touch — a chapter and its notes belong
+    /// together, and their own pitches carry the air.
+    static let rowSpacing: CGFloat = 1
+    /// Between groups: the mockup's group gap.
+    static let groupSpacing: CGFloat = 20
+}
+
+private extension View {
+    /// A navigator row's rect, for the DEBUG oracle only (the
+    /// `outlineAnchor` pattern: the reporter lives at the row, and the app
+    /// build carries nothing).
+    @ViewBuilder func navigatorRowFrame(_ id: String, chapter: Bool) -> some View {
+        #if DEBUG
+        self.onGeometryChange(for: CGRect.self) {
+            $0.frame(in: .named(BookNavigatorLayout.space))
+        } action: { frame in
+            if chapter {
+                BookOutlineGeometry.navigatorChapterRows[id] = frame
+            } else {
+                BookOutlineGeometry.navigatorNoteRows[id] = frame
+            }
+        }
+        #else
+        self
+        #endif
+    }
+}
 
 /// What an Outline anchor reports: where its top sits in the scroll's
 /// visible space, and how tall the row is (the landing converges on the
