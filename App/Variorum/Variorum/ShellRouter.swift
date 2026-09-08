@@ -41,6 +41,44 @@ final class ShellRouter {
     /// 13f batch 3: the window's open notes + per-pane back/forward.
     let workspace = WorkspaceModel()
 
+    // MARK: - The parked block landing (17o c/d/e round 1, MAJOR-2)
+
+    /// **A block a navigation named, held for the mount that consumes it.**
+    ///
+    /// Stage C parked this on `RootView` as `@State` and only ever WROTE it:
+    /// the block-naming door set it, and every ordinary navigation door —
+    /// `opener`/`openHere`, the sidebar's own binding, ⌘K, the back/forward
+    /// chips — went through `adopt`, which never touched the field. So a
+    /// park was never consumed and never expired: `landing(for:)` kept
+    /// answering for that container id forever, and re-entering the note
+    /// re-landed a block she had clicked an hour ago, against row 42/U-20's
+    /// ruled promise (*"every door into Write lands at the remembered
+    /// caret"*).
+    ///
+    /// It lives on the router now for the reason `pendingSelection` does: it
+    /// is per-window navigation state the shell's doors already speak to
+    /// (P-4), and holding it here is what makes the rule below a fact a pin
+    /// can read instead of a `@State` nobody outside one view can see.
+    private(set) var blockLanding: BlockLanding?
+
+    struct BlockLanding: Equatable, Sendable {
+        let containerID: String
+        let blockID: String
+    }
+
+    /// **THE ONE RULE: a navigation expires whatever is parked, and parks
+    /// only what it names.** Every door calls this — the ones that name a
+    /// block pass one, the ones that do not pass `nil` — so "the park
+    /// expires" needs no second mechanism and no door can forget.
+    func park(_ landing: BlockLanding?) {
+        blockLanding = landing
+    }
+
+    /// What a mounting container should land on, if this park is its own.
+    func landing(for containerID: String) -> String? {
+        blockLanding?.containerID == containerID ? blockLanding?.blockID : nil
+    }
+
     // MARK: - The navigation doors (menu + strip)
 
     /// ⌘[ — walk the active pane back. Silent when there is nowhere to go:

@@ -53,15 +53,15 @@ struct RootView: View {
     /// pre-13x 5b (ledger 64): the iCloud Drive offer's brain — made once the
     /// services exist; nil until then and in harness mounts without services.
     @State private var iCloudOffer: ICloudDriveOfferModel?
-    /// Stage C: a palette/Library block hit lands CARET-PRECISE — the
-    /// target block rides beside the selection and seeds the opened
-    /// editor's caret (cleared on ordinary navigation).
-    @State private var blockTarget: BlockTarget?
+    // (Stage C's parked block target LEFT this view at 17o c/d/e round 1,
+    // MAJOR-2: it is `ShellRouter.blockLanding` now — same per-window scope,
+    // but on the object every navigation door already speaks to, so the
+    // "a navigation expires the park" rule has one home and one pin.)
     /// 13f W10b: the released original the lineage door asked to see; the
     /// recovery surface reveals it and consumes the request.
     /// 13f W20(a) — THE ASCENT: the post a book was asked to open AT. One
     /// shot, keyed by book so a stale request can never land in another
-    /// book (the `blockTarget` guard's shape).
+    /// book (the `blockLanding` guard's shape).
     @State private var bookAscent: BookAscent?
 
     struct BookAscent: Equatable {
@@ -69,10 +69,6 @@ struct RootView: View {
         let postID: String
     }
 
-    struct BlockTarget: Equatable {
-        let containerID: String
-        let blockID: String
-    }
     /// Phase 13 (B1): the live voice — tokens + idioms, environment-fed.
     @State private var theme: ThemeStore
     @Environment(\.openSettings) private var openSettings
@@ -460,6 +456,15 @@ struct RootView: View {
     /// rule (a split never shows one note twice) cannot be bypassed by
     /// adding a door, and is spoken in one voice wherever it fires.
     private func adopt(_ destination: SidebarSelection, in pane: PaneID) {
+        // 17o c/d/e round 1, MAJOR-2: **a navigation expires a parked block
+        // landing.** Every ordinary door lands here — `openHere`, the
+        // sidebar's own binding, ⌘K's rows, the back/forward chips, the
+        // open-post broadcast — and none of them names a block, so the park
+        // must not outlive them. `open(_:blockID:)` calls this FIRST and
+        // parks AFTER, which is why clearing here cannot erase a park as it
+        // is made (the cold review's exact objection to doing it the other
+        // way round).
+        router.park(nil)
         switch router.workspace.select(destination, in: pane) {
         case .adopted:
             break
@@ -473,7 +478,9 @@ struct RootView: View {
     /// pane and navigates it in one click, which is how a row click inside
     /// an UNFOCUSED list pane does the obvious thing.
     private func opener(_ pane: PaneID) -> (SidebarSelection) -> Void {
-        { destination in adopt(destination, in: pane) }
+        // MAJOR-2's ruled line: a list-row door names NO block, and says so
+        // through the one road that knows how to write that (`open`'s nil).
+        { destination in open(destination, blockID: nil, in: pane) }
     }
 
     // MARK: - The pane row (W1/A25)
@@ -618,7 +625,7 @@ struct RootView: View {
             // born here (the sidebar rows retired).
             // 17o batch e (row 38): the door carries its own target — a
             // CARD names its group AND the snippet clicked, so the caret
-            // lands in it (the Stage C `blockTarget` road, which the
+            // lands in it (the Stage C landing road, which the
             // Library's block hits have always used); the header's scope
             // door names the group alone and CLEARS a stale landing, which
             // `openHere` never did.
@@ -736,17 +743,20 @@ struct RootView: View {
     private func open(
         _ picked: SidebarSelection, blockID: String?, in pane: PaneID? = nil
     ) {
+        // ORDER IS THE FIX (MAJOR-2): navigate first — `adopt` expires
+        // whatever was parked — then park what THIS door names. Parking
+        // before adopting would have the clear eat the park.
+        adopt(picked, in: pane ?? router.workspace.focusedPane)
         switch (picked, blockID) {
         case (.post(let id), .some(let block)), (.pool(let id), .some(let block)):
-            blockTarget = BlockTarget(containerID: id, blockID: block)
+            router.park(ShellRouter.BlockLanding(containerID: id, blockID: block))
         default:
-            blockTarget = nil
+            break
         }
-        adopt(picked, in: pane ?? router.workspace.focusedPane)
     }
 
     private func target(for containerID: String) -> String? {
-        blockTarget?.containerID == containerID ? blockTarget?.blockID : nil
+        router.landing(for: containerID)
     }
 
     /// The dated home's door (R38: the journal lives on the shelf;
