@@ -3702,8 +3702,18 @@ store's chosen while the drift check compares the projection's; the reviewer's c
 
 **LIVE STATUS — 17o batch b (opus-implementer, opened 2026-09-08 at `6d301624`).**
 
-**NOT DONE YET (this line is the record's first, per rule 9 — it is rewritten at the close):** everything
-below marked NOT-STARTED or IN-PROGRESS; the walk; the closing suites.
+**WHAT I DID NOT DO (the record's first line, per rule 9).** Nothing in the batch is left open: rows
+7 · 8 · 20 · 42 are all FIXED with red-on-old evidence, walked and captured. What I deliberately did
+NOT touch: `Sources/` (core — zero lines, proven by `git diff`), `Sync/`, schema, `App/Variorum/Shared/`
+(zero lines — the iOS build was run anyway and SUCCEEDED), `BlockRangeIndex`, the structural door,
+`LandingTarget` (reused by name only, not edited), the Read→Index scrolled-open door beyond consuming
+the offset, and the phone (the parity row below is the round's to carry). Two things I found and did
+NOT fix, recorded for their owners rather than folded in: **(a)** the Blocks workbench's context PANEL
+makes its pane live and parks its caret at the take's END — visible in capture 04/05 and harmless here
+(that pane reports no caret to the router), but it is the same class this batch just closed one surface
+over; **(b)** the fan panel's "Open Takes mode" is the only door row 8 literally names, and on a
+FOUR-block note its scroll is a no-op by geometry — the strong scroll evidence is the ⌘2 landing on
+block 162 of 215 (capture 06). Both are notes for the reviewer, not deferrals of the rows.
 
 - **Orientation — DONE.** Read in my own context, in the brief's order: `CLAUDE.md` and the canon it
   auto-loads (CoreDescription · OverallModel · AppSpec · SyncSpec · TEXTKIT2_NOTES — §2 the viewport/
@@ -3741,8 +3751,7 @@ below marked NOT-STARTED or IN-PROGRESS; the walk; the closing suites.
 2. Write's landing consumes the offset and reveals through `JumpPrimitive` — **DONE (hash next)**
 3. Blocks → Write reveals (row 20) — **DONE (hash next)**
 4. the Takes board's article scrolls to the landed slot (row 8) — **DONE (`68632d31`)**
-5. the walk + captures + the closing suites — **IN-PROGRESS** (the walk DONE and captured; the
-   per-keystroke measurement DONE and acted on; the re-walk on the rebuilt binary + the closing suites next)
+5. the walk + captures + the closing suites — **DONE (this commit)**
 
 **Rows:** 7 · 8 · 20 · 42 — all **FIXED**, each red-on-old measured (below).
 
@@ -3912,4 +3921,102 @@ red by design) · `CurrentBlockContinuityTests` · `BlockHistoryPaneTests` · `B
 `BlocksArrivalMeasureTests` · `BlocksWorkbenchFaceTests` · `EditorSessionTests` · `TakesBoardTests`.
 **Re-run after piece 3** (`scratchpad/suite-4.log`, 18 names → `Test run with 108 tests in 18 suites
 passed`, adding `FragmentLinesTests` · `EditorProjectionEngineTests`): all green.
+
+---
+
+#### THE WALK (the acceptance gate — USE, on the dev-store Debug build)
+
+`io.lduarte.Variorum.debug` (`…/DerivedData/Variorum-dnpxwqhpxdqrdjbunktnzoahckpd/Build/Products/Debug/
+Variorum.app`, bundle id verified), `cliclick` + `Tools/WalkKit`; zero instances at open and at close by
+`pgrep -fl 'Variorum.app/Contents/MacOS'`; **her `/Applications` build was never running and was never
+touched**; no Release build, no install refresh. The note: **The Boscombe Valley Mystery — 215 blocks,
+9,689 words**, long paragraphs (the brief's "paste 3,000+ words, several long blocks", satisfied by a
+note the store already holds). **ONE voice (Terminal): the landing family renders no face of its own —
+it is caret placement and scroll position — so there is nothing a voice changes.** Walked TWICE: once on
+the piece-1…4 binary (captures 01–10), then again on the FINAL binary after piece 5a's coalescing
+(captures 11–14).
+
+| Row | The walk | What happened | Capture |
+|---|---|---|---|
+| **7 · 42** | Write, caret mid-way through block 7's long paragraph (in "Sh\|erlock Holmes was pacing") → ⌘2 → ⌘1 | Takes' live pane opened **with the caret at "Sh\|erlock"**; Write came back at **block 7/215 with the caret at "Sh\|erlock"** and the page unmoved (the reveal's guard: it was already on screen) | `01` · `02` · `03` |
+| **20** | Blocks ▸ filter "Cooee" ▸ row **162** ▸ *open in write* | Write opened at **block 162/215 with that paragraph at the very top of the viewport** — the caret placed AND the page moved to it | `04` · `05` |
+| **8** | Write on block 162 → ⌘2 | the board landed **scrolled to block 162's slot at the top**, ringed | `06` |
+| **8** (the door it names) | the field guide ▸ *the take ceremony* ▸ Write ▸ the bar's `takes` ▸ **Open Takes mode** | the board opened with that block **bloomed, ringed, and at the top of the article** (blocks 1–2 above the fold) | `07` · `08` |
+| **42** (Read's door) | Read ▸ `edit` on block 162 ▸ click into the pane, caret after "whom" → ⌘1 | Write at **block 162/215, caret after "whom", the line at the viewport top** (it was NOT on screen, so the reveal fired) | `09` · `10` |
+| **bonus** | ⌘Q, rebuild, relaunch, reopen the note from ⌘K | **the caret came back after "whom" in block 162 across a full relaunch** — the persisted offset, which is piece 5a's coalescing proving itself | `11` |
+| **7 · 42 (final binary)** | Write, caret at "I \|found the ash of a cigar" (block ~178) → ⌘2 → ⌘1 | the take pane's caret at "I \|found"; Write back at "I \|found" with the line at the viewport top | `12` · `13` · `14` |
+
+**Captures** (in `notes/plans/use-report-2026-09-06-screens/17o-b/`, gitignored):
+`01-write-caret-mid-block.png` · `02-takes-live-pane-caret.png` · `03-write-back-caret-kept.png` ·
+`04-blocks-far-row-162-picked.png` · `05-blocks-open-in-write-lands-and-scrolls.png` ·
+`06-takes-board-scrolled-to-block-162.png` · `07-write-fan-panel-open-takes-mode.png` ·
+`08-fan-panel-landing-blooms-and-scrolls.png` · `09-read-edit-pane-caret-mid-block.png` ·
+`10-read-to-write-caret-kept.png` · `11-relaunch-lands-at-the-remembered-caret.png` ·
+`12-rebuilt-write-caret-mid-block.png` · `13-rebuilt-takes-pane-caret.png` ·
+`14-rebuilt-write-back-caret-kept.png`.
+
+#### THE ROWS, DISPOSITIONED
+
+| # | Her words (short) | Disposition |
+|---|---|---|
+| **7** | *"switching from takes to write doesn't leave you where your cursor was"* | **FIXED** — pins: `CurrentBlockContinuityTests.theCurrentBlockFollowsHerWriteTakesReadBlocksWrite` (step 5, red-on-old **59 ≠ 65**) · `LandingOffsetTests.theMemoryRoundTripsTheCaretOffsetAndReadsOldTwoFieldFactsAsUnknown` (4 issues under revert) · `…theRouterCarriesTheOffsetWithoutMovingTheObservedIdentity` (5) · `…theBareArrivalLandsAtTheBlocksStartPlusTheRememberedOffsetClamped` (2). Walked: captures 01–03, 12–14 |
+| **8** | *"open takes mode in write from the takes menu is also not automatically navigating you to where the take is"* | **FIXED** — pins: `TakesLandingTests.theBloomLandingAlsoAsksTheArticleToScrollToThatSlot` · `…theNineLandingOnTheCurrentBlockAsksTheArticleToScrollThere` · `…theFallThroughLandingAsksForNoScrollAtAll` (3 issues under revert). Model-level by the brief's own instruction (the rig cannot mount the whole board — KnownIssues' rig row); walked: captures 06, 07–08 |
+| **20** | *"Opening in write from blocks puts your cursor in the right place but doesn't move you there"* | **FIXED** — pin: `LandingOffsetTests.aSeededCaretFarDownALongNoteArrivesInsideTheVisibleRect`, red-on-old **caret line top 6930 with the viewport at 0…719**, green **6944 with the viewport at 6944…7663**; guard pin `…aSeededCaretTheViewportAlreadyShowsDoesNotScrollThePage`. Walked: captures 04–05 |
+| **42** | *"when you are within a block and then click go to write, you also end up with your caret at the start of the block"* (U-20) | **FIXED with row 7** — the same one rule, the same pins; the extra doors walked: Read's `edit` pane (09–10) and the relaunch (11). **Her condition answered in use:** the fix disturbed no layout, and the scroll only moves when the caret is off screen |
+
+**Nothing DISMISSED AS HOLLOW; nothing DEFERRED.**
+
+#### CLOSING RUNS (this tree)
+
+- **Mac, ONE `xcodebuild test`** over every suite this batch touched or leans on — the landing family
+  (`LandingOffsetTests` · `CurrentBlockContinuityTests` · `BlocksArrivalMeasureTests` ·
+  `ReadArrivalMeasureTests` · `ReadLandingTests` · `BookOutlineLandingTests` · `CanvasArrivalTests` ·
+  `JumpCorrectionLoopTests` · `FragmentLinesTests` · `StructuralUndoTests`), the router/fact family
+  (`CommandRouterTests` · `StatusCenterTests` · `TakesLandingTests` · `MoveAndExecuteTests` ·
+  `StaleWriteIntentTests` · `SealDoorTests` · `BlockTOCStatusTests` · `TakesWordCountTests` ·
+  `BlockHistoryPaletteDoorTests` · `BlockHistoryPaneTests` · `BlockHistoryHostTests`), every pane and
+  board suite the `PaneSurface`/Takes edits reach (`PaneSurfaceTests` · `PanePublishDoorTests` ·
+  `PaneTextAuthorityTests` · `TakePaneMeasureTests` · `TakePaneDurabilityTests` ·
+  `TakesArticleRenderTests` · `TakesBoardSoakTests` · `TakesBoardTests` · `QuitFinalizeSurfacesTests` ·
+  `TakesBufferConvergenceTests` · `TakesPresentationTests` · `LensesReorderTests` · `TakesDivideTests` ·
+  `FannedDefaultsBoardTests` · `WriteTakesPanelTests`), the editor family (`EditorSessionTests` ·
+  `ReviewRoundFixTests` · `CommitFlowTests` · `FanFlowTests` · `EditorProjectionEngineTests`), the
+  surfaces that host the changed panes (`ReadModeTests` · `NoteIndexOutlineTests` · `BlockTOCTests` ·
+  `BlocksWorkbenchFaceTests` · `CompareCompositionTests` · `CompareViewModelTests` ·
+  `BookIndexEditingTests` · `PostDetailModeMemoryTests` · `PostDetailRoutingTests` ·
+  `LibraryPanelHostTests`) and the ten `Tutorial*` spine types →
+  **`✔ Test run with 350 tests in 61 suites passed after 93.745 seconds.`** — sixty-one suites for
+  sixty-one `-only-testing` type names, nothing silently dropped; the log's one `skipped` match is the
+  `appintentsmetadataprocessor` build warning, checked by line (`scratchpad/closing.log`).
+- **Core: UNTOUCHED** — `git diff --stat 6d301624..HEAD -- Sources/` is empty. Zero `Sync/`, zero schema.
+  `swift test` therefore not re-run (the batch's baseline stands).
+- **`App/Variorum/Shared/`: UNTOUCHED** (empty diff — `LandingTarget` was reused by name, never edited).
+  The iOS build was run anyway to prove it: `xcodebuild -scheme VariorumMobile -destination
+  'generic/platform=iOS' build` → `** BUILD SUCCEEDED **`.
+
+#### WHAT THE LETTER'S CLOSEOUT INHERITS FROM THIS BATCH
+
+- **No canon delta is owed.** U-20 is a defect ruling on landing behaviour; AppSpec describes no landing
+  offsets and OverallModel none of this. `CurrentBlockMemory`'s persisted string gained a third field —
+  a LOCAL `UserDefaults` value in the scroll-position class, never synced, never schema.
+- **No new QUESTIONS entry.** Nothing here needed a decision the spec and §1 do not make; the two
+  judgment calls below are mechanism, not product, and both are recorded where they happen.
+- **Two judgment calls for the orchestrator's J-list.** **(1)** The offset rides
+  `@ObservationIgnored` beside the observed identity rather than in it, so row 33's "reported only when
+  the block changes" cadence is preserved exactly — a caret walking inside one paragraph still wakes no
+  observer (the alternative, an observable write per keystroke, would re-render the Block History pane
+  at typing rate). **(2)** The reveal is GUARDED: a caret already inside the visible rect scrolls
+  nothing. Her words ask for "the page is scrolled to it"; without the guard a bare arrival hauls the
+  caret's line to the viewport top on every ⌘2-then-⌘1, overriding the scroll anchor `renderFull` had
+  just restored. Both walked; if she wants the unguarded form it is one `if` away.
+- **Mobile parity (for the round's ONE line):** the phone owes a version of **"the caret place travels
+  with the current block"** — its own current-block memory (if any) gains the offset, and its doors into
+  the writing surface land at it. Nothing in this batch is `Shared/`, so the phone inherits nothing by
+  construction.
+- **13u coordination:** this batch touched no 13u item's code. It hands 13u2's restyle continuation two
+  additive seams on surfaces it will re-dress: `PaneSurfaceView.caretOnGoingLive` and
+  `TakesBoardLayout.articleLanding` (both session-only, both consumed at one place).
+
+**Batch b CLOSED at this commit. Everything is committed and pushed; no revert is in flight; the tree is
+clean.**
 
