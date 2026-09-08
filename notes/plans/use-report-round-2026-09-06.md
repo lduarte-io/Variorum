@@ -7427,7 +7427,7 @@ mode's bar-in-the-page).
 
 | Piece | What it is | Status |
 |---|---|---|
-| A | the core read behind the facts line (`Queries.noteStamps`) | **DONE** (`PENDING-hash`) |
+| A | the core read behind the facts line (`Queries.noteStamps`) | **DONE** (`e6b4148c`) |
 | B | the pure brains: the box's state rule, its copy, the rail-height measurement | NOT STARTED |
 | C | the box VIEW + the sidebar's slot + the geometry oracle + the fit math | NOT STARTED |
 | D | the book publishes its subject; `RootView` composes; the facts model | NOT STARTED |
