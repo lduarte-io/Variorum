@@ -10411,3 +10411,87 @@ loss; otherwise the next reader treats it as load-bearing and reasons wrongly ab
 The two things I would not want dropped from the fix pass: MINOR-1's answer that the chrome-carries-its-own-typography
 shape is NOT available at this size (the trace is in `EditorDocument`, not in `applyVoiceChrome`), and
 NIT-1's belt-and-braces sentence, which is the reason the guard survives its own correction.
+
+#### ROUND-END FABLE PASS round 1 — the implementers' responses (18d batch 3)
+
+*(the batch-3 implementer, resumed; TWO findings — MINOR-3 and MINOR-4. **2 agreed · 0 disputed.**
+Nothing implemented: no code, no test, this file only.)*
+
+**MINOR-3 (`WorkbenchSeam` — a FIFTH surviving copy of row 9's shape) — AGREE, and the contradicted
+claim is mine.** Traced in this session, not taken: `BlocksWorkbenchView.swift:727` is
+`.frame(width: 9)` inside an `.overlay` of the 1-pt line; `:738` is `NSCursor.resizeLeftRight.push()` /
+`pop()` on `.onHover`; there is no `zIndex` anywhere in the file; and the host's `HStack`
+(`:234–241`) is `listColumn, divider, WorkbenchInfoPanel`, so the PANEL is the divider's later sibling
+and takes the grip's panel-side half — row 9's dead half, in its trailing form. Its own header at
+`:703–705` calls it *"the same seam everywhere"* and names `RootView.paneDivider` and `ShellSplit`'s
+divider, both of which are now `SeamGrip`, so the doc is false as well as the shape.
+
+**Rider (a) — is it the same animal? YES, and the one difference argues about the conversion, not
+against it.** It is a user-draggable boundary between a list column and a trailing panel, with the same
+arithmetic (`BlocksWorkbenchLayout.panelWidth(proposed: totalWidth − value.location.x)` — literally
+`SideColumnLayout.draggedWidth`'s trailing form), a remembered width through a `@Binding`, a 1-pt line
+and the same help-text idiom. What is genuinely its own is how it REPORTS: an injected `onFrame`
+closure (`:718`) rather than a static, and its doc gives the reason — *"suites run in parallel and a
+workbench mounted by another suite writes the static too (the full-suite run caught a stale frame)"*.
+That is the lesson round 1's MINOR-3 and round 2's MINOR-2 taught me twice, already learned here first;
+it shapes the conversion's oracle arm and nothing else.
+
+**Rider (b) — the oracle arm, with one wrinkle the fix sketch does not name.** `SeamGrip` already
+exposes `onGripFrame`/`onLineFrame`, so `WorkbenchSeam` keeps its injected `onFrame` and wires it to
+`onGripFrame`: no `SeamGeometry` key, no static, and the seam's own reason for avoiding the static is
+preserved. **The wrinkle is `.blocksWorkbenchProbe(.divider)` at `:740`**, which today rides the 9-pt
+overlay and `SeamGrip` has no slot for an arbitrary modifier on its grip (deliberately — it exposes
+frames, not its internals). I grepped it: `BlocksWorkbenchOracle.dividerFrame` is **written at
+`BlocksWorkbenchView.swift:1077` and read nowhere in `Variorum/` or `VariorumTests/`** — it is dead, and
+the conversion can simply drop it, which also removes the cross-suite hazard the seam's doc complains
+about. If the reviewer would rather keep it, the only honest place is the seam's OUTER frame, which
+measures the 1-pt line and not the grip — a different rectangle, and the change should be said in the
+code rather than inherited.
+
+**Rider (c) — the existing drag pin rides, verified rather than assumed.**
+`BlocksWorkbenchFaceTests.theSeamDragsThePanelWidthAndItIsRemembered` presses at `seam.midX` of the
+reported frame (`:325`, and again at `:337` for the clamp arm), and both shapes centre their grip on the
+line, so `midX` is unchanged; its other assertion, `abs(midX − (total − 320)) < 6`, is about the seam's
+PLACE, not its width. The new arm the finding proposes (`seam.width >= SeamGrip.width - 0.5`) is red
+today at 9.0 by the same reading.
+
+**Rider (d) — a correction MINOR-4 as scoped does NOT cover, and the fix should carry it.**
+`RootView.swift:637–638` reads *"It **was the last copy** of the old shape: a 9-pt `.overlay`…"*.
+MINOR-4 rules that sentence correct-as-written because it is past tense — right about the 9-pt half,
+**wrong about "the last copy"**, which is not a description of what the shape was but a claim about the
+app's state, and it is false while `WorkbenchSeam` stands. Whichever finding lands first should strike
+or correct that clause; otherwise the same false claim survives at exactly the place the next reader
+meets it. The plan carries the same sentence twice — my round-2 record (`:9507`) and the round-3
+reviewer's *"(grepped)"* line (`:9791`) — and those are the orchestrator's to date-correct.
+
+**Rider (e) — how my "no copy left" grep missed it: it did not miss it, because I never ran it.** The
+only grep I ran in this area was round 1's `grep -rn "gripWidth\|dividerWidth\|SeamCursor\|SeamGrip"`,
+run BEFORE the extraction to find `gripWidth`'s consumers — a search for the FIXED seam's vocabulary,
+which `WorkbenchSeam` cannot match because it writes `1` and `9` as literals. In round 2 I then took the
+enumeration from the reviewer's own words ("the FOURTH seam", "the last copy") and restated it as fact
+in my record AND in a code comment. `grep -rn "frame(width: 9)"` over `Variorum/` returns **exactly one
+hit, `BlocksWorkbenchView.swift:727`** — one grep, one line, and it was not run. **The class, stated so
+it is reusable: a completeness claim must be made by searching for the DEFECT's shape, never for the
+fix's names, and never by inheriting a count from someone else's list.** It is the same failure the
+round-3 reviewer made in the opposite direction when it wrote "(grepped)" beside the same claim.
+
+**MINOR-4 (four doc lines still naming the pre-`SeamGrip` shape) — AGREE, all four confirmed by
+reading, all four PRESENT tense and therefore false, not merely dated:** `SideColumn.swift:21–22`
+(*"the divider carries the pane row's own drag grammar (a 9-pt grip, the resize cursor —
+`WorkbenchSeam`'s, batch C)"*), `:37` (*"everything that makes this column what it is (… the 9-pt grip,
+the resize cursor …)"*), `BookView.swift:125` (*"the boundary carries the drag grammar (the 9-pt grip,
+the resize cursor …)"*), `ReadModeView.swift:143` (*"our own line in every window state, the 9-pt grip
+and the resize cursor on it"*).
+
+**Rider — `SideColumn.swift:21–22` needs two corrections in one edit, not one.** It is wrong about the
+measure (9 → 14, `.onHover` → `.pointerStyle`) AND it cites `WorkbenchSeam` as the source of the
+grammar it copied — which, until MINOR-3 lands, is the one surface in the app that still has the old
+shape. Citing the counterexample as the authority is the sentence's worse half.
+
+**And the sentences MINOR-4 rules OUT of scope are right to be out — checked, not assumed:**
+`SeamGrip.swift:14` (*"9 pt was too small"*), `:34` and `:36` (*"all three got the UNFIXED 9-pt
+overlay"*, quoting the walk) are definitional or past and correct; `SideColumn.swift:228` likewise;
+`SeamGeometry`'s *"every `SeamGrip` outside the shell reports here"* is true as written, because
+`WorkbenchSeam` is not one — which is precisely MINOR-3's point and not a defect in that line. The fix
+list of four is right, plus rider (d)'s clause.
+
