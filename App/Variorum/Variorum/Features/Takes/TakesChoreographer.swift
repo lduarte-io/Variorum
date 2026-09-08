@@ -169,10 +169,15 @@ final class TakesChoreographer {
             switch landing {
             case .bloom(_, let blockID):
                 model.board.bloom(blockID)
-                if let slot = new.slots.first(where: { $0.blockID == blockID }),
-                   let variantID = slot.variantID {
-                    model.focus(TakesViewModel.PaneKey(
-                        columnID: landingColumnID, blockID: blockID, variantID: variantID))
+                if let slot = new.slots.first(where: { $0.blockID == blockID }) {
+                    if let variantID = slot.variantID {
+                        model.focus(TakesViewModel.PaneKey(
+                            columnID: landingColumnID, blockID: blockID, variantID: variantID))
+                    }
+                    // 17o batch b (row 8): …and the page GOES there. Blooming
+                    // a block below the fold and ringing its pane while the
+                    // article stays at the top is the defect she reported.
+                    model.board.landArticle(on: slot.placementID)
                 }
             }
             landingFocusDone = true
@@ -191,6 +196,12 @@ final class TakesChoreographer {
                 landingFocusDone = true
                 model.landAuthorityFocus(TakesViewModel.PaneKey(
                     columnID: landingColumnID, blockID: slot.blockID, variantID: variantID))
+                // 17o batch b (row 8's rule, the same event): the board
+                // ENTERS on the note's current block, so the page shows it.
+                // Only when the fact named it — the fall-through to the first
+                // slot is already at the top and asking for a scroll there
+                // would fight a restored position for nothing.
+                if current != nil { model.board.landArticle(on: slot.placementID) }
             }
         }
     }

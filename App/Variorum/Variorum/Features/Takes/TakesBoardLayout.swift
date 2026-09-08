@@ -293,6 +293,29 @@ final class TakesBoardLayout {
         expandedBlocks.insert(blockID)
     }
 
+    // MARK: - The article's landing (17o batch b, ledger row 8)
+
+    /// **The slot the article column is asked to scroll to** — a
+    /// `placementID`, which is the article `ForEach`'s own identity (the Act
+    /// 10 ladder's R1-3 lesson: the identity IS the anchor; an explicit `.id`
+    /// drifts under a lazy column's estimate). Her words on row 8: *"open
+    /// takes mode in write from the takes menu is also not automatically
+    /// navigating you to where the take is"* — the board bloomed the block and
+    /// put the ring on its pane, and left the page where it was.
+    ///
+    /// Session-only view geometry, like everything else here. Set once per
+    /// landing, cleared by the article the moment it has scrolled, so a page
+    /// she scrolls afterwards is never hauled back.
+    private(set) var articleLanding: String?
+
+    func landArticle(on placementID: String) {
+        articleLanding = placementID
+    }
+
+    func clearArticleLanding() {
+        articleLanding = nil
+    }
+
     func toggleExpanded(_ blockID: String) {
         if expandedBlocks.contains(blockID) {
             expandedBlocks.remove(blockID)

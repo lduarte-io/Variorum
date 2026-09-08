@@ -549,6 +549,7 @@ struct TakesBoardView: View {
         // instead of hanging a fixed 166pt into space the sidebar owns.
         GeometryReader { proxy in
             let commentRoom = max((proxy.size.width - articleMeasure) / 2, 0)
+            ScrollViewReader { column in
             ScrollView {
                 if model.projection.slots.isEmpty {
                     // Batch 6: an empty post must never be a dead end — blocks
@@ -598,6 +599,19 @@ struct TakesBoardView: View {
                 if !model.projection.slots.isEmpty {
                     typewriterRoom(viewport: proxy.size.height)
                 }
+            }
+            // 17o batch b (ledger row 8, her words: *"open takes mode in write
+            // from the takes menu is also not automatically navigating you to
+            // where the take is"*). The landing named a slot; the page goes
+            // there and the request is spent, so a page she scrolls afterwards
+            // is never hauled back. UNANIMATED and anchored on the ForEach's
+            // OWN identity (the placement id) — the Act 10 ladder's R1-3
+            // lesson about lazy columns and estimate drift, one surface over.
+            .onChange(of: model.articleLanding, initial: true) { _, landing in
+                guard let landing else { return }
+                column.scrollTo(landing, anchor: .top)
+                model.clearArticleLanding()
+            }
             }
         }
     }

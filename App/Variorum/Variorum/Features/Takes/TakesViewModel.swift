@@ -592,6 +592,15 @@ final class TakesViewModel {
         paneCaretLanding?.variantID == variantID ? paneCaretLanding?.offset : nil
     }
 
+    // MARK: - The article's landing (17o batch b, row 8) — the board layout's,
+    // forwarded
+
+    /// The `placementID` the article column is asked to scroll to, or nil.
+    var articleLanding: String? { board.articleLanding }
+
+    /// The article scrolled: the request is spent.
+    func clearArticleLanding() { board.clearArticleLanding() }
+
     /// What a pane rendering `variantID` is handed. Zero for every pane the
     /// room did not name, so nothing else in the board ever sees a change.
     func caretToEndToken(forVariant variantID: String) -> Int {

@@ -3740,10 +3740,11 @@ below marked NOT-STARTED or IN-PROGRESS; the walk; the closing suites.
 1. the fact + the memory + the router + the reporters — **DONE (hash next)**
 2. Write's landing consumes the offset and reveals through `JumpPrimitive` — **DONE (hash next)**
 3. Blocks → Write reveals (row 20) — **DONE (hash next)**
-4. the Takes board's article scrolls to the landed slot (row 8) — **NOT-STARTED**
+4. the Takes board's article scrolls to the landed slot (row 8) — **DONE (hash next)**; its red-on-old
+   is a BEHAVIORAL REVERT, run next (the mechanism is new API, so no pin could compile on the old tree)
 5. the walk + captures + the closing suites — **NOT-STARTED**
 
-**Rows:** 7 · 20 · 42 — **FIXED** (pins below) · 8 — OPEN.
+**Rows:** 7 · 20 · 42 — **FIXED** (pins below) · 8 — **FIXED**, red-on-old PENDING (the revert).
 
 **RED ON OLD, measured before a line moved** (`scratchpad/red-1.log`, tree `35c11948`):
 
@@ -3839,6 +3840,25 @@ Act 10 batch-G record already names, widened by one field. The pin's assertion i
 `swift-version 6`; `scratchpad/suite-3.log` has the backtrace). Factoring the world into one private
 helper (`mountedLongNote(seed:rng:_:)`) compiles and runs; nothing about the pins' assertions changed.
 Recorded so the next session that meets it knows the shape, not just the crash.
+
+**PIECE 4 — the board's article goes where the landing went (DONE; row 8).**
+
+Her words: *"open takes mode in write from the takes menu is also not automatically navigating you to
+where the take is"* — the fan panel's "Open Takes mode" parked `.bloom`, the choreographer bloomed the
+block and put the ring on its pane, and the article column stayed at the top. `TakesBoardLayout` (the
+board's session-only view geometry — its exact remit) gains `articleLanding` / `landArticle(on:)` /
+`clearArticleLanding()`, carrying a **`placementID`** because that is the article `ForEach`'s own
+identity (the Act 10 ladder's R1-3 lesson: the identity IS the anchor; an explicit `.id` drifts under a
+lazy column's estimate). `TakesChoreographer` sets it on the bloom arm **and** on the N9 arm when the
+note's current block named the slot — the same event, one rule: *the board enters on the current block,
+so the page shows it*. The fall-through to the first slot asks for nothing (it is already at the top;
+asking would fight a restored position for nothing). `TakesBoardView.singleColumnArticle` gains a
+`ScrollViewReader` and an `.onChange(of: model.articleLanding, initial: true)` that scrolls
+**unanimated** to the id and spends the request, so a page she scrolls afterwards is never hauled back.
+Pins (`TakesLandingTests` ×3 — model-level, because the real-click rig cannot mount the whole board,
+KnownIssues' rig row; the face is walked): the bloom landing asks for the landed slot · the ⌘2 landing on
+the current block asks for it AND hands its pane the remembered caret offset · the fall-through asks for
+nothing.
 
 **Suites green at this commit** (`scratchpad/suite-2.log`, ONE run, 16 `-only-testing` type names →
 `Test run with 96 tests in 16 suites`): `LandingOffsetTests` (3 of 4 — the row-20 pin is piece 3's, still

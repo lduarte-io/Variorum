@@ -235,6 +235,82 @@ struct TakesLandingTests {
             #expect(session.commandRouter.pendingTakesLanding == nil, "one-shot")
         }
     }
+
+    // MARK: - 17o batch b, ledger row 8 — the landing also SCROLLS
+
+    /// Her words: *"open takes mode in write from the takes menu is also not
+    /// automatically navigating you to where the take is"*. The bloom landing
+    /// (the fan panel's "Open Takes mode") ringed the pane and left the
+    /// article column where it was. Model-level, because the real-click rig
+    /// cannot mount the whole board (KnownIssues' rig row) — the face is
+    /// walked. The requested id is the article `ForEach`'s own identity, the
+    /// placement id.
+    @Test func theBloomLandingAlsoAsksTheArticleToScrollToThatSlot() async throws {
+        try await withSessionWorld { session, db in
+            let post = try session.operations.createPost(title: "scroll to it")
+            for i in 1...12 {
+                _ = try session.operations.newBlock(in: post.id, text: "block \(i) of the note.")
+            }
+            let target = try session.operations.newBlock(in: post.id, text: "the far target block.")
+            session.commandRouter.pendingTakesLanding =
+                .bloom(postID: post.id, blockID: target.block.id)
+            let model = TakesViewModel(session: session, postID: post.id)
+            model.landingEnabled = true
+            let projection = try await db.read { try Queries.takesProjection($0, post: post.id) }
+            model.adopt(projection)
+            let slot = try #require(projection.slots.first { $0.blockID == target.block.id })
+            #expect(model.articleLanding == slot.placementID,
+                    "the article is asked to scroll to the landed slot, not left at the top")
+            // One-shot: the article spends it, and a scroll afterwards stands.
+            model.clearArticleLanding()
+            #expect(model.articleLanding == nil)
+        }
+    }
+
+    /// The same rule at the ordinary ⌘2 landing: the board ENTERS on the
+    /// note's current block (the Act 10 row-39 fact), so the page shows it.
+    @Test func theNineLandingOnTheCurrentBlockAsksTheArticleToScrollThere() async throws {
+        try await withSessionWorld { session, db in
+            let post = try session.operations.createPost(title: "enter on it")
+            for i in 1...8 {
+                _ = try session.operations.newBlock(in: post.id, text: "block \(i).")
+            }
+            let target = try session.operations.newBlock(in: post.id, text: "where she was.")
+            let router = session.commandRouter
+            router.forgetCurrentBlock(for: post.id)
+            defer { router.forgetCurrentBlock(for: post.id) }
+            let token = router.registerDetail(postID: post.id, mode: .write) { _ in }
+            defer { router.unregisterDetail(token) }
+            router.noteFocusedBlock(
+                target.block.id, variantID: target.variant.id, postID: post.id, utf16Offset: 4)
+            let model = TakesViewModel(session: session, postID: post.id)
+            model.landingEnabled = true
+            let projection = try await db.read { try Queries.takesProjection($0, post: post.id) }
+            model.adopt(projection)
+            let slot = try #require(projection.slots.first { $0.blockID == target.block.id })
+            #expect(model.authority.livePane?.blockID == target.block.id)
+            #expect(model.articleLanding == slot.placementID)
+            // …and the pane it rings enters at the remembered caret place.
+            #expect(model.caretLanding(forVariant: target.variant.id) == 4)
+        }
+    }
+
+    /// The fall-through (no fact, or a fact this note does not hold) rings the
+    /// FIRST slot — which is already at the top. Asking for a scroll there
+    /// would fight a restored position for nothing, so nothing is asked.
+    @Test func theFallThroughLandingAsksForNoScrollAtAll() async throws {
+        try await withSessionWorld { session, db in
+            let post = try session.operations.createPost(title: "no fact")
+            _ = try session.operations.newBlock(in: post.id, text: "first.")
+            _ = try session.operations.newBlock(in: post.id, text: "second.")
+            session.commandRouter.forgetCurrentBlock(for: post.id)
+            let model = TakesViewModel(session: session, postID: post.id)
+            model.landingEnabled = true
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: post.id) })
+            #expect(model.authority.livePane != nil, "the ring still lands")
+            #expect(model.articleLanding == nil)
+        }
+    }
 }
 
 // MARK: - D3: fire-and-DO from Takes (the lecture is dead)
