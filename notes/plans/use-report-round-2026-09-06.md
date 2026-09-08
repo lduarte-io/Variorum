@@ -6867,3 +6867,91 @@ zero schema, and the editor seam proper is untouched by every one of them.
 - **NIT-2 (`resolveTitles` test-only, its doc claims callers) — CONFIRMED → batch d.** Delete or demote with an honest doc.
 
 Order of the fix passes: batch e (the MAJOR + MINOR-1) → batch d (MINOR-2 core pin + NIT-2) → batch c (NIT-1). Round 3 (fresh reviewer, the cap) follows — the MAJOR is new inside round 1's fixes.
+
+---
+
+#### 17o c/d/e round 2 — fixes (batch e)
+
+*(the batch-e implementer, resumed; TWO findings — the MAJOR + MINOR-1)*
+
+**MAJOR (the park is not one-shot; a re-mount is not a navigation) — CONFIRMED and FIXED.**
+
+The reviewer's trace held at every step, verified myself before touching anything: `adopt` was the only
+clearer; the landing is applied by `.onAppear`'s `jump(to: initialBlockID)`, which fires on every mount;
+and `RootView` re-creates the detail whenever the pane stops being live — `PaneMount.kind` is
+`windowIsKey && pane == focused`, and pane focus moves through `router.workspace.focus` while window
+key-ness moves through `WindowRegistry`, neither passing a navigation door.
+
+**The park is SPENT when it lands.** The shell's mount calls `router.spendLanding(for:)`, and the
+detail's view identity keys on a **per-container landing GENERATION** (`ShellRouter.landingGeneration(for:)`)
+rather than on the parked block — the reviewer's shape A. That is what makes the spend safe: a NEW park
+bumps the generation and re-creates the editor (so "open it again, at another block" still re-lands
+her), while spending one does not, so the spend cannot rebuild the view it just landed. A container she
+never opened at a block sits at generation 0 forever and its identity never churns.
+
+**One thing I got wrong first and am recording because the comment now carries it:** `.onAppear` has to
+sit **below** the `.id`. Above it, the modifier wraps the identified child and keeps its own lifetime
+across an identity change, so it never fires again — the first cut sat there, the park was never spent,
+and the pin caught it (2 issues). Measured, not reasoned.
+
+**MINOR-1 ("ORDER IS THE FIX" has no pin) — CONFIRMED and FIXED, structure first.**
+
+The landing is folded into the ONE adoption door — `adopt(_ destination:, in pane:, landing: String? = nil)`
+— which clears and installs in a single statement, so the wrong order is **unexpressible** rather than
+merely untaken; `open(_:blockID:in:)` is a one-line forward, and `ShellRouter.BlockLanding` gains the
+failable `init(_ destination:, blockID:)` that decides which destinations can hold a landing (so that
+decision, too, has one home).
+
+**And it is pinned through the REAL road.** The reviewer's point stands exactly: `open` is private,
+every production caller is a view closure, and both existing pins reach past the shell — so the mounted
+shell publishes its block-naming door as `ShellRouter.blockNamingDoor` under `#if DEBUG` (the
+`SidebarGeometry` pattern, authorised by the arbitration; installed beside the other root wiring,
+cleared by the pin's own teardown, read by nothing in production).
+
+**Pins:**
+- `ShellLandingRuleTests` gains `aParkIsSpentOnceAndTheGenerationDoesNotMoveWhenItIs` (both halves of
+  the spend, including the one that stops it rebuilding the landed view) and
+  `onlyAContainerDestinationNamingABlockMakesALanding`.
+- `ShellLandingMountTests.aRemountAfterAFocusRoundTripLandsAtTheRememberedCaret` — the reviewer's
+  scenario: the block door, her caret moved into block 1, a `openBeside` + `focus` round trip, back.
+  **The settle for the split waits for the note's `EditorTextView` to be GONE** — measured: without it
+  SwiftUI coalesces the two focus moves into one update, nothing re-mounts, and the landing assertion
+  stops discriminating (the first cut of this pin passed under the revert probe for exactly that).
+- `ShellLandingDoorTests.theDoorNavigatesAndLeavesItsLandingParked` — one call on the real door:
+  it navigated AND its landing is parked; a door naming no block expires it.
+
+**RED-ON-HEAD / RED-ON-OLD, by behavioral revert on the committed tree** (each armed in place, run,
+then `git checkout --`'d; green again after):
+- **Probe A — the park is never spent** (the mount's `router.spendLanding` removed): **3 issues in 1
+  test** — `landing(for: X) → "…007"` where nil was wanted, at the landing and again after the round
+  trip, and **`remount`** itself, the consequence: the re-mount put her back on the named block instead
+  of the caret she left. That is the MAJOR, red.
+- **Probe B — the reversed order** (`adopt` parking the landing and then clearing, the net effect of
+  round 1's park-after-adopt reversed): **1 issue** — `landing(for: note) → nil` where the door's block
+  was wanted. **And `SnippetsLandingTests` stayed GREEN in the same run**, which is the reviewer's own
+  claim measured: the pre-existing pins reach past the shell, so only the new door pin catches it.
+
+**THE WALK** (dev-store Debug `io.lduarte.Variorum.debug`, rebuilt from the clean committed tree;
+`/Applications/Variorum.app` never launched; zero instances before and after): Snippets → double-clicked
+the *field guide* card — the group opened at **block 2/2**, the parked snippet; clicked into block 1 —
+**block 1/2** (`walk-17`). Then **File ▸ New Window**: the first window went READ-CHEAP — no mode
+picker, no bottom bar, no ring, its detail gone (`walk-18`) — the exact mount flip the finding names.
+Clicking back into the first window re-mounted the detail **live on block 1/2**, the caret she left, not
+the snippet the card door named (`walk-19`). *(`View ▸ Open Beside` was tried first and did nothing —
+with one container open the split has no candidate; the second-window road is the reviewer's other
+named road and is what the walk used.)*
+
+**CLOSING RUN: `✔ Test run with 204 tests in 44 suites passed after 32.239 seconds.`** — forty-four
+suites for forty-four `-only-testing` type names, zero `skipped` lines (`scratchpad/close3.log`): the
+three `ShellLanding*` suites · batch e's own closing set · the pane/window suites the moved state and
+the new `.id`/`onAppear` sit under (`PaneMountTests · PaneLayoutTests · PaneSplitModelTests ·
+PaneBookBlurTests · PaneSplitDoorTests · PaneUnmountTests · PaneFocusCatcherTests · PaneHeldModeTests ·
+PaneMountWindowTests · WindowUnmountTests · IndependentWorkspaceTests · TwoWindowMountTests`) · the
+navigation suites · the ten `Tutorial*` spine types.
+
+**Seams:** the two fix commits (`01a0f6e8`, `70142a50`) touch `ShellRouter.swift`, `RootView.swift` and
+`ShellLandingTests.swift` only — ZERO `Sources/`, ZERO `Sync/`, ZERO `App/Variorum/Shared/`, no schema,
+no migration, nothing in `BlockRangeIndex`/`EditorTextView`/`PaneTextAuthority`.
+
+**Counts for the round-2 fix pass (batch e): 2 findings, both FIXED — the MAJOR with a 3-issue probe and
+the walk, MINOR-1 with a 1-issue probe through a door that had no reachable road before.**
