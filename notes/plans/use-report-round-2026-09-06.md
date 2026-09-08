@@ -7660,7 +7660,7 @@ recovery/purge op was touched). The walk is PENDING at this line.
 | piece | state |
 |---|---|
 | the pure brain (`TrayFilter`/`TrayFilterFace`/`TrayViewMemory`) + the copy + the panel rebuilt + the migrated pins | DONE (this commit) |
-| the red-on-old probe of the fold pin, in a scratch worktree at `30f99fd0` | NOT-STARTED |
+| the red-on-old probe of the fold pin, in a scratch worktree at `30f99fd0` | DONE — both claims RED (below) |
 | the walk on the dev-store Debug build, both voices, 8 captures | NOT-STARTED |
 | QUESTIONS #100 (the archived explainer's departure from figure D's caption) | NOT-STARTED |
 | the closing runs (the touched Mac suites + the ten `Tutorial*Tests` spine types, ONE run) | NOT-STARTED |
@@ -7722,3 +7722,21 @@ recovery/purge op was touched). The walk is PENDING at this line.
   `NoteTrayTests`' four put-back arms and the sealed diagnosis, `TrayPanelMoveTests.theLeavingSectionPutsATakeBack`
   and `…DeleteNowConfirmsThenPurgesForGood`, `thePurgeDoorRendersOnTrashSurfacesAndNowhereElse`,
   the reveal trio.
+
+**RED ON OLD, measured on the real pre-batch code** (a scratch `git worktree` at `30f99fd0` in the
+session scratchpad — outside the working tree, its own DerivedData, nothing in the repo edited; the
+worktree removed and pruned afterwards, `git worktree list` back to `main` + the mobile worktree,
+`git status` clean). A probe file carrying the batch's two new claims, written against the OLD API so
+it compiles there: **`✘ Test run with 1 test in 1 suite failed after 0.254 seconds with 2 issues`** —
+
+- `:36` `SurfaceComposition.carries("The take's own words", in: shown)` **FAILED** — the deleted take
+  was nowhere in the panel's tree: the fold was collapsed by default (`takesShown = false`), so its
+  `ForEach` was never built. This is the fold, measured.
+- `:39` `!SurfaceComposition.carries("1 deleted take", in: shown)` **FAILED** — the fold's own label
+  was in the tree. (It matched because `chromeLabel` lowercases in Terminal and that string is already
+  lowercase; the same mechanism is why the tab words and the explainers are pinned as VALUES in
+  `TrayFilterTests` rather than through the composition dump.)
+- The third arm — `carries("A deleted block's preview")` — **PASSED on old**, so the two failures are
+  the fold and not a broken fixture. The old dump also shows what the reorganization removed: two
+  `Variorum.CalmSectionHeader`s stacked in one `LazyVStack`, with the takes' `ForEach` inside an
+  `Optional<TupleView<…>>` behind the disclosure Button.
