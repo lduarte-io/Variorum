@@ -313,6 +313,72 @@ struct ShellChromeTests {
         }
     }
 
+    /// **Row 9 — the seam's grip is wide, centred, and reaches into the
+    /// detail.** Her words: *"the hitbox for adjusting the size of the left
+    /// bar … too small … sometimes the I looking pointer."* It was a 9-pt
+    /// `.overlay` on the 1-pt line, so it was not a layout participant at
+    /// all — and the detail, the HStack's next sibling, drew and hit-tested
+    /// after it, taking every point right of the line. She could reach about
+    /// four points, on the sidebar side only.
+    ///
+    /// The claim a pin can hold is the geometry: the grip's own frame, ≥ 12
+    /// pt, centred on the line, and reaching past the line on BOTH sides.
+    /// The z-order half and the cursor half are the walk's (a pushed
+    /// `NSCursor` versus the text view's own cursor rects is not something
+    /// a mounted view can be asked about).
+    ///
+    /// RED ON OLD, measured: grip `(206.0, 52.0, 9.0, 792.0)` against a line
+    /// at `(210.0, …, 1.0, …)` — nine points wide and reaching only four
+    /// past the line's leading edge, which is the half over the sidebar. The
+    /// grip is `(203.5, …, 14.0, …)` now: centred on the seam and seven
+    /// points into each side.
+    @Test func theSeamsGripIsWideCentredAndReachesIntoBothSides() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 9))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let router = ShellRouter()
+            #if DEBUG
+            ShellGeometry.reset()
+            #endif
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 1000, height: 760),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let hosting = NSHostingView(
+                rootView: RootView(session: session, services: nil, router: router))
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            #if DEBUG
+            for _ in 0..<300 where ShellGeometry.dividerGripFrame == nil {
+                hosting.layoutSubtreeIfNeeded()
+                window.displayIfNeeded()
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(10))
+            }
+            let grip = try #require(ShellGeometry.dividerGripFrame,
+                                    "the grip publishes a frame of its own")
+            let line = try #require(ShellGeometry.dividerLineFrame)
+            print("[17o d row 9] grip \(grip) · line \(line)")
+            #expect(grip.width >= 12,
+                    "a reachable target, not the old 9: \(grip.width)")
+            #expect(abs(grip.midX - line.midX) <= 0.5,
+                    "centred on the seam: \(grip.midX) vs \(line.midX)")
+            #expect(grip.minX < line.minX - 4 && grip.maxX > line.maxX + 4,
+                    "…and it reaches into the sidebar AND the detail: \(grip) vs \(line)")
+            #expect(grip.height >= 100, "it runs the seam, not a handle")
+            #endif
+        }
+    }
+
     @Test func theSidebarWidthIsClampedToAUsableColumn() {
         #expect(ShellSplit<EmptyView, EmptyView>.clamped(10) == 180)
         #expect(ShellSplit<EmptyView, EmptyView>.clamped(210) == 210)
