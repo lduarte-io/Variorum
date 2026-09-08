@@ -197,6 +197,30 @@ struct TrayFilterTests {
                 "a take names its block through the ONE block-naming rule")
     }
 
+    /// **THE THREE CONSTANTS THE PHONE STILL CONSUMES** (18d's round-1
+    /// ladder, MINOR-4). The Mac retired all three at this batch — the two
+    /// section headers became the segmented choice's two words, the fold's
+    /// label became the `takes` chip's count — and deleting them from the
+    /// SHARED copy home would have broken the next `main` → `mobile` pull in
+    /// four places, which `iOS BUILD SUCCEEDED` on `main` cannot see because
+    /// the file that consumes them (`VariorumMobile/Features/Write/
+    /// MobileNoteTray.swift`) does not exist on this branch.
+    ///
+    /// So this pin is the guard the compiler cannot be here: the three keep
+    /// their exact words until the phone's tray is reorganized to U-9's
+    /// shape, and that session removes them with its own last call site.
+    @Test func theRetiredSectionWordsStayForThePhonesTray() {
+        #expect(RecoveryCopy.trayArchivedSection == "Archived \u{2014} kept, no clock")
+        #expect(RecoveryCopy.trayLeavingSection
+            == "Leaving \u{2014} on the \(TrashWindow.days)-day clock")
+        #expect(RecoveryCopy.trayTakesDisclosure(1) == "1 deleted take")
+        #expect(RecoveryCopy.trayTakesDisclosure(3) == "3 deleted takes")
+        // …and the MAC's own control does not speak them: the two views are
+        // the tab words, and the fold is gone from this app.
+        #expect(TrayFilterFace.tab(.archived) != RecoveryCopy.trayArchivedSection)
+        #expect(TrayFilterFace.tab(.leaving) != RecoveryCopy.trayLeavingSection)
+    }
+
     // MARK: - The reveal
 
     /// A mark under the other tab is a mark she cannot see: the panel opens

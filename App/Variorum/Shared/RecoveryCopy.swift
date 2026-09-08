@@ -202,6 +202,36 @@ nonisolated enum RecoveryCopy {
     static let trayArchivedTab = "Archived"
     static let trayLeavingTab = "Leaving"
 
+    // MARK: The two section HEADERS these replaced — KEPT FOR THE PHONE
+    //
+    // **18d's round-1 ladder, MINOR-4.** Batch 2 deleted the three constants
+    // below on the "dead code removed, not parked" standard, reasoning that
+    // the words *"stay in the one copy home, which both apps compile."* They
+    // do not: the phone's tray face is not on `main`. On the `mobile` branch
+    // all three are live consumers (`VariorumMobile/Features/Write/
+    // MobileNoteTray.swift` and that branch's own `TrayPanel.swift`), so the
+    // deletion would have broken the next `main` → `mobile` pull in four
+    // places — a break `iOS BUILD SUCCEEDED` on `main` cannot see, because
+    // the file that consumes them does not exist here.
+    //
+    // They stay, each marked retired-on-Mac, until the phone's tray is
+    // reorganized to U-9's shape; that session removes them with its own
+    // last call site. (`trayLeavingExplainer` is NOT restored to its long
+    // form: the Mac's shrunk sentence is correct here — the filter names the
+    // populations — and the phone's copy regression, whose tray still has
+    // stacked sections and a fold, is carried in the round's MOBILE PARITY
+    // LINE as the phone's own work.)
+
+    /// **Archived blocks — kept, forever, no clock.** RETIRED ON THE MAC at
+    /// 18d batch 2 (U-9 — the tab word above replaced it); the phone's tray
+    /// still consumes it until its own reorganization.
+    static let trayArchivedSection = "Archived \u{2014} kept, no clock"
+
+    /// **The leaving section** (her G5 ruling). RETIRED ON THE MAC at 18d
+    /// batch 2 (U-9); the phone's tray still consumes it until its own
+    /// reorganization.
+    static let trayLeavingSection = "Leaving \u{2014} on the \(TrashWindow.days)-day clock"
+
     /// **The filter under both views** — one row, three chips, shared by the
     /// two views so the control never changes shape under her hand (figure
     /// D). `all` carries no count (the segment above it does); a kind chip
@@ -324,11 +354,17 @@ nonisolated enum RecoveryCopy {
             + "not in the tray."
     }
 
-    // (`trayTakesDisclosure` — the *"▸ N deleted takes"* fold's label —
-    //  RETIRED at 18d batch 2. Her ruling U-9 makes the takes a FILTER
-    //  rather than a disclosure hidden under the block cards, and the count
-    //  it carried is now the `takes` chip's own (`trayFilterChip`) — still
-    //  visible without opening anything, which was the fold's one virtue.)
+    /// The takes disclosure's label — collapsed by default, carrying its
+    /// count either way, because a fold that hides its own size is not an
+    /// audit. **RETIRED ON THE MAC at 18d batch 2:** her ruling U-9 makes the
+    /// takes a FILTER rather than a disclosure hidden under the block cards,
+    /// and the count it carried is the `takes` chip's own
+    /// (`trayFilterChip`) — still visible without opening anything, which was
+    /// the fold's one virtue. The phone's tray still consumes it (the ladder's
+    /// MINOR-4; see the note above) until its own reorganization.
+    static func trayTakesDisclosure(_ count: Int) -> String {
+        count == 1 ? "1 deleted take" : "\(count) deleted takes"
+    }
 
     /// A take row NAMES ITS BLOCK (her A3 discipline: *"a deleted take
     /// definitely needs to name both note & block or it's kinda useless"* —
