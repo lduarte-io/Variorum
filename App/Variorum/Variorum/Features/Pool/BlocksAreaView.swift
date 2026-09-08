@@ -210,7 +210,15 @@ struct BlocksAreaView: View {
                 role: tagFilter == nil ? .quiet : .primary
             ) {
                 Button(SnippetsCopy.tagAny) { tagFilter = nil }
-                ForEach(SnippetFilter.tagPaths(area.items), id: \.self) { path in
+                let paths = SnippetFilter.tagPaths(area.items)
+                // Row 39's other half (the walk's finding): with nothing
+                // tagged, this menu was one dead row — a tag-shaped control
+                // on a page with no visible way to tag. It names the door
+                // now, exactly as the bulk tag menu's empty case does.
+                if paths.isEmpty {
+                    Button(SnippetsCopy.tagNoneYet) {}.disabled(true)
+                }
+                ForEach(paths, id: \.self) { path in
                     Button("#\(path)") { tagFilter = path }
                 }
             }

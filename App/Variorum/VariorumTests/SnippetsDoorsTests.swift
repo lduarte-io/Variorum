@@ -264,6 +264,21 @@ struct SnippetTagDoorTests {
                 "the chip says it is a door")
     }
 
+    /// **The walk's finding, pinned** (row 39's other half): with no snippet
+    /// in the listing wearing a tag, the toolrow's tag FILTER offered exactly
+    /// one row, "tag: any" — a tag-shaped control on a page with no visible
+    /// way to tag anything, which is what her *"there's a tag on there"* was
+    /// looking at (capture `walk-07`). The empty case names the real door.
+    @Test func theTagFilterNamesTheDoorWhenNothingIsTagged() {
+        #expect(SnippetFilter.tagPaths([]).isEmpty,
+                "the empty listing is the case the menu now has words for")
+        #expect(SnippetsCopy.tagNoneYet.localizedCaseInsensitiveContains("tag"))
+        #expect(SnippetsCopy.tagNoneYet.localizedCaseInsensitiveContains("Tags\u{2026}"),
+                "it names the door by the words on it")
+        #expect(!SnippetsCopy.tagNoneYet.localizedCaseInsensitiveContains("pool"))
+        #expect(!SnippetsCopy.tagNoneYet.localizedCaseInsensitiveContains("scrap"))
+    }
+
     /// **Red-on-old, and the only genuinely old-failing string here:** the
     /// sheet the door opens told her to make a tag in "the sidebar's Tags
     /// section" — a room gone since R52 moved tag management into Settings.

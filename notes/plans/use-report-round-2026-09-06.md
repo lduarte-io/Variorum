@@ -5794,7 +5794,10 @@ card's **`#path` chips**. Which of the two she saw is settled at the walk and re
    (`PENDING-HASH`)**
 3. the pins (the brain, the landing mount, the copy) — **DONE (`PENDING-HASH`)**
 4. the red-on-old by behavioral revert on the committed tree — **DONE (`PENDING-HASH`)**
-5. the walk + captures + the closing suites — **NOT STARTED**
+5. **row 39's other half, found BY the walk** — the tag filter's empty case names the door — **DONE
+   (`PENDING-HASH`)**
+6. the walk + captures + the closing suites — **IN PROGRESS** (rows 38 walked in both voices; row 39's
+   chip door and the filter's new words still to capture; the closing suites not run)
 
 **What landed in pieces 1 + 2:**
 
@@ -5871,3 +5874,18 @@ committed before every one, and clean after):
   a direct tree walk (the `MastheadTagDoorTests` finding). **That inch is closed by the WALK below**,
   which uses the real doors on the real build — which is exactly why this round's acceptance gate is
   USE and not a pin (§5.3, rule 4).
+
+**PIECE 5 — WHAT THE WALK FOUND, and the second half of row 39 it earned.** The brief asked me to
+*"confirm and record whether the tag she saw on her snippet was the tutorial's seeded one."* **It was
+not, and there is no such thing.** Traced first (every `applyTag` in `TutorialSeeder` is `toPost:`;
+`applyTag(…, toBlock:)` appears in the whole app and core only at three USER doors), then SEEN: on the
+dev store's Snippets page not one of the five snippets wears a tag chip (`walk-01`, `walk-05`). What IS
+"on there" is the toolrow's tag **FILTER** — and opened on a listing with nothing tagged it offered
+exactly ONE row, "tag: any" (`walk-07`): a tag-shaped control on a page with no visible way to tag
+anything. That is what her sentence was looking at, and the chip-as-door alone would never have
+answered it, because with nothing tagged there is no chip. So row 39 has a second half: **the filter's
+empty case names the real door** — `SnippetsCopy.tagNoneYet`, a quiet disabled row, the exact idiom the
+bulk tag menu's own empty case already uses two screens away in the same file, worded as the field
+guide words it (*"right-click a scrap row … and Tags… opens its tag sheet"*). No new act, no new
+surface, no invention — an existing control made honest (the J8 copy-truth doctrine this round runs on).
+Pinned: `theTagFilterNamesTheDoorWhenNothingIsTagged`.

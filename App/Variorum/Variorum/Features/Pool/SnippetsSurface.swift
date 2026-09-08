@@ -72,6 +72,14 @@ nonisolated enum SnippetsCopy {
 
     // Filters.
     static let tagAny = "tag: any"
+    /// 17o batch e (row 39, the WALK's finding): with no snippet in the
+    /// listing wearing a tag, this menu offered exactly ONE row — "tag:
+    /// any" — a tag-shaped control on a page with no visible way to tag
+    /// anything. That is what *"you can't tag snippets but there's a tag on
+    /// there"* was looking at. The empty case now names the door, in the
+    /// bulk tag menu's own idiom (a quiet disabled row, two screens away in
+    /// this same file) and in the field guide's own words.
+    static let tagNoneYet = "no snippet here wears a tag yet \u{2014} right-click one \u{25B8} Tags\u{2026}"
     static func tagFilter(_ path: String) -> String { "tag: \(path)" }
     static func sortLabel(_ sort: SnippetSort) -> String { "sort: \(sort.rawValue)" }
 
@@ -107,6 +115,7 @@ nonisolated enum SnippetsCopy {
             bulkArchive, bulkDelete, bulkClear, tagAny, tagFilter("x"),
             sortLabel(.recent), takesBadge(2), words(2), edited("today"),
             movedSnippets(2, to: "x"), groupCreated("x"), tagChipHelp,
+            tagNoneYet,
         ]
     }
 }
