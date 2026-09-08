@@ -140,6 +140,66 @@ struct BookIndexEditingTests {
         "pane:\(BookIndexEditModel.columnID)|\(variantID)"
     }
 
+    /// **Row 21 — the chapter count and the row ⋯ end in one column.** Her
+    /// punchlist 5 (image 7): *"the number of notes per chapter should be
+    /// better aligned with the ⋯ menu."* The chapter row's count was a bare
+    /// `Text` flush against the row's trailing padding; the note row's
+    /// `Menu` (`.borderlessButton`) reserved room for a disclosure chevron,
+    /// so its ⋯ sat inboard of the count above it. Both now end in
+    /// `BookIndexColumn.trailingColumn`, and the chevron is hidden.
+    ///
+    /// (Pinned HERE rather than in `BookIndexColumnTests`, which the brief
+    /// names: that suite is pure column logic with no mount, and a claim
+    /// about two rectangles needs the real rows on screen — this file owns
+    /// the book mount.)
+    ///
+    /// **The pin had to be re-shaped once, and the first shape is recorded
+    /// because it was HOLLOW:** comparing the two views' trailing edges
+    /// passes on both trees (measured — count `maxX` 282.0, menu `maxX`
+    /// 282.0 before the fix). The chevron is drawn INSIDE the menu's own
+    /// control, so the boxes always ended together and only the GLYPH sat
+    /// inboard. The claim that can see it is the control's WIDTH: 28 pt for
+    /// ⋯-plus-chevron against the 22-pt column both rows now end in.
+    ///
+    /// RED ON OLD: the note menu's control measures wider than the trailing
+    /// column, because it is reserving room to the right of its ⋯.
+    @Test func theChapterCountAndTheRowMenuEndInOneTrailingColumn() async throws {
+        try await withIndexBook { session, db, readingID, _, _ in
+            let model = BookViewModel(session: session, readingID: readingID)
+            model.adopt(try await db.read { [readingID] in
+                try Queries.assembleReading($0, readingID: readingID)
+            })
+            let structure = try await loadedStructure(session: session, db: db, readingID: readingID)
+            structure.mode = .index
+            #if DEBUG
+            BookIndexGeometry.reset()
+            #endif
+            let (window, hosting) = mounted(
+                session: session, readingID: readingID, model: model, structure: structure)
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            #if DEBUG
+            await settle(window, hosting, until: {
+                BookIndexGeometry.chapterCountFrame != nil
+                    && BookIndexGeometry.noteMenuFrame != nil
+            })
+            await settle(window, hosting, until: { false }, maxTurns: 6)
+            let count = try #require(BookIndexGeometry.chapterCountFrame,
+                                     "a chapter row reported its count")
+            let menu = try #require(BookIndexGeometry.noteMenuFrame,
+                                    "a note row reported its ⋯")
+            print("[17o d row 21] count \(count) · menu \(menu)")
+            #expect(count.width > 0 && menu.width > 0)
+            #expect(menu.width <= BookIndexColumn.trailingColumn,
+                    "the ⋯ control reserves no room to its right — 28.0 with the chevron, now \(menu.width)")
+            #expect(abs(count.maxX - menu.maxX) <= 1,
+                    "…and both end in the one column: count \(count.maxX), ⋯ \(menu.maxX)")
+            #endif
+        }
+    }
+
     /// Row 22: a landing on note 1's THIRD block makes exactly that block
     /// live — one editable pane in the whole book — and a second landing
     /// on another note MIGRATES the ring rather than adding one.

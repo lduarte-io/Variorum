@@ -40,7 +40,31 @@ import VariorumCore
 /// or one flat run) folded and filtered into the rows the column draws.
 /// Pure so the fold/filter behavior is pinned, not observed
 /// (`BookIndexColumnTests`).
+#if DEBUG
+/// Row 21's oracle (17o batch d): the two trailing glyphs' frames, in the
+/// window's own space — "the chapter count lines up with the ⋯" is a claim
+/// about two rectangles, held the way rows 58/80 hold the masthead's.
+@MainActor
+enum BookIndexGeometry {
+    static var chapterCountFrame: CGRect?
+    static var noteMenuFrame: CGRect?
+
+    static func reset() {
+        chapterCountFrame = nil
+        noteMenuFrame = nil
+    }
+}
+#endif
+
 nonisolated enum BookIndexColumn {
+    /// **The ONE trailing column both row kinds end in** (17o batch d,
+    /// ledger row 21; her punchlist 5, image 7). The chapter row's count was
+    /// a bare `Text` flush against the row's padding while the note row's
+    /// `Menu` reserved room for a disclosure chevron, so the two glyphs
+    /// ended at different x. A shared column is the calm fix: neither row
+    /// has to know what the other draws.
+    static let trailingColumn: CGFloat = 22
+
     struct Group: Equatable {
         /// Stable fold identity: the chapter's row id, `"path:" + path`
         /// for a tag-grouping run, `"unfiled"` for the trailing strays.
@@ -357,6 +381,14 @@ struct BookIndexView<Masthead: View>: View {
             Text("\(count)")
                 .font(tokens.small)
                 .foregroundStyle(tokens.faint)
+                // Row 21 (her punchlist 5, image 7): the count and the note
+                // rows' ⋯ end in ONE trailing column, so the two line up.
+                .frame(width: BookIndexColumn.trailingColumn, alignment: .trailing)
+                #if DEBUG
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+                    BookIndexGeometry.chapterCountFrame = $0
+                }
+                #endif
         }
         .padding(.horizontal, 8)
         .padding(.top, 10)
@@ -526,9 +558,26 @@ private struct BookIndexNoteRow: View {
             Spacer(minLength: 4)
             Menu("⋯") { menu() }
                 .menuStyle(.borderlessButton)
+                // Row 21, THE mechanism: a borderless menu draws a disclosure
+                // chevron and reserves room for it INSIDE its own control, so
+                // the ⋯ sat several points inboard of the chapter count above
+                // it while the two boxes ended at the same x — which is why
+                // her eye saw it and a frame comparison could not. Hidden
+                // here, the control is the glyph alone (measured: 28.0 pt →
+                // 15.0 pt, inside a 22-pt column).
+                .menuIndicator(.hidden)
                 .fixedSize()
                 .controlSize(.mini)
                 .opacity(hovering || selected ? 1 : 0.25)
+                #if DEBUG
+                // Probed on the NATURAL control, before the shared column,
+                // because its WIDTH is the claim: the chevron's reserved room
+                // is what moved the glyph.
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+                    BookIndexGeometry.noteMenuFrame = $0
+                }
+                #endif
+                .frame(width: BookIndexColumn.trailingColumn, alignment: .trailing)
         }
         .padding(.vertical, 4)
         .padding(.horizontal, 8)
