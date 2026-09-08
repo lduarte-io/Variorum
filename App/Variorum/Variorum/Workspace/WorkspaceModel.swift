@@ -441,7 +441,26 @@ final class WorkspaceModel {
         }
     }
 
-    /// The ONE-SHOT read, kept for callers that want a single resolution.
+    /// The ONE-SHOT read — **and it has no production caller** (17o c/d/e
+    /// ladder round 2, NIT-2; verified by grep, twice). Row 18 replaced the
+    /// strip's one-shot with `observeTitles` above, and `SidebarView`'s is the
+    /// only `.task` that resolves titles at all. What survives here is the
+    /// TESTS' single resolution: two suites want the map settled once, without
+    /// holding an observation task to get it — `NodSetTests`'
+    /// `theChromeNamesAnUntitledNoteByItsDate` (K1's "Untitled" is a NAME, and
+    /// every per-kind fallback) and `WorkspaceNavigationTests`'
+    /// `titlesResolveForEveryKindOnScreen`.
+    ///
+    /// It is demoted rather than deleted deliberately: those two claims are not
+    /// covered by the held road's pins (pools, tags and the K1 semantics are
+    /// theirs alone), and folding them onto `readTitles` would re-type the
+    /// subjects-and-empty-guard logic in test code — a worse copy than this one.
+    ///
+    /// **A NEW SURFACE TAKES `observeTitles`, NOT THIS.** Adopting the one-shot
+    /// re-creates exactly her row-18 complaint — *"renaming a note won't rename
+    /// it on the sidebar until you click on something else"* — because the only
+    /// thing that re-runs it is a change of `titleSubjectsKey`, which a rename
+    /// does not touch.
     func resolveTitles(session: AppSession) async {
         let subjects = titleSubjects
         guard !subjects.isEmpty else {
