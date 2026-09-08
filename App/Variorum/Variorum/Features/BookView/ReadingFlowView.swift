@@ -676,6 +676,16 @@ nonisolated enum FlowHeightEstimate {
     /// reserved nothing and stood one line tall until its text arrived.
     static let defaultColumnWidth: CGFloat = 600
 
+    /// 18d batch 4 (U-12): the stamp a REMEMBERED story size carries on
+    /// disk (`SurfaceSizeMemory.Record`). The page's type is the flow's
+    /// own and voice-independent — a fixed system serif at `fontSize`, a
+    /// fixed gap and line spacing — so this is the page's metrics, NOT
+    /// `EditorTypography.fingerprint` (which would drop every remembered
+    /// story on a voice switch that moved nothing on this page). It exists
+    /// so that if the page's own type ever moves, the memories taken under
+    /// the old one are refused rather than reserved.
+    static let fingerprint = "page-\(Int(fontSize))-\(Int(paragraphGap))-\(Int(lineSpacing))"
+
     /// Does a REMEMBERED size apply at this column width? Ladder R2-1 —
     /// R1-1's rule reaches the flow: a size measured at another width is
     /// not this story's height here (a 600-pt column's 20,000 pt is ~26,000
@@ -889,7 +899,7 @@ private struct FlowStoryRow: View {
                 StableSurface(
                     known: known, followsShrinks: false,
                     settleInterval: ReadingFlowView.surfaceSettleInterval,
-                    settled: onSettled,
+                    settled: settledHere,
                     remember: { memory.remember(entry.postID, $0) }
                 ) {
                     FlowPostView(
@@ -902,7 +912,7 @@ private struct FlowStoryRow: View {
                             memory.remember(
                                 entry.postID,
                                 CGSize(width: width, height: FlowHeightEstimate.emptyNoteHeight))
-                            onSettled()
+                            settledHere()
                         })
                 }
                 .onAppear { materialized() }
@@ -914,6 +924,16 @@ private struct FlowStoryRow: View {
             near: $near, margin: ReadingFlowView.nearMargin, space: ReadingFlowView.flowSpace,
             armed: heightKnown))
         .onChange(of: near, initial: true) { _, isNear in onNear(isNear) }
+    }
+
+    /// 18d batch 4 (U-12): this story SETTLED — the one occasion its
+    /// remembered length reaches the disk, and the landing's "this row is
+    /// done moving" in the same breath. Both settle roads come through
+    /// here: the surface's own announcement (R2-2) and R2-9's empty-read
+    /// road, which stands in for it when the surface is too short to speak.
+    private func settledHere() {
+        memory.persist(entry.postID)
+        onSettled()
     }
 
     /// The column's width for this row's geometry — the reported one, else

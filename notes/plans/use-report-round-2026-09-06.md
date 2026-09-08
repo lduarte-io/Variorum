@@ -8172,4 +8172,61 @@ width is the boundary's screen x minus 231):
 
 ### R-13 · RECORD (the implementer writes here from its first commit)
 
-*(empty until the implementer's first commit)*
+**NOT DONE (the record's first line, per rule 9):** nothing yet — the walk, the pins and the closing
+runs are PENDING at this commit. This line is rewritten at the close with whatever was genuinely left.
+
+**One acceptance unit:** ONE local-only memory (`SurfaceSizeMemory`, now persisted) and its TWO
+consumers (the book Outline's expanded notes; the Read ▸ Scroll flow's stories). Row 25 · U-12.
+
+**What the batch does NOT touch:** `Sources/VariorumCore/Sync/` (zero), the schema (zero — the memory
+is local-only view state, no migration, no lockstep event), `BlockRangeIndex`/`EditorTypeView`, and
+**`StableSurface`'s settle rule itself** (the brief's own fence): the reservation, the width refusal
+and R1-1's adopt-taller-or-shorter are byte-identical, and `StableSurfaceTests` rides unmodified —
+the only line that moved in that file is its header comment.
+
+#### The store — the decision the brief left open
+
+**UserDefaults, not a local-only table.** The count does not argue: ONE key per note per surface
+family, `surfaceSize.outline.<postID>` / `surfaceSize.flow.<postID>`, ~40 bytes each — exactly the
+shape the app already ships twice (`currentBlock.<postID>` from the Act 10 correction round's batch C,
+`postMode.<postID>`). A thousand notes browsed in both surfaces is ~2,000 keys ≈ 80 KB. A table would
+owe a migration for view state that a `defaults delete` should be allowed to end. **No schema commit
+is owed and none was made.**
+
+**The write cadence — the batch's real design.** `remember` is called at GEOMETRY cadence (every
+report while a surface loads, and on every keystroke's height change in the Outline's live editor,
+`followsShrinks: true`), and `UserDefaults.standard.set` costs ~100 µs a call on this machine
+(measured at 17o batch b). So `remember` writes the SESSION record only; the disk is written by
+`persist`, called from `StableSurface`'s existing `settled` announcement (ladder fix 2, R2-2) — the
+moment a surface has held one size for the settle interval, adopted it and dropped its reservation.
+A settle that re-adopts the size already on disk writes nothing (`written` cache). This is why NO
+change to `StableSurface` was needed: the seam it needed already existed, and the Outline simply
+started passing the `settled:` closure it had been leaving nil.
+
+**The typography stamp (the brief's "voice + fontSize").** The app has NO font-size setting — grepped:
+`font_size`/`textSize`/`fontScale` appear nowhere in `Sources/` or `App/`. What actually moves a note's
+height at the SAME width is the resolved typography: the voice (Terminal's 14-pt monospace ↔ Study's
+16-pt Iowan) and inline comments (a strip's room per paragraph). So each record carries `w|h|fingerprint`
+and a record whose fingerprint is not the current one is refused exactly as a record at another width is.
+Two fingerprints, one per key space, because the two surfaces are typed by different things:
+`EditorTypography.fingerprint` (fontName-pointSize-paragraphGap, derived from `Resolved` itself so a
+future dial moves it for free) for the Outline, and `FlowHeightEstimate.fingerprint` (`page-16-13-6`)
+for the flow, whose page is a fixed system serif and voice-independent — one app-wide stamp would have
+dropped every remembered story on a voice switch that moved nothing on that page.
+
+#### Pieces
+
+- **PIECE A — the persisted store + its two consumers. DONE (PENDING_A).**
+  `App/Variorum/Variorum/Core/Views/SurfaceSizeMemory.swift` (new — split out of `StableSurface.swift`,
+  grown into the persisted store: `Namespace` · `Record` (`w|h|fingerprint`, tenth-of-a-point, an
+  unreadable record is simply no memory) · `size` / `remember` / `persist` / `forget`; the no-arg
+  `init()` stays session-only so `ReadingFlowEstimateTests`' host rides unmodified);
+  `Theme/EditorTypography.swift` (+`fingerprint`); `Features/BookView/ReadingFlowView.swift`
+  (+`FlowHeightEstimate.fingerprint`, +`FlowStoryRow.settledHere()` — BOTH settle roads, the surface's
+  announcement and R2-9's empty-read road, persist); `Features/BookView/BookViewModel.swift` (the dict
+  becomes `outlineSurfaceSizes`, `flowSurfaceSizes` gains its namespace, +`persistSurfaceSize`);
+  `Features/BookView/BookView.swift` (the two Outline `StableSurface` call sites pass `settled:`).
+  Mac Debug build green.
+- **PIECE B — the pins. NOT-STARTED.**
+- **PIECE C — the walk on the dev-store Debug build + captures. NOT-STARTED.**
+- **PIECE D — the closing runs + dispositions. NOT-STARTED.**

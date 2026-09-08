@@ -67,6 +67,24 @@ nonisolated enum EditorTypography {
         return Resolved(font: font, paragraphSpacing: gap)
     }
 
+    /// 18d batch 4 (U-12): the CURRENT text-surface typography as one short
+    /// token — the stamp a remembered surface size carries
+    /// (`SurfaceSizeMemory.Record`), so a height measured in Terminal's
+    /// 14-pt monospace is never reserved for Study's 16-pt Iowan, and a
+    /// height measured without inline comments is never reserved with them.
+    ///
+    /// Derived from `Resolved` itself rather than from the settings, so any
+    /// future dial that reaches the surface through `resolve` moves the
+    /// stamp for free — a dial that changes the type and not this string
+    /// would leave stale reservations behind, which is the one failure this
+    /// stamp exists to prevent. Never contains `|` (the record's separator):
+    /// font names and integers do not.
+    static var fingerprint: String {
+        let resolved = current
+        return "\(resolved.font.fontName)-\(Int(resolved.font.pointSize.rounded()))"
+            + "-\(Int(resolved.paragraphSpacing.rounded()))"
+    }
+
     // MARK: - Margins (R9 — sacred; "text never runs near the window edge")
 
     /// The prose column's maximum width on the detail editor (≈68ch of

@@ -11,24 +11,19 @@
 //  changed and the observer gained the NAME of its scroll's coordinate
 //  space (it was bound to `BookView.outlineSpace`); not a byte of the
 //  behavior — `StableSurfaceTests` and the book's landing pins ride
-//  unmodified. `SurfaceSizeMemory` is new beside them: the flow's own
-//  remembered sizes (the Outline's memory lives on `BookViewModel` at
+//  unmodified. `SurfaceSizeMemory` was new beside them: the flow's own
+//  remembered sizes (the Outline's memory lived on `BookViewModel` at
 //  Write's measure — a different width, never shared).
+//
+//  18d batch 4 (U-12): that memory moved to `SurfaceSizeMemory.swift` in
+//  this folder and became the ONE persisted store behind both surfaces —
+//  the Outline's dictionary on `BookViewModel` is now an instance of it
+//  too. Nothing here changed: the reservation, the width refusal and
+//  R1-1's settle rule are byte-identical, and this file's `settled`
+//  announcement (R2-2) is the occasion the memory writes its disk on.
 //
 
 import SwiftUI
-
-/// The last settled size of each surface, keyed by post — session view
-/// state, never persisted, written at geometry cadence (a plain reference
-/// box, so no observed property re-renders a whole page per report).
-@MainActor
-final class SurfaceSizeMemory {
-    private var sizes: [String: CGSize] = [:]
-
-    func size(_ key: String) -> CGSize? { sizes[key] }
-
-    func remember(_ key: String, _ size: CGSize) { sizes[key] = size }
-}
 
 /// Row 53: whether a row sits within `margin` points of its scroll's
 /// viewport — the Outline's, the reading flow's — its frame read in the

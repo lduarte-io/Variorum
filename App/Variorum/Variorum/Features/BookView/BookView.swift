@@ -1858,6 +1858,12 @@ private struct OutlinePostRow: View {
                             StableSurface(
                                 known: model.rememberedSurfaceSize(entry.postID),
                                 followsShrinks: true,
+                                // 18d batch 4 (U-12): the settle is the ONE
+                                // occasion this note's remembered length
+                                // reaches the disk — the memory itself takes
+                                // every geometry report, and a live editor
+                                // reports on every keystroke.
+                                settled: { model.persistSurfaceSize(entry.postID) },
                                 remember: { model.rememberSurfaceSize(entry.postID, $0) }
                             ) {
                                 EditorView(
@@ -1888,6 +1894,7 @@ private struct OutlinePostRow: View {
                             StableSurface(
                                 known: model.rememberedSurfaceSize(entry.postID),
                                 followsShrinks: false,
+                                settled: { model.persistSurfaceSize(entry.postID) },
                                 remember: { model.rememberSurfaceSize(entry.postID, $0) }
                             ) {
                                 ReadPostView(

@@ -384,14 +384,32 @@ final class BookViewModel {
     /// `@ObservationIgnored`: written at geometry cadence and read only at
     /// a row's realization — an observed property here would re-render the
     /// whole book per report.
-    @ObservationIgnored private var rememberedSurfaceSizes: [String: CGSize] = [:]
+    ///
+    /// **18d batch 4 (U-12) — and now it OUTLIVES the launch.** The plain
+    /// dictionary that used to sit here is a `SurfaceSizeMemory` in the
+    /// `outline` key space: the same session behaviour, plus one
+    /// `UserDefaults` record per note written when a surface SETTLES
+    /// (`persistSurfaceSize`, called from `StableSurface`'s own settle
+    /// announcement — never at geometry cadence). Her words: *"I see no
+    /// reason why we wouldn't add in remembering the length of notes so it
+    /// can be perfect after the first time."* Local-only view state, never
+    /// synced, no schema.
+    @ObservationIgnored let outlineSurfaceSizes =
+        SurfaceSizeMemory(.outline, fingerprint: { EditorTypography.fingerprint })
 
     func rememberedSurfaceSize(_ postID: String) -> CGSize? {
-        rememberedSurfaceSizes[postID]
+        outlineSurfaceSizes.size(postID)
     }
 
     func rememberSurfaceSize(_ postID: String, _ size: CGSize) {
-        rememberedSurfaceSizes[postID] = size
+        outlineSurfaceSizes.remember(postID, size)
+    }
+
+    /// The Outline surface for this note settled — the one occasion its
+    /// size reaches the disk (the ~100 µs-a-call rule, `CurrentBlockMemory`'s
+    /// measured lesson: never on a report, never on a keystroke).
+    func persistSurfaceSize(_ postID: String) {
+        outlineSurfaceSizes.persist(postID)
     }
 
     /// Batch H (row 95): the Read ▸ Scroll flow's remembered story sizes —
@@ -400,7 +418,12 @@ final class BookViewModel {
     /// memories never share a size). Held here so a story measured once
     /// stays measured for the session across mode switches; the flow
     /// itself is re-created per mode.
-    @ObservationIgnored let flowSurfaceSizes = SurfaceSizeMemory()
+    /// (18d batch 4: persisted too, in its OWN key space and under the
+    /// PAGE's typography stamp — a story's height on the 600-pt serif page
+    /// is not its height at Write's measure, so the two memories must never
+    /// read each other's records.)
+    @ObservationIgnored let flowSurfaceSizes =
+        SurfaceSizeMemory(.flow, fingerprint: { FlowHeightEstimate.fingerprint })
 
     /// Ladder R2-4: the flow's block extents (the estimate's input), cached
     /// for the book beside the sizes — a return to Read ▸ Scroll re-reads
