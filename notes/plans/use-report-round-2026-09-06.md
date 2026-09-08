@@ -9483,3 +9483,60 @@ theme/typography and router suites, the `ReadingFlow`/`ReadPost` suites this pas
 `Tutorial*` spine types — **`Test run with 225 tests in 35 suites passed after 136.348 seconds`**, zero
 issues, zero `skipped:` lines. Zero `Sources/` (no `swift test`, no iOS build owed), zero `Shared/`, zero
 `Sync/`, zero schema.
+
+#### 18d round 2 — fixes (batch 3)
+
+*(the batch-3 implementer, resumed; THREE findings — MINOR-1, MINOR-2, NIT-1)*
+
+**MINOR-1 (the FOURTH seam, `RootView.paneDivider`, still on row 9's shape and owned by nothing) —
+CONFIRMED and FIXED, `bbb6f457`.** The reviewer is right on both halves, and the second half is mine:
+batch 3's record named two candidate owners and entered it under neither, which is exactly what
+CLAUDE.md's tracking rule forbids. Converted to the shared `SeamGrip` — three lines and layout-neutral,
+because `SeamGrip`'s own frame is `SeamGrip.lineWidth`, the same 1 pt the pane row's width math already
+subtracts (`RootView.dividerWidth`) — plus the part only a host can own, `.zIndex(1)` on the divider
+inside the row's `ForEach`, where `paneHost` is the later sibling that was taking the grip's right half
+over a live editor's I-beam. **Pin:
+`ShellChromeTests.thePaneSeamsGripIsWideCentredAndReachesIntoBothPanes`** — the shell seam pin's four
+claims verbatim, over the pane row's own space, on a real two-pane split. **RED ON OLD by behavioural
+revert** in a scratch worktree at `bbb6f457`, with the old 9-pt overlay INSTRUMENTED so it reported its
+own frame (so the pin fails on the shape, not on a missing oracle): **`grip.width → 9.0` against 13.5,
+and `grip.minX < line.minX - 4` false.** **Walked** (capture `17-LADDER-r2-minor1-…`): a real split
+(Library | the Scandal note), the press landing at **seam + 4 pt — inside the RIGHT pane, the half that
+was dead** — and the seam followed from 1131 to 925 px. There is now no copy of row 9's old shape left
+in the app: the shell, `SideColumn`'s three boundaries and the pane row all consume one component.
+
+**MINOR-2 (`SideColumnGeometry` keyed by `widthKey`, a per-host constant — round 1's MINOR-3 class
+reintroduced by MAJOR-2's own fix, with a doc claiming it was avoided) — CONFIRMED and FIXED,
+`adde01e3`.** The reviewer is right and the doc was the worst part: it named the rule and then did not
+follow it. `widthKey` is `"bookNavigatorWidth"` for every book navigator in every suite and every
+window. The oracle is now **`SeamGeometry`** with one `key(_:subject:)` rule that the view and the pin
+both call, and `SideColumn` gained a **required** `subjectKey` — required rather than defaulted, the
+structural-redo `redo:` precedent, so a new host has to name its subject instead of shipping the hole
+again. The five hosts pass `readingID` · `readingID` · `postID` · `postID` · `poolID`; the pane seam
+passes its family and index. **No red-on-old pin is owed and none is claimed** — this is harness
+hygiene, not product behaviour, and the reviewer labelled it so; what it buys is that both failure
+directions it names (a green pin about someone else's window; a spurious red comparing two windows) are
+now impossible by construction. It also belongs in J41's owed oracle-sweep row, which is the
+orchestrator's to carry.
+
+**NIT-1 (the trailing edge's new `.zIndex(1)` on five shipped panels, unwalked) — WALKED, no harm
+found, `bbb6f457`'s walk.** The reviewer found no harm by reading and asked for one press. Walked on the
+note's tray (`PostDetailView`'s trailing column), both halves of the question: **(a) the newly-live
+strip is the seam's** — a press at **line + 4 pt, INSIDE the panel**, dragged the seam and widened the
+tray from 340 to **578** (read back as `noteSideColumnWidth = 578`); **(b) the panel's own controls
+still click** — the `archived 0` tab took the click immediately after and the archived explainer
+replaced the leaving one (captures `18-` and `19-LADDER-r2-nit1-…`). The reading holds at the measured
+geometry too: after the widening the seam's line sits at 1149 pt and the tray's segmented control starts
+at 1162, so the grip's 7-pt panel-side half touches nothing. The reviewer's second observation — the
+14-pt grip putting a leading column's overlay scrollbar under its panel-side half — is the shell's own
+shipped consequence since 17o batch d and is recorded, not re-litigated.
+
+**Closing run for this fix pass — ONE `xcodebuild test`:** the batch's suites, `ShellChromeTests`, **all
+eight pane/split suites** (owed: MINOR-1 changes the pane row's layout), the book/Read/tray/chrome
+families and the ten `Tutorial*Tests` spine types — **`✔ Test run with 260 tests in 49 suites passed
+after 77.568 seconds.`** — 49 suites for 49 requested types, no `skipped:` line. **Zero `Sources/`, zero
+`Sync/`, zero schema, zero `App/Variorum/Shared/`** — the pass touches `Core/Views/SeamGrip.swift`,
+`Core/Views/SideColumn.swift`, `RootView.swift`, the five `SideColumn` hosts and two test files, so no
+`swift test` and no iOS build are owed and none was run. Captures 17–19 added to
+`notes/plans/use-report-2026-09-06-screens/18d-3/`.
+
