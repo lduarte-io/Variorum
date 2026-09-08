@@ -2,6 +2,32 @@
 
 *Written 2026-09-08 by an Opus session after the orchestrator's Fable budget ran out mid-ladder. Everything in the round is built, adjudicated, closed and pushed EXCEPT one bounded cold read and the mechanical finish behind it. This file exists so none of that costs a stale session's re-orientation: the two agents that hold this round's context (the orchestrator at ~600k tokens, the round-end reviewer at ~837k) should NOT be resumed — spawn fresh from here.*
 
+---
+
+## ⬇️ PASTE THIS AS YOUR FIRST MESSAGE TO THE NEW FABLE SESSION ⬇️
+
+*(This is the ORCHESTRATOR's kickoff. The other prompt in this file — Step 1 below — is a different thing: it is what the orchestrator later pastes to its ONE reviewer subagent. Do not confuse them.)*
+
+> You are the SUCCESSOR ORCHESTRATOR for the 2026-09-06 use-report round — 17o · 18c · 18d · 18f (18e held) — in the classic `/architect-phase` shape. **Run `/architect-phase use-report-round-2026-09-06` first.** The repo is `<home>/dev/variorum`, branch `main`, at `41078640`.
+>
+> My last orchestrating session died on my weekly Fable limit mid-ladder. An Opus session then closed everything that did not need Fable and wrote you a finish. **Do not resume either stale session** (the orchestrator is ~600k tokens, its reviewer ~837k) — you start fresh from the repo.
+>
+> **READ FIRST, in this order:** `notes/handoffs/use-report-round-2026-09-06-FABLE-KICKOFF.md` (what remains, and the paste-ready prompt for your one reviewer subagent) · `notes/handoffs/use-report-round-2026-09-06-handoff.md` (my checklist — what I owe and what I must ratify) · `notes/plans/use-report-round-2026-09-06.md`, the ONE running record: §1 my rulings U-1…U-20, §2's correction note, §3 the 47-row ledger with every row's final disposition, §5.3–§5.5, §8–§10, LIVE STATUS (J1–J46) and the five CLOSEOUT sections (the four letters plus `### THE ROUND — CLOSEOUT`) · `CLAUDE.md` and the canon it loads · `notes/plans/phase-17-standing-fixes.md` (the 17o entry, closed) · `notes/SessionResiliencyProtocol.md` including its new model-budget addendum · `notes/KnownIssuesAndTechDebt.md`.
+>
+> **YOUR FIRST DUTY — verify the closing session's notes work, and tell me plainly if it is thin.** That session wrote SEVEN commits, `9aebb725..41078640`, touching notes ONLY (no code, no tests): `40c54338` a KnownIssues repair · `bde935ce` the round's closeout · `1103d7db` AppSpec §14's round delta plus the pre-13x delta rolled to the archive · `a03d0086` this kickoff file · `2ce261c2` my author handoff · `ffd84fe9` the closing sweep (all 47 ledger statuses, §2's correction, the superseded banner on the old orchestrator handoff, the resiliency addendum) · `41078640` a commit-count correction. Read them against what the round actually did — the batch RECORDs, the six ladders' findings, dispositions and fix passes, the letter closeouts — and check: is every ledger row's disposition true to its record; does everything deferred have a KnownIssues row with a named owner; are my rulings quoted verbatim rather than paraphrased; is anything the transcripts held that the notes do not; is AppSpec §14's delta accurate about what shipped; is PL-21 right about what the phone owes. **Fix anything you find in the notes and tell me what it was.** Record what you checked in LIVE STATUS.
+>
+> **THEN, in order:**
+> 1. **Write your own LIVE STATUS line** (successor orchestrator, context fresh, the date) and commit.
+> 2. **Round 2 of the round-end Fable pass — the one act that needs Fable.** Spawn ONE fresh `fable-reviewer` on the paste-ready prompt in this file's **Step 1**. It is a bounded read over ten fix commits. If it raises findings, run the cross-model flow the round used throughout: findings → the owning batch implementers for agree/dispute (they are `opus-implementer` agents and cost no Fable) → back to the reviewer for its final call and its own fix pass with red-on-old pins → ONE sanity pass by the owning implementer. Round 3 only on a new BLOCKER or MAJOR; the cap is three.
+> 3. **The finish** (this file's **Step 2**; none of it needs Fable): record round 2's outcome and amend the round closeout's last paragraph; a final FULL Mac suite run; the four master-plan flips (the Current-phase pointer → 13u1 with the outgoing block rolled to `PhaseCloseoutArchive`; the running order; rows `3c` / `use-report` / Phase 18 with 18e HELD and my contemplation quoted verbatim; the closeout log with the pre-13x paragraph rolled); delete `notes/plans/use-report-round-briefs/`; then **the install refresh** — a zero-instance window, the A1 backup of my real store FIRST, Release built in a clean worktree, the product copied to `/Applications`, `codesign --verify --deep --strict`, the hashes recorded in my handoff.
+> 4. **Close the round** and update the memory file `variorum-phase-9-run-state`.
+>
+> **Standing rules:** never two agents at once; never edit the plan file while an agent holds the tree; never leave uncommitted edits in the tree; push after every record commit; **NO `Co-Authored-By` / `Claude-Session` trailer lines**; zero `Sources/VariorumCore/Sync/`, zero schema, zero lockstep; the 13u fence (§2). Judgment calls continue at **J47** and go in LIVE STATUS for me. Verify every agent's claims against `git` before adopting them — never trust a report. Hand off yourself with the same two-document form if your context nears ~500k with a large remainder, but finish the stage you are in.
+>
+> **One judgment already made, yours to keep or overturn (J46): round 2 is NOT being skipped.** Every one of this round's five letter-ladders found a new MAJOR inside round 1's own fixes — five for five — and the round-end pass's round 1 then found a sixth thing all five had walked past. If I would rather spend the budget elsewhere, say so and close at round 1 on my own wording (*"so Fable sees the chrome fixes once"*); the commit range is recorded either way.
+
+---
+
 ## Why there is anything left
 
 The round-end Fable pass (her ruling: *"add a bounded round-end Fable pass over the Opus-reviewed letters' final diffs only (17o c/d/e and 18d), so Fable sees the chrome fixes once after their Opus ladders. One extra Fable ladder."*) ran its **round 1** to completion: 1 MAJOR · 4 MINOR · 4 NIT, all nine agreed by the implementers, all nine fixed by the reviewer with pins, and the 18d batch-1 implementer's sanity pass returned **9 CLEAR · 0 RAISED** with a walk. **Round 2 was spawned and died at the Fable usage limit before writing a word** — its section in the plan is still an empty placeholder.
@@ -11,6 +37,8 @@ The round-end Fable pass (her ruling: *"add a bounded round-end Fable pass over 
 ---
 
 ## STEP 1 — round 2 of the round-end Fable pass (the only Fable work left)
+
+*The block below is NOT the orchestrator's kickoff — it is what the orchestrator pastes to its ONE `fable-reviewer` subagent when it reaches this step.*
 
 Spawn ONE fresh `fable-reviewer`. Paste this verbatim:
 
@@ -28,7 +56,7 @@ Spawn ONE fresh `fable-reviewer`. Paste this verbatim:
 
 ---
 
-## STEP 2 — the finish (no Fable needed; an Opus session or she can do it)
+## STEP 2 — the finish (no Fable needed — the orchestrator, an Opus session, or she can do it)
 
 1. **Record round 2's outcome** in the plan's LIVE STATUS and amend the last paragraph of `### THE ROUND — CLOSEOUT` (it currently says one verification is open).
 2. **A final FULL Mac run** from `App/Variorum/`: `xcodebuild test -scheme Variorum -destination 'platform=macOS' -only-testing:VariorumTests` — read the `Test run with N tests in M suites` line and the `skipped:` lines. The last full run was **2458/424 green** at 18d's close `01849f3b`; note that a reviewer cleared build intermediates on 2026-09-08, so the first build after that rebuilds from scratch (~10 min).
