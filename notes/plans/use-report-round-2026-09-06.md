@@ -6771,3 +6771,87 @@ second production road exists, and a future surface may adopt the one-shot and r
 staleness her row-18 complaint was about. Either say *"no production caller today; the tests' single
 resolution"* in the doc, or fold the two test call sites onto `readTitles` and delete it. No pin (dead
 production code; the mechanism is the grep).
+
+#### Considered and cleared (traced, so the next reader does not re-raise them)
+
+- **MAJOR-1's HOLLOW dismissal is CORRECT, and the pin's premise IS her case.** The brief asks
+  whether the deciding pin measures the emptied case she hits. Read against `extent(of:)`
+  (`PaneSurface.swift:117–127`, byte-unchanged), the two links really do split the way the numbers
+  say: the fallback is reached **only** when the enumeration yields no fragment, and any content
+  yields at least one under `.ensuresLayout` — so the fallback's ONLY reachable state is the empty
+  document, and the pin measures exactly that state and finds the property honest there (22.0, not
+  the 1564.0 high-water mark; the emptied frame 34.0 = a born-empty pane's 34.0). Her punchlist 13
+  (*"delete a lot of text… empty gap"*) is therefore covered end to end by two different roads —
+  everything short of empty by row 16's fragment walk, the empty endpoint by the honest property —
+  and there is no third shape in between, because a document holding even one newline still lays out
+  a fragment and takes the walk. Keeping the green pin as a standing guard is right: it is the test
+  that fires the day the fallback stops being honest.
+- **The `PaneMeasurement` doc's four-site claim is still true after the fix.** By my own grep there
+  are exactly four production call sites (`PaneSurface:1266`, `:1465`,
+  `ReadPostViewModel.swift:263`, `EditorView.swift:559`) — the doc's SET is right even though its
+  line numbers are not (NIT above).
+- **The seam grip's 6.5 pt reach into the detail steals nothing** — re-checked rather than inherited:
+  `ShelfView` pads its content `.horizontal, 28` at all three of its list levels, so the grip lands
+  in margin on the surface most exposed to it, and R9's sacred margins carry the editing surfaces.
+- **`firstLivePlacedBlock`'s tiebreak is byte-equivalent to the inline copy it replaced.**
+  `ORDER BY cb.position, cb.id` vs the retired `ORDER BY position, id` over `container_block` — the
+  same `(position, id)` sort key AppSpec §6 mandates, so the only difference between the two copies
+  is the liveness JOIN (the MINOR above), never the chosen row's order.
+- **The park's move off `RootView.@State` preserves its scope exactly.** `RootView.init` does
+  `_router = State(initialValue: router)` (`:109`, `:120`), so a router is per-RootView and a RootView
+  is per window — the same per-window scope `blockTarget` had, which is also why my MAJOR's
+  two-window road works the way it does.
+- **Row 40's collapse, the batch-b landing pins, row 14's content edge and row 43's receipt** were all
+  traced by round 1 and none of the three fix passes touched them (the fix range
+  `c79f522c^..2eb79599` names nine source files, and none is `MastheadTagCluster`, `TakesBottomBar`,
+  `TakesViewModel` or `LandingOffsetTests`).
+
+#### CLEAN BILL — load-bearing things I checked myself and found solid
+
+- **The seam answer above is verified by empty diffs, not by reading a claim**: zero
+  `Sources/VariorumCore/Sync/`, zero `App/Variorum/Shared/`, zero `Persistence`/`Models`, no hunk in
+  `EditorTextView.swift` or `BlockRangeIndex.swift`, and `PaneSurface.swift`'s only fix-pass hunks are
+  two doc comments with `extent`'s body identical.
+- **MAJOR-2's fix actually behaves as its record says on the roads it covers.** `adopt` is the single
+  choke point for `openHere`, `selectionBinding`, `pendingSelection` (⌘K, the chips, the broadcast),
+  `openToday`, `openBook` and the palette's five "Go to" rows — all seven grepped — and `open` is the
+  only writer of a non-nil park, with four call sites, all synchronous.
+- **`ShellLandingMountTests`' mount pin is a real pin, not a rule restated.** It drives a mounted
+  `RootView` through `pendingSelection` — the road the arbitrated one-liner does NOT cover — reads the
+  actual `EditorTextView`'s selection through the hosting tree, and its two RED-ON-OLD assertions are
+  the park's survival and the caret's landing. The revert-probe method (`adopt`'s `router.park(nil)`
+  removed in place, 4 issues) is the house method and the numbers are recorded.
+- **NIT-2's core change is green under my own run**, not the record's: `swift test --filter
+  VersionOperationsTests` → `19 tests in 2 suites passed`. The op stays one `database.write`, the mint
+  goes through the shared `mintBlock`, `ensureUnlocked` precedes it, and a throw on the SECOND anchor
+  rolls the FIRST anchor's mint back (arguments evaluate left to right inside the one transaction).
+- **Row 10's plist really reaches the built bundle, which is the half a key-name check cannot prove.**
+  `INFOPLIST_FILE = VariorumInfo.plist` is set on the Mac app target's Debug AND Release configs only
+  (the mobile target's configs are untouched), `GENERATE_INFOPLIST_FILE` stays YES so Xcode merges, and
+  `OneTimeCodeAutoFillTests` reads `Bundle.main` from an **app-hosted** unit bundle
+  (`TEST_HOST = $(BUILT_PRODUCTS_DIR)/Variorum.app/…`), so `Bundle.main` is Variorum.app's merged
+  Info.plist and the `NSNumber` assertion is a real bundle assertion.
+- **MINOR-3's deletion is complete**: `mastheadWidth` appears nowhere in the tree, and the oracle's
+  real reader `MastheadGeometry.contentMidX` is written at `PostDetailView.swift:340` and read by four
+  `MastheadLayoutTests` assertions — the doc's corrected claim is checkable.
+- **Row 18's held observation is viewport-shaped and thread-shaped.** `readTitles` is
+  `nonisolated static` and runs inside `session.database.observe`'s fetch (the reader pool, P2), only
+  the `titles` assignment lands on the `@MainActor` model; the tag arm reads the new bounded
+  `Queries.tagPaths(_:ids:)` over exactly the on-screen tag ids (`IN (…)`, empty-in → empty-out with no
+  query) rather than `allTags`; a failed read holds the last names instead of blanking; and the
+  `.task(id: titleSubjectsKey)` key is unchanged, so the restart discipline is the shipped one.
+- **Row 47's widening is still strictly the ruled one.** `bareArrivalLanding` is now
+  `rememberedArrivalLanding(fact:) ?? 0` — identical signature and value, so batch b's pins on it ride
+  — and the reveal's condition moved from `landing > 0` to `remembered != nil`, which adds exactly the
+  remembered-0 case and excludes the nothing-remembered default; the reveal's own visibility guard
+  still returns without moving for a line already on screen.
+- **No default's meaning moved.** `PaneSurfaceView.indicator` defaults to `.outline` (the shipped
+  ring) and `ThemeStore.editingIndicator(of:)` resolves a nil store to the same `.outline`, in ONE
+  copy — so a host the appearance push has not reached looks exactly as it did.
+- **Nothing in the three fix passes is reachable from the phone**: `App/Variorum/Shared/` has an empty
+  diff across the whole range, and the one core change (`markPostsAsVersions`) has no mobile caller.
+
+**Counts (round 2): 1 MAJOR · 3 MINOR · 2 NIT.** None needs Fable — the MAJOR is shell composition
+(`RootView` / `ShellRouter` / `PostDetailView.onAppear`), the MINORs are one composition ordering, one
+core-ops pin and one constitution-wording question, and the NITs are docs. Zero `Sync/`, zero custody,
+zero schema, and the editor seam proper is untouched by every one of them.
