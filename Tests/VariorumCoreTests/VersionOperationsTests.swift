@@ -130,6 +130,116 @@ struct VersionOperationsTests {
         }
     }
 
+    /// **The liveness JOIN, pinned** (17o c/d/e ladder round 2, MINOR-2). The
+    /// round-1 NIT-2 fix replaced `markPostsAsVersions`' inline anchor SELECT
+    /// with `firstLivePlacedBlock`, which JOINs `block` on liveness where the
+    /// inline copy did not — a real behavioural delta in a public operation,
+    /// and it shipped with no guard, because none of row 17's three pins ever
+    /// puts a tombstoned block under a LIVE placement.
+    ///
+    /// That state is not hypothetical: it is the doubly-raced sync shape
+    /// SyncSpec §5/§7 designs for (rows arrive out of order, and a read must
+    /// tolerate a placement whose block has not arrived or has died). Anchoring
+    /// a `version_of` edge there would put the post's whole version identity on
+    /// a block that renders NOTHING. The post reads as blockless instead, and
+    /// U-19 (1)'s road gives it a live empty anchor — which is the same answer
+    /// it gives any other blockless post.
+    ///
+    /// RED ON OLD, and sharper than the finding predicted: the old road did
+    /// not anchor a live edge on the dead block — it handed the dead id to
+    /// `insertVersionOfEdge`, whose `liveBlock` guard threw
+    /// `blockNotFound(id:)`. The old behaviour was a REFUSAL naming a block she
+    /// cannot see; the new one is the link she asked for.
+    @Test func aLivePlacementOverATombstonedBlockIsNotAnAnchor() throws {
+        try withOperations { ops, db in
+            let raced = try ops.createPost(title: "the raced note", profile: .blog)
+            let dead = try ops.newBlock(in: raced.id, text: "It was here.", at: .end).block
+            let peer = try ops.createPost(title: "the peer", profile: .blog)
+            let peerFirst = try ops.newBlock(in: peer.id, text: "Peer first.", at: .end).block
+
+            // The race, built exactly: the BLOCK row is tombstoned while its
+            // placement stays live. The block cascade tombstones the placement,
+            // so the same transaction puts it back — which is the state a
+            // half-delivered batch really leaves behind.
+            try db.write { database in
+                try database.execute(
+                    sql: "UPDATE block SET deleted_at = ? WHERE id = ?",
+                    arguments: ["2026-07-01T00:00:00.000Z", dead.id])
+                try database.execute(
+                    sql: "UPDATE container_block SET deleted_at = NULL WHERE block_id = ?",
+                    arguments: [dead.id])
+            }
+            let placed = try db.read { database in
+                try String.fetchAll(
+                    database,
+                    sql: "SELECT block_id FROM container_block "
+                        + "WHERE container_id = ? AND deleted_at IS NULL",
+                    arguments: [raced.id])
+            }
+            #expect(placed == [dead.id], "the placement is live and points at the dead block")
+
+            let edge = try ops.markPostsAsVersions(raced.id, peer.id)
+            let anchor = try #require(
+                [edge.sourceBlockId, edge.targetBlockId].first { $0 != peerFirst.id })
+            #expect(anchor != dead.id,
+                    "a placement over a tombstoned block is not a place to anchor an edge")
+
+            let (live, text, count) = try db.read { database -> (Bool, String?, Int) in
+                let alive = try Bool.fetchOne(
+                    database,
+                    sql: "SELECT deleted_at IS NULL FROM block WHERE id = ?",
+                    arguments: [anchor]) ?? false
+                let body = try String.fetchOne(
+                    database,
+                    sql: "SELECT working_text FROM variant "
+                        + "WHERE block_id = ? AND deleted_at IS NULL AND status = 'active'",
+                    arguments: [anchor])
+                let n = try Int.fetchOne(
+                    database,
+                    sql: "SELECT COUNT(*) FROM variant "
+                        + "WHERE block_id = ? AND deleted_at IS NULL AND status = 'active'",
+                    arguments: [anchor]) ?? 0
+                return (alive, body, n)
+            }
+            #expect(live, "the anchor is a LIVE block")
+            #expect(text == "" && count == 1, "…minted with one live empty take (U-19 (1))")
+
+            let peers = try db.read { try Queries.versionPeerPosts($0, of: raced.id) }
+            #expect(peers == [peer.id], "and the link is findable from the raced note")
+        }
+    }
+
+    /// The same race under a SEAL: the mint arm's `ensureUnlocked` is the
+    /// refusal the old road did not have — it anchored on the dead block
+    /// silently. Pinned beside the delta it belongs to (round 2, MINOR-2).
+    ///
+    /// RED ON OLD: `blockNotFound` — the dead id reached
+    /// `insertVersionOfEdge`'s `liveBlock` guard before the seal was ever
+    /// consulted, so the refusal she got named the wrong thing.
+    @Test func theRacedShapeUnderASealRefusesRatherThanAnchoringOnTheDeadBlock() throws {
+        try withOperations { ops, db in
+            let raced = try ops.createPost(title: "sealed and raced", profile: .blog)
+            let dead = try ops.newBlock(in: raced.id, text: "It was here.", at: .end).block
+            let peer = try ops.createPost(title: "the peer", profile: .blog)
+            _ = try ops.newBlock(in: peer.id, text: "Peer first.", at: .end)
+            try db.write { database in
+                try database.execute(
+                    sql: "UPDATE block SET deleted_at = ? WHERE id = ?",
+                    arguments: ["2026-07-01T00:00:00.000Z", dead.id])
+                try database.execute(
+                    sql: "UPDATE container_block SET deleted_at = NULL WHERE block_id = ?",
+                    arguments: [dead.id])
+            }
+            try ops.lockPost(raced.id)
+
+            #expect(throws: OperationError.lockedPost(id: raced.id)) {
+                _ = try ops.markPostsAsVersions(raced.id, peer.id)
+            }
+            #expect(try db.read { try Queries.versionPeerPosts($0, of: raced.id) }.isEmpty,
+                    "and nothing was linked on the way to the refusal")
+        }
+    }
+
     /// A SEALED blockless post refuses, because minting a block is exactly
     /// what the seal freezes (the everything-under-the-post letter). The
     /// LINK itself stays free under a seal — a sealed post with blocks marks

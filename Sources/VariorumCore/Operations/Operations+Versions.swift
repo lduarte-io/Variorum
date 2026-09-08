@@ -140,6 +140,16 @@ extension Operations {
                 // an anchor — an edge there would render nothing. Where that
                 // leaves a post with no live placed block at all, the mint arm
                 // below gives it one, which is exactly what U-19 (1) asks for.
+                //
+                // **MEASURED at the round-2 pin** (17o c/d/e, MINOR-2), and
+                // sharper than the round-1 record guessed: the retired inline
+                // copy did not anchor a live edge on the dead block — it handed
+                // the dead id to `insertVersionOfEdge`, whose `liveBlock` guard
+                // threw `blockNotFound`. So the old road REFUSED the link in
+                // this state, with a raw enum naming a block she cannot see;
+                // the new one links it correctly. Pinned by
+                // `aLivePlacementOverATombstonedBlockIsNotAnAnchor` and
+                // `theRacedShapeUnderASealRefusesRatherThanAnchoringOnTheDeadBlock`.
                 if let id = try Self.firstLivePlacedBlock(db, of: post.id) {
                     return id
                 }
