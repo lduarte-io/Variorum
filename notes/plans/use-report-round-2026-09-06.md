@@ -6354,12 +6354,12 @@ CORRECTED, and the number MEASURED so 13u2 inherits a fact instead of a worry.**
 **The site set, verified by my own grep, not taken on trust** — `PaneMeasurement.height` has FOUR
 production call sites, and the reviewer's reading of them is exactly right:
 
-| site | what its document is |
+| site (named by its FUNCTION — see round 2's NIT-1 below) | what its document is |
 |---|---|
-| `Surface/PaneSurface.swift:1241` (the publisher's measure) | ONE take |
-| `Surface/PaneSurface.swift:1440` (the divergence check) | ONE take |
-| `Features/ReadTier/ReadPostViewModel.swift:263` | a WHOLE POST |
-| `Features/Editor/EditorView.swift:559` (`InlineEditorSurface.remeasure`) | a WHOLE POST, **once per keystroke** — wired to `NSTextStorage.didProcessEditing` (`:539–549`), deferred one main-queue turn |
+| `Surface/PaneSurface.swift` — `Coordinator.install(view:publishHeight:publishCanary:)`'s `PanePublisher` `measure` closure | ONE take |
+| `Surface/PaneSurface.swift` — `Coordinator.reconvergeIfDiverged(restoreRender:)` | ONE take |
+| `Features/ReadTier/ReadPostViewModel.remeasure` | a WHOLE POST |
+| `Features/Editor/EditorView.swift` — `InlineEditorSurface.remeasure` | a WHOLE POST, **once per keystroke** — wired to `NSTextStorage.didProcessEditing`, deferred one main-queue turn |
 
 The doc now states that set explicitly, marks which two are panes and which two are whole-post, names
 the per-keystroke one, and hands 13u2 those two sites by name.
@@ -7019,3 +7019,40 @@ corrected claim about what the pre-NIT-2 road did in the raced state — it refu
 `blockNotFound`, it did not silently link a dead block. That is measured, not read: the revert probe's
 red is quoted above, and re-running it reproduces both reds in one `swift test --filter
 VersionOperationsTests`.
+
+
+#### 17o c/d/e round 2 — fixes (batch c)
+
+*(the batch-c implementer, resumed; one finding — NIT-1)*
+
+**NIT-1 (the MINOR-1 doc cites line numbers that were already wrong in the commit that wrote them) —
+CONFIRMED and FIXED.** The reviewer is exactly right, and I verified its arithmetic on the current
+tree rather than taking it: `grep -rn "PaneMeasurement.height" App/Variorum/Variorum/` reports the two
+pane sites at **`:1266`** and **`:1465`**, not the `:1241`/`:1440` my paragraph typed — my own commit
+added 25 lines above them and pushed both down by exactly 25, so the sentence was stale the moment it
+was written. It is MINOR-2's class one file over (a doc that re-types a number instead of naming the
+thing), and it is a doubly deserved catch: the paragraph existed *because* the previous version told
+the next reader something false.
+
+**The fix, made so the number can never be wrong again:** the list now names each site by the FUNCTION
+it sits in and carries no line numbers at all — this file's `Coordinator.install(view:publishHeight:
+publishCanary:)`'s `PanePublisher` `measure` closure and `Coordinator.reconvergeIfDiverged(
+restoreRender:)` for the two panes; `ReadPostViewModel.remeasure` and `EditorView.swift`'s
+`InlineEditorSurface.remeasure` for the two whole-post surfaces. The reason is stated in the doc
+itself, so the next reader knows why there are no line numbers there. **The round-1 record's own table
+carried the same two stale numbers and is corrected the same way** in this commit — it was my defect in
+both places, not just the code's.
+
+**The third `fixedSize()` — NOT touched, per the reviewer's answer to the question I handed it.** It
+walked all 35 `.fixedSize()` sites and found **27** with no `lineLimit`; the orchestrator arbitrated
+the CLASS to a `KnownIssuesAndTechDebt.md` row (owner 13u2) rather than a third ladder patch. Recorded
+here so my round-1 note ("the reviewer's call whether it joins the class") is closed: it does not join
+as a patch, it joins as a parked class. `TakesBoardView`'s `newTakeDoors` is left exactly as it was.
+
+**Comment-only: no test run is owed and none was made.** The diff is a doc comment in
+`Surface/PaneSurface.swift` plus this plan file — zero executable lines, zero behaviour, so there is
+nothing a suite could tell apart from the previous commit (batch c's closing set was 279/38 green at
+`54ad3977` and that number stands). The file was compiled (`xcodebuild build-for-testing`) to prove
+the comment is well-formed, and nothing else.
+
+**Batch c's round-2 pass: 1 NIT FIXED · 0 open.**

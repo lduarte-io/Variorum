@@ -97,15 +97,21 @@ enum PaneMeasurement {
     /// the first version of this paragraph justified the walk with "a
     /// pane's document is ONE take by construction", which is false for
     /// half the brain's callers and told the next reader the wrong thing).
-    /// `PaneMeasurement.height` has FOUR production call sites:
-    /// - two are PANES — this file's `:1241` (the publisher's measure) and
-    ///   `:1440` (the divergence check), where the document really is one
+    /// `PaneMeasurement.height` has FOUR production call sites, named by
+    /// the FUNCTION each sits in and never by line (round 2's NIT-1: the
+    /// first version of this list quoted line numbers that its own added
+    /// lines had already pushed down by 25 — a doc that re-types a number
+    /// instead of naming the thing goes stale by being written):
+    /// - two are PANES, both in this file's `Coordinator` — the
+    ///   `PanePublisher`'s `measure` closure built in `install(view:
+    ///   publishHeight:publishCanary:)`, and `reconvergeIfDiverged(
+    ///   restoreRender:)`'s own read — where the document really is one
     ///   take and the P1 bound is the unit on screen;
     /// - two are WHOLE-POST surfaces — `ReadPostViewModel.remeasure` (the
-    ///   read tier, one post) and `EditorView.swift`'s
-    ///   `InlineEditorSurface.remeasure` (the book view's inline editor),
-    ///   and the second runs **once per keystroke** (it is wired to
-    ///   `NSTextStorage.didProcessEditing`).
+    ///   read tier, one post) and `InlineEditorSurface.remeasure` in
+    ///   `Features/Editor/EditorView.swift` (the book view's inline
+    ///   editor), and the second runs **once per keystroke** (it is wired
+    ///   to `NSTextStorage.didProcessEditing`).
     ///
     /// That per-keystroke site is why the walk's cost was MEASURED at
     /// post scale rather than argued (the numbers are in the round-1 fix
