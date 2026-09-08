@@ -4261,3 +4261,8 @@ entry and cannot outlive a mode switch.
 START/END → **QUESTIONS #97**, not disputed on product grounds by me. Nothing here was implemented; the
 tree is untouched by this response.
 
+#### 17o batch b round 1 — dispositions + fixes (the reviewer)
+
+*The cross-model flow's second half (fable-reviewer, 2026-09-08): the final call on each finding, then the fixes implemented here, each pin run RED on the pre-fix tree before the fix (the standing-17 order — pin, red, fix, green), committed per piece, pushed after every commit. This section is written incrementally; the LIVE line below is the checkpoint record.*
+
+**LIVE — REVERT IN FLIGHT (piece B's red-on-old, after its commit):** `PaneSurface.swift`'s `noteLiveness` transition body, `TakesViewModel.focusWithCaretAtEnd`'s arm line and `BlocksWorkbenchView`'s `caretOnGoingLive` argument hand-reverted IN PLACE to `4dd54c54`'s text (the new `PaneTextView.clickBroughtPlace`/`plainClick(at:)` members kept so the pins compile); the pins untouched. Restore = `git checkout HEAD -- App/Variorum/Variorum/Surface/PaneSurface.swift App/Variorum/Variorum/Features/Takes/TakesViewModel.swift App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift` from the repo root. Piece B's fix is COMMITTED before this revert.
