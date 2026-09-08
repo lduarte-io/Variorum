@@ -8739,3 +8739,104 @@ Order of the fix passes, ONE agent at a time: batch 2 → batch 3 → batch 1 �
 - **Cleared by the reviewer, adopted:** the Takes board's `.deleteTake` context door IS wired end to end (a pin would be green both sides — no row); `BlockPastCopy.deletedTakesHeader` is live copy (Block History's own region), not the tray fold.
 
 Round 2 (a fresh reviewer) follows the four passes; round 3 only on a new BLOCKER/MAJOR.
+
+#### 18d round 1 — fixes (batch 2)
+
+*(the batch-2 implementer, resumed; FIVE findings — MAJOR-1 · MINOR-4 · MINOR-8 · NIT-1 · NIT-2, all
+CONFIRMED by the arbitration. Four commits, each path-scoped, rebased and pushed, no trailer lines;
+zero `Sources/`, zero `Sync/`, zero schema; two red-on-old probes in scratch worktrees, both removed
+and pruned. **Nothing here was disputed** — each finding's mechanism was re-traced in my own context
+before its fix, and each traced true.)*
+
+**MAJOR-1 (the field guide teaches the control batch 2 retired) — CONFIRMED and FIXED `ee83fd21`.**
+The lesson said *"The tray has two sections"* and put the takes *"(folded away until you open them)"*;
+neither exists. It now teaches the shipped control: **two views at the top, each carrying its count**,
+and **one shared `all · blocks · takes` filter under them** — *"so this note's deleted takes are one
+click away with their number on the chip, never hidden under the block cards; every card says which
+kind it is."* The **five other seeder lines** that routed to a "section" follow: the archive row waits
+*"under the tray's Archived view"*, the delete row goes to *"the same tray's Leaving view"*, the
+purge-doors paragraph names *"the Leaving view of a note's own tray"*, and the two-listings lesson's
+two lines say the view — **all six quoting `TrayPath.archivedTab`/`leavingTab` and `RecoveryCopy`'s
+three filter words**, so the next rename reaches the lesson instead of being swept again.
+**Pin — `TutorialDeletionActsTests.everyDoorTheChapterNamesIsADoorTheAppHas`**, extended in place
+(the copy-truth pin the chapter already owned): the lesson carries neither `"two sections"` nor
+`"folded away"`, names both tab words, names all three filter chips, and the `trio` lesson's two
+landings and the purge paragraph's routing read `"<tab> view"`.
+**RED ON OLD, measured on the real pre-fix code** — a scratch `git worktree` at `a0ec86a0` (its own
+DerivedData, nothing in the repo edited; removed and pruned afterwards) with HEAD's
+`TutorialWalkTests.swift` copied in:
+**`✘ Test run with 13 tests in 1 suite failed after 4.955 seconds with 6 issues`** — `:2163` and
+`:2165` (the trio lesson's two landings), `:2182` (`"two sections"` present), `:2184` (`"folded away"`
+present), `:2188` (the filter's three words absent), `:2213` (the purge paragraph's routing); the
+other twelve tests green. **Honest note:** the tab-words arm at `:2186` passes on BOTH sides — the old
+text used *"Archived holds…"* / *"Leaving holds…"* as bare words — so it is a guard, not part of the
+red; the five reds above are the finding.
+**A FIELD-GUIDE DELTA FOR HER RESTORE LIST:** the tray lesson and five routing lines are re-worded, so
+**Help ▸ Restore Tutorial…** re-seeds them; a field guide already in her store keeps the old text
+until she restores it (the row-44 rule — this landed BEFORE her restore act at the round's end).
+
+**MINOR-4 (three `RecoveryCopy` constants the `mobile` branch consumes, deleted from `Shared/`) —
+CONFIRMED and FIXED `0fc42660`.** I re-checked the claim rather than taking it: the words are not
+"in the one copy home both apps compile", because the phone's tray face is not on `main` at all.
+`trayArchivedSection`, `trayLeavingSection` and `trayTakesDisclosure` are **restored byte-identically**
+to their pre-batch text (verified by `diff` against `git show 30f99fd0:…RecoveryCopy.swift`), each
+carrying a one-line doc: *retired on the Mac at 18d batch 2 (U-9); the phone's tray still consumes it
+until its own reorganization*, above a note explaining why deletion was wrong here and who removes them
+(the session that reorganizes the phone's tray, with its own last call site). **The mobile worktree was
+not touched** — `git worktree list` shows it untouched at `ddc91095` throughout.
+**Pin — `TrayFilterTests.theRetiredSectionWordsStayForThePhonesTray`**: the three keep their exact
+words, and the MAC's own control does not speak them (`TrayFilterFace.tab(...) != …Section`). It is the
+guard the compiler cannot be on this branch. **No red-on-old** — a cross-branch compile break is not
+pinnable here, exactly as the finding says; the pin's job is to stop the next sweep, not to prove the
+last one wrong. The **shrunk `trayLeavingExplainer` stays shrunk** (correct on the Mac, where the filter
+names the populations); the phone's copy regression is the orchestrator's MOBILE PARITY LINE.
+
+**MINOR-8 (a pin named for the tray asserting Block History; the tray's wrap rule unpinned) —
+CONFIRMED and FIXED `a0ec86a0`.** `theTrayLeavingExplainerRendersWholeAtTheNarrowestPane` →
+**`theRecoveryFamilysLongestExplainerRendersWholeAtTheNarrowestPane`**, with its doc naming where the
+tray's own pin now lives. **New pin — `TrayFilterTests.theTrayExplainerRendersWholeAtTheNarrowestPane`**:
+BOTH views' explainers rendered at the panel's own floor (256 pt = `minWidth: 280` less its 12-pt
+padding), each against an unlimited reference of the same words, with the family's
+"else the pin holds vacuously" guard (each sentence must exceed 1.5 lines there).
+**GREEN ON BOTH SIDES — recorded as the no-op the arbitration anticipated:** `explainerLine` already
+carries `lineLimit(nil)` + `fixedSize(horizontal: false, vertical: true)`, so there was nothing to fix;
+the pin is the guard against a future `lineLimit` arriving, which is exactly how row 89's defect was
+born one file over. **Its reach is stated at the code:** it renders the tray's WORDS with the shipped
+modifiers, not the private `explainerLine` view, so a `lineLimit` added to the VIEW would be caught by
+reading the view, not by this — the honest limit of a geometry oracle over a private property.
+
+**NIT-1 (dead `nothingIsLeaving`) — CONFIRMED and FIXED `8584bce1`.** Deleted, with a comment saying
+where the question went (`TrayFilter.count(contents, view: .leaving)` — the number the Leaving tab
+already renders); its one caller, `TrayPanelMoveTests.swift:292`, asks that instead. The batch's own
+"dead code removed, not parked" standard, applied to itself.
+
+**NIT-2 (a reveal overwrites her session tray memory) — CONFIRMED and FIXED `8584bce1`** (one commit
+with NIT-1: both edit `TrayPanel.swift`, which a path-scoped `git add` cannot split — said here rather
+than pretending to two). The reveal arm sets `view`/`kind` **directly, past `select`**, so a lineage
+door's landing never writes `AppSession.trayViewMemory`; §5.4's remembered pair stays HER choice.
+**Pin — `TrayFilterTests.aRevealLandsWithoutBecomingTheRememberedView`**: she chooses `leaving · blocks`;
+a model built with a `revealBlockID` naming an ARCHIVED block adopts a snapshot and opens on
+`archived · all`; the session memory still reads `leaving · blocks`, and the next model opens there.
+**RED ON OLD, measured** — a scratch worktree at `0fc42660` (removed and pruned) with HEAD's
+`TrayFilterTests.swift` copied in: **`✘ Test run with 8 tests in 1 suite failed … with 2 issues`** —
+`:267` `h.session.trayViewMemory → TrayViewMemory(view: .archived, kind: .all)` against
+`(.leaving, .blocks)`, and `:269` `next.view == .leaving → false`; the other seven green.
+
+**One thing the reviewer cleared that my own record had raised:** the batch-2 walk's observation 1 —
+*"`.deleteTake`'s `.contextMenu` door does not render on the Takes board's cards"* — is answered in the
+findings' cleared list: **the door IS wired end to end**, and a pin would be green on both sides, so no
+row. What I met on the walk was the LIVE pane's own AppKit menu on a card I had just made live; the
+board's card menu is the one the reviewer traced. My record's observation stands as a walk note, not as
+a defect, and I am recording the correction here rather than leaving the two readings side by side.
+
+**The fix pass's runs (at the END, ONE `xcodebuild test`):** the batch's 22 touched suite types + the
+ten `Tutorial*Tests` spine types — **`✔ Test run with 312 tests in 32 suites passed after 36.368
+seconds`** (309 → 312: the three new pins), 32 suites for 32 requested types, no `skipped:` line.
+**iOS `** BUILD SUCCEEDED **`** (`Shared/RecoveryCopy.swift` moved). **Core not run because core is not
+touched** — the four commits' file list is `Shared/RecoveryCopy.swift` · `Features/Tray/TrayPanel.swift`
+· `Features/Tutorial/TutorialSeeder.swift` · four test files, and nothing under `Sources/`.
+**Not re-walked:** none of the five fixes changes a rendered control — MAJOR-1 is seeded PROSE (her
+restore act is the door onto it), MINOR-4 is a constant no Mac surface reads, MINOR-8 is a pin, NIT-1 is
+dead code, and NIT-2 changes only which of two already-walked cells a REVEAL opens on (the reveal road
+has no capture in this batch either way; its pin drives the model directly, which is why it was built
+on the model rather than in the view).
