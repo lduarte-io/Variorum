@@ -6568,4 +6568,87 @@ pushed per commit, no trailer lines.
 
 ### 17o c/d/e LADDER — ROUND 2 FINDINGS (opus-reviewer, fresh)
 
-*(the reviewer writes here — a real pass over round 1's fixes and what they touched, anchored on the round-1 findings, arbitration and the three fix passes above; severity-ranked, the REVIEW_PROMPT format, then the clean bill)*
+**THE SEAM QUESTION FIRST (the brief's own precondition), re-verified for MYSELF over the whole
+range and again over the three fix passes alone.** The diff does **NOT** touch the editor seam
+proper, and nothing here needs Fable. `git diff --stat e6441686..2eb79599 -- Sources/VariorumCore/Sync
+App/Variorum/Shared` is EMPTY, and so is the same stat over `Persistence` + `Models` (zero schema,
+zero migration); `EditorTextView.swift` and `BlockRangeIndex.swift` have no hunk anywhere in the
+range. `PaneTextAuthority`'s semantics are untouched: the only `Surface/PaneSurface.swift` hunk in
+the three fix passes (`git diff 995108ca..2eb79599` on that file) is **two doc comments** —
+`PaneMeasurement.extent`'s cost paragraph and `caretOnGoingLive`'s — with `extent`'s body
+byte-identical, which is also what makes MAJOR-1's "the brain is byte-unchanged" claim checkable
+rather than asserted. Row 47 remains seam-ADJACENT exactly as round 1 read it (one condition in
+`applyFocusSeeds` plus the pure `rememberedArrivalLanding`, whose sibling `bareArrivalLanding` is
+now literally `rememberedArrivalLanding(fact:) ?? 0` — same signature, same value). No default's
+meaning moves: `PaneSurfaceView.indicator` still defaults to `.outline`, the shipped ring
+(`PaneSurface.swift:830`), and `ThemeStore.editingIndicator(of:)` resolves a missing store to the
+same `.outline`.
+
+**THE BRIEF'S FIRST QUESTION — is MAJOR-2's widening right? YES, and I traced it rather than
+took it.** The narrow `opener` one-liner really does leave the mechanism live: `adopt` has FIVE
+callers besides `open`, and two of them are ordinary doors she uses constantly —
+`selectionBinding`'s setter (`RootView.swift:451`), which is the sidebar's own road *including the
+Open strip* (`SidebarView.swift:640`, `.onTapGesture { selection = destination }`), and the
+`router.pendingSelection` handler (`:234`), which is ⌘K's rows, the ← → chips and the
+`.variorumOpenPost` broadcast. Neither passes through `opener`. **The order is safe on every road
+into `open`:** there are exactly four (`:210` the palette, `:483` `opener`, `:608` the Library's
+block hit, `:633` batch e's snippet card), all synchronous button/closure actions, none re-entering
+`adopt` before the park lands — `workspace.select` writes only selections/history, and the two
+`.onChange`es that could re-enter (`selection`, `pendingSelection`) run after the render, not inside
+the call. **Nothing else reads the park:** `router.blockLanding` / `landing(for:)` have exactly one
+production reader, `RootView.target(for:)` (`:759`), consumed at `:641`/`:644` (post) and
+`:673`/`:674` (pool) — grepped app-wide. And the sibling-pane worry I went looking for dissolves:
+`PaneMount.kind` makes exactly one pane live (`WorkspaceNavigation.swift:90–92`), so an unfocused
+pane is a `readCheapNote`, not a `PostDetailView` whose `.id` a clear could flip.
+
+What the widening does NOT reach is the finding below.
+
+#### Findings, severity-ranked
+
+**[MAJOR] · `App/Variorum/Variorum/Features/Takes/PostDetailView.swift:458–460` +
+`App/Variorum/Variorum/RootView.swift:641` · `:673` + `App/Variorum/Variorum/ShellRouter.swift:62–80`
+· the park is not ONE-SHOT, and a re-mount is not a navigation — so U-20/row 42's promise is still
+breakable, by the same mechanism the round just spent a MAJOR on.**
+
+*Mechanism, traced end to end on the post-fix tree.* The fixed rule is *"a navigation expires the
+park"* — `adopt` clears, nothing else does, and **nothing clears it on consumption**. So after
+`open(.post(X), blockID: B)` the park `(X, B)` stands for as long as she stays in X. Meanwhile the
+landing is applied by `PostDetailView.onAppear` — `if let initialBlockID { jump(to: initialBlockID) }`
+(`:460`) — which fires on **every mount**, and `RootView` re-mounts that view whenever the pane stops
+being the live one: `paneDetail` renders `PostDetailView` only `if live` (`RootView.swift:639`), and
+`live` is `PaneMount.kind(of:focused:windowIsKey:) == .live`, i.e. `windowIsKey && pane == focused`
+(`WorkspaceNavigation.swift:90–92`). **Neither input is changed through `adopt`.** Pane focus moves
+through `router.workspace.focus(pane)` (`RootView.swift:657`, `:722` — the read-cheap tier's own
+click-to-focus door); window key-ness moves through `WindowRegistry`.
+
+Concretely, two ordinary roads:
+
+- **Split.** Library block hit lands note X at block B in pane A (park `(X, B)`); she moves her caret
+  into block 1; she clicks into pane B; pane A goes read-cheap and its `PostDetailView` is gone; she
+  clicks back into pane A — it re-mounts with `initialBlockID: target(for: X) == B` and `onAppear`
+  jumps her to block B again, not the caret she left.
+- **Two windows.** Same park in window 1; window 2 becomes key, so window 1's pane goes read-cheap
+  (the sticky key gate); back to window 1 — same re-jump. Each window has its own `ShellRouter`, so
+  the park is right there waiting.
+
+This is a RESIDUAL of MAJOR-2, not a regression the fix introduced: pre-fix the park never expired at
+all, so both roads were already broken and worse. But the fix's stated rule reads as if the class is
+closed (*"so 'the park expires' needs no second mechanism and no door can forget"*,
+`ShellRouter.swift:65–69`), and it is not — the doors that forget are the ones that are not doors.
+
+*Pin that would prove it — RED ON THE CURRENT TREE (this is a new finding, so red-on-old is not the
+test; red-on-HEAD is):* on `ShellLandingMountTests`' exact rig, after step 2 (the caret remembered in
+block 1), split with `router.openBeside(.post(noteY.id))` — or simply
+`router.workspace.focus(.secondary)` then `router.workspace.focus(.primary)` — and re-assert the last
+expectation: the editor's selection is `blockOneStart + 4`. It is `blockThreeStart` today, and
+`router.landing(for: noteX.id)` is still `"…007"`.
+
+*Fix shape (the reviewer's, for the orchestrator to arbitrate):* make the park a one-shot the mount
+CONSUMES. The obstacle is that `target(for:)` also keys the view's identity
+(`.id("\(postID)#\(target(for: postID) ?? "")")`) precisely so a NEW park for the container
+re-creates the editor — so consuming it inside that same identity would loop. The shape that does not:
+give the park a monotonically increasing generation on `ShellRouter`, key the `.id` on the generation
+rather than on the block, and have the landing consumed (`router.park(nil)`) once applied — a second
+park for the same container still bumps the generation and still re-lands. A cheaper variant, if the
+identity coupling is wanted kept: leave `.id` alone and have `PostDetailView` consume through a
+closure after `jump(to:)`, accepting one extra body pass.
