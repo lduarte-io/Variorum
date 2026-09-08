@@ -41,7 +41,12 @@ struct RecoveryExplainerTests {
     /// minimum (280) less the tray's own padding.
     private static let narrow: CGFloat = 256
 
-    /// **RETARGETED at 18d batch 2, claim intact.** The subject was the
+    /// **RETARGETED — AND RENAMED — at 18d batch 2 (the rename at its round-1
+    /// ladder, MINOR-8: a pin named for the tray while asserting Block
+    /// History makes a grep-based audit of "what pins the tray's explainer"
+    /// answer falsely; the tray's own explainer is pinned in
+    /// `TrayFilterTests.theTrayExplainerRendersWholeAtTheNarrowestPane`).**
+    /// The subject was the
     /// tray's leaving explainer, which her ruling U-9 SHRANK to one line
     /// (the filter names the populations now, so the sentence no longer
     /// lists them) — a short sentence cannot hold this pin, whose whole
@@ -50,7 +55,7 @@ struct RecoveryExplainerTests {
     /// the family still renders through `CalmSectionHeader`: Block History's
     /// came-from region, one door away from the tray and the room the tray's
     /// own kept-originals sentence points at.
-    @Test func theTrayLeavingExplainerRendersWholeAtTheNarrowestPane() async throws {
+    @Test func theRecoveryFamilysLongestExplainerRendersWholeAtTheNarrowestPane() async throws {
         let detail = OriginPeekCopy.explainer
         let shipped = try Self.renderedHeight(width: Self.narrow) { report in
             CalmSectionHeader(

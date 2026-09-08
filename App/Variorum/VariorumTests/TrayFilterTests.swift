@@ -38,6 +38,11 @@ import Testing
 @testable import VariorumCore
 @testable import Variorum
 
+/// The rendered height a probe reports (a class so the closure can write it).
+private final class TrayHeightBox: @unchecked Sendable {
+    var height: CGFloat?
+}
+
 @MainActor
 @Suite("This Note's Tray — the two views and the filter (18d batch 2, U-9)", .serialized)
 struct TrayFilterTests {
@@ -219,6 +224,94 @@ struct TrayFilterTests {
         // the tab words, and the fold is gone from this app.
         #expect(TrayFilterFace.tab(.archived) != RecoveryCopy.trayArchivedSection)
         #expect(TrayFilterFace.tab(.leaving) != RecoveryCopy.trayLeavingSection)
+    }
+
+    /// **ROW 89's RULE, ON THE TRAY'S OWN EXPLAINER** (18d's round-1 ladder,
+    /// MINOR-8). Batch 2 moved the tray's meaning line out of
+    /// `CalmSectionHeader` into a plain `Text` (`TrayPanel.explainerLine`),
+    /// so the rule row 89 was written for — *a meaning line wraps whole,
+    /// never truncates* — lost its coverage of the surface that motivated it.
+    ///
+    /// It renders the shipped line at the tray's narrowest pane against an
+    /// unlimited reference of the same words in the same font, and holds the
+    /// shipped height at the reference's. **Green on both sides** — the
+    /// shipped `explainerLine` already carries `lineLimit(nil)` +
+    /// `fixedSize(horizontal: false, vertical: true)`, so this is a no-op
+    /// pin recorded as such: it is the guard against a future
+    /// `lineLimit` arriving here, which is exactly how row 89's defect was
+    /// born one file over.
+    ///
+    /// **Its reach, stated:** it renders the tray's WORDS with the shipped
+    /// modifiers, not the private `explainerLine` view — so it guards the
+    /// sentence (that it needs more than one line at the panel's floor, and
+    /// that nothing about those words truncates them there), and a future
+    /// `lineLimit` added to the view itself would be caught by reading the
+    /// view, not by this. That is the honest limit of a geometry oracle over
+    /// a private property, and it is why the assertion below is doubled with
+    /// the "else the pin holds vacuously" guard the family uses.
+    @Test func theTrayExplainerRendersWholeAtTheNarrowestPane() throws {
+        for view in TrayView.allCases {
+            let detail = TrayFilterFace.explainer(view, home: .post)
+            let shipped = try Self.renderedHeight(width: Self.narrowPane) { report in
+                Text(VoiceTokens.terminalLight.chromeLabel(detail))
+                    .font(VoiceTokens.terminalLight.small)
+                    .lineLimit(nil)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { report($0) }
+            }
+            let oneLine = try Self.renderedHeight(width: 4000) { report in
+                Text(VoiceTokens.terminalLight.chromeLabel(detail))
+                    .font(VoiceTokens.terminalLight.small)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { report($0) }
+            }
+            #expect(shipped > oneLine * 1.5,
+                    "\(view) wraps at \(Self.narrowPane) pt (\(shipped) vs one line \(oneLine)) — else the pin holds vacuously")
+            // The whole sentence is drawn: an unlimited reference of the same
+            // words at the same width can be no taller.
+            let reference = try Self.renderedHeight(width: Self.narrowPane) { report in
+                Text(VoiceTokens.terminalLight.chromeLabel(detail))
+                    .font(VoiceTokens.terminalLight.small)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { report($0) }
+            }
+            #expect(shipped >= reference - 1,
+                    "\(view): \(shipped) pt against the unlimited reference's \(reference)")
+        }
+    }
+
+    /// The narrowest width the tray's content gets: the panel's own floor
+    /// (`minWidth: 280`) less its 12-pt padding on each side.
+    private static let narrowPane: CGFloat = 256
+
+    /// Mounts `content` alone in a real window of `width` and returns the
+    /// height it reports (the `RecoveryExplainerTests` probe, which is where
+    /// row 89's rule was first measured).
+    private static func renderedHeight<V: View>(
+        width: CGFloat, @ViewBuilder _ content: @escaping (@escaping (CGFloat) -> Void) -> V
+    ) throws -> CGFloat {
+        let box = TrayHeightBox()
+        let window = NSWindow(
+            contentRect: NSRect(x: 60, y: 60, width: width, height: 400),
+            styleMask: [.titled], backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
+        defer {
+            window.orderOut(nil)
+            window.close()
+        }
+        let hosting = NSHostingView(
+            rootView: content { box.height = $0 }
+                .frame(width: width, alignment: .topLeading))
+        hosting.frame = NSRect(x: 0, y: 0, width: width, height: 400)
+        window.contentView = hosting
+        window.orderFrontRegardless()
+        for _ in 0..<40 {
+            hosting.layoutSubtreeIfNeeded()
+            window.displayIfNeeded()
+            if box.height != nil { break }
+            RunLoop.main.run(until: Date().addingTimeInterval(0.03))
+        }
+        return try #require(box.height)
     }
 
     // MARK: - The reveal
