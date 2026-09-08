@@ -7060,4 +7060,136 @@ the comment is well-formed, and nothing else.
 
 ### 17o c/d/e LADDER — ROUND 3 FINDINGS (opus-reviewer, fresh — the cap)
 
-*(the reviewer writes here — a full pass focused on rounds 1–2's fixes, anchored on both rounds' records; severity-ranked, the REVIEW_PROMPT format, then the clean bill)*
+**THE SEAM QUESTION FIRST (the brief's own precondition), verified for MYSELF over the whole range and
+again over the two rounds' five fix commits alone — by empty diffs, not by inheriting two records.**
+`git diff --stat e6441686..941380a2 -- Sources/VariorumCore/Sync App/Variorum/Shared
+Sources/VariorumCore/Persistence Sources/VariorumCore/Models` is **EMPTY**, and so is the same stat over
+`'*EditorTextView*' '*BlockRangeIndex*' '*PaneTextAuthority*'`: zero `Sync/`, zero custody/keychain, zero
+schema, zero migration, zero `App/Variorum/Shared/` (so nothing here is reachable from the phone), and the
+editor seam proper has no hunk anywhere in the range. `PaneSurface.swift`'s hunks are the measurement brain
+(`PaneMeasurement`), the new pure `PaneDecoration`, and one pushed parameter on `PaneSurfaceView`; the
+file's authority section has none. **Row 47 is seam-ADJACENT and no more** — one condition in
+`EditorViewModel.applyFocusSeeds`' bare-arrival arm plus the pure `rememberedArrivalLanding`, whose sibling
+`bareArrivalLanding` is now literally `rememberedArrivalLanding(fact:) ?? 0` (same signature, same value),
+and that is the file's whole 58-line diff. **No default's meaning moves:** `PaneSurfaceView.indicator`
+defaults to `.outline` — the shipped ring — and `ThemeStore.editingIndicator(of:)` resolves a nil store to
+the same `.outline`, in ONE copy; the two behaviour changes are her U-19 (1) and U-15, not defaults.
+**Nothing here needs Fable; the cap stays with the `opus-reviewer`.**
+
+**The two core changes are the only writes below the app**, and both landed alone ahead of their faces:
+`markPostsAsVersions`' anchor (rows 17 + round-1 NIT-2 + round-2 MINOR-2) and `Queries.tagPaths` (row 18).
+Neither has a mobile caller (`markPostsAsVersions` is called from `LibraryViewModel:182` and
+`CompareBoardView:690` only — grepped app-wide).
+
+#### Findings, severity-ranked
+
+**[MINOR] · `App/Variorum/Variorum/ShellRouter.swift:88–91` (`park`'s RULE ONE) + `:100` (`func park`) ·
+`App/Variorum/Variorum/RootView.swift:470–476` · round 2's MINOR-1 fix is structurally right for the road
+it fenced and its doc claims MORE than the fence delivers — "no door can express 'park, then navigate'"
+is false while `park(_:)` is module-visible, and the ladder's own pins are the proof.**
+
+*Mechanism, traced on the post-fix tree.* The fold is real and I checked it: `adopt(_:in:landing:)`
+(`RootView:461`) clears-and-installs in **one statement** (`:477`), `open(_:blockID:in:)` is a one-line
+forward (`:773`), and `ShellRouter.BlockLanding`'s failable init decides which destinations can hold a
+landing — so **a caller that goes through `adopt` cannot express the wrong order.** What the doc then says
+is wider: *"`RootView.adopt` calls this on every navigation, in one statement, so **no door can express**
+'park, then navigate'"* (`ShellRouter:88–91`), echoed at `RootView:474–476` (*"makes the wrong order
+**UNEXPRESSIBLE** rather than merely untaken"*).
+
+`park(_:)` is **internal** — no `private`, no `fileprivate` — on a class every view in the module holds
+(`RootView` takes `router` as a parameter; `paneDetail`, `openBeside`, the palette and the chips all speak
+to it). So `router.park(ShellRouter.BlockLanding(containerID:blockID:)); adopt(dest, in: pane)` is
+expressible today, in one file, by any door; it compiles, it silently deletes the landing (`adopt`'s
+`park(nil)` runs after), and **the suite stays green — because the two `ShellLandingMountTests` pins park
+exactly that way themselves** (`ShellLandingTests.swift:213`, `:318` — `router.park(...)` called directly,
+with a comment saying it is "performing the two halves `RootView.open(_:blockID:)` performs"). The one pin
+that drives the real door (`ShellLandingDoorTests:420`) goes through `blockNamingDoor` → `open` → `adopt`,
+so it holds `adopt`'s order and nothing else.
+
+*Traced degradation.* This is the identical shape round 2 raised, one layer out: 18d batch 1 is named in
+this file's own comments as the next editor of the sidebar/shell, and a next author who reads `park`'s
+doc concludes the ordering class is structurally closed, reaches for `router.park(...)` from a new door
+(the natural thing to do — it is the router's public-looking verb, and the tests model it), and loses the
+landing with every pin green. The guarantee that exists is *"no door **that navigates through `adopt`**
+can express it"*, which is a convention over `adopt`'s callers plus one pin — strictly stronger than round
+1's two statements, and strictly weaker than the sentence.
+
+*No red-on-old pin exists for this and I say so* — nothing behaves wrongly today (I re-ran the three
+`ShellLanding*` suites plus `ShellChromeTests`: **8 tests in 3 suites passed**). It is a claim-versus-code
+finding, and it is exactly the class this ladder has now spent three dispositions on (round 1's MINOR-3
+`mastheadWidth` doc, round 2's NIT-1 stale line numbers, round 2's NIT-2 `resolveTitles`).
+
+*Fix shape (the reviewer's; the orchestrator's to route).* Either **(a)** make the sentence true — narrow
+`park(_:)` to the one production caller (`private` plus a `#if DEBUG` seam for the two mount pins, the
+`blockNamingDoor` pattern the same fix pass already established two members up), which also removes the
+tests' modelling of the wrong shape; or **(b)** make the doc true — say *"no door that navigates through
+`adopt` can express it; `park` itself is the primitive `adopt` is built from, and a door that calls it
+directly is outside the fence"*, at both sites. (a) is the one the round-2 finding's own argument
+("structure over test, which is cheaper and stronger") points at.
+
+---
+
+**[NIT] · `App/Variorum/Variorum/RootView.swift:660–664` · the comment that exists to stop the next reader
+repeating the implementer's own measured mistake gives the instruction INVERTED against the source it sits
+in.**
+
+The line reads *"**BELOW the `.id`**, deliberately and measured: a modifier **ABOVE it** wraps the
+identified child, so it keeps its own lifetime across an identity change and never fires again — the first
+cut of this line sat there and the park was never spent."* In view-tree terms that is exactly right
+(`.id(…)` is applied last, so it identifies the subtree containing `.onAppear`, which is therefore
+re-created and re-fires). In the **source text a reader is looking at**, `.onAppear` (`:665`) sits
+**above** `.id` (`:671`) — so a reader who follows the words literally moves `.onAppear` to the line below
+`.id`, which is the broken arrangement the comment was written to prevent. Two vocabularies (tree depth
+vs. line order) are inverted with respect to each other in the one place this batch already got wrong once.
+
+*Bounded, and I say so:* `ShellLandingMountTests.aRemountAfterAFocusRoundTripLandsAtTheRememberedCaret`
+catches the wrong arrangement (the record's own number: 2 issues), so the hazard is a wasted debugging
+cycle, not a shipped defect. Fix: say it in one vocabulary — *"`.id` comes LAST in this chain, so it
+identifies the `.onAppear` above it and a new identity re-fires the spend; moving `.onAppear` after the
+`.id` makes it outlive the identity and it never fires again (measured — the first cut sat there)."*
+
+---
+
+**[NIT] · `App/Variorum/Variorum/ShellRouter.swift:136–145` (`static var blockNamingDoor`) +
+`App/Variorum/Variorum/RootView.swift:315–317`, `:778–785` · a process-global DEBUG closure is published by
+every `RootView` mount and cleared by exactly ONE of the eight mount sites in the test target.**
+
+*Mechanism.* `publishBlockNamingDoor()` runs in `RootView`'s `.onAppear` (`:315`) and assigns
+`ShellRouter.blockNamingDoor` — a `static var` — a closure capturing that shell (its `session`, its
+`router`, its `@State` boxes). Eight `RootView(` mount sites exist across six test files (`PaneSplitTests`,
+`BookAscentTests`, `ShellChromeTests` ×3, `WindowsTests` ×2, `WorkspaceNavigationTests`,
+`ShellLandingMountTests` ×2); **only `ShellLandingDoorTests` clears it** (`ShellLandingTests.swift:409`).
+So after any other mount the global holds a closed window's shell, and `ShellLandingDoorTests`' settle
+(`:413–417`) waits for `blockNamingDoor != nil` and `#require`s **whatever is there** without checking it
+is its own — a stale door would navigate a foreign router and the test's own assertions would go red.
+
+*MEASURED, and it does not reproduce today — recorded honestly rather than filed as a defect.* I ran the
+adverse order myself: `xcodebuild test … -only-testing:VariorumTests/ShellChromeTests
+-only-testing:VariorumTests/ShellLandingDoorTests -only-testing:VariorumTests/ShellLandingMountTests` →
+**`✔ Test run with 8 tests in 3 suites passed after 1.516 seconds`**, with `ShellChromeTests`' three shells
+and `ShellLandingMountTests`' two mounting first. The reason is that `NSHostingView` + `makeKeyAndOrderFront`
+runs the first SwiftUI update (and therefore `onAppear`) synchronously enough that the static already holds
+the CURRENT shell before the settle's first predicate evaluation. That is a property of AppKit's mount
+timing, not of the code, so what remains is a latent order dependence plus a DEBUG-only retention of one
+closed window's shell. Fix (cheap, either): key the publication (`[windowID: door]`) or have the door pin
+set `ShellRouter.blockNamingDoor = nil` **before** it mounts, so it can only ever take its own.
+
+---
+
+**[NIT] · `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:1509–1530` (`TakeCardGeometry`) · the
+only APPEND-ONLY oracle in the round; every other DEBUG probe here is last-write-wins.**
+
+`TakeCardGeometry.record` does `reports.append(…)` and nothing prunes it; `reset()` has exactly two callers,
+both in `TakesCardHeightTests` (`:594`, `:634`). The probe is installed on every take card and on every
+chosen bar (`takeCardGeometryProbe(.card)` / `(.chosenBar)`), driven by `.onGeometryChange`, so in a DEBUG
+build — the dev-store build the walks use — the array accumulates for the process's life, and `latest`/
+`tallest` scan the whole history. Contrast the diff's six other new oracles (`ShellGeometry`,
+`SidebarGeometry.headerTextFrames`, `BookIndexGeometry`, `MastheadGeometry.titleFieldFrame`/
+`titleLabelFrame`, `PostDetailOracle.titleShown`, `TakesEmptyStateDoors`), every one of which stores a
+single value or a keyed last-write.
+
+*Honest bound on the rate:* `.onGeometryChange` fires on CHANGE, and a card's frame in its own coordinate
+space changes only when the card resizes (a line-count change, a width change, a take added or removed) —
+not per keystroke. So the growth is slow, and this is a NIT, not a leak worth a fix pass. Fix if touched:
+keep a last-per-slot plus a running max (which is all `latest`/`tallest` ask for), or `reset()` on the
+board's appear.
