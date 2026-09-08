@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- 17o batch d, ledger row 10 — the "Fill code · From Messages" popover
+	     over the note title. On macOS 26 that suggestion is time-and-focus
+	     based and content-agnostic: every text-input-capable field in every
+	     Mac app is eligible while Messages or Mail has recently detected a
+	     one-time code. This key (macOS 26+, default NO) is the one documented
+	     opt-out — with it YES, only a field explicitly annotated
+	     `.textContentType(.oneTimeCode)` is offered the suggestion.
+	     Variorum has no verification-code field, so nothing loses anything;
+	     credential AutoFill (.password / .newPassword / .username in the auth
+	     views) is a different mechanism and is untouched.
+
+	     THE ONE COST, stated: a one-time-code field added later MUST carry
+	     that annotation. `OneTimeCodeAutoFillTests` pins both halves.
+
+	     This file is a PARTIAL plist: GENERATE_INFOPLIST_FILE stays YES and
+	     Xcode merges its generated keys over these, because the
+	     INFOPLIST_KEY_* build-setting road only carries key names Xcode
+	     itself knows (measured: the setting was silently dropped from the
+	     built bundle). -->
+	<key>NSAutoFillRequiresTextContentTypeForOneTimeCodeOnMac</key>
+	<true/>
+</dict>
+</plist>

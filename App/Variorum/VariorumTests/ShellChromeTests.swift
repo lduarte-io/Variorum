@@ -99,6 +99,61 @@ private func countSplitViews(in view: NSView) -> Int {
     return count
 }
 
+/// **Row 10 — the "Fill code · From Messages" popover over the note title.**
+///
+/// The traced HYPOTHESIS was wrong and is recorded as such: the title field's
+/// prompt is the note's date, all digits, and the guess was that AppKit read a
+/// digit prompt as a verification-code field. It does not. On macOS 26 the
+/// suggestion is time-and-focus based and CONTENT-AGNOSTIC — Apple's own
+/// documentation of the opt-out key says every text-input-capable field in
+/// every Mac app is eligible whenever Messages or Mail has detected a one-time
+/// code, a field has focus, and under three minutes have passed. (Hence the
+/// same popover reported over spreadsheet cells and terminal emulators.) The
+/// brief's API-free fallback — render the date as a `Text` behind an
+/// empty-prompt field — would therefore have changed nothing.
+///
+/// The one documented opt-out is app-wide and lives in the bundle:
+/// `NSAutoFillRequiresTextContentTypeForOneTimeCodeOnMac` (macOS 26+, default
+/// `NO`). With it `YES`, only a field explicitly annotated `.oneTimeCode` gets
+/// the suggestion — and Variorum declares that content type nowhere, which is
+/// the point: it has no verification-code field to break. Credential AutoFill
+/// is untouched (the auth views' `.password` / `.newPassword` / `.username`
+/// annotations are a different mechanism).
+///
+/// **If a one-time-code field is ever added, it must carry
+/// `.textContentType(.oneTimeCode)` or AutoFill will not offer it.** That is
+/// the whole cost of this key, and this pin is where the next reader learns it.
+@Suite("One-time-code AutoFill is opted out of (17o batch d, row 10)")
+struct OneTimeCodeAutoFillTests {
+    @Test func theBundleRequiresAnExplicitContentTypeForOneTimeCodes() throws {
+        let key = "NSAutoFillRequiresTextContentTypeForOneTimeCodeOnMac"
+        let raw = Bundle.main.object(forInfoDictionaryKey: key)
+        #expect((raw as? NSNumber)?.boolValue == true,
+                "declared as a real Boolean, not \(String(describing: raw))")
+    }
+
+    /// The key's cost, stated as an assertion: nothing in the app asks for
+    /// one-time-code AutoFill today, so nothing loses it.
+    @Test func noFieldInTheAppClaimsToBeAOneTimeCodeField() throws {
+        let sources = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()  // VariorumTests
+            .deletingLastPathComponent()  // App/Variorum
+        var claimants: [String] = []
+        let wanted = ["Variorum", "Shared"]
+        for folder in wanted {
+            let root = sources.appendingPathComponent(folder)
+            guard let walk = FileManager.default.enumerator(
+                at: root, includingPropertiesForKeys: nil) else { continue }
+            for case let url as URL in walk where url.pathExtension == "swift" {
+                guard let text = try? String(contentsOf: url, encoding: .utf8) else { continue }
+                if text.contains("oneTimeCode") { claimants.append(url.lastPathComponent) }
+            }
+        }
+        #expect(claimants.isEmpty,
+                "annotate it `.textContentType(.oneTimeCode)` or the bundle key blocks it: \(claimants)")
+    }
+}
+
 @MainActor
 @Suite("The flat shell (correction round, row 2) and the strip's pitch (row 3)")
 struct ShellChromeTests {
