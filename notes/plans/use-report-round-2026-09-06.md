@@ -7193,3 +7193,167 @@ space changes only when the card resizes (a line-count change, a width change, a
 not per keystroke. So the growth is slow, and this is a NIT, not a leak worth a fix pass. Fix if touched:
 keep a last-per-slot plus a running max (which is all `latest`/`tallest` ask for), or `reset()` on the
 board's appear.
+
+#### Considered and cleared (traced, so the next reader — and the letter's closeout — does not re-raise them)
+
+- **`markPostsAsVersions`' NEW seal refusal is derivable from ratified canon, not an unruled product
+  call — I went looking for a QUESTIONS entry and concluded none is owed.** Row 17's ruling (U-19 (1),
+  *"a is good"*) and the plan's row text (`§5.3`, line 524) say *mint the empty first block and link*, and
+  neither names the seal; the implementer added `ensureUnlocked(post)` inside the mint arm
+  (`Operations+Versions.swift:156`) and shipped it with no PROVISIONAL, while R-8's canon-delta list says
+  *"QUESTIONS: nothing new."* The reason that stands: AppSpec §9's `lockPost` is explicit that a sealed
+  post freezes **pointer order** and *"everything under the post"*, and the mint INSERTS a
+  `container_block` row — so refusing is what the seal already ruled, and the asymmetry it produces (a
+  sealed post WITH blocks still links; a sealed BLOCKLESS one refuses) is the same asymmetry the seal
+  draws everywhere between content and metadata. `setPostWordTarget`'s recorded PROVISIONAL is NOT the
+  parallel: that one writes a `container` column, which the seal's own sentence lists as still-allowed.
+  **No AppSpec delta is owed either** — `markPostsAsVersions` has never been listed in §9, so no canon
+  sentence went stale; the KnownIssues amendment R-8 already drafted is the whole debt.
+- **The POOL road's shell composition is held by the walk plus the POST road's structural twin, not by a
+  pin of its own — and I could not turn that into a defect.** `RootView`'s `.onAppear` spend fires beside
+  `PoolDetailView`'s own `.onAppear`, whose landing is ASYNC (`CanvasView.swift:1091–1104` — a
+  `database.read` inside a `Task`), so the worry is a spend that outruns the delivery. It cannot:
+  `initialBlockID` is a `let` on the struct the appear closure was formed with, so nil-ing the park
+  afterwards cannot reach a closure already made; the `.id` does not move on a spend, so the `@State`
+  `pendingCaret` write lands in the live box; and both appear actions belong to one insertion transaction.
+  The POST road is pinned end to end through the mounted shell
+  (`ShellLandingMountTests` asserts `selectedRange().location == blockThreeStart` BEFORE the spend
+  assertion) and the two roads share every line of shell code, differing only in the detail view.
+- **`ShellRouter.openBeside` bypasses `adopt` and therefore does not expire a park — harmless after round
+  2's fix, and worth knowing.** `openBeside` → `workspace.openBeside` → `workspace.select`
+  (`WorkspaceModel.swift:186–197`), never `RootView.adopt`. Pre-round-2 that would have been a second hole
+  in RULE ONE; post-fix the park is SPENT on the mount that delivers it, so a park cannot still be
+  standing when an `openBeside` runs (the only way to survive a mount is for the destination's detail
+  never to go live, in which case delivering it later is the wanted behaviour). Recorded because RULE
+  ONE's doc reads as if `adopt` were the only navigation.
+- **`landingGenerations` is never pruned** — one `Int` per container ever opened at a block, per window,
+  per session. Bounded by her block-door usage and freed with the window; not worth a fix.
+- **The `.focusedExistingPane` road delivers correctly**, checked rather than assumed: `adopt` parks first,
+  `select` then focuses the pane already showing the note (`WorkspaceModel.swift:159–162`), that pane
+  becomes live, its detail mounts with `initialBlockID` and spends. A block door into a note sitting in the
+  other pane lands her in it.
+- **Row 40's "a note with NO tags keeps the field open" is the PLAN's decision, not the implementer's** —
+  §5.3's row-40 text (line 5243) says it in those words, so it is not an unruled edge and needs no
+  QUESTIONS row.
+- **`header()`'s 12-pt leading move is still safe on the current tree** (round 1's clean-bill item,
+  re-checked at today's line numbers, not inherited): all three call sites — `SidebarView:400`, `:487`,
+  `:566` — sit inside a `VStack` carrying `.padding(.horizontal, Self.groupPadding)` (`:405`, `:527`,
+  `:588`); there is no fourth. A header added OUTSIDE such a group would now under-pad by 12, which is
+  what 18d's note box inherits.
+- **Row 14's card rebuild moves no content**, re-derived: the retired `HStack` gave the content
+  `3 (bar) + 7` = 10 pt of leading; the new chain is `.padding(.horizontal, 7)` then
+  `.padding(.leading, 3)` = 10 pt, with the bar an `.overlay(alignment: .leading)` inside the same
+  `clipShape`.
+
+#### CLEAN BILL — load-bearing things I checked myself and found solid
+
+- **Round 2's MAJOR fix is correct, and I traced the whole road rather than reading its record.** `park`
+  bumps the generation only for a NEW landing (`ShellRouter:104–107`) and `spendLanding` deliberately does
+  not, so the spend cannot rebuild the view it just landed while a second park still re-lands her; the
+  `.id` keys on the generation (`RootView:671`, `:702`) and `target(for:)` (`:788`) is the ONLY reader of
+  the park app-wide (grepped: one reader, one writer, two spends, two generation reads). Both the
+  construction (`initialBlockID: target(for:)`) and the spend read the same router state in the same body
+  pass, so they can never disagree; a container never opened at a block sits at generation 0 and its
+  identity never churns. The two roads the finding named (a split's focus round trip, a second window
+  becoming key) both re-mount through `PaneMount.kind`, which neither `adopt` nor `park` touches — which
+  is precisely why the spend, not the navigation clear, is the right mechanism.
+- **The suites I ran myself, not the record's numbers:** `ShellChromeTests` · `ShellLandingDoorTests` ·
+  `ShellLandingMountTests` → **`✔ Test run with 8 tests in 3 suites passed after 1.516 seconds`**
+  (`** TEST SUCCEEDED **`), deliberately in the adverse order for the NIT above. I did NOT run the full
+  suite (the standing rule).
+- **MAJOR-1's HOLLOW dismissal is right, and its deciding pin says what the record says it says.** I read
+  `TakePaneMeasureTests.aPaneEmptiedCompletelyDoesNotJumpBackToItsTallestHeight` (`:840–882`): it mounts
+  the live 30-line pane, asserts non-vacuity (`tall > 900`), selects the whole document, `deleteBackward`s,
+  asserts the take really is empty, counts the fragments, and compares the emptied frame against a
+  born-empty pane's within 24 pt — with the fragment count and the property value in the failure message.
+  `extent(of:)`'s body (`PaneSurface.swift:132–141`) is byte-unchanged and its fallback is reachable only
+  when the enumeration yields nothing, which under `.ensuresLayout` is only the empty document. Her
+  punchlist 13 is covered end to end by two roads and there is no third shape between them.
+- **The round-2 batch-d record's CORRECTED claim — the one it explicitly asked round 3 to re-read — is
+  true by reading, not only by its revert probe.** `insertVersionOfEdge`
+  (`Operations+Versions.swift:589–596`) calls `liveBlock` on BOTH ids, and `liveBlock`
+  (`Operations.swift:71–76`) throws `blockNotFound(id:)` for a tombstoned block. So the pre-NIT-2 inline
+  copy really did REFUSE the link in the raced shape rather than anchor a dead edge, and round 1's
+  *"can only turn a would-be dead anchor into a live empty one"* really was an understatement. The op's
+  comment and both pins now carry the measured version.
+- **The two new core pins are the race, built exactly, and they are not tautological.**
+  `aLivePlacementOverATombstonedBlockIsNotAnAnchor` tombstones the `block` row and puts its
+  `container_block` back live **inside the same transaction** (the half-delivered-batch shape SyncSpec
+  §5/§7 designs for), asserts the placement really is live and points at the dead id, then asserts the
+  anchor is a different, LIVE block carrying exactly one live empty take, and that `versionPeerPosts`
+  finds the peer from the raced note; `theRacedShapeUnderASealRefusesRatherThanAnchoringOnTheDeadBlock`
+  asserts the mint arm's `ensureUnlocked` fires and that nothing was linked on the way to it. Neither
+  could pass on the inline copy.
+- **`markPostsAsVersions` stays one transaction and sync-shaped.** One `database.write`; `now` read once
+  and shared by the mint, the touch and the edge; `livePost` for both sides first; the already-linked
+  guard before anything is written; the mint through the shared `mintBlock`, so the block/variant FK
+  circle, `default_variant_id`, the placement's `chosen_variant_id` and the fractional position are the
+  ordinary ones and I10 holds on an empty buffer; `touchContainer` without churn (AppSpec §9's structural
+  rule, pinned); a throw on the SECOND anchor rolls the FIRST anchor's mint back (left-to-right argument
+  evaluation inside the one transaction); and A == B still refuses through
+  `cannotVersionLinkBlockToItself` after the second `anchorBlock` resolves to the first's minted block.
+  No writes outside the ops layer, no schema, no trigger, no `Sync/`.
+- **The held title observations are viewport-shaped — the thing that could have gone wrong.** I read the
+  queries rather than the claim: `Queries.noteDisplayTitle` and `poolDisplayTitle`
+  (`TakesQueries.swift:195–215`) are each ONE indexed `container` row, so `readTitles` is O(subjects on
+  screen) and `PostTitleLabel.watch()` is O(1) per note — a `container` write (every autosave stamps one)
+  re-runs a bounded fetch, and `AppDatabase.observe`'s own `removeDuplicates` keeps the assignment still.
+  `Queries.tagPaths` is a correct bounded twin of `allTags`: live-only, `IN (…)` over exactly the on-screen
+  ids, empty-in → empty-out with no query, missing/tombstoned ids simply absent — which is what the
+  chrome's per-kind fallback already handles. P1 holds.
+- **`resolveTitles`' demotion is honest and complete.** Its doc now names its two test callers, says
+  plainly that it has none in production, and warns that a new surface must take `observeTitles` — and the
+  grep backs it: `SidebarView.swift:261–262` (`.task(id: titleSubjectsKey)`) is the only `.task` that resolves titles and it calls
+  `observeTitles`. `readTitles` is `nonisolated static` and runs inside the observation's fetch (the
+  reader pool, P2); only the assignment lands on the `@MainActor` model.
+- **The NIT-1 doc fix cannot go stale the way its predecessor did.** `PaneMeasurement.extent`'s cost
+  paragraph now names all four call sites by the FUNCTION each sits in and carries no line numbers at all,
+  and states why. I re-verified the SET myself: `grep -rn "PaneMeasurement.height"` reports exactly four
+  production sites — two panes in this file's `Coordinator`, `ReadPostViewModel.remeasure` and
+  `InlineEditorSurface.remeasure` — matching the doc.
+- **Row 6's "every host, through the ONE component" is still true by grep on the current tree.** There are
+  exactly TEN `PaneSurfaceView(` construction sites in the app and all ten pass `indicator:`; every one of
+  the eight host files resolves it through `ThemeStore.editingIndicator(of:)` — never a second copy of the
+  fallback — and the three hosts that draw their own frame consume `PaneDecoration.hostRing`.
+  `PaneDecoration.resolve` (`PaneSurface.swift:776–800`) preserves the at-rest look byte-for-byte and
+  returns `rest` for both `!isLive` and `.off`, so nothing can paint a pane that is not live.
+- **Row 43's receipt reads the op's own shape, not the instant road's arithmetic.**
+  `TakesViewModel:2345–2352`: `rodeOntoFirst` is `Set(first.sourceVariantIDs).subtracting(second…)` (so a
+  seed that split across both is excluded, and a take copied to both is excluded), and the count is claimed
+  only when `seedSplit` is true — otherwise R1-9's zero form, which claims nothing. Correct for all four
+  sheet arrangements including a seed parked at its START and per-take hand cuts.
+- **Row 45's guard is exhaustive over the enum, not a hand-list** —
+  `Set(TakesBottomBar.structuralBar.map(\.act)) == Set(StructuralAct.allCases)` — so the omission it fixes
+  (a `.bottomBar` capability satisfied by `CommitBar` alone while the boards rendered neither ceremony)
+  cannot recur for a future act. Row 46's help pin asserts both the new sentence and the ABSENCE of the
+  retired one (`"onto both"` == false), which is the J8 shape.
+- **Row 44's tutorial prose now matches U-2 in both places** — the lesson and the staged take both say the
+  other take *stays whole on the first block*, which is what `KeepOnTopDivide` does.
+- **The masthead pins earn their keep.** `bothTitleFacesShareOneBoxSoNothingShiftsOnClick` drives the real
+  `beginEditing()` through the DEBUG oracle and compares the EDITING face's frame against the RESTING
+  face's on midY, minX and height in both voices — it would fail on any reintroduction of the retired
+  380-pt measure; and the retired centering pin is genuinely deleted (no `@Test` by that name; only a
+  comment block explaining the deletion).
+- **Row 47's widening is strictly the ruled one, and its reveal still cannot fight the anchor restore.**
+  `bareArrivalLanding` is `rememberedArrivalLanding(fact:) ?? 0` (identical signature and value, so batch
+  b's pins on it ride), and the reveal's condition moved from `landing > 0` to `remembered != nil` — which
+  adds exactly the remembered-0 case (#98(a)'s ruled behaviour) and excludes the nothing-remembered
+  default, which is what keeps `aColdMountRestoresTheSessionScrollAnchorAtTheSettleHop` green.
+- **Every pin the three batches and the two fix passes claim exists in the tree**, located by name and the
+  load-bearing ones read rather than summarised: the four new core tests in `VersionOperationsTests`,
+  `TagTimelineQueryTests.tagPathsReadsOnlyTheNamedTagsAndSkipsTheDead`, the three `ShellLanding*` suites'
+  six tests, `TakePaneMeasureTests` ×3, `PaneSurfaceTests` ×4, `TakesEmptyStateTests` ×4,
+  `TakesCardHeightTests` ×2, `MastheadLayoutTests` ×4, `MastheadTagDoorTests`, `SnippetsDoorsTests` ×5,
+  `BookIndexEditingTests`, `CompareBoardTests`, `CapabilityRegistryTests`, `FannedDefaultsTests`,
+  `OriginBlockDoorTests` ×2, `ShellChromeTests` ×2, `TutorialWalkTests`, `WorkspaceNavigationTests`,
+  `LandingOffsetTests`.
+- **Nothing in the range is reachable from the phone**, and I checked the road rather than the folder:
+  `App/Variorum/Shared/` has an empty diff across all five commits, and the one core semantic change has
+  no mobile caller.
+
+**Counts (round 3, the cap): 0 BLOCKER · 0 MAJOR · 1 MINOR · 3 NIT.** None needs Fable, none is a
+bug-class finding, and none is owed a red-on-old pin — the MINOR is a doc-versus-access-level claim in the
+shell's composition file and the three NITs are a comment's vocabulary and two DEBUG-only oracles. The
+ladder's three MAJORs are all closed with their mechanisms traced independently here: round 1's MAJOR-1
+dismissed hollow by a pin I read, round 1's MAJOR-2 and round 2's MAJOR fixed by machinery I re-traced end
+to end and re-ran. **Nothing here needs a fix pass; all four are recorded for the orchestrator to route.**
