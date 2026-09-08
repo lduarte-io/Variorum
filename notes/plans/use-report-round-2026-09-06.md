@@ -6431,3 +6431,86 @@ by the deciding pin, per J30) · 1 MINOR FIXED as a doc correction plus the meas
 asked for (MINOR-1) · 1 NIT FIXED (NIT-1) · 1 thing found and recorded rather than folded in (the third
 `fixedSize()`).**
 
+---
+
+#### 17o c/d/e round 1 — fixes (batch e)
+
+*(the batch-e implementer, resumed; ONE finding — MAJOR-2)*
+
+**MAJOR-2 (`RootView`'s parked `blockTarget` never cleared by the `openHere` doors) — CONFIRMED and
+FIXED, with the ruled one-liner in and one honest correction to its sufficiency.**
+
+**The ruled line landed verbatim.** `opener(_:)` is now
+`{ destination in open(destination, blockID: nil, in: pane) }` — a list-row door names NO block, said
+through the one road that already knows how to write that. The record's rejected form
+(`blockTarget = nil` inside `adopt` while `open` parks first) is not what shipped, and the reviewer was
+right to reject it.
+
+**And I did not stop there, because the ruled line alone leaves the finding's own mechanism live.**
+Traced myself before touching anything: `openHere` is **not** the only road into `adopt`, and the
+finding's enumeration lists only the `openHere` doors. Three others reach `adopt` directly —
+**`selectionBinding` (`RootView:455`), which is the SIDEBAR's own road, including the Open strip's note
+tabs (`SidebarView:640` `.onTapGesture { selection = destination }`)**; `router.pendingSelection`
+(`:238`), which is ⌘K's rows, the back/forward chips and the `.variorumOpenPost` broadcast; and
+`openToday` (`:757`). Park a landing for note X, leave through the sidebar, come back through the Open
+strip or ⌘[ — the stale block still lands. Closing a MAJOR over a mechanism I had just watched stay
+alive is the thing rule 9 forbids, so the clear went where **every** door already passes, with the
+review's exact objection answered by ORDER rather than by exception:
+
+- `adopt(_:in:)` calls `router.park(nil)` FIRST — *a navigation expires a parked landing*;
+- `open(_:blockID:in:)` calls `adopt` FIRST and parks AFTER — so clearing in `adopt` cannot erase a
+  park as it is made, which was the whole of the reviewer's objection to the rejected form.
+
+**The park moved off `RootView`'s `@State` onto `ShellRouter`** (`blockLanding` + `park(_:)` +
+`landing(for:)`; `RootView.BlockTarget` and `target(for:)`'s field are gone, `target(for:)` is now one
+line reading the router). Same per-window scope — `ShellRouter` has been per-window `@State` since 13f
+batch 5b — on the object every navigation door already speaks to, which is `pendingSelection`'s own
+reason (P-4) and is also **what makes the rule readable by a pin at all**: as private `@State` on a
+view whose parking doors are all view closures, no test could see it or reach it.
+
+**Pins (`App/Variorum/VariorumTests/ShellLandingTests.swift`, 3 tests in 2 suites):**
+- `ShellLandingRuleTests.aParkAnswersOnlyForItsOwnContainerAndOnlyUntilTheNextNavigation` and
+  `…aSecondParkReplacesTheFirst` — the rule as arithmetic.
+- `ShellLandingMountTests.aTripAwayAndBackExpiresTheParkAndLandsAtTheRememberedCaret` — **the review's
+  scenario through a mounted `RootView`**: note X opened and block 3 parked (the two halves
+  `open(_:blockID:)` performs), her caret moved into block 1 and remembered, away to Y and back to X
+  through the ordinary door — `blockLanding == nil`, `landing(for: X) == nil`, and Write lands at the
+  caret she left.
+
+**RED-ON-OLD, by behavioral revert on the committed tree `8d27088d`** (`adopt`'s `router.park(nil)`
+removed in place, then `git checkout --`'d; green again after): **4 issues in 1 test** —
+`router.blockLanding → BlockLanding(containerID: …000, blockID: …007)` where nil was wanted; the same
+at `landing(for: X)`; again after the return trip; and the consequence itself, the settle for the
+remembered caret timing out because Write had landed on block 3. **That probe is also the evidence for
+the correction above**: the road it drives is `pendingSelection`, not `openHere`, so with the ruled
+one-liner alone in place those four issues stand.
+
+**THE WALK** (dev-store Debug `io.lduarte.Variorum.debug`, rebuilt from the clean committed tree,
+`/Applications/Variorum.app` never launched, zero instances before and after): Snippets → double-clicked
+the *field guide* card "a variorum is an edition…" — the group opened at **block 2/2**, the parked
+snippet (`walk-14`). Clicked into block 1 — **block 1/2** (`walk-15`). Left to the Shelf **through the
+sidebar** and came back **through the ← chip** — the two roads the ruled one-liner does not cover — and
+the editor returned live on **block 1/2**, the caret she left, not the snippet a door named
+(`walk-16`).
+
+**CLOSING RUN (this fix pass): `✔ Test run with 181 tests in 36 suites passed after 30.078 seconds.`**
+— thirty-six suites for thirty-six `-only-testing` type names, zero `skipped` lines
+(`scratchpad/close2.log`): the two new pin suites · batch e's own closing set (the seven Snippets
+suites, `CapabilityRegistryTests`, `CanvasAndPoolTests`, `PoolCardPreviewTests`, `BlockTOCTests`,
+`NoteTagDeclarationTests`, `LibraryTagFaceTests`, `PaneMountTests`, `PaneSplitDoorTests`,
+`PaneUnmountTests`, `AscentRoutingTests`, `ShellChromeTests`) · the navigation suites the moved state
+sits under (`NavigationHistoryTests` · `OpenNotesTests` · `WorkspaceModelTests` · `NavigationDoorsTests`
+· `IndependentWorkspaceTests` · `TwoWindowMountTests`) · the ten `Tutorial*` spine types.
+
+**Seams:** the fix commit `8d27088d` touches `App/Variorum/Variorum/ShellRouter.swift`,
+`App/Variorum/Variorum/RootView.swift` and one new test file — ZERO `Sources/`, ZERO `Sync/`, ZERO
+`App/Variorum/Shared/`, no schema, no migration, nothing in `BlockRangeIndex`/`EditorTextView`/
+`PaneTextAuthority`.
+
+**Counts for the round-1 fix pass (batch e): 1 MAJOR FIXED with its red-on-old pin (4 issues) and its
+walk · 1 correction recorded to the ruled fix's sufficiency, with the mechanism that forced it.**
+
+**For the round-2 reviewer, stated plainly:** the shipped fix is a superset of the ruled one — the
+ruled `opener` line is in, and the clear also sits in `adopt` with `open` reordered around it. If the
+reviewer wants the narrow form instead, removing `adopt`'s `router.park(nil)` restores it exactly and
+turns the mount pin red by the four issues above; that is the disagreement, made cheap to settle.
