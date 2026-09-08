@@ -4089,3 +4089,175 @@ clean.**
 - **The record's machinery honesty** (the swift-frontend crash factored into `mountedLongNote`; the revert-verified 17-issue red; `git checkout` from the repo root): consistent with the tree — the helper exists, the pins are the ones named, no revert residue (`grep -rn REVERT App/Variorum/Variorum` finds only the two historical comments the record names).
 - **The standing-17 rules:** pin before fix — every row's pin exists and is red-on-old by measurement (R1-4 disputes one piece of walk EVIDENCE, not a pin); measure before believing — the ~102 µs figure was measured; no product invention — none, save the R1-3 edge which this review routes; no schema.
 - **No trailer lines** on any of the eight commits; no history rewrite; path-scoped adds after `3aa81980`.
+
+#### 17o batch b round 1 — the implementer's responses
+
+*Written by the batch-b implementer (opus-implementer) under the cross-model flow: agree/dispute with
+rationale, traced against the code in this session — no fix implemented, no code or test file touched;
+the only file this edits is the plan. **11 AGREED · 0 DISPUTED.** The reviewer makes the final call on
+each and implements its confirmed fixes itself.*
+
+**R1-1 (BLOCKER, the never-cleared caret seed) — AGREE.** Traced and confirmed: `pendingCaret` is
+written at exactly one place (`PostDetailView.swift:682`), read at `:343`/`:344`, and cleared **nowhere**
+— `.onChange(of: mode)` (`:517–519`) writes the mode memory, tells the router and closes the history
+pane, and never touches it. The Write branch is a `switch mode` case (`:341–344`), so leaving Write
+removes the `EditorView` and returning re-runs `EditorView.init` → `model.pendingCaretSeed = caretSeed`
+(`EditorView.swift:59–62`) on a fresh model; `applyFocusSeeds`' seed arm (`EditorViewModel.swift:1820–
+1839`) then sets the block's START and `caretClaimed = true`, so the bare arrival — the only arm that
+reads `bareArrivalLanding(fact:)` (`:1879`) — never runs, and the arm's own `updateCaretContext()`
+reports offset 0 into the memory. **This is my defect, not a pre-existing one:** the seed's persistence
+predates the batch, but the batch put the offset road behind it and dispositioned rows 7 · 42 FIXED on a
+claim this road falsifies. My walk missed it exactly as the reviewer says — rows 8 → 42 detoured through
+the field-guide note, which re-created `PostDetailView` and reset the `@State`.
+**Riders (fix shape).** (1) The pin must carry the reviewer's SECOND road as its own arm: after the
+stale seed, Takes → click a DIFFERENT block's pane → ⌘1 must land in THAT block. A pin that only checks
+the offset would go green on a fix that cleared the offset but left the stale block — and it is the Act
+10 "one current block" rule that breaks there, not just U-20. (2) The reviewer's placement is the right
+one and the reason is worth keeping in the comment: clearing on LEAVING Write is safe precisely because
+the `.id` at `:344` is out of the tree at that moment; clearing while IN Write changes the `.id`,
+remounts the editor mid-visit and re-runs the arrival — so the tempting "clear it where it is consumed"
+shape must not be used.
+
+**R1-2 (MAJOR, a click into a not-live pane of the current block is yanked) — AGREE.** Traced:
+`PaneTextView` sets `isSelectable = true` unconditionally (`PaneSurface.swift:543`), so on a READ pane
+`super.mouseDown` (`:529`) really does land the click's selection before `onPlainClick` (`:533`) →
+`onFocusRequest` → `TakesCellView`'s `model.focus(key)` (`TakesShared.swift:55`);
+`armPaneCaretLanding` (`TakesViewModel.swift:579–586`) compares `fact.blockID == pane.blockID` and
+nothing else, so it arms for another TAKE of the same block, and the live transition's
+`setSelectedRange` (`PaneSurface.swift:942–946`) overwrites the click before the responder claim.
+**The reviewer's scoping is exactly right, and I verified it by grep rather than by reading its word for
+it:** only two call sites pass `caretOnGoingLive` — `TakesShared.swift:65` (`TakesCellView`, used by the
+Takes article column AND every Lenses column) and `ReadEditPane.swift:153`; the fan/stack cards
+(`TakesBoardView.swift:1289`, `:1476`) pass none. The Takes ARTICLE column is one pane per block, so a
+click there always targets another block (armed nil); Read's non-live branch is a `Text` stack
+(`ReadEditPane.swift:145–160`) that brings no caret at all. **Lenses is the one live road.** My record's
+rule — *"a click into another block keeps the place the click brought"* — is the wording that missed
+another TAKE of the same block.
+**Riders.** (1) The flag should be set in `PaneTextView.mouseDown` itself, not inside the
+`onPlainClick` closure, so the ⌘-click claim path (`:524–528`, which returns before
+`super.mouseDown`) can never leave it set. (2) It must be cleared unconditionally at the end of
+`noteLiveness` — including when no transition ran — or a click that does not change liveness leaves it
+armed for a later programmatic landing.
+
+**R1-3 (MAJOR, a nil-offset programmatic ring lands at the take's END, reports it, and Write honors it)
+— AGREE on the bug; I do NOT dispute the pane-side START on product grounds.** Traced: with
+`caretOnGoingLive == nil` the transition does nothing (`PaneSurface.swift:942`) and the selection stays
+where the read pane's `view.string = text` left it — the END; the responder claim's notification then
+reaches `onSelectionChange` → `notePaneSelection` → `noteFocusedBlock(… utf16Offset: END)`
+(`TakesViewModel.swift:1755–1758`), so the memory says END and `bareArrivalLanding` lands there. **This
+is a regression I introduced**, and it is worse than the reviewer states in one respect worth recording:
+`notePaneSelection` existed before this batch but only fed `choreography.paneSelection` — the END was
+always there and was always harmless because nothing carried it to Write. The batch is what made the
+artifact load-bearing. The road is unwalked because my walk always had a remembered offset by the time a
+pane went live.
+**On the product edge:** I do not dispute START. The case for END is the N9 "just start typing"
+doctrine (an arriving surface is for typing, and appending is what "continue" means); the case for START
+is that Write's own no-memory landing IS the block's start (Act 10 rows 39/49) and this batch promised
+*"surfaces with no caret … land at the block's start as today"*. START is the spec-defensible one and I
+would build it. But it belongs on the ratify list as **QUESTIONS #97** exactly as the reviewer routes
+it, for a reason neither of us should paper over: the END was never a ruling — it is AppKit's leftover —
+and turning an artifact into a decision is hers, not ours. The REPORTED-END half is a bug either way and
+is not PROVISIONAL.
+**Riders (a real interaction the fix must not break).** (1) `focusWithCaretAtEnd`
+(`TakesViewModel.swift:554–566`) CLEARS the arm so the room's landing gets the END. With
+`caretOnGoingLive ?? 0`, a pane **born live** under a room request would land at 0, because
+`makeNSView` ADOPTS the caret-to-end baseline rather than applying it (`PaneSurface.swift:783–785`;
+`applyCaretToEndIfRequested` runs last in `updateNSView` only) — so the `?? 0` default would win where
+the END stands today. The fix should either have `focusWithCaretAtEnd` arm the END explicitly, or have
+`noteLiveness` skip the default while a caret-to-end token is outstanding. (2) **Correcting my own
+record's note (a), which the finding cites:** the Blocks workbench panel's pane
+(`BlocksWorkbenchView.swift:854–863`) passes neither `onSelectionChange` NOR `caretOnGoingLive`, so its
+caret-at-END reports nothing and is cosmetic — it is not a landing defect. Passing `caretOnGoingLive`
+there is a consistency improvement I support; passing `onSelectionChange` would mint a FOURTH reporter,
+which this batch deliberately did not do and which should not ride a ladder fix.
+
+**R1-4 (MAJOR, the persisted offset is never written at quit; capture 11's evidence is from the pre-5a
+binary) — AGREE, including the half that is against my own record.** Traced:
+`applicationShouldTerminate` (`VariorumAppDelegate.swift:53–68`) awaits
+`editorRouter.active?.finalizeWork()` and `quitFinalize.finalizeAll()`; the only registrants are
+`QuickNoteView.swift:179` and `AppSession.swift:219` (the per-post autosave holds) — none touches
+`CurrentBlockMemory`; `PostDetailView.onDisappear` (`:489–493`) does not run at process exit, so
+`unregisterDetail`'s `persist` (`CommandRouter.swift:112`) never runs at ⌘Q. Since `edc16c1b` the
+persisted offset is therefore the block's ENTRY offset. **And the evidence half is right and mine to
+own:** the walk table's bonus row credits capture 11 to "piece 5a's coalescing proving itself", but that
+⌘Q ran on the pieces-1…4 binary, whose `remember` wrote `UserDefaults` on every report
+(`git show a0aade08:App/Variorum/Variorum/Registry/CurrentBlockMemory.swift`); the final binary only
+READ that value. What capture 11 honestly proves is "the memory survives a relaunch" — not the write
+path. That sentence in the record is wrong and should be corrected in the fix pass (I am not editing my
+own record's claim under this flow; naming it here is the correction of record).
+**Rider.** Call the new `persistCurrentBlocks()` on `MacWillLock`'s road too (`MacWillLock.swift:47`) —
+locking the store is a leave-the-note event of the same kind — and keep it in BOTH branches of
+`applicationShouldTerminate` as the reviewer says rather than on `willTerminateNotification` alone, so
+the `.terminateNow` path is covered without depending on notification delivery order.
+
+**R1-5 (MAJOR, timing — the parked reveal spendable by a stale-generation hop) — AGREE.** Traced the
+machinery rather than the window: `attach` bumps at `EditorViewModel.swift:352`;
+`overlayLayoutDidSettle` (`:2845–2869`) captures `let generation` at schedule time and the hop marks
+`overlayGenerationDelivered = generation` and calls `consumePendingReveal()` FIRST, which clears the
+park unconditionally at `:1940`; the park is set inside `applyFocusSeeds` (`:1931`), which runs in
+`applyProjection`'s `.initialRender` arm (`:664–676`). So a hop queued for G₁ before the projection
+drains can spend the park against the pre-fill frame — and the record's own justification for parking
+at all is precisely that the frame is not honest at that moment, so I cannot call the window
+theoretical. I did not observe it (every walk landing was pixel-exact), which is consistent with a
+narrow ordering window, not with its absence.
+**Riders.** (1) The refusing hop must LEAVE the park, not clear it — and re-arming is already
+guaranteed: `storageDidEdit` bumped G₂ (`:1002`) while `overlayGenerationDelivered` becomes G₁, so the
+next display pass schedules hop(G₂). (2) Worth one more pin arm while the seam is open: the park should
+not survive into ANOTHER note's editor — `pendingRevealOffset` is per-model and models are per-mount,
+so I believe it cannot, but the pin that proves the generation stamp is the cheapest place to say so.
+
+**R1-6 (MINOR, the `landing > 0` exemption) — AGREE.** Verified: the exemption at
+`EditorViewModel.swift:1887`, the anchor restore it can hide behind at
+`EditorSurfaceController.swift:159–162`, and the visibility guard that makes the exemption pointless at
+`:1947–1950`. The reviewer's reading of the history is right: the guard existed to stop a
+`scrollRangeToVisible` that moved the page on every arrival, and the new reveal already moves nothing
+when the caret is on screen. **Rider:** dropping it costs one `JumpPrimitive.lineTop` per bare arrival —
+the same single-fragment `ensuresLayout` the jump itself would perform, so P1 is unmoved.
+
+**R1-7 (MINOR, the suites write the dev-store app's `UserDefaults.standard`) — AGREE.** Verified: the
+memory threads `defaults:` through every method (`CurrentBlockMemory.swift:42`, `:64`, `:78`, `:84`) but
+the ROUTER holds no seam (`CommandRouter.swift:191` constructs the memory bare), and the test host is
+`io.lduarte.Variorum.debug`, so every mounted-editor suite writes real app domains for `.incrementing`
+post ids. My `withNote` edit patched the one suite that broke and left the class standing — the reviewer
+is right that under CLAUDE.md's rule that class now needs an owner.
+**Rider on the fix shape (a preference, not a dispute).** In THIS round I would take the KnownIssues row
+(owner 12, beside the rig row) over the injection: the injection needs a `UserDefaults` on
+`CommandRouter` and a way for a test world to set it, which reaches `AppSession`'s construction — wider
+than a ladder fix should carry and touching a seam no finding requires. If the reviewer prefers the
+injection anyway it is defensible and I will not dispute it; the row is simply the cheaper true
+statement.
+
+**R1-8 (NIT, the orphan suite plist) — AGREE.** `LandingOffsetTests.swift:44` mints
+`UserDefaults(suiteName:)` and never removes the domain; `removePersistentDomain(forName:)` in a `defer`
+is the whole fix.
+
+**R1-9 (NIT, the raw offset stored inside the observed half) — AGREE.** Verified both sites:
+`CommandRouter.swift:184` (`focusedBlockIdentity = fact`) and `:67` (`= restored`). **Rider:** at `:67`
+the strip must come AFTER `focusedOffset = restored?.utf16Offset` on the next line, or the restore loses
+the offset it exists to carry — the two lines are adjacent and the order is load-bearing.
+
+**R1-10 (NIT, the cadence is unpinned) — AGREE.** The name promises what J18(1) rests on, and only the
+values are asserted (`LandingOffsetTests.swift:99–129`). **Rider:** the `withObservationTracking` arm
+should assert the POSITIVE as well — a BLOCK change DOES wake the observer — or the pin would pass on a
+router that notifies nobody at all, which is the failure the cadence claim is worth guarding against.
+
+**R1-11 (NIT, the visibility test reads the line's top only) — AGREE.** `EditorViewModel.swift:1949`
+tests `top <= visible.maxY − 1`. **Rider:** `JumpPrimitive.lineTop` returns only the top, so the fix
+needs the line's bounds — either a second return or a `lineRect(ofOffset:in:)` beside it, both reading
+the same `typographicBounds` the function already has in hand — and the existing 1-pt slack should be
+kept so a line flush with the bottom edge still reveals rather than sitting half-clipped.
+
+**On the "considered and cleared" list:** I read all ten and agree with every clearance. Two are worth a
+sentence back. The **fill's transient report** clearance is right and I had not traced it — `renderFull`
+ends with `updateCaretContext()` on the fill's end-of-document selection
+(`EditorSurfaceController.swift:164`), and the arrival fact is read BEFORE the fill
+(`EditorViewModel.swift:674`), so the memory is corrected in the same synchronous run; the two persisted
+writes per Write entry are the honest cost of my per-caret reporting and are worth the record. And the
+**stale `paneCaretLanding`** clearance matches what I relied on when I made the arm
+`@ObservationIgnored`: the boards' models are per-mount `@State`, so the arm is re-derived at every
+entry and cannot outlive a mode switch.
+
+**Counts: 11 AGREED · 0 DISPUTED.** One product edge routed rather than decided: R1-3's pane-side
+START/END → **QUESTIONS #97**, not disputed on product grounds by me. Nothing here was implemented; the
+tree is untouched by this response.
+
