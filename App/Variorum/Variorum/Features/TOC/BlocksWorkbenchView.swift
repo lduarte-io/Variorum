@@ -160,6 +160,11 @@ struct BlocksWorkbenchView: View {
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
     }
+    /// 17o batch c (her U-7): the editing indicator this surface pushes
+    /// into every pane it composes — ONE resolution, in `ThemeStore`.
+    private var indicator: EditingIndicatorStyle {
+        ThemeStore.editingIndicator(of: themeStore)
+    }
 
     init(
         session: AppSession, postID: String,
@@ -233,6 +238,7 @@ struct BlocksWorkbenchView: View {
                     divider
                     WorkbenchInfoPanel(
                         session: session, model: model, tokens: tokens,
+                        indicator: indicator,
                         row: row, ordinal: ordinal(of: row.blockID),
                         onJump: { onJump?(row.blockID) },
                         onRename: {
@@ -802,6 +808,9 @@ private struct WorkbenchInfoPanel: View {
     let session: AppSession
     let model: BlockTOCViewModel
     let tokens: VoiceTokens
+    /// 17o batch c (her U-7): carried to the panel's live pane and to the
+    /// row card's own frame, decided nowhere here.
+    let indicator: EditingIndicatorStyle
     let row: Queries.WorkbenchRow
     let ordinal: Int
     let onJump: () -> Void
@@ -855,6 +864,7 @@ private struct WorkbenchInfoPanel: View {
                         text: model.displayText(variantID: variantID, storeText: row.text),
                         isLive: model.liveBlockID == row.blockID && !row.variantLocked,
                         tokens: tokens,
+                        indicator: indicator,
                         role: "workbench", variantID: variantID,
                         onFocusRequest: { model.makeLive(row.blockID, variantID: variantID) },
                         onEdit: { newText in
@@ -874,11 +884,19 @@ private struct WorkbenchInfoPanel: View {
                         caretOnGoingLive: model.caretLanding(forVariant: variantID))
                         .padding(8)
                         .background(tokens.surface, in: RoundedRectangle(cornerRadius: 8))
+                        // 17o batch c (row 6): this card draws its own
+                        // frame, so it CONSUMES the pane's decision rather
+                        // than keeping a second rule — under `.off` and
+                        // `.background` the live row wears the resting line
+                        // and the pane itself carries the wash.
                         .overlay(
                             RoundedRectangle(cornerRadius: 8)
                                 .stroke(
                                     model.liveBlockID == row.blockID
-                                        ? tokens.ring : tokens.line,
+                                        ? (PaneDecoration.hostRing(
+                                            indicator: indicator, tokens: tokens)
+                                            ?? tokens.line)
+                                        : tokens.line,
                                     lineWidth: 1))
                 }
 

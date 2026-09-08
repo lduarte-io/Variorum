@@ -30,6 +30,9 @@ struct ReadEditPane: View {
 
     let model: BlockTOCViewModel
     let tokens: VoiceTokens
+    /// 17o batch c (her U-7): the editing indicator, pushed in beside the
+    /// tokens and carried to the block panes — this surface decides nothing.
+    let indicator: EditingIndicatorStyle
     let selectedBlockID: String?
     /// The ONE-shot scroll request — the host sets it on a column click, a
     /// seed or a landing; the pane lands and clears it. A pane click never
@@ -50,7 +53,8 @@ struct ReadEditPane: View {
                         // ForEach IDENTITY (the placement id) is the landing
                         // anchor — no explicit `.id` on the row.
                         ReadEditBlock(
-                            model: model, tokens: tokens, row: row, ordinal: i + 1,
+                            model: model, tokens: tokens, indicator: indicator,
+                            row: row, ordinal: i + 1,
                             selected: selectedBlockID == row.blockID,
                             onTap: {
                                 onSelect(row.blockID)
@@ -106,6 +110,7 @@ extension ReadEditPane {
 private struct ReadEditBlock: View {
     let model: BlockTOCViewModel
     let tokens: VoiceTokens
+    let indicator: EditingIndicatorStyle
     let row: Queries.TOCRow
     let ordinal: Int
     let selected: Bool
@@ -136,6 +141,7 @@ private struct ReadEditBlock: View {
                     text: text,
                     isLive: true,
                     tokens: tokens,
+                    indicator: indicator,
                     role: ReadEditPane.role, variantID: variantID,
                     onFocusRequest: { model.makeLive(row.blockID, variantID: variantID) },
                     onEdit: { newText in
@@ -153,7 +159,16 @@ private struct ReadEditBlock: View {
                     caretOnGoingLive: model.caretLanding(forVariant: variantID))
                     .padding(.horizontal, 6)
                     .padding(.vertical, 4)
-                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(tokens.ring, lineWidth: 1))
+                    // 17o batch c (row 6, named in the brief): this pane's
+                    // own overlay CONSUMES the one rule instead of keeping a
+                    // second one — under `.off`/`.background` no ring is
+                    // drawn here and the pane carries the wash itself.
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(
+                                PaneDecoration.hostRing(
+                                    indicator: indicator, tokens: tokens) ?? .clear,
+                                lineWidth: 1))
             } else {
                 VStack(alignment: .leading, spacing: 8) {
                     ForEach(Array(paragraphs.enumerated()), id: \.offset) { _, paragraph in

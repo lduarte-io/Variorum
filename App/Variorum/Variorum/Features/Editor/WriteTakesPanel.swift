@@ -29,6 +29,11 @@ struct WriteTakesPanel: View {
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
     }
+    /// 17o batch c (her U-7): the editing indicator this surface pushes
+    /// into every pane it composes — ONE resolution, in `ThemeStore`.
+    private var indicator: EditingIndicatorStyle {
+        ThemeStore.editingIndicator(of: themeStore)
+    }
 
     private let column = TakesColumn(id: "write-panel-main", kind: .main)
 
@@ -202,6 +207,7 @@ struct WriteTakesPanel: View {
                     text: model.liveText(take),
                     isLive: model.isPaneLive(key),
                     tokens: tokens,
+                    indicator: indicator,
                     role: "panel", variantID: take.id,
                     onFocusRequest: { model.focus(key) },
                     onEdit: { model.paneEdited(variantID: take.id, newText: $0) })

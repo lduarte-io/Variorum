@@ -704,6 +704,80 @@ nonisolated enum PaneCaretLanding: Equatable, Sendable {
     }
 }
 
+// MARK: - The live pane's decoration (17o batch c, row 6 — her U-7)
+
+/// **How a pane shows that it is the live one — ONE decision, for every
+/// pane in the app** (her U-7: *"the take mode always shows a ring around
+/// what piece you're editing — it doesn't follow the preference on cursor
+/// being enough, wanting background wash, or ring"*; U-19 (5) confirms the
+/// preference governs EVERY live pane).
+///
+/// **R22's reason for the ring is preserved, not overruled** — among many
+/// editable surfaces the ring is how you find the one live editor, and it
+/// remains the shipped look under `.outline`, which is what a pane renders
+/// wherever the appearance push cannot reach. What her ruling changes is
+/// that the pane no longer OVERRIDES her stated preference: the three
+/// styles the Write surface has honoured since R14/R22 now mean the same
+/// thing on every pane.
+///
+/// The three styles are the Write editor's own, read from `BlockDecor`'s
+/// `renderIndicator` so the two surfaces can never drift:
+/// - `.off` — the caret is enough: the live pane wears the same hairline it
+///   wears at rest.
+/// - `.outline` — today's ring (`tokens.ring`, 1.5 pt).
+/// - `.background` — a wash fill inside the pane's own frame
+///   (`tokens.wash`), the hairline at rest, no ring. Write fills the caret
+///   block the same way, in the same token.
+///
+/// It is a PURE function of (live, style, tokens) so a pin asserts the
+/// decision without measuring pixels, and so the three hosts that draw
+/// their own frame around a live pane (`ReadEditPane`, `BookIndexView`,
+/// `BlocksWorkbenchView`) can CONSUME it instead of keeping a second rule.
+nonisolated struct PaneDecoration: Equatable {
+    /// The frame stroke's colour (`.clear` where the composition supplies
+    /// the paper and nothing is drawn at rest).
+    var stroke: Color
+    var lineWidth: CGFloat
+    /// The wash inside the pane's frame — nil unless the live pane is
+    /// wearing `.background`.
+    var fill: Color?
+
+    static func resolve(
+        isLive: Bool, indicator: EditingIndicatorStyle, tokens: VoiceTokens?
+    ) -> PaneDecoration {
+        // The AT-REST look, byte-unchanged: voiced compositions draw
+        // nothing (the card behind is the paper); the pre-13 call sites
+        // (tokens nil — the tutorial samples and the pins) keep their grey
+        // hairline.
+        let rest = PaneDecoration(
+            stroke: tokens == nil ? Color.gray.opacity(0.25) : .clear,
+            lineWidth: 0.5, fill: nil)
+        guard isLive else { return rest }
+        switch indicator {
+        case .off:
+            return rest
+        case .outline:
+            return PaneDecoration(
+                stroke: tokens?.ring ?? Color.accentColor, lineWidth: 1.5, fill: nil)
+        case .background:
+            var washed = rest
+            // No tokens ⇒ no voice wash to borrow; the accent at low
+            // opacity is the same gesture in the pre-13 look.
+            washed.fill = tokens?.wash ?? Color.accentColor.opacity(0.12)
+            return washed
+        }
+    }
+
+    /// What a HOST that draws its OWN frame around the live pane should
+    /// stroke with — nil means "draw the frame you draw at rest" (the ring
+    /// is not this preference's mark). The three hosts that keep a frame of
+    /// their own ask this instead of reaching for `tokens.ring`, so U-7 has
+    /// exactly one rule in the app.
+    static func hostRing(indicator: EditingIndicatorStyle, tokens: VoiceTokens) -> Color? {
+        indicator == .outline ? tokens.ring : nil
+    }
+}
+
 // MARK: - The SwiftUI pane (read + live modes)
 
 /// One pane: a take's cell, a TOC row's body, a tutorial sample — EVERY
@@ -721,6 +795,14 @@ struct PaneSurfaceView: View {
     /// tokens.ring (R22: among many editable surfaces, the ring is how you
     /// find the one live editor).
     var tokens: VoiceTokens? = nil
+    /// 17o batch c (her U-7 · U-19 (5)): which of the three editing
+    /// indicators this pane wears when it is the live one. PUSHED like the
+    /// tokens beside it — the appearance road `EditorAppearance` already
+    /// takes into the Write surface (a View reads the store; a component
+    /// never pulls a setting of its own). `.outline` is the shipped ring,
+    /// so a call site the push has not reached — the pins, the tutorial
+    /// samples — looks exactly as it did.
+    var indicator: EditingIndicatorStyle = .outline
     /// Surface identity for tests/soaks: the pane's role in its
     /// composition ("article", "card", "mini", …) and the variant it
     /// mirrors — carried on the NSView identifier, rendered nowhere.
@@ -829,15 +911,25 @@ struct PaneSurfaceView: View {
                 // pane is always its measured content height; the width
                 // hook + publishes keep it converged (the batch-12 pin).
                 .frame(height: height)
+                // 17o batch c (row 6): the wash goes INSIDE the pane's own
+                // frame — the same shape the stroke uses, so the two can
+                // never disagree, and the composition's padding stays the
+                // card's, not the indicator's.
+                .background(
+                    decoration.fill.map { fill in
+                        RoundedRectangle(cornerRadius: cornerRadius).fill(fill)
+                    })
                 .overlay(
-                    RoundedRectangle(cornerRadius: tokens == nil ? 3 : 6)
-                        .stroke(strokeColor, lineWidth: isLive ? 1.5 : 0.5))
+                    RoundedRectangle(cornerRadius: cornerRadius)
+                        .stroke(decoration.stroke, lineWidth: decoration.lineWidth))
         }
     }
 
-    private var strokeColor: Color {
-        if let tokens { return isLive ? tokens.ring : .clear }
-        return isLive ? Color.accentColor : Color.gray.opacity(0.25)
+    private var cornerRadius: CGFloat { tokens == nil ? 3 : 6 }
+
+    /// The ONE decision (row 6). Views render it; nothing re-derives it.
+    private var decoration: PaneDecoration {
+        .resolve(isLive: isLive, indicator: indicator, tokens: tokens)
     }
 }
 

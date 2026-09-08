@@ -46,6 +46,11 @@ struct TakesBoardView: View {
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
     }
+    /// 17o batch c (her U-7): the editing indicator this surface pushes
+    /// into every pane it composes — ONE resolution, in `ThemeStore`.
+    private var indicator: EditingIndicatorStyle {
+        ThemeStore.editingIndicator(of: themeStore)
+    }
 
     private var themeSettings: Queries.ThemeSettings {
         themeStore?.settings ?? Queries.ThemeSettings()
@@ -783,7 +788,8 @@ struct TakesBoardView: View {
         let noteWidth = min(150, max(commentRoom - 16, 24))
         let picked = model.isSelectedForMerge(slot.blockID)
         return TakesCellView(
-            model: model, tokens: tokens, slot: slot, column: mainColumn,
+            model: model, tokens: tokens, indicator: indicator,
+            slot: slot, column: mainColumn,
             tinted: false, role: "article",
             // 13f W7: the room's landing — nonzero only for the pane it named.
             caretToEndToken: model.resolvedTake(column: mainColumn, slot: slot)
@@ -848,7 +854,7 @@ struct TakesBoardView: View {
                     take: take, text: model.liveText(take),
                     isChosen: take.id == slot.variantID,
                     isLive: paneKeyIsLive(slot: slot, take: take),
-                    tokens: tokens,
+                    tokens: tokens, indicator: indicator,
                     onFocus: { focusPane(slot: slot, take: take) },
                     onEdit: { model.paneEdited(variantID: take.id, newText: $0) },
                     onChoose: { Task { await model.choose(blockID: slot.blockID, variantID: take.id) } },
@@ -1290,6 +1296,7 @@ struct TakesBoardView: View {
             text: model.liveText(take),
             isLive: paneKeyIsLive(slot: slot, take: take),
             tokens: tokens,
+            indicator: indicator,
             role: "mini", variantID: take.id,
             onFocusRequest: { focusPane(slot: slot, take: take) },
             onEdit: { model.paneEdited(variantID: take.id, newText: $0) },
@@ -1446,6 +1453,8 @@ private struct CollapsibleTakeCard: View {
     let isChosen: Bool
     let isLive: Bool
     let tokens: VoiceTokens
+    /// 17o batch c (her U-7): carried down to the pane, decided nowhere here.
+    let indicator: EditingIndicatorStyle
     let onFocus: () -> Void
     let onEdit: (String) -> Void
     let onChoose: () -> Void
@@ -1475,6 +1484,7 @@ private struct CollapsibleTakeCard: View {
                 } else {
                     PaneSurfaceView(
                         text: text, isLive: isLive, tokens: tokens,
+                        indicator: indicator,
                         role: "card", variantID: take.id,
                         onFocusRequest: onFocus, onEdit: onEdit)
                 }

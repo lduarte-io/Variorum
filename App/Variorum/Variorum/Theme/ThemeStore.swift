@@ -97,4 +97,16 @@ extension ThemeStore {
     func tokens(for scheme: ColorScheme) -> VoiceTokens {
         tokens(dark: scheme == .dark)
     }
+
+    /// **17o batch c (her U-7 · U-19 (5)):** the editing-indicator style a
+    /// surface pushes into its panes, resolved for a host whose store may
+    /// be absent (previews, a detached hosting root, the pins) — the
+    /// shipped RING, so a surface the appearance push has not reached
+    /// looks exactly as it always did.
+    ///
+    /// ONE copy, deliberately: the fallback is a decision, and a decision
+    /// copied into ten hosts is the drift class row 6 exists because of.
+    static func editingIndicator(of store: ThemeStore?) -> EditingIndicatorStyle {
+        store?.settings.editingIndicator ?? .outline
+    }
 }

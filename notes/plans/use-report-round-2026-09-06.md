@@ -4858,8 +4858,8 @@ restyle beyond the four rows.
 
 **Pieces (checkpoint order):**
 
-1. row 16 — the pane's stale height after a big deletion — **DONE (this commit)**
-2. row 6 — the ring follows the indicator setting, everywhere, through the ONE component — **NOT STARTED**
+1. row 16 — the pane's stale height after a big deletion — **DONE (`3c6bcbb6`)**
+2. row 6 — the ring follows the indicator setting, everywhere, through the ONE component — **DONE (this commit)**
 3. row 14 — the chosen bar runs the card's full height — **NOT STARTED**
 4. row 15 — "＋ new block" in the EMPTY state of Takes and Lenses — **NOT STARTED**
 5. the walk (both voices, the setting cycled) + captures + the closing suites — **NOT STARTED**
@@ -4921,9 +4921,76 @@ the same P1 argument `PaneSurface.swift` already makes in its header for full-do
 30-line pane, deletes 25 lines through the responder path, and asserts the frame falls below a third of
 its old height within ONE main-queue turn (plus a regrow arm, and two non-vacuity assertions). Beside it,
 `aFreshPanesMeasurementIsUnchangedByRow16sFix` states the no-regression half (green on both sides
-deliberately — it is not the pin). Red-on-old by behavioral revert: **PENDING (next commit).**
+deliberately — it is not the pin). **RED-ON-OLD PROVED by behavioral revert** (the fragment read swapped
+back for the property, on the committed tree): 2 issues —
+`(short → 1201.0) < (tall / 3 → 411.67)` failed, and the regrow arm
+`(pane.bounds.height → 1201.0) > (short + 200 → 1401.0)` failed. Green again on restore.
 
 **For 13u2's kickoff (row 32, the general pane-stability trace — this row is item 1's member):** the
 high-water mark above is a *class*, not a one-off. Anything in the app that sizes from
 `usageBoundsForTextContainer` inherits it; the full-document EDITOR is the other surface kind and was
 NOT examined here (out of this batch's one surface). 13u2 should start from that question.
+
+---
+
+#### ROW 6 — THE RING FOLLOWS THE PREFERENCE, THROUGH THE ONE COMPONENT
+
+**Her U-7, verbatim:** *"the take mode always shows a ring around what piece you're editing — it doesn't
+follow the preference on cursor being enough, wanting background wash, or ring"*; **U-19 (5)** confirms
+the preference governs EVERY live pane.
+
+**The traced mechanism (confirmed by reading, then by the revert):** `PaneSurfaceView.strokeColor`
+returned `tokens.ring` whenever `isLive` and read no setting at all, while the Write surface has honoured
+the three styles since R14/R22 (`BlockDecor.renderIndicator`, `:513–535`: `.off` draws nothing,
+`.outline` strokes `tokens.ring`, `.background` fills `tokens.wash`). So the setting she chose was
+honoured in Write and overridden in every pane.
+
+**R22's reason, recorded as the brief requires — and PRESERVED, not overruled.** R22's ring exists
+because *among many editable surfaces the ring is how you find the one live editor*, and that is exactly
+what `.outline` still does: it is the shipped look, it stays the default, and it is what a pane wears
+wherever the appearance push has not reached (the pins, the tutorial samples). What her ruling changes is
+narrower and right: the pane may no longer OVERRIDE a preference she set — under `.off` the caret is
+enough (her words), and under `.background` the live pane wears the same wash Write puts behind the caret
+block, in the same token. Nothing about "find the live editor" is lost; the mark just obeys her.
+
+**The shape — ONE decision, in the ONE component (P-3):** `PaneDecoration` (`Surface/PaneSurface.swift`)
+is a pure `resolve(isLive:indicator:tokens:)` returning stroke · lineWidth · fill; `PaneSurfaceView`
+renders it (a `.background` fill and an `.overlay` stroke on the SAME rounded shape, so the two can never
+disagree and the composition's padding stays the card's). No host contains ring or wash logic.
+
+**The push (the brief's road, followed exactly):** the style rides in beside `tokens` —
+`PaneSurfaceView.indicator`, defaulting to `.outline` — the way `EditorAppearance` already carries theme
+facts into the Write surface. A **View** reads the store; the component never pulls a setting. The
+fallback is a decision, so it has exactly ONE copy: `ThemeStore.editingIndicator(of:)`, which every host
+calls. **All TEN production construction sites in eight files pass it** (audited by grep after the
+change): `TakesShared` (the cell both boards compose) · `TakesBoardView` ×2 (the mini card, the stack
+card) · `CompareBoardView` ×2 · `CanvasView` · `WriteTakesPanel` · `ReadEditPane` · `BookIndexView` ·
+`BlocksWorkbenchView`. Lenses reaches every pane through `TakesCellView`, so it needs no site of its own.
+
+**The three hosts that drew their OWN ring now CONSUME the decision** (`PaneDecoration.hostRing`, nil ⇒
+"draw the frame you draw at rest"): `ReadEditPane.swift` (the overlay the brief names), `BookIndexView`
+(the same shape, found by grepping `tokens.ring` — the brief named only Read's), and
+`BlocksWorkbenchView`'s row card (`ring : line` — the third, same grep). No second rule survives in the
+app.
+
+**Pins** (`PaneSurfaceTests`): `theLivePanesDecorationFollowsTheIndicatorPreference` (the three styles
+plus the read-pane arm across all cases) · `aHostsOwnFrameConsumesTheSameRule` ·
+`aPaneWithNoPushKeepsTheShippedRing` (the default is a decision, so it is stated) ·
+`theIndicatorNeverMovesThePanesHeight` (mounted under all three — the decoration is a background and an
+overlay, so it can never re-open the batch-12 clipped-take class one setting over).
+**RED-ON-OLD proved by behavioral revert** (the pre-fix rule restored: the ring whatever the setting):
+**3 issues** — `off → PaneDecoration(stroke: #3F7FD6FF, lineWidth: 1.5, fill: nil)` ≠ the resting
+hairline; `background.fill → nil` ≠ `tokens.wash → #EEF0EAFF`; and `background.stroke == rest.stroke →
+false`. Green again on restore.
+
+**Stated honestly:** the three HOSTS' own frames are walked, not pinned — the rig cannot mount those
+whole surfaces (KnownIssues' rig row; the brief's own "pin brains, walk faces"). The rule they consume is
+pinned; that they consume it is a one-line read and a capture.
+
+**A trap I hit, recorded so the next session does not** (§8's own warning, *"never `git checkout` over
+uncommitted work"*): after the row-6 revert probe I restored three files with `git checkout --`, which
+discarded the row-6 work in them because it was not yet committed — `PaneSurface.swift`,
+`ReadEditPane.swift`, `BookIndexView.swift` went back to the row-16 commit. Nothing was lost (the edits
+were re-made from the same scripts and the grep audit + suites re-run), but the rule is exactly right:
+**a revert probe must be run on a COMMITTED tree, or in a scratch worktree.** Row 16's probe was safe
+because its file was committed first; row 6's was not.

@@ -260,6 +260,7 @@ struct ReadModeView: View {
         case .edit:
             ReadEditPane(
                 model: model, tokens: tokens,
+                indicator: ThemeStore.editingIndicator(of: themeStore),
                 selectedBlockID: selectedBlockID,
                 paneTarget: $paneTarget,
                 onSelect: { blockID in select(blockID, scrollFace: false) })

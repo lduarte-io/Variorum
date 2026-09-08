@@ -15,6 +15,7 @@
 import AppKit
 import SwiftUI
 import Testing
+import VariorumCore
 @testable import Variorum
 
 /// 17o batch b's ladder, R1-2 / R1-3: a pane host whose liveness a pin can
@@ -52,6 +53,21 @@ fileprivate struct PaneBareHost: View {
     }
 }
 
+
+/// 17o batch c (row 6): a pane whose INDICATOR a pin can set, so the three
+/// styles are driven through the same construction every host uses.
+fileprivate struct PaneIndicatorHost: View {
+    let live: Bool
+    let indicator: EditingIndicatorStyle
+    let tokens: VoiceTokens
+    var body: some View {
+        PaneSurfaceView(
+            text: "a take of honest prose", isLive: live,
+            tokens: tokens, indicator: indicator)
+        .frame(width: 400)
+    }
+}
+
 @MainActor
 @Suite("Pane surface (13b 1a)", .serialized)
 struct PaneSurfaceTests {
@@ -67,6 +83,96 @@ struct PaneSurfaceTests {
             if let found = findPane(sub) { return found }
         }
         return nil
+    }
+
+
+    // MARK: - 17o batch c, ledger row 6 — the ring follows the preference
+
+    /// Her U-7, verbatim: *"the take mode always shows a ring around what
+    /// piece you're editing — it doesn't follow the preference on cursor
+    /// being enough, wanting background wash, or ring"*; U-19 (5) confirms
+    /// the preference governs EVERY live pane.
+    ///
+    /// **The traced mechanism:** `PaneSurfaceView` stroked `tokens.ring`
+    /// whenever `isLive`, reading no setting at all, while the Write
+    /// surface has honoured the three styles since R14/R22 (`BlockDecor`'s
+    /// `renderIndicator`). RED ON THE PRE-FIX TREE by construction: `.off`
+    /// and `.background` both drew the ring.
+    ///
+    /// **R22's reason is preserved, not overruled** (recorded in the batch
+    /// record's disposition): among many editable surfaces the ring is how
+    /// you find the one live editor — and it stays the shipped look under
+    /// `.outline`, which is what a pane wears wherever the appearance push
+    /// has not reached. What changed is that the pane no longer overrides
+    /// the preference she set.
+    @Test func theLivePanesDecorationFollowsTheIndicatorPreference() {
+        let tokens = VoiceTokens.resolve(voice: .terminal, dark: false)
+        let rest = PaneDecoration.resolve(isLive: false, indicator: .outline, tokens: tokens)
+
+        let off = PaneDecoration.resolve(isLive: true, indicator: .off, tokens: tokens)
+        #expect(off == rest,
+                "`off` — the cursor is enough: the live pane wears exactly the resting hairline")
+
+        let outline = PaneDecoration.resolve(isLive: true, indicator: .outline, tokens: tokens)
+        #expect(outline.stroke == tokens.ring && outline.lineWidth == 1.5 && outline.fill == nil,
+                "`outline` — R22's ring, unchanged")
+
+        let background = PaneDecoration.resolve(isLive: true, indicator: .background, tokens: tokens)
+        #expect(background.fill == tokens.wash,
+                "`background` — a wash in the SAME token Write fills the caret block with")
+        #expect(background.stroke == rest.stroke && background.lineWidth == rest.lineWidth,
+                "…and no ring beside it")
+
+        // The rest look is untouched by the preference — only the LIVE pane
+        // reads it (a read pane is not what she is editing).
+        for style in EditingIndicatorStyle.allCases {
+            #expect(PaneDecoration.resolve(isLive: false, indicator: style, tokens: tokens) == rest,
+                    "a read pane renders the same under \(style)")
+        }
+    }
+
+    /// The three hosts that keep a frame of their OWN around the live pane
+    /// (`ReadEditPane`, `BookIndexView`, `BlocksWorkbenchView`) consume the
+    /// same rule instead of reaching for `tokens.ring` — the brief's
+    /// "if a host draws its own ring, it consumes the pane's decision".
+    @Test func aHostsOwnFrameConsumesTheSameRule() {
+        let tokens = VoiceTokens.resolve(voice: .study, dark: false)
+        #expect(PaneDecoration.hostRing(indicator: .outline, tokens: tokens) == tokens.ring)
+        #expect(PaneDecoration.hostRing(indicator: .off, tokens: tokens) == nil)
+        #expect(PaneDecoration.hostRing(indicator: .background, tokens: tokens) == nil)
+    }
+
+    /// A pane the appearance push has NOT reached keeps the shipped ring —
+    /// the pins, the tutorial samples, any future host built before it is
+    /// wired. (The default is a decision; this states it.)
+    @Test func aPaneWithNoPushKeepsTheShippedRing() {
+        let tokens = VoiceTokens.resolve(voice: .terminal, dark: false)
+        let defaulted = PaneSurfaceView(text: "x", isLive: true, tokens: tokens)
+        #expect(defaulted.indicator == .outline)
+    }
+
+    /// And it MOUNTS under each style: the decoration is a background and an
+    /// overlay, so it can never move the pane's measured height (which would
+    /// re-open the batch-12 clipped-take class one setting over).
+    @Test func theIndicatorNeverMovesThePanesHeight() async throws {
+        let tokens = VoiceTokens.resolve(voice: .terminal, dark: false)
+        var heights: [EditingIndicatorStyle: CGFloat] = [:]
+        for style in EditingIndicatorStyle.allCases {
+            let host = NSHostingController(
+                rootView: PaneIndicatorHost(live: true, indicator: style, tokens: tokens))
+            let window = NSWindow(
+                contentRect: NSRect(x: 0, y: 0, width: 420, height: 600),
+                styleMask: [.borderless], backing: .buffered, defer: false)
+            window.contentViewController = host
+            host.view.layoutSubtreeIfNeeded()
+            pump()
+            let pane = try #require(findPane(host.view))
+            heights[style] = pane.bounds.height
+            window.contentViewController = nil
+        }
+        #expect(heights[.off] == heights[.outline] && heights[.outline] == heights[.background],
+                "the pane measures the same under every style (\(heights))")
+        #expect((heights[.outline] ?? 0) > 0, "non-vacuity: the panes mounted")
     }
 
     // MARK: - 17o batch b's ladder, R1-2 / R1-3 — where a pane's caret lands on going live

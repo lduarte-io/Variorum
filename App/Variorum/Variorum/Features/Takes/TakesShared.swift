@@ -27,6 +27,10 @@ struct TakesDiffPresentation: Identifiable {
 struct TakesCellView: View {
     let model: TakesViewModel
     let tokens: VoiceTokens
+    /// 17o batch c (her U-7): the editing indicator, pushed beside the
+    /// tokens — the cell decides nothing, it carries the appearance down to
+    /// the ONE component that does.
+    let indicator: EditingIndicatorStyle
     let slot: Queries.RenderedBlock
     let column: TakesColumn
     let tinted: Bool
@@ -51,6 +55,7 @@ struct TakesCellView: View {
                 text: resolved.text,
                 isLive: model.isPaneLive(key),
                 tokens: tokens,
+                indicator: indicator,
                 role: role, variantID: resolved.variantID,
                 onFocusRequest: { model.focus(key) },
                 // The sanity pass's RAISE-1: the click's place, reported AFTER

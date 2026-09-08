@@ -204,6 +204,11 @@ struct BookIndexView<Masthead: View>: View {
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
     }
+    /// 17o batch c (her U-7): the editing indicator this surface pushes
+    /// into every pane it composes — ONE resolution, in `ThemeStore`.
+    private var indicator: EditingIndicatorStyle {
+        ThemeStore.editingIndicator(of: themeStore)
+    }
 
     private var groups: [BookIndexColumn.Group] {
         structure.chaptersActive
@@ -460,7 +465,8 @@ struct BookIndexView<Masthead: View>: View {
                                 .padding(.top, 26)
                         case .note(let entry):
                             BookIndexPaneNote(
-                                session: session, tokens: tokens, entry: entry,
+                                session: session, tokens: tokens,
+                                indicator: indicator, entry: entry,
                                 edit: edit,
                                 selected: selectedPostID == entry.postID,
                                 onTap: { select(entry.postID, scrollPane: false) },
@@ -550,6 +556,8 @@ private struct BookIndexNoteRow: View {
 private struct BookIndexPaneNote: View {
     let session: AppSession
     let tokens: VoiceTokens
+    /// 17o batch c (her U-7): carried to the note's live pane.
+    let indicator: EditingIndicatorStyle
     let entry: Queries.ReadingEntry
     let edit: BookIndexEditModel
     let selected: Bool
@@ -560,12 +568,14 @@ private struct BookIndexPaneNote: View {
     @State private var rows: [Queries.TOCRow] = []
 
     init(
-        session: AppSession, tokens: VoiceTokens, entry: Queries.ReadingEntry,
+        session: AppSession, tokens: VoiceTokens,
+        indicator: EditingIndicatorStyle, entry: Queries.ReadingEntry,
         edit: BookIndexEditModel, selected: Bool,
         onTap: @escaping () -> Void, onLandedBlock: @escaping (String) -> Void
     ) {
         self.session = session
         self.tokens = tokens
+        self.indicator = indicator
         self.entry = entry
         self.edit = edit
         self.selected = selected
@@ -645,6 +655,7 @@ private struct BookIndexPaneNote: View {
                 text: text,
                 isLive: true,
                 tokens: tokens,
+                indicator: indicator,
                 role: BookIndexEditModel.columnID, variantID: variantID,
                 onFocusRequest: {
                     edit.makeLive(postID: entry.postID, blockID: row.blockID, variantID: variantID)
@@ -655,7 +666,14 @@ private struct BookIndexPaneNote: View {
                         oldText: row.text ?? "", newText: newText)
                 })
                 .padding(6)
-                .overlay(RoundedRectangle(cornerRadius: 6).stroke(tokens.ring, lineWidth: 1))
+                // 17o batch c (row 6): the book index's own live frame
+                // consumes the ONE rule (see `ReadEditPane`).
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6)
+                        .stroke(
+                            PaneDecoration.hostRing(
+                                indicator: indicator, tokens: tokens) ?? .clear,
+                            lineWidth: 1))
         } else {
             let paragraphs = FlowParagraph.paragraphs(of: text, codeTint: tokens.codeTint)
             VStack(alignment: .leading, spacing: 8) {

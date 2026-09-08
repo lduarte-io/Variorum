@@ -133,6 +133,11 @@ struct CanvasView: View {
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
     }
+    /// 17o batch c (her U-7): the editing indicator this surface pushes
+    /// into every pane it composes — ONE resolution, in `ThemeStore`.
+    private var indicator: EditingIndicatorStyle {
+        ThemeStore.editingIndicator(of: themeStore)
+    }
 
     struct TagSheetBlock: Identifiable {
         let id: String
@@ -602,6 +607,7 @@ struct CanvasView: View {
                 ForEach(model.realizedCards, id: \.block.placementID) { item in
                     CanvasCardView(
                         model: model, item: item, tokens: tokens,
+                        indicator: indicator,
                         origin: origin,
                         switcherBlockID: $switcherBlockID,
                         tagSheetBlock: $tagSheetBlock)
@@ -685,12 +691,15 @@ private struct CanvasCardView: View {
     let model: CanvasViewModel
     let item: Queries.PoolItem
     let tokens: VoiceTokens
+    /// 17o batch c (her U-7): carried to the card's pane, decided nowhere here.
+    let indicator: EditingIndicatorStyle
     let origin: CGPoint
     @Binding var switcherBlockID: String?
     @Binding var tagSheetBlock: CanvasView.TagSheetBlock?
 
     init(
         model: CanvasViewModel, item: Queries.PoolItem, tokens: VoiceTokens,
+        indicator: EditingIndicatorStyle,
         origin: CGPoint,
         switcherBlockID: Binding<String?>,
         tagSheetBlock: Binding<CanvasView.TagSheetBlock?>
@@ -698,6 +707,7 @@ private struct CanvasCardView: View {
         self.model = model
         self.item = item
         self.tokens = tokens
+        self.indicator = indicator
         self.origin = origin
         _switcherBlockID = switcherBlockID
         _tagSheetBlock = tagSheetBlock
@@ -805,6 +815,7 @@ private struct CanvasCardView: View {
                     text: resolved.text,
                     isLive: model.isPaneLive(blockID: blockID, variantID: resolved.variantID),
                     tokens: tokens,
+                    indicator: indicator,
                     role: "canvas", variantID: resolved.variantID,
                     onFocusRequest: {
                         model.focus(blockID: blockID, variantID: resolved.variantID)

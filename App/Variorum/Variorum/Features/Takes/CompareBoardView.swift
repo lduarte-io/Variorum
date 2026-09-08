@@ -831,6 +831,11 @@ struct CompareBoardView: View {
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
     }
+    /// 17o batch c (her U-7): the editing indicator this surface pushes
+    /// into every pane it composes — ONE resolution, in `ThemeStore`.
+    private var indicator: EditingIndicatorStyle {
+        ThemeStore.editingIndicator(of: themeStore)
+    }
 
     /// The drag payload ("compare-move:<postID>:<blockID>") — post-scoped
     /// so a drop can refuse crossing columns before any op runs.
@@ -1321,7 +1326,7 @@ struct CompareBoardView: View {
     private func cellOrSpace(postID: String?, blockID: String?) -> some View {
         if let postID, let blockID, let slot = model.slot(postID: postID, blockID: blockID) {
             CompareCellView(
-                model: model, tokens: tokens,
+                model: model, tokens: tokens, indicator: indicator,
                 postID: postID, slot: slot,
                 dropTargetBlockID: $dropTargetBlockID)
                 .frame(maxWidth: .infinity, alignment: .topLeading)
@@ -1514,6 +1519,8 @@ private struct CompareOfferCard: View {
 private struct CompareCellView: View {
     let model: CompareViewModel
     let tokens: VoiceTokens
+    /// 17o batch c (her U-7): pushed down to the panes, decided nowhere here.
+    let indicator: EditingIndicatorStyle
     let postID: String
     let slot: Queries.RenderedBlock
     @Binding var dropTargetBlockID: String?
@@ -1550,6 +1557,7 @@ private struct CompareCellView: View {
                             text: resolved.text,
                             isLive: model.authority.isLive(key, sealed: sealed),
                             tokens: tokens,
+                            indicator: indicator,
                             role: "compare", variantID: resolved.variantID,
                             onFocusRequest: { model.focus(key) },
                             onEdit: {
@@ -1618,6 +1626,7 @@ private struct CompareCellView: View {
                         text: model.liveText(take),
                         isLive: model.authority.isLive(key, sealed: sealed),
                         tokens: tokens,
+                        indicator: indicator,
                         role: "compare-fan", variantID: take.id,
                         onFocusRequest: { model.focus(key) },
                         onEdit: {

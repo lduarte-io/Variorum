@@ -78,6 +78,11 @@ struct LensesBoardView: View {
     private var tokens: VoiceTokens {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
     }
+    /// 17o batch c (her U-7): the editing indicator this surface pushes
+    /// into every pane it composes — ONE resolution, in `ThemeStore`.
+    private var indicator: EditingIndicatorStyle {
+        ThemeStore.editingIndicator(of: themeStore)
+    }
 
     struct LensPrompt: Identifiable {
         let columnID: String
@@ -515,7 +520,8 @@ struct LensesBoardView: View {
                             ForEach(Array(model.columns.enumerated()), id: \.element.id) { i, column in
                                 VStack(alignment: .leading, spacing: 3) {
                                     TakesCellView(
-                                        model: model, tokens: tokens, slot: slot, column: column,
+                                        model: model, tokens: tokens, indicator: indicator,
+                                        slot: slot, column: column,
                                         tinted: i < tints.count ? tints[i] : false,
                                         onDiff: { diffPresentation = $0 })
                                     dangleNotice(slot: slot, column: column)
@@ -563,7 +569,8 @@ struct LensesBoardView: View {
                                         dragHandle(slot.blockID)
                                         VStack(alignment: .leading, spacing: 3) {
                                             TakesCellView(
-                                                model: model, tokens: tokens, slot: slot,
+                                                model: model, tokens: tokens,
+                                                indicator: indicator, slot: slot,
                                                 column: column, tinted: false,
                                                 onDiff: { diffPresentation = $0 })
                                             dangleNotice(slot: slot, column: column)
