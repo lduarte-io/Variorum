@@ -9093,6 +9093,17 @@ gets no reservation. Closing it entirely means caching the last adopted voice ou
 voice and a stale-for-one-launch failure mode. I did not build it — the arbitration asked for the
 adoption and the no-clobber, and this is the shape a follow-up would take if she ever sees the window.
 
+> **CORRECTED 2026-09-08, round 2's MAJOR-1 (the paragraph above was wrong in both halves).**
+> *"Nothing can be written under a guess inside it"* was **false**: `applyVoiceChrome` was a SECOND
+> adoption door, and both its hosts build their chrome from `themeStore?.settings ??
+> Queries.ThemeSettings()` — which is what a real `ThemeStore` holds until its observation returns — so
+> a surface materializing early latched `isAdopted` on the compile-time guess and the guard stopped
+> guarding; the flow's empty-read road then reached the disk in the same turn. And *"gets no
+> reservation"* described a behaviour that was itself wrong: refusing to READ an unverifiable record is
+> the very degradation MINOR-2 was raised about. What is true after round 2: **an unverifiable record is
+> read as a guess and never written**, and the only adopter is `ThemeStore.start`. The window itself is
+> unchanged and still not zero, and the cached-voice shape above is still what would close it.
+
 **CLOSING RUN — ONE `xcodebuild test`, 32 suite types:** batch 4's own sixteen (the memory, the surface,
 the flow, the Outline and the note box), the theme/typography and router suites this pass reaches
 (`EditorTypographyTests · BlockDecorGeometryTests · MarkdownFaceTests · CurrentBlockContinuityTests ·
@@ -9384,3 +9395,91 @@ Order of the fix passes, ONE agent at a time: batch 4 → batch 3 → batch 1. R
 - **The clean bill adopted:** `ShellChromeTests`' row-9 pin still proves the shell's seam; MINOR-5's HOLLOW call right; MINOR-1's shadow reproduction faithful; the `active` sweep complete; the mobile branch's four call sites verified read-only.
 
 **(J43)** MINOR-3 arbitrated as trace-then-decide rather than "wire it": a production eviction door for per-note view state may not exist app-side, and minting one would be invention; the honest alternative is an accepted, arithmetic-bounded leak said in the code and the row.
+
+#### 18d round 2 — fixes (batch 4)
+
+*(the batch-4 implementer, resumed; THREE findings — MAJOR-1 · MINOR-3 · NIT-2, all CONFIRMED and all
+fixed. Code + pins at `7e0d7302`.)*
+
+**MAJOR-1 (round 1's guard defeated by its own second adoption door) — CONFIRMED and FIXED at
+`7e0d7302`.** I re-traced it before touching anything and the reviewer's reading is exact:
+`EditorView.swift:72–74` and `ReadTier/ReadPostView.swift:47–49` are both
+`themeStore?.settings ?? Queries.ThemeSettings()`, and the `??` is not the only road to the placeholder —
+a REAL `ThemeStore` *holds* `Queries.ThemeSettings()` until its observation returns
+(`ThemeStore.swift:22`), so the two branches are the same value in exactly the window round 1's guard
+was built for. `applyVoiceChrome` handed that to `adopt`, `isAdopted` latched on the guess, and
+`SurfaceSizeMemory.remember`'s guard stopped dropping.
+
+**The fix is two rules, not one:**
+- **Drawing is not adopting.** `applyVoiceChrome` writes `EditorTypography.current` directly (surfaces
+  still agree, and a few frames in the wrong voice self-correct when the chrome re-applies); `adopt` now
+  has exactly ONE caller, `ThemeStore.start`, and its doc says so as a rule rather than as a fact.
+- **READ and WRITE part company while the voice is unknown.** This is the half round 1 got wrong in the
+  other direction, and the suite said so out loud: with the second door closed, refusing to *read* an
+  unverifiable record left `BookOutlineLandingTests.aChapterRevealLandsAtTheChapterWithAStoryExpandedAndLive`
+  at `editorHeight → 24.0` against `> 3000`. That is MINOR-2's own complaint arriving from the other
+  side. So `size` ANSWERS an unstamped record — it is a guess, and a guess from her last session beats
+  the unmeasured fallback, the same doctrine already written at `BookView.surfacePlaceholder` for the
+  width — while `remember` drops and `persist` now refuses locally instead of relying on that as an
+  emergent property. `persist` matters on its own because `FlowStoryRow`'s empty-read branch calls
+  `remember` then `settledHere()` → `persist` in the SAME turn: no settle interval stands between a
+  wrong stamp and the disk.
+
+**Pin:** `aSurfaceTakingChromeBeforeTheVoiceLandsCannotRecordUnderTheGuess` — through the PRODUCTION
+door (a real `EditorTextView.makeInlineEditor()` taking `EditorSurfaceChrome(tokens: Queries.ThemeSettings(), …)`),
+then the flow's same-turn `remember`+`persist` replayed on an injected unknown stamp, asserting her
+record survives in memory and on disk.
+
+**MINOR-3 (`forgetPersisted` on a door production never walks; two comments claiming otherwise) —
+CONFIRMED, TRACED per J43, and FIXED at `7e0d7302`.** The trace: the app's per-note view state should
+die at the point of NO RETURN, which is the **purge**, not the delete — a deleted note sits in the Trash
+and Put back must find her caret and her remembered lengths where she left them, so wiring
+`deleteContainer` would have been a bug wearing a fix's clothes. That occasion exists Mac-side:
+`RecoveryViewModel.confirmPendingPurge` → the new `forgetLocalMemories`, which on a successful
+`.deleteNow` over a note (`kind == .note`, not a version) calls the one router door. The shared act
+(`Shared/RecoveryActs.swift`) is untouched — the keys are local, so the eviction is local.
+**What is deliberately NOT covered, and is now said in three places instead of contradicted in two:**
+Empty Trash's targets are re-read INSIDE the shared act at act time and never returned, so covering it
+means a fourth read racing the act's third to decide what to forget; likewise a note the janitor purges
+on another device, and a note simply never purged. That is the accepted leak — ~40 bytes a key in a plist
+a `defaults delete` may end — and it now has a **KnownIssues row with an owner (12 Hardening, beside the
+R1-7 per-note-defaults row)**, plus corrected comments at `SurfaceSizeMemory.forgetPersisted` and
+`CommandRouter.forgetCurrentBlock` naming who really walks the door.
+**Pin:** `deleteNowOnANoteTakesItsPerNoteMemoriesWithIt` — a real note, deleted, listed in the Trash,
+confirmed through `RecoveryViewModel`, asserting `surfaceSize.outline.<id>`, `surfaceSize.flow.<id>` AND
+`currentBlock.<id>` all go.
+
+**NIT-2 (a pin writing two process globals for up to 5 s) — CONFIRMED and FIXED; and it was NOT only
+hygiene.** Bounding it was forced by evidence, not taste: with MAJOR-1's fix in, the six-suite set
+(`SurfaceSizeMemoryTests · StableSurfaceTests · BookOutlineLandingTests · BookOutlineRowsTests ·
+ReadingFlowLandingTests · ReadingFlowEstimateMeasureTests`) failed at `editorHeight → 24.0`;
+`BookOutlineLandingTests` **alone passed**; the same five suites **without** mine passed; and the set
+went green the moment the windows were bounded. So this suite's unadopted window really was reaching
+into a concurrently mounted book — round 1's MINOR-3 class, measured rather than argued. The fix: the
+answer is CAPTURED and the globals put back BEFORE anything is asserted, the store wait is 2 s not 5,
+and every stamp is injected wherever the global is not itself the subject (the MAJOR-1 pin touches it for
+exactly one statement — the `applyVoiceChrome` call whose behaviour is the claim).
+
+**RED-ON-OLD — one revert probe, on the committed tree (`7e0d7302`), both behavioural lines at once.**
+Reverted `applyVoiceChrome` to `EditorTypography.adopt(chrome.typography)` and removed
+`forgetLocalMemories(of: confirm)`. Result — **`Test run with 11 tests in 1 suite failed … with 4
+issues`: both new pins red, the nine older pins green.**
+- `aSurfaceTakingChromeBeforeTheVoiceLandsCannotRecordUnderTheGuess` — *"(latched → true) == false"*: the
+  production door latched the guess. (The pin stops there by design; the clobber that follows from a
+  latched guess is the injected replay in the same test, and round 1's
+  `aReportBeforeTheVoiceIsKnownNeitherStampsNorClobbers` carries its first half as the recorded trace.)
+- `deleteNowOnANoteTakesItsPerNoteMemoriesWithIt` — all three keys still present after a real purge.
+Restored with `git checkout --`; `git status` clean.
+
+**The round-1 record's residual paragraph is CORRECTED in place by a dated line** (as arbitrated), naming
+both halves that were wrong: *"nothing can be written under a guess"* (false — the second door) and the
+no-reservation behaviour it described (itself the degradation MINOR-2 named). No walk is owed for this
+pass: MAJOR-1's mechanism is a launch-order race the batch's walk explicitly could not distinguish, which
+is why the reviewer specified a pin and the arbitration adopted it.
+
+**CLOSING RUN — ONE `xcodebuild test`, 35 suite types:** round 1's 32 plus the two purge-door suites and
+`ReadPost`'s (`TrashPurgeDoorsTests · TrashConfirmEdgeTests · ReadTierTests`) — batch 4's own, the
+theme/typography and router suites, the `ReadingFlow`/`ReadPost` suites this pass reaches, and the ten
+`Tutorial*` spine types — **`Test run with 225 tests in 35 suites passed after 136.348 seconds`**, zero
+issues, zero `skipped:` lines. Zero `Sources/` (no `swift test`, no iOS build owed), zero `Shared/`, zero
+`Sync/`, zero schema.
