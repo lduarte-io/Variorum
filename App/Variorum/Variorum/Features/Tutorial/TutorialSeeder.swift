@@ -895,13 +895,13 @@ enum TutorialSeeder {
             "ARCHIVE ME: I'm worth keeping and I don't belong in this note "
             + "today. Put your cursor in me and use Block \u{25B8} Archive "
             + "Block — the right-click menu has the same row. I leave the page "
-            + "and wait in the tray's Archived section wearing "
+            + "and wait under the tray's \(TrayPath.archivedTab) view wearing "
             + "\u{201C}kept — no clock\u{201D}, and Put back returns me to this "
             + "exact spot.",
 
             "DELETE ME: I've had my day. Block \u{25B8} Delete Block, or "
             + "triple-click me and press \u{232B}. I go to the same tray's "
-            + "Leaving section with a countdown on me, and to the Trash in the "
+            + "\(TrayPath.leavingTab) view with a countdown on me, and to the Trash in the "
             + "Library, and in 30 days I'm gone for real.",
 
             "MOVE ME OUT: I'm a decent line in the wrong note. Open Blocks "
@@ -926,16 +926,31 @@ enum TutorialSeeder {
             + "counts DELETED blocks only and hides when there are none, which "
             + "is exactly why the icon is always there.",
 
-            "The tray has two sections. Archived holds what you set aside on "
-            + "purpose: kept, with no clock, forever. Leaving holds everything "
-            + "of this note's that is counting down — the blocks it deleted, "
-            + "the takes deleted on their own (folded away until you open "
-            + "them), and any original riding a family's countdown. One verb "
-            + "serves every row: Put back, and a block returns to the place it "
-            + "stood in. (A block kept whole by a divide or a merge is not "
-            + "leaving anything, so it is not here: it waits in the block it "
-            + "became, under \(BlockHistoryPath.cameFromSection) — the next "
-            + "lesson.)",
+            // 18d batch 2 (her ruling U-9; the round-1 ladder's MAJOR-1):
+            // this paragraph taught the control that batch RETIRED — two
+            // stacked SECTIONS, and the takes *"folded away until you open
+            // them"*. There are no sections (a segmented choice at the top)
+            // and no fold (the takes are a filter chip carrying their own
+            // count), so the lesson now teaches what is on screen. P-6: the
+            // tutorial is the executable spec, and a lesson that sends her
+            // looking for a disclosure triangle that does not exist is the
+            // row-44 class.
+            "The tray offers two views at the top, each carrying its count. "
+            + "\(TrayPath.archivedTab) holds what you set aside on purpose: "
+            + "kept, with no clock, forever. \(TrayPath.leavingTab) holds "
+            + "everything of this note's that is counting down — the blocks it "
+            + "deleted, the takes deleted on their own, and any original "
+            + "riding a family's countdown. Under both sits one filter — "
+            + "\(RecoveryCopy.trayFilterAll) \u{B7} "
+            + "\(RecoveryCopy.trayFilterBlocks) \u{B7} "
+            + "\(RecoveryCopy.trayFilterTakes) — so this note's deleted takes "
+            + "are one click away with their number on the chip, never hidden "
+            + "under the block cards; every card says which kind it is. One "
+            + "verb serves every row: Put back, and a block returns to the "
+            + "place it stood in. (A block kept whole by a divide or a merge "
+            + "is not leaving anything, so it is not here: it waits in the "
+            + "block it became, under \(BlockHistoryPath.cameFromSection) — "
+            + "the next lesson.)",
 
             "The Library holds the other half, in two rooms. Archived is its "
             + "own item in the sidebar: calm and clockless, whole notes you "
@@ -956,8 +971,8 @@ enum TutorialSeeder {
             // in TRASH SURFACES — the Library's Trash and this note's own
             // trash section — and never in the writing flow.
             "Ending something early is deliberate, and it lives in exactly two "
-            + "kinds of place: the Trash, and the Leaving section of a note's "
-            + "own tray. Delete Now ends one row's remaining days; Empty Trash "
+            + "kinds of place: the Trash, and the \(TrayPath.leavingTab) view "
+            + "of a note's own tray. Delete Now ends one row's remaining days; Empty Trash "
             + "takes everything the Trash lists at once. Both ask first — "
             + "Delete Now asks every single time, there is no don't-ask to "
             + "set — and Empty Trash's question names the full count by kind "
@@ -1178,13 +1193,13 @@ enum TutorialSeeder {
             + "paragraph below and press \u{232B}. It leaves the page onto a "
             + "\(TrashWindow.days)-day clock, and it is now in TWO listings of "
             + "the same fact: \(TrayPath.menuLabel) (the tray icon at the top "
-            + "of the note, Leaving section) and the Trash in the Library. Put "
+            + "of the note, \(TrayPath.leavingTab)) and the Trash in the Library. Put "
             + "back in either one returns it to the place it stood in. "
             + "Deleted means LEAVING, and anything that is leaving always says "
             + "how long it has.",
 
             "EXIT ONE: triple-click me and press \u{232B}. I'm the deletion "
-            + "\u{2014} look for me in the tray's Leaving section, and in the "
+            + "\u{2014} look for me under the tray's \(TrayPath.leavingTab) view, and in the "
             + "Trash, and put me back from either.",
 
             "THE SECOND EXIT \u{2014} it became something else. Select from "

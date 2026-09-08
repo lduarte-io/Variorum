@@ -2153,12 +2153,16 @@ struct TutorialDeletionActsTests {
             let trio = try #require(prose["archive \u{B7} delete \u{B7} scraps"])
             #expect(trio.contains(CapabilityRegistry.capability(.archiveBlock).verb))
             #expect(trio.contains(CapabilityRegistry.capability(.deleteBlock).verb))
-            // Her G5 split: the archive lesson names the ARCHIVED section and
-            // the delete lesson names LEAVING — the tray's own headers, quoted
+            // Her G5 split: the archive lesson names the ARCHIVED view and
+            // the delete lesson names LEAVING — the tray's own words, quoted
             // from the constants, so a rename reaches the lesson.
-            #expect(trio.contains("Archived section"),
-                    "the tray section archive's own row lands in")
-            #expect(trio.contains("Leaving section"),
+            // (18d batch 2 turned the two SECTIONS into the two VIEWS of a
+            // segmented choice — U-9 — and the round-1 ladder's MAJOR-1 swept
+            // the seeder; the claim is unchanged and now quotes the tab
+            // constants, which the sections' names never were.)
+            #expect(trio.contains("\(TrayPath.archivedTab) view"),
+                    "the tray view archive's own row lands in")
+            #expect(trio.contains("\(TrayPath.leavingTab) view"),
                     "and the one delete's row lands in")
             #expect(trio.contains(TrayPath.archivedForever), "archive's own promise, in its own words")
             #expect(trio.contains("Move out to a pool"), "the Blocks-mode row, verbatim")
@@ -2166,6 +2170,25 @@ struct TutorialDeletionActsTests {
 
             let trash = try #require(prose["the tray & the Trash"])
             #expect(trash.contains(TrayPath.menuLabel))
+            // **18d's round-1 ladder, MAJOR-1 (P-6: the tutorial is the
+            // executable spec).** The lesson taught the control batch 2
+            // retired — *"The tray has two sections"* and the takes *"(folded
+            // away until you open them)"* — so she was sent looking for a
+            // disclosure triangle that no longer exists under cards that are
+            // no longer stacked under headers. It teaches the shipped control
+            // now: two VIEWS at the top, one shared filter under them.
+            // RED ON OLD: both retired phrases are in the seeded text at
+            // `86f01d64`.
+            #expect(!trash.contains("two sections"),
+                    "the tray's two stacked sections became a segmented choice (U-9)")
+            #expect(!trash.lowercased().contains("folded away"),
+                    "and the takes fold became a filter chip carrying its own count")
+            #expect(trash.contains(TrayPath.leavingTab) && trash.contains(TrayPath.archivedTab),
+                    "the two views, by the names the control renders")
+            #expect(trash.contains(RecoveryCopy.trayFilterAll)
+                && trash.contains(RecoveryCopy.trayFilterBlocks)
+                && trash.contains(RecoveryCopy.trayFilterTakes),
+                    "and the one filter under them, chip by chip")
             // The post-13l polish round (ledger row 17): the lesson's path
             // constant now names the Block History pane's came-from region,
             // because that is where an unclocked original lives after her G5
@@ -2184,7 +2207,10 @@ struct TutorialDeletionActsTests {
             // the capability"* after takes left the global Trash. The rule
             // that replaced it is checkable against the two surfaces
             // themselves, which is what makes this a lesson and not a slogan.
-            #expect(trash.contains("Leaving section"),
+            // (18d batch 2 turned the Leaving SECTION into the tray's
+            //  Leaving VIEW — U-9; the claim is the same one, quoted from the
+            //  tab constant so a rename reaches the lesson.)
+            #expect(trash.contains("\(TrayPath.leavingTab) view"),
                     "the second place a purge door lives, named")
             #expect(!trash.contains("No door inside a note"),
                     "…and the superseded absolute is gone")
