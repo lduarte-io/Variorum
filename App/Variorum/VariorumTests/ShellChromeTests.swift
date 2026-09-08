@@ -60,7 +60,13 @@ struct SidebarLayoutTests {
     /// separator) has ~82 pt more room for its rows than the full column.
     @Test func theChromeCountsOnlyTheHeadedGroupsPresent() {
         #expect(SidebarLayout.chromeHeight(headedGroups: 3) == SidebarLayout.fixedChromeHeight)
-        #expect(SidebarLayout.chromeHeight(headedGroups: 1) == SidebarLayout.fixedChromeHeight - 2 * 41)
+        #expect(SidebarLayout.chromeHeight(headedGroups: 1)
+                == SidebarLayout.fixedChromeHeight - 2 * (SidebarLayout.groupHeaderHeight + SidebarLayout.separatorHeight),
+                "one headed group's chrome, from the constants rather than a copied number")
+        // 17o batch d (row 13): the header row grew 22 → 30, and the fit math
+        // reads the SAME constant the header draws at — so this arithmetic
+        // cannot silently disagree with the column again.
+        #expect(SidebarLayout.groupHeaderHeight == SidebarLayout.generousRowHeight)
         // Twelve rows (five areas + seven strip rows) with ONE headed group
         // (the strip): the three-group chrome would compress at this height;
         // the honest count fits.
@@ -75,7 +81,18 @@ struct SidebarLayoutTests {
     @Test func fewRowsNeverCompressInAShortWindow() {
         // Five areas alone in a 400 pt column: plenty of room — a fixed
         // pixel threshold would have squeezed them for nothing.
-        #expect(!SidebarLayout.compressesRows(columnHeight: 400, rows: 5))
+        //
+        // **A JUSTIFIED EDIT (17o batch d, row 13), the claim intact:** this
+        // said `rows: 5` and took the DEFAULT three headed groups, which is
+        // not the scenario it describes — five areas ALONE carry no header
+        // and no separator. It passed on 17 pt of slack that the header row's
+        // 22 → 30 growth consumed. The combination it was actually asserting
+        // is unreachable (a column with three headed groups has more than
+        // five rows — the rail alone is seven), so the fix is to ask the
+        // question the comment asks.
+        #expect(!SidebarLayout.compressesRows(columnHeight: 400, rows: 5, headedGroups: 0))
+        // …and the reachable near-boundary still reads honestly.
+        #expect(!SidebarLayout.compressesRows(columnHeight: 400, rows: 5, headedGroups: 1))
     }
 
     @Test func anUnmeasuredColumnNeverCompresses() {
@@ -210,6 +227,88 @@ struct ShellChromeTests {
                                      "the strip drew its row for the visited note")
             #expect(drawn == SidebarLayout.generousRowHeight,
                     "an Open-strip row at an ordinary height is the generous 30 pt row (the pre-round strip drew ~21)")
+            #endif
+        }
+    }
+
+    /// **Row 13 — the sidebar's headers sit on their rows' edge, with air
+    /// before the first wash.** Her punchlist 3 and its follow-up: *"'This
+    /// note' is misaligned from write, takes…"*, *"Open… from the tabs"*,
+    /// and *"the highlight on the mode you're in and the words 'this note'
+    /// or 'open' is very close to touching and the items in that pane should
+    /// all be aligned."*
+    ///
+    /// The mechanism: `header()` padded `groupPadding + rowPadding` while
+    /// sitting INSIDE groups that already pad `groupPadding`, so its words
+    /// landed 12 pt inboard of the rows beside them; and its 22-pt box with
+    /// the text bottom-aligned left nothing between the words and the first
+    /// row's wash. Both headed groups are checked, because the defect was
+    /// one rule wrong in one place and would come back the same way.
+    ///
+    /// RED ON OLD: each header's words sit 12 pt right of its rows, and the
+    /// gap to the first wash is 0.
+    @Test func theSidebarHeadersSitOnTheirRowsEdgeWithAirBeforeTheWash() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 13))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let post = try session.operations.createPost(title: "a tab")
+            _ = try session.operations.newBlock(in: post.id, text: "so the rail has a note.")
+            let router = ShellRouter()
+            #if DEBUG
+            SidebarGeometry.resetHeaders()
+            #endif
+
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 1000, height: 900),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let hosting = NSHostingView(
+                rootView: RootView(session: session, services: nil, router: router))
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            for _ in 0..<200 where router.workspace.history().current == nil {
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(5))
+            }
+            // A visited note gives BOTH headed groups: the rail ("this
+            // note") and the Open strip.
+            router.workspace.visit(.post(post.id))
+            _ = router.workspace.select(.post(post.id))
+            #if DEBUG
+            for _ in 0..<400 where SidebarGeometry.headerTextFrames.count < 2 {
+                hosting.layoutSubtreeIfNeeded()
+                window.displayIfNeeded()
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(10))
+            }
+            for _ in 0..<20 {
+                hosting.layoutSubtreeIfNeeded()
+                window.displayIfNeeded()
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(10))
+            }
+            print("[17o d row 13 keys] headers \(SidebarGeometry.headerTextFrames.keys.sorted()) · rows \(SidebarGeometry.firstRowContentFrames.keys.sorted())")
+            for title in ["this note", WorkspaceNaming.openSectionHeader] {
+                let words = try #require(SidebarGeometry.headerTextFrames[title],
+                                         "the \(title) header drew")
+                let row = try #require(SidebarGeometry.firstRowContentFrames[title],
+                                       "…and its first row drew")
+                let box = try #require(SidebarGeometry.firstRowBoxFrames[title])
+                print("[17o d row 13] \(title): words \(words) · row \(row) · box \(box)")
+                #expect(abs(words.minX - row.minX) <= 0.5,
+                        "\(title): the header's words start where its rows' do — \(words.minX) vs \(row.minX)")
+                #expect(box.minY - words.maxY >= 5,
+                        "\(title): air between the words and the first wash — \(box.minY - words.maxY)")
+            }
             #endif
         }
     }

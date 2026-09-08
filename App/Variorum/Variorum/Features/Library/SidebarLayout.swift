@@ -53,7 +53,14 @@ nonisolated enum SidebarLayout {
     static let fixedChromeHeight: CGFloat = chromeHeight(headedGroups: 3)
 
     static let topPadding: CGFloat = 14
-    static let groupHeaderHeight: CGFloat = 22
+    /// 17o batch d (ledger row 13): the header ROW's pitch. It was 22 with
+    /// the words bottom-aligned and nothing under them, which is how the
+    /// header came to touch the first row's wash; it is the column's own
+    /// generous pitch now, with `SidebarView.headerAir` below the words.
+    /// **The fit math reads THIS**, so the header's height and the height
+    /// the column budgets for it can never drift apart — the drift would be
+    /// silent (a column that fails to compress when it should).
+    static let groupHeaderHeight: CGFloat = 30
     static let separatorHeight: CGFloat = 19
     static let bottomInset: CGFloat = 96
 

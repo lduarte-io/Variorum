@@ -295,15 +295,41 @@ struct SidebarView: View {
     /// The mockup's `.sb-row`: 8 pt of side padding inside the row.
     private static let rowPadding: CGFloat = 8
 
+    /// Row 13 (17o batch d): the header ROW's pitch, and the air between the
+    /// words and the first row's wash. Her punchlist 3 and its follow-up:
+    /// *"the highlight on the mode you're in and the words 'this note' or
+    /// 'open' is very close to touching and the items in that pane should
+    /// all be aligned."*
+    /// ONE truth with the fit math: the column budgets `groupHeaderHeight`
+    /// for each headed group, so the header draws exactly that.
+    private static var headerHeight: CGFloat { SidebarLayout.groupHeaderHeight }
+    static let headerAir: CGFloat = 6
+
     /// A group header — small, in the accent (the voice's own header
     /// register, kept from the List), sitting on the rows' text edge.
+    ///
+    /// **Row 13, both halves.** The header padded `groupPadding + rowPadding`
+    /// while sitting INSIDE `railGroup`/`openGroup`/`starredGroup`, which
+    /// already pad `groupPadding` — so its words landed 12 pt inboard of the
+    /// row text beside them ("this note" adrift from Write · Takes …, "Open"
+    /// from the tabs). A header inside a padded group pads `rowPadding`
+    /// ONLY, which puts it on exactly the edge `rowChrome` gives its
+    /// content. And its 22-pt box, with the text bottom-aligned and nothing
+    /// under it, left the words touching the first row's wash; the row is
+    /// now the column's own 30-pt pitch with `headerAir` below the words.
     private func header(_ title: String) -> some View {
         Text(tokens.chromeLabel(title))
             .font(tokens.small)
             .foregroundStyle(tokens.accent)
             .lineLimit(1)
-            .padding(.horizontal, Self.groupPadding + Self.rowPadding)
-            .frame(height: 22, alignment: .bottomLeading)
+            #if DEBUG
+            .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+                SidebarGeometry.headerTextFrames[title] = $0
+            }
+            #endif
+            .padding(.horizontal, Self.rowPadding)
+            .padding(.bottom, Self.headerAir)
+            .frame(height: Self.headerHeight, alignment: .bottomLeading)
     }
 
     /// The mockup's `.sb-sep`: one 1 pt line with side margins and air.
@@ -476,7 +502,23 @@ struct SidebarView: View {
                                     .foregroundStyle(current ? tokens.accent : tokens.muted)
                                     .lineLimit(1)
                             }
+                            #if DEBUG
+                            // Row 13's oracle: the FIRST row's content edge —
+                            // what the header above it must sit on.
+                            .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+                                if m == PostDetailView.Mode.allCases.first {
+                                    SidebarGeometry.firstRowContentFrames["this note"] = $0
+                                }
+                            }
+                            #endif
                         }
+                        #if DEBUG
+                        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { box in
+                            if m == PostDetailView.Mode.allCases.first {
+                                SidebarGeometry.firstRowBoxFrames["this note"] = box
+                            }
+                        }
+                        #endif
                     }
                     .buttonStyle(.plain)
                     .help("\(m.rawValue) (⌘\((PostDetailView.Mode.allCases.firstIndex(of: m) ?? 0) + 1))")
@@ -574,10 +616,25 @@ struct SidebarView: View {
                     .foregroundStyle(tokens.muted)
                     .help("Close this row — the note itself is untouched")
             }
+            #if DEBUG
+            // Row 13's oracle: the FIRST strip row's content edge — what the
+            // "Open" header above it must sit on.
+            .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
+                if ordinal == 1 {
+                    SidebarGeometry.firstRowContentFrames[
+                        WorkspaceNaming.openSectionHeader] = $0
+                }
+            }
+            #endif
         }
         #if DEBUG
         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
             SidebarGeometry.openRowHeight = height
+        }
+        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { box in
+            if ordinal == 1 {
+                SidebarGeometry.firstRowBoxFrames[WorkspaceNaming.openSectionHeader] = box
+            }
         }
         #endif
         .onTapGesture { selection = destination }
@@ -618,6 +675,22 @@ struct SidebarView: View {
 @MainActor
 enum SidebarGeometry {
     static var openRowHeight: CGFloat?
+    /// KEPT AND PUBLISHED for 18d batch 1, which puts a note BOX where the
+    /// rail stands, at the rail's height — the header rule this batch settles
+    /// (row 13) is the one that box inherits.
     static var railGroupHeight: CGFloat?
+    /// Row 13 (17o batch d): per headed group, the header's words, and the
+    /// first row's content edge and box under it — "the header sits on its
+    /// rows' text edge, with air before the first wash" is a claim about
+    /// rectangles, keyed by the header's own title.
+    static var headerTextFrames: [String: CGRect] = [:]
+    static var firstRowContentFrames: [String: CGRect] = [:]
+    static var firstRowBoxFrames: [String: CGRect] = [:]
+
+    static func resetHeaders() {
+        headerTextFrames = [:]
+        firstRowContentFrames = [:]
+        firstRowBoxFrames = [:]
+    }
 }
 #endif
