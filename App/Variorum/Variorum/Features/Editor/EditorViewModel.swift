@@ -524,6 +524,9 @@ final class EditorViewModel {
         if session.editorRouter.active === self {
             session.editorRouter.active = nil
         }
+        if session.editorRouter.editing === self {
+            session.editorRouter.editing = nil
+        }
         canary.disarm()
         // 13c 1E: the phantom fix's debounce dies with the surface it was
         // measuring (its geometry world goes with the text view).
@@ -2850,6 +2853,14 @@ final class EditorViewModel {
 
     func updateCaretContext() {
         guard let textView else { return }
+        // 18d batch 1: THIS is the editor under the caret — the fact the
+        // sidebar's note box builds its bar from (`EditorRouter.editing`,
+        // whose comment has the measured reason it is not `active`).
+        // Assigned only on a change, so a caret walking inside one block
+        // writes nothing and wakes nobody.
+        if session.editorRouter.editing !== self {
+            session.editorRouter.editing = self
+        }
         let previousCaretBlock = caretBlockID
         let selection = textView.selectedRange()
         let caret = selection.location

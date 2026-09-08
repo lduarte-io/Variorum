@@ -563,11 +563,11 @@ struct RootView: View {
               let report = noteBoxReport, report.readingID == showing
         else { return nil }
         let tokens = theme.tokens(for: scheme)
-        // THE REGISTERED LIVE EDITOR (`EditorRouter.active`, set at attach and
-        // cleared at teardown — the seam every menu command already routes
-        // through). Gated on the note the BOOK reported: an editor left
-        // standing on another surface must never lend its doors to this box.
-        let live = session.editorRouter.active
+        // THE EDITOR UNDER THE CARET (`EditorRouter.editing` — its own
+        // comment carries the measured reason it is not `active`). Gated on
+        // the note the BOOK reported besides: an editor left standing on
+        // another surface must never lend its doors to this box.
+        let live = session.editorRouter.editing
         let barModel = report.state.isLive && live?.postID == report.state.postID
             ? live : nil
         return AnyView(SidebarNoteBox(

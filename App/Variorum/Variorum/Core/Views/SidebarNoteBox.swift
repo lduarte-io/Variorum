@@ -61,11 +61,18 @@ struct SidebarNoteBox: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
+            if case .empty = state {
+                // The empty state cannot overflow, so it does not scroll —
+                // and it CENTRES in the box's room (mockup figure C's
+                // `margin: auto 0`), which is what makes "nothing is
+                // selected" read as a state rather than as a stub at the top.
+                emptyBody
+            } else {
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
                     switch state {
                     case .empty:
-                        emptyBody
+                        EmptyView()
                     case .selected:
                         identityBlock
                         factsBlock
@@ -88,6 +95,7 @@ struct SidebarNoteBox: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
             .scrollBounceBehavior(.basedOnSize)
+            }
         }
         .padding(Self.inset)
         // The COLUMN owns the height (`SidebarLayout.railGroupHeight`, framed
@@ -142,8 +150,7 @@ struct SidebarNoteBox: View {
                 .multilineTextAlignment(.center)
                 .lineLimit(3)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.top, 18)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.horizontal, 2)
         .help(NoteBoxCopy.emptyHelp)
 #if DEBUG
