@@ -581,6 +581,18 @@ struct LandingOffsetTests {
             // (a block's start is a line start).
             session.editorRouter.scrollAnchors[postID] = anchor
             let token = session.commandRouter.registerDetail(postID: postID, mode: .write) { _ in }
+            // The cap's R3-3: the teardown on a `defer`, so a `#require`
+            // throwing inside a body cannot leak this post's memory into
+            // `UserDefaults.standard` (the R1-7 class). It captures only the
+            // router and the id — a main-actor class and a String — which is
+            // the shape the R1-4 pin's own `defer` already uses; the
+            // dictionary-free form is what the `SendNonSendable` crash asked
+            // for and is untouched.
+            defer {
+                session.commandRouter.unregisterDetail(token)
+                session.editorRouter.scrollAnchors[postID] = nil
+                session.commandRouter.forgetCurrentBlock(for: postID)
+            }
             if memoryEntry >= 0 {
                 session.commandRouter.noteFocusedBlock(
                     blocks[memoryEntry], variantID: variants[memoryEntry],
@@ -608,9 +620,6 @@ struct LandingOffsetTests {
             try body(anchor, caret, editor, scrollView.contentView.bounds)
             window.orderOut(nil)
             window.close()
-            session.commandRouter.unregisterDetail(token)
-            session.editorRouter.scrollAnchors[postID] = nil
-            session.commandRouter.forgetCurrentBlock(for: postID)
         }
     }
 
@@ -623,6 +632,12 @@ struct LandingOffsetTests {
     /// the cold mount PARKS the restore for the same hop, generation-stamped
     /// like the reveal. Red on the pre-fix tree: `visible.minY` ≈ 24 where
     /// the anchor's line top (thousands of points down) was owed.
+    ///
+    /// **It is also row 47's boundary** (17o batch d): this note remembers
+    /// NOTHING, so the bare arrival's landing of 0 is a default rather than a
+    /// place she left, and the reveal must not honour it — dropping the old
+    /// `landing > 0` condition outright (the cap's designed shape) turns this
+    /// pin red by 6927 pt, which is why the reveal now tests REMEMBERED.
     @Test func aColdMountRestoresTheSessionScrollAnchorAtTheSettleHop() async throws {
         try await Self.mountedLongNoteWithAnchor(
             anchorEntry: 199, memoryEntry: -1, memoryOffset: 0, rng: 51
@@ -652,6 +667,37 @@ struct LandingOffsetTests {
                     "the view she left, not the caret's line re-topped (red-on-old: \(visible.minY) == the caret's line top \(caretSpan.top))")
             #expect(caretSpan.top >= Double(visible.minY) - 1 && caretSpan.bottom <= Double(visible.maxY) + 1,
                     "…and the caret is on screen in it")
+        }
+    }
+
+    /// **A remembered caret at offset 0 is revealed like any other** (ledger
+    /// row 47; the batch-b ladder's cap, R3-1). The bare arrival parked its
+    /// reveal only `if landing > 0` — an exemption round 1 dismissed as
+    /// hollow because the cold-mount anchor restore clamped at ~24 pt and so
+    /// hid nothing. Round 2's RAISE-M1 made the restore EXACT, and the
+    /// exemption became reachable: the page returns to the far view she left
+    /// (correct) and a landing of 0 — a real remembered 0 at the note's very
+    /// start, a first block with no offset, or no memory at all — parks no
+    /// reveal, so "⌘1 then type" (N12's literal promise) types off screen
+    /// until AppKit's own insertion reveal hauls the page to the top.
+    ///
+    /// The fix is the condition's removal, not a second special case: the
+    /// reveal's own visibility guard is the whole rule, which is why the
+    /// no-anchor 0 (`aSeededCaretTheViewportAlreadyShowsDoesNotScrollThePage`)
+    /// stays green on both sides — its line at 24 is already inside 0…719.
+    @Test func aRememberedCaretAtTheNotesStartIsOnScreenUnderAFarAnchor() async throws {
+        try await Self.mountedLongNoteWithAnchor(
+            anchorEntry: 199, memoryEntry: 0, memoryOffset: 0, rng: 53
+        ) { anchor, caret, editor, visible in
+            #expect(caret == 0, "the memory really is the note's first character")
+            #expect(editor.selectedRange().location == 0, "the bare arrival landed there")
+            let anchorTop = try #require(JumpPrimitive.lineTop(ofOffset: anchor, in: editor))
+            let caretSpan = try #require(JumpPrimitive.lineSpan(ofOffset: 0, in: editor))
+            print("[17o d row 47] caret line \(caretSpan.top)…\(caretSpan.bottom) "
+                  + "· anchor top \(anchorTop) · visible \(visible.minY)…\(visible.maxY)")
+            #expect(caretSpan.top >= Double(visible.minY) - 1
+                    && caretSpan.bottom <= Double(visible.maxY) + 1,
+                    "the caret she will type at is on screen — red-on-old: the line at \(caretSpan.top) against a viewport at \(visible.minY)")
         }
     }
 }

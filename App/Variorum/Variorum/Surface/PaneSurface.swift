@@ -835,12 +835,14 @@ struct PaneSurfaceView: View {
     /// take's first character (and so the report the pane makes on going live
     /// is that same place, never the end of the text AppKit left the
     /// selection at). **The ladder's R1-2/R1-3:** it governs a PROGRAMMATIC
-    /// transition only — a click keeps the place the click brought — and
-    /// nil means the take's START (Write's nil rule; the END AppKit left was
-    /// an artifact the pane then reported as her place — QUESTIONS #97).
-    /// `Int.max` asks for the END explicitly (the room's gesture).
-    /// **RAISE-2:** an explicit `PaneCaretLanding`, defaulting to `.leave`, so
-    /// a host that passes nothing keeps the shipped END.
+    /// transition only — a click keeps the place the click brought.
+    /// **RAISE-2 (and the cap's R3-2, which found these sentences still
+    /// quoting the retired `Int?`):** the type is `PaneCaretLanding` —
+    /// `.offset` for a place the note remembers inside this take, `.start`
+    /// for the note's entry with nothing remembered (QUESTIONS #97,
+    /// PROVISIONAL), `.end` when the room asks for it, and `.leave` (the
+    /// default, so a host that passes nothing keeps the shipped END) moves
+    /// nothing.
     var caretOnGoingLive: PaneCaretLanding = .leave
     /// 13b 1b (AD-4): the pane's Variorum context-menu items.
     var menuItems: (() -> [PaneTextView.MenuItemSpec])?

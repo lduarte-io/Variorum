@@ -1885,18 +1885,40 @@ final class EditorViewModel {
             // caret she has since put somewhere (the K5 list pin caught the
             // first cut doing exactly that). The retry claims first
             // responder only.
-            let landing = bareArrivalLanding(fact: arrivalFact)
+            let remembered = rememberedArrivalLanding(fact: arrivalFact)
+            let landing = remembered ?? 0
             textView.setSelectedRange(NSRange(location: landing, length: 0))
-            if landing > 0 {
-                // 17o batch b (rows 20/42): the REVEAL is the Phase 6 hybrid
-                // jump, never `scrollRangeToVisible` — on TK2 the reveal runs
-                // before the document below the viewport is laid out, so it
-                // steers by the height ESTIMATE and lands short (measured on
-                // a 250-paragraph note: the caret's line at y 6930 with the
-                // viewport at 0…719). `JumpPrimitive` scrolls to a
-                // proportional estimate, forces layout of the ONE target
-                // fragment, and corrects — bounded, and the only ensureLayout
-                // this target performs (P1; TEXTKIT2 §2).
+            // 17o batch b (rows 20/42): the REVEAL is the Phase 6 hybrid
+            // jump, never `scrollRangeToVisible` — on TK2 the reveal runs
+            // before the document below the viewport is laid out, so it
+            // steers by the height ESTIMATE and lands short (measured on
+            // a 250-paragraph note: the caret's line at y 6930 with the
+            // viewport at 0…719). `JumpPrimitive` scrolls to a
+            // proportional estimate, forces layout of the ONE target
+            // fragment, and corrects — bounded, and the only ensureLayout
+            // this target performs (P1; TEXTKIT2 §2).
+            //
+            // 17o batch d (ledger row 47; the batch-b ladder's cap, R3-1):
+            // it runs at every REMEMBERED landing, 0 included. The old
+            // `landing > 0` exemption was hollow while the cold-mount anchor
+            // restore clamped at ~24 pt — it hid nothing, which is why round
+            // 1 dismissed it — and round 2's RAISE-M1 made that restore
+            // EXACT, so a remembered 0 under a far anchor left the caret off
+            // screen and "⌘1 then type" typed where she could not see.
+            //
+            // The test is REMEMBERED, not `> 0`, because the two ruled
+            // behaviours meet here: QUESTIONS #98(a) is about *the remembered
+            // caret* — when it is not inside the restored view, its line
+            // lands at the viewport top — while RAISE-M1 is about the anchor
+            // she left. With nothing remembered there is no caret of hers to
+            // honour, only a default, and revealing a default would haul the
+            // page off the anchor the cold mount just restored (measured:
+            // dropping the condition outright turned
+            // `aColdMountRestoresTheSessionScrollAnchorAtTheSettleHop` red by
+            // 6927 pt). Everything the reveal does beyond that is its own
+            // visibility guard's: a remembered 0 the viewport already shows
+            // still moves nothing.
+            if remembered != nil {
                 revealLanding(landing, textView: textView)
             }
             updateCaretContext()
@@ -2029,9 +2051,21 @@ final class EditorViewModel {
     /// the next block — the one thing worse than the start. No offset (a
     /// surface that holds no caret) is the block's start, exactly as before.
     func bareArrivalLanding(fact: FocusedBlock?) -> Int {
+        rememberedArrivalLanding(fact: fact) ?? 0
+    }
+
+    /// The same brain, read for WHETHER the landing is remembered at all
+    /// (ledger row 47). `bareArrivalLanding` folds two different situations
+    /// into the number 0 — "her caret was at the note's very start" and
+    /// "this note remembers nothing, so land at the start" — and the reveal
+    /// has to tell them apart: the first is a place she left and the second
+    /// is a default that must never outrank the session scroll anchor the
+    /// cold mount just restored. `nil` ⇒ nothing remembered for this note
+    /// (no fact, another note's fact, or a block the index no longer holds).
+    func rememberedArrivalLanding(fact: FocusedBlock?) -> Int? {
         guard let fact, fact.postID == postID,
               let i = index.entries.firstIndex(where: { $0.blockID == fact.blockID })
-        else { return 0 }
+        else { return nil }
         let range = index.range(ofEntryAt: i)
         let offset = min(max(0, fact.utf16Offset ?? 0), range.length)
         return min(range.location + offset, max(0, index.documentLength))
