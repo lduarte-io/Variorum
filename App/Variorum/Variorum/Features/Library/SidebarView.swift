@@ -739,6 +739,11 @@ enum SidebarGeometry {
     /// room" is a claim about rectangles, not about a constant.
     static var noteBoxFrame: CGRect?
     static var noteBoxHeaderFrame: CGRect?
+    /// WHICH FACE the box is showing right now — `"empty"` (state 1) and
+    /// `"door"` (state 2's one door). The state a view was HANDED is not what
+    /// it DREW, and the pin's whole job is the second; the bar's own mount
+    /// oracle (`CommitBarGeometry.mounted["box"]`) answers for state 3.
+    static var noteBoxFaces: [String: Int] = [:]
     /// Row 13 (17o batch d): per headed group, the header's words, and the
     /// first row's content edge and box under it — "the header sits on its
     /// rows' text edge, with air before the first wash" is a claim about
@@ -750,6 +755,7 @@ enum SidebarGeometry {
     static func resetHeaders() {
         noteBoxFrame = nil
         noteBoxHeaderFrame = nil
+        noteBoxFaces = [:]
         headerTextFrames = [:]
         firstRowContentFrames = [:]
         firstRowBoxFrames = [:]

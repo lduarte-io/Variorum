@@ -146,6 +146,10 @@ struct SidebarNoteBox: View {
         .padding(.top, 18)
         .padding(.horizontal, 2)
         .help(NoteBoxCopy.emptyHelp)
+#if DEBUG
+        .onAppear { SidebarGeometry.noteBoxFaces["empty", default: 0] += 1 }
+        .onDisappear { SidebarGeometry.noteBoxFaces["empty", default: 0] -= 1 }
+#endif
     }
 
     // MARK: - States 2 and 3 — the identity
@@ -218,6 +222,10 @@ struct SidebarNoteBox: View {
             }
             .buttonStyle(.plain)
             .help(NoteBoxCopy.editDoorHelp)
+#if DEBUG
+            .onAppear { SidebarGeometry.noteBoxFaces["door", default: 0] += 1 }
+            .onDisappear { SidebarGeometry.noteBoxFaces["door", default: 0] -= 1 }
+#endif
         }
     }
 

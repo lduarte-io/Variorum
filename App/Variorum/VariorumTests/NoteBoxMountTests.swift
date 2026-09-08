@@ -1,0 +1,497 @@
+//
+//  NoteBoxMountTests.swift
+//  VariorumTests
+//
+//  18d batch 1 — the sidebar note box's MOUNTED pins (her U-10). The brains
+//  are pinned pure in `NoteBoxTests`; a brain pin cannot prove a rectangle.
+//
+//  What these hold:
+//  · **THE GEOMETRY ORACLE** — the box stands at the rail's EXACT drawn
+//    height, in every state and in both voices, so the Open strip below it
+//    never moves (her *"measured to take up the same amount of room"*). Two
+//    measured rectangles, never a constant either view might not consult.
+//  · **THE COMPOSITION** — a book opening in the real shell puts the box on
+//    the column saying "no note selected", through the whole road: the book
+//    publishes, `RootView` composes, the sidebar renders.
+//  · **THE PUBLICATION** — the book's own report moves empty → live → empty
+//    as she focuses and clicks out, carrying the identity the navigator holds.
+//  · **THE RETIREMENT (U-17)** — the book's editing surfaces mount NO bar of
+//    their own: not the Outline's focused row (its gutter is gone), not the
+//    paged Book mode's page (her *"it won't be at the bottom"*).
+//
+//  Red-on-old: the box did not exist, so the oracle's second rectangle had
+//  nothing to measure. The retirement's pins ARE red on old by construction
+//  and were measured so — see the batch record.
+//
+
+import AppKit
+import Dependencies
+import Foundation
+import SwiftUI
+import Testing
+import VariorumCore
+@testable import Variorum
+
+// MARK: - The oracle's host
+
+/// One root whose two inputs the test drives: which sidebar selection stands
+/// (a note ⇒ the rail; a book ⇒ the box) and, for the box, which state.
+@MainActor
+private struct NoteBoxOracleHost: View {
+    let session: AppSession
+    let library: LibraryViewModel
+    let pool: PoolViewModel
+    let workspace: WorkspaceModel
+    let stars: StarsModel
+    let theme: ThemeStore
+    var selection: SidebarSelection?
+    var box: AnyView?
+
+    var body: some View {
+        SidebarView(
+            session: session, model: library, pool: pool,
+            workspace: workspace, stars: stars,
+            selection: .constant(selection),
+            noteBox: box)
+            .frame(width: 230)
+            .environment(theme)
+    }
+}
+
+@MainActor
+private func makeBox(
+    _ state: NoteBoxState, tokens: VoiceTokens, withBar: Bool = false,
+    model: EditorViewModel? = nil
+) -> AnyView {
+    AnyView(SidebarNoteBox(
+        tokens: tokens,
+        state: state,
+        identity: state.postID.map {
+            NoteBoxIdentity(
+                postID: $0,
+                title: "The Five Orange Pips and a title long enough to wrap",
+                chapter: "chapter two", index: 5, total: 12)
+        },
+        facts: NoteBoxFacts(
+            words: 3214, blocks: 41, fannedBlocks: 2,
+            editedAt: Date(timeIntervalSince1970: 1_788_000_000),
+            savedAt: Date(timeIntervalSince1970: 1_787_800_000)),
+        caretLabel: state.isLive ? BlockLineLabel.caret(ordinal: 3, of: 41) : nil,
+        onEditHere: {},
+        bar: withBar && model != nil ? AnyView(CommitBar(model: model!, axis: .box)) : nil))
+}
+
+@MainActor
+@Suite("The note box's geometry (18d batch 1 — U-10's 'the same amount of room')", .serialized)
+struct NoteBoxGeometryTests {
+    private func pump(_ seconds: TimeInterval = 0.02) {
+        RunLoop.main.run(until: Date().addingTimeInterval(seconds))
+    }
+
+    private func settle(
+        _ window: NSWindow, _ hosting: NSView, until predicate: () -> Bool, maxTurns: Int = 60
+    ) async {
+        for _ in 0..<maxTurns {
+            hosting.layoutSubtreeIfNeeded()
+            window.layoutIfNeeded()
+            window.displayIfNeeded()
+            pump()
+            await Task.yield()
+            try? await Task.sleep(for: .milliseconds(10))
+            if predicate() { return }
+        }
+    }
+
+    /// Mount one column and read what it drew. A fresh window per case: the
+    /// column's own `@State` (its measured height, its fit verdict) is what
+    /// decides the row pitch, and a fresh mount is the honest way to ask two
+    /// different columns the same question.
+    private func drawnColumn(
+        session: AppSession, theme: ThemeStore,
+        selection: SidebarSelection?, box: AnyView?,
+        openNote: String?,
+        until predicate: @escaping () -> Bool
+    ) async -> (NSWindow, NSHostingView<NoteBoxOracleHost>) {
+        let workspace = WorkspaceModel()
+        if let openNote { workspace.visit(.post(openNote)) }
+        let window = NSWindow(
+            contentRect: NSRect(x: 80, y: 80, width: 230, height: 900),
+            styleMask: [.titled], backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
+        let hosting = NSHostingView(rootView: NoteBoxOracleHost(
+            session: session, library: LibraryViewModel(session: session),
+            pool: PoolViewModel(session: session), workspace: workspace,
+            stars: StarsModel(session: session), theme: theme,
+            selection: selection, box: box))
+        window.contentView = hosting
+        window.makeKeyAndOrderFront(nil)
+        await settle(window, hosting, until: predicate)
+        return (window, hosting)
+    }
+
+    /// **THE ORACLE.** The rail's group and the box are measured in the SAME
+    /// column at the SAME width, and must agree to the point — in all three
+    /// states, in both voices.
+    ///
+    /// RED ON OLD: `SidebarGeometry.noteBoxFrame` had nothing to publish;
+    /// with a book open the column drew no group at all where the rail
+    /// stands, so the Open strip sat a whole rail-group higher than it does
+    /// for a note — which is exactly what her ruling forbids.
+    @Test(arguments: [ThemeVoice.terminal, ThemeVoice.study])
+    func theBoxStandsAtTheRailsExactHeightInEveryStateAndBothVoices(
+        voice: ThemeVoice
+    ) async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 10))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            try session.operations.setThemeVoice(voice)
+            let post = try session.operations.createPost(title: "a note")
+            _ = try session.operations.newBlock(in: post.id, text: "so the rail has a note.")
+            let book = try session.operations.createReading(name: "a book", kind: .curated)
+            let theme = ThemeStore(session: session)
+            let themeTask = Task { await theme.start() }
+            defer { themeTask.cancel() }
+
+#if DEBUG
+            SidebarGeometry.railGroupHeight = nil
+            let (railWindow, _) = await drawnColumn(
+                session: session, theme: theme, selection: .post(post.id), box: nil,
+                openNote: post.id, until: { SidebarGeometry.railGroupHeight != nil })
+            defer {
+                railWindow.orderOut(nil)
+                railWindow.close()
+            }
+            let rail = try #require(
+                SidebarGeometry.railGroupHeight, "the rail drew for the selected note")
+            #expect(
+                rail == SidebarLayout.railGroupHeight(
+                    rowHeight: SidebarLayout.generousRowHeight,
+                    railRows: PostDetailView.Mode.allCases.count),
+                "the rail's DRAWN group is the arithmetic the box reads: \(rail)")
+
+            let tokens = VoiceTokens.resolve(voice: voice, dark: false)
+            for state in [
+                NoteBoxState.empty,
+                NoteBoxState.selected(post.id),
+                NoteBoxState.live(post.id),
+            ] {
+                SidebarGeometry.noteBoxFrame = nil
+                let (window, _) = await drawnColumn(
+                    session: session, theme: theme, selection: .reading(book.id),
+                    box: makeBox(state, tokens: tokens), openNote: post.id,
+                    until: { SidebarGeometry.noteBoxFrame != nil })
+                let box = SidebarGeometry.noteBoxFrame
+                window.orderOut(nil)
+                window.close()
+                let drawn = try #require(box, "the box drew in state \(state)")
+                #expect(abs(drawn.height - rail) <= 0.5,
+                        "\(voice) · \(state): the box is the rail's height — \(drawn.height) vs \(rail)")
+            }
+#endif
+        }
+    }
+
+    /// Her punchlist 3's *"the items in that pane should all be aligned"*,
+    /// applied to a bordered box: the box's header words start on exactly the
+    /// left edge the column's own rows start on.
+    @Test func theBoxesHeaderSitsOnTheColumnsOneLeftEdge() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 11))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let post = try session.operations.createPost(title: "a note")
+            _ = try session.operations.newBlock(in: post.id, text: "text.")
+            let book = try session.operations.createReading(name: "a book", kind: .curated)
+            let theme = ThemeStore(session: session)
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 230, height: 900),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+#if DEBUG
+            SidebarGeometry.resetHeaders()
+#endif
+            let workspace = WorkspaceModel()
+            workspace.visit(.post(post.id))
+            let hosting = NSHostingView(rootView: NoteBoxOracleHost(
+                session: session, library: LibraryViewModel(session: session),
+                pool: PoolViewModel(session: session), workspace: workspace,
+                stars: StarsModel(session: session), theme: theme,
+                selection: .reading(book.id),
+                box: makeBox(.selected(post.id), tokens: .terminalLight)))
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+#if DEBUG
+            await settle(window, hosting, until: {
+                SidebarGeometry.noteBoxHeaderFrame != nil
+                    && SidebarGeometry.firstRowContentFrames[
+                        WorkspaceNaming.openSectionHeader] != nil
+            })
+            let words = try #require(SidebarGeometry.noteBoxHeaderFrame)
+            // The Open strip's first row is the column's own row-text edge —
+            // the same rectangle row 13 measured the rail's header against.
+            let row = try #require(
+                SidebarGeometry.firstRowContentFrames[WorkspaceNaming.openSectionHeader])
+            #expect(abs(words.minX - row.minX) <= 1.5,
+                    "the box's header starts where the column's rows do — \(words.minX) vs \(row.minX)")
+#endif
+        }
+    }
+}
+
+// MARK: - The composition, the publication, and the retirement
+
+@MainActor
+private func withOutlineBook<T>(
+    posts: Int,
+    _ body: @MainActor (AppSession, AppDatabase, _ readingID: String, _ postIDs: [String]) async throws -> T
+) async throws -> T {
+    let db = try AppDatabase.inMemory()
+    let start = Date(timeIntervalSince1970: 1_782_864_000)
+    let tick = LockIsolated(0)
+    return try await withDependencies {
+        $0.database = db
+        $0.uuid = .incrementing
+        $0.date = DateGenerator {
+            let seconds = tick.withValue { value -> Int in
+                defer { value += 1 }
+                return value
+            }
+            return start.addingTimeInterval(Double(seconds))
+        }
+        $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 18))
+    } operation: { @MainActor in
+        let session = AppSession(database: db)
+        let reading = try session.operations.createReading(name: "the box's book", kind: .curated)
+        var postIDs: [String] = []
+        for p in 0..<posts {
+            let post = try session.operations.createPost(title: "note \(p)")
+            _ = try session.operations.newBlock(
+                in: post.id,
+                text: "Prose of note \(p), long enough to read like real writing "
+                    + "and to give the surface something to lay out.")
+            try session.operations.addPostToReading(post.id, to: reading.id)
+            postIDs.append(post.id)
+        }
+        let one = try session.operations.createSection(in: reading.id, name: "one")
+        for postID in postIDs.prefix(1) {
+            try session.operations.assignPostToSection(postID, in: reading.id, section: one.id)
+        }
+        return try await body(session, db, reading.id, postIDs)
+    }
+}
+
+@MainActor
+@Suite("The note box's composition and the gutter's retirement (18d batch 1)", .serialized)
+struct NoteBoxCompositionTests {
+    private func pump(_ seconds: TimeInterval = 0.02) {
+        RunLoop.main.run(until: Date().addingTimeInterval(seconds))
+    }
+
+    /// The book's two models, SEEDED by hand — the mount-test pattern
+    /// (`BookRedesignMountTests`): `start()` is an endless observation, and a
+    /// hosted `.task` never fires under the test host anyway.
+    private func loadedBook(
+        session: AppSession, db: AppDatabase, readingID: String
+    ) async throws -> (BookViewModel, BookStructureModel) {
+        let model = BookViewModel(session: session, readingID: readingID)
+        model.adopt(try await db.read { [readingID] in
+            try Queries.assembleReading($0, readingID: readingID)
+        })
+        let structure = BookStructureModel(session: session, readingID: readingID)
+        structure.adopt(.init(
+            reading: try await db.read { [readingID] in
+                try Queries.reading($0, id: readingID)
+            },
+            sections: try await db.read { [readingID] in
+                try Queries.readingSections($0, readingID: readingID)
+            },
+            deletedSections: [],
+            assignments: try await db.read { [readingID] in
+                try Queries.sectionAssignments($0, readingID: readingID)
+            }))
+        return (model, structure)
+    }
+
+    private func settle(
+        _ window: NSWindow, _ hosting: NSView, until predicate: () -> Bool, maxTurns: Int = 80
+    ) async {
+        for _ in 0..<maxTurns {
+            hosting.layoutSubtreeIfNeeded()
+            window.layoutIfNeeded()
+            window.displayIfNeeded()
+            pump()
+            await Task.yield()
+            try? await Task.sleep(for: .milliseconds(10))
+            if predicate() { return }
+        }
+    }
+
+    /// **THE WHOLE ROAD.** A book opening in the real shell puts the box on
+    /// the column, at the rail's height, saying *"no note selected"* — the
+    /// book publishes, `RootView` composes, the sidebar renders.
+    ///
+    /// RED ON OLD: with a book open the column drew nothing where the rail
+    /// stands, so `noteBoxFrame` had nothing to publish and the empty face
+    /// did not exist.
+    @Test func aBookOpeningPutsTheBoxOnTheColumnSayingNoNoteSelected() async throws {
+        try await withOutlineBook(posts: 3) { session, db, readingID, postIDs in
+            let router = ShellRouter()
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 1200, height: 900),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+#if DEBUG
+            SidebarGeometry.railGroupHeight = nil
+            SidebarGeometry.resetHeaders()
+#endif
+            let hosting = NSHostingView(
+                rootView: RootView(session: session, services: nil, router: router))
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            // A note first: the rail draws, and its height is what the box
+            // must match on this very column.
+            router.workspace.visit(.post(postIDs[0]))
+            _ = router.workspace.select(.post(postIDs[0]))
+#if DEBUG
+            await settle(window, hosting, until: { SidebarGeometry.railGroupHeight != nil })
+            let rail = try #require(SidebarGeometry.railGroupHeight, "the rail drew")
+
+            // …then the book.
+            router.pendingSelection = .reading(readingID)
+            await settle(window, hosting, until: {
+                SidebarGeometry.noteBoxFrame != nil
+                    && (SidebarGeometry.noteBoxFaces["empty"] ?? 0) > 0
+            })
+            let box = try #require(
+                SidebarGeometry.noteBoxFrame, "the box drew for the open book")
+            #expect((SidebarGeometry.noteBoxFaces["empty"] ?? 0) > 0,
+                    "and it says 'no note selected' — nothing has been clicked")
+            #expect(abs(box.height - rail) <= 0.5,
+                    "at the rail's own height: \(box.height) vs \(rail)")
+#endif
+        }
+    }
+
+    /// **THE PUBLICATION.** The book's report moves empty → live → empty as
+    /// she focuses a note and clicks out of it, and carries the identity the
+    /// navigator holds (title, chapter, place in the reading order).
+    ///
+    /// RED ON OLD: `onNoteBox` did not exist — the book published nothing,
+    /// and its doors lived in a 190-pt gutter down the right of the page.
+    @Test func theBookPublishesItsNoteAndTheIdentityTheNavigatorHolds() async throws {
+        try await withOutlineBook(posts: 3) { session, db, readingID, postIDs in
+            let (model, structure) = try await loadedBook(
+                session: session, db: db, readingID: readingID)
+            let reports = LockIsolated<[NoteBoxReport?]>([])
+            let window = NSWindow(
+                contentRect: NSRect(x: 60, y: 60, width: 1200, height: 800),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let hosting = NSHostingView(rootView: BookView(
+                session: session, readingID: readingID,
+                model: model, structure: structure,
+                onNoteBox: { _, report, _ in
+                    reports.withValue { $0.append(report) }
+                }))
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            await settle(window, hosting, until: { !reports.value.isEmpty })
+
+            #expect(reports.value.last??.state == NoteBoxState.empty,
+                    "an Outline with nothing focused points at no note")
+
+            model.focus(postIDs[0])
+            await settle(window, hosting, until: {
+                reports.value.last??.state == NoteBoxState.live(postIDs[0])
+            })
+            let live = try #require(reports.value.last ?? nil)
+            #expect(live.state == .live(postIDs[0]))
+            let identity = try #require(live.identity)
+            #expect(identity.postID == postIDs[0])
+            #expect(identity.title == "note 0")
+            #expect(identity.chapter == "one", "the chapter the navigator shows it under")
+            #expect(identity.index == 1)
+            #expect(identity.total == 3)
+
+            // …and clicking out empties it (her U-10's own sentence).
+            model.focus(nil)
+            await settle(window, hosting, until: {
+                reports.value.last??.state == NoteBoxState.empty
+            })
+            #expect(reports.value.last??.state == NoteBoxState.empty)
+        }
+    }
+
+    /// **THE RETIREMENT (U-17).** The book's editing surfaces render NO bar
+    /// of their own — her *"then it can stop taking up room on the right and
+    /// it won't be at the bottom when you're in that book editing mode."*
+    ///
+    /// RED ON OLD, measured by behavioural revert (the batch record has the
+    /// numbers): Outline's focused row mounted a `CommitBar(axis: .vertical)`
+    /// in a 190-pt gutter, and the paged Book mode's active page mounted the
+    /// horizontal bar INSIDE the page's own scroll.
+    @Test func theBooksEditingSurfacesMountNoBarOfTheirOwn() async throws {
+        try await withOutlineBook(posts: 3) { session, db, readingID, postIDs in
+            let (model, structure) = try await loadedBook(
+                session: session, db: db, readingID: readingID)
+            let window = NSWindow(
+                contentRect: NSRect(x: 60, y: 60, width: 1200, height: 800),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+#if DEBUG
+            CommitBarGeometry.reset()
+#endif
+            let hosting = NSHostingView(rootView: BookView(
+                session: session, readingID: readingID,
+                model: model, structure: structure)
+                .environment(ThemeStore(session: session)))
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            await settle(window, hosting, until: { false }, maxTurns: 8)
+
+            // OUTLINE, a note focused: one live editor, zero bars.
+            model.focus(postIDs[0])
+            await settle(window, hosting, until: { model.liveFocusedPostID == postIDs[0] })
+            await settle(window, hosting, until: { false }, maxTurns: 12)
+#if DEBUG
+            #expect((CommitBarGeometry.mounted["horizontal"] ?? 0) == 0,
+                    "Outline's focused note draws no bar in the page")
+            #expect(CommitBarGeometry.rowFrame == nil,
+                    "…and none drew at all: the gutter's rail is retired")
+
+            // THE PAGED BOOK MODE: the same, at the bottom of the page.
+            structure.mode = .spread
+            model.seedSpreadFromFocus()
+            await settle(window, hosting, until: { !model.spreadEntries.isEmpty })
+            await settle(window, hosting, until: { false }, maxTurns: 12)
+            #expect((CommitBarGeometry.mounted["horizontal"] ?? 0) == 0,
+                    "the paged Book mode's page draws no floating bar either")
+#endif
+        }
+    }
+}

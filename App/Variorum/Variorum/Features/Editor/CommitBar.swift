@@ -153,6 +153,13 @@ struct CommitBar: View {
                 horizontalBody
             }
         }
+#if DEBUG
+        // 18d batch 1's retirement oracle: which arrangements are ON SCREEN.
+        // "The book's editing surfaces render no bar of their own" is a claim
+        // about what is mounted, and only a mount can answer it.
+        .onAppear { CommitBarGeometry.mounted[Self.name(of: axis), default: 0] += 1 }
+        .onDisappear { CommitBarGeometry.mounted[Self.name(of: axis), default: 0] -= 1 }
+#endif
         // Ledger row 17: the FALLBACK host. The pane's named home is the post
         // detail's inspector; this editor is also composed where there is no
         // detail (the scraps hosts, the book spread's inline form), and a door
@@ -259,6 +266,15 @@ struct CommitBar: View {
     }
 
     nonisolated static let boxCellHeight: CGFloat = 26
+
+#if DEBUG
+    nonisolated static func name(of axis: Axis) -> String {
+        switch axis {
+        case .horizontal: return "horizontal"
+        case .box: return "box"
+        }
+    }
+#endif
 
     private var commentsDoor: some View {
         Button(tokens.chromeLabel("comments")) { model.openCaretComments() }
@@ -799,10 +815,16 @@ struct CommitBar: View {
 enum CommitBarGeometry {
     static var rowFrame: CGRect?
     static var barWidth: CGFloat?
+    /// 18d batch 1: how many bars of each arrangement are mounted right now.
+    /// The retirement's oracle — the book's editing surfaces must mount NONE
+    /// (their doors are in the sidebar's note box), and the box must mount
+    /// exactly one when a note there is live.
+    static var mounted: [String: Int] = [:]
 
     static func reset() {
         rowFrame = nil
         barWidth = nil
+        mounted = [:]
     }
 }
 #endif
