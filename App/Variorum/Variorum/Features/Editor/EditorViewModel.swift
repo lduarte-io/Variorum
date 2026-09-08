@@ -1929,16 +1929,33 @@ final class EditorViewModel {
         // generation always bumps first and the N14 layout-settle hop always
         // arrives. That hop is the first moment the frame is honest, and it is
         // where the reveal is spent.
+        //
+        // The ladder's R1-5: STAMPED with the geometry generation it was
+        // parked under. A hop is scheduled with the generation it SAW, and
+        // the empty editor's first display pass can queue hop(G₁) BEFORE the
+        // projection drains — renderFull then bumps G₂ and parks here, and
+        // that older hop would spend the park against the very frame the
+        // park exists to wait out (the jump clamps at a couple of dozen
+        // points; the honest hop(G₂) then finds nothing). A hop for an older
+        // generation leaves the park alone; the bump guarantees hop(G₂).
         pendingRevealOffset = offset
+        pendingRevealGeneration = overlayGeometryGeneration
     }
 
     /// The landing waiting for the post-layout settle (above). Cleared the
     /// moment it is spent, and abandoned if the caret has since moved — a
     /// second jump must never yank her away from a place she chose.
-    @ObservationIgnored private var pendingRevealOffset: Int?
+    @ObservationIgnored private(set) var pendingRevealOffset: Int?  // read by the R1-5 pin
+    /// The generation the park was made under (R1-5) — a settle hop for an
+    /// OLDER generation is not the one the park is waiting for.
+    @ObservationIgnored private var pendingRevealGeneration = 0
 
-    private func consumePendingReveal() {
+    private func consumePendingReveal(deliveredBy generation: Int) {
         guard let offset = pendingRevealOffset else { return }
+        // R1-5: a stale hop LEAVES the park — the honest one is guaranteed
+        // (the bump that parked it is undelivered, so the next display pass
+        // schedules it).
+        guard generation >= pendingRevealGeneration else { return }
         pendingRevealOffset = nil
         guard let textView, let scrollView,
               textView.selectedRange().location == offset else { return }
@@ -2842,7 +2859,9 @@ final class EditorViewModel {
     @ObservationIgnored private var overlayGenerationDelivered = -1
     @ObservationIgnored private var overlaySettleScheduled = false
 
-    private func overlayLayoutDidSettle() {
+    /// Internal (not private) so the ladder's R1-5 pin can schedule a hop
+    /// for one generation and deliver a projection under the next.
+    func overlayLayoutDidSettle() {
         guard overlayGenerationDelivered != overlayGeometryGeneration,
               !overlaySettleScheduled else { return }
         overlaySettleScheduled = true
@@ -2854,8 +2873,9 @@ final class EditorViewModel {
             overlaySettleScheduled = false
             overlayGenerationDelivered = generation
             // 17o batch b (row 20): the arriving landing's second, exact jump
-            // — this hop is the first moment the document's frame is honest.
-            consumePendingReveal()
+            // — this hop is the first moment the document's frame is honest
+            // (for the generation this hop saw — R1-5).
+            consumePendingReveal(deliveredBy: generation)
             // A generation bumped between schedule and run re-arms on its
             // own draw pass — delivered records what this refresh SAW.
             refreshBadges()

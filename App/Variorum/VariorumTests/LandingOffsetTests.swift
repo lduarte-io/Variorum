@@ -230,6 +230,88 @@ struct LandingOffsetTests {
         }
     }
 
+    // MARK: - 2b. The parked reveal survives a stale-generation settle hop (the ladder's R1-5)
+
+    /// 17o batch b's ladder, round 1 — R1-5 (MAJOR, timing). The reveal is
+    /// PARKED at the landing and spent at the N14 layout-settle hop, because
+    /// at landing time the text view's frame is still the pre-fill height.
+    /// But a hop is scheduled with the generation it SAW: the empty editor's
+    /// first display pass queues hop(G₁), and if the projection's delivery
+    /// drains ahead of it — `renderFull` bumps G₂ and parks the reveal — that
+    /// older hop ran `consumePendingReveal` against the very frame the park
+    /// exists to wait out, spent it (the jump clamps at a couple of dozen
+    /// points), and the honest hop(G₂) then found nothing parked: the row-20
+    /// defect back, under a timing window. Now the park is stamped with its
+    /// generation and a hop for an OLDER one leaves it alone — hop(G₂), which
+    /// the bump guarantees, spends it. Red on the pre-fix tree: nil.
+    @Test func aSettleHopForAnOlderGenerationLeavesTheParkedRevealForTheHonestOne() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 23))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let post = try session.operations.createPost(title: "the stale hop")
+            var far: (block: String, variant: String)?
+            for i in 1...40 {
+                let minted = try session.operations.newBlock(
+                    in: post.id, text: "Paragraph \(i): a line of the story, prose enough to matter.")
+                if i == 30 { far = (minted.block.id, minted.variant.id) }
+            }
+            let target = try #require(far)
+            let router = session.commandRouter
+            router.forgetCurrentBlock(for: post.id)
+            defer { router.forgetCurrentBlock(for: post.id) }
+            let token = router.registerDetail(postID: post.id, mode: .write) { _ in }
+            defer { router.unregisterDetail(token) }
+            router.noteFocusedBlock(target.block, variantID: target.variant, postID: post.id, utf16Offset: 9)
+
+            // An UNLOADED model with a real surface attached (G₁) — the
+            // `withEditor` harness pre-loads, so it is built by hand here.
+            let model = EditorViewModel(session: session, postID: post.id)
+            model.tailIdleSleep = { _ in throw CancellationError() }
+            model.longBlockLayout.sleep = { _ in throw CancellationError() }
+            let (scrollView, textView) = EditorTextView.makeEditor()
+            let surfaceDelegate = EditorSurfaceDelegate(model: model)
+            surfaceDelegate.wire(to: textView)
+            model.attach(textView: textView, scrollView: scrollView)
+            withExtendedLifetime((scrollView, surfaceDelegate)) {}
+
+            // The projection, fetched FIRST: nothing may suspend between the
+            // hop's scheduling and the park, or the hop runs before there is
+            // anything to spend (the ordering under test is hop queued →
+            // projection drains ahead of it).
+            let (slots, header) = try await db.read { db in
+                (try Queries.renderPost(db, containerID: post.id),
+                 try Queries.containerHeader(db, containerID: post.id))
+            }
+            // The empty editor's first display pass: hop(G₁) is QUEUED.
+            model.overlayLayoutDidSettle()
+            // The projection drains ahead of that hop: renderFull (G₂) and
+            // the arrival parks its reveal at the current block's place.
+            model.adoptHeader(header)
+            model.applyProjection(slots)
+            let parked = model.pendingRevealOffset
+            #expect(parked != nil, "the arrival parked a reveal (the landing is far down)")
+            // hop(G₁) runs. A real suspension: the test body is itself a
+            // main-queue job, so a nested runloop pump cannot re-enter the
+            // main queue and a bare yield re-enqueues ahead of the older
+            // dispatch block — `Task.sleep` hands the queue back.
+            try await Task.sleep(for: .milliseconds(60))
+            #expect(model.pendingRevealOffset == parked,
+                    "a hop for the OLDER generation leaves the park for the honest one (red-on-old: spent — nil)")
+
+            // The rider's arm: a park is per model, and models are per mount —
+            // another note's editor never sees it.
+            let other = try session.operations.createPost(title: "another note")
+            let otherModel = EditorViewModel(session: session, postID: other.id)
+            #expect(otherModel.pendingRevealOffset == nil)
+            withExtendedLifetime((model, otherModel)) {}
+        }
+    }
+
     // MARK: - 3. The reveal (mounted, 250 paragraphs) — row 20
 
     private nonisolated static func pumpRunLoop(_ seconds: TimeInterval) {
