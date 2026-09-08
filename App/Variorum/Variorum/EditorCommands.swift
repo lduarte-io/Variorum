@@ -550,13 +550,20 @@ struct EditorCommands: Commands {
             // ATTACHMENT-level (round-1 MINOR-3): enabled ⇒ the editor the
             // action chains into exists — never enabled-but-silent while
             // Write is still mounting.
+            //
+            // **`editingOrActive`, not `active` (the 18d ladder's MINOR-1).**
+            // These act on the CARET, and in the book's Outline `active` is
+            // the projection-less shadow (`EditorRouter`'s own comment): the
+            // items were enabled and the act did nothing, which is a straight
+            // P-2 break — a rendered door performs the act or delivers a real
+            // refusal.
             Button(verb(.previousBlock)) {
-                session?.editorRouter.active?.jumpToAdjacentBlock(-1)
+                session?.editorRouter.editingOrActive?.jumpToAdjacentBlock(-1)
             }
             .keyboardShortcut(.upArrow, modifiers: [.command, .control])
             .disabled(!enabled(.previousBlock))
             Button(verb(.nextBlock)) {
-                session?.editorRouter.active?.jumpToAdjacentBlock(1)
+                session?.editorRouter.editingOrActive?.jumpToAdjacentBlock(1)
             }
             .keyboardShortcut(.downArrow, modifiers: [.command, .control])
             .disabled(!enabled(.nextBlock))

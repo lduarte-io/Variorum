@@ -13,6 +13,22 @@ import Observation
 @MainActor
 @Observable
 final class EditorRouter {
+    /// **WHICH QUESTION EACH FIELD ANSWERS** (the 18d ladder's MINOR-1 — the
+    /// rule this file was missing, stated once so no door has to guess):
+    ///
+    /// - `active` answers *"which text view attached last"*. It is the right
+    ///   question for **attachment**: is a full-document editor mounted at
+    ///   all, does it own a scroll view, is there anything to tear down.
+    /// - `editing` answers *"which editor is she writing in"*. It is the
+    ///   right question for any door that acts on the caret — the block she
+    ///   is in, the block it exports, the block it jumps from.
+    ///
+    /// They agree everywhere except the book's Outline, where a second
+    /// `InlineEditorSurface` for the focused note attaches ~60 ms after the
+    /// real one and takes `active` (the KnownIssues row has the trace). A
+    /// caret door reading `active` there acts on a projection-less shadow —
+    /// silently, because the shadow answers nil to everything. **A door
+    /// about the caret reads `editingOrActive`.**
     weak var active: EditorViewModel?
 
     /// **THE EDITOR UNDER THE CARET** (18d batch 1, her U-10 — the sidebar's
@@ -38,6 +54,13 @@ final class EditorRouter {
     /// only on a CHANGE, so the write costs one comparison per caret move and
     /// wakes a reader only when the editor itself changes.
     weak var editing: EditorViewModel?
+
+    /// **The editor a CARET DOOR should act on** (the 18d ladder's MINOR-1).
+    /// `editing` when a projection has landed and a caret has been computed;
+    /// `active` while it has not — a freshly attached editor that has not yet
+    /// reported a caret is still the only editor there is, and falling back
+    /// keeps every door's behaviour outside the Outline byte-identical.
+    var editingOrActive: EditorViewModel? { editing ?? active }
     /// Top visible text location per post (UTF-16 offset) — content-anchored
     /// reopen restore (accepted memo: never px-anchor).
     @ObservationIgnored var scrollAnchors: [String: Int] = [:]

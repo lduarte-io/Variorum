@@ -282,6 +282,12 @@ private func withOutlineBook<T>(
                 in: post.id,
                 text: "Prose of note \(p), long enough to read like real writing "
                     + "and to give the surface something to lay out.")
+            // A SECOND block: the caret-door pin needs somewhere to jump to,
+            // and a one-block note cannot exercise ⌃⌘↓ at all.
+            _ = try session.operations.newBlock(
+                in: post.id,
+                text: "A second paragraph of note \(p), so this note has two "
+                    + "blocks and a caret can move between them.")
             try session.operations.addPostToReading(post.id, to: reading.id)
             postIDs.append(post.id)
         }
@@ -440,6 +446,70 @@ struct NoteBoxCompositionTests {
                 reports.value.last??.state == NoteBoxState.empty
             })
             #expect(reports.value.last??.state == NoteBoxState.empty)
+        }
+    }
+
+    /// **THE TWO CARET DOORS, IN AN OUTLINE NOTE** (the 18d ladder's
+    /// MINOR-1). ⌃⌘↑/↓ (`EditorCommands`' `previousBlock`/`nextBlock`) and
+    /// Export ▸ This Block (`ShellActions.exportCaretBlock`) both act on the
+    /// caret, and both used to read `EditorRouter.active` — which in the
+    /// Outline is the projection-less shadow the KnownIssues row traces. The
+    /// menu closure and the save panel are unreachable from a test; what IS
+    /// reachable is the exact expression each door evaluates, so the pin
+    /// holds THAT and the record names the two call sites (one grep).
+    ///
+    /// RED ON OLD, measured by behavioural revert (`editingOrActive` → the
+    /// bare `active` at both sites): `caretBlockID → nil` — the export door's
+    /// guard fails and it speaks the unavailable note, and the jump returns
+    /// at its first `guard` with the caret exactly where it was.
+    @Test func theCaretDoorsActOnTheEditorSheIsWritingInNotTheLastToAttach() async throws {
+        try await withOutlineBook(posts: 3) { session, db, readingID, postIDs in
+            let (model, structure) = try await loadedBook(
+                session: session, db: db, readingID: readingID)
+            let window = NSWindow(
+                contentRect: NSRect(x: 60, y: 60, width: 1200, height: 800),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+            let hosting = NSHostingView(rootView: BookView(
+                session: session, readingID: readingID,
+                model: model, structure: structure)
+                .environment(ThemeStore(session: session)))
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            await settle(window, hosting, until: { !model.entries.isEmpty })
+
+            // A note focused in Outline: the ONE full-document editor mounts.
+            model.focus(postIDs[0])
+            await settle(window, hosting, until: {
+                session.editorRouter.editingOrActive?.caretBlockID != nil
+            })
+
+            // THE DOORS' OWN EXPRESSION. `exportCaretBlock` guards on exactly
+            // this pair; the jump's first guard reads the same two.
+            let door = try #require(
+                session.editorRouter.editingOrActive,
+                "a caret door finds an editor while a note is focused in Outline")
+            // …and it is the editor she is writing in: the block she is in is
+            // exactly what Export ▸ This Block would name.
+            let firstBlock = try #require(door.caretBlockID)
+            #expect(door.blockCount > 1, "the fixture has blocks to jump between")
+
+            // ⌃⌘↓: the caret MOVES to the next block.
+            door.jumpToAdjacentBlock(1)
+            await settle(window, hosting, until: { door.caretBlockID != firstBlock })
+            #expect(door.caretBlockID != nil)
+            #expect(door.caretBlockID != firstBlock,
+                    "⌃⌘↓ moved the caret — the act the enabled menu item promises (P-2)")
+
+            // …and ⌃⌘↑ comes back, so the pair is symmetric through the
+            // same accessor.
+            door.jumpToAdjacentBlock(-1)
+            await settle(window, hosting, until: { door.caretBlockID == firstBlock })
+            #expect(door.caretBlockID == firstBlock)
         }
     }
 

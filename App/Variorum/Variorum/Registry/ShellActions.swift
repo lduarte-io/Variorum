@@ -243,7 +243,12 @@ struct ShellActions {
         // Round-1 MINOR-3: the guard SPEAKS — enablement is attachment-
         // level (the registry), so a caret outside any block (the open
         // tail) reaches here and must never be a silent no-op.
-        guard let editor = session.editorRouter.active,
+        // `editingOrActive` (the 18d ladder's MINOR-1): this door exports
+        // THE BLOCK SHE IS IN, so it asks which editor she is writing in. In
+        // the book's Outline `active` is the projection-less shadow, whose
+        // `caretBlockID` is nil — the door spoke "unavailable" over a note
+        // she was typing in.
+        guard let editor = session.editorRouter.editingOrActive,
               let blockID = editor.caretBlockID else {
             status.speak(CapabilityRegistry.capability(.exportCaretBlock).unavailableNote)
             return
