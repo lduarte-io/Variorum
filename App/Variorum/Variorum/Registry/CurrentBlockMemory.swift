@@ -68,7 +68,28 @@ struct CurrentBlockMemory {
            known.blockID == fact.blockID {
             fact.utf16Offset = known.utf16Offset
         }
+        let previous = facts[fact.postID]
         facts[fact.postID] = fact
+        // **The session dict takes every report; the PERSISTED copy is written
+        // when the block (or its take) changes, and once more when the note
+        // leaves the screen (`persist`).** Measured on this machine (17o batch
+        // b): `UserDefaults.standard.set` costs ~100 µs — fine per block
+        // change, not a price worth paying on every keystroke for a value
+        // nothing reads until a landing. The only thing a hard quit can cost
+        // is the offset's drift within the block she was last in; the BLOCK is
+        // always current, so a relaunch still lands in the right paragraph.
+        guard previous?.blockID != fact.blockID || previous?.variantID != fact.variantID
+        else { return }
+        write(fact, defaults)
+    }
+
+    /// The note is leaving the screen — write what the session dict holds.
+    mutating func persist(postID: String, defaults: UserDefaults = .standard) {
+        guard let fact = facts[postID] else { return }
+        write(fact, defaults)
+    }
+
+    private func write(_ fact: FocusedBlock, _ defaults: UserDefaults) {
         defaults.set(
             "\(fact.blockID)|\(fact.variantID ?? "")|\(fact.utf16Offset.map(String.init) ?? "")",
             forKey: Self.key(fact.postID))

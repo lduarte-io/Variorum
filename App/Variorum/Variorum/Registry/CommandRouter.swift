@@ -59,6 +59,10 @@ final class CommandRouter {
         // one current block per note, kept across mounts), or nothing. The
         // same note re-registering keeps it — a remount is not a caret move.
         if activePostID != postID {
+            // 17o batch b: the outgoing note's caret place is written now (the
+            // session dict has been taking every report; the persisted copy is
+            // written at block changes and here).
+            if let leaving = activePostID { currentBlocks.persist(postID: leaving) }
             let restored = currentBlocks.current(for: postID)
             focusedBlockIdentity = restored
             focusedOffset = restored?.utf16Offset
@@ -102,6 +106,10 @@ final class CommandRouter {
         showTray = nil
         showBlockHistory = nil
         showVersions = nil
+        // 17o batch b: the leaving note's caret place is written before the
+        // fact goes (the session dict keeps it either way; this is what a
+        // relaunch reads).
+        if let leaving = activePostID { currentBlocks.persist(postID: leaving) }
         activePostID = nil
         activeMode = nil
         // A genuine teardown (no successor mounted yet): any parked

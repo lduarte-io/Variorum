@@ -80,6 +80,20 @@ struct LandingOffsetTests {
             FocusedBlock(postID: "p1", blockID: "b2", variantID: "v2", utf16Offset: 0),
             defaults: defaults)
         #expect(memory.current(for: "p1", defaults: defaults)?.utf16Offset == 0)
+        // The PERSISTED copy is written at block changes and when the note
+        // leaves the screen — a caret walking inside one block never touches
+        // `UserDefaults` (measured ~100 µs a write; the session dict is the
+        // caret-rate truth). `persist` is the leaving door.
+        memory.remember(
+            FocusedBlock(postID: "p1", blockID: "b2", variantID: "v2", utf16Offset: 55),
+            defaults: defaults)
+        #expect(memory.current(for: "p1", defaults: defaults)?.utf16Offset == 55)
+        #expect(CurrentBlockMemory().current(for: "p1", defaults: defaults)?.utf16Offset == nil,
+                "…the walk inside the block has not been written yet; b2 was persisted at its block change, with no offset known then")
+        memory.persist(postID: "p1", defaults: defaults)
+        #expect(CurrentBlockMemory().current(for: "p1", defaults: defaults)?.utf16Offset == 55,
+                "…and the leaving door writes it")
+
         memory.forget(postID: "p1", defaults: defaults)
         #expect(memory.current(for: "p1", defaults: defaults) == nil)
     }

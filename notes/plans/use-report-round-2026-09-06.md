@@ -3741,9 +3741,24 @@ below marked NOT-STARTED or IN-PROGRESS; the walk; the closing suites.
 2. Write's landing consumes the offset and reveals through `JumpPrimitive` — **DONE (hash next)**
 3. Blocks → Write reveals (row 20) — **DONE (hash next)**
 4. the Takes board's article scrolls to the landed slot (row 8) — **DONE (`68632d31`)**
-5. the walk + captures + the closing suites — **IN-PROGRESS**
+5. the walk + captures + the closing suites — **IN-PROGRESS** (the walk DONE and captured; the
+   per-keystroke measurement DONE and acted on; the re-walk on the rebuilt binary + the closing suites next)
 
 **Rows:** 7 · 8 · 20 · 42 — all **FIXED**, each red-on-old measured (below).
+
+**PIECE 5a — THE MEASUREMENT, and what it changed (the standing-17 rule 4).** Reporting on every caret
+move meant a `UserDefaults` write per keystroke. Measured rather than assumed
+(a throwaway probe, 10,000 calls, deleted after): **`CurrentBlockMemory.remember` ~103 µs per call, of
+which ~102 µs is `UserDefaults.standard.set` itself** on this machine. O(1) in document size, so P1 is
+not at risk — but ~100 µs of main-thread IPC per keystroke for a value nothing reads until a landing is
+not a price worth paying. So the memory SPLIT: **the session dict takes every report (free); the
+persisted copy is written when the block or its take changes, and once more when the note leaves the
+screen** — `CurrentBlockMemory.persist(postID:)`, called from `CommandRouter.unregisterDetail` and from
+`registerDetail` when the note changes. A caret walking inside one block now touches `UserDefaults` zero
+times. The only thing a hard quit can cost is the offset's drift within the block she was last in — the
+BLOCK is always current, so a relaunch still lands in the right paragraph, which is strictly better than
+before this batch. Pinned (`LandingOffsetTests`, the memory pin's new arm: the walk inside a block is
+not written; `persist` writes it).
 
 **THE COMBINED RED-ON-OLD — VERIFIED BY BEHAVIORAL REVERT** (from the committed state `68632d31`, the
 six mechanisms turned off IN PLACE — the memory's third field and its nil-keeps rule; the router's
