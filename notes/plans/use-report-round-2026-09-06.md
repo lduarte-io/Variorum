@@ -10495,3 +10495,136 @@ overlay"*, quoting the walk) are definitional or past and correct; `SideColumn.s
 `WorkbenchSeam` is not one — which is precisely MINOR-3's point and not a defect in that line. The fix
 list of four is right, plus rider (d)'s clause.
 
+
+#### ROUND-END FABLE PASS round 1 — dispositions + fixes (the reviewer)
+
+*(the fable-reviewer, the cross-model flow's second half: the FINAL CALL on each of the nine findings
+after the three implementers' responses — 9 AGREED · 0 DISPUTED — then the fixes, in this session, each
+committed per piece with its pin. Every revert probe ran IN PLACE on a COMMITTED tree and was restored by
+`git checkout --` (`git status` clean after each); NO scratch worktree was minted, so there is no
+DerivedData to reclaim — the disk stands where the cap left it. Zero `Sources/`, zero `App/Variorum/Shared/`,
+zero `Sources/VariorumCore/Sync/` across the pass, by `git diff --stat bc06d1e6..HEAD`.)*
+
+**[MAJOR-1] — CONFIRMED. FIXED `1f6ea613`.** Riders 1–6 all ADOPTED: the label crosses into the shell as
+a closure over the LOCAL `barModel` (`RootView.swift`, `caretLabel: barModel.map { model in { … } }`),
+captured STRONGLY, never `self`; `SidebarNoteBox.caretLabel` is `(() -> String?)?` and is evaluated inside
+the box's own `identityBlock`; rider 3 is a confirmation (`EditorRouter.editing`'s on-change assignment
+scopes nothing here — the two caret properties on the editor are the whole fix); rider 4 built as asked —
+the counter increments INSIDE `SidebarView.body` (`let _ = SidebarGeometry.noteBodyEvaluation(for:
+workspace)`, keyed by the workspace); rider 5 built — a second arm proves the where-line still follows the
+caret; rider 6 used as the settle predicate. Through the REAL shell: a keyed DEBUG focus door published by
+`BookView` (`BookOutlineGeometry.focusDoors[readingID]`, cleared on disappear — J41's keying) and the
+rendered where-line published per subject (`SidebarGeometry.noteBoxWhereLines`).
+**Pin `NoteBoxCompositionTests.aKeystrokeInABookNoteReRunsTheBoxAndNotTheShell` — RED ON OLD, measured by
+behavioural revert on the committed tree (the caret read moved back into the shell's closure, in place):
+`[round-end Fable pass · MAJOR-1] twenty caret-context updates ran the sidebar's body 20 times` —
+`(ran → 20) < 5` failed, 1 issue; restored and GREEN: `… ran the sidebar's body 0 times`, the where-line
+moving `block 1/2` → `block 2/2` in the second arm.** Exactly one shell render per keystroke on old, none
+after — the mechanism's number.
+
+**[MINOR-1] — CONFIRMED (J44's MINOR-1). FIXED `240201f7`.** The sharpenings ADOPTED into the fix's doc:
+the trigger is the NOTE WINDOW's store (the only `applyVoiceChrome` sites are `ReadPostView:152`,
+`EditorView:448/526`; `NoteWindowView` mounts `PostDetailView`), the victim the MAIN window's Outline
+(`current` is a process global). The chrome-carries-its-own-typography shape DECLINED at this size for the
+reason the batch-4 implementer traced (`applyVoiceChrome` attributes through `EditorDocument`'s
+`baseFont`/`baseParagraphStyle`/`baseAttributes`, which read `current` — P-3 plumbing, not a MINOR's
+fix). The stored-stamp complement DECLINED for this pass with the reason at the code: once
+`applyVoiceChrome` writes `current` only while `!isAdopted`, `adopt` is `current`'s ONLY writer after
+adoption, so a stored stamp would be a second copy of the same value (the drift class); it is the belt to
+add the day a second writer of `current` appears. The fix: `if !EditorTypography.isAdopted {
+EditorTypography.current = chrome.typography }` — strictly better for drawing too (a surface materializing
+in an un-landed window now materializes in the ADOPTED voice). **Pin
+`SurfaceSizeMemoryTests.aDrawingHostCannotMoveTheStampOnceTheVoiceIsAdopted` — the cap's designed pin,
+MEASURED: RED ON OLD by behavioural revert of the one line, 3 issues — `(stampAfter →
+".AppleSystemUIFontMonospaced-Regular-14-7") == (herStamp → "IowanOldStyle-Roman-16-8")`, `(answered →
+nil) == (hers → (696.0, 20993.0))` (her record REFUSED), and the disk record's suffix not her stamp (the
+same-turn `remember` + `persist` wrote under the guess); GREEN after, the eleven older pins green on both
+sides.** One statement wide, the globals captured and put back before asserting (round 2's NIT-2).
+**A justified edit rode with it (`6629f362`):** the closing run turned
+`MarkdownFaceTests.theFaceFollowsAVoiceSwitch` red (2 issues, green in isolation — an order dependence):
+it modelled a voice switch as `applyVoiceChrome` ALONE, with no adoption, which is exactly the
+drawing-host write the fix closed; it now adopts Study through the one authority first (the app's own
+switch road: `ThemeStore.start` → `adopt`, then the chrome re-applies) and restores the latch — its
+claim, that the face follows a voice switch, is unchanged.
+
+**[MINOR-2] — CONFIRMED (J44's MINOR-2). FIXED `1fa0602c` (harness hygiene; no red-on-old owed, none
+claimed).** Riders ADOPTED: (a) `SidebarGeometry.railGroupHeights[postID]` keyed by the rail's post (the
+value `railGroup(_:)` already holds), both `NoteBoxMountTests` pins reading their own, the
+generous-arithmetic guard KEPT at the first site and ADDED at the second — the local proof, no longer
+cross-suite noise; (b) `RootView.paneSeamSubject(router:index:)` — this window's router identity plus the
+seam's index — one rule the view and `ShellChromeTests` both call, and the comment that argued against it
+(*"a window has at most one split, and the pins mount their own window"*) deleted; (c)
+`SeamGeometry.reset()` → `forget(_ key:)`, the two pins (`ShellChromeTests`, `OutlineRoomTests`) clearing
+their own seam only — `onGeometryChange` never republishes a wiped frame. All three are DONE rather than
+owed in J41's oracle-sweep row. `RootView`'s commit also carries MINOR-3's rider (d), below.
+
+**[MINOR-3] — CONFIRMED. FIXED `b415498a`.** Riders ADOPTED: (a) the same animal — one difference, the
+injected `onFrame`, kept and wired to `SeamGrip.onGripFrame` (no `SeamGeometry` static, the seam's own
+reason preserved); (b) `.blocksWorkbenchProbe(.divider)` and `BlocksWorkbenchOracle.dividerFrame` DROPPED
+— written at `:1077`, read nowhere in `Variorum/` or `VariorumTests/` (re-grepped; `LibraryPanelOracle.
+dividerFrame` is another enum), and the `.divider` case retired from `BlocksWorkbenchProbeSlot` with a
+comment saying where the frame reaches a pin; (c) the drag pin's press lands at `seam.midX`, which is the
+line's centre on both shapes — it rides unmodified and green; (d) `RootView.swift`'s *"the last copy"*
+clause corrected in the MINOR-2 commit (a fifth copy stood while it was written; the completeness rule
+recorded there and at `WorkbenchSeam`'s header: search for the DEFECT's shape, never the fix's names); (e)
+recorded. The host puts `.zIndex(1)` on the divider in its `HStack` (the part only a host can own).
+**Pin: the width arm added to `BlocksWorkbenchFaceTests.theSeamDragsThePanelWidthAndItIsRemembered` —
+RED ON OLD by behavioural revert on the committed tree (the 9-pt overlay body restored in place):
+`(seam.width → 9.0) >= (SeamGrip.width - 0.5 → 13.5)` failed, 1 issue, the drag arms green beside it;
+restored and GREEN (4/1).**
+
+**[MINOR-4] — CONFIRMED (J44's MINOR-3). FIXED `2a6be552` (docs; `BookView`'s line in `4471df17`).** The
+rider ADOPTED: `SideColumn.swift`'s header takes two corrections in one edit — the measure (14 pt,
+`.pointerStyle`) and its citation of `WorkbenchSeam` as the grammar's source (now: born as a copy of it,
+converted last). `SideColumn`'s edge paragraph, `BookView` and `ReadModeView` name `SeamGrip`. The
+sentences ruled out of scope stay as they are.
+
+**[NIT-1] — CONFIRMED (J44's NIT-1). FIXED `25ec33d3` (doc).** The rider ADOPTED: the belt-and-braces
+sentence KEPT; the road named is `StableSurface.report`'s settle closure through `BookView`'s
+`settled: { model.persistSurfaceSize(…) }`, with the retired citation explained in place so nobody puts it
+back.
+
+**[NIT-2] — CONFIRMED (J44's NIT-2). FIXED `7eb1788e` (doc).** The rider ADOPTED: the clause states an
+INTENT (a saved moment is not a note whose view state exists), says outright that evicting would remove
+nothing, and names the promoted case.
+
+**[NIT-3] — CONFIRMED, scoped as the rider asks. FIXED `4471df17`.** `NoteBoxIdentity.totalIsAtLeast`
+(`BookView.identity(of:)` passes `model.truncated`) and `NoteBoxCopy.whereLine(… totalIsAtLeast:)` says
+*"5 of 300+ in this book"*; the nil-identity branch documented at the code as an unreachable GUARD (every
+selecting door builds its rows from the same windowed list). **Pin
+`NoteBoxCopyTests.theWhereLineSaysAFloorForAWindowedBook` — a copy-truth pin over a new parameter, not
+red-on-old by nature, said so in its doc.**
+
+**[NIT-4] — CONFIRMED. FIXED `0a84408c`.** The rider ADOPTED: `guard !Task.isCancelled else { return }`
+sits ABOVE both assignments and is a different question from the deliberate `read == nil` case below it,
+which still claims the subject. No deterministic pin (an injectable slow read the model does not take),
+labelled in the finding as the bounded race it is.
+
+**THE CLOSING RUN (this tree, `6629f362`) — ONE `xcodebuild test` from `App/Variorum/` over every suite
+the fixes reach: the box (`NoteBoxGeometryTests · NoteBoxCompositionTests · NoteBoxStateTests ·
+BookNoteBoxSubjectTests · NoteBoxHeightTests · NoteBoxCopyTests`), the shell and sidebar (`ShellChromeTests ·
+SidebarLayoutTests · ShellLandingRuleTests · ShellLandingMountTests · ShellLandingDoorTests · PaneMountTests ·
+PaneSplitDoorTests · PaneUnmountTests · PaneLayoutTests · PaneSplitModelTests · TwoWindowMountTests ·
+WindowUnmountTests · PaneMountWindowTests · IndependentWorkspaceTests · WorkspaceModelTests · CommandRouterTests`),
+the workbench (`BlocksWorkbenchFaceTests · BlocksWorkbenchTests · BlockTOCTests · LibraryPanelHostTests`), the
+memory and typography (`SurfaceSizeMemoryTests · StableSurfaceTests · EditorTypographyTests ·
+BlockDecorGeometryTests · MarkdownFaceTests`), the outline and room (`OutlineRoomTests · SideColumnTests ·
+BookOutlineLandingTests · BookOutlineRowsTests · BookOutlineFacesTests · BookViewTests · BookFocusFoldTests ·
+OutlineWritingSurfaceTests · BookRedesignMountTests · SpreadBookViewTests · ReadingFlowEstimateTests ·
+ReadingFlowLandingTests · ReadingFlowEstimateMeasureTests · BookIndexEditingTests · ReadTierTests · ReadModeTests ·
+TrashPurgeDoorsTests`) and the ten `Tutorial*Tests` spine types — 58 type names requested, each verified to
+exist first: `✔ Test run with 311 tests in 58 suites passed after 128.050 seconds` — 58 for 58, zero
+`skipped:` lines.** (The first closing run, before the justified edit, was 296 tests in 56 suites with the
+MarkdownFace pair red — two of my typed names did not exist and were replaced by the real
+`LibraryPanelHostTests` / `WorkspaceModelTests`.) `swift test` NOT run and the iOS build NOT run, per the
+brief: `Sources/` and `App/Variorum/Shared/` are untouched by every commit of this pass.
+
+**Counts for the fix pass: 9 findings CONFIRMED (0 dismissed) · 9 FIXED — 3 with pins measured red-on-old
+by behavioural revert (MAJOR-1: 20 → 0 shell renders per twenty keystrokes; MINOR-1: 3 issues; MINOR-3: 9.0
+vs 13.5), 1 with a copy-truth pin (NIT-3), 2 harness/behaviour fixes owed no pin (MINOR-2, NIT-4), 3 docs
+(MINOR-4, NIT-1, NIT-2) · 1 justified test edit (the MarkdownFace premise) · ten commits `1f6ea613` …
+`6629f362`, pushed.** Nothing here re-opens a ruling; no QUESTIONS row. **For the 18d batch-1
+implementer's sanity pass:** the diff is `bc06d1e6..6629f362`; the two DEBUG doors it adds
+(`BookOutlineGeometry.focusDoors`, `SidebarGeometry.bodyEvaluations` / `noteBoxWhereLines`) are keyed and
+DEBUG-only; `SidebarNoteBox.caretLabel`'s type changed (`(() -> String?)?`), which `makeBox` in
+`NoteBoxMountTests` follows.
