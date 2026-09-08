@@ -7903,4 +7903,35 @@ in the writing flow.
 
 ### R-12 · RECORD (the implementer writes here from its first commit)
 
-*(empty until the implementer's first commit)*
+**NOT DONE (the record's FIRST LINE) — PENDING while the batch runs; rewritten honestly at the close.**
+
+**The batch:** ONE acceptance unit — the leading-edge side column, built once in `Core/Views`, and its
+two consumers (the book navigator; the note Read tab's contents column). Rows 22 · 26 · 33.
+
+#### LIVE STATUS (rewritten at every commit)
+
+| Piece | What it is | Status |
+|---|---|---|
+| A | the width brain's LEADING mirror + `SideColumn`'s `edge`/`maximum`; the pure pins | **DONE** (this commit) |
+| B | the book navigator becomes the leading column (remembered width; the row pitch) | NOT-STARTED |
+| C | the note Read contents column becomes it (remembered width) | NOT-STARTED |
+| D | the walk on the dev-store Debug build, both voices; captures | NOT-STARTED |
+
+**Piece A, what landed.** `SideColumnLayout` gained `draggedWidthFromLeading` — the mirror, in the ONE
+width brain, so R1-7's past-the-edge floor could not be re-derived (or forgotten) at a call site — and
+`width`/`draggedWidth` gained an optional `maximum:` a host may LOWER (the navigator's 360 against the
+note panels' 640), defaulted to the shared ceiling so every caller written before this reads unchanged.
+`SideColumn` gained `edge: HorizontalEdge = .trailing`: ONE component, not a second struct — everything
+that makes the column what it is (our own divider in every window state, the 9-pt grip, the resize
+cursor, the remembered width, the geometry read) is edge-independent, and the only thing that mirrors is
+the drag arithmetic, which mirrors inside the brain where the pin can hold the two halves against each
+other. One deliberate change to the shipped rule: the UNMEASURED first pass now clamps to the host's own
+floor and ceiling (it returned the raw `wanted`), so a stored width wider than a host allows never draws
+for a frame; the shipped `SideColumnTests` assert two unmeasured cases and both are inside [280, 640],
+so they ride unmodified — verified, not assumed.
+
+**Piece A's pins** (`App/Variorum/VariorumTests/OutlineRoomTests.swift`):
+`theLeadingDragMirrorsTheTrailingOneAboutTheColumn` (the relation, over a stride of pointer positions
+from past one edge to past the other, at both hosts' clamps — not a second table of numbers) ·
+`aLeadingDragPastTheEdgeMeansTheMinimumNeverTheIdeal` (R1-7's floor, mirrored) ·
+`aHostsOwnCeilingClampsTheRememberedWidth`. Run with `SideColumnTests`: **6 tests in 2 suites passed**.
