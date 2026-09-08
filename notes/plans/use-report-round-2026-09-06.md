@@ -7414,4 +7414,37 @@ to end and re-ran. **Nothing here needs a fix pass; all four are recorded for th
 
 ### R-10 · RECORD (the implementer writes here from its first commit)
 
-*(empty until the implementer's first commit)*
+**NOT DONE (the record's FIRST LINE — kept current; final at close).** *In progress — this line is
+rewritten at the close with the honest list.* Nothing outside 18d batch 1's one surface is touched:
+zero `Sources/VariorumCore/Sync/`, zero schema, no tray (batch 2), no room (batch 3), no memory
+(batch 4).
+
+**The batch:** ONE acceptance unit — the sidebar's note box (its three states, at the rail's height)
+and the retirement it pays for (the book's right gutter, the `.side` bar placement, the paged Book
+mode's bar-in-the-page).
+
+#### LIVE STATUS (rewritten at every commit)
+
+| Piece | What it is | Status |
+|---|---|---|
+| A | the core read behind the facts line (`Queries.noteStamps`) | **DONE** (`PENDING-hash`) |
+| B | the pure brains: the box's state rule, its copy, the rail-height measurement | NOT STARTED |
+| C | the box VIEW + the sidebar's slot + the geometry oracle + the fit math | NOT STARTED |
+| D | the book publishes its subject; `RootView` composes; the facts model | NOT STARTED |
+| E | the retirement (the gutter · `.side` · the paged mode) + the click-out | NOT STARTED |
+| F | the walk, both voices, every state in every mode; captures | NOT STARTED |
+
+#### Piece A — the facts line's one read (core, alone, ahead of the code that uses it)
+
+`Sources/VariorumCore/Queries/NoteStamps.swift` — `Queries.noteStamps(_:postID:)` returns the note's
+two time facts as ONE indexed read: `editedAt` (`last_touched_at` falling back to `created_at` — the
+shelf's and the Library panel's own COALESCE, so three surfaces cannot disagree) and `savedAt` (the
+newest `commit_point.created_at` across the note's LIVE blocks' LIVE variants — every take, not only
+the rendered one). nil for a missing or tombstoned container (the `containerHeader` convention).
+Zero schema; the day derivation stays the caller's (a stamp is data, a day is a face).
+
+**Pin:** `Tests/VariorumCoreTests/NoteStampsTests.swift` — **5 tests / 1 suite, green.** RED ON OLD in
+the only sense available: the query did not exist, so §5.4's *"edited Sep 4 · saved Sep 2"* had nothing
+honest to read. The pins hold the four claims that could drift: a fresh note reports no savepoint but
+still a day; an autosave moves the edited stamp; the saved stamp follows a savepoint on an UNRENDERED
+take and on any block; a deleted block's moments leave the note's stamp with the cascade.
