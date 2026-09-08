@@ -27,3 +27,5 @@ notes/plans/pre-13u-screens/
 notes/plans/pre-13u-act10-screens/
 notes/plans/act10-correction-screens/
 notes/plans/use-report-2026-09-06-screens/
+# Session scratch (build/test logs, revert probes) — local, never canon
+scratchpad/
