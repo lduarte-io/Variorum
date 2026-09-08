@@ -162,9 +162,6 @@ struct PostDetailView: View {
     /// The icon row's measured width — the TITLE row's symmetric inset, so
     /// the centered title never runs under the icons (rows 4/19, row 55).
     @State private var mastheadIconRowWidth: CGFloat = 0
-    /// The masthead's own width — measured for the DEBUG oracle's reach
-    /// check and row two's width-aware layout.
-    @State private var mastheadWidth: CGFloat = 0
     /// Row 58: the least room between the path chip and the tag cluster on
     /// the masthead's second row.
     static let rowTwoGap: CGFloat = 16
@@ -319,7 +316,16 @@ struct PostDetailView: View {
                 }
             }
             .frame(maxWidth: mastheadMeasure, alignment: .leading)
-            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { mastheadWidth = $0 }
+            // 17o c/d/e ladder round 1, MINOR-3: the masthead's own measured
+            // width USED to live here as `@State`, read only by
+            // `titleInsets`' 240-pt line floor. Row 11 retired that floor
+            // with the centering it existed for, leaving the state
+            // write-only — every width change invalidating this body for a
+            // value nothing consumed, and row 9's newly reachable seam grip
+            // makes a resize drag run that continuously. The DEBUG oracle's
+            // reach check reads the masthead's own half-width below
+            // (`contentMidX`) and the title BAND's frame in `PostTitleLabel`;
+            // row two computes from its own layout. Nothing read it.
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 24)
             .padding(.top, 12)
