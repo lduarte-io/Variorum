@@ -110,14 +110,32 @@ struct SeamGrip: View {
 }
 
 #if DEBUG
-/// **The seam oracle for `SideColumn`'s consumers** (18d's ladder, MAJOR-2).
-/// Keyed by the column's `widthKey`, because Swift Testing runs SUITES in
-/// parallel and a second column mounted elsewhere would land in the same
-/// statics — the lesson 18d batch 3 measured on its own geometry oracles.
-/// "The grip is wide, centred on the line, and reaches into both sides" is a
-/// claim about two rectangles, so the pin reads rectangles.
+/// **The seam oracle** — every `SeamGrip` outside the shell reports here
+/// (18d's ladder: MAJOR-2 minted it, round 2's MINOR-2 corrected its key,
+/// MINOR-1 added the pane row). "The grip is wide, centred on the line, and
+/// reaches into both sides" is a claim about two rectangles, so a pin reads
+/// rectangles. The shell's seam keeps `ShellGeometry`, whose row-9 pin is
+/// older than this and rides unmodified.
+///
+/// **Keyed by the FAMILY *and its SUBJECT*, which is the whole rule** —
+/// round 2's MINOR-2, and the correction of a doc that claimed the rule was
+/// already followed. Swift Testing runs SUITES in parallel, and the first
+/// cut keyed on `widthKey` alone: a per-HOST `@AppStorage` constant
+/// (`"bookNavigatorWidth"`), so EVERY book navigator in every suite and
+/// every window wrote the same two entries. Both failure directions are
+/// real — another suite supplying both rectangles gives a green pin about
+/// someone else's window; supplying one gives a SPURIOUS red, because
+/// "centred on the line" would then compare two windows. The subject is the
+/// book's or note's id, minted live per suite, exactly as the oracles this
+/// one sits beside are keyed (`BookIndexGeometry.columnFrames[readingID]`,
+/// `ReadModeOracle.indexColumnFrames[postID]`).
 @MainActor
-enum SideColumnGeometry {
+enum SeamGeometry {
+    /// The one key rule, so a view and a pin can never spell it differently.
+    static func key(_ family: String, subject: String) -> String {
+        "\(family)|\(subject)"
+    }
+
     static var lineFrames: [String: CGRect] = [:]
     static var gripFrames: [String: CGRect] = [:]
 

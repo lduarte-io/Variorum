@@ -120,6 +120,14 @@ struct SideColumn<Content: View, Panel: View>: View {
     /// The `@AppStorage` key the dragged width is remembered under — one
     /// per host; it doubles as the column's coordinate-space name.
     let widthKey: String
+    /// **WHAT this column is showing** — the book's or note's id. It is not
+    /// storage and not layout: it is the DEBUG seam oracle's key, and it is
+    /// required rather than defaulted so a new host has to name its subject
+    /// instead of silently shipping the hole round 2's MINOR-2 found
+    /// (`widthKey` alone is a per-host constant, so every navigator in every
+    /// parallel suite wrote the same entry). A host that genuinely has one
+    /// instance passes a stable name of its own.
+    let subjectKey: String
     /// Which side the panel stands on. `.trailing` is the note's and the
     /// scraps area's (row 74's original); `.leading` is the book navigator's
     /// and the note Read tab's contents column (18d batch 3, U-13). The
@@ -140,7 +148,7 @@ struct SideColumn<Content: View, Panel: View>: View {
     @State private var totalWidth: CGFloat = 0
 
     init(
-        tokens: VoiceTokens, shown: Bool, widthKey: String,
+        tokens: VoiceTokens, shown: Bool, widthKey: String, subjectKey: String,
         edge: HorizontalEdge = .trailing,
         ideal: CGFloat = 420, minimum: CGFloat = 280,
         maximum: CGFloat = SideColumnLayout.maximum,
@@ -151,6 +159,7 @@ struct SideColumn<Content: View, Panel: View>: View {
         self.tokens = tokens
         self.shown = shown
         self.widthKey = widthKey
+        self.subjectKey = subjectKey
         self.edge = edge
         self.ideal = ideal
         self.minimum = minimum
@@ -245,12 +254,14 @@ struct SideColumn<Content: View, Panel: View>: View {
             onLineFrame: { frame in
                 onDividerFrame?(frame)
                 #if DEBUG
-                SideColumnGeometry.lineFrames[widthKey] = frame
+                SeamGeometry.lineFrames[
+                    SeamGeometry.key(widthKey, subject: subjectKey)] = frame
                 #endif
             },
             onGripFrame: { frame in
                 #if DEBUG
-                SideColumnGeometry.gripFrames[widthKey] = frame
+                SeamGeometry.gripFrames[
+                    SeamGeometry.key(widthKey, subject: subjectKey)] = frame
                 #endif
             })
     }

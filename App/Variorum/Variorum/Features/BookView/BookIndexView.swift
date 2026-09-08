@@ -274,6 +274,7 @@ struct BookIndexView<Masthead: View>: View {
             tokens: tokens,
             shown: true,
             widthKey: BookIndexColumn.widthKey,
+            subjectKey: model.readingID,
             edge: .leading,
             ideal: BookIndexColumn.idealWidth,
             minimum: BookIndexColumn.minimumWidth,

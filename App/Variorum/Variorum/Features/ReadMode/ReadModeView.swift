@@ -149,6 +149,7 @@ struct ReadModeView: View {
                 tokens: tokens,
                 shown: outlineShown,
                 widthKey: Self.indexColumnWidthKey,
+                subjectKey: postID,
                 edge: .leading,
                 ideal: NoteIndexColumn.width,
                 minimum: NoteIndexColumn.minimumWidth

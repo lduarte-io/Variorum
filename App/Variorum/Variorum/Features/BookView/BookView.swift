@@ -134,6 +134,7 @@ struct BookView: View {
             tokens: tokens,
             shown: structure.mode != .index,
             widthKey: BookNavigatorLayout.widthKey,
+            subjectKey: readingID,
             edge: .leading,
             ideal: BookNavigatorLayout.idealWidth,
             minimum: BookNavigatorLayout.minimumWidth,

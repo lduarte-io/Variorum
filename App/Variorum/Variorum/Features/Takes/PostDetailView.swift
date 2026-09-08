@@ -191,7 +191,8 @@ struct PostDetailView: View {
 
     var body: some View {
         SideColumn(
-            tokens: tokens, shown: inspectorPanel != nil, widthKey: Self.sideColumnWidthKey,
+            tokens: tokens, shown: inspectorPanel != nil,
+            widthKey: Self.sideColumnWidthKey, subjectKey: postID,
             onDividerFrame: { frame in
                 #if DEBUG
                 PostDetailOracle.sideColumnDividerFrame = frame

@@ -453,17 +453,20 @@ struct OutlineRoomTests {
     @Test func theLeadingSeamsGripIsWideCentredAndReachesIntoBothSides() async throws {
         try await withChapteredBook { book in
             #if DEBUG
-            SideColumnGeometry.reset()
+            SeamGeometry.reset()
             #endif
             UserDefaults.standard.removeObject(forKey: BookNavigatorLayout.widthKey)
             let (window, _) = await mountBook(book)
             defer { window.orderOut(nil); window.close() }
             #if DEBUG
+            // Round 2's MINOR-2: MY navigator's seam, by the book's own id
+            // — `widthKey` alone is a per-host constant, so every navigator
+            // in every parallel suite wrote the same entry.
+            let seam = SeamGeometry.key(BookNavigatorLayout.widthKey, subject: book.readingID)
             let grip = try #require(
-                SideColumnGeometry.gripFrames[BookNavigatorLayout.widthKey],
+                SeamGeometry.gripFrames[seam],
                 "the grip publishes a frame of its own (an overlay never did)")
-            let line = try #require(
-                SideColumnGeometry.lineFrames[BookNavigatorLayout.widthKey])
+            let line = try #require(SeamGeometry.lineFrames[seam])
             #expect(grip.width >= SeamGrip.width - 0.5,
                     "a reachable target, not the old 9: \(grip.width)")
             #expect(abs(grip.midX - line.midX) <= 0.5,

@@ -1052,7 +1052,10 @@ struct PoolDetailView: View {
     }
 
     var body: some View {
-        SideColumn(tokens: tokens, shown: trayShown, widthKey: Self.sideColumnWidthKey) {
+        SideColumn(
+            tokens: tokens, shown: trayShown,
+            widthKey: Self.sideColumnWidthKey, subjectKey: poolID
+        ) {
         VStack(spacing: 0) {
             HStack(spacing: 8) {
                 Picker("Pool mode", selection: $mode) {
