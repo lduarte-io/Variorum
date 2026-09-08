@@ -48,6 +48,36 @@ nonisolated enum EditorTypography {
     nonisolated(unsafe) static var current: Resolved =
         EditorTypography.resolve(voice: .terminal, inlineComments: false)
 
+    /// **18d ladder round 1, MINOR-2: whether `current` is the STORE's answer
+    /// or still the compile-time default above.** Until the appearance
+    /// settings have landed, "the current typography" is a guess — the
+    /// leading voice, which is right for a Terminal store by luck and wrong
+    /// for a Study one. Nothing that only DRAWS needs to tell those apart (a
+    /// surface materialized early re-styles when its chrome is applied), but
+    /// anything that RECORDS the typography must, or it stamps a guess:
+    /// `SurfaceSizeMemory.remember` writes no record while this is false, so
+    /// a geometry report arriving in that window can never overwrite a
+    /// record she measured in her own voice.
+    ///
+    /// Settable rather than `private(set)` so a pin can put the process
+    /// global back where it found it — this value is shared across Swift
+    /// Testing's parallel suites (batch 1's MINOR-3 class).
+    nonisolated(unsafe) static var isAdopted = false
+
+    /// The one adoption door: `ThemeStore` calls it where a settings value
+    /// LANDS, and `applyVoiceChrome` calls it when a surface takes a real
+    /// voice. Both were already writing `current`; what they now also say is
+    /// that the answer is no longer a guess.
+    static func adopt(_ resolved: Resolved) {
+        current = resolved
+        isAdopted = true
+    }
+
+    /// The same door from the settings themselves.
+    static func adopt(_ settings: Queries.ThemeSettings) {
+        adopt(resolve(voice: settings.voice, inlineComments: settings.inlineComments))
+    }
+
     static func resolve(voice: ThemeVoice, inlineComments: Bool) -> Resolved {
         let font: NSFont
         switch voice {
@@ -79,7 +109,13 @@ nonisolated enum EditorTypography {
     /// would leave stale reservations behind, which is the one failure this
     /// stamp exists to prevent. Never contains `|` (the record's separator):
     /// font names and integers do not.
-    static var fingerprint: String {
+    /// **nil until the voice is KNOWN** (18d ladder MINOR-2): a stamp is a
+    /// claim about which type a height was measured in, and before the
+    /// settings land this module has no such claim to make — only the
+    /// default. A reader treats nil as "no stamp to compare" and a writer as
+    /// "nothing to stamp"; neither invents one.
+    static var fingerprint: String? {
+        guard isAdopted else { return nil }
         let resolved = current
         return "\(resolved.font.fontName)-\(Int(resolved.font.pointSize.rounded()))"
             + "-\(Int(resolved.paragraphSpacing.rounded()))"
@@ -171,8 +207,10 @@ extension NSTextView {
     /// warns about; decorations stay overlays.
     func applyVoiceChrome(_ chrome: EditorSurfaceChrome) {
         // The one global typography updates FIRST so every subsequent
-        // surface write (materialization, differential) agrees.
-        EditorTypography.current = chrome.typography
+        // surface write (materialization, differential) agrees. Through
+        // `adopt` since the 18d ladder's MINOR-2: a surface taking a real
+        // voice is an adoption, not a guess.
+        EditorTypography.adopt(chrome.typography)
         // 13g batch 2 (L7): the markdown face's two colors ride the same
         // resolution — one voice, one dimmed marker, everywhere.
         MarkdownStyling.palette = MarkdownStyling.Palette(tokens: chrome.tokens)

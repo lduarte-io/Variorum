@@ -28,12 +28,26 @@ final class ThemeStore {
 
     /// Runs for the app's lifetime; the setting table is tiny, so the held
     /// observation is bounded by construction.
+    ///
+    /// **The one global text-surface typography is adopted HERE, where a
+    /// settings value LANDS** (18d ladder round 1, MINOR-2). It used to be
+    /// adopted by `RootView`'s `.onChange(of: theme.settings)` — a VIEW
+    /// noticing a change — which is one turn later and, worse, conditional
+    /// on the loaded value DIFFERING from the compile-time default: a store
+    /// whose settings happen to equal the default never fires it at all, and
+    /// a Study store fires it only after a SwiftUI update cycle. Anything
+    /// that stamps or compares the typography (`SurfaceSizeMemory`, whose
+    /// records carry the type they were measured in) was reading a guess in
+    /// that gap. The store is the theme's authority; the adoption belongs to
+    /// it. `RootView` still owns the markdown palette, which also depends on
+    /// the color SCHEME and so is genuinely a view's question.
     func start() async {
         do {
             for try await value in session.database.observe({ db in
                 try Queries.themeSettings(db)
             }) {
                 settings = value
+                EditorTypography.adopt(value)
             }
         } catch is CancellationError {
         } catch {

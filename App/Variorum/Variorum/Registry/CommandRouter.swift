@@ -221,8 +221,18 @@ final class CommandRouter {
     }
 
     /// A pin's reset (or a deleted note): the memory for one note goes.
+    ///
+    /// **Every per-note memory, not only this one** (18d ladder round 1,
+    /// NIT-3): the book Outline's and the reading flow's remembered surface
+    /// sizes are persisted per note too, and they live on per-book view
+    /// models this router cannot reach — so the door drops their PERSISTED
+    /// records here, which is the part that would otherwise outlive the note
+    /// (`SurfaceSizeMemory.forgetPersisted` says why the session halves need
+    /// no reaching). One occasion, every memory: adding the next per-note
+    /// memory beside them is a line here, not a new eviction road.
     func forgetCurrentBlock(for postID: String) {
         currentBlocks.forget(postID: postID)
+        SurfaceSizeMemory.forgetPersisted(postID)
         if focusedBlockIdentity?.postID == postID {
             focusedBlockIdentity = nil
             focusedOffset = nil

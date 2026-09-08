@@ -51,7 +51,7 @@ final class SurfaceSizeMemory {
     /// page's, so a note has a different height in each and the two
     /// memories must never meet (they would refuse each other's width
     /// forever, one settle at a time).
-    enum Namespace: String {
+    enum Namespace: String, CaseIterable {
         /// The book Outline's expanded notes (live and read-cheap alike —
         /// one measure, the caller's `.id` starting a fresh reservation).
         case outline
@@ -119,7 +119,12 @@ final class SurfaceSizeMemory {
     /// The typography the CURRENT frame stands in — read live at every
     /// read and every remember, never cached, so a voice switch is felt
     /// inside the session and not only after a relaunch.
-    private let fingerprint: () -> String
+    ///
+    /// **nil = the voice is not known yet** (18d ladder round 1, MINOR-2 —
+    /// `EditorTypography.fingerprint` answers nil until the appearance
+    /// settings land). A memory with no stamp to write CANNOT record; see
+    /// `remember`.
+    private let fingerprint: () -> String?
 
     /// The session's word. Read before the disk and never invalidated by
     /// it: what a surface reported this session outranks what a previous
@@ -143,7 +148,7 @@ final class SurfaceSizeMemory {
     init(
         _ namespace: Namespace,
         defaults: UserDefaults = .standard,
-        fingerprint: @escaping () -> String
+        fingerprint: @escaping () -> String?
     ) {
         self.namespace = namespace
         self.defaults = defaults
@@ -160,8 +165,20 @@ final class SurfaceSizeMemory {
 
     /// A surface reported its size — geometry cadence, session only. The
     /// disk waits for `persist`.
+    ///
+    /// **A report arriving before the voice is known is DROPPED** (18d ladder
+    /// round 1, MINOR-2). Without this, a geometry report in the window
+    /// between launch and the appearance settings landing stamped the session
+    /// record with the compile-time default voice — overwriting the record
+    /// loaded from disk, and then `persist` (one settle later, by which time
+    /// the real voice HAS landed) wrote that guess over the record she
+    /// measured in her own voice. It self-healed within one more settle, but
+    /// it destroyed a good record to do it. Losing one early report costs
+    /// nothing: the surface reports again as it loads, and the settle is what
+    /// decides in any case.
     func remember(_ key: String, _ size: CGSize) {
-        records[key] = Record(size: size, fingerprint: fingerprint())
+        guard let stamp = fingerprint() else { return }
+        records[key] = Record(size: size, fingerprint: stamp)
         consulted.insert(key)
     }
 
@@ -175,8 +192,26 @@ final class SurfaceSizeMemory {
         defaults.set(encoded, forKey: Self.key(namespace, key))
     }
 
+    /// Drop a note's PERSISTED records in every key space — the door the
+    /// app itself walks through when a note's memories go
+    /// (`CommandRouter.forgetCurrentBlock`, beside `CurrentBlockMemory`'s).
+    ///
+    /// Static because the instances live on per-book `BookViewModel`s the
+    /// router cannot reach, and because the disk is the part that outlives
+    /// everything: a live model's session record for a note that no longer
+    /// exists is asked for by nobody and dies with the model, while a
+    /// `surfaceSize.*` key would otherwise sit in `UserDefaults` forever
+    /// (18d ladder round 1, NIT-3).
+    static func forgetPersisted(_ surface: String, defaults: UserDefaults = .standard) {
+        for namespace in Namespace.allCases {
+            defaults.removeObject(forKey: key(namespace, surface))
+        }
+    }
+
     /// Drop a surface's memory here and on disk (the note is gone, or a
-    /// pin resets).
+    /// pin resets) — the INSTANCE door, which also clears the session
+    /// record. Its callers are the pins; the app's own occasion goes
+    /// through `forgetPersisted` above, for the reason stated there.
     func forget(_ key: String) {
         records[key] = nil
         written[key] = nil

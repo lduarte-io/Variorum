@@ -302,13 +302,16 @@ struct RootView: View {
             summonQuickNote()
             router.quickNoteRequested = false
         }
-        // Phase 13 C1: the voice's text-surface half — keep the one global
-        // typography current so surfaces created LATER materialize in the
-        // right voice (open surfaces re-style through their own chrome
-        // application; both writers set the same resolved value).
-        .onChange(of: theme.settings) { _, settings in
-            EditorTypography.current = EditorTypography.resolve(
-                voice: settings.voice, inlineComments: settings.inlineComments)
+        // Phase 13 C1: the voice's text-surface half — the one global
+        // typography keeps surfaces created LATER materializing in the right
+        // voice. **18d ladder MINOR-2: the typography adoption MOVED to
+        // `ThemeStore.start`, where the settings land** — a view noticing a
+        // change is one turn late and never fires at all when the loaded
+        // value equals the default, and `SurfaceSizeMemory`'s records carry
+        // the type they were measured in. What stays here is the markdown
+        // palette, which depends on the color SCHEME too (the hook below) and
+        // so is genuinely this view's question.
+        .onChange(of: theme.settings) { _, _ in
             adoptMarkdownPalette()
         }
         // 13g batch 2 (L7): the markdown face's palette follows the voice AND

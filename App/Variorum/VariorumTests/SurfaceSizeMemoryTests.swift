@@ -37,6 +37,7 @@
 //
 
 import AppKit
+import Dependencies
 import Foundation
 import SwiftUI
 import Testing
@@ -53,11 +54,37 @@ private final class CountingDefaults: UserDefaults, @unchecked Sendable {
     }
 }
 
+
+/// A bare session (the `ExportFacesTests` shape) — enough to write an
+/// appearance setting and run the theme's own observation over it.
+@MainActor
+private func withSession<T>(
+    _ body: @MainActor (AppSession) async throws -> T
+) async throws -> T {
+    let db = try AppDatabase.inMemory()
+    let start = Date(timeIntervalSince1970: 1_783_900_800)
+    let tick = LockIsolated(0)
+    return try await withDependencies {
+        $0.database = db
+        $0.uuid = .incrementing
+        $0.date = DateGenerator {
+            let seconds = tick.withValue { value -> Int in
+                defer { value += 1 }
+                return value
+            }
+            return start.addingTimeInterval(Double(seconds))
+        }
+        $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 12))
+    } operation: { @MainActor in
+        try await body(AppSession(database: db))
+    }
+}
+
 /// The typography in force, movable by hand (the voice switch, without a
 /// theme store).
 @MainActor
 private final class Stamp {
-    var value = "terminal-14-7"
+    var value: String? = "terminal-14-7"
 }
 
 @MainActor
@@ -120,9 +147,13 @@ struct SurfaceSizeMemoryTests {
         let comments = EditorTypography.resolve(voice: .terminal, inlineComments: true)
         func stamp(_ resolved: EditorTypography.Resolved) -> String {
             let restore = EditorTypography.current
-            defer { EditorTypography.current = restore }
-            EditorTypography.current = resolved
-            return EditorTypography.fingerprint
+            let wasAdopted = EditorTypography.isAdopted
+            defer {
+                EditorTypography.current = restore
+                EditorTypography.isAdopted = wasAdopted
+            }
+            EditorTypography.adopt(resolved)
+            return EditorTypography.fingerprint ?? "<unadopted>"
         }
         #expect(stamp(terminal) != stamp(study), "Terminal's 14-pt mono ≠ Study's 16-pt Iowan")
         #expect(stamp(terminal) != stamp(comments), "…and inline comments move the paragraph gap")
@@ -130,6 +161,20 @@ struct SurfaceSizeMemoryTests {
         #expect(!FlowHeightEstimate.fingerprint.contains("|"))
         #expect(FlowHeightEstimate.fingerprint != stamp(terminal),
                 "the page's type is its own — the flow's memories are not the Outline's")
+
+        // 18d ladder MINOR-2: before the settings land there is no stamp to
+        // give — not the leading voice's, which would be a guess.
+        let restore = EditorTypography.current
+        let wasAdopted = EditorTypography.isAdopted
+        defer {
+            EditorTypography.current = restore
+            EditorTypography.isAdopted = wasAdopted
+        }
+        EditorTypography.isAdopted = false
+        #expect(EditorTypography.fingerprint == nil,
+                "an unadopted typography names no voice")
+        EditorTypography.adopt(study)
+        #expect(EditorTypography.fingerprint != nil)
     }
 
     // MARK: - 2. The write cadence
@@ -353,5 +398,138 @@ struct SurfaceSizeMemoryTests {
         #expect(live.size("p1") == nil)
         #expect(SurfaceSizeMemory(.outline, defaults: defaults, fingerprint: { "t" }).size("p1") == nil)
         #expect(defaults.string(forKey: SurfaceSizeMemory.key(.outline, "p1")) == nil)
+    }
+
+    // MARK: - 6. The ladder's MINOR-2: the voice is known where it LANDS
+
+    /// **RED ON OLD.** `ThemeStore.start` adopts the resolved typography the
+    /// moment a settings value lands. Before this fix the only adoption was
+    /// `RootView`'s `.onChange(of: theme.settings)` — a VIEW noticing — so in
+    /// a host that runs the store without that view (and, in the app, for a
+    /// SwiftUI update cycle after every launch) `EditorTypography.current`
+    /// still named the compile-time default while the store already held her
+    /// Study settings, and every Study-stamped record was refused.
+    ///
+    /// The pin forces a known ADOPTED Terminal state first, so its failure on
+    /// the old tree cannot be an accident of whatever a parallel suite left
+    /// in the process global — and restores what it found, for the same
+    /// reason (batch 1's MINOR-3 class).
+    @Test func theTypographyIsAdoptedWhereTheSettingsLandNotWhereAViewNoticesThem() async throws {
+        try await withSession { session in
+            let restore = EditorTypography.current
+            let wasAdopted = EditorTypography.isAdopted
+            defer {
+                EditorTypography.current = restore
+                EditorTypography.isAdopted = wasAdopted
+            }
+            EditorTypography.adopt(
+                EditorTypography.resolve(voice: .terminal, inlineComments: false))
+            let terminalStamp = EditorTypography.fingerprint
+
+            try await session.runner.run { try $0.setThemeVoice(.study) }
+            let store = ThemeStore(session: session)
+            let task = Task { await store.start() }
+            defer { task.cancel() }
+
+            let deadline = Date().addingTimeInterval(5)
+            while Date() < deadline, store.settings.voice != .study {
+                try? await Task.sleep(for: .milliseconds(10))
+            }
+            #expect(store.settings.voice == .study, "the settings landed")
+
+            let study = EditorTypography.fingerprint
+            #expect(study != terminalStamp,
+                    "the landing adopted the voice: \(String(describing: study))")
+            #expect(EditorTypography.current
+                        == EditorTypography.resolve(voice: .study, inlineComments: false),
+                    "…and it is exactly the Study resolution, not merely a different one")
+        }
+    }
+
+    /// **The clobber MINOR-2 names, and the fix.** A geometry report arriving
+    /// before the voice is known used to stamp the SESSION record with the
+    /// compile-time default and, one settle later, write that guess over the
+    /// record she measured in her own voice. Now a report with no stamp is
+    /// dropped and the loaded record stands.
+    ///
+    /// The first half REPRODUCES the old mechanism with a wrong-but-present
+    /// stamp (green on both trees — it is the trace, not the pin); the second
+    /// half is the pin, and it could not exist on the old tree, where the
+    /// memory had no way to say "the voice is not known".
+    @Test func aReportBeforeTheVoiceIsKnownNeitherStampsNorClobbers() {
+        let suiteName = "surface-size-\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let study = "IowanOldStyle-Roman-16-8"
+        let terminal = ".AppleSystemUIFontMonospaced-Regular-14-7"
+        let hers = CGSize(width: 696, height: 20993)
+
+        func seedHerRecord() {
+            let seed = SurfaceSizeMemory(.outline, defaults: defaults, fingerprint: { study })
+            seed.remember("p1", hers)
+            seed.persist("p1")
+        }
+
+        // THE MECHANISM (the old behaviour, reproduced): a report stamped with
+        // a voice that is not hers replaces the loaded record, and the settle
+        // writes the guess over her measurement.
+        seedHerRecord()
+        let guessing = SurfaceSizeMemory(.outline, defaults: defaults, fingerprint: { terminal })
+        _ = guessing.size("p1")                       // loads her record
+        guessing.remember("p1", CGSize(width: 696, height: 40))
+        guessing.persist("p1")
+        #expect(SurfaceSizeMemory(.outline, defaults: defaults, fingerprint: { study })
+                    .size("p1") == nil,
+                "her Study record is gone — this is what MINOR-2 described")
+
+        // THE FIX: with no stamp to write, the report is dropped and her
+        // record survives the whole window.
+        defaults.removeObject(forKey: SurfaceSizeMemory.key(.outline, "p1"))
+        seedHerRecord()
+        let stamp = Stamp()
+        stamp.value = nil                              // the voice has not landed
+        let unknowing = SurfaceSizeMemory(
+            .outline, defaults: defaults, fingerprint: { stamp.value })
+        #expect(unknowing.size("p1") == nil, "no stamp to compare — no answer")
+        unknowing.remember("p1", CGSize(width: 696, height: 40))
+        unknowing.persist("p1")
+        stamp.value = study                            // the settings land
+        #expect(unknowing.size("p1") == hers,
+                "her record survived the window, in the very memory that saw the report")
+        #expect(SurfaceSizeMemory(.outline, defaults: defaults, fingerprint: { study })
+                    .size("p1") == hers,
+                "…and on disk")
+    }
+
+    // MARK: - 7. The ladder's NIT-3: one occasion, every per-note memory
+
+    /// **RED ON OLD.** The app's "this note's memories go" door
+    /// (`CommandRouter.forgetCurrentBlock`) now drops the surface records in
+    /// BOTH key spaces beside the current-block one. Before this it dropped
+    /// only the current block, so a note's `surfaceSize.*` keys outlived it.
+    @Test func theNotesEvictionDoorDropsEveryKeySpacesRecord() async throws {
+        try await withSession { session in
+            let postID = "walked-\(UUID().uuidString)"
+            defer { SurfaceSizeMemory.forgetPersisted(postID) }
+            let outline = SurfaceSizeMemory(.outline, fingerprint: { "t" })
+            let flow = SurfaceSizeMemory(.flow, fingerprint: { "t" })
+            outline.remember(postID, CGSize(width: 696, height: 20993))
+            outline.persist(postID)
+            flow.remember(postID, CGSize(width: 600, height: 20071))
+            flow.persist(postID)
+            #expect(UserDefaults.standard.string(
+                forKey: SurfaceSizeMemory.key(.outline, postID)) != nil)
+            #expect(UserDefaults.standard.string(
+                forKey: SurfaceSizeMemory.key(.flow, postID)) != nil)
+
+            session.commandRouter.forgetCurrentBlock(for: postID)
+
+            #expect(UserDefaults.standard.string(
+                forKey: SurfaceSizeMemory.key(.outline, postID)) == nil,
+                    "the Outline's record went with the note")
+            #expect(UserDefaults.standard.string(
+                forKey: SurfaceSizeMemory.key(.flow, postID)) == nil,
+                    "…and the flow's")
+        }
     }
 }
