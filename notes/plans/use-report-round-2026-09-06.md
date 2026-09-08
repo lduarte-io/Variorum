@@ -7414,10 +7414,26 @@ to end and re-ran. **Nothing here needs a fix pass; all four are recorded for th
 
 ### R-10 · RECORD (the implementer writes here from its first commit)
 
-**NOT DONE (the record's FIRST LINE — kept current; final at close).** *In progress — this line is
-rewritten at the close with the honest list.* Nothing outside 18d batch 1's one surface is touched:
-zero `Sources/VariorumCore/Sync/`, zero schema, no tray (batch 2), no room (batch 3), no memory
-(batch 4).
+**NOT DONE (the record's FIRST LINE, honest and final).** Three things, each named with its reason.
+**(a) The wide row's newlines chip does not show at the default sidebar width** — figure C's state 3
+puts *"Aa · newlines make blocks"* and its state word on one row; measured, that row needs ~215 pt in
+the Terminal voice's monospace and the box's interior is ~191 at her sidebar width, so `ViewThatFits`
+falls to the shipped fallback: `Aa` alone, with the newlines chip inside the popover it opens (where
+`formattingRow` already carries it). No door is lost and the flat bar's own folded tier does exactly
+this at exactly this kind of width; it appears again when the sidebar is dragged wider. Recorded rather
+than solved by inventing a shorter chip label. **(b) The door carries no ⏎** — QUESTIONS #99(a): a
+window-wide Return equivalent is checked before the responder chain and would steal Return from the
+masthead's title field, the `#` tag field and the Index column's filter. **(c) The Index's live state
+shows no bar** — QUESTIONS #99(b): the Index mounts no full-document editor by design (P-3), so there
+is no `CommitBar` to render; it shows the identity, the *"editing"* mark and the facts, which is
+strictly more than Index has ever shown.
+
+Nothing outside 18d batch 1's one surface is touched: zero `Sources/VariorumCore/Sync/`, zero schema,
+no tray (batch 2), no room (batch 3), no memory (batch 4). **One editor-seam touch to declare for the
+reviewer:** two lines in `EditorViewModel` — an assignment in `updateCaretContext` and its clear in
+`teardown` — publishing `EditorRouter.editing`. It changes no mount, no projection, no identity and no
+lifecycle; it sits beside the `editorRouter.active` assignment that has always lived there. The walk's
+first finding (below) is why it exists.
 
 **The batch:** ONE acceptance unit — the sidebar's note box (its three states, at the rail's height)
 and the retirement it pays for (the book's right gutter, the `.side` bar placement, the paged Book
@@ -7432,7 +7448,67 @@ mode's bar-in-the-page).
 | C | the box VIEW + the sidebar's slot + the fit math | **DONE** (`cb4c4669`) · the geometry oracle is PENDING |
 | D | the book publishes its subject; `RootView` composes; the facts model | **DONE** (`cb4c4669`) |
 | E | the retirement (the gutter · `.side` · the paged mode) + the click-out | **DONE** (`cb4c4669`) |
-| F | the walk, both voices, every state in every mode; captures | NOT STARTED |
+| F | the walk, both voices, every state in every mode; captures | **DONE** (`de5bf316` · `874cead6` · `b7ead2fa` — three findings fixed at the walk) |
+
+#### THE WALK — the dev-store Debug build, both voices, every state in every mode
+
+The acceptance gate, on `io.lduarte.Variorum.debug` (never `/Applications`; the instance check ran
+first and found none of hers). Captures in `notes/plans/use-report-2026-09-06-screens/18d-1/`
+(gitignored), each compared against figure C below. **It found three real things, all fixed inside the
+batch and all committed with their reasons.**
+
+**FINDING 1 — the bar was blank, and the cause is not mine (`de5bf316`).** State 3 rendered the grid
+but read *"block —"*, commit greyed, no counts. Traced with an attach-time stack trace on the running
+build rather than guessed: the Outline runs `InlineEditorSurface.makeNSView` **twice** for the focused
+note, ~60 ms apart, each with its own `EditorViewModel` (`…d215b700` then `…d0b61e00`); only the FIRST
+ever receives a projection or a selection change, and the SECOND takes `EditorRouter.active` and never
+leaves. `active` means "the last text view to attach", which in this surface is a projection-less
+shadow. **Fix:** the box asks a different question — `EditorRouter.editing`, published by the model
+that computes a CARET CONTEXT, which needs a live text view and a landed projection. Two lines in
+`EditorViewModel`, no lifecycle touched. **The shadow itself is PRE-EXISTING and is now a KnownIssues
+row** (owner 13u2's pane/mount-stability family) with what it still exposes written out — the quit,
+lock and adjacent-block doors read `active` too; nothing is known to be lost there (the quit door
+flushes per POST through `QuitFinalizeRegistry`, not per editor), but they are answering about the
+wrong object. Capture `03-FINDING-before-the-bar-came-from-the-caret.png` is the before.
+
+**FINDING 2 — a book opened into Index had a highlighted row and an empty box (`874cead6`).** The
+index's arrival seed calls `select(…, report: false)` deliberately: `indexAnchorPostID` is W21's CARRY
+("if you clicked over, where would you land"), which an arrival must not write. The box's question is a
+different one, so it got its own report (`BookViewModel.noteIndexSelection`) written by every
+`select`, and the carry's cadence is untouched.
+
+**FINDING 3 — the Terminal voice's two-line identity line pushed the footer past the box's floor
+(`874cead6`)**, and the door floated under the facts instead of sitting at the box's bottom. The door
+moved OUTSIDE the scroll (figure C's `margin-top: auto`, and it must never scroll out of reach), the
+grid cell went 26 → 24 (figure C's caption names this latitude) and two points of padding came out.
+Terminal at the 180-pt minimum then held everything (`12-terminal-narrow-sidebar-180.png`).
+
+**AND THE CLOSING SUITE FOUND A FOURTH (`b7ead2fa`)** — `outlineProseSitsOnWritesOwnMeasure` went red
+at **374 pt against Write's 680**. The click-out margins are HStack siblings of the prose column, and
+`.frame(maxWidth:)` only CAPS: three flexible children split the pane evenly. `.layoutPriority(1)`
+fixed it — **but only as the OUTERMOST modifier**; placed before `.padding(.vertical:)` it did nothing,
+which is recorded at the code because the next reader will place it the wrong way too. The pin that
+caught it is Act 10's, riding unmodified: exactly what it exists for.
+
+| Capture | What it shows | Against figure C |
+|---|---|---|
+| `01-study-outline-nothing-selected.png` | Outline, book open, nothing clicked | **state 1** — header in the accent, *"no note selected"* centred with its hint under it; the box at the rail's height |
+| `02-study-outline-live-note.png` | Outline, a note focused from the navigator | **state 3** — *"welcome · 1 of 33 · block 1/4"*, the `editing` mark, the six-cell grid, `Aa`, the footer *"49w block · 177w in note"* + `?` |
+| `03-FINDING-before-the-bar-came-from-the-caret.png` | the same, BEFORE finding 1's fix | the defect: *"block —"*, commit greyed, an empty footer |
+| `04-study-outline-clicked-out.png` | a click in the page's margin | **state 1** — her *"you've clicked out of something"*, made literal |
+| `05-study-index-selected-not-live.png` | Index, a note selected | **state 2** — title · *"welcome · 1 of 33 in this book"* · *"177 words · 4 blocks"* · *"edited Sep 8 · saved Sep 8"* · the door at the box's bottom |
+| `06-study-index-live-after-edit-here.png` | the door pressed | the block goes LIVE in the index (the ring is on it); the box keeps identity + facts and swaps the door for the `editing` mark — QUESTIONS #99(b) |
+| `07-study-book-spread-selected.png` | the paged Book mode, a page selected | **state 2**; and the page carries NO bar of its own |
+| `08-study-book-spread-live.png` | the door pressed there | **state 3** in the box; her *"it won't be at the bottom when you're in that book editing mode"*, delivered |
+| `09-study-narrow-sidebar-180.png` | the sidebar dragged to its 180-pt minimum | the box holds the rail's height and its content SCROLLS inside — the briefed rule, never a taller box |
+| `10-terminal-outline-live.png` | the Terminal voice, state 3, a chaptered book | the box wears the voice (mono, lowercased chrome, green accent, the ring-blue `editing`); everything fits after finding 3 |
+| `11-terminal-outline-clicked-out.png` | Terminal, the margin click | state 1 in the second voice |
+| `12-terminal-narrow-sidebar-180.png` | Terminal at the 180-pt minimum | the whole bar and the footer inside the rail's height |
+
+**What the walk did NOT reach:** the Read tab is not walked because the box is not shown there (the
+rule is pinned, `theBoxStandsInTheEditingModesOnly`), and a SPLIT with two books was not walked (the
+publication is gated on `paneFocused` and the box re-checks the focused pane's own selection; both are
+read-only guards, and the split's second book publishes nil by construction).
 
 #### THE PINS, AND THEIR RED (both probes run on the committed tree `ffef837d`, restored by `git checkout --`, `git diff --stat` empty after each)
 
@@ -7446,7 +7522,52 @@ mode's bar-in-the-page).
 | `NoteBoxStateTests` ×3 · `BookNoteBoxSubjectTests` ×5 · `NoteBoxHeightTests` ×2 · `NoteBoxCopyTests` ×5 | the brains (piece B) | new surface — stated in the file |
 | `NoteStampsTests` ×5 (core) | the facts line's one read (piece A) | the query did not exist |
 
-**Totals so far: 21 Mac tests / 6 suites green, 5 core tests / 1 suite green.**
+**Totals: 21 Mac tests / 6 suites of this batch's own, plus the moved gutter pin; 5 core tests / 1 suite.**
+
+#### THE ROWS, DISPOSITIONED
+
+| Row | What she asked for | Status |
+|---|---|---|
+| **23** (U-10) | *"the block menu should move to being where the 'this note…' menu is, measured to take up the same amount of room, and should show 'no note selected' when you haven't clicked into anything or you've clicked out of something"* | **FIXED** — the box, its three states, at the rail's measured height. Pins: `theBoxStandsAtTheRailsExactHeightInEveryStateAndBothVoices` (the oracle) · `aBookOpeningPutsTheBoxOnTheColumnSayingNoNoteSelected` (the whole road) · `theBookPublishesItsNoteAndTheIdentityTheNavigatorHolds` · `NoteBoxStateTests` (her sentence as a function) · the walk, both voices, every state in every mode |
+| **30** (U-17) | the paged Book mode's floating card; the right gutter retires ENTIRELY | **FIXED** — the gutter, the `.side` placement, `CommitBar(axis: .vertical)`, the unfocused rows' details line and the paged mode's in-page bar are all gone (dead code removed, not parked); the prose recentres on the full width. Pin: `theBooksEditingSurfacesMountNoBarOfTheirOwn`, red-on-old with `mounted["horizontal"] → 1` in BOTH modes and a real `rowFrame` in the page |
+
+Nothing was DISMISSED AS HOLLOW; nothing is DEFERRED out of this batch. Two PROVISIONALs go to her as
+**QUESTIONS #99** (the door's key · the Index's live state), and one PRE-EXISTING defect the walk
+uncovered is a **KnownIssues** row with an owner (13u2).
+
+#### WHAT RETIRED, NAMED
+
+`BookView.outlineGutterWidth` · `outlineGutterSpacing` · `outlineFocusedRowWidth` · `gutterDetails` ·
+the row's `meta` state · `EditorView.BarPlacement.side` · `CommitBar.Axis.vertical` (its `verticalBody`,
+`railPair` and the `bookSideRailCollapsed` preference) · `BookOutlineRows.gutterLine` (**moved**, with
+its pin, to `NoteBoxCopy.takesLine`). Every one of them existed to serve the right gutter; U-17 retires
+the gutter, so they go with it rather than sitting unreferenced.
+
+#### CLOSING RUNS (this tree)
+
+- **Mac, ONE run** (`-only-testing` × 48 suite types — this batch's six, the shell/sidebar chrome, the
+  book's nine, the bar, the routing and landing families, the two brains the diff touched, and the ten
+  `Tutorial*` spine types): **`Test run with 286 tests in 48 suites passed after 72.266 seconds`**,
+  zero issues, zero `skipped:` lines.
+- **Core** (`swift test` — the batch adds `Queries.noteStamps`): **`1503 tests in 163 suites passed`**
+  (1498 → 1503, the five new stamps pins).
+- **iOS** (core is touched): `xcodebuild -scheme VariorumMobile -destination 'generic/platform=iOS'
+  build` — **BUILD SUCCEEDED**. Zero `Shared/` changes; the phone's own suites untouched.
+
+#### WHAT THE LETTER'S CLOSEOUT INHERITS FROM THIS BATCH
+
+- **QUESTIONS #99** on the ratify list (both PROVISIONALs, each one line to change).
+- **A KnownIssues row** (the Outline's second `InlineEditorSurface`), owner 13u2, re-homeable to a 17
+  entry at her word — and worth her knowing because the quit and lock doors read the same `active`.
+- **AppSpec §12's book-mode paragraph** wants the delta this batch makes: the details gutter the Act 10
+  correction round put on the right ("Outline's open right earns its keep as a DETAILS GUTTER") is
+  RETIRED by U-17, and the note's controls live in the sidebar's box for every book editing mode. The
+  orchestrator applies the canon delta at the letter's close (this record is its source).
+- **Batch 3's `SideColumn` leading variant** will want the outline's click-out margins in mind: they are
+  HStack siblings of the prose column, and the column keeps its measure by `layoutPriority(1)` placed
+  OUTERMOST (the closing suite's own finding).
+- **Nothing owed to mobile:** the box is Mac chrome over a Mac editor; §5.4's own parity note says d and
+  e are Mac chrome, nothing owed by construction.
 
 #### Piece B — the brains, before any pixel
 
