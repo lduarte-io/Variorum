@@ -379,6 +379,77 @@ struct ShellChromeTests {
         }
     }
 
+    /// **The FOURTH seam** (18d's ladder round 2, MINOR-1): the pane row's
+    /// divider, converted to the shared `SeamGrip` because it was the last
+    /// copy of row 9's shape — a 9-pt `.overlay` with `NSCursor.push()` and
+    /// no `zIndex`, in a row where `paneHost` is drawn after it and takes
+    /// the grip's right half, over a live editor's I-beam.
+    ///
+    /// The claims are the shell seam's above, verbatim, over the pane row's
+    /// own space. RED on the pre-fix shape (measured by behavioural revert:
+    /// the 9-pt overlay, instrumented so it reported its own frame, gave
+    /// `grip.width → 9.0` and did not reach past the line into the pane).
+    @Test func thePaneSeamsGripIsWideCentredAndReachesIntoBothPanes() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            // Live ids: the seam oracle is keyed by the subject, and suites
+            // run in parallel (round 2's MINOR-2).
+            $0.uuid = UUIDGenerator { UUID() }
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 91))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let left = try session.operations.createPost(title: "Left", profile: nil)
+            let right = try session.operations.createPost(title: "Right", profile: nil)
+            _ = try session.operations.newBlock(in: left.id, text: "left text")
+            _ = try session.operations.newBlock(in: right.id, text: "right text")
+            let router = ShellRouter()
+            #if DEBUG
+            SeamGeometry.reset()
+            #endif
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 1200, height: 760),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer { window.orderOut(nil); window.close() }
+            let hosting = NSHostingView(
+                rootView: RootView(session: session, services: nil, router: router))
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            for _ in 0..<300 where router.workspace.history().current != .shelf {
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(5))
+            }
+            router.pendingSelection = .post(left.id)
+            for _ in 0..<300 where session.commandRouter.activePostID != left.id {
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(5))
+            }
+            router.openBeside(.post(right.id))
+            let seam = SeamGeometry.key(RootView.paneSeamFamily, subject: "0")
+            #if DEBUG
+            for _ in 0..<300 where SeamGeometry.gripFrames[seam] == nil {
+                hosting.layoutSubtreeIfNeeded()
+                window.displayIfNeeded()
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(10))
+            }
+            #expect(router.workspace.panes.count == 2, "the split is really on screen")
+            let grip = try #require(SeamGeometry.gripFrames[seam],
+                                    "the pane seam's grip publishes a frame of its own")
+            let line = try #require(SeamGeometry.lineFrames[seam])
+            #expect(grip.width >= SeamGrip.width - 0.5,
+                    "a reachable target, not the old 9: \(grip.width)")
+            #expect(abs(grip.midX - line.midX) <= 0.5,
+                    "centred on the seam: \(grip.midX) vs \(line.midX)")
+            #expect(grip.minX < line.minX - 4 && grip.maxX > line.maxX + 4,
+                    "…and it reaches into BOTH panes: \(grip) vs \(line)")
+            #expect(grip.height >= 100, "it runs the seam, not a handle")
+            #endif
+        }
+    }
+
     @Test func theSidebarWidthIsClampedToAUsableColumn() {
         #expect(ShellSplit<EmptyView, EmptyView>.clamped(10) == 180)
         #expect(ShellSplit<EmptyView, EmptyView>.clamped(210) == 210)

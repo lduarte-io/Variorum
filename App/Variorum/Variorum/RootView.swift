@@ -608,7 +608,13 @@ struct RootView: View {
                     fractions: router.workspace.splitFractions)
                 ForEach(Array(panes.enumerated()), id: \.element) { index, pane in
                     if index > 0 {
+                        // Row 9's part the HOST owns (18d ladder round 2,
+                        // MINOR-1): `paneHost` is the divider's later HStack
+                        // sibling and so hit-tests above it, which is why
+                        // the grip's right half was dead over a live
+                        // editor's I-beam — her sentence verbatim.
                         paneDivider(index: index - 1, rowWidth: geo.size.width, tokens: tokens)
+                            .zIndex(1)
                     }
                     paneHost(pane, split: panes.count > 1, tokens: tokens)
                         .frame(width: panes.count > 1 ? widths[index] : nil)
@@ -623,31 +629,48 @@ struct RootView: View {
     private static let dividerWidth: CGFloat = 1
     private static let paneRowSpace = "variorum-pane-row"
 
-    /// The draggable seam. Its arithmetic is `PaneLayout`'s (clamped so a
-    /// drag can never swallow a pane); the drag itself is AppKit's and is
-    /// on the visual-verification list.
+    /// The draggable seam — **the shared one** (`SeamGrip`, `Core/Views`).
+    /// Its arithmetic is `PaneLayout`'s (clamped so a drag can never swallow
+    /// a pane); the seam's shape is row 9's, which the shell got at 17o
+    /// batch d and `SideColumn`'s three boundaries at 18d's ladder.
+    ///
+    /// **The FOURTH seam, converted at round 2's MINOR-1.** It was the last
+    /// copy of the old shape: a 9-pt `.overlay` with `NSCursor.push()` on
+    /// `.onHover` and no `zIndex`, in the row where `paneHost` is drawn
+    /// after it and takes the grip's right half — over a live editor, so the
+    /// pointer she got there was the I-beam. **Layout-neutral:**
+    /// `SeamGrip`'s own frame is `SeamGrip.lineWidth`, the same 1 pt this
+    /// row's width math already subtracts (`Self.dividerWidth`, above).
+    /// Batch 3's record left this with two candidate owners and no row; the
+    /// ladder's rule is that a known defect with no owner gets fixed now.
     private func paneDivider(index: Int, rowWidth: CGFloat, tokens: VoiceTokens) -> some View {
-        Rectangle()
-            .fill(tokens.line)
-            .frame(width: Self.dividerWidth)
-            .overlay {
-                Rectangle()
-                    .fill(Color.clear)
-                    .frame(width: 9)
-                    .contentShape(Rectangle())
-                    .gesture(
-                        DragGesture(coordinateSpace: .named(Self.paneRowSpace))
-                            .onChanged { value in
-                                guard rowWidth > 0 else { return }
-                                router.workspace.setSplitFraction(
-                                    at: index, to: value.location.x / rowWidth)
-                            })
-                    .onHover { inside in
-                        if inside { NSCursor.resizeLeftRight.push() } else { NSCursor.pop() }
-                    }
-            }
-            .help("Drag to resize the panes")
+        SeamGrip(
+            tokens: tokens,
+            space: Self.paneRowSpace,
+            onDrag: { location in
+                guard rowWidth > 0 else { return }
+                router.workspace.setSplitFraction(at: index, to: location.x / rowWidth)
+            },
+            help: "Drag to resize the panes",
+            frameSpace: .named(Self.paneRowSpace),
+            onLineFrame: { frame in
+                #if DEBUG
+                SeamGeometry.lineFrames[
+                    SeamGeometry.key(Self.paneSeamFamily, subject: "\(index)")] = frame
+                #endif
+            },
+            onGripFrame: { frame in
+                #if DEBUG
+                SeamGeometry.gripFrames[
+                    SeamGeometry.key(Self.paneSeamFamily, subject: "\(index)")] = frame
+                #endif
+            })
     }
+
+    /// The pane seam's family in the shared oracle; its SUBJECT is the seam's
+    /// index in the row (a window has at most one split, and the pins mount
+    /// their own window).
+    static let paneSeamFamily = "paneDivider"
 
     private func paneHost(_ pane: PaneID, split: Bool, tokens: VoiceTokens) -> some View {
         // THE MOUNT RULE, consulted as the one fork (13f batch 4, gate (b);
