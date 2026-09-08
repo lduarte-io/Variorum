@@ -64,11 +64,32 @@ nonisolated enum SidebarLayout {
     /// compute from the constants rather than a copied 41).
     static let fixedChromeHeight: CGFloat = chromeHeight(headedGroups: 3)
 
+    // MARK: - The column's grammar (the mockup's `.sb-group` / `.sb-row`)
+    //
+    // **They live HERE since the 18d ladder's MINOR-7.** They were private
+    // to `SidebarView`; batch 1 un-private'd two of them so the note box —
+    // which lives in `Core/Views/`, the shared-chrome home — could land its
+    // contents on the column's one left edge. That inverts the placement
+    // rule's direction: components move UP into the shared home, and the
+    // shared home must never reach DOWN into a feature for numbers (a
+    // Library edit could then move a shared component silently). This
+    // layout brain is where the fit math already lives and what the box
+    // already reads (`groupHeaderHeight`, `railGroupHeight`), so the three
+    // numbers move here and both readers ask the same place.
+
+    /// The mockup's `.sb-group`: 12 pt of side padding around its rows.
+    static let groupPadding: CGFloat = 12
+    /// The mockup's `.sb-row`: 8 pt of side padding inside the row.
+    static let rowPadding: CGFloat = 8
+    /// Row 13 (17o batch d): the air between a group header's words and the
+    /// first row's wash under them.
+    static let headerAir: CGFloat = 6
+
     static let topPadding: CGFloat = 14
     /// 17o batch d (ledger row 13): the header ROW's pitch. It was 22 with
     /// the words bottom-aligned and nothing under them, which is how the
     /// header came to touch the first row's wash; it is the column's own
-    /// generous pitch now, with `SidebarView.headerAir` below the words.
+    /// generous pitch now, with `headerAir` below the words.
     /// **The fit math reads THIS**, so the header's height and the height
     /// the column budgets for it can never drift apart — the drift would be
     /// silent (a column that fails to compress when it should).

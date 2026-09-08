@@ -325,13 +325,13 @@ struct SidebarView: View {
 
     // MARK: - The grammar (the mockup's `.sb-group` / `.sb-head` / `.sb-row` / `.sb-sep`)
 
-    /// The mockup's `.sb-group`: 12 pt of side padding around its rows.
-    /// Not private since 18d batch 1 (the note box's group uses it).
-    static let groupPadding: CGFloat = 12
-    /// The mockup's `.sb-row`: 8 pt of side padding inside the row.
-    /// Not private since 18d batch 1: the note box reads it so its contents
-    /// land on the column's ONE left edge (`SidebarNoteBox.inset`).
-    static let rowPadding: CGFloat = 8
+    // (The three grammar numbers — `groupPadding`, `rowPadding` and
+    //  `headerAir` — moved to `SidebarLayout` at the 18d ladder's MINOR-7,
+    //  where the fit math already lives, so the note box in `Core/Views/`
+    //  reads the layout BRAIN rather than this feature's view. These are
+    //  private aliases: this file's own call sites keep reading two words.)
+    private static var groupPadding: CGFloat { SidebarLayout.groupPadding }
+    private static var rowPadding: CGFloat { SidebarLayout.rowPadding }
 
     /// Row 13 (17o batch d): the header ROW's pitch, and the air between the
     /// words and the first row's wash. Her punchlist 3 and its follow-up:
@@ -341,7 +341,7 @@ struct SidebarView: View {
     /// ONE truth with the fit math: the column budgets `groupHeaderHeight`
     /// for each headed group, so the header draws exactly that.
     private static var headerHeight: CGFloat { SidebarLayout.groupHeaderHeight }
-    static let headerAir: CGFloat = 6
+    private static var headerAir: CGFloat { SidebarLayout.headerAir }
 
     /// A group header — small, in the accent (the voice's own header
     /// register, kept from the List), sitting on the rows' text edge.

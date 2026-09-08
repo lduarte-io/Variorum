@@ -55,7 +55,11 @@ struct SidebarNoteBox: View {
     /// (`groupPadding` + 1 pt of border + this = `rowPadding`'s inset). Her
     /// punchlist 3's *"the items in that pane should all be aligned"*,
     /// applied to a bordered box.
-    static let inset: CGFloat = SidebarView.rowPadding - 1
+    ///
+    /// The numbers come from `SidebarLayout` — the column's layout BRAIN,
+    /// not the column's view (the 18d ladder's MINOR-7: the shared-chrome
+    /// home never reaches down into a feature).
+    static let inset: CGFloat = SidebarLayout.rowPadding - 1
     private static let corner: CGFloat = 8
 
     var body: some View {
@@ -134,7 +138,7 @@ struct SidebarNoteBox: View {
                 SidebarGeometry.noteBoxHeaderFrame = $0
             }
 #endif
-            .padding(.bottom, SidebarView.headerAir)
+            .padding(.bottom, SidebarLayout.headerAir)
             .frame(height: SidebarLayout.groupHeaderHeight, alignment: .bottomLeading)
     }
 
