@@ -4833,10 +4833,26 @@ nothing can be typed), and every other road was caret placement and mode switche
 
 **LIVE STATUS — 17o batch c (opus-implementer, opened 2026-09-08 at `e6441686`).**
 
-**WHAT I DID NOT DO (the record's first line, per rule 9).** IN PROGRESS — this line is rewritten at the
-close. So far: zero `Sources/` (core), zero `Sync/`, zero schema, zero `App/Variorum/Shared/`, no
-`PaneTextAuthority` code, no `BlockRangeIndex`, no `BlockDecor` change (read as the reference only), no
-restyle beyond the four rows.
+**WHAT I DID NOT DO (the record's first line, per rule 9).** Nothing in the batch is left open: rows
+6 · 14 · 15 · 16 are all FIXED with red-on-old evidence, walked on the dev-store Debug build and
+captured. What I deliberately did NOT touch, proven by `git diff --stat e6441686..HEAD`: `Sources/`
+(core — EMPTY diff), `App/Variorum/Shared/` (EMPTY diff), `Sync/`, schema, `PaneTextAuthority`'s code,
+`BlockRangeIndex`, `BlockDecor` (read as the reference behaviour only), the batch-b landing API
+(`PaneCaretLanding` · `clickBroughtPlace` · `onClickPlace` — the indicator rides the appearance road
+BESIDE it; `PaneSurfaceTests` · `CurrentBlockContinuityTests` · `LandingOffsetTests` all ride
+unmodified and green), and the phone. **No `PaneTextAuthority` semantics change** — so the batch stays
+with the c/d/e `opus-reviewer` as the brief's default; nothing here re-routes it to Fable.
+
+**THREE THINGS I FOUND AND DID NOT FIX, recorded for their owners rather than folded in.**
+**(a)** The **Study voice's `.background` wash reads very faintly** against Study's own paper (capture
+13): it is the SAME `tokens.wash` Write puts behind the caret block, so the pane is consistent with the
+editor by construction and changing it would be a token decision, not a defect fix — a taste note for her
+walk, and 13u2's restyle territory if she wants it stronger. **(b)** The brief's own proposed remedy for
+row 16 (`ensureLayout` after a shrinking edit) is **already what the shipped code did** and does not fix
+the row — recorded in full above so no future session repeats the guess. **(c)** In the walk, ⌘A inside
+a live take pane did not select the pane's text (the selection never appeared; a shift-⌘-↓ extension from
+a click did work) — outside this batch's four rows and its one surface, unpinned, recorded here for
+whoever owns the pane's key handling.
 
 - **Orientation — DONE.** Read in my own context, in the brief's order: `CLAUDE.md` and the canon it
   auto-loads (CoreDescription · OverallModel — §4's I10 and §5's P1–P3 · AppSpec — §12's takes
@@ -4861,8 +4877,8 @@ restyle beyond the four rows.
 1. row 16 — the pane's stale height after a big deletion — **DONE (`3c6bcbb6`)**
 2. row 6 — the ring follows the indicator setting, everywhere, through the ONE component — **DONE (`d6ab4b40`)**
 3. row 14 — the chosen bar runs the card's full height — **DONE (`97fe2dfa`)**
-4. row 15 — "＋ new block" in the EMPTY state of Takes and Lenses — **DONE (this commit)**
-5. the walk (both voices, the setting cycled) + captures + the closing suites — **NOT STARTED**
+4. row 15 — "＋ new block" in the EMPTY state of Takes and Lenses — **DONE (`76e4722c`)**
+5. the walk (both voices, the setting cycled) + captures + the closing suites — **DONE (this commit)**
 
 ---
 
@@ -5083,3 +5099,104 @@ discarded the row-6 work in them because it was not yet committed — `PaneSurfa
 were re-made from the same scripts and the grep audit + suites re-run), but the rule is exactly right:
 **a revert probe must be run on a COMMITTED tree, or in a scratch worktree.** Row 16's probe was safe
 because its file was committed first; row 6's was not.
+
+---
+
+#### THE WALK — the dev-store Debug build, both voices, the setting cycled
+
+`io.lduarte.Variorum.debug` from
+`…/DerivedData/Variorum-dnpxwqhpxdqrdjbunktnzoahckpd/Build/Products/Debug/Variorum.app` (never
+`/Applications`), pid 44527, launched and quit by me; `pgrep -fl 'Variorum.app/Contents/MacOS'` showed
+ZERO instances before and after — her real-store app was never running and was never touched. Driven with
+`cliclick` + `Tools/WalkKit/`, using the AX road for the Settings pop-up after coordinate clicks proved
+unreliable (a pop-up menu opens with its CHECKED item under the cursor, so the item positions move with
+the current value).
+
+**Seventeen captures**, `notes/plans/use-report-2026-09-06-screens/17o-c/`:
+
+| # | file | what it shows |
+|---|---|---|
+| 01 | `01-row15-takes-empty-state-new-block-door.png` | a blockless note in Takes: *"nothing here yet — make the first block here, or start writing."* with the dashed **＋ new block** door above "start writing (write mode)" |
+| 02 | `02-row15-first-block-minted-ring-and-typing.png` | the door pressed: block 1/1 minted, the caret in it, **typed straight in** — "A first block made right here in Takes." |
+| 03 | `03-row6-takes-off-hairline-terminal.png` | Terminal · `.off` — a live 30-line take pane with **no ring and no wash** (the cursor is enough) |
+| 04 | `04-row6-takes-outline-ring-terminal.png` | Terminal · `.outline` — R22's ring, unchanged |
+| 05 | `05-row6-takes-background-wash-terminal.png` | Terminal · `.background` — the wash inside the pane's frame, **no ring** |
+| 06 | `06-row16-pane-shrinks-after-big-deletion.png` | 25 of 30 lines selected and deleted in the live pane: the pane stands five lines tall with the "＋ new block" door immediately under it — **no empty gap, no mode switch** |
+| 07 | `07-row14-chosen-bar-mid-long-card.png` | the stack style, a fanned block, scrolled into the middle of the long CHOSEN card: the green bar runs unbroken down the whole visible height |
+| 08 | `08-row14-chosen-bar-reaches-the-card-bottom.png` | the same card's bottom edge: **the bar reaches it**, and the un-chosen card below carries none |
+| 09–12 | `09-row6-lenses-…` · `10-row6-compare-…` · `11-row6-canvas-…` · `12-row6-read-edit-pane-…` | `.background` reaching **Lenses · Compare · Canvas · Read's edit pane**, one live pane each, no per-host ring |
+| 13–15 | `13-row6-takes-background-wash-study.png` · `14-row6-takes-outline-ring-study.png` · `15-row6-takes-off-hairline-study.png` | the **Study voice**, all three states — the sepia ring under `.outline`, the paper wash under `.background`, nothing under `.off` |
+| 16 | `16-row6-blocks-workbench-background-wash.png` | the Blocks workbench's context panel — the third host-drawn ring, now the resting line with the pane's own wash |
+| 17 | `17-row15-lenses-empty-state-new-block-door.png` | **Lenses' empty state** carrying the identical door — one face, both boards |
+
+**The setting change lands LIVE on every mounted pane** — no remount, no mode switch: the ring appeared
+on the take pane behind the still-open Settings window the instant the picker changed. That is the
+`@Observable` `ThemeStore` doing for panes what it already did for Write.
+
+---
+
+#### THE ROWS, DISPOSITIONED
+
+| # | Her words (short) | Disposition |
+|---|---|---|
+| **6** | *"the take mode always shows a ring… it doesn't follow the preference"* (U-7 · U-19 (5)) | **FIXED** — pins: `PaneSurfaceTests.theLivePanesDecorationFollowsTheIndicatorPreference` (red-on-old **3 issues** by behavioral revert) · `…aHostsOwnFrameConsumesTheSameRule` · `…aPaneWithNoPushKeepsTheShippedRing` · `…theIndicatorNeverMovesThePanesHeight`. **R22's reason recorded above and PRESERVED** — the ring stays what `.outline` draws and stays the default; only the override of her preference is gone. Walked: captures 03–05, 09–16 |
+| **14** | *"the chosen green line doesn't go all the way down"* (image 6) | **FIXED** — geometry oracle `TakeCardGeometry`; pin `TakesCardHeightTests.theChosenBarRunsTheWholeCardOnTheRealStackBoard`, measured **card 1246.0 · bar 1220.5** on the pre-fix layout and **1246.0 / 1246.0** after; the synthetic arm `…theChosenBarRunsTheWholeHeightOfALongCard` is green on both sides and says so in its own doc. Walked: captures 07–08 |
+| **15** | *"you should be able to make a first block there"* (image 3) | **FIXED** — pins: `TakesEmptyStateTests.theTakesBoardOffersAFirstBlockOnAnEmptyNote` · `…theLensesBoardOffersAFirstBlockOnAnEmptyNote` (red-on-old **2 issues**, both boards recording `[write]` alone) · `…bothBoardsRenderTheOneDoorList` · `…theDoorMintsTheFirstBlockAndItsPaneTakesTheRing`. Walked: captures 01–02, 17 |
+| **16** | *"delete a lot of text from a take… empty gap… until you switch modes"* | **FIXED** — pin `TakePaneMeasureTests.aPaneThatLosesMostOfItsTextShrinksWithinOneTurn`, red-on-old **2 issues** (`short → 1201.0` where five lines were owed; the regrow arm too); the mechanism is `usageBoundsForTextContainer`'s high-water mark, and the brief's proposed remedy was measured NOT to work. Walked: capture 06 |
+
+**Nothing DISMISSED AS HOLLOW; nothing DEFERRED.**
+
+#### CLOSING RUNS (this tree)
+
+- **Mac, ONE `xcodebuild test`** over every suite this batch touched or leans on — the pane family
+  (`PaneSurfaceTests` · `TakePaneMeasureTests` · `TakePaneDurabilityTests` · `TakesCardHeightTests` ·
+  `TakesEmptyStateTests` · `PaneTextAuthorityTests` · `PanePublishDoorTests`), the boards
+  (`TakesBoardTests` · `TakesBoardSoakTests` · `TakesArticleRenderTests` · `TakesPresentationTests` ·
+  `TakesRoomTests` · `LensesReorderTests` · `CompareCompositionTests` · `CompareViewModelTests` ·
+  `CanvasArrivalTests` · `WriteTakesPanelTests` · `TakesBufferConvergenceTests` · `TakesDivideTests` ·
+  `FannedDefaultsBoardTests` · `TakesLandingTests`), the other pane hosts (`BookIndexEditingTests` ·
+  `BlocksWorkbenchFaceTests` · `BlockTOCTests` · `ReadModeTests`), the batch-b landing pins that must
+  ride unmodified (`CurrentBlockContinuityTests` · `LandingOffsetTests`) and the ten `Tutorial*` spine
+  types → **`✔ Test run with 265 tests in 37 suites passed after 98.438 seconds.`** — thirty-seven
+  suites for thirty-seven `-only-testing` type names, nothing silently dropped; ZERO `skipped` lines in
+  the log (`scratchpad/closing.log`).
+- **Core: UNTOUCHED** — `git diff --stat e6441686..HEAD -- Sources/` is empty, so `swift test` was not
+  re-run (the round's baseline stands: 1493/162 at 18c batch 3). Zero `Sync/`, zero schema, zero
+  migrations.
+- **`App/Variorum/Shared/`: UNTOUCHED** (empty diff) — the phone inherits nothing by construction.
+
+#### WHAT THE LETTER'S CLOSEOUT INHERITS FROM THIS BATCH
+
+- **A canon delta IS owed, and it is small.** AppSpec §12's Phase 13 surfaces paragraph records the
+  editing indicator as *"the editing indicator a setting (off/outline/background — R14/R22)"* inside the
+  **editor language** list, where it reads as Write's alone. Her U-7 + U-19 (5) make it govern **every
+  live pane**, which is a widening of a shipped ruling's reach, not a new behaviour — one clause, the
+  orchestrator's to place. **Nothing else moves:** no schema (the setting is the shipped
+  `EditingIndicatorStyle` on the synced `setting` row), no operation, no invariant.
+- **No new QUESTIONS entry.** Nothing here needed a decision the spec and §1 do not make. The one place
+  I could have invented — what `.off` and `.background` MEAN on a pane — is answered by `BlockDecor`'s
+  shipped three-way rule, which I copied rather than re-designed.
+- **Two judgment calls for the orchestrator's J-list.** **(1)** The indicator rides an explicit
+  parameter beside `tokens` (the brief's *"the tokens already ride that road — follow them exactly"*)
+  rather than a SwiftUI environment value. The parameter is greppable and all ten sites are audited;
+  the environment road would have needed no per-host line at all. Both fail SAFE to `.outline` (the
+  shipped ring) where the push does not reach, so the choice is about drift risk, not behaviour — and
+  the fallback lives in ONE place (`ThemeStore.editingIndicator(of:)`) precisely so it cannot drift.
+  **(2)** Row 16's fix moves the app's ONE measurement brain — the widest blast radius in the batch —
+  so it is fenced by measurement rather than by argument: eight steady-state shapes measured identical,
+  the empty document explicitly falling back to the old property, and the cost measured at both ends.
+- **Mobile parity (for the round's ONE line):** the phone owes a version of **"the live pane's mark
+  follows the editing-indicator preference"** — its take surfaces read the same synced
+  `editingIndicator` setting and should honour off / outline / background the way the Mac's panes now
+  do. Nothing here is `Shared/`, so the phone inherits nothing by construction. Rows 14 · 15 · 16 are
+  Mac-surface-specific (the card frame, the boards' empty states, TK2 on macOS 26) — the phone should be
+  CHECKED for row 16's class (whether iOS's `usageBoundsForTextContainer` ratchets the same way) rather
+  than assumed clean.
+- **13u coordination:** this batch built **13u2 item 1's member row 16** and hands that phase the
+  measured fact above — the high-water mark is a CLASS, and anything in the app sizing from
+  `usageBoundsForTextContainer` inherits it. The full-document EDITOR is the other surface kind and was
+  deliberately NOT examined (out of this batch's one surface); 13u2's pane-stability trace should start
+  there. Row 32 stays 13u2's. Nothing else in the 13u fence was touched.
+
+**Batch c CLOSED at this commit. Everything is committed and pushed; no revert is in flight; the tree is
+clean.**
