@@ -164,7 +164,8 @@ struct ReadModeView: View {
                     onJump: onJump)
                     .onGeometryChange(for: CGSize.self) { $0.size } action: { size in
                         #if DEBUG
-                        ReadModeOracle.indexColumnFrame = CGRect(origin: .zero, size: size)
+                        ReadModeOracle.indexColumnFrames[postID] =
+                            CGRect(origin: .zero, size: size)
                         #endif
                     }
             }
@@ -387,8 +388,9 @@ enum ReadModeOracle {
     static var firstEditRowPaintedAt: Date?
     /// 18d batch 3 (her U-13): what the CONTENTS COLUMN actually drew. "It
     /// is the width she left it at" is a claim about a rectangle, so the pin
-    /// reads the rectangle, never `NoteIndexColumn.width`.
-    static var indexColumnFrame: CGRect?
+    /// reads the rectangle, never `NoteIndexColumn.width`. Keyed by the
+    /// NOTE's id: suites run in parallel, so a pin must read its own note's.
+    static var indexColumnFrames: [String: CGRect] = [:]
 
     static func reset() {
         face = nil
@@ -399,7 +401,7 @@ enum ReadModeOracle {
         editBlockFrames = [:]
         pageTurns = 0
         firstEditRowPaintedAt = nil
-        indexColumnFrame = nil
+        indexColumnFrames = [:]
     }
 }
 #endif

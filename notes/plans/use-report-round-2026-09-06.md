@@ -7915,7 +7915,8 @@ two consumers (the book navigator; the note Read tab's contents column). Rows 22
 | A | the width brain's LEADING mirror + `SideColumn`'s `edge`/`maximum`; the pure pins | **DONE** (`b72d23f9`) |
 | B | the book navigator becomes the leading column (remembered width; the row pitch) | **DONE** (`6350758e`) · red-on-old MEASURED |
 | C | the note Read contents column becomes it (remembered width) | **DONE** (`d0817ec1`) · red-on-old MEASURED |
-| D | the walk on the dev-store Debug build, both voices; captures | NOT-STARTED |
+| C2 | the book's OTHER chapter panel — Index's column — becomes it (the walk's finding) | **DONE** (this commit) |
+| D | the walk on the dev-store Debug build, both voices; captures | IN-PROGRESS (captures 01–05 taken) |
 
 **Piece A, what landed.** `SideColumnLayout` gained `draggedWidthFromLeading` — the mirror, in the ONE
 width brain, so R1-7's past-the-edge floor could not be re-derived (or forgotten) at a call site — and
@@ -7980,6 +7981,29 @@ and the numbers ARE her complaint:
 - **What passed on BOTH sides, deliberately and by design:** each pin's *"nothing remembered"* arm — the
   navigator opens at 190 and Read's column at 340 whatever else changed. That is the no-change
   guarantee, not a hollow claim: the day she updates, nothing moves until she drags.
+
+**PIECE C2 — a THIRD consumer, found at the walk, and why it is inside this unit.** The brief's
+acceptance gate says *"drag the book navigator wider and narrower in Outline and Index"* — but by wave
+2c's own rule the navigator STEPS ASIDE in Index (*"the index column IS the outline pane grown up"*), so
+there is nothing of the navigator to drag there. What stands in its place is `BookIndexView`'s own
+chapter panel, a fixed `.frame(width: 300)` — and capture `05` shows it truncating the very same chapter
+names hers did (*"The Adventure of the Engineer's T…"*, *"The Adventure of the Noble Bachel…"*). U-13's
+words are about *"the panel with the chapter names"*, the book has that panel in two places, and leaving
+one draggable and its twin a slab makes one tab row behave two ways. So it became the same leading
+column: **its own** key (`bookIndexColumnWidth`), its own ideal 300 (unchanged on open), 240 … 460 — a
+separate memory because it is a different panel (a filter field and a per-row count live in it) and
+dragging one must never move the other. No new mechanism, no new question, no change to what it lists.
+**Pin:** `theIndexsChapterPanelIsTheWidthSheLeftItAtAndKeepsItsOwnMemory`.
+
+**A test-side defect this batch found and fixed in its own pins (worth the reviewer's eye).** The three
+DEBUG geometry oracles were single statics, and **Swift Testing runs SUITES in parallel** — a book
+mounted by `BookIndexEditingTests` landed in the same static as mine (measured: four chapter rows in a
+two-chapter book; a 700-pt-tall frame reported for a book mounted in an 800-pt window). Keying them by
+the book's / note's id was not enough on its own, because `.incrementing` hands EVERY suite the same id
+sequence, so two books share `…0001`. Both halves are fixed: the oracles are dictionaries keyed by id,
+and this suite's two harnesses take the LIVE uuid generator (`UUIDGenerator { UUID() }`) — these pins
+assert about rectangles, never about a particular id, so nothing here wanted determinism; uniqueness is
+what they needed. Recorded because the same trap is waiting for the next mounted-geometry pin.
 
 **Piece A's pins** (`App/Variorum/VariorumTests/OutlineRoomTests.swift`):
 `theLeadingDragMirrorsTheTrailingOneAboutTheColumn` (the relation, over a stride of pointer positions

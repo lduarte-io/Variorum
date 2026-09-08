@@ -707,7 +707,8 @@ struct BookView: View {
             .background(tokens.room)
             .onGeometryChange(for: CGSize.self) { $0.size } action: { size in
                 #if DEBUG
-                BookOutlineGeometry.navigatorFrame = CGRect(origin: .zero, size: size)
+                BookOutlineGeometry.navigatorFrames[readingID] =
+                    CGRect(origin: .zero, size: size)
                 #endif
             }
             .coordinateSpace(name: BookNavigatorLayout.space)
@@ -1690,12 +1691,17 @@ enum BookOutlineGeometry {
     /// navigator's own named space. "The chapters have room" and "the
     /// column is the width she dragged" are claims about rectangles, so
     /// the pins read rectangles rather than the constants below.
-    static var navigatorFrame: CGRect?
+    /// Keyed by the BOOK's id, and the rows by their own: Swift Testing runs
+    /// SUITES in parallel, so a second book mounted in another suite lands in
+    /// the same statics — a pin that reads "the navigator" rather than "MY
+    /// navigator" is flaky by construction (measured: 4 chapter rows in a
+    /// two-chapter book, and a frame from someone else's mount).
+    static var navigatorFrames: [String: CGRect] = [:]
     static var navigatorChapterRows: [String: CGRect] = [:]
     static var navigatorNoteRows: [String: CGRect] = [:]
 
     static func resetNavigator() {
-        navigatorFrame = nil
+        navigatorFrames = [:]
         navigatorChapterRows = [:]
         navigatorNoteRows = [:]
     }

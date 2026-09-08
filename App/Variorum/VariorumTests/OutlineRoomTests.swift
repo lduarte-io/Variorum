@@ -113,22 +113,44 @@ struct OutlineRoomTests {
 
     /// A chaptered book, mounted: two chapters, two notes each (so no
     /// chapter row collapses into its one note — row 8's rule).
+    /// What the harness hands its body: the book, its models, and the ids
+    /// of ITS rows — every pin reads its own rows out of the shared oracle,
+    /// because Swift Testing runs suites in PARALLEL and a second book
+    /// mounted elsewhere lands in the same statics.
+    private struct Chaptered {
+        var session: AppSession
+        var readingID: String
+        var model: BookViewModel
+        var structure: BookStructureModel
+        var sectionIDs: [String]
+        var postIDs: [String]
+    }
+
     private func withChapteredBook<T>(
-        _ body: @MainActor (AppSession, String, BookViewModel, BookStructureModel) async throws -> T
+        _ body: @MainActor (Chaptered) async throws -> T
     ) async throws -> T {
         let db = try AppDatabase.inMemory()
         return try await withDependencies {
             $0.database = db
-            $0.uuid = .incrementing
+            // The LIVE uuid generator, deliberately: `.incrementing` hands
+            // every suite the same id sequence, so two books mounted in
+            // parallel suites share `…0001` and land on each other's key in
+            // the DEBUG oracle (measured — a 700-pt-tall frame arriving for
+            // a book mounted in an 800-pt window). These pins assert about
+            // rectangles, never about a particular id, so nothing here wants
+            // determinism; uniqueness is what they need.
+            $0.uuid = UUIDGenerator { UUID() }
             $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
             $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 22))
         } operation: { @MainActor in
             let session = AppSession(database: db)
             let reading = try session.operations.createReading(name: "the room", kind: .curated)
             var entries: [Queries.ReadingEntry] = []
+            var sectionIDs: [String] = []
             for c in 0..<2 {
                 let section = try session.operations.createSection(
                     in: reading.id, name: "chapter \(c)")
+                sectionIDs.append(section.id)
                 for n in 0..<2 {
                     let post = try session.operations.createPost(title: "note \(c).\(n)")
                     _ = try session.operations.newBlock(
@@ -154,15 +176,16 @@ struct OutlineRoomTests {
                     try Queries.sectionAssignments($0, readingID: id)
                 }))
             structure.mode = .outline
-            return try await body(session, reading.id, model, structure)
+            return try await body(Chaptered(
+                session: session, readingID: reading.id, model: model,
+                structure: structure, sectionIDs: sectionIDs,
+                postIDs: entries.map(\.postID)))
         }
     }
 
     /// Mount a book and pump until the navigator has reported.
     private func mountBook(
-        session: AppSession, readingID: String,
-        model: BookViewModel, structure: BookStructureModel,
-        width: CGFloat = 1200, height: CGFloat = 800
+        _ book: Chaptered, width: CGFloat = 1200, height: CGFloat = 800
     ) async -> (NSWindow, NSHostingView<some View>) {
         let window = NSWindow(
             contentRect: NSRect(x: 60, y: 60, width: width, height: height),
@@ -170,9 +193,9 @@ struct OutlineRoomTests {
         window.isReleasedWhenClosed = false
         let hosting = NSHostingView(
             rootView: BookView(
-                session: session, readingID: readingID,
-                model: model, structure: structure)
-                .environment(ThemeStore(session: session)))
+                session: book.session, readingID: book.readingID,
+                model: book.model, structure: book.structure)
+                .environment(ThemeStore(session: book.session)))
         hosting.frame = NSRect(x: 0, y: 0, width: width, height: height)
         window.contentView = hosting
         window.makeKeyAndOrderFront(nil)
@@ -193,33 +216,33 @@ struct OutlineRoomTests {
     /// over rows at their text height gave ~17-pt rows 2 pt apart, and the
     /// gap between groups was those same 2 pt.
     @Test func theNavigatorsChaptersHaveRoom() async throws {
-        try await withChapteredBook { session, readingID, model, structure in
+        try await withChapteredBook { book in
             #if DEBUG
             BookOutlineGeometry.resetNavigator()
             #endif
             UserDefaults.standard.removeObject(forKey: BookNavigatorLayout.widthKey)
-            let (window, _) = await mountBook(
-                session: session, readingID: readingID, model: model, structure: structure)
+            let (window, _) = await mountBook(book)
             defer { window.orderOut(nil); window.close() }
             #if DEBUG
-            let chapters = BookOutlineGeometry.navigatorChapterRows
-            let notes = BookOutlineGeometry.navigatorNoteRows
-            #expect(chapters.count == 2, "two chapter rows drew: \(chapters.keys.sorted())")
-            #expect(notes.count == 4, "four note rows drew: \(notes.count)")
-            for (id, frame) in chapters {
-                #expect(frame.height >= BookNavigatorLayout.chapterRowHeight - 0.5,
-                        "chapter \(id) drew \(frame.height) pt tall")
+            // MY rows, by id — never "whatever is in the oracle".
+            let chapters = book.sectionIDs.compactMap {
+                BookOutlineGeometry.navigatorChapterRows[$0]
             }
-            for (id, frame) in notes {
+            let notes = book.postIDs.compactMap { BookOutlineGeometry.navigatorNoteRows[$0] }
+            #expect(chapters.count == 2, "both chapter rows drew: \(chapters.count)")
+            #expect(notes.count == 4, "all four note rows drew: \(notes.count)")
+            for (index, frame) in chapters.enumerated() {
+                #expect(frame.height >= BookNavigatorLayout.chapterRowHeight - 0.5,
+                        "chapter \(index) drew \(frame.height) pt tall")
+            }
+            for (index, frame) in notes.enumerated() {
                 #expect(frame.height >= BookNavigatorLayout.noteRowHeight - 0.5,
-                        "note \(id) drew \(frame.height) pt tall")
+                        "note \(index) drew \(frame.height) pt tall")
             }
             // The groups stand apart: the lower chapter row's top, against
             // the bottom of the last note row above it.
-            let orderedChapters = chapters.values.sorted { $0.minY < $1.minY }
-            let secondChapter = try #require(orderedChapters.last)
-            let above = notes.values.filter { $0.maxY <= secondChapter.minY + 0.5 }
-                .map(\.maxY).max()
+            let secondChapter = try #require(chapters.sorted { $0.minY < $1.minY }.last)
+            let above = notes.filter { $0.maxY <= secondChapter.minY + 0.5 }.map(\.maxY).max()
             let lastAbove = try #require(above, "two notes drew above the second chapter")
             #expect(secondChapter.minY - lastAbove >= BookNavigatorLayout.groupSpacing - 0.5,
                     "the groups are \(secondChapter.minY - lastAbove) pt apart")
@@ -233,7 +256,7 @@ struct OutlineRoomTests {
     /// move. (The drag that WRITES the store is the width brain's, pinned
     /// pure above and walked on the real build; this is the read half.)
     @Test func theNavigatorIsTheWidthSheLeftItAtAcrossARemount() async throws {
-        try await withChapteredBook { session, readingID, model, structure in
+        try await withChapteredBook { book in
             defer { UserDefaults.standard.removeObject(forKey: BookNavigatorLayout.widthKey) }
             // Nothing remembered: exactly the shipped slab's width, so the
             // day she upgrades nothing moves until she drags.
@@ -241,10 +264,9 @@ struct OutlineRoomTests {
             #if DEBUG
             BookOutlineGeometry.resetNavigator()
             #endif
-            let (first, _) = await mountBook(
-                session: session, readingID: readingID, model: model, structure: structure)
+            let (first, _) = await mountBook(book)
             #if DEBUG
-            let fresh = try #require(BookOutlineGeometry.navigatorFrame)
+            let fresh = try #require(BookOutlineGeometry.navigatorFrames[book.readingID])
             #expect(abs(fresh.width - BookNavigatorLayout.idealWidth) <= 1,
                     "a book with nothing remembered opens at the shipped width: \(fresh.width)")
             #endif
@@ -255,10 +277,9 @@ struct OutlineRoomTests {
             #if DEBUG
             BookOutlineGeometry.resetNavigator()
             #endif
-            let (second, _) = await mountBook(
-                session: session, readingID: readingID, model: model, structure: structure)
+            let (second, _) = await mountBook(book)
             #if DEBUG
-            let remembered = try #require(BookOutlineGeometry.navigatorFrame)
+            let remembered = try #require(BookOutlineGeometry.navigatorFrames[book.readingID])
             #expect(abs(remembered.width - 300) <= 1,
                     "the remembered width came back: \(remembered.width)")
             #endif
@@ -270,13 +291,56 @@ struct OutlineRoomTests {
             #if DEBUG
             BookOutlineGeometry.resetNavigator()
             #endif
-            let (third, _) = await mountBook(
-                session: session, readingID: readingID, model: model, structure: structure)
+            let (third, _) = await mountBook(book)
             defer { third.orderOut(nil); third.close() }
             #if DEBUG
-            let clamped = try #require(BookOutlineGeometry.navigatorFrame)
+            let clamped = try #require(BookOutlineGeometry.navigatorFrames[book.readingID])
             #expect(abs(clamped.width - BookNavigatorLayout.maximumWidth) <= 1,
                     "the navigator's own ceiling held: \(clamped.width)")
+            #endif
+        }
+    }
+
+    /// **The book's OTHER chapter panel.** By wave 2c's rule the navigator
+    /// steps aside in Index and the index column stands in its place, so
+    /// "the panel with the chapter names" is that column there — and it
+    /// truncated the same names (measured at the walk). It is the same
+    /// leading column, with its OWN remembered width: dragging one panel
+    /// never moves the other. RED on the pre-fix shape (`.frame(width: 300)`).
+    @Test func theIndexsChapterPanelIsTheWidthSheLeftItAtAndKeepsItsOwnMemory() async throws {
+        try await withChapteredBook { book in
+            defer {
+                UserDefaults.standard.removeObject(forKey: BookIndexColumn.widthKey)
+                UserDefaults.standard.removeObject(forKey: BookNavigatorLayout.widthKey)
+            }
+            book.structure.mode = .index
+            // The navigator's own remembered width is a DIFFERENT panel's.
+            UserDefaults.standard.set(340.0, forKey: BookNavigatorLayout.widthKey)
+            UserDefaults.standard.removeObject(forKey: BookIndexColumn.widthKey)
+            #if DEBUG
+            BookIndexGeometry.reset()
+            BookOutlineGeometry.resetNavigator()
+            #endif
+            let (fresh, _) = await mountBook(book)
+            #if DEBUG
+            let shipped = try #require(BookIndexGeometry.columnFrames[book.readingID])
+            #expect(abs(shipped.width - BookIndexColumn.idealWidth) <= 1,
+                    "Index opens at the shipped 300 whatever the navigator remembers: \(shipped.width)")
+            #expect(BookOutlineGeometry.navigatorFrames[book.readingID] == nil,
+                    "and THIS book's navigator steps aside in Index (wave 2c)")
+            #endif
+            fresh.orderOut(nil); fresh.close()
+
+            UserDefaults.standard.set(420.0, forKey: BookIndexColumn.widthKey)
+            #if DEBUG
+            BookIndexGeometry.reset()
+            #endif
+            let (wider, _) = await mountBook(book)
+            defer { wider.orderOut(nil); wider.close() }
+            #if DEBUG
+            let remembered = try #require(BookIndexGeometry.columnFrames[book.readingID])
+            #expect(abs(remembered.width - 420) <= 1,
+                    "the remembered width came back: \(remembered.width)")
             #endif
         }
     }
@@ -285,12 +349,14 @@ struct OutlineRoomTests {
 
     /// Mount Read (`edit`, the face it opens on) over a three-block note.
     private func withReadHost<T>(
-        _ body: @MainActor (NSWindow, NSHostingView<AnyView>, BlockTOCViewModel) async throws -> T
+        _ body: @MainActor (String, BlockTOCViewModel) async throws -> T
     ) async throws -> T {
         let db = try AppDatabase.inMemory()
         return try await withDependencies {
             $0.database = db
-            $0.uuid = .incrementing
+            // Live ids, for the reason above: the oracle is keyed by the
+            // NOTE's id and parallel suites share `.incrementing`'s sequence.
+            $0.uuid = UUIDGenerator { UUID() }
             $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
             $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 26))
         } operation: { @MainActor in
@@ -326,7 +392,7 @@ struct OutlineRoomTests {
                 try? await Task.sleep(for: .milliseconds(30))
             }
             defer { window.orderOut(nil); window.close() }
-            return try await body(window, hosting, model)
+            return try await body(post.id, model)
         }
     }
 
@@ -340,18 +406,18 @@ struct OutlineRoomTests {
         // Nothing remembered: the shipped measure, so nothing moves for her
         // until she drags.
         UserDefaults.standard.removeObject(forKey: ReadModeView.indexColumnWidthKey)
-        try await withReadHost { _, _, _ in
+        try await withReadHost { postID, _ in
             #if DEBUG
-            let fresh = try #require(ReadModeOracle.indexColumnFrame)
+            let fresh = try #require(ReadModeOracle.indexColumnFrames[postID])
             #expect(abs(fresh.width - NoteIndexColumn.width) <= 1,
                     "a note with nothing remembered opens at the shipped 340: \(fresh.width)")
             #endif
         }
         // What a drag writes, read back on a FRESH mount.
         UserDefaults.standard.set(480.0, forKey: ReadModeView.indexColumnWidthKey)
-        try await withReadHost { _, _, _ in
+        try await withReadHost { postID, _ in
             #if DEBUG
-            let wider = try #require(ReadModeOracle.indexColumnFrame)
+            let wider = try #require(ReadModeOracle.indexColumnFrames[postID])
             #expect(abs(wider.width - 480) <= 1,
                     "the remembered width came back: \(wider.width)")
             #endif
@@ -359,9 +425,9 @@ struct OutlineRoomTests {
         // And the floor holds: dragged past it, the column stops being a
         // contents list, so it never goes under its minimum.
         UserDefaults.standard.set(80.0, forKey: ReadModeView.indexColumnWidthKey)
-        try await withReadHost { _, _, _ in
+        try await withReadHost { postID, _ in
             #if DEBUG
-            let floored = try #require(ReadModeOracle.indexColumnFrame)
+            let floored = try #require(ReadModeOracle.indexColumnFrames[postID])
             #expect(abs(floored.width - NoteIndexColumn.minimumWidth) <= 1,
                     "the column's floor held: \(floored.width)")
             #endif

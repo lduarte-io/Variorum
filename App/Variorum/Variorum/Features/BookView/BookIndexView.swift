@@ -48,10 +48,15 @@ import VariorumCore
 enum BookIndexGeometry {
     static var chapterCountFrame: CGRect?
     static var noteMenuFrame: CGRect?
+    /// 18d batch 3 (her U-13): what the CHAPTER PANEL drew — the rectangle,
+    /// never `idealWidth`. Keyed by the BOOK's id: suites run in parallel,
+    /// so a pin must read ITS book's panel, not the last one drawn anywhere.
+    static var columnFrames: [String: CGRect] = [:]
 
     static func reset() {
         chapterCountFrame = nil
         noteMenuFrame = nil
+        columnFrames = [:]
     }
 }
 #endif
@@ -64,6 +69,18 @@ nonisolated enum BookIndexColumn {
     /// ended at different x. A shared column is the calm fix: neither row
     /// has to know what the other draws.
     static let trailingColumn: CGFloat = 22
+
+    /// **The column's room** (18d batch 3, her U-13 — the twin of
+    /// `BookNavigatorLayout`'s). Its OWN remembered width: this panel and
+    /// the navigator stand in the same slot but are not the same panel (a
+    /// filter field and a per-row count live here), so each remembers where
+    /// she left it and dragging one never moves the other.
+    static let widthKey = "bookIndexColumnWidth"
+    /// Where it starts — exactly the shipped 300, so nothing moves until
+    /// she drags.
+    static let idealWidth: CGFloat = 300
+    static let minimumWidth: CGFloat = 240
+    static let maximumWidth: CGFloat = 460
 
     struct Group: Equatable {
         /// Stable fold identity: the chapter's row id, `"path:" + path`
@@ -241,11 +258,36 @@ struct BookIndexView<Masthead: View>: View {
     }
 
     var body: some View {
-        HStack(spacing: 0) {
-            column
-                .frame(width: 300)
-            Divider().overlay(tokens.line)
+        // **18d batch 3 (her U-13): the index's chapter panel is the same
+        // leading side column.** Her ruling is about *"the panel with the
+        // chapter names"*, and the book has that panel in TWO places: the
+        // navigator in every other mode, and — by wave 2c's own rule, where
+        // *"the index column IS the outline pane grown up"* and the minimal
+        // navigator steps aside — this column in Index. Leaving one
+        // draggable and its twin a fixed slab would make one tab row behave
+        // two ways, and this column truncates the same chapter names hers
+        // did (*"The Adventure of the Engineer's T…"*, measured at the walk).
+        // Its own key and its own ideal, not the navigator's: it starts
+        // wider (300) because it carries a filter field and a count beside
+        // every row, and dragging one panel must not move the other.
+        SideColumn(
+            tokens: tokens,
+            shown: true,
+            widthKey: BookIndexColumn.widthKey,
+            edge: .leading,
+            ideal: BookIndexColumn.idealWidth,
+            minimum: BookIndexColumn.minimumWidth,
+            maximum: BookIndexColumn.maximumWidth
+        ) {
             pane
+        } panel: {
+            column
+                .onGeometryChange(for: CGSize.self) { $0.size } action: { size in
+                    #if DEBUG
+                    BookIndexGeometry.columnFrames[model.readingID] =
+                        CGRect(origin: .zero, size: size)
+                    #endif
+                }
         }
         .background(tokens.surface)
         .onAppear {
