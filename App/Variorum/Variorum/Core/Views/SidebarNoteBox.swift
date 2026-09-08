@@ -30,6 +30,11 @@ import SwiftUI
 
 struct SidebarNoteBox: View {
     let tokens: VoiceTokens
+    /// **Whose box this is** — the book it belongs to. Its one job is the
+    /// DEBUG oracles' key (the 18d ladder's MINOR-3: suites run in parallel,
+    /// so a pin must read ITS box's rectangles, never the last box drawn
+    /// anywhere). Production passes the report's `readingID`.
+    let subjectKey: String
     let state: NoteBoxState
     /// What the BOOK knows about the note (nil while the facts have not
     /// arrived, or in the empty state).
@@ -116,7 +121,7 @@ struct SidebarNoteBox: View {
         .overlay(alignment: .topTrailing) { editingMark }
 #if DEBUG
         .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
-            SidebarGeometry.noteBoxFrame = $0
+            SidebarGeometry.noteBoxFrames[subjectKey] = $0
         }
 #endif
     }
@@ -135,7 +140,7 @@ struct SidebarNoteBox: View {
             .lineLimit(1)
 #if DEBUG
             .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
-                SidebarGeometry.noteBoxHeaderFrame = $0
+                SidebarGeometry.noteBoxHeaderFrames[subjectKey] = $0
             }
 #endif
             .padding(.bottom, SidebarLayout.headerAir)
@@ -160,8 +165,8 @@ struct SidebarNoteBox: View {
         .padding(.horizontal, 2)
         .help(NoteBoxCopy.emptyHelp)
 #if DEBUG
-        .onAppear { SidebarGeometry.noteBoxFaces["empty", default: 0] += 1 }
-        .onDisappear { SidebarGeometry.noteBoxFaces["empty", default: 0] -= 1 }
+        .onAppear { SidebarGeometry.noteBoxFaces[subjectKey, default: [:]]["empty", default: 0] += 1 }
+        .onDisappear { SidebarGeometry.noteBoxFaces[subjectKey, default: [:]]["empty", default: 0] -= 1 }
 #endif
     }
 
@@ -236,8 +241,8 @@ struct SidebarNoteBox: View {
             .buttonStyle(.plain)
             .help(NoteBoxCopy.editDoorHelp)
 #if DEBUG
-            .onAppear { SidebarGeometry.noteBoxFaces["door", default: 0] += 1 }
-            .onDisappear { SidebarGeometry.noteBoxFaces["door", default: 0] -= 1 }
+            .onAppear { SidebarGeometry.noteBoxFaces[subjectKey, default: [:]]["door", default: 0] += 1 }
+            .onDisappear { SidebarGeometry.noteBoxFaces[subjectKey, default: [:]]["door", default: 0] -= 1 }
 #endif
         }
     }

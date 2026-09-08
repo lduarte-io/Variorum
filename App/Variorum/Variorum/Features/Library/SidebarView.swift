@@ -737,13 +737,23 @@ enum SidebarGeometry {
     /// words. The geometry oracle compares these two rectangles against the
     /// rail's, because "the box is measured to take up the same amount of
     /// room" is a claim about rectangles, not about a constant.
-    static var noteBoxFrame: CGRect?
-    static var noteBoxHeaderFrame: CGRect?
+    ///
+    /// **KEYED BY THE BOX'S SUBJECT** (the 18d ladder's MINOR-3, batch 3's
+    /// own lesson one letter over): `.serialized` orders tests WITHIN a
+    /// suite, and Swift Testing runs SUITES in parallel — a singleton here
+    /// lets another suite's mounted sidebar answer this pin's question, and
+    /// a pin that reads someone else's rectangle is a green pin that proved
+    /// nothing. The key is the book the box belongs to (`RootView` passes
+    /// the report's `readingID`); the suites mint LIVE uuids so two worlds
+    /// cannot share one.
+    static var noteBoxFrames: [String: CGRect] = [:]
+    static var noteBoxHeaderFrames: [String: CGRect] = [:]
     /// WHICH FACE the box is showing right now — `"empty"` (state 1) and
-    /// `"door"` (state 2's one door). The state a view was HANDED is not what
-    /// it DREW, and the pin's whole job is the second; the bar's own mount
-    /// oracle (`CommitBarGeometry.mounted["box"]`) answers for state 3.
-    static var noteBoxFaces: [String: Int] = [:]
+    /// `"door"` (state 2's one door), per subject. The state a view was
+    /// HANDED is not what it DREW, and the pin's whole job is the second;
+    /// the bar's own mount oracle (`CommitBarGeometry.mounted`) answers for
+    /// state 3.
+    static var noteBoxFaces: [String: [String: Int]] = [:]
     /// Row 13 (17o batch d): per headed group, the header's words, and the
     /// first row's content edge and box under it — "the header sits on its
     /// rows' text edge, with air before the first wash" is a claim about
@@ -753,8 +763,8 @@ enum SidebarGeometry {
     static var firstRowBoxFrames: [String: CGRect] = [:]
 
     static func resetHeaders() {
-        noteBoxFrame = nil
-        noteBoxHeaderFrame = nil
+        noteBoxFrames = [:]
+        noteBoxHeaderFrames = [:]
         noteBoxFaces = [:]
         headerTextFrames = [:]
         firstRowContentFrames = [:]

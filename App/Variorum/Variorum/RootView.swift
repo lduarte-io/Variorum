@@ -573,6 +573,7 @@ struct RootView: View {
             ? live : nil
         return AnyView(SidebarNoteBox(
             tokens: tokens,
+            subjectKey: report.readingID,
             state: report.state,
             identity: report.identity,
             facts: noteBoxFacts.facts(for: report.state.postID),

@@ -60,11 +60,12 @@ private struct NoteBoxOracleHost: View {
 
 @MainActor
 private func makeBox(
-    _ state: NoteBoxState, tokens: VoiceTokens, withBar: Bool = false,
-    model: EditorViewModel? = nil
+    _ state: NoteBoxState, tokens: VoiceTokens, subjectKey: String,
+    withBar: Bool = false, model: EditorViewModel? = nil
 ) -> AnyView {
     AnyView(SidebarNoteBox(
         tokens: tokens,
+        subjectKey: subjectKey,
         state: state,
         identity: state.postID.map {
             NoteBoxIdentity(
@@ -133,7 +134,7 @@ struct NoteBoxGeometryTests {
     /// column at the SAME width, and must agree to the point — in all three
     /// states, in both voices.
     ///
-    /// RED ON OLD: `SidebarGeometry.noteBoxFrame` had nothing to publish;
+    /// RED ON OLD: `SidebarGeometry.noteBoxFrames` had nothing to publish;
     /// with a book open the column drew no group at all where the rail
     /// stands, so the Open strip sat a whole rail-group higher than it does
     /// for a note — which is exactly what her ruling forbids.
@@ -144,7 +145,11 @@ struct NoteBoxGeometryTests {
         let db = try AppDatabase.inMemory()
         try await withDependencies {
             $0.database = db
-            $0.uuid = .incrementing
+            // The LIVE uuid generator, deliberately (the 18d ladder's
+            // MINOR-3): `.incrementing` hands every parallel suite the SAME
+            // ids, so the oracle keys below would collide across suites and
+            // the keying would buy nothing.
+            $0.uuid = UUIDGenerator { UUID() }
             $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
             $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 10))
         } operation: { @MainActor in
@@ -180,12 +185,13 @@ struct NoteBoxGeometryTests {
                 NoteBoxState.selected(post.id),
                 NoteBoxState.live(post.id),
             ] {
-                SidebarGeometry.noteBoxFrame = nil
+                SidebarGeometry.noteBoxFrames[book.id] = nil
                 let (window, _) = await drawnColumn(
                     session: session, theme: theme, selection: .reading(book.id),
-                    box: makeBox(state, tokens: tokens), openNote: post.id,
-                    until: { SidebarGeometry.noteBoxFrame != nil })
-                let box = SidebarGeometry.noteBoxFrame
+                    box: makeBox(state, tokens: tokens, subjectKey: book.id),
+                    openNote: post.id,
+                    until: { SidebarGeometry.noteBoxFrames[book.id] != nil })
+                let box = SidebarGeometry.noteBoxFrames[book.id]
                 window.orderOut(nil)
                 window.close()
                 let drawn = try #require(box, "the box drew in state \(state)")
@@ -203,7 +209,7 @@ struct NoteBoxGeometryTests {
         let db = try AppDatabase.inMemory()
         try await withDependencies {
             $0.database = db
-            $0.uuid = .incrementing
+            $0.uuid = UUIDGenerator { UUID() }
             $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
             $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 11))
         } operation: { @MainActor in
@@ -230,16 +236,17 @@ struct NoteBoxGeometryTests {
                 pool: PoolViewModel(session: session), workspace: workspace,
                 stars: StarsModel(session: session), theme: theme,
                 selection: .reading(book.id),
-                box: makeBox(.selected(post.id), tokens: .terminalLight)))
+                box: makeBox(.selected(post.id), tokens: .terminalLight,
+                             subjectKey: book.id)))
             window.contentView = hosting
             window.makeKeyAndOrderFront(nil)
 #if DEBUG
             await settle(window, hosting, until: {
-                SidebarGeometry.noteBoxHeaderFrame != nil
+                SidebarGeometry.noteBoxHeaderFrames[book.id] != nil
                     && SidebarGeometry.firstRowContentFrames[
                         WorkspaceNaming.openSectionHeader] != nil
             })
-            let words = try #require(SidebarGeometry.noteBoxHeaderFrame)
+            let words = try #require(SidebarGeometry.noteBoxHeaderFrames[book.id])
             // The Open strip's first row is the column's own row-text edge —
             // the same rectangle row 13 measured the rail's header against.
             let row = try #require(
@@ -263,7 +270,8 @@ private func withOutlineBook<T>(
     let tick = LockIsolated(0)
     return try await withDependencies {
         $0.database = db
-        $0.uuid = .incrementing
+        // LIVE uuids (MINOR-3): the oracle keys are these ids.
+        $0.uuid = UUIDGenerator { UUID() }
         $0.date = DateGenerator {
             let seconds = tick.withValue { value -> Int in
                 defer { value += 1 }
@@ -350,7 +358,7 @@ struct NoteBoxCompositionTests {
     /// book publishes, `RootView` composes, the sidebar renders.
     ///
     /// RED ON OLD: with a book open the column drew nothing where the rail
-    /// stands, so `noteBoxFrame` had nothing to publish and the empty face
+    /// stands, so `noteBoxFrames` had nothing to publish and the empty face
     /// did not exist.
     @Test func aBookOpeningPutsTheBoxOnTheColumnSayingNoNoteSelected() async throws {
         try await withOutlineBook(posts: 3) { session, db, readingID, postIDs in
@@ -382,12 +390,12 @@ struct NoteBoxCompositionTests {
             // …then the book.
             router.pendingSelection = .reading(readingID)
             await settle(window, hosting, until: {
-                SidebarGeometry.noteBoxFrame != nil
-                    && (SidebarGeometry.noteBoxFaces["empty"] ?? 0) > 0
+                SidebarGeometry.noteBoxFrames[readingID] != nil
+                    && (SidebarGeometry.noteBoxFaces[readingID]?["empty"] ?? 0) > 0
             })
             let box = try #require(
-                SidebarGeometry.noteBoxFrame, "the box drew for the open book")
-            #expect((SidebarGeometry.noteBoxFaces["empty"] ?? 0) > 0,
+                SidebarGeometry.noteBoxFrames[readingID], "the box drew for the open book")
+            #expect((SidebarGeometry.noteBoxFaces[readingID]?["empty"] ?? 0) > 0,
                     "and it says 'no note selected' — nothing has been clicked")
             #expect(abs(box.height - rail) <= 0.5,
                     "at the rail's own height: \(box.height) vs \(rail)")
@@ -570,18 +578,22 @@ struct NoteBoxCompositionTests {
             await settle(window, hosting, until: { model.liveFocusedPostID == postIDs[0] })
             await settle(window, hosting, until: { false }, maxTurns: 12)
 #if DEBUG
-            #expect((CommitBarGeometry.mounted["horizontal"] ?? 0) == 0,
+            #expect(CommitBarGeometry.mounted("horizontal", post: postIDs[0]) == 0,
                     "Outline's focused note draws no bar in the page")
-            #expect(CommitBarGeometry.rowFrame == nil,
-                    "…and none drew at all: the gutter's rail is retired")
+            // (`rowFrame` stays a singleton — it belongs to row 81's own
+            //  pin and is not this batch's to re-key; the per-post counter
+            //  above is what this pin reads, so a bar mounted by another
+            //  suite cannot answer for this book.)
 
             // THE PAGED BOOK MODE: the same, at the bottom of the page.
             structure.mode = .spread
             model.seedSpreadFromFocus()
             await settle(window, hosting, until: { !model.spreadEntries.isEmpty })
             await settle(window, hosting, until: { false }, maxTurns: 12)
-            #expect((CommitBarGeometry.mounted["horizontal"] ?? 0) == 0,
-                    "the paged Book mode's page draws no floating bar either")
+            for postID in postIDs {
+                #expect(CommitBarGeometry.mounted("horizontal", post: postID) == 0,
+                        "the paged Book mode's page draws no floating bar either")
+            }
 #endif
         }
     }

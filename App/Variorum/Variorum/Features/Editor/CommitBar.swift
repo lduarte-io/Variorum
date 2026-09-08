@@ -157,8 +157,14 @@ struct CommitBar: View {
         // 18d batch 1's retirement oracle: which arrangements are ON SCREEN.
         // "The book's editing surfaces render no bar of their own" is a claim
         // about what is mounted, and only a mount can answer it.
-        .onAppear { CommitBarGeometry.mounted[Self.name(of: axis), default: 0] += 1 }
-        .onDisappear { CommitBarGeometry.mounted[Self.name(of: axis), default: 0] -= 1 }
+        .onAppear {
+            CommitBarGeometry.mounted[model.postID, default: [:]][
+                Self.name(of: axis), default: 0] += 1
+        }
+        .onDisappear {
+            CommitBarGeometry.mounted[model.postID, default: [:]][
+                Self.name(of: axis), default: 0] -= 1
+        }
 #endif
         // Ledger row 17: the FALLBACK host. The pane's named home is the post
         // detail's inspector; this editor is also composed where there is no
@@ -820,11 +826,20 @@ struct CommitBar: View {
 enum CommitBarGeometry {
     static var rowFrame: CGRect?
     static var barWidth: CGFloat?
-    /// 18d batch 1: how many bars of each arrangement are mounted right now.
-    /// The retirement's oracle — the book's editing surfaces must mount NONE
+    /// 18d batch 1: how many bars of each arrangement are mounted right now,
+    /// **keyed by the bar's POST** (the 18d ladder's MINOR-3). The
+    /// retirement's oracle — the book's editing surfaces must mount NONE
     /// (their doors are in the sidebar's note box), and the box must mount
-    /// exactly one when a note there is live.
-    static var mounted: [String: Int] = [:]
+    /// exactly one when a note there is live. Per post, because a singleton
+    /// counter asserting "zero horizontal bars" goes red the moment ANY
+    /// other suite mounts an editor: suites run in parallel and `.serialized`
+    /// only orders tests inside one.
+    static var mounted: [String: [String: Int]] = [:]
+
+    /// How many bars of `axis` are mounted for this post.
+    static func mounted(_ axis: String, post: String) -> Int {
+        mounted[post]?[axis] ?? 0
+    }
 
     static func reset() {
         rowFrame = nil
