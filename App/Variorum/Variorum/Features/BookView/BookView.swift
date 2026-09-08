@@ -122,8 +122,8 @@ struct BookView: View {
         // column** — *"the panel with the chapter names should also be
         // draggable to be a bit bigger."* It was an `HStack` of a 190-pt slab,
         // a `Divider` and the mode; it is the same three things, drawn by
-        // `SideColumn` so the boundary carries the drag grammar (the 9-pt
-        // grip, the resize cursor, our own line in every window state) and
+        // `SideColumn` so the boundary carries the drag grammar (`SeamGrip`'s
+        // 14-pt grip and resize pointer, our own line in every window state) and
         // the width she chooses is remembered. `shown` keeps wave 2c's rule
         // exactly: in INDEX the minimal navigator steps aside — the index
         // column IS the outline pane grown up, and it carries the same
@@ -756,6 +756,14 @@ struct BookView: View {
     /// carries the chapter's NAME where chapters govern (and the tag path
     /// where they do not), so this walks the entries once and asks the
     /// grouping brain nothing.
+    ///
+    /// `entries` is the book's WINDOW (`BookViewModel.entryWindow`), so the
+    /// total is a floor past it and the line says so (`totalIsAtLeast` — the
+    /// round-end Fable pass, NIT-3). The nil branch is a GUARD, not a reachable
+    /// state: every door that can make a note this box's subject (the
+    /// navigator, Outline's rows, the Index column, the spread) builds its rows
+    /// from this same windowed list, so a note past the window cannot be
+    /// clicked and cannot arrive here.
     private func identity(of postID: String?) -> NoteBoxIdentity? {
         guard let postID,
               let i = model.entries.firstIndex(where: { $0.postID == postID })
@@ -763,7 +771,7 @@ struct BookView: View {
         let entry = model.entries[i]
         return NoteBoxIdentity(
             postID: postID, title: entry.displayTitle, chapter: entry.sectionPath,
-            index: i + 1, total: model.entries.count)
+            index: i + 1, total: model.entries.count, totalIsAtLeast: model.truncated)
     }
 
     private func publishNoteBox() {

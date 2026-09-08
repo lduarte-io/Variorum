@@ -71,13 +71,23 @@ nonisolated struct NoteBoxIdentity: Equatable, Sendable {
     /// 1-based place among the book's notes (0 ⇒ unknown, and omitted).
     var index: Int
     var total: Int
+    /// `total` is a FLOOR, not the count (the round-end Fable pass, NIT-3):
+    /// the book's entries are windowed (`BookViewModel.entryWindow`), so a
+    /// book longer than the window knows only that it has at least this
+    /// many — and the line says `300+` rather than claiming a count it does
+    /// not hold.
+    var totalIsAtLeast: Bool
 
-    init(postID: String, title: String, chapter: String? = nil, index: Int = 0, total: Int = 0) {
+    init(
+        postID: String, title: String, chapter: String? = nil,
+        index: Int = 0, total: Int = 0, totalIsAtLeast: Bool = false
+    ) {
         self.postID = postID
         self.title = title
         self.chapter = chapter
         self.index = index
         self.total = total
+        self.totalIsAtLeast = totalIsAtLeast
     }
 }
 
@@ -141,13 +151,19 @@ nonisolated enum NoteBoxCopy {
     /// The block half is the BAR's own label (`BlockLineLabel`), handed in
     /// rather than re-derived: 13g R5-4's rule — one shared label, so no two
     /// surfaces can disagree about where the caret is.
-    static func whereLine(chapter: String?, index: Int, total: Int, block: String?) -> String {
+    ///
+    /// `totalIsAtLeast` (NIT-3): a windowed book's total is a floor, said as
+    /// *"5 of 300+ in this book"* — never a count the book does not hold.
+    static func whereLine(
+        chapter: String?, index: Int, total: Int, totalIsAtLeast: Bool = false, block: String?
+    ) -> String {
         var pieces: [String] = []
         if let chapter, !chapter.trimmingCharacters(in: .whitespaces).isEmpty {
             pieces.append(chapter)
         }
         if index > 0, total > 0 {
-            pieces.append(block == nil ? "\(index) of \(total) in this book" : "\(index) of \(total)")
+            let count = totalIsAtLeast ? "\(total)+" : "\(total)"
+            pieces.append(block == nil ? "\(index) of \(count) in this book" : "\(index) of \(count)")
         }
         if let block { pieces.append(block) }
         return pieces.joined(separator: " \u{B7} ")

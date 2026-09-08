@@ -179,6 +179,22 @@ struct NoteBoxCopyTests {
                 == "5 of 12 in this book")
     }
 
+    /// The round-end Fable pass, NIT-3: a book longer than the entry window
+    /// knows only a FLOOR, and the line says `300+` rather than a count it
+    /// does not hold (`BookView.identity(of:)` passes `model.truncated`).
+    /// A copy-truth pin over a new parameter — not red-on-old by nature.
+    @Test func theWhereLineSaysAFloorForAWindowedBook() {
+        #expect(NoteBoxCopy.whereLine(
+                    chapter: nil, index: 5, total: 300, totalIsAtLeast: true, block: nil)
+                == "5 of 300+ in this book")
+        #expect(NoteBoxCopy.whereLine(
+                    chapter: "one", index: 5, total: 300, totalIsAtLeast: true,
+                    block: BlockLineLabel.caret(ordinal: 3, of: 41))
+                == "one · 5 of 300+ · block 3/41")
+        #expect(NoteBoxIdentity(postID: "p", title: "t").totalIsAtLeast == false,
+                "the default is a real count")
+    }
+
     /// State 3: the caret's block joins the line, and "in this book" gives up
     /// its words to it. The block half is the BAR's own label, handed in.
     @Test func theWhereLineTakesTheCaretsBlockWhileLive() {

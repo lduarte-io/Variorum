@@ -199,7 +199,8 @@ struct SidebarNoteBox: View {
                     .fixedSize(horizontal: false, vertical: true)
                 let line = NoteBoxCopy.whereLine(
                     chapter: identity.chapter, index: identity.index,
-                    total: identity.total, block: caretLabel?())
+                    total: identity.total, totalIsAtLeast: identity.totalIsAtLeast,
+                    block: caretLabel?())
 #if DEBUG
                 // MAJOR-1's second arm: what the where-line SAYS, so the pin
                 // that counts the shell's bodies can also prove the label
