@@ -33,6 +33,28 @@ import Testing
 import VariorumCore
 @testable import Variorum
 
+/// The containment scan, copied from `BookOrderConversionTests` (where it is
+/// private) so the twin pin below reads exactly what the navigator's shipped
+/// pin reads: the leftmost DARK pixel in a horizontal band. The b6dae25 class
+/// is not a clip — `.frame(width:)` CENTRES an over-wide child, so chrome
+/// that will not fit pushes the whole column left and every row loses its
+/// first characters. That is visible as ink at x near 0.
+@MainActor
+private func leftmostInkX(in view: NSView, band: ClosedRange<CGFloat>, maxX: CGFloat) -> CGFloat? {
+    guard let rep = view.bitmapImageRepForCachingDisplay(in: view.bounds) else { return nil }
+    view.cacheDisplay(in: view.bounds, to: rep)
+    let scale = CGFloat(rep.pixelsWide) / view.bounds.width
+    for px in 0..<Int(maxX * scale) {
+        for py in Int(band.lowerBound * scale)...Int(band.upperBound * scale) {
+            guard let color = rep.colorAt(x: px, y: py) else { continue }
+            let luminance = 0.299 * color.redComponent + 0.587 * color.greenComponent
+                + 0.114 * color.blueComponent
+            if luminance < 0.6 { return CGFloat(px) / scale }
+        }
+    }
+    return nil
+}
+
 @MainActor
 @Suite("The outline's room (18d batch 3, U-13)", .serialized)
 struct OutlineRoomTests {
@@ -345,6 +367,71 @@ struct OutlineRoomTests {
         }
     }
 
+    // MARK: - The floors, exercised (18d ladder, MINOR-5)
+
+    /// **The twin of `theNavigatorsChromeStaysInsideItsColumn`, at the two
+    /// floors batch 3 minted.** The Index chapter panel went 300 to [240,
+    /// 460] and Read's contents column 340 to [240, 640] — 60 and 100 pt
+    /// below the fixed measure that WAS their containment guarantee — and
+    /// both carry chrome inside the column (the book's masthead and word-tab
+    /// row, the order control and a filter field; a filter field and a
+    /// fold-all door). The b6dae25 class is that a frame does not clip an
+    /// over-wide child, it CENTRES it, so chrome that will not fit pushes the
+    /// whole column left and every row loses its first characters. Nothing
+    /// exercised either floor: the width pins assert widths, and the walk
+    /// dragged both only WIDER.
+    ///
+    /// PIN-DECIDES (the ladder's arbitration): red at the floor means raise
+    /// the floor or fix the chrome; green means the finding was a coverage
+    /// gap, now closed, recorded with its numbers.
+    @Test func bothColumnsChromeStaysInsideThemAtTheirFloors() async throws {
+        // (a) The book Index's chapter panel at its 240-pt floor.
+        try await withChapteredBook { book in
+            defer { UserDefaults.standard.removeObject(forKey: BookIndexColumn.widthKey) }
+            book.structure.mode = .index
+            UserDefaults.standard.set(
+                Double(BookIndexColumn.minimumWidth), forKey: BookIndexColumn.widthKey)
+            #if DEBUG
+            BookIndexGeometry.reset()
+            #endif
+            let (window, hosting) = await mountBook(book)
+            defer { window.orderOut(nil); window.close() }
+            #if DEBUG
+            let drawn = try #require(BookIndexGeometry.columnFrames[book.readingID])
+            #expect(abs(drawn.width - BookIndexColumn.minimumWidth) <= 1,
+                    "it really is at its floor: \(drawn.width)")
+            #endif
+            // The band holding the column's chrome — the book's title and
+            // word-tab row, the order control, the filter — and the rows.
+            let margin = try #require(
+                leftmostInkX(in: hosting, band: 20...460, maxX: 40),
+                "the column drew something")
+            print("[18d MINOR-5] Index panel at its floor: leftmost ink \(margin) pt")
+            #expect(margin >= 6,
+                    "Index chapter panel clipped at its 240-pt floor: ink at \(margin) pt")
+        }
+
+        // (b) Read's contents column at its 240-pt floor.
+        UserDefaults.standard.set(true, forKey: "readModeOutlineShown")
+        UserDefaults.standard.set(
+            Double(NoteIndexColumn.minimumWidth), forKey: ReadModeView.indexColumnWidthKey)
+        defer { UserDefaults.standard.removeObject(forKey: ReadModeView.indexColumnWidthKey) }
+        try await withReadHost { postID, _, hosting in
+            #if DEBUG
+            let drawn = try #require(ReadModeOracle.indexColumnFrames[postID])
+            #expect(abs(drawn.width - NoteIndexColumn.minimumWidth) <= 1,
+                    "it really is at its floor: \(drawn.width)")
+            #endif
+            // Below the face bar: the filter field, the fold-all door, the rows.
+            let margin = try #require(
+                leftmostInkX(in: hosting, band: 50...600, maxX: 40),
+                "the column drew something")
+            print("[18d MINOR-5] Read column at its floor: leftmost ink \(margin) pt")
+            #expect(margin >= 6,
+                    "Read contents column clipped at its 240-pt floor: ink at \(margin) pt")
+        }
+    }
+
     // MARK: - The seam itself (18d ladder, MAJOR-2)
 
     /// **Ledger row 9, on the boundary her U-13 asked to be draggable.** The
@@ -394,7 +481,7 @@ struct OutlineRoomTests {
 
     /// Mount Read (`edit`, the face it opens on) over a three-block note.
     private func withReadHost<T>(
-        _ body: @MainActor (String, BlockTOCViewModel) async throws -> T
+        _ body: @MainActor (String, BlockTOCViewModel, NSHostingView<AnyView>) async throws -> T
     ) async throws -> T {
         let db = try AppDatabase.inMemory()
         return try await withDependencies {
@@ -437,7 +524,7 @@ struct OutlineRoomTests {
                 try? await Task.sleep(for: .milliseconds(30))
             }
             defer { window.orderOut(nil); window.close() }
-            return try await body(post.id, model)
+            return try await body(post.id, model, hosting)
         }
     }
 
@@ -451,7 +538,7 @@ struct OutlineRoomTests {
         // Nothing remembered: the shipped measure, so nothing moves for her
         // until she drags.
         UserDefaults.standard.removeObject(forKey: ReadModeView.indexColumnWidthKey)
-        try await withReadHost { postID, _ in
+        try await withReadHost { postID, _, _ in
             #if DEBUG
             let fresh = try #require(ReadModeOracle.indexColumnFrames[postID])
             #expect(abs(fresh.width - NoteIndexColumn.width) <= 1,
@@ -460,7 +547,7 @@ struct OutlineRoomTests {
         }
         // What a drag writes, read back on a FRESH mount.
         UserDefaults.standard.set(480.0, forKey: ReadModeView.indexColumnWidthKey)
-        try await withReadHost { postID, _ in
+        try await withReadHost { postID, _, _ in
             #if DEBUG
             let wider = try #require(ReadModeOracle.indexColumnFrames[postID])
             #expect(abs(wider.width - 480) <= 1,
@@ -470,7 +557,7 @@ struct OutlineRoomTests {
         // And the floor holds: dragged past it, the column stops being a
         // contents list, so it never goes under its minimum.
         UserDefaults.standard.set(80.0, forKey: ReadModeView.indexColumnWidthKey)
-        try await withReadHost { postID, _ in
+        try await withReadHost { postID, _, _ in
             #if DEBUG
             let floored = try #require(ReadModeOracle.indexColumnFrames[postID])
             #expect(abs(floored.width - NoteIndexColumn.minimumWidth) <= 1,
