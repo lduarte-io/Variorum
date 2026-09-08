@@ -33,6 +33,26 @@ extension Queries {
             sql: "SELECT * FROM tag WHERE deleted_at IS NULL ORDER BY path")
     }
 
+    /// **The paths of NAMED tags only** (17o batch d, ledger row 18): the
+    /// bounded twin of `allTags`, for chrome that must name the handful of
+    /// tags currently on screen. `allTags` is fine for a one-shot read at
+    /// navigation rate, and wrong inside a HELD observation — which re-runs
+    /// on every `container` write, so its fetch must be viewport-shaped
+    /// (`AppDatabase.observe`'s own rule). Missing and tombstoned ids are
+    /// simply absent from the result, which is how the chrome's per-kind
+    /// fallback already reads a name it cannot resolve.
+    public static func tagPaths(_ db: Database, ids: [String]) throws -> [String: String] {
+        guard !ids.isEmpty else { return [:] }
+        let places = databaseQuestionMarks(count: ids.count)
+        let rows = try Row.fetchAll(
+            db,
+            sql: "SELECT id, path FROM tag WHERE deleted_at IS NULL AND id IN (\(places))",
+            arguments: StatementArguments(ids))
+        return Dictionary(
+            rows.map { ($0["id"] as String, $0["path"] as String) },
+            uniquingKeysWith: { first, _ in first })
+    }
+
     /// "Everything tagged X" — the two application tables, resolved
     /// together (AppSpec §7: the UNION query; acceptable, and rare outside
     /// the pool). Distinct live targets only; `includeSubtree` widens the

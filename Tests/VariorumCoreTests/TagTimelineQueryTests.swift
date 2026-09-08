@@ -53,6 +53,31 @@ struct TagTimelineQueryTests {
         }
     }
 
+    /// **The bounded twin** (17o batch d, ledger row 18): the chrome's held
+    /// title observation re-fetches on every `container` write, so the names
+    /// it resolves must be read by id — never the whole taxonomy. Missing
+    /// and tombstoned ids are simply absent, which is exactly how the
+    /// chrome's per-kind fallback already reads a name it cannot resolve.
+    @Test func tagPathsReadsOnlyTheNamedTagsAndSkipsTheDead() throws {
+        try withOperations { ops, db in
+            let life = try ops.createTag(name: "life")
+            let goals = try ops.createTag(parent: life.id, name: "goals")
+            _ = try ops.createTag(name: "art")
+            let dead = try ops.createTag(name: "dead")
+            try ops.deleteTag(dead.id)
+
+            let paths = try db.read {
+                try Queries.tagPaths($0, ids: [goals.id, dead.id, "no-such-tag"])
+            }
+            #expect(paths == [goals.id: "life/goals"],
+                    "only what was asked for, and only what is live")
+            #expect(try db.read { try Queries.tagPaths($0, ids: []) }.isEmpty,
+                    "an empty ask reads nothing at all")
+            #expect(try db.read { try Queries.tagPaths($0, ids: [life.id, goals.id]) }
+                    == [life.id: "life", goals.id: "life/goals"])
+        }
+    }
+
     @Test func taggedPostItemsUseSubtreeSemanticsAndFindArchived() throws {
         try withOperations { ops, db in
             let life = try ops.createTag(name: "life")
