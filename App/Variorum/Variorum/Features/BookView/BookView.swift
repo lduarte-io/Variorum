@@ -1324,7 +1324,15 @@ struct BookView: View {
                 // gutter retired, left-anchoring would leave exactly the
                 // *"bizarrely open on the right"* she reported at wave 2c.
                 .frame(maxWidth: BookView.proseColumn, alignment: .leading)
+                // The column claims its measure BEFORE the margins flex —
+                // the same device the retired gutter's row used, and the
+                // reason it is needed here: `maxWidth` only CAPS, so three
+                // flexible children split the pane evenly and the prose
+                // landed at 374 pt against Write's 680 (caught by
+                // `outlineProseSitsOnWritesOwnMeasure`, which exists for
+                // exactly this).
                 .padding(.vertical, 22)
+                .layoutPriority(1)
                 clickOutMargin
                 }
                 .frame(maxWidth: .infinity)
