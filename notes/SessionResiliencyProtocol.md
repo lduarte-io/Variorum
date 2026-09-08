@@ -203,3 +203,33 @@ round's tail (midpoint review · ladder · closeout) rather than hand off.
 2. **Swift Testing's "Test run with N tests in M suites passed" COUNTS SKIPPED TESTS.** A suite disabled by
    `.enabled(if:)` still contributes to N. Read the `skipped:` lines (or XCTest's `Executed 0 tests`) before
    claiming a gated suite ran — the batch's record flips rode one commit late on exactly this.
+
+## Addendum — a MODEL BUDGET running out is a different death, and it needs a different move (2026-09-08, the use-report round's tail)
+
+Every death this file described until now was a SESSION death: the transcript ends, the tree survives, and the answer is
+resume-or-continue on the same model. The use-report round hit a new one. The author's **Fable usage limit** was reached
+while a fresh `fable-reviewer` was mid-read: the agent died with nothing written, and — the part that matters — **no Fable
+agent could be spawned to replace it, including the orchestrator itself.** The remedy is not resumption at all.
+
+1. **Recognise it by the error, not by the symptom.** `rate_limit` / HTTP 429 naming the model ("You've reached your Fable
+   limit") is a BUDGET death; a session-limit death says nothing about the model. Budget deaths do not clear on a retry
+   and are not fixed by a fresh agent of the same model — the whole class is unavailable until the limit resets.
+2. **Never resume a stale session to work around it.** The reflex is to reach for the sessions that hold the context.
+   Those are exactly the most expensive things to wake (this round's orchestrator was at ~600k tokens and its reviewer at
+   ~837k), and waking them spends the scarce budget on re-orientation rather than on work. Write instead.
+3. **Split the remainder by what actually needs that model.** Most of a round's tail does not: canon deltas, closeout
+   sections, the master plan's flips, archives, parity rows, handoffs, KnownIssues hygiene, an install refresh. Another
+   model can do all of it, and should, so that the constrained model's reset is spent only on the one act that needs its
+   judgment. Say in the handoff which item is which, and why.
+4. **The finish gets its own paste-ready document**, beside the author handoff and pointing at it: what remains, the exact
+   prompt for the constrained model's one act, the flow to run if that act raises findings (naming which agent types are
+   NOT of the constrained model and therefore free to use), and the mechanical steps behind it with their commands.
+   `notes/handoffs/use-report-round-2026-09-06-FABLE-KICKOFF.md` is the worked example.
+5. **Do not mark the work closed to make the gap tidy.** Record the open verification in the closeout itself, in the
+   author handoff's first section, and in memory — with the reason it is not being skipped. A round that says "one read
+   is owed and here is the prompt" is finishable by anyone; a round that says "done" with a silent hole is not.
+6. **A budget death is also a checkpoint prompt.** Whatever the surviving session's own model, it should immediately
+   sweep for anything the round recorded only in transcripts — the ledger statuses, the judgment-call numbering, table
+   well-formedness, superseded handoffs — because the sessions that would have known are the ones now too expensive to
+   wake. This round's sweep found 44 ledger rows still carrying their pre-fix status and a KnownIssues row whose cells
+   had been left in the wrong order.
