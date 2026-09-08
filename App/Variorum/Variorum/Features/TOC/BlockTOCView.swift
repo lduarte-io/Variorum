@@ -256,20 +256,16 @@ final class BlockTOCViewModel {
     /// START (R1-3); any other block is left alone (`.leave`, the shipped
     /// END — the sanity pass's RAISE-2; QUESTIONS #97).
     private func armPaneCaretLanding(blockID: String, variantID: String) {
-        guard let fact = session.commandRouter.currentBlock(for: postID),
-              fact.blockID == blockID
-        else {
-            paneCaretLanding = nil
-            return
-        }
-        paneCaretLanding = (
-            variantID: variantID,
-            landing: fact.utf16Offset.map(PaneCaretLanding.offset) ?? .start)
+        // Round 2 (R2-4): the entry rule is `PaneCaretLanding.entering` —
+        // one pure copy shared with `TakesViewModel`.
+        paneCaretLanding = PaneCaretLanding.entering(
+            session.commandRouter.currentBlock(for: postID), block: blockID
+        ).map { (variantID: variantID, landing: $0) }
     }
 
     /// What a pane rendering `variantID` is handed on going live.
     func caretLanding(forVariant variantID: String) -> PaneCaretLanding {
-        paneCaretLanding?.variantID == variantID ? paneCaretLanding!.landing : .leave
+        paneCaretLanding.map { $0.variantID == variantID ? $0.landing : .leave } ?? .leave
     }
 
     /// 17o batch b (her ruling U-20): Read's `edit` face holds a real caret

@@ -862,10 +862,13 @@ private struct WorkbenchInfoPanel: View {
                                 variantID: variantID,
                                 oldText: row.text ?? "", newText: newText)
                         },
-                        // 17o batch b's ladder, R1-3 (the record's note (a)):
-                        // the panel's pane enters the note's current block
-                        // where she was, else at its start — the same rule as
-                        // every other pane host. It still reports no caret
+                        // 17o batch b's ladder, R1-3 (the record's note (a)),
+                        // scoped at RAISE-2/J20 and said exactly at round 2
+                        // (R2-2): the panel's pane follows the models' entry
+                        // rule (`PaneCaretLanding.entering`) — the note's
+                        // CURRENT block enters where she was, else at its
+                        // start; any other block keeps the shipped END
+                        // (`.leave`, QUESTIONS #97). It still reports no caret
                         // (no `onSelectionChange`): a fourth reporter is a
                         // design act, not a ladder fix.
                         caretOnGoingLive: model.caretLanding(forVariant: variantID))

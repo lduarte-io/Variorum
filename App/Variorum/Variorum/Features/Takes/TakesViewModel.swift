@@ -588,21 +588,17 @@ final class TakesViewModel {
     /// keeps the "continue at the end of what you just made" it shipped with
     /// (the sanity pass's RAISE-2; QUESTIONS #97 names the edge).
     private func armPaneCaretLanding(for pane: PaneKey) {
-        guard let fact = session.commandRouter.currentBlock(for: postID),
-              fact.blockID == pane.blockID
-        else {
-            paneCaretLanding = nil
-            return
-        }
-        paneCaretLanding = (
-            variantID: pane.variantID,
-            landing: fact.utf16Offset.map(PaneCaretLanding.offset) ?? .start)
+        // Round 2 (R2-4): the entry rule is `PaneCaretLanding.entering` —
+        // one pure copy shared with `BlockTOCViewModel`.
+        paneCaretLanding = PaneCaretLanding.entering(
+            session.commandRouter.currentBlock(for: postID), block: pane.blockID
+        ).map { (variantID: pane.variantID, landing: $0) }
     }
 
     /// What a pane rendering `variantID` is handed. `.leave` for every pane
     /// the landing did not name, so nothing else on the board ever moves.
     func caretLanding(forVariant variantID: String) -> PaneCaretLanding {
-        paneCaretLanding?.variantID == variantID ? paneCaretLanding!.landing : .leave
+        paneCaretLanding.map { $0.variantID == variantID ? $0.landing : .leave } ?? .leave
     }
 
     // MARK: - The article's landing (17o batch b, row 8) — the board layout's,

@@ -230,7 +230,12 @@ final class PaneTextView: NSTextView, MarkdownFormattable {
     /// block went live at the first take's offset). Read and spent by the
     /// coordinator's liveness transition: a read→read render keeps it (the
     /// flip may take a render to arrive), a live render or any transition
-    /// consumes it, so it can never outlive the gesture that set it.
+    /// consumes it. Round 2 (R2-2), said exactly: it is spent by the NEXT
+    /// transition or live render of THIS pane — so on a host whose click
+    /// flips nothing (the workbench panel's read pane of a LOCKED take: the
+    /// authority moves, the pane stays read) it stays armed until that pane
+    /// next goes live, harmlessly — such a pane then lands at the click's own
+    /// place, the better landing, and it reports nothing.
     var clickBroughtPlace = false
 
     /// The plain click-to-focus gesture as ONE road — `mouseDown`'s tail and
@@ -638,6 +643,21 @@ nonisolated enum PaneCaretLanding: Equatable, Sendable {
     case start
     case end
     case offset(Int)
+
+    /// **The note's ENTRY rule, pure — ONE copy for both models** (the
+    /// ladder's round 2, R2-4; it was duplicated verbatim in
+    /// `TakesViewModel` and `BlockTOCViewModel`, two places a future flip
+    /// could miss). The landing a pane adopts when it takes the ring
+    /// PROGRAMMATICALLY for `blockID`, given the note's current-block fact:
+    /// the CURRENT block lands at its remembered place, else at its START
+    /// (R1-3 — QUESTIONS #97's PROVISIONAL default; a ruling for the END is
+    /// the one line here); any other block answers nil, which the models
+    /// hand the pane as `.leave` — the shipped END (the post-structural ring
+    /// landings; a click brings its own place anyway).
+    static func entering(_ fact: FocusedBlock?, block blockID: String) -> PaneCaretLanding? {
+        guard let fact, fact.blockID == blockID else { return nil }
+        return fact.utf16Offset.map(PaneCaretLanding.offset) ?? .start
+    }
 }
 
 // MARK: - The SwiftUI pane (read + live modes)

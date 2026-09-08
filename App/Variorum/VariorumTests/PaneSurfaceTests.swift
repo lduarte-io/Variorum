@@ -178,6 +178,21 @@ struct PaneSurfaceTests {
         window2.contentViewController = nil
     }
 
+    /// The ladder's round 2, R2-4: the entry rule is ONE pure function both
+    /// models call (`PaneCaretLanding.entering`) — the rule QUESTIONS #97
+    /// asks her to ratify, in one place with a pin on it.
+    @Test func theEntryRuleIsOnePureFunctionForBothModels() {
+        #expect(PaneCaretLanding.entering(nil, block: "b1") == nil, "no fact ⇒ the models hand `.leave`")
+        let other = FocusedBlock(postID: "p", blockID: "b2", variantID: "v", utf16Offset: 7)
+        #expect(PaneCaretLanding.entering(other, block: "b1") == nil, "another block ⇒ `.leave`")
+        let known = FocusedBlock(postID: "p", blockID: "b1", variantID: "v", utf16Offset: 7)
+        #expect(PaneCaretLanding.entering(known, block: "b1") == .offset(7), "the remembered place")
+        let unknown = FocusedBlock(postID: "p", blockID: "b1", variantID: "v", utf16Offset: nil)
+        #expect(PaneCaretLanding.entering(unknown, block: "b1") == .start, "#97's PROVISIONAL default")
+        let zero = FocusedBlock(postID: "p", blockID: "b1", variantID: "v", utf16Offset: 0)
+        #expect(PaneCaretLanding.entering(zero, block: "b1") == .offset(0), "zero is a place, not unknown")
+    }
+
     @Test func aTK1FallbackRendersAVisibleBannerInThePane() async throws {
         // The memo posture stops the world on fire in debug builds BY
         // DESIGN; the pin swaps the assertion for a no-op for exactly this
