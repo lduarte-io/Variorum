@@ -33,7 +33,8 @@ struct EditorView: View {
     /// - `.inSidebarBox` — **the BOOK's editing surfaces (18d batch 1, her
     ///   U-10)**: this editor renders NO bar of its own, because its doors
     ///   live in the sidebar's note box, which the shell builds from the
-    ///   registered live editor (`EditorRouter.active`). Wave 2c's `.side`
+    ///   editor UNDER THE CARET (`EditorRouter.editing`, never `active` —
+    ///   its own comment carries the measured reason). Wave 2c's `.side`
     ///   arm — the same bar as a vertical rail in the Outline's right gutter
     ///   — RETIRED with the gutter itself (U-17), and her ruling's own
     ///   sentence is why: *"then it can stop taking up room on the right and

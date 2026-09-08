@@ -1928,7 +1928,8 @@ private struct OutlinePostRow: View {
             }
         }
         // Ladder R1-10: the facts (one `renderPost` over the WHOLE note) feed
-        // the COLLAPSED card's excerpt and gutter line only — an expanded
+        // the COLLAPSED card's excerpt alone since 18d batch 1 retired the
+        // gutter line with the gutter (U-17) — an expanded
         // row renders neither, and every expanded row is a direct child of
         // the outer VStack now (never lazy), so "expand all" on Sherlock
         // used to read twelve full stories for nothing rendered. The task's
@@ -2088,9 +2089,11 @@ private struct OutlinePostRow: View {
                     .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
                     .help("Open this note in the full editor (Write · Takes · Lenses · …)")
                 }
-                // Wave 2c (W8-5): the excerpt stays on the card; the META
-                // moved out to the gutter — details to the side, never
-                // below the opening paragraphs.
+                // Wave 2c (W8-5): the excerpt stays on the card, and the
+                // note's facts are not under it. They were in the details
+                // gutter to the right until 18d batch 1 retired it (U-17);
+                // the sidebar's note box carries them now, for whichever
+                // note the book is pointing at.
                 if !excerpt.isEmpty {
                     Text(excerpt)
                         .font(tokens.body)
@@ -2166,9 +2169,9 @@ private func outlineEntryTitle(_ entry: Queries.ReadingEntry) -> String {
     entry.displayTitle
 }
 
-// (PostCardExcerpt was absorbed into OutlinePostRow at wave 2c — the one
-// fetch now serves the card's excerpt AND the gutter's meta, same
-// per-realized-row cadence.)
+// (PostCardExcerpt was absorbed into OutlinePostRow at wave 2c; since 18d
+// batch 1 retired the gutter (U-17) the one fetch serves the card's excerpt
+// alone, at the same per-realized-row cadence.)
 
 /// The navigator's settings leg (R43): finish, rename, extents — the book's
 /// own faces, beside the shelf's.

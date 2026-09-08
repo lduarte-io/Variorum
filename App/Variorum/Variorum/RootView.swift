@@ -66,7 +66,8 @@ struct RootView: View {
     /// **18d batch 1 (her U-10) — THE SIDEBAR'S NOTE BOX, composed here.**
     /// The focused pane's book publishes a VALUE and a DOOR; this view builds
     /// the box's content — the facts from the published id, the bar from the
-    /// registered live editor (`EditorRouter.active`) — and hands the sidebar
+    /// editor UNDER THE CARET (`EditorRouter.editing`, never `active`) — and
+    /// hands the sidebar
     /// a view to RENDER. The sidebar never constructs or holds the book's or
     /// the editor's view model (CLAUDE.md's P39 refinement); this composition
     /// is what keeps that true.
