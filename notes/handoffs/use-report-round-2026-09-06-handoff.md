@@ -39,6 +39,8 @@ Her evening writing with takes, answered whole. **18c** the typing model: the Re
 - **18d** (Opus ×3): 2 MAJOR, then a new MAJOR in round 2 (the Study cold launch), capped clean.
 - **The round-end Fable pass** (your extra ladder): round 1 found a MAJOR the five Opus/Fable ladders had all walked past — the whole shell re-rendering on every keystroke while a book note was live — plus a FIFTH surviving copy of the old seam grip. Nine findings, nine fixed, sanity pass 9 CLEAR. **Round 2 is the one thing still open** (it died at your Fable limit).
 
+**The totals, counted from the per-round tallies above: 1 BLOCKER and 21 MAJOR-class findings raised across the six ladders — 20 fixed with red-on-old pins, 1 dismissed as hollow by its own deciding pin.** Three findings in all were dismissed as hollow across every severity (a pin that passes on both sides is recorded, never fixed — the standing guard).
+
 **The pattern worth your eye: every single ladder's round 2 found a new MAJOR inside round 1's fixes. Five for five, and the round-end pass found a sixth thing nobody had seen.** That is why round 2 of the last pass is not being skipped.
 
 ## Finals
