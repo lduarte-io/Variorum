@@ -982,9 +982,14 @@ enum TutorialSeeder {
             + "the panel on the right: every take's saved moments, the takes it "
             + "archived, the takes it deleted, and where it came from.",
 
+            // U-2 (18c batch 1): \u{2318}\u{21E7}D keeps the other takes whole on
+            // the TOP block. This lesson and its staged take taught 13j's
+            // duplicate default until the 18f ladder's R3-2 (ledger row 44) —
+            // the U-2 sweep reached the structure chapter's ceremony lesson
+            // only, because neither text carries the word "ceremony".
             "This block has two takes. Put your cursor in the middle of it and "
             + "press \u{2318}\u{21E7}D: the take you are looking at splits across "
-            + "two new blocks, and the other take is copied whole onto both. "
+            + "two new blocks, and the other take stays whole on the first block. "
             + "What became of the block you cut? It was kept — whole, off to "
             + "one side, not deleted.",
 
@@ -1031,7 +1036,7 @@ enum TutorialSeeder {
             + "says so in its own receipt, while you are standing there.",
         ])
         try take(on: past.blocks[1],
-            "The other take of the dividing block: I ride WHOLE onto both halves when you press \u{2318}\u{21E7}D, and the block we came from is kept preserved.")
+            "The other take of the dividing block: I stay whole on the first block when you press \u{2318}\u{21E7}D, and the block we came from is kept preserved.")
         // Index 4, not 3: A7's merge sentence joined this lesson at the
         // post-13l polish round and sits between the lineage paragraph and
         // this one. (The walk's `theChapterIsStagedForItsActs` holds the

@@ -5249,4 +5249,52 @@ clean.**
 
 ### R-8 · RECORD (the implementer writes here from its first commit)
 
-*(empty until the implementer's first commit)*
+**NOT DONE (the record's first line, kept current):** at this checkpoint — every row below marked
+NOT-STARTED; the walk; the closing suites. Nothing outside the seventeen rows was touched: zero
+`Sources/VariorumCore/Sync/`, zero schema, no 18d work, no editor-seam change beyond row 47's one
+condition in `applyFocusSeeds` (flagged seam-adjacent below for the c/d/e reviewer).
+
+**The batch:** the window's CHROME as one acceptance unit — masthead · sidebar · divider · Index
+column · Compare's one door — plus the two ladders' routed residue (rows 43–47).
+
+| Row | What it is | Status | Pin |
+|---|---|---|---|
+| 9 | the divider's grip is too small / the I-beam wins | NOT-STARTED | — |
+| 10 | the Messages fill-code popover on the title | NOT-STARTED | — |
+| 11 | the title LEADS (U-8) | NOT-STARTED | — |
+| 12 | the placeholder shifts up on click | NOT-STARTED | — |
+| 13 | the sidebar headers' alignment + air | NOT-STARTED | — |
+| 17 | versions on a blockless note (core; U-19 (1)) | NOT-STARTED | — |
+| 18 | a rename doesn't reach the open strip | NOT-STARTED | — |
+| 19 | a date change doesn't reach the masthead title | NOT-STARTED | — |
+| 21 | the Index count ↔ ⋯ trailing edges | NOT-STARTED | — |
+| 27 | Compare speaks the raw `OperationError` | NOT-STARTED | — |
+| 40 | the tag field collapses on focus loss | NOT-STARTED | — |
+| 41 | the divider's white top | NOT-STARTED | — |
+| 43 | the Takes board's sheet receipt count | NOT-STARTED | — |
+| 44 | the field guide's deleting chapter still teaches ⌘⇧D's retired default | **DONE** (see below) | `theDeletingChaptersDivideLessonTeachesKeepOnTop` |
+| 45 | the Takes/Lenses bar's `block ▾` lacks the two ceremony rows | NOT-STARTED | — |
+| 46 | that bar's Divide help narrates the retired default | NOT-STARTED | — |
+| 47 | the bare arrival's `landing > 0` exemption (seam-adjacent) | NOT-STARTED | — |
+
+#### Row 44 — FIXED
+
+**Traced myself.** `TutorialSeeder.swift`'s deleting chapter, lesson *"what a block leaves behind"*,
+card 2 read *"…the take you are looking at splits across two new blocks, and the other take is copied
+whole onto both"*, and the staged spare take she reads in the fan said *"I ride WHOLE onto both halves
+when you press ⌘⇧D"*. Since 18c batch 1 (U-2) the act keeps the other takes whole on the TOP block, so
+the guide predicted a shape the app no longer produces — in the chapter whose whole point is performing
+the acts. **Fix:** both sentences re-worded to U-2's shape (the structure chapter's and the helper's own
+vocabulary — *"stays whole on the first block"*), a provenance comment above card 2, and the two test
+comments that narrated the duplicate shape corrected with them.
+
+**Pin (red-on-old):** `TutorialDeletionActsTests.theDeletingChaptersDivideLessonTeachesKeepOnTop` —
+**RED on `f4011a56` with 4 issues** (the lesson's prose contains "copied whole onto both" and lacks
+"stays whole on the first block"; the staged take contains "onto both halves" and lacks "stay whole on
+the first block"); GREEN after. The pin ties the WORDS TO THE ACT: it then runs the same ⌘⇧D on the same
+staged fan and asserts the successors carry `[2, 1]` active takes — that half is green on both sides by
+design (the act was already right; it is what makes a future default flip turn both halves red at once).
+Suite green: **13 tests / 1 suite**.
+
+**Sequencing (why this row went first):** her ONE restore act at the round's end re-seeds the field
+guide. This had to land before the handoff's restore note or the restore would seed the stale lesson.

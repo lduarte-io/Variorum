@@ -2594,9 +2594,9 @@ struct TutorialDeletionActsTests {
             })
             let range = try entryRange(harness, dividing.blockID)
 
-            // ⌘⇧D, mid-block — the fanned default (J4): the shown take is
-            // cut across two blocks, the other rides whole onto both, and
-            // the block itself is kept preserved.
+            // ⌘⇧D, mid-block — the fanned default (U-2, 18c batch 1): the
+            // shown take is cut across two blocks, the other stays whole on
+            // the first, and the block itself is kept preserved.
             harness.textView.setSelectedRange(
                 NSRange(location: range.location + range.length / 2, length: 0))
             harness.model.updateCaretContext()
@@ -2638,6 +2638,61 @@ struct TutorialDeletionActsTests {
                 try Queries.renderPost($0, containerID: lesson).map(\.blockID)
             }
             #expect(placed.contains(dividing.blockID), "Put back in note does what it says")
+        }
+    }
+
+    /// **The deleting chapter's divide lesson teaches U-2's keep-on-top, and
+    /// its words are pinned TO THE ACT** (ledger row 44; the 18f ladder's
+    /// R3-2). Both the lesson's card 2 and the staged spare take dated from
+    /// 13j's J4 duplicate default — *"the other take is copied whole onto
+    /// both"*, *"I ride WHOLE onto both halves"* — and the U-2 sweep reached
+    /// the structure chapter's ceremony lesson only, because neither text
+    /// carries the word "ceremony". Since 18c batch 1 the act keeps the other
+    /// takes whole on the FIRST block, so the prose predicted a shape the app
+    /// no longer produces. P-6 (the guide is the executable spec): the same
+    /// \u{2318}\u{21E7}D the lesson names is run here on the same staged fan,
+    /// and the take counts it leaves are asserted beside the sentences that
+    /// promise them — a future default flip makes BOTH halves red at once.
+    @Test func theDeletingChaptersDivideLessonTeachesKeepOnTop() async throws {
+        try await withTutorialWorld { session, db, bookID in
+            let lesson = try await db.read {
+                try lessonID($0, bookID: bookID, "what a block leaves behind")
+            }
+            let projected = try await projection(db, lesson)
+            let prose = projected.slots.compactMap(\.text).joined(separator: "\n")
+            #expect(!prose.contains("copied whole onto both"),
+                    "the retired J4 duplicate default, taught as fact")
+            #expect(prose.contains("stays whole on the first block"),
+                    "U-2's shape, in the lesson's own words")
+
+            let dividing = try #require(projected.slots.first {
+                $0.text?.hasPrefix("This block has two takes") == true
+            })
+            let fan = try #require(projected.fans[dividing.blockID])
+            #expect(fan.count == 2, "the lesson's two takes are staged")
+            let spare = try #require(fan.first {
+                $0.workingText.hasPrefix("The other take of the dividing block")
+            })
+            #expect(!spare.workingText.contains("onto both halves"),
+                    "the take she READS in the fan promised the old shape too")
+            #expect(spare.workingText.contains("stay whole on the first block"),
+                    "it says what it now does")
+
+            // The act the lesson names, on the block the lesson stages.
+            let harness = try tutorialEditor(session, db, postID: lesson)
+            let wasThere = Set(try harness.storeSlots().map(\.blockID))
+            let range = try entryRange(harness, dividing.blockID)
+            harness.textView.setSelectedRange(
+                NSRange(location: range.location + range.length / 2, length: 0))
+            harness.model.updateCaretContext()
+            await harness.model.invokeGesture(.divideAtCursor)
+            await harness.flush()
+
+            let successors = try harness.storeSlots()
+                .filter { !wasThere.contains($0.blockID) }
+            #expect(successors.count == 2)
+            #expect(successors.map(\.activeVariantCount) == [2, 1],
+                    "keep-on-top: the spare rides whole onto the FIRST block")
         }
     }
 
@@ -2704,7 +2759,7 @@ struct TutorialDeletionActsTests {
             try harness.reload()
 
             // The two blocks that stand where the divided one stood — the
-            // duplicating divide mints BOTH halves fresh (A is preserved).
+            // keep-on-top divide mints BOTH halves fresh (A is preserved).
             let successors = try harness.storeSlots().filter { !wasThere.contains($0.blockID) }
             #expect(successors.count == 2)
 
