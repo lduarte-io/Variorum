@@ -8385,4 +8385,337 @@ the reservation, while the first frame stands on the record's height whatever wi
 
 ### 18d LADDER — ROUND 1 FINDINGS (opus-reviewer)
 
-*(the reviewer writes here — severity-ranked, the REVIEW_PROMPT format, then the clean bill)*
+Cold review of `git diff ce6eb9cb..86f01d64` (18d batches 1–4) against `CLAUDE.md`, `notes/AppSpec.md`
+(§9 · §12), `notes/OverallModel.md` (I1–I10 · P1–P3 · S1–S5), `notes/SyncSpec.md`, `notes/KnownIssuesAndTechDebt.md`,
+this file's §1 (U-9 · U-10 · U-12 · U-13 · U-17), §3 rows 22 · 23 · 25 · 26 · 30 · 33 · 34, §5.4 whole,
+R-0 (P-3 · P-8 · P-9 · the P39 refinement), the briefs R-10…R-13 with their RECORDs and ADJUDICATIONs
+(J33–J39), QUESTIONS #99 · #100 · #101, and mockup figures C and D. Read myself, in this session.
+
+#### THE SCOPE CALL, FIRST (the orchestrator's question 1)
+
+**J34's `EditorRouter.editing` touch is NOT the editor seam. This round stays with Opus.** The change is
+two guarded assignments — `EditorViewModel.swift:2861–2863` (in `updateCaretContext`, above the existing
+body) and `:527–529` (in `teardown`, beside the `active` clear it mirrors) — publishing a `weak var` on
+`EditorRouter` (`EditorRouter.swift:40`). It touches no mount, no projection, no `BlockRangeIndex`, no
+`EditorTextView`, no identity attribute, no undo registration, no lifecycle, and no default's meaning; the
+briefs' own seam list (`BlockRangeIndex`/`EditorTextView`, custody/keychain, `Sources/VariorumCore/Sync/`,
+a default's meaning) is untouched, and `git diff --name-only` confirms the only `Sources/` file in the
+whole range is the additive `Queries/NoteStamps.swift`. What the touch DOES create is a second
+"which editor" answer beside `active`, which is MINOR-1 below — an architecture finding, not a seam.
+
+#### Findings, severity-ranked
+
+**[MAJOR-1] · `App/Variorum/Variorum/Features/Tutorial/TutorialSeeder.swift:929–932` (and `:958–959`) ·
+the field guide teaches the control 18d batch 2 retired.** The lesson "the tray & the Trash" says, verbatim:
+*"The tray has two sections. Archived holds… Leaving holds everything of this note's that is counting down —
+the blocks it deleted, the takes deleted on their own **(folded away until you open them)**, and any original
+riding a family's countdown."* Batch 2 retired both facts: there are no stacked SECTIONS (a segmented
+`Leaving · Archived` choice — `TrayPanel.viewChoice`), and there is no FOLD (`takesDisclosure` and
+`RecoveryCopy.trayTakesDisclosure` are gone; the takes are a filter chip carrying their own count). The
+later paragraph at `:958–959` still routes Delete Now to *"the Leaving **section** of a note's own tray."*
+**Mechanism:** she opens Help ▸ the field guide (or restores the tutorial, which re-seeds this exact text),
+follows it to the tray, and looks for a disclosure triangle that no longer exists under cards that are no
+longer stacked under headers. **This is the row-44 class the 18f ladder already routed as a real fix** (that
+row's own note: *"MUST land before her restore act at the round's end (the restore re-seeds the lesson)"*),
+and P-6 makes the tutorial the executable spec. Batch 2 fixed the one adjacent copy line it met
+(`BlockHistoryPane.swift`, *"choose Leaving ▸ takes"*) and did not sweep the seeder. **Pin (red-on-old):** a
+tutorial copy-truth assertion in the `Tutorial*Tests` spine — the tray lesson's paragraphs contain neither
+`"two sections"` nor `"folded away"`, and name the tab words `RecoveryCopy.trayLeavingTab`/`trayArchivedTab`
+and the `takes` filter; RED on `86f01d64` (both strings are in the seeded text today), green after the
+rewrite. **Fix:** rewrite the two paragraphs to the shipped control (two views at the top, one shared
+`all · blocks · takes` filter, every card naming its kind), and replace "the Leaving section" with
+"Leaving" wherever the seeder routes to it (`:903`, `:958`, `:1180`, `:1187`).
+
+**[MAJOR-2] · `App/Variorum/Variorum/Core/Views/SideColumn.swift:210–217` · the shared draggable seam still
+carries ledger row 9's defect, and batch 3 put it on three more boundaries.** `SideColumn`'s grip is a 9-pt
+`Rectangle` in an `.overlay` of a 1-pt divider, with no `zIndex` and with `NSCursor.push/pop` on `.onHover`.
+Ledger row 9 — her *"the hitbox for adjusting the size of the left bar… too small… sometimes the I looking
+pointer"* — is exactly this shape, and 17o batch d fixed it for `ShellSplit` **three ways**
+(`Workspace/ShellSplit.swift:59–67, 90–91, 104–110`): the grip became a real layout participant at
+`gripWidth = 14`, a ZStack sibling at `.zIndex(1)` in the HStack so the seam hit-tests **above** the detail,
+and the cursor became an AppKit cursor rect (the record says the `onHover` road took three cuts before it was
+abandoned). **Mechanism, traced:** in an `HStack` later siblings sit above earlier ones, and for a LEADING
+column the order is `sidePanel, divider, content` — so the ~4 pt of the grip that overhangs into the content
+is hit-tested by the content, which in Outline is the prose column and in Read is the page; the usable grip
+is ~5 pt of the 9. **Evidence from this round's own record:** R-12's walk, verbatim — *"An earlier attempt
+read 190 after a relaunch — a drag whose press had **missed the 9-pt grip**, so nothing was ever written."*
+That is row 9's symptom, observed by the implementer, on the new boundary. The class is pre-existing in
+`SideColumn` (its trailing consumers had it), but batch 3 tripled the exposure — the book navigator, the
+book Index's chapter panel and the note Read contents column — after her U-13 asked for exactly this
+boundary to be draggable. **Pin (red-on-old):** a geometry oracle on the seam, the shape row 9's own pin
+took — `SideColumn` reports its GRIP's frame (it already reports the divider's, via `onDividerFrame`) and a
+mount asserts the grip is ≥ `ShellSplit.gripWidth`, centred on the line; RED on `86f01d64` (nothing reports
+a grip frame, and the overlay is 9 pt), green after. **Fix:** port `ShellSplit`'s three-part fix into
+`SideColumn` — grip as a sibling at `.zIndex(1)`, `gripWidth` shared with `ShellSplit` (one constant, the
+hoist rule), the AppKit cursor rect in place of `onHover`.
+
+**[MINOR-1] · `App/Variorum/Variorum/EditorRouter.swift:16, 40` + `notes/KnownIssuesAndTechDebt.md` (the new
+row) · two routers of record, and the row's "nothing is known to be lost" is scoped narrower than it reads.**
+The app now answers "which full-document editor is current" two ways: `active` ("the last text view to
+attach") and `editing` ("the model that computed a caret context"). Exactly one caller — the note box
+(`RootView.swift:570`) — uses the correct one; the other five keep `active` and therefore answer about the
+Outline's projection-less shadow whenever a note is focused there. The KnownIssues row argues the quit and
+lock doors are covered (`QuitFinalizeRegistry` registers per POST) and concludes *"nothing is known to be
+lost."* **Two doors are lost, and the row should say so:** (a) `EditorCommands.swift:554/559` —
+`previousBlock`/`nextBlock` (⌃⌘↑/↓) call `active?.jumpToAdjacentBlock(±1)`; enablement is attachment-level,
+so the menu items are ENABLED and the act silently does nothing while an Outline note is focused, which is a
+straight P-2 break (*"a rendered door either performs the act… or delivers the operations layer's real
+refusal"*); (b) `ShellActions.swift:246` — `exportCaretBlock` guards on `editor.caretBlockID`, nil on the
+shadow, so it SPEAKS the unavailable note instead of exporting the block she is in. Architecturally, P-3's
+doctrine is one authority per question; this diff adds a second field with no stated rule for which door
+reads which, and the two doc comments that were supposed to state it are both wrong (MINOR-6). **No
+red-on-old pin is owed for the doc half** (it is documentation truth). For the code half the honest pin is a
+mount asserting `editorRouter.editing` and `editorRouter.active` name the same model in Write and disagree in
+Outline — green on both sides today, i.e. hollow as a bug pin; the real fix is the shadow, which is 13u2's.
+**Fix (this round):** amend the KnownIssues row to name the two doors as ACTUALLY wrong today, and put one
+sentence at `EditorRouter.active` saying which question each field answers and that `editing` is the one a
+door about "the editor she is writing in" should ask.
+
+**[MINOR-2] · `App/Variorum/Variorum/RootView.swift:308` + `Theme/EditorTypography.swift:49, 83` ·
+on a cold launch in the STUDY voice the persisted surface memories are refused for the first frames — U-12's
+"perfect after the first time" degraded to "perfect after the theme lands".** `EditorTypography.current` is
+initialised to the TERMINAL resolution (`EditorTypography.swift:49`) and is corrected only by
+`.onChange(of: theme.settings)` — **without `initial:`** — so it is not adopted until `theme.start()` has
+loaded settings that DIFFER from the default. `SurfaceSizeMemory.size` calls `fingerprint()`
+(`EditorTypography.fingerprint`) on every read (`SurfaceSizeMemory.swift:156–158`). **Mechanism:** launch in
+Study → `RootView` renders → `BookView`'s Outline rows realize → `surfacePlaceholder` reads
+`rememberedSurfaceSize` → the disk record's stamp is `IowanOldStyle-Roman-16-8`, the live stamp is still
+`.AppleSystemUIFontMonospaced-Regular-14-7` → refused → the row falls back to `unmeasuredSurfaceHeight`
+(800). Worse, a geometry report arriving in that window calls `remember`, which stamps the SESSION record
+with the Terminal fingerprint (`:163–166`) and so clobbers the loaded disk record in `records`; a `persist` inside
+the window would then write a Terminal-stamped record over her Study one. Everything converges once the
+theme lands and the surface settles, so nothing is corrupted — but the first frame after every Study launch
+is the picture her ruling exists to remove, and the batch's walk only ever demonstrated the refusal
+deliberately (step 4 planted a TERMINAL stamp) and never tested "a Study record, honored on a Study launch".
+**Pin (red-on-old):** seed a Study theme in the store, drive `RootView`'s theme adoption, and assert
+`EditorTypography.fingerprint` names Iowan BEFORE the first `SurfaceSizeMemory` read — or, mechanism-level and
+window-free, assert that `EditorTypography.current` equals `resolve(voice: loaded.voice, …)` immediately after
+`theme.start()` returns. RED today (it equals the terminal default until an `onChange` fires). **Fix:** adopt
+the resolved typography where the settings LAND (an `initial: true` on that `onChange` plus adoption at
+`theme.start()`'s completion), or make `SurfaceSizeMemory` answer nil rather than "refused" until the voice is
+known.
+
+**[MINOR-3] · `Features/Library/SidebarView.swift:740, 741, 746` and `Features/Editor/CommitBar.swift:827` ·
+four new SINGLETON DEBUG oracles, added into the exact class this round measured as broken under Swift
+Testing's parallel suites.** R-12's own record: *"the three DEBUG geometry oracles were single statics, and
+Swift Testing runs SUITES in parallel — a book mounted by `BookIndexEditingTests` landed in the same static as
+mine (measured: four chapter rows in a two-chapter book…)"*, and batch 3 keyed its three by id. Batch 1
+(earlier in the same letter) added `SidebarGeometry.noteBoxFrame`, `noteBoxHeaderFrame` and the
+`noteBoxFaces` COUNTER, plus `CommitBarGeometry.mounted`, all process-global and all unkeyed. `.serialized`
+on `NoteBoxGeometryTests`/`NoteBoxCompositionTests` orders tests WITHIN a suite; it does not stop another
+suite mounting a `SidebarView` or a `CommitBar` concurrently. **Mechanism:** (a)
+`aBookOpeningPutsTheBoxOnTheColumnSayingNoNoteSelected` waits on `noteBoxFrame != nil && noteBoxFaces["empty"] > 0`
+and then compares that rectangle against a rail height captured from ITS OWN mount — a concurrent suite's box
+satisfies both and the compare is meaningless; (b) `noteBoxFaces` is incremented on appear and decremented on
+disappear, so a cross-suite increment makes `> 0` pass spuriously and SwiftUI's mount-before-unmount ordering
+can leave it at 2 or −1 within one suite; (c) worst, `theBooksEditingSurfacesMountNoBarOfTheirOwn` — **the
+U-17 retirement's own pin, the one measured red at 3 issues** — asserts `mounted["horizontal"] == 0`, which any
+concurrently-mounted `EditorView` in another suite turns red. **No red-on-old pin applies** (this is harness
+hygiene, not product behaviour) and I label it as such rather than let the ladder call it hollow. **Fix:** key
+all four by the subject's id, as batch 3 did (`[String: CGRect]` / `[String: [String: Int]]`), and give the
+suites live UUID generators; then answer the orchestrator's standing question — **yes, the sweep is worth a
+row**: `MastheadGeometry`, `TakeCardGeometry`, `CompareGeometry`, `LensesGeometry`, `SidebarGeometry`,
+`BlocksWorkbenchOracle` belong in a KnownIssues row under 13u2's harness family beside the c/d/e cap's own
+oracle row, because the failure mode is a green pin that proved nothing.
+
+**[MINOR-4] · `App/Variorum/Shared/RecoveryCopy.swift` (batch 2's retirements) · three constants deleted
+from the SHARED copy home that the `mobile` branch's tray still consumes; `iOS BUILD SUCCEEDED` on `main`
+cannot see it.** Batch 2 removed `trayArchivedSection`, `trayLeavingSection` and `trayTakesDisclosure` on the
+"dead code removed, not parked" standard, with the reasoning that the words *"stay in the one copy home,
+which both apps compile."* They do not: the phone's tray face is not on `main`. In the mobile worktree
+(`~/dev/variorum-mobile`, branch `mobile` at `ddc91095`) all three are live consumers —
+`App/Variorum/VariorumMobile/Features/Write/MobileNoteTray.swift:114, 115, 579, 584` and that branch's
+`App/Variorum/Variorum/Features/Tray/TrayPanel.swift:117, 118, 809`. **Mechanism:** the next `main` → `mobile`
+pull (which `notes/plans/mobile-parity-round.md`'s branch discipline requires at every mobile kickoff) fails
+to compile in four places. The same edit also SHRANK `trayLeavingExplainer` so it no longer names the three
+populations — correct on the Mac, where the filter names them, and a copy regression on the phone, whose tray
+still has stacked sections and a fold and now has no sentence naming what Leaving holds. **No red-on-old pin
+exists in this tree** (a cross-branch compile break is not pinnable here) — stated honestly rather than
+dressed as a bug pin. **Fix:** either keep the three constants (marked retired-on-Mac, removed when the
+phone's tray is reorganized), or carry the break explicitly into the round's MOBILE PARITY LINE (§10) so the
+mobile session expects the four call sites and the shrunk explainer as work, not as a surprise.
+
+**[MINOR-5] · `Features/BookView/BookIndexView.swift:82` and `Features/ReadMode/NoteIndexColumn.swift:45` ·
+two chrome-bearing columns gained a floor BELOW their shipped width, and neither is walked nor pinned at that
+floor.** The book Index's chapter panel goes 300 → `[240, 460]` and Read's contents column 340 → `[240, 640]`
+— i.e. 60 pt and 100 pt narrower than the fixed measure that was the containment guarantee. `BookIndexView`'s
+`column` is not a list of names: `:352–354` puts `masthead()` (the book's title, the `Outline · Index · Book ·
+Read` word-tab row, settings, order) and `columnHeader`'s filter `TextField` (`:401`) inside it. **Mechanism:**
+P-8's standing law is the b6dae25 class — chrome that must stay inside its column — and this project keeps a
+pin for exactly it on the twin (`BookOrderConversionTests.theNavigatorsChromeStaysInsideItsColumn`, which
+batch 3 correctly re-ran because the navigator can now be 190 OR 360). The two new columns got no such twin:
+their only pins (`theIndexsChapterPanelIsTheWidthSheLeftItAtAndKeepsItsOwnMemory`,
+`theReadContentsColumnIsTheWidthSheLeftItAtAcrossARemount`) assert widths, and R-12's walk dragged both only
+WIDER (300 → 430, 340 → 600). The floors are unexercised by anything. **Pin:** the navigator's containment
+oracle, twinned — mount each column at its own `minimumWidth` and assert its chrome's drawn frames sit inside
+the column's. **Honest label:** the defect is unmeasured; if that pin is green at 240 on both sides the
+finding is HOLLOW and should be recorded as such rather than fixed. What is not speculative is the coverage
+gap: a fixed width was replaced by a range whose bottom nothing tests.
+
+**[MINOR-6] · five comments that now say the opposite of the code (the J8 copy-truth class).** (a)
+`Features/Editor/EditorView.swift:36` — `.inSidebarBox`'s doc says the shell builds the box *"from the
+registered live editor (`EditorRouter.active`)"*; it builds it from `editing`, and `active` is precisely the
+value that rendered the blank bar the walk found. (b) `RootView.swift:69` — the same sentence, on the state
+that holds the report. Both will send the next reader to the wrong field, which is the one mistake this
+batch's whole finding-1 exists to prevent. (c) `Features/BookView/BookView.swift:1931` — *"the facts… feed
+the COLLAPSED card's excerpt **and gutter line** only"*; the gutter line is retired. (d) `:2091` — *"the
+excerpt stays on the card; the META moved out to the gutter"*; there is no gutter. (e) `:2170` — *"the one
+fetch now serves the card's excerpt AND the gutter's meta."* **Fix:** five one-line edits.
+**Not a finding, and cleared here so nobody re-raises it:** `BlockPastCopy.deletedTakesHeader`
+(`TutorialSeeder.swift:1019`) is NOT dead copy — it resolves to `BlockHistoryPath.deletedSection`
+(`Shared/BlockHistoryFace.swift:92`), Block History's own live region, pinned twice in `TutorialWalkTests`
+(`:2197`, `:2725`). The tutorial line around it is about Block History, not the retired tray fold.
+
+**[MINOR-7] · `Core/Views/SidebarNoteBox.swift:58, 137` · the shared-chrome home now depends on a feature.**
+The box reads `SidebarView.rowPadding` and `SidebarView.headerAir`, and batch 1 un-private'd two constants in
+`Features/Library/SidebarView.swift:330, 334` to allow it. The placement rule's direction is one-way —
+components move UP into `Core/Views/`; `Core/Views/` reaching DOWN into `Features/Library/` for layout numbers
+inverts it, and it makes a Library edit able to move a shared component silently. **Mechanism:** low harm
+today (one module), real drift tomorrow — the next reader who moves `rowPadding` has no signal that a file in
+`Core/Views` reads it. **No pin applies** (an architectural finding; the traced degradation is the coupling
+itself). **Fix, cheap and one-way:** move `groupPadding`/`rowPadding`/`headerAir` into `SidebarLayout` (the
+layout brain the box ALREADY reads for `groupHeaderHeight` and `railGroupHeight`, and which is where the fit
+math lives), and re-privatise the `SidebarView` copies; or move `SidebarNoteBox` into `Features/Library/`,
+since the sidebar is its only renderer.
+
+**[MINOR-8] · `App/Variorum/VariorumTests/RecoveryExplainerTests.swift:53` · a pin whose name no longer
+matches its subject, and a rule the tray lost coverage of.** `theTrayLeavingExplainerRendersWholeAtTheNarrowestPane`
+now renders `OriginPeekCopy.explainer` under `BlockHistoryPath.cameFromSection` — nothing of the tray. The
+retarget is argued honestly in the diff, and the family-level claim survives; the NAME does not, and a
+grep-based audit of "what pins the tray's explainer" now returns a false positive. Separately, the tray's own
+explainer moved out of `CalmSectionHeader` into a plain `Text` (`TrayPanel.explainerLine`), so row 89's rule
+(*a meaning line wraps whole, never truncates*) is now unpinned for the surface it was written for.
+**Pin:** rename to what it asserts (e.g. `theRecoveryFamilysLongestExplainerRendersWholeAtTheNarrowestPane`),
+and add a narrow-pane render of `TrayFilterFace.explainer(.leaving, home: .post)` in the tray's own suite —
+red on old only if it truncates, so if it is green on both sides record it as the no-op it is.
+
+**[NIT-1] · `Features/Tray/TrayPanel.swift:366` · `TrayViewModel.nothingIsLeaving` has no production reader
+left** (the panel's empty line is `TrayFilterFace.nothing(view:kind:home:)` now); its only caller is
+`TrayPanelMoveTests.swift:292`. The batch's own standard is "dead code removed, not parked" — either delete it
+and let the test assert `TrayFilter.count(contents, view: .leaving) == 0`, or say at the code why it stays.
+
+**[NIT-2] · `Features/Tray/TrayPanel.swift:486` · a reveal overwrites her session tray memory.** `applyReveal`
+calls `select(view:)`/`select(kind:)`, and both call `remember()`, which writes `AppSession.trayViewMemory`.
+So opening the tray from a lineage door doesn't just land on the revealed row's view — it becomes "the last
+view" for the rest of the session, and the next unrelated ⌫ press opens there instead of where she last chose.
+§5.4 says *"Remembered: the last view and filter per session"*, which reads as her choice, not a landing.
+One line: set `view`/`kind` directly in the reveal arm without `remember()`.
+
+**[NIT-3] · `Core/Views/SurfaceSizeMemory.swift:180` · `forget` has no production caller.** Its stated
+precedent, `CurrentBlockMemory`, is evicted from production code (`CommandRouter.swift:225`,
+`currentBlocks.forget(postID:)`); this one is called only from `SurfaceSizeMemoryTests.swift:352`. So a
+deleted or purged note leaves one or two `surfaceSize.*` keys in UserDefaults forever. Harmless at the record's
+own arithmetic (~40 bytes), and view state a `defaults delete` may end — but the asymmetry with the precedent
+it cites is worth one line either way (wire it to the same occasion, or say at the code why it does not).
+
+#### Considered and cleared (traced, so the next reader does not re-raise them)
+
+- **The walk's `.deleteTake` observation — the board's context door IS wired; a pin for it would be green on
+  both sides, i.e. hollow.** I traced the whole path: `TakesBoardView.washedCell:791` builds `TakesCellView`,
+  which passes `menuItems: { menuSpecs(resolved:) }` (`TakesShared.swift:185`) into `PaneSurfaceView`, which
+  forwards it (`PaneSurface.swift:936`) to `PaneSurfaceRepresentable`, which sets `view.variorumMenu` in BOTH
+  `makeNSView` (`:1032`) and `updateNSView` (`:1060`), and `PaneTextView.menu(for:)` (`:361–380`) inserts the
+  specs ABOVE the inherited menu. `menuSpecs` contains `TakeCardMenuCopy.deleteTake` (`TakesShared.swift:276`)
+  and can never return empty. So the board IS a `.contextMenu` renderer for `.deleteTake` by construction, the
+  registry's `doors: [.contextMenu, .surface]` (`CapabilityRegistry.swift:427`) is satisfied on this surface
+  and not merely by the union, and P-1 is not violated. The walk's *"only AppKit's own text menu"* is
+  unreproduced by reading; the plausible remaining explanations are environmental (the right-click landing on
+  the card's chrome/overlay rather than the pane's text view, or the cell falling to its `· · ·` gap branch
+  when `resolvedTake` is nil). **Recommendation: do not open a row.** A mount pin asserting
+  `PaneTextView.menu(for:)` carries the delete row would pass on the pre-batch tree too — the hallucination
+  guard's own definition of hollow. If she sees it again, the evidence owed is a walk that records where the
+  pointer was.
+- **`BookView.surfacePlaceholder` standing on a remembered height without a width compare (batch 4's argued
+  non-fix) — the argument holds; I set out to falsify it and could not.** The record's reasoning is sound in
+  both directions: the reservation, where a wrong width would actually mis-lay the page, DOES refuse
+  (`stableSurfaceWidthTolerance`, pinned twice here including once on a persisted record), and the placeholder's
+  alternative is `unmeasuredSurfaceHeight` (800), which is wrong by ~25× where a foreign-width memory is wrong
+  by the width ratio. The TYPOGRAPHY half is checked, which is the half where the fallback is honestly better.
+  The asymmetry is pre-existing (the flow's `FlowHeightEstimate.honestHeight` compares because it has an
+  estimate to fall back to; the Outline has none). One thing the record does not say and that the closeout
+  should: the harm is asymmetric — a memory taken NARROW and used WIDE over-reserves and pushes the next
+  chapter off screen (the walk's capture 04 picture, at a planted value), and that direction self-corrects in
+  ~4 s at the settle. Accepted as recorded, not a finding.
+- **The P39 refinement (question 2) — the composition is clean.** `BookView` publishes a VALUE and a CLOSURE
+  upward (`onNoteBox`, `BookView.swift:44`); `RootView` composes (`noteBoxView`, `RootView.swift:555–589`),
+  reads `session.editorRouter.editing` (a router it owns) and builds `CommitBar(model:axis:.box)` itself;
+  `SidebarView` receives `var noteBox: AnyView?` (`SidebarView.swift:183`) and only RENDERS it. No feature
+  constructs, holds, or calls into a sibling's view model; P39b (`WriteTakesPanel` → `TakesViewModel`) is
+  untouched. The gate that keeps a stale report off the column is real and correct: `noteBoxView` re-derives
+  the focused pane's showing book rather than trusting the stored report, and `adoptNoteBox` stamps CLEARS with
+  their publisher so SwiftUI's mount-before-unmount ordering cannot erase the arriving book's box.
+- **The leading column and `layoutPriority` (question 5) — respected, and the pin that would catch it rides
+  green.** `SideColumn.body` puts `content()` into the HStack with only `.frame(maxWidth: .infinity)` and no
+  container of its own, so Outline's `clickOutMargin · prose(.layoutPriority(1)) · clickOutMargin` HStack
+  keeps deciding; the priority is applied OUTERMOST at `BookView.swift:1389` (after `.frame(maxWidth:)` and
+  `.padding(.vertical:)`), which is the order batch 1's closing suite proved is load-bearing;
+  `OutlineWritingSurfaceTests.outlineProseSitsOnWritesOwnMeasure` was re-run green in batch 3's closing run.
+- **The tray's populations under the new filter (question 4) — byte-unchanged.** `TrayContents` is assembled
+  from the four listings the model already held (`TrayPanel.swift:343–346`), `TrayFilter.rows` only SELECTS from
+  them, `count` is defined as `rows(...).total` so a chip cannot advertise a size the list does not hold, and
+  `putBackDeleted`/`putBackOriginal`/`putBackArchived`/`takeRow`/the purge confirm are unmodified. The two
+  truncation lines are correctly re-gated to the cell that renders their rows. The archived · takes cell being
+  empty by construction is honest (it names Block History), and `viewHolding` asks only the two block
+  populations because a reveal names a block.
+- **Zero `Sources/VariorumCore/Sync/`, zero schema, zero migration, no lockstep event owed.** Confirmed by
+  `git diff --name-only ce6eb9cb..86f01d64` — the only `Sources/` files are `Queries/NoteStamps.swift` and its
+  test. `SurfaceSizeMemory` and the three column widths are UserDefaults, local-only, never synced (S1–S5
+  untouched); no default's meaning moved.
+
+#### CLEAN BILL — load-bearing things I checked myself and found solid
+
+- **`Queries.noteStamps` (piece A) — run, not trusted.** `swift test --filter NoteStampsTests` in this tree:
+  `Test run with 5 tests in 1 suite passed after 0.105 seconds`. The query is one indexed read over the note's
+  own rows (`Sources/VariorumCore/Queries/NoteStamps.swift:38–56`), returns nil for a missing or tombstoned
+  container (the `containerHeader` convention SyncSpec §5 asks read sides for), and its `savedAt` correctly
+  joins through LIVE variants and LIVE blocks and LIVE placements, so an unrendered take's savepoint counts and
+  a cascade-tombstoned block's does not — exactly what the four pins claim.
+- **U-17's retirement is complete and the dead code is gone, not parked.** `EditorView.BarPlacement.side`,
+  `CommitBar.Axis.vertical` with `verticalBody`/`railPair`/the `bookSideRailCollapsed` preference,
+  `BookView.outlineGutterWidth`/`outlineGutterSpacing`/`outlineFocusedRowWidth`/`gutterDetails`, the row's
+  `meta` state and `BookOutlineRows.gutterLine` are all absent from the tree; the spread's editor
+  (`SpreadBookView.swift:358`) and the Outline's focused row (`BookView.swift:1872`) both pass
+  `.inSidebarBox`. `loadFacts`'s whole-note read is correctly gated on the COLLAPSED form
+  (`BookView.swift:1936–1939`), so "expand all" on Sherlock still reads nothing.
+- **The `.box` bar is the SAME bar, not a copy.** `boxBody` composes `blockMenu`, `takesDoor`, `commitDoor`,
+  `historyDoor`, `presentingNoteDoors(noteMenu)`, `commentsDoor`, `formattingRow` (via the popover) and the
+  `WordTargetFace`/`?` footer — every one of them the property the horizontal bar renders, so the retired
+  vertical rail lost no door and gained the newlines chip. P-1 holds: the registry's doors are still declared
+  once and rendered from the one component.
+- **The box's height rule is a measurement, not a constant.** `SidebarLayout.railGroupHeight(rowHeight:railRows:)`
+  is a function of the DRAWN row height, the column budgets the box as `railEquivalentRows` in both `rowCount`
+  and `headedGroupCount`, and the box takes it as a fixed frame with an internal `ScrollView` — so the Open
+  strip cannot move between a note and a book or between the three states, which is the whole of her
+  *"measured to take up the same amount of room."* The oracle compares two DRAWN rectangles, and its
+  red-on-old is real (probe 1: 110/208/178 against 240).
+- **The facts read's cadence is right.** `NoteBoxFactsModel` is a `.task(id: "postID|isLive")` read, not a
+  `ValueObservation` — the header says why (`variant` is the autosave table, and a standing observation would
+  re-run the note's whole read per keystroke, which P1 forbids), and it is strictly cheaper than the
+  per-realized-row `loadFacts` cadence it sits beside. `facts(for:)` refuses to hand a stale note's numbers to
+  a new note's title.
+- **The width brain's mirror is a relation, not a second table of numbers.** `draggedWidthFromLeading` routes
+  through the same `width(...)`, so R1-7's past-the-edge floor could not be forgotten on the new side, and the
+  pin holds `leading(x) == trailing(total − x)` over a stride. The one deliberate change to the shipped rule
+  (the unmeasured first pass now clamps to the host's floor and ceiling) is stated, and the two shipped
+  unmeasured cases are inside `[280, 640]` either way — I checked, rather than taking the record's word.
+- **`SurfaceSizeMemory`'s write cadence is the design and it holds.** `remember` touches only the session
+  dictionary; the disk is written by `persist` from `StableSurface`'s existing `settled` announcement, deduped
+  against `written`; `record(_:)` consults UserDefaults once per key; an unreadable record reads as no memory
+  rather than an error; and the separator-safe `split(maxSplits: 2)` means a fingerprint containing `|` still
+  round-trips. `StableSurface`'s reservation, its width refusal and R1-1's settle rule are byte-identical and
+  `StableSurfaceTests` rides unmodified (verified in the diff, not assumed). The two key spaces and two
+  fingerprints are justified: `FlowHeightEstimate.fingerprint` is the page's own metrics, and the Outline's is
+  derived from `Resolved` — which really does move with the inline-comments setting, since
+  `EditorTypography.resolve` folds `inlineCommentSpacing` into `paragraphSpacing` (`:65–66`).
+- **The click-out is a sibling, never an overlay.** `clickOutMargin` (`BookView.swift:1460–1465`) is an HStack
+  sibling of the prose column with `contentShape` + `onTapGesture`, so no tap layer sits under a live text
+  surface; a chapter-row click also releases focus (`BookView.swift:1177`) while leaving expansion alone,
+  which is her *"you've clicked out of something"* made literal in both places.
+- **The Index's own selection report is the right shape.** `BookViewModel.noteIndexSelection` is deliberately
+  NOT `indexAnchorPostID` — the arrival's seed writes no W21 carry, and the box asks a different question — and
+  the index reports both its selection and its live note, with `.onDisappear` clearing both. `BookNoteBox`
+  disagrees with `BookAnchor` ON PURPOSE and says so at the code, with a pin asserting the disagreement.
+- **The canon delta AppSpec §12 owes is correctly identified and still open.** §12's *"Outline's open right
+  earns its keep as a DETAILS GUTTER"* is now false in the shipped app; R-10's record names it and §10 assigns
+  it to the letter's close. Tracked, not missing. So is the round's MOBILE PARITY LINE (§10) — which MINOR-4
+  above gives concrete content for.
