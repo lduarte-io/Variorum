@@ -5988,4 +5988,95 @@ in U-1…U-20 was re-opened.
 
 ### 17o c/d/e LADDER — ROUND 1 FINDINGS (opus-reviewer)
 
-*(the reviewer writes here — severity-ranked, the REVIEW_PROMPT format, then the clean bill)*
+**THE SEAM QUESTION FIRST (the brief's own precondition).** The diff does **NOT** touch the editor
+seam proper, and nothing here needs Fable. Verified by reading, not assumed: zero
+`Sources/VariorumCore/Sync/`, zero custody/keychain, zero schema, zero migrations; `BlockRangeIndex`
+and `EditorTextView` are untouched (empty diffs); `PaneTextAuthority`'s code and semantics are
+untouched — batch c's `PaneSurface.swift` hunks are the measurement brain (`PaneMeasurement`), a new
+pure `PaneDecoration`, and one new pushed parameter on `PaneSurfaceView`, and the file's authority
+section has no hunk. **Row 47 is seam-ADJACENT and no more:** it is one condition in
+`EditorViewModel.applyFocusSeeds`' bare-arrival arm (`:1888–1918`) plus a new pure read
+(`rememberedArrivalLanding`, `:2056–2072`) whose sibling `bareArrivalLanding` is byte-identical in
+signature and behaviour — the index, the storage and the identity machinery are not consulted
+differently. **No default's meaning moves:** `PaneSurfaceView.indicator` is a NEW parameter whose
+default is the shipped ring, `SidebarLayout.groupHeaderHeight` is a layout constant, and the two
+ruled behaviour changes (row 17's mint, row 40's collapse) are her U-19 (1) and U-15, not defaults.
+
+#### Findings, severity-ranked
+
+**[MAJOR] · `App/Variorum/Variorum/Surface/PaneSurface.swift:101–110` (the fallback) + `:73–85` (the
+claim it rests on) · row 16's fix leaves the EMPTIEST case of her own gesture unfixed, and the doc
+states the opposite as fact.**
+
+*Mechanism, traced from the batch's own two measurements and the code in front of me.*
+`extent(of:)` returns `bottom ?? layoutManager.usageBoundsForTextContainer.height` — the ratcheting
+property is the fallback whenever the enumeration yields no fragment. The record establishes both
+halves of the trap itself: (i) *"the EMPTY document … lays out no fragment at all"* (the steady-state
+table's first row: `empty | property 17.0 | fragments 0.0 → falls back to 17.0`), and (ii) the
+property *"is a HIGH-WATER MARK for its container's life … it grows and never shrinks"* (1223 → 1189
+after 25 of 30 lines went, unmoved for six turns). Put together: a take that is emptied **completely**
+— select the rest and delete, or backspace through the last character — lays out zero fragments,
+takes the fallback, and reads the container's tallest-ever height back. The pane does not merely fail
+to shrink; it shrinks as she deletes and then **jumps back to ~1223** when the last character goes.
+That is her punchlist 13 (*"delete a lot of text from a take… empty gap… until you switch modes"*) at
+its endpoint, inside the row the batch reports FIXED.
+
+The doc's justification is falsified by the record's own finding: *"the EMPTY document … while the
+property still reports one empty line's 17 pt; the fallback below keeps that shipped number"* (`:81–
+85`) is true only of a container that never laid out more — which is exactly the container the
+fallback is not needed for. For the container the fallback IS reached on in use, the property is the
+high-water mark the fix was written to escape.
+
+*Pin that would prove it (red on the current tree):* in `TakePaneMeasureTests`, beside
+`aPaneThatLosesMostOfItsTextShrinksWithinOneTurn` and on its exact rig — mount the live 30-line pane,
+select the WHOLE document and `deleteBackward`, pump one turn, assert `pane.bounds.height` is within a
+line or two of a fresh empty pane's (≈ 17 + insets) rather than the 30-line height. **Stated honestly:
+this is the one link I could not measure read-only** — whether an EMPTIED (as opposed to born-empty)
+TK2 document really enumerates zero fragments. The record measured the born-empty case; if an emptied
+container keeps one fragment for its empty paragraph the pin is **green on both sides and this finding
+is hollow**, and I would rather say that here than have the ladder say it. One run decides it.
+
+*Fix shape if red:* stop letting the ratchet be the fallback — take the property only when the layout
+manager has never laid out (or gate on `documentRange.isEmpty` and return the typography's own empty-
+line height), so the fallback can never hand back a number the text has outgrown.
+
+---
+
+**[MAJOR] · `App/Variorum/Variorum/RootView.swift:462–467` · `:474–476` · `:736–746` · `:748–750` ·
+the parked `blockTarget` is never cleared by the `openHere` doors — CONFIRMED, and batch e adds a new
+way to park one. (This is J29 (a), confirmed with the mechanism the adjudication asked for — and its
+proposed one-line fix is wrong.)**
+
+*Mechanism, traced end to end.* `open(_:blockID:in:)` (`:736`) parks `blockTarget =
+BlockTarget(containerID:blockID:)` when a block is named and **nils it otherwise** (`:743`);
+`adopt(_:in:)` (`:462`) — which is all `opener(_:)`/`openHere` does (`:474–476`) — never touches the
+field. Nothing else in the file assigns it (`blockTarget` appears at `:59`, `:741`, `:743` only), so a
+park is **never consumed and never expires**: `target(for:)` (`:748`) keeps answering for that
+container id forever. The consumers re-land it on every mount — `PostDetailView(initialBlockID:
+target(for: postID))` with `.id("\(postID)#\(target(for: postID) ?? "")")` (`:634`, `:637`) and
+`PoolDetailView` the same (`:666`, `:667`).
+
+Concretely, and in one view: the Library's block hit parks a target (`:601`, `onOpenBlock` →
+`open(picked, blockID:)`); the Library's ordinary row (`:600`, `onOpen: openHere`) then re-enters that
+same note without clearing it, so the caret lands on the old block instead of the caret her note
+remembers. Every `openHere` door has the same exposure — the Shelf (`:594`), the Library (`:600`),
+Pool posts (`:612`), the folder (`:643`), Recovery (`:674`, `:677`) and Archived (`:683`). **What this
+diff changes:** batch e's card door now parks a target for a POOL container (`:626`), a shape that
+never parked one before — open a snippet card (parks `(poolX, B)`), go anywhere, come back to that
+group through Recovery's `openPool` (`:677`) or the folder/Library road, and the caret lands on the
+clicked-an-hour-ago snippet. That directly contradicts row 42/U-20's ruled promise ("every door into
+Write lands at the remembered caret"), which 17o batch b shipped two batches ago.
+
+*The record's proposed fix is wrong as written.* R-9 says *"it is one line (`blockTarget = nil` inside
+`adopt`)"* — but `open` **sets** the target and then calls `adopt`, so clearing inside `adopt` would
+erase every park at the moment it is made and delete the Stage C landing road entirely. The correct
+one-liner is on the other side of the pair: `opener(_:)` becomes
+`{ destination in open(destination, blockID: nil, in: pane) }` (`:474–476`), which is the same
+navigation plus the nil the road already knows how to write.
+
+*Pin that would prove it (red on the current tree):* the field is `@State` on `RootView`, so the honest
+pin is a DEBUG oracle on the parked target (the round's own `SidebarGeometry`/`ShellGeometry`
+pattern) read from a `PaneMountTests`-shaped mount: open note X at block B through the block door,
+navigate to Y through `openHere`, return to X through `openHere`, and assert `target(for: X) == nil`
+(and, on the same mount, that the editor's landing is the remembered caret, not B). Red today at the
+first assertion.
