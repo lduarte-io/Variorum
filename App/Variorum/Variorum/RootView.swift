@@ -657,11 +657,13 @@ struct RootView: View {
                     // park re-threw her to the named block instead of the
                     // caret she left (round 2's MAJOR).
                     //
-                    // BELOW the `.id`, deliberately and measured: a modifier
-                    // ABOVE it wraps the identified child, so it keeps its own
-                    // lifetime across an identity change and never fires
-                    // again — the first cut of this line sat there and the
-                    // park was never spent.
+                    // `.id` comes LAST in this chain (a few lines down), so it
+                    // identifies the `.onAppear` written here and a new
+                    // identity re-fires the spend. Moving `.onAppear` AFTER
+                    // the `.id` in the source makes it outlive the identity
+                    // and it never fires again — measured: the first cut sat
+                    // there and the park was never spent (the 17o c/d/e
+                    // ladder's round-3 NIT-1 reworded this in one vocabulary).
                     .onAppear { router.spendLanding(for: postID) }
                     // A different post — or a NEW landing for this one — is a
                     // different editor. The key is the landing GENERATION, not

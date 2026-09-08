@@ -2909,3 +2909,9 @@ Everything is committed and pushed; no revert is in flight; the tree is clean; t
 ## CLOSEOUT — the Act 10 correction round CLOSED (2026-09-02 ~06:15 MDT)
 
 *[removed for publication]*
+
+---
+
+## Supersession recorded after the round (2026-09-08)
+
+> **Rows 4 · 19 — SUPERSEDED 2026-09-08 by her ruling U-8** (the use-report round, 17o batch d, ledger row 11; `5ce18072`). The centered title is retired: the title LEADS, its band starting at row two's path-chip edge and running right to the icon row's gap. Row 4/19's *defect* is not re-opened — an asymmetric masthead was the complaint, and a leading title on the same edge as row two answers it the way she asked. What survives of batch A's work is row 80's clause (the title never runs under the icons), now carried by `theTitleLeadsWithRowTwoAndReachesPastTheOldCenteredMeasure`; `theTitleBlockCentersOnTheMastheadInEveryMode` is deleted rather than weakened. Row 58's two "title stays centered" clauses are rewritten to the leading rule; row 80's pure pin to the trailing inset alone.
