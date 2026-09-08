@@ -131,14 +131,16 @@ extension Operations {
             }
             let now = date.now
             func anchorBlock(_ post: Container) throws -> String {
-                if let id = try String.fetchOne(
-                    db,
-                    sql: """
-                        SELECT block_id FROM container_block
-                        WHERE container_id = ? AND deleted_at IS NULL
-                        ORDER BY position, id LIMIT 1
-                        """,
-                    arguments: [post.id]) {
+                // The first-live-placed-block rule is `firstLivePlacedBlock`'s,
+                // consumed rather than typed a second time (17o c/d/e ladder
+                // round 1, NIT-2). The helper's own sentence has claimed since
+                // 13l that it IS this rule made shared, and it was the more
+                // correct of the two copies: it JOINs `block` on liveness, so a
+                // live placement left over a TOMBSTONED block is not chosen as
+                // an anchor — an edge there would render nothing. Where that
+                // leaves a post with no live placed block at all, the mint arm
+                // below gives it one, which is exactly what U-19 (1) asks for.
+                if let id = try Self.firstLivePlacedBlock(db, of: post.id) {
                     return id
                 }
                 try ensureUnlocked(post)

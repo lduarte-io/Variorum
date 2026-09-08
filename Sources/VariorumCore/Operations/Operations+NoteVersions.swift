@@ -319,8 +319,13 @@ extension Operations {
     // MARK: - Internals
 
     /// A container's first live placed block, in the order the note reads —
-    /// the `version_of` anchor's own rule (`markPostsAsVersions`' `firstBlock`,
-    /// made shared rather than typed a second time).
+    /// the `version_of` anchor's own rule, made shared rather than typed a
+    /// second time. **And now actually consumed there** (17o c/d/e ladder
+    /// round 1, NIT-2): `markPostsAsVersions`' anchor (`Operations+Versions
+    /// .swift`, `firstBlock` until 17o batch d renamed it `anchorBlock`) had
+    /// kept its own inline copy, and the two disagreed — this one JOINs
+    /// `block` on liveness and the copy did not. This is the rule; a live
+    /// placement over a tombstoned block is not a place to anchor an edge.
     static func firstLivePlacedBlock(_ db: Database, of containerID: String) throws -> String? {
         try String.fetchOne(
             db,
