@@ -43,13 +43,25 @@ nonisolated enum SidebarLayout {
 
     /// The column's fixed chrome at the generous pitch, for a column that
     /// carries all THREE headed groups (starred · the note's rail · the Open
-    /// strip — each a 22-pt header and a 19-pt separator): the top padding,
-    /// the headers, the separators and the bottom status inset — everything
-    /// that is not a row. 14 (top) + 3 × 22 + 3 × 19 + 96 (the status rows
-    /// and the bottom padding) = 233. Ladder R1-12: the fit test counts the
-    /// groups ACTUALLY present (`chromeHeight(headedGroups:)`) — a column
-    /// with no starred group and no rail carries one header and one
-    /// separator, ~80 pt less, and used to compress a little early.
+    /// strip — each one `groupHeaderHeight` of header and `separatorHeight`
+    /// of separator): the top padding, the headers, the separators and the
+    /// bottom status inset — everything that is not a row. It is
+    /// `chromeHeight(headedGroups: 3)` and nothing else, which is the point:
+    /// **the arithmetic is not restated here.** Ladder R1-12: the fit test
+    /// counts the groups ACTUALLY present (`chromeHeight(headedGroups:)`) —
+    /// a column with no starred group and no rail carries one header and one
+    /// separator, two groups' worth less, and used to compress a little early.
+    ///
+    /// 17o c/d/e ladder round 1, MINOR-2: this paragraph used to spell the
+    /// sum out — *"each a 22-pt header … = 233"* — and row 13 moved
+    /// `groupHeaderHeight` 22 → 30 (the value is 257) without it. Row 13's
+    /// own stated point is that the header's drawn height and the height the
+    /// column budgets *"can never drift apart — the drift would be silent"*;
+    /// a doc that re-types the sum is that same silent drift one layer up,
+    /// so it names the constants and lets them carry the number. The test
+    /// beside it does the same (`ShellChromeTests`
+    /// `theChromeCountsOnlyTheHeadedGroupsPresent`, rewritten at row 13 to
+    /// compute from the constants rather than a copied 41).
     static let fixedChromeHeight: CGFloat = chromeHeight(headedGroups: 3)
 
     static let topPadding: CGFloat = 14
