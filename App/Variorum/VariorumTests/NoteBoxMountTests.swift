@@ -458,10 +458,18 @@ struct NoteBoxCompositionTests {
     /// reachable is the exact expression each door evaluates, so the pin
     /// holds THAT and the record names the two call sites (one grep).
     ///
-    /// RED ON OLD, measured by behavioural revert (`editingOrActive` → the
-    /// bare `active` at both sites): `caretBlockID → nil` — the export door's
-    /// guard fails and it speaks the unavailable note, and the jump returns
-    /// at its first `guard` with the caret exactly where it was.
+    /// **THE SHADOW IS REPRODUCED HERE, DELIBERATELY.** A hosted mount does
+    /// not grow the Outline's second `InlineEditorSurface` (the same reason
+    /// `BookRedesignMountTests` measures exactly one `EditorTextView`) — it
+    /// is a live-app timing, traced on the dev build with an attach-time
+    /// stack. Waiting for SwiftUI to produce it would make this pin green on
+    /// both sides and prove nothing, so the pin reproduces the MECHANISM the
+    /// trace names: a second `EditorViewModel` for the same post attaches a
+    /// text view and takes `active`, exactly as the shadow does. RED ON OLD,
+    /// measured by behavioural revert of both doors to the bare `active`:
+    /// `caretBlockID → nil` — the export door's guard fails and speaks the
+    /// unavailable note, and the jump returns at its first `guard` with the
+    /// caret where it was (2 issues).
     @Test func theCaretDoorsActOnTheEditorSheIsWritingInNotTheLastToAttach() async throws {
         try await withOutlineBook(posts: 3) { session, db, readingID, postIDs in
             let (model, structure) = try await loadedBook(
@@ -485,8 +493,21 @@ struct NoteBoxCompositionTests {
             // A note focused in Outline: the ONE full-document editor mounts.
             model.focus(postIDs[0])
             await settle(window, hosting, until: {
-                session.editorRouter.editingOrActive?.caretBlockID != nil
+                session.editorRouter.editing?.caretBlockID != nil
             })
+            let writing = try #require(session.editorRouter.editing)
+
+            // THE SHADOW, reproduced: a second model for the same post
+            // attaches a text view and takes `active`, with no projection
+            // and no caret — the live condition the KnownIssues row traces.
+            let shadow = EditorViewModel(session: session, postID: postIDs[0])
+            shadow.attach(textView: EditorTextView.makeInlineEditor(), scrollView: nil)
+            #expect(session.editorRouter.active === shadow,
+                    "the last text view to attach took `active`, as it does live")
+            #expect(shadow.caretBlockID == nil,
+                    "…and it knows nothing: no projection, no caret")
+            #expect(session.editorRouter.editing === writing,
+                    "`editing` still names the editor she is writing in")
 
             // THE DOORS' OWN EXPRESSION. `exportCaretBlock` guards on exactly
             // this pair; the jump's first guard reads the same two.
