@@ -565,10 +565,10 @@ final class TakesViewModel {
         // than cleared (the ladder's R1-3 rider): a pane BORN live under the
         // room's request only ADOPTS the caret-to-end token at its first
         // render (`makeNSView` — the token applies on updates), so with the
-        // transition's nil-means-START rule a cleared arm would have landed
-        // it at 0; `Int.max` clamps to the text's end in the transition, and
-        // an already-mounted pane's token application lands the same place.
-        paneCaretLanding = (variantID: pane.variantID, offset: .max)
+        // transition's START rule a cleared arm would have landed it at 0;
+        // `.end` lands the text's end in the transition, and an already-
+        // mounted pane's token application lands the same place.
+        paneCaretLanding = (variantID: pane.variantID, landing: .end)
     }
 
     // MARK: - Where a pane's caret lands when it takes the ring (17o batch b)
@@ -577,25 +577,32 @@ final class TakesViewModel {
     /// `@ObservationIgnored` on purpose: it is read at the render the ring
     /// move already caused, never watched — a caret place is data, not a
     /// signal (the argument in full is on `CommandRouter.focusedBlock`).
-    @ObservationIgnored private var paneCaretLanding: (variantID: String, offset: Int)?
+    @ObservationIgnored private var paneCaretLanding: (variantID: String, landing: PaneCaretLanding)?
 
     /// Arms the landing when — and only when — the pane taking the ring is
-    /// the note's CURRENT block. A click into another block brought its own
-    /// place with it and must keep it.
+    /// the note's CURRENT block: the remembered place, else its START (R1-3
+    /// — an accidental END there becomes "where she was"). Any other block
+    /// is left alone (`.leave`, the shipped END): a click brought its own
+    /// place, and a post-structural ring landing (the survivor, the merged
+    /// block, the divide successors, the moved take — `parkFocus` → `focus`)
+    /// keeps the "continue at the end of what you just made" it shipped with
+    /// (the sanity pass's RAISE-2; QUESTIONS #97 names the edge).
     private func armPaneCaretLanding(for pane: PaneKey) {
         guard let fact = session.commandRouter.currentBlock(for: postID),
-              fact.blockID == pane.blockID, let offset = fact.utf16Offset
+              fact.blockID == pane.blockID
         else {
             paneCaretLanding = nil
             return
         }
-        paneCaretLanding = (variantID: pane.variantID, offset: offset)
+        paneCaretLanding = (
+            variantID: pane.variantID,
+            landing: fact.utf16Offset.map(PaneCaretLanding.offset) ?? .start)
     }
 
-    /// What a pane rendering `variantID` is handed. nil for every pane the
-    /// landing did not name, so nothing else on the board ever sees a change.
-    func caretLanding(forVariant variantID: String) -> Int? {
-        paneCaretLanding?.variantID == variantID ? paneCaretLanding?.offset : nil
+    /// What a pane rendering `variantID` is handed. `.leave` for every pane
+    /// the landing did not name, so nothing else on the board ever moves.
+    func caretLanding(forVariant variantID: String) -> PaneCaretLanding {
+        paneCaretLanding?.variantID == variantID ? paneCaretLanding!.landing : .leave
     }
 
     // MARK: - The article's landing (17o batch b, row 8) — the board layout's,
@@ -1799,6 +1806,13 @@ final class TakesViewModel {
         // — and enters it WHERE SHE WAS. (This door deliberately does not
         // report the fact; it is landing ON the fact.)
         armPaneCaretLanding(for: pane)
+        // The N9 FALL-THROUGH (no fact — a note opened fresh in Takes) is
+        // still the note's ENTRY, never a structural act: it lands at the
+        // START like Write's own no-memory arrival (R1-3's fall-through road
+        // — the pane reports, so its END would become the memory).
+        if paneCaretLanding == nil {
+            paneCaretLanding = (variantID: pane.variantID, landing: .start)
+        }
         authority.focus(pane)
     }
 

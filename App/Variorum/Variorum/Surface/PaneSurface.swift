@@ -616,6 +616,30 @@ extension PaneTextView {
     }
 }
 
+// MARK: - Where a pane's caret lands when it takes the ring
+
+/// **Where a pane's caret goes on a PROGRAMMATIC live transition** (17o
+/// batch b's ladder — R1-3 and the sanity pass's RAISE-2). A click always
+/// keeps the place the click brought; this is for the transitions no click
+/// caused. `.leave` is the DEFAULT and the shipped behaviour: the selection
+/// stays where AppKit's `string =` left it — the END — which is what every
+/// host that passes nothing (the fan/stack cards, Compare, Canvas, the Write
+/// panel, the Book Index's Act 10 row-22 landing) and every post-structural
+/// ring landing (the survivor, the merged block, the divide successors, the
+/// moved take) had before this ladder and keeps. The hosts whose panes
+/// REPORT their caret to the note's memory pass an explicit landing, because
+/// there an accidental END becomes "where she was" (R1-3): `.offset` when
+/// the note remembers a place in that block, `.start` for the note's ENTRY
+/// landings with nothing remembered (Write's own nil rule — QUESTIONS #97
+/// carries START/END, START built PROVISIONAL), `.end` when the typewriter
+/// room asks for it.
+nonisolated enum PaneCaretLanding: Equatable, Sendable {
+    case leave
+    case start
+    case end
+    case offset(Int)
+}
+
 // MARK: - The SwiftUI pane (read + live modes)
 
 /// One pane: a take's cell, a TOC row's body, a tutorial sample — EVERY
@@ -641,6 +665,14 @@ struct PaneSurfaceView: View {
     /// A plain click on a read pane — the container migrates the live
     /// editor here.
     var onFocusRequest: (() -> Void)?
+    /// The sanity pass's RAISE-1: the plain click's PLACE (UTF-16), delivered
+    /// AFTER `onFocusRequest` has moved the ring — the click's own selection
+    /// change arrives while the ring is still on the old pane and the
+    /// composition's live-pane guard rightly drops it, and R1-2's flag
+    /// (rightly) moves nothing on the transition, so without this the first
+    /// click into a pane was kept in the pane and never reported. Only the
+    /// hosts that report a caret pass it.
+    var onClickPlace: ((Int) -> Void)?
     /// A live pane's edit: the full new text (the model computes cost and
     /// routes autosave).
     var onEdit: ((String) -> Void)?
@@ -661,7 +693,9 @@ struct PaneSurfaceView: View {
     /// nil means the take's START (Write's nil rule; the END AppKit left was
     /// an artifact the pane then reported as her place — QUESTIONS #97).
     /// `Int.max` asks for the END explicitly (the room's gesture).
-    var caretOnGoingLive: Int?
+    /// **RAISE-2:** an explicit `PaneCaretLanding`, defaulting to `.leave`, so
+    /// a host that passes nothing keeps the shipped END.
+    var caretOnGoingLive: PaneCaretLanding = .leave
     /// 13b 1b (AD-4): the pane's Variorum context-menu items.
     var menuItems: (() -> [PaneTextView.MenuItemSpec])?
     /// QoL batch 2 (L3/L4 — the RULED measurement seam): the pane's
@@ -717,7 +751,7 @@ struct PaneSurfaceView: View {
                 ink: tokens.map { NSColor($0.ink) },
                 role: role, variantID: variantID,
                 spellcheck: spellcheck, paragraphGap: paragraphGap,
-                onFocusRequest: onFocusRequest, onEdit: onEdit,
+                onFocusRequest: onFocusRequest, onClickPlace: onClickPlace, onEdit: onEdit,
                 onCommandClick: onCommandClick,
                 onSelectionChange: onSelectionChange,
                 caretOnGoingLive: caretOnGoingLive, menuItems: menuItems,
@@ -758,11 +792,13 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
     var spellcheck: SpellcheckLevel = .off
     var paragraphGap: ParagraphGap = .standard
     var onFocusRequest: (() -> Void)?
+    var onClickPlace: ((Int) -> Void)?
     var onEdit: ((String) -> Void)?
     var onCommandClick: ((Bool) -> Bool)?
     var onSelectionChange: ((NSRange) -> Void)?
-    /// The landing place a pane adopts on going live (17o batch b).
-    var caretOnGoingLive: Int?
+    /// The landing place a pane adopts on going live (17o batch b; RAISE-2:
+    /// `.leave` when the host passes nothing).
+    var caretOnGoingLive: PaneCaretLanding = .leave
     var menuItems: (() -> [PaneTextView.MenuItemSpec])?
     var onMeasuredHeight: ((CGFloat) -> Void)?
     var caretToEndToken: Int = 0
@@ -788,8 +824,10 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
             },
             publishCanary: { canaryMessage = $0 })
         context.coordinator.onEdit = onEdit
-        view.onPlainClick = { [weak coordinator = context.coordinator] _ in
+        view.onPlainClick = { [weak coordinator = context.coordinator] offset in
             coordinator?.onFocusRequest?()
+            // RAISE-1: the place is reported AFTER the ring has moved.
+            coordinator?.onClickPlace?(offset)
         }
         // 13e E3: the claim goes through the COORDINATOR like every other
         // callback, so `updateNSView` keeps it current instead of capturing
@@ -799,6 +837,7 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         }
         context.coordinator.onCommandClick = onCommandClick
         context.coordinator.onFocusRequest = onFocusRequest
+        context.coordinator.onClickPlace = onClickPlace
         context.coordinator.onSelectionChange = onSelectionChange
         context.coordinator.caretOnGoingLive = caretOnGoingLive
         view.variorumMenu = menuItems
@@ -825,6 +864,7 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         context.coordinator.onEdit = onEdit
         context.coordinator.onCommandClick = onCommandClick
         context.coordinator.onFocusRequest = onFocusRequest
+        context.coordinator.onClickPlace = onClickPlace
         context.coordinator.onSelectionChange = onSelectionChange
         context.coordinator.onMeasuredHeight = onMeasuredHeight
         context.coordinator.caretOnGoingLive = caretOnGoingLive
@@ -923,13 +963,15 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
     final class Coordinator: NSObject, NSTextViewDelegate {
         var onEdit: ((String) -> Void)?
         var onFocusRequest: (() -> Void)?
+        /// RAISE-1: the plain click's place, after the ring has moved.
+        var onClickPlace: ((Int) -> Void)?
         /// 13e E3: the composition's ⌘-click claim (her A18's selection).
         var onCommandClick: ((Bool) -> Bool)?
         var onSelectionChange: ((NSRange) -> Void)?
         /// 17o batch b: the place this pane's caret takes when it goes live
-        /// (nil = leave the selection where it is). Refreshed on every render
-        /// so the transition below acts on the current memory.
-        var caretOnGoingLive: Int?
+        /// (`.leave` = the selection stays where it is). Refreshed on every
+        /// render so the transition below acts on the current memory.
+        var caretOnGoingLive: PaneCaretLanding = .leave
         /// QoL batch 2 (L3/L4): the composer's measured-height sink.
         var onMeasuredHeight: ((CGFloat) -> Void)?
         private weak var view: PaneTextView?
@@ -981,13 +1023,26 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
             // left behind: that END was an artifact, and the live pane then
             // REPORTED it as "where she was", so Blocks' row → Takes → Write
             // landed at the end of the paragraph. QUESTIONS #97 carries the
-            // START/END edge (START built, PROVISIONAL); `Int.max` is how the
-            // room asks for the END explicitly (clamped below).
+            // START/END edge (START built, PROVISIONAL).
+            //
+            // The sanity pass's RAISE-2: the landing is an explicit
+            // `PaneCaretLanding`, and `.leave` — the default for every host
+            // that passes nothing, and what the models hand a pane whose
+            // landing is not the note's own entry (the post-structural ring
+            // landings) — moves nothing: the shipped END stays there.
             if !clickBroughtPlace {
-                let landing = caretOnGoingLive ?? 0
                 let length = (view.string as NSString).length
-                view.setSelectedRange(
-                    NSRange(location: min(max(0, landing), length), length: 0))
+                switch caretOnGoingLive {
+                case .leave:
+                    break
+                case .start:
+                    view.setSelectedRange(NSRange(location: 0, length: 0))
+                case .end:
+                    view.setSelectedRange(NSRange(location: length, length: 0))
+                case .offset(let landing):
+                    view.setSelectedRange(
+                        NSRange(location: min(max(0, landing), length), length: 0))
+                }
             }
             if let window = view.window {
                 window.makeFirstResponder(view)

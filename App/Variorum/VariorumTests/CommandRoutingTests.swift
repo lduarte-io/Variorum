@@ -291,7 +291,7 @@ struct TakesLandingTests {
             #expect(model.authority.livePane?.blockID == target.block.id)
             #expect(model.articleLanding == slot.placementID)
             // …and the pane it rings enters at the remembered caret place.
-            #expect(model.caretLanding(forVariant: target.variant.id) == 4)
+            #expect(model.caretLanding(forVariant: target.variant.id) == .offset(4))
         }
     }
 
@@ -309,6 +309,11 @@ struct TakesLandingTests {
             model.adopt(try await db.read { try Queries.takesProjection($0, post: post.id) })
             #expect(model.authority.livePane != nil, "the ring still lands")
             #expect(model.articleLanding == nil)
+            // The sanity pass's RAISE-2, the fall-through's caret: the note's
+            // ENTRY with nothing remembered is the START (R1-3's road — this
+            // pane reports), never `.leave`.
+            let live = try #require(model.authority.livePane)
+            #expect(model.caretLanding(forVariant: live.variantID) == .start)
         }
     }
 }

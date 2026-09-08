@@ -250,21 +250,26 @@ final class BlockTOCViewModel {
     /// The note's remembered caret place, for the ONE pane about to go live
     /// (17o batch b). `@ObservationIgnored`: read at the render the ring move
     /// already caused, never watched.
-    @ObservationIgnored private var paneCaretLanding: (variantID: String, offset: Int)?
+    @ObservationIgnored private var paneCaretLanding: (variantID: String, landing: PaneCaretLanding)?
 
+    /// The note's CURRENT block lands at the remembered place, else its
+    /// START (R1-3); any other block is left alone (`.leave`, the shipped
+    /// END — the sanity pass's RAISE-2; QUESTIONS #97).
     private func armPaneCaretLanding(blockID: String, variantID: String) {
         guard let fact = session.commandRouter.currentBlock(for: postID),
-              fact.blockID == blockID, let offset = fact.utf16Offset
+              fact.blockID == blockID
         else {
             paneCaretLanding = nil
             return
         }
-        paneCaretLanding = (variantID: variantID, offset: offset)
+        paneCaretLanding = (
+            variantID: variantID,
+            landing: fact.utf16Offset.map(PaneCaretLanding.offset) ?? .start)
     }
 
     /// What a pane rendering `variantID` is handed on going live.
-    func caretLanding(forVariant variantID: String) -> Int? {
-        paneCaretLanding?.variantID == variantID ? paneCaretLanding?.offset : nil
+    func caretLanding(forVariant variantID: String) -> PaneCaretLanding {
+        paneCaretLanding?.variantID == variantID ? paneCaretLanding!.landing : .leave
     }
 
     /// 17o batch b (her ruling U-20): Read's `edit` face holds a real caret

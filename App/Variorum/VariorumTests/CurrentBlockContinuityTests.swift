@@ -352,17 +352,25 @@ struct CurrentBlockContinuityTests {
                     $0.identifier?.rawValue.hasSuffix("|\(variants[2])") == true
                 } && router.focusedBlock?.blockID == blocks[2]
             }, "block 3's pane takes the ring and is the current block")
+            // The sanity pass's RAISE-1: the FIRST click into a not-yet-live
+            // pane is kept in the pane (R1-2) but was never REPORTED — its
+            // selection change arrived while the ring was still on the old
+            // pane, so `notePaneSelection`'s guard dropped it, and the
+            // transition (correctly) moved nothing. The click's place must
+            // reach the memory, and Write must land ON it.
+            #expect(await Self.settle(window, hosting) {
+                router.currentBlock(for: post.id)?.utf16Offset == 3
+            }, "the click's own place (3) is the note's remembered offset (red-on-old: nil — dropped)")
             #expect(router.requestMode(.write, postID: post.id))
             #expect(await Self.settle(window, hosting) {
                 guard let view = Self.views(EditorTextView.self, in: hosting).first,
                       view.string.count >= index.documentLength else { return false }
-                let caret = view.selectedRange().location
-                return caret >= blockThreeRange.location && caret <= blockThreeRange.upperBound
-            }, "Write re-enters in block 3 — the current block, never the jump's")
+                return view.selectedRange().location == blockThreeRange.location + 3
+            }, "Write re-enters in block 3 AT the click's place — the current block, never the jump's")
             let third = try #require(Self.views(EditorTextView.self, in: hosting).first)
             let caret = third.selectedRange().location
-            #expect(caret >= blockThreeRange.location && caret <= blockThreeRange.upperBound,
-                    "arm 2: the caret is in block 3 (\(caret) vs block 3 \(blockThreeRange)), not at the jump's block start \(blockTwoRange.location)")
+            #expect(caret == blockThreeRange.location + 3,
+                    "arm 2: the caret is at the click's place in block 3 (\(caret) vs \(blockThreeRange.location + 3)), not at block 3's start \(blockThreeRange.location) and not at the jump's block start \(blockTwoRange.location)")
             #expect(router.focusedBlock?.blockID == blocks[2])
         }
     }

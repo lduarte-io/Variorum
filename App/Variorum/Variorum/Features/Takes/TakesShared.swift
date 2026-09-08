@@ -53,6 +53,14 @@ struct TakesCellView: View {
                 tokens: tokens,
                 role: role, variantID: resolved.variantID,
                 onFocusRequest: { model.focus(key) },
+                // The sanity pass's RAISE-1: the click's place, reported AFTER
+                // the ring moved — the click's own selection change arrived
+                // while the ring was elsewhere and was rightly dropped.
+                onClickPlace: { offset in
+                    model.notePaneSelection(
+                        variantID: resolved.variantID,
+                        range: NSRange(location: offset, length: 0))
+                },
                 onEdit: { model.paneEdited(variantID: resolved.variantID, newText: $0) },
                 onCommandClick: onCommandClick,
                 onSelectionChange: { range in

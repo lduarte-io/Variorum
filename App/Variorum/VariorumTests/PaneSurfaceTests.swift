@@ -25,7 +25,7 @@ import Testing
 @MainActor @Observable
 fileprivate final class PaneLiveBox {
     var live = false
-    var landing: Int?
+    var landing: PaneCaretLanding = .leave
 }
 
 fileprivate struct PaneLiveFlipHost: View {
@@ -37,6 +37,18 @@ fileprivate struct PaneLiveFlipHost: View {
             onFocusRequest: { box.live = true },
             caretOnGoingLive: box.landing)
         .frame(width: 400)
+    }
+}
+
+/// The sanity pass's RAISE-2: a host that passes NO landing at all — the
+/// six hosts outside R1-3's trace (the fan/stack cards, Compare, Canvas, the
+/// Write panel, the Book Index) and every post-structural ring landing.
+fileprivate struct PaneBareHost: View {
+    let box: PaneLiveBox
+    let text: String
+    var body: some View {
+        PaneSurfaceView(text: text, isLive: box.live)
+            .frame(width: 400)
     }
 }
 
@@ -60,7 +72,7 @@ struct PaneSurfaceTests {
     // MARK: - 17o batch b's ladder, R1-2 / R1-3 — where a pane's caret lands on going live
 
     private func mountFlipHost(
-        text: String, landing: Int?
+        text: String, landing: PaneCaretLanding
     ) -> (box: PaneLiveBox, host: NSHostingController<PaneLiveFlipHost>, window: NSWindow, pane: PaneTextView)? {
         let box = PaneLiveBox()
         box.landing = landing
@@ -79,12 +91,13 @@ struct PaneSurfaceTests {
         "A take of prose long enough that a caret can sit well inside it."
 
     /// R1-3: a PROGRAMMATIC transition with nothing remembered lands at the
-    /// take's START. Red on the pre-fix tree: the selection stayed where
-    /// AppKit's `string =` left it — the END — and the live pane then
-    /// reported that end as her place.
+    /// take's START — what the reporting hosts' models hand a pane for the
+    /// note's own entry (`.start`). Red on the pre-fix tree: the selection
+    /// stayed where AppKit's `string =` left it — the END — and the live
+    /// pane then reported that end as her place.
     @Test func aProgrammaticTransitionWithNothingRememberedLandsAtTheTakesStart() async throws {
         let (box, host, window, pane) = try #require(
-            mountFlipHost(text: Self.sixtyCharacterTake, landing: nil))
+            mountFlipHost(text: Self.sixtyCharacterTake, landing: .start))
         #expect(!pane.isEditable)
         box.live = true
         pump()
@@ -102,7 +115,7 @@ struct PaneSurfaceTests {
     /// click's 10 with the remembered 30 before the responder claim.
     @Test func aClickIntoAReadPaneKeepsTheClicksOwnPlaceOverTheRememberedOne() async throws {
         let (box, host, window, pane) = try #require(
-            mountFlipHost(text: Self.sixtyCharacterTake, landing: 30))
+            mountFlipHost(text: Self.sixtyCharacterTake, landing: .offset(30)))
         // What `mouseDown` does: the selection tracking loop places the
         // caret, then the plain-click road asks for focus.
         pane.setSelectedRange(NSRange(location: 10, length: 0))
@@ -117,12 +130,36 @@ struct PaneSurfaceTests {
         window.contentViewController = nil
     }
 
+    /// The sanity pass's RAISE-2 (scope): a host that passes NO landing keeps
+    /// the shipped END on a programmatic transition — the rule R1-3 built is
+    /// for the hosts that pass one (the ones whose panes REPORT). Red on the
+    /// tree before the raise's fix: `?? 0` landed every host at the start.
+    @Test func aHostThatPassesNoLandingKeepsTheShippedEndOnAProgrammaticTransition() async throws {
+        let box = PaneLiveBox()
+        let host = NSHostingController(rootView: PaneBareHost(box: box, text: Self.sixtyCharacterTake))
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 400, height: 600),
+            styleMask: [.borderless], backing: .buffered, defer: false)
+        window.contentViewController = host
+        host.view.layoutSubtreeIfNeeded()
+        pump()
+        let pane = try #require(findPane(host.view))
+        box.live = true
+        pump()
+        host.view.layoutSubtreeIfNeeded()
+        pump()
+        #expect(pane.isEditable)
+        #expect(pane.selectedRange().location == (pane.string as NSString).length,
+                "no landing passed ⇒ the selection is left where it was — the shipped END (\(pane.selectedRange().location) of \((pane.string as NSString).length))")
+        window.contentViewController = nil
+    }
+
     /// The rule's other half, unchanged by the fix (a guard, green both
     /// sides): a PROGRAMMATIC transition lands at the remembered place — and
-    /// the room's `Int.max` asks for the END, clamped.
+    /// the room's `.end` asks for the END.
     @Test func aProgrammaticTransitionLandsAtTheRememberedPlaceAndIntMaxMeansTheEnd() async throws {
         let (box, host, window, pane) = try #require(
-            mountFlipHost(text: Self.sixtyCharacterTake, landing: 30))
+            mountFlipHost(text: Self.sixtyCharacterTake, landing: .offset(30)))
         box.live = true
         pump()
         host.view.layoutSubtreeIfNeeded()
@@ -131,13 +168,13 @@ struct PaneSurfaceTests {
         window.contentViewController = nil
 
         let (box2, host2, window2, pane2) = try #require(
-            mountFlipHost(text: Self.sixtyCharacterTake, landing: .max))
+            mountFlipHost(text: Self.sixtyCharacterTake, landing: .end))
         box2.live = true
         pump()
         host2.view.layoutSubtreeIfNeeded()
         pump()
         #expect(pane2.selectedRange().location == (pane2.string as NSString).length,
-                "Int.max is the END, clamped to the text")
+                ".end is the END")
         window2.contentViewController = nil
     }
 
