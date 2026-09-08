@@ -8840,3 +8840,86 @@ restore act is the door onto it), MINOR-4 is a constant no Mac surface reads, MI
 dead code, and NIT-2 changes only which of two already-walked cells a REVEAL opens on (the reveal road
 has no capture in this batch either way; its pin drives the model directly, which is why it was built
 on the model rather than in the view).
+
+#### 18d round 1 — fixes (batch 3)
+
+*(the batch-3 implementer, resumed; TWO findings — MAJOR-2 and MINOR-5)*
+
+**MAJOR-2 (`SideColumn`'s 9-pt overlay grip, row 9's defect on three more seams) — CONFIRMED and FIXED,
+`2f76f45a`.** The reviewer's mechanism is right and I re-traced it rather than taking it: in an `HStack`
+later siblings sit above earlier ones, and a leading column's order is `sidePanel, divider, content`, so
+the half of the grip that overhangs into the CONTENT — the prose column in Outline, the page in Read — was
+hit-tested by the content. My own walk had recorded the symptom without naming it (*"a drag whose press had
+missed the 9-pt grip, so nothing was ever written"*); the reviewer named it.
+
+**EXTRACTED, not mirrored — and the reason is the finding itself.** The arbitration left the choice to me.
+The defect being fixed IS a copy: the three-part fix lived inside `ShellSplit`, so every seam minted through
+`SideColumn` was born with the old shape. Mirroring it would fix today's three boundaries and leave the next
+one to be born wrong again. So the seam is now ONE component in the shared home — **`SeamGrip`**
+(`App/Variorum/Variorum/Core/Views/SeamGrip.swift`), CLAUDE.md's hoist-at-next-touch rule applied to the
+component two hosts now consume — carrying the two parts a component can own (a 14-pt grip that is a real
+layout participant beside the 1-pt line, and `.pointerStyle(.columnResize)` in place of `NSCursor.push()` on
+`.onHover`), with the arithmetic left to each host: it reports where the pointer is in the host's own space,
+and the host decides whether that means a sidebar width, a panel width or a split fraction. `ShellSplit`
+and `SideColumn` both consume it; `ShellSplit.gripWidth` forwards to `SeamGrip.width`, so there is one
+constant and the pin holds them against each other.
+
+**The third part stays with the host, on both edges.** `.zIndex(1)` is a claim about a stack's order, so it
+belongs where the stack is: `SideColumn`'s body now puts it on the divider for the leading AND the trailing
+edge (leading: the content is drawn after and took the grip's right half; trailing: the panel is). The
+shell's own `.zIndex(1)` is untouched.
+
+**Pin: `OutlineRoomTests.theLeadingSeamsGripIsWideCentredAndReachesIntoBothSides`** — the shell pin's four
+claims verbatim (≥ 14 wide · centred on the line within 0.5 · reaching more than 4 pt past it on BOTH sides ·
+running the seam's height), read off `SideColumnGeometry`'s id-keyed rectangles, plus the shared constant
+held against `ShellSplit.gripWidth`. **RED ON OLD, and stronger than an absent oracle:** in a scratch
+worktree at `86f01d64` I INSTRUMENTED the old 9-pt overlay so it reported its own frame, and the pin still
+failed on the SHAPE — **`grip.width → 9.0` against 13.5, and `grip.minX < line.minX - 4` false**. Green
+after. `ShellChromeTests.theSeamsGripIsWideCentredAndReachesIntoBothSides` rides **unmodified** over the
+extracted component, which is the honest test that the extraction changed nothing for the shell.
+
+**The `.zIndex` half is walked, not pinned** — a hit-test order is not a rectangle. Three drags on the
+dev-store Debug build, each with the press landing at **boundary + 4 pt**, i.e. inside the part of the grip
+that overhangs the content — precisely the half that was dead — and each read back out of the store:
+the book navigator **190 → 314** (`14-LADDER-major2-…`), the book Index's chapter panel **300 → 420**
+(`15-…`), Read's contents column **340 → 603** (`16-…`). Under the old shape that press reached the prose
+column, the index pane and the page respectively.
+
+**A FOURTH seam carries the same shape and I did NOT touch it** — `RootView.paneDivider`
+(`RootView.swift:623–643`): a 9-pt `.overlay`, `NSCursor.push()` on `.onHover`, no `zIndex`, inside the pane
+row's `ForEach`. It is outside this batch's diff, the reviewer did not name it, and converting it changes
+the layout of the split row that owns the one-live-surface mount rule (13f). Recorded here with its file and
+line so it is a decision rather than an omission: a KnownIssues row under 13u2's chrome family, or a 17
+entry at her word. `SeamGrip` is now sitting there ready for it.
+
+**MINOR-5 (two columns gained floors 60/100 pt below their shipped widths, unexercised) — the pin decided:
+HOLLOW as a defect, REAL as a coverage gap, now closed. `3a52dcd0`, no code change.** The reviewer's honest
+label was the right one, and the arbitration's protocol answered it. **Pin:
+`OutlineRoomTests.bothColumnsChromeStaysInsideThemAtTheirFloors`** — the navigator's own containment scan
+(`leftmostInkX`, the b6dae25 class: a frame does not clip an over-wide child, it CENTRES it, so chrome that
+will not fit pushes the whole column left and its rows lose their first characters), twinned for both new
+columns, each mounted at its own 240-pt floor, asserting first that it really drew at that floor and then
+that no dark ink reaches within 6 pt of the column's left edge.
+
+**GREEN at both floors, with the numbers the pin prints: the book Index's chapter panel leaves 15.0 pt of
+clear margin at 240, Read's contents column 20.0 pt.** So no floor is raised and no chrome is changed.
+
+**And the oracle has teeth — measured, not assumed.** A green pin proves nothing unless it can go red, so a
+scratch worktree dropped both `minimumWidth`s to 110 and re-ran it: the Index panel's ink went to
+**x = 0.0** (the b6dae25 symptom exactly), and its drawn width came back **195, not 110** — the frame could
+not shrink the chrome, so it centred it and let it overflow, which is the class made visible in one number.
+Read's column at 110 stayed clear at 20.0 pt (its chrome is a filter field and it shrinks). So the pin
+detects the class, the Index panel is the one under real chrome pressure, its true floor lies between 110
+and 240, and the shipped 240 has 15 pt of headroom. Recorded rather than tuned: moving a floor she has not
+complained about, on a measurement that says it is comfortable, would be inventing a change.
+
+**Closing run for this fix pass — ONE `xcodebuild test`:** the batch's 30 suite types (every suite that
+mounts `BookView`, `BookIndexView` or `ReadModeView`; every consumer of `SideColumn`, `NoteIndexColumn`,
+`BookIndexColumn` and the oracles; the chrome-fit family) **plus `ShellChromeTests`** (owed: `ShellSplit`
+now consumes the extracted seam) **plus the ten `Tutorial*Tests` spine types**: **`✔ Test run with 233
+tests in 40 suites passed after 73.797 seconds.`** — 40 suites for 40 requested types, no `skipped:` line;
+231 → 233 is exactly the two new pins. **Zero `Sources/`, zero `Sync/`, zero schema, zero
+`App/Variorum/Shared/`** — the fix pass touches `Core/Views/SeamGrip.swift` (new), `Core/Views/SideColumn.swift`,
+`Workspace/ShellSplit.swift` and `VariorumTests/OutlineRoomTests.swift`, so no `swift test` and no iOS build
+are owed and none was run. Captures 14–16 added to `notes/plans/use-report-2026-09-06-screens/18d-3/`.
+
