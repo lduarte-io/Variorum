@@ -8227,6 +8227,37 @@ dropped every remembered story on a voice switch that moved nothing on that page
   becomes `outlineSurfaceSizes`, `flowSurfaceSizes` gains its namespace, +`persistSurfaceSize`);
   `Features/BookView/BookView.swift` (the two Outline `StableSurface` call sites pass `settled:`).
   Mac Debug build green.
-- **PIECE B — the pins. NOT-STARTED.**
+- **PIECE B — the pins. DONE (PENDING_B).** `App/Variorum/VariorumTests/SurfaceSizeMemoryTests.swift`
+  (new, 6 tests / 7 cases): (1) the round trip — a report alone reaches no disk, `persist` makes a
+  FRESH memory read the size back, another typography refuses it, the old typography returns it, and
+  the stamp is felt WITHIN a session too; (1b) the two voices really do stamp differently and inline
+  comments move the stamp, and the page's stamp is not the Outline's; (2) THE CADENCE, counted against
+  a `UserDefaults` subclass — 200 `remember` calls = 0 writes, one `persist` = 1 write, a settle
+  re-adopting the stored size = still 1, a real change = 2, and reading a record back never re-writes
+  it; (3) mounted through the REAL `StableSurface`, both directions — a persisted memory taller than
+  the surface settles DOWN onto the disk and a shorter one settles UP; (4) mounted — a persisted
+  memory at another WIDTH reserves nothing, decided inside the settle interval; (5) the two key spaces
+  never meet, nine malformed records each read as no memory, a fingerprint containing the separator
+  still round-trips, `forget` ends the record here and on disk.
+  **Run:** `SurfaceSizeMemoryTests` + `StableSurfaceTests` — `Test run with 9 tests in 2 suites passed`.
+  **`StableSurfaceTests` rides byte-unmodified** (`git diff` shows no change to that file).
+
+  **On red-on-old (rule 3, stated honestly):** row 25 is `HERS (ruled)`, not a bug class — the
+  evidence owed is the pins plus the walk, and there is no pre-fix tree on which a persistence pin
+  could be red because the capability did not exist. The pre-fix behaviour is provable from the diff
+  rather than asserted: at `310e3432` the whole type was
+  `final class SurfaceSizeMemory { private var sizes: [String: CGSize] = [:]; func size(_:) -> CGSize?;
+  func remember(_:_:) }` — one dictionary, no defaults, no disk, and `BookViewModel`'s was a bare
+  `[String: CGSize]` marked *"session view state, never persisted"*. Pin 1 states that old behaviour
+  beside the new one (a session-only `SurfaceSizeMemory()` still forgets, and is still what
+  `ReadingFlowEstimateTests`' host uses), so the change stays legible in the suite.
+
+  **A pin that was wrong before it was right (recorded because it is the batch's one real trap):**
+  the both-directions pin first watched only the ROW's height. For a memory TALLER than the surface
+  that is a proxy for the settle (the reservation holds the row up until the settle drops it), but for
+  a SHORTER one the row is already correct on its first frame — a `minHeight` never squashes content —
+  so the pin passed a full second before anything was written and then read the stale `120` back. It
+  now waits on the DISK. Had it not been run in both directions the batch would have shipped a pin
+  that could not fail.
 - **PIECE C — the walk on the dev-store Debug build + captures. NOT-STARTED.**
 - **PIECE D — the closing runs + dispositions. NOT-STARTED.**
