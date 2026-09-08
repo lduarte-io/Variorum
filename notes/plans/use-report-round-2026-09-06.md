@@ -6305,3 +6305,41 @@ Every finding read against the canon and the batch records; each disposition nam
 - **NIT-3 (⌘A in a live take pane) — RECORDED, no fix.** The reviewer ruled out every interception by reading; the rest is a walk. A KnownIssues row at the letter's close, owner 13u2 (the pane family), evidence class a walk.
 
 **(J30)** MAJOR-1 is arbitrated as pin-decides rather than confirmed-and-fix: the finding's own mechanism has one unmeasured link and the guard's rule is that a pin green on both sides dismisses, so the fixer runs the pin before touching the brain.
+
+
+#### 17o c/d/e round 1 — fixes (batch c)
+
+*(the batch-c implementer, resumed; three findings — MAJOR-1 · MINOR-1 · NIT-1)*
+
+**MAJOR-1 (`PaneMeasurement`'s empty-document fallback) — DISMISSED AS HOLLOW, by the deciding pin, per
+J30 and standing-17 rule 1.**
+
+The pin was built exactly as the finding designed it and run BEFORE the brain was touched:
+`TakePaneMeasureTests.aPaneEmptiedCompletelyDoesNotJumpBackToItsTallestHeight` — a live 30-line pane,
+the WHOLE document selected and `deleteBackward`, one main-queue turn, the height compared against a
+fresh empty pane's. **It passed on the untouched tree.**
+
+**The measured numbers, and why the finding's two links split:**
+
+| fact | measured |
+|---|---|
+| the 30-line pane's height before | **1564.0** |
+| fragments the EMPTIED container enumerates | **0** — the finding's link ONE is TRUE, the fallback really is the road taken |
+| `usageBoundsForTextContainer` at that moment | **22.0** — the finding's link TWO is FALSE; it is NOT the tallest-ever 1564.0 |
+| the emptied pane's frame | **34.0** |
+| a fresh, born-empty pane's frame | **34.0** — identical; there is no jump |
+
+**What the numbers mean, stated so nobody re-raises it.** `usageBoundsForTextContainer` is a high-water
+mark **only while the document still holds text** — which is exactly the state row 16 measured it in
+(1223 → 1189 after 25 of 30 lines went, unmoved for six turns). When the document becomes EMPTY the
+property resets to one empty line's height, so the one case in which the fallback is ever reached is
+also the one case in which the property is honest. And the fallback is reachable ONLY there: under
+`.ensuresLayout` any content yields at least one fragment, so a non-empty document never takes it.
+The reviewer was right to flag the shape and right to say the deciding link was unmeasured; the
+measurement went the other way. **Not fixed** — the brain is byte-unchanged, and per rule 1 a pin green
+on both sides dismisses rather than licenses a fix.
+
+**The pin STAYS** as a standing guard on the endpoint of her gesture (the counter-intuitive verdict is
+written into its doc comment, with these numbers), on the `aFreshPanesMeasurementIsUnchangedByRow16sFix`
+precedent: green when written, kept because it is the pin that would catch the day the fallback stopped
+being honest.

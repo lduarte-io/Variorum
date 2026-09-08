@@ -806,6 +806,81 @@ extension TakePaneMeasureTests {
                 "fifteen lines stand taller than five (\(pane.bounds.height) vs \(short))")
     }
 
+
+    /// **17o c/d/e ladder, MAJOR-1 — the DECIDING pin (J30: pin-decides, run
+    /// before the brain is touched).** Row 16's fix left `extent(of:)`
+    /// falling back to `usageBoundsForTextContainer` whenever the fragment
+    /// enumeration yields nothing — and that property is the very
+    /// high-water mark the fix exists to escape. The reviewer's traced
+    /// consequence: a take emptied COMPLETELY (select the rest, delete)
+    /// would lay out zero fragments, take the fallback, and JUMP BACK to
+    /// the container's tallest-ever height — her punchlist 13 at its
+    /// endpoint, inside the row reported fixed.
+    ///
+    /// The one link neither the record nor the review could settle without
+    /// running it: whether an EMPTIED TK2 container really enumerates zero
+    /// fragments (the record measured only the BORN-empty case). This pin
+    /// decided it, and the verdict is worth keeping here because it is
+    /// counter-intuitive.
+    ///
+    /// **MEASURED (17o c/d/e round 1): the finding is HOLLOW, and its two
+    /// links split.** Link one is TRUE — an emptied container enumerates
+    /// **zero** fragments, so the fallback really is the road taken. Link
+    /// two is FALSE — at that moment `usageBoundsForTextContainer` reads
+    /// **22.0**, not the container's tallest-ever **1564.0**: the property
+    /// is a high-water mark only while the document still holds text (the
+    /// 1223 → 1189 measurement row 16 was built on), and it resets when the
+    /// document becomes EMPTY. So the emptied pane framed at **34.0**,
+    /// exactly a fresh empty pane's 34.0, with no jump at all. The pin was
+    /// green when written and stays as a standing guard on the endpoint of
+    /// her gesture: the fallback is reachable ONLY for an empty document
+    /// (any content yields at least one fragment under `.ensuresLayout`),
+    /// and this is the pin that would catch it if that ever stopped being
+    /// honest.
+    @Test func aPaneEmptiedCompletelyDoesNotJumpBackToItsTallestHeight() throws {
+        // The reference: what a pane holding no text at all stands at.
+        let freshEmpty = pumpedPaneHeight(text: "")
+
+        let lines = (1...30).map {
+            "Line \($0) of honest prose that keeps flowing along the measured line and wraps."
+        }
+        let host = NSHostingController(
+            rootView: PaneSurfaceView(text: lines.joined(separator: "\n"), isLive: true)
+                .frame(width: 400))
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 420, height: 1400),
+            styleMask: [.borderless], backing: .buffered, defer: false)
+        window.contentViewController = host
+        host.view.frame = NSRect(x: 0, y: 0, width: 420, height: 1400)
+        defer { window.contentViewController = nil }
+        func findPane(_ view: NSView) -> PaneTextView? {
+            if let pane = view as? PaneTextView { return pane }
+            for sub in view.subviews { if let found = findPane(sub) { return found } }
+            return nil
+        }
+        for _ in 0..<6 { host.view.layoutSubtreeIfNeeded(); pumpMain(0.04) }
+        let pane = try #require(findPane(host.view))
+        let tall = pane.bounds.height
+        #expect(tall > 900, "non-vacuity: thirty lines really are tall (\(tall))")
+
+        // The gesture at its endpoint: the WHOLE take goes.
+        pane.setSelectedRange(NSRange(location: 0, length: (pane.string as NSString).length))
+        pane.deleteBackward(nil)
+        #expect(pane.string.isEmpty, "non-vacuity: the take really is empty now")
+
+        pumpMain(0.05)
+        host.view.layoutSubtreeIfNeeded()
+        let emptied = pane.bounds.height
+        let layout = try #require(pane.textLayoutManager)
+        var fragments = 0
+        layout.enumerateTextLayoutFragments(from: nil, options: [.ensuresLayout]) { _ in
+            fragments += 1
+            return true
+        }
+        #expect(abs(emptied - freshEmpty) < 24,
+                "an emptied take stands where a fresh empty pane stands (\(emptied) vs \(freshEmpty)); it was \(tall) — the emptied container enumerated \(fragments) fragment(s) and the property reads \(layout.usageBoundsForTextContainer.height)")
+    }
+
     /// The measurement's own contract, stated where a future reader will
     /// look for it: at steady state the fragments' bottom and the old
     /// property agree, so nothing that was converged moved when row 16's
