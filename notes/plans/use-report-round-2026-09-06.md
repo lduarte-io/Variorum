@@ -10313,3 +10313,101 @@ two, and the existing comment stays true.
 **Summary: 4 agreed · 0 disputed.** Nothing here re-opens a ruling and nothing needs a QUESTIONS row.
 The one addition I ask the fix to carry is MAJOR-1's rider 5 — an arm that proves the label still
 updates — because a body-count pin alone is satisfied by removing the feature it is protecting.
+
+#### ROUND-END FABLE PASS round 1 — the implementers' responses (18d batch 4)
+
+*(the batch-4 implementer, resumed. THREE findings — MINOR-1 · NIT-1 · NIT-2. All AGREED, each
+re-traced at HEAD in this session. I have touched no code and no test; the fix pass is the reviewer's.)*
+
+**[MINOR-1] — AGREE.** Re-traced and correct in every link: `applyVoiceChrome` writes
+`EditorTypography.current = chrome.typography` unconditionally (`EditorTypography.swift:231`);
+`fingerprint` derives from `current` whenever `isAdopted` (`:125–130`); `isAdopted` is a process-global
+latch set by whichever `ThemeStore` lands FIRST (`ThemeStore.swift:44–45`); four stores are minted, one
+per window kind; both chrome hosts read `themeStore?.settings ?? Queries.ThemeSettings()`, and — the
+link that makes the `??` a red herring — a real store HOLDS that same value until its own observation
+returns (`ThemeStore.swift:22`). Round 2 closed the latch and left the value it guards writable by a
+drawing host, which does falsify `adopt`'s own doc. My round-2 record's rule ("only the settings'
+authority adopts") is true of the LATCH and false of the STAMP; that is the finding.
+
+**Two sharpenings for the fix pass, both from greps run here — neither weakens the finding.**
+
+1. **Of the four stores, only the NOTE WINDOW's can drive this.** `QuickNoteView` is a SwiftUI
+   `TextEditor` (`QuickNoteView.swift:130`) and `AppSettingsView` mounts no text surface — neither
+   reaches `applyVoiceChrome` (grepped: the only three call sites are `ReadPostView.swift:152` and
+   `EditorView.swift:448, 526`). `NoteWindowView` mounts `PostDetailView` (`:90`), which is exactly
+   those hosts. So the trigger is concrete and everyday: **open a note into its own window during a
+   Study session**, before that window's own store's first read returns. The VICTIM is the main
+   window's Outline, because `current` is a process global — the second window needs no book of its own.
+2. **The finding's (i) and (ii) halves are not equally reachable, and the difference is in the settle
+   closure.** (i) — `size()` refusing her Study records while that `current` stands — is reachable for
+   the whole window, and is the first-frame picture round 1's MINOR-2 was raised about arriving through
+   a third door. (ii) — a Study-measured height written under the Terminal stamp — is narrower than it
+   looks, because `StableSurface.report`'s settle closure calls `remember(size)` **immediately before**
+   `settled?()` → `persist`, so a geometry-cadence `remember` stamped Terminal earlier in the window is
+   re-stamped correctly the moment the settle fires. For (ii) to bite, the settle's OWN
+   remember/persist pair must fall inside the window. Real, narrow, and worth knowing when writing the
+   pin: the reviewer's designed pin asserts the STAMP first, which is the reachable half and needs no
+   timing at all.
+
+**The fix shape, answering the coordinator's question directly.**
+
+- **"Can `applyVoiceChrome` draw WITHOUT writing `current` at all — the chrome carrying its own resolved
+  typography?" NO, not at this size, and the trace says why.** The body does not use `chrome.typography`
+  to attribute anything: it writes `current` and then reads the document's attributes back out of it —
+  `font = EditorDocument.baseFont`, `defaultParagraphStyle = EditorDocument.baseParagraphStyle`,
+  `typingAttributes = EditorDocument.baseAttributes`, and the full-range `addAttributes(baseAttributes)`
+  — and all three of those read `EditorTypography.current` (`EditorDocument.swift:24, 43–47, 53–56`).
+  The write IS the mechanism by which a chrome reaches a document. Making the chrome carry its own
+  typography means turning those three into functions of a passed-in `Resolved`, and they are the same
+  three used by materialization, programmatic replaces, differential structural applies and the read
+  tier (their own doc says so) — P-3 plumbing, not a MINOR's fix. **Do not attempt it in this pass.**
+- **"Or must the stamp be derived from the landed settings rather than from `current`?" That is the
+  better long answer, and it is one line — but it is a COMPLEMENT to the reviewer's fix, not a
+  substitute.** Storing the stamp at `adopt` time (an `adoptedStamp` beside `isAdopted`, with
+  `fingerprint` returning it instead of re-deriving from `current`) makes the stamp structurally immune
+  to any writer of `current`, present or future — which is what "only the settings' authority adopts"
+  should have meant all along, and it survives the next drawing host that forgets. **But it alone is
+  insufficient:** it leaves the transient wrong-voice MATERIALIZATION untouched — a surface realized in
+  the main window during the note window's read still takes `baseFont` from a Terminal `current`. The
+  reviewer's own fix (`applyVoiceChrome` writes `current` only while `!isAdopted`) closes both halves,
+  and I have checked its one risk: after adoption the surface draws from the ADOPTED resolution rather
+  than its host's chrome, which is only ever a difference while that host is un-landed — every
+  `EditorSurfaceChrome` is built from a `ThemeSettings` and there is no per-surface voice override
+  (grepped), and on the voice-SWITCH path `adopt` runs before any surface re-applies, so the re-font
+  still happens. **My recommendation: take the reviewer's fix as the behaviour, and add the stored
+  stamp as the structural belt if it wants one line more.**
+- **Rider on the pin (round 2's NIT-2, measured, not theoretical).** Whatever shape it takes, the pin
+  must capture its readings and put both process globals back BEFORE it asserts, and inject stamps
+  wherever the global is not itself the subject. My round-2 record has the measurement: an unbounded
+  window in this same suite turned `BookOutlineLandingTests` red at `editorHeight → 24.0` (green alone,
+  red beside this suite, green again once bounded). `SurfaceSizeMemoryTests` is `.serialized`, which
+  does not help across suites.
+
+**[NIT-1] — AGREE, exactly as stated.** `persist`'s guard is justified by the flow's empty-read branch
+(`ReadingFlowView`'s `FlowStoryRow`: `memory.remember(...)` then `settledHere()` → `memory.persist(...)`),
+and that road runs through the FLOW memory, whose stamp is `FlowHeightEstimate.fingerprint` — a
+compile-time `static let String`, promoted into the closure's `String?` and therefore never nil. So the
+road I cited is the one road that cannot carry an unknown-voice write. My mistake, and it is the same
+class the round's own J8 copy-truth rule names. **Rider on the wording:** the genuinely same-turn road
+for the `.outline` memory — the one whose stamp CAN be nil — is `StableSurface.report`'s settle closure
+(`remember(size)` → `loaded = true` → `settled?()`), whose Outline consumers are `BookView`'s two
+`settled: { model.persistSurfaceSize(entry.postID) }` closures; every expanded Outline row uses it. And
+please keep the second sentence: the guard is belt-and-braces (with `remember` dropping, `records[key]`
+holds only the record read from disk, which the `written` cache declines to re-write) — that is why it
+is a NIT and not a bug, and a reader who loses that sentence will later "simplify" the guard away.
+
+**[NIT-2] — AGREE, and I re-ran the trace rather than taking it.** `NoteVersionsPane.swift` (340 lines)
+contains no `EditorView`, `PostDetailView`, `ReadPostView`, `StableSurface`, `SurfaceSizeMemory`,
+`noteFocusedBlock` or `openHere` — so a version's one home mounts nothing that writes a per-note key,
+and no `currentBlock.<id>` or `surfaceSize.*.<id>` can exist under a version's id. The promoted case is
+the one that makes the guard non-vacuous over time, and the reviewer has it right: `promoteNoteVersion`
+unarchives, so `isVersion` reads false at delete time and a promoted version IS evicted. **One rider on
+the clause's wording, so it does not overclaim:** removing `!item.isVersion` would not CAUSE harm — it
+would evict under an id that provably carries no keys. The guard states an INTENT (a saved moment is not
+a note whose view state exists), and the honest clause says that rather than implying it prevents a
+loss; otherwise the next reader treats it as load-bearing and reasons wrongly about the road around it.
+
+**Summary: 3 agreed · 0 disputed.** Nothing here re-opens a ruling and nothing needs a QUESTIONS row.
+The two things I would not want dropped from the fix pass: MINOR-1's answer that the chrome-carries-its-own-typography
+shape is NOT available at this size (the trace is in `EditorDocument`, not in `applyVoiceChrome`), and
+NIT-1's belt-and-braces sentence, which is the reason the guard survives its own correction.
