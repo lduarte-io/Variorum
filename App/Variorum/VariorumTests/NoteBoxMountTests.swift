@@ -163,16 +163,20 @@ struct NoteBoxGeometryTests {
             defer { themeTask.cancel() }
 
 #if DEBUG
-            SidebarGeometry.railGroupHeight = nil
+            // MY rail — keyed by the note it draws for (the round-end Fable
+            // pass, MINOR-2 (a)): a rail drawn concurrently by another suite
+            // used to supply this reference, spuriously red at a compressed
+            // pitch and meaninglessly green at the generous one.
+            SidebarGeometry.railGroupHeights[post.id] = nil
             let (railWindow, _) = await drawnColumn(
                 session: session, theme: theme, selection: .post(post.id), box: nil,
-                openNote: post.id, until: { SidebarGeometry.railGroupHeight != nil })
+                openNote: post.id, until: { SidebarGeometry.railGroupHeights[post.id] != nil })
             defer {
                 railWindow.orderOut(nil)
                 railWindow.close()
             }
             let rail = try #require(
-                SidebarGeometry.railGroupHeight, "the rail drew for the selected note")
+                SidebarGeometry.railGroupHeights[post.id], "the rail drew for the selected note")
             #expect(
                 rail == SidebarLayout.railGroupHeight(
                     rowHeight: SidebarLayout.generousRowHeight,
@@ -372,7 +376,8 @@ struct NoteBoxCompositionTests {
                 window.close()
             }
 #if DEBUG
-            SidebarGeometry.railGroupHeight = nil
+            // MY rail, by its note (the round-end Fable pass, MINOR-2 (a)).
+            SidebarGeometry.railGroupHeights[postIDs[0]] = nil
             SidebarGeometry.resetHeaders()
 #endif
             let hosting = NSHostingView(
@@ -384,8 +389,16 @@ struct NoteBoxCompositionTests {
             router.workspace.visit(.post(postIDs[0]))
             _ = router.workspace.select(.post(postIDs[0]))
 #if DEBUG
-            await settle(window, hosting, until: { SidebarGeometry.railGroupHeight != nil })
-            let rail = try #require(SidebarGeometry.railGroupHeight, "the rail drew")
+            await settle(window, hosting, until: {
+                SidebarGeometry.railGroupHeights[postIDs[0]] != nil
+            })
+            let rail = try #require(SidebarGeometry.railGroupHeights[postIDs[0]], "the rail drew")
+            // The local proof that the rail drew at the pitch the box's frame
+            // assumes — its own number now, not cross-suite noise.
+            #expect(rail == SidebarLayout.railGroupHeight(
+                rowHeight: SidebarLayout.generousRowHeight,
+                railRows: PostDetailView.Mode.allCases.count),
+                    "the rail's DRAWN group is the arithmetic the box reads: \(rail)")
 
             // …then the book.
             router.pendingSelection = .reading(readingID)

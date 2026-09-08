@@ -405,8 +405,15 @@ struct ShellChromeTests {
             _ = try session.operations.newBlock(in: left.id, text: "left text")
             _ = try session.operations.newBlock(in: right.id, text: "right text")
             let router = ShellRouter()
+            // MY seam's key — this window's router and the seam's index (the
+            // round-end Fable pass, MINOR-2 (b)); cleared for THIS key only
+            // (MINOR-2 (c): a whole-oracle reset wiped parallel suites' seams,
+            // which `onGeometryChange` never republishes).
+            let seam = SeamGeometry.key(
+                RootView.paneSeamFamily,
+                subject: RootView.paneSeamSubject(router: router, index: 0))
             #if DEBUG
-            SeamGeometry.reset()
+            SeamGeometry.forget(seam)
             #endif
             let window = NSWindow(
                 contentRect: NSRect(x: 80, y: 80, width: 1200, height: 760),
@@ -427,7 +434,6 @@ struct ShellChromeTests {
                 try? await Task.sleep(for: .milliseconds(5))
             }
             router.openBeside(.post(right.id))
-            let seam = SeamGeometry.key(RootView.paneSeamFamily, subject: "0")
             #if DEBUG
             for _ in 0..<300 where SeamGeometry.gripFrames[seam] == nil {
                 hosting.layoutSubtreeIfNeeded()

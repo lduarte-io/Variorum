@@ -649,9 +649,13 @@ struct RootView: View {
     /// a pane); the seam's shape is row 9's, which the shell got at 17o
     /// batch d and `SideColumn`'s three boundaries at 18d's ladder.
     ///
-    /// **The FOURTH seam, converted at round 2's MINOR-1.** It was the last
-    /// copy of the old shape: a 9-pt `.overlay` with `NSCursor.push()` on
-    /// `.onHover` and no `zIndex`, in the row where `paneHost` is drawn
+    /// **The FOURTH seam, converted at round 2's MINOR-1.** It carried the
+    /// old shape (a 9-pt `.overlay` with `NSCursor.push()` on `.onHover` and
+    /// no `zIndex`) — as did a FIFTH, the Blocks workbench's `WorkbenchSeam`,
+    /// which the round-end Fable pass converted after this comment had
+    /// called this one "the last copy" (a completeness claim must be made by
+    /// searching for the DEFECT's shape, never by inheriting a count). Here
+    /// the defect sat in the row where `paneHost` is drawn
     /// after it and takes the grip's right half — over a live editor, so the
     /// pointer she got there was the I-beam. **Layout-neutral:**
     /// `SeamGrip`'s own frame is `SeamGrip.lineWidth`, the same 1 pt this
@@ -671,21 +675,34 @@ struct RootView: View {
             onLineFrame: { frame in
                 #if DEBUG
                 SeamGeometry.lineFrames[
-                    SeamGeometry.key(Self.paneSeamFamily, subject: "\(index)")] = frame
+                    SeamGeometry.key(
+                        Self.paneSeamFamily,
+                        subject: Self.paneSeamSubject(router: router, index: index))] = frame
                 #endif
             },
             onGripFrame: { frame in
                 #if DEBUG
                 SeamGeometry.gripFrames[
-                    SeamGeometry.key(Self.paneSeamFamily, subject: "\(index)")] = frame
+                    SeamGeometry.key(
+                        Self.paneSeamFamily,
+                        subject: Self.paneSeamSubject(router: router, index: index))] = frame
                 #endif
             })
     }
 
-    /// The pane seam's family in the shared oracle; its SUBJECT is the seam's
-    /// index in the row (a window has at most one split, and the pins mount
-    /// their own window).
+    /// The pane seam's family in the shared oracle.
     static let paneSeamFamily = "paneDivider"
+
+    /// The pane seam's SUBJECT — THIS window's router and the seam's index in
+    /// its row (the round-end Fable pass, MINOR-2 (b)). The index alone was
+    /// `paneDivider|0` for every split in every suite and every window, so a
+    /// pin polling for its own seam could exit on another suite's mounted
+    /// shell and then compare two windows' rectangles. The router is
+    /// per-window `@State` (13f batch 5b), so its identity is the window's;
+    /// the view and the pin both call this one rule.
+    static func paneSeamSubject(router: ShellRouter, index: Int) -> String {
+        "\(ObjectIdentifier(router))|\(index)"
+    }
 
     private func paneHost(_ pane: PaneID, split: Bool, tokens: VoiceTokens) -> some View {
         // THE MOUNT RULE, consulted as the one fork (13f batch 4, gate (b);

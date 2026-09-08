@@ -139,9 +139,14 @@ enum SeamGeometry {
     static var lineFrames: [String: CGRect] = [:]
     static var gripFrames: [String: CGRect] = [:]
 
-    static func reset() {
-        lineFrames = [:]
-        gripFrames = [:]
+    /// A pin clears ITS OWN seam and no other (the round-end Fable pass,
+    /// MINOR-2 (c)). The old `reset()` wiped every subject's entries — and
+    /// `onGeometryChange` republishes only on CHANGE, so a still-mounted seam
+    /// in a parallel suite was never republished and that suite's `#require`
+    /// timed out with no defect behind it.
+    static func forget(_ key: String) {
+        lineFrames[key] = nil
+        gripFrames[key] = nil
     }
 }
 #endif

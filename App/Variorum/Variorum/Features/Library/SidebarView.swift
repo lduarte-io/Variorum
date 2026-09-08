@@ -572,7 +572,7 @@ struct SidebarView: View {
             .padding(.horizontal, Self.groupPadding)
             #if DEBUG
             .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
-                SidebarGeometry.railGroupHeight = height
+                SidebarGeometry.railGroupHeights[postID] = height
             }
             #endif
         }
@@ -738,8 +738,12 @@ enum SidebarGeometry {
     static var openRowHeight: CGFloat?
     /// KEPT AND PUBLISHED for 18d batch 1, which puts a note BOX where the
     /// rail stands, at the rail's height — the header rule this batch settles
-    /// (row 13) is the one that box inherits.
-    static var railGroupHeight: CGFloat?
+    /// (row 13) is the one that box inherits. **Keyed by the note the rail
+    /// draws for** (the round-end Fable pass, MINOR-2 (a)): the box pins take
+    /// their REFERENCE height from here, and an unkeyed number let a rail
+    /// drawn concurrently by another suite supply it — spuriously red at a
+    /// compressed pitch, meaninglessly green at the generous one.
+    static var railGroupHeights: [String: CGFloat] = [:]
     /// 18d batch 1: what the NOTE BOX drew — the whole box, and its header's
     /// words. The geometry oracle compares these two rectangles against the
     /// rail's, because "the box is measured to take up the same amount of

@@ -452,17 +452,20 @@ struct OutlineRoomTests {
     /// is exactly the half that was dead.
     @Test func theLeadingSeamsGripIsWideCentredAndReachesIntoBothSides() async throws {
         try await withChapteredBook { book in
+            // Round 2's MINOR-2: MY navigator's seam, by the book's own id
+            // — `widthKey` alone is a per-host constant, so every navigator
+            // in every parallel suite wrote the same entry. Cleared for THIS
+            // key only (the round-end Fable pass, MINOR-2 (c)): a
+            // whole-oracle reset wiped parallel suites' seams, which
+            // `onGeometryChange` never republishes.
+            let seam = SeamGeometry.key(BookNavigatorLayout.widthKey, subject: book.readingID)
             #if DEBUG
-            SeamGeometry.reset()
+            SeamGeometry.forget(seam)
             #endif
             UserDefaults.standard.removeObject(forKey: BookNavigatorLayout.widthKey)
             let (window, _) = await mountBook(book)
             defer { window.orderOut(nil); window.close() }
             #if DEBUG
-            // Round 2's MINOR-2: MY navigator's seam, by the book's own id
-            // — `widthKey` alone is a per-host constant, so every navigator
-            // in every parallel suite wrote the same entry.
-            let seam = SeamGeometry.key(BookNavigatorLayout.widthKey, subject: book.readingID)
             let grip = try #require(
                 SeamGeometry.gripFrames[seam],
                 "the grip publishes a frame of its own (an overlay never did)")
