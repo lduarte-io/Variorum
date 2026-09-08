@@ -7434,6 +7434,13 @@ mode's bar-in-the-page).
 | E | the retirement (the gutter · `.side` · the paged mode) + the click-out | **DONE** (`cb4c4669`) |
 | F | the walk, both voices, every state in every mode; captures | NOT STARTED |
 
+**REVERT PROBE IN FLIGHT (named before it runs, per the checkpoint rule).** The tree is committed at
+`ffef837d`; two behavioural reverts follow, each restored by `git checkout --` from the repo root with
+`git diff --stat` verified empty afterwards. **Probe 1 (the height claim):** the box's frame dropped so
+it sizes to its content — the geometry oracle must go red on the DIFFERENCE, not on absence. **Probe 2
+(the existence + the retirement):** the sidebar's box branch removed and `.inSidebarBox` made to render
+the bottom bar again — the composition pin and the retirement pin must go red.
+
 #### Piece B — the brains, before any pixel
 
 Four pure pieces, none of which needs a window:
