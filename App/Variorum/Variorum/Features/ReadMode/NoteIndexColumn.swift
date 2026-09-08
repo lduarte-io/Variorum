@@ -34,8 +34,15 @@ struct NoteIndexColumn: View {
     /// menu's archive/delete family; declared ⇔ rendered).
     static let surfaceCapabilities: [CapabilityID] = [.archiveBlock, .deleteBlock]
 
-    /// The column's measure — the Index tab's own.
+    /// The column's measure — the Index tab's own. Since 18d batch 3 (her
+    /// U-13) it is where the column STARTS, not where it stays: the host
+    /// mounts it in the leading `SideColumn`, so this is the ideal a note
+    /// with nothing remembered opens at, and nothing moves for her until she
+    /// drags the boundary.
     static let width: CGFloat = 340
+    /// How narrow she may drag it before the handles and the first lines
+    /// stop being a contents list at all.
+    static let minimumWidth: CGFloat = 240
 
     let session: AppSession
     let model: BlockTOCViewModel

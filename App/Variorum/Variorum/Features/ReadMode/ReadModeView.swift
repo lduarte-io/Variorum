@@ -69,6 +69,12 @@ struct ReadModeView: View {
 
     static func faceKey(_ postID: String) -> String { "readFace.\(postID)" }
 
+    /// The contents column's remembered width (18d batch 3, her U-13). ONE
+    /// posture for every note, like `readModeOutlineShown` beside it — how
+    /// wide she wants a note's contents is how she reads, not a fact about
+    /// one note. Local-only, never synced (the `CurrentBlockMemory` class).
+    static let indexColumnWidthKey = "readModeIndexColumnWidth"
+
     /// The host's own coordinate space — the DEBUG geometry oracle reads
     /// block frames in it (a `.global` read inside a macOS `ScrollView`
     /// answers in the scroll view's own hosting space, not the window's —
@@ -128,20 +134,39 @@ struct ReadModeView: View {
     var body: some View {
         VStack(spacing: 0) {
             faceBar
-            HStack(spacing: 0) {
-                if outlineShown {
-                    NoteIndexColumn(
-                        session: session, model: model, tokens: tokens,
-                        selectedBlockID: selectedBlockID,
-                        showsCount: face == .edit,
-                        columnTarget: $columnTarget,
-                        onSelect: { blockID in select(blockID, scrollFace: true) },
-                        onJump: onJump)
-                        .frame(width: NoteIndexColumn.width)
-                        .transition(.move(edge: .leading).combined(with: .opacity))
-                    Divider().overlay(tokens.line)
-                }
+            // **18d batch 3 (her U-13): the contents column is the shared
+            // LEADING side column** — *"table of contents in read mode for a
+            // note is horizontally limited and not changable, should be
+            // adjustable."* It was a fixed 340-pt slab beside a plain
+            // `Divider`, so a long first line truncated mid-word and there
+            // was nothing to do about it. Same three things, drawn by
+            // `SideColumn`: our own line in every window state, the 9-pt
+            // grip and the resize cursor on it, and the width she drags
+            // remembered (240 … 640). `shown` is the outline toggle she
+            // loves, unchanged, and the slide-in transition it animates now
+            // comes from the column itself.
+            SideColumn(
+                tokens: tokens,
+                shown: outlineShown,
+                widthKey: Self.indexColumnWidthKey,
+                edge: .leading,
+                ideal: NoteIndexColumn.width,
+                minimum: NoteIndexColumn.minimumWidth
+            ) {
                 faceView
+            } panel: {
+                NoteIndexColumn(
+                    session: session, model: model, tokens: tokens,
+                    selectedBlockID: selectedBlockID,
+                    showsCount: face == .edit,
+                    columnTarget: $columnTarget,
+                    onSelect: { blockID in select(blockID, scrollFace: true) },
+                    onJump: onJump)
+                    .onGeometryChange(for: CGSize.self) { $0.size } action: { size in
+                        #if DEBUG
+                        ReadModeOracle.indexColumnFrame = CGRect(origin: .zero, size: size)
+                        #endif
+                    }
             }
         }
         .background(tokens.room)
@@ -360,6 +385,10 @@ enum ReadModeOracle {
     /// Ladder R1-9: when the `edit` face painted its FIRST row (the Blocks
     /// arrival measure's shape).
     static var firstEditRowPaintedAt: Date?
+    /// 18d batch 3 (her U-13): what the CONTENTS COLUMN actually drew. "It
+    /// is the width she left it at" is a claim about a rectangle, so the pin
+    /// reads the rectangle, never `NoteIndexColumn.width`.
+    static var indexColumnFrame: CGRect?
 
     static func reset() {
         face = nil
@@ -370,6 +399,7 @@ enum ReadModeOracle {
         editBlockFrames = [:]
         pageTurns = 0
         firstEditRowPaintedAt = nil
+        indexColumnFrame = nil
     }
 }
 #endif

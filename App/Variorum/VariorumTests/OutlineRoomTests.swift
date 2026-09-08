@@ -280,4 +280,91 @@ struct OutlineRoomTests {
             #endif
         }
     }
+
+    // MARK: - 3 (the other half). The note Read tab's contents column
+
+    /// Mount Read (`edit`, the face it opens on) over a three-block note.
+    private func withReadHost<T>(
+        _ body: @MainActor (NSWindow, NSHostingView<AnyView>, BlockTOCViewModel) async throws -> T
+    ) async throws -> T {
+        let db = try AppDatabase.inMemory()
+        return try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 26))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let post = try session.operations.createPost(title: "a note with contents")
+            for text in [
+                "# A heading whose first line is long enough to want the room",
+                "A paragraph whose first line runs well past the column's shipped measure.",
+                "A third block, so the column has something to scroll.",
+            ] {
+                _ = try session.operations.newBlock(in: post.id, text: text)
+            }
+            #if DEBUG
+            ReadModeOracle.reset()
+            #endif
+            _ = session.commandRouter.registerDetail(postID: post.id, mode: .read) { _ in }
+            let model = BlockTOCViewModel(session: session, postID: post.id)
+            let window = NSWindow(
+                contentRect: NSRect(x: 100, y: 100, width: 1100, height: 750),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            let hosting = NSHostingView(rootView: AnyView(
+                ReadModeView(session: session, postID: post.id, model: model)
+                    .environment(ThemeStore(session: session))))
+            hosting.frame = NSRect(x: 0, y: 0, width: 1100, height: 750)
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            for _ in 0..<12 {
+                hosting.layoutSubtreeIfNeeded()
+                window.layoutIfNeeded()
+                window.displayIfNeeded()
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(30))
+            }
+            defer { window.orderOut(nil); window.close() }
+            return try await body(window, hosting, model)
+        }
+    }
+
+    /// **Her U-13's other half, measured.** Read's contents column is the
+    /// width she left it at, on a fresh mount — so a long first line has
+    /// somewhere to go. RED on the pre-fix shape: `.frame(width:
+    /// NoteIndexColumn.width)`, a constant no stored width can move.
+    @Test func theReadContentsColumnIsTheWidthSheLeftItAtAcrossARemount() async throws {
+        defer { UserDefaults.standard.removeObject(forKey: ReadModeView.indexColumnWidthKey) }
+        UserDefaults.standard.set(true, forKey: "readModeOutlineShown")
+        // Nothing remembered: the shipped measure, so nothing moves for her
+        // until she drags.
+        UserDefaults.standard.removeObject(forKey: ReadModeView.indexColumnWidthKey)
+        try await withReadHost { _, _, _ in
+            #if DEBUG
+            let fresh = try #require(ReadModeOracle.indexColumnFrame)
+            #expect(abs(fresh.width - NoteIndexColumn.width) <= 1,
+                    "a note with nothing remembered opens at the shipped 340: \(fresh.width)")
+            #endif
+        }
+        // What a drag writes, read back on a FRESH mount.
+        UserDefaults.standard.set(480.0, forKey: ReadModeView.indexColumnWidthKey)
+        try await withReadHost { _, _, _ in
+            #if DEBUG
+            let wider = try #require(ReadModeOracle.indexColumnFrame)
+            #expect(abs(wider.width - 480) <= 1,
+                    "the remembered width came back: \(wider.width)")
+            #endif
+        }
+        // And the floor holds: dragged past it, the column stops being a
+        // contents list, so it never goes under its minimum.
+        UserDefaults.standard.set(80.0, forKey: ReadModeView.indexColumnWidthKey)
+        try await withReadHost { _, _, _ in
+            #if DEBUG
+            let floored = try #require(ReadModeOracle.indexColumnFrame)
+            #expect(abs(floored.width - NoteIndexColumn.minimumWidth) <= 1,
+                    "the column's floor held: \(floored.width)")
+            #endif
+        }
+    }
 }

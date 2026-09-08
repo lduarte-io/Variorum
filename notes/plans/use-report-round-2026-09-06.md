@@ -7914,7 +7914,7 @@ two consumers (the book navigator; the note Read tab's contents column). Rows 22
 |---|---|---|
 | A | the width brain's LEADING mirror + `SideColumn`'s `edge`/`maximum`; the pure pins | **DONE** (this commit) |
 | B | the book navigator becomes the leading column (remembered width; the row pitch) | **DONE** (this commit) · red-on-old PENDING |
-| C | the note Read contents column becomes it (remembered width) | NOT-STARTED |
+| C | the note Read contents column becomes it (remembered width) | **DONE** (this commit) · red-on-old PENDING |
 | D | the walk on the dev-store Debug build, both voices; captures | NOT-STARTED |
 
 **Piece A, what landed.** `SideColumnLayout` gained `draggedWidthFromLeading` — the mirror, in the ONE
@@ -7953,6 +7953,15 @@ navigator's own 360, not the note panels' 640). Both read RECTANGLES from a DEBU
 constants. Suites at this commit: **71 tests in 14 suites** — the pins plus every suite that mounts
 `BookView`, `SideColumnTests`, and the two inherited geometry pins this batch could have broken
 (`outlineProseSitsOnWritesOwnMeasure` · `theNavigatorsChromeStaysInsideItsColumn`).
+
+**Piece C, what landed.** Read's `HStack` — column, `Divider`, face — is the same leading `SideColumn`.
+`shown` is the outline toggle she loves, unchanged (the slide-in it animates now comes from the column
+itself); `NoteIndexColumn.width` (340) becomes the IDEAL rather than the frame, `minimumWidth` (240) the
+floor, and the ceiling is the brain's shared 640, remembered under `readModeIndexColumnWidth` — one
+posture for every note, beside `readModeOutlineShown`, local-only and never synced. Nothing changed
+about what the column LISTS. **Pin:** `theReadContentsColumnIsTheWidthSheLeftItAtAcrossARemount` (the
+shipped 340 with nothing remembered · a stored 480 back on a fresh mount · a stored 80 held at the
+floor), reading `ReadModeOracle.indexColumnFrame` — the rectangle, never the constant.
 
 **Piece A's pins** (`App/Variorum/VariorumTests/OutlineRoomTests.swift`):
 `theLeadingDragMirrorsTheTrailingOneAboutTheColumn` (the relation, over a stride of pointer positions
