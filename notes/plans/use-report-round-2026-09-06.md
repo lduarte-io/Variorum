@@ -4496,3 +4496,135 @@ match the code, or that the code narrow to the recorded scope until #97 is ruled
 - **No trailer lines** on any of the fifteen commits under review; no history rewrite; path-scoped adds throughout; the shared tree untouched by this review.
 
 **Counts: 0 BLOCKER · 1 MAJOR · 0 MINOR · 3 NIT.** The cross-model flow applies (R2-1 is a bug-class finding with its red-on-old pin written and its fix validated in the worktree; R2-2 · R2-3 · R2-4 are cleanliness): the implementer's agree/dispute comes back to me, then the fix pass here.
+
+#### 17o batch b round 2 — the implementer's responses
+
+*The batch-b implementer (opus-implementer), 2026-09-08: agree/dispute with rationale, traced against
+the code at `6e9a5e26` in my own context — nothing implemented, no code or test file touched, the plan
+is the only file this edits. **4 AGREED · 0 DISPUTED.** The reviewer makes the final call on each and
+implements its confirmed fixes itself.*
+
+**R2-1 (MAJOR — the landing at the note's very END) — AGREE, and the arithmetic falls straight out of
+the code, which is why I can agree without re-running it.** Every link traced:
+
+- **The landing really can be `documentLength`.** `bareArrivalLanding` returns
+  `min(range.location + min(remembered, range.length), documentLength)`
+  (`EditorViewModel.swift:1992–1998`); for the LAST entry `range.location + range.length ==
+  documentLength` (no trailing separator — `BlockRangeIndex`'s tiling), and `updateCaretContext`
+  attributes an inclusive end to its own block (`caret <= location + entry.length`, `:2823`), so a caret
+  resting at the end of the last block reports exactly `entry.length` and the arrival lands at the
+  document's end. The reviewer's "with no open tail" qualifier is the right one: an open tail is storage
+  past the last entry, and then the landing is short of `documentLength`. So the road is the ordinary
+  *"I stopped typing at the end of the note, then ⌘2, then ⌘1"* — not a corner.
+- **The nil is structural, not incidental.** `lineSpan` builds `target =
+  location(documentRange.location, offsetBy: clamped)` (`JumpPrimitive.swift:123–125`) and enumerates
+  `from: target`; the document's END location is inside no element's range, so the callback never fires
+  and `span` stays nil at `:146`. `consumePendingReveal` reads `if let span = …` (`:1970`) — nil skips
+  the guard entirely rather than failing safe.
+- **And the jump cannot correct, by construction.** `jump` runs the SAME enumeration from the SAME
+  location inside `JumpCorrectionLoop`'s closure (`:206–213`), so `targetMinY` answers nil on the first
+  call and `run` bails at its own `guard let minY … else { return Result(finalTop: top, iterations: 0,
+  converged: false) }` (`:41–43`) — **after** the closure has already scrolled. The place it scrolled to
+  is `estimate = Double(clamped) / Double(docLength) * textHeight` (`:204`), which for `clamped ==
+  docLength` is `1.0 × textHeight`, clamped by `scroll(to:)` to `maxScroll = docHeight − clip.height`
+  (`:180`, `:196`). On the reviewer's three-block note: `docHeight 791`, `room 702` ⇒ `textHeight 89`,
+  `maxScroll 72` — and the measurement reads `visible 72.0…791.0`. The number is the code's, and it is
+  the typewriter room that makes it a full-viewport lurch rather than a few points.
+- **It is the batch's own regression, and my walk could not have caught it.** Before the batch a bare
+  arrival was always a block's START (Act 10 rows 39/49), so no landing ever sat at the document's end;
+  U-20's offset created the road and my reveal is what acts on it. My walk's round trips all started
+  from a caret placed by a CLICK inside a paragraph — never from the note's end, which is exactly where
+  a writer's caret rests.
+
+**Riders on the fix shape** (the reviewer's shape is right; these are the edges I would want stated):
+
+1. **The adjustment belongs to the enumeration START only.** `enumerateTextLayoutFragments(from: clamped
+   − 1 …)` when `clamped == length && length > 0`, while the value handed to
+   `FragmentLines.lineIndex(atLocalOffset: max(0, clamped − fragmentStart))` stays `clamped` — whose
+   "past the last range ⇒ the last line" rule (`JumpPrimitive.swift:88–93`) is what makes the answer the
+   LAST line rather than the second-to-last. Both functions need it; `lineTop` inherits it for free
+   because it delegates (`:106`). The `else` arm (`span = (fragmentTop, frame.maxY)`) must stay for a
+   fragment that reports no line fragments.
+2. **The guard now RUNS at the note's end, which is the whole point** — and it is worth saying in the
+   record that the new behaviour is *"nothing moves when the last line is already on screen"*, i.e.
+   J18(2)'s accepted rule finally reaching the one offset it could never see. The page will still jump
+   when the end is genuinely off screen, which is correct.
+3. The 17-pt shortfall (`8647.1` against `maxScroll 8647.5`) is the room's own arithmetic — the estimate
+   excludes the room while `maxScroll` includes it — and is pre-existing in every jump. Not worth
+   chasing inside this finding.
+
+**On the blast radius the coordinator asked about — can the end-of-document resolution disturb the Phase
+6 hybrid jump's other callers, `JumpCorrectionLoopTests`' contract in particular? Traced: no, and in
+three independent ways.**
+
+- **`JumpCorrectionLoopTests` cannot be touched by construction.** Its three tests drive the PURE
+  `JumpCorrectionLoop.run` with fabricated `targetMinY` closures (`JumpAndUndoTests.swift:20–45`) —
+  stable geometry, an exact estimate, shifting estimates within the cap. The fix changes only which
+  `NSTextLocation` the closure *inside* `JumpPrimitive.jump` enumerates from; `run`'s signature, its
+  tolerance, its iteration cap, its clamp-means-converged rule and its nil-bail are all unmoved. The
+  loop's contract is not in the diff's reach.
+- **The scroll-anchor callers can never reach the new branch.** `renderFull` restores through
+  `JumpPrimitive.jump(toOffset: min(anchor, documentLength) …)` (`EditorSurfaceController.swift:156–162`)
+  where the anchor is `topVisibleOffset()` or `editorRouter.scrollAnchors[postID]` — itself a
+  `topVisibleOffset()` value. That function returns `fragmentStart + lines[i].characterRange.location`
+  (`EditorViewModel.swift:3268–3279`): a LINE START, or nil when `textLayoutFragment(for:)` finds nothing
+  (which is precisely what happens when the page is scrolled into the typewriter room). A line start
+  equals `documentLength` only for an empty document, where `jump` has already returned at `guard
+  docLength > 0` (`:189`). So `renderFull`'s restore and `restoreTopVisibleOffset` (`:3281–3288`) stay
+  byte-identical, and the anchor round trip (`topVisibleOffset` ⇄ `jump`, whose exactness the Phase 6
+  memo and 13c 1A both rest on) is untouched.
+- **No pin anywhere encodes the current end-of-document behaviour.** The three direct `jump` call sites
+  in tests all target a block START mid-document — `EditorWindowSmokeTests.swift:59` (block 40, which
+  then asserts `topVisibleOffset() == target`), `:120` (block 25), `:233` (`paragraphs / 2`). Nothing
+  green today says "a jump to the end lands at `maxScroll`", so nothing can flip red for the wrong
+  reason.
+
+**R2-2 (NIT — the flag's doc overclaims) — AGREE.** The two lines really do contradict: the doc at
+`PaneSurface.swift:230–233` says *"it can never outlive the gesture that set it"* while `:1003`'s rule
+deliberately KEEPS it across a read→read render (R1-2's refinement, which I agreed to and still think is
+right). The workbench panel is the host where that has a consequence: its `isLive` is `model.liveBlockID
+== row.blockID && !row.variantLocked` (`BlocksWorkbenchView.swift:856`), so a click on a LOCKED take's
+pane moves the authority without flipping the pane, and the flag sits armed until that pane's next
+transition. Benign for the reason given — the panel passes no `onSelectionChange`, so nothing it holds
+reaches the note's memory, and if an in-place unlock later flips it live the click's own place is the
+better landing anyway. **Rider: bundle a THIRD stale comment into the same sweep** —
+`BlocksWorkbenchView.swift:865–871` still says the panel's pane *"enters the note's current block where
+she was, else at its start — the same rule as every other pane host"*, which after RAISE-2/J20 is no
+longer true of *every* host (the six that pass nothing keep `.leave`). Same class as R2-3: a comment
+that outlived the code it described.
+
+**R2-3 (NIT — #97's (a) quotes retired code) — AGREE.** Verified against `notes/QUESTIONS.md:1212`: (a)
+still reads *"`noteLiveness`: `caretOnGoingLive ?? 0`"* and *"the typewriter room still asks for the END
+explicitly (`Int.max`)"*, while (b) was already updated to `PaneCaretLanding.start → .end` and the SCOPE
+paragraph describes the enum — so the staleness is confined to (a), exactly as the finding says. A
+reader opening `PaneSurface.swift` finds `caretOnGoingLive: PaneCaretLanding` (`:619–642`, four cases)
+and neither of the quoted expressions. **Rider:** while the two phrases are being replaced, the
+parameter's own description is worth one word too — it is no longer an `Int?` — so a future reader of
+#97 can grep the name and land on the enum.
+
+**R2-4 (NIT — the arm and its read duplicated across the two models) — AGREE.** Verified byte-for-byte:
+`TakesViewModel.swift:590–606` and `BlockTOCView.swift:258–273` carry the same guard, the same
+`fact.utf16Offset.map(PaneCaretLanding.offset) ?? .start`, and the same
+`paneCaretLanding?.variantID == variantID ? paneCaretLanding!.landing : .leave`. The reviewer's reason is
+the one that matters: this is the very rule #97 asks her to ratify, and two copies of it are two places a
+future flip can miss. **Riders on the shape:** (1) the force-unwrap is safe *today* by construction —
+`Optional<String> == String` is false when the tuple is nil, so the branch cannot be entered — but the
+hoist should not carry it across; `paneCaretLanding.map { $0.variantID == variantID ? $0.landing :
+.leave } ?? .leave` says the same thing without the sharp edge. (2) Keep the helper PURE and give it the
+FACT, not the router (`PaneCaretLanding.entering(_ fact: FocusedBlock?, block: String) ->
+PaneCaretLanding?`): the two models differ only in how they name the pane, and a pure entry rule beside
+the enum in `Surface/PaneSurface.swift` is reachable from both without a new file and is unit-testable
+without a session — which is what would let #97's flip land in one line with a pin on it.
+
+**On the "considered and cleared" list:** I read all ten and agree with every clearance; the three
+re-measured red-on-old numbers match round 1's record exactly, which is the check I could not run
+myself. Two are worth a sentence back. The clearance of **RAISE-2's scope** against every `parkFocus`
+site is the check I wanted and did not do — I named those sites as the roads that would change and the
+reviewer verified they land on a NEW or NEIGHBOURING block, where the arm yields `.leave`, so the
+narrower J20 change left them exactly as they shipped. And the **`read`-face click-through asymmetry**
+the reviewer surfaces (`ReadModeView.openInEdit` reports the block first and so lands `.start`, while a
+`Text`-tap into a non-current block lands `.leave`/the END) is a real difference between two similar
+gestures that I had not seen; routing it into #97's text rather than deciding it is the right call.
+
+**Counts: 4 AGREED · 0 DISPUTED.** Nothing implemented; the tree is untouched by this response.
+
