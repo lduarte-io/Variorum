@@ -4859,8 +4859,8 @@ restyle beyond the four rows.
 **Pieces (checkpoint order):**
 
 1. row 16 — the pane's stale height after a big deletion — **DONE (`3c6bcbb6`)**
-2. row 6 — the ring follows the indicator setting, everywhere, through the ONE component — **DONE (this commit)**
-3. row 14 — the chosen bar runs the card's full height — **NOT STARTED**
+2. row 6 — the ring follows the indicator setting, everywhere, through the ONE component — **DONE (`d6ab4b40`)**
+3. row 14 — the chosen bar runs the card's full height — **DONE (this commit)**
 4. row 15 — "＋ new block" in the EMPTY state of Takes and Lenses — **NOT STARTED**
 5. the walk (both voices, the setting cycled) + captures + the closing suites — **NOT STARTED**
 
@@ -4986,6 +4986,50 @@ false`. Green again on restore.
 **Stated honestly:** the three HOSTS' own frames are walked, not pinned — the rig cannot mount those
 whole surfaces (KnownIssues' rig row; the brief's own "pin brains, walk faces"). The rule they consume is
 pinned; that they consume it is a one-line read and a capture.
+
+---
+
+#### ROW 14 — THE CHOSEN BAR RUNS THE CARD'S FULL HEIGHT
+
+**Her punchlist 11, verbatim:** *"the chosen green line doesn't go all the way down"* (image 6 —
+`greenchosenlinedoesntgoallthewaydown.png`, which I read: the STACK style, wash on, block 4/8, a 581-word
+chosen take whose card runs past the viewport while the green bar stops about a third of the way down).
+
+**The traced mechanism:** `TakeCardFrame` drew the 3-pt bar as an HStack SIBLING of the content. A
+flexible `Color` inside a stack is sized against the height the stack has RESOLVED — and beside a
+`PaneSurfaceView` whose measured height publishes on a LATER main-queue turn (`PanePublisher`'s
+deliberate deferral, and the A47b FRAME LEVER which moves the AppKit frame directly), the height the
+stack resolved with is a previous one. The card's own background and border chase the settled content;
+the sibling bar does not.
+
+**The fix:** the bar is an `.overlay(alignment: .leading)` of the finished card (the brief's own
+prescription), laid out against the card's resolved height rather than beside it, so it is the card's
+height by construction however many turns the pane takes to settle. The content keeps its exact leading
+inset (the 3 pt the bar's column used to occupy is now a `.padding(.leading, 3)`), so nothing moves.
+
+**The geometry oracle** (`TakeCardGeometry`, the `LensesGeometry` DEBUG pattern one surface over): the
+bar and the card each report their frame in the card's own coordinate space; the oracle keeps EVERY
+report rather than last-one-wins, because a board draws many cards.
+
+**MEASURED, both sides, by behavioral revert (the HStack sibling restored in place — no `git checkout`
+this time):**
+
+| arm | pre-fix | fixed |
+|---|---|---|
+| the real STACK board (her image 6's surface), tallest card vs tallest bar | **card 1246.0 · bar 1220.5** | **card 1246.0 · bar 1246.0** |
+| a bare synthetic 40-line card, ten settle turns | equal | equal |
+
+**Stated honestly:** the SYNTHETIC arm is green on both sides — a bare mount settles and the pre-fix
+HStack catches up, so it states the law without catching the defect. It is kept for the law (a future
+card composition that never reaches a board still owes it) and the arm that CATCHES the row is
+`theChosenBarRunsTheWholeCardOnTheRealStackBoard`. The board arm compares MAXIMA, because the oracle
+cannot say which bar belongs to which card; `max(bar) < max(card)` still means some card's bar falls
+short, which is her report exactly.
+
+**Pins:** `TakesCardHeightTests.theChosenBarRunsTheWholeCardOnTheRealStackBoard` (the pin) ·
+`…theChosenBarRunsTheWholeHeightOfALongCard` (the law). Suites at this commit:
+`TakesCardHeightTests` · `WriteTakesPanelTests` · `TakesBoardTests` · `TakesPresentationTests` ·
+`TakesBoardSoakTests` — **38/5 green** (`WriteTakesPanel` composes `TakeCardFrame` too).
 
 **A trap I hit, recorded so the next session does not** (§8's own warning, *"never `git checkout` over
 uncommitted work"*): after the row-6 revert probe I restored three files with `git checkout --`, which

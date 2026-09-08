@@ -563,6 +563,91 @@ struct TakesCardHeightTests {
         }
     }
 
+
+    // MARK: - 17o batch c, ledger row 14 — the chosen bar's full height
+
+    /// Her punchlist 11, verbatim: *"the chosen green line doesn't go all
+    /// the way down"* (image 6, the stack style).
+    ///
+    /// **The traced mechanism:** `TakeCardFrame` drew the 3-pt chosen bar as
+    /// an HStack SIBLING of the content. A flexible `Color` inside a stack
+    /// is sized against the height the stack has RESOLVED — and beside a
+    /// `PaneSurfaceView` whose measured height publishes on a LATER
+    /// main-queue turn (`PanePublisher`'s deliberate deferral), the height
+    /// the stack resolved with is the pane's PREVIOUS one. The card then
+    /// grows to the settled pane and the bar keeps the older number.
+    ///
+    /// **The geometry oracle** (the brief's own evidence shape for this
+    /// row): the bar and the card each report their frame in the card's
+    /// coordinate space, and the bar must be the card's full height on a
+    /// 40-line take.
+    ///
+    /// **Recorded honestly: THIS synthetic arm is green on BOTH sides.** A
+    /// bare mount settles in ten turns and the pre-fix HStack catches up, so
+    /// it states the law without catching the defect. The arm that catches
+    /// it is `theChosenBarRunsTheWholeCardOnTheRealStackBoard` below —
+    /// measured on the pre-fix layout at **card 1246.0 vs bar 1220.5**, and
+    /// **1246.0 / 1246.0** after. Kept because the law is worth stating on
+    /// the component itself, and because a future card composition that
+    /// never reaches a board still owes it.
+    @Test func theChosenBarRunsTheWholeHeightOfALongCard() async throws {
+        TakeCardGeometry.reset()
+        let text = (1...40).map {
+            "Line \($0) of an honest take that keeps flowing along the measure and wraps."
+        }.joined(separator: "\n")
+        let tokens = VoiceTokens.resolve(voice: .terminal, dark: false)
+        let host = NSHostingController(
+            rootView: ScrollView {
+                TakeCardFrame(isChosen: true, tokens: tokens) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("✓ chosen").font(tokens.small)
+                        PaneSurfaceView(text: text, isLive: false, tokens: tokens)
+                    }
+                }
+                .frame(width: 420)
+            })
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 460, height: 1600),
+            styleMask: [.borderless], backing: .buffered, defer: false)
+        window.contentViewController = host
+        host.view.frame = NSRect(x: 0, y: 0, width: 460, height: 1600)
+        defer { window.contentViewController = nil }
+        await settle(window, host.view, until: { false }, maxTurns: 10)
+
+        let card = try #require(TakeCardGeometry.tallest(.card))
+        let bar = try #require(TakeCardGeometry.tallest(.chosenBar))
+        #expect(card.height > 600,
+                "non-vacuity: a forty-line take really does make a tall card (\(card.height))")
+        #expect(abs(bar.height - card.height) < 1,
+                "the chosen bar runs the card's whole height (bar \(bar.height) vs card \(card.height)) — her green line stopped short")
+        #expect(abs(bar.minY - card.minY) < 1,
+                "…from the card's top (\(bar.minY) vs \(card.minY))")
+    }
+
+
+    /// The same claim on the REAL board in the STACK style — her image 6's
+    /// surface (`style: stack`, a long chosen take, wash on). The synthetic
+    /// mount above settles in ten turns; the board is where the pane's
+    /// height arrives over several publishes while the card is already laid
+    /// out, which is the state her screenshot caught.
+    @Test func theChosenBarRunsTheWholeCardOnTheRealStackBoard() async throws {
+        TakeCardGeometry.reset()
+        try await withBoard(style: .stack, takes: 2, paragraphs: 14) { hosting, window, _, _ in
+            await settle(window, hosting, until: { false }, maxTurns: 12)
+            let card = try #require(TakeCardGeometry.tallest(.card))
+            let bar = try #require(TakeCardGeometry.tallest(.chosenBar))
+            #expect(card.height > 400,
+                    "non-vacuity: the stack board really drew a tall card (\(card.height))")
+            // Compared as MAXIMA: a board draws several cards and the
+            // oracle cannot say which bar belongs to which card, but
+            // `max(bar) < max(card)` means SOME card's bar falls short —
+            // which is exactly her report, and exactly what the pre-fix
+            // layout produced (1220.5 against 1246.0).
+            #expect(abs(bar.height - card.height) < 1,
+                    "the chosen bar runs the card's whole height on the board (tallest bar \(bar.height) vs tallest card \(card.height))")
+        }
+    }
+
     /// The seam SETTLES: deliveries converge to one write per card and
     /// stop. (The termination argument made mechanical — a delivery can
     /// change only the wrapper height, and the pane's measurement is

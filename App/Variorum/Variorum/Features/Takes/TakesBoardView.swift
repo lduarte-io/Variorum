@@ -1428,17 +1428,85 @@ struct TakeCardFrame<Content: View>: View {
     @ViewBuilder let content: () -> Content
 
     var body: some View {
-        HStack(alignment: .top, spacing: 0) {
-            (isChosen ? tokens.chosen : Color.clear)
-                .frame(width: 3)
-            content()
-                .padding(.vertical, 5)
-                .padding(.horizontal, 7)
-                .frame(maxWidth: .infinity, alignment: .topLeading)
-        }
-        .background(tokens.card)
-        .clipShape(RoundedRectangle(cornerRadius: 6))
-        .overlay(RoundedRectangle(cornerRadius: 6).stroke(tokens.takeLine, lineWidth: 1))
+        content()
+            .padding(.vertical, 5)
+            .padding(.horizontal, 7)
+            // The 3 pt the bar's own column used to occupy in the HStack, so
+            // the content's leading edge does not move.
+            .padding(.leading, 3)
+            .frame(maxWidth: .infinity, alignment: .topLeading)
+            .background(tokens.card)
+            // 17o batch c, ledger row 14 (her punchlist 11: "the chosen
+            // green line doesn't go all the way down", image 6). The bar
+            // used to be an HStack SIBLING of the content, so it was sized
+            // against the height the stack had RESOLVED — which, beside a
+            // pane whose measured height publishes on a later turn, is the
+            // pane's PREVIOUS height. An overlay is laid out against the
+            // finished card instead, so the bar is the card's height by
+            // construction, whenever the pane settles and however often.
+            .overlay(alignment: .leading) {
+                (isChosen ? tokens.chosen : Color.clear)
+                    .frame(width: 3)
+                    .frame(maxHeight: .infinity)
+                    .takeCardGeometryProbe(.chosenBar)
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 6))
+            .overlay(RoundedRectangle(cornerRadius: 6).stroke(tokens.takeLine, lineWidth: 1))
+            .takeCardGeometryProbe(.card)
+            .coordinateSpace(name: TakeCardProbeSlot.space)
+    }
+}
+
+/// The row-14 oracle's slots, and the card's own coordinate space (a
+/// non-generic home, so the probe can name it without `TakeCardFrame`'s
+/// `Content`).
+enum TakeCardProbeSlot: Hashable {
+    case card
+    case chosenBar
+
+    static let space = "take-card"
+}
+
+#if DEBUG
+@MainActor
+enum TakeCardGeometry {
+    /// EVERY report, in arrival order — a board draws many cards, and a
+    /// last-one-wins dictionary would let a short card's numbers stand in
+    /// for the long one the pin is about.
+    static var reports: [(slot: TakeCardProbeSlot, frame: CGRect)] = []
+
+    static func record(_ slot: TakeCardProbeSlot, _ frame: CGRect) {
+        reports.append((slot, frame))
+    }
+
+    static func latest(_ slot: TakeCardProbeSlot) -> CGRect? {
+        reports.last { $0.slot == slot }?.frame
+    }
+
+    /// The TALLEST card reported, and the tallest bar — a board pin asks
+    /// about the long card, whichever order SwiftUI reported them in.
+    static func tallest(_ slot: TakeCardProbeSlot) -> CGRect? {
+        reports.filter { $0.slot == slot }.map(\.frame).max { $0.height < $1.height }
+    }
+
+    /// A pin resets before its mount, so a stale report can never satisfy it.
+    static func reset() { reports = [] }
+}
+#endif
+
+extension View {
+    /// The DEBUG oracle write: this view's frame in the card's own
+    /// coordinate space. A no-op outside DEBUG (the `LensesGeometry`
+    /// pattern, one surface over).
+    @ViewBuilder
+    func takeCardGeometryProbe(_ slot: TakeCardProbeSlot) -> some View {
+        #if DEBUG
+        self.onGeometryChange(for: CGRect.self) {
+            $0.frame(in: .named(TakeCardProbeSlot.space))
+        } action: { TakeCardGeometry.record(slot, $0) }
+        #else
+        self
+        #endif
     }
 }
 
