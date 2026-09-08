@@ -5249,8 +5249,8 @@ clean.**
 
 ### R-8 · RECORD (the implementer writes here from its first commit)
 
-**NOT DONE (the record's first line, kept current):** at this checkpoint — every row below marked
-NOT-STARTED; the walk; the closing suites. Nothing outside the seventeen rows was touched: zero
+**NOT DONE (the record's first line, kept current):** at this checkpoint — rows 9 · 10 · 11 · 12 ·
+13 · 17 · 18 · 19 · 21 · 27 · 40 · 41; the walk; the closing suites. Nothing outside the seventeen rows was touched: zero
 `Sources/VariorumCore/Sync/`, zero schema, no 18d work, no editor-seam change beyond row 47's one
 condition in `applyFocusSeeds` (flagged seam-adjacent below for the c/d/e reviewer).
 
@@ -5271,11 +5271,11 @@ column · Compare's one door — plus the two ladders' routed residue (rows 43�
 | 27 | Compare speaks the raw `OperationError` | NOT-STARTED | — |
 | 40 | the tag field collapses on focus loss | NOT-STARTED | — |
 | 41 | the divider's white top | NOT-STARTED | — |
-| 43 | the Takes board's sheet receipt count | NOT-STARTED | — |
-| 44 | the field guide's deleting chapter still teaches ⌘⇧D's retired default | **DONE** (see below) | `theDeletingChaptersDivideLessonTeachesKeepOnTop` |
-| 45 | the Takes/Lenses bar's `block ▾` lacks the two ceremony rows | NOT-STARTED | — |
-| 46 | that bar's Divide help narrates the retired default | NOT-STARTED | — |
-| 47 | the bare arrival's `landing > 0` exemption (seam-adjacent) | NOT-STARTED | — |
+| 43 | the Takes board's sheet receipt count | **DONE** (`45cdfdef`) | `aSeedParkedAtItsStartDoesNotGetTheSplitAcrossBothReceipt` |
+| 44 | the field guide's deleting chapter still teaches ⌘⇧D's retired default | **DONE** (`0f9496cd`) | `theDeletingChaptersDivideLessonTeachesKeepOnTop` |
+| 45 | the Takes/Lenses bar's `block ▾` lacks the two ceremony rows | **DONE** (`df75906b`) | `theBoardsStructuralGroupRendersEveryStructuralAct` |
+| 46 | that bar's Divide help narrates the retired default | **DONE** (`b8730fc6`) | `theBoardBarsStructuralHelpsTellTheKeepOnTopTruth` |
+| 47 | the bare arrival's `landing > 0` exemption (seam-adjacent) | **DONE** (`67fdced1`) | `aRememberedCaretAtTheNotesStartIsOnScreenUnderAFarAnchor` |
 
 #### Row 44 — FIXED
 
@@ -5298,3 +5298,88 @@ Suite green: **13 tests / 1 suite**.
 
 **Sequencing (why this row went first):** her ONE restore act at the round's end re-seeds the field
 guide. This had to land before the handoff's restore note or the restore would seed the stale lesson.
+
+#### Row 45 — FIXED
+
+**Traced myself.** `CapabilityRegistry` declares `.bottomBar` on both ceremonies (`:196`, `:220`);
+`CommitBar.renderedCapabilities` lists them and `CommitBar.blockMenu` renders both rows; the boards'
+`TakesBottomBar.structuralBar` was Divide · Extract · Make Block · Merge, and
+`theBottomBarsRenderExactlyTheDeclaredBarDoors` asserts the **union** of the two bars — so CommitBar
+alone satisfied the declaration and nothing could see the gap. `runStructuralDoor` has handled both
+ceremony acts since 13j (divide natively on the board, merge carried to Write like its plain twin), so
+the rows act honestly with no new machinery. **Fix:** two rows beside their plain twins, titles taken
+from the registry with their chords exactly as CommitBar takes them (`structuralBar` became a computed
+`static var` for that); the two ids added to `renderedCapabilities`.
+
+**Pin (red-on-old):** `CapabilityRegistryTests.theBoardsStructuralGroupRendersEveryStructuralAct` —
+PER BAR, and **exhaustive over `StructuralAct.allCases`** rather than a hand-listed set, so a future
+structural act cannot repeat the omission. RED on `0f9496cd` with 2 issues; green after. The union walk
+stays green. **24 tests / 1 suite.**
+
+#### Row 46 — FIXED
+
+**Traced myself.** That same table's Divide help read *"the rest are copied whole onto both halves
+(⌥⌘⇧D to place each cut by hand)"* — the retired 13j J4 default — beside a receipt that has said
+"stayed on the first" since 18c batch 1 (J8; the file's own comment above the tuple describes the
+defect exactly). The Merge help pointed at ⌥⌘⇧M as the only way to pair; since row 45 the row that does
+it sits directly below, so the chord leaves the sentence and the door's NAME takes its place in both.
+
+**Pin (red-on-old):** `FannedDefaultsTests.theBoardBarsStructuralHelpsTellTheKeepOnTopTruth`, placed
+beside the receipt's own copy-truth pins because they are one sentence in two places. RED on `df75906b`
+with 4 issues; green after. **55 tests / 2 suites** with the row-45 walk beside it.
+
+#### Row 43 — FIXED
+
+**Traced myself.** `TakesViewModel.runDivideW` spoke the INSTANT road's arithmetic,
+`first.variants.count - 1`, which assumes exactly one seed-half sits in the first block.
+`KeepOnTopDivide.compose` guarantees that at the instant door; the sheet does not — keep-on-top with
+the ✂ at the seed's very START is legal (`presetBlocker` blocks only `parkedAtEnd`) and parks the seed
+WHOLE into the bottom block, and under "Choose per take…" any take may be cut by hand. **Fix:** the two
+claims read off the op's own `FanHalf.sourceVariantIDs` — a take rode whole onto the first iff its
+source id is in `first` and not in `second`; the seed split iff it is in both. Where the seed did not
+split, the line falls back to R1-9's deliberate zero form, which claims nothing.
+
+**The choice, recorded:** the ladder offered two landings — the zero line, or a new `seedSplit:`
+sentence naming the seed riding whole. I took the zero line: it is the shipped, ruled fallback (R1-9)
+and needs no new copy, so nothing is invented. A sentence for that shape is hers to ask for.
+
+**Pins:** `OriginBlockDoorTests.aSeedParkedAtItsStartDoesNotGetTheSplitAcrossBothReceipt` — RED on
+`b8730fc6` with 3 issues, the receipt reading *"…split across both blocks; 1 other take stayed on the
+first"* where the seed did not split and TWO takes stayed; green after. Beside it
+`.aSeedCutMidBlockStillCountsWhatRodeOntoTheFirst` (green both sides) holds the shape the arithmetic
+was right for, so the fix cannot quietly silence the working case. **51 tests / 4 suites.**
+
+#### Row 47 — FIXED · **SEAM-ADJACENT (the reviewer's call whether it wants Fable)**
+
+**Traced myself.** `applyFocusSeeds` parked its reveal only `if landing > 0` (`:1890`). Round 1 of the
+batch-b ladder dismissed that exemption as hollow because the cold-mount anchor restore clamped at
+~24 pt and so hid nothing; round 2's RAISE-M1 made the restore EXACT and the exemption became
+reachable — the page returns to the far view she left (correct) and a landing of 0 parks no reveal, so
+"⌘1 then type" types off screen.
+
+**DEVIATION FROM THE DESIGNED FIX, measured and recorded.** The cap designed "drop the `landing > 0`
+condition". Applied literally it turns `aColdMountRestoresTheSessionScrollAnchorAtTheSettleHop` **red
+by 6927 pt** — because `bareArrivalLanding` folds two different situations into the number 0: *her
+caret was at the note's very start*, and *this note remembers nothing, so land at the start*. Only the
+first outranks the anchor, and the two ruled behaviours meet exactly there — QUESTIONS #98(a) speaks of
+**the remembered caret** (when it is not inside the restored view, its line lands at the viewport top),
+RAISE-M1 of the view she left. **Fix:** `bareArrivalLanding` now reads through a new
+`rememberedArrivalLanding(fact:) -> Int?` (one brain, `nil` = nothing remembered for this note — no
+fact, another note's fact, or a block the index no longer holds) and the reveal tests REMEMBERED rather
+than `> 0`. Strictly wider than the old condition (it adds the remembered 0) and strictly narrower than
+unconditional (it excludes the default). `bareArrivalLanding`'s own signature and behaviour are
+byte-identical, so batch b's pins on it ride unmodified.
+
+**Pin (red-on-old):** `LandingOffsetTests.aRememberedCaretAtTheNotesStartIsOnScreenUnderAFarAnchor` —
+the cap's designed rig (`memoryEntry: 0, memoryOffset: 0` under the block-200 anchor). RED on
+`45cdfdef` with the cap's own numbers: `caret line 24.0…41.0 · anchor top 6944.1 · visible
+6944.1…7663.1`. Green after. The anchor pin is now also this row's boundary and says so in its doc.
+
+**Riders from the same cap, both landed in this commit:** R3-2 — `PaneSurfaceView.caretOnGoingLive`'s
+doc still quoted the `Int?` era ("nil means the take's START", "`Int.max` asks for the END"), rewritten
+to the four `PaneCaretLanding` cases. R3-3 — `mountedLongNoteWithAnchor`'s teardown moved onto a
+`defer` capturing only the router and the post id, so a `#require` throwing in a body can no longer
+leak the memory into `UserDefaults.standard`.
+
+**Suites green at this commit:** `LandingOffsetTests · CurrentBlockContinuityTests ·
+JumpCorrectionLoopTests · ScrollAnchorTests · PaneSurfaceTests · TakesLandingTests` — **44 / 6**.
