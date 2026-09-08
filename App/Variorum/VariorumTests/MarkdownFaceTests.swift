@@ -252,12 +252,22 @@ struct MarkdownFaceTests {
         }
     }
 
+    /// A voice SWITCH is the settings' authority landing (`ThemeStore.start`
+    /// → `EditorTypography.adopt`) and the surface's chrome re-applying after
+    /// it — so the pin models both halves. (The round-end Fable pass, MINOR-1:
+    /// `applyVoiceChrome` no longer writes the global typography once a voice
+    /// is adopted — a drawing host must not move the stamp — and any full run
+    /// has adopted one by the time this suite runs, so a chrome applied with
+    /// no adoption is not a switch; it was the very defect that fix closed.)
     @Test func theFaceFollowsAVoiceSwitch() {
         withVoice {
             let (text, _) = EditorDocument.materialize([slot("a", text: "a **bold** word")])
             let view = EditorTextView.makeEditor().textView
             view.textStorage?.setAttributedString(text)
 
+            let wasAdopted = EditorTypography.isAdopted
+            defer { EditorTypography.isAdopted = wasAdopted }
+            EditorTypography.adopt(EditorTypography.resolve(voice: .study, inlineComments: false))
             view.applyVoiceChrome(EditorSurfaceChrome(
                 voice: .study, dark: false, inlineComments: false))
             let storage = try? #require(view.textStorage)
