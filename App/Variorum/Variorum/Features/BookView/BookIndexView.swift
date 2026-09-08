@@ -248,12 +248,23 @@ struct BookIndexView<Masthead: View>: View {
             pane
         }
         .background(tokens.surface)
-        .onAppear { landOrSeed() }
+        .onAppear {
+            landOrSeed()
+            // 18d batch 1: the index's LIVE note reaches the book the same
+            // way its selection does — the sidebar's note box needs an
+            // answer in every editing mode, and this mode's liveness is its
+            // own pane's, never the book's focus (P-3).
+            model.noteIndexLive(edit.livePostID)
+        }
         .onChange(of: model.pendingReveal) { _, _ in landOrSeed() }
         .onChange(of: model.entries) { _, _ in landOrSeed() }
+        .onChange(of: edit.livePostID) { _, live in model.noteIndexLive(live) }
         // Leaving the index releases its ring (the one live pane), flushing
         // whatever it held — the same discipline every pane host follows.
-        .onDisappear { edit.teardown() }
+        .onDisappear {
+            edit.teardown()
+            model.noteIndexLive(nil)
+        }
     }
 
     /// Arrive where she was: the carry's parked reveal wins; else the

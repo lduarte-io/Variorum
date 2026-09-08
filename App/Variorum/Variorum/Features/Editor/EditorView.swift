@@ -26,13 +26,19 @@ struct EditorView: View {
     /// per container by construction (one focused post), which is P3's
     /// one-live-editor rule.
     var inline = false
-    /// Wave 2c (Act 10 item 18, W8-5): where the bar goes. `.bottom` is
-    /// the standing form everywhere; `.side` renders the SAME `CommitBar`
-    /// as a vertical rail beside the surface — the book Outline's focused
-    /// inline note, whose details render to the SIDE, never below the
-    /// paragraphs (her ruling). The rail width is the outline gutter's, so
-    /// the bar lands exactly where the unfocused rows put their details.
-    enum BarPlacement { case bottom, side }
+    /// Where the bar goes.
+    ///
+    /// - `.bottom` — the standing form everywhere: the `CommitBar` under the
+    ///   surface, byte-unchanged.
+    /// - `.inSidebarBox` — **the BOOK's editing surfaces (18d batch 1, her
+    ///   U-10)**: this editor renders NO bar of its own, because its doors
+    ///   live in the sidebar's note box, which the shell builds from the
+    ///   registered live editor (`EditorRouter.active`). Wave 2c's `.side`
+    ///   arm — the same bar as a vertical rail in the Outline's right gutter
+    ///   — RETIRED with the gutter itself (U-17), and her ruling's own
+    ///   sentence is why: *"then it can stop taking up room on the right and
+    ///   it won't be at the bottom when you're in that book editing mode."*
+    enum BarPlacement { case bottom, inSidebarBox }
     var barPlacement: BarPlacement = .bottom
     @State private var model: EditorViewModel
     @State private var inlineHeight: CGFloat = 24
@@ -114,17 +120,11 @@ struct EditorView: View {
     var body: some View {
         @Bindable var model = model
         Group {
-            if case .side = barPlacement {
-                // Wave 2c: the side rail — the SAME bar, vertical, in the
-                // gutter beside the surface (the book Outline's grammar;
-                // the surface column keeps the prose measure the caller
-                // frames, the rail takes the gutter's fixed width).
-                HStack(alignment: .top, spacing: 24) {
-                    surfaceColumn
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    CommitBar(model: model, axis: .vertical)
-                        .frame(width: 190, alignment: .leading)
-                }
+            if case .inSidebarBox = barPlacement {
+                // 18d batch 1: no bar here at all — the doors are in the
+                // sidebar's note box, built by the shell from the registered
+                // live editor. The prose gets the whole measure back.
+                surfaceColumn
             } else {
                 VStack(spacing: 0) {
                     surfaceColumn

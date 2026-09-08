@@ -7429,9 +7429,9 @@ mode's bar-in-the-page).
 |---|---|---|
 | A | the core read behind the facts line (`Queries.noteStamps`) | **DONE** (`e6b4148c`) |
 | B | the pure brains: the box's state rule, its copy, the rail-height measurement | **DONE** (`9b5028d5`) |
-| C | the box VIEW + the sidebar's slot + the geometry oracle + the fit math | NOT STARTED |
-| D | the book publishes its subject; `RootView` composes; the facts model | NOT STARTED |
-| E | the retirement (the gutter · `.side` · the paged mode) + the click-out | NOT STARTED |
+| C | the box VIEW + the sidebar's slot + the fit math | **DONE** (`PENDING-C`) · the geometry oracle is PENDING |
+| D | the book publishes its subject; `RootView` composes; the facts model | **DONE** (`PENDING-C`) |
+| E | the retirement (the gutter · `.side` · the paged mode) + the click-out | **DONE** (`PENDING-C`) |
 | F | the walk, both voices, every state in every mode; captures | NOT STARTED |
 
 #### Piece B — the brains, before any pixel

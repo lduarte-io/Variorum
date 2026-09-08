@@ -12,16 +12,22 @@ import VariorumCore
 struct CommitBar: View {
     let model: EditorViewModel
 
-    /// Wave 2c (Act 10 item 18, W8-5 — "note details render to the SIDE
-    /// never below the opening paragraphs"): the bar's SECOND arrangement.
-    /// `.horizontal` is the standing bottom bar; `.vertical` stacks the
-    /// same clusters into a narrow side rail for the book Outline's
-    /// focused inline note — ONE brain, every door, two arrangements
-    /// (the drift a second bar would invite is exactly why this is an
-    /// axis and not a sibling view). In the vertical form the Aa slide-out
-    /// becomes a popover (the formatting cluster's ideal width is wider
-    /// than any side rail — same doors, summoned).
-    enum Axis { case horizontal, vertical }
+    /// Wave 2c gave this bar a SECOND arrangement so the book Outline's
+    /// focused note could carry its doors in the right gutter; **18d batch 1
+    /// (her U-10) moved them to the sidebar's note box and retired the
+    /// gutter entirely (U-17)**, so `.vertical` retired with it and `.box`
+    /// took its place. ONE brain, every door, two arrangements — the drift a
+    /// second bar would invite is exactly why this is an axis and not a
+    /// sibling view.
+    ///
+    /// - `.horizontal` — the standing bottom bar, byte-unchanged.
+    /// - `.box` — the sidebar note box's live state (mockup figure C): the
+    ///   same doors as a two-column grid at the sidebar's pitch, the
+    ///   formatting cluster summoned as a popover (its ideal width is wider
+    ///   than any sidebar), and the counts as the box's footer. It draws NO
+    ///   caret line: the box's own identity line carries where she is, from
+    ///   the same `BlockLineLabel` this bar uses, so the two cannot drift.
+    enum Axis { case horizontal, box }
     var axis: Axis = .horizontal
 
     init(
@@ -141,8 +147,8 @@ struct CommitBar: View {
 
     var body: some View {
         Group {
-            if axis == .vertical {
-                verticalBody
+            if axis == .box {
+                boxBody
             } else {
                 horizontalBody
             }
@@ -178,113 +184,146 @@ struct CommitBar: View {
         }
     }
 
-    /// **Row 40's collapse (the Act 10 correction round — her "maybe the
-    /// note menu needs to be collapsible"):** the side rail folds to its
-    /// where-you-are line and the count. A preference, not per-bar state:
-    /// the bar is re-created with every focused note, and a fold she chose
-    /// should survive that (the `writeHoverHandles` density class).
-    @AppStorage("bookSideRailCollapsed") private var sideRailCollapsed = false
-
-    /// The SIDE RAIL (wave 2c; re-shaped at the Act 10 correction round,
-    /// row 40 — her image 16: *"a tall rounded card stacking the bottom
-    /// bar's items VERTICALLY … looks kind of weird … what's in that menu
-    /// and how it looks needs to be a bit clearer"*). ONE calm control in
-    /// four groups, read top-down: where you are (with the fold) · the
-    /// block's doors, paired — `block ▾ · Takes`, then its two time
-    /// controls `commit ⌘S · history` · the note's doors `note ▾ ·
-    /// comments · Aa` · ONE count line, the word-target door. Pairs are
-    /// `ViewThatFits`: side by side where the rail's width allows, stacked
-    /// where it does not — a chrome label never wraps mid-word (P-8). The
-    /// rail's `Nw block` / `Nw selected` lines are GONE (C-6 — a narrow rail
-    /// is exactly where a metric "just because" reads as noise; the flat
-    /// bar keeps its R11 status idiom). Every door survives.
-    private var verticalBody: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 6) {
-                Text(tokens.chromeLabel(caretLabel))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .lineLimit(1)
-                Spacer(minLength: 4)
-                Button {
-                    sideRailCollapsed.toggle()
-                } label: {
-                    Text(sideRailCollapsed ? "▸" : "▾")
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.faint)
-                        .padding(.horizontal, 2)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .help(sideRailCollapsed
-                    ? "Show this note's controls" : "Fold the controls away")
+    /// **THE BOX'S BAR** (18d batch 1, her U-10: *"The block menu should move
+    /// to being where the 'this note, write, lenses, compare, etc.' menu
+    /// is"*). Mockup figure C, state 3: a two-column grid of the SAME doors
+    /// this bar has always rendered — `block ▾` · Takes / `commit ⌘S` ·
+    /// history / `note ▾` · comments — one wide row for the formatting door
+    /// and the newlines chip, and the counts as the box's footer.
+    ///
+    /// What is deliberately NOT here, and why:
+    /// - **the caret line** — the box's own identity line carries it (from
+    ///   the same `BlockLineLabel`, so the two can never disagree);
+    /// - **the fold** — the retired side rail folded because it stood in the
+    ///   prose's gutter and she asked for it back (row 40); a box that never
+    ///   changes height has nothing to fold away from;
+    /// - **the box's own frame** — the box draws the border and the room, so
+    ///   this arrangement is transparent chrome inside it.
+    ///
+    /// Every door survives at every width: each pair falls to one column
+    /// where two will not fit, and the newlines chip rides inside the Aa
+    /// popover where the wide row will not hold both — which is exactly what
+    /// the flat bar's own folded and compact tiers do (row 81).
+    private var boxBody: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            boxPair {
+                boxCell(blockMenu)
+                boxCell(takesDoor)
             }
-            if !sideRailCollapsed {
-                railPair {
-                    blockMenu
-                    gestureButton("Takes", available: model.gestureAvailability.takes,
-                                  action: model.openCaretFan)
-                }
-                railPair {
-                    Button(tokens.chromeLabel("commit ⌘S")) { model.commitCaretVariant() }
-                        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .primary))
-                        .disabled(model.caretVariantID == nil || model.header?.locked == true)
-                        .help("An immutable savepoint of the take under the caret")
-                    Button(tokens.chromeLabel(BlockHistoryPath.doorLabel)) {
-                        model.requestBlockHistory()
-                    }
-                    .buttonStyle(VoicedButtonStyle(tokens: tokens))
-                    .help("Everything this block has been: each take's saved moments, "
-                        + "its archived and deleted takes, and the block it came out of")
-                }
-                Divider().overlay(tokens.line).padding(.vertical, 1)
-                railPair {
-                    presentingNoteDoors(noteMenu)
-                    Button(tokens.chromeLabel("comments")) { model.openCaretComments() }
-                        .buttonStyle(VoicedButtonStyle(tokens: tokens))
-                        .help("The caret block's comments — working remarks on a block, "
-                            + "never per-take")
-                    VoicedChip(
-                        tokens: tokens, text: FormattingDoor.label, on: formattingShown
-                    ) {
-                        formattingShown.toggle()
-                    }
-                    .help(FormattingDoor.help(expanded: formattingShown))
-                    .popover(isPresented: $formattingShown, arrowEdge: .trailing) {
-                        // The same slide-out, summoned: the formatting
-                        // cluster and the newlines chip, at their own
-                        // ideal width.
-                        formattingRow
-                    }
-                }
-                Divider().overlay(tokens.line).padding(.vertical, 1)
+            boxPair {
+                boxCell(commitDoor, emphasised: true)
+                boxCell(historyDoor)
             }
-            HStack(spacing: 6) {
-                if let total = model.postWordCount {
-                    WordTargetFace(
-                        tokens: tokens, baseLabel: "\(total.formatted())w in note",
-                        words: model.postWordCount,
-                        target: model.header?.wordTarget,
-                        onSet: { target in await model.setPostWordTarget(target) })
-                }
-                Spacer(minLength: 4)
-                Button("?") { openWindow(id: "variorum-helper") }
-                    .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                    .help(HelperCheatSheet.summary)
+            boxPair {
+                boxCell(presentingNoteDoors(noteMenu))
+                boxCell(commentsDoor)
             }
+            formattingWideRow
+            Spacer(minLength: 4)
+            boxFooter
         }
-        .padding(10)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(tokens.room, in: RoundedRectangle(cornerRadius: 10))
-        .overlay(RoundedRectangle(cornerRadius: 10).stroke(tokens.line, lineWidth: 1))
     }
 
-    /// A rail group: its doors side by side where they fit, else stacked
-    /// — never a wrapped label.
-    private func railPair<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
+    /// A pair of cells: side by side where the box's width allows, stacked
+    /// where it does not — a chrome label never wraps mid-word (P-8). The
+    /// members are `fixedSize` inside the first arrangement so `ViewThatFits`
+    /// measures their IDEAL widths: every cluster here is compressible, and
+    /// a flexible child makes `ViewThatFits` judge any arrangement as fitting
+    /// (the N15 gotcha, seen live on this same bar).
+    private func boxPair<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
         ViewThatFits(in: .horizontal) {
-            HStack(spacing: 6) { content() }
-            VStack(alignment: .leading, spacing: 6) { content() }
+            HStack(spacing: 4) { content() }
+            VStack(alignment: .leading, spacing: 4) { content() }
+        }
+    }
+
+    /// One cell of the grid (the mockup's `.box .r`): the door itself, in a
+    /// bordered 26-pt box at the sidebar's own pitch. `emphasised` is
+    /// commit's — the column's OWN selected-row grammar (the wash under
+    /// accent words), not a filled web button: a filled cell among five
+    /// outlined ones at 69 pt shouts, and the wash is what every other
+    /// "this one" in this column already looks like.
+    private func boxCell<V: View>(_ content: V, emphasised: Bool = false) -> some View {
+        content
+            .fixedSize()
+            .frame(maxWidth: .infinity)
+            .frame(height: Self.boxCellHeight)
+            .background(
+                emphasised ? AnyShapeStyle(tokens.wash) : AnyShapeStyle(tokens.surface),
+                in: RoundedRectangle(cornerRadius: 6))
+            .overlay(
+                RoundedRectangle(cornerRadius: 6)
+                    .stroke(emphasised ? tokens.accent.opacity(0.5) : tokens.line, lineWidth: 1))
+            .contentShape(Rectangle())
+    }
+
+    nonisolated static let boxCellHeight: CGFloat = 26
+
+    private var commentsDoor: some View {
+        Button(tokens.chromeLabel("comments")) { model.openCaretComments() }
+            .buttonStyle(VoicedButtonStyle(tokens: tokens))
+            .help("The caret block's comments — working remarks on a block, "
+                + "never per-take")
+    }
+
+    /// The wide row: the formatting door and the newlines chip. Where both
+    /// will not fit, the chip rides inside the popover the door opens (the
+    /// formatting row carries it there already), so no door is lost — the
+    /// flat bar's folded tier, one surface over.
+    private var formattingWideRow: some View {
+        let aa = VoicedChip(
+            tokens: tokens, text: FormattingDoor.label, on: formattingShown
+        ) {
+            formattingShown.toggle()
+        }
+        .help(FormattingDoor.help(expanded: formattingShown))
+        .popover(isPresented: $formattingShown, arrowEdge: .trailing) {
+            // The same slide-out, summoned: the formatting cluster and the
+            // newlines chip, at their own ideal width.
+            formattingRow
+        }
+        return ViewThatFits(in: .horizontal) {
+            HStack(spacing: 6) {
+                aa.fixedSize()
+                Spacer(minLength: 4)
+                newlinesChip.fixedSize()
+            }
+            HStack(spacing: 6) {
+                aa.fixedSize()
+                Spacer(minLength: 0)
+            }
+        }
+        .frame(height: Self.boxCellHeight)
+    }
+
+    /// The box's footer (mockup figure C): the counts and `?`. The full
+    /// counts where they fit, the note's total alone where they do not —
+    /// C-6's own verdict for a narrow column, and the same two faces the
+    /// flat bar's full and folded rows use.
+    private var boxFooter: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Divider().overlay(tokens.line)
+            HStack(spacing: 6) {
+                ViewThatFits(in: .horizontal) {
+                    trailingCountsFace.fixedSize()
+                    noteTotalFace.fixedSize()
+                }
+                Spacer(minLength: 4)
+                helperDoor.fixedSize()
+            }
+        }
+    }
+
+    /// The flat bar's own counts face, reused whole (R11's word-count
+    /// prominence + the per-post word-target door).
+    @ViewBuilder private var trailingCountsFace: some View {
+        if let words = wordCountLabel {
+            WordTargetFace(
+                tokens: tokens, baseLabel: words,
+                words: model.postWordCount,
+                target: model.header?.wordTarget,
+                onSet: { target in await model.setPostWordTarget(target) })
         }
     }
 

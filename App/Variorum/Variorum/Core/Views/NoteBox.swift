@@ -115,8 +115,17 @@ nonisolated enum NoteBoxCopy {
     static let header = "this note"
     static let nothingSelected = "no note selected"
     static let nothingSelectedHint = "click a note in the book to see its controls here"
-    /// The one door out of the read-cheap state (⏎ is its key).
-    static let editDoor = "edit here \u{23CE}"
+    /// The one door out of the read-cheap state.
+    ///
+    /// **The mockup labels it *"edit here ⏎"* and this one does not carry the
+    /// glyph** (QUESTIONS #99, PROVISIONAL). A `keyboardShortcut` is a KEY
+    /// EQUIVALENT, checked before the responder chain — a window-wide Return
+    /// on a sidebar button steals Return from the masthead's title field, the
+    /// tag field and the Index column's filter, which is the exact class
+    /// `SpreadBookView`'s flip shortcut already guards against by refusing to
+    /// exist while an editor is live. A glyph promising a key nothing binds
+    /// is worse than no glyph, so the door is a button and says so.
+    static let editDoor = "edit here"
     /// The live mark, in the ring colour at the box's corner.
     static let editingMark = "editing"
 

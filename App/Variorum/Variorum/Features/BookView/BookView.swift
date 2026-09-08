@@ -31,6 +31,17 @@ struct BookView: View {
     /// opens in, revealed.
     var revealPostID: String?
     var onRevealConsumed: (() -> Void)?
+    /// **18d batch 1 (her U-10): what this book's sidebar note box shows.**
+    /// A VALUE and a DOOR, published upward — the sidebar never constructs or
+    /// holds this book's model, and `RootView` composes the box from what
+    /// arrives here (CLAUDE.md's P39 refinement; "features receive view
+    /// models, values, and closures"). Only the FOCUSED pane publishes: two
+    /// books in a split would otherwise fight over one column.
+    /// The publisher's own `readingID` rides every call, INCLUDING the clear
+    /// on disappear: SwiftUI mounts the arriving `.id` before it unmounts the
+    /// departing one, so an unstamped clear would erase the box the next book
+    /// just filled (the `CommandRouter.unregisterDetail` token, one seam over).
+    var onNoteBox: ((String, NoteBoxReport?, NoteBoxDoor?) -> Void)?
     @State private var model: BookViewModel
     @State private var structure: BookStructureModel
 
@@ -48,7 +59,8 @@ struct BookView: View {
         paneFocused: Bool = true,
         onPaneFocusRequest: (() -> Void)? = nil,
         revealPostID: String? = nil,
-        onRevealConsumed: (() -> Void)? = nil
+        onRevealConsumed: (() -> Void)? = nil,
+        onNoteBox: ((String, NoteBoxReport?, NoteBoxDoor?) -> Void)? = nil
     ) {
         self.session = session
         self.readingID = readingID
@@ -57,6 +69,7 @@ struct BookView: View {
         self.onPaneFocusRequest = onPaneFocusRequest
         self.revealPostID = revealPostID
         self.onRevealConsumed = onRevealConsumed
+        self.onNoteBox = onNoteBox
         let resolved = model ?? BookViewModel(session: session, readingID: readingID)
         for postID in initiallyExpanded { resolved.expand(postID) }
         _model = State(initialValue: resolved)
@@ -92,23 +105,17 @@ struct BookView: View {
     static let proseColumn =
         EditorTypography.maxColumnWidth + 2 * EditorTypography.inlineSurfaceInset
 
-    /// Wave 2c (item 18, W8-5 — "it's so bizarrely open on the right and
-    /// it's ugly how the note details render below the note's opening
-    /// paragraphs - if anything, those should render to the side"): the
-    /// DETAILS GUTTER. A fixed rail to the prose column's right that
-    /// carries each note's details — the card's meta, the expanded note's
-    /// facts, and (through `EditorView`'s `.side` bar placement) the
-    /// focused note's whole editor bar. The open right earns its keep.
-    static let outlineGutterWidth: CGFloat = 190
-    static let outlineGutterSpacing: CGFloat = 24
-    /// The FOCUSED note's row: the prose measure + the editor's side bar
-    /// (`EditorView(barPlacement: .side)` splits this into the surface and
-    /// a 190 pt rail). Only the focused row is capped — the correction
-    /// round (row 13) let the other rows span the pane with a flexible
-    /// gutter, but a live editor spanning the pane would put the prose
-    /// past Write's measure (R9 — margins are sacred).
-    static let outlineFocusedRowWidth =
-        proseColumn + outlineGutterSpacing + outlineGutterWidth
+    // (Wave 2c's DETAILS GUTTER — `outlineGutterWidth` · `outlineGutterSpacing`
+    //  · `outlineFocusedRowWidth` — RETIRED at 18d batch 1, her U-17: *"the
+    //  book's right gutter retires ENTIRELY"* once the bar moves into the
+    //  sidebar's note box. Her ruling's own reason, U-10: *"then it can stop
+    //  taking up room on the right."* The bar went to the box; the unfocused
+    //  rows' facts line went with it — state 2 of the box carries the note's
+    //  facts now, for the whole book rather than one card at a time. What is
+    //  left is the prose at Write's measure, and it is CENTRED in the pane
+    //  rather than left-anchored beside dead space (§5.4: *"the prose
+    //  recentres on the full width"* — the taste note the correction round
+    //  recorded as HELD, now answered).)
 
     var body: some View {
         HStack(spacing: 0) {
@@ -189,6 +196,13 @@ struct BookView: View {
             takeAscentRequest()
         }
         .onChange(of: paneFocused) { _, focused in model.paneFocused = focused }
+        // 18d batch 1 (her U-10): publish this book's note box. `.onAppear`
+        // and `.onChange` together, because the box must be right on the
+        // book's OPEN and not only after something moves; `.onDisappear`
+        // clears it, so a book leaving the pane takes its box with it.
+        .onAppear { publishNoteBox() }
+        .onChange(of: noteBoxReport) { _, _ in publishNoteBox() }
+        .onDisappear { onNoteBox?(readingID, nil, nil) }
         // 13f W20(a): the ascent's request, taken once — whether this book
         // was already open (onChange) or opened by the ascent (onAppear).
         .onChange(of: revealPostID) { _, _ in takeAscentRequest() }
@@ -647,6 +661,79 @@ struct BookView: View {
         }
     }
 
+    // MARK: - The sidebar's note box (18d batch 1 — her U-10)
+
+    /// What the box should show, derived from facts the modes already hold
+    /// (`BookNoteBox`, pure). nil ⇒ nothing to show: Read, or an UNFOCUSED
+    /// pane — a split's second book must not speak for the one column.
+    private var noteBoxReport: NoteBoxReport? {
+        guard paneFocused, BookNoteBox.shows(mode: structure.mode) else { return nil }
+        let selected = BookNoteBox.selectedPost(
+            mode: structure.mode,
+            focusedPostID: model.focusedPostID,
+            spreadPostIDs: model.spreadEntries.map(\.postID),
+            indexPostID: model.indexAnchorPostID)
+        let live = BookNoteBox.livePost(
+            mode: structure.mode,
+            liveFocusedPostID: model.liveFocusedPostID,
+            indexLivePostID: model.indexLivePostID)
+        return NoteBoxReport(
+            readingID: readingID, selected: selected, live: live,
+            identity: identity(of: live ?? selected))
+    }
+
+    /// The note's identity as THIS book knows it — its title, the chapter it
+    /// sits under, and its place in the reading order. `sectionPath` already
+    /// carries the chapter's NAME where chapters govern (and the tag path
+    /// where they do not), so this walks the entries once and asks the
+    /// grouping brain nothing.
+    private func identity(of postID: String?) -> NoteBoxIdentity? {
+        guard let postID,
+              let i = model.entries.firstIndex(where: { $0.postID == postID })
+        else { return nil }
+        let entry = model.entries[i]
+        return NoteBoxIdentity(
+            postID: postID, title: entry.displayTitle, chapter: entry.sectionPath,
+            index: i + 1, total: model.entries.count)
+    }
+
+    private func publishNoteBox() {
+        let report = noteBoxReport
+        onNoteBox?(
+            readingID, report,
+            report.map { report in NoteBoxDoor { editHere(report) } })
+    }
+
+    /// **The box's one act**, and it is mode-shaped because "live" is:
+    ///
+    /// - Outline and the spread mount the ONE full-document editor through
+    ///   the book's own focus authority, so the door focuses the note — and
+    ///   parks a bare `WriteIntent` at the block she was last in, which is
+    ///   the shipped road every "open in Write at this block" door already
+    ///   takes (a bare focus lands at the note's FIRST block by design).
+    /// - Index upgrades ONE BLOCK to a live pane instead, and its own
+    ///   landing door is the book's `requestLanding` — the same
+    ///   `LandingTarget` the Read click travels on (row 38).
+    private func editHere(_ report: NoteBoxReport) {
+        guard let postID = report.selected ?? report.live else { return }
+        let remembered = session.commandRouter.currentBlock(for: postID)
+        switch structure.mode {
+        case .index:
+            model.requestLanding(
+                LandingTarget(postID: postID, blockID: remembered?.blockID))
+        case .outline, .spread:
+            if let blockID = remembered?.blockID {
+                session.commandRouter.pendingWriteIntent = WriteIntent(
+                    postID: postID, blockID: blockID,
+                    offsetInBlock: remembered?.utf16Offset ?? 0)
+            }
+            model.focus(postID)
+            model.requestReveal(postID)
+        case .read:
+            break
+        }
+    }
+
     /// 13f W20(a) — the ascent, adopted. The shell's one-shot request becomes
     /// this book's landing (W21's slot), so "open the book at this post"
     /// needs no second mechanism: it is the same reveal a mode switch parks,
@@ -1028,6 +1115,12 @@ struct BookView: View {
         case .read:
             if let first { model.requestReveal(first.postID) }
         case .outline:
+            // 18d batch 1 (her U-10: the box shows *"no note selected"* when
+            // *"you've clicked out of something"*): a chapter row is a click
+            // OUT of the note — you asked for the chapter, not the note you
+            // were in — so the focus is released and the box empties. The
+            // expansion is untouched: what you unfolded stays unfolded.
+            model.focus(nil)
             model.requestChapterReveal(section.id)
         case .index:
             // Ladder R1-16: nothing in Index consumes a chapter reveal
@@ -1087,6 +1180,8 @@ struct BookView: View {
     private var outlineBody: some View {
         ScrollViewReader { proxy in
             ScrollView {
+                HStack(alignment: .top, spacing: 0) {
+                clickOutMargin
                 VStack(alignment: .leading, spacing: 10) {
                     // Batch 12 (her mockup reference): the book's TITLE
                     // heads the content column, aligned with the posts —
@@ -1219,17 +1314,21 @@ struct BookView: View {
                 // tiers in this column (the inline editor and the read
                 // surface) carry the same 8pt container inset, so a column
                 // of maxColumn + 2×inset puts this book's prose on exactly
-                // the measure Write puts a post's on. It stays LEFT-ANCHORED
-                // beside the navigator (batch 12, her mockup reference:
-                // "there shouldn't be so much open space to the left").
-                // Wave 2c: the row includes the details gutter — the prose
-                // keeps its measure; the gutter takes the right. The
-                // correction round (row 13): the gutter is FLEXIBLE, so the
-                // row spans the pane and the right edge is the pane's own
-                // rather than a rail's cliff 190 pt past the prose.
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 40)
+                // the measure Write puts a post's on.
+                //
+                // **18d batch 1 — it RECENTRES** (§5.4: *"the prose recentres
+                // on the full width"*; the taste note the correction round
+                // recorded as HELD, now answered by her U-17). It was
+                // left-anchored because a 190-pt details gutter stood to its
+                // right and the pane's right edge was the gutter's; with the
+                // gutter retired, left-anchoring would leave exactly the
+                // *"bizarrely open on the right"* she reported at wave 2c.
+                .frame(maxWidth: BookView.proseColumn, alignment: .leading)
                 .padding(.vertical, 22)
+                clickOutMargin
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, 20)
             }
             .coordinateSpace(name: Self.outlineSpace)
             // Row 53: the landing listens to the WHOLE column, not only its
@@ -1283,6 +1382,24 @@ struct BookView: View {
             // Book spread and Read's paginated sub-mode both KEEP a bottom
             // bar, and 2B/2C are their owners.
         }
+    }
+
+    /// **The page's empty margin, and it is a DOOR** (18d batch 1, her U-10:
+    /// the box says *"no note selected"* when *"you've clicked out of
+    /// something"*). A click beside the column releases the note's focus —
+    /// the live editor comes down and flushes exactly as a collapse brings it
+    /// down — and leaves every expansion alone.
+    ///
+    /// It is a SIBLING of the prose, never an overlay or a background: a tap
+    /// layer under a live text surface would fight the caret, which is the
+    /// one thing this must not do. Scrolling is untouched (a tap is not a
+    /// drag), and nothing droppable lives out here — the rows' drop targets
+    /// are the cards themselves.
+    private var clickOutMargin: some View {
+        Color.clear
+            .frame(maxWidth: .infinity)
+            .contentShape(Rectangle())
+            .onTapGesture { model.focus(nil) }
     }
 
     /// Outline's half of W21's landing — and the chapter landing's only
@@ -1585,19 +1702,18 @@ private struct OutlinePostRow: View {
 
     /// 13f W11: this row's drop indicator (a chapter or a post is hovering).
     @State private var dropTargeted = false
-    /// The note's details for the gutter (wave 2c — fetched once per
-    /// realized row, the PostCardExcerpt cadence it replaces).
+    /// The card's preview (fetched once per realized row).
     @State private var excerpt = ""
-    @State private var meta = ""
 
     var body: some View {
         Group {
             if model.isExpanded(entry.postID) {
                 if model.liveFocusedPostID == entry.postID {
-                    // THE FOCUSED NOTE: the editor's bar rides the gutter
-                    // (`.side` — W8-5's "those should render to the side";
-                    // the ONE bar, arranged vertically, exactly where the
-                    // unfocused rows put their details).
+                    // THE FOCUSED NOTE. 18d batch 1 (U-10/U-17): the editor
+                    // renders NO bar here — its doors are in the sidebar's
+                    // note box — so the row is the prose at Write's measure
+                    // and nothing else. The gutter it used to reserve is
+                    // gone with the bar that lived in it.
                     VStack(alignment: .leading, spacing: 6) {
                         postHeader
                             .bookDropRow(self, targeted: $dropTargeted, tokens: tokens)
@@ -1611,7 +1727,7 @@ private struct OutlinePostRow: View {
                                 EditorView(
                                     session: session, postID: entry.postID, inline: true,
                                     caretSeed: model.caretSeed, fanSeed: model.fanSeed,
-                                    barPlacement: .side)
+                                    barPlacement: .inSidebarBox)
                             }
                             .id(entry.postID)
                             .onAppear { materialized() }
@@ -1619,67 +1735,53 @@ private struct OutlinePostRow: View {
                             surfacePlaceholder
                         }
                     }
-                    .frame(maxWidth: BookView.outlineFocusedRowWidth, alignment: .leading)
+                    .frame(maxWidth: BookView.proseColumn, alignment: .leading)
                     .padding(.bottom, 26)
                     .modifier(NearViewportObserver(near: $nearViewport, margin: Self.nearMargin, space: BookView.outlineSpace))
                 } else {
-                    // Expanded, read-cheap: prose at the measure, the
-                    // note's facts in the gutter.
-                    HStack(alignment: .top, spacing: BookView.outlineGutterSpacing) {
-                        VStack(alignment: .leading, spacing: 6) {
-                            // The HEADER is the handle, not the prose: an
-                            // expanded post shows a read-cheap text surface,
-                            // and a drag over it would fight selection.
-                            postHeader.bookDropRow(self, targeted: $dropTargeted, tokens: tokens)
-                            if nearViewport {
-                                StableSurface(
-                                    known: model.rememberedSurfaceSize(entry.postID),
-                                    followsShrinks: false,
-                                    remember: { model.rememberSurfaceSize(entry.postID, $0) }
-                                ) {
-                                    ReadPostView(
-                                        session: session, postID: entry.postID,
-                                        onFocusRequest: { offset in
-                                            model.focus(entry.postID, caret: offset)
-                                        },
-                                        onBadgeTap: { blockID in
-                                            // Interpretation 1 (PROVISIONAL): focus
-                                            // FIRST, then the fan panel opens on the
-                                            // one live surface.
-                                            model.focus(entry.postID, fanBlock: blockID)
-                                        })
-                                }
-                                .id("read-\(entry.postID)")
-                                .onAppear { materialized() }
-                            } else {
-                                surfacePlaceholder
+                    // Expanded, read-cheap: prose at the measure. (The facts
+                    // that used to sit in the gutter beside it are the note
+                    // box's now — state 2, for whichever note the book is
+                    // pointing at.)
+                    VStack(alignment: .leading, spacing: 6) {
+                        // The HEADER is the handle, not the prose: an
+                        // expanded post shows a read-cheap text surface,
+                        // and a drag over it would fight selection.
+                        postHeader.bookDropRow(self, targeted: $dropTargeted, tokens: tokens)
+                        if nearViewport {
+                            StableSurface(
+                                known: model.rememberedSurfaceSize(entry.postID),
+                                followsShrinks: false,
+                                remember: { model.rememberSurfaceSize(entry.postID, $0) }
+                            ) {
+                                ReadPostView(
+                                    session: session, postID: entry.postID,
+                                    onFocusRequest: { offset in
+                                        model.focus(entry.postID, caret: offset)
+                                    },
+                                    onBadgeTap: { blockID in
+                                        // Interpretation 1 (PROVISIONAL): focus
+                                        // FIRST, then the fan panel opens on the
+                                        // one live surface.
+                                        model.focus(entry.postID, fanBlock: blockID)
+                                    })
                             }
+                            .id("read-\(entry.postID)")
+                            .onAppear { materialized() }
+                        } else {
+                            surfacePlaceholder
                         }
-                        .frame(maxWidth: BookView.proseColumn, alignment: .leading)
-                        .layoutPriority(1)  // the prose claims its measure before the gutter flexes
-                        // An expanded note's takes wear their own badges on
-                        // the prose; the gutter beside it stays calm (row 13).
-                        Spacer(minLength: BookView.outlineGutterWidth)
                     }
+                    .frame(maxWidth: BookView.proseColumn, alignment: .leading)
                     .padding(.bottom, 26)
                     .modifier(NearViewportObserver(near: $nearViewport, margin: Self.nearMargin, space: BookView.outlineSpace))
                 }
             } else {
-                HStack(alignment: .top, spacing: BookView.outlineGutterSpacing) {
-                    collapsedPostCard
-                        .bookDropRow(self, targeted: $dropTargeted, tokens: tokens)
-                        .frame(maxWidth: BookView.proseColumn, alignment: .leading)
-                        .layoutPriority(1)  // the card claims its measure before the gutter flexes
-                    // Row 13: the gutter shares the pane's width with the
-                    // card honestly (flexible, never a fixed rail with a
-                    // cliff at its right), and carries the one fact a card
-                    // cannot show — that a block has takes.
-                    gutterDetails
-                        .frame(minWidth: BookView.outlineGutterWidth, maxWidth: .infinity, alignment: .leading)
-                        .padding(.top, 13)
-                }
-                .padding(.bottom, 2)
-                .onAppear { materialized() }
+                collapsedPostCard
+                    .bookDropRow(self, targeted: $dropTargeted, tokens: tokens)
+                    .frame(maxWidth: BookView.proseColumn, alignment: .leading)
+                    .padding(.bottom, 2)
+                    .onAppear { materialized() }
             }
         }
         // Ladder R1-10: the facts (one `renderPost` over the WHOLE note) feed
@@ -1715,21 +1817,14 @@ private struct OutlinePostRow: View {
         #endif
     }
 
-    /// The gutter's details beside a card: the takes fact (row 13 — the
-    /// note info that used to sit BELOW the card's opening paragraphs,
-    /// W8-5 — to the side, never below; the word count dropped, C-6).
-    @ViewBuilder private var gutterDetails: some View {
-        if !meta.isEmpty {
-            Text(tokens.chromeLabel(meta))
-                .font(tokens.small)
-                .foregroundStyle(tokens.muted)
-                .multilineTextAlignment(.leading)
-        }
-    }
+    // (The gutter's details view RETIRED at 18d batch 1 with the gutter
+    //  itself — U-17. The takes fact it carried is a fact about a NOTE, and
+    //  the note box's second state says it for whichever note the book is
+    //  pointing at, beside its words, its blocks and its two stamps. One
+    //  place, more facts, and no rail reserved down the right of every card.)
 
     /// One fetch per realized row (LazyVStack — cost ∝ what's on screen,
-    /// P1; the PostCardExcerpt cadence, hoisted so the card and the gutter
-    /// share it).
+    /// P1; the PostCardExcerpt cadence).
     private func loadFacts() async {
         #if DEBUG
         BookOutlineFactsReads.count += 1
@@ -1738,10 +1833,8 @@ private struct OutlinePostRow: View {
             try Queries.renderPost(db, containerID: postID)
         }) ?? []
         // Row 45: the preview reads ACROSS the leading blocks and skips a
-        // lone heading/numeral ("I."); row 13: the gutter carries the takes
-        // fact alone — the per-card word count is DROPPED (C-6).
+        // lone heading/numeral ("I.").
         excerpt = BookOutlineRows.cardPreview(blocks: slots.compactMap(\.text))
-        meta = NoteBoxCopy.takesLine(fannedBlocks: slots.filter(\.hasFan).count) ?? ""
     }
 
     /// 13f W11 — the row's own drag/drop contract, shared by both forms

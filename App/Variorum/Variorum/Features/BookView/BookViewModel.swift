@@ -514,6 +514,18 @@ final class BookViewModel {
         indexAnchorPostID = postID
     }
 
+    /// **The index's LIVE note** (18d batch 1): the note whose block the
+    /// index's one live pane is in, reported the same way its selection is.
+    /// Index mounts no full-document editor by design — it is a projection
+    /// tier that upgrades ONE block (`BookIndexEditModel`, P-3) — so the
+    /// book's own `liveFocusedPostID` cannot answer for it, and the sidebar
+    /// box's third state needs an answer in every editing mode.
+    private(set) var indexLivePostID: String?
+
+    func noteIndexLive(_ postID: String?) {
+        indexLivePostID = postID
+    }
+
     /// The facts `BookAnchor` reads, assembled from my own state.
     var anchorPlace: BookAnchor.Place {
         BookAnchor.Place(

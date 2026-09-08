@@ -86,3 +86,35 @@ nonisolated enum BookNoteBox {
         }
     }
 }
+
+// MARK: - What the book publishes to the shell
+
+/// The book's publication for the sidebar's note box (18d batch 1).
+///
+/// **A VALUE, deliberately.** The sidebar never constructs or holds the
+/// book's `BookViewModel` or the editor's `EditorViewModel` (CLAUDE.md's P39
+/// refinement): the book publishes ids and strings, `RootView` composes the
+/// box from them and from the registered live editor, and the sidebar renders
+/// a view it is handed.
+nonisolated struct NoteBoxReport: Equatable, Sendable {
+    /// The book publishing this — carried so the shell can tell a stale
+    /// report from a live one when a pane changes what it is showing.
+    var readingID: String
+    var selected: String?
+    var live: String?
+    /// What the BOOK knows about that note: its title, its chapter, and its
+    /// place in the reading order. nil ⇒ the entries have not arrived yet.
+    var identity: NoteBoxIdentity?
+
+    var state: NoteBoxState { .from(selected: selected, live: live) }
+}
+
+/// The box's ONE act, handed up as a closure beside the report — the shape
+/// the cross-feature rule sanctions ("features receive view models, values,
+/// and closures"). Not `Equatable`: it is stored and called, never compared.
+@MainActor
+struct NoteBoxDoor {
+    /// Make the selected note live, at the block she was last in — mode
+    /// shaped, because "live" means a different thing in each editing mode.
+    let editHere: () -> Void
+}

@@ -63,6 +63,19 @@ struct RootView: View {
     /// shot, keyed by book so a stale request can never land in another
     /// book (the `blockLanding` guard's shape).
     @State private var bookAscent: BookAscent?
+    /// **18d batch 1 (her U-10) — THE SIDEBAR'S NOTE BOX, composed here.**
+    /// The focused pane's book publishes a VALUE and a DOOR; this view builds
+    /// the box's content — the facts from the published id, the bar from the
+    /// registered live editor (`EditorRouter.active`) — and hands the sidebar
+    /// a view to RENDER. The sidebar never constructs or holds the book's or
+    /// the editor's view model (CLAUDE.md's P39 refinement); this composition
+    /// is what keeps that true.
+    ///
+    /// Per WINDOW by construction: `RootView` is the window (13f batch 5b),
+    /// exactly as its `router` is.
+    @State private var noteBoxReport: NoteBoxReport?
+    @State private var noteBoxDoor: NoteBoxDoor?
+    @State private var noteBoxFacts = NoteBoxFactsModel()
 
     struct BookAscent: Equatable {
         let bookID: String
@@ -150,6 +163,7 @@ struct RootView: View {
                 // 13b 1b: the rail's marker reads the router's observable
                 // mode truth (the broadcast-derived shadow is retired).
                 postMode: (session.commandRouter.activeMode ?? .takes).rawValue,
+                noteBox: noteBoxView,
                 bottom: statusRows)
         } detail: {
             paneRow
@@ -300,6 +314,11 @@ struct RootView: View {
         // the appearance — the second is why it needs its own hook (the
         // settings value does not move when the Mac switches to dark).
         .onChange(of: scheme) { _, _ in adoptMarkdownPalette() }
+        // 18d batch 1: the note box's facts — one read per selection (and one
+        // more when a note stops being live), never an observation.
+        .task(id: noteBoxFactsKey) {
+            await noteBoxFacts.load(session: session, postID: noteBoxReport?.state.postID)
+        }
         .task { await theme.start() }
         .task { await library.start() }
         .task { await library.startJournal() }
@@ -510,6 +529,70 @@ struct RootView: View {
     /// and `_crashOnException` kills the app. Reading `geo` is fine; feeding
     /// it back as a hard frame is the loop. `.infinity` accepts whatever is
     /// proposed THIS pass, so the row settles in one.
+    // MARK: - The sidebar's note box (18d batch 1 — her U-10)
+
+    /// A book's publication, adopted for THIS window.
+    ///
+    /// A CLEAR is stamped with its publisher, and applies only when the box
+    /// standing is that publisher's: SwiftUI mounts an arriving `.id` before
+    /// it unmounts the departing one, so an unstamped clear would erase the
+    /// box the next book just filled. A REPORT always wins — the focused
+    /// pane's book is the only one that publishes a non-nil one (its own
+    /// `paneFocused` gate), and `noteBoxView` re-checks against the focused
+    /// pane's selection anyway, so nothing stale can reach the column.
+    private func adoptNoteBox(
+        _ bookID: String, _ report: NoteBoxReport?, _ door: NoteBoxDoor?
+    ) {
+        if report == nil, noteBoxReport != nil, noteBoxReport?.readingID != bookID {
+            return
+        }
+        noteBoxReport = report
+        noteBoxDoor = door
+    }
+
+    /// The box's content, or nil when no book in an editing mode is showing —
+    /// in which case the sidebar's column is exactly what it was.
+    private var noteBoxView: AnyView? {
+        // THE GATE: the box belongs to the book the FOCUSED pane is showing,
+        // and to no other. Derived rather than remembered, so a report left
+        // behind by a book that is no longer on screen — a pane switched to
+        // the Library, a second window taking key — can never leak into the
+        // one column this window has.
+        guard case .reading(let showing)? =
+                router.workspace.selections[router.workspace.focusedPane],
+              let report = noteBoxReport, report.readingID == showing
+        else { return nil }
+        let tokens = theme.tokens(for: scheme)
+        // THE REGISTERED LIVE EDITOR (`EditorRouter.active`, set at attach and
+        // cleared at teardown — the seam every menu command already routes
+        // through). Gated on the note the BOOK reported: an editor left
+        // standing on another surface must never lend its doors to this box.
+        let live = session.editorRouter.active
+        let barModel = report.state.isLive && live?.postID == report.state.postID
+            ? live : nil
+        return AnyView(SidebarNoteBox(
+            tokens: tokens,
+            state: report.state,
+            identity: report.identity,
+            facts: noteBoxFacts.facts(for: report.state.postID),
+            // One label, from the bar's own brain (13g R5-4), so the box's
+            // identity line and the bar can never disagree about where the
+            // caret is.
+            caretLabel: barModel.map {
+                BlockLineLabel.caret(ordinal: $0.caretOrdinal, of: $0.blockCount)
+            },
+            onEditHere: noteBoxDoor?.editHere,
+            bar: barModel.map { AnyView(CommitBar(model: $0, axis: .box)) }))
+    }
+
+    /// The facts read's key: the note, and whether it is live. Leaving the
+    /// live state re-reads, which is what makes the counts honest again after
+    /// a writing burst (the model's header says why they are not observed).
+    private var noteBoxFactsKey: String {
+        guard let state = noteBoxReport?.state, let postID = state.postID else { return "" }
+        return "\(postID)|\(state.isLive)"
+    }
+
     private var paneRow: some View {
         let panes = router.workspace.panes
         let tokens = theme.tokens(for: scheme)
@@ -690,7 +773,11 @@ struct RootView: View {
                 // 13f W20(a): the ascent's landing, handed to the book it
                 // named and to no other.
                 revealPostID: bookAscent?.bookID == readingID ? bookAscent?.postID : nil,
-                onRevealConsumed: { bookAscent = nil })
+                onRevealConsumed: { bookAscent = nil },
+                // 18d batch 1: the book publishes what its sidebar box shows.
+                onNoteBox: { bookID, report, door in
+                    adoptNoteBox(bookID, report, door)
+                })
                 .id(readingID)
         case .pool(let poolID):
             if live {

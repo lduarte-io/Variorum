@@ -173,6 +173,14 @@ struct SidebarView: View {
     /// Batch 14: the open post's current mode (the rail's › marker) —
     /// broadcast by PostDetailView, tracked by the shell.
     var postMode: String = PostDetailView.Mode.takes.rawValue
+    /// **THE NOTE BOX** (18d batch 1, her U-10) — built by `RootView` from
+    /// the book's published ids and the registered live editor, and handed
+    /// here as a view to RENDER. The sidebar never constructs or holds the
+    /// book's `EditorViewModel`; rendering a sibling's view is legal
+    /// composition (CLAUDE.md's P39 refinement), and this parameter is the
+    /// seam that keeps it so. nil ⇒ no book in an editing mode: the column
+    /// is exactly what it was.
+    var noteBox: AnyView? = nil
     /// The column's BOTTOM — the protection/sync status rows, which
     /// `RootView` composes (they read services it owns) and hands in. They
     /// were the split view's `safeAreaInset`; with the flat `ShellSplit`
@@ -200,18 +208,33 @@ struct SidebarView: View {
         return nil
     }
 
+    /// The rail's rows — and, for a book, the note BOX's, because the box
+    /// stands in the rail's place AT the rail's height (18d batch 1). The
+    /// column must budget it identically or it would fail to compress with a
+    /// book open exactly where it compresses with a note open, and the drift
+    /// would be silent (row 13's own lesson).
+    private var railEquivalentRows: Int {
+        railPostID == nil && noteBox == nil ? 0 : PostDetailView.Mode.allCases.count
+    }
+
+    /// The height the rail group draws at — and the frame the box takes.
+    private var railGroupHeight: CGFloat {
+        SidebarLayout.railGroupHeight(
+            rowHeight: rowHeight, railRows: PostDetailView.Mode.allCases.count)
+    }
+
     /// Every row the column is about to draw, for the fit test.
     private var rowCount: Int {
         SidebarLayout.rowCount(
             starred: stars.items.count, areas: Self.areas.count,
-            rail: railPostID == nil ? 0 : PostDetailView.Mode.allCases.count,
+            rail: railEquivalentRows,
             openNotes: workspace.openNotes.shown.count)
     }
 
     /// The headed groups the column is about to draw (ladder R1-12: the
     /// fit test counts the chrome actually present).
     private var headedGroupCount: Int {
-        (stars.items.isEmpty ? 0 : 1) + (railPostID == nil ? 0 : 1)
+        (stars.items.isEmpty ? 0 : 1) + (railEquivalentRows == 0 ? 0 : 1)
             + (workspace.openNotes.shown.isEmpty ? 0 : 1)
     }
 
@@ -233,6 +256,16 @@ struct SidebarView: View {
                     if let railPostID {
                         railGroup(railPostID)
                             .transition(.opacity)
+                    } else if let noteBox {
+                        // 18d batch 1: a BOOK in an editing mode stands the
+                        // note box exactly where the rail stands, at the
+                        // rail's height — so the Open strip below never moves
+                        // between a note and a book (her U-10's "measured to
+                        // take up the same amount of room"). It fades in and
+                        // out on the same 0.22 s as the rail (row 24's
+                        // sidebar half: nothing on the left ever snaps).
+                        noteBoxGroup(noteBox)
+                            .transition(.opacity)
                     }
                     openGroup
                 }
@@ -251,6 +284,8 @@ struct SidebarView: View {
         // Row 24 (the sidebar half): the rail fades in and out with the
         // note — the groups below it slide, nothing snaps.
         .animation(.easeInOut(duration: 0.22), value: railPostID)
+        // …and on the box's arrival and departure, for the same reason.
+        .animation(.easeInOut(duration: 0.22), value: noteBox == nil)
         // The strip's names, HELD for exactly what is on screen (17o batch
         // d, ledger row 18 — her *"renaming a note won't rename it on the
         // sidebar until you click on something else"*). The key still names
@@ -291,9 +326,12 @@ struct SidebarView: View {
     // MARK: - The grammar (the mockup's `.sb-group` / `.sb-head` / `.sb-row` / `.sb-sep`)
 
     /// The mockup's `.sb-group`: 12 pt of side padding around its rows.
-    private static let groupPadding: CGFloat = 12
+    /// Not private since 18d batch 1 (the note box's group uses it).
+    static let groupPadding: CGFloat = 12
     /// The mockup's `.sb-row`: 8 pt of side padding inside the row.
-    private static let rowPadding: CGFloat = 8
+    /// Not private since 18d batch 1: the note box reads it so its contents
+    /// land on the column's ONE left edge (`SidebarNoteBox.inset`).
+    static let rowPadding: CGFloat = 8
 
     /// Row 13 (17o batch d): the header ROW's pitch, and the air between the
     /// words and the first row's wash. Her punchlist 3 and its follow-up:
@@ -533,6 +571,22 @@ struct SidebarView: View {
         }
     }
 
+    // MARK: - "this note" — the BOX (18d batch 1, her U-10)
+
+    /// The box's group: the rail's separator, then the box at the rail's
+    /// height, inside the same `groupPadding` the rail's rows sit in. The
+    /// box carries its own header (mockup figure C), which is why nothing
+    /// draws one here — and why the column's chrome budget counts this group
+    /// as a headed one exactly as it counts the rail.
+    private func noteBoxGroup(_ box: AnyView) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            separator
+            box
+                .frame(height: railGroupHeight)
+                .padding(.horizontal, Self.groupPadding)
+        }
+    }
+
     // MARK: - The OPEN strip (13f batch 3, W3/A27; rebuilt Act 10 item 9; placed back here by the correction round)
 
     /// **The reorder payload** — its own transfer type, deliberately not a
@@ -679,6 +733,12 @@ enum SidebarGeometry {
     /// rail stands, at the rail's height — the header rule this batch settles
     /// (row 13) is the one that box inherits.
     static var railGroupHeight: CGFloat?
+    /// 18d batch 1: what the NOTE BOX drew — the whole box, and its header's
+    /// words. The geometry oracle compares these two rectangles against the
+    /// rail's, because "the box is measured to take up the same amount of
+    /// room" is a claim about rectangles, not about a constant.
+    static var noteBoxFrame: CGRect?
+    static var noteBoxHeaderFrame: CGRect?
     /// Row 13 (17o batch d): per headed group, the header's words, and the
     /// first row's content edge and box under it — "the header sits on its
     /// rows' text edge, with air before the first wash" is a claim about
@@ -688,6 +748,8 @@ enum SidebarGeometry {
     static var firstRowBoxFrames: [String: CGRect] = [:]
 
     static func resetHeaders() {
+        noteBoxFrame = nil
+        noteBoxHeaderFrame = nil
         headerTextFrames = [:]
         firstRowContentFrames = [:]
         firstRowBoxFrames = [:]

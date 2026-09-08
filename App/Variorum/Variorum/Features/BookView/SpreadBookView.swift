@@ -343,9 +343,19 @@ private struct SpreadPage: View {
                         // THE one live editor — the full-document editor,
                         // exactly as Outline mounts it (its identity
                         // machinery, its autosave, its routed acts).
+                        //
+                        // 18d batch 1 (her U-10, her own words about THIS
+                        // mode: *"even when you're in the book editing mode
+                        // (where you scroll through notes and each note is a
+                        // page but you can edit) … it won't be at the bottom"*):
+                        // the bar renders in the sidebar's note box, not in
+                        // the page. It used to sit under the prose INSIDE this
+                        // page's scroll, which is why it read as a card
+                        // floating mid-page on a short note.
                         EditorView(
                             session: session, postID: entry.postID, inline: true,
-                            caretSeed: model.caretSeed, fanSeed: model.fanSeed)
+                            caretSeed: model.caretSeed, fanSeed: model.fanSeed,
+                            barPlacement: .inSidebarBox)
                             .id(entry.postID)
                     } else {
                         ReadPostView(
