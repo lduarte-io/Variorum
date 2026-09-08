@@ -8264,13 +8264,13 @@ dropped every remembered story on a voice switch that moved nothing on that page
   so the pin passed a full second before anything was written and then read the stale `120` back. It
   now waits on the DISK. Had it not been run in both directions the batch would have shipped a pin
   that could not fail.
-- **PIECE C — the walk + two code-truth comments. DONE (PENDING_C).** The walk is below; the two
+- **PIECE C — the walk + two code-truth comments. DONE (f38ded24).** The walk is below; the two
   comments are `BookView.surfacePlaceholder` (what it checks and what it deliberately does not — the
   finding below) and `FlowHeightEstimate.fingerprint` (the maintenance rule: it is a compile-time
   constant because the page's metrics are; the note's own Read mode HAS a runtime `Aa −/Aa +` dial
   (`readModeTypeScale`) and that surface composes no `StableSurface`, so if such a dial ever reaches
   this page the fingerprint must become a function of it in the same edit).
-- **PIECE D — the closing run. DONE (PENDING_C).** ONE `xcodebuild test` run, 26 suite types — the
+- **PIECE D — the closing run. DONE (f38ded24).** ONE `xcodebuild test` run, 26 suite types — the
   touched Mac suites (`SurfaceSizeMemoryTests · StableSurfaceTests · ReadingFlowEstimateTests ·
   ReadingFlowEstimateMeasureTests · ReadingFlowLandingTests · BookOutlineRowsTests ·
   BookOutlineLandingTests · BookOutlineFacesTests · BookViewTests · BookFocusFoldTests ·
