@@ -57,6 +57,14 @@ final class NoteBoxFactsModel {
                 editedAt: stamps.editedAt,
                 savedAt: stamps.savedAt)
         }
+        // A SUPERSEDED read leaves both to the newer task (the round-end
+        // Fable pass, NIT-4): `.task(id:)` cancels this task on a key change,
+        // but the database read is not cancellation-aware mid-flight, and an
+        // old note's read finishing last would otherwise claim `subject` and
+        // leave the new note factless until the next selection. This guard
+        // sits ABOVE both assignments and is a different question from the
+        // `read == nil` case below, which deliberately claims the subject.
+        guard !Task.isCancelled else { return }
         // A note that vanished between the ask and the read (a tombstone, a
         // sync arrival) leaves the box factless rather than wrong.
         subject = postID
