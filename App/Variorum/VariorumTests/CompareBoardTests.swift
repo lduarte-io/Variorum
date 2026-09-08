@@ -600,6 +600,57 @@ struct CompareViewModelTests {
         }
     }
 
+    /// **Compare's versions door speaks in words, and links a note that has
+    /// nothing in it yet** (ledger rows 17 + 27; her U-19 (1)).
+    ///
+    /// Two defects, one door. (a) Marking a pair that is ALREADY linked fell
+    /// to `OpsRefusalCopy`'s `default:` and printed the raw enum with both
+    /// post UUIDs in it — the J8 class, on a click she can make by
+    /// double-pressing the row. (b) A peer with no blocks refused with
+    /// `postHasNoBlocks`, likewise raw: on the note she had just made, the
+    /// door said `Refused: postHasNoBlocks(id: "…")`. The core now mints the
+    /// anchor block (row 17), so (b) does not refuse at all — it LINKS — and
+    /// the wording added here covers the shape that survives it (a blockless
+    /// note on the copy roads) plus (a).
+    @Test func theVersionsDoorSpeaksInWordsAndLinksABlocklessNote() async throws {
+        try await withCompareWorld { session, db in
+            let world = try await makeWorld(session)
+            let fresh = try await session.runner.run { ops in
+                try ops.createPost(title: "the note I just made").id
+            }
+            let model = CompareViewModel(session: session, anchorPostID: world.anchor)
+            model.peerSlots = [.init(postID: fresh)]
+            try await adoptFresh(model, db, anchor: world.anchor, peers: [fresh])
+
+            // (b) U-19 (1): it LINKS, and the note gains its anchor block.
+            model.markAsVersions(fresh)
+            await poll { model.statusMessage != nil || model.isRelated(fresh) }
+            try await adoptFresh(model, db, anchor: world.anchor, peers: [fresh])
+            let (peers, slots) = try await db.read { database in
+                (try Queries.versionPeerPosts(database, of: fresh),
+                 try Queries.renderPost(database, containerID: fresh))
+            }
+            #expect(peers == [world.anchor], "the link landed on a note with nothing in it")
+            #expect(slots.map(\.text) == [""], "one empty block, minted as the anchor")
+            #expect(model.statusMessage?.contains("Refused") != true,
+                    "and no raw error: \(model.statusMessage ?? "nil")")
+
+            // (a) The same door again on the now-linked pair: words, and no
+            // enum dump carrying the ids.
+            let firstLine = model.statusMessage
+            model.markAsVersions(fresh)
+            await poll { model.statusMessage != firstLine && model.statusMessage != nil }
+            let spoken = try #require(model.statusMessage)
+            #expect(!spoken.hasPrefix("Refused:"), "\(spoken)")
+            #expect(!spoken.contains(fresh), "a UUID is not a sentence: \(spoken)")
+            #expect(!spoken.contains(world.anchor), "\(spoken)")
+            #expect(spoken == OpsRefusalCopy.message(
+                for: OperationError.postsAlreadyVersionLinked(a: world.anchor, b: fresh)),
+                    "the refusal's ONE home, so both doors say it the same way")
+            model.teardown()
+        }
+    }
+
     /// 13c Batch 2E (C4): the filter, ON THE BOARD — and since her #47(c)
     /// ruling (13c ratify walk, built 13d batch 1) it is what Compare OPENS
     /// with. Only the kin rows compose, and the unrelated column reports

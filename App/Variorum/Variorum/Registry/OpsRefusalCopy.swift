@@ -362,6 +362,22 @@ nonisolated enum OpsRefusalCopy {
                 return "That take is locked — unlock it or branch a new take."
             case .versionLinkNotFound:
                 return "These two notes aren't marked as versions — nothing to unmark."
+            // 17o batch d (ledger row 27, J8): the mark door's own refusal
+            // fell to `default:` and printed the raw enum WITH BOTH POST
+            // UUIDs in it — on a click she can make by pressing the row
+            // twice. Its inverse above has spoken since Sitting 9; this is
+            // the missing half of that pair.
+            case .postsAlreadyVersionLinked:
+                return "These two notes are already marked as versions of each other."
+            // Same batch, same class. Since row 17 the VERSION-LINK door no
+            // longer raises this at all (a blockless note gains its anchor
+            // block — her U-19 (1)); what survives are the COPY roads —
+            // Compare's "make outline note" and duplicate-as-version — where
+            // there is genuinely nothing to copy. `VersionActs.words` has its
+            // own sentence for the note-moments family, whose "save a version
+            // of" phrasing belongs only there.
+            case .postHasNoBlocks:
+                return "There's nothing in that note yet — write a line in it first."
             // 13b Stage 4 ladder round 1, MINOR-2: the two Stage 4 doors
             // that spoke raw enum dumps get app words. `readingNotDeleted`
             // is the recovery door's double-click/raced-restore path;
