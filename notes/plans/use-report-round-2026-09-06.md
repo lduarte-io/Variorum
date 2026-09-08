@@ -4292,3 +4292,158 @@ tree is untouched by this response.
 **The fix pass's commits, in order:** `31b24d64` (the findings) · `1ed87482` (R1-1) · `3ded9683` (R1-2 + R1-3) · `6db6e2f1` (the section opens, the revert state named) · `83afcfe7` (R1-4 + the record's correction) · `97889b66` (R1-5) · `5055ea89` (R1-11) · `49b2952f` (R1-7 · R1-8 · R1-9 · R1-10) · this commit (the dispositions closed). No trailer lines; no history rewrite; every commit path-scoped, rebased and pushed.
 
 **Counts after the pass:** 1 BLOCKER fixed · 4 MAJOR fixed · 1 MINOR dismissed as HOLLOW (R1-6, measured) · 1 MINOR resolved by a KnownIssues row (R1-7) · 4 NIT fixed. **Open for the implementer's sanity pass:** the R1-6 observation (the cold-mount saved-anchor restore landing at 24 pt in the rig) — words, not a row.
+
+#### 17o batch b round 1 — the implementer's sanity pass
+
+*The cross-model flow's last step (the batch-b implementer, opus-implementer, 2026-09-08): one pass over
+the reviewer's diff `53fb8dd8..c0c850ca` with the context the reviewer does not hold — did each fix do
+what its disposition says, did it break anything the batch built, were my riders adopted or refined as
+recorded, and does anything reopen a hole. Then the five roads WALKED on the dev-store Debug build
+rebuilt from `c0c850ca`. **No code or test file touched; the only file this edits is the plan.**
+**11 CLEAR · 2 RAISED** (the two raises are NEW items, not findings flipped — each returns to the
+reviewer for the final word; I implemented nothing).*
+
+**Environment:** `io.lduarte.Variorum.debug` from
+`…/DerivedData/Variorum-dnpxwqhpxdqrdjbunktnzoahckpd/Build/Products/Debug/Variorum.app`, rebuilt at
+`c0c850ca` (19:33) and relaunched twice; `pgrep -fl 'Variorum.app/Contents/MacOS'` clean at open, between
+the two launches and at close; her `/Applications` build never running, never touched. One store
+mutation made and UNDONE inside the walk (an `X` typed into Boscombe block 182 to prove the report rides
+a keystroke, then removed — the paragraph reads `cigar. I have` again, verified by capture); one Lens
+column minted for the R1-2 road and CLOSED unsaved ("unnamed lens — 💾 keeps it"), verified gone.
+
+**Per fix:**
+
+- **R1-1 (the one-shot seed) — CLEAR.** The clear is where my rider said it had to be
+  (`PostDetailView.swift:517–535`, inside the existing `.onChange(of: mode)`, `if new != .write`), and
+  the reason is in the comment. I re-checked the two orderings that could bite: `jump(to:)` sets
+  `pendingCaret` and then `mode = .write`, so the change that fires carries `.write` and does not clear
+  (`:673–685`); and clearing at any moment when the Write branch IS mounted would change the `.id` at
+  `:344` under a live editor — which is exactly what the placement avoids. **Rider 1 adopted** (the pin's
+  second arm is the Act 10 rule, not just the offset). Walked, both arms — the road my own walk missed.
+- **R1-2 (a click keeps its place) — CLEAR for what it claims.** `plainClick(at:)` as the ONE road
+  (`PaneSurface.swift:225–241`, called from `mouseDown`'s tail at `:549`) means the ⌘-click claim, the
+  link door and the checkbox path — all of which return before it — cannot set the flag: **rider 1
+  adopted exactly.** **Rider 2's refinement I checked against the case that motivated it and agree with
+  the reviewer's version, not mine:** an unconditional clear on the intermediate read→read render would
+  have thrown the flag away before the flip it was set for; the recorded rule (spent by any transition
+  and by a live render, kept across read→read) leaves no path where a flag outlives its gesture — I
+  traced the four `noteLiveness` cases at `:953–962` and each is covered. Walked on Lenses. **It also
+  produced RAISE-1 below** — not a defect in the fix, a gap the fix uncovers one layer up.
+- **R1-3 (the nil landing) — CLEAR for the bug.** The transition's `caretOnGoingLive ?? 0`
+  (`PaneSurface.swift:970–989`) is the rule as disposed, and **rider 1 was adopted in the form that
+  actually holds**: arming the END as `Int.max` rather than clearing the arm
+  (`TakesViewModel.swift:560–571`) — I had named the born-live/`makeNSView` corner and the reviewer's
+  shape closes it, since `min(max(0, .max), length)` is the text's end with no overflow. **Rider 2
+  adopted** and my record's note (a) correctly re-dispositioned: the workbench panel now passes
+  `caretOnGoingLive` (`BlocksWorkbenchView.swift:864–871`) and still passes no `onSelectionChange`, so no
+  fourth reporter was minted. Walked (Blocks' row → Takes → Write, the START at both ends).
+  **RAISE-2 below is about this fix's SCOPE, not its correctness.**
+- **R1-4 (the quit and lock doors) — CLEAR, and this is the one my walk could not have told you.**
+  `persistCurrentBlocks()` (`CommandRouter.swift:209–220`) is called synchronously at the top of
+  `applicationShouldTerminate` (`VariorumAppDelegate.swift:54`) — ahead of both branches, which is my
+  rider satisfied by construction rather than by a second call — and on `macWillLock`'s road
+  (`MacWillLock.swift:44`), the rider adopted. The correction to my record's capture-11 sentence is
+  accurate and I stand behind it. **Walked on THIS binary:** ⌘Q, relaunch, reopen → the caret came back
+  to `dire|ction` inside block 38, mid-paragraph. That is the claim capture 11 could not make.
+- **R1-5 (the generation stamp) — CLEAR.** `revealLanding` stamps
+  (`EditorViewModel.swift:1932–1943`), `consumePendingReveal(deliveredBy:)` refuses an older hop and
+  **LEAVES the park** (`:1947–1953`) — my rider 1, adopted verbatim, and the re-arm is guaranteed for the
+  reason I gave (`storageDidEdit`'s bump at `:1002` makes `overlayGenerationDelivered != generation`, so
+  the next display pass schedules hop(G₂)). The `internal`/`private(set)` widening is test-visibility
+  only and is annotated as such. The reveal is still exact in use (rows (1) · (3) · (5) of the walk all
+  land the target paragraph at the viewport top). My rider 2 (the park not surviving into another note)
+  is answered by the model's per-mount lifetime and the reviewer says the pin's arm rides it.
+- **R1-6 (HOLLOW) — CLEAR; the dismissal is sound and I withdraw my AGREE on the reachability half.** A
+  pin green on both sides dismisses under the standing-17 rule, and the number explains itself: the
+  cold-mount anchor restore clamps at the pre-fill frame — the very mechanism this batch measured for the
+  reveal — so the rig cannot produce a hidden caret. **On the observation handed to me:** in USE I saw
+  the opposite case and it is worth recording beside it — on a WARM mode round trip (⌘2 then ⌘1 in the
+  batch's own walk, captures 01/03) the page came back to the same scroll position, so the anchor restore
+  is doing real work there; what the rig measured is the COLD mount, where there is no earlier
+  `topVisibleOffset()` to restore from. I could not distinguish "the anchor restored, then the reveal
+  moved the page" from "the anchor never restored" in any capture on this walk, because the reveal now
+  lands the target line at the top whenever the caret is off screen. So: consistent with the reviewer's
+  observation, not confirmed by it, and correctly handed to 13u2 item 1 as words rather than a row.
+- **R1-7 (the KnownIssues row) — CLEAR.** Owner 12, beside the rig row, and the row states the mechanism,
+  the two remedies and why the ladder took the cheaper one. My preference was adopted with its reason.
+- **R1-8 · R1-9 · R1-10 · R1-11 — CLEAR.** The suite domain is removed in a `defer`; the observed half is
+  stripped at BOTH sites with the restore reading the offset off the fact first
+  (`CommandRouter.swift:64–73`) — my rider's ordering, adopted, and the two lines are still adjacent so
+  the comment naming the order earns its keep; the cadence arm asserts both directions with the
+  relative-count honesty the reviewer discovered; and `lineSpan(ofOffset:in:)`
+  (`JumpPrimitive.swift:106–150`, `lineTop` delegating) tests the whole line with the 1-pt slack kept at
+  BOTH edges — my rider, adopted, and the slack at the top edge is new and right (a line flush with the
+  top no longer re-reveals).
+
+**RAISED — 2 (returned to the reviewer; I fixed nothing).**
+
+- **RAISE-1 · MAJOR · the FIRST click into a not-yet-live pane is kept in the pane but never REPORTED, so
+  the next door into Write lands at the block's START — row 7's own complaint, on the road R1-2 just
+  made correct in the pane.** *Traced, then walked, then discriminated.* Mechanism: `super.mouseDown`
+  places the click's selection (`PaneSurface.swift:549`) and the resulting
+  `textViewDidChangeSelection` → `onSelectionChange` (`:1131–1134`) reaches
+  `TakesViewModel.notePaneSelection`, whose guard is `focusedPane?.variantID == variantID`
+  (`TakesViewModel.swift:1761–1768`) — at that instant the ring is still on the OLD pane, so the report
+  is DROPPED. `plainClick` then moves the ring; R1-2's `clickBroughtPlace` correctly suppresses the
+  transition's `setSelectedRange` (`:975–984`), so **no second selection change occurs** and the
+  responder claim posts none for an unchanged selection. Net: the clicked offset never reaches the
+  memory, and R1-3's `?? 0` then lands Write at the block's start. **Before this fix pass the road
+  reported a value (the wrong one — the remembered offset or the END); it now reports none**, so the fix
+  converted a wrong-place landing into a no-place landing on the commonest gesture in Takes.
+  **Walked (captures L05 · L06 · L07 · L08):** click mid-take in block 187's read pane → the pane goes
+  live at exactly `unusual s|trength` (R1-2 works) → ⌘1 → **Write at block 187's START**. Then the
+  discriminator: click again INSIDE the now-live pane at `powe|r` → ⌘1 → **Write at `powe|r`**. So the
+  gap is precisely the first click, the one that moves the ring.
+  **Pin that would show it:** model-level in `PaneSurfaceTests`' existing rig plus a `TakesViewModel` —
+  a read pane of the note's current block, `view.plainClick(at: 10)` wired to a real
+  `onFocusRequest` that rings it, then `router.currentBlock(for: postID)?.utf16Offset == 10` (red today:
+  nil). A mounted arm in `CurrentBlockContinuityTests` would carry the whole road.
+  **Fix shape, for the reviewer's judgment (not implemented):** the offset is already in hand and
+  deliberately dropped one line up — `view.onPlainClick = { [weak coordinator] _ in
+  coordinator?.onFocusRequest?() }` (`PaneSurface.swift:~789`) discards the `Int` that
+  `PaneTextView.onPlainClick` carries. Carrying it through to the composition's focus door
+  (`TakesShared.swift:55`'s `model.focus(key)` → a `clickedAt:` the model reports AFTER the ring moves)
+  closes it at the same seam R1-2 used. **Scope note:** Read's `edit` face is unaffected in kind — its
+  not-live branch is a `Text` (`ReadEditPane.swift:145–160`), which cannot say where it was clicked (the
+  Act 10 row-38 limit), so it correctly lands and reports the START.
+- **RAISE-2 · MINOR (scope, not correctness) · `caretOnGoingLive ?? 0` lives in the SHARED pane
+  component, so it governs six hosts that pass no `caretOnGoingLive` and were never in R1-3's trace —
+  every programmatic ring landing in the app now lands at the take's START where it previously stayed at
+  the END.** The disposition's own comment enumerates the transitions it means ("the N9 and bloom
+  landings, Read's edit face, the room"); the code is wider. Hosts passing nothing:
+  `TakesBoardView.swift:1289` (the fan/stack take cards) and `:1476` (the collapsible card),
+  `CompareBoardView.swift:1549`/`:1617`, `CanvasView.swift:804`, `WriteTakesPanel.swift:201`,
+  `BookIndexView.swift:644`. The roads where the old END plausibly served better are the
+  **post-structural ring landings**, all of which reach a pane through `parkFocus(onVariant:)` →
+  `consumeLandings` → `focus`: the survivor after a delete or archive
+  (`TakesStructureController.swift:139`, `:174`), the merged block (`:837`), the divide successors
+  (`:516`, `:570`), the moved take (`:666`) — "continue writing at the end of what you just made" was the
+  shipped feel, and it is now the start. (The `+ new block` / blank-take mints at `:76`/`:101` are empty
+  text, so START == END; the Book Index's clicked-block-goes-live landing at the END is a behaviour the
+  Act 10 record explicitly names at its row 22, and it flips here.) **I am not asking for a revert** —
+  the global rule is coherent and QUESTIONS #97 already carries the START/END edge. What I am raising is
+  that #97 and the disposition read narrower than the code: either the recorded scope should say "every
+  programmatic transition in every pane host, including the post-structural landings", or the hosts that
+  pass nothing should keep the END until #97 is ruled. **Pin that would show it:** a `PaneSurfaceTests`
+  arm mounting a host that passes NO `caretOnGoingLive` and asserting the landed place (0 today), plus a
+  `TakesBoardTests`/`TakesDivideTests` arm asserting the ring's caret after `mergeSelectedBlocks`.
+
+**THE WALK (dev-store Debug at `c0c850ca`; captures in
+`notes/plans/use-report-2026-09-06-screens/17o-b-ladder/`, gitignored — one voice, Terminal: the landing
+family renders no face a voice changes).**
+
+| # | Road | What happened | Verdict | Captures |
+|---|---|---|---|---|
+| 1a | Blocks ▸ *open in write* on block **182** (far) → type `X` mid-paragraph → ⌘2 → ⌘1 | Write re-entered at **block 182 with the caret immediately after the `X`** — not at the block's start; the page scrolled to that line. On the pre-fix tree the stale seed re-landed at the block's start | **R1-1 CLEAR** | `L01` · `L02` · `L03` · `L04` |
+| 1b | then Takes → click **block 187's** pane → ⌘1 | Write in **block 187** — the stale seed did not re-land block 182 (the Act 10 rule holds) | **R1-1 CLEAR** | `L05` · `L06` |
+| 1c | *(the discriminator that produced RAISE-1)* the click's place vs. a second click inside the live pane | first click → Write at the block's START; second click at `powe|r` → Write at `powe|r` | **RAISE-1** | `L07` · `L08` |
+| 2 | Lenses, two columns on one block: column A live at `halv|es`, click column B at `get \|cut?` | **B went live at the clicked place**, not at A's offset | **R1-2 CLEAR** | `L09` · `L10` |
+| 3 | Blocks' plain row click on block **38** (407 words, nil offset) → ⌘2 → ⌘1 | the pane rang with the caret at the take's **START** (before `"Mr. James McCarthy…`), and Write landed at block 38's **START** — not the end of a 407-word paragraph | **R1-3 CLEAR** | `L11` · `L12` · `L13` |
+| 4 | caret at `dire\|ction` mid-block 38 → **⌘Q** → relaunch → reopen from ⌘K | **the caret came back to `dire\|ction`**, block 38/215, the page scrolled to it — on THIS binary, which is what R1-4 is about | **R1-4 CLEAR** | `L14` · `L15` |
+| 5 | Blocks ▸ double-click a far row (block **168**) → Write | the paragraph landed **at the viewport top**, caret at its start — the reveal is still exact after the generation stamp and the span guard | **R1-5 · R1-11 CLEAR** | `L16` |
+
+**Counts: 11 CLEAR · 2 RAISED.** Nothing was implemented in this pass; the tree is untouched by it. The
+two raises are the reviewer's to call — RAISE-1 is a real hole in the batch's own acceptance unit (row
+7's words) that the fix pass uncovered rather than caused; RAISE-2 asks only that the recorded scope
+match the code, or that the code narrow to the recorded scope until #97 is ruled.
+
