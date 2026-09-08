@@ -86,12 +86,14 @@ struct TakesBottomBar: View {
     /// re-picked key moves in one place.
     static var structuralBar: [(title: String, act: StructuralAct, help: String)] {
         [
-        // 13j J4/J4b: both helps say what the flipped defaults actually do —
-        // copy naming a behaviour the app no longer has is the J8 class.
+        // 18c/18f (U-2/U-4): every help says what the current default
+        // actually does, and names the door beside it rather than a bare
+        // chord — copy naming a behaviour the app no longer has is the J8
+        // class, and the chord was the only way in until row 45.
         ("Divide", .divide,
          "Cut the block you're in at your cursor, right here — on a block with "
-         + "several takes the take you're looking at is cut and the rest are "
-         + "copied whole onto both halves (⌥⌘⇧D to place each cut by hand)"),
+         + "several takes the take you're looking at is cut and the rest stay "
+         + "whole on the top block (Divide choosing takes… to arrange them)"),
         (CapabilityRegistry.capability(.divideWithCeremony).menuTitle(), .divideWithCeremony,
          "Lay every take out in one sheet and say where each one goes — right "
          + "here, without leaving Takes"),
@@ -101,7 +103,7 @@ struct TakesBottomBar: View {
          "Your selected span becomes its own block — in Write, carried there for you"),
         ("Merge", .merge,
          "Join the block you're in with the one above it, bringing every take "
-         + "along — in Write, carried there for you (⌥⌘⇧M to pair takes by hand)"),
+         + "along — in Write, carried there for you"),
         (CapabilityRegistry.capability(.mergeWithCeremony).menuTitle(), .mergeWithCeremony,
          "Choose what the merged block keeps — every take, only the ones you "
          + "were looking at, or takes paired by hand — in Write, carried there for you"),

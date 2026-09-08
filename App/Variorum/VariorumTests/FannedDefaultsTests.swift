@@ -208,6 +208,26 @@ struct FannedDefaultsTests {
         }
     }
 
+    /// **The boards' bottom-bar help tells the same truth the receipt does**
+    /// (ledger row 46; the 18f ladder's R3-4). The bar's Divide help still
+    /// narrated the retired J4 duplicate default — *"the rest are copied
+    /// whole onto both halves"* — beside a receipt that already said the
+    /// takes stayed on the first block. J8: a door's own words may not name
+    /// a behaviour the app no longer has. Pinned beside the receipt's pins
+    /// because they are one sentence in two places.
+    @Test func theBoardBarsStructuralHelpsTellTheKeepOnTopTruth() {
+        let helps = Dictionary(
+            uniqueKeysWithValues: TakesBottomBar.structuralBar.map { ($0.act, $0.help) })
+        let divide = try? #require(helps[.divide])
+        #expect(divide?.contains("stay whole on the top block") == true)
+        #expect(divide?.contains("onto both") == false,
+                "the duplicate shape is gone from the words too")
+        #expect(divide?.contains(CapabilityRegistry.capability(.divideWithCeremony).verb) == true,
+                "it names the door that arranges them, not a bare chord")
+        #expect(helps[.merge]?.contains("pair takes by hand") == false,
+                "pairing is one of the three options on the row below it")
+    }
+
     /// The matrix's wide end: five takes, four of them riding — and the
     /// top block's fan is A's OWN fan order with the divided take swapped
     /// for its first half (the W's letter: contributors are collected in
