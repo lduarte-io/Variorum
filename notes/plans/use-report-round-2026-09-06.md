@@ -9840,3 +9840,334 @@ to reclaim, not mine to delete unasked.
 **13u coordination:** batch 1 hands 13u2 item 1's mount-stability family the Outline's shadow `InlineEditorSurface` (a KnownIssues row); batch 3 hands 13u2's harness family the singleton-oracle trap; P39b untouched; the box composes through `RootView` under the P39 refinement.
 
 **Finals for the letter:** core `swift test` **1503/163** (batch 1's run at `d85708cb`; the only core change in the letter is the additive `Queries.noteStamps` — untouched since) · the FULL Mac suite over the letter's final tree `01849f3b`: **`✔ Test run with 2458 tests in 424 suites passed after 618.193 seconds`** (the orchestrator's own run, 2026-09-08; zero failures; the only skips the opt-in Keychain drills) · iOS `generic/platform=iOS` build **SUCCEEDED** (batch 2's round-1 run — the last `Shared/` touch). Baseline at 17o's close: Mac 2406/415 → +52 tests, +9 suites.
+
+### ROUND-END FABLE PASS — ROUND 1 FINDINGS (fable-reviewer)
+
+Cold pass over the union of the two Opus-reviewed letters' FINAL diffs — `git diff e6441686..941380a2`
+(17o batches c/d/e + their three-round Opus ladder; batch b and its Fable ladder excluded as already
+Fable-reviewed) and `git diff ce6eb9cb..01849f3b` (18d's four batches + their three-round Opus ladder) —
+at `bc06d1e6`. Read against `CLAUDE.md`, `notes/AppSpec.md` (§7 · §9 · §12), `notes/OverallModel.md`
+(I1–I10 · P1–P3 · S1–S5), `notes/SyncSpec.md`, `notes/TEXTKIT2_NOTES.md`, `notes/KnownIssuesAndTechDebt.md`,
+this file's §0–§5 (§5.3 · §5.4 whole), R-0, the briefs R-7…R-13 with their RECORDs and ADJUDICATIONs,
+both letters' three ladder rounds (findings, arbitrations, fix passes) and closeouts, J23–J44, QUESTIONS
+#97–#101, and — per J44 — the 18d cap's residue as the anchor. Every file in both ranges was read as a
+diff, myself, in this session; the code under it was read at `HEAD` where a mechanism needed the
+surrounding lines. **Nothing was run** (read-only round; the suite is the fix pass's).
+
+**THE SEAM AND CUSTODY QUESTION, answered by EMPTY DIFFS rather than by two records:**
+`git diff --stat e6441686..941380a2 -- Sources/VariorumCore/Sync/` and the same over
+`ce6eb9cb..01849f3b` are both **EMPTY**; a name grep over both ranges for `custod|keychain|vault|DeviceKey`
+returns nothing. The only `Sources/` writes in the union are `Operations+Versions.swift` (the anchor mint,
+U-19 (1)), `Operations+NoteVersions.swift` (a doc line), `Queries/TagQueries.swift` (`tagPaths`) and the
+new `Queries/NoteStamps.swift`. No schema, no migration, no lockstep event; S1–S5 untouched. The two
+editor-seam neighbours the mandate names were read whole: `EditorViewModel`'s three hunks
+(`rememberedArrivalLanding` + the `remembered != nil` reveal — row 47; the two guarded `editing`
+assignments — J34) and `PaneSurface.swift`'s three (`PaneMeasurement.extent`, `PaneDecoration`, the
+pushed `indicator`) — `BlockRangeIndex`, `EditorTextView` and `PaneTextAuthority` have no hunk in either
+range.
+
+#### Findings, severity-ranked
+
+**[MAJOR-1] · `App/Variorum/Variorum/RootView.swift:586–587` (`noteBoxView`'s `caretLabel`) · with
+`EditorViewModel.swift:2854–2884` (`updateCaretContext`) and `SidebarNoteBox.swift:47` · THE SHELL
+RE-EVALUATES PER KEYSTROKE while a book's note is live — the box's identity line reads the editor's
+caret ordinal from inside the shell's body.**
+
+*Mechanism, traced.* `RootView.noteBoxView` (`:559–589`) is evaluated inside the `sidebar:` closure
+handed to `ShellSplit` (`:157–168`), which `ShellSplit.body` runs (`ShellSplit.swift:89`). When a book
+note is live (state 3, `barModel != nil`) it reads `$0.caretOrdinal` and `$0.blockCount` off the live
+`EditorViewModel` (`:586–587`). Both are plain `@Observable` stored properties, and `updateCaretContext`
+— called from `textViewDidChangeSelection` (`EditorView.swift:618`), i.e. on EVERY keystroke — assigns
+them unconditionally on every call (`:2870 caretOrdinal = nil`, `:2872 blockCount = …`, `:2884
+caretOrdinal = i + 1`). Observation's registrar notifies on every assignment with no equality check
+(the implementer knew this: the `editing !== self` guard two lines up, `:2861`, exists for exactly that
+reason), so each keystroke invalidates **`ShellSplit`** — the view whose body registered the access —
+and its body re-runs BOTH closures: `SidebarView(…)` is re-constructed with a fresh `AnyView`
+(non-comparable ⇒ `SidebarView.body` re-runs: the starred rows, the areas, the Open strip), and
+`paneRow` re-runs → `paneHost` → `BookView(session:readingID:…)` is re-constructed — its `init` mints
+and discards a `BookViewModel` + `BookStructureModel` per pass (`BookView.swift:74–81`) — and, carrying
+three closure fields (`onPaneFocusRequest`, `onRevealConsumed`, `onNoteBox`), it cannot compare equal,
+so `BookView.body` re-runs: the leading `SideColumn` (closure fields ⇒ its body too), the mode's
+`outlineBody`/`spread`, the navigator's `ForEach` of chapter and note rows, and `noteBoxReport`'s
+entry walk (`.onChange(of: noteBoxReport)` re-computes it each pass, `:745–752`). Before 18d nothing
+at keystroke rate was read inside those closures (the old side rail read `caretLabel` inside
+`CommitBar`'s OWN body, one small view); the horizontal bar still does. So this diff moves a
+keystroke-rate observation from the smallest view in the tree to the largest.
+
+*What degrades.* Not corpus-scaled — the shell is the viewport, so P1's letter holds — but it is a
+per-keystroke re-diff of the sidebar column and the whole book pane on the typing path of the very
+surface 18d reworked, which is the "invalidation ∝ realized rows" letter of P-8 and the churn class
+13u1 exists to hunt. Two view-model allocations per keystroke thrown away is the concrete cost a
+profiler will show first. I am NOT claiming a visible stutter (unmeasured — the fix pass measures);
+I am claiming the mechanism, which is certain.
+
+*Pin that would prove it (RED on the tree as it stands):* a DEBUG counter on `SidebarView.body`
+(`SidebarGeometry.sidebarBodyEvaluations`, the oracle pattern) and a keyed DEBUG door on `BookView`
+publishing `{ model.focus($0) }` under `BookOutlineGeometry` (the `blockNamingDoor` /
+`beginTitleEditing` precedent, KEYED by `readingID` per J41); the pin mounts a real `RootView`
+(`NoteBoxMountTests`' rig), opens an Outline book, focuses a note through that door, settles until
+`session.editorRouter.editing?.postID` is the note and `CommitBarGeometry.mounted("box", post:) == 1`,
+snapshots the counter, calls `editing.updateCaretContext()` twenty times (the per-keystroke call,
+without needing the rig to type), pumps, and asserts the sidebar's body ran fewer than five more times.
+Red today (≥ 20); green after the fix. **Fix:** the label crosses the observation boundary as a
+CLOSURE, not a value — `SidebarNoteBox.caretLabel: (() -> String?)?`, evaluated inside the box's own
+`body` (`:187`), and `RootView` passes `{ BlockLineLabel.caret(ordinal: model.caretOrdinal, of:
+model.blockCount) }` — so the only view that re-runs per caret move is the box (which already carries
+the bar). Features receive closures (CLAUDE.md's own wording); the sidebar still holds no model.
+
+---
+
+**[MINOR-1] · `App/Variorum/Variorum/Theme/EditorTypography.swift:231` (`applyVoiceChrome`) with
+`:125–130` (`fingerprint`) · J44's MINOR-1 — CONFIRMED on its mechanism.** `applyVoiceChrome` writes
+`EditorTypography.current = chrome.typography` unconditionally; `fingerprint` is `current` whenever
+`isAdopted`; `isAdopted` is a process-global latch set by the FIRST `ThemeStore.start` landing
+(`ThemeStore.swift:44–45`). Four stores are minted, one per window kind (`RootView.swift:144`,
+`Workspace/NoteWindowView.swift:55`, `Features/QuickNote/QuickNoteView.swift:118`,
+`Features/Settings/AppSettingsView.swift:38`), each holding `Queries.ThemeSettings()` — `.terminal` —
+until its own observation returns, and both chrome-building hosts read
+`themeStore?.settings ?? Queries.ThemeSettings()` (`EditorView.swift:72–74`, `ReadPostView.swift:48`).
+So in a Study session, opening a note window or the quick-note window applies a Terminal chrome under
+`isAdopted == true` → `current` = Terminal → `fingerprint` = the monospace stamp → (i) `size()`
+(`SurfaceSizeMemory.swift:176–180`) REFUSES her Study-stamped Outline records for as long as that
+`current` stands (the first-frame picture round 1's MINOR-2 was raised about, back through a third
+door), and (ii) a `remember` + settle `persist` in that window writes a Study-measured height under the
+Terminal stamp over her record, which the next Study launch refuses. Round 2 closed the LATCH; the
+VALUE the latch guards is still writable by a drawing host, which falsifies `adopt`'s own doc
+(*"only the settings' authority adopts"*). MINOR, as the cap said: a second window inside its store's
+DB-read window, view state only, self-healing at the next settle. **Pin (red on HEAD; designed by the
+cap, UNMEASURED — I measure it in the fix pass):** `SurfaceSizeMemoryTests` — adopt Study
+(`EditorTypography.adopt(.resolve(voice: .study, inlineComments: false))`), seed her record through a
+memory wired `fingerprint: { EditorTypography.fingerprint }`, drive the production door
+`EditorTextView.makeInlineEditor().applyVoiceChrome(EditorSurfaceChrome(tokens: Queries.ThemeSettings(),
+dark: false))`, assert `EditorTypography.fingerprint` is unchanged (red: it becomes
+`.AppleSystemUIFontMonospaced-Regular-14-7`), then replay `remember` + `persist` and assert her record
+survives in memory and on disk; the globals restored before any assertion (round 2's NIT-2). **Fix:**
+`applyVoiceChrome` writes `current` only while `!EditorTypography.isAdopted`; after adoption the store's
+`adopt` is the only writer. Strictly better for the drawing hosts too: `EditorDocument.baseFont` reads
+`EditorTypography.current` (`EditorDocument.swift:24`), so a surface materializing in a not-yet-landed
+window now materializes in the ADOPTED voice rather than Terminal-then-flip. Checked: every
+`EditorSurfaceChrome` is built from a `ThemeSettings` (`EditorTypography.swift:192–199`), so a landed
+store's chrome carries exactly the adopted resolution — nothing a host draws changes on the normal path.
+
+---
+
+**[MINOR-2] · `Features/Library/SidebarView.swift:735` (+`:568`) · `RootView.swift:659, 665, 673` ·
+`Core/Views/SeamGrip.swift:142–145` · J44's MINOR-2 — CONFIRMED at all three sites, harness hygiene
+(no red-on-old pin applies, labelled so).** (a) `SidebarGeometry.railGroupHeight` is an unkeyed
+`CGFloat?` written by any drawn rail (`:568`); `NoteBoxMountTests.swift:166–180` nils it, waits for
+ANY non-nil, `#require`s it, guards it against the generous arithmetic (`:177`) and then compares its
+keyed box against that number; `:375–388` does the same with no guard. A rail drawn concurrently by
+another suite at a COMPRESSED row height supplies the number → spurious red at the guard and at the
+compare; at the generous height the guard passes about another window (harmless only because the
+number coincides). (b) The pane seam's subject is the divider's INDEX (`"\(index)"`, `:659/:665`) —
+`paneDivider|0` for every split in every suite and window; `ShellChromeTests.swift:430` reads that key
+while `ShellLandingTests.swift:297–338` mounts a second `RootView` with a split; the poll at
+`ShellChromeTests:429–435` exits on whichever window published first, and `abs(grip.midX - line.midX)
+<= 0.5` can then compare two windows. (c) `SeamGeometry.reset()` clears EVERY subject's entries;
+`ShellChromeTests.swift:409` and `OutlineRoomTests.swift:456` both call it, and `onGeometryChange`
+re-fires only on change, so a wiped rectangle is never republished and the other suite's `#require`
+times out. **Fix (mine, in the fix pass):** `railGroupHeights[postID]` keyed by the rail's post, the two
+mount pins reading their own; the pane seam's subject minted from the router's identity plus the index
+(`RootView.paneSeamSubject(router:index:)`, one rule the view and the pin both call); `reset()` takes a
+key (`forget(_:)`), the two callers clearing only their own — with live uuids there is nothing stale to
+clear anyway. All three then belong in J41's oracle-sweep row as done rather than owed.
+
+---
+
+**[MINOR-3] · `App/Variorum/Variorum/Features/TOC/BlocksWorkbenchView.swift:703–745`
+(`WorkbenchSeam`; its host `:347`) · A FIFTH copy of ledger row 9's shape survives the sweep, and the
+diff's own claim that none does is false.** `WorkbenchSeam` is a 1-pt line with a 9-pt `.overlay` grip
+(`:727`), `NSCursor.push()`/`pop()` on `.onHover` (`:738`), no `zIndex`, in an `HStack` where
+`WorkbenchInfoPanel` is the divider's LATER sibling (`:235–241`) — so the grip's panel-side half is
+hit-tested by the panel, exactly row 9's dead half; and its header (`:703–705`) still says it is *"the
+same seam everywhere"* naming `RootView.paneDivider` and `ShellSplit`, both of which are now
+`SeamGrip`. The 18d round-2 fix's comment at `RootView.swift:638` calls the pane row *"the last copy
+of the old shape"* and the batch-3 record says *"no copy of row 9's old shape left in the app
+(grepped)"* — a grep for `frame(width: 9)` finds this one. Pre-existing (pre-13u batch C), not minted
+by either range, hence MINOR — but a known defect with no owner is fixed now (CLAUDE.md's tracking
+rule), and `SideColumn.swift:21` even cites `WorkbenchSeam` as the source of the grammar it copied.
+**Pin (red on old):** `BlocksWorkbenchFaceTests`' `SeamHost` already receives the seam's frame through
+`onFrame` (`:278–297`) — today that reports the 9-pt OVERLAY's frame; one arm beside
+`theSeamDragsThePanelWidthAndItIsRemembered`: `seam.width >= SeamGrip.width - 0.5` (red: 9.0). **Fix:**
+`WorkbenchSeam` composes `SeamGrip` (space, `onDrag` → the existing `BlocksWorkbenchLayout.panelWidth`
+arithmetic, `onGripFrame` → `onFrame` and the `.divider` probe), and the host puts `.zIndex(1)` on the
+divider in its `HStack` — the part only a host can own. The existing drag pin must ride green (its
+press lands at `seam.midX`, which is the line's centre on both shapes).
+
+---
+
+**[MINOR-4] · `Core/Views/SideColumn.swift:21–22, :37` · `Features/BookView/BookView.swift:125` ·
+`Features/ReadMode/ReadModeView.swift:143` · J44's MINOR-3 — CONFIRMED by grep (`9-pt|9 pt` over
+the app).** Four live comments still describe the shipped seam as a 9-pt grip with the old cursor road;
+the component (`SeamGrip.swift`) and `ShellSplit` say 14 and `.pointerStyle`. The historical sentences
+at `RootView.swift:638`, `SeamGrip.swift:14/34/36` and `SideColumn.swift:228` are correct as written
+(they describe what the shape WAS) and stay. **Fix:** four one-line edits naming `SeamGrip` and 14 pt
+(doc; no pin).
+
+---
+
+**[NIT-1] · `Core/Views/SurfaceSizeMemory.swift:211–213` (`persist`'s doc) · J44's NIT-1 — CONFIRMED.**
+The guard is justified by *"`FlowStoryRow`'s empty-read branch calls `remember` and then `settledHere()`
+→ `persist` in the SAME turn"* — but that road runs through the FLOW memory, whose stamp is
+`FlowHeightEstimate.fingerprint` (`ReadingFlowView.swift:695`), a compile-time `static let` that is never
+nil, so it cannot carry an unknown-voice write. The genuinely same-turn road for the `.outline` memory
+— the one whose stamp CAN be nil — is `StableSurface.report`'s settle closure (`StableSurface.swift:208–210`:
+`remember(size)` then `settled?()` → `persist`), which every Outline row uses. The guard is right
+(belt-and-braces: with `remember` dropping, `records[key]` holds only the disk record, which `written`
+declines to rewrite); its stated reason is wrong. **Fix:** one clause (doc; no pin).
+
+**[NIT-2] · `Features/Library/RecoveryView.swift:477` (`!item.isVersion`) · J44's NIT-2 — CONFIRMED
+as a missing reason, and the exclusion is RIGHT.** Traced: `currentBlock.<id>` is written only through
+`CommandRouter.noteFocusedBlock` (`:167–183`) from caret-reporting surfaces, and `surfaceSize.*` only
+by the Outline's and the flow's `StableSurface` consumers; a version's ONE home is Note ▸ Versions
+(`NoteVersionsPane.swift` mounts no `ReadPostView`/`PostDetailView`/`StableSurface`/`EditorView` and
+opens nothing — grepped), a version rides no book membership, and a PROMOTED version is a note whose
+`isVersion` reads false at delete time and so IS evicted. Hence no per-note key can exist under a
+version's id and the exclusion is exact. **Fix:** one clause at the guard saying so (doc; no pin).
+
+**[NIT-3] · `Features/BookView/BookView.swift:745–752` (`identity(of:)`) with
+`BookViewModel.swift:27` (`entryWindow = 300`) · the box's *"N of M in this book"* takes M from the
+WINDOWED entries, and a note past the window has no identity line at all.** `model.entries` is the
+observation's first 300 rows (`:106–107`, `truncated` held beside it); the box says "5 of 300" for a
+400-note book and shows no title/place for note 301+ (`firstIndex` → nil). Beyond her library's scale
+(Sherlock is 13), so NIT; `model.truncated` is at hand. **Fix:** omit the total (or say "of 300+")
+when `model.truncated`; the identity for an out-of-window note is a separate read the box does not owe
+today. Pin if fixed: a pure `NoteBoxCopy.whereLine` arm, or a `BookNoteBoxSubjectTests` case over a
+truncated model (green on both sides for the copy half — a copy-truth pin, not a red-on-old).
+
+**[NIT-4] · `Core/Views/NoteBoxFactsModel.swift:56–63` (`load`) · a superseded read can land its
+subject over a newer one — no cancellation check after the await.** `.task(id: noteBoxFactsKey)`
+cancels the previous task on a key change, but `database.read` is not cancellation-aware mid-flight,
+and `load` assigns `subject = postID; facts = read` unconditionally after the await — so a selection
+changed twice inside one read (a few ms) can have the OLD note's read finish last, leaving `subject` on
+the old note and `facts(for: new)` nil until the next selection change. Bounded (a missing facts line,
+never a wrong one — `facts(for:)`'s subject check is what keeps it honest), hand-reachable only by
+two clicks inside a read. **Fix:** `guard !Task.isCancelled else { return }` before the assignments
+(one line). A deterministic pin needs an injectable slow read the model does not take; labelled as the
+bounded race it is rather than dressed as a bug pin.
+
+#### Considered and cleared (traced, so the next reader does not re-raise them)
+
+- **The indicator setting's DEFAULT did not move.** `Queries.ThemeSettings.editingIndicator` is still
+  `.off` (`AppearanceQueries.swift:16`, R14/R22); `ThemeStore.editingIndicator(of:)`'s `.outline` is the
+  fallback for a NIL store only (previews, pins, the tutorial samples), which is the shipped ring those
+  sites always drew — the shipped look preserved, not the setting's meaning changed. A host with a real
+  but un-landed store renders `.off` for the same frames Write does (both read the store's placeholder),
+  and every one of the ten `PaneSurfaceView(` sites passes `indicator:` through that one resolver.
+- **`PaneMeasurement.extent` is sound and P1-shaped.** `enumerateTextLayoutFragments(from: nil,
+  options: [.ensuresLayout])` lays out from the document's start — the same full-document work the
+  retired `ensureLayout(for: documentRange)` did at all four sites (interleaved measurement: no delta);
+  fragment frames and `usageBoundsForTextContainer` share the container's coordinate space (the eight
+  steady-state shapes measured identical); the fallback is reachable only for the empty document, where
+  the property was measured honest (MAJOR-1 of c/d/e round 1, hollow by its pin). A nil
+  `textLayoutManager` still returns 0. TEXTKIT2_NOTES §3 carries the high-water-mark finding.
+- **Row 47's widening is exactly the ruled one, and its reveal cannot fight the anchor.**
+  `rememberedArrivalLanding` returns nil for no fact, another post's fact, or a block the index no longer
+  holds — and a fact WITHOUT an offset (Blocks' row, the outline's card) lands at the block's start and
+  reveals, which is row 20's jump. `bareArrivalLanding` is byte-identical in signature and value; the
+  reveal's own visibility guard still returns without moving for a line the viewport shows; the
+  cold-mount anchor pin stays green because a nothing-remembered 0 no longer reveals.
+- **The parked block landing on `ShellRouter` is correct end to end.** `adopt(_:in:landing:)` clears
+  and installs in one statement; `open` is a one-line forward; `spendLanding` fires in the mount's
+  `.onAppear` BELOW the `.id` keyed on the landing GENERATION (a new park bumps it, a spend does not);
+  `PostDetailView.initialBlockID` and `PoolDetailView.initialBlockID` are `let`s captured before the
+  spend, so the body pass that follows the spend (now `initialBlockID: nil`, same identity) cannot
+  re-land; the cap's residue (`park` module-visible; two DEBUG oracles) is in KnownIssues under 13u2.
+- **`EditorRouter.editing` is a second FIELD, not a second AUTHORITY, and its rule is stated once.**
+  `active` = attachment, `editing` = the caret, `editingOrActive` = what a caret door reads
+  (`EditorRouter.swift:16–63`); `editing` is claimed only where a caret context is computed (a live
+  text view and a landed projection), cleared in `teardown` when it is self, and only ONE full-document
+  editor can compute a caret context at a time under `PaneMount.kind`'s one-live-surface fork — so the
+  box (which reads `editing` ALONE, `RootView.swift:574`, and gates it on the reported post, `:575`) can
+  never lend the Outline's shadow's doors, and the two caret doors' fallback keeps behaviour outside the
+  Outline byte-identical. P-3's one-authority letter is `PaneTextAuthority`'s (which text, is it live);
+  `editing` answers a shell question about full-document editors and does not touch it. The shadow
+  itself is 13u2's row.
+- **P39 holds at the box.** `BookView` publishes a VALUE and a CLOSURE (`onNoteBox`, stamped with its
+  `readingID` so a clear cannot erase the next book's box); `RootView` composes the box and builds
+  `CommitBar(model:axis:.box)` itself; `SidebarView` receives `noteBox: AnyView?` and renders. No
+  feature constructs, holds or calls a sibling's model; P39b untouched. MAJOR-1 above is about WHERE
+  the caret is read, not about who holds what.
+- **The typography adoption and the surface-size memory's read/write split are coherent at every
+  caller** (the one door J44 MINOR-1 leaves open aside): `ThemeStore.start` adopts at every landing;
+  `size` answers an unstamped record as a guess (the width doctrine of `BookView.surfacePlaceholder`,
+  argued and accepted); `remember` drops without a stamp; `persist` refuses without one and never
+  rewrites a merely-read record (`written` seeded at `record(_:)`); the flow's memory carries a
+  constant stamp; the eviction fires at the PURGE (`confirmPendingPurge` → `forgetLocalMemories` →
+  `forgetCurrentBlock` → `forgetPersisted`), never at the delete, so Put back finds her lengths.
+- **The AutoFill opt-out reaches the bundle and touches no other default.**
+  `NSAutoFillRequiresTextContentTypeForOneTimeCodeOnMac` = `<true/>` in a PARTIAL `VariorumInfo.plist`
+  beside the synchronized folder; `INFOPLIST_FILE` set on the Mac target's Debug AND Release configs
+  only, `GENERATE_INFOPLIST_FILE` still YES; the external fact (content-agnostic on macOS 26; the key is
+  the documented opt-out) was settled by the c/d/e ladder's own lookup and the app-hosted pin reads
+  `Bundle.main`. Credential AutoFill is a separate mechanism, untouched.
+- **The held title observations are viewport-shaped (P1) and thread-shaped (P2).** `observeTitles`
+  and `PostTitleLabel.watch()` re-run on every `container` write (every autosave — `AppDatabase.observe`'s
+  own documented rate), but each fetch is one indexed row per on-screen subject plus `Queries.tagPaths`
+  over exactly the on-screen tag ids (empty-in → no query), run inside the observation's fetch on the
+  reader pool with `removeDuplicates`; the `.task(id: titleSubjectsKey)` restart discipline is unchanged;
+  a failed read keeps the last names. `resolveTitles` is honestly demoted to a test seam.
+- **The core writes are transaction-shaped and sync-shaped.** `markPostsAsVersions`: one `database.write`,
+  `now` read once, both `livePost`s and the already-linked guard before any write, the anchor through the
+  shared `mintBlock` (I10 on an empty buffer), `ensureUnlocked` BEFORE the mint (a seal refuses with
+  nothing minted — derivable from `lockPost`'s letter, no QUESTIONS row owed), `touchContainer` without
+  churn (AppSpec §9's structural rule), left-to-right evaluation so a throw on the second anchor rolls the
+  first back, and `firstLivePlacedBlock`'s liveness JOIN consumed (the raced shape pinned twice).
+  `Queries.noteStamps`: one indexed read over the note's own placements → blocks → variants →
+  `commit_point`, all live-gated, nil for a gone container; `Queries.tagPaths`: live-only `IN (…)`.
+  No new writes outside the ops layer, no trigger, no schema.
+- **`SeamGrip` and `SideColumn` are right.** The grip is a ZStack sibling framed at the LINE's width
+  so it overhangs and still hit-tests; `.zIndex(1)` lives with each host (a stack-order claim);
+  `.pointerStyle(.columnResize)` replaces the push/pop; the shell's line alone ignores the top safe
+  area (row 41); the leading drag mirrors through the ONE width brain
+  (`draggedWidthFromLeading` → `width`), so R1-7's past-the-edge floor cannot be forgotten; the
+  unmeasured first pass now clamps to the host's floor and ceiling (the two shipped unmeasured cases are
+  inside [280, 640] either way); every host passes a required `subjectKey`.
+- **The tray's populations are unchanged and the filter is exact.** `TrayContents` is the four listings
+  the model already held; `rows` selects, `count` is DEFINED as `rows(…).total`; the archived · takes
+  cell is empty by construction and names Block History (#100); a reveal sets `view`/`kind` past
+  `select` so it never becomes her remembered choice; Put back / Delete Now / the purge confirm are
+  byte-unchanged; the three retired `RecoveryCopy` constants stand for the `mobile` branch.
+- **The box's `editHere` road is the shipped one.** Outline/spread: a `WriteIntent` parked on the
+  router (consumed by the arriving inline editor for ITS post at `EditorViewModel.swift:1860–1864`,
+  cleared by the router on a detail change or a non-Write mode change) then `model.focus` +
+  `requestReveal`; Index: `requestLanding(LandingTarget)`. No new landing mechanism; nothing rides the
+  shell's block park.
+- **Nothing in either range is reachable from the phone except `RecoveryCopy` strings and
+  `AppSession.trayViewMemory` inside the `#if os(macOS)` block** (the iOS build ran green where owed);
+  the one core semantic change (`markPostsAsVersions`) has no mobile caller.
+
+#### CLEAN BILL — load-bearing things I checked myself and found solid
+
+- Zero `Sources/VariorumCore/Sync/`, zero custody/keychain, zero schema/migration/lockstep in the union
+  of both ranges — by empty diffs and a name grep, above.
+- Every pin the two closeouts name for the rows in scope exists in the tree by name (grepped: the
+  `PaneSurfaceTests` ×4, `TakePaneMeasureTests` ×3, `TakesCardHeightTests` ×2, `TakesEmptyStateTests` ×4,
+  `ShellChromeTests` ×4, `MastheadLayoutTests` ×4, `MastheadTagDoorTests`, `WorkspaceNavigationTests`,
+  `BookIndexEditingTests`, `CompareBoardTests`, `OriginBlockDoorTests` ×2, `CapabilityRegistryTests`,
+  `FannedDefaultsTests`, `TutorialWalkTests`, `LandingOffsetTests`, `SnippetsDoorsTests` ×6,
+  `VersionOperationsTests` ×4, `TagTimelineQueryTests`, `NoteStampsTests` ×5, the three `ShellLanding*`
+  suites, `NoteBoxTests` ×4 suites, `NoteBoxMountTests`, `TrayFilterTests` ×9, `OutlineRoomTests` ×6,
+  `SurfaceSizeMemoryTests` ×10), and the load-bearing ones were read rather than summarised: the row-47
+  pin asserts the caret line inside the visible rect under the block-200 anchor; the c/d/e MAJOR-2 mount
+  pin drives `pendingSelection` (the road the one-liner did not cover); the J44 MINOR-1 twin
+  (`aSurfaceTakingChromeBeforeTheVoiceLandsCannotRecordUnderTheGuess`) latches with `isAdopted = false`
+  and so cannot see the adopted-window door MINOR-1 above names.
+- The KnownIssues rows the two closeouts claim are present with owners (the per-note-defaults leak → 12;
+  the 27 `fixedSize` sites, the unvoiced tag sheet, the shell park + oracle hygiene, ⌘A in a pane, the
+  Outline's shadow `InlineEditorSurface` → 13u2); QUESTIONS #97–#101 exist with the options recorded.
+- The tutorial's two rewritten lessons (row 44's deleting chapter; the tray lesson) quote the app's own
+  constants (`TrayPath.leavingTab`/`archivedTab`, the three filter words), so the next rename reaches the
+  field guide; the copy-truth pins hold the absence of the retired sentences.
+- Row 43's receipt reads `FanHalf.sourceVariantIDs` for both claims; row 45's guard is exhaustive over
+  `StructuralAct.allCases`; row 46's help pin asserts the retired sentence's absence.
+- Row 14's overlay bar keeps the content's 10-pt leading edge; row 15's empty-state face is one view
+  both boards compose; row 6's three host-drawn frames consume `PaneDecoration.hostRing`.
+
+**Counts (round 1): 0 BLOCKER · 1 MAJOR · 4 MINOR · 4 NIT.** One MAJOR is mine (the per-keystroke shell
+re-evaluation); of the four MINORs three are J44's residue confirmed on their mechanisms (the adopted-window
+write to `current`; the three unkeyed oracle sites; the four seam docs) and one is mine (the fifth seam);
+of the four NITs two are J44's confirmed (the `persist` doc; the version exclusion's reason) and two mine
+(the windowed total; the facts read's cancellation). The two J44 items with pins designed by the cap were
+NOT measured here (read-only); both are measured in my fix pass. Nothing here re-opens a ruling; nothing
+needs a QUESTIONS row.
