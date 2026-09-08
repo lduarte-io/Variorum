@@ -339,8 +339,14 @@ struct ShellLandingMountTests {
             let split = await Self.settle(window, hosting) {
                 router.workspace.panes.count == 2
                     && router.workspace.focusedPane != .primary
+                    // The note's detail must actually be GONE before the trip
+                    // back, or SwiftUI coalesces the two focus moves into one
+                    // update, nothing re-mounts, and the last assertion below
+                    // stops discriminating (measured — the first cut of this
+                    // pin passed under the revert probe for exactly that).
+                    && Self.views(EditorTextView.self, in: hosting).isEmpty
             }
-            #expect(split, "the split's second pane has the focus")
+            #expect(split, "the split's second pane has the focus and the note's detail is unmounted")
             router.workspace.focus(.primary)
             let backLive = await Self.settle(window, hosting) {
                 router.workspace.focusedPane == .primary
