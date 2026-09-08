@@ -6404,3 +6404,30 @@ nothing renders differently today.
 `PaneSurfaceTests` → **44/4 green**. Core untouched (the diff is `Surface/PaneSurface.swift` doc,
 `TakesShared.swift`, `TakesBoardView.swift`); zero `Sync/`, no `PaneTextAuthority` change.
 
+---
+
+**BATCH C'S FIX PASS — CLOSING RUN.** ONE `xcodebuild test` over the batch's closing set — the pane
+family (`PaneSurfaceTests` · `TakePaneMeasureTests` · `TakePaneDurabilityTests` · `TakesCardHeightTests`
+· `TakesEmptyStateTests` · `PaneTextAuthorityTests` · `PanePublishDoorTests`), the boards
+(`TakesBoardTests` · `TakesBoardSoakTests` · `TakesArticleRenderTests` · `TakesPresentationTests` ·
+`TakesRoomTests` · `LensesReorderTests` · `CompareCompositionTests` · `CompareViewModelTests` ·
+`CanvasArrivalTests` · `WriteTakesPanelTests` · `TakesBufferConvergenceTests` · `TakesDivideTests` ·
+`FannedDefaultsBoardTests` · `TakesLandingTests`), the other pane hosts (`BookIndexEditingTests` ·
+`BlocksWorkbenchFaceTests` · `BlockTOCTests` · `ReadModeTests` · `ReadTierTests` — the read tier added
+because MINOR-1 names `ReadPostViewModel` as a whole-post caller), the batch-b landing pins that must
+ride unmodified (`CurrentBlockContinuityTests` · `LandingOffsetTests`) and the ten `Tutorial*` spine
+types → **`✔ Test run with 279 tests in 38 suites passed after 104.089 seconds.`** — thirty-eight
+suites for thirty-eight `-only-testing` type names, ZERO `skipped` lines in the log
+(`scratchpad/closing2.log`).
+
+**The seams, verified per commit rather than asserted:** all seven of batch c's commits
+(`3c6bcbb6` · `d6ab4b40` · `97fe2dfa` · `76e4722c` · `995108ca` · `c79f522c` · `aa01ff25`) touch ZERO
+`Sources/`, ZERO `App/Variorum/Shared/`, ZERO `Sync/` — checked with `git show --stat` on each, because
+a range diff against `e6441686` now also carries batches d and e. No schema, no migration, no
+`PaneTextAuthority` change: the batch stays with the `opus-reviewer`.
+
+**Counts for the round-1 fix pass (batch c): 1 MAJOR DISMISSED AS HOLLOW with its numbers (MAJOR-1,
+by the deciding pin, per J30) · 1 MINOR FIXED as a doc correction plus the measurement the arbitration
+asked for (MINOR-1) · 1 NIT FIXED (NIT-1) · 1 thing found and recorded rather than folded in (the third
+`fixedSize()`).**
+
