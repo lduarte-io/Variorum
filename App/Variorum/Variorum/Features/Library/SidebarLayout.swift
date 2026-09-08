@@ -82,6 +82,25 @@ nonisolated enum SidebarLayout {
         topPadding + CGFloat(headedGroups) * (groupHeaderHeight + separatorHeight) + bottomInset
     }
 
+    /// **THE ONE MEASUREMENT the "this note" rail and the note BOX share**
+    /// (18d batch 1, her U-10: the box is *"measured to take up the same
+    /// amount of room"* as the rail). The rail draws a header over its mode
+    /// rows and nothing else, so its group is exactly that arithmetic — and
+    /// the box takes it as a fixed frame, which is what keeps the Open strip
+    /// below from moving between a note and a book, or between the box's
+    /// three states.
+    ///
+    /// It is a FUNCTION of the drawn row height, not a constant, because the
+    /// column compresses (`rowHeight`) — a constant would hold at the
+    /// generous pitch and lie in a short window, which is the silent drift
+    /// row 13 fixed one layer down. `SidebarGeometry.railGroupHeight` (DEBUG)
+    /// publishes what the rail actually drew, and the box publishes what IT
+    /// drew, so the pin compares two measured rectangles rather than trusting
+    /// this line.
+    static func railGroupHeight(rowHeight: CGFloat, railRows: Int) -> CGFloat {
+        groupHeaderHeight + CGFloat(railRows) * rowHeight
+    }
+
     /// How many Open-strip rows show before the SECTION scrolls in place
     /// (Act 10 item 9's ruled window — the starred precedent's "~7").
     static let openStripWindow = 7

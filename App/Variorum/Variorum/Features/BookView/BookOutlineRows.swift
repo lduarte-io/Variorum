@@ -220,14 +220,11 @@ nonisolated enum BookOutlineRows {
         return token.count <= 5 && token.allSatisfy { roman.contains($0) }
     }
 
-    /// The details gutter's line beside a collapsed card (row 13 — C-6's
-    /// verdict): the TAKES fact only, because a card cannot show that a
-    /// block carries takes any other way; the word count is dropped (it was
-    /// "thrown in everywhere just because"). nil ⇒ the gutter is empty.
-    static func gutterLine(fannedBlocks: Int) -> String? {
-        guard fannedBlocks > 0 else { return nil }
-        return "⑂ takes on \(fannedBlocks) block\(fannedBlocks == 1 ? "" : "s")"
-    }
+    // (The details gutter's line LEFT this file at 18d batch 1: U-17 retires
+    // the gutter entirely and state 2 of the sidebar's note box carries the
+    // note's facts now, so the function moved to its only remaining consumer
+    // — `NoteBoxCopy.takesLine` — rather than being called across a feature
+    // boundary. Its claim and its pin are unchanged; the pin moved with it.)
 
     // MARK: - The navigator's duplicate line (row 8)
 

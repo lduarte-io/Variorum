@@ -57,17 +57,22 @@ struct BookOutlineFacesTests {
         #expect(!BookOutlineRows.cardPreview(blocks: ["a\nb c d"]).contains("\n"))
     }
 
-    // MARK: Row 13 — the gutter's line (C-6's verdict)
+    // MARK: Row 13 — the takes line (C-6's verdict)
+    //
+    // **The line MOVED at 18d batch 1** (U-17: the details gutter retires and
+    // the sidebar note box's second state carries the note's facts). The
+    // claim is unchanged and so is this pin — it reads the function at its
+    // new home, `NoteBoxCopy.takesLine`.
 
     /// RED on the old line ("236w · ⑂ takes on 1 block"): the word count is
-    /// gone; the takes fact stays; an unfanned card's gutter is empty.
+    /// gone; the takes fact stays; an unfanned note says nothing.
     @Test func theGutterCarriesTheTakesFactAndNoWordCount() {
-        #expect(BookOutlineRows.gutterLine(fannedBlocks: 0) == nil)
-        #expect(BookOutlineRows.gutterLine(fannedBlocks: 1) == "⑂ takes on 1 block")
-        #expect(BookOutlineRows.gutterLine(fannedBlocks: 3) == "⑂ takes on 3 blocks")
+        #expect(NoteBoxCopy.takesLine(fannedBlocks: 0) == nil)
+        #expect(NoteBoxCopy.takesLine(fannedBlocks: 1) == "⑂ takes on 1 block")
+        #expect(NoteBoxCopy.takesLine(fannedBlocks: 3) == "⑂ takes on 3 blocks")
         for n in 0...3 {
-            #expect(!(BookOutlineRows.gutterLine(fannedBlocks: n) ?? "").contains("w"),
-                    "no word count rides the gutter")
+            #expect(!(NoteBoxCopy.takesLine(fannedBlocks: n) ?? "").contains("w"),
+                    "no word count rides the takes line")
         }
     }
 

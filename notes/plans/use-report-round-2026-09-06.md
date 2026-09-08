@@ -7428,11 +7428,42 @@ mode's bar-in-the-page).
 | Piece | What it is | Status |
 |---|---|---|
 | A | the core read behind the facts line (`Queries.noteStamps`) | **DONE** (`e6b4148c`) |
-| B | the pure brains: the box's state rule, its copy, the rail-height measurement | NOT STARTED |
+| B | the pure brains: the box's state rule, its copy, the rail-height measurement | **DONE** (`PENDING-B`) |
 | C | the box VIEW + the sidebar's slot + the geometry oracle + the fit math | NOT STARTED |
 | D | the book publishes its subject; `RootView` composes; the facts model | NOT STARTED |
 | E | the retirement (the gutter · `.side` · the paged mode) + the click-out | NOT STARTED |
 | F | the walk, both voices, every state in every mode; captures | NOT STARTED |
+
+#### Piece B — the brains, before any pixel
+
+Four pure pieces, none of which needs a window:
+
+- **`Core/Views/NoteBox.swift`** — `NoteBoxState.from(selected:live:)` (the three states; **LIVE WINS**,
+  so the box never says *"edit here"* about a note under the caret), `NoteBoxIdentity` (what the BOOK
+  knows: title · chapter · place in the reading order — the sidebar never re-derives it), `NoteBoxFacts`
+  (words · blocks · fanned blocks · the two stamps), and `NoteBoxCopy` (the header, the empty state's two
+  lines, the door, the editing mark, and the four line-builders).
+- **`Features/BookView/BookNoteBox.swift`** — the book's own rule: which modes show the box (every
+  EDITING mode, never Read) and which note each one POINTS AT. **It deliberately disagrees with
+  `BookAnchor`**, and the file says why: the anchor always falls back to the standing place (a carry
+  that lands nowhere is indistinguishable from one that never happened), so under it a book she has ever
+  put anywhere points at that note forever — and *"no note selected"* would be a state the box could
+  never reach. Her ruling names that state outright, so the box's rule has no fallback.
+- **`SidebarLayout.railGroupHeight(rowHeight:railRows:)`** — THE ONE MEASUREMENT the rail and the box
+  share (her *"measured to take up the same amount of room"*). A function of the DRAWN row height, not a
+  constant, because the column compresses; a constant would hold at the generous pitch and lie in a short
+  window, which is the silent drift row 13 fixed one layer down.
+- **`NoteBoxCopy.takesLine` — hoisted** from `BookOutlineRows.gutterLine`. U-17 retires the details
+  gutter and state 2 carries the facts now, so the function moved to its only remaining consumer rather
+  than being called across a feature boundary (the hoist-at-next-touch rule). Claim unchanged; **its pin
+  moved with it** (`BookOutlineFacesTests.theGutterCarriesTheTakesFactAndNoWordCount`, a justified edit).
+
+**Pins:** `App/Variorum/VariorumTests/NoteBoxTests.swift` — 4 suites (`NoteBoxStateTests` ·
+`BookNoteBoxSubjectTests` · `NoteBoxHeightTests` · `NoteBoxCopyTests`). With the moved gutter pin:
+**22 tests / 5 suites, green.** Red-on-old is stated in the file: none of this existed — the box is a new
+surface, so its pins are the ruled shape written down as claims a function can be asked about. The one
+pin that reads as a real regression guard is
+`theBoxHasNoStandingFallbackAndTheAnchorDoes`, which asserts the two rules disagree ON PURPOSE.
 
 #### Piece A — the facts line's one read (core, alone, ahead of the code that uses it)
 

@@ -1,0 +1,197 @@
+//
+//  NoteBox.swift
+//  Variorum (Mac)
+//
+//  18d batch 1 — THE SIDEBAR'S NOTE BOX (her ruling U-10, verbatim: *"The
+//  block menu should move to being where the 'this note, write, lenses,
+//  compare, etc.' menu is, measured to take up the same amount of room, and
+//  should show 'no note selected' when you haven't clicked into anything or
+//  you've clicked out of something."*).
+//
+//  This file is the box's BRAINS ONLY — its state rule and its words, pure
+//  and pinnable without a window. The face is `SidebarNoteBox`; the shell
+//  composes them (`RootView`), the sidebar renders what it is handed.
+//
+//  Why a rule and not an `if` in a view body: the three states are the whole
+//  feature, and the one thing her ruling names outright ("no note selected
+//  when you haven't clicked into anything") is a claim about a pair of ids.
+//  A claim about a pair of ids belongs in a function a test can call.
+//
+
+import Foundation
+
+// MARK: - The state
+
+/// The box's three states (mockup figure C, left to right).
+///
+/// **LIVE WINS.** A note under the caret is also the book's selected note, so
+/// the two ids are usually both filled; the box shows the bar, not the door.
+nonisolated enum NoteBoxState: Equatable, Sendable {
+    /// Nothing clicked, or clicked out of: *"no note selected"*.
+    case empty
+    /// A note the book points at, read-cheap — its identity, its facts, and
+    /// ONE door into editing.
+    case selected(String)
+    /// The caret is in the note — the identity line, the editing mark, and
+    /// the bar that used to ride the right gutter.
+    case live(String)
+
+    /// The rule, over the two ids the book publishes.
+    static func from(selected: String?, live: String?) -> NoteBoxState {
+        if let live { return .live(live) }
+        if let selected { return .selected(selected) }
+        return .empty
+    }
+
+    /// The note this state is about, if any.
+    var postID: String? {
+        switch self {
+        case .empty: nil
+        case .selected(let id), .live(let id): id
+        }
+    }
+
+    var isLive: Bool {
+        if case .live = self { return true }
+        return false
+    }
+}
+
+// MARK: - What the box knows about the note
+
+/// The note's identity as the BOOK knows it — published by the book, never
+/// re-derived by the sidebar (the book is the only thing that knows which
+/// chapter a note is in and where it sits in the reading order).
+nonisolated struct NoteBoxIdentity: Equatable, Sendable {
+    var postID: String
+    var title: String
+    /// The chapter's name, when the book is sectioned; nil ⇒ unsectioned or
+    /// a flat book, and the line simply omits it.
+    var chapter: String?
+    /// 1-based place among the book's notes (0 ⇒ unknown, and omitted).
+    var index: Int
+    var total: Int
+
+    init(postID: String, title: String, chapter: String? = nil, index: Int = 0, total: Int = 0) {
+        self.postID = postID
+        self.title = title
+        self.chapter = chapter
+        self.index = index
+        self.total = total
+    }
+}
+
+/// The note's FACTS, fetched once per selection (the retired gutter's own
+/// cadence — never a per-frame query, and never a keystroke-rate observation:
+/// `variant` is the table autosave writes, and a standing observation here
+/// would re-run the whole read on every character, which P1 forbids).
+nonisolated struct NoteBoxFacts: Equatable, Sendable {
+    var words: Int
+    var blocks: Int
+    var fannedBlocks: Int
+    var editedAt: Date?
+    var savedAt: Date?
+
+    init(
+        words: Int = 0, blocks: Int = 0, fannedBlocks: Int = 0,
+        editedAt: Date? = nil, savedAt: Date? = nil
+    ) {
+        self.words = words
+        self.blocks = blocks
+        self.fannedBlocks = fannedBlocks
+        self.editedAt = editedAt
+        self.savedAt = savedAt
+    }
+}
+
+// MARK: - The words
+
+/// The box's copy, in one place (R93's legible-words rule; the app's own
+/// mouth, never a coined term).
+nonisolated enum NoteBoxCopy {
+    /// The box wears the rail's own header — her ruling measures the box
+    /// against *"the 'this note, write, lenses, compare, etc.' menu"*, and
+    /// the header is half of what makes it read as the same thing.
+    static let header = "this note"
+    static let nothingSelected = "no note selected"
+    static let nothingSelectedHint = "click a note in the book to see its controls here"
+    /// The one door out of the read-cheap state (⏎ is its key).
+    static let editDoor = "edit here \u{23CE}"
+    /// The live mark, in the ring colour at the box's corner.
+    static let editingMark = "editing"
+
+    static let emptyHelp =
+        "This is where a note's controls live while a book is open. "
+        + "Click a note in the book and they appear here."
+    static let editDoorHelp =
+        "Write in this note, at the block you were last in"
+
+    /// *"chapter 2 · 5 of 12 in this book"* — and, while live, the caret's
+    /// block joins it: *"chapter 2 · 5 of 12 · block 3/41"*.
+    ///
+    /// The block half is the BAR's own label (`BlockLineLabel`), handed in
+    /// rather than re-derived: 13g R5-4's rule — one shared label, so no two
+    /// surfaces can disagree about where the caret is.
+    static func whereLine(chapter: String?, index: Int, total: Int, block: String?) -> String {
+        var pieces: [String] = []
+        if let chapter, !chapter.trimmingCharacters(in: .whitespaces).isEmpty {
+            pieces.append(chapter)
+        }
+        if index > 0, total > 0 {
+            pieces.append(block == nil ? "\(index) of \(total) in this book" : "\(index) of \(total)")
+        }
+        if let block { pieces.append(block) }
+        return pieces.joined(separator: " \u{B7} ")
+    }
+
+    /// *"3,214 words · 41 blocks"*.
+    static func countsLine(words: Int, blocks: Int) -> String {
+        "\(words.formatted()) word\(words == 1 ? "" : "s") \u{B7} "
+            + "\(blocks) block\(blocks == 1 ? "" : "s")"
+    }
+
+    /// *"⑂ takes on 2 blocks"* — nil ⇒ nothing to say, and the line is not
+    /// drawn.
+    ///
+    /// **Hoisted from `BookOutlineRows.gutterLine` (18d batch 1).** It was
+    /// the details gutter's one fact; U-17 retires the gutter and state 2 of
+    /// this box carries the facts now, so the function moves to its only
+    /// remaining consumer rather than being called across a feature boundary
+    /// (the hoist-at-next-touch rule). Its claim and its pin are unchanged.
+    static func takesLine(fannedBlocks: Int) -> String? {
+        guard fannedBlocks > 0 else { return nil }
+        return "\u{2442} takes on \(fannedBlocks) block\(fannedBlocks == 1 ? "" : "s")"
+    }
+
+    /// *"edited Sep 4 · saved Sep 2"* — DATE-ONLY (the recovery family's
+    /// rule: glanceable, never forensic). nil ⇒ neither stamp is known.
+    static func stampsLine(
+        edited: Date?, saved: Date?, now: Date,
+        calendar: Calendar = .current, locale: Locale = .current
+    ) -> String? {
+        var pieces: [String] = []
+        if let edited {
+            pieces.append("edited \(day(edited, now: now, calendar: calendar, locale: locale))")
+        }
+        if let saved {
+            pieces.append("saved \(day(saved, now: now, calendar: calendar, locale: locale))")
+        }
+        return pieces.isEmpty ? nil : pieces.joined(separator: " \u{B7} ")
+    }
+
+    /// A day, short: *"Sep 4"* — with the YEAR when the stamp is not from
+    /// this one, because "Sep 4" for something written two years ago is a
+    /// lie told by omission. Pure over an injected `now`, so a pin can hold
+    /// the rule rather than the machine's clock.
+    static func day(
+        _ date: Date, now: Date, calendar: Calendar = .current, locale: Locale = .current
+    ) -> String {
+        let sameYear = calendar.component(.year, from: date)
+            == calendar.component(.year, from: now)
+        let formatter = DateFormatter()
+        formatter.calendar = calendar
+        formatter.locale = locale
+        formatter.setLocalizedDateFormatFromTemplate(sameYear ? "MMMd" : "MMMdyyyy")
+        return formatter.string(from: date)
+    }
+}

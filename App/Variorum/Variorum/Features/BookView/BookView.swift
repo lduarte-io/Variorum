@@ -1741,7 +1741,7 @@ private struct OutlinePostRow: View {
         // lone heading/numeral ("I."); row 13: the gutter carries the takes
         // fact alone — the per-card word count is DROPPED (C-6).
         excerpt = BookOutlineRows.cardPreview(blocks: slots.compactMap(\.text))
-        meta = BookOutlineRows.gutterLine(fannedBlocks: slots.filter(\.hasFan).count) ?? ""
+        meta = NoteBoxCopy.takesLine(fannedBlocks: slots.filter(\.hasFan).count) ?? ""
     }
 
     /// 13f W11 — the row's own drag/drop contract, shared by both forms
