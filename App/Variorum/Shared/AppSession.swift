@@ -515,6 +515,14 @@ final class AppSession {
     /// (one AppSession per launch; parallel test worlds stay independent).
     var mergeJoinMemory: MergeJoin?
 
+    /// The use-report round, 18d batch 2 (her ruling U-9): **This Note's
+    /// Tray's last view and filter, per SESSION** — the same shape and the
+    /// same reason as the join memory above. A fresh launch opens the tray
+    /// on Leaving · all; within a launch the panel comes back where she left
+    /// it, whichever note or scraps area it is the tray of (the choice is
+    /// about how she is READING the tray, not about one note's contents).
+    var trayViewMemory = TrayViewMemory()
+
     /// 13b Stage 2 ladder (NIT-6): the tutorial doors' in-flight latch —
     /// a double-pressed Restore must never race two discoveries into two
     /// live field guides. Session-scoped (parallel test worlds stay

@@ -189,44 +189,121 @@ nonisolated enum RecoveryCopy {
     // round, ledger rows 9 and 20: her C1 move to the side panel and her G5
     // *"honest trash section"*)
 
-    /// **Archived blocks — kept, forever, no clock** (lifecycle row B1: the
-    /// note's tray only, never a global surface).
+    /// **THE TWO VIEWS, AT THE TOP** (the use-report round's 18d batch 2 —
+    /// her ruling U-9: *"archived v. leaving should be top level, with block
+    /// or takes as a filter under each one"*; mockup figure D).
     ///
-    /// It used to share a header with the deleted ones (*"Deleted &
-    /// archived"*), which asked her to hold the difference between a
-    /// forever-list and a countdown inside one section. Her B2 ruling split
-    /// exactly that pair one level up — *"separating archive and trash more
-    /// makes sense"* — and the same argument is true inside a note.
-    static let trayArchivedSection = "Archived \u{2014} kept, no clock"
+    /// They were SECTION HEADERS carrying their whole meaning in their names
+    /// (*"Archived — kept, no clock"* / *"Leaving — on the 30-day clock"*) —
+    /// both stacked in one scroll, the takes hidden in a fold under the
+    /// second. Now they are a segmented choice with a count, and the meaning
+    /// each name carried moves one line down, into that view's explainer:
+    /// the words are the same words, said where there is room for them.
+    static let trayArchivedTab = "Archived"
+    static let trayLeavingTab = "Leaving"
 
-    /// **The leaving section** (her G5 ruling, verbatim: *"the tray of a note
-    /// should have an honest trash section with everything being deleted, so
-    /// it's never a surprise… so you can always see a list of what will be
-    /// deleted"*). Everything of THIS note that is on the 30-day clock.
-    static let trayLeavingSection = "Leaving \u{2014} on the \(TrashWindow.days)-day clock"
+    /// **The filter under both views** — one row, three chips, shared by the
+    /// two views so the control never changes shape under her hand (figure
+    /// D). `all` carries no count (the segment above it does); a kind chip
+    /// carries its own only when it has one, which is exactly how the mockup
+    /// draws the empty view.
+    static let trayFilterAll = "all"
+    static let trayFilterBlocks = "blocks"
+    static let trayFilterTakes = "takes"
 
-    /// The one line under that header: what the section is FOR. Her word was
-    /// *"never a surprise"*, and a section that lists three different kinds of
-    /// thing owes one sentence saying so.
+    /// A chip's own words: its name, and its count where it has one. (The
+    /// Mac's `TrayFilterFace` picks the name from the kind — the enums are
+    /// the Mac face's, this file is compiled into both apps.)
+    static func trayFilterChip(_ name: String, count: Int?) -> String {
+        guard let count, count > 0 else { return name }
+        return "\(name) \u{B7} \(count)"
+    }
+
+    /// **THE KIND LABEL EVERY CARD WEARS** (figure D: *"the cards name their
+    /// kind"*). It is what the retired section headers used to say for a
+    /// whole run of rows — said per row instead, because under a filter a
+    /// row can no longer borrow its meaning from the header above it.
+    static let trayKindBlock = "block"
+    /// A preserved original riding a family's countdown. It is a BLOCK (it
+    /// filters under blocks), and its own line already says why it is here —
+    /// `goesWithItsFamily`, unchanged.
+    static let trayKindOriginal = "original"
+    /// A take names the block it came out of, in the kind label rather than
+    /// the quiet line under it (her A3 discipline, moved one line up: the
+    /// mockup's *"take · of block 3"*). The handle is `Queries.tocHandle`'s,
+    /// the ONE block-naming rule — never a second one invented here.
+    static let trayKindTakeWord = "take"
+    static func trayKindTake(inBlock blockHandle: String) -> String {
+        "\(trayKindTakeWord) \u{B7} \(trayTakeInBlock(blockHandle))"
+    }
+
+    /// The one line under the filter: what THIS view is, and what its two
+    /// verbs do. It shrank from the three-population sentence it used to be
+    /// (*"blocks it deleted, takes deleted on their own, and originals riding
+    /// a family's countdown"*) because the FILTER now names the populations —
+    /// which is the whole of U-9's argument, and the reason the fold retired.
     static var trayLeavingExplainer: String { trayLeavingExplainer(.post) }
 
     /// The scraps area composes the same panel over a pool, so the sentence
     /// takes the home's kind rather than calling a scraps area a note (13l
     /// row 26's rule, which this whole family now keeps).
     static func trayLeavingExplainer(_ home: ContainerKind) -> String {
-        "Everything this \(homeWord(home)) has on the clock: blocks it deleted, "
-        + "takes deleted on their own, and originals riding a family's "
-        + "countdown. Put back keeps a row; \(deleteNowVerb) ends its days early."
+        "Everything this \(homeWord(home)) has on the \(TrashWindow.days)-day "
+        + "clock. Put back keeps a row; \(deleteNowVerb) ends its days early."
     }
 
-    /// The tray's empty states, in the home's own noun.
+    /// The archived view's own line — the words its retired header carried
+    /// (*"kept, no clock"*), plus what puts a row here.
+    ///
+    /// **It says BLOCK, not "a block or a take".** The tray's archived
+    /// population is `Queries.archivedBlocks`; an archived TAKE lives among
+    /// its block's archived takes and is reached from Block History, which is
+    /// what `takeRestoredArchived` already tells her. Naming a population
+    /// this view cannot hold is the defect
+    /// `theTraysSectionsNameOnlyStatesTheProductCanProduce` exists to catch.
+    /// (Recorded as a departure from mockup figure D's caption, which says
+    /// *"a block or a take"*; QUESTIONS #100.)
+    static var trayArchivedExplainer: String { trayArchivedExplainer(.post) }
+
+    static func trayArchivedExplainer(_ home: ContainerKind) -> String {
+        "Kept out of this \(homeWord(home)), with no clock. Archiving a block "
+        + "keeps it here with no countdown."
+    }
+
+    /// The tray's empty states, in the home's own noun — and, since U-9, in
+    /// the FILTER's own noun too: *"Nothing from this note is on the clock"*
+    /// under a takes-only filter would be a lie told by a control she set
+    /// herself (the Trash's own filters-applied lesson, ledger row 2).
     static func trayNothingArchived(_ home: ContainerKind) -> String {
-        "Nothing archived from this \(homeWord(home)). Archiving a block keeps "
-        + "it here with no countdown."
+        "Nothing archived from this \(homeWord(home))."
     }
 
     static func trayNothingLeaving(_ home: ContainerKind) -> String {
         "Nothing from this \(homeWord(home)) is on the clock."
+    }
+
+    /// The four filtered empty lines (the Mac face maps its cells onto
+    /// these; `trayNothingLeaving` / `trayNothingArchived` above serve the
+    /// unfiltered `all` cells).
+    static func trayNoBlocksLeaving(_ home: ContainerKind) -> String {
+        "No blocks from this \(homeWord(home)) are on the clock."
+    }
+
+    static func trayNoTakesLeaving(_ home: ContainerKind) -> String {
+        "No takes from this \(homeWord(home)) are on the clock."
+    }
+
+    static func trayNoBlocksArchived(_ home: ContainerKind) -> String {
+        "No blocks are archived from this \(homeWord(home))."
+    }
+
+    /// The one cell that is empty BY CONSTRUCTION — so it says where an
+    /// archived take actually lives instead of pretending it could ever be
+    /// here (`takeRestoredArchived`'s own sentence, pointed at the room).
+    static var trayNoTakesArchived: String {
+        "Takes aren't archived here \u{2014} an archived take stays with its "
+        + "block, under \(BlockHistoryPath.archivedSection) in "
+        + "\(BlockHistoryPath.name)."
     }
 
     /// The reveal's arrival-time explanation (`TrayViewModel.revealMissing`).
@@ -247,12 +324,11 @@ nonisolated enum RecoveryCopy {
             + "not in the tray."
     }
 
-    /// The takes disclosure's label — **collapsed by default** (her *"albeit
-    /// maybe not shown by default"*), and it carries the count either way,
-    /// because a fold that hides its own size is not an audit.
-    static func trayTakesDisclosure(_ count: Int) -> String {
-        count == 1 ? "1 deleted take" : "\(count) deleted takes"
-    }
+    // (`trayTakesDisclosure` — the *"▸ N deleted takes"* fold's label —
+    //  RETIRED at 18d batch 2. Her ruling U-9 makes the takes a FILTER
+    //  rather than a disclosure hidden under the block cards, and the count
+    //  it carried is now the `takes` chip's own (`trayFilterChip`) — still
+    //  visible without opening anything, which was the fold's one virtue.)
 
     /// A take row NAMES ITS BLOCK (her A3 discipline: *"a deleted take
     /// definitely needs to name both note & block or it's kinda useless"* —

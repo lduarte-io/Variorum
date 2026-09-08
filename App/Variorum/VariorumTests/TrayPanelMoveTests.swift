@@ -215,9 +215,13 @@ struct TrayPanelMoveTests {
             deletedAt: DateFormatter.variorumISO8601.string(from: harnessNow),
             label: nil, text: "Another way of saying it.",
             blockName: nil, blockText: "The sea took the boat.")
+        // (18d batch 2: the take's BLOCK moved up into the card's kind label
+        //  — figure D's *"take · of block 3"* — so the lead is the stamp
+        //  alone. The split row 63 pinned is unchanged: the stamp is
+        //  date-only and truncatable, the clock rides its own slot.)
         let takeLead = TrayTakeFace.lead(take)
-        #expect(takeLead.count == 2)
-        #expect(takeLead[1] == "deleted \(harnessNow.formatted(date: .abbreviated, time: .omitted))")
+        #expect(takeLead.count == 1)
+        #expect(takeLead[0] == "deleted \(harnessNow.formatted(date: .abbreviated, time: .omitted))")
         #expect(TrayTakeFace.clockSlot(take, now: harnessNow)
             == TrayPath.daysLeftLabel(TrashWindow.days))
         #expect(TrayTakeFace.meta(take, now: harnessNow)
@@ -236,9 +240,17 @@ struct TrayPanelMoveTests {
             label: nil, text: "Another way of saying it.",
             blockName: nil, blockText: "The sea took the boat. It came back.")
         #expect(TrayTakeFace.label(take) == "Another way of saying it.")
-        let meta = TrayTakeFace.meta(take, now: harnessNow)
-        #expect(meta.first == RecoveryCopy.trayTakeInBlock("The sea took the boat."),
+        // **The block's name moved to the KIND LABEL at 18d batch 2** (her
+        // ruling U-9 / figure D): the claim is unchanged — a take row names
+        // its block, through the ONE block-naming rule — and it is now said
+        // on the line that says what the row IS, which is where a filtered
+        // list needs it.
+        #expect(TrayFilterFace.takeKind(take)
+            == RecoveryCopy.trayKindTake(inBlock: "The sea took the boat."),
                 "the ONE block-naming rule — its first sentence, derived at read time")
+        #expect(TrayFilterFace.takeKind(take).hasPrefix(RecoveryCopy.trayKindTakeWord),
+                "…and it says TAKE first, never 'block'")
+        let meta = TrayTakeFace.meta(take, now: harnessNow)
         #expect(meta.last == TrayPath.daysLeftLabel(TrashWindow.days))
         // A labelled take says its label; an empty one says TAKE, never
         // "block" (the `BlockPastCopy.emptyTake` lesson).
@@ -251,8 +263,10 @@ struct TrayPanelMoveTests {
             variantID: "v2", blockID: "b1", deletedAt: take.deletedAt, text: "")
         #expect(TrayTakeFace.label(empty) == RecoveryCopy.emptyTakeLabel)
         #expect(!TrayTakeFace.label(empty).contains("block"))
-        #expect(RecoveryCopy.trayTakesDisclosure(1) == "1 deleted take")
-        #expect(RecoveryCopy.trayTakesDisclosure(3) == "3 deleted takes")
+        // (The fold's *"N deleted takes"* label RETIRED at 18d batch 2 — the
+        //  count it carried is the `takes` chip's, and it is visible without
+        //  opening anything, which was the fold's one virtue.
+        //  `TrayFilterTests` holds the chip's own pin.)
     }
 
     /// **Put back, on the take row, through the real op** — and the receipt
@@ -390,6 +404,7 @@ struct TrayPanelMoveTests {
         // places (13l row 26's rule, kept by this whole family).
         for (post, pool) in [
             (RecoveryCopy.trayLeavingExplainer(.post), RecoveryCopy.trayLeavingExplainer(.pool)),
+            (RecoveryCopy.trayArchivedExplainer(.post), RecoveryCopy.trayArchivedExplainer(.pool)),
             (RecoveryCopy.trayNothingArchived(.post), RecoveryCopy.trayNothingArchived(.pool)),
             (RecoveryCopy.trayNothingLeaving(.post), RecoveryCopy.trayNothingLeaving(.pool)),
             (RecoveryCopy.trayRevealMissing(.post), RecoveryCopy.trayRevealMissing(.pool)),

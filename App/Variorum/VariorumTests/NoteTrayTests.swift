@@ -216,23 +216,34 @@ struct NoteTrayTests {
     /// the pin keeps its claim in the stronger form: each heading may name
     /// only what its own section can hold, and the clock is what tells them
     /// apart.
+    /// **GRADUATED A THIRD TIME at 18d batch 2** (her ruling U-9): the two
+    /// names are a segmented CHOICE now, not two stacked headers, so each
+    /// name's second half moved one line down into that view's explainer.
+    /// The claim is unchanged and is checked where the words now live —
+    /// each view may name only what it can hold, and the clock is what tells
+    /// them apart. The population list moved too: the FILTER names the
+    /// populations, which is the whole of U-9's argument.
     @Test func theTraysSectionsNameOnlyStatesTheProductCanProduce() {
-        #expect(TrayPath.archivedSection.contains("no clock"),
-                "the forever section says so in its own header")
-        #expect(TrayPath.leavingSection.contains("\(TrashWindow.days)-day"),
+        #expect(TrayPath.archivedExplainer.contains("no clock"),
+                "the forever view says so in its own line")
+        #expect(TrayPath.leavingExplainer.contains("\(TrashWindow.days)-day"),
                 "and the other one wears the clock")
-        #expect(!TrayPath.archivedSection.lowercased().contains("delet"),
-                "the two states never share a header again")
+        #expect(!TrayPath.archivedExplainer.lowercased().contains("delet"),
+                "the two states never share a name again")
+        #expect(!TrayPath.archivedExplainer.lowercased().contains("take"),
+                "the archived view never claims a population it cannot hold: an archived TAKE lives among its block's takes, never here")
         // The archived state is real: the act is declared with its doors, and
         // the tray has a listing to put an archived block in.
         #expect(CapabilityRegistry.capability(.archiveBlock).verb == "Archive Block")
         #expect(TrayPath.archivedForever.contains("no clock"),
                 "…and the row says what makes it different from a deleted one")
-        // The leaving section says what it is FOR — her "never a surprise".
-        for word in ["blocks", "takes", "originals"] {
-            #expect(TrayPath.leavingExplainer.lowercased().contains(word),
-                    "the explainer names every population it holds: \(word)")
-        }
+        // The populations are named by the FILTER and by every card's kind
+        // label — her "never a surprise", said by the control she uses.
+        #expect(TrayFilterFace.name(.blocks) == "blocks")
+        #expect(TrayFilterFace.name(.takes) == "takes")
+        #expect(TrayFilterFace.originalKind == "original")
+        #expect(TrayFilterFace.blockKind == "block",
+                "a card's kind is the filter's noun, singular")
     }
 
     // MARK: - Put back

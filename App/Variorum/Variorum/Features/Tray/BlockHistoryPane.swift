@@ -341,8 +341,14 @@ final class BlockHistoryModel {
 nonisolated extension BlockHistoryCopy {
     /// The deleted region's own explainer: **no purge door here**, and the
     /// honest place it does live (row 21's letter).
+    /// (18d batch 2: the tray's *"leaving section"* became its **Leaving**
+    /// view, one of two at the top of the panel — so the road this sentence
+    /// names is spelled the way the panel now reads, filter and all. J8's
+    /// copy-truth rule: a sentence that points at a door must point at the
+    /// door that is there.)
     static let deletedExplainer = deletedRegionExplainer(
-        purgeRoad: "open \(TrayPath.menuLabel) and use its leaving section")
+        purgeRoad: "open \(TrayPath.menuLabel) and choose "
+            + "\(TrayPath.leavingTab) \u{25B8} \(RecoveryCopy.trayFilterTakes)")
 }
 
 /// **THE BLOCK HISTORY PANE.** One occupant of the post detail's inspector

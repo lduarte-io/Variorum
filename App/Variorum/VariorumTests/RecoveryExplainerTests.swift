@@ -41,12 +41,21 @@ struct RecoveryExplainerTests {
     /// minimum (280) less the tray's own padding.
     private static let narrow: CGFloat = 256
 
+    /// **RETARGETED at 18d batch 2, claim intact.** The subject was the
+    /// tray's leaving explainer, which her ruling U-9 SHRANK to one line
+    /// (the filter names the populations now, so the sentence no longer
+    /// lists them) — a short sentence cannot hold this pin, whose whole
+    /// force is the `reference > oneLine * 3.5` guard below. The rule is the
+    /// family's, not one string's, so the pin moves to the longest explainer
+    /// the family still renders through `CalmSectionHeader`: Block History's
+    /// came-from region, one door away from the tray and the room the tray's
+    /// own kept-originals sentence points at.
     @Test func theTrayLeavingExplainerRendersWholeAtTheNarrowestPane() async throws {
-        let detail = RecoveryCopy.trayLeavingExplainer(.post)
+        let detail = OriginPeekCopy.explainer
         let shipped = try Self.renderedHeight(width: Self.narrow) { report in
             CalmSectionHeader(
-                tokens: .terminalLight, title: TrayPath.leavingSection, detail: detail,
-                onDetailHeight: report)
+                tokens: .terminalLight, title: BlockHistoryPath.cameFromSection,
+                detail: detail, onDetailHeight: report)
         }
         let reference = try Self.renderedHeight(width: Self.narrow) { report in
             Text(VoiceTokens.terminalLight.chromeLabel(detail))

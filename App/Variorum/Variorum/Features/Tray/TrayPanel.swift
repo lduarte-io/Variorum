@@ -106,17 +106,20 @@ nonisolated enum TrayPath {
         }
     }
 
-    /// **The tray's three sections** (the post-13l polish round, ledger rows
-    /// 9 and 20 — her C1 *"preserved originals separated from deleted"* and
-    /// her G5 leaving section). The names are SEMANTIC, so they live in the
-    /// shared home and the phone's batch-6 tray inherits them.
+    /// **The tray's two VIEWS** (the use-report round's 18d batch 2 — her
+    /// ruling U-9: *"archived v. leaving should be top level, with block or
+    /// takes as a filter under each one"*). The names are SEMANTIC, so they
+    /// live in the shared home and the phone's tray inherits them.
     ///
-    /// *(The single `"Deleted & archived"` header these two replace held a
-    /// forever-list and a countdown under one name — the same blur her B2
-    /// ruling split one level up, inside one note.)*
-    static let archivedSection = RecoveryCopy.trayArchivedSection
-    static let leavingSection = RecoveryCopy.trayLeavingSection
+    /// *(They were SECTION HEADERS until 18d batch 2 — two stacked runs in
+    /// one scroll, `"Leaving — on the 30-day clock"` and `"Archived — kept,
+    /// no clock"`, with the takes folded under the first. Each name's second
+    /// half moved one line down into that view's explainer, where there is
+    /// room for it; the fold became the filter.)*
+    static let archivedTab = RecoveryCopy.trayArchivedTab
+    static let leavingTab = RecoveryCopy.trayLeavingTab
     static let leavingExplainer = RecoveryCopy.trayLeavingExplainer
+    static let archivedExplainer = RecoveryCopy.trayArchivedExplainer
     // (`originalsSection` is RETIRED — the post-13l polish round, batch 4:
     // her G5 ruling moved unclocked originals to lineage, so the tray has no
     // such section to name. The path constants below now point at the Block
@@ -304,6 +307,54 @@ final class TrayViewModel {
         self.session = session
         self.postID = postID
         self.revealBlockID = revealBlockID
+        // The last view and filter of THIS session (18d batch 2's own line;
+        // the `mergeJoinMemory` precedent — one AppSession per launch, so a
+        // fresh launch opens on Leaving · all and parallel test worlds stay
+        // independent).
+        self.view = session.trayViewMemory.view
+        self.kind = session.trayViewMemory.kind
+    }
+
+    // MARK: - The view and the filter (18d batch 2 — her ruling U-9)
+
+    /// The TOP-LEVEL choice, and the filter under it. Both live on the model
+    /// rather than in the view's `@State` for the reason the fold they
+    /// replace did not have to care about: they decide what the panel
+    /// RENDERS, they are remembered for the session, and the reveal moves
+    /// them — three things a pin must be able to drive without a window.
+    private(set) var view: TrayView
+    private(set) var kind: TrayKind
+
+    func select(view: TrayView) {
+        self.view = view
+        remember()
+    }
+
+    func select(kind: TrayKind) {
+        self.kind = kind
+        remember()
+    }
+
+    private func remember() {
+        session.trayViewMemory = TrayViewMemory(view: view, kind: kind)
+    }
+
+    /// The four populations as ONE value for the pure rule (`TrayFilter`).
+    var contents: TrayContents {
+        TrayContents(
+            deleted: deleted, stranded: stranded, takes: takes, archived: archived)
+    }
+
+    /// What the current cell renders, in render order.
+    var rows: TrayRows { TrayFilter.rows(contents, view: view, kind: kind) }
+
+    /// The segmented choice's count for a view — everything it holds,
+    /// whatever the filter says.
+    func count(of view: TrayView) -> Int { TrayFilter.count(contents, view: view) }
+
+    /// A chip's count, following the CURRENT view (U-9's *"under each one"*).
+    func count(of kind: TrayKind) -> Int {
+        TrayFilter.count(contents, view: view, kind: kind)
     }
 
     var isEmpty: Bool {
@@ -427,6 +478,15 @@ final class TrayViewModel {
             // said nothing. The third state says where it lives instead.
             revealKeptInLineage = inOriginals && !inStranded
                 && !inDeleted && !inArchived
+            // 18d batch 2: a mark under the OTHER tab is a mark she cannot
+            // see. The panel opens on the view that holds the revealed row,
+            // unfiltered — latched at arrival like the two sentences above,
+            // and for the same reason (a later act of hers must never move
+            // the tab under her hand).
+            if let holder = TrayFilter.viewHolding(revealBlockID, in: contents) {
+                select(view: holder)
+                select(kind: .all)
+            }
         }
         loaded = true
     }
@@ -667,10 +727,10 @@ struct TrayPanel: View {
     /// column the host puts away, so the host hands down the closing act.
     var onClose: (() -> Void)?
     @State private var model: TrayViewModel
-    /// The takes fold — **collapsed by default**, her G5 words (*"albeit
-    /// maybe not shown by default"*). Session UI state like every other
-    /// expansion in the app; a fold is not document semantics.
-    @State private var takesShown = false
+    // (The takes FOLD retired at 18d batch 2 — her ruling U-9. Its `@State`
+    //  went with it: the view and the filter that replace it live on the
+    //  MODEL, remembered for the session, because the reveal moves them and
+    //  a pin must be able to drive them without a window.)
     @Environment(\.dismiss) private var dismiss
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
@@ -692,20 +752,29 @@ struct TrayPanel: View {
         themeStore?.tokens(for: scheme) ?? .fallback(for: scheme)
     }
 
-    /// **The Act 10 item 1 rebuild.** Her screenshot showed the SECOND
-    /// section's header clipped to a sliver under a divider — the traced
-    /// class is the `List` section header itself: a plain macOS List
-    /// measures headers at a fixed height, and this panel's Leaving header
-    /// carries a title AND a multi-line explainer. The rebuild retires the
-    /// List for a ScrollView of calm cards (the W8-2 mockup grammar), where
-    /// headers are ordinary stacked views that cannot be clipped by a
-    /// header-height measurement — the mechanism dies by construction
-    /// (`TrayPanelShapeTests` pins the List's absence and the composition).
+    /// **The Act 10 item 1 rebuild, REORGANIZED at 18d batch 2.**
     ///
-    /// Ordering (her "badly ordered / organized", judged in place under the
-    /// granted latitude): **LEAVING first** — what is counting down is what
-    /// she opened the tray for — then the takes fold, then ARCHIVED (kept
-    /// forever, no urgency, reads calmly below).
+    /// Act 10 retired the `List` for a ScrollView of calm cards (her
+    /// screenshot: the Leaving header clipped to a sliver, the traced class
+    /// being a plain List's fixed header-height measurement). That grammar
+    /// stays. What her ruling U-9 changes is the CHOOSING above it:
+    ///
+    ///   *"you should be able to select if you want to see leaving, if you
+    ///   want to see blocks or takes under leaving, and separetly if you want
+    ///   to see archived (archived v. leaving should be top level, with block
+    ///   or takes as a filter under each one"*
+    ///
+    /// So the two stacked sections become ONE segmented choice carrying its
+    /// count, with ONE filter row under it whose counts follow the view, and
+    /// one explainer line per view. **The "▸ N deleted takes" fold retires:**
+    /// the filter is the fold, and it is a fold that cannot be missed — her
+    /// complaint was a disclosure hiding under the block cards.
+    ///
+    /// Nothing about what the tray HOLDS moved: the three leaving
+    /// populations and the archived one are the same rows from the same
+    /// queries, and Put back / Delete Now are where they were (the 13j
+    /// doctrine — a purge door lives in a trash surface, never in the
+    /// writing flow).
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
@@ -747,70 +816,12 @@ struct TrayPanel: View {
                     .lineLimit(nil)
                     .fixedSize(horizontal: false, vertical: true)
             }
+            viewChoice
+            filterRow
+            explainerLine
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 6) {
-                    // ── LEAVING (her G5 ruling) ────────────────────────────
-                    // The complete per-note pre-purge audit: blocks, takes,
-                    // and the originals that have MOVED onto a family's
-                    // clock.
-                    CalmSectionHeader(
-                        tokens: tokens, title: TrayPath.leavingSection,
-                        detail: RecoveryCopy.trayLeavingExplainer(home))
-                    if model.nothingIsLeaving {
-                        empty(RecoveryCopy.trayNothingLeaving(home))
-                    }
-                    ForEach(model.deleted, id: \.blockID) { item in
-                        row(
-                            blockID: item.blockID, text: item.text,
-                            stamp: item.deletedAt, when: "deleted",
-                            clock: TrashWindow.daysLeft(item.deletedAt, now: session.now),
-                            help: "Puts the block back where it was in this note "
-                                + "(a released original that was deleted later has "
-                                + "no old place left, and lands at the end)"
-                        ) {
-                            await model.putBackDeleted(item.blockID)
-                        }
-                    }
-                    // The originals that MOVED here (round 8b): their whole
-                    // family is in the Trash, so they ride its clock.
-                    ForEach(model.stranded, id: \.blockID) { item in
-                        row(
-                            blockID: item.blockID, text: item.text,
-                            stamp: model.strandedClock(item.blockID), when: "goes",
-                            clock: model.strandedClock(item.blockID).flatMap {
-                                TrashWindow.daysLeft($0, now: session.now)
-                            },
-                            note: TrayPath.goesWithItsFamily,
-                            help: "Put back the blocks it became — or put the "
-                                + "original itself back into this note — and it "
-                                + "stops counting down"
-                        ) {
-                            await model.putBackOriginal(item.blockID)
-                        }
-                    }
-                    if model.deletedTruncated { truncation("deleted") }
-                    if !model.takes.isEmpty { takesDisclosure }
-                    // ── ARCHIVED (lifecycle row B1) ────────────────────────
-                    // Kept, forever, no clock, under its own header: her B2
-                    // ruling split archive from the Trash one level up for
-                    // exactly this reason, and the pair blurs the same way
-                    // inside a note.
-                    CalmSectionHeader(tokens: tokens, title: TrayPath.archivedSection)
-                        .padding(.top, 8)
-                    if model.archived.isEmpty {
-                        empty(RecoveryCopy.trayNothingArchived(home))
-                    }
-                    ForEach(model.archived, id: \.blockID) { item in
-                        row(
-                            blockID: item.blockID, text: item.text,
-                            stamp: item.deletedAt, when: "archived", clock: nil,
-                            forever: true,
-                            help: "Kept out of the note, with no clock — Put back "
-                                + "returns it where it stood"
-                        ) {
-                            await model.putBackArchived(item.blockID)
-                        }
-                    }
+                    cellRows
                 }
                 .padding(.bottom, 8)
             }
@@ -826,49 +837,177 @@ struct TrayPanel: View {
         .trayPurgeConfirmDialog(model)
     }
 
+    /// **THE TOP-LEVEL CHOICE** (U-9), in the mockup's `.seg` grammar: two
+    /// words in one bordered group, the chosen one washed and accented, each
+    /// carrying its count — including a zero, because *"Archived 0"* answers
+    /// the question before she clicks it. Full-width halves rather than the
+    /// mockup's inline pill: the panel is an inspector column at 280 pt, and
+    /// a generous target is C-7's standing rule.
+    private var viewChoice: some View {
+        HStack(spacing: 0) {
+            ForEach(TrayView.allCases) { choice in
+                let on = model.view == choice
+                Button { model.select(view: choice) } label: {
+                    HStack(spacing: 5) {
+                        Text(tokens.chromeLabel(TrayFilterFace.tab(choice)))
+                            .font(tokens.small)
+                            .fontWeight(on ? .semibold : .regular)
+                            .foregroundStyle(on ? tokens.accent : tokens.muted)
+                            .lineLimit(1)
+                        Text("\(model.count(of: choice))")
+                            .font(tokens.small)
+                            .foregroundStyle(on ? tokens.accent : tokens.faint)
+                            .lineLimit(1)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 5)
+                    .background(on ? tokens.wash : tokens.card)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .help(TrayFilterFace.explainer(choice, home: home))
+                if choice != TrayView.allCases.last {
+                    Rectangle().fill(tokens.line).frame(width: 1)
+                }
+            }
+        }
+        .fixedSize(horizontal: false, vertical: true)
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .overlay(RoundedRectangle(cornerRadius: 8).stroke(tokens.line, lineWidth: 1))
+    }
+
+    /// **THE FILTER UNDER BOTH VIEWS** — one row, shared, so the control
+    /// never changes shape under her hand (figure D). The counts follow the
+    /// view; `all` carries none, because the segment above it does.
+    private var filterRow: some View {
+        HStack(spacing: 6) {
+            ForEach(TrayKind.allCases) { kind in
+                VoicedChip(
+                    tokens: tokens,
+                    text: TrayFilterFace.chip(kind, count: model.count(of: kind)),
+                    on: model.kind == kind) { model.select(kind: kind) }
+                    .help(chipHelp(kind))
+            }
+            Spacer(minLength: 0)
+        }
+    }
+
+    /// A chip's tooltip. The takes chip inherits the retired fold's own
+    /// sentence — the one thing that surface said which nothing else does.
+    private func chipHelp(_ kind: TrayKind) -> String {
+        switch kind {
+        case .all:
+            return "Everything this view holds"
+        case .blocks:
+            return model.view == .leaving
+                ? "Blocks this note deleted, and originals riding a family's countdown"
+                : "Blocks archived out of this note — kept, with no clock"
+        case .takes:
+            return "Takes deleted on their own \u{2014} each on its own "
+                + "\(TrashWindow.days) days. They never show in the Library's "
+                + "Trash: a take alone is hard to place, so this is where they "
+                + "are audited."
+        }
+    }
+
+    /// The one line under the filter: what THIS view is, and what its verbs
+    /// do. Row 89's rule — a meaning line wraps whole, never truncates.
+    private var explainerLine: some View {
+        Text(tokens.chromeLabel(TrayFilterFace.explainer(model.view, home: home)))
+            .font(tokens.small)
+            .foregroundStyle(tokens.faint)
+            .lineLimit(nil)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+
+    /// The chosen cell, in render order — blocks, the originals that moved
+    /// onto a family's clock, then takes. Each card names its kind, because
+    /// under a filter a row can no longer borrow its meaning from a header.
+    @ViewBuilder private var cellRows: some View {
+        let rows = model.rows
+        if rows.isEmpty {
+            empty(TrayFilterFace.nothing(
+                view: model.view, kind: model.kind, home: home))
+        }
+        ForEach(rows.blocks, id: \.blockID) { item in
+            if model.view == .leaving {
+                row(
+                    kind: TrayFilterFace.blockKind,
+                    blockID: item.blockID, text: item.text,
+                    stamp: item.deletedAt, when: "deleted",
+                    clock: TrashWindow.daysLeft(item.deletedAt, now: session.now),
+                    help: "Puts the block back where it was in this note "
+                        + "(a released original that was deleted later has "
+                        + "no old place left, and lands at the end)"
+                ) {
+                    await model.putBackDeleted(item.blockID)
+                }
+            } else {
+                // ── ARCHIVED (lifecycle row B1) ────────────────────────
+                // Kept, forever, no clock: her B2 ruling split archive from
+                // the Trash one level up, and U-9 makes that split the
+                // panel's own top-level choice.
+                row(
+                    kind: TrayFilterFace.blockKind,
+                    blockID: item.blockID, text: item.text,
+                    stamp: item.deletedAt, when: "archived", clock: nil,
+                    forever: true,
+                    help: "Kept out of the note, with no clock — Put back "
+                        + "returns it where it stood"
+                ) {
+                    await model.putBackArchived(item.blockID)
+                }
+            }
+        }
+        // The originals that MOVED here (round 8b): their whole family is in
+        // the Trash, so they ride its clock — and they are BLOCKS, so they
+        // filter under blocks (figure D's caption), their stranded-clock
+        // line unchanged.
+        ForEach(rows.stranded, id: \.blockID) { item in
+            row(
+                kind: TrayFilterFace.originalKind,
+                blockID: item.blockID, text: item.text,
+                stamp: model.strandedClock(item.blockID), when: "goes",
+                clock: model.strandedClock(item.blockID).flatMap {
+                    TrashWindow.daysLeft($0, now: session.now)
+                },
+                note: TrayPath.goesWithItsFamily,
+                help: "Put back the blocks it became — or put the "
+                    + "original itself back into this note — and it "
+                    + "stops counting down"
+            ) {
+                await model.putBackOriginal(item.blockID)
+            }
+        }
+        if model.view == .leaving, !rows.blocks.isEmpty, model.deletedTruncated {
+            truncation("deleted")
+        }
+        ForEach(rows.takes) { take in
+            takeRow(take)
+        }
+        if !rows.takes.isEmpty, model.takesTruncated { truncation("deleted") }
+    }
+
     private func close() {
         if let onClose { onClose() } else { dismiss() }
     }
 
-    /// **The takes fold** (her G5 ruling): collapsed at rest, complete when
-    /// opened, and carrying its count either way. Each row names its BLOCK
-    /// (A3's discipline — the note is the panel, so the row owes the block),
-    /// and carries the two doors her fourth sitting placed here: **Put back**
-    /// and **Delete Now**.
-    @ViewBuilder private var takesDisclosure: some View {
-        // Row 64 (the correction round): the WHOLE line is the toggle. The
-        // DisclosureGroup it replaces toggled only on its chevron — a click
-        // on the label did nothing (C-7's generous targets; walked).
-        Button {
-            withAnimation(.easeInOut(duration: 0.15)) { takesShown.toggle() }
-        } label: {
-            HStack(spacing: 6) {
-                Text(tokens.chromeLabel(takesShown ? "\u{25BE}" : "\u{25B8}"))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                Text(tokens.chromeLabel(RecoveryCopy.trayTakesDisclosure(model.takes.count)))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
-                    .lineLimit(1)
-                Spacer(minLength: 0)
-            }
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .help("Takes deleted on their own — each on its own "
-            + "\(TrashWindow.days) days. They never show in the Library's Trash: "
-            + "a take alone is hard to place, so this is where they are audited.")
-        if takesShown {
-            ForEach(model.takes) { take in
-                takeRow(take)
-            }
-            if model.takesTruncated { truncation("deleted") }
-        }
-    }
+    // (`takesDisclosure` — the *"▸ N deleted takes"* full-line toggle
+    //  (Act 10's row 64, itself a `DisclosureGroup` before that) — RETIRED
+    //  at 18d batch 2. Her ruling U-9 makes the takes a FILTER: the count it
+    //  carried is the `takes` chip's, visible without opening anything, and
+    //  the rows it hid are one click away in a control that names itself.
+    //  The help it carried — *"they never show in the Library's Trash: a
+    //  take alone is hard to place, so this is where they are audited"* —
+    //  rides the chip's own tooltip below.)
 
     private func takeRow(_ take: Queries.TrayTake) -> some View {
         CalmCard(tokens: tokens) {
             VStack(alignment: .leading, spacing: 4) {
+                // The kind label (figure D): what this row IS, and — her A3
+                // discipline, moved one line up out of the quiet lead — the
+                // block it came out of.
+                kindLabel(TrayFilterFace.takeKind(take))
                 Text(TrayTakeFace.label(take))
                     .font(tokens.body)
                     .foregroundStyle(take.text.isEmpty ? tokens.muted : tokens.ink)
@@ -919,6 +1058,15 @@ struct TrayPanel: View {
         }
     }
 
+    /// The card's kind line — the quietest register in the panel, above the
+    /// preview (the mockup's `.kind`).
+    private func kindLabel(_ text: String) -> some View {
+        Text(tokens.chromeLabel(text))
+            .font(tokens.small)
+            .foregroundStyle(tokens.faint)
+            .lineLimit(1)
+    }
+
     private func empty(_ line: String) -> some View {
         Text(tokens.chromeLabel(line))
             .font(tokens.small)
@@ -951,6 +1099,7 @@ struct TrayPanel: View {
     /// full-width line (up to two), and the stamp, the clock and the label
     /// share the quiet line under it with the verb. Nothing competes.
     private func row(
+        kind: String,
         blockID: String, text: String?, stamp: String?, when: String,
         clock: Int?, forever: Bool = false, note: String? = nil, help: String,
         putBack: @escaping () async -> Void
@@ -959,6 +1108,10 @@ struct TrayPanel: View {
         // list still answers "which one" (`RecoveryView`'s W10b idiom).
         CalmCard(tokens: tokens, selected: model.revealBlockID == blockID) {
             VStack(alignment: .leading, spacing: 4) {
+                // 18d batch 2 (figure D): every card names its kind. Under a
+                // filter a row cannot borrow its meaning from the header
+                // above it — and there is no header above it any more.
+                kindLabel(kind)
                 Text(TrayRowPreview.line(text))
                     .font(tokens.body)
                     .foregroundStyle(text?.isEmpty == false ? tokens.ink : tokens.muted)
@@ -1049,21 +1202,21 @@ nonisolated enum TrayTakeFace {
         return line == TrayRowPreview.emptyBlock ? RecoveryCopy.emptyTakeLabel : line
     }
 
-    /// Which block it came out of, when it went, and how long it has. The
-    /// block's handle runs through `Queries.tocHandle` — the ONE block-naming
-    /// rule (its explicit name, else its first sentence, derived at read time
-    /// and never stored) — rather than a second rule invented here.
+    /// When it went — and, since 18d batch 2, ONLY that.
     ///
-    /// **Row 63: the same two-slot split as `TrayRowFace`** — the walk found
-    /// this row's stamp AND clock both gone behind the block handle. The
-    /// stamp is date-only; the clock rides its own uncompressible slot.
+    /// **Which block it came out of moved UP into the card's kind label**
+    /// (`TrayFilterFace.takeKind`, figure D's *"take · of block 3"*). Her A3
+    /// discipline is unchanged and unweakened — a take row still names its
+    /// block, through the same `Queries.tocHandle`, the ONE block-naming
+    /// rule; it says so on the line that says what the row IS, which is
+    /// where the mockup puts it and where a filtered list needs it.
+    ///
+    /// **Row 63's split survives**: the stamp is date-only and truncatable,
+    /// the clock rides its own uncompressible slot beside it.
     static func lead(_ take: Queries.TrayTake) -> [String] {
-        var pieces = [RecoveryCopy.trayTakeInBlock(
-            Queries.tocHandle(name: take.blockName, text: take.blockText))]
-        if let stamp = TrayRowPreview.stampTextDateOnly(take.deletedAt, verb: "deleted") {
-            pieces.append(stamp)
-        }
-        return pieces
+        guard let stamp = TrayRowPreview.stampTextDateOnly(
+            take.deletedAt, verb: "deleted") else { return [] }
+        return [stamp]
     }
 
     static func clockSlot(_ take: Queries.TrayTake, now: Date) -> String? {

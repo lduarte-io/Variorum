@@ -225,8 +225,11 @@ struct TrashSurfaceTests {
         // header until her G5 ruling split it — the CLAIM is unchanged and
         // is now checked at its strongest in
         // `NoteTrayTests.theTraysSectionsNameOnlyStatesTheProductCanProduce`.)
-        #expect(TrayPath.leavingSection.contains("\(TrashWindow.days)-day"))
-        #expect(TrayPath.archivedSection.contains("no clock"))
+        // (18d batch 2: the two names became a segmented CHOICE, and each
+        //  name's second half moved into that view's explainer line — the
+        //  claim reads there now, exactly as before.)
+        #expect(TrayPath.leavingExplainer.contains("\(TrashWindow.days)-day"))
+        #expect(TrayPath.archivedExplainer.contains("no clock"))
         // The Trash surface names the window in words, so a countdown is
         // never a bare threat.
         #expect(RecoveryPath.windowNote.contains("30 days"))

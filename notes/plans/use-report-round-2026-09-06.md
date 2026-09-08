@@ -7650,4 +7650,75 @@ take and on any block; a deleted block's moments leave the note's stamp with the
 
 ### R-11 · RECORD (the implementer writes here from its first commit)
 
-*(empty until the implementer's first commit)*
+**WHAT I HAVE NOT DONE (the record's first line, kept honest as the batch runs):** nothing outside the
+tray panel — no `Sources/VariorumCore/`, no `Sync/`, no schema, no change to WHAT the tray holds (the
+three leaving populations and the archived population are the same rows from the same queries, and no
+recovery/purge op was touched). The walk is PENDING at this line.
+
+**LIVE STATUS**
+
+| piece | state |
+|---|---|
+| the pure brain (`TrayFilter`/`TrayFilterFace`/`TrayViewMemory`) + the copy + the panel rebuilt + the migrated pins | DONE (this commit) |
+| the red-on-old probe of the fold pin, in a scratch worktree at `30f99fd0` | NOT-STARTED |
+| the walk on the dev-store Debug build, both voices, 8 captures | NOT-STARTED |
+| QUESTIONS #100 (the archived explainer's departure from figure D's caption) | NOT-STARTED |
+| the closing runs (the touched Mac suites + the ten `Tutorial*Tests` spine types, ONE run) | NOT-STARTED |
+
+**What landed in this commit (the surface, whole):**
+
+- **`App/Variorum/Variorum/Features/Tray/TrayFilter.swift` (NEW, pure).** `TrayView` (`leaving` ·
+  `archived`) · `TrayKind` (`all` · `blocks` · `takes`) · `TrayContents` (the four populations as one
+  value) · `TrayRows` (what a cell renders) · `TrayFilter` (the six-cell matrix, the counts, the
+  reveal's landing view) · `TrayViewMemory` (the session's last view + filter) · `TrayFilterFace` (the
+  enums mapped onto `RecoveryCopy`'s words — the words stay in the one copy home, which both apps
+  compile, so the Mac-only enums cannot be dragged into it). **The counts are DEFINED as the rows they
+  render** (`count(_:view:kind:) = rows(...).total`), so a chip can never advertise a size the list
+  does not hold — the fold-that-hid-its-own-size defect, closed by construction.
+- **`App/Variorum/Shared/RecoveryCopy.swift`.** `trayLeavingTab` = "Leaving" · `trayArchivedTab` =
+  "Archived" · the three filter names + `trayFilterChip` · the kind labels (`block` · `original` ·
+  `take · in ‹handle›`, the handle through `Queries.tocHandle`, the ONE block-naming rule) ·
+  `trayLeavingExplainer` SHRUNK to one line · `trayArchivedExplainer` NEW · `trayNothingArchived`
+  shortened (its second sentence is the explainer's now) · four filtered empty lines. **RETIRED:**
+  `trayArchivedSection` · `trayLeavingSection` · `trayTakesDisclosure` (dead code removed, not parked
+  — the batch-1 precedent), each with a comment saying where its words went.
+- **`App/Variorum/Variorum/Features/Tray/TrayPanel.swift`.** The two stacked `CalmSectionHeader`
+  sections and the `▸ N deleted takes` fold are gone; the panel is header → status → **segmented
+  choice with counts** → **filter chips whose counts follow the view** → **one explainer line** →
+  the chosen cell's cards, each wearing its kind. `view`/`kind` live on the MODEL (not `@State`):
+  they decide what renders, they are remembered for the session, and the reveal moves them — three
+  things a pin must drive without a window. Put back / Delete Now, their receipts, their refusals,
+  the reveal's mark, the truncation lines and the `minWidth: 280` floor are byte-unchanged.
+- **`App/Variorum/Shared/AppSession.swift`.** `trayViewMemory`, in the `#if os(macOS)` block beside
+  `mergeJoinMemory` — its exact precedent and its exact reason (one session per launch; parallel test
+  worlds independent; no global).
+- **`App/Variorum/Variorum/Features/Tray/BlockHistoryPane.swift`.** One copy-truth line: the deleted
+  region's purge road said *"open This Note's Tray and use its leaving section"* — there is no leaving
+  SECTION now, so it says *"choose Leaving ▸ takes"*, which is also the exact road.
+
+**The pins (all green, `Test run with 58 tests in 6 suites passed`):**
+
+- **NEW `VariorumTests/TrayFilterTests` (6 tests)** — `theFilterChoosesTheSameRowsTheTrayHasAlwaysHeld`
+  (the whole matrix, including the empty-contents sweep and the archived/takes cell that is empty by
+  construction) · `everyCountIsExactlyWhatItsCellRenders` (count ≡ rows, every cell; a view's count is
+  its two kind cells' sum) · `theControlSaysWhatFigureDSays` (both tabs; the chip labels with and
+  without counts; both explainers, each in the home's own noun; six DISTINCT empty lines; the kind
+  labels) · `theRevealNamesTheViewThatHoldsIt` · **`theFoldIsGoneAndTheTakesRenderWithTheBlocks`**
+  (over a real seeded store: the deleted take renders beside the deleted block with nothing to open,
+  each filter narrows, and the archived block is under the other tab) ·
+  `theLastViewAndFilterAreRememberedForTheSession`.
+- **Migrated in place, annotated (the batch-2/3 precedent), claims intact:**
+  `NoteTrayTests.theTraysSectionsNameOnlyStatesTheProductCanProduce` (the names' second halves moved
+  into the explainers; the population list moved to the FILTER — and it gained an arm: the archived
+  view may not name takes) · `TrashSurfaceTests.theCountdownWordsAreTheWindowsOwnAnswer` (two lines) ·
+  `TrayPanelShapeTests.everySectionRendersUnclippedComposition` (the List's absence and the
+  composition survive; the header strings are values now, pinned in `TrayFilterTests`; it gained the
+  archived-under-the-other-tab arm) · `TrayPanelMoveTests` (the take's block moved to the kind label —
+  `TrayTakeFace.lead` is the stamp alone; the fold's label assertions retired; the archived explainer
+  joined the post/pool pairs) · `RecoveryExplainerTests` RETARGETED to `OriginPeekCopy.explainer`
+  (the tray's leaving explainer shrank by ruling and can no longer clear that pin's own
+  `reference > oneLine * 3.5` guard; the rule is the family's, not one string's).
+- **Riding UNMODIFIED, as the brief requires:** every Put back and Delete Now pin —
+  `NoteTrayTests`' four put-back arms and the sealed diagnosis, `TrayPanelMoveTests.theLeavingSectionPutsATakeBack`
+  and `…DeleteNowConfirmsThenPurgesForGood`, `thePurgeDoorRendersOnTrashSurfacesAndNowhereElse`,
+  the reveal trio.

@@ -64,18 +64,27 @@ struct TrayPanelShapeTests {
 
             let shown = SurfaceComposition.text(of: panel.body)
 
-            // Both section headers AND the Leaving explainer are in the tree.
-            #expect(SurfaceComposition.carries(TrayPath.leavingSection, in: shown))
-            #expect(SurfaceComposition.carries(TrayPath.archivedSection, in: shown))
-            #expect(SurfaceComposition.carries(
-                RecoveryCopy.trayLeavingExplainer(.post), in: shown))
+            // (18d batch 2: the two section HEADERS became a segmented
+            //  choice whose words live inside a `ForEach` closure, which
+            //  `dump` does not evaluate — the choice's own words, counts and
+            //  explainers are pinned as values in `TrayFilterTests`. What
+            //  this composition pin holds is what it always held: the panel
+            //  lays out, and every row kind reaches the tree.)
 
-            // Every row kind renders: a deleted block, an archived block,
-            // the takes fold with its count.
+            // The leaving view's rows render — the deleted block AND the
+            // deleted take, with NO fold to open (the fold's own pin is
+            // `TrayFilterTests.theFoldIsGoneAndTheTakesRenderWithTheBlocks`).
             #expect(SurfaceComposition.carries("A deleted block's preview", in: shown))
-            #expect(SurfaceComposition.carries("An archived block's preview", in: shown))
-            #expect(SurfaceComposition.carries(
-                RecoveryCopy.trayTakesDisclosure(1), in: shown))
+            #expect(SurfaceComposition.carries("The block that stays", in: shown),
+                    "the deleted take's own text — a branch of the surviving block")
+
+            // The archived block lives under the OTHER view now.
+            model.select(view: .archived)
+            let archived = SurfaceComposition.text(of: panel.body)
+            #expect(SurfaceComposition.carries("An archived block's preview", in: archived))
+            #expect(!SurfaceComposition.carries("A deleted block's preview", in: archived),
+                    "…and only it: the two views never stack in one scroll again")
+            model.select(view: .leaving)
 
             // RED ON OLD: the panel was a `List`, whose fixed header-height
             // measurement is the traced clipping mechanism. The rebuild must
@@ -83,12 +92,14 @@ struct TrayPanelShapeTests {
             #expect(!shown.contains("List<"), "the tray must not be a List again")
             #expect(shown.contains("ScrollView"), "the calm-card scroll rebuild")
 
-            // Row 64 (the correction round): the takes fold's WHOLE line is
-            // the toggle — a DisclosureGroup toggles only on its chevron,
-            // and the walk clicked its label to no effect. RED ON OLD: the
-            // fold was a DisclosureGroup.
+            // Row 64 (the correction round) GRADUATED at 18d batch 2: the
+            // fold is GONE, so neither of its two shipped shapes may return —
+            // not the `DisclosureGroup` Act 10 retired, and not the full-line
+            // Button that replaced it. Its label is the claim's anchor.
             #expect(!shown.contains("DisclosureGroup"),
-                    "the takes fold is a full-line Button, not a chevron-only DisclosureGroup")
+                    "the takes fold is retired, chevron and all")
+            #expect(!SurfaceComposition.carries("1 deleted take", in: shown),
+                    "the fold's label is gone — the count is the chip's now")
         }
     }
 }
