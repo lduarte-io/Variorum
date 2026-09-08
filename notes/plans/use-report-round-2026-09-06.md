@@ -6514,3 +6514,53 @@ walk · 1 correction recorded to the ruled fix's sufficiency, with the mechanism
 ruled `opener` line is in, and the clear also sits in `adopt` with `open` reordered around it. If the
 reviewer wants the narrow form instead, removing `adopt`'s `router.park(nil)` restores it exactly and
 turns the mount pin red by the four issues above; that is the disagreement, made cheap to settle.
+
+#### 17o c/d/e round 1 — fixes (batch d)
+
+*(the batch-d implementer, resumed; THREE findings — MINOR-2 · MINOR-3 · NIT-2, all CONFIRMED by the
+arbitration and all fixed. None was a bug-class finding, so none was owed a pin, and none is claimed:
+the two doc/dead-code fixes carry their mechanism, and the core one names the pins whose premise it
+was checked against.)*
+
+**MINOR-2 (`SidebarLayout.fixedChromeHeight`'s doc teaches the retired arithmetic) — CONFIRMED and
+FIXED (`89c679ba`).** The paragraph spelled the sum out — *"each a 22-pt header and a 19-pt separator
+… 14 + 3 × 22 + 3 × 19 + 96 … = 233"* — while row 13 moved `groupHeaderHeight` 22 → 30 and the value
+to 257. The reviewer's framing is the one I took: row 13's whole stated point is that the header's
+drawn height and the height the column budgets *"can never drift apart — the drift would be silent"*,
+and a doc that re-types the sum is that same silent drift one layer up. **Rewritten from the constants
+it names, with the reason recorded in place** so the next reader does not re-type the number; the test
+beside it already computes from the constants (row 13 rewrote it off a copied 41). Doc-class: no pin,
+and none owed. `ShellChromeTests` + `SidebarLayoutTests` **11/2**.
+
+**MINOR-3 (`mastheadWidth` is write-only state) — CONFIRMED and FIXED (`5e761bef`).** Verified the
+reviewer's grep myself before touching anything: the identifier appeared **exactly twice** in the whole
+app — the `@State` (`:167`) and the `onGeometryChange` that wrote it (`:322`) — because row 11 retired
+`titleInsets`' 240-pt line floor, its only reader, along with the centering that floor existed for. Its
+rewritten doc claimed two readers it does not have; both re-checked: the DEBUG oracle's reach check
+reads the masthead's own half-width (`MastheadGeometry.contentMidX`, written further down the same
+chain) and the title BAND's frame (written in `PostTitleLabel`), and row two computes from its own
+layout. **The state and its geometry reader are deleted**, and a comment at the site records why — with
+the reviewer's own sharpening of the cost kept, that row 9's newly reachable seam grip makes a resize
+drag run that invalidation continuously. No pin (dead state; the mechanism is the grep).
+`MastheadLayoutTests` + `MastheadTagDoorTests` **14/2**.
+
+**NIT-2 (`anchorBlock` re-types the rule `firstLivePlacedBlock` says it shares) — CONFIRMED and FIXED
+(`e691dc56`, a CORE commit alone).** The helper is consumed. Its liveness JOIN is the more correct of
+the two copies and its own sentence has promised since 13l that it IS this rule made shared: a live
+placement left over a TOMBSTONED block is not a place to anchor an edge — one there would render
+nothing. **The behavioural delta, stated rather than waved at:** where that leaves a post with no live
+placed block at all, row 17's mint arm gives it one, so the change can only turn a would-be dead anchor
+into a live empty one — which is what U-19 (1) asks for anyway. The helper's own doc is corrected too
+(it still named the pre-batch `firstBlock`) and now records that it is actually consumed.
+
+**No pin's premise moved, checked rather than assumed:** the row-17 pins assert the minted block's
+shape, the both-sides-blockless case, the seal gate and the touch-without-churn stamps — none concerns
+a tombstoned block under a live placement — and `Queries.versionPeerPosts` is untouched. `swift test`
+**1496 / 162**.
+
+**Closing runs for this pass:** `swift test` → **1496 tests in 162 suites**, green. ONE `xcodebuild
+test` over **13 suite TYPES** (`ShellChromeTests` · `MastheadLayoutTests` · `NoteVersionsPaneTests` +
+the ten `Tutorial*Tests` spine types) → **`✔ Test run with 100 tests in 13 suites passed`**, zero
+`skipped:` lines. iOS **BUILD SUCCEEDED** (core moved), its one warning the pre-existing
+`appintentsmetadataprocessor` note. Zero `Sources/VariorumCore/Sync/`, zero schema; path-scoped adds,
+pushed per commit, no trailer lines.
