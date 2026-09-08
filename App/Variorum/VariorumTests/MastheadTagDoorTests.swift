@@ -106,8 +106,85 @@ struct MastheadTagDoorTests {
         }
     }
 
+    /// **Row 40 (her U-15): the field collapses when she clicks out of it —
+    /// once the note already carries a tag.** Her words: *"if there's a tag
+    /// already applied this new tag template shouldn't just sit here by
+    /// default, it should collapse after you click out of it."* The field
+    /// had no focus-loss road at all: only ⎋ and the ＃ closed it, so an
+    /// empty template sat in the masthead beside her tags until she went
+    /// back for it. The ＃ reopens it, unchanged.
+    ///
+    /// The untagged case is the deliberate other half: a note with NO tags
+    /// keeps the field open, because there is nothing yet for the template
+    /// to be sitting redundantly beside (her words are about the
+    /// already-tagged case, and this is the reading recorded in §5.3).
+    ///
+    /// RED ON OLD: `open` stays true in both halves.
+    @Test func theFieldCollapsesOnFocusLossOnceTheNoteCarriesATag() async throws {
+        for tagged in [true, false] {
+            let db = try AppDatabase.inMemory()
+            try await withDependencies {
+                $0.database = db
+                $0.uuid = .incrementing
+                $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            } operation: { @MainActor in
+                let session = AppSession(database: db)
+                let post = try session.operations.createPost(title: "tag me")
+                if tagged {
+                    let tag = try session.operations.createTag(name: "walked")
+                    _ = try session.operations.applyTag(tag.id, toPost: post.id)
+                }
+                let box = FieldBox()
+
+                let window = NSWindow(
+                    contentRect: NSRect(x: 80, y: 80, width: 520, height: 160),
+                    styleMask: [.titled], backing: .buffered, defer: false)
+                window.isReleasedWhenClosed = false
+                defer {
+                    window.orderOut(nil)
+                    window.close()
+                }
+                let hosting = NSHostingView(
+                    rootView: FocusHost(session: session, postID: post.id, box: box))
+                hosting.frame = NSRect(x: 0, y: 0, width: 520, height: 160)
+                window.contentView = hosting
+                window.makeKeyAndOrderFront(nil)
+                await settle(window, hosting, turns: 40)
+                #expect(textFieldExists(in: hosting), "the field is out to begin with")
+                #expect(box.open, "…and the cluster still says so")
+
+                // Click out: the field resigns, and the cluster decides.
+                window.makeFirstResponder(nil)
+                await settle(window, hosting, turns: 40)
+                #expect(box.open == !tagged,
+                        tagged
+                            ? "a tagged note collapses the empty template"
+                            : "an untagged note keeps its field on the first click")
+            }
+        }
+    }
+
     private func textFieldExists(in view: NSView) -> Bool {
         if view is NSTextField { return true }
         return view.subviews.contains { textFieldExists(in: $0) }
+    }
+}
+
+@MainActor
+@Observable
+private final class FieldBox {
+    var open = true
+}
+
+@MainActor
+private struct FocusHost: View {
+    let session: AppSession
+    let postID: String
+    @Bindable var box: FieldBox
+    var body: some View {
+        MastheadTagCluster(
+            session: session, postID: postID, tokens: .terminalLight, fieldOpen: $box.open)
+            .padding(20)
+            .frame(width: 520, height: 160, alignment: .topTrailing)
     }
 }

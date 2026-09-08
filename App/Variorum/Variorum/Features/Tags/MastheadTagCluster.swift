@@ -116,8 +116,26 @@ struct MastheadTagCluster: View {
                             tokens: tokens, allTags: allTags, applied: Set(tags.map(\.path)),
                             onApply: { path in
                                 apply(path)
-                                // The field stays out after an apply, so several
-                                // tags go on in one breath; ⎋ or ＃ closes it.
+                                // 17o batch d, ledger row 40 (her U-15): the
+                                // note now carries a tag, so the template does
+                                // not sit open beside it — the ＃ is right
+                                // there for the next one. (This retires "the
+                                // field stays out after an apply, so several
+                                // tags go on in one breath": it is exactly the
+                                // sitting-open she asked to stop, and one key
+                                // reopens it.)
+                                fieldOpen = false
+                            },
+                            onFocusLost: {
+                                // Her rule, verbatim in shape: *"if there's a
+                                // tag already applied this new tag template
+                                // shouldn't just sit here by default, it should
+                                // collapse after you click out of it."* A note
+                                // with NO tags keeps the field on the first
+                                // click — there is nothing yet for the template
+                                // to be sitting redundantly beside, and her
+                                // words are about the already-tagged case.
+                                if !tags.isEmpty { fieldOpen = false }
                             },
                             onDismiss: { fieldOpen = false })
                             .offset(x: -Self.fieldGap)
@@ -206,6 +224,9 @@ struct TagInlineField: View {
     let allTags: [Tag]
     let applied: Set<String>
     let onApply: (String) -> Void
+    /// Row 40: the field resigned the keyboard — the CLUSTER decides what
+    /// that means, because only it knows whether the note carries a tag.
+    let onFocusLost: () -> Void
     let onDismiss: () -> Void
 
     @State private var typed = ""
@@ -233,6 +254,12 @@ struct TagInlineField: View {
                     .stroke(focused ? tokens.accent.opacity(0.45) : tokens.line, lineWidth: 1))
             .onSubmit { apply(typed) }
             .onExitCommand { onDismiss() }
+            // Row 40: clicking out reports. A suggestion row is a plain
+            // `Button`, which does not take the keyboard on macOS, so this
+            // cannot fire under a click on the list below.
+            .onChange(of: focused) { _, nowFocused in
+                if !nowFocused { onFocusLost() }
+            }
             // The matches hang UNDER the field, over whatever sits below the
             // masthead (the masthead's z-order lifts them above the page).
             .overlay(alignment: .topLeading) {
