@@ -55,7 +55,7 @@ struct ShellSplit<Sidebar: View, Detail: View>: View {
     static var minimumWidth: CGFloat { 180 }
     static var idealWidth: Double { 210 }
     static var maximumWidth: CGFloat { 360 }
-    static var dividerWidth: CGFloat { 1 }
+    static var dividerWidth: CGFloat { SeamGrip.lineWidth }
     /// **The seam's grip** (17o batch d, ledger row 9). Her words: *"the
     /// hitbox for adjusting the size of the left bar … too small … sometimes
     /// the I looking pointer."* It was 9 pt, and — worse — it was an
@@ -64,7 +64,12 @@ struct ShellSplit<Sidebar: View, Detail: View>: View {
     /// after the divider, so it won the right half's hits and gave her the
     /// editor's I-beam there. The grip is a real layout participant now, at
     /// `.zIndex(1)` over the seam, and this wide.
-    static var gripWidth: CGFloat { 14 }
+    ///
+    /// **18d's ladder, MAJOR-2:** the shape below is no longer written here
+    /// — it is `SeamGrip` in `Core/Views`, which `SideColumn`'s three
+    /// boundaries consume too. This stays as the name the shell's own pins
+    /// and docs use, forwarding to the one constant.
+    static var gripWidth: CGFloat { SeamGrip.width }
 
     /// The width the column draws at — the remembered value, clamped, so a
     /// stale or hand-edited default can never draw an unusable column.
@@ -97,67 +102,48 @@ struct ShellSplit<Sidebar: View, Detail: View>: View {
         .animation(.easeInOut(duration: 0.2), value: sidebarShown)
     }
 
-    /// The one honest line, and the grip over it — the pane row's seam
-    /// grammar (`RootView.paneDivider`): a 1 pt `line` with a wide invisible
-    /// grip centred on it and the resize cursor inside it.
+    /// The one honest line, and the grip over it — **the shared seam**
+    /// (`SeamGrip`, `Core/Views`). Row 9's fix was written here in three
+    /// parts; 18d's ladder (MAJOR-2) moved the parts a component can own
+    /// into that component, because batch 3 gave three more boundaries a
+    /// draggable seam through `SideColumn` and every one of them was born
+    /// with the OLD 9-pt overlay. What stays here is the part only a host
+    /// can own: `.zIndex(1)` in the HStack below, and the arithmetic.
     ///
-    /// **Row 9's fix, in three parts.** (1) The grip is a ZStack SIBLING of
-    /// the line rather than an `.overlay` of it, so it is a real layout
-    /// participant with its own frame; (2) the whole divider carries
-    /// `.zIndex(1)` in the HStack, so the seam hit-tests above the detail —
-    /// without that the detail (the next sibling, drawn after) won every
-    /// point right of the line and she got the editor's I-beam over half the
-    /// grip she was aiming at; (3) the cursor comes from an AppKit cursor
-    /// rect and tracking area (`SeamCursor`) rather than `NSCursor.push()`,
-    /// because a pushed cursor loses to the text view's own cursor rects the
-    /// moment the mouse moves — which is exactly the I-beam she saw. Nothing
-    /// is pushed, so nothing can be left unbalanced.
+    /// The two measured cursor failures that led to `.pointerStyle` are
+    /// written out below, kept here because this is where they happened.
     private var divider: some View {
-        ZStack {
-            Rectangle()
-                .fill(tokens.line)
-                .frame(width: Self.dividerWidth)
-                // **Row 41** (17o batch d; her follow-up: *"the line that
-                // separates the left pane from the main editor is white for
-                // just a tiny bit at the top"*). MEASURED on the dev-store
-                // Debug build, not guessed: at the seam's x the window is
-                // pure white (255,255,255) for the first ~40 pt while the
-                // sidebar's ground (246,246,241) and the detail's
-                // (251,251,247) are both painted to y = 0. The two columns'
-                // BACKGROUNDS run under the window's toolbar band, as
-                // backgrounds do; the divider is a laid-out view inside the
-                // safe area, so it started below the band and the window's
-                // own white showed through the 1-pt gap between them. The
-                // LINE runs the height the grounds run; the GRIP deliberately
-                // does not — a resize drag under the toolbar band would be a
-                // new gesture, not a fix.
-                .ignoresSafeArea(.container, edges: .top)
-            Rectangle()
-                .fill(Color.clear)
-                .frame(width: Self.gripWidth)
-                .contentShape(Rectangle())
-                // Row 9's cursor half, THE THIRD ATTEMPT and the one that
-                // works — see `SeamGrip`'s retired doc below for the two
-                // that did not.
-                .pointerStyle(.columnResize)
-                .gesture(
-                    DragGesture(coordinateSpace: .named(Self.splitSpace))
-                        .onChanged { value in
-                            sidebarWidth = Double(Self.clamped(Double(value.location.x)))
-                        })
+        SeamGrip(
+            tokens: tokens,
+            space: Self.splitSpace,
+            onDrag: { location in
+                sidebarWidth = Double(Self.clamped(Double(location.x)))
+            },
+            help: "Drag to resize the sidebar",
+            // **Row 41** (17o batch d; her follow-up: *"the line that
+            // separates the left pane from the main editor is white for just
+            // a tiny bit at the top"*). MEASURED on the dev-store Debug
+            // build, not guessed: at the seam's x the window is pure white
+            // (255,255,255) for the first ~40 pt while the sidebar's ground
+            // (246,246,241) and the detail's (251,251,247) are both painted
+            // to y = 0. The two columns' BACKGROUNDS run under the window's
+            // toolbar band, as backgrounds do; the divider is a laid-out
+            // view inside the safe area, so it started below the band and
+            // the window's own white showed through the 1-pt gap between
+            // them. The LINE runs the height the grounds run; the GRIP
+            // deliberately does not — a resize drag under the toolbar band
+            // would be a new gesture, not a fix.
+            lineRunsUnderTheTopBand: true,
+            onLineFrame: { frame in
                 #if DEBUG
-                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
-                    ShellGeometry.dividerGripFrame = $0
-                }
+                ShellGeometry.dividerLineFrame = frame
                 #endif
-        }
-        .frame(width: Self.dividerWidth)
-        #if DEBUG
-        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: {
-            ShellGeometry.dividerLineFrame = $0
-        }
-        #endif
-        .help("Drag to resize the sidebar")
+            },
+            onGripFrame: { frame in
+                #if DEBUG
+                ShellGeometry.dividerGripFrame = frame
+                #endif
+            })
     }
 }
 

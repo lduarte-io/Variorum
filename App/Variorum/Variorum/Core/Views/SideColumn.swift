@@ -171,7 +171,14 @@ struct SideColumn<Content: View, Panel: View>: View {
         HStack(spacing: 0) {
             if edge == .leading, shown {
                 sidePanel
-                divider
+                // Row 9's part (2), and it is not optional on this edge: in
+                // an HStack later siblings sit above earlier ones, so
+                // without this the CONTENT (the prose column in Outline, the
+                // page in Read) wins every point right of the line and the
+                // half of the grip that overhangs into it is dead — the
+                // exact half that made a press "miss the grip" in 18d batch
+                // 3's own walk.
+                divider.zIndex(1)
             }
             // 18d batch 1's lesson, restated because the leading edge makes
             // it easy to lose: a host whose content claims a MEASURE by
@@ -182,7 +189,9 @@ struct SideColumn<Content: View, Panel: View>: View {
             content()
                 .frame(maxWidth: .infinity)
             if edge == .trailing, shown {
-                divider
+                // The mirror: here it is the PANEL that is drawn after the
+                // seam and would take the grip's right half.
+                divider.zIndex(1)
                 sidePanel
             }
         }
@@ -203,40 +212,46 @@ struct SideColumn<Content: View, Panel: View>: View {
                     .combined(with: .opacity))
     }
 
-    /// OUR boundary: a 1-pt line in the voice's `line`, drawn in every
-    /// window state, carrying the pane row's drag grammar.
+    /// OUR boundary: the shared seam (`SeamGrip`, `Core/Views`) — a 1-pt
+    /// line in the voice's `line`, drawn in every window state, with row
+    /// 9's 14-pt grip and its `.pointerStyle` cursor over it.
+    ///
+    /// **18d's ladder, MAJOR-2.** This used to be a 9-pt `Rectangle` in an
+    /// `.overlay` with `NSCursor.push()` on `.onHover` — ledger row 9's
+    /// exact shape, which 17o batch d had already fixed for the shell's seam
+    /// and which batch 3 then put on three more boundaries (the book
+    /// navigator, the book Index's chapter panel, the note Read contents
+    /// column) at the moment her U-13 asked for those boundaries to be
+    /// draggable. The fix is not copied here: the seam is ONE component both
+    /// hosts consume, so no future seam can be born with the old defect.
     private var divider: some View {
-        Rectangle()
-            .fill(tokens.line)
-            .frame(width: 1)
-            .overlay {
-                Rectangle()
-                    .fill(Color.clear)
-                    .frame(width: 9)
-                    .contentShape(Rectangle())
-                    .gesture(
-                        DragGesture(coordinateSpace: .named(widthKey))
-                            .onChanged { value in
-                                guard totalWidth > 0 else { return }
-                                // The one brain, either side (18d batch 3).
-                                remembered = Double(
-                                    edge == .leading
-                                        ? SideColumnLayout.draggedWidthFromLeading(
-                                            pointerX: value.location.x, total: totalWidth,
-                                            ideal: ideal, minimum: minimum, maximum: maximum)
-                                        : SideColumnLayout.draggedWidth(
-                                            pointerX: value.location.x, total: totalWidth,
-                                            ideal: ideal, minimum: minimum, maximum: maximum))
-                            })
-                    .onHover { inside in
-                        if inside { NSCursor.resizeLeftRight.push() } else { NSCursor.pop() }
-                    }
-            }
-            .onGeometryChange(for: CGRect.self) {
-                $0.frame(in: .named(widthKey))
-            } action: { frame in
+        SeamGrip(
+            tokens: tokens,
+            space: widthKey,
+            onDrag: { location in
+                guard totalWidth > 0 else { return }
+                // The one width brain, either side (18d batch 3).
+                remembered = Double(
+                    edge == .leading
+                        ? SideColumnLayout.draggedWidthFromLeading(
+                            pointerX: location.x, total: totalWidth,
+                            ideal: ideal, minimum: minimum, maximum: maximum)
+                        : SideColumnLayout.draggedWidth(
+                            pointerX: location.x, total: totalWidth,
+                            ideal: ideal, minimum: minimum, maximum: maximum))
+            },
+            help: "Drag to give the panel more or less room",
+            frameSpace: .named(widthKey),
+            onLineFrame: { frame in
                 onDividerFrame?(frame)
-            }
-            .help("Drag to give the panel more or less room")
+                #if DEBUG
+                SideColumnGeometry.lineFrames[widthKey] = frame
+                #endif
+            },
+            onGripFrame: { frame in
+                #if DEBUG
+                SideColumnGeometry.gripFrames[widthKey] = frame
+                #endif
+            })
     }
 }

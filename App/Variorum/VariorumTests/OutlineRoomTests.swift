@@ -345,6 +345,51 @@ struct OutlineRoomTests {
         }
     }
 
+    // MARK: - The seam itself (18d ladder, MAJOR-2)
+
+    /// **Ledger row 9, on the boundary her U-13 asked to be draggable.** The
+    /// shell's seam was fixed three ways at 17o batch d; `SideColumn` kept
+    /// the old 9-pt `.overlay` with `NSCursor.push()`, and batch 3 put that
+    /// on three more boundaries — the symptom showed up in its OWN walk ("a
+    /// drag whose press had missed the 9-pt grip, so nothing was ever
+    /// written"). The claim, in rectangles, is the shell pin's verbatim:
+    /// the grip is wide, centred on the line, and reaches into BOTH sides.
+    ///
+    /// RED on the pre-fix tree in the strongest way there is — nothing
+    /// reported a grip frame at all, because there was no grip with a frame
+    /// of its own (an `.overlay` is not a layout participant).
+    ///
+    /// The `.zIndex(1)` half cannot be asserted from a frame (a hit-test
+    /// order is not a rectangle) — it is walked instead, by a drag whose
+    /// press lands in the part of the grip that overhangs the CONTENT, which
+    /// is exactly the half that was dead.
+    @Test func theLeadingSeamsGripIsWideCentredAndReachesIntoBothSides() async throws {
+        try await withChapteredBook { book in
+            #if DEBUG
+            SideColumnGeometry.reset()
+            #endif
+            UserDefaults.standard.removeObject(forKey: BookNavigatorLayout.widthKey)
+            let (window, _) = await mountBook(book)
+            defer { window.orderOut(nil); window.close() }
+            #if DEBUG
+            let grip = try #require(
+                SideColumnGeometry.gripFrames[BookNavigatorLayout.widthKey],
+                "the grip publishes a frame of its own (an overlay never did)")
+            let line = try #require(
+                SideColumnGeometry.lineFrames[BookNavigatorLayout.widthKey])
+            #expect(grip.width >= SeamGrip.width - 0.5,
+                    "a reachable target, not the old 9: \(grip.width)")
+            #expect(abs(grip.midX - line.midX) <= 0.5,
+                    "centred on the seam: \(grip.midX) vs \(line.midX)")
+            #expect(grip.minX < line.minX - 4 && grip.maxX > line.maxX + 4,
+                    "…and it reaches into the navigator AND the page: \(grip) vs \(line)")
+            #expect(grip.height >= 100, "it runs the seam, not a handle")
+            // ONE constant, both seams (the hoist rule's point).
+            #expect(ShellSplit<EmptyView, EmptyView>.gripWidth == SeamGrip.width)
+            #endif
+        }
+    }
+
     // MARK: - 3 (the other half). The note Read tab's contents column
 
     /// Mount Read (`edit`, the face it opens on) over a three-block note.
