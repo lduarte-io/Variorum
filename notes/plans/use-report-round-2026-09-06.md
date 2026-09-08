@@ -9575,4 +9575,249 @@ no editor-lifecycle change — so no `swift test` and no iOS build is owed, and 
 
 ### 18d LADDER — ROUND 3 FINDINGS (opus-reviewer, fresh — the cap)
 
-*(the reviewer writes here — a full pass focused on rounds 1–2's fixes, anchored on both rounds' records; severity-ranked, the REVIEW_PROMPT format, then the clean bill)*
+Full pass over `git diff ce6eb9cb..01849f3b` — the four 18d batches, round 1's four fix passes
+(batch 2 `0fc42660..627fde0b` · batch 3 `2f76f45a..6f0ed2b4` · batch 1 `0a1d823f..e93429c8` ·
+batch 4 `1a1bea5c..ecacfa42`) and round 2's three (batch 4 `7e0d7302..4afae1aa` · batch 3
+`adde01e3..767416f7` · batch 1 `4e3aca85..01849f3b`) — weighted, as the cap's brief asks, toward
+rounds 1–2's fixes. Read against `CLAUDE.md`, `notes/AppSpec.md` (§7 · §9 · §12),
+`notes/OverallModel.md` (I1–I10 · P1–P3 · S1–S5), `notes/SyncSpec.md`, `notes/KnownIssuesAndTechDebt.md`,
+this file's §1 (U-9 · U-10 · U-12 · U-13 · U-17), §3 rows 22 · 23 · 25 · 26 · 30 · 33 · 34, §5.4,
+R-0, the briefs R-10…R-13 with their RECORDs and ADJUDICATIONs (J33–J43), QUESTIONS #99–#101, and
+BOTH rounds' findings + arbitrations + the seven fix records above. Read myself, in this session;
+two suites RUN here rather than trusted (the clean bill).
+
+#### THE SCOPE CALL, FIRST
+
+**Still Opus — the diff does not touch the editor seam proper, and nothing here needs Fable.** The
+only `Sources/` files in the whole range are the additive `Queries/NoteStamps.swift` and its test
+(`git diff --name-only ce6eb9cb..01849f3b -- Sources/ Tests/`); `Sources/VariorumCore/Sync/` is
+untouched; no schema, no migration, no lockstep event; no default's meaning moves (the three column
+widths, the two surface-size key spaces and the tray's view memory are all `UserDefaults` view
+state). The one `EditorViewModel` change in the range is still J34's two guarded assignments
+(`:527–529` in `teardown`, `:2856–2863` in `updateCaretContext`); round 2's three fix passes touch
+`Theme/EditorTypography.swift`, `Core/Views/SurfaceSizeMemory.swift`, `Features/Library/RecoveryView.swift`,
+`Registry/CommandRouter.swift`, `Core/Views/SeamGrip.swift`, `Core/Views/SideColumn.swift`,
+`RootView.swift`, the five `SideColumn` hosts and the `SidebarLayout` rename — no mount, no
+`BlockRangeIndex`, no `EditorTextView`, no `PaneTextAuthority`, no custody. Rounds 1 and 2 called it
+the same way and both calls hold.
+
+#### Findings, severity-ranked
+
+**[MINOR-1] · `App/Variorum/Variorum/Theme/EditorTypography.swift:215–231` (`applyVoiceChrome`) +
+`:125–130` (`fingerprint`) · round 2's MAJOR-1 closed the LATCH and left the VALUE the latch guards
+writable by a drawing host — so a second window's un-landed `ThemeStore` can still make
+`EditorTypography.fingerprint` non-nil AND WRONG, which is the state the fix exists to make
+impossible.** The fix's rule is stated twice, as a rule: *"only the settings' authority adopts"*
+(`:71–79`) and *"a claim made under a guess outlives the guess"* (`SurfaceSizeMemory.swift:173–175`).
+But the stamp is not derived from the adoption — it is derived from `current`
+(`fingerprint`: `guard isAdopted else { return nil }`, then `let resolved = current`), and
+`applyVoiceChrome` still writes `current` unconditionally on every chrome application. **Mechanism,
+traced:** the app mints FOUR `ThemeStore`s, one per window kind — `RootView.swift:144`,
+`Workspace/NoteWindowView.swift:55`, `Features/QuickNote/QuickNoteView.swift:118`,
+`Features/Settings/AppSettingsView.swift:38` — each starting its own observation
+(`.task { await theme.start() }`) and each holding `Queries.ThemeSettings()` (voice `.terminal`,
+`ThemeStore.swift:22`) until its own DB read returns. `isAdopted` is a process-global, monotone latch
+already set by the FIRST store's landing. So: her Study main window is up and adopted → she opens a
+note in its own window (`NoteWindowView` → `PostDetailView` → `EditorView`, or its read-cheap
+`ReadPostView`) → that window's chrome is `themeStore?.settings ?? Queries.ThemeSettings()`
+(`EditorView.swift:72–74`, `ReadTier/ReadPostView.swift:47–49`) = the Terminal placeholder →
+`applyVoiceChrome` sets `EditorTypography.current` to the Terminal resolution while `isAdopted`
+stays true → `fingerprint` hands out `.AppleSystemUIFontMonospaced-Regular-14-7` as if it were her
+answer → `SurfaceSizeMemory.remember`'s `guard let stamp` passes and a Study-measured Outline height
+is recorded, and `persist` (whose new guard only asks `fingerprint() != nil`) writes it to disk. Her
+record is replaced by a mis-stamped one, which the next Study launch REFUSES — the U-12 degradation
+round 1's MINOR-2 and round 2's MAJOR-1 both exist to prevent, arriving through the third door.
+**Why MINOR and not MAJOR** (said plainly so the arbitration can weigh it): round 2's door was on
+the ORDINARY launch path; this one needs a second window opened inside its own store's DB-read
+window AND a surface reporting geometry into the stamp-bearing `.outline` memory in that gap — narrow,
+and the damage is one launch's first frames of view state, never store truth. It is nonetheless the
+same rule broken one step further along, and it falsifies `adopt`'s own new doc sentence, which says
+the guess is now distinguishable from her answer. **Pin (red on the tree as it stands; designed, and
+I did NOT measure it — see the machine note at the end):** in `SurfaceSizeMemoryTests`, adopt Study
+(`EditorTypography.adopt(EditorTypography.resolve(voice: .study, inlineComments: false))`), seed her
+record through a memory wired as `BookViewModel` wires it (`fingerprint: { EditorTypography.fingerprint }`),
+then drive the PRODUCTION door — `EditorTextView.makeInlineEditor().applyVoiceChrome(EditorSurfaceChrome(tokens: Queries.ThemeSettings(), dark: false))`
+— and assert `EditorTypography.fingerprint` is unchanged; the second arm replays the flow's
+`remember` + `persist` and asserts her record survives in memory and on disk. Red today at the first
+`#expect` (the stamp moves to the monospace), green after the fix. The window must be one statement
+long and the globals restored before asserting (round 2's NIT-2). **Fix, one line + a doc:**
+`applyVoiceChrome` writes `current` only while `!EditorTypography.isAdopted` — after adoption the
+store's own `adopt` is the only writer, and every chrome the hosts build once their store has landed
+carries exactly that value, so nothing visible changes on the normal path. (The alternative round 2
+itself named — an `authoritative` flag on `EditorSurfaceChrome` set only from a landed store — is
+larger and buys the same thing.)
+
+**[MINOR-2] · `Features/Library/SidebarView.swift:735` · `RootView.swift:646–676` ·
+`Core/Views/SeamGrip.swift:142–145` · the oracle-KEYING rule that rounds 1 and 2 each confirmed is
+unfinished at three sites the round's OWN new pins read.** Round 1's MINOR-3 keyed the box's
+rectangles and the bar's mount counter; round 2's MINOR-2 keyed the seam oracle and made
+`SideColumn.subjectKey` required. Three holes of the same class remain, and two of them are read by
+pins minted in this letter: **(a) `SidebarGeometry.railGroupHeight` is still an unkeyed
+`CGFloat?`**, published by any `SidebarView` whose rail draws (`SidebarView.swift:568`), and BOTH box
+geometry pins take their reference height from it — `NoteBoxMountTests.swift:166–180`
+(`theBoxTakesTheRailGroupsOwnHeight`: nil it, wait for ANY non-nil, then compare the keyed
+`noteBoxFrames[book.id]` against it) and `:375–401` (`aBookOpeningPutsTheBoxOnTheColumnSayingNoNoteSelected`,
+same shape with no arithmetic guard at all). A concurrently mounted rail in another suite supplies
+that number: at the same `generousRowHeight` the pin passes about another window (round 1's own
+*"a green pin that proved nothing"*), at a COMPRESSED row height it goes spuriously red — so the
+half of the compare the fix keyed is protected and the half it did not is not. **(b)
+`RootView.paneSeamFamily` + `subject: "\(index)"`** — the pane seam's "subject" is the divider's
+INDEX in the row, i.e. `paneDivider|0` for every split in every suite and every window, which is
+exactly the per-host-constant shape round 2's MINOR-2 rejected (`SideColumnGeometry`'s `widthKey`);
+`ShellChromeTests.swift:430` reads that key, and `ShellLandingTests.swift:297–338` mounts a real
+`RootView` in a displayed window and opens a second pane, publishing into it. **(c)
+`SeamGeometry.reset()` clears EVERY subject's entries**, so a suite that resets (`ShellChromeTests.swift:409`,
+`OutlineRoomTests.swift:456`) can wipe frames another suite has already published — and
+`onGeometryChange` only fires on CHANGE, so a wiped rectangle is never republished and the waiting
+`#require` fails: keying does not protect against the reset. **No red-on-old pin applies** — this is
+harness hygiene, not product behaviour, and I label it so rather than let the ladder call it hollow.
+**Fix:** key `railGroupHeight` by the rail's post (the `noteBoxFrames` shape) and let the two mount
+pins read their own; give the pane seam a real subject (the window's or the router's id, minted live
+in the pin); make `reset()` take the subject it is resetting, or have each pin clear only its own
+keys. All three belong in J41's owed oracle-sweep row either way, which is the orchestrator's to
+carry.
+
+**[MINOR-3] · `Core/Views/SideColumn.swift:21–22` and `:37` · `Features/BookView/BookView.swift:125` ·
+`Features/ReadMode/ReadModeView.swift:143` · four live comments still describe the shipped seam as
+a 9-pt grip with the old cursor road — the J8 copy-truth class round 1's MINOR-6 swept once and
+MAJOR-2's fix re-created.** MAJOR-2 replaced the 9-pt `.overlay` with the shared `SeamGrip` at
+`width = 14` and `.pointerStyle(.columnResize)`, and round 2's MINOR-1 finished the job at the fourth
+seam. The component's own header says so; the HOSTS' prose does not: `SideColumn`'s header still
+tells the next reader the divider *"carries the pane row's own drag grammar (a 9-pt grip, the resize
+cursor — `WorkbenchSeam`'s, batch C)"* and that the leading edge brings *"the 9-pt grip"* with it,
+`BookView` says the navigator's boundary carries *"the 9-pt grip, the resize cursor"*, and
+`ReadModeView` the same. **Mechanism (the degradation, since no pin applies):** the next reader
+measuring or moving a seam reads a number the app does not use, and the two files that DO say 14
+(`SeamGrip`, `ShellSplit`) then look like the exception rather than the rule — the same failure
+round 1 fixed by hand five comments at a time. **Fix:** four one-line edits naming `SeamGrip` and its
+14 pt; the historical sentences at `RootView.swift:638`, `SeamGrip.swift:36` and `SideColumn.swift:228`
+are correct as they stand (they describe what the shape WAS) and must not be swept with them.
+
+**[NIT-1] · `Core/Views/SurfaceSizeMemory.swift:204–215` · `persist`'s new guard is justified by a
+road that cannot carry the defect.** The doc says the promise matters because *"`FlowStoryRow`'s
+empty-read branch calls `remember` and then `settledHere()` → `persist` in the SAME turn, so there is
+no settle interval standing between a wrong stamp and the disk"* — but that road writes through the
+FLOW memory, whose stamp is `FlowHeightEstimate.fingerprint` (`ReadingFlowView.swift:695`), a
+compile-time `let ... = "page-\(…)"` that is never nil (or through `ownSizes`, the session-only
+memory whose closure is `{ "" }`). The unknown-voice window exists only for the `.outline` memory
+(`BookViewModel.swift:398`), which that branch never touches. The guard is right to exist — the
+genuinely same-turn road is `StableSurface.report`'s own settle closure (`StableSurface.swift:206–211`:
+`remember(size)` then `settled?()` → `persist`), which EVERY consumer uses including the Outline's —
+so the fix stands and only its stated reason is wrong. **No pin is owed** (documentation truth).
+**Fix:** one clause naming the settle closure instead of the flow's empty-read branch.
+
+**[NIT-2] · `Features/Library/RecoveryView.swift:472–478` · the eviction door's `!item.isVersion`
+exclusion is unexplained, and the KnownIssues row that enumerates what the door does not reach does
+not name it.** `forgetLocalMemories` fires only for `kind == .note, !item.isVersion`; the doc beside
+it explains Delete-Now-only and Empty-Trash-excluded at length and says nothing about versions, and
+the new KnownIssues row lists Empty Trash, another device's janitor and a never-purged note as the
+accepted leak. A version is a container with its own id, so if any per-note key can ever be written
+under it the keys outlive the purge; if none can (a version's one home is Note ▸ Versions and it
+mounts no `StableSurface`), the exclusion is right and the reason belongs at the code. **Fix:** one
+clause either way — and if it is a leak, one word in the row.
+
+**[NIT-3] · `notes/KnownIssuesAndTechDebt.md:53–56` · the new Outline-shadow row contains a blank
+line, which ends the markdown table: the row's OWNER cell (`| **13u2** … |`) renders as body text
+rather than as the table's third column.** CLAUDE.md's tracking rule is satisfied in substance (the
+owner is named in the text), and the file already carries one earlier blank at `:43`, so this is
+cosmetic and pre-existing in kind. **Fix:** fold the second paragraph into the same cell (the
+file's other long rows do exactly that) or split it into a second row with its own owner cell.
+
+#### Considered and cleared (traced, so the next reader does not re-raise them)
+
+- **`AppSession.trayViewMemory` referencing a Mac-only type from `App/Variorum/Shared/` is NOT a
+  cross-target break.** I checked this properly rather than trusting the batch's "iOS BUILD
+  SUCCEEDED": `Shared` is a `PBXFileSystemSynchronizedRootGroup` in BOTH targets
+  (`project.pbxproj:184` and `:254`) and `TrayViewMemory` is declared only in
+  `Features/Tray/TrayFilter.swift:165`, which the phone does not compile — but the property sits
+  inside `AppSession.swift`'s `#if os(macOS)` region (`:432`…`:542`), so the phone never sees it.
+- **The pane seam's conversion really is layout-neutral.** `SeamGrip`'s own frame is
+  `SeamGrip.lineWidth` = 1 (`SeamGrip.swift:93`), the same 1 pt `RootView.dividerWidth` already
+  subtracts from the row's width budget (`RootView.swift:607`), and `.zIndex(1)` orders drawing and
+  hit-testing without touching layout. The walked drag (seam + 4 pt inside the right pane, 1131 → 925)
+  is the evidence for the half a rectangle cannot prove.
+- **`StableSurface` cannot feed a guessed reservation back into a record.** `onGeometryChange` is
+  applied to `content()` BEFORE `.frame(minHeight: reserved)` (`StableSurface.swift:177–180`), so the
+  reservation never inflates the size the surface reports — the read-a-guess half of round 2's
+  MAJOR-1 fix cannot become a written guess by that route, which is the first thing I tried to
+  falsify about it.
+- **`size`'s guess and `persist`'s cache do not fight.** `record(_:)` seeds `written[key]` with the
+  stored string (`:268`), so a record merely READ under an unknown voice and then persisted after the
+  voice lands short-circuits at `:218` — the disk keeps her own stamp rather than being rewritten
+  under the new one.
+- **The two caret doors read the right field and the fallback cannot reopen the blank-bar road.**
+  `EditorCommands.swift:561–569` and `ShellActions.swift:242–252` go through `editingOrActive`;
+  `RootView.swift:574` (the box's bar) still reads `editing` ALONE, so the shadow can never build a
+  bar. `teardown` clears both fields (`EditorViewModel.swift:521–529`) and `updateCaretContext`
+  claims `editing` only on a change (`:2856–2863`).
+- **The tray's populations and counts are still defined by the rows.** `TrayFilter.count` is
+  `rows(...).total` by construction (`TrayFilter.swift:126–128`), the reveal arm sets `view`/`kind`
+  past `select` so a landing never becomes her remembered choice (`TrayPanel.swift:497–500`), and it
+  is latched inside `if !loaded` (`:466`) so a later snapshot cannot move the tab under her hand.
+- **`Queries.noteStamps` is one indexed read over the note's own rows** — `container_block` by
+  container, `variant` by block, `commit_point` by variant — nil for a missing or tombstoned
+  container, and it counts every live take's savepoint, which is what its four pins claim. Cost ∝ the
+  note, never the corpus.
+
+#### CLEAN BILL — load-bearing things I checked myself and found solid
+
+- **The two suites that carry round 2's fixes — RUN here, not trusted:**
+  `xcodebuild test -only-testing:VariorumTests/SurfaceSizeMemoryTests -only-testing:VariorumTests/ShellChromeTests`
+  → `✔ Test run with 17 tests in 2 suites passed after 3.211 seconds`, including
+  `aSurfaceTakingChromeBeforeTheVoiceLandsCannotRecordUnderTheGuess`,
+  `deleteNowOnANoteTakesItsPerNoteMemoriesWithIt`,
+  `theTypographyIsAdoptedWhereTheSettingsLandNotWhereAViewNoticesThem` and
+  `thePaneSeamsGripIsWideCentredAndReachesIntoBothPanes`.
+- **`SidebarLayout`'s hoist is a pure rename, verified with `git diff -M`:** `similarity index 89%`,
+  `rename from Features/Library/SidebarLayout.swift`, and the ONLY hunk is the 17-line header naming
+  the new home and its grepped consumers — not a constant moved, not a function changed. The
+  placement rule now holds in the direction it is written: `Core/Views/SidebarNoteBox` reads no
+  `Features/` type (`SidebarNoteBox.swift:68, 147–148` read `SidebarLayout`, which is now beside it).
+- **The eviction really is wired to the point of no return, and Put back is safe.**
+  `RecoveryViewModel.confirmPendingPurge` calls `forgetLocalMemories` only AFTER `TrashPurge.confirm`
+  returns (`RecoveryView.swift:448–451`), and only on `.deleteNow` over a live note — a note in the
+  Trash keeps `currentBlock.<id>` and both `surfaceSize.<family>.<id>` records, so J43's reason for
+  choosing the purge over `deleteContainer` is honoured in the code and not only in the prose. The
+  shared act (`Shared/RecoveryActs.swift`) is untouched: local keys, local eviction.
+- **The read/write split is coherent at every caller.** `size` answers an unstamped record as a guess
+  (`SurfaceSizeMemory.swift:176–180`), `remember` drops without a stamp (`:195–199`), `persist`
+  refuses without one (`:214–215`); the flow's memory carries a constant stamp so it is unaffected in
+  both directions, and `BookView.surfacePlaceholder`'s documented width asymmetry is unchanged.
+- **`SeamGrip` is one component and both parts a component can own are in it** — the 14-pt grip as a
+  ZStack sibling framed at the line's width, and `.pointerStyle(.columnResize)` — with `.zIndex(1)`
+  left to each host because it is a claim about a stack's order: `SideColumn` puts it on both edges
+  (`:190`, `:203`), `RootView` inside the pane row's `ForEach` (`:616`), `ShellSplit` keeps its own.
+  There is no copy of row 9's old shape left in the app (grepped).
+- **Every `SideColumn` host names a real subject** — `readingID` · `readingID` · `postID` · `postID` ·
+  `poolID` (`BookView.swift:137`, `BookIndexView.swift:277`, `ReadModeView.swift:152`,
+  `PostDetailView.swift:195`, `CanvasView.swift:1057`) — and `subjectKey` is required rather than
+  defaulted, which is the structural-redo `redo:` precedent applied correctly.
+- **The box's arrangements degrade rather than overflow.** Every cluster in `boxBody` is a
+  `ViewThatFits` (`CommitBar.swift:246–251`, `:313`, `:335`) with `fixedSize` members so the ideal
+  widths are measured, and the wide row folds the newlines chip into the Aa popover. The one thing
+  NOT pinned is a mount at the sidebar's own floor (the `bothColumnsChromeStaysInsideThemAtTheirFloors`
+  twin, which round 1's MINOR-5 established as the shape for exactly this question) — recorded as a
+  coverage observation rather than raised as a finding, because reading found no over-wide leaf.
+- **P1/P3 hold.** `NoteBoxFactsModel.load` is one `.task(id: "postID|isLive")` read whose cost is ∝
+  the note's own blocks, with the reason it is not a `ValueObservation` at its head; the fix passes
+  added no per-frame query and no new observation; `SeamGrip`'s two reporters are the two the shell
+  already had.
+- **Zero `Sources/VariorumCore/Sync/`, zero schema, zero migration, no lockstep event owed; S1–S5
+  untouched.** The whole round's persisted additions are `UserDefaults` view state.
+
+#### A MACHINE NOTE THE NEXT SESSION NEEDS (not a finding)
+
+While measuring MINOR-1's pin in a scratch worktree I filled the boot volume: it was already at
+**100% (418 GiB used of 460)** before this round's builds, and a cold `DerivedData` for the scratch
+tree took the last of it — every write on the machine failed with `ENOSPC` until I recovered. **What
+I did:** deleted `Build/Intermediates.noindex` from every `~/Library/Developer/Xcode/DerivedData/Variorum-*`
+(regenerable; the NEXT Mac test run in the shared tree therefore rebuilds from scratch and will be
+slow), deleted the scratch tree's own DerivedData, removed the scratch worktree and pruned. The
+volume now reads **8.0 GiB free (99%)**, and `git worktree list` is back to `variorum` + `variorum-mobile`
+with the shared tree clean. **Consequences for the orchestrator:** MINOR-1's pin is DESIGNED and
+traced but NOT measured — I abandoned the run rather than spend the last GiB, and the fix pass should
+measure it; and there are stale `DerivedData` trees for `/tmp` worktrees of dead sessions
+(`Variorum-bgnjmuhyqftzrndfopqjtwnunidq`, `-cfoyfrajdavtgjepnirbkimhllxa`, `-dijrdsajvkduxjfjneufblvwflrw`,
+`-etepviktypyfugcnvtvjpezglkbj`, `-ffanmtlfpjcfrxcbwxvlnqwnbbyz`, `-ghjhsouhamvzvzdbjjyappyjpzyj`,
+plus two under `.claude/worktrees/`) whose paths no longer exist — several GiB that are the author's
+to reclaim, not mine to delete unasked.
