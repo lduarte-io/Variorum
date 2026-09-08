@@ -616,8 +616,14 @@ struct RootView: View {
         case .blocks:
             // Batch 12: the Blocks AREA — standalone blocks live and are
             // born here (the sidebar rows retired).
-            BlocksAreaView(session: session, model: pool) { poolID in
-                openHere(.pool(poolID))
+            // 17o batch e (row 38): the door carries its own target — a
+            // CARD names its group AND the snippet clicked, so the caret
+            // lands in it (the Stage C `blockTarget` road, which the
+            // Library's block hits have always used); the header's scope
+            // door names the group alone and CLEARS a stale landing, which
+            // `openHere` never did.
+            BlocksAreaView(session: session, model: pool) { target in
+                open(.pool(target.poolID), blockID: target.blockID, in: pane)
             }
         case .post(let postID):
             if live {

@@ -5739,4 +5739,83 @@ about pixels rather than about a picture, it is **pixel-probed**, not eyeballed.
 
 ### R-9 · RECORD (the implementer writes here from its first commit)
 
-*(empty until the implementer's first commit)*
+**LIVE STATUS — 17o batch e (opus-implementer, opened 2026-09-08 at `c248eb01`).**
+
+**WHAT I HAVE NOT DONE (the record's first line, per rule 9) — PENDING, kept honest as I go.**
+At this checkpoint: the pins are not written, the walk is not run, the closing suites have not run.
+What I will deliberately NOT touch in this batch, stated up front: `Sources/` (core), `Sync/`, schema,
+`App/Variorum/Shared/`, `BlockRangeIndex`/`EditorTextView`, the Snippets GROUPS model, and any
+post-tag machinery on pools (a pool wears none — the brief's fence).
+
+- **Orientation — DONE.** Read in my own context, in the brief's order: `CLAUDE.md` and the canon it
+  auto-loads (CoreDescription — the inspiration pool; OverallModel §2/§4/§7; AppSpec §7 `block_tag`
+  ("block-level tags primarily serve the pool") and `container`/`container_block`, §9 `poolDragCopy` +
+  `applyTag`, §12's Snippets/groups vocabulary and R44/R52; SyncSpec; TEXTKIT2_NOTES §2/§3); this plan's
+  §0, §1 (U-15's snippets lines verbatim, U-14's "only opus to fix this item"), §2's 13u fence, §3 rows
+  38 · 39 whole, §4.5, §5.3 **Batch e** verbatim, §8, §9, §10, R-0 (P-1…P-9), the R-9 brief;
+  `notes/plans/phase-17-standing-fixes.md`'s philosophy + "Standing rules for every entry" + the
+  allocation register; her report `notes/author-reports/2026-09-06-use-report.md` (part 2's snippets
+  paragraph verbatim, and the image manifest — images 14–16 were pasted in chat and are NOT described
+  in the repo, so image 15 is not readable by me; noted where it matters below). Then the code:
+  `BlocksAreaView.swift` whole · `SnippetsSurface.swift` whole · `BlockTagViews.swift` whole ·
+  `RootView.swift` (`opener`/`adopt`/`open(_:blockID:in:)`/`target(for:)`/`paneDetail`'s `.blocks` and
+  `.pool` cases/`BlockTarget`) · `PoolDetailView` (in `CanvasView.swift`) · `EditorView`'s `caretSeed`
+  road · `EditorViewModel.applyFocusSeeds` + `revealLanding` · `PaneHost` (no tag door on a pool pane) ·
+  `ContextBarDoors` · `CapabilityRegistry`'s `.tagBlock` · `TutorialSeeder` (the scrap pool at `:1524`)
+  · the pin suites `SnippetsRefreshTests` and `CurrentBlockContinuityTests`' mount rig.
+  Tree clean at `c248eb01`, `main` == `origin/main`, zero app instances (`pgrep`).
+
+**THE TRACE, run myself by reading (rule 3's first half) — row 38, confirmed and one step WIDER than
+the brief.** `area.activePool` is `pools.first { $0.id == selectedGroupID } ?? pools.first`
+(`SnippetsSurface.swift`), and the rail's head row "all snippets" sets `selectedGroupID = nil` — so
+while browsing all groups the active pool is `pools.first`, i.e. the OLDEST group, the seeded default
+that `PoolNaming` displays as "Snippets". Her snippet lives in the tutorial's own group ("tutorial
+scraps", minted later — `TutorialSeeder.swift:1524`). Both card doors — the ⋯/context row
+(`SnippetsCopy.openRow`) and the DOUBLE-CLICK — asked for that active pool and passed no block, and
+`openPool` was `openHere(.pool(poolID))` → `adopt`, which never touches `blockTarget`. So: wrong
+container, and no landing. **The wider step:** `openHere` also never CLEARS a stale `blockTarget`,
+while `RootView.open(_:blockID:)` does — so a Library block hit into a pool followed by the Snippets
+header's *open as editor* on that same pool re-landed the old block. Routing both doors through
+`open(_:blockID:in:)` closes that too, for free.
+
+**Row 39, traced:** the tutorial seeds **no block tags at all** — every `applyTag` in `TutorialSeeder`
+is `toPost:`; there is no `applyTag(…, toBlock:)` anywhere in the app or core outside three USER doors
+(`BlockTagViews`, `BlocksAreaView`'s bulk bar, `BlockTOCView`). The pool EDITOR has no tag door either:
+`MastheadTagCluster` is constructed only by `PostDetailView` (`:315`), `PaneHost`'s tag half left at Act
+10 item 5, and `ContextBarDoors.Icon` is `back · book · forward`. So a pool pane carries no `#` at all.
+The remaining tag-shaped things on this surface are the toolrow's **tag filter** ("tag: any") and a
+card's **`#path` chips**. Which of the two she saw is settled at the walk and recorded there.
+
+**Pieces (checkpoint order):**
+
+1. the door's decision made explicit + both card doors + RootView + the copy (row 38) — **DONE
+   (`PENDING-HASH`)**
+2. the tag chip becomes the door + the sheet's stale empty-state copy (row 39) — **DONE
+   (`PENDING-HASH`)**
+3. the pins (the brain, the landing mount, the copy) — **NOT STARTED**
+4. the red-on-old by behavioral revert on the committed tree — **NOT STARTED**
+5. the walk + captures + the closing suites — **NOT STARTED**
+
+**What landed in pieces 1 + 2:**
+
+- **`SnippetOpenTarget`** (`SnippetsSurface.swift`, beside `SnippetFilter`/`SnippetCardFace` — the
+  surface's home for its pure brains): `poolID` + optional `blockID`, with two makers, `\.card(item)`
+  (the card's OWN group, landing on the clicked snippet) and `\.group(pool)` (the scope door — the
+  group being browsed, no landing). The decision is now one pure, pinnable value instead of two inline
+  closure literals that had drifted from the door they sat on.
+- **`BlocksAreaView`**: `openPool: (String) -> Void` → `openSnippet: (SnippetOpenTarget) -> Void`;
+  the double-click and the ⋯ row both send `.card(item)`; the header sends `.group(pool)`.
+- **`RootView`**: the `.blocks` case composes `open(.pool(target.poolID), blockID: target.blockID, in: pane)`
+  — the Stage C road the Library's block hits have always used, which also clears a stale landing.
+- **Copy:** `SnippetsCopy.openRow` "Open in the Snippets editor" → **"Open this snippet in its editor"**
+  (her confusion was the promise itself: *"it says open in the 'Snippets editor' … but the snippet i
+  clicked on was part of the tutorial so it's not in the Snippets editor"*); the header's help line
+  says "This group in the full editor" rather than "The snippets container".
+- **Row 39:** each `#path` chip on a card is now a `Button` opening the SAME
+  `BlockTagAssignmentSheet` the ⋯ row's "Tags…" opens — one act, one sheet, a second face where the tag
+  already shows. New string `SnippetsCopy.tagChipHelp`, added to the vocabulary sweep's `allStrings`.
+- **Row 39's rider:** `BlockTagAssignmentSheet`'s empty state said *"create one in the sidebar's Tags
+  section"* — a room that has not existed since R52 moved tag management into Settings. Now
+  "No tags yet — make one in Settings ▸ Tags.", the Blocks workbench's wording.
+
+Mac Debug build green after pieces 1 + 2.

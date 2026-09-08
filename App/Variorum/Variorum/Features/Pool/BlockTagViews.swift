@@ -84,7 +84,11 @@ struct BlockTagAssignmentSheet: View {
             Text("Tags for block “\(preview?.isEmpty == false ? String(preview!.prefix(48)) : "(empty)")”")
                 .font(.headline)
             if model.allTags.isEmpty {
-                Text("No tags yet — create one in the sidebar's Tags section.")
+                // 17o batch e (row 39's rider): the sidebar has had no Tags
+                // section since R52 moved tag management into Settings — a
+                // door that names a room that is not there is worse than no
+                // sentence at all. Worded as the Blocks workbench's twin.
+                Text("No tags yet — make one in Settings \u{25B8} Tags.")
                     .foregroundStyle(.secondary)
             }
             List(model.allTags, id: \.id) { tag in

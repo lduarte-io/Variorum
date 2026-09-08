@@ -36,8 +36,11 @@ struct BlocksAreaView: View {
     /// The panel/drag model — kept for `createPool` + the drag payload;
     /// the page's own listing lives on `SnippetsAreaModel`.
     let model: PoolViewModel
-    /// Opens the snippets container in the detail editor.
-    var openPool: (String) -> Void
+    /// Opens a snippet group in the detail editor — and, when the door
+    /// pointed at ONE snippet, lands the caret in it (17o batch e, row 38).
+    /// `SnippetOpenTarget` is the whole decision; this closure only carries
+    /// it out (RootView composes it onto the pane's own navigation).
+    var openSnippet: (SnippetOpenTarget) -> Void
 
     /// 13b 4D (N32(c) — S4-15): the snippet rows' TAG door + the archive/
     /// delete pair (the post-13l polish round, 4(b)/F1), registry-walked.
@@ -52,11 +55,11 @@ struct BlocksAreaView: View {
 
     init(
         session: AppSession, model: PoolViewModel,
-        openPool: @escaping (String) -> Void
+        openSnippet: @escaping (SnippetOpenTarget) -> Void
     ) {
         self.session = session
         self.model = model
-        self.openPool = openPool
+        self.openSnippet = openSnippet
         _area = State(initialValue: SnippetsAreaModel(session: session))
     }
     @State private var entryText = ""
@@ -220,9 +223,14 @@ struct BlocksAreaView: View {
             }
             Spacer()
             if let pool = area.activePool {
-                Button(tokens.chromeLabel(SnippetsCopy.openAsEditor)) { openPool(pool.id) }
+                // The SCOPE door: the group she is browsing, whole, landing
+                // nowhere in particular (row 38's other half — this one was
+                // always right, and stays exactly as it was).
+                Button(tokens.chromeLabel(SnippetsCopy.openAsEditor)) {
+                    openSnippet(.group(pool))
+                }
                     .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary))
-                    .help("The snippets container in the full editor — type, split, fan takes")
+                    .help("This group in the full editor — type, split, fan takes")
             }
         }
         .padding(.horizontal, 24)
@@ -457,11 +465,27 @@ struct BlocksAreaView: View {
                         .lineLimit(3)
                         .multilineTextAlignment(.leading)
                     HStack(spacing: 6) {
+                        // 17o batch e (row 39) — THE CHIP IS THE DOOR. Her
+                        // words: *"you can't tag snippets but there's a tag
+                        // on there. so not sure what the deal with that
+                        // is."* Tagging a snippet has always been possible
+                        // (block tags are the model's, and "block-level tags
+                        // primarily serve the pool" — AppSpec §7); the ONE
+                        // door was buried in the right-click menu, so a tag
+                        // she could SEE read as decoration. Same act, same
+                        // sheet, one more face — where the tag already is.
                         ForEach(item.tagPaths, id: \.self) { path in
-                            Text("#\(path)")
-                                .font(tokens.small)
-                                .foregroundStyle(tokens.accent.opacity(0.85))
-                                .lineLimit(1)
+                            Button {
+                                tagSheetBlock = CanvasView.TagSheetBlock(
+                                    id: item.block.blockID, preview: item.block.text)
+                            } label: {
+                                Text("#\(path)")
+                                    .font(tokens.small)
+                                    .foregroundStyle(tokens.accent.opacity(0.85))
+                                    .lineLimit(1)
+                            }
+                            .buttonStyle(.plain)
+                            .help(SnippetsCopy.tagChipHelp)
                         }
                         ForEach(
                             SnippetCardFace.metadata(
@@ -497,7 +521,7 @@ struct BlocksAreaView: View {
         .contentShape(Rectangle())
         .onDrag { PoolViewModel.dragProvider(blockID: item.block.blockID) }
         .onTapGesture(count: 2) {
-            if let pool = area.activePool { openPool(pool.id) }
+            openSnippet(.card(item))
         }
         .onTapGesture { toggle(item.block.blockID) }
         .contextMenu { cardMenu(area, item) }
@@ -506,7 +530,7 @@ struct BlocksAreaView: View {
     @ViewBuilder
     private func cardMenu(_ area: SnippetsAreaModel, _ item: Queries.PoolItem) -> some View {
         Button(SnippetsCopy.openRow) {
-            if let pool = area.activePool { openPool(pool.id) }
+            openSnippet(.card(item))
         }
         Button(SnippetsCopy.tagsRow) {
             tagSheetBlock = CanvasView.TagSheetBlock(

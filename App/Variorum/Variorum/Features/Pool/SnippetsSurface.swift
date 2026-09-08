@@ -52,7 +52,11 @@ nonisolated enum SnippetsCopy {
     static let emptySearch = "Nothing matches."
 
     // The per-card ⋯ / context rows.
-    static let openRow = "Open in the Snippets editor"
+    /// 17o batch e (row 38): the row names THE SNIPPET, never a particular
+    /// container. It read "Open in the Snippets editor" and promised the one
+    /// group it could not keep — *"the snippet i clicked on was part of the
+    /// tutorial so it's not in the Snippets editor"*.
+    static let openRow = "Open this snippet in its editor"
     static let tagsRow = "Tags…"
     static let moveRow = "Move to Group"
     static let archiveRow = "Archive Snippet"
@@ -70,6 +74,12 @@ nonisolated enum SnippetsCopy {
     static let tagAny = "tag: any"
     static func tagFilter(_ path: String) -> String { "tag: \(path)" }
     static func sortLabel(_ sort: SnippetSort) -> String { "sort: \(sort.rawValue)" }
+
+    /// 17o batch e (row 39): the tag chip on a card IS the tag door — her
+    /// words, *"you can't tag snippets but there's a tag on there"*. The
+    /// door existed (the ⋯ menu's "Tags…"); what it lacked was a face
+    /// where the tag already shows.
+    static let tagChipHelp = "This snippet's tags — click to add or remove them"
 
     // The metadata face's words.
     static func takesBadge(_ count: Int) -> String { "⑂ \(count) takes" }
@@ -96,7 +106,7 @@ nonisolated enum SnippetsCopy {
             archiveRow, deleteRow, selectedLine(2), bulkMove, bulkTag,
             bulkArchive, bulkDelete, bulkClear, tagAny, tagFilter("x"),
             sortLabel(.recent), takesBadge(2), words(2), edited("today"),
-            movedSnippets(2, to: "x"), groupCreated("x"),
+            movedSnippets(2, to: "x"), groupCreated("x"), tagChipHelp,
         ]
     }
 }
@@ -175,6 +185,45 @@ nonisolated enum SnippetCardFace {
             parts.append(SnippetsCopy.edited(day))
         }
         return parts
+    }
+}
+
+// MARK: - Where a Snippets door goes (pure — pinned)
+
+/// **What a Snippets door opens** — a container, and optionally the block to
+/// land on (17o batch e, ledger row 38; her words: *"if you right click on a
+/// snippet and open it in the snippet editor, it just opens a whole note with
+/// several different snippets but not even the snippet that i right clicked
+/// on … the snippet i clicked on was part of the tutorial so it's not in the
+/// Snippets editor"*).
+///
+/// The two doors of this surface differ, and that difference IS the fix:
+///
+/// - a **card** is pointed at directly (the `.tagBlock` grammar — the target
+///   is the row you right-clicked), so it opens the card's OWN group at the
+///   snippet she clicked;
+/// - the header's **open as editor** is a SCOPE door — it opens the group she
+///   is browsing, landing nowhere in particular.
+///
+/// Before this the card's two doors both asked for `activePool`, which under
+/// the rail's "all snippets" head row is `pools.first` — the oldest group,
+/// the seeded default — so a card in any other group opened the wrong
+/// container, with no landing either way.
+nonisolated struct SnippetOpenTarget: Equatable, Sendable {
+    /// The `container.kind='pool'` row to open (the group, in the surface's
+    /// ruled vocabulary).
+    let poolID: String
+    /// The block to land the caret in, when the door pointed at one.
+    let blockID: String?
+
+    /// A CARD's door: its own group, landing on the clicked snippet.
+    static func card(_ item: Queries.PoolItem) -> SnippetOpenTarget {
+        SnippetOpenTarget(poolID: item.poolID, blockID: item.block.blockID)
+    }
+
+    /// The HEADER's door: the group being browsed, no landing.
+    static func group(_ pool: Container) -> SnippetOpenTarget {
+        SnippetOpenTarget(poolID: pool.id, blockID: nil)
     }
 }
 
