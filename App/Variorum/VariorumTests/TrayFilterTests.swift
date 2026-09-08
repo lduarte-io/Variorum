@@ -234,6 +234,43 @@ struct TrayFilterTests {
                 "…and nil is the case `revealMissing` already words")
     }
 
+    /// **A REVEAL IS A LANDING, NOT A CHOICE** (18d's round-1 ladder, NIT-2).
+    ///
+    /// The panel opens on the view that HOLDS the revealed row — a mark under
+    /// the other tab is a mark she cannot see — but that landing must not
+    /// become the session's remembered pair. §5.4's line is *"the last view
+    /// and filter"*, which is HER choice; a lineage door's receipt writing it
+    /// would make the next unrelated ⌫ press open wherever the last reveal
+    /// sent her.
+    ///
+    /// **Red on the pre-fix code:** the reveal arm called `select(view:)` /
+    /// `select(kind:)`, both of which `remember()` — so the third arm below
+    /// found `.archived · all` where she had left `.leaving · blocks`.
+    @Test func aRevealLandsWithoutBecomingTheRememberedView() async throws {
+        try await withEditor(seedBlocks: ["one"]) { h in
+            // What she chose, this session.
+            let chooser = TrayViewModel(session: h.session, postID: h.postID)
+            chooser.select(view: .leaving)
+            chooser.select(kind: .blocks)
+
+            // A lineage door reveals a block that lives under the OTHER tab.
+            let revealed = TrayViewModel(
+                session: h.session, postID: h.postID, revealBlockID: "archived-1")
+            revealed.adopt(TrayViewModel.Snapshot(
+                archived: [Queries.TrayItem(
+                    blockID: "archived-1", deletedAt: "2026-09-01T10:00:00.000Z",
+                    text: "the archived one")]))
+            #expect(revealed.view == .archived && revealed.kind == .all,
+                    "the panel opens where the marked row actually is")
+
+            // …and the session still holds what SHE chose.
+            #expect(h.session.trayViewMemory == TrayViewMemory(view: .leaving, kind: .blocks))
+            let next = TrayViewModel(session: h.session, postID: h.postID)
+            #expect(next.view == .leaving && next.kind == .blocks,
+                    "the next ⌫ press opens where she left it, not where a receipt sent her")
+        }
+    }
+
     // MARK: - Over the real panel
 
     /// **THE FOLD IS GONE** (red on old), the takes filter narrows to them,

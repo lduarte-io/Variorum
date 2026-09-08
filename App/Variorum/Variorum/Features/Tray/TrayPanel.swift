@@ -361,11 +361,13 @@ final class TrayViewModel {
         deleted.isEmpty && archived.isEmpty && stranded.isEmpty && takes.isEmpty
     }
 
-    /// Is anything on this note's clock? — the leaving section's own emptiness,
-    /// named so the face asks one question instead of three.
-    var nothingIsLeaving: Bool {
-        deleted.isEmpty && stranded.isEmpty && takes.isEmpty
-    }
+    // (`nothingIsLeaving` — "is anything on this note's clock?" — RETIRED at
+    //  18d's round-1 ladder, NIT-1: the panel's empty line has been
+    //  `TrayFilterFace.nothing(view:kind:home:)` since batch 2, so the
+    //  property had no production reader left and only a pin still called
+    //  it. The same question is `TrayFilter.count(contents, view: .leaving)`,
+    //  which is the number the tab already renders. Dead code removed, not
+    //  parked — this batch's own standard, applied to itself.)
 
     /// True once the listings have loaded and the requested block was in
     /// neither of them — e.g. an original released from a DIFFERENT note
@@ -483,9 +485,18 @@ final class TrayViewModel {
             // unfiltered — latched at arrival like the two sentences above,
             // and for the same reason (a later act of hers must never move
             // the tab under her hand).
+            //
+            // **It does NOT `remember()`** (18d's round-1 ladder, NIT-2).
+            // §5.4's remembered pair is *the last view and filter* — HER
+            // choice, not a landing: a lineage door's reveal that wrote the
+            // memory would make "where the tray opens" mean "wherever the
+            // last receipt sent me", and the next unrelated ⌫ press would
+            // land somewhere she never picked. So the two fields are set
+            // directly here, past `select`, and the session keeps what she
+            // last chose.
             if let holder = TrayFilter.viewHolding(revealBlockID, in: contents) {
-                select(view: holder)
-                select(kind: .all)
+                view = holder
+                kind = .all
             }
         }
         loaded = true

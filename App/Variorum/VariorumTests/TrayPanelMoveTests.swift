@@ -289,7 +289,10 @@ struct TrayPanelMoveTests {
             }
             #expect(model.takes.map(\.variantID) == [second.id],
                     "the panel's own observation delivers the note's deleted takes")
-            #expect(!model.nothingIsLeaving)
+            // (18d's round-1 ladder, NIT-1: `nothingIsLeaving` was this
+            //  pin's last caller and is retired — the same question is the
+            //  number the Leaving tab renders.)
+            #expect(TrayFilter.count(model.contents, view: .leaving) > 0)
 
             await model.putBackTake(second.id)
             #expect(model.status == .receipt(RecoveryCopy.takeRestoredReceipt(.active)))
