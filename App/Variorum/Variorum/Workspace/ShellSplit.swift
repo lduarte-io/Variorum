@@ -117,6 +117,21 @@ struct ShellSplit<Sidebar: View, Detail: View>: View {
             Rectangle()
                 .fill(tokens.line)
                 .frame(width: Self.dividerWidth)
+                // **Row 41** (17o batch d; her follow-up: *"the line that
+                // separates the left pane from the main editor is white for
+                // just a tiny bit at the top"*). MEASURED on the dev-store
+                // Debug build, not guessed: at the seam's x the window is
+                // pure white (255,255,255) for the first ~40 pt while the
+                // sidebar's ground (246,246,241) and the detail's
+                // (251,251,247) are both painted to y = 0. The two columns'
+                // BACKGROUNDS run under the window's toolbar band, as
+                // backgrounds do; the divider is a laid-out view inside the
+                // safe area, so it started below the band and the window's
+                // own white showed through the 1-pt gap between them. The
+                // LINE runs the height the grounds run; the GRIP deliberately
+                // does not — a resize drag under the toolbar band would be a
+                // new gesture, not a fix.
+                .ignoresSafeArea(.container, edges: .top)
             Rectangle()
                 .fill(Color.clear)
                 .frame(width: Self.gripWidth)
