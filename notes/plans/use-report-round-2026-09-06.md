@@ -8216,7 +8216,7 @@ dropped every remembered story on a voice switch that moved nothing on that page
 
 #### Pieces
 
-- **PIECE A — the persisted store + its two consumers. DONE (PENDING_A).**
+- **PIECE A — the persisted store + its two consumers. DONE (1191a7fc).**
   `App/Variorum/Variorum/Core/Views/SurfaceSizeMemory.swift` (new — split out of `StableSurface.swift`,
   grown into the persisted store: `Namespace` · `Record` (`w|h|fingerprint`, tenth-of-a-point, an
   unreadable record is simply no memory) · `size` / `remember` / `persist` / `forget`; the no-arg
