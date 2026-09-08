@@ -583,8 +583,23 @@ struct RootView: View {
             // One label, from the bar's own brain (13g R5-4), so the box's
             // identity line and the bar can never disagree about where the
             // caret is.
-            caretLabel: barModel.map {
-                BlockLineLabel.caret(ordinal: $0.caretOrdinal, of: $0.blockCount)
+            //
+            // **A CLOSURE over the LOCAL model, never a value and never
+            // `self`** (the round-end Fable pass, MAJOR-1). This body runs
+            // inside `ShellSplit`'s sidebar closure, and `caretOrdinal` /
+            // `blockCount` are rewritten on every keystroke — reading them
+            // HERE registered the shell against the caret, so every
+            // keystroke in a book note re-ran the sidebar column and the
+            // whole pane row (`BookView.init` minting two view models per
+            // pass). The box evaluates the closure inside its own body, so
+            // the observation lands on the smallest view in the tree. The
+            // capture is the local `model` and it is STRONG: a weak capture
+            // would let the where-line silently lose its "block 3/41" in a
+            // teardown race, and the closure lives one render of the box.
+            caretLabel: barModel.map { model in
+                { () -> String? in
+                    BlockLineLabel.caret(ordinal: model.caretOrdinal, of: model.blockCount)
+                }
             },
             onEditHere: noteBoxDoor?.editHere,
             bar: barModel.map { AnyView(CommitBar(model: $0, axis: .box)) }))

@@ -217,9 +217,23 @@ struct BookView: View {
         // and `.onChange` together, because the box must be right on the
         // book's OPEN and not only after something moves; `.onDisappear`
         // clears it, so a book leaving the pane takes its box with it.
-        .onAppear { publishNoteBox() }
+        .onAppear {
+            publishNoteBox()
+#if DEBUG
+            // The round-end Fable pass, MAJOR-1's door: a pin that mounts the
+            // REAL shell has no road to this book's focus (the model is this
+            // view's `@State`), so the book publishes its one focus act,
+            // keyed by its own id (J41: never a singleton).
+            BookOutlineGeometry.focusDoors[readingID] = { model.focus($0) }
+#endif
+        }
         .onChange(of: noteBoxReport) { _, _ in publishNoteBox() }
-        .onDisappear { onNoteBox?(readingID, nil, nil) }
+        .onDisappear {
+            onNoteBox?(readingID, nil, nil)
+#if DEBUG
+            BookOutlineGeometry.focusDoors[readingID] = nil
+#endif
+        }
         // 13f W20(a): the ascent's request, taken once — whether this book
         // was already open (onChange) or opened by the ascent (onAppear).
         .onChange(of: revealPostID) { _, _ in takeAscentRequest() }
@@ -1700,6 +1714,11 @@ enum BookOutlineGeometry {
     static var navigatorFrames: [String: CGRect] = [:]
     static var navigatorChapterRows: [String: CGRect] = [:]
     static var navigatorNoteRows: [String: CGRect] = [:]
+    /// The round-end Fable pass, MAJOR-1: each mounted book's ONE focus act
+    /// (`BookViewModel.focus`), published by the view whose `@State` holds
+    /// the model — the only way a pin over the real shell can make a note
+    /// live in the Outline. Keyed by the book's id; cleared on disappear.
+    static var focusDoors: [String: @MainActor (String?) -> Void] = [:]
 
     static func resetNavigator() {
         navigatorFrames = [:]

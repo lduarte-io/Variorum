@@ -244,6 +244,13 @@ struct SidebarView: View {
     }
 
     var body: some View {
+#if DEBUG
+        // The round-end Fable pass, MAJOR-1's oracle: how many times THIS
+        // column's body has run, keyed by the workspace it renders (a pin's
+        // window has its own). Counted INSIDE the evaluation — `.onAppear`
+        // or a geometry report would count mounts and layouts, not bodies.
+        let _ = SidebarGeometry.noteBodyEvaluation(for: workspace)
+#endif
         VStack(spacing: 0) {
             // The groups. An outer scroll is the LAST resort for a window
             // shorter than even the compact layout — inert at ordinary
@@ -761,6 +768,31 @@ enum SidebarGeometry {
     static var headerTextFrames: [String: CGRect] = [:]
     static var firstRowContentFrames: [String: CGRect] = [:]
     static var firstRowBoxFrames: [String: CGRect] = [:]
+
+    /// **The round-end Fable pass, MAJOR-1:** how many times a column's
+    /// `body` has been evaluated, keyed by the workspace it renders — so a
+    /// pin can assert that typing in a book note does NOT re-render the
+    /// shell (the box's caret label used to be read as a value inside the
+    /// shell's sidebar closure, and Observation registered every keystroke
+    /// against it). Keyed, because suites run in parallel and each pin
+    /// mounts its own shell with its own router.
+    static var bodyEvaluations: [String: Int] = [:]
+    /// …and what the note box's where-line SAYS, per subject — the second
+    /// arm of the same pin: the count must fall AND the label must still
+    /// follow the caret, or the pin is satisfied by deleting the label.
+    static var noteBoxWhereLines: [String: String] = [:]
+
+    static func bodyKey(for workspace: WorkspaceModel) -> String {
+        "\(ObjectIdentifier(workspace))"
+    }
+
+    static func noteBodyEvaluation(for workspace: WorkspaceModel) {
+        bodyEvaluations[bodyKey(for: workspace), default: 0] += 1
+    }
+
+    static func recordWhereLine(_ line: String, for subject: String) {
+        noteBoxWhereLines[subject] = line
+    }
 
     static func resetHeaders() {
         noteBoxFrames = [:]

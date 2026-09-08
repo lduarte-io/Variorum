@@ -44,7 +44,22 @@ struct SidebarNoteBox: View {
     let facts: NoteBoxFacts?
     /// The caret's block, as the bar labels it (`BlockLineLabel`) — nil in a
     /// mode with no full editor, where the box shows the facts instead.
-    let caretLabel: String?
+    ///
+    /// **A CLOSURE, deliberately, and evaluated inside THIS view's body**
+    /// (the round-end Fable pass, MAJOR-1). The label reads the live
+    /// editor's `caretOrdinal`/`blockCount`, which `updateCaretContext`
+    /// rewrites on EVERY keystroke — and Observation registers an access
+    /// against whichever body is evaluating when it happens. As a VALUE the
+    /// shell computed it inside `ShellSplit`'s sidebar closure, so every
+    /// keystroke in a book note re-ran the whole shell: the sidebar column
+    /// re-made with a fresh `AnyView`, the pane row re-made (a `BookView`
+    /// whose `init` mints and discards two view models per pass), the
+    /// navigator's rows re-diffed. Read HERE, the only view that re-runs per
+    /// caret move is this box, which already carries the bar. The shell
+    /// still holds no model: it hands down a closure over the local model it
+    /// composed the bar from (CLAUDE.md: features receive values and
+    /// closures), never `self`.
+    let caretLabel: (() -> String?)?
     /// "now", for the day rule (injected so a pin holds the rule and not the
     /// machine's clock).
     var now: Date = Date()
@@ -184,7 +199,14 @@ struct SidebarNoteBox: View {
                     .fixedSize(horizontal: false, vertical: true)
                 let line = NoteBoxCopy.whereLine(
                     chapter: identity.chapter, index: identity.index,
-                    total: identity.total, block: caretLabel)
+                    total: identity.total, block: caretLabel?())
+#if DEBUG
+                // MAJOR-1's second arm: what the where-line SAYS, so the pin
+                // that counts the shell's bodies can also prove the label
+                // still follows the caret (a body count alone is satisfied by
+                // deleting the label).
+                let _ = SidebarGeometry.recordWhereLine(line, for: subjectKey)
+#endif
                 if !line.isEmpty {
                     Text(tokens.chromeLabel(line))
                         .font(tokens.small)

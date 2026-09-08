@@ -77,7 +77,7 @@ private func makeBox(
             words: 3214, blocks: 41, fannedBlocks: 2,
             editedAt: Date(timeIntervalSince1970: 1_788_000_000),
             savedAt: Date(timeIntervalSince1970: 1_787_800_000)),
-        caretLabel: state.isLive ? BlockLineLabel.caret(ordinal: 3, of: 41) : nil,
+        caretLabel: state.isLive ? { BlockLineLabel.caret(ordinal: 3, of: 41) } : nil,
         onEditHere: {},
         bar: withBar && model != nil ? AnyView(CommitBar(model: model!, axis: .box)) : nil))
 }
@@ -594,6 +594,90 @@ struct NoteBoxCompositionTests {
                 #expect(CommitBarGeometry.mounted("horizontal", post: postID) == 0,
                         "the paged Book mode's page draws no floating bar either")
             }
+#endif
+        }
+    }
+
+    /// **The round-end Fable pass, MAJOR-1 — a keystroke in a book note
+    /// re-runs the BOX, never the SHELL.** The box's where-line reads the
+    /// live editor's `caretOrdinal`/`blockCount`, which `updateCaretContext`
+    /// rewrites on every keystroke; read as a VALUE inside `ShellSplit`'s
+    /// sidebar closure, that registered the whole shell against the caret,
+    /// and every keystroke re-ran the sidebar column and the pane row.
+    ///
+    /// Through the REAL shell: a book opened in Outline, a note made live
+    /// through the book's published focus door, the box's bar mounted; then
+    /// twenty caret-context updates (the per-keystroke call), each given its
+    /// own run-loop turn so SwiftUI cannot coalesce them, against a counter
+    /// that increments INSIDE `SidebarView.body`. The second arm proves the
+    /// label still follows the caret — the count must fall AND the where-line
+    /// must move, or the pin is satisfied by deleting the feature.
+    ///
+    /// RED ON OLD (measured by behavioural revert — the value read back in
+    /// the shell's closure): twenty updates ran the sidebar's body twenty
+    /// times. Green after: fewer than five.
+    @Test func aKeystrokeInABookNoteReRunsTheBoxAndNotTheShell() async throws {
+        try await withOutlineBook(posts: 2) { session, db, readingID, postIDs in
+            let router = ShellRouter()
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 1200, height: 900),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+            }
+#if DEBUG
+            SidebarGeometry.noteBoxFrames[readingID] = nil
+            SidebarGeometry.noteBoxWhereLines[readingID] = nil
+            BookOutlineGeometry.focusDoors[readingID] = nil
+#endif
+            let hosting = NSHostingView(
+                rootView: RootView(session: session, services: nil, router: router))
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            router.pendingSelection = .reading(readingID)
+#if DEBUG
+            await settle(window, hosting, until: {
+                SidebarGeometry.noteBoxFrames[readingID] != nil
+                    && BookOutlineGeometry.focusDoors[readingID] != nil
+            })
+            let focus = try #require(
+                BookOutlineGeometry.focusDoors[readingID], "the book published its focus door")
+            focus(postIDs[0])
+            await settle(window, hosting, until: {
+                session.editorRouter.editing?.postID == postIDs[0]
+                    && CommitBarGeometry.mounted("box", post: postIDs[0]) == 1
+                    && SidebarGeometry.noteBoxWhereLines[readingID]?.contains("block 1/2") == true
+            }, maxTurns: 160)
+            let editing = try #require(session.editorRouter.editing, "the note is live in Outline")
+            #expect(editing.postID == postIDs[0])
+            #expect(CommitBarGeometry.mounted("box", post: postIDs[0]) == 1, "the box's bar is up")
+            #expect(SidebarGeometry.noteBoxWhereLines[readingID]?.contains("block 1/2") == true,
+                    "the where-line names the caret's block: \(String(describing: SidebarGeometry.noteBoxWhereLines[readingID]))")
+
+            // Let the mount's own churn drain, then count.
+            await settle(window, hosting, until: { false }, maxTurns: 6)
+            let key = SidebarGeometry.bodyKey(for: router.workspace)
+            let before = SidebarGeometry.bodyEvaluations[key] ?? 0
+            for _ in 0..<20 {
+                editing.updateCaretContext()
+                await settle(window, hosting, until: { false }, maxTurns: 1)
+            }
+            let ran = (SidebarGeometry.bodyEvaluations[key] ?? 0) - before
+            print("[round-end Fable pass · MAJOR-1] twenty caret-context updates ran "
+                  + "the sidebar's body \(ran) times")
+            #expect(ran < 5,
+                    "the shell must not re-render per keystroke — twenty caret-context updates ran the sidebar's body \(ran) times")
+
+            // The second arm: the label still follows the caret.
+            editing.jumpToAdjacentBlock(1)
+            editing.updateCaretContext()
+            await settle(window, hosting, until: {
+                SidebarGeometry.noteBoxWhereLines[readingID]?.contains("block 2/2") == true
+            })
+            #expect(SidebarGeometry.noteBoxWhereLines[readingID]?.contains("block 2/2") == true,
+                    "…and the box's where-line still moves with the caret: \(String(describing: SidebarGeometry.noteBoxWhereLines[readingID]))")
 #endif
         }
     }
