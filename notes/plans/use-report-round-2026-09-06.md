@@ -6955,3 +6955,67 @@ no migration, nothing in `BlockRangeIndex`/`EditorTextView`/`PaneTextAuthority`.
 
 **Counts for the round-2 fix pass (batch e): 2 findings, both FIXED — the MAJOR with a 3-issue probe and
 the walk, MINOR-1 with a 1-issue probe through a door that had no reachable road before.**
+
+#### 17o c/d/e round 2 — fixes (batch d)
+
+*(the batch-d implementer, resumed; TWO findings — MINOR-2 · NIT-2, both CONFIRMED and both fixed)*
+
+**MINOR-2 (NIT-2's liveness JOIN is a behavioural delta in a public op with no pin) — CONFIRMED and
+FIXED (`58341998`, a CORE commit alone). The finding is right, and the probe found the delta is
+SHARPER than either the finding or my own round-1 record said.**
+
+The reviewer's mechanism holds exactly: consuming `firstLivePlacedBlock` is not a rename, none of row
+17's three pins puts a tombstoned block under a LIVE placement, and *"the row-17 pins ride"* is true
+without being the same claim as *this change is pinned*. So the pin was written to the reviewer's own
+design — the race built exactly, in one transaction: the `block` row tombstoned, and its
+`container_block` row put back live inside the same write, because the block cascade takes the
+placement with it and a half-delivered batch does not (SyncSpec §5/§7).
+
+**What the red-on-old probe actually measured** (an in-place revert of the op to its pre-NIT-2 inline
+copy, on the committed tree, restored after): the old road did **not** anchor a live edge on the dead
+block. It handed the dead id to `insertVersionOfEdge`, whose `liveBlock` guard threw
+`blockNotFound(id: "…0001")` — so in this state the old road **REFUSED the link**, with a raw enum
+naming a block she cannot see, and the seal was never even consulted. **My round-1 record's sentence —
+*"can only turn a would-be dead anchor into a live empty one"* — understated it**, and both that
+sentence's home (the op's own comment) and the pins' docs now carry the measured truth instead. The new
+road links the notes correctly, which is strictly better than the refusal it replaces.
+
+**Pins (both red under that revert, green after):**
+- `VersionOperationsTests.aLivePlacementOverATombstonedBlockIsNotAnAnchor` — the anchor is a LIVE
+  minted block carrying one live EMPTY take, never the dead id, and `versionPeerPosts` finds the peer
+  from the raced note. RED: `blockNotFound(id: …0001)`.
+- `.theRacedShapeUnderASealRefusesRatherThanAnchoringOnTheDeadBlock` — the mint arm's `ensureUnlocked`
+  is the refusal the old road never reached, and nothing is linked on the way to it. RED: the same
+  `blockNotFound`, thrown before the seal.
+
+`swift test` **1498 / 162** (1496 + the two pins).
+
+**NIT-2 (`resolveTitles` is test-only while its doc claims callers) — CONFIRMED and FIXED (`0a970e3a`)
+by DEMOTION, with the choice weighed in the doc rather than asserted.**
+
+The grep is the reviewer's and I re-ran it: `SidebarView`'s is the only `.task` that resolves titles
+and it calls `observeTitles`; `resolveTitles` survives in `NodSetTests:224` and
+`WorkspaceNavigationTests:480` alone. The arbitration offered delete-or-demote; **demote**, because the
+two test claims are NOT covered by the held road's pins — pools, tags and K1's *"Untitled is a NAME"*
+are theirs alone — and folding them onto `readTitles` would re-type the subjects-and-empty-guard logic
+in test code, which is a worse copy than the one being complained about. The doc now names its two
+callers, says plainly that it has none in production, and carries the warning the finding asked for:
+**a new surface takes `observeTitles`**, because adopting the one-shot re-creates her row-18 complaint
+exactly (only a change of `titleSubjectsKey` re-runs it, and a rename does not touch it).
+
+No pin (dead production code; the mechanism is the grep). `WorkspaceModelTests` + `NodSetTests`
+**18 / 2**.
+
+**Closing runs for this pass:** `swift test` → **1498 tests in 162 suites**, green. ONE `xcodebuild
+test` over **19 suite TYPES** (`NoteVersionsPaneTests` · the workspace/strip suites touched —
+`WorkspaceModelTests` · `NodSetTests` · `WorkspaceNamingTests` · `OpenNotesTests` ·
+`NavigationHistoryTests` · `NavigationDoorsTests` · `MastheadLayoutTests` · `ShellChromeTests` — plus
+the ten `Tutorial*Tests` spine types) → **`✔ Test run with 140 tests in 19 suites passed`**, zero
+`skipped:` lines. iOS **BUILD SUCCEEDED**, zero errors (core moved). Zero
+`Sources/VariorumCore/Sync/`, zero schema; path-scoped adds, pushed per commit, no trailer lines.
+
+**For the round-3 reviewer, stated plainly:** the one thing in this pass worth re-reading is the
+corrected claim about what the pre-NIT-2 road did in the raced state — it refused with
+`blockNotFound`, it did not silently link a dead block. That is measured, not read: the revert probe's
+red is quoted above, and re-running it reproduces both reds in one `swift test --filter
+VersionOperationsTests`.
