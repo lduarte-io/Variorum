@@ -861,7 +861,14 @@ private struct WorkbenchInfoPanel: View {
                             model.paneEdited(
                                 variantID: variantID,
                                 oldText: row.text ?? "", newText: newText)
-                        })
+                        },
+                        // 17o batch b's ladder, R1-3 (the record's note (a)):
+                        // the panel's pane enters the note's current block
+                        // where she was, else at its start — the same rule as
+                        // every other pane host. It still reports no caret
+                        // (no `onSelectionChange`): a fourth reporter is a
+                        // design act, not a ladder fix.
+                        caretOnGoingLive: model.caretLanding(forVariant: variantID))
                         .padding(8)
                         .background(tokens.surface, in: RoundedRectangle(cornerRadius: 8))
                         .overlay(

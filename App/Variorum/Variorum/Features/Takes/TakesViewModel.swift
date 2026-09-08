@@ -561,8 +561,14 @@ final class TakesViewModel {
         caretToEndCounter += 1
         focus(pane)
         // The room asked for the END explicitly (13f W7's A22) — the note's
-        // remembered place does not get a say here.
-        paneCaretLanding = nil
+        // remembered place does not get a say here. Armed as the END rather
+        // than cleared (the ladder's R1-3 rider): a pane BORN live under the
+        // room's request only ADOPTS the caret-to-end token at its first
+        // render (`makeNSView` — the token applies on updates), so with the
+        // transition's nil-means-START rule a cleared arm would have landed
+        // it at 0; `Int.max` clamps to the text's end in the transition, and
+        // an already-mounted pane's token application lands the same place.
+        paneCaretLanding = (variantID: pane.variantID, offset: .max)
     }
 
     // MARK: - Where a pane's caret lands when it takes the ring (17o batch b)

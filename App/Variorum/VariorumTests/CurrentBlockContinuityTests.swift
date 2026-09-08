@@ -343,9 +343,10 @@ struct CurrentBlockContinuityTests {
             let paneThree = try #require(Self.views(PaneTextView.self, in: hosting).first {
                 $0.identifier?.rawValue.hasSuffix("|\(variants[2])") == true
             })
-            // The click's own place, then the click-to-focus gesture.
+            // The click's own place, then the click-to-focus gesture (the
+            // one road `mouseDown` takes — R1-2's flag rides it).
             paneThree.setSelectedRange(NSRange(location: 3, length: 0))
-            paneThree.onPlainClick?(3)
+            paneThree.plainClick(at: 3)
             #expect(await Self.settle(window, hosting) {
                 Self.livePanes(in: hosting).contains {
                     $0.identifier?.rawValue.hasSuffix("|\(variants[2])") == true
@@ -363,6 +364,111 @@ struct CurrentBlockContinuityTests {
             #expect(caret >= blockThreeRange.location && caret <= blockThreeRange.upperBound,
                     "arm 2: the caret is in block 3 (\(caret) vs block 3 \(blockThreeRange)), not at the jump's block start \(blockTwoRange.location)")
             #expect(router.focusedBlock?.blockID == blocks[2])
+        }
+    }
+
+    // MARK: - 17o batch b ladder, R1-3 (MAJOR): a nil-offset ring landing lands at the START
+
+    /// Round 1's R1-3. A surface that holds no caret (Blocks' row, the
+    /// Library's Open, the outline's card) reports the block and a nil
+    /// offset; the Takes landing then rang that block's pane with nothing
+    /// remembered and left the caret where AppKit's `string =` had parked
+    /// it — the END — and the live pane REPORTED that end as "where she
+    /// was", so the next door into Write landed at the END of the
+    /// paragraph. Before the batch that road landed at the block's START;
+    /// the batch's own rule says nil lands at the start "as today". Red on
+    /// the pre-fix tree at both places it asserts: the pane's caret on
+    /// going live (the END) and Write's landing (the END).
+    @Test func aRingLandingWithNothingRememberedLandsAtTheTakesStartAndWriteFollowsIt() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 13))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let post = try session.operations.createPost(title: "nil lands at the start")
+            var blocks: [String] = []
+            var variants: [String] = []
+            for text in [
+                "Block one, the opening paragraph.",
+                "Block two, a middle paragraph she never clicked into.",
+                "Block three — Blocks' row picks it, with no caret to report.",
+            ] {
+                let minted = try session.operations.newBlock(in: post.id, text: text)
+                blocks.append(minted.block.id)
+                variants.append(minted.variant.id)
+            }
+            let router = session.commandRouter
+            router.forgetCurrentBlock(for: post.id)
+            UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(post.id)")
+            #if DEBUG
+            ReadModeOracle.reset()
+            BlocksWorkbenchOracle.focusedBlockID = nil
+            #endif
+            let slots = try await db.read { [id = post.id] db in
+                try Queries.renderPost(db, containerID: id)
+            }
+            let index = BlockRangeIndex(slots: slots, tail: nil)
+            let blockThreeRange = index.range(ofEntryAt: 2)
+
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 1100, height: 750),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            defer {
+                window.orderOut(nil)
+                window.close()
+                UserDefaults.standard.removeObject(forKey: "postMode.\(post.id)")
+                UserDefaults.standard.removeObject(forKey: ReadModeView.faceKey(post.id))
+                router.forgetCurrentBlock(for: post.id)
+            }
+            let hosting = NSHostingView(
+                rootView: PostDetailView(session: session, postID: post.id)
+                    .environment(ThemeStore(session: session)))
+            hosting.frame = NSRect(x: 0, y: 0, width: 1100, height: 750)
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            #expect(await Self.settle(window, hosting) {
+                Self.views(EditorTextView.self, in: hosting).first?.window != nil
+                    && router.activeMode == .write && router.focusedBlock != nil
+            }, "Write mounts and reports its arrival")
+
+            // BLOCKS: its row click reports the block and NO offset — the
+            // literal call `BlocksWorkbenchView`'s row makes.
+            #expect(router.requestMode(.blocks, postID: post.id))
+            #expect(await Self.settle(window, hosting) { router.activeMode == .blocks })
+            router.noteFocusedBlock(blocks[2], variantID: variants[2], postID: post.id)
+            #expect(router.focusedBlock?.blockID == blocks[2])
+            #expect(router.focusedBlock?.utf16Offset == nil, "no caret was reported — nil, not zero")
+
+            // TAKES rings block 3's pane: with nothing remembered the caret
+            // is at the take's START (red-on-old: the END, `text.length`).
+            #expect(router.requestMode(.takes, postID: post.id))
+            #expect(await Self.settle(window, hosting) {
+                Self.livePanes(in: hosting).contains {
+                    $0.identifier?.rawValue.hasSuffix("|\(variants[2])") == true
+                }
+            }, "Takes lands with block 3 live")
+            let pane = try #require(Self.livePanes(in: hosting).first {
+                $0.identifier?.rawValue.hasSuffix("|\(variants[2])") == true
+            })
+            #expect(pane.selectedRange().location == 0,
+                    "the pane's caret on going live is the take's START, not AppKit's leftover END (\(pane.selectedRange().location) of \((pane.string as NSString).length))")
+            #expect(await Self.settle(window, hosting) { router.focusedBlock?.utf16Offset == 0 },
+                    "…and that is what the live pane reports as her place")
+
+            // WRITE follows: block 3's START, never its end.
+            #expect(router.requestMode(.write, postID: post.id))
+            #expect(await Self.settle(window, hosting) {
+                guard let view = Self.views(EditorTextView.self, in: hosting).first,
+                      view.string.count >= index.documentLength else { return false }
+                return view.selectedRange().location == blockThreeRange.location
+            }, "Write lands at block 3's start — as it did before the batch")
+            let editor = try #require(Self.views(EditorTextView.self, in: hosting).first)
+            #expect(editor.selectedRange().location == blockThreeRange.location,
+                    "Write's landing (\(editor.selectedRange().location)) is block 3's start \(blockThreeRange.location), not its end \(blockThreeRange.upperBound)")
         }
     }
 }

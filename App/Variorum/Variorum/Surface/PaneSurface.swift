@@ -222,6 +222,25 @@ final class PaneTextView: NSTextView, MarkdownFormattable {
     /// from it; take panes ignore the value).
     var onPlainClick: ((Int) -> Void)?
 
+    /// **17o batch b's ladder, R1-2: the click has ALREADY placed the caret.**
+    /// Set by the plain click-to-focus gesture, so the live transition that
+    /// click causes leaves the selection where the click put it instead of
+    /// landing the composition's remembered place over it (measured on the
+    /// Lenses board: a click at offset 10 into another take of the current
+    /// block went live at the first take's offset). Read and spent by the
+    /// coordinator's liveness transition: a read→read render keeps it (the
+    /// flip may take a render to arrive), a live render or any transition
+    /// consumes it, so it can never outlive the gesture that set it.
+    var clickBroughtPlace = false
+
+    /// The plain click-to-focus gesture as ONE road — `mouseDown`'s tail and
+    /// the pins' door (a synthesized `NSEvent` would run AppKit's selection
+    /// tracking loop, which waits on a mouse-up nobody sends).
+    func plainClick(at offset: Int) {
+        clickBroughtPlace = true
+        onPlainClick?(offset)
+    }
+
     /// **13e E3 — ⌘-CLICK, where a composition claims it** (her A18: *"⌘-click
     /// in Takes to select blocks to merge"*). Return true to CONSUME the
     /// click: no selection tracking, no click-to-focus. nil everywhere but
@@ -530,7 +549,7 @@ final class PaneTextView: NSTextView, MarkdownFormattable {
         defer { fireConvergenceOccasion() }  // 13c 1G: a click is an occasion
         guard selectedRange().length == 0 else { return }
         let point = convert(event.locationInWindow, from: nil)
-        onPlainClick?(characterIndexForInsertion(at: point))
+        plainClick(at: characterIndexForInsertion(at: point))
     }
 
     /// The one factory: explicit TK2 opt-in (TEXTKIT2 §4.1), content-sized
@@ -637,8 +656,11 @@ struct PaneSurfaceView: View {
     /// mode switch keeps her where she was instead of dropping her at the
     /// take's first character (and so the report the pane makes on going live
     /// is that same place, never the end of the text AppKit left the
-    /// selection at). nil = leave the selection alone (a click brought its
-    /// own place; a pane the note has no memory of starts where it starts).
+    /// selection at). **The ladder's R1-2/R1-3:** it governs a PROGRAMMATIC
+    /// transition only — a click keeps the place the click brought — and
+    /// nil means the take's START (Write's nil rule; the END AppKit left was
+    /// an artifact the pane then reported as her place — QUESTIONS #97).
+    /// `Int.max` asks for the END explicitly (the room's gesture).
     var caretOnGoingLive: Int?
     /// 13b 1b (AD-4): the pane's Variorum context-menu items.
     var menuItems: (() -> [PaneTextView.MenuItemSpec])?
@@ -931,7 +953,16 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
             // reliably receives. Transition-gated so ordinary read→read
             // updates cost nothing.
             if live != was { view?.fireConvergenceOccasion() }
-            guard live, !was, let view else { return }
+            guard live, !was, let view else {
+                // 17o batch b's ladder, R1-2: a click's flag is spent by a
+                // live render (the pane already held the ring — nothing to
+                // land) or by a live→read transition (the gesture is over);
+                // a read→read render KEEPS it for the flip it asked for.
+                if live || live != was { view?.clickBroughtPlace = false }
+                return
+            }
+            let clickBroughtPlace = view.clickBroughtPlace
+            view.clickBroughtPlace = false
             // 17o batch b (U-20): the ring arrives WHERE SHE WAS. Placed
             // before the responder claim, so the claim's own selection
             // notification reports this place — the note's one caret — rather
@@ -939,7 +970,21 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
             // at (measured: a take pane going live reported its block's END,
             // which then became the note's remembered offset and landed Write
             // at the end of the paragraph she was standing in the middle of).
-            if let landing = caretOnGoingLive {
+            //
+            // The ladder's R1-2/R1-3 (round 1): this is the rule for a
+            // PROGRAMMATIC transition only — the N9 and bloom landings, Read's
+            // edit face, the room. A CLICK placed the caret itself and keeps
+            // it (a click into another take of the current block was being
+            // landed at the first take's offset). And with nothing
+            // remembered the pane lands at the take's START — Write's own
+            // nil rule (Act 10 rows 39/49), not the END AppKit's `string =`
+            // left behind: that END was an artifact, and the live pane then
+            // REPORTED it as "where she was", so Blocks' row → Takes → Write
+            // landed at the end of the paragraph. QUESTIONS #97 carries the
+            // START/END edge (START built, PROVISIONAL); `Int.max` is how the
+            // room asks for the END explicitly (clamped below).
+            if !clickBroughtPlace {
+                let landing = caretOnGoingLive ?? 0
                 let length = (view.string as NSString).length
                 view.setSelectedRange(
                     NSRange(location: min(max(0, landing), length), length: 0))
