@@ -8227,7 +8227,7 @@ dropped every remembered story on a voice switch that moved nothing on that page
   becomes `outlineSurfaceSizes`, `flowSurfaceSizes` gains its namespace, +`persistSurfaceSize`);
   `Features/BookView/BookView.swift` (the two Outline `StableSurface` call sites pass `settled:`).
   Mac Debug build green.
-- **PIECE B — the pins. DONE (PENDING_B).** `App/Variorum/VariorumTests/SurfaceSizeMemoryTests.swift`
+- **PIECE B — the pins. DONE (df747e5f).** `App/Variorum/VariorumTests/SurfaceSizeMemoryTests.swift`
   (new, 6 tests / 7 cases): (1) the round trip — a report alone reaches no disk, `persist` makes a
   FRESH memory read the size back, another typography refuses it, the old typography returns it, and
   the stamp is felt WITHIN a session too; (1b) the two voices really do stamp differently and inline
