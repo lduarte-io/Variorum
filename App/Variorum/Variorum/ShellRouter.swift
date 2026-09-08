@@ -64,20 +64,85 @@ final class ShellRouter {
     struct BlockLanding: Equatable, Sendable {
         let containerID: String
         let blockID: String
+
+        /// A landing for a destination, if that destination is a container
+        /// that can hold one and a block was actually named. Living here is
+        /// what lets the one adoption door take a `String?` and still be the
+        /// only place the pair is assembled.
+        init?(_ destination: SidebarSelection, blockID: String?) {
+            guard let blockID else { return nil }
+            switch destination {
+            case .post(let id), .pool(let id):
+                self.init(containerID: id, blockID: blockID)
+            default:
+                return nil
+            }
+        }
+
+        init(containerID: String, blockID: String) {
+            self.containerID = containerID
+            self.blockID = blockID
+        }
     }
 
-    /// **THE ONE RULE: a navigation expires whatever is parked, and parks
-    /// only what it names.** Every door calls this — the ones that name a
-    /// block pass one, the ones that do not pass `nil` — so "the park
-    /// expires" needs no second mechanism and no door can forget.
+    /// **RULE ONE — a NAVIGATION expires whatever is parked, and parks only
+    /// what it names.** `RootView.adopt` calls this on every navigation, in
+    /// one statement, so no door can express "park, then navigate" (round 2,
+    /// MINOR-1: that order deletes the landing road with the suite green).
+    ///
+    /// **RULE TWO — a park is SPENT WHEN IT LANDS** (`spendLanding`), because
+    /// a RE-MOUNT is not a navigation: the detail view applies the landing in
+    /// `onAppear`, and the shell re-mounts it whenever the pane stops being
+    /// the live one — a split's other pane taking focus, a second window
+    /// becoming key — neither of which passes through a navigation door. An
+    /// unspent park therefore re-threw her to the block a door named an hour
+    /// ago every time she came back (round 2's MAJOR).
     func park(_ landing: BlockLanding?) {
         blockLanding = landing
+        // Only a NEW park bumps the generation; spending one must not, or
+        // the mount's identity would change under a view that has already
+        // landed and SwiftUI would rebuild it, throwing the caret away.
+        if let landing {
+            landingGenerations[landing.containerID, default: 0] += 1
+        }
     }
 
     /// What a mounting container should land on, if this park is its own.
     func landing(for containerID: String) -> String? {
         blockLanding?.containerID == containerID ? blockLanding?.blockID : nil
     }
+
+    /// **Spend it.** Called by the shell the moment a container's detail
+    /// MOUNTS with a landing in hand — the landing has been delivered, so
+    /// the park's work is done and a later re-mount of the same note must
+    /// land at the remembered caret instead (U-20/row 42). A no-op when
+    /// nothing of this container's is parked, so re-mounts are free.
+    func spendLanding(for containerID: String) {
+        if blockLanding?.containerID == containerID { blockLanding = nil }
+    }
+
+    /// **How many landings this container has been handed.** The detail's
+    /// view identity keys on THIS, never on the parked block: a NEW park
+    /// re-creates the editor (which is what makes "open it again, at another
+    /// block" work), and spending one does not (which is what stops the
+    /// spend from rebuilding the view it just landed). A container she never
+    /// opened at a block sits at 0 forever and its identity never churns.
+    func landingGeneration(for containerID: String) -> Int {
+        landingGenerations[containerID] ?? 0
+    }
+
+    private var landingGenerations: [String: Int] = [:]
+
+#if DEBUG
+    /// **Round 2, MINOR-1's oracle** (`SidebarGeometry`'s pattern, one door
+    /// wide): `RootView.open(_:blockID:in:)` is private and every production
+    /// caller of it is a view closure a test cannot fire, so the one thing
+    /// the finding is about — that the SHELL's block-naming door navigates
+    /// and parks in the right order — had no way to be asserted through the
+    /// real road. The mounted shell publishes its door here; the pin calls
+    /// it. Nothing production reads it.
+    static var blockNamingDoor: ((SidebarSelection, String?) -> Void)?
+#endif
 
     // MARK: - The navigation doors (menu + strip)
 

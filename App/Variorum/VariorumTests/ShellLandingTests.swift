@@ -64,6 +64,48 @@ struct ShellLandingRuleTests {
         #expect(router.landing(for: "X") == nil)
         #expect(router.landing(for: "Y") == "b9")
     }
+
+    /// **Round 2's MAJOR, as arithmetic: a park is SPENT when it lands, and
+    /// the identity generation does not move when it is.** The second half
+    /// is the whole reason the identity keys on the generation rather than
+    /// on the block — a spend that changed the key would rebuild the very
+    /// view that had just landed.
+    @Test func aParkIsSpentOnceAndTheGenerationDoesNotMoveWhenItIs() {
+        let router = ShellRouter()
+        #expect(router.landingGeneration(for: "X") == 0,
+                "a container never opened at a block never churns its identity")
+
+        router.park(ShellRouter.BlockLanding(containerID: "X", blockID: "b3"))
+        #expect(router.landingGeneration(for: "X") == 1)
+        #expect(router.landing(for: "X") == "b3")
+
+        router.spendLanding(for: "X")
+        #expect(router.landing(for: "X") == nil, "spent — a re-mount lands nowhere")
+        #expect(router.landingGeneration(for: "X") == 1,
+                "…and the identity is untouched, so the landed view survives")
+
+        // Spending again, and spending someone else's, are free.
+        router.spendLanding(for: "X")
+        router.park(ShellRouter.BlockLanding(containerID: "X", blockID: "b7"))
+        router.spendLanding(for: "Y")
+        #expect(router.landing(for: "X") == "b7", "another container's spend is not ours")
+        #expect(router.landingGeneration(for: "X") == 2,
+                "a NEW park DOES move the identity — that is what re-lands her")
+    }
+
+    /// The one adoption door's landing, assembled in one place: only a
+    /// container that can hold a landing gets one, and only when a block is
+    /// actually named.
+    @Test func onlyAContainerDestinationNamingABlockMakesALanding() {
+        #expect(ShellRouter.BlockLanding(.post("p"), blockID: "b")
+                == ShellRouter.BlockLanding(containerID: "p", blockID: "b"))
+        #expect(ShellRouter.BlockLanding(.pool("s"), blockID: "b")
+                == ShellRouter.BlockLanding(containerID: "s", blockID: "b"))
+        #expect(ShellRouter.BlockLanding(.post("p"), blockID: nil) == nil,
+                "an ordinary navigation names none")
+        #expect(ShellRouter.BlockLanding(.reading("r"), blockID: "b") == nil)
+        #expect(ShellRouter.BlockLanding(.library, blockID: "b") == nil)
+    }
 }
 
 // MARK: - The reviewer's scenario, through the real shell
@@ -71,13 +113,13 @@ struct ShellLandingRuleTests {
 @Suite("A navigation expires the park (17o c/d/e round 1, MAJOR-2)", .serialized)
 @MainActor
 struct ShellLandingMountTests {
-    private nonisolated static func pumpRunLoop(_ seconds: TimeInterval) {
+    nonisolated static func pumpRunLoop(_ seconds: TimeInterval) {
         MainActor.assumeIsolated {
             RunLoop.main.run(until: Date().addingTimeInterval(seconds))
         }
     }
 
-    private static func settle(
+    static func settle(
         _ window: NSWindow, _ hosting: NSView, timeout: TimeInterval = 8,
         until predicate: () -> Bool
     ) async -> Bool {
@@ -94,7 +136,7 @@ struct ShellLandingMountTests {
         return predicate()
     }
 
-    private static func views<V: NSView>(_ type: V.Type, in view: NSView) -> [V] {
+    static func views<V: NSView>(_ type: V.Type, in view: NSView) -> [V] {
         var found: [V] = []
         if let v = view as? V { found.append(v) }
         for sub in view.subviews { found.append(contentsOf: views(type, in: sub)) }
@@ -207,6 +249,178 @@ struct ShellLandingMountTests {
                       view.string.count >= index.documentLength else { return false }
                 return view.selectedRange().location == blockOneStart + 4
             }, "RED ON OLD: Write lands at the remembered caret \(blockOneStart + 4), not at the block a door named a navigation ago (\(blockThreeStart))")
+        }
+    }
+
+    /// **ROUND 2's MAJOR — a RE-MOUNT is not a navigation.** The shell
+    /// re-creates the note's detail whenever the pane stops being the live
+    /// one (a split's other pane taking focus, a second window becoming
+    /// key), and the landing is applied in `onAppear`, which fires on every
+    /// mount. With the park unspent, coming back threw her to the block a
+    /// door named instead of the caret she left — U-20/row 42 again, by a
+    /// road no navigation door passes through.
+    ///
+    /// Red on HEAD before this fix (a new finding, so red-on-HEAD is the
+    /// test): the second mount re-jumped to block 3 and `landing(for: X)`
+    /// still answered.
+    @Test func aRemountAfterAFocusRoundTripLandsAtTheRememberedCaret() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 9))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let router = ShellRouter()
+            let noteX = try session.operations.createPost(title: "X")
+            var blocks: [String] = []
+            for text in [
+                "the first paragraph of note X, long enough to hold a caret.",
+                "the second paragraph of note X.",
+                "the third paragraph of note X — the one a door named.",
+            ] {
+                blocks.append(try session.operations.newBlock(
+                    in: noteX.id, text: text, at: .end).block.id)
+            }
+            let slots = try await db.read { [id = noteX.id] db in
+                try Queries.renderPost(db, containerID: id)
+            }
+            let index = BlockRangeIndex(slots: slots, tail: nil)
+            let blockOneStart = index.range(ofEntryAt: 0).location
+            let blockThreeStart = index.range(ofEntryAt: 2).location
+
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 1200, height: 800),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            let hosting = NSHostingView(
+                rootView: RootView(session: session, services: nil, router: router))
+            hosting.frame = NSRect(x: 0, y: 0, width: 1200, height: 800)
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            defer {
+                window.orderOut(nil)
+                window.close()
+                session.commandRouter.forgetCurrentBlock(for: noteX.id)
+                UserDefaults.standard.removeObject(forKey: "postMode.\(noteX.id)")
+            }
+            _ = await Self.settle(window, hosting) {
+                router.workspace.history().current != nil
+            }
+
+            // The block door, then her caret elsewhere in the same note.
+            router.pendingSelection = .post(noteX.id)
+            let showing = await Self.settle(window, hosting) {
+                router.workspace.focusedSelection == .post(noteX.id)
+            }
+            #expect(showing, "X is showing")
+            router.park(ShellRouter.BlockLanding(
+                containerID: noteX.id, blockID: blocks[2]))
+            let landedOnThree = await Self.settle(window, hosting) {
+                guard let view = Self.views(EditorTextView.self, in: hosting).first,
+                      view.string.count >= index.documentLength else { return false }
+                return view.selectedRange().location == blockThreeStart
+            }
+            #expect(landedOnThree, "the named block is where the caret lands")
+            #expect(router.landing(for: noteX.id) == nil,
+                    "RED ON HEAD: the park is SPENT the moment it lands")
+
+            let editor = try #require(Self.views(EditorTextView.self, in: hosting).first)
+            editor.setSelectedRange(NSRange(location: blockOneStart + 4, length: 0))
+            let remembered = await Self.settle(window, hosting) {
+                session.commandRouter.currentBlock(for: noteX.id)?.blockID == blocks[0]
+            }
+            #expect(remembered, "the caret's block is remembered")
+
+            // A FOCUS ROUND TRIP — no navigation anywhere: the pane stops
+            // being live, its detail unmounts, and it comes back.
+            router.openBeside(.shelf)
+            let split = await Self.settle(window, hosting) {
+                router.workspace.panes.count == 2
+                    && router.workspace.focusedPane != .primary
+            }
+            #expect(split, "the split's second pane has the focus")
+            router.workspace.focus(.primary)
+            let backLive = await Self.settle(window, hosting) {
+                router.workspace.focusedPane == .primary
+            }
+            #expect(backLive, "and the note's pane is live again")
+
+            #expect(router.landing(for: noteX.id) == nil,
+                    "nothing is waiting to re-throw her")
+            let remount = await Self.settle(window, hosting) {
+                guard let view = Self.views(EditorTextView.self, in: hosting).first,
+                      view.string.count >= index.documentLength else { return false }
+                return view.selectedRange().location == blockOneStart + 4
+            }
+            #expect(remount, "RED ON HEAD: the re-mount lands at the remembered caret \(blockOneStart + 4), not at the named block (\(blockThreeStart))")
+        }
+    }
+}
+
+// MARK: - The block-naming door, through the real road (round 2, MINOR-1)
+
+@Suite("The shell's block-naming door navigates AND parks (17o c/d/e round 2, MINOR-1)", .serialized)
+@MainActor
+struct ShellLandingDoorTests {
+    /// **The order, held where it lives.** Round 1 shipped the rule as two
+    /// statements in `RootView.open` — adopt (which clears) then park — and
+    /// nothing held it: `open` is private, every production caller is a view
+    /// closure, and both existing pins reach past the shell (one calls
+    /// `router.park` itself, the other mounts `PoolDetailView` directly), so
+    /// reversing the two lines left the suite green while the whole Stage C
+    /// landing road died. The landing is folded into the one adoption door
+    /// now — an order that cannot be expressed — and this drives the REAL
+    /// door through the shell's own DEBUG publication of it.
+    @Test func theDoorNavigatesAndLeavesItsLandingParked() async throws {
+        let db = try AppDatabase.inMemory()
+        try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = .constant(Date(timeIntervalSince1970: 1_782_864_000))
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 3))
+        } operation: { @MainActor in
+            let session = AppSession(database: db)
+            let router = ShellRouter()
+            let note = try session.operations.createPost(title: "X")
+            let one = try session.operations.newBlock(in: note.id, text: "first.", at: .end)
+            let two = try session.operations.newBlock(in: note.id, text: "second.", at: .end)
+            _ = one
+
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 900, height: 600),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            let hosting = NSHostingView(
+                rootView: RootView(session: session, services: nil, router: router))
+            hosting.frame = NSRect(x: 0, y: 0, width: 900, height: 600)
+            window.contentView = hosting
+            window.makeKeyAndOrderFront(nil)
+            defer {
+                window.orderOut(nil)
+                window.close()
+                ShellRouter.blockNamingDoor = nil
+                session.commandRouter.forgetCurrentBlock(for: note.id)
+                UserDefaults.standard.removeObject(forKey: "postMode.\(note.id)")
+            }
+            _ = await ShellLandingMountTests.settle(window, hosting) {
+                ShellRouter.blockNamingDoor != nil
+            }
+            let door = try #require(ShellRouter.blockNamingDoor,
+                                    "the mounted shell publishes its block-naming door")
+
+            // THE REAL ROAD: one call, both halves.
+            door(.post(note.id), two.block.id)
+            #expect(router.workspace.focusedSelection == .post(note.id),
+                    "it navigated")
+            #expect(router.landing(for: note.id) == two.block.id,
+                    "RED on a reversed order: …and its landing is parked, not eaten")
+
+            // And a door that names NO block expires it, through the same road.
+            door(.library, nil)
+            #expect(router.workspace.focusedSelection == .library)
+            #expect(router.landing(for: note.id) == nil)
         }
     }
 }

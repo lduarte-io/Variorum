@@ -312,6 +312,9 @@ struct RootView: View {
             wirePaletteCommands()
             wireWorkspace()
             adoptMarkdownPalette()
+#if DEBUG
+            publishBlockNamingDoor()
+#endif
             // 13e E14 (W26): ask the system for ⌃⌥⌘N. Here because this is
             // the one place holding BOTH the app-lifetime centre and the
             // `openWindow` a summon needs; idempotent, so the second window
@@ -455,16 +458,23 @@ struct RootView: View {
     /// The ONE door a destination enters a pane through — so her round-7.3
     /// rule (a split never shows one note twice) cannot be bypassed by
     /// adding a door, and is spoken in one voice wherever it fires.
-    private func adopt(_ destination: SidebarSelection, in pane: PaneID) {
-        // 17o c/d/e round 1, MAJOR-2: **a navigation expires a parked block
-        // landing.** Every ordinary door lands here — `openHere`, the
+    private func adopt(
+        _ destination: SidebarSelection, in pane: PaneID, landing blockID: String? = nil
+    ) {
+        // 17o c/d/e round 1 (MAJOR-2) + round 2 (MINOR-1): **a navigation
+        // expires a parked block landing and installs the one it names — in
+        // ONE statement.** Every ordinary door lands here — `openHere`, the
         // sidebar's own binding, ⌘K's rows, the back/forward chips, the
         // open-post broadcast — and none of them names a block, so the park
-        // must not outlive them. `open(_:blockID:)` calls this FIRST and
-        // parks AFTER, which is why clearing here cannot erase a park as it
-        // is made (the cold review's exact objection to doing it the other
-        // way round).
-        router.park(nil)
+        // must not outlive them.
+        //
+        // Round 1 shipped this as two statements in `open` (adopt, then
+        // park) and the ORDER was load-bearing with nothing holding it:
+        // reverse the two and the clear eats every park as it is made,
+        // deleting the whole Stage C landing road with the suite green.
+        // Folding the landing into the one adoption door makes the wrong
+        // order UNEXPRESSIBLE rather than merely untaken.
+        router.park(ShellRouter.BlockLanding(destination, blockID: blockID))
         switch router.workspace.select(destination, in: pane) {
         case .adopted:
             break
@@ -640,8 +650,25 @@ struct RootView: View {
                     session: session, postID: postID,
                     initialBlockID: target(for: postID),
                     recentBookIDs: router.workspace.recentBookIDs)
-                    // a different post (or block landing) is a different editor
-                    .id("\(postID)#\(target(for: postID) ?? "")")
+                    // **The park is spent when it lands.** A re-mount is not
+                    // a navigation — the shell re-creates this view whenever
+                    // the pane stops being live (a split's other pane taking
+                    // focus, a second window becoming key) — so an unspent
+                    // park re-threw her to the named block instead of the
+                    // caret she left (round 2's MAJOR).
+                    //
+                    // BELOW the `.id`, deliberately and measured: a modifier
+                    // ABOVE it wraps the identified child, so it keeps its own
+                    // lifetime across an identity change and never fires
+                    // again — the first cut of this line sat there and the
+                    // park was never spent.
+                    .onAppear { router.spendLanding(for: postID) }
+                    // A different post — or a NEW landing for this one — is a
+                    // different editor. The key is the landing GENERATION, not
+                    // the parked block: the mount above SPENDS the park, and
+                    // an identity keyed on the block would then change under a
+                    // view that has already landed and throw the caret away.
+                    .id("\(postID)#\(router.landingGeneration(for: postID))")
             } else {
                 readCheapNote(postID, pane: pane)
             }
@@ -671,7 +698,8 @@ struct RootView: View {
                 PoolDetailView(
                     session: session, poolID: poolID,
                     initialBlockID: target(for: poolID))
-                    .id("\(poolID)#\(target(for: poolID) ?? "")")
+                    .onAppear { router.spendLanding(for: poolID) }
+                    .id("\(poolID)#\(router.landingGeneration(for: poolID))")
             } else {
                 readCheapNote(poolID, pane: pane)
             }
@@ -743,17 +771,19 @@ struct RootView: View {
     private func open(
         _ picked: SidebarSelection, blockID: String?, in pane: PaneID? = nil
     ) {
-        // ORDER IS THE FIX (MAJOR-2): navigate first — `adopt` expires
-        // whatever was parked — then park what THIS door names. Parking
-        // before adopting would have the clear eat the park.
-        adopt(picked, in: pane ?? router.workspace.focusedPane)
-        switch (picked, blockID) {
-        case (.post(let id), .some(let block)), (.pool(let id), .some(let block)):
-            router.park(ShellRouter.BlockLanding(containerID: id, blockID: block))
-        default:
-            break
+        adopt(picked, in: pane ?? router.workspace.focusedPane, landing: blockID)
+    }
+
+#if DEBUG
+    /// Publishes THIS shell's block-naming door for round 2's MINOR-1 pin —
+    /// see `ShellRouter.blockNamingDoor`. Installed on appear beside the
+    /// other root wiring; the pin clears it in its own teardown.
+    private func publishBlockNamingDoor() {
+        ShellRouter.blockNamingDoor = { destination, blockID in
+            open(destination, blockID: blockID)
         }
     }
+#endif
 
     private func target(for containerID: String) -> String? {
         router.landing(for: containerID)
