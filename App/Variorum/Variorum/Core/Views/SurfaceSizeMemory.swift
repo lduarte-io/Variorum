@@ -207,10 +207,15 @@ final class SurfaceSizeMemory {
     /// loaded from disk, which the `written` cache would decline to re-write —
     /// but the promise is the one the round-1 record made out loud, and a
     /// promise that holds only as an emergent property of two other rules is
-    /// one refactor away from being false. The flow's road is why it matters:
-    /// `FlowStoryRow`'s empty-read branch calls `remember` and then
-    /// `settledHere()` → `persist` in the SAME turn, so there is no settle
-    /// interval standing between a wrong stamp and the disk.
+    /// one refactor away from being false. The road that makes it matter is
+    /// `StableSurface.report`'s settle closure — `remember(size)` and then
+    /// `settled?()` → `persist` in the SAME turn, which every Outline row
+    /// takes through `BookView`'s `settled: { model.persistSurfaceSize(…) }` —
+    /// so there is no settle interval standing between a wrong stamp and the
+    /// disk. (The round-end Fable pass's NIT-1: this sentence used to cite
+    /// `FlowStoryRow`'s empty-read branch, which runs through the FLOW memory,
+    /// whose stamp is a compile-time constant and can never be nil — the one
+    /// road that cannot carry an unknown-voice write.)
     func persist(_ key: String) {
         guard fingerprint() != nil else { return }
         guard let namespace, let record = records[key] else { return }
