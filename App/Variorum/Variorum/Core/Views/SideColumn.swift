@@ -18,10 +18,12 @@
 //  host's content and, while `shown`, OUR 1-pt divider in the voice's
 //  `line` and the panel at a remembered, clamped width — both drawn by us,
 //  in every window state; `controlActiveState` cannot take them. The
-//  divider carries the pane row's own drag grammar (a 9-pt grip, the
-//  resize cursor — `WorkbenchSeam`'s, batch C), so the room the inspector
-//  used to let her drag is still hers; the width she chooses is
-//  remembered per host. The column's presence slides + fades (E's
+//  divider carries the app's ONE seam grammar (`SeamGrip`, `Core/Views`:
+//  a 14-pt grip centred on the line, `.pointerStyle(.columnResize)` —
+//  ledger row 9's shape; it was born as a copy of `WorkbenchSeam`'s 9-pt
+//  overlay at batch C, which the round-end Fable pass converted last), so
+//  the room the inspector used to let her drag is still hers; the width
+//  she chooses is remembered per host. The column's presence slides + fades (E's
 //  precedent), which needs the HOST to change `shown` inside an animated
 //  transaction (E's burst lesson: a container-level `.animation(value:)`
 //  does not carry a transition through an `@Observable`/`@State` change).
@@ -34,8 +36,8 @@
 //  navigator and the note Read tab's contents column, both fixed-width
 //  slabs until now. It is ONE component with an `edge`, not a second
 //  struct: everything that makes this column what it is (our own divider in
-//  every window state, the 9-pt grip, the resize cursor, the remembered
-//  width, the geometry read, the transition) is edge-independent, and a
+//  every window state, `SeamGrip`'s 14-pt grip and resize pointer, the
+//  remembered width, the geometry read, the transition) is edge-independent, and a
 //  copy of it would be two things to keep in step for the sake of one
 //  `if`. What DOES mirror is the DRAG ARITHMETIC, and it mirrors inside the
 //  one width brain (`SideColumnLayout.draggedWidthFromLeading`) where the

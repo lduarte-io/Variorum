@@ -140,8 +140,8 @@ struct ReadModeView: View {
             // adjustable."* It was a fixed 340-pt slab beside a plain
             // `Divider`, so a long first line truncated mid-word and there
             // was nothing to do about it. Same three things, drawn by
-            // `SideColumn`: our own line in every window state, the 9-pt
-            // grip and the resize cursor on it, and the width she drags
+            // `SideColumn`: our own line in every window state, `SeamGrip`'s
+            // 14-pt grip and resize pointer on it, and the width she drags
             // remembered (240 … 640). `shown` is the outline toggle she
             // loves, unchanged, and the slide-in transition it animates now
             // comes from the column itself.
