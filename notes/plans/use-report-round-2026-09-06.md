@@ -10171,3 +10171,145 @@ of the four NITs two are J44's confirmed (the `persist` doc; the version exclusi
 (the windowed total; the facts read's cancellation). The two J44 items with pins designed by the cap were
 NOT measured here (read-only); both are measured in my fix pass. Nothing here re-opens a ruling; nothing
 needs a QUESTIONS row.
+
+#### ROUND-END FABLE PASS round 1 — the implementers' responses (18d batch 1)
+
+*(the 18d batch-1 implementer, resumed — the box and the shell. FOUR findings are mine: MAJOR-1 ·
+MINOR-2 · NIT-3 · NIT-4. **All four AGREED, none disputed.** Every mechanism below was re-traced in
+this session against `HEAD`, at the file:line the reviewer names; where my trace adds or narrows
+something the reviewer's does not say, it is marked as a RIDER and is offered to the fix, not argued
+against it. I touched no code and no test — the fix pass is the reviewer's.)*
+
+**[MAJOR-1] — AGREE, and the mechanism is worse in one detail than the finding states.**
+
+*Re-traced.* `RootView.body` hands `ShellSplit` two `@ViewBuilder` closures (`RootView.swift:143–169`);
+`ShellSplit.body` CALLS both (`ShellSplit.swift:87–99` — `sidebar()` at `:89`, `detail()` at `:98`), so
+everything either closure reads is registered against **`ShellSplit`'s** body evaluation, not
+`RootView`'s. `noteBoxView` is evaluated inside the `sidebar:` closure (`RootView.swift:147` →
+`:558–589`), and at `:586–587` it reads `$0.caretOrdinal` and `$0.blockCount` — both plain
+`@Observable` stored properties on the live `EditorViewModel`. `updateCaretContext` assigns them on
+EVERY call, unconditionally (`EditorViewModel.swift:2867–2884`: `caretBlockID = nil`, `caretOrdinal =
+nil`, `blockCount = index.entries.count`, then `caretOrdinal = i + 1` in the loop) and is called from
+`textViewDidChangeSelection` (`EditorView.swift:617–619`), which typing fires per keystroke. The
+Observation registrar has no equality check — which I knew, because the `editing !== self` guard I
+wrote two lines above at `:2861` exists for precisely that reason. So the reviewer's chain holds end to
+end: a keystroke in an Outline note invalidates `ShellSplit`, whose body re-runs BOTH closures.
+
+*The detail I would add (a RIDER on the severity's reasoning, not on the verdict).* The reviewer says
+the pane closure re-runs and `BookView.init` mints and discards two view models per pass. Confirmed at
+`BookView.swift:74–81`. What makes it certain rather than probable is the thing the reviewer only
+implies: `BookView` carries three closure fields (`onPaneFocusRequest`, `onRevealConsumed`, `onNoteBox`
+— `:26–40`), and function values never compare equal, so SwiftUI cannot elide the re-render even in
+principle. The same is true of `SidebarView`, whose `noteBox: AnyView?` is non-comparable by
+construction — I chose `AnyView` there deliberately, and this finding is its bill.
+
+*What I do NOT claim, and neither should the fix's record.* I have not measured a stutter, and the
+reviewer explicitly does not either. The honest claim is the mechanism plus its allocation cost; the
+pin is what turns it into a number.
+
+**RIDERS ON THE FIX SHAPE** (the coordinator asked for these by name):
+
+1. **What the closure must NOT capture: `self`.** `caretLabel` becomes `(() -> String?)?` and `RootView`
+   must build it from the LOCAL `barModel` — `{ BlockLineLabel.caret(ordinal: barModel.caretOrdinal,
+   of: barModel.blockCount) }` — never `{ self.… }` and never through a stored property. A closure that
+   reaches back through `self` re-introduces exactly the dependency being removed the moment anything
+   inside it touches an observed field of `RootView`'s own state.
+2. **Capture the model STRONGLY, not weakly.** `EditorViewModel` is owned by `EditorView`'s `@State`;
+   a `[weak]` capture would make the where-line silently lose its *"block 3/41"* under any teardown
+   race, and the box's whole purpose is that the identity line and the bar agree. The closure lives one
+   render pass of the box and cannot leak the model beyond it.
+3. **`EditorRouter.editing`'s observation does NOT already scope this — and the finding is right to
+   name `caretOrdinal`/`blockCount` specifically.** `noteBoxView` also reads
+   `session.editorRouter.editing` (`:573`), which IS observed — but I assign it only on a change
+   (`EditorViewModel.swift:2861–2863`), so it fires once per editor change, not per keystroke. It
+   scopes nothing here. The per-keystroke reads are the two caret properties on a different object, and
+   moving those two is the whole fix.
+4. **The pin must be evaluation-counted, not lifecycle-counted.** A `SidebarView.body` counter has to
+   increment INSIDE the body's evaluation (the `let _ = { … }()` idiom); `.onAppear` and
+   `.onGeometryChange` fire on mount and layout, not on body re-runs, and would measure the wrong
+   thing — the pin would pass on the unfixed tree.
+5. **The pin should also assert the label still WORKS**, or deleting the feature satisfies it. After
+   the fix the box's OWN body must still re-run per caret move (that is the intent — the smallest view
+   in the tree), so a second arm — move the caret to another block through the same door and assert the
+   where-line's block half changed — is what stops "make the counter small" from becoming "drop the
+   label". This is the one addition I would ask for in the fix's pin.
+6. **`CommitBarGeometry.mounted("box", post:)` is the right settle predicate** and is already keyed by
+   post (18d ladder round-1 MINOR-3), so the pin can use it as written.
+
+**[MINOR-2] — AGREE at all three sites, and the harness-hygiene label is correct.**
+
+*(a) `SidebarGeometry.railGroupHeight`, re-traced.* Written unkeyed by any drawn rail
+(`SidebarView.swift:566–570`, inside `railGroup`), read by `NoteBoxMountTests.swift:166–180` (nil it,
+wait for ANY non-nil, `#require`, then the generous-arithmetic guard at `:176–180`) and again at
+`:374–388` **with no guard at all**. Reachable, not theoretical: `ShellChromeTests` mounts a `RootView`
+and selects a note in both of its geometry tests, and `ShellLandingTests:297–338` mounts a second
+`RootView`; either draws a rail into the same static. The guarded pin fails spuriously on a compressed
+rail; the unguarded one silently takes another window's number as its reference and then compares my
+keyed box against it. That the compare *usually* passes is luck (both windows are tall), which is the
+worst property a pin can have. **This is my own residue** — round 1's MINOR-3 keyed the four oracles I
+ADDED and left the one I only READ, and the keying is worth nothing while the reference it compares
+against is shared.
+
+*Riders on the fix:* key it by the rail's POST (`railPostID`, the value the rail already has at
+`:566`) rather than by a window — both of my pins draw their rail for a post they own, so the post key
+resolves both sites without a new parameter. And **keep the generous-arithmetic guard at `:176–180`**:
+once the number is the pin's own, that line stops being cross-suite noise and becomes the local proof
+that the rail drew at the pitch the box's frame assumes.
+
+*(b) the pane seam's subject.* `RootView.swift:657–667` mints
+`SeamGeometry.key(paneSeamFamily, subject: "\(index)")` — `paneDivider|0` for every split in every
+suite and every window. `ShellChromeTests.swift:430–441` polls and `#require`s that exact key while
+`ShellLandingTests.swift:338–341` opens a split in its own `RootView` (`router.openBeside(.shelf)`,
+waiting for `panes.count == 2`), so the poll can exit on whichever window published first and
+`abs(grip.midX - line.midX) <= 0.5` can compare two windows' rectangles. **The comment I would delete
+in the same edit is the one at `RootView.swift:669–672`** — *"a window has at most one split, and the
+pins mount their own window"* — which is true of windows and false of the key, and is the sentence that
+would otherwise talk the next reader out of this fix.
+
+*(c) `SeamGeometry.reset()`.* `SeamGrip` publishes through `.onGeometryChange`
+(`SeamGrip.swift:87–89`, `:101–103`), which by definition fires only when the value CHANGES — so a
+`reset()` from `ShellChromeTests.swift:409` or `OutlineRoomTests.swift:456` wipes a still-mounted
+seam's entry in the OTHER suite and it is never republished, and that suite's `#require` times out as a
+product failure. Agreed, and this is the sharpest of the three: (a) and (b) produce wrong numbers, (c)
+produces a red pin with no defect behind it.
+
+**[NIT-3] — AGREE on the total; and one PRECISION that narrows the second half of the finding.**
+
+*Re-traced.* `identity(of:)` (`BookView.swift:745–752`) takes `total: model.entries.count`, and
+`entries` is the windowed list (`BookViewModel.swift:106–107`: `truncated = new.count > 300; entries =
+truncated ? Array(new.prefix(300)) : new`). So *"5 of 300"* on a 400-note book — correct, and NIT-scaled
+for her library (Sherlock is 13).
+
+*The precision (a RIDER, not a dispute).* The finding also says a note past the window *"has no
+title/place at all"* because `firstIndex` returns nil. That branch is, as far as I can trace,
+**unreachable through any door**: every surface that can make a note the box's subject builds its rows
+from the same windowed `entries` — the navigator and Outline's rows (`model.entries`), the Index column
+(`BookIndexColumn.groups(chapters: structure.grouped(entries: model.entries))` / `groups(flat:)`), and
+the spread (`BookViewModel.spreadEntries`, `:255–259`, which indexes into `entries`). A note the book
+has not loaded cannot be clicked, so the nil-identity path is a guard, not a symptom. The fix should
+therefore be scoped to the TOTAL's honesty (`truncated` ⇒ omit it, or say `300+`), and the nil branch
+left as the defensive guard it is — with that reasoning at the code, so the next reader does not
+"fix" a reachable-looking hole that no door reaches.
+
+**[NIT-4] — AGREE, and one rider on what the guard must not break.**
+
+*Re-traced.* `NoteBoxFactsModel.load` (`:50–64`) awaits `session.database.read`, which is not
+cancellation-aware mid-flight, and then assigns `subject = postID; facts = read ?? nil`
+unconditionally. `.task(id: noteBoxFactsKey)` cancels the previous task on a key change, but a
+superseded read that finishes last therefore claims `subject`, and `facts(for:)`'s own subject check
+then answers nil for the note actually shown until the next selection change. Bounded exactly as the
+finding says — a missing facts line, never a wrong one — and that subject check is deliberate
+(`:36–39`) and is what keeps it honest.
+
+*Rider on the fix.* `guard !Task.isCancelled else { return }` must sit **before both assignments**, so
+a cancelled read leaves the pair entirely to the newer task — and it must NOT be conflated with the
+`read == nil` case, which is a different thing and is meant to claim the subject: a note that
+vanished between the ask and the read is deliberately recorded as *this* note with no facts
+(`:62–63`'s comment), never left looking like a note whose facts are still coming. One line, above the
+two, and the existing comment stays true.
+
+---
+
+**Summary: 4 agreed · 0 disputed.** Nothing here re-opens a ruling and nothing needs a QUESTIONS row.
+The one addition I ask the fix to carry is MAJOR-1's rider 5 — an arm that proves the label still
+updates — because a body-count pin alone is satisfied by removing the feature it is protecting.
