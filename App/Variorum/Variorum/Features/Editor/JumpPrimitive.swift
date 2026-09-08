@@ -103,6 +103,16 @@ enum JumpPrimitive {
     /// inside the visible rect must not be "revealed", because moving a page
     /// she can already see is exactly the lurch a reveal is meant to avoid.
     static func lineTop(ofOffset offset: Int, in textView: NSTextView) -> Double? {
+        lineSpan(ofOffset: offset, in: textView)?.top
+    }
+
+    /// The line's vertical SPAN (top and bottom), same geometry as `lineTop`
+    /// — the ladder's R1-11: "is it on screen?" has to see the line's bottom
+    /// too, or a line whose top is inside the viewport and whose body is
+    /// clipped below it counts as visible and is never revealed.
+    static func lineSpan(
+        ofOffset offset: Int, in textView: NSTextView
+    ) -> (top: Double, bottom: Double)? {
         guard let layoutManager = textView.textLayoutManager,
               let contentManager = layoutManager.textContentManager
         else { return nil }
@@ -113,11 +123,12 @@ enum JumpPrimitive {
         guard let target = contentManager.location(
             contentManager.documentRange.location, offsetBy: clamped)
         else { return nil }
-        var top: Double?
+        var span: (top: Double, bottom: Double)?
         layoutManager.enumerateTextLayoutFragments(
             from: target, options: [.ensuresLayout]
         ) { fragment in
-            let fragmentTop = Double(fragment.layoutFragmentFrame.minY)
+            let frame = fragment.layoutFragmentFrame
+            let fragmentTop = Double(frame.minY)
             let fragmentStart = contentManager.offset(
                 from: contentManager.documentRange.location,
                 to: fragment.rangeInElement.location)
@@ -125,14 +136,16 @@ enum JumpPrimitive {
             if let i = FragmentLines.lineIndex(
                 atLocalOffset: max(0, clamped - fragmentStart),
                 lineRanges: lines.map(\.characterRange)) {
-                top = fragmentTop + Double(lines[i].typographicBounds.minY)
+                let bounds = lines[i].typographicBounds
+                span = (fragmentTop + Double(bounds.minY), fragmentTop + Double(bounds.maxY))
             } else {
-                top = fragmentTop
+                span = (fragmentTop, Double(frame.maxY))
             }
             return false
         }
-        guard let top else { return nil }
-        return top + Double(textView.textContainerOrigin.y)
+        guard let span else { return nil }
+        let origin = Double(textView.textContainerOrigin.y)
+        return (span.top + origin, span.bottom + origin)
     }
 
     /// Lands the LINE containing `offset` (UTF-16) at the viewport top.

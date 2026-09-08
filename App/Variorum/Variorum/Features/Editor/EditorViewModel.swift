@@ -1964,9 +1964,14 @@ final class EditorViewModel {
         // REVEAL means make visible, never "move". (Without this a bare
         // arrival would haul the caret's line to the viewport top on every
         // ⌘2-then-⌘1, a lurch nobody asked for.)
-        if let top = JumpPrimitive.lineTop(ofOffset: offset, in: textView) {
+        // The ladder's R1-11: the WHOLE line — top and bottom — with the
+        // 1-pt slack kept, so a line flush with an edge still counts as
+        // shown and a line clipped by more than that is revealed.
+        if let span = JumpPrimitive.lineSpan(ofOffset: offset, in: textView) {
             let visible = scrollView.contentView.bounds
-            if top >= Double(visible.minY), top <= Double(visible.maxY) - 1 { return }
+            if span.top >= Double(visible.minY) - 1, span.bottom <= Double(visible.maxY) + 1 {
+                return
+            }
         }
         JumpPrimitive.jump(toOffset: offset, textView: textView, scrollView: scrollView)
     }
