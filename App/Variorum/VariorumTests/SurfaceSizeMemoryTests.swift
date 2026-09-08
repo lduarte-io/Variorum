@@ -620,6 +620,70 @@ struct SurfaceSizeMemoryTests {
                     .size("p1") == hers, "…and on disk")
     }
 
+    /// **The round-end Fable pass, MINOR-1 (the 18d cap's residue, J44).**
+    /// Round 2 closed the LATCH — `applyVoiceChrome` no longer adopts — and
+    /// left the VALUE the latch guards writable by any drawing host: it still
+    /// wrote `EditorTypography.current` unconditionally, and `fingerprint`
+    /// derives from `current` once adopted. The app mints one `ThemeStore`
+    /// per window kind, each holding the Terminal placeholder until its own
+    /// read returns, so a NOTE WINDOW opened in a Study session applied a
+    /// Terminal chrome under `isAdopted == true`: the stamp became the
+    /// monospace, her Study-stamped lengths were REFUSED in the main window's
+    /// Outline, and a settle in that window wrote a Study-measured height
+    /// under the Terminal stamp over her record.
+    ///
+    /// Through the production door, one statement wide: her session is
+    /// adopted (Study), her record stands, a real inline editor takes the
+    /// chrome an UN-LANDED store hands out — and the stamp must not move, her
+    /// record must still be answered, and the flow's same-turn `remember` +
+    /// `persist` must write under HER stamp. The process globals are captured
+    /// and put back before anything is asserted (round 2's NIT-2).
+    ///
+    /// RED ON OLD (measured by behavioural revert of the one line): the stamp
+    /// moved to `.AppleSystemUIFontMonospaced-Regular-14-7`, her record was
+    /// refused, and the disk record ended in the monospace stamp.
+    @Test func aDrawingHostCannotMoveTheStampOnceTheVoiceIsAdopted() {
+        let suiteName = "surface-size-\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let restore = EditorTypography.current
+        let wasAdopted = EditorTypography.isAdopted
+        defer {
+            EditorTypography.current = restore
+            EditorTypography.isAdopted = wasAdopted
+        }
+        let textView = EditorTextView.makeInlineEditor()
+        let unlanded = EditorSurfaceChrome(tokens: Queries.ThemeSettings(), dark: false)
+        let hers = CGSize(width: 696, height: 20993)
+        let live = SurfaceSizeMemory(
+            .outline, defaults: defaults, fingerprint: { EditorTypography.fingerprint })
+
+        // THE WINDOW: adopted in Study, her record written in her voice, then
+        // the second window's un-landed chrome — and the flow's same-turn road
+        // replayed under whatever stamp that left behind.
+        EditorTypography.adopt(EditorTypography.resolve(voice: .study, inlineComments: false))
+        let herStamp = EditorTypography.fingerprint
+        live.remember("p1", hers)
+        live.persist("p1")
+        textView.applyVoiceChrome(unlanded)
+        let stampAfter = EditorTypography.fingerprint
+        let answered = live.size("p1")
+        live.remember("p1", CGSize(width: 696, height: 40))
+        live.persist("p1")
+        let onDisk = defaults.string(forKey: SurfaceSizeMemory.key(.outline, "p1"))
+        EditorTypography.current = restore
+        EditorTypography.isAdopted = wasAdopted
+
+        let study = try? #require(herStamp)
+        #expect(study?.contains("Iowan") == true, "the adopted stamp is Study's: \(String(describing: herStamp))")
+        #expect(stampAfter == herStamp,
+                "a drawing host cannot move the stamp once the voice is adopted: \(String(describing: stampAfter)) vs \(String(describing: herStamp))")
+        #expect(answered == hers,
+                "her Study record is still answered after the un-landed chrome: \(String(describing: answered))")
+        #expect(onDisk?.hasSuffix("|\(herStamp ?? "?")") == true,
+                "the same-turn remember + persist wrote under HER stamp, never the guess: \(String(describing: onDisk))")
+    }
+
     // MARK: - 9. Round 2's MINOR-3: the door the app really walks
 
     /// **RED ON `ecacfa42`.** Round 1 wired `forgetPersisted` to

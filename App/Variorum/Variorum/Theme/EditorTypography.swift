@@ -217,18 +217,37 @@ extension NSTextView {
         // The one global typography updates FIRST so every subsequent
         // surface write (materialization, differential) agrees.
         //
-        // **It writes `current` and does NOT adopt** (18d ladder round 2,
-        // MAJOR-1 — this line called `adopt` for one round and that was the
-        // bug). Both hosts build this chrome from `themeStore?.settings ??
-        // Queries.ThemeSettings()`, and a `ThemeStore` that has not answered
-        // yet HOLDS that same placeholder — so a surface materializing before
-        // the observation returns handed this door the compile-time Terminal
-        // guess, `adopt` latched `isAdopted` on it, and the guess became
-        // indistinguishable from her answer. Drawing in the wrong voice for a
-        // few frames is harmless and self-correcting (the chrome re-applies);
-        // RECORDING in the wrong voice is not, which is the whole reason
-        // adoption belongs to the settings' one authority.
-        EditorTypography.current = chrome.typography
+        // **It writes `current` only while the voice is NOT YET ADOPTED, and
+        // it never adopts** (18d ladder round 2, MAJOR-1 closed the latch;
+        // the round-end Fable pass's MINOR-1 closed the value). Both hosts
+        // build this chrome from `themeStore?.settings ?? Queries.ThemeSettings()`,
+        // and a `ThemeStore` that has not answered yet HOLDS that same
+        // placeholder — the app mints one store per window kind, so a NOTE
+        // WINDOW opened in a Study session hands this door the compile-time
+        // Terminal guess while the main window is long adopted. Written
+        // unconditionally, that guess replaced `current` for the whole
+        // process: `fingerprint` (derived from `current` once adopted) became
+        // the monospace stamp, the main window's Outline REFUSED her
+        // Study-stamped lengths, and a settle in that window wrote a
+        // Study-measured height under the Terminal stamp over her record.
+        // After adoption `adopt` is `current`'s ONLY writer — which is what
+        // "only the settings' authority adopts" has to mean for the stamp to
+        // be structurally hers. Before adoption the write stands: the
+        // placeholder is the best guess there is, and `SurfaceSizeMemory`
+        // refuses to record under it either way (`fingerprint` is nil).
+        //
+        // Strictly better for drawing too: `EditorDocument.baseFont` and its
+        // siblings read `current`, so a surface materializing in a window
+        // whose store has not landed now materializes in the ADOPTED voice
+        // instead of Terminal-then-flip. Every `EditorSurfaceChrome` is built
+        // from a `ThemeSettings` and there is no per-surface voice override,
+        // so a landed host's chrome is exactly the adopted resolution — nothing
+        // a host draws changes on the normal path, and a voice SWITCH still
+        // re-fonts because `ThemeStore.start` adopts before any surface
+        // re-applies.
+        if !EditorTypography.isAdopted {
+            EditorTypography.current = chrome.typography
+        }
         // 13g batch 2 (L7): the markdown face's two colors ride the same
         // resolution — one voice, one dimmed marker, everywhere.
         MarkdownStyling.palette = MarkdownStyling.Palette(tokens: chrome.tokens)
