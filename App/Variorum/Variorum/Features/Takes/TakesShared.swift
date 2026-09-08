@@ -99,6 +99,9 @@ struct TakesEmptyStateView: View {
                                 .stroke(
                                     tokens.faint,
                                     style: StrokeStyle(lineWidth: 1, dash: [4, 3])))
+                        // P-8: a chrome `fixedSize` text always carries a
+                        // `lineLimit` (the b6dae25 class).
+                        .lineLimit(1)
                         .fixedSize()
                         .help(TakesEmptyState.newBlockHelp)
                         .recordEmptyStateDoor(.newBlock)

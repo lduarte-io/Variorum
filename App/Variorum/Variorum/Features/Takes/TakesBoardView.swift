@@ -590,6 +590,10 @@ struct TakesBoardView: View {
                         .overlay(
                             RoundedRectangle(cornerRadius: 6)
                                 .stroke(tokens.faint, style: StrokeStyle(lineWidth: 1, dash: [4, 3])))
+                        // P-8: a chrome `fixedSize` text always carries a
+                        // `lineLimit` (the b6dae25 class) — the door the
+                        // empty state's copies, closed on both.
+                        .lineLimit(1)
                         .fixedSize()
                         .help("A new block at the end of the note — type right into it")
                     }

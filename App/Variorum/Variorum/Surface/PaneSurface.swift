@@ -93,11 +93,36 @@ enum PaneMeasurement {
     /// (18c's Return rule mints them; row 15's first block is one) is
     /// unchanged.
     ///
-    /// Cost: `.ensuresLayout` does the layout the old call did, and the
-    /// added work is one frame read per fragment — measured 0.58 ms vs
-    /// 0.41 ms on a 400-line / 16,393-pt pane, 0.12 ms at 30 lines. P1
-    /// holds for the reason this file already states: a pane's document is
-    /// ONE take by construction, so the bound is the unit on screen.
+    /// **Cost, and the true CALL-SITE SET** (17o c/d/e round 1, MINOR-1 —
+    /// the first version of this paragraph justified the walk with "a
+    /// pane's document is ONE take by construction", which is false for
+    /// half the brain's callers and told the next reader the wrong thing).
+    /// `PaneMeasurement.height` has FOUR production call sites:
+    /// - two are PANES — this file's `:1241` (the publisher's measure) and
+    ///   `:1440` (the divergence check), where the document really is one
+    ///   take and the P1 bound is the unit on screen;
+    /// - two are WHOLE-POST surfaces — `ReadPostViewModel.remeasure` (the
+    ///   read tier, one post) and `EditorView.swift`'s
+    ///   `InlineEditorSurface.remeasure` (the book view's inline editor),
+    ///   and the second runs **once per keystroke** (it is wired to
+    ///   `NSTextStorage.didProcessEditing`).
+    ///
+    /// That per-keystroke site is why the walk's cost was MEASURED at
+    /// post scale rather than argued (the numbers are in the round-1 fix
+    /// record). Against the road this replaced — `ensureLayout(for:
+    /// documentRange)` then one property read — timed INTERLEAVED so
+    /// neither benefits from running first, on a bare TK2 view at 640 pt:
+    /// **200 blocks / 42k chars → 0.191 ms old vs 0.186 ms new per edit;
+    /// 800 blocks / 169k chars → 0.591 ms vs 0.574 ms.** The `ensureLayout`
+    /// revalidation dominates at both scales and the added frame reads do
+    /// not surface above noise, so the walk costs these two sites nothing
+    /// measurable. Neither site is a NEW P1 class either: the old body
+    /// already laid out the whole document there.
+    ///
+    /// What 13u2 inherits (its pane-stability item, whose trace this batch
+    /// deliberately did not extend to the other surface kind): these two
+    /// whole-post sites by name, and the fact that their per-edit cost is
+    /// `ensureLayout` over the post — not this walk.
     private static func extent(of layoutManager: NSTextLayoutManager) -> CGFloat {
         var bottom: CGFloat?
         layoutManager.enumerateTextLayoutFragments(

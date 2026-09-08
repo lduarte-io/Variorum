@@ -6343,3 +6343,64 @@ on both sides dismisses rather than licenses a fix.
 written into its doc comment, with these numbers), on the `aFreshPanesMeasurementIsUnchangedByRow16sFix`
 precedent: green when written, kept because it is the pin that would catch the day the fallback stopped
 being honest.
+
+---
+
+**MINOR-1 (the per-fragment walk's doc named two call sites where there are four) — CONFIRMED, doc
+CORRECTED, and the number MEASURED so 13u2 inherits a fact instead of a worry.**
+
+**The site set, verified by my own grep, not taken on trust** — `PaneMeasurement.height` has FOUR
+production call sites, and the reviewer's reading of them is exactly right:
+
+| site | what its document is |
+|---|---|
+| `Surface/PaneSurface.swift:1241` (the publisher's measure) | ONE take |
+| `Surface/PaneSurface.swift:1440` (the divergence check) | ONE take |
+| `Features/ReadTier/ReadPostViewModel.swift:263` | a WHOLE POST |
+| `Features/Editor/EditorView.swift:559` (`InlineEditorSurface.remeasure`) | a WHOLE POST, **once per keystroke** — wired to `NSTextStorage.didProcessEditing` (`:539–549`), deferred one main-queue turn |
+
+The doc now states that set explicitly, marks which two are panes and which two are whole-post, names
+the per-keystroke one, and hands 13u2 those two sites by name.
+
+**THE MEASUREMENT (the arbitration's "no behaviour change unless the number argues" — it does not
+argue).** A bare TK2 view at 640 pt holding a book note, the two roads timed **INTERLEAVED** (one real
+one-character insert through `shouldChangeText` → storage → `didChangeText`, then ONE road timed,
+alternating, so neither benefits from running first or from a warmer document):
+
+| post | fragments · chars | OLD road (`ensureLayout` + the property) | NEW road (the fragment walk) |
+|---|---|---|---|
+| 200 blocks | 200 · 42,211 | **0.191 ms** per edit | **0.186 ms** per edit |
+| 800 blocks | 800 · 168,811 | **0.591 ms** per edit | **0.574 ms** per edit |
+
+Steady-state (no edit between measurements) was the same story: 0.144 vs 0.141 at 200, 0.542 vs 0.528
+at 800. Two independent runs of the 200-block arm agreed to ±0.01 ms. **The `ensureLayout`
+revalidation dominates at both scales and the added frame reads never surface above noise** — the new
+road even measured marginally FASTER in every arm, which is noise, not a gain. So the amplification the
+finding traced is real in shape and unmeasurable in size at the scale it worried about, and no
+behaviour changes. Probe deleted; the numbers live in the doc and here.
+
+**Recorded honestly, because it corrects one of MY OWN earlier numbers.** The batch record's row-16
+paragraph cites "0.58 ms vs 0.41 ms on a 400-line pane". That comparison was between the fragment WALK
+and the STEP-BACK candidate I was choosing between — both new-road candidates, in the pane rig at
+400 pt — not between the walk and the shipped old body. Measured properly against the old body, as
+above, there is no delta. The doc comment's cost paragraph now carries the interleaved numbers instead.
+
+**A third `fixedSize()` found and NOT fixed, named so it can be routed:** `TakesBoardView.swift:1258`
+(`newTakeDoors`, the "＋ new take (branch) · ＋ blank take" row) carries `.fixedSize()` with no
+`lineLimit` too. It is PRE-EXISTING, outside NIT-1's two, and a different shape (an `HStack` of two
+buttons rather than a single label), so I left it rather than widen a NIT's scope — the reviewer's call
+whether it joins the class.
+
+---
+
+**NIT-1 (two chrome `fixedSize()` without `lineLimit`) — FIXED.** `.lineLimit(1)` added above the
+`fixedSize()` on both, each with the P-8 reason in a comment: the empty state's `＋ new block` door
+(`TakesShared.swift:104`) and the article's end-of-note door it copied
+(`TakesBoardView.swift:596`). No pin (P-8 is a constitution rule about chrome, and the b6dae25 class is
+a window-sizing hazard the rule exists to make unnecessary to test); the labels are short constants, so
+nothing renders differently today.
+
+**Suites at this commit:** `TakePaneMeasureTests` · `TakesEmptyStateTests` · `TakesCardHeightTests` ·
+`PaneSurfaceTests` → **44/4 green**. Core untouched (the diff is `Surface/PaneSurface.swift` doc,
+`TakesShared.swift`, `TakesBoardView.swift`); zero `Sync/`, no `PaneTextAuthority` change.
+
