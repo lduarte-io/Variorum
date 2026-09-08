@@ -6652,3 +6652,122 @@ rather than on the block, and have the landing consumed (`router.park(nil)`) onc
 park for the same container still bumps the generation and still re-lands. A cheaper variant, if the
 identity coupling is wanted kept: leave `.id` alone and have `PostDetailView` consume through a
 closure after `jump(to:)`, accepting one extra body pass.
+
+---
+
+**[MINOR] · `App/Variorum/Variorum/RootView.swift:743–755` + `:458–467` · "ORDER IS THE FIX" is the
+one load-bearing half of the widened fix that NO pin holds — and reversing two statements deletes
+the whole Stage C landing road with the suite green.**
+
+*Mechanism.* The widened clear is safe only because `open` calls `adopt` (which clears) FIRST and
+parks AFTER. Swap those two lines — or let any future door park before it navigates — and the clear
+eats every park at the moment it is made: `target(for:)` answers nil forever, and the Library's block
+hits, ⌘K's block rows and **batch e's brand-new row-38 card door** all silently stop landing. The
+fix's own comment says exactly this (`:746–749`), which is the point: it is a rule the code states
+and the tests do not.
+
+*Traced, not assumed — I checked what the pins actually drive.* `ShellLandingMountTests` parks by
+calling `router.park(...)` **directly** (`ShellLandingTests.swift:171`), with a comment saying it is
+performing "the two halves `RootView.open(_:blockID:)` performs" — but performing them itself, in its
+own order, never through `open`. `SnippetsDoorsTests.openingAGroupAtANamedSnippetLandsTheCaretInIt`
+mounts `PoolDetailView(initialBlockID:)` **directly** (`SnippetsDoorsTests.swift:216–218`), below the
+shell entirely. And `RootView.open` is `private`, so no test can call it: of the six test files that
+mount `RootView` (`PaneSplitTests` · `BookAscentTests` · `ShellChromeTests` · `ShellLandingTests` ·
+`WindowsTests` · `WorkspaceNavigationTests`), none reaches a block-naming door. So the reversed-order
+tree is green everywhere.
+
+*No red-on-old pin exists for this and I say so* — nothing behaves wrongly today; the traced
+degradation is that a shipped feature now hangs on a statement order with no guard, in a file the next
+batch will edit. *Fix shape (structure over test, which is cheaper and stronger):* fold the landing
+INTO the one adoption door — `adopt(_ destination:, in pane:, landing: String? = nil)`, which clears
+and parks in one statement — so `opener` and the four `open` roads cannot express the wrong order at
+all, and `open` becomes a one-line forward. Then the rule has one home, as `ShellRouter.park`'s own doc
+already claims it does.
+
+---
+
+**[MINOR] · `Sources/VariorumCore/Operations/Operations+Versions.swift:134–150` · NIT-2's fix carried
+a real behavioural delta into a PUBLIC core operation and shipped it with no pin — and the delta is
+cheaply pinnable red-on-old.**
+
+*Mechanism.* Consuming `firstLivePlacedBlock` is not a rename: the helper JOINs `block` on liveness
+(`Operations+NoteVersions.swift:333–338`) and the retired inline copy did not. So for a container
+holding a **live `container_block` row over a TOMBSTONED block**, `markPostsAsVersions` used to anchor
+the `version_of` edge on that dead block and now takes the mint arm instead — `ensureUnlocked`, then
+`mintBlock(text: "")`, then `touchContainer`. That is a WRITE (a new block, a new variant, a new
+placement, a `last_touched_at` stamp, three outbox rows) where the old code wrote only an edge, plus a
+new refusal (`ensureUnlocked`) on a road that previously had none. The batch-d record states the delta
+honestly and I agree it is the more correct rule — a placement over a tombstoned block is not a place
+to anchor an edge, and the mint is what U-19 (1) asks for anyway. What is missing is the guard.
+
+*Verified, not assumed.* I ran `swift test --filter VersionOperationsTests` myself → **19 tests in 2
+suites green**, and read the three row-17 pins
+(`aBlocklessPostGainsAnEmptyAnchorBlockAndTheLinkLands`,
+`theAnchorMintIsGatedByTheSealButTheLinkItselfIsNot`,
+`markPostsAsVersionsAnchorsTheFirstBlocksAndThePeerTraversalFindsThem`): none of them puts a tombstoned
+block under a live placement, so none would notice this arm being reverted or re-broken. The
+arbitration's *"the row-17 pins ride"* is true and is not the same as *this change is pinned*.
+
+*Pin that would prove it (red on the pre-NIT-2 code, green after):* in `VersionOperationsTests`, mint
+post P with one block, then inside one `database.write` tombstone the BLOCK row only (leaving its
+`container_block` live — the sync-race state the JOIN exists for), mark P as a version of an ordinary
+post Q, and assert the edge's P-side block is a NEW live block whose take is empty. Pre-fix it is the
+tombstoned block's id. Two assertions, no new machinery.
+
+---
+
+**[MINOR] · `App/Variorum/Variorum/Features/Takes/TakesBoardView.swift:1258` (the batch's explicit
+question to me) · the third `fixedSize()` is not one more — it is TWENTY-SEVEN more, and patching them
+one ladder at a time is what makes P-8 read closed when it is not.**
+
+*Mechanism, measured rather than sampled.* P-8 says *"Chrome `fixedSize` texts always carry a
+`lineLimit`"*, with no exception. I walked every `.fixedSize()` in `App/Variorum/Variorum` (35 sites)
+and checked each for a `lineLimit` within the four lines above it: **27 real sites carry none** —
+`BlocksWorkbenchView:619`, `CompareBoardView:1041`, `LensesBoardView:780/808/825/841/856`,
+`TakesBoardView:1258`, `TrayPanel:896/914/986`, `MastheadTagCluster:288`, `BlocksAreaView:300`,
+`WriteTakesPanel:203/280`, `CommitBar:350/356/365/368`, `MergeCeremonySheet:317`,
+`ReadModeView:218/228`, `NoteIndexColumn:341`, `MembershipChip:128`, `BookIndexView:569`,
+`VoiceControls:118`, `StatusToast:37`. NIT-1 closed two of twenty-nine.
+
+The traced degradation is not a rendering bug — most of those are fine, and `TrayPanel:986` even
+carries a deliberate *"a verb never truncates"* rider. It is that the constitution's rule is being
+enforced at whatever rate a ladder happens to grep, which gives the next reader (and the next
+reviewer) a closed-class impression the tree does not support — **CLAUDE.md's own P39 doctrine, the
+one that re-worded the feature-to-feature rule after measuring 57 violations of which 55 were benign:
+a rule ignored that often protects nothing.**
+
+*No pin, and none is owed (a constitution-wording question, not behaviour).* Two honest exits, the
+author's call which: (a) narrow P-8's wording to the shape b6dae25 actually caught — an unbounded-ideal
+`Text` in **window-sizing chrome** — and say so, or (b) keep the wording and give the sweep a
+`KnownIssuesAndTechDebt.md` row with an owner (13u2, the pane/chrome family), so the 27 are parked
+rather than invisible. **My answer to the question batch c handed me:** do NOT patch `:1258` alone —
+a third patch is the thing that makes this worse, not better.
+
+---
+
+**[NIT] · `App/Variorum/Variorum/Surface/PaneSurface.swift:101–102` · the MINOR-1 doc fix cites line
+numbers that were already wrong in the commit that wrote them.**
+
+The corrected paragraph names the two pane call sites as *"this file's `:1241` (the publisher's
+measure) and `:1440` (the divergence check)"*. In `aa01ff25` itself — the commit that wrote the
+sentence — `git show aa01ff25:…/PaneSurface.swift | grep -n PaneMeasurement.height` reports them at
+**`:1266` and `:1465`**: the doc quoted the round-1 finding's pre-fix numbers and its own 25 added
+lines pushed the sites down by exactly 25. They are still 1266/1465 today. Harmless in itself, and
+exactly the class MINOR-2 was about one file over (a doc that re-types a number instead of naming the
+thing): cite the two symbols (`PaneTextRepresentable`'s measure and the divergence check) and the
+number can never be wrong.
+
+---
+
+**[NIT] · `App/Variorum/Variorum/Workspace/WorkspaceModel.swift:444–452` · `resolveTitles` is now
+test-only, and its new doc claims callers it does not have — MINOR-3's exact class, one layer up.**
+
+Row 18 replaced the strip's one-shot with the held `observeTitles`, and kept the old entry point
+labelled *"The ONE-SHOT read, kept for callers that want a single resolution."* By grep it has **no
+production caller**: the only `.task` that resolves titles is `SidebarView.swift:261–262`, which calls
+`observeTitles`; `resolveTitles` survives only in `NodSetTests:224` and
+`WorkspaceNavigationTests:480`. Traced degradation is small and honest — a reader reasonably infers a
+second production road exists, and a future surface may adopt the one-shot and re-create the very
+staleness her row-18 complaint was about. Either say *"no production caller today; the tests' single
+resolution"* in the doc, or fold the two test call sites onto `readTitles` and delete it. No pin (dead
+production code; the mechanism is the grep).
