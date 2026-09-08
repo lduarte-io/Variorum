@@ -8923,3 +8923,81 @@ tests in 40 suites passed after 73.797 seconds.`** — 40 suites for 40 requeste
 `Workspace/ShellSplit.swift` and `VariorumTests/OutlineRoomTests.swift`, so no `swift test` and no iOS build
 are owed and none was run. Captures 14–16 added to `notes/plans/use-report-2026-09-06-screens/18d-3/`.
 
+
+#### 18d round 1 — fixes (batch 1)
+
+*(the batch-1 implementer, resumed; FOUR findings — MINOR-1 · MINOR-3 · MINOR-6 · MINOR-7, all
+CONFIRMED, MINOR-1 WIDENED by J40. All four FIXED. Closing run at the tail.)*
+
+**MINOR-7 — FIXED (`0a1d823f`).** `groupPadding` · `rowPadding` · `headerAir` moved into
+`SidebarLayout` — the layout brain the box already reads for `groupHeaderHeight` and
+`railGroupHeight`, and where the fit math lives — and `SidebarView`'s copies are private computed
+aliases again, so its own call sites still read two words. `Core/Views/SidebarNoteBox` now asks the
+brain, never the feature; the one-way placement rule holds in the direction it is written. **No pin
+applies** (an architectural finding; the traced degradation is the coupling). The `ShellChromeTests`
+budget pins rode UNMODIFIED — 13 tests / 3 suites green — which is the proof the addresses moved and
+the numbers did not.
+
+**MINOR-6 — FIXED (`1832b8be`).** All five: (a) `EditorView.swift`'s `.inSidebarBox` doc and (b)
+`RootView.swift`'s `noteBoxReport` doc now name `EditorRouter.editing` — and say *"never `active`"*,
+because `active` is precisely the value that rendered the blank bar the walk found; (c/d/e) the three
+`BookView` comments that still described the retired details gutter say what the code does now. Five
+edits, no behaviour.
+
+**MINOR-1 — FIXED, both doors (`31f7a575`), with the KnownIssues row narrowed (`95ae87d1`).**
+
+- **The rule, stated once** at `EditorRouter.active`: `active` answers *"which text view attached
+  last"* — the right question for ATTACHMENT (is an editor mounted, does it own a scroll view, is
+  there anything to tear down); `editing` answers *"which editor is she writing in"* — the right
+  question for any door that acts on the CARET. They agree everywhere but the Outline. **A caret door
+  reads `editingOrActive`**, a new one-line accessor (`editing ?? active`) whose fallback keeps every
+  door's behaviour outside the Outline byte-identical: a freshly attached editor that has not yet
+  reported a caret is still the only editor there is.
+- **The two doors:** `EditorCommands`' ⌃⌘↑/↓ (`previousBlock`/`nextBlock`) and
+  `ShellActions.exportCaretBlock` now read it. Each carries a comment naming the P-2 break it was.
+- **The pin:** `NoteBoxCompositionTests.theCaretDoorsActOnTheEditorSheIsWritingInNotTheLastToAttach`
+  — a book in Outline, a note focused, then **the shadow reproduced deliberately**: a second
+  `EditorViewModel` for the same post attaches a text view and takes `active`, exactly as the trace
+  describes. The pin asserts the doors' own expressions — `editingOrActive` is non-nil and its
+  `caretBlockID` is the block she is in (what Export ▸ This Block would name), and
+  `jumpToAdjacentBlock(±1)` through it MOVES the caret and comes back.
+- **Why the shadow is reproduced rather than awaited, said plainly:** a hosted mount does not grow the
+  Outline's second `InlineEditorSurface` — the same reason `BookRedesignMountTests` measures exactly
+  one `EditorTextView` — so a pin that waited for it would be green on both sides and prove nothing.
+  **Measured, and recorded because it is the honest version of the reviewer's own prediction:** the
+  first cut of this pin did not reproduce the shadow, and a revert probe of both doors to the bare
+  `active` left it **GREEN** — hollow. With the mechanism reproduced, the same probe is **RED: 1 issue,
+  `caretBlockID → nil`** — the export door's guard fails and speaks the unavailable note, and the jump
+  returns at its first `guard` with the caret where it was. Both probes ran on a committed tree
+  (`31f7a575`), restored by `git checkout --`, `git diff --stat` empty after each.
+- **The KnownIssues row, narrowed to what it can honestly claim.** It now names the two doors as FIXED
+  and enumerates what `active`'s REMAINING readers get wrong: (a) `MacWillLock` and
+  `VariorumAppDelegate` call `active?.finalizeWork()`, which the shadow answers nil to — the note's
+  real pending text is flushed by the per-POST autosave coordinator through `QuitFinalizeRegistry`
+  (per post, not per editor), which both doors also await, so **what is actually exposed is the OPEN
+  TAIL's crystallization**, the one thing only `finalizeWork()` performs: a quit or a screen-lock
+  inside the idle interval with an uncrystallized tail in an Outline note. Narrow, not empty — and the
+  sharpest reason to fix the shadow rather than route around it a third time. (b)
+  `AppSession`'s `writeEditorAttached` / `writeEditorOwnsScrollView` ask an ATTACHMENT question and are
+  **correct as they stand**, listed so nobody "fixes" them. The shadow itself stays 13u2's, per J40.
+
+**MINOR-3 — FIXED (`e82c2e2a`). Harness hygiene: no red-on-old pin applies, and I say so rather than
+let the ladder call it hollow.** All four oracles are keyed by their subject: `SidebarGeometry`'s
+`noteBoxFrame`/`noteBoxHeaderFrame` became `noteBoxFrames`/`noteBoxHeaderFrames` keyed by the BOOK
+(`SidebarNoteBox` gains a `subjectKey`; `RootView` passes the report's `readingID`), `noteBoxFaces`
+became `[String: [String: Int]]` under the same key, and `CommitBarGeometry.mounted` is keyed by the
+bar's POST with a `mounted(_:post:)` reader. **And the suites mint LIVE uuids** — without that the
+keying buys nothing, because `.incrementing` hands every parallel suite the same ids (batch 3's own
+lesson, followed here). The exposed pin was the U-17 retirement's: `mounted["horizontal"] == 0` went
+red on any concurrently mounted `EditorView` anywhere in the run. One honest scope note at the code:
+`CommitBarGeometry.rowFrame` stays a singleton — it belongs to row 81's pin and is not this batch's to
+re-key — so this suite reads the per-post counter instead, and the line that used to assert `rowFrame
+== nil` is retired with its reason.
+
+**CLOSING RUN (this tree, ONE `xcodebuild test`):** the batch's own six suites, the shell/sidebar
+chrome, the book's nine, the bar, the routing/landing families, the two brains the diff touches, the
+door and export suites the MINOR-1 change reaches (`CapabilityRegistryTests` · `ExportFacesTests` ·
+`DuplicateBookNameDoorTests` · `BookAscentDeclarationTests`), batch 3's `OutlineRoomTests`, and the ten
+`Tutorial*` spine types — **`Test run with 310 tests in 52 suites passed after 78.687 seconds`**, zero
+issues, zero `skipped:` lines. Core untouched this pass (no `Sources/` change), so no `swift test` and
+no iOS build is owed; zero `Sync/`, zero schema, no editor-lifecycle change.
