@@ -10675,7 +10675,245 @@ characters and one new empty block in the field guide's "start here", and a wide
 
 ### ROUND-END FABLE PASS — ROUND 2 FINDINGS (fable-reviewer, fresh)
 
-*(the reviewer writes here — a real pass over round 1's fixes and what they touched, anchored on round 1's record; severity-ranked, the REVIEW_PROMPT format, then the clean bill)*
+A real pass over round 1's ten fix commits — `git diff 1f6ea613~1..6629f362` (twenty files, +487/−103) —
+read against the two letters' final diffs they sit in (`e6441686..941380a2` for 17o c/d/e; `ce6eb9cb..01849f3b`
+for 18d), at `e102cb00`, whose code is byte-identical to `6629f362` (`git diff --stat 6629f362..e102cb00 -- App/
+Sources/ Package.swift` is EMPTY — every commit after the fixes is notes). Anchor: round 1's nine findings, the
+three implementers' responses with their riders, the dispositions + fixes, the sanity pass and the walk (above);
+the two letter closeouts; J23–J47; QUESTIONS #97–#101; `notes/KnownIssuesAndTechDebt.md` (rows 50 and 53 in
+particular). Every hunk was read as a diff, myself, and the code under it at HEAD: `RootView.noteBoxView`
+and the pane seam, `SidebarNoteBox`, `SidebarView` (the body counter, `railGroup`, `SidebarGeometry` whole),
+`NoteBox`, `NoteBoxFactsModel`, `SeamGrip` + `SeamGeometry`, `SideColumn`'s header, `BlocksWorkbenchView`'s
+host/seam/probe, `BookView` (init, the publish/door, `identity(of:)`, `BookOutlineGeometry`), `SurfaceSizeMemory`,
+`RecoveryView`'s guard, `ReadModeView`'s line, `EditorTypography` whole, `EditorDocument`'s three accessors,
+`ThemeStore` whole, `EditorRouter` whole, `EditorViewModel.updateCaretContext`/`jumpToAdjacentBlock`,
+`ShellSplit.body`, `StableSurface.report`, `ParagraphGap`, both chrome hosts (`EditorView`, `ReadPostView`),
+`NoteWindowView`, and every touched test with its helpers. **Runs (none at the start; the touched suites and
+three scratch-worktree probes at the end, then the FULL Mac suite as the round's owed verification):**
+
+- **The tree (`e102cb00`), the eight suites the fixes reach** (`NoteBoxCompositionTests · NoteBoxGeometryTests ·
+  NoteBoxCopyTests · SurfaceSizeMemoryTests · BlocksWorkbenchFaceTests · MarkdownFaceTests · ShellChromeTests ·
+  OutlineRoomTests`): **57 tests / 8 suites GREEN in 16 s**, the MAJOR-1 pin printing *"twenty caret-context
+  updates ran the sidebar's body 0 times"*.
+- **A scratch worktree at `6629f362`** (own `-derivedDataPath`, 1.6 GB; **removed with the worktree when done —
+  `git worktree list` back to the two standing trees, 13 GiB free**; the shared tree never reverted): **MAJOR-1's
+  premise REPRODUCED** — the VALUE read back inside the shell's closure, the same pin: *"ran the sidebar's body
+  20 times"*, `(ran → 20) < 5` failed, 1 issue; **MINOR-1's red-on-old REPRODUCED** — the one-line guard
+  removed: 3 issues, byte-for-byte the record's (`stampAfter → ".AppleSystemUIFontMonospaced-Regular-14-7"`,
+  `answered → nil`, the disk suffix), the eleven older pins green beside it; and **the pin for my MINOR-1 below,
+  written in the worktree only: RED on the tree's code (2 issues), GREEN with the one-line stamp fix, 26 tests /
+  4 suites green beside it** (`SurfaceSizeMemoryTests · EditorTypographyTests · StableSurfaceTests ·
+  BookOutlineLandingTests`).
+- **The FULL Mac suite over `e102cb00`** (ONE `xcodebuild test` from `App/Variorum/`, the round's owed
+  verification, run at the END of this pass — never at its start): **`✔ Test run with 2461 tests in 424 suites
+  passed after 617.883 seconds`** — zero failures; the only `skipped:` lines are the four opt-in Keychain drills
+  (`VARIORUM_APPLE_KEY_ROUND_TRIP` · `VARIORUM_MIGRATION_DRILL` · `VARIORUM_POSTURE_DRILL` · `VARIORUM_CONNECT_DRILL`).
+  Against 18d's close (2458/424): +3 tests, the pass's three pins. **The core suite at HEAD, `swift test`: 1503
+  tests / 163 suites GREEN** (54 s; `Sources/` untouched by the range, so this is the recorded baseline re-run).
+  Two extra samples of the MAJOR-1 pin under the full run's load: 0 and 0; `NoteBoxGeometryTests` +
+  `ShellChromeTests` beside it: 8/2 green. One green full run is ONE sample of the harness classes below (MINOR-2,
+  NIT-2) — it neither proves nor disproves a low-probability flake, and is recorded as exactly that.
+
+**THE SEAM AND CUSTODY QUESTION:** `git diff --stat 1f6ea613~1..6629f362 -- Sources/ App/Variorum/Shared/` is
+**EMPTY**; a name grep over the diff for `custod|keychain|vault|DeviceKey` returns nothing; zero schema, zero
+migration, zero lockstep. `BlockRangeIndex`, `EditorTextView`, `PaneTextAuthority` and `EditorRouter` have no
+hunk in the range; the one editor-adjacent file touched is `EditorTypography.swift` (the guarded write), read
+whole below. **No default's meaning moved:** `NoteBoxIdentity.totalIsAtLeast` defaults to `false` ("a real
+count", pinned), `whereLine`'s new parameter is defaulted, `EditorTypography.current`'s compile-time Terminal
+and `isAdopted`'s `false` are untouched, and `applyVoiceChrome` BEFORE adoption still writes exactly as it did.
+
+#### Findings, severity-ranked
+
+**[MINOR-1] · `App/Variorum/Variorum/Theme/EditorTypography.swift:125–130` (`fingerprint`) with
+`Features/Editor/EditorDocument.swift:42–48` (`baseParagraphStyle`) and `Theme/EditorBehaviorSettings.swift:49–52`
+(`ParagraphGap.current`) · THE STAMP'S PROVENANCE EXCLUDES A DIAL THAT CHANGES EVERY PARAGRAPH'S HEIGHT — a
+surface size measured under one paragraph gap is answered under the other.** *(Pre-existing — 18d batch 4's J38
+design, not minted by round 1's fixes; raised under this pass's mandate to verify the stamp's provenance, which
+MINOR-1's fix made "structurally hers" for the VOICE and no further.)*
+
+*Mechanism, traced.* `fingerprint` is `fontName-pointSize-paragraphSpacing`, all three from `Resolved`
+(`:127–129`). `Resolved.paragraphSpacing` is `resolve`'s gap — half the point size plus the inline-comment room
+(`:103–104`). This Mac's A23 setting, `ParagraphGap`, deliberately does NOT reach `Resolved`: it is read at
+style-construction time in `EditorDocument.baseParagraphStyle` (`:46`, *"not cached in `EditorTypography.current`"*
+— its own doc at `EditorBehaviorSettings.swift:45–48`), and under `.paragraphTall` it adds one whole line of the
+font after EVERY paragraph (`extraSpacing`, `:55–59`). Every Outline surface materializes and re-styles with
+`baseAttributes` (`EditorDocument.swift:53–56`; `applyVoiceChrome` at `EditorTypography.swift:259–265`), so a
+40-paragraph story is ~40 lines taller under the tall gap — and its stamp is byte-identical. `SurfaceSizeMemory.size`
+(`:176–180`) compares only `record.fingerprint == stamp`, so after she flips the gap (Settings ▸ A23) every
+remembered note's stale height is ANSWERED on its next realization: `BookViewModel.rememberedSurfaceSize`
+(`:400–401`) → `StableSurface`'s reservation → the row stands at the wrong height until the 1.0-s settle
+(`stableSurfaceSettleInterval`, `StableSurface.swift:101`) adopts the real one and `persist` overwrites the
+record. That is exactly the failure the stamp exists to prevent, in its own words (`:114–118`: *"a dial that
+changes the type and not this string would leave stale reservations behind, which is the one failure this stamp
+exists to prevent"*) — A23 kept the gap out of `current` (right, for the ordering hazard it names) and J38 derived
+the stamp from `current` (right, for the voice), and the two designs never met.
+
+*What degrades.* U-12's promise — the surface right from the FIRST FRAME — is broken once per remembered note
+after a gap change, in the direction of a too-short reservation (standard → tall) or a too-tall one (tall →
+standard): the first-frame jump the memory was built to remove, for one settle each. View state only; self-healing;
+the setting is rarely toggled. MINOR.
+
+*Pin — RED ON THE TREE, measured in the scratch worktree (2 issues), GREEN with the fix below (26/4 beside it):*
+`SurfaceSizeMemoryTests.aParagraphGapChangeMovesTheStamp` — adopt Terminal, a memory wired
+`fingerprint: { EditorTypography.fingerprint }`, `UserDefaults.standard` set to `ParagraphGap.standard.rawValue`
+under `ParagraphGap.settingKey`, `remember("p1", 696×20993)` + `persist`, capture the stamp; set the key to
+`.paragraphTall.rawValue`; assert the stamp CHANGED and `size("p1") == nil`; the globals and the defaults key put
+back before asserting (round 2's NIT-2, and `TypingErgonomicsTests.withGap`'s own restore shape). Red today:
+`(tallStamp → ".AppleSystemUIFontMonospaced-Regular-14-7") != (standardStamp → ".AppleSystemUIFontMonospaced-Regular-14-7")`
+and `(answered → (696.0, 20993.0)) == nil`.
+
+*Fix (one line, in `fingerprint`):* stamp the gap the surface LAYS OUT with — `resolved.paragraphSpacing +
+ParagraphGap.current.extraSpacing(for: resolved.font)` in place of `resolved.paragraphSpacing` (equivalently,
+`EditorDocument.baseParagraphStyle.paragraphSpacing`). Under `.standard` the extra is 0, so every existing stamp
+and every literal in the suites (`…-14-7`, `…-16-8`) is unchanged — the run above proves it. The read is one
+`UserDefaults` string per `remember`/`size`, which `baseParagraphStyle` already pays per surface write and
+Foundation caches in-process; P1-shaped (constant, never ∝ document). The doc line at `:114–118` should then say
+the stamp is derived from `Resolved` PLUS this Mac's gap dial, and why the dial is not folded into `Resolved` (A23's
+ordering reason stands).
+
+---
+
+**[MINOR-2] · `Features/Library/SidebarView.swift:801–808` (`SidebarGeometry.resetHeaders()`) with its three
+callers `VariorumTests/NoteBoxMountTests.swift:234, :381` and `VariorumTests/ShellChromeTests.swift:263` · THE
+SAME (c) CLASS THE PASS CLOSED FOR `SeamGeometry.reset()`, ONE LINE UNDER THE PASS'S OWN EDIT — a whole-oracle
+wipe of KEYED entries that are never republished. Harness hygiene (no red-on-old pin applies, labelled so).**
+
+*Mechanism, traced.* `resetHeaders()` sets `noteBoxFrames`, `noteBoxHeaderFrames`, `noteBoxFaces`,
+`headerTextFrames`, `firstRowContentFrames` and `firstRowBoxFrames` to `[:]` — every subject's entries, exactly
+the shape round 1's MINOR-2 (c) traced for `SeamGeometry.reset()` and replaced with `forget(_ key:)`. The first
+three are KEYED by the box's subject (the 18d ladder's MINOR-3) and are written by `onGeometryChange`
+(`SidebarNoteBox.swift:139–141, :158–160`) and by `onAppear`/`onDisappear` counters (`:184–185, :268–269`) —
+which fire on CHANGE and on MOUNT respectively, never again for a still-mounted box. The callers are three
+DIFFERENT suites (`NoteBoxGeometryTests`, `NoteBoxCompositionTests`, `ShellChromeTests`), and Swift Testing runs
+suites in parallel: `NoteBoxCompositionTests.aBookOpeningPutsTheBoxOnTheColumn…` (`:381`) wipes the oracle
+while `NoteBoxGeometryTests.theBoxStandsAtTheRailsExactHeight…` (`:187–204`) is inside its per-state loop —
+box mounted, frame published, poll not yet read (the wipe lands at the poll's `await Task.yield()`/`Task.sleep`,
+`:99–101`) — and that frame is never republished, so the poll runs its 60 turns and `#require(box)` fails with no
+defect behind it; the `"empty"` counter goes the same way (`(faces > 0)` never true again after a wipe). The
+reverse direction (`:234` or `ShellChromeTests:263` wiping `NoteBoxCompositionTests`' box mid-poll) is the same
+shape. This is the sharpest of the three sub-classes round 1 named — *"(c) produces a red pin with no defect
+behind it"* — and the pass's MINOR-2 commit touched `:380` and left `:381` standing. Reachable, low-probability,
+and exactly what a FULL parallel run samples. (The other three fields — `headerTextFrames[title]`,
+`firstRowContentFrames["this note"]`, `firstRowBoxFrames["this note"]`, `SidebarView.swift:372, :555, :563` — are
+keyed by a TITLE every window shares, round 1's (a) sub-class; they coincide across windows because the sidebar's
+left edge is x = 0 in every host, so they are "meaninglessly green" rather than red, and they ARE owned:
+KnownIssues row 53, *"`SidebarGeometry`'s older fields"*, 13u2. Not re-raised; named so the fix's scope is exact.)
+
+*Fix:* `SidebarGeometry.forget(subject:)` clearing `noteBoxFrames[subject]`, `noteBoxHeaderFrames[subject]` and
+`noteBoxFaces[subject]` — the three keyed fields — with the three callers clearing their OWN book's id (each already
+has it in hand: `book.id`, `readingID`); `resetHeaders()` keeps only the title-keyed trio until row 53's sweep, or
+retires if `ShellChromeTests:263` is the only caller that needs those (it is — `:301–305`). No pin: a harness fix
+proves itself by the full run, as (c)'s did.
+
+---
+
+**[NIT-1] · `Core/Views/NoteBoxFactsModel.swift:60–67` (the guard's reason clause) · the stated premise — *"the
+database read is not cancellation-aware mid-flight"* — is wrong for GRDB 7.11, and the truth makes the guard MORE
+necessary, not less.** GRDB's async accessors run under `withTaskCancellationHandler` with
+`interruptsWhenCancelled: true` (`GRDB/Core/Database.swift:381`; `SerializedDatabase.swift:256`), and
+`Database.checkCancellation()` throws `CancellationError` at the next statement boundary once the task is
+cancelled (`Database.swift:370–374`; `DatabaseReader.read`'s own doc, `:216`). So `.task(id:)`'s cancellation does
+reach a mid-flight read — it comes back as a THROW, which `try?` turns into `nil` — and before this guard the
+superseded task then ran `subject = postID; facts = nil` on every interrupted read, claiming the subject with no
+facts; it did not need to "finish last". The fix is right and the disposition's *"no deterministic pin"* stands
+(the ordering of the cancelled continuation against the new task's read is still the scheduler's); one clause
+wrong. **Fix:** say the read is cancellation-aware and that `try?` maps the cancellation to `nil`, which is the
+case the guard exists for (doc; no pin).
+
+**[NIT-2] · `VariorumTests/NoteBoxMountTests.swift:157–163` (`NoteBoxGeometryTests`, the Study arm) ·
+`VariorumTests/MastheadLayoutTests.swift:245–251, :493–499` · `VariorumTests/SurfaceSizeMemoryTests.swift:599,
+:668` · harness hygiene around the typography process globals, LATENT (no victim found — labelled so).** (a) Both
+suites start a REAL `ThemeStore` in Study (`setThemeVoice(.study)` + `theme.start()`; `store.setVoice(.study)`),
+which adopts through the one authority and is never put back, so after they run `EditorTypography.current` is
+Study and `isAdopted` is `true` process-wide until another suite's store lands Terminal. Before MINOR-1's fix any
+mounted host's `applyVoiceChrome(terminal)` healed that inside its own mount; after it — correctly, for the app —
+a host draws whatever the last adopter left, which is the MarkdownFace order dependence's class one door over.
+Grepped for a victim and found none: every font-dependent mounted pin derives its expectation at assertion time
+(`TypewriterRoomReachabilityTests:128–129`, `TakesRoomTests:170`, `TypingErgonomicsTests:152` read
+`EditorDocument.baseFont`/`EditorTypography.current`) or compares its own measurements; the two literal Terminal
+fonts (`TypewriterRoomTests:44`, `TypingErgonomicsTests:143`) are in pure pins. The FULL run above is the one
+sample this pass took. (b) The two production-door pins' `applyVoiceChrome(unlanded)` also leave
+`MarkdownStyling.palette` at Terminal's for the process (`EditorTypography.swift:253` writes it unconditionally);
+`MarkdownFaceTests.withVoice` and `FormattingSurfacesTests.withVoicePalette` restore theirs. **Fix:** bound the
+two suites' adoption the way `SurfaceSizeMemoryTests` bounds its own (capture and restore `current` + `isAdopted`),
+and restore the palette in the two pins (harness; no pin).
+
+#### Considered and cleared (traced, so the next reader does not re-raise them)
+
+- **MAJOR-1's fix does what it says, and the measurement's premise is real.** The closure captures the LOCAL
+  `model` (`RootView.swift:599–603`), strongly, never `self`; it is evaluated inside the box's own
+  `identityBlock` (`SidebarNoteBox.swift:200–203`), so Observation registers `caretOrdinal`/`blockCount` against
+  the box. Nothing else in `noteBoxView` is at keystroke rate: `router.workspace.selections` (per selection),
+  `noteBoxReport` (`@State`, per publish — `BookView.noteBoxReport`'s inputs are `focusedPostID`, `spreadEntries`,
+  `indexSelectedPostID`, `entries`; the entries observation is autosave-cadenced and pre-existing), `noteBoxFacts`
+  (per selection/liveness), `theme.tokens` (per theme), `editorRouter.editing` (assigned only on change,
+  `EditorViewModel.swift`'s `!==` guard — rider 3 confirmed). `CommitBar`'s and `SidebarNoteBox`'s inits are
+  memberwise. The counter increments INSIDE `SidebarView.body` (`:247–253`) keyed by `ObjectIdentifier(workspace)`
+  (no observed read). **20 on the reverted mechanism, 0 on the tree — measured here, not carried.** P39 holds: a
+  feature receives a closure; the model was already reachable through the bar's `AnyView`; nothing constructs,
+  holds by name, or owns a lifecycle. The DEBUG focus door is keyed by `readingID` and cleared on disappear.
+- **MINOR-1's fix does exactly what its doc claims against `EditorDocument`.** `baseFont`, `baseParagraphStyle`,
+  `baseAttributes` read `current` (`EditorDocument.swift:24, 42–48, 53–56`); after adoption `adopt` is `current`'s
+  ONLY writer (the one production write, `EditorTypography.swift:249`, guarded; the rest are test restores);
+  `ThemeStore.start` adopts per emission in the same synchronous loop body as `settings = value`
+  (`ThemeStore.swift:49–50`) and SwiftUI's re-evaluation is a later turn, so a voice SWITCH re-fonts. Every
+  production chrome is built from a `ThemeSettings` (`EditorView.swift:82`, `ReadPostView.swift:57`;
+  `InlineEditorSurface.chrome`'s default at `:475` is overwritten by its host's), so a landed host's chrome equals
+  the adopted resolution. The un-landed note window (the sole trigger: `NoteWindowView.swift:55` + its
+  `PostDetailView`) now draws the adopted FONT with its placeholder COLOURS and PALETTE for its first frames — the
+  palette write at `:253` is unconditional and pre-existing since 13g (`RootView.adoptMarkdownPalette` also writes
+  it), and the next `MarkdownStyling.style` pass repaints; cosmetic, inside one DB-observation delivery, not raised.
+  The stored-stamp complement's decline is right (a second copy of one value is the drift class). The
+  `MarkdownFaceTests` edit models adopt-then-chrome, restores `isAdopted` on `defer` under `withVoice`'s own
+  `current`/palette restore, in the right order.
+- **MINOR-2's three keyings are correct as far as they go.** `railGroupHeights[postID]` from the value
+  `railGroup(_:)` holds (`:573`); `paneSeamSubject` is `ObjectIdentifier(router)|index` (`RootView.swift:703–705`),
+  the pin computes it from its OWN router and forgets before mounting (the recycled-address residual closed);
+  `forget(_:)` scoped (`SeamGrip.swift:147–150`), both callers clearing their own. The residue is my MINOR-2.
+- **MINOR-3's conversion is layout-neutral and arithmetic-identical.** `WorkbenchSeam` composes `SeamGrip`
+  (`BlocksWorkbenchView.swift:737–748`): the drag proposes `total − location.x` in the same named space as before;
+  the seam's own frame stays 1 pt (`SeamGrip.swift:93`); the host's `.zIndex(1)` sits inside the `if let row`
+  (`:236–243`) where the divider only exists beside the panel; `onFrame` now reports the GRIP; the `.divider`
+  probe and `dividerFrame` were written and read nowhere (re-grepped). The pin mounts the seam alone, so the
+  zIndex half is the walk's (item 3, walked). Green on the tree.
+- **The three doc fixes are true to the code.** NIT-1's road is `StableSurface.report`'s settle closure
+  (`StableSurface.swift:206–210`: `remember(size)` → `settled?()`), consumed by `BookView`'s `settled:` closures;
+  `FlowHeightEstimate.fingerprint` is a `static let`. NIT-2's clause states an intent and names the promoted case.
+  MINOR-4's four lines name `SeamGrip`, 14 pt and the pointer style; `SideColumn.swift:21–24`'s citation corrected.
+- **NIT-3's total is honest and its guard is a guard.** `totalIsAtLeast: model.truncated`
+  (`BookView.swift:767–774`); `NoteBoxIdentity: Equatable` gains a field, so `noteBoxReport` equality moves only
+  when truncation flips; the four selecting doors build rows from `model.entries`; the copy pin holds both shapes.
+- **NIT-4's guard sits above both assignments and the `read == nil` case still claims** — correct; GRDB's
+  cancellation semantics (my NIT-1) make it more necessary than its comment says.
+- **P-3's one-authority doctrine is untouched and the typography one-source is strengthened.** `PaneTextAuthority`
+  has no hunk; `EditorRouter.editing` has no hunk in this range and is a FIELD (round 1's clearing stands);
+  `current` gains a single post-adoption writer.
+- **The KnownIssues rows the fixes lean on exist with owners:** row 50 (the shell park + two oracle items → 13u2),
+  row 53 (the singleton oracles → 13u2 — and it names `SidebarGeometry`'s older fields, which is why MINOR-2 above
+  is scoped to the keyed trio and the reset door). QUESTIONS #97–#101 exist with their options.
+- **Machine note (not a finding):** `App/Variorum/DerivedData/` holds 16 GB in `18d1/`, `18d2/`, `18d3/` — dead
+  sessions' worktree DerivedData, HERS to reclaim per the handoff checklist; untouched here. My own probe's
+  worktree and DerivedData are gone; the boot volume stands at 13 GiB free, up from 12.
+
+#### CLEAN BILL — load-bearing things I checked myself and found solid
+
+- Zero `Sources/`, zero `App/Variorum/Shared/`, zero `Sync/`, zero custody/keychain, zero schema across the ten
+  commits — by empty diffs and a name grep.
+- Every pin the dispositions name exists and was READ, and the two red-on-old claims I could reach cheaply were
+  REPRODUCED in a scratch worktree rather than trusted: MAJOR-1 (20 vs 0) and MINOR-1 (3 issues). MINOR-3's width
+  arm ran green on the tree (its 9.0 red is the record's; the seam was not re-reverted — the conversion is read).
+- The eight touched suites green on the tree (57/8); the FULL Mac suite's result is recorded in the runs line above.
+- HEAD's code is the fix tree's code (empty diff), so the walk at `6629f362` and this read describe one tree.
+- The closure's capture, the counter's placement and the second arm are built as the riders asked (1–6), in the
+  code, not only the record; the focus door is keyed and cleared.
+- No default's meaning moved; every new parameter is defaulted to the shipped behaviour and pinned so.
+
+**Counts (round 2): 0 BLOCKER · 0 MAJOR · 2 MINOR · 2 NIT.** MINOR-1 is a pre-existing provenance gap the
+mandate's own check surfaced (red-on-old measured); MINOR-2 is the pass's own (c) class left standing one line
+under its edit (harness, no pin); the NITs are a doc clause and a latent harness leak. Nothing here re-opens a
+ruling; nothing needs a QUESTIONS row. **Per the brief, NOTHING IS FIXED IN THIS SESSION:** the findings go to the
+batch implementers for agree/dispute (MINOR-1 → 18d batch 4; MINOR-2 → 18d batch 1; NIT-1 → batch 1; NIT-2 → batch
+4 and batch 1) and return here for the final call and the fix pass.
 
 ### THE ROUND — CLOSEOUT (written 2026-09-08 by an OPUS session after the successor Fable orchestrator's budget ran out mid-ladder; ONE verification still open — see the last paragraph)
 
