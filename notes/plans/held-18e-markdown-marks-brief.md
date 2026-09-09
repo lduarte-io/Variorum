@@ -1,3 +1,7 @@
+# 18e — markdown marks faded — THE HELD BRIEF (R-14, pre-drafted by the first orchestrator 2026-09-08; NEVER RUN)
+
+> **HELD.** 18e was held out of the 2026-09-06 use-report round at her word on 2026-09-08 — her ruling and her markdown-mode contemplation are in `notes/plans/use-report-round-2026-09-06.md` §5.5, which a future 18e kickoff reads FIRST (the open question is now upstream of this brief: whether a markdown MODE exists as a switch at all). This file is that brief, kept verbatim so the design work is not lost with the round's scaffolding folder (the successor orchestrator's J47, 2026-09-09). Every file:line pointer in it was read at the 18c/18f close and WILL have drifted — re-grep before use.
+
 
 ---
 
