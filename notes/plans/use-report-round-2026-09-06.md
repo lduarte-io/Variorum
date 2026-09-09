@@ -10915,6 +10915,187 @@ ruling; nothing needs a QUESTIONS row. **Per the brief, NOTHING IS FIXED IN THIS
 batch implementers for agree/dispute (MINOR-1 → 18d batch 4; MINOR-2 → 18d batch 1; NIT-1 → batch 1; NIT-2 → batch
 4 and batch 1) and return here for the final call and the fix pass.
 
+#### ROUND-END FABLE PASS round 2 — the implementers' responses (18d batch 4)
+
+*(the batch-4 implementer's STAND-IN — a fresh session; the original batch-4 session is dead, so nothing
+here is carried from its context and every link below was re-traced at HEAD `79314287` in this session.
+TWO findings — MINOR-1 · NIT-2. **Both AGREED.** I have touched no code and no test; the fix pass is the
+reviewer's.)*
+
+**[MINOR-1] — AGREE.** Re-traced link by link and correct in every one:
+
+- `EditorTypography.fingerprint` (`Theme/EditorTypography.swift:125–130`) is
+  `fontName-Int(pointSize)-Int(paragraphSpacing)` off `current` alone, and `Resolved.paragraphSpacing` is
+  `resolve`'s gap — `(pointSize * 0.5).rounded()` plus the inline-comment room (`:103–105`). Nothing else
+  enters it.
+- The A23 dial is deliberately outside that: `ParagraphGap.current` reads
+  `UserDefaults.standard["editorParagraphGap"]` at style-construction time (`Theme/EditorBehaviorSettings.swift:49–52`,
+  and its own doc at `:45–48` says why), and `.paragraphTall` adds a whole line of the prose font after
+  EVERY paragraph (`:55–60` → `lineHeight(of:)`, `:65–67`).
+- It reaches the surface at `EditorDocument.baseParagraphStyle` (`Features/Editor/EditorDocument.swift:42–48`),
+  whose line `:45–46` is `typography.paragraphSpacing + ParagraphGap.current.extraSpacing(for: typography.font)`
+  — and that style is in `baseAttributes` (`:53–55`), which is what BOTH Outline surfaces lay out with:
+  `materialize` (`:67–74`) at every full render and the full-range `addAttributes` in `applyVoiceChrome`
+  (`EditorTypography.swift:261–265`).
+- Both Outline consumers are those surfaces — `BookView.swift:1886` (the live `EditorView`,
+  `followsShrinks: true`) and `:1922` (the read-cheap `ReadPostView`) — and both are wired to the ONE
+  memory whose stamp is the fingerprint (`BookViewModel.swift:397–401`; `grep EditorTypography.fingerprint
+  Variorum/` returns that single production site).
+- `SurfaceSizeMemory.size` compares `record.fingerprint == stamp` and nothing else (`Core/Views/SurfaceSizeMemory.swift:176–180`),
+  so a record taken under the other gap is ANSWERED, and `StableSurface.reserved` (`Core/Views/StableSurface.swift:214–220`)
+  reserves that height until the 1.0-s settle (`:101`) adopts the real one and `persist` overwrites it.
+
+Two sharpenings, both from this session's greps; neither weakens the finding.
+
+1. **It is reachable WITHOUT a relaunch, and the fix's doc should say so.** The dial is `@AppStorage` on
+   both surfaces (`EditorView.swift:78`, `ReadPostView.swift:53`) and on its Settings door
+   (`AppSettingsView.swift:91`), and it rides `EditorSurfaceChrome.paragraphGap`, whose `Equatable` gate is
+   the app's ONE "re-apply this surface" mechanism (`EditorTypography.swift:166–173`). So the moment she
+   flips it, every mounted Outline surface re-styles to the new height while every stored record keeps the
+   old stamp — the stale reservation then lands on each row's NEXT realization, in the same session as well
+   as after a launch. The finding's "on its next realization" already covers it; the sentence is worth
+   keeping explicit, because "she rarely toggles it" reads as "she must relaunch" otherwise.
+2. **The mechanism's last link is already PINNED and green** — `TypingErgonomicsTests.paragraphTallAddsAWholeLineOfTheProseFont`
+   (`:142–153`) asserts `EditorDocument.baseParagraphStyle.paragraphSpacing` grows by exactly
+   `ParagraphGap.lineHeight(of: EditorTypography.current.font)` under the tall gap. The finding therefore
+   rests on a shipped pin, not on an argument: the type really does move and the stamp really does not.
+
+**The coordinator's three questions, answered by name.**
+
+- **Is the one-line fix the right shape, or should the gap reach `Resolved`?** The one-liner is right, and
+  the gap must NOT reach `Resolved`. **A23's ordering reason still holds and is STRONGER than when it was
+  written, because of round 1's own fix.** Concretely: after that fix, `current`'s only writer past adoption
+  is `EditorTypography.adopt` (`:79–82`, and `applyVoiceChrome`'s write is now gated at `:248–250`), whose
+  one caller is `ThemeStore.start` (`Theme/ThemeStore.swift:44–51`) — which emits only on the SYNCED
+  `setting` table's `themeSettings` observation. The A23 gap is app-local `UserDefaults`, deliberately not in
+  that table (`EditorBehaviorSettings.swift:12–15`). So a gap folded into `Resolved` would never be
+  re-resolved when she moves the dial: `baseParagraphStyle`, reading from `current`, would lay out at the OLD
+  gap until some unrelated theme change happened to arrive. Before round 1's fix, `applyVoiceChrome`'s
+  unconditional write would at least have healed that at the next chrome application — and that heal is
+  exactly what the fix removed. **Folding the dial into `Resolved` today would be a regression in the LAYOUT,
+  not merely in the stamp.** A23's doc named the hazard in the abstract; this round made it concrete.
+- **Does the extra `UserDefaults` read per `remember`/`size` stay P1-shaped?** Yes. It is one cached
+  `UserDefaults.standard.string(forKey:)` — constant, never ∝ document or corpus — and it is a read the same
+  surface already pays at a HIGHER cadence: `baseAttributes` → `baseParagraphStyle` → `ParagraphGap.current`
+  runs on every materialization and every differential apply, i.e. per keystroke on the very surface whose
+  geometry report would now also read it. `remember`'s own cadence is bounded by geometry reports, which are
+  bounded by the viewport (P1/P3), not by the note's length. (Rider 3 below makes the two reads one.)
+- **Does it change any existing stamp under `.standard`?** No — byte for byte. `extraSpacing` returns 0 for
+  `.standard` (`EditorBehaviorSettings.swift:57`) and `Int((x + 0).rounded()) == Int(x.rounded())`, so
+  `.AppleSystemUIFontMonospaced-Regular-14-7` and `IowanOldStyle-Roman-16-8` stand. Under `.paragraphTall`
+  the third term becomes the sum — still an integer, still no `|`, so the record-separator promise at
+  `:118–119` holds. And checked so the fix does not go hunting: the literal stamps in the suite
+  (`SurfaceSizeMemoryTests:127, :138, :475–476, :584`) are INJECTED strings handed to a memory's
+  `fingerprint` closure and never compared against the real fingerprint, so they are untouched at any gap;
+  the one real-fingerprint content assertion (`:678`, `study?.contains("Iowan")`) is a substring and
+  gap-independent.
+
+**Riders offered to the fix.**
+
+1. **It is exactly ONE stamp, not two — the `.flow` key space needs nothing.** `FlowHeightEstimate.fingerprint`
+   (`ReadingFlowView.swift:695`) is the page's own constants, and that file never consults `ParagraphGap`
+   (zero hits) because `FlowPostView` (`:980`) is a SwiftUI `Text` page at `.lineSpacing(6)` / `spacing: 13`.
+   Stamping the gap there would drop every remembered story on a dial that moves nothing on that page —
+   precisely the mistake the flow's own doc (`:679–686`) exists to prevent.
+2. **The provenance sweep, finished rather than sampled — and worth saying in the fix's doc, since the
+   mandate's question deserves an answer and not just a patch.** The two Outline surfaces carry exactly three
+   `@AppStorage` dials between them: `ParagraphGap` (the finding), `SpellcheckLevel` (`EditorView.swift:79`,
+   `ReadPostView.swift:54`) and `writeHoverHandles` (`EditorView.swift:50`). Neither of the other two moves
+   laid-out height — `SpellcheckLevel.apply` writes only NSTextView checking flags
+   (`EditorBehaviorSettings.swift:105–132`) and `hoverHandles` gates a decor OVERLAY (`BlockDecor.swift:638`).
+   After this one line the stamp's provenance is COMPLETE for these surfaces.
+3. **Prefer the explicit form over the `baseParagraphStyle` equivalent the finding offers in parentheses —
+   and close the drift the explicit form opens.** `EditorDocument.baseParagraphStyle.paragraphSpacing`
+   allocates an `NSMutableParagraphStyle` and re-reads `current` on every call; at geometry cadence that is
+   strictly worse than `ParagraphGap.current.extraSpacing(for: resolved.font)`. But the explicit form
+   re-states an arithmetic that lives at `EditorDocument.swift:45–46`, which is the J8 copy-truth class this
+   round has spent three letters closing. The shape with neither cost is ONE function on `EditorTypography` —
+   `static func laidOutParagraphSpacing(_ resolved: Resolved) -> CGFloat` — called by `fingerprint` and by
+   `baseParagraphStyle` (which already holds its `typography` local to hand it): one arithmetic, no
+   allocation, no second copy, and the dependency direction unchanged (`EditorDocument` → `EditorTypography`).
+   Offered, not demanded: it touches `EditorDocument`, which the one-liner does not.
+4. **The doc line's maintenance rule should key on `baseAttributes`, not on `resolve`.** `:114–118` today says
+   any future dial "that reaches the surface through `resolve` moves the stamp for free" — after the fix that
+   is half the rule, and the wrong half to leave standing alone. The checkable form: *a dial that changes what
+   `EditorDocument.baseAttributes` produces must be added to this stamp in the same edit, whether or not it
+   passes through `resolve`* — and the grep that finds such a dial is `@AppStorage` on the surfaces
+   `SurfaceSizeMemory(.outline)` measures (rider 2 is that grep, run).
+5. **The fix WIDENS the process-global surface the pins straddle — new, and it is this pass's own MINOR-2 /
+   NIT-2 class arriving through the stamp.** Today `EditorTypography.fingerprint` is a pure function of two
+   globals this suite already captures and restores. After the fix it is also a function of
+   `UserDefaults.standard`'s `editorParagraphGap`, which two OTHER suites flip process-wide:
+   `TypingErgonomicsTests.withGap` (`:115–126`, synchronous windows) and — much wider —
+   `PaneSurfaceTests.aGapOrVoiceChangeRestoresTheRenderTierWithNoUserEvent` (`:354–390`), which holds
+   `.paragraphTall` across a dozen `pump` / `await Task.yield()` turns and restores only in its `defer`. Two
+   existing pins then compare two REAL fingerprints taken at different instants:
+   `aDrawingHostCannotMoveTheStampOnceTheVoiceIsAdopted` captures `herStamp` at `:665` and `stampAfter` at
+   `:669` and asserts equality at `:679`, and builds the disk suffix from `herStamp` at `:683` against a
+   record written at `:671–672`. A flip landing inside either window turns them red with no defect behind
+   them. **The fix should pin the gap key for those two windows exactly as the new pin does for its own**
+   (set `ParagraphGap.standard.rawValue`, restore what it found) — two lines, and it removes the class
+   instead of sampling it.
+
+---
+
+**[NIT-2] — AGREE**, on both halves, and I re-ran the traces rather than taking them. *(Scope note for the
+fix pass: (a)'s two files are batch 1's surfaces — the note box and the masthead — while (b)'s two pins are
+mine; the findings section routes this NIT to both batches, and my agreement covers the traces, not the
+ownership of (a)'s files.)*
+
+*(a)* `NoteBoxMountTests.swift:157–163` — `setThemeVoice(voice)` at `:157` on a test parameterized over both
+voices (`:141`), a `ThemeStore` at `:161` and `Task { await theme.start() }` at `:162` with only
+`defer { themeTask.cancel() }` at `:163`. `start()` adopts on EVERY emission (`ThemeStore.swift:50`), so the
+Study arm leaves `current` at Iowan 16 and `isAdopted` true for the process, and nothing in the file puts
+either back. The file's other three `ThemeStore`s (`:224`, `:509`, `:584`) are never started, so they adopt
+nothing — the finding's citation of the single site is exact. `MastheadLayoutTests.swift:245–251` and
+`:493–499` create a store, start it, then `setVoice(.study)` and wait on `store.settings.voice == .study`:
+the store adopts twice (the initial Terminal emission, then Study) and neither is restored.
+**And the completeness check the finding invites, run here:** the Study-landing set across the whole suite is
+exactly those two files plus `SurfaceSizeMemoryTests:433`, which bounds itself (`:423–428`, `:450–451`) —
+`grep -rn "setThemeVoice(.study)\|setVoice(.study)\|setThemeVoice(voice)\|setVoice(voice)" VariorumTests/`
+returns four hits and no others. **(a)'s list is COMPLETE.**
+
+*(b)* Both production-door pins call `applyVoiceChrome` (`:599`, `:668`), which writes
+`MarkdownStyling.palette` unconditionally at `EditorTypography.swift:253` before anything else; both capture
+and restore `current` and `isAdopted`, and neither captures the palette. `MarkdownFaceTests.withVoice`
+(`:25–38`) and `FormattingSurfacesTests:286–288` do restore theirs. Exact as stated.
+
+**Riders.**
+
+1. **The leak has a DIRECTION, and that is the cheap way to finish the victim grep.** Study's 16-pt Iowan is
+   TALLER than Terminal's 14-pt mono at the same width, so a leaked adoption can only make a mounted surface
+   taller. A victim is therefore a pin asserting an UPPER bound (or an equality) on a mounted surface's
+   height — never a lower one, which is why the `editorHeight > 3000` shape at `BookOutlineLandingTests` is
+   safe in this direction, and why one green full run is weak evidence: it sampled the leak, not the shape.
+2. **A genuine scope widening, offered not demanded: the palette has a PRODUCTION writer the pins already
+   run.** `RootView.adoptMarkdownPalette` (`RootView.swift:382–384`) writes `MarkdownStyling.palette` from
+   its own theme + scheme, so any pin mounting a real `RootView` (this pass's own MINOR-2 cites
+   `ShellLandingTests:297–338` as one) is a writer too. Restoring the palette in my two pins closes the two
+   writers this pass ADDED; the class — a process-global palette with production writers, whose reachable
+   victim shape is a pin that styles storage under one palette and asserts against
+   `MarkdownStyling.palette` at assertion time (`FormattingSurfacesTests:191`, `MarkdownFaceTests:167–170,
+   :239`) — stays open and belongs with `SidebarGeometry`'s older fields on KnownIssues row 53 / 13u2. The
+   fix's wording should claim the two, not the class.
+3. **The narrowing I would least want dropped: "capture and restore in a `defer`" is NOT sound for these two
+   suites, and would look done while staying racy.** Both hold a live `Task { await store.start() }` for the
+   whole body and only `cancel()` it. `cancel()` does not await, and `start()`'s `for try await` can deliver
+   one more value — and re-adopt — after a restoring `defer` has run; worse, defers unwind in reverse
+   declaration order, so a restore declared after the existing cancel-defer runs FIRST. The honest shape is
+   explicit rather than deferred: at the end of the body `watching.cancel()`, then `await watching.value`
+   (`start()` returns on cancellation — `ThemeStore.swift:52` — so the await is finite), and only then put
+   `current` and `isAdopted` back. `SurfaceSizeMemoryTests` gets its one-statement window precisely because
+   it never runs a store; these two do, so they owe the join.
+
+---
+
+**Summary: 2 agreed · 0 disputed.** Nothing here re-opens a ruling and nothing needs a QUESTIONS row —
+MINOR-1 is a code decision about a stamp's provenance (A23's semantics are untouched: the dial keeps its
+meaning, its locality and its exclusion from `Resolved`) and NIT-2 is harness hygiene; neither changes a
+behaviour she can name. The two things I would not want dropped from the fix pass: **MINOR-1 rider 5** (the
+fix makes the stamp a function of a `UserDefaults.standard` key two other suites flip, so the two existing
+real-fingerprint pins must pin the gap for their windows) and **NIT-2 rider 3** (a bare restoring `defer`
+races the store's own task — cancel and await before restoring).
+
 ### THE ROUND — CLOSEOUT (written 2026-09-08 by an OPUS session after the successor Fable orchestrator's budget ran out mid-ladder; ONE verification still open — see the last paragraph)
 
 **What she asked for, and what she got.** Her evening writing with takes (`notes/author-reports/2026-09-06-use-report.md`) named three things the app did to her and ~twenty smaller ones. All of it is built, in five letters run as one round, with a ladder over every letter:
