@@ -1,3 +1,5 @@
+> **✔ CONSUMED 2026-09-09.** The fresh Fable session this file was written for ran it to the end: the audit (J47), round 2 (0·0·2·2 — fixed, sanity-passed, no round 3), the finish. Kept for provenance; the live record is the plan's LIVE STATUS + `### THE ROUND — CLOSEOUT`, and the author handoff. *(Its commit list says eight; there were nine — `6b6d4fc1` landed after it was written.)*
+
 # THE FINISH — a paste-ready kickoff for a FRESH Fable session
 
 *Written 2026-09-08 by an Opus session after the orchestrator's Fable budget ran out mid-ladder. Everything in the round is built, adjudicated, closed and pushed EXCEPT one bounded cold read and the mechanical finish behind it. This file exists so none of that costs a stale session's re-orientation: the two agents that hold this round's context (the orchestrator at ~600k tokens, the round-end reviewer at ~837k) should NOT be resumed — spawn fresh from here.*
