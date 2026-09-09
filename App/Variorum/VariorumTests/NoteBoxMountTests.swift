@@ -376,9 +376,12 @@ struct NoteBoxCompositionTests {
                 window.close()
             }
 #if DEBUG
-            // MY rail, by its note (the round-end Fable pass, MINOR-2 (a)).
+            // MY rail, by its note (the round-end Fable pass, MINOR-2 (a)) —
+            // and MY box, by its book (round 2's MINOR-2: the whole-oracle
+            // `resetHeaders()` that stood here wiped every other suite's box
+            // too, and `onGeometryChange` never republishes a wiped frame).
             SidebarGeometry.railGroupHeights[postIDs[0]] = nil
-            SidebarGeometry.resetHeaders()
+            SidebarGeometry.forgetBox(subject: readingID)
 #endif
             let hosting = NSHostingView(
                 rootView: RootView(session: session, services: nil, router: router))
@@ -641,8 +644,9 @@ struct NoteBoxCompositionTests {
                 window.close()
             }
 #if DEBUG
-            SidebarGeometry.noteBoxFrames[readingID] = nil
-            SidebarGeometry.noteBoxWhereLines[readingID] = nil
+            // MY box, by its book (round 2's MINOR-2 folded the two hand-nils
+            // that stood here into the one keyed door).
+            SidebarGeometry.forgetBox(subject: readingID)
             BookOutlineGeometry.focusDoors[readingID] = nil
 #endif
             let hosting = NSHostingView(

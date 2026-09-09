@@ -798,10 +798,39 @@ enum SidebarGeometry {
         noteBoxWhereLines[subject] = line
     }
 
+    /// **A pin clears ITS OWN box and no other** (the round-end Fable pass's
+    /// round 2, MINOR-2 — the (c) class round 1 closed for `SeamGeometry`,
+    /// one door over). The four subject-keyed statics — the box's frame, its
+    /// header's frame, its faces and its where-line — are published
+    /// change-only (`onGeometryChange`) or mount-only (`onAppear`/`onDisappear`
+    /// counters), so an entry wiped from under a still-mounted box is never
+    /// republished, and a wiped COUNTER goes negative when that box finally
+    /// disappears. A whole-oracle wipe from one suite therefore turned another
+    /// suite's poll red with no defect behind it (`@MainActor` suites
+    /// interleave at every settle's `await`). Not a correctness fix for any
+    /// caller — every keyed read is under a live uuid — but the removal of
+    /// the whole-wipe DOOR from the box's statics, which is the class itself.
+    /// Named for the BOX's subject: the rails' key space (`railGroupHeights`,
+    /// keyed by the rail's POST) is a different thing and stays per-key at
+    /// its own callers.
+    static func forgetBox(subject: String) {
+        noteBoxFrames[subject] = nil
+        noteBoxHeaderFrames[subject] = nil
+        noteBoxFaces[subject] = nil
+        noteBoxWhereLines[subject] = nil
+    }
+
+    /// The HEADER oracles — keyed by a TITLE every window shares
+    /// (`"this note"`, the Open header, each group's words), so this is
+    /// still a whole wipe of those three, and it stays one: the KEY is the
+    /// shared thing, and a shared key cannot be scoped by its callers. That
+    /// residue is KnownIssues row 53's shape (`SidebarGeometry`'s older
+    /// fields — 13u2's sweep keys them by host); until then a suite that
+    /// calls this can wipe a header frame another suite is polling for. The
+    /// box's subject-keyed statics LEFT this door at the round-end Fable
+    /// pass's round 2 (MINOR-2): they have `forgetBox(subject:)`, and the
+    /// name describes the body again.
     static func resetHeaders() {
-        noteBoxFrames = [:]
-        noteBoxHeaderFrames = [:]
-        noteBoxFaces = [:]
         headerTextFrames = [:]
         firstRowContentFrames = [:]
         firstRowBoxFrames = [:]
