@@ -10,7 +10,7 @@ The Fable session also AUDITED the Opus closing session's nine notes commits aga
 
 ## Your checklist (in this order)
 
-1. **`/Applications/Variorum.app` is NOT yet refreshed** — the install refresh is the round's last act and it waits on the one open verification (below). Every session this round worked the DEV-STORE Debug build only; your real store was never opened by any of them. When the refresh happens it takes the A1 backup first.
+*[removed for publication]*
 2. **Restore the field guide — YOUR one in-app act:** Help ▸ Restore Tutorial… (Replace). The changed lessons: writing ▸ *blocks & typing* (card two — the Return model, 18c); structure ▸ *the take ceremony* RENAMED *divide choosing takes* (both cards), *divide* (the fanned card — keep-on-top), *merge* (two cards + the staged spare take's line), *extract & make block*, and the ⌘/ helper's Structure rows (18f); deleting ▸ *what a block leaves behind* (card 2 + the spare take's line — keep-on-top, 17o row 44); deleting ▸ *the tray & the Trash* (the two views and the filter, 18d). Nothing you wrote is touched; the tutorial's own book is replaced.
 3. **The walk — the round's rows, in the order you hit them** (each pinned and walked by its implementer on the dev store; captures under `notes/plans/use-report-2026-09-06-screens/`):
    - **Write with the chip on:** ⏎ at a block's end → an empty block below; ⏎ mid-paragraph → a divide at the caret; ⏎ at a block's start → an empty block above; ⇧⏎ the blank line; type during a divide's flight — nothing dropped. Note ▾ / block ▾ ▸ *Make every newline a block*.
@@ -45,7 +45,7 @@ Her evening writing with takes, answered whole. **18c** the typing model: the Re
 **The pattern worth your eye: every single ladder's round 2 found a new MAJOR inside round 1's fixes. Five for five, and the round-end pass found a sixth thing nobody had seen.** That is why round 2 of the last pass is not being skipped.
 
 ## Finals
-core `swift test` **1503/163** · the FULL Mac suite **2458/424 green** (at 18d's close) · iOS build SUCCEEDED. The round-end pass's fixes then ran **311/58** over every suite they reach. A final full run rides the finish.
+core `swift test` **1503/163** · the FULL Mac suite **2462/424 green** over the final tree (`✔ Test run with 2462 tests in 424 suites passed after 610.288 seconds`, 2026-09-09 — zero failures; the only skips the five opt-in Keychain drill tests) · iOS build SUCCEEDED (the last `Shared/` touch was 18d batch 2's; every commit since is Mac-only or notes). The round-end pass's round 1 ran 311/58 and its round 2 290/48 over the suites they reach.
 
 ## Handed forward, every item owned
 - **13u1 (the editor seam):** the deferred-keystroke stash/replay seam now under an everyday key; the text-undo-clears directive; **the quit/lock/seal door-await gap**; **⌥⌘Z for a ⏎-made empty block** — the last two are the pair you ruled stay with 13u1 rather than becoming a 17 entry.
