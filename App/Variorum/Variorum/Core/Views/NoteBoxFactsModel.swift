@@ -58,11 +58,22 @@ final class NoteBoxFactsModel {
                 savedAt: stamps.savedAt)
         }
         // A SUPERSEDED read leaves both to the newer task (the round-end
-        // Fable pass, NIT-4): `.task(id:)` cancels this task on a key change,
-        // but the database read is not cancellation-aware mid-flight, and an
-        // old note's read finishing last would otherwise claim `subject` and
-        // leave the new note factless until the next selection. This guard
-        // sits ABOVE both assignments and is a different question from the
+        // Fable pass, NIT-4; its reason corrected at round 2, NIT-1):
+        // `.task(id:)` cancels this task on a key change, and GRDB 7's async
+        // `read` IS cancellation-aware — the in-flight statement is
+        // interrupted and comes back as a THROW (`CancellationError`), which
+        // the `try?` above maps to `nil`. So without this guard a superseded
+        // task did not have to finish last to do harm: it usually lands
+        // EARLY, and its stale write BLANKS whatever subject it claims. The
+        // case a reader can try is two clicks — select a note (`A|false`),
+        // then "edit here" (`A|true`): the cancelled read blanks the SAME
+        // postID, `facts(for:)` answers nil for the note on screen, and the
+        // live state's facts line stays empty until the next selection.
+        // `try?` collapses two answers into one `nil` — "the note vanished"
+        // and "I was superseded" — and `Task.isCancelled` is how the second
+        // is recovered; a future `do`/`catch` here must `return` on the
+        // `CancellationError` arm and keep this guard as the belt. It sits
+        // ABOVE both assignments and is a different question from the
         // `read == nil` case below, which deliberately claims the subject.
         guard !Task.isCancelled else { return }
         // A note that vanished between the ask and the read (a tombstone, a
