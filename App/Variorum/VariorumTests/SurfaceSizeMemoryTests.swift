@@ -684,6 +684,68 @@ struct SurfaceSizeMemoryTests {
                 "the same-turn remember + persist wrote under HER stamp, never the guess: \(String(describing: onDisk))")
     }
 
+    /// **The round-end Fable pass, round 2 — MINOR-1: the stamp moves with the
+    /// paragraph-gap dial.** This Mac's A23 setting (`ParagraphGap`) adds a
+    /// whole line after EVERY paragraph under `.paragraphTall`, and it reaches
+    /// the surface through `EditorDocument.baseParagraphStyle`, NOT through
+    /// `resolve` — so the stamp, derived from `Resolved` alone, did not move
+    /// with it, and a height measured under `.standard` was ANSWERED under
+    /// `.paragraphTall`: a wrong reservation for one settle on every
+    /// remembered note, the moment she flipped the dial (the chrome's
+    /// `Equatable` gate re-styles every mounted surface at once; the stored
+    /// records kept the old stamp). Now the stamp and the layout read ONE
+    /// arithmetic, `EditorTypography.laidOutParagraphSpacing`.
+    ///
+    /// The globals and the defaults key are captured and put back before
+    /// anything is asserted (round 2's NIT-2; `ParagraphGapTests.withGap`'s
+    /// own restore shape). Every flipper of this key in the suite is
+    /// `@MainActor` and this body is synchronous, so nothing can move the key
+    /// inside it.
+    ///
+    /// RED ON OLD (measured by behavioural revert of the one line in
+    /// `fingerprint`, in place on the committed tree): the stamp read
+    /// `.AppleSystemUIFontMonospaced-Regular-14-7` under BOTH gaps, and her
+    /// record was answered under the tall one.
+    @Test func aParagraphGapChangeMovesTheStamp() {
+        let suiteName = "surface-size-\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let restore = EditorTypography.current
+        let wasAdopted = EditorTypography.isAdopted
+        let savedGap = UserDefaults.standard.string(forKey: ParagraphGap.settingKey)
+        defer {
+            EditorTypography.current = restore
+            EditorTypography.isAdopted = wasAdopted
+            if let savedGap {
+                UserDefaults.standard.set(savedGap, forKey: ParagraphGap.settingKey)
+            } else {
+                UserDefaults.standard.removeObject(forKey: ParagraphGap.settingKey)
+            }
+        }
+        EditorTypography.adopt(EditorTypography.resolve(voice: .terminal, inlineComments: false))
+        let live = SurfaceSizeMemory(
+            .outline, defaults: defaults, fingerprint: { EditorTypography.fingerprint })
+
+        // Her record, measured under the standard gap…
+        UserDefaults.standard.set(ParagraphGap.standard.rawValue, forKey: ParagraphGap.settingKey)
+        let hers = CGSize(width: 696, height: 20993)
+        live.remember("p1", hers)
+        live.persist("p1")
+        let standardStamp = EditorTypography.fingerprint
+        // …then the dial flipped: the stamp must move, and the record must
+        // not be answered under a gap it was never measured in.
+        UserDefaults.standard.set(ParagraphGap.paragraphTall.rawValue, forKey: ParagraphGap.settingKey)
+        let tallStamp = EditorTypography.fingerprint
+        let answered = live.size("p1")
+        EditorTypography.current = restore
+        EditorTypography.isAdopted = wasAdopted
+
+        #expect(tallStamp != standardStamp,
+                "a dial that changes every paragraph's height moves the stamp: \(String(describing: standardStamp)) vs \(String(describing: tallStamp))")
+        #expect(answered == nil,
+                "a height measured under one gap is not reserved under another: \(String(describing: answered))")
+    }
+
     // MARK: - 9. Round 2's MINOR-3: the door the app really walks
 
     /// **RED ON `ecacfa42`.** Round 1 wired `forgetPersisted` to

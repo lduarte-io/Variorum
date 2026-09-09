@@ -105,18 +105,50 @@ nonisolated enum EditorTypography {
         return Resolved(font: font, paragraphSpacing: gap)
     }
 
+    /// **The paragraph gap a surface LAYS OUT with** — the voice's resolved
+    /// spacing PLUS this Mac's `ParagraphGap` dial (A23). ONE arithmetic,
+    /// read by `EditorDocument.baseParagraphStyle` (the layout) and by
+    /// `fingerprint` (the stamp) — the round-end Fable pass's round 2,
+    /// MINOR-1: the two used to be one arithmetic and one omission, and a
+    /// stamp that does not move with the layout is the stale-reservation
+    /// failure the stamp exists to prevent. The dial deliberately stays OUT
+    /// of `current`/`Resolved` (its own doc at `ParagraphGap.current`): it is
+    /// app-local `UserDefaults`, not the synced `setting` row `ThemeStore`
+    /// observes, so a copy cached in `current` would never be re-resolved
+    /// when she moves it — and since round 1's fix `adopt` is `current`'s
+    /// only writer past adoption, that stale copy would be the LAYOUT's, not
+    /// only the stamp's. Read at every call, as `baseParagraphStyle` always
+    /// has: one cached defaults string, constant, never ∝ document.
+    static func laidOutParagraphSpacing(_ resolved: Resolved) -> CGFloat {
+        resolved.paragraphSpacing + ParagraphGap.current.extraSpacing(for: resolved.font)
+    }
+
     /// 18d batch 4 (U-12): the CURRENT text-surface typography as one short
     /// token — the stamp a remembered surface size carries
     /// (`SurfaceSizeMemory.Record`), so a height measured in Terminal's
-    /// 14-pt monospace is never reserved for Study's 16-pt Iowan, and a
-    /// height measured without inline comments is never reserved with them.
+    /// 14-pt monospace is never reserved for Study's 16-pt Iowan, a height
+    /// measured without inline comments is never reserved with them, and —
+    /// since the round-end Fable pass's round 2 (MINOR-1) — a height measured
+    /// under the standard paragraph gap is never reserved under the tall one.
     ///
-    /// Derived from `Resolved` itself rather than from the settings, so any
-    /// future dial that reaches the surface through `resolve` moves the
-    /// stamp for free — a dial that changes the type and not this string
-    /// would leave stale reservations behind, which is the one failure this
-    /// stamp exists to prevent. Never contains `|` (the record's separator):
-    /// font names and integers do not.
+    /// **THE MAINTENANCE RULE, keyed on what the surface lays out with:** a
+    /// dial that changes what `EditorDocument.baseAttributes` produces must
+    /// be added to this stamp in the same edit, whether or not it passes
+    /// through `resolve`. The font and the resolved spacing arrive through
+    /// `Resolved` for free; the paragraph-gap dial does NOT pass through
+    /// `resolve` (see `laidOutParagraphSpacing`) and was missed for exactly
+    /// that reason — she flips it in Settings, every mounted surface
+    /// re-styles at once (the chrome's `Equatable` gate carries it), and
+    /// every stored record kept the old stamp, so each remembered note stood
+    /// at the wrong height for one settle on its next realization. The grep
+    /// that finds the next such dial: `@AppStorage` on the surfaces
+    /// `SurfaceSizeMemory(.outline)` measures (`EditorView`, `ReadPostView`
+    /// — today `ParagraphGap`, `SpellcheckLevel` and `writeHoverHandles`, of
+    /// which only the first moves laid-out height). The `.flow` key space
+    /// needs none of this: its page is a SwiftUI `Text` with its own
+    /// constants (`FlowHeightEstimate.fingerprint`), untouched by the dial.
+    /// Never contains `|` (the record's separator): font names and integers
+    /// do not.
     /// **nil until the voice is KNOWN** (18d ladder MINOR-2): a stamp is a
     /// claim about which type a height was measured in, and before the
     /// settings land this module has no such claim to make — only the
@@ -126,7 +158,7 @@ nonisolated enum EditorTypography {
         guard isAdopted else { return nil }
         let resolved = current
         return "\(resolved.font.fontName)-\(Int(resolved.font.pointSize.rounded()))"
-            + "-\(Int(resolved.paragraphSpacing.rounded()))"
+            + "-\(Int(laidOutParagraphSpacing(resolved).rounded()))"
     }
 
     // MARK: - Margins (R9 — sacred; "text never runs near the window edge")

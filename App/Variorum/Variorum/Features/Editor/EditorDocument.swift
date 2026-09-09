@@ -41,9 +41,11 @@ nonisolated extension EditorDocument {
     /// nowhere.
     static var baseParagraphStyle: NSParagraphStyle {
         let style = NSMutableParagraphStyle()
-        let typography = EditorTypography.current
-        style.paragraphSpacing = typography.paragraphSpacing
-            + ParagraphGap.current.extraSpacing(for: typography.font)
+        // ONE arithmetic with the stamp (`EditorTypography.fingerprint`) — the
+        // round-end Fable pass's round 2, MINOR-1: the gap this style lays out
+        // with is the gap the surface-size memory must stamp, and a second
+        // copy of the sum here is how the two drifted apart in the first place.
+        style.paragraphSpacing = EditorTypography.laidOutParagraphSpacing(EditorTypography.current)
         return style
     }
 
