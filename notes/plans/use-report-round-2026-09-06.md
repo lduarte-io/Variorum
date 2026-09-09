@@ -11330,6 +11330,124 @@ must NOT retire — `NoteBoxMountTests:234` reads the title-keyed `firstRowConte
 hand-nils folded in), and **NIT-2 (a)'s throw path** (a cancel → await → restore that runs only at the
 happy exit leaks on exactly the run where a pin fails).
 
+#### ROUND-END FABLE PASS round 2 — dispositions + fixes (the reviewer)
+
+*(the fable-reviewer, the cross-model flow's second half: the FINAL CALL on each of the four findings after the
+two stand-ins' responses — 5 AGREED · 0 DISPUTED across the two records — then the fixes, in this session, each
+committed per piece. Every rider was VERIFIED in the code at `824578f3` before it was adopted or dismissed; none
+was taken on the record's word. `Sources/` and `App/Variorum/Shared/` untouched throughout; no scratch worktree
+this time — the one red-on-old re-measure runs IN PLACE on the committed tree, restored by `git checkout --`.)*
+
+**[MINOR-1] — CONFIRMED (2 agreed).** The riders, each checked and decided by name:
+
+- **Rider 3 (ONE function, no copied arithmetic) — ADOPTED.** `EditorDocument.baseParagraphStyle`
+  (`EditorDocument.swift:42–48`) holds the arithmetic `typography.paragraphSpacing +
+  ParagraphGap.current.extraSpacing(for: typography.font)`; a second copy in `fingerprint` is the J8 copy-truth
+  class. The shipped shape is `EditorTypography.laidOutParagraphSpacing(_ resolved:)` — consumed by
+  `fingerprint` and by `baseParagraphStyle` (which already has its `typography` local to hand it) — so the stamp
+  and the layout read ONE arithmetic; the dependency direction is unchanged (`EditorDocument` → `EditorTypography`,
+  which `baseFont` already takes). It touches `EditorDocument.swift` — the Mac platform half under
+  `Features/Editor/`, not `Shared/EditorBrain` — so the seam rule holds.
+- **Rider 5 (the two existing real-fingerprint pins must pin the gap for their windows) — DISMISSED AS HOLLOW,
+  with the reason.** Every flipper of `editorParagraphGap` in the suite is `@MainActor`
+  (`ParagraphGapTests`, `TypingErgonomicsTests.swift:111–113`; `PaneSurfaceTests`, `:71–73`), and the two pins
+  named (`aDrawingHostCannotMoveTheStampOnceTheVoiceIsAdopted`, `aSurfaceTakingChromeBeforeTheVoiceLandsCannotRecordUnderTheGuess`)
+  are SYNCHRONOUS bodies on the same actor (`SurfaceSizeMemoryTests`, `:90–92`) — a MainActor writer cannot land
+  inside a synchronous MainActor body, so `herStamp` at `:665` and `stampAfter` at `:669` are read under one gap
+  by construction, and the disk suffix at `:683` is derived from that same `herStamp`. What a flip BETWEEN tests
+  does is change the VALUE both readings share (`…-16-8` → `…-16-25` while `PaneSurfaceTests` holds `.paragraphTall`
+  across its yields), never their equality; the one content assertion (`contains("Iowan")`) is gap-independent.
+  A pin that passes on both sides is hollow; two lines that close no reachable race would be cargo. The NEW pin
+  sets and restores the key because its CLAIM is about the flip.
+- **Rider 1 (the flow key space needs nothing) — VERIFIED, adopted into the doc:** `ReadingFlowView.swift` has
+  zero `ParagraphGap` hits; `FlowHeightEstimate.fingerprint` stays a constant.
+- **Rider 2 (the provenance sweep is complete) — VERIFIED:** the two Outline surfaces carry exactly
+  `ParagraphGap`, `SpellcheckLevel` (`EditorView.swift:78–79`, `ReadPostView.swift:53–54`) and
+  `writeHoverHandles` (`EditorView.swift:50`); the latter two move no laid-out height. Said in the doc.
+- **Rider 4 (the maintenance rule keys on `baseAttributes`, not `resolve`) — ADOPTED** in `fingerprint`'s doc,
+  with the grep that finds the next dial (`@AppStorage` on the surfaces `SurfaceSizeMemory(.outline)` measures).
+- **Sharpening 1 (reachable without a relaunch — the chrome's `Equatable` gate re-styles every mounted surface
+  the moment she flips the dial) — VERIFIED** (`EditorSurfaceChrome.paragraphGap`, `EditorTypography.swift:166–173`;
+  `@AppStorage` on both hosts and on `AppSettingsView.swift:91`); said in the doc.
+- **The three coordinator questions** stand as the stand-in answered them (the one-liner's shape; P1 — one cached
+  defaults read at geometry cadence, already paid per keystroke by `baseAttributes`; byte-identical stamps under
+  `.standard`) — each re-checked here: `extraSpacing` is `0` for `.standard` (`EditorBehaviorSettings.swift:57`),
+  so `Int((x + 0).rounded()) == Int(x.rounded())`, and the suite's literal stamps are injected strings.
+
+**FIX: NOT-STARTED** *(rewritten below when it lands)*.
+
+**[MINOR-2] — CONFIRMED (agreed), and the FIX AS I SKETCHED IT IS CORRECTED by batch 1 — three corrections, each
+verified:**
+
+- **`resetHeaders()` must NOT retire** — my parenthetical *"(it is — `:301–305`)"* was wrong:
+  `NoteBoxGeometryTests.theBoxesHeaderSitsOnTheColumnsOneLeftEdge` (`NoteBoxMountTests.swift:212–262`) settles on
+  `firstRowContentFrames[WorkspaceNaming.openSectionHeader]` (`:248–252`) and `#require`s it (`:256–257`) — a BOOK
+  is selected there, no rail draws, and the Open strip's first row is that column's only row-text edge. So the door
+  KEEPS the title-keyed trio (`headerTextFrames`, `firstRowContentFrames`, `firstRowBoxFrames`) and keeps BOTH its
+  title-trio callers (`:234`, `ShellChromeTests:263`).
+- **The keyed door takes FOUR fields, not three:** `noteBoxWhereLines` (`SidebarView.swift:787`, written at
+  `SidebarNoteBox.swift:209`) is subject-keyed too, and round 1's MAJOR-1 pin nils it by hand beside
+  `noteBoxFrames` (`NoteBoxMountTests.swift:644–645`) — those two hand-nils fold into the door.
+- **No caller needs a whole wipe:** `:381` reads only live-uuid keys (`noteBoxFrames[readingID]`,
+  `noteBoxFaces[readingID]`, `railGroupHeights[postIDs[0]]`) — its `resetHeaders()` was pure collateral and becomes
+  the keyed door for its own book (self-documenting rather than deleted).
+- **Riders 1–4 ADOPTED:** the door is named for the BOX's subject (`forgetBox(subject:)`) so the rails' key space
+  (`railGroupHeights`, the rail's POST) is not folded in; the sentence at `resetHeaders()` says the remaining
+  title-trio wipe is row 53's shape (a shared KEY cannot be scoped by its callers — 13u2's sweep keys it by host);
+  the generous-arithmetic guards untouched; the name becomes true. The stand-in's framing is right and is the
+  record's: this is not a correctness fix for any caller (every keyed read is under a live uuid) — it removes the
+  whole-wipe DOOR from the box's statics, which is the (c) class itself, and it closes the counter's
+  going-negative shape (rider 2 — a wiped `noteBoxFaces` entry decremented on disappear).
+- **No pin, said so:** harness hygiene proves itself by the full run, as round 1's (c) did.
+
+**FIX: NOT-STARTED** *(rewritten below when it lands)*.
+
+**[NIT-1] — CONFIRMED (agreed; the GRDB claim independently verified by the stand-in in the vendored
+`7.11.1+sqlcipher.1` checkout through Variorum's own `AppDatabase.read` chain — the pool AND the in-memory
+queue the pins run on).** The three riders ADOPTED into the clause: the two-click case (`A|false` → *edit here*
+→ `A|true`: the cancelled read blanks the SAME postID, so the live state's facts line stays empty until the next
+selection — the shape that makes "more necessary" concrete); rider 2's correction of my own over-reach (the
+interrupted read returns EARLY and usually lands first — cancellation changed WHAT the stale write carries, nil
+instead of the old facts, not whether the race is won; the clause says that, not "no longer needs to finish
+last"); rider 3 (`try?` collapses "the note vanished" and "I was superseded" into one `nil`, and `Task.isCancelled`
+is how the second is recovered — a future `do`/`catch` must `return` on the `CancellationError` arm).
+
+**FIX: NOT-STARTED** *(doc only)*.
+
+**[NIT-2] — CONFIRMED (agreed by both stand-ins), and the FIX SHAPE IS THE STAND-INS', not my finding's:**
+
+- **A bare restoring `defer` is UNSOUND for the two store-running suites — VERIFIED.** `Task.cancel()` does not
+  join; a value whose continuation resumed before the cancel is an enqueued main-actor job that runs AFTER the
+  body's synchronous `defer`, and `ThemeStore.start`'s loop body is `settings = value; adopt(value)`
+  (`ThemeStore.swift:49–50`) — the re-adopt lands over the restore. Defers also unwind in reverse, so a restore
+  declared after the cancel-defer runs FIRST. The sound sequence is `cancel()` → `await watching.value` → restore,
+  and `start()` returns on cancellation (`ThemeStore.swift:52`; the `AsyncThrowingStream` iterator returns on the
+  consuming task's cancellation, `ValueObservation.swift:428–435`), so the await is finite. Batch 1's addition —
+  `defer` cannot await, so the join must run on the THROW path too (both bodies are full of throwing `#require`s,
+  and a FAILING pin is exactly the run that matters) — is right, and settles the shape: ONE helper in
+  `EditorTestSupport.swift` (the shared support file that already hosts `SeededGenerator`),
+  `withAdoptedTheme(session:) { store in … }`, which captures `current`, `isAdopted` AND `MarkdownStyling.palette`,
+  starts the store, runs the body under `do`/`catch`, and on BOTH exits cancels, awaits, then restores. Three call
+  sites, one rule (`NoteBoxMountTests.swift:161–163`; `MastheadLayoutTests.swift:245–251`, `:493–499`).
+- **`MastheadLayoutTests` leaks the palette too — VERIFIED** (both sites mount `PostDetailView` in the write mode,
+  `:239/:267`, `:490/:515` — a real `applyVoiceChrome` at `EditorTypography.swift:253`); the helper restores it
+  for all three sites, which is harmless where nothing wrote it (`NoteBoxMountTests` mounts `SidebarView` alone).
+- **Batch 4's rider 2 (claim the two palette writers this pass ADDED, not the class) — ADOPTED** in the wording:
+  the two `SurfaceSizeMemoryTests` production-door pins capture and restore the palette; the palette's production
+  writers (`RootView.adoptMarkdownPalette`, every mounted `RootView` in a pin) and their victim shape
+  (`FormattingSurfacesTests:191`, `MarkdownFaceTests:167–170, :239`) stay with KnownIssues row 53 / 13u2.
+- **The direction rider (a leaked Study adoption can only make a mounted surface TALLER, so a victim is an
+  upper-bound or equality pin) and both stand-ins' victim sweeps — VERIFIED as far as they reach**; the
+  non-geometric reason batch 1 found (a leaked adoption switches OFF the inertness `isAdopted == false` gives every
+  storeless host, so later mounted book pins write real `.outline` records into `UserDefaults.standard` under a
+  voice no host chose — the Phase-12 row's class, minted here with a wrong stamp) is right and is the stronger
+  reason for the join; recorded, not re-raised.
+
+**FIX: NOT-STARTED** *(harness; no pin)*.
+
+**Summary of the calls: 4 CONFIRMED · 0 DISMISSED AS HOLLOW as findings** (one RIDER dismissed as hollow —
+MINOR-1's rider 5 — with its reason). Nothing re-opens a ruling; no QUESTIONS row. The fixes follow, per piece.
+
 ### THE ROUND — CLOSEOUT (written 2026-09-08 by an OPUS session after the successor Fable orchestrator's budget ran out mid-ladder; ONE verification still open — see the last paragraph)
 
 **What she asked for, and what she got.** Her evening writing with takes (`notes/author-reports/2026-09-06-use-report.md`) named three things the app did to her and ~twenty smaller ones. All of it is built, in five letters run as one round, with a ladder over every letter:
