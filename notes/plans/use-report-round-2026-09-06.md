@@ -11374,7 +11374,19 @@ this time — the one red-on-old re-measure runs IN PLACE on the committed tree,
   `.standard`) — each re-checked here: `extraSpacing` is `0` for `.standard` (`EditorBehaviorSettings.swift:57`),
   so `Int((x + 0).rounded()) == Int(x.rounded())`, and the suite's literal stamps are injected strings.
 
-**FIX: NOT-STARTED** *(rewritten below when it lands)*.
+**FIXED `8ce778ff`.** `EditorTypography.laidOutParagraphSpacing(_ resolved:)` — the resolved spacing plus this
+Mac's `ParagraphGap` extra — is the ONE arithmetic; `fingerprint` stamps `Int(laidOutParagraphSpacing(resolved).rounded())`
+and `EditorDocument.baseParagraphStyle` lays out with the same call (its old inline sum removed). `fingerprint`'s
+doc carries the re-keyed maintenance rule (a dial that changes what `baseAttributes` produces joins the stamp in the
+same edit, `resolve` or not; the `@AppStorage` grep; the three dials today; the `.flow` key space untouched), and
+the function's doc says why the dial stays out of `Resolved` (A23's ordering reason, stronger since round 1).
+**Pin `SurfaceSizeMemoryTests.aParagraphGapChangeMovesTheStamp` — RED ON OLD, measured TWICE: in the round-2
+scratch worktree against the one-liner, and RE-MEASURED IN PLACE on the committed tree against the shipped shape
+(the one line in `fingerprint` reverted to `resolved.paragraphSpacing`, `SurfaceSizeMemoryTests` run: 2 issues —
+`(tallStamp → ".AppleSystemUIFontMonospaced-Regular-14-7") != (standardStamp → ".AppleSystemUIFontMonospaced-Regular-14-7")`
+and `(answered → (696.0, 20993.0)) == nil`; the twelve older pins green beside it; restored by `git checkout --`,
+`git status` clean).** GREEN after. The piece's own run: 61 tests / 8 suites (`SurfaceSizeMemory · EditorTypography ·
+StableSurface · BookOutlineLanding · ParagraphGap · SpellcheckLevel · PaneSurface · MarkdownFace`).
 
 **[MINOR-2] — CONFIRMED (agreed), and the FIX AS I SKETCHED IT IS CORRECTED by batch 1 — three corrections, each
 verified:**
@@ -11400,7 +11412,13 @@ verified:**
   going-negative shape (rider 2 — a wiped `noteBoxFaces` entry decremented on disappear).
 - **No pin, said so:** harness hygiene proves itself by the full run, as round 1's (c) did.
 
-**FIX: NOT-STARTED** *(rewritten below when it lands)*.
+**FIXED `d03473df` (harness hygiene; no pin owed, none claimed).** `SidebarGeometry.forgetBox(subject:)` clears
+the four subject-keyed statics (`noteBoxFrames`, `noteBoxHeaderFrames`, `noteBoxFaces`, `noteBoxWhereLines`);
+`resetHeaders()` keeps only the title-keyed trio, with the row-53 sentence at the door (a shared KEY cannot be
+scoped by its callers; the name describes its body again). Callers: `NoteBoxMountTests:234` and
+`ShellChromeTests:263` unchanged (the title trio); `NoteBoxCompositionTests`' book-opening pin takes
+`forgetBox(subject: readingID)` in place of its whole wipe, and the MAJOR-1 pin's two hand-nils fold into the same
+door. The piece's own run: 36 tests / 8 suites (the six `NoteBox*` suites · `ShellChrome` · `SidebarLayout`).
 
 **[NIT-1] — CONFIRMED (agreed; the GRDB claim independently verified by the stand-in in the vendored
 `7.11.1+sqlcipher.1` checkout through Variorum's own `AppDatabase.read` chain — the pool AND the in-memory
@@ -11412,7 +11430,10 @@ instead of the old facts, not whether the race is won; the clause says that, not
 last"); rider 3 (`try?` collapses "the note vanished" and "I was superseded" into one `nil`, and `Task.isCancelled`
 is how the second is recovered — a future `do`/`catch` must `return` on the `CancellationError` arm).
 
-**FIX: NOT-STARTED** *(doc only)*.
+**FIXED `756b7a2b` (doc).** The clause at `NoteBoxFactsModel.swift:60–78` now says the read IS
+cancellation-aware, that `try?` maps the throw to `nil` so a superseded task's stale write BLANKS whatever subject
+it claims (usually landing early — cancellation changed what the write carries, not who lands first), names the
+two-click case, and says what a future `do`/`catch` must do.
 
 **[NIT-2] — CONFIRMED (agreed by both stand-ins), and the FIX SHAPE IS THE STAND-INS', not my finding's:**
 
@@ -11443,10 +11464,47 @@ is how the second is recovered — a future `do`/`catch` must `return` on the `C
   voice no host chose — the Phase-12 row's class, minted here with a wrong stamp) is right and is the stronger
   reason for the join; recorded, not re-raised.
 
-**FIX: NOT-STARTED** *(harness; no pin)*.
+**FIXED `9c00e3cd` (harness hygiene; no pin owed).** `withAdoptedTheme(session:) { store in … }` in
+`EditorTestSupport.swift`: captures `EditorTypography.current`, `isAdopted` and `MarkdownStyling.palette`, starts
+the store, runs the body under `do`/`catch`, and on BOTH exits cancels the store's task, awaits it, then restores —
+its doc carries the stand-ins' reasons (the enqueued re-adopt a `defer` is overtaken by; the throw path; the
+inertness a leaked `isAdopted` switches off). Its three sites: `NoteBoxGeometryTests`' both-voices arm
+(`NoteBoxMountTests.swift:161–165`) and `MastheadLayoutTests`' two rigs (`:245–249`, `:496–500`), each body wrapped
+unchanged inside the closure. The two `SurfaceSizeMemoryTests` production-door pins capture and restore the palette
+their `applyVoiceChrome` writes — the two writers this pass added, claimed by name; the palette's production writers
+stay row 53's. The joins terminate (the piece's run would otherwise hang): 47 tests / 6 suites
+(`NoteBoxGeometry · NoteBoxComposition · MastheadLayout · MastheadTagDoor · SurfaceSizeMemory · MarkdownFace`).
 
 **Summary of the calls: 4 CONFIRMED · 0 DISMISSED AS HOLLOW as findings** (one RIDER dismissed as hollow —
-MINOR-1's rider 5 — with its reason). Nothing re-opens a ruling; no QUESTIONS row. The fixes follow, per piece.
+MINOR-1's rider 5 — with its reason). Nothing re-opens a ruling; no QUESTIONS row.
+
+**THE CLOSING RUN (this tree, `9c00e3cd`) — ONE `xcodebuild test` from `App/Variorum/` over every suite the four
+fixes reach, 48 suite TYPE names each verified to exist first** (a first attempt carried two FILE names —
+`TintRegistrationTests`, `Phase13SurfaceTests` — which `-only-testing` drops silently; it ran 274/45, the list was
+corrected to those files' real suites and the run repeated as ONE): the stamp and its consumers
+(`SurfaceSizeMemoryTests · EditorTypographyTests · StableSurfaceTests · BookOutlineLandingTests · ParagraphGapTests ·
+SpellcheckLevelTests · PaneSurfaceTests · MarkdownFaceTests · TypewriterRoomReachabilityTests · TakesRoomTests ·
+DecorRegistrationMappingTests · DecorRegistrationWindowTests · InlineEditorWindowTests · ReadTierTests ·
+ReadModeTests · BlockDecorGeometryTests · FormattingSurfacesTests · CommentsAndReorderTests · BookOutlineRowsTests ·
+BookOutlineFacesTests · OutlineWritingSurfaceTests · BookRedesignMountTests · ReadingFlowEstimateTests ·
+ReadingFlowLandingTests · ReadingFlowEstimateMeasureTests`), the box and the shell (`NoteBoxCompositionTests ·
+NoteBoxGeometryTests · NoteBoxCopyTests · NoteBoxStateTests · BookNoteBoxSubjectTests · NoteBoxHeightTests ·
+ShellChromeTests · SidebarLayoutTests · ShellLandingRuleTests · ShellLandingMountTests · ShellLandingDoorTests`),
+the masthead (`MastheadLayoutTests · MastheadTagDoorTests`) and the ten `Tutorial*Tests` spine types:
+**`✔ Test run with 290 tests in 48 suites passed after 150.723 seconds` — 48 for 48, zero `skipped:` lines.**
+`swift test` NOT run and the iOS build NOT run: `Sources/` and `App/Variorum/Shared/` are untouched by every commit
+of this pass (`git diff --stat 824578f3..9c00e3cd -- Sources/ App/Variorum/Shared/` is EMPTY). No scratch worktree
+this pass; the one revert probe ran in place on the committed tree and was restored; `git status` clean.
+
+**Counts for the fix pass: 4 findings CONFIRMED (0 dismissed) · 4 FIXED — 1 with a red-on-old pin measured twice
+(MINOR-1: 2 issues in the worktree, 2 issues in place), 2 harness fixes owed no pin (MINOR-2, NIT-2), 1 doc (NIT-1)
+· four commits `8ce778ff` · `d03473df` · `756b7a2b` · `9c00e3cd`, pushed.** Nothing re-opens a ruling; no
+QUESTIONS row. **For the implementers' sanity pass: the diff is `824578f3..9c00e3cd`** (the code in
+`6a925b86..9c00e3cd`; `6a925b86` is this record's own first commit) — `EditorTypography.laidOutParagraphSpacing`
+is new API two files consume; `SidebarGeometry.forgetBox(subject:)` replaces the box's share of `resetHeaders()`;
+`withAdoptedTheme(session:)` is a new shared test helper whose three sites re-indented their bodies one level (a
+large but mechanical diff in `MastheadLayoutTests.swift` and `NoteBoxMountTests.swift` — read it as a wrap, not a
+rewrite).
 
 ### THE ROUND — CLOSEOUT (written 2026-09-08 by an OPUS session after the successor Fable orchestrator's budget ran out mid-ladder; ONE verification still open — see the last paragraph)
 
