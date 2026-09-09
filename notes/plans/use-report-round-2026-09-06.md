@@ -11096,6 +11096,240 @@ fix makes the stamp a function of a `UserDefaults.standard` key two other suites
 real-fingerprint pins must pin the gap for their windows) and **NIT-2 rider 3** (a bare restoring `defer`
 races the store's own task — cancel and await before restoring).
 
+---
+
+#### ROUND-END FABLE PASS round 2 — the implementers' responses (18d batch 1)
+
+*(the batch-1 implementer's STAND-IN — a fresh session; the original batch-1 session is dead, so nothing
+here is carried from its context and every link below was re-traced at HEAD `62e16cc0` in this session.
+THREE findings are mine — **MINOR-2 · NIT-1 · NIT-2 (a)** (batch 4's stand-in answered NIT-2 whole; (a)'s
+two files are batch 1's, so its BOUNDING is what I answer). **All three AGREED, none disputed.** I have
+touched no code and no test; the fix pass is the reviewer's. Where my trace adds or narrows something the
+finding does not say, it is marked RIDER and offered to the fix.)*
+
+**[MINOR-2] — AGREE**, at the mechanism, at the harness-hygiene label, and at the scoping to the keyed
+trio. **One factual link inside the FIX's parenthetical is wrong, and it changes what the fix may do** —
+recorded here as a correction, not as a dispute of the finding.
+
+*Re-traced.* `SidebarGeometry.resetHeaders()` (`Features/Library/SidebarView.swift:801–808`) assigns `[:]`
+to six statics. Three are keyed by the box's SUBJECT and published change-only or mount-only:
+`noteBoxFrames` / `noteBoxHeaderFrames` by `.onGeometryChange` (`Core/Views/SidebarNoteBox.swift:139–141`,
+`:158–160`) and `noteBoxFaces` by `.onAppear`/`.onDisappear` counters (`:184–185`, `:268–269`). Three are
+keyed by a TITLE every window shares: `headerTextFrames[title]` (`SidebarView.swift:372`),
+`firstRowContentFrames` / `firstRowBoxFrames` under `"this note"` (`:555`, `:563`) and under
+`WorkspaceNaming.openSectionHeader` (`:685`, `:697`). The three callers are three different suites —
+`NoteBoxGeometryTests` (`NoteBoxMountTests.swift:234`), `NoteBoxCompositionTests` (`:381`) and
+`ShellChromeTests` (`ShellChromeTests.swift:263`). `onGeometryChange` fires only when the value CHANGES,
+so a wiped entry of a still-mounted box is never republished and the other suite's poll runs out its turns
+and `#require`s nil — the (c) shape round 1 closed for `SeamGeometry.reset()` (`Core/Views/SeamGrip.swift:147–150`),
+standing one line under that edit. Agreed as written.
+
+*Two sharpenings of the mechanism (RIDERS on its statement, not on the verdict).*
+
+1. **It is not parallelism, it is INTERLEAVING — and that is why one green full run says so little.** All
+   three suites are `@MainActor`, so no two wipes and reads run at once; every one of the settle loops
+   suspends (`NoteBoxMountTests.swift:346–358`: `pump()`, `await Task.yield()`, `Task.sleep(10 ms)` per
+   turn), and a wipe from another suite lands in exactly those suspensions. The hazard is therefore a
+   scheduling coincidence between two MainActor bodies, which a single run samples once — the finding's
+   own "reachable, low-probability" is right, and the reason is worth writing at the door so the next
+   reader does not "prove" it absent with a green run.
+2. **Wiping a COUNTER is worse than wiping a frame.** `noteBoxFaces` is incremented on appear and
+   DECREMENTED on disappear (`SidebarNoteBox.swift:184–185`, `:268–269`). A frame that is wiped is merely
+   never republished; a counter that is wiped goes NEGATIVE when its still-mounted box finally disappears
+   (`-= 1` into a zeroed dictionary), so a later mount of the same subject brings it back only to 0 and
+   every `(faces > 0)` reader stays false. Bounded to that subject's own key, and the pins mint live
+   uuids, so it dies with the test — but it is the reason a counter must never be reachable from a
+   whole-oracle door.
+
+*The coordinator's questions, answered by name.*
+
+- **Is `SidebarGeometry.forget(subject:)` — the three keyed fields, each caller clearing its OWN book's id —
+  complete and correct?** **Correct, and incomplete by one field.** There is a FOURTH subject-keyed static:
+  `noteBoxWhereLines` (`SidebarView.swift:787`, written at `SidebarNoteBox.swift:209`), which round 1's own
+  MAJOR-1 pin already clears by hand beside `noteBoxFrames`
+  (`NoteBoxMountTests.swift:644–645`). A door that takes three of the four leaves the next reader to
+  discover the fourth the hard way, and leaves two hand-nils standing next to the door that exists to
+  replace them. **Take all four, and let `aKeystrokeInABookNoteReRunsTheBoxAndNotTheShell` call it.**
+  Second half of the same answer, and it matters for how the fix is DESCRIBED: measured against the
+  callers, `forget(subject:)` is not a correctness fix for any of them — every keyed read in all three
+  sites is under a LIVE uuid (`NoteBoxMountTests.swift:152` and `withOutlineBook`'s `:278`;
+  `ShellChromeTests:263` reads no keyed field at all), so nothing stale can exist under those keys. Its
+  value is that it removes the whole-wipe DOOR from the box's statics, which is the (c) class itself. Say
+  that, rather than implying the pins were reading stale keys of their own.
+- **Should `resetHeaders()` retire, or keep the title-keyed trio for `ShellChromeTests:263`?** **KEEP it,
+  with the title trio only — and the finding's parenthetical *"(it is — `:301–305`)"* is the one link I
+  had to correct.** `ShellChromeTests:263` is NOT the only caller that needs those fields:
+  `NoteBoxMountTests.swift:234`'s test settles on `firstRowContentFrames[WorkspaceNaming.openSectionHeader]`
+  (`:248–252`) and `#require`s it as its reference edge (`:256–257`) — it must, because a BOOK is selected
+  there so no rail draws, and the Open strip's first row is the only row-text edge on that column. Retire
+  the door and that pin loses its clear. So: drop the three (four) keyed fields from `resetHeaders()`,
+  keep the title trio, and keep BOTH callers (`:234` and `:263`).
+- **Is there any caller that needs a WHOLE wipe?** **No.** `:381` needs nothing at all — it reads
+  `noteBoxFrames[readingID]`, `noteBoxFaces[readingID]` and `railGroupHeights[postIDs[0]]`, all live-uuid
+  keyed, and it already nils the rail by hand (`:380`); its `resetHeaders()` call is pure collateral
+  damage and can simply go (or become `forget(subject: readingID)` if the fix prefers a self-documenting
+  line). `:234` needs the title trio and nothing else. `:263` needs the title trio and nothing else.
+
+*Riders on the fix.*
+
+1. **The (c) class is NOT closed for the title trio, and cannot be closed by scoping — say so at the
+   door.** Two suites still wipe those three fields while the other polls them (`:234` and `:263` are
+   different suites, and `ShellChromeTests`' poll at `:287–298` runs up to 400 turns), so the sharpest
+   sub-class survives exactly where the fix stops. It cannot be fixed by "each caller clears its own key",
+   because the KEY is the shared thing: every window publishes `"this note"` and the Open header. The real
+   fix is keying them by host — `KnownIssuesAndTechDebt.md` row 53, owner 13u2, which the finding is right
+   to leave alone. What the fix owes is one sentence at `resetHeaders()` saying the remaining wipe is row
+   53's shape, so nobody reads "`forget(subject:)` exists" as "this door is safe now".
+2. **The name becomes TRUE for free.** `resetHeaders()` today wipes `noteBoxFrames` and `noteBoxFaces`,
+   which are not headers by any reading; once the keyed fields leave it, the name describes its body.
+3. **Keep the generous-arithmetic guards** (`NoteBoxMountTests.swift:178–184`, `:395–400`) — round 1 put
+   the second one there deliberately; nothing in this fix touches them, and they are the local proof that
+   the rail drew at the pitch the box's frame assumes.
+4. **`railGroupHeights` is a different key space** (the rail's POST, `SidebarView.swift:575`), and both
+   pins clear it per-key already (`:170`, `:380`). Name the new door for the BOX's subject explicitly so a
+   later reader does not fold the rails into it and re-mint a wipe one key space over.
+
+**[NIT-1] — AGREE. I verified the GRDB claim myself, in the vendored source, at the pinned version, and
+through Variorum's own call chain rather than through the protocol alone.**
+
+*Version, first, because "GRDB 7.11" is only an answer if it is the version that builds:* `Package.resolved`
+pins `grdb.swift` at **`7.11.1+sqlcipher.1`, revision `404dde04154ebcf4f2975a9b032548ee19023929`**
+(the `lduarte-io` fork), and `.build/checkouts/GRDB.swift` is at exactly that revision (`git log -1` →
+`404dde041`). Everything below is that tree.
+
+*The chain, link by link.* `AppDatabase.read` (async, `Sources/VariorumCore/Persistence/AppDatabase.swift:184–186`)
+→ `currentWriter().read` → `DatabasePool.read` (`Core/DatabasePool.swift:354–379`) or `DatabaseQueue.read`
+(`Core/DatabaseQueue.swift:236–244`) — **both** funnel into `SerializedDatabase.execute` (async,
+`Core/SerializedDatabase.swift:251–270`), which is `withTaskCancellationHandler` (`:256`) with
+`cancelMutex.store(db.cancel)` (`:263`), a `try Task.checkCancellation()` before the block (`:264`) and
+`onCancel { cancelMutex.withLock { $0?() } }` (`:266–268`). `Database.cancel` (`Core/Database.swift:1245–1267`)
+sets `isCancelled` and — because `interruptsWhenCancelled` defaults **true** (`:378–381`) — calls
+`sqlite3_interrupt`. The in-flight statement then fails `SQLITE_INTERRUPT`/`SQLITE_ABORT` and is converted
+at `Core/Database+Statements.swift:502` and `:525` through `Suspension.checkCancellation()`
+(`Database.swift:370–374`) into `CancellationError`; the NEXT statement is refused before it runs by
+`checkForSuspensionViolation` (`Database.swift:1386–1391`, the `.cancel` arm). And the protocol's own
+documentation says it in one line — `DatabaseReader.read`'s throws clause: *"or `CancellationError` if the
+task is cancelled"* (`Core/DatabaseReader.swift:214–216`). **So the finding is exactly true for the pinned
+version**, and true on BOTH connection kinds Variorum uses — the on-disk pool (`AppDatabase.swift:89`) and
+the in-memory queue the pins run on (`:95`) — which is what makes it true in the suites as well as in the
+app. `try?` at `NoteBoxFactsModel.swift:50` is what turns that throw into `nil`, and the clause at
+`:60–66` is wrong where it says *"the database read is not cancellation-aware mid-flight"*.
+
+*Riders on the doc's new clause.*
+
+1. **The case that makes *"MORE necessary, not less"* concrete rather than rhetorical — and it is two
+   clicks, not a contrivance.** The read's key is `"\(postID)|\(state.isLive)"` (`RootView.swift:611–614`)
+   under `.task(id: noteBoxFactsKey)` (`:323–325`), and `subject` is the postID ALONE. Select a note
+   (`A|false`), then press *"edit here"* (`A|true`): the first task is cancelled, its read is interrupted,
+   `try?` gives `nil`, and — before this guard — it assigned `subject = A, facts = nil`. If that landing
+   comes after the live task's, the subject MATCHES the note on screen, so `facts(for:)`
+   (`NoteBoxFactsModel.swift:33–36`) answers nil and **the live state's facts line stays empty until the
+   selection changes again**. Under the clause's old premise the same late landing would have carried A's
+   REAL facts and healed itself. That is the shape in which cancellation-awareness makes the guard
+   strictly more necessary, and it is worth naming in the doc because it is the one a reader can try.
+2. **Do not over-correct in the other direction: ordering still decides visibility.** The interrupted read
+   returns EARLY, so a superseded task now usually lands BEFORE the newer one and its stale write is
+   harmlessly overwritten. What cancellation changed is WHAT the stale write carries (nil rather than the
+   old note's facts), not whether the race is won or lost. The honest clause is *"a superseded read comes
+   back as a throw, which `try?` maps to nil — so the stale write blanks whatever subject it claims"*,
+   not *"the read no longer needs to finish last"*.
+3. **One clause about `try?` itself, since it is the erasure the guard repairs.** `try?` collapses two
+   different answers into `nil` — *"the note vanished"* and *"I was superseded"* — and `Task.isCancelled`
+   is how the second is recovered. If anyone later replaces it with a `do`/`catch` (to log, say), the
+   `CancellationError` arm must `return` without assigning, and this guard stays as the belt. Worth the
+   half-sentence: the deliberate `read == nil` case below it (`:68–71`) is the OTHER answer, and the two
+   must not be merged.
+
+**[NIT-2 (a)] — AGREE for both of my files; and I CONFIRM batch 4's rider 3 (cancel → await → restore,
+never a bare `defer`), with one addition that rider does not cover and one file-specific extension.**
+
+*Re-traced, my two files.* `NoteBoxMountTests.swift:141–163`: `setThemeVoice(voice)` at `:157` lands in the
+DB BEFORE the store is built at `:161`, so `start()`'s FIRST emission adopts the arm's voice
+(`ThemeStore.swift:44–50` — `settings = value` then `EditorTypography.adopt(value)`); the only teardown is
+`defer { themeTask.cancel() }` at `:163`; nothing in the file restores `EditorTypography.current` or
+`isAdopted`. The suite is `.serialized` over `[ThemeVoice.terminal, ThemeVoice.study]`, so **Study is what
+the file leaves standing**. (The file's other three `ThemeStore`s — `:224`, `:509`, `:584` — are never
+started and adopt nothing; the finding's single-site citation is exact, re-checked here.)
+`MastheadLayoutTests.swift:245–251` and `:493–499`: a store started, then `setVoice(.study)` with a settle
+on `store.settings.voice == .study` — the store adopts TWICE (the initial Terminal emission, then Study)
+and neither is put back. Both files' leaks are exactly as described.
+
+*Confirming rider 3 for these files, with the reason each link holds here.*
+
+- **`cancel()` is not a join, and in `NoteBoxMountTests` the adoption is never awaited at all.** Unlike the
+  Masthead rig, that arm never waits for the store to land (its settle predicates are geometry — `:173`,
+  `:197`), and its assertions do not depend on the adoption. So at the moment the body ends, the first
+  emission may still be in flight: a restoring `defer` there can be overtaken by the very adoption it is
+  undoing. In this file that is not the tail risk, it is the ordinary case.
+- **The unwinding order is as stated.** A `defer { restore }` written after `defer { themeTask.cancel() }`
+  — the natural place, right beside it — runs FIRST, so the restore would land while the store is still
+  live. Confirmed.
+- **`await watching.value` terminates.** `start()` iterates an `AsyncValueObservation` whose `Iterator.next()`
+  is `AsyncThrowingStream`'s (`ValueObservation.swift:428–435`), which returns on task cancellation, and
+  `start()` catches `CancellationError` and returns (`ThemeStore.swift:52–55`). Cancel-then-await is finite,
+  and the order matters: cancel first, or the await is the observation's lifetime.
+
+*The addition rider 3 does not cover — and both of my sites need it.* **`defer` cannot `await`, so an
+explicit end-of-body join does not run on the THROW path**, and both files' bodies are full of throwing
+requires (`NoteBoxMountTests.swift:179`, `:198–202`; the Masthead rigs' own). A FAILING pin is exactly when
+the leak matters most, because the process keeps running every other suite afterwards. The shape that
+covers both exits is a small helper the three sites share — capture `current` + `isAdopted`, build and
+start the store, run the body inside a `do`/`catch`, and on BOTH exits `watching.cancel()`,
+`await watching.value`, then restore. Two files, three call sites, one rule.
+
+*The file-specific extension: `MastheadLayoutTests` leaks the PALETTE too, by (b)'s own road.* Those two
+sites mount `PostDetailView` (`:267`, `:515`) with `postMode.write` forced (`:239`, `:490`) — a real editor
+surface — and `applyVoiceChrome` writes `MarkdownStyling.palette` unconditionally
+(`Theme/EditorTypography.swift:253`), so the Study arms leave Study's palette standing exactly as (b)'s two
+pins do. If the fix restores only `current` + `isAdopted` there, half of that file's leak stays open.
+`NoteBoxMountTests` needs no such line: its `NoteBoxOracleHost` (`:39–59`) mounts `SidebarView` alone — no
+text surface, no `applyVoiceChrome` — so its restore set is exactly the two typography globals.
+
+*The victim question, answered with my own sweep rather than by agreeing with two other sweeps.*
+
+- **The direction filter is right and it is the cheap half of the answer:** Study's 16-pt Iowan lays out
+  taller (and wider) than Terminal's 14-pt mono at one size (`EditorTypography.swift:89–105`), so a victim
+  must assert an UPPER bound or an EQUALITY on something a mounted TEXT surface lays out. A lower bound
+  cannot be a victim of this leak's direction.
+- **I ran it, and found no victim.** Every literal-bounded height expectation in `VariorumTests` falls into
+  one of three immune shapes: (i) injected measures in pure pins — `PaneSurfaceTests`' `heights == [46]`
+  (`:460–530`) is a `PanePublisher` with `measure: { 46 }`, no layout at all; (ii) self-relative
+  comparisons — `LongBlockLayoutTests:285/290/518`, `PhantomSpaceTests:271/332`, `FindAndReplaceTests:558`,
+  `MastheadLayoutTests:126`, `CommitBarLayoutTests:78`, `DivideCeremonyCostTests:384`, and my own
+  `NoteBoxMountTests:202/413` (box against rail, both from `SidebarLayout` constants, voice-independent);
+  (iii) chrome-font probes with an order of magnitude of headroom — `ChromeMinHeightTests`' four `< 400`
+  (`:52`, `:65`, `:98`, `:105`, `:122`), none of which reads `EditorTypography` at all.
+- **The two literal Terminal fonts the finding calls safe ARE safe, and I checked why rather than taking
+  it.** `TypewriterRoomTests:44` uses the literal only in arithmetic about itself; `TypingErgonomicsTests:143`'s
+  literal likewise, and its one assertion that touches the global derives BOTH sides from
+  `EditorTypography.current` at assertion time (`:152`).
+- **Two that looked like victims and are not:** `BookViewTests:615` compares a drawn read-surface width
+  against `EditorTypography.maxColumnWidth`, which is a hard `680` (`EditorTypography.swift:136`) against a
+  SwiftUI-framed width — both voice-independent; `TintRegistrationTests:205` derives its expected gap from
+  `current` at assertion time, so the measured frames and the expectation move together.
+- **What the sweep DID turn up is not a height, and it is the reason I would not let the bounding slip.**
+  `isAdopted` is the GATE on `SurfaceSizeMemory`'s writes: `remember` (`Core/Views/SurfaceSizeMemory.swift:195–196`)
+  and `persist` (`:219–220`) both refuse while `fingerprint()` is nil, and `fingerprint` is nil while
+  `isAdopted` is false (`EditorTypography.swift:125–126`). A host that never starts a store is therefore
+  deliberately INERT, and the code says so in as many words (`:66–69`). My leak switches that off: while
+  the adoption stands, **any mounted book pin in any later suite that settles a row writes a real
+  `.outline` record into `UserDefaults.standard`** — `BookViewModel.swift:398` builds its memory with the
+  default `defaults: .standard` — stamped with MY arm's voice. The write itself belongs to the
+  "the suites write the dev-store's `UserDefaults`" row already handed to **Phase 12**, and I am not
+  re-raising it; what is minted by this leak specifically is that those records carry a stamp from a voice
+  no host in that suite ever chose. It is a second, non-geometric reason the two files owe the join, and it
+  is checkable: bound the adoption and those hosts go inert again, as designed.
+
+---
+
+**Summary: 3 agreed · 0 disputed.** Nothing here re-opens a ruling and nothing needs a QUESTIONS row —
+MINOR-2 and NIT-2 (a) are harness hygiene and NIT-1 is a doc clause; none changes a behaviour she can name.
+The three things I would least want dropped from the fix pass: **MINOR-2's correction** (`resetHeaders()`
+must NOT retire — `NoteBoxMountTests:234` reads the title-keyed `firstRowContentFrames` too, at `:248–257`),
+**MINOR-2's fourth field** (`noteBoxWhereLines` belongs in `forget(subject:)`, with the MAJOR-1 pin's two
+hand-nils folded in), and **NIT-2 (a)'s throw path** (a cancel → await → restore that runs only at the
+happy exit leaks on exactly the run where a pin fails).
+
 ### THE ROUND — CLOSEOUT (written 2026-09-08 by an OPUS session after the successor Fable orchestrator's budget ran out mid-ladder; ONE verification still open — see the last paragraph)
 
 **What she asked for, and what she got.** Her evening writing with takes (`notes/author-reports/2026-09-06-use-report.md`) named three things the app did to her and ~twenty smaller ones. All of it is built, in five letters run as one round, with a ladder over every letter:
