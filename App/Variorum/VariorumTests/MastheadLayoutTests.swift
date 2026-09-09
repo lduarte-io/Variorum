@@ -242,78 +242,81 @@ struct MastheadLayoutTests {
             UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(post.id)")
 
             // The voice: the live store, switched through its own setter.
-            let store = ThemeStore(session: session)
-            let watching = Task { await store.start() }
-            defer { watching.cancel() }
-            if voice == .study {
-                store.setVoice(.study)
-                await settle(until: { store.settings.voice == .study })
-                #expect(store.settings.voice == .study, "the Study voice took")
-            }
+            // …started and RESTORED by the one helper (round 2's NIT-2): the
+            // Study arms used to leave the adoption — and, through the write
+            // mode's real editor, the markdown palette — standing process-wide,
+            // with only a `cancel()` that never joined the store's own task.
+            try await withAdoptedTheme(session: session) { store in
+                if voice == .study {
+                    store.setVoice(.study)
+                    await settle(until: { store.settings.voice == .study })
+                    #expect(store.settings.voice == .study, "the Study voice took")
+                }
 
-            #if DEBUG
-            MastheadGeometry.resetRowTwo()
-            #endif
-            let window = NSWindow(
-                contentRect: NSRect(x: 80, y: 80, width: 1100, height: 750),
-                styleMask: [.titled], backing: .buffered, defer: false)
-            window.isReleasedWhenClosed = false
-            defer {
-                window.orderOut(nil)
-                window.close()
-                UserDefaults.standard.removeObject(forKey: "postMode.\(post.id)")
-            }
-            let hosting = NSHostingView(
-                rootView: PostDetailView(session: session, postID: post.id)
-                    .environment(store))
-            hosting.frame = NSRect(x: 0, y: 0, width: 1100, height: 750)
-            window.contentView = hosting
-            window.makeKeyAndOrderFront(nil)
-            await settle(window, hosting, until: {
-                session.commandRouter.activePostID == post.id
-            })
+                #if DEBUG
+                MastheadGeometry.resetRowTwo()
+                #endif
+                let window = NSWindow(
+                    contentRect: NSRect(x: 80, y: 80, width: 1100, height: 750),
+                    styleMask: [.titled], backing: .buffered, defer: false)
+                window.isReleasedWhenClosed = false
+                defer {
+                    window.orderOut(nil)
+                    window.close()
+                    UserDefaults.standard.removeObject(forKey: "postMode.\(post.id)")
+                }
+                let hosting = NSHostingView(
+                    rootView: PostDetailView(session: session, postID: post.id)
+                        .environment(store))
+                hosting.frame = NSRect(x: 0, y: 0, width: 1100, height: 750)
+                window.contentView = hosting
+                window.makeKeyAndOrderFront(nil)
+                await settle(window, hosting, until: {
+                    session.commandRouter.activePostID == post.id
+                })
 
-            #if DEBUG
-            await settle(window, hosting, until: {
-                MastheadGeometry.pathChipFrame != nil && MastheadGeometry.cardFrames.count == 5
-            })
-            await settle(window, hosting, until: { false }, maxTurns: 6)
-            let gap = PostDetailView.rowTwoGap
-            let chip = try #require(MastheadGeometry.pathChipFrame, "the path chip reported its frame (\(voice))")
-            let width = try #require(MastheadGeometry.contentMidX).magnitude * 2
-            let cards = MastheadGeometry.cardFrames
-            #expect(cards.count == 5, "five cards reported (\(voice)), got \(cards.count)")
-            for (id, card) in cards {
-                #expect(!chip.intersects(card),
-                        "(\(voice)) the path chip \(chip) is drawn clear of card \(id) \(card)")
-                #expect(card.minX - chip.maxX >= gap - 0.5,
-                        "(\(voice)) card \(id) sits right of the chip by the row's gap (\(gap)): \(card.minX - chip.maxX)")
-                #expect(card.minX >= -0.5 && card.maxX <= width + 0.5,
-                        "(\(voice)) card \(id) \(card) stays inside the masthead (0…\(width))")
-            }
-            let titleClosed = try #require(MastheadGeometry.titleFrame)
-            #expect(abs(titleClosed.minX - chip.minX) <= 1,
-                    "\(voice), five tags: title \(titleClosed.minX) vs chip \(chip.minX)")
+                #if DEBUG
+                await settle(window, hosting, until: {
+                    MastheadGeometry.pathChipFrame != nil && MastheadGeometry.cardFrames.count == 5
+                })
+                await settle(window, hosting, until: { false }, maxTurns: 6)
+                let gap = PostDetailView.rowTwoGap
+                let chip = try #require(MastheadGeometry.pathChipFrame, "the path chip reported its frame (\(voice))")
+                let width = try #require(MastheadGeometry.contentMidX).magnitude * 2
+                let cards = MastheadGeometry.cardFrames
+                #expect(cards.count == 5, "five cards reported (\(voice)), got \(cards.count)")
+                for (id, card) in cards {
+                    #expect(!chip.intersects(card),
+                            "(\(voice)) the path chip \(chip) is drawn clear of card \(id) \(card)")
+                    #expect(card.minX - chip.maxX >= gap - 0.5,
+                            "(\(voice)) card \(id) sits right of the chip by the row's gap (\(gap)): \(card.minX - chip.maxX)")
+                    #expect(card.minX >= -0.5 && card.maxX <= width + 0.5,
+                            "(\(voice)) card \(id) \(card) stays inside the masthead (0…\(width))")
+                }
+                let titleClosed = try #require(MastheadGeometry.titleFrame)
+                #expect(abs(titleClosed.minX - chip.minX) <= 1,
+                        "\(voice), five tags: title \(titleClosed.minX) vs chip \(chip.minX)")
 
-            // ⌘⇧I's road opens the field.
-            #expect(session.commandRouter.requestTagField(), "the router reaches this masthead's field")
-            await settle(window, hosting, until: { MastheadGeometry.fieldFrame != nil })
-            await settle(window, hosting, until: { false }, maxTurns: 8)
-            let field = try #require(MastheadGeometry.fieldFrame, "the open field reported its frame (\(voice))")
-            #expect(!chip.intersects(field),
-                    "(\(voice)) the open field \(field) is drawn clear of the path chip \(chip)")
-            #expect(field.minX - chip.maxX >= gap - 0.5,
-                    "(\(voice)) the field sits right of the chip by the row's gap: \(field.minX - chip.maxX)")
-            for (id, card) in MastheadGeometry.cardFrames {
-                #expect(!field.intersects(card), "(\(voice)) the field \(field) covers no card (\(id) \(card))")
+                // ⌘⇧I's road opens the field.
+                #expect(session.commandRouter.requestTagField(), "the router reaches this masthead's field")
+                await settle(window, hosting, until: { MastheadGeometry.fieldFrame != nil })
+                await settle(window, hosting, until: { false }, maxTurns: 8)
+                let field = try #require(MastheadGeometry.fieldFrame, "the open field reported its frame (\(voice))")
+                #expect(!chip.intersects(field),
+                        "(\(voice)) the open field \(field) is drawn clear of the path chip \(chip)")
+                #expect(field.minX - chip.maxX >= gap - 0.5,
+                        "(\(voice)) the field sits right of the chip by the row's gap: \(field.minX - chip.maxX)")
+                for (id, card) in MastheadGeometry.cardFrames {
+                    #expect(!field.intersects(card), "(\(voice)) the field \(field) covers no card (\(id) \(card))")
+                }
+                let chipOpen = try #require(MastheadGeometry.pathChipFrame)
+                #expect(abs(chipOpen.minX - chip.minX) <= 0.5 && abs(chipOpen.minY - chip.minY) <= 0.5,
+                        "(\(voice)) opening the field moved nothing: the chip stayed at \(chip.origin), now \(chipOpen.origin)")
+                let titleOpen = try #require(MastheadGeometry.titleFrame)
+                #expect(abs(titleOpen.minX - chip.minX) <= 1,
+                        "(\(voice)) …and with the tag field open: \(titleOpen.minX) vs \(chip.minX)")
+                #endif
             }
-            let chipOpen = try #require(MastheadGeometry.pathChipFrame)
-            #expect(abs(chipOpen.minX - chip.minX) <= 0.5 && abs(chipOpen.minY - chip.minY) <= 0.5,
-                    "(\(voice)) opening the field moved nothing: the chip stayed at \(chip.origin), now \(chipOpen.origin)")
-            let titleOpen = try #require(MastheadGeometry.titleFrame)
-            #expect(abs(titleOpen.minX - chip.minX) <= 1,
-                    "(\(voice)) …and with the tag field open: \(titleOpen.minX) vs \(chip.minX)")
-            #endif
         }
     }
 
@@ -490,37 +493,40 @@ struct MastheadLayoutTests {
             UserDefaults.standard.set(PostMode.write.rawValue, forKey: "postMode.\(post.id)")
             // The voice: the live store, switched through its own setter
             // (the rows-58 rig's road).
-            let store = ThemeStore(session: session)
-            let watching = Task { await store.start() }
-            defer { watching.cancel() }
-            if voice == .study {
-                store.setVoice(.study)
-                await settle(until: { store.settings.voice == .study })
-                #expect(store.settings.voice == .study, "the Study voice took")
+            // …started and RESTORED by the one helper (round 2's NIT-2): the
+            // Study arms used to leave the adoption — and, through the write
+            // mode's real editor, the markdown palette — standing process-wide,
+            // with only a `cancel()` that never joined the store's own task.
+            try await withAdoptedTheme(session: session) { store in
+                if voice == .study {
+                    store.setVoice(.study)
+                    await settle(until: { store.settings.voice == .study })
+                    #expect(store.settings.voice == .study, "the Study voice took")
+                }
+                #if DEBUG
+                MastheadGeometry.resetRowTwo()
+                MastheadGeometry.resetTitleRow()
+                #endif
+                let window = NSWindow(
+                    contentRect: NSRect(x: 80, y: 80, width: width, height: 750),
+                    styleMask: [.titled], backing: .buffered, defer: false)
+                window.isReleasedWhenClosed = false
+                defer {
+                    window.orderOut(nil)
+                    window.close()
+                    UserDefaults.standard.removeObject(forKey: "postMode.\(post.id)")
+                }
+                let hosting = NSHostingView(
+                    rootView: PostDetailView(session: session, postID: post.id)
+                        .environment(store))
+                hosting.frame = NSRect(x: 0, y: 0, width: width, height: 750)
+                window.contentView = hosting
+                window.makeKeyAndOrderFront(nil)
+                await settle(window, hosting, until: {
+                    session.commandRouter.activePostID == post.id
+                })
+                try await body(session, post.id, window, hosting)
             }
-            #if DEBUG
-            MastheadGeometry.resetRowTwo()
-            MastheadGeometry.resetTitleRow()
-            #endif
-            let window = NSWindow(
-                contentRect: NSRect(x: 80, y: 80, width: width, height: 750),
-                styleMask: [.titled], backing: .buffered, defer: false)
-            window.isReleasedWhenClosed = false
-            defer {
-                window.orderOut(nil)
-                window.close()
-                UserDefaults.standard.removeObject(forKey: "postMode.\(post.id)")
-            }
-            let hosting = NSHostingView(
-                rootView: PostDetailView(session: session, postID: post.id)
-                    .environment(store))
-            hosting.frame = NSRect(x: 0, y: 0, width: width, height: 750)
-            window.contentView = hosting
-            window.makeKeyAndOrderFront(nil)
-            await settle(window, hosting, until: {
-                session.commandRouter.activePostID == post.id
-            })
-            try await body(session, post.id, window, hosting)
         }
     }
 }

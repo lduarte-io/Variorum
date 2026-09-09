@@ -158,51 +158,54 @@ struct NoteBoxGeometryTests {
             let post = try session.operations.createPost(title: "a note")
             _ = try session.operations.newBlock(in: post.id, text: "so the rail has a note.")
             let book = try session.operations.createReading(name: "a book", kind: .curated)
-            let theme = ThemeStore(session: session)
-            let themeTask = Task { await theme.start() }
-            defer { themeTask.cancel() }
+            // The store — started and RESTORED by the one helper (round 2's
+            // NIT-2): this arm adopts the DB's voice on the store's first
+            // emission and used to leave it standing process-wide, with only
+            // a `cancel()` that never joined the store's own task.
+            try await withAdoptedTheme(session: session) { theme in
 
 #if DEBUG
-            // MY rail — keyed by the note it draws for (the round-end Fable
-            // pass, MINOR-2 (a)): a rail drawn concurrently by another suite
-            // used to supply this reference, spuriously red at a compressed
-            // pitch and meaninglessly green at the generous one.
-            SidebarGeometry.railGroupHeights[post.id] = nil
-            let (railWindow, _) = await drawnColumn(
-                session: session, theme: theme, selection: .post(post.id), box: nil,
-                openNote: post.id, until: { SidebarGeometry.railGroupHeights[post.id] != nil })
-            defer {
-                railWindow.orderOut(nil)
-                railWindow.close()
-            }
-            let rail = try #require(
-                SidebarGeometry.railGroupHeights[post.id], "the rail drew for the selected note")
-            #expect(
-                rail == SidebarLayout.railGroupHeight(
-                    rowHeight: SidebarLayout.generousRowHeight,
-                    railRows: PostDetailView.Mode.allCases.count),
-                "the rail's DRAWN group is the arithmetic the box reads: \(rail)")
+                // MY rail — keyed by the note it draws for (the round-end Fable
+                // pass, MINOR-2 (a)): a rail drawn concurrently by another suite
+                // used to supply this reference, spuriously red at a compressed
+                // pitch and meaninglessly green at the generous one.
+                SidebarGeometry.railGroupHeights[post.id] = nil
+                let (railWindow, _) = await drawnColumn(
+                    session: session, theme: theme, selection: .post(post.id), box: nil,
+                    openNote: post.id, until: { SidebarGeometry.railGroupHeights[post.id] != nil })
+                defer {
+                    railWindow.orderOut(nil)
+                    railWindow.close()
+                }
+                let rail = try #require(
+                    SidebarGeometry.railGroupHeights[post.id], "the rail drew for the selected note")
+                #expect(
+                    rail == SidebarLayout.railGroupHeight(
+                        rowHeight: SidebarLayout.generousRowHeight,
+                        railRows: PostDetailView.Mode.allCases.count),
+                    "the rail's DRAWN group is the arithmetic the box reads: \(rail)")
 
-            let tokens = VoiceTokens.resolve(voice: voice, dark: false)
-            for state in [
-                NoteBoxState.empty,
-                NoteBoxState.selected(post.id),
-                NoteBoxState.live(post.id),
-            ] {
-                SidebarGeometry.noteBoxFrames[book.id] = nil
-                let (window, _) = await drawnColumn(
-                    session: session, theme: theme, selection: .reading(book.id),
-                    box: makeBox(state, tokens: tokens, subjectKey: book.id),
-                    openNote: post.id,
-                    until: { SidebarGeometry.noteBoxFrames[book.id] != nil })
-                let box = SidebarGeometry.noteBoxFrames[book.id]
-                window.orderOut(nil)
-                window.close()
-                let drawn = try #require(box, "the box drew in state \(state)")
-                #expect(abs(drawn.height - rail) <= 0.5,
-                        "\(voice) · \(state): the box is the rail's height — \(drawn.height) vs \(rail)")
-            }
+                let tokens = VoiceTokens.resolve(voice: voice, dark: false)
+                for state in [
+                    NoteBoxState.empty,
+                    NoteBoxState.selected(post.id),
+                    NoteBoxState.live(post.id),
+                ] {
+                    SidebarGeometry.noteBoxFrames[book.id] = nil
+                    let (window, _) = await drawnColumn(
+                        session: session, theme: theme, selection: .reading(book.id),
+                        box: makeBox(state, tokens: tokens, subjectKey: book.id),
+                        openNote: post.id,
+                        until: { SidebarGeometry.noteBoxFrames[book.id] != nil })
+                    let box = SidebarGeometry.noteBoxFrames[book.id]
+                    window.orderOut(nil)
+                    window.close()
+                    let drawn = try #require(box, "the box drew in state \(state)")
+                    #expect(abs(drawn.height - rail) <= 0.5,
+                            "\(voice) · \(state): the box is the rail's height — \(drawn.height) vs \(rail)")
+                }
 #endif
+            }
         }
     }
 

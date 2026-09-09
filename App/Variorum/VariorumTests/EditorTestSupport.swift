@@ -191,3 +191,53 @@ func withEditor<T>(
         return try await body(harness)
     }
 }
+
+// MARK: - A pin that starts a REAL ThemeStore (the round-end Fable pass, round 2 — NIT-2)
+
+/// Runs `body` with a REAL `ThemeStore` started for `session`, and puts the
+/// three process globals the store's adoption reaches — `EditorTypography.current`,
+/// `EditorTypography.isAdopted`, `MarkdownStyling.palette` — back where it
+/// found them, on BOTH exits, AFTER the store's own task has finished.
+///
+/// Why this shape and not a `defer` (the round-end Fable pass's round 2,
+/// NIT-2 — both stand-ins' rider, verified): `ThemeStore.start` adopts on
+/// EVERY emission, and `Task.cancel()` does not join — a value whose
+/// continuation resumed before the cancel is an enqueued main-actor job that
+/// runs AFTER a body's synchronous `defer`, so a restore in a `defer` is
+/// overtaken by the very adoption it undoes (and defers unwind in reverse,
+/// so a restore declared beside the cancel-defer runs FIRST). `defer` cannot
+/// `await`, so the join is explicit here and runs on the THROW path too — a
+/// FAILING pin is exactly the run where a leaked Study adoption matters,
+/// because every later suite in the process inherits it (and a leaked
+/// `isAdopted` switches off the inertness a storeless host is designed to
+/// have, so later mounted book pins write real `.outline` records into
+/// `UserDefaults.standard` under a voice no host chose). `start()` returns
+/// on cancellation, so the await is finite. The palette is restored for
+/// every caller, even one whose host writes it nowhere — one rule, three
+/// sites (`NoteBoxMountTests`, `MastheadLayoutTests` ×2).
+@MainActor
+func withAdoptedTheme<T>(
+    session: AppSession,
+    _ body: (ThemeStore) async throws -> T
+) async throws -> T {
+    let current = EditorTypography.current
+    let adopted = EditorTypography.isAdopted
+    let palette = MarkdownStyling.palette
+    let store = ThemeStore(session: session)
+    let watching = Task { await store.start() }
+    func finish() async {
+        watching.cancel()
+        await watching.value
+        EditorTypography.current = current
+        EditorTypography.isAdopted = adopted
+        MarkdownStyling.palette = palette
+    }
+    do {
+        let result = try await body(store)
+        await finish()
+        return result
+    } catch {
+        await finish()
+        throw error
+    }
+}

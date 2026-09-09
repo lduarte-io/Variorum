@@ -572,9 +572,14 @@ struct SurfaceSizeMemoryTests {
         defer { defaults.removePersistentDomain(forName: suiteName) }
         let restore = EditorTypography.current
         let wasAdopted = EditorTypography.isAdopted
+        // …and the markdown palette, which the production door below writes
+        // unconditionally (round 2's NIT-2 (b): the two writers this pass
+        // added, restored; the palette's production writers stay row 53's).
+        let palette = MarkdownStyling.palette
         defer {
             EditorTypography.current = restore
             EditorTypography.isAdopted = wasAdopted
+            MarkdownStyling.palette = palette
         }
 
         // Her record, written in her own voice by a previous launch. The
@@ -648,9 +653,14 @@ struct SurfaceSizeMemoryTests {
         defer { defaults.removePersistentDomain(forName: suiteName) }
         let restore = EditorTypography.current
         let wasAdopted = EditorTypography.isAdopted
+        // …and the markdown palette, which the production door below writes
+        // unconditionally (round 2's NIT-2 (b): the two writers this pass
+        // added, restored; the palette's production writers stay row 53's).
+        let palette = MarkdownStyling.palette
         defer {
             EditorTypography.current = restore
             EditorTypography.isAdopted = wasAdopted
+            MarkdownStyling.palette = palette
         }
         let textView = EditorTextView.makeInlineEditor()
         let unlanded = EditorSurfaceChrome(tokens: Queries.ThemeSettings(), dark: false)
