@@ -11506,6 +11506,102 @@ is new API two files consume; `SidebarGeometry.forgetBox(subject:)` replaces the
 large but mechanical diff in `MastheadLayoutTests.swift` and `NoteBoxMountTests.swift` — read it as a wrap, not a
 rewrite).
 
+#### ROUND-END FABLE PASS round 2 — the implementer's sanity pass
+
+*(the 18d batch-4 stand-in, resumed — the batch's context the reviewer does not hold. I read the whole fix
+diff `824578f3..9c00e3cd` myself against the dispositions, RAN the eleven suites the four fixes reach,
+RE-MEASURED MINOR-1's red-on-old in place, and WALKED MINOR-1's felt behaviour on the dev-store Debug build
+(`io.lduarte.Variorum.debug`; `pgrep -fl 'Variorum.app/Contents/MacOS'` returned nothing before every launch
+and nothing after every quit — only ever my own PIDs 2223 · 2389 · 2447; her `/Applications` copy was never
+touched, launched or quit). **4 CLEAR · 0 RAISED**, and my one dismissed rider CONCEDED after checking the
+dismissal's reasoning against the code myself. I changed no code and no test; the tree is clean.)*
+
+| Fix | Does it do what the disposition says | Verdict |
+|---|---|---|
+| **MINOR-1** (`8ce778ff`) | Yes, and it is rider 3's shape exactly, not an approximation of it. `EditorTypography.laidOutParagraphSpacing(_ resolved:)` (`:108–122`) is the ONE arithmetic; `fingerprint` stamps `Int(laidOutParagraphSpacing(resolved).rounded())` (`:161`) off a `current` read ONCE at `:159`, and `EditorDocument.baseParagraphStyle` (`:42–49`) calls the same function with its own single `current` read — the old inline sum is gone, so there is no second copy to drift and no `NSMutableParagraphStyle` allocated to compute a stamp. The two doc riders landed as asked: the maintenance rule is re-keyed on **`baseAttributes`** (not `resolve`), carries the `@AppStorage` grep and today's three dials, and says the `.flow` key space needs none of it; `laidOutParagraphSpacing`'s own doc carries A23's ordering reason in the strengthened form (the dial is app-local `UserDefaults`, not the synced row `ThemeStore` observes, and since round 1's fix `adopt` is `current`'s only writer — so a copy cached in `Resolved` would be the LAYOUT's stale gap, not only the stamp's). Verified rather than trusted: the stamp under `.standard` is byte-unchanged (three ways — the arithmetic, the twelve older pins green on BOTH sides of the revert, and her 125 real dev-store records still in their pre-fix shapes after a launch of the fixed build, walk step 3). | **CLEAR** |
+| **MINOR-2** (`d03473df`) | Yes, and the two corrections to the reviewer's own sketch are right. `forgetBox(subject:)` clears **all four** subject-keyed statics — `noteBoxFrames`, `noteBoxHeaderFrames`, `noteBoxFaces` **and `noteBoxWhereLines`** — and I enumerated `SidebarGeometry` myself to check the door is complete for the box: the only other keyed statics are `railGroupHeights` (the rail's POST — deliberately its own key space, per-key at its callers) and `bodyEvaluations` (round 1's counter, keyed by workspace, never in any wipe door). `resetHeaders()` keeps exactly the title trio and says at the door that a shared KEY cannot be scoped by its callers (row 53 / 13u2). The three callers are as described: the two title-trio ones unchanged, `NoteBoxCompositionTests`' book-opening pin swapped to `forgetBox(subject: readingID)`, and the MAJOR-1 pin's two hand-nils folded into the same door. | **CLEAR** |
+| **NIT-1** (`756b7a2b`) | Yes. The clause (`NoteBoxFactsModel.swift:60–78`) now says the read IS cancellation-aware, that `try?` maps the throw to `nil`, that the superseded task **usually lands EARLY** and its stale write BLANKS the subject it claims (the over-reach corrected rather than reversed), names the two-click case as the shape a reader can try, and tells a future `do`/`catch` to `return` on the `CancellationError` arm. The guard itself is byte-unchanged and still sits ABOVE both assignments, with the deliberate `read == nil` case below it untouched. | **CLEAR** |
+| **NIT-2** (`9c00e3cd`) | Yes, on the half I own and on the half I checked. `withAdoptedTheme(session:)` (`EditorTestSupport.swift`) captures all three globals — `current`, `isAdopted` **and** `MarkdownStyling.palette` — starts the store, and on BOTH exits (`do` and `catch`) runs the same `finish()`: `watching.cancel()`, **`await watching.value`**, then the three restores. That is the join, on the throw path too, which is the whole of my rider 3; nothing is left in a `defer`, so nothing can be overtaken by an enqueued re-adopt. Its three sites are wraps, not rewrites (`git diff -w` shows the bodies unchanged inside the closure). The two production-door pins in `SurfaceSizeMemoryTests` capture and restore the palette their `applyVoiceChrome` writes — the two writers this pass added, claimed by name, with the class left to row 53 exactly as my rider 2 asked. | **CLEAR** |
+
+**Nothing reopens a hole**, and I looked at the two places these fixes could have opened one. (1) Could
+`laidOutParagraphSpacing` change what the LAYOUT produces? No — `baseParagraphStyle`'s new call is the
+identical sum on the identical single `current` read, and `ParagraphGapTests.paragraphTallAddsAWholeLineOfTheProseFont`
+(which asserts that sum) is green on both sides of the revert. (2) Could `forgetBox` under-clear? No — the
+four fields are every box-keyed static in the enum, and `noteBoxWhereLines` (which `resetHeaders()` never
+touched) is now covered rather than hand-nilled.
+
+**MY DISMISSED RIDER — MINOR-1's rider 5 — CONCEDED. The dismissal HOLDS, and I checked its reasoning
+against the code rather than taking it.** Verified here: `SurfaceSizeMemoryTests` is `@MainActor`
+(`:90–92`), and so is every flipper of `editorParagraphGap` in the suite — `ParagraphGapTests`
+(`TypingErgonomicsTests.swift:111–113`) and `PaneSurfaceTests` (`:71–73`); a grep for the key returns those
+two, the new pin, and the four `@AppStorage` declarations, so there is **no non-main-actor writer at all**.
+And the link I had NOT checked when I raised it, which is the one that decides: both named pins are
+**synchronous** bodies — `grep` for `await`/`async` over `aDrawingHostCannotMoveTheStampOnceTheVoiceIsAdopted`
+(`:645–685`) and `aSurfaceTakingChromeBeforeTheVoiceLandsCannotRecordUnderTheGuess` (`:569–621`) returns
+nothing — so no other main-actor job can interleave between `:665` and `:669`, and the straddle I described
+is unreachable by construction. A rider that names no reachable race is hollow, and two lines closing it
+would be cargo; the reviewer is right to have dismissed it and right to have kept the key in the NEW pin,
+whose claim IS the flip. *(One observation, not a dispute and needing nothing now: the dismissal's soundness
+is exactly the condition it states — those bodies staying suspension-free. An `await` added to either later
+makes the straddle reachable again, and the reason as written already says so.)*
+
+**THE WALK (MINOR-1's felt behaviour, on the dev-store Debug build; captures in `…-screens/18d-4/`).** An
+A/B on one gesture, and it came about honestly: after the red-on-old probe I restored the source but the
+DerivedData Debug product was still the probe's binary — the **pre-fix arithmetic** — so the first launch
+walked the DEFECT before I rebuilt and walked the FIX. Both runs use the seeded Sherlock library in the
+Study voice, the book Outline, and one story ("A Scandal in Bohemia", 8,605 w), with the gap dial planted
+with the app down.
+
+1. **The defect, live (pre-fix binary).** The dial set to `paragraphTall`; the story's record on disk
+   `696.0|24410.0|IowanOldStyle-Roman-16-8`, measured under the standard gap. Expanded it → the record became
+   **`696.0|35894.0|IowanOldStyle-Roman-16-8`**: the note is **11,484 pt taller** under the tall gap (+47 % at
+   the same 696-pt width — the finding's premise, measured in the app rather than from the arithmetic) and
+   **the stamp did not move**. So the stale 24,410 was ANSWERED — reserved until the settle — and the new
+   height was then written under a stamp that lies about the gap it was measured in, which the next standard-gap
+   launch would honour in turn. **Capture 11.**
+2. **The fix, live (rebuilt at HEAD).** Same planted record, same tall dial, same gesture → the record becomes
+   **`696.0|35894.0|IowanOldStyle-Roman-16-30`** — the stamp moved with the dial (Iowan 16's gap 8 + one line 22),
+   so her standard-gap record was REFUSED rather than reserved, and what replaced it is honest about the gap it
+   was taken under. **Capture 12.**
+3. **The stamp under `.standard` is byte-unchanged — on her real records, not only in the arithmetic.** The
+   dial deleted (back to `.standard`), same gesture on the fixed build → the record returns to
+   **`696.0|24410.0|IowanOldStyle-Roman-16-8`**, byte-identical to what the pre-fix app wrote. The dev store's
+   whole census is unmoved before and after the walk — **113 `.AppleSystemUIFontMonospaced-Regular-14-7` · 6
+   `IowanOldStyle-Roman-16-8` · 7 `page-16-13-6`** — so none of her 126 existing records is orphaned by this
+   fix. Exactly ONE record moved during the walk (the story I expanded) and it came back. **Capture 13.**
+4. **The dev store was left as found:** no `editorParagraphGap` key, the census above, my instance quit, zero
+   instances running (`pgrep` after each quit). Captures:
+   `11-sanity-pass-old-build-gap-flipped-stamp-did-not-move.png` ·
+   `12-sanity-pass-fixed-build-stamp-moves-with-the-gap.png` ·
+   `13-sanity-pass-standard-gap-restored-stamp-byte-unchanged.png` (gitignored, as the folder is).
+
+**THE RUNS (mine, this tree).**
+
+- **At HEAD, the eleven suite types the four fixes reach** (`SurfaceSizeMemoryTests · EditorTypographyTests ·
+  ParagraphGapTests · StableSurfaceTests · MarkdownFaceTests · PaneSurfaceTests · NoteBoxGeometryTests ·
+  NoteBoxCompositionTests · MastheadLayoutTests · ShellChromeTests · BookOutlineLandingTests`, each verified to
+  be a TYPE before the run): **`Test run with 79 tests in 11 suites passed after 40.831 seconds`** — 11 for 11,
+  zero `skipped:` lines. Never the full suite.
+- **MINOR-1's red-on-old, RE-MEASURED IN PLACE** on the committed tree (the one line in `fingerprint` reverted to
+  `resolved.paragraphSpacing`, nothing else): **`Test run with 13 tests in 1 suite failed … with 2 issues`** —
+  `(tallStamp → ".AppleSystemUIFontMonospaced-Regular-14-7") != (standardStamp → ".AppleSystemUIFontMonospaced-Regular-14-7")`
+  at `:753` and `(answered → (696.0, 20993.0)) == nil` at `:755`, byte-for-byte the record's; **the twelve older
+  pins green beside it**, which is also the cleanest form of the byte-unchanged claim (every pre-existing stamp
+  expectation passes on both arithmetics). Restored with `git checkout --`; `git status` clean; the Debug product
+  rebuilt afterwards so the walk's second half ran the real thing.
+- **Seams, checked not trusted:** `git diff --stat 824578f3..9c00e3cd -- Sources/ App/Variorum/Shared/` is
+  **EMPTY**; no schema, no migration, no lockstep; nothing in `Sync/`, `BlockRangeIndex`, `EditorTextView`.
+
+**Considered and cleared (so the next reader does not re-raise them).** `SidebarGeometry.openRowHeight` is
+still an unkeyed `CGFloat?` and `bodyEvaluations` is workspace-keyed — neither is wiped by any door, so the (c)
+class this fix closes does not reach them; the unkeyed one is row 53's (a) class, already owned by 13u2. The
+`.flow` key space is untouched by all four fixes and needs to be (`FlowHeightEstimate.fingerprint` stays a
+constant; `ReadingFlowView` has zero `ParagraphGap` hits). `withAdoptedTheme` restores the palette even at
+`NoteBoxMountTests`, whose host writes it nowhere — harmless, and one rule beats three.
+
+**Counts: 4 CLEAR · 0 RAISED.** Nothing goes back to the reviewer. Nothing re-opens a ruling; no QUESTIONS
+row owed.
+
 ### THE ROUND — CLOSEOUT (written 2026-09-08 by an OPUS session after the successor Fable orchestrator's budget ran out mid-ladder; ONE verification still open — see the last paragraph)
 
 **What she asked for, and what she got.** Her evening writing with takes (`notes/author-reports/2026-09-06-use-report.md`) named three things the app did to her and ~twenty smaller ones. All of it is built, in five letters run as one round, with a ladder over every letter:
