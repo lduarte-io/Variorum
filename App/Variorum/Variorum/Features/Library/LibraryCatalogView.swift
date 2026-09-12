@@ -582,7 +582,7 @@ struct LibraryCatalogView: View {
             // R1-4: a capped listing says so rather than reading as the
             // library. The day's answer is uncapped, so this never draws
             // under one.
-            if model.truncated {
+            if model.listingIsTruncated {
                 LibraryTruncationLine(tokens: tokens)
             }
         }
@@ -613,7 +613,7 @@ struct LibraryCatalogView: View {
                             .padding(24)
                     }
                 }
-                if model.truncated {
+                if model.notesAreTruncated {
                     LibraryTruncationLine(tokens: tokens)
                         .padding(.vertical, 10)
                 }

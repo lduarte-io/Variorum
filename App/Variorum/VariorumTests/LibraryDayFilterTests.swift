@@ -364,6 +364,33 @@ struct LibraryDayFilterTests {
         }
     }
 
+    /// **The truncation line belongs to the body that draws it** (the
+    /// ladder's R2-2). `capped` counts per kind and collapsed to ONE
+    /// boolean, and the Notes body — which draws notes only — read it: with
+    /// more books than a page and every note drawn, it said "showing the
+    /// first 40" over a complete list of notes.
+    ///
+    /// Red on old: one flag, true for both bodies.
+    @Test func theNotesBodysTruncationIsAboutNotes() async throws {
+        try await withTravellingLibrary { session, _ in
+            for index in 0..<(LibraryCatalogModel.pageSize + 1) {
+                _ = try session.operations.createReading(
+                    name: String(format: "book %03d", index), kind: .curated)
+            }
+            for index in 0..<3 {
+                let note = try session.operations.createPost(title: "note \(index)")
+                _ = try session.operations.newBlock(in: note.id, text: "words")
+            }
+            let model = LibraryCatalogModel(session: session, defaults: try scrubbed("kinds"))
+            await model.search()
+
+            #expect(model.listingIsTruncated, "41 books are more than a page")
+            #expect(!model.notesAreTruncated,
+                    "…but every note is drawn, so the Notes mode has nothing to confess")
+            #expect(model.hits.filter { $0.kind == .post }.count == 3)
+        }
+    }
+
     // MARK: - The filter's calendar (the ladder's R1-8)
 
     /// **The day filter's calendar is GREGORIAN, carrying HER time zone** —
@@ -420,16 +447,16 @@ struct LibraryDayFilterTests {
             await model.search()
             #expect(noteIDs(model).count == LibraryCatalogModel.pageSize,
                     "the ordinary listing is a page")
-            #expect(model.truncated, "…and it says so")
+            #expect(model.notesAreTruncated, "…and it says so")
 
             model.setEditedOn(day(of: clock.current))
             await model.search()
             #expect(noteIDs(model).count == 45, "the day's answer is the whole set")
-            #expect(!model.truncated, "so there is nothing to confess")
+            #expect(!model.notesAreTruncated, "so there is nothing to confess")
 
             model.setEditedOn(nil)
             await model.search()
-            #expect(model.truncated)
+            #expect(model.notesAreTruncated)
         }
     }
 
@@ -444,13 +471,13 @@ struct LibraryDayFilterTests {
             let model = LibraryCatalogModel(session: session, defaults: try scrubbed("edge"))
             await model.search()
             #expect(noteIDs(model).count == 40)
-            #expect(!model.truncated, "exactly a page is not a truncation")
+            #expect(!model.notesAreTruncated, "exactly a page is not a truncation")
 
             let extra = try session.operations.createPost(title: "one more")
             _ = try session.operations.newBlock(in: extra.id, text: "words")
             await model.search()
             #expect(noteIDs(model).count == 40)
-            #expect(model.truncated, "one over the page IS")
+            #expect(model.notesAreTruncated, "one over the page IS")
         }
     }
 
