@@ -1521,6 +1521,48 @@ Three rounds, one letter-half, over `2bfc8461..e78bc896`. **Round 1** (fable-rev
 
 ### R-2 · RECORD (the implementer writes here from its first commit)
 
-*(empty until the implementer's first commit)*
+**LIVE STATUS — 17p batch b (`opus-implementer`, opened 2026-09-12 at `48f54268`).**
+
+**WHAT I HAVE NOT DONE (the record's first line).** At this commit: nothing but the orientation and
+this record. Deliberately NOT in scope, by the brief and held for the whole batch: `Sources/`
+(core — zero lines), `Sync/`, schema, `App/Variorum/Shared/` (the tray explainer STAYS — it becomes
+true once the door exists), `BlockRangeIndex`, `EditorTextView`'s seam and the identity machinery,
+rendering attributes, `exclusionPaths`, `TakesEmptyStateView`, the Takes board (batch a's surface).
+Stranded originals get NO Delete Now door (R-Q3's letter).
+
+- **Orientation — DONE.** Read in my own context, in the brief's order: `CLAUDE.md` and the canon it
+  auto-loads (CoreDescription · OverallModel · AppSpec — §12's comments/callouts lines (R7 margin
+  comments, R16/R17/R27 callouts, R9 sacred margins) and §9's tray/purge ops · SyncSpec ·
+  TEXTKIT2_NOTES — §3's overlays-never-rendering-attributes rule and the iOS paragraph-style/
+  `exclusionPaths` finding, §4's defensive practices); this plan's §1 (Q-3 · Q-4), §3 rows 3–6,
+  §4.3–§4.4, §7 (R-Q3 · R-Q4 — SETTLED), §8, §9, §12 (F-0 · F-3 · F-4), R-0 (P-1…P-9 + the
+  application notes), R-1's BRIEF + RECORD + the orchestrator's adjudication + the three ladder
+  rounds' findings and the LADDER — CLOSED residue (the her-hand rule's story: a rule stands
+  "complete by enumeration" with a road table as its proof, and an ENUMERATED exemption was wrong
+  twice at first use); `notes/plans/phase-17-standing-fixes.md`'s philosophy, standing rules and the
+  17p row; `notes/SessionResiliencyProtocol.md`'s implementer half; `notes/QUESTIONS.md`'s tail
+  (**#102 is free**). Then the code behind every row — `TrayPanel` (`cellRows` · `row(...)` ·
+  `takeRow` · `TrayViewModel`'s purge doors · `surfaceCapabilities` · the confirm host) ·
+  `TrayFilter` · `RecoveryView`'s block Delete Now + the stranded rule · `TrashPurge` ·
+  `Queries.TrashItem`/`TrayItem`/`TrayTake` · `CalloutMenu.emojiAccessory` + `promptEmoji` ·
+  `BlockDecor` (`calloutRect` · `renderCallouts` · `renderComments` · `leftCardRect` ·
+  `gutterFitsCards`) · `EditorTypography`'s margins · `EditorTextView.makeInlineEditor`/
+  `updateGutters` · `InlineEditorSurface` + its coordinator · `EditorViewModel.refreshDecorations`
+  and the decor state's `textLeft`/`textRight` · the pins that ride (`TrayPanelMoveTests` ·
+  `TrayPanelShapeTests` · `NoteTrayTests` · `DoorSetTests`/`CalloutEmojiPickerTests` ·
+  `BlockDecorGeometryTests` · `MarginHoverCommentTests`' sweep pin). Tree clean at `48f54268`,
+  `main` == `origin/main`. **Zero app instances** (`pgrep -fl 'Variorum.app/Contents/MacOS'` empty —
+  her real-store app is quit for the night; every walk is on `io.lduarte.Variorum.debug`).
+
+**Pieces (checkpoint order):**
+
+1. **row 3 — the tray's block rows gain Delete Now** — **NOT-STARTED**
+2. **row 4 — the Callout Emoji alert's collapsed field** — **NOT-STARTED**
+3. **rows 5–6 — the decoration lane + the emoji inside the frame** — **NOT-STARTED**
+4. **the walk + captures + the closing suites** — **NOT-STARTED**
+
+**Rows:** 3 · 4 · 5 · 6 — dispositions PENDING.
+
+**No revert is in flight.**
 
 *(Pointers re-verified by the orchestrator on 2026-09-12 after batch a's ladder, at `17803ce4`: `RecoveryView.swift` lives at `App/Variorum/Variorum/Features/Library/RecoveryView.swift` (`requestDeleteNow` `:400`; the stranded rule `:122–126`); `EditorTypography.swift` at `App/Variorum/Variorum/Theme/EditorTypography.swift` (`minGutter` `:171`, `inlineSurfaceInset` `:176`); `TrayPanel.swift`'s lines hold within one (`confirmPendingPurge` `:637`, `trashItem(for:)` `:653`); `CalloutMenu.emojiAccessory` `:179`; `BlockDecor` badge `:592`, emoji `:479`, `calloutRect` `:167`; `EditorTextView.makeInlineEditor` `:823`; `EditorViewModel` `textLeft` `:3162`; `DoorSetTests:327` is the accessory's title pin. Batch a moved nothing in this batch's files. The environment traps and rules 1–8 are R-1's, verbatim by reference; her app is QUIT for the night — an instance at `/Applications` means she is awake: never touch it.)*
