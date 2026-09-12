@@ -34,20 +34,45 @@ import Foundation
 import VariorumCore
 
 nonisolated enum LibrarySortWords {
-    /// One lower-case word per sort — the Mac's `sort ▾` rows and the
-    /// phone's picker, from the same line.
+    /// **HER FOUR, and only hers** — the words R-Q8 names: *edited (the
+    /// default, as today) · created · date (entry date) · title A–Z*. nil for
+    /// any other case, because a word no ruling names is not this table's to
+    /// give.
     ///
-    /// `lastMajorRevision` is the case neither surface offers today (the
-    /// timeline's own stamp); it answers so the vocabulary can never reach a
-    /// surface with no word for it, which is exactly the hole the phone's
-    /// exhaustive switch found when `.title` was minted.
-    static func label(_ sort: Queries.LibrarySort) -> String {
+    /// This separation is the ladder's R2-4: the hoist's warrant was her
+    /// ruling, and it was applied one case too far — `.lastMajorRevision`,
+    /// which the Mac does not offer and the phone does, had its shipped
+    /// string changed on nobody's word. The rule the hoist itself states
+    /// four lines up ("what stays platform-side is copy no other platform
+    /// says") is what forbids that.
+    static func ruledLabel(_ sort: Queries.LibrarySort) -> String? {
         switch sort {
         case .lastTouched: "edited"
         case .createdAt: "created"
         case .entryDate: "date"
         case .title: "title"
-        case .lastMajorRevision: "revised"
+        case .lastMajorRevision: nil
         }
+    }
+
+    /// The word for the one case no ruling names — **the phone's own, and
+    /// unchanged since the mobile parity round's C3**. It is AppSpec §10's
+    /// vocabulary for `last_major_revision_at` in her app's mouth
+    /// (*"meaningful edits only"*), which is why it reads as a sentence
+    /// where her four read as labels.
+    ///
+    /// It sits here rather than back in `MobileLibraryViewModel` for one
+    /// reason: the Mac can still be ASKED for it — a remembered
+    /// `libraryCatalogSort` of `last_major_revision` (a hand-edited plist)
+    /// reads back and reaches the door's label — so both platforms need an
+    /// answer, and two files each holding the same string is the drift R1-7
+    /// just retired. One string, one place; what the ladder ruled out was
+    /// CHANGING it, not keeping it findable.
+    static let unruledLabel = "last meaningful edit"
+
+    /// What a surface says for any case: her word where she has ruled one,
+    /// the app's own otherwise.
+    static func label(_ sort: Queries.LibrarySort) -> String {
+        ruledLabel(sort) ?? unruledLabel
     }
 }

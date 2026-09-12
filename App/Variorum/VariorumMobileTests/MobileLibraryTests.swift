@@ -309,9 +309,22 @@ struct MobileLibrarySortTests {
         #expect(M.sortWord(.entryDate) == "date")
         #expect(M.sortWord(.createdAt) == "created")
         #expect(M.sortWord(.lastTouched) == "edited")
-        #expect(M.sortWord(.lastMajorRevision) == "revised")
+        // …and the case her ruling does NOT name keeps the phone's own word
+        // (the ladder's R2-4): the hoist's warrant was R-Q8's four words, and
+        // it had reached one case too far.
+        #expect(M.sortWord(.lastMajorRevision) == "last meaningful edit")
+        #expect(LibrarySortWords.ruledLabel(.lastMajorRevision) == nil,
+                "the shared table gives no word where no ruling gave one")
+
+        // **A WORD WITHOUT AN OFFER** (the ladder's R2-5): the phone can name
+        // `.title` — the shared table gives it one — and must not BE it,
+        // because this model's listing is `Queries.library`, which refuses
+        // `.title` by a precondition that is live in release. RED ON OLD:
+        // `setSort(.title)` took, and the next observation would have trapped
+        // the process rather than degrading the order.
         #expect(M.sortWord(.title) == LibrarySortWords.label(.title),
-                "the case the phone does not offer still has a word, from the one table")
+                "it has a word, from the one table")
+        #expect(!M.sortOptions.contains(.title), "…and no offer")
 
         // The no-op flip: same value ⇒ no mutation ⇒ no observation
         // fires (the registration stays armed); a real flip fires it.
@@ -330,6 +343,14 @@ struct MobileLibrarySortTests {
             model.setSort(.entryDate)
             #expect(notified.value == true, "a real flip wakes the observer")
             #expect(model.sort == .entryDate)
+
+            // R2-5, driven: the door refuses the sort its listing cannot
+            // serve. On the pre-fix code this took, and `startAll`'s next
+            // `observeLibrary` would have hit `Queries.library`'s
+            // precondition — a process trap in release, from a picker tap.
+            model.setSort(.title)
+            #expect(model.sort == .entryDate,
+                    "`.title` is refused at the door, so the listing never asks for it")
         }
     }
 }

@@ -307,8 +307,9 @@ final class LibraryCatalogModel {
         // more than the code does: it promised the list could never be "in a
         // shape no menu row matches", and `"last_major_revision"` parses
         // fine while `LibrarySortFace.offered` does not list it — so a plist
-        // carrying it would leave the door reading *revised · newest first*
-        // with no ✓ on any row. Only a hand edit reaches that (nothing in the
+        // carrying it would leave the door reading *last meaningful edit ·
+        // newest first* with no ✓ on any row (that word changed at R2-4,
+        // which restored the phone's own for the case no ruling names). Only a hand edit reaches that (nothing in the
         // app writes it), which is why this is a sentence and not a guard;
         // validating against `offered` on read is the one line if it ever
         // stops being hypothetical.
