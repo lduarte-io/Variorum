@@ -99,6 +99,37 @@ nonisolated enum LibrarySortFace {
         case .lastTouched, .lastMajorRevision, .title: .edited
         }
     }
+
+    /// What a row's trailing stamp IS: the subject and the stored value
+    /// together, from the one hit the row is drawing.
+    ///
+    /// Handed out as a pair rather than as two calls so a renderer cannot
+    /// pick the subject from one sort and the value from another — the
+    /// mismatch would read as a confident lie ("created today" over an edit
+    /// stamp), which is the worst failure a date face can have.
+    struct RowStamp: Equatable {
+        let subject: TimeStampFace.Subject
+        /// nil ⇒ this row has no such stamp (a book or block hit), and the
+        /// face draws nothing.
+        let stamp: String?
+    }
+
+    static func rowStamp(
+        _ sort: Queries.LibrarySort, for hit: Queries.CatalogHit
+    ) -> RowStamp {
+        let subject = stampSubject(sort)
+        // NOTES only, said outright rather than left to the parse: a book
+        // hit's `detail` is the word "book" and a block's is its home note's
+        // title, and neither is a date. `TimeStampFace` would refuse both
+        // anyway, but a face that relies on a parse failing is a face one
+        // edit away from printing nonsense.
+        guard hit.kind == .post else { return RowStamp(subject: subject, stamp: nil) }
+        switch subject {
+        case .created: return RowStamp(subject: subject, stamp: hit.createdAt)
+        case .dated: return RowStamp(subject: subject, stamp: hit.detail)
+        case .edited: return RowStamp(subject: subject, stamp: hit.lastTouchedAt)
+        }
+    }
 }
 
 // MARK: - The door
@@ -157,10 +188,13 @@ struct LibrarySortMenu: View {
 /// wedged-window class).
 struct CatalogRowStamp: View {
     let tokens: VoiceTokens
-    let subject: TimeStampFace.Subject
-    /// The stored stamp: the canonical ISO instant, or a day key.
-    let stamp: String?
-    let now: Date
+    /// The subject and its stored value, from `LibrarySortFace.rowStamp` —
+    /// one value so the two can never disagree.
+    let face: LibrarySortFace.RowStamp
+    /// "now", for the relative rule (the `SidebarNoteBox` convention:
+    /// defaulted here, injected by a pin so the pin holds the rule and not
+    /// the machine's clock).
+    var now: Date = Date()
     /// The DEBUG baseline probe, the `NoteTagsRow` convention: a prefix on
     /// the rows pinned for alignment (`LibraryRowAlignmentTests`), nil
     /// elsewhere — `baselineProbe` itself no-ops on a nil id.
@@ -168,13 +202,13 @@ struct CatalogRowStamp: View {
     var baselineProbeSpace: String = ""
 
     var body: some View {
-        if let words = TimeStampFace.stamp(subject, iso: stamp, now: now) {
+        if let words = TimeStampFace.stamp(face.subject, iso: face.stamp, now: now) {
             Text(tokens.chromeLabel(words))
                 .font(tokens.small)
                 .foregroundStyle(tokens.muted)
                 .lineLimit(1)
                 .fixedSize()
-                .help(TimeStampFace.tooltip(subject, iso: stamp) ?? words)
+                .help(TimeStampFace.tooltip(face.subject, iso: face.stamp) ?? words)
                 .baselineProbe(baselineProbePrefix.map { "\($0).stamp" }, in: baselineProbeSpace)
         }
     }

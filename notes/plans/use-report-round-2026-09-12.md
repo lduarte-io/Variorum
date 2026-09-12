@@ -2932,7 +2932,7 @@ LOCAL UI state, so AppSpec §7's seeds are untouched — see the canon note at t
   errors on `87799c6a` (`scratchpad/18h-1/red-on-old-core.log`, quoted below); green after:
   `✔ Test run with 21 tests in 3 suites passed after 0.272 seconds` (the two new suites +
   18d's `NoteStampsTests` riding untouched, which is the parity proof for the struct's new field).
-- **Piece 2 — the sort menu + the model's memory:** DONE — this commit. A new small file
+- **Piece 2 — the sort menu + the model's memory:** DONE (`a33db2bf`). A new small file
   `App/Variorum/Variorum/Features/Library/LibraryTimeFace.swift` (NOT more lines in the
   1,300-line `LibraryCatalogView.swift` — F-0/P-9) holding three things of one theme:
   `LibrarySortFace` (the words + two rules: each sort's natural direction, and which stamp a row
@@ -2946,10 +2946,21 @@ LOCAL UI state, so AppSpec §7's seeds are untouched — see the canon note at t
   (7 tests) — red-on-old `scratchpad/18h-1/red-on-old-piece2.log` (`extra argument 'defaults'`,
   `no member 'sortKey'`, `cannot find 'LibrarySortFace'`); green:
   `✔ Test run with 7 tests in 1 suite passed after 0.267 seconds`.
-- **Piece 3 — the row stamps + `TimeStampFace` adopted by 18d's facts line:** NOT-STARTED.
-  A trailing muted stamp on `CatalogNoteLine` (right of the `Spacer()`, on the line's first-text
-  baseline, with the tooltip) and the same words on the Notes card's line, both reading the
-  SORT's own subject; `NoteBoxCopy.day` becomes a forwarder to `TimeStampFace.day`.
+- **Piece 3 — the row stamps + `TimeStampFace` adopted by 18d's facts line:** DONE — this
+  commit. `LibrarySortFace.rowStamp(sort, for: hit)` is the ONE rule (subject + stored value as
+  ONE value, so a renderer cannot pick the subject from one sort and the value from another —
+  "created today" over an edit stamp is the worst lie a date face can tell; notes only, said
+  outright rather than left to the parse). `CatalogNoteLine` wears it trailing, past the
+  `Spacer()`, on the title's baseline; the Notes card's date slot now shows the SAME words where
+  it used to print the raw stored day (`2026-09-09`). `NoteBoxCopy.day` is a forwarder to
+  `TimeStampFace.day`. Pins: `LibraryRowAlignmentTests.aNoteRowsTrailingStampSitsOnTheTitlesBaselineInBothVoices`
+  (red-on-old: `BaselineProbe.baseline("note.stamp")` nil — no stamp existed) ·
+  `LibrarySortMenuTests.aRowsStampIsTheSortsOwnStampInWords` (the real query's hit → the real
+  rule → the real words: *edited Jul 1* · *created Jul 1* · *dated Jan 15*; a book row's nil) ·
+  `…theNoteBoxsDayWordsAreTheOneBrainsNow` (the no-drift claim). Green:
+  `✔ Test run with 12 tests in 2 suites passed after 2.755 seconds` and 18d's four NoteBox
+  suites UNCHANGED — `✔ Test run with 17 tests in 4 suites passed after 0.010 seconds` (the
+  forwarder's parity proof).
 - **Piece 4 — the masthead stamp (row two's third subview + the oracle slot):** NOT-STARTED.
   `MastheadRowTwo` grows from two subviews to three (the stamp trailing on one line, riding the
   chip's line when row two stacks), the stamp a quiet `Button` flipping *edited …* ↔ *created …*

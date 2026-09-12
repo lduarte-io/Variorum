@@ -19,6 +19,7 @@
 //
 
 import Foundation
+import VariorumCore  // the one stamp-wording brain (`TimeStampFace`)
 
 // MARK: - The state
 
@@ -208,15 +209,16 @@ nonisolated enum NoteBoxCopy {
     /// this one, because "Sep 4" for something written two years ago is a
     /// lie told by omission. Pure over an injected `now`, so a pin can hold
     /// the rule rather than the machine's clock.
+    ///
+    /// **A FORWARDER since 18h batch 1.** The rule it used to implement here
+    /// is now `TimeStampFace.day` in core `Domain` — the one stamp-wording
+    /// brain the Library's rows and the note masthead's stamp also read
+    /// (review focus F-5). The name stays so every 18d pin and call site is
+    /// untouched, which is the parity proof; what left is the second copy of
+    /// the rule (MobileSoul §3's drift class).
     static func day(
         _ date: Date, now: Date, calendar: Calendar = .current, locale: Locale = .current
     ) -> String {
-        let sameYear = calendar.component(.year, from: date)
-            == calendar.component(.year, from: now)
-        let formatter = DateFormatter()
-        formatter.calendar = calendar
-        formatter.locale = locale
-        formatter.setLocalizedDateFormatFromTemplate(sameYear ? "MMMd" : "MMMdyyyy")
-        return formatter.string(from: date)
+        TimeStampFace.day(date, now: now, calendar: calendar, locale: locale)
     }
 }

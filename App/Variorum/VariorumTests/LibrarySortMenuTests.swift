@@ -200,6 +200,73 @@ struct LibrarySortMenuTests {
                 "the vocabulary's unoffered case still answers, never crashes")
     }
 
+    /// **The row's stamp is the sort's own, end to end** (her row 9 + the
+    /// brief's rule): the real query's hit goes through the real rule and the
+    /// real brain, and the WORDS come out. Nothing here is hand-fed — the hit
+    /// is whatever `searchCatalog` landed for the note the model is listing.
+    @Test func aRowsStampIsTheSortsOwnStampInWords() async throws {
+        try await withTickingLibrary { session, _ in
+            let f = try fixture(session)
+            let model = LibraryCatalogModel(session: session, defaults: try scrubbed("rows"))
+            await model.search()
+            let hit = try #require(model.hits.first { $0.id == f.b })
+            // The fixture's world is 2026-07-01, so "now" a week later makes
+            // every stamp a plain day — the words the rule owes, not the
+            // machine's today.
+            let now = Date(timeIntervalSince1970: 1_782_864_000 + 7 * 86_400)
+            var calendar = Calendar(identifier: .gregorian)
+            calendar.timeZone = TimeZone(identifier: "UTC")!
+            let locale = Locale(identifier: "en_US")
+
+            func words(_ sort: Queries.LibrarySort) -> String? {
+                let face = LibrarySortFace.rowStamp(sort, for: hit)
+                return TimeStampFace.stamp(
+                    face.subject, iso: face.stamp, now: now,
+                    calendar: calendar, locale: locale)
+            }
+
+            #expect(words(.lastTouched) == "edited Jul 1")
+            #expect(words(.createdAt) == "created Jul 1")
+            #expect(words(.title) == "edited Jul 1",
+                    "a name order says nothing about time, so the edit stamp stands")
+            #expect(words(.entryDate) == "dated Jan 15",
+                    "the day SHE stated, not the day the row was written")
+
+            // The pair can never mismatch — the value follows the subject.
+            #expect(LibrarySortFace.rowStamp(.createdAt, for: hit).stamp == hit.createdAt)
+            #expect(LibrarySortFace.rowStamp(.lastTouched, for: hit).stamp == hit.lastTouchedAt)
+            #expect(LibrarySortFace.rowStamp(.entryDate, for: hit).stamp == hit.detail)
+
+            // A BOOK row has no such stamp and draws nothing — `detail` there
+            // is the word "book", and a face that relied on the parse failing
+            // would be one edit from printing it as a date.
+            let book = try session.operations.createReading(name: "the field guide", kind: .curated)
+            await model.search()
+            let bookHit = try #require(model.hits.first { $0.kind == .book && $0.id == book.id })
+            #expect(bookHit.detail == "book")
+            for sort in LibrarySortFace.offered {
+                #expect(LibrarySortFace.rowStamp(sort, for: bookHit).stamp == nil,
+                        "\(sort): a book row carries no stamp")
+            }
+        }
+    }
+
+    /// **One brain, no second copy** (F-5): 18d's facts line words its day
+    /// through the same rule the Library's rows do. Its own pins
+    /// (`NoteBoxTests`) ride UNCHANGED, which is the parity proof; this is
+    /// the no-drift claim stated outright.
+    @Test func theNoteBoxsDayWordsAreTheOneBrainsNow() {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+        let locale = Locale(identifier: "en_US")
+        let now = Date(timeIntervalSince1970: 1_789_222_980)
+        for offset: TimeInterval in [0, -86_400, -4 * 86_400, -400 * 86_400] {
+            let date = now.addingTimeInterval(offset)
+            #expect(NoteBoxCopy.day(date, now: now, calendar: calendar, locale: locale)
+                    == TimeStampFace.day(date, now: now, calendar: calendar, locale: locale))
+        }
+    }
+
     /// The header carries ONE sort door, and it is the voiced menu (never a
     /// system picker beside the two that are there).
     @Test func theHeaderCarriesOneVoicedSortDoor() async throws {

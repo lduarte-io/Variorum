@@ -86,6 +86,42 @@ struct LibraryRowAlignmentTests {
         }
     }
 
+    /// **18h batch 1 (her row 9): the trailing STAMP joins that one
+    /// baseline.** *"I need to be able to see the created time and last
+    /// edited time easily on the library"* — and the stamp she reads at a
+    /// glance must not be the one thing on the row sitting a couple of points
+    /// off the words, which is the misalignment she reported in image 4 about
+    /// the chips.
+    ///
+    /// RED ON OLD: `CatalogNoteLine` had no stamp at all, so
+    /// `BaselineProbe.baseline("note.stamp")` was nil and the `#require`
+    /// failed — the honest shape of an absent capability.
+    @Test func aNoteRowsTrailingStampSitsOnTheTitlesBaselineInBothVoices() throws {
+        let now = Date(timeIntervalSince1970: 1_789_222_980)  // 2026-09-12
+        for tokens in [VoiceTokens.terminalLight, VoiceTokens.studyLight] {
+            #if DEBUG
+            BaselineProbe.reset()
+            #endif
+            let stamped = DateFormatter.variorumISO8601.string(
+                from: now.addingTimeInterval(-3 * 86_400))
+            let window = mount(CatalogNoteLine(
+                tokens: tokens, title: "three ways of working", date: "2026-09-09",
+                tags: [tag("tutorial")], allTags: [],
+                onTitleTap: {}, onApply: { _ in }, onRemove: { _ in },
+                stamp: LibrarySortFace.RowStamp(subject: .edited, stamp: stamped),
+                now: now))
+            defer { close(window) }
+            #if DEBUG
+            let title = try #require(BaselineProbe.baseline("note.title"), "the title reported")
+            let stamp = try #require(BaselineProbe.baseline("note.stamp"), "the stamp reported")
+            #expect(abs(title - stamp) <= 1,
+                    "the stamp's baseline (\(stamp)) sits on the title's (\(title)) within 1 pt")
+            // That it sits at the row's TRAILING end (past the `Spacer()`) is
+            // the walk's capture: `BaselineProbe` reports baselines, not x.
+            #endif
+        }
+    }
+
     @Test func aBookRowsTitleAndKindLabelShareOneBaselineInBothVoices() throws {
         for tokens in [VoiceTokens.terminalLight, VoiceTokens.studyLight] {
             #if DEBUG

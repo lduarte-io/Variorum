@@ -977,12 +977,12 @@ struct LibraryCatalogView: View {
                     .font(tokens.body)
                     .foregroundStyle(tokens.ink)
                     .lineLimit(1)
-                if let date = hit.detail {
-                    Text(tokens.chromeLabel(date))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
-                        .lineLimit(1)
-                }
+                // 18h batch 1 (her row 9): the card's date slot is the SORT's
+                // own stamp, in the one brain's words — *"edited today 1:33
+                // AM"* where it used to print the raw stored day
+                // ("2026-09-09"), which is the shape she asked to see
+                // "easily" and the shape Apple Notes' own card wears.
+                CatalogRowStamp(tokens: tokens, face: LibrarySortFace.rowStamp(model.sort, for: hit))
                 Spacer(minLength: 0)
                 if !card.books.isEmpty {
                     Text(tokens.chromeLabel(card.books.joined(separator: " · ")))
@@ -1056,7 +1056,8 @@ struct LibraryCatalogView: View {
                 tags: model.postTags[hit.id] ?? [], allTags: tags.tags,
                 onTitleTap: { openHit(hit) },
                 onApply: { path in Task { await model.applyTypedPath(path, to: [hit.id]) } },
-                onRemove: { tag in Task { await model.removeTag(tag.id, from: [hit.id]) } })
+                onRemove: { tag in Task { await model.removeTag(tag.id, from: [hit.id]) } },
+                stamp: LibrarySortFace.rowStamp(model.sort, for: hit))
         }
         .draggable(hit.id)
         .contextMenu { postRowMenu(hit) }
@@ -1383,6 +1384,13 @@ struct CatalogNoteLine: View {
     let onTitleTap: () -> Void
     let onApply: (String) -> Void
     let onRemove: (Tag) -> Void
+    /// **18h batch 1 (her row 9):** the muted trailing stamp — the SORT'S
+    /// own (`LibrarySortFace.rowStamp`), worded by the one brain. Defaulted
+    /// to nothing so the shipped alignment pins construct the line exactly as
+    /// they did and keep measuring exactly what they measured.
+    var stamp = LibrarySortFace.RowStamp(subject: .edited, stamp: nil)
+    /// "now" for the stamp's words, injected by the pin that fixes the clock.
+    var now: Date = Date()
 
     static let probeSpace = "catalog-note-line"
 
@@ -1402,6 +1410,12 @@ struct CatalogNoteLine: View {
                 onApply: onApply, onRemove: onRemove,
                 baselineProbePrefix: "note", baselineProbeSpace: Self.probeSpace)
             Spacer()
+            // Her row 9: *"see the created time and last edited time easily
+            // on the library."* At the row's trailing edge, muted, on the
+            // title's own baseline, the whole fact on hover.
+            CatalogRowStamp(
+                tokens: tokens, face: stamp, now: now,
+                baselineProbePrefix: "note", baselineProbeSpace: Self.probeSpace)
         }
         .coordinateSpace(name: Self.probeSpace)
     }
