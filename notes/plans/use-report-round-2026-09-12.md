@@ -3166,7 +3166,8 @@ forensic"); no change to what `last_touched_at` MEANS (AppSpec §10 untouched); 
 the row stamps or the masthead stamp (18h batch 1's, `2d43df7c…f531955a`); the Timeline mode's own
 listing untouched; no new `setting` key (the day filter is transient UI state — see the batch's calls).
 
-**LIVE STATUS — pieces 1 and 3 DONE, piece 2 NOT NEEDED (measured), piece 4 (the walk) next**
+**LIVE STATUS — THE BATCH IS CLOSED** (`c3d81b31` · `ff112dab` · `dced175b` + this commit; piece 2,
+the index, was measured and NOT needed, so there is no schema commit and the marker stays 8)
 
 - **Piece 1 — THE CORE (the union query arm + the pure day→UTC-bounds rule):** DONE (`c3d81b31`). `DayBounds`
   (`Sources/VariorumCore/Domain/DayBounds.swift`) is the conversion: a local calendar day → the
@@ -3183,8 +3184,8 @@ listing untouched; no new `setting` key (the day filter is transient UI state �
   stamp suites riding UNMODIFIED beside them (the parity proof for the `parse` refactor):
   `✔ Test run with 43 tests in 5 suites passed after 0.761 seconds.`
 - **Piece 2 — THE INDEX: NOT NEEDED, measured, no commit.** See "THE MEASUREMENT".
-- **Piece 3 — THE FACE (the header's day field · the model's day · the empty answer):** DONE (hash
-  PENDING until this commit lands). A new small file
+- **Piece 3 — THE FACE (the header's day field · the model's day · the empty answer):** DONE
+  (`ff112dab`). A new small file
   `App/Variorum/Variorum/Features/Library/LibraryDayFilter.swift` (NOT more lines in the 1,300-line
   `LibraryCatalogView.swift`, and NOT bolted into batch 1's `LibraryTimeFace.swift`, which is the
   sort-and-stamp file — F-0/P-9) holding two things of one theme: `LibraryDayFace` (the door's words
@@ -3199,8 +3200,8 @@ listing untouched; no new `setting` key (the day filter is transient UI state �
   Pin: `App/Variorum/VariorumTests/LibraryDayFilterTests.swift` (9). Red-on-old captured as compile
   errors on `c3d81b31` in a throwaway worktree (`scratchpad/18h-2/red-on-old-face.log`, quoted
   below). Green: `✔ Test run with 9 tests in 1 suite passed after 0.110 seconds.`
-- **Piece 4 — THE WALK (the acceptance gate) + the closing runs:** DONE (hash PENDING until this
-  commit lands). Eleven captures in `notes/plans/use-report-2026-09-12-screens/18h-2/` (gitignored;
+- **Piece 4 — THE WALK (the acceptance gate) + the closing runs:** DONE (`dced175b`; the closing
+  runs landed at `PENDING-FLIP`). Eleven captures in `notes/plans/use-report-2026-09-12-screens/18h-2/` (gitignored;
   the table below), both voices, on the DEV-STORE Debug build (`io.lduarte.Variorum.debug`, built
   into `App/Variorum/DerivedData/18h2`); her `/Applications` app was not running before, during or
   after (`pgrep -fl 'Variorum.app/Contents/MacOS'` empty at the start and after my quit), and I left
@@ -3387,11 +3388,28 @@ LibraryDayFilterTests.swift:264:27: error: value of type 'LibraryCatalogModel' h
 
 ### R-4 · CLOSING THE BATCH (the three runs, exact lines)
 
-- **Core (`swift test`, repo root — I touched `Sources/`):** PENDING
-- **Mac (ONE `xcodebuild test` from `App/Variorum/`, the touched suites + the ten `Tutorial*` spine
-  TYPES):** PENDING
+- **Core (`swift test`, repo root — I touched `Sources/`):**
+  `✔ Test run with 1541 tests in 167 suites passed after 56.799 seconds.`
+  (batch 1 closed at 1519/165; +22 tests in +2 suites is exactly this batch's two new core suites —
+  `DayBoundsTests` 9 + `LibraryDaySearchTests` 13.)
+- **Mac (ONE `xcodebuild test` from `App/Variorum/`, TYPE names throughout — batch 1's closing set
+  plus mine plus the ten `Tutorial*` spine types; zero `skipped:` lines):**
+  `✔ Test run with 208 tests in 37 suites passed after 109.228 seconds.`
+  The 37: `LibraryDayFilterTests` (new) · `LibrarySortMenuTests` · `MastheadStampTests` ·
+  `LibraryRowAlignmentTests` · `MastheadLayoutTests` · `MastheadTagDoorTests` ·
+  `LibraryPreviewBrainTests` · `LibraryPanelHostTests` · `ConnectLibraryTests` ·
+  `SampleLibraryTests` · `NoteBoxCopyTests` · `NoteBoxStateTests` · `NoteBoxHeightTests` ·
+  `BookNoteBoxSubjectTests` · `NoteRowSelectionRuleTests` · `NoteRowRoutingTests` ·
+  `RowClickTimingTests` · `LibraryRowClickTests` · `ShelfModelTests` · `PromoteAndPaletteTests` ·
+  `LibraryTagFaceTests` · `NoteTagDeclarationTests` · `ContextBarDoorsTests` · `TagChipFitTests` ·
+  `StarTargetingTests` · `StarDeclarationTests` · `StarActingTests` (the ⌘K palette's own suites —
+  the palette is `searchCatalog`'s other caller) · the ten `Tutorial*Tests`.
+  Batch 1's 33 all passed UNCHANGED beside the new one, which is the parity proof for
+  `showsSortDoor` becoming a forwarder and for `search()`'s new argument.
 - **iOS (`xcodebuild build -scheme VariorumMobile -destination 'generic/platform=iOS'` — a core
-  signature changed again):** PENDING
+  signature changed again):** `** BUILD SUCCEEDED **`. It did NOT fail first this time: `editedOn:`
+  is defaulted and the phone's `MobileLibraryViewModel` call compiles untouched — unlike batch 1's
+  `LibrarySort.title`, which the phone's exhaustive `switch` had to answer for.
 
 
 *(Pointers re-verified by the orchestrator on 2026-09-12 after 18h batch 1 — `Queries.searchCatalog` is now `ShelfQueries.swift:399` with `sort:`/`direction:` (R-3's `2d43df7c`); `idx_container_touched` is created at `Sources/VariorumCore/Persistence/Migrations.swift:42` (the composite live-row form) and `idx_commit_variant ON commit_point(variant_id, created_at)` at `:807`; `commit_point` has NO index on `created_at` alone today. QUESTIONS' next free number is **#103** unless R-3 took it (read the file's tail). Her app is QUIT for the night — an instance at `/Applications` means she is awake: never touch it.)*
