@@ -575,9 +575,13 @@ final class TakesBoardLayout {
     }
 
     /// How many coarse aims a restore may take before it gives up. Bounded so
-    /// a memory naming a row the note no longer holds (a block deleted while
-    /// she was away) settles instead of waiting forever — a restore that never
-    /// settles would also never let a landing be spent.
+    /// a row the column never brings to the fold settles instead of aiming
+    /// forever — a restore that never settles would also never let a landing
+    /// be spent. The bound counts GEOMETRY REPORTS (one aim per report), so
+    /// it cannot cover a row the note no longer holds: `scrollTo` on a gone
+    /// row is a no-op, the geometry stops changing, and the count stops with
+    /// it — that case settles at once by the slot order instead (the 17p
+    /// batch-a ladder, R1-4).
     nonisolated static let articleRestoreAttempts = 24
 
     @ObservationIgnored private(set) var articleRestore: ArticleRestore = .undecided
@@ -613,8 +617,18 @@ final class TakesBoardLayout {
     /// whole rule can be pinned without a window: what the article should do,
     /// given where it is, what it remembers, and whether her hand has already
     /// moved it.
+    ///
+    /// `order` is the article's slots in `ForEach` order, or nil while the
+    /// note's slots are not yet known (the projection may still be loading
+    /// at the first geometry report). An autoclosure, read only while a
+    /// restore is pending: a remembered row the note no longer holds — a
+    /// block deleted, merged or divided away while she was in Write or on
+    /// the phone — settles the restore AT ONCE, so the landing still lands
+    /// and the memory is corrected (R1-4; measured: without it the restore
+    /// starved the entry landing for the rest of the session's entries).
     func consumeArticleGeometry(
-        _ geometry: ArticleGeometry, remembered: ArticlePlace?, positionedByUser: Bool
+        _ geometry: ArticleGeometry, remembered: ArticlePlace?, positionedByUser: Bool,
+        order: @autoclosure () -> [String]? = nil
     ) -> ArticleRestoreStep {
         guard geometry.viewport > 0 else { return .wait }
         articleGeometrySeen = true
@@ -635,9 +649,11 @@ final class TakesBoardLayout {
             }
             articleRestore = .wanted(remembered)
             articleRestoreAimsLeft = Self.articleRestoreAttempts
-            return restoreStep(to: remembered, geometry, positionedByUser: positionedByUser)
+            return restoreStep(
+                to: remembered, geometry, positionedByUser: positionedByUser, order: order())
         case .wanted(let place):
-            return restoreStep(to: place, geometry, positionedByUser: positionedByUser)
+            return restoreStep(
+                to: place, geometry, positionedByUser: positionedByUser, order: order())
         case .settled:
             return rememberStep(geometry)
         }
@@ -651,7 +667,8 @@ final class TakesBoardLayout {
     }
 
     private func restoreStep(
-        to place: ArticlePlace, _ geometry: ArticleGeometry, positionedByUser: Bool
+        to place: ArticlePlace, _ geometry: ArticleGeometry, positionedByUser: Bool,
+        order: [String]?
     ) -> ArticleRestoreStep {
         // Her hand outranks a pending restore: if she has already scrolled
         // this page herself, the restore is over and we remember her place.
@@ -662,6 +679,14 @@ final class TakesBoardLayout {
         // The TOP never reaches `.wanted` (it settles at `.undecided`); total
         // for the type's sake.
         guard let rowID = place.rowID else {
+            articleRestore = .settled
+            return rememberStep(geometry)
+        }
+        // A row the note no longer holds settles at once (R1-4): there is
+        // nothing to scroll to, and waiting would starve the landing. Only
+        // once the slots are KNOWN — nil means the projection has not
+        // arrived, and the aim below is kept until it does.
+        if let order, !order.contains(rowID) {
             articleRestore = .settled
             return rememberStep(geometry)
         }

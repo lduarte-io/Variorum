@@ -642,7 +642,12 @@ final class TakesViewModel {
     ) -> TakesBoardLayout.ArticleRestoreStep {
         let step = board.consumeArticleGeometry(
             geometry, remembered: rememberedArticlePlace,
-            positionedByUser: positionedByUser)
+            positionedByUser: positionedByUser,
+            // The slot order, LAZILY and only once the projection has landed
+            // (nil = not yet known, so a restore keeps aiming until it is):
+            // a remembered row the note no longer holds settles at once
+            // (R1-4).
+            order: loaded ? projection.slots.map(\.placementID) : nil)
         if case .remember(let place) = step { rememberArticlePlace(place) }
         return step
     }

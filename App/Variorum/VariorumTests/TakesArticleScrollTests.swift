@@ -754,4 +754,65 @@ struct TakesArticleScrollTests {
         #expect(board.articleLandingStep(order: order()) == .reveal("far", .foot))
         #expect(reads == 1, "a pending landing reads it once per step (\(reads))")
     }
+
+    /// **R1-4 — RED ON THE ROUND-1 TREE (aims 0, ready false).** A memory
+    /// naming a row the note no longer holds (a block deleted, merged or
+    /// divided away while she was in Write or on the phone) settles the
+    /// restore at once, so the entry landing still lands and the memory is
+    /// corrected. Before, `scrollTo` on the gone row was a no-op, the
+    /// geometry stopped changing, the aim bound (counted per report) was
+    /// never reached, and the restore starved the landing for the rest of
+    /// the session's entries into that note.
+    @Test func aMemoryOfARowTheNoteNoLongerHoldsSettlesAndLetsTheLandingLand() async throws {
+        try await withSession(blocks: 12) { session, fixture, db, mount in
+            let router = session.commandRouter
+            router.forgetCurrentBlock(for: fixture.postID)
+            defer { router.forgetCurrentBlock(for: fixture.postID) }
+            let token = router.registerDetail(postID: fixture.postID, mode: .write) { _ in }
+            defer { router.unregisterDetail(token) }
+            router.noteFocusedBlock(
+                fixture.lastBlock, variantID: fixture.lastVariant,
+                postID: fixture.postID, utf16Offset: 0)
+            session.editorRouter.takesArticlePlaces[fixture.postID]
+                = TakesBoardLayout.ArticlePlace(rowID: "gone-row")
+
+            let model = try await landingModel(session: session, fixture: fixture, db: db)
+            let (window, hosting) = await mount(model)
+            guard let article = articleScrollView(in: hosting) else {
+                Issue.record("no article scroll view")
+                return
+            }
+            await settle(window, hosting, until: { false }, maxTurns: 16)
+            #expect(model.articleLandingAims > 0,
+                    "the landing still lands under a stale memory (aims \(model.articleLandingAims))")
+            #expect(offset(article) > 0,
+                    "the board went to the block she was in (offset \(offset(article)))")
+            #expect(session.editorRouter.takesArticlePlaces[fixture.postID]?.rowID != "gone-row",
+                    "the stale memory was corrected once the page settled")
+        }
+    }
+
+    /// R1-4's rule, pure: a remembered row the note no longer holds settles
+    /// the restore at once (the memory corrected to where the page is), while
+    /// a note whose slots are not yet KNOWN keeps the aim — the projection may
+    /// still be loading at the first geometry report, and settling then would
+    /// lose the memory.
+    @Test func aRememberedRowTheNoteNoLongerHoldsSettlesAtOnce() {
+        let board = freshBoard("gone-memory")
+        board.noteArticleRowFrame("a", CGRect(x: 0, y: 18, width: 680, height: 60))
+        #expect(board.consumeArticleGeometry(
+            geometry(offset: 0), remembered: TakesBoardLayout.ArticlePlace(rowID: "gone"),
+            positionedByUser: false, order: ["a"])
+                == .remember(.top),
+                "a gone row: settled at once, the memory corrected")
+        #expect(board.articleReadyForLanding, "…and the landing may land")
+
+        let late = freshBoard("slots-not-yet-known")
+        #expect(late.consumeArticleGeometry(
+            geometry(offset: 0), remembered: TakesBoardLayout.ArticlePlace(rowID: "x"),
+            positionedByUser: false, order: nil)
+                == .scrollToRow("x"),
+                "slots unknown: the aim is kept until the projection lands")
+        #expect(!late.articleReadyForLanding)
+    }
 }
