@@ -1559,19 +1559,16 @@ Stranded originals get NO Delete Now door (R-Q3's letter).
 1. **row 3 — the tray's block rows gain Delete Now** — **DONE (`e394ac76`)**, red-on-old measured
 2. **row 4 — the Callout Emoji alert's collapsed field** — **DONE (this commit)**, red-on-old
    measured on the PRE-FIX code (no revert needed — the pin was written and run first)
-3. **rows 5–6 — the decoration lane + the emoji inside the frame** — **DONE (`5712779e`)**; its
-   red-on-old numbers are **PENDING** (the behavioral revert runs NEXT, announced below)
+3. **rows 5–6 — the decoration lane + the emoji inside the frame** — **DONE (`5712779e`)**,
+   red-on-old measured
 4. **the walk + captures + the closing suites** — **NOT-STARTED**
 
 **Rows:** 3 · 4 · 5 · 6 — dispositions PENDING.
 
-**A BEHAVIORAL REVERT IS ANNOUNCED, NOT YET STARTED** (the resiliency protocol's rule 2): the next
-act is an early `return` in `EditorTextView.setDecorLane` — the contained editor's prose stays at
-8 pt, the pre-batch state — to measure rows 5–6's red-on-old, then
-`git checkout -- App/Variorum/Variorum/Features/Editor/EditorTextView.swift` to restore (the file is
-committed at `5712779e`, so the restore is the safe one; no scratchpad copy is used). Row 3's two
-reverts ran earlier and were restored the same way from `e394ac76`, the tree verified diff-clean and
-re-run green.
+**No revert is in flight.** Three ran across this batch — row 3's two (from `e394ac76`) and rows
+5–6's one (from `5712779e`) — each announced in this record BEFORE it started, each restored by
+`git checkout --` of a COMMITTED file (never a scratchpad copy), and after each the tree was verified
+diff-clean against its commit and the suite re-run green.
 
 ---
 
@@ -1798,7 +1795,22 @@ passed after 29.983 seconds` (`BlockDecorLaneTests` · `MarginHoverCommentTests`
 `FocusHandoffTests` · `FormattingSurfacesTests` · `CalloutEmojiPickerTests`) — every shipped decor
 pin riding UNMODIFIED, which is the parity proof.
 
-**RED ON OLD: PENDING** (the announced behavioral revert runs next).
+**RED ON OLD — measured by the announced behavioral revert over `5712779e`** (an early `return` in
+`EditorTextView.setDecorLane`, which is exactly the pre-batch state: the contained editor's prose at
+8 pt), then restored by `git checkout --`, the tree verified diff-clean and the suite re-run
+`✔ 9 tests in 1 suite` (`red4.log`, local). **15 issues across 4 of the 9 pins** — her images 10 and
+11, in numbers:
+
+| What the pin measured | The number |
+|---|---|
+| the badge over the words | `badge (2, 10, 32, 16)` **intersects** `prose (8, 10, 604, 34)` |
+| the glyph over the words | `glyph (6, 10, 18, 17)` **intersects** the same prose — note that this is the NEW glyph rule already: with the card clamped to `minX 2` for want of a lane, *inside the frame* is still on top of the text, which is why the lane and the widened frame are ONE fix and not two |
+| the two colliding | `badge (2, 10, 32, 16)` **intersects** `glyph (6, 10, 18, 17)` — her *"the callout goes on top of the comment badge"* |
+| the badge on the card's tint | `badge.maxX 34.0` > `card.minX + 0.5 = 2.5` |
+| comments not on the left of the text | `badge.maxX 34.0` > `textLeft 8.0` |
+| the lane never reserved | `proseLeft → 8.0` where 72 is owed, twice (a comment; a glyph) |
+| the container never narrowed | `textContainer.size.width → 604.0` where `≤ 556.0` is owed |
+| and at every width | the same two overlaps at **360 · 480 · 900** pt |
 
 **TWO THINGS RECORDED, NOT FIXED (residuals, with their owners):**
 1. **A Write window narrow enough to sit at `minGutter` (28) still has no room** for a count badge
