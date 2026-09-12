@@ -67,3 +67,39 @@ public enum JournalDay {
         return calendar.date(from: components)
     }
 }
+
+extension JournalDay {
+    /// **THE CALENDAR THE STORE'S DAYS ARE WRITTEN IN — Gregorian, in HER
+    /// time zone** (the 18h ladder, 2026-09-13: "one calendar per letter").
+    ///
+    /// The store's day grammar is Gregorian ISO by this type's own
+    /// definition: `isValid` validates against proleptic Gregorian, and
+    /// `entry_date` is that shape everywhere. But `Calendar.current` is
+    /// whatever macOS Language & Region says, and it can be Hebrew, Islamic
+    /// or Japanese — in which case `dayString(from:)` emits the CURRENT
+    /// calendar's own components (`"5786-13-05"`), `isValid` refuses them,
+    /// and any door built on the pair silently stops working. The 18h day
+    /// filter met exactly that (the ladder's R1-8).
+    ///
+    /// So the surfaces that speak the store's days name the calendar they
+    /// mean, and this is it. **The TIME ZONE stays hers** — that is what
+    /// makes a day boundary her day's, and it is the half `Calendar.current`
+    /// gets right.
+    ///
+    /// **What it is NOT:** a change to `dayString(from:calendar:)`'s own
+    /// default, which stays `.current`. That parameter mints `entry_date`
+    /// values all over Phase 8's operations, and re-pointing it is a wider
+    /// change than any one letter should make from the side.
+    ///
+    /// Read by: `TimeStampFace`'s public entry points (so every stamp in the
+    /// Library and the masthead words itself here), 18d's note-box facts line
+    /// through them, and the Library's day filter (`LibraryDayFace.calendar`,
+    /// which forwards). Pinned:
+    /// `TimeStampFaceTests.theStampsSpeakTheStoresOwnCalendarNotTheSystems`
+    /// and `LibraryDayFilterTests.theFiltersCalendarIsGregorianAndKeepsHerTimeZone`.
+    public static var storeCalendar: Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = Calendar.current.timeZone
+        return calendar
+    }
+}

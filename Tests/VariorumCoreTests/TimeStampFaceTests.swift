@@ -136,6 +136,59 @@ struct TimeStampFaceTests {
             == "Dated Sep 9, 2026", "a day has no time to spell")
     }
 
+    /// **ONE CALENDAR PER LETTER** (the 18h ladder's calendar ruling,
+    /// 2026-09-13 — the cousin batch 2's R1-8 fix left standing).
+    ///
+    /// The day filter learned to name its calendar (Gregorian, her zone)
+    /// because `JournalDay.dayString` emits the CURRENT calendar's components
+    /// while `JournalDay.isValid` validates proleptic Gregorian — so under a
+    /// Hebrew `Calendar.current` the filter's own key would be refused. The
+    /// STAMPS beside it still defaulted to `Calendar.current`, which meant a
+    /// non-Gregorian user would read one calendar in the Library's rows and
+    /// another in the day door, on one screen. Now both read
+    /// `JournalDay.storeCalendar`.
+    ///
+    /// A test cannot change `Calendar.current`, so the Hebrew half is pinned
+    /// the way batch 2 pinned its own: the trap is demonstrated on the road
+    /// the defaults no longer take.
+    @Test func theStampsSpeakTheStoresOwnCalendarNotTheSystems() throws {
+        #expect(JournalDay.storeCalendar.identifier == .gregorian)
+        #expect(JournalDay.storeCalendar.timeZone == Calendar.current.timeZone,
+                "her day boundaries stay her zone's — that half of Calendar.current is right")
+
+        let instant = try #require(
+            DateFormatter.variorumISO8601.date(from: "2026-09-09T18:00:00.000Z"))
+        let asOf = try #require(
+            DateFormatter.variorumISO8601.date(from: "2026-09-12T18:00:00.000Z"))
+
+        // The road the stamps no longer take: a Hebrew calendar words the
+        // same instant as a different day entirely.
+        var hebrew = Calendar(identifier: .hebrew)
+        hebrew.timeZone = Calendar.current.timeZone
+        let hebrewWords = TimeStampFace.day(
+            instant, now: asOf, calendar: hebrew, locale: locale)
+
+        // The road they take: the defaults are the store's calendar, and they
+        // answer as the explicit Gregorian one does.
+        let defaulted = TimeStampFace.day(instant, now: asOf, locale: locale)
+        let explicit = TimeStampFace.day(
+            instant, now: asOf, calendar: JournalDay.storeCalendar, locale: locale)
+        #expect(defaulted == explicit, "the default IS the store's calendar")
+        #expect(defaulted != hebrewWords,
+                "…and it is not the system's, whatever the system is: \(hebrewWords)")
+
+        // The same for the labelled form every row and the masthead draw.
+        #expect(TimeStampFace.stamp(.edited, date: instant, now: asOf, locale: locale)
+                == TimeStampFace.stamp(
+                    .edited, date: instant, now: asOf,
+                    calendar: JournalDay.storeCalendar, locale: locale))
+
+        // And the day KEY the filter compares against is one this store can
+        // name — the whole reason the calendar is named at all.
+        let key = JournalDay.dayString(from: instant, calendar: JournalDay.storeCalendar)
+        #expect(JournalDay.isValid(key), "\(key) is a day the store can name")
+    }
+
     /// **The formatter cache's own risk, pinned** (the 18h ladder, R1-5).
     /// The fix is a performance fix and the arbitration owed it no pin — but
     /// a CACHE introduces a failure the slow code could not have: a key that

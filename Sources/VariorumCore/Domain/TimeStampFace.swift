@@ -86,7 +86,7 @@ public enum TimeStampFace {
     /// *Sep 9* · *Sep 9, 2025*.
     public static func relative(
         _ date: Date, now: Date,
-        calendar: Calendar = .current, locale: Locale = .current
+        calendar: Calendar = JournalDay.storeCalendar, locale: Locale = .current
     ) -> String {
         words(date, now: now, calendar: calendar, locale: locale, dayOnly: false)
     }
@@ -97,7 +97,7 @@ public enum TimeStampFace {
     /// today/yesterday, which is `relative`'s job.
     public static func day(
         _ date: Date, now: Date,
-        calendar: Calendar = .current, locale: Locale = .current
+        calendar: Calendar = JournalDay.storeCalendar, locale: Locale = .current
     ) -> String {
         let sameYear = calendar.component(.year, from: date)
             == calendar.component(.year, from: now)
@@ -108,7 +108,7 @@ public enum TimeStampFace {
     /// The labelled form for an instant: *edited today 1:33 AM*.
     public static func stamp(
         _ subject: Subject, date: Date, now: Date,
-        calendar: Calendar = .current, locale: Locale = .current
+        calendar: Calendar = JournalDay.storeCalendar, locale: Locale = .current
     ) -> String {
         let words = self.words(
             date, now: now, calendar: calendar, locale: locale,
@@ -123,7 +123,7 @@ public enum TimeStampFace {
     /// not a stamp at all.
     public static func stamp(
         _ subject: Subject, iso: String?, now: Date,
-        calendar: Calendar = .current, locale: Locale = .current
+        calendar: Calendar = JournalDay.storeCalendar, locale: Locale = .current
     ) -> String? {
         guard let date = parse(iso, calendar: calendar) else { return nil }
         return stamp(subject, date: date, now: now, calendar: calendar, locale: locale)
@@ -133,7 +133,7 @@ public enum TimeStampFace {
     /// for what the caller holds.
     public static func stamp(
         _ subject: Subject, day: String?, now: Date,
-        calendar: Calendar = .current, locale: Locale = .current
+        calendar: Calendar = JournalDay.storeCalendar, locale: Locale = .current
     ) -> String? {
         stamp(subject, iso: day, now: now, calendar: calendar, locale: locale)
     }
@@ -145,7 +145,7 @@ public enum TimeStampFace {
     /// guessing which year *Sep 9* was. A day subject has no time to spell.
     public static func tooltip(
         _ subject: Subject, date: Date,
-        calendar: Calendar = .current, locale: Locale = .current
+        calendar: Calendar = JournalDay.storeCalendar, locale: Locale = .current
     ) -> String {
         let template = subject.isDayPrecision ? "MMMdyyyy" : "MMMdyyyyjmm"
         return "\(subject.titleCased) "
@@ -156,7 +156,7 @@ public enum TimeStampFace {
     /// as `stamp(_:iso:now:)`.
     public static func tooltip(
         _ subject: Subject, iso: String?,
-        calendar: Calendar = .current, locale: Locale = .current
+        calendar: Calendar = JournalDay.storeCalendar, locale: Locale = .current
     ) -> String? {
         guard let date = parse(iso, calendar: calendar) else { return nil }
         return tooltip(subject, date: date, calendar: calendar, locale: locale)
@@ -165,7 +165,7 @@ public enum TimeStampFace {
     /// The tooltip for a day key.
     public static func tooltip(
         _ subject: Subject, day: String?,
-        calendar: Calendar = .current, locale: Locale = .current
+        calendar: Calendar = JournalDay.storeCalendar, locale: Locale = .current
     ) -> String? {
         tooltip(subject, iso: day, calendar: calendar, locale: locale)
     }

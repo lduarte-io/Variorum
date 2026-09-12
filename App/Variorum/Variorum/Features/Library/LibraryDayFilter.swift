@@ -53,11 +53,15 @@ nonisolated enum LibraryDayFace {
     /// calendar it means. The TIME ZONE stays hers: that is what makes the
     /// day boundaries her day's. Pinned:
     /// `LibraryDayFilterTests.theFiltersCalendarIsGregorianAndKeepsHerTimeZone`.
-    static var calendar: Calendar {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = Calendar.current.timeZone
-        return calendar
-    }
+    /// **A forwarder since the 18h ladder's calendar ruling** (2026-09-13,
+    /// "one calendar per letter"): the constructor moved to core `Domain` as
+    /// `JournalDay.storeCalendar`, beside the day grammar it belongs to, so
+    /// the row STAMPS could read the same one — until then the filter spoke
+    /// Gregorian-in-her-zone while every stamp beside it spoke
+    /// `Calendar.current`, and a non-Gregorian user would have read two
+    /// calendars on one screen. The name stays so this file's own pin and
+    /// call sites read unchanged.
+    static var calendar: Calendar { JournalDay.storeCalendar }
 
     /// The door, closed: *on day…* — an invitation, in the chrome's own
     /// ellipsis grammar.

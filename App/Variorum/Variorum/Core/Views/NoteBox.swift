@@ -193,7 +193,7 @@ nonisolated enum NoteBoxCopy {
     /// rule: glanceable, never forensic). nil ⇒ neither stamp is known.
     static func stampsLine(
         edited: Date?, saved: Date?, now: Date,
-        calendar: Calendar = .current, locale: Locale = .current
+        calendar: Calendar = JournalDay.storeCalendar, locale: Locale = .current
     ) -> String? {
         var pieces: [String] = []
         if let edited {
@@ -216,8 +216,14 @@ nonisolated enum NoteBoxCopy {
     /// (review focus F-5). The name stays so every 18d pin and call site is
     /// untouched, which is the parity proof; what left is the second copy of
     /// the rule (MobileSoul §3's drift class).
+    ///
+    /// Its calendar default moved with the 18h ladder's calendar ruling
+    /// (`JournalDay.storeCalendar` — Gregorian in her zone, one calendar per
+    /// letter), so this line and the Library's day filter cannot name
+    /// different days on one screen. A caller that means something else
+    /// still passes it.
     static func day(
-        _ date: Date, now: Date, calendar: Calendar = .current, locale: Locale = .current
+        _ date: Date, now: Date, calendar: Calendar = JournalDay.storeCalendar, locale: Locale = .current
     ) -> String {
         TimeStampFace.day(date, now: now, calendar: calendar, locale: locale)
     }
