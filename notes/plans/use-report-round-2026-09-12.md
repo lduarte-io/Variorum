@@ -4720,3 +4720,72 @@ does not lose it.
 - **R2-7…R2-12 NIT — CONFIRMED, by owner as the record marks them:** the conditional-`help` identity flip (a stable modifier, the string conditional); `DayBounds`' surviving `.current` default → `JournalDay.storeCalendar`; the DEBUG oracles reset between pins; the fallback doc trimmed to what the code does; the R1-5 record's attribution corrected to the measured split (71.8 µs → 0.54 µs; lock + hash 0.15 µs); the F-0 residue (`NoteCards` / `TagChips` still in the view file; the model's next split) RECORDED for 13u2, not done here.
 
 **The order:** batch 2's implementer (R2-1, R2-2, R2-3, R2-6 + its NITs), then batch 1's (R2-4, R2-5 + its NITs); core + the Library/masthead suites + the tutorial spine + the iOS build at each end; then **round 3** — a fresh `opus-reviewer`, the cap, focused on these fixes; anything still open after it is recorded for her, never looped on. The `ANALYZE` KnownIssues row (owner 12) is owed at the round's close, as the reviewer notes.
+
+---
+
+#### Batch 2's fixes (round 2)
+
+*(The arbitration's order, one commit per finding, each pushed as it landed. My agree/dispute is
+folded in as instructed: **nothing is disputed** — R2-1 is a regression of my own R1-11 fix and the
+reviewer's trace is exact. `Sync/` untouched; `Shared/` untouched. Zero `/Applications` instances
+before, during and after — she is awake, so the check ran before each timing run. Last code hash:
+`f1f60061`.)*
+
+| # | finding | commit | pin | red on old |
+|---|---|---|---|---|
+| 1 | **R2-1** MAJOR — the mode round trip | `be4a70ff` | `LibraryDayFilterTests.returningToTheCatalogListsTheWholeLibraryAgain` | `hits` unchanged across the round trip — the note the day excluded stayed excluded while the header read `on day…` |
+| 2 | **R2-2** the truncation line's subject | `9e04513b` | `…theNotesBodysTruncationIsAboutNotes` | no `listingIsTruncated` / `notesAreTruncated`; ONE flag, true for both bodies (41 books + 3 notes said "showing the first 40" over a complete list of notes) |
+| 3 | **R2-3** the two docs | `ec148df7` | — (docs; the arbitration's own call) | the two sentences quoted in the finding |
+| 4 | **R2-6 · R2-8 · R2-7** | `cf7f95d6` | — (a display environment a test cannot set · a default both callers override · a view-identity shape) | — |
+| 5 | **R2-10** the fallback comment | `f1f60061` | — (a comment) | the sentence quoted in the finding |
+
+**What each changed, beyond the table:**
+
+- **R2-1.** `modeChanged()` is now `async` and re-reads when it cleared the day; the view spawns it
+  the way it spawns every other listing change. The model's convention (write here, the caller spawns
+  the read) bends exactly once, and the doc says why: the caller is an `onChange` that cannot know
+  whether anything was cleared. **This was my own regression** — R1-11 changed state on a road that
+  had no re-read on it, and the reviewer is right that the shipped alternative
+  (`.disabled(showsCatalogControls && …)`) would have closed the original complaint without touching
+  state. The fix keeps the clear, because a filter whose door is off screen is the worse of the two.
+- **R2-2.** `capped` already counted per kind and then threw the detail away. It now returns
+  `Set<Kind>`; the List body reads `listingIsTruncated` (it draws every kind), the Notes body reads
+  `notesAreTruncated`. R1-4's two pins moved to the name that means what they assert.
+- **R2-3.** Both sentences now name what actually bounds the derived reads — the answer the query
+  returned, which is the cap when a caller passes one and the DAY's notes when it does not — and the
+  accepted ceiling is written down rather than implied: *a day on which she edited a thousand notes
+  would load a thousand cards per keystroke, and the fix then is to bound the derived reads to the
+  DRAWN window.* Cost ∝ the answer is what P1 asks for; cost ∝ the corpus is what it forbids, and the
+  day's predicate is what keeps it on the right side.
+- **R2-6.** The `DatePicker` takes `\.calendar` and `\.timeZone` from the filter's own calendar. The
+  binding always converted correctly, so no answer was ever wrong — it was the one control that
+  DRAWS a calendar showing a different one from the label beside it.
+- **R2-7.** Closed the other way, as the reviewer suggested: a meaningful tooltip in both states
+  (one view identity, no `_ConditionalContent` teardown of the segmented picker), with both sentences
+  named in `LibraryCopy` so the body chooses between names and not literals. `help(ifPresent:)` had
+  no callers left and is **removed** — R1-8's own lesson about a door nothing walks through.
+- **R2-8.** `DayBounds.init?(day:calendar:)` defaults to `JournalDay.storeCalendar`.
+- **R2-10.** The sort's fallback comment is narrowed to what the code does, and the one line that
+  would make the old sentence true (validating against `LibrarySortFace.offered` on read) is named
+  for whoever meets it. It sits in the file batch 2 extracted, which is why it is here and not with
+  batch 1's.
+
+**NOT done, with the reason (not a dispute):** **R2-9** — the DEBUG oracles' `.onDisappear` reset.
+The findings mark it batch 1's (R1-14's fix), and it lives in `MastheadStamp.swift` +
+`PostDetailView.swift`, which are batch 1's files and which batch 1's implementer runs into next; two
+hands in one file across two sessions is the collision this order exists to avoid. **R2-12** is
+RECORDED for 13u2 by the arbitration, not done here: `NoteCards` and `TagChips` (~110 lines of
+database reading) are still in the view file, and the model's own next split is the tag acts.
+
+**THE CLOSING RUNS (round 2's fixes, at `f1f60061`):**
+
+- **Core (`swift test`, repo root):** `✔ Test run with 1545 tests in 167 suites passed after 56.472 seconds.`
+  (unchanged in count — round 2 added no core pin; `DayBounds`' default and the two docs are covered
+  by the pins already there.)
+- **Mac (ONE `xcodebuild test` from `App/Variorum/`, TYPE names, zero `skipped:` lines — the same 37
+  suites):** `✔ Test run with 217 tests in 37 suites passed after 110.035 seconds.`
+  (+2 over round 1's 215: R2-1's and R2-2's pins.)
+- **iOS (`xcodebuild build -scheme VariorumMobile -destination 'generic/platform=iOS'`):**
+  `** BUILD SUCCEEDED **`.
+
+**The marker stays 8**; no schema, no migration, no `setting` key, no mirror DDL in this pass.
