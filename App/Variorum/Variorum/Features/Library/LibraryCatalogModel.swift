@@ -300,9 +300,18 @@ final class LibraryCatalogModel {
     init(session: AppSession, defaults: UserDefaults = .standard) {
         self.session = session
         self.defaults = defaults
-        // A remembered value the app does not recognise (a hand-edited
-        // plist, an older build's key) reads as the shipped default rather
-        // than leaving the list in a shape no menu row matches.
+        // A remembered value the enum does not PARSE (a hand-edited plist,
+        // an older build's key) reads as the shipped default.
+        //
+        // Narrowed at the ladder's R2-10, because the sentence used to claim
+        // more than the code does: it promised the list could never be "in a
+        // shape no menu row matches", and `"last_major_revision"` parses
+        // fine while `LibrarySortFace.offered` does not list it — so a plist
+        // carrying it would leave the door reading *revised · newest first*
+        // with no ✓ on any row. Only a hand edit reaches that (nothing in the
+        // app writes it), which is why this is a sentence and not a guard;
+        // validating against `offered` on read is the one line if it ever
+        // stops being hypothetical.
         sort = defaults.string(forKey: Self.sortKey)
             .flatMap(Queries.LibrarySort.init(rawValue:)) ?? .lastTouched
         direction = defaults.string(forKey: Self.directionKey)
