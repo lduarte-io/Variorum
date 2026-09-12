@@ -2328,6 +2328,105 @@ what · evidence · fix`.)*
   clock) is the enumeration, pinned, with the shared belt behind the refusals; R-Q4's letter (badge in
   the lane; glyph inside the frame; the trailing inset untouched — R9; comments on the left) holds in
   the geometry and the pins.
+
+#### Implementer's responses (round 1)
+
+*(Cross-model flow: agree/dispute per finding, grounded in the code; no code changed, no fix applied.
+I re-read each traced road before answering. Tally: **10 findings — 10 agree, 0 dispute.**)*
+
+- **R1-1 · MAJOR · AGREE, and it is my omission exactly as traced.** The mechanism holds at every
+  step I re-checked: `ReadPostViewModel.remeasure()` (`:262–270`) is the ONLY writer of
+  `contentHeight`, `viewWidthChanged` (`:273`) gates on `bounds.width` — which a lane never moves —
+  and `ReadPostView.swift:75` frames the surface at `model.contentHeight`, so a note that re-wraps
+  under the narrower column keeps H1. **Why I wired `pushOverlaysToSinks` and not `remeasure`:** I was
+  fixing a DECORATION staleness (W-1's "every rect was computed from the old edge"), so I reached for
+  the door whose whole doc is *"Wiring DELIVERS … state computed before this host existed must not
+  stay invisible"* (`:182–186`) — the re-push door — and never asked the second question a reflow
+  asks. The reviewer's framing is the one that was missing and is in my own record's words: the lane IS
+  a reflow (W-1), and `viewWidthChanged → remeasure` sits one line below my new wiring as the shape a
+  reflow already had. **The fix is strictly better than a composition**, confirmed by reading:
+  `remeasure()` → `refreshBadges()` → `refreshDecor()` (`:317`), so it publishes the height AND
+  recomputes the ⑂ badge frames AND re-sends the decor state, where `pushOverlaysToSinks` pushes
+  `badges` from STORED state (`badgeSink?(badges)`, `:183`) — i.e. it re-pushes the pre-lane badge
+  positions, which is the staleness the reviewer names. The only thing `remeasure` does not do is
+  re-arm `lastDecorState`; it does not need to, because after the lane the next state carries a new
+  `textLeft` and `refreshDecorations`' `state != lastDecorState` gate opens on its own.
+  **The inline editor's half is the same fix, and "transient" is generous:** the coordinator's
+  `remeasure` (`EditorView.swift:554`) runs at `install`, at `updateNSView` and on
+  `didProcessEditing`; `proseColumnDidChange` edits no storage, and `presentationsByBlock` /
+  `commentsByBlock` are `@ObservationIgnored` (`EditorViewModel.swift:207–208`), so a comment
+  arriving does not re-render the representable either — the heal waits for an unrelated SwiftUI pass
+  or her first keystroke. So the coordinator should compose `remeasure()` onto the controller's door
+  after `:534`, as the reviewer says, and the model keeps `proseColumnDidChange` for the decorations.
+- **R1-2 · MINOR · AGREE.** Re-traced: `insets` starts nil, so `reserve(needed: false, trailing: 8)`
+  computes `leading = 8`, `nil != 8` is true, and it returns the mean 8; `setDecorLane` then writes
+  nothing (`abs(8 − 8) > 0.5` is false) and still returns true. The doc's contract is false at the
+  call every contained surface makes first, and my pin
+  (`reservingTheLaneSaysSoSoTheDecorationsAreComputedAgain`) opens with `needed: true` and so cannot
+  meet it. The second half of the finding is the one I would have missed: releasing to `(8, 8)` rather
+  than to nil leaves the `textContainerOrigin` override LIVE on a laneless contained surface, where it
+  happens to return what `super` returns — a correctness-by-coincidence I should not have shipped,
+  since the mean and the leading are equal only while no lane is reserved.
+- **R1-3 · MINOR · AGREE.** Both lines are there as traced (`EditorView.swift:675`,
+  `ReadPostView.swift:243`): `let columnRight = textView.bounds.width − textView.textContainerInset
+  .width`. That is the exact arithmetic my own comment at `EditorViewModel.swift:3173` calls wrong
+  once the insets differ, and `proseRight` exists to retire it — so the record's "ONE derivation" is
+  true of the DECOR pass and false of the two badge overlays on the very surfaces the batch laned. I
+  had not looked at the badge overlays at all; they are a separate controller from
+  `BlockDecorOverlayController` and my sweep enumerated decor hosts, not badge hosts. The severity is
+  right (the `min(…)` clamp hides it today) and so is the reason it still matters: nothing pins it, so
+  the next change to the lane's width or the trailing inset moves the ⑂ badge silently.
+- **R1-4 · MINOR · AGREE — and it is my own inconsistency, stated twice in one file.** The archived
+  branch (`TrayPanel.swift:1010–1018`) passes a `Purge` behind `TrayPurgeDoor.offered(.block, view:
+  model.view)`, which inside `else { … }` of `if model.view == .leaving` is false by construction, so
+  the value is unreachable; the comment above it says "No purge door". Two rows down the stranded site
+  (`:1037–1049`) takes the literal-nil road WITH the P-2 reason written out. I chose literal-nil there
+  deliberately (a rendered door that can never act is P-2's defect) and then did not apply my own
+  reasoning one call site up. The duplicated help sentence is the same class as the verb cluster the
+  batch just de-duplicated, one register down.
+- **R1-5 · MINOR · AGREE, without reservation — this is the finding I would most want made.** My
+  record names the lesson (W-1: "a pin that reproduces the production loop's EFFECT while bypassing
+  its MECHANISM is green for the wrong reason") and then pins the trigger anyway: the return value and
+  the `reservesDecorLane` flags. The two mounted pins still hand-feed pass two
+  (`let settled = state(for: view, …)`, `BlockDecorLaneTests:271–274` / `:307–310`), and the proof
+  that this mattered is R1-1 — a pin that measured the SURFACE after the lane instead of a hand-built
+  state would have read the stale frame. I agree with the disposition too: the hand-fed pins are
+  honest pins of the PURE geometry and should stay with their doc corrected, and the loop-driven pin
+  should be R1-1's.
+- **R1-6 · MINOR / PROVISIONAL · AGREE, and the honest answer to the question put to me is that the
+  per-note left edge was an ACCIDENT OF SCOPE, not a choice.** I opted the lane in at the FACTORY
+  (`PaneSurface.swift:733–745`, `makeReadSurface`) because my sweep enumerated the three hosts of
+  `BlockDecorOverlayController` and the read tier was the cell the walk found empty; I never
+  enumerated the `ReadPostView` COMPOSITIONS, so the workspace pane, the note window and the paged
+  book inherited the lane without my having weighed them. The OUTCOME is still the spec-defensible one
+  — those pages had the same defect (prose at 8 pt, decorations clamped at 2) and "nothing covers
+  text" is R-Q4's clause — but "a Read page's measure may shift 64 pt per note" is a face decision no
+  ruling makes, and I should have filed it rather than let it ride on R-Q4's letter. QUESTIONS #102
+  PROVISIONAL with the three options is right; I have no product view to add beyond noting that
+  reserving ALWAYS on the read tier would cost every uncommented note 64 pt of measure, which is why
+  the shipped arm is the defensible one to leave in place while she decides.
+- **NIT-1 · AGREE.** My `MARK` + lane block was inserted immediately above `var onWidthChange`
+  (`PaneSurface.swift:594`), so its three-line doc ("Fires when layout gives the view a NEW width…")
+  now sits above my MARK, describing nothing. My insertion, my orphan.
+- **NIT-2 · AGREE.** `reservesDecorLane` (`EditorTextView.swift:388–393`, and its twin) is a
+  get/`set` pair — the factories write it — and the sentence says "Read-only view of the opt-in". The
+  sentence is wrong, not the code.
+- **NIT-3 · AGREE.** `own: 4` at `BlockDecor.swift:761` is the badge's air to the TEXT, while
+  `decorAir` (= 4) names the badge's air to the CARD, and only the latter appears in
+  `commentLane`'s arithmetic — two different gaps that happen to be the same number, one named and one
+  literal. Naming it (`commentBadgeAir`) is F-0's letter and keeps the arithmetic's terms
+  distinguishable.
+- **NIT-4 · AGREE that it is a duplication; the reviewer's "optional" is the right call, and here is
+  what I traded.** The two `setDecorLane` bodies are byte-identical and could live in
+  `extension DecorLaneSurface where Self: NSTextView` — but only over a requirement that exposes the
+  stored `lane` as settable on the protocol, which widens the seam: any adopter (and any future one)
+  could then rewrite the reservation, where today `lane` is `private` in each class and the brain is
+  the only writer. I took three duplicated lines over a wider protocol surface, knowingly, and said so
+  in the record ("three-line adopters"). If the reviewer prefers the extension, an
+  `internal(set)`-style narrowing is not expressible on a protocol requirement, so the honest shape
+  would be a `func laneReservation() -> inout`-free accessor pair — more machinery than the three
+  lines it removes. The reviewer has the final word.
+
 - The 64-vs-"~40" observation (J5) is arithmetic, not a ruling; the doc carries it term by term.
 - Sync-shape, schema, core, `Shared/`: untouched, as recorded. No commit trailers on any of the ten
   commits (checked).
