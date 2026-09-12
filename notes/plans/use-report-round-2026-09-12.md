@@ -3117,6 +3117,64 @@ rendering a raw string.
 - **`notes/QUESTIONS.md`** — **#103 is filed** (PROVISIONAL, the shipped arm marked).
 - **`notes/KnownIssuesAndTechDebt.md`** — nothing owed by this batch.
 
+**THE MEASUREMENT, CORRECTED (the ladder's R1-1 · R1-2 — the numbers the record should have
+carried; probe log `scratchpad/18h-2/cost-probe3.log`, a throwaway suite deleted after the run).**
+
+**What was wrong with the measurement above, in one sentence:** the probe and the pin both wrote
+every fixture note ON the day they then searched, so the STAMP arm answered every row and SQLite's
+`OR` short-circuited — **the savepoint arm never executed in anything I measured.** The pin's own
+comment said so (*"the stamp arm answers most notes before the subquery runs at all"*) and I did not
+draw the consequence. So the "+27% of the VM steps" figure measured extra `COALESCE` comparisons;
+"note-shaped, not savepoint-shaped" was a claim about a path that did not run; and the 5578/5578
+index comparison proved only that the planner ignores a `created_at`-only index for the CORRELATED
+form. The verdict that rested on all three — *"no index needed"* — was wrong.
+
+**The corrected measurement.** 300 notes × 2 takes × 2 savepoints, VM steps on the SHIPPED statement,
+the day matching **NO** note (any past day — the feature's ordinary use):
+
+| blocks/note | the shipped correlated arm | + `idx_commit_created` alone | uncorrelated `IN` alone | **uncorrelated `IN` + the index (shipped now)** | any form, a day matching every note |
+|---|---|---|---|---|---|
+| 1 | 18,016 | 18,016 | 12,630 | **6,636** | 7,078 |
+| 20 | 206,116 | 206,116 | 126,630 | **6,636** | 7,078 |
+| 100 | 998,116 | 998,116 | 606,630 | **6,636** | 7,078 |
+
+The correlated arm's cost is **linear in blocks per note, summed over the corpus** — P1's forbidden
+shape (OverallModel §5: *"cost ∝ what is on screen and what is being edited, never the total size of
+the document or the corpus"*), on a query `search()` spawns per keystroke. The `LIMIT 40` cannot stop
+it: the `ORDER BY` is a `COALESCE`, so the plan carries `USE TEMP B-TREE FOR ORDER BY` and every
+row's `WHERE` is evaluated before any row is discarded.
+
+**Why `idx_commit_created` alone changes nothing (the column that reads identically):** the app never
+runs `ANALYZE` — I grepped `Sources/` and the app and found none; the only mention is a comment at
+`Migrations.swift:491`, which says the same thing for `v1_15`'s index. With no `sqlite_stat1` the
+planner keeps the correlated order whatever indexes exist. *With* `ANALYZE` it does re-order
+(12,617 / 10,218 / 10,218) — which makes the correlated form's cost depend on statistics the app does
+not create, on a per-keystroke query. That hazard is recorded for owner 12, not fixed here.
+
+**What shipped:** the savepoint half turned around — `id IN (SELECT cb.container_id …)` — plus
+`CREATE INDEX idx_commit_created ON commit_point(created_at)` as migration **v1_17 in its own schema
+commit** (`33407d64`) ahead of the query (`f714ca73`). **An index is still not a SyncSpec §12 lockstep
+event** (`v1_15_note_version_index`'s own reasoning: the mirrors carry no indexes beyond the PK by
+design, so a local index changes no wire semantics, no column, no classification) — **the marker
+stays 8**, and the phone gains the index by construction, the migration set being shared.
+
+**And §4.8's promise, named (R1-2's second half).** §4.8 predicted *"one indexed seek"* on
+`idx_container_touched`. The shipped plan — which I pasted into the original measurement verbatim and
+did not read against that promise — says `SEARCH container USING INDEX idx_container_kind (kind=?)`:
+the first arm compares `COALESCE(last_touched_at, created_at)`, and a COALESCE expression cannot use
+a column index. **That is a deliberate trade, now stated instead of implied:** the filter compares
+exactly the value the row DISPLAYS (and that the `.lastTouched` sort orders by), so a row reading
+*edited today* can never fail to be found by today. The cost of the trade is bounded by the NOTE
+count — the shipped listing's own documented shape, benchmarked since Phase 4 — never by the corpus.
+The corpus-shaped half was the savepoint arm, and that is what R1-1 fixed.
+
+**The pins that now hold it** (both re-written, because the originals could not fail):
+`theSavepointArmIsDrivenByTheDaysOwnSavepoints` — the plan must use `idx_commit_created` and must not
+be `CORRELATED`; red on old with v1_17 ALREADY in the store. And
+`theDaySearchsWorkTracksTheDaysSavepointsNotTheCorpusBlocks` — 40 notes, the searched day matching
+nothing, sweeping blocks-per-note: **red on old at 1,896 → 13,096** VM steps for 1 → 15 blocks each
+(6.9× for 15× the blocks), **green after at 916 → 916** — flat, and less than half the old floor.
+
 **RED ON OLD, piece 1 (the honest shape for a PRODUCT row — the capability is absent, so the pins
 do not compile on `87799c6a`; full log `scratchpad/18h-1/red-on-old-core.log`):**
 
@@ -3239,8 +3297,13 @@ the wording, and names QUESTIONS for anything else):**
 
 ---
 
-**THE MEASUREMENT (17c's discipline — the plan and the counts, never timings alone; probe log
-`scratchpad/18h-2/plan-probe.log`, a throwaway suite deleted before this commit).** A store of **200
+**THE MEASUREMENT — ⚠️ THIS SECTION'S ORIGINAL VERDICT WAS WRONG AND IS CORRECTED BELOW** (the
+ladder's R1-1/R1-2; the correction was applied at `f714ca73`, the fix's commit). The original text is
+kept verbatim because a record that quietly replaces a falsified measurement teaches nothing; read it
+with **THE MEASUREMENT, CORRECTED** immediately after it.
+
+*(17c's discipline — the plan and the counts, never timings alone; probe log
+`scratchpad/18h-2/plan-probe.log`, a throwaway suite deleted before this commit).* A store of **200
 notes × 8 savepoints each = 1,600 savepoints**, the day set to the day they were all written:
 
 ```
