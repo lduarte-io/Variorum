@@ -4706,3 +4706,17 @@ operations. Named rather than filed: the next Library touch moves the two reader
 for the **`ANALYZE` absence** (a statistics-dependent plan on a per-keystroke query, owner 12) "at
 the round's close" — it is not in the file yet, and the round is not closed. Named here so the close
 does not lose it.
+
+#### Orchestrator's ARBITRATION (round 2) — against the spec (2026-09-13)
+
+*(A deliberate shortening, recorded with its reason: she asked that 18h finish in THIS session and the rest of the round move to a new one, and these twelve findings are mechanical — so each implementer's agree/dispute is FOLDED into its fix pass: it disputes in its record where it disagrees, else it fixes. The ladder's letter otherwise stands: round 3 with a FRESH reviewer follows, focused on these fixes.)*
+
+- **R2-1 MAJOR — CONFIRMED (a regression by R1-11's fix):** clearing the day on a mode change without re-running `search()` leaves the day's answer on screen with no filter shown. Fix: the day is cleared through the one door that re-searches (`setEditedOn(nil)` + `search()`, or the mode change re-searches when it changed the model's inputs); a model pin — arm a day, leave the catalog, return → the whole library listed. **Owner: batch 2.**
+- **R2-2 MINOR — CONFIRMED:** `truncated` is read by the notes-only body but computed for the whole listing; the flag is computed for the KIND the body draws. Pin: books over the cap, notes under it → no line in Notes mode. **Owner: batch 2.**
+- **R2-3 MINOR — CONFIRMED as DOCS, not code:** with a day armed the answer is bounded by the DAY's notes — cost ∝ the query's answer, which is what P1 asks for — so the tag-chip / note-card reads and the title map are bounded by the same set; the two docs that still claim "rows on screen" / "bounded by `limitPerKind`" are corrected to say so. **Owner: batch 2.**
+- **R2-4 MINOR — CONFIRMED:** the hoist changed an unruled phone-only string (`last meaningful edit` → `revised`); her R-Q8 names four words and that case is not one of them — the phone's word for that case is RESTORED (the table carries her four; the phone keeps its own for the rest). **Owner: batch 1.**
+- **R2-5 MINOR — CONFIRMED:** one guard on the phone's `setSort` refusing `.title` (a word without an offer), pinned. **Owner: batch 1.**
+- **R2-6 MINOR — CONFIRMED:** the `DatePicker` takes `\.calendar` = `LibraryDayFace.calendar` — the one screen the calendar ruling was for. **Owner: batch 2.**
+- **R2-7…R2-12 NIT — CONFIRMED, by owner as the record marks them:** the conditional-`help` identity flip (a stable modifier, the string conditional); `DayBounds`' surviving `.current` default → `JournalDay.storeCalendar`; the DEBUG oracles reset between pins; the fallback doc trimmed to what the code does; the R1-5 record's attribution corrected to the measured split (71.8 µs → 0.54 µs; lock + hash 0.15 µs); the F-0 residue (`NoteCards` / `TagChips` still in the view file; the model's next split) RECORDED for 13u2, not done here.
+
+**The order:** batch 2's implementer (R2-1, R2-2, R2-3, R2-6 + its NITs), then batch 1's (R2-4, R2-5 + its NITs); core + the Library/masthead suites + the tutorial spine + the iOS build at each end; then **round 3** — a fresh `opus-reviewer`, the cap, focused on these fixes; anything still open after it is recorded for her, never looped on. The `ANALYZE` KnownIssues row (owner 12) is owed at the round's close, as the reviewer notes.
