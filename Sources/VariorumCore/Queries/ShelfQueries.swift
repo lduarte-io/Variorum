@@ -545,15 +545,46 @@ extension Queries {
     /// released pointer that would attribute another note's block here. The
     /// variant is deliberately NOT filtered — a take she later deleted still
     /// spent that day being written, and its block is still this note's.
+    ///
+    /// ── WHY THE SECOND HALF IS UNCORRELATED (the ladder's R1-1, a P1
+    ///    BLOCKER on the first shipped shape) ─────────────────────────────
+    ///
+    /// It was written as `OR EXISTS (… AND cb.container_id = container.id …)`.
+    /// SQLite short-circuits `OR`, so that subquery ran for **every note
+    /// whose own stamp missed the day** — which is every note in the store
+    /// whenever she asks about a past day, the feature's ordinary use — at
+    /// that note's blocks × takes. Measured on the shipped statement (VM
+    /// steps, 300 notes × 2 takes × 2 savepoints, a day matching nothing):
+    /// **18,016 → 206,116 → 998,116** for 1 → 20 → 100 blocks per note. The
+    /// `LIMIT 40` cannot stop it: the `ORDER BY` is a `COALESCE`, so the plan
+    /// carries `USE TEMP B-TREE FOR ORDER BY` and every row's `WHERE` is
+    /// evaluated first. That is P1's forbidden shape — cost ∝ the corpus — on
+    /// a query `search()` spawns per keystroke.
+    ///
+    /// Turned around, the question is the cheap one: *which notes do the
+    /// DAY's savepoints belong to*. The set is the same set (the correlation
+    /// became the subquery's projection), the driver is `idx_commit_created`
+    /// (migration v1_17, its own commit), and the measurement is **FLAT at
+    /// 6,636 steps** across 1 → 100 blocks per note — below the 7,078 the
+    /// same query costs on a day that matches every note. The day filter
+    /// stops being a cost at all.
+    ///
+    /// The index alone would NOT have fixed the correlated form: this repo
+    /// never runs `ANALYZE`, so with no `sqlite_stat1` the planner keeps the
+    /// correlated order and the counts are identical to the byte with and
+    /// without it (that is why the first measurement and its adjudication saw
+    /// nothing). Pinned both ways —
+    /// `theSavepointArmIsDrivenByTheDaysOwnSavepoints` (the plan) and
+    /// `theDaySearchsWorkTracksTheDaysSavepointsNotTheCorpusBlocks` (the
+    /// steps).
     static let editedOnClause = """
         (
              (COALESCE(last_touched_at, created_at) >= ?
               AND COALESCE(last_touched_at, created_at) < ?)
-          OR EXISTS (
-               SELECT 1 FROM commit_point cp
+          OR id IN (
+               SELECT cb.container_id FROM commit_point cp
                JOIN variant v ON v.id = cp.variant_id
                JOIN container_block cb ON cb.block_id = v.block_id
-                AND cb.container_id = container.id
                 AND cb.deleted_at IS NULL
                WHERE cp.created_at >= ? AND cp.created_at < ?)
         )

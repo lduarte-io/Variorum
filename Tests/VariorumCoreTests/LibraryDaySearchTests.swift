@@ -294,41 +294,38 @@ struct LibraryDaySearchTests {
 
     // MARK: - The measurement (17c's discipline: the plan and the counts)
 
-    /// **THE PLAN PIN.** `EXPLAIN QUERY PLAN` over the SHIPPED statement
-    /// (`catalogPostsSQL` — the pin explains the string the query runs, not a
-    /// retyped copy). What it must show: the savepoint arm reached through
-    /// the note's OWN placements and takes, ending at `idx_commit_variant`,
-    /// so the `commit_point` read is bounded by this note's savepoints —
-    /// never a full scan of every savepoint in the corpus (P1).
+    /// **THE PLAN PIN** — rewritten at the ladder's R1-1, because the first
+    /// one asserted the plan's SHAPE and a corpus-shaped path satisfied it.
     ///
-    /// This is the pin that decides whether `commit_point(created_at)` needs
-    /// an index of its own; the verdict is in the batch record.
-    @Test func theSavepointArmIsBoundedByTheNotesOwnSavepoints() throws {
+    /// `EXPLAIN QUERY PLAN` over the SHIPPED statement (`catalogPostsSQL` —
+    /// the pin explains the string the query runs, never a retyped copy).
+    /// What it must show: the savepoint arm DRIVEN BY THE DAY — the window's
+    /// own savepoints found through `idx_commit_created`, their notes then
+    /// looked up — and NOT a correlated subquery, which is the shape whose
+    /// cost is Σ(blocks × takes) over every note the stamp arm did not
+    /// answer (R1-1; the numbers are in the batch record).
+    @Test func theSavepointArmIsDrivenByTheDaysOwnSavepoints() throws {
         try withTravellingClock { ops, db, clock in
             clock.set("2026-09-09T09:00:00.000Z")
             let note = try ops.createPost(title: "planned")
             let block = try ops.newBlock(in: note.id, text: "words")
             _ = try ops.commit(block.variant.id, kind: .auto)
 
+            let day = try bounds("2026-09-09")
             let sql = Queries.catalogPostsSQL(
-                sort: .lastTouched, direction: .desc, editedOn: try bounds("2026-09-09"))
+                sort: .lastTouched, direction: .desc, editedOn: day)
             let plan = try db.read { database in
                 try String.fetchAll(
                     database, sql: "EXPLAIN QUERY PLAN \(sql)",
-                    arguments: ["", "%%", "%%",
-                                try bounds("2026-09-09").start, try bounds("2026-09-09").end,
-                                try bounds("2026-09-09").start, try bounds("2026-09-09").end,
-                                40],
+                    arguments: ["", "%%", "%%", day.start, day.end, day.start, day.end, 40],
                     adapter: SuffixRowAdapter(fromIndex: 3))
             }
             let text = plan.joined(separator: "\n")
 
-            #expect(text.contains("idx_cblock_order"),
-                    "the note's own placements are the correlated hook\n\(text)")
-            #expect(text.contains("idx_variant_block"),
-                    "its blocks' takes, by index\n\(text)")
-            #expect(text.contains("idx_commit_variant"),
-                    "and the savepoints by take — bounded, not scanned\n\(text)")
+            #expect(text.contains("idx_commit_created"),
+                    "the DAY's savepoints are the driver (v1_17's index)\n\(text)")
+            #expect(!text.contains("CORRELATED"),
+                    "a correlated subquery runs once per note the stamp arm missed (R1-1)\n\(text)")
             #expect(!text.contains("SCAN commit_point"),
                     "a full savepoint scan would make the cost corpus-shaped (P1)\n\(text)")
         }
@@ -372,47 +369,60 @@ struct LibraryDaySearchTests {
         }
     }
 
-    /// **THE WORK COUNT** (`SQLITE_STMTSTATUS_VM_STEP`): the day search's
-    /// cost tracks the NOTES it walks, never the savepoints the corpus holds.
-    /// Ten times the savepoints on ten times the notes must not be a hundred
-    /// times the work.
-    @Test func theDaySearchsWorkTracksTheNotesNotTheSavepoints() throws {
-        func steps(notes: Int, savepointsEach: Int) throws -> Int {
+    /// **THE WORK COUNT** (`SQLITE_STMTSTATUS_VM_STEP`) — RE-FIXTURED at the
+    /// ladder's R1-1/R1-2, because the first version never executed the arm
+    /// it measured.
+    ///
+    /// The old fixture wrote every note on the day it then searched, so the
+    /// STAMP arm answered every row and SQLite's `OR` short-circuited before
+    /// the savepoint half ever ran. The measurement it produced ("+27%",
+    /// "note-shaped, not savepoint-shaped") was about a path that did not
+    /// execute, and the index comparison that rested on it decided wrongly.
+    ///
+    /// So: the searched day matches **NO** note — the ordinary use, since any
+    /// past day matches nothing by stamp — and the fixture sweeps
+    /// BLOCKS-PER-NOTE, which is what the correlated form's cost was
+    /// proportional to. The claim is that the work does NOT grow with the
+    /// corpus's blocks: the day's own savepoints drive the arm.
+    ///
+    /// **Red on old** (the correlated arm, even with v1_17's index, because
+    /// this repo never runs `ANALYZE` and the planner keeps the correlated
+    /// order): the two counts diverge by roughly the block ratio. Green
+    /// after: they are equal to the step.
+    @Test func theDaySearchsWorkTracksTheDaysSavepointsNotTheCorpusBlocks() throws {
+        func steps(notes: Int, blocksEach: Int) throws -> Int {
             try withTravellingClock { ops, db, clock in
                 clock.set("2026-09-09T09:00:00.000Z")
                 for index in 0..<notes {
                     let note = try ops.createPost(title: "note \(index)")
-                    let block = try ops.newBlock(in: note.id, text: "words")
-                    for _ in 0..<savepointsEach {
+                    for _ in 0..<blocksEach {
+                        let block = try ops.newBlock(in: note.id, text: "words")
                         _ = try ops.commit(block.variant.id, kind: .auto)
                     }
                 }
-                let day = try bounds("2026-09-09")
+                // A day NOTHING was written on — so every note must be
+                // decided by the savepoint arm, which is the whole point.
+                let day = try bounds("2026-08-01")
                 let sql = Queries.catalogPostsSQL(
                     sort: .lastTouched, direction: .desc, editedOn: day)
                 return try db.read { database in
                     let statement = try database.makeStatement(sql: sql)
-                    _ = try Row.fetchAll(
+                    let rows = try Row.fetchAll(
                         statement,
                         arguments: ["", "%%", "%%", day.start, day.end, day.start, day.end, 40])
+                    #expect(rows.isEmpty, "the fixture's day must match nothing")
                     return Int(sqlite3_stmt_status(
                         statement.sqliteStatement, SQLITE_STMTSTATUS_VM_STEP, 0))
                 }
             }
         }
 
-        let small = try steps(notes: 4, savepointsEach: 2)
-        let manySavepoints = try steps(notes: 4, savepointsEach: 20)
-        let manyNotes = try steps(notes: 40, savepointsEach: 2)
+        let thin = try steps(notes: 40, blocksEach: 1)
+        let thick = try steps(notes: 40, blocksEach: 15)
 
-        // Ten times the savepoints per note barely moves it — the arm stops
-        // at the FIRST savepoint in the window (EXISTS), and the stamp arm
-        // answers most notes before the subquery runs at all.
-        #expect(Double(manySavepoints) < Double(small) * 3,
-                "savepoints: \(small) → \(manySavepoints)")
-        // Ten times the notes costs about ten times — the honest shape: the
-        // listing walks the notes it lists.
-        #expect(Double(manyNotes) < Double(small) * 20,
-                "notes: \(small) → \(manyNotes)")
+        // Fifteen times the blocks is the SAME work: the arm reads the day's
+        // savepoints (none, here) and never walks a note's blocks at all.
+        #expect(Double(thick) < Double(thin) * 1.5,
+                "blocks per note: \(thin) → \(thick) — the corpus must not be the driver (P1)")
     }
 }
