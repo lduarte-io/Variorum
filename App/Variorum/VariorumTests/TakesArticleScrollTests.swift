@@ -661,4 +661,72 @@ struct TakesArticleScrollTests {
                 == .remember(TakesBoardLayout.ArticlePlace(rowID: "a")),
                 "scrolled: the row at the top of the viewport is the place")
     }
+
+    /// **R1-2 — RED ON THE ROUND-1 TREE.** Every board gesture is her hand:
+    /// a bloom, expand-all, close-all, and any Operations call through the
+    /// board's plumbing end a pending landing exactly as a scroll, a click
+    /// away or a keystroke do. Before, the kept-alive request survived them
+    /// and re-aimed the page after her own click.
+    @Test func herBoardGesturesEndAPendingLanding() async throws {
+        try await withSession(blocks: 3) { session, fixture, db, _ in
+            let model = try await landingModel(session: session, fixture: fixture, db: db)
+            let far = model.projection.slots[2].placementID
+
+            model.board.landArticle(on: far)
+            model.toggleExpanded(fixture.blocks[0].block)
+            #expect(model.articleLanding == nil, "a bloom is her hand")
+
+            model.board.landArticle(on: far)
+            model.expandAllFans()
+            #expect(model.articleLanding == nil, "expand-all is her hand")
+
+            model.board.landArticle(on: far)
+            model.closeAllFans()
+            #expect(model.articleLanding == nil, "close-all is her hand")
+
+            model.board.landArticle(on: far)
+            await model.choose(blockID: fixture.blocks[0].block, variantID: fixture.blocks[0].variant)
+            #expect(model.articleLanding == nil, "an Operations call through `run` is her hand")
+        }
+    }
+
+    /// **R1-2, the face — RED ON THE ROUND-1 TREE (65 → 97).** Entered on
+    /// the last block, the board reveals it at the foot; she then blooms a
+    /// row ABOVE it. The page stays where it is — the landing does not re-aim
+    /// after her own gesture and scroll the top rows off the screen.
+    @Test func herBloomAboveTheLandedRowLeavesThePageWhereItIs() async throws {
+        try await withSession(blocks: 12) { session, fixture, db, mount in
+            let router = session.commandRouter
+            router.forgetCurrentBlock(for: fixture.postID)
+            defer { router.forgetCurrentBlock(for: fixture.postID) }
+            let token = router.registerDetail(postID: fixture.postID, mode: .write) { _ in }
+            defer { router.unregisterDetail(token) }
+            router.noteFocusedBlock(
+                fixture.lastBlock, variantID: fixture.lastVariant,
+                postID: fixture.postID, utf16Offset: 0)
+
+            let model = try await landingModel(session: session, fixture: fixture, db: db)
+            let (window, hosting) = await mount(model)
+            guard let article = articleScrollView(in: hosting) else {
+                Issue.record("no article scroll view")
+                return
+            }
+            await settle(window, hosting, until: { false }, maxTurns: 12)
+            let before = offset(article)
+            #expect(before > 0, "non-vacuity: the landing revealed the far block (\(before))")
+            #expect(model.articleLandingAims > 0, "non-vacuity: the landing aimed")
+
+            // A row on screen ABOVE the landed one blooms (its footer grows).
+            model.toggleExpanded(fixture.blocks[1].block)
+            await settle(window, hosting, until: { false }, maxTurns: 14)
+            let after = offset(article)
+            #expect(model.articleLanding == nil, "the bloom ended the landing")
+            #expect(abs(after - before) < 2,
+                    """
+                    the page stays where it was after her bloom (\(before) → \
+                    \(after)) — before the fix the kept-alive landing re-aimed \
+                    the far block to the foot and the top rows left the screen
+                    """)
+        }
+    }
 }

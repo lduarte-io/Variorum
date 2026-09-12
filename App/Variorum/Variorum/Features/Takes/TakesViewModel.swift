@@ -831,7 +831,14 @@ final class TakesViewModel {
 
     // MARK: - Expansion (session-only) — the board's, forwarded
 
+    /// Every board gesture is HER HAND and ends a pending article landing
+    /// (the 17p batch-a ladder, R1-2 — measured: a bloom on a row above the
+    /// landed one grew the content, pushed the landed row below the fold, and
+    /// the kept-alive request re-aimed the page 65 → 97 after her own click).
+    /// The expansion doors and the Operations plumbing (`run` /
+    /// `runCopying`) clear it here, beside the migrate and edit arms.
     func toggleExpanded(_ blockID: String) {
+        board.clearArticleLanding()
         board.toggleExpanded(blockID)
     }
 
@@ -840,11 +847,13 @@ final class TakesViewModel {
     /// supplies the projection's fanned set (the board never reads the
     /// projection).
     func expandAllFans() {
+        board.clearArticleLanding()
         board.expandAll(
             fannedBlockIDs: Set(projection.slots.filter(\.hasFan).map(\.blockID)))
     }
 
     func closeAllFans() {
+        board.clearArticleLanding()
         board.closeAllFans()
     }
 
@@ -2311,6 +2320,7 @@ final class TakesViewModel {
     /// through the SAME body rather than growing a second copy of it.
     func run(_ body: @escaping @Sendable (Operations) throws -> Void) async {
         status = nil
+        board.clearArticleLanding()   // her hand (R1-2)
         do {
             try await session.runner.run(body)
         } catch {
@@ -2325,6 +2335,7 @@ final class TakesViewModel {
     /// would hide which doors mint copies.
     func runCopying(_ body: @escaping @Sendable (Operations) throws -> Void) async {
         status = nil
+        board.clearArticleLanding()   // her hand (R1-2)
         do {
             try await session.runCopying(from: postID, body)
         } catch {
