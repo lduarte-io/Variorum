@@ -653,6 +653,9 @@ final class TakesViewModel {
 
     /// The landing's next step, judged against the article's slots in their
     /// `ForEach` order (so an unrealized row can be aimed at by direction).
+    /// The order is handed over LAZILY (the board's autoclosure): called from
+    /// every realized row's frame report at scroll rate, and the O(N) map
+    /// must not run when nothing is pending (R1-3, P1).
     func articleLandingStep() -> TakesBoardLayout.ArticleLandingStep {
         board.articleLandingStep(order: projection.slots.map(\.placementID))
     }

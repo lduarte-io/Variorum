@@ -410,10 +410,16 @@ final class TakesBoardLayout {
     /// on screen never did.
     @ObservationIgnored private(set) var articleLandingAims = 0
 
-    /// `order` is the article's slots in `ForEach` order (their placement ids).
-    func articleLandingStep(order: [String]) -> ArticleLandingStep {
+    /// `order` is the article's slots in `ForEach` order (their placement ids)
+    /// — an AUTOCLOSURE, evaluated only past the guards (the 17p batch-a
+    /// ladder, R1-3): this step runs from every realized row's frame report
+    /// at scroll rate, and with nothing pending it must cost nothing in the
+    /// note's block count (P1's letter — cost ∝ the viewport, never the
+    /// document).
+    func articleLandingStep(order: @autoclosure () -> [String]) -> ArticleLandingStep {
         guard let landing = articleLanding else { return .done }
         guard articleReadyForLanding else { return .wait }
+        let order = order()
         guard order.contains(landing) else {
             articleLanding = nil   // the row is gone from the note
             return .done

@@ -729,4 +729,29 @@ struct TakesArticleScrollTests {
                     """)
         }
     }
+
+    /// **R1-3 (P1).** The landing step runs from every realized row's frame
+    /// report at scroll rate; with nothing pending it must never build the
+    /// note's slot order (an O(N) map in the block count). The order is an
+    /// autoclosure the board evaluates only past its guards — pinned by
+    /// counting the evaluations. (On the round-1 tree the view model built the
+    /// array before the call, unconditionally, by construction.)
+    @Test func theLandingStepReadsTheSlotOrderOnlyWhenARequestIsPending() {
+        let board = freshBoard("order")
+        var reads = 0
+        let order: () -> [String] = {
+            reads += 1
+            return ["a", "far"]
+        }
+        _ = board.articleLandingStep(order: order())
+        settle(board)
+        _ = board.articleLandingStep(order: order())
+        board.noteArticleRowFrame("a", CGRect(x: 0, y: 0, width: 680, height: 60))
+        _ = board.articleLandingStep(order: order())
+        #expect(reads == 0, "nothing pending: the order is never read (\(reads))")
+
+        board.landArticle(on: "far")
+        #expect(board.articleLandingStep(order: order()) == .reveal("far", .foot))
+        #expect(reads == 1, "a pending landing reads it once per step (\(reads))")
+    }
 }
