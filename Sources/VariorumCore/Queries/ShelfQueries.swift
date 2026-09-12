@@ -396,9 +396,22 @@ extension Queries {
     /// as before (and `.title`'s is too), so SQLite runs the same bounded
     /// top-N scan over the `container` table it already ran — cost ∝ the note
     /// count under `limitPerKind`, never corpus text size.
+    ///
+    /// **`editedOn` is THE DAY SEARCH** (18h batch 2 — her row 11: *"being
+    /// able to search for any note edited on a particular day"*; ruling
+    /// R-Q8). One more ARM of this same query, never a second listing
+    /// (review focus F-5): a note answers for a day when its own last-edit
+    /// stamp falls in the day's window, **or** when any savepoint on a take
+    /// of a block it holds was written that day. The union is what makes the
+    /// answer honest — see `Queries.editedOnClause` for why the store needs
+    /// both halves. Books and blocks stand down while a day is set (they
+    /// carry no edit stamp; a listing that answered "on Sep 9" with every
+    /// book would be a lie by juxtaposition — the batch's call, QUESTIONS
+    /// #104).
     public static func searchCatalog(
         _ db: Database, query: String, limitPerKind: Int = 20,
-        sort: LibrarySort = .lastTouched, direction: SortDirection = .desc
+        sort: LibrarySort = .lastTouched, direction: SortDirection = .desc,
+        editedOn: DayBounds? = nil
     ) throws -> [CatalogHit] {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         var hits: [CatalogHit] = []
@@ -410,34 +423,30 @@ extension Queries {
             .replacingOccurrences(of: "_", with: "\\_")
         let like = "%\(escaped)%"
 
-        let books = try Row.fetchAll(
-            db,
-            sql: """
-                SELECT id, name, kind, locked FROM reading
-                WHERE deleted_at IS NULL AND (? = '' OR name LIKE ? ESCAPE '\\')
-                ORDER BY name LIMIT ?
-                """,
-            arguments: [trimmed, like, limitPerKind])
-        hits += books.map {
-            CatalogHit(
-                kind: .book, id: $0["id"], title: $0["name"],
-                detail: ($0["kind"] as String) == "smart" ? "smart book"
-                    : (($0["locked"] as Int) == 1 ? "finished book" : "book"))
+        if editedOn == nil {
+            let books = try Row.fetchAll(
+                db,
+                sql: """
+                    SELECT id, name, kind, locked FROM reading
+                    WHERE deleted_at IS NULL AND (? = '' OR name LIKE ? ESCAPE '\\')
+                    ORDER BY name LIMIT ?
+                    """,
+                arguments: [trimmed, like, limitPerKind])
+            hits += books.map {
+                CatalogHit(
+                    kind: .book, id: $0["id"], title: $0["name"],
+                    detail: ($0["kind"] as String) == "smart" ? "smart book"
+                        : (($0["locked"] as Int) == 1 ? "finished book" : "book"))
+            }
         }
 
-        let dir = direction == .desc ? "DESC" : "ASC"
         let posts = try Row.fetchAll(
             db,
-            sql: """
-                SELECT id, title, entry_date, created_at,
-                       COALESCE(last_touched_at, created_at) AS touched_at
-                FROM container
-                WHERE kind = 'post' AND deleted_at IS NULL AND archived_at IS NULL
-                  AND (? = '' OR COALESCE(title, '') LIKE ? ESCAPE '\\' OR COALESCE(entry_date, '') LIKE ? ESCAPE '\\')
-                ORDER BY \(sort.expression) \(dir), id \(dir)
-                LIMIT ?
-                """,
-            arguments: [trimmed, like, like, limitPerKind])
+            sql: catalogPostsSQL(sort: sort, direction: direction, editedOn: editedOn),
+            arguments: StatementArguments(
+                [trimmed, like, like]
+                    + (editedOn.map { [$0.start, $0.end, $0.start, $0.end] } ?? [])
+                    + [limitPerKind]))
         hits += posts.map {
             // 13g batch 7 (R6-3): the hit's name is the ONE display brain's
             // answer — this row-set is bounded by `limitPerKind`, so it is
@@ -454,7 +463,7 @@ extension Queries {
         }
 
         // Blocks: named blocks anywhere + pool scraps by first-line handle.
-        if !trimmed.isEmpty {
+        if !trimmed.isEmpty, editedOn == nil {
             let blocks = try Row.fetchAll(
                 db,
                 sql: """
@@ -482,6 +491,73 @@ extension Queries {
         }
         return hits
     }
+
+    /// The catalog's NOTE arm, as SQL — one string, built in one place, so
+    /// the shipped statement is the statement `EXPLAIN QUERY PLAN` is asked
+    /// about in the pin (`LibraryDaySearchTests.theDaySearchIsOneBoundedStatement`).
+    /// A pin that re-typed the query would be pinning a copy, which is the
+    /// drift class this whole file's shape is against.
+    ///
+    /// Placeholders, in order: the trimmed query (3×), then — only when a day
+    /// is set — `start, end, start, end`, then the limit.
+    static func catalogPostsSQL(
+        sort: LibrarySort, direction: SortDirection, editedOn: DayBounds?
+    ) -> String {
+        let dir = direction == .desc ? "DESC" : "ASC"
+        let day = editedOn == nil ? "" : "\n  AND \(editedOnClause)"
+        return """
+            SELECT id, title, entry_date, created_at,
+                   COALESCE(last_touched_at, created_at) AS touched_at
+            FROM container
+            WHERE kind = 'post' AND deleted_at IS NULL AND archived_at IS NULL
+              AND (? = '' OR COALESCE(title, '') LIKE ? ESCAPE '\\' OR COALESCE(entry_date, '') LIKE ? ESCAPE '\\')\(day)
+            ORDER BY \(sort.expression) \(dir), id \(dir)
+            LIMIT ?
+            """
+    }
+
+    /// **"EDITED ON THIS DAY", THE UNION** (18h batch 2, her row 11).
+    ///
+    /// Two readings of one question, OR'd, because the store holds exactly
+    /// one edit stamp per note — AppSpec §10's own design, *coarse, not
+    /// forensic*. So:
+    ///
+    /// 1. **The last-edit stamp.** `COALESCE(last_touched_at, created_at)` —
+    ///    the SAME expression the row's own stamp displays (and the
+    ///    `.lastTouched` sort orders by), so the filter can never disagree
+    ///    with the words beside it: a row reading *edited today* is always
+    ///    found by today.
+    /// 2. **A savepoint written that day** on a take of a block this note
+    ///    holds. Since Phase 13j one lands per changed take when she leaves a
+    ///    note (`closeAutoCommit`), with the 2-hour idle timer as backstop —
+    ///    so the days a note was edited BEFORE its last one are exactly the
+    ///    days its savepoints remember, from 13j's date onward.
+    ///
+    /// The honest caveat rides the face (`LibraryDayFace.emptyAnswer`): a
+    /// note edited Monday and again Tuesday answers for Tuesday by its stamp,
+    /// and for Monday only if a savepoint landed then. Storing a per-day edit
+    /// log would answer it exactly and is forbidden by definition (that is
+    /// the forensic tracking CoreDescription rules out) — so the product
+    /// SAYS what it knows instead of pretending.
+    ///
+    /// The placement join is LIVE (`cb.deleted_at IS NULL`): the note's
+    /// blocks are the ones it holds now (I2's live-unique ownership), never a
+    /// released pointer that would attribute another note's block here. The
+    /// variant is deliberately NOT filtered — a take she later deleted still
+    /// spent that day being written, and its block is still this note's.
+    static let editedOnClause = """
+        (
+             (COALESCE(last_touched_at, created_at) >= ?
+              AND COALESCE(last_touched_at, created_at) < ?)
+          OR EXISTS (
+               SELECT 1 FROM commit_point cp
+               JOIN variant v ON v.id = cp.variant_id
+               JOIN container_block cb ON cb.block_id = v.block_id
+                AND cb.container_id = container.id
+                AND cb.deleted_at IS NULL
+               WHERE cp.created_at >= ? AND cp.created_at < ?)
+        )
+        """
 
     // MARK: - The note picker's feed (pre-13u Act 10, item 14)
 

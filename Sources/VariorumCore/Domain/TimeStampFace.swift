@@ -190,19 +190,14 @@ public enum TimeStampFace {
     /// The store's two stamp shapes, one door. A day key is resolved at NOON
     /// in the given calendar — only its calendar day is ever read, and noon
     /// cannot be shifted across a day boundary by a DST transition the way
-    /// midnight can.
+    /// midnight can. *(18h batch 2: the noon rule itself moved to
+    /// `JournalDay.date(from:calendar:)`, beside the function it inverts —
+    /// this door had the only copy of it, and `DayBounds` needed the same
+    /// answer.)*
     static func parse(_ text: String?, calendar: Calendar) -> Date? {
         guard let text, !text.isEmpty else { return nil }
         if let instant = DateFormatter.variorumISO8601.date(from: text) { return instant }
-        guard JournalDay.isValid(text) else { return nil }
-        let parts = text.split(separator: "-").compactMap { Int($0) }
-        guard parts.count == 3 else { return nil }
-        var components = DateComponents()
-        components.year = parts[0]
-        components.month = parts[1]
-        components.day = parts[2]
-        components.hour = 12
-        return calendar.date(from: components)
+        return JournalDay.date(from: text, calendar: calendar)
     }
 
     private static func formatted(

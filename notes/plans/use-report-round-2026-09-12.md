@@ -3157,6 +3157,91 @@ The canon note drafted under "WHAT THE LETTER'S CLOSE OWES" (AppSpec §12's Libr
 
 ### R-4 · RECORD (the implementer writes here from its first commit)
 
-*(empty until the implementer's first commit)*
+**WHAT I DID NOT DO (the record's first line):** **no schema, no migration, NO INDEX** — the measured
+plan says none is needed (the verdict is under "THE MEASUREMENT" below), so the lockstep marker stays
+**8** and there is no second commit ahead of the code; nothing in `Sources/VariorumCore/Sync/`;
+nothing in `BlockRangeIndex` / `EditorTextView` / `PaneTextAuthority` / `PaneMeasurement`; no stored
+per-day edit log and no FTS (both forbidden by the brief and by CoreDescription's "coarse, not
+forensic"); no change to what `last_touched_at` MEANS (AppSpec §10 untouched); no change to the sort,
+the row stamps or the masthead stamp (18h batch 1's, `2d43df7c…f531955a`); the Timeline mode's own
+listing untouched; no new `setting` key (the day filter is transient UI state — see the batch's calls).
+
+**LIVE STATUS — piece 1 DONE, piece 2 NOT NEEDED (measured), pieces 3–4 next**
+
+- **Piece 1 — THE CORE (the union query arm + the pure day→UTC-bounds rule):** DONE (hash PENDING
+  until this commit lands — flipped in the commit itself). `DayBounds`
+  (`Sources/VariorumCore/Domain/DayBounds.swift`) is the conversion: a local calendar day → the
+  half-open UTC ISO window `[start, end)` the stored stamps are directly comparable against.
+  `JournalDay.date(from:calendar:)` is the noon anchor it and `TimeStampFace.parse` now SHARE (the
+  parse door had the only copy of that rule; a second copy would have been the drift class).
+  `Queries.searchCatalog` gains `editedOn: DayBounds? = nil` — one ARM of the one query (F-5), whose
+  SQL is built by `Queries.catalogPostsSQL` so the plan pin explains the SHIPPED statement rather than
+  a retyped copy, and whose day predicate is the one documented constant `Queries.editedOnClause`.
+  Pins: `Tests/VariorumCoreTests/DayBoundsTests.swift` (9) +
+  `Tests/VariorumCoreTests/LibraryDaySearchTests.swift` (13).
+  Red-on-old captured as compile errors on `bd85e6ef` in a throwaway worktree
+  (`scratchpad/18h-2/red-on-old-core.log`, quoted below). Green after, with 18h batch 1's and 18d's
+  stamp suites riding UNMODIFIED beside them (the parity proof for the `parse` refactor):
+  `✔ Test run with 43 tests in 5 suites passed after 0.761 seconds.`
+- **Piece 2 — THE INDEX: NOT NEEDED, measured, no commit.** See "THE MEASUREMENT".
+- **Piece 3 — the face (the header's day field + the model + the empty answer):** NOT-STARTED.
+  Settled design: `LibraryCatalogModel.editedOn: String?` (a canonical day key) through
+  `setEditedOn(_:)`, handed to `searchCatalog` as `DayBounds(day:calendar: .current)`; a new small
+  file `Features/Library/LibraryDayFilter.swift` holding the door and the ONE wording of the empty
+  answer, which both empty states (List and Notes) read.
+- **Piece 4 — THE WALK + the closing runs:** NOT-STARTED. Captures into
+  `notes/plans/use-report-2026-09-12-screens/18h-2/`.
+
+---
+
+**THE MEASUREMENT (17c's discipline — the plan and the counts, never timings alone; probe log
+`scratchpad/18h-2/plan-probe.log`, a throwaway suite deleted before this commit).** A store of **200
+notes × 8 savepoints each = 1,600 savepoints**, the day set to the day they were all written:
+
+```
+==== BEFORE any new index
+---- PLAN: day search
+   SEARCH container USING INDEX idx_container_kind (kind=?)
+   CORRELATED SCALAR SUBQUERY 1
+     SEARCH cb USING INDEX idx_cblock_order (container_id=?)
+     SEARCH v USING INDEX idx_variant_block (block_id=?)
+     SEARCH cp USING COVERING INDEX idx_commit_variant (variant_id=? AND created_at>? AND created_at<?)
+   USE TEMP B-TREE FOR ORDER BY
+   rows=40 vmSteps=5578 sorts=1 fullscanSteps=0
+---- PLAN: open catalog note arm (the SHIPPED listing, for scale)
+   SEARCH container USING INDEX idx_container_kind (kind=?)
+   USE TEMP B-TREE FOR ORDER BY
+   rows=40 vmSteps=4376 sorts=1 fullscanSteps=0
+==== AFTER CREATE INDEX idx_commit_created ON commit_point(created_at)
+---- PLAN: day search
+   (BYTE-IDENTICAL to the plan above)
+   rows=40 vmSteps=5578 sorts=1 fullscanSteps=0
+```
+
+**The verdict: `idx_commit_created` is NOT needed and was NOT added.** The savepoint arm is
+*correlated by `variant_id`*, so the planner reaches it through the note's own placements and takes
+and finishes at `idx_commit_variant` — as a **COVERING** index read, never touching the
+`commit_point` table at all, and bounded by the window (`created_at>? AND created_at<?` are in the
+seek). A `created_at`-only index has nothing to offer that path: with it created, the plan and the VM
+step count are **identical to the byte** (5578 / 5578), and `fullscanSteps` is **0** on both sides.
+The union arm's whole cost over the shipped listing is +27% of the VM steps at 1,600 savepoints
+(4376 → 5578), and it is note-shaped, not savepoint-shaped — pinned:
+`theDaySearchsWorkTracksTheNotesNotTheSavepoints` (4 notes × 2 savepoints → 4 × 20 barely moves;
+40 × 2 costs about ten times). **An index is not a SyncSpec §12 lockstep event** (17c/P20's
+precedent) — but the point is moot here: no index was created, no schema commit exists, and the
+**marker stays 8**.
+
+**RED ON OLD, piece 1 (the honest shape for a PRODUCT row — the capability is absent, so the pins do
+not compile on `bd85e6ef`; full log `scratchpad/18h-2/red-on-old-core.log`, captured in a throwaway
+worktree at that commit):**
+
+```
+DayBoundsTests.swift:25:34: error: cannot find type 'DayBounds' in scope
+DayBoundsTests.swift:32:35: error: cannot find 'DayBounds' in scope
+DayBoundsTests.swift:127:43: error: type 'JournalDay' has no member 'date'
+LibraryDaySearchTests.swift:84:31: error: extra argument 'editedOn' in call
+LibraryDaySearchTests.swift:313:31: error: type 'Queries' has no member 'catalogPostsSQL'
+LibraryDaySearchTests.swift:314:24: error: cannot infer contextual base in reference to member 'lastTouched'
+```
 
 *(Pointers re-verified by the orchestrator on 2026-09-12 after 18h batch 1 — `Queries.searchCatalog` is now `ShelfQueries.swift:399` with `sort:`/`direction:` (R-3's `2d43df7c`); `idx_container_touched` is created at `Sources/VariorumCore/Persistence/Migrations.swift:42` (the composite live-row form) and `idx_commit_variant ON commit_point(variant_id, created_at)` at `:807`; `commit_point` has NO index on `created_at` alone today. QUESTIONS' next free number is **#103** unless R-3 took it (read the file's tail). Her app is QUIT for the night — an instance at `/Applications` means she is awake: never touch it.)*
