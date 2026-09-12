@@ -29,6 +29,57 @@ final class LibraryCatalogModel {
     @ObservationIgnored let session: AppSession
     var scope: Scope = .all
     var mode: Mode = .list
+
+    // MARK: - The sort (18h batch 1, her row 10 — ruling R-Q8's first half)
+
+    /// **What the notes are ordered by**, and which way. Her words: *"i need
+    /// to be able to sort the library by time."*
+    ///
+    /// Written through `setSort`/`setDirection` (which remember it) and read
+    /// by `search()`, which hands both to `Queries.searchCatalog` — a
+    /// PARAMETER of the one catalog query, never a second listing (review
+    /// focus F-5). The `.timeline` mode keeps its own order: it IS the
+    /// timeline.
+    private(set) var sort: Queries.LibrarySort
+    private(set) var direction: SortDirection
+
+    /// Remembered LOCALLY — the `readModeOutlineShown` class: a posture of
+    /// this machine's Library, never a synced `setting` (nothing about how
+    /// she is looking at a list is document semantics).
+    static let sortKey = "libraryCatalogSort"
+    static let directionKey = "libraryCatalogSortDirection"
+    /// **Injected** (KnownIssues R1-7): the suites and her hand walks share
+    /// the dev-store app's `.standard`, so a pin that read the real store
+    /// would be reading whatever a walk left behind. `.standard` in the app,
+    /// a scrubbed suite in the pins.
+    @ObservationIgnored private let defaults: UserDefaults
+
+    /// Her pick from the `sort ▾` door. It takes the sort's NATURAL
+    /// direction (newest-first for a stamp, A–Z for a name — the reading
+    /// every list-sorting control gives), which an explicit direction pick
+    /// then overrides until the next sort pick.
+    ///
+    /// Deliberately no `didSet` task: this writes and remembers, and the
+    /// caller spawns `search()` — the convention `query`/`scope` already
+    /// follow in this file, so a pin drives exactly the two steps the menu
+    /// does.
+    func setSort(_ sort: Queries.LibrarySort) {
+        self.sort = sort
+        direction = LibrarySortFace.naturalDirection(for: sort)
+        defaults.set(sort.rawValue, forKey: Self.sortKey)
+        defaults.set(direction.rawValue, forKey: Self.directionKey)
+    }
+
+    func setDirection(_ direction: SortDirection) {
+        self.direction = direction
+        defaults.set(direction.rawValue, forKey: Self.directionKey)
+    }
+
+    /// Where the door stands. The Timeline mode IS an order — offering it a
+    /// sort menu would be a door that cannot act (P-2), so it stands down
+    /// there. A rule on the model rather than an `if` buried in the header,
+    /// so a pin can hold it (P-1's own doctrine: gating is data).
+    var showsSortDoor: Bool { mode != .timeline }
     /// Set by the view's binding, which also spawns `search()` — no hidden
     /// didSet task (deterministic under test; the generation guard orders
     /// the UI's unordered spawns).
@@ -152,19 +203,29 @@ final class LibraryCatalogModel {
         if let anchor = selectionAnchor, !listed.contains(anchor) { selectionAnchor = nil }
     }
 
-    init(session: AppSession) {
+    init(session: AppSession, defaults: UserDefaults = .standard) {
         self.session = session
+        self.defaults = defaults
+        // A remembered value the app does not recognise (a hand-edited
+        // plist, an older build's key) reads as the shipped default rather
+        // than leaving the list in a shape no menu row matches.
+        sort = defaults.string(forKey: Self.sortKey)
+            .flatMap(Queries.LibrarySort.init(rawValue:)) ?? .lastTouched
+        direction = defaults.string(forKey: Self.directionKey)
+            .flatMap(SortDirection.init(rawValue:)) ?? .desc
     }
 
-    /// One-shot per typed query / scope change (the core query's contract);
-    /// the resting state is books + recent posts.
+    /// One-shot per typed query / scope / sort change (the core query's
+    /// contract); the resting state is books + recent posts.
     func search() async {
         searchGeneration += 1
         let generation = searchGeneration
         do {
             let query = query
+            let (sort, direction) = (sort, direction)
             let all = try await session.database.read { db in
-                try Queries.searchCatalog(db, query: query, limitPerKind: 40)
+                try Queries.searchCatalog(
+                    db, query: query, limitPerKind: 40, sort: sort, direction: direction)
             }
             guard generation == searchGeneration else { return }  // stale
             hits = filtered(all)
@@ -732,6 +793,21 @@ struct LibraryCatalogView: View {
                 }
                 .pickerStyle(.segmented)
                 .frame(maxWidth: 230)
+                // 18h batch 1 (her row 10): the notes' order, hers to
+                // choose. The Timeline mode is its own order by definition,
+                // so the door stands down there rather than lying.
+                if model.showsSortDoor {
+                    LibrarySortMenu(
+                        tokens: tokens, sort: model.sort, direction: model.direction,
+                        onPick: { pick in
+                            model.setSort(pick)
+                            Task { await model.search() }
+                        },
+                        onDirection: { pick in
+                            model.setDirection(pick)
+                            Task { await model.search() }
+                        })
+                }
                 if selectedPosts.count > 1 {
                     Menu(tokens.chromeLabel("Tag \(selectedPosts.count) notes")) {
                         ForEach(tags.tags, id: \.id) { tag in

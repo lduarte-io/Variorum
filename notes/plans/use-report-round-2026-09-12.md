@@ -2926,18 +2926,26 @@ LOCAL UI state, so AppSpec §7's seeds are untouched — see the canon note at t
 **LIVE STATUS (flipped in the same commit as each piece):**
 
 - **Piece 1 — THE CORE (`sort:`/`direction:` · `LibrarySort.title` · `CatalogHit`'s two stamps ·
-  `NoteStamps.createdAt` · the ONE wording brain `TimeStampFace`):** DONE — this commit.
+  `NoteStamps.createdAt` · the ONE wording brain `TimeStampFace`):** DONE (`2d43df7c`).
   Pins: `Tests/VariorumCoreTests/LibraryTimeSortTests.swift` (8 tests) +
   `Tests/VariorumCoreTests/TimeStampFaceTests.swift` (8 tests). Red-on-old captured as compile
   errors on `87799c6a` (`scratchpad/18h-1/red-on-old-core.log`, quoted below); green after:
   `✔ Test run with 21 tests in 3 suites passed after 0.272 seconds` (the two new suites +
   18d's `NoteStampsTests` riding untouched, which is the parity proof for the struct's new field).
-- **Piece 2 — the sort menu + the model's memory:** NOT-STARTED. The settled design: a
-  `VoicedMenu` "sort ▾" in the catalog header beside the scope/mode pickers (edited · created ·
-  date · title, then a direction row); `LibraryCatalogModel` holds `sort`/`direction`, remembers
-  them in an INJECTED `UserDefaults` (`.standard` in the app, a scrubbed suite in the pins —
-  KnownIssues R1-7), and `search()` passes them to `Queries.searchCatalog`; the Timeline mode
-  keeps its own order.
+- **Piece 2 — the sort menu + the model's memory:** DONE — this commit. A new small file
+  `App/Variorum/Variorum/Features/Library/LibraryTimeFace.swift` (NOT more lines in the
+  1,300-line `LibraryCatalogView.swift` — F-0/P-9) holding three things of one theme:
+  `LibrarySortFace` (the words + two rules: each sort's natural direction, and which stamp a row
+  shows under it), `LibrarySortMenu` (the ONE `VoicedMenu` door, its label saying what the list
+  is doing — *"edited · newest first"*), and `CatalogRowStamp` (the row stamp piece 3 wires).
+  `LibraryCatalogModel` gained `sort`/`direction` written through `setSort`/`setDirection`
+  (which remember them in an INJECTED `UserDefaults` — `.standard` in the app, a scrubbed suite
+  per pin, KnownIssues R1-7), `showsSortDoor` as a RULE (the Timeline mode is an order already,
+  so the door stands down there — P-1's gating-is-data, P-2's no-dead-doors), and `search()`
+  now hands both to `Queries.searchCatalog`. Pin: `VariorumTests/LibrarySortMenuTests.swift`
+  (7 tests) — red-on-old `scratchpad/18h-1/red-on-old-piece2.log` (`extra argument 'defaults'`,
+  `no member 'sortKey'`, `cannot find 'LibrarySortFace'`); green:
+  `✔ Test run with 7 tests in 1 suite passed after 0.267 seconds`.
 - **Piece 3 — the row stamps + `TimeStampFace` adopted by 18d's facts line:** NOT-STARTED.
   A trailing muted stamp on `CatalogNoteLine` (right of the `Spacer()`, on the line's first-text
   baseline, with the tooltip) and the same words on the Notes card's line, both reading the
