@@ -449,4 +449,103 @@ struct TrayFilterTests {
             #expect(TrayViewMemory() == TrayViewMemory(view: .leaving, kind: .all))
         }
     }
+
+    // MARK: - 17p batch b, row 3: THE PURGE DOOR'S ROWS (her ruling R-Q3)
+
+    /// **WHICH ROWS MAY END THEIR OWN CLOCK — the whole enumeration, and the
+    /// belt behind every answer.**
+    ///
+    /// Her report: *"i don't know where Delete Now is here — the text talks
+    /// about it but the button doesn't appear to be visible"* (image 3). The
+    /// traced mechanism: `TrayPanel.row(...)` carried ONE verb while
+    /// `RecoveryCopy.trayLeavingExplainer` — rendered directly above those
+    /// rows — promises two (*"Put back keeps a row; Delete Now ends its days
+    /// early"*). Her R-Q3: *"Add it to block rows"*, *"stranded originals
+    /// stay without one"*.
+    ///
+    /// The rule is enumerated over the three populations the panel draws in
+    /// BOTH views (six cells, like the filter matrix above), because the
+    /// batch-a ladder's standard for a rule of this shape is *complete by
+    /// enumeration* — an argued exemption was wrong twice there at first use.
+    @Test func onlyTheLeavingViewsBlocksAndTakesMayEndTheirOwnClock() {
+        // Leaving: what is counting down may skip the rest of its days.
+        #expect(TrayPurgeDoor.offered(.block, view: .leaving))
+        #expect(TrayPurgeDoor.offered(.take, view: .leaving))
+        // …and a stranded original never, in either view: it rides its
+        // FAMILY's clock (her round-8b ruling), exactly as the Library's
+        // Trash refuses it the same door.
+        #expect(!TrayPurgeDoor.offered(.strandedOriginal, view: .leaving))
+        #expect(!TrayPurgeDoor.offered(.strandedOriginal, view: .archived))
+        // Archived: KEPT, with no clock (her B2 ruling — the whole reason the
+        // two views stand apart). There are no remaining days for a door to
+        // skip, and the block is LIVE.
+        #expect(!TrayPurgeDoor.offered(.block, view: .archived))
+        #expect(!TrayPurgeDoor.offered(.take, view: .archived))
+        // No case is left unanswered — the enumeration is the proof.
+        #expect(TrayPurgeDoor.Population.allCases.count == 3)
+
+        // THE BELT, behind the two faces that refuse: the shared purge layer
+        // hands back no confirm for a preserved original whatever a surface
+        // offers (`TrashPurge.deleteNowConfirm`'s own rule, both platforms).
+        let original = Queries.TrashItem(
+            kind: .preservedOriginal, id: "b-orig", deletedAt: "2026-09-12T00:00:00Z")
+        #expect(TrashPurge.deleteNowConfirm(for: original) == nil)
+        // …and it DOES hand one back for a block, which is what row 3 needed
+        // all along: the capability existed, only this panel's door did not.
+        let block = Queries.TrashItem(
+            kind: .block, id: "b-1", deletedAt: "2026-09-12T00:00:00Z")
+        #expect(TrashPurge.deleteNowConfirm(for: block)
+            == .deleteNow(block, savedVersions: 0))
+    }
+
+    /// **THE FACE: what each row ACTUALLY DREW, over a real seeded store.**
+    ///
+    /// The oracle is `TrayRowDoorProbe` (DEBUG), for the two measured reasons
+    /// batch a recorded: a hosted SwiftUI tree reports one accessibility
+    /// element with no children in this test host, and a composition `dump`
+    /// never evaluates a `ForEach`'s content closure — so the row previews in
+    /// the dump are the `ForEach`'s DATA, not its buttons. The probe records
+    /// from the row's own `onAppear`, so it reports the mounted face.
+    ///
+    /// **RED ON OLD** (behavioral revert, verified): pass `deleteNow: nil` at
+    /// `cellRows`' leaving-block call site and the deleted block's row reports
+    /// `["Put back"]` where `["Put back", "Delete Now"]` is owed.
+    @Test func theLeavingBlockRowDrawsBothVerbsAndTheOtherRowsDrawOne() async throws {
+        try await withEditor(seedBlocks: [
+            "A deleted block's preview", "An archived block's preview",
+            "The take's own words",
+        ]) { h in
+            let slots = try h.storeSlots()
+            let spareID = try await h.session.runner.run { (ops: Operations) -> String in
+                try ops.deleteBlock(slots[0].blockID)
+                try ops.archiveBlock(slots[1].blockID)
+                let spare = try ops.branchVariant(
+                    slots[2].blockID, from: slots[2].variantID ?? "")
+                try ops.deleteVariant(spare.id)
+                return spare.id
+            }
+            let model = TrayViewModel(session: h.session, postID: h.postID)
+            let panel = TrayPanel(session: h.session, postID: h.postID, model: model)
+            TrayRowDoorProbe.reset()
+            await SurfaceComposition.host(panel, size: NSSize(width: 320, height: 640))
+            #expect(model.deleted.count == 1 && model.archived.count == 1
+                && model.takes.count == 1, "the fixture landed")
+
+            // LEAVING · all — the deleted block and the deleted take each
+            // draw BOTH verbs, in that order.
+            #expect(TrayRowDoorProbe.verbs[slots[0].blockID] == ["Put back", "Delete Now"],
+                    "row 3: the block row's door — \(TrayRowDoorProbe.verbs)")
+            #expect(TrayRowDoorProbe.verbs[spareID] == ["Put back", "Delete Now"],
+                    "the take row's door, unchanged (her G5 ruling)")
+            #expect(TrayPath.putBackVerb == "Put back"
+                && RecoveryCopy.deleteNowVerb == "Delete Now", "the words themselves")
+
+            // ARCHIVED — one verb, because there is no clock to skip.
+            TrayRowDoorProbe.reset()
+            model.select(view: .archived)
+            await SurfaceComposition.host(panel, size: NSSize(width: 320, height: 640))
+            #expect(TrayRowDoorProbe.verbs[slots[1].blockID] == ["Put back"],
+                    "archived is kept, with no clock — \(TrayRowDoorProbe.verbs)")
+        }
+    }
 }

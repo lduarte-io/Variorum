@@ -352,6 +352,83 @@ struct TrayPanelMoveTests {
         }
     }
 
+    // MARK: - 17p batch b, row 3: the same door on a leaving BLOCK row
+
+    /// **DELETE NOW ON A BLOCK ROW — one confirm, one act, one copy** (her
+    /// ruling R-Q3: the block rows get it *"with the same confirm-every-time
+    /// door the Library's Trash gives a block"*).
+    ///
+    /// This is the take pin above, driven over a BLOCK: the same
+    /// `TrashPurge.deleteNowConfirm`, the same `confirmPendingPurge` →
+    /// `TrashPurge.confirm` → `requestPurge`, and the same sentence the
+    /// Trash's own block row asks (`RecoveryCopy.deleteNowConfirm(.block)`).
+    /// No second confirm text and no second purge path exist for this row
+    /// (review focus F-4) — the capability was never missing, only its door
+    /// in this panel was, while the explainer above it promised both verbs.
+    ///
+    /// **RED ON OLD** by compilation (`requestDeleteNowBlock` and
+    /// `trashItem(for: Queries.TrayItem)` did not exist) and, once they do,
+    /// by behavioral revert of either.
+    @Test func aLeavingBlockRowsDeleteNowConfirmsThenPurgesForGood() async throws {
+        try await withTray { session, postID, model, blockID, _ in
+            try session.operations.deleteBlock(blockID)
+            try Self.reload(model, session: session, postID: postID)
+            let item = try #require(model.deleted.first)
+            #expect(item.blockID == blockID, "the tray holds the deleted block")
+
+            // The row's target IS the Trash's own row for the same block.
+            let target = model.trashItem(for: item)
+            #expect(target.kind == .block && target.id == blockID)
+            #expect(target.deletedAt == item.deletedAt)
+            #expect(target.noteID == postID, "the block names the note it left")
+
+            #expect(model.pendingPurge == nil)
+            model.requestDeleteNowBlock(item)
+            let confirm = try #require(model.pendingPurge)
+            #expect(confirm.message == RecoveryCopy.deleteNowConfirm(.block))
+            #expect(confirm.message.contains("block"), "it names what it takes")
+            #expect(confirm.message.contains("no putting it back"))
+            #expect(!confirm.message.contains("version"),
+                    "a block has no saved moments beside it — savedVersions stays 0")
+
+            // The read-back hazard, driven (13l Act 2's rule): SwiftUI clears
+            // `isPresented` synchronously before the action's Task resumes.
+            model.cancelPendingPurge()
+            await model.confirmPendingPurge(confirm)
+            #expect(model.pendingPurge == nil)
+            #expect(model.status?.isRefusal == false, "the act happened: \(model.status as Any)")
+            let intents = try await session.database.read { db in
+                try Int.fetchOne(
+                    db, sql: "SELECT COUNT(*) FROM purge_intent WHERE row_id = ?",
+                    arguments: [blockID])
+            }
+            #expect(intents == 1, "ONE intent, through the one shared act")
+            try Self.reload(model, session: session, postID: postID)
+            #expect(model.deleted.isEmpty, "the row has left every surface")
+        }
+    }
+
+    /// …and it asks EVERY time (her round-10 ruling — no don't-ask state
+    /// exists anywhere in the app, and none may be added), on a block row
+    /// exactly as on a take row.
+    @Test func aBlockRowsPurgeDoorAsksEveryTime() async throws {
+        try await withTray { session, postID, model, blockID, chosen in
+            let second = try session.operations.newBlock(
+                in: postID, text: "The second block.")
+            try session.operations.deleteBlock(blockID)
+            try session.operations.deleteBlock(second.block.id)
+            try Self.reload(model, session: session, postID: postID)
+            #expect(model.deleted.count == 2)
+            _ = chosen
+
+            for item in model.deleted {
+                model.cancelPendingPurge()
+                model.requestDeleteNowBlock(item)
+                #expect(model.pendingPurge != nil, "no don't-ask state, ever")
+            }
+        }
+    }
+
     /// **The purge door renders on TRASH SURFACES ONLY** — the evolved rule
     /// her G5 ruling put in place of 13j's "never a note, ever": the global
     /// Trash and the note-level trash section, never the writing flow.

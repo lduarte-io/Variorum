@@ -153,6 +153,58 @@ nonisolated enum TrayFilter {
     }
 }
 
+/// **WHICH ROWS CARRY THE PURGE DOOR** — 17p batch b, row 3, her ruling
+/// **R-Q3** (*"i don't know where Delete Now is here — the text talks about
+/// it but the button doesn't appear to be visible"*; she picked *"Add it to
+/// block rows"*).
+///
+/// It is ONE rule rather than three call-site conditions for the reason the
+/// rest of this file exists: the panel rows three populations through two
+/// builders, and *"which of them may end its own clock"* is a fact about the
+/// matrix, not about a `ForEach`. A pin can hold a value; it cannot hold a
+/// condition inside a view body.
+///
+/// **The three answers, and why each is what it is:**
+/// · **a LEAVING block** — YES. It is deleted and already counting down, and
+///   the same door exists one Library away in the global Trash
+///   (`RecoveryView`), so this adds no capability: it puts the one she was
+///   promised where the explainer promises it (`RecoveryCopy
+///   .trayLeavingExplainer` — *"Put back keeps a row; Delete Now ends its
+///   days early"*, which on a block row described a door that was not there).
+/// · **a STRANDED ORIGINAL** — NO, in both views. It rides its FAMILY's clock
+///   (her round-8b ruling); the Trash refuses it the same door for the same
+///   reason (`RecoveryView`'s `item.kind != .preservedOriginal` arm), and
+///   `TrashPurge.deleteNowConfirm` refuses `.preservedOriginal` behind both
+///   faces. Her R-Q3 says so in as many words: *"stranded originals stay
+///   without one"*.
+/// · **an ARCHIVED block** — NO. Archived is *kept, with no clock* (her B2
+///   ruling, the whole reason the two views stand apart): there are no
+///   remaining days for a door to skip, and a purge door over a LIVE block
+///   would not be impatience but a delete with no Trash behind it.
+///
+/// A TAKE keeps the door her G5 fourth-sitting ruling gave it, in the leaving
+/// view where its rows live — stated here so the panel's one rule covers
+/// every row it draws rather than leaving the take's answer implied.
+///
+/// **The trash-surfaces rule is satisfied by construction** (13j round 3, as
+/// her G5 ruling evolved it): every row this returns `true` for is already
+/// deleted and already counting down, and the panel that draws it is a trash
+/// surface, never the writing flow.
+nonisolated enum TrayPurgeDoor {
+    /// The populations the panel rows, in render order.
+    enum Population: Equatable, Sendable, CaseIterable {
+        case block, strandedOriginal, take
+    }
+
+    static func offered(_ population: Population, view: TrayView) -> Bool {
+        switch population {
+        case .block: return view == .leaving
+        case .strandedOriginal: return false
+        case .take: return view == .leaving
+        }
+    }
+}
+
 /// **The last view and filter, remembered PER SESSION** (the batch's own
 /// line; the `AppSession.mergeJoinMemory` precedent, and for its reason: one
 /// `AppSession` per launch, so parallel test worlds stay independent and a

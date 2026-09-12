@@ -1556,13 +1556,88 @@ Stranded originals get NO Delete Now door (R-Q3's letter).
 
 **Pieces (checkpoint order):**
 
-1. **row 3 — the tray's block rows gain Delete Now** — **NOT-STARTED**
+1. **row 3 — the tray's block rows gain Delete Now** — **DONE (this commit)**; its red-on-old
+   numbers are **PENDING** (the behavioral revert runs NEXT, announced below)
 2. **row 4 — the Callout Emoji alert's collapsed field** — **NOT-STARTED**
 3. **rows 5–6 — the decoration lane + the emoji inside the frame** — **NOT-STARTED**
 4. **the walk + captures + the closing suites** — **NOT-STARTED**
 
 **Rows:** 3 · 4 · 5 · 6 — dispositions PENDING.
 
-**No revert is in flight.**
+**A BEHAVIORAL REVERT IS ANNOUNCED, NOT YET STARTED** (the resiliency protocol's rule 2): the next
+act after this commit is passing `deleteNow: nil` at `TrayPanel.cellRows`' leaving-block call site to
+measure row 3's red-on-old, then `git checkout -- App/Variorum/Variorum/Features/Tray/TrayPanel.swift`
+to restore (the file is committed at this commit, so the restore is the safe one — no scratchpad copy
+is used, and no other piece edits that file yet).
+
+---
+
+#### PIECE 1 — ROW 3: DELETE NOW ON THE TRAY'S BLOCK ROWS (her ruling R-Q3)
+
+**THE MECHANISM, TRACED MYSELF (by reading, then pinned).** `TrayPanel.cellRows` renders the leaving
+BLOCK rows through `row(...)`, whose trailing `HStack` ended with exactly ONE button —
+`Button(TrayPath.putBackVerb)`. Only `takeRow` carried a second (`RecoveryCopy.deleteNowVerb` → 
+`TrayViewModel.requestDeleteNowTake` → `TrashPurge.deleteNowConfirm(for: trashItem(for: take))` →
+`confirmPendingPurge`). Directly ABOVE those rows the panel renders `explainerLine` =
+`RecoveryCopy.trayLeavingExplainer(home)` — *"Everything this note has on the 30-day clock. Put back
+keeps a row; Delete Now ends its days early."* So on a block row the panel's own sentence named a
+door that was not there, which is her image 3 exactly. The capability itself was never missing: the
+Library's Trash gives a block the same door (`RecoveryView`, every kind but `.preservedOriginal`),
+one Library away.
+
+**WHAT SHIPPED — one rule, one cluster, one road.**
+
+1. **The rule (`TrayPurgeDoor`, `Features/Tray/TrayFilter.swift`)** — which of the three populations
+   the panel draws may end its own clock, enumerated over BOTH views (six answers, the filter
+   matrix's own shape): a LEAVING block yes (R-Q3), a LEAVING take yes (her G5 ruling, unchanged), a
+   stranded original NEVER (it rides its family's clock — R-Q3's *"stranded originals stay without
+   one"*), an ARCHIVED row never (kept, no clock — her B2 ruling; there are no days to skip and the
+   block is LIVE). Enumerated rather than argued, because the batch-a ladder's standard for a rule of
+   this shape is *complete by enumeration* — an argued exemption was wrong twice there at first use.
+2. **The face (`TrayRowVerbs`)** — the trailing verbs are ONE cluster now, shared by `row(...)` and
+   `takeRow`. Row 3 would otherwise have been the THIRD hand-rolled copy of the same two buttons
+   (styles, help, row 63's `fixedSize` rider); the order and both `CalmButtonStyle` roles are the take
+   row's own, byte-for-byte. A `Purge` value carries the button and its help TOGETHER, so a row can
+   never draw the verb without the sentence that says what it costs.
+3. **The road (`TrayViewModel.requestDeleteNowBlock` + `trashItem(for: Queries.TrayItem)`)** —
+   `requestDeleteNowTake`'s line for a block row and deliberately nothing more: the SAME
+   `TrashPurge.deleteNowConfirm`, the same `confirmPendingPurge` → `TrashPurge.confirm` →
+   `requestPurge`, and the same sentence the Trash's own block row asks
+   (`RecoveryCopy.deleteNowConfirm(.block)`). No second confirm text, no second purge path (F-4).
+   `savedVersions` stays at its default 0: the Trash's count names a NOTE's saved moments beside it,
+   and a sentence about versions over a block row would be false.
+4. **`Shared/` untouched** — the explainer at `RecoveryCopy.swift:282` is now TRUE on a block row,
+   which is the whole of Q-3 option (a). `TrayPanel.surfaceCapabilities` already declared
+   `.deleteNow`, so the registry walk and `thePurgeDoorRendersOnTrashSurfacesAndNowhereElse` ride
+   UNMODIFIED — the trash-surfaces rule is satisfied by construction (every row this door reaches is
+   already deleted and already counting down).
+
+**THE ORACLE PROBLEM, and how it was answered.** *"Which doors did the panel actually draw on this
+row"* is not reachable the usual way: batch a measured that a hosted SwiftUI tree reports ONE
+accessibility element with no children in this test host, and a composition `dump` does not evaluate
+a `ForEach`'s content closure — the row previews the shipped composition pins match are the
+`ForEach`'s DATA (`[Queries.TrayItem]`), not its buttons. So the face rides a DEBUG render oracle the
+view itself feeds, the `TakesCellChrome`/`TakesArticleDoorProbe` pattern: **`TrayRowDoorProbe`**,
+recorded from the verb cluster's own `onAppear`, keyed by the row's id.
+
+**PINS (green on this tree):**
+- `TrayFilterTests.onlyTheLeavingViewsBlocksAndTakesMayEndTheirOwnClock` — the six-cell enumeration
+  plus the BELT behind the two refusals (`TrashPurge.deleteNowConfirm` hands back nil for a
+  `.preservedOriginal` whatever a surface offers, and DOES hand one back for a `.block`).
+- `TrayFilterTests.theLeavingBlockRowDrawsBothVerbsAndTheOtherRowsDrawOne` — the FACE, over a real
+  seeded store in a mounted 320×640 panel: the deleted block's row and the deleted take's row each
+  report `["Put back", "Delete Now"]`; the archived block's row reports `["Put back"]`.
+- `TrayPanelMoveTests.aLeavingBlockRowsDeleteNowConfirmsThenPurgesForGood` — the ROAD, the take pin's
+  own shape: the target IS the Trash's row for that block (`.block` / the block id / the note), the
+  confirm is `RecoveryCopy.deleteNowConfirm(.block)` and names no versions, the read-back hazard is
+  driven (13l Act 2's rule), ONE `purge_intent` lands, and the row leaves every surface.
+- `TrayPanelMoveTests.aBlockRowsPurgeDoorAsksEveryTime` — her round-10 ruling, on a block row.
+
+**Green:** `✔ Test run with 47 tests in 4 suites passed after 1.743 seconds`
+(`TrayFilterTests` · `TrayPanelMoveTests` · `TrayPanelShapeTests` · `NoteTrayTests`) — the four
+shipped tray suites ride with the two new pins, unmodified.
+
+**RED ON OLD: PENDING** (the announced behavioral revert runs next).
+
 
 *(Pointers re-verified by the orchestrator on 2026-09-12 after batch a's ladder, at `17803ce4`: `RecoveryView.swift` lives at `App/Variorum/Variorum/Features/Library/RecoveryView.swift` (`requestDeleteNow` `:400`; the stranded rule `:122–126`); `EditorTypography.swift` at `App/Variorum/Variorum/Theme/EditorTypography.swift` (`minGutter` `:171`, `inlineSurfaceInset` `:176`); `TrayPanel.swift`'s lines hold within one (`confirmPendingPurge` `:637`, `trashItem(for:)` `:653`); `CalloutMenu.emojiAccessory` `:179`; `BlockDecor` badge `:592`, emoji `:479`, `calloutRect` `:167`; `EditorTextView.makeInlineEditor` `:823`; `EditorViewModel` `textLeft` `:3162`; `DoorSetTests:327` is the accessory's title pin. Batch a moved nothing in this batch's files. The environment traps and rules 1–8 are R-1's, verbatim by reference; her app is QUIT for the night — an instance at `/Applications` means she is awake: never touch it.)*

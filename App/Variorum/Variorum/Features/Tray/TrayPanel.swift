@@ -623,6 +623,29 @@ final class TrayViewModel {
         pendingPurge = confirm
     }
 
+    /// **THE SAME DOOR ON A LEAVING BLOCK ROW** — 17p batch b, row 3, her
+    /// ruling R-Q3 (*"Add it to block rows"*: the block rows get Delete Now
+    /// *"with the same confirm-every-time door the Library's Trash gives a
+    /// block"*).
+    ///
+    /// It is `requestDeleteNowTake`'s line for a different row type, and
+    /// deliberately nothing more: ONE confirm (`TrashPurge.deleteNowConfirm`),
+    /// ONE act (`confirmPendingPurge` → `TrashPurge.confirm` → `requestPurge`),
+    /// ONE copy (`RecoveryCopy.deleteNowConfirm(.block)` — the very sentence
+    /// the Trash's own block row asks). No second confirm text and no second
+    /// purge path exist for this row, because the capability was never
+    /// missing — only its door in this panel was (review focus F-4).
+    ///
+    /// `savedVersions` is deliberately left at its default 0: the count the
+    /// Trash passes names a NOTE's saved moments beside it in the Trash
+    /// (`RecoveryView`'s LR1-4 line), and a block has none — a sentence about
+    /// versions over a block row would be false.
+    func requestDeleteNowBlock(_ item: Queries.TrayItem) {
+        guard let confirm = TrashPurge.deleteNowConfirm(for: trashItem(for: item))
+        else { return }
+        pendingPurge = confirm
+    }
+
     func cancelPendingPurge() {
         pendingPurge = nil
     }
@@ -654,6 +677,17 @@ final class TrayViewModel {
         Queries.TrashItem(
             kind: .take, id: take.variantID, deletedAt: take.deletedAt,
             text: take.text, noteID: postID, blockID: take.blockID)
+    }
+
+    /// The leaving BLOCK, as the shared purge layer's row type (row 3). A
+    /// block's purge target is the `block` table and the block's own id —
+    /// exactly what the global Trash hands the same machinery for the same
+    /// row (`Queries.trash`'s block arm), so the family the server-side
+    /// expansion takes is the same family either door would have taken.
+    nonisolated func trashItem(for item: Queries.TrayItem) -> Queries.TrashItem {
+        Queries.TrashItem(
+            kind: .block, id: item.blockID, deletedAt: item.deletedAt,
+            text: item.text, noteID: postID, blockID: item.blockID)
     }
 }
 
@@ -949,7 +983,16 @@ struct TrayPanel: View {
                     clock: TrashWindow.daysLeft(item.deletedAt, now: session.now),
                     help: "Puts the block back where it was in this note "
                         + "(a released original that was deleted later has "
-                        + "no old place left, and lands at the end)"
+                        + "no old place left, and lands at the end)",
+                    // Row 3 (her R-Q3): the door the explainer above has
+                    // always promised. Same confirm, same act, same copy as
+                    // the Library Trash's own block row.
+                    deleteNow: TrayPurgeDoor.offered(.block, view: model.view)
+                        ? .init(
+                            help: "Ends this block's remaining days now. There is "
+                                + "no putting it back afterwards.",
+                            act: { model.requestDeleteNowBlock(item) })
+                        : nil
                 ) {
                     await model.putBackDeleted(item.blockID)
                 }
@@ -964,7 +1007,16 @@ struct TrayPanel: View {
                     stamp: item.deletedAt, when: "archived", clock: nil,
                     forever: true,
                     help: "Kept out of the note, with no clock — Put back "
-                        + "returns it where it stood"
+                        + "returns it where it stood",
+                    // No purge door, and the rule says why: archived is KEPT,
+                    // with no clock (her B2 ruling) — there are no remaining
+                    // days for a door to skip, and the block is live.
+                    deleteNow: TrayPurgeDoor.offered(.block, view: model.view)
+                        ? .init(
+                            help: "Ends this block's remaining days now. There is "
+                                + "no putting it back afterwards.",
+                            act: { model.requestDeleteNowBlock(item) })
+                        : nil
                 ) {
                     await model.putBackArchived(item.blockID)
                 }
@@ -985,7 +1037,17 @@ struct TrayPanel: View {
                 note: TrayPath.goesWithItsFamily,
                 help: "Put back the blocks it became — or put the "
                     + "original itself back into this note — and it "
-                    + "stops counting down"
+                    + "stops counting down",
+                // NEVER a purge door here — `TrayPurgeDoor.offered(
+                // .strandedOriginal, view:)` is false in both views, which is
+                // her R-Q3's own words (*"stranded originals stay without
+                // one"*): it rides its FAMILY's clock (round 8b), exactly as
+                // the Trash refuses it the same door, and
+                // `TrashPurge.deleteNowConfirm` is the belt behind both faces.
+                // Written as the literal nil rather than through the rule
+                // because a rendered door that could never act is P-2's own
+                // defect — the rule's enumeration is what the pin holds.
+                deleteNow: nil
             ) {
                 await model.putBackOriginal(item.blockID)
             }
@@ -1039,31 +1101,28 @@ struct TrayPanel: View {
                             .layoutPriority(1)
                     }
                     Spacer(minLength: 8)
-                    Button(TrayPath.putBackVerb) {
-                        Task { await model.putBackTake(take.variantID) }
-                    }
-                    .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary, compact: true))
-                    .fixedSize()
-                    .help("Puts this take back exactly as it was — its label, its "
-                        + "place in the fan and its savepoints come back with it "
-                        + "(a take that was archived when it was deleted comes "
-                        + "back archived)")
                     // The purge door, on the ONE surface a take has one (her G5
                     // fourth-sitting addition). It confirms every time — no
                     // don't-ask state exists anywhere in the app, and none may
                     // be added (her round-10 ruling).
                     //
-                    // Row 63's rider (the post-fix walk): a VERB never
-                    // truncates — the walk met "Delete…" on a destructive
-                    // door; the squeeze belongs to the lead, so both buttons
-                    // keep their natural size.
-                    Button(RecoveryCopy.deleteNowVerb, role: .destructive) {
-                        model.requestDeleteNowTake(take)
-                    }
-                    .buttonStyle(CalmButtonStyle(tokens: tokens, role: .danger, compact: true))
-                    .fixedSize()
-                    .help("Ends this take's remaining days now. There is no putting "
-                        + "it back afterwards.")
+                    // 17p batch b (row 3): the two verbs are ONE cluster now
+                    // (`TrayRowVerbs`), shared with the block rows that gained
+                    // the same door — the styles, the `fixedSize` rider and the
+                    // order are the take row's own, kept byte-for-byte.
+                    TrayRowVerbs(
+                        tokens: tokens, rowID: take.variantID,
+                        putBackHelp: "Puts this take back exactly as it was — its label, its "
+                            + "place in the fan and its savepoints come back with it "
+                            + "(a take that was archived when it was deleted comes "
+                            + "back archived)",
+                        putBack: { await model.putBackTake(take.variantID) },
+                        deleteNow: TrayPurgeDoor.offered(.take, view: model.view)
+                            ? .init(
+                                help: "Ends this take's remaining days now. There is no putting "
+                                    + "it back afterwards.",
+                                act: { model.requestDeleteNowTake(take) })
+                            : nil)
                 }
             }
         }
@@ -1109,10 +1168,18 @@ struct TrayPanel: View {
     /// move the squeeze around. The row stacks instead: the preview owns a
     /// full-width line (up to two), and the stamp, the clock and the label
     /// share the quiet line under it with the verb. Nothing competes.
+    ///
+    /// **`deleteNow` — 17p batch b, row 3 (her R-Q3).** A row carries the
+    /// purge door only where `TrayPurgeDoor` says it may: nil is the answer
+    /// for a stranded original (it rides its family's clock) and for every
+    /// archived row (kept, no clock — there are no days to skip). The three
+    /// call sites in `cellRows` consult that one rule; this builder only
+    /// draws what it is handed.
     private func row(
         kind: String,
         blockID: String, text: String?, stamp: String?, when: String,
         clock: Int?, forever: Bool = false, note: String? = nil, help: String,
+        deleteNow: TrayRowVerbs.Purge? = nil,
         putBack: @escaping () async -> Void
     ) -> some View {
         // The reveal's mark rides the card's own selected grammar: a long
@@ -1144,16 +1211,97 @@ struct TrayPanel: View {
                             .layoutPriority(1)
                     }
                     Spacer(minLength: 8)
-                    Button(TrayPath.putBackVerb) { Task { await putBack() } }
-                        .buttonStyle(CalmButtonStyle(
-                            tokens: tokens, role: .primary, compact: true))
-                        .fixedSize()  // a verb never truncates (row 63's rider)
-                        .help(help)
+                    TrayRowVerbs(
+                        tokens: tokens, rowID: blockID, putBackHelp: help,
+                        putBack: putBack, deleteNow: deleteNow)
                 }
             }
         }
     }
 }
+
+/// **A ROW'S TRAILING VERBS — ONE CLUSTER, EVERY ROW** (17p batch b, row 3).
+///
+/// Before this batch the two row builders each hand-rolled the same buttons:
+/// `takeRow` drew Put back + Delete Now, `row(...)` drew Put back alone, with
+/// the styles, the help and row 63's `fixedSize` rider written twice. Row 3
+/// gives the leaving BLOCK rows the same purge door (her R-Q3), which would
+/// have made it three copies of one cluster — the drift class MobileSoul §3
+/// names and review focus F-0 checks. So the cluster is one view, and the
+/// order (Put back, then the destructive verb) and both styles are the take
+/// row's own, kept byte-for-byte.
+///
+/// **Row 63's rider, preserved:** a VERB never truncates. Both buttons carry
+/// `.fixedSize()`; the squeeze belongs to the lead line above them.
+struct TrayRowVerbs: View {
+    /// The purge door's two halves, together — so a row can never render the
+    /// button without the sentence that says what it costs.
+    struct Purge {
+        let help: String
+        let act: () -> Void
+
+        init(help: String, act: @escaping () -> Void) {
+            self.help = help
+            self.act = act
+        }
+    }
+
+    let tokens: VoiceTokens
+    /// The row this cluster belongs to (a block id or a variant id) — the
+    /// DEBUG probe's key, and nothing the face reads.
+    let rowID: String
+    let putBackHelp: String
+    let putBack: () async -> Void
+    /// nil where `TrayPurgeDoor` says this row carries no purge door.
+    let deleteNow: Purge?
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Button(TrayPath.putBackVerb) { Task { await putBack() } }
+                .buttonStyle(CalmButtonStyle(tokens: tokens, role: .primary, compact: true))
+                .fixedSize()  // a verb never truncates (row 63's rider)
+                .help(putBackHelp)
+            if let deleteNow {
+                Button(RecoveryCopy.deleteNowVerb, role: .destructive, action: deleteNow.act)
+                    .buttonStyle(CalmButtonStyle(tokens: tokens, role: .danger, compact: true))
+                    .fixedSize()
+                    .help(deleteNow.help)
+            }
+        }
+        #if DEBUG
+        .onAppear { TrayRowDoorProbe.record(rowID, verbs) }
+        #endif
+    }
+
+    /// What this cluster draws, in order — the value the DEBUG probe reports
+    /// and the one the composition pin reads.
+    var verbs: [String] {
+        deleteNow == nil
+            ? [TrayPath.putBackVerb]
+            : [TrayPath.putBackVerb, RecoveryCopy.deleteNowVerb]
+    }
+}
+
+#if DEBUG
+/// **THE TRAY ROW'S DOORS, AS A TEST ORACLE** (17p batch b, row 3 — the
+/// `TakesCellChrome` / `TakesArticleDoorProbe` pattern batch a established,
+/// and for the same measured reason: a hosted SwiftUI tree reports ONE
+/// accessibility element with no children in this test host, and a
+/// composition `dump` does not evaluate a `ForEach`'s content closure — so
+/// *"which doors did the panel actually draw on THIS row"* is unanswerable
+/// any other way).
+///
+/// It records what a MOUNTED row drew, from the row's own `onAppear`, keyed
+/// by the row's id. DEBUG only; the shipping panel carries none of it.
+@MainActor
+enum TrayRowDoorProbe {
+    private(set) static var verbs: [String: [String]] = [:]
+
+    static func reset() { verbs = [:] }
+
+    static func record(_ rowID: String, _ drawn: [String]) { verbs[rowID] = drawn }
+}
+#endif
 
 /// **THE ROW'S TWO LINES, AS A VALUE** (ledger row 9's layout fix, stated
 /// where a pin can hold it): the preview is one thing, and everything that
