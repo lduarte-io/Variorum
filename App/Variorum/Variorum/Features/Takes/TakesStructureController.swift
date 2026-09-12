@@ -269,6 +269,19 @@ final class TakesStructureController {
         // half) — measured: the note-wide split hauled the page 406 → 1047
         // after her click. All three split doors run through this one body
         // and nothing programmatic reaches it.
+        //
+        // The arm sits at the BODY, not at the three doors (the ladder's
+        // round 3, R3-2): a DOOR-level refusal — `structuralInFlight`, no
+        // target, a failed flush, the note-wide door's own "already whole"
+        // check — never enters here and leaves a pending landing alone,
+        // where `run` clears even on a refusal. Both placements fail safe,
+        // in OPPOSITE directions, and only one direction is safe to move
+        // toward: over-clearing (`run`'s) costs at most a reveal that does
+        // not happen; under-clearing costs a page that moves after her hand
+        // — her complaint's own direction. A refusal is a gesture that did
+        // nothing and SAID so; cancelling the entry reveal there would give
+        // it a second, invisible consequence. Do not "tidy" this into the
+        // door-level placement without a measured reason.
         model.clearArticleLanding()
         do {
             let stack = model.session.undoStack
