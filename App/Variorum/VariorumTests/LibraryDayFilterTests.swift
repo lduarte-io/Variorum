@@ -61,9 +61,11 @@ struct LibraryDayFilterTests {
     ) async throws -> T {
         let db = try AppDatabase.inMemory()
         let clock = TravellingClock()
-        // Noon, so "this day" and "two days earlier" are unambiguous in any
-        // machine timezone the suite happens to run in.
-        clock.set(Date(timeIntervalSince1970: 1_789_646_400))  // 2026-09-09T12:00:00Z
+        // Noon UTC, so "this day" and "two days earlier" are unambiguous in
+        // any machine timezone the suite happens to run in. (Every pin here
+        // names its days through `day(of:)`, never by literal, so the exact
+        // date is arbitrary — it is 2026-09-17.)
+        clock.set(Date(timeIntervalSince1970: 1_789_646_400))  // 2026-09-17T12:00:00Z
         return try await withDependencies {
             $0.database = db
             $0.uuid = .incrementing
@@ -127,6 +129,12 @@ struct LibraryDayFilterTests {
 
     /// The closed door opens on TODAY — a date field's own convention, and
     /// the answer she most often wants.
+    ///
+    /// **Driven through the door's OWN action** (the ladder's R1-9): this
+    /// used to set `dateBinding` and passed only because the pin fed it the
+    /// value the Button would have computed, so changing the door to open on
+    /// yesterday left it green. `openOnToday()` is the closure the Button
+    /// runs, and nothing else here reproduces it.
     @Test func openingTheClosedDoorPicksToday() async throws {
         try await withTravellingLibrary { _, clock in
             var picked: String?
@@ -134,8 +142,7 @@ struct LibraryDayFilterTests {
                 tokens: VoiceTokens.resolve(voice: .study, dark: false),
                 day: nil, now: clock.current,
                 onPick: { picked = $0 }, onClear: {})
-            // The closed door's own action, the one its Button calls.
-            field.dateBinding.wrappedValue = clock.current
+            field.openOnToday()
             #expect(picked == day(of: clock.current))
         }
     }
@@ -290,6 +297,33 @@ struct LibraryDayFilterTests {
                 "the query is named, and trimmed")
         #expect(narrowed.caveat == LibraryDayFace.caveat,
                 "the caveat rides either way")
+    }
+
+    /// **Leaving the catalog clears the day** (the ladder's R1-11). The
+    /// Timeline mode runs its own listing, so the day field is not drawn
+    /// there — and an armed day left behind meant the scope picker stayed
+    /// disabled with the only control that could clear it off screen. The
+    /// `clearSelection`-on-mode-switch precedent, one screen away, applied to
+    /// the other piece of listing state.
+    ///
+    /// Red on old: `editedOn` survived the mode change — the view's
+    /// `.onChange(of: model.mode)` called `clearSelection()`, which owns the
+    /// PICK and nothing else.
+    @Test func leavingTheCatalogClearsTheDay() async throws {
+        try await withTravellingLibrary { session, clock in
+            let model = LibraryCatalogModel(session: session, defaults: try scrubbed("leave"))
+            model.setEditedOn(day(of: clock.current))
+            #expect(model.editedOn != nil)
+
+            model.mode = .notes
+            model.modeChanged()
+            #expect(model.editedOn != nil, "the Notes mode is the same listing")
+
+            model.mode = .timeline
+            model.modeChanged()
+            #expect(model.editedOn == nil,
+                    "the Timeline runs its own listing — the day goes with the door")
+        }
     }
 
     // MARK: - The filter's calendar (the ladder's R1-8)

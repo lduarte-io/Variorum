@@ -144,6 +144,15 @@ struct LibraryDayField: View {
     let onPick: (String) -> Void
     let onClear: () -> Void
 
+    /// **The closed door's own action** — the exact closure its Button runs,
+    /// exposed for the same reason `dateBinding` is (the ladder's R1-9: the
+    /// pin used to drive the BINDING and pass only because it fed the value
+    /// the Button would have computed; change the door to open on yesterday
+    /// and it still passed).
+    func openOnToday() {
+        onPick(JournalDay.dayString(from: now, calendar: calendar))
+    }
+
     /// The date control's own binding — the exact closure the `DatePicker`
     /// drives, exposed so a pin can drive it too (never a hand-fed value).
     var dateBinding: Binding<Date> {
@@ -182,7 +191,7 @@ struct LibraryDayField: View {
                 .accessibilityLabel("Clear the day filter")
             } else {
                 Button {
-                    onPick(JournalDay.dayString(from: now, calendar: calendar))
+                    openOnToday()
                 } label: {
                     Text(tokens.chromeLabel(LibraryDayFace.closedLabel))
                 }
