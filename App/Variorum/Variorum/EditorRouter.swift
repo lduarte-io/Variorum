@@ -74,11 +74,13 @@ final class EditorRouter {
     /// `@State`, so a mode round trip destroys it — a memory that is to
     /// survive leaving the page can only live at the session.
     ///
-    /// Deliberately a PIXEL offset where Write's is a content anchor: the
-    /// article is an ordinary SwiftUI `ScrollView` whose rows are the note's
-    /// blocks, so its offset means the same thing on re-entry (a note edited
-    /// elsewhere re-lays out, and the restore clamps to the content's travel).
     /// Session-only and never persisted — R-Q1's own letter ("not across
     /// launches"); a cold launch lands on the remembered block instead.
-    @ObservationIgnored var takesArticleOffsets: [String: CGFloat] = [:]
+    ///
+    /// A PLACE, not a pixel: the row at the top of the viewport plus how far
+    /// into it she was. A raw content offset is not stable across mounts in a
+    /// lazy column — the rows above the fold are estimated until realized, so
+    /// the same y means a different block on the way back (measured on her
+    /// 262-block note: ~390 pt, two blocks, high).
+    @ObservationIgnored var takesArticlePlaces: [String: TakesBoardLayout.ArticlePlace] = [:]
 }

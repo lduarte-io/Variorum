@@ -651,9 +651,16 @@ struct TakesBoardView: View {
                 // that a `@State` written and re-read inside one update
                 // transaction is not a promise SwiftUI makes); the view only
                 // performs the scroll it is told to.
-                if let y = model.consumeArticleGeometry(
-                    geometry, positionedByUser: articleScroll.isPositionedByUser) {
-                    articleScroll.scrollTo(y: y)
+                switch model.consumeArticleGeometry(
+                    geometry, positionedByUser: articleScroll.isPositionedByUser
+                ) {
+                case .scrollToRow(let rowID):
+                    // The restore's ONE move: put the block she was reading
+                    // back at the top of the page. Absolute, so re-aiming as
+                    // the lazy column's real heights arrive converges.
+                    column.scrollTo(rowID, anchor: .top)
+                case .remember, .wait:
+                    break
                 }
                 spendArticleLanding(column)
             }

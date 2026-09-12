@@ -632,23 +632,16 @@ final class TakesViewModel {
     var articleReadyForLanding: Bool { board.articleReadyForLanding }
 
     /// The article reported its geometry: run the board's restore rule against
-    /// the SESSION's memory and answer the one thing the view can do about it
-    /// — an offset to scroll to, or nil.
+    /// the SESSION's memory and hand back the ONE thing the view can do about
+    /// it. The memory write happens here, where the session is.
     func consumeArticleGeometry(
         _ geometry: TakesBoardLayout.ArticleGeometry, positionedByUser: Bool
-    ) -> CGFloat? {
-        switch board.consumeArticleGeometry(
-            geometry, remembered: rememberedArticleOffset,
-            positionedByUser: positionedByUser
-        ) {
-        case .scroll(let y):
-            return y
-        case .remember(let y):
-            rememberArticleOffset(y)
-            return nil
-        case .wait:
-            return nil
-        }
+    ) -> TakesBoardLayout.ArticleRestoreStep {
+        let step = board.consumeArticleGeometry(
+            geometry, remembered: rememberedArticlePlace,
+            positionedByUser: positionedByUser)
+        if case .remember(let place) = step { rememberArticlePlace(place) }
+        return step
     }
 
     func articleReveal(for placementID: String) -> TakesBoardLayout.ArticleReveal {
@@ -663,14 +656,14 @@ final class TakesViewModel {
     /// Gated on `landingEnabled`, which is true on THE takes board and false
     /// on the Write panel's embedded model: two surfaces sharing one note's
     /// remembered position would have them fighting over it.
-    var rememberedArticleOffset: CGFloat? {
+    var rememberedArticlePlace: TakesBoardLayout.ArticlePlace? {
         guard landingEnabled else { return nil }
-        return session.editorRouter.takesArticleOffsets[postID]
+        return session.editorRouter.takesArticlePlaces[postID]
     }
 
-    func rememberArticleOffset(_ y: CGFloat) {
+    func rememberArticlePlace(_ place: TakesBoardLayout.ArticlePlace) {
         guard landingEnabled else { return }
-        session.editorRouter.takesArticleOffsets[postID] = max(y, 0)
+        session.editorRouter.takesArticlePlaces[postID] = place
     }
 
     /// What a pane rendering `variantID` is handed. Zero for every pane the

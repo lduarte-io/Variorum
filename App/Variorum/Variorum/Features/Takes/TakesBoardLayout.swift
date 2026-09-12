@@ -399,32 +399,64 @@ final class TakesBoardLayout {
         var travel: CGFloat { max(content - viewport, 0) }
     }
 
+    /// **Where the article was left: the BLOCK at the top of the page.**
+    ///
+    /// Deliberately a row identity and nothing else. Two measurements decided
+    /// the shape, both taken at this batch:
+    ///
+    /// 1. A raw content OFFSET is not the same number for the same view twice
+    ///    in a lazy column — the rows above the fold are estimated until they
+    ///    are realized, so the same y means a different block on the way back
+    ///    (96 pt and nine blocks apart on a sixty-block note; ~390 pt on her
+    ///    262-block one).
+    /// 2. A row identity PLUS the pixels she was into it looks more faithful
+    ///    and is not: the pixel half has to be applied as a RELATIVE nudge,
+    ///    and the row frames and the scroll geometry arrive in different
+    ///    passes — a nudge computed from a frame one pass stale doubled its
+    ///    own correction and landed 896 where 800 was owed.
+    ///
+    /// So the promise is exactly what a reader can state and a pin can check:
+    /// **the block she was reading comes back to the top of the page.** A
+    /// `scrollTo(id, anchor: .top)` is absolute and idempotent, so re-aiming
+    /// as the column's real heights arrive converges instead of drifting.
+    struct ArticlePlace: Equatable {
+        /// The `placementID` of the row at the top of the viewport.
+        let rowID: String
+    }
+
     /// The one-shot restore's state. `.undecided` until the FIRST honest
     /// geometry — **never resolved in `onAppear`**, whose ordering against
     /// that first geometry event is not ours to assume (measured at this
     /// batch: the geometry hook fires first, and a mount that records its own
     /// 0 before reading the memory erases the very thing it came back for).
-    /// `.wanted` then holds while the lazy column's content is still growing,
-    /// re-aiming as it does — the 17o batch-b ladder's RAISE-M1 lesson (never
-    /// restore against a frame that has not been filled) in this surface's
-    /// vocabulary.
+    /// `.wanted` then holds while the article finds the row again — the 17o
+    /// batch-b ladder's RAISE-M1 lesson (never restore against a frame that
+    /// has not been filled) in this surface's vocabulary.
     enum ArticleRestore: Equatable {
         case undecided
-        case wanted(CGFloat)
+        case wanted(ArticlePlace)
         case settled
     }
 
-    /// What the view should do with a geometry report. `nil` = nothing.
+    /// What the view should do with a geometry report.
     enum ArticleRestoreStep: Equatable {
-        /// Scroll to this offset (the restore, aiming or re-aiming).
-        case scroll(CGFloat)
-        /// Write this offset into the session's memory.
-        case remember(CGFloat)
-        /// Wait — the content is still growing.
+        /// Scroll to this row (the coarse aim, for a row a lazy column has
+        /// not realized yet — the only scroll that can reach one).
+        case scrollToRow(String)
+        /// Write this place into the session's memory.
+        case remember(ArticlePlace)
+        /// Wait — nothing to do this turn.
         case wait
     }
 
+    /// How many coarse aims a restore may take before it gives up. Bounded so
+    /// a memory naming a row the note no longer holds (a block deleted while
+    /// she was away) settles instead of waiting forever — a restore that never
+    /// settles would also never let a landing be spent.
+    nonisolated static let articleRestoreAttempts = 24
+
     @ObservationIgnored private(set) var articleRestore: ArticleRestore = .undecided
+    @ObservationIgnored private var articleRestoreAimsLeft = articleRestoreAttempts
     /// The article has reported real geometry at least once. Until it has,
     /// nothing knows where anything is, so no landing may be spent.
     @ObservationIgnored private(set) var articleGeometrySeen = false
@@ -436,12 +468,28 @@ final class TakesBoardLayout {
         articleGeometrySeen && articleRestore == .settled
     }
 
+    /// The row at the top of the viewport right now — the place worth
+    /// remembering. The lowest row whose top is at or above the fold (the one
+    /// she is reading through); failing that, the first row below it.
+    var articlePlaceNow: ArticlePlace? {
+        var best: (id: String, minY: CGFloat)?
+        for (id, frame) in articleRowFrames where frame.minY <= 0.5 {
+            if best == nil || frame.minY > best!.minY { best = (id, frame.minY) }
+        }
+        if best == nil {
+            for (id, frame) in articleRowFrames {
+                if best == nil || frame.minY < best!.minY { best = (id, frame.minY) }
+            }
+        }
+        return best.map { ArticlePlace(rowID: $0.id) }
+    }
+
     /// **THE RESTORE, as a decision.** Pure but for its own state, so the
     /// whole rule can be pinned without a window: what the article should do,
-    /// given where it is, how tall it is, what it remembers, and whether her
-    /// hand has already moved it.
+    /// given where it is, what it remembers, and whether her hand has already
+    /// moved it.
     func consumeArticleGeometry(
-        _ geometry: ArticleGeometry, remembered: CGFloat?, positionedByUser: Bool
+        _ geometry: ArticleGeometry, remembered: ArticlePlace?, positionedByUser: Bool
     ) -> ArticleRestoreStep {
         guard geometry.viewport > 0 else { return .wait }
         articleGeometrySeen = true
@@ -449,37 +497,50 @@ final class TakesBoardLayout {
         switch articleRestore {
         case .undecided:
             // Read the memory BEFORE this mount has written anything into it.
-            guard let remembered, remembered > 0.5 else {
+            guard let remembered else {
                 articleRestore = .settled
-                return .remember(geometry.offset)
+                return rememberStep()
             }
             articleRestore = .wanted(remembered)
+            articleRestoreAimsLeft = Self.articleRestoreAttempts
             return restoreStep(to: remembered, geometry, positionedByUser: positionedByUser)
-        case .wanted(let wanted):
-            return restoreStep(to: wanted, geometry, positionedByUser: positionedByUser)
+        case .wanted(let place):
+            return restoreStep(to: place, geometry, positionedByUser: positionedByUser)
         case .settled:
-            return .remember(geometry.offset)
+            return rememberStep()
         }
     }
 
+    private func rememberStep() -> ArticleRestoreStep {
+        articlePlaceNow.map { .remember($0) } ?? .wait
+    }
+
     private func restoreStep(
-        to wanted: CGFloat, _ geometry: ArticleGeometry, positionedByUser: Bool
+        to place: ArticlePlace, _ geometry: ArticleGeometry, positionedByUser: Bool
     ) -> ArticleRestoreStep {
         // Her hand outranks a pending restore: if she has already scrolled
         // this page herself, the restore is over and we remember her place.
         if positionedByUser {
             articleRestore = .settled
-            return .remember(geometry.offset)
+            return rememberStep()
         }
-        let target = min(wanted, geometry.travel)
-        guard abs(geometry.offset - target) < 0.5 else { return .scroll(target) }
-        // There. Settle only once the content is tall enough that the target
-        // IS the remembered place; otherwise stay armed and a later growth
-        // event carries us the rest of the way.
-        if target >= wanted - 0.5 || geometry.travel <= 0 {
+        // **Settled when the ROW says so**, never when an offset we computed
+        // says so: a lazy column re-lays out under a scroll, and the row
+        // frames and the scroll geometry arrive in different passes.
+        if let frame = articleRowFrames[place.rowID], abs(frame.minY) <= 2 {
             articleRestore = .settled
+            return .wait
         }
-        return .wait
+        // Otherwise aim again. The aim is ABSOLUTE (scroll this row to the
+        // top) and therefore idempotent: re-aiming as the real heights arrive
+        // converges, where a relative nudge computed from a stale frame
+        // doubles its own correction.
+        guard articleRestoreAimsLeft > 0 else {
+            articleRestore = .settled   // the row is gone, or will not settle.
+            return .wait
+        }
+        articleRestoreAimsLeft -= 1
+        return .scrollToRow(place.rowID)
     }
 
     func toggleExpanded(_ blockID: String) {

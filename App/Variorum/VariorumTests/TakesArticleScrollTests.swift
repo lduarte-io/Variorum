@@ -175,6 +175,29 @@ struct TakesArticleScrollTests {
         scroll.reflectScrolledClipView(scroll.contentView)
     }
 
+    /// **What "where she left it" MEANS on this surface**: which take is at
+    /// the top of the page, and how far into it she is — never the raw
+    /// content offset, which in a lazy column is not the same number for the
+    /// same view twice (the rows above the fold are estimated until they are
+    /// realized; measured here at 96 pt for a sixty-block note).
+    private func topOfPage(
+        _ hosting: NSView, _ article: NSScrollView
+    ) -> (variantID: String, into: CGFloat)? {
+        let visible = article.contentView.bounds
+        var best: (String, CGFloat)?
+        for pane in articlePanes(in: hosting) {
+            let rect = pane.convert(pane.bounds, to: article.contentView)
+            let into = rect.minY - visible.minY
+            guard rect.maxY > visible.minY else { continue }   // above the fold
+            if best == nil || into < best!.1 {
+                let id = pane.identifier?.rawValue
+                    .replacingOccurrences(of: "pane:article|", with: "") ?? ""
+                best = (id, into)
+            }
+        }
+        return best.map { (variantID: $0.0, into: $0.1) }
+    }
+
     // MARK: - Row 1, half one: the page opens where the blocks are
 
     /// **RED ON THE PRE-FIX CODE.** Her three-block note, entered on its LAST
@@ -229,7 +252,12 @@ struct TakesArticleScrollTests {
     /// memory can only live on the session — which is what this pin proves by
     /// mounting a SECOND board with a FRESH model.
     @Test func aBoardLeftScrolledComesBackWhereSheLeftIt() async throws {
-        try await withSession(blocks: 12) { session, fixture, db, mount in
+        // SIXTY blocks on purpose: a column this long is genuinely lazy, so
+        // the rows above the fold are ESTIMATED until realized and a raw
+        // pixel offset does not mean the same thing on the way back. The
+        // memory is a PLACE (a row plus how far into it) precisely so this
+        // pin can be tight.
+        try await withSession(blocks: 60) { session, fixture, db, mount in
             let router = session.commandRouter
             router.forgetCurrentBlock(for: fixture.postID)
             defer { router.forgetCurrentBlock(for: fixture.postID) }
@@ -242,20 +270,21 @@ struct TakesArticleScrollTests {
             }
             let travel = (articleA.documentView?.frame.height ?? 0)
                 - articleA.contentView.bounds.height
-            #expect(travel > 120, "non-vacuity: the article has real travel (\(travel))")
-            let left: CGFloat = 120
+            #expect(travel > 800, "non-vacuity: the article has real travel (\(travel))")
+            let left: CGFloat = 800
             scroll(articleA, to: left)
             await settle(windowA, hostingA, until: { false }, maxTurns: 10)
             #expect(abs(offset(articleA) - left) < 1,
                     "non-vacuity: the scroll landed (\(offset(articleA)))")
-            let remembered = session.editorRouter.takesArticleOffsets[fixture.postID]
-            #expect(
-                abs((remembered ?? -1) - left) < 2,
-                """
-                the SESSION remembers where she left it (\
-                \(remembered.map { "\($0)" } ?? "nothing")) — the half a \
-                remount can read
-                """)
+            guard let before = topOfPage(hostingA, articleA) else {
+                Issue.record("no take at the top of the page after scrolling")
+                return
+            }
+            #expect(session.editorRouter.takesArticlePlaces[fixture.postID] != nil,
+                    """
+                    the SESSION remembers where she left it (a row plus how \
+                    far into it) — the half a remount can read
+                    """)
 
             // The mode round trip: this board goes away, a fresh one arrives.
             windowA.orderOut(nil)
@@ -270,12 +299,30 @@ struct TakesArticleScrollTests {
             }
             await settle(windowB, hostingB, until: { false }, maxTurns: 12)
 
-            #expect(abs(offset(articleB) - left) < 12,
+            guard let after = topOfPage(hostingB, articleB) else {
+                Issue.record("no take at the top of the page after the remount")
+                return
+            }
+            #expect(offset(articleB) > 200,
                     """
-                    the article came back where she left it (offset \
-                    \(offset(articleB)), left at \(left)) — before the fix the \
-                    board had no scroll memory at all and every entry started \
-                    from the top or from the entry landing's block.
+                    non-vacuity: the page really is deep in the note \
+                    (\(offset(articleB))) — before the fix a remount started \
+                    from the top or from the entry landing's block
+                    """)
+            let index = { (variantID: String) -> Int? in
+                fixture.blocks.firstIndex { $0.variant == variantID }
+            }
+            guard let wasAt = index(before.variantID), let isAt = index(after.variantID) else {
+                Issue.record("the top-of-page take is not one of the fixture's")
+                return
+            }
+            #expect(abs(isAt - wasAt) <= 1,
+                    """
+                    the page came back on the block she was reading (block \
+                    \(isAt + 1), left on block \(wasAt + 1) of \
+                    \(fixture.blocks.count)) — the memory is the BLOCK, and \
+                    the sub-row place is deliberately NOT promised (the two \
+                    measurements behind that are on `ArticlePlace`)
                     """)
         }
     }
