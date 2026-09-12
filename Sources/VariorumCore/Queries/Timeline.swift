@@ -109,12 +109,39 @@ extension Queries {
         /// not a stamp, and it belongs here because the alternative is a
         /// second listing query (review focus F-5).
         ///
-        /// It orders by what she is LOOKING AT, never the raw column:
-        /// `DisplayTitle.note`'s fallback chain (stored title → the stated
-        /// day → the mint's day) written as SQL, so an untitled note sorts
-        /// under the date it shows rather than collapsing to the top as a
-        /// NULL. `NULLIF(title, '')` is the same "absent means blank too"
-        /// rule `DisplayTitle.isAbsent` applies in Swift.
+        /// It orders by `DisplayTitle.note`'s own fallback chain (stored
+        /// title → the stated day → the mint) written as SQL, so an untitled
+        /// note sorts under the date it shows rather than collapsing to the
+        /// top as a NULL. `NULLIF(title, '')` is the same "absent means blank
+        /// too" rule `DisplayTitle.isAbsent` applies in Swift.
+        ///
+        /// **ONE CORNER, NAMED** (the 18h ladder, R1-10 — this doc used to
+        /// claim it orders by what she is looking at *"never the raw
+        /// column"*, and at one boundary that was false): the THIRD link
+        /// sorts by the stored `created_at` INSTANT, while `DisplayTitle`'s
+        /// third link is `day(fromStamp:)` — the LOCAL calendar day of that
+        /// instant, local on purpose so both halves of the chain mean the
+        /// same KIND of day. Inside the created-at group the two agree (the
+        /// local-day map is monotone in the instant); ACROSS the groups they
+        /// can invert. In UTC−5 an untitled, undated note created
+        /// `2026-03-05T02:00:00.000Z` DISPLAYS `2026-03-04` but sorts at
+        /// `2026-03-05T02…`, which is greater than a neighbour whose
+        /// `entry_date` is `2026-03-05` — so A–Z lists *2026-03-05* above
+        /// *2026-03-04*. It needs an untitled, undated note created inside
+        /// the offset window of midnight, beside an entry-dated neighbour on
+        /// the boundary day.
+        ///
+        /// **The available fix, recorded rather than taken:**
+        /// `date(created_at, 'localtime')` as the third link — measured
+        /// byte-identical to the displayed name on this store's stamp format
+        /// (`sqlite3` 3.51: under `TZ=America/New_York` the instant above
+        /// answers `2026-03-04`; under `TZ=UTC`, `2026-03-05`). It was NOT
+        /// taken because it makes the ORDER depend on the process's time zone
+        /// per row and inherits the `Calendar.current`-vs-Gregorian mismatch
+        /// `JournalDay` carries — a real cost for a corner this narrow.
+        /// `substr(created_at, 1, 10)` is NOT the fix: a UTC slice is exactly
+        /// what `DisplayTitle.day(fromStamp:)`'s own doc rejects, and the
+        /// inversion survives it.
         case title
 
         var expression: String {
