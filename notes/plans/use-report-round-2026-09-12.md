@@ -2648,3 +2648,161 @@ sanity pass, so under the ladder's rule round 2 is the fresh reviewer's re-revie
 `d6cc8f30` · `1faf6b8b` · `17b650ae`) — with this record (findings · responses · dispositions ·
 sanity pass · this word) as its anchor. The dev-store leftovers the batch left for the ladder are
 untouched.
+
+### 17p batch b LADDER — ROUND 2 FINDINGS (fable-reviewer)
+
+*(A FRESH cold reviewer's re-review of the round-1 fixes — `git diff b84336bf..17b650ae`, the eight
+commits `4e21cde0` · `a536e216` · `aa52961e` · `5ad571ed` · `d39b6100` · `d6cc8f30` · `1faf6b8b` ·
+`17b650ae` — read against the whole batch `48f54268..17b650ae` for what they touched, with the whole
+batch-b thread above (findings · responses · dispositions · sanity pass · final word) as the anchor,
+`notes/REVIEW_PROMPT.md` verbatim, §3 rows 3–6, §4.3–§4.4, §5.1, §7 R-Q3/R-Q4, §12 F-0/F-3/F-4, R-0,
+the R-2 brief/record/adjudication, QUESTIONS #102, AppSpec §12 (R7/R9/R16/R17/R27) and TEXTKIT2_NOTES
+§3–§4. Every mechanism below was traced by me, by reading — and where the claim was about the
+platform, by measurement. Nothing delegated; the tree at `cd89ad12` == `origin/main`, clean; zero app
+instances at `/Applications` throughout. The thirteen touched-and-leaned-on suites re-run on this tree:
+`✔ Test run with 113 tests in 13 suites passed after 9.797 seconds` (`BlockDecorLaneTests` ·
+`TrayFilterTests` · `TrayPanelMoveTests` · `TrayPanelShapeTests` · `NoteTrayTests` ·
+`CalloutEmojiPickerTests` · `ReadTierTests` · `InlineEditorWindowTests` · `PaneSurfaceTests` ·
+`TypewriterRoomTests` · `EditorTypographyTests` · `BlockDecorGeometryTests` · `MarginHoverCommentTests`;
+`scratchpad/r2-touched.log`, local). Format: `R2-n · severity · file:line · what · evidence · fix`.)*
+
+#### Findings, severity-ranked
+
+**No BLOCKER. No MAJOR. No MINOR.** Three NITs, all in the register R1-4 opened — none owes a pin
+(nothing observable changes), none re-opens a ruling, and under the ladder's rule none opens a round 3.
+
+- **R2-1 · NIT · `App/Variorum/Variorum/Features/Tray/TrayPanel.swift:1169–1171` (the `row(...)`
+  builder's `deleteNow` doc) · The sentence "The three call sites in `cellRows` consult that one rule"
+  has been false since R1-4 (`5ad571ed`).** · *Evidence:* the leaving-block site (`:990`) is the only
+  `row(...)` caller that consults `TrayPurgeDoor.offered`; the archived site (`:1016`) and the stranded
+  site (`:1038`) pass the literal `nil` with the rule cited in a comment — which is exactly the road
+  R1-4 chose and the file's own comments now explain. The builder's doc still describes the pre-R1-4
+  shape. · *Fix:* the sentence — one site consults the rule; the two whose answer the rule fixes at nil
+  write the literal and cite it.
+
+- **R2-2 · NIT · `App/Variorum/Variorum/Features/Tray/TrayPanel.swift:1237` (`TrayRowVerbs.Purge
+  .init(help:act:)`) · R1-4's "the help sentence lives ONCE per kind" holds by census, not by
+  construction.** · *Evidence:* the memberwise-shaped `init(help:act:)` stays internal and its only
+  caller is the private `door(_:act:)` (grepped — both row sites use `.block(act:)` / `.take(act:)`
+  since `5ad571ed`), so a fourth row type could still hand in a fourth sentence. · *Fix:* `private
+  init` — the factories become the only door. (Noted beside it, no change asked: the leaving-block
+  site's `: nil` arm at `:990–992` sits inside `if model.view == .leaving` where
+  `offered(.block, view: .leaving)` is true by construction — the mirror of R1-4's dead branch, harmless,
+  and the rule's one live consultation in the file.)
+
+- **R2-3 · NIT (cleanliness; hollow today — no pin owed, optional) · `App/Variorum/Variorum/Surface/
+  DecorLane.swift:87–90` (`reserve`'s `resting`) · The brain's one-writer contract ("both contained
+  factories are born at the resting inset the brain measures against") is enforced by the census of two
+  factories and one pin, not by the brain.** · *Evidence:* `resting` is read from the global
+  `EditorTypography.inlineInset(needsLane: false)` while `trailing` arrives from the adopter as
+  `inlineSurfaceInset` — the same number by two roads (`EditorTextView.swift:402`,
+  `PaneSurface.swift:567`). A future contained adopter born at another inset would have its first
+  laneless ask report a false move and be RELEASED to 8 rather than to its own inset; today no such
+  adopter exists (`theFirstLanelessAskReportsNoMovement` pins both factories at 8), so a pin would pass on
+  both sides. · *Fix (if wanted, one parameter):* the adopter hands the brain its resting inset once
+  (`DecorLaneReservation(reserves:resting:)`, the trailing being that same number at rest by
+  `textContainerInset`'s own symmetry), and the constant read goes.
+
+#### Considered and cleared (traced; measured where it mattered)
+
+- **R1-1 on the READ tier (`ReadPostView.swift:184–186` → `ReadPostViewModel.proseColumnDidChange`
+  `:294–296` = `remeasure`):** the loop terminates where the final word says — `remeasure` →
+  `refreshBadges` → `refreshDecor` → the state's `textLeft` moved (8 ↔ 72) → sent → `render` →
+  `setDecorLane` → the brain's `(insets?.leading ?? resting) != leading` reads `72 != 72` → nil → false,
+  nothing scheduled. **The async hop's re-measure reads the re-wrapped layout regardless of any display
+  pass:** `PaneMeasurement.height` enumerates with `.ensuresLayout` (`PaneSurface.swift`, the ONE
+  measurement brain), so it forces the narrowed container's layout itself. The read tier's decor walk is
+  WHOLE-post (`refreshDecor`, no viewport pruning), so nothing is left out by the frame growing later;
+  the height re-frame (`ReadPostView.swift:75`) drives `PaneTextView.layout()` down its same-width
+  branch, whose `onLayoutPass` the read tier never wires (`install` wires `onWidthChange` only) — no A47
+  re-entry. The RELEASE road traced too: comments gone with a plain callout left → S1 (72) sent → release
+  → hop → S2 (8) sent → card redrawn at 8 → false; comments gone with nothing decorated → `State()` sent
+  once, then equal — and `refreshBadges` re-reads the ⑂ badges at the wider column either way.
+- **R1-1 on the INLINE host (`EditorView.swift:542–546`):** the one ordering question the fix depends
+  on, MEASURED rather than assumed. `EditorViewModel.viewportBounds(of:)` (`:3290–3293`) returns
+  `textView.bounds` for the inline editor, and `refreshDecorations` drops any block whose frame misses
+  that window (`:3163`) — so if the model's settle hop (scheduled by `proseColumnDidChange` INSIDE the
+  lane hop) ran BEFORE SwiftUI applied the re-reported height, a tail block pushed below the pre-lane
+  height by the re-wrap would lose its decorations until the next trigger. It does not: a main-queue
+  block dispatched from inside a main-queue block runs AFTER the runloop's BeforeWaiting observers
+  (`beforeWaiting → A → beforeWaiting → B → beforeWaiting → C`, `scratchpad/drain-order.swift`, an
+  NSApplication runloop with a `kCFRunLoopBeforeWaiting` observer), which is where SwiftUI/CA commit
+  the `height` binding write into the view's frame — so the settle hop reads the grown bounds. The
+  batch's inline pin, which sets the frame synchronously inside `reportHeight`, is therefore a faithful
+  stand-in for the production commit. **The mount case is covered by a different road than the doc
+  describes:** `BlockDecorOverlayController`'s convenience init pushes decorations
+  (`BlockDecor.swift:471`) BEFORE the coordinator composes its door (`EditorView.swift:542`), so a note
+  opened ALREADY commented reserves the lane under the model-only door — and `install`'s trailing
+  `remeasure()` (`:563`) then measures the already-narrowed container (`.ensuresLayout`) and reports
+  the laned height. Correct; noted so the next reader does not hunt for the composed door there.
+- **R1-2 (`DecorLane.swift:85–92`):** the four cases of (`insets`, `needed`) traced — nil/false → nil;
+  nil/true → (72, 8), mean 40; (72, 8)/true → nil; (72, 8)/false → nil, mean 8, the adopter writes 8 —
+  and the override defers to `super` exactly while `insets` is nil (`originX`). Inside `setDecorLane`
+  the brain mutates before the inset write and nothing reads between the two statements.
+- **R1-3 (`EditorView.swift:693`, `ReadPostView.swift:253`):** on the FULL editor `proseRight` is
+  `bounds − textContainerInset.width` by identity (`insets` nil) — the shipped ⑂ badge pins ride
+  unmodified, as the disposition says; `ReadBadgeOverlay`'s only construction site hands it a
+  `ReadPostTextView` (grepped, app and tests).
+- **R1-4 (`TrayPanel.swift:990–992` · `:1016` · `:1038` · `:1244–1257`):** the factored sentences
+  equal the pre-fix concatenations (the `17b650ae` pin holds them; re-derived from `b84336bf`'s two
+  sites in the diff); the archived branch is the `else` of `if model.view == .leaving` (`:978`), so the
+  literal nil states the truth; the take site keeps its rule consultation.
+- **The sanity pass's (a) (`EditorTextView.swift:585–596`):** the precondition sits AFTER `guard let
+  maxColumnWidth`, and `applyFrameHeight` calls `updateGutters()` on every frame of every
+  `EditorTextView` (`:485`, `:501`) — inert on the inline editor by that guard, a boolean on the full
+  editor's path; `maxColumnWidth` is assigned in `makeEditor` alone (`:862`) and no test assigns it to
+  an inline editor (grepped `VariorumTests`).
+- **The sanity pass's (b):** pinned words, green here.
+- **A pending hop after dismantle cannot misfire:** `render` captures `onProseColumnChanged` strongly
+  into the hop; after `uninstall` the read tier's `remeasure` guards on the detached `textView`
+  (`detach` nils it), and the inline coordinator's `remeasure` guards on its weak `textView` with
+  `reportHeight` nilled by `uninstall` (`EditorView.swift:571–580`).
+- **NIT-1/2/3 (`d39b6100`):** the `onWidthChange` doc is back on its property (`PaneSurface.swift:591–594`);
+  `reservesDecorLane`'s sentence matches its get/set; `commentBadgeAir` is read at the badge site
+  (`BlockDecor.swift:762–764`) and the constant's doc says why it is not `decorAir`.
+- **R1-6 → QUESTIONS #102:** the entry carries the three options with (a) marked PROVISIONAL and names
+  the one line (`makeReadSurface`) and the sweep pin that changes with the answer. A note beside it, not
+  a finding: the Outline's read tier sits in `StableSurface(followsShrinks: false)` (`BookView.swift`,
+  18d), so a lane RELEASE — a shrink — is followed on that wrapper's own settle terms, exactly as any
+  content shrink is; 18d's standing semantics, untouched here.
+- **Cost (P1):** one extra whole-post measure + decor pass per lane TRANSITION per contained surface,
+  ∝ the post; the settled state costs one comparison per render (the brain's guard). `PaneMeasurement`'s
+  doc already names `ReadPostViewModel.remeasure` and the inline coordinator's as its two whole-post
+  sites.
+- **Record integrity:** the relocated sanity pass (`e4568ba2`) is byte-identical to `8e1c6d82`'s block
+  (diffed against lines 1106–1171 there — only my range ends differ); the batch-b thread stands in
+  order; LIVE STATUS names this round.
+- **Sync/schema/core/Shared:** `git diff --stat 48f54268..17b650ae -- Sources App/Variorum/Shared` is
+  empty; no `setting`, no column, no `Sync/`; no `Co-Authored-By`/`Claude-Session` line on any of the
+  eight commits (checked).
+
+#### Review foci (§12), addressed
+
+- **F-0 (no god brain, no god file):** the fixes layered on — 11 lines on `ReadPostViewModel`, a
+  composed closure on the inline coordinator, 28 on the brain, five on `TrayRowVerbs.Purge`; the two
+  drift pairs round 1 named are closed (R1-3's second prose-right derivation; R1-4's sentence), and
+  R2-2/R2-3 are the structural residue of those closures — census where construction is one line away.
+  No literal number-as-rule was added; `commentBadgeAir` named the last one.
+- **F-3 (ONE constant + ONE decision; the emoji's placement ONE rule; no `exclusionPaths`; no
+  rendering attributes):** unchanged by the fixes and still true — `commentLane` + `inlineInset(needsLane:)`,
+  `calloutGlyphRect` for both surfaces; the fix diff carries zero `exclusionPaths`, zero rendering
+  attributes, zero paragraph-style writes (grepped). The reflow's height half round 1 found missing is
+  now on both hosts through the production loop. SATISFIED.
+- **F-4 (the tray reuses the take row's confirm and purge road):** unchanged and still one road; the
+  help sentence is one per kind (R2-2 would make that structural). SATISFIED.
+
+#### CLEAN BILL — checked and found solid
+
+- R1-1 is FIXED as traced: on both contained surfaces the lane takes a reflow's whole road (height,
+  ⑂ badges, decorations), the loop-driven pins measure the surface rather than a hand-built state, the
+  loop terminates at the brain's equality, and the one platform assumption the inline half rests on
+  (the commit precedes the settle hop) is measured true.
+- R1-2 · R1-3 · R1-4 · R1-5 · NIT-1/2/3 and the sanity pass's (a)/(b) are fixed as their dispositions
+  say; R1-6 is recorded as ruled; NIT-4's dismissal stands on its stated trade.
+- Her R-Q3's letter (leaving blocks and takes yes; stranded originals never; archived never) and R-Q4's
+  (the badge in the lane, the glyph inside the frame, the trailing inset untouched, comments on the left)
+  hold in the geometry, the enumeration and the pins on this tree.
+
+**Round-2 tally: 0 BLOCKER · 0 MAJOR · 0 MINOR · 3 NIT (R2-1 · R2-2 · R2-3).** No new BLOCKER/MAJOR, so
+under the ladder's rule no round 3 is owed; the three NITs go to the implementer for agree/dispute and
+return here for the final word and the fix pass (each a sentence or a keyword; no pin owed).
