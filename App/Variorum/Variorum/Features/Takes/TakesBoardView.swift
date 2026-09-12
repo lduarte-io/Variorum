@@ -636,11 +636,12 @@ struct TakesBoardView: View {
                 }
             }
             // 17p batch a (row 1, her ruling R-Q1): the page opens where she
-            // left it. The offset is the SESSION's (the model dies with the
-            // mount), the restore is ONE-SHOT, and nothing is remembered until
-            // it has been spent — a fresh mount reports offset 0 before the
-            // restore runs, and recording that would erase the very thing we
-            // came back for.
+            // left it. The PLACE (the row at the top of the page, or the top
+            // itself) is the SESSION's (the model dies with the mount), the
+            // restore is ONE-SHOT, and nothing is remembered until it has
+            // been spent — a fresh mount reports offset 0 before the restore
+            // runs, and recording that would erase the very thing we came
+            // back for.
             .scrollPosition($articleScroll)
             .onScrollGeometryChange(for: TakesBoardLayout.ArticleGeometry.self) {
                 TakesBoardLayout.ArticleGeometry(

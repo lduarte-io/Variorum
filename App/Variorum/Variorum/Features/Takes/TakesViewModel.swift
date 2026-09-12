@@ -659,7 +659,7 @@ final class TakesViewModel {
 
     /// **Where she left this note's article** — held at the SESSION, because
     /// this model dies with the mount and the memory must not
-    /// (`EditorRouter.takesArticleOffsets`, beside Write's `scrollAnchors`).
+    /// (`EditorRouter.takesArticlePlaces`, beside Write's `scrollAnchors`).
     ///
     /// Gated on `landingEnabled`, which is true on THE takes board and false
     /// on the Write panel's embedded model: two surfaces sharing one note's

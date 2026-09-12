@@ -77,10 +77,13 @@ final class EditorRouter {
     /// Session-only and never persisted — R-Q1's own letter ("not across
     /// launches"); a cold launch lands on the remembered block instead.
     ///
-    /// A PLACE, not a pixel: the row at the top of the viewport plus how far
-    /// into it she was. A raw content offset is not stable across mounts in a
-    /// lazy column — the rows above the fold are estimated until realized, so
-    /// the same y means a different block on the way back (measured on her
-    /// 262-block note: ~390 pt, two blocks, high).
+    /// A PLACE, not a pixel: the row at the top of the viewport — or the top
+    /// of the page itself — and deliberately nothing finer (the sub-row
+    /// pixels were tried and removed: a relative nudge from a frame one pass
+    /// stale doubled its own correction; the measurements are on
+    /// `TakesBoardLayout.ArticlePlace`). A raw content offset is not stable
+    /// across mounts in a lazy column — the rows above the fold are estimated
+    /// until realized, so the same y means a different block on the way back
+    /// (measured on her 262-block note: ~390 pt, two blocks, high).
     @ObservationIgnored var takesArticlePlaces: [String: TakesBoardLayout.ArticlePlace] = [:]
 }

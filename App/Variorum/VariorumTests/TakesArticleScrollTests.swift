@@ -81,11 +81,15 @@ struct TakesArticleScrollTests {
         let blocks: [(block: String, variant: String)]
         /// The session's OWN defaults. The test host is the dev-store app, so
         /// `.standard` is shared with every other suite AND with hand walks —
-        /// and `.incrementing` mints the same post id in every world, so a
-        /// `takesViewMemory` left by a Lenses lesson (four columns, alignment
-        /// locked) mounted THIS board as a four-column Lenses board and the
-        /// reveal guard read offset 0 with no article pane (the R1-7 class,
-        /// KnownIssues, owner 12; found at the 17p batch-a adjudication).
+        /// and `.incrementing` mints the same post id in every world, so this
+        /// board would otherwise read a `takesViewMemory` and slot heights
+        /// left for "post 0" by the tutorial spine's Takes lessons (the R1-7
+        /// class, KnownIssues, owner 12; found at the 17p batch-a
+        /// adjudication). The own suite is right for that class; it was NOT
+        /// the red guard's mechanism (the Takes board renders the article
+        /// unconditionally — the columns memory drives Lenses — and the
+        /// scrubbed suite left that pin red: the cause was the landing spent
+        /// against unrealized rows, J1).
         let defaults: UserDefaults
         var lastBlock: String { blocks[blocks.count - 1].block }
         var lastVariant: String { blocks[blocks.count - 1].variant }
@@ -190,10 +194,12 @@ struct TakesArticleScrollTests {
     }
 
     /// **What "where she left it" MEANS on this surface**: which take is at
-    /// the top of the page, and how far into it she is — never the raw
-    /// content offset, which in a lazy column is not the same number for the
-    /// same view twice (the rows above the fold are estimated until they are
-    /// realized; measured here at 96 pt for a sixty-block note).
+    /// the top of the page — never the raw content offset, which in a lazy
+    /// column is not the same number for the same view twice (the rows above
+    /// the fold are estimated until they are realized; measured here at 96 pt
+    /// for a sixty-block note). The `into` half is this helper's own
+    /// bookkeeping for choosing the top take; the memory itself is the ROW
+    /// (the sub-row place is deliberately not promised — `ArticlePlace`).
     private func topOfPage(
         _ hosting: NSView, _ article: NSScrollView
     ) -> (variantID: String, into: CGFloat)? {
@@ -269,8 +275,8 @@ struct TakesArticleScrollTests {
         // SIXTY blocks on purpose: a column this long is genuinely lazy, so
         // the rows above the fold are ESTIMATED until realized and a raw
         // pixel offset does not mean the same thing on the way back. The
-        // memory is a PLACE (a row plus how far into it) precisely so this
-        // pin can be tight.
+        // memory is a PLACE (the row at the top of the page) precisely so
+        // this pin can be stated in blocks.
         try await withSession(blocks: 60) { session, fixture, db, mount in
             let router = session.commandRouter
             router.forgetCurrentBlock(for: fixture.postID)
@@ -296,8 +302,8 @@ struct TakesArticleScrollTests {
             }
             #expect(session.editorRouter.takesArticlePlaces[fixture.postID] != nil,
                     """
-                    the SESSION remembers where she left it (a row plus how \
-                    far into it) — the half a remount can read
+                    the SESSION remembers where she left it (the row at the \
+                    top of the page) — the half a remount can read
                     """)
 
             // The mode round trip: this board goes away, a fresh one arrives.
