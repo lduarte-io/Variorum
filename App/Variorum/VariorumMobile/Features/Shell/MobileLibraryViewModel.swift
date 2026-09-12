@@ -78,19 +78,15 @@ final class MobileLibraryViewModel {
     nonisolated static let sortOptions: [Queries.LibrarySort] =
         [.entryDate, .createdAt, .lastTouched, .lastMajorRevision]
 
+    /// **A forwarder since the 18h ladder (R1-7):** the words are
+    /// `LibrarySortWords` in `Shared/`, the same table the Mac's `sort ▾`
+    /// reads. Until then this switch was a SECOND wording over one core
+    /// vocabulary (*last touched* / *entry date* against the Mac's *edited* /
+    /// *date*), which is MobileSoul §3's drift class; her R-Q8 names the four
+    /// words herself, so the phone adopts them. What stays the phone's is
+    /// which cases it OFFERS — `sortOptions` above, still the four stamps.
     nonisolated static func sortWord(_ sort: Queries.LibrarySort) -> String {
-        switch sort {
-        case .entryDate: return "entry date"
-        case .createdAt: return "created"
-        case .lastTouched: return "last touched"
-        case .lastMajorRevision: return "last meaningful edit"
-        // The Mac's Library gained an A–Z sort at 18h batch 1 (her row 10);
-        // the phone's picker deliberately still offers the four stamps above
-        // (`sortOptions`), so this answers only so the vocabulary can never
-        // reach a surface with no word for it. Whether the phone OFFERS it is
-        // the mobile project's call — the parity ledger carries the row.
-        case .title: return "title"
-        }
+        LibrarySortWords.label(sort)
     }
 
     /// Flips the way of looking; the view's `.task(id: sort)` restarts

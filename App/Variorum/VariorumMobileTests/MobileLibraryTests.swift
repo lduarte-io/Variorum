@@ -299,11 +299,19 @@ struct MobileLibrarySortTests {
     /// and does not claim to (the hallucination guard's honesty rule).
     @Test func theSortVocabularyIsPinned() async throws {
         typealias M = MobileLibraryViewModel
-        #expect(M.sortOptions == [.entryDate, .createdAt, .lastTouched, .lastMajorRevision])
-        #expect(M.sortWord(.entryDate) == "entry date")
+        #expect(M.sortOptions == [.entryDate, .createdAt, .lastTouched, .lastMajorRevision],
+                "which cases the phone OFFERS stays the phone's")
+        // …but not what they are CALLED (the 18h ladder, R1-7): the words are
+        // now `LibrarySortWords` in `Shared/`, read by the Mac's `sort ▾`
+        // too, and they are HERS — R-Q8 names *edited · created · date ·
+        // title*. This pin changed with the hoist: it used to assert *last
+        // touched* and *entry date*, which is the drift the hoist retired.
+        #expect(M.sortWord(.entryDate) == "date")
         #expect(M.sortWord(.createdAt) == "created")
-        #expect(M.sortWord(.lastTouched) == "last touched")
-        #expect(M.sortWord(.lastMajorRevision) == "last meaningful edit")
+        #expect(M.sortWord(.lastTouched) == "edited")
+        #expect(M.sortWord(.lastMajorRevision) == "revised")
+        #expect(M.sortWord(.title) == LibrarySortWords.label(.title),
+                "the case the phone does not offer still has a word, from the one table")
 
         // The no-op flip: same value ⇒ no mutation ⇒ no observation
         // fires (the registration stays armed); a real flip fires it.

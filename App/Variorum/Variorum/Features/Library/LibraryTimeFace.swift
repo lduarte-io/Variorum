@@ -46,14 +46,14 @@ nonisolated enum LibrarySortFace {
 
     /// One lower-case word per sort — the menu's rows and half the door's
     /// own label.
+    ///
+    /// **A forwarder since the 18h ladder (R1-7):** the table itself is
+    /// `LibrarySortWords` in `Shared/`, read by the phone's picker too, so
+    /// one core vocabulary can no longer be called two different things on
+    /// two surfaces. The name stays here so every call site and pin in this
+    /// letter reads unchanged.
     static func label(_ sort: Queries.LibrarySort) -> String {
-        switch sort {
-        case .lastTouched: "edited"
-        case .createdAt: "created"
-        case .entryDate: "date"
-        case .title: "title"
-        case .lastMajorRevision: "revised"
-        }
+        LibrarySortWords.label(sort)
     }
 
     /// The direction, in the SORT'S own language: a stamp runs newest →
