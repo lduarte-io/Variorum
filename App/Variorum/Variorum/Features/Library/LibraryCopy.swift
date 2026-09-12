@@ -28,6 +28,15 @@ nonisolated enum LibraryCopy {
     /// The Notes mode's silence (it lists notes only, and says so).
     static let noNotesMatch = "No notes match."
 
+    /// The scope picker's tooltip, in both of its states — named here so the
+    /// view chooses between two sentences rather than carrying one and a
+    /// placeholder (the ladder's R2-7, closing R1-12's complaint the other
+    /// way: a conditional MODIFIER flipped the picker's view identity and
+    /// tore the segmented control down on every arm and clear).
+    static let scopeDoor = "Scope the listing to books, notes or blocks"
+    static let scopeDoorUnderADay =
+        "A day names notes \u{2014} clear it to scope books and blocks again"
+
     /// **The cap, spoken** (P-2's grammar: the app says what it did). Drawn
     /// under a listing that had more rows than it drew.
     static func showingTheFirst(_ page: Int) -> String {

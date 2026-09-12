@@ -46,7 +46,13 @@ public struct DayBounds: Equatable, Sendable {
 
     /// nil when the key is not a real calendar day (`JournalDay.isValid`'s
     /// own rule) — a face draws nothing rather than filtering by a guess.
-    public init?(day: String, calendar: Calendar = .current) {
+    ///
+    /// The default is `JournalDay.storeCalendar` — Gregorian in the device's
+    /// zone — and not `Calendar.current` (the ladder's R2-8): a type whose
+    /// own doc explains why the system calendar is unsafe for a day KEY
+    /// should not hand it out as the default. Both production callers name
+    /// their calendar anyway; this is the safe answer for the next one.
+    public init?(day: String, calendar: Calendar = JournalDay.storeCalendar) {
         guard let noon = JournalDay.date(from: day, calendar: calendar),
               let nextNoon = calendar.date(byAdding: .day, value: 1, to: noon)
         else { return nil }

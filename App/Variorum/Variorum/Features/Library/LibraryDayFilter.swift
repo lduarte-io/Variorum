@@ -178,6 +178,18 @@ struct LibraryDayField: View {
                     .datePickerStyle(.field)
                     .labelsHidden()
                     .font(tokens.small)
+                    // The control DRAWS a calendar, so it draws the one the
+                    // filter means (the ladder's R2-6). Unoverridden,
+                    // SwiftUI's `\.calendar` tracks Language & Region — so
+                    // under a Hebrew or Japanese system calendar the field
+                    // showed that calendar's digits while the label beside
+                    // it and every row stamp read Gregorian. The binding
+                    // already converted through the named calendar, so this
+                    // was a display disagreement on the one screen the
+                    // calendar ruling was for; `\.timeZone` rides along so
+                    // the two halves of "her day" travel together.
+                    .environment(\.calendar, calendar)
+                    .environment(\.timeZone, calendar.timeZone)
                     // A MEASURED width, not `fixedSize` (found on the walk):
                     // the field grows a stepper the moment it takes focus,
                     // and an ideal-width control sized while unfocused then
