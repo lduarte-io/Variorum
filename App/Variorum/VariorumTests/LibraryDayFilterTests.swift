@@ -316,13 +316,51 @@ struct LibraryDayFilterTests {
             #expect(model.editedOn != nil)
 
             model.mode = .notes
-            model.modeChanged()
+            await model.modeChanged()
             #expect(model.editedOn != nil, "the Notes mode is the same listing")
 
             model.mode = .timeline
-            model.modeChanged()
+            await model.modeChanged()
             #expect(model.editedOn == nil,
                     "the Timeline runs its own listing — the day goes with the door")
+        }
+    }
+
+    /// **…and the LISTING goes with it** (the ladder's R2-1 — a regression of
+    /// the fix above, caught by the fresh reviewer).
+    ///
+    /// Clearing the day changed the model's inputs and nothing re-read, so
+    /// coming back to List showed the DAY's notes under a header saying
+    /// `on day…` with the scope picker live again: the invisible-state hazard
+    /// the R1-11 fix's own doc names, moved one step down. Any later
+    /// keystroke repaired it silently, which is what would have made it read
+    /// as "notes went missing" rather than as a filter.
+    ///
+    /// Red on old: `hits` unchanged across the round trip — the excluded note
+    /// stayed excluded.
+    @Test func returningToTheCatalogListsTheWholeLibraryAgain() async throws {
+        try await withTravellingLibrary { session, clock in
+            let today = clock.current
+            let fresh = try session.operations.createPost(title: "today")
+            _ = try session.operations.newBlock(in: fresh.id, text: "new")
+            clock.set(today.addingTimeInterval(-3 * 86_400))
+            let old = try session.operations.createPost(title: "three days ago")
+            _ = try session.operations.newBlock(in: old.id, text: "old")
+            clock.set(today)
+
+            let model = LibraryCatalogModel(session: session, defaults: try scrubbed("roundtrip"))
+            model.setEditedOn(day(of: today))
+            await model.search()
+            #expect(noteIDs(model) == [fresh.id], "the day's answer")
+
+            model.mode = .timeline
+            await model.modeChanged()
+            model.mode = .list
+            await model.modeChanged()
+
+            #expect(model.editedOn == nil, "no filter is shown…")
+            #expect(Set(noteIDs(model)) == [fresh.id, old.id],
+                    "…so none may be applied: the whole library is listed")
         }
     }
 
