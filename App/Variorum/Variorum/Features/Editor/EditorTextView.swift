@@ -374,6 +374,82 @@ final class EditorTextView: NSTextView, MarkdownFormattable {
         didSet { updateGutters() }
     }
 
+    // MARK: - The decoration lane (17p batch b, rows 5–6 — her ruling R-Q4)
+
+    /// **Does this surface reserve a LEFT LANE for block decorations?**
+    ///
+    /// True for the CONTAINED (book) editor alone, set at construction. The
+    /// full-document editor never needs it: its gutter is the dynamic
+    /// centering inset (`updateGutters`), which is already wide enough for a
+    /// margin comment card at any window that is not at `minGutter`. The
+    /// contained editor's prose starts 8 pt from its own edge, and 8 pt is
+    /// where the decorations were landing on the words.
+    ///
+    /// Default false, so every other surface's inset path is byte-identical
+    /// and `setDecorLane` is inert on it.
+    var reservesDecorLane = false
+
+    /// The asymmetric prose insets a lane produces — nil is the ORDINARY
+    /// symmetric `textContainerInset` road every surface but the contained
+    /// editor takes, and the road the contained editor itself takes until a
+    /// decoration arrives.
+    private var proseInsets: (leading: CGFloat, trailing: CGFloat)?
+
+    /// **Reserve (or release) the lane.** Change-gated: the inset write
+    /// triggers a relayout, and a same-value pass must write nothing.
+    ///
+    /// Inert unless `reservesDecorLane`. The caller is the decoration
+    /// overlay controller, which is handed the state that answers the
+    /// question (`BlockDecor.needsLane`) — so the lane follows the note's own
+    /// comments and callouts with no second source of truth.
+    func setDecorLane(needed: Bool) {
+        guard reservesDecorLane else { return }
+        let leading = EditorTypography.inlineInset(needsLane: needed)
+        let trailing = EditorTypography.inlineSurfaceInset
+        guard proseInsets?.leading != leading else { return }
+        proseInsets = (leading, trailing)
+        // `textContainerInset` is SYMMETRIC, so the pair rides as its mean
+        // and `textContainerOrigin` (below) places the container at the
+        // LEADING edge: the container's width is then
+        // `bounds.width - (leading + trailing)` and its right edge lands at
+        // `bounds.width - trailing`, untouched. (The alternative — growing
+        // the symmetric inset — would take the lane off the RIGHT margin
+        // too, narrowing the measure twice for room only the left needs.)
+        let mean = ((leading + trailing) / 2).rounded()
+        if abs(textContainerInset.width - mean) > 0.5 {
+            textContainerInset = NSSize(width: mean, height: textContainerInset.height)
+        }
+    }
+
+    /// The container's origin — overridden ONLY while a lane is reserved, so
+    /// the prose sits at the leading inset rather than at the symmetric mean.
+    ///
+    /// This is `NSTextView`'s documented customization point for exactly this
+    /// (an asymmetric text container placement) and it is not a TextKit 1
+    /// API — no `NSLayoutManager`, no TK1-era drawing override, so it is not
+    /// a silent-downgrade trigger (TEXTKIT2_NOTES §4.2). The fallback canary
+    /// is asserted silent over a laned surface in
+    /// `BlockDecorLaneTests.aLanedSurfaceStaysOnTextKit2`.
+    override var textContainerOrigin: NSPoint {
+        guard let proseInsets else { return super.textContainerOrigin }
+        return NSPoint(x: proseInsets.leading, y: super.textContainerOrigin.y)
+    }
+
+    /// **THE PROSE COLUMN, in this view's own space — ONE derivation.**
+    ///
+    /// The decoration pass used to read `textContainerOrigin.x` and
+    /// `bounds.width - textContainerInset.width` separately; the second is
+    /// wrong the moment the insets are asymmetric. On a symmetric surface
+    /// these two are IDENTICAL to what it read before — `textContainerOrigin
+    /// .x == textContainerInset.width`, and the trailing inset IS that same
+    /// number — so every shipped decoration geometry is unchanged by
+    /// identity rather than by luck.
+    var proseLeft: CGFloat { textContainerOrigin.x }
+
+    var proseRight: CGFloat {
+        bounds.width - (proseInsets?.trailing ?? textContainerInset.width)
+    }
+
     /// **TYPEWRITER ROOM — A22, rebuilt (QoL round 2026-07-29, L5).** The
     /// scroll allowance she should be able to scroll into below her last line,
     /// carried ON THE DOCUMENT rather than as a clip-view allowance. Zero for
@@ -853,6 +929,11 @@ final class EditorTextView: NSTextView, MarkdownFormattable {
         textView.textContainerInset = NSSize(
             width: EditorTypography.inlineSurfaceInset,
             height: EditorTypography.inlineSurfaceInset)
+        // 17p batch b (rows 5–6, her R-Q4): THIS is the surface whose prose
+        // starts 8 pt from its own edge, so this is the surface whose block
+        // decorations had nowhere to stand. The lane is reserved only while
+        // the note carries a comment or a callout glyph (`setDecorLane`).
+        textView.reservesDecorLane = true
         textView.isEditable = true
         textView.isSelectable = true
         textView.isRichText = false

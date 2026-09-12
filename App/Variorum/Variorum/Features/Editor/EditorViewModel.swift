@@ -3159,8 +3159,16 @@ final class EditorViewModel {
             selectedBlockIDs: blockSelection.picked,
             presentations: presentationsByBlock,
             comments: commentsByBlock,
-            textLeft: origin.x,
-            textRight: textView.bounds.width - textView.textContainerInset.width,
+            // 17p batch b (rows 5–6): ONE derivation for the prose column
+            // (`EditorTextView.proseLeft`/`proseRight`). On a symmetric
+            // surface both are IDENTICAL to the arithmetic that stood here —
+            // `textContainerOrigin.x == textContainerInset.width`, and the
+            // trailing inset IS that same number — so every shipped
+            // decoration geometry is unchanged by identity. The contained
+            // editor's insets become ASYMMETRIC while its decoration lane is
+            // reserved, and only the one derivation can be right then.
+            textLeft: textView.proseLeft,
+            textRight: textView.proseRight,
             viewWidth: textView.bounds.width,
             entryCount: index.entries.count))
     }
