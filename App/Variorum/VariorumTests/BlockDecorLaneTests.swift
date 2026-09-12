@@ -36,7 +36,14 @@
 //    what shipped (the parity claim: this batch may not move Write's faces);
 //  · a laned surface stays on TextKit 2 — the fallback canary is silent
 //    (overriding `textContainerOrigin` is not a TK1 API, TEXTKIT2_NOTES §4,
-//    but "not a downgrade trigger" is a claim that must be measured).
+//    but "not a downgrade trigger" is a claim that must be measured);
+//  · THE LOOP, DRIVEN (the ladder's R1-1 / R1-5): on BOTH contained hosts,
+//    through the real coordinator wiring, a comment's arrival reserves the
+//    lane, the host door fires, and the surface is then READ — its
+//    published height equals its measured (re-wrapped) height and the
+//    badge the loop finally drew stands left of the prose the loop finally
+//    placed. The two mounted disjointness pins below rebuild pass two by
+//    hand and so pin the pure geometry of the faces, never the loop.
 //
 
 import AppKit
@@ -295,9 +302,13 @@ struct BlockDecorLaneTests {
         defer { controller.uninstall() }
 
         let framed = BlockPresentation(color: "sand", emoji: "\u{1f4a1}")
-        // Pass one reserves the lane; pass two is the production loop's
-        // second visit, with the state rebuilt against the new prose column
-        // (which is what the layout-settle hop does in the app).
+        // Pass one reserves the lane; pass two rebuilds the state BY HAND
+        // against the new prose column. That makes this a pin of the PURE
+        // GEOMETRY of the three faces at a laned edge — not of the
+        // production loop, which it bypasses (the ladder's R1-5: the batch's
+        // walk found W-1 and W-2 while this pin was green). The loop itself
+        // — host door, re-measure, the badge's FINAL rect — is driven
+        // end-to-end by the `…ThroughTheProductionLoop` pins below.
         controller.render(state(for: view, comment: true, presentation: framed))
         view.layoutSubtreeIfNeeded()
         let settled = state(for: view, comment: true, presentation: framed)
@@ -336,6 +347,8 @@ struct BlockDecorLaneTests {
 
     /// **THE SWEEP, at the OTHER width** (the constitution's closing form): a
     /// laned surface narrow enough to be a book column still covers nothing.
+    /// Pass two is hand-fed here too — pure geometry at three widths; the
+    /// loop is the `…ThroughTheProductionLoop` pins' (R1-5).
     @Test func theLaneHoldsAtANarrowBookColumnToo() {
         for width in [360.0, 480.0, 900.0] as [CGFloat] {
             let (view, window) = inlineSurface(width: width)
@@ -445,6 +458,147 @@ struct BlockDecorLaneTests {
         state.presentations["b0"] = BlockPresentation(kind: "future", emoji: "\u{1f4a1}")
         #expect(!BlockDecor.needsLane(state))
         #expect(!BlockDecor.hasLeadingGlyph(state.presentations["b0"]))
+    }
+
+    // MARK: - The loop, driven (the ladder's R1-1 MAJOR + R1-5)
+
+    /// A paragraph long enough that the 64 pt-narrower measure re-wraps it
+    /// by lines — the shape the walk's ONE-LINE fixture could not take, which
+    /// is why the walk saw the badge move and never the height stay.
+    private var longParagraph: String {
+        (0..<220).map { "word\($0 % 97)" }.joined(separator: " ")
+    }
+
+    /// The proven wait (the N14 pins' shape): async polling drains the
+    /// controller's next-turn door and the settle hop; `display` gives any
+    /// draw-pass report its chance.
+    private func pump(_ window: NSWindow? = nil, until condition: @MainActor () -> Bool) async {
+        for _ in 0..<400 {
+            if condition() { return }
+            window?.displayIfNeeded()
+            await Task.yield()
+            try? await Task.sleep(for: .milliseconds(5))
+        }
+    }
+
+    /// The last height a host published — a box, so the closure the real
+    /// coordinator calls and the poll that reads it share one cell.
+    @MainActor private final class HeightLog {
+        var last: CGFloat = 0
+    }
+
+    /// **THE READ TIER RE-MEASURES ITS HEIGHT WHEN THE LANE NARROWS ITS
+    /// MEASURE — driven through the production loop, never a hand-built
+    /// state** (the ladder's R1-1, MAJOR; and R1-5's effect-level pin for
+    /// W-1/W-2 on the surface the book Outline shows by default).
+    ///
+    /// The REAL wiring, end to end: `ReadPostSurfaceCoordinator.install` (what
+    /// `makeNSView` does), the comment written through the operations layer
+    /// and delivered by the model's own decor-context observation, the lane
+    /// reserved by the controller's render, the host door fired on the next
+    /// turn. Then the surface is READ, not rebuilt: its published
+    /// `contentHeight` equals its measured height, that height GREW (the
+    /// paragraph re-wrapped — the pin's own non-vacuity guard), and the badge
+    /// the loop finally drew stands left of the prose the loop finally placed.
+    ///
+    /// **RED ON OLD** (behavioral revert — the pre-fix `ReadPostView` whose
+    /// door was `pushOverlaysToSinks`): `contentHeight` stays at the pre-lane
+    /// number while `PaneMeasurement.height` reads the re-wrapped one, i.e.
+    /// the last lines outside the frame `ReadPostView` gives the surface.
+    @Test func theReadTiersLaneReMeasuresItsHeightThroughTheProductionLoop() async throws {
+        try await withReadTier(seedBlocks: [longParagraph, "A second block."]) { h in
+            let coordinator = ReadPostSurfaceCoordinator(model: h.model)
+            coordinator.install(textView: h.textView)
+            defer { coordinator.uninstall() }
+            let before = h.model.contentHeight
+            #expect(before > 40, "the harness measured the seeded paragraph: \(before)")
+            #expect(abs(before - PaneMeasurement.height(of: h.textView)) < 0.5,
+                    "steady state before the lane")
+            #expect(h.textView.proseLeft == EditorTypography.inlineSurfaceInset)
+
+            // The comment lands the way it lands in the app: a row, observed.
+            let slots = try await h.database.read { try Queries.renderPost($0, containerID: h.postID) }
+            _ = try h.session.operations.addBlockComment(
+                to: slots[0].blockID, text: "a note in the margin")
+
+            await pump {
+                h.textView.proseLeft == EditorTypography.inlineInset(needsLane: true)
+                    && h.model.contentHeight > before
+                    && abs(h.model.contentHeight - PaneMeasurement.height(of: h.textView)) < 0.5
+            }
+            #expect(h.textView.proseLeft == EditorTypography.inlineInset(needsLane: true),
+                    "the lane arrived through the observation: \(h.textView.proseLeft)")
+            let measured = PaneMeasurement.height(of: h.textView)
+            #expect(measured > before + 10,
+                    "the paragraph re-wrapped under the narrower measure: \(before) → \(measured)")
+            #expect(abs(h.model.contentHeight - measured) < 0.5,
+                    "R1-1: the published height follows the lane: \(h.model.contentHeight) vs \(measured)")
+            // R1-5: the badge the LOOP drew, against the prose the LOOP placed.
+            let badge = try #require(h.textView.subviews.compactMap { $0 as? CommentCardView }.first)
+            #expect(badge.frame.maxX <= h.textView.proseLeft,
+                    "the badge's final rect is in the lane: \(badge.frame) vs \(h.textView.proseLeft)")
+        }
+    }
+
+    /// **THE CONTAINED EDITOR RE-REPORTS ITS HEIGHT WHEN THE LANE NARROWS
+    /// ITS MEASURE** — the same loop one host over: the real
+    /// `InlineEditorSurface.Coordinator.install` (its height report captured
+    /// exactly as `makeNSView` captures it), the comment adopted through the
+    /// model's own door, the lane reserved by the controller's render, and the
+    /// coordinator's re-measure composed onto the host door.
+    ///
+    /// **RED ON OLD** (behavioral revert — the pre-fix `EditorView` where the
+    /// coordinator left the door to the model alone): the last reported height
+    /// stays at the pre-lane number — no storage edit re-measured, and the
+    /// decoration projections are `@ObservationIgnored`, so no SwiftUI pass
+    /// followed the comment either.
+    @Test func theContainedEditorsLaneReReportsItsHeightThroughTheProductionLoop() async throws {
+        try await withInlineEditor(seedBlocks: [longParagraph, "A second block."]) { h in
+            let window = NSWindow(
+                contentRect: NSRect(x: 80, y: 80, width: 620, height: 300),
+                styleMask: [.titled], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            let container = NSView(frame: NSRect(x: 0, y: 0, width: 620, height: 300))
+            window.contentView = container
+            h.textView.frame = NSRect(x: 0, y: 0, width: 620, height: 300)
+            container.addSubview(h.textView)
+            let log = HeightLog()
+            let coordinator = InlineEditorSurface.Coordinator(model: h.model)
+            coordinator.install(textView: h.textView) { height in
+                log.last = height
+                h.textView.frame = NSRect(x: 0, y: 0, width: 620, height: height)
+            }
+            defer {
+                coordinator.uninstall()
+                window.orderOut(nil)
+                window.close()
+            }
+            window.orderFrontRegardless()
+            coordinator.remeasure()
+            let before = log.last
+            #expect(before > 24 && abs(before - PaneMeasurement.height(of: h.textView)) < 0.5,
+                    "steady state before the lane: \(before)")
+            #expect(h.textView.proseLeft == EditorTypography.inlineSurfaceInset)
+
+            let slots = try h.storeSlots()
+            h.model.adoptComments([slots[0].blockID: [.init(id: "c1", text: "a note in the margin")]])
+
+            await pump(window) {
+                h.textView.proseLeft == EditorTypography.inlineInset(needsLane: true)
+                    && log.last > before
+                    && abs(log.last - PaneMeasurement.height(of: h.textView)) < 0.5
+            }
+            #expect(h.textView.proseLeft == EditorTypography.inlineInset(needsLane: true),
+                    "the lane arrived through the model's door: \(h.textView.proseLeft)")
+            let measured = PaneMeasurement.height(of: h.textView)
+            #expect(measured > before + 10,
+                    "the paragraph re-wrapped under the narrower measure: \(before) → \(measured)")
+            #expect(abs(log.last - measured) < 0.5,
+                    "R1-1: the reported height follows the lane: \(log.last) vs \(measured)")
+            let badge = try #require(h.textView.subviews.compactMap { $0 as? CommentCardView }.first)
+            #expect(badge.frame.maxX <= h.textView.proseLeft,
+                    "the badge's final rect is in the lane: \(badge.frame) vs \(h.textView.proseLeft)")
+        }
     }
 
     // MARK: - The parity claim: Write's faces do not move

@@ -275,6 +275,26 @@ final class ReadPostViewModel {
         remeasure()
     }
 
+    /// **THE PROSE COLUMN MOVED WITHOUT THE FRAME CHANGING** (17p batch b
+    /// ladder round 1, R1-1): the decoration lane reserved or released its
+    /// room, which narrows or widens the CONTAINER while the view's bounds
+    /// stay put — so `viewWidthChanged` never fires, yet the text has
+    /// re-wrapped exactly as it does under a width reflow. A lane IS a
+    /// reflow (the batch's own W-1 finding), so it takes a reflow's whole
+    /// road: `remeasure` publishes the new height AND re-reads the ⑂
+    /// badges' fragment positions AND re-sends the decoration state against
+    /// the new edge (`remeasure` → `refreshBadges` → `refreshDecor`; the
+    /// decor gate opens on its own because the state's `textLeft` moved).
+    /// The door this replaced — `pushOverlaysToSinks` — re-sent the
+    /// decorations only, and pushed the badges from STORED pre-lane state,
+    /// so a note whose paragraphs re-wrap under the 64 pt-narrower column
+    /// kept its pre-lane `contentHeight` and its last lines fell outside
+    /// the frame (`ReadPostView` frames the surface at `contentHeight`).
+    /// Pinned through the production loop in `BlockDecorLaneTests`.
+    func proseColumnDidChange() {
+        remeasure()
+    }
+
     /// Badges for fanned blocks — the whole post (a read view is fully laid
     /// out by construction; fans are opt-in and rare, so this walk is
     /// ∝ fanned blocks).
