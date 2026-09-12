@@ -208,6 +208,14 @@ struct LibraryDayField: View {
 /// The empty answer, drawn the same way wherever the listing is empty while
 /// a day is armed (the List mode's section and the Notes mode's column).
 struct LibraryDayEmptyAnswer: View {
+    /// **The caveat's measure** (the ladder's R1-15 — a number in a view body
+    /// is a rule with no name). Two sentences of explanation stay readable at
+    /// roughly 60–70 characters of this chrome size; wider and the eye loses
+    /// the line, which is the opposite of what an explanation is for. The
+    /// empty answer is the only prose the Library speaks, so it is the only
+    /// place that needs one.
+    static let measure: CGFloat = 520
+
     let tokens: VoiceTokens
     let day: String
     /// What else is narrowing the listing, so the headline can name it
@@ -231,6 +239,6 @@ struct LibraryDayEmptyAnswer: View {
                 .lineLimit(3)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        .frame(maxWidth: 520, alignment: .leading)
+        .frame(maxWidth: Self.measure, alignment: .leading)
     }
 }

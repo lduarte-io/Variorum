@@ -296,11 +296,11 @@ struct LibrarySortMenuTests {
             // Where it stands is a RULE, not an `if` a pin cannot reach
             // (P-1's doctrine: gating is data). The Timeline mode is an
             // order already, so a sort door there could not act (P-2).
-            #expect(model.showsSortDoor, "List mode offers the door")
+            #expect(model.showsCatalogControls, "List mode offers the door")
             model.mode = .notes
-            #expect(model.showsSortDoor, "so does her Apple-Notes-shaped list")
+            #expect(model.showsCatalogControls, "so does her Apple-Notes-shaped list")
             model.mode = .timeline
-            #expect(!model.showsSortDoor, "the Timeline keeps its own order")
+            #expect(!model.showsCatalogControls, "the Timeline keeps its own order")
         }
     }
 }

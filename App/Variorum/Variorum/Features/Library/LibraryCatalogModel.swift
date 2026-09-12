@@ -87,10 +87,13 @@ final class LibraryCatalogModel {
     /// field can act there — a door that cannot act is not rendered (P-2).
     /// A rule on the model rather than an `if` buried in the header, so a
     /// pin can hold it (P-1's own doctrine: gating is data).
+    ///
+    /// *(It was minted as `showsSortDoor` in 18h batch 1 and kept as a
+    /// forwarder when batch 2 widened it. The ladder's R1-13 retired that:
+    /// the 3C parity pattern exists for pins a batch must not touch, and both
+    /// names were minted by the SAME letter — two names for one rule with no
+    /// distinction between them is the drift the letter should not ship.)*
     var showsCatalogControls: Bool { mode != .timeline }
-    /// 18h batch 1's name for the same rule, kept so its pin reads unchanged
-    /// (the 3C parity pattern).
-    var showsSortDoor: Bool { showsCatalogControls }
 
     // MARK: - The day filter (18h batch 2, her row 11 — ruling R-Q8)
 

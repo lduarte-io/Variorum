@@ -131,6 +131,16 @@ struct VoicedMenu<Content: View>: View {
     }
 }
 
+extension View {
+    /// `.help` only when there is something to say — an EMPTY help string is
+    /// a placeholder standing in for "no tooltip", and a `cond ? "" : "…"`
+    /// in a body is a string-as-rule (the 18h ladder's R1-12; review focus
+    /// F-0's own line). Pass nil or "" and the modifier is not applied.
+    @ViewBuilder func help(ifPresent text: String?) -> some View {
+        if let text, !text.isEmpty { self.help(text) } else { self }
+    }
+}
+
 /// The faint dot that separates status-line clusters (replaces bezel-era
 /// vertical dividers in voiced chrome).
 struct StatusDot: View {

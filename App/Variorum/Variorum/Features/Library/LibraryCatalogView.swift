@@ -405,8 +405,8 @@ struct LibraryCatalogView: View {
                 // stands down with them rather than offering picks that
                 // would list nothing (P-2).
                 .disabled(model.editedOn != nil)
-                .help(model.editedOn == nil
-                      ? "" : "A day names notes — clear it to scope books and blocks again")
+                .help(ifPresent: model.editedOn == nil
+                      ? nil : "A day names notes — clear it to scope books and blocks again")
                 Picker("", selection: Binding(get: { model.mode }, set: { model.mode = $0 })) {
                     Text(tokens.chromeLabel("List")).tag(LibraryCatalogModel.Mode.list)
                     Text(tokens.chromeLabel("Notes")).tag(LibraryCatalogModel.Mode.notes)

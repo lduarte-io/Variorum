@@ -461,12 +461,10 @@ struct LibraryDayFilterTests {
         try await withTravellingLibrary { session, _ in
             let model = LibraryCatalogModel(session: session, defaults: try scrubbed("timeline"))
             #expect(model.showsCatalogControls)
-            #expect(model.showsSortDoor)
             model.mode = .notes
             #expect(model.showsCatalogControls)
             model.mode = .timeline
             #expect(!model.showsCatalogControls)
-            #expect(!model.showsSortDoor, "batch 1's name reads the same one rule")
         }
     }
 
