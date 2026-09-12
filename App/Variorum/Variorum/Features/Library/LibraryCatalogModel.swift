@@ -226,6 +226,20 @@ final class LibraryCatalogModel {
         infoHit = nil
     }
 
+    /// **The view mode changed** — everything the LISTING owns that the new
+    /// mode cannot show goes with it. The pick, as it always has (a mode that
+    /// draws no selection must not hold one), and now the DAY: the Timeline
+    /// runs its own listing, so its door is not drawn, and an armed day left
+    /// behind there kept the scope picker disabled with the only control that
+    /// could clear it off screen (the ladder's R1-11).
+    ///
+    /// One door the view calls, rather than two calls a future mode could
+    /// forget one of.
+    func modeChanged() {
+        clearSelection()
+        if !showsCatalogControls { editedOn = nil }
+    }
+
     func deselect(_ postIDs: [String]) {
         selectedPosts.subtract(postIDs)
         if let anchor = selectionAnchor, postIDs.contains(anchor) { selectionAnchor = nil }

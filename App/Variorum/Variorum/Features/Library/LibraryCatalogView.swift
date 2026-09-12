@@ -216,7 +216,7 @@ struct LibraryCatalogView: View {
         // mode draws it. Carrying it into Notes or Timeline would leave the
         // bulk bar offering to delete notes nothing on screen shows as
         // picked — an invisible selection behind a destructive door.
-        .onChange(of: model.mode) { _, _ in model.clearSelection() }
+        .onChange(of: model.mode) { _, _ in model.modeChanged() }
         .sheet(item: $tagSheetTarget) { target in
             TagAssignmentSheet(session: session, postID: target.id, postTitle: target.title)
         }
