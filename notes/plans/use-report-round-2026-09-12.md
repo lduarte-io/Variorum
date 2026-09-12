@@ -1,8 +1,6 @@
 # The 2026-09-12 use-report round — 17p · 18g · 18h · 18i (EXECUTION PLAN, v1)
 
-**STATUS: v1 — READY FOR THE KICKOFF SITTING (2026-09-12). Her report is traced; the letters are
-proposed; §1 carries the questions the sitting must rule (Q-1…Q-10) with the architect's recommended
-option first. Nothing is built until she rules. Run shape, hers: `/architect-phase`, the second round
+**STATUS: v2 — RULED AND RUNNING (the kickoff sitting of 2026-09-12: every Q-1…Q-10 answered — §7 is the record; §1 keeps the questions as asked). First batch: 17p batch a (R-1).** *(v1, the same day: READY FOR THE KICKOFF SITTING.)* Run shape, hers: `/architect-phase`, the second round
 "in the mold of" the 2026-09-06 use-report round — a Fable orchestrator that stays LEAN, `opus-implementer`
 on every batch, `fable-reviewer` where the landing family or a default's meaning moves, `opus-reviewer`
 elsewhere. Runs NOW, before 13u1 (her sequencing, the same as last round's).**
@@ -145,8 +143,8 @@ Her words are quoted from the report; the ledger (§3) carries the rows.
   **17p** (claimed in `notes/plans/phase-17-standing-fixes.md`'s register). Palettes (**18g**), time
   stamps + sort + the day search (**18h**) and the confirmations setting (**18i**) change what the app
   IS → the master plan's Phase 18 row. Letters are allocation order; the running order is Q-10's.
-- **Sizing (`notes/PhaseSizingGuidance.md`), stated:** 17p is ~9 defect rows in three one-surface
-  batches (the Takes board; the chrome singles; the phone); 18g one unit (the token layer + one
+- **Sizing (`notes/PhaseSizingGuidance.md`), stated:** 17p is six defect rows in two one-surface
+  batches (the Takes board; the chrome singles — the phone's row left for the mobile session, R-Q9); 18g one unit (the token layer + one
   settings row + the mockup's four seeds); 18h one unit (a core column on the listing item, a sort
   menu, two stamps, one filter) — the day search is its second half and may be held (Q-8); 18i one
   unit (the kind on the one status seam + a setting + a bar slot). Nothing here is phase-sized; the
@@ -168,18 +166,18 @@ traced by READING, unproven — the pin is the first act of every fix. Image num
 
 | # | Her words (short) | Surface | Traced mechanism / architect's read (file:line) | Letter · batch | Status |
 |---|---|---|---|---|---|
-| 1 | "the page keeps trying to jump to the bottom and not show the text above… it should remember your scroll position" (image 1: block 3/3, only the empty block visible) | Takes article | The N9 entry arm scrolls the CURRENT block to the TOP (`TakesChoreographer.consumeLandings`, `:196–205` → `landArticle`; the view's `column.scrollTo(landing, anchor: .top)`, `TakesBoardView.swift:616–619`) and the typewriter room (`typewriterRoom`, `:606/:646`) makes the last block a legal top; no scroll memory exists for the article — §4.1 | 17p · a | TRACED · Q-1 |
-| 2 | "the take page looks like an absolute mess now… misaligned… the invitation to write a block is weird… The empty take — line kept instruction is not good" (images 1, 2) | Takes cell | The R103 placeholder overlay (`TakesShared.swift:191–204`: `padding(.leading, 8)`, `.top, 6`) sits where the live caret sits, under the indicator OFF no ring frames the pane (`PaneDecoration.resolve`, `PaneSurface.swift`), and "＋ new block" aligns to the CELL's edge (`TakesBoardView.swift:582–598`) while the prose sits `textContainerInset` + 2 pt inboard — §4.2 | 17p · a | TRACED · Q-2 |
-| 3 | "i don't know where Delete Now is here — the text talks about it but the button doesn't appear" (image 3) | This Note's Tray | Block rows render Put back only (`TrayPanel.row(...)`, `:1112–1155`); take rows carry Delete Now (`:1060`); the explainer is the panel's (`RecoveryCopy.swift:282`) — §4.3 | 17p · b | TRACED · Q-3 |
+| 1 | "the page keeps trying to jump to the bottom and not show the text above… it should remember your scroll position" (image 1: block 3/3, only the empty block visible) | Takes article | The N9 entry arm scrolls the CURRENT block to the TOP (`TakesChoreographer.consumeLandings`, `:196–205` → `landArticle`; the view's `column.scrollTo(landing, anchor: .top)`, `TakesBoardView.swift:616–619`) and the typewriter room (`typewriterRoom`, `:606/:646`) makes the last block a legal top; no scroll memory exists for the article — §4.1 | 17p · a | RULED (R-Q1) — batch a |
+| 2 | "the take page looks like an absolute mess now… misaligned… the invitation to write a block is weird… The empty take — line kept instruction is not good" (images 1, 2) | Takes cell | The R103 placeholder overlay (`TakesShared.swift:191–204`: `padding(.leading, 8)`, `.top, 6`) sits where the live caret sits, under the indicator OFF no ring frames the pane (`PaneDecoration.resolve`, `PaneSurface.swift`), and "＋ new block" aligns to the CELL's edge (`TakesBoardView.swift:582–598`) while the prose sits `textContainerInset` + 2 pt inboard — §4.2 | 17p · a | RULED (R-Q2) — batch a |
+| 3 | "i don't know where Delete Now is here — the text talks about it but the button doesn't appear" (image 3) | This Note's Tray | Block rows render Put back only (`TrayPanel.row(...)`, `:1112–1155`); take rows carry Delete Now (`:1060`); the explainer is the panel's (`RecoveryCopy.swift:282`) — §4.3 | 17p · b | RULED (R-Q3) — batch b |
 | 4 | "the callout pane is broken" (image 9) | Callout Emoji alert | `CalloutMenu.emojiAccessory` (`:183–204`): an `NSStackView` of an editable field with no width constraint — an empty editable `NSTextField` has a near-zero intrinsic width, so the stack gives the button its size and the field the sliver — §4.4a | 17p · b | TRACED |
-| 5 | "the callout goes on top of the comment badge which is on top of the text" (image 11) | Book Outline (inline editor) | The emoji label at `x = max(2, textLeft − width − 8)` (`BlockDecor.swift:476–480`); the badge at `x = max(2, textLeft − 36)` (`:585–593`); both clamp onto the text when `textLeft` is small — §4.4b | 17p · b | TRACED · Q-4 |
-| 6 | "in book view the comment thing needs to be moved or only accessible on the left because it's blocking the text" (image 10) | Book Outline | The same mechanism as 5, the badge alone | 17p · b | TRACED · Q-4 |
-| 7 | "the mobile app also has this issue to an even worse degree where it defaults to showing NONE of the written text lines" | Phone (surface TBD) | Candidate: the Write arrival + the phone's typewriter room (`MobileEditorViewModel.jumpToBlock` shows the room's contract, `:838–860`); NOT shared code with the Mac's row 1 — §4.9 | 17p · c | OPEN · Q-9 |
-| 8 | "little text confirmation popups that are always appearing… blocks joining… a newline divide" (images 6, 7) | `StatusCenter` + the toast | ONE seam: `StatusCenter.speak` (`Registry/StatusCenter.swift:49–62`, 6 s auto-dismiss) rendered by `StatusToast` at the shell's bottom (`RootView.swift:177`, `NoteWindowView.swift:106`); the editor's `statusMessage` forwards to it (`EditorViewModel.swift:71–73`); no kind, no setting — §4.5 | 18i | TRACED · Q-5 |
-| 9 | "see the created time and last edited time easily on the library and within the note itself" (image 4) | Library rows + the note masthead | `TimelineItem` carries `createdAt` and the sort `stamp` only (`Queries/Timeline.swift:10–23`); the List row shows `hit.detail` (the entry date) beside the title (`LibraryCatalogView.swift:978`); the masthead has no stamp (`MastheadRowTwo`: chip + tags) — §4.7 | 18h · 1 | TRACED · Q-7 |
+| 5 | "the callout goes on top of the comment badge which is on top of the text" (image 11) | Book Outline (inline editor) | The emoji label at `x = max(2, textLeft − width − 8)` (`BlockDecor.swift:476–480`); the badge at `x = max(2, textLeft − 36)` (`:585–593`); both clamp onto the text when `textLeft` is small — §4.4b | 17p · b | RULED (R-Q4) — batch b |
+| 6 | "in book view the comment thing needs to be moved or only accessible on the left because it's blocking the text" (image 10) | Book Outline | The same mechanism as 5, the badge alone | 17p · b | RULED (R-Q4) — batch b |
+| 7 | "the mobile app also has this issue to an even worse degree where it defaults to showing NONE of the written text lines" | Phone (surface TBD) | Candidate: the Write arrival + the phone's typewriter room (`MobileEditorViewModel.jumpToBlock` shows the room's contract, `:838–860`); NOT shared code with the Mac's row 1 — §4.9 | — (mobile) | DEFERRED (the mobile app project row — her ruling R-Q9; written to the mobile branch's handoff §12.2; PL-22) |
+| 8 | "little text confirmation popups that are always appearing… blocks joining… a newline divide" (images 6, 7) | `StatusCenter` + the toast | ONE seam: `StatusCenter.speak` (`Registry/StatusCenter.swift:49–62`, 6 s auto-dismiss) rendered by `StatusToast` at the shell's bottom (`RootView.swift:177`, `NoteWindowView.swift:106`); the editor's `statusMessage` forwards to it (`EditorViewModel.swift:71–73`); no kind, no setting — §4.5 | 18i | RULED (R-Q5: quiet default, toast an option) |
+| 9 | "see the created time and last edited time easily on the library and within the note itself" (image 4) | Library rows + the note masthead | `TimelineItem` carries `createdAt` and the sort `stamp` only (`Queries/Timeline.swift:10–23`); the List row shows `hit.detail` (the entry date) beside the title (`LibraryCatalogView.swift:978`); the masthead has no stamp (`MastheadRowTwo`: chip + tags) — §4.7 | 18h · 1 | RULED (R-Q7) |
 | 10 | "i need to be able to sort the library by time" | Library header | `LibraryViewModel.start` hardwires `sort: .lastTouched, direction: .desc` (`:48–50`); core `LibrarySort` already has entryDate · createdAt · lastTouched · lastMajorRevision (`Timeline.swift:97–108`), no title case; no control in the header (`LibraryCatalogView.swift:690–735`) — §4.8 | 18h · 1 | TRACED |
-| 11 | "how difficult it would be to implement being able to search for any note edited on a particular day" | Library filter | Cheap: `idx_container_touched` on `last_touched_at`; the honest caveat and the savepoint union — §4.8 | 18h · 2 | HERS · Q-8 |
-| 12 | "basic color themes… lavender, mint green, pink, blue, a pastel set… the hex code of your default theme" (image 5) | The token layer + Settings | `VoiceTokens.resolve(voice:dark:)` picks one of four static token sets (`Shared/Theme/VoiceTokens.swift:153–160`); `ThemeStore` reads `Queries.themeSettings` (six keys); 67 resolve sites consume tokens, none hold a literal — §4.6 | 18g | TRACED · Q-6 |
+| 11 | "how difficult it would be to implement being able to search for any note edited on a particular day" | Library filter | Cheap: `idx_container_touched` on `last_touched_at`; the honest caveat and the savepoint union — §4.8 | 18h · 2 | RULED (R-Q8: build now) |
+| 12 | "basic color themes… lavender, mint green, pink, blue, a pastel set… the hex code of your default theme" (image 5) | The token layer + Settings | `VoiceTokens.resolve(voice:dark:)` picks one of four static token sets (`Shared/Theme/VoiceTokens.swift:153–160`); `ThemeStore` reads `Queries.themeSettings` (six keys); 67 resolve sites consume tokens, none hold a literal — §4.6 | 18g | RULED (R-Q6) |
 
 ## 4. The traces (the architect's read — by reading, never by running; the pin decides)
 
@@ -331,9 +329,7 @@ a land-at-top; the offset remembered per note for the session).
   `BlockDecor`, the inline editor's inset, the callout rect. Evidence: three red-on-old pins (the
   field's width; the badge/emoji rects disjoint from the text rect; the block row's door through the
   registry walk); walked in Write and the book Outline, both voices. Reviewer: `opus-reviewer`.
-- **Batch c — THE PHONE (row 7, if Q-9 confirms):** the Write arrival's reveal + the session offset
-  memory. Evidence: the phone's own pins + a simulator walk with captures; the parity line.
-  Reviewer: `opus-reviewer`.
+- ~~**Batch c — THE PHONE (row 7)**~~ — **RETIRED at the sitting (R-Q9):** the phone's Write arrival is the mobile session's, standalone or with the post-13u catch-up; the item lives on the `mobile` branch (`mobile-round-2-orchestrator-handoff.md` §12.2) and in PL-22.
 
 ### 5.2 — 18h · time (stamps · sort · the day search)
 - **Batch 1 — STAMPS + SORT (rows 9 · 10):** core first (`TimelineItem.lastTouchedAt`; the title
@@ -357,13 +353,24 @@ palette parameter, the two settings, the pane's swatch row + hex field, `ThemeTo
 (default = byte-identical to today's four sets — the parity proof). Evidence: the pins; a walk in
 both voices × four seeds × custom × light and dark; captures. Reviewer: `fable-reviewer`.
 
-## 6. THE KICKOFF PROMPT
-*(Written after the sitting — the rulings go in §1 first, then the prompt is the paste-ready text a
-fresh orchestrator session starts from. This session IS the orchestrator; the prompt is for a
-successor if a cutover is needed — `notes/SessionResiliencyProtocol.md`.)*
+## 6. THE KICKOFF PROMPT (paste-ready — for a SUCCESSOR orchestrator if this session cuts over; `notes/SessionResiliencyProtocol.md`)
 
-## 7. Her rulings (the record — filled at the sitting)
-*(Pending. Each Q-n's answer lands here verbatim-faithful the turn she gives it.)*
+> `/architect-phase use-report round 2 (2026-09-12)` — you are the orchestrator of the 2026-09-12 use-report round (17p · 18g · 18h · 18i). Read, in this order: CLAUDE.md and the canon it loads; `notes/plans/use-report-round-2026-09-12.md` WHOLE (§7 her rulings are settled — never re-open them; LIVE STATUS says where the round stands; the Records carry every batch's brief, record and adjudication); `notes/author-reports/2026-09-12-use-report.md`; the previous round's `notes/plans/use-report-round-2026-09-06.md` §8 (the process this round binds by reference) and its handoff; `notes/plans/phase-17-standing-fixes.md`'s rules and the 17p row; `notes/KnownIssuesAndTechDebt.md`; `notes/SessionResiliencyProtocol.md`; the three agent definitions in `.claude/agents/`. Verify the state against git before anything (`git log --oneline -8`, `git status -sb`, `pgrep -fl 'Variorum.app/Contents/MacOS'`). Then continue from LIVE STATUS's **Next**. One agent at a time; briefs by pointer from this file; records repo-first; the ladder per letter; the round-end Fable pass; the closeout ritual; her walk before the install refresh.
+
+## 7. Her rulings (the record — the kickoff sitting, 2026-09-12; verbatim-faithful: the option she picked is named by its label, her own words quoted where she added any; SETTLED)
+
+- **R-Q1 — REMEMBER + REVEAL ONLY.** She picked *"Remember + reveal only"*: a per-note scroll memory for the session, restored on entry; a landing (the current block on entry, a fan-panel bloom) scrolls only when the block is off-screen, minimally, never to the top; the typewriter room stays. (Not across launches; the entry landing is not retired.)
+- **R-Q2 — NO PLACEHOLDER ANYWHERE.** She picked *"No placeholder anywhere"*: an empty block in Takes is an empty line exactly as Write renders it; the ⑂+ badge still marks the row. **This SUPERSEDES Phase 13 batch 9's R103 wording** ("the kept line says what it is") — the R103 ruling's SUBSTANCE stands (a take deleted down to nothing KEEPS the block's own line — the line is not removed), its FACE (the "empty take — line kept" overlay) is retired. The ＋ new block door aligns to the text's left edge (from Q-2's shared text, unopposed).
+- **R-Q3 — DELETE NOW ON THE TRAY'S BLOCK ROWS.** She picked *"Add it to block rows"*: Leaving's block rows get Delete Now with the same confirm-every-time door the Library's Trash gives a block; stranded originals stay without one (they ride their family's clock).
+- **R-Q4 — A LEFT LANE; THE EMOJI INSIDE THE FRAME.** She picked *"Reserve a left lane; emoji inside the frame"*: the book Outline's inline editor reserves ~40 pt on the left whenever the note has a comment or a callout emoji; the badge sits in the lane; the emoji moves inside the callout frame's leading inset; nothing covers text; comments stay on the left.
+- **R-Q5 — RECEIPTS: QUIET BY DEFAULT, TOAST STAYS AN OPTION.** Her words: *"Quiet should be the default, but toast should still be an option"* → the setting is three-way (toast · quiet · off), the default QUIET; refusals and offers always toast; the strings are untouched.
+- **R-Q6 — ONE SEED HUE, BOTH VOICES, CUSTOM HEX.** She picked the recommended option: four presets (lavender · mint · pink · blue) + a custom hex; one brain derives the room, wash, accent, take tints and hairline; Terminal and Study both accept a palette; dark stays black; the setting syncs; the seeds are adjusted at her eye during the walk.
+- **R-Q7 — THE MASTHEAD STAMP, CLICK TOGGLES.** She picked the recommended option: at the trailing end of the "in no book" row, *edited today 1:33 AM* (or *edited Sep 9*); a click flips it to *created …*, a click again returns; the Library rows get a muted trailing stamp too.
+- **R-Q8 — THE DAY SEARCH, BUILT NOW.** She picked *"Build now, small filter in the Library"*: a date field in the Library header ("on day…"), the union query (the last-edit stamp OR a savepoint that day), half a batch beside the sort menu.
+- **R-Q9 — THE PHONE: THE WRITE PAGE — AND IT LEAVES THIS ROUND.** She picked *"The Write page when a note opens"*; then, minutes later, her instruction verbatim: *"the mobile bug can be noted and I can handle it in a separate variorum mobile session - that repo has its own rules, if it's not shared. I would like you to write about it in the plans for that repo though, to be completed as a standalone part or with 13u, if I work on mobile after 13u is done."* → **17p batch c is RETIRED from this round.** The item is written into the mobile branch's plan (`notes/plans/mobile-round-2-orchestrator-handoff.md` §12.2 on `mobile`, commit pushed) with the trace, the ruled shape (reveal minimally, remember the offset per note for the session, the room stays) and the fences; the parity line is `notes/MobileSoul.md` §6 row PL-22. Owner: the mobile app project row.
+- **R-Q10 — CAST AND ORDER AS PROPOSED.** Order **17p → 18h → 18i → 18g**; `opus-implementer` everywhere; `fable-reviewer` on 17p batch a and on 18g; `opus-reviewer` elsewhere; the round-end Fable pass over the Opus-reviewed letters as last round.
+
+**No opening question remains.** A batch that finds a new one follows §8's PROVISIONAL rule (QUESTIONS #102 next).
 
 ## 8. Process (binding on every batch)
 - **The previous round's §8 binds by reference** (`notes/plans/use-report-round-2026-09-06.md` §8):
@@ -413,9 +420,8 @@ session with only the repo continues the round from here.)*
   guidance · the resiliency protocol · the review prompt · the standing-fixes rules and register · the
   three agent definitions · the code behind every row (§4). Her ten screenshots copied and the folder
   gitignored; her report saved verbatim. **Tree at open:** `3805e210`, clean, `main` == `origin/main`.
-- **Next:** THE KICKOFF SITTING — Q-1…Q-10 to her; her rulings into §7; then the mechanical flips
-  (the 17 register's 17p row · the Phase 18 row's 18g/18h/18i · the running order · the Current-phase
-  pointer), the baselines, and 17p batch a's brief (R-1).
+- **THE KICKOFF SITTING — DONE (2026-09-12):** Q-1…Q-10 all answered in one sitting (§7, R-Q1…R-Q10); the mechanical flips landed at the opening commit `0fc6347e` (the 17 register's 17p row · the Phase 18 row's 18g/18h/18i · running-order row 3d · the Current-phase pointer · the sequence line). **Baselines:** the code tree is BYTE-IDENTICAL to the last round's final full run (`fd434824`'s code = `9c00e3cd`; every commit since is `notes/`-only — verified by `git diff --stat 9c00e3cd HEAD -- Sources App`), so its finals STAND as this round's baseline: core 1503/163 · Mac FULL 2462/424 · iOS green · marker 8; a fresh core run is recorded below when it lands.
+- **Next:** 17p batch a on R-1 (appended below) — `opus-implementer`, then the batch-a Fable ladder.
 
 ## Records
 
