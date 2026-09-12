@@ -1561,18 +1561,13 @@ Stranded originals get NO Delete Now door (R-Q3's letter).
    measured on the PRE-FIX code (no revert needed — the pin was written and run first)
 3. **rows 5–6 — the decoration lane + the emoji inside the frame** — **DONE (`5712779e`)**,
    red-on-old measured
-4. **the walk + captures + the closing suites** — **IN-PROGRESS.** Rows 3 · 4 walked green (captures
-   `01`–`03`, `06`–`09`); row 5's WRITE side walked green (`04` · `05`). **The walk FOUND A DEFECT in
-   piece 3 — W-1, fixed at this commit** (below); the book-Outline half of the walk re-runs on the
-   rebuilt app next. Remaining: the Outline captures in both voices, the tray captures, the closing
-   suites.
+4. **the walk + captures + the closing suites** — **DONE (this commit).** All four rows walked green
+   in USE, both voices, 18 captures. **The walk FOUND TWO DEFECTS in piece 3 — W-1 (`6c094a21`) and
+   W-2 (`60766652`), both fixed and pinned.** Closing run: **`✔ 426 tests in 57 suites`**
 
 **Rows:** 3 · 4 · 5 · 6 — dispositions PENDING.
 
-**A ONE-LINE BEHAVIORAL REVERT IS ANNOUNCED, NOT YET STARTED:** removing `onWidthReflow?()` from
-`EditorTextView.setDecorLane` (the W-1 fix at this commit) to measure its red-on-old, then
-`git checkout -- App/Variorum/Variorum/Features/Editor/EditorTextView.swift` to restore. Three others
-ran across this batch — row 3's two (from `e394ac76`) and rows
+**No revert is in flight.** FOUR ran across this batch — row 3's two (from `e394ac76`) and rows
 5–6's one (from `5712779e`) — each announced in this record BEFORE it started, each restored by
 `git checkout --` of a COMMITTED file (never a scratchpad copy), and after each the tree was verified
 diff-clean against its commit and the suite re-run green.
@@ -1859,10 +1854,213 @@ silently did nothing)".
 the inset — a lane IS a prose-column reflow, so the existing signal is the honest one rather than a
 new mechanism beside it. Fires only on a real change, so the second pass writes nothing and the loop
 closes after exactly one extra cycle. Pins:
-`BlockDecorLaneTests.reservingTheLaneReportsTheReflowThatRefreshesTheDecorations` (1 report on
-reserve, 0 on a settled re-ask, 1 more on giving it back, and INERT on a surface that reserves no
-lane) and `…anAttachedInlineSurfaceCarriesTheModelsReflowHandler` (the wiring the report rides).
-`✔ Test run with 11 tests in 1 suite passed`.
+`BlockDecorLaneTests.reservingTheLaneSaysSoSoTheDecorationsAreComputedAgain` (the report on reserve,
+none on a settled re-ask, one more on giving it back, and INERT on a surface that reserves no lane).
+**RED ON OLD, measured by the announced revert and restored** (`git checkout --`): removing the one
+line left `reflows → 0` where 1 is owed, four times over (`red5.log`, local). At the W-2 fix below
+the seam generalized from `onWidthReflow` to the controller's own `onProseColumnChanged`, because the
+read tier's reflow signal (`onWidthChange` → `viewWidthChanged`) guards on `bounds.width` and a lane
+changes the CONTAINER's width, not the frame's — so the editor's signal could not serve both.
+
+##### THE WALK'S SECOND FINDING — W-2: THE LANE REACHED ONE SURFACE OF TWO (found in USE, fixed)
+
+The rebuilt app showed the defect AGAIN, unchanged. **The book Outline renders a note through TWO
+different text views** (`BookView`'s two branches, read at the capture rather than assumed):
+
+| The row's state | The surface | Before W-2 |
+|---|---|---|
+| expanded, FOCUSED | `EditorView(inline: true)` → `InlineEditorSurface` → `EditorTextView.makeInlineEditor()` | lane ✓ |
+| expanded, NOT focused | `ReadPostView` → `PaneTextView.makeReadSurface()` | **no lane** |
+
+The second is what an Outline shows BY DEFAULT — nothing is focused until she clicks in — so it is
+the surface her screenshots were of, and piece 3's fix had reached the other one. `PaneTextView` is a
+SIBLING `NSTextView` subclass, not a subclass of `EditorTextView`, so it could inherit nothing.
+
+**The fix: the lane becomes ONE BRAIN both adopt** (`App/Variorum/Variorum/Surface/DecorLane.swift`)
+— `DecorLaneReservation` holds the state and the arithmetic, `DecorLaneSurface` is the one question
+the decoration controller asks, and each text view is a three-line adopter (hold it, write the inset
+it names, override `textContainerOrigin` to the leading edge it names). Two copies of that arithmetic
+in two sibling classes is exactly the drift class (F-0). The controller's refresh call becomes the
+HOST's own door (`EditorViewModel.proseColumnDidChange` / `ReadPostViewModel.pushOverlaysToSinks`),
+so W-1's fix serves both surfaces through one seam; and `ReadPostViewModel` reads the same one
+prose-column derivation.
+
+**THE SWEEP TABLE, as the pin** (`…everyDecoratedSurfaceHasItsLaneAnsweredOneWayOrTheOther`) — the
+constitution's closing form, over every host of `BlockDecorOverlayController` (there are exactly
+three, grepped):
+
+| Host | Surface | Lane | Why |
+|---|---|---|---|
+| `InlineEditorSurface` | `makeInlineEditor` | **YES** | prose at 8 pt; the book's focused note |
+| `ReadPostView` | `makeReadSurface` | **YES** | prose at 8 pt; the book's unfocused note and Read's page — W-2's own cell |
+| `EditorSurface` | `makeEditor` | **no** | its gutter is the dynamic centering inset, wide enough for a margin card at any window not at `minGutter` |
+| *(a take pane)* | `makeTakeSurface` | **no** | hosts no decoration controller at all, so nothing to make room for |
+
+`✔ Test run with 12 tests in 1 suite passed`.
+
+#### PIECE 4 — THE WALK (the acceptance gate: USE, on the DEV-STORE Debug build)
+
+`io.lduarte.Variorum.debug` (verified by `CFBundleIdentifier`), `cliclick` 5.1 + `Tools/WalkKit`, the
+dev store's sample library. **Her real-store app was QUIT for the whole batch** — `pgrep -fl
+'Variorum.app/Contents/MacOS'` empty at the open and at every launch; every instance in this record
+lives under `scratchpad/17p-b/DD/…/Debug/Variorum.app` and was discriminated by PATH. No Release
+build, no `/Applications` refresh.
+
+**The fixture,** built by hand in the app: the sample library's `field notes` book, its one note
+`2026-08-31`, whose block 1 (*"loose thoughts on structure"*) was given a **sand callout**, then the
+**🔥 glyph** through the Callout Emoji alert (row 4's own walk), then a **comment** (*"a note in the
+margin"*) — i.e. exactly the *commented callout carrying an emoji* rows 5–6 are about — plus a
+deleted block and an archived block for the tray.
+
+| Row | The walk | What happened | Capture |
+|---|---|---|---|
+| **4** | Block ▸ Callout ▸ Emoji… | the field stands at its full width beside *"Emoji & Symbols…"* — her image 9's sliver is gone | `01` |
+| **4** | typing into it | the glyph lands and reads back (a paste and a picked glyph both) | `02` · `02b` |
+| **4** | the picker door | *"Emoji & Symbols…"* opens the SYSTEM picker at the field, and the alert survives it (an alert BUTTON would have dismissed the prompt) | `03` |
+| **4** | four glyphs in the field | the field holds them with room to spare — the accessory grew to its fitting size | `02b` |
+| **5** | WRITE, the callout with its glyph | the 🔥 sits INSIDE the card's leading inset (the card grew leftward for it); before the batch it floated in the bare margin, LEFT of its own frame | `04` |
+| **5** | WRITE, the same block with a comment | the margin card on the left, the glyph inside the card, the text untouched — all three clear of each other (both voices) | `05` · `05b` |
+| **5 · 6** | **the BOOK OUTLINE** (her surface), Terminal | the `#1` badge in the LANE, the 🔥 inside the frame, *"loose thoughts on structure"* WHOLE and uncovered | `07` · `07b` |
+| **5 · 6** | the same, **Study** | identical, in serif | `08` · `08b` |
+| **5 · 6** | the book's paged mode, **"edit here"** → the CONTAINED EDITOR live | badge in the lane, glyph in the frame, the ring on the block, the caret in the text, all three disjoint | `09` |
+| **3** | the tray's Leaving view, Study | the block row carries **Put back AND Delete Now** — the door the explainer above it promises; her image 3's missing button | `10` |
+| **3** | Delete Now | the confirm asks, in the Trash's own words for a block: *"Delete this block for good? It skips the rest of its 30 days — there's no putting it back."* | `11` |
+| **3** | Delete for Good | the act LANDED: *"The block is gone from the app now — the app's own cleanup removes the bytes."*, Leaving 0 | `12` |
+| **3** | the Archived view | the archived block row keeps **Put back alone** — *"kept — no clock"*, nothing to skip | `13` |
+| **3** | the same row, **Terminal** | both verbs, in mono | `14` |
+
+**Captures** (in `notes/plans/use-report-2026-09-12-screens/17p-b/`, gitignored):
+`01-row4-callout-emoji-alert-field-wide.png` · `02-row4-typing-lands-in-the-field.png` ·
+`02b-row4-four-glyphs-typed-and-pasted.png` · `03-row4-the-picker-door-opens.png` ·
+`04-row5-write-the-glyph-inside-its-card.png` ·
+`05-row5-write-margin-card-and-glyph-both-clear-of-the-text.png` · `05b-row5-write-study-voice.png` ·
+**`06-w1-the-defect-the-walk-found.png`** (the first walk's evidence: the badge over the "lo" of
+"loose") · `07-rows56-outline-terminal-badge-in-the-lane-glyph-in-the-frame.png` ·
+`07b-rows56-outline-terminal-full.png` · `08-rows56-outline-study-voice-same.png` ·
+`08b-rows56-outline-study-full-window.png` ·
+`09-rows56-the-contained-editor-live-all-three-disjoint.png` ·
+`10-row3-the-block-row-carries-delete-now.png` ·
+`11-row3-the-confirm-asks-with-the-blocks-own-sentence.png` ·
+`12-row3-the-purge-lands-and-the-row-leaves.png` ·
+`13-row3-the-archived-row-keeps-put-back-alone.png` ·
+`14-row3-terminal-voice-the-block-row-both-verbs.png`.
+
+**TWO WALK ROWS NOT REACHED, and why** (stated rather than implied): a **deleted TAKE row beside the
+block row** — the Block menu has `Archive Take` but no *delete* take door (the takes board's card menu
+owns it), and the take row's Delete Now is SHIPPED behaviour this batch did not touch, pinned by
+`TrayPanelMoveTests.theLeavingSectionsDeleteNowConfirmsThenPurgesForGood` and by the face pin's own
+take arm (which asserts the take row reports both verbs in the same mounted frame as the block row —
+capture-free but from a real mount); and a **stranded original**, which needs a divide-W to exist.
+Both are covered by the enumeration pin and by the shared belt
+(`TrashPurge.deleteNowConfirm` refusing a `.preservedOriginal`).
+
+**THREE ENVIRONMENT NOTES, recorded so they are not met twice.**
+1. **The recorded first-launch pitfall is REAL and it cost this walk an hour.** The first launch of a
+   fresh build took every click and every keystroke and showed nothing — `cliclick t:` and
+   `osascript keystroke` both landed nowhere while the app was demonstrably frontmost, and a
+   `kp:delete` DID land, so it was not focus. Quitting my instance and relaunching cleared it
+   (batch a recorded the same thing). **Always prove the keyboard works with a throwaway probe
+   before building a fixture by typing.**
+2. **`osascript keystroke "<emoji>"` silently mangles the glyph** (a 💡 typed as `aa`), and
+   `cliclick t:"💡"` refuses outright (*"Unable to get key code"*). The road that works is
+   `pbcopy` + ⌘V — and the system emoji PANEL, once opened, stays in front of the alert and eats the
+   next clicks, so close it by its own ✕ before touching the alert again.
+3. **Typing a long string through `cliclick` loses characters against the 18c deferred-keystroke
+   seam** — 32 characters typed in one call arrived as one. Chunked typing with 350 ms waits is the
+   road. (The related observation — a surface that stopped accepting text entirely while an empty
+   live block held the ring, on the pre-relaunch instance — is 13u1's deferred-keystroke item, not
+   this batch's; recorded, not chased.)
+
+#### CLOSING RUNS (this tree)
+
+- **Mac, ONE `xcodebuild test` from `App/Variorum/`** over the fifty-seven type names this batch
+  touched or leans on — the TRAY/recovery family (`TrayFilterTests` · `TrayPanelMoveTests` ·
+  `TrayPanelShapeTests` · `NoteTrayTests` · `RecoveryDoorsTests` · `RecoveryExplainerTests` ·
+  `TrashPurgeDoorsTests` · `TrashPurgeSharedLayerTests` · `TrashConfirmEdgeTests` ·
+  `IAAndTrashShapeTests` · `TrashSurfaceTests` · `TrashPoolHonestyTests` · `SnippetGroupTrashTests`),
+  the CALLOUT/doors family (`CalloutEmojiPickerTests` · `CalloutSwatchTests` ·
+  `DuplicateBookNameDoorTests` · `BookAscentDeclarationTests` · `FormattingSurfacesTests`), the
+  EDITOR/decor family (`BlockDecorLaneTests` · `BlockDecorGeometryTests` · `EditorTypographyTests` ·
+  `CommentsAndReorderTests` · `MarginHoverCommentTests` · `CalmPageHoverTests` ·
+  `LongBlockLayoutPlannerTests` · `LongBlockLayoutHostedTests` · `DecorRegistrationMappingTests` ·
+  `DecorRegistrationWindowTests` · `PaneSurfaceTests` · `PanePublishDoorTests` ·
+  `BlockHighlightTests` · `ParagraphGapTests` · `TypewriterRoomTests` · `FindAndReplaceTests` ·
+  `FocusHandoffTests` · `BareArrivalFocusTests`), the READ-TIER family the W-2 fix reaches
+  (`ReadTierTests` · `ReadRenderingTests` · `ReadModeTests` · `ReadLandingTests` ·
+  `ReadArrivalMeasureTests` · `ReadingFlowLandingTests` · `ReadingFlowEstimateTests` ·
+  `NavigatorReadRowsTests` · `PagedReadViewTests` · `PagePaginatorTests`), the registry walk
+  (`CapabilityRegistryTests`) and the ten `Tutorial*` spine types →
+  **`✔ Test run with 426 tests in 57 suites passed after 108.320 seconds`** — fifty-seven suites for
+  fifty-seven names, zero `✘`, and the log's single `skipped` match is the
+  `appintentsmetadataprocessor` build warning, checked by line
+  (`scratchpad/17p-b/closing.log`, local).
+- **Core: UNTOUCHED** — `git diff --stat 48f54268..HEAD -- Sources/` is EMPTY. Zero `Sync/`, zero
+  schema, zero `Domain/`. `swift test` therefore not owed and not re-run; the round's baseline
+  (1503/163) stands.
+- **`App/Variorum/Shared/`: UNTOUCHED** (empty diff — the tray explainer stays, and is now true), so
+  the iOS build is not owed and was not run.
+- **The editor seam: UNTOUCHED** — `BlockRangeIndex`, `EditorSurfaceController` and `PaneTextAuthority`
+  are diff-empty; `EditorTextView`'s change is GEOMETRY only (an opt-in container origin) and
+  `PaneSurface`'s is the same, both default-inert. The fallback canary is asserted silent over a laned
+  surface. Zero rendering attributes, zero `exclusionPaths`, zero paragraph-style writes.
+- **No commit trailers** on any of this batch's commits (verified).
+
+#### THE ROWS, DISPOSITIONED
+
+| # | Her words (short) | Disposition |
+|---|---|---|
+| **3** | *"i don't know where Delete Now is here — the text talks about it but the button doesn't appear to be visible"* | **FIXED** — pins: `TrayFilterTests.theLeavingBlockRowDrawsBothVerbsAndTheOtherRowsDrawOne` (red-on-old **`["Put back"]` where `["Put back", "Delete Now"]` is owed**, with the take row in the same frame still reporting both) · `…onlyTheLeavingViewsBlocksAndTakesMayEndTheirOwnClock` (the six-cell enumeration + the shared belt) · `TrayPanelMoveTests.aLeavingBlockRowsDeleteNowConfirmsThenPurgesForGood` (red-on-old **`pendingPurge → nil`** under the kind revert) · `…aBlockRowsPurgeDoorAsksEveryTime`. Walked: `10`–`14`, both voices, the confirm and the landing |
+| **4** | *"the callout pane is broken"* | **FIXED** — pin: `CalloutEmojiPickerTests.theEmojiFieldHasRoomToTypeIn` (red-on-old **`field.frame.width → 0.0`**, measured on the pre-fix code in a real window; the button and the accessory already passed, which is the rest of the diagnosis). Walked: `01` · `02` · `02b` · `03` |
+| **5** | *"the callout goes on top of the comment badge which is on top of the text"* | **FIXED** — pins: `BlockDecorLaneTests.aCommentedCalloutWithAGlyphCoversNoTextAndNothingElseEither` (red-on-old **badge `(2,10,32,16)` ∩ prose `(8,10,604,34)`, glyph `(6,10,18,17)` ∩ both**) · `…theCardWidensToHoldItsGlyphAndTheGlyphSitsInside` · `…theLaneHoldsAtANarrowBookColumnToo` · `…everyDecoratedSurfaceHasItsLaneAnsweredOneWayOrTheOther` · `…reservingTheLaneSaysSoSoTheDecorationsAreComputedAgain` · `…aLanedSurfaceStaysOnTextKit2` · `…writesMarginCardAndPlainCalloutAreWhereTheyShipped` (the parity). Walked: `04` · `05` · `05b` · `07`–`09` |
+| **6** | *"in book view the comment thing needs to be moved or only accessible on the left because it's blocking the text"* | **FIXED** — the same mechanism and the same pins; the badge lives in the lane and comments stay on the LEFT (her R5-3 letter). Walked: `07`–`09`, and `06` is the before |
+
+**Nothing DISMISSED AS HOLLOW.** Every row had a measured mechanism and a red-on-old number.
+**Nothing DEFERRED** except the two recorded residuals below, each with an owner.
+
+#### WHAT THE LETTER'S CLOSEOUT INHERITS
+
+- **NO CANON DELTA IS OWED.** All four rows are DEFECTS against behaviour AppSpec already describes:
+  §12's R7 (comments in the margin, degrading to a count badge) and R16/R17/R27 (the callout frame and
+  its glyph) and R9 (sacred margins) say what should happen; this batch makes the three contained
+  surfaces do it. The lane is a LOCAL geometry constant, never synced, never schema. Her R-Q3 and R-Q4
+  are recorded in this plan's §7 and want no second home.
+- **NO NEW QUESTIONS ENTRY** — **#102 is still free.** Every decision here is R-Q3's or R-Q4's letter;
+  the two numbers that were mine (the lane's width, the glyph's box) are recorded with their
+  arithmetic rather than asked, exactly as the brief assigns them.
+- **TWO RESIDUALS, with owners.**
+  1. **A Write window narrow enough to sit at `minGutter` (28)** still has no room for a count badge
+     beside a glyphed callout (the badge clamps at 2, the prose starts at 28). No worse than what
+     shipped, and not the book's editor — the honest fix is a decoration-aware floor under Write's own
+     `minGutter`, which moves Write's measure (R9) and is a ruling, not a batch's number.
+     **Owner: 13u2** (the restyle continuation).
+  2. **A multi-glyph callout answer CLIPS** inside the fixed 18 pt glyph box (before, it clamped at 2
+     and sat on the words). Bounded and honest; a real fix is either a measured box — which makes the
+     card change shape with the glyph and re-opens the lane's arithmetic — or a one-grapheme guard at
+     `promptEmoji`, which is a product call about what *"a leading glyph"* means.
+     **Owner: 13u2**, or her word.
+- **ONE OBSERVATION FOR HER, not a question.** Her R-Q4 estimates the lane at *"~40 pt"*; the built
+  lane is **64**, because that estimate counted the badge alone while the same ruling also widens the
+  frame to hold the glyph, and the widened pad stands between the badge and the text. 64 is the
+  smallest width at which all three of her clauses hold at once, and the arithmetic is in
+  `EditorTypography.commentLane`'s doc term by term. If the narrower measure matters more to her than
+  the badge's full size, the two levers are the badge's width and the glyph's box.
+- **Mobile parity:** nothing in `Shared/` moved, so the phone inherits nothing by construction. The
+  phone's own comment/callout decorations are the mobile session's; this batch's shape — ONE lane
+  brain the contained surfaces adopt, the glyph inside its own frame — is the design note that
+  session should read if it meets the same class.
+- **13u coordination:** this batch touched no 13u item's code. It hands 13u2's restyle continuation
+  four additive seams on surfaces it will re-dress: `EditorTypography.commentLane` /
+  `inlineInset(needsLane:)`, `Surface/DecorLane.swift` (the reservation + the `DecorLaneSurface`
+  protocol), `BlockDecor`'s five named gutter constants with `calloutLeadingPad` /
+  `calloutGlyphRect` / `commentBadgeRect` / `commentClearance`, and `TrayRowVerbs` +
+  `TrayRowDoorProbe` (the tray's shared verb cluster and the DEBUG oracle that can pin a mounted
+  `ForEach` row's doors).
+
+**Batch b CLOSED at this commit.** Everything is committed and pushed; no revert is in flight; the
+tree is clean. My own dev-store leftovers: the `field notes` note now carries a callout with a 🔥
+glyph, one comment, one archived empty block and one deleted empty block — deliberately left so the
+ladder sees the same store I did.
+
 
 
 *(Pointers re-verified by the orchestrator on 2026-09-12 after batch a's ladder, at `17803ce4`: `RecoveryView.swift` lives at `App/Variorum/Variorum/Features/Library/RecoveryView.swift` (`requestDeleteNow` `:400`; the stranded rule `:122–126`); `EditorTypography.swift` at `App/Variorum/Variorum/Theme/EditorTypography.swift` (`minGutter` `:171`, `inlineSurfaceInset` `:176`); `TrayPanel.swift`'s lines hold within one (`confirmPendingPurge` `:637`, `trashItem(for:)` `:653`); `CalloutMenu.emojiAccessory` `:179`; `BlockDecor` badge `:592`, emoji `:479`, `calloutRect` `:167`; `EditorTextView.makeInlineEditor` `:823`; `EditorViewModel` `textLeft` `:3162`; `DoorSetTests:327` is the accessory's title pin. Batch a moved nothing in this batch's files. The environment traps and rules 1–8 are R-1's, verbatim by reference; her app is QUIT for the night — an instance at `/Applications` means she is awake: never touch it.)*
