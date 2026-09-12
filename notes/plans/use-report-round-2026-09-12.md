@@ -1559,13 +1559,19 @@ Stranded originals get NO Delete Now door (R-Q3's letter).
 1. **row 3 — the tray's block rows gain Delete Now** — **DONE (`e394ac76`)**, red-on-old measured
 2. **row 4 — the Callout Emoji alert's collapsed field** — **DONE (this commit)**, red-on-old
    measured on the PRE-FIX code (no revert needed — the pin was written and run first)
-3. **rows 5–6 — the decoration lane + the emoji inside the frame** — **NOT-STARTED**
+3. **rows 5–6 — the decoration lane + the emoji inside the frame** — **DONE (`5712779e`)**; its
+   red-on-old numbers are **PENDING** (the behavioral revert runs NEXT, announced below)
 4. **the walk + captures + the closing suites** — **NOT-STARTED**
 
 **Rows:** 3 · 4 · 5 · 6 — dispositions PENDING.
 
-**No revert is in flight** (row 3's two ran and were restored by `git checkout --` from
-`e394ac76`; the tree was verified diff-clean against that commit and re-run green afterwards).
+**A BEHAVIORAL REVERT IS ANNOUNCED, NOT YET STARTED** (the resiliency protocol's rule 2): the next
+act is an early `return` in `EditorTextView.setDecorLane` — the contained editor's prose stays at
+8 pt, the pre-batch state — to measure rows 5–6's red-on-old, then
+`git checkout -- App/Variorum/Variorum/Features/Editor/EditorTextView.swift` to restore (the file is
+committed at `5712779e`, so the restore is the safe one; no scratchpad copy is used). Row 3's two
+reverts ran earlier and were restored the same way from `e394ac76`, the tree verified diff-clean and
+re-run green.
 
 ---
 
@@ -1691,6 +1697,121 @@ that FILE holds four suite TYPES (`DuplicateBookNameDoorTests` · `CalloutSwatch
 names it silently tests fewer suites than it claims; caught here by reading the
 `Test run with N tests in M suites` line against the number of names passed (the brief's own
 instruction), and the closing run names types only.
+
+#### PIECE 3 — ROWS 5–6: THE DECORATION LANE, AND THE GLYPH INSIDE ITS FRAME (her ruling R-Q4)
+
+**THE MECHANISM, TRACED MYSELF — and it is TWO defects, not one.** A CONTAINED (book) editor's prose
+starts `EditorTypography.inlineSurfaceInset` = 8 pt from its own left edge (`makeInlineEditor` sets
+the inset; `updateGutters` returns early there because `maxColumnWidth` is nil), and
+`EditorViewModel.sendDecorState` hands the decor `textLeft = textContainerOrigin.x` — so `textLeft`
+IS 8 in the book's editor (measured: `view.proseLeft == 8` at rest). Both left-margin decorations
+place themselves left of that edge and clamp at 2:
+
+| The face | Its shipped rule | At `textLeft == 8` |
+|---|---|---|
+| the comment count badge | `x = max(2, textLeft - 36)`, 32 wide | **[2, 34]** — over the words, which start at 8 |
+| the callout's glyph | `x = max(2, textLeft - width - 8)` | **[2, 2 + w]** — over the words, and over the badge |
+
+That is her image 10 and the first half of image 11. **The second defect is width-independent and
+shows in Write too:** the glyph's rule put it at `textLeft - w - 8` while `calloutRect`'s own leading
+edge is `textLeft - 12` — so the glyph sat OUTSIDE its own card, in the bare margin to its left, and
+at any gutter where a badge is also drawn the two aim at the same corner and collide. Her *"the
+callout goes on top of the comment badge"* is that, and a lane alone would not have fixed it.
+
+**WHAT SHIPPED — geometry only. No text attribute, no paragraph style, no `exclusionPaths`.**
+
+1. **ONE constant and ONE decision** (review focus F-3): `EditorTypography.commentLane` (64) and
+   `EditorTypography.inlineInset(needsLane:)`. The constant's doc carries the ARITHMETIC that
+   produced it, term by term, so a future edit can check it rather than guess:
+   `2 edge + 32 badge + 4 air + 12 card pad + 4 glyph pad + 18 glyph box = 72` from the view's left
+   edge, less the surface's own 8.
+2. **ONE trigger** — `BlockDecor.needsLane(_ state:)`, asked of the decoration state the overlay
+   controller is already holding (it carries `comments` and `presentations`), so the lane has no
+   second source of truth and no second trigger. Her R-Q4's words exactly: a comment OR a callout
+   glyph. A callout with NO glyph reserves nothing (its 12 pt of card air always had room).
+3. **The LEFT only.** `textContainerInset` is symmetric, so the pair rides as its mean and
+   `EditorTextView.textContainerOrigin` is overridden to place the container at the LEADING inset —
+   the container's width becomes `bounds - (leading + trailing)` and its right edge stays at
+   `bounds - 8`. The measure narrows by the lane, which is the point (R9 — the margins stay sacred);
+   growing the symmetric inset instead would have taken the lane off the right margin too, for room
+   only the left needs. **Opt-in:** `reservesDecorLane` is set by `makeInlineEditor` alone, so
+   `setDecorLane` is inert on every other surface and their inset paths are byte-identical.
+4. **ONE prose-column derivation.** `EditorTextView.proseLeft`/`proseRight`, read by
+   `sendDecorState`. On a symmetric surface both are IDENTICAL to the arithmetic that stood there
+   (`textContainerOrigin.x == textContainerInset.width`, and the trailing inset IS that number), so
+   every shipped decoration geometry is unchanged by identity rather than by luck — the old
+   `bounds.width - textContainerInset.width` is simply wrong once the insets differ.
+5. **The glyph is the FRAME's.** `BlockDecor.calloutLeadingPad(hasGlyph:)` grows the card's leading
+   pad by the glyph's room (her R-Q4: *"the frame widens to hold it"*), `calloutGlyphRect(card:
+   blockTop:)` places the glyph in the card's top-leading corner, and the TRAILING edge and the
+   white-gap rule (R17) are untouched. ONE rule, shared by Write and the book's editor, so the two
+   surfaces cannot disagree. The glyph's box is FIXED (18 × 17) rather than measured: a card whose
+   pad followed a measured label would change shape with the glyph, and `promptEmoji` returns
+   whatever she typed — a multi-glyph answer now clips inside its box instead of pushing the card
+   past the badge (before, it clamped at 2 and sat on the words).
+6. **The comment faces yield the gutter a card claims.** `BlockDecor.commentClearance(hasCallout:
+   hasGlyph:own:)` is ONE answer for the badge and the margin card alike: their own shipped air where
+   the block wears no card, the card's leading pad + 4 where it does. A plain callout's 12 + 4 is
+   inside the margin card's own 28, so **Write's card does not move at all** — the parity claim, as
+   arithmetic and as a pin.
+
+**Five literals became named constants on `BlockDecor`** (`calloutGutterPad` 12 · `calloutGlyphPad` 4
+· `calloutGlyphBox` 18 × 17 · `commentBadgeSize` 32 × 16 · `decorAir` 4) — F-0's "no
+number-as-rule in a view", and the lane's arithmetic is built from them.
+
+**THE GEOMETRY, AFTER (measured in the pin, a laned 620 pt book editor, `textLeft` 72):**
+
+| | x-range | |
+|---|---|---|
+| the comment badge | **[2, 34]** | in the lane |
+| the callout card | from **38** | its leading pad 34 = 12 + 4 + 18 |
+| the glyph | **[42, 60]** | inside the card, 12 pt clear of the text |
+| the prose | **[72, 612]** | the trailing inset untouched |
+
+**PINS — `BlockDecorLaneTests` (9), all green, and none vacuous** (the `try?`/`guard`-return holes
+were closed after the first run: the disjointness pins now assert exactly one badge, one glyph and
+one card are drawn, and that the glyph's string is the glyph):
+- `theBookEditorsLaneArrivesWithADecorationAndLeavesWithIt` — 8 → 72 on a comment, 8 → 72 on a glyph,
+  **given back** to 8 when the note carries neither, and the trailing inset never moving.
+- `aCommentedCalloutWithAGlyphCoversNoTextAndNothingElseEither` — the ROW: badge, glyph and prose
+  pairwise disjoint in a real mounted surface, the glyph CONTAINED by its card, the badge stopping at
+  the card's edge, everything left of the text (her *"comments stay on the left"*).
+- `theLaneHoldsAtANarrowBookColumnToo` — the sweep, at 360 · 480 · 900 pt.
+- `aLanedSurfaceStaysOnTextKit2` — the fallback canary armed over a laned surface through a real
+  edit: silent, `textLayoutManager` non-nil, and the container really narrowed. Overriding
+  `textContainerOrigin` is not a TK1 API (TEXTKIT2_NOTES §4.2), but "not a downgrade trigger" is a
+  claim that must be measured, not assumed.
+- `theFullEditorReservesNoLaneAtAll` — the opt-in: `setDecorLane` inert on the full editor.
+- `theCardWidensToHoldItsGlyphAndTheGlyphSitsInside` ·
+  `theCommentFacesYieldTheGutterACalloutCardClaims` · `theLanesTriggerIsACommentOrACalloutGlyph` —
+  the pure rules.
+- `writesMarginCardAndPlainCalloutAreWhereTheyShipped` — the PARITY pin: the margin card at a wide
+  gutter is `(62, 40, 210, 54)`, a plain callout's card is `(16, 99, 424, 46)` and the narrow-gutter
+  badge is `(24, 0, 32, 16)` — the numbers the shipped pins already assert.
+
+**Green, the whole editor/decor neighbourhood in one run:** `✔ Test run with 123 tests in 18 suites
+passed after 29.983 seconds` (`BlockDecorLaneTests` · `MarginHoverCommentTests` ·
+`CalmPageHoverTests` · `EditorTypographyTests` · `BlockDecorGeometryTests` ·
+`CommentsAndReorderTests` · `LongBlockLayoutPlannerTests` · `LongBlockLayoutHostedTests` ·
+`DecorRegistrationMappingTests` · `DecorRegistrationWindowTests` · `PaneSurfaceTests` ·
+`BlockHighlightTests` · `ParagraphGapTests` · `TypewriterRoomTests` · `FindAndReplaceTests` ·
+`FocusHandoffTests` · `FormattingSurfacesTests` · `CalloutEmojiPickerTests`) — every shipped decor
+pin riding UNMODIFIED, which is the parity proof.
+
+**RED ON OLD: PENDING** (the announced behavioral revert runs next).
+
+**TWO THINGS RECORDED, NOT FIXED (residuals, with their owners):**
+1. **A Write window narrow enough to sit at `minGutter` (28) still has no room** for a count badge
+   beside a glyphed callout: the badge clamps at 2 and the prose starts at 28. It is no worse than
+   what shipped (the badge clamped to 2 there before too) and it is not the book's editor, which is
+   what rows 5–6 and her R-Q4 are about; the honest fix is a decoration-aware floor under Write's own
+   `minGutter`, which moves Write's measure (R9) and is a ruling, not a batch's number. Owner: the
+   13u2 restyle continuation.
+2. **Her ruling estimates the lane at *"~40 pt"* and the built lane is 64**, because that estimate
+   counted the badge alone while the same ruling also widens the frame to hold the glyph, and the
+   widened pad stands between the badge and the text. 64 is the smallest width at which all three of
+   her clauses hold at once. Stated here for her eye rather than filed as a question: it is a number
+   the brief assigns to the batch, and no ruling is re-opened.
 
 
 *(Pointers re-verified by the orchestrator on 2026-09-12 after batch a's ladder, at `17803ce4`: `RecoveryView.swift` lives at `App/Variorum/Variorum/Features/Library/RecoveryView.swift` (`requestDeleteNow` `:400`; the stranded rule `:122–126`); `EditorTypography.swift` at `App/Variorum/Variorum/Theme/EditorTypography.swift` (`minGutter` `:171`, `inlineSurfaceInset` `:176`); `TrayPanel.swift`'s lines hold within one (`confirmPendingPurge` `:637`, `trashItem(for:)` `:653`); `CalloutMenu.emojiAccessory` `:179`; `BlockDecor` badge `:592`, emoji `:479`, `calloutRect` `:167`; `EditorTextView.makeInlineEditor` `:823`; `EditorViewModel` `textLeft` `:3162`; `DoorSetTests:327` is the accessory's title pin. Batch a moved nothing in this batch's files. The environment traps and rules 1–8 are R-1's, verbatim by reference; her app is QUIT for the night — an instance at `/Applications` means she is awake: never touch it.)*
