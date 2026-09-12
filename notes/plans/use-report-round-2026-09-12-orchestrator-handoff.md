@@ -1,4 +1,4 @@
-# The 2026-09-12 use-report round — ORCHESTRATOR HANDOFF (written 2026-09-12 ~06:00 by the Fable orchestrator, at her ask: "write a handoff note for me so I don't have to wake you later… save whatever you durably need to know in a note so I can run / compact")
+# The 2026-09-12 use-report round — ORCHESTRATOR HANDOFF (first written 2026-09-12 ~06:00 by the Fable orchestrator for a compaction; REWRITTEN 2026-09-13 at the CUTOVER to a SUCCESSOR SESSION at her word — "you're at 600k and given that 18i, 18g, and 18j still remain it would be best to do that in a new session")
 
 *This file is the orchestrator's transcript-proof state. It serves THREE readers: (1) the SAME session after a
 context compaction (read it first, then LIVE STATUS in the plan); (2) a SUCCESSOR orchestrator if this session
@@ -6,41 +6,13 @@ dies (§0 is paste-ready); (3) the AUTHOR in the morning (§5 — what is hers).
 `notes/plans/use-report-round-2026-09-12.md`; this file never contradicts it — when the plan's LIVE STATUS is
 newer than §2 below, the plan wins.*
 
-## 0. PASTE-READY KICKOFF (a fresh session, or this one after compaction, starts here)
+## 0. PASTE-READY KICKOFF FOR THE SUCCESSOR ORCHESTRATOR (written 2026-09-13 by the first orchestrator at ~600k context, at her word: "it would be best to do that in a new session")
 
-> `/architect-phase use-report round 2 (2026-09-12)` — you are the orchestrator of the 2026-09-12 use-report
-> round (17p · 18g · 18h · 18i · 18j), running UNATTENDED overnight at her R-Q14. Work in
-> `~/dev/variorum` on `main`. **READ, YOURSELF, IN THIS ORDER:** this handoff whole ·
-> `notes/plans/use-report-round-2026-09-12.md` — §7 (her rulings R-Q1…R-Q15, SETTLED, never re-opened), §12
-> (the REVIEW FOCI — every reviewer is told to treat them as mandatory), §8–§9, LIVE STATUS (where the round
-> stands — newer than this file's §2), and the Records (R-0 the constitution; every batch's BRIEF · RECORD ·
-> ADJUDICATION · ladder rounds) · `notes/plans/use-report-2026-09-12-briefs/R-2.md … R-7.md` (the drafted
-> briefs for every remaining batch — append each to the plan's Records VERBATIM at the previous batch's close,
-> re-grepping its pointers first) · `notes/author-reports/2026-09-12-use-report.md` · CLAUDE.md and the canon
-> it loads · `notes/plans/use-report-round-2026-09-06.md` §8 (the process bound by reference) and its
-> handoff · `notes/plans/phase-17-standing-fixes.md`'s rules · `notes/SessionResiliencyProtocol.md` ·
-> `notes/KnownIssuesAndTechDebt.md` · `.claude/agents/*.md`.
-> **VERIFY, NEVER TRUST, before acting:** `git log --oneline -10`, `git status -sb`, `git diff --stat`,
-> `pgrep -fl 'Variorum.app/Contents/MacOS'` (her app is QUIT for the night — if an instance at
-> `/Applications` appears, she is awake: NEVER quit/kill it), `pgrep -fl caffeinate` (a `caffeinate -dims`
-> should be running; restart it detached if not), `ListAgents` (is an implementer or reviewer still running?
-> a running agent gets a MESSAGE, never a twin — resume by `SendMessage` first; a fresh continuation only on
-> "No transcript found"). Then continue from the plan's LIVE STATUS **Next**.
-> **THE LOOP, per batch:** spawn ONE `opus-implementer` on the brief (by pointer: "your brief is `### R-n ·
-> … — BRIEF` in the plan; write your RECORD under `### R-n · RECORD`") → on its report VERIFY against git
-> (commits, `--stat` scopes, the record's claims, trailer-free messages) → write the ADJUDICATION (Jn — the
-> judgment calls numbered J1… in this round; she reads them in the morning) → at the LETTER's end the ladder:
-> a fresh cold reviewer running `notes/REVIEW_PROMPT.md` VERBATIM with `{PHASE}` = the letter, zero framing
-> (Fable on 17p-a, 18g, 18j; Opus elsewhere); findings recorded repo-first; the cross-model flow for an
-> Opus implementer under a Fable reviewer (the implementer responds agree/dispute, the REVIEWER decides and
-> fixes, the implementer sanity-passes); same-model flow otherwise (you arbitrate against the spec, the
-> implementer fixes); round 2 re-reviews with a FRESH reviewer; a new BLOCKER/MAJOR ⇒ round 3; cap 3 —
-> residue to KnownIssues with an owner or a ledger row into a later batch. **Then the round-end Fable pass**
-> over the Opus-reviewed letters' final diffs (her standing rule from last round), the closeout ritual
-> (CLAUDE.md's, unabridged — §4 of this file lists the obligations), the author handoff, the install refresh
-> at a zero-instance window behind the A1 backup (the exact recipe in §3).
-> **ONE agent at a time. Never edit the plan while an implementer holds the tree (append briefs between
-> batches). Repo-first records. Push every commit. No trailers. PROVISIONAL-and-continue; bundle for her.**
+> `/architect-phase use-report round 2 (2026-09-12) — the SECOND SESSION` — you are the successor orchestrator of the 2026-09-12 use-report round. **17p and 18h are CLOSED**; you run **17q → 18i → 18g → 18j → the round-end Fable pass → the closeout → the author handoff → the install refresh**. Work in `~/dev/variorum` on `main`. **READ, YOURSELF, IN THIS ORDER:** this handoff whole (§1 what the round is; §2 the state as of the cutover; §3 the install-refresh recipe; §4 the close's obligations; §5 her items; §6 machinery lessons — the first session's, all still true, plus the second list) · `notes/plans/use-report-round-2026-09-12.md` — §7 (her rulings R-Q1…R-Q20, SETTLED — R-Q16…R-Q20 from her 2026-09-13 morning sitting), §12 (the REVIEW FOCI — every reviewer is told to treat them as mandatory), §8–§9, LIVE STATUS (the newest state — it wins over §2 here), the Records — R-0 the constitution; R-1…R-4 with their adjudications and ladders (read the 17p LETTER CLOSEOUT and the 18h LETTER CLOSEOUT for the round's standard of evidence and its lessons: pins whose second pass is hand-fed are green for the wrong reason; a measurement must execute the arm it measures; name suite TYPES; the app never runs ANALYZE) · the briefs already appended for you: `### R-5 · 18i — BRIEF` (with its pointer note), and the staged `R-6` / `R-7` texts in `notes/plans/use-report-2026-09-12-briefs/` (append each VERBATIM at the previous batch's close, re-grepping its pointers — 18i moves `ThemeSettings`, `Operations+Appearance`, `ThemeStore` and the Appearance pane before 18g; 18g rewrites the resolver before 18j) · `notes/author-reports/2026-09-12-use-report.md` · CLAUDE.md and the canon it loads · `notes/plans/phase-17-standing-fixes.md`'s rules · `notes/SessionResiliencyProtocol.md` · `notes/KnownIssuesAndTechDebt.md` · `.claude/agents/*.md`.
+> **VERIFY, NEVER TRUST, before acting:** `git log --oneline -10`, `git status -sb`, `git diff --stat`, `pgrep -fl 'Variorum.app/Contents/MacOS'` (**she is AWAKE now** — a real-store instance at `/Applications` is hers: NEVER quit/kill it; walks run on the dev-store Debug build regardless; the install refresh at the close needs a zero-instance window she grants), `pgrep -fl caffeinate`, `ListAgents`.
+> **FIRST ACT — 17q (small, before 18i):** her two morning builds — R-Q20 (J3: when the entry landing names a block, the landing wins and the remembered place is not restored; one condition on `TakesBoardLayout`'s restore/landing step + a pin) and R-Q17 (#103: the Library's Notes card shows the stated day AND the sort's stamp where there is room, the click-flip where small) — one `opus-implementer`, one cold review (`fable-reviewer`: the Takes half is the landing family), the dev-store walk, a register row in `phase-17-standing-fixes.md`, dispositions at its close.
+> **THE LOOP, per batch:** spawn ONE `opus-implementer` on the brief by pointer → on its report VERIFY against git → write the ADJUDICATION (the next J number — J14 onward) → the ladder per letter: `fable-reviewer` on 18g and 18j (a default's meaning; every surface), `opus-reviewer` on 18i (chrome; re-spawn as Fable if the diff reaches the seam or a default's meaning); the cross-model flow under a Fable reviewer, the same-model flow under Opus (you arbitrate against the spec, the implementer fixes); round 2 fresh; a new BLOCKER/MAJOR ⇒ round 3; cap 3. **Then the round-end Fable pass** over the Opus-reviewed letters (18h — already Opus-reviewed, its fixes included — and 18i), the closeout (§4), the author handoff `notes/handoffs/use-report-round-2026-09-12-handoff.md` with HER CHECKLIST at the top, the install refresh (§3) at a window she grants.
+> **ONE agent at a time. Never edit the plan while an implementer holds the tree. Repo-first records. Push every commit. No trailers. Name suite TYPES. PROVISIONAL-and-continue; bundle for her — she is present today, so a genuine product fork may be ASKED with the question tool (≤4 per call, recommended first) instead of parked.**
 
 ## 1. WHAT THE ROUND IS (one paragraph — the plan's §0 is the full one)
 
@@ -53,40 +25,20 @@ five bold palette builds, dark mode pulled forward from 13u4. Five letters: **17
 the phone's row left for a mobile session) · **18h** time (batches 1, 2) · **18i** confirmations · **18g**
 palettes · **18j** dark mode. Order 17p → 18h → 18i → 18g → 18j.
 
-## 2. STATE AT THIS WRITING (2026-09-12 ~06:00 — the plan's LIVE STATUS supersedes this the moment it is newer)
+## 2. STATE AT THE CUTOVER (2026-09-13, the first session's close at ~610k context — the plan's LIVE STATUS supersedes this the moment it is newer)
 
-- Tree: `main` at `33fa46d5` + uncommitted batch-a work (piece 5, the walk, in progress). `main` == `origin/main`
-  at every orchestrator commit; the implementer pushes its own.
-- **17p batch a IN FLIGHT** — `opus-implementer` spawned after `8df4f6c0`; pieces 1–4 landed (`664b7ad0` the
-  scroll memory + reveal rule; `33fa46d5` the empty line + the door's alignment); piece 5 (the walk) running.
-  Its RECORD is under `### R-1 · RECORD` in the plan. **After it reports:** verify against git; write the R-1
-  ADJUDICATION (J1…); spawn the 17p-a Fable ladder round 1 (`fable-reviewer`, `{PHASE}` = "17p batch a", zero
-  framing) — cross-model flow (the batch's implementer resumed for agree/dispute and the sanity pass; the
-  reviewer decides and fixes); then append R-2 and spawn batch b.
-- Baselines: core 1503/163 (this session); the FULL Mac suite 2462/424 over the byte-identical code tree
-  `fd434824` (last round's final); iOS green; marker 8. Zero schema, zero `Sync/` expected.
-- Her rulings: R-Q1…R-Q15 in the plan's §7 — all SETTLED. Notable: R-Q2 no placeholder anywhere (R103's face
-  retired); R-Q5 receipts quiet by default, toast an option; R-Q11 + R-Q13 the three preset batches (4 pastels ·
-  6 two-tone incl. grey & GREEN · 5 bold) all ship, custom = one hex + optional second; R-Q12 dark mode = 18j;
-  R-Q14 overnight unattended; R-Q15 architecture in every review (§12's foci).
-- Mobile: the phone's Write-page scroll LEFT the round (her word) — written on the `mobile` branch's
-  `notes/plans/mobile-round-2-orchestrator-handoff.md` §12.2 + §12.2a (a paste-ready kickoff for her mobile
-  session); PL-22 in `notes/MobileSoul.md` §6. Nothing here touches it.
-- Briefs drafted and COMMITTED: `notes/plans/use-report-2026-09-12-briefs/R-2.md` (17p batch b) · `R-3.md`
-  (18h batch 1 — carries a CORRECTION to the plan's §4.7/§4.8: the Library surface is `LibraryCatalogModel` over
-  `Queries.searchCatalog`, not `observeLibrary`; apply that correction to §4.7/§4.8 when appending R-3) ·
-  `R-4.md` (18h batch 2) · `R-5.md` (18i) · `R-6.md` (18g — the three preset batches, the two-seed brain with
-  two intensity tables, custom's two fields) · `R-7.md` (18j). Append each VERBATIM as `### R-n · … — BRIEF`
-  + `### R-n · RECORD` at the previous batch's close; re-grep every `file:line` first (the tree moves).
-- The palette mockup — her approved reference for 18g, committed: `notes/plans/use-report-2026-09-12-mockups/palettes.html`
-  (two pastel rows per voice, the six two-tone builds, the five bold builds; the dark strips are 18j's
-  previews, not part of any light theme). Keep it; the closeout names it in the master plan's row 3d (already).
-- Machinery running: `caffeinate -dims` (detached); the core baseline log at `scratchpad/use-report-2/core-baseline.log`
-  (scratch — not durable; the number is recorded in LIVE STATUS).
+- **Tree:** `main` at `7236a1e7 (18h's close) plus this handoff commit` == `origin/main`, clean. Marker **8** (v1_17 added `idx_commit_created` — an index, not a lockstep event).
+- **17p — CLOSED as a letter** (`34799a1b`): rows 1–6 FIXED with pins, row 7 RETIRED to mobile; batch a's Fable ladder capped at three rounds, batch b's closed at two; the LETTER CLOSEOUT is in the plan and copied into `notes/plans/phase-17-standing-fixes.md` (the register row CLOSED); canon deltas applied (AppSpec §12's takes line; R103's dated sentence; KnownIssues' R1-7 amendment + two 13u2 rows).
+- **18h — CLOSED as a letter** (`7236a1e7`): rows 9–11 FIXED; the Opus ladder's round 1 (1 BLOCKER · 3 MAJOR · 7 MINOR · 5 NIT — all fixed; the BLOCKER was the day search's correlated savepoint arm, P1, my J11 having accepted a measurement that never ran the arm) and round 2 (round 2: 1 MAJOR — a regression by R1-11's fix, fixed — · 5 MINOR · 6 NIT; round 3, the cap: 3 MINOR · 7 NIT recorded to 17q / #103 / the close; open defects none); the LETTER CLOSEOUT in the plan; AppSpec §7's `commit_point` DDL gained the index and §12's Library line the stamps, the sort and the day filter. Baselines at the cutover: core 1545/167 · Mac (the letter's closing set) 217/37 (batch 2's set) · 206/34 (batch 1's set) · iOS green.
+- **Her morning sitting (2026-09-13) — R-Q16…R-Q20 in §7:** #102 ratified (the lane everywhere) · #103 RULED (the card shows both where there is room, the click-flip where small — a BUILD, 17q) · #104 ratified (notes only) · J5 the 64 pt lane kept for now (her stack-under-the-drag-dots idea recorded for the lane's next touch) · J3 RULED — the block she came from wins (a BUILD, 17q).
+- **NOT STARTED:** 17q (the two morning builds — first), 18i (R-5 appended in the plan), 18g (R-6 in the briefs folder — append), 18j (R-7 — append), the round-end Fable pass over 18h + 18i, the closeout, the author handoff, the install refresh.
+- **Briefs:** `### R-5 · 18i — BRIEF` is IN the plan with its pointer note; R-6 and R-7 are in `notes/plans/use-report-2026-09-12-briefs/` — append each verbatim at the previous batch's close and re-grep (18i moves `ThemeSettings` / `Operations+Appearance` / `ThemeStore` / the Appearance pane; 18g rewrites the resolver). The palette mockup she approved: `notes/plans/use-report-2026-09-12-mockups/palettes.html`.
+- **Machinery:** `caffeinate -dims` was left running by the first session (check `pgrep -fl caffeinate`); she is AWAKE and may run her real app — never touch it; the install refresh needs a zero-instance window she grants.
+- **Agents from the first session:** all finished; none to resume. The successor spawns fresh.
 
 ## 3. THE INSTALL REFRESH RECIPE (the last act; only after the round-end pass and the closeout; zero instances)
 
-`pgrep -fl 'Variorum.app/Contents/MacOS'` must be empty. **A1 backup FIRST:** copy the whole container store
+`pgrep -fl 'Variorum.app/Contents/MacOS'` must be empty — she is awake and may be using her real app, so the window is HERS to grant (ask; never quit it). **A1 backup FIRST:** copy the whole container store
 folder (the encrypted `variorum.sqlite` + shm/wal, the key files, `Backups/`) to
 `~/dev/variorum-store-backups/use-report-2-refresh-<UTC stamp>/` with the app closed; `cmp` the sqlite and wal
 byte-identical; verify the header is NOT `SQLite format 3` (ciphertext) — NO headless `integrity_check`
@@ -113,13 +65,11 @@ handoff `notes/handoffs/use-report-round-2026-09-12-handoff.md` with HER CHECKLI
 refresh (§3) · the briefs folder deleted at the finish (its content lives in the plan's Records) · memory
 updated · push.
 
-## 5. FOR HER, SO FAR (the morning bundle grows in the plan's LIVE STATUS; this is the seed)
+## 5. FOR HER (the morning bundle so far; the author handoff at the close carries the final list)
 
-- Nothing needs her before the close. Her acts at the close (the author handoff will list them): launch the
-  refreshed app; the walk of each row; the Appearance pane — pick a palette, try custom, cycle the appearance
-  choice; QUESTIONS #102+ to ratify; the judgment calls J1… to review.
-- Every preset's seeds are constants she can change later (R-Q13: "I'll change them later if I feel like it").
-- The phone's Write-page scroll: the mobile session's, on its own branch (§2).
+- **Ratified/ruled today:** #102, #103 (→ 17q), #104, J3 (→ 17q), J5 (keep 64 for now; the stacking idea recorded).
+- **Still hers at the close:** the walk of every row on the refreshed build; the Appearance pane after 18g/18j (pick a palette, try custom, cycle the appearance choice); QUESTIONS from 18i/18g/18j; the judgment calls J14+.
+- **Recorded, not asked:** the KnownIssues rows (the kept-alive landing's enumerated her-hand set + option (b) for 13u2; the reflow discriminator; the lane's two residuals; the app never runs `ANALYZE` — owner 12); the two hoist candidates named in R-3/R-4's records.
 
 ## 6. MACHINERY LESSONS THIS SESSION (so a successor does not relearn them)
 
@@ -132,3 +82,14 @@ updated · push.
   are on `io.lduarte.Variorum.debug` regardless.
 - The scratchpad is not durable (the resiliency protocol's addendum 11) — the briefs moved into
   `notes/plans/use-report-2026-09-12-briefs/` for that reason; anything else worth keeping goes in the repo.
+
+### The second list (2026-09-13 — the first session's items above stand)
+
+- **A pin whose second pass is hand-fed is green for the wrong reason** (17p a's three-block pin; 17p b's nine lane pins): drive the second pass through the surface's own report, or the walk finds it.
+- **A measurement must execute the arm it measures** (18h's J11): a fixture where every row satisfies the cheap arm never reaches the expensive one; contrast the empty case.
+- **`-only-testing` takes suite TYPE names**; a file name matches nothing and `xcodebuild` runs the rest silently — read the `Test run with N tests in M suites` line every time.
+- **zsh does not word-split an unquoted `$var`** — put `-only-testing` arguments in an array.
+- **Two heredocs on one shell line** fed a python script to `git commit -F -` (`5f9a3a89`): never chain a commit onto a script on the same line; the message is a separate, checked step.
+- **A same-model ladder with two batches**: route findings to each batch's implementer, arbitrate once, fix in batch order (the shared file's latest hand first), then round 2 fresh.
+- **Her presence changes the rule:** parked PROVISIONALs become question-tool batches (≤4, recommended first); record her words verbatim the same turn.
+
