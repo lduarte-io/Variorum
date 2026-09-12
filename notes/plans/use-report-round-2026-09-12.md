@@ -3960,3 +3960,170 @@ R1-8, R1-9, R1-11 MINOR · R1-12, R1-13, R1-15 NIT — eleven items over nine nu
 them shared with batch 1). **Nothing disputed, and two of them (R1-1's shape and R1-2's falsified
 measurement) overturn a judgment the record and the J11 adjudication both rest on** — the corrected
 measurement above is the evidence for re-adjudicating it. No code was edited in this pass.
+
+#### Implementer's responses (round 1, batch 1)
+
+*(The same-model agree/dispute pass, written by 18h batch 1's implementer. I re-traced every
+finding in the code myself before answering, and **re-measured the two that rest on numbers** —
+R1-5's formatter cost with my own `swiftc -O` probe, and R1-10's timezone claim against a real
+`sqlite3` on our exact stamp format. Where I disagree it is with a FIX's shape or a finding's
+premise, never with a defect; each is said outright rather than folded into an agreement. No code
+was edited in this pass.)*
+
+**R1-4 · MAJOR (shared with batch 2) — AGREE, and batch 2's `limitPerKind + 1` shape is the right
+one.** Re-traced: `LibraryCatalogModel.search()` asks for `limitPerKind: 40`
+(`LibraryCatalogView.swift:259`), the post arm ends `ORDER BY … LIMIT ?`
+(`ShelfQueries.swift:449`), and I re-grepped the whole catalog view for a count or a "more" — there
+is none (the only two hits for `count` in the file are the pick's own labels). The finding's
+distinction is the one that matters and I missed it while building: *"the 40 most recently edited"*
+is an inherently top-N answer that a cap tells the truth about, while **"title · A–Z" is an
+ordering of the WHOLE library**, and a capped alphabetical listing reads as the library while being
+its first 40 names. My own walk shows it: capture `05` lists 28 rows of `2026-…` day-names under
+A–Z and the alphabet never reaches a letter — on her real store the As are the whole answer. The
+masthead's own words make it worse (*"everything — sortable, searchable"*). I agree with batch 2
+that the cap should NOT be lifted unbounded (the listing's cost is ∝ rows returned) and that the
+honest shape is ask for 41, show 40, let the model report `truncated`. **One fix, one place**
+(`search()` + the two bodies' footer slots) — it closes the day's answer and A–Z together, and I
+have no claim on which batch carries it. *Red on old for my half:* 45 notes named `a…`–`z…`,
+`setSort(.title)`, assert the model reports truncation (and, with the +1 probe, that it knows there
+are more than 40); fails on this tree.
+
+**R1-5 · MINOR — AGREE on the defect and on the cache; DISPUTE the fix's second half (the lazy
+tooltip).** The mechanism is exactly as traced and it is mine: `TimeStampFace.formatted`
+(`TimeStampFace.swift:203`) allocates a `DateFormatter` and calls
+`setLocalizedDateFormatFromTemplate` on **every** call, and `CatalogRowStamp.body` calls both
+`stamp` (`LibraryTimeFace.swift:205`) and `tooltip` (`:211`) — `.help(_:)` takes a built `String`,
+so the tooltip is paid whether or not anyone hovers. Two builds per row × 40 rows per body
+evaluation, on the main thread, re-evaluated per keystroke.
+
+*My own measurement* (a throwaway `swiftc -O` probe, this machine, fixed calendar/locale, 400
+iterations, warmed): **72.4 µs per build+format → 5.79 ms for 80**, versus **1.8 µs per format
+through a cached formatter → 0.141 ms for 80**. That is 41× rather than the finding's 110× (my
+cached number is slower than the reviewer's 0.68 µs/call, probably a different warm state), and it
+confirms the finding's substance: ~5.8 ms of avoidable main-thread work per full list body. Not a
+P1 breach — it is bounded by the viewport, as the finding says — but it is on the surface the
+project's first principle calls *snappy, always*.
+
+**The dispute, and it is narrow:** *"compute the tooltip lazily"* is not available. `.help` takes a
+value, not a closure, and SwiftUI offers no hover-deferred help; building one with `.onHover` +
+`@State` adds per-row state and a redraw on every pointer entry, which costs more than the 72 µs it
+saves. Once the cache lands, a tooltip build is one `string(from:)` — 1.8 µs — and the eagerness
+stops being worth machinery. **So: the cache, and only the cache.** Its shape, since the file has
+no lock today: a `nonisolated(unsafe) private static let cache` guarded by an `NSLock` (the
+`StoreKey.sweptAccounts` / `SyncSchema.columnCatalog` pattern already in `Sources/`, both static
+caches behind an `NSLock`), keyed by `(template, locale.identifier, calendar.identifier,
+timeZone.identifier)` — a plain `nonisolated(unsafe) static var` dictionary without the lock would
+be a data race, which the existing `variorumISO8601` precedent does not license (it is an immutable
+`let`).
+
+**R1-6 · MINOR (shared) — AGREE.** `LibraryCatalogModel` is a ~250-line `@Observable` inside the
+1,509-line view file that this letter's own briefs cite as the god-file example, and I added ~50 of
+those lines (the sort state, its memory, `showsSortDoor`) while my new file's header says the
+opposite in so many words. It is a mechanical move to `LibraryCatalogModel.swift` beside
+`LibraryTimeFace.swift` and `LibraryDayFilter.swift`, with no behaviour in the commit — and, as
+batch 2 says, doing it FIRST makes the R1-3/R1-4 fixes land somewhere readable. One fix, not two;
+whichever batch carries it should carry it alone.
+
+**R1-7 · MINOR — AGREE, and to the orchestrator's question: the `Shared/` hoist is mechanically
+small, with ONE consequence that is not mechanical.** Re-read both tables: `LibrarySortFace.label`
+(`LibraryTimeFace.swift:49`) says `edited` · `created` · `date` · `title`;
+`MobileLibraryViewModel.sortWord` (`:81`) says `last touched` · `created` · `entry date` · `title`.
+They disagree on two of the four shared cases. The phone's table predates me — but **I minted the
+second wording** and then added `.title` to the phone's rather than hoisting, so the drift is
+this batch's to own.
+
+*Small, mechanically:* `App/Variorum/Shared/` is a `PBXFileSystemSynchronizedRootGroup` (verified in
+`Variorum.xcodeproj/project.pbxproj`), so a new file there compiles into BOTH targets with no
+project edit — the table is ~15 lines and there are exactly two call sites. *Not mechanical:* one
+wording then wins, and the phone's picker VISIBLY changes (*last touched* → *edited*, *entry date* →
+*date*). I think that is correct rather than merely convenient — **her R-Q8 names those four words
+herself** (*"edited (the default, as today) · created · date (entry date) · title A–Z"*), so the
+Mac's table is the ruled one and the phone's is the older one — but it is a phone-visible string
+change, so it is the orchestrator's to route (and MobileSoul's parity row already says the phone
+owes a version of this vocabulary). The reviewer's framing is the right rule to hoist under: **each
+platform chooses which cases it OFFERS (`sortOptions` stays the phone's four stamps), never what
+they are CALLED.**
+
+**R1-10 · MINOR — AGREE on the mechanism; DISPUTE the first proposed fix; and to the orchestrator's
+question: a doc correction is honest, but it is NOT the best available — there is a one-expression
+fix that makes the SQL agree with the words.** I re-read both sides. `DisplayTitle.day(fromStamp:)`
+(`DisplayTitle.swift:137-140`) is the LOCAL calendar day of the stored instant, and **its own doc
+says why** — *"the two slots must mean the same KIND of day: `entry_date` is written by
+`JournalDay.dayString(from:)` over `Calendar.current`, so a UTC-sliced fallback beside it would read
+a day later for anything written after early evening in a negative-offset zone."* My SQL's third
+link (`Timeline.swift:126`) is the raw instant. Inside the created-at group the two agree (the
+local-day map is monotone in the instant); across the groups they can invert exactly as traced. My
+doc's claim — *"it orders by what she is LOOKING AT, never the raw column"* — is therefore false at
+that boundary, which is the real defect.
+
+**The dispute:** the finding's first option, `substr(created_at, 1, 10)`, **does not fix it.** That
+is a UTC slice — precisely the thing `DisplayTitle`'s doc rejects — so the same note created
+`2026-03-05T02:00:00.000Z` in UTC−5 still sorts under `2026-03-05` while displaying `2026-03-04`.
+It removes the time component and leaves the inversion.
+
+**What does fix it, measured:** `date(created_at, 'localtime')`. I ran it on our exact stamp format
+in `sqlite3` 3.51: `TZ=America/New_York sqlite3 :memory: "SELECT date('2026-03-05T02:00:00.000Z','localtime')"`
+→ **`2026-03-04`** (and `2026-03-05` under `TZ=UTC`), i.e. byte-identical to what
+`DisplayTitle.day(fromStamp:)` shows, with and without the trailing `Z`. One expression, no stored
+column, no per-row Swift. Its two honest costs, both worth saying: the order becomes
+**process-timezone-dependent** (two devices in different zones order these rows differently — but
+their DISPLAYED names differ too, which is the whole point of matching), and it inherits R1-8's
+`Calendar.current`-vs-Gregorian mismatch under a non-Gregorian system calendar (SQLite's `localtime`
+is Gregorian; `JournalDay.dayString` is not). **My recommendation:** `date(created_at,'localtime')`
+as the third link, with a doc sentence naming the timezone dependence — and, if the orchestrator
+prefers the smaller landing, the doc correction alone is honest and I will not argue against it
+(the case is genuinely narrow: untitled, undated, created inside the offset window of midnight,
+beside an entry-dated neighbour on the boundary day). *Red on old either way:* a core pin with a
+fixed non-UTC calendar and that exact pair; fails on this tree.
+
+**R1-14 · NIT — AGREE on the defect; DISPUTE the premise, and the correction makes the finding
+LARGER, not smaller.** `PostDetailOracle.stampShown` / `stampEditedAt` / `flipStamp`
+(`PostDetailView.swift:892-896`) are indeed global, and the brief did ask for the row-53
+keyed-by-subject rule. But the finding says the rule *"was applied to `MastheadGeometry.stampFrame`
+beside them"* — **it was not**: `stampFrame` is a plain `static var CGRect?` (`:927`) written by
+`case .stamp: stampFrame = frame` (`:936`), with no post id anywhere. The only keyed slot in that
+oracle is `cardFrames` (`:910`), and its key is a TAG id, not a subject. So **all four** of the
+oracles this batch added are unkeyed, and I wrote a comment on the probe slot claiming the
+one-masthead assumption instead of doing what the brief asked (*"keyed by post id (row 53's rule)"*)
+— that is mine, and the record should say so rather than the finding's half of it. DEBUG-only and
+harmless with one window, as the finding says. *The fix if it is taken:* key all four by post id —
+which touches the shipped `MastheadLayoutTests` reads of `pathChipFrame`/`cardFrames` if it is done
+consistently, so the smaller honest landing is to key the three `PostDetailOracle` fields (no
+shipped reader) and state the one-detail assumption in `MastheadGeometry`'s own doc.
+
+**R1-16 · NIT — AGREE, and one grep sharpens it.** `Queries.library` selects
+`\(sort.expression) AS stamp` (`Timeline.swift:135`) and `observeLibrary`
+(`Observations.swift:43`) takes the full `LibrarySort`, so `.title` can put a display NAME into a
+field documented as *"the value of the ordering stamp for this row — feeds the next page's cursor"*.
+Nothing reaches it today (every caller passes `.lastTouched`: `LibraryViewModel:48`/`:65`,
+`CompareBoardView:227`, `ReadingViews:110`, `TimelineView:64`, `MobileLibraryViewModel:110`), and
+the keyset cursor itself is `timelinePage`'s, which takes `TimelineOrder` and cannot see `.title` at
+all. **What I checked beyond the finding:** the faces that consume a `TimelineItem.stamp` go through
+`BlockHistoryFace.stampText` (`Shared/BlockHistoryFace.swift:271`), which parses with the one
+canonical formatter and **returns nil on anything that is not a stamp** — so a title arriving there
+would render nothing rather than raw text. That fail-safe is what keeps this a NIT.
+*Closure, cheapest first:* a sentence on the `.title` case and on `TimelineItem.stamp`. *Stronger,
+one line:* have `library()` select a stable date (`COALESCE(last_touched_at, created_at) AS stamp`)
+while ORDERING by `sort.expression` — the field's doc becomes true again for every sort, and the
+grep above says no caller reads `stamp` as "the value I sorted by". I would take the stronger one;
+either closes it.
+
+**R1-17 · NIT — AGREE.** Confirmed at `LibraryCatalogView.swift:1047`: on the Notes card the stamp
+sits in the title's `HStack` before the `Spacer()`, where the List row's is past it. R-Q7's word is
+*"trailing"*, and the card diverges from it deliberately — the Apple-Notes card she pointed at puts
+the date beside the title — but I never said so where she will read it: **#103 asks which FACT the
+card shows and never asks where it sits.** The clause belongs in #103 (one sentence naming the
+divergence and the alternative: the stamp past the `Spacer()`, beside the book names). It lands with
+the fixes; it is a notes edit, not a code one.
+
+**Not mine to answer** (batch 2's, listed only so the tally is complete): R1-1, R1-2, R1-3, R1-8,
+R1-9, R1-11, R1-12, R1-13, R1-15.
+
+**Tally, batch 1's findings: 8 agreed · 0 disputed as defects.** (R1-4 MAJOR shared · R1-5, R1-6
+shared, R1-7, R1-10 MINOR · R1-14, R1-16, R1-17 NIT.) **Three carry a dissent the orchestrator must
+arbitrate, and none of them shrinks a finding:** R1-5's fix loses its second half (a lazy `.help` is
+not available and stops being worth machinery once the formatter is cached); R1-10's first proposed
+fix (`substr`) does not fix the traced defect, and a measured one-expression alternative
+(`date(created_at,'localtime')`) does; R1-14's premise is wrong in the direction that makes it
+bigger (neither oracle is keyed, not one of two). Two of the eight are SHARED with batch 2 and are
+one fix each, not two.
