@@ -485,17 +485,6 @@ final class TakesBoardLayout {
         articleRowFrames.removeValue(forKey: placementID)
     }
 
-    func noteArticleViewport(height: CGFloat) {
-        articleViewportHeight = height
-    }
-
-    /// What the article should do about a landing on this slot.
-    func articleReveal(for placementID: String) -> ArticleReveal {
-        Self.revealDecision(
-            rowFrame: articleRowFrames[placementID],
-            viewportHeight: articleViewportHeight)
-    }
-
     // MARK: - The scroll memory's one-shot restore (17p batch a, row 1)
 
     /// The article's scroll geometry, reduced to the three numbers the memory

@@ -626,14 +626,6 @@ final class TakesViewModel {
         board.forgetArticleRowFrame(placementID)
     }
 
-    func noteArticleViewport(height: CGFloat) {
-        board.noteArticleViewport(height: height)
-    }
-
-    /// True once the article is where the memory says it should be — the
-    /// moment a landing may be considered.
-    var articleReadyForLanding: Bool { board.articleReadyForLanding }
-
     /// The article reported its geometry: run the board's restore rule against
     /// the SESSION's memory and hand back the ONE thing the view can do about
     /// it. The memory write happens here, where the session is.
@@ -650,10 +642,6 @@ final class TakesViewModel {
             order: loaded ? projection.slots.map(\.placementID) : nil)
         if case .remember(let place) = step { rememberArticlePlace(place) }
         return step
-    }
-
-    func articleReveal(for placementID: String) -> TakesBoardLayout.ArticleReveal {
-        board.articleReveal(for: placementID)
     }
 
     /// The landing's next step, judged against the article's slots in their
