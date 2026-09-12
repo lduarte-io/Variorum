@@ -321,10 +321,12 @@ final class TakesBoardLayout {
     /// **THE RULE (settled at the 17p batch-a ladder's final word, so the
     /// next arm is not guesswork):** a landing is a REVEAL kept alive only
     /// against the lazy column's own settling; what can defeat it after that
-    /// is a change to the article's CONTENT HEIGHT or to the LIVE PANE — so
-    /// her hand is every gesture that can do either, and the arms sit at the
-    /// view model's GESTURE DOORS for those, never at a model method a
-    /// programmatic road shares. The arms: her scroll of the article
+    /// is a change to the article's CONTENT HEIGHT, to its VIEWPORT HEIGHT
+    /// (chrome appearing above it — the ladder's round 3, R3-1: the
+    /// selection banner), or to the LIVE PANE — so her hand is every gesture
+    /// that can do any of the three, and the arms sit at the view model's
+    /// GESTURE DOORS for those, never at a model method a programmatic road
+    /// shares. The arms: her scroll of the article
     /// (`consumeArticleGeometry`'s user branch); a click that migrates the
     /// live pane (`focus`'s `.migrated` arm only — the landed pane's own
     /// first-responder round trip is `.unchanged` and must not end it); a
@@ -338,7 +340,10 @@ final class TakesBoardLayout {
     /// `turnTakesIntoBlocks` (rows minted above when a card above is the
     /// target) — the ladder's round 2, R2-1, measured: the note-wide split
     /// hauled the page 406 → 1047 after her click, a callout above the landed
-    /// row 65 → 75.
+    /// row 65 → 75; and the two ⌘-PICK doors (`toggleMergeSelection` /
+    /// `extendMergeSelection`) plus the banner's `deleteSelectedBlocks` — the
+    /// ladder's round 3, R3-1, measured: ONE pick moved the page 65 → 93
+    /// (the banner's 28 pt of viewport), the delete itself nothing.
     ///
     /// **COMPLETENESS IS BY ENUMERATION, NEVER "BY CONSTRUCTION"** (round 1
     /// claimed the latter for the structure controller and round 2 falsified
@@ -352,20 +357,25 @@ final class TakesBoardLayout {
     /// | the ceremony (`runDivideW` · `runDivideDuplicating`) | yes | the target is the landed (focused) block → A released → the row gone → `.done` |
     /// | `addBlockAtEnd` · `insertBlockBelowFocused` · `deleteFocusedBlock` · `archiveFocusedBlock` · `runDivide` · `runKeepOnTopDivide` · `moveTakeIntoBlockBelow` · `mergeSelectedBlocks` | yes | `parkFocus` → `focus` → `.migrated`; a one-block delete → the row gone |
     /// | `moveTake` (reorder within the fan) | no (same cards, same height) | — |
-    /// | `deleteSelectedBlocks` | yes (rows removed) | a `.foot` landing's rows above going away moves it UP, still on screen; a `.head` landing's rows above are off-screen and unclickable without a scroll (her hand) |
     /// | `runSplit` (three doors) · `turnTakesIntoBlocks` · `applyCallout` | yes | THEIR OWN ARMS (R2-1) |
+    /// | the ⌘-click PICK (`toggleMergeSelection` · `extendMergeSelection`) | VIEWPORT height (the selection banner appears above the article) | THEIR OWN ARMS (R3-1 — round 1 dismissed the pick as "a stroke overlay, no layout effect": true of the CELL, blind to the BANNER. Measured: one pick 65 → 93, the banner's 28 pt, nine more aims; the same pick with no landing pending moves nothing) |
+    /// | `deleteSelectedBlocks` (the banner's Delete · the card row's delete-picked) | yes (rows removed; a ⌘-click never migrates the ring) | ITS OWN ARM (R3-1, the rule's letter — round 2 EXEMPTED this row by argument; measured at round 3 the delete itself moves nothing (no-landing control 65 → 65) and the pick before it has already ended the landing, so this arm is the letter, not the mover. No row in this table is argued any more — every door that can change content or viewport height is ARMED) |
     /// | the Lenses-host-only column roads (`addWriteColumn` · `branchIntoColumn` · `adoptColumn` · …) | n/a | host-gated; the Lenses board holds no article landing |
     /// | `saveNoteVersion` | no (the copy is born archived) | — |
     ///
     /// Deliberately NOT arms: a fan strip's page turn (a fixed strip height —
     /// and `setPage` is shared with the strip's settled-scroll write-back, a
-    /// programmatic road after `pageToReveal`); the merge pick (a stroke
-    /// overlay; and `clearMergeSelection` is called by the structure
-    /// controller); the density menus (`beneathCount` cannot change height —
+    /// programmatic road after `pageToReveal`); `clearMergeSelection` (the
+    /// banner's "clear" AND the structure controller's post-act clears — a
+    /// shared road, and a banner LEAVING grows the viewport, which can clip
+    /// nothing); the density menus (`beneathCount` cannot change height —
     /// N40's fixed strip; `gridRows` measured moving nothing in the reachable
     /// margin-grid shape at round 2) — none can move the article page, and an
-    /// arm on a shared road would end a landing her hand did not. A future
-    /// gesture that changes a row's height or the live pane adds its door
+    /// arm on a shared road would end a landing her hand did not. (Round 1
+    /// listed "the merge pick" here as a stroke overlay with no layout
+    /// effect; round 3 measured the pick's BANNER shrinking the viewport, so
+    /// the two pick doors are arms above.) A future gesture that changes a
+    /// row's height, the viewport's height or the live pane adds its door
     /// here, its row above, and its arm in the pin
     /// (`herBoardGesturesEndAPendingLanding`).
     ///
