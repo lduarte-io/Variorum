@@ -2076,3 +2076,261 @@ ladder sees the same store I did.
 
 
 *(Pointers re-verified by the orchestrator on 2026-09-12 after batch a's ladder, at `17803ce4`: `RecoveryView.swift` lives at `App/Variorum/Variorum/Features/Library/RecoveryView.swift` (`requestDeleteNow` `:400`; the stranded rule `:122–126`); `EditorTypography.swift` at `App/Variorum/Variorum/Theme/EditorTypography.swift` (`minGutter` `:171`, `inlineSurfaceInset` `:176`); `TrayPanel.swift`'s lines hold within one (`confirmPendingPurge` `:637`, `trashItem(for:)` `:653`); `CalloutMenu.emojiAccessory` `:179`; `BlockDecor` badge `:592`, emoji `:479`, `calloutRect` `:167`; `EditorTextView.makeInlineEditor` `:823`; `EditorViewModel` `textLeft` `:3162`; `DoorSetTests:327` is the accessory's title pin. Batch a moved nothing in this batch's files. The environment traps and rules 1–8 are R-1's, verbatim by reference; her app is QUIT for the night — an instance at `/Applications` means she is awake: never touch it.)*
+
+### 17p batch b LADDER — ROUND 1 FINDINGS (fable-reviewer)
+
+*(Cold review of `48f54268..b84336bf` — the seven code commits — against `notes/REVIEW_PROMPT.md`
+verbatim, this plan's §3 rows 3–6, §4.3–§4.4, §5.1, §7 R-Q3/R-Q4, §12 F-0/F-3/F-4, R-0, the R-2 brief,
+record and adjudication, AppSpec §12 (R7/R9/R16/R17/R27), TEXTKIT2_NOTES §3–§4, and the four suites
+this batch touched, re-run here: `✔ Test run with 41 tests in 4 suites passed` (`BlockDecorLaneTests`
+· `TrayFilterTests` · `TrayPanelMoveTests` · `CalloutEmojiPickerTests`). Zero app instances at
+`/Applications` throughout. Every finding below was traced by me, by reading and — where a claim about
+AppKit was load-bearing — by measurement; nothing was delegated. Format: `R1-n · severity · file:line ·
+what · evidence · fix`.)*
+
+#### Findings, severity-ranked
+
+- **R1-1 · MAJOR · `App/Variorum/Variorum/Features/ReadTier/ReadPostView.swift:178–180` (the read
+  tier's `onProseColumnChanged` door) and `App/Variorum/Variorum/Features/Editor/EditorView.swift:534`
+  (`InlineEditorSurface.Coordinator.install`, where the contained editor's controller is built) · The
+  lane narrows the measure by 64 pt but NEITHER contained host re-measures its height afterwards, so a
+  note whose paragraphs re-wrap under the narrower column keeps its PRE-lane `contentHeight` and its
+  last lines fall outside the surface's frame — on the read tier, which is the surface an Outline shows
+  by default (W-2's own finding), persistently.** · *Evidence (traced, every step file:line):*
+  `ReadPostViewModel.contentHeight` is written only by `remeasure()` (`ReadPostViewModel.swift:261`),
+  reached from `applyProjection` (`renderFull`/`applyDifferential`), from `viewWidthChanged` (`:273`,
+  gated on `bounds.width != lastMeasuredWidth` — a lane changes the CONTAINER's width, never the
+  bounds'), and from `applyChrome` (`ReadPostView.swift:149`, gated on a chrome change). The lane is
+  reserved inside `BlockDecorOverlayController.render` (`BlockDecor.swift:555–559`) — reached via
+  `adoptDecorContext` → `refreshDecor` → `decorSink` — which writes `textContainerInset`
+  (`PaneSurface.swift:573–574`) and narrows the container (measured by the batch's own pin
+  `aLanedSurfaceStaysOnTextKit2`: `textContainer.size.width ≤ bounds − 64`); the host's door for that
+  event is `pushOverlaysToSinks` (`ReadPostViewModel.swift:182`), which runs `refreshDecor` ONLY.
+  `ReadPostView.swift:75` frames the surface at `model.contentHeight`. So in EITHER arrival order —
+  projection first (`renderFull` → `remeasure` at the 604-wide container → H1; then the comment lands
+  → lane → re-wrap to H2 > H1 → nothing writes H2) or decor context first (`refreshDecor` sends the
+  empty state because `index.entries` is empty; then `renderFull` → `remeasure` H1 → `refreshBadges` →
+  `refreshDecor` → NOW the lane, after the measurement in the same call chain) — the surface stays H1
+  tall until a window resize or a projection change. The contained editor is the same class one host
+  over: `InlineEditorSurface.Coordinator.remeasure` (`EditorView.swift:554`) runs at `install`, at
+  `updateNSView` and on `didProcessEditing`; the lane lands on the async hops AFTER any synchronous
+  render (`render` → `DispatchQueue.main.async` → `proseColumnDidChange` → the settle hop) and edits no
+  storage, so no remeasure follows — there it heals at the next SwiftUI re-render or keystroke
+  (transient); on the read tier nothing heals it. The walk could not see it: the fixture note is ONE
+  line (captures `07b`/`09`, read here), which cannot re-wrap. This is the hole J6 named — the second
+  pass was pinned by hand — with a different occupant: the lane is a REFLOW (the record's own words,
+  W-1), and a reflow's other half is the height (`viewWidthChanged` → `remeasure` is exactly how a
+  width reflow is handled one line below the new wiring). · *Pin (red on old):* through
+  `withReadTier` with ONE long paragraph (~1,200 chars) in a 620-wide surface, the REAL
+  `ReadPostSurfaceCoordinator.install(textView:)` (its wiring is the production wiring — the R1-5
+  point), a comment added through the operations layer and delivered by the observation; after the
+  hop, `abs(model.contentHeight − PaneMeasurement.height(of: textView)) < 0.5` — red on old (H1 < H2)
+  — and the badge's final frame `maxX ≤ textView.proseLeft` (the loop-driven form of the disjointness
+  pin). The inline twin through `withInlineEditor` + the real coordinator's `install(…) { height in }`,
+  asserting the LAST reported height equals the measured one after `adoptComments`. · *Fix:* each
+  host's prose-column door is its REFLOW door, not its decor door — read tier:
+  `ReadPostViewModel.proseColumnDidChange()` = `remeasure()` (which already chains `refreshBadges` →
+  `refreshDecor`, re-reading the ⑂ badges' y-positions too, which the re-wrap also moved and which
+  `pushOverlaysToSinks` would have re-pushed STALE from stored state), wired at `:178`; inline editor:
+  the coordinator composes `remeasure()` onto the controller's door after `:534` (the model keeps its
+  `proseColumnDidChange` for the decorations; the height is the coordinator's to re-report, exactly as
+  it is on every other trigger).
+
+- **R1-2 · MINOR · `App/Variorum/Variorum/Surface/DecorLane.swift:64–71` (`reserve(needed:trailing:)`)
+  · The brain reports a change on its FIRST call even when nothing moved, so every contained surface's
+  first decoration render schedules a spurious host refresh, and the doc's contract ("nil when nothing
+  changed"; `setDecorLane`'s "true when the prose column actually MOVED") is false at exactly the call
+  every surface makes first.** · *Evidence:* `insets` starts nil; a first `reserve(needed: false, …)`
+  computes `leading = 8`, and `guard insets?.leading != leading` is `nil != 8` → true → `insets =
+  (8, 8)`, returns 8; `setDecorLane` (`EditorTextView.swift:401`, `PaneSurface.swift:569`) writes
+  nothing (`abs(8 − 8) > 0.5` is false) but returns TRUE → `render` (`BlockDecor.swift:555–559`)
+  schedules `onProseColumnChanged` → on the read tier a whole `pushOverlaysToSinks`, on the editor a
+  generation bump + settle hop (`refreshBadges` + `refreshDecorations` + `considerLongBlockLayout`).
+  Once per contained surface at mount — in a book Outline, once per visible read tier. Bounded (the
+  second call is change-gated), no loop; but it is a wasted pass the record says does not happen, and
+  it leaves `originX` = 8 so the `textContainerOrigin` override is ACTIVE on every laneless contained
+  surface (returning what `super` would — harmless today, one edit away from not). The batch's pin
+  `reservingTheLaneSaysSoSoTheDecorationsAreComputedAgain` starts with `needed: true` and so never
+  meets it. · *Pin (red on old):* `PaneTextView.makeReadSurface().setDecorLane(needed: false) == false`
+  and the same on `EditorTextView.makeInlineEditor()` (both return true today). · *Fix:* compare
+  against the surface's RESTING leading (`insets?.leading ?? EditorTypography.inlineInset(needsLane:
+  false)`), and release to `insets = nil` (defer to `super`) rather than to `(8, 8)`, so the override
+  is live only while a lane is.
+
+- **R1-3 · MINOR (architectural — the drift class F-0 names; no pin owed) ·
+  `App/Variorum/Variorum/Features/Editor/EditorView.swift:675` (`BadgeOverlayController.render`) and
+  `App/Variorum/Variorum/Features/ReadTier/ReadPostView.swift:243` (`ReadBadgeOverlay.render`) · The ⑂
+  badge overlays on BOTH contained hosts still derive the prose column's right edge as `bounds.width −
+  textContainerInset.width` — the arithmetic the batch's own comment at `EditorViewModel.swift:3173`
+  calls "simply wrong once the insets differ" and created `proseRight` to retire — so the ONE
+  prose-column derivation the record claims is two derivations on the very views the batch changed.**
+  · *Evidence:* on a laned 620-wide surface `textContainerInset.width` is the MEAN (40), so
+  `columnRight` reads 580 where the column ends at 612 (`proseRight`). The visible effect today is
+  small — the `min(bounds − size − 8, columnRight + 6)` clamp usually wins on a contained surface (both
+  arms land within ~6 pt) — which is why this is not a bug finding; the traced degradation is that the
+  next change to the lane's width or the trailing inset moves the ⑂ badge by the difference on
+  exactly these two hosts, silently, with no pin watching (the one-derivation rule exists to make that
+  impossible). · *Fix:* both overlays read the edge through the surface (`proseRight` — the editor's
+  overlay holds an `EditorTextView`; the read tier's holds an `NSTextView` and casts to `any
+  DecorLaneSurface`, falling back to the old arithmetic for a surface that is not one); a small parity
+  pin that the badge's x is unchanged on an unlaned surface.
+
+- **R1-4 · MINOR (cleanliness) · `App/Variorum/Variorum/Features/Tray/TrayPanel.swift:1010–1018` (the
+  ARCHIVED block row's `deleteNow:` argument) · The archived row constructs a `TrayRowVerbs.Purge` —
+  with its own copy of the help sentence — behind `TrayPurgeDoor.offered(.block, view: model.view)`,
+  inside the `else` branch of `if model.view == .leaving` where that rule is false by construction; the
+  comment above it says "No purge door" while the code builds one, and the block's help sentence now
+  exists twice (`:992–993`, `:1016–1017`) beside the take's near-copy (`:1116–1117`).** · *Evidence:*
+  `cellRows` (`:964–1023`) renders the archived branch only when `model.view != .leaving`;
+  `TrayPurgeDoor.offered(.block, view:)` is `view == .leaving` (`TrayFilter.swift:199`); the
+  stranded-original site two rows down (`:1037–1049`) takes the OTHER road — a literal `nil` with the
+  rule cited and the P-2 reason — so the file now states the same rule two ways. No behavior is wrong
+  (the enumeration pin holds the rule; the face pin measured the archived row at `["Put back"]`);
+  this is F-0's "two copies" letter applied to a sentence-as-rule. · *Fix:* the archived site passes
+  `nil` as the stranded site does (the rule's enumeration is the pin), and the purge door's help
+  sentence lives ONCE — a `TrayRowVerbs.Purge` factory per kind (`.block(act:)` / `.take(act:)`) or two
+  statics beside `RecoveryCopy.deleteNowVerb`'s consumers in this file — so a third row type cannot
+  mint a fourth copy. No pin (nothing observable changes).
+
+- **R1-5 · MINOR (the pin-quality gap J6 asked this round to look for; the fix rides R1-1's pin) ·
+  `App/Variorum/VariorumTests/BlockDecorLaneTests.swift:271–274` and `:307–310` (the two mounted
+  disjointness pins' second pass) · W-1 and W-2 are pinned at their TRIGGER — `setDecorLane`'s return
+  value (`reservingTheLaneSaysSoSoTheDecorationsAreComputedAgain`) and the `reservesDecorLane` flags
+  (`everyDecoratedSurfaceHasItsLaneAnsweredOneWayOrTheOther`) — never at their EFFECT through the
+  production loop: no pin on either host drives model → controller → host door → model → re-sent
+  state and asserts the FINAL badge rect against the FINAL prose column, and the two mounted pins
+  still hand-feed pass two (`let settled = state(for: view, …)`), which is the exact shape the record
+  itself names as "green for the wrong reason".** · *Evidence:* the record (PIECE 3, W-1) states the
+  lesson and then pins the trigger; R1-1 is what a loop-driven pin would have caught, because a pin
+  that measures the SURFACE after the lane (rather than a hand-built state) reads its frame. ·
+  *Fix:* R1-1's read-tier pin is written through the real `ReadPostSurfaceCoordinator.install` and the
+  real observation, and asserts both halves (the badge's final `maxX ≤ proseLeft`; the height); the
+  two hand-fed pins stay (they pin the pure geometry honestly) with their doc corrected to say so.
+
+- **R1-6 · MINOR (PROVISIONAL — a product consequence the docs do not decide; goes to QUESTIONS #102,
+  no code change) · `App/Variorum/Variorum/Surface/PaneSurface.swift:733–745` (`makeReadSurface`
+  reserves the lane) · The lane reaches EVERY `ReadPostView` composition — the workspace's read-cheap
+  pane (`RootView.swift:897`), the note window (`NoteWindowView.swift:94`), the spread/paged book
+  (`SpreadBookView.swift:361`) — not only the book Outline her R-Q4 names; on those pages a commented
+  note's prose column now stands 64 pt right of an uncommented note's, so the left edge of the calm
+  page varies per note.** · *Evidence:* R-Q4's letter names "the book Outline's inline editor"; the
+  record's sweep table lists the read-tier cell as a MECHANISM fact ("same 8 pt prose inset, same
+  decorations, same defect") and the inheritance section says "#102 is still free — every decision
+  here is R-Q3's or R-Q4's letter". The overlap defect did exist on those pages too (prose at 8 pt
+  inside a 20 pt SwiftUI pad, decorations clamped at 2), so the shipped behaviour is the
+  spec-defensible one ("nothing covers text"); but whether a Read page may shift its measure per note,
+  or should reserve the lane ALWAYS (a stable edge) or never (comments as a count in the pad), is hers,
+  and unrecorded. · *Fix:* record it as QUESTIONS #102 PROVISIONAL with the three options, the shipped
+  one marked; nothing in code.
+
+- **NIT-1 · `App/Variorum/Variorum/Surface/PaneSurface.swift:545–548` · the doc comment "Fires when
+  layout gives the view a NEW width (batch 12 …)" is now orphaned above the lane's `MARK`, attached to
+  nothing; `onWidthChange` at `:594` lost its doc.** Fix: move the three lines down to the property.
+- **NIT-2 · `App/Variorum/Variorum/Features/Editor/EditorTextView.swift:388–393` ·
+  `reservesDecorLane` is documented as "Read-only view of the opt-in" and has a setter (the factories
+  use it).** Fix: the sentence.
+- **NIT-3 · `App/Variorum/Variorum/Features/Editor/BlockDecor.swift:761` · the badge's own air to the
+  text is the literal `own: 4` in the controller while `decorAir` (= 4) sits above as a named constant
+  for a DIFFERENT gap (badge → card), and `EditorTypography.commentLane`'s arithmetic names only the
+  latter.** Fix: name it (`commentBadgeAir`) so the two 4s are two named things (F-0's letter), or
+  cite the constant at the call site.
+- **NIT-4 · `EditorTextView.setDecorLane`/`textContainerOrigin` (`:401–423`) and
+  `PaneTextView`'s (`PaneSurface.swift:569–584`) are byte-identical bodies.** The override must stay
+  per class, but `setDecorLane` could live once in `extension DecorLaneSurface where Self: NSTextView`
+  over a `lane` requirement. Optional; the record calls them "three-line adopters" knowingly.
+
+#### Considered and cleared (traced; measured where it mattered)
+
+- **The `textContainerOrigin` override under TextKit 2 is honored for hit-testing, caret geometry and
+  drawing alike — MEASURED, not assumed** (a bare `NSTextView(usingTextLayoutManager: true)` subclass
+  with the batch's override, 620 wide, in an offscreen window; `scratchpad/lane-hittest.swift`):
+  symmetric inset 8 → `characterIndexForInsertion` at x = 41 → 4, x = 73 → 9; `firstRect(0..1)` x =
+  13; first-line ink from 14 pt. Laned (origin 72, inset mean 40, container 540) → x = 41/60/73/80 → 0,
+  x = 100 → 3; `firstRect` x = 77; the caret rect x = 77; ink from 78 pt; the container really 540.
+  So `PaneTextView.mouseDown`'s `characterIndexForInsertion` (the read tier's click-to-focus offset)
+  and AppKit's own caret placement agree with the drawn text on a laned surface. The batch's canary
+  pin covers the downgrade question; this covers the geometry one it could not.
+- **The reveal/anchor consumption cannot be stranded by the lane's generation bump:**
+  `consumePendingReveal(deliveredBy:)` / `consumePendingAnchorRestore` use `generation >= pending…`
+  (`EditorViewModel.swift:2009`, `:2022`), so a hop delivering a LATER generation still consumes; and
+  `overlayLayoutDidSettle`'s "bumped between schedule and run re-arms on its own draw pass" holds
+  because `onLayoutSettle` fires from `viewWillDraw` (`EditorTextView.swift:364–367`) and an inset
+  change invalidates display.
+- **No loop:** the second `setDecorLane` on a settled lane returns nil → false; `proseColumnDidChange`
+  → `refreshDecorations` sends only on `state != lastDecorState`; the read tier's `pushOverlaysToSinks`
+  re-runs `render` once and the guard closes it. Verified by reading both gates.
+- **`updateGutters` cannot clobber the lane's mean inset on the inline editor** — it early-returns on
+  `maxColumnWidth == nil` (`EditorTextView.swift:583`), and `makeInlineEditor` never sets one. No other
+  writer of `textContainerInset` exists on either contained class (grepped: `:405`, `:588`, `:850`,
+  `:916`; `PaneSurface.swift:574`, `:690`).
+- **`LongBlockLayout.swift:314`** reads `bounds − 2 × inset.width` as the container width — on a laned
+  surface that is `620 − 80 = 540`, the true container width, by construction of the mean. Correct by
+  identity. `:447` reads `textContainerOrigin` (the override). Fine.
+- **`PaneMeasurement.height`** uses `inset.height × 2` — vertical only; the lane never touches height.
+- **The lane's trigger is whole-note, not viewport-scoped** (`presentationsByBlock`/`commentsByBlock`
+  are the note's maps in both `sendDecorState`s), so scrolling never toggles it — R-Q4's "whenever the
+  note has" letter. Cost per pass ∝ callouts + comments in the note, never the corpus (P1).
+- **Sync/schema/core:** `git diff --stat 48f54268..b84336bf -- Sources App/Variorum/Shared` is empty;
+  no `setting`, no column, no `Sync/` — the record's claims hold.
+- **The tray road (F-4):** `requestDeleteNowBlock` → `TrashPurge.deleteNowConfirm(for: trashItem(for:))`
+  → `confirmPendingPurge` → `TrashPurge.confirm` → `requestPurge([SyncPurgeTarget(table:
+  item.kind.purgeTable, rowID: item.id)])` (`RecoveryActs.swift:343–397`); the target for a block is
+  the `block` table + the block id, byte-equal to `Queries.trash`'s block arm (`Trash.swift:281`). The
+  extra `blockID` the tray sets on a `.block` item is read by nothing on this road (the message is by
+  kind — pinned). The stranded original keeps no door (the literal nil AND the belt). `surfaceCapabilities`
+  already declared `.deleteNow`; the registry walk rides unmodified.
+- **`TrayRowVerbs` layout parity:** the take row's outer `HStack(spacing: 8)` held the two buttons at
+  spacing 8; the cluster is an `HStack(spacing: 8)` inside it — the gap between the verbs and to the
+  `Spacer` is unchanged. Both `.fixedSize()` riders kept.
+- **`CalloutMenu.emojiAccessory`:** the width anchor is activated after `NSStackView(views:)` adopted
+  the field (a superview exists), `.defaultLow` hugging on the field gives it the slack, and the
+  stack's frame is its fitting size floored at 320 — `NSAlert` sizes the accessory from the frame, so
+  the field cannot be squeezed back. The pin measures in a real window (red-on-old 0.0 recorded).
+- **`hasLeadingGlyph` is the ONE question** for the card's pad, the glyph's rect, the label count and
+  the comment faces' clearance (four call sites, one function). A callout with no glyph reserves
+  nothing; a glyph on a non-callout presentation is not a glyph (pinned).
+- **The arithmetic** (`commentLane`'s doc): 2 + 32 + 4 + 12 + 4 + 18 = 72; 72 − 8 = 64; the after-table
+  (badge [2, 34], card from 38, glyph [42, 60], prose from 72) recomputed by hand from the constants —
+  consistent. Write's margin card and plain callout numbers recomputed through the defaulted
+  parameters — byte-identical (the parity pin's numbers are the shipped pins' own).
+- **Write at a gutter between 28 and 72 (not only AT `minGutter`):** the recorded residual 1 is
+  narrower than the mechanism — with a glyphed callout AND a badge, the badge's `max(2, textLeft − 38
+  − 32)` clamps at 2 for any `textLeft < 72`, i.e. any Write window narrower than `maxColumnWidth +
+  144 = 824` pt, and the card's `textLeft − 34` then overlaps it. Not a regression (the badge clamped
+  at 2 there before too; the glyph sat OUTSIDE its card at every width) and the residual's owner (13u2)
+  is right; recorded here so 13u2 reads the true range, not "at 28".
+
+#### Review foci (§12), addressed
+
+- **F-0 (no god brain, no god file):** the lane is its own 100-line brain (`Surface/DecorLane.swift`) adopted by
+  two classes; `BlockDecor` grew five constants and six pure functions inside its existing geometry
+  enum; `TrayPanel.swift` (1,422 lines) gained one subview + a DEBUG probe, layered on, not bolted in;
+  `EditorViewModel.swift` (3,508 lines) gained 11 — its size is standing, not this batch's. Two rules
+  now exist twice where one should (R1-3, the prose-right derivation; R1-4, the help sentence) and one
+  contract is false at its first call (R1-2). No literal colour; the literal `4` is NIT-3.
+- **F-3 (ONE constant + ONE decision; the emoji's placement ONE rule; no `exclusionPaths`; no
+  rendering attributes):** `EditorTypography.commentLane` + `inlineInset(needsLane:)` — one each;
+  `calloutGlyphRect(card:blockTop:)` is the one glyph rule for Write and the Outline; grepped: zero
+  `exclusionPaths`, zero rendering-attribute or paragraph-style writes in the diff. SATISFIED — with
+  the height half of the reflow missing (R1-1).
+- **F-4 (the tray reuses the take row's confirm and purge road — no second confirm text, no second
+  purge path):** SATISFIED (traced above); the help SENTENCE is duplicated (R1-4), the confirm and the
+  road are not.
+
+#### CLEAN BILL — checked and found solid
+
+- Rows 3–6 are FIXED against the mechanisms the plan traced (§4.3–§4.4), and each red-on-old number
+  in the record is real: I re-derived the pre-batch geometry (badge [2, 34], glyph [2, 2 + w], prose from
+  8) from the old code in the diff, and the four suites pass on this tree (41/4).
+- The `textContainerOrigin` override is not a TK1 API and is honored consistently by NSTextView on
+  TextKit 2 for drawing, caret and hit-testing (measured above) — the seam change is sound.
+- Her R-Q3's letter (leaving blocks and takes yes; stranded originals never; archived never — kept, no
+  clock) is the enumeration, pinned, with the shared belt behind the refusals; R-Q4's letter (badge in
+  the lane; glyph inside the frame; the trailing inset untouched — R9; comments on the left) holds in
+  the geometry and the pins.
+- The 64-vs-"~40" observation (J5) is arithmetic, not a ruling; the doc carries it term by term.
+- Sync-shape, schema, core, `Shared/`: untouched, as recorded. No commit trailers on any of the ten
+  commits (checked).
+- The `min`-clamp in both badge overlays is why R1-3 is architectural rather than a bug today.
+
+**Counts:** 0 BLOCKER · 1 MAJOR (R1-1) · 5 MINOR (R1-2 … R1-6) · 4 NIT.
