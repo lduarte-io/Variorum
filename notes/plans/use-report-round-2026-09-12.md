@@ -587,10 +587,52 @@ five pieces are NOT-STARTED.
 
 **Pieces (checkpoint order):**
 
-1. the before/after capture diff (`f402ccce` vs HEAD, both voices) — **NOT-STARTED**
+1. the before/after capture diff (`f402ccce` vs HEAD, both voices) — **DONE (this commit)**
 2. the scroll memory + the reveal rule (row 1, R-Q1) — **NOT-STARTED**
 3. the empty block's face (row 2, R-Q2) — **NOT-STARTED**
 4. the ＋ new block door's alignment (row 2) — **NOT-STARTED**
 5. the walk + captures + the closing suites — **NOT-STARTED**
 
 **Rows:** 1 · 2 — dispositions PENDING.
+
+---
+
+#### PIECE 1 — THE BEFORE/AFTER (the batch's first act; `f402ccce` vs `2bfc8461`, the SAME dev store)
+
+**How.** `git worktree add ../variorum-before f402ccce` → `xcodebuild -scheme Variorum -configuration
+Debug -derivedDataPath …/DD build` there (the SAME bundle id `io.lduarte.Variorum.debug`, the SAME dev
+store) and the ordinary Debug build at HEAD; **never both running at once** (`pgrep` between every
+launch; her `/Applications` build was running throughout at pid 23216 and was never touched). The
+fixture was built by hand in the app at HEAD and then opened, unchanged, on the before binary: a new
+note, **three blocks** — "Paragraph one." (given a second take through Block ▸ New Take (Branch), so
+it carries ⑂2), "Paragraph two is a single line.", and an **EMPTY third** made by 18c's Return — with
+the caret left in the third, so `block 3/3` is the note's CURRENT block. Style **stack**, wash on,
+indicator **Outline ring**, both voices. The worktree and its DerivedData are removed; `git worktree
+list` is clean.
+
+**THE HEADLINE: the page's position, and nothing else, is what changed.**
+
+| What | BEFORE (`f402ccce`) | AFTER (HEAD, `2bfc8461`) | Moved by |
+|---|---|---|---|
+| **The article's scroll on entering Takes** | **at the TOP** — "Paragraph one." (⑂2), "Paragraph two is a single line." and the empty third block all on screen, in both voices (`03`, `04`) | **scrolled to the CURRENT block's top** — blocks 1 and 2 are ABOVE the fold; the page shows the empty third block, its ⑂+ badge and the ＋ new block door and nothing else, in both voices (`01`, `02`) | `68632d31` (17o batch b piece 4, row 8): the N9 entry arm calls `landArticle(on:)` for the note's current block and the view spends it `anchor: .top`. **Her image 1 reproduced exactly.** |
+| The empty block's placeholder | *"empty take — line kept"* present, at the pane's top-leading | **identical** — same string, same place | **NOTHING.** The R103 overlay is unchanged since 13 batch 9; what changed around it is that empty blocks became EVERYDAY (18c's Return mints one at every paragraph break, and 17o's ＋ new block door mints one on demand), so a face built for "a take deleted down to nothing" now greets a block she just made. |
+| The ＋ new block door's alignment | dashed frame's leading edge flush with the PANE's frame, ~11 pt left of the prose | **identical** | **NOTHING** — the door has been padded from the cell's edge since 13b 1b. It reads as misalignment now because the empty third block is often the only thing on the page (row 1), which puts the door directly under an empty pane with nothing else to line up against. |
+| The live pane's ring | Outline ring drawn (indicator = Outline ring) | identical | — (17o batch c's U-7 fix made the ring follow the preference; under indicator OFF there is NO ring, which is the state her image 1 was captured in and why the caret reads as sitting *in* the words) |
+| Everything else on the board (chrome row, badges, bottom bar, both voices) | — | no visible delta | — |
+
+**What this answers.** Her *"the take page looks like an absolute mess now"* and *"keeps trying to jump
+to the bottom"* are **ONE regression with ONE cause** — `68632d31`'s entry landing — and *"I want it to
+return to what it used to look like"* is satisfied for row 1 by restoring the page's position. The
+empty block's face and the door's alignment are **NOT regressions**: they are old faces newly made
+prominent, and R-Q2 rules them both. Nothing else on the board moved between the two trees.
+
+**Captures:** `notes/plans/use-report-2026-09-12-screens/17p-a/01-after-takes-study-stack.png` ·
+`02-after-takes-terminal-stack.png` · `03-before-takes-terminal-stack.png` ·
+`04-before-takes-study-stack.png` (gitignored).
+
+**Two environment notes, recorded so they are not met twice.** (1) WalkKit's `walk-cap` writes
+`w<n>.png` where `n` is the window's index in ITS OWN listing and does **not** clear the directory — a
+stale `w1.png` from an earlier run read as the current frame and cost three wrong conclusions. Always
+capture into a FRESH directory. (2) The recorded first-launch pitfall is live: the first launch of the
+HEAD build took every click and keystroke and showed nothing; quitting MY instance and relaunching
+cleared it (her `/Applications` instance was never involved).
