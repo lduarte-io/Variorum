@@ -589,6 +589,7 @@ struct TakesBoardView: View {
                                 $0.frame(in: .scrollView)
                             } action: { frame in
                                 model.noteArticleRowFrame(slot.placementID, frame)
+                                spendArticleLanding(column)
                             }
                     }
                     if !model.projection.slots.isEmpty {
@@ -669,11 +670,11 @@ struct TakesBoardView: View {
             // where the take is"*) — REVISED by 17p batch a's R-Q1: the
             // landing REVEALS. It still names the slot on the ForEach's OWN
             // identity (the placement id — the Act 10 ladder's R1-3 lesson
-            // about lazy columns and estimate drift), but it is spent with
-            // `anchor: nil` (SwiftUI's minimal scroll) and only when the
-            // board's own geometry says the row is not fully on screen, and
-            // only AFTER the scroll memory has been restored — so a landing
-            // can never be the reason the page jumps to the bottom.
+            // about lazy columns and estimate drift), but it is spent as the
+            // MINIMAL scroll (the row to the nearer edge of the page) and only
+            // when the board's own geometry says the row is not fully on
+            // screen, and only AFTER the scroll memory has been restored — so
+            // a landing can never be the reason the page jumps to the bottom.
             .onChange(of: model.articleLanding, initial: true) { _, _ in
                 spendArticleLanding(column)
             }
@@ -681,16 +682,23 @@ struct TakesBoardView: View {
         }
     }
 
-    /// A landing is spent exactly once, and never before the page is where
-    /// the memory says it should be (the 17o batch-b BLOCKER's class: a
-    /// landing request that outlives its moment re-lands on every later mount).
+    /// A landing never runs before the page is where the memory says it
+    /// should be, never hauls a row to the far edge, and ends at HER HAND
+    /// (the 17o batch-b BLOCKER's class was a request outliving its moment
+    /// across MOUNTS; this one dies with the model and is ended by a scroll,
+    /// a click or an edit). The step machine is the board's
+    /// (`articleLandingStep`, with the measured reasons); the view performs
+    /// the scroll it is told to. Re-entered from the geometry hook, the
+    /// landing's change, AND each row's frame report, so the request re-aims
+    /// as the lazy column realizes and measures its rows (the 17p batch-a
+    /// adjudication, J1).
     private func spendArticleLanding(_ column: ScrollViewProxy) {
-        guard model.articleReadyForLanding, let landing = model.articleLanding
-        else { return }
-        if model.articleReveal(for: landing) == .reveal {
-            column.scrollTo(landing, anchor: nil)
+        switch model.articleLandingStep() {
+        case .reveal(let rowID, let aim):
+            column.scrollTo(rowID, anchor: aim == .head ? .top : .bottom)
+        case .wait, .done:
+            break
         }
-        model.clearArticleLanding()
     }
 
     /// **13f W7 — HER RULING (2026-07-30):** *"the whitespace underneath works

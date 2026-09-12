@@ -311,8 +311,14 @@ final class TakesBoardLayout {
 
     func landArticle(on placementID: String) {
         articleLanding = placementID
+        articleLandingAimsLeft = Self.articleLandingAttempts
+        articleLandingAims = 0
     }
 
+    /// Her hand ends a landing — a scroll (`consumeArticleGeometry`'s user
+    /// branch), a click that migrates the live pane, an edit. The request is
+    /// otherwise kept through the column's settling passes (see
+    /// `ArticleLandingStep`).
     func clearArticleLanding() {
         articleLanding = nil
     }
@@ -343,9 +349,109 @@ final class TakesBoardLayout {
         rowFrame: CGRect?, viewportHeight: CGFloat
     ) -> ArticleReveal {
         guard viewportHeight > 0, let rowFrame else { return .reveal }
+        // A row TALLER than the viewport can never be fully on screen; it is
+        // revealed when its top is (nothing above it could stay visible
+        // anyway, so "minimal" and "top" coincide for that one shape).
+        if rowFrame.height > viewportHeight {
+            return rowFrame.minY >= -0.5 && rowFrame.minY < viewportHeight - 0.5
+                ? .none : .reveal
+        }
         // A generous pixel of slack: a row flush with an edge is on screen.
         return rowFrame.minY >= -0.5 && rowFrame.maxY <= viewportHeight + 0.5
             ? .none : .reveal
+    }
+
+    /// **THE LANDING, as a bounded step machine** (the 17p batch-a
+    /// adjudication, J1). Measured at that adjudication, on the mounted board:
+    /// (1) the landing was spent at the article's FIRST geometry report, with
+    /// zero rows realized, and a scroll against a row a lazy column has not
+    /// realized is a no-op; (2) a lazy column's rows report PLACEHOLDER
+    /// frames first (every row 28 pt, then 50, then their measured heights,
+    /// each pass on its own turn), so "the row is on screen" read from an
+    /// early frame is the starved-host class — true for a page that does not
+    /// exist yet; (3) the article's position is a bound `ScrollPosition`,
+    /// which SwiftUI re-applies on every relayout until her hand moves the
+    /// page, so a one-shot scroll is undone by the next content-size change
+    /// (65 pt, then back to 0). No local signal says "measurement is
+    /// complete", so the request does what the restore beside it does: it
+    /// STAYS and re-aims as the column settles (bounded), and it ends at HER
+    /// HAND — a scroll, a click into another pane, an edit — never at a
+    /// frame that may be a placeholder.
+    enum ArticleLandingStep: Equatable {
+        /// Nothing pending (or the row is gone from the note).
+        case done
+        /// Keep the request; nothing to do this turn (no geometry yet, the
+        /// restore still running, a column that has laid out nothing, or the
+        /// row on screen right now).
+        case wait
+        /// Scroll this row to this edge of the page.
+        case reveal(String, ArticleRevealAim)
+    }
+
+    /// Which edge of the page a reveal puts the row at — the MINIMAL scroll
+    /// stated as an edge: a row below the fold comes up to the foot (the rows
+    /// above it stay), a row above the fold comes down to the head. A row the
+    /// column has not realized is placed by which side of the realized rows
+    /// it lies on. A model-side word, mapped to a SwiftUI anchor by the view.
+    /// Never the far edge: her words on the shipped behaviour were *"the page
+    /// keeps trying to jump to the bottom and now show the text above"*.
+    enum ArticleRevealAim: Equatable {
+        case head
+        case foot
+    }
+
+    /// Bounded, so a request can never loop: every aim is one idempotent
+    /// scroll, and the column settles in a handful of passes.
+    nonisolated static let articleLandingAttempts = 64
+    @ObservationIgnored private var articleLandingAimsLeft = articleLandingAttempts
+    /// Observation seam (the `measuredHeightWrites` precedent — a plain
+    /// counter, not DEBUG-gated): how many aims the current landing issued.
+    /// The pins' non-vacuity: a far block aimed at least once; a block already
+    /// on screen never did.
+    @ObservationIgnored private(set) var articleLandingAims = 0
+
+    /// `order` is the article's slots in `ForEach` order (their placement ids).
+    func articleLandingStep(order: [String]) -> ArticleLandingStep {
+        guard let landing = articleLanding else { return .done }
+        guard articleReadyForLanding else { return .wait }
+        guard order.contains(landing) else {
+            articleLanding = nil   // the row is gone from the note
+            return .done
+        }
+        let frame = articleRowFrames[landing]
+        if frame == nil, articleRowFrames.isEmpty { return .wait }
+        if Self.revealDecision(rowFrame: frame, viewportHeight: articleViewportHeight) == .none {
+            return .wait   // on screen now; the request stays until her hand
+        }
+        guard articleLandingAimsLeft > 0 else {
+            articleLanding = nil
+            return .done
+        }
+        articleLandingAimsLeft -= 1
+        articleLandingAims += 1
+        return .reveal(
+            landing,
+            Self.revealAnchor(
+                for: landing, rowFrame: frame, order: order,
+                realizedRows: Set(articleRowFrames.keys)))
+    }
+
+    /// Pure: which edge reaches the row. A realized row goes by its frame —
+    /// above the fold → `.head`, else `.foot`. An unrealized row lies beyond
+    /// the realized rows on one side — below them → `.foot` (it lands at the
+    /// foot with the rows above it still showing), above them → `.head`. A
+    /// shape that says neither takes `.foot` (a landing is a block she was
+    /// working in, and the page opens at the top).
+    nonisolated static func revealAnchor(
+        for placementID: String, rowFrame: CGRect?, order: [String], realizedRows: Set<String>
+    ) -> ArticleRevealAim {
+        if let rowFrame { return rowFrame.minY < 0 ? .head : .foot }
+        guard let target = order.firstIndex(of: placementID) else { return .foot }
+        let indices = order.indices.filter { realizedRows.contains(order[$0]) }
+        guard let low = indices.min(), let high = indices.max() else { return .foot }
+        if target > high { return .foot }
+        if target < low { return .head }
+        return .foot
     }
 
     /// The realized article rows' frames in the scroll view's own space, and
@@ -494,6 +600,10 @@ final class TakesBoardLayout {
         guard geometry.viewport > 0 else { return .wait }
         articleGeometrySeen = true
         articleViewportHeight = geometry.viewport
+        // Her hand outranks a pending LANDING too: a request that outlived
+        // its moment must never haul a page she has since scrolled (the 17o
+        // batch-b BLOCKER's class).
+        if positionedByUser { articleLanding = nil }
         switch articleRestore {
         case .undecided:
             // Read the memory BEFORE this mount has written anything into it.

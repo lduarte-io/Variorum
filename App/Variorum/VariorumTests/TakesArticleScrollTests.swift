@@ -75,9 +75,18 @@ struct TakesArticleScrollTests {
         return outermost
     }
 
-    private struct Fixture {
+    // `@unchecked`: `UserDefaults` is documented thread-safe but not `Sendable`.
+    private struct Fixture: @unchecked Sendable {
         let postID: String
         let blocks: [(block: String, variant: String)]
+        /// The session's OWN defaults. The test host is the dev-store app, so
+        /// `.standard` is shared with every other suite AND with hand walks —
+        /// and `.incrementing` mints the same post id in every world, so a
+        /// `takesViewMemory` left by a Lenses lesson (four columns, alignment
+        /// locked) mounted THIS board as a four-column Lenses board and the
+        /// reveal guard read offset 0 with no article pane (the R1-7 class,
+        /// KnownIssues, owner 12; found at the 17p batch-a adjudication).
+        let defaults: UserDefaults
         var lastBlock: String { blocks[blocks.count - 1].block }
         var lastVariant: String { blocks[blocks.count - 1].variant }
     }
@@ -98,6 +107,10 @@ struct TakesArticleScrollTests {
         let db = try AppDatabase.inMemory()
         let start = Date(timeIntervalSince1970: 1_782_864_000)
         let tick = LockIsolated(0)
+        let suiteName = "TakesArticleScroll-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
+        defaults.removePersistentDomain(forName: suiteName)
+        defer { defaults.removePersistentDomain(forName: suiteName) }
         try await withDependencies {
             $0.database = db
             $0.uuid = .incrementing
@@ -120,7 +133,7 @@ struct TakesArticleScrollTests {
                         + "once at the article's measure so the rows have real height.")
                 made.append((minted.block.id, minted.variant.id))
             }
-            let fixture = Fixture(postID: post.id, blocks: made)
+            let fixture = Fixture(postID: post.id, blocks: made, defaults: defaults)
 
             var windows: [NSWindow] = []
             var hostings: [NSHostingView<TakesBoardView>] = []
@@ -158,7 +171,8 @@ struct TakesArticleScrollTests {
     private func landingModel(
         session: AppSession, fixture: Fixture, db: AppDatabase
     ) async throws -> TakesViewModel {
-        let model = TakesViewModel(session: session, postID: fixture.postID)
+        let model = TakesViewModel(
+            session: session, postID: fixture.postID, defaults: fixture.defaults)
         model.landingEnabled = true
         model.adopt(try await db.read { try Queries.takesProjection($0, post: fixture.postID) })
         return model
@@ -355,8 +369,8 @@ struct TakesArticleScrollTests {
             }
             await settle(window, hosting, until: { false }, maxTurns: 12)
 
-            #expect(model.articleLanding == nil,
-                    "non-vacuity: the landing request WAS spent")
+            #expect(model.articleLandingAims > 0,
+                    "non-vacuity: the landing really aimed the page")
             #expect(offset(article) > 0,
                     "the board went to the block she was in (offset \(offset(article)))")
 
@@ -415,6 +429,13 @@ struct TakesArticleScrollTests {
         // on screen, so reveal.
         #expect(TakesBoardLayout.revealDecision(rowFrame: nil, viewportHeight: viewport)
                 == .reveal)
+        // A row TALLER than the page is on screen when its top is.
+        #expect(TakesBoardLayout.revealDecision(
+            rowFrame: CGRect(x: 0, y: 10, width: 680, height: 900), viewportHeight: viewport)
+                == .none)
+        #expect(TakesBoardLayout.revealDecision(
+            rowFrame: CGRect(x: 0, y: -50, width: 680, height: 900), viewportHeight: viewport)
+                == .reveal)
         // A viewport we have not measured yet decides nothing, and the view's
         // own minimal scroll settles it.
         #expect(TakesBoardLayout.revealDecision(
@@ -446,5 +467,119 @@ struct TakesArticleScrollTests {
         // A row that scrolled away is forgotten, and an unknown slot reveals.
         board.forgetArticleRowFrame("near")
         #expect(board.articleReveal(for: "near") == .reveal)
+    }
+
+    // MARK: - The landing as a step machine (the 17p batch-a adjudication, J1)
+
+    private func freshBoard(_ name: String) -> TakesBoardLayout {
+        let suite = "TakesArticleScroll-\(name)"
+        let defaults = UserDefaults(suiteName: suite)!
+        defaults.removePersistentDomain(forName: suite)
+        return TakesBoardLayout(postID: "post", defaults: defaults)
+    }
+
+    private func settle(_ board: TakesBoardLayout, byUser: Bool = false) {
+        _ = board.consumeArticleGeometry(
+            TakesBoardLayout.ArticleGeometry(offset: 0, content: 3000, viewport: 700),
+            remembered: nil, positionedByUser: byUser)
+    }
+
+    /// Measured at the adjudication (the layout's `ArticleLandingStep` doc
+    /// carries the three numbers): the request waits for rows, aims by
+    /// direction at a row it cannot see, re-aims as the column's placeholder
+    /// frames give way to measured ones, and ENDS AT HER HAND — never at a
+    /// frame that may be a placeholder. Red on old: the old spend cleared the
+    /// request on the first report and never aimed again.
+    @Test func theLandingWaitsForRowsAimsByDirectionAndStaysUntilHerHand() {
+        let board = freshBoard("steps")
+        let order = ["a", "b", "c", "far"]
+        board.landArticle(on: "far")
+
+        // No geometry yet → wait, and the request is kept.
+        #expect(board.articleLandingStep(order: order) == .wait)
+        #expect(board.articleLanding == "far")
+
+        // Geometry, but the column has laid out nothing → still wait.
+        settle(board)
+        #expect(board.articleLandingStep(order: order) == .wait)
+        #expect(board.articleLanding == "far")
+        #expect(board.articleLandingAims == 0)
+
+        // Rows realized above the target → aim at the foot; request kept.
+        board.noteArticleRowFrame("a", CGRect(x: 0, y: 0, width: 680, height: 60))
+        board.noteArticleRowFrame("b", CGRect(x: 0, y: 66, width: 680, height: 60))
+        #expect(board.articleLandingStep(order: order) == .reveal("far", .foot))
+        #expect(board.articleLanding == "far")
+        #expect(board.articleLandingAims == 1)
+
+        // The row realized but still below the fold → to the foot; a row
+        // realized above the fold → to the head. Never the far edge.
+        board.noteArticleRowFrame("far", CGRect(x: 0, y: 900, width: 680, height: 60))
+        #expect(board.articleLandingStep(order: order) == .reveal("far", .foot))
+        board.noteArticleRowFrame("far", CGRect(x: 0, y: -300, width: 680, height: 60))
+        #expect(board.articleLandingStep(order: order) == .reveal("far", .head))
+        #expect(board.articleLanding == "far")
+
+        // The row reports itself on screen → nothing to do, request KEPT
+        // (that frame may be a placeholder pass).
+        board.noteArticleRowFrame("far", CGRect(x: 0, y: 600, width: 680, height: 60))
+        #expect(board.articleLandingStep(order: order) == .wait)
+        #expect(board.articleLanding == "far")
+
+        // …and when a later pass pushes it below the fold, it is re-aimed.
+        board.noteArticleRowFrame("far", CGRect(x: 0, y: 700, width: 680, height: 60))
+        #expect(board.articleLandingStep(order: order) == .reveal("far", .foot))
+        #expect(board.articleLandingAims == 4)
+
+        // Her hand ends it.
+        settle(board, byUser: true)
+        #expect(board.articleLanding == nil)
+        #expect(board.articleLandingStep(order: order) == .done)
+    }
+
+    /// A landing naming a row the note no longer holds ends at once; one
+    /// naming a row the column never realizes ends after the bounded aims.
+    @Test func theLandingEndsForAGoneRowAndAfterItsBoundedAims() {
+        let board = freshBoard("bounded")
+        settle(board)
+        board.noteArticleRowFrame("a", CGRect(x: 0, y: 0, width: 680, height: 60))
+        board.landArticle(on: "gone")
+        #expect(board.articleLandingStep(order: ["a"]) == .done)
+        #expect(board.articleLanding == nil)
+
+        board.landArticle(on: "late")
+        for _ in 0..<TakesBoardLayout.articleLandingAttempts {
+            #expect(board.articleLandingStep(order: ["a", "late"]) == .reveal("late", .foot))
+        }
+        #expect(board.articleLandingStep(order: ["a", "late"]) == .done)
+        #expect(board.articleLanding == nil)
+    }
+
+    @Test func theLandingAimsAtTheHeadForARowAboveTheRealizedOnes() {
+        let board = freshBoard("head")
+        settle(board)
+        board.noteArticleRowFrame("c", CGRect(x: 0, y: 0, width: 680, height: 60))
+        board.noteArticleRowFrame("d", CGRect(x: 0, y: 66, width: 680, height: 60))
+        board.landArticle(on: "a")
+        #expect(board.articleLandingStep(order: ["a", "b", "c", "d"]) == .reveal("a", .head))
+        // Pure: a realized row goes by its frame; an unknown id takes the foot.
+        #expect(TakesBoardLayout.revealAnchor(
+            for: "c", rowFrame: CGRect(x: 0, y: -10, width: 680, height: 60),
+            order: ["a", "b", "c", "d"], realizedRows: ["c", "d"]) == .head)
+        #expect(TakesBoardLayout.revealAnchor(
+            for: "c", rowFrame: CGRect(x: 0, y: 800, width: 680, height: 60),
+            order: ["a", "b", "c", "d"], realizedRows: ["c", "d"]) == .foot)
+        #expect(TakesBoardLayout.revealAnchor(
+            for: "zz", rowFrame: nil, order: ["a", "b"], realizedRows: ["a"]) == .foot)
+    }
+
+    /// Her hand outranks a pending landing (the 17o batch-b BLOCKER's class:
+    /// a request that outlives its moment must never haul the page later).
+    @Test func herOwnScrollCancelsAPendingLanding() {
+        let board = freshBoard("hand")
+        board.landArticle(on: "far")
+        settle(board, byUser: true)
+        #expect(board.articleLanding == nil)
+        #expect(board.articleLandingStep(order: ["a", "far"]) == .done)
     }
 }

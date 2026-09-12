@@ -529,6 +529,9 @@ final class TakesViewModel {
         case .unchanged:
             return
         case .migrated(let leaving):
+            // Her hand: a click that moves the live editor ends a pending
+            // article landing (17p batch a, J1).
+            board.clearArticleLanding()
             // The leaving pane's text lands as the ring migrates (the
             // handoff contract in miniature — safety rides the buffers +
             // the `!isLive` adopt guard; the flush converges the store).
@@ -648,6 +651,15 @@ final class TakesViewModel {
         board.articleReveal(for: placementID)
     }
 
+    /// The landing's next step, judged against the article's slots in their
+    /// `ForEach` order (so an unrealized row can be aimed at by direction).
+    func articleLandingStep() -> TakesBoardLayout.ArticleLandingStep {
+        board.articleLandingStep(order: projection.slots.map(\.placementID))
+    }
+
+    /// How many aims the current landing issued (the pins' non-vacuity).
+    var articleLandingAims: Int { board.articleLandingAims }
+
 
     /// **Where she left this note's article** — held at the SESSION, because
     /// this model dies with the mount and the memory must not
@@ -681,6 +693,8 @@ final class TakesViewModel {
             storeText: currentStoreText(variantID: variantID) ?? "")
         let cost = TakeEditCost.utf16Cost(from: old, to: newText)
         guard cost > 0 else { return }
+        // Her hand: an edit ends a pending article landing (17p batch a, J1).
+        board.clearArticleLanding()
         authority.bufferEdited(variantID: variantID, text: newText)
         autosave.record(variantID: variantID, text: newText, charDelta: cost)
     }
