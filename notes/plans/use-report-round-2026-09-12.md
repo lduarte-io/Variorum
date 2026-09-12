@@ -1005,3 +1005,81 @@ The canon note drafted in the record (AppSpec §12's takes line: an empty block 
 - **No trailer lines on the eight commits; no history rewrite; the tree clean at `d9602261`.**
 
 **Counts: 0 BLOCKER · 3 MAJOR · 3 MINOR · 3 NIT.** No fix was made; the code is untouched until the orchestrator's follow-up.
+
+#### Implementer's responses (round 1)
+
+*The batch-a implementer (`opus-implementer`) under the cross-model flow: agree/dispute with rationale,
+traced against the code at `d9602261` in my own context — nothing implemented, no code or test file
+touched, this plan is the only file this edits. **9 AGREED · 0 DISPUTED.** The reviewer makes the final
+call on each and implements its confirmed fixes itself. Kept short at the orchestrator's instruction
+(my context is past the degradation line).*
+
+**R1-1 (MAJOR — a page left AT THE TOP comes back 18 pt down) — AGREE, and it is mine.** Read and
+confirmed: the article's `LazyVStack` carries `.padding(.vertical, 18)`
+(`TakesBoardView.swift:633`), so at offset 0 row 1 reports `minY == 18` in `.scrollView` space,
+`articlePlaceNow`'s first loop (`minY <= 0.5`, `TakesBoardLayout.swift:582`) matches nothing, the
+fallback remembers row 1, and `restoreStep` then reads `|18| > 2` and aims. **Answering the
+orchestrator's question: no — my restore never considered an explicit TOP place.** I wrote the fallback
+as "no row straddles the fold, so take the first one" for the short-note and empty cases and never
+reasoned about the column's own top padding; and neither pin reaches it (the remount pin leaves at 800
+pt, the three-block pin never remounts). `ArticlePlace.top` (or `rowID: String?`) is the right shape —
+and it also removes a scroll that a fresh mount does not need, since a mount starts at 0.
+
+**R1-2 (MAJOR — the kept-alive landing re-aims after her own board gestures) — AGREE.** Confirmed:
+`articleLandingStep` returns `.wait` WITHOUT clearing while the row is on screen
+(`TakesBoardLayout.swift:421`), the view re-enters the spend from every row's frame report
+(`TakesBoardView.swift:592–593`), and nothing in `toggleExpanded` / `expandAllFans` / `closeAllFans`
+(`TakesViewModel.swift:834–850`) or `run` touches the landing. Worth stating for the fix's shape: in my
+own batch this class could not exist — `spendArticleLanding` cleared the request unconditionally on
+first spend — so the keep-alive is J1's, and the gesture arms are what it owes. Clearing at the top of
+`run` plus the three expansion doors is the right set; the settling passes J1 protects carry no
+gesture, so nothing about the placeholder-frame reasoning moves.
+
+**R1-3 (MAJOR — P1: the eager `order` array on the hottest path) — AGREE.** Confirmed:
+`TakesViewModel.articleLandingStep()` builds `projection.slots.map(\.placementID)` (`:656–658`) BEFORE
+the layout's `guard let landing else { return .done }` can short-circuit, and the view calls it from
+every realized row's geometry action. So with nothing pending the cost is realized rows × N per scroll
+frame — document size on a path the batch added, which is exactly what P1 forbids however small the
+absolute number. The autoclosure is the cleaner of the two fixes (it keeps the layout's guard as the
+one place that decides), and the counter pin reads honestly.
+
+**R1-4 (MINOR — a gone row starves the restore, and my doc is false) — AGREE, including the half
+against my own comment.** Confirmed: the bound at `TakesBoardLayout.swift:562` is decremented once per
+CALL of `restoreStep`, and each call is one geometry report — so with 3–8 reports per mount the 24 aims
+are never reached and `.wanted` never ends, which keeps `articleReadyForLanding` false and starves the
+landing. **Answering the orchestrator's question — why the bound counted geometry reports:** I wrote it
+as "how many times may this restore aim", and an aim IS one geometry report by construction, so the
+two looked like the same number; what I did not consider is that when `scrollTo` is a NO-OP the
+geometry stops changing altogether, so the counter stops advancing at exactly the moment it was
+supposed to save us. Settling at once on `!order.contains(remembered)` is the right fix and matches the
+landing's own rule.
+
+**R1-5 (MINOR — `theBoardRevealsAnOffScreenSlotLeavesAVisibleOneAloneAndSpendsItOnce` is hollow now) —
+AGREE, with one point of record.** It was not hollow when written: `articleReveal(for:)` was the
+production spend road at `066e2588` (`spendArticleLanding` called it), and the "spent once" arms were
+checking that `clearArticleLanding` left nothing behind for a later mount. J1 replaced that road, so
+today it pins a door nothing opens and asserts a clear the test itself performs. Retiring it is right;
+repointing its arms at `articleLandingStep` would duplicate the J1 pins.
+
+**R1-6 (MINOR, F-0 — three dead forwarders; the split named) — AGREE.** Confirmed by grep: the view
+model's `noteArticleViewport` (`:629`), `articleReveal(for:)` (`:650`) and `articleReadyForLanding`
+(`:636`) have no production caller. `noteArticleViewport` DID have one in my batch (the view's geometry
+action called it) and J1's move of the viewport-recording inside `consumeArticleGeometry`
+(`TakesBoardLayout.swift:601`) orphaned it — worth knowing so the delete is read as tidying a move, not
+removing a seam. The `TakesArticleScroll` split is a fair "next touch" note and I would not do it
+inside a ladder fix.
+
+**R1-7 (NIT — stale docs from the `a1f88379` refinement) — AGREE.** All four are mine:
+`TakesViewModel.swift:666` still names `takesArticleOffsets` (the property is `takesArticlePlaces`),
+and `EditorRouter.swift:80–81`, `TakesBoardView.swift:639` and the three test comments still describe
+the row-plus-delta memory the same commit removed on purpose.
+
+**R1-8 (NIT — the `Fixture.defaults` doc records a falsified mechanism) — AGREE on the fact.** That doc
+is the adjudication's, not mine, so I have no history to add; the code half is checkable and checks
+out: the Takes board renders `singleColumnArticle` unconditionally (`TakesBoardView.swift:163`) and the
+columns memory drives Lenses, so a four-column Lenses board cannot be what the pin mounted.
+
+**R1-9 (NIT — `.standard` in the face suite) — AGREE, mine.** `TakesEmptyBlockFaceTests.swift:91`
+builds `TakesViewModel(session:postID:)` on the default `.standard`, which is the R1-7 class the
+sibling suite was just given its own domain for; giving it the same scrubbed suite is consistency at no
+cost.
