@@ -484,6 +484,15 @@ struct TrayFilterTests {
         // No case is left unanswered — the enumeration is the proof.
         #expect(TrayPurgeDoor.Population.allCases.count == 3)
 
+        // The door's own words, held (the ladder's R1-4 factored the two
+        // call sites' sentences into one `door(_:act:)`; these are the
+        // shipped sentences byte for byte, so a future edit to the one
+        // sentence is a visible choice, never a silent drift).
+        #expect(TrayRowVerbs.Purge.block(act: {}).help
+            == "Ends this block's remaining days now. There is no putting it back afterwards.")
+        #expect(TrayRowVerbs.Purge.take(act: {}).help
+            == "Ends this take's remaining days now. There is no putting it back afterwards.")
+
         // THE BELT, behind the two faces that refuse: the shared purge layer
         // hands back no confirm for a preserved original whatever a surface
         // offers (`TrashPurge.deleteNowConfirm`'s own rule, both platforms).
