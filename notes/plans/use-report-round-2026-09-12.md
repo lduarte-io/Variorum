@@ -2923,6 +2923,12 @@ change to what `last_touched_at` MEANS (AppSpec §10 untouched); the Timeline mo
 untouched; no stored stamp anywhere new (no denormalization); no new `setting` key (the sort is
 LOCAL UI state, so AppSpec §7's seeds are untouched — see the canon note at the end).
 
+**MACHINERY HONESTY (the protocol's rule 7):** commit `5f9a3a89` — the one that landed the three
+closing runs into this record — carries a GARBAGE MESSAGE: two heredocs on one shell line, and
+`git commit -F -` read the python script instead of the message. Its CONTENT is exactly right (this
+record, with the closing lines). It is not amended, because history is never rewritten here; this
+line is the correction, and the message it should have carried is the one on the commit after it.
+
 **LIVE STATUS — THE BATCH IS CLOSED** (`2d43df7c` · `a33db2bf` · `440d5c52` · `4a838d70` ·
 `f531955a`; every piece flipped in its own commit as it landed):
 
@@ -3201,7 +3207,7 @@ the index, was measured and NOT needed, so there is no schema commit and the mar
   errors on `c3d81b31` in a throwaway worktree (`scratchpad/18h-2/red-on-old-face.log`, quoted
   below). Green: `✔ Test run with 9 tests in 1 suite passed after 0.110 seconds.`
 - **Piece 4 — THE WALK (the acceptance gate) + the closing runs:** DONE (`dced175b`; the closing
-  runs landed at `PENDING-FLIP`). Eleven captures in `notes/plans/use-report-2026-09-12-screens/18h-2/` (gitignored;
+  runs landed at `5f9a3a89`). Eleven captures in `notes/plans/use-report-2026-09-12-screens/18h-2/` (gitignored;
   the table below), both voices, on the DEV-STORE Debug build (`io.lduarte.Variorum.debug`, built
   into `App/Variorum/DerivedData/18h2`); her `/Applications` app was not running before, during or
   after (`pgrep -fl 'Variorum.app/Contents/MacOS'` empty at the start and after my quit), and I left
