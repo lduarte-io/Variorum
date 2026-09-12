@@ -2916,6 +2916,49 @@ context) — recorded here; nothing loops after this word. **Last code hash: `c3
 
 ### R-3 · RECORD (the implementer writes here from its first commit)
 
-*(empty until the implementer's first commit)*
+**WHAT I DID NOT DO (the record's first line):** no schema, no migration, nothing in
+`Sources/VariorumCore/Sync/`, nothing in `BlockRangeIndex` / `EditorTextView` /
+`PaneTextAuthority` / `PaneMeasurement`; **no day search** (row 11 — that is batch 2's, R-4); no
+change to what `last_touched_at` MEANS (AppSpec §10 untouched); the Timeline mode's own order
+untouched; no stored stamp anywhere new (no denormalization); no new `setting` key (the sort is
+LOCAL UI state, so AppSpec §7's seeds are untouched — see the canon note at the end).
+
+**LIVE STATUS (flipped in the same commit as each piece):**
+
+- **Piece 1 — THE CORE (`sort:`/`direction:` · `LibrarySort.title` · `CatalogHit`'s two stamps ·
+  `NoteStamps.createdAt` · the ONE wording brain `TimeStampFace`):** DONE — this commit.
+  Pins: `Tests/VariorumCoreTests/LibraryTimeSortTests.swift` (8 tests) +
+  `Tests/VariorumCoreTests/TimeStampFaceTests.swift` (8 tests). Red-on-old captured as compile
+  errors on `87799c6a` (`scratchpad/18h-1/red-on-old-core.log`, quoted below); green after:
+  `✔ Test run with 21 tests in 3 suites passed after 0.272 seconds` (the two new suites +
+  18d's `NoteStampsTests` riding untouched, which is the parity proof for the struct's new field).
+- **Piece 2 — the sort menu + the model's memory:** NOT-STARTED. The settled design: a
+  `VoicedMenu` "sort ▾" in the catalog header beside the scope/mode pickers (edited · created ·
+  date · title, then a direction row); `LibraryCatalogModel` holds `sort`/`direction`, remembers
+  them in an INJECTED `UserDefaults` (`.standard` in the app, a scrubbed suite in the pins —
+  KnownIssues R1-7), and `search()` passes them to `Queries.searchCatalog`; the Timeline mode
+  keeps its own order.
+- **Piece 3 — the row stamps + `TimeStampFace` adopted by 18d's facts line:** NOT-STARTED.
+  A trailing muted stamp on `CatalogNoteLine` (right of the `Spacer()`, on the line's first-text
+  baseline, with the tooltip) and the same words on the Notes card's line, both reading the
+  SORT's own subject; `NoteBoxCopy.day` becomes a forwarder to `TimeStampFace.day`.
+- **Piece 4 — the masthead stamp (row two's third subview + the oracle slot):** NOT-STARTED.
+  `MastheadRowTwo` grows from two subviews to three (the stamp trailing on one line, riding the
+  chip's line when row two stacks), the stamp a quiet `Button` flipping *edited …* ↔ *created …*
+  on click, fed by a HELD `Queries.noteStamps` observation (never a one-shot — 17o row 18/19's
+  lesson); `MastheadProbeSlot.stamp` + `MastheadGeometry.stampFrame` for the DEBUG oracle.
+- **Piece 5 — THE WALK (the acceptance gate) + the closing runs:** NOT-STARTED.
+
+**RED ON OLD, piece 1 (the honest shape for a PRODUCT row — the capability is absent, so the pins
+do not compile on `87799c6a`; full log `scratchpad/18h-1/red-on-old-core.log`):**
+
+```
+LibraryTimeSortTests.swift:62:38: error: extra arguments at positions #3, #4 in call
+LibraryTimeSortTests.swift:92:44: error: type 'Queries.LibrarySort' has no member 'title'
+LibraryTimeSortTests.swift:165:29: error: value of type 'Queries.CatalogHit' has no member 'createdAt'
+LibraryTimeSortTests.swift:191:25: error: value of type 'Queries.CatalogHit' has no member 'lastTouchedAt'
+LibraryTimeSortTests.swift:206:28: error: value of type 'Queries.NoteStamps' has no member 'createdAt'
+TimeStampFaceTests.swift:105:17: error: cannot find 'TimeStampFace' in scope
+```
 
 *(Pointers re-verified by the orchestrator on 2026-09-12 during 17p batch b, at `48f54268`: `Queries.searchCatalog` `ShelfQueries.swift:367`, `CatalogHit` `:325`, `LibrarySort` `Timeline.swift:97`, `LibraryCatalogModel` `LibraryCatalogView.swift:22` with its call at `:167`; `MastheadRowTwo` is a `Layout` in its OWN file, `App/Variorum/Variorum/Features/Takes/MastheadRowTwo.swift:32` (the masthead that composes it is `PostDetailView.swift`). **Two more callers of `searchCatalog`** the brief did not name: `Features/CommandPalette/CommandPalette.swift:91` (`limitPerKind: 12`) and the phone's `VariorumMobile/Features/Shell/MobileLibraryViewModel.swift:144` — the new parameters are nil/defaulted so both compile unchanged, and the iOS build is owed for that reason exactly. Test suites and hand walks share the dev-store app's `UserDefaults.standard` (KnownIssues R1-7): the sort memory's harness gets its OWN scrubbed suite. Her app is QUIT for the night — an instance at `/Applications` means she is awake: never touch it.)*

@@ -1,0 +1,150 @@
+import Foundation
+import Testing
+@testable import VariorumCore
+
+/// **18h batch 1 — the ONE stamp-wording brain** (review focus F-5: *"the
+/// relative-time wording is ONE pure brain (`TimeStampFace`) used by every
+/// row and the masthead"*).
+///
+/// Her ruling R-Q7 names the words: *edited today 1:33 AM* / *edited Sep 9*,
+/// flipping to *created …* on a click. Every threshold below is the BATCH'S
+/// number, recorded in `TimeStampFace`'s own doc rather than asked of her.
+///
+/// RED ON OLD: `TimeStampFace` did not exist. The nearest thing was
+/// `NoteBoxCopy.day` (18d's *"edited Sep 4 · saved Sep 2"*), which knows
+/// only the day form and nothing of today/yesterday or a time — so the pins
+/// here do not compile on the pre-change tree.
+@Suite("The stamp's words (18h batch 1 — TimeStampFace)")
+struct TimeStampFaceTests {
+    /// A fixed world: UTC, en_US, and a "now" of 2026-09-12 at 13:33 — so
+    /// the words are the rule's, never the machine's clock or locale.
+    private var calendar: Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+        return calendar
+    }
+
+    private let locale = Locale(identifier: "en_US")
+
+    private func date(_ iso: String) -> Date {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone(identifier: "UTC")
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        return formatter.date(from: iso)!
+    }
+
+    private var now: Date { date("2026-09-12T13:33:00") }
+
+    private func words(_ iso: String) -> String {
+        TimeStampFace.relative(date(iso), now: now, calendar: calendar, locale: locale)
+    }
+
+    @Test func todayCarriesTheTimeAndYesterdayIsJustTheWord() {
+        #expect(words("2026-09-12T01:33:00") == "today 1:33\u{202F}AM")
+        #expect(words("2026-09-12T13:33:00") == "today 1:33\u{202F}PM", "the same minute as now")
+        #expect(words("2026-09-12T00:00:00") == "today 12:00\u{202F}AM", "midnight is still today")
+        // Yesterday is the DAY before in the calendar, not 24 hours back:
+        // 23:59 last night is yesterday even though it is minutes away.
+        #expect(words("2026-09-11T23:59:00") == "yesterday")
+        #expect(words("2026-09-11T00:01:00") == "yesterday")
+    }
+
+    @Test func thisYearIsTheDayAndAnyOtherYearCarriesIt() {
+        #expect(words("2026-09-09T16:02:00") == "Sep 9")
+        #expect(words("2026-01-01T16:02:00") == "Jan 1")
+        #expect(words("2025-09-09T16:02:00") == "Sep 9, 2025",
+                "a year omitted would be a lie told by omission (18d's own rule)")
+        #expect(words("2024-12-31T23:00:00") == "Dec 31, 2024")
+    }
+
+    /// A stamp from the FUTURE is a real shape — a store copied from a
+    /// machine whose clock ran ahead, or a sync arrival. It reads as a day,
+    /// never as "today" and never as an error.
+    @Test func aFutureStampReadsAsItsDay() {
+        #expect(words("2026-09-13T09:00:00") == "Sep 13")
+        #expect(words("2027-01-04T09:00:00") == "Jan 4, 2027")
+        #expect(words("2026-09-12T23:59:00") == "today 11:59\u{202F}PM",
+                "later TODAY is still today")
+    }
+
+    /// The verb is the brain's too, so no view spells it (P-8/F-0: no
+    /// string-as-rule in a view).
+    @Test func theLabelledFormCarriesTheVerb() {
+        #expect(TimeStampFace.stamp(
+            .edited, date: date("2026-09-12T01:33:00"), now: now,
+            calendar: calendar, locale: locale) == "edited today 1:33\u{202F}AM")
+        #expect(TimeStampFace.stamp(
+            .created, date: date("2026-09-09T01:33:00"), now: now,
+            calendar: calendar, locale: locale) == "created Sep 9")
+    }
+
+    /// **A DAY-precision stamp never prints a time** — `entry_date` is a day
+    /// she stated, and inventing "12:00 PM" for it would be the app claiming
+    /// a fact it does not hold.
+    @Test func aDayStampSaysTheDayAndNoTime() {
+        #expect(TimeStampFace.stamp(
+            .dated, day: "2026-09-12", now: now,
+            calendar: calendar, locale: locale) == "dated today")
+        #expect(TimeStampFace.stamp(
+            .dated, day: "2026-09-11", now: now,
+            calendar: calendar, locale: locale) == "dated yesterday")
+        #expect(TimeStampFace.stamp(
+            .dated, day: "2026-09-09", now: now,
+            calendar: calendar, locale: locale) == "dated Sep 9")
+        #expect(TimeStampFace.stamp(
+            .dated, day: "2025-09-09", now: now,
+            calendar: calendar, locale: locale) == "dated Sep 9, 2025")
+    }
+
+    /// The ISO door: the store's canonical stamp text in, words out — and
+    /// nil for anything that is not a stamp, so a face draws nothing rather
+    /// than a lie.
+    @Test func theISODoorParsesTheStoresOwnStampAndRefusesTheRest() {
+        let stored = DateFormatter.variorumISO8601.string(from: date("2026-09-09T16:02:00"))
+        #expect(TimeStampFace.stamp(
+            .edited, iso: stored, now: now, calendar: calendar, locale: locale)
+            == "edited Sep 9")
+        #expect(TimeStampFace.stamp(
+            .edited, iso: nil, now: now, calendar: calendar, locale: locale) == nil)
+        #expect(TimeStampFace.stamp(
+            .edited, iso: "", now: now, calendar: calendar, locale: locale) == nil)
+        #expect(TimeStampFace.stamp(
+            .edited, iso: "not a stamp", now: now, calendar: calendar, locale: locale) == nil)
+        #expect(TimeStampFace.stamp(
+            .dated, day: "2026-13-40", now: now, calendar: calendar, locale: locale) == nil,
+            "an impossible day is refused, never rendered")
+        // A day key arriving at the ISO door still reads (the Library's
+        // `detail` column is a day, and one door tolerating both is why the
+        // face never has to guess which shape it holds).
+        #expect(TimeStampFace.stamp(
+            .dated, iso: "2026-09-09", now: now, calendar: calendar, locale: locale)
+            == "dated Sep 9")
+    }
+
+    /// The tooltip is the WHOLE fact — the glanceable words are a summary,
+    /// and hovering must never leave her guessing which year "Sep 9" was.
+    @Test func theTooltipSpellsTheWholeFact() {
+        #expect(TimeStampFace.tooltip(
+            .edited, date: date("2026-09-09T16:02:00"),
+            calendar: calendar, locale: locale) == "Edited Sep 9, 2026 at 4:02\u{202F}PM")
+        #expect(TimeStampFace.tooltip(
+            .created, date: date("2026-09-12T01:33:00"),
+            calendar: calendar, locale: locale) == "Created Sep 12, 2026 at 1:33\u{202F}AM")
+        #expect(TimeStampFace.tooltip(
+            .dated, day: "2026-09-09", calendar: calendar, locale: locale)
+            == "Dated Sep 9, 2026", "a day has no time to spell")
+    }
+
+    /// The day form on its own — the shape 18d's facts line already ships
+    /// (`NoteBoxCopy.day` forwards here, so the two can never drift).
+    @Test func theDayFormIsTheOneTheFactsLineAlreadyShips() {
+        #expect(TimeStampFace.day(date("2026-09-09T16:02:00"), now: now,
+                                  calendar: calendar, locale: locale) == "Sep 9")
+        #expect(TimeStampFace.day(date("2025-09-09T16:02:00"), now: now,
+                                  calendar: calendar, locale: locale) == "Sep 9, 2025")
+        #expect(TimeStampFace.day(date("2026-09-12T16:02:00"), now: now,
+                                  calendar: calendar, locale: locale) == "Sep 12",
+                "the DAY form knows nothing of today — that is the relative form's job")
+    }
+}

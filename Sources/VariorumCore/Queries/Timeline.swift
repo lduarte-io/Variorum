@@ -94,11 +94,28 @@ extension Queries {
     /// missing the stamp fall back to `created_at` (never NULL), so a
     /// freshly created, never-touched post still shows up (PROVISIONAL,
     /// phase closeout).
-    public enum LibrarySort: Sendable {
-        case entryDate
-        case createdAt
-        case lastTouched
-        case lastMajorRevision
+    ///
+    /// **String-backed since 18h batch 1** (her row 10 — *"i need to be able
+    /// to sort the library by time"*): the Library's `sort ▾` remembers her
+    /// choice in local UI state, and a raw value is what a remembered enum
+    /// needs (`SortDirection`'s own shape, beside it). The raw values are the
+    /// columns' own names, so a stored preference reads as what it means.
+    public enum LibrarySort: String, Sendable {
+        case entryDate = "entry_date"
+        case createdAt = "created_at"
+        case lastTouched = "last_touched"
+        case lastMajorRevision = "last_major_revision"
+        /// **A–Z on the DISPLAYED name** (18h batch 1) — the one sort that is
+        /// not a stamp, and it belongs here because the alternative is a
+        /// second listing query (review focus F-5).
+        ///
+        /// It orders by what she is LOOKING AT, never the raw column:
+        /// `DisplayTitle.note`'s fallback chain (stored title → the stated
+        /// day → the mint's day) written as SQL, so an untitled note sorts
+        /// under the date it shows rather than collapsing to the top as a
+        /// NULL. `NULLIF(title, '')` is the same "absent means blank too"
+        /// rule `DisplayTitle.isAbsent` applies in Swift.
+        case title
 
         var expression: String {
             switch self {
@@ -106,6 +123,7 @@ extension Queries {
             case .createdAt: "created_at"
             case .lastTouched: "COALESCE(last_touched_at, created_at)"
             case .lastMajorRevision: "COALESCE(last_major_revision_at, created_at)"
+            case .title: "COALESCE(NULLIF(title, ''), entry_date, created_at) COLLATE NOCASE"
             }
         }
     }

@@ -20,6 +20,14 @@ extension Queries {
     /// written on a take she is no longer looking at is still a moment this
     /// note has.
     public struct NoteStamps: Equatable, Sendable {
+        /// The mint — `container.created_at`, NOT NULL by schema.
+        ///
+        /// **Added at 18h batch 1** (her ruling R-Q7): the masthead's quiet
+        /// stamp flips *edited …* ↔ *created …* on a click, so the note's
+        /// created stamp is a THIRD fact of the same one read rather than a
+        /// second query beside it. 18d's two fields are byte-unchanged and
+        /// its pins ride untouched.
+        public let createdAt: Date
         /// Any keystroke's stamp, falling back to the mint (never nil for a
         /// live container — `created_at` is NOT NULL).
         public let editedAt: Date
@@ -27,7 +35,8 @@ extension Queries {
         /// committed here (a fresh note), which the face says by omission.
         public let savedAt: Date?
 
-        public init(editedAt: Date, savedAt: Date?) {
+        public init(createdAt: Date, editedAt: Date, savedAt: Date?) {
+            self.createdAt = createdAt
             self.editedAt = editedAt
             self.savedAt = savedAt
         }
@@ -52,6 +61,7 @@ extension Queries {
                 """,
             arguments: [postID])
         return NoteStamps(
+            createdAt: container.createdAt,
             editedAt: container.lastTouchedAt ?? container.createdAt, savedAt: saved)
     }
 }

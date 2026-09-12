@@ -341,11 +341,26 @@ extension Queries {
         /// fire-and-speak on the legibility surface itself).
         public let homeContainerID: String?
         public let homeIsPool: Bool
+        /// **The note's two TIME facts, as stored** (18h batch 1 — her row 9:
+        /// *"I need to be able to see the created time and last edited time
+        /// easily on the library"*). Canonical ISO-8601 text, carried raw —
+        /// the words are `TimeStampFace`'s, asked per RENDERED row, so a
+        /// listing pays for the rows it draws and nothing is stored anywhere
+        /// new (the no-denormalization rule).
+        ///
+        /// `lastTouchedAt` is the shelf's own COALESCE — `last_touched_at`
+        /// falling back to `created_at`, so a note nobody has typed in still
+        /// reports a day rather than a blank (`Queries.noteStamps`' rule, one
+        /// surface over). Both are nil for book and block hits, and
+        /// nil-defaulted so every existing caller compiles unchanged.
+        public let createdAt: String?
+        public let lastTouchedAt: String?
 
         public init(
             kind: Kind, id: String, title: String, detail: String?,
             storedTitle: String? = nil,
-            homeContainerID: String? = nil, homeIsPool: Bool = false
+            homeContainerID: String? = nil, homeIsPool: Bool = false,
+            createdAt: String? = nil, lastTouchedAt: String? = nil
         ) {
             self.kind = kind
             self.id = id
@@ -354,6 +369,8 @@ extension Queries {
             self.detail = detail
             self.homeContainerID = homeContainerID
             self.homeIsPool = homeIsPool
+            self.createdAt = createdAt
+            self.lastTouchedAt = lastTouchedAt
         }
     }
 
@@ -364,8 +381,24 @@ extension Queries {
     /// posts + all books (the palette's resting state). Block hits cover
     /// named blocks and pool scraps (first-line handle) — prose content
     /// search stays out of scope (FTS is not this phase's).
+    ///
+    /// **`sort`/`direction` order the NOTE arm** (18h batch 1 — her row 10:
+    /// *"i need to be able to sort the library by time"*). A PARAMETER of
+    /// this one query, never a second listing (review focus F-5): books stay
+    /// by name and blocks by their own recency, because a book list that
+    /// reshuffled with the note sort is not what a sort menu over the notes
+    /// means. The default is byte-identical to what shipped —
+    /// `COALESCE(last_touched_at, created_at) DESC, id DESC` — so every
+    /// caller that says nothing gets the order it always got (the ⌘K palette
+    /// and the phone's listing both do).
+    ///
+    /// P1, unchanged in class: the ORDER BY is a COALESCE expression exactly
+    /// as before (and `.title`'s is too), so SQLite runs the same bounded
+    /// top-N scan over the `container` table it already ran — cost ∝ the note
+    /// count under `limitPerKind`, never corpus text size.
     public static func searchCatalog(
-        _ db: Database, query: String, limitPerKind: Int = 20
+        _ db: Database, query: String, limitPerKind: Int = 20,
+        sort: LibrarySort = .lastTouched, direction: SortDirection = .desc
     ) throws -> [CatalogHit] {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         var hits: [CatalogHit] = []
@@ -392,13 +425,16 @@ extension Queries {
                     : (($0["locked"] as Int) == 1 ? "finished book" : "book"))
         }
 
+        let dir = direction == .desc ? "DESC" : "ASC"
         let posts = try Row.fetchAll(
             db,
             sql: """
-                SELECT id, title, entry_date, created_at FROM container
+                SELECT id, title, entry_date, created_at,
+                       COALESCE(last_touched_at, created_at) AS touched_at
+                FROM container
                 WHERE kind = 'post' AND deleted_at IS NULL AND archived_at IS NULL
                   AND (? = '' OR COALESCE(title, '') LIKE ? ESCAPE '\\' OR COALESCE(entry_date, '') LIKE ? ESCAPE '\\')
-                ORDER BY COALESCE(last_touched_at, created_at) DESC, id DESC
+                ORDER BY \(sort.expression) \(dir), id \(dir)
                 LIMIT ?
                 """,
             arguments: [trimmed, like, like, limitPerKind])
@@ -412,7 +448,9 @@ extension Queries {
                     title: $0["title"], entryDate: $0["entry_date"],
                     createdAt: $0["created_at"]),
                 detail: $0["entry_date"],
-                storedTitle: DisplayTitle.isAbsent($0["title"]) ? nil : $0["title"])
+                storedTitle: DisplayTitle.isAbsent($0["title"]) ? nil : $0["title"],
+                createdAt: $0["created_at"],
+                lastTouchedAt: $0["touched_at"])
         }
 
         // Blocks: named blocks anywhere + pool scraps by first-line handle.
