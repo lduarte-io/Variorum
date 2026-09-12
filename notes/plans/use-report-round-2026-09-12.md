@@ -1102,6 +1102,76 @@ cost.
 
 **For the implementer's sanity pass (the cross-model flow's next step) and the orchestrator:** the diff to read is `1112d4b1..839342a3` (eight commits, four files under `App/Variorum/Variorum/` — `TakesBoardLayout` · `TakesViewModel` · `TakesBoardView` (a comment) · `EditorRouter` (a comment) — and the two test files). Two things worth a second pair of eyes: (1) R1-4's `loaded ? slots : nil` — the "slots not yet known" arm is the guard against the app's asynchronous projection (`.task { await model.start() }` lands after the first geometry report; the tests adopt before mounting and cannot exercise the late arrival — the pure pin's nil arm states the contract); (2) R1-2 leaves the structure controller's acts uncleared by the reasoning above — if the implementer knows an act that ends in neither a migration nor a gone row, it names it and the fix is one line at that act. Nothing here is open; no QUESTIONS entry; the canon note drafted at the adjudication stands.
 
+
+#### Implementer's sanity pass (round 1)
+
+*(One pass over `git diff 0b4e7fac..10da023a`, read whole; nothing run — every claim below is a
+read of code already in the diff or a grep named at its line. **CLEAR: no defect found in the nine
+fixes.** Two observations follow, both for the reviewer's final word, neither a fix I would ask for.)*
+
+**(1) THE LOOP IS CLOSED, on both hosts, at exactly one extra cycle — as designed, and now with a
+second independent gate behind it.** Read tier: `render` → `setDecorLane(true)` → true → next turn
+`proseColumnDidChange()` → `remeasure()` → `refreshBadges()` → `refreshDecor()`
+(`ReadPostViewModel.swift:317`) → `decorSink` → `render` → `setDecorLane(needed: true)`, where the
+brain's guard is now `(insets?.leading ?? resting) != leading` = `72 != 72` → nil → **false → nothing
+scheduled**. Contained editor: `onProseColumnChanged` = `{ modelDoor?(); remeasure() }`
+(`EditorView.swift:541–545`) — `modelDoor` → `proseColumnDidChange` → generation bump +
+`overlayLayoutDidSettle` (async) → `refreshDecorations` → `render` → the same false; and
+`remeasure()` → `reportHeight` → the `@Binding height` → SwiftUI → `updateNSView` → `applyChrome`
+(chrome-gated) + `coordinator.remeasure()` (same number, `abs(height − newHeight) > 0.5` false → no
+write). **The lane is asked from exactly one place — `render` — so no other road can re-enter it**,
+and behind the real-change guard each model's own `state != lastDecorState` gate would stop a
+re-entry anyway. One third candidate cleared: the read tier's new `contentHeight` re-frames the
+surface, but only its HEIGHT, so `PaneTextView.layout()` takes the same-width branch
+(`PaneSurface.swift:583–596`) → the A47 divergence check → already converged. **One ordering nuance I
+hold that the fix depends on:** on the inline host `remeasure()` runs SYNCHRONOUSLY *before* the
+model door's async hop, and the inset write it measures against happened synchronously inside the
+previous turn's `render` — so the measurement sees the re-wrap rather than racing it. That is not an
+assumption: the reviewer's own red-on-old numbers (448 → 499 inline, 448 → 516 read tier) are a
+measurement of exactly this, and the pins poll the published height against
+`PaneMeasurement.height` rather than a settle count.
+
+**(2) NO SURFACE STARTS LIFE AT A NON-RESTING INSET.** `resting` is
+`inlineInset(needsLane: false)` = `inlineSurfaceInset` = 8, and both surfaces that set
+`reserves = true` are born at exactly 8: `makeInlineEditor` (`EditorTextView.swift:916–918`) and
+`makeReadSurface` (`PaneSurface.swift:690`, through `makeSurface(inset: inlineSurfaceInset)`). They
+are the only two — grepped. **And nothing can move a contained surface's inset out from under the
+brain**, which is the sharper form of the question: the writers of `textContainerInset` on the two
+contained classes are `setDecorLane` (`EditorTextView.swift:406`, `PaneSurface.swift:571`),
+`updateGutters` (`:588`) and the factories (`:850` the full editor at `minGutter` 28, `:916` inline at
+8, `PaneSurface:690`) — and `updateGutters` early-returns unless `maxColumnWidth != nil`, which is
+assigned in exactly ONE place in the target (`EditorTextView.swift:851`, inside `makeEditor()` — the
+full editor, which reserves no lane). So the first ask reports correctly on both surfaces, and the
+released state is consistent too: `reserve` returns the resting mean *and* clears `insets` in the
+same call, and `setDecorLane` then writes 8 back to the view before anything reads it, so
+`proseRight` = `bounds − 8` whether it answers from `insets.trailing` or from the inset fallback —
+the same number by construction.
+
+**Two observations, for the reviewer.**
+- **(a) NIT-class, the flip side of R1-2's improvement.** The brain is now the sole source of truth
+  for `originX`/`proseRight` and no longer reads the view's actual inset. Today that is strictly
+  better (R1-2's own point). The residual it creates is a FUTURE one: a host that ever set
+  `maxColumnWidth` on a contained surface — or wrote `textContainerInset` directly — would have
+  `updateGutters` move the container while the brain kept answering from `insets`, leaving the decor
+  self-consistent and the TEXT somewhere else. Impossible today by the grep above. One sentence in
+  `DecorLaneReservation`'s doc, or a `precondition(maxColumnWidth == nil)` beside
+  `reservesDecorLane = true`, would make it impossible by construction rather than by census. The
+  reviewer's call; I would not hold the round for it.
+- **(b) R1-4's copy is byte-identical, confirmed against the pre-fix strings.** `Purge.block` /
+  `.take` over the one private `door(_:act:)` produces *"Ends this block's remaining days now. There
+  is no putting it back afterwards."* and its take twin — the same sentences the two call sites
+  concatenated before (they differed only in where the source line broke, not in content), so the
+  face pins and `theLeavingSectionsDeleteNowConfirmsThenPurgesForGood` ride on unchanged text, as the
+  reviewer states. Recorded because I wrote both originals and am the one who can say the wording did
+  not drift.
+
+**The rest of the diff, read and sound:** R1-3's two overlays now read `proseRight` and
+`ReadBadgeOverlay`'s surface is typed `ReadPostTextView` (it always was one — `install(textView:)`
+is its only door); R1-5's two hand-fed pins keep their honest claim with their docs corrected to say
+which half they pin; NIT-1/2/3 are the three sentences and the one named constant
+(`commentBadgeAir` beside `decorAir` — the two 4s are two named gaps now); QUESTIONS #102 records
+R1-6 with the shipped arm marked PROVISIONAL, which is where I left it. NIT-4 dismissed — agreed.
+
 #### Implementer's sanity pass (round 1)
 
 *The batch-a implementer (`opus-implementer`), the cross-model flow's one sanity pass over
