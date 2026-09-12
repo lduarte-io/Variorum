@@ -44,6 +44,15 @@ import AppKit
 /// the lane, which is the point (R9 — the margins stay sacred); growing the
 /// symmetric inset instead would take the lane off the RIGHT margin too, for
 /// room only the left needs.
+///
+/// **THE BRAIN IS THE ONE WRITER of a laned surface's horizontal inset, and
+/// it never reads the view's inset back** — `originX` and `proseRight` are
+/// answered from `insets`, so a second writer (the full editor's gutter rule,
+/// `EditorTextView.updateGutters`) would move the container while the
+/// decorations stayed self-consistent with the text somewhere else. A
+/// surface therefore takes exactly ONE of the two: `updateGutters` refuses a
+/// laned surface by precondition, and both contained factories are born at
+/// the resting inset (`inlineSurfaceInset`) the brain measures against.
 struct DecorLaneReservation {
     /// Does this surface reserve a lane at all? False for every surface but
     /// the two contained ones, so the whole mechanism is inert elsewhere and

@@ -582,6 +582,17 @@ final class EditorTextView: NSTextView, MarkdownFormattable, DecorLaneSurface {
 
     private func updateGutters() {
         guard let maxColumnWidth else { return }
+        // The gutter rule and the decoration lane are TWO writers of one
+        // inset, and a surface takes exactly one (17p batch b ladder round
+        // 1, the sanity pass's observation (a)): the lane brain answers
+        // `originX`/`proseRight` from its own state and never reads the
+        // view's inset back, so a laned surface whose gutter rule moved the
+        // container would keep its decorations self-consistent with the
+        // TEXT somewhere else. Today no surface has both (`maxColumnWidth`
+        // is assigned only in `makeEditor`, which reserves no lane); this
+        // makes that a fact by construction rather than by census.
+        precondition(!lane.reserves,
+                     "a laned surface's inset is the decoration lane's — it cannot also carry a gutter rule")
         let inset = EditorTypography.gutterInset(
             viewWidth: bounds.width, maxColumn: maxColumnWidth)
         if abs(textContainerInset.width - inset) > 0.5 {
