@@ -3199,8 +3199,14 @@ listing untouched; no new `setting` key (the day filter is transient UI state �
   Pin: `App/Variorum/VariorumTests/LibraryDayFilterTests.swift` (9). Red-on-old captured as compile
   errors on `c3d81b31` in a throwaway worktree (`scratchpad/18h-2/red-on-old-face.log`, quoted
   below). Green: `✔ Test run with 9 tests in 1 suite passed after 0.110 seconds.`
-- **Piece 4 — THE WALK + the closing runs:** NOT-STARTED. Captures into
-  `notes/plans/use-report-2026-09-12-screens/18h-2/`.
+- **Piece 4 — THE WALK (the acceptance gate) + the closing runs:** DONE (hash PENDING until this
+  commit lands). Eleven captures in `notes/plans/use-report-2026-09-12-screens/18h-2/` (gitignored;
+  the table below), both voices, on the DEV-STORE Debug build (`io.lduarte.Variorum.debug`, built
+  into `App/Variorum/DerivedData/18h2`); her `/Applications` app was not running before, during or
+  after (`pgrep -fl 'Variorum.app/Contents/MacOS'` empty at the start and after my quit), and I left
+  the dev store as I found it — Terminal · List · edited · newest first · the day closed (capture
+  10). **The walk found and fixed a face defect** (below). Closing runs: the three lines under
+  "CLOSING THE BATCH".
 
 ---
 
@@ -3276,6 +3282,95 @@ LibraryDaySearchTests.swift:313:31: error: type 'Queries' has no member 'catalog
 LibraryDaySearchTests.swift:314:24: error: cannot infer contextual base in reference to member 'lastTouched'
 ```
 
+---
+
+### R-4 · THE WALK (the acceptance gate — USE, not mount)
+
+| # | capture | what it shows |
+|---|---|---|
+| 00 | `00-before-the-focused-field-overflowed.png` | **the defect the walk found, before the fix:** the date field takes focus, grows a stepper, and — sized at its IDEAL width by `fixedSize` — prints its own digits through the ✕ beside it (`9/12/2025 ⇅ )25 ×`). Fixed in the same walk (a reserved width, `LibraryDayField.fieldWidth`); every capture below is after |
+| 01 | `01-library-day-door-closed.png` | the Library at rest, Terminal voice: the header's new **`on day…`** door beside 18h batch 1's `edited · newest first ▾`; books, notes and blocks all listed |
+| 02 | `02-day-opens-on-today.png` | **clicked `on day…`** → it opens on TODAY: the door reads `on sep 12`, the date field shows `9/12/2026` with its ✕, and the listing is the five notes edited today. The books section is gone and the scope picker (all · books · posts · blocks) is greyed — a day names notes (#104) |
+| 03 | `03-empty-day-says-why.png` | **a day with nothing on it** (stepped to sep 11 in the field, whose calendar popover is open): *"no note's last edit or savepoint falls on sep 11."* and under it the caveat — *"a note keeps one edit stamp, so a note edited on two days answers for the later one — earlier days show up where a savepoint landed."* §4.8's honesty, on the surface |
+| 04 | `04-sep-8-the-union-answers.png` | **THE UNION, on her real store.** Picked sep 8 from the calendar: 30-odd notes answer, and the FIRST row is *start here — **edited today 1:22 pm***. Its stamp is today's, and the stamp arm compares exactly the value that row displays — so the only thing that can have matched sep 8 is a SAVEPOINT from that day. The capability her row 11 asked for, doing the thing the caveat says it does |
+| 05 | `05-notes-mode-day-armed.png` | the **Notes** mode under the same day: her Apple-Notes-shaped cards, the day filter riding the one listing |
+| 06 | `06-notes-mode-empty-day.png` | the Notes mode on an empty day — **the same two sentences, word for word** (one wording, both modes) |
+| 07 | `07-cleared-whole-library-back.png` | **✕** → the door reads `on day…` again, books are back, the scope picker is live again |
+| 08 | `08-timeline-has-no-day-door.png` | the **Timeline** mode: neither the sort door nor the day field (one rule — `showsCatalogControls`, in the app and not only in a pin) |
+| 09 | `09-study-voice-day-armed.png` | the **Study** voice: `on Sep 12` and the field in the serif, the same place, the voice's own casing |
+| 10 | `10-restored-terminal-day-closed.png` | the dev store left as I found it |
+
+**What the walk changed in my understanding — and in the code:** capture 00. A `DatePicker` in
+`.field` style is TWO controls: unfocused it is a plain date, focused it grows a stepper (and, on
+macOS 26, a calendar popover). `fixedSize()` measures the unfocused one, so the focused control
+overflowed its reserved room and drew its digits over the ✕. The fix is a reserved width
+(`LibraryDayField.fieldWidth = 108`, measured at ~88 pt focused plus slack for a wider locale's
+date). **No red-on-old pin exists for it and that is deliberate, said plainly:** the defect appears
+only when a real window gives a real control keyboard focus, and the harness cannot mount a whole
+surface (KnownIssues R1-7's own rule — *pin brains, walk faces*). The before/after captures are its
+evidence, which is exactly why the gate is USE.
+
+---
+
+### R-4 · DISPOSITIONS (every row this batch owns)
+
+- **Ledger row 11 — *"how difficult it would be to implement being able to search for any note
+  edited on a particular day"* — FIXED.** Pins: `LibraryDaySearchTests` (13) — the two readings
+  (`aNoteEditedMondayThenTuesdayAnswersForTuesdayByItsStamp` ·
+  `aSavepointFromMondayBringsTheNoteBackForMonday`), the absence
+  (`aNoteWithNeitherAStampNorASavepointOnTheDayIsAbsent`), the correlation
+  (`aSavepointOnAnotherNotesBlockNeverAnswersHere` ·
+  `aSavepointOnADeletedBlockNoLongerAnswersForTheNote`), the COALESCE
+  (`anUntouchedNotesMintCountsAsItsEdit`), the window
+  (`theWindowIsHalfOpenAtBothEnds`), the scope (`onlyNotesAnswerADay` ·
+  `archivedAndDeletedNotesStayOutOfTheDaysAnswer`), the composition
+  (`theDayComposesWithTheTypedQueryAndTheSort`) and the measurement
+  (`theSavepointArmIsBoundedByTheNotesOwnSavepoints` ·
+  `theDaySearchIsOneStatementWhereTheOpenCatalogIsThree` ·
+  `theDaySearchsWorkTracksTheNotesNotTheSavepoints`) · `DayBoundsTests` (9 — the midnight and the
+  two DST pins the brief names, plus the day whose midnight never happened) ·
+  `LibraryDayFilterTests` (9 — the field's value reaching the query through the control's own
+  binding, the clear, the refusal, the words, the two composing controls).
+  Walked: captures 01–10.
+- **Nothing DISMISSED AS HOLLOW** (a product row — the capability was absent, which the compile-error
+  red-on-old says exactly). **Nothing DEFERRED.**
+
+### R-4 · THINGS FOUND AND DELIBERATELY NOT FIXED
+
+- **A third private copy of the statement-capture helper was NOT made.** `ReadLayerP1Tests` and
+  `NotePickerShapeTests` each carry their own private `captureStatements` + `sqlite3_stmt_status`
+  reader, each with a comment saying it is *"kept private here for the same reason it is private
+  there"*. My measurement needs are smaller (a statement COUNT and one VM-step read), so they are
+  four inline lines rather than a third copy of that machinery — but the two existing copies are a
+  hoist candidate for whoever next touches either file (the project's own hoist-at-next-touch rule).
+- **The scope picker greys out rather than announcing itself.** A disabled control with a tooltip is
+  the quietest honest answer, but it is a control changing state for a reason she must hover to
+  learn — named as option (c) in QUESTIONS #104 rather than decided here.
+- **`idx_commit_created` was not created.** Measured, not assumed — see THE MEASUREMENT. A future
+  query that filters savepoints by day WITHOUT the note correlation (a global "what did I save on
+  Tuesday") would want it; this one does not, and an index nothing uses is a write cost on every
+  savepoint for nothing.
+
+### R-4 · WHAT THE LETTER'S CLOSE OWES (drafted for the orchestrator)
+
+- **`notes/AppSpec.md` §12** — the Library line (which batch 1's close already amends) gains the
+  filter. Draft, to sit after batch 1's sentence: *"…and a **day filter** (`on day…`) answers "notes
+  edited on this day" as the UNION of the note's own last-edit stamp and any savepoint written that
+  day on a take it holds — the honest reading under §10's one-stamp-per-note design, with the caveat
+  worded on the surface where the answer is empty. A day names NOTES: books and blocks stand down
+  while one is armed (QUESTIONS #104, PROVISIONAL)."*
+- **`notes/AppSpec.md` §7** — **nothing owed**: no schema, no migration, no index, no new `setting`
+  key (the day is transient UI state, not even remembered). **The lockstep marker stays 8.**
+- **`notes/MobileSoul.md` §6** — the parity row this batch owes, for the letter's close: *the Mac's
+  Library answers "which notes did I edit on this day" (the last-edit stamp OR a savepoint from that
+  day, one query arm; the day→UTC conversion is core's `DayBounds`) — the phone owes a version of
+  the question, and the conversion is already shared.*
+- **`notes/QUESTIONS.md`** — **#104 is filed** (PROVISIONAL, the shipped arm marked).
+- **`notes/KnownIssuesAndTechDebt.md`** — nothing owed by this batch (the statement-capture hoist
+  above is a note in this record, not a deferral: nothing is broken).
+
+---
+
 **RED ON OLD, piece 3 (the same honest shape one layer up — the face pins do not compile on
 `c3d81b31`, the tree that already carries the core; full log
 `scratchpad/18h-2/red-on-old-face.log`):**
@@ -3287,5 +3382,16 @@ LibraryDayFilterTests.swift:154:19: error: value of type 'LibraryCatalogModel' h
 LibraryDayFilterTests.swift:232:22: error: cannot find 'LibraryDayFace' in scope
 LibraryDayFilterTests.swift:264:27: error: value of type 'LibraryCatalogModel' has no member 'showsCatalogControls'
 ```
+
+---
+
+### R-4 · CLOSING THE BATCH (the three runs, exact lines)
+
+- **Core (`swift test`, repo root — I touched `Sources/`):** PENDING
+- **Mac (ONE `xcodebuild test` from `App/Variorum/`, the touched suites + the ten `Tutorial*` spine
+  TYPES):** PENDING
+- **iOS (`xcodebuild build -scheme VariorumMobile -destination 'generic/platform=iOS'` — a core
+  signature changed again):** PENDING
+
 
 *(Pointers re-verified by the orchestrator on 2026-09-12 after 18h batch 1 — `Queries.searchCatalog` is now `ShelfQueries.swift:399` with `sort:`/`direction:` (R-3's `2d43df7c`); `idx_container_touched` is created at `Sources/VariorumCore/Persistence/Migrations.swift:42` (the composite live-row form) and `idx_commit_variant ON commit_point(variant_id, created_at)` at `:807`; `commit_point` has NO index on `created_at` alone today. QUESTIONS' next free number is **#103** unless R-3 took it (read the file's tail). Her app is QUIT for the night — an instance at `/Applications` means she is awake: never touch it.)*

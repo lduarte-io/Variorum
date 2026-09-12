@@ -95,6 +95,12 @@ nonisolated enum LibraryDayFace {
 /// hazard this app's own walk standard forbids. Opening it picks TODAY —
 /// what a date field does everywhere, and the answer she most often wants.
 struct LibraryDayField: View {
+    /// The date control's reserved width in points — enough for
+    /// `9/12/2026` PLUS the stepper the field grows when it takes focus
+    /// (measured on the walk at ~88 pt focused; the slack keeps a wider
+    /// locale's date from clipping).
+    static let fieldWidth: CGFloat = 108
+
     let tokens: VoiceTokens
     /// The armed day, canonical `yyyy-MM-dd` in her calendar; nil = closed.
     let day: String?
@@ -126,7 +132,13 @@ struct LibraryDayField: View {
                     .datePickerStyle(.field)
                     .labelsHidden()
                     .font(tokens.small)
-                    .fixedSize()
+                    // A MEASURED width, not `fixedSize` (found on the walk):
+                    // the field grows a stepper the moment it takes focus,
+                    // and an ideal-width control sized while unfocused then
+                    // overflows — the digits printed THROUGH the ✕ beside
+                    // it. The room is reserved for the focused shape, which
+                    // is the wider of the two.
+                    .frame(width: Self.fieldWidth)
                 Button {
                     onClear()
                 } label: {
