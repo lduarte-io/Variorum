@@ -1810,6 +1810,11 @@ final class TakesViewModel {
             return
         }
         status = nil
+        // Her hand (the 17p batch-a ladder, R2-1): a frame pads the row it
+        // lands on — above a landed row, the kept-alive landing re-aimed
+        // (measured 65 → 75 after her menu pick); a bare-runner road with no
+        // focus migration, so the arm is here.
+        board.clearArticleLanding()
         do {
             try await session.runner.run { ops in
                 try ops.updateBlockPresentation(target) {

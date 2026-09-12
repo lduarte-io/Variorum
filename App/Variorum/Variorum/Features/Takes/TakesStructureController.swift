@@ -263,6 +263,13 @@ final class TakesStructureController {
         model.structuralInFlight = true
         defer { model.structuralInFlight = false }
         model.setStatus(nil)
+        // Her hand (the 17p batch-a ladder, R2-1): the split multiplies rows
+        // ABOVE a landed one through a bare runner with no focus migration
+        // and no gone row (the landed row keeps its identity as its own first
+        // half) — measured: the note-wide split hauled the page 406 → 1047
+        // after her click. All three split doors run through this one body
+        // and nothing programmatic reaches it.
+        model.clearArticleLanding()
         do {
             let stack = model.session.undoStack
             let results: [Operations.SplitAtNewlinesResult] = try await model.session.runner
@@ -686,6 +693,11 @@ final class TakesStructureController {
         model.structuralInFlight = true
         defer { model.structuralInFlight = false }
         model.setStatus(nil)
+        // Her hand (R2-1): rows are minted BELOW the target, which a card's
+        // own menu names on any row — above a landed one, the landed row is
+        // pushed down and the kept-alive landing would re-aim; no `parkFocus`
+        // here, so nothing else ends it.
+        model.clearArticleLanding()
         do {
             let result: Operations.TakesToBlocksResult = try await model.session.runner.run { ops in
                 try ops.takesToBlocks(targetID)

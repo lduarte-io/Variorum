@@ -100,9 +100,19 @@ struct TakesArticleScrollTests {
     /// as a real mode round trip does (`TakesBoardView`'s model is per-mount
     /// `@State`). Whatever survives a remount survives because it lives on
     /// the SESSION, which is the whole point of row 1.
+    /// The fixture's prose: long enough to wrap once at the article's measure
+    /// so the rows have real height.
+    nonisolated private static func proseText(_ i: Int) -> String {
+        "Paragraph \(i). Honest prose on the measured line, long enough to wrap "
+            + "once at the article's measure so the rows have real height."
+    }
+
+    /// `text` builds block `i`'s text (1-based); the default is the prose
+    /// above. The round-2 face pin hands in blocks WITH newlines.
     private func withSession(
         blocks: Int,
         windowHeight: CGFloat = 700,
+        text: @escaping @MainActor (Int) -> String = { TakesArticleScrollTests.proseText($0) },
         _ body: @MainActor (
             _ session: AppSession, _ fixture: Fixture, _ db: AppDatabase,
             _ mount: @MainActor (TakesViewModel) async -> (NSWindow, NSHostingView<TakesBoardView>)
@@ -131,10 +141,7 @@ struct TakesArticleScrollTests {
             let post = try session.operations.createPost(title: "article scroll fixture")
             var made: [(block: String, variant: String)] = []
             for i in 1...blocks {
-                let minted = try session.operations.newBlock(
-                    in: post.id,
-                    text: "Paragraph \(i). Honest prose on the measured line, long enough to wrap "
-                        + "once at the article's measure so the rows have real height.")
+                let minted = try session.operations.newBlock(in: post.id, text: text(i))
                 made.append((minted.block.id, minted.variant.id))
             }
             let fixture = Fixture(postID: post.id, blocks: made, defaults: defaults)
@@ -678,6 +685,28 @@ struct TakesArticleScrollTests {
             model.board.landArticle(on: far)
             model.resetSlotHeight(fixture.blocks[0].block)
             #expect(model.articleLanding == nil, "the handle's double-click is her hand")
+
+            // The ladder's round 2 (R2-1): three bare-runner doors that change
+            // the article's CONTENT HEIGHT with no focus migration and no gone
+            // row — a callout frame, the note-wide split, takes-to-blocks —
+            // were outside the arms and the kept-alive landing re-aimed after
+            // them (measured on the round-1 tree: the split hauled 406 → 1047,
+            // a callout above the landed row 65 → 75).
+            model.board.landArticle(on: far)
+            await model.applyCallout(
+                .color(CalloutPalette.defaultName), blockID: fixture.blocks[0].block)
+            #expect(model.articleLanding == nil, "a callout frame is her hand")
+
+            _ = try session.operations.newBlock(in: fixture.postID, text: "One line.\nTwo lines.")
+            model.board.landArticle(on: far)
+            await model.splitEveryNewlineIntoBlocks()
+            #expect(model.articleLanding == nil, "the note-wide split is her hand")
+
+            _ = try session.operations.branchVariant(
+                fixture.blocks[0].block, from: fixture.blocks[0].variant)
+            model.board.landArticle(on: far)
+            await model.turnTakesIntoBlocks(blockID: fixture.blocks[0].block)
+            #expect(model.articleLanding == nil, "takes-to-blocks is her hand")
         }
     }
 
@@ -747,6 +776,111 @@ struct TakesArticleScrollTests {
                     the page stays where it was after her bloom (\(before) → \
                     \(after)) — before the fix the kept-alive landing re-aimed \
                     the far block to the foot and the top rows left the screen
+                    """)
+        }
+    }
+
+    /// **R2-1, the face — RED ON THE ROUND-1 TREE (65 → 75).** Entered on
+    /// the last block, the board reveals it at the foot; she then puts a
+    /// callout frame on a row ABOVE it through the cell menu's own door
+    /// (`applyCallout(_:blockID:)`, a bare-runner road with no focus
+    /// migration and no gone row). The frame pads that row, the landed row
+    /// slips past the fold, and before the fix the kept-alive landing
+    /// re-aimed the page after her menu pick (measured: 65 → 75, 18 more
+    /// aims). A frame changes no row IDENTITY, so the landing was the ONLY
+    /// mover here — which is what makes this the discriminating face pin
+    /// (compare the split below).
+    @Test func herCalloutAboveTheLandedRowLeavesThePageWhereItIs() async throws {
+        try await withSession(blocks: 12) { session, fixture, db, mount in
+            let router = session.commandRouter
+            router.forgetCurrentBlock(for: fixture.postID)
+            defer { router.forgetCurrentBlock(for: fixture.postID) }
+            let token = router.registerDetail(postID: fixture.postID, mode: .write) { _ in }
+            defer { router.unregisterDetail(token) }
+            router.noteFocusedBlock(
+                fixture.lastBlock, variantID: fixture.lastVariant,
+                postID: fixture.postID, utf16Offset: 0)
+
+            let model = try await landingModel(session: session, fixture: fixture, db: db)
+            let (window, hosting) = await mount(model)
+            guard let article = articleScrollView(in: hosting) else {
+                Issue.record("no article scroll view")
+                return
+            }
+            await settle(window, hosting, until: { false }, maxTurns: 12)
+            let before = offset(article)
+            #expect(before > 0, "non-vacuity: the landing revealed the far block (\(before))")
+            #expect(model.articleLandingAims > 0, "non-vacuity: the landing aimed")
+
+            // A frame on the row above the landed one. The hosted board's
+            // `.task` observes the store, so the projection lands by itself;
+            // the explicit adopt below makes the pin deterministic either way.
+            await model.applyCallout(
+                .color(CalloutPalette.defaultName), blockID: fixture.blocks[1].block)
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: fixture.postID) })
+            await settle(window, hosting, until: { false }, maxTurns: 16)
+            let after = offset(article)
+            #expect(model.articleLanding == nil, "the callout ended the landing")
+            #expect(abs(after - before) < 2,
+                    """
+                    the page stays where it was after her callout (\(before) → \
+                    \(after)) — before the fix the kept-alive landing re-aimed \
+                    the far block to the foot after her menu pick
+                    """)
+        }
+    }
+
+    /// **R2-1's second door, mounted — RED ON THE ROUND-1 TREE (aims 11 → 64:
+    /// the landing burned to its whole bound fighting the reflow below).** "Make every newline a
+    /// block" (18c's U-6, the bottom bar's note row) over eleven three-line
+    /// blocks above the landed one: the split ends the landing and spends no
+    /// aim. **What this pin deliberately does NOT promise:** that the page's
+    /// offset stays. Measured at the ladder's round 2 (a temporary probe,
+    /// twice): the column's IDENTITY changes (22 rows inserted above), and on
+    /// that SwiftUI keeps the bottom-anchored content — the last row stays at
+    /// the foot and the offset moves by exactly the height inserted above it
+    /// (406 → 1268) — with NO landing ever set and NO proxy scroll ever
+    /// issued (a hand-scrolled page moved identically). That is the
+    /// framework's own reflow on a structural act, not the landing's, and it
+    /// is the same on both sides of this fix; the landing's 53 extra aims on
+    /// the old tree merely fought it. Her block stays where she sees it.
+    @Test func herNoteWideSplitEndsTheLandingAndSpendsNoAim() async throws {
+        try await withSession(blocks: 12, text: { i in
+            i == 12
+                ? TakesArticleScrollTests.proseText(i)
+                : "Line one of \(i).\nLine two of \(i).\nLine three of \(i)."
+        }) { session, fixture, db, mount in
+            let router = session.commandRouter
+            router.forgetCurrentBlock(for: fixture.postID)
+            defer { router.forgetCurrentBlock(for: fixture.postID) }
+            let token = router.registerDetail(postID: fixture.postID, mode: .write) { _ in }
+            defer { router.unregisterDetail(token) }
+            router.noteFocusedBlock(
+                fixture.lastBlock, variantID: fixture.lastVariant,
+                postID: fixture.postID, utf16Offset: 0)
+
+            let model = try await landingModel(session: session, fixture: fixture, db: db)
+            let (window, hosting) = await mount(model)
+            guard let article = articleScrollView(in: hosting) else {
+                Issue.record("no article scroll view")
+                return
+            }
+            await settle(window, hosting, until: { false }, maxTurns: 12)
+            #expect(offset(article) > 0, "non-vacuity: the landing revealed the far block")
+            let aimsBefore = model.articleLandingAims
+            #expect(aimsBefore > 0, "non-vacuity: the landing aimed")
+
+            await model.splitEveryNewlineIntoBlocks()
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: fixture.postID) })
+            await settle(window, hosting, until: { false }, maxTurns: 20)
+            #expect(model.projection.slots.count > 12,
+                    "non-vacuity: the split minted rows (\(model.projection.slots.count))")
+            #expect(model.articleLanding == nil, "the split ended the landing")
+            #expect(model.articleLandingAims == aimsBefore,
+                    """
+                    the landing spent no aim after her split (\(aimsBefore) → \
+                    \(model.articleLandingAims)) — before the fix it re-aimed \
+                    to its whole 64-aim bound against the framework's own reflow
                     """)
         }
     }
