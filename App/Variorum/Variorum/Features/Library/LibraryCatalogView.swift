@@ -863,9 +863,20 @@ struct LibraryCatalogView: View {
 ///     done for forty rows" — was right about the OBVIOUS query and wrong
 ///     about the necessary one: `Queries.smartBookMembership` drives from the
 ///     PAGE (a `CROSS JOIN` over its ids, one statement per smart book) and
-///     is therefore ∝ books × rows on screen and FLAT in corpus, measured at
-///     10× and pinned on the plan. A 200-row page costs 0.15 ms at her one
-///     smart book, one-shot per listing load.
+///     is therefore ∝ books × THE ROWS IT IS HANDED and FLAT in corpus,
+///     measured at 10× and pinned on the plan. A 200-row page costs 0.15 ms
+///     at her one smart book, one-shot per listing load.
+///
+///     **What hands it those rows changed at 18h batch 2's ladder (R2-3):**
+///     it used to be "rows on screen", which meant `limitPerKind` — a hard
+///     40. With a DAY armed the listing is uncapped (the day's answer is a
+///     SET, R1-4), so this runs over the day's whole answer. That is still
+///     what P1 asks for — cost ∝ the answer the query returned, never ∝ the
+///     corpus — and a day's answer is small by construction (her own walk
+///     found "30-odd" for a busy day). The accepted ceiling, said plainly: a
+///     day on which she edited a thousand notes would load a thousand cards
+///     per keystroke. If that day ever exists, the fix is to bound these
+///     derived reads to the DRAWN window rather than to the answer.
 enum NoteCards {
     struct Card: Equatable {
         var snippet: String = ""

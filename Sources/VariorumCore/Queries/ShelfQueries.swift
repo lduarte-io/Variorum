@@ -459,8 +459,12 @@ extension Queries {
                     + [limit]))
         hits += posts.map {
             // 13g batch 7 (R6-3): the hit's name is the ONE display brain's
-            // answer — this row-set is bounded by `limitPerKind`, so it is
-            // computed eagerly rather than lazily like a listing's.
+            // answer, computed eagerly rather than lazily like a listing's —
+            // this row-set is BOUNDED BY WHAT THE QUERY RETURNED, which is
+            // `limitPerKind` when the caller passes one and the DAY's own
+            // notes when it does not (18h batch 2's ladder, R2-3: `nil` is
+            // not a bound, and the sentence used to name only the cap).
+            // Either way it is the answer's size, never the corpus's.
             CatalogHit(
                 kind: .post, id: $0["id"],
                 title: DisplayTitle.note(
