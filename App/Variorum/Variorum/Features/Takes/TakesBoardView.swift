@@ -40,6 +40,19 @@ struct TakesBoardView: View {
     @State private var commandToken: UUID?
     /// 13c 2B: the takes-board ATTACHMENT token (the availability half).
     @State private var attachToken: UUID?
+    /// 17p batch a (row 1, R-Q1): the article's own scroll handle — the one
+    /// road by which the remembered offset is restored.
+    @State private var articleScroll = ScrollPosition()
+    /// Whether the remembered offset still has to be honoured. It starts
+    /// `.undecided` and is resolved at the FIRST honest geometry — never in
+    /// `onAppear`, whose ordering against the scroll view's first geometry is
+    /// not ours to assume (measured: the geometry hook can fire first, and a
+    /// mount that records its own 0 before reading the memory erases the very
+    /// thing it came back for).
+    @State private var articleRestore: ArticleRestore = .undecided
+    /// The article has reported real geometry at least once — until it has,
+    /// nothing knows where anything is, so no landing is spent.
+    @State private var articleGeometrySeen = false
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
 
@@ -572,7 +585,21 @@ struct TakesBoardView: View {
                     ForEach(model.projection.slots, id: \.placementID) { slot in
                         articleRow(slot: slot, commentRoom: commentRoom)
                             .onAppear { model.rowAppeared(slot.blockID) }
-                            .onDisappear { model.rowDisappeared(slot.blockID) }
+                            .onDisappear {
+                                model.rowDisappeared(slot.blockID)
+                                model.forgetArticleRowFrame(slot.placementID)
+                            }
+                            // 17p batch a (row 1): the row says WHERE it is,
+                            // in the scroll view's own space, so a landing can
+                            // ask "is this already on screen?" and answer with
+                            // geometry instead of guessing. `onGeometryChange`
+                            // republishes only on change and the board stores
+                            // it un-observed, so a scroll re-renders nothing.
+                            .onGeometryChange(for: CGRect.self) {
+                                $0.frame(in: .scrollView)
+                            } action: { frame in
+                                model.noteArticleRowFrame(slot.placementID, frame)
+                            }
                     }
                     if !model.projection.slots.isEmpty {
                         // D3's third leg (13b 1b): the add-block door lives
@@ -606,20 +633,116 @@ struct TakesBoardView: View {
                     typewriterRoom(viewport: proxy.size.height)
                 }
             }
+            // 17p batch a (row 1, her ruling R-Q1): the page opens where she
+            // left it. The offset is the SESSION's (the model dies with the
+            // mount), the restore is ONE-SHOT, and nothing is remembered until
+            // it has been spent — a fresh mount reports offset 0 before the
+            // restore runs, and recording that would erase the very thing we
+            // came back for.
+            .scrollPosition($articleScroll)
+            .onScrollGeometryChange(for: ArticleGeometry.self) {
+                ArticleGeometry(
+                    offset: $0.contentOffset.y,
+                    content: $0.contentSize.height,
+                    viewport: $0.containerSize.height)
+            } action: { _, geometry in
+                articleGeometrySeen = true
+                model.noteArticleViewport(height: geometry.viewport)
+                consumeArticleRestore(geometry)
+                spendArticleLanding(column)
+            }
             // 17o batch b (ledger row 8, her words: *"open takes mode in write
             // from the takes menu is also not automatically navigating you to
-            // where the take is"*). The landing named a slot; the page goes
-            // there and the request is spent, so a page she scrolls afterwards
-            // is never hauled back. UNANIMATED and anchored on the ForEach's
-            // OWN identity (the placement id) — the Act 10 ladder's R1-3
-            // lesson about lazy columns and estimate drift, one surface over.
-            .onChange(of: model.articleLanding, initial: true) { _, landing in
-                guard let landing else { return }
-                column.scrollTo(landing, anchor: .top)
-                model.clearArticleLanding()
+            // where the take is"*) — REVISED by 17p batch a's R-Q1: the
+            // landing REVEALS. It still names the slot on the ForEach's OWN
+            // identity (the placement id — the Act 10 ladder's R1-3 lesson
+            // about lazy columns and estimate drift), but it is spent with
+            // `anchor: nil` (SwiftUI's minimal scroll) and only when the
+            // board's own geometry says the row is not fully on screen, and
+            // only AFTER the scroll memory has been restored — so a landing
+            // can never be the reason the page jumps to the bottom.
+            .onChange(of: model.articleLanding, initial: true) { _, _ in
+                spendArticleLanding(column)
             }
+            .onChange(of: articleRestore) { _, _ in spendArticleLanding(column) }
             }
         }
+    }
+
+    /// The article's scroll geometry, reduced to the three numbers the memory
+    /// and the reveal need (an Equatable value, so the hook republishes only
+    /// when one of them actually moves).
+    private struct ArticleGeometry: Equatable {
+        let offset: CGFloat
+        let content: CGFloat
+        let viewport: CGFloat
+
+        /// How far the article can scroll — the restore clamps to it, because
+        /// a note edited elsewhere may be shorter than when she left it.
+        var travel: CGFloat { max(content - viewport, 0) }
+    }
+
+    /// The one-shot restore's state. `.wanted` holds until the content is
+    /// tall enough to honour it — the lazy column's height grows as rows
+    /// realize, and restoring against the first (short) estimate is the
+    /// pre-fill-frame mistake the 17o batch-b ladder's RAISE-M1 recorded.
+    enum ArticleRestore: Equatable {
+        case undecided
+        case wanted(CGFloat)
+        case settled
+    }
+
+    private func consumeArticleRestore(_ geometry: ArticleGeometry) {
+        guard geometry.viewport > 0 else { return }
+        switch articleRestore {
+        case .undecided:
+            // Read the memory BEFORE this mount has written anything into it.
+            guard let wanted = model.rememberedArticleOffset, wanted > 0.5 else {
+                articleRestore = .settled
+                model.rememberArticleOffset(geometry.offset)
+                return
+            }
+            articleRestore = .wanted(wanted)
+            restoreArticle(to: wanted, geometry)
+        case .wanted(let wanted):
+            restoreArticle(to: wanted, geometry)
+        case .settled:
+            model.rememberArticleOffset(geometry.offset)
+        }
+    }
+
+    private func restoreArticle(to wanted: CGFloat, _ geometry: ArticleGeometry) {
+        // Her hand outranks a pending restore: if she has already scrolled
+        // this page herself, the restore is over and we remember her place.
+        if articleScroll.isPositionedByUser {
+            articleRestore = .settled
+            model.rememberArticleOffset(geometry.offset)
+            return
+        }
+        let target = min(wanted, geometry.travel)
+        if abs(geometry.offset - target) < 0.5 {
+            // There. Settle only once the content is tall enough that the
+            // target IS the remembered place; otherwise stay armed and a
+            // later growth event carries us the rest of the way.
+            if target >= wanted - 0.5 || geometry.travel <= 0 {
+                articleRestore = .settled
+            }
+            return
+        }
+        articleScroll.scrollTo(y: target)
+    }
+
+    /// A landing is spent exactly once, and never before the page is where
+    /// the memory says it should be (the 17o batch-b BLOCKER's class: a
+    /// landing request that outlives its moment re-lands on every later mount).
+    private func spendArticleLanding(_ column: ScrollViewProxy) {
+        guard articleGeometrySeen, articleRestore == .settled,
+              let landing = model.articleLanding
+        else { return }
+        if model.articleReveal(for: landing) == .reveal {
+            column.scrollTo(landing, anchor: nil)
+        }
+        model.clearArticleLanding()
     }
 
     /// **13f W7 — HER RULING (2026-07-30):** *"the whitespace underneath works

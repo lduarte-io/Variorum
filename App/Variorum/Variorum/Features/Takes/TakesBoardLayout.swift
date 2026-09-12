@@ -21,6 +21,7 @@
 //  invalidation).
 //
 
+import CoreGraphics
 import Foundation
 import Observation
 import VariorumCore
@@ -314,6 +315,73 @@ final class TakesBoardLayout {
 
     func clearArticleLanding() {
         articleLanding = nil
+    }
+
+    // MARK: - The landing REVEALS (17p batch a, ledger row 1 — her ruling R-Q1)
+
+    /// What a landing may ask the article for. **Never a top anchor:** her
+    /// words on the shipped behaviour were *"the page keeps trying to jump to
+    /// the bottom and now show the text above"* — anchoring a slot's top at
+    /// the viewport's top is exactly what pushed every earlier block off the
+    /// screen, and the typewriter room made the LAST block a legal place to
+    /// stop. A landing now either does nothing or reveals, minimally.
+    enum ArticleReveal: Equatable {
+        /// The slot is already fully on screen; the page does not move.
+        case none
+        /// The slot is not fully on screen: scroll the minimum that shows it
+        /// (`anchor: nil`), never to the top.
+        case reveal
+    }
+
+    /// **THE RULE, pure.** `rowFrame` is the row's frame in the article scroll
+    /// view's own space (`.scrollView`), i.e. `minY == 0` is the viewport's
+    /// top edge. A row we have no frame for is one a lazy column has not
+    /// realized — which is proof it is NOT on screen, so it reveals; and a
+    /// viewport we have not measured yet decides nothing, so it reveals too
+    /// and the view's own minimal scroll settles the rest.
+    nonisolated static func revealDecision(
+        rowFrame: CGRect?, viewportHeight: CGFloat
+    ) -> ArticleReveal {
+        guard viewportHeight > 0, let rowFrame else { return .reveal }
+        // A generous pixel of slack: a row flush with an edge is on screen.
+        return rowFrame.minY >= -0.5 && rowFrame.maxY <= viewportHeight + 0.5
+            ? .none : .reveal
+    }
+
+    /// The realized article rows' frames in the scroll view's own space, and
+    /// the viewport they are measured against. **`@ObservationIgnored` on
+    /// purpose:** these are written on every scroll frame by the rows' own
+    /// geometry hooks, and nothing renders FROM them — they answer one
+    /// question, at the moment a landing arrives. Observing them would
+    /// re-render the whole article at scroll rate (P1's letter: cost ∝ the
+    /// viewport, and a re-render per frame is not that).
+    @ObservationIgnored private var articleRowFrames: [String: CGRect] = [:]
+    @ObservationIgnored private(set) var articleViewportHeight: CGFloat = 0
+
+    /// Equality-gated, like every other geometry sink on this component: a
+    /// row re-reporting the same place inside one layout pass writes nothing.
+    func noteArticleRowFrame(_ placementID: String, _ frame: CGRect) {
+        if let existing = articleRowFrames[placementID],
+           abs(existing.minY - frame.minY) < 0.5,
+           abs(existing.height - frame.height) < 0.5 {
+            return
+        }
+        articleRowFrames[placementID] = frame
+    }
+
+    func forgetArticleRowFrame(_ placementID: String) {
+        articleRowFrames.removeValue(forKey: placementID)
+    }
+
+    func noteArticleViewport(height: CGFloat) {
+        articleViewportHeight = height
+    }
+
+    /// What the article should do about a landing on this slot.
+    func articleReveal(for placementID: String) -> ArticleReveal {
+        Self.revealDecision(
+            rowFrame: articleRowFrames[placementID],
+            viewportHeight: articleViewportHeight)
     }
 
     func toggleExpanded(_ blockID: String) {

@@ -610,6 +610,45 @@ final class TakesViewModel {
     /// The article scrolled: the request is spent.
     func clearArticleLanding() { board.clearArticleLanding() }
 
+    // MARK: - The article's scroll memory and its reveal rule (17p batch a,
+    // row 1 — her ruling R-Q1)
+
+    /// The article's realized rows report their place; the board answers
+    /// whether a landing needs a scroll at all.
+    func noteArticleRowFrame(_ placementID: String, _ frame: CGRect) {
+        board.noteArticleRowFrame(placementID, frame)
+    }
+
+    func forgetArticleRowFrame(_ placementID: String) {
+        board.forgetArticleRowFrame(placementID)
+    }
+
+    func noteArticleViewport(height: CGFloat) {
+        board.noteArticleViewport(height: height)
+    }
+
+    func articleReveal(for placementID: String) -> TakesBoardLayout.ArticleReveal {
+        board.articleReveal(for: placementID)
+    }
+
+
+    /// **Where she left this note's article** — held at the SESSION, because
+    /// this model dies with the mount and the memory must not
+    /// (`EditorRouter.takesArticleOffsets`, beside Write's `scrollAnchors`).
+    ///
+    /// Gated on `landingEnabled`, which is true on THE takes board and false
+    /// on the Write panel's embedded model: two surfaces sharing one note's
+    /// remembered position would have them fighting over it.
+    var rememberedArticleOffset: CGFloat? {
+        guard landingEnabled else { return nil }
+        return session.editorRouter.takesArticleOffsets[postID]
+    }
+
+    func rememberArticleOffset(_ y: CGFloat) {
+        guard landingEnabled else { return }
+        session.editorRouter.takesArticleOffsets[postID] = max(y, 0)
+    }
+
     /// What a pane rendering `variantID` is handed. Zero for every pane the
     /// room did not name, so nothing else in the board ever sees a change.
     func caretToEndToken(forVariant variantID: String) -> Int {

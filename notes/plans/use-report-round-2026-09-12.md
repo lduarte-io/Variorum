@@ -610,7 +610,7 @@ five pieces are NOT-STARTED.
 **Pieces (checkpoint order):**
 
 1. the before/after capture diff (`f402ccce` vs HEAD, both voices) — **DONE (this commit)**
-2. the scroll memory + the reveal rule (row 1, R-Q1) — **NOT-STARTED**
+2. the scroll memory + the reveal rule (row 1, R-Q1) — **DONE (this commit)**
 3. the empty block's face (row 2, R-Q2) — **NOT-STARTED**
 4. the ＋ new block door's alignment (row 2) — **NOT-STARTED**
 5. the walk + captures + the closing suites — **NOT-STARTED**
@@ -651,6 +651,78 @@ prominent, and R-Q2 rules them both. Nothing else on the board moved between the
 **Captures:** `notes/plans/use-report-2026-09-12-screens/17p-a/01-after-takes-study-stack.png` ·
 `02-after-takes-terminal-stack.png` · `03-before-takes-terminal-stack.png` ·
 `04-before-takes-study-stack.png` (gitignored).
+
+#### PIECE 2 — THE SCROLL MEMORY AND THE REVEAL RULE (row 1, her ruling R-Q1)
+
+**RED ON OLD, measured before a line moved** (`TakesArticleScrollTests`, the mounted board + its REAL
+`NSScrollView`, run on the pre-fix tree — `/tmp/red1.log`, local):
+
+- `aThreeBlockNoteEnteredOnItsLastBlockOpensAtTheTop` — **`offset(article) → 86.0` where 0 is owed.**
+  Her three-block note, entered on its last block, opened 86 pt down: blocks 1 and 2 off the screen.
+  Her image 1, in a pin.
+- `aBoardLeftScrolledComesBackWhereSheLeftIt` — **`abs(offset - 120) → 120.0`**, i.e. the re-mount came
+  back at **0**: there was no scroll memory at all.
+
+**What the pin measures and why it is mounted.** "Where does the page open" is only answerable by a
+laid-out scroll view, so the suite hosts the whole `TakesBoardView` in a real window (the
+`TakesRoomTests` pattern) and reads `scrollView.contentView.bounds` — the clip view's BOUNDS, whose
+origin IS the scroll offset, so "on screen" is measured against that rect. The remount pin mounts a
+SECOND board with a FRESH `TakesViewModel`, exactly as a mode round trip does.
+
+**What shipped.**
+
+1. **The memory is the SESSION's** — `EditorRouter.takesArticleOffsets[postID]`, an
+   `@ObservationIgnored` per-note pixel offset beside Write's `scrollAnchors`, session-only and never
+   persisted (R-Q1's "not across launches"). It has to live there and nowhere else: `TakesBoardView`'s
+   model is per-mount `@State`, so `TakesViewModel` — and with it `TakesBoardLayout` — dies at every
+   mode switch. Gated on `landingEnabled`, so the Write panel's embedded model never shares it.
+2. **The restore is ONE-SHOT and decided at the first honest geometry.** `.scrollPosition($articleScroll)`
+   + `.onScrollGeometryChange` give the article an offset it can read and set; a small state machine
+   (`.undecided → .wanted(y) → .settled`) reads the memory at the FIRST geometry event — **not in
+   `onAppear`**, whose ordering against that event is not ours to assume (measured: the geometry hook
+   fires first, and a mount that records its own 0 before reading the memory erases the thing it came
+   back for). `.wanted` holds while the lazy column's content is still growing and re-aims as it does
+   — the 17o batch-b ladder's RAISE-M1 lesson (never restore against a pre-fill frame) in the board's
+   vocabulary. Her hand outranks it: `articleScroll.isPositionedByUser` ends the restore on the spot.
+   Nothing is written to the memory until `.settled`.
+3. **A landing REVEALS.** `TakesBoardLayout.revealDecision(rowFrame:viewportHeight:)` is a pure rule —
+   fully inside the viewport ⇒ `.none`; clipped, scrolled away, **or not realized at all** ⇒ `.reveal`
+   (an unrealized row is proof it is off screen). The frames come from each article row's
+   `onGeometryChange(for: CGRect) { $0.frame(in: .scrollView) }` (measured and confirmed: `.scrollView`
+   IS the visible-region space — a row above the fold reports a negative `minY`), stored
+   `@ObservationIgnored` and equality-gated, so a scroll re-renders nothing. The view spends a reveal
+   with **`anchor: nil`** — SwiftUI's minimal scroll — never `.top`, and only after the restore has
+   settled, and exactly once (`clearArticleLanding`, the batch-b BLOCKER's class).
+4. **`TakesChoreographer` is untouched.** The N9 entry arm and the bloom arm still call
+   `landArticle(on:)` exactly as they did — the three `TakesLandingTests` model pins ride UNMODIFIED.
+   What changed is only how the article spends the request. Her R-Q1 keeps the entry landing; it is
+   now a reveal.
+
+**GREEN, and the guard against over-correcting.** Five pins in `TakesArticleScrollTests`: the two
+red-on-old ones above; `aLongNoteEnteredOnAFarBlockRevealsItWithoutHaulingItToTheTop` (twelve blocks,
+entered on the last: the board DOES go there — row 8 of the last round survives — but the block lands
+at the FOOT of the viewport with everything above it on screen, `minY` 561 pt down a 619 pt page,
+which is red on the old anchor's `minY ≈ 0`); and two pure/model pins for the decision and for
+"spent exactly once". **`✔ Test run with 5 tests in 1 suite passed`**; the takes neighbourhood green in
+one run — `✔ Test run with 64 tests in 9 suites passed` (`TakesArticleScrollTests` ·
+`TakesRoomTests` · `TakesBoardTests` · `TakesArticleRenderTests` · `TakesBoardSoakTests` ·
+`TakesCardHeightTests` · `TakesRailPagingTests` · `TakesEmptyStateTests` · `TakePaneMeasureTests`) plus
+`✔ 10 tests in 2 suites` for `TakesLandingTests` · `CommandRouterTests`.
+
+**One thing built, measured, and then REMOVED — recorded because the measurement is the finding.** The
+first cut carried a bounded re-aim loop (the `JumpCorrectionLoop` doctrine: a lazy column scrolls to
+its ESTIMATE of an unrealized row and the rows then realize taller). A DEBUG trace through a real
+mount showed it never fired usefully — the budget burned inside one layout pass, and the reveal landed
+correctly WITHOUT it because SwiftUI re-resolves `scrollTo(id:)` across the column's height growth on
+this SDK. Unexercised machinery on the app's riskiest surface is worse than none, so it is gone; the
+trace is the evidence, and a future point release that changes this behaviour is a TEXTKIT2 §5-class
+re-measure, not a regression to rediscover.
+
+**A consequence of her ruling, recorded rather than papered over** (not a deviation — R-Q1 says both
+halves): on a LONG note whose current block is far from where she left the page, the restore puts her
+back where she was and the entry landing then reveals the current block, so the page can move once
+after the restore. On short notes — the case she reported — nothing moves at all. Her ruling keeps the
+entry landing deliberately ("the entry landing is not retired"), so this is built exactly as ruled.
 
 **Two environment notes, recorded so they are not met twice.** (1) WalkKit's `walk-cap` writes
 `w<n>.png` where `n` is the window's index in ITS OWN listing and does **not** clear the directory — a

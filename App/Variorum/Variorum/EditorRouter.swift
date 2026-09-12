@@ -8,6 +8,7 @@
 //  became shared with the mobile target (Phase 8).
 //
 
+import CoreGraphics
 import Observation
 
 @MainActor
@@ -64,4 +65,20 @@ final class EditorRouter {
     /// Top visible text location per post (UTF-16 offset) — content-anchored
     /// reopen restore (accepted memo: never px-anchor).
     @ObservationIgnored var scrollAnchors: [String: Int] = [:]
+
+    /// **Where the TAKES board's article was left, per note** (17p batch a,
+    /// ledger row 1 — her ruling R-Q1: *"it should remember your scroll
+    /// position"*). Write's twin is `scrollAnchors` above, and this sits
+    /// beside it for the same reason that one does: the board's own model
+    /// (`TakesViewModel`, and with it `TakesBoardLayout`) is per-MOUNT
+    /// `@State`, so a mode round trip destroys it — a memory that is to
+    /// survive leaving the page can only live at the session.
+    ///
+    /// Deliberately a PIXEL offset where Write's is a content anchor: the
+    /// article is an ordinary SwiftUI `ScrollView` whose rows are the note's
+    /// blocks, so its offset means the same thing on re-entry (a note edited
+    /// elsewhere re-lays out, and the restore clamps to the content's travel).
+    /// Session-only and never persisted — R-Q1's own letter ("not across
+    /// launches"); a cold launch lands on the remembered block instead.
+    @ObservationIgnored var takesArticleOffsets: [String: CGFloat] = [:]
 }
