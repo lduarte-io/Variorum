@@ -1283,3 +1283,63 @@ it up and leaves it on screen).
 **Closing runs (tree `fbe52f21`; zero app instances by `pgrep` before each):** the two batch suites, three times — `✔ Test run with 21 tests in 2 suites passed after 14.533 seconds` · `… 21 tests in 2 suites passed after 14.618 seconds` · `… 21 tests in 2 suites passed after 14.566 seconds` (`TakesArticleScrollTests` 18 + `TakesEmptyBlockFaceTests` 3); the batch's 38-suite closing set in ONE `xcodebuild test` (the RECORD's type list as a zsh array) — **`✔ Test run with 264 tests in 38 suites passed after 122.332 seconds`** (round 1's 262 + the two new mounted pins; zero `skipped` matches in the log). Core `swift test` not re-run (`Sources/` untouched); the iOS build not owed (`Shared/` untouched).
 
 **For the implementer's sanity pass and round 3:** the diff is `5febae9e..fbe52f21` (two commits, three files under `App/Variorum/Variorum/Features/Takes/` — `TakesStructureController` · `TakesViewModel` · `TakesBoardLayout` (doc only) — and `TakesArticleScrollTests`). Two things worth a second pair of eyes: (1) the arm's placement at `runSplit` rather than at its three doors — a split the guards refuse ("already whole") leaves a landing pending, which is the rule's letter (a refused split cannot change content height) but differs from `run`, which clears even on a refusal; (2) the split pin's promise being the landing's half only, with the framework's reflow recorded rather than asserted. Nothing here is open; no QUESTIONS entry made (the reflow observation is the orchestrator's to bundle or file); the canon note drafted at the adjudication stands.
+
+#### Implementer's sanity pass (round 2)
+
+*The batch-a implementer (`opus-implementer`), the cross-model flow's one sanity pass over
+`git diff 5febae9e..fbe52f21` — read in my own context, no code or test file touched, no suite run.
+**(1) the arm's placement is RIGHT, with a reason worth keeping. (2) NO — I do not know, and I say so
+plainly; but I can name a cheaper discriminator than the pre-batch rebuild.** Nothing raised as a
+defect.*
+
+**(1) The arm at `runSplit`'s body, not at its three doors — RIGHT, and the asymmetry with `run` is
+benign in both directions.** Two cases have to be separated. A split that is ENTERED and splits
+nothing ("already whole") is covered: the arm sits at `TakesStructureController.swift:266`, before the
+`do`, so it fires on every entry regardless of what the operation reports. What is left pending is a
+DOOR-level refusal — `structuralInFlight`, no target, a failed flush — where `runSplit` is never
+entered. **That is the behaviour I would choose, and not only because a refused split changes no
+content height:** a door-level refusal is a gesture that did nothing and SAID so (`speak(…)`, the
+refusal in the toast). Clearing the landing there would give the refusal a second, invisible
+consequence — the entry reveal she is still waiting for would be cancelled by a gesture the app just
+told her it would not perform. The placement keeps the refusal inert, which is what a refusal should
+be. **And the asymmetry with `run` (`TakesViewModel.swift:2321`, which clears before the operation and
+so clears on a refusal too) fails safe in the other direction:** over-clearing costs at most a reveal
+that does not happen, where under-clearing costs a page that moves after her hand — her complaint's
+own direction. Both placements are safe; they are safe differently, and that is worth the doc line so
+a later reader does not "fix" the asymmetry into the unsafe direction.
+
+**(2) Whether the pre-batch board reflowed the same way on a split — I DO NOT KNOW, and my captures
+cannot answer it.** Piece 1's before/after was a three-block note in Takes on `f402ccce`, both voices,
+stack, at rest: **I never performed a split, or any structural act, on the before binary** — the
+question the reviewer is asking was not one the batch had at that point. The worktree and its
+DerivedData are gone (`git worktree remove --force` + `rm -rf`, recorded at piece 1's close), so
+answering it that way is a cold rebuild plus a walk.
+
+**What I DO know, and it narrows the question usefully.** The batch's `.scrollPosition($articleScroll)`
+(`TakesBoardView.swift:645`) is new — the pre-batch article carried a `ScrollViewReader` and nothing
+else (`git show f402ccce:…/TakesBoardView.swift` has `.scrollPosition` only on the two fan STRIPS,
+`:1001`/`:1055`, never on the article) — so the reviewer is right that the binding's arrival is a live
+candidate and my evidence cannot rule it out. But on the tested tree **that binding issues no scroll at
+all**: `articleScroll` has exactly three occurrences (`:45` the `@State`, `:645` the modifier, `:657`
+the `isPositionedByUser` read) and **no `articleScroll.scrollTo` call site anywhere** — the restore's
+`.scrollToRow` goes through the PROXY (`column.scrollTo`), and the `scrollTo(y:)` I originally wrote
+left with the pixel memory at `a1f88379`. So the only way the binding could be the mover is by its mere
+PRESENCE changing the scroll view's anchoring, not by anything the batch asks it to do.
+
+**Which makes the cheap discriminator one line, not a rebuild:** on a scratch branch, delete
+`.scrollPosition($articleScroll)` (and the `positionedByUser:` argument's source) and re-run the
+reviewer's no-landing probe — if the 406 → 1268 reflow persists, the framework's identity-change
+anchoring is pre-existing and the binding is exonerated; if it vanishes, the batch owns it. That
+isolates the binding instead of confounding it with every other change between `f402ccce` and here,
+and it is the shape I would hand the 13u2 split rather than a KnownIssues note that says "measured
+2026-09-12, cause unknown". **I would not gate this round on it:** no ruling says which reflow is
+wanted, the direction it moves (her block stays where she can see it) is the defensible one, and the
+landing's own half is pinned.
+
+**Nothing else raised.** The three arms read right at their sites
+(`TakesStructureController.swift:266` · `:697`, `TakesViewModel.swift:1813`), each beside the status
+reset and each with the mechanism in its comment; the doc's move from "covered by construction" to
+"complete by enumeration" with the table is the right correction of the claim I helped get wrong; the
+harness fact about `NSClipView.scroll(to:)` not flipping `isPositionedByUser` matches what I found
+building the remount pin (the memory is written from the geometry report regardless, which is why that
+pin works) and is worth its record.
