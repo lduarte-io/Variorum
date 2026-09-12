@@ -4796,3 +4796,68 @@ database reading) are still in the view file, and the model's own next split is 
   `** BUILD SUCCEEDED **`.
 
 **The marker stays 8**; no schema, no migration, no `setting` key, no mirror DDL in this pass.
+
+#### Batch 1's fixes (round 2)
+
+*(Four items, one commit each, path-scoped and pushed as they landed. **Nothing disputed** — one
+finding (R2-4) is fixed in substance with its fix's SHAPE argued in the commit and below, which is
+the agree/dispute the shortened arbitration folded into this pass. `Sync/` untouched; `Sources/`
+moved in COMMENTS ONLY (R2-11's numbers — `git diff` over the core file shows no non-doc line), so
+the core run below is a courtesy rather than an obligation. Her app was absent from `/Applications`
+at every timed run. The last code hash is `634a57c4`.)*
+
+| # | finding | commit | pin | red on old |
+|---|---|---|---|---|
+| 1 | **R2-4** the unruled word restored | `f96c7181` | `MobileLibrarySortTests.theSortVocabularyIsPinned` | the phone answered *"revised"* where *"last meaningful edit"* has shipped since the parity round; and `ruledLabel(.lastMajorRevision)` did not exist to say the table gives no word where no ruling gave one |
+| 2 | **R2-5** the phone's door refuses `.title` | `aee25810` | the same pin, driving `setSort(.title)` on a real model | **`model.sort → .title` where `.entryDate` is owed** — measured with the guard REVERTED (announced; restored with `git checkout --` from the committed tree, never a copy) |
+| 3 | **R2-9** the four oracles reset on disappear | `0f80ec7f` | the mount harness, so all three mounted stamp pins assert it | with the `.onDisappear` reverted: `flipStamp` retained, `stampShown → "edited Jun 30"`, `stampEditedAt → 2026-07-01 00:00:01`, `stampFrames → (787.5, 40.0, 102.5, 18.0)` — all four still there after the window went |
+| 4 | **R2-11** the record's attribution | `634a57c4` | — (a record + a doc) | the sentence that stood was falsifiable; it is marked corrected in place |
+
+**What each fix actually changed, beyond the table:**
+
+- **R2-4.** `LibrarySortWords.ruledLabel` answers HER FOUR and nil for anything else; `label`
+  falls back to `unruledLabel` — *"last meaningful edit"*, AppSpec §10's own vocabulary, the
+  phone's shipped string. **The one place I read the ruling's substance rather than its letter,
+  argued rather than done quietly:** the arbitration says *"the phone keeps its own for the rest"*,
+  and I kept the WORD rather than the LOCATION. The Mac can still be asked for that case — a
+  hand-edited `libraryCatalogSort` of `last_major_revision` parses and reaches the door's label,
+  which is R2-10's own scenario — so both platforms need an answer, and two files each holding the
+  same string is the drift R1-7 retired three commits earlier. What the finding forbids is
+  CHANGING the word; `ruledLabel` is what makes "her four, and only hers" a claim a pin holds. **If
+  the orchestrator wants the literal split it is one line**, and round 3 can take it. Batch 2's
+  R2-10 comment named the door's wrong-shape example by the string this restores, so it moved with
+  it.
+- **R2-5.** One guard, at the door, with the reason written where the next reader stands: this
+  model's listing is `observeLibrary` → `Queries.library`, which refuses `.title` by a precondition
+  that is **live in release**, and the same letter gave `.title` a word so a picker could say it.
+  The state it leaves is named rather than hidden: the phone can NAME `.title` and cannot BE it
+  until its listing can serve it — `searchCatalog`'s road, not `library`'s, and a mobile decision.
+- **R2-9.** `resetStamp(_:)` now clears the FOURTH oracle beside its own three
+  (`MastheadGeometry.stampFrames`), so one call is the whole cleanup rather than three-quarters of
+  it, and `.onDisappear` calls it. The pin rides in the mount harness so all three mounted pins
+  assert the teardown rather than one of them.
+- **R2-11.** The cause is **withdrawn, not replaced**: round 2's split (71.8 µs built · 0.54 µs
+  cached · 0.15 µs lock+hash · 0.08 µs `storeCalendar`) cannot explain a 110× → 19× narrowing, and
+  inventing a second explanation would repeat the first mistake — what my harness paid beyond them
+  is unattributed and now says so. The fix is better than the record claimed (~132× on the
+  reviewer's numbers); what left the main thread per keystroke is the same ~5.7 ms either way. The
+  function's own doc now carries the measured numbers.
+
+**THE CLOSING RUNS (at `634a57c4`):**
+
+- **Core (`swift test`, repo root — comment-only movement, run anyway):**
+  `✔ Test run with 1545 tests in 167 suites passed after 57.694 seconds.` (unchanged from round 1's
+  close, as a doc-only core change should be.)
+- **Mac (ONE `xcodebuild test` from `App/Variorum/`, TYPE names, zero `skipped:` lines — the same
+  34 suites as round 1's close):** `✔ Test run with 206 tests in 34 suites passed after 109.852 seconds.`
+  (+2 over round 1's 204: R2-9's four assertions ride inside three existing tests, and the two new
+  tests are batch 2's day-filter pins landing in `LibraryDayFilterTests` between the runs.)
+- **iOS:** `** BUILD SUCCEEDED **`, and the two phone-visible fixes RUN rather than compiled —
+  `✔ Test run with 2 tests in 1 suite passed after 0.063 seconds`
+  (`VariorumMobileTests/MobileLibrarySortTests` on the `Variorum-batch6a` simulator).
+
+**What I did NOT do:** no walk (nothing user-visible moved on the Mac: a shared word table, a phone
+guard, DEBUG-only oracle cleanup, and two records — the phone's picker string is the only visible
+change and it is pinned on the simulator); nothing in `Sync/`, no schema, no migration, no
+`setting` key — **marker 8**; **R2-10 and R2-12 are not mine** (R2-10 landed with batch 2 at
+`f1f60061`; R2-12's F-0 residue is RECORDED for 13u2 by the arbitration, not done here).
