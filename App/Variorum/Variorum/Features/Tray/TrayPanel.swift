@@ -1232,12 +1232,15 @@ struct TrayPanel: View {
 /// `.fixedSize()`; the squeeze belongs to the lead line above them.
 struct TrayRowVerbs: View {
     /// The purge door's two halves, together — so a row can never render the
-    /// button without the sentence that says what it costs.
+    /// button without the sentence that says what it costs. The init is
+    /// PRIVATE (the ladder's R2-2): the two factories below are the only door
+    /// in, so "the sentence lives once per kind" is true by construction, not
+    /// by a census of call sites.
     struct Purge {
         let help: String
         let act: () -> Void
 
-        init(help: String, act: @escaping () -> Void) {
+        private init(help: String, act: @escaping () -> Void) {
             self.help = help
             self.act = act
         }
