@@ -1557,7 +1557,8 @@ Stranded originals get NO Delete Now door (R-Q3's letter).
 **Pieces (checkpoint order):**
 
 1. **row 3 — the tray's block rows gain Delete Now** — **DONE (`e394ac76`)**, red-on-old measured
-2. **row 4 — the Callout Emoji alert's collapsed field** — **NOT-STARTED**
+2. **row 4 — the Callout Emoji alert's collapsed field** — **DONE (this commit)**, red-on-old
+   measured on the PRE-FIX code (no revert needed — the pin was written and run first)
 3. **rows 5–6 — the decoration lane + the emoji inside the frame** — **NOT-STARTED**
 4. **the walk + captures + the closing suites** — **NOT-STARTED**
 
@@ -1644,6 +1645,52 @@ shipped tray suites ride with the two new pins, unmodified.
 The ROAD pins' red on the PRE-BATCH tree is by COMPILATION (neither `requestDeleteNowBlock` nor
 `trashItem(for: Queries.TrayItem)` existed) — the `CalloutEmojiPickerTests` precedent's form; the
 second revert above is their discriminating measurement on this tree.
+
+#### PIECE 2 — ROW 4: THE CALLOUT EMOJI ALERT'S FIELD (her *"the callout pane is broken"*, image 9)
+
+**RED ON OLD, measured on the PRE-FIX code before a line of the fix was written** (the pin came
+first here, so no revert was needed): `CalloutEmojiPickerTests.theEmojiFieldHasRoomToTypeIn` —
+**`accessory.field.frame.width → 0.0`**, in a real 480×80 window after `layoutSubtreeIfNeeded()`.
+Not a sliver: ZERO. Every other expectation in the same pin already passed, which is the rest of the
+diagnosis — the BUTTON kept its own size (≥ 80) and the stack kept its shipped 320, so the accessory
+had the room all along and spent all of it on the one arranged view with an intrinsic width
+(`red3.log`, local).
+
+**THE MECHANISM, TRACED MYSELF.** `CalloutMenu.emojiAccessory` built
+`NSTextField(frame: 200 × 24)` and handed it to an `NSStackView`. A stack view lays its arranged
+subviews out by INTRINSIC CONTENT SIZE and priorities and clears
+`translatesAutoresizingMaskIntoConstraints` on the way in — so the construction frame is discarded
+the moment the field becomes arranged, and the field was never 200 wide in any build. An empty
+editable `NSTextField` has no intrinsic width to speak of (the placeholder does not give it one),
+while `NSButton`'s title does; with nothing asking for width and nothing resisting compression, the
+stack gave the button its fitting width and the field zero. The 13e E1 pin beside it
+(`theAccessoryOffersTheSystemPickerBesideTheField`) checked the parts' EXISTENCE and the title, never
+a measured frame, which is why a zero-width field shipped for a month.
+
+**WHAT SHIPPED (three lines and two named numbers).** `field.setContentHuggingPriority(.defaultLow,
+for: .horizontal)` — it takes the slack instead of handing it over — and
+`field.widthAnchor.constraint(greaterThanOrEqualToConstant: CalloutMenu.emojiFieldMinWidth)`
+activated AFTER the stack adopts the field (which is what gives the constraint a hierarchy); then the
+accessory's own frame becomes its FITTING size, floored at the shipped
+`emojiAccessoryMinWidth` — because `NSAlert` sizes an accessory view from its frame, and a frame
+narrower than the content is how one of two arranged views gets squeezed whatever the constraints
+say. Both numbers are named constants on `CalloutMenu` (200 — the width the field was constructed
+with since 13e and never got; 320 — the shipped accessory width, now a floor rather than a promise).
+
+**GREEN, with the claims tightened after the red measurement** (the floor was `>= 150` when the red
+was taken and is `>= emojiFieldMinWidth` (200) now — 0.0 fails either): the field ≥ 200, the picker
+door ≥ 80 (a fix that squeezed the BUTTON would have moved the defect, not ended it), the accessory
+≥ 320 and as wide as what it holds, neither view clipped inside it, and typing lands and reads back
+(`promptEmoji` returns `field.stringValue`, so the round trip is the prompt's whole contract).
+`✔ Test run with 17 tests in 3 suites passed` (`CalloutEmojiPickerTests` · `CalloutSwatchTests` ·
+`FormattingSurfacesTests`).
+
+**One environment note for the record:** `-only-testing:VariorumTests/DoorSetTests` matches NOTHING —
+that FILE holds four suite TYPES (`DuplicateBookNameDoorTests` · `CalloutSwatchTests` ·
+`CalloutEmojiPickerTests` · `BookAscentDeclarationTests`) and the flag takes type names. A run that
+names it silently tests fewer suites than it claims; caught here by reading the
+`Test run with N tests in M suites` line against the number of names passed (the brief's own
+instruction), and the closing run names types only.
 
 
 *(Pointers re-verified by the orchestrator on 2026-09-12 after batch a's ladder, at `17803ce4`: `RecoveryView.swift` lives at `App/Variorum/Variorum/Features/Library/RecoveryView.swift` (`requestDeleteNow` `:400`; the stranded rule `:122–126`); `EditorTypography.swift` at `App/Variorum/Variorum/Theme/EditorTypography.swift` (`minGutter` `:171`, `inlineSurfaceInset` `:176`); `TrayPanel.swift`'s lines hold within one (`confirmPendingPurge` `:637`, `trashItem(for:)` `:653`); `CalloutMenu.emojiAccessory` `:179`; `BlockDecor` badge `:592`, emoji `:479`, `calloutRect` `:167`; `EditorTextView.makeInlineEditor` `:823`; `EditorViewModel` `textLeft` `:3162`; `DoorSetTests:327` is the accessory's title pin. Batch a moved nothing in this batch's files. The environment traps and rules 1–8 are R-1's, verbatim by reference; her app is QUIT for the night — an instance at `/Applications` means she is awake: never touch it.)*

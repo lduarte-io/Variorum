@@ -346,6 +346,59 @@ struct CalloutEmojiPickerTests {
         #expect(opened.first === accessory.field)
     }
 
+    /// **THE FIELD HAS ROOM TO TYPE IN** — 17p batch b, row 4 (her report:
+    /// *"the callout pane is broken"*, image 9).
+    ///
+    /// **The traced mechanism:** the accessory is an `NSStackView`, which
+    /// lays its arranged subviews out by INTRINSIC SIZE and priorities and
+    /// discards the frame each was constructed with — so the
+    /// `NSTextField(frame: 200 × 24)` above was never 200 wide. An EMPTY
+    /// editable field's intrinsic width is next to nothing, and the button's
+    /// title gives IT a real one, so the stack spent its width on the button
+    /// and left the field the sliver in her screenshot.
+    ///
+    /// Measured in a real window, because "how wide is it" is a layout
+    /// question and an unlaid-out stack answers with its construction frame.
+    @Test func theEmojiFieldHasRoomToTypeIn() {
+        let accessory = CalloutMenu.emojiAccessory { _ in }
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 480, height: 80),
+            styleMask: [.titled], backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
+        defer {
+            window.orderOut(nil)
+            window.close()
+        }
+        window.contentView?.addSubview(accessory.view)
+        accessory.view.layoutSubtreeIfNeeded()
+
+        // RED ON OLD (measured): the field was **0.0 pt** wide here — the
+        // whole of her image 9 — while every other expectation below already
+        // passed, i.e. the button kept its size and the stack its 320.
+        #expect(accessory.field.frame.width >= CalloutMenu.emojiFieldMinWidth,
+                "the field is typeable — it gets the 200 it asks for: \(accessory.field.frame)")
+        // …and the picker door beside it keeps its own size — a fix that
+        // squeezed the button would have moved the defect, not ended it.
+        #expect(accessory.pickerButton.frame.width >= 80,
+                "the picker door still reads: \(accessory.pickerButton.frame)")
+        // The accessory ASKS for room enough for both, so `NSAlert` gives it
+        // room: a stack whose own frame is narrower than its content is how
+        // one of the two gets squeezed whatever the constraints say.
+        #expect(accessory.view.frame.width
+            >= accessory.field.frame.width + accessory.pickerButton.frame.width,
+                "the accessory is as wide as what it holds: \(accessory.view.frame)")
+        // Both inside their host, neither clipped.
+        #expect(accessory.view.frame.width >= CalloutMenu.emojiAccessoryMinWidth,
+                "never below the shipped 320: \(accessory.view.frame)")
+        #expect(accessory.field.frame.minX >= -0.5)
+        #expect(accessory.pickerButton.frame.maxX <= accessory.view.frame.width + 0.5)
+        // And typing lands: the field is editable and the prompt reads it
+        // back (`promptEmoji` returns `accessory.field.stringValue`).
+        #expect(accessory.field.isEditable)
+        accessory.field.stringValue = "\u{1f4a1}"
+        #expect(accessory.field.stringValue == "\u{1f4a1}")
+    }
+
     /// The prompt's own contract is unchanged (K6's letter): the answer is the
     /// field's string, an EMPTY string is a real answer ("no glyph"), and only
     /// cancellation is nil. Pinned at the transform the answer flows into, the

@@ -173,6 +173,18 @@ enum CalloutMenu {
     /// says what will open (⌃⌘Space's own menu item is worded this way).
     static let emojiPickerButtonTitle = "Emoji & Symbols\u{2026}"
 
+    /// **The typing room the field ASKS FOR** — 17p batch b, row 4. It is the
+    /// width the field was CONSTRUCTED with since 13e E1 and never got (see
+    /// `emojiAccessory`); named here because the batch's numbers belong where
+    /// a reader can find them, and pinned in `CalloutEmojiPickerTests`.
+    static let emojiFieldMinWidth: CGFloat = 200
+
+    /// The accessory's floor, the shipped 320 — a stack narrower than its
+    /// content is how one of two arranged views gets squeezed whatever the
+    /// constraints say, so the frame never drops below this and grows to the
+    /// fitting size when the field and the door together want more.
+    static let emojiAccessoryMinWidth: CGFloat = 320
+
     /// Builds the accessory. `openPicker` is injectable for the pin's sake and
     /// defaults to the real thing: focus the field, then hand the system panel
     /// that field as its insertion target.
@@ -182,7 +194,8 @@ enum CalloutMenu {
             NSApp?.orderFrontCharacterPalette(field)
         }
     ) -> EmojiAccessory {
-        let field = NSTextField(frame: NSRect(x: 0, y: 0, width: 200, height: 24))
+        let field = NSTextField(
+            frame: NSRect(x: 0, y: 0, width: emojiFieldMinWidth, height: 24))
         field.placeholderString = "e.g. \u{1f4a1}"
         let trampoline = EmojiPickerTrampoline(field: field, open: openPicker)
         let button = NSButton(
@@ -198,7 +211,35 @@ enum CalloutMenu {
         stack.orientation = .horizontal
         stack.spacing = 8
         stack.alignment = .firstBaseline
-        stack.frame = NSRect(x: 0, y: 0, width: 320, height: 26)
+        // **17p batch b, row 4 — her *"the callout pane is broken"* (image 9).**
+        //
+        // The traced mechanism, measured: an `NSStackView` lays its arranged
+        // subviews out by INTRINSIC size and priorities and discards the frame
+        // each was constructed with (it clears
+        // `translatesAutoresizingMaskIntoConstraints` on the way in) — so the
+        // 200-wide field above was never 200 wide, and an EMPTY editable
+        // `NSTextField` has an intrinsic width of nothing at all: the pin
+        // measured the field at **0.0 pt** while the button, whose title gives
+        // IT a real intrinsic width, kept its own 120-odd and the stack's 320.
+        // Her screenshot is that zero.
+        //
+        // Two lines end it, and both are needed: the field ASKS for its typing
+        // room explicitly, and it hugs LOOSELY so it takes the slack instead
+        // of handing it to the button. The constraint is activated AFTER the
+        // stack adopts the field, which is what gives it a superview.
+        field.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        field.widthAnchor.constraint(
+            greaterThanOrEqualToConstant: emojiFieldMinWidth).isActive = true
+        // And the accessory is as wide as what it holds: `NSAlert` sizes an
+        // accessory view from its FRAME, so a frame narrower than the content
+        // would squeeze one of the two back whatever the constraints say.
+        stack.layoutSubtreeIfNeeded()
+        let fitting = stack.fittingSize
+        stack.frame = NSRect(
+            x: 0, y: 0,
+            width: max(emojiAccessoryMinWidth, fitting.width.rounded(.up)),
+            height: max(26, fitting.height.rounded(.up)))
+        stack.layoutSubtreeIfNeeded()
         return EmojiAccessory(
             view: stack, field: field, pickerButton: button, trampoline: trampoline)
     }
