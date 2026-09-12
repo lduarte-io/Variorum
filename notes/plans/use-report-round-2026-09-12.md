@@ -4209,3 +4209,76 @@ one fix each, not two.
 - **R1-12 · R1-13 · R1-15 NIT — CONFIRMED, batch 2.** **R1-14 · R1-16 · R1-17 NIT — CONFIRMED, batch 1** — R1-14 WIDENED by batch 1's own correction: `MastheadGeometry.stampFrame` is not keyed either; all FOUR oracles the batch added are unkeyed, so all four are keyed by post id (DEBUG-only, small); R1-16: refuse `.title` in `Queries.library()` with a documented precondition rather than a sentence; R1-17: one clause on #103 — "trailing" on the card is unanswered by her word.
 
 **The order of work (one agent at a time):** batch 2's implementer first — R1-6's extraction FIRST (behaviour-free), then R1-1's index commit, then the query, then R1-2's re-fixture and record correction, R1-3, R1-4, R1-8, R1-9, R1-11, the three NITs; core `swift test` + the Library suites + the tutorial spine + the iOS build; then batch 1's implementer — R1-5, R1-7 (Shared → iOS build), R1-10, R1-14, R1-16, R1-17 + the #103 clause; the same closing runs. Then round 2 with a FRESH `opus-reviewer` over the fixes.
+
+---
+
+#### Batch 2's fixes (round 1)
+
+*(Applied in the arbitration's order, one commit per finding, path-scoped, each pushed as it landed.
+Every red-on-old below was run on the tree the fix landed on — for the face findings that meant
+writing the pin BEFORE the fix and watching it fail in place, which is cheaper and more honest than a
+worktree: the committed tree IS the pre-fix tree. `Sync/` untouched; `Shared/` untouched. The last
+code hash is `bfe8d75c`.)*
+
+| # | finding | commit | pin | red on old |
+|---|---|---|---|---|
+| 1 | **R1-6** the model's extraction | `1667a8cb` | — (behaviour-free) | nothing to be red on; the parity proof is ZERO test edits, 33/5 green unmodified |
+| 2 | **R1-1** the index, its own schema commit | `33407d64` | `MigrationTests.theDaySearchIndexArrivesForAnOlderStore` | a v1_16 store carries no `idx_commit_created`; migrating adds exactly one index |
+| 3 | **R1-1** the query turned around | `f714ca73` | `LibraryDaySearchTests.theSavepointArmIsDrivenByTheDaysOwnSavepoints` · `…theDaySearchsWorkTracksTheDaysSavepointsNotTheCorpusBlocks` | the plan carried `CORRELATED SCALAR SUBQUERY` and no `idx_commit_created` **with v1_17 already in the store**; the steps read **1,896 → 13,096** for 1 → 15 blocks per note (6.9× for 15× the blocks). Green: **916 → 916** — flat, and less than half the old floor |
+| 4 | **R1-2** the record's correction | `e695f63f` | — (a record) | the falsified measurement is kept in place under a warning, with the corrected table beside it |
+| 5 | **R1-3** both halves | `62f8870e` | `LibraryDayFilterTests.armingADayMovesABooksScopeToNotes` · `…theDaysSentenceIsNotSpokenForAScopeItCannotDescribe` · `…theEmptyAnswerNamesTheTypedQueryWhenOneIsNarrowingToo` | `scope → .books` where `.posts` is owed **and** the listing `[]` where the day's note is owed; `dayForEmptyAnswer` and `emptyAnswer(query:)` did not exist |
+| 6 | **R1-4** both halves | `6066c6f9` | `LibraryDaySearchTests.aDaysAnswerIsNotCappedWhenTheCallerLiftsTheCap` · `LibraryDayFilterTests.theDaysAnswerIsWholeAndACappedListingSaysSo` · `…theProbeIsExactAtThePagesEdge` | `limitPerKind: nil` did not compile (the parameter was a non-optional `Int`); no `truncated` member; the day's answer stopped at 40 of 45 |
+| 7 | **R1-8** the calendar + the removal | `7a5f7da6` | `LibraryDayFilterTests.theFiltersCalendarIsGregorianAndKeepsHerTimeZone` | `LibraryDayFace.calendar` did not exist; every site took `Calendar.current` whole |
+| 8 | **R1-9** the closed door's action | `b403b879` | `LibraryDayFilterTests.openingTheClosedDoorPicksToday`, rewritten | `openOnToday()` did not exist; the old pin drove the BINDING and could not fail |
+| 9 | **R1-11** leaving the catalog | `b40cab03` | `LibraryDayFilterTests.leavingTheCatalogClearsTheDay` | `editedOn → "2026-09-17"` where nil is owed |
+| 10 | **R1-12 · R1-13 · R1-15** | `bfe8d75c` | the two suites green with batch 1's three assertions renamed | — (cosmetic; R1-13's proof is that the alias is gone and nothing references it) |
+
+**What each fix actually changed, beyond the table:**
+
+- **R1-1.** The savepoint half is now `OR id IN (SELECT cb.container_id …)` and the driver is
+  v1_17's `idx_commit_created`. The set is the same set — the correlation became the subquery's
+  projection — and the five correctness pins rode unchanged, which is the proof. **The `ANALYZE`
+  finding is the part worth carrying forward:** the app never runs it, so with no `sqlite_stat1` the
+  planner keeps a correlated order whatever indexes exist; the index alone left the step counts
+  identical to the byte. The arbitration records that for owner 12.
+- **R1-3(b) reverses my own QUESTIONS #104 recommendation and #104 says so now** (the amendment is
+  filed on the question itself): I argued against a control moving under her hand, and the trace
+  showed the alternative is an unreachable listing under a confidently false sentence. The scope
+  moves once, on arming, and does NOT move back on clearing — a control that moves twice is worse
+  than one that moves once.
+- **R1-4** made `limitPerKind` optional (`nil` = unbounded), which is `Queries.library(limit:)`'s own
+  convention two screens down in the same file; the day lifts the cap and everything else asks for
+  `pageSize + 1`, draws `pageSize`, and reports `truncated` — no `COUNT(*)`, which would be a second
+  statement per keystroke. The two plain empty sentences moved into the new `LibraryCopy.swift`
+  beside the truncation line, so no listing sentence is a literal in a view body any more.
+- **R1-8** removed `DayBounds.init(containing:)` outright rather than making it failable: a public
+  door nothing walks through, whose force-unwrap was sound only in a Gregorian calendar its signature
+  did not require. **Recorded, not fixed:** the row STAMPS still word themselves in
+  `Calendar.current` (batch 1's `TimeStampFace`), so a non-Gregorian user would read one calendar in
+  the rows and another in the day door — batch 1's surface, named here so it is not lost.
+- **R1-11** gave the view ONE door for a mode change (`modeChanged()`) rather than two calls a future
+  mode could forget one of.
+
+**Two honesty notes on the mechanics:** R1-11's PIN rode in R1-9's commit (`b403b879`) because both
+live in `LibraryDayFilterTests.swift` and the test file was staged with the R1-9 fix; R1-11's own
+commit carries the model and the view. And the R1-3 fix was written before its pin, so I reverted it
+with `git checkout --` (announced, from the committed tree — never a scratchpad copy), wrote the pin,
+watched it fail on the real pre-fix code, and re-applied the identical edits.
+
+**THE CLOSING RUNS (this batch's fixes, at `bfe8d75c`):**
+
+- **Core (`swift test`, repo root):** `✔ Test run with 1542 tests in 167 suites passed after 59.799 seconds.`
+  (+1 over the batch's close: `MigrationTests`' new index pin. The day-search suite grew by two and
+  lost none — two measurement pins were REWRITTEN in place, and `DayBoundsTests` lost the retired
+  initializer's pin, which is the −1 that balances it.)
+- **Mac (ONE `xcodebuild test` from `App/Variorum/`, TYPE names, zero `skipped:` lines — the same 37
+  suites the batch closed on):** `✔ Test run with 215 tests in 37 suites passed after 111.111 seconds.`
+  (+7 over the batch's 208: the five new day-filter pins and the two R1-4 ones.)
+- **iOS (`xcodebuild build -scheme VariorumMobile -destination 'generic/platform=iOS'` — the
+  migration set is shared, so the phone gains v1_17 by construction):** `** BUILD SUCCEEDED **`.
+
+**What I did NOT do in this pass:** nothing in `Sources/VariorumCore/Sync/`, nothing in
+`App/Variorum/Shared/` (R1-7 is batch 1's), no editor-seam file, no new `setting` key, no mirror DDL
+— **the lockstep marker stays 8**, as the migration's own comment says. Batch 1's findings (R1-5,
+R1-7, R1-10, R1-14, R1-16, R1-17) are untouched, except that R1-13's rename edited three assertions
+in `LibrarySortMenuTests` — which is the fix itself, and they pass.
