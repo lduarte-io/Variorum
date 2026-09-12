@@ -1383,3 +1383,46 @@ pin works) and is worth its record.
 - Zero `Sources/` / `Shared/` / `Sync/` / schema / choreographer / `CommandRoutingTests` change across the whole batch and the ladder; no trailer lines on any of the eighteen commits since `2bfc8461`; no history rewrite; the tree clean at `17803ce4` after the probe's deletion.
 
 **Counts: 0 BLOCKER · 1 MAJOR · 0 MINOR · 1 NIT.** R3-1 is NEW at MAJOR in round 3 — the hard cap: its fix lands under this round's cross-model follow-up (the reviewer's fix pass with its red-on-old pins, the implementer's one sanity pass), and whatever remains open after that is recorded for the author, never looped on. No fix was made; the code is untouched until the orchestrator's follow-up.
+
+#### Implementer's responses (round 3)
+
+*The batch-a implementer (`opus-implementer`) under the cross-model flow: traced against the code at
+`17803ce4` in my own context — nothing implemented, no code or test file touched, no suite run; this
+plan is the only file this edits. **2 AGREED · 0 DISPUTED.***
+
+**R3-1 (MAJOR — `deleteSelectedBlocks` is the fourth door) — AGREE, and the ⌘-click's no-migration is
+DELIBERATE exactly as the reviewer reads it.** I built beside that line: `onCommandClick` at
+`TakesBoardView.swift:893–903` carries its own reason in the code — *"the claim consumes the click, so
+the ring does not migrate here — picking blocks is not writing in one"* (13e E3, her A18) — and the
+claim's return of `true` is what consumes the mouse-down before `PaneSurface`'s selection tracking
+runs, so the ring genuinely stays where it was. **That is the whole reason this door is in the class:**
+every other height-changing road either mints a pane the ring moves to or removes the landed row, and
+this one is the only gesture in the board's vocabulary whose *design intent* is to leave the ring — and
+therefore a pending landing — untouched while changing what is above it. The door itself reads as
+traced: `TakesStructureController.swift:930–932` is `structuralInFlight = true` → `setStatus(nil)` →
+the compound through a bare `model.session.runner.run`, with `clearMergeSelection` and `speak` after
+and **no `parkFocus` anywhere in the body** (`:925–946`). The two callers are gesture doors
+(`TakesBoardView.swift:529` the banner, `TakesShared.swift:363` the card row). **And I accept the
+falsification of round 2's table row without reservation** — it was argued from "the frames stay
+honest through the delete", and J1's own measurement (b) (placeholder frames, 28 → 50 → measured, one
+pass each) says a lazy column's identity change is precisely when they do not; the no-landing control
+at 65 → 65 makes the 28 pt the landing's alone, which is the cleanest attribution in the whole ladder.
+The arm at `:932`, beside the status reset and before the `do`, matches `runSplit`'s and
+`turnTakesIntoBlocks`' placement, and with the table row armed the "complete by enumeration" claim
+finally has no argued exemption left in it.
+
+**R3-2 (NIT — `runSplit`'s arm comment should carry the asymmetry) — AGREE.** It is the sentence my
+round-2 sanity pass asked for and the right place for it: the arm is at the body
+(`TakesStructureController.swift:266`), so a door-level refusal leaves the landing pending while `run`
+(`TakesViewModel.swift:2321`) clears even on a refusal, and both fail safe in OPPOSITE directions. The
+one addition I would make to the wording: say which way is unsafe, not just that they differ —
+over-clearing costs at most a reveal that does not happen; under-clearing costs a page that moves after
+her hand, which is her complaint's own direction. A reader who knows that cannot "tidy" the asymmetry
+the wrong way.
+
+**Nothing else raised, and one note on the shape rather than the code.** This is the class's fifth
+surfacing and the second time an ENUMERATED exemption was wrong at its first use — which is exactly
+P-5's signal, and it strengthens what I said at round 2: option (a) is the patch, option (b) (one arm
+in `adopt`) is the design, and the `TakesArticleScroll` split (owner 13u2) should build it rather than
+inherit a table that has now been corrected twice. I would not reopen it here; the hard cap is the
+right place to stop enumerating.
