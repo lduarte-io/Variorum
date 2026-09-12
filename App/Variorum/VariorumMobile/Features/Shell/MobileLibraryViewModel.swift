@@ -84,6 +84,12 @@ final class MobileLibraryViewModel {
         case .createdAt: return "created"
         case .lastTouched: return "last touched"
         case .lastMajorRevision: return "last meaningful edit"
+        // The Mac's Library gained an A–Z sort at 18h batch 1 (her row 10);
+        // the phone's picker deliberately still offers the four stamps above
+        // (`sortOptions`), so this answers only so the vocabulary can never
+        // reach a surface with no word for it. Whether the phone OFFERS it is
+        // the mobile project's call — the parity ledger carries the row.
+        case .title: return "title"
         }
     }
 

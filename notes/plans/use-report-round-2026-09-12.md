@@ -2961,8 +2961,8 @@ LOCAL UI state, so AppSpec §7's seeds are untouched — see the canon note at t
   `✔ Test run with 12 tests in 2 suites passed after 2.755 seconds` and 18d's four NoteBox
   suites UNCHANGED — `✔ Test run with 17 tests in 4 suites passed after 0.010 seconds` (the
   forwarder's parity proof).
-- **Piece 4 — the masthead stamp (row two's third subview + the oracle slot):** DONE — this
-  commit. `MastheadRowTwo` lays out TWO OR THREE subviews: the stamp takes its ideal width at
+- **Piece 4 — the masthead stamp (row two's third subview + the oracle slot):** DONE
+  (`4a838d70`). `MastheadRowTwo` lays out TWO OR THREE subviews: the stamp takes its ideal width at
   the line's TRAILING edge and the cluster reflows in the room between (which is what keeps the
   right edge calm — the stamp is pinned where she reads it, the tag cards move); on two lines
   the stamp rides the chip's line and the cluster keeps its full-width line below.
@@ -2983,7 +2983,138 @@ LOCAL UI state, so AppSpec §7's seeds are untouched — see the canon note at t
   so the read that would fill it can never start (the stamp was blank forever, and the first
   run of all three mounted pins caught it). The waiting face is a zero-size `Color.clear`,
   which row two sizes at 0 and treats exactly as "no stamp".
-- **Piece 5 — THE WALK (the acceptance gate) + the closing runs:** NOT-STARTED.
+- **Piece 5 — THE WALK (the acceptance gate) + the closing runs:** DONE — this commit. Seventeen
+  captures in `notes/plans/use-report-2026-09-12-screens/18h-1/` (gitignored; listed below), both
+  voices, on the DEV-STORE Debug build (`io.lduarte.Variorum.debug`, pid 86093, built into
+  `App/Variorum/DerivedData/18h1`); her `/Applications` app was not running before, during or
+  after (`pgrep -fl 'Variorum.app/Contents/MacOS'` empty at the start and after my quit), and I
+  left the dev store on Terminal · List · edited · newest first (capture 17).
+
+---
+
+### R-3 · THE WALK (the acceptance gate — USE, not mount)
+
+| # | capture | what it shows |
+|---|---|---|
+| 1 | `01-shelf-terminal.png` | the dev-store build up, Terminal voice — the walk's starting state |
+| 2 | `02-library-list-edited-newest-first.png` | the Library's List rows each wearing a muted trailing stamp — *edited today 11:08 am* · *edited today 4:49 am* · *edited sep 8* — and the new `edited · newest first ▾` door in the header |
+| 3 | `03-sort-menu-open.png` | the door open: ✓ edited · created · date · title, a divider, ✓ newest first · oldest first |
+| 4 | `04-sort-created-newest-first.png` | **created · newest first**: the listing REORDERED (the note that led under *edited* is gone from the top) and every row's stamp now reads *created …* |
+| 5 | `05-sort-title-a-z.png` | **title · a–z** — picked from the menu and the direction came with it (A–Z, not Z–A: the natural-direction rule); the rows are in displayed-name order and their stamps are *edited …* |
+| 6 | `06-sort-date-newest-first.png` | **date · newest first**: the future-dated note leads and says *dated sep 22*; notes with no stated day show no stamp (the honest silence — QUESTIONS #103's edge) |
+| 7 | `07-sort-edited-oldest-first.png` | the direction alone: **edited · oldest first**, the list flipped (aug 31 → sep 1 → sep 4 → sep 7) |
+| 8 | `08-notes-cards-with-stamp.png` | her Apple-Notes-shaped **Notes** cards: the date slot now says *edited today 11:08 am* where it printed the raw `2026-09-09` |
+| 9 | `09-masthead-stamp-edited.png` | a note open: the masthead's second row — `~/the field guide` … `tutorial ×` `#` **`edited sep 8`** at the trailing end, quiet, on the chip's line |
+| 10 | `10-masthead-stamp-moved-on-autosave.png` | **typed one word into the note** (`cliclick t:" walked"`) → the stamp moved to *edited today 1:22 pm* with no reopen — the held read, live |
+| 11 | `11-masthead-stamp-flipped-to-created.png` | **clicked the stamp** → *created sep 8* |
+| 12 | `12-masthead-stamp-returns-to-edited.png` | **clicked again** → *edited today 1:22 pm*. R-Q7's gesture, whole |
+| 13 | `13-study-masthead-stamp.png` | the **Study** voice: *edited today 1:22 PM* in the serif, same place, proper case (the voice's own idiom) |
+| 14 | `14-study-notes-cards.png` | Study's Notes cards with the stamp |
+| 15 | `15-study-list-rows.png` | Study's List rows: the trailing stamps on the rows' own baselines |
+| 16 | `16-timeline-has-no-sort-door.png` | the **Timeline** mode: no sort door (it has its own stamp control — `showsSortDoor` in the app, not only in a pin) |
+| 17 | `17-restored-terminal-list-edited-newest.png` | the dev store left as I found it |
+
+**What the walk changed in my understanding:** nothing about the design — but it is where I saw
+that the stamp's words obey the VOICE's own casing (Terminal lowercases chrome, Study does not),
+which is `tokens.chromeLabel` doing its job and the reason the stamp goes through it rather than
+rendering a raw string.
+
+---
+
+### R-3 · DISPOSITIONS (every row this batch owns)
+
+- **Ledger row 9 — "see the created time and last edited time easily on the library and within
+  the note itself" — FIXED.** Pins: `LibraryTimeSortTests.everyNoteHitCarriesItsCreatedAndEditedStamps`
+  · `…anUntouchedNotesEditedStampFallsBackToItsMint` · `…theNotesStampsReadCarriesTheMintBesideTheEdit`
+  · `TimeStampFaceTests` (8) · `LibraryRowAlignmentTests.aNoteRowsTrailingStampSitsOnTheTitlesBaselineInBothVoices`
+  · `LibrarySortMenuTests.aRowsStampIsTheSortsOwnStampInWords` · `MastheadStampTests` (4).
+  Walked: captures 02 · 08 · 09–15.
+- **Ledger row 10 — "i need to be able to sort the library by time" — FIXED.** Pins:
+  `LibraryTimeSortTests.theCatalogSortsByEveryStampInBothDirections` · `…titleSortsOnTheDisplayedNameCaseInsensitively`
+  · `…titleSortIgnoresCase` · `…theDefaultIsTheShippedEditedNewestFirstOrder` ·
+  `…booksAndBlocksKeepTheirOwnOrderUnderEverySort` · `LibrarySortMenuTests` (9, incl. the memory
+  and the unknown-value fallback). Walked: captures 02–07 · 16.
+- **Nothing DISMISSED AS HOLLOW** (both rows are product rows — the capability was absent, which
+  the compile-error red-on-old says exactly). **Nothing DEFERRED** except the day search, which
+  was never this batch's (row 11 is R-4's).
+
+### R-3 · THE BATCH'S OWN CALLS (recorded, not asked — §8's rule)
+
+1. **The relative-time thresholds** (the brief says they are the batch's numbers): today carries
+   the time, yesterday is the bare word, this year is the day, another year carries it. Recorded
+   in `TimeStampFace`'s doc with the reasoning, and pinned.
+2. **A sort pick takes its natural direction** (newest-first for a stamp, A–Z for a name); an
+   explicit direction pick stands until the next sort pick. Not a product decision about what the
+   app IS — it is what every list-sorting control in the OS does, and her ruling names "a
+   direction toggle" without saying what a sort pick does to it. `LibrarySortFace.naturalDirection`,
+   pinned, one line to change.
+3. **The sort memory is LOCAL, never a synced `setting`** (the `readModeOutlineShown` class), so
+   **AppSpec §7's `setting` seeds are untouched** and the lockstep marker stays 8.
+4. **QUESTIONS #103 (PROVISIONAL, filed):** the Notes card has ONE date slot and the brief asks it
+   to read the one brain — so the sort's stamp REPLACED the stated day there. Built as the brief
+   says, with the two alternatives and the related "no stamp under the date sort for a note with
+   no stated day" edge named on the same line.
+
+### R-3 · THINGS FOUND AND DELIBERATELY NOT FIXED
+
+- **A pre-existing double date on some List rows** (visible in capture 05): a note with no stored
+  title but WITH an entry date shows that date as its TITLE (`DisplayTitle`'s fallback) and again
+  in the row's own `date:` slot. Shipped since 13g batch 7; not this batch's surface and not a
+  regression — recorded so the next reader does not blame the stamp for it.
+- **`LibraryViewModel`'s hardwired `sort: .lastTouched, direction: .desc`** (the ledger row's
+  original trace, `:48–50`) is UNTOUCHED: the §4.7/§4.8 correction is right — the Library she is
+  looking at is `LibraryCatalogModel` over `searchCatalog`, and that other model serves the older
+  folder listing. Changing it would have been a second surface.
+- **The phone does not OFFER the title sort.** `MobileLibraryViewModel.sortWord` gained the case
+  (it switches exhaustively, which is why the iOS build was owed and how it caught this), but
+  `sortOptions` still lists the four stamps — whether the phone's picker gains A–Z, and whether
+  the phone's rows gain stamps, is the mobile project's call. **The parity line this batch owes
+  (`notes/MobileSoul.md` §6, for the letter's close):** *the Library's rows and the note's
+  masthead now show a created/edited stamp (one shared brain, `TimeStampFace` in core `Domain`),
+  and the Mac Library sorts by edited · created · date · title with a remembered direction — the
+  phone owes a version of both.*
+
+### R-3 · CLOSING THE BATCH (the three runs, exact lines)
+
+- **Core (`swift test`, repo root — I touched `Sources/`):**
+  `✔ Test run with 1519 tests in 165 suites passed after 58.745 seconds.`
+  (the round's baseline was 1503/163; +16 tests in +2 suites is exactly this batch's two new core
+  suites.)
+- **Mac (ONE `xcodebuild test` from `App/Variorum/`, the touched suites + the ten `Tutorial*`
+  spine types; TYPE names, zero `skipped:` lines):**
+  `✔ Test run with 188 tests in 33 suites passed after 108.636 seconds.`
+  The 33: `LibrarySortMenuTests` · `MastheadStampTests` · `LibraryRowAlignmentTests` ·
+  `MastheadLayoutTests` · `MastheadTagDoorTests` · `LibraryPreviewBrainTests` ·
+  `LibraryPanelHostTests` · `ConnectLibraryTests` · `SampleLibraryTests` · `NoteBoxCopyTests` ·
+  `NoteBoxStateTests` · `NoteBoxHeightTests` · `BookNoteBoxSubjectTests` ·
+  `NoteRowSelectionRuleTests` · `NoteRowRoutingTests` · `RowClickTimingTests` ·
+  `LibraryRowClickTests` · `ShelfModelTests` · `PromoteAndPaletteTests` · `LibraryTagFaceTests` ·
+  `NoteTagDeclarationTests` · `ContextBarDoorsTests` · `TagChipFitTests` · the ten `Tutorial*Tests`.
+  *(The brief named six suites by FILE name; four of those files carry differently-named types —
+  `LibraryPanelTests` is `LibraryPreviewBrainTests` + `LibraryPanelHostTests`, and so on. The
+  first attempt named them as written and xcodebuild silently ran 21 suites; the list above is
+  the re-run with the real type names. Recorded because a silently-skipped suite is the exact
+  way a closing run lies.)*
+- **iOS:** `** BUILD SUCCEEDED **`
+  (`xcodebuild build -scheme VariorumMobile -destination 'generic/platform=iOS'`). **It FAILED
+  first**, which is the point of owing it: `MobileLibraryViewModel.swift:82:9: error: switch must
+  be exhaustive` — the phone's `sortWord` switches over every `LibrarySort` case, and `.title`
+  was new. One line, with a comment saying why the phone answers for a sort it does not offer.
+
+### R-3 · WHAT THE LETTER'S CLOSE OWES (drafted for the orchestrator)
+
+- **`notes/AppSpec.md` §12** — the Library line gains the stamps and the sort. Draft: *"Ratified
+  addition (18h batch 1, 2026-09-12 — her rulings R-Q7 · R-Q8's first half): the Library's rows
+  (List and the Notes cards) carry a muted TIME STAMP — the sort's own, worded by the one pure
+  brain `TimeStampFace` (`Domain`; today · yesterday · the day · the day with its year) — and the
+  header carries a `sort ▾` door: edited · created · date · title, with a direction remembered
+  LOCALLY (never a synced `setting`). The note's masthead wears the same stamp at the trailing
+  end of its second row, flipping edited ↔ created on a click."*
+- **`notes/AppSpec.md` §7** — **nothing owed**: no new `setting` key (the sort memory is local UI
+  state), no schema, no migration, marker stays 8.
+- **`notes/MobileSoul.md` §6** — the parity row quoted above.
+- **`notes/QUESTIONS.md`** — **#103 is filed** (PROVISIONAL, the shipped arm marked).
+- **`notes/KnownIssuesAndTechDebt.md`** — nothing owed by this batch.
 
 **RED ON OLD, piece 1 (the honest shape for a PRODUCT row — the capability is absent, so the pins
 do not compile on `87799c6a`; full log `scratchpad/18h-1/red-on-old-core.log`):**
