@@ -3798,3 +3798,165 @@ the one surface that diverges from it. Worth one clause in #103.
    with their alternatives and their one-line-to-change lines named.
 10. **Both batches' recorded runs reproduce** — I re-ran the core suites (43/5) and five Mac suites
     (36/5) myself, green, on the reviewed tree.
+
+---
+
+#### Implementer's responses (round 1, batch 2)
+
+*(The same-model agree/dispute pass, written by 18h batch 2's implementer. **I re-traced and
+re-measured R1-1 and R1-2 myself before answering** — the hallucination guard cuts both ways, and a
+finding against my own measurement is exactly the one I must not take on trust. My probe is a
+throwaway suite (deleted; log `scratchpad/18h-2/cost-probe3.log`) that builds stores by raw insert
+(a COST probe — correctness stays pinned through the real ops), reads `SQLITE_STMTSTATUS_VM_STEP` on
+the SHIPPED statement (`Queries.catalogPostsSQL`) and on the reviewer's candidate, and prints
+`EXPLAIN QUERY PLAN` for each. **Step counts, not timings** — 17c's discipline, and they carry one
+thing timings cannot: they are machine-independent.)*
+
+**R1-1 · BLOCKER — AGREE, without reservation, and the reviewer's fix shape is what I would build.**
+My own numbers, 300 notes × 2 takes × 2 savepoints, the day matching NO note (the ordinary use — any
+past day):
+
+| blocks/note | SHIPPED | SHIPPED + `idx_commit_created` | uncorrelated `IN` | uncorrelated `IN` + index | any form, a day that matches every note |
+|---|---|---|---|---|---|
+| 1 | 18,016 | **18,016** | 12,630 | **6,636** | 7,078 |
+| 20 | 206,116 | **206,116** | 126,630 | **6,636** | 7,078 |
+| 100 | 998,116 | **998,116** | 606,630 | **6,636** | 7,078 |
+
+The mechanism is exactly as traced: `OR` short-circuits, so the correlated `EXISTS` runs for every
+note whose own stamp misses the day, at that note's blocks × takes. 5.5× the blocks is 5.5× the work
+(18,016 → 998,116 is 55× for 100× the blocks — the fixed per-note overhead is the rest), and
+`search()` is spawned per keystroke while a day is armed. That is P1's own sentence — *"cost ∝ what
+is on screen and what is being edited, never the total size of the document or the corpus"* — and my
+`editedOnClause` breaks it. **The `LIMIT 40` cannot save it**: the `ORDER BY` is a `COALESCE`
+expression, so the plan carries `USE TEMP B-TREE FOR ORDER BY` and every row's `WHERE` is evaluated
+before any row is discarded. I built the arm the way the brief's own sketch wrote it and never
+questioned the shape; that is mine, not the brief's.
+
+**Two refinements my re-measurement adds to the finding, both strengthening it:**
+
+1. **`idx_commit_created` ALONE does nothing on the shipped store — because the app never runs
+   `ANALYZE`** (I grepped: no `ANALYZE` anywhere in `Sources/` or the app; the only mention is a
+   comment at `Migrations.swift:491`). With no `sqlite_stat1`, the planner keeps the correlated
+   order (`SEARCH cp USING COVERING INDEX idx_commit_variant`) and the step counts are **identical to
+   the byte** with and without the index — the column above. *With* `ANALYZE` the planner does
+   re-order the correlated subquery to start at `idx_commit_created` (12,617 / 10,218 / 10,218), which
+   is why this looks like a near-miss. It is not a near-miss: it is a fix that depends on statistics
+   the app does not create, on a per-keystroke query. The uncorrelated form wins **without stats**,
+   which is the only condition that matters here.
+2. **The fixed form is not merely better, it is FLAT AND FREE**: 6,636 steps at 1, 20 and 100 blocks —
+   *below* the 7,078 the same query costs on a day that matches every note. The day filter stops being
+   a cost at all.
+
+So: **the uncorrelated `id IN (…)` + `CREATE INDEX idx_commit_created ON commit_point(created_at)`,
+the index in its OWN schema commit ahead of the code that relies on it** (CLAUDE.md's model-changes-
+get-their-own-commit rule; 17c/P20's precedent that an index is not a §12 lockstep event — **the
+marker stays 8**, and I will say so again in the record). Semantics are identical: the correlation
+`cb.container_id = container.id` becomes the subquery's projection, so the set is the same set — and
+the five correctness pins that would break if it were not (`aSavepointOnAnotherNotesBlockNeverAnswersHere`,
+`aSavepointOnADeletedBlockNoLongerAnswersForTheNote`, the two Monday/Tuesday pins,
+`anUntouchedNotesMintCountsAsItsEdit`) all ride unchanged as the proof.
+
+**The pin that goes RED on the shipped code** (and it is the corrected R1-2 pin, so the two findings
+close together): `theDaySearchsWorkTracksTheNotesNotTheSavepoints`, re-fixtured so **the searched day
+matches NO note** and the fixture sweeps blocks-per-note, asserting the VM step count does not grow
+with blocks — red on old at 18,016 → 206,116 (11.4× for 20× the blocks, where the claim is ~1×),
+green after at 6,636 → 6,636. Beside it a plan pin: the plan must contain `idx_commit_created` and
+must NOT contain `CORRELATED SCALAR SUBQUERY`. Both are step/plan assertions, never timings.
+
+**R1-2 · MAJOR — AGREE.** The probe and the pin both write every note on the searched day, so the
+`OR` short-circuits and the arm I was measuring never executed; the pin's own comment says it out
+loud (*"the stamp arm answers most notes before the subquery runs at all"*) and I did not draw the
+consequence. The "+27% of the VM steps" figure measures extra `COALESCE` comparisons, and
+"note-shaped, not savepoint-shaped" was a claim about an arm that did not run. The 5578/5578
+index comparison is real but proves only that the planner ignores a `created_at`-only index for the
+CORRELATED form **without stats** — which R1-1 is precisely about. **The §4.8 half is agreed too and
+is the part I should have caught while writing the record:** §4.8 predicted *"one indexed seek"* on
+`idx_container_touched`, and the plan I pasted into THE MEASUREMENT verbatim says `SEARCH container
+USING INDEX idx_container_kind (kind=?)` — because the first arm wraps the column in `COALESCE`,
+exactly as the pre-existing `.lastTouched` sort does. I quoted the contradiction and did not name it.
+The record will name it: **the day predicate cannot use `idx_container_touched` while it compares
+the same COALESCE the row displays, and that is a deliberate trade** (the filter must never disagree
+with the words beside it — a row reading *edited today* must be found by today), **whose cost is
+bounded by the note count, not the corpus** — which is the shipped listing's own documented shape.
+
+**R1-3 · MAJOR — AGREE, and it is the worst of the four, because the sentence it makes false is the
+one the batch calls the product's honesty.** I re-read both sites (`LibraryCatalogView.swift:989-993`,
+`:1018-1021`): the day is the only condition. Both paths are real — I confirmed by reading rather
+than by running: (1) a typed query narrows the post arm's `LIKE` to nothing and the headline still
+asserts a fact about the day; (2) `filtered` applies `scope` AFTER a day-armed `searchCatalog` has
+returned posts only, so `.books` or `.blocks` yields `[]` with the picker disabled and ✕ the only
+escape. **What I would build:** (a) the day answer renders only when the day is the ONLY narrowing
+(`query` empty and the scope not restricted to a kind the day cannot answer); with a typed query
+beside it the headline names the query too (*"No note matching "zzz" was edited on Sep 9."*) and
+keeps the caveat, since the caveat is still the reason a note she remembers is missing; (b) arming a
+day moves a `.books`/`.blocks` scope to `.posts` — **this reverses my own #104 recommendation and I
+say so plainly**: I argued against a control moving under her hand, and the reviewer's trace shows
+the alternative is an unreachable listing under a false sentence, which is worse. #104's shipped arm
+gains that amendment rather than being re-opened. *Red on old:* a model pin —
+`model.scope = .books; model.setEditedOn(today); await model.search()` — asserting the day's notes
+are listed; and a wording pin for the typed-query headline.
+
+**R1-4 · MAJOR (shared with batch 1) — AGREE on the defect; a note on the fix's shape.** The trace is
+right: `limitPerKind: 40` was a benign top-N for *"the 40 most recently edited"* and this letter turned
+it into a wrong answer twice — the day's answer is a SET (its size is the fact she asked for) and
+A–Z is an ordering of the whole library. My walk's own capture 04 says *"30-odd notes answer"* on her
+real store, which is one tutorial book away from silent truncation. **What I would build:** ask for
+`limitPerKind + 1`, show the first 40, and let the model report `truncated` — so a "showing the first
+40 — narrow the day or the search" line can be drawn without ever claiming a count the query did not
+establish. I would NOT lift the cap unbounded: the listing's cost is ∝ the rows returned and a day
+early in a big corpus can be large; an honest bound beats an unbounded promise. The fix lives in ONE
+place (`LibraryCatalogModel.search()` + the two bodies' empty/footer slots) whichever batch is
+charged with it — it is one fix, not two. *Red on old:* 45 notes on one day, `editedOn` set, assert
+the model reports truncation (and, with the `+1` probe, that it knows there are more than 40).
+
+**R1-6 · MINOR (shared) — AGREE.** `LibraryCatalogModel` is ~250 lines of model inside a 1,509-line
+view file, and I added to it while my own file header says the opposite. It is a pure mechanical move
+to `LibraryCatalogModel.swift` beside the two new files, and I would do it as its OWN commit with no
+behaviour in it — which also makes the R1-3 and R1-4 fixes land somewhere readable.
+
+**R1-8 · MINOR — AGREE, and the finding is sharper than it says.** `DayBounds.init(containing:)` has
+no production caller (I re-grepped: the only production construction is `DayBounds(day:)` at
+`LibraryCatalogView.swift:256`), its doc names a door that does not go through it, and the
+force-unwrap's proof is Gregorian-only. **The part worth escalating:** the same mismatch reaches the
+SHIPPED path. `JournalDay.dayString` emits the CURRENT calendar's components while `JournalDay.isValid`
+validates proleptic Gregorian — so under a non-Gregorian `Calendar.current` the day key the field
+produces (`"5786-13-05"`) is refused by `setEditedOn` and the filter would silently never arm. That
+predates me (`JournalDay` is Phase 8's) but my code inherits it. **What I would build:** delete
+`init(containing:)` and its pin (dead code whose only keeper is its own test is the class the finding
+names), and give the day filter an explicit GREGORIAN calendar carrying the user's TIME ZONE — her
+local day boundaries, the store's own day grammar — rather than `Calendar.current` wholesale. That is
+consistent with `entry_date`/`JournalDay` everywhere else in the store, and it is two lines.
+
+**R1-9 · MINOR — AGREE.** The pin drives `dateBinding`, not the closed door's Button closure, and
+passes only because it feeds the same value the closure would compute. It is my own *"never
+hand-feed"* standard applied to every control but the one. Fix: expose the closed door's action
+(`var todayPick: String`, or an `openAction` closure) and assert through it, so changing the Button
+to open on yesterday turns it red.
+
+**R1-11 · MINOR — AGREE.** Read and confirmed: `showsCatalogControls` gates the sort menu and the day
+field, but the scope `Picker`'s `.disabled(model.editedOn != nil)` sits outside that `if`
+(`LibraryCatalogView.swift:825`), so in Timeline the picker is dead with its clearing door off screen.
+One line: `.disabled(model.showsCatalogControls && model.editedOn != nil)`.
+
+**R1-12 · NIT — AGREE.** `.help("")` is a placeholder standing in for "no tooltip" and a string-as-rule
+in a body. Apply the modifier conditionally.
+
+**R1-15 · NIT — AGREE.** `.frame(maxWidth: 520)` is an unnamed number-as-rule in the one file that
+otherwise names and justifies its measured constant. It gets a name and a sentence (it is the
+caveat's measure — the line length at which two sentences of explanation stay readable).
+
+**R1-13 · NIT — AGREE, with one precision.** `showsSortDoor` is a forwarder for a pin minted by the
+SAME letter, which is not what the 3C parity pattern is for (that pattern protects pins a batch must
+not touch). I would rename the batch-1 assertion and retire the alias. The precision: I kept it
+deliberately and said so in the record, so this is a judgment I lost rather than an oversight — the
+right reading is the reviewer's, because two names for one rule with no distinction is exactly the
+drift the same letter should not ship.
+
+**Not mine to answer** (batch 1's, recorded here only so the tally is complete): R1-5, R1-7, R1-10,
+R1-14, R1-16, R1-17.
+
+**Tally, batch 2's findings: 9 agreed · 0 disputed** (R1-1 BLOCKER · R1-2, R1-3, R1-4 MAJOR · R1-6,
+R1-8, R1-9, R1-11 MINOR · R1-12, R1-13, R1-15 NIT — eleven items over nine numbered findings, two of
+them shared with batch 1). **Nothing disputed, and two of them (R1-1's shape and R1-2's falsified
+measurement) overturn a judgment the record and the J11 adjudication both rest on** — the corrected
+measurement above is the evidence for re-adjudicating it. No code was edited in this pass.
