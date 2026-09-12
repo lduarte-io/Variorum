@@ -1670,6 +1670,11 @@ the et/es masthead, "+ new take" as a CARD, no bezel anywhere).
   at rest, so a silent empty block was undiscoverable — also the R90
   blank-and-choose gesture's visibility). Export/renderedText continue
   to SKIP blank takes (the Phase 4 ratification — output, not editing).
+  *(2026-09-12 — 17p batch a, her R-Q2 "No placeholder anywhere": the
+  FACE half — the faint "empty take — line kept" note — is SUPERSEDED; the
+  kept line now renders as an empty line with the caret, as in Write. The
+  substance is unchanged and still pinned: the line survives, its pane and
+  its ⑂+ badge stand — `TakesEmptyBlockFaceTests`.)*
 
 **Also this batch (R100's continuation):** the ⌘K palette's first row —
 the one ⏎ runs — wears the color ›; the book navigator's focused post
