@@ -1221,3 +1221,51 @@ recorded); R1-5's retirement is right and the J1 pins carry its road; the four d
 - Zero `Sources/` / `Shared/` / `Sync/` / schema / choreographer / `CommandRoutingTests` change across the whole batch and the ladder; no trailer lines; no history rewrite; the tree clean at `f5e86272` after the probe's deletion.
 
 **Counts: 0 BLOCKER · 1 MAJOR · 0 MINOR · 0 NIT.** R2-1 is NEW at MAJOR (the round-1 fix for its class was incomplete — three doors, two measured), so under the ladder's rule its fixes get round 3. No fix was made; the code is untouched until the orchestrator's follow-up.
+
+#### Implementer's responses (round 2)
+
+*The batch-a implementer (`opus-implementer`) under the cross-model flow: agree/dispute traced against
+the code at `f5e86272` in my own context — nothing implemented, no code or test file touched, no suite
+run; this plan is the only file this edits. **1 AGREED · 0 DISPUTED.** The reviewer makes the final call
+and implements its confirmed fix itself.*
+
+**R2-1 (MAJOR — three height-changing board doors outside the her-hand set) — AGREE, and the
+completeness claim it falsifies is partly MINE, so here is exactly how I got it wrong.** All three
+sites read as the finding says: `runSplit` (`TakesStructureController.swift:260–267`) and
+`turnTakesIntoBlocks` (`:676–692`) each go `model.setStatus(nil)` → `model.session.runner.run { … }`
+with no `parkFocus` anywhere in the body, and `applyCallout` (`TakesViewModel.swift:1807–1815`) goes
+`status = nil` → `session.runner.run { … }` — none of the three touches `run`/`runCopying`, none mints
+a pane the ring migrates to, and none removes the landed row from the order, so `articleLandingStep`
+finds the request still pending and re-aims. **My sanity pass's error was a generalisation from two
+samples:** I checked `choose` (`:860`) and `archiveTake` (`:1299`), found both routed through
+`await run { … }`, and wrote "the model's other bare-`session.runner` acts are not a hole" without
+enumerating them — `applyCallout` is exactly such an act and I never looked at it. On the controller I
+leaned on the PREVIOUS round's ladder, which enumerated the eight `parkFocus` sites; I read that list
+as if it enumerated the controller's Operations sites, and it does not — `runSplit`,
+`turnTakesIntoBlocks` and `deleteSelectedBlocks` are outside it. The table in this finding is the
+artifact that list should have been, and the note-wide split is the worst case precisely because it is
+a door she reached for last round (18c's U-6) on the bottom bar's note row.
+
+**Which shape I would build: (a) NOW, and (b) at the split — and I would not merge them.** Option (a)
+is the settled rule's letter, it is three lines at three sites whose bodies I have just read (each has
+its own `setStatus(nil)`/`status = nil` line to sit beside, and no programmatic caller reaches them),
+and it is pinnable red-on-old today — that is what a ladder round should land. My reason for not
+reaching for (b) here is the one the reviewer gives and one more: `adopt` is the board's convergence
+seam (it settles the authority, prunes the merge selection, re-pages a lagging reveal and consumes the
+landings), so adding "a changed projection ends a pending landing" there changes the meaning of every
+arrival, sync included, on the surface whose landing family has already produced one BLOCKER and two
+MAJORs this round and last. That is a change to reason about with the `TakesArticleScroll` type around
+it, not inside a fix pass. **But I do think (b) is the right end state and I would say so louder than
+"recorded":** P-5's signal is real — three surfacings of one class (J1's keep-alive → R1-2 → the drag →
+these three doors) means the enumeration is the wrong shape, and the honest framing is that (a) is the
+patch and (b) is the design. One caveat for whoever builds (b): `!=` on `Queries.TakesProjection` fires
+on any field of any slot, so a pure metadata arrival (a word count, a comment) would end a landing too
+— which is fine under her complaint (a landing that has to survive an arrival is not a landing she is
+waiting on), but it should be written down as the chosen behaviour rather than discovered.
+
+**Nothing else raised.** The density-doors clearing reads right to me (N40's fixed strip cannot change
+height, and the margin-grid measurement is the reachable shape); the 47-of-64 aims note is worth the
+orchestrator's eye as the reviewer files it — SPECULATIVE, and its failure mode (`.done` with the row a
+few points short) is the safe direction under her report; and `deleteSelectedBlocks`' "no traced page
+move" argument matches what I know of the two anchors (a `.foot` landing's rows above going away moves
+it up and leaves it on screen).
