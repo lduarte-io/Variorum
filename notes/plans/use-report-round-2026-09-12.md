@@ -1101,3 +1101,57 @@ cost.
 **Closing runs (this tree, `839342a3`; zero app instances by `pgrep` before each):** the two batch suites, three times — `✔ Test run with 18 tests in 2 suites passed after 10.674 seconds` · `… 18 tests in 2 suites passed after 10.674 seconds` · `… 18 tests in 2 suites passed after 10.658 seconds` (`TakesArticleScrollTests` 15 + `TakesEmptyBlockFaceTests` 3); the batch's 38-suite closing set in ONE `xcodebuild test` (the RECORD's type list, a zsh array) — **`✔ Test run with 261 tests in 38 suites passed after 118.012 seconds`** (the adjudication's 255 + the seven new pins − the one retired; the log's only `skipped` match is the `appintentsmetadataprocessor` build line). Core `swift test` not re-run (`Sources/` untouched); the iOS build not owed (`Shared/` untouched).
 
 **For the implementer's sanity pass (the cross-model flow's next step) and the orchestrator:** the diff to read is `1112d4b1..839342a3` (eight commits, four files under `App/Variorum/Variorum/` — `TakesBoardLayout` · `TakesViewModel` · `TakesBoardView` (a comment) · `EditorRouter` (a comment) — and the two test files). Two things worth a second pair of eyes: (1) R1-4's `loaded ? slots : nil` — the "slots not yet known" arm is the guard against the app's asynchronous projection (`.task { await model.start() }` lands after the first geometry report; the tests adopt before mounting and cannot exercise the late arrival — the pure pin's nil arm states the contract); (2) R1-2 leaves the structure controller's acts uncleared by the reasoning above — if the implementer knows an act that ends in neither a migration nor a gone row, it names it and the fix is one line at that act. Nothing here is open; no QUESTIONS entry; the canon note drafted at the adjudication stands.
+
+#### Implementer's sanity pass (round 1)
+
+*The batch-a implementer (`opus-implementer`), the cross-model flow's one sanity pass over
+`git diff 1112d4b1..839342a3` — read in my own context, nothing implemented, no code or test file
+touched. **(1) CLEAR. (2) ONE ACT RAISED**, plus two consistency notes. Anything here goes back to the
+reviewer for the final word.*
+
+**(1) R1-4's `loaded ? slots : nil` arm on the real entry road — CLEAR, and the reasoning that makes it
+safe is worth keeping.** Two facts from the batch's context settle it. **(a) A landing implies
+`loaded`:** `articleLanding` is only ever set by `consumeLandings`, which runs from `adopt`, and
+`adopt`'s FIRST line is `loaded = true` (`TakesViewModel.swift:418–419`) — so the landing and the
+non-nil order arrive in the same call. **(b) The projection's arrival always produces at least one more
+geometry report:** the article's `ScrollView` exists before any slot does (`singleColumnArithcle`
+renders the empty state at `TakesBoardView.swift:559–568`), so the restore can indeed begin with
+`order == nil` and aim at a no-op; but `adopt` replaces the empty state with N rows plus the typewriter
+room, which changes `contentSize.height`, and `content` is one of `ArticleGeometry`'s three fields
+(`TakesBoardLayout.swift:492–503`) — so `onScrollGeometryChange` republishes, and the gone-row check
+runs with the order KNOWN on that report. A late projection therefore cannot leave the restore aimed at
+a gone row. **The one edge, and it fails safe:** the pre-projection no-op aims spend
+`articleRestoreAimsLeft`, so a slow enough load (≥24 reports before `adopt`) settles the restore by the
+bound instead of by the order — the same outcome the fix wants (settled, the memory rewritten by
+`rememberStep`, the landing free), just reached by the other door.
+
+**(2) R1-2's uncleared acts — ONE that ends in neither a migration nor a gone row: the SLOT-HEIGHT
+DRAG.** `TakesViewModel.slotDragChanged` / `slotDragEnded` / `resetSlotHeight` (`:1957–1968`, driven
+from the handle's `DragGesture` and its double-tap at `TakesBoardView.swift:1050–1057`) writes
+`TakesBoardLayout.slotHeights` directly (`:208–231`): **no Operations call, so neither `run` nor
+`runCopying`; no mint, so no focus migration; no delete, so the landed row is still in the order.** And
+what it changes is a ROW'S HEIGHT — R1-2's measured mechanism exactly: drag a slot above the landed one
+taller and the landed row goes below the fold → `.reveal(.foot)` → the page scrolls after her hand.
+It is her hand in the plainest sense (she is dragging the board). One line at
+`slotDragEnded`/`resetSlotHeight` — or, cheaper and more robust, at `beginSlotDrag`, so a drag that is
+still in flight cannot be fought either. (The structure controller's own acts I checked out as the
+disposition says: every `session.runner.run` site there ends in a `parkFocus` on a new or neighbouring
+block, or tombstones the block whose row was landed on — the previous round's ladder enumerated the
+same eight sites. And the model's other bare-`session.runner` acts are not a hole: `choose` (`:860`)
+and `archiveTake` (`:1299`) both go through `await run { … }`, so they are covered.)
+
+**Two consistency notes, benign today, named so the reviewer can take them or leave them.** `setPage`
+(the ◀ ▶ pager, `:824`) and `toggleMergeSelection` / `extendMergeSelection` (`:1254`) are also board
+gestures outside all three arms, and I traced both as harmless right now — N40's fixed strip height
+means a page turn changes no content height, and the merge pick draws a stroke overlay
+(`TakesBoardView.swift`'s `washedCell` overlay) with no layout effect. They only matter if the rule is
+meant to be "every board gesture is her hand" rather than "every gesture that can move the page"; the
+first is the cheaper invariant to keep true.
+
+**Everything else in the diff reads right to me.** `ArticlePlace.top` is the shape I should have
+written (and `restoreStep`'s nil-row arm makes it total rather than relying on the `.undecided` settle);
+the autoclosure keeps the layout's guard as the one decider for both R1-3 and R1-4; the three deleted
+forwarders are the ones grep showed dead, `noteArticleViewport` included (orphaned by J1's move, as
+recorded); R1-5's retirement is right and the J1 pins carry its road; the four doc corrections say what
+`a1f88379` actually did. No `Sources/`, `Shared/`, `Sync/` or choreographer change in the diff
+(`git diff --stat` confirms six files, four app + two test).
