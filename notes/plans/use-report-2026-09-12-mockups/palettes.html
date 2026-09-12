@@ -1,29 +1,29 @@
 <!doctype html><meta charset="utf-8"><title>Variorum palettes — a mockup for the 2026-09-12 sitting</title>
 <style>
 body{font:14px -apple-system,system-ui;margin:24px;background:#fff;color:#29241C}
-h1{font-size:18px} .note{max-width:900px;color:#6b6456;line-height:1.5}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:22px;margin-top:18px}
-.card h2{font-size:14px;margin:0 0 8px;text-transform:lowercase} .seed{font-weight:normal;color:#8D8578;margin-left:8px;font-family:ui-monospace,monospace;font-size:12px}
-.win{display:grid;grid-template-columns:120px 1fr;border:1px solid #ddd;border-radius:8px;overflow:hidden;height:300px;font-family:"Iowan Old Style",Georgia,serif}
-aside{background:var(--room);padding:12px 10px;border-right:1px solid var(--line);font:12px -apple-system,system-ui}
+h1{font-size:18px} h2.voice{font-size:15px;margin:28px 0 6px;text-transform:uppercase;letter-spacing:.06em;color:#8D8578} .note{max-width:900px;color:#6b6456;line-height:1.5}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:22px;margin-top:8px}
+.card h2{font-size:14px;margin:0 0 8px} .seed{font-weight:normal;color:#8D8578;margin-left:8px;font-family:ui-monospace,monospace;font-size:12px}
+.win{display:grid;grid-template-columns:120px 1fr;border:1px solid #ddd;border-radius:8px;overflow:hidden;height:300px;font-family:var(--font)}
+aside{background:var(--room);padding:12px 10px;border-right:1px solid var(--line);font-family:var(--chrome);font-size:12px}
 .nav{line-height:1.9} .hdr{color:var(--accent);font-size:11px;margin:10px 0 2px}
 .sel{background:var(--wash);color:var(--accent);padding:2px 6px;border-radius:5px;font-weight:600}
 main{background:#fff;padding:14px 18px;position:relative}
-.title{color:#8D8578;font-weight:600;font-size:16px} .title small{color:#B5AD9E;font-weight:normal;margin-left:8px;font-size:11px}
-.bar{font:11px -apple-system,system-ui;color:#8D8578;margin:8px 0} .chip{border:1px solid var(--accent);color:var(--accent);border-radius:10px;padding:0 7px}
+.title{color:#8D8578;font-weight:600;font-size:16px} .title small{color:#B5AD9E;font-weight:normal;margin-left:8px;font-size:11px;font-family:var(--chrome)}
+.bar{font-family:var(--chrome);font-size:11px;color:#8D8578;margin:8px 0} .chip{border:1px solid var(--accent);color:var(--accent);border-radius:10px;padding:0 7px}
 .prose{margin:8px 0;font-size:14px} .washed{background:var(--wash);border-radius:6px;padding:6px 8px}
 .take{background:var(--take);border:1px solid var(--takeline);border-radius:6px;padding:6px 10px;margin:4px 0 4px 16px;font-size:13px}
-.chosen{color:#5A7D46;font:11px -apple-system,system-ui} .muted{color:#8D8578;font:11px -apple-system,system-ui}
-.foot{position:absolute;bottom:8px;left:18px;font:11px -apple-system,system-ui;color:#6b6456} .acc{color:var(--accent);font-weight:600}
+.chosen{color:#5A7D46;font-family:var(--chrome);font-size:11px} .muted{color:#8D8578;font-family:var(--chrome);font-size:11px}
+.foot{position:absolute;bottom:8px;left:18px;font-family:var(--chrome);font-size:11px;color:#6b6456} .acc{color:var(--accent);font-weight:600}
 .dark{margin-top:6px;background:#000;color:#948C7C;padding:6px 10px;border-radius:6px;font:12px -apple-system,system-ui} .dark .w{background:var(--wash);padding:1px 6px;border-radius:4px}
 .tokens{font:11px ui-monospace,monospace;color:#8D8578;margin-top:4px}
 </style>
-<h1>Colour palettes over the Study voice — the 2026-09-12 sitting's mockup (Q-6)</h1>
-<p class="note">ONE seed hue per palette; a pure brain derives the whole tinted family from it — the ROOM (the tan panels), the WASH (selected rows, the changing-block wash), the ACCENT (the coloured chrome words: "this note", "commit ⌘S", the chips), the take tint and its line, the hairline. Type, idioms and the paper stay the voice's (Study's serif here; Terminal's mono would wear the same colours). Dark mode keeps the fully black room (R51) and derives only the accent, the wash and the tints. "custom" is the same brain fed her hex — no per-token picker. The first card is today's Study, untouched, for comparison. Seeds are the architect's first guess — hers to move.</p>
-<div class="grid">
+<h1>Colour palettes over the two voices — the 2026-09-12 sitting's mockup (Q-6)</h1>
+<p class="note">ONE seed hue per palette; a pure brain derives the whole tinted family from it — the ROOM (the tan panels), the WASH (selected rows, the changing-block wash), the ACCENT (the coloured chrome words: "this note", "commit ⌘S", the chips), the take tint and its line, the hairline. Type, idioms and the paper stay the voice's — Study's serif, Terminal's mono and lowercase and the › marker. Dark mode keeps the fully black room (R51) and derives only the accent, the wash and the tints. "custom" is the same brain fed your hex — no per-token picker. The first card of each row is today's voice, untouched, for comparison. Seeds are the architect's first guess — yours to move at the walk.</p>
+<h2 class="voice">study voice</h2><div class="grid">
 <section class="card">
-  <h2>default (Study) </h2>
-  <div class="win" style="--room:#FAF8F3;--wash:rgba(61,107,142,0.12);--accent:#3D6B8E;--take:#F4F2EC;--takeline:#E4DDD0;--line:#E4DDD0">
+  <h2>study · default </h2>
+  <div class="win" style="--room:#FAF8F3;--wash:rgba(61,107,142,0.12);--accent:#3D6B8E;--take:#F4F2EC;--takeline:#E4DDD0;--line:#E4DDD0;--font:"Iowan Old Style",Georgia,serif;--chrome:-apple-system,system-ui">
     <aside>
       <div class="nav">Shelf<br>Library<br>Pool<br>Snippets<br>Archived</div>
       <div class="hdr">this note</div>
@@ -45,8 +45,8 @@ main{background:#fff;padding:14px 18px;position:relative}
   <div class="tokens">room #FAF8F3 · wash rgba(61,107,142,0.12) · accent #3D6B8E · take #F4F2EC/#E4DDD0</div>
 </section>
 <section class="card">
-  <h2>lavender <span class="seed">seed #B9A7E6</span></h2>
-  <div class="win" style="--room:#F4F1FB;--wash:#DFD7F4;--accent:#5230A6;--take:#F1EEF9;--takeline:#D4CBEB;--line:#E2DDEE">
+  <h2>study · lavender <span class="seed">seed #B9A7E6</span></h2>
+  <div class="win" style="--room:#F4F1FB;--wash:#DFD7F4;--accent:#5230A6;--take:#F1EEF9;--takeline:#D4CBEB;--line:#E2DDEE;--font:"Iowan Old Style",Georgia,serif;--chrome:-apple-system,system-ui">
     <aside>
       <div class="nav">Shelf<br>Library<br>Pool<br>Snippets<br>Archived</div>
       <div class="hdr">this note</div>
@@ -68,8 +68,8 @@ main{background:#fff;padding:14px 18px;position:relative}
   <div class="tokens">room #F4F1FB · wash #DFD7F4 · accent #5230A6 · take #F1EEF9/#D4CBEB</div>
 </section>
 <section class="card">
-  <h2>mint <span class="seed">seed #9ED9BE</span></h2>
-  <div class="win" style="--room:#F2FAF6;--wash:#DAF1E6;--accent:#3C9A6F;--take:#EFF9F4;--takeline:#CCEBDD;--line:#DDEEE6">
+  <h2>study · mint <span class="seed">seed #9ED9BE</span></h2>
+  <div class="win" style="--room:#F2FAF6;--wash:#DAF1E6;--accent:#3C9A6F;--take:#EFF9F4;--takeline:#CCEBDD;--line:#DDEEE6;--font:"Iowan Old Style",Georgia,serif;--chrome:-apple-system,system-ui">
     <aside>
       <div class="nav">Shelf<br>Library<br>Pool<br>Snippets<br>Archived</div>
       <div class="hdr">this note</div>
@@ -91,8 +91,8 @@ main{background:#fff;padding:14px 18px;position:relative}
   <div class="tokens">room #F2FAF6 · wash #DAF1E6 · accent #3C9A6F · take #EFF9F4/#CCEBDD</div>
 </section>
 <section class="card">
-  <h2>pink <span class="seed">seed #F2B3C9</span></h2>
-  <div class="win" style="--room:#FBF1F4;--wash:#F4D7E1;--accent:#A63059;--take:#F9EEF2;--takeline:#EBCBD6;--line:#EEDDE3">
+  <h2>study · pink <span class="seed">seed #F2B3C9</span></h2>
+  <div class="win" style="--room:#FBF1F4;--wash:#F4D7E1;--accent:#A63059;--take:#F9EEF2;--takeline:#EBCBD6;--line:#EEDDE3;--font:"Iowan Old Style",Georgia,serif;--chrome:-apple-system,system-ui">
     <aside>
       <div class="nav">Shelf<br>Library<br>Pool<br>Snippets<br>Archived</div>
       <div class="hdr">this note</div>
@@ -114,8 +114,8 @@ main{background:#fff;padding:14px 18px;position:relative}
   <div class="tokens">room #FBF1F4 · wash #F4D7E1 · accent #A63059 · take #F9EEF2/#EBCBD6</div>
 </section>
 <section class="card">
-  <h2>blue <span class="seed">seed #A7C4EB</span></h2>
-  <div class="win" style="--room:#F1F5FB;--wash:#D7E3F4;--accent:#3062A6;--take:#EEF3F9;--takeline:#CBD9EB;--line:#DDE4EE">
+  <h2>study · blue <span class="seed">seed #A7C4EB</span></h2>
+  <div class="win" style="--room:#F1F5FB;--wash:#D7E3F4;--accent:#3062A6;--take:#EEF3F9;--takeline:#CBD9EB;--line:#DDE4EE;--font:"Iowan Old Style",Georgia,serif;--chrome:-apple-system,system-ui">
     <aside>
       <div class="nav">Shelf<br>Library<br>Pool<br>Snippets<br>Archived</div>
       <div class="hdr">this note</div>
@@ -134,5 +134,120 @@ main{background:#fff;padding:14px 18px;position:relative}
     </main>
   </div>
   <div class="dark" style="--accent:#90B2DF;--wash:#142134">dark: room stays black · <span class="acc">this note · commit ⌘S</span> · <span class="w">wash</span></div>
+  <div class="tokens">room #F1F5FB · wash #D7E3F4 · accent #3062A6 · take #EEF3F9/#CBD9EB</div>
+</section></div><h2 class="voice">terminal voice</h2><div class="grid">
+<section class="card">
+  <h2>terminal · default </h2>
+  <div class="win" style="--room:#F6F6F1;--wash:#EEF0EA;--accent:#2F7D5F;--take:#F2F4EE;--takeline:#D6DCD0;--line:#E4E4DC;--font:ui-monospace,"SF Mono",Menlo,monospace;--chrome:ui-monospace,"SF Mono",Menlo,monospace">
+    <aside>
+      <div class="nav">shelf<br>library<br>pool<br>snippets<br>archived</div>
+      <div class="hdr">this note</div>
+      <div class="nav">write<br><span class="sel">› takes</span><br>read<br>lenses<br>compare</div>
+      <div class="hdr">open</div>
+      <div class="nav"><span class="sel">› 2026-09-12</span></div>
+    </aside>
+    <main>
+      <div class="title">2026-09-12 <small>in no book</small></div>
+      <div class="bar"><span class="chip">wash: on</span> expand all · close all</div>
+      <p class="prose washed">what's being removed from 2nd mind</p>
+      <div class="take"><span class="chosen">✓ chosen</span><br>what's being removed from 2nd mind</div>
+      <div class="take"><span class="muted">choose</span><br>hello?</div>
+      <p class="prose">hmmm</p>
+      <div class="foot">block 3/3 · block ▾ · + take · <span class="acc">commit ⌘s</span> · history</div>
+    </main>
+  </div>
+  <div class="dark" style="--accent:#6FBF94;--wash:#1A211C">dark: room stays black · <span class="acc">this note · commit ⌘s</span> · <span class="w">wash</span></div>
+  <div class="tokens">room #F6F6F1 · wash #EEF0EA · accent #2F7D5F · take #F2F4EE/#D6DCD0</div>
+</section>
+<section class="card">
+  <h2>terminal · lavender <span class="seed">seed #B9A7E6</span></h2>
+  <div class="win" style="--room:#F4F1FB;--wash:#DFD7F4;--accent:#5230A6;--take:#F1EEF9;--takeline:#D4CBEB;--line:#E2DDEE;--font:ui-monospace,"SF Mono",Menlo,monospace;--chrome:ui-monospace,"SF Mono",Menlo,monospace">
+    <aside>
+      <div class="nav">shelf<br>library<br>pool<br>snippets<br>archived</div>
+      <div class="hdr">this note</div>
+      <div class="nav">write<br><span class="sel">› takes</span><br>read<br>lenses<br>compare</div>
+      <div class="hdr">open</div>
+      <div class="nav"><span class="sel">› 2026-09-12</span></div>
+    </aside>
+    <main>
+      <div class="title">2026-09-12 <small>in no book</small></div>
+      <div class="bar"><span class="chip">wash: on</span> expand all · close all</div>
+      <p class="prose washed">what's being removed from 2nd mind</p>
+      <div class="take"><span class="chosen">✓ chosen</span><br>what's being removed from 2nd mind</div>
+      <div class="take"><span class="muted">choose</span><br>hello?</div>
+      <p class="prose">hmmm</p>
+      <div class="foot">block 3/3 · block ▾ · + take · <span class="acc">commit ⌘s</span> · history</div>
+    </main>
+  </div>
+  <div class="dark" style="--accent:#A790DF;--wash:#1D1434">dark: room stays black · <span class="acc">this note · commit ⌘s</span> · <span class="w">wash</span></div>
+  <div class="tokens">room #F4F1FB · wash #DFD7F4 · accent #5230A6 · take #F1EEF9/#D4CBEB</div>
+</section>
+<section class="card">
+  <h2>terminal · mint <span class="seed">seed #9ED9BE</span></h2>
+  <div class="win" style="--room:#F2FAF6;--wash:#DAF1E6;--accent:#3C9A6F;--take:#EFF9F4;--takeline:#CCEBDD;--line:#DDEEE6;--font:ui-monospace,"SF Mono",Menlo,monospace;--chrome:ui-monospace,"SF Mono",Menlo,monospace">
+    <aside>
+      <div class="nav">shelf<br>library<br>pool<br>snippets<br>archived</div>
+      <div class="hdr">this note</div>
+      <div class="nav">write<br><span class="sel">› takes</span><br>read<br>lenses<br>compare</div>
+      <div class="hdr">open</div>
+      <div class="nav"><span class="sel">› 2026-09-12</span></div>
+    </aside>
+    <main>
+      <div class="title">2026-09-12 <small>in no book</small></div>
+      <div class="bar"><span class="chip">wash: on</span> expand all · close all</div>
+      <p class="prose washed">what's being removed from 2nd mind</p>
+      <div class="take"><span class="chosen">✓ chosen</span><br>what's being removed from 2nd mind</div>
+      <div class="take"><span class="muted">choose</span><br>hello?</div>
+      <p class="prose">hmmm</p>
+      <div class="foot">block 3/3 · block ▾ · + take · <span class="acc">commit ⌘s</span> · history</div>
+    </main>
+  </div>
+  <div class="dark" style="--accent:#98D7BA;--wash:#143325">dark: room stays black · <span class="acc">this note · commit ⌘s</span> · <span class="w">wash</span></div>
+  <div class="tokens">room #F2FAF6 · wash #DAF1E6 · accent #3C9A6F · take #EFF9F4/#CCEBDD</div>
+</section>
+<section class="card">
+  <h2>terminal · pink <span class="seed">seed #F2B3C9</span></h2>
+  <div class="win" style="--room:#FBF1F4;--wash:#F4D7E1;--accent:#A63059;--take:#F9EEF2;--takeline:#EBCBD6;--line:#EEDDE3;--font:ui-monospace,"SF Mono",Menlo,monospace;--chrome:ui-monospace,"SF Mono",Menlo,monospace">
+    <aside>
+      <div class="nav">shelf<br>library<br>pool<br>snippets<br>archived</div>
+      <div class="hdr">this note</div>
+      <div class="nav">write<br><span class="sel">› takes</span><br>read<br>lenses<br>compare</div>
+      <div class="hdr">open</div>
+      <div class="nav"><span class="sel">› 2026-09-12</span></div>
+    </aside>
+    <main>
+      <div class="title">2026-09-12 <small>in no book</small></div>
+      <div class="bar"><span class="chip">wash: on</span> expand all · close all</div>
+      <p class="prose washed">what's being removed from 2nd mind</p>
+      <div class="take"><span class="chosen">✓ chosen</span><br>what's being removed from 2nd mind</div>
+      <div class="take"><span class="muted">choose</span><br>hello?</div>
+      <p class="prose">hmmm</p>
+      <div class="foot">block 3/3 · block ▾ · + take · <span class="acc">commit ⌘s</span> · history</div>
+    </main>
+  </div>
+  <div class="dark" style="--accent:#DF90AC;--wash:#34141F">dark: room stays black · <span class="acc">this note · commit ⌘s</span> · <span class="w">wash</span></div>
+  <div class="tokens">room #FBF1F4 · wash #F4D7E1 · accent #A63059 · take #F9EEF2/#EBCBD6</div>
+</section>
+<section class="card">
+  <h2>terminal · blue <span class="seed">seed #A7C4EB</span></h2>
+  <div class="win" style="--room:#F1F5FB;--wash:#D7E3F4;--accent:#3062A6;--take:#EEF3F9;--takeline:#CBD9EB;--line:#DDE4EE;--font:ui-monospace,"SF Mono",Menlo,monospace;--chrome:ui-monospace,"SF Mono",Menlo,monospace">
+    <aside>
+      <div class="nav">shelf<br>library<br>pool<br>snippets<br>archived</div>
+      <div class="hdr">this note</div>
+      <div class="nav">write<br><span class="sel">› takes</span><br>read<br>lenses<br>compare</div>
+      <div class="hdr">open</div>
+      <div class="nav"><span class="sel">› 2026-09-12</span></div>
+    </aside>
+    <main>
+      <div class="title">2026-09-12 <small>in no book</small></div>
+      <div class="bar"><span class="chip">wash: on</span> expand all · close all</div>
+      <p class="prose washed">what's being removed from 2nd mind</p>
+      <div class="take"><span class="chosen">✓ chosen</span><br>what's being removed from 2nd mind</div>
+      <div class="take"><span class="muted">choose</span><br>hello?</div>
+      <p class="prose">hmmm</p>
+      <div class="foot">block 3/3 · block ▾ · + take · <span class="acc">commit ⌘s</span> · history</div>
+    </main>
+  </div>
+  <div class="dark" style="--accent:#90B2DF;--wash:#142134">dark: room stays black · <span class="acc">this note · commit ⌘s</span> · <span class="w">wash</span></div>
   <div class="tokens">room #F1F5FB · wash #D7E3F4 · accent #3062A6 · take #EEF3F9/#CBD9EB</div>
 </section></div>
