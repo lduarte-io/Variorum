@@ -1166,9 +1166,12 @@ struct TrayPanel: View {
     /// **`deleteNow` — 17p batch b, row 3 (her R-Q3).** A row carries the
     /// purge door only where `TrayPurgeDoor` says it may: nil is the answer
     /// for a stranded original (it rides its family's clock) and for every
-    /// archived row (kept, no clock — there are no days to skip). The three
-    /// call sites in `cellRows` consult that one rule; this builder only
-    /// draws what it is handed.
+    /// archived row (kept, no clock — there are no days to skip). Of the
+    /// three `row(...)` call sites in `cellRows`, the leaving-block site
+    /// consults that rule; the archived and stranded sites, whose answer the
+    /// rule fixes at nil, write the literal and cite it (the ladder's R1-4 —
+    /// a door built behind a rule that is false by construction is dead
+    /// code). This builder only draws what it is handed.
     private func row(
         kind: String,
         blockID: String, text: String?, stamp: String?, when: String,
