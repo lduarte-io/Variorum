@@ -212,9 +212,11 @@ public enum TimeStampFace {
     ///
     /// The cold review measured what this function used to do: a
     /// `DateFormatter` allocated and `setLocalizedDateFormatFromTemplate`d on
-    /// EVERY call — **72.4 µs** per call on this machine, against **1.8 µs**
-    /// to format through one already built (the implementer's own `swiftc -O`
-    /// probe; the reviewer measured 76 µs / 0.68 µs). A Library row asks for
+    /// EVERY call — **71.8 µs** per call on this machine, against **0.54 µs**
+    /// through the cache end to end, of which the lock and the hash are
+    /// **0.15 µs** (the ladder's round-2 measurement, R2-11, over 200k
+    /// iterations of the landed shapes; round 1's own probes read 72–76 µs
+    /// built and 0.68–1.8 µs cached). A Library row asks for
     /// two of them (its words and its tooltip — `.help` takes a built
     /// `String`, so the tooltip is paid whether or not anyone hovers), so a
     /// 40-row list body paid **~5.8 ms of main-thread work** and re-paid it on
@@ -224,8 +226,8 @@ public enum TimeStampFace {
     ///
     /// **The tooltip stays EAGER** (ruled at the ladder's arbitration): `.help`
     /// takes a value, not a closure, and a hover-deferred build (`onHover` +
-    /// per-row `@State`) costs more on every pointer entry than the 1.8 µs it
-    /// would save now that the formatter is cached.
+    /// per-row `@State`) costs more on every pointer entry than the
+    /// sub-microsecond it would save now that the formatter is cached.
     ///
     /// **The key is the whole shape** — template AND locale AND calendar AND
     /// time zone. A key that forgot any of them would hand back a formatter

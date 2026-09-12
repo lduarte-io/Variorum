@@ -4322,9 +4322,16 @@ phone's picker words) is pinned on the simulator rather than guessed at. The las
   beside it is an immutable `let` and licenses nothing mutable). The lock covers the dictionary;
   the formatter formats outside it, on the thread-safety the shared ISO formatter has relied on
   since Phase 1. **The tooltip stays EAGER, as ruled.** The re-measured 19× is smaller than the
-  review's 110× and my own earlier 41× for raw per-call numbers — the gap is the lock and the hash,
-  which is the price of not racing a dictionary, and 5.7 ms per keystroke is still what left the
-  main thread. **The pin exists because the FIX has a failure the slow code could not have:** a key
+  review's 110× and my own earlier 41× for raw per-call numbers. **[CORRECTED AT ROUND 2, R2-11 —
+  the sentence that stood here said "the gap is the lock and the hash, which is the price of not
+  racing a dictionary", and that is falsifiable and wrong.]** Round 2 measured the landed shapes on
+  this machine (200k iterations): building per call **71.8 µs**, the cached path end-to-end
+  **0.54 µs**, of which the lock + hash is **0.15 µs** and `JournalDay.storeCalendar`'s per-call
+  construction (added under it by the calendar ruling) **0.08 µs**. So the lock and the hash cannot
+  account for a 110× → 19× narrowing; what my own harness was paying beyond them is UNATTRIBUTED
+  rather than newly explained — the honest correction is to withdraw the cause, not to invent a
+  second one. The fix is BETTER than the record claimed: ~132× on the reviewer's numbers, and
+  either way what left the main thread is ~5.7 ms per keystroke. **The pin exists because the FIX has a failure the slow code could not have:** a key
   that forgets part of the shape hands back a formatter speaking the wrong calendar or zone, so the
   same template is asked under four shapes and each must answer as itself — including 23:30 UTC
   being already tomorrow in Tokyo.
