@@ -73,6 +73,14 @@ struct TakesEmptyBlockFaceTests {
         let db = try AppDatabase.inMemory()
         let start = Date(timeIntervalSince1970: 1_782_864_000)
         let tick = LockIsolated(0)
+        // The model's OWN defaults (the sibling suite's rule): the test host
+        // is the dev-store app, `.standard` is shared with every suite and
+        // with hand walks, and `.incrementing` mints the same post id in every
+        // world (the R1-7 class, KnownIssues, owner 12).
+        let suiteName = "TakesEmptyBlockFace-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
+        defaults.removePersistentDomain(forName: suiteName)
+        defer { defaults.removePersistentDomain(forName: suiteName) }
         try await withDependencies {
             $0.database = db
             $0.uuid = .incrementing
@@ -91,7 +99,7 @@ struct TakesEmptyBlockFaceTests {
             _ = try session.operations.newBlock(in: post.id, text: "Paragraph two is a line.")
             _ = try session.operations.newBlock(in: post.id, text: "")
 
-            let model = TakesViewModel(session: session, postID: post.id)
+            let model = TakesViewModel(session: session, postID: post.id, defaults: defaults)
             model.landingEnabled = true
             model.adopt(try await db.read { try Queries.takesProjection($0, post: post.id) })
             defer { model.teardown() }
