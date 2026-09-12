@@ -4294,3 +4294,87 @@ watched it fail on the real pre-fix code, and re-applied the identical edits.
 — **the lockstep marker stays 8**, as the migration's own comment says. Batch 1's findings (R1-5,
 R1-7, R1-10, R1-14, R1-16, R1-17) are untouched, except that R1-13's rename edited three assertions
 in `LibrarySortMenuTests` — which is the fix itself, and they pass.
+
+#### Batch 1's fixes (round 1)
+
+*(Applied in the arbitration's order, one commit per finding, path-scoped, each pushed as it
+landed. `Sync/` untouched, no schema, no migration, no new `setting` key — **the marker stays 8**.
+`Shared/` IS touched (R1-7's whole point), so the iOS build was owed and ran twice. Her app was
+running at `/Applications` for none of this — `pgrep` empty before the timed runs — and no walk was
+needed: every fix here is a brain, a doc or a DEBUG oracle, and the one user-visible change (the
+phone's picker words) is pinned on the simulator rather than guessed at. The last code hash is
+`4159a5b6`.)*
+
+| # | finding | commit | pin | red on old / the number |
+|---|---|---|---|---|
+| 1 | **R1-5** the formatter cache | `ccb3e69b` | `TimeStampFaceTests.theFormatterCacheAnswersPerLocaleCalendarAndZone` | no pin owed (a degradation). **Re-measured on the LANDED shape** (`swiftc -O`, 25 bodies × 80 calls): one 40-row list body **6.01 ms → 0.313 ms, 19×**. The pin that IS owed is the cache's own new risk |
+| 2 | **R1-7** one table for the words | `dd78de17` | `MobileLibrarySortTests.theSortVocabularyIsPinned`, rewritten | the phone answered *"last touched"* / *"entry date"* where her R-Q8's words are *edited* / *date*; run for real on the simulator, **2 tests in 1 suite passed** |
+| 3 | **R1-10** the A–Z doc | `a1728f2b` | — (a doc) | the corner worked as an example, and the `localtime` measurement recorded beside it |
+| 4 | **R1-14** the four oracles keyed | `a4847522` | the three mounted stamp pins, each now naming its note | the pins read a global; with two note windows the last `onAppear` answered for both |
+| 5 | **R1-16** `library()` refuses `.title` | `38307a68` | `LibraryTimeSortTests.theStampListingStillServesEveryStampSort` | a precondition cannot be pinned without trapping the process; the pin holds the other half (the guard does not over-fire) |
+| 6 | **R1-17** the #103 clause | `821c6ecd` | — (a question) | — |
+| 7 | **the calendar cousin** (the ladder's ruling) | `4159a5b6` | `TimeStampFaceTests.theStampsSpeakTheStoresOwnCalendarNotTheSystems` | the stamps defaulted to `Calendar.current` while the day door spoke Gregorian-in-her-zone — one screen, two calendars under a non-Gregorian system setting |
+
+**What each fix actually changed, beyond the table:**
+
+- **R1-5.** The cache is keyed by the WHOLE shape — template · locale · calendar · time zone —
+  behind an `NSLock` (`StoreKey.sweptAccounts` / `SyncSchema.columnCatalog`; `variorumISO8601`
+  beside it is an immutable `let` and licenses nothing mutable). The lock covers the dictionary;
+  the formatter formats outside it, on the thread-safety the shared ISO formatter has relied on
+  since Phase 1. **The tooltip stays EAGER, as ruled.** The re-measured 19× is smaller than the
+  review's 110× and my own earlier 41× for raw per-call numbers — the gap is the lock and the hash,
+  which is the price of not racing a dictionary, and 5.7 ms per keystroke is still what left the
+  main thread. **The pin exists because the FIX has a failure the slow code could not have:** a key
+  that forgets part of the shape hands back a formatter speaking the wrong calendar or zone, so the
+  same template is asked under four shapes and each must answer as itself — including 23:30 UTC
+  being already tomorrow in Tokyo.
+- **R1-7.** `Shared/LibrarySortWords.swift` holds the one table; both platforms' names are
+  forwarders, so every call site and pin reads unchanged except the phone's own vocabulary pin,
+  which is the fix. **Her words win by ruling** (R-Q8 names the four). What stays platform-side is
+  copy no other platform says — the direction's wording and the Mac door's composed label — with a
+  line in the file saying they move here when the phone grows a direction control, rather than
+  being minted twice. **PL-22 owes the note** (the phone's picker strings changed).
+- **R1-10.** The doc names the corner with its example and records `date(created_at,'localtime')`
+  as the available fix with the measurement that says it works, plus the two reasons it was not
+  taken — and records that the reviewer's first suggestion (`substr`) is NOT a fix, since a UTC
+  slice is exactly what `DisplayTitle.day(fromStamp:)`'s own doc rejects.
+- **R1-14.** The probe slot carries the post id (`case stamp(String)`); `MastheadGeometry` keeps
+  `stampFrames` per note and `PostDetailOracle` keeps three dictionaries with `resetStamp(_:)`
+  beside them. Both keep a one-window read so nothing outside this batch has to care. The finding
+  believed `stampFrame` was already keyed; my response corrected that, the arbitration widened it
+  to all four, and this is that.
+- **R1-16.** `precondition` rather than a graceful fallback, because silently re-ordering a listing
+  the caller asked for would be a quieter lie than the one being closed; the message names the
+  alternative (`searchCatalog`, which carries no `stamp`). **Writing the pin found something worth
+  the record: `TimelineItem.stamp` was ALREADY not always an instant** — under `.entryDate` it is a
+  DAY key, true since Phase 8 — so the pin asks the one time-brain (`TimeStampFace.parse`, which
+  knows both of the store's shapes) rather than the instant parser. A title parses as neither,
+  which is exactly the line being drawn.
+- **The calendar cousin.** `JournalDay.storeCalendar` in core `Domain`, beside the day grammar it
+  is about; `TimeStampFace`'s eight public entry points default to it (so no caller passes
+  anything), 18d's facts line follows through its own forwarder, and `LibraryDayFace.calendar`
+  forwards so batch 2's pin rides unchanged. **What did NOT move:** `JournalDay.dayString`'s own
+  calendar default stays `.current` — that parameter mints `entry_date` values throughout Phase 8's
+  operations, and re-pointing it from the side is wider than this letter.
+
+**THE CLOSING RUNS (this batch's fixes, at `4159a5b6`):**
+
+- **Core (`swift test`, repo root):** `✔ Test run with 1545 tests in 167 suites passed after 58.037 seconds.`
+  (+3 over batch 2's 1542: the two new `TimeStampFaceTests` and the one new `LibraryTimeSortTests`.)
+- **Mac (ONE `xcodebuild test` from `App/Variorum/`, TYPE names, zero `skipped:` lines):**
+  `✔ Test run with 204 tests in 34 suites passed after 108.697 seconds.`
+  (The 34 = batch 1's closing 33 + `LibraryDayFilterTests`. The count is 204 rather than batch 2's
+  215 because that run carried three day-search suites this set does not; every suite common to
+  both is green in both.)
+- **iOS (`xcodebuild build -scheme VariorumMobile -destination 'generic/platform=iOS'`):**
+  `** BUILD SUCCEEDED **` — and, because R1-7 changed a phone-visible string and its pin, the
+  mobile suite was RUN, not merely compiled: `✔ Test run with 2 tests in 1 suite passed` on the
+  `Variorum-batch6a` simulator (`VariorumMobileTests/MobileLibrarySortTests`).
+
+**What I did NOT do in this pass:** no walk (no user-visible Mac change: a cache, a doc, DEBUG
+oracles, a precondition and a calendar default that is byte-identical for a Gregorian user — the
+one visible change is the PHONE's picker words, pinned on the simulator); nothing in
+`Sources/VariorumCore/Sync/`, no editor-seam file, no schema, no migration, no `setting` key;
+**#103's RULING (R-Q17) left exactly as written** — I added only the clause the question never
+carried, and the build of her ruling is 17q's. Batch 2's findings are untouched except that R1-7's
+hoist moved the phone's `sortWord` body, which is the fix.
