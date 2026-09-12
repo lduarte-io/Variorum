@@ -542,9 +542,6 @@ final class PaneTextView: NSTextView, MarkdownFormattable, DecorLaneSurface {
     @objc private func enclosingScrollDidEndLiveScroll(_ note: Notification) {
         fireConvergenceOccasion()
     }
-    /// Fires when layout gives the view a NEW width (batch 12 — the
-    /// clipped-take fix's trigger; width-gated so height publishes can't
-    /// loop through it).
     // MARK: - The decoration lane (17p batch b, rows 5-6 - her ruling R-Q4)
 
     /// The lane's own state and arithmetic - the SAME brain the contained
@@ -591,6 +588,9 @@ final class PaneTextView: NSTextView, MarkdownFormattable, DecorLaneSurface {
         lane.proseRight(bounds: bounds.width, symmetricInset: textContainerInset.width)
     }
 
+    /// Fires when layout gives the view a NEW width (batch 12 — the
+    /// clipped-take fix's trigger; width-gated so height publishes can't
+    /// loop through it).
     var onWidthChange: (() -> Void)?
     /// Fires on every SAME-WIDTH layout pass (13c 1F — A47, the take-card
     /// gap): the frame must hug the pane's CURRENT measurement from BOTH

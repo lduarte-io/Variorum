@@ -385,8 +385,8 @@ final class EditorTextView: NSTextView, MarkdownFormattable, DecorLaneSurface {
     /// every line below is inert there.
     private var lane = DecorLaneReservation()
 
-    /// Read-only view of the opt-in, for the pins and for clarity at the
-    /// factories.
+    /// The opt-in — written by the factory (`makeInlineEditor` alone), read
+    /// by the pins and the sweep table.
     var reservesDecorLane: Bool {
         get { lane.reserves }
         set { lane.reserves = newValue }

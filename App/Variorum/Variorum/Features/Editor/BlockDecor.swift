@@ -188,6 +188,13 @@ nonisolated enum BlockDecor {
     /// The air a comment face leaves between itself and a callout card.
     static let decorAir: CGFloat = 4
 
+    /// The narrow-gutter badge's own air to the TEXT — the shipped `textLeft
+    /// − 36` for a 32-wide badge, stated as the number it always was. The
+    /// same 4 as `decorAir` by coincidence, not by rule: that one is the
+    /// badge → card gap in the lane's arithmetic, this one the badge → prose
+    /// gap when nothing else claims the gutter (the ladder's NIT-3).
+    static let commentBadgeAir: CGFloat = 4
+
     /// Does this presentation put a GLYPH in its card's leading inset? The
     /// one question the card's width, the glyph's rect and the comment
     /// faces' clearance all ask, so they cannot disagree.
@@ -755,10 +762,7 @@ final class BlockDecorOverlayController {
                     textLeft: state.textLeft, blockTop: item.frame.frame.minY,
                     clearance: BlockDecor.commentClearance(
                         hasCallout: hasCallout, hasGlyph: hasGlyph,
-                        // The badge's own air to the text — the shipped
-                        // placement's, stated as the number it always was
-                        // (`textLeft - 36` for a 32-wide badge).
-                        own: 4))
+                        own: BlockDecor.commentBadgeAir))
             }
         }
     }
