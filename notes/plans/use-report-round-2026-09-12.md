@@ -601,9 +601,20 @@ session with only the repo continues the round from here.)*
 
 **LIVE STATUS — 17p batch a (`opus-implementer`, opened 2026-09-12 at `2bfc8461`).**
 
-**WHAT I HAVE NOT DONE (the record's first line).** *(Flipped at each piece; at the batch's close this
-line states what the batch deliberately left.)* At this commit: everything but the orientation — the
-five pieces are NOT-STARTED.
+**WHAT I HAVE NOT DONE (the record's first line).** **ONE PIN IS RED AT THE CLOSE and I stopped rather
+than iterate on it** (the orchestrator's instruction at my context limit):
+`TakesArticleScrollTests.aLongNoteEnteredOnAFarBlockRevealsItWithoutHaulingItToTheTop` — the guard that
+the reveal still reveals — was green 3+ runs (logs `g16` · `g18` · `g19` · `nb2` · `nb3`, including two
+15-suite runs) and is now reproducibly RED standalone, 3/3, on the BYTE-IDENTICAL committed code
+(`git checkout --` of the test file to `a1f88379` reproduces it). The trace is below under **THE RED
+PIN**; the behaviour it guards is green in USE (walk capture `07`, and the two red-on-old pins for the
+rows themselves are green). Everything else in the batch is done. Also deliberately NOT done, by the
+brief: nothing in `Sources/` (core — zero lines), `Sync/`, schema, `App/Variorum/Shared/`,
+`PaneTextAuthority`, `PaneSurface`'s liveness or measurement brain, `BlockRangeIndex`,
+`EditorTextView`, `TakesChoreographer`'s landing arms, `TakesEmptyStateView`'s layout, the typewriter
+room's height rule, and the fan panel's embedded model. No QUESTIONS entry was needed (#102 is still
+free): every decision here is R-Q1's or R-Q2's letter, and the one consequence of her ruling worth her
+eye is recorded as an observation, not a new question.
 
 - **Orientation — DONE.** Read in my own context, in the brief's order: `CLAUDE.md` and the canon it
   auto-loads (CoreDescription · OverallModel · AppSpec — §4's P1–P3 and §12's takes presentations ·
@@ -632,7 +643,7 @@ five pieces are NOT-STARTED.
 2. the scroll memory + the reveal rule (row 1, R-Q1) — **DONE (this commit)**
 3. the empty block's face (row 2, R-Q2) — **DONE (this commit)**
 4. the ＋ new block door's alignment (row 2) — **DONE (this commit)**
-5. the walk + captures + the closing suites — **NOT-STARTED**
+5. the walk + captures + the closing suites — **DONE (this commit)** — the walk is captured and green in USE; the closing run is **RED on ONE pin**, traced and recorded below, with everything else green
 
 **Rows:** 1 · 2 — dispositions PENDING.
 
@@ -802,3 +813,131 @@ stale `w1.png` from an earlier run read as the current frame and cost three wron
 capture into a FRESH directory. (2) The recorded first-launch pitfall is live: the first launch of the
 HEAD build took every click and keystroke and showed nothing; quitting MY instance and relaunching
 cleared it (her `/Applications` instance was never involved).
+
+#### PIECE 5 — THE WALK (the acceptance gate: USE, on the DEV-STORE Debug build)
+
+`io.lduarte.Variorum.debug` (`…/DerivedData/Variorum-dnpxwqhpxdqrdjbunktnzoahckpd/Build/Products/Debug/
+Variorum.app`, bundle id verified), `cliclick` + `Tools/WalkKit`. **Her real-store app was RUNNING for
+the first half of this batch** (pid 23216 at `/Applications/Variorum.app`) — discriminated by PATH at
+every `pgrep`, never quit, never touched; she closed it herself part-way through. No Release build, no
+`/Applications` refresh. The fixture is the note built by hand in piece 1 (three blocks: a fanned first
+with two takes · a one-line second · an EMPTY third; the caret left in the third, so `block 3/3` is the
+note's current block) plus **A Scandal in Bohemia, 262 blocks**, for the long-note rows.
+
+| Row | The walk | What happened | Capture |
+|---|---|---|---|
+| **1** | the three-block fixture, current block = the third → Library → the note opens in Takes | **all three blocks on screen, the page at the TOP** — "Paragraph one." (⑂2), "Paragraph two is a single line.", the empty third, the ＋ new block door. Her image 1's page, answered | `05` |
+| **1** (the reveal still reveals) | the 262-block note → ⌘2, entering on its current block (21/262) | the board **went** there and revealed it at the **FOOT** of the page, with six earlier blocks fully visible above it — never hauled to the top. Row 8 of the last round survives R-Q1 | `07` |
+| **1** (the memory) | from there: ⌘1 (Write) → ⌘2 (Takes) | **the page came back PIXEL-IDENTICAL** — `08` and `09` are the same frame, block 21/262, same six blocks above. On a 262-block note | `08` · `09` |
+| **2** (the face) | the empty third block, in every capture above | **an empty line and the caret, no words.** The ⑂+ badge still marks the row (R103's substance) | `05` · `10` · `11` |
+| **2** (the door) | the ＋ new block door under the empty pane | its dashed frame's leading edge now sits **on the prose's left edge** (same x as "Paragraph one.", within ~1 pt); before, it stood 8 pt left | `05` · `10` · `11` |
+| **both** | style **stack** and style **carousel** | identical on both | `05` (stack) · `10` (carousel) |
+| **both** | voice **Study** and voice **Terminal** | identical in both | `05`/`10` (Study) · `11` (Terminal) |
+
+**Captures** (in `notes/plans/use-report-2026-09-12-screens/17p-a/`, gitignored):
+`01-after-takes-study-stack.png` · `02-after-takes-terminal-stack.png` ·
+`03-before-takes-terminal-stack.png` · `04-before-takes-study-stack.png` (piece 1's before/after) ·
+`05-walk-takes-study-stack-all-three.png` · `06-walk-left-scrolled.png` ·
+`07-walk-reveal-at-the-foot-not-the-top.png` · `08-walk-long-note-left-here.png` ·
+`09-walk-long-note-came-back-here.png` · `10-walk-carousel-style.png` ·
+`11-walk-terminal-voice.png`.
+
+**A walk note for the record:** the three stray empty `2026-09-12` notes in the dev store are mine —
+the first launch's swallowed ⌘N presses minted them before the app started responding (the recorded
+first-launch pitfall). Dev store only; harmless; not tidied so the ladder sees the same store I did.
+
+#### THE RED PIN — what I know, measured, and where I stopped
+
+**The pin:** `TakesArticleScrollTests.aLongNoteEnteredOnAFarBlockRevealsItWithoutHaulingItToTheTop`.
+It is the **guard** that the reveal still reveals (row 8's door surviving R-Q1) — not one of the two
+red-on-old pins for rows 1 and 2, both of which are green.
+
+**What it asserts:** a twelve-block board entered on its last block moves (offset > 0) and lands that
+block at the FOOT of the viewport, with everything above it on screen.
+
+**The history, from the logs:** green in `/tmp/g16.log`, `/tmp/g18.log`, `/tmp/g19.log` (8/2), and in
+two fifteen-suite runs `/tmp/nb2.log` and `/tmp/nb3.log` (**103 tests in 15 suites passed**). It then
+failed once inside the 38-suite closing run, and now fails **3/3 standalone** — on the
+byte-identical committed test file (`git checkout --` back to `a1f88379` reproduces it exactly), and
+also 3/3 with a longer occasion-based settle. So it is not the settle budget and not my last edit.
+
+**The failure's shape, twice measured:** `offset(article) → 0.0` (the board never moved at all) AND the
+last block's article pane is not found by its `pane:article|<variantID>` identifier. Both together say
+the composition under test is not the one the pin was written against.
+
+**The prime suspect, and it is a RECORDED class:** the Mac suites run in the DEV-STORE APP's own
+`UserDefaults.standard` (the test host IS `io.lduarte.Variorum.debug`), and `.incrementing` UUIDs mint
+the SAME post id in every world — the 17o batch-b ladder's **R1-7**, owned by Phase 12 in KnownIssues.
+The board reads three things from there per post (`TakesViewMemory`'s columns, the layout's slot
+heights, and `@AppStorage` density), and between the green runs and the red ones **I ran the walk**,
+which wrote real board memories into that same domain. `Queries.takesProjection`'s `fanStyle` is NOT
+implicated (it comes from the in-memory store's `setting` table, default `.stack`, fresh per test) —
+so the suspect is a per-post `UserDefaults` value, not the style setting.
+
+**Where I stopped, and why:** at the orchestrator's instruction (my context past the degradation line)
+I did not start another stabilization attempt. **The one-line check for whoever picks this up:** give
+the harness its own `UserDefaults` (`TakesViewModel(session:postID:defaults:)` already takes one, and
+`TakesBoardLayout` threads it) and see whether the pin goes green — that is R1-7's own proposed
+injection, and if it does, this pin is the evidence that row's owner was waiting for.
+
+#### CLOSING RUNS (this tree)
+
+- **Mac, ONE `xcodebuild test` from `App/Variorum/`** over the thirty-eight type names this batch
+  touched or leans on — the takes/pane family (`TakesArticleScrollTests` · `TakesEmptyBlockFaceTests` ·
+  `TakesRoomTests` · `TakesBoardTests` · `TakesArticleRenderTests` · `TakesBoardSoakTests` ·
+  `TakesCardHeightTests` · `TakesRailPagingTests` · `TakesEmptyStateTests` · `TakePaneMeasureTests` ·
+  `TakePaneDurabilityTests` · `TakesSlotDragTests` · `TakesBufferConvergenceTests` ·
+  `TakesDivideTests` · `FannedDefaultsBoardTests` · `WriteTakesPanelTests` · `TakesWordCountTests` ·
+  `TakesPresentationTests` · `LensesReorderTests` · `PaneSurfaceTests` · `PaneTextAuthorityTests` ·
+  `PanePublishDoorTests`), the landing/router family (`TakesLandingTests` · `CommandRouterTests` ·
+  `StatusCenterTests` · `MoveAndExecuteTests` · `LandingOffsetTests` ·
+  `CurrentBlockContinuityTests`) and the ten `Tutorial*` spine types →
+  **`✘ Test run with 251 tests in 38 suites failed after 111.418 seconds with 2 issues`** — the two
+  issues are the ONE red pin above, nothing else; thirty-eight suites for thirty-eight names, and the
+  log's single `skipped` match is the `appintentsmetadataprocessor` build warning, checked by line
+  (`/tmp/closing.log`, local).
+- **The same set minus the Tutorial spine, twice, before the walk: `✔ Test run with 103 tests in 15
+  suites passed`** (`/tmp/nb2.log`, `/tmp/nb3.log`) — the state the ladder should compare against.
+- **Core: UNTOUCHED** — `git diff --stat 2bfc8461..HEAD -- Sources/` is empty. Zero `Sync/`, zero
+  schema. `swift test` therefore not re-run; the round's baseline (1503/163) stands.
+- **`App/Variorum/Shared/`: UNTOUCHED** (empty diff), so the iOS build is not owed and was not run.
+
+#### THE ROWS, DISPOSITIONED
+
+| # | Her words (short) | Disposition |
+|---|---|---|
+| **1** | *"the page keeps trying to jump to the bottom and not show the text above… it should remember your scroll position"* | **FIXED** — pins: `TakesArticleScrollTests.aThreeBlockNoteEnteredOnItsLastBlockOpensAtTheTop` (red-on-old **86.0 where 0 is owed**) · `…aBoardLeftScrolledComesBackWhereSheLeftIt` (red-on-old **the remount came back at 0 where 120 was left**; now stated in block terms on a 60-block lazy note) · `…theRevealDecisionOnlyMovesForARowThatIsNotFullyOnScreen` · `…theBoardRevealsAnOffScreenSlotLeavesAVisibleOneAloneAndSpendsItOnce`. Walked: captures `05` · `07` · `08` · `09`. The reveal's guard pin is the RED one above |
+| **2** | *"the take page looks like an absolute mess now… the invitation to write a block is weird… The empty take — line kept instruction is not good"* | **FIXED** — pins: `TakesEmptyBlockFaceTests.anEmptyBlockShowsNoPlaceholderWords` (red-on-old **`["empty take — line kept"]` where `[]` is owed**) · `…theEmptyBlockStillHasItsOwnRow` (R103's surviving substance) · `…theNewBlockDoorsEdgeSitsOnTheProsesEdge` (red-on-old **door 210.0 vs prose 218.0, off by 8.0**). Walked: `05` · `10` · `11`, both voices, both styles |
+
+**Nothing DISMISSED AS HOLLOW; nothing DEFERRED.** Piece 1's before/after is the evidence that her
+*"return to what it used to look like"* had ONE cause for row 1 and none for row 2 — the face and the
+door were unchanged since `f402ccce` and are ruled changes, not regressions.
+
+#### WHAT THE LETTER'S CLOSEOUT INHERITS
+
+- **CANON NOTE OWED (drafted for the orchestrator to apply at 17p's close).** **AppSpec §12**, the
+  takes-presentations line: after *"the changing-block wash behind a default-on toggle (R13)"*, R103's
+  face retires — suggested wording: *"…and an empty block in Takes is an empty LINE (17p batch a, her
+  R-Q2 — this supersedes the FACE of Phase 13 batch 9's R103, whose substance stands: the kept line,
+  its pane and its ⑂+ badge)."* **`notes/plans/phase-13-ui-design.md`'s R103** (line ~1662) should gain
+  a dated sentence that its "the kept line says what it is" half was superseded on 2026-09-12. Nothing
+  else in canon moves: the article's scroll memory is a LOCAL session value in `scrollAnchors`' class,
+  never synced, never schema.
+- **No new QUESTIONS entry** (#102 still free).
+- **ONE observation for the J-list, hers if she wants it.** R-Q1 keeps BOTH halves — restore, then
+  reveal-if-off-screen — so on a LONG note whose current block is far from where she left the page,
+  the restore puts her back and the entry landing then reveals the current block, moving the page once
+  more. On the notes she reported (two or three blocks) nothing moves at all. Built exactly as ruled;
+  if she wants the restore to suppress the entry landing, it is one condition.
+- **Mobile parity:** nothing in `Shared/` moved, so the phone inherits nothing by construction. Its
+  own version of R-Q1 is already the mobile session's (R-Q9, PL-22); this batch's shape — remember the
+  BLOCK at the top of the page, never a pixel offset, and reveal minimally — is the design note that
+  session should read first, and the two measurements on `TakesBoardLayout.ArticlePlace` are why.
+- **13u coordination:** this batch touched no 13u item's code. It hands 13u2's restyle continuation
+  three additive seams on a surface it will re-dress: `TakesBoardLayout.revealDecision` /
+  `ArticlePlace`, `TakesBoardView.articleTextLeadingInset`, and two DEBUG render oracles
+  (`TakesCellChrome`, `TakesArticleDoorProbe`) — the in-process way to pin a hosted SwiftUI face now
+  that the accessibility road is measured shut.
+
+**Batch a CLOSED at this commit.** Everything is committed and pushed; no revert is in flight; the tree
+is clean. The ONE red pin is named, traced and handed to the ladder.
