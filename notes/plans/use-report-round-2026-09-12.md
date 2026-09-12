@@ -4378,3 +4378,331 @@ one visible change is the PHONE's picker words, pinned on the simulator); nothin
 **#103's RULING (R-Q17) left exactly as written** — I added only the clause the question never
 carried, and the build of her ruling is 17q's. Batch 2's findings are untouched except that R1-7's
 hoist moved the phone's `sortWord` body, which is the fix.
+
+---
+
+### 18h LADDER — ROUND 2 FINDINGS (opus-reviewer)
+
+*(A FRESH cold reviewer, zero implementation context. Round 2 is the re-review of round 1's fixes
+`e526f557..4159a5b6` — batch 2's ten (`1667a8cb` · `33407d64` (SCHEMA v1_17) · `f714ca73` ·
+`62f8870e` · `6066c6f9` · `7a5f7da6` · `b403b879` · `b40cab03` · `bfe8d75c`) and batch 1's seven
+(`ccb3e69b` · `dd78de17` · `a1728f2b` · `a4847522` · `38307a68` · `821c6ecd` · `4159a5b6`) — read
+against the whole letter `2d43df7c^..4159a5b6` for what they touched. Anchor: the recorded round-1
+findings, both implementers' responses and the orchestrator's arbitration, read in full before the
+code. Tree `6c4d59de` == `origin/main`, notes-only after `4159a5b6`; zero `/Applications` instances
+before, during and after.*
+
+*Scope check first, per the reviewer's own contract: the diff touches **no** editor seam
+(`EditorTextView` / `PaneTextAuthority` / `PaneMeasurement` / `BlockRangeIndex` all diff-empty over
+the whole letter), **no** custody or keychain code, **nothing** in `Sources/VariorumCore/Sync/` or
+`Server/` (verified by `git diff --stat` over both paths — empty), and changes **no** default's
+meaning (`searchCatalog()` with no arguments still reproduces the shipped
+`COALESCE(last_touched_at, created_at) DESC, id DESC`, pinned; `limitPerKind` gained `nil` but kept
+its 20). `lockstepVersion` is still **8** (`SyncSchema.swift:101`). Opus is the right seat; no Fable
+re-spawn is owed.*
+
+**Counts: 0 BLOCKER · 1 MAJOR · 5 MINOR · 6 NIT.**
+
+Verification runs I made myself (not the record's): core `swift test` → **`1545 tests in 167 suites
+passed`** (60.6 s — the recorded closing number, reproduced on this tree); Mac
+`-only-testing:` `LibraryDayFilterTests` · `LibrarySortMenuTests` · `MastheadStampTests` ·
+`MastheadLayoutTests` · `LibraryRowAlignmentTests` · `MastheadTagDoorTests` → **`46 tests in 6
+suites passed`** (`DerivedData/review18h-r2`). Two external facts checked through one Sonnet lookup
+(Apple docs): `DateFormatter` concurrent `string(from:)` and SwiftUI's `\.calendar` — both cited
+where they bear.
+
+#### Findings, severity-ranked
+
+**R2-1 · MAJOR · batch 2 (R1-11's fix) · `LibraryCatalogModel.swift:241-244` +
+`LibraryCatalogView.swift:219` — clearing the day on a mode change leaves the LISTING narrowed by a
+day the header no longer shows.**
+
+*Mechanism, traced:* `modeChanged()` sets `editedOn = nil` when the mode leaves the catalog, and it
+is the only thing `.onChange(of: model.mode)` calls. **Nothing re-runs `search()` on a mode change** —
+I grepped every `model.search()` call site in the view (`:211` the one-shot `.task`, `:261` rename,
+`:278` the delete signal, `:391` the query field, `:396` the scope picker, `:425/:429` the sort door,
+`:437/:441` the day field, `:784` archive) and the mode picker's binding is `set: { model.mode = $0 }`
+with no task; `.task(id: model.mode)` (`:214`) calls only `refreshNoteCards()`. So: arm a day in List
+mode (`hits` = that day's notes) → switch to Timeline (`editedOn` = nil, `hits` untouched) → switch
+back to List. The header now reads `on day…` (closed), the scope picker is live again, and the list
+is still the day's notes with **nothing on screen saying so** — the invisible-state hazard the fix's
+own doc comment names, moved one step down. Any later keystroke, scope pick or sort pick repairs it
+silently, which is what makes it read as "notes went missing" rather than as a filter.
+
+This is a REGRESSION of the fix, not of the letter: before `b40cab03` the day survived the round trip
+and `hits` agreed with it (the complaint was only the dead scope picker, which the reviewer's own
+one-line alternative — `.disabled(model.showsCatalogControls && model.editedOn != nil)` — would have
+closed without touching state).
+
+*Fix:* make the mode change re-read when it cleared something — `func modeChanged() async` that
+`await search()`s after clearing (the view already spawns tasks for every other listing change), or
+clear the day on ENTERING the catalog rather than on leaving, or take the reviewer's original
+`.disabled(...)` line and leave `editedOn` alone. *Red on old:* a model pin —
+`setEditedOn(day); await search(); mode = .timeline; modeChanged(); mode = .list; modeChanged()` and
+assert the notes the day excluded are listed again; fails on this tree (`hits` is unchanged).
+
+**R2-2 · MINOR · batch 2 (R1-4's fix) · `LibraryCatalogModel.swift:346-363` +
+`LibraryCatalogView.swift:616-619` — `truncated` is a WHOLE-listing flag read by a NOTES-ONLY body,
+so the Notes mode can say "showing the first 40" over a complete list of notes.**
+
+*Mechanism, traced:* `capped(_:to:)` counts per kind but collapses to ONE `over` boolean, and
+`search()` stores it as `truncated` (`:324`). `notesBody` draws only `hits.filter { $0.kind == .post }`
+(`:601`) and then `if model.truncated { LibraryTruncationLine(...) }` (`:616`). With `scope == .all`
+(the default) in Notes mode, a books or blocks arm that came back with 41 rows sets the flag even
+though every NOTE is drawn — so the line asserts a truncation of a listing the body does not show.
+Reachable two ways: >40 live books with no query, or >40 matching named-block/pool-scrap hits under
+any typed query (the block arm runs whenever the query is non-empty, `ShelfQueries.swift:479`). The
+List mode is honest by comparison (its truncated section is on screen); the Notes mode is not.
+
+*Fix:* have `capped` return the truncation PER KIND (or a `truncatedKinds: Set<Kind>`), and let each
+body read its own — `notesBody` the post kind, `listBody` any. *Red on old:* a model pin — 41 books
++ 3 notes, `mode = .notes`, `await search()`, assert the notes body's truncation is false while the
+list body's is true; fails on this tree (one flag, true for both).
+
+**R2-3 · MINOR · batch 2 (R1-4's fix) · `LibraryCatalogModel.swift:316` ·
+`LibraryCatalogView.swift:866` · `ShelfQueries.swift:462` — lifting the cap for the day un-bounded
+three things that were bounded by it, and two of them carry docs that still say they are bounded.**
+
+*Mechanism, traced:* `let cap: Int? = day == nil ? Self.pageSize + 1 : nil` makes the day's answer
+unbounded — correct for the ANSWER (the ruling) — but everything downstream of `hits` inherited the
+40-row bound and nothing was re-reasoned: (1) `loadTagChips(for: postIDs)` runs for every hit in
+BOTH modes; (2) `loadNoteCards(for: postIDs)` in Notes mode runs `NoteCards.load` (three statements,
+one of them `Queries.smartBookMembership` per smart book) over the whole set — and that function's
+own doc (`LibraryCatalogView.swift:866`) still reads *"∝ books × rows on screen and FLAT in corpus …
+A 200-row page costs 0.15 ms"*, a claim whose "rows on screen" premise the cap lift removed; (3) the
+eager `DisplayTitle.note` map in `searchCatalog` whose comment (`ShelfQueries.swift:462`) says *"this
+row-set is bounded by `limitPerKind`, so it is computed eagerly rather than lazily"* — nil is not a
+bound. All three re-run per keystroke while a day is armed. **Not a P1 breach as I can measure it**:
+the cost is ∝ the DAY's notes, not the corpus, and a day's notes are small in her store (her own
+walk capture `04` says "30-odd"). It is the docs that are now false and the reasoning that is now
+missing.
+
+*Fix:* either bound the derived reads to the drawn window (the `observeLibrary` discipline the same
+model cites elsewhere), or — cheaper and honest — correct the two doc claims to say what now bounds
+them (the day's own predicate) and state the accepted ceiling. *No red-on-old pin owed* (a
+degradation + two falsified doc claims, R1-5's class); the evidence is the two sentences above and
+the `cap == nil` branch.
+
+**R2-4 · MINOR · batch 1 (R1-7's fix) · `App/Variorum/Shared/LibrarySortWords.swift:50` +
+`VariorumMobile/Features/Shell/MobileLibraryViewModel.swift:88` — the hoist changed an UNRULED,
+phone-only picker string, against the hoisted file's own stated limit.**
+
+*Mechanism, traced:* the arbitration's warrant for changing the phone's words is *"her R-Q8 names
+those four words herself"* — **edited · created · date · title**. `.lastMajorRevision` is not among
+them, the Mac does not offer it (`LibrarySortFace.offered`, `LibraryTimeFace.swift:45`), and the
+phone does (`sortOptions`, `:77`). So the one case only ONE platform shows had its shipped, live
+string changed from *"last meaningful edit"* — AppSpec §10's own vocabulary for
+`last_major_revision_at` (*"meaningful edits only"*) — to *"revised"*, on nobody's ruling. The file
+that made the change states the rule that forbids it four lines earlier: *"What stays platform-side
+is copy no other platform says"* (`LibrarySortWords.swift:26-30`) — a word no other platform says is
+exactly what this is. There was no drift to retire on that case: one table, one consumer.
+
+*Fix:* keep her four in `Shared/` and leave `.lastMajorRevision`'s word on the phone (or restore
+*"last meaningful edit"* in the shared table). *Disposition, not a pin:* the phone's own vocabulary
+pin (`MobileLibraryTests.theSortVocabularyIsPinned`) is the assertion either way — it was edited to
+match the change, so it will be edited back. If the shipped word is kept, it is a phone-visible
+product change made from a Mac letter and belongs in PL-22 as a change, not as a note.
+
+**R2-5 · MINOR · batch 1 (R1-16 + R1-7 together) · `Timeline.swift:194` +
+`MobileLibraryViewModel.swift:96` — the letter gave the phone a WORD for `.title` and, in the same
+letter, made the listing the phone uses TRAP on it.**
+
+*Mechanism, traced:* `Queries.library` now `precondition(sort != .title, …)` — live in release
+builds. The phone's listing is `observeLibrary(sort: sort, …)` → `Queries.library`
+(`MobileLibraryViewModel.swift:106`), and its `setSort(_ next: Queries.LibrarySort)` (`:96`) accepts
+any case with no guard; only `sortOptions` keeps `.title` out today. Meanwhile R1-7 gave `.title` a
+word in the shared table *specifically so the phone's picker can say it*, and this letter's own
+parity line says *"the phone owes a version of both"* (the sort included). So the very next mobile
+touch that adds `.title` to `sortOptions` — the touch the parity row invites — turns a picker tap
+into a process trap rather than a degraded order. That is precisely R1-16's own stated worry ("a
+later batch adopts the reachable spelling innocently"), left open on the platform the same letter
+pointed at it.
+
+*Fix:* one line on the phone — `setSort` refuses (or clamps) a sort `observeLibrary` cannot serve —
+or make the core guard a documented `throws`/clamp for the observation path. *Red on old:* a mobile
+pin — `model.setSort(.title)` then `#expect(model.sort != .title)`; fails on this tree.
+
+**R2-6 · MINOR · batch 2 (R1-8 + the calendar ruling) · `LibraryDayFilter.swift:177-187` — the day
+door's own `DatePicker` still renders in the SYSTEM calendar, which is the one screen the "one
+calendar per letter" ruling set out to make single-calendar.**
+
+*Mechanism, traced:* R1-8 named the filter's calendar (`LibraryDayFace.calendar` →
+`JournalDay.storeCalendar`, Gregorian in her zone) and `4159a5b6` moved the row STAMPS onto the same
+one, with the stated reason *"a non-Gregorian user would have read two calendars on one screen"*.
+The `DatePicker` at `:177` carries no `.environment(\.calendar, calendar)` (nor `\.timeZone`), so it
+formats through SwiftUI's `EnvironmentValues.calendar` — Apple documents that key as *"The current
+calendar that views should use when handling dates"* and lists it in the same topic group as
+`DatePicker` and `datePickerStyle(_:)`; unoverridden it tracks the user's Language & Region calendar.
+*(Apple's reference does not spell out "DatePicker consults this" in those words — flagging the
+citation's edge honestly — but the environment key exists for exactly this and the override
+`.environment(\.calendar, …)` is the documented way to force a non-default one.)* Consequence under
+a Hebrew or Japanese system calendar: the field shows that calendar's digits while the label beside
+it (`LibraryDayFace.openLabel`, Gregorian) and every row stamp read Gregorian. The FILTER still works
+— the binding converts through the named calendar (`:157`, `:165`) — so this is a display
+disagreement, not a wrong answer, on the one control that draws a calendar.
+
+*Fix:* one modifier — `.environment(\.calendar, calendar)` on the `DatePicker` (and `\.timeZone` for
+symmetry). *No crisp red-on-old pin* (a test cannot set `Calendar.current`, and the modifier is not
+observable from outside the view) — the batch's own idiom applies: demonstrate the trap on the road
+not taken, as `theFiltersCalendarIsGregorianAndKeepsHerTimeZone` already does, and let the walk carry
+the rest.
+
+**R2-7 · NIT · batch 2 (R1-12's fix) · `VoiceControls.swift:134-141`, used at
+`LibraryCatalogView.swift:408` — `help(ifPresent:)` trades an empty tooltip string for a
+`_ConditionalContent` identity flip on the scope Picker.** The `@ViewBuilder` `if/else` returns two
+different structural branches, so arming or clearing a day changes the Picker's view identity and
+SwiftUI tears the segmented control down and rebuilds it rather than updating it. Nothing of ours
+holds state inside it, so the cost is a rebuild and a lost transition, not a bug — but the shape is
+the conditional-modifier hazard, and the F-0 complaint (a `cond ? "" : "…"` string-as-rule in a body)
+is equally answered by giving the picker a MEANINGFUL tooltip in both states ("Scope the listing to
+books, notes or blocks" / the day's line), which keeps one identity.
+
+**R2-8 · NIT · batch 2 (R1-8's fix) · `DayBounds.swift:49` — the type still defaults to
+`Calendar = .current`,** which is the exact default R1-8 named as the trap ("every site took
+`Calendar.current` whole"). Both production constructions pass `LibraryDayFace.calendar` explicitly
+(`LibraryCatalogModel.swift:308`) and every pin names its calendar, so nothing is wrong today; but a
+type whose doc now explains why `Calendar.current` is unsafe for day keys should not hand it out as
+the default. Either drop the default (make it required, as `TimeStampFace`'s callers already do by
+convention) or default it to `JournalDay.storeCalendar` beside the rest.
+
+**R2-9 · NIT · batch 1 (R1-14's fix) · `MastheadStamp.swift:71` +
+`PostDetailView.swift:894-916` — the four keyed oracles are written on `.onAppear` and cleared only
+by a pin.** `flipStamp[postID] = { flip() }` retains a closure per note ever mounted, and
+`stampShown`/`stampEditedAt`/`stampFrames` grow the same way; `resetStamp(_:)` exists but is called
+only from the test helper. DEBUG-only, so no shipped consequence — but the keying fix's own reason
+(a stale report satisfying a pin) survives in the other direction: a `stampShown[postID]` left by an
+earlier mount answers a later pin that forgot to reset. A `.onDisappear { PostDetailOracle
+.resetStamp(postID) }` beside the `.onAppear` closes it in one line.
+
+**R2-10 · NIT · batch 1 · `LibraryCatalogModel.swift:289-296` — the fallback doc claims more than
+the code does.** *"A remembered value the app does not recognise … reads as the shipped default
+rather than leaving the list in a shape no menu row matches."* A stored `"last_major_revision"` IS
+recognised by `LibrarySort(rawValue:)` and is NOT offered by `LibrarySortFace.offered`, so it reads
+back, the door label says *"revised · newest first"* and no menu row carries the ✓ — exactly the
+shape the sentence promises cannot happen. Only a hand-edited plist reaches it. Either validate
+against `LibrarySortFace.offered` on read, or narrow the sentence to what it means.
+
+**R2-11 · NIT · batch 1 (R1-5's record) · the fix's own doc,
+`TimeStampFace.swift:209-245`, and the batch-1 fix note's *"the gap is the lock and the hash"* —
+falsifiable, and the fix is better than the record says.** Measured on this machine (`swiftc -O`,
+200k iterations of the landed shapes): building a formatter per call **71.8 µs**; the cached path
+end-to-end **0.54 µs** (the lock + hash is **0.15 µs** of it, and `JournalDay.storeCalendar`'s
+per-call construction — which the calendar ruling added under it — is **0.08 µs**). So the lock and
+the hash cannot account for a 110× → 19× narrowing; whatever the re-measure's harness was paying, it
+was not that. Nothing to change in the code; the doc's causal sentence should not stand as the
+record's explanation.
+
+**R2-12 · NIT · F-0 residue after R1-6 · `LibraryCatalogView.swift:869` and `:950`,
+`LibraryCatalogModel.swift` (529 lines) — the extraction is real and verified, and it left two
+database readers behind.** I checked the move byte-for-byte (every line removed from the view
+reappears in the model; the only additions are the header and six imports — so "no test changed" is
+a true parity proof) and the view is down from 1,509 to **1,101** lines. What did not go with the
+model: `enum NoteCards` and `enum TagChips`, ~110 lines of `Database` reading inside a view file,
+which is the same concern-mixing the extraction was for; and the model itself now mixes listing
+state, the selection algebra, the info panel's subject, the bounded reads and four tag-editing
+operations. Named rather than filed: the next Library touch moves the two readers beside the model
+(or into `Queries`), and the tag acts are the model's own next split.
+
+#### Considered and cleared (traced, and measured or run where it mattered)
+
+- **R1-1's turnaround is correct AND cheap, and I checked both halves myself.** The uncorrelated
+  `id IN (SELECT cb.container_id …)` is the same SET as the correlated `EXISTS` (the correlation
+  became the subquery's projection; `cb.deleted_at IS NULL` still fences I2's live ownership), which
+  is why the five correctness pins rode unmodified — that is the real proof, not the prose. The plan
+  pin now asserts the DRIVER (`idx_commit_created`) and the ABSENCE of `CORRELATED`, which is the
+  shape claim the old pin could not make, and the step pin's re-fixture (the searched day matches
+  NOTHING, blocks-per-note swept 1 → 15) is exactly the arm the old fixture short-circuited past. I
+  re-ran both green. The populated-day path is covered too: the plan pin's own fixture has a
+  savepoint ON the searched day, so the `LIST SUBQUERY` shape is what is pinned, not the empty case.
+- **v1_17 is a schema commit of its own, ahead of the query that uses it** (`33407d64` touches only
+  `Migrations.swift` + `MigrationTests.swift`; `f714ca73` is the next commit) — CLAUDE.md's rule
+  followed to the letter, and `theDaySearchIndexArrivesForAnOlderStore` proves a v1_16 store gains
+  exactly one index. Not a §12 lockstep event (the mirrors carry no indexes beyond the PK by design,
+  SyncSpec §2), and the marker is still 8 — I read `SyncSchema.swift:101` rather than trusting it.
+- **`Sync/`, `Server/` and the editor seam are diff-empty across the WHOLE letter**, not just the
+  fixes. Zero writes, zero new `setting` key, nothing stored, nothing copied, nothing forensic.
+- **R1-3's two halves are honest and pinned.** `dayForEmptyAnswer` gates the day's sentence on the
+  scope, the wording names a typed query and trims it, and `setEditedOn` moves a books/blocks scope
+  to notes so the gated case is unreachable rather than merely guarded. #104 carries the amendment
+  and says the arm reversed its own recommendation, which is the right way to record a reversal.
+- **R1-9's rewrite genuinely bites.** `openOnToday()` is the Button's own closure and the pin calls
+  nothing else; change the door to open on yesterday and it fails. The old binding-driven version
+  could not.
+- **R1-5's cache is safe as built.** The key carries template · locale identifier · calendar
+  identifier · time-zone identifier; the dictionary is behind an `NSLock` and the formatter formats
+  outside it — Apple documents `DateFormatter` as thread-safe for non-mutating use on macOS 10.9+ in
+  64-bit modern behaviour (*"In macOS 10.9 and later NSDateFormatter is thread safe so long as you
+  are using the modern behavior in a 64-bit app"*), which this is. The cache's own new failure mode
+  (a key that forgets part of the shape) is pinned across four shapes including 23:30 UTC being
+  tomorrow in Tokyo.
+- **R1-14's keying is complete.** All four oracles (`stampShown`, `stampEditedAt`, `flipStamp`,
+  `stampFrames`) are per-note, the probe slot carries the id, and the three mounted pins name their
+  note; the one-window readers are labelled as such.
+- **R1-16's precondition does not over-fire** — I ran `theStampListingStillServesEveryStampSort`; and
+  the pin's own discovery (that `TimelineItem.stamp` is a DAY key under `.entryDate`, true since
+  Phase 8) is recorded rather than papered over.
+- **R1-10's landing is the right size.** The doc now says the created-at link orders by the INSTANT,
+  names the corner with its example, records `date(created_at,'localtime')` as the available fix with
+  the measurement that says it works and the two reasons it was not taken, and records that `substr`
+  is NOT a fix. A doc correction with its own falsification attached.
+- **R1-13 is properly retired** — `showsSortDoor` is gone, not aliased, and the three assertions in
+  `LibrarySortMenuTests` were renamed in the same commit.
+- **The record's own honesty.** R-4's falsified measurement is kept verbatim under a warning with the
+  corrected table beside it, the garbage commit message is recorded and not amended, and the R1-3
+  fix's write-then-revert-then-pin sequence is announced. That is the standard this ladder is for.
+- **My own reproduction of the closing runs:** core 1545/167 and six Mac suites 46/6, both green on
+  this tree.
+
+#### Review foci (§12), addressed
+
+- **F-0 — no god brain, no god file.** *Materially improved and verified:* R1-6's extraction is a
+  byte-for-byte move (I diffed it line by line), the view is 1,509 → 1,101 lines, and every new rule
+  of this letter has a small home with a unit pin (`TimeStampFace`, `DayBounds`, `JournalDay
+  .storeCalendar`, `LibrarySortFace`, `LibraryDayFace`, `LibrarySortWords`, `LibraryCopy`). R1-7
+  retired a real cross-platform duplication; R1-15 and R1-12 pulled a number and a string out of
+  view bodies. *Not clean:* the two database readers left in the view file and the 529-line model's
+  mixed concerns (**R2-12**), the shared word table overreaching into copy only one platform says
+  (**R2-4**), and R1-12's cure carrying a small identity hazard (**R2-7**).
+- **F-5 — 18h's own foci**, item by item after the fixes: *the sort is a PARAMETER of the one catalog
+  query* — **clean** (`catalogPostsSQL`, one builder). *The title order is a `LibrarySort` case* —
+  **clean**, and R1-16 fenced the one listing that could not carry it (with **R2-5** as the fence's
+  own loose end). *No stored stamp anywhere new* — **clean**. *ONE pure wording brain used by every
+  row and the masthead* — **clean**, and the calendar ruling closed the two-calendars-on-one-screen
+  hole it opened, except on the control that draws a calendar (**R2-6**). *The masthead stamp is a
+  third subview of the existing width-aware layout* — **clean**, parity re-proved by my own run of
+  the untouched `MastheadLayoutTests` / `MastheadTagDoorTests`. *The day search is one query arm with
+  its plan pinned, its index its own commit* — **now clean, and this is the fix the ladder existed
+  for**: the arm is uncorrelated, the plan pin asserts the driver, the step pin runs the arm it
+  measures, and v1_17 landed alone ahead of the query. The cap lift that rode with it is where
+  **R2-2** and **R2-3** land.
+
+#### CLEAN BILL — checked and found solid
+
+1. **The day search's cost shape after R1-1** — the plan (driver `idx_commit_created`, no
+   `CORRELATED`, no `SCAN commit_point`), the step pin over the arm that now actually runs, and the
+   set-identity argument confirmed by the five correctness pins riding unmodified.
+2. **v1_17's discipline** — its own commit, ahead of its query, exactly one index added to an older
+   store, no lockstep event, marker 8 read from the source.
+3. **The extraction's parity** — verified line-for-line, not taken on the record's word: zero body
+   changes, zero test edits.
+4. **The union's answer, unchanged by the turnaround** — the Monday/Tuesday pair, the savepoint
+   rescue, the cross-note correlation, the live-placement fence, the half-open boundary, and
+   archived/deleted exclusion all still pinned through the real operations on a travelling clock.
+5. **`DayBounds` and `JournalDay.storeCalendar`** — the noon anchor, the half-open window, 23-/25-hour
+   days, São Paulo's missing midnight, the 365-day round trip, and the Hebrew trap demonstrated on
+   the road no longer taken. The removal of `init(containing:)` is the right call and its proof pin
+   was re-pointed rather than deleted.
+6. **The cap's `+1` probe** — exact at 40 and 41, and the day's answer whole at 45; `LibraryCopy`
+   holds all three listing sentences so no wording lives in a body.
+7. **The formatter cache** — key, lock, documented thread-safety, and a pin for the failure only a
+   cache can have. Measured 71.8 µs → 0.54 µs per call here.
+8. **Sync-shape and canon** — no writes, no `Sync/`, no `Server/`, no `setting` seed, no editor seam,
+   no denormalization, nothing forensic; marker 8; QUESTIONS #103 (with R-Q17's ruling and R1-17's
+   clause) and #104 (with R1-3(b)'s amendment) both filed as recorded.
+9. **The recorded closing runs reproduce** — core `1545 tests in 167 suites`, Mac `46 tests in 6
+   suites`, both run by me on this tree.
+
+**One obligation, not a finding:** the arbitration promises a `notes/KnownIssuesAndTechDebt.md` row
+for the **`ANALYZE` absence** (a statistics-dependent plan on a per-keystroke query, owner 12) "at
+the round's close" — it is not in the file yet, and the round is not closed. Named here so the close
+does not lose it.
