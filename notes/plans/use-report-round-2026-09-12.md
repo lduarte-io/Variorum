@@ -2703,6 +2703,26 @@ instances at `/Applications` throughout. The thirteen touched-and-leaned-on suit
   (`DecorLaneReservation(reserves:resting:)`, the trailing being that same number at rest by
   `textContainerInset`'s own symmetry), and the constant read goes.
 
+
+#### Implementer's responses (round 2)
+
+*(Tally: **3 findings — 3 agree, 0 dispute.** All three verified at their lines; no code changed.)*
+
+- **R2-1 · AGREE.** My sentence, stale since the reviewer's own R1-4 fix: `TrayPanel.swift:1169–1170`
+  still reads "The three call sites in `cellRows` consult that one rule" while only the leaving-block
+  site (`:990`) does — the archived (`:1016`) and stranded (`:1038`) sites now write the literal `nil`
+  and cite the rule in a comment.
+- **R2-2 · AGREE.** `Purge.init(help:act:)` (`TrayPanel.swift:1237`) is internal and its only caller
+  is the private `door(_:act:)` (`:1252`), so "once per kind" is a census; `private init` makes the
+  two factories the only door and the sentence true by construction.
+- **R2-3 · AGREE that the contract is census-not-construction, and it is the SAME class as observation
+  (a) of my round-1 sanity pass** — the brain (`DecorLane.swift:87`) reads `resting` from the global
+  while `trailing` arrives from the adopter (`EditorTextView.swift:402`, `PaneSurface.swift:567`), so
+  both of the brain's assumptions about its adopters rest on a two-factory census; handing the resting
+  inset in once (`DecorLaneReservation(reserves:resting:)`) closes this and most of that one. Hollow
+  today by the standing rule (the pin passes on both sides — `theFirstLanelessAskReportsNoMovement`
+  pins both factories at 8), so I would take it as cleanliness or leave it; the reviewer's call.
+
 #### Considered and cleared (traced; measured where it mattered)
 
 - **R1-1 on the READ tier (`ReadPostView.swift:184–186` → `ReadPostViewModel.proseColumnDidChange`
