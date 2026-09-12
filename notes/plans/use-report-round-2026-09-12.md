@@ -2704,25 +2704,6 @@ instances at `/Applications` throughout. The thirteen touched-and-leaned-on suit
   `textContainerInset`'s own symmetry), and the constant read goes.
 
 
-#### Implementer's responses (round 2)
-
-*(Tally: **3 findings — 3 agree, 0 dispute.** All three verified at their lines; no code changed.)*
-
-- **R2-1 · AGREE.** My sentence, stale since the reviewer's own R1-4 fix: `TrayPanel.swift:1169–1170`
-  still reads "The three call sites in `cellRows` consult that one rule" while only the leaving-block
-  site (`:990`) does — the archived (`:1016`) and stranded (`:1038`) sites now write the literal `nil`
-  and cite the rule in a comment.
-- **R2-2 · AGREE.** `Purge.init(help:act:)` (`TrayPanel.swift:1237`) is internal and its only caller
-  is the private `door(_:act:)` (`:1252`), so "once per kind" is a census; `private init` makes the
-  two factories the only door and the sentence true by construction.
-- **R2-3 · AGREE that the contract is census-not-construction, and it is the SAME class as observation
-  (a) of my round-1 sanity pass** — the brain (`DecorLane.swift:87`) reads `resting` from the global
-  while `trailing` arrives from the adopter (`EditorTextView.swift:402`, `PaneSurface.swift:567`), so
-  both of the brain's assumptions about its adopters rest on a two-factory census; handing the resting
-  inset in once (`DecorLaneReservation(reserves:resting:)`) closes this and most of that one. Hollow
-  today by the standing rule (the pin passes on both sides — `theFirstLanelessAskReportsNoMovement`
-  pins both factories at 8), so I would take it as cleanliness or leave it; the reviewer's call.
-
 #### Considered and cleared (traced; measured where it mattered)
 
 - **R1-1 on the READ tier (`ReadPostView.swift:184–186` → `ReadPostViewModel.proseColumnDidChange`
@@ -2826,3 +2807,68 @@ instances at `/Applications` throughout. The thirteen touched-and-leaned-on suit
 **Round-2 tally: 0 BLOCKER · 0 MAJOR · 0 MINOR · 3 NIT (R2-1 · R2-2 · R2-3).** No new BLOCKER/MAJOR, so
 under the ladder's rule no round 3 is owed; the three NITs go to the implementer for agree/dispute and
 return here for the final word and the fix pass (each a sentence or a keyword; no pin owed).
+
+#### Implementer's responses (round 2)
+
+*(Tally: **3 findings — 3 agree, 0 dispute.** All three verified at their lines; no code changed.)*
+
+- **R2-1 · AGREE.** My sentence, stale since the reviewer's own R1-4 fix: `TrayPanel.swift:1169–1170`
+  still reads "The three call sites in `cellRows` consult that one rule" while only the leaving-block
+  site (`:990`) does — the archived (`:1016`) and stranded (`:1038`) sites now write the literal `nil`
+  and cite the rule in a comment.
+- **R2-2 · AGREE.** `Purge.init(help:act:)` (`TrayPanel.swift:1237`) is internal and its only caller
+  is the private `door(_:act:)` (`:1252`), so "once per kind" is a census; `private init` makes the
+  two factories the only door and the sentence true by construction.
+- **R2-3 · AGREE that the contract is census-not-construction, and it is the SAME class as observation
+  (a) of my round-1 sanity pass** — the brain (`DecorLane.swift:87`) reads `resting` from the global
+  while `trailing` arrives from the adopter (`EditorTextView.swift:402`, `PaneSurface.swift:567`), so
+  both of the brain's assumptions about its adopters rest on a two-factory census; handing the resting
+  inset in once (`DecorLaneReservation(reserves:resting:)`) closes this and most of that one. Hollow
+  today by the standing rule (the pin passes on both sides — `theFirstLanelessAskReportsNoMovement`
+  pins both factories at 8), so I would take it as cleanliness or leave it; the reviewer's call.
+
+#### Reviewer's dispositions + fixes (round 2)
+
+*(The cross-model flow's final word, made in the round-2 reviewer's own session after the implementer's
+3/3 agree pass (`51f2da42`). One record note first: the responses had been inserted INSIDE this round's
+findings section — between the findings and the considered-and-cleared list — and were moved here
+byte-for-byte, beneath the whole section, exactly as round 1's final word moved the misplaced sanity
+pass; nothing else touched. Commits per finding, plain messages, pushed; `Sources/`,
+`App/Variorum/Shared/`, `Sync/` and the editor seam untouched — the two fixes are one doc sentence and
+one access keyword in `TrayPanel.swift`. Zero app instances at `/Applications` at every run.)*
+
+- **R2-1 · NIT · CONFIRMED-FIXED — `d5602ae7`.** The `row(...)` builder's `deleteNow` doc now says
+  which site consults the rule (the leaving-block site) and which two write the cited literal nil (the
+  archived and stranded sites), and why — R1-4's own letter. No pin: a sentence.
+- **R2-2 · NIT · CONFIRMED-FIXED — `c3918e48`.** `TrayRowVerbs.Purge.init(help:act:)` is `private`;
+  `.block(act:)` / `.take(act:)` over the private `door(_:act:)` are the only door in, so "the sentence
+  lives once per kind" holds by construction. Every existing site compiles unchanged (both row sites and
+  the sentence pin use the factories). No pin: nothing observable.
+- **R2-3 · NIT · DISMISSED on re-check — my own finding, and the implementer's "cleanliness or leave
+  it" taken as leave it, for a reason the finding did not weigh.** The one-parameter shape it proposed —
+  the adopter hands the brain its resting inset and the constant read goes — would have the brain
+  compute the LANED leading as `resting + commentLane` itself: a second copy of F-3's ONE decision
+  (`EditorTypography.inlineInset(needsLane:)`), the exact drift class the focus forbids. Keeping the
+  decision whole means the brain consults it for BOTH arms, and its `false` arm IS the resting inset —
+  so the "constant read" is the decision consulted, not a second rule; the `trailing` the adopters pass
+  is that same constant by name. A future contained adopter at another inset would need the DECISION to
+  take an inset parameter, a change with no consumer today. Hollow by the standing rule
+  (`theFirstLanelessAskReportsNoMovement` holds both factories at 8 on both sides of any such change)
+  and, as shaped, a net loss for F-3 — recorded, not fixed. The brain's doc already states the
+  one-writer contract and the census behind it; the implementer's round-1 observation (a) stays closed
+  by `1faf6b8b`'s precondition.
+
+**Suite lines (tree `c3918e48`; zero instances by `pgrep` before each run):** the touched tray family +
+the lane suite, once — `✔ Test run with 62 tests in 5 suites passed after 1.817 seconds`
+(`TrayFilterTests` · `TrayPanelMoveTests` · `TrayPanelShapeTests` · `NoteTrayTests` ·
+`BlockDecorLaneTests`); the batch's CLOSING SET, ONCE, in one `xcodebuild test` from `App/Variorum/`
+over round 1's 58 type names — **`✔ Test run with 432 tests in 58 suites passed after 109.450
+seconds`**, 58 suites for 58 names, zero `✘`, zero `skipped` matches in the log
+(`scratchpad/r2-closing.log`, local). Core `swift test` and the iOS build not owed (`Sources/`,
+`App/Variorum/Shared/` untouched throughout the ladder).
+
+**Round-2 tally:** 2 NIT fixed (R2-1 · R2-2) · 1 NIT dismissed on re-check (R2-3). The implementer's
+sanity pass over the two fixes is waived by the orchestrator (its follow-up: three NITs, not worth the
+context) — recorded here; nothing loops after this word. **Last code hash: `c3918e48`.**
+
+**Open after round 2: none.**
