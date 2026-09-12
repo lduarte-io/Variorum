@@ -480,8 +480,11 @@ struct TakesArticleScrollTests {
 
     private func settle(_ board: TakesBoardLayout, byUser: Bool = false) {
         _ = board.consumeArticleGeometry(
-            TakesBoardLayout.ArticleGeometry(offset: 0, content: 3000, viewport: 700),
-            remembered: nil, positionedByUser: byUser)
+            geometry(offset: 0), remembered: nil, positionedByUser: byUser)
+    }
+
+    private func geometry(offset: CGFloat) -> TakesBoardLayout.ArticleGeometry {
+        TakesBoardLayout.ArticleGeometry(offset: offset, content: 3000, viewport: 700)
     }
 
     /// Measured at the adjudication (the layout's `ArticleLandingStep` doc
@@ -581,5 +584,81 @@ struct TakesArticleScrollTests {
         settle(board, byUser: true)
         #expect(board.articleLanding == nil)
         #expect(board.articleLandingStep(order: ["a", "far"]) == .done)
+    }
+
+    // MARK: - The ladder's round 1 (fable-reviewer, 2026-09-12)
+
+    /// **R1-1 — RED ON THE ROUND-1 TREE (18.0 where 0 is owed).** A page left
+    /// at the TOP comes back at the top. The column's own top padding put row
+    /// 1 at `minY 18` in `.scrollView` space, so the memory said "row 1" and
+    /// the restore aligned that row's top with the viewport's top — 18 pt
+    /// down, on every return. The two- and three-block notes she reported
+    /// are exactly this road; the memory now carries the TOP as a place of
+    /// its own, and a mount that starts there issues no scroll at all.
+    @Test func aBoardLeftAtTheTopComesBackAtTheTop() async throws {
+        try await withSession(blocks: 12) { session, fixture, db, mount in
+            let router = session.commandRouter
+            router.forgetCurrentBlock(for: fixture.postID)
+            defer { router.forgetCurrentBlock(for: fixture.postID) }
+
+            let first = try await landingModel(session: session, fixture: fixture, db: db)
+            let (windowA, hostingA) = await mount(first)
+            guard let articleA = articleScrollView(in: hostingA) else {
+                Issue.record("no article scroll view on the first mount")
+                return
+            }
+            await settle(windowA, hostingA, until: { false }, maxTurns: 10)
+            #expect(offset(articleA) == 0, "non-vacuity: the first mount is at the top")
+            #expect((articleA.documentView?.frame.height ?? 0)
+                    > articleA.contentView.bounds.height,
+                    "non-vacuity: there IS somewhere to scroll to")
+            #expect(session.editorRouter.takesArticlePlaces[fixture.postID] != nil,
+                    "non-vacuity: the session remembered a place")
+
+            windowA.orderOut(nil)
+            first.teardown()
+            await settle(windowA, hostingA, until: { false }, maxTurns: 4)
+
+            let second = try await landingModel(session: session, fixture: fixture, db: db)
+            let (windowB, hostingB) = await mount(second)
+            guard let articleB = articleScrollView(in: hostingB) else {
+                Issue.record("no article scroll view on the second mount")
+                return
+            }
+            await settle(windowB, hostingB, until: { false }, maxTurns: 12)
+            #expect(offset(articleB) == 0,
+                    """
+                    a page left at the TOP comes back at the top (offset \
+                    \(offset(articleB))) — the round-1 tree came back 18 pt \
+                    down, the column's top padding, on every return
+                    """)
+        }
+    }
+
+    /// R1-1's rule, pure: a page at rest remembers the TOP itself (not the
+    /// row the column's padding holds 18 pt below the fold), a mount with the
+    /// top remembered is ready at once and issues no scroll, and a scrolled
+    /// page remembers the row at the top of the viewport.
+    @Test func theTopOfThePageIsRememberedAsTheTopAndRestoresWithoutAScroll() {
+        let board = freshBoard("top")
+        board.noteArticleRowFrame("a", CGRect(x: 0, y: 18, width: 680, height: 60))
+        #expect(board.consumeArticleGeometry(
+            geometry(offset: 0), remembered: nil, positionedByUser: false)
+                == .remember(.top),
+                "at rest the memory is the top, never the padded first row")
+
+        let again = freshBoard("top-again")
+        #expect(again.consumeArticleGeometry(
+            geometry(offset: 0), remembered: .top, positionedByUser: false)
+                == .remember(.top),
+                "the top remembered: no scroll is issued")
+        #expect(again.articleReadyForLanding, "…and a landing may be considered at once")
+
+        board.noteArticleRowFrame("a", CGRect(x: 0, y: -30, width: 680, height: 60))
+        board.noteArticleRowFrame("b", CGRect(x: 0, y: 36, width: 680, height: 60))
+        #expect(board.consumeArticleGeometry(
+            geometry(offset: 100), remembered: nil, positionedByUser: false)
+                == .remember(TakesBoardLayout.ArticlePlace(rowID: "a")),
+                "scrolled: the row at the top of the viewport is the place")
     }
 }

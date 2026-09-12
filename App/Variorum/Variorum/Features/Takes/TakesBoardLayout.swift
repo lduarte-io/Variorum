@@ -525,9 +525,22 @@ final class TakesBoardLayout {
     /// **the block she was reading comes back to the top of the page.** A
     /// `scrollTo(id, anchor: .top)` is absolute and idempotent, so re-aiming
     /// as the column's real heights arrive converges instead of drifting.
+    ///
+    /// **The TOP is a place of its own** (the 17p batch-a ladder, R1-1 —
+    /// measured: a page left at offset 0 came back at 18, on every return).
+    /// The column's own top padding puts row 1 at `minY 18` when the page is
+    /// at rest, so "row 1 at the top of the viewport" is NOT where a page at
+    /// rest sits — aligning that row's top with the viewport's top scrolls
+    /// past the padding. A page left at the top therefore remembers the top
+    /// itself, and a mount that starts there (every mount does) issues no
+    /// scroll at all.
     struct ArticlePlace: Equatable {
-        /// The `placementID` of the row at the top of the viewport.
-        let rowID: String
+        /// The `placementID` of the row at the top of the viewport — or nil
+        /// for the TOP of the page itself.
+        let rowID: String?
+
+        /// The page at rest: nothing above the first row.
+        static let top = ArticlePlace(rowID: nil)
     }
 
     /// The one-shot restore's state. `.undecided` until the FIRST honest
@@ -607,9 +620,12 @@ final class TakesBoardLayout {
         switch articleRestore {
         case .undecided:
             // Read the memory BEFORE this mount has written anything into it.
-            guard let remembered else {
+            // No memory, or the TOP remembered: a mount starts at the top, so
+            // there is nothing to scroll to — settled at once, no scroll
+            // issued (R1-1).
+            guard let remembered, remembered.rowID != nil else {
                 articleRestore = .settled
-                return rememberStep()
+                return rememberStep(geometry)
             }
             articleRestore = .wanted(remembered)
             articleRestoreAimsLeft = Self.articleRestoreAttempts
@@ -617,12 +633,15 @@ final class TakesBoardLayout {
         case .wanted(let place):
             return restoreStep(to: place, geometry, positionedByUser: positionedByUser)
         case .settled:
-            return rememberStep()
+            return rememberStep(geometry)
         }
     }
 
-    private func rememberStep() -> ArticleRestoreStep {
-        articlePlaceNow.map { .remember($0) } ?? .wait
+    /// A page at rest remembers the TOP itself (R1-1); a scrolled page
+    /// remembers the row at the top of the viewport.
+    private func rememberStep(_ geometry: ArticleGeometry) -> ArticleRestoreStep {
+        if geometry.offset <= 0.5 { return .remember(.top) }
+        return articlePlaceNow.map { .remember($0) } ?? .wait
     }
 
     private func restoreStep(
@@ -632,12 +651,18 @@ final class TakesBoardLayout {
         // this page herself, the restore is over and we remember her place.
         if positionedByUser {
             articleRestore = .settled
-            return rememberStep()
+            return rememberStep(geometry)
+        }
+        // The TOP never reaches `.wanted` (it settles at `.undecided`); total
+        // for the type's sake.
+        guard let rowID = place.rowID else {
+            articleRestore = .settled
+            return rememberStep(geometry)
         }
         // **Settled when the ROW says so**, never when an offset we computed
         // says so: a lazy column re-lays out under a scroll, and the row
         // frames and the scroll geometry arrive in different passes.
-        if let frame = articleRowFrames[place.rowID], abs(frame.minY) <= 2 {
+        if let frame = articleRowFrames[rowID], abs(frame.minY) <= 2 {
             articleRestore = .settled
             return .wait
         }
@@ -650,7 +675,7 @@ final class TakesBoardLayout {
             return .wait
         }
         articleRestoreAimsLeft -= 1
-        return .scrollToRow(place.rowID)
+        return .scrollToRow(rowID)
     }
 
     func toggleExpanded(_ blockID: String) {
