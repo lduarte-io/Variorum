@@ -707,6 +707,34 @@ struct TakesArticleScrollTests {
             model.board.landArticle(on: far)
             await model.turnTakesIntoBlocks(blockID: fixture.blocks[0].block)
             #expect(model.articleLanding == nil, "takes-to-blocks is her hand")
+
+            // The ladder's round 3 (R3-1): the ⌘-click PICK summons the
+            // selection banner ABOVE the article, which shrinks the article's
+            // VIEWPORT by the banner's height — a third mechanism beside
+            // content height and the live pane — so a landed row at the
+            // foot reads as clipped and the kept-alive landing revealed after
+            // her click (measured on the round-2 tree: 65 → 93, the banner's
+            // 28 pt; round 1 had dismissed the pick as "a stroke overlay, no
+            // layout effect" — true of the cell, blind to the banner). A
+            // ⌘-click never migrates the ring (picking blocks is not writing
+            // in one), so nothing else ends it. Both pick doors are arms;
+            // `clearMergeSelection` is not (shared with the controller's
+            // post-act clears, and a banner LEAVING can clip nothing).
+            model.board.landArticle(on: far)
+            model.toggleMergeSelection(fixture.blocks[0].block)
+            #expect(model.articleLanding == nil, "a ⌘-click pick is her hand")
+
+            model.board.landArticle(on: far)
+            model.extendMergeSelection(to: fixture.blocks[1].block)
+            #expect(model.articleLanding == nil, "a ⌘⇧-click extend is her hand")
+
+            // …and the banner's Delete over that selection: rows REMOVED
+            // through a bare runner with no `parkFocus` — the rule's letter
+            // (content height), armed at the door even though the pick
+            // before it has already ended the landing.
+            model.board.landArticle(on: far)
+            await model.deleteSelectedBlocks()
+            #expect(model.articleLanding == nil, "deleting picked blocks is her hand")
         }
     }
 
@@ -882,6 +910,120 @@ struct TakesArticleScrollTests {
                     \(model.articleLandingAims)) — before the fix it re-aimed \
                     to its whole 64-aim bound against the framework's own reflow
                     """)
+        }
+    }
+
+    /// **R3-1, the face — RED ON THE ROUND-2 TREE (65 → 93).** Entered on
+    /// the last block, the board reveals it at the foot (measured at rest:
+    /// the row at 571–617 in a 619 pt viewport, unchanged over 72 turns);
+    /// she then ⌘-picks ONE row above it. The pick summons the selection
+    /// banner ABOVE the article (`mergeSelectionBanner` precedes
+    /// `singleColumnArticle` in the board's VStack), which shrinks the
+    /// article's VIEWPORT by the banner's height — the landed row now reads
+    /// as clipped at the foot, and before the fix the kept-alive landing
+    /// revealed it after her click: 65 → 93 (exactly the banner's 28 pt),
+    /// nine more aims. With NO landing pending the same pick moves the page
+    /// not at all (the round-3 control), so the landing was the only mover.
+    /// A ⌘-click deliberately never migrates the ring (picking blocks is not
+    /// writing in one — `TakesBoardView`'s `onCommandClick`), which is why
+    /// nothing else ended it. The viewport assertion pins the MECHANISM: a
+    /// viewport-height change is the third way a landed row leaves the
+    /// screen, beside content height and the live pane.
+    @Test func herPickAboveTheLandedRowLeavesThePageWhereItIs() async throws {
+        try await withSession(blocks: 12) { session, fixture, db, mount in
+            let router = session.commandRouter
+            router.forgetCurrentBlock(for: fixture.postID)
+            defer { router.forgetCurrentBlock(for: fixture.postID) }
+            let token = router.registerDetail(postID: fixture.postID, mode: .write) { _ in }
+            defer { router.unregisterDetail(token) }
+            router.noteFocusedBlock(
+                fixture.lastBlock, variantID: fixture.lastVariant,
+                postID: fixture.postID, utf16Offset: 0)
+
+            let model = try await landingModel(session: session, fixture: fixture, db: db)
+            let (window, hosting) = await mount(model)
+            guard let article = articleScrollView(in: hosting) else {
+                Issue.record("no article scroll view")
+                return
+            }
+            await settle(window, hosting, until: { false }, maxTurns: 12)
+            let before = offset(article)
+            let aimsBefore = model.articleLandingAims
+            let viewportBefore = article.contentView.bounds.height
+            #expect(before > 0, "non-vacuity: the landing revealed the far block (\(before))")
+            #expect(aimsBefore > 0, "non-vacuity: the landing aimed")
+
+            model.toggleMergeSelection(fixture.blocks[0].block)
+            await settle(window, hosting, until: { false }, maxTurns: 20)
+            let after = offset(article)
+            let viewportAfter = article.contentView.bounds.height
+            #expect(viewportAfter < viewportBefore - 2,
+                    """
+                    non-vacuity, the mechanism: the pick's banner took room above \
+                    the article (viewport \(viewportBefore) → \(viewportAfter))
+                    """)
+            #expect(model.articleLanding == nil, "the pick ended the landing")
+            #expect(abs(after - before) < 2,
+                    """
+                    the page stays where it was after her pick (\(before) → \
+                    \(after)) — before the fix the kept-alive landing revealed \
+                    the far block again once the banner had shrunk the viewport
+                    """)
+            #expect(model.articleLandingAims == aimsBefore,
+                    "the landing spent no aim after her pick (\(aimsBefore) → \(model.articleLandingAims))")
+        }
+    }
+
+    /// **R3-1's whole road, mounted:** two picks, then the banner's Delete
+    /// (rows REMOVED through a bare runner with no `parkFocus` — the rule's
+    /// letter, armed at the door). Red on the round-2 tree for the same
+    /// reason as the pin above (the picks moved the page 65 → 93 and the
+    /// landing survived into the delete); measured on this tree: the delete
+    /// itself moves nothing (its no-landing control 65 → 65), so the road's
+    /// promise is the page at rest across all of it.
+    @Test func herPickAndDeleteAboveTheLandedRowLeavesThePageWhereItIs() async throws {
+        try await withSession(blocks: 12) { session, fixture, db, mount in
+            let router = session.commandRouter
+            router.forgetCurrentBlock(for: fixture.postID)
+            defer { router.forgetCurrentBlock(for: fixture.postID) }
+            let token = router.registerDetail(postID: fixture.postID, mode: .write) { _ in }
+            defer { router.unregisterDetail(token) }
+            router.noteFocusedBlock(
+                fixture.lastBlock, variantID: fixture.lastVariant,
+                postID: fixture.postID, utf16Offset: 0)
+
+            let model = try await landingModel(session: session, fixture: fixture, db: db)
+            let (window, hosting) = await mount(model)
+            guard let article = articleScrollView(in: hosting) else {
+                Issue.record("no article scroll view")
+                return
+            }
+            await settle(window, hosting, until: { false }, maxTurns: 12)
+            let before = offset(article)
+            let aimsBefore = model.articleLandingAims
+            #expect(before > 0, "non-vacuity: the landing revealed the far block (\(before))")
+            #expect(aimsBefore > 0, "non-vacuity: the landing aimed")
+
+            // Two rows above the landed one, picked and deleted. The hosted
+            // board's `.task` observes the store, so the projection lands by
+            // itself; the explicit adopt makes the pin deterministic.
+            model.toggleMergeSelection(fixture.blocks[0].block)
+            model.toggleMergeSelection(fixture.blocks[1].block)
+            await model.deleteSelectedBlocks()
+            model.adopt(try await db.read { try Queries.takesProjection($0, post: fixture.postID) })
+            await settle(window, hosting, until: { false }, maxTurns: 20)
+            let after = offset(article)
+            #expect(model.projection.slots.count == 10,
+                    "non-vacuity: the delete removed two rows (\(model.projection.slots.count))")
+            #expect(model.articleLanding == nil, "the picks and the delete ended the landing")
+            #expect(abs(after - before) < 2,
+                    """
+                    the page stays where it was across her picks and delete \
+                    (\(before) → \(after)) — before the fix the kept-alive \
+                    landing revealed the far block again after the first pick
+                    """)
+            #expect(model.articleLandingAims == aimsBefore,
+                    "the landing spent no aim across the road (\(aimsBefore) → \(model.articleLandingAims))")
         }
     }
 

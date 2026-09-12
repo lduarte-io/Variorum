@@ -1251,7 +1251,17 @@ final class TakesViewModel {
     /// view state, like expansion).
     var mergeSelection: Set<String> { board.mergeSelection }
 
+    /// Her hand (the 17p batch-a ladder, R3-1): a pick summons the selection
+    /// banner ABOVE the article, which shrinks the article's VIEWPORT by the
+    /// banner's height — so a landed row at the foot reads as clipped and a
+    /// kept-alive landing revealed it again after her click (measured: 65 →
+    /// 93, the banner's 28 pt; the same pick with no landing moves nothing).
+    /// The ⌘-click deliberately never migrates the ring (picking blocks is
+    /// not writing in one), so the arm sits at the two PICK doors — never at
+    /// `clearMergeSelection`, which the structure controller shares after a
+    /// merge, a split or a delete, and whose banner LEAVING can clip nothing.
     func toggleMergeSelection(_ blockID: String) {
+        board.clearArticleLanding()
         board.toggleMergeSelection(blockID)
     }
 
@@ -1260,6 +1270,7 @@ final class TakesViewModel {
     /// SELECTION, not an act — naming what she is pointing at is exactly
     /// what a projection is for; every act below still re-reads the store.
     func extendMergeSelection(to blockID: String) {
+        board.clearArticleLanding()   // her hand (R3-1, as above)
         board.extendMergeSelection(to: blockID, in: projection.slots.map(\.blockID))
     }
 

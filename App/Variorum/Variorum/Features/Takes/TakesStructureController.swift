@@ -930,6 +930,15 @@ final class TakesStructureController {
         model.structuralInFlight = true
         defer { model.structuralInFlight = false }
         model.setStatus(nil)
+        // Her hand (the 17p batch-a ladder, R3-1): rows are REMOVED above a
+        // landed one through a bare runner with no `parkFocus` — and a
+        // ⌘-click deliberately never migrates the ring (picking blocks is
+        // not writing in one), so this is the one height-changing door whose
+        // design leaves a pending landing untouched. Measured on the round-2
+        // tree: the landing ALONE moved the page 65 → 93 after her click (the
+        // same delete with no landing pending moved it not at all). Both
+        // callers are gesture doors; nothing programmatic reaches this.
+        model.clearArticleLanding()
         do {
             let stack = model.session.undoStack
             try await model.session.runner.run { ops in
