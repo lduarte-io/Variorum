@@ -197,6 +197,59 @@ struct BlockDecorLaneTests {
                 "the container really narrowed: \(view.textContainer?.size ?? .zero)")
     }
 
+    /// **THE WALK'S OWN FINDING (W-1), PINNED.** Reserving the lane moves
+    /// where the text begins — and every decoration's rect is computed from
+    /// that edge. The render that RESERVES the lane is working from the OLD
+    /// `textLeft`, so without a second decoration pass the badge stays
+    /// exactly where it was: on the words. The batch's first walk met that
+    /// (the book Outline's `#1` badge still covering "lo" of "loose") while
+    /// every unit pin was green, because the pins rebuilt the state from the
+    /// view's new prose column BY HAND and so simulated a loop that did not
+    /// run.
+    ///
+    /// The model's decoration loop is driven by `overlayLayoutDidSettle`,
+    /// whose generation gate only opens on a REPORTED geometry change, and
+    /// `onWidthReflow` is that report (`EditorViewModel.attach` wires it to
+    /// bump the generation and run the settle hop). A lane IS a prose-column
+    /// reflow, so `setDecorLane` reports one.
+    ///
+    /// **RED ON OLD** (this tree, before the one-line fix): `reflows == 0`.
+    @Test func reservingTheLaneReportsTheReflowThatRefreshesTheDecorations() {
+        let view = EditorTextView.makeInlineEditor()
+        var reflows = 0
+        view.onWidthReflow = { reflows += 1 }
+
+        view.setDecorLane(needed: true)
+        #expect(reflows == 1, "the prose column moved, and the decor is asked again")
+        view.setDecorLane(needed: true)
+        #expect(reflows == 1, "change-gated: a settled lane reports nothing")
+        view.setDecorLane(needed: false)
+        #expect(reflows == 2, "giving the lane back is a reflow too")
+        view.setDecorLane(needed: false)
+        #expect(reflows == 2)
+
+        // …and the report is INERT on a surface that reserves no lane, so no
+        // other editor pays a spurious reflow.
+        let (_, full) = EditorTextView.makeEditor()
+        var fullReflows = 0
+        full.onWidthReflow = { fullReflows += 1 }
+        full.setDecorLane(needed: true)
+        #expect(fullReflows == 0)
+    }
+
+    /// The wiring the report depends on, asserted where it is made: an
+    /// attached surface has the model's reflow handler, so the report reaches
+    /// the loop rather than a nil closure.
+    @Test func anAttachedInlineSurfaceCarriesTheModelsReflowHandler() async throws {
+        try await withEditor(seedBlocks: ["Alpha."]) { h in
+            let inline = EditorTextView.makeInlineEditor()
+            h.model.attach(textView: inline, scrollView: nil)
+            #expect(inline.onWidthReflow != nil,
+                    "attach wires the reflow report the lane rides")
+            #expect(inline.reservesDecorLane)
+        }
+    }
+
     // MARK: - Rows 5–6: nothing covers anything
 
     /// **THE ROW, PINNED: badge, glyph and prose are pairwise DISJOINT.**

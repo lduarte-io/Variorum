@@ -419,6 +419,24 @@ final class EditorTextView: NSTextView, MarkdownFormattable {
         if abs(textContainerInset.width - mean) > 0.5 {
             textContainerInset = NSSize(width: mean, height: textContainerInset.height)
         }
+        // **AND THE PROSE COLUMN MOVED, SO THE DECORATIONS MUST BE ASKED
+        // AGAIN** — the defect the batch's own WALK found (17p batch b, the
+        // walk's finding W-1). Reserving the lane changes where the text
+        // begins, and every decoration's rect is computed from that edge; but
+        // the render that reserved it was working from the OLD `textLeft`, so
+        // without a second pass the badge stayed exactly where it was, on the
+        // words. The model's decoration loop is driven by
+        // `overlayLayoutDidSettle`, whose generation gate only opens on a
+        // reported geometry change — and `onWidthReflow` is that report,
+        // wired in `EditorViewModel.attach` to bump the generation and run
+        // the settle hop. A lane IS a prose-column reflow (the container's
+        // width changes, even though the view's frame does not), so this is
+        // the honest signal rather than a new one.
+        //
+        // Fires ONLY on a real change (the guard above returned otherwise),
+        // so the second pass writes nothing and the loop closes after exactly
+        // one extra cycle.
+        onWidthReflow?()
     }
 
     /// The container's origin — overridden ONLY while a lane is reserved, so

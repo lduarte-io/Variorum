@@ -1561,11 +1561,18 @@ Stranded originals get NO Delete Now door (R-Q3's letter).
    measured on the PRE-FIX code (no revert needed — the pin was written and run first)
 3. **rows 5–6 — the decoration lane + the emoji inside the frame** — **DONE (`5712779e`)**,
    red-on-old measured
-4. **the walk + captures + the closing suites** — **NOT-STARTED**
+4. **the walk + captures + the closing suites** — **IN-PROGRESS.** Rows 3 · 4 walked green (captures
+   `01`–`03`, `06`–`09`); row 5's WRITE side walked green (`04` · `05`). **The walk FOUND A DEFECT in
+   piece 3 — W-1, fixed at this commit** (below); the book-Outline half of the walk re-runs on the
+   rebuilt app next. Remaining: the Outline captures in both voices, the tray captures, the closing
+   suites.
 
 **Rows:** 3 · 4 · 5 · 6 — dispositions PENDING.
 
-**No revert is in flight.** Three ran across this batch — row 3's two (from `e394ac76`) and rows
+**A ONE-LINE BEHAVIORAL REVERT IS ANNOUNCED, NOT YET STARTED:** removing `onWidthReflow?()` from
+`EditorTextView.setDecorLane` (the W-1 fix at this commit) to measure its red-on-old, then
+`git checkout -- App/Variorum/Variorum/Features/Editor/EditorTextView.swift` to restore. Three others
+ran across this batch — row 3's two (from `e394ac76`) and rows
 5–6's one (from `5712779e`) — each announced in this record BEFORE it started, each restored by
 `git checkout --` of a COMMITTED file (never a scratchpad copy), and after each the tree was verified
 diff-clean against its commit and the suite re-run green.
@@ -1824,6 +1831,38 @@ pin riding UNMODIFIED, which is the parity proof.
    widened pad stands between the badge and the text. 64 is the smallest width at which all three of
    her clauses hold at once. Stated here for her eye rather than filed as a question: it is a number
    the brief assigns to the batch, and no ruling is re-opened.
+
+##### THE WALK'S OWN FINDING — W-1: THE LANE WAS NOT REACHING THE SURFACE (found in USE, fixed)
+
+**This is why the gate is USE and not pins.** Every one of piece 3's nine pins was green, and the
+first walk of the book Outline showed the defect UNCHANGED: the `#1` comment badge still sat on the
+words, covering the "lo" of *"loose thoughts on structure"* (capture `06-w1-the-defect-the-walk-found
+.png`), with no glyph drawn at all.
+
+**The mechanism, traced from the capture.** Reserving the lane moves where the text begins, and every
+decoration's rect is computed from that edge — but the render that RESERVES the lane is working from
+the OLD `textLeft` (8). A second decoration pass is needed, and the model's decoration loop is driven
+by `overlayLayoutDidSettle`, whose generation gate opens only on a REPORTED geometry change
+(`EditorViewModel.attach` wires `onWidthReflow` to bump the generation and run the settle hop). An
+inset change reports nothing: `applyFrameHeight` fires `onWidthReflow` only when the view's FRAME
+width changes, and the lane changes the container's width, not the frame's. So the lane was reserved
+and nothing ever re-read it.
+
+**Why the pins did not catch it — stated plainly, because it is the lesson.** The mounted pins
+rebuilt the decoration state from the view's NEW prose column BY HAND for their second pass
+(`let settled = state(for: view, …)`), which simulated a loop that did not exist. A pin that
+reproduces the production loop's EFFECT while bypassing its MECHANISM is green for the wrong reason —
+the same class as batch a's own "the three-block pin was green for the WRONG reason (its reveal
+silently did nothing)".
+
+**The fix (one line) and its pin.** `setDecorLane` reports `onWidthReflow?()` when it actually changes
+the inset — a lane IS a prose-column reflow, so the existing signal is the honest one rather than a
+new mechanism beside it. Fires only on a real change, so the second pass writes nothing and the loop
+closes after exactly one extra cycle. Pins:
+`BlockDecorLaneTests.reservingTheLaneReportsTheReflowThatRefreshesTheDecorations` (1 report on
+reserve, 0 on a settled re-ask, 1 more on giving it back, and INERT on a surface that reserves no
+lane) and `…anAttachedInlineSurfaceCarriesTheModelsReflowHandler` (the wiring the report rides).
+`✔ Test run with 11 tests in 1 suite passed`.
 
 
 *(Pointers re-verified by the orchestrator on 2026-09-12 after batch a's ladder, at `17803ce4`: `RecoveryView.swift` lives at `App/Variorum/Variorum/Features/Library/RecoveryView.swift` (`requestDeleteNow` `:400`; the stranded rule `:122–126`); `EditorTypography.swift` at `App/Variorum/Variorum/Theme/EditorTypography.swift` (`minGutter` `:171`, `inlineSurfaceInset` `:176`); `TrayPanel.swift`'s lines hold within one (`confirmPendingPurge` `:637`, `trashItem(for:)` `:653`); `CalloutMenu.emojiAccessory` `:179`; `BlockDecor` badge `:592`, emoji `:479`, `calloutRect` `:167`; `EditorTextView.makeInlineEditor` `:823`; `EditorViewModel` `textLeft` `:3162`; `DoorSetTests:327` is the accessory's title pin. Batch a moved nothing in this batch's files. The environment traps and rules 1–8 are R-1's, verbatim by reference; her app is QUIT for the night — an instance at `/Applications` means she is awake: never touch it.)*
