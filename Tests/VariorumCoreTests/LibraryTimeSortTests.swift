@@ -192,6 +192,35 @@ struct LibraryTimeSortTests {
         }
     }
 
+    /// **The A–Z order is `searchCatalog`'s alone** (the 18h ladder, R1-16):
+    /// `Queries.library` reports its ordering value as `TimelineItem.stamp`,
+    /// which faces parse as a date, so `.title` is refused there by
+    /// precondition. A precondition cannot be pinned without trapping the
+    /// test process — what IS pinned is the other half, that the guard does
+    /// not over-fire: every sort the listing DOES serve still answers, and
+    /// its stamp still parses as a date.
+    @Test func theStampListingStillServesEveryStampSort() throws {
+        try withOperations { ops, db in
+            let f = try fixture(ops)
+            for sort in [Queries.LibrarySort.lastTouched, .createdAt, .entryDate, .lastMajorRevision] {
+                let items = try db.read { db in try Queries.library(db, sort: sort) }
+                #expect(Set(items.map(\.postID)) == Set([f.a, f.b, f.c]),
+                        "\(sort): every live note is listed")
+                for item in items {
+                    // A TIME value in one of the store's two shapes — the
+                    // canonical instant, or a day key. (`.entryDate`'s stamp
+                    // is a DAY: `COALESCE(entry_date, created_at)` yields
+                    // "2026-03-01" for a dated note, which has been true since
+                    // Phase 8 and is why this asks the one time-brain rather
+                    // than the instant parser alone.) A TITLE parses as
+                    // neither, which is what `.title` would put here.
+                    #expect(TimeStampFace.parse(item.stamp, calendar: .current) != nil,
+                            "\(sort): the stamp reads as a time — \(item.stamp)")
+                }
+            }
+        }
+    }
+
     /// **The masthead's read** (row 9's other half): the note's stamps come
     /// as ONE read, and it now carries the MINT beside the edit — the stamp
     /// her click flips to. `editedAt` and `savedAt` are byte-unchanged (18d's

@@ -109,6 +109,11 @@ extension Queries {
         /// not a stamp, and it belongs here because the alternative is a
         /// second listing query (review focus F-5).
         ///
+        /// **It is `searchCatalog`'s alone** (the ladder's R1-16):
+        /// `Queries.library` refuses it by precondition, because that listing
+        /// reports its ordering value as `TimelineItem.stamp` and a name is
+        /// not a stamp. See `library`'s own doc.
+        ///
         /// It orders by `DisplayTitle.note`'s own fallback chain (stored
         /// title → the stated day → the mint) written as SQL, so an untitled
         /// note sorts under the date it shows rather than collapsing to the
@@ -164,6 +169,21 @@ extension Queries {
     /// expression is a COALESCE (un-indexable), so SQLite runs a top-N scan
     /// over the *container* table: cost ∝ post count, never corpus text
     /// size — asserted by benchmark.
+    ///
+    /// **PRECONDITION: `sort` is not `.title`** (the 18h ladder, R1-16). This
+    /// listing puts the ordering value in `TimelineItem.stamp`, a field
+    /// documented as *"the value of the ordering stamp for this row — feeds
+    /// the next page's cursor"* and read by faces that parse it as a date
+    /// (`BlockHistoryFace.stampText`). `.title` would put a NAME there. No
+    /// caller does it today — every one passes `.lastTouched` — and the
+    /// faces fail safe (an unparseable stamp renders nothing rather than raw
+    /// text), which is what kept this a latent trap rather than a bug; the
+    /// trap is that a later batch adopts the reachable spelling innocently.
+    /// The A–Z order's home is `searchCatalog`, which carries no `stamp`.
+    ///
+    /// A precondition and not a graceful fallback on purpose: silently
+    /// re-ordering a listing the caller asked for in release would be a
+    /// quieter lie than the one being closed.
     public static func library(
         _ db: Database,
         sort: LibrarySort = .lastTouched,
@@ -171,6 +191,11 @@ extension Queries {
         limit: Int? = nil,
         profile: Profile? = nil
     ) throws -> [TimelineItem] {
+        precondition(
+            sort != .title,
+            "Queries.library orders by a STAMP — its rows carry that value in "
+                + "TimelineItem.stamp, which faces parse as a date. For an A–Z "
+                + "listing use Queries.searchCatalog(sort: .title), which has no stamp.")
         let dir = direction == .desc ? "DESC" : "ASC"
         var arguments: [(any DatabaseValueConvertible)?] = []
         var sql = """
