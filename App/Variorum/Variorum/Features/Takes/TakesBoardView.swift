@@ -43,16 +43,6 @@ struct TakesBoardView: View {
     /// 17p batch a (row 1, R-Q1): the article's own scroll handle — the one
     /// road by which the remembered offset is restored.
     @State private var articleScroll = ScrollPosition()
-    /// Whether the remembered offset still has to be honoured. It starts
-    /// `.undecided` and is resolved at the FIRST honest geometry — never in
-    /// `onAppear`, whose ordering against the scroll view's first geometry is
-    /// not ours to assume (measured: the geometry hook can fire first, and a
-    /// mount that records its own 0 before reading the memory erases the very
-    /// thing it came back for).
-    @State private var articleRestore: ArticleRestore = .undecided
-    /// The article has reported real geometry at least once — until it has,
-    /// nothing knows where anything is, so no landing is spent.
-    @State private var articleGeometrySeen = false
     @Environment(ThemeStore.self) private var themeStore: ThemeStore?
     @Environment(\.colorScheme) private var scheme
 
@@ -606,7 +596,7 @@ struct TakesBoardView: View {
                         // where blocks end — the same dashed grammar as the
                         // fan-growth doors. The minted block's pane takes the
                         // ring, so typing continues instantly.
-                        Button("＋ new block") {
+                        Button(TakesEmptyState.newBlockVerb) {
                             Task { await model.addBlockAtEnd() }
                         }
                         .buttonStyle(.plain)
@@ -623,6 +613,17 @@ struct TakesBoardView: View {
                         .lineLimit(1)
                         .fixedSize()
                         .help("A new block at the end of the note — type right into it")
+                        // The probe measures the DASHED RECT itself, so it
+                        // sits INSIDE the padding below — a probe outside it
+                        // reads the padding's own frame and reports the old
+                        // place (measured).
+                        .articleDoorProbe()
+                        // 17p batch a (row 2, her R-Q2): the door's edge sits
+                        // on the PROSE's edge, not the cell's. Derived from
+                        // the two constants that actually create the daylight
+                        // — never a magic number, so the door cannot drift
+                        // from the text it stands under.
+                        .padding(.leading, Self.articleTextLeadingInset)
                     }
                 }
                 .frame(maxWidth: articleMeasure, alignment: .leading)
@@ -640,15 +641,20 @@ struct TakesBoardView: View {
             // restore runs, and recording that would erase the very thing we
             // came back for.
             .scrollPosition($articleScroll)
-            .onScrollGeometryChange(for: ArticleGeometry.self) {
-                ArticleGeometry(
+            .onScrollGeometryChange(for: TakesBoardLayout.ArticleGeometry.self) {
+                TakesBoardLayout.ArticleGeometry(
                     offset: $0.contentOffset.y,
                     content: $0.contentSize.height,
                     viewport: $0.containerSize.height)
             } action: { _, geometry in
-                articleGeometrySeen = true
-                model.noteArticleViewport(height: geometry.viewport)
-                consumeArticleRestore(geometry)
+                // The RULE lives in the model (P-9, and the measured lesson
+                // that a `@State` written and re-read inside one update
+                // transaction is not a promise SwiftUI makes); the view only
+                // performs the scroll it is told to.
+                if let y = model.consumeArticleGeometry(
+                    geometry, positionedByUser: articleScroll.isPositionedByUser) {
+                    articleScroll.scrollTo(y: y)
+                }
                 spendArticleLanding(column)
             }
             // 17o batch b (ledger row 8, her words: *"open takes mode in write
@@ -664,80 +670,15 @@ struct TakesBoardView: View {
             .onChange(of: model.articleLanding, initial: true) { _, _ in
                 spendArticleLanding(column)
             }
-            .onChange(of: articleRestore) { _, _ in spendArticleLanding(column) }
             }
         }
-    }
-
-    /// The article's scroll geometry, reduced to the three numbers the memory
-    /// and the reveal need (an Equatable value, so the hook republishes only
-    /// when one of them actually moves).
-    private struct ArticleGeometry: Equatable {
-        let offset: CGFloat
-        let content: CGFloat
-        let viewport: CGFloat
-
-        /// How far the article can scroll — the restore clamps to it, because
-        /// a note edited elsewhere may be shorter than when she left it.
-        var travel: CGFloat { max(content - viewport, 0) }
-    }
-
-    /// The one-shot restore's state. `.wanted` holds until the content is
-    /// tall enough to honour it — the lazy column's height grows as rows
-    /// realize, and restoring against the first (short) estimate is the
-    /// pre-fill-frame mistake the 17o batch-b ladder's RAISE-M1 recorded.
-    enum ArticleRestore: Equatable {
-        case undecided
-        case wanted(CGFloat)
-        case settled
-    }
-
-    private func consumeArticleRestore(_ geometry: ArticleGeometry) {
-        guard geometry.viewport > 0 else { return }
-        switch articleRestore {
-        case .undecided:
-            // Read the memory BEFORE this mount has written anything into it.
-            guard let wanted = model.rememberedArticleOffset, wanted > 0.5 else {
-                articleRestore = .settled
-                model.rememberArticleOffset(geometry.offset)
-                return
-            }
-            articleRestore = .wanted(wanted)
-            restoreArticle(to: wanted, geometry)
-        case .wanted(let wanted):
-            restoreArticle(to: wanted, geometry)
-        case .settled:
-            model.rememberArticleOffset(geometry.offset)
-        }
-    }
-
-    private func restoreArticle(to wanted: CGFloat, _ geometry: ArticleGeometry) {
-        // Her hand outranks a pending restore: if she has already scrolled
-        // this page herself, the restore is over and we remember her place.
-        if articleScroll.isPositionedByUser {
-            articleRestore = .settled
-            model.rememberArticleOffset(geometry.offset)
-            return
-        }
-        let target = min(wanted, geometry.travel)
-        if abs(geometry.offset - target) < 0.5 {
-            // There. Settle only once the content is tall enough that the
-            // target IS the remembered place; otherwise stay armed and a
-            // later growth event carries us the rest of the way.
-            if target >= wanted - 0.5 || geometry.travel <= 0 {
-                articleRestore = .settled
-            }
-            return
-        }
-        articleScroll.scrollTo(y: target)
     }
 
     /// A landing is spent exactly once, and never before the page is where
     /// the memory says it should be (the 17o batch-b BLOCKER's class: a
     /// landing request that outlives its moment re-lands on every later mount).
     private func spendArticleLanding(_ column: ScrollViewProxy) {
-        guard articleGeometrySeen, articleRestore == .settled,
-              let landing = model.articleLanding
+        guard model.articleReadyForLanding, let landing = model.articleLanding
         else { return }
         if model.articleReveal(for: landing) == .reveal {
             column.scrollTo(landing, anchor: nil)
@@ -813,6 +754,21 @@ struct TakesBoardView: View {
     /// article sits exactly where Write and stack put it).
     private var articleMeasure: CGFloat {
         Self.articleMeasure(engagedRailWidth: railEngaged ? marginRailWidth : nil)
+    }
+
+    /// The article cell's own breathing room around its pane (the washed
+    /// card's inset). Named because the ＋ new block door has to line up
+    /// against it (17p batch a, row 2).
+    nonisolated static let articleCellPadding: CGFloat = 2
+
+    /// **Where the article's PROSE starts, relative to the column** — the
+    /// cell's padding plus the take pane's own text inset. Her ruling R-Q2
+    /// aligns the ＋ new block door to this, not to the cell's edge; measured
+    /// on the pre-fix tree the two were 8 pt apart, which is the daylight she
+    /// read as misalignment (her image 2).
+    @MainActor
+    static var articleTextLeadingInset: CGFloat {
+        articleCellPadding + PaneTextView.takeSurfaceInset
     }
 
     /// The composition-measure brain (13b 3F — the D2/AD-6 pin's target):
@@ -932,7 +888,7 @@ struct TakesBoardView: View {
                 return true
             },
             onDiff: { diffPresentation = $0 })
-            .padding(2)
+            .padding(Self.articleCellPadding)
             .background(washed && markChangingBlock ? tokens.wash : Color.clear)
             .clipShape(RoundedRectangle(cornerRadius: 6))
             // 13e E3: a picked block SAYS it is picked (boundaries are
@@ -1682,5 +1638,36 @@ private struct CollapsibleTakeCard: View {
                 }
             }
         }
+    }
+}
+
+#if DEBUG
+/// **R-Q2's second oracle: where the article's ＋ new block door actually is.**
+/// The door is a SwiftUI `Button` — drawn, never mounted as an `NSView` — and
+/// a hosted board builds no accessibility tree in the test host (measured at
+/// 17p batch a), so the door reports its own frame, in WINDOW space, and the
+/// pin compares that x against the real pane's real text origin. The
+/// `LensesGeometry` pattern.
+@MainActor
+enum TakesArticleDoorProbe {
+    static var frame: CGRect?
+
+    static func reset() { frame = nil }
+}
+#endif
+
+extension View {
+    /// The DEBUG oracle write (a no-op outside DEBUG).
+    @ViewBuilder
+    func articleDoorProbe() -> some View {
+        #if DEBUG
+        self.onGeometryChange(for: CGRect.self) {
+            $0.frame(in: .global)
+        } action: { frame in
+            TakesArticleDoorProbe.frame = frame
+        }
+        #else
+        self
+        #endif
     }
 }

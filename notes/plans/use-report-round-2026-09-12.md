@@ -629,8 +629,8 @@ five pieces are NOT-STARTED.
 
 1. the before/after capture diff (`f402ccce` vs HEAD, both voices) — **DONE (this commit)**
 2. the scroll memory + the reveal rule (row 1, R-Q1) — **DONE (this commit)**
-3. the empty block's face (row 2, R-Q2) — **NOT-STARTED**
-4. the ＋ new block door's alignment (row 2) — **NOT-STARTED**
+3. the empty block's face (row 2, R-Q2) — **DONE (this commit)**
+4. the ＋ new block door's alignment (row 2) — **DONE (this commit)**
 5. the walk + captures + the closing suites — **NOT-STARTED**
 
 **Rows:** 1 · 2 — dispositions PENDING.
@@ -741,6 +741,59 @@ halves): on a LONG note whose current block is far from where she left the page,
 back where she was and the entry landing then reveals the current block, so the page can move once
 after the restore. On short notes — the case she reported — nothing moves at all. Her ruling keeps the
 entry landing deliberately ("the entry landing is not retired"), so this is built exactly as ruled.
+
+#### PIECES 3 + 4 — THE EMPTY BLOCK'S FACE AND THE DOOR'S EDGE (row 2, her ruling R-Q2)
+
+**The oracle problem, and how it was answered.** Both halves of row 2 are claims about what a REAL
+mount draws, and neither is reachable the usual way: a SwiftUI `Text` or `Button` is drawn, never
+mounted as an `NSView` (KnownIssues' rig row). The accessibility tree was tried first and **is not an
+option here — measured**: a hosted `TakesBoardView` reports exactly ONE accessibility element (the
+hosting view, role `AXGroup`) with no children at all. So both pins ride DEBUG render oracles the views
+themselves feed — the `TakesEmptyStateDoors` / `LensesGeometry` pattern this codebase already uses for
+exactly this: **`TakesCellChrome`** (variantID → the chrome words that cell draws over its pane) and
+**`TakesArticleDoorProbe`** (the ＋ new block door's own frame, in window space). One trap recorded: the
+door's probe must sit INSIDE the new leading padding — outside it, it reads the padding's frame and
+reports the old place.
+
+**RED ON OLD, measured before either fix** (`TakesEmptyBlockFaceTests`, the oracles wired to the
+SHIPPED code — `/tmp/red4.log`, local):
+
+- `anEmptyBlockShowsNoPlaceholderWords` — the empty block's cell reported
+  **`["empty take — line kept"]`** where `[]` is owed.
+- `theNewBlockDoorsEdgeSitsOnTheProsesEdge` — **`door.minX 210.0 · prose 218.0 · off by 8.0`** — the
+  door's dashed rect stood 8 pt left of the first character of the prose above it. Exactly the cell's
+  `.padding(2)` plus the take pane's `textContainerInset` of 6; her image 2's daylight, in numbers.
+
+**What shipped.**
+
+- **The R103 overlay is GONE** (`TakesShared.swift`). An empty block in Takes renders as the pane's own
+  empty line, exactly as Write renders it. The supersession is written where the overlay was: **only
+  the FACE retires — R103's substance stands** (the block keeps its own line, its own pane and its ⑂+
+  badge), and it is still pinned where it always was (`PaneTextAuthorityTests`,
+  `TakesBoardSoakTests`), plus a new `theEmptyBlockStillHasItsOwnRow` here. The string had exactly one
+  production reader (grepped); no tutorial or helper names it. `LensesBoardView` composes the same
+  `TakesCellView`, so the Lenses columns inherit the change with no edit — verified by grep, and its
+  suites ride green.
+- **The door aligns to the prose.** `PaneTextView.takeSurfaceInset` (6) and
+  `TakesBoardView.articleCellPadding` (2) are now NAMED where they were literals, and
+  `TakesBoardView.articleTextLeadingInset` is their sum — the one number the article's `＋ new block`
+  door pads by and the same one the cell's own padding uses, so the door cannot drift from the text it
+  stands under. `TakesEmptyStateView`'s centred empty-NOTE layout is untouched, as the brief requires.
+
+**GREEN:** `✔ Test run with 8 tests in 2 suites passed` (`TakesEmptyBlockFaceTests` ·
+`TakesArticleScrollTests`), and the takes neighbourhood in one run — **`✔ Test run with 103 tests in 15
+suites passed`** (adding `TakesLandingTests` · `PaneSurfaceTests` · `PaneTextAuthorityTests` ·
+`LensesReorderTests` · `TakesPresentationTests` to piece 2's set).
+
+**A refactor made mid-piece, and why (it is in the diff, so it is recorded here).** The restore's state
+machine started as view `@State` written from inside the scroll-geometry action. Two facts moved it
+onto `TakesBoardLayout`: a `@State` written and re-read inside ONE update transaction is not a promise
+SwiftUI makes (measured earlier in this batch — a view-held reveal target never re-armed), and P-9 puts
+rules in the model anyway. `TakesBoardLayout.consumeArticleGeometry(_:remembered:positionedByUser:)`
+now answers `.scroll(y) | .remember(y) | .wait` and the view only performs it. **Checked, not assumed:**
+the SwiftUI "Modifying state during view update" warning this surface already emitted is PRE-EXISTING
+board chrome noise and the rate went DOWN, not up — 30 warnings over 3 mounts on the pre-fix tree
+(10/mount), 55 over 7 mounts after (7.9/mount).
 
 **Two environment notes, recorded so they are not met twice.** (1) WalkKit's `walk-cap` writes
 `w<n>.png` where `n` is the window's index in ITS OWN listing and does **not** clear the directory — a

@@ -627,6 +627,30 @@ final class TakesViewModel {
         board.noteArticleViewport(height: height)
     }
 
+    /// True once the article is where the memory says it should be — the
+    /// moment a landing may be considered.
+    var articleReadyForLanding: Bool { board.articleReadyForLanding }
+
+    /// The article reported its geometry: run the board's restore rule against
+    /// the SESSION's memory and answer the one thing the view can do about it
+    /// — an offset to scroll to, or nil.
+    func consumeArticleGeometry(
+        _ geometry: TakesBoardLayout.ArticleGeometry, positionedByUser: Bool
+    ) -> CGFloat? {
+        switch board.consumeArticleGeometry(
+            geometry, remembered: rememberedArticleOffset,
+            positionedByUser: positionedByUser
+        ) {
+        case .scroll(let y):
+            return y
+        case .remember(let y):
+            rememberArticleOffset(y)
+            return nil
+        case .wait:
+            return nil
+        }
+    }
+
     func articleReveal(for placementID: String) -> TakesBoardLayout.ArticleReveal {
         board.articleReveal(for: placementID)
     }

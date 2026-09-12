@@ -128,6 +128,44 @@ extension View {
     }
 }
 
+#if DEBUG
+/// **R-Q2's oracle: what CHROME WORDS a take cell draws OVER its pane.**
+///
+/// Her ruling (17p batch a, row 2) is that there are none — a take pane shows
+/// the take's own text and nothing else, so an empty block reads as the empty
+/// line Write already renders. A pin cannot see that any other way: a SwiftUI
+/// `Text` is drawn rather than mounted as an `NSView` (KnownIssues' rig row),
+/// and a hosted board builds NO accessibility tree in the test host (measured
+/// at this batch: exactly one element, the hosting view, with no children).
+///
+/// So the cell DECLARES what it draws, on every render, and the pin reads the
+/// declaration. The list is empty today and the call site is the place a
+/// future overlay would have to pass through.
+@MainActor
+enum TakesCellChrome {
+    /// variantID → the chrome words drawn over that cell's pane.
+    static var overlayWords: [String: [String]] = [:]
+
+    static func record(_ variantID: String, _ words: [String]) {
+        overlayWords[variantID] = words
+    }
+
+    static func reset() { overlayWords = [:] }
+}
+#endif
+
+extension View {
+    /// The DEBUG oracle write (a no-op outside DEBUG).
+    @ViewBuilder
+    func recordCellChrome(_ variantID: String, _ words: [String]) -> some View {
+        #if DEBUG
+        self.onAppear { TakesCellChrome.record(variantID, words) }
+        #else
+        self
+        #endif
+    }
+}
+
 /// One cell: the column's resolved take for a slot. Rendering + gestures
 /// only — every rule lives in the model.
 struct TakesCellView: View {
@@ -185,25 +223,27 @@ struct TakesCellView: View {
                 menuItems: { menuSpecs(resolved: resolved) },
                 caretToEndToken: caretToEndToken)
                 .background(tinted ? tokens.accent.opacity(0.12) : Color.clear)
-                .overlay(alignment: .topLeading) {
-                    // Batch 9 (R103, her ruling): a take deleted down to
-                    // nothing KEEPS the block's own line — and the kept
-                    // line says what it is instead of sitting as an
-                    // invisible void (boundaries are invisible at rest).
-                    // Write renders the same empty line as plain prose;
-                    // export still skips blank takes (the Phase 4 rule —
-                    // output, not editing). `resolved.text` already
-                    // overlays the live buffer (the authority), so the
-                    // emptiness check is one equality (13b 1a).
-                    if resolved.text.isEmpty {
-                        Text(tokens.chromeLabel("empty take — line kept"))
-                            .font(tokens.small)
-                            .foregroundStyle(tokens.faint)
-                            .padding(.leading, 8)
-                            .padding(.top, 6)
-                            .allowsHitTesting(false)
-                    }
-                }
+                // **NOTHING is drawn over a take's pane** (17p batch a, row 2
+                // — her ruling R-Q2, "no placeholder anywhere"): an empty
+                // block in Takes is an empty LINE, exactly as Write renders
+                // it. The `[]` is the whole face, declared so a pin can read
+                // it, and this is the place any future overlay would have to
+                // pass through.
+                //
+                // **This SUPERSEDES the FACE of Phase 13 batch 9's R103**, and
+                // only the face. R103's substance stands and is pinned
+                // elsewhere (`PaneTextAuthorityTests`, `TakesBoardSoakTests`):
+                // a take deleted down to nothing KEEPS the block's own line —
+                // the row, the pane and the ⑂+ badge are all still there. What
+                // retires is the words that described it. They were written
+                // for a take she had emptied on purpose; 18c's Return and
+                // 17o's ＋ new block door made empty blocks EVERYDAY, so the
+                // note greeted a block she had just made — and under the
+                // editing indicator OFF, where a live pane draws no ring
+                // (17o batch c, U-7), her caret sat in the middle of the
+                // words. Her report: *"the invitation to write a block is
+                // weird… I want it to return to what it used to look like."*
+                .recordCellChrome(resolved.variantID, [])
         } else {
             Text("· · ·")  // a gap slot renders a gap, never crashes
                 .foregroundStyle(tokens.muted)

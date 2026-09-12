@@ -690,9 +690,16 @@ extension PaneTextView {
         makeSurface(inset: EditorTypography.inlineSurfaceInset, allowsUndo: false)
     }
 
+    /// How far a take pane insets its text from its own frame. **Named
+    /// because a second surface has to line up with it** (17p batch a, row 2 —
+    /// her R-Q2: the Takes article's ＋ new block door aligns to the PROSE's
+    /// left edge, not the cell's), and two copies of a number that must agree
+    /// is how a face drifts.
+    static let takeSurfaceInset: CGFloat = 6
+
     /// A take pane's configuration (live/read toggled by the composer).
     static func makeTakeSurface() -> PaneTextView {
-        makeSurface(inset: 6, allowsUndo: true)
+        makeSurface(inset: takeSurfaceInset, allowsUndo: true)
     }
 }
 

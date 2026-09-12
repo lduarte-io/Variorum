@@ -384,6 +384,104 @@ final class TakesBoardLayout {
             viewportHeight: articleViewportHeight)
     }
 
+    // MARK: - The scroll memory's one-shot restore (17p batch a, row 1)
+
+    /// The article's scroll geometry, reduced to the three numbers the memory
+    /// needs (Equatable, so the view's hook republishes only when one of them
+    /// actually moves).
+    struct ArticleGeometry: Equatable {
+        let offset: CGFloat
+        let content: CGFloat
+        let viewport: CGFloat
+
+        /// How far the article can scroll — the restore clamps to it, because
+        /// a note edited elsewhere may be shorter than when she left it.
+        var travel: CGFloat { max(content - viewport, 0) }
+    }
+
+    /// The one-shot restore's state. `.undecided` until the FIRST honest
+    /// geometry — **never resolved in `onAppear`**, whose ordering against
+    /// that first geometry event is not ours to assume (measured at this
+    /// batch: the geometry hook fires first, and a mount that records its own
+    /// 0 before reading the memory erases the very thing it came back for).
+    /// `.wanted` then holds while the lazy column's content is still growing,
+    /// re-aiming as it does — the 17o batch-b ladder's RAISE-M1 lesson (never
+    /// restore against a frame that has not been filled) in this surface's
+    /// vocabulary.
+    enum ArticleRestore: Equatable {
+        case undecided
+        case wanted(CGFloat)
+        case settled
+    }
+
+    /// What the view should do with a geometry report. `nil` = nothing.
+    enum ArticleRestoreStep: Equatable {
+        /// Scroll to this offset (the restore, aiming or re-aiming).
+        case scroll(CGFloat)
+        /// Write this offset into the session's memory.
+        case remember(CGFloat)
+        /// Wait — the content is still growing.
+        case wait
+    }
+
+    @ObservationIgnored private(set) var articleRestore: ArticleRestore = .undecided
+    /// The article has reported real geometry at least once. Until it has,
+    /// nothing knows where anything is, so no landing may be spent.
+    @ObservationIgnored private(set) var articleGeometrySeen = false
+
+    /// True once the page is where the memory says it should be — the moment
+    /// a landing may be considered, and not before (a reveal judged against a
+    /// position we are about to change would be judged against the wrong page).
+    var articleReadyForLanding: Bool {
+        articleGeometrySeen && articleRestore == .settled
+    }
+
+    /// **THE RESTORE, as a decision.** Pure but for its own state, so the
+    /// whole rule can be pinned without a window: what the article should do,
+    /// given where it is, how tall it is, what it remembers, and whether her
+    /// hand has already moved it.
+    func consumeArticleGeometry(
+        _ geometry: ArticleGeometry, remembered: CGFloat?, positionedByUser: Bool
+    ) -> ArticleRestoreStep {
+        guard geometry.viewport > 0 else { return .wait }
+        articleGeometrySeen = true
+        articleViewportHeight = geometry.viewport
+        switch articleRestore {
+        case .undecided:
+            // Read the memory BEFORE this mount has written anything into it.
+            guard let remembered, remembered > 0.5 else {
+                articleRestore = .settled
+                return .remember(geometry.offset)
+            }
+            articleRestore = .wanted(remembered)
+            return restoreStep(to: remembered, geometry, positionedByUser: positionedByUser)
+        case .wanted(let wanted):
+            return restoreStep(to: wanted, geometry, positionedByUser: positionedByUser)
+        case .settled:
+            return .remember(geometry.offset)
+        }
+    }
+
+    private func restoreStep(
+        to wanted: CGFloat, _ geometry: ArticleGeometry, positionedByUser: Bool
+    ) -> ArticleRestoreStep {
+        // Her hand outranks a pending restore: if she has already scrolled
+        // this page herself, the restore is over and we remember her place.
+        if positionedByUser {
+            articleRestore = .settled
+            return .remember(geometry.offset)
+        }
+        let target = min(wanted, geometry.travel)
+        guard abs(geometry.offset - target) < 0.5 else { return .scroll(target) }
+        // There. Settle only once the content is tall enough that the target
+        // IS the remembered place; otherwise stay armed and a later growth
+        // event carries us the rest of the way.
+        if target >= wanted - 0.5 || geometry.travel <= 0 {
+            articleRestore = .settled
+        }
+        return .wait
+    }
+
     func toggleExpanded(_ blockID: String) {
         if expandedBlocks.contains(blockID) {
             expandedBlocks.remove(blockID)
