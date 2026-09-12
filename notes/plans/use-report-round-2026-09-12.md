@@ -2923,7 +2923,8 @@ change to what `last_touched_at` MEANS (AppSpec §10 untouched); the Timeline mo
 untouched; no stored stamp anywhere new (no denormalization); no new `setting` key (the sort is
 LOCAL UI state, so AppSpec §7's seeds are untouched — see the canon note at the end).
 
-**LIVE STATUS (flipped in the same commit as each piece):**
+**LIVE STATUS — THE BATCH IS CLOSED** (`2d43df7c` · `a33db2bf` · `440d5c52` · `4a838d70` ·
+`f531955a`; every piece flipped in its own commit as it landed):
 
 - **Piece 1 — THE CORE (`sort:`/`direction:` · `LibrarySort.title` · `CatalogHit`'s two stamps ·
   `NoteStamps.createdAt` · the ONE wording brain `TimeStampFace`):** DONE (`2d43df7c`).
@@ -2983,7 +2984,7 @@ LOCAL UI state, so AppSpec §7's seeds are untouched — see the canon note at t
   so the read that would fill it can never start (the stamp was blank forever, and the first
   run of all three mounted pins caught it). The waiting face is a zero-size `Color.clear`,
   which row two sizes at 0 and treats exactly as "no stamp".
-- **Piece 5 — THE WALK (the acceptance gate) + the closing runs:** DONE — this commit. Seventeen
+- **Piece 5 — THE WALK (the acceptance gate) + the closing runs:** DONE (`f531955a`). Seventeen
   captures in `notes/plans/use-report-2026-09-12-screens/18h-1/` (gitignored; listed below), both
   voices, on the DEV-STORE Debug build (`io.lduarte.Variorum.debug`, pid 86093, built into
   `App/Variorum/DerivedData/18h1`); her `/Applications` app was not running before, during or
