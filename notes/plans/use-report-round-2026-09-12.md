@@ -2433,3 +2433,103 @@ I re-read each traced road before answering. Tally: **10 findings — 10 agree, 
 - The `min`-clamp in both badge overlays is why R1-3 is architectural rather than a bug today.
 
 **Counts:** 0 BLOCKER · 1 MAJOR (R1-1) · 5 MINOR (R1-2 … R1-6) · 4 NIT.
+
+#### Reviewer's dispositions + fixes (round 1)
+
+*(The cross-model flow's final word, made in the reviewer's own session after the implementer's
+10/10 agree pass (`0b4e7fac`). Every bug-class fix below landed with its pin and a RED-ON-OLD number
+measured by BEHAVIORAL REVERT — the pre-fix source file(s) restored from `b84336bf` via `git show`
+onto the committed tree, the pin run red, the file(s) restored by `git checkout --`, the tree verified
+diff-clean and the suite re-run green before the next commit. Commits per finding, path-scoped, plain
+messages, pushed after each. `Sources/`, `App/Variorum/Shared/`, `Sync/`, `BlockRangeIndex`,
+`PaneTextAuthority`: untouched (`git diff --stat b84336bf..HEAD -- Sources App/Variorum/Shared` is
+empty). Zero app instances at `/Applications` at every timing run.)*
+
+- **R1-1 · MAJOR · CONFIRMED-FIXED — `4e21cde0`.** The lane is a REFLOW, so each contained host's
+  prose-column door is its reflow door: `ReadPostViewModel.proseColumnDidChange()` = `remeasure()`
+  (publishes the re-wrapped height AND re-reads the ⑂ badges' fragment positions AND re-sends the
+  decorations — `remeasure` → `refreshBadges` → `refreshDecor`; the decor gate opens on its own since
+  the state's `textLeft` moved), wired at `ReadPostView.swift`'s `install` in place of
+  `pushOverlaysToSinks` (which re-sent decorations only and pushed the badges from STORED pre-lane
+  state — the implementer's own re-trace, adopted: `remeasure` is strictly better than a
+  composition there); the inline coordinator composes its `remeasure()` onto the model's door after
+  the controller is built (`EditorView.swift`, `InlineEditorSurface.Coordinator.install`) — the
+  implementer's correction that the inline half is NOT transient is accepted (`presentationsByBlock`
+  / `commentsByBlock` are `@ObservationIgnored`, so no SwiftUI pass follows a comment; the heal waited
+  for her next keystroke). **Pins (loop-driven, the R1-5 shape):**
+  `BlockDecorLaneTests.theReadTiersLaneReMeasuresItsHeightThroughTheProductionLoop` — the REAL
+  `ReadPostSurfaceCoordinator.install`, the comment written through `Operations.addBlockComment` and
+  delivered by the model's own decor-context observation, then the surface READ: published height ==
+  measured (±0.5), grown by lines (non-vacuity: a 220-word paragraph at 600 pt), the badge's FINAL
+  `maxX ≤ proseLeft`; `…theContainedEditorsLaneReReportsItsHeightThroughTheProductionLoop` — the real
+  `InlineEditorSurface.Coordinator.install` with its height report captured as `makeNSView` captures
+  it, the comment through `adoptComments`. **RED ON OLD (behavioral revert of `ReadPostView.swift` ·
+  `ReadPostViewModel.swift` · `EditorView.swift` to `b84336bf`, the two pins run):** read tier
+  **`contentHeight 448.0` vs measured `516.0`** (68 pt — four lines outside the frame) and inline
+  **reported `448.0` vs measured `499.0`** (51 pt — three lines), each the ONLY failing expectation
+  in its pin: the lane arrived, the badge stood in it, the height stayed behind — the traced
+  mechanism in numbers (`scratchpad/…`, local). Restored, diff-clean, re-run green.
+- **R1-2 · MINOR · CONFIRMED-FIXED — `a536e216`.** `DecorLaneReservation.reserve` measures "nothing
+  changed" against the surface's RESTING leading inset (`inlineInset(needsLane: false)`), never against
+  "never asked"; a released lane returns `insets` to nil, so the `textContainerOrigin` override defers
+  to `super` exactly while no lane is reserved (the implementer's second half — correctness by
+  coincidence — fixed with it). **Pin:** `BlockDecorLaneTests.theFirstLanelessAskReportsNoMovement`
+  (both surfaces: the first two laneless asks report nothing; reserve → release → the resting numbers
+  and nothing to say). **RED ON OLD (behavioral revert of `DecorLane.swift` to `b84336bf`):** both
+  surfaces **returned `true` on the first laneless ask** — 2 issues, `EditorTextView` and
+  `PaneTextView` each. Restored, diff-clean, re-run green.
+- **R1-3 · MINOR (architectural) · CONFIRMED-FIXED — `aa52961e`.** Both ⑂ badge overlays
+  (`BadgeOverlayController.render`, `ReadBadgeOverlay.render`) read the prose column's right edge
+  through the surface's ONE derivation (`proseRight`); `ReadBadgeOverlay`'s surface is typed
+  `ReadPostTextView` (it always was one; no other construction site — grepped). **No pin owed, by the
+  finding's own letter:** the `min(bounds − size − 8, columnRight + 6)` clamp makes the old and new
+  numbers coincide today (580 + 6 vs 612 + 6 both lose to `bounds − size − 8` for any badge wider
+  than ~26 pt), so a pin would pass on both sides and be hollow; the traced degradation — the next
+  change to the lane's width or the trailing inset moving the ⑂ badge silently on exactly these two
+  hosts, with no pin watching — is the justification, and the derivation is now the one the decor
+  pass reads. The shipped badge pins ride unmodified (parity).
+- **R1-4 · MINOR (cleanliness) · CONFIRMED-FIXED — `5ad571ed`.** The archived row passes the literal
+  `nil` with the rule cited, as the stranded site already did; the purge door's help sentence lives
+  ONCE per kind (`TrayRowVerbs.Purge.block(act:)` / `.take(act:)` over one private `door(_:act:)`),
+  byte-identical to the shipped sentences. No pin (nothing observable changes; the face pin measured
+  the archived row at `["Put back"]` before and after, the enumeration pin holds the rule).
+- **R1-5 · MINOR · CONFIRMED-FIXED — rides `4e21cde0`.** The effect-level pins for W-1/W-2 are R1-1's
+  two `…ThroughTheProductionLoop` pins (host door → re-measure → the badge's FINAL rect, on BOTH
+  hosts, through the real coordinators); the two hand-fed pins stay as pins of the pure geometry with
+  their docs corrected to say so, and the file header names the split.
+- **R1-6 · MINOR · CONFIRMED-RECORDED — `d6cc8f30`, QUESTIONS #102 PROVISIONAL.** The lane on every
+  Read page (the workspace's read-cheap pane, the note window, the paged book — all through
+  `makeReadSurface`, not only the book Outline R-Q4 names) was an accident of scope, per the
+  implementer's own answer; the shipped arm (a) is the spec-defensible one and stands while she
+  decides; (b) always reserve on the read tier (one stable edge, 64 pt of measure lost on every
+  uncommented note); (c) the Outline's alone with the other pages' comment count drawn by the
+  composition. No code change. Owner: her word at the morning bundle; the line is named in the entry.
+- **NIT-1 · CONFIRMED-FIXED — `d39b6100`** (the orphaned `onWidthChange` doc returned to its
+  property). **NIT-2 · CONFIRMED-FIXED — `d39b6100`** (`reservesDecorLane`'s sentence).
+  **NIT-3 · CONFIRMED-FIXED — `d39b6100`** (`BlockDecor.commentBadgeAir` named beside `decorAir`; the
+  call site reads the constant; the test's own `own: 4` literals stay as the test's statement of the
+  number).
+- **NIT-4 · DISMISSED (the implementer's trade stands).** Folding the two byte-identical
+  `setDecorLane` bodies into `extension DecorLaneSurface where Self: NSTextView` needs a settable
+  `lane` requirement on the protocol, which widens the seam — any adopter could then rewrite the
+  reservation, where today `lane` is `private` in each class and the brain is the only writer. Three
+  duplicated lines that cannot drift (they call the one brain and write what it returns) are the
+  cheaper of the two costs; recorded as a knowing choice in the file already ("three-line adopters").
+  No change.
+
+**Closing runs (this tree, `d6cc8f30`; zero instances):** the batch's closing set in ONE
+`xcodebuild test` from `App/Variorum/` over the record's 57 type names + `InlineEditorWindowTests`
+(whose harness the new pins lean on) → **`✔ Test run with 432 tests in 58 suites passed after
+109.638 seconds`** — 58 suites for 58 names, zero `✘`, zero `skipped` matches in the log
+(`scratchpad/closing-r1.log`, local; the record's 426/57 + the three new pins + the harness suite's
+three). The ten touched suites (`BlockDecorLaneTests` · `ReadTierTests` · `InlineEditorWindowTests` ·
+`TrayFilterTests` · `TrayPanelMoveTests` · `TrayPanelShapeTests` · `NoteTrayTests` ·
+`BlockDecorGeometryTests` · `MarginHoverCommentTests` · `PaneSurfaceTests`) three times: **`✔ Test
+run with 96 tests in 10 suites passed`** ×3 (7.49 s · 7.52 s · 7.59 s). Core `swift test` not owed
+(`Sources/` diff-empty); the iOS build not owed (`Shared/` diff-empty).
+
+**Round-1 tally:** 1 MAJOR fixed · 4 MINOR fixed (R1-2 · R1-3 · R1-4 · R1-5) · 1 MINOR recorded
+(R1-6 → #102) · 3 NIT fixed · 1 NIT dismissed. **Commits:** `4e21cde0` · `a536e216` · `aa52961e` ·
+`5ad571ed` · `d39b6100` · `d6cc8f30` (+ this record). No trailers. The tree is clean; `main` ==
+`origin/main`. The implementer's sanity pass over `b84336bf..HEAD` is next; anything it raises
+returns here for the final word.
