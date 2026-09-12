@@ -93,7 +93,23 @@ final class MobileLibraryViewModel {
     /// the observation. Never a write — sorting reshuffles nothing
     /// (CoreDescription pillar 7 is about the STAMPS; the picker only
     /// chooses which one orders the list).
+    ///
+    /// **It refuses `.title`** (the 18h ladder, R2-5). This model's listing is
+    /// `observeLibrary` → `Queries.library`, which reports its ordering value
+    /// as `TimelineItem.stamp` and therefore **refuses `.title` by
+    /// precondition — a trap, live in release**. 18h gave `.title` a word in
+    /// the shared table so a picker could say it, and this round's parity row
+    /// invites the phone to grow the sort; so the very next touch that adds
+    /// `.title` to `sortOptions` would turn a picker tap into a crash rather
+    /// than a degraded order. The guard is here, at the door, so that touch
+    /// is a no-op it can notice instead of a trap it discovers.
+    ///
+    /// A word without an offer is the state this leaves: the phone can NAME
+    /// `.title` (the shared table) and cannot BE it (this guard) until its
+    /// listing can serve it — which is `searchCatalog`'s road, not
+    /// `library`'s, and a mobile decision either way.
     func setSort(_ next: Queries.LibrarySort) {
+        guard next != .title else { return }
         guard next != sort else { return }
         sort = next
     }
