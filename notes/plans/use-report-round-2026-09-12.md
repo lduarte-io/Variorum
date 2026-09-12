@@ -1,4 +1,4 @@
-# The 2026-09-12 use-report round — 17p · 18g · 18h · 18i (EXECUTION PLAN, v1)
+# The 2026-09-12 use-report round — 17p · 18g · 18h · 18i · 18j (EXECUTION PLAN)
 
 **STATUS: v2 — RULED AND RUNNING (the kickoff sitting of 2026-09-12: every Q-1…Q-10 answered — §7 is the record; §1 keeps the questions as asked). First batch: 17p batch a (R-1).** *(v1, the same day: READY FOR THE KICKOFF SITTING.)* Run shape, hers: `/architect-phase`, the second round
 "in the mold of" the 2026-09-06 use-report round — a Fable orchestrator that stays LEAN, `opus-implementer`
@@ -24,9 +24,9 @@ promises but its block rows lack, a collapsed field in the Callout Emoji alert, 
 the callout's emoji drawn over the text in the book Outline, the confirmation toasts "always
 appearing" — and four asks that change what the app IS: created/edited times in the Library and the
 note, the Library sortable by time, an "edited on this day" search, and pastel colour palettes with a
-custom hex. This round takes all of it, grouped by KIND into four letters: **17p** the defects ·
-**18g** colour palettes · **18h** time (stamps, sort, the day search) · **18i** the confirmations
-setting. The phone's opening-scroll complaint rides 17p if it shares the Mac's mechanism (Q-9).
+custom hex. This round takes all of it, grouped by KIND into five letters: **17p** the defects ·
+**18g** colour palettes (+ the two-tone builds, R-Q11) · **18h** time (stamps, sort, the day search) ·
+**18i** the confirmations setting · **18j** dark mode (13u4's item 6, pulled forward — R-Q12). The phone's opening-scroll complaint rides 17p if it shares the Mac's mechanism (Q-9).
 
 ## 1. Her asks, and THE SITTING'S QUESTIONS (Q-1…Q-10 — recommended option FIRST; her rulings land here VERBATIM-FAITHFUL the turn she gives them)
 
@@ -132,7 +132,7 @@ Her words are quoted from the report; the ledger (§3) carries the rows.
 - **Q-10 — THE CAST AND THE ORDER.** Recommended: `fable-reviewer` on 17p batch a (the landing family
   — the last round's batch-b ladder found a BLOCKER there) and on 18g (a default's meaning: the
   voice/palette resolution reaches every surface); `opus-reviewer` elsewhere; the round-end Fable
-  pass over the Opus-reviewed letters as last time. Order: **17p → 18h → 18i → 18g** (her two named
+  pass over the Opus-reviewed letters as last time. Order: **17p → 18h → 18i → 18g → 18j** (her two named
   pains first; the palettes last because they are the widest surface change and their mockup wants
   her eye before the build).
 
@@ -147,8 +147,8 @@ Her words are quoted from the report; the ledger (§3) carries the rows.
   batches (the Takes board; the chrome singles — the phone's row left for the mobile session, R-Q9); 18g one unit (the token layer + one
   settings row + the mockup's four seeds); 18h one unit (a core column on the listing item, a sort
   menu, two stamps, one filter) — the day search is its second half and may be held (Q-8); 18i one
-  unit (the kind on the one status seam + a setting + a bar slot). Nothing here is phase-sized; the
-  widest change is 18g's palette resolution, which is why it goes last and gets the Fable eye.
+  unit (the kind on the one status seam + a setting + a bar slot). **18j (dark mode) IS phase-sized** — with 18g it makes TWO phase-sized units under ONE theme (appearance), AT the
+  sizing guidance's line (said here, R-Q12); everything else is small. 18g goes after 18i and gets the Fable eye; 18j runs last.
 - **THE 13u FENCE — untouched, as last round:** nothing here touches `BlockRangeIndex`,
   `EditorTextView`'s seam, `CrossBlockEditPlanner` or `PaneTextAuthority`'s liveness contract. The
   Takes scroll is the BOARD's (`TakesBoardLayout`/`TakesChoreographer`/the article's `ScrollView`),
@@ -178,6 +178,8 @@ traced by READING, unproven — the pin is the first act of every fix. Image num
 | 10 | "i need to be able to sort the library by time" | Library header | `LibraryViewModel.start` hardwires `sort: .lastTouched, direction: .desc` (`:48–50`); core `LibrarySort` already has entryDate · createdAt · lastTouched · lastMajorRevision (`Timeline.swift:97–108`), no title case; no control in the header (`LibraryCatalogView.swift:690–735`) — §4.8 | 18h · 1 | TRACED |
 | 11 | "how difficult it would be to implement being able to search for any note edited on a particular day" | Library filter | Cheap: `idx_container_touched` on `last_touched_at`; the honest caveat and the savepoint union — §4.8 | 18h · 2 | RULED (R-Q8: build now) |
 | 12 | "basic color themes… lavender, mint green, pink, blue, a pastel set… the hex code of your default theme" (image 5) | The token layer + Settings | `VoiceTokens.resolve(voice:dark:)` picks one of four static token sets (`Shared/Theme/VoiceTokens.swift:153–160`); `ThemeStore` reads `Queries.themeSettings` (six keys); 67 resolve sites consume tokens, none hold a literal — §4.6 | 18g | RULED (R-Q6) |
+| 13 | "a couple mixed color builds, like how terminal has tan and blue… like gold and black" | The token layer + Settings | Two seeds through the one brain (R-Q11); the five in the mockup's second half | 18g | RULED (R-Q11) |
+| 14 | "dark theme was somewhere in 13u but we can pull that forward and up and into this work" | Every surface, both voices | The Mac follows the system scheme (`RootView.swift:89`); dark tokens exist (R51) but no in-app choice and no dark walk has ever run; 13u4 item 6 → 18j | 18j | RULED (R-Q12) |
 
 ## 4. The traces (the architect's read — by reading, never by running; the pin decides)
 
@@ -346,12 +348,29 @@ table in the record), the `receipt_style` setting (core `Queries.themeSettings` 
 appearance family; the Appearance pane's row), the bar's quiet slot. Evidence: the per-class pins;
 walked with the setting cycled. Reviewer: `opus-reviewer`.
 
-### 5.4 — 18g · colour palettes (row 12)
+### 5.4 — 18g · colour palettes (rows 12 · 13 — the four pastels + the five two-tone builds + custom)
 ONE batch after her eye on the mockup: `PaletteDerivation` (pure, in `Shared/Theme`, pinned — every
 derived token's contrast against the room checked against a floor, both appearances), the resolver's
 palette parameter, the two settings, the pane's swatch row + hex field, `ThemeTokenTests` extended
-(default = byte-identical to today's four sets — the parity proof). Evidence: the pins; a walk in
-both voices × four seeds × custom × light and dark; captures. Reviewer: `fable-reviewer`.
+(default = byte-identical to today's four sets — the parity proof). R-Q11: the brain takes TWO seeds
+(room, accent); the pastels are one-seed cases; the five two-tone builds are named presets. Evidence:
+the pins; a walk in both voices × (default + 4 pastels + 5 duos + custom) × light and dark; captures.
+Reviewer: `fable-reviewer`.
+
+### 5.5 — 18j · dark mode (row 14 — 13u4's item 6, pulled forward at her word, R-Q12)
+ONE phase-sized unit, run AFTER 18g (its dark readings ride the palettes): (1) the appearance choice —
+follow system · light · dark — a LOCAL preference (device taste, the `readModeOutlineShown` class; the
+voice and palette stay synced) applied at the window root (`preferredColorScheme` / the window's
+appearance) so every `@Environment(\.colorScheme)` reader follows it; (2) the every-surface dark walk
+in BOTH voices on the dev-store Debug build — the shell, the sidebar and its note box, the Library
+(all three modes), the Shelf, the Pool/Snippets, every note mode (Write · Takes · Read · Lenses ·
+Compare · Blocks · Canvas), the book modes, the ceremonies, the tray, the Trash, Settings and every
+sheet — each capture verdicted RIGHT or FIXED (literal colours, system-default fills, unreadable ink,
+the markdown palette, the callout swatches' dark variants, the reading page); the phone's shipped
+dark mode is the look reference (13u's letter); (3) the R51 pin (fully black room in both voices)
+extended to the palettes' dark families. Evidence: the sweep table (surface × voice → verdict, capture
+name) is the acceptance record; the pins per fix. Reviewer: `fable-reviewer` (the round-end pass's
+class — every surface).
 
 ## 6. THE KICKOFF PROMPT (paste-ready — for a SUCCESSOR orchestrator if this session cuts over; `notes/SessionResiliencyProtocol.md`)
 
@@ -368,7 +387,10 @@ both voices × four seeds × custom × light and dark; captures. Reviewer: `fabl
 - **R-Q7 — THE MASTHEAD STAMP, CLICK TOGGLES.** She picked the recommended option: at the trailing end of the "in no book" row, *edited today 1:33 AM* (or *edited Sep 9*); a click flips it to *created …*, a click again returns; the Library rows get a muted trailing stamp too.
 - **R-Q8 — THE DAY SEARCH, BUILT NOW.** She picked *"Build now, small filter in the Library"*: a date field in the Library header ("on day…"), the union query (the last-edit stamp OR a savepoint that day), half a batch beside the sort menu.
 - **R-Q9 — THE PHONE: THE WRITE PAGE — AND IT LEAVES THIS ROUND.** She picked *"The Write page when a note opens"*; then, minutes later, her instruction verbatim: *"the mobile bug can be noted and I can handle it in a separate variorum mobile session - that repo has its own rules, if it's not shared. I would like you to write about it in the plans for that repo though, to be completed as a standalone part or with 13u, if I work on mobile after 13u is done."* → **17p batch c is RETIRED from this round.** The item is written into the mobile branch's plan (`notes/plans/mobile-round-2-orchestrator-handoff.md` §12.2 on `mobile`, commit pushed) with the trace, the ruled shape (reveal minimally, remember the offset per note for the session, the room stays) and the fences; the parity line is `notes/MobileSoul.md` §6 row PL-22. Owner: the mobile app project row.
-- **R-Q10 — CAST AND ORDER AS PROPOSED.** Order **17p → 18h → 18i → 18g**; `opus-implementer` everywhere; `fable-reviewer` on 17p batch a and on 18g; `opus-reviewer` elsewhere; the round-end Fable pass over the Opus-reviewed letters as last round.
+- **R-Q10 — CAST AND ORDER AS PROPOSED.** Order **17p → 18h → 18i → 18g → 18j** (18j added at R-Q12); `opus-implementer` everywhere; `fable-reviewer` on 17p batch a and on 18g; `opus-reviewer` elsewhere; the round-end Fable pass over the Opus-reviewed letters as last round.
+
+- **R-Q11 — THE PASTELS ARE IN; FIVE TWO-TONE BUILDS JOIN THEM (2026-09-12, after seeing the mockup).** Her words: *"yeah those look good, I like those. I want them included. I think I'd also like a couple mixed color builds, like how terminal has tan and blue. you can determine 5 that you think would look the coolest and most complimentary from a graphic design perspective and background, I want the app to feel good. like gold and black, for example."* → the four pastel seeds are APPROVED as mocked (adjusted at the walk at her eye); a TWO-TONE palette carries two seeds — the ROOM hue (panels, wash, take tints, hairline) and the ACCENT hue (the chrome words, chips) — through the same derivation brain; the architect's five, in the mockup's second half for her eye: **gold & black** (her example; dark-led — black room, gold words; light = ivory + deep gold) · **sage & terracotta** · **slate & amber** · **plum & cream** · **ink & coral**. 18g's scope widens by the second seed (one brain, `PaletteFamily` derived from `(roomSeed, accentSeed)`; a pastel is a two-tone whose accent seed equals its room seed at a deeper tone). The five names and seeds are hers to move at the walk.
+- **R-Q12 — DARK MODE COMES FORWARD INTO THIS ROUND (2026-09-12).** Her words: *"I think dark theme was somewhere in 13u but we can pull that forward and up and into this work as well I think it would make sense to do that."* → 13u4's item 6 (*"dark mode: R51's direction (fully black in both voices); the PHONE's shipped dark mode is the look reference; token work shared"*) MOVES here as **18j — DARK MODE**: today the Mac follows the SYSTEM appearance through `@Environment(\.colorScheme)` (`RootView.swift:89`) and the dark token sets exist (R51), but no in-app appearance choice exists and the surfaces have never been walked in dark; 18j = an appearance setting (follow system · light · dark), the every-surface dark walk in BOTH voices with the fixes it finds, and the palettes' dark readings (R-Q11) riding it. Phase-sized (an app-wide pass) — the round now holds TWO phase-sized units under ONE theme (appearance: 18g + 18j), at the sizing guidance's line; said here rather than split silently. The master plan's 13u4 row loses item 6 (recorded there).
 
 **No opening question remains.** A batch that finds a new one follows §8's PROVISIONAL rule (QUESTIONS #102 next).
 
