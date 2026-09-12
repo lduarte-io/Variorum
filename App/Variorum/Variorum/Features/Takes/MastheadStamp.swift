@@ -68,7 +68,14 @@ struct MastheadStamp: View {
                 await watch()
             }
             #if DEBUG
+            // The four DEBUG oracles are this note's while its masthead
+            // stands, and nobody's after (the ladder's R2-9). Without the
+            // second line they grow one entry per note ever mounted — a
+            // retained closure among them — and a pin that forgot to reset
+            // could read an earlier mount's words as if they were this
+            // note's.
             .onAppear { PostDetailOracle.flipStamp[postID] = { flip() } }
+            .onDisappear { PostDetailOracle.resetStamp(postID) }
             #endif
     }
 

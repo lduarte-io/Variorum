@@ -226,6 +226,23 @@ struct MastheadStampTests {
                     await Task.yield()
                 }
                 try await body(session, post.id)
+
+                // **The oracles are this note's while its masthead stands,
+                // and nobody's after** (the ladder's R2-9) — asserted by
+                // every mounted pin rather than by one of them, since the
+                // teardown is the same for all three. RED ON OLD: the four
+                // dictionaries kept the note's entries (a retained closure
+                // among them) after the window went away, and a later pin
+                // that forgot to reset could read them as its own.
+                #if DEBUG
+                window.contentView = nil
+                await settle(until: { PostDetailOracle.flipStamp[post.id] == nil }, maxTurns: 20)
+                #expect(PostDetailOracle.flipStamp[post.id] == nil,
+                        "the closure is not retained past the masthead")
+                #expect(PostDetailOracle.stampShown[post.id] == nil)
+                #expect(PostDetailOracle.stampEditedAt[post.id] == nil)
+                #expect(MastheadGeometry.stampFrames[post.id] == nil)
+                #endif
             }
         }
     }

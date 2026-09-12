@@ -908,12 +908,18 @@ enum PostDetailOracle {
     static var stampShownAnywhere: String? { stampShown.values.first }
     static var stampEditedAtAnywhere: Date? { stampEditedAt.values.first }
 
-    /// Clear this note's stamp oracles before a mount, so a stale report from
-    /// an earlier one can never satisfy a pin.
+    /// Forget this note's stamp oracles — called before a pin's mount so a
+    /// stale report cannot satisfy it, and by the masthead itself when the
+    /// note goes away (the ladder's R2-9: the keying fix made them grow one
+    /// entry per note ever mounted, `flipStamp` retaining a closure each
+    /// time, and the staleness the keying closed came back in the other
+    /// direction — a later pin that forgot to reset could be answered by an
+    /// earlier mount's words).
     static func resetStamp(_ postID: String) {
         stampShown[postID] = nil
         stampEditedAt[postID] = nil
         flipStamp[postID] = nil
+        MastheadGeometry.stampFrames[postID] = nil
     }
 }
 
