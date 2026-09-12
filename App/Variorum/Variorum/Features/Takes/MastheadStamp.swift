@@ -68,7 +68,7 @@ struct MastheadStamp: View {
                 await watch()
             }
             #if DEBUG
-            .onAppear { PostDetailOracle.flipStamp = { flip() } }
+            .onAppear { PostDetailOracle.flipStamp[postID] = { flip() } }
             #endif
     }
 
@@ -94,7 +94,7 @@ struct MastheadStamp: View {
             .help("\(TimeStampFace.tooltip(subject, date: date)) \u{2014} "
                   + "click to see when it was \(showsCreated ? "last edited" : "created")")
             .accessibilityLabel(words)
-            .mastheadGeometryProbe(.stamp, in: PostDetailView.mastheadSpace)
+            .mastheadGeometryProbe(.stamp(postID), in: PostDetailView.mastheadSpace)
         } else {
             Color.clear.frame(width: 0, height: 0)
         }
@@ -103,7 +103,7 @@ struct MastheadStamp: View {
     private func flip() {
         showsCreated.toggle()
         #if DEBUG
-        PostDetailOracle.stampShown = date.map {
+        PostDetailOracle.stampShown[postID] = date.map {
             TimeStampFace.stamp(subject, date: $0, now: now)
         }
         #endif
@@ -116,8 +116,8 @@ struct MastheadStamp: View {
             }) {
                 stamps = read
                 #if DEBUG
-                PostDetailOracle.stampEditedAt = read?.editedAt
-                PostDetailOracle.stampShown = date.map {
+                PostDetailOracle.stampEditedAt[postID] = read?.editedAt
+                PostDetailOracle.stampShown[postID] = date.map {
                     TimeStampFace.stamp(subject, date: $0, now: now)
                 }
                 #endif

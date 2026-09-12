@@ -77,15 +77,18 @@ struct MastheadStampTests {
     /// with the old two-subview layout handed three subviews, `plan` refused
     /// and row two laid nothing out at all.
     @Test func theStampSitsAtRowTwosTrailingEndAndCoversNothing() async throws {
-        try await withMountedDetail(width: 1100, tags: ["walked", "tutorial"]) { _, _ in
+        try await withMountedDetail(width: 1100, tags: ["walked", "tutorial"]) { _, postID in
             #if DEBUG
             await settle(until: {
-                MastheadGeometry.stampFrame != nil && MastheadGeometry.pathChipFrame != nil
+                MastheadGeometry.stampFrames[postID] != nil && MastheadGeometry.pathChipFrame != nil
                     && MastheadGeometry.cardFrames.count == 2
                     && MastheadGeometry.doorFrame != nil
             })
             await settle(until: { false }, maxTurns: 6)
-            let stamp = try #require(MastheadGeometry.stampFrame, "the stamp reported its frame")
+            // Keyed by the NOTE since the ladder's R1-14 — the pin names
+            // whose masthead it is reading, rather than whichever mounted last.
+            let stamp = try #require(MastheadGeometry.stampFrames[postID],
+                                     "this note's stamp reported its frame")
             let chip = try #require(MastheadGeometry.pathChipFrame)
             let door = try #require(MastheadGeometry.doorFrame)
             let masthead = try #require(MastheadGeometry.contentMidX).magnitude * 2
@@ -117,8 +120,9 @@ struct MastheadStampTests {
     @Test func anAutosaveMovesTheStampWithoutReopeningTheNote() async throws {
         try await withMountedDetail(width: 1100, tags: []) { session, postID in
             #if DEBUG
-            await settle(until: { PostDetailOracle.stampEditedAt != nil })
-            let before = try #require(PostDetailOracle.stampEditedAt, "the held read delivered")
+            await settle(until: { PostDetailOracle.stampEditedAt[postID] != nil })
+            let before = try #require(
+                PostDetailOracle.stampEditedAt[postID], "the held read delivered")
             let variantID = try await session.database.read { db in
                 try Queries.renderPost(db, containerID: postID).first?.variantID
             }
@@ -127,9 +131,9 @@ struct MastheadStampTests {
                 try ops.autosave(variant, text: "a block, so the mode can host. And more.", charDelta: 10)
             }
             await settle(until: {
-                (PostDetailOracle.stampEditedAt ?? before) > before
+                (PostDetailOracle.stampEditedAt[postID] ?? before) > before
             })
-            let after = try #require(PostDetailOracle.stampEditedAt)
+            let after = try #require(PostDetailOracle.stampEditedAt[postID])
             #expect(after > before,
                     "the held read delivered the new edit stamp (\(after) vs \(before))")
             #endif
@@ -139,21 +143,26 @@ struct MastheadStampTests {
     /// **A click flips it to *created …*, and again returns** — her ruling's
     /// own gesture, driven through the very closure the Button calls.
     @Test func aClickFlipsTheStampToCreatedAndBackAgain() async throws {
-        try await withMountedDetail(width: 1100, tags: []) { _, _ in
+        try await withMountedDetail(width: 1100, tags: []) { _, postID in
             #if DEBUG
-            await settle(until: { PostDetailOracle.stampShown != nil })
-            let edited = try #require(PostDetailOracle.stampShown)
+            await settle(until: { PostDetailOracle.stampShown[postID] != nil })
+            let edited = try #require(PostDetailOracle.stampShown[postID])
             #expect(edited.hasPrefix("edited "), "it rests on the edit stamp: \(edited)")
 
-            let flip = try #require(PostDetailOracle.flipStamp, "the stamp's click reachable")
+            let flip = try #require(
+                PostDetailOracle.flipStamp[postID], "the stamp's click reachable")
             flip()
-            await settle(until: { PostDetailOracle.stampShown?.hasPrefix("created ") == true })
-            let created = try #require(PostDetailOracle.stampShown)
+            await settle(until: {
+                PostDetailOracle.stampShown[postID]?.hasPrefix("created ") == true
+            })
+            let created = try #require(PostDetailOracle.stampShown[postID])
             #expect(created.hasPrefix("created "), "a click shows when it was created: \(created)")
 
             flip()
-            await settle(until: { PostDetailOracle.stampShown?.hasPrefix("edited ") == true })
-            #expect(PostDetailOracle.stampShown?.hasPrefix("edited ") == true,
+            await settle(until: {
+                PostDetailOracle.stampShown[postID]?.hasPrefix("edited ") == true
+            })
+            #expect(PostDetailOracle.stampShown[postID]?.hasPrefix("edited ") == true,
                     "a click again returns")
             #endif
         }
@@ -194,9 +203,7 @@ struct MastheadStampTests {
             defer { UserDefaults.standard.removeObject(forKey: "postMode.\(post.id)") }
             try await withAdoptedTheme(session: session) { store in
                 MastheadGeometry.resetRowTwo()
-                PostDetailOracle.stampShown = nil
-                PostDetailOracle.stampEditedAt = nil
-                PostDetailOracle.flipStamp = nil
+                PostDetailOracle.resetStamp(post.id)
                 let window = NSWindow(
                     contentRect: NSRect(x: 80, y: 80, width: width, height: 750),
                     styleMask: [.titled], backing: .buffered, defer: false)

@@ -801,9 +801,11 @@ enum MastheadProbeSlot: Hashable {
     /// Row 59: the ＃ door — its frame IS its hit target.
     case door
     /// 18h batch 1 (her R-Q7): the note's time stamp at row two's trailing
-    /// end — keyed by the slot, like every other frame here (the subject is
-    /// the one masthead the probe space belongs to).
-    case stamp
+    /// end — **keyed by the NOTE** (the ladder's R1-14 and the brief's own
+    /// row-53 rule, "keyed by subject"): two note windows write this oracle
+    /// from two mastheads, and an unkeyed slot lets the last one mounted
+    /// answer for both.
+    case stamp(String)
 }
 
 /// **Row 80 (the Act 10 correction round, batch G) — the title row's two
@@ -889,11 +891,30 @@ enum PostDetailOracle {
     /// and the edited stamp its HELD read last delivered — so "an autosave
     /// moves it" is a claim about the observation rather than about the
     /// store it reads (the row-19 lesson, pinned).
-    static var stampShown: String?
-    static var stampEditedAt: Date?
+    ///
+    /// **Keyed by note since the ladder's R1-14.** The brief asked for the
+    /// row-53 rule ("keyed by subject") and the batch applied it to none of
+    /// the four oracles it added — including `MastheadGeometry.stampFrame`,
+    /// which the finding believed was keyed and was not. With two note
+    /// windows open in a DEBUG build the last `onAppear` won, for all of
+    /// them. DEBUG-only either way; keyed now, so a pin can name its note.
+    static var stampShown: [String: String] = [:]
+    static var stampEditedAt: [String: Date] = [:]
     /// …and its click, so a pin flips it without simulating an AppKit click
     /// into hosted chrome (`beginTitleEditing`'s own pattern).
-    static var flipStamp: (@MainActor () -> Void)?
+    static var flipStamp: [String: @MainActor () -> Void] = [:]
+
+    /// The one-window reads, for a pin that mounted exactly one detail.
+    static var stampShownAnywhere: String? { stampShown.values.first }
+    static var stampEditedAtAnywhere: Date? { stampEditedAt.values.first }
+
+    /// Clear this note's stamp oracles before a mount, so a stale report from
+    /// an earlier one can never satisfy a pin.
+    static func resetStamp(_ postID: String) {
+        stampShown[postID] = nil
+        stampEditedAt[postID] = nil
+        flipStamp[postID] = nil
+    }
 }
 
 /// The correction round's masthead oracle (rows 4/19 — the `BookOutlineGeometry`
@@ -923,8 +944,12 @@ enum MastheadGeometry {
     /// Row 59: the ＃ door's frame — its hit target.
     static var doorFrame: CGRect?
     /// 18h batch 1: the time stamp's frame, so "it sits at the row's
-    /// trailing end and covers nothing" is a claim about rectangles.
-    static var stampFrame: CGRect?
+    /// trailing end and covers nothing" is a claim about rectangles — **per
+    /// note** since the ladder's R1-14.
+    static var stampFrames: [String: CGRect] = [:]
+
+    /// The one-window read, for a pin that mounted exactly one detail.
+    static var stampFrame: CGRect? { stampFrames.values.first }
 
     static func record(_ slot: MastheadProbeSlot, _ frame: CGRect) {
         switch slot {
@@ -933,7 +958,7 @@ enum MastheadGeometry {
         case .field: fieldFrame = frame
         case .iconRow: iconRowFrame = frame
         case .door: doorFrame = frame
-        case .stamp: stampFrame = frame
+        case .stamp(let postID): stampFrames[postID] = frame
         }
     }
 
@@ -944,7 +969,7 @@ enum MastheadGeometry {
         cardFrames = [:]
         fieldFrame = nil
         doorFrame = nil
-        stampFrame = nil
+        stampFrames = [:]
     }
 
     /// Row 80's pin resets the title row's frames the same way.
