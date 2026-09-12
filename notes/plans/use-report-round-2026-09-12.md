@@ -1556,19 +1556,15 @@ Stranded originals get NO Delete Now door (R-Q3's letter).
 
 **Pieces (checkpoint order):**
 
-1. **row 3 — the tray's block rows gain Delete Now** — **DONE (this commit)**; its red-on-old
-   numbers are **PENDING** (the behavioral revert runs NEXT, announced below)
+1. **row 3 — the tray's block rows gain Delete Now** — **DONE (`e394ac76`)**, red-on-old measured
 2. **row 4 — the Callout Emoji alert's collapsed field** — **NOT-STARTED**
 3. **rows 5–6 — the decoration lane + the emoji inside the frame** — **NOT-STARTED**
 4. **the walk + captures + the closing suites** — **NOT-STARTED**
 
 **Rows:** 3 · 4 · 5 · 6 — dispositions PENDING.
 
-**A BEHAVIORAL REVERT IS ANNOUNCED, NOT YET STARTED** (the resiliency protocol's rule 2): the next
-act after this commit is passing `deleteNow: nil` at `TrayPanel.cellRows`' leaving-block call site to
-measure row 3's red-on-old, then `git checkout -- App/Variorum/Variorum/Features/Tray/TrayPanel.swift`
-to restore (the file is committed at this commit, so the restore is the safe one — no scratchpad copy
-is used, and no other piece edits that file yet).
+**No revert is in flight** (row 3's two ran and were restored by `git checkout --` from
+`e394ac76`; the tree was verified diff-clean against that commit and re-run green afterwards).
 
 ---
 
@@ -1637,7 +1633,17 @@ recorded from the verb cluster's own `onAppear`, keyed by the row's id.
 (`TrayFilterTests` · `TrayPanelMoveTests` · `TrayPanelShapeTests` · `NoteTrayTests`) — the four
 shipped tray suites ride with the two new pins, unmodified.
 
-**RED ON OLD: PENDING** (the announced behavioral revert runs next).
+**RED ON OLD — measured by TWO discriminating behavioral reverts over `e394ac76`, then restored**
+(`git checkout --`; the tree verified diff-clean and re-run `✔ 47 tests in 4 suites` afterwards):
+
+| The revert | What went red | The number |
+|---|---|---|
+| `deleteNow: nil` at `cellRows`' leaving-BLOCK call site (the fix's one line) | `theLeavingBlockRowDrawsBothVerbsAndTheOtherRowsDrawOne` | the deleted block's row reported **`["Put back"]`** where `["Put back", "Delete Now"]` is owed — and the deleted TAKE's row in the SAME mounted frame still reported `["Put back", "Delete Now"]`, so the pin discriminates the block row's door from the take's rather than the cluster's existence (`red1.log`, local) |
+| `kind: .preservedOriginal` for `kind: .block` in `trashItem(for: Queries.TrayItem)` (the road's one word) | `aLeavingBlockRowsDeleteNowConfirmsThenPurgesForGood` · `aBlockRowsPurgeDoorAsksEveryTime` | `target.kind == .block → false`, then **`model.pendingPurge → nil`** at the `#require` — the shared belt (`TrashPurge.deleteNowConfirm` refusing a `.preservedOriginal`) swallowing the confirm, so the road pin is non-vacuous and the belt is live (`red2.log`, local) |
+
+The ROAD pins' red on the PRE-BATCH tree is by COMPILATION (neither `requestDeleteNowBlock` nor
+`trashItem(for: Queries.TrayItem)` existed) — the `CalloutEmojiPickerTests` precedent's form; the
+second revert above is their discriminating measurement on this tree.
 
 
 *(Pointers re-verified by the orchestrator on 2026-09-12 after batch a's ladder, at `17803ce4`: `RecoveryView.swift` lives at `App/Variorum/Variorum/Features/Library/RecoveryView.swift` (`requestDeleteNow` `:400`; the stranded rule `:122–126`); `EditorTypography.swift` at `App/Variorum/Variorum/Theme/EditorTypography.swift` (`minGutter` `:171`, `inlineSurfaceInset` `:176`); `TrayPanel.swift`'s lines hold within one (`confirmPendingPurge` `:637`, `trashItem(for:)` `:653`); `CalloutMenu.emojiAccessory` `:179`; `BlockDecor` badge `:592`, emoji `:479`, `calloutRect` `:167`; `EditorTextView.makeInlineEditor` `:823`; `EditorViewModel` `textLeft` `:3162`; `DoorSetTests:327` is the accessory's title pin. Batch a moved nothing in this batch's files. The environment traps and rules 1–8 are R-1's, verbatim by reference; her app is QUIT for the night — an instance at `/Applications` means she is awake: never touch it.)*
