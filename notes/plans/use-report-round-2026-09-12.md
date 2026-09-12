@@ -558,4 +558,39 @@ session with only the repo continues the round from here.)*
 
 ### R-1 · RECORD (the implementer writes here from its first commit)
 
-*(empty until the implementer's first commit)*
+**LIVE STATUS — 17p batch a (`opus-implementer`, opened 2026-09-12 at `2bfc8461`).**
+
+**WHAT I HAVE NOT DONE (the record's first line).** *(Flipped at each piece; at the batch's close this
+line states what the batch deliberately left.)* At this commit: everything but the orientation — the
+five pieces are NOT-STARTED.
+
+- **Orientation — DONE.** Read in my own context, in the brief's order: `CLAUDE.md` and the canon it
+  auto-loads (CoreDescription · OverallModel · AppSpec — §4's P1–P3 and §12's takes presentations ·
+  SyncSpec · TEXTKIT2_NOTES — §2 the viewport/scroll-to-location risk, §3's macOS-26 findings); this
+  plan's §0, §1 (Q-1 · Q-2), §2, §3 rows 1–2, §4.1–§4.2, §7 (R-Q1 · R-Q2 — SETTLED), §8, §9, R-0
+  (P-1…P-9 + the application notes), and the R-1 brief in full; the previous round's `### R-6` brief ·
+  record · adjudication and its three ladder rounds (the landing family's whole history — the R1-1
+  BLOCKER's never-cleared seed, R1-5's stale-generation hop, R2-1's document-end landing, RAISE-M1's
+  pre-fill-frame anchor restore, R3-1's revived exemption); `notes/plans/phase-17-standing-fixes.md`'s
+  philosophy + "Standing rules for every entry". Then the code: `TakesChoreographer.consumeLandings` ·
+  `TakesBoardLayout` (the landing, `rowVisibility`, the card geometry) · `TakesBoardView`
+  (`singleColumnArticle`, `articleRow`, `washedCell`, `typewriterRoom`, the fan strips'
+  `.scrollPosition` + `stripBinding` idiom) · `TakesShared` (`TakesCellView`, the R103 overlay, the
+  empty-state face and its DEBUG door oracle) · `TakesViewModel` (`adopt`, `landingEnabled`,
+  `notePaneSelection`, `board`) · `PaneSurface.makeSurface`/`makeTakeSurface` (inset 6) ·
+  `EditorRouter` (`scrollAnchors` — the session-scoped precedent) · `LensesBoardView` ·
+  `TakesRoomTests`'s mounted-board harness (a real `NSHostingView<TakesBoardView>` with its real
+  `NSScrollView` — the geometry oracle this batch's pins ride) · `CommandRoutingTests`' three landing
+  pins. Tree clean at `2bfc8461`, `main` == `origin/main`. **Her real-store app IS running**
+  (`pgrep` → pid 23216 at `/Applications/Variorum.app/Contents/MacOS/Variorum`) — never touched, never
+  quit; every walk is on `io.lduarte.Variorum.debug`.
+
+**Pieces (checkpoint order):**
+
+1. the before/after capture diff (`f402ccce` vs HEAD, both voices) — **NOT-STARTED**
+2. the scroll memory + the reveal rule (row 1, R-Q1) — **NOT-STARTED**
+3. the empty block's face (row 2, R-Q2) — **NOT-STARTED**
+4. the ＋ new block door's alignment (row 2) — **NOT-STARTED**
+5. the walk + captures + the closing suites — **NOT-STARTED**
+
+**Rows:** 1 · 2 — dispositions PENDING.
