@@ -39,6 +39,26 @@ import VariorumCore
 /// it. The search unions the two — and where the union still finds nothing,
 /// the face says exactly why rather than implying the day was empty.
 nonisolated enum LibraryDayFace {
+    /// **THE FILTER'S CALENDAR — one construction site** (the ladder's
+    /// R1-8): GREGORIAN, carrying HER time zone.
+    ///
+    /// Not `Calendar.current` whole, because the two halves of a day KEY
+    /// disagree under a non-Gregorian one: `JournalDay.dayString` emits the
+    /// current calendar's components while `JournalDay.isValid` validates
+    /// proleptic Gregorian, so under a Hebrew calendar (macOS Language &
+    /// Region offers it) the field would produce `"5786-13-05"`,
+    /// `setEditedOn` would refuse it, and the filter would silently never
+    /// arm. The store's day grammar IS Gregorian ISO by `JournalDay`'s own
+    /// definition — `entry_date` everywhere — so the filter names the
+    /// calendar it means. The TIME ZONE stays hers: that is what makes the
+    /// day boundaries her day's. Pinned:
+    /// `LibraryDayFilterTests.theFiltersCalendarIsGregorianAndKeepsHerTimeZone`.
+    static var calendar: Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = Calendar.current.timeZone
+        return calendar
+    }
+
     /// The door, closed: *on day…* — an invitation, in the chrome's own
     /// ellipsis grammar.
     static let closedLabel = "on day\u{2026}"
@@ -46,7 +66,8 @@ nonisolated enum LibraryDayFace {
     /// The door, open: *on Sep 9* — the same day words every stamp in the
     /// Library uses (`TimeStampFace.day`, core `Domain`).
     static func openLabel(
-        day: String, now: Date, calendar: Calendar = .current, locale: Locale = .current
+        day: String, now: Date, calendar: Calendar = LibraryDayFace.calendar,
+        locale: Locale = .current
     ) -> String {
         "on \(dayWords(day: day, now: now, calendar: calendar, locale: locale))"
     }
@@ -56,7 +77,8 @@ nonisolated enum LibraryDayFace {
     /// it something that is not a day (a face draws what it has, never a
     /// crash).
     static func dayWords(
-        day: String, now: Date, calendar: Calendar = .current, locale: Locale = .current
+        day: String, now: Date, calendar: Calendar = LibraryDayFace.calendar,
+        locale: Locale = .current
     ) -> String {
         guard let date = JournalDay.date(from: day, calendar: calendar) else { return day }
         return TimeStampFace.day(date, now: now, calendar: calendar, locale: locale)
@@ -83,7 +105,7 @@ nonisolated enum LibraryDayFace {
     /// reason a note she remembers writing that day can be missing.
     static func emptyAnswer(
         day: String, query: String = "", now: Date,
-        calendar: Calendar = .current, locale: Locale = .current
+        calendar: Calendar = LibraryDayFace.calendar, locale: Locale = .current
     ) -> EmptyAnswer {
         let words = dayWords(day: day, now: now, calendar: calendar, locale: locale)
         let typed = query.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -118,7 +140,7 @@ struct LibraryDayField: View {
     /// "now" — defaulted for the app, injected by a pin so the pin holds the
     /// rule and not the machine (the `CatalogRowStamp` convention).
     var now: Date = Date()
-    var calendar: Calendar = .current
+    var calendar: Calendar = LibraryDayFace.calendar
     let onPick: (String) -> Void
     let onClear: () -> Void
 
@@ -183,7 +205,7 @@ struct LibraryDayEmptyAnswer: View {
     /// (R1-3(a)) — empty when the day is the only narrowing.
     var query: String = ""
     var now: Date = Date()
-    var calendar: Calendar = .current
+    var calendar: Calendar = LibraryDayFace.calendar
 
     var body: some View {
         let answer = LibraryDayFace.emptyAnswer(

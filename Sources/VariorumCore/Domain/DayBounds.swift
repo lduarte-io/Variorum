@@ -55,12 +55,14 @@ public struct DayBounds: Equatable, Sendable {
         end = DateFormatter.variorumISO8601.string(from: calendar.startOfDay(for: nextNoon))
     }
 
-    /// The day a given instant falls in — the door a "today" filter uses.
-    public init(containing date: Date, calendar: Calendar = .current) {
-        // `dayString` and `date(from:)` are inverses through the noon
-        // anchor, so this cannot fail; the force-unwrap is the type system
-        // asking for a proof the two functions already have (and the pin
-        // `everyDayOfAYearRoundTripsThroughItsOwnKey` is that proof).
-        self.init(day: JournalDay.dayString(from: date, calendar: calendar), calendar: calendar)!
-    }
+    // **There is deliberately no `init(containing: Date)`** (the ladder's
+    // R1-8). One shipped briefly, force-unwrapping its own failable sibling
+    // on the grounds that `dayString` and `date(from:)` are inverses — true
+    // only in a GREGORIAN calendar: `dayString` emits the CURRENT calendar's
+    // components while `JournalDay.isValid` validates proleptic Gregorian, so
+    // under a Hebrew `Calendar.current` a leap year's month 13 yields
+    // "5786-13-05", `isValid` refuses it, and the `!` traps. It had no
+    // production caller — a public force-unwrap kept alive by its own test is
+    // the thing a later batch adopts innocently. Callers name the day they
+    // mean (`JournalDay.dayString`) and go through `init?(day:)`.
 }

@@ -288,7 +288,7 @@ final class LibraryCatalogModel {
             let (sort, direction) = (sort, direction)
             // Her day, in her calendar, converted once — the query compares
             // the store's own UTC text (18h batch 2).
-            let day = editedOn.flatMap { DayBounds(day: $0) }
+            let day = editedOn.flatMap { DayBounds(day: $0, calendar: LibraryDayFace.calendar) }
             // **The day's answer is a SET, so it is not capped** (the
             // ladder's R1-4): "which notes did I edit on Sep 8" answered with
             // the day's 40 newest and said nothing about the rest, which is a

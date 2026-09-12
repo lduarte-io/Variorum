@@ -292,6 +292,46 @@ struct LibraryDayFilterTests {
                 "the caveat rides either way")
     }
 
+    // MARK: - The filter's calendar (the ladder's R1-8)
+
+    /// **The day filter's calendar is GREGORIAN, carrying HER time zone** —
+    /// one construction site, and this is the pin that says why.
+    ///
+    /// `JournalDay.dayString` emits the CURRENT calendar's components while
+    /// `JournalDay.isValid` validates proleptic Gregorian. Those agree only
+    /// while `Calendar.current` IS Gregorian. Under a Hebrew calendar — which
+    /// macOS Language & Region offers — a leap year's month 13 makes a key
+    /// like `"5786-13-05"`, `isValid` refuses it, and every door in this
+    /// filter that takes a day key silently does nothing: `setEditedOn`
+    /// refuses the pick, so the filter would never arm at all.
+    ///
+    /// The store's day grammar is Gregorian ISO by `JournalDay`'s own
+    /// definition (`entry_date` everywhere), so the filter names its calendar
+    /// instead of inheriting one — and keeps her TIME ZONE, which is what
+    /// makes the day HERS. Red on old: `LibraryDayFace.calendar` did not
+    /// exist; every site took `Calendar.current` whole.
+    @Test func theFiltersCalendarIsGregorianAndKeepsHerTimeZone() throws {
+        #expect(LibraryDayFace.calendar.identifier == .gregorian)
+        #expect(LibraryDayFace.calendar.timeZone == Calendar.current.timeZone,
+                "her day boundaries are her zone's")
+
+        let instant = try #require(
+            DateFormatter.variorumISO8601.date(from: "2026-09-09T18:00:00.000Z"))
+
+        // The trap, demonstrated on the road the filter no longer takes.
+        var hebrew = Calendar(identifier: .hebrew)
+        hebrew.timeZone = Calendar.current.timeZone
+        let hebrewKey = JournalDay.dayString(from: instant, calendar: hebrew)
+        #expect(!JournalDay.isValid(hebrewKey),
+                "\(hebrewKey) is not a day this store can name")
+        #expect(DayBounds(day: hebrewKey, calendar: hebrew) == nil)
+
+        // The road it takes.
+        let key = JournalDay.dayString(from: instant, calendar: LibraryDayFace.calendar)
+        #expect(JournalDay.isValid(key))
+        #expect(DayBounds(day: key, calendar: LibraryDayFace.calendar) != nil)
+    }
+
     // MARK: - The cap, and the day's answer (the ladder's R1-4)
 
     /// **The day's answer is whole; every other listing says it is capped.**

@@ -110,18 +110,12 @@ struct DayBoundsTests {
         #expect(DayBounds(day: "", calendar: utc) == nil)
     }
 
-    /// The "today" door: the day an INSTANT falls in is her calendar's, not
-    /// UTC's — 02:00Z on the tenth is still the ninth in Los Angeles.
-    @Test func theDayContainingAnInstantIsHerCalendarsOwn() throws {
-        let instant = try #require(
-            DateFormatter.variorumISO8601.date(from: "2026-09-10T02:00:00.000Z"))
-        #expect(DayBounds(containing: instant, calendar: calendar("UTC")).day == "2026-09-10")
-        #expect(DayBounds(containing: instant,
-                          calendar: calendar("America/Los_Angeles")).day == "2026-09-09")
-    }
-
-    /// The proof behind `init(containing:)`'s force-unwrap: the noon anchor
-    /// round-trips every day of a year in a zone that shifts twice.
+    /// The noon anchor round-trips every day of a year in a zone that shifts
+    /// twice — which is what lets a caller name a day with
+    /// `JournalDay.dayString` and get bounds back for exactly that day.
+    /// *(This was `init(containing:)`'s force-unwrap proof until the
+    /// ladder's R1-8 retired that initializer: the proof holds for a
+    /// GREGORIAN calendar and the initializer's signature promised any.)*
     @Test func everyDayOfAYearRoundTripsThroughItsOwnKey() throws {
         let ny = calendar("America/New_York")
         var day = try #require(JournalDay.date(from: "2026-01-01", calendar: ny))
