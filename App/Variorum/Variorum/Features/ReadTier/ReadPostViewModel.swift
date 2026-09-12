@@ -381,8 +381,14 @@ final class ReadPostViewModel {
             caretBlockID: nil,
             presentations: presentationsByBlock,
             comments: commentsByBlock,
-            textLeft: origin.x,
-            textRight: textView.bounds.width - textView.textContainerInset.width,
+            // 17p batch b (rows 5–6): ONE derivation for the prose column
+            // (`PaneTextView.proseLeft`/`proseRight`) — identical to the
+            // arithmetic that stood here on a surface with no decoration
+            // lane, and the only correct answer once this surface reserves
+            // one (the read tier is a CONTAINED surface: the walk found its
+            // badge on the words in the book Outline).
+            textLeft: textView.proseLeft,
+            textRight: textView.proseRight,
             viewWidth: textView.bounds.width,
             entryCount: index.entries.count))
     }

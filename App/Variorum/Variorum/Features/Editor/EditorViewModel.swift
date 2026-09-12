@@ -3047,6 +3047,17 @@ final class EditorViewModel {
     /// the next REAL change — callouts/seams/handles blank on an ordinary
     /// mount, timing-dependent. Re-arming the gate before refreshing makes
     /// wiring itself a delivery.
+    /// **THE PROSE COLUMN MOVED WITHOUT THE FRAME CHANGING** (17p batch b,
+    /// the walk's finding W-1): the decoration lane reserved or released its
+    /// room, so every rect the last pass drew was computed from where the
+    /// text used to begin. Same consequence as a width reflow, and the same
+    /// road: bump the geometry generation so the settle hop's gate opens,
+    /// then run it.
+    func proseColumnDidChange() {
+        overlayGeometryGeneration &+= 1
+        overlayLayoutDidSettle()
+    }
+
     func pushDecorationsToSink() {
         lastDecorState = BlockDecor.State()
         refreshDecorations()

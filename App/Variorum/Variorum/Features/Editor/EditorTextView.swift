@@ -13,7 +13,7 @@ import AppKit
 import VariorumCore
 
 @MainActor
-final class EditorTextView: NSTextView, MarkdownFormattable {
+final class EditorTextView: NSTextView, MarkdownFormattable, DecorLaneSurface {
     /// Set while a bulk-entry-classed insertion is being applied — a
     /// clipboard PASTE or a text DROP (author-ratified contract item 7,
     /// Phase 9: a drop into the open tail is bulk entry exactly like paste —
@@ -376,67 +376,36 @@ final class EditorTextView: NSTextView, MarkdownFormattable {
 
     // MARK: - The decoration lane (17p batch b, rows 5–6 — her ruling R-Q4)
 
-    /// **Does this surface reserve a LEFT LANE for block decorations?**
-    ///
-    /// True for the CONTAINED (book) editor alone, set at construction. The
-    /// full-document editor never needs it: its gutter is the dynamic
-    /// centering inset (`updateGutters`), which is already wide enough for a
-    /// margin comment card at any window that is not at `minGutter`. The
-    /// contained editor's prose starts 8 pt from its own edge, and 8 pt is
-    /// where the decorations were landing on the words.
-    ///
-    /// Default false, so every other surface's inset path is byte-identical
-    /// and `setDecorLane` is inert on it.
-    var reservesDecorLane = false
+    /// The lane's own state and arithmetic — ONE brain, shared with the read
+    /// tier's `PaneTextView` (`Surface/DecorLane.swift`, whose doc carries
+    /// the whole design and the three-surface sweep). `reserves` is set by
+    /// `makeInlineEditor`: the CONTAINED editor is the surface whose prose
+    /// starts 8 pt from its own edge, and 8 pt is where the decorations were
+    /// landing on the words. The full-document editor leaves it false, so
+    /// every line below is inert there.
+    private var lane = DecorLaneReservation()
 
-    /// The asymmetric prose insets a lane produces — nil is the ORDINARY
-    /// symmetric `textContainerInset` road every surface but the contained
-    /// editor takes, and the road the contained editor itself takes until a
-    /// decoration arrives.
-    private var proseInsets: (leading: CGFloat, trailing: CGFloat)?
+    /// Read-only view of the opt-in, for the pins and for clarity at the
+    /// factories.
+    var reservesDecorLane: Bool {
+        get { lane.reserves }
+        set { lane.reserves = newValue }
+    }
 
-    /// **Reserve (or release) the lane.** Change-gated: the inset write
-    /// triggers a relayout, and a same-value pass must write nothing.
-    ///
-    /// Inert unless `reservesDecorLane`. The caller is the decoration
-    /// overlay controller, which is handed the state that answers the
-    /// question (`BlockDecor.needsLane`) — so the lane follows the note's own
-    /// comments and callouts with no second source of truth.
-    func setDecorLane(needed: Bool) {
-        guard reservesDecorLane else { return }
-        let leading = EditorTypography.inlineInset(needsLane: needed)
-        let trailing = EditorTypography.inlineSurfaceInset
-        guard proseInsets?.leading != leading else { return }
-        proseInsets = (leading, trailing)
-        // `textContainerInset` is SYMMETRIC, so the pair rides as its mean
-        // and `textContainerOrigin` (below) places the container at the
-        // LEADING edge: the container's width is then
-        // `bounds.width - (leading + trailing)` and its right edge lands at
-        // `bounds.width - trailing`, untouched. (The alternative — growing
-        // the symmetric inset — would take the lane off the RIGHT margin
-        // too, narrowing the measure twice for room only the left needs.)
-        let mean = ((leading + trailing) / 2).rounded()
+    /// Reserve (or release) the lane. Returns true when the prose column
+    /// actually moved — the caller's cue to have the decorations computed
+    /// again (the walk's finding W-1: the render that reserves the lane is
+    /// working from the OLD `textLeft`, so without a second pass the badge
+    /// stays exactly where it was, on the words).
+    @discardableResult
+    func setDecorLane(needed: Bool) -> Bool {
+        guard let mean = lane.reserve(
+            needed: needed, trailing: EditorTypography.inlineSurfaceInset)
+        else { return false }
         if abs(textContainerInset.width - mean) > 0.5 {
             textContainerInset = NSSize(width: mean, height: textContainerInset.height)
         }
-        // **AND THE PROSE COLUMN MOVED, SO THE DECORATIONS MUST BE ASKED
-        // AGAIN** — the defect the batch's own WALK found (17p batch b, the
-        // walk's finding W-1). Reserving the lane changes where the text
-        // begins, and every decoration's rect is computed from that edge; but
-        // the render that reserved it was working from the OLD `textLeft`, so
-        // without a second pass the badge stayed exactly where it was, on the
-        // words. The model's decoration loop is driven by
-        // `overlayLayoutDidSettle`, whose generation gate only opens on a
-        // reported geometry change — and `onWidthReflow` is that report,
-        // wired in `EditorViewModel.attach` to bump the generation and run
-        // the settle hop. A lane IS a prose-column reflow (the container's
-        // width changes, even though the view's frame does not), so this is
-        // the honest signal rather than a new one.
-        //
-        // Fires ONLY on a real change (the guard above returned otherwise),
-        // so the second pass writes nothing and the loop closes after exactly
-        // one extra cycle.
-        onWidthReflow?()
+        return true
     }
 
     /// The container's origin — overridden ONLY while a lane is reserved, so
@@ -449,8 +418,8 @@ final class EditorTextView: NSTextView, MarkdownFormattable {
     /// is asserted silent over a laned surface in
     /// `BlockDecorLaneTests.aLanedSurfaceStaysOnTextKit2`.
     override var textContainerOrigin: NSPoint {
-        guard let proseInsets else { return super.textContainerOrigin }
-        return NSPoint(x: proseInsets.leading, y: super.textContainerOrigin.y)
+        guard let x = lane.originX else { return super.textContainerOrigin }
+        return NSPoint(x: x, y: super.textContainerOrigin.y)
     }
 
     /// **THE PROSE COLUMN, in this view's own space — ONE derivation.**
@@ -465,7 +434,7 @@ final class EditorTextView: NSTextView, MarkdownFormattable {
     var proseLeft: CGFloat { textContainerOrigin.x }
 
     var proseRight: CGFloat {
-        bounds.width - (proseInsets?.trailing ?? textContainerInset.width)
+        lane.proseRight(bounds: bounds.width, symmetricInset: textContainerInset.width)
     }
 
     /// **TYPEWRITER ROOM — A22, rebuilt (QoL round 2026-07-29, L5).** The

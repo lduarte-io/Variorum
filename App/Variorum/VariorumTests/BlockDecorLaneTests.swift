@@ -214,40 +214,66 @@ struct BlockDecorLaneTests {
     /// reflow, so `setDecorLane` reports one.
     ///
     /// **RED ON OLD** (this tree, before the one-line fix): `reflows == 0`.
-    @Test func reservingTheLaneReportsTheReflowThatRefreshesTheDecorations() {
-        let view = EditorTextView.makeInlineEditor()
-        var reflows = 0
-        view.onWidthReflow = { reflows += 1 }
-
-        view.setDecorLane(needed: true)
-        #expect(reflows == 1, "the prose column moved, and the decor is asked again")
-        view.setDecorLane(needed: true)
-        #expect(reflows == 1, "change-gated: a settled lane reports nothing")
-        view.setDecorLane(needed: false)
-        #expect(reflows == 2, "giving the lane back is a reflow too")
-        view.setDecorLane(needed: false)
-        #expect(reflows == 2)
-
-        // …and the report is INERT on a surface that reserves no lane, so no
-        // other editor pays a spurious reflow.
+    @Test func reservingTheLaneSaysSoSoTheDecorationsAreComputedAgain() {
+        // Every contained surface answers the ONE question, and answers TRUE
+        // only when the column really moved.
+        for surface in [
+            EditorTextView.makeInlineEditor() as any DecorLaneSurface,
+            PaneTextView.makeReadSurface() as any DecorLaneSurface,
+        ] {
+            #expect(surface.setDecorLane(needed: true),
+                    "the prose column moved — ask the decorations again")
+            #expect(!surface.setDecorLane(needed: true),
+                    "change-gated: a settled lane says nothing")
+            #expect(surface.setDecorLane(needed: false),
+                    "giving the lane back moves it too")
+            #expect(!surface.setDecorLane(needed: false))
+        }
+        // …and INERT on the surface that reserves none, so the full editor
+        // never asks for a spurious second pass.
         let (_, full) = EditorTextView.makeEditor()
-        var fullReflows = 0
-        full.onWidthReflow = { fullReflows += 1 }
-        full.setDecorLane(needed: true)
-        #expect(fullReflows == 0)
+        #expect(!full.setDecorLane(needed: true))
+        #expect(!full.reservesDecorLane)
     }
 
-    /// The wiring the report depends on, asserted where it is made: an
-    /// attached surface has the model's reflow handler, so the report reaches
-    /// the loop rather than a nil closure.
-    @Test func anAttachedInlineSurfaceCarriesTheModelsReflowHandler() async throws {
-        try await withEditor(seedBlocks: ["Alpha."]) { h in
-            let inline = EditorTextView.makeInlineEditor()
-            h.model.attach(textView: inline, scrollView: nil)
-            #expect(inline.onWidthReflow != nil,
-                    "attach wires the reflow report the lane rides")
-            #expect(inline.reservesDecorLane)
-        }
+    /// **THE SWEEP TABLE** (the constitution's closing form for a fixed
+    /// class): every host of `BlockDecorOverlayController` — there are
+    /// exactly three — and what each gets. The batch's WALK found the read
+    /// tier's cell empty after the editor's was filled, which is precisely
+    /// why the table is the pin.
+    @Test func everyDecoratedSurfaceHasItsLaneAnsweredOneWayOrTheOther() {
+        // 1 — the CONTAINED editor (`InlineEditorSurface`): a lane.
+        #expect(EditorTextView.makeInlineEditor().reservesDecorLane)
+        // 2 — the READ tier (`ReadPostView`): a lane. Same 8 pt prose inset,
+        //     same decorations, and the surface an expanded-but-unfocused
+        //     note in the book Outline renders (`BookView`'s read-cheap
+        //     branch) — her screenshots' own surface.
+        #expect(PaneTextView.makeReadSurface().reservesDecorLane)
+        // 3 — the FULL editor (`EditorSurface`): none. Its gutter is the
+        //     dynamic centering inset, already wide enough for a margin card
+        //     at any window that is not at `minGutter`.
+        let (_, full) = EditorTextView.makeEditor()
+        #expect(!full.reservesDecorLane)
+        // …and a TAKE pane, which hosts no decoration controller at all,
+        //     reserves nothing either.
+        #expect(!PaneTextView.makeTakeSurface().reservesDecorLane)
+    }
+
+    /// The read tier's lane does the same geometry the editor's does — one
+    /// brain, so the two contained surfaces cannot disagree about where a
+    /// note's badge lives.
+    @Test func theReadTiersLaneMovesItsProseColumnTheSameWay() {
+        let view = PaneTextView.makeReadSurface()
+        view.frame = NSRect(x: 0, y: 0, width: 620, height: 400)
+        #expect(view.proseLeft == EditorTypography.inlineSurfaceInset)
+        #expect(view.proseRight == 620 - EditorTypography.inlineSurfaceInset)
+        view.setDecorLane(needed: true)
+        #expect(view.proseLeft == EditorTypography.inlineSurfaceInset
+            + EditorTypography.commentLane)
+        #expect(view.proseRight == 620 - EditorTypography.inlineSurfaceInset,
+                "the trailing inset never moves here either")
+        view.setDecorLane(needed: false)
+        #expect(view.proseLeft == EditorTypography.inlineSurfaceInset)
     }
 
     // MARK: - Rows 5–6: nothing covers anything

@@ -170,6 +170,14 @@ final class ReadPostSurfaceCoordinator {
         model.decorSink = { [weak decorController] state in
             decorController?.render(state)
         }
+        // The decoration lane's second pass (17p batch b, the walk's finding
+        // W-1): the lane moves this surface's prose column without changing
+        // its frame, so `onWidthChange` never fires and nothing would
+        // re-compute the decoration rects against the new edge. This tier's
+        // refresh door is the same one the wiring itself uses.
+        decorController.onProseColumnChanged = { [weak model] in
+            model?.pushOverlaysToSinks()
+        }
         // Width reflows change wrapping, so height must re-measure —
         // the SHARED width-gated layout hook (13b 1a: the batch-12
         // brain, one copy for every pane surface; replaces this

@@ -291,7 +291,7 @@ final class PanePublisher {
 
 // MARK: - The text view
 
-final class PaneTextView: NSTextView, MarkdownFormattable {
+final class PaneTextView: NSTextView, MarkdownFormattable, DecorLaneSurface {
     /// A click that created no selection — the click-to-focus gesture, with
     /// the clicked UTF-16 offset (the read tier seeds the editor's caret
     /// from it; take panes ignore the value).
@@ -545,6 +545,52 @@ final class PaneTextView: NSTextView, MarkdownFormattable {
     /// Fires when layout gives the view a NEW width (batch 12 — the
     /// clipped-take fix's trigger; width-gated so height publishes can't
     /// loop through it).
+    // MARK: - The decoration lane (17p batch b, rows 5-6 - her ruling R-Q4)
+
+    /// The lane's own state and arithmetic - the SAME brain the contained
+    /// editor holds (`Surface/DecorLane.swift`), because the batch's walk
+    /// found that the book Outline shows an expanded-but-unfocused note
+    /// through THIS surface (`makeReadSurface`), not through the editor - so
+    /// this is the surface her screenshots were of, and two copies of the
+    /// arithmetic would be the drift class.
+    ///
+    /// `reserves` is set by `makeReadSurface` alone: a TAKE pane
+    /// (`makeTakeSurface`) hosts no `BlockDecorOverlayController` at all
+    /// (grepped - there are exactly three hosts), so it has no decoration to
+    /// make room for and the whole mechanism stays inert there.
+    private var lane = DecorLaneReservation()
+
+    var reservesDecorLane: Bool {
+        get { lane.reserves }
+        set { lane.reserves = newValue }
+    }
+
+    @discardableResult
+    func setDecorLane(needed: Bool) -> Bool {
+        guard let mean = lane.reserve(
+            needed: needed, trailing: EditorTypography.inlineSurfaceInset)
+        else { return false }
+        if abs(textContainerInset.width - mean) > 0.5 {
+            textContainerInset = NSSize(width: mean, height: textContainerInset.height)
+        }
+        return true
+    }
+
+    /// Overridden only while a lane is reserved (see the editor's twin for
+    /// why this is not a TextKit 1 downgrade trigger).
+    override var textContainerOrigin: NSPoint {
+        guard let x = lane.originX else { return super.textContainerOrigin }
+        return NSPoint(x: x, y: super.textContainerOrigin.y)
+    }
+
+    /// The prose column - ONE derivation, identical to the shipped
+    /// arithmetic on a surface with no lane.
+    var proseLeft: CGFloat { textContainerOrigin.x }
+
+    var proseRight: CGFloat {
+        lane.proseRight(bounds: bounds.width, symmetricInset: textContainerInset.width)
+    }
+
     var onWidthChange: (() -> Void)?
     /// Fires on every SAME-WIDTH layout pass (13c 1F — A47, the take-card
     /// gap): the frame must hug the pane's CURRENT measurement from BOTH
@@ -687,7 +733,15 @@ extension PaneTextView {
     /// The read tier's configuration (non-editable always; the container
     /// sizes it; selection + plain-click per the ratified read contract).
     static func makeReadSurface() -> PaneTextView {
-        makeSurface(inset: EditorTypography.inlineSurfaceInset, allowsUndo: false)
+        let view = makeSurface(inset: EditorTypography.inlineSurfaceInset, allowsUndo: false)
+        // 17p batch b (rows 5-6, her R-Q4): the read tier is a CONTAINED
+        // surface - its prose starts 8 pt from its own edge and it hosts the
+        // shared decoration controller, so it is one of the two surfaces
+        // whose badge and callout glyph had nowhere to stand. The batch's
+        // WALK found it: an expanded-but-unfocused note in the book Outline
+        // renders THIS view, which is what her screenshots showed.
+        view.reservesDecorLane = true
+        return view
     }
 
     /// How far a take pane insets its text from its own frame. **Named
