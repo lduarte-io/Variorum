@@ -682,9 +682,15 @@ final class BadgeOverlayController {
             button.sizeToFit()
             // Corner badge: top-right of the block's first fragment — at
             // the prose COLUMN's edge, not the window's (Phase 13 C1, R9:
-            // wide gutters put the window edge far from the text).
+            // wide gutters put the window edge far from the text). The
+            // edge is the surface's ONE derivation (`proseRight` — 17p
+            // batch b ladder round 1, R1-3): `bounds − textContainerInset
+            // .width` is the symmetric MEAN once the decoration lane makes
+            // the insets asymmetric, and a second copy of that arithmetic
+            // here would drift from the decor pass's the next time the lane
+            // or the trailing inset moved.
             let size = button.frame.size
-            let columnRight = textView.bounds.width - textView.textContainerInset.width
+            let columnRight = textView.proseRight
             button.frame = NSRect(
                 x: min(textView.bounds.width - size.width - 8, columnRight + 6),
                 y: badge.frame.minY,

@@ -223,11 +223,11 @@ final class ReadPostSurfaceCoordinator {
 /// Phase 6 memo keeps decorations off the text storage).
 @MainActor
 final class ReadBadgeOverlay {
-    private weak var textView: NSTextView?
+    private weak var textView: ReadPostTextView?
     private let onTap: (String) -> Void
     private var buttons: [String: NSButton] = [:]
 
-    init(textView: NSTextView, onTap: @escaping (String) -> Void) {
+    init(textView: ReadPostTextView, onTap: @escaping (String) -> Void) {
         self.textView = textView
         self.onTap = onTap
     }
@@ -246,7 +246,11 @@ final class ReadBadgeOverlay {
             button.title = "⑂\(badge.variantCount)"
             button.sizeToFit()
             let size = button.frame.size
-            let columnRight = textView.bounds.width - textView.textContainerInset.width
+            // The prose column's edge is the surface's ONE derivation
+            // (`proseRight` — 17p batch b ladder round 1, R1-3; the editor's
+            // twin says why the inset arithmetic is the symmetric mean, not
+            // the edge, once the decoration lane makes the insets asymmetric).
+            let columnRight = textView.proseRight
             button.frame = NSRect(
                 x: min(textView.bounds.width - size.width - 8, columnRight + 6),
                 y: badge.frame.minY,
