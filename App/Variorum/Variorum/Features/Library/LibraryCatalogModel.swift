@@ -289,13 +289,23 @@ final class LibraryCatalogModel {
             // Her day, in her calendar, converted once — the query compares
             // the store's own UTC text (18h batch 2).
             let day = editedOn.flatMap { DayBounds(day: $0) }
+            // **The day's answer is a SET, so it is not capped** (the
+            // ladder's R1-4): "which notes did I edit on Sep 8" answered with
+            // the day's 40 newest and said nothing about the rest, which is a
+            // WRONG answer rather than a short one. The day's own predicate
+            // bounds the read. Everywhere else the cap stays and we ask for
+            // ONE MORE than we show, so the listing can SAY it is truncated
+            // without a second counting statement per keystroke.
+            let cap: Int? = day == nil ? Self.pageSize + 1 : nil
             let all = try await session.database.read { db in
                 try Queries.searchCatalog(
-                    db, query: query, limitPerKind: 40, sort: sort, direction: direction,
+                    db, query: query, limitPerKind: cap, sort: sort, direction: direction,
                     editedOn: day)
             }
             guard generation == searchGeneration else { return }  // stale
-            hits = filtered(all)
+            let capped = Self.capped(filtered(all), to: cap == nil ? nil : Self.pageSize)
+            truncated = capped.truncated
+            hits = capped.hits
             pruneSelectionToListing()   // R2-2: the pick follows the listing
             let postIDs = hits.filter { $0.kind == .post }.map(\.id)
             await loadTagChips(for: postIDs, generation: generation)
@@ -305,6 +315,34 @@ final class LibraryCatalogModel {
             guard generation == searchGeneration else { return }
             lastError = String(describing: error)
         }
+    }
+
+    /// **The listing's page size** — the one place that knows the number, so
+    /// the line that says it and the read that asks for one more can never
+    /// disagree (18h ladder, R1-4).
+    static let pageSize = 40
+
+    /// Is the listing showing fewer rows than the store holds? Set by the
+    /// `+ 1` probe: we ask for 41 per kind, draw 40, and a 41st is the proof
+    /// there are more — never a `COUNT(*)`, which would be a second statement
+    /// on every keystroke.
+    private(set) var truncated = false
+
+    /// Trim each kind to the page and say whether anything was over.
+    /// `nil` = uncapped (the day's answer), which is never truncated.
+    static func capped(
+        _ hits: [Queries.CatalogHit], to page: Int?
+    ) -> (hits: [Queries.CatalogHit], truncated: Bool) {
+        guard let page else { return (hits, false) }
+        var seen: [Queries.CatalogHit.Kind: Int] = [:]
+        var kept: [Queries.CatalogHit] = []
+        var over = false
+        for hit in hits {
+            let n = (seen[hit.kind] ?? 0) + 1
+            seen[hit.kind] = n
+            if n <= page { kept.append(hit) } else { over = true }
+        }
+        return (kept, over)
     }
 
     func filtered(_ all: [Queries.CatalogHit]) -> [Queries.CatalogHit] {

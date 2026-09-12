@@ -292,6 +292,34 @@ struct LibraryDaySearchTests {
         }
     }
 
+    /// **A DAY'S ANSWER IS A SET, so the caller may lift the cap** (the
+    /// ladder's R1-4). `limitPerKind: nil` is unbounded — the
+    /// `Queries.library(limit:)` convention. Red on old: the parameter was a
+    /// non-optional `Int`, so `nil` did not compile, and the app's 40 turned
+    /// "which notes did I edit that day" into the day's 40 newest with no
+    /// word about the rest.
+    @Test func aDaysAnswerIsNotCappedWhenTheCallerLiftsTheCap() throws {
+        try withTravellingClock { ops, db, clock in
+            clock.set("2026-09-09T09:00:00.000Z")
+            for index in 0..<45 {
+                let note = try ops.createPost(title: "note \(index)")
+                _ = try ops.newBlock(in: note.id, text: "words")
+            }
+            let day = try bounds("2026-09-09")
+            let uncapped = try db.read { database in
+                try Queries.searchCatalog(
+                    database, query: "", limitPerKind: nil, editedOn: day)
+            }
+            #expect(uncapped.count == 45, "every note the day holds")
+
+            let capped = try db.read { database in
+                try Queries.searchCatalog(
+                    database, query: "", limitPerKind: 40, editedOn: day)
+            }
+            #expect(capped.count == 40, "the cap still caps when a caller asks for one")
+        }
+    }
+
     // MARK: - The measurement (17c's discipline: the plan and the counts)
 
     /// **THE PLAN PIN** — rewritten at the ladder's R1-1, because the first

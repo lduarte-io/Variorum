@@ -323,7 +323,7 @@ extension Queries {
     // MARK: - The catalog search (Library = EVERYTHING, R32; ⌘K's feed, R15)
 
     public struct CatalogHit: Equatable, Sendable {
-        public enum Kind: Sendable { case book, post, block }
+        public enum Kind: Sendable, Hashable { case book, post, block }
         public let kind: Kind
         public let id: String
         /// What the hit is CALLED — for a post this is the display brain's
@@ -408,12 +408,22 @@ extension Queries {
     /// carry no edit stamp; a listing that answered "on Sep 9" with every
     /// book would be a lie by juxtaposition — the batch's call, QUESTIONS
     /// #104).
+    /// **`limitPerKind: nil` is UNBOUNDED** (the ladder's R1-4) — the
+    /// `Queries.library(limit:)` convention two screens down, same meaning.
+    /// The cap is a top-N answer's honest shape ("the 40 most recently
+    /// edited"), and it is the WRONG shape for a question whose answer is a
+    /// SET: "which notes did I edit on Sep 8" silently returned the day's 40
+    /// newest and said nothing about the rest. A day's own predicate bounds
+    /// the read (cost ∝ the day's notes), so the caller lifts the cap there
+    /// and keeps it everywhere else.
     public static func searchCatalog(
-        _ db: Database, query: String, limitPerKind: Int = 20,
+        _ db: Database, query: String, limitPerKind: Int? = 20,
         sort: LibrarySort = .lastTouched, direction: SortDirection = .desc,
         editedOn: DayBounds? = nil
     ) throws -> [CatalogHit] {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        // SQLite's own rule: a negative LIMIT is no limit.
+        let limit = limitPerKind ?? -1
         var hits: [CatalogHit] = []
         // LIKE-escape the query (round 2 NIT: `_` is a single-char
         // wildcard too; escape the escape first, then both wildcards).
@@ -431,7 +441,7 @@ extension Queries {
                     WHERE deleted_at IS NULL AND (? = '' OR name LIKE ? ESCAPE '\\')
                     ORDER BY name LIMIT ?
                     """,
-                arguments: [trimmed, like, limitPerKind])
+                arguments: [trimmed, like, limit])
             hits += books.map {
                 CatalogHit(
                     kind: .book, id: $0["id"], title: $0["name"],
@@ -446,7 +456,7 @@ extension Queries {
             arguments: StatementArguments(
                 [trimmed, like, like]
                     + (editedOn.map { [$0.start, $0.end, $0.start, $0.end] } ?? [])
-                    + [limitPerKind]))
+                    + [limit]))
         hits += posts.map {
             // 13g batch 7 (R6-3): the hit's name is the ONE display brain's
             // answer — this row-set is bounded by `limitPerKind`, so it is
@@ -480,7 +490,7 @@ extension Queries {
                            OR (c.kind = 'pool' AND v.working_text LIKE ? ESCAPE '\\'))
                     ORDER BY b.updated_at DESC LIMIT ?
                     """,
-                arguments: [like, like, limitPerKind])
+                arguments: [like, like, limit])
             hits += blocks.map {
                 CatalogHit(
                     kind: .block, id: $0["id"], title: $0["handle"] ?? "block",

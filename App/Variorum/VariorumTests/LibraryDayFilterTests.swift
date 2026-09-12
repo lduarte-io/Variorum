@@ -292,6 +292,56 @@ struct LibraryDayFilterTests {
                 "the caveat rides either way")
     }
 
+    // MARK: - The cap, and the day's answer (the ladder's R1-4)
+
+    /// **The day's answer is whole; every other listing says it is capped.**
+    /// Red on old: `truncated` did not exist and the day's answer stopped at
+    /// 40 with nothing said.
+    @Test func theDaysAnswerIsWholeAndACappedListingSaysSo() async throws {
+        try await withTravellingLibrary { session, clock in
+            for index in 0..<45 {
+                let note = try session.operations.createPost(title: "note \(index)")
+                _ = try session.operations.newBlock(in: note.id, text: "words")
+            }
+            let model = LibraryCatalogModel(session: session, defaults: try scrubbed("cap"))
+
+            await model.search()
+            #expect(noteIDs(model).count == LibraryCatalogModel.pageSize,
+                    "the ordinary listing is a page")
+            #expect(model.truncated, "…and it says so")
+
+            model.setEditedOn(day(of: clock.current))
+            await model.search()
+            #expect(noteIDs(model).count == 45, "the day's answer is the whole set")
+            #expect(!model.truncated, "so there is nothing to confess")
+
+            model.setEditedOn(nil)
+            await model.search()
+            #expect(model.truncated)
+        }
+    }
+
+    /// The `+ 1` probe is exact at the boundary: 40 notes are a full page and
+    /// NOT truncated; 41 are.
+    @Test func theProbeIsExactAtThePagesEdge() async throws {
+        try await withTravellingLibrary { session, _ in
+            for index in 0..<LibraryCatalogModel.pageSize {
+                let note = try session.operations.createPost(title: "note \(index)")
+                _ = try session.operations.newBlock(in: note.id, text: "words")
+            }
+            let model = LibraryCatalogModel(session: session, defaults: try scrubbed("edge"))
+            await model.search()
+            #expect(noteIDs(model).count == 40)
+            #expect(!model.truncated, "exactly a page is not a truncation")
+
+            let extra = try session.operations.createPost(title: "one more")
+            _ = try session.operations.newBlock(in: extra.id, text: "words")
+            await model.search()
+            #expect(noteIDs(model).count == 40)
+            #expect(model.truncated, "one over the page IS")
+        }
+    }
+
     // MARK: - The words
 
     /// The empty answer says the FACT and then the REASON — the product's

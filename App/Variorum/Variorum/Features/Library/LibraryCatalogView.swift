@@ -574,10 +574,16 @@ struct LibraryCatalogView: View {
                 if let day = model.dayForEmptyAnswer {
                     LibraryDayEmptyAnswer(tokens: tokens, day: day, query: model.query)
                 } else {
-                    Text(tokens.chromeLabel("Nothing matches."))
+                    Text(tokens.chromeLabel(LibraryCopy.nothingMatches))
                         .font(tokens.small)
                         .foregroundStyle(tokens.muted)
                 }
+            }
+            // R1-4: a capped listing says so rather than reading as the
+            // library. The day's answer is uncapped, so this never draws
+            // under one.
+            if model.truncated {
+                LibraryTruncationLine(tokens: tokens)
             }
         }
         .scrollContentBackground(.hidden)
@@ -601,11 +607,15 @@ struct LibraryCatalogView: View {
                         LibraryDayEmptyAnswer(tokens: tokens, day: day, query: model.query)
                             .padding(24)
                     } else {
-                        Text(tokens.chromeLabel("No notes match."))
+                        Text(tokens.chromeLabel(LibraryCopy.noNotesMatch))
                             .font(tokens.small)
                             .foregroundStyle(tokens.muted)
                             .padding(24)
                     }
+                }
+                if model.truncated {
+                    LibraryTruncationLine(tokens: tokens)
+                        .padding(.vertical, 10)
                 }
             }
             .padding(.horizontal, 20)
