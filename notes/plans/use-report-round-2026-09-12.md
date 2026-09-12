@@ -2923,12 +2923,6 @@ change to what `last_touched_at` MEANS (AppSpec §10 untouched); the Timeline mo
 untouched; no stored stamp anywhere new (no denormalization); no new `setting` key (the sort is
 LOCAL UI state, so AppSpec §7's seeds are untouched — see the canon note at the end).
 
-**MACHINERY HONESTY (the protocol's rule 7):** commit `5f9a3a89` — the one that landed the three
-closing runs into this record — carries a GARBAGE MESSAGE: two heredocs on one shell line, and
-`git commit -F -` read the python script instead of the message. Its CONTENT is exactly right (this
-record, with the closing lines). It is not amended, because history is never rewritten here; this
-line is the correction, and the message it should have carried is the one on the commit after it.
-
 **LIVE STATUS — THE BATCH IS CLOSED** (`2d43df7c` · `a33db2bf` · `440d5c52` · `4a838d70` ·
 `f531955a`; every piece flipped in its own commit as it landed):
 
@@ -3171,6 +3165,12 @@ per-day edit log and no FTS (both forbidden by the brief and by CoreDescription'
 forensic"); no change to what `last_touched_at` MEANS (AppSpec §10 untouched); no change to the sort,
 the row stamps or the masthead stamp (18h batch 1's, `2d43df7c…f531955a`); the Timeline mode's own
 listing untouched; no new `setting` key (the day filter is transient UI state — see the batch's calls).
+
+**MACHINERY HONESTY (the protocol's rule 7):** commit `5f9a3a89` — the one that landed the three
+closing runs into this record — carries a GARBAGE MESSAGE: two heredocs on one shell line, and
+`git commit -F -` read the python script instead of the message. Its CONTENT is exactly right (this
+record, with the closing lines). It is not amended, because history is never rewritten here; this
+line is the correction, and the message it should have carried is the one on the commit after it.
 
 **LIVE STATUS — THE BATCH IS CLOSED** (`c3d81b31` · `ff112dab` · `dced175b` + this commit; piece 2,
 the index, was measured and NOT needed, so there is no schema commit and the marker stays 8)
