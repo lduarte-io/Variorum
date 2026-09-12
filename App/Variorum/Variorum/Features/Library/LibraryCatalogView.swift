@@ -571,8 +571,8 @@ struct LibraryCatalogView: View {
             if model.hits.isEmpty {
                 // 18h batch 2: a day that finds nothing says WHY — the one
                 // wording, shared with the Notes mode below.
-                if let day = model.editedOn {
-                    LibraryDayEmptyAnswer(tokens: tokens, day: day)
+                if let day = model.dayForEmptyAnswer {
+                    LibraryDayEmptyAnswer(tokens: tokens, day: day, query: model.query)
                 } else {
                     Text(tokens.chromeLabel("Nothing matches."))
                         .font(tokens.small)
@@ -597,8 +597,8 @@ struct LibraryCatalogView: View {
                     Divider().overlay(tokens.line.opacity(0.6))
                 }
                 if posts.isEmpty {
-                    if let day = model.editedOn {
-                        LibraryDayEmptyAnswer(tokens: tokens, day: day)
+                    if let day = model.dayForEmptyAnswer {
+                        LibraryDayEmptyAnswer(tokens: tokens, day: day, query: model.query)
                             .padding(24)
                     } else {
                         Text(tokens.chromeLabel("No notes match."))

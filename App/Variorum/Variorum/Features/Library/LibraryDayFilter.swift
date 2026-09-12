@@ -74,12 +74,23 @@ nonisolated enum LibraryDayFace {
         let caveat: String
     }
 
+    /// **The headline names every narrowing, not just the day** (the ladder's
+    /// R1-3(a)). The unqualified sentence asserts a fact about the DAY, and
+    /// the search field sits two controls from the day door — so with a query
+    /// typed beside it, *"No note's last edit or savepoint falls on Sep 9"*
+    /// is confidently false whenever notes WERE edited that day and merely
+    /// did not match the words. The caveat rides either way: it is still the
+    /// reason a note she remembers writing that day can be missing.
     static func emptyAnswer(
-        day: String, now: Date, calendar: Calendar = .current, locale: Locale = .current
+        day: String, query: String = "", now: Date,
+        calendar: Calendar = .current, locale: Locale = .current
     ) -> EmptyAnswer {
-        EmptyAnswer(
-            headline: "No note's last edit or savepoint falls on "
-                + dayWords(day: day, now: now, calendar: calendar, locale: locale) + ".",
+        let words = dayWords(day: day, now: now, calendar: calendar, locale: locale)
+        let typed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        return EmptyAnswer(
+            headline: typed.isEmpty
+                ? "No note's last edit or savepoint falls on \(words)."
+                : "No note matching \u{201C}\(typed)\u{201D} was edited on \(words).",
             caveat: caveat)
     }
 }
@@ -168,11 +179,15 @@ struct LibraryDayField: View {
 struct LibraryDayEmptyAnswer: View {
     let tokens: VoiceTokens
     let day: String
+    /// What else is narrowing the listing, so the headline can name it
+    /// (R1-3(a)) — empty when the day is the only narrowing.
+    var query: String = ""
     var now: Date = Date()
     var calendar: Calendar = .current
 
     var body: some View {
-        let answer = LibraryDayFace.emptyAnswer(day: day, now: now, calendar: calendar)
+        let answer = LibraryDayFace.emptyAnswer(
+            day: day, query: query, now: now, calendar: calendar)
         VStack(alignment: .leading, spacing: 4) {
             Text(tokens.chromeLabel(answer.headline))
                 .font(tokens.small)

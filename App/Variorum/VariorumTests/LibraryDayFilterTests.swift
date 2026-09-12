@@ -217,6 +217,81 @@ struct LibraryDayFilterTests {
         }
     }
 
+    // MARK: - What the day may and may not say (the ladder's R1-3)
+
+    /// **A day names NOTES, so arming one moves a books/blocks scope to
+    /// Notes** (R1-3(b)). Before the fix the picker was merely DISABLED with
+    /// its value intact, so the listing was empty — `searchCatalog` returns
+    /// posts only while a day is armed, and `filtered` then kept none of
+    /// them — under a control she could not change, with ✕ the only escape.
+    ///
+    /// Red on old: `scope` stayed `.books` and the day's own notes were not
+    /// listed.
+    @Test func armingADayMovesABooksScopeToNotes() async throws {
+        try await withTravellingLibrary { session, clock in
+            let note = try session.operations.createPost(title: "today's note")
+            _ = try session.operations.newBlock(in: note.id, text: "words")
+            _ = try session.operations.createReading(name: "a book", kind: .curated)
+
+            let model = LibraryCatalogModel(session: session, defaults: try scrubbed("scope"))
+            model.scope = .books
+            await model.search()
+            #expect(model.hits.map(\.kind) == [.book], "books, as she asked")
+
+            model.setEditedOn(day(of: clock.current))
+            #expect(model.scope == .posts,
+                    "the day moved the scope to the kind it can answer")
+            await model.search()
+            #expect(noteIDs(model) == [note.id],
+                    "and the day's notes are listed, not an empty page")
+        }
+    }
+
+    /// **The day's sentence is only spoken when the day is what emptied the
+    /// listing** (R1-3(a), the scope half). A scope the day cannot answer is
+    /// unreachable after the fix above — this is the guard that keeps it
+    /// unreachable, and it is the one the empty-answer site reads.
+    ///
+    /// Red on old: `dayForEmptyAnswer` did not exist (the site read
+    /// `editedOn`, which is set under every scope).
+    @Test func theDaysSentenceIsNotSpokenForAScopeItCannotDescribe() async throws {
+        try await withTravellingLibrary { session, clock in
+            let model = LibraryCatalogModel(session: session, defaults: try scrubbed("guard"))
+            model.setEditedOn(day(of: clock.current))
+            #expect(model.dayForEmptyAnswer == day(of: clock.current))
+            model.scope = .blocks
+            #expect(model.dayForEmptyAnswer == nil,
+                    "the plain sentence is honest where the day's would not be")
+            model.scope = .all
+            #expect(model.dayForEmptyAnswer == day(of: clock.current))
+        }
+    }
+
+    /// **A typed query narrows too, so the headline names it** (R1-3(a), the
+    /// query half). The unqualified sentence asserts a fact about the DAY,
+    /// and with a query beside it that fact can be flatly false — notes WERE
+    /// edited that day, they just did not match the words. The caveat rides
+    /// either way: it is still why a note she remembers can be missing.
+    ///
+    /// Red on old: `emptyAnswer` took no query and said the same thing.
+    @Test func theEmptyAnswerNamesTheTypedQueryWhenOneIsNarrowingToo() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+        let now = try #require(
+            DateFormatter.variorumISO8601.date(from: "2026-09-12T12:00:00.000Z"))
+
+        let alone = LibraryDayFace.emptyAnswer(
+            day: "2026-09-09", query: "", now: now, calendar: calendar)
+        #expect(alone.headline == "No note's last edit or savepoint falls on Sep 9.")
+
+        let narrowed = LibraryDayFace.emptyAnswer(
+            day: "2026-09-09", query: "  zzz ", now: now, calendar: calendar)
+        #expect(narrowed.headline == "No note matching \u{201C}zzz\u{201D} was edited on Sep 9.",
+                "the query is named, and trimmed")
+        #expect(narrowed.caveat == LibraryDayFace.caveat,
+                "the caveat rides either way")
+    }
+
     // MARK: - The words
 
     /// The empty answer says the FACT and then the REASON — the product's

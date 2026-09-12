@@ -107,6 +107,14 @@ final class LibraryCatalogModel {
     /// nil clears. Same convention as `setSort`: this writes, and the caller
     /// spawns `search()`, so a pin drives exactly the two steps the field
     /// does.
+    ///
+    /// **Arming a day moves a books/blocks scope to Notes** (the ladder's
+    /// R1-3(b); QUESTIONS #104 gains the clause). A day names notes — the
+    /// books and blocks arms stand down while one is armed — so a scope still
+    /// pointing at a kind the day cannot answer leaves an EMPTY listing under
+    /// a disabled picker, with ✕ the only escape. Moving the value is the
+    /// smaller harm than that dead end; the shipped arm of #104 said the
+    /// picker stands down and never said what happens to a value already set.
     func setEditedOn(_ day: String?) {
         // A key that is not a real day would filter by a guess; refusing it
         // leaves the Library as it was (`DayBounds`' own nil rule, one layer
@@ -114,6 +122,26 @@ final class LibraryCatalogModel {
         guard let day else { editedOn = nil; return }
         guard JournalDay.isValid(day) else { return }
         editedOn = day
+        if scope == .books || scope == .blocks { scope = .posts }
+    }
+
+    /// **The day the empty answer may speak about** — nil when something the
+    /// day's sentence cannot honestly describe is also narrowing the listing.
+    ///
+    /// The sentence asserts a fact about the DAY (*"No note's last edit or
+    /// savepoint falls on Sep 9."*), so it may only be spoken when the day is
+    /// what emptied the listing. A typed query is handled by the WORDING (the
+    /// face names the query too); a scope the day cannot answer is handled
+    /// here, by silence — the plain `Nothing matches.` is honest where the
+    /// day's sentence would not be. `setEditedOn` makes that case unreachable
+    /// by moving the scope, so this is the guard that keeps it unreachable
+    /// rather than a path she can walk.
+    var dayForEmptyAnswer: String? {
+        guard let editedOn else { return nil }
+        switch scope {
+        case .all, .posts: return editedOn
+        case .books, .blocks: return nil
+        }
     }
     /// Set by the view's binding, which also spawns `search()` — no hidden
     /// didSet task (deterministic under test; the generation guard orders
