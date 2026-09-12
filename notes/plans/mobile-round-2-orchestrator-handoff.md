@@ -1523,3 +1523,47 @@ an objection:
 that does NOT touch `Shared/EditorBrain/` or the cross-block planner
 while 13u1 is live. The tray, the Two-rooms IA, the Library filters, and
 the takes/book doors are all clear of it.
+
+## 12.2 🔴 HANDED IN FROM THE MAC'S 2026-09-12 USE-REPORT ROUND — THE WRITE PAGE OPENS SHOWING NONE OF THE TEXT (her report; her ruling: the mobile session's, standalone or with 13u)
+
+*(Written 2026-09-12 by the Mac round's Fable orchestrator, at her instruction the same day: "the mobile
+bug can be noted and I can handle it in a separate variorum mobile session — that repo has its own
+rules, if it's not shared. I would like you to write about it in the plans for that repo though, to be
+completed as a standalone part or with 13u, if I work on mobile after 13u is done." The Mac round's
+record is `notes/plans/use-report-round-2026-09-12.md` on `main` — ledger row 7, §4.9, her ruling R-Q9;
+her report `notes/author-reports/2026-09-12-use-report.md`.)*
+
+**Her words (2026-09-12, verbatim):** *"the mobile app also has this issue to an even worse degree where
+it defaults to showing NONE of the written text lines, which also drives me insane."* — and at the
+sitting she named the surface: **the Write page when a note opens** (not the takes browser sheet).
+
+**What the Mac found about ITS twin (so the class is understood, not the code):** on the Mac the Takes
+board scrolled her CURRENT block to the TOP of the viewport on every entry (`scrollTo(anchor: .top)`)
+and the typewriter room — the clear extent below the last row — let the LAST block sit at the top with
+nothing above it; a two-block note therefore opened showing only its empty third block. **Nothing of
+that is shared code**: it is board code under `App/Variorum/Variorum/Features/Takes/`. The Mac's ruled
+fix (R-Q1): a per-note scroll memory for the session, restored on entry, and a landing that REVEALS a
+block only when it is off-screen, minimally — never a land-at-top.
+
+**The phone's candidate mechanism (traced by reading on `main` at `3805e210`; unproven — the pin
+decides):** the phone's Write page keeps a typewriter room as a BOTTOM INSET on its `UITextView`, and
+its own code states the contract: *"the typewriter room's bottom inset already makes any block's top a
+legitimate scroll target"* (`MobileEditorViewModel.jumpToBlock`, ~`:838–860`, the block-list jump). An
+ARRIVAL that lands the caret at the note's END (`MobileWriteView`'s arrival — "the Today door's
+straight-into-typing invitation", ~`:40`/`:162`) and reveals it therefore shows the room and no text —
+the same CLASS as the Mac's, in the phone's own scroll (`contentOffset` on a `UITextView`; nothing in
+`App/Variorum/Shared/` scrolls). Whether the keyboard's rise compounds it (the visible band shrinks to
+the room above the keyboard) is the first thing to measure.
+
+**The ruled shape (hers, from the Mac sitting — the phone builds its OWN version):** (1) opening a note
+REVEALS the caret's line minimally — never lands it at the top — unless the note is being entered with
+nothing remembered, in which case the page opens at the TOP; (2) the page's offset is remembered per
+note for the SESSION and restored on re-entry (the Mac's `scrollAnchors` class); (3) the room stays.
+Evidence of the kind: a pin on the arrival (a three-block note whose caret is in the last block opens
+with block 1 visible — red on old), a pin on the memory, and a simulator walk with captures. **Fences:**
+nothing in `Shared/EditorBrain/` (13u1's), nothing in the cross-block planner; the phone's own
+`MobileEditorViewModel`/`MobileWriteView` arrival only.
+
+**Where it runs:** at her word — as a standalone mobile unit, or folded into the mobile catch-up after
+13u (this handoff's §12.1 says why the post-13u1 merge is the careful one). The Mac round's MOBILE
+PARITY LINE is `notes/MobileSoul.md` §6 row **PL-22** on `main`.
