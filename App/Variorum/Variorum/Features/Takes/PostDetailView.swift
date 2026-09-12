@@ -314,6 +314,13 @@ struct PostDetailView: View {
                         session: session, postID: postID, tokens: tokens,
                         fieldOpen: $tagFieldOpen,
                         geometryProbeSpace: Self.mastheadSpace)
+                    // 18h batch 1 (her R-Q7): the note's own time, quiet, at
+                    // the row's trailing end — *edited today 1:33 AM*, a
+                    // click flipping it to *created …*. Row two's THIRD
+                    // subview, not a second layout: the width-aware rule
+                    // already knows how to give three things one line or
+                    // two.
+                    MastheadStamp(session: session, postID: postID, tokens: tokens)
                 }
             }
             .frame(maxWidth: mastheadMeasure, alignment: .leading)
@@ -793,6 +800,10 @@ enum MastheadProbeSlot: Hashable {
     case iconRow
     /// Row 59: the ＃ door — its frame IS its hit target.
     case door
+    /// 18h batch 1 (her R-Q7): the note's time stamp at row two's trailing
+    /// end — keyed by the slot, like every other frame here (the subject is
+    /// the one masthead the probe space belongs to).
+    case stamp
 }
 
 /// **Row 80 (the Act 10 correction round, batch G) — the title row's two
@@ -874,6 +885,15 @@ enum PostDetailOracle {
     /// Row 74: OUR divider's frame in the side column's space — reported in
     /// every window state, nil while no panel stands.
     static var sideColumnDividerFrame: CGRect?
+    /// 18h batch 1 (row 9): the WORDS the masthead's time stamp is showing,
+    /// and the edited stamp its HELD read last delivered — so "an autosave
+    /// moves it" is a claim about the observation rather than about the
+    /// store it reads (the row-19 lesson, pinned).
+    static var stampShown: String?
+    static var stampEditedAt: Date?
+    /// …and its click, so a pin flips it without simulating an AppKit click
+    /// into hosted chrome (`beginTitleEditing`'s own pattern).
+    static var flipStamp: (@MainActor () -> Void)?
 }
 
 /// The correction round's masthead oracle (rows 4/19 — the `BookOutlineGeometry`
@@ -902,6 +922,9 @@ enum MastheadGeometry {
     static var iconRowFrame: CGRect?
     /// Row 59: the ＃ door's frame — its hit target.
     static var doorFrame: CGRect?
+    /// 18h batch 1: the time stamp's frame, so "it sits at the row's
+    /// trailing end and covers nothing" is a claim about rectangles.
+    static var stampFrame: CGRect?
 
     static func record(_ slot: MastheadProbeSlot, _ frame: CGRect) {
         switch slot {
@@ -910,6 +933,7 @@ enum MastheadGeometry {
         case .field: fieldFrame = frame
         case .iconRow: iconRowFrame = frame
         case .door: doorFrame = frame
+        case .stamp: stampFrame = frame
         }
     }
 
@@ -920,6 +944,7 @@ enum MastheadGeometry {
         cardFrames = [:]
         fieldFrame = nil
         doorFrame = nil
+        stampFrame = nil
     }
 
     /// Row 80's pin resets the title row's frames the same way.

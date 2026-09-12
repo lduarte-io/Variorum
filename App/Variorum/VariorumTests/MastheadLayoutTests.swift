@@ -433,6 +433,7 @@ struct MastheadLayoutTests {
                     MastheadGeometry.pathChipFrame != nil
                         && MastheadGeometry.cardFrames.count == tags.count
                         && MastheadGeometry.doorFrame != nil
+                        && MastheadGeometry.stampFrame != nil
                 })
                 await settle(until: { false }, maxTurns: 6)
                 let chip = try #require(MastheadGeometry.pathChipFrame, "(\(voice) \(width) \(tags.count) tags) the chip reported")
@@ -452,6 +453,19 @@ struct MastheadLayoutTests {
                 #expect(abs(door.midY - lastLineY) <= 4,
                         "(\(voice) \(width) \(tags.count) tags) the door (\(door)) sits on the last card's line (midY \(lastLineY)), never orphaned below it")
                 #expect(!chip.intersects(door), "(\(voice) \(width)) the door never covers the chip")
+                // 18h batch 1: row two now carries a THIRD thing — the time
+                // stamp at its trailing end — and the claim this pin makes is
+                // that row two HOLDS at narrow widths, so the stamp is held to
+                // it too. (The chip yields a little room to it and ellipsizes
+                // sooner; that is row 80b's own ruled yield, not a collision.)
+                let stamp = try #require(MastheadGeometry.stampFrame, "(\(voice) \(width)) the stamp reported")
+                #expect(stamp.maxX <= masthead + 0.5,
+                        "(\(voice) \(width)) the stamp stays inside the masthead: \(stamp)")
+                #expect(!stamp.intersects(chip), "(\(voice) \(width)) the stamp never covers the chip")
+                #expect(!stamp.intersects(door), "(\(voice) \(width)) …nor the ＃ door")
+                for (id, card) in cards {
+                    #expect(!stamp.intersects(card), "(\(voice) \(width)) …nor card \(id) \(card)")
+                }
                 #endif
             }
         }

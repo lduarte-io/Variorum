@@ -2946,8 +2946,8 @@ LOCAL UI state, so AppSpec §7's seeds are untouched — see the canon note at t
   (7 tests) — red-on-old `scratchpad/18h-1/red-on-old-piece2.log` (`extra argument 'defaults'`,
   `no member 'sortKey'`, `cannot find 'LibrarySortFace'`); green:
   `✔ Test run with 7 tests in 1 suite passed after 0.267 seconds`.
-- **Piece 3 — the row stamps + `TimeStampFace` adopted by 18d's facts line:** DONE — this
-  commit. `LibrarySortFace.rowStamp(sort, for: hit)` is the ONE rule (subject + stored value as
+- **Piece 3 — the row stamps + `TimeStampFace` adopted by 18d's facts line:** DONE
+  (`440d5c52`). `LibrarySortFace.rowStamp(sort, for: hit)` is the ONE rule (subject + stored value as
   ONE value, so a renderer cannot pick the subject from one sort and the value from another —
   "created today" over an edit stamp is the worst lie a date face can tell; notes only, said
   outright rather than left to the parse). `CatalogNoteLine` wears it trailing, past the
@@ -2961,11 +2961,28 @@ LOCAL UI state, so AppSpec §7's seeds are untouched — see the canon note at t
   `✔ Test run with 12 tests in 2 suites passed after 2.755 seconds` and 18d's four NoteBox
   suites UNCHANGED — `✔ Test run with 17 tests in 4 suites passed after 0.010 seconds` (the
   forwarder's parity proof).
-- **Piece 4 — the masthead stamp (row two's third subview + the oracle slot):** NOT-STARTED.
-  `MastheadRowTwo` grows from two subviews to three (the stamp trailing on one line, riding the
-  chip's line when row two stacks), the stamp a quiet `Button` flipping *edited …* ↔ *created …*
-  on click, fed by a HELD `Queries.noteStamps` observation (never a one-shot — 17o row 18/19's
-  lesson); `MastheadProbeSlot.stamp` + `MastheadGeometry.stampFrame` for the DEBUG oracle.
+- **Piece 4 — the masthead stamp (row two's third subview + the oracle slot):** DONE — this
+  commit. `MastheadRowTwo` lays out TWO OR THREE subviews: the stamp takes its ideal width at
+  the line's TRAILING edge and the cluster reflows in the room between (which is what keeps the
+  right edge calm — the stamp is pinned where she reads it, the tag cards move); on two lines
+  the stamp rides the chip's line and the cluster keeps its full-width line below.
+  `arrangement` gained `stampWidth: CGFloat = 0`, and a 0 stamp adds NOTHING — not even a gap —
+  so the shipped pure pin and every mounted row-58/80b pin hold unchanged (**parity proved:
+  `MastheadLayoutTests` + `MastheadTagDoorTests` 14/2 green before I touched them**). The stamp
+  is `MastheadStamp` in its own file (a quiet `VoicedButtonStyle(.quiet)` button, `lineLimit(1)`
+  + `fixedSize` per P-8) on a HELD `Queries.noteStamps` observation. Pins:
+  `VariorumTests/MastheadStampTests.swift` (4 tests) — the pure three-subview rule, the mounted
+  no-collision claim, **an autosave through the REAL runner moving the held read**, and the
+  click flipping *edited* ↔ *created* through the Button's own closure; plus the narrow-width
+  row-80b helper EXTENDED to hold the stamp to the same no-collision claim (an existing pin
+  whose claim grew because row two grew — stated here rather than done quietly). Green:
+  `✔ Test run with 4 tests in 1 suite passed after 2.045 seconds` and
+  `✔ Test run with 11 tests in 1 suite passed after 14.293 seconds`.
+  **A trap found and recorded:** a `Layout`'s subview that renders `EmptyView` while it waits
+  for data contributes NO subview — and a view that is not in the tree never runs its `.task`,
+  so the read that would fill it can never start (the stamp was blank forever, and the first
+  run of all three mounted pins caught it). The waiting face is a zero-size `Color.clear`,
+  which row two sizes at 0 and treats exactly as "no stamp".
 - **Piece 5 — THE WALK (the acceptance gate) + the closing runs:** NOT-STARTED.
 
 **RED ON OLD, piece 1 (the honest shape for a PRODUCT row — the capability is absent, so the pins
