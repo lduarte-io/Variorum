@@ -1,0 +1,298 @@
+//
+//  LibraryDayFilterTests.swift
+//  VariorumTests
+//
+//  **18h batch 2 — the Library's day filter** (the 2026-09-12 use-report
+//  round, her ledger row 11; ruling R-Q8). Her words: *"how difficult it
+//  would be to implement being able to search for any note edited on a
+//  particular day."*
+//
+//  RED ON OLD — a PRODUCT row, so these pins do not COMPILE on the
+//  pre-change tree: `LibraryCatalogModel` had no `editedOn`/`setEditedOn`,
+//  there was no `LibraryDayField` to drive and no `LibraryDayFace` to say
+//  the words. The recorded compile errors are in the batch record.
+//
+//  ── WHAT THESE PINS DRIVE (never hand-feed — the round's own lesson) ─────
+//  The value reaches the query through the CONTROL'S OWN closures: the pins
+//  build the real `LibraryDayField` and drive `dateBinding` (what the
+//  `DatePicker` sets) and its `onPick`/`onClear` (what the door and the ✕
+//  call), then run the model's own `search()` and read the hits the model
+//  landed. Nothing constructs a `DayBounds` by hand on the way in.
+//
+//  Every model gets its own scrubbed `UserDefaults(suiteName:)` — suites and
+//  hand walks share the dev-store app's `.standard` (KnownIssues R1-7).
+//
+
+import AppKit
+import Dependencies
+import Foundation
+import GRDB
+import SwiftUI
+import Testing
+import VariorumCore
+@testable import Variorum
+
+@MainActor
+@Suite("The Library's 'on day…' filter (18h batch 2, row 11)", .serialized)
+struct LibraryDayFilterTests {
+    private func scrubbed(_ name: String) throws -> UserDefaults {
+        let suite = "18h-2-day-\(name)-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defaults.removePersistentDomain(forName: suite)
+        return defaults
+    }
+
+    /// A clock she can move, so "the day before" is a day the OPERATIONS
+    /// stamped, not a row edited by hand.
+    private final class TravellingClock: @unchecked Sendable {
+        private let state = LockIsolated(Date(timeIntervalSince1970: 0))
+        var current: Date { state.value }
+        func set(_ date: Date) { state.setValue(date) }
+        func next() -> Date {
+            state.withValue { value in
+                defer { value = value.addingTimeInterval(0.001) }
+                return value
+            }
+        }
+    }
+
+    private func withTravellingLibrary<T>(
+        _ body: @MainActor (AppSession, TravellingClock) async throws -> T
+    ) async throws -> T {
+        let db = try AppDatabase.inMemory()
+        let clock = TravellingClock()
+        // Noon, so "this day" and "two days earlier" are unambiguous in any
+        // machine timezone the suite happens to run in.
+        clock.set(Date(timeIntervalSince1970: 1_789_646_400))  // 2026-09-09T12:00:00Z
+        return try await withDependencies {
+            $0.database = db
+            $0.uuid = .incrementing
+            $0.date = DateGenerator { clock.next() }
+            $0.withRandomNumberGenerator = WithRandomNumberGenerator(SeededGenerator(seed: 31))
+        } operation: { @MainActor in
+            try await body(AppSession(database: db), clock)
+        }
+    }
+
+    /// The day an instant falls in, in HER calendar — the same conversion
+    /// the field performs.
+    private func day(of date: Date) -> String { JournalDay.dayString(from: date) }
+
+    private func noteIDs(_ model: LibraryCatalogModel) -> [String] {
+        model.hits.filter { $0.kind == .post }.map(\.id)
+    }
+
+    // MARK: - The value reaches the query
+
+    /// THE FACE PIN the brief names — driven through the date control's own
+    /// binding, which is the closure the `DatePicker` sets.
+    @Test func theFieldsValueReachesTheQuery() async throws {
+        try await withTravellingLibrary { session, clock in
+            let earlier = clock.current.addingTimeInterval(-2 * 86_400)
+            clock.set(earlier)
+            let old = try session.operations.createPost(title: "two days ago")
+            _ = try session.operations.newBlock(in: old.id, text: "old words")
+
+            clock.set(clock.current.addingTimeInterval(2 * 86_400))
+            let today = clock.current
+            let fresh = try session.operations.createPost(title: "today")
+            _ = try session.operations.newBlock(in: fresh.id, text: "new words")
+
+            let model = LibraryCatalogModel(session: session, defaults: try scrubbed("reaches"))
+            await model.search()
+            #expect(Set(noteIDs(model)) == [old.id, fresh.id], "both notes, unfiltered")
+
+            // The REAL control, driven the way the DatePicker drives it.
+            var picked: String?
+            let field = LibraryDayField(
+                tokens: VoiceTokens.resolve(voice: .terminal, dark: false),
+                day: model.editedOn, now: today,
+                onPick: { picked = $0 }, onClear: {})
+            field.dateBinding.wrappedValue = today
+            model.setEditedOn(try #require(picked))
+            await model.search()
+            #expect(noteIDs(model) == [fresh.id], "the day she picked, and only it")
+
+            picked = nil
+            let armed = LibraryDayField(
+                tokens: VoiceTokens.resolve(voice: .terminal, dark: false),
+                day: model.editedOn, now: today,
+                onPick: { picked = $0 }, onClear: {})
+            armed.dateBinding.wrappedValue = earlier
+            model.setEditedOn(try #require(picked))
+            await model.search()
+            #expect(noteIDs(model) == [old.id], "moved back two days, the older note answers")
+        }
+    }
+
+    /// The closed door opens on TODAY — a date field's own convention, and
+    /// the answer she most often wants.
+    @Test func openingTheClosedDoorPicksToday() async throws {
+        try await withTravellingLibrary { _, clock in
+            var picked: String?
+            let field = LibraryDayField(
+                tokens: VoiceTokens.resolve(voice: .study, dark: false),
+                day: nil, now: clock.current,
+                onPick: { picked = $0 }, onClear: {})
+            // The closed door's own action, the one its Button calls.
+            field.dateBinding.wrappedValue = clock.current
+            #expect(picked == day(of: clock.current))
+        }
+    }
+
+    /// ✕ puts the whole Library back — books and blocks included, which is
+    /// the visible half of "a day names notes".
+    @Test func theClearDoorReturnsTheWholeLibrary() async throws {
+        try await withTravellingLibrary { session, clock in
+            let note = try session.operations.createPost(title: "shelf note")
+            let block = try session.operations.newBlock(in: note.id, text: "shelf words")
+            try session.operations.setBlockName(block.block.id, name: "shelf")
+            _ = try session.operations.createReading(name: "shelf", kind: .curated)
+
+            let model = LibraryCatalogModel(session: session, defaults: try scrubbed("clear"))
+            model.query = "shelf"
+            model.setEditedOn(day(of: clock.current))
+            await model.search()
+            #expect(model.hits.map(\.kind) == [.post], "a day names notes")
+
+            var cleared = false
+            let field = LibraryDayField(
+                tokens: VoiceTokens.resolve(voice: .terminal, dark: false),
+                day: model.editedOn, now: clock.current,
+                onPick: { _ in }, onClear: { cleared = true })
+            field.onClear()
+            #expect(cleared)
+            model.setEditedOn(nil)
+            await model.search()
+            #expect(Set(model.hits.map(\.kind)) == [.book, .post, .block],
+                    "every kind is back")
+        }
+    }
+
+    /// A note edited on two days, through the app's own doors: the day
+    /// filter finds it by the later day always, and by the earlier one once
+    /// a savepoint has landed there.
+    @Test func aNoteEditedOnTwoDaysIsFoundByBothOnceASavepointLanded() async throws {
+        try await withTravellingLibrary { session, clock in
+            let monday = clock.current.addingTimeInterval(-86_400)
+            clock.set(monday)
+            let note = try session.operations.createPost(title: "the long one")
+            let block = try session.operations.newBlock(in: note.id, text: "monday")
+
+            clock.set(clock.current.addingTimeInterval(86_400))
+            let tuesday = clock.current
+            try session.operations.autosave(block.variant.id, text: "monday tuesday", charDelta: 8)
+
+            let model = LibraryCatalogModel(session: session, defaults: try scrubbed("twodays"))
+            model.setEditedOn(day(of: tuesday))
+            await model.search()
+            #expect(noteIDs(model) == [note.id])
+
+            model.setEditedOn(day(of: monday))
+            await model.search()
+            #expect(noteIDs(model) == [], "one stamp per note — the caveat, on the real surface")
+
+            // Now the savepoint that leaving the note on Monday would have
+            // left (13j's `closeAutoCommit`), written at Monday's clock.
+            clock.set(monday)
+            _ = try session.operations.commit(block.variant.id, kind: .auto)
+            clock.set(tuesday)
+            await model.search()
+            #expect(noteIDs(model) == [note.id], "Monday answers through its savepoint")
+        }
+    }
+
+    /// A day the calendar does not have never reaches the query — the model
+    /// keeps what it had rather than filtering by a guess.
+    @Test func aKeyThatIsNotADayIsRefusedRatherThanGuessed() async throws {
+        try await withTravellingLibrary { session, clock in
+            let model = LibraryCatalogModel(session: session, defaults: try scrubbed("bad"))
+            model.setEditedOn("2026-02-30")
+            #expect(model.editedOn == nil)
+            model.setEditedOn(day(of: clock.current))
+            model.setEditedOn("tomorrow")
+            #expect(model.editedOn == day(of: clock.current), "the armed day is untouched")
+            model.setEditedOn(nil)
+            #expect(model.editedOn == nil, "nil is the clear")
+        }
+    }
+
+    // MARK: - The words
+
+    /// The empty answer says the FACT and then the REASON — the product's
+    /// honesty about its own one-stamp design, worded in ONE place
+    /// (`LibraryDayFace.emptyAnswer`, which both the List mode's section and
+    /// the Notes mode's column render through `LibraryDayEmptyAnswer`).
+    @Test func anEmptyDaySaysWhichDayAndWhyItMightBeWrong() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+        let now = try #require(
+            DateFormatter.variorumISO8601.date(from: "2026-09-12T12:00:00.000Z"))
+
+        let answer = LibraryDayFace.emptyAnswer(day: "2026-09-09", now: now, calendar: calendar)
+        #expect(answer.headline == "No note's last edit or savepoint falls on Sep 9.")
+        #expect(answer.caveat.contains("one edit stamp"))
+        #expect(answer.caveat.contains("savepoint"))
+        #expect(answer.caveat == LibraryDayFace.caveat,
+                "the door's hover and the empty answer say the same sentence")
+
+        // A day from another year carries it — *Sep 9* alone would be a lie
+        // by omission (`TimeStampFace.day`'s own rule, inherited).
+        let old = LibraryDayFace.emptyAnswer(day: "2025-09-09", now: now, calendar: calendar)
+        #expect(old.headline.contains("Sep 9, 2025"))
+    }
+
+    @Test func theDoorSaysWhichDayItIsShowing() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+        let now = try #require(
+            DateFormatter.variorumISO8601.date(from: "2026-09-12T12:00:00.000Z"))
+        #expect(LibraryDayFace.closedLabel == "on day\u{2026}")
+        #expect(LibraryDayFace.openLabel(day: "2026-09-09", now: now, calendar: calendar)
+                == "on Sep 9")
+        #expect(LibraryDayFace.dayWords(day: "not a day", now: now, calendar: calendar)
+                == "not a day", "a face draws what it has")
+    }
+
+    // MARK: - Where the controls stand
+
+    /// The Timeline mode runs its own listing, so neither catalog control is
+    /// rendered there — ONE rule, with 18h batch 1's name still reading it.
+    @Test func theTimelineModeOffersNeitherCatalogControl() async throws {
+        try await withTravellingLibrary { session, _ in
+            let model = LibraryCatalogModel(session: session, defaults: try scrubbed("timeline"))
+            #expect(model.showsCatalogControls)
+            #expect(model.showsSortDoor)
+            model.mode = .notes
+            #expect(model.showsCatalogControls)
+            model.mode = .timeline
+            #expect(!model.showsCatalogControls)
+            #expect(!model.showsSortDoor, "batch 1's name reads the same one rule")
+        }
+    }
+
+    /// The day and the sort are both parameters of the ONE listing, so they
+    /// compose: the day narrows, the sort orders what is left.
+    @Test func theDayAndTheSortComposeOnOneListing() async throws {
+        try await withTravellingLibrary { session, clock in
+            let today = clock.current
+            let apple = try session.operations.createPost(title: "apple")
+            _ = try session.operations.newBlock(in: apple.id, text: "a")
+            let banana = try session.operations.createPost(title: "banana")
+            _ = try session.operations.newBlock(in: banana.id, text: "b")
+            clock.set(today.addingTimeInterval(2 * 86_400))
+            let cherry = try session.operations.createPost(title: "cherry")
+            _ = try session.operations.newBlock(in: cherry.id, text: "c")
+
+            let model = LibraryCatalogModel(session: session, defaults: try scrubbed("compose"))
+            model.setEditedOn(day(of: today))
+            model.setSort(.title)   // takes A–Z, batch 1's natural direction
+            await model.search()
+            #expect(noteIDs(model) == [apple.id, banana.id])
+
+            model.setDirection(.desc)
+            await model.search()
+            #expect(noteIDs(model) == [banana.id, apple.id], "the sort still orders the day")
+        }
+    }
+}

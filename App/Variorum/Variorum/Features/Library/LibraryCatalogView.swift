@@ -75,11 +75,39 @@ final class LibraryCatalogModel {
         defaults.set(direction.rawValue, forKey: Self.directionKey)
     }
 
-    /// Where the door stands. The Timeline mode IS an order — offering it a
-    /// sort menu would be a door that cannot act (P-2), so it stands down
-    /// there. A rule on the model rather than an `if` buried in the header,
-    /// so a pin can hold it (P-1's own doctrine: gating is data).
-    var showsSortDoor: Bool { mode != .timeline }
+    /// Where the catalog's own controls stand. The Timeline mode runs its
+    /// OWN listing with its own order, so neither the sort door nor the day
+    /// field can act there — a door that cannot act is not rendered (P-2).
+    /// A rule on the model rather than an `if` buried in the header, so a
+    /// pin can hold it (P-1's own doctrine: gating is data).
+    var showsCatalogControls: Bool { mode != .timeline }
+    /// 18h batch 1's name for the same rule, kept so its pin reads unchanged
+    /// (the 3C parity pattern).
+    var showsSortDoor: Bool { showsCatalogControls }
+
+    // MARK: - The day filter (18h batch 2, her row 11 — ruling R-Q8)
+
+    /// **"Notes edited on this day"**, or nil for the whole Library. A
+    /// canonical `yyyy-MM-dd` key in HER calendar; `search()` converts it to
+    /// the store's UTC window through core's one pure rule (`DayBounds`).
+    ///
+    /// Deliberately NOT remembered: the sort is a posture of how she likes
+    /// her Library, and a filter is a question she asked once. A Library that
+    /// reopened tomorrow still narrowed to yesterday — with most of her notes
+    /// invisible — is the invisible-state hazard, not a convenience.
+    private(set) var editedOn: String?
+
+    /// nil clears. Same convention as `setSort`: this writes, and the caller
+    /// spawns `search()`, so a pin drives exactly the two steps the field
+    /// does.
+    func setEditedOn(_ day: String?) {
+        // A key that is not a real day would filter by a guess; refusing it
+        // leaves the Library as it was (`DayBounds`' own nil rule, one layer
+        // up so the model never holds a value the query would drop).
+        guard let day else { editedOn = nil; return }
+        guard JournalDay.isValid(day) else { return }
+        editedOn = day
+    }
     /// Set by the view's binding, which also spawns `search()` — no hidden
     /// didSet task (deterministic under test; the generation guard orders
     /// the UI's unordered spawns).
@@ -223,9 +251,13 @@ final class LibraryCatalogModel {
         do {
             let query = query
             let (sort, direction) = (sort, direction)
+            // Her day, in her calendar, converted once — the query compares
+            // the store's own UTC text (18h batch 2).
+            let day = editedOn.flatMap { DayBounds(day: $0) }
             let all = try await session.database.read { db in
                 try Queries.searchCatalog(
-                    db, query: query, limitPerKind: 40, sort: sort, direction: direction)
+                    db, query: query, limitPerKind: 40, sort: sort, direction: direction,
+                    editedOn: day)
             }
             guard generation == searchGeneration else { return }  // stale
             hits = filtered(all)
@@ -786,6 +818,13 @@ struct LibraryCatalogView: View {
                 }
                 .pickerStyle(.segmented)
                 .frame(maxWidth: 280)
+                // 18h batch 2: a day names NOTES — books and blocks carry no
+                // edit stamp and stand down while one is armed, so the scope
+                // stands down with them rather than offering picks that
+                // would list nothing (P-2).
+                .disabled(model.editedOn != nil)
+                .help(model.editedOn == nil
+                      ? "" : "A day names notes — clear it to scope books and blocks again")
                 Picker("", selection: Binding(get: { model.mode }, set: { model.mode = $0 })) {
                     Text(tokens.chromeLabel("List")).tag(LibraryCatalogModel.Mode.list)
                     Text(tokens.chromeLabel("Notes")).tag(LibraryCatalogModel.Mode.notes)
@@ -796,7 +835,7 @@ struct LibraryCatalogView: View {
                 // 18h batch 1 (her row 10): the notes' order, hers to
                 // choose. The Timeline mode is its own order by definition,
                 // so the door stands down there rather than lying.
-                if model.showsSortDoor {
+                if model.showsCatalogControls {
                     LibrarySortMenu(
                         tokens: tokens, sort: model.sort, direction: model.direction,
                         onPick: { pick in
@@ -805,6 +844,18 @@ struct LibraryCatalogView: View {
                         },
                         onDirection: { pick in
                             model.setDirection(pick)
+                            Task { await model.search() }
+                        })
+                    // 18h batch 2 (her row 11): *"search for any note edited
+                    // on a particular day."*
+                    LibraryDayField(
+                        tokens: tokens, day: model.editedOn,
+                        onPick: { day in
+                            model.setEditedOn(day)
+                            Task { await model.search() }
+                        },
+                        onClear: {
+                            model.setEditedOn(nil)
                             Task { await model.search() }
                         })
                 }
@@ -936,9 +987,15 @@ struct LibraryCatalogView: View {
                 }
             }
             if model.hits.isEmpty {
-                Text(tokens.chromeLabel("Nothing matches."))
-                    .font(tokens.small)
-                    .foregroundStyle(tokens.muted)
+                // 18h batch 2: a day that finds nothing says WHY — the one
+                // wording, shared with the Notes mode below.
+                if let day = model.editedOn {
+                    LibraryDayEmptyAnswer(tokens: tokens, day: day)
+                } else {
+                    Text(tokens.chromeLabel("Nothing matches."))
+                        .font(tokens.small)
+                        .foregroundStyle(tokens.muted)
+                }
             }
         }
         .scrollContentBackground(.hidden)
@@ -958,10 +1015,15 @@ struct LibraryCatalogView: View {
                     Divider().overlay(tokens.line.opacity(0.6))
                 }
                 if posts.isEmpty {
-                    Text(tokens.chromeLabel("No notes match."))
-                        .font(tokens.small)
-                        .foregroundStyle(tokens.muted)
-                        .padding(24)
+                    if let day = model.editedOn {
+                        LibraryDayEmptyAnswer(tokens: tokens, day: day)
+                            .padding(24)
+                    } else {
+                        Text(tokens.chromeLabel("No notes match."))
+                            .font(tokens.small)
+                            .foregroundStyle(tokens.muted)
+                            .padding(24)
+                    }
                 }
             }
             .padding(.horizontal, 20)

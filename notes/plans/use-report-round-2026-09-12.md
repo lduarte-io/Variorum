@@ -3166,10 +3166,9 @@ forensic"); no change to what `last_touched_at` MEANS (AppSpec §10 untouched); 
 the row stamps or the masthead stamp (18h batch 1's, `2d43df7c…f531955a`); the Timeline mode's own
 listing untouched; no new `setting` key (the day filter is transient UI state — see the batch's calls).
 
-**LIVE STATUS — piece 1 DONE, piece 2 NOT NEEDED (measured), pieces 3–4 next**
+**LIVE STATUS — pieces 1 and 3 DONE, piece 2 NOT NEEDED (measured), piece 4 (the walk) next**
 
-- **Piece 1 — THE CORE (the union query arm + the pure day→UTC-bounds rule):** DONE (hash PENDING
-  until this commit lands — flipped in the commit itself). `DayBounds`
+- **Piece 1 — THE CORE (the union query arm + the pure day→UTC-bounds rule):** DONE (`c3d81b31`). `DayBounds`
   (`Sources/VariorumCore/Domain/DayBounds.swift`) is the conversion: a local calendar day → the
   half-open UTC ISO window `[start, end)` the stored stamps are directly comparable against.
   `JournalDay.date(from:calendar:)` is the noon anchor it and `TimeStampFace.parse` now SHARE (the
@@ -3184,13 +3183,46 @@ listing untouched; no new `setting` key (the day filter is transient UI state �
   stamp suites riding UNMODIFIED beside them (the parity proof for the `parse` refactor):
   `✔ Test run with 43 tests in 5 suites passed after 0.761 seconds.`
 - **Piece 2 — THE INDEX: NOT NEEDED, measured, no commit.** See "THE MEASUREMENT".
-- **Piece 3 — the face (the header's day field + the model + the empty answer):** NOT-STARTED.
-  Settled design: `LibraryCatalogModel.editedOn: String?` (a canonical day key) through
-  `setEditedOn(_:)`, handed to `searchCatalog` as `DayBounds(day:calendar: .current)`; a new small
-  file `Features/Library/LibraryDayFilter.swift` holding the door and the ONE wording of the empty
-  answer, which both empty states (List and Notes) read.
+- **Piece 3 — THE FACE (the header's day field · the model's day · the empty answer):** DONE (hash
+  PENDING until this commit lands). A new small file
+  `App/Variorum/Variorum/Features/Library/LibraryDayFilter.swift` (NOT more lines in the 1,300-line
+  `LibraryCatalogView.swift`, and NOT bolted into batch 1's `LibraryTimeFace.swift`, which is the
+  sort-and-stamp file — F-0/P-9) holding two things of one theme: `LibraryDayFace` (the door's words
+  and, in ONE place, the honest empty answer) and `LibraryDayField` (the door: `on day…` until she
+  names a day, then the date field with its ✕). `LibraryCatalogModel` gained `editedOn` written
+  through `setEditedOn` (which REFUSES a key that is not a real day rather than filtering by a
+  guess), and `search()` converts it once through `DayBounds`. `showsSortDoor` became ONE rule under
+  a truer name — `showsCatalogControls` — with batch 1's name kept as its forwarder so that pin
+  reads unchanged (the 3C parity pattern); both controls stand down in the Timeline mode, and the
+  SCOPE picker stands down while a day is armed (a day names notes). Both empty states — the List
+  mode's and the Notes mode's — render the one `LibraryDayEmptyAnswer`.
+  Pin: `App/Variorum/VariorumTests/LibraryDayFilterTests.swift` (9). Red-on-old captured as compile
+  errors on `c3d81b31` in a throwaway worktree (`scratchpad/18h-2/red-on-old-face.log`, quoted
+  below). Green: `✔ Test run with 9 tests in 1 suite passed after 0.110 seconds.`
 - **Piece 4 — THE WALK + the closing runs:** NOT-STARTED. Captures into
   `notes/plans/use-report-2026-09-12-screens/18h-2/`.
+
+---
+
+**THE BATCH'S OWN CALLS (recorded, not asked — §8's rule; the brief grants the field's placement and
+the wording, and names QUESTIONS for anything else):**
+
+1. **The field sits in the header's control row, after `sort ▾`** — the filter row she already uses
+   (search · scope · mode · sort), so the two things that shape the listing stand together.
+2. **Closed until she opens it, and it opens on TODAY.** An always-armed date control would narrow
+   the Library the moment the page drew, with no gesture behind it — the invisible-state hazard the
+   app's own walk standard forbids. Opening picks today because that is what a date field does and
+   what "what did I write today" wants.
+3. **The day is NOT remembered across sessions** (unlike the sort, which is a posture). A Library
+   that reopened still narrowed to a day she asked about yesterday hides most of her notes behind a
+   control she does not remember setting.
+4. **The empty answer carries the caveat; the armed door carries it on hover.** §4.8 calls the
+   caveat "the product's honesty — the face must word it"; this is where it is worded, in one place
+   both modes read. It is NOT a permanent banner over a listing that DID find notes — that would nag
+   on every successful answer.
+5. **QUESTIONS #104 (PROVISIONAL, filed):** while a day is armed the listing is NOTES ONLY (books
+   and blocks carry no edit stamp), and the scope picker stands down with them. Built that way, with
+   the two alternatives named.
 
 ---
 
@@ -3242,6 +3274,18 @@ DayBoundsTests.swift:127:43: error: type 'JournalDay' has no member 'date'
 LibraryDaySearchTests.swift:84:31: error: extra argument 'editedOn' in call
 LibraryDaySearchTests.swift:313:31: error: type 'Queries' has no member 'catalogPostsSQL'
 LibraryDaySearchTests.swift:314:24: error: cannot infer contextual base in reference to member 'lastTouched'
+```
+
+**RED ON OLD, piece 3 (the same honest shape one layer up — the face pins do not compile on
+`c3d81b31`, the tree that already carries the core; full log
+`scratchpad/18h-2/red-on-old-face.log`):**
+
+```
+LibraryDayFilterTests.swift:107:25: error: cannot find 'LibraryDayField' in scope
+LibraryDayFilterTests.swift:109:28: error: value of type 'LibraryCatalogModel' has no member 'editedOn'
+LibraryDayFilterTests.swift:154:19: error: value of type 'LibraryCatalogModel' has no member 'setEditedOn'
+LibraryDayFilterTests.swift:232:22: error: cannot find 'LibraryDayFace' in scope
+LibraryDayFilterTests.swift:264:27: error: value of type 'LibraryCatalogModel' has no member 'showsCatalogControls'
 ```
 
 *(Pointers re-verified by the orchestrator on 2026-09-12 after 18h batch 1 — `Queries.searchCatalog` is now `ShelfQueries.swift:399` with `sort:`/`direction:` (R-3's `2d43df7c`); `idx_container_touched` is created at `Sources/VariorumCore/Persistence/Migrations.swift:42` (the composite live-row form) and `idx_commit_variant ON commit_point(variant_id, created_at)` at `:807`; `commit_point` has NO index on `created_at` alone today. QUESTIONS' next free number is **#103** unless R-3 took it (read the file's tail). Her app is QUIT for the night — an instance at `/Applications` means she is awake: never touch it.)*
