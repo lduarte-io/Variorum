@@ -50,7 +50,9 @@ struct DecorLaneReservation {
     /// their inset paths are byte-identical.
     var reserves = false
 
-    /// nil = the ORDINARY symmetric road (no lane reserved yet, or never).
+    /// nil = the ORDINARY symmetric road (no lane reserved, released, or
+    /// never) — the `textContainerOrigin` override defers to `super` exactly
+    /// while this is nil.
     private(set) var insets: (leading: CGFloat, trailing: CGFloat)?
 
     init(reserves: Bool = false) {
@@ -61,11 +63,22 @@ struct DecorLaneReservation {
     /// surface should now carry, or **nil when nothing changed** — the caller
     /// writes nothing and reports nothing, so a settled lane costs one
     /// comparison per render.
+    ///
+    /// "Nothing changed" is measured against the surface's RESTING leading
+    /// inset, never against "never asked" (17p batch b ladder round 1,
+    /// R1-2): the first ask on a laneless surface used to read `nil != 8`,
+    /// answer "moved", and send every contained surface's first render back
+    /// through its host door for nothing — once per visible note in a book
+    /// Outline — while leaving the `textContainerOrigin` override live at
+    /// the resting value, correct only by coincidence. A released lane
+    /// returns to nil, so the override defers to `super` exactly while no
+    /// lane is reserved.
     mutating func reserve(needed: Bool, trailing: CGFloat) -> CGFloat? {
         guard reserves else { return nil }
+        let resting = EditorTypography.inlineInset(needsLane: false)
         let leading = EditorTypography.inlineInset(needsLane: needed)
-        guard insets?.leading != leading else { return nil }
-        insets = (leading, trailing)
+        guard (insets?.leading ?? resting) != leading else { return nil }
+        insets = needed ? (leading, trailing) : nil
         return ((leading + trailing) / 2).rounded()
     }
 

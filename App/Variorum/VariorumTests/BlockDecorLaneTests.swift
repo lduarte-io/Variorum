@@ -243,6 +243,33 @@ struct BlockDecorLaneTests {
         #expect(!full.reservesDecorLane)
     }
 
+    /// **THE FIRST LANELESS ASK SAYS NOTHING** (the ladder's R1-2). Every
+    /// contained surface's first render asks `setDecorLane(needed: false)`
+    /// before any comment exists; the brain answered "moved" (its state was
+    /// nil, and nil is not 8) and so sent that first render back through the
+    /// host door for nothing — once per contained surface, once per visible
+    /// note in a book Outline — and left the origin override live at the
+    /// resting value. RED ON OLD: both surfaces returned true on the first
+    /// ask.
+    @Test func theFirstLanelessAskReportsNoMovement() {
+        for surface in [
+            EditorTextView.makeInlineEditor() as any DecorLaneSurface,
+            PaneTextView.makeReadSurface() as any DecorLaneSurface,
+        ] {
+            #expect(!surface.setDecorLane(needed: false),
+                    "nothing moved — the resting inset IS the resting inset")
+            #expect(!surface.setDecorLane(needed: false))
+            #expect(surface.proseLeft == EditorTypography.inlineSurfaceInset)
+            // …and a lane reserved then released returns the surface to the
+            // ordinary road: the same resting numbers, and nothing to say
+            // on the next laneless ask.
+            #expect(surface.setDecorLane(needed: true))
+            #expect(surface.setDecorLane(needed: false))
+            #expect(surface.proseLeft == EditorTypography.inlineSurfaceInset)
+            #expect(!surface.setDecorLane(needed: false))
+        }
+    }
+
     /// **THE SWEEP TABLE** (the constitution's closing form for a fixed
     /// class): every host of `BlockDecorOverlayController` — there are
     /// exactly three — and what each gets. The batch's WALK found the read
