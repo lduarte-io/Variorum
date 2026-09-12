@@ -331,16 +331,51 @@ final class TakesBoardLayout {
     /// keystroke (`paneEdited`); the expansion doors (`toggleExpanded` /
     /// `expandAllFans` / `closeAllFans`); the slot-height drag and its
     /// double-click (`beginSlotDrag` / `resetSlotHeight`); every Operations
-    /// call through `run` / `runCopying` (the structure controller's acts end
-    /// in a focus migration or a gone row by construction). Deliberately NOT
-    /// arms: a fan strip's page turn (a fixed strip height — and `setPage` is
-    /// shared with the strip's settled-scroll write-back, a programmatic road
-    /// after `pageToReveal`) and the merge pick (a stroke overlay; and
-    /// `clearMergeSelection` is called by the structure controller) — neither
-    /// can move the article page, and an arm on a shared road would end a
-    /// landing her hand did not. A future gesture that changes a row's height
-    /// or the live pane adds its door here and to the arms' pin
+    /// call through `run` / `runCopying`; and the three bare-runner doors that
+    /// change content height with neither a migration nor a gone row —
+    /// `applyCallout` (a frame's pad), the split doors' one body
+    /// (`TakesStructureController.runSplit`: rows multiply above) and
+    /// `turnTakesIntoBlocks` (rows minted above when a card above is the
+    /// target) — the ladder's round 2, R2-1, measured: the note-wide split
+    /// hauled the page 406 → 1047 after her click, a callout above the landed
+    /// row 65 → 75.
+    ///
+    /// **COMPLETENESS IS BY ENUMERATION, NEVER "BY CONSTRUCTION"** (round 1
+    /// claimed the latter for the structure controller and round 2 falsified
+    /// it): every Operations road reachable from the Takes board, classified.
+    /// The next arm is a row in this table, not a guess.
+    ///
+    /// | road | height / live pane? | covered by |
+    /// |---|---|---|
+    /// | every `run` / `runCopying` caller (choose · pick · the lens doors · set fan style · archive / unarchive / label / lock / delete take · commit · seal · entry date · the newlines chip · word target · restore commit · the drag-reorder) | various | the `run` arm — no programmatic caller of `run` exists |
+    /// | `branchTake` · `newBlankTake` · `newBlankTakeAsChosen` | yes (the fan grows) | `revealTake` → `focus` → `.migrated` (a fresh variant is never the live pane) |
+    /// | the ceremony (`runDivideW` · `runDivideDuplicating`) | yes | the target is the landed (focused) block → A released → the row gone → `.done` |
+    /// | `addBlockAtEnd` · `insertBlockBelowFocused` · `deleteFocusedBlock` · `archiveFocusedBlock` · `runDivide` · `runKeepOnTopDivide` · `moveTakeIntoBlockBelow` · `mergeSelectedBlocks` | yes | `parkFocus` → `focus` → `.migrated`; a one-block delete → the row gone |
+    /// | `moveTake` (reorder within the fan) | no (same cards, same height) | — |
+    /// | `deleteSelectedBlocks` | yes (rows removed) | a `.foot` landing's rows above going away moves it UP, still on screen; a `.head` landing's rows above are off-screen and unclickable without a scroll (her hand) |
+    /// | `runSplit` (three doors) · `turnTakesIntoBlocks` · `applyCallout` | yes | THEIR OWN ARMS (R2-1) |
+    /// | the Lenses-host-only column roads (`addWriteColumn` · `branchIntoColumn` · `adoptColumn` · …) | n/a | host-gated; the Lenses board holds no article landing |
+    /// | `saveNoteVersion` | no (the copy is born archived) | — |
+    ///
+    /// Deliberately NOT arms: a fan strip's page turn (a fixed strip height —
+    /// and `setPage` is shared with the strip's settled-scroll write-back, a
+    /// programmatic road after `pageToReveal`); the merge pick (a stroke
+    /// overlay; and `clearMergeSelection` is called by the structure
+    /// controller); the density menus (`beneathCount` cannot change height —
+    /// N40's fixed strip; `gridRows` measured moving nothing in the reachable
+    /// margin-grid shape at round 2) — none can move the article page, and an
+    /// arm on a shared road would end a landing her hand did not. A future
+    /// gesture that changes a row's height or the live pane adds its door
+    /// here, its row above, and its arm in the pin
     /// (`herBoardGesturesEndAPendingLanding`).
+    ///
+    /// The structural end state, recorded for the `TakesArticleScroll` split
+    /// (owner 13u2), not built here: ONE arm in `adopt` — a projection that
+    /// arrives while a landing is pending and differs from the one it was
+    /// judged against ends it — makes every Operations road, hers or a sync
+    /// arrival's, end a landing by construction. `!=` on the projection fires
+    /// on any field, so a pure metadata arrival would end one too; chosen
+    /// behaviour to write down there, not to discover.
     func clearArticleLanding() {
         articleLanding = nil
     }
