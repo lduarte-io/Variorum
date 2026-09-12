@@ -136,6 +136,45 @@ struct TimeStampFaceTests {
             == "Dated Sep 9, 2026", "a day has no time to spell")
     }
 
+    /// **The formatter cache's own risk, pinned** (the 18h ladder, R1-5).
+    /// The fix is a performance fix and the arbitration owed it no pin — but
+    /// a CACHE introduces a failure the slow code could not have: a key that
+    /// forgets part of the shape hands back a formatter speaking the wrong
+    /// locale, calendar or zone, turning a slow-but-correct answer into a
+    /// fast lie. So the words are asked for through the SAME template under
+    /// four different shapes, and each must answer as itself.
+    @Test func theFormatterCacheAnswersPerLocaleCalendarAndZone() {
+        let instant = date("2026-09-09T23:30:00")
+
+        // Same template, two LOCALES.
+        let american = TimeStampFace.day(
+            instant, now: now, calendar: calendar, locale: Locale(identifier: "en_US"))
+        let french = TimeStampFace.day(
+            instant, now: now, calendar: calendar, locale: Locale(identifier: "fr_FR"))
+        #expect(american == "Sep 9")
+        #expect(french != american, "a second locale is not served the first's formatter: \(french)")
+
+        // Same template and locale, two ZONES — and the zone is what decides
+        // which DAY 23:30 UTC belongs to.
+        var tokyo = Calendar(identifier: .gregorian)
+        tokyo.timeZone = TimeZone(identifier: "Asia/Tokyo")!
+        #expect(TimeStampFace.day(instant, now: now, calendar: tokyo, locale: locale) == "Sep 10",
+                "Tokyo is already on the 10th; a zone-blind cache would say Sep 9")
+        #expect(TimeStampFace.day(instant, now: now, calendar: calendar, locale: locale) == "Sep 9",
+                "…and UTC still says Sep 9 afterwards — neither poisoned the other")
+
+        // Same template, locale and zone, two CALENDARS.
+        var hebrew = Calendar(identifier: .hebrew)
+        hebrew.timeZone = TimeZone(identifier: "UTC")!
+        let hebrewDay = TimeStampFace.day(instant, now: now, calendar: hebrew, locale: locale)
+        #expect(hebrewDay != "Sep 9", "a calendar-blind cache would answer Gregorian: \(hebrewDay)")
+
+        // …and the first answer is still the first answer, asked again.
+        #expect(TimeStampFace.day(
+            instant, now: now, calendar: calendar,
+            locale: Locale(identifier: "en_US")) == "Sep 9")
+    }
+
     /// The day form on its own — the shape 18d's facts line already ships
     /// (`NoteBoxCopy.day` forwards here, so the two can never drift).
     @Test func theDayFormIsTheOneTheFactsLineAlreadyShips() {

@@ -203,11 +203,71 @@ public enum TimeStampFace {
     private static func formatted(
         _ date: Date, template: String, calendar: Calendar, locale: Locale
     ) -> String {
+        formatter(template: template, calendar: calendar, locale: locale).string(from: date)
+    }
+
+    // MARK: - The formatter cache (the 18h ladder, R1-5)
+
+    /// **Build the formatter once per shape, not once per call.**
+    ///
+    /// The cold review measured what this function used to do: a
+    /// `DateFormatter` allocated and `setLocalizedDateFormatFromTemplate`d on
+    /// EVERY call — **72.4 µs** per call on this machine, against **1.8 µs**
+    /// to format through one already built (the implementer's own `swiftc -O`
+    /// probe; the reviewer measured 76 µs / 0.68 µs). A Library row asks for
+    /// two of them (its words and its tooltip — `.help` takes a built
+    /// `String`, so the tooltip is paid whether or not anyone hovers), so a
+    /// 40-row list body paid **~5.8 ms of main-thread work** and re-paid it on
+    /// every keystroke, selection change and row recycle. Viewport-bounded, so
+    /// never a P1 breach — but it sat on the surface the project's first
+    /// principle calls *snappy, always*.
+    ///
+    /// **The tooltip stays EAGER** (ruled at the ladder's arbitration): `.help`
+    /// takes a value, not a closure, and a hover-deferred build (`onHover` +
+    /// per-row `@State`) costs more on every pointer entry than the 1.8 µs it
+    /// would save now that the formatter is cached.
+    ///
+    /// **The key is the whole shape** — template AND locale AND calendar AND
+    /// time zone. A key that forgot any of them would hand back a formatter
+    /// speaking the wrong calendar or zone, which is the one way a cache can
+    /// turn a slow-but-correct answer into a fast lie; pinned by
+    /// `TimeStampFaceTests.theFormatterCacheAnswersPerLocaleCalendarAndZone`.
+    ///
+    /// **Locked, not merely `nonisolated(unsafe)`** — this is a MUTABLE
+    /// dictionary read and written from whatever thread renders, and the
+    /// `variorumISO8601` precedent beside it is an immutable `let` that
+    /// licenses nothing of the kind. The shape is `StoreKey.sweptAccounts` /
+    /// `SyncSchema.columnCatalog`: an `NSLock` around a static store. Bounded
+    /// by construction: four templates × the one locale/calendar/zone a
+    /// process actually renders in. The lock covers the DICTIONARY; the
+    /// formatter it hands back formats outside it, on the same documented
+    /// thread-safety `DateFormatter.variorumISO8601` has relied on since
+    /// Phase 1 (a shared formatter used from every layer).
+    private struct FormatterShape: Hashable {
+        let template: String
+        let locale: String
+        let calendar: Calendar.Identifier
+        let timeZone: String
+    }
+
+    private static let formatterLock = NSLock()
+    nonisolated(unsafe) private static var formatters: [FormatterShape: DateFormatter] = [:]
+
+    private static func formatter(
+        template: String, calendar: Calendar, locale: Locale
+    ) -> DateFormatter {
+        let shape = FormatterShape(
+            template: template, locale: locale.identifier,
+            calendar: calendar.identifier, timeZone: calendar.timeZone.identifier)
+        formatterLock.lock()
+        defer { formatterLock.unlock() }
+        if let cached = formatters[shape] { return cached }
         let formatter = DateFormatter()
         formatter.calendar = calendar
         formatter.timeZone = calendar.timeZone
         formatter.locale = locale
         formatter.setLocalizedDateFormatFromTemplate(template)
-        return formatter.string(from: date)
+        formatters[shape] = formatter
+        return formatter
     }
 }
