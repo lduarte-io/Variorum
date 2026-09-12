@@ -1950,7 +1950,13 @@ final class TakesViewModel {
             variantIDs: (projection.fans[blockID] ?? []).map(\.id))
     }
 
+    /// Her hand (the 17p batch-a ladder's final word, after the sanity pass's
+    /// raise): the slot-height drag and its double-click write a row's HEIGHT
+    /// through no Operations call and no focus migration — R1-2's measured
+    /// mechanism — so both gesture doors end a pending article landing.
+    /// `slotDragChanged` / `slotDragEnded` always follow `beginSlotDrag`.
     func beginSlotDrag(_ blockID: String) {
+        board.clearArticleLanding()
         board.beginSlotDrag(blockID, naturalHeight: naturalSlotHeight(blockID))
     }
 
@@ -1964,6 +1970,7 @@ final class TakesViewModel {
     }
 
     func resetSlotHeight(_ blockID: String) {
+        board.clearArticleLanding()
         board.resetSlotHeight(blockID)
     }
 

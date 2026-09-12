@@ -315,10 +315,32 @@ final class TakesBoardLayout {
         articleLandingAims = 0
     }
 
-    /// Her hand ends a landing — a scroll (`consumeArticleGeometry`'s user
-    /// branch), a click that migrates the live pane, an edit. The request is
-    /// otherwise kept through the column's settling passes (see
-    /// `ArticleLandingStep`).
+    /// Her hand ends a landing. The request is otherwise kept through the
+    /// column's settling passes (see `ArticleLandingStep`).
+    ///
+    /// **THE RULE (settled at the 17p batch-a ladder's final word, so the
+    /// next arm is not guesswork):** a landing is a REVEAL kept alive only
+    /// against the lazy column's own settling; what can defeat it after that
+    /// is a change to the article's CONTENT HEIGHT or to the LIVE PANE — so
+    /// her hand is every gesture that can do either, and the arms sit at the
+    /// view model's GESTURE DOORS for those, never at a model method a
+    /// programmatic road shares. The arms: her scroll of the article
+    /// (`consumeArticleGeometry`'s user branch); a click that migrates the
+    /// live pane (`focus`'s `.migrated` arm only — the landed pane's own
+    /// first-responder round trip is `.unchanged` and must not end it); a
+    /// keystroke (`paneEdited`); the expansion doors (`toggleExpanded` /
+    /// `expandAllFans` / `closeAllFans`); the slot-height drag and its
+    /// double-click (`beginSlotDrag` / `resetSlotHeight`); every Operations
+    /// call through `run` / `runCopying` (the structure controller's acts end
+    /// in a focus migration or a gone row by construction). Deliberately NOT
+    /// arms: a fan strip's page turn (a fixed strip height — and `setPage` is
+    /// shared with the strip's settled-scroll write-back, a programmatic road
+    /// after `pageToReveal`) and the merge pick (a stroke overlay; and
+    /// `clearMergeSelection` is called by the structure controller) — neither
+    /// can move the article page, and an arm on a shared road would end a
+    /// landing her hand did not. A future gesture that changes a row's height
+    /// or the live pane adds its door here and to the arms' pin
+    /// (`herBoardGesturesEndAPendingLanding`).
     func clearArticleLanding() {
         articleLanding = nil
     }

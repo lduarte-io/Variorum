@@ -667,7 +667,48 @@ struct TakesArticleScrollTests {
             model.board.landArticle(on: far)
             await model.choose(blockID: fixture.blocks[0].block, variantID: fixture.blocks[0].variant)
             #expect(model.articleLanding == nil, "an Operations call through `run` is her hand")
+
+            // The slot-height drag (the sanity pass's raise): it writes a
+            // row's HEIGHT through no Operations call and no migration —
+            // R1-2's measured mechanism — from two gesture doors.
+            model.board.landArticle(on: far)
+            model.beginSlotDrag(fixture.blocks[0].block)
+            #expect(model.articleLanding == nil, "a slot-height drag is her hand")
+
+            model.board.landArticle(on: far)
+            model.resetSlotHeight(fixture.blocks[0].block)
+            #expect(model.articleLanding == nil, "the handle's double-click is her hand")
         }
+    }
+
+    /// A GUARD, not a red-on-old pin (green on both sides — measured at the
+    /// ladder's final word, so the same-value-write hazard was dismissed as
+    /// hollow rather than "fixed"): `articleLanding` is observed (the view's
+    /// `.onChange` rides it) and the geometry hook's her-hand branch writes
+    /// `nil` on EVERY scroll frame once she has scrolled; if a same-value
+    /// write ever started waking observers, the board's body would
+    /// re-evaluate per frame. This pin is the tripwire for that.
+    @Test func endingANothingPendingLandingWakesNoObserver() {
+        let board = freshBoard("quiet")
+        settle(board)
+        #expect(board.articleLanding == nil)
+        let woke = LockIsolated(0)
+        withObservationTracking {
+            _ = board.articleLanding
+        } onChange: {
+            woke.withValue { $0 += 1 }
+        }
+        _ = board.consumeArticleGeometry(
+            geometry(offset: 120), remembered: nil, positionedByUser: true)
+        _ = board.consumeArticleGeometry(
+            geometry(offset: 240), remembered: nil, positionedByUser: true)
+        board.clearArticleLanding()
+        #expect(woke.value == 0,
+                "nothing pending: her scroll and a clear wake no observer (\(woke.value))")
+
+        // Non-vacuity: a real change does wake it.
+        board.landArticle(on: "far")
+        #expect(woke.value == 1, "a landing set wakes the observer once (\(woke.value))")
     }
 
     /// **R1-2, the face — RED ON THE ROUND-1 TREE (65 → 97).** Entered on
