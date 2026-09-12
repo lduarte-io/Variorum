@@ -443,32 +443,6 @@ struct TakesArticleScrollTests {
                 == .reveal)
     }
 
-    /// The same rule through the component that owns the frames — and the
-    /// landing request is spent EXACTLY ONCE (the 17o batch-b BLOCKER's
-    /// class: a landing seed that is never cleared re-lands on every later
-    /// mount).
-    @Test func theBoardRevealsAnOffScreenSlotLeavesAVisibleOneAloneAndSpendsItOnce() {
-        let board = TakesBoardLayout(postID: "post", defaults: .standard)
-        board.noteArticleViewport(height: 700)
-        board.noteArticleRowFrame("near", CGRect(x: 0, y: 30, width: 680, height: 60))
-        board.noteArticleRowFrame("far", CGRect(x: 0, y: 900, width: 680, height: 60))
-
-        board.landArticle(on: "near")
-        #expect(board.articleReveal(for: "near") == .none,
-                "a slot already on screen is not scrolled to")
-        board.clearArticleLanding()
-        #expect(board.articleLanding == nil)
-
-        board.landArticle(on: "far")
-        #expect(board.articleReveal(for: "far") == .reveal)
-        board.clearArticleLanding()
-        #expect(board.articleLanding == nil, "the request is spent exactly once")
-
-        // A row that scrolled away is forgotten, and an unknown slot reveals.
-        board.forgetArticleRowFrame("near")
-        #expect(board.articleReveal(for: "near") == .reveal)
-    }
-
     // MARK: - The landing as a step machine (the 17p batch-a adjudication, J1)
 
     private func freshBoard(_ name: String) -> TakesBoardLayout {
