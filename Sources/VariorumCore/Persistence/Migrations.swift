@@ -524,6 +524,43 @@ extension AppDatabase {
                 DROP TABLE IF EXISTS bridge_state;
                 """)
         }
+        // **The day search's index** (18h batch 2's ladder, R1-1 — the
+        // 2026-09-12 use-report round; her row 11: *"search for any note
+        // edited on a particular day"*).
+        //
+        // The Library's day filter asks "which notes were edited on day D"
+        // as the union of the note's own last-edit stamp and any SAVEPOINT
+        // written that day (`Queries.editedOnClause`). The savepoint half
+        // needs to be driven BY THE DAY — "the savepoints written in this
+        // window, whose notes are they" — and `idx_commit_variant
+        // (variant_id, created_at)` cannot serve that: its leading column is
+        // the take. Without this index the only path is per-note, and the
+        // measured cost was Σ(blocks × takes) over the whole corpus on every
+        // keystroke — 18,016 → 998,116 VM steps at 1 → 100 blocks per note
+        // on a 300-note store, which is P1's forbidden shape. With it, and
+        // with the query's uncorrelated form (the commit after this one),
+        // the same measurement is FLAT at 6,636.
+        //
+        // Stats-free, like `v1_15`'s: this repo never runs ANALYZE, so the
+        // index has to be the obvious path rather than the cheap one — a
+        // bare range on `created_at` is exactly that for a `WHERE created_at
+        // >= ? AND created_at < ?` driver, and it is what the planner picks
+        // (pinned: `LibraryDaySearchTests.theSavepointArmIsDrivenByTheDaysOwnSavepoints`).
+        //
+        // **NOT a SyncSpec §12 lockstep event**, on `v1_15_note_version_index`'s
+        // own reasoning: the Postgres mirrors carry no indexes beyond the PK
+        // by design (SyncSpec §2 — the constraint-free mirror is what makes
+        // the §7 repairs possible), so a local index changes no wire
+        // semantics, no column and no classification. **The marker stays 8.**
+        // It is still a schema change, so it lands in its own commit ahead of
+        // the query that uses it (CLAUDE.md), and an un-migrated client
+        // simply keeps the old plan. The phone gains it by construction —
+        // the migration set is shared.
+        migrator.registerMigration("v1_17_commit_created_index") { db in
+            try db.execute(sql: """
+                CREATE INDEX idx_commit_created ON commit_point(created_at);
+                """)
+        }
         return migrator
     }
 }

@@ -51,6 +51,10 @@ struct MigrationTests {
         // own partial index — LOCAL only, no §12 lockstep event (the
         // mirrors carry no indexes beyond the PK by design, SyncSpec §2).
         "idx_container_note_version",
+        // 18h batch 2's ladder (R1-1, v1_17): the day search's driver — the
+        // savepoints written in a window, so the arm is driven by the DAY
+        // and not walked per note. LOCAL only, no §12 event, marker 8.
+        "idx_commit_created",
     ]
 
     // Tables synced to the server — all carry sync_version (AppSpec §6).
@@ -99,6 +103,31 @@ struct MigrationTests {
                 "v1_16 drops both bridge tables")
         #expect(tables == Self.expectedTables,
                 "the drop takes exactly the two bridge tables and nothing else")
+    }
+
+    /// **The day search's index** (18h batch 2's ladder, R1-1 — v1_17). A
+    /// store that ran every migration up to v1_16 does not have it; migrating
+    /// the rest of the way adds it and nothing else. Red on the pre-fix tree
+    /// by construction: no such migration existed and `expectedIndexes` did
+    /// not name it.
+    @Test func theDaySearchIndexArrivesForAnOlderStore() throws {
+        let queue = try DatabaseQueue()
+        try AppDatabase.migrator.migrate(queue, upTo: "v1_16_drop_bridge_tables")
+        func indexes() throws -> Set<String> {
+            try queue.read { db in
+                Set(try String.fetchAll(
+                    db,
+                    sql: "SELECT name FROM sqlite_master WHERE type = 'index' AND name NOT LIKE 'sqlite_%'"))
+            }
+        }
+        let before = try indexes()
+        #expect(!before.contains("idx_commit_created"),
+                "a v1_16 store walks the savepoints per note")
+        try AppDatabase.migrator.migrate(queue)
+        let after = try indexes()
+        #expect(after.subtracting(before) == ["idx_commit_created"],
+                "v1_17 adds exactly one index")
+        #expect(after == Self.expectedIndexes)
     }
 
     @Test func allIndexesExist() throws {
