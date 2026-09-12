@@ -988,10 +988,7 @@ struct TrayPanel: View {
                     // always promised. Same confirm, same act, same copy as
                     // the Library Trash's own block row.
                     deleteNow: TrayPurgeDoor.offered(.block, view: model.view)
-                        ? .init(
-                            help: "Ends this block's remaining days now. There is "
-                                + "no putting it back afterwards.",
-                            act: { model.requestDeleteNowBlock(item) })
+                        ? .block(act: { model.requestDeleteNowBlock(item) })
                         : nil
                 ) {
                     await model.putBackDeleted(item.blockID)
@@ -1008,15 +1005,15 @@ struct TrayPanel: View {
                     forever: true,
                     help: "Kept out of the note, with no clock — Put back "
                         + "returns it where it stood",
-                    // No purge door, and the rule says why: archived is KEPT,
-                    // with no clock (her B2 ruling) — there are no remaining
-                    // days for a door to skip, and the block is live.
-                    deleteNow: TrayPurgeDoor.offered(.block, view: model.view)
-                        ? .init(
-                            help: "Ends this block's remaining days now. There is "
-                                + "no putting it back afterwards.",
-                            act: { model.requestDeleteNowBlock(item) })
-                        : nil
+                    // NEVER a purge door here — this branch IS the archived
+                    // view, where `TrayPurgeDoor.offered(.block, view:)` is
+                    // false: archived is KEPT, with no clock (her B2 ruling),
+                    // so there are no remaining days for a door to skip, and
+                    // the block is live. The literal nil, as the stranded
+                    // site below writes it (17p batch b ladder round 1,
+                    // R1-4): a door built behind a rule that is false by
+                    // construction is dead code wearing a help sentence.
+                    deleteNow: nil
                 ) {
                     await model.putBackArchived(item.blockID)
                 }
@@ -1118,10 +1115,7 @@ struct TrayPanel: View {
                             + "back archived)",
                         putBack: { await model.putBackTake(take.variantID) },
                         deleteNow: TrayPurgeDoor.offered(.take, view: model.view)
-                            ? .init(
-                                help: "Ends this take's remaining days now. There is no putting "
-                                    + "it back afterwards.",
-                                act: { model.requestDeleteNowTake(take) })
+                            ? .take(act: { model.requestDeleteNowTake(take) })
                             : nil)
                 }
             }
@@ -1243,6 +1237,22 @@ struct TrayRowVerbs: View {
         init(help: String, act: @escaping () -> Void) {
             self.help = help
             self.act = act
+        }
+
+        /// The purge door for a BLOCK row / a TAKE row — the help sentence
+        /// that says what the door costs lives ONCE, here, per kind (17p
+        /// batch b ladder round 1, R1-4): the row builders name the kind and
+        /// hand over the act, so a third row type cannot mint a third copy
+        /// of the sentence (the verb cluster's own de-duplication, one
+        /// register down).
+        static func block(act: @escaping () -> Void) -> Purge { door("block", act: act) }
+        static func take(act: @escaping () -> Void) -> Purge { door("take", act: act) }
+
+        private static func door(_ noun: String, act: @escaping () -> Void) -> Purge {
+            Purge(
+                help: "Ends this \(noun)'s remaining days now. There is no putting "
+                    + "it back afterwards.",
+                act: act)
         }
     }
 
