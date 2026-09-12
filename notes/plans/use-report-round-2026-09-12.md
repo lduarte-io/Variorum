@@ -1445,3 +1445,50 @@ right place to stop enumerating.
 3. **R-Q1's observation (J3), unchanged:** on a LONG note whose current block is far from where she left the page, the restore puts her back and the entry landing then reveals the current block once more; on the two- and three-block notes she reported nothing moves. One condition if she wants the restore to suppress the entry landing — hers to say.
 4. **KnownIssues, for 17p's close:** the R1-7 row's tutorial-spine instance (J1 — its Takes lessons write `takesViewMemory` for the lesson post into the shared domain) stays as recorded; the `TakesArticleScroll` split row (R1-6) gains items 1 and 2 above.
 5. **Open defects after this round: NONE.** R3-1 and R3-2 are fixed and pinned; every round-1 and round-2 fix re-verified; the batch's rows 1 and 2 stand FIXED with their pins; the suites green (23/2 ×3, 266/38). Whatever the implementer's sanity pass raises is recorded beside this paragraph for the author, never fixed in a fourth round.
+
+#### Implementer's sanity pass (round 3)
+
+*The batch-a implementer (`opus-implementer`), the ladder's last sanity pass, over
+`git diff 8e1fd59c..e78bc896` — read in my own context, no code or test file touched, no suite run.
+**(1) the placement is RIGHT, with the stated reason corrected. (2) the extend arm is NOT redundant —
+measured in the code: ⇧-click reaches `extendMergeSelection` with no toggle first, and the arm is the
+only thing covering that road.** Nothing raised as a defect.*
+
+**(1) The pick arms on the view model's forwarders — RIGHT, and the reason is a better one than the
+note gives.** Checked by grep: the layout's selection methods have exactly four direct callers, all in
+`TakesViewModel` — `pruneMergeSelection` (`:452`, from `adopt`) · `toggleMergeSelection` (`:1265`) ·
+`extendMergeSelection` (`:1274`) · `clearMergeSelection` (`:1278`). So the *programmatic* road is
+`pruneMergeSelection`, a DIFFERENT method; the layout's `toggleMergeSelection` /
+`extendMergeSelection` are reached only through these forwarders, and an arm on the layout's own two
+methods would in fact have been safe. **The placement is still the right one for two reasons that
+survive that correction:** the forwarder is where the batch's other her-hand arms already live (the
+three expansion doors, `run` / `runCopying`, `paneEdited`, `focus`'s `.migrated`), so the whole set
+reads in one place instead of straddling the two types; and putting landing policy INSIDE the component
+that owns the landing state is what `bloom` deliberately avoids — the choreographer's bloom arm calls
+`board.bloom` *before* `landArticle`, so a layout-side arm there would cancel the landing the
+choreographer is about to set. Keeping every arm on the model keeps that hazard in one type's view.
+**And `clearMergeSelection` staying un-armed is right:** the structure controller calls it after a
+merge, a split and a delete (`TakesStructureController.swift:951` and its siblings), each of which
+already has its own arm, and a banner LEAVING gives the viewport 28 pt BACK — it can clip nothing.
+
+**(2) NOT redundant — ⇧-click can be the FIRST pick, and then `extendMergeSelection` is the only road.**
+`BlockSelection.extend` (`App/Variorum/Variorum/Registry/BlockSelection.swift:77–89`) falls through to
+**`toggle(blockID)` when there is no anchor**, and the view's chord router sends a ⌘⇧-click straight
+there (`TakesBoardView.swift:896–903`: `if extending { model.extendMergeSelection(to:) } else {
+model.toggleMergeSelection(…) }` — no toggle on the extending branch). So on a board with nothing
+picked, a ⌘⇧-click summons the banner — the 28 pt viewport shrink — through `extendMergeSelection`
+alone, and without its arm R3-1's mechanism would survive on that one gesture. The same `else` branch
+also fires when the anchor or the target is missing from `order` (a stale anchor after `pruneMergeSelection`
+or a sync arrival), which is a second road to a banner-from-empty. Both arms are load-bearing; neither
+is a belt on the other's braces.
+
+**Nothing else raised, and the trigger's correction is the honest one.** I own the falsified half: my
+round-1 sanity pass cleared the merge pick as "a stroke overlay with no layout effect" — true of the
+overlay (`washedCell`'s `RoundedRectangle` stroke) and irrelevant, because the mover is the BANNER
+above the article in the board's `VStack` (`TakesBoardView.swift:161–162`), a third seam — the
+article's VIEWPORT height — that the rule named nowhere and that I did not think to look for. The
+doc's three seams (content height · the live pane · the viewport) are the right generalisation, and
+R3-2's comment now says which direction is unsafe to tidy toward, which was the point. With the
+ladder's cap here, option (b) (one arm in `adopt`) stands as the design for the `TakesArticleScroll`
+split, owner 13u2 — the recurrence count is now six, and a seam nobody enumerated is exactly what a
+structural arm would have covered for free.
