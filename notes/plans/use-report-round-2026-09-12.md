@@ -8973,8 +8973,9 @@ CALLS; none of it re-opens R-Q6/R-Q11/R-Q13.
 - **PIECE 1 — core (the enum, the seed rule, the query, the two setters): DONE (`7400d9a9`).**
   Pins: `AppearanceSettingsTests` ×2 + the new `ThemeTintTests` ×3 — 11 tests in 2 suites green.
 - **PIECE 2 — the brain (`PaletteDerivation` + the 15 presets): DONE (`42fb4e5f`).**
-  Pins: `PaletteDerivationTests` ×10 green (the AA floor for 15 × 2 × 3 backdrops, eleven hostile
-  custom seeds, R51, the finals table).
+  Pins: `PaletteDerivationTests` ×10 green at this piece (the AA floor for 15 × 2 × 3 backdrops, eleven
+  hostile custom seeds, R51, the finals table) — **×12 by the batch's close** (piece 4 added the strip and
+  the refusal pins; the ladder's R1-5 reconciled the two counts).
 - **PIECE 3 — the resolver (`VoiceTokens.resolve(voice:palette:tint:dark:)` + `ThemeStore`): DONE (`c1251c75`).**
   Pin: `ThemeTokenTests.theDefaultPaletteIsEachVoicesShippedColoursByteIdentically`. iOS build green.
 - **PIECE 4 — the face (the Appearance pane's palette row + the custom hex fields): DONE (`dc1fd1e9`).**
@@ -9015,12 +9016,15 @@ writer; everything else is `let`.
 | every type + idiom slot | the VOICE's | the VOICE's | R1/R12: this is the whole reason a palette is not a third voice |
 
 **The two intensity tables, and where the numbers come from.** All 32 mockup cards were read as HSL; the
-tables were fitted to them. **Every two-tone and bold card's room, wash and accent is reproduced BYTE-EXACT
-from its seed pair alone** — that is what proved the mockup was one rule with two levels rather than 32
-hand-picked cards, and it is pinned for two of them
-(`theTablesReproduceTheApprovedMockupsRoomAndWash`). The four PASTEL cards were drawn a hair lighter than
-the two-tone ones (room L .965 vs .955, accent L .420 vs .400); they collapse into the soft table here —
-a difference of 2–3 values out of 255, recorded rather than given a third table.
+tables were fitted to them. **All eleven two-tone and bold rooms and ten of the eleven washes are
+reproduced BYTE-EXACT from their seed pairs alone** (teal & rust's wash is one value off in one channel —
+mockup `C2EAE6`, shipped `C3EAE6` — rounding), **and the nine accents that already cleared AA are
+byte-exact too** *(the sentence corrected at the ladder, R1-5: it had said "every … BYTE-EXACT")* — that is
+what proved the mockup was one rule with two levels rather than 32 hand-picked cards, and it is pinned for
+two of them (`theTablesReproduceTheApprovedMockupsRoomAndWash`). The four PASTEL cards were drawn a hair
+lighter than the two-tone ones (room L .965 vs .955, accent L .420 vs .400); they collapse into the soft
+table here — within seven values out of 255 (lavender's accent `5230A6` → `4E2D9F` is the widest; *"2–3"*
+was the record's understatement, corrected at R1-5), recorded rather than given a third table.
 
 | Token | soft L (light / dark) | soft S≤ | bold L (light / dark) | bold S≤ |
 |---|---|---|---|---|

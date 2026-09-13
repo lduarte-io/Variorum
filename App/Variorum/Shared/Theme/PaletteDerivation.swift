@@ -11,13 +11,15 @@
 //
 //  Where the numbers came from: the sitting's mockup
 //  (`notes/plans/use-report-2026-09-12-mockups/palettes.html`), read as HSL.
-//  Every two-tone and bold card's room, wash and accent is reproduced
-//  BYTE-EXACT by the tables below from its seed pair alone — which is what
+//  All eleven two-tone and bold rooms and ten of the eleven washes are
+//  reproduced BYTE-EXACT by the tables below from their seed pairs alone
+//  (teal & rust's wash is one value off in one channel — rounding), and the
+//  nine accents that already cleared AA are byte-exact too — which is what
 //  proved the mockup really was one rule with two intensity levels rather
 //  than 32 hand-picked cards. (The four PASTEL cards were drawn a hair
 //  lighter than the two-tone ones — room L .965 vs .955, accent L .420 vs
-//  .400; they collapse into the soft table here, a difference of 2–3 values
-//  out of 255. The batch record says so.)
+//  .400; they collapse into the soft table here, within seven values out of
+//  255. The batch record says so; the ladder's R1-5 corrected both numbers.)
 //
 
 import Foundation
