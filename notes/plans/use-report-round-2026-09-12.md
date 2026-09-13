@@ -8956,7 +8956,8 @@ by this letter, and making the boards speak is new copy on a door.
 - **PIECE 2 — the brain (`PaletteDerivation` + the 15 presets): DONE (`42fb4e5f`).**
   Pins: `PaletteDerivationTests` ×10 green (the AA floor for 15 × 2 × 3 backdrops, eleven hostile
   custom seeds, R51, the finals table).
-- **PIECE 3 — the resolver (`VoiceTokens.resolve(voice:palette:tint:dark:)` + `ThemeStore`): IN-PROGRESS.**
-- **PIECE 4 — the face (the Appearance pane's palette row + the custom hex fields): NOT-STARTED.**
+- **PIECE 3 — the resolver (`VoiceTokens.resolve(voice:palette:tint:dark:)` + `ThemeStore`): DONE (`c1251c75`).**
+  Pin: `ThemeTokenTests.theDefaultPaletteIsEachVoicesShippedColoursByteIdentically`. iOS build green.
+- **PIECE 4 — the face (the Appearance pane's palette row + the custom hex fields): IN-PROGRESS.**
 - **PIECE 5 — the walk (both voices × the palettes × light/dark on the dev-store Debug build): NOT-STARTED.**
 - **THE CLOSING RUNS: NOT-STARTED.**

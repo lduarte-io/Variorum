@@ -395,6 +395,14 @@ nonisolated enum OpsRefusalCopy {
             case .invalidExtent:
                 return "A word target or note cap must be a positive number — "
                     + "nothing was changed."
+            // 18g (her R-Q13's custom hex): the belt behind the palette
+            // field. The refusal shows back what she typed and says the
+            // shape, because "invalid" without an example is the R1-3
+            // class — and it names that nothing moved, since a half-written
+            // pair is exactly what the one-transaction setter prevents.
+            case .invalidTint(let value):
+                return "\u{201C}\(value)\u{201D} isn't a colour — a colour is six hex "
+                    + "digits, like B9A7E6 or #8A7A3A. Nothing was changed."
             // 13c Stage 1 ladder, R3-1: the empty-block carve's
             // authorization, re-checked inside the tombstone's own
             // transaction. Worded here as well as in the editor's own

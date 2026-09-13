@@ -244,6 +244,36 @@ struct PaletteDerivationTests {
         }
     }
 
+    /// The FACE's grouping covers every palette exactly once — her three
+    /// batches plus the two that are not builds. A sixteenth preset added
+    /// to the enum without a home in the strip would be invisible in
+    /// Settings; this is what says so.
+    @Test func theSwatchStripShowsEveryPaletteExactlyOnce() {
+        let shown = PaletteCopy.Group.allCases.flatMap(\.palettes)
+        #expect(Set(shown) == Set(ThemePalette.allCases))
+        #expect(shown.count == ThemePalette.allCases.count, "no palette in two groups")
+        #expect(PaletteCopy.Group.pastels.palettes.count == 4)
+        #expect(PaletteCopy.Group.twoTone.palettes.count == 6)
+        #expect(PaletteCopy.Group.bold.palettes.count == 5)
+        // Every one has words of its own — no raw enum name reaches her.
+        for palette in ThemePalette.allCases {
+            let label = PaletteCopy.label(palette)
+            #expect(!label.isEmpty)
+            #expect(label != palette.rawValue || palette == .custom || palette == .default,
+                    "a build's label is app words, not its stored token")
+        }
+    }
+
+    /// The seed refusal speaks app words and shows back what she typed —
+    /// never the raw enum dump (the `invalidExtent` belt's class).
+    @Test func aSeedThatIsNotAColourRefusesInWords() {
+        let copy = OpsRefusalCopy.message(for: OperationError.invalidTint(value: "octarine"))
+        #expect(!copy.contains("invalidTint"))
+        #expect(!copy.hasPrefix("Refused:"))
+        #expect(copy.contains("octarine"), "it shows back what she typed")
+        #expect(copy.contains("six hex digits"))
+    }
+
     /// The arithmetic itself, so the two pieces the rule rests on are
     /// checkable without a palette: WCAG's own worst and best pairs, and
     /// an HSL round trip.

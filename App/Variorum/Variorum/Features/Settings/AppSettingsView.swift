@@ -114,9 +114,15 @@ private struct AppearancePane: View {
                     Text("Study").tag(ThemeVoice.study)
                 }
                 .pickerStyle(.segmented)
-                Text("Two voices, one structure: Terminal is mono and airy with its own idioms; Study is the warm paper-and-serif look. Everything works identically in both.")
+                Text("Two voices, one structure: Terminal is mono and airy with its own idioms; Study is the warm paper-and-serif look. Everything works identically in both, and the colour palette below works under either one.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                // 18g (her R-Q6/R-Q11/R-Q13): the palette sits UNDER the
+                // voice — same section, one row down, because that is what
+                // it is. Its own file: a feature that arrives as fifty
+                // lines inside a pane is how a pane becomes a god file.
+                PaletteSettingsRow(session: session, theme: theme)
             }
             Section("Editor") {
                 Toggle("Show block seams (dotted lines between blocks)", isOn: Binding(
