@@ -1340,8 +1340,12 @@ final class TakesViewModel {
             return
         }
         guard await flushPendingText() else { return }
-        speak(await TakeClipboard.copyBlock(
-            targetID, session: session, to: destination).message)
+        // J43's batch call: the SAME `Outcome` Write's door speaks, through
+        // the same predicate — a copy that landed is a receipt on both
+        // surfaces, so one sentence cannot carry two classes.
+        let outcome = await TakeClipboard.copyBlock(
+            targetID, session: session, to: destination)
+        outcome.isRefusal ? speak(outcome.message) : setStatus(outcome.message)
     }
 
     // MARK: - The merge selection (13e E3 — her A18)

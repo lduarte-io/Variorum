@@ -307,6 +307,80 @@ struct ConfirmationsSettingTests {
         }
     }
 
+    // MARK: - Write's own acts obey her setting too (the round-3 BLOCKER, J43)
+
+    /// **SEALING A NOTE IS AN ACT THAT LANDED** (the 18i ladder round 3's
+    /// BLOCKER — J43). Eight Write doors reported acts through `showStatus`,
+    /// which is `setStatusMessage(_, kind: .refusal)` — the ALWAYS-SHOWN
+    /// door — so sealing, archiving a take, saving a lens, a pool drop, a new
+    /// take, a word target and an entry date all kept throwing the card she
+    /// asked to stop seeing, and kept throwing it under `off`, where the
+    /// Settings pane prints "Nothing: they stay unsaid."
+    ///
+    /// Three arms: her default, a second door, and `off` — where the receipt
+    /// must REACH the centre and be dropped, not vanish before it.
+    ///
+    /// **Red on old:** the sentence in `current` with `kind: .refusal`,
+    /// `quietLine == nil`.
+    @Test func writesOwnActsSpeakQuietlyUnderHerDefault() async throws {
+        try await withEditor(seedBlocks: ["Alpha."]) { h in
+            h.session.status.receiptStyle = .quiet
+
+            h.model.toggleSeal()
+            await settleStatus {
+                h.session.status.quietLine != nil || h.session.status.current != nil
+            }
+
+            #expect(h.session.status.current == nil, "no toast — this is the row")
+            #expect(h.session.status.quietLine?.kind == .receipt)
+            #expect(h.session.status.quietLine?.text
+                    == "Sealed — the note is read-only until unsealed.",
+                    "her words, unchanged: \(h.session.status.quietLine?.text ?? "nil")")
+        }
+    }
+
+    /// The second door, so the pin is a CLASS pin and not one site's.
+    @Test func archivingATakeFromWriteSpeaksQuietlyToo() async throws {
+        try await withEditor(seedBlocks: ["Alpha.", "Beta."]) { h in
+            // A block keeps at least one take (I10), so the door only ACTS on
+            // a fanned block — branch one, then archive it.
+            let slot = try #require(try h.storeSlots().first)
+            let second = try h.session.operations.branchVariant(
+                slot.blockID, from: try #require(slot.variantID))
+            try h.session.operations.chooseVariant(slot.blockID, variantID: second.id)
+            try h.reload()
+            h.session.status.receiptStyle = .quiet
+            caret(h, entry: 0, offset: 1)
+
+            h.model.archiveCaretTake()
+            await settleStatus {
+                h.session.status.quietLine != nil || h.session.status.current != nil
+            }
+
+            #expect(h.session.status.current == nil)
+            #expect(h.session.status.quietLine?.kind == .receipt)
+            #expect(h.session.status.quietLine?.text.hasPrefix("Take archived") == true,
+                    "\(h.session.status.quietLine?.text ?? "nil")")
+        }
+    }
+
+    /// **AND `off` MEANS OFF ON WRITE'S DOORS TOO** — the receipt reaches the
+    /// centre and is dropped there, which is what makes the pane's sentence
+    /// true; a refusal from the same surface still toasts beside it.
+    @Test func writesOwnActsSayNothingWhenConfirmationsAreOff() async throws {
+        try await withEditor(seedBlocks: ["Alpha."]) { h in
+            h.session.status.receiptStyle = .off
+
+            h.model.toggleSeal()
+            await settleStatus { h.session.status.lastDroppedReceipt != nil }
+
+            #expect(h.session.status.current == nil && h.session.status.quietLine == nil)
+            #expect(h.session.status.lastDroppedReceipt
+                    == "Sealed — the note is read-only until unsealed.",
+                    "it REACHED the centre and was dropped — not a door gone accidentally silent")
+        }
+    }
+
     // MARK: - The one predicate that keeps a no-op split a refusal (J32)
 
     /// **"MAKE EVERY NEWLINE A BLOCK" ON A NOTE THAT ALREADY IS** (the ladder

@@ -55,6 +55,16 @@ enum TakeClipboard {
         case nothingToCopy
         case failed(String)
 
+        /// **WHETHER NOTHING HAPPENED** (the 18i ladder round 3, J43): a
+        /// copy that landed is a RECEIPT — her confirmations setting governs
+        /// it — while "no text to copy" and a failure are REFUSALS and always
+        /// show (P-2). ONE predicate beside the message, so the two doors
+        /// that speak this outcome cannot give the same sentence two classes.
+        var isRefusal: Bool {
+            if case .copied = self { return false }
+            return true
+        }
+
         var message: String {
             switch self {
             case .copied(let takes):

@@ -2492,7 +2492,7 @@ final class EditorViewModel {
                     try await session.runner.run { [postID] ops in
                         try ops.unlockPost(postID)
                     }
-                    showStatus("Unsealed.")
+                    showReceipt("Unsealed.")  // J43: the seal moved
                 } else {
                     await finalizeWork()?.value
                     // finishMint's corrections/attachments ride the
@@ -2501,7 +2501,7 @@ final class EditorViewModel {
                     try await session.runner.run { [postID] ops in
                         try ops.lockPost(postID)
                     }
-                    showStatus("Sealed — the note is read-only until unsealed.")
+                    showReceipt("Sealed — the note is read-only until unsealed.")  // J43
                 }
             } catch {
                 showOperationError(error)
@@ -2551,7 +2551,9 @@ final class EditorViewModel {
             try await session.runner.run { [postID] ops in
                 try ops.setPostWordTarget(postID, wordTarget: target)
             }
-            showStatus(target.map(WordTargetFaceCopy.setNote)
+            // J43: the target landed (the board's twin has always been a
+            // receipt — one act, one class).
+            showReceipt(target.map(WordTargetFaceCopy.setNote)
                 ?? WordTargetFaceCopy.clearNote)
         } catch {
             showOperationError(error)
@@ -2565,7 +2567,7 @@ final class EditorViewModel {
             try await session.runner.run { [postID] ops in
                 try ops.setEntryDate(postID, entryDate: day)
             }
-            showStatus(day.map { "Entry date set to \($0)." } ?? "Entry date cleared.")
+            showReceipt(day.map { "Entry date set to \($0)." } ?? "Entry date cleared.")  // J43
         } catch {
             showOperationError(error)
         }
@@ -2598,7 +2600,8 @@ final class EditorViewModel {
                     try ops.poolDragCopy(
                         blockID, to: post, at: insert, includeFan: includeFan)
                 }
-                self.showStatus(includeFan
+                // J43: the copy landed.
+                self.showReceipt(includeFan
                     ? "Copied from the pool with its takes."
                     : "Copied from the pool.")
             } catch {
@@ -2813,7 +2816,8 @@ final class EditorViewModel {
                         try ops.chooseVariant(blockID, variantID: take.id)
                     }
                 }
-                showStatus(asChosen
+                // J43: the take exists now.
+                showReceipt(asChosen
                     ? "New blank take opened as chosen — type away (the old take is still in the fan)."
                     : "New take added on this block — ⌘⇧T shows the takes.")
             } catch {
@@ -2837,7 +2841,8 @@ final class EditorViewModel {
                         _ = try ops.setLensChoice(lens: lens.id, block: blockID, variant: variantID)
                     }
                 }
-                showStatus("Saved — “\(name)” remembers these choices (open it in Lenses, ⌘5).")
+                // J43: the lens exists (the boards' and canvas's twins are receipts).
+                showReceipt("Saved — “\(name)” remembers these choices (open it in Lenses, ⌘5).")
             } catch {
                 showOperationError(error)
             }
@@ -2859,7 +2864,8 @@ final class EditorViewModel {
                 // NEAREST road — Write's own takes panel keeps the archived
                 // list (the tutorial's "keeping takes safe" lesson teaches
                 // both roads; the Takes-board siblings name theirs).
-                showStatus("Take archived — never gone: the takes panel (⌘⇧T) keeps it under “archived takes”.")
+                // J43: it was archived (the board's twin is a receipt).
+                showReceipt("Take archived — never gone: the takes panel (⌘⇧T) keeps it under “archived takes”.")
             } catch {
                 showOperationError(error)
             }
@@ -3272,8 +3278,12 @@ final class EditorViewModel {
             return
         }
         await autosave.flushNow()
-        showStatus(await TakeClipboard.copyBlock(
-            caretBlockID, session: session, to: destination).message)
+        // J43, the split-by-outcome pair: `Outcome` already knows whether it
+        // copied anything — a copy that landed is a RECEIPT, and
+        // "no text to copy" / "Copy failed" are refusals that always show.
+        let outcome = await TakeClipboard.copyBlock(
+            caretBlockID, session: session, to: destination)
+        outcome.isRefusal ? showStatus(outcome.message) : showReceipt(outcome.message)
     }
 
     /// Sets/clears the caret block's callout frame (R16/R27). Kept as the

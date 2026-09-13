@@ -556,8 +556,13 @@ extension EditorViewModel {
         manager?.endUndoGrouping()
         // ONE voice (F-7): the final line carries the whole outcome —
         // any mid-loop belt refusal is deliberately superseded by it.
-        showStatus(FindReplaceGate.completion(
-            applied: applied, moved: moved, blocked: blocked))
+        // J43, the split-by-outcome pair: a replace that replaced something
+        // is a RECEIPT (its takes-aware twin at
+        // `EditorSurfaceController.replaceInEveryTake` already is one); a run
+        // that applied NOTHING reports a no-op and always shows (P-2).
+        let line = FindReplaceGate.completion(
+            applied: applied, moved: moved, blocked: blocked)
+        applied > 0 ? showReceipt(line) : showStatus(line)
         findReplaceTask = nil
     }
 }
