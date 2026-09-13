@@ -340,6 +340,14 @@ struct ConfirmationsSettingTests {
     /// is an implementation choice, stated in `QuietReceiptLine`'s own doc
     /// with its reason; the LOOK and the PLACE in each of the three bars are
     /// walked, not pinned — the rig cannot mount a whole bar (KnownIssues).
+    ///
+    /// **The HEIGHT is pinned too** (the 18i ladder round 1, MINOR-1 — J31):
+    /// the shipped oracle asserted width three times and height never, so the
+    /// vertical composition's reservation was unpinned in BOTH directions —
+    /// nothing caught that the note-box footer permanently carries a blank
+    /// row, and nothing would have caught someone collapsing it. Both are
+    /// asserted now, because "nothing moves for it" is the claim every bar
+    /// depends on and it is a claim about height, not only width.
     @Test func theQuietSlotIsWeightlessUntilItSpeaks() async throws {
         let center = StatusCenter()
         center.receiptStyle = .quiet
@@ -353,6 +361,17 @@ struct ConfirmationsSettingTests {
         window.contentView = host
         defer { window.orderOut(nil); window.close() }
 
+        // The VERTICAL composition — the book's sidebar note-box footer,
+        // `lines: 2`, in a ~200 pt column — measured beside it.
+        let boxHost = NSHostingView(
+            rootView: QuietReceiptLine(status: center, tokens: tokens, lines: 2))
+        boxHost.frame = NSRect(x: 0, y: 0, width: 200, height: 40)
+        let boxWindow = NSWindow(
+            contentRect: boxHost.frame, styleMask: [.titled], backing: .buffered, defer: false)
+        boxWindow.isReleasedWhenClosed = false
+        boxWindow.contentView = boxHost
+        defer { boxWindow.orderOut(nil); boxWindow.close() }
+
         /// The standing async-poll rule (never a sync RunLoop pump from an
         /// async context — Swift 6 makes that unavailable, and it is the
         /// repo's rule anyway).
@@ -361,6 +380,9 @@ struct ConfirmationsSettingTests {
                 host.layoutSubtreeIfNeeded()
                 window.layoutIfNeeded()
                 window.displayIfNeeded()
+                boxHost.layoutSubtreeIfNeeded()
+                boxWindow.layoutIfNeeded()
+                boxWindow.displayIfNeeded()
                 if predicate() { return }
                 await Task.yield()
                 try? await Task.sleep(for: .milliseconds(10))
@@ -370,14 +392,25 @@ struct ConfirmationsSettingTests {
         await settle { host.fittingSize.width == 0 }
         #expect(host.fittingSize.width == 0,
                 "idle: the slot is mounted and takes NO width — nothing reflows")
+        let idleHeight = host.fittingSize.height
+        let idleBoxHeight = boxHost.fittingSize.height
+        #expect(boxHost.fittingSize.width == 0, "idle: no width in the box either")
+        #expect(idleBoxHeight > 0,
+                "…but ONE LINE'S HEIGHT, reserved deliberately so the counts and the `?` door never move when a receipt lands (J31)")
 
         center.receipt("Blocks joined — \u{2325}\u{2318}Z undoes it.")
         await settle { host.fittingSize.width > 0 }
         #expect(host.fittingSize.width > 0, "speaking: the words are there")
+        #expect(host.fittingSize.height == idleHeight,
+                "the flat bar's row NEVER changes height for it")
+        #expect(boxHost.fittingSize.height == idleBoxHeight,
+                "…and the box's footer holds exactly the room it already had")
 
         center.clear()
         await settle { host.fittingSize.width == 0 }
         #expect(host.fittingSize.width == 0, "and the room goes back")
+        #expect(boxHost.fittingSize.height == idleBoxHeight,
+                "the reservation is stable across the whole cycle")
     }
 
     /// **A REFUSAL NEVER REACHES THE QUIET SLOT** — even under `.quiet`, so
