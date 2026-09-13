@@ -86,4 +86,25 @@ final class EditorRouter {
     /// until realized, so the same y means a different block on the way back
     /// (measured on her 262-block note: ~390 pt, two blocks, high).
     @ObservationIgnored var takesArticlePlaces: [String: TakesBoardLayout.ArticlePlace] = [:]
+
+    /// **Which block was CURRENT when the Takes board was last shown** — the
+    /// row's `placementID`, per note, for the session (17q piece 6, her
+    /// ruling R-Q21 on J14: *"the same block"* means the note's current block
+    /// did not CHANGE while she was away).
+    ///
+    /// It rides beside the place above because the two answer one question
+    /// together: the place says where the page was, and this says which block
+    /// she was in there. A landing outranks the remembered place only when it
+    /// names a DIFFERENT block than this one — so a plain mode round trip
+    /// (leave, ⌘1, ⌘2, nothing clicked) restores exactly, and only a
+    /// deliberate move to another block makes the landing win.
+    ///
+    /// A PLACEMENT id rather than a block id, so the comparison against a
+    /// landing — which is a placement id, the article `ForEach`'s own
+    /// identity — needs no map at the moment it is made
+    /// (`TakesBoardLayout.landingOutranks`). Session-only, never persisted,
+    /// never synced; written by the board whenever its live pane becomes or
+    /// changes, read ONCE per mount as a snapshot (the value is about the
+    /// PREVIOUS showing, so it must not move under this one).
+    @ObservationIgnored var takesArticleCurrentRows: [String: String] = [:]
 }

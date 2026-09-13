@@ -166,11 +166,28 @@ final class TakesBoardLayout {
     @ObservationIgnored private var postID: String?
     @ObservationIgnored private var defaults: UserDefaults = .standard
 
-    init(postID: String? = nil, defaults: UserDefaults = .standard) {
+    init(
+        postID: String? = nil, defaults: UserDefaults = .standard,
+        lastCurrentRow: String? = nil
+    ) {
         self.postID = postID
         self.defaults = defaults
+        self.articleLastCurrentRow = lastCurrentRow
         loadSlotHeights()
     }
+
+    /// **The block that was CURRENT when this board was LAST SHOWN** — its
+    /// row's `placementID`, snapshotted from the session at construction
+    /// (`EditorRouter.takesArticleCurrentRows`) and never moved after (17q
+    /// piece 6, her ruling R-Q21).
+    ///
+    /// **A per-mount CONSTANT on purpose.** The value is a fact about the
+    /// PREVIOUS showing, and this mount overwrites the session's copy within
+    /// milliseconds — `consumeLandings` sets the entry ring (which writes it)
+    /// BEFORE it sets the landing — so a live read would compare the landing
+    /// against itself and the memory would always win. The session's copy is
+    /// the NEXT mount's snapshot; this one is this mount's question.
+    @ObservationIgnored let articleLastCurrentRow: String?
 
     static let slotHeightsKeyPrefix = "takesSlotHeights."
 
@@ -313,9 +330,9 @@ final class TakesBoardLayout {
         articleLanding = placementID
         articleLandingAimsLeft = Self.articleLandingAttempts
         articleLandingAims = 0
-        // **R-Q20 — THE LANDING WINS** (her 2026-09-13 ruling on J3). A
-        // restore still aiming at a DIFFERENT row ends here, before it can
-        // move the page: on the real board the geometry hook runs before the
+        // **R-Q20 — THE LANDING WINS** (her 2026-09-13 ruling on J3), keyed
+        // by R-Q21. A restore still aiming ends here, before it can move the
+        // page: on the real board the geometry hook runs before the
         // projection (the article's ScrollView exists from the first layout;
         // `adopt` arrives on a `.task`), so this is the order the app takes.
         // Nothing has moved yet when it does — before the projection the
@@ -324,42 +341,57 @@ final class TakesBoardLayout {
         // geometry — every pin's, since `landingModel` adopts before
         // mounting) is answered in `consumeArticleGeometry`'s `.undecided`
         // branch, by the same predicate.
-        if case .wanted(let place) = articleRestore,
-           Self.landingOutranks(placementID, remembered: place) {
+        if case .wanted = articleRestore,
+           Self.landingOutranks(placementID, lastCurrentRow: articleLastCurrentRow) {
             articleRestore = .settled
         }
     }
 
     /// **R-Q20, as a rule** (her words on J3: *"the block I came from
     /// wins"*; her reasoning: *"switching between different modes is supposed
-    /// to be seamless and keep the place you're writing in"*).
+    /// to be seamless and keep the place you're writing in"*) — **keyed on
+    /// what "the same block" MEANS by her ruling R-Q21 (2026-09-12):
+    /// the note's CURRENT block did not CHANGE while she was away.**
     ///
-    /// An entry landing NAMES the block she was working in. When it names a
-    /// row other than the one at the top of the page she left, the landing
-    /// outranks the memory: the restore is abandoned, the page stays where a
-    /// mount starts (the top) and the landing reveals from there — ONE move
-    /// where J3 measured two. The memory still rules when she comes back to
-    /// the SAME block, and when there is no landing at all.
+    /// So a landing outranks the remembered place **iff it names a different
+    /// block than the one that was current when the board was last shown**
+    /// (`articleLastCurrentRow`). A plain mode round trip — leave Takes, ⌘1,
+    /// ⌘2, nothing clicked — therefore restores the page EXACTLY as she left
+    /// it, and only a deliberate move to another block makes the landing win,
+    /// in which case the page opens where a mount starts (the top) and the
+    /// landing reveals from there: ONE move where J3 measured two.
     ///
-    /// **Two consequences, ruled and recorded rather than hidden.** (1) A
-    /// landing naming a block that was INSIDE the page she left — visible,
-    /// but not the row at its top — wins too, so the page opens at the top
-    /// and reveals it at the foot rather than restoring the view she had.
-    /// That is her letter ("the remembered place is NOT restored"), and the
-    /// alternative (ranking the memory above a landing whose row it already
-    /// shows) is a rule she did not ask for. (2) The restore settling
-    /// without aiming lets `rememberStep` write the page's CURRENT place at
-    /// once — the top — so the old memory is replaced the moment the landing
-    /// wins; the reveal then moves the page and the memory converges to
-    /// where it comes to rest, which is what she will come back to next time.
+    /// **Why it is keyed on the current block and not on the remembered ROW
+    /// (the 17q walk's measurement, and her ruling on it).** The first build
+    /// read "the same block" as *the landing's row equals the row at the top
+    /// of the page she left* — and the walk measured what that means: the two
+    /// coincide only when her block happens to straddle the fold, so the
+    /// restore practically never ran and a PLAIN round trip moved the page.
+    /// Her own reason for R-Q20 argues against exactly that, and she ruled
+    /// the other reading (R-Q21, J14).
     ///
-    /// Pure and total: nil for no landing, and for the TOP as a remembered
-    /// place (which settles at once and issues no scroll anyway — R1-1).
+    /// **The two nil cases, stated.** No landing at all ⇒ the memory rules,
+    /// as it always has. A landing with NO recorded prior current block ⇒ the
+    /// landing rules: we cannot claim "the same block" about a showing we
+    /// have no record of, and the case is either a first entry (where there
+    /// is no memory to restore either, so it costs nothing) or a previous
+    /// mount that went away before its projection landed.
+    ///
+    /// **One consequence, recorded rather than hidden:** if she left Takes
+    /// having scrolled AWAY from her own block, the restore puts the page
+    /// back and the entry landing — naming that same block, now off screen —
+    /// reveals it once. That is one move where the first build made a larger
+    /// one (the page went to the top first), and removing it would mean
+    /// standing the landing down whenever it does not outrank, which would
+    /// also stand down the fan-panel bloom door's *"go there"* (row 8).
+    /// Distinguishing the two landing arms is the change that would allow it;
+    /// it is not this piece's.
     nonisolated static func landingOutranks(
-        _ landing: String?, remembered: ArticlePlace?
+        _ landing: String?, lastCurrentRow: String?
     ) -> Bool {
-        guard let landing, let rowID = remembered?.rowID else { return false }
-        return landing != rowID
+        guard let landing else { return false }
+        guard let lastCurrentRow else { return true }
+        return landing != lastCurrentRow
     }
 
     /// Her hand ends a landing. The request is otherwise kept through the
@@ -644,11 +676,13 @@ final class TakesBoardLayout {
     /// itself, and a mount that starts there (every mount does) issues no
     /// scroll at all.
     ///
-    /// **The promise is CONDITIONAL since 17q** (her ruling R-Q20, *"the
-    /// block I came from wins"*): the block she was reading comes back to the
-    /// top of the page when she returns with no entry landing, or with one
-    /// naming that same block. A landing naming ANOTHER block outranks the
-    /// memory and the restore never runs — see `landingOutranks`.
+    /// **The promise is CONDITIONAL since 17q** (her rulings R-Q20 *"the
+    /// block I came from wins"* and R-Q21 on what *"the same block"* means):
+    /// the block she was reading comes back to the top of the page when she
+    /// returns with no entry landing, or on the SAME block she was in when
+    /// she left — which is every plain mode round trip. A landing naming a
+    /// block she moved to while away outranks the memory and the restore
+    /// never runs — see `landingOutranks`.
     struct ArticlePlace: Equatable {
         /// The `placementID` of the row at the top of the viewport — or nil
         /// for the TOP of the page itself.
@@ -759,11 +793,14 @@ final class TakesBoardLayout {
             // Read the memory BEFORE this mount has written anything into it.
             // No memory, or the TOP remembered: a mount starts at the top, so
             // there is nothing to scroll to — settled at once, no scroll
-            // issued (R1-1). **And a landing already pending on another row
-            // outranks the memory** (17q, her R-Q20 — `landingOutranks`): the
-            // block she came from wins, so the restore never aims.
+            // issued (R1-1). **And a landing already pending on a DIFFERENT
+            // block than the one that was current when this board was last
+            // shown outranks the memory** (17q, her R-Q20 keyed by R-Q21 —
+            // `landingOutranks`): the block she came from wins, so the
+            // restore never aims.
             guard let remembered, remembered.rowID != nil,
-                  !Self.landingOutranks(articleLanding, remembered: remembered)
+                  !Self.landingOutranks(
+                    articleLanding, lastCurrentRow: articleLastCurrentRow)
             else {
                 articleRestore = .settled
                 return rememberStep(geometry)

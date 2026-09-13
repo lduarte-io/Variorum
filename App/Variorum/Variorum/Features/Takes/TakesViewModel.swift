@@ -41,7 +41,18 @@ final class TakesViewModel {
         self.session = session
         self.postID = postID
         self.defaults = defaults
-        self.board = TakesBoardLayout(postID: postID, defaults: defaults)
+        // 17q piece 6 (her R-Q21): the board asks ONCE, at construction, which
+        // block was current when it was last shown — the value is a fact about
+        // the PREVIOUS showing and this mount overwrites the session's copy
+        // within milliseconds (`consumeLandings` sets the entry ring before it
+        // sets the landing), so a live read would compare the landing against
+        // itself. `landingEnabled` is not known yet here; the WRITE side is
+        // gated on it, so the Write panel's embedded model never puts anything
+        // in this store and its snapshot is whatever the real board left —
+        // which it never consults, because it holds no article landing.
+        self.board = TakesBoardLayout(
+            postID: postID, defaults: defaults,
+            lastCurrentRow: session.editorRouter.takesArticleCurrentRows[postID])
         // 13b 1a (N3): the ONE per-post coordinator (shared with the Write
         // editor and the TOC on the same post). The quit door covers it at
         // the session scope — this surface no longer registers itself.
@@ -532,6 +543,10 @@ final class TakesViewModel {
             // Her hand: a click that moves the live editor ends a pending
             // article landing (17p batch a, J1).
             board.clearArticleLanding()
+            // 17q piece 6 (her R-Q21): …and it makes THIS the block she is
+            // in, so leaving right afterwards is not "she moved blocks while
+            // away".
+            rememberArticleCurrentBlock(pane.blockID)
             // The leaving pane's text lands as the ring migrates (the
             // handoff contract in miniature — safety rides the buffers +
             // the `!isLive` adopt guard; the flush converges the store).
@@ -672,6 +687,28 @@ final class TakesViewModel {
     func rememberArticlePlace(_ place: TakesBoardLayout.ArticlePlace) {
         guard landingEnabled else { return }
         session.editorRouter.takesArticlePlaces[postID] = place
+    }
+
+    /// **Which block is current on this board right now** — remembered for
+    /// the session beside the place (17q piece 6, her ruling R-Q21: *"the
+    /// same block"* means the note's current block did not CHANGE while she
+    /// was away). The NEXT mount snapshots it at construction and asks
+    /// whether its entry landing names a different block.
+    ///
+    /// Written at the TWO doors where this board's live pane becomes or
+    /// changes — the entry ring (`landAuthorityFocus`) and a click that
+    /// migrates it (`focus`'s `.migrated` arm) — never from the geometry
+    /// hook: a click that moves the ring without scrolling the page must
+    /// still count, or leaving right after it would read as "she moved
+    /// blocks while away" when she moved them while here.
+    ///
+    /// Gated on `landingEnabled` exactly as the place is, so the Write
+    /// panel's embedded model never writes into the board's memory.
+    private func rememberArticleCurrentBlock(_ blockID: String) {
+        guard landingEnabled else { return }
+        guard let row = projection.slots.first(where: { $0.blockID == blockID })?.placementID
+        else { return }
+        session.editorRouter.takesArticleCurrentRows[postID] = row
     }
 
     /// What a pane rendering `variantID` is handed. Zero for every pane the
@@ -1901,6 +1938,11 @@ final class TakesViewModel {
             paneCaretLanding = (variantID: pane.variantID, landing: .start)
         }
         authority.focus(pane)
+        // 17q piece 6 (her R-Q21): the entry ring IS this board's current
+        // block from now on — the next mount's snapshot. (It is written AFTER
+        // the layout took its own snapshot in `init`, which is what keeps the
+        // two showings apart.)
+        rememberArticleCurrentBlock(pane.blockID)
     }
 
     // MARK: - Keyboard fan paging (13b 1b — AD-2's keyboard companion;

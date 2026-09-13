@@ -458,11 +458,12 @@ struct TakesArticleScrollTests {
 
     // MARK: - The landing as a step machine (the 17p batch-a adjudication, J1)
 
-    private func freshBoard(_ name: String) -> TakesBoardLayout {
+    private func freshBoard(_ name: String, lastCurrentRow: String? = nil) -> TakesBoardLayout {
         let suite = "TakesArticleScroll-\(name)"
         let defaults = UserDefaults(suiteName: suite)!
         defaults.removePersistentDomain(forName: suite)
-        return TakesBoardLayout(postID: "post", defaults: defaults)
+        return TakesBoardLayout(
+            postID: "post", defaults: defaults, lastCurrentRow: lastCurrentRow)
     }
 
     private func settle(_ board: TakesBoardLayout, byUser: Bool = false) {
@@ -1113,29 +1114,36 @@ struct TakesArticleScrollTests {
         #expect(!late.articleReadyForLanding)
     }
 
-    // MARK: - 17q — THE LANDING WINS OVER THE REMEMBERED PLACE (her R-Q20)
+    // MARK: - 17q — THE LANDING WINS, AND WHAT "THE SAME BLOCK" MEANS
+    //         (her R-Q20, keyed by her R-Q21)
 
     /// **HER RULING R-Q20 (2026-09-13, on J3): *"the block I came from
     /// wins."*** Her reasoning, verbatim: *"I'm inclined towards Only the
     /// block I came from, since switching between different modes is supposed
     /// to be seamless and keep the place you're writing in."*
     ///
-    /// So: a landing that names a row OTHER than the remembered one ends the
-    /// restore before it aims — the page starts where a mount starts (the
-    /// top) and the landing reveals from there, ONE move instead of two. The
-    /// remembered place is used only when she comes back to the SAME block,
-    /// or with no landing at all.
+    /// **…and HER RULING R-Q21 (2026-09-12, on J14) says what "the same
+    /// block" MEANS: the note's CURRENT block did not CHANGE while she was
+    /// away.** So a landing outranks the memory iff it names a different
+    /// block than the one that was current when the board was last shown; a
+    /// plain mode round trip restores exactly, and only a deliberate move to
+    /// another block makes the landing win — the page then starts where a
+    /// mount starts (the top) and the landing reveals from there, ONE move
+    /// instead of two.
     ///
-    /// **Red on the pre-fix rule:** `.scrollToRow("left")` where
-    /// `.remember(.top)` is owed, and the restore left `.wanted`.
-    @Test func theLandingOutranksARememberedRowButNotTheSameOne() {
+    /// **Red on the 17q-as-built rule** (`75d690ff`, which keyed "the same
+    /// block" on the remembered ROW): the same-block arms below asked for
+    /// `.scrollToRow`/`.wanted` and got `.remember(.top)`/`.settled`, because
+    /// a block mid-page is never the row at the fold.
+    @Test func theLandingOutranksAMoveToAnotherBlockButNotAPlainRoundTrip() {
         let left = TakesBoardLayout.ArticlePlace(rowID: "left")
 
         // (a) THE HARNESS'S ORDER — the landing is already pending when the
         // first geometry arrives (`landingModel` adopts before mounting, and
-        // so does `CommandRoutingTests`). The restore settles at once and
+        // so does `CommandRoutingTests`). She MOVED: the block she comes back
+        // on is not the one she left in, so the restore settles at once and
         // issues NO scroll.
-        let a = freshBoard("outranks-pending")
+        let a = freshBoard("outranks-pending", lastCurrentRow: "was-here")
         a.landArticle(on: "far")
         #expect(a.consumeArticleGeometry(
             geometry(offset: 0), remembered: left, positionedByUser: false,
@@ -1144,17 +1152,20 @@ struct TakesArticleScrollTests {
         #expect(a.articleRestoreAims == 0, "the landing wins WITHOUT a restore aim")
         #expect(a.articleReadyForLanding, "…and the landing may land at once")
 
-        // (b) THE SAME BLOCK — she came back to where she left: the restore
-        // runs exactly as it did.
-        let b = freshBoard("outranks-same")
-        b.landArticle(on: "left")
+        // (b) A PLAIN ROUND TRIP — the landing names the block that was
+        // current when the board was last shown, so nothing moved while she
+        // was away and the restore runs exactly as it does with no landing.
+        // **Note the row it names is NOT the remembered one** — that is the
+        // whole of R-Q21: her block sits mid-page, not at the fold.
+        let b = freshBoard("outranks-same", lastCurrentRow: "was-here")
+        b.landArticle(on: "was-here")
         #expect(b.consumeArticleGeometry(
             geometry(offset: 0), remembered: left, positionedByUser: false,
-            order: ["left", "far"]) == .scrollToRow("left"))
+            order: ["left", "was-here"]) == .scrollToRow("left"))
         #expect(b.articleRestore == .wanted(left))
 
         // (c) NO LANDING — unchanged, the memory rules.
-        let c = freshBoard("outranks-none")
+        let c = freshBoard("outranks-none", lastCurrentRow: "was-here")
         #expect(c.consumeArticleGeometry(
             geometry(offset: 0), remembered: left, positionedByUser: false,
             order: ["left", "far"]) == .scrollToRow("left"))
@@ -1162,10 +1173,11 @@ struct TakesArticleScrollTests {
         // (d) THE APP'S ORDER — the geometry is first (the article's
         // ScrollView exists from the first layout; the projection arrives on
         // a `.task`), so the restore is already `.wanted` when the landing is
-        // armed. It is ended on the spot — and it cannot have moved anything,
-        // because before the projection the column holds no rows and
-        // `scrollTo` on an id it does not hold is a no-op.
-        let d = freshBoard("outranks-wanted")
+        // armed. A landing on ANOTHER block ends it on the spot — and it
+        // cannot have moved anything, because before the projection the
+        // column holds no rows and `scrollTo` on an id it does not hold is a
+        // no-op.
+        let d = freshBoard("outranks-wanted", lastCurrentRow: "was-here")
         #expect(d.consumeArticleGeometry(
             geometry(offset: 0), remembered: left, positionedByUser: false,
             order: nil) == .scrollToRow("left"))
@@ -1176,36 +1188,34 @@ struct TakesArticleScrollTests {
             geometry(offset: 0), remembered: left, positionedByUser: false,
             order: ["left", "far"]) == .remember(.top))
 
-        // (e) …and a landing on the SAME row arriving mid-restore leaves it
-        // running.
-        let e = freshBoard("outranks-wanted-same")
+        // (e) …and a plain round trip's landing arriving mid-restore leaves
+        // it running.
+        let e = freshBoard("outranks-wanted-same", lastCurrentRow: "was-here")
         _ = e.consumeArticleGeometry(
             geometry(offset: 0), remembered: left, positionedByUser: false, order: nil)
-        e.landArticle(on: "left")
+        e.landArticle(on: "was-here")
         #expect(e.articleRestore == .wanted(left))
 
         // (f) The TOP remembered already settles at once and issues no
         // scroll (R1-1), so a landing trivially wins there — no branch owed.
-        let f = freshBoard("outranks-top")
+        let f = freshBoard("outranks-top", lastCurrentRow: "was-here")
         f.landArticle(on: "far")
         #expect(f.consumeArticleGeometry(
             geometry(offset: 0), remembered: .top, positionedByUser: false,
             order: ["left", "far"]) == .remember(.top))
         #expect(f.articleRestoreAims == 0)
+
+        // (g) THE TWO NIL CASES, stated. No landing ⇒ the memory rules
+        // whatever we know about the last showing; a landing with NO recorded
+        // prior current block ⇒ the landing rules, because "the same block"
+        // is a claim about a showing we have no record of.
+        #expect(TakesBoardLayout.landingOutranks(nil, lastCurrentRow: "was-here") == false)
+        #expect(TakesBoardLayout.landingOutranks(nil, lastCurrentRow: nil) == false)
+        #expect(TakesBoardLayout.landingOutranks("far", lastCurrentRow: nil))
+        #expect(TakesBoardLayout.landingOutranks("far", lastCurrentRow: "was-here"))
+        #expect(TakesBoardLayout.landingOutranks("was-here", lastCurrentRow: "was-here") == false)
     }
 
-    /// **R-Q20 on the mounted board — RED ON OLD (the restore aimed).** She
-    /// leaves the page deep in a sixty-block note, goes to Write, clicks a
-    /// block FAR from that page, and comes back: the block she came from is
-    /// revealed, and the old place is not restored on the way.
-    ///
-    /// **What the number means.** Both roads END at the same rest — a
-    /// reveal's `scrollTo(row, .bottom)` is absolute — so the destination
-    /// cannot discriminate; what her ruling removes is the MOVE. The
-    /// discriminating measurement is therefore the restore's own aim count:
-    /// 0 after the fix, ≥ 1 before it (the page hauled to the remembered row
-    /// first, then moved again by the reveal — J3's double move, in a
-    /// number).
     @Test func aLandingOnAnotherBlockWinsOverTheRememberedPlace() async throws {
         try await withSession(blocks: 60) { session, fixture, db, mount in
             let router = session.commandRouter
@@ -1266,18 +1276,36 @@ struct TakesArticleScrollTests {
         }
     }
 
-    /// **The mirror, and a GUARD (green on both sides, deliberately):** she
-    /// comes back to the SAME block she left at the top of the page — the
-    /// remembered place is restored exactly as it was, and the reveal has
-    /// nothing to do (the block is at the top, so it is on screen).
+    /// **THE PLAIN ROUND TRIP — RED ON THE 17q-AS-BUILT RULE** (`75d690ff`),
+    /// and her ruling R-Q21's own pin. She leaves Takes with her block
+    /// MID-PAGE (where a block she is writing in normally sits — not at the
+    /// fold), goes to Write, comes straight back with nothing clicked: the
+    /// page is exactly where she left it.
+    ///
+    /// The as-built rule keyed "the same block" on the remembered ROW, so a
+    /// block mid-page never matched and the landing won: the restore never
+    /// aimed (`articleRestoreAims == 0`) and the page opened at the top with
+    /// her block revealed at the foot — a page that MOVES on a plain mode
+    /// switch, which is what her own reason for R-Q20 argues against (J14).
+    ///
+    /// The first mount deliberately enters with NO fact, so nothing lands;
+    /// the ring is then migrated to a mid-page block through the board's own
+    /// door (`focus`) — a click in Takes — which is what makes that block
+    /// both the note's current block AND this board's last-shown one.
     ///
     /// The third mirror — a remount with NO landing at all — is
     /// `aBoardLeftScrolledComesBackWhereSheLeftIt`, unchanged by 17q.
-    @Test func aLandingOnTheBlockSheLeftAtTheTopStillRestoresThePlace() async throws {
+    @Test func aPlainRoundTripComesBackExactlyWhereSheLeftIt() async throws {
         try await withSession(blocks: 60) { session, fixture, db, mount in
             let router = session.commandRouter
             router.forgetCurrentBlock(for: fixture.postID)
             defer { router.forgetCurrentBlock(for: fixture.postID) }
+            // The board REPORTS its ring through `noteFocusedBlock`, which
+            // refuses a post that is not the active detail — so the click
+            // below only becomes the note's current block with a detail
+            // registered, exactly as the app has one.
+            let token = router.registerDetail(postID: fixture.postID, mode: .takes) { _ in }
+            defer { router.unregisterDetail(token) }
 
             let first = try await landingModel(session: session, fixture: fixture, db: db)
             let (windowA, hostingA) = await mount(first)
@@ -1287,26 +1315,52 @@ struct TakesArticleScrollTests {
             }
             scroll(articleA, to: 800)
             await settle(windowA, hostingA, until: { false }, maxTurns: 10)
-            guard let before = topOfPage(hostingA, articleA) else {
+            guard let atTop = topOfPage(hostingA, articleA) else {
                 Issue.record("no take at the top of the page after scrolling")
                 return
             }
-            guard let topBlock = fixture.blocks.first(where: { $0.variant == before.variantID })
-            else {
+            guard let topIndex = fixture.blocks.firstIndex(where: {
+                $0.variant == atTop.variantID
+            }) else {
                 Issue.record("the top-of-page take is not one of the fixture's")
                 return
             }
+            // Her block: two rows BELOW the fold — mid-page, visible, and
+            // deliberately not the row the memory names.
+            guard topIndex + 2 < fixture.blocks.count else {
+                Issue.record("the fixture is too short for a mid-page block")
+                return
+            }
+            let mid = fixture.blocks[topIndex + 2]
+            first.focus(TakesViewModel.PaneKey(
+                columnID: TakesViewModel.takesMainColumnID,
+                blockID: mid.block, variantID: mid.variant))
+            await settle(windowA, hostingA, until: { false }, maxTurns: 8)
+            #expect(first.authority.livePane?.blockID == mid.block,
+                    "non-vacuity: the ring really moved to the mid-page block")
+            guard let before = topOfPage(hostingA, articleA) else {
+                Issue.record("no take at the top of the page after the click")
+                return
+            }
+            guard let wasAt = fixture.blocks.firstIndex(where: {
+                $0.variant == before.variantID
+            }) else {
+                Issue.record("the top-of-page take is not one of the fixture's")
+                return
+            }
+            #expect(fixture.blocks[wasAt].block != mid.block,
+                    """
+                    non-vacuity: her block is MID-PAGE, not the row at the \
+                    fold — which is exactly the shape the as-built rule got \
+                    wrong
+                    """)
+
             windowA.orderOut(nil)
             first.teardown()
             await settle(windowA, hostingA, until: { false }, maxTurns: 4)
 
-            // She comes back from the very block that was at the top.
-            let token = router.registerDetail(postID: fixture.postID, mode: .write) { _ in }
-            defer { router.unregisterDetail(token) }
-            router.noteFocusedBlock(
-                topBlock.block, variantID: topBlock.variant,
-                postID: fixture.postID, utf16Offset: 0)
-
+            // …and back, with nothing clicked: the note's current block is
+            // still the one she was in.
             let second = try await landingModel(session: session, fixture: fixture, db: db)
             let (windowB, hostingB) = await mount(second)
             guard let articleB = articleScrollView(in: hostingB) else {
@@ -1315,23 +1369,32 @@ struct TakesArticleScrollTests {
             }
             await settle(windowB, hostingB, until: { false }, maxTurns: 14)
 
+            #expect(second.board.articleLanding != nil,
+                    """
+                    non-vacuity: a landing WAS armed on this mount (the road                     under test) — it simply did not outrank the memory
+                    """)
             #expect(second.board.articleRestoreAims > 0,
-                    "non-vacuity: the restore really did run")
+                    """
+                    the restore RAN (\(second.board.articleRestoreAims) aims) — \
+                    the as-built rule let the landing outrank a plain round \
+                    trip and never aimed at all
+                    """)
             guard let after = topOfPage(hostingB, articleB) else {
                 Issue.record("no take at the top of the page after the remount")
                 return
             }
-            let index = { (variantID: String) -> Int? in
-                fixture.blocks.firstIndex { $0.variant == variantID }
-            }
-            guard let wasAt = index(before.variantID), let isAt = index(after.variantID) else {
+            guard let isAt = fixture.blocks.firstIndex(where: {
+                $0.variant == after.variantID
+            }) else {
                 Issue.record("the top-of-page take is not one of the fixture's")
                 return
             }
             #expect(abs(isAt - wasAt) <= 1,
                     """
-                    the same block: the page came back where she left it \
-                    (block \(isAt + 1), left on block \(wasAt + 1))
+                    a plain round trip comes back EXACTLY where she left it \
+                    (block \(isAt + 1), left on block \(wasAt + 1) of \
+                    \(fixture.blocks.count)) — the as-built rule opened at the \
+                    top and revealed her block at the foot
                     """)
         }
     }

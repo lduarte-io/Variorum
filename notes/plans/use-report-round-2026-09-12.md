@@ -5286,7 +5286,8 @@ migration, no new `setting`; nothing in `PaneTextAuthority` · `PaneSurface` · 
 `EditorTextView` · `PaneMeasurement`; no change to the memory's SHAPE (`ArticlePlace`), the reveal's
 anchor rule, the her-hand set, the typewriter room, or `TakesChoreographer`'s two landing arms (what a
 landing NAMES is untouched — only what it outranks); no change to the List row's TRAILING stamp or to
-the masthead's stamp; no Release build and no `/Applications` touch. **And one thing I did NOT get to
+the masthead's stamp; no Release build and no `/Applications` touch. **Piece 6 (her R-Q21) re-keyed R-Q20's predicate after
+her evening ruling on J14 — the record below carries it.** **And one thing I did NOT get to
 build:** her R-Q17's SECOND arm is built and pinned but **never fires in the shipped window** — the
 card's title yields before the stamps do, and below ~700 pt the shell's own minimum content width
 clips instead of reflowing. Measured on the walk, filed as **QUESTIONS #105** with the one-modifier
@@ -5303,7 +5304,8 @@ no revert is in flight.**
 | 2 | R-Q17 — the card (both where room, the flip where small) + R3-2 (the List row's lead slot) + QUESTIONS #103 | **DONE (`2b7a86d6`)** — R3-2's red measured by behavioral revert and RESTORED; **no revert is in flight** |
 | 3 | R3-1 — the synchronous selection clear (R3-6 rides it) | **DONE (`e62987e6`)** — the compile-red measured by revert and RESTORED; **no revert is in flight** |
 | 4 | the NIT sweep (R3-4 · R3-5 · R3-7 · R3-8 · R3-9 · R3-10; R3-6 landed with piece 3) | **DONE (this commit)** |
-| 5 | the walk (the acceptance gate) + the closing runs | **DONE (this commit)** |
+| 5 | the walk (the acceptance gate) + the closing runs | **DONE (`a9967b0b`)** |
+| 6 | **R-Q21** — "the same block" = the CURRENT block unchanged while away (her evening sitting, on J14) | **CODE DONE (this commit)** — the walk's two re-walked rows and the closing set are NEXT; **no revert is in flight** |
 
 **Items:** R-Q20 · R-Q17 · R3-2 · R3-1 · R3-4 · R3-5 · R3-6 · R3-7 · R3-8 · R3-9 · R3-10 —
 **all dispositioned below.** ONE new QUESTIONS entry: **#105** (her R-Q17's second arm never fires in
@@ -5781,3 +5783,97 @@ two-window edge (recorded above) and QUESTIONS #105's option (b)/(c) (hers).
 - **(J18) R3-1's compile-red, the NIT sweep, R3-10's half — ACCEPTED.** A fix that IS a signature has a compile pin as its honest red (the product-row class, measured by revert — three errors at the pin, one at the call site); R3-4…R3-9 each say whether behaviour moved; R3-10's two-window edge is left with a stated reason (DEBUG-only, needs ownership tracking) — a KnownIssues row at the close beside the hoist (owner 13u2). The dev-store note renamed for the narrow-card walk is dev-store only, harmless, left so the ladder sees the store the walk saw.
 - **(J19) The closing set — my brief named two FILE names (`CommandRoutingTests`, "the ten `Tutorial*Tests`") and the implementer caught it the way 18h's lesson says to (the `Test run with N tests in M suites` line; the first two attempts ran 10 and 21 suites silently), then verified all 27 type names one by one.** Recorded as the round's machinery lesson met a THIRD time; the orchestrator handoff's §6 gains the line "grep `struct <Name>` for every `-only-testing` name in a brief before writing it".
 - **(J14 → RULED, R-Q21; J17 → RULED, R-Q22)** — her answers the same turn (§7). The implementer is resumed for piece 6 (R-Q21's reading) BEFORE the ladder, so the reviewer sees one rule, not a rule and its correction.
+
+---
+
+#### PIECE 6 — R-Q21: "THE SAME BLOCK" IS THE CURRENT BLOCK, NOT THE REMEMBERED ROW
+
+**Her ruling (§7, R-Q21, on J14):** *"the same block"* means the note's CURRENT block did not CHANGE
+while she was away — a plain round trip restores the page exactly as she left it; the landing wins
+only when she comes back on a DIFFERENT block than the one she was in when she left Takes. This
+replaces the brief's own definition (the landing's row equals the remembered top row), which I built
+at piece 1 and then MEASURED at the walk: the two coincide only when her block straddles the fold, so
+the restore practically never ran and a plain mode switch moved the page — the thing her own reason
+for R-Q20 argues against.
+
+**What shipped — one new session value, the same ONE predicate, the same TWO consult sites.**
+
+1. **`EditorRouter.takesArticleCurrentRows[postID]`** — the `placementID` of the block current on the
+   Takes board, `@ObservationIgnored`, session-only, riding beside `takesArticlePlaces` because the
+   two answer one question together (where the page was, and which block she was in there). A
+   PLACEMENT id and not a block id, so the comparison against a landing — which IS a placement id —
+   needs no map at the moment it is made.
+2. **`TakesBoardLayout.articleLastCurrentRow`** — a `let`, snapshotted from that store in
+   `TakesViewModel.init` and **never moved after**. It has to be a per-mount CONSTANT: the value is a
+   fact about the PREVIOUS showing, and this mount overwrites the session's copy within milliseconds
+   (`consumeLandings` sets the entry ring — which writes it — BEFORE it sets the landing), so a live
+   read would compare the landing against itself and the memory would always win. The session's copy
+   is the NEXT mount's snapshot; the layout's is this mount's question. *(That ordering is the one
+   real trap in this piece, and it is written at the property.)*
+3. **`landingOutranks(_:lastCurrentRow:)`** — re-keyed, still ONE pure predicate, still consulted at
+   `consumeArticleGeometry`'s `.undecided` branch and at `landArticle(on:)`. The two nil cases are
+   stated in its doc and pinned: **no landing ⇒ the memory rules** (unchanged); **a landing with no
+   recorded prior current block ⇒ the landing rules** — we cannot claim "the same block" about a
+   showing we have no record of, and the case is either a first entry (no memory to restore, so it
+   costs nothing) or a mount that went away before its projection landed.
+4. **Two write sites, both on the view model, both gated on `landingEnabled`** (as the place already
+   is, so the Write panel's embedded model never writes here): `landAuthorityFocus` (the entry ring)
+   and `focus`'s `.migrated` arm (a click that moves the ring). **Deliberately NOT the geometry
+   hook** — a click that moves the ring without scrolling must still count, or leaving right after it
+   would read as "she moved blocks while away" when she moved them while here. **`TakesChoreographer`
+   is untouched**, as the brief fences.
+
+**RED ON THE AS-BUILT RULE, measured by behavioral revert and restored** (`75d690ff`'s predicate and
+its two call sites put back; pre-revert copy in `scratchpad/17q-p6-prerevert/`; **no revert is in
+flight**). `/tmp/17q-p6-red2.log`, local — `✘ Test run with 23 tests in 1 suite failed after 22.316
+seconds with 7 issues`:
+
+- **`aPlainRoundTripComesBackExactlyWhereSheLeftIt`** (mounted, 60 blocks, her block put MID-PAGE
+  through the board's own click door and the page left where it was): **`articleRestoreAims → 0`
+  where > 0 is owed**, and **`abs(isAt - wasAt) → 9` where ≤ 1 is owed** — the page came back **nine
+  blocks away** from where she left it, on a plain ⌘1/⌘2 with nothing clicked. That number is J14's
+  finding in one line.
+- **`theLandingOutranksAMoveToAnotherBlockButNotAPlainRoundTrip`** — five issues: the plain-round-trip
+  arm returned `.remember(.top)` / `.settled` where `.scrollToRow("left")` / `.wanted(left)` are
+  owed (both at `.undecided` and mid-restore), and the two nil-key arms.
+
+**GREEN:** `✔ Test run with 23 tests in 1 suite passed after 22.418 seconds` and the landing
+neighbourhood in one run — `✔ Test run with 89 tests in 12 suites passed after 67.859 seconds`
+(`TakesArticleScrollTests` · `TakesLandingTests` · `CommandRouterTests` · `TakesRoomTests` ·
+`TakesBoardTests` · `TakesEmptyBlockFaceTests` · `TakesArticleRenderTests` · `TakesBoardSoakTests` ·
+`CurrentBlockContinuityTests` · `LandingOffsetTests` · `PaneTextAuthorityTests` ·
+`WriteTakesPanelTests`). `aLandingOnAnotherBlockWinsOverTheRememberedPlace` and
+`aBoardLeftScrolledComesBackWhereSheLeftIt` ride green and unmodified.
+
+**ONE PIN RETIRED, and why.** `aLandingOnTheBlockSheLeftAtTheTopStillRestoresThePlace` asserted the
+OLD definition's mirror — *she comes back to the block she left AT THE TOP OF THE PAGE* — which is
+exactly the reading R-Q21 replaced; under the new rule its premise (mount A entered with no fact, so
+the last-current is slot 1) makes it assert the opposite of the ruling. It is replaced by
+`aPlainRoundTripComesBackExactlyWhereSheLeftIt`, which is the same mirror under her reading and is
+RED on the as-built rule rather than green on both sides.
+
+**A HARNESS FACT the pin cost me, recorded so the next reader does not pay it twice:**
+`CommandRouter.noteFocusedBlock` begins `guard activePostID == postID else { return }`, so the
+board's ring report is DROPPED unless a detail is registered for the post. Without
+`router.registerDetail(postID:mode: .takes)` the click in mount A never became the note's current
+block, mount B had no landing at all, and the pin passed on the as-built tree **for the wrong
+reason** (the restore ran because nothing outranked it). The first red run caught it — the log said
+`second.board.articleLanding → nil` — and the non-vacuity assertion that now guards it is
+`articleLanding != nil` on the second mount.
+
+**A RESIDUAL, recorded rather than built:** if she left Takes having scrolled AWAY from her own
+block, the restore puts the page back and the entry landing — naming that same block, now off screen
+— reveals it once. That is strictly better than the as-built rule (which took the page to the top
+first), and removing it would mean standing the landing down whenever it does not outrank, which
+would also stand down the fan-panel bloom door's *"go there"* (row 8). Distinguishing the two landing
+arms is the change that would allow it; it is not this piece's, and the reasoning is written at
+`landingOutranks`.
+
+**A MACHINERY NOTE, honestly (the resiliency protocol's addendum 3, met for real).** Restoring the
+revert I ran `git checkout -- TakesBoardLayout.swift` on a file whose piece-6 edits were **not yet
+committed** — which restored `75d690ff`, wiping them. The uniquely-named pre-revert copy this batch
+took (`scratchpad/17q-p6-prerevert/`, made by me, for this piece) is what got them back, verified by
+grep at both consult sites and by a clean `build-for-testing`. The addendum's rule "never
+`git checkout --` on a file the batch also edits" is exactly this, and the reason to take the copy
+even when the protocol's other half (commit first) has not yet run.
+
