@@ -6935,7 +6935,10 @@ Both rows are the R3-1 class (a settle that the column's later measurement passe
   chip's whole sentence in the toast), `theSameJoinSaysNothingWhenConfirmationsAreOff` ×2 (the toast
   showing under `.off`, nothing recorded as dropped). Restored by `git checkout --`; green again at
   6 tests in 1 suite.
-- **PIECE 4 — the quiet slot: NOT-STARTED.**
+- **PIECE 4 — the quiet slot: DONE (`82245a57`).** ONE view (`Core/Views/QuietReceiptLine`), three
+  composition sites (Write's bar × 3 tiers · the takes bars × 2 arrangements · the note box's footer,
+  which the book's live note inherits through 18d's seam). Its own red-on-old is not the shape — the
+  slot did not exist; its evidence is the mounted geometry oracle plus the WALK.
 - **PIECE 5 — the Appearance pane's row: NOT-STARTED.**
 - **PIECE 6 — the walk (the acceptance gate): NOT-STARTED.**
 - **THE CLOSING RUNS:** PENDING.
