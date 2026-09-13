@@ -157,7 +157,7 @@ struct ConfirmationsSettingTests {
     /// The standing async-poll rule (never a sync RunLoop pump from an async
     /// context). `NoteDeletion.fire` is a detached `Task`, so its outcome
     /// arrives a turn or more later.
-    private func settle(_ predicate: @MainActor () -> Bool) async {
+    private func settleStatus(_ predicate: @MainActor () -> Bool) async {
         for _ in 0..<400 {
             if predicate() { return }
             await Task.yield()
@@ -187,7 +187,7 @@ struct ConfirmationsSettingTests {
             try h.session.operations.deleteContainer(dead)
 
             NoteDeletion.fire(session: h.session, postIDs: [dead])
-            await settle {
+            await settleStatus {
                 h.session.status.current != nil || h.session.status.lastDroppedReceipt != nil
             }
 
@@ -207,7 +207,7 @@ struct ConfirmationsSettingTests {
             let pool = try h.session.operations.createPool(title: "scraps").id
 
             NoteDeletion.fire(session: h.session, postIDs: [pool])
-            await settle {
+            await settleStatus {
                 h.session.status.current != nil || h.session.status.quietLine != nil
             }
 
@@ -413,7 +413,7 @@ struct ConfirmationsSettingTests {
         /// The standing async-poll rule (never a sync RunLoop pump from an
         /// async context — Swift 6 makes that unavailable, and it is the
         /// repo's rule anyway).
-        func settle(until predicate: () -> Bool) async {
+        func settleLayout(until predicate: () -> Bool) async {
             for _ in 0..<60 {
                 host.layoutSubtreeIfNeeded()
                 window.layoutIfNeeded()
@@ -427,7 +427,7 @@ struct ConfirmationsSettingTests {
             }
         }
 
-        await settle { host.fittingSize.width == 0 }
+        await settleLayout { host.fittingSize.width == 0 }
         #expect(host.fittingSize.width == 0,
                 "idle: the slot is mounted and takes NO width — nothing reflows")
         let idleHeight = host.fittingSize.height
@@ -436,7 +436,7 @@ struct ConfirmationsSettingTests {
                 "…but ONE LINE'S HEIGHT, reserved deliberately so the counts and the `?` door never move when a receipt lands (J31)")
 
         center.receipt("Blocks joined — \u{2325}\u{2318}Z undoes it.")
-        await settle { host.fittingSize.width > 0 }
+        await settleLayout { host.fittingSize.width > 0 }
         #expect(host.fittingSize.width > 0, "speaking: the words are there")
         #expect(host.fittingSize.height == idleHeight,
                 "the flat bar's row NEVER changes height for it")
@@ -444,7 +444,7 @@ struct ConfirmationsSettingTests {
                 "…and the box's column holds exactly the room it already had — at ITS width, where this sentence measures 204 pt and would otherwise wrap")
 
         center.clear()
-        await settle { host.fittingSize.width == 0 }
+        await settleLayout { host.fittingSize.width == 0 }
         #expect(host.fittingSize.width == 0, "and the room goes back")
         #expect(boxHost.fittingSize.height == idleBoxHeight,
                 "the reservation is stable across the whole cycle")

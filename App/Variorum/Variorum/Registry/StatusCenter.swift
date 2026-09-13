@@ -154,8 +154,22 @@ final class StatusCenter {
     /// ladder round 1, J29): a door that computes its line from what it did
     /// — the note delete's four outcomes, the import's skips, the export's
     /// count — knows whether anything landed, and that answer IS the class.
-    /// The mapping lives here and only here, so the three doors that carry
-    /// such a fact cannot spell it three ways (F-0's drift class).
+    /// The mapping lives here for **every door that speaks to the CENTRE
+    /// directly**, so those three cannot spell it three ways (F-0).
+    ///
+    /// **What this does NOT cover, and why** (the ladder round 2, N1 — the
+    /// shipped sentence said "here and only here" and overclaimed): three
+    /// sites spell the same `landed ? … : …` as a ternary because they write
+    /// a VIEW MODEL's own status property rather than the centre —
+    /// `EditorSurfaceController`'s `runStructural` seam
+    /// (`outcome.noteIsRefusal ? showStatus : showReceipt`),
+    /// `TakesStructureController`'s split door (`setStatus`/`setRefusal`, the
+    /// board's `RecoveryStatus`, which `WriteTakesPanel` RENDERS), and
+    /// `BlockTOCViewModel`'s (`showReceipt`/`speak`). Routing any of them
+    /// through this door would bypass a property ~22 shipped pins read and,
+    /// on the board, a slot a view draws — the parity this letter has kept
+    /// everywhere else. Giving each model its own `say` would spell the
+    /// mapping three MORE times, not once.
     ///
     /// `refusing` is the doors' own vocabulary — `RecoveryStatus.isRefusal`
     /// and `StructuralOutcome.noteIsRefusal` are the two spellings already in

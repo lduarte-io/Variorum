@@ -541,12 +541,15 @@ nonisolated enum SplitAtNewlinesCopy {
         // split" — this used to compute its own `filter { !$0.isNoOp }`
         // six lines from the predicate that answers the same question.
         guard acted(results) else { return whenNothingSplit }
-        let split = results.filter { !$0.isNoOp }
-        return self.split(
-            made: split.reduce(0) { $0 + $1.blocksMade },
-            from: split.count,
-            takesKept: split.reduce(0) { $0 + $1.takesKeptOnTop },
-            takesLeftBehind: split.reduce(0) { $0 + $1.takesLeftBehind })
+        // N3 (round 2): named for what they ARE, not for the method that
+        // renders them — the round-1 collapse called this `split` and had to
+        // reach the static `split(made:from:…)` as `self.split(…)`.
+        let splitters = results.filter { !$0.isNoOp }
+        return split(
+            made: splitters.reduce(0) { $0 + $1.blocksMade },
+            from: splitters.count,
+            takesKept: splitters.reduce(0) { $0 + $1.takesKeptOnTop },
+            takesLeftBehind: splitters.reduce(0) { $0 + $1.takesLeftBehind })
     }
 
     /// The honest no-op — a REFUSAL that says what is already true, never a
