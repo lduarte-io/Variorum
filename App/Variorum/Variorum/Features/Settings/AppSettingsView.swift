@@ -141,21 +141,10 @@ private struct AppearancePane: View {
             // inline refusal sit at the 460 pt pane's fold (18g's own walk
             // finding), and a section added above would push that refusal
             // further out of sight.
+            // Its own file (the 18j ladder's R1-8), for the reason the
+            // palette row gives above.
             if let appearance {
-                Section("Light & dark") {
-                    Picker("Appearance", selection: Binding(
-                        get: { appearance.choice },
-                        set: { appearance.set($0) })) {
-                        Text("Follow system").tag(AppearanceChoice.system)
-                        Text("Light").tag(AppearanceChoice.light)
-                        Text("Dark").tag(AppearanceChoice.dark)
-                    }
-                    .pickerStyle(.segmented)
-                    Text("Dark is a fully black room in both voices, and under every colour palette. This Mac only — your voice and palette follow you everywhere, but how bright the screen should be is about where you are sitting.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
+                AppearanceChoiceRow(appearance: appearance)
             }
             Section("Editor") {
                 Toggle("Show block seams (dotted lines between blocks)", isOn: Binding(
