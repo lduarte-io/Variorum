@@ -34,18 +34,27 @@ nonisolated enum MarkdownStyling {
         /// **13k K10 — the inline-code CHIP** (her ruling: a faint per-voice
         /// tint hugging exactly the span, never block-wide).
         let codeTint: NSColor
+        /// **18j (the 18g ladder's R2-1):** the surface's CURRENT prose ink,
+        /// so clearing a face restores the ink that is there NOW rather than
+        /// the one captured when the face was written — see
+        /// `MarkdownFace.Palette.prose`. **Required, never defaulted** (the
+        /// shared core says why): the two builders below are the only
+        /// constructions in the app, and a third that forgot would put a
+        /// stale ink back under every face it cleared.
+        let prose: NSColor
 
-        init(marker: NSColor, link: NSColor, codeTint: NSColor) {
+        init(marker: NSColor, link: NSColor, codeTint: NSColor, prose: NSColor) {
             self.marker = marker
             self.link = link
             self.codeTint = codeTint
+            self.prose = prose
         }
 
         @MainActor
         init(tokens: VoiceTokens) {
             self.init(
                 marker: NSColor(tokens.muted), link: NSColor(tokens.accent),
-                codeTint: NSColor(tokens.codeTint))
+                codeTint: NSColor(tokens.codeTint), prose: NSColor(tokens.ink))
         }
 
         /// Before any voice has been applied (a bare test host, a surface
@@ -60,12 +69,14 @@ nonisolated enum MarkdownStyling {
                 // A real system faint fill, for the same reason the other two
                 // are system colours here: a copied token literal would be
                 // the duplicate-palette class P-8 forbids.
-                codeTint: .unemphasizedSelectedTextBackgroundColor)
+                codeTint: .unemphasizedSelectedTextBackgroundColor,
+                prose: .textColor)
         }
 
         /// This Mac palette in the shared core's shape.
         var face: MarkdownFace.Palette {
-            MarkdownFace.Palette(marker: marker, link: link, codeTint: codeTint)
+            MarkdownFace.Palette(
+                marker: marker, link: link, codeTint: codeTint, prose: prose)
         }
     }
 

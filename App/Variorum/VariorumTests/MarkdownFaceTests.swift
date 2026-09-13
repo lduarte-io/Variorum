@@ -235,6 +235,17 @@ struct MarkdownFaceTests {
             storage.addAttribute(
                 .foregroundColor, value: NSColor.systemBrown,
                 range: NSRange(location: 0, length: storage.length))
+            // 18j (the 18g ladder's R2-1): the face clears back to the HOST'S
+            // CURRENT ink, which the host DECLARES in its palette — so a
+            // surface whose prose is systemBrown says so. The round trip this
+            // pin states is byte-unchanged (`isEqual(to: reference)` below);
+            // what changed is the road to it, because capturing the colour
+            // off the storage is precisely what left every face in the old
+            // ink after a dark toggle. `withVoice`'s defer restores this.
+            let voiced = MarkdownStyling.palette
+            MarkdownStyling.palette = MarkdownStyling.Palette(
+                marker: voiced.marker, link: voiced.link,
+                codeTint: voiced.codeTint, prose: .systemBrown)
             #expect(MarkdownStyling.style(storage) == true)
             #expect(color(storage, at: 4) == MarkdownStyling.palette.marker)
 
@@ -278,6 +289,71 @@ struct MarkdownFaceTests {
             #expect(isBold(storage ?? text, at: boldAt), "re-derived, not lost to the base refresh")
             #expect(color(storage ?? text, at: 2)
                 == NSColor(VoiceTokens.studyLight.muted), "the new voice's dimmed marker")
+        }
+    }
+
+    /// **18j (the 18g ladder's R2-1, a pre-existing MAJOR from Phase 13g L7)
+    /// — RED ON OLD.** A faced run's `.foregroundColor` was restored to the
+    /// ink CAPTURED WHEN THE FACE WAS WRITTEN, so after any ink MOVE — a
+    /// live dark/light toggle, a voice switch — bold, italic, heading and
+    /// code came back in the OLD ink while only the link (which re-derives
+    /// from the palette) was right. The second toggle left bold reading
+    /// `D6DAD2` on `FBFBF7` paper: near-invisible emphasis.
+    ///
+    /// The sequence below IS the surface's: `textColor`'s setter writes the
+    /// new ink over the ENTIRE storage, then `style` re-derives — and the
+    /// clear loop's restore put the stale colour back over the ink that had
+    /// just landed. `theFaceFollowsAVoiceSwitch` above never caught it
+    /// because it reads the MARKER's colour, which comes from the palette.
+    @Test func aFacedRunFollowsTheInkWhenTheAppearanceMoves() {
+        withVoice {
+            let light = NSColor(VoiceTokens.terminalLight.ink)
+            let dark = NSColor(VoiceTokens.terminalDark.ink)
+            let storage = NSMutableAttributedString(string: "a **bold** word")
+            let whole = NSRange(location: 0, length: storage.length)
+            storage.addAttribute(.foregroundColor, value: light, range: whole)
+            MarkdownFace.style(
+                storage, base: .systemFont(ofSize: 14),
+                palette: MarkdownStyling.palette.face)
+            let boldAt = 4
+            #expect(color(storage, at: boldAt) == light, "the face starts in the surface's ink")
+
+            // The appearance moves. The host's chrome does BOTH halves in
+            // one gesture (`applyVoiceChrome`): `NSTextView.textColor` writes
+            // the new ink over every character, and the markdown palette
+            // moves to the same tokens — then the surface re-derives.
+            storage.addAttribute(.foregroundColor, value: dark, range: whole)
+            MarkdownFace.style(
+                storage, base: .systemFont(ofSize: 14),
+                palette: MarkdownStyling.Palette(tokens: .terminalDark).face)
+            #expect(color(storage, at: boldAt) == dark,
+                    "bold reads in the CURRENT ink, not the one captured when the face was written")
+            #expect(isBold(storage, at: boldAt), "and it is still bold")
+            #expect(color(storage, at: 1) == dark, "the prose beside it too")
+        }
+    }
+
+    /// The other half of the same rule: a run that had NO foreground colour
+    /// when the face was written must still end with none, so a surface
+    /// that draws with the view's own `textColor` is not quietly given an
+    /// explicit one. (This is what `NSNull` records, and it is why the fix
+    /// keeps the presence/absence distinction rather than always writing.)
+    @Test func aFaceOverColourlessProseLeavesItColourless() {
+        withVoice {
+            let storage = NSMutableAttributedString(string: "a **bold** word")
+            MarkdownFace.style(
+                storage, base: .systemFont(ofSize: 14),
+                palette: MarkdownStyling.palette.face)
+            // Delete the emphasis: the face clears and the content returns
+            // to prose — with no colour of its own.
+            storage.replaceCharacters(in: NSRange(location: 2, length: 2), with: "")
+            storage.replaceCharacters(in: NSRange(location: 6, length: 2), with: "")
+            MarkdownFace.restyle(
+                storage, range: NSRange(location: 0, length: storage.length),
+                base: .systemFont(ofSize: 14), palette: MarkdownStyling.palette.face)
+            #expect(storage.string == "a bold word")
+            #expect(color(storage, at: 3) == nil,
+                    "nothing was given an explicit colour it never had")
         }
     }
 

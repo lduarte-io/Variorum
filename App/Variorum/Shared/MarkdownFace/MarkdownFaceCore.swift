@@ -60,11 +60,35 @@ nonisolated enum MarkdownFace {
         let marker: MarkdownFaceColor
         let link: MarkdownFaceColor
         let codeTint: MarkdownFaceColor
+        /// **The surface's CURRENT prose ink** (18j — the 18g ladder's R2-1,
+        /// a pre-existing MAJOR from 13g L7). A faced run is cleared back to
+        /// THIS, never to the ink that happened to be under the face when it
+        /// was written: an ink MOVE (a live dark/light toggle, a voice
+        /// switch) writes the new colour over the whole storage and then
+        /// re-derives the face, and a restore from a captured colour puts
+        /// the stale one straight back over it — bold, italic, heading and
+        /// code came back in the OLD ink while only the link (which
+        /// re-derives from `link`) was right.
+        ///
+        /// The face-attribute value still records PRESENCE (a run that had
+        /// no colour ends with none — `NSNull`); what it no longer decides
+        /// is WHICH colour, because the host knows that and the face does
+        /// not. **Required, never defaulted** — the structural-redo
+        /// `register(redo:)` posture: a future host must DECIDE what its
+        /// prose ink is rather than silently inherit a stand-in that would
+        /// put the wrong colour back under every face it clears. Both
+        /// platforms' one builder supplies it
+        /// (`MarkdownStyling.Palette(tokens:)`, `MobileEditorStyle.Face`).
+        let prose: MarkdownFaceColor
 
-        init(marker: MarkdownFaceColor, link: MarkdownFaceColor, codeTint: MarkdownFaceColor) {
+        init(
+            marker: MarkdownFaceColor, link: MarkdownFaceColor,
+            codeTint: MarkdownFaceColor, prose: MarkdownFaceColor
+        ) {
             self.marker = marker
             self.link = link
             self.codeTint = codeTint
+            self.prose = prose
         }
     }
 
@@ -78,11 +102,19 @@ nonisolated enum MarkdownFace {
     static let italicTrait: MarkdownFaceTraits = .italic
     #endif
 
-    /// Marks a range this face has styled, and REMEMBERS the prose
-    /// foreground color that was there — so clearing restores exactly what
-    /// the surface had. `NSNull` records "there was no foreground
-    /// attribute" (the state materialization produces). ONE key across both
-    /// platforms — the Mac's `MarkdownStyling.faceAttribute` forwards here.
+    /// Marks a range this face has styled, and records WHETHER the prose
+    /// carried a foreground color there — so clearing puts the surface's
+    /// CURRENT ink back (`Palette.prose`) or removes the attribute again.
+    /// `NSNull` records "there was no foreground attribute" (the state
+    /// materialization produces).
+    ///
+    /// *(18j — R2-1: the value used to be the captured COLOR itself and the
+    /// clear wrote it straight back, which is how an ink move left every
+    /// non-link face in the old ink. It is kept as a color rather than a
+    /// flag because a stored `NSColor` is what every surface already carries
+    /// and reading it as "a color was here" costs nothing; what changed is
+    /// that nothing restores FROM it.)* ONE key across both platforms — the
+    /// Mac's `MarkdownStyling.faceAttribute` forwards here.
     static let faceAttribute = NSAttributedString.Key("io.lduarte.variorum.markdownFace")
 
     // MARK: - Doors
@@ -142,8 +174,10 @@ nonisolated enum MarkdownFace {
             // so the clear that owns those ranges owns the chip too — a
             // backtick deleted mid-word must not leave a tinted ghost.
             storage.removeAttribute(.backgroundColor, range: sub)
-            if let color = value as? MarkdownFaceColor {
-                storage.addAttribute(.foregroundColor, value: color, range: sub)
+            // 18j (R2-1): the CURRENT ink, never the captured one. The value
+            // decides only whether there WAS a colour here.
+            if value is MarkdownFaceColor {
+                storage.addAttribute(.foregroundColor, value: palette.prose, range: sub)
             } else {
                 storage.removeAttribute(.foregroundColor, range: sub)
             }

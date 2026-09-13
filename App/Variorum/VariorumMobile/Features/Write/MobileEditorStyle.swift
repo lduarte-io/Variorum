@@ -140,7 +140,12 @@ nonisolated enum MobileEditorStyle {
             palette = MarkdownFace.Palette(
                 marker: dynamic(\.muted),
                 link: dynamic(\.accent),
-                codeTint: dynamic(\.codeTint))
+                codeTint: dynamic(\.codeTint),
+                // 18j (the 18g ladder's R2-1): the prose ink a cleared face
+                // returns to. Dynamic like every colour here, so it is right
+                // in both appearances with no storage write at all — which
+                // is why the phone never showed this defect.
+                prose: dynamic(\.ink))
         }
     }
 

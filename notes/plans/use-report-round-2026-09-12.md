@@ -9923,6 +9923,18 @@ and nothing was launched by me.
 
 - **PIECE 2 — the sweep (the every-surface dark walk, both voices):** NOT-STARTED.
 - **PIECE 3 — the pins (R51 per preset, the literal-colour grep pin, each token fix's):** NOT-STARTED.
-- **PIECE 4 — the two INHERITED items (R2-1 the stale-ink face restore · R2-5 the appearance road's
-  whole-storage ink write on a long note):** NOT-STARTED.
+- **PIECE 4a — INHERITED item R2-1 (the stale-ink face restore) — the fix: DONE.** `MarkdownFace.Palette`
+  gains **`prose`** — the surface's CURRENT ink, **required and never defaulted** (the `register(redo:)`
+  posture: a future host must decide) — and the clear loop restores a faced run to IT rather than to the
+  colour captured when the face was written; the face attribute now records only WHETHER a colour was there.
+  Both platforms' ONE builder supplies it (`MarkdownStyling.Palette(tokens:)` → `NSColor(tokens.ink)`;
+  `MobileEditorStyle.Face` → its DYNAMIC ink, which is why the phone never showed this defect). Pins:
+  `MarkdownFaceTests.aFacedRunFollowsTheInkWhenTheAppearanceMoves` — **RED on the pre-fix code by a
+  one-line behavioural revert** (bold stayed `23272B` after the ink moved to `D6DAD2`) — plus
+  `aFaceOverColourlessProseLeavesItColourless` (the `NSNull` half, green on both sides by design: it states
+  what the fix must NOT break). ONE pre-existing pin edited with its reason written in place
+  (`removingTheSyntaxRESTORESTheProseFaceExactly` declared a `systemBrown` prose the palette did not know;
+  it now declares it through the palette — its assertion is byte-unchanged). 45/4 green; iOS green.
+- **PIECE 4b — INHERITED item R2-5 (the appearance road's whole-storage ink write on a long note):**
+  NOT-STARTED — measured on the walk.
 - **THE CLOSING RUNS:** PENDING.
