@@ -130,8 +130,16 @@ struct PaletteReachTests {
     /// **The decision is pure:** a colour-only chrome change — a palette, a
     /// custom seed, the appearance — never re-writes the storage's base
     /// attributes; only the inputs of `EditorDocument.baseAttributes` do
-    /// (the voice, inline comments, the paragraph gap). The ink moves with
-    /// the voice or the appearance, never with a palette.
+    /// (the voice, inline comments, the paragraph gap). ~~The ink moves with
+    /// the voice or the appearance, never with a palette.~~
+    ///
+    /// *(18j, the 18g ladder's own R2-5 met: the ink moves with the VOICE
+    /// alone now. It is ONE dynamic colour per voice that answers both
+    /// appearances, so a light/dark change needs no `textColor` write —
+    /// which was the last full-range write on that road and the reason a
+    /// dark toggle jumped a long note's viewport. The line below that said
+    /// "the appearance does" now says it does not, and `EditorInkTests`
+    /// carries the whole statement with its red-on-old.)*
     @Test func aColourOnlyChromeChangeNeedsNoStorageRefresh() {
         let plain = EditorSurfaceChrome(tokens: settings(.default), dark: false)
         let lavender = EditorSurfaceChrome(tokens: settings(.lavender), dark: false)
@@ -142,7 +150,8 @@ struct PaletteReachTests {
         #expect(!custom.needsStorageRefresh(from: lavender), "nor does a seed")
         #expect(!dark.needsStorageRefresh(from: lavender), "nor the appearance")
         #expect(!lavender.inkChanged(from: plain), "a palette never recolours the ink")
-        #expect(dark.inkChanged(from: lavender), "the appearance does")
+        #expect(!dark.inkChanged(from: lavender),
+                "18j: nor does the appearance — one dynamic ink per voice answers both")
         let study = EditorSurfaceChrome(tokens: settings(.lavender, voice: .study), dark: false)
         #expect(study.needsStorageRefresh(from: lavender), "the voice is the font")
         #expect(study.inkChanged(from: lavender))

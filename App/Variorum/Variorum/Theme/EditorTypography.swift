@@ -37,6 +37,15 @@ nonisolated enum EditorTypography {
         let font: NSFont
         /// The uniform per-paragraph gap (points).
         let paragraphSpacing: CGFloat
+        /// **18j:** which voice this resolution IS, so the prose INK can be
+        /// read from the same one-source place the FONT is. It is the same
+        /// fact the font already encodes (one font per voice) — named rather
+        /// than derived, because deriving a voice from a font name is the
+        /// guess this module exists to avoid. It does not reach
+        /// `fingerprint` (the font name and the spacing already say
+        /// everything a stamp compares) and `resolve` below is its ONE
+        /// constructor, so nothing else had to change.
+        let voice: ThemeVoice
     }
 
     /// Extra uniform paragraph room when inline comments are ON — one
@@ -81,6 +90,62 @@ nonisolated enum EditorTypography {
         isAdopted = true
     }
 
+    // MARK: - The prose ink (18j — her R-Q12)
+
+    /// **THE PROSE INK, as ONE DYNAMIC COLOUR PER VOICE** — the phone's own
+    /// pattern ported (`MobileEditorStyle.Face`, whose every colour is a
+    /// `UIColor` with a provider, cached one face per voice).
+    ///
+    /// **Why the ink had to come here at all** (18j's dark walk, the first
+    /// thing it found): `EditorDocument.baseAttributes` carried the font and
+    /// the paragraph style and NO colour, so a materialized document's prose
+    /// had no `.foregroundColor` at all. The Write editor's chrome is applied
+    /// at `makeNSView` — on an EMPTY storage — so `textColor`'s setter had no
+    /// characters to write and left only the typing attributes; the document
+    /// then arrived through `setAttributedString` and drew in AppKit's own
+    /// default. In LIGHT that default is near-black and the voice's ink is
+    /// near-black, so the defect hid for the editor's whole life. In DARK
+    /// every note in Write was black on black. (The read tier and the panes
+    /// were always right: they set the colour and THEN the string, so the
+    /// typing attributes carry it into every character.)
+    ///
+    /// **Why DYNAMIC and not "resolve it for the current appearance"**: a
+    /// static colour would have to be re-written over the whole storage every
+    /// time the appearance moved — `NSTextView.textColor`'s setter
+    /// re-attributes every character, which on a long note invalidates the
+    /// document and jumps the viewport (the 18g ladder's R2-5, the second
+    /// item this batch inherited). One colour object that answers per
+    /// appearance costs NO storage write at all: AppKit resolves it against
+    /// the drawing view's `effectiveAppearance` at draw time. That is why
+    /// `inkChanged(from:)` below is keyed on the VOICE alone.
+    ///
+    /// One instance per voice, held: the provider is called per appearance
+    /// and its answer cached by AppKit, which is exactly right for a colour
+    /// whose only other input (the voice) is fixed at construction. A palette
+    /// deliberately does not move `ink` (18g's derivation table — prose is
+    /// the voice's register), so the palette is not an input here.
+    nonisolated(unsafe) private static let terminalInk = dynamicInk(.terminal)
+    nonisolated(unsafe) private static let studyInk = dynamicInk(.study)
+
+    /// The ink for a NAMED voice — what a surface's own chrome asks for.
+    static func ink(for voice: ThemeVoice) -> NSColor {
+        switch voice {
+        case .terminal: terminalInk
+        case .study: studyInk
+        }
+    }
+
+    /// The ink of the ADOPTED voice — what `EditorDocument.baseAttributes`
+    /// asks for, beside `baseFont`, from the same `current`.
+    static var ink: NSColor { ink(for: current.voice) }
+
+    private static func dynamicInk(_ voice: ThemeVoice) -> NSColor {
+        NSColor(name: NSColor.Name("variorum.prose.ink.\(voice.rawValue)")) { appearance in
+            let dark = appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
+            return NSColor(VoiceTokens.resolve(voice: voice, dark: dark).ink)
+        }
+    }
+
     /// The same door from the settings themselves.
     static func adopt(_ settings: Queries.ThemeSettings) {
         adopt(resolve(voice: settings.voice, inlineComments: settings.inlineComments))
@@ -102,7 +167,7 @@ nonisolated enum EditorTypography {
         }
         let gap = (font.pointSize * 0.5).rounded()
             + (inlineComments ? inlineCommentSpacing : 0)
-        return Resolved(font: font, paragraphSpacing: gap)
+        return Resolved(font: font, paragraphSpacing: gap, voice: voice)
     }
 
     /// **The paragraph gap a surface LAYS OUT with** — the voice's resolved
@@ -302,7 +367,13 @@ struct EditorSurfaceChrome: Equatable {
     }
 
     var paper: NSColor { NSColor(tokens.surface) }
-    var ink: NSColor { NSColor(tokens.ink) }
+    /// **18j:** the ONE dynamic ink for this chrome's voice — not
+    /// `NSColor(tokens.ink)`, which is this appearance's answer frozen. The
+    /// same object serves both appearances, so writing it once is writing it
+    /// for good (`EditorTypography.ink(for:)` says why at length). A palette
+    /// never moves the ink (18g's derivation table), so the voice is its
+    /// only input.
+    var ink: NSColor { EditorTypography.ink(for: voice) }
     var caret: NSColor { NSColor(tokens.accent) }
 
     // MARK: What a chrome change has to touch (18g ladder, the R1-1 walk)
@@ -326,11 +397,20 @@ struct EditorSurfaceChrome: Equatable {
     }
 
     /// Whether the INK moved — `NSTextView.textColor`'s setter writes the
-    /// colour over the entire storage, so it is set only when the voice or
-    /// the appearance changed (a palette never recolours the ink).
+    /// colour over the entire storage, so it is set as rarely as it can be.
+    ///
+    /// **18j — the APPEARANCE is no longer an input** (the 18g ladder's R2-5,
+    /// the second item this batch inherited). The ink is now ONE dynamic
+    /// colour per voice (`EditorTypography.ink(for:)`): the very same object
+    /// answers light and dark, so a light/dark change needs no write at all —
+    /// AppKit re-resolves it against the drawing view's appearance. Before
+    /// this, `dark` moving meant a full-range `textColor` write, which on the
+    /// 262-block story invalidated the document and jumped the viewport
+    /// exactly as the re-font road does. A palette never moved the ink and
+    /// still does not, so the VOICE is the only input left.
     func inkChanged(from previous: EditorSurfaceChrome?) -> Bool {
         guard let previous else { return true }
-        return previous.voice != voice || previous.dark != dark
+        return previous.voice != voice
     }
 }
 

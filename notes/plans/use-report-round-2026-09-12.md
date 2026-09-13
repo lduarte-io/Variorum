@@ -9921,7 +9921,21 @@ and nothing was launched by me.
   and **SwiftUI's `@Environment(\.colorScheme)` follows the app appearance** (the bridge all 48 readers ride,
   pinned rather than assumed). 4/1 green.
 
-- **PIECE 2 — the sweep (the every-surface dark walk, both voices):** NOT-STARTED.
+- **PIECE 2 — the sweep (the every-surface dark walk, both voices): IN-PROGRESS.** The walk's FIRST find is
+  the batch's biggest: **every note in the full-document Write editor drew its prose in AppKit's own
+  near-black default rather than the voice's ink** — in LIGHT that default sits a few values from
+  `terminalLight.ink` so it hid for the editor's whole life; in DARK it is black on black and the note is
+  gone (`13-write-existing-note-T-dark.png`). Traced: `EditorDocument.baseAttributes` carried the font and
+  the paragraph style and NO colour; Write applies its chrome at `makeNSView`, on an EMPTY storage, so
+  `textColor`'s setter left only the typing attributes, and the document arrived through
+  `setAttributedString` with no `.foregroundColor` anywhere. (The read tier and the panes set the colour and
+  THEN the string — `14-read-edit-T-dark.png` was always right; a voice switch repaired it,
+  `15-write-after-voice-switch-S-dark.png`, because THAT write lands on a non-empty storage.) **FIXED as a
+  TOKEN fix at the one source** (`baseAttributes` gains `.foregroundColor`), the ink being ONE DYNAMIC
+  colour per voice — the phone's own `MobileEditorStyle` pattern ported — so it answers both appearances
+  with no storage write. Pins `EditorInkTests` ×5, red on old four ways; walked
+  (`17-write-ink-FIXED-S-dark.png`). Reproduced under the SYSTEM dark too, so it is a pre-existing dark
+  defect this batch found, not one the choice introduced.
 - **PIECE 3 — the pins (R51 per preset, the literal-colour grep pin, each token fix's):** NOT-STARTED.
 - **PIECE 4a — INHERITED item R2-1 (the stale-ink face restore) — the fix: DONE.** `MarkdownFace.Palette`
   gains **`prose`** — the surface's CURRENT ink, **required and never defaulted** (the `register(redo:)`
@@ -9935,6 +9949,11 @@ and nothing was launched by me.
   what the fix must NOT break). ONE pre-existing pin edited with its reason written in place
   (`removingTheSyntaxRESTORESTheProseFaceExactly` declared a `systemBrown` prose the palette did not know;
   it now declares it through the palette — its assertion is byte-unchanged). 45/4 green; iOS green.
-- **PIECE 4b — INHERITED item R2-5 (the appearance road's whole-storage ink write on a long note):**
-  NOT-STARTED — measured on the walk.
+- **PIECE 4b — INHERITED item R2-5 (the appearance road's whole-storage ink write on a long note):
+  CARVED, by the same change.** With ONE dynamic ink per voice the APPEARANCE is no longer an input of
+  `inkChanged(from:)` — the same colour object answers light and dark, so a light/dark change writes
+  NOTHING full-range in the editor (the cheap road's `restyleFacedLines`, ∝ the faced lines, still runs).
+  Pin: `EditorInkTests.anAppearanceChangeWritesNothingOverTheWholeStorage`, red on old. ONE pre-existing
+  18g pin edited with its reason written in place (`PaletteReachTests.aColourOnlyChromeChangeNeedsNoStorageRefresh`
+  said *"the appearance does"*; it now says it does not). **The long-note walk measurement is still owed.**
 - **THE CLOSING RUNS:** PENDING.

@@ -52,8 +52,22 @@ nonisolated extension EditorDocument {
     /// The base attributes EVERY surface write uses — materialization,
     /// programmatic replaces, differential structural applies, and the
     /// read tier. One source so no path can drop the paragraph style.
+    ///
+    /// **18j: it carries the PROSE INK too** (`EditorTypography.ink` — ONE
+    /// dynamic colour per voice, resolved per appearance at draw time). It
+    /// did not, and that was the hole 18j's dark walk fell into on its first
+    /// note: the Write editor's chrome is applied at `makeNSView`, on an
+    /// EMPTY storage, so `textColor`'s setter left only the typing
+    /// attributes, and the document that arrived a line later through
+    /// `setAttributedString` carried no colour at all — every note in Write
+    /// drew in AppKit's own near-black default, which in LIGHT is close
+    /// enough to the voice's ink to hide and in DARK is black on black.
+    /// The fix belongs HERE for the reason the sentence above already gives
+    /// about the paragraph style: this is the one source every surface write
+    /// goes through, so no path can drop it.
     static var baseAttributes: [NSAttributedString.Key: Any] {
-        [.font: baseFont, .paragraphStyle: baseParagraphStyle]
+        [.font: baseFont, .paragraphStyle: baseParagraphStyle,
+         .foregroundColor: EditorTypography.ink]
     }
 
     /// The pre-move materialization, exactly as it always behaved: the
