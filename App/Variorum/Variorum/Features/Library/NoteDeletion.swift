@@ -88,8 +88,37 @@ struct NoteDeleteConfirm: Identifiable, Equatable {
 /// **DELETE A NOTE — one road, four doors.**
 @MainActor
 enum NoteDeletion {
+    /// **WHAT THE ACT SAID, AND WHETHER ANYTHING HAPPENED** (the 18i ladder
+    /// round 1's BLOCKER — J29). This door has FOUR outcomes and only one of
+    /// them is a receipt: the other three report that nothing happened (the
+    /// empty gesture, the scraps kind fence, and the race where every named
+    /// note was already tombstoned), which is a REFUSAL's voice — the copy's
+    /// own doc says so at `RecoveryCopy.notesAlreadyGone`, and P-2 says she
+    /// must see it whatever her confirmations setting is. It matters most
+    /// exactly here: none of this act's four doors mounts a bottom bar, so a
+    /// refusal routed as a receipt is invisible under her own default.
+    ///
+    /// The shape is `SplitAtNewlinesCopy.acted`'s — ONE discriminator, one
+    /// home, carried beside the words rather than re-derived by reading them.
+    struct Report {
+        let text: String
+        /// True when NOTHING happened. `fire` routes on it; `run` drops it.
+        let isRefusal: Bool
+    }
+
     /// Flush, delete, announce. Returns the receipt; refusals throw for the
     /// caller to word (the `TrashPutBack` / `TrashPurge` shape).
+    ///
+    /// **Kept byte-identical in name and return type** (the 3C parity
+    /// pattern) when J29 gave the act its discriminator: every shipped pin
+    /// over this function and `LibraryViewModel.delete`, which wants the
+    /// words and nothing else, compile and pass unmodified.
+    static func run(session: AppSession, postIDs: [String]) async throws -> String {
+        try await report(session: session, postIDs: postIDs).text
+    }
+
+    /// The act itself — the same body this file has always had, now saying
+    /// which of its four endings it reached.
     ///
     /// **Flush FIRST, like every structural door.** `deleteContainer`
     /// cascades to the note's blocks and their takes; a refused flush that
@@ -111,8 +140,10 @@ enum NoteDeletion {
     /// gesture because one of five rows had already been deleted elsewhere
     /// would be a refusal about nothing. Anything else the operations layer
     /// refuses propagates and is spoken.
-    static func run(session: AppSession, postIDs: [String]) async throws -> String {
-        guard !postIDs.isEmpty else { return RecoveryCopy.notesAlreadyGone(0) }
+    static func report(session: AppSession, postIDs: [String]) async throws -> Report {
+        guard !postIDs.isEmpty else {
+            return Report(text: RecoveryCopy.notesAlreadyGone(0), isRefusal: true)
+        }
         // **THE KIND FENCE** (13l Act 7 — the 8d walk; the mechanism and the
         // 28 lost scraps are written at `RecoveryCopy.notADeletableNote`).
         // `deleteContainer` has no kind guard, and the scraps editor renders
@@ -130,7 +161,9 @@ enum NoteDeletion {
                 try Queries.containerHeader(db, containerID: id)?.kind != .pool
             }
         }
-        guard !notes.isEmpty else { return RecoveryCopy.notADeletableNote }
+        guard !notes.isEmpty else {
+            return Report(text: RecoveryCopy.notADeletableNote, isRefusal: true)
+        }
         let postIDs = notes
         for id in postIDs {
             await session.flushExistingAutosave(forPost: id)
@@ -153,8 +186,12 @@ enum NoteDeletion {
         NotificationCenter.default.post(
             name: .variorumNotesDeleted, object: nil,
             userInfo: ["postIDs": postIDs])
-        guard deleted > 0 else { return RecoveryCopy.notesAlreadyGone(postIDs.count) }
-        return RecoveryCopy.movedToTrashReceipt(notes: deleted)
+        guard deleted > 0 else {
+            return Report(
+                text: RecoveryCopy.notesAlreadyGone(postIDs.count), isRefusal: true)
+        }
+        return Report(
+            text: RecoveryCopy.movedToTrashReceipt(notes: deleted), isRefusal: false)
     }
 
     /// **THE ASK, with its version count read at ask time** (V2's one honest
@@ -174,7 +211,10 @@ enum NoteDeletion {
     static func fire(session: AppSession, postIDs: [String]) {
         Task { @MainActor in
             do {
-                session.status.receipt(try await run(session: session, postIDs: postIDs))
+                // J29: the outcome's own class — three of the four endings
+                // report that nothing happened, and a refusal always shows.
+                let outcome = try await report(session: session, postIDs: postIDs)
+                session.status.say(outcome.text, refusing: outcome.isRefusal)
             } catch {
                 session.status.speak(DeletionRefusal.words(error, act: .delete))
             }

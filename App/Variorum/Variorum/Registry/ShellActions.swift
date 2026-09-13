@@ -235,7 +235,11 @@ struct ShellActions {
             if let failure = importer.lastError {
                 status.speak("Import failed: \(failure)")
             } else {
-                status.receipt(importer.lastReport ?? "Import finished.")
+                // J29's second member: a report that names only SKIPS says
+                // nothing arrived, and a refusal always shows.
+                status.say(
+                    importer.lastReport ?? "Import finished.",
+                    refusing: importer.lastReportIsRefusal)
             }
         }
     }
@@ -249,7 +253,10 @@ struct ShellActions {
             if let failure = exporter.lastError {
                 status.speak("Export failed: \(failure)")
             } else {
-                status.receipt(exporter.lastReport ?? "Export finished.")
+                // J37: "Exported 0 files." wrote nothing, so nothing landed.
+                status.say(
+                    exporter.lastReport ?? "Export finished.",
+                    refusing: exporter.lastReportIsRefusal)
             }
         }
     }
@@ -287,7 +294,10 @@ struct ShellActions {
             if let failure = exporter.lastError {
                 status.speak("Export failed: \(failure)")
             } else {
-                status.receipt(exporter.lastReport ?? "Export finished.")
+                // J37: "Exported 0 files." wrote nothing, so nothing landed.
+                status.say(
+                    exporter.lastReport ?? "Export finished.",
+                    refusing: exporter.lastReportIsRefusal)
             }
         }
     }

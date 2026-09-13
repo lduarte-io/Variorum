@@ -289,6 +289,30 @@ struct StatusCenterTests {
         }
     }
 
+    /// **THE ONE MAPPING FOR A DOOR WHOSE OUTCOME DECIDES ITS CLASS** (the
+    /// ladder round 1, J29): `say(_:refusing:)` is where "did anything land"
+    /// becomes a kind, so the three doors that carry that fact — the note
+    /// delete, the import, the export — cannot spell it three ways. A
+    /// refusal reaches her under every setting; a receipt obeys her.
+    @Test func sayMapsALandedActToAReceiptAndANoOpToARefusal() async throws {
+        try await withSessionWorld { session, _ in
+            for style in ReceiptStyle.allCases {
+                session.status.clear()
+                session.status.receiptStyle = style
+                session.status.say("That note is already gone.", refusing: true)
+                #expect(session.status.current?.text == "That note is already gone.",
+                        "a no-op report toasts under \(style.rawValue)")
+                #expect(session.status.current?.kind == .refusal)
+                #expect(session.status.quietLine == nil)
+            }
+            session.status.clear()
+            session.status.receiptStyle = .quiet
+            session.status.say("Note moved to the Trash.", refusing: false)
+            #expect(session.status.current == nil, "a landed act obeys her setting")
+            #expect(session.status.quietLine?.kind == .receipt)
+        }
+    }
+
     /// **THE DEFAULT IS HERS, AND IT IS ADOPTED WHERE IT LANDS.** The
     /// centre's compile-time value already is her default; the theme store
     /// pushes the stored one in from the settings observation (the 18d

@@ -152,6 +152,133 @@ struct ConfirmationsSettingTests {
         }
     }
 
+    // MARK: - A door that did nothing says so (the ladder's BLOCKER, J29)
+
+    /// The standing async-poll rule (never a sync RunLoop pump from an async
+    /// context). `NoteDeletion.fire` is a detached `Task`, so its outcome
+    /// arrives a turn or more later.
+    private func settle(_ predicate: @MainActor () -> Bool) async {
+        for _ in 0..<400 {
+            if predicate() { return }
+            await Task.yield()
+            try? await Task.sleep(for: .milliseconds(5))
+        }
+    }
+
+    /// **A DELETE THAT DELETED NOTHING STILL SPEAKS** (the 18i ladder round
+    /// 1's BLOCKER — J29). `NoteDeletion.run` has FOUR outcomes and three of
+    /// them report that nothing happened: the empty gesture, the scraps kind
+    /// fence, and this one — the race where every named note was already
+    /// tombstoned (a double-press, a second window, a stale list, a pull that
+    /// landed the tombstones). The copy's own doc says it in words:
+    /// *"Nothing happened, so this is a refusal's voice, not a receipt's."*
+    ///
+    /// They were all handed to `receipt(…)`, so her setting could hide them —
+    /// and the four doors that fire this act (the Library, the Pool, Archived
+    /// and both `note ▾` menus) mount NO bottom bar, so under her own default
+    /// "quiet" was already silence, and `off` dropped them outright.
+    ///
+    /// **Red on old:** `current == nil`, with the words sitting in
+    /// `lastDroppedReceipt`.
+    @Test func aDeleteThatDeletedNothingStillSpeaks() async throws {
+        try await withEditor(seedBlocks: ["Alpha."]) { h in
+            h.session.status.receiptStyle = .off
+            let dead = try h.session.operations.createPost(title: "gone already").id
+            try h.session.operations.deleteContainer(dead)
+
+            NoteDeletion.fire(session: h.session, postIDs: [dead])
+            await settle {
+                h.session.status.current != nil || h.session.status.lastDroppedReceipt != nil
+            }
+
+            #expect(h.session.status.current?.text == RecoveryCopy.notesAlreadyGone(1))
+            #expect(h.session.status.current?.kind == .refusal)
+            #expect(h.session.status.lastDroppedReceipt == nil,
+                    "nothing was dropped — this was never a receipt")
+        }
+    }
+
+    /// The Act-7 kind fence is the BELT behind `CommitBar`'s braces, and a
+    /// belt that speaks only where a bar happens to be mounted is not one.
+    /// Under HER DEFAULT the scraps refusal must still be a toast.
+    @Test func theScrapsFenceStillSpeaksUnderHerDefault() async throws {
+        try await withEditor(seedBlocks: ["Alpha."]) { h in
+            h.session.status.receiptStyle = .quiet
+            let pool = try h.session.operations.createPool(title: "scraps").id
+
+            NoteDeletion.fire(session: h.session, postIDs: [pool])
+            await settle {
+                h.session.status.current != nil || h.session.status.quietLine != nil
+            }
+
+            #expect(h.session.status.current?.text == RecoveryCopy.notADeletableNote)
+            #expect(h.session.status.current?.kind == .refusal)
+            #expect(h.session.status.quietLine == nil,
+                    "a refusal never rides the quiet slot, under any setting")
+        }
+    }
+
+    /// **AN IMPORT THAT IMPORTED NOTHING SAYS SO** (the same BLOCKER's second
+    /// member — J29). An EMPTY `.md` is read fine and then refused by the
+    /// operation (`emptyImport`), so it is collected as a SKIP: `imported`
+    /// is 0, `lastError` is explicitly nil, and the report names only skips.
+    /// That reports a no-op, and it fires from the Library, which mounts no
+    /// bottom bar — so under her default it was said to nobody.
+    ///
+    /// **Red on old** (behavioural revert — the predicate is new API, so the
+    /// honest red is the predicate forced to `false`, the pre-J29 behaviour
+    /// where every import report was a receipt).
+    @Test func anImportThatImportedNothingIsARefusal() async throws {
+        try await withEditor(seedBlocks: ["Alpha."]) { h in
+            let dir = URL(fileURLWithPath: NSTemporaryDirectory())
+                .appendingPathComponent("variorum-18i-import-\(UUID().uuidString)")
+            try FileManager.default.createDirectory(
+                at: dir, withIntermediateDirectories: true)
+            defer { try? FileManager.default.removeItem(at: dir) }
+            let empty = dir.appendingPathComponent("empty.md")
+            try Data().write(to: empty)
+
+            let importer = ImportModel(session: h.session)
+            await importer.importFiles([empty], into: .library)
+
+            #expect(importer.lastError == nil,
+                    "the gesture did not FAIL — it landed nothing, which is a different thing")
+            #expect(importer.lastReport?.contains("Skipped") == true,
+                    "the report names only skips: \(importer.lastReport ?? "nil")")
+            #expect(importer.lastReportIsRefusal,
+                    "nothing arrived, so nothing landed — it is a refusal's voice")
+
+            // …and one that DID import is a receipt, so the predicate is not
+            // simply always true.
+            let real = dir.appendingPathComponent("real.md")
+            try "A paragraph.".write(to: real, atomically: true, encoding: .utf8)
+            await importer.importFiles([real], into: .library)
+            #expect(importer.lastReportIsRefusal == false)
+            #expect(importer.lastReport?.contains("Imported 1 note") == true)
+        }
+    }
+
+    /// **AN EXPORT THAT WROTE NO FILE SAYS SO** (J37 — the import predicate's
+    /// twin). A store with nothing to export still said *"Exported 0 files."*
+    /// as a confirmation. Same rule, same shape, one line apart.
+    @Test func anExportThatWroteNothingIsARefusal() async throws {
+        try await withEditor(seedBlocks: ["Alpha."]) { h in
+            try h.session.operations.deleteContainer(h.postID)  // nothing left to export
+            let dir = URL(fileURLWithPath: NSTemporaryDirectory())
+                .appendingPathComponent("variorum-18i-export-\(UUID().uuidString)")
+            try FileManager.default.createDirectory(
+                at: dir, withIntermediateDirectories: true)
+            defer { try? FileManager.default.removeItem(at: dir) }
+
+            let exporter = ExportModel(session: h.session)
+            await exporter.writeBulkExport(to: dir)
+
+            #expect(exporter.lastError == nil)
+            #expect(exporter.lastReport == "Exported 0 files.")
+            #expect(exporter.lastReportIsRefusal, "no file was written — nothing landed")
+        }
+    }
+
     // MARK: - The quiet slot itself (a mounted geometry oracle)
 
     /// **THE SLOT TAKES NO ROOM WHEN THERE IS NOTHING TO SAY** — and the

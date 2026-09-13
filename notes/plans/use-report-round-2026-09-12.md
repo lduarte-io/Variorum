@@ -7012,14 +7012,14 @@ reading the words (the `RecoveryStatus` rule, reused rather than re-derived).
 | 32 | the same two doors | `nothingToUndo` · `nothingToRedo` · `undoFailed` · `redoFailed` · `undoCancelled` | **REFUSAL** | nothing came back |
 | 33 | `ShellActions.restoreTutorial` | "The tutorial is fresh — … is on your shelf." | **RECEIPT** | it was re-seeded |
 | 34 | `ShellActions.restoreSeededBook` | "Restored …", "… is already whole — it's on your shelf." | **RECEIPT** | both report the book's state after the door ran |
-| 35 | `ShellActions` import/export ×3 | "Import/Export finished." / the report | **RECEIPT** | files moved. The `… failed:` half of each expression is split out and stays a **REFUSAL** |
+| 35 | `ShellActions` import/export ×3 | "Import/Export finished." / the report | **SPLIT BY OUTCOME** *(corrected at the ladder round 1, J29's second member + J37 — it shipped as a flat RECEIPT)* | files moved — WHEN they did. An empty `.md` is refused by the operation (`emptyImport`) and collected as a SKIP, so `imported == 0` with no error and a report naming only skips; a bulk export of a store with nothing in it writes no file and still said "Exported 0 files." Both now carry ONE predicate — `ImportModel.lastReportIsRefusal` (`imported == 0`) and `ExportModel.lastReportIsRefusal` (`count == 0`) — and the three doors route through `StatusCenter.say(_:refusing:)`. The `… failed:` half of each expression is split out and stays a **REFUSAL** |
 | 36 | `ShellActions.todaysEntry` `:210` | the shelving note | **REFUSAL** | `JournalBooks.Outcome.note` is non-nil ONLY when the membership half could not happen — it is a refusal wearing a receipt's shape |
 | 37 | `ShellActions` — every `unavailableNote`, `OpsRefusalCopy.message`, "…failed: …", "That command isn't wired…" | | **REFUSAL** | unchanged |
 | 38 | `AppSession:486` | `MultiBookEditNote.sentence` + the Diverge button | **OFFER** | inferred from the action; always shows |
 | 39 | `AppSession:505` | `DivergeCopy.done(book:)` | **RECEIPT** | the copy exists |
 | 40 | `QuickNoteView:255` | `QuickNoteCopy.filedNote` | **RECEIPT** | the note was filed |
 | 41 | `QuickNoteView:257` · `:261` | `refusedFilingLine` · `refusedPrefix` | **REFUSAL** | the filing did not happen (the note is safe and says so) |
-| 42 | `NoteDeletion.fire` | the deletion report | **RECEIPT** | the notes went |
+| 42 | `NoteDeletion.fire` | the deletion report | **SPLIT BY OUTCOME** *(corrected at the ladder round 1, J29 — it shipped as a flat RECEIPT, which was the BLOCKER)* | the act has FOUR endings and only `movedToTrashReceipt` is one: the empty gesture (`:115`), the scraps kind fence (`:133`) and the already-gone race (`:156`) all report that NOTHING happened, which is a refusal's voice — `RecoveryCopy.notesAlreadyGone`'s own doc says so, and none of the four doors mounts a bar, so a receipt there is invisible under her default. `run` gained `Report { text; isRefusal }` (the `acted` shape) with `run` kept as a byte-identical forwarder; `fire` routes through `StatusCenter.say(_:refusing:)` |
 | 43 | `RootView:505` · `ShellRouter.openBeside` | `WorkspaceNaming.sameNoteNote` | **REFUSAL** | no new pane opened |
 | 44 | `MastheadTagCluster` · `StarsModel` · `BookIndexEditModel` · `BookIndexView` · `MarkdownActs` · `EditorCommands` | error and unavailable notes | **REFUSAL** | unchanged |
 

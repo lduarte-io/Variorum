@@ -33,6 +33,18 @@ final class ImportModel {
     private(set) var lastError: String?
     private(set) var lastReport: String?
 
+    /// **WHETHER `lastReport` REPORTS A NO-OP** (the 18i ladder round 1, J29's
+    /// second member). A report that names only SKIPS — every picked file
+    /// refused, which an empty `.md` produces on its own (`importPost` throws
+    /// `emptyImport`) — says that nothing happened, and a door that says
+    /// nothing happened is a REFUSAL: it must reach her whatever her
+    /// confirmations setting is (P-2), and the Library it fires from mounts no
+    /// bottom bar, so a receipt there is invisible under her own default.
+    ///
+    /// ONE predicate with one home, the `SplitAtNewlinesCopy.acted` shape; the
+    /// door routes on it through `StatusCenter.say(_:refusing:)`.
+    private(set) var lastReportIsRefusal = false
+
     /// Plain-prose files only — the pipeline treats contents verbatim
     /// (headings stay Markdown in block text, AppSpec §14.8; nothing is
     /// parsed). Anything else is skipped with a visible note.
@@ -250,6 +262,8 @@ final class ImportModel {
             parts.append("Skipped: \(skipped.joined(separator: ", ")).")
         }
         lastReport = parts.isEmpty ? nil : parts.joined(separator: " ")
+        // J29: nothing arrived, so nothing landed — whatever the skips say.
+        lastReportIsRefusal = imported == 0
     }
 }
 

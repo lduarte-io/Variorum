@@ -142,6 +142,20 @@ final class StatusCenter {
         deliver(text, kind: .receipt)
     }
 
+    /// **The door for an act whose OWN OUTCOME decides the class** (the 18i
+    /// ladder round 1, J29): a door that computes its line from what it did
+    /// — the note delete's four outcomes, the import's skips, the export's
+    /// count — knows whether anything landed, and that answer IS the class.
+    /// The mapping lives here and only here, so the three doors that carry
+    /// such a fact cannot spell it three ways (F-0's drift class).
+    ///
+    /// `refusing` is the doors' own vocabulary — `RecoveryStatus.isRefusal`
+    /// and `StructuralOutcome.noteIsRefusal` are the two spellings already in
+    /// the codebase, and this is the third consumer of the same word.
+    func say(_ text: String, refusing: Bool) {
+        deliver(text, kind: refusing ? .refusal : .receipt)
+    }
+
     /// The general door, for a producer that already knows its class — the
     /// view models whose own status line is classed where the message is
     /// produced (`RecoveryStatus`, and the `statusMessage` forwarders).

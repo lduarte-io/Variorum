@@ -31,6 +31,13 @@ final class ExportModel {
     /// surfaced beside the gesture that ran it.
     private(set) var lastReport: String?
 
+    /// **WHETHER `lastReport` REPORTS A NO-OP** (the 18i ladder round 1, J37 —
+    /// the import predicate's twin, same rule, same home). A bulk export of a
+    /// store with nothing to export writes no file and still says "Exported 0
+    /// files."; nothing landed, so it is a REFUSAL and always shows (P-2). The
+    /// door routes on it through `StatusCenter.say(_:refusing:)`.
+    private(set) var lastReportIsRefusal = false
+
     init(session: AppSession) {
         self.session = session
     }
@@ -92,6 +99,7 @@ final class ExportModel {
                 try ExportWriter.write(manifest, to: root)
             }.value
             lastReport = "Exported \(count) file\(count == 1 ? "" : "s")."
+            lastReportIsRefusal = count == 0  // J37: no file written, nothing landed
             lastError = nil
         } catch {
             lastError = String(describing: error)
@@ -124,6 +132,7 @@ final class ExportModel {
         do {
             try data.write(to: url, options: .atomic)
             lastReport = "Exported \(what) to \(url.lastPathComponent)."
+            lastReportIsRefusal = false  // a file was written
             lastError = nil
         } catch {
             lastError = String(describing: error)
