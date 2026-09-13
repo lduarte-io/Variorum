@@ -672,8 +672,9 @@ struct TakesBoardView: View {
                     // 17p-shaped place, `anchorY` down it otherwise (the 17q
                     // ladder, R1-1). Absolute, so re-aiming as the lazy
                     // column's real heights arrive converges.
-                    column.scrollTo(
-                        rowID, anchor: anchorY == 0 ? .top : UnitPoint(x: 0.5, y: anchorY))
+                    // (`.top` IS `UnitPoint(x: 0.5, y: 0)` — one value, one
+                    // spelling; the 17q ladder's round 2, R2-5.)
+                    column.scrollTo(rowID, anchor: UnitPoint(x: 0.5, y: anchorY))
                 case .remember, .wait:
                     break
                 }
