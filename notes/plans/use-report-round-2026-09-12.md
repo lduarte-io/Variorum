@@ -10920,3 +10920,25 @@ of decor escape a pin every other view answers to, with no occupant but plenty o
 
 **Counts: 3 findings · 3 AGREE · 0 DISPUTE.** Two are record/handoff items for the close; R2-3 is a
 one-line pin edit whose greenness I verified form by form.
+
+### 18j LADDER — ROUND 2 · THE REVIEWER'S FINAL CALL AND FIXES (fable-reviewer, 2026-09-14)
+
+The implementer's responses (`a2e65484`) read whole: 3 AGREE · 0 DISPUTE, each precision checked against
+the tree before acting (the form-by-form BlockDecor verification; the two-row listing; the convention
+clause). **3 CONFIRMED · 0 DISMISSED.** The fix pass touched ONE test file and this plan — no production
+source, nothing in `Sources/`, `Server/`, `Persistence/` or any fenced file; zero trailer lines; her
+real-store app was not running before, during or after (`pgrep -fl 'Variorum.app/Contents/MacOS'` by
+path — empty each time); nothing launched.
+
+| # | Call | Commit / disposition | What landed | Run |
+|---|---|---|---|---|
+| **R2-1** NIT | **CONFIRMED — DISPOSITIONED TO THE ORCHESTRATOR'S CLOSE** | (no change here, per the orchestrator's direction) | The handoff's flagged-for-her line gains the DiffView clause WITH the implementer's convention sentence, carried verbatim so the close does not soften it: the diff's marks were the one place the old literals carried a CONVENTION (red-removed / green-added, the near-universal diff idiom); `tokens.alarm`/`tokens.positive` preserve the reading in both voices, and *"the diff no longer uses the system stoplight"* is exactly the sentence she should get to disagree with — reversible in tokens either way | record |
+| **R2-2** NIT | **CONFIRMED** | `d5a048e1` | The round-1 final call's R1-4 row corrected IN PLACE, marked as corrected at round 2: the other-voice walk covered every one-voice surface EXCEPT batch rows 14 (the markdown face in Study) and 29 (the block ▾ menu in Terminal), which the fix-pass table never claimed; the bounding named; two ten-second captures at the letter-close walk close it outright (the implementer would take them if the walk happens anyway — the close's to decide) | record |
+| **R2-3** NIT | **CONFIRMED** | `eb8a6a3e` | `BlockDecor.swift`'s whole-file allowance converted to the by-form shape its own mechanism was minted for: `allowedForms` carries `"Features/Editor/BlockDecor.swift": ["srgbRed:"]` (`CalloutPalette`'s one component builder at `:396–397`, the file's only banned form — the implementer's form-by-form check and mine agree), the entry-5 comment folded into `allowedForms`' doc with the same recorded reason; the other 1,128 lines of decor now answer the pin like every other view, and the run proves no occupant was hiding in them | `✔ Test run with 2 tests in 1 suite passed after 7.027 seconds.` · `** TEST SUCCEEDED **` (`NoLiteralColourTests`, the only touched suite — the other edit is this plan) |
+
+**DISMISSED: none.** No new pin owed anywhere (R2-3 is itself pin hygiene, green today as a guard — the
+conversion WIDENED the scanned surface by 1,128 lines and stayed green, which is the point). No walk owed
+(no production change; the two optional captures belong to the letter-close walk). Counts stand at **0
+BLOCKER · 0 MAJOR · 0 MINOR · 3 NIT, all closed** — no round 3 (round 2's own rule: only a NEW
+BLOCKER/MAJOR triggers one). **Handed to the implementer's one look:** `eb8a6a3e` and `d5a048e1`;
+anything it raises returns to me for the final word.
