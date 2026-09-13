@@ -9533,3 +9533,116 @@ Cross-model flow: the implementer's responses (`5bb4d248`, 6 AGREE · 0 DISPUTE,
 - **iOS** (`xcodebuild build -scheme VariorumMobile -destination 'generic/platform=iOS'`): `** BUILD SUCCEEDED **`
 
 **Counts: 6 findings · 6 CONFIRMED · 0 DISMISSED · 9 commits (`64836c79` `7b4b387a` `ba206d39` `15136397` `6a9d7711` `36d4aac0` `ee3c939f` `3adb7d2d` + this record) · 13 new pins (`PaletteReachTests` ×8, `PaletteDerivationTests` +1, and the three inside `PaletteReachTests` that exist for the walk's two findings) · 21 new captures.** Awaiting the implementer's sanity pass over `fbe2720b..3adb7d2d`'s reviewer half; anything it raises returns to me for the final word.
+
+### 18g LADDER — ROUND 1 · THE IMPLEMENTER'S SANITY PASS
+
+Over `git diff 5bb4d248 3adb7d2d -- App Sources`, every one of the nine commits' diffs read whole, plus the
+sites each touches. I ran, on the reviewer's tree: `build-for-testing` (EXIT 0, zero errors), the eight
+touched suite TYPES — `ThemeTokenTests` · `PaletteDerivationTests` · `PaletteReachTests` ·
+`MarkdownFaceTests` · `FormattingSurfacesTests` · `SurfaceSizeMemoryTests` · `ParagraphGapTests` ·
+`SpellcheckLevelTests` (each `grep -rl "struct <Name>"`-verified; `TypingErgonomicsTests` is a FILE, its
+types are the last two) — **`✔ Test run with 73 tests in 8 suites passed`** — and the iOS build myself,
+**`** BUILD SUCCEEDED **`**. I fixed nothing. **6 CLEAR · 1 RAISED.**
+
+**(1) The `.default` parity — CLEAR.** `ThemeTests.swift` is diff-empty across the whole range (the
+zero-test-edit proof: the only test files touched are the new `PaletteReachTests` and `PaletteDerivationTests`
++21, so every pre-existing suite rides unmodified). And `.default` is byte-identical through the NEW road *by
+construction*, not by coincidence: `resolve(settings:dark:)` (`VoiceTokens.swift:194–199`) is a pure forward
+to the four-parameter resolver, whose `PalettePreset.resolved` returns nil for `.default` and hands back
+`base` — the same static instance. `PaletteReachTests.defaultSettingsStillGiveBothHostsTheShippedSet`
+asserts it at both hosts × both voices × both schemes, and `ThemeTokenTests`' own parity pin passed
+unmodified.
+
+**(2) The construction sites, the `Equatable` gates, `Sendable` — CLEAR.** `EditorSurfaceChrome`'s new
+`palette:`/`tint:` are defaulted and placed BEFORE `paragraphGap:`, so every labelled call still matches
+declaration order: `EditorView.swift:475`'s sentinel, `TypingErgonomicsTests:185/187`,
+`MarkdownFaceTests:271`, `SurfaceSizeMemoryTests:597/666` compile untouched (the build proves it) and compare
+exactly as before, because both sides carry `.default`/`.none`. `EditorAppearance`'s two are stored-property
+defaults, so `EditorAppearance()` — the models' placeholders (`EditorViewModel:210`, `ReadPostViewModel:74`,
+`BlockDecor:79`) and five test sites — is byte-identical. Synthesized `Equatable` now includes both (both
+`Equatable`), and `nonisolated … Sendable` holds because `ThemePalette` and `PaletteTint` are both `Sendable`.
+The gates MOVE where they must: `PaletteReachTests.aPaletteChangeMovesTheChromeGateAndTheAppearanceGate`
+pins exactly the thing my response said the fix must not miss.
+
+**(3) The colour-only road — CLEAR for the two hosts the fix owns; ONE RAISE below for a third consumer.**
+I traced the ranges rather than taking the claim: the ONLY palette-dependent storage attribute is the
+markdown LINK's `.foregroundColor` — `MarkdownStyling.Palette` is `marker: tokens.muted` (the voice's),
+`link: tokens.accent` (the palette's), `codeTint: tokens.codeTint` (the voice's, `MarkdownStyling.swift:47`)
+— so the code chip cannot go stale, and the callout tint is a `BlockDecor` overlay off `CalloutPalette`, not
+storage, so it is untouched by either road. Every styled range carries `faceAttribute`
+(`MarkdownFaceCore.swift:238`, including the `.link` case at `:215–217`), and `restyleFacedLines`
+(`MarkdownStyling.swift:120–133`) collects the line of every non-nil faced range and `restyle`s each — which
+is the same door the editor already runs per keystroke (`EditorViewModel:784/:1117`). Three sub-checks I made
+because they could each have been a hole: the line list is collected BEFORE any mutation and `restyle` is
+attributes-only (`EditorDocument:62–64`), so the collected ranges stay valid; `enumerateAttribute` ascends, so
+the `lines.last != line` dedupe cannot miss a line; and `restyle` wraps each line in its own
+`beginEditing/endEditing` (`MarkdownFaceCore.swift:135–136`), which is what makes "one edit per line" true.
+**And the full road's skipped writes are exactly the inputs that did not move:** `EditorDocument.baseAttributes`
+is `[.font, .paragraphStyle]` with NO colour (`:55–57`), `EditorTypography.Resolved` is a pure function of
+(voice, inlineComments) (`:89–106`), and `baseParagraphStyle` adds only the `ParagraphGap` dial — precisely
+the three things `needsStorageRefresh` tests. `textColor` is skipped only when the ink did not move, and a
+palette never moves `ink` (the record's own table), while `dark` does and `inkChanged` names it.
+
+**(4) The typography adoption latch — CLEAR.** `EditorTypography.current = chrome.typography` still runs
+BEFORE the branch and still only under `if !EditorTypography.isAdopted` (`:373–375`) — the cheap road did not
+widen it. And the cheap road cannot skip a refresh a VOICE change needs: `Resolved` depends on exactly
+(voice, inlineComments), both of which force the full road. I checked the one ordering hazard that could have
+bitten — a surface whose first chrome applied under the pre-adoption placeholder, then a store landing on the
+SAME voice: `resolve(.terminal, false)` is the compile-time default, so `baseFont` did not move and there is
+nothing stale to re-apply; any landed value that DID move the font moves `voice` or `inlineComments` with it.
+
+**(5) R1-2's focus rewrite against my three walk fixes — CLEAR, with two observations.** All three survive
+intact and I re-read them in place: the Custom swatch's `.contentShape(RoundedRectangle(cornerRadius: 5))`
+(`:131`), the labels above their fields (`Text(label)` in `hexField`'s VStack, `:179`), and the
+fields-then-note-then-help order (`:68–75`) — the diff touches none of them. The new rule is sound where I
+pushed on it: `isDirty` is right at every boundary I could think of (empty over nothing → clean; `#e07a5f`
+over a landed `E07A5F` → clean; emptied over a landed colour → dirty, which is how clearing survives — walk
+step 9; `nope` over nothing → dirty, so it gets its refusal), and the refusal now outlives the re-seed because
+`landedKey` no longer moves on focus (so a refused field keeps its text AND its words, which is what capture 8
+shows). Two observations, neither a raise, both deliberate consequences of the ruled shape: **(a)** clicking a
+PRESET swatch while a dirty hex field is focused now commits that field on the way out — so she can get a
+refusal about an abandoned field while selecting Gold & black. That IS "a field she leaves is a field she is
+done with", and the alternative is the silent discard R1-2 exists to end; worth a sentence in the record, not
+a change. **(b)** if a macOS `TextField` ever moved focus on Return, `onSubmit` and `fieldLostFocus` would
+both fire (the landed value has not arrived yet, so the field still reads dirty) — a duplicate
+`setThemeTints` of identical values, idempotent and invisible. Theoretical on macOS, noted only so it is not
+rediscovered.
+
+**(6) The phone — CLEAR.** No `VariorumMobile` file is in the diff at all, `MobileEditorStyle.swift:102` still
+calls the two-parameter forwarder with its LOCAL voice, and the two `Shared/` files that moved compile into
+the phone target: I ran `xcodebuild build -scheme VariorumMobile -destination 'generic/platform=iOS'` myself
+— `** BUILD SUCCEEDED **`. The new `resolve(settings:dark:)` is correctly documented as the Mac's convenience
+that the phone must NOT call (LK2), and `PaletteTint(_ settings:)` is the shared half its road will use — the
+precision from my response landed.
+
+**(7) RAISED — a palette change leaves a mounted PANE's markdown link colour stale, and unlike a voice switch
+nothing repairs it.** Traced, because check (3) asked whether a palette click can leave stale storage
+attributes and the answer is yes in a consumer outside the two hosts the fix names:
+
+- `PaneSurface` (the Takes / Lenses / Compare panes and the pane-based read surfaces) writes the markdown face
+  into its storage at materialization (`:1102`, `:1148`, `:1171`, `:1196`), so a take containing a link holds
+  `.foregroundColor = tokens.accent` — **palette-dependent**.
+- Its only two re-style paths are change-gated on things a palette does not move: `applyStyle`'s A47c ink gate
+  (`:1180`, `guard view.appliedInk != ink else { return }`) where `ink` is `tokens.ink`
+  (`:991`, `ink: tokens.map { NSColor($0.ink) }`) — and the record's own derivation table keeps `ink` the
+  VOICE's; and the base-attributes gate (`:1134–1136`, font / paragraphSpacing), which a palette also never
+  moves.
+- **The asymmetry is 18g's, not inherited:** a VOICE switch moves `ink`, so the gate fires and
+  `MarkdownStyling.style(storage)` repairs every pane. A PALETTE switch moves the link colour and nothing
+  else the gates watch, so the pane keeps the old accent until it re-materializes (a mode switch, a recycle,
+  a text change). Before 18g there was no way to change the link colour without changing the ink.
+- Severity as I read it: narrow (a link inside a take card; her own notes may carry few), visible, and
+  self-healing on the next remount. I am NOT calling it a BLOCKER and I am not deciding its home — it may be
+  R1-1's residue (a third consumer of the same `MarkdownStyling.palette` global) or a separate item beside
+  the pane family already handed to 13u2. **The reviewer's call.**
+- If it is taken: the shape is small and improves the existing path too — give the pane's style gate the
+  face's palette-dependent colour as a second input, and repair through `MarkdownStyling.restyleFacedLines`
+  (which `3adb7d2d` just made available) rather than `style(storage)`, which would also retire the pane's
+  remaining full-document union write on a voice switch — the exact class `3adb7d2d` fixed for the editor.
+
+**One more thing I saw, below raise level, recorded so it is not rediscovered.** `applyVoiceChrome` now
+early-returns on `guard let storage = textStorage else { return }` (`EditorTypography.swift:397`) BEFORE the
+font / `defaultParagraphStyle` / `typingAttributes` writes, which the old body performed unconditionally. Every
+Mac caller passes a view built with `usingTextLayoutManager: true` (`EditorTextView.swift:856/:924`), whose
+`textStorage` is non-nil, so the branch is unreachable in production and in the pins — but it is a real
+narrowing of the old contract, and a future storage-less host would now get no base font at all.
