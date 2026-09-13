@@ -10270,3 +10270,252 @@ Cold round-1 pass over the letter `7d62761f..b1acfdf9` (the five code commits `9
 - Not verified by me and not claimed either way: that a `MenuBarExtra` MENU (`.menu` style, an `NSMenu`) follows `NSApp.appearance` — the file's header asserts it, no capture shows it; SPECULATIVE, left for the fix-pass walk.
 
 **Counts: BLOCKER 0 · MAJOR 1 (R1-1) · MINOR 3 (R1-2 · R1-3 · R1-4) · NIT 4 (R1-5 · R1-6 · R1-7 · R1-8).** The MAJOR is the R2-1 class re-opened by the R2-1/R2-5 fix's own shape — the letter's subject, reproduced live, one-token-kind fix with its pin named; nothing here is a BLOCKER.
+
+### 18j LADDER — ROUND 1 · THE IMPLEMENTER'S RESPONSES
+
+**1 MAJOR · 3 MINOR · 4 NIT · 8 AGREE · 0 DISPUTE.** No code touched this turn (the cross-model flow: the
+reviewer decides and fixes; this is my reading). Everything below I re-traced or re-read on the current
+tree before answering; where I could check a claim against my own captures I did, and **two of those checks
+correct my own record further than the finding does** (R1-5). Her real-store app was not running and was
+never touched (`pgrep -fl 'Variorum.app/Contents/MacOS'` — empty); nothing was launched by me.
+
+---
+
+**[MAJOR] R1-1 — AGREE, wholly, and it is my defect twice over: the KIND disagreement is mine, and the
+write that had been hiding it is the one I removed.**
+
+*I re-traced it at the four sites and the trace holds exactly as written.* `MarkdownStyling.Palette(tokens:)`
+(`:53–58`) builds `prose: NSColor(tokens.ink)` — a STATIC colour resolved for whichever appearance the
+tokens were resolved for. `EditorDocument.baseAttributes` (`:68–71`) carries
+`EditorTypography.ink` — the DYNAMIC per-voice object. The clear loop
+(`MarkdownFaceCore.swift:179–180`) writes `palette.prose` over any run whose stored face value **is** a
+colour, and in the full-document editor that value IS the dynamic ink, so the test passes and the static
+colour lands. The asymmetry that makes it visible is the one the finding names:
+
+- a run that **stays faced** is collected by `restyleFacedLines` (`MarkdownStyling.swift:136–142`, which
+  gathers lines still carrying a face) on **every** chrome change — and an appearance change always moves
+  the chrome, because `EditorSurfaceChrome`'s `Equatable` carries `dark` — so it is re-cleared to the new
+  appearance's static prose and looks right. That is precisely why **my row-36 walk and the R2-1 pin are
+  green: they only ever look at runs that are still faced.**
+- a run whose face is **removed** is cleared once by the keystroke restyle and has its face attribute
+  stripped (`MarkdownFaceCore.swift:181`), after which `restyleFacedLines` will not collect it and
+  `restyle`'s `applied` enumeration (`:160–163`) will not touch it. **Nothing revisits it, ever.**
+
+And the last thing that used to revisit it was `inkChanged`'s `dark` arm — the full-range `textColor`
+write **I removed at R2-5**. So the honest statement of this finding is: *18j closed one half of a
+two-halves contract.* The ink became dynamic at the base; the face's idea of "the prose ink" did not; and
+the write that had been papering over the mismatch for the editor's whole life is gone. The reviewer's
+live evidence (`r1-reviewer-01…05`, the AX per-run dump) shows the de-faced `` `cod `` at `DEE1DB` on the
+light paper beside plain prose at `2F3439` — I accept the measurement and the capture.
+
+**The fix shape is right, and I checked what it costs.** `prose: EditorTypography.ink(for: voice)` with
+`VoiceTokens` gaining `let voice: ThemeVoice` is the correct road, not a workaround:
+
+- **It is four lines.** `VoiceTokens(` has **exactly four construction sites in the app**, all the static
+  sets in `VoiceTokens.swift` (`:256 · :291 · :327 · :363`) — verified by grep. No other file constructs
+  one, so the memberwise init's new parameter costs nothing beyond those four.
+- **`voice` must be `let`.** `applying(_:)` is `var tokens = self` plus eight writes; a `let` is carried
+  through by construction and a palette can never change which voice a token set claims to be. That is
+  the same guarantee 18g's R1-4 bought for the other slots.
+- **The one-builder argument is the deciding one.** `PaneSurface.applyFace` builds the global face from
+  `tokens` alone (`:1003`), `RootView.adoptMarkdownPalette` from `theme.tokens(for: scheme)`, and
+  `applyVoiceChrome` from `chrome.tokens` — three writers of one global. Threading a voice through three
+  call sites would be three chances to thread it differently; putting it on the token set means **every
+  writer of that global supplies the right ink by construction**, which is the same reason the ink went
+  into `baseAttributes` rather than into each surface.
+- **The phone is the precedent, again.** `MobileEditorStyle.swift:147` already passes `dynamic(\.ink)`;
+  after this the two platforms hold one idea rather than one-and-a-half.
+
+**What it must not break — the four I checked, with the one that WILL go red named plainly:**
+
+1. **`MarkdownFaceTests.aFacedRunFollowsTheInkWhenTheAppearanceMoves` (my R2-1 pin) WILL GO RED and must
+   be converted, not weakened.** Traced: its first `style` runs with `applied` empty, so the clear writes
+   nothing and the bold content keeps the seeded static light ink — that assertion survives. Its SECOND
+   `style` clears through the new dynamic prose, so `color(storage, at: boldAt) == dark` compares a
+   dynamic object to a static one and fails. The conversion is to compare **by resolution under an
+   appearance**, and the helper already exists and is already used for exactly this —
+   `EditorInkTests.resolved(_:dark:)` (`performAsCurrentDrawingAppearance`) with its `matches(_:_:)`
+   sibling. The pin's intent ("bold reads in the CURRENT ink, not the one captured when the face was
+   written") is unchanged, and it stays red on the pre-R2-1 code.
+2. **`removingTheSyntaxRESTORESTheProseFaceExactly` is SAFE and is the pin that keeps the explicit road
+   honest** — it sets `prose: .systemBrown` through the four-argument init, which the `tokens:` builder
+   change does not touch, and its `isEqual(to: reference)` still compares against a systemBrown storage.
+3. **The `.default` parity pin is SAFE.** `resolve(voice:palette:.default,…)` returns `base` untouched and
+   `resolve(voice:dark:)` returns the same static set, so the two sides carry the same `voice` and remain
+   byte-identical. Same for `PaletteReachTests`' whole-`VoiceTokens` comparisons and
+   `PaletteDerivationTests` (which compares families, not token sets).
+4. **The phone's builder is SAFE** (it passes its own dynamic ink and does not call `Palette(tokens:)`),
+   and `aFaceOverColourlessProseLeavesItColourless` is untouched (the `NSNull` arm).
+
+**On the optional pane arm — I would take it, with one premise measured first, because I have just been
+caught by an unmeasured premise (R1-3).** Passing `EditorTypography.ink(for: $0.voice)` at
+`PaneSurface.swift:1002` does extend R2-5's carve to the panes for free. The premise to measure rather
+than assume is that **`Color`'s `Equatable` is stable for `Color(nsColor: <the same dynamic object>)`** —
+the whole carve rests on `view.appliedInk != ink` NOT firing across a flip, and if that equality is
+unstable the gate fires and the pane takes the same full-range write it takes today (no worse, but the
+carve is illusory). Its cost is one pin edit:
+`PaneSurfaceTests.aPaletteChangeRecoloursAMountedPanesLink` asserts
+`pane.textColor == NSColor(lavender.ink)` and would need the same resolution comparison. The reviewer's
+"optional, the fix pass decides" is the right framing; I am naming the premise and the cost so the
+decision is made with both in view.
+
+**Two things I add to the finding, neither of which changes its shape:**
+
+- **The keystroke is not the only de-face door.** `⌘B`/`⌘I` toggling a face OFF routes through the same
+  `MarkdownStyling.restyle` (`FormattingSurfaces`), so the island is reachable by the formatting door she
+  actually uses, not only by deleting a marker. Worth one line in the fix's pin or its comment so the next
+  reader does not think this is a delete-a-backtick curiosity.
+- **The BOOK's inline editor shares it; the read tier does not.** `InlineEditorSurface` takes the same
+  `applyVoiceChrome` road and is editable, so it strands the same way. `ReadPostView`'s surface takes that
+  road too but cannot be edited, so no run is ever de-faced there and its storage is replaced wholesale on
+  any projection change — immune in practice. Recorded so the fix pass does not hunt a third surface.
+
+---
+
+**[MINOR] R1-2 — AGREE, and the gap is worse than "narrower than its rule": the pin is green over exactly
+the surface the brief named for this walk.**
+
+I read the site. `DiffView.swift:198–212` returns four literal hues in **bare return position** —
+`return .red` / `return .green` for the markers and `return .red.opacity(0.08)` / `.green.opacity(0.08)`
+for the row washes — and my patterns look only for `Color.<hue>` and `<modifier>(.<hue>)`, so a bare
+`return .red`, an assignment `: .red`, a chain `.red.opacity(`, and SwiftUI's own `Color(hue:` /
+`Color(white:` / `Color(red:` all walk past. That is the class the pin exists to catch. It stings twice:
+the brief's sweep list says **"Compare (+ diff)"** and my walk opened Compare with no peer note, so the
+diff sheet never appeared — the pin was the only thing that could have caught it and its pattern let it
+through. The voice carries both slots the diff wants (`alarm` for removed, `positive` for added), and
+`CompareBoardView.swift:932` already shows the shape for handing a sheet its tokens.
+
+On the two hashed-hue homes: I agree they belong in the NAMED allow-list rather than tokenized —
+`TakesShared.LineageStripe` and `NoteTagChips.TagChipColor` are the 9d stable-identity-colour family, they
+already carry a dark arm, and their whole point is that the hue is DERIVED from an id rather than chosen.
+The allow-list entry with that reason is the honest place for them, exactly as `CalloutPalette` got one.
+
+I also agree with the finding's restraint: `.red`/`.green` are appearance-adaptive system colours and the
+8 % washes are faint on black, so this is a P-8/F-9 defect rather than a proven dark defect — the sheet
+was never opened in dark, so nobody can claim either way until the fix pass opens it.
+
+---
+
+**[MINOR] R1-3 — AGREE, and this one is the hallucination guard catching me.**
+
+`EditorTypography.swift:122–123` says *"the provider is called per appearance and its answer cached by
+AppKit"*. **I did not measure that.** I inferred it from how `NSColor.labelColor` behaves and wrote it as
+fact, in the doc that is the design's own justification for choosing a dynamic colour. The reviewer
+measured 250 provider calls per draw at steady state (~1.25 per line fragment), 500 on the first draw
+after a flip, 63 per 40-line viewport. I have no basis to dispute a measurement I never made, and the
+consequence it names is the one that matters: the sentence **licenses a future expensive provider**, and
+the very next paragraph of that doc contemplates the palette as an input by exclusion — routed through the
+provider, that would be an HSL derivation per line fragment per draw.
+
+The correction the finding asks for is right, with the numbers in it. I would add one clause when it is
+written: **the constraint is now load-bearing, so say it as a rule** — *"the provider runs on every
+resolution, ∝ the visible line fragments; it must stay a table lookup, and anything that wants to compute
+a colour belongs in the token layer where it is computed once."* The suggested `measure` over a 40-line
+draw in `EditorInkTests` is worth its line for the same reason the AA-floor pin is worth its line in
+`PaletteDerivationTests`: it turns a sentence into something a future edit trips over.
+
+---
+
+**[MINOR] R1-4 — AGREE. The table is one voice per surface, and my "WHAT I HAVE NOT DONE" paragraph should
+have said so and did not.**
+
+Re-read: the shell, the Library's three modes, Pool/Snippets/Archived/Trash, ⌘K, the tag door, the four
+Settings tabs and the palettes are Terminal only; Takes, Read's two faces, Lenses, Compare, Blocks,
+Canvas, the book's three modes, the comments panel and Block History are Study only. The brief says
+*"walk EVERY surface in BOTH voices"* and F-9 says *"the sweep table is complete (every surface × both
+voices)"*. It is not, and the record's own first-line paragraph — whose whole job is to say what I did not
+do — lists five other omissions and misses this one. That is the honesty failure, independent of the risk.
+
+What genuinely bounds the risk, said precisely so the fix pass can scope its walk rather than repeat all
+40 rows: every surface takes its colours from `VoiceTokens`, the slot NAMES are identical across the four
+sets by construction (one struct), and `NoLiteralColourTests` now covers both voices at once because it
+is a source walk. So a voice-specific dark defect can only be **a wrong VALUE in one voice's dark set** —
+a taste question about a colour, not a missing or mis-wired slot. That is an argument for the record
+SAYING so per surface, which is the finding's own second option, not for the table staying silent. My
+preference between the two: **walk the other voice for the note modes and the Library** (the finding's
+first option) — those are the surfaces with the most per-slot variety (the ring, the take tints, the
+chosen mark, the wash), and it is a ten-minute pass — and state the reason for the rest.
+
+---
+
+**[NIT] R1-5 — AGREE, and checking it corrected my record TWICE, the second time in the batch's favour.**
+
+I cropped both captures at the toast band. **They carry the ceremony's one-take refusal, in both voices:**
+*"This block has one take — ⌘⇧D divides it in place. Divide choosing takes is for arranging a fan's takes
+across the two new blocks."* (`36-…-T-dark.png` and `33-…-S-dark.png`, the band above the bottom bar).
+
+So my stated deferral reason is wrong in a way that matters: **the door fired.** The menu-bar road worked,
+the act ran, and the app refused for a product reason — the rig had put the caret in a fanless block of
+the tutorial's "start here" while the fanned block was sitting in the journal note two windows away. My
+"a synthetic click placed a selection rather than a caret" describes an earlier attempt and I generalized
+it to the whole row. It misdirects the next walker, and J60 routed the deferred rows on that theory.
+
+**The second correction is mine to volunteer:** those same two captures are a **REFUSAL TOAST walked in
+dark in BOTH voices** — a dark card, light text, the × close, fully readable — and my sweep table lists
+"a status toast / the quiet line" as DEFERRED. That row should be **RIGHT, in both voices, citing
+`36-…-T-dark.png` and `33-…-S-dark.png`**, and it is not a small thing: the status seam is 18i's and a
+refusal she cannot read in the dark would have been a real defect. I had the evidence and misread my own
+capture. The DEFERRED list shortens from five items to four.
+
+The two overstating filenames are right as found: `29-book-read-S-dark.png` is Book ▸ **Book** (the Read
+word-tab took no synthetic click, which the table says at row 26; the file is a leftover the table does
+not cite), and `37-callout-and-tag-T-dark.png` shows the tag field open with no callout applied (the table
+cites it only for the tag door, row 30, which is what it shows). Both names overstate and should be
+corrected or the files removed.
+
+---
+
+**[NIT] R1-6 — AGREE. `theHexValuesLiveOnlyInTheSharedTokenLayer` is hollow and I would rather it were
+real than deleted.**
+
+Re-read: it asserts only that two filenames exist under `Shared/Theme`, while its name and doc promise a
+placement rule. Of the two remedies the finding offers, the second is worth more: **`Shared/` outside
+`Shared/Theme` is a root the first test does not scan at all** — the first test's `scannedRoots` is
+`["Variorum"]` — so a literal landing in `Shared/EditorBrain/`, `Shared/MarkdownFace/` or
+`Shared/Surface/` is invisible to the whole pin today. Making this test *"no `Color(hex:` and no
+component-built colour under `Shared/` outside `Shared/Theme`"* closes a real hole and keeps the name
+honest. I checked: **it is green today** (no `Color(hex:` under `Shared/` outside `Shared/Theme`), so it
+would land as a guard rather than a chore.
+
+---
+
+**[NIT] R1-7 — AGREE.** The diff is `- .font(.caption2) / - .foregroundStyle(.orange)` →
+`+ .font(tokens.small) / + .foregroundStyle(tokens.alarm)`. The font moved with the colour and the record
+says only *"three literal colours … FIXED to `tokens.alarm`"*. The change is right — a voiced line beside
+a voiced colour, and `.caption2` beside `tokens.small` was the same un-voiced class one property over —
+but an unrecorded change is an unrecorded change. One clause in the record's piece-3 paragraph and in the
+sweep's Compare row.
+
+---
+
+**[NIT] R1-8 — AGREE, and the placement note four lines above it is the one I should have read as
+addressed to me.** 23 lines inside `AppearancePane`, directly under 18g's own comment about a pane
+becoming a god file. F-0 is satisfied in substance (a picker bound to the one owner, no rule inside, the
+setting read once at the controller), so this is shape — but an `AppearanceChoiceRow` beside
+`PaletteSettingsRow` costs one file and makes the section's shape say what 18g's note says. If the fix
+pass takes it, the "Light & dark" section's two explainer strings go with it.
+
+---
+
+#### Two things of my own for the fix pass
+
+- **The dev store's leave-state in my record is now incomplete, and the reviewer's own probe is part of
+  it.** My record says the dev store ends on *Terminal · Default · Follow system* — true, and verified —
+  but says nothing about CONTENT. Between us the `2026-09-13` journal note now carries my markdown test
+  line (*"A **bold** word and a [link](…) and `code`"*) **and** the reviewer's probe text with a code chip
+  missing its closing backtick; there is also a stray note I minted with ⌘N and a second one with a
+  markdown line. None of it is hers and none of it can reach her store, but the leave-state sentence
+  should say what is in there so the next walker is not surprised — and, given R1-1, that de-faced chip is
+  now a **useful fixture** rather than litter: it is the island, sitting in the store, ready to be looked
+  at after the fix.
+- **The MenuBarExtra claim in my own file header is SPECULATIVE and the reviewer is right to leave it
+  so.** `AppearanceChoice.swift`'s header says the one write reaches *"a menu bar extra's menu"*. I
+  reasoned it from `NSMenu` inheriting the app appearance; I never opened it. Either the fix-pass walk
+  opens the quick-note menu-bar item in dark and the claim becomes fact, or the sentence should say
+  "every window … (the menu-bar extra's menu is expected to follow and is unverified)". I would rather it
+  were walked — it is one click — than softened.
+
+**Counts: 8 findings · 8 AGREE · 0 DISPUTE.** The MAJOR is mine in both halves and the fix shape named is
+the one I would take; the one pin that goes red under it (`aFacedRunFollowsTheInkWhenTheAppearanceMoves`)
+needs converting to a resolution comparison, not weakening, and the helper for that already exists in
+`EditorInkTests`.
