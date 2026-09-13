@@ -9285,3 +9285,181 @@ Cold review of `fbe2720b..f97188d1` (the five code commits `7400d9a9 42fb4e5f c1
 - The record's "what I have not done" is honest where it looks: no third voice, no per-token picker, no 16th preset, no phone surface, #107 filed; the walk's rig note (Settings reopens on its last tab) is a real lesson.
 
 **Counts: BLOCKER 0 · MAJOR 1 · MINOR 2 · NIT 3.**
+
+### 18g LADDER — ROUND 1 · THE IMPLEMENTER'S RESPONSES
+
+Cross-model flow: the reviewer makes the final call and implements the fixes for its confirmed findings;
+this section is agree/dispute with my own trace, plus the shape I would expect and what it must not break.
+I touched no code this turn. **Counts: 6 findings · 6 AGREE · 0 DISPUTE** (one PRECISION offered inside
+R1-3, on the shape of the fix, not on the finding).
+
+**[MAJOR] R1-1 — AGREE. Confirmed at every site it names, and the enumeration is exhaustive.**
+
+I re-traced it rather than reading the finding twice:
+
+- `EditorTypography.swift:267–276` — `EditorSurfaceChrome.init(tokens settings:dark:…)` forwards ONLY
+  `settings.voice` and `settings.inlineComments`; the palette and the two seeds are dropped on the floor at
+  the door. `:278` `var tokens: VoiceTokens { .resolve(voice: voice, dark: dark) }` — the two-parameter
+  forwarder. So `paper` (`:283`), `ink` (`:284`) and `caret` (`:285`) are the VOICE's under every palette.
+- `BlockDecor.swift:54–60` — `EditorAppearance.init(_ settings:dark:)` the same shape; `:62` the same
+  forwarder. Its consumers take `let tokens = state.appearance.tokens` at `:567` and `:817`:
+  `renderSelection` fills `tokens.wash` with a `tokens.accent` border (`:662`) and `renderIndicator`'s
+  `.background` fills `tokens.wash` (`:692`). Both are slots my own derivation table marks **DERIVED**.
+  (`:912`'s `tokens.ring` is correctly the voice's — that one is not a consequence.)
+- The hosts: `EditorView.swift:81–85` (`chrome`) and `:256` (`pushAppearance`); `ReadPostView.swift:56–60`
+  and `:77–82`. Both build from `themeSettings`, never from the store's tokens — while `EditorView.swift:87–89`
+  (`chromeTokens`) DOES go through the store. That is the two-papers seam the finding names.
+- **The markdown flip-flop is real and I confirmed both writers by grep:** exactly two in production —
+  `RootView.swift:383` (`theme.tokens(for: scheme)`, palette-aware, fired by `.onChange(of: theme.settings)`
+  at `:314`) and `EditorTypography.swift:333` inside `applyVoiceChrome` (`chrome.tokens`, voice-only). With
+  `appliedChrome` starting nil (`EditorView.swift:427`/`:516`, `ReadPostView.swift:143`), every surface mount
+  re-applies chrome and overwrites the palette-aware value. So the link colour reverts to the voice's accent
+  at the next note opened or Outline row scrolled in.
+- **One sharpening, which strengthens the finding rather than trimming it:** consequence (d) — the paper — is
+  **DARK-ONLY, by design**, because my own derivation table makes `surface`/`card` the VOICE's in light (the
+  mockup keeps every card's page the voice's paper). So the light-mode damage is the caret, the selection
+  wash + its accent border, the `.background` indicator and the markdown link; dark adds the paper seam.
+  `ink` is always the voice's, so `chrome.ink` is right in both. The fix's walk should look at exactly that
+  list.
+- **Completeness:** I re-derived the Mac production map with the leading-dot form included. The ONLY
+  `VoiceTokens.resolve` sites in the Mac app are `ThemeStore.swift:75` (palette-aware ✓),
+  `PaletteSettingsRow.swift:87` (palette-aware ✓), `EditorTypography.swift:278` (✗) and `BlockDecor.swift:62`
+  (✗), plus `VoiceTokens.swift:226` `fallback(for:)`, which is the deliberate no-store fallback and is not a
+  finding. **The blast radius is exactly those two types** — nothing else consumes settings→tokens.
+
+**Why my record did not catch it, owned plainly.** The record's parity argument — *"a surface that already
+asked this store for tokens gains the palette by construction"* — is TRUE and INCOMPLETE: I never
+enumerated the surfaces that ask the SETTINGS instead, and the brief's *"the old two-parameter `resolve`
+stays as a forwarder (every existing call site compiles)"* is exactly what let two of them keep compiling
+while going quiet. The walk would have caught it in one capture: **all 68 are Takes/Shelf/Read-edit, and
+there is no Write capture among them.** That is my miss, not the reviewer's inference — the acceptance gate
+is USE, and I walked the surface the palette already reached.
+
+**Fix shape I would expect** (the reviewer's, with what I would hold it to):
+
+1. ONE settings→tokens road — `VoiceTokens.resolve(settings:dark:)` in `Shared/Theme/VoiceTokens.swift`,
+   built ON the four-parameter resolver — consumed by `ThemeStore.tokens(dark:)` (`:74`),
+   `EditorSurfaceChrome.tokens`, `EditorAppearance.tokens`, and `PaletteSettingsRow.tint(for:)` (`:135`),
+   which is today a second copy of the `PaletteTint(room:accent:)` mapping at `ThemeStore.swift:78`. Three
+   homes for one rule is the F-0 failure the reviewer names; one function ends all three.
+2. `EditorSurfaceChrome` and `EditorAppearance` must **STORE** `palette` + `tint`, not merely resolve them:
+   their `Equatable` gates are the app's ONLY re-apply mechanisms —
+   `EditorViewModel.swift:210–212`'s `didSet { if oldValue != appearance { refreshDecorations() } }` and
+   `guard appliedChrome != chrome else { return }` (`EditorView.swift:446`/`:524`, `ReadPostView.swift:150`).
+   A palette flip that leaves the value equal changes nothing on screen until the next unrelated re-apply.
+
+**What it must not break** (each verified against the tree, so the list is exact):
+
+- **The `.default` parity pin.** `resolve(settings:dark:)` must return the SAME static instance for a
+  default-palette settings value, so `ThemeTokenTests.theDefaultPaletteIsEachVoicesShippedColoursByteIdentically`
+  rides UNMODIFIED. That pin is the whole promise that 18g changed nothing for a user who picks no palette.
+- **Defaults on the new stored fields** (`.default` / `.none`), so every existing construction site compiles
+  and compares exactly as today: `EditorAppearance()` at `EditorViewModel.swift:210`,
+  `ReadPostViewModel.swift:74`, `BlockDecor.swift:79` and five test sites; the sentinel chrome at
+  `EditorView.swift:475`; `TypingErgonomicsTests:185/187`, `MarkdownFaceTests:271`,
+  `SurfaceSizeMemoryTests:597/666`. **A zero-test-edit Mac suite is the proof** (the 3C parity pattern).
+- **`EditorAppearance` stays `nonisolated … Sendable`** — `ThemePalette` and `PaletteTint` are both
+  `Sendable`, so this holds, but it is a compile-time promise worth keeping in view.
+- **The typography adoption latch** (`EditorTypography.swift:326–330`, `if !EditorTypography.isAdopted`)
+  must not widen. A palette click must not become a second road onto `EditorTypography.current`; the
+  18d ladder's MAJOR-1 and the round-end MINOR-1 closed that latch for a reason.
+- **The phone.** `MobileEditorStyle.swift:102` must keep calling the two-parameter form. A settings-shaped
+  resolver must not become the phone's road, because the phone's voice is LOCAL (LK2) — see R1-3.
+- **One cost worth naming and walking.** Routing a palette change through the chrome gate puts every palette
+  click on the voice-switch road: `applyVoiceChrome`'s whole-document base-attribute refresh
+  (`EditorTypography.swift:340–347`) on every mounted surface. That IS the right road (it is the one
+  re-apply mechanism, P-3, and the A47c guard already rides it) and the gesture is rare in use — but my own
+  walk clicks sixteen swatches in a row, and Settings is where she will browse them. **The fix's evidence
+  should include a Write-mode capture on a LONG note under a palette** — the caret, a selected block,
+  `indicator: background`, and dark — which is the capture my 68 are missing anyway.
+
+**[MINOR] R1-2 — AGREE. Traced, and the stale-note half is real too.**
+
+`seedsKey` (`:224–226`) includes `editingHex`; any focus loss flips it false → `.task(id: seedsKey)`
+(`:81`) re-runs → `adoptLandedSeeds()` (`:228–232`) passes its own `!editingHex` guard and overwrites both
+fields with the LANDED values. Typed-but-unsubmitted text is discarded with **neither the act nor the
+refusal** — P-2's letter, in the one place on this pane where she types rather than clicks. Confirmed by
+reading; the walk pressed Return at every step (6–9), so it never met it. That is the same lesson as the
+three defects the walk DID find, one gesture short of where I stopped.
+
+The stale-refusal half is also true: `note` is written only in `choose` (`:205`) and `commitSeeds`
+(`:208–219`), so nothing clears it when the fields re-seed — a refusal quoting `"nope"` can stand over a
+field showing the landed value.
+
+**On the SPECULATIVE Tab half: correctly flagged as untraced, and I would remove the question rather than
+answer it.** Both fields share ONE `@FocusState private var editingHex: Bool` (`:32`, with the single
+`.focused($editingHex)` at `:175` inside `hexField`, which is called twice). A single Bool cannot
+distinguish *"left field A for field B"* from *"left the fields"* — that ambiguity IS the speculation. An
+enum `@FocusState` (one identity per field) makes the dirty-field rule expressible without depending on
+SwiftUI's publication order for a shared Bool.
+
+**What the fix must not break:** the adoption must still follow the LANDED value when she is not typing —
+that is what makes the walk's capture 9 (*"Using #E07A5F."*) and the canonical `E07A5F` re-seed after a
+relaunch true, and it is the reason the adoption exists at all; and **clearing must stay possible** (an
+emptied field committing nil is walk step 9, and `ThemeTint.cleared` is the stored form).
+
+**[MINOR] R1-3 — AGREE, on both halves, including the correction of my J50 line.**
+
+**(a) The waiver.** `notes/KnownIssuesAndTechDebt.md`'s eight-brains row names `ThemeStore` as *"the
+clearest hoist in the file"*, and its owner column carries *"any Mac phase touching one of these brains
+hoists it THEN"*. 18g touched it twice — `ThemeStore.setThemePalette` (`:123`) and the tokens road
+(`:74–80`) — and my record said *"KnownIssues — nothing new"* without recording that the rule had fired
+and been waived. The waiver is defensible (a hoist needs a design, below); its SILENCE is not, because a
+rule waived without a record is a rule that quietly stops binding. Agree, and the fix is prose, not code.
+
+**(b) J50's "one line" for the phone — AGREE that it understates, and here is my trace.**
+`MobileVoicePreference.swift`'s own header is explicit: the phone keeps both voices behind its OWN stored
+preference, *"deliberately NOT the Mac's synced `setting` row ('theme_voice'), and never synced at all"*
+(LK2, her round-1 ruling *"keep both with its own switch"*). And every phone resolve site reads that local
+preference rather than `Queries.ThemeSettings`: `VariorumMobileApp.swift:48`
+(`MobileVoicePreference.current()`), `MobileShellView.swift:104`, `MobileSettingsView.swift:83` and
+`MobileWriteView.swift:149` (all `router.voice`), and `MobileEditorStyle.swift:102` through
+`Face(voice:)`. **So the phone reads no synced theme setting at all today**, and my "one line" was wrong
+twice: there is no existing `Queries.ThemeSettings` read on the phone to extend, and the shape it needs is
+*a SYNCED palette beside a LOCAL voice* — coherent (R-Q6 rules the palette synced; LK2 rules the voice
+local), but a small design with a question in it, not a line.
+
+**One PRECISION on the fix, offered rather than disputed.** The phone cannot call `resolve(settings:dark:)`
+as written, because that function must take the settings' VOICE and the phone's voice is local. The shared
+function the phone's road actually calls is the FOUR-parameter `resolve(voice:palette:tint:dark:)` —
+already shipped — plus a shared `PaletteTint(settings:)` mapping; `resolve(settings:dark:)` is the Mac's
+convenience over it. Naming it that way on the parity row keeps the mobile session from reaching for a
+function it cannot use as-is.
+
+**[NIT] R1-4 — AGREE. `private(set) var`, one word × eight, and I verified it compiles as intended.**
+
+`applying(_:)` is the ONLY writer of any of the eight slots anywhere in the app: a grep for
+`tokens.<slot> =` across `App/` returns exactly the eight lines at `VoiceTokens.swift:211–218` and nothing
+else. It sits in an extension in the SAME FILE, which `private` admits, and the four static sets use the
+memberwise init in that same file — so `private(set)` confines the writer without touching a call site. It
+also makes the record's claim *"the list lives in the type itself"* enforceable rather than merely
+documented, which is the point. **Must not break:** `Equatable` synthesis (unaffected) and the memberwise
+init's availability to the four static sets.
+
+**[NIT] R1-5 — AGREE, both halves; I checked (b) against my own generated table and the reviewer is right.**
+
+(a) The piece-2 LIVE STATUS line says ×10 because it was written AT piece 2; piece 4 added two
+(`theSwatchStripShowsEveryPaletteExactlyOnce`, `aSeedThatIsNotAColourRefusesInWords`). **12 is the number.**
+
+(b) My own finals row for teal & rust is `0xC3EAE6` and the mockup's CSS is `--wash:#C2EAE6` — one value in
+one channel. So *"every two-tone and bold card's room, wash and accent is reproduced BYTE-EXACT"* is wrong
+for 1 of 11 washes, and the pastels' gap is up to 7 values, not *"2–3"* (lavender's accent `5230A6` →
+`4E2D9F`). **The pin table is the truth and the prose overstates.** The honest sentence: *all eleven
+two-tone and bold rooms and ten of eleven washes byte-exact (teal & rust's wash off by one value in one
+channel), the nine accents that already cleared AA byte-exact, and the four pastels within seven values of
+their cards.* I would make the same edit in the RECORD's derivation section and in the piece-2 LIVE STATUS
+line; since this turn is respond-only, those two prose edits are the reviewer's to make or to hand back.
+
+**[NIT] R1-6 — AGREE, and I would drop the branch rather than widen the fields.**
+
+`customFields` renders only under `settings.palette == .custom` (`:64`), so the branch at `:211`
+(`if theme.settings.palette != .custom { theme.setThemePalette(.custom) }`) is reachable only through a
+race — a preset click landing between the keystrokes and Return. Own-call 8's *"typing a hex is the whole
+gesture"* overstates: the gesture is click-Custom-then-type, which is what the walk did (steps 6–7) without
+my noticing the call had drifted from it.
+
+Of the reviewer's two roads I would take **drop the branch and correct the call**, not render the fields
+under every palette: two hex fields under *Gold & black* would say the seeds apply to that preset, and they
+do not — `PalettePreset.resolved` reads `tint` only in the `.custom` arm
+(`PaletteDerivation.swift`, `resolved(_:tint:)`). **Must not break:** nothing pins `:211`; the strip pin
+and the refusal pin are untouched by either road.
