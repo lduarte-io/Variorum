@@ -5286,9 +5286,14 @@ migration, no new `setting`; nothing in `PaneTextAuthority` · `PaneSurface` · 
 `EditorTextView` · `PaneMeasurement`; no change to the memory's SHAPE (`ArticlePlace`), the reveal's
 anchor rule, the her-hand set, the typewriter room, or `TakesChoreographer`'s two landing arms (what a
 landing NAMES is untouched — only what it outranks); no change to the List row's TRAILING stamp or to
-the masthead's stamp; no Release build and no `/Applications` touch. **Piece 6 (her R-Q21) re-keyed R-Q20's predicate after
-her evening ruling on J14 — the record below carries it.** **And one thing I did NOT get to
-build:** her R-Q17's SECOND arm is built and pinned but **never fires in the shipped window** — the
+the masthead's stamp; no Release build and no `/Applications` touch. **PIECE 6 (her R-Q21) is BUILT AND PINNED BUT DOES NOT PASS ITS
+WALK:** the rule is re-keyed on the current block, the landing stands down on a plain round trip, and
+four mounted pins — one of them driving the walk's exact road — say the page comes back; in the app
+the FIRST return after a scroll still settles with her block at the page's edge. The evidence rules
+the landing family out and points at the entry ring's pane taking first responder (AppKit scrolling
+it into view) — the `PaneSurface` seam this brief fences. **Open, with its discriminator named, at
+piece 6's tail.** **QUESTIONS #105 is RULED (a) by her R-Q22 — keep as built.** **And one thing I did
+NOT get to build:** her R-Q17's SECOND arm is built and pinned but **never fires in the shipped window** — the
 card's title yields before the stamps do, and below ~700 pt the shell's own minimum content width
 clips instead of reflowing. Measured on the walk, filed as **QUESTIONS #105** with the one-modifier
 fix as option (b); not taken here because which of title-vs-dates yields is a taste call her ruling
@@ -5661,6 +5666,12 @@ exactly and only a deliberate click elsewhere win — is a small addition, not o
 second session value (which block was current when the board was last shown) beside
 `takesArticlePlaces`. **Hers to say; nothing here re-opens R-Q20.**
 
+**→ RULED R-Q21 (her evening sitting, 2026-09-12, on the orchestrator's J14): the alternative
+reading. BUILT AT PIECE 6**, with the second session value exactly as named above — and with one
+thing this observation did not foresee, which the piece's own walk found: re-keying the predicate is
+not enough, the landing has to STAND DOWN on a plain round trip or it races the restore through the
+lazy column's settling passes. See piece 6.**
+
 **A walk note for the record:** the dev store now carries a note renamed to *"A deliberately long note
 title for the narrow card walk"* (it was untitled, displaying its `2026-09-22` entry date) — mine, made
 to reach the small-card case, left in place so the ladder sees the store I did. Harmless; dev store
@@ -5672,7 +5683,8 @@ only.
 
 | item | disposition |
 |---|---|
-| **R-Q20** — her J3 ruling, *"the block I came from wins"* | **FIXED.** Pins: `TakesArticleScrollTests.theLandingOutranksARememberedRowButNotTheSameOne` (pure, six arms — **red on old: `.scrollToRow("left")` where `.remember(.top)` is owed; the restore left `.wanted`; `articleRestoreAims → 1` where 0**) · `…aLandingOnAnotherBlockWinsOverTheRememberedPlace` (mounted, 60 blocks — **red on old: `articleRestoreAims → 3` where 0 is owed**) · `…aLandingOnTheBlockSheLeftAtTheTopStillRestoresThePlace` (the mirror GUARD, green on both sides, labelled as such) · `…aBoardLeftScrolledComesBackWhereSheLeftIt` (the no-landing mirror, unmodified). Walked: `01`–`07`. |
+| **R-Q20** — her J3 ruling, *"the block I came from wins"* | **FIXED.** Pins: `TakesArticleScrollTests.theLandingOutranksARememberedRowButNotTheSameOne` (pure, six arms — **red on old: `.scrollToRow("left")` where `.remember(.top)` is owed; the restore left `.wanted`; `articleRestoreAims → 1` where 0**) · `…aLandingOnAnotherBlockWinsOverTheRememberedPlace` (mounted, 60 blocks — **red on old: `articleRestoreAims → 3` where 0 is owed**) · `…aBoardLeftScrolledComesBackWhereSheLeftIt` (the no-landing mirror, unmodified). Walked: `01`–`07`, and the different-block half re-walked at piece 6 (`19`). |
+| **R-Q21** — her evening ruling on J14: *"the same block"* is the CURRENT block, unchanged while away | **BUILT AND PINNED; ITS WALK DOES NOT PASS — OPEN, with the mechanism ruled out and the discriminator named** (piece 6's tail). Pins: `theLandingOutranksAMoveToAnotherBlockButNotAPlainRoundTrip` (pure, re-keyed, seven arms incl. the two nil cases and the stand-down — **red on the as-built rule, five issues**) · `aPlainRoundTripComesBackExactlyWhereSheLeftIt` (mounted — **red on the as-built rule: `articleRestoreAims → 0` where > 0 is owed, and the page came back NINE BLOCKS away**) · `theEntryRingsOwnRoadAlsoComesBackWhereSheLeftIt` (mounted, the walk's exact road) · `aLandingOnAnotherBlockWinsOverTheRememberedPlace` riding green. **ONE pin retired** (`aLandingOnTheBlockSheLeftAtTheTopStillRestoresThePlace` — its premise was the reading R-Q21 replaced). Walked: `17` · `18` · `19`. |
 | **R-Q17** — her #103 ruling, both where there is room | **FIXED** (the first arm walked; the second arm built, pinned and unreachable in the shipped window — QUESTIONS #105). Pins: `LibraryCardStampsTests.theTwoFactsARowShowsAreTheStatedDayAndTheSortsOwnStamp` (the rule) · `…aWideCardShowsTheStatedDayAndTheSortsStamp` · `…aSmallCardShowsOneStampAndAClickFlipsIt` · `…aNoteWithNoStatedDayShowsItsOneStampAndNoFlipDoor`. Walked: `10` · `11` · `14`. |
 | **R3-2** — the List row's raw `entry_date` slot | **FIXED.** Pin: `LibraryCardStampsTests.theListRowSpeaksTheOneBrainAndNeverPrintsOneDayTwice` — **red on old by behavioral revert: `row.date → "2026-01-15"` beside `row.stamp → "dated Jan 15"` under `.entryDate` (one day, twice, two grammars), and the raw stored column under the other three**. Walked: `08` · `09`. |
 | **R3-1** — the synchronous selection clear | **FIXED.** Pin: `LibraryDayFilterTests.theModeChangeClearsThePickInItsOwnUpdate` — **red on old as a COMPILE red (the fix IS the signature; three errors at the pin, one at the view's call site, measured by revert)**; the two shipped `modeChanged` pins drive the new door and each gained an assertion. Walked: `12` · `13`. |
@@ -5748,11 +5760,13 @@ two-window edge (recorded above) and QUESTIONS #105's option (b)/(c) (hers).
 
 ### R-8 · WHAT THE ENTRY'S CLOSE OWES (drafted for the orchestrator)
 
-- **`notes/AppSpec.md` §12, the takes-presentations line** — R-Q20's sentence. Draft: *"…and an entry
-  landing OUTRANKS the remembered place (17q, her R-Q20 on J3: 'the block I came from wins') — when
-  the landing names a block other than the one at the top of the page she left, the page opens at the
-  top and reveals that block minimally; the remembered place is restored only on a return to the same
-  block, or with no landing."*
+- **`notes/AppSpec.md` §12, the takes-presentations line** — R-Q20's sentence, **restated for
+  R-Q21's reading**. Draft: *"…and an entry landing OUTRANKS the remembered place (17q, her R-Q20 on
+  J3: 'the block I came from wins', keyed by her R-Q21 on what 'the same block' means) — when the
+  landing names a block OTHER than the one that was current when the board was last shown, the page
+  opens at the top and reveals that block minimally; when it names the same one — every plain mode
+  round trip — the landing stands down and the remembered place is restored exactly, as it is with no
+  landing at all."*
 - **`notes/AppSpec.md` §12, the Library line** — R-Q17's. Draft: *"…and the Notes cards carry BOTH the
   day she stated and the sort's own stamp where the row has room, collapsing to ONE click-flipping
   stamp where it does not (17q, her R-Q17 on QUESTIONS #103); the List row's beside-the-title day
@@ -5762,9 +5776,13 @@ two-window edge (recorded above) and QUESTIONS #105's option (b)/(c) (hers).
 - **`notes/QUESTIONS.md`** — **#103 updated** (BUILT, with the three PROVISIONAL calls) and **#105
   filed** (PROVISIONAL, (a) built). Next free: **#106**.
 - **`notes/KnownIssuesAndTechDebt.md`** — the row *"The 18h ladder's residue at the cap"* (owner 17q)
-  is **RESOLVED by this entry** and should be struck or marked closed; if the orchestrator wants a
-  successor row, it is R3-10's two-window edge (DEBUG-only, owner 13u2) and the `FlippingStamp` hoist
-  (owner 13u2, beside the Library restyle).
+  is **RESOLVED by this entry** and should be struck or marked closed; the successor rows are R3-10's
+  two-window edge (DEBUG-only, owner 13u2), the `FlippingStamp` hoist (owner 13u2, beside the Library
+  restyle), and — **new, and the one that matters** — **piece 6's open walk row**: the Takes entry
+  ring's pane takes first responder and AppKit scrolls it into view, so the first return after a
+  scroll settles with her block at the page's edge even though the landing family's own rule holds
+  (four pins, one on the walk's exact road); the discriminator is one `PaneSurface` change and a
+  re-walk of frames `17`/`18`.
 - **`notes/MobileSoul.md` §6 (PL-22)** — the phone owes a version of R-Q20's rule if its Takes surface
   ever gains a scroll memory (it does not today); `App/Variorum/Shared/LibrarySortWords.swift` moved
   at R3-4 with **no string change**, so the phone's picker words are byte-identical and nothing new
