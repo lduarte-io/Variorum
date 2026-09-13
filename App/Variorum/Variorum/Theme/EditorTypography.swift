@@ -119,11 +119,21 @@ nonisolated enum EditorTypography {
     /// the drawing view's `effectiveAppearance` at draw time. That is why
     /// `inkChanged(from:)` below is keyed on the VOICE alone.
     ///
-    /// One instance per voice, held: the provider is called per appearance
-    /// and its answer cached by AppKit, which is exactly right for a colour
-    /// whose only other input (the voice) is fixed at construction. A palette
-    /// deliberately does not move `ink` (18g's derivation table — prose is
-    /// the voice's register), so the palette is not an input here.
+    /// One instance per voice, held. **The provider is NOT cached by AppKit
+    /// — it runs on EVERY resolution** (18j ladder round 1, R1-3, measured on
+    /// a standalone TK2 probe: 250 provider calls per draw of 200 lines at
+    /// steady state, ~1.25 per line fragment, 500 on the first draw after an
+    /// appearance flip, 63 per 40-line viewport draw). The cost is ∝ the
+    /// visible line fragments — never the document — and today it is a
+    /// `switch` over four static sets plus one `NSColor(Color)` bridge at
+    /// ~0.6 µs, which a 40-line viewport draw showed as 1.61 ms against
+    /// 1.51 ms with a static colour. **That is the rule this design now
+    /// rests on: the provider must stay a table lookup.** Anything that
+    /// wants to COMPUTE a colour belongs in the token layer, where it is
+    /// computed once — which is one more reason a palette is not an input
+    /// here: it deliberately does not move `ink` (18g's derivation table —
+    /// prose is the voice's register), and routed through this provider its
+    /// derivation would run per line fragment per draw.
     nonisolated(unsafe) private static let terminalInk = dynamicInk(.terminal)
     nonisolated(unsafe) private static let studyInk = dynamicInk(.study)
 
