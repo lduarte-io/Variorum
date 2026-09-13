@@ -103,6 +103,14 @@ final class StatusCenter {
     /// SLOT (`StatusCenterTests`) read `current`/`quietLine` directly. At
     /// most one of the two is ever non-nil — a new message clears the other
     /// slot — so this is a choice, never a merge.
+    ///
+    /// **THE TRAP, named for the next author** (the 18i ladder round 1, N2):
+    /// this is *what is on screen*, NOT *what was said*. Under `.off` a
+    /// receipt is produced, reaches the centre, and is dropped — and `spoken`
+    /// reads nil. So a pin that asserts SILENCE by reading `spoken` means
+    /// "nothing is showing", which under `.off` is true of every receipt in
+    /// the app; if such a pin is ever run under that style it is hollow. Read
+    /// `lastDroppedReceipt` to tell "dropped" from "never produced".
     var spoken: Item? { current ?? quietLine }
 
     /// **What a RECEIPT does** — adopted by `ThemeStore` from the LANDED
@@ -216,6 +224,12 @@ final class StatusCenter {
         dismissTask = nil
         current = nil
         quietLine = nil
+#if DEBUG
+        // N1 (the 18i ladder round 1): the drop record is part of what
+        // `clear()` clears. Without this a pin asserting "nothing was
+        // dropped" after an earlier drop in the same session passes wrongly.
+        lastDroppedReceipt = nil
+#endif
     }
 }
 

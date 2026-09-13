@@ -48,6 +48,15 @@
 //  deliberately no horizontal `fixedSize`, which is the same rule's other
 //  side.
 //
+//  ── AND WHY IT IS SELECTABLE ─────────────────────────────────────────────
+//  `.textSelection(.enabled)` in window chrome is deliberate (the 18i ladder
+//  round 1, N5): `StatusToast` and `WriteTakesPanel`'s own status slot carry
+//  the same modifier, so this line speaks the chrome's existing vocabulary,
+//  and a receipt naming an export path or a block's name is worth being able
+//  to copy. The hit-target it adds is bounded by construction — idle the view
+//  has zero width, and speaking it sits at the bar's trailing end where
+//  `layoutPriority(-1)` guarantees it overlaps no door.
+//
 
 import SwiftUI
 

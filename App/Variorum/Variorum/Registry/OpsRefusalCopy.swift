@@ -537,13 +537,16 @@ nonisolated enum SplitAtNewlinesCopy {
     static func receipt(
         _ results: [Operations.SplitAtNewlinesResult], whenNothingSplit: String
     ) -> String {
-        let acted = results.filter { !$0.isNoOp }
-        guard !acted.isEmpty else { return whenNothingSplit }
-        return split(
-            made: acted.reduce(0) { $0 + $1.blocksMade },
-            from: acted.count,
-            takesKept: acted.reduce(0) { $0 + $1.takesKeptOnTop },
-            takesLeftBehind: acted.reduce(0) { $0 + $1.takesLeftBehind })
+        // N3 (the 18i ladder round 1): ONE spelling of "did anything
+        // split" — this used to compute its own `filter { !$0.isNoOp }`
+        // six lines from the predicate that answers the same question.
+        guard acted(results) else { return whenNothingSplit }
+        let split = results.filter { !$0.isNoOp }
+        return self.split(
+            made: split.reduce(0) { $0 + $1.blocksMade },
+            from: split.count,
+            takesKept: split.reduce(0) { $0 + $1.takesKeptOnTop },
+            takesLeftBehind: split.reduce(0) { $0 + $1.takesLeftBehind })
     }
 
     /// The honest no-op — a REFUSAL that says what is already true, never a
