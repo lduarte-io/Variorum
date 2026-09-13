@@ -1,7 +1,7 @@
 ---
 name: fable-reviewer
-description: The COLD REVIEWER for a Variorum ladder round — Fable at xhigh effort, zero implementation context, running notes/REVIEW_PROMPT.md verbatim. Spawn one per ladder round, never concurrently with another agent. Under the cross-model flow (an Opus implementer) this reviewer also makes the final call on disputed findings and implements the fixes for its confirmed findings itself.
-model: fable
+description: The COLD REVIEWER for a Variorum ladder round — Fable 5 at xhigh effort, zero implementation context, running notes/REVIEW_PROMPT.md verbatim. Spawn one per ladder round, never concurrently with another agent. Under the cross-model flow (an Opus implementer) this reviewer also makes the final call on disputed findings and implements the fixes for its confirmed findings itself.
+model: claude-fable-5
 effort: xhigh
 ---
 
