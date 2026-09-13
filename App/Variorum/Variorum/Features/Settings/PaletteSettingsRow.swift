@@ -55,14 +55,12 @@ struct PaletteSettingsRow: View {
                     Spacer(minLength: 0)
                 }
             }
-            Text(PaletteCopy.help)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-            Text(PaletteCopy.notAVoiceNote)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
+            // The fields and whatever the pane has to SAY sit directly
+            // under the strip that summons them, above the two long help
+            // paragraphs. Found on the walk: with the help text first, a
+            // refused hex put its refusal below the window's fold in a
+            // pane that is 460 pt tall and does not resize — a refusal she
+            // cannot see is the P-2 failure wearing a layout's clothes.
             if settings.palette == .custom { customFields }
             if let note {
                 Text(note)
@@ -71,6 +69,14 @@ struct PaletteSettingsRow: View {
                     .lineLimit(4)
                     .fixedSize(horizontal: false, vertical: true)
             }
+            Text(PaletteCopy.help)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            Text(PaletteCopy.notAVoiceNote)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .task(id: seedsKey) { adoptLandedSeeds() }
     }
@@ -104,6 +110,14 @@ struct PaletteSettingsRow: View {
                 }
             }
             .frame(width: 30, height: 22)
+            // **Found on the walk:** an UNSEEDED Custom swatch fills with
+            // `Color.clear`, and SwiftUI does not hit-test a clear fill —
+            // so the one swatch she has to click FIRST (before there is a
+            // colour to show) was the one that could not be clicked; only
+            // its 1-pt dashed border was live. The content shape makes the
+            // whole rectangle the button, which is what every other swatch
+            // gets for free from its opaque fill.
+            .contentShape(RoundedRectangle(cornerRadius: 5))
             .overlay(
                 RoundedRectangle(cornerRadius: 7)
                     .strokeBorder(chosen ? Color.accentColor : .clear, lineWidth: 2)
@@ -127,9 +141,13 @@ struct PaletteSettingsRow: View {
     // MARK: Her own hex
 
     @ViewBuilder private var customFields: some View {
-        HStack(spacing: 10) {
+        // The labels sit ABOVE their fields, not beside them: the pane is
+        // 560 pt wide and a `TextField`'s inline label wrapped mid-phrase
+        // ("Your / colour") at that width — seen on the walk.
+        HStack(alignment: .bottom, spacing: 14) {
             hexField(PaletteCopy.roomFieldLabel, text: $roomField)
             hexField(PaletteCopy.accentFieldLabel, text: $accentField)
+            Spacer(minLength: 0)
         }
         Text(PaletteCopy.customHelp)
             .font(.caption)
@@ -144,12 +162,20 @@ struct PaletteSettingsRow: View {
     }
 
     private func hexField(_ label: String, text: Binding<String>) -> some View {
-        TextField(label, text: text, prompt: Text(PaletteCopy.hexPrompt))
-            .textFieldStyle(.roundedBorder)
-            .frame(width: 130)
-            .focused($editingHex)
-            .onSubmit { commitSeeds() }
-            .accessibilityLabel(label)
+        VStack(alignment: .leading, spacing: 2) {
+            Text(label)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+                .fixedSize()
+            TextField(label, text: text, prompt: Text(PaletteCopy.hexPrompt))
+                .labelsHidden()
+                .textFieldStyle(.roundedBorder)
+                .frame(width: 120)
+                .focused($editingHex)
+                .onSubmit { commitSeeds() }
+                .accessibilityLabel(label)
+        }
     }
 
     // MARK: Acts

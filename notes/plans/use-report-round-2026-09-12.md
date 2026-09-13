@@ -8958,6 +8958,10 @@ by this letter, and making the boards speak is new copy on a door.
   custom seeds, R51, the finals table).
 - **PIECE 3 — the resolver (`VoiceTokens.resolve(voice:palette:tint:dark:)` + `ThemeStore`): DONE (`c1251c75`).**
   Pin: `ThemeTokenTests.theDefaultPaletteIsEachVoicesShippedColoursByteIdentically`. iOS build green.
-- **PIECE 4 — the face (the Appearance pane's palette row + the custom hex fields): IN-PROGRESS.**
-- **PIECE 5 — the walk (both voices × the palettes × light/dark on the dev-store Debug build): NOT-STARTED.**
+- **PIECE 4 — the face (the Appearance pane's palette row + the custom hex fields): DONE (`dc1fd1e9`).**
+  Pins: the strip covers every palette exactly once; the seed refusal speaks app words.
+- **PIECE 5 — the walk (both voices × 16 palettes × light/dark on the dev-store Debug build): DONE (hash below).**
+  **68 captures + 4 contact sheets** under `notes/plans/use-report-2026-09-12-screens/18g/`; THREE face
+  defects found in my own new code and fixed in the walk's commit (the unclickable Custom swatch, the
+  wrapping field labels, the below-the-fold refusal). The table is below.
 - **THE CLOSING RUNS: NOT-STARTED.**
