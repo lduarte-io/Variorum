@@ -134,6 +134,45 @@ struct TakeToBlockDoorTests {
         }
     }
 
+    /// **THE BOARD'S STRUCTURAL RECEIPTS ARE NOT ALARMS** (the 18i ladder
+    /// round 1, MINOR-4 — J34). Five of this controller's messages reported
+    /// acts that LANDED and went through `speak`, the fire-and-speak door for
+    /// a door that CANNOT act — so `WriteTakesPanel`'s own slot painted them
+    /// `tokens.alarm` (`status.isRefusal ? alarm : muted`), and *"Take moved
+    /// earlier — ⌥⌘Z undoes it."* had been reading as an error since the
+    /// post-13l polish round. 18i re-classed them, and this is the pin that
+    /// fix owed: `theBoardTellsAReceiptFromARefusal` drives `setStatus`/`speak`
+    /// directly, so it pins the MECHANISM and says nothing about which of the
+    /// two these SITES call.
+    ///
+    /// **Red on old** by the one-word revert the fix itself made — `setStatus`
+    /// back to `speak` at `TakesStructureController`'s two move doors.
+    @Test func theBoardsStructuralReceiptsAreNotAlarms() async throws {
+        try await withTakesWorld(seedBlocks: ["Shown take.", "Next block."]) { world in
+            let fan = try fanned(world)
+            world.focus(blockID: fan.slot.blockID, variantID: fan.second)
+
+            // (1) the take moves within its fan — the act landed.
+            await world.model.moveTake(fan.second, in: fan.slot.blockID, by: -1)
+            #expect(world.model.status?.isRefusal == false,
+                    "a take that MOVED is a receipt, not an alarm: \(world.model.status?.text ?? "nil")")
+            #expect(world.model.status?.text.contains("Take moved") == true)
+
+            // (2) the take becomes the block below — the second door, same class.
+            try world.reload()
+            let after = try #require(world.model.projection.slots.first)
+            world.focus(blockID: after.blockID, variantID: try #require(after.variantID))
+            await world.model.moveTakeIntoBlockBelow()
+            #expect(world.model.status?.isRefusal == false,
+                    "a take that BECAME a block is a receipt: \(world.model.status?.text ?? "nil")")
+
+            // …and the door that genuinely cannot act still refuses, so the
+            // pin cannot pass by the class simply never being a refusal.
+            await world.model.moveTake(fan.second, in: "no-such-block", by: 1)
+            #expect(world.model.status?.isRefusal == true)
+        }
+    }
+
     @Test func theCardDoorActsOnItsOwnTakeNotTheFocusedOne() async throws {
         // A right-click never moves the keyboard (13k K6's lesson): the card
         // names both its block AND its take.
