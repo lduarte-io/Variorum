@@ -7445,3 +7445,343 @@ twin's guard, one line, speaking `FindReplaceGate`-shaped refusal copy. Pinnable
   instead of being quietly fixed.
 
 **Counts: 1 BLOCKER · 1 MAJOR · 6 MINOR · 5 NIT.**
+
+### 18i LADDER — ROUND 1 · THE IMPLEMENTER'S RESPONSES
+
+*(Same-model flow: agree/dispute with rationale, no code touched this turn. Every mechanism below was
+traced in my own context against the tree at `a70fd24c` before I agreed to anything — the hallucination
+guard's letter. Where I agree, the fix and its red-on-old pin are named; where I dispute, the concrete
+reason is a trace, not an opinion.)*
+
+---
+
+**[BLOCKER] `NoteDeletion` — three refusals on the receipt road — AGREE. Fully, and it is the right
+severity.**
+
+Traced, not accepted on the reading: `NoteDeletion.run` (`Features/Library/NoteDeletion.swift:114–158`)
+returns a bare `String`, and three of its four returns report that nothing happened —
+`:115` (`notesAlreadyGone(0)`, the empty gesture), `:133` (`notADeletableNote`, the Act-7 kind fence),
+`:156` (`notesAlreadyGone(postIDs.count)`, the race where every named note was already tombstoned) —
+while `:157` alone is the real receipt. `fire` (`:177`) hands **all four** to `session.status.receipt(…)`,
+which `StatusCenter.slot(for:)` (`:187–198`) routes by `receiptStyle`: `.quiet` → `quietLine`, `.off` →
+dropped. The copy's own doc says the opposite in words I did not write and should have read at
+classification time — `Shared/RecoveryCopy.swift:726`: *"Nothing happened, so this is a refusal's voice,
+not a receipt's — it goes where `DeletionRefusal`'s sentences go."* My own RECORD states the same rule
+two paragraphs above the table that then breaks it. That is the finding, and it is mine.
+
+**Where it bites, verified:** none of the four `fire` doors mounts a bottom bar. `QuietReceiptLine` is
+composed at exactly six sites, all of them Write's `CommitBar` (three tiers + the sidebar box's footer),
+`TakesBottomBar` (two arrangements) — grep-verified; the mounts are `EditorView.swift:132`,
+`RootView.swift:605`, `TakesBoardView.swift:174`, `LensesBoardView.swift:146`. The Library
+(`LibraryCatalogView:277`), the Pool (`PoolPostsView:215`) and Archived (`ArchivedView:101`) have **no
+bar at all**, so under HER DEFAULT the refusal is written to `quietLine` and rendered by nobody (R-Q23's
+ruled arm), and under `.off` it is dropped outright. Before 18i all three toasted. Row 42 of my table
+("the deletion report") treated a four-outcome door as if it had one outcome; that is the exact
+classification error, and the reviewer's reading of it is correct.
+
+**Reachability:** `notesAlreadyGone` is live today (double-press, a second window, a stale list, a pull
+that landed the tombstones). `notADeletableNote` is the belt behind `CommitBar.swift:722`'s
+`model.header?.kind == .post` brace, and `NoteDeletionDoorsTests.swift:310–324` records in its own doc
+that this brace has already been silently invalidated once. Converting a belt from "always speaks" to
+"speaks only where a bar happens to be mounted, and only if the setting is not `off`" is not a belt.
+
+**The fix I would make** — the `SplitAtNewlinesCopy.acted` shape, one predicate with one home, **and the
+3C parity pattern so not one shipped pin is edited**:
+
+- a small value `NoteDeletion.Report { let text: String; let isRefusal: Bool }`, produced by a new
+  `report(session:postIDs:)` that holds today's body — the three no-op returns carry `isRefusal: true`,
+  `movedToTrashReceipt` carries `false`;
+- **`run(session:postIDs:)` stays byte-identical in name and return type**, forwarding
+  (`try await report(…).text`), so `NoteDeletionDoorsTests` (6 call sites), `SnippetsRefreshTests:184`
+  and `LibraryViewModel.delete` compile and pass UNMODIFIED — zero test edits is the parity proof;
+- `fire` routes: `outcome.isRefusal ? status.speak(outcome.text) : status.receipt(outcome.text)`.
+
+**Recommended, and the orchestrator's to arbitrate** (it is a shape question, not a product one): put
+that ternary in ONE place rather than at each door — `SpokenOutcome { text; isRefusal }` beside the
+centre plus `StatusCenter.say(_:)` — because the audit below found a SECOND door that needs the same
+two lines, and `runStructural`'s `StructuralOutcome.noteIsRefusal` (`EditorSurfaceController.swift:1746`,
+routed at `:2757`) is already the same rule one layer over. Three spellings of "did this door act?" is
+the drift class F-0 names. The minimum honest fix is the per-door discriminator; the shared value is the
+one I would build.
+
+**Red-on-old pin** (the axis the whole batch was missing — new, in `ConfirmationsSettingTests`):
+`aDeleteThatDeletedNothingStillSpeaks` — seed a post, tombstone it directly through `ops`, set
+`receiptStyle = .off`, call `NoteDeletion.fire(session:postIDs:[dead])`, poll the bounded async way
+(`fire` is a detached `Task`; the repo's poll rule, never a RunLoop pump) until
+`status.current != nil || status.lastDroppedReceipt != nil`, then
+`#expect(status.current?.text == RecoveryCopy.notesAlreadyGone(1))` and
+`#expect(status.current?.kind == .refusal)` and `#expect(status.lastDroppedReceipt == nil)`.
+**Red on this tree**: `current == nil`, the words sitting in `lastDroppedReceipt`. A second arm pins the
+belt: `fire` over a POOL id under `.quiet` → `current?.text == RecoveryCopy.notADeletableNote`, kind
+`.refusal`, `quietLine == nil`.
+
+---
+
+**[MAJOR] The forwarder rule copied into four view models (F-0) — AGREE, and the reviewer's
+`StatusForwarder` shape is right.**
+
+The four copies are real and I counted them again myself: `EditorViewModel.swift:80–95`,
+`BlockTOCView.swift:87–109`, `CanvasViewModel.swift:81–103`, `CompareBoardView.swift:173–195` —
+`outgoingKind` appears at 20 lines across the four files, three of them byte-identical including the
+comment block. My RECORD's call #1 weighed the shadow against converting `statusMessage` into a classed
+value across ~100 assignment sites and picked the shadow; the reviewer is right that the third option —
+**one home for the rule AND zero call-site edits** — was never on my list, and it is strictly better than
+what I built. The degradation is not hypothetical: the fourth copy has already diverged (`EditorViewModel`
+alone routes through `setStatusMessage(_:kind:)` at `:92` and names kinds at three doors), and the reset
+is an INVARIANT — a missed reset makes the next refusal speak as a receipt, which under `.off` is
+silence. That is the BLOCKER's failure mode arriving by drift instead of by classification.
+
+**Where it lives and what it costs.** I would put it in `Registry/StatusCenter.swift` itself rather than a
+new file — twenty lines whose only reason to exist is that seam's rule belong beside the seam, and a
+`StatusForwarder.swift` holding one struct is a file that will be read as a subsystem. `@MainActor`
+(it calls a `@MainActor` method), `struct` not `class` (the reset is value semantics; each model owns
+one). Each model then carries `@ObservationIgnored private var forwarder: StatusForwarder`, initialised
+in its init after `session` is assigned (four inits touched, mechanical), its `didSet` becomes the one
+line `forwarder.deliver(statusMessage)`, and `showReceipt` becomes
+`forwarder.outgoing = .receipt; statusMessage = message`. `EditorViewModel`'s `setStatusMessage(_:kind:)`
+survives as `forwarder.outgoing = kind; statusMessage = message` — the divergence becomes a parameter
+instead of a second copy. Net ≈ −25 lines across four files, **zero call-site edits**, and the ~100 bare
+`statusMessage = …` assignments stay byte-unchanged, which was the whole point of the shadow.
+
+No test pin is owed (architectural, per the guard) and I am not inventing one; the existing kind pins
+(`ConfirmationsSettingTests`, `StatusCenterTests`) cover the behaviour through all four models unchanged,
+which is the right proof for a refactor of this kind.
+
+**On the clean half — I agree and re-derived it.** The shadow cannot strand: `didSet` fires on every set
+with no equality gate; all four doors that raise it (`showReceipt` ×3, `setStatusMessage`/`showTransient`)
+take a non-optional `String` (`EditorViewModel.swift:92`, `:2455–2476`, `:3433–3444`); the only
+`statusMessage = nil` writes (`EditorViewModel.swift:2474`, the boards' clears) run after a delivery has
+already reset it. J25's worry is closed.
+
+---
+
+**[MINOR-1] The idle slot is weightless only horizontally; the box footer reserves a blank line; the
+oracle pins width only — AGREE, and I MEASURED it myself rather than taking the number.**
+
+Throwaway `swiftc`/`NSHostingView` probe in the scratchpad (outside the repo, reproducing the exact
+modifier chain and `boxFooter`'s `VStack(spacing: 4)`): the idle line is **width 0, height 14** at both
+`lines: 1` and `lines: 2`; the footer's fitting height is **37 idle and 37 speaking** — identical, i.e.
+the blank row (14 + 4) is permanently reserved. The view's header claims "zero width, nothing drawn, no
+reflow", which is true of the three flat-bar sites and false of the box; and
+`ConfirmationsSettingTests.swift:195–205` asserts `fittingSize.width == 0` three times and the height
+never, so the reservation is unpinned in both directions. Both halves of the finding hold.
+
+**Which road, and why: (a) — keep the reservation, pin it, correct the doc.** Not (b). The box's footer
+carries the counts AND the `?` helper door; collapsing the slot would move a DOOR 18 pt when a receipt
+lands and 18 pt back six seconds later, under her cursor — which is the precise hazard `QuietReceiptLine`
+is always-mounted to avoid (its own doc says so), and the walk's capture 10 shows her the geometry as
+built. The cost of (a) is one blank row inside a box whose content already scrolls in a column-fixed
+frame; the cost of (b) is a moving door. So: correct the header to say what is true — *zero WIDTH in the
+flat bars; one line's height in the vertical composition, reserved deliberately so the counts and the `?`
+never move* — and make the oracle say it too.
+
+**The height oracle** (extending `theQuietSlotIsWeightlessUntilItSpeaks`, not a new suite): mount a
+SECOND host with `lines: 2` (the composition the current oracle never measures), and assert idle
+`fittingSize.height > 0` **and** `idleHeight == speakingHeight` — the stability claim, in both directions,
+so a future collapse of the slot goes red at the pin rather than in her hands. The `lines: 1` host keeps
+its three width assertions unchanged. No red-on-old is owed (doc/pin finding); the height assertion IS
+the pin for the behaviour chosen.
+
+---
+
+**[MINOR-2] `SplitAtNewlinesCopy.acted` has no pin, and neither does the axis — AGREE, and this is the
+finding I most deserve.**
+
+Verified: `acted` (`Registry/OpsRefusalCopy.swift:556`) has four consumers
+(`EditorSurfaceController.swift:611`, `:630`; `TakesStructureController.swift:299–300`;
+`BlockTOCView.swift:596`) and zero tests. The three existing pins on the copy
+(`SplitAtNewlinesDoorTests.swift:103`, `:120`, `:161`) assert `model.statusMessage`, which is set on BOTH
+roads (`showStatus` and `showReceipt` both write it — `EditorViewModel.swift:3433/:3442`), so reverting
+`acted` to `true` leaves every one of them green. The reviewer's conclusion is exact: this missing axis is
+how the BLOCKER survived a 2577-test green suite, because it is the same axis.
+
+**Two pins, both red-on-old against a reverted `acted`** (in `ConfirmationsSettingTests`, beside its
+siblings): (1) `aSplitThatSplitNothingStillSpeaks` — a note already one paragraph per block, `.off`,
+`splitEveryNewlineIntoBlocks()` → `status.current?.text == SplitAtNewlinesCopy.noteAlreadyWhole`, kind
+`.refusal`, `lastDroppedReceipt == nil`; (2) `aSplitThatSplitLandsQuietly` — a note with a newline,
+`.quiet` → `current == nil`, `quietLine?.text` the split sentence, kind `.receipt`. Red on old: with
+`acted` forced true, (1) fails on all three expectations.
+
+---
+
+**[MINOR-3] Row 34 — `"… is already whole"` classed a RECEIPT — AGREE; the fix is to SPEAK it.**
+
+The table's own stated rule is "a RECEIPT reports an act that LANDED (**the store changed**…)", and
+`SeededBookRestore.restore` returns `.alreadyWhole` precisely when nothing was minted
+(`Shared/SampleLibrary/SeededBookRestore.swift:61–62, :104`). Row 29 paid a whole predicate to apply that
+rule the other way. I still think the reason I gave is *true* — the shelf selection does move
+(`ShellActions.swift:356`), so P-2 is not breached and this is correctly MINOR, not part of the BLOCKER —
+but "the rule says X and this verdict says not-X" is a defect in the rule's authority, and the rule is the
+thing 18i is made of.
+
+**Of the reviewer's two roads I take the first: speak `.alreadyWhole`** (`ShellActions.swift:357–359`,
+one line), leaving `.restored` a receipt. I would NOT widen the rule to "the store changed **or** the
+shell moved", because that widening reclassifies row 36 (`todaysEntry`, which navigates and is correctly a
+refusal) and blurs every navigating door in the app. The asymmetry inside one door is already the shape
+row 31/32 has (undone → receipt, nothing-to-undo → refusal). The table's row 34 gets its verdict and its
+reason corrected in the same commit. No red-on-old pin is owed (a classification correction with no
+behaviour to trap), but the fix is cheap to pin and I would pin it the same way as the BLOCKER's second
+arm if the orchestrator wants symmetry.
+
+---
+
+**[MINOR-4] The five re-classed board sites landed with no pin — AGREE; the pin the guard owed.**
+
+Confirmed: `NoteVersionsPaneTests.theBoardTellsAReceiptFromARefusal` (`:332–357`) drives
+`takes.setStatus` / `takes.speak` directly — it pins the MECHANISM, which never changed, and says nothing
+about which door the five sites call. And `TakeStructureDoorTests.theBoardDoorMovesTheTakeYoureInAndTheRingFollowsIt`
+(`:112–134`) asserts `statusMessage?.contains("archived")` — the WORDS, which are identical on both roads.
+So reverting `TakesStructureController.swift:653` · `:694` · `:726` · `:873` · `:978` to `model.speak(…)`
+leaves the whole repo green while *"Take moved earlier — ⌥⌘Z undoes it."* paints in `tokens.alarm` again
+(`WriteTakesPanel.swift:107`). CLAUDE.md's guard is explicit that a bug-class fix lands with a red-on-old
+pin; this one did not, and "the class's own pin already exists" was the wrong answer — that pin is about
+the model, not about these sites.
+
+**The pin:** in `TakeStructureDoorTests` (it already owns the board harness and drives two of the five),
+`theBoardsStructuralReceiptsAreNotAlarms` — drive `moveTake(_:in:by:)` and `moveTakeIntoBlockBelow()` on a
+fanned block and assert `model.status?.isRefusal == false` for each. **Red on old** by the one-word revert
+the RECORD itself names (`setStatus` → `speak`), which is exactly the pre-18i spelling. I would add the
+same single expectation to the existing `:112` test rather than duplicating its setup, and the new test
+covers the second door.
+
+---
+
+**[MINOR-5] R-Q23's two consequences she was not shown — AGREE, record-only, do not build.**
+
+I re-derived the premise myself before agreeing: nothing in `BlockTOCView`, `CanvasViewModel`/`CanvasView`
+or `CompareBoardView` READS `statusMessage` (grep: writes only), and none of those surfaces mounts a bar
+(the four bar mounts are Write, the book's sidebar box, Takes, Lenses). So under her default the two
+classes the reviewer names are spoken to nobody:
+
+1. **receipts carrying the road back** — `BlockTOCView.swift:388` (*"…the block LEFT this note… Find it in
+   Snippets; ⌥⌘Z brings it back."*), `:634`, and `CanvasViewModel.swift:810` (*"Ordered — N cards lead the
+   note now (⌥⌘Z undoes)."*);
+2. **doors whose only feedback was the receipt** — `CanvasViewModel.swift:644` (save-as-lens) and
+   `:726` / `CompareBoardView.swift:782` (⌘S commit): nothing else on those surfaces changes, so a
+   savepoint on Compare or Canvas now lands in complete silence under her default.
+
+R-Q23 is ruled and I am not re-opening it; #106's examples were *"✓ chosen"* (whose card mark changes
+anyway) and *"Undid: Divide"*, and neither of these two classes was in front of her. **What I would
+record, exactly:** a line in the letter's residue naming both classes with their sites, and a line in the
+author handoff's judgment calls — *"quiet means quiet" leaves five doors on the bar-less surfaces
+(Blocks · Canvas · Compare) with no feedback at all under the default; option (c) of #106 (one
+`QuietReceiptLine` composed into those surfaces' footers) remains hers to call, and is ~10 lines if she
+wants it.* No build, no re-classification, no pin. NIT-4 below belongs on the same line for her.
+
+---
+
+**[MINOR-6] Delete-in-Every-Take has no `edits.isEmpty` guard — DISPUTE. The stated mechanism is
+unreachable, and the pin the finding proposes would be GREEN ON BOTH SIDES.**
+
+The finding says *"when every take skips ('no unique match'), `applied == 0`"*. Traced at
+`EditorSurfaceController.swift:2446–2481`: the per-target loop's FIRST branch is
+`if take.id == target.renderedID`, which appends an edit built from `target.intraRange` **without any
+match test at all** and does `applied += 1` before `continue`. The rendered take never takes the
+`uniqueRange` road — that road exists only for the OTHER takes. And `targets` is non-empty by construction
+(`guard let first = touched.first` at `:2402`, one target per touched entry). So on every road a user can
+drive, `applied ≥ targets.count ≥ 1`, and *"Deleted in 0 takes."* cannot be produced.
+
+That is exactly why the Replace twin's guard exists and this one's does not: in
+`replaceInEveryTake` the rendered take's edit is itself conditional — `guard !matches.isEmpty else
+{ continue }` (`:2611`) — because a match can MOVE under the deferred find window, so `edits` there really
+can end up empty. The two doors are not symmetric, and the asymmetry is the substrate's, not an omission.
+
+**The only residue**, stated honestly so it is not rediscovered: if the rendered take were concurrently
+archived or tombstoned by another window between the surface's index and the fan read (the
+`status == .active` filter at `:2450` would then exclude it) AND no other take had a unique match, `edits`
+would be empty, `editTakesAtomically([])` returns 0 without throwing
+(`Operations+TakeEdits.swift:50`), `landed` is true, and "Deleted in 0 takes." would speak. Reaching that
+in a pin means deliberately desynchronising the editor's own projection from the store — i.e. pinning a
+corrupted surface, not a door. I do not think that is a pin worth having, and I will not write one to
+make a finding true.
+
+**If the orchestrator wants the guard anyway** (the twin's one line, speaking `FindReplaceGate`-shaped
+copy), I will add it and record it as **defensive symmetry, not a fix** — with no pin, because there is no
+red-on-old to have. My recommendation is to record the trace instead: it belongs in the audit below as a
+verdict, which is where I have put it.
+
+---
+
+**NITs**
+
+- **`lastDroppedReceipt` never cleared (`StatusCenter.swift:127`, `clear()` at `:200`) — AGREE.** Traced:
+  `clear()` nils `current`/`quietLine` only, so a pin asserting *"nothing was dropped"* after an earlier
+  drop in the same session passes wrongly — and `ConfirmationsSettingTests.swift:151` is already that
+  shape (honest today only because its harness is fresh). One line in `clear()`. DEBUG-only, no production
+  behaviour, makes a pin honest.
+- **`spoken`'s doc (`StatusCenter.swift:101–106`) — AGREE.** It means "what is on screen", not "what was
+  said": under `.off` it is nil though a message was produced. 26 assertions across ~10 suites read it, so
+  any of them later run under `.off` becomes hollow. One sentence naming the trap.
+- **`receipt` vs `acted`, two spellings six lines apart (`OpsRefusalCopy.swift:537–558`) — AGREE.**
+  `guard acted(results) else { return whenNothingSplit }`, then the filtered array under a different
+  local name for the reduces. One rule, one spelling; it also makes MINOR-2's pin cover both.
+- **`WriteTakesPanel.swift:104–107` renders the board's receipt under `.off` — AGREE, record only.** It is
+  a surface-local caption, the class my RECORD already lists as out of scope (the Library's caption, the
+  chip's popover, the panels' own lines), and making the setting reach into local captions is a scope
+  widening that is hers, not mine. It goes on MINOR-5's line to her, because "Nothing" is her word and
+  this is one place it is not literally true.
+- **`.textSelection(.enabled)` on the quiet line (`QuietReceiptLine.swift:55`) — AGREE it is worth a
+  recorded reason; DISPUTE that it should change.** Precedent: `WriteTakesPanel.swift:108` and the rest of
+  the chrome vocabulary enable selection on status text, and a receipt naming an export path or a block
+  name is worth being able to copy. The hit-target worry is bounded by construction: idle the view has
+  zero width (measured above), and speaking it sits at the bar's trailing end with no door beneath it
+  (`layoutPriority(-1)` means it never overlaps one). I would add the one clause to the view's doc and
+  leave the behaviour.
+
+---
+
+#### THE RE-AUDIT THE BLOCKER ASKS FOR — every receipt door whose argument is a COMPUTED string
+
+*(Every `status.receipt(…)` / `showReceipt(…)` / `showTransientReceipt(…)` / `setStatus(…)` call in the
+app, filtered to those whose argument is computed rather than a fixed sentence. The question asked of each:
+**can it ever report a no-op?** Sites whose argument is a fixed constant — `"Committed."`,
+`"Blocks joined — ⌥⌘Z undoes it."`, `QuickNoteCopy.filedNote`, `BlockSelectionCopy.archivedNote`, the two
+`"type away."` lines — are omitted: a fixed sentence cannot lie about a count it does not carry, and each
+is already inside a `landed` / `do` success path.)*
+
+| Site | Computed from | Can it report a no-op? |
+|---|---|---|
+| `NoteDeletion.swift:177` | `run`'s four outcomes | **YES ×3 — THE BLOCKER.** `:115`, `:133`, `:156` |
+| **`ShellActions.swift:238`** (import) | `importer.lastReport` | **YES — A SECOND INSTANCE, reachable in one gesture.** Import an EMPTY (or whitespace-only) `.md`: `readFiles` reads it, `ops.importPost` throws `emptyImport` (`Operations+Import.swift:63`), the compound's inner `catch` collects it as a SKIP, `imported == 0`, `lastError` is explicitly set nil (`ImportModel.swift:91`), and `report` (`:239–253`) yields *"Skipped: x.md (nothing to import)."* — spoken through `status.receipt`. The Library has no bar, so under HER DEFAULT she picks a file and **nothing is said at all**; under `.off`, the same. Fix: the BLOCKER's shape (`imported > 0` is the discriminator, one predicate on `ImportModel`, routed at the one door). Pin: `importFiles([emptyURL], into: .library)` → the new predicate false + `lastReport` non-nil; and the door's routing under `.off` → `current?.kind == .refusal`. **I propose fixing this with the BLOCKER, in the same commit family.** |
+| `ShellActions.swift:252` (export library) | `"Exported N files."` (`ExportModel.swift:94`) | **YES, narrowly** — a store with nothing to export yields `count == 0` and *"Exported 0 files."* while no file was written. Only reachable on a store emptied of notes AND readings; the same one-predicate fix covers it if the orchestrator wants it. Recorded either way. |
+| `ShellActions.swift:290` (export caret block) | `lastReport ?? "Export finished."` | **NO — checked, and it is clean.** `markdown(forBlock:)` returns nil only when the read threw, and that road sets `lastError` (`ExportModel.swift:110–120`), which the door speaks as a refusal; a non-nil markdown always writes and always sets `lastReport`. |
+| `ShellActions.swift:358` (`.alreadyWhole`) | the book's name | **YES — MINOR-3.** Nothing minted; fix = speak. |
+| `ShellActions.swift:362` (`.restored`) | `minted` | **NO.** `.alreadyWhole` is returned exactly when nothing was minted (`SeededBookRestore.swift:104`), so `.restored` carries ≥ 1. |
+| `ShellActions.swift:117` (seal) | `sealed ? … : …` | **NO.** A selection between two fixed sentences after the op landed; a refusal throws. |
+| `ShellActions.swift:160` · `:184` (undo/redo) | `undone(label)` / `redone(label)` | **NO.** Inside `if let label`; the nothing-cases are already `speak` (rows 31/32 — the split this batch made). |
+| `ShellActions.swift:319` (restore tutorial) | the book name | **NO.** It re-seeds unconditionally past the confirm. |
+| `AppSession.swift:505` | `DivergeCopy.done(book:)` | **NO.** Inside the landed diverge. |
+| `EditorViewModel.swift:2539` (the newlines chip) | `asked` + the re-read `effectivelyMints` | **NO.** The setting write landed; the sentence is re-derived from the EFFECTIVE mode read back, which is why it cannot lie. |
+| `EditorSurfaceController.swift:2503` (Delete in Every Take) | `applied`, `skipped` | **NO — MINOR-6, disputed.** The rendered take always contributes an edit (`:2446–2455`), so `applied ≥ 1` on every reachable road. |
+| `EditorSurfaceController.swift:2670` (Replace in Every Take) | `replacedInEveryTake(…)` | **NO.** Guarded by `guard !edits.isEmpty` at `:2656`, whose refusal road is `refuseFeedback`. |
+| `EditorSurfaceController.swift:2757` (`runStructural`) | `outcome.note` | **NO** — it carries its own discriminator (`noteIsRefusal`, `:1746`), which is the shape the BLOCKER's fix copies. |
+| `EditorSurfaceController.swift:257` · `:372` · `:1619` (transient lineage notes) | `otherTakes` / `count` | **NO.** Each is behind `guard count > 0` / `if landed, otherTakes > 0`. |
+| `EditorSurfaceController.swift:1026` · `:1100` (delete + stranding) | `deletedNote(n)` + `StrandedOriginals.note` | **NO.** Inside `if landed`; `n` is the gesture's own non-empty chain. |
+| `BlockTOCViewModel:351` (move) | ordinal + total | **NO.** The already-there case returns early as a refusal at `:346`, and the receipt is further gated on `statusMessage == nil`. |
+| `BlockTOCViewModel:435` · `:517` · `:564` · `:634` (bulk move/merge/delete/move-out) | `chain.count` | **NO.** Each guards `!chain.isEmpty` and speaks only after the write landed. |
+| **`BlockTOCViewModel:616` (bulk tag)** | `"Tagged N blocks."` | **A THIRD, MILDER CLASS — recorded, not proposed for fixing.** `catch OperationError.alreadyTagged {}` (`:614`) swallows the idempotent case, so tagging 3 already-tagged blocks writes nothing and still says *"Tagged 3 blocks."* Unlike the BLOCKER's three, **the words are TRUE of the end state** (they are tagged) and the rows' own tag face shows it — this is row 34's class, not the refusal class. Recording it so the next reader does not have to re-derive it. |
+| `BlockTOCView:596` (split) | `acted(results)` | **NO** — it is the predicate; MINOR-2 pins it. |
+| `CanvasViewModel:644` (save as lens) | the lens name | **NO.** The lens was created in the same transaction. |
+| `CanvasViewModel:810` (order) | `sequence.count` | **NO.** `guard orderMode, !orderSequence.isEmpty` at `:788`. |
+| `TakesStructureController:144` · `:978` (delete + stranding) | `chain.count` | **NO.** Non-empty picks, landed compound. |
+| `TakesStructureController:300` (split) | `acted(results)` | **NO** — the predicate again. |
+| `TakesStructureController:595` (divide) | `FannedDefaultsCopy.divided(…)` | **NO.** Inside the landed divide. |
+| `TakesStructureController:653` (take moved) | earlier/later | **NO.** `reorderTake` landed; the no-move cases refuse above (`:639`). |
+| `TakesStructureController:726` (takes→blocks) | `convertedNote(blocks:skippedBlanks:)` | **NO.** The zero case cannot be spoken — `Operations+TakeStructure.swift:163` throws `noConvertibleTakes` first (verified at the operation, not assumed). |
+| `TakesStructureController:873` · `BlockTOCViewModel:517` (merge chain) | `mergedChain(blocks:carried:)` | **NO.** A landed `MergeChainRun` over a ≥ 2 pick. |
+| `TakesViewModel.speakCeremonyReceipt` / `EditorSurfaceController:2969` | the released-original note | **NO.** Inside `if landed` (`DivideWCeremony.swift:617–629`). |
+
+**Audit verdict:** the class is real and has **two members that silence a refusal** — `NoteDeletion.fire`
+(the BLOCKER) and `ShellActions.importFiles` (found here) — plus one degenerate case (`exportLibrary` on
+an emptied store) and one end-state-true case (`BlockTOCViewModel:616`) that are not the same thing and are
+recorded rather than fixed. Everything else that computes its words is gated on a landed write, and I
+re-derived each gate at the code rather than trusting my own table.
+
+*(This section was written by a CONTINUATION of the 18i implementer — the original session was unreachable
+after the orchestrator's compaction, so this response was built from the record in this file, the brief's
+named sections and the code itself, per the resiliency protocol's "fresh continuation briefed from the
+record"; no code was touched this turn.)*
+
+**Counts: 11 AGREE · 1 DISPUTE (MINOR-6, with the trace) · 1 AGREE-AS-RECORDED-ONLY (NIT-5 — record the
+reason, keep the behaviour). Plus one NEW BLOCKER-class instance found by the audit (`ShellActions.swift:238`),
+proposed for the same fix.**
