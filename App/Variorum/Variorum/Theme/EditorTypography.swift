@@ -396,12 +396,17 @@ extension NSTextView {
         if chrome.inkChanged(from: previous) { textColor = chrome.ink }
         insertionPointColor = chrome.caret
         chrome.spellcheck.apply(to: self)  // A24 — write-gated inside
-        guard let storage = textStorage else { return }
-        if chrome.needsStorageRefresh(from: previous) {
+        let refresh = chrome.needsStorageRefresh(from: previous)
+        if refresh {
+            // The view-level half of the re-font — set whether or not the
+            // view holds a storage (the old contract, kept: the sanity
+            // pass's below-raise note).
             font = EditorDocument.baseFont
             defaultParagraphStyle = EditorDocument.baseParagraphStyle
             typingAttributes = EditorDocument.baseAttributes
-            guard storage.length > 0 else { return }
+        }
+        guard let storage = textStorage, storage.length > 0 else { return }
+        if refresh {
             storage.beginEditing()
             storage.addAttributes(
                 EditorDocument.baseAttributes,
@@ -413,7 +418,7 @@ extension NSTextView {
             // gesture whose whole point is that everything re-fonts.
             MarkdownStyling.style(storage)
             storage.endEditing()
-        } else if storage.length > 0 {
+        } else {
             // A colour-only change (18g ladder, the R1-1 walk): the markdown
             // face's link and marker colours live IN the storage, so they
             // re-derive from the new palette — LINE BY LINE, each faced line

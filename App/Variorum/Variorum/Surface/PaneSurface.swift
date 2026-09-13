@@ -471,6 +471,17 @@ final class PaneTextView: NSTextView, MarkdownFormattable, DecorLaneSurface {
     /// (a real voice/ink switch).
     var appliedInk: NSColor?
 
+    /// **18g ladder round 1, the sanity pass's raise: the last markdown
+    /// FACE this pane was styled with** — the palette-dependent half of the
+    /// storage (a link's `.foregroundColor` is `tokens.accent`, the
+    /// PALETTE's). The two gates above and below — the ink, the base
+    /// attributes — are what a VOICE switch moves, and before 18g nothing
+    /// could change the link's colour without moving the ink; a PALETTE
+    /// click moves the accent alone, so a mounted pane kept the old link
+    /// colour until it re-materialized. Change-gated exactly like the ink:
+    /// the same face writes nothing.
+    var appliedFace: MarkdownStyling.Palette?
+
     /// 13c 1G (A47b): the PRODUCTION occasions for the divergence check.
     /// The 1F check rides `layout()` — and the 1G census proved production
     /// delivers NO layout passes to an idle, already-laid-out card: clicks,
@@ -989,6 +1000,7 @@ struct PaneSurfaceView: View {
             PaneSurfaceRepresentable(
                 text: text, isLive: isLive, height: $height, canaryMessage: $canaryMessage,
                 ink: tokens.map { NSColor($0.ink) },
+                face: tokens.map { MarkdownStyling.Palette(tokens: $0) },
                 role: role, variantID: variantID,
                 spellcheck: spellcheck, paragraphGap: paragraphGap,
                 onFocusRequest: onFocusRequest, onClickPlace: onClickPlace, onEdit: onEdit,
@@ -1035,6 +1047,12 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
     /// Voice styling: non-nil ⇒ transparent background (the card/article
     /// behind provides the paper) + this ink.
     var ink: NSColor?
+    /// The markdown face's colours from the SAME tokens (18g ladder round 1,
+    /// the sanity pass's raise): the link's colour is the palette's accent,
+    /// which moves without the ink — pushed beside it so a palette click
+    /// re-derives a mounted pane's faces (`applyFace`). nil (no tokens) ⇒
+    /// the global palette as before.
+    var face: MarkdownStyling.Palette?
     var role: String
     var variantID: String?
     /// 13d batch 4 (A23/A24) — carried as values (not read from defaults
@@ -1091,6 +1109,7 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         context.coordinator.onSelectionChange = onSelectionChange
         context.coordinator.caretOnGoingLive = caretOnGoingLive
         view.variorumMenu = menuItems
+        applyFace(to: view)  // before any `style` below reads the palette
         applyStyle(to: view)
         applyIdentity(to: view)
         spellcheck.apply(to: view)  // A24
@@ -1121,6 +1140,7 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         view.variorumMenu = menuItems
         view.isEditable = isLive
         context.coordinator.noteLiveness(isLive)
+        applyFace(to: view)  // before `applyStyle`: its `style` reads the palette
         applyStyle(to: view)
         applyIdentity(to: view)
         spellcheck.apply(to: view)  // A24 — write-gated, so a same-level
@@ -1198,6 +1218,28 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
             view.appliedInk = nil
             view.drawsBackground = true
         }
+    }
+
+    /// **18g ladder round 1, the sanity pass's raise — CHANGE-GATED like
+    /// the ink.** The markdown face's colours live in the storage and the
+    /// link's is the PALETTE's accent, which a palette click moves without
+    /// moving the ink or the base attributes — the two gates that used to
+    /// be the only roads to a re-style. With the host's face pushed beside
+    /// its ink: the first application only adopts it (the materialization's
+    /// own `style` follows and reads it); a CHANGED face re-derives the
+    /// faced lines — one line-scoped edit per faced line
+    /// (`restyleFacedLines`), never a whole-pane union write. The global
+    /// palette is set from the pushed face first, so every `style` this
+    /// file runs reads the same colours the host resolved — the third
+    /// writer of that global, and it writes what the other two write, all
+    /// three resolving from the one settings → tokens road.
+    private func applyFace(to view: PaneTextView) {
+        guard let face, view.appliedFace != face else { return }
+        let first = view.appliedFace == nil
+        view.appliedFace = face
+        MarkdownStyling.palette = face
+        guard !first, let storage = view.textStorage else { return }
+        MarkdownStyling.restyleFacedLines(storage)
     }
 
     private func applyIdentity(to view: PaneTextView) {

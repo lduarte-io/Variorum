@@ -54,6 +54,24 @@ fileprivate struct PaneBareHost: View {
 }
 
 
+/// 18g ladder round 1 (the sanity pass's raise): a pane whose TOKENS a pin
+/// can move after the mount — the palette click, as every host delivers it
+/// (new tokens pushed into the same mounted surface).
+@MainActor @Observable
+fileprivate final class PaneTokensBox {
+    var tokens = VoiceTokens.resolve(voice: .terminal, dark: false)
+}
+
+fileprivate struct PaneTokensHost: View {
+    let box: PaneTokensBox
+    var body: some View {
+        PaneSurfaceView(
+            text: "see [the walk](https://example.com/walk) here", isLive: false,
+            tokens: box.tokens)
+        .frame(width: 400)
+    }
+}
+
 /// 17o batch c (row 6): a pane whose INDICATOR a pin can set, so the three
 /// styles are driven through the same construction every host uses.
 fileprivate struct PaneIndicatorHost: View {
@@ -140,6 +158,50 @@ struct PaneSurfaceTests {
         #expect(PaneDecoration.hostRing(indicator: .outline, tokens: tokens) == tokens.ring)
         #expect(PaneDecoration.hostRing(indicator: .off, tokens: tokens) == nil)
         #expect(PaneDecoration.hostRing(indicator: .background, tokens: tokens) == nil)
+    }
+
+    /// **18g ladder round 1, the sanity pass's raise (RED on `3adb7d2d`):**
+    /// a mounted pane holding a markdown link, its host's tokens moved to a
+    /// palette — the link's colour in the pane's STORAGE must follow the
+    /// palette's accent. Before the fix the pane's only re-style roads were
+    /// the ink gate and the base-attributes gate, neither of which a palette
+    /// moves, so the link kept its old colour until the pane re-materialized.
+    @Test func aPaletteChangeRecoloursAMountedPanesLink() throws {
+        let savedPalette = MarkdownStyling.palette
+        defer { MarkdownStyling.palette = savedPalette }
+        let box = PaneTokensBox()
+        let host = NSHostingController(rootView: PaneTokensHost(box: box))
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 420, height: 600),
+            styleMask: [.borderless], backing: .buffered, defer: false)
+        window.contentViewController = host
+        defer { window.contentViewController = nil }
+        host.view.layoutSubtreeIfNeeded()
+        pump()
+        let pane = try #require(findPane(host.view))
+        let storage = try #require(pane.textStorage)
+        let linkAt = (pane.string as NSString).range(of: "the walk").location
+        #expect(linkAt != NSNotFound)
+        func linkColour() -> NSColor? {
+            (storage.attribute(.foregroundColor, at: linkAt, effectiveRange: nil) as? NSColor)?
+                .usingColorSpace(.sRGB)
+        }
+        func matches(_ colour: NSColor?, _ expected: Color) -> Bool {
+            guard let colour, let want = NSColor(expected).usingColorSpace(.sRGB) else { return false }
+            return abs(colour.redComponent - want.redComponent) < 0.002
+                && abs(colour.greenComponent - want.greenComponent) < 0.002
+                && abs(colour.blueComponent - want.blueComponent) < 0.002
+        }
+        #expect(matches(linkColour(), box.tokens.accent), "mounted: the voice's accent")
+
+        let lavender = VoiceTokens.resolve(
+            voice: .terminal, palette: .lavender, tint: .none, dark: false)
+        box.tokens = lavender
+        host.view.layoutSubtreeIfNeeded()
+        pump()
+        #expect(matches(linkColour(), lavender.accent),
+                "after the palette click: the link wears the palette's accent in the SAME pane")
+        #expect(pane.textColor == NSColor(lavender.ink), "…while the ink is still the voice's")
     }
 
     /// A pane the appearance push has NOT reached keeps the shipped ring —
