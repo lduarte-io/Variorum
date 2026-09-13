@@ -8233,3 +8233,90 @@ none is owed — label it honestly as closing a road, not fixing a bug.
 - **NITs:** N1 `say`'s doc overclaims — FIX by the F-0-shaped road: the four ternaries adopt `say` (or the model-side equivalent where the mapping feeds `showStatus`/`showReceipt` — one mapping, spelled once; if a site cannot reach the centre directly, the doc clause instead). N2 `speak`/`say` near-synonyms — RECORD only (a rename across 105 sites is not this ladder's; the doc names the difference). N3 the `split` shadow — FIX (rename the local). N4 the two `settle` helpers — FIX (one name each).
 
 **Fix order:** J38 (with the enumeration and the row-18 correction) → J39 (pin first, constrained) → J40 → J41 → the NITs; each its own commit with its measured red; the closing set (round 1's 39 types + `TakesLandingTests`-class suites that mount the board + `LensesBoard`-class suites) green in ONE run; the record `### 18i LADDER — ROUND 2 · THE FIXES`; push after each. Round 3 is a FRESH `opus-reviewer` over the round-2 fixes — the cap.
+
+### 18i LADDER — ROUND 2 · THE IMPLEMENTER'S RESPONSES
+
+*(The same-model flow, both halves this turn: responses first, then the fixes in the dispositions' order.
+Every mechanism below was traced or MEASURED in my own context before I agreed — the MAJOR's geometry was
+re-probed from scratch rather than taken from the finding.)*
+
+**[BLOCKER · J38] Eight `TakesViewModel` refusals classed `.receipt` — AGREE, and the reviewer's reading of
+WHY it is this letter's is exactly right.**
+
+Traced at all eight: `:966` `pick` on the main column (the `switch`'s `.main` arm sets the line and the
+function ends — no pick is written), `:1128` `adoptColumn` on the main column (`return` before any op),
+`:1466` the lens fallback's `.gone`/`.foreign` arm (nothing to restore, nothing restored), and the five
+guard-else doors `:1572` `:2346` `:2361` `:2376` `:2398`, each `return`ing before it acts. Every one is
+`RecoveryStatus`'s own definition of a refusal (`RecoveryCopy.swift:849–851`: *"`case refusal` — Nothing
+happened, and this says why"*). Before this letter the board's `status` didSet was
+`session.status.speak(status.text)` — always the toast; 18i changed it to
+`deliver(status.text, kind: status.isRefusal ? .refusal : .receipt)` (`TakesViewModel.swift:143–154`), which
+is the move that turned a PANEL-COLOUR mis-class into a VISIBILITY one. **That is this letter's to own by
+the identical reasoning J29 was confirmed on**, and my round-1 table is where it should have been caught: row
+18 ruled the whole family in one line ("CLASSED ALREADY"), and my sweep checked the 13 `setStatus(` callers
+while 25 direct `status = .receipt(…)` assignments inside the model were never enumerated. I am not disputing
+a word of it.
+
+I checked the blast radius myself: all eight are live doors (`TakesBoardView.swift:269/:381–387`,
+`LensesBoardView.swift:203/:320–326` register the four commands; `pick`/`adoptColumn` are one click each in
+Lenses), neither board renders a local status slot, and under `.off` ⌘S with no take focused is completely
+silent. I also confirmed **zero shipped pins move**: the only test naming any of the eight sentences is
+`RecoveryDoorsTests.swift:609`, which reads `statusMessage` (the text), unchanged by the class.
+
+The `:1208` sibling is real on the same trace: `Operations.branchAllFans` returns `[:]` without throwing when
+a post has no renderable slots (`Operations+Versions.swift:481–487`), so *"New takes written on 0 blocks"* is
+producible with nothing written — J37's one-line predicate exactly.
+
+**[MAJOR · J39] The height oracle cannot fail, and the header's claim is false at the box's real width —
+AGREE. I re-measured from scratch and got the reviewer's numbers to the point.**
+
+My own throwaway probe (scratchpad, outside the repo), the view's exact modifier chain:
+
+| | idle | speaking *"Blocks joined — ⌥⌘Z undoes it."* |
+|---|---|---|
+| the bare view, `lines: 2`, UNCONSTRAINED (what the shipped oracle reads) | 0 × 14 | **204** × 14 |
+| the bare view, `lines: 2`, `.frame(width: 200)` | 200 × 14 | 200 × **28** |
+| the bare view, `lines: 1`, `.frame(width: 200)` | 200 × 14 | 200 × **14** |
+| the footer's shape, `lines: 2`, at 200 | 200 × **37** | 200 × **51** |
+| the footer's shape, `lines: 1`, at 200 | 200 × **37** | 200 × **37** |
+
+Both halves hold. `NSHostingView.fittingSize` is the UNCONSTRAINED ideal size — the host's frame does not
+constrain it — so my round-1 assertion `boxHost.fittingSize.height == idleBoxHeight` is true for every string
+at every `lines` value and cannot bite; and the sentence measures **204 pt wide** in a **200 pt** column, so
+it really does wrap in the app and really does move the counts row and the `?` door. The header I wrote
+("nothing below it moves") is false for any receipt over roughly 28 characters there, which is most of them.
+
+**And I looked for the recorded reason `lines: 2` was load-bearing: there is none.** The only thing written
+anywhere is the view's own rationale sentence, which I wrote in this batch — *"a one-line truncation there
+would say almost nothing"* — and the measurement above is its refutation: at 204 pt in a 200 pt column the
+second line carries about one character. It is an opinion of mine that the numbers falsify, not a dependency.
+So I take the third road as dispositioned — **`lines: 1` in the box** — and I go one step further and REMOVE
+the `lines` parameter entirely: with every composition at one line a per-site knob with one value is a dead
+knob, and one shape everywhere is what F-0 asks for. The whole sentence stays one hover away in `help`, which
+is the flat bars' shape she already walked (capture 02).
+
+**[MINOR · J40] `run`'s doc still says "Returns the receipt" — AGREE.** It is the exact sentence a call-site
+completion shows, and it is false for three of the four endings since J29. Doc only, the reviewer's wording.
+
+**[MINOR · J41] `StatusForwarder.deliver(nil)` leaves `outgoing` raised — AGREE, as a road closed, not a bug
+fixed.** Traced: `guard let text else { return }` skips the reset, and the one door with an optional
+parameter (`EditorViewModel.setStatusMessage(_:kind:)`) is called at three sites, all with non-optional
+strings — so no road reaches it TODAY and no red-on-old exists. But J30's own doc calls the reset an
+invariant, and an invariant held by "no caller does this" is the weaker thing. One line makes it
+unconditional.
+
+**NITs.** **N1 — AGREE on the overclaim; the fix is the DOC CLAUSE, and here is why the F-0 road is not
+available at any of the four sites.** Each of the four ternaries feeds a MODEL's own status property, not the
+centre: `EditorSurfaceController.swift:2757` → `model.showStatus`/`showReceipt` (writes
+`EditorViewModel.statusMessage`, which ~22 shipped pins read), `TakesStructureController.swift:299–300` →
+`model.setStatus`/`setRefusal` (writes the board's `RecoveryStatus`, which `WriteTakesPanel` RENDERS in its
+own slot), `BlockTOCView.swift:596` → `showReceipt`/`speak` (same shape). Routing any of them to
+`status.say` directly would bypass the tested property and, for the board, the panel's own line — the exact
+parity the letter has protected everywhere else. Adding a `say(_:refusing:)` to each of the three models
+would spell the mapping three MORE times, not once. So: the sentence is narrowed to what is true (the
+mapping for a door that speaks to the CENTRE directly), with the model-side ternaries named and their reason
+given. **N2 — AGREE, record only** (a rename across `speak`'s 105 call sites is not this ladder's; the doc
+names the difference). **N3 — AGREE**, the local is renamed (the shadow is mine, from N3 of round 1).
+**N4 — AGREE**, one name each.
+
+**Counts: 8 AGREE · 0 DISPUTE.** Nothing is stopped; every finding is fixed below in the dispositions' order.
