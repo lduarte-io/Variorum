@@ -5275,4 +5275,91 @@ ladder is capped here; nothing is looped on.**
 
 ### R-8 · RECORD (the implementer writes here from its first commit)
 
-*(empty until the implementer's first commit)*
+**WHAT I HAVE NOT DONE (the record's first line).** *(Opened 2026-09-12 at `e02438a9`; this line is
+kept honest at every commit.)* By the brief: nothing in `Sources/VariorumCore/Sync/`, no schema, no
+migration, no new `setting`; nothing in `PaneTextAuthority` · `PaneSurface` · `BlockRangeIndex` ·
+`EditorTextView` · `PaneMeasurement`; no change to the memory's SHAPE (`ArticlePlace`), the reveal's
+anchor rule, the her-hand set, the typewriter room, or `TakesChoreographer`'s two landing arms (what a
+landing NAMES is untouched — only what it outranks); no change to the List row's TRAILING stamp or to
+the masthead's stamp; no Release build and no `/Applications` touch. **PENDING at this commit:** every
+piece below.
+
+**LIVE STATUS — 17q (`opus-implementer`, opened 2026-09-12 at `e02438a9`).**
+
+| # | piece | state |
+|---|---|---|
+| 0 | orientation + the mount-ordering trace | **DONE (this commit)** |
+| 1 | R-Q20 — the landing wins over the remembered place (the condition + its pins) | **NOT-STARTED** |
+| 2 | R-Q17 — the card (both where room, the flip where small) + R3-2 (the List row's lead slot) + QUESTIONS #103 | **NOT-STARTED** |
+| 3 | R3-1 — the synchronous selection clear | **NOT-STARTED** |
+| 4 | the NIT sweep (R3-4…R3-10) | **NOT-STARTED** |
+| 5 | the walk (the acceptance gate) + the closing runs | **NOT-STARTED** |
+
+**Items:** R-Q20 · R-Q17 · R3-2 · R3-1 · R3-4 · R3-5 · R3-6 · R3-7 · R3-8 · R3-9 · R3-10 —
+dispositions PENDING.
+
+- **Orientation — DONE.** Read in my own context, in the brief's order: `CLAUDE.md` and the canon it
+  auto-loads (CoreDescription · OverallModel · AppSpec — §10's two stamps, §12's takes-presentations
+  line and its Library line, both carrying this round's supersessions · SyncSpec · TEXTKIT2_NOTES);
+  this plan's §0, §7 (R-Q1 · R-Q7 · R-Q17 · R-Q20 and the "17q (for the successor's kickoff)"
+  paragraph), §8–§9, §12 (F-0 · F-1 · F-5), R-0 (P-1…P-9 + the application notes); the **R-1 brief +
+  record + its three-round ladder + the 17p LETTER CLOSEOUT** (the landing family whole: J1's bounded
+  step machine, J2's row-identity memory, J3's observation her R-Q20 now rules on; R1-1's TOP place,
+  R1-4's gone-row settle, R2-1's three bare-runner doors, R3-1's PICK and its banner — the third
+  seam); the **R-3 brief + record + the 18h ladder's rounds 1–3 with their dispositions + the 18h
+  LETTER CLOSEOUT**; `notes/QUESTIONS.md` #103 whole (the RULED line, the R3-2 clause, the R1-17
+  clause with its three readings) and #104; `notes/plans/phase-17-standing-fixes.md`'s philosophy,
+  its "Standing rules for every entry" and the 17q register row; `notes/SessionResiliencyProtocol.md`
+  whole; `notes/KnownIssuesAndTechDebt.md`'s 17q row. Then the code: `TakesBoardLayout` (the landing's
+  step machine `:300–536`, the restore `:560–766`), `TakesChoreographer.consumeLandings` `:150–206`,
+  `TakesBoardView`'s three spend sites (`:588–593` the row frames · `:645–668` the geometry hook ·
+  `:679–681` the landing's change) and `singleColumnArticle` `:554–575`, `TakesViewModel`'s forwarders
+  `:605–676` and `adopt` `:418`, `TakesArticleScrollTests`' harness; `LibraryCatalogView.noteCard`
+  `:641–668` · `tagsRow`/`postRow` `:700–716` · `CatalogNoteLine` `:1043–1093`, `LibraryTimeFace.swift`
+  whole, `MastheadStamp.swift` whole, `TimeStampFace` (core `Domain`), `LibraryCatalogModel`
+  (`setEditedOn` `:121–129`, `clearSelection` `:225–232`, `modeChanged` `:234–258`),
+  `LibraryDayFilter` · `LibraryCopy` · `Shared/LibrarySortWords` · `JournalDay` · `Timeline.LibrarySort`
+  · `PostDetailOracle.resetStamp`. **Tree clean at `e02438a9`, `main` == `origin/main`.**
+  **Her real-store app is NOT running** (`pgrep -fl 'Variorum.app/Contents/MacOS'` empty at open) — it
+  is never touched either way; every walk is on `io.lduarte.Variorum.debug`.
+
+---
+
+#### THE MOUNT-ORDERING TRACE (written BEFORE the code, as the brief requires)
+
+**The question:** at a mount, which arrives first — the FIRST honest geometry report (which decides
+the restore) or the projection that arms the landing (`TakesChoreographer.consumeLandings` →
+`landArticle`)?
+
+**The answer is: IT DEPENDS ON THE SURFACE, and both orders are real — so the condition needs both
+halves the brief anticipated.** Traced by reading, three facts:
+
+1. **In the APP the GEOMETRY is first.** `TakesBoardView`'s article `ScrollView` exists from the very
+   first layout pass whether or not the note has slots — `singleColumnArticle`
+   (`TakesBoardView.swift:554–575`) renders `TakesEmptyStateView` INSIDE the `ScrollView` when
+   `model.projection.slots.isEmpty`. So `onScrollGeometryChange` (`:646`) fires with `viewport > 0`
+   on that first pass. The projection, by contrast, arrives from `.task { await model.start() }`
+   (`:176`) → `observeTakes` → `deliver` → `adopt` (`TakesViewModel.swift:418`), which is
+   asynchronous and therefore lands AFTER the first layout. `consumeLandings` (`:456`) — and with it
+   the only two `landArticle` callers in the codebase (the bloom arm and the N9 entry arm,
+   `TakesChoreographer.swift:167–186` / `:189–212`) — runs inside `adopt`. **So on the real board the
+   restore has already entered `.wanted(remembered)` by the time the landing is armed.**
+2. **…and the restore cannot have MOVED anything yet.** Before `adopt` the article has zero rows, so
+   the restore's `.scrollToRow(rowID)` is a proxy scroll at an id the column does not hold — a no-op
+   (the same fact R1-4 rests on). That is what makes the second half of the condition sufficient:
+   settling the restore at `landArticle` time cancels it before it can scroll for real.
+3. **In the PIN HARNESS the LANDING is first.** `TakesArticleScrollTests.landingModel` calls
+   `adopt` BEFORE `mount` (`:180–190`), exactly as `CommandRoutingTests` does, so the landing is
+   already armed when the first geometry report arrives and the restore is still `.undecided`.
+
+**Consequence for the condition's home — both halves, one rule.** A single pure predicate
+(`TakesBoardLayout.landingOutranks(_:remembered:)`) is consulted at the two places the two orders
+reach:
+  **(i)** `consumeArticleGeometry`'s `.undecided` branch — a landing already pending that names a row
+  OTHER than the remembered one settles the restore at once, no scroll issued (the harness's order,
+  and the app's if a projection ever lands before the first geometry);
+  **(ii)** `landArticle(on:)` — a restore already `.wanted(place)` whose `place.rowID` differs from
+  the arriving landing is settled on the spot (the app's order).
+A `.settled` restore is left alone in both (nothing to cancel), and a memory of `.top` already
+settles at once with no scroll, so a landing trivially wins there and no branch is owed.
+
