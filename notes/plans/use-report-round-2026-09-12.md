@@ -6943,7 +6943,7 @@ Both rows are the R3-1 class (a settle that the column's later measurement passe
   its own section (it is neither the Editor's look nor the document's habits), three rows from
   `ReceiptStyle.allCases`, `ReceiptStyleCopy` beside `SavepointCadenceCopy` with the sentence the
   setting must never leave out. No suite mounts the pane — the walk is its evidence.
-- **PIECE 6 — the walk (the acceptance gate): DONE (`HASH6`).** Eleven captures under `notes/plans/use-report-2026-09-12-screens/18i/`; the table is below.
+- **PIECE 6 — the walk (the acceptance gate): DONE (`fa957af5`).** Eleven captures under `notes/plans/use-report-2026-09-12-screens/18i/`; the table is below.
 - **THE CLOSING RUNS:** PENDING.
 
 #### R-5 · THE RECEIPT-SITE CLASSIFICATION (every site that reaches `StatusCenter`, with its verdict)
