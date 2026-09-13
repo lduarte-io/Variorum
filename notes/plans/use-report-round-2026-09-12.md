@@ -6009,3 +6009,145 @@ throughout.
 - No product invention: every decision is R-Q1's, R-Q17's, R-Q20's, R-Q21's or R-Q22's letter, or a recorded PROVISIONAL on #103; nothing re-opened.
 
 **Counts: 0 BLOCKER · 2 MAJOR · 2 MINOR · 4 NIT.** No fix was made; the code is untouched until the orchestrator's follow-up.
+
+### 17q LADDER — ROUND 1 · THE IMPLEMENTER'S RESPONSES
+
+*The 17q implementer (`opus-implementer`) under the cross-model flow: agree/dispute traced against the
+code at `42536eae` in my own context — nothing implemented, no code or test file touched, no suite
+run; this plan is the only file this edits. **8 AGREED · 0 DISPUTED**, six of them with a rider the
+reviewer's fix sketch would otherwise get wrong. The reviewer makes the final call on each and
+implements its confirmed fixes itself.*
+
+**R1-1 (MAJOR — the open row's real mechanism is the restore's ROW precision, not the pane seam) —
+AGREE on the mechanism and the fix, AGREE that my diagnosis was unsupported, and ONE RIDER THAT
+MATTERS: the walk's own numbers are bigger than one straddle, and the reviewer's probe says so too.**
+
+Re-read and confirmed: `articlePlaceNow` keeps the row with the LARGEST `minY` among those `<= 0.5` —
+the row straddling the fold, at `minY == -s` — and `restoreStep` aims `anchor: .top` and settles at
+`abs(minY) <= 2`, i.e. at `minY == 0`. So the restored page sits `s` pt lower in the content and
+every row below the fold, her block included, is `s` pt further down. That is a real defect, it is
+mine, and the fix's shape (sub-row precision as an ANCHOR on the absolute, idempotent, row-settled
+restore, with `.top` kept for a row taller than the viewport and the ONE proxy as the scroll) is the
+right one. **I also accept that my `PaneSurface` diagnosis is not supported:** the probe measured the
+first responder to BE her pane with the pane off screen — AppKit did not scroll it — which is a
+direct measurement of the thing I could only hypothesise, and my record said so in those words ("what
+it points AT", "the discriminator is named"). It was an untested hypothesis and the reviewer tested
+it. **What I hold that the reviewer does not: the two walk captures.** Reading `17` and `18` (the
+262-block note, her block 98 mid-page, ⌘1/⌘2): the page's TOP ROW CHANGED — *"Holmes laughed."* in
+`17`, *"Stolen, then."* in `18` — with four rows now standing above where one row stood, and her
+block's card moved down by ≈295 pt (≈342 px at the capture's displayed scale). The reviewer's probe
+reports the opposite for its own case (`sameTopAsA=true`, a 47-pt shift). **Both can be true — one
+straddle is bounded by the straddling row's height and that fixture's rows are 46 pt — but a
+295-pt shift with the top row four rows earlier is NOT accounted for by a one-row straddle on a page
+whose visible top row was a single line.** So: the fix is right and owed; it may not be the whole of
+the open row. **The rider, concretely: the fix pass must RE-WALK frames `17`/`18` on the real
+262-block note and compare, not close the row on the probe** — the probe's fixture cannot produce the
+magnitude the walk shows, and "the pins pass at the granularity that hides this" is exactly the trap
+the reviewer names, one level up. A second contributor I could not rule out and flag rather than
+assert: the memory is written from EVERY `.settled` geometry report, so a report arriving during the
+board's teardown (the content shrinking as rows leave) would record a place she never saw — that is a
+read, not a measurement, and it is the next thing I would instrument.
+
+**R1-2 (MAJOR — the stand-down clears the fan-panel BLOOM landing too) — AGREE, it is mine, and the
+self-contradiction the reviewer found is mine twice over.**
+
+Confirmed at the sites: `consumeLandings`' bloom arm (`TakesChoreographer.swift:171–181`) runs
+`board.bloom` → `model.focus(…)` → `board.landArticle(on: slot.placementID)`, and my
+`resolveLandingAgainstAPendingRestore` compares that placement against `articleLastCurrentRow` with
+no notion of which arm asked — so a bloom on the block the ring was last in is cleared, and 17o row
+8's door stops going there. And the reviewer is right that her rulings do not reach it: R-Q20 names
+*"the entry landing"* and R-Q21 names *"a plain round trip … nothing clicked"*; a fan-panel door is a
+click. **The contradiction is worse than a stale paragraph:** `landingOutranks`'s last paragraph
+(which I wrote at piece 6's first half) says standing the landing down "would also stand down the
+fan-panel bloom door's *'go there'* … it is not this piece's" — and then the walk made me build
+exactly that in the second half, and I did not go back and re-read my own reason for not doing it.
+That is the finding. **Riders for the fix, two:** (1) **it needs one token in
+`TakesChoreographer`**, at `:180` and `:204` — the brief's *"`TakesChoreographer` still untouched"*
+was the ORCHESTRATOR's scope fence for piece 6, not a canon rule, and this is precisely the change
+that earns lifting it; say so rather than working around it (a `kind:` parameter defaulted to
+`.entry` keeps all twenty-two test call sites compiling unmodified). (2) **the distinction must land
+at BOTH stand-down sites** — the resolver AND the `.undecided` branch's inline copy (R1-3) — or the
+bloom road stays broken on the harness's ordering while it works on the app's.
+
+**R1-3 (MINOR, F-0 — the layout at 1,017 lines; the stand-down written twice) — AGREE, and the
+mechanical fold is NOT mechanical: here is the line the sketch would get wrong.**
+
+Confirmed: the `.undecided` branch spells the rule itself (`!landingOutranks(…)` inside the guard,
+then `articleLanding = nil` after entering `.wanted`) instead of calling the one resolver, so my
+record's *"ONE private method, consulted from the same two sites"* is not literally true — it is one
+PREDICATE at two sites and one METHOD at one of them. **The rider:** the guard does two jobs at once
+— it decides whether to enter `.wanted` AND what to RETURN. Folding it as sketched ("enter `.wanted`
+and call the resolver") changes the return: after the resolver settles a restore that should not run,
+the branch must return `rememberStep(geometry)`, not `restoreStep(…)`, or it issues the very scroll
+her ruling removes. The fold therefore needs a re-check of `articleRestore` after the resolver call,
+and the pure pin's arm (a) — `.remember(.top)` with `articleRestoreAims == 0` — is what catches it if
+it is got wrong. On the split: I agree `TakesArticleScroll` is the right home and that 17q made the
+row worse (610 of 1,017 lines), and I would not do the split inside a ladder fix pass — the 17p
+ladder's own R1-6 took that position and the orchestrator sustained it.
+
+**R1-4 (MINOR — the words oracle grows; the doc claims a teardown that does not exist) — AGREE; the
+sentence is mine and it is false.**
+
+Confirmed by grep: `CatalogStampOracle.reset(_:)` has no production caller, only the four pins;
+`catalogStampFlipDoor` tears down `flip[postID]` and nothing tears down `shown[postID]`. My doc
+claimed R2-9's hygiene was "applied at birth" and it was applied to half of it. **Rider:** clearing
+the slot from `recordCatalogStamp`'s own `onDisappear` is the right shape and is better than a
+card-level `reset(postID)` — the modifier sits on the `Text` inside `if let words`, so a stamp that
+stops being drawn (the `ViewThatFits` arrangement swapping, or the List row's day slot standing down
+under the `date` sort) clears exactly its own slot and leaves the others. No pin breaks: all four pins
+`reset` before mounting, and none asserts a slot's presence across a disappearance.
+
+**R1-5 (NIT — R3-10's half: the new note's flip door is never registered on a `.task(id:)` swap) —
+AGREE, it is the half-step my own fix left.**
+
+Confirmed: `.onAppear` registers `flipStamp[postID]` once, my `onChange(of: postID)` now clears the
+OLD note's entries, and on a swap where the view is reused `onAppear` does not re-fire — so the new
+note has no flip door until a remount. Before 17q the stale old entry survived; now neither exists.
+**Rider on the sketch:** register in the `.task(id: postID)` body that already resets `showsCreated`
+and `stamps`, rather than in `onChange` — `task(id:)` runs on a fresh mount AND on every swap, so one
+site covers both roads with no double-registration, and its first statements are synchronous (before
+`await watch()`), so it is as prompt as `onAppear`. Registering in `onChange` alone would leave a
+fresh mount without a door.
+
+**R1-6 (NIT — the two renderers state different FACTS for a no-stated-day note under `date`) —
+AGREE, and the clause needs to say what the row's options actually are.**
+
+Confirmed: the card's one rule fills the second slot with the edit stamp (my recorded call (iii)) and
+the List row shows nothing — `listDay` is nil because `sortIsTheStatedDay`, and the trailing
+`rowStamp(.entryDate)` is nil because she stated no day. I recorded (iii) as a CARD consequence and
+the reviewer is right that the row's silence is its other half. **Rider the clause must carry:** the
+row cannot simply be given the edit stamp. Its trailing stamp is fenced by the brief (*"no change to
+the List row's TRAILING stamp"*), so the only lever is `listDay` — and under the `date` sort
+`listDay` must stay nil or the row prints one day twice, which is R3-2, the thing this entry fixed.
+Making the row match the card is therefore a change to the FENCED slot, i.e. hers, and the clause
+should say so rather than reading as a one-line tidy.
+
+**R1-7 (NIT — `rowStamp` computed three times per row) — AGREE, and the substitution is already
+pinned, so no new pin is owed.**
+
+Confirmed at `postRow`: `rowStamps(...)` (which calls `rowStamp` twice) for `date:` and a third
+`rowStamp(...)` for `stamp:`. **Rider:** `pair.sorted` is byte-identical to `rowStamp(sort, for:
+hit)` under every sort by the type's own definition (`sortIsTheStatedDay ? stated : other`, and
+`stated == rowStamp(.entryDate)` exactly when that is the sort), and the pure pin already asserts
+both halves (`pair.other == LibrarySortFace.rowStamp(sort, for: hit)` and `dated.sorted ==
+dated.stated`) — so the substitution is covered by existing assertions and
+`LibrarySortMenuTests.aRowsStampIsTheSortsOwnStampInWords`, which drives `rowStamp` directly, rides
+unmodified.
+
+**R1-8 (NIT — the small card's flip is not reset on a sort change) — AGREE, with a correction to the
+reset's KEY.**
+
+Confirmed: `showsTheOther` is `@State` on `CatalogCardStamps` with no `.id`, so a sort change
+re-renders the same identity and the flip survives — showing a different fact without a click.
+**Rider:** the sketch's key (`stamps.sortIsTheStatedDay`) is too narrow. Switching `edited` →
+`created` leaves that flag false while `other`'s SUBJECT changes from edited to created, so the
+flipped card silently swaps facts and the reset never fires. The honest key is the fact's identity —
+`stamps.sorted.subject` — not the flag and not the whole `stamps` value (which changes whenever a
+note's edit stamp merely moves, and a glance gesture should not be cancelled by an autosave). That
+matches the masthead's rule, whose reset is per NOTE and not per keystroke.
+
+**Nothing else raised.** The "considered and cleared" list matches what I traced while building —
+the mount-ordering trace, the two ring doors as the only write sites, the placement-id key, the nil
+cases, the per-mount snapshot's ordering trap, and the Library half's shape; and the reviewer's own
+run of the three touched suites agrees with the record's `196/27`.
+
