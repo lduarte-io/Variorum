@@ -416,12 +416,16 @@ extension NSTextView {
         } else if storage.length > 0 {
             // A colour-only change (18g ladder, the R1-1 walk): the markdown
             // face's link and marker colours live IN the storage, so they
-            // re-derive from the new palette — on the face's own ranges,
-            // which is a write ∝ the markdown spans and a zero-write fast
-            // path on a note without any. The base attributes are untouched,
-            // so the document's layout is not invalidated and the viewport
-            // stays where she left it.
-            MarkdownStyling.style(storage)
+            // re-derive from the new palette — LINE BY LINE, each faced line
+            // its own edit. NOT the whole-document `style(storage)`: that
+            // pass wraps every face in ONE begin/endEditing, and the storage
+            // reports the UNION as the edited range — on a note whose faces
+            // sit near both ends (the 262-block story's `_the_` italics) that
+            // is the document, and TextKit 2 invalidates everything between,
+            // which is the very viewport jump the base refresh caused. A
+            // line-scoped edit invalidates its line; a note with no faces is
+            // a zero-write.
+            MarkdownStyling.restyleFacedLines(storage)
         }
     }
 }

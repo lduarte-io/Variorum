@@ -202,6 +202,51 @@ struct PaletteReachTests {
                 "the re-font road still refreshes the whole storage")
     }
 
+    /// **A note WITH markdown faces near both ends** — the 262-block story's
+    /// shape, `_the_` italics in its first paragraph and a link in its last.
+    /// A palette-only re-apply must re-derive the faces (the link takes the
+    /// palette's accent) as LINE-SCOPED edits — never one edit spanning the
+    /// document, which is what the whole-document `style` reports (the
+    /// union of every face inside one begin/endEditing) and what jumped the
+    /// walk's viewport a second time. RED before `restyleFacedLines`: one
+    /// edit of length ≈ the whole storage.
+    @Test func aPaletteClickOnAFacedNoteEditsOnlyTheFacedLines() throws {
+        let view = EditorTextView.makeEditor().textView
+        var paragraphs = (1...200).map { "Paragraph \($0) of a long note, plain prose." }
+        paragraphs[0] = "To Sherlock Holmes she is always _the_ woman."
+        paragraphs[199] = "See [the walk](https://example.com/walk) for the rest."
+        let text = paragraphs.joined(separator: "\n")
+        view.textStorage?.setAttributedString(NSAttributedString(string: text))
+        let wasAdopted = EditorTypography.isAdopted
+        defer { EditorTypography.isAdopted = wasAdopted }
+
+        let plain = EditorSurfaceChrome(tokens: settings(.default), dark: false)
+        view.applyVoiceChrome(plain)
+        let storage = try #require(view.textStorage)
+        let counter = StorageEditCounter()
+        let previousDelegate = storage.delegate
+        storage.delegate = counter
+        defer { storage.delegate = previousDelegate }
+
+        let lavender = EditorSurfaceChrome(tokens: settings(.lavender), dark: false)
+        view.applyVoiceChrome(lavender, previous: plain)
+        let longestLine = paragraphs.map(\.utf16.count).max()! + 1
+        #expect(!counter.edits.isEmpty, "the faces must re-derive")
+        #expect(counter.edits.allSatisfy { $0.length <= longestLine },
+                "every edit is line-scoped, never the document: \(counter.edits)")
+        // …and the link now wears the palette's accent.
+        let linkAt = (text as NSString).range(of: "the walk").location
+        let linkColour = (storage.attribute(.foregroundColor, at: linkAt, effectiveRange: nil)
+            as? NSColor)?.usingColorSpace(.sRGB)
+        let accent = NSColor(lavender.tokens.accent).usingColorSpace(.sRGB)
+        #expect(linkColour != nil && accent != nil)
+        if let linkColour, let accent {
+            #expect(abs(linkColour.redComponent - accent.redComponent) < 0.002)
+            #expect(abs(linkColour.greenComponent - accent.greenComponent) < 0.002)
+            #expect(abs(linkColour.blueComponent - accent.blueComponent) < 0.002)
+        }
+    }
+
     /// `MarkdownStyling.palette` has two writers — `RootView` from the
     /// store's tokens and `applyVoiceChrome` from the chrome's. They must
     /// agree, or the link colour flips at every surface mount.

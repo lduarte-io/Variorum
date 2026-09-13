@@ -106,6 +106,33 @@ nonisolated enum MarkdownStyling {
             storage, range: range, base: EditorDocument.baseFont, palette: palette.face)
     }
 
+    /// **Re-derives the face on every line that already wears one — one
+    /// line-scoped edit per line** (18g ladder, the R1-1 walk). The colour-
+    /// only road of `applyVoiceChrome` (a palette, a seed, the appearance):
+    /// the link and marker colours live in the storage and must follow the
+    /// palette, but the whole-document `style(_:)` coalesces every face into
+    /// ONE edited range — the union, which on a long note with faces near
+    /// both ends is the document, and TextKit 2 invalidates everything
+    /// between. Here each faced line is its own `restyle`, so the storage
+    /// reports one edit per line, ∝ the faced lines, and a note without a
+    /// face writes nothing. Returns the number of lines re-styled.
+    @discardableResult
+    static func restyleFacedLines(_ storage: NSMutableAttributedString) -> Int {
+        let length = storage.length
+        guard length > 0 else { return 0 }
+        let string = storage.string as NSString
+        var lines: [NSRange] = []
+        storage.enumerateAttribute(
+            faceAttribute, in: NSRange(location: 0, length: length), options: []
+        ) { value, range, _ in
+            guard value != nil else { return }
+            let line = string.lineRange(for: range)
+            if lines.last != line { lines.append(line) }
+        }
+        for line in lines { restyle(storage, range: line) }
+        return lines.count
+    }
+
     // MARK: - Fonts (forwards)
 
     /// The bold/italic face of `font`, or `font` itself when the family ships
