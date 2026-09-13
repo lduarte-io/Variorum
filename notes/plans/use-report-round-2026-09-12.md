@@ -6920,7 +6920,13 @@ Both rows are the R3-1 class (a settle that the column's later measurement passe
   touched either way.
 
 - **PIECE 1 — the core enum + query + operation: DONE (`b1a74b3d`).**
-- **PIECE 2 — the seam's kind and routing: NOT-STARTED.**
+- **PIECE 2 — the seam's kind and routing: DONE (`8285be03`).** RED ON OLD proven by behavioural
+  revert of the routing itself (`slot(for:)` returning `.toast` for every receipt — pre-18i, where
+  every receipt was a `speak`): **3 tests failed with 6 issues** —
+  `aReceiptLandsWhereTheSettingSays` ×4 (the toast standing where it must be nil; the quiet line nil
+  where it must carry the words; `.off` showing the toast; `lastDroppedReceipt` nil),
+  `oneMessageAtATimeAcrossBothSlots` ×1, `theQuietLineAutoDismissesUnderTheOnePolicy` ×1. Restored by
+  `git checkout --`; green again at 9 tests in 1 suite.
 - **PIECE 3 — the receipt sites (the classification table): NOT-STARTED.**
 - **PIECE 4 — the quiet slot: NOT-STARTED.**
 - **PIECE 5 — the Appearance pane's row: NOT-STARTED.**
