@@ -7,6 +7,7 @@
 //  idioms — R1; the slots are load-bearing, not decoration).
 //
 
+import AppKit
 import SwiftUI
 import Testing
 import VariorumCore
@@ -70,6 +71,77 @@ struct ThemeTokenTests {
         // BLACK background, both voices.
         #expect(VoiceTokens.terminalDark.room == Color.black)
         #expect(VoiceTokens.studyDark.room == Color.black)
+    }
+
+    /// **R51 AT THE TOKEN A VIEW ACTUALLY CONSUMES** (18j — her R-Q12).
+    ///
+    /// `PaletteDerivationTests.theDarkRoomStaysFullyBlackUnderEveryPalette`
+    /// pins the FAMILY the brain derives; this pins what comes out of the
+    /// RESOLVER, which is the only value a surface ever sees — and it is the
+    /// arm the family pin structurally cannot reach, because `.default` and
+    /// a seedless `custom` have no family at all (the resolver returns the
+    /// voice's own set). Every preset, her own hex included, both voices:
+    /// the dark room is BLACK, and nothing else in the app can make it
+    /// otherwise.
+    @Test func theDarkRoomIsBlackUnderEveryPaletteInBothVoices() {
+        var checked = 0
+        for voice in ThemeVoice.allCases {
+            for palette in ThemePalette.allCases {
+                // Her own hex, including deliberately hostile ones.
+                for tint in [PaletteTint.none,
+                             PaletteTint(room: "FFFFFF", accent: nil),
+                             PaletteTint(room: "FFFF00", accent: "FF00FF")] {
+                    let tokens = VoiceTokens.resolve(
+                        voice: voice, palette: palette, tint: tint, dark: true)
+                    #expect(tokens.room == Color.black,
+                            "R51: \(voice.rawValue) · \(palette.rawValue)")
+                    checked += 1
+                }
+            }
+        }
+        #expect(checked == ThemeVoice.allCases.count * ThemePalette.allCases.count * 3)
+    }
+
+    /// **The paper stays a WHISPER of the room** (18j; 18g's J52 handed the
+    /// dark readings here). With the room black, a palette carries the hue
+    /// on `surface`/`card` — but a paper that drifted bright would make the
+    /// black room a frame around a light page, which is not the composition
+    /// R51's "fully black" names. The band holds both voices' own dark
+    /// papers (Terminal's `0C0D0C`, Study's `14120F`) and the derived ones
+    /// the mockup drew, and is tight enough that a future seed table cannot
+    /// quietly light the page up.
+    @Test func theDarkPaperStaysAWhisperOfTheRoomUnderEveryPalette() {
+        var brightest = (name: "", value: 0.0)
+        for voice in ThemeVoice.allCases {
+            for palette in ThemePalette.allCases {
+                let tokens = VoiceTokens.resolve(
+                    voice: voice, palette: palette,
+                    tint: PaletteTint(room: "FFFF00", accent: nil), dark: true)
+                for (slot, colour) in [("surface", tokens.surface), ("card", tokens.card)] {
+                    let level = Self.luminance(colour)
+                    // Measured max today: 0.0192 (terminal/teal_rust/card).
+                    // The ceiling leaves real headroom and still catches a
+                    // paper that drifted toward a page.
+                    #expect(level < 0.05,
+                            "\(voice.rawValue) · \(palette.rawValue) · \(slot) is not a whisper of a black room (luminance \(level))")
+                    if level > brightest.value {
+                        brightest = ("\(voice.rawValue)/\(palette.rawValue)/\(slot)", level)
+                    }
+                }
+            }
+        }
+        print("[18j] the brightest dark paper: \(brightest.name) at \(brightest.value)")
+    }
+
+    /// WCAG relative luminance of a resolved SwiftUI colour.
+    private static func luminance(_ colour: Color) -> Double {
+        let native = NSColor(colour).usingColorSpace(.sRGB) ?? .black
+        func channel(_ value: Double) -> Double {
+            value <= 0.03928 ? value / 12.92 : pow((value + 0.055) / 1.055, 2.4)
+        }
+        return 0.2126 * channel(native.redComponent)
+            + 0.7152 * channel(native.greenComponent)
+            + 0.0722 * channel(native.blueComponent)
     }
 
     /// **THE ERROR/DANGER SLOT, IN BOTH VOICES** (the post-13l polish round,

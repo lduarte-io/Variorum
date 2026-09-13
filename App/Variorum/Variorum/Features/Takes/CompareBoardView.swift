@@ -1321,8 +1321,14 @@ struct CompareBoardView: View {
                         if i < aligned.peerMoved.count, aligned.peerMoved[i],
                            !aligned.peerKin[i].isEmpty {
                             Text("moved (order differs in this version)")
-                                .font(.caption2)
-                                .foregroundStyle(.orange)
+                                .font(tokens.small)
+                                // 18j: the voice's own "this one is
+                                // different" slot (its doc's words), never a
+                                // literal hue — this line's whole job is to
+                                // say that one column reads out of order, and
+                                // a colour that cannot follow the appearance
+                                // says it at the wrong weight on black paper.
+                                .foregroundStyle(tokens.alarm)
                         }
                         if i < aligned.peerKin.count {
                             ForEach(aligned.peerKin[i], id: \.self) { kinBlock in

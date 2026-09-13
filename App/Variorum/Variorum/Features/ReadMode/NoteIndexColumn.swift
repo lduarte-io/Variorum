@@ -320,7 +320,9 @@ struct NoteIndexColumn: View {
                         if row.variantLocked {
                             Text(tokens.chromeLabel("locked"))
                                 .font(tokens.small)
-                                .foregroundStyle(Color.orange)
+                                // 18j — the same token as the Blocks
+                                // workbench's lock mark, for the same reason.
+                                .foregroundStyle(tokens.alarm)
                         }
                         Spacer(minLength: 4)
                     }

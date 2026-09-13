@@ -9936,7 +9936,20 @@ and nothing was launched by me.
   with no storage write. Pins `EditorInkTests` ×5, red on old four ways; walked
   (`17-write-ink-FIXED-S-dark.png`). Reproduced under the SYSTEM dark too, so it is a pre-existing dark
   defect this batch found, not one the choice introduced.
-- **PIECE 3 — the pins (R51 per preset, the literal-colour grep pin, each token fix's):** NOT-STARTED.
+- **PIECE 3 — the pins: DONE.** (a) **R51 at the token a VIEW consumes** —
+  `ThemeTokenTests.theDarkRoomIsBlackUnderEveryPaletteInBothVoices` walks 2 voices × 17 palettes × 3 seeds
+  (including hostile hexes) through the RESOLVER, which is the arm 18g's family pin structurally cannot
+  reach (`.default` and a seedless `custom` have no family); (b) **the dark paper stays a whisper** —
+  `theDarkPaperStaysAWhisperOfTheRoomUnderEveryPalette`, relative luminance < 0.05 for `surface`/`card`
+  under every palette in both voices (measured brightest today: terminal/teal_rust/card at 0.0192), which
+  is 18g's J52 dark reading pinned rather than argued; (c) **the literal-colour grep pin** —
+  `NoLiteralColourTests` walks every `.swift` under `App/Variorum/Variorum` and fails on `Color(hex:)` or
+  any literal hue, with a NAMED allow-list carrying each entry's recorded decision (the three TK2 canary
+  banners; `SharedPageStyle`'s system-semantic warnings, whose own text records the decision;
+  `DataSafetyPane`'s staleness warnings, the same class; `VoiceControls`, where the vocabulary lives). It
+  found **three real offenders**, all FIXED to `tokens.alarm`: the "locked" mark in the Blocks workbench and
+  in the note's index column (a literal orange that read as an alien hue in Terminal and as Study's own ring
+  hue in Study), and Compare's "moved (order differs in this version)" line.
 - **PIECE 4a — INHERITED item R2-1 (the stale-ink face restore) — the fix: DONE.** `MarkdownFace.Palette`
   gains **`prose`** — the surface's CURRENT ink, **required and never defaulted** (the `register(redo:)`
   posture: a future host must decide) — and the clear loop restores a faced run to IT rather than to the

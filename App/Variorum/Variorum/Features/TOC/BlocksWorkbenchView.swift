@@ -589,7 +589,13 @@ struct BlocksWorkbenchView: View {
                 }
             }
             if row.variantLocked {
-                Text(tokens.chromeLabel("locked")).foregroundStyle(Color.orange)
+                // 18j: the voice's own "this one is different" slot, never a
+                // literal hue. A lock is the guard that refuses edits, and
+                // `alarm` is deliberately quiet rather than a stoplight (its
+                // own doc) — which is exactly a lock's register. The literal
+                // was an alien orange in Terminal and Study's ring hue in
+                // Study, saying two different things in one app.
+                Text(tokens.chromeLabel("locked")).foregroundStyle(tokens.alarm)
             }
             if let facts {
                 ForEach(facts.tagPaths.prefix(3), id: \.self) { path in
