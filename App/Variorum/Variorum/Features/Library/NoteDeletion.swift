@@ -106,8 +106,13 @@ enum NoteDeletion {
         let isRefusal: Bool
     }
 
-    /// Flush, delete, announce. Returns the receipt; refusals throw for the
-    /// caller to word (the `TrashPutBack` / `TrashPurge` shape).
+    /// Flush, delete, announce. Returns **the words only** — and three of the
+    /// four endings are REFUSALS, so a caller that routes this to the status
+    /// centre must use `report(…)` and `say(_:refusing:)`, never `receipt(…)`
+    /// (the round-1 BLOCKER was exactly that misreading, and this line said
+    /// "returns the receipt" until the round-2 ladder caught it still
+    /// standing). Operation failures still throw for the caller to word (the
+    /// `TrashPutBack` / `TrashPurge` shape).
     ///
     /// **Kept byte-identical in name and return type** (the 3C parity
     /// pattern) when J29 gave the act its discriminator: every shipped pin
