@@ -755,14 +755,19 @@ final class TakesBoardLayout {
     @ObservationIgnored private var lastArticleGeometry: ArticleGeometry?
 
     func forgetArticleRowFrame(_ placementID: String) {
-        articleRowFrames.removeValue(forKey: placementID)
-        articleRowDepartures += 1
+        // Remove always; count what was removed (the 17q ladder's round 3,
+        // R3-2): a row realized and de-realized in one pass never reported a
+        // frame, and never joined the set the counter speaks of.
+        if articleRowFrames.removeValue(forKey: placementID) != nil {
+            articleRowDepartures += 1
+        }
     }
 
     /// Observation seam (the `articleRestoreAims` precedent — a plain
-    /// counter, not DEBUG-gated): how many rows have left the realized set on
-    /// this mount. The pins' non-vacuity: a departure really happened before
-    /// the memory was read, and a teardown really ran every row's.
+    /// counter, not DEBUG-gated): how many rows that had REPORTED a frame
+    /// have left the realized set on this mount. The pins' non-vacuity: a
+    /// departure really happened before the memory was read, and a teardown
+    /// really ran every row's.
     @ObservationIgnored private(set) var articleRowDepartures = 0
 
     // MARK: - The scroll memory's one-shot restore (17p batch a, row 1)
