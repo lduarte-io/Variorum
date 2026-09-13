@@ -8430,3 +8430,9 @@ names the difference at both doors.
   `…-screens/18i/12-j39-one-line-in-the-box-footer.png`. The same walk is what caught ⌘⇧S toasting under
   quiet. Her real-store app was NOT running at any point (`pgrep -fl 'Variorum.app/Contents/MacOS'` empty
   before the launch and after my quit) and was never touched; zero instances at the close.
+
+### 18i LADDER — ROUND 2 · THE ORCHESTRATOR'S NOTE ON THE WALK FIND (J42) — and the cast of round 3
+
+- **(J42) `EditorViewModel.saveNoteVersion`'s success arm on the refusal door (`dcec83e0`, found on the J39 walk): ACCEPTED as a fix of this letter.** The batch's own rule (a receipt reports an act that LANDED) and R-Q5's letter (the setting governs receipts) make ⌘⇧S's "Saved a version" line a receipt; the board's twin already classed it so; leaving it would have kept one savepoint toasting under the default she chose to stop the toasting. One word, byte-identical string, pinned red on the shipped tree (1 test / 3 issues). Round 3 reviews it with the rest.
+- **Round 2 verified against git by the orchestrator:** `cb6386f7 b1b0a576 dcec83e0 8ee11683 eb062857 9f0c31b2` + the two record commits; zero trailers; `Sources/`, `Shared/`, `Server/` diff-empty against `987d306e`; 31 `.refusal(` assignments in `TakesViewModel` where round 2 counted 25 `.receipt(` + the pre-existing refusals; the `lines` knob removed; the closing run 639/87 green; the J39 capture `12-j39-one-line-in-the-box-footer.png` on disk.
+- **Round 3 (the cap): a FRESH `opus-reviewer` over the round-2 fixes (`810e1b25..a97c7d60`), anchored on rounds 1–2's recorded findings, responses, dispositions and fixes.** Anything open after round 3 is recorded for her with an owner, never looped on.
