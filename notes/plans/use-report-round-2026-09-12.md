@@ -8933,7 +8933,24 @@ by this letter, and making the boards speak is new copy on a door.
 
 ### R-6 · RECORD (the implementer writes here from its first commit)
 
-**LIVE STATUS — 18g (`opus-implementer`, opened 2026-09-13 at `fbe2720b`; the code tree it builds on is `b22dc138`).**
+**LIVE STATUS — 18g (`opus-implementer`, opened 2026-09-13 at `fbe2720b`; the code tree it builds on is
+`b22dc138`). CLOSED 2026-09-13 at `dd955fa3` + the record commit; five code commits `7400d9a9..dd955fa3`.**
+
+**WHAT I HAVE NOT DONE (the record's first line).** **Nothing in the batch is left undone or left red** —
+every piece landed, every pin is green on the closing tree, and the walk ran in both voices, in light and
+dark, over all sixteen palettes. What I deliberately did NOT do, by the brief: **zero
+`Sources/VariorumCore/Sync/` and zero `Server/`** (diff-empty against `b22dc138`), **zero schema and zero
+migration** (`Persistence/` diff-empty; three `setting` keys, upsert-only — not a §12 lockstep event, the
+marker stays **8**), **no third VOICE** (R1/R12 hold at exactly two — a palette is colour UNDER a voice,
+and the pin says every idiom slot and every type slot is untouched by one), **no change to any voice's
+idioms or type**, **no literal colour outside the token layer** (the swatches draw from the one resolver),
+**no per-token picker** (R-Q13's "the brain… Nothing else is asked of her"), **no 16th preset**, and **no
+phone surface** — which matters, because §4.6's architect read that the phone *"inherits the palette from
+the synced setting for free"* is **WRONG as built** and is corrected below with its one-line road. **ONE
+product question went to the author rather than being decided here: QUESTIONS #107** — whether a palette
+reaches the CALM READING PAGE, whose tokens are a separate voice-independent type (R2). Arm (a) is BUILT
+(it does not) and marked PROVISIONAL. Everything else this batch decided is recorded under THE BATCH'S OWN
+CALLS; none of it re-opens R-Q6/R-Q11/R-Q13.
 
 - **Orientation — DONE.** Read in my own context, in the brief's order: `CLAUDE.md` and the canon it
   auto-loads (CoreDescription · OverallModel · AppSpec — §12's two-voice paragraph (R1/R12 "hold at
@@ -8960,8 +8977,243 @@ by this letter, and making the boards speak is new copy on a door.
   Pin: `ThemeTokenTests.theDefaultPaletteIsEachVoicesShippedColoursByteIdentically`. iOS build green.
 - **PIECE 4 — the face (the Appearance pane's palette row + the custom hex fields): DONE (`dc1fd1e9`).**
   Pins: the strip covers every palette exactly once; the seed refusal speaks app words.
-- **PIECE 5 — the walk (both voices × 16 palettes × light/dark on the dev-store Debug build): DONE (hash below).**
+- **PIECE 5 — the walk (both voices × 16 palettes × light/dark on the dev-store Debug build): DONE (`dd955fa3`).**
   **68 captures + 4 contact sheets** under `notes/plans/use-report-2026-09-12-screens/18g/`; THREE face
   defects found in my own new code and fixed in the walk's commit (the unclickable Custom swatch, the
   wrapping field labels, the below-the-fold refusal). The table is below.
-- **THE CLOSING RUNS: NOT-STARTED.**
+- **THE CLOSING RUNS: DONE** — core `1551 tests in 168 suites passed`; the FULL Mac suite
+  `2604 tests in 433 suites passed`, `** TEST SUCCEEDED **`, zero `✘`, the 9 standing opt-in skip lines;
+  iOS `** BUILD SUCCEEDED **`. The exact lines are at the record's end.
+
+#### R-6 · WHICH TOKENS A PALETTE OWNS (the derivation table — the brief's ask)
+
+**The rule I decided by**, stated once: a palette owns the slots her ruling NAMES — *"the room (the tan
+panels), the wash, the accent (the coloured chrome words), the take tint/line and the hairline"* — plus,
+in DARK ONLY, the two that carry the room's job when the room is black (R51). Every other slot is what
+makes a voice a voice, and moving one would make a palette a third voice, which R1/R12 forbid. The list
+lives in the type itself: the eight owned slots are `var` on `VoiceTokens` and `applying(_:)` is their one
+writer; everything else is `let`.
+
+| Slot | Light | Dark | Why |
+|---|---|---|---|
+| `room` | **DERIVED** | **BLACK** | her "tan panels". R51 falls out of the table (dark lightness 0), never a special case |
+| `wash` | **DERIVED** | **DERIVED** | selected rows + the changing-block wash — she sees it on every row she clicks |
+| `accent` | **DERIVED** | **DERIVED** | *"the lightly colored text like (this note) and commit"* — the ask's second half |
+| `takeTint` · `takeLine` | **DERIVED** | **DERIVED** | the ruling names the take tints |
+| `line` | **DERIVED** | **DERIVED** | the hairline the ruling names |
+| `surface` · `card` | the VOICE's | **DERIVED** | light: the mockup keeps every card's page the voice's paper — paper is paper. Dark: the room is black, so the paper carries the whisper of hue instead (the mockup's own dark preview) |
+| `ink` · `muted` · `faint` | the VOICE's | the VOICE's | prose and quiet chrome are the voice's register; recolouring them is a voice change (13s's) |
+| `chosen` · `positive` | the VOICE's | the VOICE's | "✓ chosen" is a MEANING, not a decoration — it must mean the same thing under every palette |
+| `ring` | the VOICE's | the VOICE's | the editing indicator is a state mark (R14/R22), and U-7 ties it to her preference, not to colour taste |
+| `star` | the VOICE's | the VOICE's | her direct call, pre-13u Act 10 item 13: *"i like the blue star"* — blue in every voice, so in every palette |
+| `alarm` | the VOICE's | the VOICE's | a refusal must read as a refusal; a palette that could tint the alarm toward its own accent would undo the post-13l ledger row 29 fix |
+| `commentTint` · `commentInk` | the VOICE's | the VOICE's | R7's comment register is its own language beside the prose |
+| `codeTint` | the VOICE's | the VOICE's | 13k K10 chose it *neutral to the voice's room on purpose*; a palette hue would make it a callout |
+| `seam` | the VOICE's | the VOICE's | the dotted seam is the boundary MECHANISM (R6), not a hairline — the ruling names `line`, and these are different jobs |
+| every type + idiom slot | the VOICE's | the VOICE's | R1/R12: this is the whole reason a palette is not a third voice |
+
+**The two intensity tables, and where the numbers come from.** All 32 mockup cards were read as HSL; the
+tables were fitted to them. **Every two-tone and bold card's room, wash and accent is reproduced BYTE-EXACT
+from its seed pair alone** — that is what proved the mockup was one rule with two levels rather than 32
+hand-picked cards, and it is pinned for two of them
+(`theTablesReproduceTheApprovedMockupsRoomAndWash`). The four PASTEL cards were drawn a hair lighter than
+the two-tone ones (room L .965 vs .955, accent L .420 vs .400); they collapse into the soft table here —
+a difference of 2–3 values out of 255, recorded rather than given a third table.
+
+| Token | soft L (light / dark) | soft S≤ | bold L (light / dark) | bold S≤ |
+|---|---|---|---|---|
+| room | .955 / .000 | .55 | .920 / .000 | .75 |
+| surface | — / .070 | .32 | — / .080 | .42 |
+| card | — / .105 | .32 | — / .115 | .42 |
+| wash | .890 / .150 | .56 | .841 / .170 | .70 |
+| accent | .400 / .680 | .70 | .420 / .660 | .90 |
+| takeTint | .949 / .060 | .48 | .929 / .070 | .60 |
+| takeLine | .840 / .190 | .45 | .780 / .200 | .55 |
+| line | .880 / .145 | .35 | .841 / .155 | .50 |
+
+**THE ONE CORRECTION ON TOP, and why it is not a fudge.** HSL lightness is not luminance: a gold at .40 is
+nearly twice as bright as a blue at .40. Measured against **the mockup's own cards**, six of the fifteen
+accents came out below WCAG AA on their own room — mint 3.51 · gold & black 3.20 · slate & amber 3.42 ·
+grey & green 3.25 · cobalt & tangerine 3.52 · **rose & moss 2.56** — while the other nine sat above 5:1.
+Lowering the table's number for everyone would have darkened the nine that were already right. So the rule
+**steps the accent away from its backdrops until it clears 4.5:1** (darker in light, lighter in dark),
+measured against the room AND the wash. It is still ONE rule with no per-preset constant — and it is what
+makes **her own hex** safe: `#FFFF00` typed into the custom field produces an accent that reads (pinned,
+eleven hostile seeds). **Six preset accents therefore ship DEEPER than the mockup she approved**, named
+here so she can say otherwise in one constant edit:
+
+| Preset | the mockup's accent | shipped | why |
+|---|---|---|---|
+| mint | `#3C9A6F` | **`#2E7555`** | 3.51 → 5.15 on its room |
+| gold & black | `#A98523` | **`#81661A`** | 3.20 → 5.05 |
+| slate & amber | `#AD791F` | **`#845D17`** | 3.42 → 5.31 |
+| grey & green | `#339960` | **`#257147`** | 3.25 → 5.40 |
+| cobalt & tangerine | `#CB520C` | **`#933B08`** | 3.52 → 5.82 |
+| rose & moss | `#659C3B` | **`#3C5D23`** | 2.56 → 5.85 |
+
+The other nine are the mockup's accents byte-exact. **The full finals table** (all 15 × both appearances ×
+room/wash/accent) is pinned as `PaletteDerivationTests.theShippedFamiliesAreTheRecordedOnes` — that pin IS
+the record, so a future seed or tone edit shows up as an exact diff instead of a colour nobody noticed
+moving. Worst measured ratio across all 15 × 2 appearances × 3 backdrops: **4.50**.
+
+#### R-6 · THE WALK (the acceptance gate — USE, not mount)
+
+On the **DEV-STORE Debug build** (`io.lduarte.Variorum.debug`,
+`App/Variorum/DerivedData/18g/Build/Products/Debug/Variorum.app`), `cliclick` + `Tools/WalkKit`. **Her
+real-store app was NOT running at any point** (`pgrep -fl 'Variorum.app/Contents/MacOS'` → empty before
+each launch and after each quit; zero instances at the close); `/Applications` untouched, no Release
+build. Fixture: today's journal entry with one block of two lines and a **second take**, in Takes —
+which puts the room, the selected-row wash, the block wash, the accent words (`this note` · `open` ·
+`takes` · `+ take` · `commit ⌘S` · `note actions` · the `wash: on` chip), a take card's tint and line, and
+the "✓ chosen" mark all on one screen. **The system appearance was toggled to dark for the dark half and
+put back to light** (it was light at the start and is light now — verified by `osascript` both ways).
+
+| # | What I did | What I saw | Capture |
+|---|---|---|---|
+| 1 | **Terminal · light · all 16 palettes** (Settings ▸ Appearance ▸ Voice, clicking each swatch) | every palette recoloured the sidebar panels, the bottom bar, the selected `› takes` row, the block's wash band, the take cards and every accent word — live, with no relaunch. The two desaturated seeds (sage & terracotta, grey & green) read as *nearly* default, faithfully: their seeds are S .15 and S .06 | `t-light-<palette>.png` ×16 · sheet `t-light-CONTACT.png` |
+| 2 | **Study · light · all 16** | the same sixteen under the serif voice: Study keeps its serif, its no-marker rows and its orange editing ring under every one of them (R1 held by eye, as the pin holds it by value) | `s-light-<palette>.png` ×16 · sheet `s-light-CONTACT.png` |
+| 3 | **Terminal · DARK · all 16** | the sidebar is FULLY BLACK in all sixteen (R51 by eye); the paper carries the whisper of the room hue; the accent lifts and reads. `t-dark-note-teal-rust.png` is the full-size one: black room, dark-teal paper, rust chrome words | `t-dark-<palette>.png` ×16 · sheet `t-dark-CONTACT.png` · `t-dark-note-teal-rust.png` |
+| 4 | **Study · DARK · all 16** | the same, serif | `s-dark-<palette>.png` ×16 · sheet `s-dark-CONTACT.png` |
+| 5 | **The detail pass** — sidebar rail + take cards + bottom bar, at full size, for default · gold & black · rose & moss | the accent moves and the MEANING slots do not: "✓ chosen" stays green under all three, the live pane's blue ring stays blue, and `this note` / `+ take` / `commit ⌘S` take the palette's accent | `t-light-DETAIL.png` |
+| 6 | **Custom, ONE hex** — typed `#e07a5f`, Return | the swatch filled warm and the whole app took it; the field's `#` was tolerated and the stored value came back canonical (`E07A5F`) after a relaunch | `t-light-custom-one-hex.png` |
+| 7 | **Custom, TWO hexes** — added `3d5a80` in "Accent, optional" | the room stayed warm and the chrome words went blue — her R-Q13's second hex doing exactly what it says | `t-light-custom-two-hex.png` |
+| 8 | **A refusal** — typed `nope` into the accent field, Return | *"nope" isn't a colour — a colour is six hex digits, like B9A7E6 or #8A7A3A. Nothing was changed.* — inline, in the pane, and **nothing landed** (the swatch kept the previous pair) | `settings-custom-refusal.png` |
+| 9 | **Clearing** — emptied the accent field, Return | the note became *"Using #E07A5F."* and the swatch's dot went back to the room-derived accent | `settings-the-palette-row.png` |
+| 10 | **Read ▸ edit under Teal & rust** | the editable Read surface is fully palette-aware — the outline column, the block's wash, the `read` row, the accent words | `t-light-teal-rust-read.png` |
+| 11 | **Back to Terminal · Default · light** | indistinguishable from the pre-18g app — the parity pin, seen | `t-light-restored.png` |
+
+**Three defects the walk found in my own new face, all fixed in `dd955fa3`:** (1) the **Custom swatch could
+not be clicked** — an unseeded swatch fills with `Color.clear` and SwiftUI does not hit-test a clear fill,
+so the one swatch she must press FIRST was the only dead one (`.contentShape` fixes it); (2) the hex
+fields' **inline labels wrapped mid-phrase** ("Your / colour") at the pane's 560 pt (labels moved above the
+fields); (3) the **refusal fell below the window's fold** — the pane is 460 pt and does not resize, and a
+refusal she cannot see is P-2 failing in a layout's clothes (the fields and the note moved above the help
+paragraphs). Each was found by clicking, not by reading, which is the gate's whole point.
+
+#### R-6 · DISPOSITIONS (the rows this batch owns)
+
+| Row | Her words | Disposition |
+|---|---|---|
+| **12** | *"basic color themes… lavender, mint green, pink, blue, a pastel set… the hex code of your default theme"* (image 5) | **FIXED**, to R-Q6/R-Q13's letter — `ThemePalette` + the two seeds as synced settings, ONE derivation brain, the resolver's new arm, and one row in Settings ▸ Appearance ▸ Voice. Pins: `AppearanceSettingsTests` ×2 · `ThemeTintTests` ×3 · `PaletteDerivationTests` ×12 · `ThemeTokenTests.theDefaultPaletteIsEachVoicesShippedColoursByteIdentically`. Walked in USE over both voices × 16 palettes × light and dark, 68 captures. **A taste row, so there is no red-on-old pin and none is owed** (R-1 rule 3's own carve: taste and design rows get a geometry oracle or a walk capture) — what IS pinned red-on-old-shaped is the thing a pin can decide: the contrast floor, which **fails on the mockup's own six accents** and passes on the shipped ones. |
+| **13** | *"a couple mixed color builds, like how terminal has tan and blue… like gold and black"* + *"light grey & green"* + *"a little more personality… or add a third batch"* | **FIXED**, to R-Q11's letter — the SIX two-tone builds and the FIVE bold builds ship beside the four pastels, from the mockup's own seed pairs, through the same brain at two intensity levels. Six accents ship deeper than the mockup for AA (the table above). The names and seeds are one constant edit each, as R-Q13 promises. |
+
+#### R-6 · THE BATCH'S OWN CALLS (recorded, not asked — §8's rule)
+
+1. **The accent is corrected per colour, not per table.** The alternative was one lower lightness for
+   everyone, which would have darkened the nine accents that were already right. Recorded above with the
+   measured numbers, because it moves six swatches she approved by eye.
+2. **The floor is measured against the WASH as well as the room.** Her ruling names the room; the accent is
+   also selected-row ink on the wash, which is the harder backdrop in both appearances. Checking both costs
+   nothing and is what makes the take-tint reading pass too.
+3. **`custom` is the SOFT table.** R-Q13: *"With one hex it does exactly what the pastels do."*
+4. **A cleared seed is the empty string.** A `setting` row is upsert-only and never tombstoned (the
+   `fan_style` class), so "no colour" needed a stored form; the one rule reads `""` as absent.
+5. **The read side validates too, not just the setter.** A value that reached the column by any other road
+   — a hand-edited store, a peer on a build that spelled the key differently — reads as ABSENT rather than
+   as a colour nobody can name. Two copies of a validation rule is the drift class, so both sides call
+   `ThemeTint`.
+6. **`ThemeStore` got a setter for the PALETTE and deliberately none for the SEEDS.** Its `run` swallows
+   errors into a `lastError` nothing renders, and the seeds' setter can refuse; the seeds' write therefore
+   goes through the runner in the pane, showing the operations layer's real words inline — the exact shape
+   of the three other refusable settings on that pane.
+7. **No `StatusCenter` receipt from the Settings pane.** The Settings scene mounts no toast and no bottom
+   bar, so a receipt spoken there is invisible under her default — QUESTIONS #106's class, decided the same
+   way. The window recolouring as she clicks is the confirmation; the custom field gets a line of its own.
+8. **A landed colour also selects Custom**, so typing a hex is the whole gesture rather than
+   typing-then-clicking.
+9. **`PaletteFamily` carries `card` as well as the brief's seven.** In dark, a tinted paper with the voice's
+   neutral card would read as two materials; `card` is `surface`'s sibling and moves with it.
+10. **The grouping into three strips lives in the FACE** (`PaletteCopy.Group`), not in the brain: the brain
+    knows seeds and intensity, and "Pastels / Two-tone / Bold" are headings. A pin asserts the strips cover
+    every palette exactly once, so a 16th preset with no home in Settings fails the suite.
+
+#### R-6 · THINGS FOUND AND DELIBERATELY NOT FIXED
+
+- **§4.6's "the phone inherits the palette for free" is WRONG as built, and the parity line must say so.**
+  `MobileEditorStyle.Face(voice:)` builds its colours from `VoiceTokens.resolve(voice:dark:)` — the
+  TWO-parameter resolver — so the phone compiles untouched (iOS build green) and shows the DEFAULT colours
+  whatever the synced setting says. The road is one line: read `Queries.ThemeSettings`' palette + seeds
+  where the phone builds its face and call the four-parameter resolver. Not done here because the phone is
+  a different surface and this batch is one (R-1 rule 2); written into WHAT THE LETTER'S CLOSE OWES as a
+  MOBILE PARITY row.
+- **The calm READING PAGE is untouched by every palette** — `ReadingPageTokens` is a separate type picked
+  by the colour scheme alone (`ReadModeView.swift:118`), deliberately voice-independent since R2. Built as
+  shipped and filed as **QUESTIONS #107 PROVISIONAL** with the one-parameter road to the alternative.
+  *(Determined by reading the type and its call sites; the `edit ▸ read` pill did not take a synthetic
+  click in the walk rig, so capture `t-light-teal-rust-read-page.png` shows the `edit` half.)*
+- **The voice's QUIET chrome (`muted`, `faint`) sits slightly lower on a palette's room than on the voice's
+  own.** Measured: Terminal's `muted` reads 3.01:1 on its shipped room and 2.53:1 on the worst palette's
+  (rose & moss); `faint` 1.90 → 1.59. The palettes deepen an existing choice rather than introduce a class
+  — `faint` is meant to be faint — and moving those two slots is a VOICE change (13s's design review, her
+  standing ruling on the hue slots). Recorded with the numbers so 18j can weigh it with her eye.
+- **In DARK the palette's paper is lighter than the TERMINAL voice's own.** The derived dark surface is
+  L .07/.08 (the mockup's dark preview, byte-exact); Terminal's own dark surface is L .025 and Study's is
+  L .070. So under a palette, Terminal's dark paper matches Study's rather than its own. Left as the
+  mockup's number — **18j owns the dark walk and the palettes' dark readings by the plan's own §5.5**, and
+  this is precisely the kind of thing that wants her eye on a real screen, not a number chosen here.
+- **A bold palette's room is strong while the writing page stays white.** That is the mockup's own
+  composition (every card's page is white) and R-Q6's letter ("the tan panels"), so it ships as approved;
+  named here because it is the first thing a reader of the contact sheets will ask about.
+- **The Appearance pane now needs scrolling to reach the sections below Voice.** It did before 18g too
+  (Editor + Writing + Confirmations already exceed the 460 pt pane), and the palette row adds ~150 pt.
+  Not a new class; not fixed inside a batch about colour.
+- **`AppSettingsView` has no suite to ride** (no test mounts the pane — the real-click rig cannot mount a
+  whole surface, KnownIssues). The walk is the row's evidence, as it was for 18i's Confirmations section.
+
+#### R-6 · WHAT THE LETTER'S CLOSE OWES (drafted for the orchestrator)
+
+- **AppSpec §12's two-voice paragraph** — one sentence, at the end of the Phase 13 surfaces paragraph:
+  *(18g, 2026-09-13 — her R-Q6 · R-Q11 · R-Q13: a **COLOUR PALETTE** now layers UNDER the voice — sixteen
+  choices plus her own hex (four pastels · six two-tone builds · five bold builds · custom), stored as the
+  synced settings `theme_palette` + `theme_tint` + `theme_accent_tint`. **The voices still hold at exactly
+  two (R1/R12):** a palette replaces only the room, the wash, the accent, the take tints and the hairline —
+  derived from one or two seed hues by ONE pure rule (`PaletteDerivation`, two intensity tables) whose
+  accent is stepped deep enough to clear WCAG AA on its own room and wash, so any hex she types reads. Type,
+  idioms, "✓ chosen", the editing ring, the star, the alarm, the comment register, the code chip and the
+  block seam stay the VOICE's; **`default` is each voice's shipped colours byte-identical**; and dark keeps
+  a fully black room under every palette (R51). PROVISIONAL: QUESTIONS #107 — the calm reading page's own
+  voice-independent tokens (R2) are untouched by a palette.)*
+- **AppSpec §7's `setting` block** — a comment line beside `receipt_style`'s, in the same register:
+  > `-- ('theme_palette' / 'theme_tint' / 'theme_accent_tint' are NOT seeded: like theme_voice their`
+  > `-- defaults are applied at READ time (Queries.ThemeSettings) — no palette, no seeds. The palette is`
+  > `-- enum-valued; the two tint values are a VALIDATED six-hex-digit token or the empty string (cleared),`
+  > `-- structured and never prose, so the column's PLAIN classification and its "enum semantics, no prose"`
+  > `-- promise are untouched. 18g, her R-Q6/R-Q13.)`
+- **QUESTIONS** — **#107** filed (open, PROVISIONAL, arm (a) built).
+- **`notes/MobileSoul.md`'s parity ledger** — a row: **the Mac's colour palette (`theme_palette` +
+  `theme_tint` + `theme_accent_tint`, synced) has NO phone consumer.** `MobileEditorStyle.Face(voice:)`
+  calls the two-parameter resolver, so the phone shows the default colours whatever she picked on the Mac;
+  the road is one line (read the palette + seeds beside the voice and call the four-parameter resolver).
+  This CORRECTS §4.6's architect read, which predicted the phone would inherit for free. Owner: the mobile
+  app project row.
+- **KnownIssues** — nothing new. (#107 is a product call; the phone's parity is a parity row; the
+  `muted`/`faint` reading is a recorded measurement for 18j, not debt.)
+- **18j inherits, by the plan's own §5.5:** the palettes' dark readings — specifically the derived dark
+  paper's lightness (.07/.08, the mockup's) against Terminal's own (.025), and the R51 pin extended to the
+  palettes' dark families (already pinned here at the family level:
+  `theDarkRoomStaysFullyBlackUnderEveryPalette`).
+- **Schema / `Sync/` / the lockstep marker** — **zero, zero, and the marker stays 8**: three `setting` keys
+  are upsert-only, so this is not a §12 event. Verified by diff against `b22dc138`
+  (`Sources/VariorumCore/Sync/`, `Server/` and `Sources/VariorumCore/Persistence/` all empty).
+
+#### R-6 · CLOSING THE BATCH (the three runs, exact lines)
+
+- **Core** (`swift test` from the repo root — `Sources/` was touched: the enum, the seed rule, the query,
+  the two setters, the error case):
+  `✔ Test run with 1551 tests in 168 suites passed after 54.211 seconds.`
+- **The FULL Mac suite** (`xcodebuild test -scheme Variorum -destination 'platform=macOS'`, no
+  `-only-testing` — the diff reaches `VoiceTokens`, which every voiced surface in the app consumes, so the
+  honest close is everything):
+  `✔ Test run with 2604 tests in 433 suites passed after 697.571 seconds.` · `** TEST SUCCEEDED **` · zero
+  `✘` lines.
+  **Skips (9 lines, all the standing opt-in gates, none new):** the four `pre-13x` drill suites and their
+  tests — the Apple-key round trip, the migration drill, the posture drills, the adopt drill — each
+  disabled unless its `TEST_RUNNER_VARIORUM_*` variable is set.
+  *(The suite-TYPE rule was met: every `-only-testing` name used during the batch —
+  `PaletteDerivationTests`, `ThemeTokenTests` — was `grep -rl "struct <Name>"`-verified first, and the
+  closing run uses no filter at all.)*
+- **iOS** (`xcodebuild build -scheme VariorumMobile -destination 'generic/platform=iOS'` —
+  `App/Variorum/Shared/Theme/` was touched):
+  `** BUILD SUCCEEDED **`. **The phone compiles untouched**: the two-parameter `resolve` is unchanged in
+  signature and behaviour and `Queries.ThemeSettings` gained DEFAULTED fields — and, as recorded above,
+  that is exactly why the phone does not yet SHOW a palette.
