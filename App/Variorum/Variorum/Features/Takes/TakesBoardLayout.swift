@@ -361,20 +361,34 @@ final class TakesBoardLayout {
         // `adopt` arrives on a `.task`), so this is the order the app takes.
         // Nothing has moved yet when it does — before the projection the
         // column holds no rows and `scrollTo` at an id it does not hold is a
-        // no-op. The other order (a landing already pending at the first
-        // geometry — every pin's, since `landingModel` adopts before
-        // mounting) is answered in `consumeArticleGeometry`'s `.undecided`
-        // branch, by the same resolver.
-        if case .wanted = articleRestore { resolveEntryLandingAgainstTheMemory() }
+        // no-op. **The condition is "a page to come back to", never "a
+        // restore pending"** (the 17q ladder's round 2, R2-1): a TOP memory
+        // settles at the first geometry without ever reaching `.wanted`, and
+        // the entry landing that then arrives on the block she was in must
+        // stand down there exactly as it does over a row — measured in USE:
+        // a page left at rest came back with her block revealed at the foot
+        // (captures `39` → `40`). So the resolver is consulted whenever the
+        // first geometry READ a memory (`articleMemoryAtMount`), the restore
+        // still aiming or already settled. The other order (a landing
+        // already pending at the first geometry — every pin's, since
+        // `landingModel` adopts before mounting) is answered in
+        // `consumeArticleGeometry`'s `.undecided` branch by the same
+        // resolver; there the restore is still `.undecided` and this line
+        // does nothing.
+        if articleRestore != .undecided, articleMemoryAtMount != nil {
+            resolveEntryLandingAgainstTheMemory()
+        }
     }
 
     /// **Which of the two wins, decided in ONE place** (17q piece 6, her
     /// rulings R-Q20 + R-Q21; the 17q ladder's R1-2/R1-3 made it the ONE
     /// site) — called at the two moments an ENTRY landing and a remembered
-    /// page first meet: the landing arriving while a restore is pending
-    /// (`landArticle`, the app's order), and the first geometry finding a
-    /// landing already pending (`consumeArticleGeometry`'s `.undecided`
-    /// branch, the pins' order). A BLOOM landing is never weighed here: it
+    /// page first meet: the landing arriving after the first geometry has
+    /// read a memory (`landArticle`, the app's order — the restore aiming
+    /// at a row, or already settled at the TOP; the ladder's round 2, R2-1),
+    /// and the first geometry finding a landing already pending
+    /// (`consumeArticleGeometry`'s `.undecided` branch, the pins' order). A
+    /// BLOOM landing is never weighed here: it
     /// rides through the restore and reveals afterwards (17o row 8's door,
     /// 17p's shipped road — `ArticleLandingKind`).
     ///
@@ -856,6 +870,13 @@ final class TakesBoardLayout {
     nonisolated static let articleRestoreAttempts = 24
 
     @ObservationIgnored private(set) var articleRestore: ArticleRestore = .undecided
+    /// What the FIRST geometry read from the session — a per-mount fact
+    /// (the 17q ladder's round 2, R2-1): whether there is a page to come back
+    /// to at all, which is the condition under which an ENTRY landing that
+    /// arrives later is weighed against it (`landArticle`). A TOP memory
+    /// settles the restore at once and never reaches `.wanted`, so the
+    /// restore's STATE cannot carry this fact; nil until the first report.
+    @ObservationIgnored private var articleMemoryAtMount: ArticlePlace?
     @ObservationIgnored private var articleRestoreAimsLeft = articleRestoreAttempts
     /// Observation seam (the `articleLandingAims` precedent — a plain
     /// counter, not DEBUG-gated): how many coarse aims the restore has
@@ -941,6 +962,11 @@ final class TakesBoardLayout {
             // the block she was in stands down, and the page comes back
             // exactly — the TOP included; a bloom landing is not weighed.
             // With NO memory there is nothing to weigh and nothing to lose.
+            // The fact is kept for the mount: a landing arriving AFTER this
+            // report (the app's order) is weighed by `landArticle` iff a
+            // memory was read here — the TOP included, which settles below
+            // without ever reaching `.wanted` (the ladder's round 2, R2-1).
+            articleMemoryAtMount = remembered
             if remembered != nil { resolveEntryLandingAgainstTheMemory() }
             if articleRestore == .settled { return rememberStep(geometry) }
             // No memory, or the TOP remembered: a mount starts at the top, so

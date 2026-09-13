@@ -1201,8 +1201,11 @@ struct TakesArticleScrollTests {
         e.landArticle(on: "was-here")
         #expect(e.articleRestore == .wanted(left))
 
-        // (f) The TOP remembered already settles at once and issues no
-        // scroll (R1-1), so a landing trivially wins there — no branch owed.
+        // (f) The TOP remembered settles at once and issues no scroll (R1-1);
+        // a landing that OUTRANKS wins there without a branch. (A landing
+        // that does NOT outrank stands down at the TOP too — in both orders
+        // since the 17q ladder's round 2, R2-1: `theTopStandDownHoldsIn
+        // TheAppsOrderToo`, and arm `t` of the bloom pin for this order.)
         let f = freshBoard("outranks-top", lastCurrentRow: "was-here")
         f.landArticle(on: "far")
         #expect(f.consumeArticleGeometry(
@@ -1901,6 +1904,113 @@ struct TakesArticleScrollTests {
                     constructing THE takes board on it makes it so — before any \
                     appear, so the first geometry report reads the memory
                     """)
+        }
+    }
+
+    // MARK: - The 17q ladder, round 2 — R2-1: the TOP stand-down in the APP's
+    //         order (the harness order had it all along)
+
+    /// **RED ON THE ROUND-1 TREE (`9c57f977`).** A page left AT REST remembers
+    /// the TOP, and the TOP settles at the first geometry without ever
+    /// reaching `.wanted` — so `landArticle`'s `if case .wanted` consult never
+    /// weighed the entry landing that arrives AFTERWARDS (the app's order:
+    /// the projection lands on the view's `.task`), and a plain round trip to
+    /// a page left at rest revealed her block again. Measured in USE at the
+    /// round-2 review: the long note left at rest came back as the entry
+    /// frame, byte-identical (captures `39` → `40`). The harness order stood
+    /// it down all along (arm `t` of `aBloomLandingRidesThroughTheRestoreIn
+    /// BothOrders`), which is why no pin saw it. The condition is now "the
+    /// first geometry READ a memory", whichever state the restore is in.
+    @Test func theTopStandDownHoldsInTheAppsOrderToo() {
+        // The app's order at a TOP memory, the SAME block: stands down.
+        let same = freshBoard("top-app-same", lastCurrentRow: "was-here")
+        #expect(same.consumeArticleGeometry(
+            geometry(offset: 0), remembered: .top, positionedByUser: false, order: nil)
+                == .remember(.top))
+        #expect(same.articleRestore == .settled)
+        same.landArticle(on: "was-here")
+        #expect(same.articleLanding == nil,
+                """
+                a plain round trip to a page left at rest: the landing stands \
+                down (on the round-1 tree it lived and revealed her block)
+                """)
+        #expect(same.articleRestoreAims == 0)
+
+        // …on a DIFFERENT block: the landing wins, as it always did there.
+        let moved = freshBoard("top-app-moved", lastCurrentRow: "was-here")
+        _ = moved.consumeArticleGeometry(
+            geometry(offset: 0), remembered: .top, positionedByUser: false, order: nil)
+        moved.landArticle(on: "far")
+        #expect(moved.articleLanding == "far")
+        #expect(moved.articleRestore == .settled)
+
+        // The FIRST entry (no memory at all): nothing to come back to, so the
+        // landing lives — 17o row 8's everyday road (green on both sides; the
+        // guard against over-correcting).
+        let fresh = freshBoard("top-app-first", lastCurrentRow: "was-here")
+        _ = fresh.consumeArticleGeometry(
+            geometry(offset: 0), remembered: nil, positionedByUser: false, order: nil)
+        fresh.landArticle(on: "was-here")
+        #expect(fresh.articleLanding == "was-here", "no memory ⇒ nothing to stand down for")
+
+        // A BLOOM at a TOP memory is never weighed (R1-2's kind guard).
+        let bloom = freshBoard("top-app-bloom", lastCurrentRow: "was-here")
+        _ = bloom.consumeArticleGeometry(
+            geometry(offset: 0), remembered: .top, positionedByUser: false, order: nil)
+        bloom.landArticle(on: "was-here", kind: .bloom)
+        #expect(bloom.articleLanding == "was-here")
+    }
+
+    /// **RED ON THE ROUND-1 TREE, mounted — the app's LANDING order** (the
+    /// bare-model road: the first geometry arrives before the projection,
+    /// which the view's own `.task` brings — the one order this harness
+    /// reproduces by construction; the `.onAppear`-vs-geometry order of W-1 is
+    /// the one it cannot). A page left at rest, her ring on a block below the
+    /// fold, a plain round trip: the page comes back AT REST.
+    @Test func aPageLeftAtRestComesBackAtRestOnTheAppsOrder() async throws {
+        try await withSession(blocks: 60) { session, fixture, db, mount in
+            let router = session.commandRouter
+            router.forgetCurrentBlock(for: fixture.postID)
+            defer { router.forgetCurrentBlock(for: fixture.postID) }
+            let token = router.registerDetail(postID: fixture.postID, mode: .takes) { _ in }
+            defer { router.unregisterDetail(token) }
+            let hers = fixture.blocks[40]
+            router.noteFocusedBlock(
+                hers.block, variantID: hers.variant, postID: fixture.postID, utf16Offset: 0)
+            // What the previous showing left behind: the page at rest, the
+            // ring on block 41 (the session's two values, as the board's own
+            // ring door and geometry hook write them).
+            let projection = try await db.read {
+                try Queries.takesProjection($0, post: fixture.postID)
+            }
+            guard let hersRow = projection.slots.first(where: { $0.blockID == hers.block })?
+                    .placementID else {
+                Issue.record("her block has no slot")
+                return
+            }
+            session.editorRouter.takesArticlePlaces[fixture.postID] = .top
+            session.editorRouter.takesArticleCurrentRows[fixture.postID] = hersRow
+
+            let bare = TakesViewModel(
+                session: session, postID: fixture.postID, defaults: fixture.defaults)
+            let (window, hosting) = await mount(bare)
+            guard let article = articleScrollView(in: hosting) else {
+                Issue.record("no article scroll view")
+                return
+            }
+            await settle(window, hosting, until: { false }, maxTurns: 16)
+            #expect(bare.authority.livePane?.blockID == hers.block,
+                    "non-vacuity: the entry ring is on her block")
+            #expect(bare.board.articleLanding == nil,
+                    "the entry landing stood down at a page left at rest")
+            #expect(bare.articleLandingAims == 0, "…and never aimed")
+            #expect(offset(article) < 1,
+                    """
+                    the page comes back AT REST (offset \(offset(article))) — on \
+                    the round-1 tree the landing lived and revealed her block
+                    """)
+            #expect(!isOnScreen(hers.variant, hosting, article),
+                    "her block stays where the page she left had it: off the page")
         }
     }
 }
