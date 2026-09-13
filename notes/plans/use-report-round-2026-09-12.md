@@ -9143,8 +9143,12 @@ instances at the close.
 - **§4.6's "the phone inherits the palette for free" is WRONG as built, and the parity line must say so.**
   `MobileEditorStyle.Face(voice:)` builds its colours from `VoiceTokens.resolve(voice:dark:)` — the
   TWO-parameter resolver — so the phone compiles untouched (iOS build green) and shows the DEFAULT colours
-  whatever the synced setting says. The road is one line: read `Queries.ThemeSettings`' palette + seeds
-  where the phone builds its face and call the four-parameter resolver. Not done here because the phone is
+  whatever the synced setting says. ~~The road is one line: read `Queries.ThemeSettings`' palette + seeds
+  where the phone builds its face and call the four-parameter resolver.~~ *(Corrected at the ladder, R1-3:
+  the phone reads NO synced theme setting at all — its five resolve sites take the LOCAL LK2 voice
+  preference — so the road is a synced palette beside a local voice: read the palette + seeds through the
+  shared `PaletteTint(settings)` and call the four-parameter resolver with the phone's own voice; a small
+  design with a question in it, not a line.)* Not done here because the phone is
   a different surface and this batch is one (R-1 rule 2); written into WHAT THE LETTER'S CLOSE OWES as a
   MOBILE PARITY row.
 - **The calm READING PAGE is untouched by every palette** — `ReadingPageTokens` is a separate type picked
@@ -9194,11 +9198,16 @@ instances at the close.
 - **`notes/MobileSoul.md`'s parity ledger** — a row: **the Mac's colour palette (`theme_palette` +
   `theme_tint` + `theme_accent_tint`, synced) has NO phone consumer.** `MobileEditorStyle.Face(voice:)`
   calls the two-parameter resolver, so the phone shows the default colours whatever she picked on the Mac;
-  the road is one line (read the palette + seeds beside the voice and call the four-parameter resolver).
+  the road is a SYNCED palette beside the phone's LOCAL voice (LK2 — it reads no synced theme setting
+  today): the palette + seeds through the shared `PaletteTint(settings)` mapping and the four-parameter
+  `VoiceTokens.resolve(voice:palette:tint:dark:)` with the phone's own voice — never the Mac's
+  `resolve(settings:dark:)`, which takes the settings' voice *(the ladder's R1-3 correction of "one line")*.
   This CORRECTS §4.6's architect read, which predicted the phone would inherit for free. Owner: the mobile
   app project row.
-- **KnownIssues** — nothing new. (#107 is a product call; the phone's parity is a parity row; the
-  `muted`/`faint` reading is a recorded measurement for 18j, not debt.)
+- **KnownIssues** — ~~nothing new~~ *(corrected at the ladder, R1-3)*: the eight-brains row's `ThemeStore`
+  touch rule FIRED here (and at 18i) and was waived; the waiver and its reason (a hoist is a design under
+  LK2, not a move) are now written INTO the row. (#107 is a product call; the phone's parity is a parity
+  row; the `muted`/`faint` reading is a recorded measurement for 18j, not debt.)
 - **18j inherits, by the plan's own §5.5:** the palettes' dark readings — specifically the derived dark
   paper's lightness (.07/.08, the mockup's) against Terminal's own (.025), and the R51 pin extended to the
   palettes' dark families (already pinned here at the family level:
@@ -9234,7 +9243,7 @@ instances at the close.
 - **(J47) The six accents shipped DEEPER than the mockup she approved — ACCEPTED, and FLAGGED FOR HER.** F-8 pins the AA floor (accent on room ≥ 4.5:1, every preset, both appearances) and six of the mockup's own accents measured below it (rose & moss at 2.56:1); the batch corrected per colour by stepping each accent away from its backdrops rather than lowering the table for all fifteen — ONE rule, no per-preset constant, and the same rule is what makes her own hex safe. This moves six swatches she approved by eye, so it is hers to see on the refreshed build: the before/after hexes are in the record and a reversal is one constant. The reviewer checks that the step is the only place the rule bends and that `derive` carries no preset name (F-7).
 - **(J48) WHICH slots a palette owns — ACCEPTED as the batch's reasoned set.** The eight the ruling names (room · wash · accent · takeTint · takeLine · line, plus surface/card in DARK only, where a black room hands the paper the hue) are `var` on `VoiceTokens` with `applying(_:)` the one writer; everything that makes a voice a voice (type, idioms, ink/muted/faint, chosen/positive, ring, star, alarm, the comment register, codeTint, seam) stays `let`. The pin that `.default` is byte-identical is the parity proof F-7 asks for. The reviewer weighs the two borderline slots — `line` derived while `seam` stays (different jobs, the record says) and `card` riding `surface` in dark.
 - **(J49) QUESTIONS #107 — the calm reading page under a palette: PROVISIONAL (a), BUNDLED (she is asleep).** R2's voice-independence is a ratified line; bending it is hers. Recorded in the handoff's ratify list with the one-parameter road to (b).
-- **(J50) The phone does NOT inherit the palette — §4.6's architect read was WRONG; ACCEPTED as a MOBILE PARITY row, not a defect.** `MobileEditorStyle.Face(voice:)` calls the two-parameter resolver, so the phone compiles untouched and shows the default colours whatever the synced setting says; the one-line road is recorded. PL-22's "BY CONSTRUCTION (to be confirmed)" sentence is corrected at the letter's close — the phone OWES the palette (and 18i's quiet slot). The plan's §4.6 is left as written (a trace, superseded by the record).
+- **(J50) The phone does NOT inherit the palette — §4.6's architect read was WRONG; ACCEPTED as a MOBILE PARITY row, not a defect.** `MobileEditorStyle.Face(voice:)` calls the two-parameter resolver, so the phone compiles untouched and shows the default colours whatever the synced setting says; the road is recorded *(corrected at the ladder, R1-3 — not "one line": the phone reads no synced theme setting at all, its voice is LOCAL under LK2, so the road is the shared `PaletteTint(settings)` + the four-parameter resolver with the phone's own voice, a small design)*. PL-22's "BY CONSTRUCTION (to be confirmed)" sentence is corrected at the letter's close — the phone OWES the palette (and 18i's quiet slot). The plan's §4.6 is left as written (a trace, superseded by the record).
 - **(J51) The seeds' setter through the pane's runner, no `ThemeStore` seed setter, no `StatusCenter` receipt from the Settings pane — ACCEPTED.** The seeds can REFUSE and the store's `run` swallows errors, so the refusal is spoken inline by the operations layer's own words (the three other refusable settings' shape); a receipt from the Settings scene would be spoken to no slot (#106's class, decided the same way — the window recolouring is the confirmation). The read-time validation on BOTH sides through the one `ThemeTint` rule (a foreign value reads as absent) and the empty string as "cleared" (a `setting` row never tombstones) are the sync-shaped calls.
 - **(J52) The dark readings handed to 18j — ACCEPTED.** The derived dark paper (L .07/.08, the mockup's) against Terminal's own (.025), and the `muted`/`faint` contrast on the deeper rooms (measured, recorded), are 18j's dark walk to weigh with a capture; R51's black room is already pinned under every palette.
 - **(J53) The walk's three face defects fixed inside the batch (the unclickable clear-filled Custom swatch, the wrapping labels, the below-the-fold refusal) — ACCEPTED as the gate working; the Settings-window-reopens-on-last-tab rig note is a lesson for the next walk.** **Cast:** `fable-reviewer` per R-Q10 — the resolver every surface consults is a default's meaning; the cross-model flow (the implementer responds, the reviewer decides and fixes, the implementer sanity-passes).
