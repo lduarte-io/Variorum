@@ -88,6 +88,13 @@ nonisolated enum LibraryDayFace {
         return TimeStampFace.day(date, now: now, calendar: calendar, locale: locale)
     }
 
+    /// The door's own two hovers (the 18h ladder's R3-8 — they were literals
+    /// in the view's body, two rows from the sentences this type already
+    /// owns; F-0's "no string-as-rule in a view", applied to the copy beside
+    /// the rule).
+    static let closedDoorHelp = "Show only the notes edited on one day"
+    static let clearDoorHelp = "Clear the day \u{2014} list every note again"
+
     /// The caveat, in one sentence — on the door's hover whenever the filter
     /// is armed, and under the empty answer when it finds nothing.
     static let caveat =
@@ -203,7 +210,7 @@ struct LibraryDayField: View {
                     Text("\u{2715}")
                 }
                 .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
-                .help("Clear the day — list every note again")
+                .help(LibraryDayFace.clearDoorHelp)
                 .accessibilityLabel("Clear the day filter")
             } else {
                 Button {
@@ -215,9 +222,7 @@ struct LibraryDayField: View {
                 .accessibilityLabel("Filter by the day a note was edited")
             }
         }
-        .help(day == nil
-              ? "Show only the notes edited on one day"
-              : LibraryDayFace.caveat)
+        .help(day == nil ? LibraryDayFace.closedDoorHelp : LibraryDayFace.caveat)
     }
 }
 

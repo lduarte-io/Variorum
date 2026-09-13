@@ -72,7 +72,21 @@ nonisolated enum LibrarySortWords {
 
     /// What a surface says for any case: her word where she has ruled one,
     /// the app's own otherwise.
+    ///
+    /// **An exhaustive switch, not a `??`** (the 18h ladder's R3-4).
+    /// `ruledLabel`'s own switch does fail the build on a new `LibrarySort`
+    /// case — but the cheapest way to satisfy it is `case .newThing: nil`,
+    /// and the `??` then silently labelled the new sort *"last meaningful
+    /// edit"*: a word about a DIFFERENT column, on both platforms. Naming the
+    /// cases here too means a case that is in neither list fails the build in
+    /// both places, so it has to be ANSWERED rather than inherit an answer.
+    /// The four words themselves still live in exactly one table above; the
+    /// `??` in the first arm is unreachable by that table's own shape and is
+    /// there only so the arm needs no force-unwrap.
     static func label(_ sort: Queries.LibrarySort) -> String {
-        ruledLabel(sort) ?? unruledLabel
+        switch sort {
+        case .lastTouched, .createdAt, .entryDate, .title: ruledLabel(sort) ?? unruledLabel
+        case .lastMajorRevision: unruledLabel
+        }
     }
 }

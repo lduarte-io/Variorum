@@ -919,7 +919,10 @@ enum PostDetailOracle {
         stampShown[postID] = nil
         stampEditedAt[postID] = nil
         flipStamp[postID] = nil
-        MastheadGeometry.stampFrames[postID] = nil
+        // …and the GEOMETRY oracle clears its own row (the ladder's R3-10):
+        // one call site for a pin, but neither oracle reaches into the
+        // other's storage.
+        MastheadGeometry.forgetStamp(postID)
     }
 }
 
@@ -956,6 +959,12 @@ enum MastheadGeometry {
 
     /// The one-window read, for a pin that mounted exactly one detail.
     static var stampFrame: CGRect? { stampFrames.values.first }
+
+    /// Forget ONE note's stamp frame — this oracle's own door, called by
+    /// `PostDetailOracle.resetStamp` when a masthead's note goes away (the
+    /// 18h ladder's R3-10: that function used to assign into `stampFrames`
+    /// directly, so one oracle owned another's storage lifetime).
+    static func forgetStamp(_ postID: String) { stampFrames[postID] = nil }
 
     static func record(_ slot: MastheadProbeSlot, _ frame: CGRect) {
         switch slot {

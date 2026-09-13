@@ -69,12 +69,20 @@ struct MastheadStamp: View {
             }
             #if DEBUG
             // The four DEBUG oracles are this note's while its masthead
-            // stands, and nobody's after (the ladder's R2-9). Without the
-            // second line they grow one entry per note ever mounted — a
+            // stands, and nobody's after (the ladder's R2-9). Without a
+            // teardown they grow one entry per note ever mounted — a
             // retained closure among them — and a pin that forgot to reset
             // could read an earlier mount's words as if they were this
             // note's.
+            //
+            // **The PER-NOTE boundary is the swap, not the disappearance**
+            // (the ladder's R3-10): a `.task(id: postID)` swap — the view
+            // staying, the note changing — runs no `onDisappear`, so the
+            // PREVIOUS note's three entries and its `stampFrames` row
+            // survived it. They are cleared here, where the old id is still
+            // in hand.
             .onAppear { PostDetailOracle.flipStamp[postID] = { flip() } }
+            .onChange(of: postID) { old, _ in PostDetailOracle.resetStamp(old) }
             .onDisappear { PostDetailOracle.resetStamp(postID) }
             #endif
     }

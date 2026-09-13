@@ -5291,8 +5291,8 @@ piece below.
 | 0 | orientation + the mount-ordering trace | **DONE (this commit)** |
 | 1 | R-Q20 — the landing wins over the remembered place (the condition + its pins) | **DONE (this commit)** |
 | 2 | R-Q17 — the card (both where room, the flip where small) + R3-2 (the List row's lead slot) + QUESTIONS #103 | **DONE (`2b7a86d6`)** — R3-2's red measured by behavioral revert and RESTORED; **no revert is in flight** |
-| 3 | R3-1 — the synchronous selection clear (R3-6 rides it) | **DONE (this commit)** — the compile-red is measured by revert at the next commit; **no revert is in flight at this one** |
-| 4 | the NIT sweep (R3-4…R3-10) | **NOT-STARTED** |
+| 3 | R3-1 — the synchronous selection clear (R3-6 rides it) | **DONE (`e62987e6`)** — the compile-red measured by revert and RESTORED; **no revert is in flight** |
+| 4 | the NIT sweep (R3-4 · R3-5 · R3-7 · R3-8 · R3-9 · R3-10; R3-6 landed with piece 3) | **DONE (this commit)** |
 | 5 | the walk (the acceptance gate) + the closing runs | **NOT-STARTED** |
 
 **Items:** R-Q20 · R-Q17 · R3-2 · R3-1 · R3-4 · R3-5 · R3-6 · R3-7 · R3-8 · R3-9 · R3-10 —
@@ -5533,13 +5533,24 @@ field's `private(set)` exists to force; it now calls `setEditedOn(nil)`. Byte-id
 today (nil takes the same path) — the point is that two writers of one field is how a future clause
 inside that door (QUESTIONS #104's option (c), say) gets skipped on one of the two roads.
 
-**RED ON OLD — PENDING at this commit; the revert is announced here before it starts.** This one is
-a COMPILE red by its nature and the reviewer said so: on the pre-fix tree `modeChanged()` was
-`async`, so there is no way to read the selection in the same turn that changed the mode — the pin
-cannot be written. The revert is one line (the signature back to `async`, the body's `return`s
-dropped) and the errors it raises at the pin are the evidence; pre-revert copies in
-`scratchpad/17q-prerevert/`, restored with `git checkout --`. **At THIS commit no revert is in
-flight.**
+**RED ON OLD — MEASURED BY BEHAVIORAL REVERT, then RESTORED** (announced in the previous commit
+before it started; pre-revert copies in `scratchpad/17q-prerevert/`, restored with `git checkout --`
+and verified byte-identical by `diff`; **no revert is in flight**). This one is a COMPILE red by its
+nature and the reviewer said so: on the pre-fix tree `modeChanged()` was `async`, so there is no way
+to read the selection in the same turn that changed the mode — the pin cannot be written. With the
+model's signature back to `async` and the view's `onChange` back to `Task { await … }`
+(`/tmp/17q-red3b.log`, local):
+
+```
+LibraryDayFilterTests.swift:337:31: error: binary operator '==' cannot be applied to operands of type '()' and 'Bool'
+LibraryDayFilterTests.swift:365:41: error: binary operator '==' cannot be applied to operands of type '()' and 'Bool'
+LibraryDayFilterTests.swift:405:22: error: cannot convert value of type '()' to expected condition type 'Bool'
+```
+
+…and with only the MODEL reverted, the view's own call site fails first
+(`LibraryCatalogView.swift:225:22: error: cannot convert value of type '()' to expected condition
+type 'Bool'`, `/tmp/17q-red3.log`) — which is the fix stated as a type: the door's shape is what
+makes the caller able to clear now and read later. Restored and green again.
 
 **Pins.** `LibraryDayFilterTests.theModeChangeClearsThePickInItsOwnUpdate` (new) — two notes picked
 and an info subject set, the mode flipped, `modeChanged()` called with **no `await` between it and
@@ -5554,4 +5565,30 @@ headless pin** — the rig cannot mount the whole catalog (KnownIssues) — so t
 **GREEN:** `✔ Test run with 24 tests in 2 suites passed after 4.961 seconds`
 (`LibraryDayFilterTests` 10 + `LibraryCardStampsTests` 5… and the counts are the suites', not a sum —
 the log's own line is the record).
+
+---
+
+#### PIECE 4 — THE NIT SWEEP (R3-4 · R3-5 · R3-7 · R3-8 · R3-9 · R3-10; R3-6 landed with piece 3)
+
+All seven of the 18h ladder's cap NITs are taken. **Which changed BEHAVIOUR and which did not** is
+said per item, as the brief asks; no pin is owed where behaviour is byte-identical, and each of those
+says so.
+
+| # | what landed | behaviour |
+|---|---|---|
+| **R3-4** | `LibrarySortWords.label` is an EXHAUSTIVE switch instead of `ruledLabel(sort) ?? unruledLabel`. `ruledLabel`'s own switch already failed the build on a new `LibrarySort` case — but the cheapest way to satisfy it is `case .newThing: nil`, and the `??` then labelled the new sort *"last meaningful edit"*, a word about a DIFFERENT column, on both platforms. The four words still live in exactly one table; the `??` left in the first arm is unreachable by that table's shape and is there only so the arm needs no force-unwrap. | **BYTE-IDENTICAL** — a compile-time shape. No pin owed; the two shipped pins (`ruledLabel(.lastMajorRevision) == nil` and `M.sortWord(.lastMajorRevision) == "last meaningful edit"`) ride and are the proof nothing moved. |
+| **R3-5** | `JournalDay.date(from:calendar:)`'s default is `JournalDay.storeCalendar`, the one R2-8 gave its own inverse (`DayBounds.init?`). Under a Hebrew `Calendar.current` a valid Gregorian key passes `isValid` — proleptic Gregorian — and then builds year/month/day as a HEBREW date: a silently wrong, NON-NIL instant no caller can notice. | **BYTE-IDENTICAL for every caller today** (all four pass a calendar explicitly — re-grepped across `Sources` and `App`). No red-on-old exists to write; same class as R2-8. Core suites re-run. |
+| **R3-7** | One clause in `LibrarySort.title`'s doc: **"case-insensitively" means ASCII.** `COLLATE NOCASE` folds `A–Z` only — the reviewer's own `sqlite3` measurement (*apple · Apple · Zoe · Émile · émile*: every accent-initial title after every ASCII one, `É`/`é` adjacent by code-point luck) is quoted. SQLite has no built-in locale collation and the Swift-side alternative re-opens the "cost ∝ what the query returned" trade this letter settled, so the ASCII fold is the accepted SHAPE. | **DOC ONLY.** The `.title` pins exercise ASCII, so they are true of what they test; the clause is what the word covers. The test's NAME is left alone deliberately — the reviewer's fix was the doc clause, and renaming a shipped pin is a test edit with no claim behind it. |
+| **R3-8** | Three tooltip literals out of view bodies. `LibrarySortMenu`'s `.help` is now **composed** from `LibrarySortFace.offered` + the one word table (`doorHelp`) — the shipped literal re-spelled all four words, so a rename in `LibrarySortWords` left it lying, one file over from the drift R1-7 retired. `LibraryDayField`'s two join `LibraryDayFace` (`closedDoorHelp` · `clearDoorHelp`), beside the sentences that type already owns. | **The sort tooltip's TEXT is unchanged today** (the composition reproduces it word for word) and becomes correct-by-construction tomorrow; the day's two are byte-identical literals moved. No pin owed. |
+| **R3-9** | `LibraryCopy.swift`'s mid-file `import SwiftUI` moved to the header beside `import Foundation`. | **BYTE-IDENTICAL.** |
+| **R3-10** | Taken in the half that has no trade, and the other half RECORDED. **Taken:** the per-note boundary is the SWAP — `MastheadStamp` now clears the PREVIOUS note's oracles from `.onChange(of: postID) { old, _ in … }`, where the old id is still in hand (a `.task(id:)` swap with the view staying runs no `onDisappear`, so those three entries and the `stampFrames` row survived it); and `MastheadGeometry` clears its OWN row through `forgetStamp(_:)`, so `PostDetailOracle.resetStamp` no longer owns another oracle's storage lifetime. | **DEBUG-ONLY, and no pin owed** (all `#if DEBUG`; `MastheadStampTests`, `MastheadLayoutTests` and `MastheadTagDoorTests` ride unmodified and green). **LEFT, with its reason:** the reviewer's other edge — the SAME note open in two windows, where closing either runs `resetStamp(postID)` and clears the oracles the other masthead is still maintaining — is not fixed. Fixing it needs ownership tracking (which view's entry is this?), which is real machinery for a DEBUG-only corner no pin reaches, and dropping `onDisappear` to avoid it would re-open the growth R2-9 closed. Recorded rather than papered over. |
+
+**GREEN after the sweep:** core `swift test --filter
+'LibraryTimeSortTests|TimeStampFaceTests|DayBoundsTests|LibraryDaySearchTests|NoteStampsTests|JournalDay'`
+→ **`✔ Test run with 46 tests in 5 suites passed after 1.923 seconds`**; Mac (the seven touched
+suites) → **`✔ Test run with 54 tests in 7 suites passed after 35.860 seconds`**
+(`LibraryDayFilterTests` · `LibraryCardStampsTests` · `LibrarySortMenuTests` ·
+`LibraryRowAlignmentTests` · `MastheadStampTests` · `MastheadLayoutTests` · `MastheadTagDoorTests`);
+iOS (owed — `App/Variorum/Shared/LibrarySortWords.swift` and `Sources/` both moved) →
+**`** BUILD SUCCEEDED **`**.
 

@@ -147,6 +147,18 @@ extension Queries {
         /// `substr(created_at, 1, 10)` is NOT the fix: a UTC slice is exactly
         /// what `DisplayTitle.day(fromStamp:)`'s own doc rejects, and the
         /// inversion survives it.
+        ///
+        /// **AND "case-insensitively" MEANS ASCII** (the 18h ladder's R3-7 —
+        /// the accepted shape, named rather than implied). `COLLATE NOCASE`
+        /// folds `A–Z` only: measured in `sqlite3` 3.51, `ORDER BY x COLLATE
+        /// NOCASE` over *apple · Apple · Zoe · Émile · émile* puts every
+        /// accent-initial title after every ASCII one, and `É`/`é` land
+        /// adjacent by code-point luck rather than by folding. SQLite has no
+        /// built-in locale collation, and the alternative — sorting in Swift
+        /// — re-opens the "cost ∝ what the query returned" trade this letter
+        /// just settled, so the ASCII fold is the shape, not an oversight.
+        /// The `.title` pins exercise ASCII, so they are true of what they
+        /// test; this clause is what the word covers.
         case title
 
         var expression: String {

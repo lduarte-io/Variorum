@@ -55,7 +55,19 @@ public enum JournalDay {
     /// its own copy of the noon rule. Two copies of one rule are the drift
     /// class (MobileSoul §3), so it lives here once, beside the function it
     /// inverts, and both callers read it.)*
-    public static func date(from day: String, calendar: Calendar = .current) -> Date? {
+    /// *(The default is `storeCalendar`, not `.current` — the 18h ladder's
+    /// R3-5, the same correction R2-8 made to this function's own inverse,
+    /// `DayBounds.init?(day:calendar:)`. A type whose doc explains why the
+    /// system calendar is unsafe for a day KEY must not hand it out as the
+    /// default: under a Hebrew `Calendar.current` a valid Gregorian key
+    /// passes `isValid` — which is proleptic Gregorian — and then builds
+    /// year/month/day as a HEBREW date, returning a silently wrong instant
+    /// that is non-nil, so no caller can notice. Every production caller
+    /// already passes a calendar explicitly; this is the safe answer for the
+    /// next one.)*
+    public static func date(
+        from day: String, calendar: Calendar = JournalDay.storeCalendar
+    ) -> Date? {
         guard isValid(day) else { return nil }
         let parts = day.split(separator: "-").compactMap { Int($0) }
         guard parts.count == 3 else { return nil }

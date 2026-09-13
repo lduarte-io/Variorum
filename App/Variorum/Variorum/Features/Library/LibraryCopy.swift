@@ -20,6 +20,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 nonisolated enum LibraryCopy {
     /// The List mode's silence — books, notes and blocks all empty.
@@ -44,7 +45,6 @@ nonisolated enum LibraryCopy {
     }
 }
 
-import SwiftUI
 
 /// The quiet line under a capped listing. One view, both modes — the same
 /// reason the sentences above live in one place.
