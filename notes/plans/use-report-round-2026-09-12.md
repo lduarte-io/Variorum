@@ -5289,7 +5289,7 @@ piece below.
 | # | piece | state |
 |---|---|---|
 | 0 | orientation + the mount-ordering trace | **DONE (this commit)** |
-| 1 | R-Q20 — the landing wins over the remembered place (the condition + its pins) | **NOT-STARTED** |
+| 1 | R-Q20 — the landing wins over the remembered place (the condition + its pins) | **DONE (this commit)** |
 | 2 | R-Q17 — the card (both where room, the flip where small) + R3-2 (the List row's lead slot) + QUESTIONS #103 | **NOT-STARTED** |
 | 3 | R3-1 — the synchronous selection clear | **NOT-STARTED** |
 | 4 | the NIT sweep (R3-4…R3-10) | **NOT-STARTED** |
@@ -5362,4 +5362,69 @@ reach:
   the arriving landing is settled on the spot (the app's order).
 A `.settled` restore is left alone in both (nothing to cancel), and a memory of `.top` already
 settles at once with no scroll, so a landing trivially wins there and no branch is owed.
+
+---
+
+#### PIECE 1 — R-Q20: THE LANDING WINS OVER THE REMEMBERED PLACE
+
+**RED ON OLD, measured before a line of the rule moved** (`/tmp/17q-red1.log`, local — the counter
+and the three pins on the tree with the OLD rule: `✘ Test run with 23 tests in 1 suite failed after
+21.998 seconds with 7 issues`):
+
+- `theLandingOutranksARememberedRowButNotTheSameOne` — **six issues.** The harness's order (a): the
+  step was **`.scrollToRow("left")` where `.remember(.top)` is owed**, the restore left
+  **`.wanted(rowID: "left")` where `.settled` is owed**, **`articleRestoreAims → 1` where 0 is
+  owed**, and `articleReadyForLanding → false` (the landing could not even be spent yet). The app's
+  order (d): the same two, after the landing arrived mid-restore.
+- `aLandingOnAnotherBlockWinsOverTheRememberedPlace` (mounted, 60 blocks, left at 800 pt, returning
+  on the note's LAST block) — **`second.board.articleRestoreAims → 3` where 0 is owed**: the page
+  was hauled to the remembered row first and the reveal then moved it again. J3's double move, in a
+  number.
+- `aLandingOnTheBlockSheLeftAtTheTopStillRestoresThePlace` — **GREEN on both sides, deliberately**:
+  it is the mirror guard (she comes back to the same block; the memory still rules), not a
+  red-on-old claim. Said outright rather than counted as evidence.
+
+**Why the number and not the page.** Both roads end at the SAME rest — a reveal's
+`scrollTo(row, .bottom)` is absolute, so the destination cannot discriminate. What her ruling
+removes is the MOVE, and "the page was left alone on the way" is measurable only as the restore's own
+aim count. So the counter `TakesBoardLayout.articleRestoreAims` was added beside the shipped
+`articleLandingAims` (the same `measuredHeightWrites` precedent: a plain counter, not DEBUG-gated),
+and the pins read it through `model.board` — **no new view-model forwarder** (R1-6's lesson: the
+batch that added ten forwarders shipped three dead ones).
+
+**What shipped.** ONE pure predicate, `TakesBoardLayout.landingOutranks(_:remembered:)` — a landing
+outranks a remembered ROW when it names a different one (nil for no landing, and for the TOP, which
+settles at once and issues no scroll anyway) — consulted at the two places the two mount orders
+reach, per the trace above:
+
+1. **`consumeArticleGeometry`'s `.undecided` branch** — a landing already pending at the first
+   geometry settles the restore at once and issues no scroll (the pins' order, and the app's if a
+   projection ever beats the first layout).
+2. **`landArticle(on:)`** — a restore already `.wanted(place)` at a different row is settled on the
+   spot (the app's own order). Nothing has moved when it fires: before `adopt` the column holds no
+   rows, so the restore's aims were no-ops at an id the column does not hold.
+
+`TakesChoreographer` is **untouched** — what a landing NAMES is unchanged; only what it outranks
+moved. The memory's shape, the reveal's anchor rule, the bounded step machine, the her-hand set and
+the room are all byte-unchanged (`git diff` touches `TakesBoardLayout.swift` and the one test file).
+
+**Two consequences of her letter, recorded rather than hidden** (both written into
+`landingOutranks`' doc so the next reader finds them in the code):
+
+1. **A landing on a block that was INSIDE the page she left — visible, but not the row at its top —
+   wins too**, so the page opens at the top and reveals that block at the foot rather than restoring
+   the view she had. That is her letter exactly (*"the remembered place is not restored"*); ranking
+   the memory above a landing whose row it already shows is a rule she did not ask for. It is the
+   ruled reading, not a corner.
+2. **The memory is rewritten the moment the landing wins**: settling without aiming lets
+   `rememberStep` record the page's current place (the top), and the memory then converges to
+   wherever the reveal comes to rest — which is what she comes back to next time.
+
+**GREEN:** `✔ Test run with 23 tests in 1 suite passed after 21.989 seconds`
+(`TakesArticleScrollTests`, 20 shipped + 3 new), and the landing neighbourhood in one run —
+`✔ Test run with 76 tests in 10 suites passed after 67.090 seconds` (`TakesArticleScrollTests` ·
+`TakesLandingTests` · `CommandRouterTests` · `TakesRoomTests` · `TakesBoardTests` ·
+`TakesEmptyBlockFaceTests` · `TakesArticleRenderTests` · `TakesBoardSoakTests` ·
+`CurrentBlockContinuityTests` · `LandingOffsetTests`). Every shipped landing and restore pin rides
+**unmodified** — the only test-file change is the three appended pins.
 
