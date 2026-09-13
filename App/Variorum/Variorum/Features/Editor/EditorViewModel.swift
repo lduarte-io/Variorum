@@ -2753,7 +2753,13 @@ final class EditorViewModel {
     /// it is not the moment she asked for.
     func saveNoteVersion() async {
         do {
-            showStatus(try await VersionActs.save(session: session, postID: postID))
+            // FOUND ON THE ROUND-2 WALK (18i): the moment LANDED, so this is
+            // a RECEIPT and her setting governs it — the board's twin
+            // (`TakesViewModel.saveNoteVersion`) has always classed it that
+            // way, and this arm's `showStatus` kept ⌘⇧S toasting over Write
+            // and the book's inline editor under the default she chose to
+            // stop the toasting. The J38 class, other direction.
+            showReceipt(try await VersionActs.save(session: session, postID: postID))
         } catch {
             showStatus(VersionActs.words(error))
         }

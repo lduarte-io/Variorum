@@ -279,6 +279,34 @@ struct ConfirmationsSettingTests {
         }
     }
 
+    // MARK: - Found ON THE WALK, round 2 (the J38 class, other direction)
+
+    /// **⌘⇧S's RECEIPT IS A RECEIPT** — found on the round-2 walk, which
+    /// captured it toasting over the book's Outline while her setting said
+    /// quiet. `EditorViewModel.saveNoteVersion`'s SUCCESS arm spoke through
+    /// `showStatus` — the always-shown refusal door — so the one door whose
+    /// twin two files over (`TakesViewModel:1775`) is a `.receipt` behaved
+    /// differently on Write and the book's inline editor than on the boards,
+    /// and kept toasting under the default she chose to stop the toasting.
+    ///
+    /// Same class as the round-2 BLOCKER, opposite direction: there a refusal
+    /// wore a receipt's clothes and could be hidden; here a receipt wears a
+    /// refusal's and cannot be quieted. The error arm stays `showStatus`.
+    ///
+    /// **Red on old:** the sentence in `current`, `quietLine == nil`.
+    @Test func savingAVersionSpeaksQuietlyUnderHerDefault() async throws {
+        try await withEditor(seedBlocks: ["A note worth keeping."]) { h in
+            h.session.status.receiptStyle = .quiet
+
+            await h.model.saveNoteVersion()
+
+            #expect(h.session.status.current == nil, "no toast — this is the row")
+            #expect(h.session.status.quietLine?.kind == .receipt)
+            #expect(h.session.status.quietLine?.text.hasPrefix("Saved a version") == true,
+                    "the words are untouched: \(h.session.status.quietLine?.text ?? "nil")")
+        }
+    }
+
     // MARK: - The one predicate that keeps a no-op split a refusal (J32)
 
     /// **"MAKE EVERY NEWLINE A BLOCK" ON A NOTE THAT ALREADY IS** (the ladder
