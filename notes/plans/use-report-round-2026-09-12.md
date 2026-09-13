@@ -6939,7 +6939,10 @@ Both rows are the R3-1 class (a settle that the column's later measurement passe
   composition sites (Write's bar × 3 tiers · the takes bars × 2 arrangements · the note box's footer,
   which the book's live note inherits through 18d's seam). Its own red-on-old is not the shape — the
   slot did not exist; its evidence is the mounted geometry oracle plus the WALK.
-- **PIECE 5 — the Appearance pane's row: NOT-STARTED.**
+- **PIECE 5 — the Appearance pane's row: DONE (`8f6dff1d`).** Settings ▸ Appearance ▸ **Confirmations**,
+  its own section (it is neither the Editor's look nor the document's habits), three rows from
+  `ReceiptStyle.allCases`, `ReceiptStyleCopy` beside `SavepointCadenceCopy` with the sentence the
+  setting must never leave out. No suite mounts the pane — the walk is its evidence.
 - **PIECE 6 — the walk (the acceptance gate): NOT-STARTED.**
 - **THE CLOSING RUNS:** PENDING.
 
