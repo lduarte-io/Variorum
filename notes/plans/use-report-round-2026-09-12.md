@@ -10192,7 +10192,9 @@ batch pinned. Owner: **her final walk of the round** (the round's own re-walk be
   `-only-testing`** — the diff reaches `EditorDocument.baseAttributes`, which every TK2 surface write in
   the app goes through, so the honest close is everything):
   `✔ Test run with 2629 tests in 437 suites passed after 713.981 seconds.` · `** TEST SUCCEEDED **` ·
-  zero `✘`.
+  zero `✘`. *(Run over the tree at `44e25598`. ONE change landed after it — `7782099f` — and it is a TEST
+  file only (`NoLiteralColourTests.swift`, closing its own grep gap); its suite ran `✔ Test run with 2
+  tests in 1 suite passed` on the final tree and no production source moved, so the full result stands.)*
   **Skips (9 lines, all the standing opt-in gates, none new):** the four `pre-13x` drill suites and their
   tests — the Apple-key round trip, the migration drill, the posture drills, the adopt drill — each
   disabled unless its `TEST_RUNNER_VARIORUM_*` variable is set. (18g closed at 2604/433 and its ladder's
