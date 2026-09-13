@@ -9889,8 +9889,9 @@ and nothing was launched by me.
 ### R-7 · RECORD (the implementer writes here from its first commit)
 
 **LIVE STATUS — 18j (`opus-implementer`, opened 2026-09-14 at `7d62761f`; the code tree it builds on is
-`516802e9`). CLOSED 2026-09-13 at `44e25598` + this record commit; four code commits
-`9e2c6fb7..44e25598`.**
+`516802e9`). CLOSED 2026-09-13; **five code commits** — `9e2c6fb7` (the choice) · `17023bb9` (R2-1) ·
+`5e386598` (the walk's first find, and R2-5 carved by the same change) · `44e25598` (the pins) ·
+`7782099f` (the pin closing its own gap — a TEST file only) — plus the record commits.**
 
 **WHAT I HAVE NOT DONE (the record's first line).** **FOUR SWEEP ROWS WERE NOT WALKED** and are DEFERRED
 with their reason: the two ceremony sheets (*Divide choosing takes…* · *Merge choosing takes…*), This
