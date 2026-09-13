@@ -636,7 +636,12 @@ struct LibraryCatalogView: View {
                 // AM"* where it used to print the raw stored day
                 // ("2026-09-09"), which is the shape she asked to see
                 // "easily" and the shape Apple Notes' own card wears.
-                CatalogRowStamp(tokens: tokens, face: LibrarySortFace.rowStamp(model.sort, for: hit))
+                // 17q (her R-Q17 on #103): …and the day she STATED stands
+                // beside it where the row has room, the two collapsing to
+                // one click-flipping stamp where it does not.
+                CatalogCardStamps(
+                    tokens: tokens, postID: hit.id,
+                    stamps: LibrarySortFace.rowStamps(model.sort, for: hit))
                 Spacer(minLength: 0)
                 if !card.books.isEmpty {
                     Text(tokens.chromeLabel(card.books.joined(separator: " · ")))
@@ -706,12 +711,19 @@ struct LibraryCatalogView: View {
             onDoubleClick: { openHit(hit) }
         ) {
             CatalogNoteLine(
-                tokens: tokens, title: hit.title, date: hit.detail,
+                // 17q (the 18h ladder's R3-2): the beside-the-title day is
+                // the one rule's, and it stands down under the `date` sort —
+                // the trailing stamp is already saying that day, and one
+                // fact printed twice in two grammars is what the ladder
+                // found.
+                tokens: tokens, title: hit.title,
+                date: LibrarySortFace.rowStamps(model.sort, for: hit).listDay,
                 tags: model.postTags[hit.id] ?? [], allTags: tags.tags,
                 onTitleTap: { openHit(hit) },
                 onApply: { path in Task { await model.applyTypedPath(path, to: [hit.id]) } },
                 onRemove: { tag in Task { await model.removeTag(tag.id, from: [hit.id]) } },
-                stamp: LibrarySortFace.rowStamp(model.sort, for: hit))
+                stamp: LibrarySortFace.rowStamp(model.sort, for: hit),
+                oracleKey: hit.id)
         }
         .draggable(hit.id)
         .contextMenu { postRowMenu(hit) }
@@ -1043,6 +1055,13 @@ struct CatalogBookLine: View {
 struct CatalogNoteLine: View {
     let tokens: VoiceTokens
     let title: String
+    /// **The day she STATED** (`container.entry_date`), or nothing. Worded
+    /// by the one brain since 17q (the 18h ladder's R3-2 — this slot printed
+    /// the RAW stored `2026-09-08` beside worded stamps, so the List row and
+    /// the Notes card spoke one note's time in two grammars); the CALLER
+    /// decides whether the row carries it at all
+    /// (`LibrarySortFace.RowStamps.listDay` — nothing under the `date` sort,
+    /// where the trailing stamp already says that day).
     let date: String?
     let tags: [Tag]
     let allTags: [Tag]
@@ -1056,6 +1075,9 @@ struct CatalogNoteLine: View {
     var stamp = LibrarySortFace.RowStamp(subject: .edited, stamp: nil)
     /// "now" for the stamp's words, injected by the pin that fixes the clock.
     var now: Date = Date()
+    /// The note this row is about — the DEBUG words oracle's key (17q; nil
+    /// off the pinned surfaces, and the oracle itself is DEBUG-only).
+    var oracleKey: String?
 
     static let probeSpace = "catalog-note-line"
 
@@ -1067,8 +1089,12 @@ struct CatalogNoteLine: View {
                 .baselineProbe("note.title", in: Self.probeSpace)
                 .onTapGesture(perform: onTitleTap)
             if let date {
-                Text(date).font(tokens.small).foregroundStyle(tokens.muted)
-                    .baselineProbe("note.date", in: Self.probeSpace)
+                CatalogRowStamp(
+                    tokens: tokens,
+                    face: LibrarySortFace.RowStamp(subject: .dated, stamp: date), now: now,
+                    baselineProbePrefix: "note", baselineProbeSpace: Self.probeSpace,
+                    baselineProbeName: "date",
+                    oracleKey: oracleKey, oracleSlot: "row.date")
             }
             NoteTagsRow(
                 tokens: tokens, tags: tags, allTags: allTags,
@@ -1080,7 +1106,8 @@ struct CatalogNoteLine: View {
             // title's own baseline, the whole fact on hover.
             CatalogRowStamp(
                 tokens: tokens, face: stamp, now: now,
-                baselineProbePrefix: "note", baselineProbeSpace: Self.probeSpace)
+                baselineProbePrefix: "note", baselineProbeSpace: Self.probeSpace,
+                oracleKey: oracleKey, oracleSlot: "row.stamp")
         }
         .coordinateSpace(name: Self.probeSpace)
     }

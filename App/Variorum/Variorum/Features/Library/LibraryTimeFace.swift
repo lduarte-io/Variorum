@@ -114,6 +114,76 @@ nonisolated enum LibrarySortFace {
         let stamp: String?
     }
 
+    /// **THE TWO FACTS A NOTE ROW CAN SHOW** (17q — her ruling R-Q17 on
+    /// QUESTIONS #103, 2026-09-13: *"in the library / pool there's enough
+    /// room to show both. if the area is small, the same UI i mentioned
+    /// earlier of clicking on the time should switch to show you the date
+    /// created or the date associated with the note"*).
+    ///
+    /// ONE rule, both note renderers — the List row and the Notes card — so
+    /// the two modes can no longer word one note's time differently (the 18h
+    /// ladder's R3-2, which found the List row still printing the raw stored
+    /// `entry_date` beside worded stamps, and the same day twice under the
+    /// `date` sort).
+    struct RowStamps: Equatable {
+        /// **The day she stated** (`entry_date`) — the fact the Notes card's
+        /// one slot carried from 13g until 18h, and the List row's
+        /// beside-the-title slot. nil-stamped when she never stated one.
+        let stated: RowStamp
+        /// **The other fact worth the glance:** the SORT's own stamp — or,
+        /// when the sort IS the stated day, the EDIT stamp, so one fact is
+        /// never printed twice (R3-2's letter).
+        let other: RowStamp
+        /// True when the sort's own stamp IS the stated day (`.entryDate`).
+        let sortIsTheStatedDay: Bool
+
+        /// The one a SMALL card shows before she clicks: the SORT's own, so
+        /// the stamp on screen always explains the order she is looking at.
+        var sorted: RowStamp { sortIsTheStatedDay ? stated : other }
+        /// The one her click reveals.
+        var unsorted: RowStamp { sortIsTheStatedDay ? other : stated }
+
+        /// **The List row's beside-the-title day** — the stated day, or
+        /// NOTHING when the row's trailing stamp is already saying that same
+        /// day (R3-2: one fact, never twice). The List row keeps its trailing
+        /// stamp exactly as 18h shipped it, so this is the only slot 17q
+        /// moves there.
+        var listDay: String? { sortIsTheStatedDay ? nil : stated.stamp }
+    }
+
+    static func rowStamps(
+        _ sort: Queries.LibrarySort, for hit: Queries.CatalogHit
+    ) -> RowStamps {
+        let sorted = rowStamp(sort, for: hit)
+        let isTheStatedDay = sorted.subject == .dated
+        return RowStamps(
+            stated: isTheStatedDay ? sorted : rowStamp(.entryDate, for: hit),
+            // When the sort IS the stated day the OTHER fact is the edit
+            // stamp — the honest second, and the one she asked to see
+            // "easily" in the first place.
+            other: isTheStatedDay ? rowStamp(.lastTouched, for: hit) : sorted,
+            sortIsTheStatedDay: isTheStatedDay)
+    }
+
+    /// The door's tooltip, COMPOSED from the offered cases and the one word
+    /// table (the 18h ladder's R3-8 — the shipped literal re-spelled the four
+    /// words, so a rename in `LibrarySortWords` left it lying).
+    static var doorHelp: String {
+        "Sort the notes \u{2014} " + offered.map(label).joined(separator: " \u{B7} ")
+            + ", newest or oldest first"
+    }
+
+    /// What a click on a small card's one stamp is about to do — the
+    /// masthead's own tooltip grammar (*"click to see when it was
+    /// created"*), said here so no view body spells it.
+    static func flipHint(to subject: TimeStampFace.Subject) -> String {
+        switch subject {
+        case .created: "click to see when it was created"
+        case .edited: "click to see when it was last edited"
+        case .dated: "click to see the day this note is about"
+        }
+    }
+
     static func rowStamp(
         _ sort: Queries.LibrarySort, for hit: Queries.CatalogHit
     ) -> RowStamp {
@@ -172,7 +242,10 @@ struct LibrarySortMenu: View {
                 }
             }
         }
-        .help("Sort the notes — edited · created · date · title, newest or oldest first")
+        // The 18h ladder's R3-8: composed from the one word table, never
+        // re-spelled here — a rename in `LibrarySortWords` used to leave this
+        // sentence stale (the drift R1-7 closed one file over).
+        .help(LibrarySortFace.doorHelp)
     }
 }
 
@@ -200,16 +273,169 @@ struct CatalogRowStamp: View {
     /// elsewhere — `baselineProbe` itself no-ops on a nil id.
     var baselineProbePrefix: String?
     var baselineProbeSpace: String = ""
+    /// Which slot of the row this stamp is — `note.stamp` by default (the
+    /// trailing one 18h shipped); the List row's beside-the-title day passes
+    /// `date`, so the shipped alignment pin's `note.stamp` keeps meaning what
+    /// it measured.
+    var baselineProbeName: String = "stamp"
+    /// The DEBUG words oracle: the note this stamp is about, and which slot
+    /// it fills. Both nil off the pinned surfaces (KnownIssues row 53: an
+    /// oracle is keyed by its SUBJECT, never global).
+    var oracleKey: String?
+    var oracleSlot: String = ""
+    /// One clause appended to the tooltip where a click does something (the
+    /// small card's flipping stamp) — the words are `LibrarySortFace`'s.
+    var helpSuffix: String?
 
     var body: some View {
         if let words = TimeStampFace.stamp(face.subject, iso: face.stamp, now: now) {
+            let whole = TimeStampFace.tooltip(face.subject, iso: face.stamp) ?? words
             Text(tokens.chromeLabel(words))
                 .font(tokens.small)
                 .foregroundStyle(tokens.muted)
                 .lineLimit(1)
                 .fixedSize()
-                .help(TimeStampFace.tooltip(face.subject, iso: face.stamp) ?? words)
-                .baselineProbe(baselineProbePrefix.map { "\($0).stamp" }, in: baselineProbeSpace)
+                .help(helpSuffix.map { "\(whole) \u{2014} \($0)" } ?? whole)
+                .baselineProbe(
+                    baselineProbePrefix.map { "\($0).\(baselineProbeName)" },
+                    in: baselineProbeSpace)
+                .recordCatalogStamp(oracleKey, slot: oracleSlot, words: words)
         }
+    }
+}
+
+// MARK: - The Notes card's pair (17q — her ruling R-Q17)
+
+/// **BOTH FACTS WHERE THERE IS ROOM; ONE, WITH THE CLICK-FLIP, WHERE THERE
+/// IS NOT** (her R-Q17 on QUESTIONS #103, 2026-09-13: *"in the library /
+/// pool there's enough room to show both. if the area is small, the same UI
+/// i mentioned earlier of clicking on the time should switch to show you the
+/// date created or the date associated with the note"*).
+///
+/// **ONE width-aware decision, not two layouts** — `ViewThatFits(in:
+/// .horizontal)` picks the first arrangement whose IDEAL width fits the room
+/// the card's title row leaves. Every member is `fixedSize` + `lineLimit(1)`
+/// (`CatalogRowStamp` already is), which is what makes the judgement honest:
+/// a compressible child makes `ViewThatFits` call every arrangement a fit
+/// (the N15 gotcha, `CommitBar.boxPair`'s own doc).
+///
+/// **The small arrangement reuses the masthead's grammar** (`MastheadStamp`):
+/// a quiet button, the flip as VIEW state per note defaulting to the sort's
+/// own stamp, the tooltip saying the whole fact and what a click will show.
+/// It is not the same TYPE: the masthead flips between two subjects of a
+/// HELD `noteStamps` observation and carries the masthead's geometry probe,
+/// while this flips between two already-computed `RowStamp`s a catalog hit
+/// carries — so the shared thing is the WORDS (`TimeStampFace`, one brain)
+/// and the tooltip grammar, and a `FlippingStamp` hoist is named for the next
+/// touch rather than forced here (17q's record).
+///
+/// With only ONE fact to show (a note with no stated day) there is no flip
+/// door at all — a door that could not act is not rendered (P-2).
+struct CatalogCardStamps: View {
+    let tokens: VoiceTokens
+    /// The note this card draws — the DEBUG oracle's key.
+    let postID: String
+    let stamps: LibrarySortFace.RowStamps
+    /// "now", for the relative rule (the `CatalogRowStamp` convention).
+    var now: Date = Date()
+
+    @State private var showsTheOther = false
+
+    var body: some View {
+        if stamps.stated.stamp != nil, stamps.other.stamp != nil {
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    stamp(stamps.stated, slot: "card.wide.stated")
+                    stamp(stamps.other, slot: "card.wide.other")
+                }
+                flipping
+            }
+        } else {
+            stamp(stamps.stated.stamp != nil ? stamps.stated : stamps.other, slot: "card.only")
+        }
+    }
+
+    private func stamp(_ face: LibrarySortFace.RowStamp, slot: String) -> some View {
+        CatalogRowStamp(
+            tokens: tokens, face: face, now: now, oracleKey: postID, oracleSlot: slot)
+    }
+
+    private var shown: LibrarySortFace.RowStamp {
+        showsTheOther ? stamps.unsorted : stamps.sorted
+    }
+
+    private var flipping: some View {
+        Button {
+            showsTheOther.toggle()
+        } label: {
+            CatalogRowStamp(
+                tokens: tokens, face: shown, now: now,
+                oracleKey: postID, oracleSlot: "card.small",
+                helpSuffix: LibrarySortFace.flipHint(
+                    to: showsTheOther ? stamps.sorted.subject : stamps.unsorted.subject))
+        }
+        .buttonStyle(VoicedButtonStyle(tokens: tokens, role: .quiet))
+        .fixedSize()
+        .catalogStampFlipDoor(postID) { showsTheOther.toggle() }
+    }
+}
+
+// MARK: - The DEBUG words oracle (the `TakesCellChrome` pattern)
+
+#if DEBUG
+/// What a note row's time slots actually DREW, keyed by the note (row 53's
+/// rule: an oracle keyed by its subject, never a global singleton), and what
+/// a click on a small card's one stamp does. Idempotent across re-renders —
+/// a slot writes its own words, so a body that runs twice records once.
+@MainActor enum CatalogStampOracle {
+    static var shown: [String: [String: String]] = [:]
+    static var flip: [String: @MainActor () -> Void] = [:]
+
+    static func record(_ key: String?, slot: String, words: String) {
+        guard let key, !slot.isEmpty else { return }
+        shown[key, default: [:]][slot] = words
+    }
+
+    /// Forget this note's slots — called before a pin's mount so a stale
+    /// report cannot satisfy it, and by the card itself when it goes away
+    /// (the 18h ladder's R3-10: an oracle that only ever grows answers a
+    /// later pin with an earlier mount's words, and retains a closure each
+    /// time).
+    static func reset(_ key: String) {
+        shown[key] = nil
+        flip[key] = nil
+    }
+}
+#endif
+
+extension View {
+    /// The DEBUG words-oracle write (a no-op outside DEBUG, and on any stamp
+    /// that was given no key).
+    @ViewBuilder
+    func recordCatalogStamp(_ key: String?, slot: String, words: String) -> some View {
+        #if DEBUG
+        self
+            .onAppear { CatalogStampOracle.record(key, slot: slot, words: words) }
+            .onChange(of: words) { _, new in
+                CatalogStampOracle.record(key, slot: slot, words: new)
+            }
+        #else
+        self
+        #endif
+    }
+
+    /// The DEBUG flip door (a no-op outside DEBUG): a pin clicks the small
+    /// card's stamp the way `MastheadStamp`'s pin clicks the masthead's.
+    @ViewBuilder
+    func catalogStampFlipDoor(
+        _ postID: String, _ flip: @escaping @MainActor () -> Void
+    ) -> some View {
+        #if DEBUG
+        self
+            .onAppear { CatalogStampOracle.flip[postID] = flip }
+            .onDisappear { CatalogStampOracle.flip[postID] = nil }
+        #else
+        self
+        #endif
     }
 }

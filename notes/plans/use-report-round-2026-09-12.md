@@ -5290,7 +5290,7 @@ piece below.
 |---|---|---|
 | 0 | orientation + the mount-ordering trace | **DONE (this commit)** |
 | 1 | R-Q20 — the landing wins over the remembered place (the condition + its pins) | **DONE (this commit)** |
-| 2 | R-Q17 — the card (both where room, the flip where small) + R3-2 (the List row's lead slot) + QUESTIONS #103 | **NOT-STARTED** |
+| 2 | R-Q17 — the card (both where room, the flip where small) + R3-2 (the List row's lead slot) + QUESTIONS #103 | **DONE (this commit)** — R3-2's red-on-old is measured by BEHAVIORAL REVERT at the next commit (see below: no revert is in flight at this commit) |
 | 3 | R3-1 — the synchronous selection clear | **NOT-STARTED** |
 | 4 | the NIT sweep (R3-4…R3-10) | **NOT-STARTED** |
 | 5 | the walk (the acceptance gate) + the closing runs | **NOT-STARTED** |
@@ -5427,4 +5427,68 @@ the room are all byte-unchanged (`git diff` touches `TakesBoardLayout.swift` and
 `TakesEmptyBlockFaceTests` · `TakesArticleRenderTests` · `TakesBoardSoakTests` ·
 `CurrentBlockContinuityTests` · `LandingOffsetTests`). Every shipped landing and restore pin rides
 **unmodified** — the only test-file change is the three appended pins.
+
+---
+
+#### PIECE 2 — R-Q17: THE CARD SHOWS BOTH WHERE THERE IS ROOM (and R3-2: the List row's day)
+
+**ONE rule, both note renderers.** `LibrarySortFace.rowStamps(_:for:)` answers what a note row's two
+time facts are: **`stated`** — the day she stated (`entry_date`), the fact the Notes card's one slot
+carried from 13g until 18h — and **`other`** — the SORT's own stamp, *or the EDIT stamp when the sort
+IS that day*, so one fact is never printed twice. It also says which of the two the sort is about
+(`sorted` / `unsorted`, the small card's opening face and what her click reveals) and what the List
+row puts beside its title (`listDay` — nothing under the `date` sort, where the trailing stamp is
+already saying that day). The List row's TRAILING stamp is `rowStamp(sort, for: hit)`, byte-unchanged
+from 18h, as the brief requires.
+
+**The card's face.** `CatalogCardStamps` (in `LibraryTimeFace.swift`, never in the 1,101-line
+`LibraryCatalogView.swift` — F-0/P-9) offers **two arrangements to `ViewThatFits(in: .horizontal)`**:
+the pair side by side, and ONE flipping stamp. Every member is `fixedSize` + `lineLimit(1)` — which
+is what makes the judgement honest (the N15 gotcha `CommitBar.boxPair` records: a compressible child
+makes `ViewThatFits` call every arrangement a fit). **Measured, not assumed:** at 520 pt the pair
+drew and the flipping stamp's `onAppear` never ran; at 120 pt the reverse. So `ViewThatFits` places
+only the arrangement it chose, which is what the oracle reads.
+
+**The small card's flip reuses the masthead's grammar, and is deliberately NOT the same TYPE.** A
+quiet `VoicedButtonStyle(role: .quiet)` button, the flip as VIEW state per note defaulting to the
+SORT's own stamp, the tooltip saying the whole fact plus what a click will show. It is not hoisted
+into a shared `FlippingStamp` because the two flips differ in both halves that matter: `MastheadStamp`
+flips between two SUBJECTS of a HELD `noteStamps` observation and carries the masthead's geometry
+probe, while the card flips between two already-computed `RowStamp`s a catalog hit carries. What they
+share is the WORDS (`TimeStampFace`, one brain) and the tooltip grammar, and both already read them
+from the same place — so there is no second copy of a RULE, only a second twelve-line button. **The
+hoist is NAMED for the next touch** (13u2's Library restyle) rather than forced through
+`MastheadStamp`, whose pins the brief requires to ride unmodified. They do (`MastheadStampTests` 4/1,
+untouched).
+
+**The DEBUG words oracle** (`CatalogStampOracle`, `LibraryTimeFace.swift`) is the `TakesCellChrome`
+pattern with row 53's rule applied: keyed by the NOTE, one entry per SLOT (`card.wide.stated` ·
+`card.wide.other` · `card.small` · `card.only` · `row.date` · `row.stamp`) so a body that runs twice
+records once, reset by the pin before every mount, and the flip door torn down on `onDisappear`
+(R3-10's own hygiene, applied at birth rather than inherited).
+
+**GREEN:** `✔ Test run with 21 tests in 4 suites passed after 9.535 seconds` —
+`LibraryCardStampsTests` (5 new) · `LibraryRowAlignmentTests` · `LibrarySortMenuTests` ·
+`MastheadStampTests`, **the last three UNMODIFIED** (the parity proof: `CatalogNoteLine` kept its
+`date: String?` parameter, so the alignment pins construct the line exactly as they did; the trailing
+stamp keeps its `note.stamp` baseline id because the new day slot passes `baselineProbeName: "date"`).
+
+**The three calls this batch made inside her ruling — all recorded on QUESTIONS #103 as PROVISIONAL,
+each one line to change:** (i) the pair sits BESIDE THE TITLE (reading (i) of #103's R1-17 clause —
+the shape she pointed at); (ii) under the `date` sort the second fact is the EDIT stamp (the brief's
+own call: the sort's stamp there IS the stated day, and "both" cannot mean one fact twice); (iii) a
+note with NO stated day under the `date` sort now shows the EDIT stamp where it used to show nothing
+— not a special case but a CONSEQUENCE of the one rule (the first slot is silent, the second is "the
+other fact"), and it arrives at the answer #103's own "related edge" paragraph floated, from the
+other end.
+
+**RED ON OLD FOR R3-2 — PENDING at this commit, and the revert is announced here before it starts
+(the resiliency protocol's addendum 2).** R3-2's defect is a COMPOSITION, so its red needs both
+halves reverted: (1) `CatalogNoteLine`'s day slot back to `Text(date)` raw (with the oracle write
+kept, so the pin can still read what drew), and (2) the call site's `date:` back to `hit.detail`. The
+pin `theListRowSpeaksTheOneBrainAndNeverPrintsOneDayTwice` builds the line the way the call site does,
+so reverting (1) alone shows half of it and the pin's own `pair.listDay` shows the other. **At THIS
+commit no revert is in flight and the tree is the fixed one**; the pre-revert copies go in
+`scratchpad/17q-prerevert/` and the restore is `git checkout --`, never a copy-back. The numbers land
+in the next commit.
 
