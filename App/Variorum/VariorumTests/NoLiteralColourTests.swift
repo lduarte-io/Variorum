@@ -55,6 +55,16 @@ struct NoLiteralColourTests {
         "Surface/PaneSurface.swift",
         "Theme/VoiceControls.swift",
         "Features/Settings/DataSafetyPane.swift",
+        // 5. **`BlockDecor.swift`'s `CalloutPalette`** — the five callout
+        //    names' washes, and the ONE colour home in the app outside
+        //    `Shared/Theme` that is legitimately a table of values: it
+        //    already carries an explicit DARK arm for every name (R51's
+        //    "keep the fully-black room readable"), verified by reading at
+        //    18j. Its values are component constructions, not `Color(hex:)`,
+        //    so the first check above would have missed it — which is why
+        //    the second check below exists and why this entry is named
+        //    rather than left to a gap in the grep.
+        "Features/Editor/BlockDecor.swift",
     ]
 
     /// `Shared/Theme/` is the token layer itself (and `SharedPageStyle`'s
@@ -96,6 +106,14 @@ struct NoLiteralColourTests {
                     let text = String(line)
                     if text.contains("Color(hex:") {
                         offenders.append("\(relative):\(index + 1) — Color(hex:)")
+                    }
+                    // A colour built from COMPONENTS is the same literal
+                    // wearing another spelling — and the one the first check
+                    // misses (18j: `CalloutPalette` is exactly this shape).
+                    for form in ["srgbRed:", "calibratedRed:", "calibratedWhite:",
+                                 "NSColor(white:", "NSColor(red:", "UIColor(red:"]
+                    where text.contains(form) {
+                        offenders.append("\(relative):\(index + 1) — \(form)")
                     }
                     for hue in Self.hues where text.contains("Color.\(hue)") {
                         offenders.append("\(relative):\(index + 1) — Color.\(hue)")

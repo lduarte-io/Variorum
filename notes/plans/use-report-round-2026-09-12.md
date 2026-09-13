@@ -9971,7 +9971,14 @@ OWN CALLS for her eye instead. Everything else this batch decided is in that sec
   `DataSafetyPane`'s staleness warnings, the same class; `VoiceControls`, where the vocabulary lives). It
   found **three real offenders**, all FIXED to `tokens.alarm`: the "locked" mark in the Blocks workbench and
   in the note's index column (a literal orange that read as an alien hue in Terminal and as Study's own ring
-  hue in Study), and Compare's "moved (order differs in this version)" line.
+  hue in Study), and Compare's "moved (order differs in this version)" line. **The pin then closed its own
+  gap:** a colour built from COMPONENTS is the same literal in another spelling and the first check missed
+  it, so the pin also bans `srgbRed:` / `calibratedRed:` / `calibratedWhite:` / `NSColor(white:`,
+  `NSColor(red:`, `UIColor(red:` — which named the ONE such home in the app, `CalloutPalette`
+  (`BlockDecor.swift`), allow-listed with its reason: it is a legitimate table of values and **it already
+  carries an explicit DARK arm for all five callout names** (verified by reading, since the walk never got
+  a callout on screen — `green 17251A · sand 262012 · violet 1F1A2A · rose 2A1A1C · blue 14202B`, each a
+  deep tint that keeps the fully-black room readable, R51's own words in its doc).
 - **PIECE 4a — INHERITED item R2-1 (the stale-ink face restore) — the fix: DONE.** `MarkdownFace.Palette`
   gains **`prose`** — the surface's CURRENT ink, **required and never defaulted** (the `register(redo:)`
   posture: a future host must decide) — and the clear loop restores a faced run to IT rather than to the
