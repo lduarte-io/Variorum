@@ -55,16 +55,6 @@ struct NoLiteralColourTests {
         "Surface/PaneSurface.swift",
         "Theme/VoiceControls.swift",
         "Features/Settings/DataSafetyPane.swift",
-        // 5. **`BlockDecor.swift`'s `CalloutPalette`** — the five callout
-        //    names' washes, and the ONE colour home in the app outside
-        //    `Shared/Theme` that is legitimately a table of values: it
-        //    already carries an explicit DARK arm for every name (R51's
-        //    "keep the fully-black room readable"), verified by reading at
-        //    18j. Its values are component constructions, not `Color(hex:)`,
-        //    so the first check above would have missed it — which is why
-        //    the second check below exists and why this entry is named
-        //    rather than left to a gap in the grep.
-        "Features/Editor/BlockDecor.swift",
     ]
 
     /// **Forms allowed in ONE file each, with the decision** (18j ladder
@@ -73,12 +63,19 @@ struct NoLiteralColourTests {
     /// family — `LineageStripe` (same block, same colour, forever) and
     /// `TagChipColor` (same tag path, same hue) — DERIVE a hue from an id
     /// rather than choosing one, carry their own dark arm, and cannot come
-    /// from the token layer by their nature. `CalloutPalette`'s file is
-    /// wholly allowed above for the same reason in the other direction (a
-    /// table of values).
+    /// from the token layer by their nature. `CalloutPalette` is the third
+    /// (18j ladder round 2, R2-3 — converted from a whole-file allowance,
+    /// by this mechanism's own rationale: narrower than a whole file, so
+    /// the OTHER 1,128 lines of decor stay under the pin): the five callout
+    /// names' washes are a legitimate table of values with an explicit DARK
+    /// arm for every name (R51's "keep the fully-black room readable"), and
+    /// `NSColor(srgbRed:` at `BlockDecor.swift:396–397` is the table's ONE
+    /// component builder — the file's only banned form, verified form by
+    /// form at the ladder.
     private static let allowedForms: [String: Set<String>] = [
         "Features/Takes/TakesShared.swift": ["Color(hue:"],
         "Features/Tags/NoteTagChips.swift": ["Color(hue:"],
+        "Features/Editor/BlockDecor.swift": ["srgbRed:"],
     ]
 
     /// `Shared/Theme/` is the token layer itself (and `SharedPageStyle`'s
