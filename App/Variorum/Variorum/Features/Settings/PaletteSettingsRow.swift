@@ -206,8 +206,10 @@ struct PaletteSettingsRow: View {
     /// for the seeds: its `run` swallows errors into a `lastError` nothing
     /// renders.
     ///
-    /// A colour that LANDS also selects Custom, so typing one is the whole
-    /// gesture rather than typing-then-clicking.
+    /// The fields exist only under Custom (`customFields` renders when the
+    /// landed palette is `.custom`), so the gesture is click-Custom-then-
+    /// type and a landed colour never has to SELECT Custom — the branch
+    /// that did was reachable only through a race (18g ladder, R1-6).
     private func commitSeeds() {
         let room = roomField.trimmingCharacters(in: .whitespacesAndNewlines)
         let accent = accentField.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -219,11 +221,8 @@ struct PaletteSettingsRow: View {
                         room: room.isEmpty ? nil : room,
                         accent: accent.isEmpty ? nil : accent)
                 }
-                if let landed = ThemeTint.normalize(room) {
-                    note = PaletteCopy.landed(landed, accent: ThemeTint.normalize(accent))
-                    if theme.settings.palette != .custom { theme.setThemePalette(.custom) }
-                } else {
-                    note = nil
+                note = ThemeTint.normalize(room).map {
+                    PaletteCopy.landed($0, accent: ThemeTint.normalize(accent))
                 }
             } catch {
                 note = OpsRefusalCopy.message(for: error)

@@ -9134,8 +9134,11 @@ instances at the close.
 7. **No `StatusCenter` receipt from the Settings pane.** The Settings scene mounts no toast and no bottom
    bar, so a receipt spoken there is invisible under her default — QUESTIONS #106's class, decided the same
    way. The window recolouring as she clicks is the confirmation; the custom field gets a line of its own.
-8. **A landed colour also selects Custom**, so typing a hex is the whole gesture rather than
-   typing-then-clicking.
+8. ~~**A landed colour also selects Custom**, so typing a hex is the whole gesture rather than
+   typing-then-clicking.~~ *(Retired at the ladder, R1-6: the hex fields render only under Custom, so the
+   gesture IS click-Custom-then-type and the branch was reachable only through a race — a preset click
+   landing between the keystrokes and Return; dropped rather than the fields widened to every palette,
+   where two seeds under "Gold & black" would claim to apply and would not.)*
 9. **`PaletteFamily` carries `card` as well as the brief's seven.** In dark, a tinted paper with the voice's
    neutral card would read as two materials; `card` is `surface`'s sibling and moves with it.
 10. **The grouping into three strips lives in the FACE** (`PaletteCopy.Group`), not in the brain: the brain
