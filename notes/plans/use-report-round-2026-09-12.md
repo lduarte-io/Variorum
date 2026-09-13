@@ -8792,3 +8792,108 @@ three endings, because making the boards speak is new copy on a door.
 
 **Counts: 6 AGREE · 0 DISPUTE.** Nothing is stopped; J44, N2 and N3 are recorded rather than built, exactly
 as dispositioned.
+
+### 18i LADDER — ROUND 3 · THE FIXES (the implementer continuation, 2026-09-14 — THE CAP: three commits, in the dispositions' order)
+
+*Pin before fix, the red watched and counted. `Sources/` and `App/Variorum/Shared/` are diff-empty against
+round 2's close `a97c7d60`; `Sync/`, `Server/`, the schema and the editor seam untouched; `lockstepVersion`
+**8**; five app files and one test file changed; zero trailer lines on the three commits.*
+
+**(J43) The BLOCKER — `fe4e5fe6`.** The eight Write sites read `showReceipt(` (strings byte-unchanged, the
+error arms untouched), and the two split-by-outcome doors take the letter's shape:
+`TakeClipboard.Outcome.isRefusal` (ONE predicate beside the message — `.copied` acted; "no text to copy"
+and "Copy failed" always show) and `EditorFind`'s completion routed on `applied > 0`. **The batch call,
+flagged:** `Outcome.message`'s second caller (`TakesViewModel.copyBlockTakes`) routes through the same
+predicate, so the identical sentence cannot carry two classes across surfaces — one line, reversible alone.
+- **Pins** (the J42 shape, three arms, in `ConfirmationsSettingTests`):
+  `writesOwnActsSpeakQuietlyUnderHerDefault` (the seal under `.quiet`) ·
+  `archivingATakeFromWriteSpeaksQuietlyToo` (a second door, on a FANNED block — I10 makes the door refuse on
+  a one-take block, which the first draft of the pin caught) ·
+  `writesOwnActsSayNothingWhenConfirmationsAreOff` (the receipt reaches the centre and is dropped).
+- **RED ON OLD on the shipped tree, nothing reverted: 3 tests / 8 issues** — each sentence in `current` with
+  `kind: .refusal`, `quietLine` nil, nothing recorded as dropped under `off`.
+- **Green after:** ConfirmationsSetting + LifecycleFaces + CopyAllTakesDoor + CopyDoorFlush 41/4, **zero test
+  edits** (every shipped pin over these doors reads the WORDS, identical on both roads).
+- RECORD table **row 15** corrected to point at the enumeration below.
+
+**THE ROW-15 ENUMERATION — every `showStatus(` call site, with a verdict** *(43 across the three files;
+line numbers at `d9effce2`, the tree the reviewer read. TEN change; THIRTY-THREE were already right.)*
+
+| # | Site | What it says | Verdict |
+|---|---|---|---|
+| 1 | `EditorViewModel:2193` | "Caret at the end — typing here starts a new block." | REFUSAL ✓ — a DIRECTION (round 1's table row 45; nothing was minted) |
+| 2 | `:2401` | `OriginPeekCopy.noOriginHere` | REFUSAL ✓ — nothing to peek at |
+| 3 | `:2495` | "Unsealed." | **RECEIPT — FIXED.** After `unlockPost` returned |
+| 4 | `:2504` | "Sealed — the note is read-only until unsealed." | **RECEIPT — FIXED.** After `lockPost` returned |
+| 5 | `:2554` | `WordTargetFaceCopy.setNote` / `.clearNote` | **RECEIPT — FIXED.** The board's twin was already one |
+| 6 | `:2568` | "Entry date set to …" / "Entry date cleared." | **RECEIPT — FIXED** |
+| 7 | `:2601` | "Copied from the pool[ with its takes]." | **RECEIPT — FIXED.** After `poolDragCopy` |
+| 8 | `:2733` | `CapabilityRegistry.capability(.showBlockHistory).unavailableNote` | REFUSAL ✓ |
+| 9 | `:2764` | `VersionActs.words(error)` | REFUSAL ✓ — the ERROR arm (its success arm is J42's receipt) |
+| 10 | `:2775` | "Place the caret in a block to see its takes." | REFUSAL ✓ |
+| 11 | `:2795` | "Put the caret in a block first — takes grow on the block you're in." | REFUSAL ✓ |
+| 12 | `:2816` | "New take added on this block…" / "New blank take opened as chosen…" | **RECEIPT — FIXED** |
+| 13 | `:2840` | "Saved — “…” remembers these choices (open it in Lenses, ⌘5)." | **RECEIPT — FIXED.** Two twins were already receipts |
+| 14 | `:2849` | "Put the caret in a block first — ⌘⇧A archives the take you're on." | REFUSAL ✓ |
+| 15 | `:2862` | "Take archived — never gone: the takes panel (⌘⇧T)…" | **RECEIPT — FIXED.** The board's twin was already one |
+| 16 | `:3235` | "Place the caret in a block to see its comments." | REFUSAL ✓ |
+| 17 | `:3248` | "Place the caret in a block first — the frame goes on that block." | REFUSAL ✓ |
+| 18 | `:3271` | "Place the caret in a block first — this copies that block's takes." | REFUSAL ✓ |
+| 19 | `:3275` | `TakeClipboard.Outcome.message` | **SPLIT BY OUTCOME — FIXED** (+ its second caller) |
+| 20 | `:3465` | `EditorUndoHint.message` | REFUSAL ✓ — the brief's own ruling: a DIRECTION, never a receipt |
+| 21 | `EditorFind:559` | `FindReplaceGate.completion(applied:moved:blocked:)` | **SPLIT BY OUTCOME — FIXED** (`applied > 0`) |
+| 22–32 | `EditorSurfaceController:491 · :575 · :650 · :726 · :1346 · :1403 · :1885 · :2439 · :2578 · :2736 · :2920` | "Unsaved changes couldn't be written — resolve that first, then retry." ×11 | REFUSAL ✓ — the flush failed, so the act never ran |
+| 33–41 | `:405 · :525 · :673 · :680 · :720 · :757 · :1539 · :1696 · :1721` | the takes-/blocks-changed family and the ceremony sheet's re-open line | REFUSAL ✓ — nothing landed |
+| 42 | `:2757` | `outcome.note` | **ALREADY CLASSED** ✓ — `noteIsRefusal`, the letter's own seam |
+| 43 | `:2964` | `speakCeremonyStatus` | REFUSAL ✓ — "the takes changed, try the divide again" |
+
+**(J44) The MAJOR — RECORDED, no code.** Agreed and left to the close: the KnownIssues row with owner
+**13u2**, naming the reviewer's two structural moves (the always-shown doors renamed so a call site reads
+its class; `TakesViewModel.status` made private with `setStatus`/`setRefusal` the only writers) and P-1's
+registry-walk shape as the checkable form. **One addition from inside the work, for whoever takes it:**
+J38's 25 direct `status = .receipt(…)` assignments and this round's 43 `showStatus(` sites are the SAME
+shape — a classed door that can be bypassed — so "make the classed door the only writer" would have made
+both families structurally impossible, not merely easier to audit.
+
+**(J45) The MINOR — `68881106`.** A THIRD host at `.frame(width: 420)` — the flat bar's own width —
+asserting `height == idleHeight`, and the oracle now speaks a 125-character sentence (~896 pt) that wraps
+at both widths unless the view refuses to. The flat host stays unconstrained for its `width == 0` / `> 0`
+assertions, which is the tension the reviewer named.
+**RED ON OLD by behavioural revert (`lineLimit(2)`, the pre-J39 shape): 1 test / 2 issues** — 28 vs 14 on
+the box host AND 28 vs 14 on the new flat host, the assertion that could not fail before. Green: 18/1.
+
+**(N1) — `b22dc138`.** The header's width clause is now about what the slot ASKS FOR (zero ideal width,
+hence no reflow in a row) and says plainly that its rendered width in the box is the column's and that the
+pin there asserts the height. Doc only. **(N2 · N3) — RECORDED**, on the residue line below.
+
+#### THE RESIDUE LINE FOR HER (the letter's close — J35 + N4 from round 1, N2 + N3 from round 3)
+
+**What "quiet means quiet" costs, and three sentences that are hers to change.** (1) R-Q23 leaves five doors
+on the three surfaces with no bottom bar — **Blocks · Canvas · Compare** — with no feedback at all under her
+default, including two that name the road back (⌥⌘Z) and ⌘S on Compare and Canvas; option (c) of #106 (one
+`QuietReceiptLine` composed into those surfaces' footers, ~10 lines) remains hers. (2) On one surface
+"Nothing" is not quite literal: the Write fan panel keeps showing the board's own line in its own slot, as
+the Library's caption does. (3) **Three sentences now say something slightly off on the road they take, and
+changing any of them is new copy, which is hers:** *"New takes written on 0 blocks — open any fan to see
+them, or open them side by side in Lenses."* (the second clause is wrong advice on the no-op road, where it
+always shows); *"… is already whole — it's on your shelf."* (true, but now spoken as a refusal); and
+*"Tagged 3 blocks."* when all three already carried the tag (true of the end state, nothing written).
+(4) **One act still has three behaviours:** sealing a note speaks a receipt from the Library/shell and from
+Write, and says NOTHING from the Takes and Lenses boards (`TakesViewModel.toggleSeal`) — pre-18i, untouched
+by this letter, and making the boards speak is new copy on a door.
+
+#### CLOSING THE ROUND-3 FIXES (the exact lines)
+
+- **ONE `xcodebuild test`** from `App/Variorum/`, **187 suite TYPE names** in a zsh array, every one
+  `grep -rl "struct <Name>"`-verified first — round 2's 87 plus every suite that mounts Write's editor model
+  or the doors this round touched (`withEditor(` · `EditorViewModel(` · `EditorFind` · `TakeClipboard`
+  across `VariorumTests`):
+  `✔ Test run with 1290 tests in 187 suites passed after 263.934 seconds.` · `** TEST SUCCEEDED **` · zero `✘`.
+- **Core:** not owed, not run — `git diff --stat a97c7d60 HEAD -- Sources` is EMPTY.
+- **iOS:** not owed, not run — `App/Variorum/Shared/` is diff-empty too.
+- **The seams:** `Sync/` · `Server/` · the schema · every editor-seam file untouched; `lockstepVersion` = 8;
+  five app files and one test file changed; zero trailer lines.
+- **No walk owed and none run:** nothing about a FACE changed — every fix moves which SLOT a sentence uses,
+  which the round-1 captures already show in both directions, and J45/N1 are a test and a comment. Her
+  real-store app was not running at any point (`pgrep -fl 'Variorum.app/Contents/MacOS'` empty) and was
+  never touched; zero instances at the close.
