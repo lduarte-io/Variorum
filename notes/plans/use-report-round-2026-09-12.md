@@ -6679,3 +6679,109 @@ absent from `--stat`); no schema, no `setting`; no trailers. My own closing evid
 **Counts: 0 BLOCKER · 1 MAJOR · 0 MINOR · 1 NIT.** No fix was made; the code is untouched until the orchestrator's follow-up.
 
 **What is OPEN after the cap, stated plainly:** R3-1 — the restore's settle is not final under SwiftUI's re-resolution (measured: `into · (1 − h/V)`), so sub-row precision holds only on short rows. If the orchestrator authorizes the cross-model fix pass in this session, it is one new restore state with three pins as sketched; if not, it is recorded with an owner — **13u2, on KnownIssues row 54 beside the `TakesArticleScroll` extraction** — and the record's "exactly" gains the caveat *"to within `into · rowHeight/viewport` — exact on short rows, the fold on a page-tall one"*. R3-2 is a one-line NIT for the same pass or the same owner.
+
+
+### 17q LADDER — ROUND 3 · THE IMPLEMENTER'S RESPONSES
+
+*The 17q implementer (`opus-implementer`) under the cross-model flow, at THE CAP: agree/dispute
+traced against the code at `71c6adf2` in my own context — nothing implemented, no code or test file
+touched, no suite run; this plan is the only file this edits. **2 AGREED · 0 DISPUTED**, both with
+riders. Nothing loops after this round, so the one rider that would leave residue names its owner.*
+
+**R3-1 (MAJOR — the settle is not final) — AGREE, and the finding explains a measurement of MINE that
+I under-called one round ago.**
+
+The road reads exactly as traced: `restoreStep` settles on the FIRST report inside `into ± 2` and
+returns `.wait`; `consumeArticleGeometry`'s `.settled` branch then returns `rememberStep` on every
+later report, and `noteArticleRowFrame` → `articleRowFramesMoved` (guarded on `.settled`, `:733`)
+writes on every moved frame — so a page that drifts after the settle is not merely drifted, it is
+REMEMBERED drifted. **And `.top` is immune** (`into · (1 − h/V)` = 0 at `into` 0), which is why every
+at-rest walk row — including the one I confirmed myself at the round-2 sanity pass, pixel-identical —
+stands: the finding is about a row place with a non-zero `into`, the shape none of the walks reached
+at a visible magnitude.
+
+**What I owe the record: my round-2 sanity pass reported a near-top round trip where "the files differ
+in every band and no integer-pixel shift in ±40 px makes them match" and read it as a RENDERING
+difference. That signature is this mechanism's own.** A FRACTIONAL-point move re-rasterizes every line
+and matches no integer offset — which is precisely what "no integer shift matches" means — so my data
+point was positive evidence for a small move and I called it the weaker explanation. The row at the
+top of that page was a seventeen-line paragraph with a small `into`; `into · h/V` on it is a fraction
+of a point. I had the measurement and drew the wrong conclusion from it.
+
+**Rider 1 — the `.holding` branch must check HER HAND FIRST, before it tests whether the row left
+`into ± 2`.** Her scroll IS what moves the row off `into`, so a branch that tests the row first fires
+one aim against a page she just scrolled — the 17o batch-b BLOCKER's class in miniature.
+`restoreStep`'s own first statement is `if positionedByUser { articleRestore = .settled; return
+rememberStep(geometry) }` (`:1056`); the `.holding` branch needs the same line in the same position,
+not "ended by her hand" as a later clause.
+
+**Rider 2 — the two readers take OPPOSITE treatments, and the sketch says both in different sentences;
+the fix must not read it mechanically.** `articleReadyForLanding` (`:934–936`) must ADMIT `.holding`,
+or a BLOOM landing — which by R1-2 rides through the restore and reveals afterwards — can never be
+spent while the hold runs, and 17o row 8's door breaks for the whole hold. `articleRowFramesMoved`'s
+guard (`:733`) must EXCLUDE it, which it does for free once `.holding` is a distinct case. The same
+exclusion is what keeps **R2-2's teardown hazard closed**: the DEFERRED departure task calls
+`articleRowFramesMoved`, so it writes nothing while holding by construction and `articleTornDown` is
+untouched. I checked that road specifically because the coordinator named it.
+
+**Rider 3 — the hold's end belongs INSIDE `clearArticleLanding()`, not "one call beside" each her-hand
+arm.** The sketch's "the same her-hand arms that call `clearArticleLanding` — one call beside it" is
+fifteen edits: `grep -rn "clearArticleLanding()" App/Variorum/Variorum/` returns **sixteen sites**,
+one definition and fifteen callers (three of them the structure controller's, through the view model's
+forwarder). Fifteen new calls beside fifteen existing ones is the scattering F-0 names and the class
+the 17p batch-a ladder surfaced SIX times before its rule was written down. Ending the hold inside
+`TakesBoardLayout.clearArticleLanding()` is ONE line and inherits that enumeration's own completeness
+proof — the road table in its doc — so every future arm gets the hold's end the day it gets the
+landing's. It is also correct where no hold exists (the Lenses host, the Write panel's embedded
+model): a state change on a board that never held is a no-op. **And the end IS needed** —
+`positionedByUser` alone would not do, because the 17p round-2 measurement stands: a note-wide split
+reflows the page by the inserted height with NO user scroll, and a hold that ended only at her scroll
+would re-aim after her own split.
+
+**Rider 4 — the shared aim budget, and the ONE residue this cap must name.** `articleRestoreAimsLeft`
+is 24 and the restore already spends it (the reviewer's own probe took 11 aims on the 542-pt row). A
+hold re-aiming on each relayout draws from the same pocket, so it can run out mid-hold; that path must
+end the hold into `.settled` exactly as `restoreStep`'s does today (`:1070–1073`) — the safe failure,
+the page stable and at worst 17p's row precision. **What follows, and is worth stating because the cap
+leaves no round to discover it in:** once the hold ends, the `.settled` road remembers whatever the
+page shows, so on that path the memory takes the drifted place — and since each trip's drift is a
+PROPORTION of the remembered `into` (`into · (1 − h/V)`), repeated round trips walk the memory toward
+the fold rather than holding at one wrong value. It converges, it never leaves the row, and it is
+strictly better than today; but *"the drift decays across trips"* is the honest sentence, not "the
+second trip is byte-identical", and the fix's doc should carry it. **If the budget interaction is not
+addressed inside this fix, that is this round's residue and its owner is 13u2 with the
+`TakesArticleScroll` extraction (KnownIssues row 54, already owed twice)** — the same type the hold's
+state machine lives in.
+
+**Rider 5 — do NOT add a memory write at the hold's non-geometry ends.** Two of the three ends (the
+her-hand funnel, a landing spend inside `articleLandingStep`) are reached from roads that do not
+return an `ArticleRestoreStep` to the view model, which is the only place the session write lives
+(`rememberArticlePlace`). Making them write would mint a second write site — the drift class this
+entry has closed twice — and would fire mid-gesture. They should set `.settled` and nothing else: a
+geometry report or a frame arrival follows every one of them (a scroll, a relayout, the reveal's own
+scroll) and writes through the one road. The budget end is inside `consumeArticleGeometry` and can
+return `rememberStep` directly, as `restoreStep` already does.
+
+**One thing I checked and found already right:** ending the hold at a landing SPEND can live inside
+`articleLandingStep` itself — on the layout, already the one place a reveal is decided — so it adds no
+site and keeps F-1's "one decision". With Rider 2's `articleReadyForLanding` change the bloom's reveal
+is spendable during a hold and spending it ends the hold, so the two never fight.
+
+**R3-2 (NIT — the departures counter counts a row that held no frame) — AGREE.**
+
+`removeValue(forKey:)`'s result is discarded at `:742`, so a row realized and de-realized in one pass
+without ever reporting a frame counts as a departure from a set it never joined, while the doc says
+"left the realized set". Both round-2 pins assert on rows that did report, so the fix is
+byte-identical for every pin, and `articleRowDepartures` has no production reader — this is doc
+honesty, the standard R1-4 was held to one file over. **One rider:** the guard wraps only the COUNTER,
+never the removal — the shape must stay "remove always, count what was removed", so that
+`forgetArticleRowFrame` keeps its unconditional `removeValue` and no future reader can find a phantom
+frame left behind.
+
+**Nothing else raised.** The "considered and cleared" list matches what I hold: `articleMemoryAtMount`
+written once per mount before the resolver and false in the harness order; the deferred departure
+coalesced and closed at `teardown()`'s top; `articlePlaceNow`'s three branches carrying the frame with
+`short` agreeing with `room > 1`; the two current-row write sites and the choreographer's two arms
+unchanged. And the reviewer is right that the walks' recorded "sub-point" differences (`41`/`42`'s
+`9 · 46/V`) are this finding's small-row regime — which is the sentence I should have written in my
+own sanity pass.
