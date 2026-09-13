@@ -7937,3 +7937,287 @@ showing the board's own line in its own slot, as the Library's caption does.)*
 - **No walk is owed** (the orchestrator's call): J31 changes no face — the geometry is byte-identical and
   only its doc and its pin moved — and every other fix changes WHICH SLOT a sentence uses, which the
   round-1 walk's captures already show in both directions.
+
+### 18i LADDER — ROUND 2 FINDINGS (opus-reviewer)
+
+**Scope check first (the agent contract).** The letter `fe54be0f..987d306e` is **verified** diff-empty
+against `Sources/VariorumCore/Sync/`, `Server/`, `Sources/VariorumCore/Persistence/` and every editor-seam
+file (`BlockRangeIndex` · `EditorTextView` · `PaneTextAuthority` · `PaneSurface` · `CrossBlockEditPlanner`);
+`SyncSchema.lockstepVersion` reads **8**; no custody or keychain code. The round-1 fixes
+(`a70fd24c..987d306e`) touch **eleven app files and four test files** and are diff-empty against `Sources/`
+and `App/Variorum/Shared/`, so the record's "core and iOS not owed" is true, not asserted. The only default
+introduced is a NEW setting's, ruled by her at R-Q5. **`opus-reviewer` is still the right cast; no Fable
+re-spawn is owed.**
+
+**What I ran myself (not read).** `xcodebuild test` over the ladder's own pins plus the delete/import/export
+family — ConfirmationsSettingTests · StatusCenterTests · TakeToBlockDoorTests · EncryptionBookDoorTests ·
+SplitAtNewlinesDoorTests · ImportFacesTests · ExportFacesTests · the four NoteDeletion types ·
+SnippetsGroupDoorsTests · NoteVersionsPaneTests → `97 tests in 13 suites passed`, `** TEST SUCCEEDED **`.
+A second run over the four models J30 refactored — BlockTOCTests · BlocksWorkbenchTests ·
+BlocksWorkbenchFaceTests · three Canvas types · three Compare types → `57 tests in 9 suites passed`. Plus
+two throwaway `swiftc`/`NSHostingView` geometry probes (in the scratchpad, outside the repo) for the MAJOR's
+measurement. Zero trailer lines on all fourteen commits. Tree clean; her real-store app was not running at
+any point (`pgrep -fl 'Variorum.app/Contents/MacOS'` empty) and was never touched.
+
+#### Findings, severity-ranked
+
+**[BLOCKER] · `App/Variorum/Variorum/Features/Takes/TakesViewModel.swift:966` · `:1128` · `:1466` · `:1572`
+· `:2346` · `:2361` · `:2376` · `:2398` · EIGHT board messages that report that NOTHING happened are classed
+`RecoveryStatus.receipt`, and 18i's one load-bearing move — letting that class RIDE to the shell
+(`:143–154`) — turns every one of them into a setting-governed receipt. Under `.off` they say nothing at
+all; under `.quiet` they land in the muted bar line instead of the toast the Settings pane promises. This is
+round 1's BLOCKER again, in a second and larger family, and it is exactly the family the RECORD's table
+declared safe without auditing.**
+
+*Mechanism, traced.* `TakesViewModel.status`'s `didSet` was `session.status.speak(status.text)` before this
+letter — ALWAYS the toast. The letter changed it to
+`session.status.deliver(status.text, kind: status.isRefusal ? .refusal : .receipt)` (the diff at `:143–154`),
+so the board's own `RecoveryStatus` now decides *visibility*, not only the panel's colour. `RecoveryStatus`
+states its own contract at `App/Variorum/Shared/RecoveryCopy.swift:848–851`: *"`case receipt` — Something
+happened, and this says what… `case refusal` — Nothing happened, and this says why."* Eight assignments
+break it:
+
+- `:1572` `commitFocusedTake()` with no focused pane → `.receipt("Click into a take first — ⌘S commits the take you're in.")`
+- `:2346` `stepTakes(by:)` with no focused pane → `.receipt("Click into a take first — ⌃⌘← and ⌃⌘→ step through its siblings.")`
+- `:2361` `stepTakes(by:)` on a one-take block → `.receipt("This block has one take — ⌘T branches a second.")`
+- `:2376` `chooseFocusedTake()` with no focused pane → `.receipt("Click into a take first — ⌘⏎ chooses the take you're in.")`
+- `:2398` `archiveFocusedTake()` with no focused pane → `.receipt("Click into a take first — ⌘⇧A archives the take you're in.")`
+- `:966` `pick(columnID:…)` on the MAIN column → `.receipt("The main column shows the note's chosen takes — use ✓ to change them.")`
+- `:1128` `adoptColumn(_:)` on the MAIN column → `.receipt("This column IS the note — nothing to adopt.")`
+- `:1466` the lens fallback's `.gone`/`.foreign` arm → `.receipt(LensFallbackCopy.nothingToRestore)`
+
+Every one returns early or falls through without a write. `StatusCenter.slot(for:)` (`:209–220`) then routes
+`.receipt` by `receiptStyle`: `.quiet` → `quietLine`, `.off` → **nil, dropped**.
+
+*What she sees.* All eight are live doors: `commitFocusedTake` / `chooseFocusedTake` / `archiveFocusedTake` /
+`stepTakes` are registered command handlers on `TakesBoardView.swift:269/:381/:383/:385/:387` and
+`LensesBoardView.swift:203/:320/:322/:324/:326`, and `pick`/`adoptColumn` are one click each in Lenses.
+Neither board renders a local status slot — both carry the comment *"13b 1b (AD-14): the transient status
+line moved to the ONE StatusCenter"* (`TakesBoardView.swift:149`, `LensesBoardView.swift:134`) — so **under
+`.off`, ⌘S in Takes with no take focused is completely silent**, as are ⌘⏎, ⌘⇧A, ⌃⌘←/→ and Adopt on the main
+column. Under **`.quiet` — her default** — they appear as a truncated muted line at the bar's trailing end,
+which is not what `ReceiptStyleCopy.alwaysShownNote` prints to her at `AppSettingsView.swift:196`:
+*"Whichever you choose, anything Variorum REFUSES still shows as a note at the bottom of the window — a door
+that can't act always says why."* Before 18i all eight were toast cards under every condition.
+
+*Why the audit missed it, precisely.* The RECORD's table row 18 rules the whole family in one line —
+*"`TakesViewModel.status` forward (`:146`) · every board message · **CLASSED ALREADY** · the board decided it
+at the door since the post-13l polish round; 18i just lets the class RIDE"* — and round 1's sweep checked
+*"every `setStatus(` caller on the board… all 13"*. But `setStatus` is only one of the doors into `status`:
+there are **25 direct `status = .receipt(…)` assignments inside `TakesViewModel` itself**, and they were
+never enumerated by either agent. The mis-classification is pre-13i (post-13l); what 18i did is make it
+*decide whether she sees the message at all*, which is this letter's to own — the identical reasoning J29
+was confirmed on.
+
+*Why no test caught it.* Nothing pins the KIND of a board refusal. `NoteVersionsPaneTests.theBoardTellsAReceiptFromARefusal`
+drives `setStatus`/`speak` directly (the mechanism), and `TakeStructureDoorTests` asserts the WORDS, which are
+identical on both roads — the same blind axis J32 was raised for.
+
+*Proposed fix.* One word at each of the eight sites: `.receipt(` → `.refusal(` (or route them through the
+model's own `speak(_:)`, which is `setRefusal`, `:1674–1676`). Note the deliberate consequence, so it is not
+a surprise: `WriteTakesPanel.swift:107` paints `status.isRefusal ? tokens.alarm : tokens.muted`, so these
+eight will read in the alarm token there — which is exactly what their siblings in
+`TakesStructureController` (*"Click into a block first…"*, table row 21) already do through `speak`, so the
+fix makes the panel consistent rather than introducing a new look. **Red-on-old pin** (in
+`ConfirmationsSettingTests` beside J29's, or in `TakeStructureDoorTests` which already owns the board
+harness): with `receiptStyle = .off`, call `model.commitFocusedTake()` on a board with no focused pane and
+assert `session.status.current?.text == "Click into a take first — ⌘S commits the take you're in."`,
+`current?.kind == .refusal`, `lastDroppedReceipt == nil` — **red on this tree** (`current == nil`, the words
+sitting in `lastDroppedReceipt`). A second arm on `adoptColumn` over the main column covers the click road.
+
+*One milder sibling on the same slot, for the same pass* (the row-35 / J37 class, not the refusal class):
+`:1202–1210` `writeNewTakesEverywhere()` speaks `.receipt("New takes written on \(picks.count) block(s) — …")`
+and `Operations.branchAllFans(post:)` (`Sources/VariorumCore/Operations/Operations+Versions.swift:481–487`)
+returns `[:]` without throwing on a post with no renderable slots — so *"New takes written on 0 blocks"* is
+producible while nothing was written. Same one-line predicate as the import's and the export's.
+
+---
+
+**[MAJOR] · `App/Variorum/Variorum/Core/Views/QuietReceiptLine.swift:24–39` + `App/Variorum/VariorumTests/ConfirmationsSettingTests.swift:364–414`
+(J31) · The fix's central claim — *"the counts and the `?` door never move"* — is FALSE in the one
+composition the road was chosen for, and the height oracle that was supposed to prove it cannot fail. Both
+agents' "37 pt idle AND 37 pt speaking" was measured at a width the box never has.**
+
+*Mechanism, measured* (two throwaway `swiftc`/`NSHostingView` probes, scratchpad, outside the repo):
+
+1. **`NSHostingView.fittingSize` is the UNCONSTRAINED ideal size — the host's frame does not constrain it.**
+   The view's exact modifier chain with `lines: 2` in a host framed at 200×40 reports, for a 125-character
+   receipt, `fittingSize = 896.0 × 14.0` — one line, at 896 pt of width. So `boxHost.frame = NSRect(… width: 200 …)`
+   at `ConfirmationsSettingTests.swift:368` buys the oracle nothing: `boxHost.fittingSize.height == idleBoxHeight`
+   (`:404–405`, `:414`) is true for **every** string and **every** `lines` value. The stability half of the
+   new pin cannot bite. (Its `idleBoxHeight > 0` half is honest and does bite — that is the half the
+   collapse-road probe saw fail.)
+2. **Constrained to the box's real column it is not stable.** Mounting the footer's actual shape —
+   `VStack(spacing: 4) { Divider(); QuietReceiptLine(lines: 2); HStack { counts; Spacer; ? } }` inside
+   `.frame(width: 200)`, i.e. `CommitBar.swift:331–348` — measures **37 pt idle → 51 pt speaking**. Not only
+   for a long sentence: it is 51 pt for the pin's OWN example, *"Blocks joined — ⌥⌘Z undoes it."* (30
+   characters at `tokens.small` = 11.5 pt monospaced ≈ 207 pt > 200), which wraps to the second line
+   `.lineLimit(2)` allows. Remove the width constraint and the same probe reports 37 → 37, which is the
+   number the round-1 finding, the implementer's re-measurement and J31's disposition all rest on.
+
+*What this means, stated honestly.* The behaviour is **not a regression** — road (a) as built moves the
+counts row and the `?` door by **one** line (14 pt) where the rejected road (b) would have moved them by
+two (28 pt), so keeping the reservation still halves the noise. What is wrong is (i) the header's absolute
+claim at `:31–38` (*"collapsing the row would move a door 18 pt… the reserved row costs a blank line and
+nothing below it moves"*) — the door moves anyway for any receipt over ~28 characters at that column width,
+which is most of them; and (ii) a pin presented in the record as *"idle == speaking in BOTH"* that is
+structurally incapable of failing on the axis it names. The disposition chose road (a) over road (b) on
+exactly the premise this falsifies.
+
+*Proposed fix (the pin first — there is a real red).* Make the oracle measure the composition it names:
+constrain the width (wrap the rootView in `.frame(width: 200)`, or set `boxHost`'s `sizingOptions` /
+`widthAnchor` before reading `fittingSize`) — **red on this tree at 37 vs 51**. Then either (a) keep the
+one-line reservation and correct the header to what is true — *the row grows by at most one line when a
+receipt wraps, and nothing OUTSIDE the box moves because `SidebarNoteBox` is framed by the column
+(`SidebarNoteBox.swift:18–27`) and this bar sits inside its `ScrollView`* — or (b) reserve the full two
+lines (`.frame(height: twoLines, alignment: .topLeading)` in the `lines > 1` composition) so the claim
+becomes literally true. Either is cheap; the width-constrained assertion is the pin for whichever is chosen.
+
+---
+
+**[MINOR] · `App/Variorum/Variorum/Features/Library/NoteDeletion.swift:109–110` · `run`'s doc still says
+*"Returns the receipt"* — the exact misreading that produced round 1's BLOCKER, left standing on the door a
+future caller reaches for.**
+
+The BLOCKER was a caller handing `run`'s string to `status.receipt(…)`. J29 fixed the caller and gave the act
+a discriminator, but `run` survives as the parity forwarder and its first line still reads *"Flush, delete,
+announce. Returns the receipt; refusals throw for the caller to word."* That is now false for three of the
+four endings: `run` returns a REFUSAL's words in the empty-gesture, scraps-fence and already-gone cases and
+does not throw. The `Report` type's own doc is correct; `run`'s is the one a call-site completion shows.
+*Proposed fix:* one sentence — *"the words only; three of the four endings are REFUSALS, so a caller that
+routes this to the status centre must use `report(…)` and `say(_:refusing:)`, never `receipt(…)`."* Doc
+only, no pin owed.
+
+---
+
+**[MINOR] · `App/Variorum/Variorum/Registry/StatusCenter.swift:267–274` · `StatusForwarder.deliver(nil)`
+leaves `outgoing` raised, and the doc's reason why that is safe (*"no door raises it and then writes nil"*)
+is held by convention across four files — with exactly one signature standing against it.**
+
+J30's own doc names the reset an INVARIANT whose breach *"makes the next refusal speak as a receipt, which
+under `off` is silence"*. The guard `guard let text else { return }` skips the reset on the nil road. Today
+no caller reaches it: `showReceipt` ×3 take a non-optional `String`, and the one door that does not —
+`EditorViewModel.setStatusMessage(_ message: String?, kind:)` (`EditorViewModel.swift:89–92`) — is called at
+three sites (`:2466`, `:3431`, `:3440`), all with non-optional strings. So the rule now has one home and one
+unguarded road into it, and the road is reached by writing `setStatusMessage(nil, kind: .receipt)` — a
+plausible future "clear the line after a receipt". *Proposed fix:* `outgoing = .refusal` in the guard's else
+(one line), which makes the invariant unconditional instead of documented; or narrow
+`setStatusMessage`'s parameter to `String` and clear through a separate door. No red-on-old exists today and
+none is owed — label it honestly as closing a road, not fixing a bug.
+
+#### NITs
+
+- **`StatusCenter.swift:153–165`** — `say(_:refusing:)`'s doc says *"The mapping lives here and only here"*,
+  but the same mapping is spelled as a ternary at four other sites: `EditorSurfaceController.swift:2757`
+  (`outcome.noteIsRefusal ? showStatus : showReceipt`), `TakesStructureController.swift:299–300`,
+  `BlockTOCView.swift:596`, and now `NoteDeletion.fire`'s own call is the only one that uses `say`. The
+  sentence is true of the three doors it names and overclaims beyond them; one clause fixes it (or those
+  four ternaries adopt `say`, which is the F-0-shaped version).
+- **`StatusCenter.swift:143` vs `:163`** — `speak` and `say` are near-synonyms on the same object with
+  opposite defaults (`speak` = always shows; `say` = maybe). At a call site nothing distinguishes them
+  without opening the doc. `report(_:refusing:)` or `deliver(_:landed:)` would read at the door.
+- **`Registry/OpsRefusalCopy.swift:540–549`** — N3's collapse traded one clarity problem for another: the
+  local `let split = results.filter { !$0.isNoOp }` now shadows the static `split(made:from:…)` it then has
+  to call as `self.split(…)`. `acted` names the rule; the array wants a name that is not the method's
+  (`splitters`, `real`).
+- **`App/Variorum/VariorumTests/ConfirmationsSettingTests.swift:157–164` vs `:376–386`** — two `settle`
+  helpers now live in one suite (a private method polling a predicate, and a nested local `func settle`
+  that also pumps two hosts' layout). The inner one shadows the outer inside that test. One name each.
+
+#### Considered and cleared (traced, and measured or run where it mattered)
+
+- **Every round-1 disposition, verified against the code and the pins, not the record.** J29: `Report`
+  + the byte-identical `run` forwarder + `fire` routing on the outcome's own class (`NoteDeletion.swift:103–118`,
+  `:217`), `ImportModel.lastReportIsRefusal` (`:262–266`), `ExportModel.lastReportIsRefusal` (`:102`, `:135`),
+  all three doors on `say` (`ShellActions.swift:240`, `:257`, `:298`) — four pins run green, and the red-on-old
+  is analytically certain on the shipped tree (`.off`/`.quiet` routed a receipt away from `current`). J30:
+  `outgoingKind` appears **nowhere** in the app (grep), one `StatusForwarder`, four one-line `didSet`s, zero
+  call-site edits. J31: applied, and it is the MAJOR above. J32: both pins present and driving the reachable
+  no-op road (the BLOCK door — the note door refuses before its flight), and `acted` genuinely governs the
+  KIND at all four consumers, so a reverted predicate is red in both directions. J33: one line, one Mac
+  consumer (`SeededBookRestore.restore` is called from exactly one place), pin runs green. J34: the pin
+  drives two of the five sites and carries a genuine-refusal arm so it cannot pass by the class never being a
+  refusal. J35/N4: recorded in the residue section with the line for her handoff. J36: nothing was added —
+  confirmed at the code, no guard, no pin. J37: the export line landed; the bulk tag is recorded.
+- **The `StatusForwarder` cannot strand, and cannot trap.** `didSet` fires on every set with no equality
+  gate; all four `showReceipt` doors take non-optional strings; the `statusMessage = nil` writes
+  (`EditorViewModel.swift:2474`, `CanvasViewModel.swift:614`, the boards' clears) happen either after a
+  delivery has reset the shadow or without ever raising it. Re-entrancy — the one hazard a `mutating` call
+  on a stored struct adds over the old two-line body — has no road: `StatusCenter.deliver` stores an `Item`
+  and schedules a `Task`; nothing in it calls back into a model synchronously, so the exclusive access to
+  `self.forwarder` cannot overlap.
+- **The three new predicates cannot go stale at their doors.** All three models are constructed fresh per
+  gesture (`ShellActions.swift:233`, `:248`, `:291`); both `ExportModel` write paths set the flag;
+  `ImportModel.report` sets it on both of its callers; and each door checks `lastError` FIRST, so the
+  `?? "Import/Export finished."` fallbacks are either unreachable or fall to the always-shown side.
+- **`LibraryViewModel.delete` discards `run`'s string** (`:166`), so the parity forwarder costs nothing and
+  the six shipped pins over `run` ride unmodified — the 3C claim checked, not taken.
+- **One `StatusCenter` exists** (`AppSession.swift:455`, a `let`), so `ThemeStore.start`'s single adoption
+  (`ThemeStore.swift:58`) covers every window and `StatusForwarder`'s captured reference can never dangle.
+  `receiptStyle` appears outside the centre and the store only in the pane's binding — no site-level
+  `if setting` (F-6).
+- **Only ONE forward carries a pre-decided class into the centre** (`grep "status.deliver("` → `TakesViewModel:151`
+  and the forwarder). The Tray, Block History, Note Versions and Data Safety slots are local and unforwarded,
+  exactly as the RECORD's out-of-scope list says — so the BLOCKER's blast radius is the board family and
+  nothing else.
+- **Spot-checked the round-1 audit's exclusion of fixed-sentence receipts** at two of its riskiest members:
+  `insertBlockBelowCaret` speaks only `if landed` (`EditorSurfaceController.swift:802–803`) and `commitCaret`
+  only inside the `do` after the op returned (`EditorViewModel.swift:2706–2720`). The exclusion holds where I
+  tested it; the class it does NOT cover is a mis-classified refusal, which is the BLOCKER.
+- **No string changed by the fixes.** Read every `+`/`-` pair: J33 moves the same literal from `receipt` to
+  `speak`; everything else is routing, predicates, docs and tests.
+- **`runStructural`'s seam still refuses correctly:** a throw goes to `showOperationError` (refusal class),
+  and `noteIsRefusal` is only ever raised by the split doors (`EditorSurfaceController.swift:609–611`, `:630`).
+- **P1–P3, I1–I10, S1–S5 untouched.** No cost scales with corpus size, no text is copied across entities, no
+  invariant is read or written by anything in the fixes. Observation scoping is unchanged: `quietLine` is read
+  inside the leaf view's own `body`, and `StatusForwarder` is `@ObservationIgnored`.
+
+#### Review foci (§12), addressed
+
+- **F-0 — no god brain, no god file.** Round 1's MAJOR is genuinely closed: the forward's stateful rule has
+  ONE home (`StatusCenter.swift:256–275`), `outgoingKind` is gone from the app, and the fourth copy's
+  divergence became a parameter. `StatusCenter` is ~275 lines with one concern plus one 20-line companion.
+  **One clause still fails, differently from round 1:** *"two copies of one rule anywhere are the drift
+  class"* — "did this door act?" is now spelled six ways (`Report.isRefusal`, `lastReportIsRefusal` ×2,
+  `noteIsRefusal`, `RecoveryStatus.isRefusal`, and `acted` at inverted polarity), which is defensible as
+  per-door FACTS feeding one mapping, except that the mapping itself is also spelled two ways (`say` and four
+  ternaries) — NIT above. *"Every new pure rule has a unit pin"* is now satisfied for `acted` (J32).
+- **F-6 — the kind on the one seam.** Met in its letter, re-verified against the code rather than the claim:
+  `Item.kind` lives only on `StatusCenter.Item`; `speak` keeps its signature and infers; the setting is
+  adopted once from the LANDED settings; `QuietReceiptLine` is ONE view composed by three call sites; no
+  site-level `if setting`; the strings are byte-unchanged. **And the focus's limit is again where the round's
+  worst finding lives:** the kind is only as good as the classification at the door, and the letter's own
+  table waved through the largest door family in one line.
+
+#### CLEAN BILL — checked and found solid
+
+- **J29's fix, end to end.** `Report`'s discriminator in the `acted` shape, `run` byte-identical as a
+  forwarder (zero test edits — the 3C parity proof, verified by compiling and running the six shipped pins
+  unmodified), `fire` on `say`, and the two sibling doors carrying one predicate each. The four new pins are
+  real: two go red on the shipped tree with nothing reverted, and the import/export pair asserts both
+  polarities so the predicate cannot be trivially true.
+- **J30's `StatusForwarder`.** The right third option, in the right file, at the right size: ~20 lines beside
+  the centre it speaks to, zero call-site edits, ~100 bare `statusMessage = …` assignments untouched, and the
+  existing kind pins riding through all four models unchanged (97/13 and 57/9 green here).
+- **J32's two pins** — the axis whose absence let round 1's BLOCKER through a 2577-test suite now has a pin
+  in each direction, on the door that can actually reach the no-op.
+- **J33** — the one-line split, the rule deliberately NOT widened, the reason written at the site, and a pin
+  that proves the minting press is still a receipt (dropped under `.off`) while the second press toasts.
+- **J34** — the pin the fix owed, with a can't-act arm so it cannot pass vacuously.
+- **J36's dismissal** — re-traced at the code: the rendered take's branch appends its edit from
+  `target.intraRange` with no match test and increments `applied` before `continue`
+  (`EditorSurfaceController.swift:2446–2455`), and `targets` is non-empty by construction, so `applied ≥ 1`
+  on every reachable road and the proposed pin really would be green on both sides. Correctly dismissed as
+  hollow, and correctly nothing added.
+- **The NITs** — N1 (`clear()` clears the drop record), N2 (the `spoken` trap named for the next author), N3
+  (one spelling of "did anything split"), N5 (no change, the reason recorded) all landed as dispositioned.
+- **The record's own honesty.** The FIXES section names each red's shape and counts, distinguishes the two
+  reds that need no revert from the ones that do, and says plainly where no pin is owed. Rows 34, 35 and 42
+  of the classification table were corrected in the same commits as their fixes rather than left to the
+  closeout — which is what let me check the table against the code instead of against a promise.
+- **The seams and the marker.** `Sync/`, `Server/`, `Persistence/`, the schema and every editor-seam file are
+  diff-empty across the whole letter; `lockstepVersion` = 8; `receipt_style` is read-time defaulted with no
+  seed and no migration; enum-valued, so `setting.value`'s PLAIN classification and its "enum semantics, no
+  prose" promise hold. Correctly not a §12 event. Zero commit trailers on all fourteen commits.
+
+**Counts: 1 BLOCKER · 1 MAJOR · 2 MINOR · 4 NIT.**
