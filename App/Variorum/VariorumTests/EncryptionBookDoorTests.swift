@@ -169,6 +169,37 @@ struct EncryptionBookDoorTests {
         }
     }
 
+    /// **"… IS ALREADY WHOLE" IS A REFUSAL** (the 18i ladder round 1, MINOR-3
+    /// — J33). 18i classed both endings of Help ▸ Restore as receipts, but the
+    /// rule it classed by is *"a RECEIPT reports an act that LANDED (the store
+    /// changed…)"* and `.alreadyWhole` changes nothing — the same reading the
+    /// same table applies to *"already one paragraph"*, which paid a whole
+    /// predicate for it. The rule is NOT widened to "or the shell moved":
+    /// that would reclassify the daily-entry note and blur every navigating
+    /// door. So the two endings split, exactly as undo/redo's already do.
+    ///
+    /// **Red on old:** under `.off` the second press said nothing at all.
+    @Test func theAlreadyWholeLineIsARefusalAndAlwaysShows() async throws {
+        try await withWorld { session, _ in
+            let actions = ShellActions(session: session, shell: ShellRouter())
+            session.status.receiptStyle = .off
+
+            actions.restoreEncryptionBook()
+            await poll { session.status.lastDroppedReceipt != nil }
+            #expect(session.status.lastDroppedReceipt?.hasPrefix("Restored") == true,
+                    "the minting press IS a receipt, and `off` drops it: \(session.status.lastDroppedReceipt ?? "nil")")
+
+            session.status.clear()
+            actions.restoreEncryptionBook()
+            await poll { session.status.current != nil }
+            #expect(session.status.current?.text
+                    == "\u{201C}\(SampleLibrarySeeder.Book.encryptionExplained.name)\u{201D} "
+                    + "is already whole — it's on your shelf.")
+            #expect(session.status.current?.kind == .refusal,
+                    "nothing was minted — P-2 says she sees it whatever the setting")
+        }
+    }
+
     /// The shared restore brain (the Mac's Help ▸ Restore and the phone's
     /// row ride it): a partial book is completed, a whole one is reported.
     @Test func theSharedRestoreMintsWhatIsMissingAndReportsAWholeBook() async throws {

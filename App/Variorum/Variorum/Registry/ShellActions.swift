@@ -365,7 +365,15 @@ struct ShellActions {
                 switch try await SeededBookRestore.restore(session: session, book: book) {
                 case .alreadyWhole(let bookID):
                     shell.pendingSelection = .reading(bookID)
-                    status.receipt(
+                    // 18i ladder round 1, J33: nothing was minted, so this is
+                    // a REFUSAL's voice and always shows — the same reading
+                    // `SplitAtNewlinesCopy.acted` gives "already one
+                    // paragraph", and the same split undo/redo already has.
+                    // The shelf selection moving is navigation, not the act
+                    // the sentence reports; the rule is NOT widened to cover
+                    // it, because "or the shell moved" would reclassify the
+                    // daily-entry note and blur every navigating door.
+                    status.speak(
                         "\u{201C}\(book.name)\u{201D} is already whole — it's on your shelf.")
                 case .restored(let readingID, let minted):
                     shell.pendingSelection = .reading(readingID)
