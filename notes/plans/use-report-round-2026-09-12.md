@@ -10942,3 +10942,30 @@ conversion WIDENED the scanned surface by 1,128 lines and stayed green, which is
 BLOCKER · 0 MAJOR · 0 MINOR · 3 NIT, all closed** — no round 3 (round 2's own rule: only a NEW
 BLOCKER/MAJOR triggers one). **Handed to the implementer's one look:** `eb8a6a3e` and `d5a048e1`;
 anything it raises returns to me for the final word.
+
+### 18j LADDER — ROUND 2 · THE IMPLEMENTER'S SANITY PASS
+
+Over `git diff a2e65484 d5a048e1` — two files, one test and one record line. **3 CLEAR · 0 RAISED.** I fixed
+nothing. Her real-store app was not running and was never touched; I launched nothing.
+
+- **(1) The by-form entry — CLEAR, and it matches my own form-by-form verification exactly.** Entry 5 is
+  gone from `allowed` and `"Features/Editor/BlockDecor.swift": ["srgbRed:"]` is in `allowedForms`, whose doc
+  now carries the converted reason with `BlockDecor.swift:396–397` — which subsumes the one precision I
+  offered (the `NSColor(` opens at 396, the matched form sits on 397, and a per-file+form allowance does not
+  care which). **No new plumbing:** `allowedForms` is already consulted in the component-spelling loop
+  `srgbRed:` lives in, so the conversion is the mechanism used as minted. Ran the pin myself on the current
+  tree: **`✔ Test run with 2 tests in 1 suite passed after 6.989 seconds.` · `** TEST SUCCEEDED **`** — so
+  the other 1,128 lines of decor are under the pin and green, which is what I had verified check by check
+  (no `Color(hex:`, no other component spelling, no `Color.<hue>`, no `<modifier>(.<hue>)`, no
+  `return .<hue>`, no `.<hue>.opacity(`) and is now proved by the suite rather than by my grep.
+- **(2) The record correction — CLEAR, it says what the captures show.** The R1-4 row now reads "every one
+  EXCEPT two rows the table below never claimed — batch row 14 (Write's markdown face) has no Study capture
+  and row 29 (the block ▾ menu) no Terminal one", marked *corrected at round 2*, with the bounding and the
+  two-captures remedy. That is exactly what my listing found: the only fix-pass face captures are
+  `r1-deface-fix-01/02`, which the walk table itself marks **T**, and the only `r1-*` menu captures are the
+  two MenuBarExtra ones. Corrected in place with the marker, the house form.
+- **(3) Nothing else moved — CLEAR.** `git diff --stat` over `App/Variorum/Variorum`, `Shared`,
+  `VariorumMobile`, `Sources` and `Server` across the range is **empty** — no production source, so the
+  round-1 finals stand untouched; the plan's diff is four lines, the single R1-4 row. R2-1 is
+  dispositioned to the orchestrator's close with my convention sentence carried, which is where a
+  handoff/record item belongs. **Nothing returns to the reviewer; the ladder closes here.**
