@@ -218,3 +218,44 @@ final class StatusCenter {
         quietLine = nil
     }
 }
+
+// MARK: - The forwarder (18i ladder round 1, J30)
+
+/// **ONE HOME FOR THE `statusMessage` FORWARD'S RULE.**
+///
+/// Four view models (`EditorViewModel`, `BlockTOCViewModel`,
+/// `CanvasViewModel`, `CompareBoardModel`) keep a `statusMessage` property
+/// that pins and sheets read and that FORWARDS to the centre on set (AD-14).
+/// 18i gave that forward a kind, and the rule it needs is stateful — *name
+/// the class the next write carries, deliver it, RESET* — so that the ~100
+/// bare `statusMessage = …` assignments in those files, every one of them a
+/// refusal or an error, keep behaving exactly as they did without a single
+/// edit.
+///
+/// The reset is an INVARIANT: a missed one makes the next refusal speak as a
+/// receipt, which under `off` is silence — the same failure the round's
+/// BLOCKER was, arriving by drift instead of by classification. It shipped as
+/// four hand-written copies (three byte-identical, the fourth already
+/// diverged), which is exactly F-0's *"two copies of one rule anywhere are
+/// the drift class"*. It lives here now, once, beside the centre it speaks
+/// to: a fifth forwarder gets the rule rather than a fifth copy of it.
+@MainActor
+struct StatusForwarder {
+    private let status: StatusCenter
+
+    /// The class the NEXT delivery carries. A door that is about to write a
+    /// receipt raises it; everything else leaves it alone, so the default —
+    /// and the value after every delivery — is the always-shown class.
+    var outgoing: StatusCenter.Kind = .refusal
+
+    init(_ status: StatusCenter) { self.status = status }
+
+    /// Called from the property's `didSet`. Nil clears the model's own line
+    /// and says nothing (the centre has its own clock), and the shadow is
+    /// untouched by a clear — no door raises it and then writes nil.
+    mutating func deliver(_ text: String?) {
+        guard let text else { return }
+        status.deliver(text, kind: outgoing)
+        outgoing = .refusal
+    }
+}

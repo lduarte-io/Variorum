@@ -40,6 +40,7 @@ final class EditorViewModel {
     init(session: AppSession, postID: String) {
         self.session = session
         self.postID = postID
+        self.forwarder = StatusForwarder(session.status)
         // 13b 1a (N3): the ONE per-post coordinator — shared with every
         // other surface editing this post (takes panel, TOC), so two
         // debounced pipelines can never race a stale flush over a newer
@@ -69,28 +70,24 @@ final class EditorViewModel {
     /// StatusCenter (13b 1b, AD-14 — one placement, one auto-dismiss
     /// policy); the property remains the tested truth and forwards on set.
     ///
-    /// **18i (her R-Q5): the forward carries a KIND.** `outgoingKind` is the
-    /// class the NEXT write delivers, named by the door that is writing
-    /// (`showReceipt` / `showTransientReceipt` say receipt; everything else
-    /// is a refusal), and it RESETS after each delivery — so the ~25 bare
-    /// `statusMessage = …` assignments in this file and its controller,
-    /// every one of them a refusal or an error, keep behaving exactly as
-    /// they did without a single edit. The rule and the reason live once, in
-    /// `StatusCenter`; four view models forward this way.
+    /// **18i (her R-Q5): the forward carries a KIND** — the class the NEXT
+    /// write delivers, named by the door that is writing (`showReceipt` /
+    /// `showTransientReceipt` say receipt; everything else is a refusal),
+    /// and RESET after each delivery — so the ~25 bare `statusMessage = …`
+    /// assignments in this file and its controller, every one of them a
+    /// refusal or an error, keep behaving exactly as they did without a
+    /// single edit. The rule and the reason live ONCE, in `StatusForwarder`
+    /// beside the centre (J30); four view models forward this way.
     private(set) var statusMessage: String? {
-        didSet {
-            guard let statusMessage else { return }
-            session.status.deliver(statusMessage, kind: outgoingKind)
-            outgoingKind = .refusal
-        }
+        didSet { forwarder.deliver(statusMessage) }
     }
 
-    /// The class the next `statusMessage` write carries (18i — see above).
-    @ObservationIgnored private var outgoingKind: StatusCenter.Kind = .refusal
+    /// The one home for the forward's rule (18i — J30).
+    @ObservationIgnored private var forwarder: StatusForwarder
 
     /// The ONE write that names its class; every door below goes through it.
     private func setStatusMessage(_ message: String?, kind: StatusCenter.Kind) {
-        outgoingKind = kind
+        forwarder.outgoing = kind
         statusMessage = message
     }
     private(set) var caretBlockID: String?
