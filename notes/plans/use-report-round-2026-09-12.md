@@ -10592,3 +10592,137 @@ Terminal · Default · Follow system (verified: the voice switched back in Setti
 #### Counts for the record
 
 **8 findings: 8 CONFIRMED · 0 DISMISSED — 6 commits** (`da151cfa` R1-1 · `45d53f03` R1-2 · `b5110cae` R1-3 · `516dfd3d` R1-6 · `4055a72e` R1-8 · `c39d4548` the MenuBarExtra claim); R1-4, R1-5 and R1-7 met by the walk and this record. **New pins: 3** (`aRunThatLosesItsFaceReturnsToTheVoicesDynamicInk`, `anAppearanceChangeWritesNothingInAMountedPane`, the widened `noViewPaintsALiteralColour` + the real `theHexValuesLiveOnlyInTheSharedTokenLayer`); **one pin converted** (the R2-1 pin, by resolution); **one shared helper** (`ResolvedInk`). The letter's DEFERRED list is now ONE item — the Account sheet, hers on the real store. **Handed to the implementer's sanity pass:** the six commits above; anything it raises returns here.
+
+### 18j LADDER — ROUND 1 · THE IMPLEMENTER'S SANITY PASS
+
+Over `git diff 839f9995 03179c4c -- App Sources` — every one of the six commits read whole, plus the code
+each one reaches. **8 CLEAR · 0 RAISED. I fixed nothing.** Ran the thirteen touched-and-neighbouring suite
+TYPES myself (each `grep -rl "struct <Name>"`-verified, a zsh array; `ThemeTokenTests ·
+PaletteDerivationTests · PaletteReachTests · MarkdownFaceTests · PaneSurfaceTests · EditorInkTests ·
+NoLiteralColourTests · AppearanceChoiceTests · FormattingSurfacesTests · EditorTypographyTests ·
+SurfaceSizeMemoryTests · TakePaneMeasureTests · BlocksWorkbenchFaceTests`):
+**`✔ Test run with 112 tests in 13 suites passed after 25.091 seconds.` · `** TEST SUCCEEDED **`**; and the
+iOS build myself, because a REQUIRED member landed on a `Shared/` type: **`** BUILD SUCCEEDED **`**. Never
+the full suite. Her real-store app was not running at any point (`pgrep -fl 'Variorum.app/Contents/MacOS'`
+by path — empty); I launched nothing.
+
+**(1) `VoiceTokens` gaining `let voice` — CLEAR.** `VoiceTokens(` has **exactly four construction sites**
+in the whole tree (`VoiceTokens.swift:271 · 307 · 344 · 381`), each carrying the right value
+(`.terminal · .terminal · .study · .study` — read against the set each precedes); the phone constructs
+none (`grep` over `VariorumMobile/` — empty), which is why a required member cost it nothing and the iOS
+build is honest. **`applying(_:)` is untouched** — the only line the diff adds near it is a doc sentence
+(`git diff … -- VoiceTokens.swift` filtered to non-comment: nothing but the field and the four
+arguments) — so `var tokens = self` carries `voice` through by construction and a palette cannot change
+which voice a set claims to be, which is the guarantee the field's own doc promises. **The parity pins ride
+byte-identical: `ThemeTests.swift` is diff-empty across the entire fix pass** (`git diff --stat 839f9995
+03179c4c -- …/ThemeTests.swift` → empty), so `theDefaultPaletteIsEachVoicesShippedColoursByteIdentically`
+and both R51 pins are the same bytes that were green before the ladder, and they are green in my run.
+
+**(2) The face palette's `prose` is the SAME dynamic object, on every road — CLEAR.** Production
+`MarkdownStyling.Palette(` has **three sites and all three are the `tokens:` builder**: `RootView.swift:383`
+(the root's scheme-driven adoption), `EditorTypography.swift:482` (`applyVoiceChrome`, every full-document
+surface) and `PaneSurface.swift:1008` (the pane host) — so all three writers of the one global now hand it
+`EditorTypography.ink(for: tokens.voice)`. The four-argument init survives for the pins alone (and
+`removingTheSyntaxRESTORESTheProseFaceExactly` still uses it with `.systemBrown`, which is what keeps the
+explicit road pinned). `MarkdownFace.Palette(` has two sites — the Mac forwarder and the phone's, whose
+`prose: dynamic(\.ink)` is untouched. **No `NSColor(<tokens>.ink)` survives anywhere that feeds a face or a
+storage:** the four remaining hits are `EditorTypography.swift:155` (inside the provider itself, by
+design), `PagedReadView`/`NotePagesView` (`ReadingPageTokens.ink` — the calm page's own type, picked by the
+scheme, not the prose ink) and `ProseTakeCard.swift:315`, a `Canvas` + Core Text fill in the ceremony card
+("no TextKit anywhere near this", its own comment) that re-draws from the current tokens. **And my R2-1 fix
+still behaves across a de-face + flip, in USE:** `r1-deface-fix-02-flipped-to-light-RIGHT-no-strand.png`,
+which I opened — the `**bold` with its closing markers deleted and the `` `codZZZ `` with its backtick
+deleted both read in the LIGHT ink on the white paper, every prose run the same, the live `[link]` still
+the accent. That is the island, gone, on the surface it lived on.
+
+**(3) The converted R2-1 pin is not weakened — CLEAR.** It now reads
+`ResolvedInk.reads(color(storage, at: boldAt), as: VoiceTokens.terminalDark.ink, dark: true)`. Traced
+against the **pre-R2-1** shape (the captured-ink restore this pin exists to catch): there the cleared bold
+holds the ink CAPTURED at face time — the static `terminalLight.ink` the pin seeds — and resolving a
+static colour under `.darkAqua` returns that same `23272B`, which `matches(_:_:)` compares against `D6DAD2`
+and fails. **Still red, for the same reason, by the same arm.** Its two neighbours are intact: the
+seeded-light assertion before it (the first `style` finds `applied` empty, so nothing is cleared and the
+bold keeps the seeded colour) and `#expect(color(storage, at: 1) == dark)` on the unfaced prose beside it,
+which the clear never touches. Green under the fix because the palette's prose is now the dynamic object
+and it RESOLVES dark under dark — which is the statement, not a relaxation of it. The helper is the right
+shape and the right size: `ResolvedInk` is 41 lines of three functions, and lifting it out of
+`EditorInkTests` (where I had written the same two privately) is the one-copy rule applied to a pin helper.
+
+**(4) The widened literal-colour pin — CLEAR, with one unoccupied residual NOTED (not raised).** The
+`return .redo` guard is correct and necessary: `returnsBare` requires the character after `return .<hue>`
+to be a non-identifier, which is exactly what separates `return .red` from `return .redo`
+(`EditorTextView.swift:816`) — and `return .red.opacity(0.08)` still trips it, because `.` is not an
+identifier character. The `DiffView` fixes are right and reach further than the literal: markers and washes
+are `tokens.alarm`/`tokens.positive`, the unchanged line's marker `tokens.muted`, and the three openers
+(`CompareBoardView:934`, `TakesBoardView:228`, `LensesBoardView:165`) hand it their tokens — the sheet held
+none before, which is exactly why it reached for a system hue. *(The `.secondary` → `tokens.muted` move is
+beyond what the pattern required; it is recorded in both the commit message and the R1-2 row, so the R1-7
+class does not repeat — I checked for that specifically.)* **Each allow-list entry's reason holds:** the
+three canary banners (loud by design), `SharedPageStyle` (its own recorded decision, shared with the
+phone), `DataSafetyPane` (that same class), `VoiceControls` (the vocabulary's home), `BlockDecor`
+(`CalloutPalette`, a table of values with its dark arm) — and the new **by-FORM** entries for the two
+hashed identity hues are the right mechanism, narrower than a whole file, so the rest of
+`TakesShared.swift` and `NoteTagChips.swift` stays under the pin. **The `shadow(color:` exemption is LIVE,
+not dead weight, and its stated reason matches the code**: I grepped — eight-plus sites, and several
+already vary the shadow by appearance (`scheme == .dark ? 0.5 : 0.10`, `dark ? 0 : 0.12`,
+`ReadingFlowView:226`, `PageLeafView:51`), so "a shadow is black on any paper and the views zero it on the
+black room" is the tree's own behaviour. **NOTE, deliberately not a raise:** the finding's prose named two
+bare forms — `return .red` **and `: .red`** — and the implementation covers the first; a hue in a labelled
+argument (`marker: .red`) or a ternary (`x ? .red : .green`) still passes. I grepped for it: **the only
+`: .<hue>` sites in the app are the exempted shadows**, so the pin is not lying about today's tree and the
+hole has no occupant. One `if` to add whenever the reviewer next touches the file; not worth a round.
+
+**(5) The hoisted `AppearanceChoiceRow` changed no behaviour — CLEAR.** Compared the moved block line by
+line against what it replaced: the same `Section("Light & dark")`, the same `Picker("Appearance", …)` over
+the same three tags in the same order, the same `.pickerStyle(.segmented)`, the same explainer string
+byte-for-byte with the same `.font(.caption)` / `.foregroundStyle(.secondary)` / `.fixedSize`. The pane
+keeps its `if let appearance` guard and its placement comment (under Voice, above Editor — the 18g fold
+reason preserved), and composes the row in one line. The row holds no rule: it reads `appearance.choice`
+and calls `set(_:)`. It compiles into the target by the synchronized group (the suites ran against it), and
+it is inside the literal-colour pin's scan with nothing to report.
+
+**(6) The pane arm and its identity premise — CLEAR, and the premise I flagged was the wrong one.** I had
+asked for `Color`'s `Equatable` to be measured; it never applied — **`PaneTextView.appliedInk` is
+`NSColor?`** (`PaneSurface.swift:472`), so the gate `view.appliedInk != ink` compares two references to the
+ONE object `EditorTypography.ink(for:)` returns, and `isEqual:` on the same instance is true whatever the
+appearance. The reviewer met the premise by identity, which is stronger than what I asked for.
+**`PaneSurfaceRepresentable(` has exactly ONE construction site** — `PaneSurfaceView` (`:1000`) — so "every
+road a pane mounts" is one road and it passes the dynamic object; and **`appliedInk` has exactly three
+production touches, all inside `applyStyle`** (`:1212/:1213/:1223`), so a gate that no longer fires on a
+flip changes nothing else. The one consequence worth stating: `applyStyle`'s whole-pane
+`MarkdownStyling.style(storage)` (`:1221`) no longer runs on a flip — but `applyFace` runs BEFORE it and
+its own gate still moves, because the face palette's `link` and `codeTint` differ between the appearances
+in **both** voices (Terminal `2F7D5F`→`6FBF94`, Study `3D6B8E`→`82ABCC`; the code tints likewise), so the
+faces re-derive **line-scoped** instead of whole-pane. That is strictly R2-5's doctrine, not a gap.
+
+**(7) The corrected verdicts and the MenuBarExtra header match the captures — CLEAR, checked by eye, not
+by the table.** All 67 `r1-*` files are on disk and every filename the record cites resolves. I opened
+three: **`r1-S-menubar-extra-menu-choice-dark-system-light.png`** shows the status menu's "New Quick Note
+⇧⌘N" drawn on a LIGHT card over the app's fully black window with the system light — exactly what the
+corrected header now claims, and my own speculative sentence was **false**, which is the right outcome of
+walking a claim instead of softening it; **`r1-T-diffview-FIXED-tokens.png`** shows the `−` in the voice's
+alarm and the `+` in its positive with the 8 % washes faint on the dark paper; **`r1-deface-fix-02…`** is
+the R1-1 fix in use (above). The corrected sweep verdicts read true against the evidence I know: row 42's
+status-toast half is RIGHT on my own captures 33/36 (the one-take refusal, both voices) exactly as I
+volunteered, the two overstating filenames are named and left in place, and the Account sheet's deferral
+now carries a MECHANISM rather than a rig excuse — the A4 fence means the dev store has no sign-in door
+(`Shared/SyncStatusViews.swift:69`), so it is genuinely unreachable there and belongs to her real-store
+walk. **The dev store's leave-state is now honest and I verified its one checkable claim myself:**
+`defaults read io.lduarte.Variorum.debug appearanceChoice` → `system`; zero instances; the system
+appearance `false` (light).
+
+**(8) Anything else — CLEAR, with one thing said for the letter's close.** The seam holds: the whole fix
+pass is comment-only in `AppearanceChoice.swift` and `EditorTypography.swift` (verified by filtering the
+diff to non-comment lines — nothing), so the production change across all six commits is exactly
+`VoiceTokens` (+1 field, +4 arguments), one line in `MarkdownStyling.Palette(tokens:)`, one line in
+`PaneSurface`, `DiffView` (+1 property, four colour lines) with three openers, and the Settings row's move
+— nothing in `Sources/`, `Server/`, `Persistence/`, `BlockRangeIndex`, `EditorTextView` or
+`PaneTextAuthority`, `lockstepVersion` still 8, no light token value moved, no `if dark` anywhere. Zero
+trailer lines on the six commits. **For the close:** the reviewer is right that the FULL suite belongs to
+the letter's close rather than to this round — `EditorDocument.baseAttributes`' road is every TK2 surface
+write in the app, and the batch's `2629/437` predates `VoiceTokens` gaining a field, so the close's run is
+the one that certifies the pair.
+
+**Counts: 8 CLEAR · 0 RAISED.** Nothing returns to the reviewer's round. One NOTE recorded above (the
+`: .<hue>` form the R1-2 prose named and the implementation does not cover — no live site today), offered
+for whenever that file is next touched, not as a finding.
