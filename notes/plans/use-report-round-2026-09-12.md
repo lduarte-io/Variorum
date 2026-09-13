@@ -9090,6 +9090,15 @@ fields); (3) the **refusal fell below the window's fold** — the pane is 460 pt
 refusal she cannot see is P-2 failing in a layout's clothes (the fields and the note moved above the help
 paragraphs). Each was found by clicking, not by reading, which is the gate's whole point.
 
+**Restored, and one thing deliberately left:** the system appearance is back to LIGHT (verified both ways
+by `osascript`); the dev store ends on **Terminal · Default · light**, verified by capture after the walk's
+Read-mode excursion — *(the first restore attempt silently did nothing, because the Settings window
+reopens on the LAST TAB IT SHOWED, which was Tags, and a swatch click landed in the tag manager instead;
+recorded so the next walk clicks the Appearance tab first)*. **Left in place: the custom ROOM seed
+`E07A5F`** in the dev store's `theme_tint` — inert under Default, and useful to the next session that
+wants the custom arm already seeded. Her real-store app was never launched, quit or touched; zero
+instances at the close.
+
 #### R-6 · DISPOSITIONS (the rows this batch owns)
 
 | Row | Her words | Disposition |
