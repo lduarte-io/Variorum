@@ -10726,3 +10726,157 @@ the one that certifies the pair.
 **Counts: 8 CLEAR · 0 RAISED.** Nothing returns to the reviewer's round. One NOTE recorded above (the
 `: .<hue>` form the R1-2 prose named and the implementation does not cover — no live site today), offered
 for whenever that file is next touched, not as a finding.
+
+### 18j LADDER — ROUND 2 FINDINGS (fable-reviewer)
+
+Fresh cold pass over round 1's fixes, `839f9995..03179c4c` (the six code commits `da151cfa · 45d53f03 ·
+b5110cae · 516dfd3d · 4055a72e · c39d4548`), against `notes/REVIEW_PROMPT.md`, this plan's §5.5, §7
+(R-Q12, R-Q25–R-Q30), §12 (F-0 · F-9), R-0, the R-7 BRIEF / RECORD / ADJUDICATION (J55–J61), and the four
+round-1 ladder sections as the anchor; TEXTKIT2_NOTES §3; CLAUDE.md and the canon it loads. Every file in
+the fix diff read whole on the current tree plus the code each fix reaches (`MarkdownFaceCore.swift`
+whole, `MarkdownStyling.swift` whole, `EditorTypography.swift`'s ink and `inkChanged` roads,
+`EditorDocument.baseAttributes`, `VoiceTokens.swift`'s resolver / `applying(_:)` / all four static sets,
+`PaneSurface.swift`'s make/update/applyStyle/applyFace roads, `DiffView.swift`, the three openers,
+`AppearanceChoiceRow`, `BlockDecor.swift`'s `CalloutPalette`). Each of the eight recorded calls verified
+against its landed fix; the pins RUN MYSELF on the current tree (`EditorInkTests · MarkdownFaceTests ·
+NoLiteralColourTests · PaneSurfaceTests · AppearanceChoiceTests · ThemeTokenTests · PaletteReachTests`,
+each type `grep -rl`-verified, one invocation against `DerivedData/18j`: **`✔ Test run with 58 tests in
+7 suites passed` · `** TEST SUCCEEDED **`**); the iOS build run myself (**`** BUILD SUCCEEDED **`** —
+`Shared/Theme` carries the new required member); red-on-old traced for all three new pins and the
+conversion, and the pre-fix `DiffView` pulled from git and confirmed to hold exactly the four offenders
+at 201/202/209/210 the final call records. Three of the 67 `r1-*` captures read by eye
+(`r1-deface-fix-02` — no strand in light; `r1-T-diffview-FIXED-tokens` — voiced marks on the dark paper;
+the batch's `36-divide-ceremony-T-dark` — the one-take refusal toast R1-5's correction rests on, real).
+The dev store's leave-state verified live (`defaults read io.lduarte.Variorum.debug appearanceChoice` →
+`system`; the system appearance light by `osascript`; zero instances by path — her real-store app was
+never running and I launched nothing). Read-only throughout; no file changed but this section. Code
+identical to `03179c4c` on the current tree (`git diff --stat 03179c4c HEAD -- App Sources Server` empty).
+
+**The seam, said first.** The fix diff does NOT reach `BlockRangeIndex`, `EditorTextView`'s identity
+machinery, `PaneTextAuthority`, custody or keychain code, `Sources/VariorumCore/Sync/`, `Server/` or
+`Persistence/` (`git diff --stat` over each — empty). What it reaches: `VoiceTokens` in `Shared/Theme`
+(+1 `let voice` field, four arguments), `MarkdownStyling.Palette(tokens:)` (one line), ONE production
+line in `PaneSurface.swift:1007`, `DiffView` + its three openers, the hoisted Settings row, and two
+comment-only files (`AppearanceChoice.swift`, `EditorTypography.swift` — verified by filtering the diff:
+nothing but comments). **No existing default's meaning moved:** `.system` is still `NSApp.appearance =
+nil`; no LIGHT token value moved (`ThemeTests.swift` is absent from the diff — the 18g parity pins ride
+byte-identical); `lockstepVersion` 8; zero trailer lines on all six commits (checked).
+
+#### Findings, severity-ranked
+
+**[NIT] R2-1 · `notes/plans/use-report-round-2026-09-12-orchestrator-handoff.md:75` (the "flagged for
+her eye" line) beside the R1-2 fix (`45d53f03`) · The DiffView re-hue is the J59 taste class and is not
+in the her-eye bundle.** The fix moved Compare's diff marks from the system stoplight to the voice
+(`.red`/`.green` → `tokens.alarm`/`tokens.positive`, the washes with them, and `.same`'s `.secondary` →
+`tokens.muted`) — a visible change on a surface she uses, reversible in tokens, exactly the class J59
+flagged for her eye for the three orange marks. The handoff's her-eye line (rewritten AFTER the fix pass,
+`111af237`) names J59 and J47 only. Fully recorded in the ladder (the R1-2 row and the sanity pass's
+`.secondary` note), so this is one missing clause, not a hidden change. *Fix:* one clause on the
+handoff's line 75 and in the letter close's her-items list; no pin (record).
+
+**[NIT] R2-2 · the round-1 FINAL CALL's summary line ("the walk table … the other voice for every
+one-voice row") · Overstates by two batch rows the fix-pass table itself never lists.** Batch row 14
+(Write's markdown face — T only, captures 12/42) and row 29 (the block ▾ menu — S only, capture 32) have
+no other-voice capture in the 67 `r1-*` files and no row in the fix-pass walk table. Bounded twice over —
+the face's colours are token-derived and the batch's S-dark Write captures (17/18) are of the journal
+note that carried the markdown line, and an in-window `NSMenu` follows the app appearance the pinned
+bridge proves — but the sentence's letter is loose, the R1-5/R1-7 record-accuracy class this ladder
+itself enforced. *Fix:* one sentence in the record naming the two rows (or two ten-second captures at
+the letter-close walk); no pin (record).
+
+**[NIT] R2-3 · `App/Variorum/VariorumTests/NoLiteralColourTests.swift:52–68` (allow-list entry 5) · The
+`BlockDecor.swift` whole-file allowance predates the by-form mechanism the R1-2 fix minted, and the
+fix's own rationale ("narrower than a whole file, so the rest of the file stays under the pin") fits it
+exactly.** `CalloutPalette` needs exactly ONE value form — `NSColor(srgbRed:` at `BlockDecor.swift:396`
+— and the file is 1,129 lines of decor besides it, all of which now escape the pin: a literal `.orange`
+added anywhere in it would pass silently, while the same literal in any other view fails the suite. No
+occupant today (my own grep: every other colour in the file is a `NSColor(tokens.…)` bridge). *Fix:*
+move entry 5 into `allowedForms` (`"Features/Editor/BlockDecor.swift": ["srgbRed:"]`) with the same
+recorded reason; green today, so it lands as a guard.
+
+#### Considered and cleared (traced; run where it mattered)
+
+- **The R1-1 fix end-to-end:** `VoiceTokens(` has exactly four construction sites (grep, whole tree),
+  each read against the set it builds (`.terminal ×2, .study ×2`, right); `voice` is a `let` and
+  `applying(_:)` writes its eight slots and nothing else, so a palette cannot re-voice a set; all THREE
+  production writers of the face global build through `Palette(tokens:)` (`RootView.swift:383`,
+  `EditorTypography.swift:482`, `PaneSurface.swift:1008` — grep), so every writer hands the ONE dynamic
+  ink by construction; the four surviving `NSColor(…ink)` hits are the provider itself
+  (`EditorTypography.swift:155`), the two `ReadingPageTokens` consumers (the calm page's own type) and
+  `ProseTakeCard.swift:315`'s CoreText fill — none feeds a face or a storage.
+- **The pane arm:** the gate is met by IDENTITY (`appliedInk` is `NSColor?`; one
+  `PaneSurfaceRepresentable(` construction site; three `appliedInk` touches, all in `applyStyle`); the
+  mount order is still colour-then-string (`makeNSView`: applyFace → applyStyle → `view.string = text`);
+  a flip in a pane costs ∝ faced lines (`applyFace` before `applyStyle`, its gate moved by the
+  per-appearance `link`/`codeTint`; the base-attribute branch keys on font/spacing, which a flip never
+  moves). The pin proves the precondition (one object on both sides of the gate) — the same proxy shape
+  `anAppearanceChangeWritesNothingOverTheWholeStorage` uses for the editor, with the 105k-word walk (row
+  37) as the outcome's evidence; noted as the house style, not raised.
+- **The converted R2-1 pin is not weakened:** on the pre-R2-1 restore-from-captured code the cleared bold
+  holds the seeded static light ink, which resolves to itself under `.darkAqua` and fails
+  `ResolvedInk.reads(…, as: terminalDark.ink, dark: true)` — red by the same arm, for the same reason;
+  green under the fix because the dynamic object RESOLVES dark under dark, which is the statement.
+- **Red-on-old for the other two new pins:** `aRunThatLosesItsFaceReturnsToTheVoicesDynamicInk` — the old
+  builder's `prose: NSColor(tokens.ink)` is a different object, so the `===` arm cannot hold (and the
+  recorded pre-fix run failed with the static dark components `D6DAD2`);
+  `anAppearanceChangeWritesNothingInAMountedPane` — the old host passed a fresh static per render, so
+  `appliedInk === voiceInk` fails at the first assertion. The widened literal pin: the pre-fix
+  `DiffView` (pulled from `45d53f03^`) holds `return .red`/`return .green`/`.opacity(` at 201/202/209/210
+  — exactly the recorded four; `returnsBare`'s identifier boundary correctly separates
+  `EditorTextView.swift`'s `return .redo` (read at the site) while still catching `return
+  .red.opacity(` (`.` is not an identifier character).
+- **Test hygiene:** `MarkdownFaceTests`' `withVoice` saves and restores BOTH globals
+  (`EditorTypography.current`, `MarkdownStyling.palette`), so the new test leaks nothing; the pane pin
+  saves/restores the palette and is in a `.serialized` suite; `ResolvedInk` is one 41-line helper with
+  three functions, shared by the three suites that read inks off storages (F-0's one-copy rule applied
+  to a pin helper).
+- **`VoiceTokens.Equatable` gaining `voice` has no consumer that could notice:** the only `tokens ==`
+  sites in the app are nil-checks (`PaneSurface.swift:856/:1039`); no `onChange(of: tokens)` exists.
+- **The sanity pass's residuals re-verified myself:** the `: .<hue>` labelled-argument form has no
+  occupant outside the exempted shadows (grep); `Shared/` outside `Shared/Theme` holds no literal hue by
+  the MODIFIER forms either (grep — the second test's value-forms scope hides no occupant today; the
+  only hue literals under `Shared/` are `SharedPageStyle`'s recorded system-semantic warnings, inside
+  the token layer's folder).
+- **R1-5's corrected deferral reason is true against the evidence:** `36-divide-ceremony-T-dark.png`
+  carries the one-take refusal toast verbatim (read by eye) — the door fired, and the toast row's RIGHT
+  verdict in both voices stands on the batch's own captures.
+- **The A4-fence citations are real** (`Shared/SyncStatusViews.swift:66–69` — the dev store has no
+  sign-in door; `ProtectionPane.swift:740` — the keys-don't-match bar's `Account…`), so the Account
+  sheet's deferral to her real-store walk carries a mechanism, not a rig excuse.
+- **The hoisted row changed no behaviour** (compared against the removed block: same section, picker,
+  tags, style, explainer string and modifiers; the row holds no rule — reads `appearance.choice`, calls
+  `set(_:)`); the pane composes it in one line under the preserved placement comment.
+- **The R1-3 doc correction carries the measurement and the rule** (`EditorTypography.swift:122–137`:
+  provider per resolution, ∝ visible line fragments, "must stay a table lookup", computed colours belong
+  in the token layer) — the load-bearing sentence is now true and load-bearing in the right direction.
+- **The MenuBarExtra header now matches the walked fact** (the status menu wears the SYSTEM appearance;
+  the old header's false `preferredColorScheme` contrast line removed with it), and the capture exists.
+
+#### Review foci (§12), addressed
+
+- **F-9:** the fix diff adds no `if dark`/`scheme ==` branch anywhere (read, and the grep pin itself now
+  guards the class more widely); every fix is a token fix — the prose ink's KIND unified at the one
+  builder, `DiffView` handed tokens by its three openers, three literals → `tokens.alarm` (round 1),
+  none new; the choice still lands at the ONE root (`NSApp.appearance`, comment-only changes this
+  round); R51 stays pinned at the resolver (`ThemeTokenTests` ran green in my run).
+- **F-0:** no god brain grew — `ResolvedInk` is one shared helper; `VoiceTokens` gained a field with one
+  meaning, not a special case; `AppearanceChoiceRow` is the P-9 split the pane's own note asked for;
+  `EditorTypography` grew doc only this round; the KIND rule now has ONE home (the token set's `voice`
+  through the one builder), which CLOSES round 1's "one rule's two homes" drift rather than adding a copy.
+
+#### CLEAN BILL — checked and found solid
+
+- The seam statement above; the tree at review == `03179c4c` in code; zero trailers; marker 8; her
+  real-store app untouched and never running (pgrep by path, empty).
+- All eight round-1 calls landed as recorded, each verified against its diff; the walk table's 67
+  captures on disk, three read by eye and matching their claimed content; the dev store's leave-state
+  claims verified live.
+- The seven touched suites green in my own run (58/7) on the current tree; the iOS build green in my own
+  run; the recorded closing set (150/19) and the sanity pass's (112/13) consistent with it.
+- J60's order honoured: every DEFERRED row but the Account sheet walked in BOTH voices by the fix pass;
+  the Account sheet's deferral is mechanically fenced, not rig-excused.
+
+**Counts: BLOCKER 0 · MAJOR 0 · MINOR 0 · NIT 3 (R2-1 · R2-2 · R2-3).** Round 2's real pass over the
+fixes finds them right: the MAJOR's fix is complete at the one builder with its kind-drift closed, the
+pins are real and red-on-old by mechanism, and nothing new rises above record- and pin-hygiene. **No new
+BLOCKER or MAJOR — no round 3 is owed on these counts.**
