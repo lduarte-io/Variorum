@@ -264,6 +264,27 @@ struct PaletteDerivationTests {
         }
     }
 
+    /// **The dirty-field rule** (18g ladder R1-2): what the row consults
+    /// when she leaves a hex field — a dirty field commits on the way out,
+    /// a clean one only takes the canonical form. Pinned here as the pure
+    /// rule it is; the discard it ends is a mounted-pane behaviour the walk
+    /// verifies (no suite mounts the Appearance pane).
+    @Test func aSeedFieldIsDirtyOnlyWhenItSaysSomethingTheLandedValueDoesNot() {
+        // Clean: the stored form, any spelling of it, and empty over nothing.
+        #expect(!PaletteSeedField.isDirty("E07A5F", landed: "E07A5F"))
+        #expect(!PaletteSeedField.isDirty("#e07a5f", landed: "E07A5F"))
+        #expect(!PaletteSeedField.isDirty("  e07a5f\n", landed: "E07A5F"))
+        #expect(!PaletteSeedField.isDirty("", landed: nil))
+        #expect(!PaletteSeedField.isDirty("   ", landed: nil))
+        // Dirty: a new colour, a not-a-colour (it wants its refusal), and
+        // an emptied field over a landed colour (it wants to clear).
+        #expect(PaletteSeedField.isDirty("3D5A80", landed: "E07A5F"))
+        #expect(PaletteSeedField.isDirty("e07a5f", landed: nil))
+        #expect(PaletteSeedField.isDirty("nope", landed: nil))
+        #expect(PaletteSeedField.isDirty("nope", landed: "E07A5F"))
+        #expect(PaletteSeedField.isDirty("", landed: "E07A5F"))
+    }
+
     /// The seed refusal speaks app words and shows back what she typed —
     /// never the raw enum dump (the `invalidExtent` belt's class).
     @Test func aSeedThatIsNotAColourRefusesInWords() {

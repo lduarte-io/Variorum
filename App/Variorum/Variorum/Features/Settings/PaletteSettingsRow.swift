@@ -24,12 +24,16 @@ struct PaletteSettingsRow: View {
     @Environment(\.colorScheme) private var scheme
 
     /// What she is typing, held locally so a keystroke is never a write.
-    /// Seeded from the landed settings, and never re-seeded under her
-    /// cursor (the focus guard below).
+    /// Seeded from the LANDED settings, and never re-seeded under her
+    /// cursor or over text she has typed and not yet committed (the
+    /// dirty-field rule below — 18g ladder R1-2).
     @State private var roomField = ""
     @State private var accentField = ""
     @State private var note: String?
-    @FocusState private var editingHex: Bool
+    /// ONE identity per field (R1-2): a shared Bool could not tell "left
+    /// the room field for the accent field" from "left the fields", and
+    /// the rule that follows needs to know WHICH field she left.
+    @FocusState private var focusedField: PaletteSeedField?
 
     private var settings: Queries.ThemeSettings { theme.settings }
 
@@ -78,7 +82,14 @@ struct PaletteSettingsRow: View {
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        .task(id: seedsKey) { adoptLandedSeeds() }
+        .task(id: landedKey) { adoptLandedSeeds() }
+        // **A field she leaves is a field she is done with** (R1-2): what
+        // she typed COMMITS on the way out — the act or the refusal, never
+        // a silent discard — exactly as a Return would; an untouched field
+        // takes the landed value's canonical form.
+        .onChange(of: focusedField) { old, _ in
+            if let old { fieldLostFocus(old) }
+        }
     }
 
     // MARK: The strip
@@ -145,8 +156,8 @@ struct PaletteSettingsRow: View {
         // 560 pt wide and a `TextField`'s inline label wrapped mid-phrase
         // ("Your / colour") at that width — seen on the walk.
         HStack(alignment: .bottom, spacing: 14) {
-            hexField(PaletteCopy.roomFieldLabel, text: $roomField)
-            hexField(PaletteCopy.accentFieldLabel, text: $accentField)
+            hexField(.room, PaletteCopy.roomFieldLabel, text: $roomField)
+            hexField(.accent, PaletteCopy.accentFieldLabel, text: $accentField)
             Spacer(minLength: 0)
         }
         Text(PaletteCopy.customHelp)
@@ -161,7 +172,9 @@ struct PaletteSettingsRow: View {
         }
     }
 
-    private func hexField(_ label: String, text: Binding<String>) -> some View {
+    private func hexField(
+        _ field: PaletteSeedField, _ label: String, text: Binding<String>
+    ) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(label)
                 .font(.caption)
@@ -172,7 +185,7 @@ struct PaletteSettingsRow: View {
                 .labelsHidden()
                 .textFieldStyle(.roundedBorder)
                 .frame(width: 120)
-                .focused($editingHex)
+                .focused($focusedField, equals: field)
                 .onSubmit { commitSeeds() }
                 .accessibilityLabel(label)
         }
@@ -218,16 +231,68 @@ struct PaletteSettingsRow: View {
         }
     }
 
-    /// The landed value is the truth; the fields follow it — except while
-    /// her cursor is in one, where following it would eat what she is
-    /// typing.
-    private var seedsKey: String {
-        "\(settings.customRoom ?? "")|\(settings.customAccent ?? "")|\(editingHex)"
+    /// The landed value is the truth; the fields follow it WHEN IT MOVES —
+    /// never on a focus change (R1-2: keying the adoption on focus was what
+    /// discarded a typed, unsubmitted colour the moment she clicked away).
+    private var landedKey: String {
+        "\(settings.customRoom ?? "")|\(settings.customAccent ?? "")"
     }
 
+    /// Each field takes the landed value unless her cursor is in it. A
+    /// field that held a REFUSED value and is now overwritten by a landed
+    /// one takes the refusal's words down with it — they named text that
+    /// is no longer there.
     private func adoptLandedSeeds() {
-        guard !editingHex else { return }
-        roomField = settings.customRoom ?? ""
-        accentField = settings.customAccent ?? ""
+        if focusedField != .room {
+            if PaletteSeedField.isDirty(roomField, landed: settings.customRoom) { note = nil }
+            roomField = settings.customRoom ?? ""
+        }
+        if focusedField != .accent {
+            if PaletteSeedField.isDirty(accentField, landed: settings.customAccent) { note = nil }
+            accentField = settings.customAccent ?? ""
+        }
+    }
+
+    /// Leaving a field: dirty → commit (the act or the refusal, inline);
+    /// clean → show the landed value's canonical form.
+    private func fieldLostFocus(_ field: PaletteSeedField) {
+        switch field {
+        case .room:
+            if PaletteSeedField.isDirty(roomField, landed: settings.customRoom) {
+                commitSeeds()
+            } else {
+                roomField = settings.customRoom ?? ""
+            }
+        case .accent:
+            if PaletteSeedField.isDirty(accentField, landed: settings.customAccent) {
+                commitSeeds()
+            } else {
+                accentField = settings.customAccent ?? ""
+            }
+        }
+    }
+}
+
+// MARK: - The two seed fields, and the one rule about leaving one
+
+/// The custom palette's two hex fields, and the PURE rule the row consults
+/// when she leaves one (18g ladder R1-2): a field is DIRTY when what it
+/// holds says something the landed value does not — so a dirty field
+/// commits on the way out (the act or the refusal, never a silent discard),
+/// and a clean one is merely shown in canonical form. Pinned in
+/// `PaletteDerivationTests`.
+nonisolated enum PaletteSeedField: Hashable, Sendable {
+    case room
+    case accent
+
+    /// Dirty iff the text is neither the landed value's stored form nor a
+    /// spelling that normalizes TO it — `#e07a5f` over a landed `E07A5F` is
+    /// clean; `nope` over nothing is dirty (it wants its refusal); an
+    /// emptied field over a landed colour is dirty (it wants to clear).
+    static func isDirty(_ text: String, landed: String?) -> Bool {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed == (landed ?? "") { return false }
+        if let normalized = ThemeTint.normalize(trimmed), normalized == landed { return false }
+        return true
     }
 }
