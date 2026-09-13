@@ -6927,8 +6927,14 @@ Both rows are the R3-1 class (a settle that the column's later measurement passe
   where it must carry the words; `.off` showing the toast; `lastDroppedReceipt` nil),
   `oneMessageAtATimeAcrossBothSlots` ×1, `theQuietLineAutoDismissesUnderTheOnePolicy` ×1. Restored by
   `git checkout --`; green again at 9 tests in 1 suite.
-- **PIECE 3 — the receipt sites (the classification table): DONE (`HASH3`).** The table is below.
-  RED ON OLD: PENDING (the behavioural revert runs next).
+- **PIECE 3 — the receipt sites (the classification table): DONE (`5f9a471e`).** The table is below.
+  RED ON OLD proven by behavioural revert of the two SITES her images name (`showReceipt` back to
+  `showStatus` — the pre-18i spelling, byte-exact): **3 tests failed with 8 issues** —
+  `theSeamJoinSpeaksQuietlyUnderHerDefault` ×3 (the toast standing with `kind: .refusal`, the quiet
+  line nil, the kind nil), `theNewlinesChipSpeaksQuietlyUnderHerDefault` ×3 (the same three, with her
+  chip's whole sentence in the toast), `theSameJoinSaysNothingWhenConfirmationsAreOff` ×2 (the toast
+  showing under `.off`, nothing recorded as dropped). Restored by `git checkout --`; green again at
+  6 tests in 1 suite.
 - **PIECE 4 — the quiet slot: NOT-STARTED.**
 - **PIECE 5 — the Appearance pane's row: NOT-STARTED.**
 - **PIECE 6 — the walk (the acceptance gate): NOT-STARTED.**
