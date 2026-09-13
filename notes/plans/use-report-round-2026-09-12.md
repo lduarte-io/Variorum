@@ -8436,3 +8436,280 @@ names the difference at both doors.
 - **(J42) `EditorViewModel.saveNoteVersion`'s success arm on the refusal door (`dcec83e0`, found on the J39 walk): ACCEPTED as a fix of this letter.** The batch's own rule (a receipt reports an act that LANDED) and R-Q5's letter (the setting governs receipts) make ⌘⇧S's "Saved a version" line a receipt; the board's twin already classed it so; leaving it would have kept one savepoint toasting under the default she chose to stop the toasting. One word, byte-identical string, pinned red on the shipped tree (1 test / 3 issues). Round 3 reviews it with the rest.
 - **Round 2 verified against git by the orchestrator:** `cb6386f7 b1b0a576 dcec83e0 8ee11683 eb062857 9f0c31b2` + the two record commits; zero trailers; `Sources/`, `Shared/`, `Server/` diff-empty against `987d306e`; 31 `.refusal(` assignments in `TakesViewModel` where round 2 counted 25 `.receipt(` + the pre-existing refusals; the `lines` knob removed; the closing run 639/87 green; the J39 capture `12-j39-one-line-in-the-box-footer.png` on disk.
 - **Round 3 (the cap): a FRESH `opus-reviewer` over the round-2 fixes (`810e1b25..a97c7d60`), anchored on rounds 1–2's recorded findings, responses, dispositions and fixes.** Anything open after round 3 is recorded for her with an owner, never looped on.
+
+### 18i LADDER — ROUND 3 FINDINGS (opus-reviewer)
+
+**Scope check first (the agent contract).** The letter `fe54be0f..d9effce2` is **verified** diff-empty against
+`Sources/VariorumCore/Sync/`, `Server/`, `Sources/VariorumCore/Persistence/` and every editor-seam file
+(`BlockRangeIndex` · `EditorTextView` · `PaneTextAuthority` · `PaneSurface` · `CrossBlockEditPlanner`) —
+`EditorViewModel`/`EditorSurfaceController` are touched, but they are the view-model layer, not the seam;
+`SyncSchema.lockstepVersion` reads **8**; zero schema, zero migration; no custody or keychain code. The one
+default the letter introduces is a NEW setting's, ruled by her at R-Q5, not a change to an existing default's
+meaning. **`opus-reviewer` is the right cast; no Fable re-spawn is owed.** Zero trailer lines across the
+letter's commits; tree clean, `main` == `origin/main` at `d9effce2`; her real-store app was not running at any
+point (`pgrep -fl 'Variorum.app/Contents/MacOS'` empty) and was never touched.
+
+**What I ran and measured myself (not read).** `xcodebuild test` over the round-2 pins and their families —
+ConfirmationsSettingTests · StatusCenterTests · TakeToBlockDoorTests · RecoveryDoorsTests → `52 tests in 4
+suites passed`, `** TEST SUCCEEDED **`; a second run over SplitAtNewlinesDoorTests · NoteDeletionActTests ·
+ImportFacesTests · ExportFacesTests · NoteVersionsPaneTests · BlockTOCStatusTests · SnippetsGroupDoorsTests →
+`48 tests in 7 suites passed`. Plus one throwaway `swiftc`/`NSHostingView` geometry probe (scratchpad, outside
+the repo) reproducing `QuietReceiptLine`'s exact modifier chain at `tokens.small` (11.5 pt monospaced), which
+**independently confirms J39 in both directions**:
+
+| composition | idle | speaking *"Blocks joined — ⌥⌘Z undoes it."* |
+|---|---|---|
+| UNCONSTRAINED host, `lineLimit(2)` (the round-1 oracle's shape) | 0 × 14 | 213.5 × **14** |
+| `.frame(width: 200)`, `lineLimit(2)` (the pre-fix box) | 200 × 14 | 200 × **28** |
+| `.frame(width: 200)`, `lineLimit(1)` (as shipped) | 200 × 14 | 200 × **14** |
+
+So round 2's MAJOR was right (the round-1 pin could not fail), the round-2 oracle's red is real (28 vs 14), and
+the shipped one-line road makes "nothing moves for it" literally true in the box. The J39 capture
+`12-j39-one-line-in-the-box-footer.png` is on disk and shows exactly what the record says.
+
+#### Findings, severity-ranked
+
+**[BLOCKER] · `App/Variorum/Variorum/Features/Editor/EditorViewModel.swift:2495` · `:2504` · `:2554` · `:2568`
+· `:2601` · `:2816` · `:2840` · `:2862` (+ `:3275` and `App/Variorum/Variorum/Features/Editor/EditorFind.swift:559`
+by outcome) · EIGHT Write-surface doors that report acts which LANDED still speak through `showStatus` — the
+always-shown REFUSAL door — so her setting does not govern them: sealing a note, archiving a take, saving a
+lens, a pool drop, adding a take, setting a word target and setting an entry date all still toast under
+`quiet` and STILL TOAST UNDER `off`. This is the J42 walk find's family, and it was never enumerated: one
+member was fixed and the other eight were left.**
+
+*Mechanism, traced.* `showStatus` is the refusal door — `EditorViewModel.swift:3436–3438`:
+`setStatusMessage(message, kind: .refusal)`, and `StatusCenter.slot(for:)` routes `.refusal` to `current`
+under every value of `receiptStyle`. Each site below sits in the SUCCESS arm of a `do` whose operation already
+returned, i.e. the store changed — the letter's own stated rule for a RECEIPT:
+
+- `:2495` / `:2504` `toggleSeal()` — `unlockPost`/`lockPost` returned; *"Unsealed."* / *"Sealed — the note is read-only until unsealed."*
+- `:2554` `setPostWordTarget(_:)` — `setPostWordTarget` returned; `WordTargetFaceCopy.setNote` / `.clearNote`
+- `:2568` `updateEntryDate(_:)` — `setEntryDate` returned; *"Entry date set to …"* / *"Entry date cleared."*
+- `:2601` the pool drop — `poolDragCopy` returned; *"Copied from the pool[ with its takes]."*
+- `:2816` the new-take door — `newBlankVariant`/`branchVariant` (+ `chooseVariant`) returned; *"New take added on this block — ⌘⇧T shows the takes."*
+- `:2840` `saveCurrentChoicesAsLens(named:)` — `createLens` + `setLensChoice` returned; *"Saved — "…" remembers these choices (open it in Lenses, ⌘5)."*
+- `:2862` `archiveCaretTake()` — `archiveVariant` returned; *"Take archived — never gone: the takes panel (⌘⇧T) keeps it under "archived takes"."*
+- `:3275` `copyCaretBlockTakes(to:)` and `EditorFind.swift:559` `FindReplaceGate.completion(applied:moved:blocked:)` are the **split-by-outcome** pair (rows 29/34/35/42's class): the acting road is a receipt on the refusal door, the no-op road is correctly always-shown.
+
+*Five of these have an exact TWIN elsewhere in the app that this letter already classed a RECEIPT*, so the same
+sentence now has two classes depending on which surface is mounted:
+
+| the sentence | Write (this finding) | its twin, classed `.receipt` by 18i |
+|---|---|---|
+| *"Sealed — the note is read-only until unsealed."* / *"Unsealed."* | `EditorViewModel:2495/:2504` — REFUSAL, always toasts | `ShellActions.swift:117` `status.receipt(…)` — table **row 30** |
+| `WordTargetFaceCopy.setNote` / `.clearNote` | `EditorViewModel:2554` | `TakesViewModel.swift:1663` `.receipt(…)` — enumeration **row 15** |
+| *"Saved — "…" remembers these choices…"* | `EditorViewModel:2840` | `TakesViewModel.swift:1243` + `CanvasViewModel.swift:642` |
+| *"Take archived — never gone: …"* | `EditorViewModel:2862` | `TakesViewModel.swift:1414` / `:1417` — enumeration **row 7** |
+| the find/replace REPORT | `EditorFind.swift:559` | `EditorSurfaceController.swift:2670` `showReceipt(FindReplaceGate.replacedInEveryTake(…))` |
+
+The seal one is the sharpest, because it is ONE routed command with three endings: `ShellActions.toggleSeal`
+(`:98–99`) dispatches first, so in **Write** `EditorView.swift:323` consumes it → `EditorViewModel.toggleSeal`
+→ toast under every setting; on the **boards** `TakesBoardView.swift:289` consumes it → `TakesViewModel.toggleSeal`
+(`:1592–1601`) → **says nothing at all**; only the handler-less FALLBACK reaches `ShellActions`' own
+`status.receipt(…)` → quiet. One act, three behaviours, and 18i created two of the three.
+
+*What she sees, and why it is this letter's.* R-Q5 is *"there's these little text confirmation popups that are
+always appearing… i either need them off, more subtle in the bottom bar"* — and the popups that are always
+appearing while she writes are exactly these. Under her default, sealing a note, archiving a take and saving a
+lens from Write still throw the card she asked to stop seeing. Under **`off`** they still throw it, which makes
+the Settings pane's own help false in the other direction: `ReceiptStyleCopy.swift:37–42` prints *"What
+Variorum says after it does something… **Nothing: they stay unsaid.**"* J42 is the proof this family exists —
+the orchestrator accepted it as a fix this letter OWED, with the reasoning *"leaving it would have kept one
+savepoint toasting under the default she chose to stop the toasting"* — and that reasoning applies unchanged
+to all eight.
+
+*Why the audit missed it, precisely.* The RECORD's classification table row 15 rules the family in one line
+(*"`EditorViewModel.refuseFeedback` · `showOperationError` · every bare `statusMessage = …` (~25) | the refusal
+family | REFUSAL | unchanged, not one edit"*). `showStatus` is a NAMED door that is neither of the two the row
+names, and its ~45 call sites were never enumerated — the same shape as row 18, which J38's disposition
+required be replaced by a 25-site enumeration. The row-18 lesson was not applied to row 15.
+
+*Why no test caught it.* Nothing pins the KIND of these doors. Every shipped pin over them reads the WORDS —
+`LifecycleFacesTests.swift:109` / `:357` assert `model.statusMessage?.contains("sealed")`, which is identical
+on both roads — and `grep` finds **no** test anywhere asserting *"Unsealed."*, *"Take archived — never gone"*
+or *"remembers these choices"* against the centre. That also means **the fix costs zero test edits**, exactly
+like J38's.
+
+*Proposed fix.* One word at each of the eight: `showStatus(` → `showReceipt(`, strings byte-unchanged (the
+error arms stay `showStatus`/`showOperationError`). `:3275` and `EditorFind.swift:559` take the letter's own
+split-by-outcome predicate (`TakeClipboard`'s message already knows whether it copied; `FindReplaceGate` has
+`applied`), routed as the other three doors are. **Red-on-old pin, the J42 pin's shape** (in
+`ConfirmationsSettingTests`, which already owns `withEditor`): with `receiptStyle = .quiet`, drive
+`model.toggleSeal()` and assert `status.current == nil`, `status.quietLine?.kind == .receipt`, the sentence
+present — red on this tree (`current` holds the words with `kind == .refusal`, `quietLine == nil`); a second
+arm on `archiveCaretTake()` and a third under `.off` asserting `lastDroppedReceipt` carries the words. And the
+row-15 correction the enumeration owes: every `showStatus(` call site listed with a verdict, the way row 18's
+was.
+
+---
+
+**[MAJOR] · F-0, across `StatusCenter.swift`, `EditorViewModel.swift`, `TakesViewModel.swift`,
+`TakesStructureController.swift`, `NoteDeletion.swift` · Nothing in the letter makes the classification
+CHECKABLE, and the ladder is capping with the fourth mis-classified family open. The class is spelled by five
+different door-pairs across ~150 call sites, and every family so far has been found by a human reading the
+sites one at a time.**
+
+*The traced degradation (no pin owed — architectural; this is the evidence).* The class is decided at the door,
+which is right. But the doors are five separate vocabularies with no shared surface:
+`speak`/`receipt`/`say(_:refusing:)` on the centre · `showStatus`/`showReceipt`/`showTransientStatus`/
+`showTransientReceipt` on `EditorViewModel` · `setStatus`/`setRefusal`/`speak` on `TakesViewModel` ·
+`status = .receipt(…)`/`.refusal(…)` written directly in `TakesViewModel` · `Report.isRefusal` /
+`lastReportIsRefusal` / `noteIsRefusal` / `acted` as per-door facts. In three ladder rounds this letter has
+found a mis-classification in **four** of them — J29 (`NoteDeletion` + import + export), J33
+(`.alreadyWhole`), J38 (eight direct assignments), J42-plus-the-BLOCKER-above (`showStatus`) — and in every
+case a full-green suite (2577 tests) was silent, because a call site's class is invisible to a test that reads
+the words. The base rate is the argument: four families in three rounds over ~150 sites, each found by hand, is
+not a converging audit.
+
+*Why it is MAJOR and not a preference.* F-0's letter is *"two copies of one rule anywhere are the drift
+class"*, and P-1's mechanism for exactly this shape is *"gating is data, never per-view if-statements… a
+registry-walk test asserts every declared door exists and every rendered door is declared"* — the structural
+answer, not another audit. Round 2's N2 recorded the near-synonym half (`speak`/`say`) and deferred the rename
+as "not this ladder's"; that deferral is now load-bearing and has no owner.
+
+*Proposed handling (the cap is real, so: fix the BLOCKER's sites, RECORD this with an owner).* The cheap
+structural moves, for whoever owns it: rename the always-shown doors so a call site reads its class without
+opening a doc (`showStatus` → `refuse`/`direct`, `speak` → `refuse`; ~150 mechanical sites, zero behaviour),
+and/or give each model ONE classed write (`TakesViewModel.setStatus` already is that door — the 25 direct
+`status = .receipt(…)` assignments J38 had to enumerate exist only because the door can be bypassed; making
+`status` private with `setStatus`/`setRefusal` the only writers would have made J38 structurally impossible).
+Owner candidates: 13u2 (which already holds the letter's other deferred sweeps) or a 17 entry.
+
+---
+
+**[MINOR] · `App/Variorum/VariorumTests/ConfirmationsSettingTests.swift:383–385`, `:441–442` · J39 constrained
+ONE of the oracle's two hosts. The FLAT-bar half is still measured unconstrained, so its height assertion —
+*"the flat bar's row NEVER changes height for it"* — cannot fail on the axis it names, which is precisely the
+defect J39 was raised for.**
+
+*Measured* (the probe above, third row of the table): with the host unconstrained, `lineLimit(2)` reports
+**14 pt idle and 14 pt speaking** — identical to `lineLimit(1)`. So `#expect(host.fittingSize.height ==
+idleHeight)` at `:441–442` passes for any `lineLimit` and any sentence. The claim it guards is real (the flat
+bars are `HStack`s; a wrapping line WOULD grow the row), and the view's header at `:26–29` rests on it.
+
+*Note the genuine tension, so the fix is not naive:* the flat host must stay unconstrained for
+`fittingSize.width == 0` / `> 0` to mean anything, so you cannot simply add `.frame(width:)` to it. *Proposed
+fix:* a THIRD host — the same view under `.frame(width: 420)` with a long sentence — asserting
+`height == idleHeight`; red on old by `lineLimit(2)` (measured 28 vs 14 at 200 pt, and the long chip sentence
+is 896 pt wide, so it wraps at 420 too). Cheap, and it closes the half J39 left.
+
+#### NITs
+
+- **`App/Variorum/Variorum/Core/Views/QuietReceiptLine.swift:30–32`** — the header still says the VERTICAL
+  composition's *"idle slot measures zero width"*. The round-2 oracle DROPPED that assertion (it had to: at
+  `.frame(width: 200)` the idle box measures 200, as my probe confirms), so the claim is now both unpinned and
+  false as the pin measures it. One clause: *"takes no room the counts can feel"*, or drop the width half for
+  the vertical case. Same doc/measurement mismatch class J39 corrected one paragraph above it.
+- **`App/Variorum/Variorum/Features/Takes/TakesViewModel.swift:1208–1220`** — J38's milder sibling now speaks
+  *"New takes written on 0 blocks — open any fan to see them, or open them side by side in Lenses."* as an
+  always-shown REFUSAL. The class is right and the words are deliberately hers to change, but the second clause
+  is now wrong advice on the road where it always shows. It is recorded only inside the enumeration table;
+  it belongs on the letter's residue line to her beside row 34 and the idempotent bulk tag (the copy-invention
+  class) so she sees all three together.
+- **`App/Variorum/Variorum/Features/Takes/TakesViewModel.swift:1592–1601`** — `TakesViewModel.toggleSeal` says
+  NOTHING on success while its two siblings speak. Pre-18i (this letter did not touch it), and only visible
+  once the BLOCKER's seal split is being fixed — record it there rather than as its own item, since a fix is
+  new copy on a door only if the fixer decides the boards should speak at all.
+
+#### Considered and cleared (traced, and measured or run where it mattered)
+
+- **J38, verified at all eight sites and arithmetically complete.** Each of `:969` (the `.main` arm writes no
+  pick and the function ends), `:1131` (`return` before any op), `:1476` (`.gone`/`.foreign` — nothing
+  restored), `:1582`, `:2356`, `:2371`, `:2386`, `:2408` (guard-elses that `return`) reads `.refusal(` with the
+  words byte-unchanged. The enumeration's arithmetic checks out at HEAD: **16 `.receipt(` + 8 flipped + 1 turned
+  into the `wrote` ternary = the 25 round 2 counted**, and `grep -c` reads 16 receipts / 31 refusals, exactly
+  what the orchestrator's note records.
+- **The flip's blast radius is what the record says it is.** `RecoveryStatus.isRefusal`'s only consumers are
+  `TakesViewModel:152` (the centre's kind) and four local token paints — `WriteTakesPanel.swift:107`,
+  `TrayPanel:841`, `BlockHistoryPane:449`, `NoteVersionsPane:216`. No button, no availability and no projection
+  reads the class, so the accepted alarm-token consequence is the whole of it.
+- **J38's pin is real and cannot pass vacuously.** Two roads (keyboard and click) under `.off` asserting
+  `current?.kind == .refusal` with `lastDroppedReceipt == nil`, plus a third arm driving a door that DID act
+  (`setNewlinesMintBlocks(false)`) so the pin fails if the board ever stops speaking receipts at all. Its red on
+  the shipped tree is analytically certain (`.receipt` under `.off` ⇒ `current == nil`). Ran green here.
+  **Zero test edits** — `grep` confirms the only shipped pin naming one of the eight sentences
+  (`RecoveryDoorsTests.swift:609`) reads `statusMessage`, which the class never touched.
+- **J42 is correct, and nothing is lost by it.** `VersionActs.save` (`Shared/VersionActs.swift:28–33`) runs the
+  op and returns `VersionsPath.saved`, throwing on every failure — so the success arm is unambiguously a landed
+  act, and the error arm correctly stays `showStatus`. I checked that every `EditorViewModel` mount has a quiet
+  slot before accepting the class change: `EditorView.swift:124–133` renders `CommitBar` unless
+  `barPlacement == .inSidebarBox`, and that case is the book's, where `RootView.swift:605` hands
+  `CommitBar(model:axis:.box)` to `SidebarNoteBox` — whose footer carries the line. The Snippets-area mount
+  (`CanvasView.swift:1081`) takes the default `.bottom`. So ⌘⇧S is never spoken into a bar-less surface.
+- **The quiet line cannot be squeezed in the box.** `SidebarNoteBox.swift:96` puts the bar inside a
+  `ScrollView`, so `layoutPriority(-1)` cannot starve the reserved row even though the box is framed at
+  `SidebarLayout.railGroupHeight` — the one road by which J39's one-line reservation could have vanished.
+- **Removing `fixedSize` changed nothing in the flat bars.** The shipped chain was
+  `fixedSize(horizontal: false, vertical: lines > 1)` with `lines == 1` there, i.e. a no-op; probed identical
+  (idle 0 × 14, speaking 213.5 × 14) before and after. P-8's `lineLimit` half is honoured.
+- **J41 makes the invariant unconditional and adds no road.** `deliver(nil)` now resets before returning;
+  `StatusCenter.deliver`'s own empty-string early return still leaves the forwarder's unconditional reset after
+  it. The one optional-parameter door (`EditorViewModel.setStatusMessage(_:kind:)`) is called at three sites,
+  all non-optional — correctly labelled a road closed, not a bug fixed.
+- **J40 and the NITs landed as dispositioned.** `run`'s doc names the words-only contract and the three refusal
+  endings; `splitters` no longer shadows the static `split(made:from:…)` (and `acted(_:)` is still the single
+  guard, so the round-1 N3 collapse survives); `settleStatus`/`settleLayout` are one name each. `say`'s doc is
+  narrowed to the doors that speak to the centre with the three model-side ternaries named — and the reason
+  given (routing them through the centre would bypass a property ~22 pins read, and the board's own rendered
+  slot) is correct at all three sites.
+- **No string changed by the round-2 fixes.** Read every `+`/`-` pair: the eight flips keep byte-identical
+  literals; `:1220`'s sentence is the same literal hoisted into a `let`; J42 moves a literal between doors;
+  `splitters` is a local. `ReceiptStyleCopy` is untouched.
+- **Every OTHER model's forward is clean.** All 20 literal `statusMessage = "…"` assignments in
+  `CanvasViewModel`, `CompareBoardView`, `BlockTOCView`, `CommentsPanel` and `EditorViewModel` are refusals or
+  observation errors; `BlockTOCView`'s five `speak(` callers are refusals; `TakesStructureController`'s 13
+  `setStatus(` callers all sit after a returned op inside `if landed`-shaped guards. The BLOCKER's family is
+  confined to `EditorViewModel`/`EditorFind`'s `showStatus`.
+- **`StatusForwarder` is adopted identically in all four models** (`grep`: four `StatusForwarder(` inits, four
+  one-line `didSet`s, four `forwarder.outgoing = .receipt` doors, `outgoingKind` gone from the app), and
+  `TakesViewModel.run` sets `status = nil` first — which the `didSet`'s `if let status` correctly skips, so no
+  spurious delivery rides an act's clear.
+- **P1–P3, I1–I10, S1–S5 untouched by the round-2 fixes.** No cost scales with corpus size, no text is copied
+  across entities, no invariant is read or written. Observation scoping unchanged (`quietLine` read inside the
+  leaf's own `body`; `receiptStyle` and `forwarder` both `@ObservationIgnored`).
+
+#### Review foci (§12), addressed
+
+- **F-0 — no god brain, no god file.** The *file* half is met and improved: `StatusCenter` is ~297 lines with
+  one concern plus a 46-line companion; `QuietReceiptLine` lost its knob and is one shape everywhere;
+  `StatusForwarder` genuinely has one home. The *rule* half is the **MAJOR** above: the class is spelled by
+  five door-pairs with no shared audit surface, and four families have now been mis-classified and found by
+  hand. Round 2's own F-0 note said the same thing in different words ("did this door act?" is spelled six
+  ways) and the fix taken was a doc narrowing; the BLOCKER is what that deferral cost.
+- **F-6 — the kind on the one seam.** Met in its letter, re-verified at the code rather than the claim:
+  `Item.kind` lives only on `StatusCenter.Item`; `speak` keeps its signature and infers; `receiptStyle` is
+  adopted once at `ThemeStore.start` from the LANDED settings and appears outside the centre and the store only
+  in the Appearance pane's binding; `QuietReceiptLine` is ONE view, composed from three call-expression sites
+  into six mounts (CommitBar's three flat tiers + `boxFooter`, TakesBottomBar's two arrangements — all present);
+  no site-level `if setting` anywhere; the strings are byte-unchanged. **And the focus's limit is where the
+  round's worst finding lives for the third consecutive round:** the kind is only as good as the classification
+  at the door, and the letter's table waved through `showStatus`'s ~45 sites in the same one line it waved
+  through the board's 25.
+
+#### CLEAN BILL — checked and found solid
+
+- **J39, end to end, independently measured.** The finding, the fix and the pin are all real: the round-1
+  oracle genuinely could not fail (unconstrained `lineLimit(2)` = 14 pt speaking), the constrained oracle
+  genuinely goes red on the pre-fix shape (28 vs 14), and one line everywhere makes the header's claim literally
+  true. Removing the `lines` knob rather than setting it to 1 at every site is the right call — a per-site knob
+  with one value is a dead knob — and the walk capture shows the result in the surface the road was chosen for.
+- **J38's fix, its enumeration and its arithmetic.** Eight sites, one word each, words untouched, the
+  consequence named and accepted, the 25-assignment enumeration with a verdict per row, and row 18 of the
+  classification table corrected from one line to that enumeration's summary. This is the audit row 18 should
+  have had in the first place, and it is complete where it was applied.
+- **J42's handling.** Found on a walk, traced, fixed with a pin red on the shipped tree, flagged to the
+  orchestrator as a batch call rather than smuggled in, and accepted with a written reason. The finding above
+  is not a criticism of J42 — it is that J42's family was never swept.
+- **The `.off` semantics.** A dropped receipt leaves whatever is on screen alone; `lastDroppedReceipt` is
+  DEBUG-only, cleared by `clear()` (N1), and the doc names the `spoken`-under-`.off` trap for the next author
+  (N2). One message at a time across both slots, one 6 s clock, refusal and offer always to `current`.
+- **The seams and the marker.** `Sync/`, `Server/`, `Persistence/`, the schema and every editor-seam file are
+  diff-empty across the whole letter; `lockstepVersion` = 8; `receipt_style` is read-time defaulted with no seed
+  and no migration; enum-valued, so `setting.value`'s PLAIN classification and its "enum semantics, no prose"
+  promise hold. Correctly not a §12 event. Zero commit trailers.
+- **The record's honesty, again.** The round-2 FIXES section names each red's shape and count, distinguishes
+  the reds that needed no revert, says plainly where no pin is owed, and carries the implementer's own probe
+  table — which matched my independent probe to the point and is what let me check the geometry against a
+  measurement instead of a promise.
+
+**Counts: 1 BLOCKER · 1 MAJOR · 1 MINOR · 3 NIT.**
