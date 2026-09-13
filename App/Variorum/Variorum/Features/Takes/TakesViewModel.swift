@@ -963,7 +963,10 @@ final class TakesViewModel {
         guard let index = columns.firstIndex(where: { $0.id == columnID }) else { return }
         switch columns[index].kind {
         case .main:
-            status = .receipt("The main column shows the note's chosen takes — use ✓ to change them.")
+            // J38: nothing is picked here, so this is a REFUSAL — and since
+            // 18i lets this class ride to the shell, the class now decides
+            // whether she sees it at all (P-2).
+            status = .refusal("The main column shows the note's chosen takes — use ✓ to change them.")
         case .scratch:
             columns[index].picks[blockID] = variantID
             saveMemory()
@@ -1125,7 +1128,7 @@ final class TakesViewModel {
             let preservation: Lens
             switch column.kind {
             case .main:
-                status = .receipt("This column IS the note — nothing to adopt.")
+                status = .refusal("This column IS the note — nothing to adopt.")  // J38
                 return
             case .lens(let lensID):
                 preservation = try await session.runner.run { ops in
@@ -1205,9 +1208,16 @@ final class TakesViewModel {
             let picks: [String: String] = try await session.runner.run { [postID] ops in
                 try ops.branchAllFans(post: postID)
             }
-            status = .receipt(
+            // J38's milder sibling, the J37 class: `branchAllFans` returns
+            // `[:]` without throwing on a post with no renderable slots, so
+            // this line is producible with NOTHING written — and a report of
+            // a no-op is a refusal, whatever its shape. ONE predicate; the
+            // words are untouched (a sentence for the zero case would be new
+            // copy, which is hers).
+            let wrote = !picks.isEmpty
+            let note =
                 "New takes written on \(picks.count) block\(picks.count == 1 ? "" : "s") — open any fan to see them, or open them side by side in Lenses."
-            )
+            status = wrote ? .receipt(note) : .refusal(note)
         } catch {
             status = .refusal(Self.message(for: error))
         }
@@ -1463,7 +1473,7 @@ final class TakesViewModel {
                 status = .refusal(Self.message(for: error))
             }
         case .gone, .foreign:
-            status = .receipt(LensFallbackCopy.nothingToRestore)
+            status = .refusal(LensFallbackCopy.nothingToRestore)  // J38: nothing restored
         }
     }
 
@@ -1569,7 +1579,7 @@ final class TakesViewModel {
     /// Commit the FOCUSED take's buffer (⌘S in takes surfaces).
     func commitFocusedTake() async {
         guard let variantID = focusedPane?.variantID else {
-            status = .receipt("Click into a take first — ⌘S commits the take you're in.")
+            status = .refusal("Click into a take first — ⌘S commits the take you're in.")  // J38
             return
         }
         await autosave.flushNow()
@@ -2343,7 +2353,7 @@ final class TakesViewModel {
         guard let pane = focusedPane,
               let slot = projection.slots.first(where: { $0.blockID == pane.blockID })
         else {
-            status = .receipt("Click into a take first — ⌃⌘← and ⌃⌘→ step through its siblings.")
+            status = .refusal("Click into a take first — ⌃⌘← and ⌃⌘→ step through its siblings.")  // J38
             return
         }
         switch host {
@@ -2358,7 +2368,7 @@ final class TakesViewModel {
             guard let fan = projection.fans[slot.blockID], fan.count > 1,
                   let current = fan.firstIndex(where: { $0.id == pane.variantID })
             else {
-                status = .receipt("This block has one take — ⌘T branches a second.")
+                status = .refusal("This block has one take — ⌘T branches a second.")  // J38
                 return
             }
             let next = min(max(current + delta, 0), fan.count - 1)
@@ -2373,7 +2383,7 @@ final class TakesViewModel {
     /// keyboard).
     func chooseFocusedTake() async {
         guard let pane = focusedPane else {
-            status = .receipt("Click into a take first — ⌘⏎ chooses the take you're in.")
+            status = .refusal("Click into a take first — ⌘⏎ chooses the take you're in.")  // J38
             return
         }
         await choose(blockID: pane.blockID, variantID: pane.variantID)
@@ -2395,7 +2405,7 @@ final class TakesViewModel {
     /// `archiveTake`'s (one copy on every door — 3D/N1).
     func archiveFocusedTake() async {
         guard let pane = focusedPane else {
-            status = .receipt("Click into a take first — ⌘⇧A archives the take you're in.")
+            status = .refusal("Click into a take first — ⌘⇧A archives the take you're in.")  // J38
             return
         }
         await archiveTake(pane.variantID)

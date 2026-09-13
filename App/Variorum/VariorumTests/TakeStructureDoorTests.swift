@@ -173,6 +173,52 @@ struct TakeToBlockDoorTests {
         }
     }
 
+    /// **A BOARD DOOR THAT COULD NOT ACT STILL SPEAKS** (the 18i ladder round
+    /// 2's BLOCKER — J38). Eight `TakesViewModel` messages that report that
+    /// NOTHING happened were classed `RecoveryStatus.receipt`, which the board
+    /// has carried since the post-13l polish round as a PANEL-COLOUR mistake.
+    /// 18i's one load-bearing move — letting that class ride to the shell
+    /// (`TakesViewModel.swift:143–154`) — turned it into a VISIBILITY one: her
+    /// setting began deciding whether a refusal is shown at all, and neither
+    /// board renders a local status slot, so under `.off` ⌘S with no take
+    /// focused said nothing whatsoever.
+    ///
+    /// Two arms, the keyboard road and the click road.
+    /// **Red on old:** `current == nil`, the sentence sitting in
+    /// `lastDroppedReceipt`.
+    @Test func aBoardDoorThatCouldNotActStillSpeaksUnderEverySetting() async throws {
+        try await withTakesWorld(seedBlocks: ["Shown take."]) { world in
+            world.session.status.receiptStyle = .off
+
+            // (1) ⌘S with no pane focused — a guard-else that returns.
+            #expect(world.model.focusedPane == nil, "no ring — the door cannot act")
+            await world.model.commitFocusedTake()
+            #expect(world.session.status.current?.text
+                    == "Click into a take first — \u{2318}S commits the take you're in.")
+            #expect(world.session.status.current?.kind == .refusal,
+                    "a door that could not act always says why (P-2)")
+            #expect(world.session.status.lastDroppedReceipt == nil,
+                    "nothing was dropped — this was never a receipt")
+
+            // (2) the click road: Adopt on the column that IS the note.
+            world.session.status.clear()
+            let main = try #require(world.model.columns.first)
+            await world.model.adoptColumn(main.id)
+            #expect(world.session.status.current?.text
+                    == "This column IS the note — nothing to adopt.")
+            #expect(world.session.status.current?.kind == .refusal)
+            #expect(world.session.status.lastDroppedReceipt == nil)
+
+            // …and a door that DID act is still a receipt, so the pin cannot
+            // pass by the board having stopped speaking receipts at all.
+            world.session.status.clear()
+            world.session.status.receiptStyle = .quiet
+            await world.model.setNewlinesMintBlocks(false)
+            #expect(world.session.status.quietLine?.kind == .receipt)
+            #expect(world.session.status.current == nil)
+        }
+    }
+
     @Test func theCardDoorActsOnItsOwnTakeNotTheFocusedOne() async throws {
         // A right-click never moves the keyboard (13k K6's lesson): the card
         // names both its block AND its take.
