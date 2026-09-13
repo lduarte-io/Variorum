@@ -174,6 +174,30 @@ private struct AppearancePane: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
+            // 18i (her R-Q5): its OWN section, because it is neither a look
+            // of the writing surface nor a habit of the document — it is how
+            // the app talks back, everywhere. Synced like the two settings
+            // below it, so the same act confirms the same way on every
+            // device (the fan_style class).
+            Section("Confirmations") {
+                Picker(ReceiptStyleCopy.title, selection: Binding(
+                    get: { theme.settings.receiptStyle },
+                    set: { theme.setReceiptStyle($0) })) {
+                    ForEach(ReceiptStyle.allCases, id: \.self) { style in
+                        Text(ReceiptStyleCopy.label(style)).tag(style)
+                    }
+                }
+                Text(ReceiptStyleCopy.help)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                // The sentence the setting must never leave out: a refusal
+                // is not a confirmation, and “Off” never silences one.
+                Text(ReceiptStyleCopy.alwaysShownNote)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             // 13d batch 4 (A16 — N34's deferred GLOBAL half): document
             // semantics, so it is SYNCED, and it says so. Per-post settings
             // still win where they are set.
