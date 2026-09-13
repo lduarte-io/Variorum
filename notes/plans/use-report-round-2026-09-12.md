@@ -7802,3 +7802,138 @@ proposed for the same fix.**
 - **NITs:** N1 `clear()` also clears `lastDroppedReceipt` — FIX. N2 the `spoken` doc sentence naming the `.off` trap — FIX (doc). N3 the two spellings collapse — FIX. N4 `WriteTakesPanel`'s local slot under `.off` — RECORD only (the scoped-local-slot class the record names out of scope), on J35's line to her. N5 `.textSelection(.enabled)` — NO CHANGE, the reason recorded in the view's doc: `StatusToast.swift:26` and `WriteTakesPanel.swift:108` carry the same modifier, so the quiet line mirrors the chrome's status vocabulary; idle it has zero width and speaking it overlaps no door.
 
 **Fix order (the implementer, this continuation):** J29 (both members + J37's export line, with the pins and the table corrections) → J32 → J34 → J33 → J30 → J31 → the NITs (N1 · N2 · N3 · N5's doc clause); each its own commit with its measured red where a red exists; then the touched suites + `ConfirmationsSettingTests` + `StatusCenterTests` + `NoteDeletionDoorsTests` + `TakeStructureDoorTests` + `NoteVersionsPaneTests` + the tutorial spine green in ONE run at the end (exact lines in a `### 18i LADDER — ROUND 1 · THE FIXES` section); push after each. Round 2 is a FRESH `opus-reviewer` anchored on this section.
+
+### 18i LADDER — ROUND 1 · THE FIXES (the implementer continuation, 2026-09-13 night — seven commits, in the dispositions' order)
+
+*Every bug-class item landed PIN FIRST with its red watched and its counts recorded. Two of the pins go
+red on the SHIPPED tree with nothing reverted (the BLOCKER's and J33's); the rest use a behavioural
+revert where the API is new or the change is a one-word classification, which is this repo's own
+practice. `Sources/` and `App/Variorum/Shared/` are diff-empty against the round-1 tree `a70fd24c`, so
+neither `swift test` nor the iOS build is owed; `Sync/`, `Server/`, the schema and the editor seam are
+untouched and `lockstepVersion` reads **8**. Zero trailer lines on all seven commits.*
+
+**(J29 + J37) The BLOCKER and its two siblings — `9f35e176`.**
+`NoteDeletion.Report { text; isRefusal }` in the `SplitAtNewlinesCopy.acted` shape, with `run` kept
+byte-identical as a forwarder (the 3C parity pattern: the six shipped pins over it and
+`LibraryViewModel.delete` compile and pass UNMODIFIED — zero test edits); `fire` routes on the outcome's
+own class. The audit's second member landed with it: `ImportModel.lastReportIsRefusal` (`imported == 0`),
+because an empty `.md` is refused by `importPost` (`emptyImport`), collected as a SKIP, and reported as a
+confirmation from the bar-less Library. J37's third: `ExportModel.lastReportIsRefusal` (`count == 0`).
+The three doors route through ONE new mapping, `StatusCenter.say(_:refusing:)`, so "did anything land"
+becomes a kind in one place (F-0).
+- **Pins:** `ConfirmationsSettingTests.aDeleteThatDeletedNothingStillSpeaks` ·
+  `.theScrapsFenceStillSpeaksUnderHerDefault` · `.anImportThatImportedNothingIsARefusal` ·
+  `.anExportThatWroteNothingIsARefusal` · `StatusCenterTests.sayMapsALandedActToAReceiptAndANoOpToARefusal`.
+- **RED ON OLD, on the shipped tree, nothing reverted: 2 tests / 6 issues** — `current == nil` and
+  `current?.kind == nil` on both delete arms, the words sitting in `lastDroppedReceipt`, and the scraps
+  refusal riding `quietLine` with `kind: .receipt`. The two new predicates are new API, so their red is
+  behavioural (forced to the pre-J29 `false`): **2 tests / 2 issues**.
+- **Green after:** ConfirmationsSettingTests + StatusCenterTests 22/2; the four note-deletion suites +
+  SnippetsGroupDoorsTests 25/5.
+- RECORD table **rows 42 and 35** corrected to SPLIT BY OUTCOME with their reasons.
+
+**(J32) `SplitAtNewlinesCopy.acted` gets its pins — `78684ba0`.**
+Two pins, one per direction, because the three shipped pins on this copy assert `model.statusMessage` —
+written on BOTH roads — so a reverted predicate left every one of them green.
+- **Pins:** `aSplitThatSplitNothingStillSpeaks` (the BLOCK door on an already-whole block under `.off`;
+  the reachable no-op road, since the note door refuses before its flight) · `aSplitThatSplitLandsQuietly`
+  (the note door on `"One.\nTwo."` under `.quiet`).
+- **RED ON OLD, both directions measured** (behavioural revert of the pure predicate): forced `true` →
+  **1 test / 3 issues** (the refusal dropped into `lastDroppedReceipt`); forced `false` → **1 test / 3
+  issues** (the receipt toasting as a refusal). Green after: 25/2 with SplitAtNewlinesDoorTests.
+
+**(J34) The board's five re-classed receipts get the pin the fix owed — `16b2da04`.**
+`theBoardsStructuralReceiptsAreNotAlarms` (TakeToBlockDoorTests) drives `moveTake` and
+`moveTakeIntoBlockBelow` and asserts `status?.isRefusal == false`, with a third arm on a door that
+genuinely cannot act so the pin cannot pass by the class never being a refusal.
+- **RED ON OLD by the one-word revert the fix itself made** (`setStatus` → `speak` at both sites):
+  **1 test / 2 issues**, `isRefusal → true` at both. Green after: 8/1.
+
+**(J33) `"… is already whole"` speaks — `f6aebc3a`.**
+One line: `.alreadyWhole` through `status.speak`. The table's rule is NOT widened ("or the shell moved"
+would reclassify row 36 and blur every navigating door); row 34's verdict and reason corrected in the
+same commit.
+- **Pin:** `EncryptionBookDoorTests.theAlreadyWholeLineIsARefusalAndAlwaysShows` — two presses under
+  `.off`: the minting one IS a receipt and is dropped, the second reaches `current` as a `.refusal`.
+- **RED ON OLD, on the shipped tree, nothing reverted: 1 test / 2 issues** (`current == nil`,
+  `kind == nil`). Green after: 5/1.
+
+**(J30) The MAJOR — the forward's rule gets ONE home — `bcc5cd2b`.**
+`StatusForwarder` in `StatusCenter.swift` beside the centre it speaks to; each of the four models holds
+one, its `didSet` is one line, `showReceipt` raises `forwarder.outgoing`, and `EditorViewModel`'s
+divergence becomes a PARAMETER of the shared rule instead of a second copy. **Zero call-site edits** —
+the ~100 bare `statusMessage = …` assignments and every shipped pin over them are untouched; `outgoingKind`
+appears nowhere in the app now. **No pin owed** (architectural, per the hallucination guard); the existing
+kind pins ride through all four models unchanged — 48/5 on the five kind suites, 62/5 on five adjacent ones.
+
+**(J31) The quiet slot's reservation, said truthfully and pinned — `b304cde1`.**
+Kept (the road the orchestrator chose): the footer holds the counts and the `?` DOOR, and collapsing the
+row would move a door 18 pt when a receipt lands and 18 pt back six seconds later. The view's header now
+says what is true per composition — zero width in the horizontal bars; one line's height in the vertical
+one, reserved deliberately — and the oracle mounts the `lines: 2` composition beside the flat one,
+asserting idle height > 0 in the box and idle == speaking in BOTH.
+- **Probed rather than asserted** (no red-on-old is owed for a doc/pin finding, but a pin nobody can see
+  bite is not a pin): with the collapse road applied (`.frame(height: item == nil ? 0 : nil)`) the oracle
+  fails **1 test / 3 issues** — idle box height 0, and both hosts growing 0 → 14 when a receipt lands.
+  Restored and green: 14/1.
+
+**(The NITs: N1 · N2 · N3 · N5) — `dcf00db1`.** N1 `clear()` also clears `lastDroppedReceipt` (DEBUG) —
+without it a "nothing was dropped" pin after an earlier drop passes wrongly, and
+`aRefusalStillToastsWithConfirmationsOff` is already that shape. N2 `spoken`'s doc names the `.off` trap
+for the 26 assertions across ~10 suites that read it. N3 `SplitAtNewlinesCopy.receipt` consults `acted(_:)`
+instead of re-spelling it six lines away. N5 NO change to `.textSelection(.enabled)`; the reason is
+recorded in the view's doc (`StatusToast` and `WriteTakesPanel` carry the same modifier; the hit-target is
+bounded by zero idle width and `layoutPriority(-1)`). **Doc/record only — no pin owed.** Green: 40/4.
+
+**(J36) MINOR-6 — DISMISSED AS HOLLOW, and NOTHING was added.** No guard, no pin, no defensive symmetry:
+the rendered take's branch appends its edit from `target.intraRange` with no match test and increments
+`applied` before `continue`, and `targets` is non-empty by construction, so `applied ≥ 1` on every
+reachable road. The concurrent-archive residue (a desynchronised projection, not a door) stays recorded in
+the round-1 audit table and nowhere else.
+
+#### J35 — THE RESIDUE (for the 18i letter's closeout)
+
+**What "quiet means quiet" costs on the surfaces with no bottom bar, recorded rather than built.** Her
+R-Q23 is ruled and the code honours it; this is not a re-open. `QuietReceiptLine` is composed by exactly
+four mounts — Write's `CommitBar` (three tiers), the book's sidebar note-box footer, and the Takes and
+Lenses `TakesBottomBar` — so **Blocks, Canvas and Compare render a quiet receipt nowhere**, and none of
+them renders a local status slot either (verified: `BlockTOCView`, `CanvasView` and `CompareBoardView`
+WRITE `statusMessage` and never read it). Two classes are sharper than the examples #106 put in front of
+her: **(1) receipts carrying the road back** — `BlockTOCView.swift:388` (*"…the block LEFT this note… Find
+it in Snippets; ⌥⌘Z brings it back."*), `:634`, and `CanvasViewModel.swift:810` (*"Ordered — N cards lead
+the note now (⌥⌘Z undoes)."*); **(2) doors whose ONLY feedback was the receipt** —
+`CanvasViewModel.swift:644` (save-as-lens) and `:726` / `CompareBoardView.swift:782` (⌘S commit), where
+nothing else on the surface changes, so a savepoint on Compare or Canvas lands in complete silence under
+her default. **N4 rides the same line:** `WriteTakesPanel.swift:104–107` renders the board's receipt in
+its OWN slot under `.off`, so "Nothing" is not literally true on that one surface — it is the
+scoped-local-slot class the batch record already lists as out of scope (the Library's caption, the
+membership chip's popover, the recovery panels' lines), and making the setting reach into local captions
+is a scope widening that is hers.
+
+**The line for her (the author handoff's judgment calls, beside #106's ruling):** *"Quiet means quiet"
+also silences five doors on the three surfaces that have no bottom bar — Blocks, Canvas and Compare —
+including two that name the road back (⌥⌘Z) and ⌘S on Compare and Canvas, which now gives no feedback at
+all. Option (c) of #106 — one `QuietReceiptLine` composed into those surfaces' footers, about ten lines —
+remains yours to call. (And on one surface "Nothing" is not quite literal: the Write fan panel keeps
+showing the board's own line in its own slot, as the Library's caption does.)*
+
+#### CLOSING THE ROUND-1 FIXES (the exact lines)
+
+- **ONE `xcodebuild test` invocation** from `App/Variorum/`, 39 suite TYPE names in a zsh array, every one
+  `grep -rl "struct <Name>"`-verified first (the 18h/17q lesson) — the touched-and-adjacent set:
+  ConfirmationsSettingTests · StatusCenterTests · CommandRouterTests · MoveAndExecuteTests ·
+  BlockTOCStatusTests · the four NoteDeletion types · SnippetsGroupDoorsTests · NoteVersionsPaneTests ·
+  TakeToBlockDoorTests · CopyAllTakesDoorTests · EncryptionBookDoorTests · SplitAtNewlinesDoorTests ·
+  ImportFacesTests · ExportFacesTests · BlockDeletionAndRedoTests · FormattingSurfacesTests · BlockTOCTests ·
+  BlocksWorkbenchTests · BlocksWorkbenchFaceTests · the four Canvas types · the three Compare types ·
+  the ten tutorial spine types:
+  `✔ Test run with 282 tests in 39 suites passed after 43.066 seconds.` · `** TEST SUCCEEDED **` · zero `✘`.
+  *(`CanvasDragTrackingTests` is deliberately not in the set — the standing flake row.)*
+- **Core:** not owed and not run — `git diff --stat a70fd24c HEAD -- Sources` is EMPTY.
+- **iOS:** not owed and not run — `App/Variorum/Shared/` is diff-empty too.
+- **The seams:** `Sources/VariorumCore/Sync/` · `Server/` · the schema · `EditorTextView` · `PaneSurface` ·
+  `PaneTextAuthority` · `BlockRangeIndex` all untouched; `SyncSchema.lockstepVersion` = **8**; eleven app
+  files and four test files changed in total; zero `Co-Authored-By` / `Claude-Session` lines.
+- **No walk is owed** (the orchestrator's call): J31 changes no face — the geometry is byte-identical and
+  only its doc and its pin moved — and every other fix changes WHICH SLOT a sentence uses, which the
+  round-1 walk's captures already show in both directions.
