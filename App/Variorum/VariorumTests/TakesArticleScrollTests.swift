@@ -1485,4 +1485,123 @@ struct TakesArticleScrollTests {
                     """)
         }
     }
+
+    // MARK: - The 17q ladder, round 1 — R1-2: the BLOOM door is never weighed
+    //         against the memory (17o row 8's door keeps going there)
+
+    private func isOnScreen(_ variantID: String, _ hosting: NSView, _ article: NSScrollView) -> Bool {
+        guard let pane = articlePanes(in: hosting).first(where: {
+            $0.identifier?.rawValue == "pane:article|\(variantID)"
+        }) else { return false }
+        let visible = article.contentView.bounds
+        let frame = pane.convert(pane.bounds, to: article.contentView)
+        return frame.minY >= visible.minY - 2 && frame.maxY <= visible.maxY + 2
+    }
+
+    /// **RED ON THE 17q TREE (`ac9c46fb`).** 17o row 8's door — Write's takes
+    /// panel, *Open Takes mode* on a block — must GO there. Piece 6's
+    /// stand-down (an ENTRY landing on the block she was in is cleared, so a
+    /// plain round trip restores exactly) was written without distinguishing
+    /// the two landing arms, so a BLOOM on the block the ring was last in —
+    /// the ordinary road: she was in it on Takes, ⌘1, the panel on it,
+    /// *Open Takes mode* — was cleared too; when she had scrolled that block
+    /// off the page before leaving, the bloomed, ringed block came back OFF
+    /// the page (measured at the ladder: `landing=nil`, `landingAims=0`, the
+    /// block one point below the viewport). A bloom landing now rides through
+    /// the restore and reveals afterwards — 17p's shipped road
+    /// (`TakesBoardLayout.ArticleLandingKind`).
+    @Test func theBloomDoorStillGoesToTheBlockTheRingWasLastIn() async throws {
+        try await withSession(blocks: 60) { session, fixture, db, mount in
+            let router = session.commandRouter
+            router.forgetCurrentBlock(for: fixture.postID)
+            defer { router.forgetCurrentBlock(for: fixture.postID) }
+            let token = router.registerDetail(postID: fixture.postID, mode: .takes) { _ in }
+            defer { router.unregisterDetail(token) }
+            let hers = fixture.blocks[40]
+            router.noteFocusedBlock(
+                hers.block, variantID: hers.variant, postID: fixture.postID, utf16Offset: 0)
+
+            let first = try await landingModel(session: session, fixture: fixture, db: db)
+            let (windowA, hostingA) = await mount(first)
+            guard let articleA = articleScrollView(in: hostingA) else {
+                Issue.record("no article scroll view on the first mount")
+                return
+            }
+            await settle(windowA, hostingA, until: { false }, maxTurns: 12)
+            #expect(first.authority.livePane?.blockID == hers.block,
+                    "non-vacuity: the entry ring is on her block")
+            // Her scroll: her own block leaves the page (it was revealed at
+            // the foot; half a page up puts it below the fold). Her hand ends
+            // the entry landing first — in the app a wheel scroll is
+            // `isPositionedByUser` and ends it; the harness's clip-view
+            // scroll is not seen as hers, and the kept-alive landing would
+            // otherwise re-reveal the block at the foot (measured at the
+            // ladder: 300 pt up, the block back at `maxY == visible.maxY`).
+            first.clearArticleLanding()
+            scroll(articleA, to: max(offset(articleA) - 500, 0))
+            await settle(windowA, hostingA, until: { false }, maxTurns: 10)
+            #expect(!isOnScreen(hers.variant, hostingA, articleA),
+                    "non-vacuity: she scrolled her block off the page")
+            windowA.orderOut(nil)
+            first.teardown()
+            await settle(windowA, hostingA, until: { false }, maxTurns: 4)
+
+            // Write's takes panel → *Open Takes mode* on HER block.
+            router.pendingTakesLanding = .bloom(postID: fixture.postID, blockID: hers.block)
+            let second = try await landingModel(session: session, fixture: fixture, db: db)
+            let (windowB, hostingB) = await mount(second)
+            guard let articleB = articleScrollView(in: hostingB) else {
+                Issue.record("no article scroll view on the second mount")
+                return
+            }
+            await settle(windowB, hostingB, until: { false }, maxTurns: 16)
+            #expect(second.board.articleRestoreAims > 0,
+                    "the restore ran — a bloom is not weighed against it")
+            #expect(second.articleLandingAims > 0,
+                    "non-vacuity: the bloom's landing really aimed the page")
+            #expect(isOnScreen(hers.variant, hostingB, articleB),
+                    """
+                    row 8: the bloom door GOES to the block — on the 17q tree \
+                    the stand-down cleared its landing and the page came back \
+                    without it (\(second.board.articleRestoreAims) restore \
+                    aims, \(second.articleLandingAims) landing aims)
+                    """)
+        }
+    }
+
+    /// The same rule, pure, in both mount orders — and the entry arm's
+    /// stand-down now reaches a page left at the TOP too (the ladder's fold:
+    /// one resolver, consulted once, whatever the memory holds).
+    @Test func aBloomLandingRidesThroughTheRestoreInBothOrders() {
+        let left = TakesBoardLayout.ArticlePlace(rowID: "left")
+
+        // The pins' order: the bloom is pending at the first geometry, on the
+        // block the ring was last in — the restore runs AND the landing lives.
+        let a = freshBoard("bloom-pending", lastCurrentRow: "was-here")
+        a.landArticle(on: "was-here", kind: .bloom)
+        #expect(a.consumeArticleGeometry(
+            geometry(offset: 0), remembered: left, positionedByUser: false,
+            order: ["left", "was-here"]) == .scrollToRow("left"))
+        #expect(a.articleRestore == .wanted(left))
+        #expect(a.articleLanding == "was-here", "the bloom's landing survives the restore")
+
+        // The app's order: the bloom arrives mid-restore, on ANOTHER block —
+        // it does not end the restore either (17p's road: restore, then reveal).
+        let d = freshBoard("bloom-wanted", lastCurrentRow: "was-here")
+        _ = d.consumeArticleGeometry(
+            geometry(offset: 0), remembered: left, positionedByUser: false, order: nil)
+        d.landArticle(on: "far", kind: .bloom)
+        #expect(d.articleRestore == .wanted(left))
+        #expect(d.articleLanding == "far")
+
+        // …and an ENTRY landing on the block she was in stands down at a
+        // page left at the TOP as well: the page comes back at rest.
+        let t = freshBoard("entry-top-same", lastCurrentRow: "was-here")
+        t.landArticle(on: "was-here")
+        #expect(t.consumeArticleGeometry(
+            geometry(offset: 0), remembered: .top, positionedByUser: false,
+            order: ["left", "was-here"]) == .remember(.top))
+        #expect(t.articleLanding == nil, "a plain round trip to a page left at rest comes back at rest")
+        #expect(t.articleRestoreAims == 0)
+    }
 }

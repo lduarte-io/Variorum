@@ -326,8 +326,32 @@ final class TakesBoardLayout {
     /// she scrolls afterwards is never hauled back.
     private(set) var articleLanding: String?
 
-    func landArticle(on placementID: String) {
+    /// **Which door asked for the landing** (the 17q ladder, R1-2). The two
+    /// arms name a row the same way and are revealed the same way; they
+    /// differ in ONE thing — what they may lose to the remembered place.
+    enum ArticleLandingKind: Equatable {
+        /// The N9 entry arm: the note's CURRENT block, on every entry. Her
+        /// rulings R-Q20/R-Q21 are about THIS landing — it outranks the
+        /// memory when she moved blocks while away, and STANDS DOWN on a
+        /// plain round trip (`resolveEntryLandingAgainstTheMemory`).
+        case entry
+        /// The fan-panel bloom door (17o row 8 — *"open takes mode in write
+        /// from the takes menu is also not automatically navigating you to
+        /// where the take is"*): a CLICK that asks to go there. It is weighed
+        /// against nothing: the restore runs as it always has and the
+        /// landing then reveals the bloomed block if the restored page does
+        /// not show it — 17p's shipped road (R-Q1's letter for a bloom).
+        /// The 17q ladder's R1-2 measured the alternative: with the
+        /// stand-down applied to a bloom on the block the ring was last in,
+        /// the page came back without the bloomed block on it.
+        case bloom
+    }
+
+    @ObservationIgnored private(set) var articleLandingKind: ArticleLandingKind = .entry
+
+    func landArticle(on placementID: String, kind: ArticleLandingKind = .entry) {
         articleLanding = placementID
+        articleLandingKind = kind
         articleLandingAimsLeft = Self.articleLandingAttempts
         articleLandingAims = 0
         // **R-Q20 — THE LANDING WINS** (her 2026-09-13 ruling on J3), keyed
@@ -340,19 +364,27 @@ final class TakesBoardLayout {
         // no-op. The other order (a landing already pending at the first
         // geometry — every pin's, since `landingModel` adopts before
         // mounting) is answered in `consumeArticleGeometry`'s `.undecided`
-        // branch, by the same predicate.
-        if case .wanted = articleRestore { resolveLandingAgainstAPendingRestore() }
+        // branch, by the same resolver.
+        if case .wanted = articleRestore { resolveEntryLandingAgainstTheMemory() }
     }
 
     /// **Which of the two wins, decided in ONE place** (17q piece 6, her
-    /// rulings R-Q20 + R-Q21) — called only while a restore is actually
-    /// pending at a ROW, i.e. only when there is something to lose.
+    /// rulings R-Q20 + R-Q21; the 17q ladder's R1-2/R1-3 made it the ONE
+    /// site) — called at the two moments an ENTRY landing and a remembered
+    /// page first meet: the landing arriving while a restore is pending
+    /// (`landArticle`, the app's order), and the first geometry finding a
+    /// landing already pending (`consumeArticleGeometry`'s `.undecided`
+    /// branch, the pins' order). A BLOOM landing is never weighed here: it
+    /// rides through the restore and reveals afterwards (17o row 8's door,
+    /// 17p's shipped road — `ArticleLandingKind`).
     ///
     /// The landing names a DIFFERENT block than the one that was current
     /// when the board was last shown ⇒ she MOVED, so the landing wins and
     /// the restore ends before it can aim. The landing names the SAME block
     /// ⇒ this is a plain round trip, so **the landing stands down** and the
-    /// restore puts the page back exactly as she left it.
+    /// restore puts the page back exactly as she left it — the TOP included
+    /// (a page left at rest with her block scrolled off it comes back at
+    /// rest; the memory is the page, not the block).
     ///
     /// **Why the landing has to stand down and not merely lose the race**
     /// (the 17q walk measured it, on her 262-block note): the two are not
@@ -368,8 +400,8 @@ final class TakesBoardLayout {
     /// AWAY from her own block, a plain round trip brings back that page —
     /// without her block on screen. That is what "the page she left" means,
     /// and revealing it would be the second move her ruling removes.
-    private func resolveLandingAgainstAPendingRestore() {
-        guard articleLanding != nil else { return }
+    private func resolveEntryLandingAgainstTheMemory() {
+        guard articleLanding != nil, articleLandingKind == .entry else { return }
         if Self.landingOutranks(articleLanding, lastCurrentRow: articleLastCurrentRow) {
             articleRestore = .settled
         } else {
@@ -407,15 +439,16 @@ final class TakesBoardLayout {
     /// is no memory to restore either, so it costs nothing) or a previous
     /// mount that went away before its projection landed.
     ///
-    /// **One consequence, recorded rather than hidden:** if she left Takes
-    /// having scrolled AWAY from her own block, the restore puts the page
-    /// back and the entry landing — naming that same block, now off screen —
-    /// reveals it once. That is one move where the first build made a larger
-    /// one (the page went to the top first), and removing it would mean
-    /// standing the landing down whenever it does not outrank, which would
-    /// also stand down the fan-panel bloom door's *"go there"* (row 8).
-    /// Distinguishing the two landing arms is the change that would allow it;
-    /// it is not this piece's.
+    /// **What this predicate does NOT decide (the 17q ladder, R1-2):** it is
+    /// consulted for the ENTRY landing only. Piece 6 first kept a losing
+    /// landing alive (so a page she had scrolled away from her own block got
+    /// one reveal), then the walk forced the stand-down — and the stand-down
+    /// written without distinguishing the arms also stood down the fan-panel
+    /// bloom door's *"go there"* (row 8): measured at the ladder, a bloom on
+    /// the block the ring was last in came back with the bloomed block off
+    /// the page. So the arms ARE distinguished (`ArticleLandingKind`): an
+    /// entry landing outranks or stands down by this rule; a bloom landing
+    /// rides through the restore and reveals afterwards, as 17p shipped it.
     nonisolated static func landingOutranks(
         _ landing: String?, lastCurrentRow: String?
     ) -> Bool {
@@ -821,25 +854,25 @@ final class TakesBoardLayout {
         switch articleRestore {
         case .undecided:
             // Read the memory BEFORE this mount has written anything into it.
+            // **A page she left meets a landing already pending — once, here,
+            // through the ONE resolver** (17q, her R-Q20 keyed by R-Q21; the
+            // ladder's R1-3 folded the inline copy): an ENTRY landing on a
+            // block she moved to while away settles the restore before it
+            // can aim (the block she came from wins — the page starts at the
+            // top and the landing reveals from there); an entry landing on
+            // the block she was in stands down, and the page comes back
+            // exactly — the TOP included; a bloom landing is not weighed.
+            // With NO memory there is nothing to weigh and nothing to lose.
+            if remembered != nil { resolveEntryLandingAgainstTheMemory() }
+            if articleRestore == .settled { return rememberStep(geometry) }
             // No memory, or the TOP remembered: a mount starts at the top, so
             // there is nothing to scroll to — settled at once, no scroll
-            // issued (R1-1). **And a landing already pending on a DIFFERENT
-            // block than the one that was current when this board was last
-            // shown outranks the memory** (17q, her R-Q20 keyed by R-Q21 —
-            // `landingOutranks`): the block she came from wins, so the
-            // restore never aims.
-            guard let remembered, remembered.rowID != nil,
-                  !Self.landingOutranks(
-                    articleLanding, lastCurrentRow: articleLastCurrentRow)
-            else {
+            // issued (R1-1).
+            guard let remembered, remembered.rowID != nil else {
                 articleRestore = .settled
                 return rememberStep(geometry)
             }
             articleRestore = .wanted(remembered)
-            // A plain round trip: the restore is about to put the page back
-            // exactly, so the landing stands down rather than racing it
-            // through the settling passes (`resolveLandingAgainstAPendingRestore`).
-            articleLanding = nil
             articleRestoreAimsLeft = Self.articleRestoreAttempts
             return restoreStep(
                 to: remembered, geometry, positionedByUser: positionedByUser, order: order())

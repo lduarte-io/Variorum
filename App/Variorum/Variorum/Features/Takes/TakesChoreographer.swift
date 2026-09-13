@@ -177,7 +177,11 @@ final class TakesChoreographer {
                     // 17o batch b (row 8): …and the page GOES there. Blooming
                     // a block below the fold and ringing its pane while the
                     // article stays at the top is the defect she reported.
-                    model.board.landArticle(on: slot.placementID)
+                    // A BLOOM landing (the 17q ladder, R1-2): never weighed
+                    // against the remembered page — it rides through the
+                    // restore and reveals afterwards. Only the ENTRY arm
+                    // below stands down on a plain round trip (R-Q21).
+                    model.board.landArticle(on: slot.placementID, kind: .bloom)
                 }
             }
             landingFocusDone = true
