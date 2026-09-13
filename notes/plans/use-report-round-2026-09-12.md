@@ -5281,8 +5281,13 @@ migration, no new `setting`; nothing in `PaneTextAuthority` · `PaneSurface` · 
 `EditorTextView` · `PaneMeasurement`; no change to the memory's SHAPE (`ArticlePlace`), the reveal's
 anchor rule, the her-hand set, the typewriter room, or `TakesChoreographer`'s two landing arms (what a
 landing NAMES is untouched — only what it outranks); no change to the List row's TRAILING stamp or to
-the masthead's stamp; no Release build and no `/Applications` touch. **PENDING at this commit:** every
-piece below.
+the masthead's stamp; no Release build and no `/Applications` touch. **And one thing I did NOT get to
+build:** her R-Q17's SECOND arm is built and pinned but **never fires in the shipped window** — the
+card's title yields before the stamps do, and below ~700 pt the shell's own minimum content width
+clips instead of reflowing. Measured on the walk, filed as **QUESTIONS #105** with the one-modifier
+fix as option (b); not taken here because which of title-vs-dates yields is a taste call her ruling
+does not make. **Nothing else is PENDING: all five pieces are DONE, every item is dispositioned, and
+no revert is in flight.**
 
 **LIVE STATUS — 17q (`opus-implementer`, opened 2026-09-12 at `e02438a9`).**
 
