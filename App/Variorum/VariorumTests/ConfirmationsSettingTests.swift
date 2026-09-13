@@ -279,6 +279,54 @@ struct ConfirmationsSettingTests {
         }
     }
 
+    // MARK: - The one predicate that keeps a no-op split a refusal (J32)
+
+    /// **"MAKE EVERY NEWLINE A BLOCK" ON A NOTE THAT ALREADY IS** (the ladder
+    /// round 1, MINOR-2 — J32). `SplitAtNewlinesCopy.acted` is the ONE guard
+    /// that keeps a split which split nothing a REFUSAL, and it shipped with
+    /// four consumers and zero pins: the three shipped pins on this copy
+    /// assert `model.statusMessage`, which is written on BOTH roads, so a
+    /// reverted `acted` left every one of them green. That missing axis is
+    /// exactly how the round's BLOCKER got through a green suite.
+    ///
+    /// The BLOCK door is the reachable no-op road (the note door refuses
+    /// before its flight); under `.off` her press must still answer.
+    ///
+    /// **Red on old** (behavioural revert — `acted` forced to `true`, the
+    /// reading where a no-op split is a confirmation).
+    @Test func aSplitThatSplitNothingStillSpeaks() async throws {
+        try await withEditor(seedBlocks: ["One.", "Two."]) { h in
+            h.session.status.receiptStyle = .off
+            caret(h, entry: 0, offset: 1)
+
+            await h.model.splitCaretBlockAtNewlines()
+
+            #expect(h.session.status.current?.text == SplitAtNewlinesCopy.blockAlreadyWhole)
+            #expect(h.session.status.current?.kind == .refusal,
+                    "nothing happened — P-2 says she sees it whatever the setting")
+            #expect(h.session.status.lastDroppedReceipt == nil, "nothing was dropped")
+            let slots = try h.storeSlots()
+            #expect(slots.count == 2, "and nothing was written")
+        }
+    }
+
+    /// The other side of the same predicate: a split that DID split is a
+    /// receipt, so it lands in the bar's quiet line under her default.
+    @Test func aSplitThatSplitLandsQuietly() async throws {
+        try await withEditor(seedBlocks: ["One.\nTwo."]) { h in
+            h.session.status.receiptStyle = .quiet
+
+            await h.model.splitEveryNewlineIntoBlocks()
+
+            let slots = try h.storeSlots()
+            #expect(slots.count == 2, "it really split")
+            #expect(h.session.status.current == nil, "no toast under her default")
+            #expect(h.session.status.quietLine?.kind == .receipt)
+            #expect(h.session.status.quietLine?.text.contains("2 blocks from 1 block") == true,
+                    "the split's own arithmetic, in the muted line: \(h.session.status.quietLine?.text ?? "nil")")
+        }
+    }
+
     // MARK: - The quiet slot itself (a mounted geometry oracle)
 
     /// **THE SLOT TAKES NO ROOM WHEN THERE IS NOTHING TO SAY** — and the
