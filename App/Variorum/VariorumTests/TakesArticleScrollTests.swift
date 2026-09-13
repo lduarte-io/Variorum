@@ -1281,16 +1281,22 @@ struct TakesArticleScrollTests {
         }
     }
 
-    /// **THE WALK'S OWN ROAD, in a pin** (17q piece 6): mount A is entered
-    /// through the FACT — the N9 entry arm, which is how the app's board
-    /// always gets its ring — rather than through a click, so the ring is set
-    /// by `landAuthorityFocus` and nothing else. Then her scroll puts that
-    /// block mid-page, she leaves, and she comes back with nothing clicked.
-    ///
-    /// This exists because the walk and the click-road pin disagreed: the pin
-    /// came back restored and her 262-block note came back with the block at
-    /// the page's edge. Whatever the difference is, it is reproducible here
-    /// or it is not in the model at all.
+    /// **THE ENTRY RING'S OWN ROAD, in a pin — and the "scrolled AWAY from
+    /// her own block" arm** (17q piece 6; its premise corrected at the 17q
+    /// ladder's sanity pass). Mount A is entered through the FACT — the N9
+    /// entry arm, which is how the app's board always gets its ring — rather
+    /// than through a click, so the ring is set by `landAuthorityFocus` and
+    /// nothing else. Her hand then ends the entry landing (in the app a wheel
+    /// scroll is `isPositionedByUser` and ends it; the harness's clip-view
+    /// scroll is NOT, and a kept-alive landing re-reveals the block at the
+    /// foot — which is what this pin's first version measured without saying
+    /// so, so its "mid-page" premise never held), and her scroll takes her
+    /// own block OFF the page. She leaves and comes back with nothing
+    /// clicked: the landing stands down, the restore runs, and the page comes
+    /// back exactly as she left it — WITHOUT her block on it. That is the
+    /// resolver's stated consequence ("the page she left"), the implementer's
+    /// second spot-walk shape on her 262-block note, and R-Q21's letter. The
+    /// mid-page arm is `aPlainRoundTripComesBackToTheSameLineNotOnlyTheSameRow`.
     @Test func theEntryRingsOwnRoadAlsoComesBackWhereSheLeftIt() async throws {
         try await withSession(blocks: 60) { session, fixture, db, mount in
             let router = session.commandRouter
@@ -1314,9 +1320,14 @@ struct TakesArticleScrollTests {
                     "non-vacuity: the ENTRY ring landed on her block")
             #expect(session.editorRouter.takesArticleCurrentRows[fixture.postID] != nil,
                     "the entry ring recorded it as the board's current block")
-            // Her scroll: her block moves off the page's edge and into it.
+            // Her hand ends the entry landing (the model's own door — what a
+            // wheel scroll does in the app), then her scroll takes her own
+            // block off the page.
+            first.clearArticleLanding()
             scroll(articleA, to: max(offset(articleA) - 300, 0))
             await settle(windowA, hostingA, until: { false }, maxTurns: 10)
+            #expect(!isOnScreen(hers.variant, hostingA, articleA),
+                    "non-vacuity: she scrolled AWAY from her own block")
             guard let before = topOfPage(hostingA, articleA) else {
                 Issue.record("no take at the top of the page after scrolling")
                 return
@@ -1342,6 +1353,11 @@ struct TakesArticleScrollTests {
 
             #expect(second.board.articleLanding == nil, "the landing stood down")
             #expect(second.board.articleRestoreAims > 0, "the restore ran")
+            #expect(!isOnScreen(hers.variant, hostingB, articleB),
+                    """
+                    the page she left comes back WITHOUT her block on it — the \
+                    resolver's stated consequence, never a second move to reveal it
+                    """)
             guard let after = topOfPage(hostingB, articleB) else {
                 Issue.record("no take at the top of the page after the remount")
                 return
