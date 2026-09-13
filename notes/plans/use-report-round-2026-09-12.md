@@ -5305,7 +5305,7 @@ no revert is in flight.**
 | 3 | R3-1 — the synchronous selection clear (R3-6 rides it) | **DONE (`e62987e6`)** — the compile-red measured by revert and RESTORED; **no revert is in flight** |
 | 4 | the NIT sweep (R3-4 · R3-5 · R3-7 · R3-8 · R3-9 · R3-10; R3-6 landed with piece 3) | **DONE (this commit)** |
 | 5 | the walk (the acceptance gate) + the closing runs | **DONE (`a9967b0b`)** |
-| 6 | **R-Q21** — "the same block" = the CURRENT block unchanged while away (her evening sitting, on J14) | **CODE DONE (this commit)** — the walk's two re-walked rows and the closing set are NEXT; **no revert is in flight** |
+| 6 | **R-Q21** — "the same block" = the CURRENT block unchanged while away (her evening sitting, on J14) | **DONE (`cdba7543` + this commit)** — built, pinned (4 mounted + 1 pure), walked; **ONE residual OPEN in USE, recorded below and handed to the ladder**; no revert is in flight |
 
 **Items:** R-Q20 · R-Q17 · R3-2 · R3-1 · R3-4 · R3-5 · R3-6 · R3-7 · R3-8 · R3-9 · R3-10 —
 **all dispositioned below.** ONE new QUESTIONS entry: **#105** (her R-Q17's second arm never fires in
@@ -5876,4 +5876,64 @@ took (`scratchpad/17q-p6-prerevert/`, made by me, for this piece) is what got th
 grep at both consult sites and by a clean `build-for-testing`. The addendum's rule "never
 `git checkout --` on a file the batch also edits" is exactly this, and the reason to take the copy
 even when the protocol's other half (commit first) has not yet run.
+
+##### PIECE 6, CONTINUED — THE STAND-DOWN, THE WALK, AND WHAT IS STILL OPEN
+
+**A SECOND change the walk forced, before the walk could pass: when the landing does NOT outrank, it
+STANDS DOWN.** Re-keying the predicate alone was not enough in USE. The two are not exclusive — a
+kept-alive landing re-aims through the lazy column's settling passes, where rows report PLACEHOLDER
+frames first (J1's finding (b)), so it can judge a row that IS on screen to be off it and pull the
+page to the foot AFTER the restore has put it back. **The 60-block pin came out restored and her
+262-block note came out revealed: one rule, two outcomes, decided by a race** — and her R-Q21 says
+*exactly* as she left it, which a race is not. So `resolveLandingAgainstAPendingRestore()` (ONE
+private method, consulted from the same two sites, still over the ONE pure predicate) either settles
+the restore (she moved) or clears the landing (a plain round trip). Pinned in three places:
+`theLandingOutranksAMoveToAnotherBlockButNotAPlainRoundTrip`'s arms (b) and (e) assert
+`articleLanding == nil`, and both mounted round-trip pins do too. **Its accepted consequence, stated
+in the code:** if she left Takes having scrolled AWAY from her own block, a plain round trip brings
+back that page — without her block on screen. That is what "the page she left" means, and revealing
+it would be the second move her ruling removes.
+
+**A THIRD pin, written because the walk and the first pin disagreed —
+`theEntryRingsOwnRoadAlsoComesBackWhereSheLeftIt`.** The first mounted pin moved the ring with a
+CLICK (`focus`'s `.migrated` arm); the app's board always gets its ring from the ENTRY arm
+(`landAuthorityFocus`). The new pin drives the walk's exact road — the fact set before mount A, the
+entry arm the only ring setter, her scroll, then the return — and asserts the entry arm recorded the
+board's current block, the landing stood down, the restore ran, and the page came back. **It passes.**
+So the model's rule is right on the road the app takes, and what the walk still sees comes from
+somewhere else (below).
+
+**THE WALK (piece 6's rows, on the dev-store Debug build; her real-store app never running —
+`pgrep` empty before the build, at every launch and after my quit):**
+
+| row | the walk | what happened | capture |
+|---|---|---|---|
+| **R-Q21, the `04`→`05` case re-walked** | A Scandal in Bohemia, the ring on block **98/262**, scrolled so block 98 sits MID-PAGE with four blocks below it; ⌘1; ⌘2 | **the page settled with block 98 at the page's EDGE, not where she left it** — `17` → `18`. **NOT as ruled**, and the residual is named below | `17` · `18` |
+| **R-Q21, the round trip from there** | from that settled page: ⌘1; ⌘2 again | **PIXEL-IDENTICAL** (`cmp`) | — |
+| **R-Q21, and again from a re-scrolled page** | scroll away from block 98, ⌘1, ⌘2 | lands back on the byte-identical settled frame — **deterministic, not a flake** | — |
+| **R-Q20 under R-Q21 (the `02`/`03` case re-walked)** | ⌘1, scroll Write far, click block **262/262**, ⌘2 | **the far block is revealed at the FOOT with ten blocks above it and the old place is not restored** — her R-Q20's half is intact under R-Q21. The 0.35 s frame's top row is already the settled one's (the reveal converging, not a restore-then-reveal) | `19` |
+
+**WHAT IS STILL OPEN — stated plainly, because the acceptance gate is USE and this row does not pass
+it.** In the app, the FIRST return after a scroll still settles with her block at the page's nearest
+edge instead of where she left the page. **What the evidence rules OUT:** the landing family's rule —
+three mounted pins, one of them driving the walk's exact road (the entry arm, her scroll, the
+return), assert the landing stands down, the restore runs and the page comes back, and all pass; and
+the app's own second round trip is pixel-identical, which a still-live landing would also produce but
+a broken rule would not. **What it points AT, and what I did not touch:** the entry ring makes a pane
+LIVE and arms its caret (`landAuthorityFocus` → `armPaneCaretLanding` → `authority.focus`), and a
+first responder taking the caret inside a scroll view is scrolled into view by AppKit itself — the
+`PaneSurface` / first-responder seam, which this brief fences (*"no change to `PaneTextAuthority`,
+`PaneSurface`…"*) and which the harness's window does not exercise the same way. **Handed to the
+ladder with the discriminator named:** suppress or observe the pane's scroll-into-view on the entry
+ring (a `PaneSurface` change) and re-walk the same three frames; if the page then holds, the mover is
+AppKit's, and R-Q21 is delivered by this piece plus that one line. I did not make that change because
+it is outside the piece's fence and because guessing at the seam that carries the app's riskiest
+machinery is exactly what the pin-before-fix rule forbids.
+
+**Closing runs over this tree:** Mac (the same 27 TYPE names, ONE `xcodebuild test` from
+`App/Variorum/`, zero `skipped:` lines) — **`✔ Test run with 196 tests in 27 suites passed after
+96.581 seconds.`** (195 + the third mounted pin). Core: **NOT OWED and NOT RE-RUN** —
+`git diff --stat cdba7543..HEAD -- Sources` is empty, so `Sources/` did not move for piece 6; the
+piece-4 run (`46/5`) and the iOS build stand. `Sync/` and `Server/` diff-empty against `634a57c4`
+throughout.
 

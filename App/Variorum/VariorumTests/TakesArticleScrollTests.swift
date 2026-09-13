@@ -1276,6 +1276,85 @@ struct TakesArticleScrollTests {
         }
     }
 
+    /// **THE WALK'S OWN ROAD, in a pin** (17q piece 6): mount A is entered
+    /// through the FACT — the N9 entry arm, which is how the app's board
+    /// always gets its ring — rather than through a click, so the ring is set
+    /// by `landAuthorityFocus` and nothing else. Then her scroll puts that
+    /// block mid-page, she leaves, and she comes back with nothing clicked.
+    ///
+    /// This exists because the walk and the click-road pin disagreed: the pin
+    /// came back restored and her 262-block note came back with the block at
+    /// the page's edge. Whatever the difference is, it is reproducible here
+    /// or it is not in the model at all.
+    @Test func theEntryRingsOwnRoadAlsoComesBackWhereSheLeftIt() async throws {
+        try await withSession(blocks: 60) { session, fixture, db, mount in
+            let router = session.commandRouter
+            router.forgetCurrentBlock(for: fixture.postID)
+            defer { router.forgetCurrentBlock(for: fixture.postID) }
+            let token = router.registerDetail(postID: fixture.postID, mode: .takes) { _ in }
+            defer { router.unregisterDetail(token) }
+            let hers = fixture.blocks[40]
+            router.noteFocusedBlock(
+                hers.block, variantID: hers.variant,
+                postID: fixture.postID, utf16Offset: 0)
+
+            let first = try await landingModel(session: session, fixture: fixture, db: db)
+            let (windowA, hostingA) = await mount(first)
+            guard let articleA = articleScrollView(in: hostingA) else {
+                Issue.record("no article scroll view on the first mount")
+                return
+            }
+            await settle(windowA, hostingA, until: { false }, maxTurns: 12)
+            #expect(first.authority.livePane?.blockID == hers.block,
+                    "non-vacuity: the ENTRY ring landed on her block")
+            #expect(session.editorRouter.takesArticleCurrentRows[fixture.postID] != nil,
+                    "the entry ring recorded it as the board's current block")
+            // Her scroll: her block moves off the page's edge and into it.
+            scroll(articleA, to: max(offset(articleA) - 300, 0))
+            await settle(windowA, hostingA, until: { false }, maxTurns: 10)
+            guard let before = topOfPage(hostingA, articleA) else {
+                Issue.record("no take at the top of the page after scrolling")
+                return
+            }
+            guard let wasAt = fixture.blocks.firstIndex(where: {
+                $0.variant == before.variantID
+            }) else {
+                Issue.record("the top-of-page take is not one of the fixture's")
+                return
+            }
+
+            windowA.orderOut(nil)
+            first.teardown()
+            await settle(windowA, hostingA, until: { false }, maxTurns: 4)
+
+            let second = try await landingModel(session: session, fixture: fixture, db: db)
+            let (windowB, hostingB) = await mount(second)
+            guard let articleB = articleScrollView(in: hostingB) else {
+                Issue.record("no article scroll view on the second mount")
+                return
+            }
+            await settle(windowB, hostingB, until: { false }, maxTurns: 14)
+
+            #expect(second.board.articleLanding == nil, "the landing stood down")
+            #expect(second.board.articleRestoreAims > 0, "the restore ran")
+            guard let after = topOfPage(hostingB, articleB) else {
+                Issue.record("no take at the top of the page after the remount")
+                return
+            }
+            guard let isAt = fixture.blocks.firstIndex(where: {
+                $0.variant == after.variantID
+            }) else {
+                Issue.record("the top-of-page take is not one of the fixture's")
+                return
+            }
+            #expect(abs(isAt - wasAt) <= 1,
+                    """
+                    the entry ring's own road comes back where she left it \
+                    (block \(isAt + 1), left on block \(wasAt + 1))
+                    """)
+        }
+    }
+
     /// **THE PLAIN ROUND TRIP — RED ON THE 17q-AS-BUILT RULE** (`75d690ff`),
     /// and her ruling R-Q21's own pin. She leaves Takes with her block
     /// MID-PAGE (where a block she is writing in normally sits — not at the
@@ -1313,6 +1392,12 @@ struct TakesArticleScrollTests {
                 Issue.record("no article scroll view on the first mount")
                 return
             }
+            // The board's ENTRY ring is a write site too (`landAuthorityFocus`),
+            // not only the click below — pinned here because the app's board
+            // always gets its ring that way and a silent no-write would make
+            // every entry look like "she moved blocks while away".
+            #expect(session.editorRouter.takesArticleCurrentRows[fixture.postID] != nil,
+                    "the entry ring recorded the board's current block")
             scroll(articleA, to: 800)
             await settle(windowA, hostingA, until: { false }, maxTurns: 10)
             guard let atTop = topOfPage(hostingA, articleA) else {
@@ -1369,9 +1454,11 @@ struct TakesArticleScrollTests {
             }
             await settle(windowB, hostingB, until: { false }, maxTurns: 14)
 
-            #expect(second.board.articleLanding != nil,
+            #expect(second.board.articleLanding == nil,
                     """
-                    non-vacuity: a landing WAS armed on this mount (the road                     under test) — it simply did not outrank the memory
+                    the landing STOOD DOWN: it named the block she was already \
+                    in, so the restore puts the page back exactly instead of \
+                    racing a reveal through the lazy column's settling passes
                     """)
             #expect(second.board.articleRestoreAims > 0,
                     """

@@ -341,9 +341,39 @@ final class TakesBoardLayout {
         // geometry — every pin's, since `landingModel` adopts before
         // mounting) is answered in `consumeArticleGeometry`'s `.undecided`
         // branch, by the same predicate.
-        if case .wanted = articleRestore,
-           Self.landingOutranks(placementID, lastCurrentRow: articleLastCurrentRow) {
+        if case .wanted = articleRestore { resolveLandingAgainstAPendingRestore() }
+    }
+
+    /// **Which of the two wins, decided in ONE place** (17q piece 6, her
+    /// rulings R-Q20 + R-Q21) — called only while a restore is actually
+    /// pending at a ROW, i.e. only when there is something to lose.
+    ///
+    /// The landing names a DIFFERENT block than the one that was current
+    /// when the board was last shown ⇒ she MOVED, so the landing wins and
+    /// the restore ends before it can aim. The landing names the SAME block
+    /// ⇒ this is a plain round trip, so **the landing stands down** and the
+    /// restore puts the page back exactly as she left it.
+    ///
+    /// **Why the landing has to stand down and not merely lose the race**
+    /// (the 17q walk measured it, on her 262-block note): the two are not
+    /// exclusive — a kept-alive landing re-aims through the lazy column's
+    /// settling passes, where rows report PLACEHOLDER frames first (J1's
+    /// finding (b)), so it can judge a row that IS on screen to be off it and
+    /// pull the page to the foot AFTER the restore has put it back. The pin's
+    /// 60-block note came out restored and her 262-block one came out
+    /// revealed — the same rule, two outcomes, decided by a race. Her R-Q21
+    /// says *exactly* as she left it, and a race is not exactly.
+    ///
+    /// The accepted consequence, stated: if she left Takes having scrolled
+    /// AWAY from her own block, a plain round trip brings back that page —
+    /// without her block on screen. That is what "the page she left" means,
+    /// and revealing it would be the second move her ruling removes.
+    private func resolveLandingAgainstAPendingRestore() {
+        guard articleLanding != nil else { return }
+        if Self.landingOutranks(articleLanding, lastCurrentRow: articleLastCurrentRow) {
             articleRestore = .settled
+        } else {
+            articleLanding = nil
         }
     }
 
@@ -806,6 +836,10 @@ final class TakesBoardLayout {
                 return rememberStep(geometry)
             }
             articleRestore = .wanted(remembered)
+            // A plain round trip: the restore is about to put the page back
+            // exactly, so the landing stands down rather than racing it
+            // through the settling passes (`resolveLandingAgainstAPendingRestore`).
+            articleLanding = nil
             articleRestoreAimsLeft = Self.articleRestoreAttempts
             return restoreStep(
                 to: remembered, geometry, positionedByUser: positionedByUser, order: order())
