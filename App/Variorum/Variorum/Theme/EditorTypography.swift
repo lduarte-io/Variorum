@@ -304,6 +304,34 @@ struct EditorSurfaceChrome: Equatable {
     var paper: NSColor { NSColor(tokens.surface) }
     var ink: NSColor { NSColor(tokens.ink) }
     var caret: NSColor { NSColor(tokens.accent) }
+
+    // MARK: What a chrome change has to touch (18g ladder, the R1-1 walk)
+
+    /// **Whether this chrome, applied after `previous`, must re-write the
+    /// STORAGE's base attributes** — the font and the paragraph style, a
+    /// full-range write that invalidates the whole document's layout (the
+    /// voice-switch road: a rare, deliberate re-font). Only the inputs of
+    /// `EditorDocument.baseAttributes` decide it: the voice (the font),
+    /// inline comments and the paragraph gap (the paragraph style). A
+    /// PALETTE, a custom seed or the appearance moves no base attribute, so
+    /// a colour-only change takes the cheap road — the walk of the R1-1 fix
+    /// caught a palette click on a 262-block note taking the full refresh
+    /// and jumping the viewport (18g's `write-long-note-*-JUMP-*` captures).
+    /// Nil previous means "first application": everything.
+    func needsStorageRefresh(from previous: EditorSurfaceChrome?) -> Bool {
+        guard let previous else { return true }
+        return previous.voice != voice
+            || previous.inlineComments != inlineComments
+            || previous.paragraphGap != paragraphGap
+    }
+
+    /// Whether the INK moved — `NSTextView.textColor`'s setter writes the
+    /// colour over the entire storage, so it is set only when the voice or
+    /// the appearance changed (a palette never recolours the ink).
+    func inkChanged(from previous: EditorSurfaceChrome?) -> Bool {
+        guard let previous else { return true }
+        return previous.voice != voice || previous.dark != dark
+    }
 }
 
 extension NSTextView {
@@ -314,7 +342,17 @@ extension NSTextView {
     /// ordinary storage write on a rare, deliberate gesture (voice switch)
     /// — distinct from the per-range RENDERING attributes TEXTKIT2 §3
     /// warns about; decorations stay overlays.
-    func applyVoiceChrome(_ chrome: EditorSurfaceChrome) {
+    ///
+    /// **`previous` is the chrome this surface last applied** (18g ladder,
+    /// the R1-1 fix's walk): with it, a colour-only change — a palette, a
+    /// custom seed, the appearance — sets the view-level colours and
+    /// re-derives the markdown face's colours on the face's OWN ranges
+    /// (∝ the markdown spans), and never re-writes the whole storage's base
+    /// attributes or the ink; the full re-font road runs only when
+    /// `needsStorageRefresh(from:)` says the font or the paragraph style
+    /// moved. Nil (the default, and the first application) is the full
+    /// road, exactly as before.
+    func applyVoiceChrome(_ chrome: EditorSurfaceChrome, previous: EditorSurfaceChrome? = nil) {
         // The one global typography updates FIRST so every subsequent
         // surface write (materialization, differential) agrees.
         //
@@ -353,13 +391,17 @@ extension NSTextView {
         // resolution — one voice, one dimmed marker, everywhere.
         MarkdownStyling.palette = MarkdownStyling.Palette(tokens: chrome.tokens)
         backgroundColor = chrome.paper
-        textColor = chrome.ink
+        // `textColor`'s setter writes the colour over the ENTIRE storage —
+        // only when the ink actually moved (the voice or the appearance).
+        if chrome.inkChanged(from: previous) { textColor = chrome.ink }
         insertionPointColor = chrome.caret
         chrome.spellcheck.apply(to: self)  // A24 — write-gated inside
-        font = EditorDocument.baseFont
-        defaultParagraphStyle = EditorDocument.baseParagraphStyle
-        typingAttributes = EditorDocument.baseAttributes
-        if let storage = textStorage, storage.length > 0 {
+        guard let storage = textStorage else { return }
+        if chrome.needsStorageRefresh(from: previous) {
+            font = EditorDocument.baseFont
+            defaultParagraphStyle = EditorDocument.baseParagraphStyle
+            typingAttributes = EditorDocument.baseAttributes
+            guard storage.length > 0 else { return }
             storage.beginEditing()
             storage.addAttributes(
                 EditorDocument.baseAttributes,
@@ -371,6 +413,15 @@ extension NSTextView {
             // gesture whose whole point is that everything re-fonts.
             MarkdownStyling.style(storage)
             storage.endEditing()
+        } else if storage.length > 0 {
+            // A colour-only change (18g ladder, the R1-1 walk): the markdown
+            // face's link and marker colours live IN the storage, so they
+            // re-derive from the new palette — on the face's own ranges,
+            // which is a write ∝ the markdown spans and a zero-write fast
+            // path on a note without any. The base attributes are untouched,
+            // so the document's layout is not invalidated and the viewport
+            // stays where she left it.
+            MarkdownStyling.style(storage)
         }
     }
 }

@@ -148,8 +148,9 @@ final class ReadPostSurfaceCoordinator {
 
     func applyChrome(_ chrome: EditorSurfaceChrome, to textView: ReadPostTextView) {
         guard appliedChrome != chrome else { return }
+        let previous = appliedChrome
         appliedChrome = chrome
-        textView.applyVoiceChrome(chrome)
+        textView.applyVoiceChrome(chrome, previous: previous)
         model.remeasure()
     }
 

@@ -444,8 +444,9 @@ private struct EditorSurface: NSViewRepresentable {
             scrollView: NSScrollView
         ) {
             guard appliedChrome != chrome else { return }
+            let previous = appliedChrome
             appliedChrome = chrome
-            textView.applyVoiceChrome(chrome)
+            textView.applyVoiceChrome(chrome, previous: previous)
             scrollView.backgroundColor = chrome.paper
             scrollView.drawsBackground = true
             model.refreshBadges()
@@ -522,8 +523,9 @@ struct InlineEditorSurface: NSViewRepresentable {
 
         func applyChrome(_ chrome: EditorSurfaceChrome, to textView: EditorTextView) {
             guard appliedChrome != chrome else { return }
+            let previous = appliedChrome
             appliedChrome = chrome
-            textView.applyVoiceChrome(chrome)
+            textView.applyVoiceChrome(chrome, previous: previous)
             model.refreshBadges()
         }
 

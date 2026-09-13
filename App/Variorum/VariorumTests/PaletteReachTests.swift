@@ -19,6 +19,7 @@
 //
 
 import AppKit
+import SwiftUI
 import Testing
 import VariorumCore
 @testable import Variorum
@@ -124,6 +125,83 @@ struct PaletteReachTests {
         }
     }
 
+    // MARK: The cost of a palette click on a mounted surface (the R1-1 walk)
+
+    /// **The decision is pure:** a colour-only chrome change — a palette, a
+    /// custom seed, the appearance — never re-writes the storage's base
+    /// attributes; only the inputs of `EditorDocument.baseAttributes` do
+    /// (the voice, inline comments, the paragraph gap). The ink moves with
+    /// the voice or the appearance, never with a palette.
+    @Test func aColourOnlyChromeChangeNeedsNoStorageRefresh() {
+        let plain = EditorSurfaceChrome(tokens: settings(.default), dark: false)
+        let lavender = EditorSurfaceChrome(tokens: settings(.lavender), dark: false)
+        let custom = EditorSurfaceChrome(tokens: settings(.custom, room: "E07A5F"), dark: false)
+        let dark = EditorSurfaceChrome(tokens: settings(.lavender), dark: true)
+        #expect(plain.needsStorageRefresh(from: nil), "the first application is the full road")
+        #expect(!lavender.needsStorageRefresh(from: plain), "a palette moves no base attribute")
+        #expect(!custom.needsStorageRefresh(from: lavender), "nor does a seed")
+        #expect(!dark.needsStorageRefresh(from: lavender), "nor the appearance")
+        #expect(!lavender.inkChanged(from: plain), "a palette never recolours the ink")
+        #expect(dark.inkChanged(from: lavender), "the appearance does")
+        let study = EditorSurfaceChrome(tokens: settings(.lavender, voice: .study), dark: false)
+        #expect(study.needsStorageRefresh(from: lavender), "the voice is the font")
+        #expect(study.inkChanged(from: lavender))
+        var inline = settings(.lavender)
+        inline.inlineComments = true
+        #expect(EditorSurfaceChrome(tokens: inline, dark: false).needsStorageRefresh(from: lavender),
+                "inline comments are paragraph room")
+        let otherGap = ParagraphGap.allCases.first { $0 != .standard }!
+        let gap = EditorSurfaceChrome(
+            voice: .terminal, dark: false, inlineComments: false,
+            palette: .lavender, paragraphGap: otherGap)
+        #expect(gap.needsStorageRefresh(from: lavender), "the gap is paragraph style")
+    }
+
+    /// **The behaviour, on a mounted TK2 surface:** after the first (full)
+    /// application, a palette-only re-apply writes NOTHING to a plain note's
+    /// storage — no full-range base refresh, no ink write — while the caret
+    /// takes the palette's accent; a paragraph-gap change still takes the
+    /// full road and writes the whole storage. The walk of the R1-1 fix
+    /// caught the full road jumping a 262-block note's viewport on a palette
+    /// click; this is what keeps that road for the re-font it was built for.
+    @Test func aPaletteClickWritesNothingToAPlainNotesStorage() throws {
+        let view = EditorTextView.makeEditor().textView
+        let text = (1...200)
+            .map { "Paragraph \($0) of a plain note, with no markdown anywhere in it." }
+            .joined(separator: "\n")
+        view.textStorage?.setAttributedString(NSAttributedString(string: text))
+        let wasAdopted = EditorTypography.isAdopted
+        defer { EditorTypography.isAdopted = wasAdopted }
+
+        let plain = EditorSurfaceChrome(tokens: settings(.default), dark: false)
+        view.applyVoiceChrome(plain)
+        let storage = try #require(view.textStorage)
+        let counter = StorageEditCounter()
+        let previousDelegate = storage.delegate
+        storage.delegate = counter
+        defer { storage.delegate = previousDelegate }
+
+        let lavender = EditorSurfaceChrome(tokens: settings(.lavender), dark: false)
+        view.applyVoiceChrome(lavender, previous: plain)
+        #expect(counter.edits.isEmpty, "a palette click must not touch the storage: \(counter.edits)")
+        let caret = view.insertionPointColor.usingColorSpace(.sRGB)
+        let accent = NSColor(lavender.tokens.accent).usingColorSpace(.sRGB)
+        #expect(caret != nil && accent != nil)
+        if let caret, let accent {
+            #expect(abs(caret.redComponent - accent.redComponent) < 0.002)
+            #expect(abs(caret.greenComponent - accent.greenComponent) < 0.002)
+            #expect(abs(caret.blueComponent - accent.blueComponent) < 0.002)
+        }
+
+        let otherGap = ParagraphGap.allCases.first { $0 != .standard }!
+        let gap = EditorSurfaceChrome(
+            voice: .terminal, dark: false, inlineComments: false,
+            palette: .lavender, paragraphGap: otherGap)
+        view.applyVoiceChrome(gap, previous: lavender)
+        #expect(counter.edits.contains { $0.length == storage.length },
+                "the re-font road still refreshes the whole storage")
+    }
+
     /// `MarkdownStyling.palette` has two writers — `RootView` from the
     /// store's tokens and `applyVoiceChrome` from the chrome's. They must
     /// agree, or the link colour flips at every surface mount.
@@ -141,5 +219,19 @@ struct PaletteReachTests {
             #expect(abs(fromChrome.greenComponent - fromStore.greenComponent) < 0.002)
             #expect(abs(fromChrome.blueComponent - fromStore.blueComponent) < 0.002)
         }
+    }
+}
+
+/// Counts the storage's processed edits — the honest measure of "did this
+/// touch the document": every `beginEditing`/attribute write lands here
+/// with the range it edited.
+private final class StorageEditCounter: NSObject, NSTextStorageDelegate {
+    nonisolated(unsafe) var edits: [NSRange] = []
+
+    nonisolated func textStorage(
+        _ textStorage: NSTextStorage, didProcessEditing editedMask: NSTextStorageEditActions,
+        range editedRange: NSRange, changeInLength delta: Int
+    ) {
+        edits.append(editedRange)
     }
 }
