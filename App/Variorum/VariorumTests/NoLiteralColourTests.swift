@@ -186,13 +186,44 @@ struct NoLiteralColourTests {
             """)
     }
 
-    /// The token layer holds the values, and it holds them in ONE place: no
-    /// hex may appear in the Mac app's views even inside a comment-free
-    /// helper. (Stated separately so the message is specific when it fires.)
+    /// The token layer holds the values, and it holds them in ONE place —
+    /// `Shared/Theme/`. **The rest of `Shared/`** (`EditorBrain`,
+    /// `MarkdownFace`, `SampleLibrary`, the custody and sync faces both
+    /// platforms compile) is a root the walk above does not scan, so this
+    /// pin walks it for the VALUE spellings — a hex or a component-built
+    /// colour — with no allow-list at all: a value there belongs in
+    /// `Shared/Theme`. *(18j ladder round 1, R1-6: this test used to assert
+    /// only that two files EXISTED under `Shared/Theme`, which pinned
+    /// nothing; it is green today because nothing outside the token layer
+    /// holds a value.)*
     @Test func theHexValuesLiveOnlyInTheSharedTokenLayer() throws {
-        let shared = Self.appRoot.appendingPathComponent("Shared/Theme")
-        let files = swiftFiles(under: shared).map { $0.lastPathComponent }
-        #expect(files.contains("VoiceTokens.swift"))
-        #expect(files.contains("PaletteDerivation.swift"))
+        let shared = Self.appRoot.appendingPathComponent("Shared")
+        let tokenLayer = shared.appendingPathComponent("Theme").path + "/"
+        #expect(FileManager.default.fileExists(atPath: tokenLayer))
+        var offenders: [String] = []
+        var scanned = 0
+        for file in swiftFiles(under: shared) where !file.path.hasPrefix(tokenLayer) {
+            scanned += 1
+            let relative = file.path.replacingOccurrences(of: shared.path + "/", with: "")
+            let source = try String(contentsOf: file, encoding: .utf8)
+            for (index, line) in source.split(
+                separator: "\n", omittingEmptySubsequences: false).enumerated()
+            where isCode(String(line)) {
+                let text = String(line)
+                for form in ["Color(hex:", "srgbRed:", "calibratedRed:", "calibratedWhite:",
+                             "NSColor(white:", "NSColor(red:", "UIColor(red:", "UIColor(white:",
+                             "Color(hue:", "Color(white:", "Color(red:",
+                             "Color(.sRGB", "Color(.displayP3"]
+                where text.contains(form) {
+                    offenders.append("\(relative):\(index + 1) — \(form)")
+                }
+            }
+        }
+        #expect(scanned > 40, "the walk must reach the shared code (\(scanned) files)")
+        #expect(offenders.isEmpty, """
+            A colour VALUE outside `Shared/Theme` is a second token layer. Move it \
+            into `VoiceTokens`/`PaletteDerivation`, or a named slot on the tokens.
+            \(offenders.joined(separator: "\n"))
+            """)
     }
 }
