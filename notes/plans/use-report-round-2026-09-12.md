@@ -8724,3 +8724,71 @@ is 896 pt wide, so it wraps at 420 too). Cheap, and it closes the half J39 left.
 - **NITs:** N1 the header's vertical "zero width" clause — FIX (doc). N2 the `:1220` sentence's second clause on the refusal road — RECORD on the residue line to her beside row 34 and the bulk tag (the copy class; her words). N3 `TakesViewModel.toggleSeal` says nothing — RECORD with J43 (pre-18i; a fix is new copy).
 
 **The cap:** after this fix pass there is NO round 4. The orchestrator verifies the fixes against git (the sites, the pins' reds as recorded, the closing run, the fences), then closes the letter: the residue owned (J44's row; J35/N4/N2/N3 on her line), the canon deltas applied.
+
+### 18i LADDER — ROUND 3 · THE IMPLEMENTER'S RESPONSES
+
+*(The cap's pass: responses, then the fixes in the dispositions' order. Every site traced in my own context;
+the geometry claim re-checked against my own round-2 probe rather than re-argued.)*
+
+**[BLOCKER · J43] Eight Write receipts still on the refusal door — AGREE, without reservation, and the
+"why the audit missed it" is exactly right.**
+
+Traced at all eight: each sits in the SUCCESS arm of a `do` whose operation already returned —
+`:2495`/`:2504` after `unlockPost`/`lockPost`, `:2554` after `setPostWordTarget`, `:2568` after
+`setEntryDate`, `:2601` after `poolDragCopy`, `:2816` after `branchVariant`/`newBlankVariant` (+
+`chooseVariant`), `:2840` after `createLens` + `setLensChoice`, `:2862` after `archiveVariant`. And
+`showStatus` is `setStatusMessage(message, kind: .refusal)` (`EditorViewModel.swift:3436–3438`), which
+`StatusCenter.slot(for:)` sends to `current` under every value of `receiptStyle`. So the store changed and
+her setting does not govern the line — under `quiet` these are the popups she asked to stop seeing, and
+under `off` they falsify `ReceiptStyleCopy`'s own *"Nothing: they stay unsaid."*
+
+This is J42's family and the orchestrator's acceptance of J42 is the same reasoning applied to one member;
+the other eight were left because **my round-1 table's row 15 ruled the family in one line** and named only
+`refuseFeedback`, `showOperationError` and the bare `statusMessage =` assignments — `showStatus` is a third,
+NAMED door that the row does not mention, and its 43 call sites were never enumerated. That is row 18's
+defect repeated, one round after J38 required row 18 be replaced by an enumeration. The row-15 enumeration
+is below in the fixes record, and I checked its arithmetic: **43 `showStatus(` sites across the three files;
+ten change (the eight + the two split-by-outcome doors), thirty-three are correct refusals, directions or
+errors.**
+
+The twin table is the sharpest part of the finding and I re-derived every row of it: the same sentence
+really does carry two classes today (`ShellActions.toggleSeal` receipt vs `EditorViewModel.toggleSeal`
+refusal; the same for the word target, the lens save, the take archive and the find/replace report).
+
+**One addition, flagged as a batch call.** The disposition names `:3275` for the split-by-outcome shape.
+`TakeClipboard.Outcome.message` has a SECOND caller — `TakesViewModel.swift:1343` — which speaks it through
+`speak(…)` (= `setRefusal`), so fixing only Write's would leave the identical sentence carrying two classes
+across surfaces, which is the defect this very finding's twin table is about. I put the predicate ON the
+`Outcome` (`isRefusal` — one home, the `acted` shape) and route BOTH callers through it. The second line is
+outside the disposition's letter and is reversible on its own.
+
+**[MAJOR · J44] The classification has no audit surface — AGREE, and RECORD is the right call for this
+letter.** The base-rate argument is sound and I am the evidence for it: four mis-classified families in
+three rounds, each found by a human reading sites one at a time, with a 2577-test green suite silent
+throughout because a call site's class is invisible to a test that reads the words. I also agree it must
+not be built here: the two structural moves are a ~150-site mechanical rename and a visibility change to
+`TakesViewModel.status`, and the cap is real. **I change no code for it.** One thing I can add to the row
+from inside the work: J38's 25 direct assignments and this round's 43 `showStatus` sites are the same
+shape — a classed property (or a classed door) that can be bypassed — so "make the classed door the only
+writer" would have made BOTH families structurally impossible, not merely easier to audit.
+
+**[MINOR · J45] The flat host's height assertion still cannot fail — AGREE.** My own round-2 probe is the
+proof, one row of it I did not act on: unconstrained, `lineLimit(2)` measures **204 × 14** for the pin's own
+sentence — one line at 204 pt of width — so `host.fittingSize.height == idleHeight` holds for any
+`lineLimit` and any string. The reviewer's tension is real and its fix is right: the flat host must stay
+unconstrained for the `width == 0` / `> 0` assertions to mean anything, so the answer is a THIRD host at
+`.frame(width: 420)` with a sentence long enough to wrap there.
+
+**NITs.** **N1 — AGREE.** My round-2 oracle dropped the `boxHost.fittingSize.width == 0` assertion (it had
+to: constrained to 200 pt the idle box reports 200), so the header's *"an idle slot measures zero width"* is
+now false for the vertical composition as the pin measures it — the same doc/measurement mismatch J39
+corrected one paragraph above. The honest wording is about what the slot ASKS FOR: zero ideal width, hence
+no reflow in a row; in the box the row is reserved and its width is the column's. **N2 and N3 — AGREE,
+RECORD only**, on the residue line to her: N2 (*"New takes written on 0 blocks — open any fan to see
+them…"*, whose second clause is wrong advice on the road where it always shows) beside row 34 and the
+idempotent bulk tag, all three being the copy-invention class that is hers; N3 (`TakesViewModel.toggleSeal`
+says nothing on success while its two siblings speak — pre-18i, untouched by this letter) beside the seal's
+three endings, because making the boards speak is new copy on a door.
+
+**Counts: 6 AGREE · 0 DISPUTE.** Nothing is stopped; J44, N2 and N3 are recorded rather than built, exactly
+as dispositioned.
