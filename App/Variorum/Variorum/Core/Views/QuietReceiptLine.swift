@@ -21,22 +21,34 @@
 //  empty string when there is nothing to say, and the words fade in and out
 //  on the centre's own clock.
 //
-//  **What "takes no room" means exactly** (corrected at the 18i ladder round
-//  1, J31 — the shipped header said "zero width, nothing drawn, no reflow",
-//  which is true of the three FLAT bars and false of the fourth site):
+//  **What "takes no room" means exactly** (round 1's J31, RE-TAKEN at round
+//  2's J39 on a measurement that falsified its premise):
 //  · in the horizontal bars (`CommitBar`'s three tiers, `TakesBottomBar`'s
 //    two arrangements) an idle slot measures **zero width** and the row's
 //    height is the doors' — nothing reflows, which is the claim those bars
 //    depend on;
 //  · in the VERTICAL composition — the book's sidebar note-box footer, where
 //    this view has its own row — an idle slot measures zero width but still
-//    **one line's height** (14 pt measured), and that reservation is
-//    DELIBERATE: the footer holds the word counts and the `?` helper DOOR,
-//    and collapsing the row would move a door 18 pt when a receipt lands and
-//    18 pt back six seconds later — precisely the noise her setting exists
-//    to remove. The box's content scrolls inside a column-fixed frame, so
-//    the reserved row costs a blank line and nothing below it moves.
-//  Both halves are pinned (`ConfirmationsSettingTests.theQuietSlotIsWeightlessUntilItSpeaks`).
+//    **one line's height** (14 pt measured), reserved DELIBERATELY: the
+//    footer holds the word counts and the `?` helper DOOR, and a row that
+//    came and went would move that door 18 pt on every receipt and 18 pt
+//    back six seconds later.
+//
+//  **ONE LINE, EVERYWHERE — and that is why there is no `lines` knob** (J39).
+//  This view shipped with a two-line option for the box, on the reasoning
+//  that "a one-line truncation in a ~200 pt column would say almost nothing".
+//  The measurement refutes it: at `tokens.small` the receipt *"Blocks joined
+//  — ⌥⌘Z undoes it."* is **204 pt** wide, so in the box's 200 pt column the
+//  second line carried about one character — and bought that with a real
+//  14 pt shove of the counts row and the `?` door on every receipt over
+//  roughly 28 characters, which is most of them. At one line the claim above
+//  is LITERALLY true in every composition: the row is reserved once, nothing
+//  ever moves for it, the words truncate at the column's edge exactly as
+//  they do in the three flat bars, and the whole sentence is one hover away
+//  (`help`) — the shape she already walked. Pinned, WIDTH-CONSTRAINED, at
+//  `ConfirmationsSettingTests.theQuietSlotIsWeightlessUntilItSpeaks`; the
+//  round-1 version of that pin measured an unconstrained `fittingSize` and
+//  could not fail.
 //
 //  ── AND WHY IT YIELDS FIRST ──────────────────────────────────────────────
 //  `layoutPriority(-1)`: the counts, the doors and the `?` take their ideal
@@ -44,9 +56,8 @@
 //  a narrow window rather than pushing anything off the bar. The whole
 //  sentence is always one hover away (`help`), and `.toast` shows it whole.
 //  P-8's rule is satisfied the way it is written: a chrome text with
-//  `fixedSize` carries a `lineLimit` — this one carries a `lineLimit` and
-//  deliberately no horizontal `fixedSize`, which is the same rule's other
-//  side.
+//  `fixedSize` carries a `lineLimit` — this one carries a `lineLimit` and no
+//  `fixedSize` at all, which is the same rule's other side.
 //
 //  ── AND WHY IT IS SELECTABLE ─────────────────────────────────────────────
 //  `.textSelection(.enabled)` in window chrome is deliberate (the 18i ladder
@@ -63,21 +74,15 @@ import SwiftUI
 struct QuietReceiptLine: View {
     let status: StatusCenter
     let tokens: VoiceTokens
-    /// 1 in the flat bars (one row, truncating — the bar's height must never
-    /// move); 2 in the sidebar note box, whose column is ~200 pt wide and
-    /// whose content already scrolls inside a fixed frame, so wrapping costs
-    /// nothing and a one-line truncation there would say almost nothing.
-    var lines: Int = 1
 
     var body: some View {
         let item = status.quietLine
         Text(item?.text ?? "")
             .font(tokens.small)
             .foregroundStyle(tokens.muted)
-            .lineLimit(lines)
+            .lineLimit(1)
             .truncationMode(.tail)
             .multilineTextAlignment(.leading)
-            .fixedSize(horizontal: false, vertical: lines > 1)
             .textSelection(.enabled)
             .opacity(item == nil ? 0 : 1)
             .animation(.easeInOut(duration: 0.18), value: item?.id)

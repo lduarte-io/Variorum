@@ -332,11 +332,12 @@ struct CommitBar: View {
         VStack(alignment: .leading, spacing: 4) {
             Divider().overlay(tokens.line)
             // 18i: the book's live note gets the quiet slot in ITS footer —
-            // its own row, wrapping to two lines, because this column is
-            // ~200 pt wide and the box's content already scrolls inside a
-            // frame the column fixes (so a taller footer never moves the
-            // Open strip below it).
-            QuietReceiptLine(status: model.session.status, tokens: tokens, lines: 2)
+            // its own row, ONE line like every other composition (the ladder
+            // round 2's J39: two lines bought about one character in this
+            // ~200 pt column and shoved the counts and the `?` door 14 pt on
+            // every receipt that wrapped). Truncated at the column's edge,
+            // the whole sentence in `help`.
+            QuietReceiptLine(status: model.session.status, tokens: tokens)
                 .frame(maxWidth: .infinity, alignment: .leading)
             HStack(spacing: 6) {
                 ViewThatFits(in: .horizontal) {

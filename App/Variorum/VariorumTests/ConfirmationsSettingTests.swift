@@ -361,10 +361,20 @@ struct ConfirmationsSettingTests {
         window.contentView = host
         defer { window.orderOut(nil); window.close() }
 
-        // The VERTICAL composition — the book's sidebar note-box footer,
-        // `lines: 2`, in a ~200 pt column — measured beside it.
+        // The VERTICAL composition — the book's sidebar note-box footer, in
+        // its real ~200 pt column.
+        //
+        // **WIDTH-CONSTRAINED, and that is the whole point** (the 18i ladder
+        // round 2's MAJOR — J39): `NSHostingView.fittingSize` is the
+        // UNCONSTRAINED ideal size and the host's frame does not constrain
+        // it, so the round-1 version of this oracle measured the receipt at
+        // 204 pt of width in a 200 pt column and reported a stable 14 pt
+        // height for every string at every `lines` value — a pin that could
+        // not fail on the axis it named. The `.frame(width:)` on the ROOT is
+        // what makes the measurement the one the box actually performs.
         let boxHost = NSHostingView(
-            rootView: QuietReceiptLine(status: center, tokens: tokens, lines: 2))
+            rootView: QuietReceiptLine(status: center, tokens: tokens)
+                .frame(width: 200))
         boxHost.frame = NSRect(x: 0, y: 0, width: 200, height: 40)
         let boxWindow = NSWindow(
             contentRect: boxHost.frame, styleMask: [.titled], backing: .buffered, defer: false)
@@ -394,7 +404,6 @@ struct ConfirmationsSettingTests {
                 "idle: the slot is mounted and takes NO width — nothing reflows")
         let idleHeight = host.fittingSize.height
         let idleBoxHeight = boxHost.fittingSize.height
-        #expect(boxHost.fittingSize.width == 0, "idle: no width in the box either")
         #expect(idleBoxHeight > 0,
                 "…but ONE LINE'S HEIGHT, reserved deliberately so the counts and the `?` door never move when a receipt lands (J31)")
 
@@ -404,7 +413,7 @@ struct ConfirmationsSettingTests {
         #expect(host.fittingSize.height == idleHeight,
                 "the flat bar's row NEVER changes height for it")
         #expect(boxHost.fittingSize.height == idleBoxHeight,
-                "…and the box's footer holds exactly the room it already had")
+                "…and the box's column holds exactly the room it already had — at ITS width, where this sentence measures 204 pt and would otherwise wrap")
 
         center.clear()
         await settle { host.fittingSize.width == 0 }
