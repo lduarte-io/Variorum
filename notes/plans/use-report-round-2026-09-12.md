@@ -10880,3 +10880,43 @@ recorded reason; green today, so it lands as a guard.
 fixes finds them right: the MAJOR's fix is complete at the one builder with its kind-drift closed, the
 pins are real and red-on-old by mechanism, and nothing new rises above record- and pin-hygiene. **No new
 BLOCKER or MAJOR — no round 3 is owed on these counts.**
+
+### 18j LADDER — ROUND 2 · THE IMPLEMENTER'S RESPONSES
+
+**3 NITs · 3 AGREE · 0 DISPUTE.** No code touched. Each checked against the tree before answering.
+
+**[NIT] R2-1 — AGREE.** Read the handoff's line: *"Flagged for her eye, not asked"* names **J59** (the three
+orange marks) and **J47** (the six deeper accents) and stops — the DiffView re-hue is absent, and it is the
+same class by every test J59 met: a visible colour change on a surface she uses, reversible in tokens,
+made by a ladder rather than by her. **One thing I would add to the clause when it is written:** the diff's
+marks are the one place the old literals carried a CONVENTION — red-removed / green-added is a near-universal
+diff idiom — and while `tokens.alarm`/`tokens.positive` preserve the reading in both voices (they are the
+voice's red-ish and green-ish), *"the diff no longer uses the system stoplight"* is exactly the sentence she
+should get to disagree with. Record-only, the orchestrator's at the close; nothing in code is owed.
+
+**[NIT] R2-2 — AGREE, verified by listing.** No `r1-*` capture covers batch row 14 (Write's markdown face)
+in Study or row 29 (the block ▾ menu) in Terminal — the only face captures in the fix pass are
+`r1-deface-fix-01/02`, which the walk table itself marks **T**, and the only `r1-*` menu captures are the two
+MenuBarExtra ones. So the summary sentence *"the other voice for every one-voice row"* overstates by exactly
+the two rows the finding names, and the fix-pass table below it never claimed them — the R1-5/R1-7
+record-accuracy class this ladder enforced on my own record, applied to its own. The bounding it offers is
+real (the face's colours are token-derived and an in-window `NSMenu` follows the app appearance the pinned
+bridge proves), which is why one sentence naming the two rows is the right fix; two ten-second captures at
+the letter-close walk would close it outright, and I would take those if the walk is happening anyway.
+
+**[NIT] R2-3 — AGREE, and the by-form conversion HOLDS: I checked the whole file against every pattern the
+pin bans.** `BlockDecor.swift` is **1,129 lines**, and the ONLY banned form anywhere in it is
+`srgbRed:` — one hit, on **line 397** (the `NSColor(` opens at 396; the pin matches per line, so the allowed
+form is the one on 397, and a per-file+form allowance does not care which). Every other check is **empty**:
+no `Color(hex:`, no other component spelling (`calibratedRed:` · `calibratedWhite:` · `NSColor(white:` ·
+`NSColor(red:` · `UIColor(red:` · `Color(hue:` · `Color(white:` · `Color(red:` · `Color(.sRGB` ·
+`Color(.displayP3`), no `Color.<hue>`, no `<modifier>(.<hue>)`, no `return .<hue>`, no `.<hue>.opacity(`
+(so the shadow exemption is not load-bearing here either). **So `"Features/Editor/BlockDecor.swift":
+["srgbRed:"]` is green today and needs no new plumbing** — `allowedForms` is already consulted in exactly
+the component-spelling loop `srgbRed:` lives in. And the finding's reasoning is the fix's own: the R1-2
+commit minted the by-form mechanism precisely so an allowance would be "narrower than a whole file, so the
+rest of the file stays under the pin", and entry 5 is the one allowance that predates it — today 1,128 lines
+of decor escape a pin every other view answers to, with no occupant but plenty of room for one.
+
+**Counts: 3 findings · 3 AGREE · 0 DISPUTE.** Two are record/handoff items for the close; R2-3 is a
+one-line pin edit whose greenness I verified form by form.
