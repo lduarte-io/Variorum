@@ -8951,8 +8951,9 @@ by this letter, and making the boards speak is new copy on a door.
   Tree clean at `fbe2720b`, `main` == `origin/main`. **Her real-store app is NOT running**
   (`pgrep -fl 'Variorum.app/Contents/MacOS'` → nothing) — never touched either way.
 
-- **PIECE 1 — core (the enum, the seed rule, the query, the two setters): IN-PROGRESS.**
-- **PIECE 2 — the brain (`PaletteDerivation` + the 15 presets): NOT-STARTED.**
+- **PIECE 1 — core (the enum, the seed rule, the query, the two setters): DONE (`7400d9a9`).**
+  Pins: `AppearanceSettingsTests` ×2 + the new `ThemeTintTests` ×3 — 11 tests in 2 suites green.
+- **PIECE 2 — the brain (`PaletteDerivation` + the 15 presets): IN-PROGRESS.**
 - **PIECE 3 — the resolver (`VoiceTokens.resolve(voice:palette:tint:dark:)` + `ThemeStore`): NOT-STARTED.**
 - **PIECE 4 — the face (the Appearance pane's palette row + the custom hex fields): NOT-STARTED.**
 - **PIECE 5 — the walk (both voices × the palettes × light/dark on the dev-store Debug build): NOT-STARTED.**
