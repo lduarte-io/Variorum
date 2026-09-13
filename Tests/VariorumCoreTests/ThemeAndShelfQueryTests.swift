@@ -90,6 +90,91 @@ struct AppearanceSettingsTests {
         }
     }
 
+    // MARK: - The colour palette (18g — her R-Q6 · R-Q11 · R-Q13)
+
+    /// The palette is a `setting` row of exactly its neighbours' kind:
+    /// read-time default, round-trip, upsert-only, an outbox row (synced —
+    /// her R-Q6), and a value nobody recognizes reading as the DEFAULT,
+    /// which is the one reading that can never leave the app half-coloured.
+    @Test func thePaletteRoundTripsAndGarbageReadsAsTheDefault() throws {
+        try withOperations { ops, db in
+            #expect(try db.read { try Queries.themeSettings($0) }.palette == .default,
+                    "R-Q6: default = each voice's shipped colours")
+
+            try ops.setThemePalette(.lavender)
+            #expect(try db.read { try Queries.themeSettings($0) }.palette == .lavender)
+            #expect(try db.outboxContains("setting", "theme_palette"),
+                    "synced document semantics, the theme_voice class")
+
+            try ops.setThemePalette(.goldAndBlack)
+            #expect(try db.read { try Queries.themeSettings($0) }.palette == .goldAndBlack)
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM setting WHERE key = 'theme_palette'") == 1,
+                    "upsert-only — never a second row")
+
+            try db.write { db in
+                try db.execute(
+                    sql: "UPDATE setting SET value = 'chartreuse' WHERE key = 'theme_palette'")
+            }
+            #expect(try db.read { try Queries.themeSettings($0) }.palette == .default,
+                    "an unrecognized palette reads as the shipped colours")
+        }
+    }
+
+    /// **Her R-Q13's custom pair, validated on BOTH sides.** The setter
+    /// normalizes what she typed (`#b9a7e6` and `B9A7E6` are one colour, so
+    /// two devices converge to the same bytes under CAS); a value that is
+    /// not a colour refuses the WHOLE write, leaving neither key touched;
+    /// nil clears; and a value that reached the row by some other road
+    /// reads as absent.
+    @Test func theCustomSeedsNormalizeRefuseAndClear() throws {
+        try withOperations { ops, db in
+            var settings = try db.read { try Queries.themeSettings($0) }
+            #expect(settings.customRoom == nil)
+            #expect(settings.customAccent == nil)
+
+            try ops.setThemeTints(room: "#b9a7e6", accent: nil)
+            settings = try db.read { try Queries.themeSettings($0) }
+            #expect(settings.customRoom == "B9A7E6", "canonical: no #, uppercase")
+            #expect(settings.customAccent == nil, "an absent accent means DERIVED")
+            #expect(try db.outboxContains("setting", "theme_tint"))
+
+            // The optional second (the two-tone case).
+            try ops.setThemeTints(room: "8A7A3A", accent: " #d4a72c ")
+            settings = try db.read { try Queries.themeSettings($0) }
+            #expect(settings.customRoom == "8A7A3A")
+            #expect(settings.customAccent == "D4A72C")
+
+            // A malformed half refuses the whole write — nothing lands.
+            #expect(throws: OperationError.self) {
+                try ops.setThemeTints(room: "8A7A3A", accent: "octarine")
+            }
+            settings = try db.read { try Queries.themeSettings($0) }
+            #expect(settings.customAccent == "D4A72C", "the refused write changed nothing")
+            #expect(throws: OperationError.self) {
+                try ops.setThemeTints(room: "12345", accent: nil)
+            }
+            #expect(try db.read { try Queries.themeSettings($0) }.customRoom == "8A7A3A")
+
+            // nil clears both, and the row survives (upsert-only, never
+            // tombstoned — the cleared form is the empty string).
+            try ops.setThemeTints(room: nil, accent: nil)
+            settings = try db.read { try Queries.themeSettings($0) }
+            #expect(settings.customRoom == nil)
+            #expect(settings.customAccent == nil)
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM setting WHERE key = 'theme_tint'") == 1)
+
+            // A value that arrived by another road is not a colour and is
+            // not treated as one.
+            try db.write { db in
+                try db.execute(
+                    sql: "UPDATE setting SET value = 'rgb(1,2,3)' WHERE key = 'theme_tint'")
+            }
+            #expect(try db.read { try Queries.themeSettings($0) }.customRoom == nil)
+        }
+    }
+
     @Test func shelfPinsAppendRemoveAndSurviveMalformedJSON() throws {
         try withOperations { ops, db in
             let one = try ops.createReading(name: "journal", kind: .curated)
@@ -119,6 +204,42 @@ struct AppearanceSettingsTests {
             #expect(try db.read { try Queries.dailyJournalBookID($0) } == nil,
                     "a dead designated book reads as none (the fallback class)")
         }
+    }
+}
+
+/// 18g — the ONE seed rule, on its own (`ThemeTint`): what it tolerates,
+/// what it refuses, and the canonical form both the setter and the read
+/// agree on.
+@Suite("Palette seeds (18g — ThemeTint)")
+struct ThemeTintTests {
+    @Test func sixHexDigitsInAnyOfTheWaysSheWouldWriteThem() {
+        #expect(ThemeTint.normalize("B9A7E6") == "B9A7E6")
+        #expect(ThemeTint.normalize("b9a7e6") == "B9A7E6")
+        #expect(ThemeTint.normalize("#b9a7e6") == "B9A7E6")
+        #expect(ThemeTint.normalize("  #B9A7E6\n") == "B9A7E6")
+        #expect(ThemeTint.value("#000000") == 0x000000)
+        #expect(ThemeTint.value("ffffff") == 0xFFFFFF)
+        #expect(ThemeTint.value("3D6B8E") == 0x3D6B8E)
+    }
+
+    @Test func everythingElseIsNotAColour() {
+        for raw in [
+            "", " ", "#", "12345", "1234567", "##B9A7E6", "B9A7E", "GGGGGG",
+            "0x123456", "rgb(1,2,3)", "lavender", "B9 A7 E6", "B9A7E6FF",
+        ] {
+            #expect(ThemeTint.normalize(raw) == nil, "not a colour: \u{201C}\(raw)\u{201D}")
+            #expect(ThemeTint.value(raw) == nil)
+        }
+        #expect(ThemeTint.normalize(nil) == nil)
+        #expect(ThemeTint.normalize(ThemeTint.cleared) == nil, "the cleared form reads as absent")
+    }
+
+    /// Full-width digits satisfy `isHexDigit` and are not hexadecimal — the
+    /// `radix: 16` parse would reject them a step later, so the two halves
+    /// agree HERE rather than disagreeing there.
+    @Test func lookalikeDigitsAreRefusedByTheSameRule() {
+        #expect(ThemeTint.normalize("Ｂ９Ａ７Ｅ６") == nil)
+        #expect(ThemeTint.value("Ｂ９Ａ７Ｅ６") == nil)
     }
 }
 

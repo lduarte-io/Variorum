@@ -67,6 +67,55 @@ extension Operations {
         }
     }
 
+    // MARK: - The colour palette (18g — her R-Q6 · R-Q11 · R-Q13)
+
+    /// **The palette layered UNDER the voice** (`ThemePalette` carries the
+    /// whole reasoning, including why this is not a third voice). Synced
+    /// document semantics like every other `setting` row here (upsert-only,
+    /// never tombstoned — the `theme_voice` class); zero schema, so no
+    /// SyncSpec §12 lockstep event and the marker stays where it is.
+    public func setThemePalette(_ palette: ThemePalette) throws {
+        try database.write { db in
+            try upsertSetting(db, key: "theme_palette", value: palette.rawValue)
+        }
+    }
+
+    /// **The `custom` palette's seeds** (her R-Q13: *"Custom = ONE hex,
+    /// with an optional second"*) — the room hue and, optionally, the
+    /// accent hue.
+    ///
+    /// Both go through the ONE rule (`ThemeTint`): a value that is not six
+    /// hex digits REFUSES the whole write (`invalidTint`) rather than
+    /// landing a colour nobody can name — the door fires and delivers the
+    /// operations layer's real refusal (P-2), and the face shows its words.
+    /// `nil` CLEARS, and a cleared seed is the empty string because a
+    /// `setting` row is upsert-only and never tombstoned; the read side
+    /// turns it back into absence through the same rule.
+    ///
+    /// One transaction for both, so the pair can never land half-written —
+    /// a room with a stale accent from the colour before it is exactly the
+    /// state the derivation could not explain.
+    public func setThemeTints(room: String?, accent: String?) throws {
+        let roomValue = try normalizedTint(room)
+        let accentValue = try normalizedTint(accent)
+        try database.write { db in
+            try upsertSetting(db, key: "theme_tint", value: roomValue)
+            try upsertSetting(db, key: "theme_accent_tint", value: accentValue)
+        }
+    }
+
+    /// nil clears; a colour normalizes; anything else refuses. Outside the
+    /// transaction on purpose — nothing is written when either half is bad.
+    private func normalizedTint(_ raw: String?) throws -> String {
+        guard let raw, !raw.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return ThemeTint.cleared
+        }
+        guard let normalized = ThemeTint.normalize(raw) else {
+            throw OperationError.invalidTint(value: raw)
+        }
+        return normalized
+    }
+
     /// The DOCUMENT-GLOBAL segmentation default (`default_segmentation` —
     /// AppSpec §7's seed, 'paragraph'): what fresh text does in every post
     /// that carries no per-post override. 13d batch 4 (her A16); 13b's 4D

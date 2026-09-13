@@ -22,6 +22,18 @@ extension Queries {
         /// 18i (R-Q5): what a RECEIPT does. Refusals and offers always
         /// toast whatever this says — `ReceiptStyle` carries the reasoning.
         public var receiptStyle: ReceiptStyle = .quiet
+        /// 18g (R-Q6/R-Q11/R-Q13): the colour palette layered UNDER the
+        /// voice. `.default` is each voice's shipped colours, byte-identical.
+        public var palette: ThemePalette = .default
+        /// 18g: the `custom` palette's ROOM seed — six hex digits, or nil.
+        /// Validated on the read through the ONE rule (`ThemeTint`), so a
+        /// value that is not a colour reads as ABSENT and `custom` falls
+        /// back to the voice's own family rather than to half a palette.
+        public var customRoom: String?
+        /// 18g: the `custom` palette's optional ACCENT seed (her R-Q13's
+        /// "an optional second"). Absent means DERIVED — the room hue
+        /// deepened, which is exactly what a pastel preset does.
+        public var customAccent: String?
 
         public init() {}
     }
@@ -33,7 +45,8 @@ extension Queries {
                 SELECT key, value FROM setting
                 WHERE key IN ('theme_voice', 'seams_visible', 'editing_indicator',
                               'inline_comments', 'follow_the_scroll', 'fan_style',
-                              'receipt_style')
+                              'receipt_style', 'theme_palette', 'theme_tint',
+                              'theme_accent_tint')
                 """)
         var settings = ThemeSettings()
         for row in rows {
@@ -54,6 +67,15 @@ extension Queries {
                 settings.fanStyle = FanStyle(rawValue: value) ?? settings.fanStyle
             case "receipt_style":
                 settings.receiptStyle = ReceiptStyle(rawValue: value) ?? settings.receiptStyle
+            case "theme_palette":
+                settings.palette = ThemePalette(rawValue: value) ?? settings.palette
+            // 18g: the two seeds go through the ONE validation rule on the
+            // way IN, so nothing downstream ever has to ask whether a
+            // stored tint is a colour (`ThemeTint` carries the reasoning).
+            case "theme_tint":
+                settings.customRoom = ThemeTint.normalize(value)
+            case "theme_accent_tint":
+                settings.customAccent = ThemeTint.normalize(value)
             default:
                 break
             }

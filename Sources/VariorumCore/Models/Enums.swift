@@ -78,6 +78,87 @@ public enum ThemeVoice: String, Codable, Sendable, CaseIterable, DatabaseValueCo
     case study
 }
 
+/// **THE COLOUR PALETTE, LAYERED UNDER THE VOICE** (the 2026-09-12
+/// use-report round, 18g — her rulings R-Q6 · R-Q11 · R-Q13, from the
+/// report: *"I need basic color themes that also update the lightly
+/// colored text like (this note) and commit. I want at least lavender,
+/// mint green, pink, blue, a pastel set. and maybe the ability to choose
+/// the hex code of your default theme (should recolor the tan panels
+/// basically) and the text that is going on top of those panels."*).
+///
+/// **A palette is NOT a third voice — R1/R12 hold at exactly two.** The
+/// voice keeps everything that makes it a voice: its type (Study's serif,
+/// Terminal's mono), its idioms (the `›` marker, `~/` path grammar, the
+/// lowercased chrome, the blinking block cursor), and every token the
+/// palette does not name. What a palette replaces is one derived FAMILY of
+/// colours — the room (her "tan panels"), the wash, the accent (her
+/// "lightly colored text like (this note) and commit"), the take tint and
+/// its hairline — computed from one or two seed hues by ONE pure rule in
+/// the app layer (`PaletteDerivation`). R1's *"never a palette swap"* was
+/// about a voice being MORE than colours; a palette UNDER a voice keeps
+/// that exactly true.
+///
+/// **Core knows the NAMES; the app knows the colours.** There is no hex in
+/// this file on purpose: a seed pair and its intensity are design data that
+/// belongs beside the token layer, and the stored value must stay a small
+/// enum token for the reason below.
+///
+/// Stored in the synced `setting` table under `theme_palette` (document
+/// semantics, the `theme_voice`/`fan_style` class — the same store looks
+/// the same on every device; her R-Q6 asks for it synced). **E2EE-clean by
+/// construction:** one enum token, never prose, so `setting.value`'s PLAIN
+/// classification and its column-fenced disclosure promise (AppSpec §7, the
+/// 14b ladder's R1-9) hold unchanged. No schema, no migration, no SyncSpec
+/// §12 lockstep event — a `setting` key is upsert-only.
+///
+/// `custom` reads its seeds from `theme_tint` (the room) and, optionally,
+/// `theme_accent_tint` (the accent) — six hex digits each, validated by the
+/// one rule `ThemeTint`. A `custom` palette whose room seed is absent or
+/// malformed resolves as `default`: a palette can never leave the app
+/// half-coloured.
+public enum ThemePalette: String, Codable, Sendable, CaseIterable, DatabaseValueConvertible {
+    /// Each voice's shipped colours, byte-identical. The default, and the
+    /// parity proof the token pins ride (`ThemeTokenTests`).
+    case `default`
+
+    // ── The four PASTELS (her R-Q11: *"yeah those look good, I like
+    // those. I want them included."*). ONE seed: the accent is the same
+    // hue, deepened.
+    case lavender
+    case mint
+    case pink
+    case blue
+
+    // ── The six TWO-TONE builds (her R-Q11: *"a couple mixed color
+    // builds, like how terminal has tan and blue… like gold and black"*,
+    // then *"i'd do a light grey one with red or something too"* amended
+    // to *"light grey & green"*). TWO seeds: a room hue and an accent hue.
+    // Each is a LIGHT theme with two hues — her clarification: the black
+    // strip in the mockup was the dark-mode preview, never part of them.
+    case goldAndBlack = "gold_black"
+    case sageAndTerracotta = "sage_terracotta"
+    case slateAndAmber = "slate_amber"
+    case plumAndCream = "plum_cream"
+    case inkAndCoral = "ink_coral"
+    case greyAndGreen = "grey_green"
+
+    // ── The five BOLD builds (her R-Q11: *"the color themes don't also
+    // have to be so pastel, you can add a little more personality to them.
+    // or add a third batch"*). The same two-seed rule at the deeper
+    // intensity table — still light themes.
+    case cobaltAndTangerine = "cobalt_tangerine"
+    case peachAndIndigo = "peach_indigo"
+    case butterAndCobalt = "butter_cobalt"
+    case roseAndMoss = "rose_moss"
+    case tealAndRust = "teal_rust"
+
+    /// Her own hex (R-Q13: *"I can also still put in one hex and what's
+    /// the 'brain' that'll take care of the second value?"*) — ONE seed,
+    /// with an optional second for the accent. The same brain, fed her
+    /// colour.
+    case custom
+}
+
 /// The editing-indicator setting (Phase 13 — rulings R14/R22, ratified
 /// sitting 4): how the block being EDITED is marked in the plain editor.
 /// OFF is the default ("sometimes people don't even want to see what

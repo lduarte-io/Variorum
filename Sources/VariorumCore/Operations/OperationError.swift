@@ -197,6 +197,12 @@ public enum OperationError: Error, Equatable, Sendable {
     /// An extent (word target or post cap) must be positive; nil clears.
     case invalidExtent(value: Int)
 
+    // The custom colour palette (18g — her R-Q6/R-Q13).
+    /// A palette seed must be six hexadecimal digits (`ThemeTint` is the
+    /// one rule). The payload is what she TYPED, so the refusal can show
+    /// it back to her. nil clears; this is only ever a malformed value.
+    case invalidTint(value: String)
+
     // Reading sections / chapters (Phase 13, Step A1 — v1_10).
     case sectionNotFound(id: String)
     case invalidSectionName(name: String)

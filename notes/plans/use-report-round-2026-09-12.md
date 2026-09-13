@@ -8933,4 +8933,27 @@ by this letter, and making the boards speak is new copy on a door.
 
 ### R-6 · RECORD (the implementer writes here from its first commit)
 
-*(empty until the implementer's first commit)*
+**LIVE STATUS — 18g (`opus-implementer`, opened 2026-09-13 at `fbe2720b`; the code tree it builds on is `b22dc138`).**
+
+- **Orientation — DONE.** Read in my own context, in the brief's order: `CLAUDE.md` and the canon it
+  auto-loads (CoreDescription · OverallModel · AppSpec — §12's two-voice paragraph (R1/R12 "hold at
+  exactly two", R51 dark = fully black, R49 fonts) and §7's `setting` comment with its E2EE PLAIN
+  promise · SyncSpec §12's lockstep rule · TEXTKIT2_NOTES); this plan's §0, §1 (Q-6), §3 rows 12–13,
+  §4.6, §5.4, §7 (R-Q6 · R-Q11 · R-Q13 — SETTLED), §8, §9, §12's F-0/F-7/F-8, R-0 (P-1…P-9 + the
+  application notes); the R-6 brief whole and R-1's rules 1–8 verbatim; the R-5 RECORD as the shape.
+  Then the mockup `notes/plans/use-report-2026-09-12-mockups/palettes.html` — all 32 cards' CSS
+  variables extracted and converted to HSL, which is how the two intensity tables below were fitted.
+  Then the code, whole: `Shared/Theme/VoiceTokens.swift` · `Theme/ThemeStore.swift` ·
+  `Queries/AppearanceQueries.swift` · `Operations/Operations+Appearance.swift` ·
+  `Features/Settings/AppSettingsView.swift` · `VariorumTests/ThemeTests.swift` ·
+  `Tests/VariorumCoreTests/ThemeAndShelfQueryTests.swift` · `VariorumMobile/.../MobileEditorStyle.swift`
+  · every one of the 67 token-consuming sites (by grep) · `Registry/OpsRefusalCopy.swift`.
+  Tree clean at `fbe2720b`, `main` == `origin/main`. **Her real-store app is NOT running**
+  (`pgrep -fl 'Variorum.app/Contents/MacOS'` → nothing) — never touched either way.
+
+- **PIECE 1 — core (the enum, the seed rule, the query, the two setters): IN-PROGRESS.**
+- **PIECE 2 — the brain (`PaletteDerivation` + the 15 presets): NOT-STARTED.**
+- **PIECE 3 — the resolver (`VoiceTokens.resolve(voice:palette:tint:dark:)` + `ThemeStore`): NOT-STARTED.**
+- **PIECE 4 — the face (the Appearance pane's palette row + the custom hex fields): NOT-STARTED.**
+- **PIECE 5 — the walk (both voices × the palettes × light/dark on the dev-store Debug build): NOT-STARTED.**
+- **THE CLOSING RUNS: NOT-STARTED.**
