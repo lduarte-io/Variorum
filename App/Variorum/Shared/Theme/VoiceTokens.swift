@@ -23,22 +23,23 @@ import VariorumCore
 /// **THE EIGHT `var`s ARE THE PALETTE'S SLOTS** (18g — her R-Q6/R-Q11/R-Q13).
 /// A palette layered under a voice replaces exactly `room`, `surface`,
 /// `card`, `accent`, `line`, `wash`, `takeTint` and `takeLine` — and nothing
-/// else, which is why they and only they are settable (`applying(_:)` below
-/// is the one writer). Everything else is `let` because it is what makes a
+/// else, which is why they and only they are settable — `private(set)`, so
+/// `applying(_:)` below is the one writer BY CONSTRUCTION, not by grep (18g
+/// ladder R1-4). Everything else is `let` because it is what makes a
 /// voice a voice: its type, its idioms, and the slots the ruling does not
 /// name (`ink`/`muted`/`faint`, `chosen`, `ring`, `star`, `alarm`,
 /// `positive`, the comment pair, the code chip, the block seam).
 struct VoiceTokens: Equatable {
     // MARK: Surfaces
     /// The room — the window/sidebar background. (Her "tan panels".)
-    var room: Color
+    private(set) var room: Color
     /// The paper — content panes, cards, rows. A palette replaces it in
     /// DARK only: there the room is black (R51), so the paper carries the
     /// hue. In light the voice keeps its own paper, as the mockup shows.
-    var surface: Color
+    private(set) var surface: Color
     /// Elevated cards (takes, palette rows). The paper's sibling — a
     /// palette replaces it under the same dark-only rule.
-    var card: Color
+    private(set) var card: Color
 
     // MARK: Ink
     let ink: Color
@@ -46,7 +47,7 @@ struct VoiceTokens: Equatable {
     let faint: Color
     /// The coloured chrome words — her *"lightly colored text like (this
     /// note) and commit"*. A palette's accent.
-    var accent: Color
+    private(set) var accent: Color
     /// **THE ERROR/DANGER SLOT** (the post-13l polish round, ledger row 29 —
     /// her mid-round ruling: *"Add it this round"*).
     ///
@@ -93,18 +94,18 @@ struct VoiceTokens: Equatable {
 
     // MARK: Lines & marks
     /// Hairline separators. A palette's hairline.
-    var line: Color
+    private(set) var line: Color
     /// The dotted block seam (R6 — THE boundary mechanism). Deliberately
     /// NOT a palette slot: the seam is the boundary MECHANISM, and her
     /// ruling names the hairline, not it.
     let seam: Color
     /// Selected rows / the changing-block wash (R13). A palette's wash.
-    var wash: Color
+    private(set) var wash: Color
     /// The takes register's tint (takes read differently than prose — R13).
     /// A palette's take tint…
-    var takeTint: Color
+    private(set) var takeTint: Color
     /// …and its line.
-    var takeLine: Color
+    private(set) var takeLine: Color
     /// The chosen take's mark.
     let chosen: Color
     /// The editing ring (R6/R22 — the outline form).
