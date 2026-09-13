@@ -170,8 +170,19 @@ struct PaletteReachTests {
             .map { "Paragraph \($0) of a plain note, with no markdown anywhere in it." }
             .joined(separator: "\n")
         view.textStorage?.setAttributedString(NSAttributedString(string: text))
+        // 18g ladder round 2, R2-4: `applyVoiceChrome` writes the process
+        // globals — the markdown palette unconditionally, the typography
+        // while unadopted — and the run shares them across suites; put all
+        // three back where they were (the `MarkdownFaceTests.withVoice`
+        // pattern every other mounted pin follows).
         let wasAdopted = EditorTypography.isAdopted
-        defer { EditorTypography.isAdopted = wasAdopted }
+        let savedTypography = EditorTypography.current
+        let savedPalette = MarkdownStyling.palette
+        defer {
+            EditorTypography.isAdopted = wasAdopted
+            EditorTypography.current = savedTypography
+            MarkdownStyling.palette = savedPalette
+        }
 
         let plain = EditorSurfaceChrome(tokens: settings(.default), dark: false)
         view.applyVoiceChrome(plain)
@@ -217,8 +228,19 @@ struct PaletteReachTests {
         paragraphs[199] = "See [the walk](https://example.com/walk) for the rest."
         let text = paragraphs.joined(separator: "\n")
         view.textStorage?.setAttributedString(NSAttributedString(string: text))
+        // 18g ladder round 2, R2-4: `applyVoiceChrome` writes the process
+        // globals — the markdown palette unconditionally, the typography
+        // while unadopted — and the run shares them across suites; put all
+        // three back where they were (the `MarkdownFaceTests.withVoice`
+        // pattern every other mounted pin follows).
         let wasAdopted = EditorTypography.isAdopted
-        defer { EditorTypography.isAdopted = wasAdopted }
+        let savedTypography = EditorTypography.current
+        let savedPalette = MarkdownStyling.palette
+        defer {
+            EditorTypography.isAdopted = wasAdopted
+            EditorTypography.current = savedTypography
+            MarkdownStyling.palette = savedPalette
+        }
 
         let plain = EditorSurfaceChrome(tokens: settings(.default), dark: false)
         view.applyVoiceChrome(plain)
