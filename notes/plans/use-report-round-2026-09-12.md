@@ -9800,3 +9800,54 @@ Cross-model flow: the implementer's responses (`57c2a316`, 4 AGREE · 0 DISPUTE,
 - **Core / iOS:** no core or `Shared/` file touched in the fix pass — the round-2 review's core `11/2` and iOS `** BUILD SUCCEEDED **` over `39cb3fb1` stand.
 
 **Counts: 4 findings · 4 CONFIRMED · 0 DISMISSED · 3 commits (`836cfa1c` `516802e9` `7b0d025d` + this record) · 0 new pins (hygiene on two existing ones) · 0 new captures.** R2-1 routed (18j). Awaiting the implementer's sanity pass over `57c2a316..7b0d025d`; anything it raises returns to me for the final word.
+
+### 18g LADDER — ROUND 2 · THE IMPLEMENTER'S SANITY PASS
+
+Over `git diff 57c2a316 7b0d025d` — two files, one test and one record; no production source, confirmed by
+the diffstat. I ran `build-for-testing` (EXIT 0) and `PaletteReachTests` myself:
+**`✔ Test run with 8 tests in 1 suite passed after 0.022 seconds.`** Fixed nothing. **4 CLEAR · 0 RAISED.**
+
+**(1) R2-4's restore — CLEAR on both halves, and the second half corrects ME.** *Every exit road:* both
+saves are taken BEFORE the first `applyVoiceChrome` (after `setAttributedString`, before `let plain`), the
+single `defer` is registered before the first throwing statement (`try #require(view.textStorage)`), so a
+thrown requirement, a returned pass and a recorded `#expect` failure all restore; the later
+`defer { storage.delegate = previousDelegate }` runs FIRST by Swift's reverse-order rule and is independent.
+Both globals are plain `nonisolated(unsafe) static var` with no observers (`EditorTypography.swift:48`,
+`:70`), so the writes restore exactly and the order inside the defer cannot matter. *The parallel concern I
+raised at round 2 — it does not apply to these pins, and I overstated it.* `PaletteReachTests` is
+`@MainActor` (`:28`) and both mounted bodies are SYNCHRONOUS with zero `await`; the readers I named are the
+same shape (`MarkdownFaceTests.withVoice` is `@MainActor` over a sync `() throws -> T`;
+`FormattingSurfacesTests` is `@MainActor:27` with a sync `withVoicePalette`). A synchronous main-actor body
+has no suspension point at which another main-actor body could run, so there is no interleaving window
+between these writers and readers — the save/restore closes the SEQUENTIAL leak completely and there was no
+concurrent one to close. The residual I was reaching for lives only where a save/restore window CONTAINS a
+suspension — `withAdoptedTheme` (`EditorTestSupport.swift:219–222`: `@MainActor` but `async`, awaiting inside
+its own window) — which is pre-existing, repo-wide in shape, and not this ladder's.
+
+**(2) R2-2 / R2-3's record corrections — CLEAR, checked against the evidence, not the prose.** Row 11 now
+reads the rig's typing appended to the landed `E07A5F` leaving `E07A5F380`, refused whole naming the ROOM's
+`E07A5F380`, the accent field empty with its prompt showing, the text kept, the second line clipped at the
+pane's edge — which is exactly what I see in
+`settings-hex-dirty-room-commits-on-focus-loss-refusal-text-kept.png`, field for field. Note (a) now cites
+`commitSeeds` (`PaletteSettingsRow.swift:214–222` — verified: that is the both-fields `setThemeTints` call)
+and says #11 shows the mirror shape, which is true. The count reads 9 at that record and 10 with the pane
+pin: my own count agrees exactly — `PaletteReachTests` 8 `@Test func` + `PaletteDerivationTests` +1 +
+`PaneSurfaceTests` +1, and the test diffstat is those three files, all insertions.
+
+**(3) R2-5's wording — CLEAR, accurate to the mechanism and the owner is not split in a way that strands the
+fix.** The cited line is right: `EditorTypography.swift:396` is
+`if chrome.inkChanged(from: previous) { textColor = chrome.ink }`, with the comment stating the whole-storage
+write above it — the mechanism I traced. The KnownIssues row is ONE row over BOTH roads, which is the shape
+I would have asked for, and the ownership reads correctly on a second look: 13u2 owns the re-font road, and
+**18j "walks the appearance road on a long note and decides whether the ink write needs the same carve"** —
+so the walking and the decision are owned, and whichever way that decision goes the road it belongs to has a
+name. Nothing is left for nobody. The two candidate shapes it names (the ink over the prose runs only, or a
+view-level ink the storage does not carry) are the two I would have listed, and pairing it with R2-1 is right:
+the same dark toggle exposes both.
+
+**(4) Anything else — nothing to raise.** No production source in the range (diffstat); `Sync/` · `Server/` ·
+`Persistence/` · the editor seam untouched; zero trailers on the three commits; the tree clean at
+`7b0d025d` == `origin/main`. The final call's claim that the full-suite result over `39cb3fb1` still stands
+is fair — the only source change since is the two pins' restore lines, and their suite is green above; my
+own `build-for-testing` over the whole app confirms nothing else moved. Her real-store app was never running
+and nothing was launched by me.
