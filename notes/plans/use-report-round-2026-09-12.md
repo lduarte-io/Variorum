@@ -9889,7 +9889,27 @@ and nothing was launched by me.
 ### R-7 · RECORD (the implementer writes here from its first commit)
 
 **LIVE STATUS — 18j (`opus-implementer`, opened 2026-09-14 at `7d62761f`; the code tree it builds on is
-`516802e9`).** *(Flipped in the same commit as each piece.)*
+`516802e9`). CLOSED 2026-09-13 at `44e25598` + this record commit; four code commits
+`9e2c6fb7..44e25598`.**
+
+**WHAT I HAVE NOT DONE (the record's first line).** **FOUR SWEEP ROWS WERE NOT WALKED** and are DEFERRED
+with their reason: the two ceremony sheets (*Divide choosing takes…* · *Merge choosing takes…*), This
+Note's Tray, the Account sheet, a status toast / the quiet line, and the callout swatches applied — the
+Debug instance ignored keystrokes at the text surface (WalkKit's own recorded pitfall) and a synthetic
+click placed a two-block selection rather than a caret, which the ceremony refuses; the menu-bar road
+opened the doors but the act still needed a caret. The `NoLiteralColourTests` pin now proves none of those
+files holds a literal colour, which is the only class that cannot follow an appearance, but **a pin is not
+a capture and I am not calling them RIGHT** — owner: her final walk of the round. The BOOK's **Read**
+word-tab took no synthetic click either (the 18g rig lesson's class); it is the same
+`ReadingPageTokens.dark` the note's reading page shows, which IS captured. Beyond those: by the brief,
+**zero `Sources/VariorumCore/Sync/` and zero `Server/`** (diff-empty), **zero schema and zero migration**
+(`Persistence/` diff-empty; the appearance is a LOCAL `UserDefaults` preference — the marker stays **8**),
+**no change to any LIGHT token value** (18g's parity pin rides unmodified), **no new
+`@Environment(\.colorScheme)` reader** (the count is the same 48 the brief named), **no `if dark` in any
+view** (F-9 — every fix is a token fix), **no rendering attributes**, **no per-surface appearance
+override**, and **no third voice**. **NO product question went to `notes/QUESTIONS.md`** — none arose that
+her rulings do not answer (#108 is still free); the one taste-flavoured call is recorded under THE BATCH'S
+OWN CALLS for her eye instead. Everything else this batch decided is in that section.
 
 - **Orientation — DONE.** Read in my own context, in the brief's order: `CLAUDE.md` and the canon it
   auto-loads (AppSpec §12's two-voice paragraph — R51 dark = fully black in both voices, R49 fonts, the 18g
@@ -9921,8 +9941,8 @@ and nothing was launched by me.
   and **SwiftUI's `@Environment(\.colorScheme)` follows the app appearance** (the bridge all 48 readers ride,
   pinned rather than assumed). 4/1 green.
 
-- **PIECE 2 — the sweep (the every-surface dark walk, both voices): IN-PROGRESS.** The walk's FIRST find is
-  the batch's biggest: **every note in the full-document Write editor drew its prose in AppKit's own
+- **PIECE 2 — the sweep (the every-surface dark walk, both voices): DONE** (the table below; 61 captures).
+  The walk's FIRST find is the batch's biggest: **every note in the full-document Write editor drew its prose in AppKit's own
   near-black default rather than the voice's ink** — in LIGHT that default sits a few values from
   `terminalLight.ink` so it hid for the editor's whole life; in DARK it is black on black and the note is
   gone (`13-write-existing-note-T-dark.png`). Traced: `EditorDocument.baseAttributes` carried the font and
@@ -9969,4 +9989,211 @@ and nothing was launched by me.
   Pin: `EditorInkTests.anAppearanceChangeWritesNothingOverTheWholeStorage`, red on old. ONE pre-existing
   18g pin edited with its reason written in place (`PaletteReachTests.aColourOnlyChromeChangeNeedsNoStorageRefresh`
   said *"the appearance does"*; it now says it does not). **The long-note walk measurement is still owed.**
-- **THE CLOSING RUNS:** PENDING.
+- **PIECE 4 — the LIGHT and SYSTEM passes: DONE** (sweep rows 36–40).
+- **THE CLOSING RUNS: DONE** — the FULL Mac suite `2629 tests in 437 suites passed`, `** TEST SUCCEEDED **`,
+  zero `✘`, the 9 standing opt-in skip lines; iOS `** BUILD SUCCEEDED **`; core NOT RUN and none owed
+  (`Sources/` diff-empty). The exact lines are at the record's end.
+
+#### R-7 · THE SWEEP TABLE (the acceptance record — surface × voice, USE not mount)
+
+On the **DEV-STORE Debug build** (`io.lduarte.Variorum.debug`,
+`App/Variorum/DerivedData/18j/Build/Products/Debug/Variorum.app`), `cliclick` + `Tools/WalkKit`. **Her
+real-store app was NOT running at any point** (`pgrep -fl 'Variorum.app/Contents/MacOS'` → empty before
+every launch and at the close); `/Applications` untouched, no Release build. The **system appearance was
+light throughout except for two deliberate probes** (the "is it the choice or pre-existing?" test and the
+follow-system pass) and is **light now, verified by `osascript`**; the dev store ends on **Terminal ·
+Default · Follow system** (the shipped default), verified by capture. **T** = Terminal, **S** = Study.
+
+| # | Surface | Voice | Verdict | Capture |
+|---|---|---|---|---|
+| 1 | Settings ▸ Appearance ▸ **Light & dark** (the new row) | T | **RIGHT** | `00-settings-light-and-dark-row.png` · `01-settings-appearance-dark.png` |
+| 2 | The shell + sidebar + Shelf | T | **RIGHT** (R51 by eye: the room is fully black) | `02-shell-shelf-T-dark.png` |
+| 3 | The shell + sidebar + Shelf | S | **RIGHT** | `16-write-ink-FIXED-S-dark.png` |
+| 4 | Library ▸ List | T | **RIGHT** | `04-library-list-T-dark.png` |
+| 5 | Library ▸ Notes | T | **RIGHT** | `05-library-notes-T-dark.png` |
+| 6 | Library ▸ Timeline | T | **RIGHT** *(its rows are a sans face, not the voice's — pre-existing and NOT a dark defect; recorded below)* | `06-library-timeline-T-dark.png` |
+| 7 | Pool | T | **RIGHT** | `03-pool-T-dark.png` |
+| 8 | Snippets (+ its groups column) | T | **RIGHT** | `07-snippets-T-dark.png` |
+| 9 | Archived | T | **RIGHT** (the `Delete Note…` alarm reads) | `08-archived-T-dark.png` |
+| 10 | Trash | T | **RIGHT** (a system sheet, dark) | `09-trash-T-dark.png` |
+| 11 | ⌘K palette | T | **RIGHT** | `10-command-palette-T-dark.png` |
+| 12 | **Write — the prose** | T | **FIXED** (`5e386598`) — black on black before | `13-write-existing-note-T-dark.png` (broken) → `35-write-T-dark.png` |
+| 13 | **Write — the prose** | S | **FIXED** (same) | `15-…-S-dark.png` (the voice-switch repair) → `17-write-ink-FIXED-S-dark.png` · `18-write-S-dark.png` |
+| 14 | Write — the markdown face (heading · bold · italic · code chip · link) | T | **RIGHT** | `12-write-markdown-T-dark.png` · `42-face-T-light.png` |
+| 15 | Takes (article, ring, ⑂+ badges, `wash: on`, `+ new block`) | S | **RIGHT** | `19-takes-S-dark.png` |
+| 16 | Read ▸ edit (outline column + the live pane) | T | **RIGHT** | `14-read-edit-T-dark.png` |
+| 17 | Read ▸ edit | S | **RIGHT** | `20-read-edit-S-dark.png` |
+| 18 | Read ▸ **read** (the calm reading page, R2's own tokens) | S | **RIGHT** — `ReadingPageTokens.dark` paper `171511`, ink `E3DCD0`; the page stands off the black room | `25-read-page-S-dark.png` (the `read` pill's own capture; see the note below) |
+| 19 | Lenses | S | **RIGHT** | `21-lenses-S-dark.png` |
+| 20 | Compare (+ its chips and lineage bars) | S | **RIGHT** | `22-compare-S-dark.png` |
+| 21 | Blocks (rows, bulk checkboxes, the context panel) | S | **RIGHT** | `23-blocks-S-dark.png` |
+| 22 | Canvas | S | **RIGHT** | `24-canvas-S-dark.png` |
+| 23 | Book ▸ Outline (+ the sidebar note box, "no note selected") | S | **RIGHT** | `26-book-outline-S-dark.png` |
+| 24 | Book ▸ Index (+ the note box live, "edit here") | S | **RIGHT** | `27-book-index-S-dark.png` |
+| 25 | Book ▸ Book (the two-column spread) | S | **RIGHT** | `28-book-book-S-dark.png` |
+| 26 | Book ▸ Read | — | **DEFERRED** — the word-tab took no synthetic click (the 18g rig lesson's class). It is the SAME `ReadingPageTokens.dark` row 18 verified. | — |
+| 27 | The comments panel | S | **RIGHT** | `30-comments-panel-S-dark.png` |
+| 28 | Block History | S | **RIGHT** | `31-block-history-S-dark.png` |
+| 29 | The block ▾ menu (both ceremony doors) | S | **RIGHT** | `32-block-menu-S-dark.png` |
+| 30 | The masthead `#` tag door (the inline field) | T | **RIGHT** | `37-callout-and-tag-T-dark.png` |
+| 31 | Settings ▸ Tags | T | **RIGHT** | `38-settings-tab2-T-dark.png` |
+| 32 | Settings ▸ Protection (the whole posture face) | T | **RIGHT** | `38-settings-tab3-T-dark.png` |
+| 33 | Settings ▸ Data Safety | T | **RIGHT** | `38-settings-tab4-T-dark.png` |
+| 34 | Settings ▸ Acknowledgments | T | **RIGHT** | `38-settings-tab5-T-dark.png` |
+| 35 | **The palettes' dark readings** (default · lavender · gold & black · butter & cobalt · custom) on the shell + a live note | T | **RIGHT** — the room is fully black in every one, the paper a whisper of the hue, the accent following | `39-palette-*-T-dark.png` ×5 |
+| 36 | **The live toggle on a FACED note** (light → dark → light) | T | **RIGHT — R2-1's own scenario, fixed** | `42-face-T-light.png` → `43-face-after-toggle-to-dark.png` → `44-face-after-second-toggle-to-light.png` |
+| 37 | **The live toggle on a LONG note** (a 105k-word book's chapter, scrolled deep) | T | **RIGHT — R2-5 carved: line-for-line identical, no jump, no stale region** | `46-long-note-before-toggle.png` → `47-…-0.3s.png` → `48-…-settled.png` |
+| 38 | **LIGHT** (the choice at `light`, system light) | T | **RIGHT — indistinguishable from the pre-18j app** (no light token moved; 18g's parity pin rides) | `40-write-T-light.png` · `45-long-note-T-light.png` |
+| 39 | **FOLLOW SYSTEM + the system DARK** | T | **RIGHT — the app follows** | `49-follow-system-dark.png` |
+| 40 | The window toolbar's pill after a LIVE in-app switch | T | **RIGHT** — see the transient recorded below | `50-toolbar-after-live-switch.png` |
+| 41 | Divide choosing takes… · Merge choosing takes… (the two sheets) | — | **DEFERRED — NOT REACHED BY THE RIG** (below) | — |
+| 42 | This Note's Tray · the Account sheet · a status toast / the quiet line · the callout swatches applied | — | **DEFERRED — NOT REACHED BY THE RIG** (below) | — |
+
+**The four DEFERRED rows, honestly.** The rig could not open them: this Debug instance **ignored `cliclick`
+and System Events keystrokes at the text surface** (WalkKit's own recorded pitfall — a relaunched instance
+eating keystrokes), so ⌥⌘⇧D/⌥⌘⇧M never fired, a synthetic click placed a two-block SELECTION rather than a
+caret, and the ceremony refuses without one. The menu-bar road (which DID work for everything else) opened
+the doors but the act still needed a caret. **What stands in for the capture, and why it is not nothing:**
+the `NoLiteralColourTests` pin now walks every file under `App/Variorum/Variorum` — `Features/Takes/`
+(both ceremony sheets), `Features/Tray/`, the account face and the status slot included — and **proves
+there is no literal colour in any of them**, which is the only class that cannot follow an appearance.
+Every one of those surfaces is built from `VoiceControls` and the token layer, whose dark values this
+batch pinned. Owner: **her final walk of the round** (the round's own re-walk before the install refresh).
+
+#### R-7 · WHAT THE WALK FOUND, AND WHAT IT COST
+
+1. **The prose in Write had NO INK AT ALL — black on black in dark** (the first note opened). `13-…png`
+   beside `14-…png` (the read tier, always right) and `15-…png` (a voice switch repairs it). Traced,
+   pinned red-on-old four ways, FIXED at the one source (`5e386598`). Reproduced under the SYSTEM dark
+   too, so it was a pre-existing dark defect the walk found, not one the choice introduced — and in
+   LIGHT the AppKit default it fell back to sits a few values from `terminalLight.ink`, which is exactly
+   why nobody had ever seen it.
+2. **R2-5 carved by the same change** — an appearance change now writes nothing over the whole storage;
+   the long-note toggle is line-for-line identical (rows 37).
+3. **R2-1 fixed** (`17023bb9`) — a faced run follows the CURRENT ink; walked on the exact two-toggle
+   scenario the 18g reviewer described (row 36).
+4. **Three literal colours** in voiced surfaces, found by the new grep pin and FIXED to `tokens.alarm`
+   (`44e25598`).
+
+#### R-7 · DISPOSITIONS (the row this batch owns)
+
+| Row | Her words | Disposition |
+|---|---|---|
+| **14** | R-Q12: *"I think dark theme was somewhere in 13u but we can pull that forward and up and into this work"* — 13u4's item 6: *"R51's direction (fully black in both voices); the PHONE's shipped dark mode is the look reference; token work shared"* | **FIXED.** (1) The appearance CHOICE (`system · light · dark`), a LOCAL preference applied as `NSApp.appearance` at ONE root, reaching all five scenes, every sheet, the menu-bar extra and AppKit's own chrome — **zero new `colorScheme` readers, not one surface touched** (F-9). (2) The every-surface dark walk in both voices, 61 captures, the table above — which found and FIXED the app's biggest dark defect (Write's prose had no ink), one inherited MAJOR (R2-1) and three literal colours. (3) R51 pinned at the resolver for every preset and both voices, plus the dark paper's band. The phone's dark mode was the LOOK reference *and*, as it turned out, the MECHANISM reference: its colours are dynamic, which is why it never had the Mac's defect, and the Mac's ink is now the same shape. Pins: `AppearanceChoiceTests` ×4 · `EditorInkTests` ×5 · `NoLiteralColourTests` ×2 · `ThemeTokenTests` +2 · `MarkdownFaceTests` +2. |
+
+#### R-7 · THE BATCH'S OWN CALLS (recorded, not asked — §8's rule)
+
+1. **`NSApp.appearance`, not `preferredColorScheme`.** Five scenes plus a menu-bar extra plus every sheet
+   and AppKit's own chrome. `preferredColorScheme` would have been five copies of one decision (the drift
+   class) and still would not have reached the last two. One write moves the process; SwiftUI's
+   `colorScheme` follows each window's `effectiveAppearance` by construction — **pinned**, because the
+   whole "not one surface changes" claim rides on it.
+2. **The owner lives on `VariorumAppDelegate`.** There is one of it however many windows exist (the
+   `WindowRegistry`/`GlobalHotKeyCenter` precedent), and it exists BEFORE the first window, which is what
+   makes the launch application deterministic. A per-window `ThemeStore` would have been several owners of
+   one process-wide fact — F-9's own shape.
+3. **LOCAL, never synced** (the `readModeOutlineShown` class). Zero schema, zero `setting` key, marker 8.
+4. **The "Light & dark" section sits UNDER Voice, not above it.** The palette row's custom-hex fields and
+   their inline refusal already sit at the 460 pt pane's fold (18g's own walk finding); a section added
+   above would have pushed that refusal further out of sight.
+5. **The prose ink is ONE DYNAMIC COLOUR PER VOICE, and it lives in `EditorDocument.baseAttributes`.**
+   The file's own doc already argued the placement for the paragraph style ("no path can drop it"); the
+   colour belongs beside it. Dynamic rather than resolved-per-appearance is what makes an appearance
+   change free of any storage write — which is R2-5 — and it is the phone's own pattern, so the two
+   platforms now hold ONE idea rather than two.
+6. **`Resolved` gained `voice`.** The ink needs the voice and the font already encodes it; naming it beats
+   deriving a voice from a font name. It has ONE constructor (`resolve`), so nothing else changed, and it
+   does not reach `fingerprint` (the font name and the spacing already say what a stamp compares).
+7. **`MarkdownFace.Palette.prose` is REQUIRED, never defaulted** — the structural-redo `register(redo:)`
+   posture: a future host must decide rather than inherit a stand-in that would put the wrong colour back
+   under every face it clears. Both platforms' one builder supplies it; zero test edits were needed.
+8. **`tokens.alarm` for the three literal colours.** The app's one named *"this one is different"* colour,
+   deliberately quiet rather than a stoplight (its own doc) — the register a guarded state ("locked") and
+   an out-of-order notice ("moved") deserve. **Flagged for her eye:** these three marks were vivid system
+   orange and are now the voice's quieter alarm.
+9. **The grep pin's allow-list is NAMED, with each entry's decision.** An allow-list entry is cheap to add
+   and impossible to add silently. The canary banners stay literal on purpose; `SharedPageStyle` and
+   `DataSafetyPane` keep their system-semantic warnings because `SharedPageStyle`'s own text records that
+   decision and the phone shares the file — not 18j's to overturn.
+
+#### R-7 · THINGS FOUND AND DELIBERATELY NOT FIXED
+
+- **The Library's TIMELINE rows render in a sans face, not the voice's type** (`06-…png`: the same dates
+  are monospaced in List and sans in Timeline). A VOICE defect, not a dark one — it reads identically
+  wrong in light — and outside this batch's one surface. Recorded for the round's sweep.
+- **A ONE-FRAME toolbar transient.** At the very first in-app switch the window's toolbar pill was still
+  drawn in the old appearance (`02-…png`, the light-grey pill on a black room). It did not reproduce:
+  `50-toolbar-after-live-switch.png` — a live switch with the system light, the window not even key —
+  shows the pill correctly dark. Recorded because the wrong conclusion was one screenshot away.
+- **`SharedPageStyle`'s warning/destructive colours and `DataSafetyPane`'s staleness warnings stay system
+  semantic.** `SharedPageStyle`'s own text carries the decision (*"honesty outranks palette"*) and the
+  phone shares the file. They are appearance-adaptive either way. Allow-listed with the reason.
+- **The voice's QUIET chrome (`muted`, `faint`) on a palette's deeper room** — 18g measured it (Terminal's
+  `muted` 3.01:1 on its own room, 2.53:1 on rose & moss) and handed it here for an eye. **Seen in dark and
+  left:** in DARK the room is black under every palette, so the quiet chrome sits on the voice's own
+  backdrop and reads as it always did — the measurement was a LIGHT-mode reading, and it belongs to
+  whichever round takes the palettes' light tuning at her eye, not to a dark batch.
+- **The reading page under a palette** stays QUESTIONS #107's PROVISIONAL arm (a): untouched. Its dark
+  reading is its own and it works (row 18).
+- **`AppSettingsView` still has no suite to ride** (no test mounts the pane — the real-click rig cannot
+  mount a whole surface, KnownIssues). The walk is the row's evidence, as it was for 18g and 18i.
+
+#### R-7 · WHAT THE LETTER'S CLOSE OWES (drafted for the orchestrator)
+
+- **AppSpec §12's two-voice paragraph** — one sentence, after 18g's palette sentence:
+  *(18j, 2026-09-13 — her R-Q12, 13u4's item 6 pulled forward: the Mac gains an **APPEARANCE CHOICE** —
+  follow system · light · dark — a LOCAL preference of this machine (the voice and the palette stay
+  synced; how bright the screen should be is about where she is sitting), applied ONCE as the app's own
+  appearance so every window, sheet, menu and the Settings scene follows and not one surface needed
+  touching. **Dark is a fully black room in both voices and under every preset (R51), pinned at the
+  resolver**, and a palette's dark paper stays a whisper of that room. The prose ink is now ONE dynamic
+  colour per voice carried by the editor's base attributes — so a light/dark change costs no storage
+  write at all, and the full-document editor's prose is the voice's ink rather than AppKit's default,
+  which in dark had been black on black.)*
+- **AppSpec §7 / SyncSpec §12** — **NOTHING.** The appearance is a LOCAL `UserDefaults` preference: zero
+  schema, zero `setting` key, **the lockstep marker stays 8** (verified: `Sources/`, `Server/` and
+  `Sources/VariorumCore/Persistence/` are diff-empty against `516802e9`).
+- **`notes/KnownIssuesAndTechDebt.md`** — the row 18g's close wrote (the two viewport-jump roads) is now
+  **HALF RESOLVED**: the **INK road is CARVED** (18j: one dynamic ink per voice, so an appearance change
+  writes nothing over the whole storage — walked on the 105k-word chapter, line-for-line identical, and
+  pinned `EditorInkTests.anAppearanceChangeWritesNothingOverTheWholeStorage`). The **RE-FONT road stands,
+  owner 13u2**, unchanged. Suggested edit: strike the ink road from the row, keep the re-font road, and
+  name 18j as where the ink half was met.
+- **QUESTIONS** — **NOTHING NEW.** No product question arose that the rulings do not answer: R-Q12 names
+  the direction, R51 names dark's composition, and the one taste-flavoured call (the three literal
+  colours becoming the voice's quieter alarm) is recorded under THE BATCH'S OWN CALLS for her eye rather
+  than filed, because it changes no behaviour and reverses in one token.
+- **`notes/MobileSoul.md`'s parity ledger** — a row, and it runs the OTHER WAY for once: **the phone's
+  dynamic-colour face was the mechanism the Mac adopted.** `MobileEditorStyle.Face` builds every colour as
+  a `UIColor` with a provider, cached one face per voice, which is why the phone never had the Mac's
+  black-on-black defect and why its appearance changes cost no storage write. The Mac's prose ink is now
+  the same shape (`EditorTypography.ink(for:)`). **Nothing is owed to the phone by this batch** — iOS has
+  its own system-wide appearance control, so the in-app CHOICE is deliberately Mac-only; the shared
+  `MarkdownFace.Palette` gained a required `prose` and the phone supplies its dynamic ink (iOS build
+  green).
+- **`notes/plans/phase-17-standing-fixes.md`** — nothing (18j is an 18 letter, not a 17 entry).
+- **18j hands forward:** the four DEFERRED sweep rows (the two ceremony sheets, the tray, the account
+  sheet, a status toast, the callout swatches) — **her final walk of the round**, with the
+  `NoLiteralColourTests` pin as the structural evidence that they hold no literal colour; and the
+  Library TIMELINE's un-voiced type (a VOICE defect, not a dark one) to the round's sweep.
+
+#### R-7 · CLOSING THE BATCH (the exact lines)
+
+- **The FULL Mac suite** (`xcodebuild test -scheme Variorum -destination 'platform=macOS'`, **no
+  `-only-testing`** — the diff reaches `EditorDocument.baseAttributes`, which every TK2 surface write in
+  the app goes through, so the honest close is everything):
+  `✔ Test run with 2629 tests in 437 suites passed after 713.981 seconds.` · `** TEST SUCCEEDED **` ·
+  zero `✘`.
+  **Skips (9 lines, all the standing opt-in gates, none new):** the four `pre-13x` drill suites and their
+  tests — the Apple-key round trip, the migration drill, the posture drills, the adopt drill — each
+  disabled unless its `TEST_RUNNER_VARIORUM_*` variable is set. (18g closed at 2604/433 and its ladder's
+  run at **2614/434**; the difference is exactly this batch's **15 new pins in 3 new suites** —
+  `AppearanceChoiceTests` ×4, `EditorInkTests` ×5, `NoLiteralColourTests` ×2, `ThemeTokenTests` +2,
+  `MarkdownFaceTests` +2.)
+- **Core** (`swift test`): **NOT RUN, and none is owed** — `Sources/` is **diff-empty** against `516802e9`
+  (`git diff --stat 516802e9 HEAD -- Sources Server` → empty). 18g's `1551 tests in 168 suites` stands.
+- **iOS** (`xcodebuild build -scheme VariorumMobile -destination 'generic/platform=iOS'` —
+  `App/Variorum/Shared/MarkdownFace/MarkdownFaceCore.swift` was touched):
+  `** BUILD SUCCEEDED **`.
+- *(Every `-only-testing` name used during the batch was `grep -rl "struct <Name>"`-verified first; the
+  closing run uses no filter at all.)*
