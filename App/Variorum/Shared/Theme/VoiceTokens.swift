@@ -30,6 +30,21 @@ import VariorumCore
 /// name (`ink`/`muted`/`faint`, `chosen`, `ring`, `star`, `alarm`,
 /// `positive`, the comment pair, the code chip, the block seam).
 struct VoiceTokens: Equatable {
+    // MARK: Identity
+    /// **Which voice this set IS** (18j ladder round 1, R1-1). A `let`, so
+    /// a palette can never change which voice a token set claims to be —
+    /// `applying(_:)` copies `self` and writes its eight slots, and this
+    /// rides through by construction (the same guarantee 18g's R1-4 bought
+    /// for the slots). It exists so the ONE builder of the markdown face's
+    /// palette (`MarkdownStyling.Palette(tokens:)`) can hand every writer of
+    /// that global the voice's DYNAMIC prose ink rather than a colour frozen
+    /// for one appearance: the editor's base ink became dynamic at 18j and
+    /// the face's idea of "the prose ink" must be the same object, or a run
+    /// the face clears comes back in the other kind — and a run whose face
+    /// is REMOVED, which nothing revisits, then reads in the wrong ink after
+    /// the next light/dark change. Four construction sites, all below.
+    let voice: ThemeVoice
+
     // MARK: Surfaces
     /// The room — the window/sidebar background. (Her "tan panels".)
     private(set) var room: Color
@@ -254,6 +269,7 @@ extension VoiceTokens {
     // MARK: - Terminal (direction B / round 2)
 
     static let terminalLight = VoiceTokens(
+        voice: .terminal,
         room: Color(hex: 0xF6F6F1),
         surface: Color(hex: 0xFBFBF7),
         card: Color(hex: 0xFDFDFA),
@@ -289,6 +305,7 @@ extension VoiceTokens {
 
     /// Terminal dark: direction B's register on a FULLY BLACK room (R51).
     static let terminalDark = VoiceTokens(
+        voice: .terminal,
         room: .black,
         surface: Color(hex: 0x0C0D0C),
         card: Color(hex: 0x161816),
@@ -325,6 +342,7 @@ extension VoiceTokens {
     // MARK: - Study (the Phase 11 mockups' look — HER favorite look, R1)
 
     static let studyLight = VoiceTokens(
+        voice: .study,
         room: Color(hex: 0xFAF8F3),
         surface: Color(hex: 0xFFFFFF),
         card: Color(hex: 0xFFFFFF),
@@ -361,6 +379,7 @@ extension VoiceTokens {
     /// Study dark: the v2 mockup's dark register on a FULLY BLACK room (R51
     /// — her direct edit removed the grey).
     static let studyDark = VoiceTokens(
+        voice: .study,
         room: .black,
         surface: Color(hex: 0x14120F),
         card: Color(hex: 0x1C1915),

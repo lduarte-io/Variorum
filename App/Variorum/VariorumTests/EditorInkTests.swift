@@ -33,21 +33,15 @@ import VariorumCore
 @Suite("The editor's prose ink (18j)")
 struct EditorInkTests {
     /// Resolve a (possibly dynamic) colour the way the text system will —
-    /// against a drawing appearance.
+    /// against a drawing appearance (the ONE helper, `ResolvedInk`, since the
+    /// ladder's R1-1 gave `MarkdownFaceTests` and `PaneSurfaceTests` the same
+    /// need).
     private func resolved(_ colour: NSColor, dark: Bool) -> NSColor {
-        let appearance = NSAppearance(named: dark ? .darkAqua : .aqua)!
-        var answer = colour
-        appearance.performAsCurrentDrawingAppearance {
-            answer = colour.usingColorSpace(.sRGB) ?? colour
-        }
-        return answer
+        ResolvedInk.resolved(colour, dark: dark)
     }
 
     private func matches(_ colour: NSColor, _ expected: Color) -> Bool {
-        guard let want = NSColor(expected).usingColorSpace(.sRGB) else { return false }
-        return abs(colour.redComponent - want.redComponent) < 0.002
-            && abs(colour.greenComponent - want.greenComponent) < 0.002
-            && abs(colour.blueComponent - want.blueComponent) < 0.002
+        ResolvedInk.matches(colour, expected)
     }
 
     private func withVoice<T>(_ voice: ThemeVoice, _ body: () throws -> T) rethrows -> T {

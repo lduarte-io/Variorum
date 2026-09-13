@@ -50,11 +50,23 @@ nonisolated enum MarkdownStyling {
             self.prose = prose
         }
 
+        /// **The prose is the voice's ONE DYNAMIC ink** (18j ladder round 1,
+        /// R1-1) — the same object `EditorDocument.baseAttributes` carries —
+        /// never `NSColor(tokens.ink)`, which is one appearance's answer
+        /// frozen. The clear loop writes `prose` over every run it clears; a
+        /// run that STAYS faced is re-cleared on every appearance change and
+        /// so hid the mismatch, but a run whose face is REMOVED (a marker
+        /// deleted, ⌘B/⌘I toggled off) is cleared once and never revisited,
+        /// and with a frozen prose it read in the OLD ink after the next
+        /// light/dark change — reproduced on the Debug build at the ladder.
+        /// The voice rides the tokens (`VoiceTokens.voice`) so all three
+        /// writers of the global palette supply the same ink by construction.
         @MainActor
         init(tokens: VoiceTokens) {
             self.init(
                 marker: NSColor(tokens.muted), link: NSColor(tokens.accent),
-                codeTint: NSColor(tokens.codeTint), prose: NSColor(tokens.ink))
+                codeTint: NSColor(tokens.codeTint),
+                prose: EditorTypography.ink(for: tokens.voice))
         }
 
         /// Before any voice has been applied (a bare test host, a surface

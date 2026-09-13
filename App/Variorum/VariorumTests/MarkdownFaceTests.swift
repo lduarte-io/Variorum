@@ -326,10 +326,59 @@ struct MarkdownFaceTests {
             MarkdownFace.style(
                 storage, base: .systemFont(ofSize: 14),
                 palette: MarkdownStyling.Palette(tokens: .terminalDark).face)
-            #expect(color(storage, at: boldAt) == dark,
+            // 18j ladder round 1 (R1-1): compared BY RESOLUTION under the
+            // dark appearance, not by `==` against the static colour — the
+            // palette's prose is the voice's one DYNAMIC ink now, so the
+            // cleared run holds that object; what the pin states is
+            // unchanged (bold READS in the current ink), and it stays red
+            // on the pre-R2-1 code, where the captured light ink came back.
+            #expect(ResolvedInk.reads(color(storage, at: boldAt),
+                                      as: VoiceTokens.terminalDark.ink, dark: true),
                     "bold reads in the CURRENT ink, not the one captured when the face was written")
             #expect(isBold(storage, at: boldAt), "and it is still bold")
             #expect(color(storage, at: 1) == dark, "the prose beside it too")
+        }
+    }
+
+    /// **18j ladder round 1, R1-1 — RED ON OLD.** The editor's prose ink is
+    /// ONE dynamic object per voice (`EditorDocument.baseAttributes`), but
+    /// the Mac's face palette declared `prose` as a colour FROZEN for one
+    /// appearance (`NSColor(tokens.ink)`), so every run the clear loop wrote
+    /// changed KIND. A run that stays faced is re-cleared on every
+    /// appearance change and hid it; a run whose face is REMOVED — a marker
+    /// deleted here, or ⌘B/⌘I toggled off (the same `restyle`) — is cleared
+    /// ONCE and never revisited, and read in the OLD ink after the next
+    /// light/dark change. Reproduced on the Debug build (the de-faced
+    /// `` `cod `` at the dark prose on the light paper). The book's inline
+    /// editor shares the road; the panes wrote `textColor` on a flip and
+    /// were immune until they took the same dynamic ink at this fix.
+    ///
+    /// On the pre-fix code the cleared run held the static DARK prose (the
+    /// palette below is the dark one) and read `D6DAD2` under `.aqua`.
+    @Test func aRunThatLosesItsFaceReturnsToTheVoicesDynamicInk() throws {
+        try withVoice(.terminal) {
+            MarkdownStyling.palette = MarkdownStyling.Palette(tokens: .terminalDark)
+            let storage = NSMutableAttributedString(
+                string: "a `code` word", attributes: EditorDocument.baseAttributes)
+            #expect(MarkdownStyling.style(storage) == true)
+            let codeAt = 3
+            #expect(color(storage, at: codeAt) === EditorTypography.ink(for: .terminal),
+                    "the chip's content keeps the base ink (the face colours only markers and links)")
+
+            // The closing backtick goes — the keystroke road: bytes, then
+            // the line's restyle.
+            storage.replaceCharacters(in: NSRange(location: 7, length: 1), with: "")
+            MarkdownStyling.restyle(storage, range: NSRange(location: 7, length: 0))
+            #expect(storage.string == "a `code word", "the opening backtick stays; the span is broken")
+            #expect(font(storage, at: codeAt)?.fontName == EditorDocument.baseFont.fontName,
+                    "the chip's face is gone")
+            let ink = try #require(color(storage, at: codeAt))
+            #expect(ink === EditorTypography.ink(for: .terminal),
+                    "the de-faced run returns to the voice's ONE dynamic ink, not a frozen copy")
+            #expect(ResolvedInk.reads(ink, as: VoiceTokens.terminalLight.ink, dark: false),
+                    "…so under the light appearance it reads in the light ink")
+            #expect(ResolvedInk.reads(ink, as: VoiceTokens.terminalDark.ink, dark: true),
+                    "…and under the dark appearance in the dark ink — no storage write needed")
         }
     }
 

@@ -201,7 +201,48 @@ struct PaneSurfaceTests {
         pump()
         #expect(matches(linkColour(), lavender.accent),
                 "after the palette click: the link wears the palette's accent in the SAME pane")
-        #expect(pane.textColor == NSColor(lavender.ink), "…while the ink is still the voice's")
+        // 18j ladder round 1 (R1-1): the pane's ink is the voice's ONE
+        // dynamic object now, so "still the voice's" is an identity, not a
+        // colour comparison.
+        #expect(pane.textColor === EditorTypography.ink(for: .terminal),
+                "…while the ink is still the voice's")
+    }
+
+    /// **18j ladder round 1 (R1-1) — RED ON OLD.** A pane's ink is the
+    /// voice's ONE dynamic object (`EditorTypography.ink(for:)`), the same
+    /// one the editor's base attributes and the face palette carry, so a
+    /// light/dark change moves nothing here: `applyStyle`'s gate compares the
+    /// object to itself and the whole-pane `textColor` write it guards never
+    /// runs — the 18g ladder's R2-5 carve, extended to the panes. Before
+    /// this the host passed `NSColor(tokens.ink)`, a colour frozen per
+    /// appearance, and every flip re-attributed the pane.
+    @Test func anAppearanceChangeWritesNothingInAMountedPane() throws {
+        let savedPalette = MarkdownStyling.palette
+        defer { MarkdownStyling.palette = savedPalette }
+        let box = PaneTokensBox()
+        let host = NSHostingController(rootView: PaneTokensHost(box: box))
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 420, height: 600),
+            styleMask: [.borderless], backing: .buffered, defer: false)
+        window.contentViewController = host
+        defer { window.contentViewController = nil }
+        host.view.layoutSubtreeIfNeeded()
+        pump()
+        let pane = try #require(findPane(host.view))
+        let storage = try #require(pane.textStorage)
+        let voiceInk = EditorTypography.ink(for: .terminal)
+        #expect(pane.appliedInk === voiceInk, "mounted: the dynamic ink is the applied one")
+        #expect(storage.attribute(.foregroundColor, at: 0, effectiveRange: nil) as? NSColor === voiceInk,
+                "…and it is what the prose carries")
+
+        box.tokens = VoiceTokens.resolve(voice: .terminal, dark: true)
+        host.view.layoutSubtreeIfNeeded()
+        pump()
+        #expect(pane.appliedInk === voiceInk, "the flip moved no ink — the same object answers dark")
+        #expect(storage.attribute(.foregroundColor, at: 0, effectiveRange: nil) as? NSColor === voiceInk,
+                "…so the storage was not re-attributed")
+        #expect(ResolvedInk.reads(voiceInk, as: VoiceTokens.terminalDark.ink, dark: true),
+                "…and it draws in the dark ink under the dark appearance")
     }
 
     /// A pane the appearance push has NOT reached keeps the shipped ring —

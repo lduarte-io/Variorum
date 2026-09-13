@@ -999,7 +999,12 @@ struct PaneSurfaceView: View {
             }
             PaneSurfaceRepresentable(
                 text: text, isLive: isLive, height: $height, canaryMessage: $canaryMessage,
-                ink: tokens.map { NSColor($0.ink) },
+                // 18j ladder round 1 (R1-1): the voice's ONE dynamic ink —
+                // the same object the editor's base attributes and the face
+                // palette below carry — so a light/dark change moves nothing
+                // here (`applyStyle`'s gate compares the same object to
+                // itself) and the pane's clear and its prose agree in kind.
+                ink: tokens.map { EditorTypography.ink(for: $0.voice) },
                 face: tokens.map { MarkdownStyling.Palette(tokens: $0) },
                 role: role, variantID: variantID,
                 spellcheck: spellcheck, paragraphGap: paragraphGap,
