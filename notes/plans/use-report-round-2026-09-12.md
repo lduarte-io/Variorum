@@ -9905,7 +9905,9 @@ word-tab took no synthetic click either (the 18g rig lesson's class); it is the 
 **zero `Sources/VariorumCore/Sync/` and zero `Server/`** (diff-empty), **zero schema and zero migration**
 (`Persistence/` diff-empty; the appearance is a LOCAL `UserDefaults` preference — the marker stays **8**),
 **no change to any LIGHT token value** (18g's parity pin rides unmodified), **no new
-`@Environment(\.colorScheme)` reader** (the count is the same 48 the brief named), **no `if dark` in any
+`@Environment(\.colorScheme)` reader** — the brief's 48 are still 48; a grep of the app now answers 49
+because `AppearanceChoice.swift`'s own header names the string while explaining why it adds none
+(`git grep -l` over both trees: the only new FILE is that one, and its two hits are comment lines), **no `if dark` in any
 view** (F-9 — every fix is a token fix), **no rendering attributes**, **no per-surface appearance
 override**, and **no third voice**. **NO product question went to `notes/QUESTIONS.md`** — none arose that
 her rulings do not answer (#108 is still free); the one taste-flavoured call is recorded under THE BATCH'S
