@@ -22,17 +22,21 @@
 //  on the centre's own clock.
 //
 //  **What "takes no room" means exactly** (round 1's J31, RE-TAKEN at round
-//  2's J39 on a measurement that falsified its premise):
+//  2's J39 on a measurement that falsified its premise; the width clause
+//  corrected at round 3's N1). It is a claim about what the slot ASKS FOR:
 //  · in the horizontal bars (`CommitBar`'s three tiers, `TakesBottomBar`'s
-//    two arrangements) an idle slot measures **zero width** and the row's
-//    height is the doors' — nothing reflows, which is the claim those bars
-//    depend on;
+//    two arrangements) an idle slot asks for **zero width**, so nothing in
+//    the row reflows for it — the claim those bars depend on — and the row's
+//    height is the doors';
 //  · in the VERTICAL composition — the book's sidebar note-box footer, where
-//    this view has its own row — an idle slot measures zero width but still
+//    this view has its own row — an idle slot asks for zero width but takes
 //    **one line's height** (14 pt measured), reserved DELIBERATELY: the
 //    footer holds the word counts and the `?` helper DOOR, and a row that
 //    came and went would move that door 18 pt on every receipt and 18 pt
-//    back six seconds later.
+//    back six seconds later. (Its RENDERED width there is the column's — the
+//    round-2 oracle measures it constrained and asserts the height, not the
+//    width, which is why the width half of this clause is about the ideal
+//    size and not about what the pin reads.)
 //
 //  **ONE LINE, EVERYWHERE — and that is why there is no `lines` knob** (J39).
 //  This view shipped with a two-line option for the box, on the reasoning
