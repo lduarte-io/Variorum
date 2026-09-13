@@ -2013,4 +2013,105 @@ struct TakesArticleScrollTests {
                     "her block stays where the page she left had it: off the page")
         }
     }
+
+    // MARK: - The 17q ladder, round 2 — R2-2: the memory follows the rows
+    //         when the remembered row LEAVES (W-2's departure half)
+
+    /// **RED ON THE ROUND-1 TREE (`9c57f977`), the view-model road.** W-2 made
+    /// a row's ARRIVAL re-derive the memory; a row's DEPARTURE did not, and
+    /// `articlePlaceNow` takes the lowest fitting frame — so a de-realized
+    /// row's last frame (held until `forgetArticleRowFrame`) masked every
+    /// other row's re-derivation while present and was then forgotten without
+    /// one: the memory stayed one fling stale (measured on her 262-block note
+    /// at the round-2 review: a fling from the entry frame to the top, ⌘1,
+    /// ⌘2 → back at the entry frame, captures `35` → `36`). Here: the hook
+    /// writes the pre-step answer; the other rows report; the remembered row
+    /// leaves without a last report — the memory must follow the rows that
+    /// remain. The write is DEFERRED to the end of the turn (see the teardown
+    /// pin beside this one), so the assertion waits one.
+    @Test func theMemoryFollowsTheRowsWhenTheRememberedRowLeaves() async throws {
+        try await withSession(blocks: 3) { session, fixture, db, _ in
+            let model = try await landingModel(session: session, fixture: fixture, db: db)
+            let rows = model.projection.slots.map(\.placementID)
+            let r = { (y: CGFloat) in CGRect(x: 0, y: y, width: 680, height: 50) }
+            // The frames BEFORE a step: a at 18 (fits), b at 74, c at 130.
+            model.noteArticleRowFrame(rows[0], r(18))
+            model.noteArticleRowFrame(rows[1], r(74))
+            model.noteArticleRowFrame(rows[2], r(130))
+            _ = model.consumeArticleGeometry(
+                TakesBoardLayout.ArticleGeometry(offset: 100, content: 3000, viewport: 700),
+                positionedByUser: false)
+            #expect(session.editorRouter.takesArticlePlaces[fixture.postID]
+                    == TakesBoardLayout.ArticlePlace(rowID: rows[0], into: 18, rowHeight: 50),
+                    "non-vacuity: the hook wrote the pre-step answer")
+            // The step moved the page 100 pt: b and c report; a LEAVES without
+            // a last report (SwiftUI de-realizes without one).
+            model.noteArticleRowFrame(rows[1], r(-26))
+            model.noteArticleRowFrame(rows[2], r(30))
+            #expect(session.editorRouter.takesArticlePlaces[fixture.postID]?.rowID == rows[0],
+                    "non-vacuity: the stale row masks the arrivals while it is present")
+            model.forgetArticleRowFrame(rows[0])
+            #expect(model.board.articleRowDepartures == 1, "non-vacuity: the departure happened")
+            try await Task.sleep(for: .milliseconds(40))
+            await Task.yield()
+            #expect(session.editorRouter.takesArticlePlaces[fixture.postID]
+                    == TakesBoardLayout.ArticlePlace(rowID: rows[2], into: 30, rowHeight: 50),
+                    """
+                    the memory follows the rows that remain when the remembered \
+                    row leaves — on the round-1 tree it stayed at the stale row
+                    """)
+        }
+    }
+
+    /// **THE GUARD the departure half must carry** (the implementer's round-2
+    /// rider, measured RED against a departure that writes at once): a board's
+    /// UNMOUNT runs every row's `onDisappear` in one transaction, so a write
+    /// per departure would re-derive the memory from a shrinking set of
+    /// frames and let the last row to leave decide what she comes back to.
+    /// The departure re-derivation is therefore deferred and coalesced to
+    /// the end of the turn, when a teardown has left no rows to derive from —
+    /// and `teardown()` closes the door regardless. Green on the round-1 tree
+    /// (no departure wrote) and on the fix; red on the naive fix — the
+    /// number is in the round-2 record.
+    @Test func tearingTheBoardDownLeavesTheMemoryWhereTheLastGeometryPutIt() async throws {
+        try await withSession(blocks: 60) { session, fixture, db, mount in
+            let router = session.commandRouter
+            router.forgetCurrentBlock(for: fixture.postID)
+            defer { router.forgetCurrentBlock(for: fixture.postID) }
+
+            let first = try await landingModel(session: session, fixture: fixture, db: db)
+            let (window, hosting) = await mount(first)
+            guard let article = articleScrollView(in: hosting) else {
+                Issue.record("no article scroll view")
+                return
+            }
+            scroll(article, to: 800)
+            await settle(window, hosting, until: { false }, maxTurns: 10)
+            guard let left = session.editorRouter.takesArticlePlaces[fixture.postID],
+                  left.rowID != nil else {
+                Issue.record("no row remembered after the scroll")
+                return
+            }
+            let departuresBefore = first.board.articleRowDepartures
+
+            // The mode round trip's first half, the way the app does it: the
+            // board's subtree leaves the window (every row's `onDisappear`),
+            // and the view's own `onDisappear` tears the model down.
+            window.contentView = NSView()
+            first.teardown()
+            await settle(window, hosting, until: { false }, maxTurns: 6)
+            try await Task.sleep(for: .milliseconds(40))
+            await Task.yield()
+
+            #expect(first.board.articleRowDepartures > departuresBefore,
+                    "non-vacuity: the unmount ran the rows' departures (\(first.board.articleRowDepartures - departuresBefore))")
+            #expect(session.editorRouter.takesArticlePlaces[fixture.postID] == left,
+                    """
+                    the memory is where the last settled geometry put it — a \
+                    teardown's departures must not rewrite it from a shrinking \
+                    set of rows (was \(String(describing: left)), now \
+                    \(String(describing: session.editorRouter.takesArticlePlaces[fixture.postID])))
+                    """)
+        }
+    }
 }

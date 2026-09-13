@@ -717,6 +717,18 @@ final class TakesBoardLayout {
     /// So a row frame's arrival re-derives the place while the restore is
     /// settled — the restore, while pending, owns the page and nothing is
     /// remembered under it (17p's one-shot rule, unchanged).
+    ///
+    /// **…and a row's DEPARTURE re-derives it too** (the 17q ladder's round
+    /// 2, R2-2 — measured: a fling from the entry frame to the top of her
+    /// 262-block note came back at the entry frame). `articlePlaceNow` takes
+    /// the lowest fitting row, so a de-realized row's last frame — still
+    /// held until `forgetArticleRowFrame` — masks every other row's arrival
+    /// while it is present, and SwiftUI de-realizes a row without a final
+    /// frame report. The view model calls this after a departure as well,
+    /// DEFERRED and coalesced to the end of the current turn, because a
+    /// board's unmount runs every row's departure in one transaction and a
+    /// write per departure would let the last row to leave decide what she
+    /// comes back to (`TakesViewModel.forgetArticleRowFrame`).
     func articleRowFramesMoved() -> ArticleRestoreStep {
         guard articleRestore == .settled, let geometry = lastArticleGeometry else { return .wait }
         return rememberStep(geometry)
@@ -728,7 +740,14 @@ final class TakesBoardLayout {
 
     func forgetArticleRowFrame(_ placementID: String) {
         articleRowFrames.removeValue(forKey: placementID)
+        articleRowDepartures += 1
     }
+
+    /// Observation seam (the `articleRestoreAims` precedent — a plain
+    /// counter, not DEBUG-gated): how many rows have left the realized set on
+    /// this mount. The pins' non-vacuity: a departure really happened before
+    /// the memory was read, and a teardown really ran every row's.
+    @ObservationIgnored private(set) var articleRowDepartures = 0
 
     // MARK: - The scroll memory's one-shot restore (17p batch a, row 1)
 

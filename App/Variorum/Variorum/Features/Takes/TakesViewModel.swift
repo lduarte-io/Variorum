@@ -481,6 +481,10 @@ final class TakesViewModel {
     }
 
     func teardown() {
+        // The article's memory is closed first (the 17q ladder's round 2,
+        // R2-2): the rows' departures that follow — or precede, the order is
+        // not SwiftUI's promise — must not write a place she never saw.
+        articleTornDown = true
         if let autosaveToken {
             autosave.stopObserving(autosaveToken)
             self.autosaveToken = nil
@@ -643,9 +647,40 @@ final class TakesViewModel {
         }
     }
 
+    /// A row left the realized set — **the DEPARTURE half of W-2's rule**
+    /// (the 17q ladder's round 2, R2-2). `articlePlaceNow` takes the lowest
+    /// fitting frame, so a de-realized row's last frame masks every arrival
+    /// while it is held and is then forgotten without a report: the memory
+    /// stayed one fling stale on her 262-block note (a fling from the entry
+    /// frame to the top, ⌘1, ⌘2 → back at the entry frame; captures `35` →
+    /// `36`). The re-derivation is DEFERRED and COALESCED to the end of the
+    /// current turn rather than written per departure: a board's unmount
+    /// runs every row's `onDisappear` in one transaction, and a write per
+    /// departure re-derived the memory from a shrinking set of rows so the
+    /// last row to leave decided what she comes back to (measured on the
+    /// naive shape: block 15 at 2 → block 24 at 506). By the end of that turn
+    /// a teardown has left no rows to derive from and `teardown()` has
+    /// closed the door; a scroll's departures and arrivals have all landed
+    /// and the ONE re-derivation reads the rows as they are.
     func forgetArticleRowFrame(_ placementID: String) {
         board.forgetArticleRowFrame(placementID)
+        guard !articleDepartureScheduled else { return }
+        articleDepartureScheduled = true
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            self.articleDepartureScheduled = false
+            guard !self.articleTornDown else { return }
+            if case .remember(let place) = self.board.articleRowFramesMoved() {
+                self.rememberArticlePlace(place)
+            }
+        }
     }
+
+    /// One deferred re-derivation per turn, however many rows left in it.
+    @ObservationIgnored private var articleDepartureScheduled = false
+    /// Set by `teardown()`: the board is leaving, and nothing it sees on the
+    /// way out is a place she was at.
+    @ObservationIgnored private var articleTornDown = false
 
     /// The article reported its geometry: run the board's restore rule against
     /// the SESSION's memory and hand back the ONE thing the view can do about
