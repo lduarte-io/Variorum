@@ -6185,3 +6185,147 @@ run of the three touched suites agrees with the record's `196/27`.
 **For the implementer's sanity pass (things it holds context on):** (1) `theEntryRingsOwnRoadAlsoComesBackWhereSheLeftIt`'s premise — "her scroll puts that block mid-page" — never held in the harness: the clip-view scroll is not `isPositionedByUser`, the kept-alive entry landing re-revealed the block at the foot, and the pin passed on that; it still passes and is left unmodified, but the new pins end the landing with the model's own door before her scroll (`clearArticleLanding()`) and say why. (2) Every "restore" observation in the 17p and 17q walks was a reveal (W-1); the first real restore in the app is this pass's, on frames `23`–`27`. (3) The `.undecided` branch now calls the resolver for ANY non-nil memory, `.top` included — an entry landing on the block she was in stands down at a page left at rest (the record's accepted-consequence paragraph applies there too). (4) `ArticlePlace` gained `into` and `rowHeight` with defaults; the session dictionary's type is unchanged; the memory is written from row-frame reports at scroll rate now, equality-gated at the view model.
 
 **Canon note owed (drafted for the orchestrator, one clause on the R-8 draft for AppSpec §12's takes line):** *"…the fan-panel bloom door is never weighed against the remembered page — it restores, then reveals (17p's road); and the restore puts the block back where its TOP sat, not only at the fold (the 17q ladder)."*
+
+### 17q LADDER — ROUND 1 · THE IMPLEMENTER'S SANITY PASS
+
+*The 17q implementer (`opus-implementer`), the cross-model flow's ONE pass over
+`git diff 35db5ffb..aa0d6bb8` (the four code commits, eight files) — read in my own context, nothing
+implemented, no code or test file touched; this plan is the only file this edits. **10 fixes CLEAR ·
+1 RAISED** (the raise is on the pass's own note (1), not on a fix — it returns to the reviewer for the
+final word). My own evidence, run for this pass: nineteen suites in ONE `xcodebuild test` —
+**`✔ Test run with 152 tests in 19 suites passed after 115.770 seconds.`**, zero `skipped:` lines
+(the landing family, the board/pane neighbours and the seven Library/masthead suites) — and a
+DEV-STORE SPOT-WALK of the row my own walk failed (`pgrep` empty before the build, at launch and after
+my quit; her app never touched).*
+
+**W-1 (the restore had never run in the app) — CLEAR, and I confirmed it in USE myself rather than
+taking the trace.** On the fix tree's Debug build, A Scandal in Bohemia, Takes: I clicked a block
+MID-PAGE (block 238/262 — the ring migrated through the board's own door) and pressed ⌘1 then ⌘2.
+**The frames are PIXEL-IDENTICAL (`cmp`).** That is byte-for-byte the row my own walk failed at `17` →
+`18`, on the same note, and it is the first time I have seen a restore in the app. A second shape —
+the page scrolled away from her own block (ring on 245, off the page) — also returned pixel-identical,
+which is R-Q21's letter and the resolver's stated consequence.
+**The one thing I checked because it is the only way this fix could bite:** `TakesBoardView.init` now
+MUTATES the model (`model.landingEnabled = true`) during a parent's body evaluation, and it does so on
+every throwaway the `model ?? TakesViewModel(…)` expression builds. It is safe, and the reason is
+specific: `landingEnabled` lives on `TakesChoreographer`, which is a plain `@MainActor final class` —
+**not `@Observable`** — so the write publishes nothing and no view can be invalidated by it; and no
+view body reads the flag anywhere (grep: the only readers are `consumeLandings`' guard and the two
+write sites). A throwaway model with the flag set reaches no geometry or focus road, so it writes
+nothing into the session. The second production construction (`SpreadBookView:337`, the book spread's
+takes page) already set the flag at `.onAppear`; the change moves it earlier, never elsewhere.
+
+**W-2 (the memory was one scroll step stale) — CLEAR, and P1 checked at the site that made me look.**
+The mechanism is the one I could not name in my rider and it explains the magnitude: the scroll hook
+runs before the rows report, so the place written from the hook is the row that sat at `into` BEFORE
+the step. The fix puts the re-derivation on the row-frame arrival, gated on `.settled` so nothing is
+remembered under a pending restore (17p's one-shot rule, intact). **What I verified rather than
+assumed:** this is now a scroll-rate path, and the 17p ladder's R1-3 is the standing lesson about
+exactly that — `articleRowFramesMoved()` → `rememberStep` → `articlePlaceNow` iterates
+`articleRowFrames`, which holds REALIZED rows only (bounded by the viewport, `forgetArticleRowFrame`
+on `onDisappear`), so the cost is ∝ viewport and never ∝ the note (P1's letter). The view model's
+`noteArticleRowFrame` short-circuits on the 0.5-pt equality gate before any of it, and
+`rememberArticlePlace`'s new gate keeps the session dictionary from churning.
+
+**R1-1 (the row-precision restore → sub-row) — CLEAR; the anchor's arithmetic checked independently,
+and one safe failure named.** I re-derived the unit point rather than reading it: `scrollTo(id,
+anchor: UnitPoint(y: a))` aligns the row's point at fraction `a` with the viewport's at the same
+fraction, so the row's top lands at `a·(viewport − rowHeight)`; setting that to `into` gives
+`a = into / (viewport − rowHeight)` — which is what `ArticlePlace.anchorY` computes, with the clamp
+and the `room > 1` guard. The clamp can never bind for a place `articlePlaceNow` produced (its `fits`
+rule requires `maxY <= viewport`, i.e. `into <= room`), so it is belt-and-braces rather than a
+behaviour. Both 17p measurements still hold and the doc still carries them: the identity is the ROW
+(measurement 1), and an ANCHOR is absolute so a stale frame re-aims instead of compounding
+(measurement 2 — the 896-where-800 nudge). The 17p pin arm that changed
+(`theTopOfThePageIsRememberedAsTheTopAndRestoresWithoutAScroll`'s scrolled-page arm) changed because
+the RULE changed, and its at-rest arm — 17p's R1-1 claim — is untouched. **The safe failure, named:**
+if the row re-wraps taller between the two mounts so `rowHeight > room`, the anchor clamps, the row's
+top lands above `into`, the settle (`|minY − into| <= 2`) never fires, and the restore ends by its
+24-aim bound with the page close but not exact. That is the bound doing its job; it is worth nobody's
+code, only this sentence.
+
+**R1-2 (the bloom landing) — CLEAR; both my riders taken and the one token is where I said it would
+have to be.** `ArticleLandingKind` defaulted to `.entry` keeps every call site compiling (twenty-two
+in the suite plus the N9 arm) and the choreographer's bloom arm carries the single `.bloom` token;
+`resolveEntryLandingAgainstTheMemory` guards on the kind, so a bloom is weighed against nothing and
+rides 17p's shipped road. The self-contradicting paragraph I left in `landingOutranks` is rewritten to
+say what is built. Checked: `landArticle`'s only production callers are the choreographer's two arms
+(`:180` bloom, `:204` entry) — no third road inherits `.entry` by accident.
+
+**R1-3 (the fold) — CLEAR; my rider is in the code, and I checked the line it protects.** The
+`.undecided` branch now calls the one resolver and then **re-reads the state** (`if articleRestore ==
+.settled { return rememberStep(geometry) }`) before the guard — which is exactly the line a mechanical
+fold gets wrong, because a landing that WINS must return `rememberStep`, never a `.scrollToRow`. Pure
+arm (a) holds it (`.remember(.top)` with `articleRestoreAims == 0`). **The extension I want stated
+because it is a real behaviour change and only the resolver's doc carries it:** the resolver is now
+consulted for ANY non-nil memory, `.top` included, so a page left AT REST with her ring on an
+off-screen block comes back at rest with no reveal. I traced the road that would have made that a
+regression of 17o row 8 and it does not: the FIRST entry into a note in a session has no memory at
+all, `resolveEntryLandingAgainstTheMemory` is not called, and the entry landing reveals as it always
+has — which is the everyday road row 8 was about. CONFIRMED-RECORDED for the split is the right call
+and the same one the 17p ladder's R1-6 took.
+
+**R1-4 (the words oracle) — CLEAR, with one latent note that costs nobody a line today.** Each stamp
+forgetting its own slot is the right site — an arrangement swap or a slot standing down clears exactly
+its words — and the doc no longer claims a teardown nothing performed. **The note:** SwiftUI does not
+guarantee that a view's `onDisappear` precedes a successor's `onAppear`, so if the SAME slot ever
+disappears and re-appears across one transaction (a card recycled by the `LazyVStack` while its words
+do not change), the late `forget` could leave that slot empty until the words next change. No pin
+reaches it — all four `LibraryCardStampsTests` mount one component in a fresh window and `reset`
+first — and the shipped consequence is nil (DEBUG-only). Recorded so a future pin that scrolls the
+Notes list knows where to look.
+
+**R1-5 (the masthead's flip door) — CLEAR.** `task(id:)` is the right site for the reason the comment
+gives (a fresh mount AND every swap, synchronous before the `await`), and the two doors key on
+different ids — `onChange(of: postID)` clears `old` while the task registers `new` — so no ordering
+between them can clobber the live entry. `onAppear`'s registration is correctly removed rather than
+left as a second writer.
+
+**R1-6 (the clause on #103 (iii)) — CLEAR.** The wording carries the whole of my rider: why `listDay`
+cannot hold the edit stamp (R3-2 returns on every dated row), that the row's trailing stamp is the 18h
+face 17q was fenced from, and that matching the two renderers is therefore hers and not a tidy. It
+also keeps the true half explicit — the WORDS stay one brain; only which FACT each renderer states
+differs.
+
+**R1-7 (`rowStamp` asked once) — CLEAR; the identity is pinned, as I said, and I re-checked it rather
+than repeating myself.** `stamps.sorted` is `sortIsTheStatedDay ? stated : other`; under `.entryDate`
+`stated` IS `rowStamp(.entryDate, for: hit)` and under every other sort `other` IS `rowStamp(sort,
+for: hit)` — so the substitution is byte-identical by the type's definition, and
+`theTwoFactsARowShowsAreTheStatedDayAndTheSortsOwnStamp` already asserts both halves while
+`LibrarySortMenuTests.aRowsStampIsTheSortsOwnStampInWords` drives `rowStamp` directly and rides
+unmodified.
+
+**R1-8 (the small card's flip) — CLEAR; I walked all four sort transitions against the chosen key.**
+`stamps.sorted.subject` fires on `edited → created` (`.edited → .created`), on `edited → date`
+(`.edited → .dated`) and on `created → title` (`.created → .edited`), and correctly does NOT fire on
+`edited → title`, where `stampSubject` is `.edited` for both and the flipped card is already showing
+the right other fact. Keying on the whole pair would have cancelled a glance on an autosave; keying on
+the flag would have missed `edited → created`. The comment says both.
+
+---
+
+**RAISED (1) — the pass's own note (1): `theEntryRingsOwnRoadAlsoComesBackWhereSheLeftIt` is left with
+a doc that states a premise the pin does not establish, which is the R1-4 class one file over.**
+
+The note is honest about the fact — in that pin's mount A the harness's clip-view `scroll(_:to:)` is
+not `isPositionedByUser`, so the kept-alive entry landing re-revealed her block at the foot and my
+"her scroll puts that block mid-page" never happened; the pin passed on the re-revealed position.
+**What I am raising is that it was left unmodified.** Its doc now asserts a setup that does not occur
+and its stated purpose ("mount A is entered through the FACT … then her scroll puts that block
+mid-page") is not what it tests; the same fix pass corrected exactly this class in
+`CatalogStampOracle.reset`'s doc, where a sentence claimed a teardown nothing performed. A pin whose
+doc is false is a pin the next reader trusts for the wrong reason — and this one sits in the suite
+that carries the landing family's whole history. **The fix is one line and the pass already owns it:**
+`first.clearArticleLanding()` before the scroll — the door the two new mounted pins use for precisely
+this reason — after which the premise is true and the pin tests what it says; or, if the reviewer
+prefers to keep it as a second round-trip guard, its doc should say that the entry landing is still
+pending through the scroll and that the position it checks is the revealed one. Either is fine; the
+present state is not. *(No assertion in it is wrong, and it passed in my own run — this is a doc and
+premise correction, not a defect in what shipped.)*
+
+**Nothing else raised.** The fences hold in the diff I read (`Sources/`, `Shared/`, `Sync/`, `Server/`,
+`PaneTextAuthority`, `PaneSurface`, `BlockRangeIndex`, `EditorTextView` all absent from
+`--stat`); `TakesChoreographer` carries the one ruled token and nothing else; no schema, no `setting`;
+no trailers. My own closing evidence for this pass: **152 tests in 19 suites, zero skipped**, plus the
+two spot-walk round trips above.
+
