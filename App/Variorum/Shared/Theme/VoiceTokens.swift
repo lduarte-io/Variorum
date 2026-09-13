@@ -19,20 +19,34 @@ import VariorumCore
 /// One voice's resolved design tokens + idiom slots. Everything a Stage
 /// B/C surface styles with comes through here — feature code never holds
 /// a literal color (the one-module rule for the design layer).
-struct VoiceTokens {
+///
+/// **THE EIGHT `var`s ARE THE PALETTE'S SLOTS** (18g — her R-Q6/R-Q11/R-Q13).
+/// A palette layered under a voice replaces exactly `room`, `surface`,
+/// `card`, `accent`, `line`, `wash`, `takeTint` and `takeLine` — and nothing
+/// else, which is why they and only they are settable (`applying(_:)` below
+/// is the one writer). Everything else is `let` because it is what makes a
+/// voice a voice: its type, its idioms, and the slots the ruling does not
+/// name (`ink`/`muted`/`faint`, `chosen`, `ring`, `star`, `alarm`,
+/// `positive`, the comment pair, the code chip, the block seam).
+struct VoiceTokens: Equatable {
     // MARK: Surfaces
-    /// The room — the window/sidebar background.
-    let room: Color
-    /// The paper — content panes, cards, rows.
-    let surface: Color
-    /// Elevated cards (takes, palette rows).
-    let card: Color
+    /// The room — the window/sidebar background. (Her "tan panels".)
+    var room: Color
+    /// The paper — content panes, cards, rows. A palette replaces it in
+    /// DARK only: there the room is black (R51), so the paper carries the
+    /// hue. In light the voice keeps its own paper, as the mockup shows.
+    var surface: Color
+    /// Elevated cards (takes, palette rows). The paper's sibling — a
+    /// palette replaces it under the same dark-only rule.
+    var card: Color
 
     // MARK: Ink
     let ink: Color
     let muted: Color
     let faint: Color
-    let accent: Color
+    /// The coloured chrome words — her *"lightly colored text like (this
+    /// note) and commit"*. A palette's accent.
+    var accent: Color
     /// **THE ERROR/DANGER SLOT** (the post-13l polish round, ledger row 29 —
     /// her mid-round ruling: *"Add it this round"*).
     ///
@@ -78,15 +92,19 @@ struct VoiceTokens {
     let positive: Color
 
     // MARK: Lines & marks
-    /// Hairline separators.
-    let line: Color
-    /// The dotted block seam (R6 — THE boundary mechanism).
+    /// Hairline separators. A palette's hairline.
+    var line: Color
+    /// The dotted block seam (R6 — THE boundary mechanism). Deliberately
+    /// NOT a palette slot: the seam is the boundary MECHANISM, and her
+    /// ruling names the hairline, not it.
     let seam: Color
-    /// Selected rows / the changing-block wash (R13).
-    let wash: Color
+    /// Selected rows / the changing-block wash (R13). A palette's wash.
+    var wash: Color
     /// The takes register's tint (takes read differently than prose — R13).
-    let takeTint: Color
-    let takeLine: Color
+    /// A palette's take tint…
+    var takeTint: Color
+    /// …and its line.
+    var takeLine: Color
     /// The chosen take's mark.
     let chosen: Color
     /// The editing ring (R6/R22 — the outline form).
@@ -152,8 +170,30 @@ struct VoiceTokens {
 }
 
 extension VoiceTokens {
-    /// The resolver: voice + light/dark → tokens. Dark is FULLY BLACK in
-    /// both voices (R51) — pinned by `ThemeTokenTests`.
+    /// **The resolver: voice + palette + light/dark → tokens** (18g — her
+    /// R-Q6: *"a palette layered on a VOICE"*).
+    ///
+    /// `.default` returns the voice's shipped set BYTE-IDENTICALLY — not
+    /// "the same numbers computed another way", literally the same static
+    /// value, because `PalettePreset.resolved` hands back nil for it and
+    /// this function returns `base` untouched. That is the parity proof the
+    /// token pins ride, and it is also why a `custom` palette with no valid
+    /// seed is safe: it takes the same road.
+    ///
+    /// Dark is FULLY BLACK in both voices and under every palette (R51) —
+    /// pinned here for the voices and in `PaletteDerivationTests` for the
+    /// families.
+    static func resolve(
+        voice: ThemeVoice, palette: ThemePalette, tint: PaletteTint, dark: Bool
+    ) -> VoiceTokens {
+        let base = resolve(voice: voice, dark: dark)
+        guard let preset = PalettePreset.resolved(palette, tint: tint) else { return base }
+        return base.applying(PaletteDerivation.derive(preset, dark: dark))
+    }
+
+    /// The shipped two-parameter resolver, unchanged in behaviour and
+    /// signature — every existing call site (67 of them, and the phone's
+    /// `MobileEditorStyle`) compiles and behaves exactly as before.
     static func resolve(voice: ThemeVoice, dark: Bool) -> VoiceTokens {
         switch (voice, dark) {
         case (.terminal, false): return .terminalLight
@@ -161,6 +201,22 @@ extension VoiceTokens {
         case (.study, false): return .studyLight
         case (.study, true): return .studyDark
         }
+    }
+
+    /// The ONE writer of the palette's eight slots. Everything else is the
+    /// voice's and is copied through untouched; `surface`/`card` are
+    /// replaced only where the family names them (dark).
+    private func applying(_ family: PaletteFamily) -> VoiceTokens {
+        var tokens = self
+        tokens.room = Color(hex: family.room)
+        if let surface = family.surface { tokens.surface = Color(hex: surface) }
+        if let card = family.card { tokens.card = Color(hex: card) }
+        tokens.accent = Color(hex: family.accent)
+        tokens.wash = Color(hex: family.wash)
+        tokens.takeTint = Color(hex: family.takeTint)
+        tokens.takeLine = Color(hex: family.takeLine)
+        tokens.line = Color(hex: family.line)
+        return tokens
     }
 
     /// The environment-missing fallback (test hosts, future embeddings):

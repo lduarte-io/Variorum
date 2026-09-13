@@ -65,8 +65,18 @@ final class ThemeStore {
 
     /// The resolved tokens for the current scheme (R51: dark = fully black
     /// in both voices).
+    ///
+    /// **18g:** the palette and its custom seeds ride here and nowhere else
+    /// — one resolver, consulted at the one store, so no surface ever reads
+    /// the palette setting itself (F-0's "every setting is read ONCE at its
+    /// store and pushed down"). A surface that already asked this store for
+    /// tokens gains the palette by construction.
     func tokens(dark: Bool) -> VoiceTokens {
-        VoiceTokens.resolve(voice: settings.voice, dark: dark)
+        VoiceTokens.resolve(
+            voice: settings.voice,
+            palette: settings.palette,
+            tint: PaletteTint(room: settings.customRoom, accent: settings.customAccent),
+            dark: dark)
     }
 
     // MARK: - Setters (through the runner, like every write)
@@ -100,6 +110,18 @@ final class ThemeStore {
     /// never disagree about what landed.
     func setReceiptStyle(_ style: ReceiptStyle) {
         run { try $0.setReceiptStyle(style) }
+    }
+
+    /// 18g (her R-Q6): the colour palette. A setter and nothing more, like
+    /// `setVoice` beside it — it cannot refuse, so it needs no words. The
+    /// CUSTOM SEEDS deliberately do NOT have one here: `setThemeTints` can
+    /// refuse a value that is not a colour, and a setter whose refusal this
+    /// store would swallow into `lastError` (which nothing renders) is a
+    /// trap. Its door is the Appearance pane's own, beside the three other
+    /// refusable settings on that pane, which show the operations layer's
+    /// real words inline.
+    func setThemePalette(_ palette: ThemePalette) {
+        run { try $0.setThemePalette(palette) }
     }
 
     /// Round 3 NIT: setters CHAIN instead of racing — parallel unstructured

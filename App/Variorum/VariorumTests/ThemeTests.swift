@@ -22,6 +22,49 @@ struct ThemeTokenTests {
         #expect(!VoiceTokens.resolve(voice: .study, dark: true).showsBlockCursor)
     }
 
+    /// **THE PARITY PROOF** (18g — her R-Q6: *"default keeps each voice's
+    /// shipped colours byte-identical"*). The palette resolver's `.default`
+    /// arm returns the SAME VALUE the two-parameter resolver does, in all
+    /// four voice/scheme combinations — so every pin above and below this
+    /// one, and all 67 token-consuming surfaces, are untouched by 18g
+    /// unless she picks a palette.
+    ///
+    /// The `custom`-with-no-seed row is the second half of the same
+    /// promise: a palette that cannot be derived falls back to the voice
+    /// rather than to half a palette.
+    @Test func theDefaultPaletteIsEachVoicesShippedColoursByteIdentically() {
+        for voice in ThemeVoice.allCases {
+            for dark in [false, true] {
+                let shipped = VoiceTokens.resolve(voice: voice, dark: dark)
+                #expect(VoiceTokens.resolve(
+                    voice: voice, palette: .default, tint: .none, dark: dark) == shipped)
+                #expect(VoiceTokens.resolve(
+                    voice: voice, palette: .custom, tint: .none, dark: dark) == shipped,
+                        "a custom palette with no seed is not a palette")
+                #expect(VoiceTokens.resolve(
+                    voice: voice, palette: .custom,
+                    tint: PaletteTint(room: "not a colour"), dark: dark) == shipped)
+                // …and a real palette DOES move the slots it owns, while
+                // leaving the voice's own alone (the other half of R1).
+                let lavender = VoiceTokens.resolve(
+                    voice: voice, palette: .lavender, tint: .none, dark: dark)
+                #expect(lavender.accent != shipped.accent)
+                #expect(lavender.wash != shipped.wash)
+                #expect(lavender.ink == shipped.ink)
+                #expect(lavender.chosen == shipped.chosen)
+                #expect(lavender.alarm == shipped.alarm)
+                #expect(lavender.star == shipped.star)
+                #expect(lavender.seam == shipped.seam)
+                #expect(lavender.selectionMarker == shipped.selectionMarker)
+                #expect(lavender.pathPrefix == shipped.pathPrefix)
+                #expect(lavender.lowercasesChrome == shipped.lowercasesChrome)
+                // In LIGHT the voice keeps its own paper; in DARK the
+                // palette carries it, because the room is black.
+                #expect((lavender.surface == shipped.surface) == !dark)
+            }
+        }
+    }
+
     @Test func darkIsFullyBlackInBothVoices() {
         // R51 (her direct edit — supersedes the grey): dark mode = a FULLY
         // BLACK background, both voices.
