@@ -195,6 +195,17 @@ nonisolated struct PaletteTint: Equatable, Sendable {
     }
 
     static let none = PaletteTint()
+
+    /// **The ONE mapping from the landed settings to the custom seeds**
+    /// (18g ladder, R1-1). Every host that holds a `Queries.ThemeSettings`
+    /// and needs tokens goes through this — the store, the Settings
+    /// pane's swatches, the AppKit surfaces' chrome and decor appearance —
+    /// so the pair can never be spelled twice. Shared, so the phone's
+    /// palette road (a synced palette beside its LOCAL voice) reads the
+    /// seeds through the same line and calls the four-parameter resolver.
+    init(_ settings: Queries.ThemeSettings) {
+        self.init(room: settings.customRoom, accent: settings.customAccent)
+    }
 }
 
 // MARK: - The rule

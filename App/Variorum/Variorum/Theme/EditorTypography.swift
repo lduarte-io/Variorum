@@ -243,6 +243,19 @@ struct EditorSurfaceChrome: Equatable {
     let voice: ThemeVoice
     let dark: Bool
     let inlineComments: Bool
+    /// **The palette and its custom seeds RIDE THE CHROME VALUE** (18g
+    /// ladder, R1-1) for the same reason the two settings below do: this
+    /// value's `Equatable` gate is the app's ONE "this surface's
+    /// presentation moved, re-apply it" mechanism (P-3), and a palette
+    /// click that left the value equal would change nothing on screen
+    /// until some unrelated re-apply. They are STORED, not merely resolved,
+    /// so the gate sees them; `tokens` below resolves through the one
+    /// settings → tokens road, never the palette-less forwarder. A palette
+    /// click therefore takes the voice-switch road — `applyVoiceChrome`'s
+    /// whole-document refresh on every mounted surface — the same rare,
+    /// deliberate gesture, and the A47c guard already rides it.
+    let palette: ThemePalette
+    let tint: PaletteTint
     /// 13d batch 4 (A23/A24): the two this-Mac editor-behaviour settings
     /// ride the chrome value NOT because they are "chrome" in the voice
     /// sense, but because the chrome's `Equatable` gate is the app's ONE
@@ -254,12 +267,15 @@ struct EditorSurfaceChrome: Equatable {
 
     init(
         voice: ThemeVoice, dark: Bool, inlineComments: Bool,
+        palette: ThemePalette = .default, tint: PaletteTint = .none,
         paragraphGap: ParagraphGap = .standard,
         spellcheck: SpellcheckLevel = .off
     ) {
         self.voice = voice
         self.dark = dark
         self.inlineComments = inlineComments
+        self.palette = palette
+        self.tint = tint
         self.paragraphGap = paragraphGap
         self.spellcheck = spellcheck
     }
@@ -272,10 +288,15 @@ struct EditorSurfaceChrome: Equatable {
         self.init(
             voice: settings.voice, dark: dark,
             inlineComments: settings.inlineComments,
+            palette: settings.palette, tint: PaletteTint(settings),
             paragraphGap: paragraphGap, spellcheck: spellcheck)
     }
 
-    var tokens: VoiceTokens { .resolve(voice: voice, dark: dark) }
+    /// The four-parameter resolver — the palette-aware road. A default
+    /// palette returns the voice's static set byte-identically.
+    var tokens: VoiceTokens {
+        .resolve(voice: voice, palette: palette, tint: tint, dark: dark)
+    }
     var typography: EditorTypography.Resolved {
         EditorTypography.resolve(voice: voice, inlineComments: inlineComments)
     }

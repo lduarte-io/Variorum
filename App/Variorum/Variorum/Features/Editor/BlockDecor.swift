@@ -48,6 +48,17 @@ nonisolated struct EditorAppearance: Equatable, Sendable {
     /// `writeHoverHandles`, the density-settings class), pushed by the
     /// View like every appearance input.
     var hoverHandles = true
+    /// **The palette and its custom seeds ride the appearance value** (18g
+    /// ladder, R1-1): the decoration layer draws the selected-block wash
+    /// with its accent border and the `.background` editing indicator from
+    /// `tokens` below, and the view model's `didSet { if oldValue !=
+    /// appearance … }` is the ONLY thing that re-renders the decor on a
+    /// theme change — so a palette click must MOVE this value, which means
+    /// the palette is stored here, not re-read. Defaults keep every
+    /// `EditorAppearance()` site (the models' placeholders, the pins)
+    /// byte-identical to before.
+    var palette: ThemePalette = .default
+    var tint: PaletteTint = .none
 
     init() {}
 
@@ -57,9 +68,15 @@ nonisolated struct EditorAppearance: Equatable, Sendable {
         self.seamsVisible = settings.seamsVisible
         self.indicator = settings.editingIndicator
         self.inlineComments = settings.inlineComments
+        self.palette = settings.palette
+        self.tint = PaletteTint(settings)
     }
 
-    @MainActor var tokens: VoiceTokens { .resolve(voice: voice, dark: dark) }
+    /// The four-parameter resolver — the palette-aware road (R1-1); a
+    /// default palette is the voice's static set byte-identically.
+    @MainActor var tokens: VoiceTokens {
+        .resolve(voice: voice, palette: palette, tint: tint, dark: dark)
+    }
 }
 
 // MARK: - Pure geometry

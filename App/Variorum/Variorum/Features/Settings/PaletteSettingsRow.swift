@@ -131,11 +131,11 @@ struct PaletteSettingsRow: View {
     }
 
     /// A swatch shows what THAT palette would look like — so the custom one
-    /// shows her seeds and every other one shows its own (none).
+    /// shows her seeds (through the one `PaletteTint(settings)` mapping,
+    /// never a second spelling of the pair — 18g ladder R1-1) and every
+    /// other one shows its own (none).
     private func tint(for palette: ThemePalette) -> PaletteTint {
-        palette == .custom
-            ? PaletteTint(room: settings.customRoom, accent: settings.customAccent)
-            : .none
+        palette == .custom ? PaletteTint(settings) : .none
     }
 
     // MARK: Her own hex

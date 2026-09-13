@@ -191,9 +191,33 @@ extension VoiceTokens {
         return base.applying(PaletteDerivation.derive(preset, dark: dark))
     }
 
+    /// **The ONE settings → tokens road** (18g ladder, R1-1). A host that
+    /// holds a landed `Queries.ThemeSettings` — the theme store, the Write
+    /// editor's and the read tier's chrome, the decoration appearance —
+    /// resolves through HERE, never by re-deriving from `settings.voice`
+    /// alone: the two-parameter forwarder below kept every such site
+    /// compiling while the palette went quiet in two of them (the caret,
+    /// the selection wash, the `.background` indicator, the dark paper and
+    /// the markdown link's second writer all drew the voice's colours under
+    /// a palette). This is the four-parameter resolver over the one
+    /// `PaletteTint(settings)` mapping; a default palette returns the
+    /// voice's static set byte-identically through the same road.
+    ///
+    /// The Mac's convenience: it takes the settings' VOICE. The phone's
+    /// voice is LOCAL (LK2), so its road is the four-parameter form with
+    /// its own voice and `PaletteTint(settings)` — never this.
+    static func resolve(settings: Queries.ThemeSettings, dark: Bool) -> VoiceTokens {
+        resolve(
+            voice: settings.voice, palette: settings.palette,
+            tint: PaletteTint(settings), dark: dark)
+    }
+
     /// The shipped two-parameter resolver, unchanged in behaviour and
     /// signature — every existing call site (67 of them, and the phone's
     /// `MobileEditorStyle`) compiles and behaves exactly as before.
+    /// **It is the palette-less road by definition:** a host that holds a
+    /// settings value must not call it (R1-1 above) — its Mac callers are
+    /// the four-parameter resolver's own base and `fallback(for:)`.
     static func resolve(voice: ThemeVoice, dark: Bool) -> VoiceTokens {
         switch (voice, dark) {
         case (.terminal, false): return .terminalLight

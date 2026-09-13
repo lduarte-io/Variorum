@@ -66,17 +66,17 @@ final class ThemeStore {
     /// The resolved tokens for the current scheme (R51: dark = fully black
     /// in both voices).
     ///
-    /// **18g:** the palette and its custom seeds ride here and nowhere else
-    /// — one resolver, consulted at the one store, so no surface ever reads
-    /// the palette setting itself (F-0's "every setting is read ONCE at its
-    /// store and pushed down"). A surface that already asked this store for
-    /// tokens gains the palette by construction.
+    /// **18g:** the palette and its custom seeds ride the ONE settings →
+    /// tokens road (`VoiceTokens.resolve(settings:dark:)`), consulted here
+    /// for every SwiftUI surface, so no surface ever reads the palette
+    /// setting itself (F-0's "every setting is read ONCE at its store and
+    /// pushed down"). The two AppKit hosts that hold the settings value
+    /// rather than asking this store — `EditorSurfaceChrome` and
+    /// `EditorAppearance` — take the same road (18g ladder, R1-1), which is
+    /// what makes "a surface gains the palette by construction" true of
+    /// every surface and not only of the ones that ask here.
     func tokens(dark: Bool) -> VoiceTokens {
-        VoiceTokens.resolve(
-            voice: settings.voice,
-            palette: settings.palette,
-            tint: PaletteTint(room: settings.customRoom, accent: settings.customAccent),
-            dark: dark)
+        VoiceTokens.resolve(settings: settings, dark: dark)
     }
 
     // MARK: - Setters (through the runner, like every write)
