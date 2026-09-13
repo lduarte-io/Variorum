@@ -709,26 +709,42 @@ final class TakesBoardLayout {
         var travel: CGFloat { max(content - viewport, 0) }
     }
 
-    /// **Where the article was left: the BLOCK at the top of the page.**
+    /// **Where the article was left: the BLOCK at the top of the page — and,
+    /// since the 17q ladder (R1-1), WHERE THAT BLOCK'S TOP SAT.**
     ///
-    /// Deliberately a row identity and nothing else. Two measurements decided
-    /// the shape, both taken at this batch:
+    /// The row identity is the memory's spine. Two measurements decided that
+    /// at 17p, and both still bind:
     ///
     /// 1. A raw content OFFSET is not the same number for the same view twice
     ///    in a lazy column — the rows above the fold are estimated until they
     ///    are realized, so the same y means a different block on the way back
     ///    (96 pt and nine blocks apart on a sixty-block note; ~390 pt on her
     ///    262-block one).
-    /// 2. A row identity PLUS the pixels she was into it looks more faithful
-    ///    and is not: the pixel half has to be applied as a RELATIVE nudge,
-    ///    and the row frames and the scroll geometry arrive in different
-    ///    passes — a nudge computed from a frame one pass stale doubled its
-    ///    own correction and landed 896 where 800 was owed.
+    /// 2. A row identity PLUS the pixels she was into it, applied as a
+    ///    RELATIVE nudge, doubles its own correction — the row frames and the
+    ///    scroll geometry arrive in different passes, and a nudge computed
+    ///    from a frame one pass stale landed 896 where 800 was owed.
     ///
-    /// So the promise is exactly what a reader can state and a pin can check:
-    /// **the block she was reading comes back to the top of the page.** A
-    /// `scrollTo(id, anchor: .top)` is absolute and idempotent, so re-aiming
-    /// as the column's real heights arrive converges instead of drifting.
+    /// **What the row-only promise cost (the 17q ladder, R1-1):** the row
+    /// remembered was the one STRADDLING the fold and it was restored with
+    /// its top AT the fold, so every page came back shifted by the straddle —
+    /// one row on the 46-pt fixture, a paragraph on her 262-block note — and
+    /// the block she was in moved that far toward the page's edge (piece 6's
+    /// walk, `17` → `18`). Her R-Q21 says *exactly* as she left it.
+    ///
+    /// So the memory carries the sub-row place too — never as a nudge, but as
+    /// the ANCHOR of the same absolute, idempotent, row-settled restore: the
+    /// row remembered is the first row whose top sits at or below the fold
+    /// and that fits in the room under it; `into` is where its top sat
+    /// (0…viewport) and `rowHeight` what it measured. The restore aims
+    /// `scrollTo(row, anchor: UnitPoint(y: into / (viewport − rowHeight)))`
+    /// — a unit point in [0, 1] for any row that fit — re-aimed with the REAL
+    /// height as the column measures the row, and settled when the row's
+    /// top reports `into` (±2). Measurement 1 holds (the row is the identity,
+    /// never the offset); measurement 2 holds (an anchor is absolute, so a
+    /// stale frame re-aims instead of compounding). A row that did not fit
+    /// falls back to the straddling row at the fold — 17p's rule — because
+    /// its unit point would leave [0, 1].
     ///
     /// **The TOP is a place of its own** (the 17p batch-a ladder, R1-1 —
     /// measured: a page left at offset 0 came back at 18, on every return).
@@ -747,12 +763,36 @@ final class TakesBoardLayout {
     /// block she moved to while away outranks the memory and the restore
     /// never runs — see `landingOutranks`.
     struct ArticlePlace: Equatable {
-        /// The `placementID` of the row at the top of the viewport — or nil
-        /// for the TOP of the page itself.
+        /// The `placementID` of the remembered row — or nil for the TOP of
+        /// the page itself.
         let rowID: String?
+        /// Where the row's top sat below the fold (0 = at the fold — 17p's
+        /// one place, and the fold-straddling fallback's). Zero for the TOP.
+        let into: CGFloat
+        /// The row's measured height when it was remembered — the first
+        /// aim's denominator, before the column has realized the row again.
+        let rowHeight: CGFloat
+
+        init(rowID: String?, into: CGFloat = 0, rowHeight: CGFloat = 0) {
+            self.rowID = rowID
+            self.into = into
+            self.rowHeight = rowHeight
+        }
 
         /// The page at rest: nothing above the first row.
         static let top = ArticlePlace(rowID: nil)
+
+        /// The aim's unit y: the row's point at this fraction of its height
+        /// meets the viewport's point at the same fraction, so the row's top
+        /// lands `into` below the fold. Clamped to [0, 1]; a row taller than
+        /// the room aims at the fold (17p's `.top`).
+        nonisolated static func anchorY(
+            into: CGFloat, rowHeight: CGFloat, viewport: CGFloat
+        ) -> CGFloat {
+            let room = viewport - rowHeight
+            guard room > 1, into > 0 else { return 0 }
+            return min(max(into / room, 0), 1)
+        }
     }
 
     /// The one-shot restore's state. `.undecided` until the FIRST honest
@@ -771,9 +811,12 @@ final class TakesBoardLayout {
 
     /// What the view should do with a geometry report.
     enum ArticleRestoreStep: Equatable {
-        /// Scroll to this row (the coarse aim, for a row a lazy column has
-        /// not realized yet — the only scroll that can reach one).
-        case scrollToRow(String)
+        /// Scroll this row to the remembered place (the coarse aim, for a row
+        /// a lazy column has not realized yet — the only scroll that can
+        /// reach one). `anchorY` is the unit point's y — 0 for the fold
+        /// (17p's `.top`), else where the row's top sat (the 17q ladder,
+        /// R1-1; `ArticlePlace.anchorY`).
+        case scrollToRow(String, anchorY: CGFloat = 0)
         /// Write this place into the session's memory.
         case remember(ArticlePlace)
         /// Wait — nothing to do this turn.
@@ -811,20 +854,32 @@ final class TakesBoardLayout {
         articleGeometrySeen && articleRestore == .settled
     }
 
-    /// The row at the top of the viewport right now — the place worth
-    /// remembering. The lowest row whose top is at or above the fold (the one
-    /// she is reading through); failing that, the first row below it.
+    /// The place worth remembering, right now (the 17q ladder, R1-1): the
+    /// first row whose top sits at or below the fold AND that fits in the
+    /// room under it — with where its top sat, sub-row exact. Failing that,
+    /// the row straddling the fold (the one she is reading through), restored
+    /// at the fold as 17p did; failing that, the first row below.
     var articlePlaceNow: ArticlePlace? {
-        var best: (id: String, minY: CGFloat)?
-        for (id, frame) in articleRowFrames where frame.minY <= 0.5 {
-            if best == nil || frame.minY > best!.minY { best = (id, frame.minY) }
-        }
-        if best == nil {
-            for (id, frame) in articleRowFrames {
-                if best == nil || frame.minY < best!.minY { best = (id, frame.minY) }
+        var fits: (id: String, frame: CGRect)?
+        var straddling: (id: String, minY: CGFloat)?
+        var below: (id: String, minY: CGFloat)?
+        for (id, frame) in articleRowFrames {
+            if frame.minY >= -0.5 {
+                if frame.maxY <= articleViewportHeight + 0.5,
+                   fits == nil || frame.minY < fits!.frame.minY {
+                    fits = (id, frame)
+                }
+                if below == nil || frame.minY < below!.minY { below = (id, frame.minY) }
+            } else if straddling == nil || frame.minY > straddling!.minY {
+                straddling = (id, frame.minY)
             }
         }
-        return best.map { ArticlePlace(rowID: $0.id) }
+        if let fits {
+            return ArticlePlace(
+                rowID: fits.id, into: max(fits.frame.minY, 0), rowHeight: fits.frame.height)
+        }
+        if let straddling { return ArticlePlace(rowID: straddling.id) }
+        return below.map { ArticlePlace(rowID: $0.id) }
     }
 
     /// **THE RESTORE, as a decision.** Pure but for its own state, so the
@@ -917,22 +972,30 @@ final class TakesBoardLayout {
         }
         // **Settled when the ROW says so**, never when an offset we computed
         // says so: a lazy column re-lays out under a scroll, and the row
-        // frames and the scroll geometry arrive in different passes.
-        if let frame = articleRowFrames[rowID], abs(frame.minY) <= 2 {
+        // frames and the scroll geometry arrive in different passes. "So"
+        // means its top is back where it SAT (the 17q ladder, R1-1) — at
+        // the fold for a 17p-shaped place, `into` below it otherwise.
+        if let frame = articleRowFrames[rowID], abs(frame.minY - place.into) <= 2 {
             articleRestore = .settled
             return .wait
         }
-        // Otherwise aim again. The aim is ABSOLUTE (scroll this row to the
-        // top) and therefore idempotent: re-aiming as the real heights arrive
-        // converges, where a relative nudge computed from a stale frame
-        // doubles its own correction.
+        // Otherwise aim again. The aim is ABSOLUTE (scroll this row to its
+        // anchor) and therefore idempotent: re-aiming as the real heights
+        // arrive converges, where a relative nudge computed from a stale
+        // frame doubles its own correction. The anchor's denominator is the
+        // row's REAL height once the column has realized it, the remembered
+        // one before (the coarse aim).
         guard articleRestoreAimsLeft > 0 else {
             articleRestore = .settled   // the row is gone, or will not settle.
             return .wait
         }
         articleRestoreAimsLeft -= 1
         articleRestoreAims += 1
-        return .scrollToRow(rowID)
+        let height = articleRowFrames[rowID]?.height ?? place.rowHeight
+        return .scrollToRow(
+            rowID,
+            anchorY: ArticlePlace.anchorY(
+                into: place.into, rowHeight: height, viewport: geometry.viewport))
     }
 
     func toggleExpanded(_ blockID: String) {

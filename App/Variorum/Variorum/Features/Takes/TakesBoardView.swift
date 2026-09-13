@@ -656,11 +656,14 @@ struct TakesBoardView: View {
                 switch model.consumeArticleGeometry(
                     geometry, positionedByUser: articleScroll.isPositionedByUser
                 ) {
-                case .scrollToRow(let rowID):
+                case .scrollToRow(let rowID, let anchorY):
                     // The restore's ONE move: put the block she was reading
-                    // back at the top of the page. Absolute, so re-aiming as
-                    // the lazy column's real heights arrive converges.
-                    column.scrollTo(rowID, anchor: .top)
+                    // back where it sat — at the top of the page for a
+                    // 17p-shaped place, `anchorY` down it otherwise (the 17q
+                    // ladder, R1-1). Absolute, so re-aiming as the lazy
+                    // column's real heights arrive converges.
+                    column.scrollTo(
+                        rowID, anchor: anchorY == 0 ? .top : UnitPoint(x: 0.5, y: anchorY))
                 case .remember, .wait:
                     break
                 }
