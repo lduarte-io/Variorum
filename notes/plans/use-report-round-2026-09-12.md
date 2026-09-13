@@ -6545,3 +6545,89 @@ it beside that one is right.
 **For the implementer's sanity pass (things it holds context on):** (1) `articleMemoryAtMount` is set in the `.undecided` branch BEFORE the resolver runs and read at `landArticle` — the two consult sites now share ONE condition ("a page to come back to"); the harness-order pins are unmodified. (2) The departure re-derivation is a `Task { @MainActor [weak self] }` from the view model — one per turn; a throwaway model (the `??` expression's) never reaches `forgetArticleRowFrame`; `teardown()` sets `articleTornDown` first, before the autosave stop. (3) `articlePlaceNow`'s `straddling` and `below` tuples now carry the frame (the height is what makes the short/tall split); the `tall` arm asserts `rowHeight` on every fallback. (4) `anchorY`'s lower bound is gone on purpose (measured); the upper clamp stays.
 
 **Canon note owed (drafted for the orchestrator, one clause on the R-8 draft for AppSpec §12's takes line):** *"…the restore puts the block back where its TOP sat — above the fold too, when it straddled it (the 17q ladder's round 2; a row taller than the page stays at the fold); the memory follows the rows as they arrive AND as they leave; and a page left at rest comes back at rest on a plain round trip in every mount order."*
+
+### 17q LADDER — ROUND 2 · THE IMPLEMENTER'S SANITY PASS
+
+*The 17q implementer (`opus-implementer`), the cross-model flow's ONE pass over
+`git diff d98c629e..44f427de` (the four code commits, four code files + two notes) — read in my own
+context, nothing implemented, no code or test file touched; this plan is the only file this edits.
+**6 CLEAR · 0 RAISED.** My own evidence, run for this pass: seventeen suites in ONE `xcodebuild test`
+— **`✔ Test run with 136 tests in 17 suites passed after 113.986 seconds.`**, zero `skipped:` — and a
+DEV-STORE SPOT-WALK of **R2-1's own shape**, the finding I missed (`pgrep` empty before the build, at
+launch and after my quit; her app never touched).*
+
+**R2-1 (the `.top` stand-down in the app's order) — CLEAR, and I confirmed it in USE myself on the
+shape my sanity pass got wrong.** On the fix tree's Debug build, A Scandal in Bohemia, ring on block
+**238/262**, I scrolled the article to REST (`"I."` under the column's top padding — the memory is the
+TOP, her block far below and off screen), then ⌘1 and ⌘2: **PIXEL-IDENTICAL (`cmp`), and the bottom
+bar still reads `block 238/262`** — so the landing WAS armed on the block she was in and stood down,
+rather than being absent. Pre-fix that page came back as the entry frame with block 238 revealed at
+the foot. **The condition, checked against the two mount orders I hold:** `articleMemoryAtMount` is
+written in the `.undecided` branch BEFORE the resolver, so (a) in the harness order `landArticle`
+still runs at `.undecided` with the fact nil — the consult is skipped and the `.undecided` branch does
+the work, which is why every pin that rides that order is unmodified; (b) in the app's order the fact
+is non-nil for both a ROW memory (`.wanted`) and a TOP memory (`.settled` without ever reaching
+`.wanted`), which is exactly the gap; (c) the first entry leaves it nil, so 17o row 8's everyday
+reveal is untouched — the road I checked at round 1 and the one this fix must not disturb; (d) a bloom
+cannot reach it, the resolver's first guard being the kind. `.undecided` is entered once per mount
+(the branch always leaves `.settled` or `.wanted`; a zero-viewport report returns before it), so the
+fact cannot be re-read later in the mount. Arm (f)'s comment is evolved with its reason, as the rider
+asked.
+
+**R2-2 (the departure half) — CLEAR; the deferral is a better answer than either guard I named, and I
+checked the two orderings that could have broken it.** My rider was that a board's unmount runs every
+row's `onDisappear` in one transaction and a per-departure write would let the last row to leave
+decide; the reviewer measured that red (block 15 at 2 → block 24 at 506) and then solved it by
+DEFERRING rather than guarding — one `Task { @MainActor [weak self] }` coalesced by
+`articleDepartureScheduled`, so however many rows leave in a turn there is ONE re-derivation, and it
+runs after every synchronous departure in that turn. **Why that dissolves my hazard rather than
+dodging it:** by the time the body runs, a teardown has left no rows to derive from AND
+`teardown()`'s `articleTornDown` has closed the door — and because the flag is set at the TOP of
+`teardown()`, before the autosave stop, it does not matter whether SwiftUI runs the board's
+`onDisappear` before or after the rows', which was the precise reason my guard (b) had no certainly-
+first site. `[weak self]` is right (a throwaway model must not be retained by a queued turn), and a
+throwaway never reaches `forgetArticleRowFrame` anyway. **P1 re-checked at the new path:** one
+re-derivation per turn over `articleRowFrames` — realized rows only — is strictly cheaper than
+W-2's arrival half, which already runs per moved row. **And the restore still owns the page while it
+is pending:** `articleRowFramesMoved`'s `articleRestore == .settled` guard means the departures a
+restore's own scrolling causes write nothing.
+
+**R2-3 (the fits-fallback) — CLEAR, and my paper split was FALSIFIED BY MEASUREMENT, which is the
+right way for it to end.** I claimed a taller-than-viewport straddler needed no `scrollTo`
+measurement because `into/room` is positive and in range when both are negative. The arithmetic is
+right and the surface does not implement it: aimed to sit at −400 the row landed at −838.5 and never
+settled, because SwiftUI aligns such a row's anchor point with the viewport's TOP rather than with the
+viewport's own fraction. That is the 17p adjudication's lesson again — this seam is measured, not
+derived — and I accept it without reservation. **What I checked on the built rule:** the two
+thresholds agree, which is where this could have drifted — `articlePlaceNow`'s
+`short = height < viewport − 1` is the same predicate as `anchorY`'s `room > 1`, so a row classified
+SHORT always gets a live denominator and a row classified TALL always falls to the fold; the settle
+(`|minY − into| ≤ 2`) needed no change for a negative `into`; the upper clamp survives for places
+`articlePlaceNow` cannot produce; and my third branch is answered — `below` now carries its
+`rowHeight` and keeps `into 0`, correct by impossibility for a tall row (a unit point cannot put such
+a row's top below the fold at all) and named in the doc for the rare short-row shape.
+
+**R2-4 (the pin's doc) — CLEAR.** It now separates the order the harness cannot reproduce
+(`.onAppear` vs the first geometry — W-1's) from the one it reproduces by construction (the landing
+vs the first geometry, because the projection rides the view's `.task`), which is the distinction my
+own mount-ordering trace turned on and the road R2-1's mounted pin needs.
+
+**R2-5 (the dead ternary) — CLEAR.** `UnitPoint(x: 0.5, y: anchorY)` alone with the comment kept;
+byte-identical, since `.top` IS that value at `anchorY == 0`.
+
+**R2-6 (the row's numbers) — CLEAR.** 1,138 at `519280a3` matches my own `git show … | wc -l`, and
+round 2's additions are named on the row.
+
+**One walk observation recorded rather than raised, because it is the class this suite already
+carries.** Before reaching rest I round-tripped a page sitting at the top of block 2 (a ROW memory):
+the returned frame's first visible row and its first line sit at the same y — the page came back — but
+the files differ in every band, and no integer-pixel shift in ±40 px makes them match, which is a
+RENDERING difference rather than a move (a pure shift would match at some delta). That is the
+sub-point class `26`/`27` and `41`/`42` already name. The decisive test for the finding — the at-rest
+shape — is pixel-identical, and I report both rather than only the clean one.
+
+**Nothing raised.** The fences hold in the diff I read (`Sources/`, `Shared/`, `Sync/`, `Server/`,
+`PaneTextAuthority`, `PaneSurface`, `BlockRangeIndex`, `EditorTextView`, `TakesChoreographer` all
+absent from `--stat`); no schema, no `setting`; no trailers. My own closing evidence for this pass:
+**136 tests in 17 suites, zero skipped**, plus the at-rest spot-walk above.
+
