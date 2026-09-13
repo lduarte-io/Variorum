@@ -6943,7 +6943,7 @@ Both rows are the R3-1 class (a settle that the column's later measurement passe
   its own section (it is neither the Editor's look nor the document's habits), three rows from
   `ReceiptStyle.allCases`, `ReceiptStyleCopy` beside `SavepointCadenceCopy` with the sentence the
   setting must never leave out. No suite mounts the pane — the walk is its evidence.
-- **PIECE 6 — the walk (the acceptance gate): NOT-STARTED.**
+- **PIECE 6 — the walk (the acceptance gate): DONE (`HASH6`).** Eleven captures under `notes/plans/use-report-2026-09-12-screens/18i/`; the table is below.
 - **THE CLOSING RUNS:** PENDING.
 
 #### R-5 · THE RECEIPT-SITE CLASSIFICATION (every site that reaches `StatusCenter`, with its verdict)
@@ -7005,6 +7005,8 @@ reading the words (the `RecoveryStatus` rule, reused rather than re-derived).
 | 43 | `RootView:505` · `ShellRouter.openBeside` | `WorkspaceNaming.sameNoteNote` | **REFUSAL** | no new pane opened |
 | 44 | `MastheadTagCluster` · `StarsModel` · `BookIndexEditModel` · `BookIndexView` · `MarkdownActs` · `EditorCommands` | error and unavailable notes | **REFUSAL** | unchanged |
 
+| 45 | `EditorViewModel.jumpToDocumentEnd` `:2196` | "Caret at the end — typing here starts a new block." | **REFUSAL (direction)** | found ON THE WALK, toasting under `.quiet` — correctly: nothing was minted; the door moved the caret and the sentence says what typing there will do. Same class as 11 and 12 |
+
 **BORDERLINE CALLS, recorded with their reason (the brief's ask):**
 
 - **29 — "already one paragraph"** is the one message that could go either way: it is the OUTCOME of a door
@@ -7027,3 +7029,27 @@ reading the words (the `RecoveryStatus` rule, reused rather than re-derived).
 and no setting governs them):** `LibraryViewModel.receipt` (the Library/Archived/Trash caption),
 `MembershipChip`'s `@State status` (the chip's popover), `TrayViewModel` / `BlockHistoryPane` /
 `NoteVersionsPane` / `DataSafetyModel` (their panels' own lines), and the phone's `MobileBlockHistory`.
+
+#### R-5 · THE WALK (the acceptance gate — USE, not mount)
+
+On the **DEV-STORE Debug build** (`io.lduarte.Variorum.debug`, `App/Variorum/DerivedData/18i/Build/Products/Debug/Variorum.app`), `cliclick` + `Tools/WalkKit`. **Her real-store app was NOT running at any point** (`pgrep -fl 'Variorum.app/Contents/MacOS'` → empty before the launch and after my quit); `/Applications` untouched, no Release build. Fixture: a fresh note with two blocks typed in Write (the second block's text arrived short — `cliclick`'s `t:` outruns the editor's per-keystroke identity oracle in DEBUG; irrelevant to what is being walked, recorded so a reader is not puzzled by "S para").
+
+| # | What I did | What I saw | Capture |
+|---|---|---|---|
+| 1 | **QUIET (her default)** · caret at block 2's start, ⌫ at the seam | the blocks joined (block 1/1) and **"Blocks joined — ⌥⌘Z undoes it."** stood MUTED at the bar's trailing end, before `5w block · 5w in note`. **No toast.** This is the row | `01-quiet-seam-join-terminal.png` |
+| 2 | QUIET · the newlines chip (her image 7) | the chip flipped `on → off` and the sentence landed in the same quiet slot, TRUNCATED at the counts' edge — *"Newlines now stay inside the block in this note — typing and pasting won't make new blocks; Divid…"* — the counts keeping their full width. No toast | `02-quiet-newlines-chip-terminal.png` |
+| 3 | QUIET · Block ▸ Merge Blocks with one block (a real refusal) | the full **TOAST card**: *"To merge, put the caret at a block seam or select across the blocks to join."* with its ✕. The guard that makes the default safe | `03-quiet-a-refusal-still-toasts-terminal.png` |
+| 4 | Settings ▸ Appearance ▸ **Confirmations** | its own section: the picker on *"A quiet line in the bottom bar (recommended)"*, the help naming the four receipts by name, and the sentence the setting never leaves out (refusals and offers always show) | `04-the-settings-row-confirmations.png` |
+| 5 | the picker, open | three rows — *A note at the bottom of the window* · **✓ A quiet line in the bottom bar (recommended)** · *Nothing*. **Her default, checked, live** | `05-the-three-way-picker-quiet-is-checked.png` |
+| 6 | **TOAST** · the same chip | the whole sentence as the toast card; the bar's quiet slot empty | `06-toast-the-same-chip-toasts-terminal.png` |
+| 7 | **OFF** · the same chip | the chip flipped and **nothing was said** — no toast, no line | `07-off-the-chip-says-nothing-terminal.png` |
+| 8 | OFF · Merge Blocks again | the refusal toasts, unchanged. P-2 holds at the most aggressive setting | `08-off-a-refusal-still-toasts-terminal.png` |
+| 9 | back to QUIET · **STUDY voice** · Block ▸ New Block Below | *"New block added below — type away."* muted in the Study serif at the bar's trailing end | `09-quiet-study-voice-a-receipt-in-the-bar.png` |
+| 10 | QUIET · a **book note LIVE** (essays in progress ▸ Outline), commit from the box | the sidebar note box's FOOTER carries **"Committed."** on its own row above `3w block · 3w in note` — inside the box, nothing outside it moved | `10-quiet-the-books-sidebar-note-box-footer.png` |
+| 11 | QUIET · **the TAKES bar** (⌘2), Block ▸ New Block at End of Note | *"New block added at the end — type away."* muted at that bar's trailing end, before `0w take · 5w note` | `11-quiet-the-takes-bar-carries-it-too.png` |
+
+**Settings persistence, walked:** each value survived closing and reopening the Settings window (capture 5's ✓ moved to *Nothing* and then back), which is the store round-trip plus the store's adoption, seen rather than asserted.
+
+**One thing the walk FOUND and I left alone, with its reason.** `jumpToDocumentEnd`'s *"Caret at the end — typing here starts a new block."* (`EditorViewModel.swift:2196`) toasted under `.quiet`. That is correct and deliberate: **nothing was minted** — the door moved the caret and the sentence says what typing there will DO. It is the same class as the undo hint and the ceremony's "run Make Block again": a DIRECTION, not a confirmation, and directions always show. It is row 45 of the table.
+
+**Restored:** the dev store's voice put back to Terminal (it was Terminal at launch; Study was the walk's). `receipt_style` is left at **quiet** — the new default, which is the point. My instance quit; zero instances at the close.
