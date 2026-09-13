@@ -1741,4 +1741,150 @@ struct TakesArticleScrollTests {
         let frame = pane.convert(pane.bounds, to: article.contentView)
         return frame.minY - article.contentView.bounds.minY
     }
+
+    // MARK: - The 17q ladder, round 1 — R1-1's re-walk on her 262-block note:
+    //         the two mechanisms the trace showed
+
+    /// **THE OPEN ROW'S MECHANISM, measured on A Scandal in Bohemia at the
+    /// ladder's re-walk — and GREEN ON BOTH SIDES HERE, said outright.** The
+    /// board's FIRST geometry report arrives before `.onAppear`, where
+    /// `landingEnabled` used to be set, and `rememberedArticlePlace` is gated
+    /// on that flag — so in the app the first geometry read NO memory, settled
+    /// the restore at once, and the entry landing then revealed her block
+    /// from the top of the page (the trace: `remember TOP` with no `AIM`, the
+    /// memory holding a row; captures `20` → `22`). This hosting view runs
+    /// `.onAppear` before its first non-zero geometry, so a bare-model mount
+    /// cannot reproduce the app's order; the pin stands as the guard that the
+    /// app's own road (a bare model, the projection from the view's `.task`)
+    /// restores at all. The RED is `theTakesBoardIsTheTakesBoardFromConstruction`
+    /// beside it, and the walk's frames.
+    @Test func theRestoreReadsTheMemoryEvenWhenTheFirstGeometryPrecedesAppear() async throws {
+        try await withSession(blocks: 60) { session, fixture, db, mount in
+            let router = session.commandRouter
+            router.forgetCurrentBlock(for: fixture.postID)
+            defer { router.forgetCurrentBlock(for: fixture.postID) }
+
+            let first = try await landingModel(session: session, fixture: fixture, db: db)
+            let (windowA, hostingA) = await mount(first)
+            guard let articleA = articleScrollView(in: hostingA) else {
+                Issue.record("no article scroll view on the first mount")
+                return
+            }
+            scroll(articleA, to: 800)
+            await settle(windowA, hostingA, until: { false }, maxTurns: 10)
+            guard let before = topOfPage(hostingA, articleA),
+                  let wasAt = fixture.blocks.firstIndex(where: { $0.variant == before.variantID })
+            else {
+                Issue.record("no fixture take at the top of the page after scrolling")
+                return
+            }
+            #expect(session.editorRouter.takesArticlePlaces[fixture.postID]?.rowID != nil,
+                    "non-vacuity: the memory holds a row")
+            windowA.orderOut(nil)
+            first.teardown()
+            await settle(windowA, hostingA, until: { false }, maxTurns: 4)
+
+            // …and back the way the app mounts a board: a BARE model — no
+            // `landingEnabled` set here, nothing adopted — the view's own
+            // `.task` brings the projection after the first layout.
+            let bare = TakesViewModel(
+                session: session, postID: fixture.postID, defaults: fixture.defaults)
+            let (windowB, hostingB) = await mount(bare)
+            guard let articleB = articleScrollView(in: hostingB) else {
+                Issue.record("no article scroll view on the second mount")
+                return
+            }
+            await settle(windowB, hostingB, until: { false }, maxTurns: 16)
+            #expect(bare.landingEnabled, "non-vacuity: the view made this THE takes board")
+            #expect(bare.board.articleRestoreAims > 0,
+                    """
+                    the restore RAN — on the 17q tree the first geometry \
+                    preceded `.onAppear`'s `landingEnabled`, read no memory and \
+                    settled the restore at once, so the app never restored a page
+                    """)
+            guard let after = topOfPage(hostingB, articleB),
+                  let isAt = fixture.blocks.firstIndex(where: { $0.variant == after.variantID })
+            else {
+                Issue.record("no fixture take at the top of the page after the remount")
+                return
+            }
+            #expect(abs(isAt - wasAt) <= 1,
+                    "the page came back (block \(isAt + 1), left on block \(wasAt + 1))")
+        }
+    }
+
+    /// **The memory follows the ROWS** (measured at the re-walk: every
+    /// scroll-geometry report carried the row frames of the PREVIOUS step —
+    /// `529E` at −15 on the 3353 report, −45 only on the 3413 one — so a
+    /// memory written from the scroll hook alone is one step stale: the row
+    /// that sat at `into` before the step). Pure: the hook writes the stale
+    /// place, the rows' arrival re-derives the true one; nothing is
+    /// re-derived while a restore is pending, and a frame that did not move
+    /// re-derives nothing.
+    @Test func aRowFramesArrivalReDerivesTheMemoryTheScrollHookWroteOneStepStale() {
+        let board = freshBoard("stale-step")
+        let a57 = { (y: CGFloat) in CGRect(x: 0, y: y, width: 680, height: 57) }
+        board.noteArticleRowFrame("a", a57(0))
+        board.noteArticleRowFrame("b", a57(63))
+        #expect(board.consumeArticleGeometry(
+            geometry(offset: 100), remembered: nil, positionedByUser: false)
+                == .remember(TakesBoardLayout.ArticlePlace(rowID: "a", into: 0, rowHeight: 57)))
+        // The NEXT step's scroll hook runs with the previous step's frames.
+        #expect(board.consumeArticleGeometry(
+            geometry(offset: 130), remembered: nil, positionedByUser: false)
+                == .remember(TakesBoardLayout.ArticlePlace(rowID: "a", into: 0, rowHeight: 57)),
+                "one step stale: the hook still says `a` at the fold")
+        // Then the rows say where they are now.
+        #expect(board.noteArticleRowFrame("a", a57(-30)))
+        #expect(board.noteArticleRowFrame("b", a57(33)))
+        #expect(board.articleRowFramesMoved()
+                == .remember(TakesBoardLayout.ArticlePlace(rowID: "b", into: 33, rowHeight: 57)),
+                "the memory follows the rows, not the hook's stale frames")
+        #expect(board.noteArticleRowFrame("b", a57(33)) == false, "a frame that did not move")
+
+        let pending = freshBoard("stale-pending")
+        _ = pending.consumeArticleGeometry(
+            geometry(offset: 0), remembered: TakesBoardLayout.ArticlePlace(rowID: "x"),
+            positionedByUser: false, order: nil)
+        pending.noteArticleRowFrame("a", a57(10))
+        #expect(pending.articleRowFramesMoved() == .wait,
+                "a pending restore owns the page — nothing is remembered under it")
+    }
+
+    /// …and the write reaches the SESSION through the view model's row-frame
+    /// door, equality-gated.
+    @Test func theSessionsMemoryFollowsTheRowsFrameReports() async throws {
+        try await withSession(blocks: 3) { session, fixture, db, _ in
+            let model = try await landingModel(session: session, fixture: fixture, db: db)
+            let rows = model.projection.slots.map(\.placementID)
+            _ = model.consumeArticleGeometry(
+                TakesBoardLayout.ArticleGeometry(offset: 100, content: 3000, viewport: 700),
+                positionedByUser: false)
+            #expect(session.editorRouter.takesArticlePlaces[fixture.postID] == nil,
+                    "non-vacuity: no frames yet, nothing remembered")
+            model.noteArticleRowFrame(rows[0], CGRect(x: 0, y: -30, width: 680, height: 57))
+            model.noteArticleRowFrame(rows[1], CGRect(x: 0, y: 33, width: 680, height: 57))
+            #expect(session.editorRouter.takesArticlePlaces[fixture.postID]
+                    == TakesBoardLayout.ArticlePlace(rowID: rows[1], into: 33, rowHeight: 57),
+                    "the rows' arrival wrote the place the hook could not")
+        }
+    }
+
+    /// **RED ON THE 17q TREE:** which board a model is THE takes board for is
+    /// a construction-time fact. Set only in `.onAppear`, the flag was false
+    /// at the first geometry report — the one that decides the restore — and
+    /// the memory read behind it returned nil (the re-walk's trace).
+    @Test func theTakesBoardIsTheTakesBoardFromConstruction() async throws {
+        try await withSession(blocks: 1) { session, fixture, _, _ in
+            let bare = TakesViewModel(
+                session: session, postID: fixture.postID, defaults: fixture.defaults)
+            #expect(!bare.landingEnabled, "non-vacuity: a bare model is nobody's board")
+            _ = TakesBoardView(session: session, postID: fixture.postID, model: bare)
+            #expect(bare.landingEnabled,
+                    """
+                    constructing THE takes board on it makes it so — before any \
+                    appear, so the first geometry report reads the memory
+                    """)
+        }
+    }
 }

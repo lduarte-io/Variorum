@@ -130,7 +130,17 @@ struct TakesBoardView: View {
     init(session: AppSession, postID: String, model: TakesViewModel? = nil) {
         self.session = session
         self.postID = postID
-        _model = State(initialValue: model ?? TakesViewModel(session: session, postID: postID))
+        let model = model ?? TakesViewModel(session: session, postID: postID)
+        // **A construction-time fact, never an appear-time one** (the 17q
+        // ladder's R1-1, measured on her 262-block note): the article's
+        // FIRST geometry report arrives before `.onAppear`, and the memory
+        // read (`rememberedArticlePlace`) is gated on this flag — so set only
+        // in `.onAppear` it read NO memory at the one moment that decides the
+        // restore, the restore settled at once, and every entry became "the
+        // top, then the landing's reveal". Which board a model is THE takes
+        // board for is known here. (`.onAppear` still sets it — harmless.)
+        model.landingEnabled = true
+        _model = State(initialValue: model)
     }
 
     var body: some View {

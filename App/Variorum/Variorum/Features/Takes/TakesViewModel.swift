@@ -634,7 +634,13 @@ final class TakesViewModel {
     /// The article's realized rows report their place; the board answers
     /// whether a landing needs a scroll at all.
     func noteArticleRowFrame(_ placementID: String, _ frame: CGRect) {
-        board.noteArticleRowFrame(placementID, frame)
+        guard board.noteArticleRowFrame(placementID, frame) else { return }
+        // The 17q ladder's R1-1 (the re-walk): the scroll hook runs before
+        // the rows' frame reports for the same step, so the memory it wrote
+        // is one step stale — a row that moved re-derives it.
+        if case .remember(let place) = board.articleRowFramesMoved() {
+            rememberArticlePlace(place)
+        }
     }
 
     func forgetArticleRowFrame(_ placementID: String) {
@@ -686,6 +692,10 @@ final class TakesViewModel {
 
     func rememberArticlePlace(_ place: TakesBoardLayout.ArticlePlace) {
         guard landingEnabled else { return }
+        // Equality-gated: the rows re-derive the place at scroll rate now
+        // (`noteArticleRowFrame`), and the session's dictionary should not
+        // churn for a place that did not move.
+        guard session.editorRouter.takesArticlePlaces[postID] != place else { return }
         session.editorRouter.takesArticlePlaces[postID] = place
     }
 

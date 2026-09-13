@@ -681,14 +681,36 @@ final class TakesBoardLayout {
 
     /// Equality-gated, like every other geometry sink on this component: a
     /// row re-reporting the same place inside one layout pass writes nothing.
-    func noteArticleRowFrame(_ placementID: String, _ frame: CGRect) {
+    /// Returns whether anything moved (the 17q ladder's R1-1 walk — the
+    /// caller re-derives the memory only when it did).
+    @discardableResult
+    func noteArticleRowFrame(_ placementID: String, _ frame: CGRect) -> Bool {
         if let existing = articleRowFrames[placementID],
            abs(existing.minY - frame.minY) < 0.5,
            abs(existing.height - frame.height) < 0.5 {
-            return
+            return false
         }
         articleRowFrames[placementID] = frame
+        return true
     }
+
+    /// **The memory follows the ROWS, not only the scroll hook** (the 17q
+    /// ladder's R1-1, measured on her 262-block note at the re-walk): for
+    /// one scroll step the scroll geometry hook runs BEFORE the rows report
+    /// their new frames, so a memory written from that hook alone is always
+    /// ONE STEP STALE — the row that sat at `into` before the step, not the
+    /// one there now (30 pt on a wheel tick; a fling's last step is pages).
+    /// So a row frame's arrival re-derives the place while the restore is
+    /// settled — the restore, while pending, owns the page and nothing is
+    /// remembered under it (17p's one-shot rule, unchanged).
+    func articleRowFramesMoved() -> ArticleRestoreStep {
+        guard articleRestore == .settled, let geometry = lastArticleGeometry else { return .wait }
+        return rememberStep(geometry)
+    }
+
+    /// The last geometry the scroll hook reported — what a row frame's
+    /// re-derivation reads (`articleRowFramesMoved`).
+    @ObservationIgnored private var lastArticleGeometry: ArticleGeometry?
 
     func forgetArticleRowFrame(_ placementID: String) {
         articleRowFrames.removeValue(forKey: placementID)
@@ -902,6 +924,7 @@ final class TakesBoardLayout {
         guard geometry.viewport > 0 else { return .wait }
         articleGeometrySeen = true
         articleViewportHeight = geometry.viewport
+        lastArticleGeometry = geometry
         // Her hand outranks a pending LANDING too: a request that outlived
         // its moment must never haul a page she has since scrolled (the 17o
         // batch-b BLOCKER's class).
@@ -942,7 +965,9 @@ final class TakesBoardLayout {
     /// A page at rest remembers the TOP itself (R1-1); a scrolled page
     /// remembers the row at the top of the viewport.
     private func rememberStep(_ geometry: ArticleGeometry) -> ArticleRestoreStep {
-        if geometry.offset <= 0.5 { return .remember(.top) }
+        if geometry.offset <= 0.5 {
+            return .remember(.top)
+        }
         return articlePlaceNow.map { .remember($0) } ?? .wait
     }
 
