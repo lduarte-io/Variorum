@@ -9,7 +9,9 @@ extension Queries {
     /// Defaults are the sittings' letter: Terminal leads (R1), seams
     /// hidden at rest (§12/R42), editing indicator OFF (R14/R22), margin
     /// comments (R7 — inline is the opt-in), follow-the-scroll off until
-    /// asked for (R25 is an OPTION).
+    /// asked for (R25 is an OPTION), receipts QUIET (18i — her R-Q5:
+    /// *"Quiet should be the default, but toast should still be an
+    /// option"*).
     public struct ThemeSettings: Equatable, Sendable {
         public var voice: ThemeVoice = .terminal
         public var seamsVisible = false
@@ -17,6 +19,9 @@ extension Queries {
         public var inlineComments = false
         public var followTheScroll = false
         public var fanStyle: FanStyle = .stack
+        /// 18i (R-Q5): what a RECEIPT does. Refusals and offers always
+        /// toast whatever this says — `ReceiptStyle` carries the reasoning.
+        public var receiptStyle: ReceiptStyle = .quiet
 
         public init() {}
     }
@@ -27,7 +32,8 @@ extension Queries {
             sql: """
                 SELECT key, value FROM setting
                 WHERE key IN ('theme_voice', 'seams_visible', 'editing_indicator',
-                              'inline_comments', 'follow_the_scroll', 'fan_style')
+                              'inline_comments', 'follow_the_scroll', 'fan_style',
+                              'receipt_style')
                 """)
         var settings = ThemeSettings()
         for row in rows {
@@ -46,6 +52,8 @@ extension Queries {
                 settings.followTheScroll = value == "1"
             case "fan_style":
                 settings.fanStyle = FanStyle(rawValue: value) ?? settings.fanStyle
+            case "receipt_style":
+                settings.receiptStyle = ReceiptStyle(rawValue: value) ?? settings.receiptStyle
             default:
                 break
             }

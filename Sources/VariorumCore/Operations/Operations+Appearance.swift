@@ -52,6 +52,21 @@ extension Operations {
         }
     }
 
+    /// **18i (her ruling R-Q5): how a RECEIPT shows itself** — toast (what
+    /// every receipt did before), quiet (her default: the bottom bar's muted
+    /// line), or off. Refusals and offers are untouched by it and always
+    /// toast; `ReceiptStyle` carries the whole reasoning, including why the
+    /// value is E2EE-clean.
+    ///
+    /// Synced document semantics like every other `setting` row here
+    /// (upsert-only, never tombstoned — the `fan_style` class). Zero schema,
+    /// so no §12 lockstep event: the marker stays where it is.
+    public func setReceiptStyle(_ style: ReceiptStyle) throws {
+        try database.write { db in
+            try upsertSetting(db, key: "receipt_style", value: style.rawValue)
+        }
+    }
+
     /// The DOCUMENT-GLOBAL segmentation default (`default_segmentation` —
     /// AppSpec §7's seed, 'paragraph'): what fresh text does in every post
     /// that carries no per-post override. 13d batch 4 (her A16); 13b's 4D

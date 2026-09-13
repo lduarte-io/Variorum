@@ -6900,4 +6900,29 @@ Both rows are the R3-1 class (a settle that the column's later measurement passe
 
 ### R-5 · RECORD (the implementer writes here from its first commit)
 
-*(empty until the implementer's first commit)*
+**LIVE STATUS — 18i (`opus-implementer`, opened 2026-09-13 at `fe54be0f`; the code tree it builds on is `03dd8a7d`).**
+
+**WHAT I HAVE NOT DONE (the record's first line).** *(PENDING until the close — filled at the last commit.)*
+
+- **Orientation — DONE.** Read in my own context, in the brief's order: `CLAUDE.md` and the canon it
+  auto-loads (CoreDescription · OverallModel · AppSpec — §7's `setting` block and its E2EE PLAIN
+  column promise, §12's chrome grammar · SyncSpec — §12's lockstep rule · TEXTKIT2_NOTES); this
+  plan's §0, §1 (Q-5), §3 row 8, §4.5, §5.3, §7 (R-Q5 — SETTLED), §8, §9, §12's F-0 and F-6, R-0
+  (P-1…P-9 + the application notes, P-2 fire-and-DO in particular); the R-5 brief in full and R-1's
+  rules 1–8 verbatim. Then the code, whole: `Registry/StatusCenter.swift` · `Registry/StatusToast.swift`
+  · `Theme/ThemeStore.swift` · `Sources/VariorumCore/Queries/AppearanceQueries.swift` ·
+  `Sources/VariorumCore/Operations/Operations+Appearance.swift` ·
+  `Features/Settings/AppSettingsView.swift`'s Appearance pane · `Features/Editor/CommitBar.swift`
+  (both arrangements + `boxFooter`) · `Features/Takes/TakesBottomBar.swift` ·
+  `Core/Views/SidebarNoteBox.swift` · and every producer that reaches the centre (below).
+  Tree clean at `fe54be0f`, `main` == `origin/main`. **Her real-store app is NOT running**
+  (`pgrep -fl 'Variorum.app/Contents/MacOS'` → nothing, 04:1x) — re-checked before the walk; never
+  touched either way.
+
+- **PIECE 1 — the core enum + query + operation: DONE (`HASH1`).**
+- **PIECE 2 — the seam's kind and routing: NOT-STARTED.**
+- **PIECE 3 — the receipt sites (the classification table): NOT-STARTED.**
+- **PIECE 4 — the quiet slot: NOT-STARTED.**
+- **PIECE 5 — the Appearance pane's row: NOT-STARTED.**
+- **PIECE 6 — the walk (the acceptance gate): NOT-STARTED.**
+- **THE CLOSING RUNS:** PENDING.

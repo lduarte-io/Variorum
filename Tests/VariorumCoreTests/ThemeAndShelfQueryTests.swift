@@ -18,6 +18,35 @@ struct AppearanceSettingsTests {
             #expect(settings.inlineComments == false, "R7: margin is the ruling")
             #expect(settings.followTheScroll == false, "R25: an OPTION, not a default")
             #expect(settings.fanStyle == .stack)
+            // 18i (her R-Q5): *"Quiet should be the default, but toast
+            // should still be an option"* — the DEFAULT is the ruling, so
+            // an unseeded store resolves it here and nowhere else.
+            #expect(settings.receiptStyle == .quiet, "R-Q5: quiet is her default")
+        }
+    }
+
+    /// 18i: the receipt-style setting is a `setting` row like every other
+    /// one on this pane — read-time default, round-trip, a garbage value
+    /// reading as the default, and the outbox row that makes it synced
+    /// document semantics.
+    @Test func receiptStyleRoundTripsAndGarbageReadsAsQuiet() throws {
+        try withOperations { ops, db in
+            try ops.setReceiptStyle(.toast)
+            #expect(try db.read { try Queries.themeSettings($0) }.receiptStyle == .toast)
+            #expect(try db.outboxContains("setting", "receipt_style"),
+                    "synced document semantics, the fan_style class")
+            try ops.setReceiptStyle(.off)
+            #expect(try db.read { try Queries.themeSettings($0) }.receiptStyle == .off)
+            #expect(try db.fetchInt(
+                "SELECT COUNT(*) FROM setting WHERE key = 'receipt_style'") == 1,
+                    "upsert-only — never a second row")
+
+            try db.write { db in
+                try db.execute(
+                    sql: "UPDATE setting SET value = 'fireworks' WHERE key = 'receipt_style'")
+            }
+            #expect(try db.read { try Queries.themeSettings($0) }.receiptStyle == .quiet,
+                    "an unrecognized value reads as her default, never as silence")
         }
     }
 

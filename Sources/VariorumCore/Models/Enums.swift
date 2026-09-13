@@ -89,6 +89,41 @@ public enum EditingIndicatorStyle: String, Codable, Sendable, CaseIterable, Data
     case background
 }
 
+/// **How a RECEIPT shows itself** (the 2026-09-12 use-report round, 18i —
+/// her ruling R-Q5, from the report: *"there's these little text confirmation
+/// popups that are always appearing… i either need them off, more subtle in
+/// the bottom bar in more muted text, or a setting if i can turn it on or
+/// off. maybe the setting is the best option?… i don't always need it less
+/// noticable because for some operations it's the right confirmation text to
+/// show."* — and her call on the default: *"Quiet should be the default, but
+/// toast should still be an option"*).
+///
+/// It governs **RECEIPTS ONLY** — the after-the-fact confirmations of an act
+/// that LANDED ("Blocks joined — ⌥⌘Z undoes it.", "Block divided", the
+/// newlines chip's sentence). **A REFUSAL and an OFFER always show as the
+/// toast, under every value here**, because a door that could not act must
+/// deliver the operations layer's real refusal (P-2, fire-and-DO) and an
+/// offer carries a button she has to be able to press. The app-side seam
+/// (`StatusCenter`) is where the three kinds live; this enum is only the
+/// stored answer to "what does a receipt do".
+///
+/// Stored in the synced `setting` table under `receipt_style` (document
+/// semantics, the `fan_style`/`savepoint_cadence` class — the same act
+/// confirms the same way on every device). **E2EE-clean by construction:**
+/// three enum tokens, never prose, so `setting.value`'s PLAIN classification
+/// and its column-fenced disclosure promise (AppSpec §7, the 14b ladder's
+/// R1-9) hold unchanged. No schema, no migration, no §12 lockstep event —
+/// a setting key is upsert-only.
+public enum ReceiptStyle: String, Codable, Sendable, CaseIterable, DatabaseValueConvertible {
+    /// What every receipt did before 18i: the shell's status toast.
+    case toast
+    /// **Her default**: a muted line at the bottom bar's trailing end,
+    /// fading on the same clock the toast uses.
+    case quiet
+    /// Nothing at all. Refusals and offers still toast.
+    case off
+}
+
 /// **The savepoint cadence** (Phase 13j, J11 — her sitting-round-1 ruling:
 /// *"ONE simple setting"*, after her observation that *"unless you've been
 /// remembering to commit version history is kind of weak right now"*).
