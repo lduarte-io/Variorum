@@ -358,7 +358,12 @@ struct VariorumApp: App {
             if case .ready(let session) = bootstrap.state {
                 AppSettingsView(
                     session: session, services: services,
-                    protection: bootstrap.protection)
+                    protection: bootstrap.protection,
+                    // 18j: the app's ONE appearance owner, handed to its
+                    // door. Never re-read from `UserDefaults` by the pane
+                    // (F-0: a setting is read once at its owner and pushed
+                    // down) — the pane binds to this object.
+                    appearance: appDelegate.appearance)
             } else {
                 Text("Open the main window first.")
                     .padding(24)

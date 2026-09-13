@@ -25,23 +25,31 @@ struct AppSettingsView: View {
     /// 13p Batch 2: the protection brain (the bootstrap's — dials, modes,
     /// escrow, the passphrase doors). Optional like `services`.
     let protection: ProtectionController?
+    /// 18j (her R-Q12): the app's ONE appearance owner (`NSApp.appearance`
+    /// at the root — `AppearanceChoice.swift`). Optional like `services`
+    /// and `protection`: a host that composes this pane without the app
+    /// delegate (a preview, a pin) gets the row's door hidden rather than a
+    /// second owner minted beside the real one.
+    let appearance: AppearanceController?
     @State private var theme: ThemeStore
     @State private var tags: TagsViewModel
 
     init(
         session: AppSession, services: AppServices? = nil,
-        protection: ProtectionController? = nil
+        protection: ProtectionController? = nil,
+        appearance: AppearanceController? = nil
     ) {
         self.session = session
         self.services = services
         self.protection = protection
+        self.appearance = appearance
         _theme = State(initialValue: ThemeStore(session: session))
         _tags = State(initialValue: TagsViewModel(session: session))
     }
 
     var body: some View {
         TabView {
-            AppearancePane(session: session, theme: theme)
+            AppearancePane(session: session, theme: theme, appearance: appearance)
                 .tabItem { Label("Appearance", systemImage: "paintpalette") }
             TagManagerPane(session: session, tags: tags)
                 .tabItem { Label("Tags", systemImage: "tag") }
@@ -75,6 +83,8 @@ struct AppSettingsView: View {
 private struct AppearancePane: View {
     let session: AppSession
     let theme: ThemeStore
+    /// 18j — the LOCAL light/dark choice (see `AppearanceChoice.swift`).
+    let appearance: AppearanceController?
     /// 13b 4D (S4-19, her ruling): hover-revealed drag handles in Write —
     /// default ON; OFF = the fully clean surface. LOCAL (this Mac's
     /// UserDefaults, the takes-density class — deliberately not the synced
@@ -123,6 +133,29 @@ private struct AppearancePane: View {
                 // it is. Its own file: a feature that arrives as fifty
                 // lines inside a pane is how a pane becomes a god file.
                 PaletteSettingsRow(session: session, theme: theme)
+            }
+            // 18j (her R-Q12): the light/dark choice sits directly UNDER the
+            // voice and the palette — the third of the three appearance
+            // dials, and the coarsest reading of the other two. Deliberately
+            // NOT above them: the palette row's custom-hex fields and their
+            // inline refusal sit at the 460 pt pane's fold (18g's own walk
+            // finding), and a section added above would push that refusal
+            // further out of sight.
+            if let appearance {
+                Section("Light & dark") {
+                    Picker("Appearance", selection: Binding(
+                        get: { appearance.choice },
+                        set: { appearance.set($0) })) {
+                        Text("Follow system").tag(AppearanceChoice.system)
+                        Text("Light").tag(AppearanceChoice.light)
+                        Text("Dark").tag(AppearanceChoice.dark)
+                    }
+                    .pickerStyle(.segmented)
+                    Text("Dark is a fully black room in both voices, and under every colour palette. This Mac only — your voice and palette follow you everywhere, but how bright the screen should be is about where you are sitting.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
             Section("Editor") {
                 Toggle("Show block seams (dotted lines between blocks)", isOn: Binding(

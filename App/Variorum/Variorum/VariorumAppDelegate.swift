@@ -13,6 +13,16 @@ import AppKit
 final class VariorumAppDelegate: NSObject, NSApplicationDelegate {
     weak var session: AppSession?
 
+    /// 18j (her R-Q12): **the app's ONE appearance owner** — follow system ·
+    /// light · dark, applied as `NSApp.appearance` so every window, sheet,
+    /// menu and the Settings scene inherit it (see `AppearanceChoice.swift`
+    /// for why this and not five `preferredColorScheme` modifiers). It lives
+    /// here for the same reason `WindowRegistry` and `GlobalHotKeyCenter`
+    /// live on the App: there is one of it, however many windows exist —
+    /// and the delegate is the app-level object that exists BEFORE the first
+    /// window, which is what makes the launch application deterministic.
+    let appearance = AppearanceController()
+
     // MARK: - Window sanitation (Sitting 9 batch 8 — the wedged window)
     //
     // Her main window came up TALLER THAN THE SCREEN and macOS's
@@ -25,6 +35,10 @@ final class VariorumAppDelegate: NSObject, NSApplicationDelegate {
     // visible frame is clamped back inside it.
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // 18j: before anything is drawn, so a chosen dark app never flashes
+        // the system's light appearance on its way up. Idempotent — the
+        // controller's own init applies it too, and neither order matters.
+        appearance.apply()
         sanitizeWindowFrames()
     }
 

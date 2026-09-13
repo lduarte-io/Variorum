@@ -9888,4 +9888,41 @@ and nothing was launched by me.
 
 ### R-7 · RECORD (the implementer writes here from its first commit)
 
-*(empty until the implementer's first commit)*
+**LIVE STATUS — 18j (`opus-implementer`, opened 2026-09-14 at `7d62761f`; the code tree it builds on is
+`516802e9`).** *(Flipped in the same commit as each piece.)*
+
+- **Orientation — DONE.** Read in my own context, in the brief's order: `CLAUDE.md` and the canon it
+  auto-loads (AppSpec §12's two-voice paragraph — R51 dark = fully black in both voices, R49 fonts, the 18g
+  palette sentence; §7's `setting` block; OverallModel; SyncSpec §12's lockstep rule; TEXTKIT2_NOTES §2–§3 —
+  overlays never rendering attributes, the macOS-26 widening and usage-bounds findings); this plan's §5.5, §7
+  (R-Q6 · R-Q11 · R-Q12 · R-Q13, SETTLED), §12 (F-0 and F-9 first), R-0 (P-1…P-9 + the application notes),
+  §8–§9; the R-7 brief WHOLE with its two inherited items; 18g's `### R-6 · RECORD` (the derivation table,
+  the walk, the calls, the things-not-fixed), `### R-6 · ADJUDICATION` (J47–J53) and both ladder rounds
+  (round 2's R2-1 trace and fix shape, R2-5, the FINAL KnownIssues wording, the sanity pass); R-1's rules 1–8
+  verbatim. Then the code: `Shared/Theme/VoiceTokens.swift` whole · `Shared/Theme/PaletteDerivation.swift` ·
+  `Theme/ThemeStore.swift` · `Theme/EditorTypography.swift`'s chrome road · `Theme/MarkdownStyling.swift` ·
+  `Shared/MarkdownFace/MarkdownFaceCore.swift` whole · `Surface/PaneSurface.swift`'s apply road ·
+  `VariorumApp.swift`'s five scenes · `VariorumAppDelegate.swift` · `Features/Settings/AppSettingsView.swift` ·
+  `Features/Editor/EditorView.swift`'s appearance push · `Features/ReadTier/ReadPostView.swift` ·
+  `Features/ReadMode/ReadModeView.swift` · the phone's `MobileEditorStyle.swift` (the LOOK reference — and,
+  as it turns out, the MECHANISM reference: its colours are DYNAMIC `UIColor`s) · the local-preference class
+  (`readModeOutlineShown`, `libraryCatalogSort`) · `ThemeTests.swift` / `PaletteDerivationTests.swift` /
+  `PaletteReachTests.swift`. Tree clean at `7d62761f`, `main` == `origin/main`. **Her real-store app is NOT
+  running** (`pgrep -fl 'Variorum.app/Contents/MacOS'` → nothing) and is never touched either way.
+
+- **PIECE 1 — THE CHOICE (one root): DONE.** `AppearanceChoice` (`system · light · dark`, a LOCAL
+  `UserDefaults` preference — zero schema, zero `setting` key, the marker stays 8) + `AppearanceController`,
+  the app's ONE owner, living on `VariorumAppDelegate` beside the window register's reason for being
+  app-level; applied as **`NSApp.appearance`**, which every window whose own appearance is nil inherits —
+  all of them — so all five scenes, every sheet, the menu-bar extra's menu and AppKit's own chrome follow
+  from ONE write. The Appearance pane gains a **"Light & dark"** section directly under Voice. **Zero new
+  `colorScheme` readers; not one surface touched.** Pins: `AppearanceChoiceTests` ×4 — the mapping, the
+  stored form (a strange value reads as follow-system), **a SECOND window made after the choice wears it**,
+  and **SwiftUI's `@Environment(\.colorScheme)` follows the app appearance** (the bridge all 48 readers ride,
+  pinned rather than assumed). 4/1 green.
+
+- **PIECE 2 — the sweep (the every-surface dark walk, both voices):** NOT-STARTED.
+- **PIECE 3 — the pins (R51 per preset, the literal-colour grep pin, each token fix's):** NOT-STARTED.
+- **PIECE 4 — the two INHERITED items (R2-1 the stale-ink face restore · R2-5 the appearance road's
+  whole-storage ink write on a long note):** NOT-STARTED.
+- **THE CLOSING RUNS:** PENDING.
