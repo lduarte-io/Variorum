@@ -1669,12 +1669,14 @@ struct TakesArticleScrollTests {
             order: ["a", "b", "c"]) == .scrollToRow("b", anchorY: anchorY),
                 "the row at the fold is not where she left it — re-aim")
         #expect(back.articleRestoreAims == 2)
-        // The row reports its top where it sat — settled, no scroll.
+        // The row reports its top where it sat — settled, no scroll: INTO A
+        // HOLD since the 17q ladder's round 3 (R3-1), because the row's
+        // report is not the page's final word.
         back.noteArticleRowFrame("b", CGRect(x: 0, y: 36, width: 680, height: 60))
         #expect(back.consumeArticleGeometry(
             geometry(offset: 0), remembered: place, positionedByUser: false,
             order: ["a", "b", "c"]) == .wait)
-        #expect(back.articleRestore == .settled)
+        #expect(back.articleRestore == .holding(place))
 
         // **The fallbacks, sub-row where the anchor can express it** (the 17q
         // ladder's round 2, R2-3 — MEASURED on the mounted harness: a unit
@@ -1765,7 +1767,7 @@ struct TakesArticleScrollTests {
                 return
             }
             await settle(windowB, hostingB, until: { false }, maxTurns: 20)
-            #expect(second.board.articleRestore == .settled,
+            #expect(restIsReached(second.board.articleRestore),
                     "the restore settled on the row's own report (\(second.board.articleRestoreAims) aims)")
             // The pane sits a fixed inset below its row's top; the control
             // mount's fitting row gives the inset (pane top − row top).
@@ -1780,10 +1782,13 @@ struct TakesArticleScrollTests {
                 return
             }
             let rowTop = paneTop - inset
-            #expect(abs(rowTop - (-30)) <= 4,
+            // ±2 since the 17q ladder's round 3 (R3-1): the ±4 of round 2 hid
+            // the re-resolution's `into · h/V` shortfall on this 46-pt row (~2.2).
+            #expect(abs(rowTop - (-30)) <= 2,
                     """
                     the row's top is back ABOVE the fold where it sat (\(rowTop)) — on the \
-                    round-1 tree a negative `into` aimed at the fold and the row came back at 0
+                    round-1 tree a negative `into` aimed at the fold and the row came back at 0; \
+                    on the round-2 tree it came back a fraction short (the settle was not final)
                     """)
         }
     }
@@ -2226,5 +2231,314 @@ struct TakesArticleScrollTests {
                     \(String(describing: session.editorRouter.takesArticlePlaces[fixture.postID])))
                     """)
         }
+    }
+
+    // MARK: - The 17q ladder, round 3 — R3-1: the settle is NOT FINAL. SwiftUI
+    //         re-resolves the scroll target after the restore has stopped
+    //         aiming, to `into · (1 − rowHeight/viewport)`; the memory then
+    //         follows the drift. Invisible on 46-pt rows (a 2-pt shortfall),
+    //         a third of `into` on a row a third of the page, the fold on a
+    //         row nearly a page tall.
+
+    /// A long block: `lines` wrapped lines in ONE block, so a row can be a
+    /// third of the page (7 lines ≈ 296 pt at the harness's width) or nearly
+    /// all of it (13 lines ≈ 542 pt).
+    nonisolated private static func longProse(lines: Int) -> String {
+        (1...lines).map {
+            "Line \($0) of the long block. Honest prose on the measured line, long enough "
+                + "to wrap once at the article's measure so the rows have real height."
+        }.joined(separator: "\n")
+    }
+
+    /// The ROW's top below the fold for a variant's pane: the pane sits a
+    /// fixed inset below its row's top, read off the page at rest (row 1
+    /// sits at the column's 18-pt padding — `articlePlaceNow` says where).
+    private func rowTopBelowTheFold(
+        _ variantID: String, _ hosting: NSView, _ article: NSScrollView, inset: CGFloat
+    ) -> CGFloat? {
+        distanceBelowTheFold(variantID, hosting, article).map { $0 - inset }
+    }
+
+    /// **RED ON THE ROUND-2 TREE (`44f427de`), mounted — measured at the round-3
+    /// review: 11 where 20 is owed.** A 7-line block (≈296 pt under a 638-pt
+    /// viewport) is the first fitting row below the fold, 20 pt into the
+    /// page; the board remembers it so; the return settles the row at 20 and
+    /// then — after the lazy column's next measurement pass — SwiftUI
+    /// re-resolves the scroll target to `20 · (1 − 296/638)` ≈ 11 with the
+    /// restore no longer aiming, and the arrivals rewrite the memory to 11.
+    /// Since R3-1 the restore HOLDS the place: it keeps re-aiming until her
+    /// hand or a landing's own scroll, so the row stays at 20 and the memory
+    /// is untouched.
+    @Test func aLongRowAtTheFoldComesBackWhereItSatNotAFractionOfIt() async throws {
+        try await withSession(
+            blocks: 12, windowHeight: 719,
+            text: { $0 == 6 ? Self.longProse(lines: 7) : Self.proseText($0) }
+        ) { session, fixture, db, mount in
+            let router = session.commandRouter
+            router.forgetCurrentBlock(for: fixture.postID)
+            defer { router.forgetCurrentBlock(for: fixture.postID) }
+            let hers = fixture.blocks[5]
+
+            let first = try await landingModel(session: session, fixture: fixture, db: db)
+            let (windowA, hostingA) = await mount(first)
+            guard let articleA = articleScrollView(in: hostingA) else {
+                Issue.record("no article scroll view on the first mount")
+                return
+            }
+            await settle(windowA, hostingA, until: { false }, maxTurns: 6)
+            guard let atRest = first.board.articlePlaceNow,
+                  let pane1 = distanceBelowTheFold(fixture.blocks[0].variant, hostingA, articleA),
+                  let pane6 = distanceBelowTheFold(hers.variant, hostingA, articleA) else {
+                Issue.record("the page at rest is not realized")
+                return
+            }
+            let inset = pane1 - atRest.into
+            let rowTop6 = pane6 - inset
+            // Her scroll leaves the long row's top 20 pt below the fold — the
+            // first fitting row, remembered with its `into` by the board.
+            scroll(articleA, to: rowTop6 - 20)
+            await settle(windowA, hostingA, until: { false }, maxTurns: 10)
+            let row6 = first.projection.slots[5].placementID
+            guard let left = session.editorRouter.takesArticlePlaces[fixture.postID],
+                  left.rowID == row6, abs(left.into - 20) <= 2, left.rowHeight > 200 else {
+                let remembered = String(describing: session.editorRouter.takesArticlePlaces[fixture.postID])
+                Issue.record(
+                    "non-vacuity: the board did not remember the long row 20 pt below the fold (\(remembered), viewport \(first.board.articleViewportHeight))")
+                return
+            }
+            windowA.orderOut(nil)
+            first.teardown()
+            await settle(windowA, hostingA, until: { false }, maxTurns: 4)
+
+            let second = try await landingModel(session: session, fixture: fixture, db: db)
+            let (windowB, hostingB) = await mount(second)
+            guard let articleB = articleScrollView(in: hostingB) else {
+                Issue.record("no article scroll view on the second mount")
+                return
+            }
+            // The yielding turns are where the view's own tasks run and the
+            // column measures — the relayout that re-resolves the target.
+            await settle(windowB, hostingB, until: { false }, maxTurns: 20)
+            #expect(second.board.articleRestoreAims > 0, "the restore ran")
+            guard let back = rowTopBelowTheFold(hers.variant, hostingB, articleB, inset: inset) else {
+                Issue.record("the long row is not realized after the remount")
+                return
+            }
+            #expect(abs(back - left.into) <= 2,
+                    """
+                    the long row's top is back where it sat (\(back) for \(left.into); row \
+                    \(left.rowHeight) pt, viewport \(second.board.articleViewportHeight)) — on \
+                    the round-2 tree it came back at `into · (1 − h/V)` ≈ 11 after the settle
+                    """)
+            let now = session.editorRouter.takesArticlePlaces[fixture.postID]
+            #expect(now?.rowID == row6 && abs((now?.into ?? -99) - left.into) <= 2,
+                    "the memory is not rewritten to the drift (\(String(describing: now)))")
+        }
+    }
+
+    /// **RED ON THE ROUND-2 TREE (`44f427de`), mounted — measured at the round-3
+    /// review: 0 where −15 is owed.** R2-3's own shape at the magnitude the
+    /// rule produces: a 13-line block (≈542 pt) under a viewport six points
+    /// taller, straddling the fold by 15 with nothing below it fitting — the
+    /// board remembers `(row, −15)`; the return puts the row's top at −15
+    /// (the proxy honours the negative anchor), and the next relayout
+    /// re-resolves it to the FOLD, the memory following. With the hold the
+    /// row stays where it sat.
+    @Test func aTallStraddlerComesBackAboveTheFoldAndStaysThere() async throws {
+        try await withSession(
+            blocks: 12, windowHeight: 629,
+            text: { $0 == 6 ? Self.longProse(lines: 13) : Self.proseText($0) }
+        ) { session, fixture, db, mount in
+            let router = session.commandRouter
+            router.forgetCurrentBlock(for: fixture.postID)
+            defer { router.forgetCurrentBlock(for: fixture.postID) }
+            let hers = fixture.blocks[5]
+
+            let first = try await landingModel(session: session, fixture: fixture, db: db)
+            let (windowA, hostingA) = await mount(first)
+            guard let articleA = articleScrollView(in: hostingA) else {
+                Issue.record("no article scroll view on the first mount")
+                return
+            }
+            await settle(windowA, hostingA, until: { false }, maxTurns: 6)
+            guard let atRest = first.board.articlePlaceNow,
+                  let pane1 = distanceBelowTheFold(fixture.blocks[0].variant, hostingA, articleA),
+                  let pane6 = distanceBelowTheFold(hers.variant, hostingA, articleA) else {
+                Issue.record("the page at rest is not realized")
+                return
+            }
+            let inset = pane1 - atRest.into
+            let rowTop6 = pane6 - inset
+            // Her scroll leaves the tall row straddling the fold by 15: no row
+            // below it fits, so the board remembers the straddler itself with
+            // its negative `into` (R2-3's branch).
+            scroll(articleA, to: rowTop6 + 15)
+            await settle(windowA, hostingA, until: { false }, maxTurns: 10)
+            let row6 = first.projection.slots[5].placementID
+            guard let left = session.editorRouter.takesArticlePlaces[fixture.postID],
+                  left.rowID == row6, abs(left.into + 15) <= 2 else {
+                let remembered = String(describing: session.editorRouter.takesArticlePlaces[fixture.postID])
+                Issue.record(
+                    "non-vacuity: the board did not remember the straddler at −15 (\(remembered), viewport \(first.board.articleViewportHeight))")
+                return
+            }
+            windowA.orderOut(nil)
+            first.teardown()
+            await settle(windowA, hostingA, until: { false }, maxTurns: 4)
+
+            let second = try await landingModel(session: session, fixture: fixture, db: db)
+            let (windowB, hostingB) = await mount(second)
+            guard let articleB = articleScrollView(in: hostingB) else {
+                Issue.record("no article scroll view on the second mount")
+                return
+            }
+            await settle(windowB, hostingB, until: { false }, maxTurns: 20)
+            #expect(second.board.articleRestoreAims > 0, "the restore ran")
+            guard let back = rowTopBelowTheFold(hers.variant, hostingB, articleB, inset: inset) else {
+                Issue.record("the tall row is not realized after the remount")
+                return
+            }
+            #expect(abs(back - left.into) <= 2,
+                    """
+                    the straddler's top is back ABOVE the fold where it sat (\(back) for \
+                    \(left.into); row \(left.rowHeight) pt, viewport \
+                    \(second.board.articleViewportHeight)) — on the round-2 tree it settled at −15 \
+                    and the next relayout put it AT the fold
+                    """)
+            let now = session.editorRouter.takesArticlePlaces[fixture.postID]
+            #expect(now?.rowID == row6 && abs((now?.into ?? -99) - left.into) <= 2,
+                    "the memory is not rewritten to the fold (\(String(describing: now)))")
+        }
+    }
+
+    /// `.settled` or `.holding` — the row said so (R3-1: a hold IS settled,
+    /// it just keeps watching).
+    private func restIsReached(_ restore: TakesBoardLayout.ArticleRestore) -> Bool {
+        switch restore {
+        case .settled, .holding: return true
+        case .undecided, .wanted: return false
+        }
+    }
+
+    /// **THE HOLD, pure** (the 17q ladder's round 3, R3-1 — the compile-red
+    /// class: `.holding` does not exist on the round-2 tree). The row's report
+    /// at `into` settles the restore INTO A HOLD; under it nothing is
+    /// remembered and a landing may be spent; a drift (SwiftUI's
+    /// re-resolution after the settle, measured `into · (1 − h/V)`) is
+    /// re-aimed with the same absolute anchor — on the round-2 tree that
+    /// report REMEMBERED the drift; the hold ends at her hand (first, and
+    /// remembering), at the her-hand funnel (`clearArticleLanding`, writing
+    /// nothing), at a landing's own scroll (writing nothing), or at the
+    /// budget (remembering the page as it shows — the drift decays across
+    /// trips); an outranking entry landing ends it too, a stand-down keeps it.
+    @Test func theRestoreHoldsThePlaceUntilHerHandOrALanding() {
+        let place = TakesBoardLayout.ArticlePlace(rowID: "b", into: 36, rowHeight: 300)
+        let anchor = TakesBoardLayout.ArticlePlace.anchorY(into: 36, rowHeight: 300, viewport: 700)
+        let sat = CGRect(x: 0, y: 36, width: 680, height: 300)
+        let drifted = CGRect(x: 0, y: 21, width: 680, height: 300)   // 36 · (1 − 300/700) ≈ 15 short
+
+        // (a) The settle is a hold; nothing is remembered under it; a drift
+        // re-aims; the row back in place waits without reading the order.
+        let a = freshBoard("hold")
+        #expect(a.consumeArticleGeometry(
+            geometry(offset: 0), remembered: place, positionedByUser: false,
+            order: ["a", "b", "c"]) == .scrollToRow("b", anchorY: anchor))
+        a.noteArticleRowFrame("b", sat)
+        #expect(a.consumeArticleGeometry(
+            geometry(offset: 100), remembered: place, positionedByUser: false,
+            order: ["a", "b", "c"]) == .wait)
+        #expect(a.articleRestore == .holding(place), "settled INTO A HOLD, not to rest")
+        #expect(a.articleReadyForLanding, "a landing may be spent during a hold (the bloom door)")
+        a.noteArticleRowFrame("b", drifted)
+        #expect(a.articleRowFramesMoved() == .wait,
+                "nothing is remembered under a hold — the deferred departure writes nothing either")
+        let aimsBefore = a.articleRestoreAims
+        #expect(a.consumeArticleGeometry(
+            geometry(offset: 115), remembered: place, positionedByUser: false,
+            order: ["a", "b", "c"]) == .scrollToRow("b", anchorY: anchor),
+                "the hold re-aims the same absolute anchor — the round-2 tree REMEMBERED the drift here")
+        #expect(a.articleRestoreAims == aimsBefore + 1)
+        a.noteArticleRowFrame("b", sat)
+        #expect(a.consumeArticleGeometry(
+            geometry(offset: 100), remembered: place, positionedByUser: false, order: nil) == .wait,
+                "back in place: the hold waits (and never reads the slot order — P1)")
+        #expect(a.articleRestore == .holding(place))
+        // Her hand ends it FIRST — and remembers.
+        a.noteArticleRowFrame("b", drifted)
+        #expect(a.consumeArticleGeometry(
+            geometry(offset: 400), remembered: place, positionedByUser: true,
+            order: ["a", "b", "c"]) == .remember(TakesBoardLayout.ArticlePlace(rowID: "b", into: 21, rowHeight: 300)),
+                "her hand outranks the hold before the row is even tested")
+        #expect(a.articleRestore == .settled)
+
+        // (b) The her-hand funnel ends it, writing nothing; the next report
+        // remembers through the one road.
+        let b = freshBoard("hold-funnel")
+        _ = b.consumeArticleGeometry(
+            geometry(offset: 0), remembered: place, positionedByUser: false, order: ["a", "b"])
+        b.noteArticleRowFrame("b", sat)
+        _ = b.consumeArticleGeometry(
+            geometry(offset: 100), remembered: place, positionedByUser: false, order: ["a", "b"])
+        #expect(b.articleRestore == .holding(place))
+        b.clearArticleLanding()
+        #expect(b.articleRestore == .settled, "a keystroke, a click, a structural act: the hold is over")
+        b.noteArticleRowFrame("b", drifted)
+        #expect(b.consumeArticleGeometry(
+            geometry(offset: 115), remembered: place, positionedByUser: false, order: ["a", "b"])
+                == .remember(TakesBoardLayout.ArticlePlace(rowID: "b", into: 21, rowHeight: 300)))
+
+        // (c) A landing's own scroll ends it — a BLOOM pending through the
+        // restore (R1-2's road), spent the moment the hold makes it ready.
+        let c = freshBoard("hold-landing", lastCurrentRow: "was-here")
+        c.landArticle(on: "far", kind: .bloom)
+        _ = c.consumeArticleGeometry(
+            geometry(offset: 0), remembered: place, positionedByUser: false, order: ["a", "b", "far"])
+        c.noteArticleRowFrame("b", sat)
+        #expect(c.articleLandingStep(order: ["a", "b", "far"]) == .wait, "not ready under a pending restore")
+        _ = c.consumeArticleGeometry(
+            geometry(offset: 100), remembered: place, positionedByUser: false, order: ["a", "b", "far"])
+        #expect(c.articleRestore == .holding(place))
+        #expect(c.articleLandingStep(order: ["a", "b", "far"]) == .reveal("far", .foot),
+                "the bloom's reveal is spendable during a hold")
+        #expect(c.articleRestore == .settled, "…and spending it ends the hold, so the two never fight")
+
+        // (d) The budget: a hold refills the pocket on entry and, when even
+        // that runs out, ends remembering the page as it shows.
+        let d = freshBoard("hold-budget")
+        _ = d.consumeArticleGeometry(
+            geometry(offset: 0), remembered: place, positionedByUser: false, order: ["a", "b"])
+        d.noteArticleRowFrame("b", sat)
+        _ = d.consumeArticleGeometry(
+            geometry(offset: 100), remembered: place, positionedByUser: false, order: ["a", "b"])
+        let aimsAtHold = d.articleRestoreAims
+        d.noteArticleRowFrame("b", drifted)
+        for _ in 0..<TakesBoardLayout.articleRestoreAttempts {
+            #expect(d.consumeArticleGeometry(
+                geometry(offset: 115), remembered: place, positionedByUser: false, order: ["a", "b"])
+                    == .scrollToRow("b", anchorY: anchor))
+        }
+        #expect(d.articleRestoreAims == aimsAtHold + TakesBoardLayout.articleRestoreAttempts,
+                "the hold's own full pocket, refilled on entry")
+        #expect(d.consumeArticleGeometry(
+            geometry(offset: 115), remembered: place, positionedByUser: false, order: ["a", "b"])
+                == .remember(TakesBoardLayout.ArticlePlace(rowID: "b", into: 21, rowHeight: 300)),
+                "the budget end remembers the page as it shows — the drift decays across trips")
+        #expect(d.articleRestore == .settled)
+
+        // (e) An ENTRY landing arriving during a hold (the app's order): one
+        // that outranks ends it; one that stands down keeps it.
+        let e = freshBoard("hold-entry", lastCurrentRow: "was-here")
+        _ = e.consumeArticleGeometry(
+            geometry(offset: 0), remembered: place, positionedByUser: false, order: nil)
+        e.noteArticleRowFrame("b", sat)
+        _ = e.consumeArticleGeometry(
+            geometry(offset: 100), remembered: place, positionedByUser: false, order: nil)
+        #expect(e.articleRestore == .holding(place))
+        e.landArticle(on: "was-here")
+        #expect(e.articleLanding == nil && e.articleRestore == .holding(place),
+                "a plain round trip: the landing stands down, the hold keeps the page")
+        e.landArticle(on: "far")
+        #expect(e.articleLanding == "far" && e.articleRestore == .settled,
+                "she moved: the landing wins and the hold is over before it can fight the reveal")
     }
 }

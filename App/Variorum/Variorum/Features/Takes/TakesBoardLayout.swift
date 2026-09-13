@@ -543,6 +543,13 @@ final class TakesBoardLayout {
     /// on any field, so a pure metadata arrival would end one too; chosen
     /// behaviour to write down there, not to discover.
     func clearArticleLanding() {
+        // The 17q ladder's round 3 (R3-1): her hand ends the restore's HOLD
+        // exactly as it ends the landing — here, in the ONE funnel every arm
+        // above already reaches, so the road table is the hold's completeness
+        // proof too. A gesture that reflows the page with no scroll (a
+        // note-wide split, a keystroke that grows a row) must not be fought
+        // by a re-aim; and on a board that never held this is a no-op.
+        endArticleHold()
         articleLanding = nil
     }
 
@@ -658,6 +665,12 @@ final class TakesBoardLayout {
         }
         articleLandingAimsLeft -= 1
         articleLandingAims += 1
+        // The 17q ladder's round 3 (R3-1): a landing's own scroll ends the
+        // restore's hold — the bloom door rides through the restore and
+        // reveals afterwards (R1-2), and a hold that re-aimed after the
+        // reveal would haul the page back. Decided here, the one place a
+        // reveal is decided (F-1), never beside the view's scroll.
+        endArticleHold()
         return .reveal(
             landing,
             Self.revealAnchor(
@@ -730,6 +743,9 @@ final class TakesBoardLayout {
     /// write per departure would let the last row to leave decide what she
     /// comes back to (`TakesViewModel.forgetArticleRowFrame`).
     func articleRowFramesMoved() -> ArticleRestoreStep {
+        // `.settled` only: a pending restore AND a hold (R3-1) own the page,
+        // and nothing is remembered under either — which is also what keeps
+        // the deferred departure silent while the restore holds.
         guard articleRestore == .settled, let geometry = lastArticleGeometry else { return .wait }
         return rememberStep(geometry)
     }
@@ -860,6 +876,15 @@ final class TakesBoardLayout {
         /// aims at the fold (17p's `.top`) and its place is remembered as
         /// the fold. The upper clamp is belt-and-braces: no place
         /// `articlePlaceNow` produces has `into > room`.
+        ///
+        /// **What the proxy honours, SwiftUI's later re-resolution does not**
+        /// (the ladder's round 3, R3-1, measured): after the row has reported
+        /// `into`, the lazy column's next measurement pass re-resolves the
+        /// scroll target to `into · (1 − rowHeight/viewport)` — the sign is
+        /// irrelevant, the row's height is everything (a 2-pt shortfall on a
+        /// 46-pt row, the fold on a page-tall one). The restore therefore
+        /// HOLDS and re-aims this same anchor until her hand or a landing
+        /// (`ArticleRestore.holding`); the anchor itself is right.
         nonisolated static func anchorY(
             into: CGFloat, rowHeight: CGFloat, viewport: CGFloat
         ) -> CGFloat {
@@ -877,9 +902,38 @@ final class TakesBoardLayout {
     /// `.wanted` then holds while the article finds the row again — the 17o
     /// batch-b ladder's RAISE-M1 lesson (never restore against a frame that
     /// has not been filled) in this surface's vocabulary.
+    ///
+    /// **`.holding` — settled when the ROW says so, and it STAYS so** (the
+    /// 17q ladder's round 3, R3-1; measured on the mounted harness): the
+    /// row's report at `into` is not the page's final word. SwiftUI
+    /// re-resolves the scroll target on the lazy column's later measurement
+    /// passes (J1(c)'s bound `ScrollPosition`), and that re-resolution does
+    /// NOT reproduce the proxy's placement — it lands the row's top at
+    /// `into · (1 − rowHeight/viewport)`: a 2-pt shortfall on a 46-pt row,
+    /// 20 → 15 / 11 / 8.5 / 6 on rows of 173 / 296 / 378 / 460 pt under a
+    /// 638-pt viewport, the FOLD for a row nearly a page tall (+4 → 0, −15 →
+    /// 0 on a 542-pt row at every room from 6 to 96 pt). A restore that
+    /// went to rest at the first report then REMEMBERED the drift, so the
+    /// next trip was byte-identical and the miss hid. So the restore holds:
+    /// it keeps re-aiming the same absolute anchor while the row is off its
+    /// place, reads the slot order only then (P1), and ends into `.settled`
+    /// at her hand (`positionedByUser`, checked first; the her-hand funnel
+    /// `clearArticleLanding`), at a landing's own scroll (`articleLandingStep`
+    /// — the bloom door's reveal is spendable during a hold and spending it
+    /// ends the hold, so the two never fight), or at the aim budget — which
+    /// the hold refills once on entry, so it is bounded exactly as the
+    /// restore is. Under a hold nothing is remembered (`rememberStep` never
+    /// runs; `articleRowFramesMoved` returns `.wait`, which keeps the
+    /// deferred departure of R2-2 silent by construction); the non-geometry
+    /// ends write nothing — a geometry report or a frame arrival follows
+    /// every one of them and writes through the one road. At the BUDGET end
+    /// the page is remembered as it shows, so a drift that outlasts the
+    /// budget DECAYS across trips (each trip's drift is a proportion of the
+    /// remembered `into`) rather than holding at one wrong value.
     enum ArticleRestore: Equatable {
         case undecided
         case wanted(ArticlePlace)
+        case holding(ArticlePlace)
         case settled
     }
 
@@ -904,7 +958,10 @@ final class TakesBoardLayout {
     /// it cannot cover a row the note no longer holds: `scrollTo` on a gone
     /// row is a no-op, the geometry stops changing, and the count stops with
     /// it — that case settles at once by the slot order instead (the 17p
-    /// batch-a ladder, R1-4).
+    /// batch-a ladder, R1-4). The HOLD (R3-1) refills the pocket once on
+    /// entry: the restore's own aims (11 on a page-tall row, 15 on a
+    /// 60-block note) must not starve the hold's, and the hold stays bounded
+    /// by the same number.
     nonisolated static let articleRestoreAttempts = 24
 
     @ObservationIgnored private(set) var articleRestore: ArticleRestore = .undecided
@@ -931,8 +988,14 @@ final class TakesBoardLayout {
     /// True once the page is where the memory says it should be — the moment
     /// a landing may be considered, and not before (a reveal judged against a
     /// position we are about to change would be judged against the wrong page).
+    /// A HOLD counts (R3-1): the page IS where the memory says; a bloom's
+    /// reveal must still spend (17o row 8), and spending it ends the hold.
     var articleReadyForLanding: Bool {
-        articleGeometrySeen && articleRestore == .settled
+        guard articleGeometrySeen else { return false }
+        switch articleRestore {
+        case .settled, .holding: return true
+        case .undecided, .wanted: return false
+        }
     }
 
     /// The place worth remembering, right now (the 17q ladder, R1-1): the
@@ -1030,12 +1093,19 @@ final class TakesBoardLayout {
             articleRestoreAimsLeft = Self.articleRestoreAttempts
             return restoreStep(
                 to: remembered, geometry, positionedByUser: positionedByUser, order: order())
-        case .wanted(let place):
+        case .wanted(let place), .holding(let place):
             return restoreStep(
                 to: place, geometry, positionedByUser: positionedByUser, order: order())
         case .settled:
             return rememberStep(geometry)
         }
+    }
+
+    /// The hold's non-geometry ends (R3-1): her hand's funnel and a landing's
+    /// spend. `.settled` and nothing else — the session write lives on the
+    /// one geometry road, and a report follows every one of these.
+    private func endArticleHold() {
+        if case .holding = articleRestore { articleRestore = .settled }
     }
 
     /// A page at rest remembers the TOP itself (R1-1); a scrolled page
@@ -1049,10 +1119,14 @@ final class TakesBoardLayout {
 
     private func restoreStep(
         to place: ArticlePlace, _ geometry: ArticleGeometry, positionedByUser: Bool,
-        order: [String]?
+        order: @autoclosure () -> [String]?
     ) -> ArticleRestoreStep {
-        // Her hand outranks a pending restore: if she has already scrolled
-        // this page herself, the restore is over and we remember her place.
+        let holding: Bool = { if case .holding = articleRestore { return true } else { return false } }()
+        // Her hand outranks a pending restore — and a hold, FIRST (R3-1: her
+        // scroll is what moves the row off its place, so a hold that tested
+        // the row first would fire one aim against a page she just moved):
+        // if she has already scrolled this page herself, the restore is over
+        // and we remember her place.
         if positionedByUser {
             articleRestore = .settled
             return rememberStep(geometry)
@@ -1063,11 +1137,15 @@ final class TakesBoardLayout {
             articleRestore = .settled
             return rememberStep(geometry)
         }
+        let atItsPlace = articleRowFrames[rowID].map { abs($0.minY - place.into) <= 2 } ?? false
+        // A hold in its steady state — the row where it sat — costs nothing
+        // in the note's size (P1): decided before the slot order is read.
+        if holding, atItsPlace { return .wait }
         // A row the note no longer holds settles at once (R1-4): there is
         // nothing to scroll to, and waiting would starve the landing. Only
         // once the slots are KNOWN — nil means the projection has not
         // arrived, and the aim below is kept until it does.
-        if let order, !order.contains(rowID) {
+        if let order = order(), !order.contains(rowID) {
             articleRestore = .settled
             return rememberStep(geometry)
         }
@@ -1075,9 +1153,12 @@ final class TakesBoardLayout {
         // says so: a lazy column re-lays out under a scroll, and the row
         // frames and the scroll geometry arrive in different passes. "So"
         // means its top is back where it SAT (the 17q ladder, R1-1) — at
-        // the fold for a 17p-shaped place, `into` below it otherwise.
-        if let frame = articleRowFrames[rowID], abs(frame.minY - place.into) <= 2 {
-            articleRestore = .settled
+        // the fold for a 17p-shaped place, `into` below it otherwise. **And
+        // it stays so** (R3-1): settled INTO A HOLD, not to rest — the row's
+        // report is not the page's final word (`ArticleRestore.holding`).
+        if atItsPlace {
+            articleRestore = .holding(place)
+            articleRestoreAimsLeft = Self.articleRestoreAttempts
             return .wait
         }
         // Otherwise aim again. The aim is ABSOLUTE (scroll this row to its
@@ -1088,7 +1169,9 @@ final class TakesBoardLayout {
         // one before (the coarse aim).
         guard articleRestoreAimsLeft > 0 else {
             articleRestore = .settled   // the row is gone, or will not settle.
-            return .wait
+            // A hold that outlasts its budget remembers the page as it shows
+            // — the drift DECAYS across trips (R3-1's documented end).
+            return holding ? rememberStep(geometry) : .wait
         }
         articleRestoreAimsLeft -= 1
         articleRestoreAims += 1
