@@ -6919,7 +6919,7 @@ Both rows are the R3-1 class (a settle that the column's later measurement passe
   (`pgrep -fl 'Variorum.app/Contents/MacOS'` → nothing, 04:1x) — re-checked before the walk; never
   touched either way.
 
-- **PIECE 1 — the core enum + query + operation: DONE (`HASH1`).**
+- **PIECE 1 — the core enum + query + operation: DONE (`b1a74b3d`).**
 - **PIECE 2 — the seam's kind and routing: NOT-STARTED.**
 - **PIECE 3 — the receipt sites (the classification table): NOT-STARTED.**
 - **PIECE 4 — the quiet slot: NOT-STARTED.**
