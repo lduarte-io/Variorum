@@ -8320,3 +8320,113 @@ names the difference). **N3 — AGREE**, the local is renamed (the shadow is min
 **N4 — AGREE**, one name each.
 
 **Counts: 8 AGREE · 0 DISPUTE.** Nothing is stopped; every finding is fixed below in the dispositions' order.
+
+### 18i LADDER — ROUND 2 · THE FIXES (the implementer continuation, 2026-09-14 — eight commits, in the dispositions' order)
+
+*Pin before fix on every bug-class item, with the red watched and counted. `Sources/` and
+`App/Variorum/Shared/` are diff-empty against round 1's close `987d306e`, so neither `swift test` nor the
+iOS build is owed; `Sync/`, `Server/`, the schema and the editor seam are untouched, `lockstepVersion` reads
+**8**, zero trailer lines on all eight commits. Seven app files and two test files changed.*
+
+**(J38) The BLOCKER — `cb6386f7`.** The eight sites read `.refusal(` now
+(`:966 · :1128 · :1466 · :1572 · :2346 · :2361 · :2376 · :2398`), words byte-unchanged; `:1208`'s milder
+sibling carries J37's predicate (`wrote = !picks.isEmpty`). The accepted consequence:
+`WriteTakesPanel` paints these in the alarm token, which is what their `TakesStructureController` siblings
+(table row 21) already do. **Zero test edits** — the only shipped pin naming one of the eight
+(`RecoveryDoorsTests.swift:609`) reads `statusMessage`, which the class never touched.
+- **Pin:** `TakeToBlockDoorTests.aBoardDoorThatCouldNotActStillSpeaksUnderEverySetting` — the keyboard road
+  (`commitFocusedTake` with no ring) and the click road (`adoptColumn` over the main column) under `.off`,
+  plus a third arm driving a door that DID act so it cannot pass by the board having stopped speaking
+  receipts at all.
+- **RED ON OLD, on the shipped tree, nothing reverted: 1 test / 6 issues** — `current == nil` and
+  `kind == nil` on both roads, both sentences sitting in `lastDroppedReceipt`.
+- **Green after:** TakeToBlockDoorTests + RecoveryDoorsTests 27/2. RECORD table **row 18** corrected.
+
+**THE ENUMERATION THE TABLE SKIPPED — every direct `status = .receipt(…)` in `TakesViewModel`, with a
+verdict** *(25 of them; line numbers at `987d306e`, the tree the reviewer read. The other 23 direct
+assignments are `.refusal(…)` — every one an `OperationError` or observation-failure path — and were
+correct as they stood.)*
+
+| # | Site | What it says | Verdict |
+|---|---|---|---|
+| 1 | `:966` `pick`, `.main` | "The main column shows the note's chosen takes — use ✓…" | **REFUSAL — FIXED.** The `.main` arm writes no pick and the function ends |
+| 2 | `:1128` `adoptColumn`, `.main` | "This column IS the note — nothing to adopt." | **REFUSAL — FIXED.** `return` before any op |
+| 3 | `:1140` `adoptColumn` | "Adopted — … the old chosen is kept as the lens …" | RECEIPT ✓ (the adopt landed) |
+| 4 | `:1183` promote | "Made a new note — … is now its own note, linked as a version." | RECEIPT ✓ |
+| 5 | `:1208` `writeNewTakesEverywhere` | "New takes written on N blocks — …" | **SPLIT BY OUTCOME — FIXED.** `branchAllFans` returns `[:]` without throwing on a post with no renderable slots |
+| 6 | `:1233` save as lens | "Saved — “…” now remembers these choices." | RECEIPT ✓ (the lens exists) |
+| 7 | `:1404` · `:1407` `archiveTake` | "Take archived — never gone: …" | RECEIPT ✓ (inside `if status == nil` after the op) |
+| 8 | `:1416` `unarchiveTake` | "Take unarchived — back in the block's fan." | RECEIPT ✓ |
+| 9 | `:1446` `restoreDanglingPick` `.archived` | `LensFallbackCopy.restoredArchived` | RECEIPT ✓ (unarchived) |
+| 10 | `:1459` `restoreDanglingPick` `.deleted` | `restoredDeleted` / `…ButArchived` | RECEIPT ✓ (the op's own answer) |
+| 11 | `:1466` `.gone`/`.foreign` | `LensFallbackCopy.nothingToRestore` | **REFUSAL — FIXED.** Nothing restored, and the notice renders without its button |
+| 12 | `:1572` `commitFocusedTake` guard | "Click into a take first — ⌘S…" | **REFUSAL — FIXED** |
+| 13 | `:1578` `commitFocusedTake` | "Committed — an immutable savepoint of this take." | RECEIPT ✓ |
+| 14 | `:1639` `setNewlinesMintBlocks` | `SegmentationFaceCopy.note(...)` | RECEIPT ✓ (re-read from the EFFECTIVE mode) |
+| 15 | `:1653` `setPostWordTarget` | `WordTargetFaceCopy.setNote` / `clearNote` | RECEIPT ✓ **with a recorded corner:** the op no-ops when the value is unchanged (AppSpec §9's extent-setter convention), so setting the same target writes nothing and still reports the state. **End-state-TRUE**, the row-34 / bulk-tag class — the words are true of the note afterwards. Recorded, not changed |
+| 16 | `:1765` `saveNoteVersion` | `VersionActs.save`'s sentence | RECEIPT ✓ — **and the board was RIGHT while Write was wrong**: see the walk find below |
+| 17 | `:2122` `restoreCommit` | "Restored — the savepoint is back in the take's buffer…" | RECEIPT ✓ |
+| 18 | `:2346` `stepTakes` guard | "Click into a take first — ⌃⌘← and ⌃⌘→…" | **REFUSAL — FIXED** |
+| 19 | `:2361` `stepTakes`, one-take block | "This block has one take — ⌘T branches a second." | **REFUSAL — FIXED** |
+| 20 | `:2376` `chooseFocusedTake` guard | "Click into a take first — ⌘⏎…" | **REFUSAL — FIXED** |
+| 21 | `:2381` `chooseFocusedTake` | "✓ chosen — the note shows this take everywhere." | RECEIPT ✓ |
+| 22 | `:2398` `archiveFocusedTake` guard | "Click into a take first — ⌘⇧A…" | **REFUSAL — FIXED** |
+| 23 | `:2545` divide (ceremony seed) | `FannedDefaultsCopy.divided(kept:)` | RECEIPT ✓ (the cut landed) |
+| 24 | `:2571` `divideDuplicating` | `FannedDefaultsCopy.divided(kept: 0)` | RECEIPT ✓ |
+| 25 | `:1404`'s Lenses twin (`:1407`) | counted with 7 above | RECEIPT ✓ |
+
+*After the fix the file holds 16 `.receipt` assignments, 31 `.refusal`, and one classed ternary.*
+
+**(Outside the dispositions — FOUND ON THE WALK) ⌘⇧S's receipt is a receipt — `dcec83e0`.** The J39 walk
+captured it: with a book note live in the Outline, ⌘⇧S toasted *"Saved a version — the whole note as it is
+now, in Versions."* while the setting said quiet. `EditorViewModel.saveNoteVersion`'s SUCCESS arm spoke
+through `showStatus` — the always-shown refusal door — so Write and the book's inline editor differed from
+the boards, whose twin (enumeration row 16) has always classed it `.receipt`. **The J38 class, opposite
+direction:** there a refusal could be HIDDEN; here a receipt could not be QUIETED. One word, the error arm
+untouched, the words untouched. Pin `savingAVersionSpeaksQuietlyUnderHerDefault`, **red on the shipped tree:
+1 test / 3 issues**. Flagged as a batch call rather than a disposition — reversible in one revert if the
+orchestrator would rather it waited for round 3.
+
+**(J39) The MAJOR — `b1b0a576`.** The oracle FIRST, width-constrained (`.frame(width: 200)` on the root,
+which is what makes `fittingSize` measure the box's real column): **RED at 28 vs 14** on the bare view at
+200 pt — the same 14 pt of growth the reviewer measured as the footer's 37 → 51. Then the third road:
+**ONE line in the box**, and the `lines` knob REMOVED with it (one value at every site is a dead knob).
+My own probe, matching the reviewer's to the point: unconstrained 0×14 → 204×14 (why the round-1 pin could
+not fail); at 200 pt `lines: 2` 14 → 28 and the footer 37 → 51; `lines: 1` 14 → 14 and the footer 37 → 37.
+**There is no recorded reason `lines: 2` was load-bearing** — only the view's own rationale sentence, which
+the measurement refutes (at 204 pt in a 200 pt column the second line carried about one character). Green
+after: 14 == 14. The header now says what is true per composition.
+
+**(J40) — `8ee11683`.** `run`'s doc no longer says "Returns the receipt": it names the words-only contract,
+the three refusal endings, and the `report(…)` + `say(_:refusing:)` road. Doc only.
+
+**(J41) — `eb062857`.** `outgoing = .refusal` in the guard's else. **Labelled as closing a road, not fixing
+a bug** — no caller reaches `deliver(nil)` today, so no red exists and none is owed; the invariant is now
+unconditional instead of documented.
+
+**(The NITs) — `9f0c31b2`.** N1: `say`'s doc narrowed to the doors that speak to the CENTRE, with the three
+model-side ternaries named and the F-0 road shown unavailable at each (routing them through the centre
+bypasses a property ~22 shipped pins read and, on the board, the slot `WriteTakesPanel` renders; a `say` per
+model would spell the mapping three MORE times). N3: the local is `splitters`, so nothing shadows the static
+`split(made:from:…)`. N4: `settleStatus` and `settleLayout`. N2 (`speak`/`say` near-synonyms): **RECORD
+only**, as dispositioned — a rename across `speak`'s 105 call sites is not this ladder's, and the doc now
+names the difference at both doors.
+
+#### CLOSING THE ROUND-2 FIXES (the exact lines)
+
+- **ONE `xcodebuild test`** from `App/Variorum/`, **87 suite TYPE names** in a zsh array, every one
+  `grep -rl "struct <Name>"`-verified first — round 1's 39 plus every suite that mounts the Takes/Lenses
+  boards this round touched (the 48 collected by grepping `TakesViewModel(` / `TakesBoardView` /
+  `LensesBoardView` across `VariorumTests`, including the board soak, the article/room/rail family, the
+  fanned-defaults and merge-selection doors, the recovery doors and the lifecycle faces):
+  `✔ Test run with 639 tests in 87 suites passed after 156.513 seconds.` · `** TEST SUCCEEDED **` · zero `✘`.
+- **Core:** not owed, not run — `git diff --stat 987d306e HEAD -- Sources` is EMPTY.
+- **iOS:** not owed, not run — `App/Variorum/Shared/` is diff-empty too.
+- **The seams:** `Sync/` · `Server/` · the schema · every editor-seam file untouched; `lockstepVersion` = 8;
+  seven app files and two test files changed; zero trailer lines on the eight commits.
+- **THE WALK** (J39 changed the box footer's line count): the dev-store Debug build
+  (`io.lduarte.Variorum.debug`), a book note LIVE in *essays in progress ▸ Outline*, commit from the box →
+  **"Committed." muted on ONE row** above `3w block · 3w in note ?`, nothing moved. Capture
+  `…-screens/18i/12-j39-one-line-in-the-box-footer.png`. The same walk is what caught ⌘⇧S toasting under
+  quiet. Her real-store app was NOT running at any point (`pgrep -fl 'Variorum.app/Contents/MacOS'` empty
+  before the launch and after my quit) and was never touched; zero instances at the close.
