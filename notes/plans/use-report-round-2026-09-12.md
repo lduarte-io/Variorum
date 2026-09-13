@@ -6395,3 +6395,121 @@ two spot-walk round trips above.
 - No product invention in the fix pass: every decision is R-Q1's, R-Q20's, R-Q21's letter or 17p's shipped road; R2-1…R2-3 are the letter delivered short on three shapes, not a ruling re-opened.
 
 **Counts: 0 BLOCKER · 3 MAJOR · 0 MINOR · 3 NIT.** No fix was made; the code is untouched until the orchestrator's follow-up.
+
+### 17q LADDER — ROUND 2 · THE IMPLEMENTER'S RESPONSES
+
+*The 17q implementer (`opus-implementer`) under the cross-model flow: agree/dispute traced against the
+code at `cfd0a837` in my own context — nothing implemented, no code or test file touched, no suite
+run; this plan is the only file this edits. **6 AGREED · 0 DISPUTED**, five with a rider. **R2-1 is a
+MISS OF MINE and I say so first:** my sanity pass cleared the `.top` extension by tracing the
+first-entry road (no memory ⇒ the resolver is not called ⇒ 17o row 8's everyday reveal survives) and
+stopped there — I never traced the app's order for a `.top` memory that DOES exist, which is the one
+the finding measures. The reviewer makes the final call on each and implements its confirmed fixes.*
+
+**R2-1 (MAJOR — the `.top` stand-down is built in the harness's order only) — AGREE; confirmed by
+reading in my own context, and three riders the sketch needs.**
+
+Re-read at the two sites and it is exactly as traced: a `.top` memory never reaches `.wanted` — the
+`.undecided` branch's guard settles it at once (`:948–951`) — and `landArticle`'s consult is
+`if case .wanted = articleRestore` (`:368`), so in the app's order (geometry first, the projection on
+the view's `.task`) the entry landing arrives at a `.settled` restore and is never weighed. The
+harness's order is the only one the shipped arm `t` pins. The behaviour is R-Q21's letter falsified on
+a shape three records — the fix pass, my sanity pass and the dispositions — all called delivered.
+
+**Rider 1 — the new condition is right, and I checked the road that would have made it wrong.** In
+the HARNESS order `landArticle` fires before any geometry, so `articleRestore == .undecided` and the
+memory has not been read; `articleRestore != .undecided && articleMemoryAtMount != nil` is false
+there and the `.undecided` branch still does the work — unchanged, and the pins that ride that order
+keep asserting the same thing. **Rider 2 — a BLOOM must not start standing down on a `.top` memory,
+and it does not:** the resolver's first guard is `articleLanding != nil, articleLandingKind == .entry`
+(`:404`), so widening the CALLER's condition cannot reach a bloom. Stated because the widening reads
+as if it might. **Rider 3 — one pin's DOC becomes false and should evolve with its reason, the way
+the 17p arm did at the fix pass:** `theLandingOutranksAMoveToAnotherBlockButNotAPlainRoundTrip`'s arm
+(f) is commented *"The TOP remembered already settles at once and issues no scroll (R1-1), so a
+landing trivially wins there — no branch owed"* — that sentence is mine, it was true when the resolver
+was not consulted for `.top`, and after this fix it is true only for a landing that OUTRANKS. Its
+assertions still hold (arm (f)'s landing is `"far"` against `lastCurrentRow` `"was-here"`), so the pin
+rides; the comment must not.
+
+**R2-2 (MAJOR — W-2's re-derivation has no departure half) — AGREE, and the rider is the one hazard I
+raised at round 1 for the wrong finding: it is live HERE, and the sketch as written would trip it.**
+
+The mechanism reads exactly as traced: `articlePlaceNow` takes the LOWEST-`minY` fitting frame, a
+de-realized row's last frame stays in `articleRowFrames` until `forgetArticleRowFrame`, and the
+forget removes it without re-deriving — so a stale small `minY` wins every comparison while it is
+present and nothing recomputes when it goes. That is the asymmetry, and W-2's own doc names the case
+it leaves open ("a fling's last step is pages").
+
+**THE RIDER — the departure re-derivation must not fire while the board is TEARING DOWN.** I hold the
+write sites: `TakesBoardView`'s rows carry `.onDisappear { model.rowDisappeared(…);
+model.forgetArticleRowFrame(slot.placementID) }`, and SwiftUI runs those `onDisappear`s when the
+BOARD's subtree is removed — every row, one after another, on a mode switch. With the sketch as
+written each of those departures would re-derive and WRITE the session memory from a shrinking set of
+frames, so the last row to leave decides what she comes back to. That is the hazard I named in my
+round-1 rider as "a report arriving during the board's teardown would record a place she never saw" —
+the reviewer was right that it was not R1-1's mechanism, and it becomes real the moment the departure
+writes. **Two candidate guards, and it must be MEASURED either way** (a mounted pin: mount, scroll to
+a known place, tear the board down, then assert `takesArticlePlaces[post]` still equals the place the
+last settled geometry wrote — red if the unmount overwrote it): (a) re-derive on departure only while
+frames REMAIN that could name a place — but note a one-by-one unmount still walks down to one row, so
+a bare `!articleRowFrames.isEmpty` is not enough; (b) suppress memory writes once the board is
+leaving, which needs a fact the layout can see (`TakesViewModel.teardown()` sets it; the board view
+calls that in its own `.onDisappear`, whose ordering against the rows' is not guaranteed — so the
+flag must be set where it is certainly first, or the guard must be (a)-shaped). I have no preference
+between them; I have the requirement that the pin exist before the departure half ships.
+
+**R2-3 (MAJOR — R1-1's shift survives where no row below the fold fits) — AGREE on the mechanism, and
+the gate is right — but the finding's two shapes are NOT one problem, and half of it needs no
+measurement at all.**
+
+The `fits` test is `into + rowHeight <= viewport`, i.e. exactly "the anchor's unit point lies in
+[0, 1]", so the fallback is 17p's rule kept for the shapes the anchor cannot express — that much is
+right. **The split, from the arithmetic I re-derived at the sanity pass:** the anchor puts a row's top
+at `a·(viewport − rowHeight)` = `a·room`.
+
+- **A TALL row (`rowHeight > viewport`, so `room < 0`) straddling the fold (`into < 0`)** — the
+  bloomed fan, a paragraph taller than the page, the case the finding names second — gives
+  `a = into/room` = negative ÷ negative = **POSITIVE, and ≤ 1 whenever the row covers the bottom
+  edge** (`into >= room` ⇔ `maxY >= viewport`). So that half is expressible with an ordinary
+  in-range unit point TODAY and needs no `scrollTo` measurement; what blocks it is
+  `ArticlePlace.anchorY`'s guard `room > 1, into > 0` (`:814–816`), which rejects every negative room
+  and every negative `into` alike. Splitting that guard is the fix for the tall half.
+- **A SHORT row straddling (`room > 0`, `into < 0`)** — the short-note case the captures measure
+  (`32` → `33`, ~9 pt) — is the one that needs `a < 0`, and that is the measurement the finding
+  gates on. Its gate is right and I would not skip it.
+
+**Rider 2 — a THIRD zero-`into` branch the finding does not name:** `articlePlaceNow`'s last fallback
+is `below` (`:904`), also constructed with `into 0`. It is reached when no row fits and none straddles
+— every realized row at or below the fold and the topmost not fitting. For a TALL row with `into > 0`
+that fallback is correct by impossibility (a unit point cannot put a tall row's top below the fold at
+all), and saying so in the doc is worth more than code; for a short row extending past the bottom edge
+it is the same shift in a third place, rare but real. Whichever way the measurement goes, the doc
+should name all three branches rather than the straddling one.
+
+**R2-4 (NIT — the pin's doc conflates two orders) — AGREE.** The doc is the fix pass's, not mine, and
+the distinction is the one my own mount-ordering trace turned on: `.onAppear` vs the first geometry is
+W-1's order and the harness genuinely cannot reproduce it; the LANDING vs the first geometry is the
+order the harness reproduces *by construction* — the projection arrives from the view's `.task`, which
+is why the bare-model road is the app's landing order and R2-1's mounted pin can ride it. Saying which
+is worth the two lines.
+
+**R2-5 (NIT — the dead branch) — AGREE.** `UnitPoint.top` is `UnitPoint(x: 0.5, y: 0)`, so
+`anchorY == 0 ? .top : UnitPoint(x: 0.5, y: anchorY)` selects between two spellings of one value.
+`UnitPoint(x: 0.5, y: anchorY)` alone with the comment kept is right; the ternary reads as if two
+behaviours existed and there is only one.
+
+**R2-6 (NIT — the KnownIssues numbers) — AGREE; checked by `git`.**
+`git show 519280a3:…/TakesBoardLayout.swift | wc -l` is **1138**, not ~1,050, and the file is 1138
+today; the article machinery's span is the reviewer's to state. Numbers only, and the row's argument
+is unaffected.
+
+**Nothing else raised.** The "considered and cleared" list matches what I hold: `adopt` sets
+`projection` before `consumeLandings` (so the entry ring records the current block on the entry road —
+my piece-6 trap doc says the same), the bloom arm returns before the N9 arm so a bloom's landing is
+never overwritten, the `.undecided` fold's re-check is the line my round-1 rider asked for, and W-2's
+P1 shape is realized-rows-only. The probe-3 harness artifact the reviewer records — no rows-space
+geometry pass after an AppKit `contentView.scroll(to:)` that realizes nothing — is the same family as
+the clip-view-scroll fact this suite already carries (it is not `isPositionedByUser`), and recording
+it beside that one is right.
+
+
