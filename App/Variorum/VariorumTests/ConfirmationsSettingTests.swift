@@ -484,6 +484,24 @@ struct ConfirmationsSettingTests {
         boxWindow.contentView = boxHost
         defer { boxWindow.orderOut(nil); boxWindow.close() }
 
+        // **THE FLAT BAR'S OWN WIDTH** (the ladder round 3, J45): the flat
+        // host above must stay UNCONSTRAINED for its `width == 0` / `> 0`
+        // assertions to mean anything — which is exactly why its height
+        // assertion could not fail: unconstrained, a long sentence reports
+        // ONE line at 896 pt of width rather than two at 420. So the row's
+        // real claim — "the bar's height never changes for it" — needs a
+        // third host at the flat bar's own width, where a long receipt would
+        // wrap if the view let it.
+        let flatHost = NSHostingView(
+            rootView: QuietReceiptLine(status: center, tokens: tokens)
+                .frame(width: 420))
+        flatHost.frame = NSRect(x: 0, y: 0, width: 420, height: 40)
+        let flatWindow = NSWindow(
+            contentRect: flatHost.frame, styleMask: [.titled], backing: .buffered, defer: false)
+        flatWindow.isReleasedWhenClosed = false
+        flatWindow.contentView = flatHost
+        defer { flatWindow.orderOut(nil); flatWindow.close() }
+
         /// The standing async-poll rule (never a sync RunLoop pump from an
         /// async context — Swift 6 makes that unavailable, and it is the
         /// repo's rule anyway).
@@ -495,6 +513,9 @@ struct ConfirmationsSettingTests {
                 boxHost.layoutSubtreeIfNeeded()
                 boxWindow.layoutIfNeeded()
                 boxWindow.displayIfNeeded()
+                flatHost.layoutSubtreeIfNeeded()
+                flatWindow.layoutIfNeeded()
+                flatWindow.displayIfNeeded()
                 if predicate() { return }
                 await Task.yield()
                 try? await Task.sleep(for: .milliseconds(10))
@@ -506,16 +527,23 @@ struct ConfirmationsSettingTests {
                 "idle: the slot is mounted and takes NO width — nothing reflows")
         let idleHeight = host.fittingSize.height
         let idleBoxHeight = boxHost.fittingSize.height
+        let idleFlatHeight = flatHost.fittingSize.height
         #expect(idleBoxHeight > 0,
                 "…but ONE LINE'S HEIGHT, reserved deliberately so the counts and the `?` door never move when a receipt lands (J31)")
 
-        center.receipt("Blocks joined — \u{2325}\u{2318}Z undoes it.")
+        // A LONG one — 125 characters, ~896 pt at `tokens.small`, so it
+        // wraps at 420 and at 200 unless the view refuses to.
+        center.receipt(
+            "Newlines now stay inside the block in this note — typing and pasting won't make new "
+            + "blocks; Divide is how a block becomes two.")
         await settleLayout { host.fittingSize.width > 0 }
         #expect(host.fittingSize.width > 0, "speaking: the words are there")
         #expect(host.fittingSize.height == idleHeight,
                 "the flat bar's row NEVER changes height for it")
         #expect(boxHost.fittingSize.height == idleBoxHeight,
-                "…and the box's column holds exactly the room it already had — at ITS width, where this sentence measures 204 pt and would otherwise wrap")
+                "…and the box's column holds exactly the room it already had — at ITS width, where this sentence would otherwise wrap")
+        #expect(flatHost.fittingSize.height == idleFlatHeight,
+                "…and the FLAT bar's row keeps its height at the bar's own width (J45): \(flatHost.fittingSize.height) vs \(idleFlatHeight)")
 
         center.clear()
         await settleLayout { host.fittingSize.width == 0 }
