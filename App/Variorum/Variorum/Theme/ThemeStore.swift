@@ -48,6 +48,14 @@ final class ThemeStore {
             }) {
                 settings = value
                 EditorTypography.adopt(value)
+                // 18i (her R-Q5): the receipt style is adopted HERE too,
+                // for the same reason and by the same rule — a settings
+                // value is adopted where it LANDS, never guessed by a view
+                // and never re-read per surface (F-6: "the setting is read
+                // by the centre once from the landed store"). The centre's
+                // compile-time value is already her default, so the gap
+                // before the first emission behaves as the store says.
+                session.status.receiptStyle = value.receiptStyle
             }
         } catch is CancellationError {
         } catch {
@@ -85,6 +93,13 @@ final class ThemeStore {
 
     func setFanStyle(_ style: FanStyle) {
         run { try $0.setFanStyle(style) }
+    }
+
+    /// 18i (her R-Q5): the confirmations setting. A setter and nothing more
+    /// — the adoption is `start`'s, above, so the centre and the pane can
+    /// never disagree about what landed.
+    func setReceiptStyle(_ style: ReceiptStyle) {
+        run { try $0.setReceiptStyle(style) }
     }
 
     /// Round 3 NIT: setters CHAIN instead of racing — parallel unstructured

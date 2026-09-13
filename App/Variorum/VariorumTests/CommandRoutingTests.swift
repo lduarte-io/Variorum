@@ -186,6 +186,125 @@ struct StatusCenterTests {
                     "AD-14: the VM's statusMessage forwards to the ONE presentation")
         }
     }
+
+    // MARK: - 18i (her R-Q5): the three kinds and the one routing rule
+
+    /// **A REFUSAL SHOWS UNDER EVERY SETTING.** The setting governs receipts
+    /// and nothing else: a door that could not act must still deliver the
+    /// operations layer's real refusal (P-2, fire-and-DO), so `off` must
+    /// never be able to silence one.
+    @Test func aRefusalToastsUnderEveryReceiptStyle() async throws {
+        try await withSessionWorld { session, _ in
+            for style in ReceiptStyle.allCases {
+                session.status.clear()
+                session.status.receiptStyle = style
+                session.status.speak("Click into a block first.")
+                #expect(session.status.current?.text == "Click into a block first.",
+                        "a refusal toasts under \(style.rawValue)")
+                #expect(session.status.quietLine == nil,
+                        "…and never lands quietly instead")
+            }
+        }
+    }
+
+    /// **AN OFFER SHOWS UNDER EVERY SETTING** — it carries a button, and a
+    /// question she cannot see is not asked. The kind is INFERRED from the
+    /// action, so every shipped `speak(_:action:)` call is unchanged.
+    @Test func anOfferAlwaysToastsAndIsInferredFromItsAction() async throws {
+        try await withSessionWorld { session, _ in
+            for style in ReceiptStyle.allCases {
+                session.status.clear()
+                session.status.receiptStyle = style
+                session.status.speak(
+                    "This note is in two books.",
+                    action: StatusCenter.Item.Action(label: "Diverge", perform: {}))
+                #expect(session.status.current?.kind == .offer,
+                        "an action makes it an offer under \(style.rawValue)")
+                #expect(session.status.current?.text == "This note is in two books.")
+                #expect(session.status.quietLine == nil)
+            }
+        }
+    }
+
+    /// **THE RECEIPT GOES WHERE SHE SAID.** RED ON OLD by the routing's own
+    /// revert: before 18i every receipt was a `speak`, i.e. a toast — so the
+    /// `.quiet` arm is exactly the fix.
+    @Test func aReceiptLandsWhereTheSettingSays() async throws {
+        try await withSessionWorld { session, _ in
+            session.status.receiptStyle = .toast
+            session.status.receipt("Blocks joined — \u{2325}\u{2318}Z undoes it.")
+            #expect(session.status.current?.text == "Blocks joined — \u{2325}\u{2318}Z undoes it.")
+            #expect(session.status.current?.kind == .receipt)
+            #expect(session.status.quietLine == nil)
+
+            session.status.clear()
+            session.status.receiptStyle = .quiet
+            session.status.receipt("Blocks joined — \u{2325}\u{2318}Z undoes it.")
+            #expect(session.status.current == nil, "HER DEFAULT: no toast")
+            #expect(session.status.quietLine?.text
+                    == "Blocks joined — \u{2325}\u{2318}Z undoes it.",
+                    "…the bottom bar's muted line carries the words")
+
+            session.status.clear()
+            session.status.receiptStyle = .off
+            session.status.receipt("Blocks joined — \u{2325}\u{2318}Z undoes it.")
+            #expect(session.status.current == nil && session.status.quietLine == nil,
+                    "off means off")
+            #expect(session.status.lastDroppedReceipt
+                    == "Blocks joined — \u{2325}\u{2318}Z undoes it.",
+                    "…and the receipt REACHED the centre — it was dropped, not unspoken")
+        }
+    }
+
+    /// The centre says ONE thing at a time, wherever it sits: a refusal
+    /// arriving over a quiet receipt clears the quiet line (and back), so
+    /// nothing stale ever reads as current. `spoken` is the kind-agnostic
+    /// read — the word pins use it, the slot pins above do not.
+    @Test func oneMessageAtATimeAcrossBothSlots() async throws {
+        try await withSessionWorld { session, _ in
+            session.status.receiptStyle = .quiet
+            session.status.receipt("Block divided.")
+            #expect(session.status.spoken?.text == "Block divided.")
+            session.status.speak("This note is sealed — unlock it first.")
+            #expect(session.status.quietLine == nil, "the quiet line stood down")
+            #expect(session.status.spoken?.text == "This note is sealed — unlock it first.")
+            session.status.receipt("Blocks merged.")
+            #expect(session.status.current == nil, "…and the toast stood down in turn")
+            #expect(session.status.spoken?.text == "Blocks merged.")
+            session.status.clear()
+            #expect(session.status.spoken == nil, "clear() empties both slots")
+        }
+    }
+
+    /// The quiet line rides the SAME clock the toast does — "quiet" is a
+    /// placement and a register, never a different lifetime.
+    @Test func theQuietLineAutoDismissesUnderTheOnePolicy() async throws {
+        try await withSessionWorld { session, _ in
+            session.status.receiptStyle = .quiet
+            session.status.dismissAfter = .milliseconds(40)
+            session.status.receipt("Moved — now block 3 of 8.")
+            #expect(session.status.quietLine != nil)
+            await poll { session.status.quietLine == nil }
+            #expect(session.status.quietLine == nil, "the one auto-dismiss policy ran")
+        }
+    }
+
+    /// **THE DEFAULT IS HERS, AND IT IS ADOPTED WHERE IT LANDS.** The
+    /// centre's compile-time value already is her default; the theme store
+    /// pushes the stored one in from the settings observation (the 18d
+    /// lesson) — no surface reads the setting for itself (F-6).
+    @Test func theThemeStoreAdoptsTheReceiptStyleFromTheLandedSettings() async throws {
+        try await withSessionWorld { session, _ in
+            #expect(session.status.receiptStyle == .quiet,
+                    "the compile-time value is her default")
+            try session.operations.setReceiptStyle(.toast)
+            try await withAdoptedTheme(session: session) { store in
+                await poll { store.settings.receiptStyle == .toast }
+                #expect(session.status.receiptStyle == .toast,
+                        "adopted where the settings LAND, never guessed by a view")
+            }
+        }
+    }
 }
 
 // MARK: - N9 / AD-17: the Takes landing
