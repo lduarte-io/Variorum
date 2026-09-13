@@ -5293,10 +5293,11 @@ piece below.
 | 2 | R-Q17 — the card (both where room, the flip where small) + R3-2 (the List row's lead slot) + QUESTIONS #103 | **DONE (`2b7a86d6`)** — R3-2's red measured by behavioral revert and RESTORED; **no revert is in flight** |
 | 3 | R3-1 — the synchronous selection clear (R3-6 rides it) | **DONE (`e62987e6`)** — the compile-red measured by revert and RESTORED; **no revert is in flight** |
 | 4 | the NIT sweep (R3-4 · R3-5 · R3-7 · R3-8 · R3-9 · R3-10; R3-6 landed with piece 3) | **DONE (this commit)** |
-| 5 | the walk (the acceptance gate) + the closing runs | **NOT-STARTED** |
+| 5 | the walk (the acceptance gate) + the closing runs | **DONE (this commit)** |
 
 **Items:** R-Q20 · R-Q17 · R3-2 · R3-1 · R3-4 · R3-5 · R3-6 · R3-7 · R3-8 · R3-9 · R3-10 —
-dispositions PENDING.
+**all dispositioned below.** ONE new QUESTIONS entry: **#105** (her R-Q17's second arm never fires in
+the shipped window — PROVISIONAL, (a) built).
 
 - **Orientation — DONE.** Read in my own context, in the brief's order: `CLAUDE.md` and the canon it
   auto-loads (CoreDescription · OverallModel · AppSpec — §10's two stamps, §12's takes-presentations
@@ -5591,4 +5592,172 @@ suites) → **`✔ Test run with 54 tests in 7 suites passed after 35.860 second
 `LibraryRowAlignmentTests` · `MastheadStampTests` · `MastheadLayoutTests` · `MastheadTagDoorTests`);
 iOS (owed — `App/Variorum/Shared/LibrarySortWords.swift` and `Sources/` both moved) →
 **`** BUILD SUCCEEDED **`**.
+
+---
+
+### R-8 · THE WALK (the acceptance gate — USE, not mount)
+
+`io.lduarte.Variorum.debug` (built into `App/Variorum/DerivedData/17q`, bundle id verified), `cliclick`
+5.1 + `Tools/WalkKit`. **Her real-store app was NOT running** — `pgrep -fl 'Variorum.app/Contents/MacOS'`
+was empty at the walk's start, before every suite run, and after my quit; the only instance at any
+moment was mine (pid 24805, discriminated by PATH). No Release build, no `/Applications` touch. The
+fixtures: **A Scandal in Bohemia (262 blocks)** from the Sherlock sample for the long-note rows, a
+two-block note I minted, and the dev store's own Library.
+
+| # | the walk | what happened | capture |
+|---|---|---|---|
+| **R-Q20** | the 262-block note in Takes: scroll deep (the page left showing *"Very truly yours / IRENE NORTON, née ADLER"*, near the note's end) | the memory holds that far row | `01` |
+| **R-Q20** | → Write, click a block FAR from it (block **26**/262, *"I carefully examined the writing…"*), → Takes | **the block she came from is revealed at the FOOT with nine blocks above it, and the deep page is never restored on the way.** Two captures: one at **0.35 s** after ⌘2 and one at **2.9 s** — **byte-identical**, so there is no intermediate frame in which the remembered page was shown. J3's double move is gone in USE | `02` · `03` |
+| **R-Q20** | from there: ⌘1 → ⌘2, nothing touched | **PIXEL-IDENTICAL** (`cmp`) — a plain mode round trip moves nothing | `03` |
+| **R-Q20** (the same-block mirror) | scroll until block 26 is exactly at the TOP of the page, leave, come back | the page came back with block 26 revealed at the FOOT, not restored to the top — and the resulting frame is **byte-identical to `03`**. **This is the ruled reading, measured:** the memory is the row at the top of the page and the landing is the block she came from, and a hand scroll almost never lands those on the same row (here the row straddling the fold was block 25, not 26), so the landing wins. See the observation below | `04` · `05` |
+| **R-Q20** (the fan-panel door) | in Write on the note's LAST block (262/262), the bottom bar's `takes` panel → **Open Takes mode** | the board **went** there: block 262 bloomed with its take strip at the FOOT of the page, nine blocks above it on screen — the bloom arm still reveals, and never to the top | `06` |
+| **R-Q20** (a short note) | a fresh TWO-block note ("Paragraph one." ⏎ "Paragraph two."), ⌘2 → ⌘1 → ⌘2 | both blocks on screen at the top; the round trip **PIXEL-IDENTICAL** | `07` |
+| **R3-2** | the Library, List mode, `edited · oldest first` | the one note in the store with a stated day reads **`2026-09-04  dated sep 4  …  edited sep 4`** — the beside-the-title slot is the one brain's words where it printed the raw `2026-09-04`, and the two facts differ | `08` |
+| **R3-2** | the same list under `date · newest first` | the row prints the day **ONCE** — only the trailing `dated sep 22`; the beside-the-title slot stands down | `09` |
+| **R-Q17** | the Library's **Notes** cards at the full window, under `date · newest first` | the dated card reads **`2026-09-22   dated sep 22   edited sep 8`** — **BOTH facts beside the title**, the day said once and the EDIT stamp as the honest second (the batch's call under the date sort). Cards with no stated day show the sort's own stamp alone | `10` |
+| **R-Q17** (the small arm) | the same card at a **900 pt** and a **760 pt** window, with a deliberately long title | **the small arrangement never fired.** The title truncated and both stamps kept their ideal width; and below ~700 pt the shell's own minimum content width takes over and the catalog is CLIPPED rather than reflowed, so no reachable window ever hands the stamps a small enough proposal. **Filed as QUESTIONS #105**, with the one-modifier fix as option (b) | `11` |
+| **R3-1** | List mode, ⌘-click two notes (the header grows `tag 2 notes ▾` · `delete 2 notes…` and the info panel opens), then switch to **Notes** | **the bulk bar and the info panel are gone with the mode** — no frame of a destructive `delete 2 notes…` over a selection nothing on screen shows | `12` (before) · `13` (after) |
+| **both voices** | the Notes cards and the List rows in **Study** | the same two facts in the serif with the voice's own casing — *`dated Sep 22  edited Sep 8`* (Terminal lowercases chrome; Study does not — `tokens.chromeLabel` doing its job) | `14` · `15` |
+| — | the dev store left as I found it | Terminal · List · `edited · newest first`; my instance quit; zero instances after | `16` |
+
+**Captures** (in `notes/plans/use-report-2026-09-12-screens/17q/`, gitignored):
+`01-takes-left-deep.png` · `02-takes-landing-wins-first-frame.png` ·
+`03-takes-landing-wins-settled.png` · `04-takes-same-block-left-at-top.png` ·
+`05-takes-same-block-came-back-revealed-at-the-foot.png` ·
+`06-takes-fan-panel-door-far-block-revealed-at-the-foot.png` ·
+`07-takes-two-block-note-round-trip.png` ·
+`08-library-list-edited-sort-dated-sep-4-beside-the-title.png` ·
+`09-library-list-date-sort-the-day-once.png` · `10-library-notes-cards-wide-both-facts.png` ·
+`11-library-notes-card-narrow-window-both-stamps-title-yields.png` ·
+`12-library-list-two-notes-picked-bulk-bar.png` ·
+`13-library-notes-mode-no-bulk-bar-r3-1.png` ·
+`14-library-notes-cards-study-voice-both-facts.png` ·
+`15-library-list-study-voice-edited-sort.png` · `16-dev-store-left-as-found.png`.
+
+**What the walk changed in my understanding — ONE OBSERVATION FOR HER, recorded rather than
+re-decided.** The brief anticipated it in words (*"a landing that names a block INSIDE the remembered
+page but not at its top still wins under her letter"*); the walk measured how WIDE that is. Because
+the memory is **the row at the top of the page** and the landing is **the block she came from**, the
+two are equal only when her current block happens to be the row at the fold — which a hand scroll
+almost never produces. So **with an entry landing present, the restore in practice never runs**, and
+what she gets is: her block always on screen, one move, and a stable page (every round trip measured
+pixel-identical). What she loses is the surrounding context she had scrolled to when her block was
+already visible but not at the top (`04` → `05`). That is her letter, built to the brief's own
+definition of "the same block", and the alternative reading — *"the same block" means the note's
+current block did not CHANGE while she was away*, which would make every plain round trip restore
+exactly and only a deliberate click elsewhere win — is a small addition, not one line: it needs a
+second session value (which block was current when the board was last shown) beside
+`takesArticlePlaces`. **Hers to say; nothing here re-opens R-Q20.**
+
+**A walk note for the record:** the dev store now carries a note renamed to *"A deliberately long note
+title for the narrow card walk"* (it was untitled, displaying its `2026-09-22` entry date) — mine, made
+to reach the small-card case, left in place so the ladder sees the store I did. Harmless; dev store
+only.
+
+---
+
+### R-8 · DISPOSITIONS (every item this entry carries)
+
+| item | disposition |
+|---|---|
+| **R-Q20** — her J3 ruling, *"the block I came from wins"* | **FIXED.** Pins: `TakesArticleScrollTests.theLandingOutranksARememberedRowButNotTheSameOne` (pure, six arms — **red on old: `.scrollToRow("left")` where `.remember(.top)` is owed; the restore left `.wanted`; `articleRestoreAims → 1` where 0**) · `…aLandingOnAnotherBlockWinsOverTheRememberedPlace` (mounted, 60 blocks — **red on old: `articleRestoreAims → 3` where 0 is owed**) · `…aLandingOnTheBlockSheLeftAtTheTopStillRestoresThePlace` (the mirror GUARD, green on both sides, labelled as such) · `…aBoardLeftScrolledComesBackWhereSheLeftIt` (the no-landing mirror, unmodified). Walked: `01`–`07`. |
+| **R-Q17** — her #103 ruling, both where there is room | **FIXED** (the first arm walked; the second arm built, pinned and unreachable in the shipped window — QUESTIONS #105). Pins: `LibraryCardStampsTests.theTwoFactsARowShowsAreTheStatedDayAndTheSortsOwnStamp` (the rule) · `…aWideCardShowsTheStatedDayAndTheSortsStamp` · `…aSmallCardShowsOneStampAndAClickFlipsIt` · `…aNoteWithNoStatedDayShowsItsOneStampAndNoFlipDoor`. Walked: `10` · `11` · `14`. |
+| **R3-2** — the List row's raw `entry_date` slot | **FIXED.** Pin: `LibraryCardStampsTests.theListRowSpeaksTheOneBrainAndNeverPrintsOneDayTwice` — **red on old by behavioral revert: `row.date → "2026-01-15"` beside `row.stamp → "dated Jan 15"` under `.entryDate` (one day, twice, two grammars), and the raw stored column under the other three**. Walked: `08` · `09`. |
+| **R3-1** — the synchronous selection clear | **FIXED.** Pin: `LibraryDayFilterTests.theModeChangeClearsThePickInItsOwnUpdate` — **red on old as a COMPILE red (the fix IS the signature; three errors at the pin, one at the view's call site, measured by revert)**; the two shipped `modeChanged` pins drive the new door and each gained an assertion. Walked: `12` · `13`. |
+| **R3-4** — the sort words' fallback as a switch | **FIXED**, behaviour BYTE-IDENTICAL (a compile-time shape); no pin owed, the two shipped word pins ride as the proof. |
+| **R3-5** — `JournalDay.date(from:)`'s `.current` default | **FIXED**, behaviour BYTE-IDENTICAL for every caller today (all four pass a calendar explicitly, re-grepped); no red-on-old exists to write, same class as R2-8. |
+| **R3-6** — `modeChanged` writing `editedOn` past its door | **FIXED** with piece 3 (`setEditedOn(nil)`), behaviour BYTE-IDENTICAL today. |
+| **R3-7** — "case-insensitively" is ASCII-only | **FIXED as a doc clause** (the accepted shape named, with the reviewer's `sqlite3` measurement quoted); the pin's NAME deliberately left alone — the reviewer's fix was the clause, and renaming a shipped pin is a test edit with no claim behind it. |
+| **R3-8** — three tooltip literals in view bodies | **FIXED.** The sort door's is now COMPOSED from `LibrarySortFace.offered` + the one word table (same text today, correct by construction tomorrow); the day field's two joined `LibraryDayFace`. No pin owed. |
+| **R3-9** — a mid-file `import` | **FIXED**, byte-identical. |
+| **R3-10** — the masthead oracles' teardown | **FIXED IN THE HALF WITH NO TRADE** (the per-note boundary is the swap — `onChange(of: postID)` clears the previous note's entries; `MastheadGeometry.forgetStamp` lets that oracle clear its own row) · **the two-window edge LEFT with its reason** (fixing it needs ownership tracking — real machinery for a DEBUG-only corner no pin reaches — and dropping `onDisappear` to avoid it would re-open the growth R2-9 closed). |
+
+**Nothing DISMISSED AS HOLLOW** — every item's mechanism reproduced where a red was possible, and the
+three that are byte-identical say so instead of claiming a pin. **Nothing DEFERRED** except R3-10's
+two-window edge (recorded above) and QUESTIONS #105's option (b)/(c) (hers).
+
+### R-8 · THE BATCH'S OWN CALLS (recorded, not asked — §8's rule)
+
+1. **The card's second fact under the `date` sort is the EDIT stamp** (the brief's own call): there the
+   sort's stamp IS the stated day, so "both" cannot mean one fact twice. On #103 as PROVISIONAL.
+2. **The pair sits BESIDE THE TITLE** — reading (i) of #103's R1-17 clause, the shape she pointed at;
+   (ii)/(iii) are one `Spacer` away. On #103 as PROVISIONAL.
+3. **A note with NO stated day under the `date` sort now shows the EDIT stamp** where 18h showed
+   nothing — not a special case but a consequence of the one rule (the first slot is silent, the
+   second is "the other fact"), arriving at the answer #103's own "related edge" paragraph floated,
+   from the other end. On #103 as PROVISIONAL.
+4. **No shared `FlippingStamp` type was hoisted.** The masthead's flip and the card's differ in both
+   halves that matter (a HELD observation over two SUBJECTS with a geometry probe, vs two
+   already-computed `RowStamp`s on a catalog hit); the WORDS rule is already one brain, so what is
+   duplicated is a twelve-line button, not a rule. The hoist is named for 13u2's Library restyle.
+5. **The pins read `model.board.articleRestoreAims` directly** rather than through a new view-model
+   forwarder — R1-6's lesson (the batch that added ten forwarders shipped three dead).
+
+### R-8 · THINGS FOUND AND DELIBERATELY NOT FIXED
+
+- **The Notes card's small arrangement is unreachable in the shipped window** — measured, filed as
+  QUESTIONS **#105** with the one-modifier option (b). Not fixed here because which of title-vs-dates
+  yields is a taste call her ruling does not make, and the card's own composition has no mounted-pin
+  road (the rig cannot mount the catalog — KnownIssues).
+- **The dev store's notes mostly carry NO `entry_date`** (their titles are `DisplayTitle`'s fallback
+  from `created_at`), which is why only one row in the walk shows a "dated …" fact. Not a defect —
+  the honest silence #103 records — but worth knowing before reading capture `09`.
+- **The pre-existing double date on some List rows** (a note with no title showing its day as the
+  TITLE and again in a date slot, 13g batch 7's fallback) is untouched: 17q's rule governs the SLOT,
+  not the title, and the two are different facts by construction now (the slot says *dated Sep 4*).
+- **R3-10's two-window edge**, above.
+
+### R-8 · CLOSING THE BATCH (the exact lines)
+
+- **Core** (`swift test --filter 'LibraryTimeSortTests|TimeStampFaceTests|DayBoundsTests|LibraryDaySearchTests|NoteStampsTests'`, repo root — `Sources/` moved at R3-5 and R3-7):
+  **`✔ Test run with 46 tests in 5 suites passed after 1.968 seconds.`**
+- **Mac** (ONE `xcodebuild test` from `App/Variorum/`, **27 TYPE names**, zero `skipped:` lines):
+  **`✔ Test run with 195 tests in 27 suites passed after 93.577 seconds.`**
+  The 27: `TakesArticleScrollTests` · `CommandRouterTests` · `MoveAndExecuteTests` ·
+  `StatusCenterTests` · `LibraryRowAlignmentTests` · `LibrarySortMenuTests` · `LibraryDayFilterTests` ·
+  `LibraryCardStampsTests` · `MastheadStampTests` · `MastheadLayoutTests` · `MastheadTagDoorTests` ·
+  `TakesLandingTests` · `TakesEmptyBlockFaceTests` · `TakesRoomTests` · `LibraryPreviewBrainTests` ·
+  `LibraryPanelHostTests` · `NoteBoxCopyTests` · and the ten `Tutorial*` spine types
+  (`TutorialBookShapeTests` · `TutorialDeletionActsTests` · `TutorialDoorTests` ·
+  `TutorialLibraryActsTests` · `TutorialLookingActsTests` · `TutorialPrivacyChapterTests` ·
+  `TutorialStructureActsTests` · `TutorialTakesActsTests` · `TutorialWherePlacesActsTests` ·
+  `TutorialWritingActsTests`).
+  *(18h's lesson met twice more, recorded: the brief named `CommandRoutingTests` and "the ten
+  `Tutorial*Tests`" — both are FILE names. The real types are `CommandRouterTests` +
+  `MoveAndExecuteTests` + `StatusCenterTests` … in that file, and the ten tutorial types all live in
+  `TutorialWalkTests.swift`. The first two attempts ran 10 and 21 suites silently; the run above was
+  verified name-by-name with `grep -rl "struct <name>"` before it was trusted.)*
+- **iOS** (owed — `App/Variorum/Shared/LibrarySortWords.swift` and `Sources/` both moved):
+  **`** BUILD SUCCEEDED **`**.
+- **Fences:** `git diff --stat 634a57c4..HEAD -- Sources/VariorumCore/Sync Server` is **EMPTY**; zero
+  schema, zero migration, zero `setting`, marker stays 8; `PaneTextAuthority` · `PaneSurface` ·
+  `BlockRangeIndex` · `EditorTextView` · `PaneMeasurement` · `TakesChoreographer` untouched. No commit
+  trailers on any of the seven commits.
+
+### R-8 · WHAT THE ENTRY'S CLOSE OWES (drafted for the orchestrator)
+
+- **`notes/AppSpec.md` §12, the takes-presentations line** — R-Q20's sentence. Draft: *"…and an entry
+  landing OUTRANKS the remembered place (17q, her R-Q20 on J3: 'the block I came from wins') — when
+  the landing names a block other than the one at the top of the page she left, the page opens at the
+  top and reveals that block minimally; the remembered place is restored only on a return to the same
+  block, or with no landing."*
+- **`notes/AppSpec.md` §12, the Library line** — R-Q17's. Draft: *"…and the Notes cards carry BOTH the
+  day she stated and the sort's own stamp where the row has room, collapsing to ONE click-flipping
+  stamp where it does not (17q, her R-Q17 on QUESTIONS #103); the List row's beside-the-title day
+  speaks the same brain and stands down under the `date` sort, where the trailing stamp already says
+  it."*
+- **`notes/AppSpec.md` §7** — **nothing owed** (no `setting`, no schema, marker 8).
+- **`notes/QUESTIONS.md`** — **#103 updated** (BUILT, with the three PROVISIONAL calls) and **#105
+  filed** (PROVISIONAL, (a) built). Next free: **#106**.
+- **`notes/KnownIssuesAndTechDebt.md`** — the row *"The 18h ladder's residue at the cap"* (owner 17q)
+  is **RESOLVED by this entry** and should be struck or marked closed; if the orchestrator wants a
+  successor row, it is R3-10's two-window edge (DEBUG-only, owner 13u2) and the `FlippingStamp` hoist
+  (owner 13u2, beside the Library restyle).
+- **`notes/MobileSoul.md` §6 (PL-22)** — the phone owes a version of R-Q20's rule if its Takes surface
+  ever gains a scroll memory (it does not today); `App/Variorum/Shared/LibrarySortWords.swift` moved
+  at R3-4 with **no string change**, so the phone's picker words are byte-identical and nothing new
+  is owed there. `Sources/` moved at R3-5/R3-7 (a default and a doc), which the phone inherits by
+  construction.
+- **`notes/plans/phase-17-standing-fixes.md`** — the 17q register row flips to CLOSED with the
+  dispositions block above copied into the entry.
 
