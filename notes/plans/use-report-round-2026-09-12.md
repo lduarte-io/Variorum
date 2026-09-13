@@ -9713,3 +9713,68 @@ Cold round-2 pass over the letter `fbe2720b..39cb3fb1` with round 1's nine fix c
 - Core 11/2 · Mac 74/7 · iOS build green · the full Mac suite (line above) · the phone's `MobileEditorStyle.swift:102` untouched.
 
 **Counts (18g's round-1 fixes): BLOCKER 0 · MAJOR 0 · MINOR 0 · NIT 4 (R2-2 · R2-3 · R2-4 · R2-5).** Beside them, **ONE pre-existing MAJOR found while tracing the road the fixes share (R2-1) — routed to 18j, not a round-3 trigger and not fixed in this ladder unless the orchestrator says so.** Round 2's real pass over the fixes finds them right; no round 3 is owed on these counts.
+
+### 18g LADDER — ROUND 2 · THE IMPLEMENTER'S RESPONSES
+
+**4 NITs · 4 AGREE · 0 DISPUTE.** No code touched.
+
+**[NIT] R2-2 — AGREE.** I opened the capture. The ROOM field holds `E07A5F380` (the rig's typing appended
+to the landed `E07A5F`), the ACCENT field is EMPTY with its `B9A7E6` prompt showing and the caret in it, and
+the refusal reads **“E07A5F380” isn't a colour** — it names the ROOM's value. So the sentence about which
+half refused does not match its evidence; the MECHANISM the row claims (a dirty field commits on focus loss,
+the refusal lands inline, the typed text is kept) is exactly what the capture shows, and the both-fields
+contract is read straight off `commitSeeds`. Rewording the row to what the capture shows is the honest fix —
+and the parenthetical is right too: the refusal's second line ("was changed.") is clipped at the pane's
+bottom edge in that shot.
+
+**[NIT] R2-3 — AGREE; the number is 10.** Counted: `PaletteReachTests` holds **8** `@Test func`;
+`PaletteDerivationTests` gained **1** (`aSeedFieldIsDirtyOnlyWhenItSaysSomethingTheLandedValueDoesNot`);
+`PaneSurfaceTests` gained **1** in `4e8db490` (`aPaletteChangeRecoloursAMountedPanesLink`) — and
+`git diff --stat 5bb4d248 4e8db490 -- App/Variorum/VariorumTests` shows exactly those three files, all
+insertions, no pre-existing test edited. So 9 through `3adb7d2d`, **10** with the pane pin. The three walk
+pins are members of the eight, not a third term.
+
+**[NIT] R2-4 — AGREE, and the answer to "can it leak into another suite's expectations in the same process"
+is: NOT TODAY, YES BY CONSTRUCTION — which is why the two lines are worth adding.** Traced both globals:
+
+- **`MarkdownStyling.palette`** is written UNCONDITIONALLY by `applyVoiceChrome` (`EditorTypography.swift:392`),
+  so both pins leave it at Lavender's face (its `link` = `#4E2D9F`; `marker`/`codeTint` are Terminal's either
+  way, since the pins use the Terminal voice — so `link` is the only value that actually moves).
+- **Can that flip an expectation on the current tree? No** — I enumerated every test-side reader:
+  `MarkdownFaceTests:134/167/168/170/183/203/239` compare the STORAGE against the GLOBAL itself (and set it
+  first, `withVoice:29–35`), `FormattingSurfacesTests:191` the same inside `withVoicePalette:286–288`,
+  `SurfaceSizeMemoryTests:578/582`, `PaneSurfaceTests:170–171` and the shared `EditorTestSupport:225/233` all
+  save-and-restore. **No test asserts a face colour against a token literal while depending on the ambient
+  global**, so a leaked Lavender face cannot change a verdict today.
+- **Which is exactly the reason to fix it.** That immunity is a property of the CURRENT suites, not a
+  guarantee: the first pin that says "this link is the Terminal accent" without setting the global becomes
+  ORDER-DEPENDENT, which is the worst failure shape there is. And the sharper hazard the house pattern does
+  NOT solve — Swift Testing runs tests in parallel in one process, so a save→set→restore body is safe against
+  sequential leakage but not against a CONCURRENT writer: an unrestored `applyVoiceChrome` in these pins is
+  precisely such a writer, and `MarkdownFaceTests:168`'s storage-vs-global comparison is what it could land
+  between. Restoring narrows that window and makes the immunity structural instead of incidental.
+- **`EditorTypography.current`:** the pins restore `isAdopted` and `applyVoiceChrome` writes `current` only
+  while unadopted (`:388`), and both pins' chromes resolve to `(voice: .terminal, inlineComments: false)` —
+  the compile-time default (`EditorTypography.swift:49`), and the `gap` chrome does not move it because the
+  gap is read at `baseParagraphStyle`, not carried in `Resolved`. So `current`'s leak is a no-op **by
+  coincidence of these pins' inputs, not by design** — and it is the one that would hurt, because every
+  `EditorDocument.baseFont`/`baseParagraphStyle` reader in the run consumes it. The same two lines make it
+  inert by construction.
+
+**[NIT] R2-5 — AGREE, and it is a gap in my own sanity pass, not only in the handoff.** `inkChanged` returns
+true when `dark` moves (`EditorTypography.swift:331–334`), and `textColor`'s setter re-attributes the ENTIRE
+storage — so a system light/dark toggle on the 262-block note takes a full-range edit and jumps exactly as
+the re-font road did. My check (4) verified the predicate was *correct* (the ink really did move) and never
+asked what the resulting WRITE costs, which is the same question the walk had to ask of the base refresh. One
+sentence in the 13u2 handoff and a long-note dark-toggle walk item in 18j's brief is the right disposition:
+the appearance change is the one input that legitimately must write the whole storage today, so it is 18j's
+to meet beside R2-1, not a carve-off here.
+
+**R2-1 (routed to 18j) — one line from my side, since the blind spot was mine.** My sanity pass's check (3)
+enumerated the palette-dependent storage attributes and concluded `marker`/`codeTint` "cannot go stale under
+a palette" — true in the PALETTE direction, and exactly the blind spot: I never asked the INK direction,
+where the non-link faces pass `color: nil` (`MarkdownFaceCore.swift:202–220`, applied at `:233` only
+`if let color`) and the clear loop restores each run to the prose colour CAPTURED at face time (`:238` stamps
+it, `:145–146` restores it), so an ink MOVE brings bold/italic/heading/code back in the old ink while only
+the link is re-derived. The trace and the pin shape in R2-1 match what I see at those lines; 18j's dark walk
+is the right place for it, and the shared core means the phone's pin rides with it.
