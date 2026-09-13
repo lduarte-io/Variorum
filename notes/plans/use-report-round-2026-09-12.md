@@ -6902,7 +6902,19 @@ Both rows are the R3-1 class (a settle that the column's later measurement passe
 
 **LIVE STATUS — 18i (`opus-implementer`, opened 2026-09-13 at `fe54be0f`; the code tree it builds on is `03dd8a7d`).**
 
-**WHAT I HAVE NOT DONE (the record's first line).** *(PENDING until the close — filled at the last commit.)*
+**WHAT I HAVE NOT DONE (the record's first line).** **Nothing in the batch is left undone or left red** —
+every piece landed, every pin is green on the closing tree, and the walk ran. What I deliberately did NOT
+do, by the brief: **zero `Sources/VariorumCore/Sync/`** (diff-empty against `03dd8a7d`), **zero schema and
+zero migration** (a `setting` key is upsert-only — not a §12 lockstep event; the marker stays **8**), **no
+string changed** (every one of her sentences is byte-identical — the diff moves which DOOR speaks them,
+never the words), **no change to WHICH acts speak** (the only acts that go quieter are receipts under her
+default; the only acts that go silent are receipts under `off`, which is what `off` means), nothing in
+`PaneTextAuthority` / `PaneSurface` / `BlockRangeIndex` / `EditorTextView`, and no phone surface (the
+mobile parity line is drafted for the orchestrator instead). **ONE product question went to the author
+rather than being decided here: QUESTIONS #106** — where a receipt goes on a surface with no bottom bar
+(Canvas, Compare, Read, Blocks, and the shell surfaces); arm (a) is BUILT and marked PROVISIONAL, with the
+reason the toast-fallback arm was not built (its mounted-slot count would be app-global while the windows
+are not). No other decision here is mine to make: everything else is R-Q5's letter or the constitution's.
 
 - **Orientation — DONE.** Read in my own context, in the brief's order: `CLAUDE.md` and the canon it
   auto-loads (CoreDescription · OverallModel · AppSpec — §7's `setting` block and its E2EE PLAIN
@@ -6944,7 +6956,7 @@ Both rows are the R3-1 class (a settle that the column's later measurement passe
   `ReceiptStyle.allCases`, `ReceiptStyleCopy` beside `SavepointCadenceCopy` with the sentence the
   setting must never leave out. No suite mounts the pane — the walk is its evidence.
 - **PIECE 6 — the walk (the acceptance gate): DONE (`fa957af5`).** Eleven captures under `notes/plans/use-report-2026-09-12-screens/18i/`; the table is below.
-- **THE CLOSING RUNS:** PENDING.
+- **THE CLOSING RUNS: DONE** — core `1546 tests in 167 suites passed`; the FULL Mac suite `2577 tests in 432 suites passed`, `** TEST SUCCEEDED **`, zero failures, 9 standing opt-in skip lines; iOS `** BUILD SUCCEEDED **`. The exact lines are at the record's end.
 
 #### R-5 · THE RECEIPT-SITE CLASSIFICATION (every site that reaches `StatusCenter`, with its verdict)
 
@@ -7053,3 +7065,47 @@ On the **DEV-STORE Debug build** (`io.lduarte.Variorum.debug`, `App/Variorum/Der
 **One thing the walk FOUND and I left alone, with its reason.** `jumpToDocumentEnd`'s *"Caret at the end — typing here starts a new block."* (`EditorViewModel.swift:2196`) toasted under `.quiet`. That is correct and deliberate: **nothing was minted** — the door moved the caret and the sentence says what typing there will DO. It is the same class as the undo hint and the ceremony's "run Make Block again": a DIRECTION, not a confirmation, and directions always show. It is row 45 of the table.
 
 **Restored:** the dev store's voice put back to Terminal (it was Terminal at launch; Study was the walk's). `receipt_style` is left at **quiet** — the new default, which is the point. My instance quit; zero instances at the close.
+
+#### R-5 · DISPOSITIONS (the row this batch owns)
+
+| Row | Her words | Disposition |
+|---|---|---|
+| **8** | *"there's these little text confirmation popups that are always appearing… i either need them off, more subtle in the bottom bar in more muted text, or a setting if i can turn it on or off. maybe the setting is the best option?… i don't always need it less noticable because for some operations it's the right confirmation text to show."* (images 6, 7) | **FIXED**, to her ruling R-Q5's letter — a KIND on the one status seam, a three-way synced setting (`receipt_style` ∈ toast · quiet · off) defaulting **quiet**, and a muted line at the bottom bar's trailing end. Pins: `StatusCenterTests`' six (the routing, red on old by the routing's revert — 3 tests / 6 issues) and `ConfirmationsSettingTests`' eight (the classification by BEHAVIOUR through her two images' own doors, red on old by the two sites' revert — 3 tests / 8 issues; plus the two guards and the slot's mounted geometry oracle). Walked in USE, eleven captures, both voices, all three values. **Not one string changed, and no act that spoke before is silent now** (except where she asks for silence). |
+
+#### R-5 · THE BATCH'S OWN CALLS (recorded, not asked — §8's rule)
+
+1. **The four forwarders' shadow kind.** `EditorViewModel`/`BlockTOCViewModel`/`CanvasViewModel`/`CompareBoardModel` deliver their `statusMessage` with `outgoingKind`, named by the writing door and RESET after each delivery. The alternative — converting `statusMessage` into a computed forwarder over a classed value (`TakesViewModel`'s shape) — is the prettier one and would have meant editing ~100 assignment sites across four files for ~15 receipts. The shadow's reset is what makes every untouched site behave identically, and the invariant is pinned wherever a receipt is followed by a refusal.
+2. **`spoken` (= `current ?? quietLine`).** Added so the twenty-two shipped pins that assert WHAT was said stay kind-agnostic, and so the pins that assert SILENCE actually mean it. The slot pins read `current`/`quietLine` directly, which keeps the distinction visible.
+3. **The `.off` drop leaves the screen alone.** A receipt she asked not to see does not sweep away a refusal she is still reading.
+4. **One message at a time across both slots.** A new message clears the other slot, so the centre can never show a stale quiet receipt under a fresh toast. Pinned.
+5. **`ReceiptStyleCopy`'s never-leave-out sentence** follows `SavepointCadenceCopy`'s bar: a setting called "Nothing" that did not say refusals still show would be the J8 copy-truth defect.
+6. **The Confirmations section is its own**, not a row inside Editor or Writing: it is neither the writing surface's look nor the document's habits.
+
+#### R-5 · THINGS FOUND AND DELIBERATELY NOT FIXED
+
+- **Five board messages were receipts going through the REFUSAL door** (`TakesStructureController`'s take-moved, take→block, takes→blocks, merged-chain, deleted-blocks). I DID fix these, because they are the batch's own subject — but the finding worth recording is the *second* defect they carried: `WriteTakesPanel`'s status slot paints `status.isRefusal ? tokens.alarm : tokens.muted`, so "Take moved earlier — ⌥⌘Z undoes it." has been reading in the ALARM token since the post-13l polish round. Fixed here as a consequence; no separate pin (the class's own pin, `theBoardTellsAReceiptFromARefusal`, already exists and rides unchanged).
+- **A receipt spoken on a surface with no bottom bar is not shown under `.quiet`** — Canvas, Compare, Read, Blocks and every shell surface have no bar. Built as the shipped reading, **QUESTIONS #106 PROVISIONAL**, with the two alternatives and why the toast-fallback one was NOT built (its mounted-slot count would be app-global while the windows are not, so a note window's bar would suppress the main window's fallback).
+- **The phone has no confirmations surface.** `Queries.ThemeSettings` gained a defaulted field and the phone reads the individual enums rather than the struct wholesale, so it compiles untouched (iOS build green) and behaves exactly as before. Its own quiet slot is a MOBILE PARITY item, not this batch's (the Mac letter's fence).
+- **`AppSettingsView` has no suite to ride.** No test mounts the pane; the walk is the row's evidence. Recorded rather than a new mount harness invented inside a batch about status routing.
+- **`showTransientStatus`'s self-clearing 6 s timer is now a second clock beside the centre's.** It always was; 18i did not change it, and under `.quiet` the two agree (both 6 s). Left alone: touching it is the pane/timer family's work, not this seam's.
+
+#### R-5 · WHAT THE LETTER'S CLOSE OWES (drafted for the orchestrator)
+
+- **AppSpec §7's `setting` block** — a comment line beside `idle_commit_hours`, in the same register:
+  > `-- ('receipt_style' is NOT seeded: like `theme_voice`/`fan_style` its default is applied at READ time (`Queries.ThemeSettings`), and the default is QUIET — her ruling R-Q5, 18i. Enum-valued, so the column's PLAIN classification and its "enum semantics, no prose" promise are untouched.)`
+- **AppSpec §12's chrome paragraph** — one sentence: *(18i, 2026-09-13 — her R-Q5: every message the app speaks now carries a KIND on the one status seam — **refusal · offer · receipt** — decided where the message is produced; a synced setting `receipt_style` (**toast · quiet · off**, **quiet by default**) governs RECEIPTS ONLY, rendering them as a muted line at the bottom bar's trailing end (`QuietReceiptLine`, composed by Write's bar, the takes bars and the book's sidebar note-box footer); **refusals and offers always toast under every value** (P-2), and not one string changed. PROVISIONAL: QUESTIONS #106 — a receipt spoken on a surface with no bottom bar is not shown under `quiet`.)*
+- **QUESTIONS** — **#106** filed (open, PROVISIONAL, arm (a) built).
+- **`notes/MobileSoul.md`'s parity ledger** — a row: the Mac's confirmations setting (`receipt_style`, synced) has no phone consumer; the phone owes a quiet slot of its own, or a deliberate ruling that it keeps toasting. Owner: the mobile app project row.
+- **KnownIssues** — nothing new. (#106's residue is a QUESTION, not tech debt: it is a product call, not a defect.)
+- **Schema / `Sync/` / the lockstep marker** — **zero, zero, and the marker stays 8**: a setting key is upsert-only, so this is not a §12 event.
+
+#### R-5 · CLOSING THE BATCH (the three runs, exact lines)
+
+- **Core** (`swift test` from the repo root — `Sources/` was touched: the enum, the query, the operation):
+  `✔ Test run with 1546 tests in 167 suites passed after 55.476 seconds.`
+- **The FULL Mac suite** (`xcodebuild test -scheme Variorum -destination 'platform=macOS'`, no `-only-testing` — the diff reaches eleven feature files across five surfaces, so the honest close is everything):
+  `✔ Test run with 2577 tests in 432 suites passed after 690.829 seconds.` · `** TEST SUCCEEDED **` · zero `✘` lines.
+  **Skips (9 lines, all the standing opt-in gates, none new):** the four `pre-13x` drill suites and their tests — the Apple-key round trip, the migration drill, the posture drills, the adopt drill — each disabled unless its `TEST_RUNNER_VARIORUM_*` variable is set.
+  *(For the record, the suite-TYPE rule was met: every `-only-testing` name used during the batch was `grep -rl "struct <Name>"`-verified first — that is how the 42-suite touched-set run was assembled — and the closing run uses no filter at all.)*
+- **iOS** (`xcodebuild build -scheme VariorumMobile -destination 'generic/platform=iOS'` — `App/Variorum/Shared/AppSession.swift` was touched):
+  `** BUILD SUCCEEDED **`. **The phone compiles against the new enum**: `ReceiptStyle` is additive in core and `Queries.ThemeSettings` gained a DEFAULTED field, and the phone reads the individual enums (`ThemeVoice`) rather than the struct wholesale — so nothing on it changed, and it has no consumer for the setting yet (the parity line above).
