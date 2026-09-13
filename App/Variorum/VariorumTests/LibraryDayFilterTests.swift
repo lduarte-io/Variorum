@@ -299,6 +299,52 @@ struct LibraryDayFilterTests {
                 "the caveat rides either way")
     }
 
+    /// **THE PICK LEAVES IN THE SAME UPDATE THE MODE DOES** (the 18h
+    /// ladder's R3-1, built at 17q). R2-1's fix made `modeChanged()` async so
+    /// it could fold in the re-read — and a `Task {}` body cannot run before
+    /// the current synchronous update completes, so `clearSelection()` was
+    /// deferred off the very update in which the mode changed. Neither the
+    /// bulk bar (`if selectedPosts.count > 1`, carrying a destructive
+    /// `Delete N notes…`) nor the info panel is mode-gated, so both could
+    /// draw for a frame in a mode that shows no selection: the
+    /// invisible-selection hazard `clearSelection`'s own doc forbids.
+    ///
+    /// **Red on old: this pin does not compile** — `modeChanged()` was
+    /// `async`, so there was no way to read the selection in the same turn
+    /// that changed the mode. That IS the finding, stated as a type: the fix
+    /// is the signature, and the signature is what the pin holds. (The frame
+    /// itself is not reachable from a headless pin — the rig cannot mount the
+    /// whole catalog, KnownIssues — so the walk carries the face: pick two
+    /// notes in List, switch to Notes, no bulk bar.)
+    @Test func theModeChangeClearsThePickInItsOwnUpdate() async throws {
+        try await withTravellingLibrary { session, clock in
+            let model = LibraryCatalogModel(session: session, defaults: try scrubbed("sync"))
+            let one = try session.operations.createPost(title: "one")
+            _ = try session.operations.newBlock(in: one.id, text: "1")
+            let two = try session.operations.createPost(title: "two")
+            _ = try session.operations.newBlock(in: two.id, text: "2")
+            await model.search()
+            model.selectedPosts = [one.id, two.id]
+            model.infoHit = model.hits.first { $0.id == one.id }
+            #expect(model.selectedPosts.count > 1, "non-vacuity: the bulk bar's own condition")
+
+            model.mode = .notes
+            // NO `await` between these two lines — that is the whole claim.
+            let owesARead = model.modeChanged()
+            #expect(model.selectedPosts.isEmpty,
+                    "the pick is gone in the same turn the mode changed")
+            #expect(model.infoHit == nil, "…and so is the info panel's subject")
+            #expect(owesARead == false, "no day was armed, so no re-read is owed")
+
+            // …and with a day armed the answer flips, so the caller re-reads
+            // exactly when the listing's inputs moved (R2-1's half, kept).
+            model.setEditedOn(day(of: clock.current))
+            model.mode = .timeline
+            #expect(model.modeChanged(), "the day was cleared: a re-read is owed")
+            #expect(model.editedOn == nil)
+        }
+    }
+
     /// **Leaving the catalog clears the day** (the ladder's R1-11). The
     /// Timeline mode runs its own listing, so the day field is not drawn
     /// there — and an armed day left behind meant the scope picker stayed
@@ -316,11 +362,11 @@ struct LibraryDayFilterTests {
             #expect(model.editedOn != nil)
 
             model.mode = .notes
-            await model.modeChanged()
+            #expect(model.modeChanged() == false, "nothing to re-read: the day stayed")
             #expect(model.editedOn != nil, "the Notes mode is the same listing")
 
             model.mode = .timeline
-            await model.modeChanged()
+            #expect(model.modeChanged(), "the day was cleared, so a re-read is owed")
             #expect(model.editedOn == nil,
                     "the Timeline runs its own listing — the day goes with the door")
         }
@@ -353,10 +399,12 @@ struct LibraryDayFilterTests {
             await model.search()
             #expect(noteIDs(model) == [fresh.id], "the day's answer")
 
+            // Exactly what the view's `.onChange` does since 17q (R3-1):
+            // the clear is synchronous, and only the READ is spawned.
             model.mode = .timeline
-            await model.modeChanged()
+            if model.modeChanged() { await model.search() }
             model.mode = .list
-            await model.modeChanged()
+            if model.modeChanged() { await model.search() }
 
             #expect(model.editedOn == nil, "no filter is shown…")
             #expect(Set(noteIDs(model)) == [fresh.id, old.id],

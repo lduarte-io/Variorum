@@ -5291,7 +5291,7 @@ piece below.
 | 0 | orientation + the mount-ordering trace | **DONE (this commit)** |
 | 1 | R-Q20 — the landing wins over the remembered place (the condition + its pins) | **DONE (this commit)** |
 | 2 | R-Q17 — the card (both where room, the flip where small) + R3-2 (the List row's lead slot) + QUESTIONS #103 | **DONE (`2b7a86d6`)** — R3-2's red measured by behavioral revert and RESTORED; **no revert is in flight** |
-| 3 | R3-1 — the synchronous selection clear | **NOT-STARTED** |
+| 3 | R3-1 — the synchronous selection clear (R3-6 rides it) | **DONE (this commit)** — the compile-red is measured by revert at the next commit; **no revert is in flight at this one** |
 | 4 | the NIT sweep (R3-4…R3-10) | **NOT-STARTED** |
 | 5 | the walk (the acceptance gate) + the closing runs | **NOT-STARTED** |
 
@@ -5503,4 +5503,55 @@ seconds with 8 issues`):
 
 **Restored and re-verified green on the fixed tree: `✔ Test run with 21 tests in 4 suites passed
 after 9.659 seconds`** (the same four suites).
+
+---
+
+#### PIECE 3 — R3-1: THE PICK LEAVES IN THE SAME UPDATE THE MODE DOES (and R3-6 rides it)
+
+**The mechanism, traced myself before the fix.** R2-1's own fix made `modeChanged()` `async` so it
+could fold in the re-read, and the whole handler became
+`.onChange(of: model.mode) { _, _ in Task { await model.modeChanged() } }`. A `Task {}` body cannot
+run before the current synchronous update completes, so `clearSelection()` — the FIRST statement
+inside that function — was deferred off the very update in which the mode changed. Neither consumer
+of the selection is mode-gated: the bulk bar is `if selectedPosts.count > 1` inside the header's
+control row, which every mode draws, and it carries
+`Button("Delete \(selectedPosts.count) notes…", role: .destructive)`; the info panel hangs off
+`model.infoHit` in the same window. So with two or more notes picked in List, switching to Notes or
+Timeline rendered at least one frame of a destructive door over a selection nothing on screen shows —
+which is what `clearSelection`'s own doc calls the invisible-selection hazard, and what P-0's rule in
+the `.onChange`'s own comment forbids.
+
+**The fix, the reviewer's own shape:** `func modeChanged() -> Bool` — clear synchronously, return
+whether a day was cleared — and `.onChange { if model.modeChanged() { Task { await model.search() } } }`.
+The model's convention (write here, the caller spawns the read) therefore **stops bending**: R2-1's
+doc said it "bends exactly once, here, because the caller is an `onChange` that cannot know whether
+anything was cleared", and the answer is simply to tell it. That sentence is replaced with this one
+in the code.
+
+**R3-6 rides the same function:** `modeChanged` wrote `editedOn = nil` directly, past the door the
+field's `private(set)` exists to force; it now calls `setEditedOn(nil)`. Byte-identical behaviour
+today (nil takes the same path) — the point is that two writers of one field is how a future clause
+inside that door (QUESTIONS #104's option (c), say) gets skipped on one of the two roads.
+
+**RED ON OLD — PENDING at this commit; the revert is announced here before it starts.** This one is
+a COMPILE red by its nature and the reviewer said so: on the pre-fix tree `modeChanged()` was
+`async`, so there is no way to read the selection in the same turn that changed the mode — the pin
+cannot be written. The revert is one line (the signature back to `async`, the body's `return`s
+dropped) and the errors it raises at the pin are the evidence; pre-revert copies in
+`scratchpad/17q-prerevert/`, restored with `git checkout --`. **At THIS commit no revert is in
+flight.**
+
+**Pins.** `LibraryDayFilterTests.theModeChangeClearsThePickInItsOwnUpdate` (new) — two notes picked
+and an info subject set, the mode flipped, `modeChanged()` called with **no `await` between it and
+the assertion**, the pick and the info subject both gone, and the returned answer `false` (no day, no
+re-read owed); then with a day armed the answer flips to `true` and the day is gone. The two shipped
+pins that drove the old door are updated to drive the new one, and each gained an assertion rather
+than losing one: `leavingTheCatalogClearsTheDay` now also states that the Notes mode owes NO re-read
+and the Timeline does; `returningToTheCatalogListsTheWholeLibraryAgain` drives exactly what the view
+does (`if model.modeChanged() { await model.search() }`). **The frame itself is not reachable from a
+headless pin** — the rig cannot mount the whole catalog (KnownIssues) — so the walk carries the face.
+
+**GREEN:** `✔ Test run with 24 tests in 2 suites passed after 4.961 seconds`
+(`LibraryDayFilterTests` 10 + `LibraryCardStampsTests` 5… and the counts are the suites', not a sum —
+the log's own line is the record).
 

@@ -239,22 +239,34 @@ final class LibraryCatalogModel {
     /// One door the view calls, rather than two calls a future mode could
     /// forget one of.
     ///
-    /// **And it RE-READS when it cleared the day** (the ladder's R2-1 — a
-    /// regression of the first version of this fix): clearing `editedOn`
-    /// changes what the listing should show, and nothing else on a mode
-    /// change re-runs `search()`. Without the re-read, coming back to List
-    /// drew the DAY's notes under a header reading `on day…` with the scope
-    /// picker live again — the same invisible-state hazard one step down, and
-    /// the kind that repairs itself on the next keystroke so it reads as
-    /// "notes went missing" rather than as a filter. The model's convention
-    /// (write here, the caller spawns the read) bends exactly once, here,
-    /// because the caller is an `onChange` that cannot know whether anything
-    /// was cleared.
-    func modeChanged() async {
+    /// **And the caller RE-READS when it cleared the day** (the ladder's
+    /// R2-1 — a regression of the first version of this fix): clearing
+    /// `editedOn` changes what the listing should show, and nothing else on a
+    /// mode change re-runs `search()`. Without the re-read, coming back to
+    /// List drew the DAY's notes under a header reading `on day…` with the
+    /// scope picker live again — the same invisible-state hazard one step
+    /// down, and the kind that repairs itself on the next keystroke so it
+    /// reads as "notes went missing" rather than as a filter.
+    ///
+    /// **SYNCHRONOUS, and it RETURNS whether a re-read is owed** (the 18h
+    /// ladder's R3-1, 17q): making this `async` to fold the re-read in also
+    /// deferred `clearSelection()` off the update in which the mode changed
+    /// — a `Task {}` body cannot run before the current synchronous update
+    /// completes — so the destructive bulk bar and the info panel, neither of
+    /// them mode-gated, could draw for a frame in a mode that shows no
+    /// selection: exactly what `clearSelection`'s own doc forbids. The
+    /// model's convention (write here, the caller spawns the read) therefore
+    /// does NOT bend: the answer tells the caller whether to spawn it, which
+    /// is the one thing an `onChange` could not work out for itself.
+    func modeChanged() -> Bool {
         clearSelection()
-        guard !showsCatalogControls, editedOn != nil else { return }
-        editedOn = nil
-        await search()
+        guard !showsCatalogControls, editedOn != nil else { return false }
+        // R3-6: through the one door the field's `private(set)` exists to
+        // force — nil takes the same path today, but two writers of one field
+        // is how a future clause in that door (QUESTIONS #104's option (c),
+        // say) gets skipped on one of the two roads.
+        setEditedOn(nil)
+        return true
     }
 
     func deselect(_ postIDs: [String]) {

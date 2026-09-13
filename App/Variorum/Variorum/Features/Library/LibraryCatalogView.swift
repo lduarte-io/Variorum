@@ -216,7 +216,14 @@ struct LibraryCatalogView: View {
         // mode draws it. Carrying it into Notes or Timeline would leave the
         // bulk bar offering to delete notes nothing on screen shows as
         // picked — an invisible selection behind a destructive door.
-        .onChange(of: model.mode) { _, _ in Task { await model.modeChanged() } }
+        // …and the clear is SYNCHRONOUS (the 18h ladder's R3-1): a `Task {}`
+        // body cannot run before this update completes, so an async clear
+        // left the bulk bar's Delete and the info panel drawing for a frame
+        // over a selection nothing on screen shows. The model answers whether
+        // a re-read is owed; only the read is spawned.
+        .onChange(of: model.mode) { _, _ in
+            if model.modeChanged() { Task { await model.search() } }
+        }
         .sheet(item: $tagSheetTarget) { target in
             TagAssignmentSheet(session: session, postID: target.id, postTitle: target.title)
         }
