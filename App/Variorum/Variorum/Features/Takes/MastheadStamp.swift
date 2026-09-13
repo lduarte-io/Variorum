@@ -65,6 +65,14 @@ struct MastheadStamp: View {
                 // in.
                 showsCreated = false
                 stamps = nil
+                #if DEBUG
+                // The flip door is registered HERE (the 17q ladder's R1-5):
+                // `task(id:)` runs on a fresh mount AND on every swap, so the
+                // new note's door exists after `onChange(of: postID)` has
+                // cleared the old note's — `onAppear` alone never re-fired on
+                // a swap. Synchronous, before the await, so it is as prompt.
+                PostDetailOracle.flipStamp[postID] = { flip() }
+                #endif
                 await watch()
             }
             #if DEBUG
@@ -81,7 +89,6 @@ struct MastheadStamp: View {
             // PREVIOUS note's three entries and its `stampFrames` row
             // survived it. They are cleared here, where the old id is still
             // in hand.
-            .onAppear { PostDetailOracle.flipStamp[postID] = { flip() } }
             .onChange(of: postID) { old, _ in PostDetailOracle.resetStamp(old) }
             .onDisappear { PostDetailOracle.resetStamp(postID) }
             #endif

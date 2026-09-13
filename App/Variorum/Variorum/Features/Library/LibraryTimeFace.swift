@@ -342,17 +342,28 @@ struct CatalogCardStamps: View {
     @State private var showsTheOther = false
 
     var body: some View {
-        if stamps.stated.stamp != nil, stamps.other.stamp != nil {
-            ViewThatFits(in: .horizontal) {
-                HStack(alignment: .firstTextBaseline, spacing: 6) {
-                    stamp(stamps.stated, slot: "card.wide.stated")
-                    stamp(stamps.other, slot: "card.wide.other")
+        Group {
+            if stamps.stated.stamp != nil, stamps.other.stamp != nil {
+                ViewThatFits(in: .horizontal) {
+                    HStack(alignment: .firstTextBaseline, spacing: 6) {
+                        stamp(stamps.stated, slot: "card.wide.stated")
+                        stamp(stamps.other, slot: "card.wide.other")
+                    }
+                    flipping
                 }
-                flipping
+            } else {
+                stamp(stamps.stated.stamp != nil ? stamps.stated : stamps.other, slot: "card.only")
             }
-        } else {
-            stamp(stamps.stated.stamp != nil ? stamps.stated : stamps.other, slot: "card.only")
         }
+        // The 17q ladder's R1-8: the flip is a glance at THIS pair. When the
+        // fact the small card opens on changes identity — a sort change
+        // (`edited` → `created` moves `other`'s subject; `date` makes the
+        // stated day the sorted one) — the glance is over, or a flipped card
+        // would silently show a different fact without a click. Keyed on the
+        // SUBJECT, never the whole pair: an autosave moving the edit stamp
+        // must not cancel a glance (the masthead's own rule — per note, not
+        // per keystroke).
+        .onChange(of: stamps.sorted.subject) { _, _ in showsTheOther = false }
     }
 
     private func stamp(_ face: LibrarySortFace.RowStamp, slot: String) -> some View {
@@ -397,13 +408,23 @@ struct CatalogCardStamps: View {
     }
 
     /// Forget this note's slots — called before a pin's mount so a stale
-    /// report cannot satisfy it, and by the card itself when it goes away
-    /// (the 18h ladder's R3-10: an oracle that only ever grows answers a
-    /// later pin with an earlier mount's words, and retains a closure each
-    /// time).
+    /// report cannot satisfy it. (The 17q ladder's R1-4: this used to claim
+    /// the card called it on its way out; nothing did, and `shown` grew a
+    /// row per note ever rendered. Each STAMP now forgets its own slot on
+    /// `onDisappear` — `forget(_:slot:)` — and the flip door tears itself
+    /// down the same way, so the oracle holds exactly what is on screen.)
     static func reset(_ key: String) {
         shown[key] = nil
         flip[key] = nil
+    }
+
+    /// One stamp leaving the screen forgets its own slot — an arrangement
+    /// swap or a slot standing down clears exactly its words and leaves the
+    /// others (the 18h ladder's R3-10 hygiene, the half 17q missed).
+    static func forget(_ key: String?, slot: String) {
+        guard let key, !slot.isEmpty else { return }
+        shown[key]?[slot] = nil
+        if shown[key]?.isEmpty == true { shown[key] = nil }
     }
 }
 #endif
@@ -419,6 +440,7 @@ extension View {
             .onChange(of: words) { _, new in
                 CatalogStampOracle.record(key, slot: slot, words: new)
             }
+            .onDisappear { CatalogStampOracle.forget(key, slot: slot) }
         #else
         self
         #endif

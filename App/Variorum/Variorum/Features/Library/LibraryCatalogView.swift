@@ -717,19 +717,20 @@ struct LibraryCatalogView: View {
             },
             onDoubleClick: { openHit(hit) }
         ) {
+            // ONE rule, asked once (the 17q ladder's R1-7): the pair carries
+            // both of this row's slots — the beside-the-title day (the 18h
+            // ladder's R3-2: the one brain's words, standing down under the
+            // `date` sort where the trailing stamp already says that day) and
+            // the trailing stamp, which IS the sort's own (`sorted`).
+            let stamps = LibrarySortFace.rowStamps(model.sort, for: hit)
             CatalogNoteLine(
-                // 17q (the 18h ladder's R3-2): the beside-the-title day is
-                // the one rule's, and it stands down under the `date` sort —
-                // the trailing stamp is already saying that day, and one
-                // fact printed twice in two grammars is what the ladder
-                // found.
                 tokens: tokens, title: hit.title,
-                date: LibrarySortFace.rowStamps(model.sort, for: hit).listDay,
+                date: stamps.listDay,
                 tags: model.postTags[hit.id] ?? [], allTags: tags.tags,
                 onTitleTap: { openHit(hit) },
                 onApply: { path in Task { await model.applyTypedPath(path, to: [hit.id]) } },
                 onRemove: { tag in Task { await model.removeTag(tag.id, from: [hit.id]) } },
-                stamp: LibrarySortFace.rowStamp(model.sort, for: hit),
+                stamp: stamps.sorted,
                 oracleKey: hit.id)
         }
         .draggable(hit.id)
