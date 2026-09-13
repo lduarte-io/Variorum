@@ -931,7 +931,7 @@ struct CompareBoardView: View {
         .sheet(item: $diffPresentation) { diff in
             DiffView(
                 leftTitle: diff.leftTitle, rightTitle: diff.rightTitle,
-                leftText: diff.left, rightText: diff.right)
+                leftText: diff.left, rightText: diff.right, tokens: tokens)
         }
         // Wave 2c (item 15): the ONE searchable picker (item 14's
         // component, its recorded 2c seam) — version peers ranked first,

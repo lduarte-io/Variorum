@@ -162,7 +162,7 @@ struct LensesBoardView: View {
         .sheet(item: $diffPresentation) { diff in
             DiffView(
                 leftTitle: diff.leftTitle, rightTitle: diff.rightTitle,
-                leftText: diff.left, rightText: diff.right)
+                leftText: diff.left, rightText: diff.right, tokens: tokens)
         }
         .sheet(item: $lensNamePrompt) { prompt in
             LensNameSheet { name in

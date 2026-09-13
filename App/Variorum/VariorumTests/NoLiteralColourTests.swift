@@ -67,6 +67,20 @@ struct NoLiteralColourTests {
         "Features/Editor/BlockDecor.swift",
     ]
 
+    /// **Forms allowed in ONE file each, with the decision** (18j ladder
+    /// round 1, R1-2 — an allow-list by FORM, so the rest of the file stays
+    /// under the pin): the two hashed IDENTITY hues of the 9d stable-colour
+    /// family — `LineageStripe` (same block, same colour, forever) and
+    /// `TagChipColor` (same tag path, same hue) — DERIVE a hue from an id
+    /// rather than choosing one, carry their own dark arm, and cannot come
+    /// from the token layer by their nature. `CalloutPalette`'s file is
+    /// wholly allowed above for the same reason in the other direction (a
+    /// table of values).
+    private static let allowedForms: [String: Set<String>] = [
+        "Features/Takes/TakesShared.swift": ["Color(hue:"],
+        "Features/Tags/NoteTagChips.swift": ["Color(hue:"],
+    ]
+
     /// `Shared/Theme/` is the token layer itself (and `SharedPageStyle`'s
     /// home) — the one place a colour VALUE belongs.
     private static let scannedRoots = ["Variorum"]
@@ -80,6 +94,18 @@ struct NoLiteralColourTests {
         guard let walker = FileManager.default.enumerator(
             at: root, includingPropertiesForKeys: nil) else { return [] }
         return walker.compactMap { $0 as? URL }.filter { $0.pathExtension == "swift" }
+    }
+
+    /// `return .red` / `return .red.opacity(…)` — the hue must END at the
+    /// identifier boundary, or `return .redo` (the editor's undo-hint chord)
+    /// reads as a colour (the first run of this widening found exactly that
+    /// false positive beside the four real ones in `DiffView`).
+    private static func returnsBare(_ hue: String, in text: String) -> Bool {
+        let needle = "return .\(hue)"
+        guard let range = text.range(of: needle) else { return false }
+        guard range.upperBound < text.endIndex else { return true }
+        let next = text[range.upperBound]
+        return !(next.isLetter || next.isNumber || next == "_")
     }
 
     /// A line is code (not a comment or a doc line) for this pin's purpose.
@@ -104,15 +130,20 @@ struct NoLiteralColourTests {
                     separator: "\n", omittingEmptySubsequences: false).enumerated()
                 where isCode(String(line)) {
                     let text = String(line)
+                    let allowedHere = Self.allowedForms[relative] ?? []
                     if text.contains("Color(hex:") {
                         offenders.append("\(relative):\(index + 1) — Color(hex:)")
                     }
                     // A colour built from COMPONENTS is the same literal
                     // wearing another spelling — and the one the first check
                     // misses (18j: `CalloutPalette` is exactly this shape).
+                    // The ladder's R1-2 added SwiftUI's own spellings, which
+                    // the AppKit/UIKit ones above had left uncovered.
                     for form in ["srgbRed:", "calibratedRed:", "calibratedWhite:",
-                                 "NSColor(white:", "NSColor(red:", "UIColor(red:"]
-                    where text.contains(form) {
+                                 "NSColor(white:", "NSColor(red:", "UIColor(red:",
+                                 "Color(hue:", "Color(white:", "Color(red:",
+                                 "Color(.sRGB", "Color(.displayP3"]
+                    where text.contains(form) && !allowedHere.contains(form) {
                         offenders.append("\(relative):\(index + 1) — \(form)")
                     }
                     for hue in Self.hues where text.contains("Color.\(hue)") {
@@ -125,6 +156,20 @@ struct NoLiteralColourTests {
                             "background", "stroke", "tint",
                         ] where text.contains("\(modifier)(.\(hue))") {
                             offenders.append("\(relative):\(index + 1) — .\(modifier)(.\(hue))")
+                        }
+                    }
+                    // 18j ladder round 1, R1-2 — the two spellings the walk
+                    // above let through on the very surface the brief named
+                    // (`DiffView`): a hue RETURNED bare from a helper
+                    // (`return .red`) and a hue CHAINED into a modifier
+                    // (`.red.opacity(0.08)`). A `.shadow(color: .black…)` is
+                    // exempt with its reason: a shadow is black on any paper,
+                    // and the views that draw one zero it on the black room.
+                    for hue in Self.hues {
+                        if Self.returnsBare(hue, in: text) {
+                            offenders.append("\(relative):\(index + 1) — return .\(hue)")
+                        } else if text.contains(".\(hue).opacity("), !text.contains("shadow(color:") {
+                            offenders.append("\(relative):\(index + 1) — .\(hue).opacity(")
                         }
                     }
                 }

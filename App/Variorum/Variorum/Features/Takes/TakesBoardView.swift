@@ -225,7 +225,7 @@ struct TakesBoardView: View {
         .sheet(item: $diffPresentation) { diff in
             DiffView(
                 leftTitle: diff.leftTitle, rightTitle: diff.rightTitle,
-                leftText: diff.left, rightText: diff.right)
+                leftText: diff.left, rightText: diff.right, tokens: tokens)
         }
         .sheet(isPresented: $lensNamePrompt) {
             LensNameSheet(title: "Save current choices as a lens") { name in

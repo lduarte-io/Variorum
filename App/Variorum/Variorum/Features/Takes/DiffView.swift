@@ -115,6 +115,12 @@ struct DiffView: View {
     let rightTitle: String
     let leftText: String
     let rightText: String
+    /// 18j ladder round 1 (R1-2): the voice's tokens, handed in by the
+    /// three boards that open this sheet — the diff's marks and washes are
+    /// the voice's `alarm` (removed) and `positive` (added), never a system
+    /// hue (P-8; the grep pin `NoLiteralColourTests` now catches the bare
+    /// `return .red` this file used to hold).
+    let tokens: VoiceTokens
     @State private var normalizeWhitespace = false
     /// N33: the save door's sheet-local outcome line (the sheet has no
     /// StatusCenter; the answer renders right here, never silently).
@@ -197,17 +203,17 @@ struct DiffView: View {
 
     private func color(_ kind: LineDiff.Kind) -> Color {
         switch kind {
-        case .same: return .secondary
-        case .removed: return .red
-        case .added: return .green
+        case .same: return tokens.muted
+        case .removed: return tokens.alarm
+        case .added: return tokens.positive
         }
     }
 
     private func background(_ kind: LineDiff.Kind) -> Color {
         switch kind {
         case .same: return .clear
-        case .removed: return .red.opacity(0.08)
-        case .added: return .green.opacity(0.08)
+        case .removed: return tokens.alarm.opacity(0.08)
+        case .added: return tokens.positive.opacity(0.08)
         }
     }
 }
