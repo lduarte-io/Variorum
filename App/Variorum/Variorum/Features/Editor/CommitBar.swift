@@ -331,6 +331,13 @@ struct CommitBar: View {
     private var boxFooter: some View {
         VStack(alignment: .leading, spacing: 4) {
             Divider().overlay(tokens.line)
+            // 18i: the book's live note gets the quiet slot in ITS footer —
+            // its own row, wrapping to two lines, because this column is
+            // ~200 pt wide and the box's content already scrolls inside a
+            // frame the column fixes (so a taller footer never moves the
+            // Open strip below it).
+            QuietReceiptLine(status: model.session.status, tokens: tokens, lines: 2)
+                .frame(maxWidth: .infinity, alignment: .leading)
             HStack(spacing: 6) {
                 ViewThatFits(in: .horizontal) {
                     trailingCountsFace.fixedSize()
@@ -398,6 +405,11 @@ struct CommitBar: View {
                         StatusDot(tokens: tokens)
                         postCluster
                         Spacer()
+                        // 18i (her R-Q5): the quiet slot — a receipt under
+                        // her default, at the bar's trailing end BEFORE the
+                        // counts. It yields first (`layoutPriority(-1)`),
+                        // so no door or count ever moves for it.
+                        quietReceipt
                         trailingCluster
                     }
                 case .folded:
@@ -415,6 +427,7 @@ struct CommitBar: View {
                         }
                         .fixedSize()
                         Spacer(minLength: 8)
+                        quietReceipt
                         Group {
                             noteTotalFace
                             helperDoor
@@ -430,6 +443,7 @@ struct CommitBar: View {
                         }
                         .fixedSize()
                         Spacer(minLength: 8)
+                        quietReceipt
                         helperDoor
                             .fixedSize()
                     }
@@ -456,6 +470,12 @@ struct CommitBar: View {
     /// The bar's own coordinate space (row 81's DEBUG oracle reads the row's
     /// frame in it against the bar's width).
     nonisolated static let barSpace = "variorum-commit-bar"
+
+    /// 18i: the ONE quiet slot this bar composes (both arrangements read
+    /// it), reading the ONE centre — no per-bar copy, no second setting read.
+    private var quietReceipt: some View {
+        QuietReceiptLine(status: model.session.status, tokens: tokens)
+    }
 
     /// The flat row's block half: where you are, the block group, and the
     /// take door she said earns its place.

@@ -23,6 +23,7 @@
 
 import AppKit
 import Foundation
+import SwiftUI
 import Testing
 import VariorumCore
 
@@ -149,6 +150,69 @@ struct ConfirmationsSettingTests {
             #expect(h.session.status.quietLine == nil)
             #expect(h.session.status.lastDroppedReceipt == nil, "nothing was dropped")
         }
+    }
+
+    // MARK: - The quiet slot itself (a mounted geometry oracle)
+
+    /// **THE SLOT TAKES NO ROOM WHEN THERE IS NOTHING TO SAY** — and the
+    /// words when there is. That is the layout claim the bars depend on: a
+    /// receipt must not widen the bar or push a count, and six seconds later
+    /// the room must go back. Only a mount can answer it, so this is a real
+    /// `NSHostingView` measured three times: idle, speaking, idle again.
+    ///
+    /// What it deliberately does NOT claim: that the view is permanently
+    /// mounted (an inserted-and-removed slot would measure the same). That
+    /// is an implementation choice, stated in `QuietReceiptLine`'s own doc
+    /// with its reason; the LOOK and the PLACE in each of the three bars are
+    /// walked, not pinned — the rig cannot mount a whole bar (KnownIssues).
+    @Test func theQuietSlotIsWeightlessUntilItSpeaks() async throws {
+        let center = StatusCenter()
+        center.receiptStyle = .quiet
+        let tokens = VoiceTokens.resolve(voice: .terminal, dark: false)
+        let host = NSHostingView(
+            rootView: QuietReceiptLine(status: center, tokens: tokens))
+        host.frame = NSRect(x: 0, y: 0, width: 420, height: 24)
+        let window = NSWindow(
+            contentRect: host.frame, styleMask: [.titled], backing: .buffered, defer: false)
+        window.isReleasedWhenClosed = false
+        window.contentView = host
+        defer { window.orderOut(nil); window.close() }
+
+        /// The standing async-poll rule (never a sync RunLoop pump from an
+        /// async context — Swift 6 makes that unavailable, and it is the
+        /// repo's rule anyway).
+        func settle(until predicate: () -> Bool) async {
+            for _ in 0..<60 {
+                host.layoutSubtreeIfNeeded()
+                window.layoutIfNeeded()
+                window.displayIfNeeded()
+                if predicate() { return }
+                await Task.yield()
+                try? await Task.sleep(for: .milliseconds(10))
+            }
+        }
+
+        await settle { host.fittingSize.width == 0 }
+        #expect(host.fittingSize.width == 0,
+                "idle: the slot is mounted and takes NO width — nothing reflows")
+
+        center.receipt("Blocks joined — \u{2325}\u{2318}Z undoes it.")
+        await settle { host.fittingSize.width > 0 }
+        #expect(host.fittingSize.width > 0, "speaking: the words are there")
+
+        center.clear()
+        await settle { host.fittingSize.width == 0 }
+        #expect(host.fittingSize.width == 0, "and the room goes back")
+    }
+
+    /// **A REFUSAL NEVER REACHES THE QUIET SLOT** — even under `.quiet`, so
+    /// the bar can never hold a refusal she would only see by looking down.
+    @Test func theQuietSlotNeverHoldsARefusal() async throws {
+        let center = StatusCenter()
+        center.receiptStyle = .quiet
+        center.speak("Click into a block first.")
+        #expect(center.quietLine == nil)
+        #expect(center.current?.text == "Click into a block first.")
     }
 
     /// **A DIRECTION RIDES THE REFUSAL CLASS** (the brief's letter: the undo

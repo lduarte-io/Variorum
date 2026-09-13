@@ -241,6 +241,7 @@ struct TakesBottomBar: View {
                         HStack(spacing: 10) {
                             postCluster
                             Spacer()
+                            quietReceipt
                             trailingCluster
                         }
                     }
@@ -250,6 +251,10 @@ struct TakesBottomBar: View {
                         StatusDot(tokens: tokens)
                         postCluster
                         Spacer()
+                        // 18i (her R-Q5): the quiet slot, Write's bar's twin
+                        // — at the trailing end before the counts, yielding
+                        // first so nothing else ever moves for it.
+                        quietReceipt
                         trailingCluster
                     }
                 }
@@ -312,6 +317,11 @@ struct TakesBottomBar: View {
         ) {
             NoteVersionsPane(session: model.session, postID: model.postID)
         }
+    }
+
+    /// 18i: the ONE quiet slot this bar composes, reading the ONE centre.
+    private var quietReceipt: some View {
+        QuietReceiptLine(status: model.session.status, tokens: tokens)
     }
 
     /// Take context + take acts (the block menu, + take, commit, history).
