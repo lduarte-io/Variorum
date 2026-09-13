@@ -797,9 +797,16 @@ final class TakesBoardLayout {
     /// height as the column measures the row, and settled when the row's
     /// top reports `into` (±2). Measurement 1 holds (the row is the identity,
     /// never the offset); measurement 2 holds (an anchor is absolute, so a
-    /// stale frame re-aims instead of compounding). A row that did not fit
-    /// falls back to the straddling row at the fold — 17p's rule — because
-    /// its unit point would leave [0, 1].
+    /// stale frame re-aims instead of compounding). **When no row below the
+    /// fold fits** (the 17q ladder's round 2, R2-3 — the last block of a
+    /// short note scrolled up through the room, or a bloomed fan under the
+    /// fold): the SHORT straddling row is remembered with where its top sat
+    /// — a negative `into`, aimed by a unit point below 0, which `scrollTo`
+    /// honours linearly (measured: aimed at −30, landed at −30.0, settled);
+    /// a TALL straddler and the `below` fallback stay at the fold, 17p's
+    /// rule, because a row taller than the viewport is not placed by the
+    /// anchor's arithmetic at all (measured: aimed to sit at −400 it landed
+    /// at −838.5 and never settled).
     ///
     /// **The TOP is a place of its own** (the 17p batch-a ladder, R1-1 —
     /// measured: a page left at offset 0 came back at 18, on every return).
@@ -839,14 +846,26 @@ final class TakesBoardLayout {
 
         /// The aim's unit y: the row's point at this fraction of its height
         /// meets the viewport's point at the same fraction, so the row's top
-        /// lands `into` below the fold. Clamped to [0, 1]; a row taller than
-        /// the room aims at the fold (17p's `.top`).
+        /// lands `into` below the fold — `into / (viewport − rowHeight)`.
+        ///
+        /// **Measured at the 17q ladder's round 2 (R2-3), on the mounted
+        /// harness:** a unit point BELOW 0 is honoured linearly by
+        /// `ScrollViewProxy.scrollTo` — a short straddler aimed at −30 landed
+        /// at −30.0 and the restore settled on the row's report — so a
+        /// negative `into` (a row whose top sits ABOVE the fold) aims where
+        /// it sat. A row TALLER than the viewport is NOT placed by that
+        /// arithmetic (aimed to sit at −400 it landed at −838.5: SwiftUI
+        /// aligns such a row's anchor point with the viewport's TOP, not with
+        /// the viewport's own fraction) and never settles, so a tall row
+        /// aims at the fold (17p's `.top`) and its place is remembered as
+        /// the fold. The upper clamp is belt-and-braces: no place
+        /// `articlePlaceNow` produces has `into > room`.
         nonisolated static func anchorY(
             into: CGFloat, rowHeight: CGFloat, viewport: CGFloat
         ) -> CGFloat {
             let room = viewport - rowHeight
-            guard room > 1, into > 0 else { return 0 }
-            return min(max(into / room, 0), 1)
+            guard room > 1 else { return 0 }
+            return min(into / room, 1)
         }
     }
 
@@ -919,29 +938,41 @@ final class TakesBoardLayout {
     /// The place worth remembering, right now (the 17q ladder, R1-1): the
     /// first row whose top sits at or below the fold AND that fits in the
     /// room under it — with where its top sat, sub-row exact. Failing that,
-    /// the row straddling the fold (the one she is reading through), restored
-    /// at the fold as 17p did; failing that, the first row below.
+    /// the row straddling the fold (the one she is reading through) — with
+    /// where ITS top sat when it is shorter than the viewport (a negative
+    /// `into`, aimed by a unit point below 0 — the ladder's round 2, R2-3,
+    /// measured), at the fold when it is taller (a tall row is not placed by
+    /// the anchor's arithmetic — measured too). Failing that, the first row
+    /// below, at the fold: nothing straddles and that row does not fit, so
+    /// it is either a tall row whose top the anchor cannot put below the
+    /// fold at all, or a fling's transient (the rows above it not yet
+    /// realized) that the arrivals re-derive.
     var articlePlaceNow: ArticlePlace? {
         var fits: (id: String, frame: CGRect)?
-        var straddling: (id: String, minY: CGFloat)?
-        var below: (id: String, minY: CGFloat)?
+        var straddling: (id: String, frame: CGRect)?
+        var below: (id: String, frame: CGRect)?
         for (id, frame) in articleRowFrames {
             if frame.minY >= -0.5 {
                 if frame.maxY <= articleViewportHeight + 0.5,
                    fits == nil || frame.minY < fits!.frame.minY {
                     fits = (id, frame)
                 }
-                if below == nil || frame.minY < below!.minY { below = (id, frame.minY) }
-            } else if straddling == nil || frame.minY > straddling!.minY {
-                straddling = (id, frame.minY)
+                if below == nil || frame.minY < below!.frame.minY { below = (id, frame) }
+            } else if straddling == nil || frame.minY > straddling!.frame.minY {
+                straddling = (id, frame)
             }
         }
         if let fits {
             return ArticlePlace(
                 rowID: fits.id, into: max(fits.frame.minY, 0), rowHeight: fits.frame.height)
         }
-        if let straddling { return ArticlePlace(rowID: straddling.id) }
-        return below.map { ArticlePlace(rowID: $0.id) }
+        if let straddling {
+            let short = straddling.frame.height < articleViewportHeight - 1
+            return ArticlePlace(
+                rowID: straddling.id, into: short ? straddling.frame.minY : 0,
+                rowHeight: straddling.frame.height)
+        }
+        return below.map { ArticlePlace(rowID: $0.id, into: 0, rowHeight: $0.frame.height) }
     }
 
     /// **THE RESTORE, as a decision.** Pure but for its own state, so the

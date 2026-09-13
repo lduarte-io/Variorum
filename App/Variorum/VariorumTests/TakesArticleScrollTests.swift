@@ -1676,17 +1676,125 @@ struct TakesArticleScrollTests {
             order: ["a", "b", "c"]) == .wait)
         #expect(back.articleRestore == .settled)
 
-        // A row that does not fit under its top falls back to the straddling
-        // row at the fold — 17p's rule — and its anchor is the fold.
+        // **The fallbacks, sub-row where the anchor can express it** (the 17q
+        // ladder's round 2, R2-3 — MEASURED on the mounted harness: a unit
+        // point BELOW 0 is honoured linearly by `scrollTo` (a short straddler
+        // aimed at −30 landed at −30.0 and settled), a row TALLER than the
+        // viewport is not (aimed to sit −400 it landed at −838.5 and never
+        // settled — SwiftUI aligns such a row's anchor point with the
+        // viewport's top). So: no row below the fold fits → the SHORT
+        // straddling row is remembered with where its top sat (negative) and
+        // aimed there; a TALL straddler and the `below` branch stay at the
+        // fold, 17p's rule, now with its reason measured.
         let tall = freshBoard("sub-row-tall")
         tall.noteArticleRowFrame("s", CGRect(x: 0, y: -30, width: 680, height: 60))
         tall.noteArticleRowFrame("t", CGRect(x: 0, y: 36, width: 680, height: 900))
         #expect(tall.consumeArticleGeometry(
             geometry(offset: 100), remembered: nil, positionedByUser: false)
-                == .remember(TakesBoardLayout.ArticlePlace(rowID: "s")))
+                == .remember(TakesBoardLayout.ArticlePlace(rowID: "s", into: -30, rowHeight: 60)),
+                "a short straddler keeps where its top sat (on the round-1 tree: `s` at the fold)")
+        let below = TakesBoardLayout.ArticlePlace.anchorY(into: -30, rowHeight: 60, viewport: 700)
+        #expect(below < 0 && below > -0.1, "a unit point below 0, honoured linearly (\(below))")
+        // A TALL straddler aims at the fold (measured: a non-zero anchor on a
+        // row taller than the viewport does not land where the arithmetic
+        // says and never settles).
+        let giant = freshBoard("sub-row-giant")
+        giant.noteArticleRowFrame("g", CGRect(x: 0, y: -100, width: 680, height: 900))
+        giant.noteArticleRowFrame("h", CGRect(x: 0, y: 806, width: 680, height: 60))
+        #expect(giant.consumeArticleGeometry(
+            geometry(offset: 100), remembered: nil, positionedByUser: false)
+                == .remember(TakesBoardLayout.ArticlePlace(rowID: "g", into: 0, rowHeight: 900)))
+        #expect(TakesBoardLayout.ArticlePlace.anchorY(into: -100, rowHeight: 900, viewport: 700) == 0)
         #expect(TakesBoardLayout.ArticlePlace.anchorY(into: 36, rowHeight: 900, viewport: 700) == 0)
+        // The `below` branch (nothing straddles, the first row at or below
+        // the fold does not fit): at the fold, 17p's rule.
+        let gap = freshBoard("sub-row-gap")
+        gap.noteArticleRowFrame("u", CGRect(x: 0, y: 3, width: 680, height: 900))
+        #expect(gap.consumeArticleGeometry(
+            geometry(offset: 100), remembered: nil, positionedByUser: false)
+                == .remember(TakesBoardLayout.ArticlePlace(rowID: "u", into: 0, rowHeight: 900)))
         // A 17p-shaped place (into 0) aims exactly as 17p did.
         #expect(TakesBoardLayout.ArticlePlace.anchorY(into: 0, rowHeight: 60, viewport: 700) == 0)
+    }
+
+    /// **RED ON THE ROUND-1 TREE, mounted (the R2-3 gate's measurement, kept
+    /// as the pin):** a SHORT row that straddled the fold — the last block of
+    /// a short note scrolled up through the typewriter room, her "you only
+    /// have two blocks" case; measured in USE at the round-2 review as a
+    /// ~9 pt drop on an eight-block note (captures `32` → `33`) — is put back
+    /// ABOVE the fold where its top sat, by a unit point below 0, and the
+    /// restore settles on the row's own report. On the round-1 tree
+    /// `anchorY` refused any negative `into`, the row came back AT the fold,
+    /// and the settle (`into ± 2`) was never met.
+    @Test func aShortRowStraddlingTheFoldComesBackAboveIt() async throws {
+        try await withSession(blocks: 60) { session, fixture, db, mount in
+            let router = session.commandRouter
+            router.forgetCurrentBlock(for: fixture.postID)
+            defer { router.forgetCurrentBlock(for: fixture.postID) }
+
+            // A control mount: the fixture rows' real height, off the memory
+            // the board itself writes for a fitting row.
+            let control = try await landingModel(session: session, fixture: fixture, db: db)
+            let (windowA, hostingA) = await mount(control)
+            guard let articleA = articleScrollView(in: hostingA) else {
+                Issue.record("no article scroll view on the control mount")
+                return
+            }
+            scroll(articleA, to: 800)
+            await settle(windowA, hostingA, until: { false }, maxTurns: 10)
+            guard let known = session.editorRouter.takesArticlePlaces[fixture.postID],
+                  known.rowID != nil, known.rowHeight > 0 else {
+                Issue.record("the control mount remembered no row")
+                return
+            }
+            let hers = fixture.blocks[19]
+            let hersRow = control.projection.slots[19].placementID
+            windowA.orderOut(nil)
+            control.teardown()
+            await settle(windowA, hostingA, until: { false }, maxTurns: 4)
+
+            // What a short straddler's memory looks like since R2-3: block 20
+            // with its top 30 pt ABOVE the fold.
+            session.editorRouter.takesArticlePlaces[fixture.postID] =
+                TakesBoardLayout.ArticlePlace(rowID: hersRow, into: -30, rowHeight: known.rowHeight)
+
+            let second = try await landingModel(session: session, fixture: fixture, db: db)
+            let (windowB, hostingB) = await mount(second)
+            guard let articleB = articleScrollView(in: hostingB) else {
+                Issue.record("no article scroll view on the second mount")
+                return
+            }
+            await settle(windowB, hostingB, until: { false }, maxTurns: 20)
+            #expect(second.board.articleRestore == .settled,
+                    "the restore settled on the row's own report (\(second.board.articleRestoreAims) aims)")
+            // The pane sits a fixed inset below its row's top; the control
+            // mount's fitting row gives the inset (pane top − row top).
+            guard let controlPane = paneTopBelowTheFold(known.rowID!, control, hostingA, articleA)
+            else {
+                Issue.record("the control row's pane is not realized")
+                return
+            }
+            let inset = controlPane - known.into
+            guard let paneTop = distanceBelowTheFold(hers.variant, hostingB, articleB) else {
+                Issue.record("her block is not realized after the remount")
+                return
+            }
+            let rowTop = paneTop - inset
+            #expect(abs(rowTop - (-30)) <= 4,
+                    """
+                    the row's top is back ABOVE the fold where it sat (\(rowTop)) — on the \
+                    round-1 tree a negative `into` aimed at the fold and the row came back at 0
+                    """)
+        }
+    }
+
+    /// The pane's top below the fold for the row a placement id names.
+    private func paneTopBelowTheFold(
+        _ placementID: String, _ model: TakesViewModel, _ hosting: NSView, _ article: NSScrollView
+    ) -> CGFloat? {
+        guard let variant = model.projection.slots.first(where: { $0.placementID == placementID })?
+                .variantID else { return nil }
+        return distanceBelowTheFold(variant, hosting, article)
     }
 
     /// **RED ON THE 17q TREE (`ac9c46fb`), mounted:** her block MID-PAGE (her
@@ -1771,12 +1879,17 @@ struct TakesArticleScrollTests {
     /// on that flag — so in the app the first geometry read NO memory, settled
     /// the restore at once, and the entry landing then revealed her block
     /// from the top of the page (the trace: `remember TOP` with no `AIM`, the
-    /// memory holding a row; captures `20` → `22`). This hosting view runs
-    /// `.onAppear` before its first non-zero geometry, so a bare-model mount
-    /// cannot reproduce the app's order; the pin stands as the guard that the
-    /// app's own road (a bare model, the projection from the view's `.task`)
-    /// restores at all. The RED is `theTakesBoardIsTheTakesBoardFromConstruction`
-    /// beside it, and the walk's frames.
+    /// memory holding a row; captures `20` → `22`). **Which order the harness
+    /// cannot reproduce, exactly** (the 17q ladder's round 2, R2-4): the
+    /// `.onAppear`-vs-first-geometry order — this hosting view runs
+    /// `.onAppear` before its first non-zero geometry, so the flag's timing
+    /// (W-1) cannot go red here. The LANDING-vs-first-geometry order it DOES
+    /// reproduce, by construction: on the bare-model road the projection
+    /// arrives from the view's own `.task`, after the first layout — the
+    /// app's order, and the road `aPageLeftAtRestComesBackAtRestOnTheApps
+    /// Order` pins R2-1 on. This pin stands as the guard that the app's own
+    /// road restores at all. The RED is `theTakesBoardIsTheTakesBoardFrom
+    /// Construction` beside it, and the walk's frames.
     @Test func theRestoreReadsTheMemoryEvenWhenTheFirstGeometryPrecedesAppear() async throws {
         try await withSession(blocks: 60) { session, fixture, db, mount in
             let router = session.commandRouter
