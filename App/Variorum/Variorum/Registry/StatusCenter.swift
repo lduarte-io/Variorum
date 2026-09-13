@@ -265,10 +265,17 @@ struct StatusForwarder {
     init(_ status: StatusCenter) { self.status = status }
 
     /// Called from the property's `didSet`. Nil clears the model's own line
-    /// and says nothing (the centre has its own clock), and the shadow is
-    /// untouched by a clear — no door raises it and then writes nil.
+    /// and says nothing (the centre has its own clock) — **and resets the
+    /// class anyway** (the ladder round 2, J41): the reset is an INVARIANT,
+    /// and holding it by "no caller writes nil after raising the class" left
+    /// exactly one road open (`EditorViewModel.setStatusMessage(_:kind:)`
+    /// takes an optional). No caller takes that road today and there is no
+    /// red to fix — this closes it rather than documenting it.
     mutating func deliver(_ text: String?) {
-        guard let text else { return }
+        guard let text else {
+            outgoing = .refusal
+            return
+        }
         status.deliver(text, kind: outgoing)
         outgoing = .refusal
     }
