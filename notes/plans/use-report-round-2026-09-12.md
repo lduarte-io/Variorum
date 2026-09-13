@@ -5290,7 +5290,7 @@ piece below.
 |---|---|---|
 | 0 | orientation + the mount-ordering trace | **DONE (this commit)** |
 | 1 | R-Q20 — the landing wins over the remembered place (the condition + its pins) | **DONE (this commit)** |
-| 2 | R-Q17 — the card (both where room, the flip where small) + R3-2 (the List row's lead slot) + QUESTIONS #103 | **DONE (this commit)** — R3-2's red-on-old is measured by BEHAVIORAL REVERT at the next commit (see below: no revert is in flight at this commit) |
+| 2 | R-Q17 — the card (both where room, the flip where small) + R3-2 (the List row's lead slot) + QUESTIONS #103 | **DONE (`2b7a86d6`)** — R3-2's red measured by behavioral revert and RESTORED; **no revert is in flight** |
 | 3 | R3-1 — the synchronous selection clear | **NOT-STARTED** |
 | 4 | the NIT sweep (R3-4…R3-10) | **NOT-STARTED** |
 | 5 | the walk (the acceptance gate) + the closing runs | **NOT-STARTED** |
@@ -5482,13 +5482,25 @@ note with NO stated day under the `date` sort now shows the EDIT stamp where it 
 other fact"), and it arrives at the answer #103's own "related edge" paragraph floated, from the
 other end.
 
-**RED ON OLD FOR R3-2 — PENDING at this commit, and the revert is announced here before it starts
-(the resiliency protocol's addendum 2).** R3-2's defect is a COMPOSITION, so its red needs both
-halves reverted: (1) `CatalogNoteLine`'s day slot back to `Text(date)` raw (with the oracle write
-kept, so the pin can still read what drew), and (2) the call site's `date:` back to `hit.detail`. The
-pin `theListRowSpeaksTheOneBrainAndNeverPrintsOneDayTwice` builds the line the way the call site does,
-so reverting (1) alone shows half of it and the pin's own `pair.listDay` shows the other. **At THIS
-commit no revert is in flight and the tree is the fixed one**; the pre-revert copies go in
-`scratchpad/17q-prerevert/` and the restore is `git checkout --`, never a copy-back. The numbers land
-in the next commit.
+**RED ON OLD FOR R3-2 — MEASURED BY BEHAVIORAL REVERT, then RESTORED** (announced in the previous
+commit before it started, per the resiliency protocol's addendum 2; pre-revert copies in
+`scratchpad/17q-prerevert/`, restored with `git checkout --` and verified byte-identical by `diff` +
+`shasum`; **no revert is in flight**). R3-2's defect is a COMPOSITION, so the revert is its two
+halves: (1) `CatalogNoteLine`'s day slot back to `Text(date)` raw, keeping the oracle write so the pin
+could still read what drew, and (2) `RowStamps.listDay` back to `stated.stamp` unconditionally —
+which is exactly what the shipped call site passed (`date: hit.detail`), expressed in the new API.
+
+**The numbers** (`/tmp/17q-red2.log`, local — `✘ Test run with 5 tests in 1 suite failed after 4.575
+seconds with 8 issues`):
+
+- `theListRowSpeaksTheOneBrainAndNeverPrintsOneDayTwice`, under `.entryDate`: the row drew
+  **`row.date` = `"2026-01-15"` beside `row.stamp` = `"dated Jan 15"`** — **one day, twice, in two
+  grammars**, which is R3-2's sentence verbatim. (`day == nil` is owed.)
+- …and under the other three sorts: **`day → "2026-01-15"` where `"dated Jan 15"` is owed**, and
+  `day != hit.detail` failed — the raw stored column on screen (`2026-01-15` IS `hit.detail`).
+- `theTwoFactsARowShowsAreTheStatedDayAndTheSortsOwnStamp`: **`dated.listDay → "2026-01-15"` where
+  `nil` is owed** — the rule's own half.
+
+**Restored and re-verified green on the fixed tree: `✔ Test run with 21 tests in 4 suites passed
+after 9.659 seconds`** (the same four suites).
 
