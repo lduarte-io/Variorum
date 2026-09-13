@@ -6927,8 +6927,91 @@ Both rows are the R3-1 class (a settle that the column's later measurement passe
   where it must carry the words; `.off` showing the toast; `lastDroppedReceipt` nil),
   `oneMessageAtATimeAcrossBothSlots` ×1, `theQuietLineAutoDismissesUnderTheOnePolicy` ×1. Restored by
   `git checkout --`; green again at 9 tests in 1 suite.
-- **PIECE 3 — the receipt sites (the classification table): NOT-STARTED.**
+- **PIECE 3 — the receipt sites (the classification table): DONE (`HASH3`).** The table is below.
+  RED ON OLD: PENDING (the behavioural revert runs next).
 - **PIECE 4 — the quiet slot: NOT-STARTED.**
 - **PIECE 5 — the Appearance pane's row: NOT-STARTED.**
 - **PIECE 6 — the walk (the acceptance gate): NOT-STARTED.**
 - **THE CLOSING RUNS:** PENDING.
+
+#### R-5 · THE RECEIPT-SITE CLASSIFICATION (every site that reaches `StatusCenter`, with its verdict)
+
+**The rule I classified by**, stated once: a **RECEIPT** reports an act that LANDED (the store changed, or a
+setting she flipped took effect) — her setting governs it. A **REFUSAL** reports that nothing happened and
+says why — P-2 (fire-and-DO) makes it always-show. A **DIRECTION** ("finish the ceremony, then run this
+again"; the ⌘Z-at-the-junction hint) reports no act and must reach her, so it rides the refusal class. An
+**OFFER** carries a button and always shows. `speak` infers refusal/offer, so **every refusal site in the app
+is byte-unchanged** — the diff touches only what I judged a receipt.
+
+**Where the class is decided:** at the DOOR that produced the message, never in the centre and never by a view
+reading the words (the `RecoveryStatus` rule, reused rather than re-derived).
+
+| # | Site (file:line at `03dd8a7d`) | The words | Verdict | Why |
+|---|---|---|---|---|
+| 1 | `EditorSurfaceController.runStructural` `:2743` (`outcome.note`) | divide · merge · split-at-newlines · takes→blocks · delete receipts | **RECEIPT** (one line) | THE structural receipt seam: every door that hands `runStructural` a note is reporting an act that landed. One edit covers the whole family. |
+| 2 | `EditorSurfaceController:2125` | "Empty block deleted — ⌥⌘Z undoes it." | **RECEIPT** | the brief's named site; the block went |
+| 3 | `EditorSurfaceController:2215` | "Blocks joined — ⌥⌘Z undoes it." | **RECEIPT** | her image 6; pinned by behaviour |
+| 4 | `EditorSurfaceController:801` | "New block added below — type away." | **RECEIPT** | the block exists now |
+| 5 | `EditorSurfaceController:917` | `TakeStructureCopy.movedNote` | **RECEIPT** | the take is a block now |
+| 6 | `EditorSurfaceController:1011` | `BlockSelectionCopy.archivedNote` | **RECEIPT** | it was archived |
+| 7 | `EditorSurfaceController:1024` · `:1098` | `deletedNote` + the stranding sentence | **RECEIPT** | the blocks went; the sentence names the road back |
+| 8 | `EditorSurfaceController:2495` | "Deleted in N takes. Skipped …" | **RECEIPT** | the ruled find/replace REPORT of what it did |
+| 9 | `EditorSurfaceController:2662` | `FindReplaceGate.replacedInEveryTake` | **RECEIPT** | same |
+| 10 | `EditorSurfaceController:257` · `:372` · `:1617` (`showTransientReceipt`) | "this block has N other takes…", the merged-fans lineage notes | **RECEIPT** | passive after-the-fact reports of what the act did to the fan |
+| 11 | `EditorSurfaceController:1989` (`showTransientStatus`) | "…finish Divide choosing takes, then run Make Block from Selection again." | **REFUSAL (direction)** | nothing landed; it tells her what to do next — the brief's `EditorUndoHint` rule, one door over |
+| 12 | `EditorViewModel.speakUndoHint` | `EditorUndoHint.message` | **REFUSAL (direction)** | the brief names it: "a direction, not a receipt — LEAVE it a refusal-class message" |
+| 13 | `EditorViewModel:2539` | `SegmentationFaceCopy.note(...)` (the newlines chip) | **RECEIPT** | her image 7; the toggle landed. Pinned by behaviour |
+| 14 | `EditorViewModel:2719` | "Committed." | **RECEIPT** | the savepoint exists |
+| 15 | `EditorViewModel.refuseFeedback` · `showOperationError` · every bare `statusMessage = …` (~25) | the refusal family | **REFUSAL** | unchanged, not one edit — the forwarder's default |
+| 16 | `DivideWCeremony:623` → `speakCeremonyReceipt` | `releasedOriginalNote` | **RECEIPT** | spoken only when the cut LANDED |
+| 17 | `DivideWCeremony:321` · `:602` · `:671` · `:711` (`speakCeremonyStatus`) | "the takes changed — try the divide again" | **REFUSAL** | nothing landed |
+| 18 | `TakesViewModel.status` forward (`:146`) | every board message | **CLASSED ALREADY** | `RecoveryStatus.receipt`/`.refusal` — the board decided it at the door since the post-13l polish round; 18i just lets the class RIDE to the shell instead of flattening to `speak` |
+| 19 | `TakesStructureController:646` | "Take moved earlier/later — ⌥⌘Z undoes it." | **RECEIPT** (was a refusal) | a real mis-classification: it went through `speak`, which also painted the board's own slot in the **alarm** token. Fixed as part of the same seam |
+| 20 | `TakesStructureController:687` · `:718` · `:863` · `:966` | `movedNote` · `convertedNote` · `mergedChain` · `deletedNote` | **RECEIPT** (were refusals) | the brief's named sites; same mis-classification class as 19 |
+| 21 | `TakesStructureController` — the other 33 `speak` sites | "Click into a block first…", "Another structural change is still landing.", the takes-changed family | **REFUSAL** | unchanged |
+| 22 | `TakesViewModel.speakCeremonyReceipt` | as 16, on the boards | **RECEIPT** | the board's twin of 16 |
+| 23 | `BlockTOCViewModel:351` · `:388` | "Moved — now block N of M", "Moved to <pool> …" | **RECEIPT** | the brief's named sites (`BlockTOCView:333/370/417`) |
+| 24 | `BlockTOCViewModel:435` · `:517` · `:541` · `:564` · `:613` · `:631` | the bulk receipts (moved · merged · archived · deleted · tagged · moved-to-pool) | **RECEIPT** | the workbench's acts landed |
+| 25 | `BlockTOCViewModel:346` | "Already block N of M." | **REFUSAL** | nothing moved |
+| 26 | `CanvasViewModel` "✓ chosen" · "Saved — …" · "Committed — …" · "Ordered — …" | | **RECEIPT** | each names a store change |
+| 27 | `CanvasViewModel` "Nothing to fit — this canvas has no cards." | | **REFUSAL** | nothing happened |
+| 28 | `CompareBoardModel` "Committed — an immutable savepoint of this take." | | **RECEIPT** | the savepoint exists |
+| 29 | `SplitAtNewlinesCopy.receipt(_:whenNothingSplit:)` — all four doors | "N blocks from M blocks…" **or** "already one paragraph" | **SPLIT BY OUTCOME** | the ONE new predicate `SplitAtNewlinesCopy.acted(_:)`: a split that split is a receipt, "already one paragraph" is a refusal (nothing happened — P-2). Carried through the flight by `StructuralOutcome.noteIsRefusal` (a plain `Bool`, because the value is built in the runner's nonisolated closure) |
+| 30 | `ShellActions.toggleSeal` | "Sealed — …" / "Unsealed." | **RECEIPT** | the seal moved |
+| 31 | `ShellActions.structuralUndo` · `structuralRedo` | `StructuralUndoCopy.undone/redone(label)` | **RECEIPT** | something came back |
+| 32 | the same two doors | `nothingToUndo` · `nothingToRedo` · `undoFailed` · `redoFailed` · `undoCancelled` | **REFUSAL** | nothing came back |
+| 33 | `ShellActions.restoreTutorial` | "The tutorial is fresh — … is on your shelf." | **RECEIPT** | it was re-seeded |
+| 34 | `ShellActions.restoreSeededBook` | "Restored …", "… is already whole — it's on your shelf." | **RECEIPT** | both report the book's state after the door ran |
+| 35 | `ShellActions` import/export ×3 | "Import/Export finished." / the report | **RECEIPT** | files moved. The `… failed:` half of each expression is split out and stays a **REFUSAL** |
+| 36 | `ShellActions.todaysEntry` `:210` | the shelving note | **REFUSAL** | `JournalBooks.Outcome.note` is non-nil ONLY when the membership half could not happen — it is a refusal wearing a receipt's shape |
+| 37 | `ShellActions` — every `unavailableNote`, `OpsRefusalCopy.message`, "…failed: …", "That command isn't wired…" | | **REFUSAL** | unchanged |
+| 38 | `AppSession:486` | `MultiBookEditNote.sentence` + the Diverge button | **OFFER** | inferred from the action; always shows |
+| 39 | `AppSession:505` | `DivergeCopy.done(book:)` | **RECEIPT** | the copy exists |
+| 40 | `QuickNoteView:255` | `QuickNoteCopy.filedNote` | **RECEIPT** | the note was filed |
+| 41 | `QuickNoteView:257` · `:261` | `refusedFilingLine` · `refusedPrefix` | **REFUSAL** | the filing did not happen (the note is safe and says so) |
+| 42 | `NoteDeletion.fire` | the deletion report | **RECEIPT** | the notes went |
+| 43 | `RootView:505` · `ShellRouter.openBeside` | `WorkspaceNaming.sameNoteNote` | **REFUSAL** | no new pane opened |
+| 44 | `MastheadTagCluster` · `StarsModel` · `BookIndexEditModel` · `BookIndexView` · `MarkdownActs` · `EditorCommands` | error and unavailable notes | **REFUSAL** | unchanged |
+
+**BORDERLINE CALLS, recorded with their reason (the brief's ask):**
+
+- **29 — "already one paragraph"** is the one message that could go either way: it is the OUTCOME of a door
+  she pressed (receipt-shaped) but reports that nothing happened (refusal-shaped). I built it as a
+  **refusal**, because under `.off` the receipt reading would leave her pressing "make every newline a block"
+  and getting silence — the P-2 failure the constitution names. It cost one predicate with one home.
+- **31/32 — the undo report.** "Undid: Divide" is a receipt; "No structural change to undo." is a refusal.
+  They used to be one expression (`label.map(undone) ?? nothingToUndo`), so the split is visible in the diff.
+- **34 — "… is already whole — it's on your shelf."** Receipt: the door's job is to make the book whole, and
+  it reports the book's state afterwards; nothing was refused, and the shelf selection moved with it.
+- **36 — the daily-entry note.** Receipt-shaped words ("Today's entry opened, but…") that only ever speak when
+  the membership half FAILED. Left a refusal; the reasoning is in `JournalBooks.Outcome`'s own doc.
+- **11/12 — the two DIRECTIONS.** Neither reports an act. The brief rules on `EditorUndoHint` explicitly; I
+  applied the same reading to the ceremony's "run Make Block again" line, which is the same shape.
+- **19/20 — five board messages that were already receipts wearing a refusal's clothes.** Re-classing them
+  fixes a second, older defect at the same time: `WriteTakesPanel`'s own status slot paints
+  `status.isRefusal ? tokens.alarm : tokens.muted`, so "Take moved earlier" read in the ALARM token.
+
+**NOT STATUSCENTER SITES (named in the brief, checked, out of scope — they render in their own local slots
+and no setting governs them):** `LibraryViewModel.receipt` (the Library/Archived/Trash caption),
+`MembershipChip`'s `@State status` (the chip's popover), `TrayViewModel` / `BlockHistoryPane` /
+`NoteVersionsPane` / `DataSafetyModel` (their panels' own lines), and the phone's `MobileBlockHistory`.

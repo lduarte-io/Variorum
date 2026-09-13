@@ -71,7 +71,11 @@ struct QuickNoteMintTests {
             #expect(books.map(\.name) == [Operations.defaultQuicknoteBookName])
             #expect(curated == 0, "collected by a predicate, never by a row")
             // And it stays QUIET beyond one line naming where it went.
-            #expect(session.status.current?.text == QuickNoteCopy.filedNote)
+            // 18i: these words are a RECEIPT now, and her default puts a
+            // receipt in the bar's quiet line rather than the toast.
+            // `spoken` is the kind-agnostic read — this pin is about
+            // WHAT was said; `StatusCenterTests` owns WHICH SLOT.
+            #expect(session.status.spoken?.text == QuickNoteCopy.filedNote)
         }
     }
 
@@ -122,7 +126,7 @@ struct QuickNoteMintTests {
                 try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM container") ?? -1
             }
             #expect(posts == 0, "not one note was minted")
-            #expect(session.status.current == nil, "and nothing was said about it")
+            #expect(session.status.spoken == nil, "and nothing was said about it")
         }
     }
 

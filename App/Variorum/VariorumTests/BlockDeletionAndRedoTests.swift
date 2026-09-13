@@ -596,7 +596,9 @@ struct BlockDeletionAndRedoTests {
 
             // The outcome REPORTS — mode-independently, through the one
             // status surface (N4's letter, applied to the new door).
-            #expect(harness.session.status.current?.text.contains("Redid") == true)
+            // 18i: the redo report is a receipt — `spoken` reads it in
+            // whichever slot her setting put it.
+            #expect(harness.session.status.spoken?.text.contains("Redid") == true)
         }
     }
 
@@ -635,7 +637,7 @@ struct BlockDeletionAndRedoTests {
 
             #expect(stack.redoDepth == 0, "the stacks moved")
             #expect(stack.depth == 1)
-            #expect(harness.session.status.current?.text.contains("Redid") == true,
+            #expect(harness.session.status.spoken?.text.contains("Redid") == true,
                     "and the report still arrives, however late the door's continuation is")
         }
     }
@@ -645,7 +647,7 @@ struct BlockDeletionAndRedoTests {
     /// above deliberately delays the door by 150 ms.
     private func settleUntilRedoIsReported(_ harness: EditorHarness) async {
         for _ in 0..<4000
-        where harness.session.status.current?.text.contains("Redid") != true {
+        where harness.session.status.spoken?.text.contains("Redid") != true {
             await Task.yield()
             try? await Task.sleep(for: .milliseconds(1))
         }

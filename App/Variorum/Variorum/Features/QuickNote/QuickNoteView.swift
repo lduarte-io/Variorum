@@ -252,7 +252,7 @@ enum QuickNoteMint {
             // landing that exactly did not happen.
             switch filing {
             case .filed, .alreadyTagged:
-                session.status.speak(QuickNoteCopy.filedNote)
+                session.status.receipt(QuickNoteCopy.filedNote)  // 18i: it landed
             case .refused(let reason):
                 session.status.speak(QuickNoteCopy.refusedFilingLine(reason))
             }

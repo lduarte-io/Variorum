@@ -85,11 +85,12 @@ struct DestructiveUndoWarningTests {
             // after the door's main-actor continuation resumes, so waiting on
             // `depth == 0` can exit before the report exists (the traced
             // shell-redo flake, same door, same window).
-            await settle { h.session.status.current?.text.contains("Undid") == true }
+            // 18i: "Undid: …" is a receipt — read it wherever it landed.
+            await settle { h.session.status.spoken?.text.contains("Undid") == true }
 
             #expect(try h.storeSlots().compactMap(\.text) == ["First sentence. Second one."])
             #expect(h.session.undoStack.depth == 0)
-            #expect(h.session.status.current?.text.contains("Undid") == true)
+            #expect(h.session.status.spoken?.text.contains("Undid") == true)
             // The set-aside writing is one restore away — the fourth quiet
             // auto-commit occasion, unchanged by the warning.
             let commits = try await h.database.read { db in
@@ -135,11 +136,11 @@ struct DestructiveUndoWarningTests {
             actions.structuralRedo()
             // Same rule as above: the report is the last signal, so it is
             // the one to wait on.
-            await settle { h.session.status.current?.text.contains("Redid") == true }
+            await settle { h.session.status.spoken?.text.contains("Redid") == true }
             let slots = try h.storeSlots().compactMap(\.text)
             #expect(slots == ["First sentence.", "Second one."])
             #expect(h.session.undoStack.redoDepth == 0)
-            #expect(h.session.status.current?.text.contains("Redid") == true)
+            #expect(h.session.status.spoken?.text.contains("Redid") == true)
         }
     }
 

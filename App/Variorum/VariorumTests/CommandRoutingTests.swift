@@ -1020,7 +1020,7 @@ struct SealDoorTests {
             actions.toggleSeal()
             // The pre-fix wrong note landed SYNCHRONOUSLY inside the
             // dispatch, before the fallback's Task ran.
-            #expect(session.status.current == nil,
+            #expect(session.status.spoken == nil,
                     "no wrong refusal flash — the quiet dispatch left speech to the outcome")
 
             // 13g batch 5: poll the LAST signal in the chain. `lockPost`
@@ -1033,7 +1033,8 @@ struct SealDoorTests {
                 try Queries.containerHeader(db, containerID: post.id)?.locked
             }
             #expect(sealed == true, "the fallback ACTED — the post sealed")
-            #expect(session.status.current?.text.contains("Sealed") == true,
+            // 18i: "Sealed — …" is a receipt; `spoken` reads either slot.
+            #expect(session.status.spoken?.text.contains("Sealed") == true,
                     "the one honest outcome spoke")
         }
     }
@@ -1151,7 +1152,7 @@ struct BlockHistoryPaletteDoorTests {
                 postID: post.id, blockID: minted.block.id,
                 focusedVariantID: minted.variant.id)],
                 "the row opened the FOCUSED block's history through the detail's inspector")
-            #expect(session.status.current == nil, "no refusal spoke — the pane opened")
+            #expect(session.status.spoken == nil, "no refusal spoke — the pane opened")
 
             // With no block in hand at all, the honest note still speaks.
             session.commandRouter.noteFocusedBlock(nil, variantID: nil, postID: post.id)

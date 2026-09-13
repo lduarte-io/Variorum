@@ -67,6 +67,10 @@ protocol DivideWCeremonyHost: AnyObject {
         blockID: String, displayedVariantID: String, cut: Int
     ) async -> Bool
     func speakCeremonyStatus(_ message: String)
+    /// 18i: the one ceremony message that REPORTS rather than
+    /// refuses — the released original's note, spoken when the cut
+    /// landed. Her setting governs it; the other four are refusals.
+    func speakCeremonyReceipt(_ message: String)
     /// A REFUSAL, in the host's own refusal voice — Write beeps because
     /// Write's structural refusals beep; a board speaks because its
     /// refusals speak. Separate from `speakCeremonyStatus` so the pre-move
@@ -620,7 +624,7 @@ final class DivideWCeremony {
             // the toast, a board in its status line, no new mechanism.
             if let note = Self.releasedOriginalNote(
                 uncheckedTakes: current.takes.count(where: { !$0.marked })) {
-                host.speakCeremonyStatus(note)
+                host.speakCeremonyReceipt(note)
             }
             state = nil
         }

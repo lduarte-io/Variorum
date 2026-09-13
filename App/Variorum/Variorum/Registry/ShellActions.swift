@@ -114,7 +114,8 @@ struct ShellActions {
                         try ops.lockPost(postID)
                     }
                 }
-                status.speak(sealed ? "Unsealed." : "Sealed — the note is read-only until unsealed.")
+                status.receipt(
+                    sealed ? "Unsealed." : "Sealed — the note is read-only until unsealed.")
             } catch {
                 status.speak(OpsRefusalCopy.message(for: error))
             }
@@ -153,8 +154,13 @@ struct ShellActions {
                 let label = try await session.runner.run { ops in
                     try undoStack.undo(with: ops)
                 }
-                status.speak(label.map(StructuralUndoCopy.undone)
-                    ?? StructuralUndoCopy.nothingToUndo)
+                // 18i: an act that came back is a RECEIPT; "nothing to
+                // undo" is a refusal and keeps the toast.
+                if let label {
+                    status.receipt(StructuralUndoCopy.undone(label))
+                } else {
+                    status.speak(StructuralUndoCopy.nothingToUndo)
+                }
             } catch {
                 // A failed inverse stays on the stack (UndoStack doctrine);
                 // the user resolves (e.g. unseals the post) and retries.
@@ -174,8 +180,11 @@ struct ShellActions {
                 let label = try await session.runner.run { ops in
                     try undoStack.redo(with: ops)
                 }
-                status.speak(label.map(StructuralUndoCopy.redone)
-                    ?? StructuralUndoCopy.nothingToRedo)
+                if let label {
+                    status.receipt(StructuralUndoCopy.redone(label))
+                } else {
+                    status.speak(StructuralUndoCopy.nothingToRedo)
+                }
             } catch {
                 status.speak(StructuralUndoCopy.redoFailed(
                     OpsRefusalCopy.message(for: error)))
@@ -221,9 +230,13 @@ struct ShellActions {
         Task { @MainActor in
             let importer = ImportModel(session: session)
             await importer.importFiles(urls, into: .library)
-            status.speak(
-                importer.lastError.map { "Import failed: \($0)" }
-                    ?? importer.lastReport ?? "Import finished.")
+            // 18i: a failure is a refusal (always shown); the report of
+            // what arrived is a receipt.
+            if let failure = importer.lastError {
+                status.speak("Import failed: \(failure)")
+            } else {
+                status.receipt(importer.lastReport ?? "Import finished.")
+            }
         }
     }
 
@@ -233,9 +246,11 @@ struct ShellActions {
             let exporter = ExportModel(session: session)
             // Readings ride ALWAYS-ON at this face (Phase 11b recorded call).
             await exporter.writeBulkExport(to: folder)
-            status.speak(
-                exporter.lastError.map { "Export failed: \($0)" }
-                    ?? exporter.lastReport ?? "Export finished.")
+            if let failure = exporter.lastError {
+                status.speak("Export failed: \(failure)")
+            } else {
+                status.receipt(exporter.lastReport ?? "Export finished.")
+            }
         }
     }
 
@@ -269,9 +284,11 @@ struct ShellActions {
             if let markdown = await exporter.markdown(forBlock: blockID) {
                 exporter.writeMarkdown(markdown, to: url)
             }
-            status.speak(
-                exporter.lastError.map { "Export failed: \($0)" }
-                    ?? exporter.lastReport ?? "Export finished.")
+            if let failure = exporter.lastError {
+                status.speak("Export failed: \(failure)")
+            } else {
+                status.receipt(exporter.lastReport ?? "Export finished.")
+            }
         }
     }
 
@@ -299,7 +316,8 @@ struct ShellActions {
                 }
                 let bookID = try await TutorialSeeder.restore(session: session, existing: existing)
                 shell.pendingSelection = .reading(bookID)
-                status.speak("The tutorial is fresh — “\(TutorialSeeder.bookName)” is on your shelf.")
+                status.receipt(
+                    "The tutorial is fresh — “\(TutorialSeeder.bookName)” is on your shelf.")
             } catch {
                 status.speak("Restore Tutorial failed: \(OpsRefusalCopy.message(for: error))")
             }
@@ -337,11 +355,11 @@ struct ShellActions {
                 switch try await SeededBookRestore.restore(session: session, book: book) {
                 case .alreadyWhole(let bookID):
                     shell.pendingSelection = .reading(bookID)
-                    status.speak(
+                    status.receipt(
                         "\u{201C}\(book.name)\u{201D} is already whole — it's on your shelf.")
                 case .restored(let readingID, let minted):
                     shell.pendingSelection = .reading(readingID)
-                    status.speak(
+                    status.receipt(
                         "Restored \u{201C}\(book.name)\u{201D} — "
                         + "\(minted) \(minted == 1 ? noun : noun + "s") came back.")
                 }

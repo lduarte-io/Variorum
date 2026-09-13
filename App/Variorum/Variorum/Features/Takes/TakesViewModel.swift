@@ -143,7 +143,14 @@ final class TakesViewModel {
     /// one auto-dismiss policy).
     private(set) var status: TrayViewModel.Status? {
         didSet {
-            if let status { session.status.speak(status.text) }
+            // 18i (her R-Q5): the class this board already decides at the
+            // door RIDES to the shell. `RecoveryStatus`'s receipt/refusal
+            // split IS the centre's — one rule, two renderers (the panel's
+            // colour and the shell's placement), never a second predicate.
+            if let status {
+                session.status.deliver(
+                    status.text, kind: status.isRefusal ? .refusal : .receipt)
+            }
         }
     }
 
@@ -2571,6 +2578,13 @@ extension TakesViewModel: DivideWCeremonyHost {
 
     func speakCeremonyStatus(_ message: String) {
         speak(message)
+    }
+
+    /// 18i: the ceremony's one RECEIPT (the released original's note) — the
+    /// board's own receipt door, so it wears the muted colour in the panel
+    /// and follows her setting in the shell.
+    func speakCeremonyReceipt(_ message: String) {
+        setStatus(message)
     }
 
     func speakCeremonyRefusal(_ message: String) {

@@ -633,7 +633,8 @@ struct TutorialDoorTests {
                 return
             }
             #expect(openedID != bookID)
-            #expect(session.status.current?.text.contains("on your shelf") == true,
+            // 18i: the restore door's report is a receipt.
+            #expect(session.status.spoken?.text.contains("on your shelf") == true,
                     "the outcome lands in the one status presentation")
         }
     }
@@ -1160,8 +1161,9 @@ struct TutorialStructureActsTests {
 
             // ⌥⌘Z — and the report lands in the one status surface (N4).
             ShellActions(session: session, shell: ShellRouter()).structuralUndo()
-            await poll { session.status.current != nil }
-            #expect(session.status.current?.text == "Undid: Divide")
+            await poll { session.status.spoken != nil }
+            // 18i: the undo report is a receipt (quiet by default).
+            #expect(session.status.spoken?.text == "Undid: Divide")
             let restored = try await slots(db, lesson)
             #expect(restored.count == before.count, "one ⌥⌘Z puts it back together")
         }

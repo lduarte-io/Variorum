@@ -254,7 +254,7 @@ final class EditorSurfaceController {
             }
             if landed, otherTakes > 0 {
                 // Contract item 8: passive, self-dismissing, never modal.
-                model.showTransientStatus(
+                model.showTransientReceipt(
                     otherTakes == 1
                         ? "This block has 1 other take — it keeps this span."
                         : "This block has \(otherTakes) other takes — they keep this span.")
@@ -369,7 +369,7 @@ final class EditorSurfaceController {
         // the lineage road — the 3A drive proved the road exists but
         // nothing pointed at it ("in lineage" named no place). Copy only;
         // merge's semantics are canon.
-        model.showTransientStatus(
+        model.showTransientReceipt(
             otherTakes == 1
                 ? "Merged the visible takes — 1 other take stays with the released block "
                     + "(\(TrayPath.originalsPath); ⌥⌘Z undoes)."
@@ -607,7 +607,8 @@ final class EditorSurfaceController {
                 caretBlockID: landing ?? caretBlockID ?? order[0],
                 caretOffset: 0, seam: nil,
                 note: SplitAtNewlinesCopy.receipt(
-                    results, whenNothingSplit: SplitAtNewlinesCopy.noteAlreadyWhole))
+                    results, whenNothingSplit: SplitAtNewlinesCopy.noteAlreadyWhole),
+                noteIsRefusal: !SplitAtNewlinesCopy.acted(results))
         }
     }
 
@@ -625,7 +626,8 @@ final class EditorSurfaceController {
             return StructuralOutcome(
                 caretBlockID: result.blockIDs.first ?? blockID, caretOffset: 0, seam: nil,
                 note: SplitAtNewlinesCopy.receipt(
-                    [result], whenNothingSplit: SplitAtNewlinesCopy.blockAlreadyWhole))
+                    [result], whenNothingSplit: SplitAtNewlinesCopy.blockAlreadyWhole),
+                noteIsRefusal: !SplitAtNewlinesCopy.acted([result]))
         }
     }
 
@@ -798,7 +800,7 @@ final class EditorSurfaceController {
             return
         }
         let landed = await insertEmptyBlock(edge: .below, entryIndex: i, blockID: blockID)
-        if landed { model.showStatus("New block added below — type away.") }
+        if landed { model.showReceipt("New block added below — type away.") }
     }
 
     /// **The one body behind BOTH doors onto "an empty block beside this
@@ -914,7 +916,7 @@ final class EditorSurfaceController {
                 caretBlockID: result.block.id, caretOffset: 0, seam: nil)
         }
         if landed {
-            model.showStatus(TakeStructureCopy.movedNote)
+            model.showReceipt(TakeStructureCopy.movedNote)
         }
     }
 
@@ -1008,7 +1010,7 @@ final class EditorSurfaceController {
         // The post-13l polish round (batch 1's deferred item): the road this
         // names depends on WHAT this pane is over — the same read the delete
         // receipt takes, one act up.
-        if landed { model.showStatus(BlockSelectionCopy.archivedNote(home: homeKind)) }
+        if landed { model.showReceipt(BlockSelectionCopy.archivedNote(home: homeKind)) }
     }
 
     /// The one delete-block body both doors use: the menu/bar act above and
@@ -1021,7 +1023,7 @@ final class EditorSurfaceController {
                 caretBlockID: landing.blockID, caretOffset: landing.offset, seam: nil)
         }
         if landed {
-            model.showStatus(note + (await StrandedOriginals.note(
+            model.showReceipt(note + (await StrandedOriginals.note(
                 session: model.session, blockIDs: [blockID]) ?? ""))
         }
     }
@@ -1095,7 +1097,7 @@ final class EditorSurfaceController {
         if landed {
             // Ledger row 4(a): the same home-aware road as the single-block
             // door — the compound is reachable from the scraps editor too.
-            model.showStatus(
+            model.showReceipt(
                 BlockSelectionCopy.deletedNote(blockIDs.count, home: homeKind)
                 + (await StrandedOriginals.note(
                     session: model.session, blockIDs: blockIDs) ?? ""))
@@ -1614,7 +1616,7 @@ final class EditorSurfaceController {
     /// same promise; the road survives on BOTH paths).
     private func speakAboutStayBehindTakes(_ count: Int) {
         guard count > 0 else { return }
-        model.showTransientStatus(
+        model.showTransientReceipt(
             count == 1
                 ? "Merged — 1 take stays with the released blocks in lineage "
                     + "(\(TrayPath.originalsPath); ⌥⌘Z undoes)."
@@ -1736,6 +1738,12 @@ final class EditorSurfaceController {
         /// `runStructural` once the rewrite lands; nil for every door that
         /// speaks its own fixed line, which is all of them before 13e.
         var note: String? = nil
+        /// 18i: a note that reports NOTHING HAPPENED is a refusal, not a
+        /// receipt — she must see it whatever her confirmations setting
+        /// says (P-2). A plain `Bool` and not the centre's `Kind` because
+        /// this value is built inside the runner's nonisolated closure.
+        /// Only the split-at-newlines doors can produce one.
+        var noteIsRefusal = false
     }
 
     // MARK: - Phase 11, A9: the boundary-fluidity package (committed scope)
@@ -2122,7 +2130,7 @@ final class EditorSurfaceController {
                 caretBlockID: landing.blockID, caretOffset: landing.offset, seam: nil)
         }
         if landed {
-            model.showStatus("Empty block deleted — ⌥⌘Z undoes it.")
+            model.showReceipt("Empty block deleted — ⌥⌘Z undoes it.")
         }
     }
 
@@ -2212,7 +2220,7 @@ final class EditorSurfaceController {
             // structural act landed from an ordinary keystroke, and ⌘Z — the
             // text stack — cannot take it back (the structural rewrite clears
             // it by design). The line names the door that can.
-            model.showStatus("Blocks joined — ⌥⌘Z undoes it.")
+            model.showReceipt("Blocks joined — ⌥⌘Z undoes it.")
         }
     }
 
@@ -2492,7 +2500,7 @@ final class EditorSurfaceController {
             if !skipped.isEmpty {
                 message += " Skipped \(skipped.count): \(skipped.joined(separator: ", "))."
             }
-            model.showStatus(message)
+            model.showReceipt(message)
         }
     }
 
@@ -2659,7 +2667,7 @@ final class EditorSurfaceController {
                 caretBlockID: landing.blockID, caretOffset: landing.offset, seam: nil)
         }
         if landed {
-            model.showStatus(FindReplaceGate.replacedInEveryTake(
+            model.showReceipt(FindReplaceGate.replacedInEveryTake(
                 replacements: replacements, takes: takesEdited,
                 skipped: skipped, moved: moved))
         }
@@ -2740,7 +2748,14 @@ final class EditorSurfaceController {
             // 13e batch 3: a receipt the op itself computed (see
             // `StructuralOutcome.note`), spoken once the surface agrees with
             // the store.
-            if let note = outcome.note { model.showStatus(note) }
+            // 18i: THE structural receipt seam — every door that hands
+            // `runStructural` a note is reporting an act that landed, so
+            // the whole family (divide, merge, split-at-newlines, convert,
+            // delete) becomes a receipt at this ONE line. The one exception
+            // declares itself: a note that says nothing happened.
+            if let note = outcome.note {
+                outcome.noteIsRefusal ? model.showStatus(note) : model.showReceipt(note)
+            }
             return true
         } catch {
             model.showOperationError(error)
@@ -2947,6 +2962,12 @@ extension EditorSurfaceController: DivideWCeremonyHost {
 
     func speakCeremonyStatus(_ message: String) {
         model.showStatus(message)
+    }
+
+    /// 18i: the ceremony’s one RECEIPT (the released original’s note) —
+    /// its other four calls are refusals ("the takes changed, try again").
+    func speakCeremonyReceipt(_ message: String) {
+        model.showReceipt(message)
     }
 
     func speakCeremonyRefusal(_ message: String) {

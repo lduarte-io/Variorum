@@ -68,10 +68,30 @@ final class EditorViewModel {
     /// The editor's transient outcome line. PRESENTATION is the shell's
     /// StatusCenter (13b 1b, AD-14 — one placement, one auto-dismiss
     /// policy); the property remains the tested truth and forwards on set.
+    ///
+    /// **18i (her R-Q5): the forward carries a KIND.** `outgoingKind` is the
+    /// class the NEXT write delivers, named by the door that is writing
+    /// (`showReceipt` / `showTransientReceipt` say receipt; everything else
+    /// is a refusal), and it RESETS after each delivery — so the ~25 bare
+    /// `statusMessage = …` assignments in this file and its controller,
+    /// every one of them a refusal or an error, keep behaving exactly as
+    /// they did without a single edit. The rule and the reason live once, in
+    /// `StatusCenter`; four view models forward this way.
     private(set) var statusMessage: String? {
         didSet {
-            if let statusMessage { session.status.speak(statusMessage) }
+            guard let statusMessage else { return }
+            session.status.deliver(statusMessage, kind: outgoingKind)
+            outgoingKind = .refusal
         }
+    }
+
+    /// The class the next `statusMessage` write carries (18i — see above).
+    @ObservationIgnored private var outgoingKind: StatusCenter.Kind = .refusal
+
+    /// The ONE write that names its class; every door below goes through it.
+    private func setStatusMessage(_ message: String?, kind: StatusCenter.Kind) {
+        outgoingKind = kind
+        statusMessage = message
     }
     private(set) var caretBlockID: String?
     private(set) var caretVariantID: String?
@@ -2433,7 +2453,20 @@ final class EditorViewModel {
     /// Internal (was private) since N10: the controller's passive hints
     /// (fanned extract, merged fans) ride the same self-clearing line.
     func showTransientStatus(_ message: String) {
-        statusMessage = message
+        showTransient(message, kind: .refusal)
+    }
+
+    /// 18i: the same self-clearing line, delivered as a RECEIPT — the
+    /// passive after-the-fact notes (a fanned extract's other takes, the
+    /// takes that stayed with a released block). Its refusal-class twin
+    /// above carries the one message that is a DIRECTION, not a report:
+    /// "finish Divide choosing takes, then run Make Block again."
+    func showTransientReceipt(_ message: String) {
+        showTransient(message, kind: .receipt)
+    }
+
+    private func showTransient(_ message: String, kind: StatusCenter.Kind) {
+        setStatusMessage(message, kind: kind)
         hintClearTask?.cancel()
         hintClearTask = Task { [weak self] in
             try? await Task.sleep(for: .seconds(6))
@@ -2501,7 +2534,9 @@ final class EditorViewModel {
             let effective = try? await session.database.read { [postID] db in
                 try Queries.containerHeader(db, containerID: postID)?.effectiveSegmentation
             }
-            showStatus(SegmentationFaceCopy.note(
+            // 18i: a RECEIPT — the toggle landed, and this says what it
+            // means. Her images 6/7 are this sentence.
+            showReceipt(SegmentationFaceCopy.note(
                 asked: mint,
                 effectivelyMints: (effective ?? nil) != .oneBlock))
         } catch {
@@ -2681,7 +2716,7 @@ final class EditorViewModel {
             _ = try await session.runner.run { ops in
                 try ops.commit(variantID, kind: .manual)
             }
-            statusMessage = "Committed."
+            showReceipt("Committed.")  // 18i: the savepoint landed
         } catch {
             showOperationError(error)
         }
@@ -3396,7 +3431,16 @@ final class EditorViewModel {
     // MARK: - Messages
 
     func showStatus(_ message: String) {
-        statusMessage = message
+        setStatusMessage(message, kind: .refusal)
+    }
+
+    /// **A RECEIPT** (18i — her R-Q5): an act LANDED and this says what.
+    /// Where it shows is her setting's answer (`StatusCenter.receiptStyle`);
+    /// the words are untouched. Its twin `showStatus` stays the always-show
+    /// door for a refusal — and for a DIRECTION she must see, which is why
+    /// `speakUndoHint` below deliberately does not call this one.
+    func showReceipt(_ message: String) {
+        setStatusMessage(message, kind: .receipt)
     }
 
     /// **13j J7 — the sign at the junction.** Speaks only when the text stack

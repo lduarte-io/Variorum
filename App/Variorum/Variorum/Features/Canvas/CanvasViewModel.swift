@@ -80,8 +80,26 @@ final class CanvasViewModel {
     /// property remains the tested truth and forwards on set.
     private(set) var statusMessage: String? {
         didSet {
-            if let statusMessage { session.status.speak(statusMessage) }
+            // 18i (her R-Q5): the forward carries a KIND — `outgoingKind` is
+            // the class the NEXT write delivers, named by the door that is
+            // writing, and it RESETS after each delivery, so every bare
+            // `statusMessage = …` assignment here (refusals and errors, all
+            // of them) is byte-unchanged. The rule and the reason live once,
+            // in `StatusCenter`.
+            guard let statusMessage else { return }
+            session.status.deliver(statusMessage, kind: outgoingKind)
+            outgoingKind = .refusal
         }
+    }
+
+    /// The class the next `statusMessage` write carries (18i).
+    @ObservationIgnored private var outgoingKind: StatusCenter.Kind = .refusal
+
+    /// A RECEIPT: an act landed, and this says what. Where it shows is her
+    /// setting's answer; the words are untouched.
+    func showReceipt(_ message: String) {
+        outgoingKind = .receipt
+        statusMessage = message
     }
 
     /// The routed commands' speaking surface (fire-and-speak, never dead).
@@ -602,7 +620,7 @@ final class CanvasViewModel {
             }
             viewPicks.removeValue(forKey: blockID)
             saveViewMemory()
-            statusMessage = "✓ chosen — the note shows this take everywhere now."
+            showReceipt("✓ chosen — the note shows this take everywhere now.")
         } catch {
             statusMessage = OpsRefusalCopy.message(for: error)
         }
@@ -623,7 +641,7 @@ final class CanvasViewModel {
                 }
                 return lens
             }
-            statusMessage = "Saved — “\(lens.name)” remembers this canvas's takes (open it in Lenses)."
+            showReceipt("Saved — “\(lens.name)” remembers this canvas's takes (open it in Lenses).")
         } catch {
             statusMessage = OpsRefusalCopy.message(for: error)
         }
@@ -705,7 +723,7 @@ final class CanvasViewModel {
             try await session.runner.run { ops in
                 _ = try ops.commit(pane.variantID)
             }
-            statusMessage = "Committed — an immutable savepoint of this take."
+            showReceipt("Committed — an immutable savepoint of this take.")
         } catch {
             statusMessage = OpsRefusalCopy.message(for: error)
         }
@@ -789,7 +807,7 @@ final class CanvasViewModel {
                 }
             }
             let count = sequence.count
-            statusMessage = "Ordered — \(count) card\(count == 1 ? "" : "s") lead the note now (⌥⌘Z undoes)."
+            showReceipt("Ordered — \(count) card\(count == 1 ? "" : "s") lead the note now (⌥⌘Z undoes).")
             orderMode = false
             orderSequence = []
         } catch {

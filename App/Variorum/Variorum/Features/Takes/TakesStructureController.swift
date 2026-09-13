@@ -292,8 +292,12 @@ final class TakesStructureController {
                     }
                 }
             if clearingSelection { model.clearMergeSelection() }
-            model.setStatus(SplitAtNewlinesCopy.receipt(
-                results, whenNothingSplit: whenNothingSplit))
+            // 18i: the split's line is a receipt when something split and a
+            // refusal when nothing did (the ONE predicate, `acted`).
+            let line = SplitAtNewlinesCopy.receipt(
+                results, whenNothingSplit: whenNothingSplit)
+            SplitAtNewlinesCopy.acted(results)
+                ? model.setStatus(line) : model.setRefusal(line)
         } catch {
             model.setRefusal(TakesViewModel.message(for: error))
         }
@@ -643,7 +647,10 @@ final class TakesStructureController {
                 try ops.reorderTake(
                     variantID, to: delta < 0 ? .before(anchor) : .after(anchor))
             }
-            model.speak(
+            // 18i: a RECEIPT — the move landed. It went through the
+            // REFUSAL door until now, which also painted the board's own
+            // slot in the alarm token (the class row 6 exists because of).
+            model.setStatus(
                 "Take moved \(delta < 0 ? "earlier" : "later") — \u{2325}\u{2318}Z undoes it.")
         } catch {
             model.setRefusal(TakesViewModel.message(for: error))
@@ -684,7 +691,7 @@ final class TakesStructureController {
                 try ops.takeToBlockBelow(target.blockID, variantID: target.variantID)
             }
             model.choreography.parkFocus(onVariant: result.variant.id)
-            model.speak(TakeStructureCopy.movedNote)
+            model.setStatus(TakeStructureCopy.movedNote)  // 18i: a receipt
         } catch {
             model.setRefusal(TakesViewModel.message(for: error))
         }
@@ -715,7 +722,8 @@ final class TakesStructureController {
             let result: Operations.TakesToBlocksResult = try await model.session.runner.run { ops in
                 try ops.takesToBlocks(targetID)
             }
-            model.speak(TakeStructureCopy.convertedNote(
+            // 18i: a receipt (it counts what the operation did)
+            model.setStatus(TakeStructureCopy.convertedNote(
                 blocks: result.converted.count, skippedBlanks: result.skippedBlankTakes))
         } catch {
             model.setRefusal(TakesViewModel.message(for: error))
@@ -860,7 +868,9 @@ final class TakesStructureController {
             }
             model.clearMergeSelection()
             model.choreography.parkFocus(onVariant: landing.variantID)
-            model.speak(FannedDefaultsCopy.mergedChain(
+            // 18i: a receipt — Write's twin already spoke through
+            // `runStructural`'s note, which is the receipt seam.
+            model.setStatus(FannedDefaultsCopy.mergedChain(
                 blocks: chain.count, carried: max(0, landing.takesOnMerged - 1)))
         } catch {
             // Ladder round 2 (R2-2): the read-to-write race — a pick that
@@ -963,7 +973,9 @@ final class TakesStructureController {
             // 13j batch 7: the stranding sentence rides the board's compound
             // too — the same gap, the same fix, on the twin door (Write's
             // `runBlockDeleteCompound` carries the trace).
-            model.speak(BlockSelectionCopy.deletedNote(chain.count)
+            // 18i: a receipt — the blocks went, and the stranding
+            // sentence rides it.
+            model.setStatus(BlockSelectionCopy.deletedNote(chain.count)
                 + (await StrandedOriginals.note(
                     session: model.session, blockIDs: chain) ?? ""))
         } catch {

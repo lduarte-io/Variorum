@@ -95,7 +95,7 @@ struct FormattingSurfacesTests {
         MarkdownActs.fire(.bold, status: status, in: window)
         #expect(pane.string == "say **this** now",
                 "the bar's button and the menu's row are the same act")
-        #expect(status.current == nil, "an act that acted says nothing")
+        #expect(status.spoken == nil, "an act that acted says nothing")
 
         // A field editor is an editable NSTextView too, and must never take
         // `****` from a toolbar button any more than from a menu key.

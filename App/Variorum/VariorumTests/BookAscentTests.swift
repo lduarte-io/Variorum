@@ -640,7 +640,9 @@ struct MultiBookEditNoteTriggerTests {
             session.autosave(forPost: post.id)
                 .record(variantID: block.variant.id, text: "Some prose!", charDelta: 1)
             for _ in 0..<8 { try? await Task.sleep(for: .milliseconds(25)) }
-            #expect(session.status.current == nil)
+            // 18i: NOTHING was said — read both slots, so a receipt
+            // landing quietly could never pass as silence.
+            #expect(session.status.spoken == nil)
             #expect(!MultiBookEditNote.hasBeenSeen(), "still owed")
         }
     }

@@ -174,7 +174,7 @@ enum NoteDeletion {
     static func fire(session: AppSession, postIDs: [String]) {
         Task { @MainActor in
             do {
-                session.status.speak(try await run(session: session, postIDs: postIDs))
+                session.status.receipt(try await run(session: session, postIDs: postIDs))
             } catch {
                 session.status.speak(DeletionRefusal.words(error, act: .delete))
             }

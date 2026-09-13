@@ -87,7 +87,7 @@ struct EncryptionBookDoorTests {
             #expect(tutorialBooks == [openedID], "the door opened the tutorial, as before")
             let after = try await encryptionBook(db)
             #expect(after.complete && after.books == 1, "the book Lesson 2 names is on the shelf — whole")
-            #expect(session.status.current?.text.contains("could not be restored") != true, "silent on success")
+            #expect(session.status.spoken?.text.contains("could not be restored") != true, "silent on success")
 
             // Again: the existing tutorial opens, the book stays one.
             shell.pendingSelection = nil
@@ -126,7 +126,7 @@ struct EncryptionBookDoorTests {
             }
             let after = try await encryptionBook(db)
             #expect(after.books == 0, "the reader's deletion STANDS — the silent ensure declines on the tombstone")
-            #expect(session.status.current?.text.contains("could not be restored") != true, "a decline is not a failure — nothing spoken")
+            #expect(session.status.spoken?.text.contains("could not be restored") != true, "a decline is not a failure — nothing spoken")
 
             // The explicit door is an ask: it mints afresh (a new reading).
             let again = try await SeededBookRestore.restore(session: session, book: .encryptionExplained)

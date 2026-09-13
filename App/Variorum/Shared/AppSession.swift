@@ -502,7 +502,7 @@ final class AppSession {
             guard let self else { return }
             do {
                 _ = try await self.divergeForBook(postID, in: book.id)
-                self.status.speak(DivergeCopy.done(book: book.name))
+                self.status.receipt(DivergeCopy.done(book: book.name))  // 18i: it landed
             } catch {
                 self.status.speak(DivergeCopy.refusal(for: error, book: book.name))
             }

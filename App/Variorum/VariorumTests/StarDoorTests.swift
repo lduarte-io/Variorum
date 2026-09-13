@@ -172,10 +172,11 @@ struct StarActingTests {
                 await stars.toggle(.post(note.id))
             }
             try await settle { stars.items.count == Operations.starLimit }
-            #expect(session.status.current == nil, "five stars say nothing at all")
+            // 18i: silence means BOTH slots empty.
+            #expect(session.status.spoken == nil, "five stars say nothing at all")
 
             await stars.toggle(.post(notes[Operations.starLimit].id))
-            let spoken = session.status.current?.text ?? ""
+            let spoken = session.status.spoken?.text ?? ""
             #expect(spoken.lowercased().contains("un-star"),
                     "the door FIRED and named the road: \(spoken)")
             #expect(stars.items.count == Operations.starLimit,

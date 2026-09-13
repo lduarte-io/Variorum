@@ -548,6 +548,15 @@ nonisolated enum SplitAtNewlinesCopy {
 
     /// The honest no-op — a REFUSAL that says what is already true, never a
     /// lecture that redirects to nothing (P-2).
+    /// **18i (her R-Q5): which CLASS the line above carries.** A split that
+    /// split something is a RECEIPT — her confirmations setting governs it.
+    /// "Already one paragraph" is a REFUSAL: nothing happened, and P-2 says
+    /// she must see that whatever the setting says. ONE predicate, consulted
+    /// by every door that speaks this copy, so no site re-derives it.
+    static func acted(_ results: [Operations.SplitAtNewlinesResult]) -> Bool {
+        results.contains { !$0.isNoOp }
+    }
+
     static let noteAlreadyWhole = "Every block is already one paragraph."
     static let blockAlreadyWhole = "This block is already one paragraph."
     static let pickedAlreadyWhole = "Every picked block is already one paragraph."
