@@ -18,14 +18,21 @@
 //  floating quick-note `Window`, the helper `Window` and `Settings` — plus
 //  a `MenuBarExtra`, and every sheet, alert, popover and menu those open.
 //  `preferredColorScheme` is a per-scene modifier: it would be five copies
-//  of one decision (the drift class), it does not reach a menu bar extra's
-//  menu, and AppKit chrome a scene does not own (the title bar, the
-//  toolbar, a Save panel) would keep the system's appearance. `NSApp`'s
-//  appearance is the app-level one that every window whose own `appearance`
-//  is nil inherits — which is all of them (nothing in this app sets a
-//  window appearance; verified by grep) — so ONE write moves the whole
-//  process, AppKit chrome included, and SwiftUI's `colorScheme` follows
-//  each window's `effectiveAppearance` by construction.
+//  of one decision (the drift class), and AppKit chrome a scene does not
+//  own (the title bar, the toolbar, a Save panel) would keep the system's
+//  appearance. `NSApp`'s appearance is the app-level one that every window
+//  whose own `appearance` is nil inherits — which is all of them (nothing
+//  in this app sets a window appearance; verified by grep) — so ONE write
+//  moves the whole process, AppKit chrome included, and SwiftUI's
+//  `colorScheme` follows each window's `effectiveAppearance` by
+//  construction. **The one thing it does NOT reach, walked at the 18j
+//  ladder rather than assumed: the `MenuBarExtra`'s MENU.** A status item's
+//  menu is drawn by the menu bar, and it wears the SYSTEM's appearance
+//  whatever the app's is (the choice at Dark with the system light: the
+//  app black, the "New Quick Note" menu light — capture
+//  `r1-S-menubar-extra-menu-choice-dark-system-light`). That is AppKit's
+//  own rule for every status menu on the Mac, not a gap to close, and the
+//  quick-note PAD the menu opens is a window, which does follow.
 //
 //  **LOCAL, never synced.** The `readModeOutlineShown` / `libraryCatalogSort`
 //  class: the VOICE and the PALETTE are document semantics and ride the
