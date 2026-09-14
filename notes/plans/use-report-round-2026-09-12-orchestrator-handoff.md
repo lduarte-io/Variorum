@@ -1,4 +1,6 @@
-# The 2026-09-12 use-report round — ORCHESTRATOR HANDOFF (first written 2026-09-12 ~06:00 by the Fable orchestrator for a compaction; REWRITTEN 2026-09-13 at the CUTOVER to a SUCCESSOR SESSION at her word — "you're at 600k and given that 18i, 18g, and 18j still remain it would be best to do that in a new session")
+# The 2026-09-12 use-report round — ORCHESTRATOR HANDOFF — **THE ROUND CLOSED 2026-09-14; this file is HISTORY.** §0's kickoff was never needed a third time (the same session resumed as Fable 5, her R-Q30, and finished the round — the ladder, the round-end pass, the closeout, the author handoff `notes/handoffs/use-report-round-2026-09-12-handoff.md`, and the install refresh). Nothing below is a live instruction.
+
+# The original header: (first written 2026-09-12 ~06:00 by the Fable orchestrator for a compaction; REWRITTEN 2026-09-13 at the CUTOVER to a SUCCESSOR SESSION at her word — "you're at 600k and given that 18i, 18g, and 18j still remain it would be best to do that in a new session")
 
 *This file is the orchestrator's transcript-proof state. It serves THREE readers: (1) the SAME session after a
 context compaction (read it first, then LIVE STATUS in the plan); (2) a SUCCESSOR orchestrator if this session
