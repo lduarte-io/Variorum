@@ -4,7 +4,7 @@
 
 ## Your checklist (in this order)
 
-1. **Launch `/Applications/Variorum.app`** — refreshed at the round's close from the final tree (the exact hashes and the codesign line are in the plan's LIVE STATUS finish entry; the A1 backup of the store was taken first, byte-verified, header ciphertext). If the LIVE STATUS finish entry instead says OWED, the refresh recipe is the orchestrator handoff's §3 and one message runs it.
+*[removed for publication]*
 2. **The walk — the round's rows, in the order you hit them:**
    - **Takes (17p a → 17q):** a long note, scroll a block to mid-page, ⌘1, ⌘2 → the page byte-where-it-was; click a DIFFERENT block in Write, ⌘2 → that block revealed minimally at the nearer edge, never the top; an empty block is an empty line; the ＋ door on the prose's edge.
    - **Chrome (17p b):** the tray's block rows' Delete Now; the Callout Emoji field; the comment badge and callout emoji in the book Outline's left lane.
