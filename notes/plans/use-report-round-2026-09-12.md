@@ -10983,3 +10983,207 @@ nothing. Her real-store app was not running and was never touched; I launched no
 **Finals over the letter's last code tree (`eb8a6a3e`, the ladder's one post-fix-pass code commit being a test file):** the FULL Mac suite, run by the orchestrator at this close in the standing parallel mode — `✘ Test run with 2631 tests in 437 suites failed after 702.647 seconds with 1 issue.` — **2,630 of 2,631 green** (18j's batch 2629/437 plus the ladder's two new suite members), the 9 standing opt-in skips, and the ONE issue a HARNESS-LATENCY artifact, cleared by the standing flake rule and recorded below; iOS `** BUILD SUCCEEDED **` (the orchestrator's own run at this close); core NOT owed (`Sources/` diff-empty across the letter — verified). `Sync/` · `Server/` · `Persistence/` · `BlockRangeIndex` · `EditorTextView`'s identity machinery · `PaneTextAuthority` diff-empty across the letter; zero schema; a LOCAL preference, no `setting` key; marker **8**; zero trailers. *(The run's own story, recorded: the harness's low-memory policy killed three tracked background attempts mid-run, so the close's runs went DETACHED with a monitor on the log — the road for every long run on this 18 GiB machine while a browser is resident. A first detached run in SERIAL test mode (`-parallel-testing-enabled NO`, an off-baseline shape tried for memory) came back red on ONE pin — `MastheadLayoutTests.thePathChipAndTheTagClusterNeverIntersectInStudy`, three ~1.5 pt sliver intersections — which is 3/3 GREEN ISOLATED on the same tree (the standing clearing bar) and green in this parallel run; nothing in the letter touches the masthead. The PARALLEL run then failed the SAME pin's Terminal variant — one ~1.5 pt corner graze of the open tag field against one card — while 3/3 GREEN ISOLATED on the same tree (the standing clearing bar) and untouched by the letter's diff (the pin is 17o batch d's, last edited at 18h piece 4). **The mechanism, traced at the pin's own code (`MastheadLayoutTests.swift:303–312`):** after `requestTagField()` the harness settles until the FIELD reports, then pumps a FIXED `maxTurns: 8` and reads the CARD frames from the DEBUG oracle — under suite load the cards' post-open re-reports can land after the pump, so the open field is compared against stale pre-open card frames; the fixed-turn-budget class the 17q ladder already named. The failing assertion's subject — the open field standing clear of the cards — is walked evidence in the app (the tag door in both voices, 18j's own captures). Recorded on KnownIssues with the owner rather than waved.)*
 
 **Canon deltas APPLIED in this commit:** AppSpec §12's 18j sentence (after 18g's); KnownIssues — the two-roads row's INK half STRUCK (carved at 18j) and ONE new row (the Timeline's un-voiced type, 13u2); MobileSoul PL-22's 18j note (it runs the other way — nothing owed to the phone); the master plan's 13u row item (6) marked MET; the orchestrator handoff's flagged-for-her line gains the diff-stoplight clause (R2-1's disposition). QUESTIONS: nothing filed (#108 free). **Her items from this letter:** J55–J61 · J59 + the diff's convention change (her eye, one token each to reverse) · the Account sheet's dark reading on her real store.
+
+---
+
+### THE ROUND-END FABLE PASS — ROUND 1 FINDINGS (fable-reviewer, over 18h + 18i)
+
+*(Her R-Q10's last round: ONE Fable pass over the two letters whose ladders ran under an OPUS
+reviewer — 18h (TIME: `2d43df7c..634a57c4`, rows 9–11, three Opus rounds to the cap, the residue
+resolved at 17q under a Fable ladder) and 18i (CONFIRMATIONS: `b1a74b3d..b22dc138`, row 8, three
+Opus rounds to the cap) — reviewed TOGETHER, cold, at HEAD (`96a62cce`, where 17q's, 18g's and
+18j's later commits sit over both letters' code). Anchors read in full before the code: §7 (R-Q5 ·
+R-Q7 · R-Q8 · R-Q16–R-Q18 · R-Q22 · R-Q23 · R-Q27), §12 (F-0 · F-5 · F-6 as mandatory checks),
+R-0, the R-3/R-4 briefs + records + the 18h ladder's three rounds with their arbitrations and fix
+passes + the 18h LETTER CLOSEOUT, the R-8 entry (the cap residue's resolution) through its
+closeout, the R-5 brief + record + the 18i ladder's three rounds + the 18i LETTER CLOSEOUT.*
+
+**Verified against git and the tree myself (not the records):** both letters' fences are diff-empty
+over their FULL ranges (`git diff 2d43df7c^..634a57c4` and `fe54be0f..b22dc138` against
+`Sources/VariorumCore/Sync/`, `Server/`, `EditorTextView`, `PaneTextAuthority`; 18i additionally
+against `Persistence/`); `lockstepVersion` = **8** read from `SyncSchema.swift:101`; v1_17
+(`idx_commit_created`) is its own commit (`33407d64`, two files — `Migrations.swift` +
+`MigrationTests.swift`) AHEAD of the query that uses it; **zero trailer lines** across both
+letters' commits (counted by `git log --format='%b' | grep -c`); zero `/Applications` instances at
+every point (`pgrep` by PATH); `TakesViewModel.swift` byte-identical to `b22dc138` at HEAD. **Runs
+I made myself:** core `swift test --filter 'LibraryDaySearchTests|DayBoundsTests|TimeStampFaceTests|LibraryTimeSortTests|NoteStampsTests|MigrationTests|AppearanceSettingsTests'`
+→ **`73 tests in 8 suites passed`**; Mac, ONE `xcodebuild test` over eight grep-verified suite
+TYPES (`ConfirmationsSettingTests` · `StatusCenterTests` · `LibraryDayFilterTests` ·
+`LibraryCardStampsTests` · `LibrarySortMenuTests` · `MastheadStampTests` · `TakeToBlockDoorTests`
+· `LibraryRowAlignmentTests`) → **`77 tests in 8 suites passed`**, zero skips
+(`DerivedData/fablepass`). Captures verified on disk (17 + 11 + 12) and one read at full size —
+`18i/01` shows BOTH letters' faces in one frame: *"Blocks joined — ⌥⌘Z undoes it."* muted at the
+bar's trailing end before `5w block · 5w in note`, no toast, and the masthead's *edited today
+5:08 am* at the second row's trailing end.
+
+#### Findings, severity-ranked
+
+**RE-1 · NIT · 18i · `App/Variorum/Variorum/Features/QuickNote/QuickNoteView.swift:255` + the
+round-3 fixes' "THE RESIDUE LINE FOR HER" — the quick-note filing door is a member of the
+no-bottom-bar class the residue line does not name.** *Mechanism, traced:* `QuickNoteMint.file`
+speaks `session.status.receipt(QuickNoteCopy.filedNote)`; under her default the line lands in
+`quietLine`, which only the bars render — so a capture taken while the Library or shelf is
+frontmost (no note open ⇒ no `CommitBar`, no takes bar, no note box anywhere) says *"Filed to
+Quicknotes"* to nobody, where pre-18i it toasted in the main window. The class is RULED — #106's
+own filing names "the shell surfaces" and R-Q23/R-Q27 ruled it — and two real mitigations keep
+this mild: the pad DISMISSES on ⌘⏎ (the window going is feedback the five Blocks/Canvas/Compare
+doors do not have), and every filing REFUSAL still toasts (`refusedFilingLine` goes through
+`speak`), so silence reliably means "filed clean". What is short is the RECORD: the residue line
+her R-Q27 leaned on enumerates *"five doors on the three surfaces that have no bottom bar —
+Blocks · Canvas · Compare"*, and if she ever takes #106's option (c) (footers on those three),
+the quick-note pad sits outside that build with nobody told. *Fix:* one clause on the residue
+line (the 18i closeout's "her items" list) naming the sixth door; no code owed under the ruling.
+
+**RE-2 · NIT · 18h · `App/Variorum/Variorum/Features/Library/LibraryTimeFace.swift:270`
+(`CatalogRowStamp.now: Date = Date()`), same shape at `MastheadStamp.swift:48`,
+`CatalogCardStamps:340`, `LibraryDayField:153` — the relative words freeze at render across a day
+rollover.** *Mechanism, traced:* every stamp face takes `now` as an init default, evaluated per
+body construction; nothing anywhere installs a day-rollover tick. A Library window (or an open
+note's masthead) left untouched across midnight keeps reading *edited today 11:59 PM* for what is
+now yesterday until ANY interaction re-evaluates the body — the class every relative-time UI
+carries unless it ticks. Self-healing, unreachable by a pin (the rig cannot mount the catalog —
+KnownIssues' real-click row; the BRAIN is correct and fully pinned, only the view's `now` goes
+stale). *Fix if it ever bothers her:* a minute/day tick at the two listing faces
+(`TimelineView`'s own shape); record-only today.
+
+**RE-3 · NIT · 18h/17q · `LibraryTimeFace.swift:396–430` (`CatalogStampOracle`, DEBUG) — the
+catalog words oracle carries the same two-window edge R3-10 recorded for the masthead's
+oracles.** *Mechanism, traced:* the same note listed in two windows' Libraries registers
+`flip[postID]` twice (last `onAppear` wins), and either window's `onDisappear` runs
+`forget(_:slot:)`/tearing down the flip door the other window still owns — exactly the edge the
+17q record left "with its reason" on the masthead's four oracles (ownership tracking is real
+machinery for a DEBUG-only corner no pin reaches). The masthead's copy of this edge rides the
+13u2 KnownIssues row; the catalog oracle should ride the same row when 13u2 sweeps it, so the
+sweeper finds both. No shipped consequence (all `#if DEBUG`). *Fix:* one clause on that
+KnownIssues row.
+
+#### Considered and cleared (traced at HEAD, and measured or run where it mattered)
+
+- **The day search's cost AND answer, end to end.** I read the shipped `editedOnClause` at
+  `ShelfQueries.swift` — the stamp arm compares the SAME `COALESCE(last_touched_at, created_at)`
+  the row displays (and `Queries.noteStamps.editedAt` computes — three surfaces, one expression,
+  re-derived rather than trusted), and the savepoint half is the uncorrelated
+  `id IN (SELECT cb.container_id …)` with `cb.deleted_at IS NULL` fencing I2's live ownership;
+  `v.deleted_at` deliberately unfiltered with the reason in the doc (a deleted take still spent
+  that day being written) — a coherent, documented asymmetry with `noteStamps`' live-only
+  `savedAt` (different questions). The plan and step pins ran green in my own core run; v1_17's
+  discipline verified from git. Mixed-precision ISO text at the window's boundaries compares
+  correctly in both directions (traced character-wise; one canonical formatter since Phase 1
+  makes it moot). `LIMIT -1` = SQLite's own no-limit; the day's uncapped answer bounds every
+  derived read by the day's notes (R2-3's corrected docs read true at HEAD).
+- **The whole calendar family.** `JournalDay.storeCalendar` is a COMPUTED var reading
+  `Calendar.current.timeZone` fresh (no staleness across a zone change); every production caller
+  of `JournalDay.date(from:)` and `DayBounds(day:)` passes a calendar explicitly (grepped), so
+  R3-5's and R2-8's default changes are byte-identical in fact, not just in claim; the
+  `DatePicker` carries `\.calendar` + `\.timeZone` (R2-6); `dayString`'s own `.current` default
+  is deliberately untouched with the Phase-8 reason written at it.
+- **The formatter cache is safe as built:** creation fully serialized under the `NSLock`, the
+  key carries template · locale · calendar identifier · time-zone identifier (a travelling user
+  mints one entry per zone visited — bounded), formatting outside the lock on documented
+  `DateFormatter` thread safety.
+- **17q's residue resolution holds at HEAD:** `modeChanged()` is synchronous and returns whether
+  a re-read is owed, clears through `setEditedOn(nil)` (R3-1/R3-6); `LibrarySortWords.label` is
+  the exhaustive switch (R3-4); the A–Z ASCII clause and the R1-10 corner sit in
+  `LibrarySort.title`'s doc with the measured `localtime` alternative recorded (R3-7);
+  `LibrarySortFace.doorHelp` composes from the one table (R3-8); the mid-file import moved
+  (R3-9); the masthead's oracles are keyed, torn down at the `.task(id:)` SWAP with the old id
+  in hand, and `MastheadGeometry` clears its own row (R1-14/R2-9/R3-10). `RowStamps` serves BOTH
+  note renderers — `listDay` stands down under the `date` sort (R3-2), the card's pair/flip
+  matches R-Q17/R-Q22's letter, the flip resets on the SORT's subject and never on an autosave.
+- **The truncation is per kind end to end** (`capped` → `truncatedKinds` → `listingIsTruncated` /
+  `notesAreTruncated`, each body reading its own), the `+1` probe never a `COUNT(*)`, the day's
+  answer never truncated, and both empty answers gated on `dayForEmptyAnswer` (scope-silenced,
+  query-worded) — R1-3/R1-4/R2-2 all verified at the HEAD bodies.
+- **18i's seam, end to end.** `StatusCenter`: `speak` infers, `receipt`/`say`/`deliver` route
+  through the ONE `slot(for:)`, `.off` drops without sweeping the screen, one message at a time
+  across both slots, `clear()` clears the drop record; `receiptStyle` adopted ONCE at
+  `ThemeStore.start()` from the landed settings and **grep-verified to appear NOWHERE else**
+  outside the centre, the store, the pane's binding and the copy — F-6's letter, checked not
+  believed. `StatusForwarder` has one home, resets unconditionally (J41), and `outgoingKind` is
+  gone from the app. ONE `quietLine` reader in the whole app (`QuietReceiptLine`), composed by
+  `CommitBar`'s two computed sites (flat + box footer, ONE line everywhere — J39's shape) and
+  the takes bar's one.
+- **Every door family the three rounds classified, re-derived at HEAD:** the eight J38 board
+  sites read `.refusal(` with words byte-unchanged; the ten J43 Write doors read `showReceipt`
+  (or the split predicates — `TakeClipboard.Outcome.isRefusal` covering BOTH its callers,
+  `EditorFind`'s `applied > 0`); every `showReceipt` in `EditorSurfaceController` sits inside
+  `if landed` (`:803` · `:919` · `:1013` · `:1026` · `:1100` · `:2133` · `:2223`) or behind its
+  own outcome (`:2757`); `NoteDeletion.report`'s four endings route through `say(_:refusing:)`
+  with the pool fence and the already-gone road intact; `ShellActions`' seal/undo/redo/
+  import/export/restore doors all read as the dispositions say (including `exportCaretBlock`
+  now on the same predicate); the transient pair splits direction-vs-report correctly;
+  `CommentsPanel`'s slot is its own model's (the out-of-scope local class); nothing renders
+  `EditorViewModel.statusMessage` locally, so `.off` means off in Write. **I found no fifth
+  mis-classified family.** The structural answer (J44) is correctly owned — the KnownIssues row
+  exists at HEAD, owner 13u2, with the reviewer's two moves and P-1's registry-walk shape named.
+- **The canon deltas all landed:** AppSpec §7's `idx_commit_created` in the DDL block and the
+  `receipt_style` comment at the `setting` seeds; §12's 18h Library sentence (with 17q's card
+  clauses) and 18i chrome sentence (#106 RULED (a)); KnownIssues' `ANALYZE` row (owner 12) and
+  J44 row (owner 13u2); MobileSoul PL-22's 18h and 18i notes (the phone's changed picker words,
+  the `setSort` guard, the owed stamps/sort/day-search, the `receipt_style` face call) — each
+  read in the file, not the closeout.
+- **The counts discrepancy that is not one:** the 18i closeout's "16 `.receipt` / 31 `.refusal`
+  assignments" versus a raw grep's 18/32 at HEAD — the closeout counted `status = .receipt(…)`
+  ASSIGNMENTS; the raw grep also matches constructor mentions in docs and `speakCeremonyReceipt`'s
+  internals. The file is byte-identical to `b22dc138`; nothing moved after the letter.
+
+#### Review foci (§12), addressed
+
+- **F-0 — no god brain, no god file.** HOLDS at HEAD for both letters, with the residue exactly
+  where the ladders filed it: every new rule has a small home with a unit pin (`TimeStampFace` ·
+  `DayBounds` · `JournalDay.storeCalendar` · `LibrarySortFace`/`RowStamps` · `LibraryDayFace` ·
+  `LibrarySortWords` · `LibraryCopy` · `StatusCenter.Kind`/`say` · `StatusForwarder` ·
+  `NoteDeletion.Report` · the import/export predicates); the settings are read once and pushed
+  down (grep-verified for `receiptStyle`; the sort memory injected `UserDefaults`); no
+  string-as-rule or number-as-rule survives in the letters' view bodies (the tooltips compose,
+  the measure and the field width are named constants). Still open and correctly OWNED, not
+  new: `NoteCards`/`TagChips` in the view file + the model's mixed concerns (13u2, R2-12's row)
+  and the status class's five vocabularies with no audit surface (13u2, J44's row).
+- **F-5 — 18h's own foci, item by item at HEAD:** the sort is a PARAMETER of the one catalog
+  query (one builder, defaults byte-identical, pinned) — **clean**; `.title` a `LibrarySort`
+  case with the `library()` precondition fence AND the phone-side guard — **clean**; no stored
+  stamp anywhere new — **clean** (read the schema diff: v1_17 is an index, nothing else); ONE
+  wording brain used by EVERY row and the masthead — **clean, now truly every row** (17q's R3-2
+  closed the List row's raw slot the cap left open); the masthead stamp a third subview of the
+  existing layout, parity by unmodified pins — **clean** (re-run green); the day search one
+  query arm, plan pinned, index its own commit — **clean, and the strongest work in the two
+  letters after its round-1 turnaround**.
+- **F-6 — 18i's own foci, item by item at HEAD:** the KIND lives on `StatusCenter.Item` and
+  nowhere else — **clean**; `speak` infers so no shipped site changed — **clean** (signature
+  read, callers grepped); the setting read once from the landed store — **clean,
+  grep-verified**; the quiet slot ONE view every bar composes — **clean** (one reader in the
+  app); no site-level `if setting` — **clean** (zero hits); the strings byte-unchanged —
+  **clean** (the ladders verified per diff; I spot-checked the moved literals). The focus's
+  known limit — the class is only as good as the door's classification — is where all four of
+  the ladder's families lived, and the structural answer is owned (J44 → 13u2).
+
+#### CLEAN BILL — checked and found solid
+
+1. **P1 at the day search** — my own read of the shipped clause + the step/plan pins run green;
+   cost ∝ the day's savepoints and the note count, never the corpus. Nothing anywhere in either
+   letter scales with corpus size, copies text across entities, or stores anything forensic.
+2. **v1_17's discipline** — its own commit ahead of its query, marker 8, not a §12 event;
+   verified from git and source, not the record.
+3. **The two-reading union's answer** — both readings, the correlation fence, the half-open
+   DST-safe window, archived/deleted exclusion, composition with query and sort: pinned through
+   the real ops, re-run green here.
+4. **R-Q7/R-Q8/R-Q17/R-Q22 built to the letter** — the sort's four words are hers, the masthead
+   flips and returns, the card shows both where there is room, the day search says why it is
+   silent; walked with captures on disk (verified present, one read at full size).
+5. **R-Q5/R-Q23 built to the letter** — receipts governed, refusals and offers always toast
+   under every value (the `.off` drop's DEBUG record proves reached-and-dropped), quiet is one
+   muted line that moves nothing, the strings untouched; the Settings pane's promise is TRUE at
+   HEAD (I could not construct a refusal her setting hides — the four families that once could
+   are all fixed and pinned).
+6. **The sync-shape of both letters** — zero `Sync/`, zero `Server/`, zero custody, one local
+   index + one upsert-only synced `setting` key (enum-valued, the E2EE PLAIN promise intact),
+   marker 8, no default's meaning changed beyond her own rulings.
+7. **The records' honesty** — the falsified measurement kept under a warning with its
+   correction, the garbage commit message recorded not amended, every red-on-old with its
+   counts, the two capped ladders' residues each owned by name. The letters' recorded runs
+   reproduce on this tree (my 73/8 + 77/8).
+
+**Counts: 0 BLOCKER · 0 MAJOR · 0 MINOR · 3 NIT.** Nothing blocks the round's close. The three
+NITs are record clauses (RE-1 on the 18i residue line; RE-3 on the 13u2 oracle row) and one
+recorded non-defect (RE-2); none needs a fix pass — the orchestrator can land the two clauses at
+the close, or route them to 13u2's rows as written.
