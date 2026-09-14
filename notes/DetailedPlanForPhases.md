@@ -11,6 +11,21 @@ This is the master build plan. It holds: the phase table, the **current phase po
 **→ 13u1 — THE EDITOR SEAM — THE CURRENT PHASE (the 2026-09-06 round closed 2026-09-09, 18e HELD; THE 2026-09-12 ROUND CLOSED 2026-09-14 — the closeout log below has its paragraph, the record `notes/plans/use-report-round-2026-09-12.md`, the handoff `notes/handoffs/use-report-round-2026-09-12-handoff.md`): CROSS-BLOCK EDITS RULED ONCE FOR BOTH PLATFORMS, AND THE SEAM MADE SOLID.**
 Items **5** (cross-block edits — the centerpiece, hers to rule at the ONE shared kickoff sitting), **7** (the `MarkdownActs` arm-then-hand-off residual), **8** (the mobile-round seam backlog — the frozen-projection fan fence, the O(N²) twin in `planVisibleTakeEdit`, the gap fence's missing face, the empty-block span, `CrossBlockRefusal`'s hoist) plus the O(N²) family and item 12's decision (the RE-SPLIT block, R-cor-12). **The kickoff message sits atop `notes/plans/phase-13u-feel-and-polish.md`; a fresh session's FIRST ACT is executing that file's split** (`phase-13u1-editor-seam.md` · `phase-13u2-feel.md` · `phase-13u3-faces.md` · `phase-13u4-restyle-and-dark-mode.md`), then the shared kickoff sitting (mobile IN it — MobileSoul §6). **What the use-report round hands it** (its 18c and 17o closeouts, `notes/plans/use-report-round-2026-09-06.md`): the deferred-keystroke stash/replay seam now under an everyday key (the Return key's intercept + the one idle-gated drain); the text-undo-clears directive now hit by ⏎; the quit/lock/seal door-await gap; ⌥⌘Z for a ⏎-made empty block (her ruling: both stay with 13u1, no 17 entry) — every one a KnownIssues row it owns; cross-block delete (image 8 of her report) was fenced to it untouched. Cast: decided at the kickoff (CLAUDE.md's model policy). Do NOT build before the sitting rules item 5's semantics. **THE PRE-RELEASE TABLE's rows 1–4** (17i · 17l · 17n · the stress-test agent's pass) stand ahead of it in that order at her word — she picks which runs first.
 
+**⚡ POINTER UPDATE 2026-09-14 — 13u1 IS OPEN.** She invoked `/run-phase 13u1` this day; the
+four-way file split EXECUTED (`phase-13u1-editor-seam.md` OPEN · `phase-13u2-feel.md` ·
+`phase-13u3-faces.md` · `phase-13u4-restyle.md`; the parent plan is history behind its split
+banner); **the ONE shared kickoff sitting RAN inside the kickoff session** — rulings
+R-13u-1…R-13u-11 in the 13u1 plan's SITTING RECORD (locked-take refuse-whole · the
+paragraph-break rule covers seams AND internal newlines · `newBlock` joins §9's structural undo
+· the capture surface holds many paragraphs, ⏎ files / ⇧⏎ paragraph · item 12 its own row · the
+crucial-17 grouping → `notes/plans/pre-beta-standing-fix-runs.md` · her 2026-09-14 feedback
+placed as items 18–20 below · 13i stays after the friends beta · the ROADMAP re-sequenced — the
+2026-09-14 supersession block under THE PRE-RELEASE TABLE is the active order). The stale
+agenda items she predicted are struck in that record with reasons (CF-12/#82 ruled AND built at
+pre-13u Act 9; dark mode shipped at 18j; item 17/row 60/Pool preview built at the correction
+round). Cast: Fable coordinator · `opus-implementer` per unit (two units) · `fable-reviewer`
+ladder (the seam — R-cor-14).
+
 *(The pointer THREAD — every superseded pointer paragraph, kept verbatim, newest first, plus the standing Phase 12 deferral paragraphs and the early out-of-band records — lives in `notes/PhaseCloseoutArchive.md` (the 2026-08-01 housekeeping rule: this section holds only the ACTIVE pointer; a superseded pointer moves to the archive at the closeout that supersedes it). Phase 12's standing condition — it kicks off only after a window of real daily use, re-baselining on the then-current counts — remains recorded on its phase-table row below.)*
 
 
@@ -88,6 +103,37 @@ fix-phase step opens the sequence:
 | 14 | 🟣 🔒 **13y — per-tenant `server_seq` + the abuse guard + THE KEY PROOF CHALLENGE + the A5 horizon's one source of truth + NIT-4 + the adopt-road pin + the Fragments abuse brief** | the LAST `Sync/` phase before strangers; ONE lockstep event in her deploy window | 13y's row |
 | 15 | 🟣 **13s — voice & polish + first-run onboarding** | copy §11's re-voicing (~45 rows) — never softening Standard's limit or Castle's "nobody can help"; the design review | 13s's row (FuturePhases) |
 *[removed for publication]*
+
+> **⚠️ SUPERSEDED IN ORDER 2026-09-14 (her 13u1 kickoff message + the kickoff sitting's Q&A —
+> rulings R-13u-6 · R-13u-8 · R-13u-11 in `notes/plans/phase-13u1-editor-seam.md`'s SITTING
+> RECORD; her plan in her words: "My current plan is: 13u, then whatever 17 elements are
+> crucial, then 13y (per tenant seq, the last one that really matters before other people see
+> the app), and then do the packaging / sparkle / dmg phase, and get the app to my first beta
+> users, friends only, not the broader public launch yet. I'll then complete the rest of the
+> pre launch items like 13i, rewriting the field guide for users, etc.").** The table above is
+> superseded in its ORDER; the rows themselves are unchanged. **THE ACTIVE ORDER:**
+>
+> 1. **13u1 → 13u2 → 13u3 → 13u4** (13u1 OPENED 2026-09-14; the former rows 1–4 — 17i · 17l ·
+>    17n · the stress pass — move BEHIND the 13u family at her word)
+> 2. **RUN A — custody & the text-loss doors: 17b + 17l (items 1–4, 6–7) + 17n + 17m** — one
+>    Fable-orchestrated run, `notes/plans/pre-beta-standing-fix-runs.md` (17m runs HERE, which
+>    satisfies its before-the-notarized-build constraint early)
+> 3. **RUN B — sync correctness: 17i + 17d + 17l item 5** (all `Sync/` — Fable end to end, the
+>    rider; same file) **+ the stress-test agent's pass** beside it (before 13y's lockstep)
+> 4. **13y — per-tenant `server_seq`** ("the last one that really matters before other people
+>    see the app")
+> 5. **13r — distribution/packaging** (Sparkle + XPC, notarized DMG; 17m already done)
+> 6. 🍰 **FRIENDS BETA — first beta users, friends only, NOT the public launch** (her milestone,
+>    2026-09-14: "I do think the app is mature enough that after the next couple of phases I'm
+>    ready to start getting feedback on it")
+> 7. **The remaining pre-launch rows, at her word:** 13i a–e (KEPT after the beta at her ruling
+>    R-13u-8 — at its lockstep event friends' builds refuse-to-sync until they update; Sparkle,
+>    already in their hands, makes the window hours) · 13o · 13x · 13s (incl. the field-guide
+>    rewrite for users) · the v1-readiness residue → 🚀
+>
+> *(This RULES the placements of 17b and 17d that the paragraph below left as "her call"; 17e
+> stays unplaced at her word. The 13u-internal detail: item 12 — multi-block drag — becomes its
+> own row after 13u1, R-13u-5 confirming R-cor-12.)*
 
 **Open 17 entries NOT placed above — her call (each runs in a session or two whenever she says):** **17b** (doors that lose or mis-copy her text — a data-loss class; the orchestrator's lean: before 🚀), **17d** (purge & sync honesty — `Sync/`; naturally beside 13y), **17e** (correctness & honesty singles). Parked: 17j (may or may not happen), 17k (joined 18a). **Not in the order:** 18a (sync considerations — the dedupe residuals, deletion-aware sync, pause), 18b (restore across devices), Phase 12 (after real use), the mobile catch-up (post-launch), 13n · 13t · 13m · 13h · 13q · 16 · EPUB · grammar · the Apple Notes import.
 
@@ -201,6 +247,14 @@ Her two named items, verbatim-faithful, plus room for more as she reports them (
 **(16) THE PDF EXPORT MUST RENDER FORMATTING (author, 2026-08-25, verbatim: "right now the export as pdf is not rendering the markdown formatting you just see the markdown in the text and that should be fixed at some point pre v1 release").** The 11b basic PDF predates 13g's markdown-as-content, so exported PDFs show raw syntax. The road: reuse the Mac's own markdown display brain to build the export's attributed strings — a projection change only (`renderedText`/bridge/`.md`-export semantics untouched; the TYPOGRAPHIC pass stays 13m's). Pre-v1 by her word; slotted here provisionally (the collector row) — movable.
 
 **(17) THE READ-VIEW EDIT JUMP LANDS AT THE TOP (author, 2026-08-26, verbatim: "right now, trying to edit from the long read view doesn't take you to the right location to edit at all - clicking on it brings you to the editable book view at the top, which sucks").** Clicking into a long Read view to edit should land the editable book view SCROLLED TO THE CLICKED LOCATION (caret at or near the clicked text), never at the top. Mechanism note: this fix builds the "open the book view scrolled to a target" door — which **13i's Book Panel click-through then REUSES** (build it once here; the panel rides it). TK2 scroll-to-location discipline applies (TEXTKIT2 §2; the Phase 6 hybrid-jump road is the proven precedent).
+
+**(18) THE LONG-BOOK LANDING & SETTLE (author, 2026-09-14, the 13u1 kickoff message — verbatim; placed → 13u2 item 1's family, her confirm R-13u-7):** *"when I'm in a long book (like the adventures of sherlock holmes), and I click on a chapter or note that's far down, I sometimes travel there before my screen starts to stutter repeatedly once I've already arrived, even though it eventually settles down."* And the two-stage jump: *"when you click on an item in a long book (like sherlock holmes), you'll be navigated there correctly if the navigation has already happened, but I clicked on the chapter (which has the same name as the book, so it's only shown once on the sidebar, which I do like), and then I got navigated to the chapter and then moved down to where the note started, which is a bit jarring and sometime I was moved too far."* **#88(c)'s trigger has now FIRED** (she noticed the shift after a chapter click in her own use — persist-per-story measured heights is on the table with her report as the evidence). One LIKE recorded to preserve: a chapter sharing the book's name shows ONCE in the navigator.
+
+**(19) THE BOOK-INDEX PRESENTATION SET (author, 2026-09-14, verbatim; placed → 13u2; the rulings are R-13u-10 in the 13u1 plan's sitting record):** *"in index, even when I have a color mode on I don't want the whole note i'm editing to be that color, it's too much. I also don't want the color background behind the cream read page - leave that white so that the cream read page isn't on a colorful background. additionally, the text indents in index mode where you're editing it, which should not be happening the second you click into a block."* And the highlight grammar: *"on first selection of an index on the left it will also highlight the block on the right, which I do think is helpful for when you're clicking around, but then when you click into another block, that one isn't highlighted as the one being edited and the wrong index block on the left stays highlighted… if you want the highlight \*on\* on the block you're editing should be a setting - it shouldn't stop the item from being highlighted on the left and highlighted when you first click on it from the index column… and the index highlight should follow where your editing cursor is regardless of what your setting of showing it on the editor is."* (The read-page-backdrop half refines #107/R-Q26: the page stays cream AND its backdrop stays neutral under every palette.)
+
+**(20) COMMENTS & CALLOUTS LIVE IN THE GUTTER (author, 2026-09-14, verbatim — SUPERSEDES QUESTIONS #102's built direction (a) and R-Q16's "keep it everywhere" ratification; placed → 13u3 item 3's rework, her confirm R-13u-7):** *"I approved comments moving all of the text to the right but now that I see it, I think it's ugly and weirdly spaced. I think comments need to make use of the whitespace gutter and should never have an impact on moving the actual text around - same with callouts, it can exist outside the text area but it's ugly and weird to have it inside the text or moving it. the comments still also aren't spaced well."* Decorations render in the margin/whitespace gutter OUTSIDE the text area; the text's measure and position never move because a note carries a comment or a callout.
+
+**HER PRAISE, SAME MESSAGE (a behaviour to protect through the seam rewrite):** *"On the whole, the selection and location that you're at are following between different modes excellently though, so that can be applauded!"*
 
 ### ⚠️ THIS ROW IS THE MobileSoul §6 "DESIGN TOGETHER" CLASS — mobile is IN the design sitting (author, 2026-08-23)
 

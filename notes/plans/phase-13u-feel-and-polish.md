@@ -1,5 +1,17 @@
 # Phase 13u — Feel & Polish (EXECUTION PLAN)
 
+> **✂️ THE SPLIT WAS EXECUTED 2026-09-14 at the 13u1 kickoff (`/run-phase 13u1`, Fable
+> coordinator) — THIS FILE IS NOW HISTORY/RAW MATERIAL.** The four live plans are
+> `phase-13u1-editor-seam.md` (OPEN) · `phase-13u2-feel.md` · `phase-13u3-faces.md` ·
+> `phase-13u4-restyle.md`. The ONE shared kickoff sitting RAN the same day inside the 13u1
+> kickoff session — its rulings (R-13u-1…R-13u-11, incl. her 2026-09-14 feedback items 18–20
+> and the roadmap re-sequencing) live in `phase-13u1-editor-seam.md`'s SITTING RECORD, and the
+> stale agenda items this file carries (CF-12/double-Touch-ID, #82, dark mode, the simulator
+> switch, items built by the correction round) are struck there with their reasons. The
+> sections this file's banners ordered carried were carried VERBATIM (the sweep fold + the
+> pre-13u inheritance → 13u1; P39 → 13u2; the restyle addendum → 13u4). Nothing below has been
+> edited since; read the four live files first.
+
 > **KICKOFF — 13u1, THE EDITOR SEAM (written 2026-09-07 at the pre-13x closeout; the master plan's pointer names this phase NEXT).** A fresh session's first act is EXECUTING THIS FILE'S SPLIT (the banner below): `phase-13u1-editor-seam.md` takes items 5 · 7 · 8 (+ the O(N²) family and the 2026-08-30 sweep fold at this file's end) and item 12's decision; `phase-13u2-feel.md` · `phase-13u3-faces.md` · `phase-13u4-restyle-and-dark-mode.md` take the rest per the master plan's RE-SPLIT block (R-cor-12). Then the ONE shared kickoff sitting with the author rules both halves' interrelated items (4 with 13, 5 with 12, 9 for both platforms — mobile IN the sitting, MobileSoul §6). Read first: `CLAUDE.md`; this file whole; the master plan's `### 13u` section; `notes/plans/mobile-round-2-orchestrator-handoff.md` §5 (the overlap); `notes/KnownIssuesAndTechDebt.md`'s `planVisibleTakeEdit` row and M12; TEXTKIT2_NOTES §3. Cast: decided at the kickoff (CLAUDE.md's model policy). Do NOT build before the sitting rules item 5's semantics — they are the phase's centerpiece and hers.
 
 > **⚠️ SPLIT BANNER (2026-08-26, the launch-strategy sitting — read
