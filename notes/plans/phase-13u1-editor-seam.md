@@ -279,7 +279,27 @@ pin, or dismissed as hollow and recorded.
 
 ## UNIT 1 RECORD (LIVE STATUS — the implementer creates and maintains this from its first commit)
 
-*(empty at kickoff)*
+**WHAT THIS UNIT DID NOT DO (the record's first line, per the closing rule):** nothing of UNIT 2 —
+item 5's cross-block compound, item 8's remaining four (the fan fence's policy half, the gap
+fence's Mac face, the empty-block plan, `CrossBlockRefusal`'s hoist), row 43's two halves, the
+tutorial TWO-EXITS lesson, the landing re-walk. `Sources/VariorumCore/Sync/`: zero lines. Schema:
+zero. Lockstep marker: 8, untouched.
+
+### LIVE STATUS (flipped per piece)
+
+| # | Piece | Status |
+|---|---|---|
+| A1 | The O(N²) sweep — the SHARED brain (`BlockRangeIndex.entryRanges()` + `StructuralGesturePlanner`'s two walks) + pins | NOT-STARTED |
+| A2 | The O(N²) sweep — the MAC app's loop sites + pins | NOT-STARTED |
+| A3 | The O(N²) sweep — the PHONE's loop sites + pins | NOT-STARTED |
+| A4 | The sweep's verdict table — EVERY production `range(ofEntryAt:)` caller enumerated and verdicted | NOT-STARTED |
+| B | The churn pair P24/P25 — the Mac adopts `ArmedEdit.exactCost` + red-on-old pin on the REAL typed path | NOT-STARTED |
+| C | The door-await chain loop (KnownIssues row 44) + the round-3 record's designed pin | NOT-STARTED |
+| D | Item 7 — `MarkdownActs`' arm-then-hand-off rewrite (the ONE input-path door) + the grep pin | NOT-STARTED |
+| E | P40 + P41 hoists (zero-test-edit proof) + the KnownIssues eight-brain enumeration amendment | NOT-STARTED |
+| F | Close — suites green, KnownIssues rows resolved/re-owned, the seven verdicted | NOT-STARTED |
+
+*(Measurements, verdicts, pins and PROVISIONALs are filled in below as each piece lands.)*
 
 ## UNIT 2 RECORD (LIVE STATUS)
 
