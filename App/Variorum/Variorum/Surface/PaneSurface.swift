@@ -1151,6 +1151,7 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         applyIdentity(to: view)
         spellcheck.apply(to: view)  // A24
         view.string = text
+        context.coordinator.adoptedText = text  // TRACE 1a: the record starts here
         // 13g batch 2 (L7): a pane wears the same dimmed-marker face as the
         // editors (F-2/F-5). Whole-pane is P1-clean here for the reason this
         // file already states about layout: a pane's "document" is ONE take
@@ -1221,7 +1222,34 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         // keystroke; never clobber the surface under the caret. Read panes
         // adopt any change. (The view-level half of PaneTextAuthority's
         // isLive contract.)
-        if !isLive, view.string != text {
+        //
+        // **TRACE 1a (13u2 UNIT D, routed here by RULING A-1).** This line
+        // used to read `view.string != text`, and `view.string` on an
+        // `NSTextView` is the storage's `NSString`, LAZILY BRIDGED — a
+        // foreign `__NSCFString`, never a native Swift string. Swift's `==`
+        // cannot take its memcmp fast path against a foreign operand, so the
+        // comparison dropped to `_stringCompareSlow`: full NFC normalization
+        // of both sides with one `-[__NSCFString characterAtIndex:]` ObjC
+        // message per UTF-16 unit — and the EQUAL case, which is the common
+        // one, is the WORST case, because proving equality means scanning to
+        // the end. Paid per read pane per SwiftUI update pass; on the Takes
+        // margin grid that is the whole board. UNIT A found it as the only
+        // Variorum leaf in the 13l hang capture (51 of 2,551 samples).
+        //
+        // The repair is the trace's own second suggestion: the coordinator
+        // REMEMBERS what it last wrote here, and the question is asked of
+        // that native string instead. It is authoritative because exactly
+        // two sites ever write a pane's characters — `makeNSView` and this
+        // one — and a read pane is `isEditable == false`, so no input path
+        // can touch it. While the pane is LIVE the record is dropped: her
+        // buffer is the truth there, and what we last wrote says nothing
+        // about what the view now holds. That leaves the first read pass
+        // after liveness with nothing to consult, and it takes the old
+        // foreign comparison — correct, and rare. **Byte-for-byte the same
+        // decision as before; only the road to it is cheap.**
+        if isLive {
+            context.coordinator.adoptedText = nil
+        } else if context.coordinator.readPaneNeedsText(text, in: view) {
             view.string = text
             // 13g batch 2 (L7): a fresh string carries only typing
             // attributes — the face is re-derived over the adopted text.
@@ -1309,6 +1337,32 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         private var publisher: PanePublisher?
         private let canary = FallbackCanary()
         private var wasLive = false
+
+        /// **TRACE 1a (13u2 UNIT D):** the text this pane last ADOPTED —
+        /// a native Swift string, so asking "has the projection changed?"
+        /// costs a native comparison (usually a pointer-identity hit, since
+        /// the projection hands the same instance back) instead of a
+        /// normalizing walk over a bridged `__NSCFString`. Nil means "we do
+        /// not know what the view holds" — set on every live render, because
+        /// a live pane's characters are hers, not ours.
+        var adoptedText: String?
+
+        /// Does this READ pane need the projection's text written into it?
+        /// Answered from the record where there is one; otherwise by the old
+        /// foreign comparison, which is correct and now rare (the first read
+        /// pass after a pane was live). **It records either way** — after
+        /// this pass the view holds `text` whichever answer came back, and a
+        /// road that recorded only on adoption would leave the record empty
+        /// (and the foreign comparison hot) for a pane whose text had not
+        /// moved across a liveness episode.
+        func readPaneNeedsText(_ text: String, in view: PaneTextView) -> Bool {
+            defer { adoptedText = text }
+            if let adopted = adoptedText { return adopted != text }
+            #if DEBUG
+            PaneSurfaceAudit.foreignTextComparisons += 1
+            #endif
+            return view.string != text
+        }
 
         /// 13b 1b (N9's keyboard half): a pane TRANSITIONING to live holds
         /// the keyboard — programmatic ring moves (the Takes landing, the
@@ -1641,3 +1695,18 @@ private struct PaneSurfaceRepresentable: NSViewRepresentable {
         }
     }
 }
+
+#if DEBUG
+/// **TRACE 1a's oracle (13u2 UNIT D).** How many times a read pane had to
+/// ask the VIEW what it holds — the bridged-`NSString` comparison whose
+/// `_stringCompareSlow` leaf UNIT A found in the 13l hang capture. The claim
+/// this counter carries is a SHAPE, not a stopwatch: after a pane has
+/// adopted its text once, no number of further SwiftUI update passes over
+/// unchanged text may reach that road again.
+@MainActor
+enum PaneSurfaceAudit {
+    static var foreignTextComparisons = 0
+
+    static func reset() { foreignTextComparisons = 0 }
+}
+#endif

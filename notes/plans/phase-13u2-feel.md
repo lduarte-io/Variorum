@@ -1762,14 +1762,14 @@ foreign-string compare).
 |---|---|
 | the record opened | **DONE** |
 | item 2 — the eager space-eater (BOTH platforms) | **TRACED + FIXED** — the durability mint's edge trim; red-on-old on the Mac (5 of 9 pins, 8 issues); the phone inherits the shared brain and has its own landing pin (TRACE D-1) |
-| item 10 — starred items scroll past ~7 | PENDING |
+| item 10 — starred items scroll past ~7 | **BUILT + pinned (red-on-old: the section drew 360 pt where the window is 225)** — with the item's headline FINDING handed up: `Operations.starLimit = 5`, so the scroll cannot engage in the shipped app. QUESTIONS #112(b) |
 | item 11 — paste without newlines (+ the phone's rule) | PENDING |
 | item 13 — the note title's room · row 93 — the nameless prompt | PENDING |
 | P39a — Pool stops holding `LibraryViewModel` | PENDING |
 | P39b — `WriteTakesPanel` stops constructing `TakesViewModel` | PENDING |
 | roster item 8 — the four protection items VERIFIED | PENDING |
 | row 57 — the RE-FONT road | PENDING |
-| TRACE 1a — the pane's projection compare | PENDING |
+| TRACE 1a — the pane's projection compare | **FIXED + MEASURED** — 0.42 ms → 0.00009 ms per read pane per update pass at 200 blocks, and FLAT in the text's length where it was linear (TRACE D-3) |
 | tests (core · FULL Mac · iOS build · mobile if `Shared/` moved) | PENDING |
 | the WALK + captures (52 onward) | PENDING |
 | PROVISIONALs → `notes/QUESTIONS.md` (next free **#112**) | PENDING |
@@ -1844,6 +1844,97 @@ as **QUESTIONS #112(a)**.
 needed **no phone-side arm**; `MobileSpaceEaterTests` drives the phone's OWN road (a real
 `NSTextStorage` edit through `typeEdit`, then `idleMintTail`, then the store) and reads
 `storage.string` and the stored block texts — **2 tests, green** on the simulator.
+
+## TRACE D-2 — ITEM 10, STARRED: the precedent that did not exist, and the cap that makes it moot
+
+Her words: *"I'm fine with where starred items are on the mac but make sure in 13u that it says
+that starred items should only show up to like 7 items and then it should start scrolling."*
+
+**What was there.** `SidebarView.starredGroup` was a plain `VStack` over `stars.items` — every
+starred row drawn, unbounded — and `SidebarLayout.rowCount` counted every one of them into the
+column's FIT TEST, so a long starred list also pushed the whole column (the five areas, the rail,
+the Open strip) into its compact 24-pt pitch. The irony worth recording: Act 10 item 9 built the
+Open strip's window and its own comment calls it *"the starred precedent's ~7"* — **the precedent
+did not exist.**
+
+**What is there now.** ONE constant, `SidebarLayout.scrollingSectionWindow = 7`, serves BOTH
+sections that have a window (`openStripWindow` is a forward, so the strip's call sites and its pins
+read unchanged), and Starred gets the strip's shape exactly: a `ScrollViewReader` + `ScrollView` +
+`LazyVStack`, `maxHeight` of the window plus half a row (so the section says there is more below),
+`fixedSize` vertically only while it fits, and a REVEAL — when the selection lands on a starred
+target its row is scrolled to, the strip's newcomer-reveal reasoning applied to the thing she is
+navigating to. `rowCount` caps the starred contribution at the same window. **Placement is
+untouched** — she said she was fine with it.
+
+**RED ON OLD, measured on a scratch worktree at this unit's opening commit** (`5a072018`, zero code
+in it) with the section's geometry oracle added there so the OLD code could be measured at all:
+
+```
+✘ twelveStarredRowsScrollInsideTheWindowInsteadOfGrowingTheColumn
+    (drawn → 360.0) <= (window7 + 1 → 226.0)
+```
+
+**360 pt — twelve rows at the generous pitch** — where the window is 225. Green after. The pure
+arm is red on old too (`rowCount(starred: 20, …)` was 25 and is 12), and `ShellChromeTests` rides
+**UNMODIFIED**, which is the Open strip's own no-drift proof.
+
+### THE FINDING THIS ITEM HANDS UP — and it is the headline, not a footnote
+
+**`Operations.starLimit` is FIVE.** It is her own ruling (13f W4, her round-3 sitting: *"up to 5
+notes or books"*), the door refuses the sixth star honestly (`starLimitReached`, naming the
+number), and the refusal's road is un-starring. So **in the shipped app this window can never
+engage**: five rows always fit inside seven.
+
+Her item-10 sentence plainly assumes more than seven starred things are possible. The two
+statements are hers and they disagree, and **the later one is not mine to enact**: raising the cap
+overturns a recorded ruling AND rewrites product copy in three places on two platforms — the Mac
+tutorial's star lesson (*"up to five"*), the Mac helper's star paragraph (*"Up to five: stars are
+meant to be…"*) and the phone's tutorial lesson (*"also STARS a note or a book (up to five)"*).
+Rewriting a tutorial lesson's promise is product work (KnownIssues row 60's own standing).
+
+**So the bound is BUILT and ready and the cap is HERS — QUESTIONS #112(b), three options.** Nothing
+about the section's geometry has to change again whichever she picks; if the cap rises, her
+sentence becomes true the same day.
+
+## TRACE D-3 — TRACE 1a: the read pane's foreign-string compare (RULING A-1's routing)
+
+UNIT A's finding, restated exactly: `PaneSurface.swift`'s `if !isLive, view.string != text`
+compares a lazily bridged `__NSCFString` against a native Swift string, so Swift's `==` cannot take
+its memcmp fast path and drops to `_stringCompareSlow` — full NFC normalization with one
+`-[__NSCFString characterAtIndex:]` per UTF-16 unit — **worst-case exactly when the strings are
+EQUAL**, which is the common case, paid per read pane per SwiftUI update pass.
+
+**THE COST, MEASURED** (a temporary harness, 2,000 iterations per row, deleted in the commit that
+records these numbers — the A2 precedent):
+
+| a pane of | the OLD road (`view.string != text`) | the NEW road (the coordinator's record) | the new road's WORST case (a different native string of the same length) |
+|---|---|---|---|
+| 1 block (70 chars) | 0.00222 ms | **0.00009 ms** | 0.00010 ms |
+| 8 blocks (567 chars) | 0.01767 ms | **0.00009 ms** | 0.00011 ms |
+| 40 blocks (2,870 chars) | 0.08413 ms | **0.00009 ms** | 0.00016 ms |
+| 200 blocks (14,491 chars) | **0.41981 ms** | **0.00009 ms** | 0.00038 ms |
+
+The old road is LINEAR in the pane's text (~29 ns a character); the new road is **FLAT**, because
+the projection usually hands back the same `String` instance and a native comparison takes the
+pointer-identity path. **4,600× at 200 blocks, and the shape — flat, not linear — is the part that
+matters**: a board of read panes used to pay the whole board's text on every update pass.
+
+**THE FIX, and why it is safe.** The coordinator holds `adoptedText`, the native string it last
+wrote, and `readPaneNeedsText(_:in:)` asks it. It is authoritative because **exactly two sites ever
+write a pane's characters** — `makeNSView` and this line (grep-verified) — and a read pane is
+`isEditable == false`, so no input path can reach it. While the pane is LIVE the record is dropped
+(her buffer is the truth there), which leaves the first read pass after liveness with nothing to
+consult; that pass takes the old foreign comparison — correct, and rare. The helper RECORDS on both
+roads, so a pane whose text did not move across a liveness episode does not leave the foreign road
+hot. **The decision is byte-for-byte the one the old line made.**
+
+**Pinned as SHAPE, never as a stopwatch** (`ReadLayerP1Tests`' discipline):
+`PaneTextCompareTests`, 3 arms over a really-mounted pane in a real window —
+twelve update passes over unchanged text reach the foreign road ZERO times; a changed projection is
+still adopted (and then asks nothing); and the one road that still asks (the first read pass after
+liveness) asks once and settles back to silence. The counter is `PaneSurfaceAudit`, `#if DEBUG`.
+`TakePaneMeasureTests` — the pane's own measure suite, 11 tests — rides **UNMODIFIED** and green,
+which is this surface's no-drift proof.
 
 ---
 

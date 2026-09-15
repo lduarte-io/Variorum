@@ -137,9 +137,25 @@ nonisolated enum SidebarLayout {
         groupHeaderHeight + CGFloat(railRows) * rowHeight
     }
 
-    /// How many Open-strip rows show before the SECTION scrolls in place
-    /// (Act 10 item 9's ruled window — the starred precedent's "~7").
-    static let openStripWindow = 7
+    /// How many rows a SCROLLING sidebar section shows before it scrolls in
+    /// place. **ONE constant for the two sections that have one**, because
+    /// two sections carrying one ruled number must not drift:
+    ///
+    /// - the **Open strip** (Act 10 item 9's ruled window), and
+    /// - **Starred** (13u2 item 10 — her words: *"I'm fine with where starred
+    ///   items are on the mac but make sure in 13u that it says that starred
+    ///   items should only show up to like 7 items and then it should start
+    ///   scrolling"*; placement unchanged, a bounded-list fix only).
+    ///
+    /// Act 10 item 9 called its own window "the starred precedent's ~7" —
+    /// **which the starred section did not actually have**: it rendered every
+    /// starred row, unbounded, and the column compressed to fit them. This is
+    /// the precedent made real.
+    static let scrollingSectionWindow = 7
+
+    /// The Open strip's name for it (kept so the strip's own call sites and
+    /// pins read as they did).
+    static var openStripWindow: Int { scrollingSectionWindow }
 
     /// Whether the column compresses its rows: true only when the
     /// generous layout for `rows` rows would not fit in `columnHeight`.
@@ -157,20 +173,34 @@ nonisolated enum SidebarLayout {
             ? compactRowHeight : generousRowHeight
     }
 
-    /// The Open strip's tallest form: the ruled window plus half a row, so
-    /// a scrollable strip visibly shows there is more below.
+    /// A scrolling section's tallest form: the ruled window plus half a row,
+    /// so a scrollable section visibly shows there is more below.
+    static func scrollingSectionMaxHeight(rowHeight: CGFloat) -> CGFloat {
+        rowHeight * (CGFloat(scrollingSectionWindow) + 0.5)
+    }
+
+    /// The Open strip's name for it (its call sites and pins read unchanged).
     static func openStripMaxHeight(rowHeight: CGFloat) -> CGFloat {
-        rowHeight * (CGFloat(openStripWindow) + 0.5)
+        scrollingSectionMaxHeight(rowHeight: rowHeight)
     }
 
-    /// How many rows the strip contributes to the fit test — its own rows,
-    /// capped at the window it scrolls inside.
+    /// How many rows a scrolling section contributes to the fit test — its
+    /// own rows, capped at the window it scrolls inside.
+    static func scrollingSectionRowsCounted(rows: Int) -> Int {
+        min(rows, scrollingSectionWindow)
+    }
+
+    /// The Open strip's name for it.
     static func openStripRowsCounted(openNotes: Int) -> Int {
-        min(openNotes, openStripWindow)
+        scrollingSectionRowsCounted(rows: openNotes)
     }
 
-    /// The whole column's row count, for the fit test.
+    /// The whole column's row count, for the fit test. **Starred is capped
+    /// at its window too (13u2 item 10):** an eighth starred note scrolls
+    /// inside the section, so it must not push the whole column into the
+    /// compact pitch — which is exactly what an uncapped count did.
     static func rowCount(starred: Int, areas: Int, rail: Int, openNotes: Int) -> Int {
-        starred + areas + rail + openStripRowsCounted(openNotes: openNotes)
+        scrollingSectionRowsCounted(rows: starred)
+            + areas + rail + openStripRowsCounted(openNotes: openNotes)
     }
 }

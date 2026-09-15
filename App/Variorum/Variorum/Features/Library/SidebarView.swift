@@ -438,13 +438,56 @@ struct SidebarView: View {
     /// in place: the right star is also the un-star door, so the mark and
     /// the act live in one spot). Long titles show an ellipsis at rest and
     /// marquee-scroll on hover ("stereo style" — `MarqueeText`).
+    /// **13u2 item 10 — her words, verbatim:** *"I'm fine with where starred
+    /// items are on the mac but make sure in 13u that it says that starred
+    /// items should only show up to like 7 items and then it should start
+    /// scrolling."* PLACEMENT IS UNCHANGED (she said so); what changes is
+    /// that past the ruled window the SECTION scrolls in place instead of
+    /// growing without bound — the Open strip's shape exactly, through the
+    /// same `SidebarLayout.scrollingSectionWindow`. (Act 10 item 9 already
+    /// called that window "the starred precedent's ~7"; the precedent did
+    /// not exist until now, which is what she noticed.)
+    ///
+    /// The CURRENT row is revealed when the selection lands on a starred
+    /// target, so navigating to an eighth starred note never leaves its row
+    /// hidden — the strip's own newcomer-reveal reasoning.
     @ViewBuilder
     private var starredGroup: some View {
-        if !stars.items.isEmpty {
+        let items = stars.items
+        if !items.isEmpty {
             VStack(alignment: .leading, spacing: 0) {
                 header(StarCopy.sectionHeader)
-                ForEach(stars.items, id: \.target) { item in
-                    starredRow(item)
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        LazyVStack(alignment: .leading, spacing: 0) {
+                            ForEach(items, id: \.target) { item in
+                                starredRow(item)
+                                    .id(item.target)
+                            }
+                        }
+                    }
+                    .scrollBounceBehavior(.basedOnSize)
+                    .frame(maxHeight: SidebarLayout.scrollingSectionMaxHeight(rowHeight: rowHeight))
+                    .fixedSize(
+                        horizontal: false,
+                        vertical: items.count <= SidebarLayout.scrollingSectionWindow)
+                    .onChange(of: selection) { _, now in
+                        if let match = items.first(where: {
+                            StarTargeting.selection(for: $0.target) == now
+                        }) {
+                            proxy.scrollTo(match.target)
+                        }
+                    }
+                    #if DEBUG
+                    // Item 10's oracle: what the SECTION actually drew,
+                    // keyed by the column's own workspace (the DEBUG-oracle
+                    // keying rule — suites run in parallel, and a singleton
+                    // here would let another suite's column answer the pin).
+                    .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height in
+                        SidebarGeometry.starredSectionHeights[
+                            SidebarGeometry.bodyKey(for: workspace)] = height
+                    }
+                    #endif
                 }
             }
             .padding(.horizontal, Self.groupPadding)
@@ -744,6 +787,11 @@ enum SidebarGeometry {
     /// drawn concurrently by another suite supply it — spuriously red at a
     /// compressed pitch, meaninglessly green at the generous one.
     static var railGroupHeights: [String: CGFloat] = [:]
+    /// 13u2 item 10: the STARRED section's drawn height, keyed by the
+    /// column's workspace. Her ask is about what the section does when the
+    /// list outgrows the window, which is a claim about a rectangle — and
+    /// the section's own scroll view is the only thing that can answer it.
+    static var starredSectionHeights: [String: CGFloat] = [:]
     /// 18d batch 1: what the NOTE BOX drew — the whole box, and its header's
     /// words. The geometry oracle compares these two rectangles against the
     /// rail's, because "the box is measured to take up the same amount of
