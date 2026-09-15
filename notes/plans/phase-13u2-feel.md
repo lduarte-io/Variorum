@@ -907,7 +907,7 @@ stated without a window (every entry's words are in hand the moment the entries 
 preview is forgotten). `BookOutlineLandingTests.theBookPrimesEachNoteOnceAndNoRowEverReadsAgain` —
 R1-10's claim RESTATED and stronger: one bounded read for the book before any row exists, mounting five
 expanded stories reads nothing more, collapsing them costs exactly one refresh read, and then nothing.
-36 test call sites gained `await model.adopt(...)`; `BookAscentTests`' `model` helper and its eight
+41 test call sites gained `await model.adopt(...)` (counted: 22 in `BookViewTests`, 5 in the landing suite, 3 in `BookIndexEditingTests`, 2 each in `PagedReadTests` and `BookRedesignMountTests`, one each in seven more); `BookAscentTests`' `model` helper and its eight
 callers became `async`. **Zero `Sources/VariorumCore/Sync/` lines, zero schema, zero migrations, marker
 8. No `Shared/` file moved**, so the phone inherits nothing from this unit.
 
