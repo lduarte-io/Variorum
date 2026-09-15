@@ -572,8 +572,19 @@ final class EditorViewModel {
         // WORK the dirty flags cannot see (its triggering keystroke was
         // REFUSED, so nothing is dirty) — quit/teardown must let it land
         // or the gesture is silently un-applied.
+        // **AND A MENU FLIGHT IS PENDING WORK TOO** (13u1 UNIT 2 —
+        // `KnownIssuesAndTechDebt.md`'s row named at UNIT 1's close, which
+        // traced it and deliberately did not fold it into the chain fix:
+        // widening the guard changes what the quit door WAITS FOR, which is
+        // door semantics rather than a loop, and the flight and the compound
+        // are one subject here). A divide, merge or ceremony launched from a
+        // MENU arms no compound handle and dirties nothing — its keystroke
+        // was never refused because there was no keystroke — so all four
+        // doors read three flags that are all false and reply "done" while
+        // the operation is still in the writer queue. Older than U-1 and
+        // older than the deferred-keystroke seam.
         guard autosave.isDirty || mintInFlight || hasTailText
-            || pendingCrossBlockTask != nil
+            || pendingCrossBlockTask != nil || structuralInFlight
         else { return nil }
         return Task { // strong self, deliberately
             // **AWAIT THE WHOLE CHAIN, not one link of it** (13u1 UNIT 1 —
@@ -595,6 +606,21 @@ final class EditorViewModel {
             while let pending = self.pendingCrossBlockTask {
                 await pending.value
                 if pending == self.pendingCrossBlockTask { break }
+            }
+            // **THE MENU FLIGHT** (13u1 UNIT 2). A keystroke-born compound
+            // has a Task handle to await; a menu-born one has only the
+            // one-flight latch, so this waits on the latch the way the mint
+            // loop below waits on `mintInFlight` — the same shape, for the
+            // same reason, in the same method. What is unknown without it is
+            // not the OPERATION (one transaction through the runner; the
+            // store is truth and a half-written structural op is not a state
+            // the operations layer can commit) but the flight's own
+            // post-landing bookkeeping: the caret landing, the deferred
+            // projection, the stash drain. It yields rather than spinning,
+            // and it converges because `runStructural`'s `defer` clears the
+            // latch on every road, throw included.
+            while self.structuralInFlight {
+                await Task.yield()
             }
             await self.autosave.flushNow()
             // Let the in-flight mint (and any round it chains) reconcile.

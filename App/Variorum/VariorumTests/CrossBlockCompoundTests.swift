@@ -436,3 +436,118 @@ struct CrossBlockCompoundTests {
         }
     }
 }
+
+// MARK: - The MENU flight the doors did not wait for (KnownIssues, 13u1 UNIT 2)
+
+/// **The neighbour UNIT 1 traced and deliberately left** (the 18c ladder's
+/// R3-1 named it as NOT its finding; UNIT 1 fixed the keystroke CHAIN and
+/// re-traced this one rather than folding it in, because widening the guard
+/// changes what the quit door WAITS FOR — door semantics, not a loop — and
+/// the flight and the compound are one subject at this unit).
+///
+/// `EditorViewModel.finalizeWork`'s guard read the dirty flags and
+/// `pendingCrossBlockTask`, **never `structuralInFlight`** — so a divide,
+/// merge or ceremony launched from a MENU (which arms no compound handle,
+/// because there was no refused keystroke to arm one) was a flight every
+/// door replied "done" over, with its operation still in the writer queue.
+@Suite("The menu flight's door await (13u1 UNIT 2)")
+struct MenuFlightDoorAwaitTests {
+
+    /// **RED ON OLD at the door's own call:** `finalizeWork()` returned nil
+    /// while a menu-born flight was up, so quit, lock, seal and teardown all
+    /// believed there was nothing to wait for.
+    @Test func theQuitDoorAwaitsAMenuBornStructuralFlight() async throws {
+        try await withEditor(seedBlocks: ["Alpha", "Beta"]) { h in
+            h.textView.setSelectedRange(NSRange(location: 0, length: 0))
+            h.model.updateCaretContext()
+
+            // A MENU gesture: ⌘⇧⏎'s door, straight into `runStructural`.
+            // Nothing is dirty, no mint is in flight, no tail is open, and
+            // no compound handle is armed — the exact three-false-flags
+            // state the old guard read.
+            let flight = Task { @MainActor in await h.model.insertBlockBelowCaret() }
+            await Task.yield()
+            #expect(h.model.structuralInFlight, "the flight is up")
+            #expect(!h.model.autosave.isDirty)
+            #expect(h.model.pendingCrossBlockTask == nil, "a menu gesture arms no handle")
+
+            let door = try #require(h.model.finalizeWork(),
+                                    "RED ON OLD: the door replied nil over a live flight")
+            await door.value
+            #expect(!h.model.structuralInFlight, "the door waited the flight out")
+
+            await flight.value
+            #expect(try h.storeSlots().count == 3, "and the block really landed")
+        }
+    }
+}
+
+// MARK: - Row 43's two halves, together (13u1 UNIT 2)
+
+/// **THE ⌘Z-ACROSS-A-BREAK JUDGMENT, and what it actually costs after this
+/// unit.** `KnownIssuesAndTechDebt.md`'s row has two halves and they turn out
+/// to be one story:
+///
+/// (1) every structural rewrite CLEARS the text-undo stack — the standing
+/// directive at `applyDifferentialStructural`, `applyDifferential` and
+/// `renderFull` — so with the chip ON, ⌘Z after a paragraph break stops at
+/// the break. **The directive stands** (the judgment is made and reasoned in
+/// this unit's record: AppKit offers no way to drop a SUFFIX of NSTextView's
+/// own registrations, and re-registering across a rewritten storage is not a
+/// thing `NSUndoManager` can do).
+///
+/// (2) `newBlock` registered no structural undo entry — which is what made
+/// half (1) bite hardest, and this is the pin for it: **before R-13u-3, the
+/// text stack was cleared AND the structural stack had nothing from the ⏎,
+/// so ⌘Z did nothing and said nothing.** The sign at the junction (13j J7)
+/// needs a structural label to speak, and there was none.
+@MainActor
+@Suite("⌘Z across a paragraph break, after R-13u-3", .serialized)
+struct ReturnKeyUndoSignTests {
+
+    @Test func afterAReturnMintTheSignSpeaksAndTheStructuralUndoRemovesTheBlock() async throws {
+        try await withEditor(seedBlocks: ["Alpha"]) { h in
+            let hosted = ReturnKeyTraceTests.host(try #require(h.textView.enclosingScrollView))
+            defer { hosted.teardown() }
+            hosted.window.makeFirstResponder(h.textView)
+
+            // Type, so the TEXT stack has something in it.
+            h.type(" more", at: 5)
+            await h.flush()
+            #expect(h.textView.undoManager?.canUndo == true)
+
+            // ⏎ at the block's end: U-1's act mints an empty block below.
+            h.textView.setSelectedRange(
+                NSRange(location: h.model.index.documentLength, length: 0))
+            h.model.updateCaretContext()
+            h.textView.keyDown(with: ReturnKeyTraceTests.returnEvent(
+                shift: false, windowNumber: hosted.window.windowNumber))
+            await h.flush()
+            #expect(try h.storeSlots().count == 2, "the block was minted")
+
+            // HALF (1), unchanged and deliberate: the text stack is gone.
+            #expect(h.textView.undoManager?.canUndo == false,
+                    "the structural rewrite cleared text-undo — the standing directive")
+
+            // HALF (2), R-13u-3: the structural stack now holds the mint, so
+            // the junction sign can speak. **RED ON OLD: `newBlock`
+            // registered nothing, so this label was nil and
+            // `EditorUndoHint.message` returned nil — ⌘Z did nothing and
+            // said nothing.**
+            #expect(h.session.undoMenuState.topLabel == "New Block")
+            h.model.showStatus("")
+            h.model.speakUndoHint(.undo)
+            #expect(h.model.statusMessage == EditorUndoHint.message(
+                for: .undo, textStackHasEntries: false,
+                structuralUndoLabel: "New Block", structuralRedoLabel: nil),
+                "the sign names ⌥⌘Z: \(h.model.statusMessage ?? "nil")")
+
+            // …and the road it names really works.
+            let stack = h.session.undoStack
+            try await h.session.runner.run { ops in _ = try stack.undo(with: ops) }
+            try h.reload()
+            #expect(try h.storeSlots().compactMap(\.text) == ["Alpha more"],
+                    "⌥⌘Z removed the block ⏎ just made — her ask, verbatim")
+        }
+    }
+}
