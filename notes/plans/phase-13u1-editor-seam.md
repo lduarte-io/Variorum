@@ -699,9 +699,29 @@ place: `ArmedEdit.exactCost`'s *"Platforms that derive cost from the report simp
   judgment and `newBlock`'s structural undo (R-13u-3), with AppSpec §9's delta owed at the phase's
   closeout.
 
-## UNIT 2 RECORD (LIVE STATUS)
+## UNIT 2 RECORD (LIVE STATUS — the implementer creates and maintains this from its first commit)
 
-*(empty at kickoff)*
+**WHAT THIS UNIT DID NOT DO (the record's first line, per the closing rule):** *(filled at the close;
+PENDING while the unit runs)*. `Sources/VariorumCore/Sync/`: **zero lines**. Schema: **zero**.
+Migrations: **zero**. Lockstep marker: **8**, untouched.
+
+### LIVE STATUS (flipped per piece)
+
+| # | Piece | Status |
+|---|---|---|
+| A | The SEVENTH quiet auto-commit occasion — the core door the compound insures through, + core pins | NOT-STARTED |
+| B | The shared compound brain (`CrossBlockCompound`): the plan (geometry + the paragraph-break rule + the fates) and the compound body over `Operations` | NOT-STARTED |
+| C | `CrossBlockRefusal` HOISTED to `Shared/` (U-5) with item 5 writing what it says; the gap fence's Mac face (U-3); the empty-block-in-a-span plan (U-4); the fan fence's policy half on a RUN-TIME read (U-1) | NOT-STARTED |
+| D | The Mac's face: the routing arm, the receipts that name where every block went, the refusals shrunk to sealed note + locked take | NOT-STARTED |
+| E | The PHONE's consumer carried to the new brain (the semantics are ruled for both platforms; the face stays the mobile project's) | NOT-STARTED |
+| F | `newBlock` registers structural undo (R-13u-3) + the AppSpec §9 canon delta in the SAME commit | NOT-STARTED |
+| G | The MENU-flight door-await neighbour (KnownIssues row 63) | NOT-STARTED |
+| H | Row 43 half (1) — the ⌘Z-across-a-break directive: the judgment, made and RECORDED with its traced mechanism | NOT-STARTED |
+| I | The tutorial's TWO-EXITS lesson updated to the fanned matrix (the Mac lesson only) | NOT-STARTED |
+| J | The WALK — the gesture matrix hands-on on the dev-store Debug build, captures in `notes/plans/13u1-screens/` — and the landing/mode-continuity re-walk (her praise) | NOT-STARTED |
+| K | Close — suites green, KnownIssues rows resolved/re-owned, the handback rows flipped, the mobile parity facts | NOT-STARTED |
+
+*(Traces, pins, PROVISIONALs and measurements are filled in below as each piece lands.)*
 
 ## CLOSEOUT (findings → dispositions; filled at the ladder's end)
 
