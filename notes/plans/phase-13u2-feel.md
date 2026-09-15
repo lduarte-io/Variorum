@@ -742,7 +742,7 @@ mount: `editorHeight == 24` after 200 turns).
 
 | piece | state |
 |---|---|
-| the record opened + TRACE 2 re-verified on the post-revert tree | **PENDING** |
+| the record opened + TRACE 2 re-verified on the post-revert tree | **DONE** — reproduced on the real Sherlock book, three runs (see TRACE 2 RE-VERIFIED below) |
 | the bounded core read (`Queries.leadingBlockTexts`) + its pins | **PENDING** |
 | the app-side priming (`BookViewModel` · `OutlinePostRow`) + the red-on-old card pin | **PENDING** |
 | the GATE: the 3-expanded fixture 3/3 isolated, beside the card pin 3/3 | **PENDING** |
@@ -751,6 +751,52 @@ mount: `editorHeight == 24` after 200 turns).
 | tests (core · FULL Mac · iOS build) | **PENDING** |
 
 *(Every line starts PENDING and is flipped in the same commit as the piece it names.)*
+
+## TRACE 2 RE-VERIFIED — the mechanism still holds on the POST-REVERT tree (2026-09-15, dev-store Debug build, the real Sherlock book)
+
+The hallucination guard's first duty: the fix is built against a mechanism that is still there. It is —
+and re-measuring it corrected TWO things about how to reproduce it, which the after-walk has to match
+or the comparison is worthless.
+
+**The protocol** (identical before and after; the dev-store build run from its binary so `NSLog`'s
+stderr lands in a file — `log show` never carried the line): launch the Debug build fresh · click *the
+adventures of sherlock holmes* on the shelf · **120 ms later** click the 11th navigator chapter (*the
+adventure of the noble bachelor*, the collapsed one-note chapter whose row IS the note's — her LIKE,
+row 8) · read `BookOutline landing` from the log.
+
+**RUN 3 (the sharpest), verbatim:**
+
+```
+page-E1483921 LAND | page-E1483921 h=23015 | top=1720 | content=25099 | top=1738 | top=1753
+| top=0.0 hops=0                                                   ← ARRIVES
+| chapter-21238 h=51 | page-67DB6BCA h=103 | … | page-D5AA052C h=103 | content=25127
+| top=13.0 | content=24977 | top=-137.0 | HOP 1 at 301 ms (top was -137.0) | top=0.0 hops=1
+| page-D17F5E79 h=46   ← A CARD REALIZES AT 46 …
+| content=25088 | top=111.0 hops=1 | top=0.0 | content=24969 | top=-119.0
+| HOP 2 at 592 ms (top was -119.0) | top=0.0 hops=2
+| page-D17F5E79 h=103  ← … AND GROWS TO 103, 57 pt, after the page had already arrived
+| content=25088 | top=119.0 hops=2 | top=0.0 hops=2
+| DONE: settled at top=0.0 after 2 hops, 1004 ms
+```
+
+Runs 4 and 5 reproduced it identically (`page-D17F5E79 h=46`, 1 and 2 hops, 1018 / 1005 ms).
+**The defect is unchanged: a card's height depends on when its preview read returns**, and every point
+of that change is spent on a page that has already arrived.
+
+**Two corrections to the reproduction, recorded because they change what the after-log can claim:**
+
+1. **The AMPLITUDE is smaller than TRACE 2's 854 pt on this store now, and the reason is not the
+   cards.** TRACE 2's run opened the Noble Bachelor for the FIRST time ever on this dev store — its
+   expanded surface reported `h=861` (the unmeasured 800-pt placeholder + header) and grew to 18,680.
+   That note's height is now REMEMBERED (`page-E1483921 h=23015` on the first report, straight out of
+   `SurfaceSizeMemory` — 18d's U-12 work doing exactly its job), so that half of the drift is
+   permanently gone for this note and cannot be re-staged without deleting a record the app wrote.
+   What remains visible is the CARD half — which is the half this unit fixes.
+2. **The card drift only shows when the chapter click beats the preview reads.** Clicking 600 ms
+   after opening the book showed every card at 103 on its first report (the reads had all landed) and
+   no drift at all; at 120 ms the cards that realize DURING the scroll still arrive at 46. That is
+   her own report's shape — *"I click on a chapter or note that's far down"*, right after opening the
+   book — and it is why the after-walk uses the same 120 ms.
 
 ---
 
