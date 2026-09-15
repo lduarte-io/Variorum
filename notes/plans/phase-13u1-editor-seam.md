@@ -1371,6 +1371,25 @@ is behaviour that shipped, not a question: it changes only which true road the r
    verbatim, AppSpec §14's new delta, the 13u2 kickoff refreshed, item 12's own row filed, the
    author handoff written LAST, the `/Applications` refresh after the walk. ✅
 
+### THE `/APPLICATIONS` REFRESH (2026-09-15, at her explicit word — *"when my app is done you can refresh it - i have it closed now"*)
+
+Run on the standing rails, the A1 backup FIRST, **her store never opened and the app never
+launched**; zero instances verified before the backup, before the copy and after.
+
+| | |
+|---|---|
+| backup | `~/dev/variorum-store-backups/13u1-refresh-20260915T073559Z/` — the WHOLE store folder (`variorum.sqlite`, `-wal`, `-shm`, all three `variorum-keys*.json`, the 88-entry `Backups/`) |
+| backup verified | `cmp` byte-identical on the sqlite, the wal and all three key files; the sqlite header is CIPHERTEXT (`1799 8efb 28ec 84e2 …`, never `SQLite format 3`) |
+| built from | `f4264bff`, clean throwaway worktree `~/dev/variorum-13u1-release` (removed after), `-configuration Release`, DerivedData in `/tmp` (removed after) |
+| old binary SHA-256 | `490285e03af15e4df98b663050737ae2941d7004ff66a7ccafb7a740e4719a2d` |
+| new binary SHA-256 | `ffe42c8817e324ce9484fd2fa3b5248363ae8ca37508fb595aeb032f26c9f65c` |
+*[removed for publication]*
+*[removed for publication]*
+
+**THE AUTHOR HANDOFF, written LAST:** `notes/handoffs/phase-13u1-handoff.md` — her checklist at the
+top (the refresh's evidence, the nine-row walk in the order she would hit it, the two ratify items,
+the row-64 priority call, the judgment calls worth her eye).
+
 ### WHAT THIS PHASE DID NOT DO
 
 Items 9 and 12 build nothing here (R-13u-4 ruled the capture model — the Mac face is 13u3's, the
