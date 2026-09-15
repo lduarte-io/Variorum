@@ -342,6 +342,30 @@ final class EditorTextView: NSTextView, MarkdownFormattable, DecorLaneSurface {
     /// selection is over.
     var onPlainClick: (() -> Void)?
 
+    /// **THIS VIEW IS ON SCREEN** (13u2 UNIT B — KnownIssues row 49's fix).
+    /// Fires whenever the view's window membership changes; the model asks
+    /// `window != nil` itself, because "moved to a window" and "moved OUT of
+    /// one" come through the same AppKit door.
+    ///
+    /// Why it exists — MEASURED, not assumed (the UNIT B RECORD has the
+    /// trace): in the book's Outline, SwiftUI realizes the focused note's
+    /// `InlineEditorSurface` TWICE, ~40 ms apart, each with its own
+    /// `EditorViewModel`, and it never dismantles the first. The second view
+    /// is an ORPHAN — measured at +0.05 s, +0.5 s and +2 s after its mount:
+    /// `window == nil` every time, `index.entries` empty forever, while the
+    /// real editor reads `window != nil` and 262 entries. So "is this view in
+    /// a window" is the exact discriminator between the editor she is looking
+    /// at and the shadow, where "has it attached" is not.
+    ///
+    /// An `NSView` override, not a TextKit 1 API — no downgrade risk
+    /// (TEXTKIT2 §4.2); `PaneTextView` overrides the same door.
+    var onWindowChange: (() -> Void)?
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        onWindowChange?()
+    }
+
     /// N14 (13b Stage 3F) — the overlay family's LAYOUT-SETTLE trigger.
     /// Fragment-geometry consumers (badges, decor) that compute before
     /// TK2's first viewport layout read garbage frames, and no mount-time

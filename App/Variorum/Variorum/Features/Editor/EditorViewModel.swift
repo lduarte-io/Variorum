@@ -435,6 +435,30 @@ final class EditorViewModel {
             }
         }
         session.editorRouter.active = self
+        // **AND AGAIN WHEN THIS VIEW REACHES THE SCREEN** (13u2 UNIT B —
+        // KnownIssues row 49). `active` means "the last text view to attach",
+        // and in the book's Outline that is the wrong object: SwiftUI
+        // realizes the focused note's `InlineEditorSurface` twice (~40 ms
+        // apart, two models, no `dismantleNSView`), so the SECOND — a
+        // projection-less orphan whose view never enters a window — held
+        // `active` for as long as the note stayed focused, and the quit and
+        // lock doors asked IT to `finalizeWork()`. A shadow has no pending
+        // text, so it answered nil and the door believed there was nothing to
+        // await: the note's OPEN TAIL, whose crystallization only
+        // `finalizeWork()` performs, could be lost to a quit inside the idle
+        // interval.
+        //
+        // The claim on window entry corrects it without changing what
+        // `attach` does for anybody: the real view reaches the window a few
+        // milliseconds later and takes `active` back, and the orphan — window
+        // nil at +0.05 s, +0.5 s and +2 s, measured — can never take it
+        // again. A view leaving its window does NOT relinquish (teardown is
+        // the one door that clears `active`, unchanged), so a re-parent or a
+        // window close cannot blank the router behind a live editor's back.
+        textView.onWindowChange = { [weak self, weak textView] in
+            guard let self, let textView, textView.window != nil else { return }
+            session.editorRouter.active = self
+        }
         if let pending = pendingProjection {
             pendingProjection = nil
             applyProjection(pending)
@@ -543,6 +567,10 @@ final class EditorViewModel {
         if session.editorRouter.editing === self {
             session.editorRouter.editing = nil
         }
+        // 13u2 UNIT B: and the window-entry claim goes with the teardown — a
+        // model that has let go must not re-take `active` if its view is
+        // re-parented on the way out.
+        textView?.onWindowChange = nil
         canary.disarm()
         // 13c 1E: the phantom fix's debounce dies with the surface it was
         // measuring (its geometry world goes with the text view).
