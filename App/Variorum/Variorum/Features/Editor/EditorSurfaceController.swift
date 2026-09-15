@@ -110,8 +110,11 @@ final class EditorSurfaceController {
     /// walks the entries from zero, so the loop cost Σi ≈ N²/2 in the BLOCK
     /// COUNT on top of the linear term — a quadratic on the road every take
     /// switch, `restoreCommit` and sync landing takes. Measured at 8,000
-    /// blocks: **3.94 s → 5.7 ms** (the record's table). The tiling is now
-    /// read ONCE through the shared accumulating walk.
+    /// blocks, mounted: **4.41 s → 56.6 ms** (the 13u1 plan's UNIT 1 RECORD
+    /// measurement table — the authority for these numbers; the ladder's
+    /// round 1 caught an interim pair here citing that table for values it
+    /// does not hold). The tiling is now read ONCE through the shared
+    /// accumulating walk.
     ///
     /// **The ranges are computed BEFORE the loop and stay correct:** the
     /// walk descends, and replacing slot `j` changes the lengths of entries
