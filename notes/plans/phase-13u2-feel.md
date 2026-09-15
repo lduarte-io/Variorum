@@ -375,7 +375,7 @@ registers behaving as her sentences describe) beside the dark pass already owed.
 | C — #109 boundary-clamp law | **CLOSED 2026-09-15** — her law BUILT, both shapes, BOTH platforms (the phone got the trim free and shape (i) with three mirrors of the Mac's road) · the family ENUMERATED in an 18-cell sweep table · 10 of 14 behaviour pins RED on the pre-fix tree · `.partialBlockAcrossSeam` retired by SPLITTING into two causes whose roads differ (forced by a finding: the phone has no seam carves — new KnownIssues row) · walked with 11 captures incl. both undo grammars · 1 PROVISIONAL (QUESTIONS #111) · finals: core **1567/171** · Mac **2702/450** (+20 pins; 1 known issue + the load-flaky red, PAIRED-measured as unchanged by this diff) · iOS **green** · mobile cross-block suites **67/6** |
 | D — the singles (+ TRACE 1a, routed by RULING A-1) | **CLOSED 2026-09-15** — item 2 FIXED at the ONE shared brain with red-on-old on BOTH trees · item 10 BUILT and pinned but **it cannot fire until she rules the star cap** (#112(b), the item's headline) · item 11 BUILT (⇧⌘V, the rule shared; the phone owes the door) · item 13 MEASURED and VERIFIED HEALED + row 93 FIXED · P39a/P39b FIXED with zero behaviour change and pins unmodified · roster item 8 VERIFIED (2 moot, 2 return) · **row 57 TRACED and it does NOT reproduce — nothing built, the row narrowed** · TRACE 1a FIXED and measured (0.42 ms → 0.00009 ms, flat where it was linear) · 8 captures · 3 PROVISIONALs (QUESTIONS #112) · finals: core **1567/171** · Mac **2730/456** (+28/+6; 1 known issue + the load-flaky red, PAIRED as unchanged) · iOS **green** · mobile **626/106 with 4 known** |
 | E — the mechanical sweeps | **CLOSED 2026-09-15** — all six dispositioned: row 56 steps 1+2 BUILT (step 3 deferred with its reason, its grep half shipped) · row 50's six oracles SWEPT with a stronger key than asked, and the measurement that forced it · row 48 WALKED and **NOT REPRODUCIBLE** (four arms) · row 59 FIXED with falsifiability demonstrated, and its arm comes OFF the flake list · row 47's park half DONE · row 51's split (**ZERO test edits**) + the ONE structural arm (red-on-old). 7 captures · 1 PROVISIONAL (#113) · finals: core **1567/171** · Mac **2744/459** (+14/+3; 1 known issue + the load-flaky red, PAIRED as unchanged) · iOS **green** · mobile **626/106 with 4 known** |
-| LADDER | **ROUND 1 RUNNING** (fable-reviewer, cold, over `13e84c02..a22745e8`) |
+| LADDER | **CLOSED 2026-09-15 — round 1 (fable-reviewer, cold): 0 BLOCKER · 0 MAJOR · 1 no-action MINOR · 2 NIT; one confirmed NIT fixed at adjudication (one doc word), one recorded deliberately unchanged; round 2 ruled NOT OWED with the reasoning in the ladder section (zero behaviour fixes to re-review; R-cor-14 satisfied by round 1 itself)** |
 | CLOSEOUT | NOT-STARTED |
 
 ---
@@ -2796,7 +2796,47 @@ ladder should eye `DebugProbeScope` as new shared DEBUG machinery.
 
 ## THE LADDER — round 1 (fable-reviewer, cold, `notes/REVIEW_PROMPT.md` verbatim, over the phase's combined diff `13e84c02..a22745e8`)
 
-Opened 2026-09-15 after unit E's close. Findings land here verbatim when the round returns.
+Opened 2026-09-15 after unit E's close. **RETURNED the same night: 0 BLOCKER · 0 MAJOR · 1 MINOR
+(explicitly "observation, not a defect — no action owed") · 2 NIT.** The reviewer read the whole
+plan and every touched file, independently re-traced the boundary-clamp seam geometry cell by cell
+(trim/join mutual exclusivity proven by construction; gate ordering verified on both platforms;
+the one-undo-grammar law honoured), verified the GRDB NULL-decode equivalence against GRDB's own
+source, ran the new core suite itself, and confirmed the fences empty by diff. Its clean bill
+covers every unit's load-bearing claim by name.
+
+### Findings and dispositions (each verbatim in the round's report; the reviewer's grades kept)
+
+1. **[NIT] `StatusCenter.swift:193` — a rename residue in a doc comment** (`(showReceipt/speak)`
+   where the door is now `refuse`). **CONFIRMED — grep-verifiable. FIXED at adjudication by the
+   orchestrator** (the architect's small-code allowance; comment-only, no pin possible or owed —
+   the reviewer itself pre-graded the class). One word.
+2. **[NIT] `EditorCommands.swift` — the ⇧⌘V item never greys via responder-chain validation,
+   unlike the Cut/Copy/Paste family; it stays clickable and refuses at runtime with guidance.**
+   **CONFIRMED as described — RECORDED, deliberately not changed.** The runtime refusal with a
+   road ("Click into some text first…") is the P-2 fire-or-DO shape as the code's own comment
+   reasons, and a permanently-greyed custom chord door is less discoverable than one that answers.
+   The reviewer's own grade: "honest under P-2… behaviourally acceptable; cleanliness only."
+   Whether the door should instead validate-and-grey is a taste call bundled for her (the
+   handoff's judgment-calls list); a 13u4/13s pass takes it at her word.
+3. **[MINOR — observation] item 10's scrolling is inert behind `Operations.starLimit = 5`.**
+   Already the unit's own STOP (#112(b)); the reviewer adds one true fact adopted into the
+   bundle's text: **if she raises the cap, the shipped scroll will have been exercised only by a
+   synthetic 12-row pin — so her first real-app scroll should get a quick walk at that time.**
+   No action now; the PROVISIONAL is the right disposition (the reviewer's words).
+
+### THE LADDER'S SHAPE — ruled by the orchestrator, recorded loudly rather than slipped
+
+**Round 2 is NOT owed, and the reasoning is stated here for her morning eye:** the ladder's round
+2 exists to re-review FIXES ("a real pass over the fixes and what they touched"). Round 1
+produced zero fixes of behaviour — the only post-review change in the tree is ONE WORD in one doc
+comment, applied by the orchestrator and verifiable in a glance (`git show` the adjudication
+commit). Spawning a fresh cold reviewer over a one-word comment is the over-review the
+hallucination guard names ("over-review invents findings when there's nothing left to find"), and
+the round-3 trigger (a NEW BLOCKER/MAJOR in round 2) cannot arise from it. R-cor-14's mandate —
+at least one FABLE pass over the whole phase, mandatory where the diff touches the editor seam or
+pane authority — is satisfied by round 1 itself, which was Fable, cold, and over the combined
+diff. **If she wants a round 2 anyway, it runs at her word on the final tree; nothing about this
+ruling forecloses it.**
 
 # CARRIED VERBATIM AT THE SPLIT (2026-09-14) — from `phase-13u-feel-and-polish.md` (P39's section, per its banner: "The file split must carry that section to 13u2")
 

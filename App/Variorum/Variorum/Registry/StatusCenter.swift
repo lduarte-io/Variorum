@@ -190,7 +190,7 @@ final class StatusCenter {
     /// (`outcome.noteIsRefusal ? refuse : showReceipt`),
     /// `TakesStructureController`'s split door (`setReceipt`/`setRefusal`, the
     /// board's `RecoveryStatus`, which `WriteTakesPanel` RENDERS), and
-    /// `BlockTOCViewModel`'s (`showReceipt`/`speak`). Routing any of them
+    /// `BlockTOCViewModel`'s (`showReceipt`/`refuse`). Routing any of them
     /// through this door would bypass a property ~22 shipped pins read and,
     /// on the board, a slot a view draws — the parity this letter has kept
     /// everywhere else. Giving each model its own `say` would spell the
