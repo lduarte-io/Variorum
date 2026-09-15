@@ -1768,10 +1768,10 @@ foreign-string compare).
 | P39a — Pool stops holding `LibraryViewModel` | **FIXED** — two closures from `RootView`; zero behaviour change, pins unmodified |
 | P39b — `WriteTakesPanel` stops constructing `TakesViewModel` | **FIXED by MOVING THE FILE to the Takes feature** — the literal "RootView constructs" road measured and rejected with its reason; zero behaviour change, pins unmodified |
 | roster item 8 — the four protection items VERIFIED | **DONE — 2 MOOT BY CONSTRUCTION · 2 RETURN, both with the exact finding and a named home** (the table below) |
-| row 57 — the RE-FONT road | PENDING |
+| row 57 — the RE-FONT road | **TRACED ON THE 262-BLOCK STORY AND IT DOES NOT REPRODUCE** — nothing built, and the measurement says why (TRACE D-6); the row is NARROWED, not closed |
 | TRACE 1a — the pane's projection compare | **FIXED + MEASURED** — 0.42 ms → 0.00009 ms per read pane per update pass at 200 blocks, and FLAT in the text's length where it was linear (TRACE D-3) |
 | tests (core · FULL Mac · iOS build · mobile if `Shared/` moved) | PENDING |
-| the WALK + captures (52 onward) | PENDING |
+| the WALK + captures (52 onward) | **DONE — 8 captures (52–59)** on the dev-store Debug build: the space surviving a 4-second pause · ⇧⌘V landing one paragraph · row 93's open mark on a nameless title · the title running to the icons at 48 characters · the Starred section unchanged at the cap · row 57 before/after in both voices |
 | PROVISIONALs → `notes/QUESTIONS.md` (next free **#112**) | **DONE — #112 (a) the space-eater's scope · (b) the STAR CAP, which stops item 10 firing · (c) the paste chord + rule; the marker moved to #113** |
 
 *(Every line starts PENDING and is flipped in the same commit as the piece it names.)*
@@ -2123,6 +2123,61 @@ with evidence, never with a guess.** Two are moot, two return.
 | 4 | **COPY ALL on the recovery phrase** — her word was NEED: *"we NEED a copy all button on the recovery phrase - i had to copy them one by one, it was really annoying"*, and the item's own scope was *"everywhere the twelve words are shown … the phone's twins"* | **PARTIALLY BUILT — RETURNS for every surface but one** | **Built, and well, in ONE place:** `ProtectionPane`'s `.wordsShow` carries the button, joins the words with a space, and **clears the pasteboard after 60 s if nothing else has written to it** (`changeCount` compared) — pre-13x design decision 23, with copy §11's sub-line (`PostureCopy.wordsCopyAll` / `wordsCopied`). **Not built anywhere else, and the evidence is a DEAD BRANCH:** three models declare `markWordsCopied()` (`KeyDoorModel`, `PostureSwitchModel`, `SyncEnrollmentModel`) and **exactly one call site exists in the whole app** — so the SHARED `SyncEnrollmentView`, which shows the twelve words and then renders `ProtectionCopy.wordsCopied` *"when `model.copiedWords`"*, carries a caption that can never appear. The PHONE shows the words at three screens (`MobilePostureSheets.wordsShow`, `MobileProtectionCeremonies` ×2) with no Copy All at all. **Why it is recorded rather than built here:** the brief makes this roster item a VERIFICATION duty, and the remaining door is cross-platform (NSPasteboard vs UIPasteboard, and whether the phone's clipboard expires the same way is a call). **Remedy, exactly:** one shared door beside `markWordsCopied()` — the pasteboard write behind a tiny platform seam, the 60-s clear as the Mac's already does — rendered by the shared enrollment page and the phone's three word screens. |
 
 **What this duty did NOT do:** it built nothing. That is the roster item's own wording (*"VERIFY each is either built, moot by construction, or returns to this roster — record the verdict per item"*), and both RETURNS above carry the finding that makes the build a short job rather than a fresh investigation.
+
+## TRACE D-6 — ROW 57's RE-FONT ROAD: traced on the long story, and it does not reproduce
+
+KnownIssues row 57 names two roads by which the full-document editor's whole-storage attribute
+writes *"jump a long note's viewport and leave a stale region"*: the **INK** road (the appearance
+change) and the **RE-FONT** road (a voice switch, the inline-comments toggle, the paragraph gap —
+`applyVoiceChrome`'s full-range `addAttributes` plus the whole-document `MarkdownStyling.style`).
+**18j carved the ink road**; the re-font half is this phase's, and the brief's instruction is exact:
+*"do the same class of carve … if the trace supports it … or record why not with the trace"*, and
+*"the full-document editor has no render-restore — do not add one without a trace saying it is the
+fix."*
+
+**So it was traced FIRST, in the app, on the surface the row names.** A temporary DEBUG probe on
+`applyVoiceChrome`'s refresh road, reporting the scroll position, the laid-out fragments and the
+usage bounds at `before` · `after` · **+0.3 s · +1.0 s · +2.0 s** (the row's own *"still there 1.9 s
+later"*); the dev-store Debug build, *A Scandal in Bohemia* (262 blocks, 8,605 words) open in Write,
+landed deep in the note (**block 239/262**). Study → Terminal, verbatim:
+
+```
+REFONT before | len=46376 | visibleY=15670.5 h=828.0 | frags=523 lowest=21754.0 coveringVisible=15
+REFONT after  | len=46376 | visibleY=15670.5 h=828.0 | frags=523 lowest=21232.0 coveringVisible=15
+REFONT +0.3s  | len=46376 | visibleY=15670.5 h=812.0 | frags=523 lowest=21232.0 coveringVisible=15
+REFONT +1.0s  | len=46376 | visibleY=15670.5 h=812.0 | frags=523 lowest=21232.0 coveringVisible=15
+REFONT +2.0s  | len=46376 | visibleY=15670.5 h=812.0 | frags=523 lowest=21232.0 coveringVisible=15
+```
+
+…and Terminal → Study, the mirror, `visibleY=15670.5` on every one of the five samples again
+(`lowest` 21232 → 24680: the serif is taller, which is the re-measure doing its job).
+
+**Read it:** the viewport **does not move** — not at the write, not 2 seconds later — and the
+document's height changes by exactly what a font change should change. The captures agree: `57-d`
+(before, Study) and `58-d` / `59-d` (after, each voice) show the page drawn from the first line to
+the last with **no blank region anywhere**, at a scroll position deep inside the note.
+
+**Verdict: the re-font road does not reproduce the symptom on this tree, so NOTHING was built.** A
+fix without a reproducible mechanism is motion without a mechanism — UNIT A2's own words, one row
+over. What most likely changed since the row was written: 18g's R1-1 fix (`ee3c939f`) took the
+PALETTE off this road entirely and `3adb7d2d` made the colour road line-scoped, and 18j took the INK
+off it — the 18g capture that founded the row was a palette click, which no longer comes here at
+all. Row 57's re-font half is therefore **NARROWED to what has never been exercised**, not closed:
+
+**Two things this trace honestly did NOT establish, stated rather than implied.**
+1. **The other two refresh occasions were not exercised.** The inline-comments toggle and the
+   paragraph gap take the same road, and neither control is reachable in the Appearance pane at the
+   shipped window size — the same **Settings fold** UNIT B recorded (*"an appearance dial you cannot
+   reach without knowing it is there"*, routed to 13u3/13u4). They remain untested.
+2. **`frags` / `coveringVisible` are not evidence about spontaneous layout**, because the probe
+   enumerated with `.ensuresLayout` and so forced the layout it counted. The load-bearing numbers
+   are `visibleY` (a fact about the scroll position, which the probe cannot move) and the captures.
+
+**Recommendation for the row's next owner:** keep it open against the two unexercised occasions, and
+re-walk it the moment the Settings fold is fixed so they can be reached at all. If it reproduces
+there, the carve the brief names — line-by-line, the palette road's shape (`restyleFacedLines`) one
+attribute set over — is the road, and the measurement to take first is whether N line-scoped edits
+beat one union edit on a 262-block note.
 
 ---
 
