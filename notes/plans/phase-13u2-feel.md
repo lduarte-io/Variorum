@@ -373,7 +373,7 @@ registers behaving as her sentences describe) beside the dark pass already owed.
 | A2 — item 18's successor: preview priming (RULING A-1) | **CLOSED 2026-09-15 — RULING A-2: the priming SHIPS** — item 18's card drift FIXED (red-on-old; no `h=46` on the real book, 3 runs) · the bounded core read MEASURED FLAT · the gate arm ADJUDICATED: hard-bounded at the residual's magnitude + the ≤ 4 aspiration in `withKnownIssue` (the scale-mix residual; unit B re-examines its closed cure beside the shadow fix) · finals: core 1567/171 · Mac 2670/446 GREEN with 1 known issue · iOS green · item 18 field acceptance: **her hands owed** |
 | B — book-Index presentation + shadow editor | **CLOSED 2026-09-15** — item 19's five ruled behaviours BUILT (one of the intended fixes DISMISSED AS HOLLOW, with its evidence) · the double editing ring removed · **KnownIssues row 49's ROUTER half FIXED** (red-on-old + verified in the app) and the row NARROWED to the surviving double realization, which is traced with three causes eliminated · scope 4 RE-EXAMINED: the run-scale split stays CLOSED, its evidence downgraded, the successor's measurement named · 3 PROVISIONALs (QUESTIONS #110) · finals: core **1567/171** · Mac **2682/449** (1 known issue + 1 load-flaky red, recorded with paired numbers, the product road walked clean) · iOS **green** |
 | C — #109 boundary-clamp law | **CLOSED 2026-09-15** — her law BUILT, both shapes, BOTH platforms (the phone got the trim free and shape (i) with three mirrors of the Mac's road) · the family ENUMERATED in an 18-cell sweep table · 10 of 14 behaviour pins RED on the pre-fix tree · `.partialBlockAcrossSeam` retired by SPLITTING into two causes whose roads differ (forced by a finding: the phone has no seam carves — new KnownIssues row) · walked with 11 captures incl. both undo grammars · 1 PROVISIONAL (QUESTIONS #111) · finals: core **1567/171** · Mac **2702/450** (+20 pins; 1 known issue + the load-flaky red, PAIRED-measured as unchanged by this diff) · iOS **green** · mobile cross-block suites **67/6** |
-| D — the singles (+ TRACE 1a, routed by RULING A-1) | **RUNNING 2026-09-15** — the record opened (UNIT D RECORD below); eight items, each traced and dispositioned on its own |
+| D — the singles (+ TRACE 1a, routed by RULING A-1) | **CLOSED 2026-09-15** — item 2 FIXED at the ONE shared brain with red-on-old on BOTH trees · item 10 BUILT and pinned but **it cannot fire until she rules the star cap** (#112(b), the item's headline) · item 11 BUILT (⇧⌘V, the rule shared; the phone owes the door) · item 13 MEASURED and VERIFIED HEALED + row 93 FIXED · P39a/P39b FIXED with zero behaviour change and pins unmodified · roster item 8 VERIFIED (2 moot, 2 return) · **row 57 TRACED and it does NOT reproduce — nothing built, the row narrowed** · TRACE 1a FIXED and measured (0.42 ms → 0.00009 ms, flat where it was linear) · 8 captures · 3 PROVISIONALs (QUESTIONS #112) · finals: core **1567/171** · Mac **2730/456** (+28/+6; 1 known issue + the load-flaky red, PAIRED as unchanged) · iOS **green** · mobile **626/106 with 4 known** |
 | E — the mechanical sweeps | NOT-STARTED |
 | LADDER | NOT-STARTED |
 | CLOSEOUT | NOT-STARTED |
@@ -1744,8 +1744,20 @@ miss, that verdict re-opens — the walk, not the harness, is the authority on t
 
 # UNIT D RECORD — THE SINGLES (opened 2026-09-15, `opus-implementer`, the overnight run)
 
-**WHAT THIS UNIT DID NOT DO — the record's first line, per the brief.** *(PENDING — this line is
-written last, when the unit knows what it did not reach. Nothing is claimed here until then.)*
+**WHAT THIS UNIT DID NOT DO — the record's first line, per the brief.** It did **not build item
+10's effect**: the Starred section is now a bounded, scrolling section at seven and **it cannot fire
+in the shipped app**, because `Operations.starLimit` is FIVE — her own 13f ruling — and raising it
+overturns that ruling AND rewrites product copy in three places on two platforms, which is not an
+implementer's call (QUESTIONS #112(b); the finding is the item's headline, not its footnote). It did
+**not fix row 57's re-font road** — it TRACED it on the 262-block story and the symptom **did not
+reproduce**, so nothing was built and the row is narrowed rather than closed (TRACE D-6), with the
+two occasions it could not reach stated. It did **not build** either of roster item 8's two RETURNS
+(that item is a VERIFICATION duty by its own wording) and it built no phone FACE for item 11 — the
+phone has the rule and owes an edit-menu item, recorded as a parity row. It did **not re-fix** item
+13's first half: the measurement says row 11's U-8 work already healed it, so it is pinned and
+recorded rather than touched. It did not walk item 10's scroll (there is nothing to walk until the
+cap moves) and did not walk DARK. **Zero `Sources/VariorumCore/Sync/` lines, zero schema, zero
+migrations, marker 8.**
 
 **What it is:** eight independent items, each traced on its own and dispositioned on its own — her
 item **2** (the eager space-eater, BOTH platforms) · item **10** (starred items scroll past ~7) ·
@@ -1770,7 +1782,7 @@ foreign-string compare).
 | roster item 8 — the four protection items VERIFIED | **DONE — 2 MOOT BY CONSTRUCTION · 2 RETURN, both with the exact finding and a named home** (the table below) |
 | row 57 — the RE-FONT road | **TRACED ON THE 262-BLOCK STORY AND IT DOES NOT REPRODUCE** — nothing built, and the measurement says why (TRACE D-6); the row is NARROWED, not closed |
 | TRACE 1a — the pane's projection compare | **FIXED + MEASURED** — 0.42 ms → 0.00009 ms per read pane per update pass at 200 blocks, and FLAT in the text's length where it was linear (TRACE D-3) |
-| tests (core · FULL Mac · iOS build · mobile if `Shared/` moved) | PENDING |
+| tests (core · FULL Mac · iOS build · mobile) | **DONE** — core **1567/171 GREEN** · the FULL Mac suite **2730/456** (+28/+6, exactly this unit's pins) with the expected **1 known issue** + the recorded load-flaky red, PAIRED-measured as unchanged by this diff · iOS build **GREEN** · the FULL mobile suite **626/106 PASSED with 4 known issues** |
 | the WALK + captures (52 onward) | **DONE — 8 captures (52–59)** on the dev-store Debug build: the space surviving a 4-second pause · ⇧⌘V landing one paragraph · row 93's open mark on a nameless title · the title running to the icons at 48 characters · the Starred section unchanged at the cap · row 57 before/after in both voices |
 | PROVISIONALs → `notes/QUESTIONS.md` (next free **#112**) | **DONE — #112 (a) the space-eater's scope · (b) the STAR CAP, which stops item 10 firing · (c) the paste chord + rule; the marker moved to #113** |
 
@@ -2178,6 +2190,88 @@ re-walk it the moment the Settings fold is fixed so they can be reached at all. 
 there, the carve the brief names — line-by-line, the palette road's shape (`restyleFacedLines`) one
 attribute set over — is the road, and the measurement to take first is whether N line-scoped edits
 beat one union edit on a 262-block note.
+
+## THE WALK — the dev-store Debug build, by hand (captures 52–59)
+
+`io.lduarte.Variorum.debug` from its own binary, never `/Applications`; the instance check ran first
+and found none of hers, and the instance was quit at the end (checked again: none). Captures in
+`notes/plans/13u2-screens/` (gitignored), continuing UNIT C's numbering. The Study voice under the
+Rose & moss bold palette throughout, plus both voices for row 57.
+
+| # | capture | the gesture | what the app did |
+|---|---|---|---|
+| 52 | `52-d-space-survives-the-pause` | ⌘N, type `the quick brown ` (trailing space), **wait 4 s** — twice the idle mint's clock — then type `fox` | **`the quick brown fox`.** The space she typed before the pause is still there, so the next word does not run into the last. On the pre-fix tree this reads `the quick brownfox`. **Item 2, in her own gesture.** |
+| 53 | `53-d-paste-without-line-breaks` | a three-line clipboard (`one line.` ⏎ `two line.` ⏎⏎ `three.`), **⇧⌘V** | **`one line. two line. three.`** — one paragraph, single spaces, in the block at the caret. **Item 11's chord and rule, in use.** |
+| 54 | `54-d-row93-open-mark-on-a-nameless-title` | a NAMELESS note (its title is the day), click the title | the day stands as a muted PROMPT, the caret sits at the field's leading edge, **and a rule now runs under the title band** — the open state row 93 asked for. Before, the click produced no visible change at all. |
+| 55 | `55-d-item13-the-title-runs-to-the-icons` | type a 63-character title, click away | **48 characters render before the ellipsis**, the words running from the masthead's leading edge right up to the icon row — the tray · **scraps** · references glyphs. Her *"at least until close to the scraps button"* is what the app does. |
+| 56 | `56-d-starred-section-unchanged-at-the-cap` | ⌘K ▸ star | the Starred section draws at the sidebar's TOP with its row and its star door, exactly as before — **placement untouched** (her own condition). The scroll cannot be shown: the cap is five. |
+| 57–59 | `57-d-row57-before-the-voice-switch` · `58-d-…-after-…-clean` · `59-d-…-second-switch-clean` | *A Scandal in Bohemia* (262 blocks) in Write at **block 239/262**, Study → Terminal → Study | the page is drawn top to bottom **with no blank region** in either voice, and the probe says the viewport never moved (TRACE D-6). |
+
+**One honest note from the walk:** `sips --cropOffset` crops from the image's CENTRE, not its top
+left — the first three crops looked at the wrong part of the window and cost a few minutes.
+Recorded so the next walk does not re-derive it.
+
+## DISPOSITIONS — every item this unit was given
+
+| the brief's item | verdict | evidence |
+|---|---|---|
+| **item 2 — the eager space-eater, BOTH platforms** | **TRACED, FIXED at the ONE shared brain, red-on-old on BOTH trees, walked** | TRACE D-1. The durability mint's edge trim; the fix is four lines in `Shared/EditorBrain/CrystallizationPlanner`. Mac: 5 of 9 pins failed pre-fix with 8 issues, the app-level arms driving the real input path. **Phone: the same pin run on a scratch worktree at this unit's opening commit failed with `storage.string → "the quick brown"`** — so the phone's red-on-old is measured, not inferred. Capture `52-d`. |
+| **item 10 — starred items scroll past ~7** | **BUILT + pinned (red-on-old: 360 pt drawn where the window is 225) — AND IT CANNOT FIRE; the cap is hers** | TRACE D-2. Placement untouched; one window constant now serves both scrolling sections and the fit test caps starred too. **`Operations.starLimit = 5`** makes her sentence unreachable — QUESTIONS #112(b), three options, and the three copy sites named. |
+| **item 11 — paste without newlines (+ the phone's rule)** | **BUILT — ⇧⌘V, the rule shared, 10 pins, walked** | TRACE D-5. The chord chosen by measurement (the app claims no "v" chord at all); the rule is one function in `Shared/`; pinned both ways — ⇧⌘V lands ONE block, ⌘V still lands three. Capture `53-d`. **The phone owes the DOOR** (a KnownIssues row, owner the mobile catch-up). |
+| **item 13 — the note-title cutoff** | **MEASURED and VERIFIED HEALED, not re-fixed** | TRACE D-4. 585.5 pt of band at every window width, ending 12 pt before the icon row where the scraps door is; ~48 characters. Healed by ledger row 11's U-8 work, which landed AFTER her report. The phone's ~30 characters is the SCREEN — recorded for the mobile catch-up. Capture `55-d`. |
+| **Act 10 row 93 — the nameless note's rename prompt** | **FIXED, pinned in both voices, walked** | TRACE D-4's second half. A 1-pt accent rule under the band while the field is open — row 93's own named remedy, in the tag field's open-state vocabulary. RED ON OLD by construction (nothing was drawn). Capture `54-d`. |
+| **P39a — Pool stops holding `LibraryViewModel`** | **FIXED, zero behaviour change** | Two closures from `RootView`; pins ride unmodified. |
+| **P39b — `WriteTakesPanel` stops constructing `TakesViewModel`** | **FIXED by MOVING THE FILE, zero behaviour change** | The literal "RootView constructs" road measured (five `EditorView` sites in four features, none of them `RootView`) and rejected with the reason at the file's head; 25 pins green, unmodified. |
+| **roster item 8 — the four protection items** | **VERIFIED: 2 MOOT BY CONSTRUCTION · 2 RETURN** | The table above, with a file:line fact per verdict. Nothing built — that is the item's own wording. |
+| **row 57 — the RE-FONT road** | **TRACED; DOES NOT REPRODUCE; nothing built; the row NARROWED** | TRACE D-6. `visibleY` identical at five samples across both voice switches on the 262-block story; the captures show no blank region. The two unexercised occasions and the probe's own caveat are stated. |
+| **TRACE 1a — the pane's projection compare** | **FIXED and MEASURED** | TRACE D-3. 0.42 ms → 0.00009 ms at 200 blocks, and FLAT where it was linear; pinned as SHAPE (zero foreign comparisons over twelve update passes), `TakePaneMeasureTests` riding unmodified. |
+
+**DEFERRED / HANDED UP, with owners:**
+
+- **The STAR CAP** (item 10's blocker) — hers: QUESTIONS #112(b).
+- **The typed near-empty confirmation** (#86(c)) — not built, its core probe unconsumed; **recommended owner 17l**, which already holds this surface's two siblings.
+- **COPY ALL on every words screen but one** — the shared enrollment page and the phone's three; the dead `copiedWords` branch is the evidence. **Owner: the closeout's call** (a 17 entry or the mobile catch-up for the phone's half).
+- **The phone's paste DOOR** — a KnownIssues row, owner the mobile app's catch-up round.
+- **Row 57's two unexercised occasions** — the row is narrowed and stays 13u2's; it needs the Settings fold fixed first (13u3/13u4's, per UNIT B).
+
+## FINALS
+
+| gate | result | baseline (UNIT C's) |
+|---|---|---|
+| core `swift test` | **1567 / 171 GREEN**, 54.7 s | 1567 / 171 — identical (this unit added no core pins) |
+| the FULL Mac suite | **2730 / 456**, 746.4 s — **+28 tests, +6 suites**, exactly this unit's pins, with the expected **1 known issue** (`openingACollapsedStoryLandsAtItsTopWithThreeStoriesExpanded`, `abs(below) → 73.0`) and **1 load-flaky red** (`theReadClickLandsInIndexAtThatBlock`) | 2702 / 450 with the same two |
+| iOS build (`VariorumMobile`) | **GREEN** — owed, `Shared/` moved (`CrystallizationPlanner` changed, `PlainPaste` added) | green |
+| the FULL mobile suite | **626 / 106 PASSED with 4 known issues**, 147 s — the 2 standing `MobileTrashTests` wrappers + row 64's 2 tutorial pins; **+4 / +1** over 13u1's full-run baseline (UNIT C's 2 cross-block pins, which never appeared in a full run, plus this unit's 2) | 622 / 105 w/ 4 known (13u1's) |
+| lockstep marker | untouched — **8** | 8 |
+
+**THE LOAD-FLAKY RED, MEASURED IN PAIRS — and this diff earned the pairing, because it touches PANE
+AUTHORITY.** `theReadClickLandsInIndexAtThatBlock` failed **3 of 3 isolated runs on the post-D tree**
+(3.17–3.19 s each) **and 3 of 3 on a scratch worktree at `5a072018`, this unit's record-only opening
+commit with zero code in it** (3.13–3.17 s), with a **byte-identical signature** down to the variant
+id (`live.count → 0`; the pane identifier nil; `…0032`). **This diff changes nothing about it.** That
+matches UNIT C's own paired measurement exactly, and the environment/load verdict in KnownIssues row
+61 stands.
+
+**No other failure in the full run**, so none of the four load-flaky siblings fired (the
+differential-latency pin, `CanvasDragTrackingTests`, `MastheadLayoutTests`' open-field arm,
+`BlocksWorkbenchFaceTests`' single-click budget).
+
+**Zero `Sources/VariorumCore/Sync/` lines. Zero `Persistence/`. Zero schema. Zero migrations. Marker
+8.** No core `Domain`/`Queries` file was touched either: item 2's fix landed in `Shared/EditorBrain`,
+item 11's rule is a new `Shared/` file, and everything else is app-side.
+
+**THE MOBILE PARITY LINE, answered rather than skipped.** Two items are both-platform and each is
+recorded as such: **item 2 is SHIPPED on the phone** (the shared plan; the phone's own road pinned
+green and measured RED on the pre-fix worktree — nothing owed), and **item 11's RULE is shipped and
+its DOOR is owed** (a KnownIssues row, owner the mobile catch-up). Item 13's phone half (a ~30-
+character title at phone width, which is probably where her count came from) is recorded for the
+same owner. Items 10 · 13-Mac · P39a/b · roster item 8 · row 57 · TRACE 1a are Mac-only surfaces.
+
+**Commits** (each pushed as it landed, per the checkpoint protocol): `5a072018` (the record opened) ·
+`a621b8ff` (item 2, both platforms) · `8db541b5` (item 10 + TRACE 1a) · `352cadcf` (item 13 + row 93)
+· `7979ec62` (item 11 + QUESTIONS #112) · `768a1d60` (P39a/P39b) · `7b932dff` (roster item 8's
+verification) · `83dda2a7` (the walk + row 57's trace) · this one (the dispositions, the finals, the
+KnownIssues rows). No history was rewritten and nothing was reverted.
 
 ---
 
