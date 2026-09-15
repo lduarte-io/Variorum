@@ -2174,27 +2174,19 @@ private struct OutlinePostRow: View {
                 // where the note started"). A card whose height does not
                 // depend on WHEN its read returns cannot do either.
                 if excerptSlotStands {
-                    ZStack(alignment: .topLeading) {
-                        // The slot's FLOOR: three lines of the card's own type,
-                        // hidden. Deliberately a prototype rather than
-                        // `lineLimit(3, reservesSpace: true)` — MEASURED: with
-                        // an EMPTY string (which is exactly the in-flight
-                        // state this exists for) `reservesSpace` reserved ONE
-                        // line, not three (the pin caught it: 66 → 103), so the
-                        // card still grew by two lines when the read landed.
-                        // A prototype in the same font cannot be wrong about
-                        // what three lines of it take.
-                        Text("X\nX\nX")
-                            .font(tokens.body)
-                            .hidden()
-                            .accessibilityHidden(true)
-                        Text(excerpt)
-                            .font(tokens.body)
-                            .foregroundStyle(tokens.ink)
-                            .lineLimit(3)
-                            .multilineTextAlignment(.leading)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .topLeading)
+                    // The slot's FLOOR is `reservesSpace` — three lines of the
+                    // card's own type whatever the preview turns out to be.
+                    // MEASURED, and the reason for the `" "`: with an EMPTY
+                    // string — exactly the in-flight state this exists for —
+                    // `reservesSpace` reserved ONE line, not three (the pin
+                    // caught it: 66 → 103, so the card still grew by two lines
+                    // when the read landed). A single space is one real line,
+                    // and the reservation then takes its three.
+                    Text(excerpt.isEmpty ? " " : excerpt)
+                        .font(tokens.body)
+                        .foregroundStyle(tokens.ink)
+                        .lineLimit(3, reservesSpace: true)
+                        .multilineTextAlignment(.leading)
                 }
             }
             .padding(.horizontal, 16)

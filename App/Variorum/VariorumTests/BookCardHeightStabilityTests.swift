@@ -190,6 +190,51 @@ struct BookCardHeightStabilityTests {
         }
     }
 
+    /// **The stabiliser the card fix needed, stated purely** (13u2 UNIT A). A
+    /// `LazyVStack` estimates its unrealized rows at the AVERAGE of the ones it
+    /// has measured, so a run holding two row SCALES reports a content height
+    /// that swings with whichever kind happens to be realized. Cards at their
+    /// honest height widened that ratio (headings ~51 pt against cards ~103)
+    /// and the swing — 68–74 pt a pass — walked a LANDED target off the top and
+    /// kept it moving: `openingACollapsedStoryLandsAtItsTopWithThreeStories
+    /// Expanded` went from settling in 0 hops to giving up 74 pt out after 13.
+    /// Proven by elimination before it was fixed: with the per-row deltas
+    /// instrumented, not ONE anchored row changed height through the drift.
+    ///
+    /// A run is therefore all-headings or all-cards. RED ON OLD: `segments`
+    /// returned a single mixed run.
+    @Test func aLazyRunHoldsRowsOfOneScaleOnly() {
+        func section(_ id: String) -> ReadingSection {
+            ReadingSection(
+                id: id, readingId: "book", name: id, position: id,
+                createdAt: Date(timeIntervalSince1970: 0),
+                updatedAt: Date(timeIntervalSince1970: 0))
+        }
+        let rows: [BookOutlineRows.Row] = [
+            .chapter(section("s1")),
+            .note(Self.entry("a")), .note(Self.entry("b")),
+            .chapter(section("s2")),
+            .note(Self.entry("c")),
+        ]
+        let segments = BookOutlineRows.segments(rows: rows, isExpanded: { _ in false })
+        let shapes: [String] = segments.map { segment in
+            switch segment {
+            case .run(let rows):
+                return rows.allSatisfy(BookOutlineRows.isCardScale) ? "cards(\(rows.count))"
+                    : (rows.contains(where: BookOutlineRows.isCardScale) ? "MIXED" : "headings(\(rows.count))")
+            case .expanded:
+                return "expanded"
+            }
+        }
+        #expect(!shapes.contains("MIXED"), "no lazy run mixes row scales — got \(shapes)")
+        #expect(shapes == ["headings(1)", "cards(2)", "headings(1)", "cards(1)"],
+                "headings and cards take their own runs — got \(shapes)")
+    }
+
+    private static func entry(_ id: String) -> Queries.ReadingEntry {
+        Queries.ReadingEntry(postID: id, title: nil, entryDate: nil, sectionPath: nil)
+    }
+
     /// The companion claim, stated so the fix cannot be read as "reserve three
     /// lines and hope": the slot's rule itself. While the read is in flight the
     /// slot stands (unknown is not empty); once the answer is a preview it
