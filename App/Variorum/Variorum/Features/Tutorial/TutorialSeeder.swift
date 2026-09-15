@@ -1220,10 +1220,51 @@ enum TutorialSeeder {
             + "BOTH originals \u{2014} not one of them \u{2014} each with its "
             + "own text and a \(BlockHistoryPath.bringBackVerb) button that "
             + "puts it into the note again, beside what it became. Nothing "
-            + "counted down. Nothing was in the Trash. Nothing announced "
-            + "itself at the time, on purpose: a message on every join would "
-            + "be noise, and this panel is the app keeping its side of that "
-            + "bargain.",
+            + "counted down. Nothing was in the Trash. All the app said at "
+            + "the time was one quiet line at the bottom, naming where the "
+            + "two originals went \u{2014} and this panel is where that line "
+            + "points.",
+
+            // **13u1 UNIT 2 — the FANNED CROSS-BLOCK MATRIX**, which row 27
+            // deliberately left to this phase (*"the fanned cross-block
+            // matrix is 13u's — its sitting + its own lesson update"*). Her
+            // item 5 legibility mandate is why it is here at all:
+            // *teachability is a design constraint*, and the gesture now has
+            // three answers where the lesson taught one.
+            "ONE MORE THING, and it is the whole shape of a big selection. "
+            + "Select across several paragraphs, press \u{232B}, and every block "
+            + "you touched gets exactly ONE of two fates \u{2014} decided by how "
+            + "much of it you selected. A block you covered WHOLE leaves the "
+            + "page the FIRST way: to the Trash, with every take on it, "
+            + "together \u{2014} so \(TrayPath.putBackVerb) returns the whole family, not "
+            + "a piece of it. A block you covered only IN PART keeps its name "
+            + "and its place, and only the take you can SEE loses its piece. "
+            + "The takes you are not looking at are never touched.",
+
+            "The two ENDS then join, or they don't, and that is decided by "
+            + "WHERE you cut. Cut in the MIDDLE of a paragraph at both ends "
+            + "and the remainders become one paragraph, the way any editor "
+            + "would join them \u{2014} the SECOND exit, with both originals kept "
+            + "whole under \(BlockHistoryPath.cameFromSection). Cut at a "
+            + "paragraph BREAK at either end \u{2014} the top of a block, the "
+            + "bottom of one, or a line break inside one \u{2014} and the ends keep "
+            + "their own blocks. You meant whole paragraphs, so whole "
+            + "paragraphs is what you get.",
+
+            "And there is one more way the ends stay apart: a TAKE hanging "
+            + "on one of them. A keystroke will never fold a fan away \u{2014} the "
+            + "edit lands in the take you can see, the fan stays where it "
+            + "is, and the two blocks stay two. When you do want them joined, "
+            + "merge them deliberately and choose what the takes do.",
+
+            "EXIT THREE, top: select from the middle of me\u{2026}",
+
+            "EXIT THREE, middle: \u{2026}straight through all of me. I have TWO "
+            + "takes, and I go to the Trash whole \u{2014} both of them with me.",
+
+            "EXIT THREE, bottom: \u{2026}to the middle of me, and press \u{232B}. Then "
+            + "look: the top and I are one paragraph, the middle is in the "
+            + "tray with both its takes, and one \u{2325}\u{2318}Z puts all of it back.",
 
             "So, whenever something is missing: if you DELETED it, look where "
             + "things are leaving \u{2014} the note's tray, then the Trash. If "
@@ -1236,7 +1277,16 @@ enum TutorialSeeder {
             + "family's clock \u{2014} and the delete that does it says so in "
             + "its own receipt, while you are standing there.",
         ])
-        _ = exits
+        // The fan the matrix teaches, staged on the MIDDLE block of the
+        // EXIT THREE trio — the cell her item 5 ruling actually CHANGED: a
+        // fanned block covered WHOLE goes to the Trash with its family
+        // intact, where the older behaviour emptied the take you could see
+        // and left a blank block with a fan hanging on it.
+        if let middle = exits.blocks.first(where: {
+            $0.variant.workingText.hasPrefix("EXIT THREE, middle")
+        }) {
+            try take(on: middle, "the middle block's second take \u{2014} it rides to the Trash too.")
+        }
 
         // ————————————————————————— keeping it private —————————————————————
         //

@@ -3256,3 +3256,94 @@ struct TutorialPrivacyChapterTests {
         }
     }
 }
+
+// MARK: - THE FANNED CROSS-BLOCK MATRIX, taught by doing (13u1 UNIT 2)
+
+/// **Row 27's deferred half, built.** The post-13l polish round wrote the
+/// "two exits" lesson and recorded in its own ledger that *"the fanned
+/// cross-block matrix is 13u's — its sitting + its own lesson update"*. Her
+/// item 5 mandate is the reason it could not stay deferred past this unit:
+/// *teachability is a design constraint*, and the gesture now has more than
+/// one answer.
+///
+/// The lesson teaches the matrix and then asks the reader to DO it (her own
+/// method for this chapter), so this walk does exactly what the EXIT THREE
+/// cards say and asks the store where each block went.
+@MainActor
+@Suite("Tutorial acts — the fanned cross-block matrix (13u1 UNIT 2)")
+struct TutorialFannedMatrixTests {
+
+    @Test func theMatrixLessonTeachesTheThreeAnswersTheGestureHas() async throws {
+        try await withTutorialWorld { _, db, bookID in
+            let lesson = try await db.read { try lessonID($0, bookID: bookID, "the two exits") }
+            let prose = try await slots(db, lesson).compactMap(\.text).joined(separator: "\n")
+
+            // The WHOLE/PART fork — the sentence the matrix rests on.
+            #expect(prose.contains("covered WHOLE") && prose.contains("covered only IN PART"))
+            #expect(prose.contains("with every take on it"),
+                    "a fanned block covered whole goes WHOLE — her ruling")
+            #expect(prose.contains("only the take you can SEE loses its piece"),
+                    "…and a partly covered one touches the shown take only")
+            // R-13u-2, in the lesson's mouth, BOTH kinds of break named.
+            #expect(prose.contains("MIDDLE of a paragraph at both ends"))
+            #expect(prose.contains("paragraph BREAK at either end"))
+            #expect(prose.contains("a line break inside one"),
+                    "the INTERNAL newline half of her ruling is named, not implied")
+            // #11a's rule at the ends.
+            #expect(prose.contains("never fold a fan away"))
+        }
+    }
+
+    @Test func theMatrixLessonsOwnGestureLandsWhereItSaysItWill() async throws {
+        try await withTutorialWorld { session, db, bookID in
+            let lesson = try await db.read { try lessonID($0, bookID: bookID, "the two exits") }
+            let harness = try tutorialEditor(session, db, postID: lesson)
+
+            let top = try staged(harness, "EXIT THREE, top")
+            let middle = try staged(harness, "EXIT THREE, middle")
+            let bottom = try staged(harness, "EXIT THREE, bottom")
+
+            // The middle really carries the fan the card promises.
+            let fanBefore = try await db.read { [blockID = middle.blockID] db in
+                try Queries.blockFan(db, blockID: blockID)
+                    .filter { $0.deletedAt == nil && $0.status == .active }
+            }
+            #expect(fanBefore.count == 2, "the staged fan the lesson names")
+
+            // The gesture the cards ask for: from the middle of the top,
+            // straight through the middle block, to the middle of the bottom.
+            let topRange = try entryRange(harness, top.blockID)
+            let bottomRange = try entryRange(harness, bottom.blockID)
+            let from = topRange.location + topRange.length / 2
+            let to = bottomRange.location + bottomRange.length / 2
+            harness.replace(NSRange(location: from, length: to - from), with: "")
+            await harness.flush()
+
+            let standing = try harness.storeSlots().map(\.blockID)
+            #expect(!standing.contains(middle.blockID), "the middle left the page")
+            #expect(!standing.contains(top.blockID) && !standing.contains(bottom.blockID),
+                    "the two ends joined into a fresh block")
+
+            // …to the TRAY, with BOTH takes — the cell her ruling changed.
+            let trayed = try await db.read { [now = session.now] db in
+                try Queries.trayBlocks(db, postID: lesson, now: now).map(\.blockID)
+            }
+            #expect(trayed.contains(middle.blockID))
+            let ridden = try await db.read { [blockID = middle.blockID, now = session.now] db in
+                try Queries.deletedTakes(db, blockID: blockID, now: now).count
+            }
+            #expect(ridden == 2, "both takes rode to the Trash — Put back returns the family")
+
+            // And the two ends are one block whose Came from names both.
+            let joined = try #require(try harness.storeSlots().first {
+                $0.text?.contains("EXIT THREE") == true
+            }).blockID
+            let history = try await db.read { [now = session.now] db in
+                try Queries.blockHistory(db, blockID: joined, now: now)
+            }
+            #expect(Set(history.origins.map(\.origin.blockID))
+                == Set([top.blockID, bottom.blockID]),
+                    "BOTH ends, kept whole in the block they became")
+        }
+    }
+}
