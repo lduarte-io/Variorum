@@ -834,7 +834,7 @@ private struct BookIndexPaneNote: View {
                 }
             } catch is CancellationError {
             } catch {
-                session.status.speak(OpsRefusalCopy.message(for: error))
+                session.status.refuse(OpsRefusalCopy.message(for: error))
             }
         }
     }

@@ -221,8 +221,8 @@ final class ShellRouter {
     // MARK: - The split's doors (13f batch 4, W1/A25)
 
     /// Speech lands in the StatusCenter — wired by the shell, exactly as
-    /// `CommandRouter.speak` is, so the router never reaches for a session.
-    @ObservationIgnored var speak: ((String) -> Void)?
+    /// `CommandRouter.refuse` is, so the router never reaches for a session.
+    @ObservationIgnored var refuse: ((String) -> Void)?
 
     /// "Open Beside" for a NAMED note (the row doors) — and the ONE place
     /// her round-7.3 refusal is spoken, so the menu door and every row door
@@ -232,7 +232,7 @@ final class ShellRouter {
         case .opened:
             break  // the pane appeared; nothing to say
         case .focusedExistingPane:
-            speak?(WorkspaceNaming.sameNoteNote(workspace.label(for: destination)))
+            refuse?(WorkspaceNaming.sameNoteNote(workspace.label(for: destination)))
         }
     }
 

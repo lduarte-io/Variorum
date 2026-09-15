@@ -561,7 +561,7 @@ extension EditorViewModel {
         // that applied NOTHING reports a no-op and always shows (P-2).
         let line = FindReplaceGate.completion(
             applied: applied, moved: moved, blocked: blocked)
-        applied > 0 ? showReceipt(line) : showStatus(line)
+        applied > 0 ? showReceipt(line) : refuse(line)
         findReplaceTask = nil
     }
 }

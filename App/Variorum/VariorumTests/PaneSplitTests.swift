@@ -382,7 +382,7 @@ struct PaneSplitDoorTests {
     @Test func theShellSpeaksTheSameNoteRefusalAndOpensTheSplitOtherwise() {
         let router = ShellRouter()
         var spoken: [String] = []
-        router.speak = { spoken.append($0) }
+        router.refuse = { spoken.append($0) }
         router.workspace.select(.post("a"))
 
         router.openBeside(.post("b"))

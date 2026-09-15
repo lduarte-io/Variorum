@@ -139,7 +139,7 @@ struct NoteWindowView: View {
             router.workspace.showOnly(.post(postID))
             windows.register(windowID, router: router, kind: .noteOnly)
             let status = session.status
-            router.speak = { status.speak($0) }
+            router.refuse = { status.refuse($0) }
         }
         .onDisappear {
             windows.unregister(windowID)

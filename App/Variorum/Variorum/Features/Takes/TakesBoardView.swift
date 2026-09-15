@@ -353,7 +353,7 @@ struct TakesBoardView: View {
             model.closeAllFans()
         case .branch:
             guard let pane = model.focusedPane else {
-                model.speak("Click into a take first — ⌘T branches the take you're in.")
+                model.refuse("Click into a take first — ⌘T branches the take you're in.")
                 return
             }
             Task {
@@ -365,7 +365,7 @@ struct TakesBoardView: View {
             }
         case .blank:
             guard let pane = model.focusedPane else {
-                model.speak("Click into a block first — ⌥⌘T adds a blank take there.")
+                model.refuse("Click into a block first — ⌥⌘T adds a blank take there.")
                 return
             }
             Task {
@@ -374,7 +374,7 @@ struct TakesBoardView: View {
             }
         case .blankChoose:
             guard let pane = model.focusedPane else {
-                model.speak("Click into a block first — ⇧⌥⌘T opens a blank take as chosen there.")
+                model.refuse("Click into a block first — ⇧⌥⌘T opens a blank take as chosen there.")
                 return
             }
             Task { await model.newBlankTakeAsChosen(blockID: pane.blockID) }

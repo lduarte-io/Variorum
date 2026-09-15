@@ -101,7 +101,7 @@ final class CanvasViewModel {
     }
 
     /// The routed commands' speaking surface (fire-and-speak, never dead).
-    func speak(_ message: String) {
+    func refuse(_ message: String) {
         statusMessage = message
     }
 

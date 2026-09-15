@@ -57,7 +57,7 @@ final class BookIndexEditModel {
         let coordinator = session.autosave(forPost: postID)
         coordinators[postID] = coordinator
         tokens[postID] = coordinator.observe(onError: { [weak self] error in
-            self?.session.status.speak(OpsRefusalCopy.message(for: error))
+            self?.session.status.refuse(OpsRefusalCopy.message(for: error))
         })
         return coordinator
     }

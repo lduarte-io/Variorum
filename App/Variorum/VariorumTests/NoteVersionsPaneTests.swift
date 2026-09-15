@@ -334,25 +334,25 @@ struct NoteVersionsPaneTests {
     /// receipt read as an error: the defect, not the fix).
     ///
     /// The class is decided WHERE THE MESSAGE IS PRODUCED, and the two doors
-    /// are `setStatus` (something happened) and `speak` (fire-and-speak — the
+    /// are `setReceipt` (something happened) and `refuse` (fire-and-speak — the
     /// door that cannot act in its context and says why). `statusMessage`
     /// survives as a forwarder, so every shipped pin rides unmodified.
     @Test func theBoardTellsAReceiptFromARefusal() async throws {
         try await mounted { session, post, _, _ in
             let takes = TakesViewModel(session: session, postID: post)
-            takes.setStatus("New block added at the end — type away.")
+            takes.setReceipt("New block added at the end — type away.")
             #expect(takes.status?.isRefusal == false, "a door that DID something")
             #expect(takes.statusMessage == "New block added at the end — type away.",
                     "the forwarder still answers — the 3C parity pattern")
 
-            takes.speak("Click into a block first — divide cuts the block you're in.")
+            takes.refuse("Click into a block first — divide cuts the block you're in.")
             #expect(takes.status?.isRefusal == true,
                     "fire-and-speak exists for the door that cannot act (P-2)")
 
             takes.setRefusal(TakesViewModel.message(for: OperationError.lockedPost(id: post)))
             #expect(takes.status?.isRefusal == true)
 
-            takes.setStatus(nil)
+            takes.clearStatus()
             #expect(takes.status == nil && takes.statusMessage == nil)
         }
     }

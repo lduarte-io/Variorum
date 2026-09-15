@@ -2381,7 +2381,7 @@ struct TutorialDeletionActsTests {
             #expect(session.undoMenuState.topLabel == "Delete Blocks")
 
             harness.textView.undoManager?.removeAllActions()
-            harness.model.showStatus("")
+            harness.model.refuse("")
             let event = NSEvent.keyEvent(
                 with: .keyDown, location: .zero, modifierFlags: .command, timestamp: 0,
                 windowNumber: 0, context: nil, characters: "z",

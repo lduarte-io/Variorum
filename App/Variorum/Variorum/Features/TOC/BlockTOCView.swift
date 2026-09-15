@@ -390,7 +390,7 @@ final class BlockTOCViewModel {
 
     /// The view's speaking surface (fire-and-speak — a malformed position
     /// entry gets words, never silence).
-    func speak(_ message: String) {
+    func refuse(_ message: String) {
         statusMessage = message
     }
 
@@ -451,7 +451,7 @@ final class BlockTOCViewModel {
     func mergePicked(bringEveryTake: Bool = true) async {
         let pickedSet = picked.picked
         guard pickedSet.count >= 2 else {
-            speak("\u{2318}-click a second block first — merge joins the blocks you pick.")
+            refuse("\u{2318}-click a second block first — merge joins the blocks you pick.")
             return
         }
         await autosave.flushNow()
@@ -466,11 +466,11 @@ final class BlockTOCViewModel {
         }
         let order = slots.map(\.blockID)
         guard pickedSet.isSubset(of: Set(order)) else {
-            speak(BlockSelectionCopy.blockGoneForMerge)
+            refuse(BlockSelectionCopy.blockGoneForMerge)
             return
         }
         guard BlockSelection.isContiguousRun(pickedSet, in: order) else {
-            speak("Merge joins neighbouring blocks — these aren't next to each other. "
+            refuse("Merge joins neighbouring blocks — these aren't next to each other. "
                 + "Pick blocks that sit side by side.")
             return
         }
@@ -497,7 +497,7 @@ final class BlockTOCViewModel {
         // on no displayed-take resolution and cannot suffer that race.
         if bringEveryTake,
            !CarryAllMerge.chainComposes(order: chain, fans: fans, displayed: displayed) {
-            speak(FannedDefaultsCopy.takesChangedMerge)
+            refuse(FannedDefaultsCopy.takesChangedMerge)
             return
         }
         statusMessage = nil
@@ -591,7 +591,7 @@ final class BlockTOCViewModel {
             // did (the ONE predicate, `acted`).
             let line = SplitAtNewlinesCopy.receipt(
                 results, whenNothingSplit: SplitAtNewlinesCopy.pickedAlreadyWhole)
-            SplitAtNewlinesCopy.acted(results) ? showReceipt(line) : speak(line)
+            SplitAtNewlinesCopy.acted(results) ? showReceipt(line) : refuse(line)
         } catch {
             statusMessage = OpsRefusalCopy.message(for: error)
         }

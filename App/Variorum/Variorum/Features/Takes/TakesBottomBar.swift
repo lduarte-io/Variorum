@@ -133,7 +133,7 @@ struct TakesBottomBar: View {
                 guard let slot = targetSlot else { return speakNoTarget() }
                 let from = model.focusedPane?.variantID ?? slot.variantID
                 guard let from else {
-                    return model.speak("This block has no renderable take to branch from.")
+                    return model.refuse("This block has no renderable take to branch from.")
                 }
                 Task { await model.branchTakeRevealed(blockID: slot.blockID, from: from) }
             }
@@ -152,7 +152,7 @@ struct TakesBottomBar: View {
                 // take you're in (the shown take on a one-block post).
                 guard let slot = targetSlot else { return speakNoTarget() }
                 guard let variantID = model.focusedPane?.variantID ?? slot.variantID else {
-                    return model.speak("This block has no renderable take to label.")
+                    return model.refuse("This block has no renderable take to label.")
                 }
                 model.requestTakeLabel(variantID: variantID)
             }
@@ -208,7 +208,7 @@ struct TakesBottomBar: View {
     }
 
     private func speakNoTarget() {
-        model.speak("Click into a block first — the block menu acts on the block you're in.")
+        model.refuse("Click into a block first — the block menu acts on the block you're in.")
     }
 
     var body: some View {
@@ -338,7 +338,7 @@ struct TakesBottomBar: View {
             guard let slot = targetSlot else { return speakNoTarget() }
             let from = model.focusedPane?.variantID ?? slot.variantID
             guard let from else {
-                return model.speak("This block has no renderable take to branch from.")
+                return model.refuse("This block has no renderable take to branch from.")
             }
             Task { await model.branchTakeRevealed(blockID: slot.blockID, from: from) }
         }

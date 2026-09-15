@@ -575,7 +575,7 @@ struct BlockDeletionAndRedoTests {
     /// `session.runner.run` — an actor hop off the main thread — and
     /// `UndoStack.redo` moves BOTH stacks under its lock and returns
     /// BEFORE the door's `Task { @MainActor }` continuation can resume and
-    /// call `status.speak`. So `redoDepth == 0` becomes true strictly
+    /// call `status.refuse`. So `redoDepth == 0` becomes true strictly
     /// earlier than the status this test asserts, and a poll that exits on
     /// the stack can land inside that window. `theRedoReportArrivesAfterTheStackHasAlreadyMoved`
     /// below holds the window open on purpose and proves it.

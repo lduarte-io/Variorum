@@ -483,15 +483,23 @@ final class AppSession {
             MultiBookEditNote.markSeen()
             let target = MultiBookEditNote.divergeTarget(
                 books, recentlyVisited: self.recentBookIDs())
-            self.status.speak(
-                MultiBookEditNote.sentence(bookCount: books.count),
-                action: target.map { book in
-                    StatusCenter.Item.Action(
+            // 13u2 UNIT E (row 56): the class is READ here rather than
+            // inferred from whether an action rode along — with a book to
+            // diverge into this is an OFFER (a question with a button);
+            // without one it is the plain note it always was. Byte-identical
+            // to what `speak(_:action:)` delivered, said out loud.
+            let sentence = MultiBookEditNote.sentence(bookCount: books.count)
+            if let book = target {
+                self.status.offer(
+                    sentence,
+                    action: StatusCenter.Item.Action(
                         label: DivergeCopy.buttonLabel(book: book.name),
                         perform: { [weak self] in
                             self?.divergeFromNote(postID, in: book)
-                        })
-                })
+                        }))
+            } else {
+                self.status.refuse(sentence)
+            }
         }
     }
 
@@ -504,7 +512,7 @@ final class AppSession {
                 _ = try await self.divergeForBook(postID, in: book.id)
                 self.status.receipt(DivergeCopy.done(book: book.name))  // 18i: it landed
             } catch {
-                self.status.speak(DivergeCopy.refusal(for: error, book: book.name))
+                self.status.refuse(DivergeCopy.refusal(for: error, book: book.name))
             }
         }
     }
@@ -566,7 +574,7 @@ final class AppSession {
         // center; the router's context reads the observable editor router
         // and undo mirror (so menu enablement tracks them).
         let status = self.status
-        commandRouter.speak = { status.speak($0) }
+        commandRouter.refuse = { status.refuse($0) }
         let editorRouter = self.editorRouter
         commandRouter.writeEditorAttached = { editorRouter.active != nil }
         // QoL batch 3 (L6): the find family needs the editor that owns a

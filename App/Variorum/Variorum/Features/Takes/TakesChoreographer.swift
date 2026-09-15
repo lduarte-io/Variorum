@@ -63,7 +63,7 @@ final class TakesChoreographer {
             addressed = model.commandTargetSlot
         }
         guard let slot = addressed else {
-            model.speak("Click into a block first — then the gesture knows where to act.")
+            model.refuse("Click into a block first — then the gesture knows where to act.")
             return
         }
         var intent = WriteIntent(postID: model.postID, blockID: slot.blockID)

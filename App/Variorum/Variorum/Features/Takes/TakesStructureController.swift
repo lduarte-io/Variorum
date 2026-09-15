@@ -25,7 +25,7 @@
 //    as a forwarder, so every call site and every pin reads UNCHANGED —
 //    zero test edits is the parity proof (the 3C pattern).
 //  - The controller reaches the model only through named internal members:
-//    `setStatus`, `run`, `speak`, `flushPendingText`, `structuralInFlight`,
+//    `setReceipt`, `run`, `refuse`, `flushPendingText`, `structuralInFlight`,
 //    `commandTargetSlot`, `clearMergeSelection`, and its read surface
 //    (`projection`, `board`, `choreography`, `authority`, `session`).
 //  - What deliberately did NOT move: the `DivideWCeremonyHost` conformance
@@ -67,14 +67,14 @@ final class TakesStructureController {
     /// empty block mints at the post's end and its pane takes the ring the
     /// moment its slot arrives ("just start typing", literally).
     func addBlockAtEnd() async {
-        model.setStatus(nil)
+        model.clearStatus()
         do {
             let result: Operations.NewBlockResult = try await model.session.runner
                 .run { [postID = model.postID] ops in
                     try ops.newBlock(in: postID, text: "", at: .end)
                 }
             model.choreography.parkFocus(onVariant: result.variant.id)
-            model.setStatus("New block added at the end — type away.")
+            model.setReceipt("New block added at the end — type away.")
         } catch {
             model.setRefusal(TakesViewModel.message(for: error))
         }
@@ -89,17 +89,17 @@ final class TakesStructureController {
     /// spoken.
     func insertBlockBelowFocused() async {
         guard let slot = model.commandTargetSlot else {
-            model.speak("Click into a block first — the new block lands right below it.")
+            model.refuse("Click into a block first — the new block lands right below it.")
             return
         }
-        model.setStatus(nil)
+        model.clearStatus()
         do {
             let result: Operations.NewBlockResult = try await model.session.runner
                 .run { [postID = model.postID] ops in
                     try ops.newBlock(in: postID, text: "", at: .after(slot.blockID))
                 }
             model.choreography.parkFocus(onVariant: result.variant.id)
-            model.setStatus("New block added below — type away.")
+            model.setReceipt("New block added below — type away.")
         } catch {
             model.setRefusal(TakesViewModel.message(for: error))
         }
@@ -114,7 +114,7 @@ final class TakesStructureController {
     /// posts refuse through the op, spoken.
     func deleteFocusedBlock() async {
         guard let slot = model.commandTargetSlot else {
-            model.speak("Click into a block first — this removes the block you're in.")
+            model.refuse("Click into a block first — this removes the block you're in.")
             return
         }
         let slots = model.projection.slots
@@ -129,10 +129,10 @@ final class TakesStructureController {
         // declared act, one contract, however many doors (P-1's own
         // reasoning); without this the two native doors differed.
         guard !model.autosave.isDirty else {
-            model.speak("Unsaved changes couldn't be written — resolve that first, then retry.")
+            model.refuse("Unsaved changes couldn't be written — resolve that first, then retry.")
             return
         }
-        model.setStatus(nil)
+        model.clearStatus()
         do {
             try await model.session.runner.run { ops in try ops.deleteBlock(slot.blockID) }
             if let variantID = survivor?.variantID {
@@ -141,7 +141,7 @@ final class TakesStructureController {
             // 13j J8(a): ONE receipt for every delete door — shared so the
             // Takes board and Write can never drift on it. 13j round 8b: it
             // also names a preserved original this delete just stranded.
-            model.setStatus(BlockSelectionCopy.deletedNote(1)
+            model.setReceipt(BlockSelectionCopy.deletedNote(1)
                 + (await StrandedOriginals.note(
                     session: model.session, blockIDs: [slot.blockID]) ?? ""))
         } catch {
@@ -155,7 +155,7 @@ final class TakesStructureController {
     /// discipline, or their ring landing.
     func archiveFocusedBlock() async {
         guard let slot = model.commandTargetSlot else {
-            model.speak("Click into a block first — this sets the block you're in aside.")
+            model.refuse("Click into a block first — this sets the block you're in aside.")
             return
         }
         let slots = model.projection.slots
@@ -164,16 +164,16 @@ final class TakesStructureController {
             .flatMap { i in i + 1 < slots.count ? slots[i + 1] : (i > 0 ? slots[i - 1] : nil) }
         await model.autosave.flushNow()
         guard !model.autosave.isDirty else {
-            model.speak("Unsaved changes couldn't be written — resolve that first, then retry.")
+            model.refuse("Unsaved changes couldn't be written — resolve that first, then retry.")
             return
         }
-        model.setStatus(nil)
+        model.clearStatus()
         do {
             try await model.session.runner.run { ops in try ops.archiveBlock(slot.blockID) }
             if let variantID = survivor?.variantID {
                 model.choreography.parkFocus(onVariant: variantID)
             }
-            model.setStatus(BlockSelectionCopy.archivedNote)
+            model.setReceipt(BlockSelectionCopy.archivedNote)
         } catch {
             model.setRefusal(TakesViewModel.message(for: error))
         }
@@ -186,7 +186,7 @@ final class TakesStructureController {
     /// One `withCompound` over every block, so the whole repair is ONE ⌥⌘Z.
     func splitEveryNewlineIntoBlocks() async {
         guard !model.structuralInFlight else {
-            model.speak("Another structural change is still landing.")
+            model.refuse("Another structural change is still landing.")
             return
         }
         guard await model.flushPendingText() else { return }
@@ -201,7 +201,7 @@ final class TakesStructureController {
         }
         guard slots.contains(where: { !NewlineSplitting.breaks(in: $0.text ?? "").isEmpty })
         else {
-            model.speak(SplitAtNewlinesCopy.noteAlreadyWhole)
+            model.refuse(SplitAtNewlinesCopy.noteAlreadyWhole)
             return
         }
         await runSplit(over: slots.map(\.blockID),
@@ -212,11 +212,11 @@ final class TakesStructureController {
     /// are standing in (`deleteFocusedBlock`'s own target rule).
     func splitFocusedBlockAtNewlines() async {
         guard let slot = model.commandTargetSlot else {
-            model.speak("Click into a block first — this splits the block you're in.")
+            model.refuse("Click into a block first — this splits the block you're in.")
             return
         }
         guard !model.structuralInFlight else {
-            model.speak("Another structural change is still landing.")
+            model.refuse("Another structural change is still landing.")
             return
         }
         guard await model.flushPendingText() else { return }
@@ -228,12 +228,12 @@ final class TakesStructureController {
     /// merge and delete (13e E2/E3's own selection).
     func splitSelectedBlocksAtNewlines() async {
         guard !model.structuralInFlight else {
-            model.speak("Another structural change is still landing.")
+            model.refuse("Another structural change is still landing.")
             return
         }
         let picked = model.board.mergeSelection
         guard !picked.isEmpty else {
-            model.speak(BlockSelectionCopy.nothingPicked)
+            model.refuse(BlockSelectionCopy.nothingPicked)
             return
         }
         guard await model.flushPendingText() else { return }
@@ -262,7 +262,7 @@ final class TakesStructureController {
     ) async {
         model.structuralInFlight = true
         defer { model.structuralInFlight = false }
-        model.setStatus(nil)
+        model.clearStatus()
         // Her hand (the 17p batch-a ladder, R2-1): the split multiplies rows
         // ABOVE a landed one through a bare runner with no focus migration
         // and no gone row (the landed row keeps its identity as its own first
@@ -297,7 +297,7 @@ final class TakesStructureController {
             let line = SplitAtNewlinesCopy.receipt(
                 results, whenNothingSplit: whenNothingSplit)
             SplitAtNewlinesCopy.acted(results)
-                ? model.setStatus(line) : model.setRefusal(line)
+                ? model.setReceipt(line) : model.setRefusal(line)
         } catch {
             model.setRefusal(TakesViewModel.message(for: error))
         }
@@ -373,15 +373,15 @@ final class TakesStructureController {
     /// this door has always opened. The plan is the same either way.
     func divideFocused(ceremony: Bool = false) async {
         guard !model.structuralInFlight else {
-            model.speak("Another structural change is still landing.")
+            model.refuse("Another structural change is still landing.")
             return
         }
         guard let slot = model.commandTargetSlot else {
-            model.speak("Click into a block first — divide cuts the block you're in.")
+            model.refuse("Click into a block first — divide cuts the block you're in.")
             return
         }
         guard let seed = seedTakeForDivide(slot: slot) else {
-            model.speak("This block has no renderable take to divide.")
+            model.refuse("This block has no renderable take to divide.")
             return
         }
         model.structuralInFlight = true
@@ -396,7 +396,7 @@ final class TakesStructureController {
                 // answer, word for word (P-2: the ceremony genuinely cannot
                 // act, so the door says why and names the one that can).
                 model.structuralInFlight = false
-                model.speak(FannedDefaultsCopy.divideCeremonyNeedsAFan)
+                model.refuse(FannedDefaultsCopy.divideCeremonyNeedsAFan)
                 return
             }
             // The act runs with the panes still FROZEN — that window is
@@ -427,12 +427,12 @@ final class TakesStructureController {
                 blockID: blockID, seedVariantID: prepared.seedTakeID, seedCut: activeCut)
         case .refusal(let refusal):
             model.structuralInFlight = false
-            model.speak(RefusalCopy.message(for: refusal))
+            model.refuse(RefusalCopy.message(for: refusal))
         default:
             // The remaining plans are span gestures the divide command
             // never returns; nothing here can act on them.
             model.structuralInFlight = false
-            model.speak(RefusalCopy.message(for: .nothingToDo))
+            model.refuse(RefusalCopy.message(for: .nothingToDo))
         }
     }
 
@@ -474,7 +474,7 @@ final class TakesStructureController {
         // take she was never in, at a caret offset from the one that died.
         guard let seedTake = liveActive.first(where: { $0.id == seed.variantID })
         else {
-            model.speak("This block's takes changed — try the divide again.")
+            model.refuse("This block's takes changed — try the divide again.")
             return nil
         }
         let plan = StructuralGesturePlanner.plan(
@@ -532,13 +532,13 @@ final class TakesStructureController {
     /// buffer clean), so there is no bespoke re-render here. The ring goes
     /// to the SUCCESSOR, mirroring Write's caret rule for this gesture.
     private func runDivide(blockID: String, cut: Int) async {
-        model.setStatus(nil)
+        model.clearStatus()
         do {
             let result: Operations.DivideResult = try await model.session.runner.run { ops in
                 try ops.divide(blockID, cut: cut)
             }
             model.choreography.parkFocus(onVariant: result.variant.id)
-            model.setStatus("Block divided — ⌥⌘Z undoes it.")
+            model.setReceipt("Block divided — ⌥⌘Z undoes it.")
         } catch {
             model.setRefusal(TakesViewModel.message(for: error))
         }
@@ -562,7 +562,7 @@ final class TakesStructureController {
         guard let cut = activeCut else {
             // A one-word seed take has no interior cut — Write's answer,
             // verbatim (the ceremony's parking is the road for that).
-            model.speak(RefusalCopy.message(for: .nothingToDo)
+            model.refuse(RefusalCopy.message(for: .nothingToDo)
                 + " Divide choosing takes (⌥⌘⇧D) can send a whole take to one side.")
             return
         }
@@ -572,10 +572,10 @@ final class TakesStructureController {
             // `prepareDivide` already verified the seed against this same
             // live fan, so this is belt-and-braces — and it speaks Write's
             // F-3 sentence rather than inventing a second one.
-            model.speak(FannedDefaultsCopy.takesChangedDivide)
+            model.refuse(FannedDefaultsCopy.takesChangedDivide)
             return
         }
-        model.setStatus(nil)
+        model.clearStatus()
         do {
             let stack = model.session.undoStack
             let result: Operations.DivideWResult
@@ -592,7 +592,7 @@ final class TakesStructureController {
             // The ring goes to the SECOND successor's leading take — Write's
             // caret rule for this shape, in this board's vocabulary.
             model.choreography.parkFocus(onVariant: result.second.variants[0].id)
-            model.setStatus(FannedDefaultsCopy.divided(
+            model.setReceipt(FannedDefaultsCopy.divided(
                 kept: max(0, result.first.variants.count - 1),
                 stayedBehind: composition.unparkable.count))
         } catch {
@@ -630,18 +630,18 @@ final class TakesStructureController {
         }
         let active = fan.filter { $0.status == .active }
         guard let index = active.firstIndex(where: { $0.id == variantID }) else {
-            model.speak("This block's takes changed — try the move again.")
+            model.refuse("This block's takes changed — try the move again.")
             return
         }
         let target = index + delta
         guard active.indices.contains(target) else {
-            model.speak(delta < 0
+            model.refuse(delta < 0
                         ? "This take is already first in the fan."
                         : "This take is already last in the fan.")
             return
         }
         let anchor = active[target].id
-        model.setStatus(nil)
+        model.clearStatus()
         do {
             try await model.session.runner.run { ops in
                 try ops.reorderTake(
@@ -650,7 +650,7 @@ final class TakesStructureController {
             // 18i: a RECEIPT — the move landed. It went through the
             // REFUSAL door until now, which also painted the board's own
             // slot in the alarm token (the class row 6 exists because of).
-            model.setStatus(
+            model.setReceipt(
                 "Take moved \(delta < 0 ? "earlier" : "later") — \u{2325}\u{2318}Z undoes it.")
         } catch {
             model.setRefusal(TakesViewModel.message(for: error))
@@ -675,23 +675,23 @@ final class TakesStructureController {
     /// the frozen projection (13d batch 3's rule for this surface).
     func moveTakeIntoBlockBelow(blockID: String? = nil, variantID: String? = nil) async {
         guard !model.structuralInFlight else {
-            model.speak("Another structural change is still landing.")
+            model.refuse("Another structural change is still landing.")
             return
         }
         guard let target = takeTarget(blockID: blockID, variantID: variantID) else {
-            model.speak("Click into a take first — this moves that take into its own block.")
+            model.refuse("Click into a take first — this moves that take into its own block.")
             return
         }
         guard await model.flushPendingText() else { return }
         model.structuralInFlight = true
         defer { model.structuralInFlight = false }
-        model.setStatus(nil)
+        model.clearStatus()
         do {
             let result: Operations.TakeToBlockResult = try await model.session.runner.run { ops in
                 try ops.takeToBlockBelow(target.blockID, variantID: target.variantID)
             }
             model.choreography.parkFocus(onVariant: result.variant.id)
-            model.setStatus(TakeStructureCopy.movedNote)  // 18i: a receipt
+            model.setReceipt(TakeStructureCopy.movedNote)  // 18i: a receipt
         } catch {
             model.setRefusal(TakesViewModel.message(for: error))
         }
@@ -702,17 +702,17 @@ final class TakesStructureController {
     /// under ONE undo entry. The block keeps showing what it showed.
     func turnTakesIntoBlocks(blockID: String? = nil) async {
         guard !model.structuralInFlight else {
-            model.speak("Another structural change is still landing.")
+            model.refuse("Another structural change is still landing.")
             return
         }
         guard let targetID = blockID ?? model.commandTargetSlot?.blockID else {
-            model.speak("Click into a block first — this turns its takes into blocks.")
+            model.refuse("Click into a block first — this turns its takes into blocks.")
             return
         }
         guard await model.flushPendingText() else { return }
         model.structuralInFlight = true
         defer { model.structuralInFlight = false }
-        model.setStatus(nil)
+        model.clearStatus()
         // Her hand (R2-1): rows are minted BELOW the target, which a card's
         // own menu names on any row — above a landed one, the landed row is
         // pushed down and the kept-alive landing would re-aim; no `parkFocus`
@@ -723,7 +723,7 @@ final class TakesStructureController {
                 try ops.takesToBlocks(targetID)
             }
             // 18i: a receipt (it counts what the operation did)
-            model.setStatus(TakeStructureCopy.convertedNote(
+            model.setReceipt(TakeStructureCopy.convertedNote(
                 blocks: result.converted.count, skippedBlanks: result.skippedBlankTakes))
         } catch {
             model.setRefusal(TakesViewModel.message(for: error))
@@ -774,12 +774,12 @@ final class TakesStructureController {
     /// serves both (`MergeChainRun`), shared with Write and the workbench.
     func mergeSelectedBlocks(bringEveryTake: Bool = true) async {
         guard !model.structuralInFlight else {
-            model.speak("Another structural change is still landing.")
+            model.refuse("Another structural change is still landing.")
             return
         }
         let picked = model.board.mergeSelection
         guard picked.count >= 2 else {
-            model.speak("\u{2318}-click a second block first — merge joins the blocks you pick.")
+            model.refuse("\u{2318}-click a second block first — merge joins the blocks you pick.")
             return
         }
         guard await model.flushPendingText() else { return }
@@ -801,11 +801,11 @@ final class TakesStructureController {
         // Same race the delete door meets, so it wears the same words one
         // verb apart.
         guard picked.isSubset(of: Set(order)) else {
-            model.speak(BlockSelectionCopy.blockGoneForMerge)
+            model.refuse(BlockSelectionCopy.blockGoneForMerge)
             return
         }
         guard TakesBoardLayout.isContiguousRun(picked, in: order) else {
-            model.speak("Merge joins neighbouring blocks — these aren't next to each other. "
+            model.refuse("Merge joins neighbouring blocks — these aren't next to each other. "
                 + "Pick blocks that sit side by side.")
             return
         }
@@ -850,12 +850,12 @@ final class TakesStructureController {
         // on no displayed-take resolution and cannot suffer that race.
         if bringEveryTake,
            !CarryAllMerge.chainComposes(order: chain, fans: fans, displayed: displayed) {
-            model.speak(FannedDefaultsCopy.takesChangedMerge)
+            model.refuse(FannedDefaultsCopy.takesChangedMerge)
             return
         }
         model.structuralInFlight = true
         defer { model.structuralInFlight = false }
-        model.setStatus(nil)
+        model.clearStatus()
         do {
             let stack = model.session.undoStack
             let landing: MergeChainRun.Landing
@@ -870,7 +870,7 @@ final class TakesStructureController {
             model.choreography.parkFocus(onVariant: landing.variantID)
             // 18i: a receipt — Write's twin already spoke through
             // `runStructural`'s note, which is the receipt seam.
-            model.setStatus(FannedDefaultsCopy.mergedChain(
+            model.setReceipt(FannedDefaultsCopy.mergedChain(
                 blocks: chain.count, carried: max(0, landing.takesOnMerged - 1)))
         } catch {
             // Ladder round 2 (R2-2): the read-to-write race — a pick that
@@ -916,12 +916,12 @@ final class TakesStructureController {
     /// selection aid, never an authorization (batch 2's rule, unchanged).
     func deleteSelectedBlocks() async {
         guard !model.structuralInFlight else {
-            model.speak("Another structural change is still landing.")
+            model.refuse("Another structural change is still landing.")
             return
         }
         let picked = model.board.mergeSelection
         guard !picked.isEmpty else {
-            model.speak(BlockSelectionCopy.nothingPicked)
+            model.refuse(BlockSelectionCopy.nothingPicked)
             return
         }
         guard await model.flushPendingText() else { return }
@@ -952,7 +952,7 @@ final class TakesStructureController {
             + order.filter { picked.contains($0) }
         model.structuralInFlight = true
         defer { model.structuralInFlight = false }
-        model.setStatus(nil)
+        model.clearStatus()
         // Her hand (the 17p batch-a ladder, R3-1): rows are REMOVED above a
         // landed one through a bare runner with no `parkFocus` — and a
         // ⌘-click deliberately never migrates the ring (picking blocks is
@@ -975,7 +975,7 @@ final class TakesStructureController {
             // `runBlockDeleteCompound` carries the trace).
             // 18i: a receipt — the blocks went, and the stranding
             // sentence rides it.
-            model.setStatus(BlockSelectionCopy.deletedNote(chain.count)
+            model.setReceipt(BlockSelectionCopy.deletedNote(chain.count)
                 + (await StrandedOriginals.note(
                     session: model.session, blockIDs: chain) ?? ""))
         } catch {

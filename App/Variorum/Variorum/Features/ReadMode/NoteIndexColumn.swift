@@ -201,7 +201,7 @@ struct NoteIndexColumn: View {
                     if let target = Int(raw) {
                         await model.move(blockID: row.blockID, toOrdinal: target)
                     } else {
-                        model.speak("\u{201C}\(raw)\u{201D} isn't a position number — type 1 to \(model.rows.count).")
+                        model.refuse("\u{201C}\(raw)\u{201D} isn't a position number — type 1 to \(model.rows.count).")
                     }
                 }
             }

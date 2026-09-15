@@ -168,7 +168,7 @@ struct StatusCenterTests {
     @Test func statusItemsAutoDismissUnderTheOnePolicy() async throws {
         try await withSessionWorld { session, _ in
             session.status.dismissAfter = .milliseconds(40)
-            session.status.speak("a transient outcome")
+            session.status.refuse("a transient outcome")
             #expect(session.status.current?.text == "a transient outcome")
             await poll { session.status.current == nil }
             #expect(session.status.current == nil, "the one auto-dismiss policy ran")
@@ -181,7 +181,7 @@ struct StatusCenterTests {
             _ = try session.operations.newBlock(in: post.id, text: "hello world.")
             _ = db
             let model = TakesViewModel(session: session, postID: post.id)
-            model.speak("the board says a thing")
+            model.refuse("the board says a thing")
             #expect(session.status.current?.text == "the board says a thing",
                     "AD-14: the VM's statusMessage forwards to the ONE presentation")
         }
@@ -198,7 +198,7 @@ struct StatusCenterTests {
             for style in ReceiptStyle.allCases {
                 session.status.clear()
                 session.status.receiptStyle = style
-                session.status.speak("Click into a block first.")
+                session.status.refuse("Click into a block first.")
                 #expect(session.status.current?.text == "Click into a block first.",
                         "a refusal toasts under \(style.rawValue)")
                 #expect(session.status.quietLine == nil,
@@ -208,18 +208,22 @@ struct StatusCenterTests {
     }
 
     /// **AN OFFER SHOWS UNDER EVERY SETTING** — it carries a button, and a
-    /// question she cannot see is not asked. The kind is INFERRED from the
-    /// action, so every shipped `speak(_:action:)` call is unchanged.
+    /// question she cannot see is not asked.
+    ///
+    /// *(13u2 UNIT E — row 56: the kind used to be INFERRED from whether an
+    /// action rode along on `speak`; it is the door's own name now. What the
+    /// pin asserts is unchanged — `offer` still lands in `current` with kind
+    /// `.offer` under every receipt style.)*
     @Test func anOfferAlwaysToastsAndIsInferredFromItsAction() async throws {
         try await withSessionWorld { session, _ in
             for style in ReceiptStyle.allCases {
                 session.status.clear()
                 session.status.receiptStyle = style
-                session.status.speak(
+                session.status.offer(
                     "This note is in two books.",
                     action: StatusCenter.Item.Action(label: "Diverge", perform: {}))
                 #expect(session.status.current?.kind == .offer,
-                        "an action makes it an offer under \(style.rawValue)")
+                        "the offer door makes it an offer under \(style.rawValue)")
                 #expect(session.status.current?.text == "This note is in two books.")
                 #expect(session.status.quietLine == nil)
             }
@@ -265,7 +269,7 @@ struct StatusCenterTests {
             session.status.receiptStyle = .quiet
             session.status.receipt("Block divided.")
             #expect(session.status.spoken?.text == "Block divided.")
-            session.status.speak("This note is sealed — unlock it first.")
+            session.status.refuse("This note is sealed — unlock it first.")
             #expect(session.status.quietLine == nil, "the quiet line stood down")
             #expect(session.status.spoken?.text == "This note is sealed — unlock it first.")
             session.status.receipt("Blocks merged.")

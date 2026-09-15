@@ -2418,7 +2418,8 @@ final class EditorViewModel {
         textView.scrollRangeToVisible(NSRange(location: end, length: 0))
         textView.window?.makeFirstResponder(textView)
         updateCaretContext()
-        showStatus("Caret at the end — typing here starts a new block.")
+        // A DIRECTION: the jump LANDED; this says what typing here will do.
+        direct("Caret at the end — typing here starts a new block.")
     }
 
     // MARK: - The W ceremony — forwards (the state machine lives in
@@ -2626,7 +2627,7 @@ final class EditorViewModel {
     /// changed is where it lands.
     func revealCaretBlockOrigin() {
         guard caretBlockOrigin != nil else {
-            showStatus(OriginPeekCopy.noOriginHere)
+            refuse(OriginPeekCopy.noOriginHere)
             return
         }
         requestBlockHistory()
@@ -2677,7 +2678,13 @@ final class EditorViewModel {
 
     /// Internal (was private) since N10: the controller's passive hints
     /// (fanned extract, merged fans) ride the same self-clearing line.
-    func showTransientStatus(_ message: String) {
+    ///
+    /// **A DIRECTION, and now named one** (13u2 UNIT E — row 56, step 1;
+    /// it was `directTransiently`): its one caller's words are *"finish
+    /// Divide choosing takes, then run Make Block from Selection again"* —
+    /// nothing was refused, and she must see it, which is exactly what the
+    /// always-shown class means.
+    func directTransiently(_ message: String) {
         showTransient(message, kind: .refusal)
     }
 
@@ -2961,7 +2968,7 @@ final class EditorViewModel {
     /// expanded"*, and the caret is the only thing that knows which that is.
     func requestBlockHistory() {
         guard let blockID = caretBlockID else {
-            showStatus(CapabilityRegistry.capability(.showBlockHistory).unavailableNote)
+            refuse(CapabilityRegistry.capability(.showBlockHistory).unavailableNote)
             return
         }
         let request = BlockHistoryRequest(
@@ -2987,12 +2994,12 @@ final class EditorViewModel {
             // FOUND ON THE ROUND-2 WALK (18i): the moment LANDED, so this is
             // a RECEIPT and her setting governs it — the board's twin
             // (`TakesViewModel.saveNoteVersion`) has always classed it that
-            // way, and this arm's `showStatus` kept ⌘⇧S toasting over Write
+            // way, and this arm's `refuse` kept ⌘⇧S toasting over Write
             // and the book's inline editor under the default she chose to
             // stop the toasting. The J38 class, other direction.
             showReceipt(try await VersionActs.save(session: session, postID: postID))
         } catch {
-            showStatus(VersionActs.words(error))
+            refuse(VersionActs.words(error))
         }
     }
 
@@ -3003,7 +3010,7 @@ final class EditorViewModel {
     /// badge, so a block's FIRST branch had no door at all).
     func openCaretFan() {
         guard let blockID = caretBlockID else {
-            showStatus("Place the caret in a block to see its takes.")
+            refuse("Place the caret in a block to see its takes.")
             return
         }
         openFan(blockID: blockID)
@@ -3023,7 +3030,7 @@ final class EditorViewModel {
 
     func mintCaretTake(blank: Bool, asChosen: Bool = false) {
         guard let blockID = caretBlockID else {
-            showStatus("Put the caret in a block first — takes grow on the block you're in.")
+            refuse("Put the caret in a block first — takes grow on the block you're in.")
             return
         }
         let sourceID = caretVariantID
@@ -3079,7 +3086,7 @@ final class EditorViewModel {
 
     func archiveCaretTake() {
         guard let variantID = caretVariantID else {
-            showStatus("Put the caret in a block first — ⌘⇧A archives the take you're on.")
+            refuse("Put the caret in a block first — ⌘⇧A archives the take you're on.")
             return
         }
         Task {
@@ -3471,7 +3478,7 @@ final class EditorViewModel {
     /// Opens the caret block's comments (the Block-menu/keyboard door).
     func openCaretComments() {
         guard let caretBlockID else {
-            showStatus("Place the caret in a block to see its comments.")
+            refuse("Place the caret in a block to see its comments.")
             return
         }
         openComments(blockID: caretBlockID)
@@ -3484,7 +3491,7 @@ final class EditorViewModel {
     /// cache. Sealed posts refuse through the op, spoken (P-2).
     func applyCallout(_ edit: CalloutEdit) async {
         guard let caretBlockID else {
-            showStatus("Place the caret in a block first — the frame goes on that block.")
+            refuse("Place the caret in a block first — the frame goes on that block.")
             return
         }
         do {
@@ -3507,7 +3514,7 @@ final class EditorViewModel {
         to destination: TakeClipboard.Destination = .general
     ) async {
         guard let caretBlockID else {
-            showStatus("Place the caret in a block first — this copies that block's takes.")
+            refuse("Place the caret in a block first — this copies that block's takes.")
             return
         }
         await autosave.flushNow()
@@ -3516,7 +3523,7 @@ final class EditorViewModel {
         // "no text to copy" / "Copy failed" are refusals that always show.
         let outcome = await TakeClipboard.copyBlock(
             caretBlockID, session: session, to: destination)
-        outcome.isRefusal ? showStatus(outcome.message) : showReceipt(outcome.message)
+        outcome.isRefusal ? refuse(outcome.message) : showReceipt(outcome.message)
     }
 
     /// Sets/clears the caret block's callout frame (R16/R27). Kept as the
@@ -3676,24 +3683,43 @@ final class EditorViewModel {
 
     // MARK: - Messages
 
-    func showStatus(_ message: String) {
+    /// **REFUSE — nothing happened, and this says why.** Always shown,
+    /// under every setting (P-2: a door that could not act must deliver the
+    /// real refusal).
+    ///
+    /// *(13u2 UNIT E — KnownIssues row 56, step 1: this door was
+    /// `refuse`, a name that said nothing about its class across ~46
+    /// call sites, which is how the 18i ladder's J42/J43 found eight Write
+    /// doors reporting ACTS through it. Zero behaviour — the body is
+    /// unchanged.)*
+    func refuse(_ message: String) {
+        setStatusMessage(message, kind: .refusal)
+    }
+
+    /// **DIRECT — a direction she must see, though nothing was refused.**
+    /// The same always-shown class as `refuse` (that is what her setting
+    /// does NOT govern), with a name that does not tell a reader something
+    /// failed when nothing did. `StatusCenter.Kind.refusal`'s own doc always
+    /// carried this distinction; 13u2 UNIT E gave it a door.
+    func direct(_ message: String) {
         setStatusMessage(message, kind: .refusal)
     }
 
     /// **A RECEIPT** (18i — her R-Q5): an act LANDED and this says what.
     /// Where it shows is her setting's answer (`StatusCenter.receiptStyle`);
-    /// the words are untouched. Its twin `showStatus` stays the always-show
-    /// door for a refusal — and for a DIRECTION she must see, which is why
-    /// `speakUndoHint` below deliberately does not call this one.
+    /// the words are untouched. Its twins `refuse` and `direct` stay the
+    /// always-show doors, which is why `speakUndoHint` below deliberately
+    /// does not call this one.
     func showReceipt(_ message: String) {
         setStatusMessage(message, kind: .receipt)
     }
 
     /// **13j J7 — the sign at the junction.** Speaks only when the text stack
     /// is empty AND the structural one is not (`EditorUndoHint` holds the
-    /// rule); a `showStatus`, never a `refuseFeedback`, because nothing was
+    /// rule); a `refuse`, never a `refuseFeedback`, because nothing was
     /// refused — the keystroke was passed straight through to AppKit and the
-    /// line is a direction, not a beep.
+    /// line is a direction, not a beep. (13u2 UNIT E: it says `direct` now,
+    /// which is what this comment had to say in prose before.)
     func speakUndoHint(_ chord: EditorUndoHint.Chord) {
         let manager = textView?.undoManager
         let textStackHasEntries = chord == .undo
@@ -3705,7 +3731,7 @@ final class EditorViewModel {
             structuralUndoLabel: session.undoMenuState.topLabel,
             structuralRedoLabel: session.undoMenuState.topRedoLabel)
         else { return }
-        showStatus(line)
+        direct(line)
     }
 
     /// Internal (was private) since N10: the controller's refusals speak

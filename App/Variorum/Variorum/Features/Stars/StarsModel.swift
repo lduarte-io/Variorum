@@ -65,7 +65,7 @@ final class StarsModel {
             lastError = nil
         } catch {
             lastError = OpsRefusalCopy.message(for: error)
-            session.status.speak(OpsRefusalCopy.message(for: error))
+            session.status.refuse(OpsRefusalCopy.message(for: error))
         }
     }
 

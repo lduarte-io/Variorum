@@ -601,7 +601,7 @@ struct ReturnKeyUndoSignTests {
             // `EditorUndoHint.message` returned nil — ⌘Z did nothing and
             // said nothing.**
             #expect(h.session.undoMenuState.topLabel == "New Block")
-            h.model.showStatus("")
+            h.model.refuse("")
             h.model.speakUndoHint(.undo)
             #expect(h.model.statusMessage == EditorUndoHint.message(
                 for: .undo, textStackHasEntries: false,

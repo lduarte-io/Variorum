@@ -159,7 +159,7 @@ enum MarkdownActs {
         in window: NSWindow? = NSApp.keyWindow
     ) {
         guard let textView = target(in: window) else {
-            status.speak(noTargetNote)
+            status.refuse(noTargetNote)
             return
         }
         apply(act, to: textView)

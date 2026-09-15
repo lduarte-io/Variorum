@@ -33,13 +33,17 @@
 //    · **receipt** — an act LANDED and this says what ("Blocks joined —
 //      ⌥⌘Z undoes it."). THESE are what her setting governs.
 //
-//  `speak` keeps its exact signature and INFERS the kind (an action ⇒ an
-//  offer, else a refusal), so every shipped call site and every pin over
-//  them is byte-unchanged; `receipt(_:)` is the new door the after-the-fact
-//  confirmations adopt; `deliver(_:kind:)` is the general door the view
-//  models that forward a CLASSED status line use (`TakesViewModel`'s
-//  `RecoveryStatus`, and the four models whose `statusMessage` didSet
-//  forwards here).
+//  **THE DOORS SAY THEIR CLASS (13u2 UNIT E — KnownIssues row 56, step 1).**
+//  18i shipped `speak`, which INFERRED the kind from whether an action rode
+//  along; the class was then invisible at ~100 call sites and the 18i ladder
+//  found FOUR mis-classified families by hand against a green suite. The
+//  inference is retired: `refuse(_:)` (nothing happened), `offer(_:action:)`
+//  (it carries a button), `direct(_:)` (a direction, always shown, nothing
+//  refused) and `receipt(_:)` (it landed — the only class her setting
+//  governs). `deliver(_:kind:)` stays the general door for a producer that
+//  already knows its class (`TakesViewModel`'s `RecoveryStatus`, and the four
+//  models whose `statusMessage` didSet forwards here); `say(_:refusing:)`
+//  stays the door for an act whose own outcome decides.
 //
 
 import Foundation
@@ -137,11 +141,32 @@ final class StatusCenter {
 
     private static let log = Logger(subsystem: "io.lduarte.Variorum", category: "status")
 
-    /// The shipped door, signature unchanged: an action makes it an OFFER,
-    /// otherwise it is a REFUSAL. Both always toast, so every call site and
-    /// pin that existed before 18i behaves byte-identically.
-    func speak(_ text: String, action: Item.Action? = nil) {
-        deliver(text, kind: action == nil ? .refusal : .offer, action: action)
+    /// **REFUSE — nothing happened, and this says why.** Always the toast,
+    /// under every setting.
+    ///
+    /// *(13u2 UNIT E — KnownIssues row 56, step 1. This door was `speak`,
+    /// which INFERRED its class from whether an action rode along, so ~100
+    /// call sites said nothing about what kind of message they were making.
+    /// The inference is gone: `refuse` takes no action and `offer` requires
+    /// one, so the class is readable at every site with no doc. Zero
+    /// behaviour — both still deliver exactly what `speak` delivered.)*
+    func refuse(_ text: String) {
+        deliver(text, kind: .refusal)
+    }
+
+    /// **OFFER — it carries a button; it is a question.** Always the toast,
+    /// because a question she cannot see is not asked.
+    func offer(_ text: String, action: Item.Action) {
+        deliver(text, kind: .offer, action: action)
+    }
+
+    /// **DIRECT — a direction she must see, though nothing was refused.**
+    /// Delivered as a refusal because the CLASS is "always shown", which is
+    /// what the setting governs; the name exists so a reader is not told
+    /// something failed when nothing did (row 56's own distinction — the doc
+    /// on `Kind.refusal` already carried it, and a name carries it better).
+    func direct(_ text: String) {
+        deliver(text, kind: .refusal)
     }
 
     /// **The receipt door** (18i): an act landed and this says what. Where
@@ -162,8 +187,8 @@ final class StatusCenter {
     /// sites spell the same `landed ? … : …` as a ternary because they write
     /// a VIEW MODEL's own status property rather than the centre —
     /// `EditorSurfaceController`'s `runStructural` seam
-    /// (`outcome.noteIsRefusal ? showStatus : showReceipt`),
-    /// `TakesStructureController`'s split door (`setStatus`/`setRefusal`, the
+    /// (`outcome.noteIsRefusal ? refuse : showReceipt`),
+    /// `TakesStructureController`'s split door (`setReceipt`/`setRefusal`, the
     /// board's `RecoveryStatus`, which `WriteTakesPanel` RENDERS), and
     /// `BlockTOCViewModel`'s (`showReceipt`/`speak`). Routing any of them
     /// through this door would bypass a property ~22 shipped pins read and,

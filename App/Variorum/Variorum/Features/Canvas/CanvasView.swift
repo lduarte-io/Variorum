@@ -242,7 +242,7 @@ struct CanvasView: View {
                     return true
                 case .takes(.stepPrev), .takes(.stepNext), .takes(.choose):
                     guard let open = switcherBlockID else {
-                        model.speak(
+                        model.refuse(
                             "Open a card's ‹ › switcher first — stepping and choosing act on it.")
                         return true
                     }

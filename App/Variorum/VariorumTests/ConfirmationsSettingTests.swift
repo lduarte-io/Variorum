@@ -17,7 +17,7 @@
 //  the source would prove a spelling, not a behaviour.
 //
 //  RED ON OLD (by behavioural revert of the two SITES — `showReceipt` back
-//  to `showStatus`, which is exactly what they said before 18i): the receipt
+//  to `refuse`, which is exactly what they said before 18i): the receipt
 //  lands as a TOAST under `.quiet`. The numbers are in the batch record.
 //
 
@@ -284,14 +284,14 @@ struct ConfirmationsSettingTests {
     /// **⌘⇧S's RECEIPT IS A RECEIPT** — found on the round-2 walk, which
     /// captured it toasting over the book's Outline while her setting said
     /// quiet. `EditorViewModel.saveNoteVersion`'s SUCCESS arm spoke through
-    /// `showStatus` — the always-shown refusal door — so the one door whose
+    /// `refuse` — the always-shown refusal door — so the one door whose
     /// twin two files over (`TakesViewModel:1775`) is a `.receipt` behaved
     /// differently on Write and the book's inline editor than on the boards,
     /// and kept toasting under the default she chose to stop the toasting.
     ///
     /// Same class as the round-2 BLOCKER, opposite direction: there a refusal
     /// wore a receipt's clothes and could be hidden; here a receipt wears a
-    /// refusal's and cannot be quieted. The error arm stays `showStatus`.
+    /// refusal's and cannot be quieted. The error arm stays `refuse`.
     ///
     /// **Red on old:** the sentence in `current`, `quietLine == nil`.
     @Test func savingAVersionSpeaksQuietlyUnderHerDefault() async throws {
@@ -310,7 +310,7 @@ struct ConfirmationsSettingTests {
     // MARK: - Write's own acts obey her setting too (the round-3 BLOCKER, J43)
 
     /// **SEALING A NOTE IS AN ACT THAT LANDED** (the 18i ladder round 3's
-    /// BLOCKER — J43). Eight Write doors reported acts through `showStatus`,
+    /// BLOCKER — J43). Eight Write doors reported acts through `refuse`,
     /// which is `setStatusMessage(_, kind: .refusal)` — the ALWAYS-SHOWN
     /// door — so sealing, archiving a take, saving a lens, a pool drop, a new
     /// take, a word target and an entry date all kept throwing the card she
@@ -557,7 +557,7 @@ struct ConfirmationsSettingTests {
     @Test func theQuietSlotNeverHoldsARefusal() async throws {
         let center = StatusCenter()
         center.receiptStyle = .quiet
-        center.speak("Click into a block first.")
+        center.refuse("Click into a block first.")
         #expect(center.quietLine == nil)
         #expect(center.current?.text == "Click into a block first.")
     }

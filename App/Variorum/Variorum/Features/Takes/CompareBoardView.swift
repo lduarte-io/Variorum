@@ -756,7 +756,7 @@ final class CompareViewModel {
     }
 
     /// The bar's speaking surface.
-    func speak(_ message: String) {
+    func refuse(_ message: String) {
         statusMessage = message
     }
 
@@ -1389,7 +1389,7 @@ struct CompareBoardView: View {
             guard let raw = items.first,
                   let payload = Self.parseDragPayload(raw) else { return false }
             guard payload.postID == zonePostID else {
-                model.speak(
+                model.refuse(
                     "Order drags stay within one note here — each column reorders its own note.")
                 return false
             }
@@ -1628,7 +1628,7 @@ private struct CompareCellView: View {
                 guard let raw = items.first,
                       let payload = CompareBoardView.parseDragPayload(raw) else { return false }
                 guard payload.postID == postID else {
-                    model.speak(
+                    model.refuse(
                         "Order drags stay within one note here — each column reorders its own note.")
                     return false
                 }

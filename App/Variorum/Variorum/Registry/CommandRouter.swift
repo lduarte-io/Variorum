@@ -282,11 +282,11 @@ final class CommandRouter {
     func requestMode(_ mode: PostMode, postID: String? = nil) -> Bool {
         if let postID, let active = activePostID, postID != active {
             // Stale targeted request — a different post mounted meanwhile.
-            speak?(Self.staleModeRequestNote)
+            refuse?(Self.staleModeRequestNote)
             return false
         }
         guard let applyMode else {
-            speak?(CapabilityRegistry.capability(.switchMode).unavailableNote)
+            refuse?(CapabilityRegistry.capability(.switchMode).unavailableNote)
             return false
         }
         applyMode(mode)
@@ -499,7 +499,7 @@ final class CommandRouter {
             return true
         }
         if speakingWhenUnhandled {
-            speak?(CapabilityRegistry.unhandledNote(for: command, context: currentContext()))
+            refuse?(CapabilityRegistry.unhandledNote(for: command, context: currentContext()))
         }
         return false
     }
@@ -515,7 +515,7 @@ final class CommandRouter {
     // MARK: - Composition wiring (set once by the session)
 
     /// Speech lands in the StatusCenter (AD-14's one presentation).
-    @ObservationIgnored var speak: ((String) -> Void)?
+    @ObservationIgnored var refuse: ((String) -> Void)?
     /// Whether a full-document Write editor is attached (wired to the
     /// EditorRouter; reads its observable `active`, so menu enablement
     /// tracks it).

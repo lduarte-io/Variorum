@@ -48,7 +48,7 @@ struct ShellActions {
     /// no note under it the registry's honest note speaks (P-2).
     func tagNote() {
         if !session.commandRouter.requestTagField() {
-            status.speak(CapabilityRegistry.capability(.tagNote).unavailableNote)
+            status.refuse(CapabilityRegistry.capability(.tagNote).unavailableNote)
         }
     }
 
@@ -83,7 +83,7 @@ struct ShellActions {
     func showBlockHistory() {
         if router.dispatch(.showBlockHistory, speakingWhenUnhandled: false) { return }
         if router.requestBlockHistoryForFocusedBlock() { return }
-        status.speak(CapabilityRegistry.capability(.showBlockHistory).unavailableNote)
+        status.refuse(CapabilityRegistry.capability(.showBlockHistory).unavailableNote)
     }
 
     /// The seal door (palette + routed): the mounted surface runs its own
@@ -98,7 +98,7 @@ struct ShellActions {
     func toggleSeal() {
         if router.dispatch(.toggleSeal, speakingWhenUnhandled: false) { return }
         guard let postID = router.activePostID else {
-            status.speak(CapabilityRegistry.capability(.sealPost).unavailableNote)
+            status.refuse(CapabilityRegistry.capability(.sealPost).unavailableNote)
             return
         }
         Task { @MainActor in
@@ -117,7 +117,7 @@ struct ShellActions {
                 status.receipt(
                     sealed ? "Unsealed." : "Sealed — the note is read-only until unsealed.")
             } catch {
-                status.speak(OpsRefusalCopy.message(for: error))
+                status.refuse(OpsRefusalCopy.message(for: error))
             }
         }
     }
@@ -147,7 +147,7 @@ struct ShellActions {
                 if let warning {
                     let approved = confirm?(warning) ?? Self.confirmDiscardingUndo(warning)
                     guard approved else {
-                        status.speak(StructuralUndoCopy.undoCancelled)
+                        status.refuse(StructuralUndoCopy.undoCancelled)
                         return
                     }
                 }
@@ -159,12 +159,12 @@ struct ShellActions {
                 if let label {
                     status.receipt(StructuralUndoCopy.undone(label))
                 } else {
-                    status.speak(StructuralUndoCopy.nothingToUndo)
+                    status.refuse(StructuralUndoCopy.nothingToUndo)
                 }
             } catch {
                 // A failed inverse stays on the stack (UndoStack doctrine);
                 // the user resolves (e.g. unseals the post) and retries.
-                status.speak(StructuralUndoCopy.undoFailed(
+                status.refuse(StructuralUndoCopy.undoFailed(
                     OpsRefusalCopy.message(for: error)))
             }
         }
@@ -183,10 +183,10 @@ struct ShellActions {
                 if let label {
                     status.receipt(StructuralUndoCopy.redone(label))
                 } else {
-                    status.speak(StructuralUndoCopy.nothingToRedo)
+                    status.refuse(StructuralUndoCopy.nothingToRedo)
                 }
             } catch {
-                status.speak(StructuralUndoCopy.redoFailed(
+                status.refuse(StructuralUndoCopy.redoFailed(
                     OpsRefusalCopy.message(for: error)))
             }
         }
@@ -204,7 +204,7 @@ struct ShellActions {
                 }
                 shell.pendingSelection = .post(post.id)
             } catch {
-                status.speak("New note failed: \(error)")
+                status.refuse("New note failed: \(error)")
             }
         }
     }
@@ -216,10 +216,10 @@ struct ShellActions {
                 let outcome = try await JournalBooks.openToday(session: session)
                 shell.pendingSelection = .post(outcome.postID)
                 if let note = outcome.note {
-                    status.speak(note)
+                    status.refuse(note)
                 }
             } catch {
-                status.speak("Today's entry failed: \(error)")
+                status.refuse("Today's entry failed: \(error)")
             }
         }
     }
@@ -233,7 +233,7 @@ struct ShellActions {
             // 18i: a failure is a refusal (always shown); the report of
             // what arrived is a receipt.
             if let failure = importer.lastError {
-                status.speak("Import failed: \(failure)")
+                status.refuse("Import failed: \(failure)")
             } else {
                 // J29's second member: a report that names only SKIPS says
                 // nothing arrived, and a refusal always shows.
@@ -251,7 +251,7 @@ struct ShellActions {
             // Readings ride ALWAYS-ON at this face (Phase 11b recorded call).
             await exporter.writeBulkExport(to: folder)
             if let failure = exporter.lastError {
-                status.speak("Export failed: \(failure)")
+                status.refuse("Export failed: \(failure)")
             } else {
                 // J37: "Exported 0 files." wrote nothing, so nothing landed.
                 status.say(
@@ -272,7 +272,7 @@ struct ShellActions {
         // she was typing in.
         guard let editor = session.editorRouter.editingOrActive,
               let blockID = editor.caretBlockID else {
-            status.speak(CapabilityRegistry.capability(.exportCaretBlock).unavailableNote)
+            status.refuse(CapabilityRegistry.capability(.exportCaretBlock).unavailableNote)
             return
         }
         let postID = editor.postID
@@ -292,7 +292,7 @@ struct ShellActions {
                 exporter.writeMarkdown(markdown, to: url)
             }
             if let failure = exporter.lastError {
-                status.speak("Export failed: \(failure)")
+                status.refuse("Export failed: \(failure)")
             } else {
                 // J37: "Exported 0 files." wrote nothing, so nothing landed.
                 status.say(
@@ -329,7 +329,7 @@ struct ShellActions {
                 status.receipt(
                     "The tutorial is fresh — “\(TutorialSeeder.bookName)” is on your shelf.")
             } catch {
-                status.speak("Restore Tutorial failed: \(OpsRefusalCopy.message(for: error))")
+                status.refuse("Restore Tutorial failed: \(OpsRefusalCopy.message(for: error))")
             }
         }
     }
@@ -373,7 +373,7 @@ struct ShellActions {
                     // the sentence reports; the rule is NOT widened to cover
                     // it, because "or the shell moved" would reclassify the
                     // daily-entry note and blur every navigating door.
-                    status.speak(
+                    status.refuse(
                         "\u{201C}\(book.name)\u{201D} is already whole — it's on your shelf.")
                 case .restored(let readingID, let minted):
                     shell.pendingSelection = .reading(readingID)
@@ -385,7 +385,7 @@ struct ShellActions {
                 // F3 (NIT-N6): the road's own words on the face; the raw
                 // error in the log.
                 Self.log.error("restore \(book.name, privacy: .public) failed: \(String(describing: error), privacy: .public)")
-                status.speak(
+                status.refuse(
                     "Restoring \u{201C}\(book.name)\u{201D} failed: "
                     + SeededBookRestore.failureLine(for: error))
             }
@@ -411,7 +411,7 @@ struct ShellActions {
             }
         } catch {
             Self.log.error("tutorial door: ensuring \(book.name, privacy: .public) failed: \(String(describing: error), privacy: .public)")
-            status.speak(
+            status.refuse(
                 "The tutorial opened, but \u{201C}\(book.name)\u{201D} "
                 + "could not be restored beside it: " + SeededBookRestore.failureLine(for: error))
         }
@@ -434,7 +434,7 @@ struct ShellActions {
                     // 13b 3F (Stage 2 round-2 note b): findOrSeed's one nil
                     // path is a DECLINED confirm — the user asked to OPEN
                     // and nothing opened; say why instead of going quiet.
-                    status.speak(
+                    status.refuse(
                         "Nothing opened — re-seeding the tutorial would replace the "
                         + "tutorial residue on this store, and you cancelled. Everything stays as it is.")
                     return
@@ -449,7 +449,7 @@ struct ShellActions {
                 // on success; a failure speaks beside the opened tutorial.
                 await Self.ensureEncryptionBook(session: session, status: status)
             } catch {
-                status.speak("Opening the tutorial failed: \(OpsRefusalCopy.message(for: error))")
+                status.refuse("Opening the tutorial failed: \(OpsRefusalCopy.message(for: error))")
             }
         }
     }
@@ -513,7 +513,7 @@ struct ShellActions {
     /// context bar, shelf pins).
     func toggleStarForCurrent() {
         guard let target = StarTargeting.target(for: shell.workspace.focusedSelection) else {
-            status.speak(CapabilityRegistry.capability(.toggleStar).unavailableNote)
+            status.refuse(CapabilityRegistry.capability(.toggleStar).unavailableNote)
             return
         }
         Task { @MainActor in
@@ -530,7 +530,7 @@ struct ShellActions {
                     try ops.setStarred(target, starred: !starred)
                 }
             } catch {
-                status.speak(OpsRefusalCopy.message(for: error))
+                status.refuse(OpsRefusalCopy.message(for: error))
             }
         }
     }
@@ -563,7 +563,7 @@ struct ShellActions {
                     try ops.setSeamsVisible(!current)
                 }
             } catch {
-                status.speak("Seam toggle failed: \(error)")
+                status.refuse("Seam toggle failed: \(error)")
             }
         }
     }
@@ -659,7 +659,7 @@ struct ShellActions {
             let status = self.status
             return {
                 assertionFailure("palette act \(id) has no wired action")
-                status.speak("That command isn't wired to the palette yet.")
+                status.refuse("That command isn't wired to the palette yet.")
             }
         }
     }

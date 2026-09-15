@@ -429,7 +429,7 @@ final class EditorSurfaceController {
         guard let leadingIndex = entryIndex(of: leadingID),
               let trailingIndex = entryIndex(of: trailingID)
         else {
-            model.showStatus(FannedDefaultsCopy.blocksChangedMerge)
+            model.refuse(FannedDefaultsCopy.blocksChangedMerge)
             return false
         }
         let trailingLength = model.index.entries[trailingIndex].length
@@ -515,7 +515,7 @@ final class EditorSurfaceController {
         // text. `runStructural` flushes again below (idempotent when clean).
         await model.autosave.flushNow()
         guard !model.autosave.isDirty else {
-            model.showStatus("Unsaved changes couldn't be written — resolve that first, then retry.")
+            model.refuse("Unsaved changes couldn't be written — resolve that first, then retry.")
             return
         }
         let fan: [Variant]
@@ -549,7 +549,7 @@ final class EditorSurfaceController {
             // the take the caret was in has vanished from the live fan. A
             // fallback would divide a take she was never in, at an offset
             // from the one that died.
-            model.showStatus(FannedDefaultsCopy.takesChangedDivide)
+            model.refuse(FannedDefaultsCopy.takesChangedDivide)
             return
         }
         if let j = model.index.entries.firstIndex(where: { $0.blockID == blockID }) {
@@ -599,7 +599,7 @@ final class EditorSurfaceController {
     func splitEveryNewlineIntoBlocks() async {
         await model.autosave.flushNow()
         guard !model.autosave.isDirty else {
-            model.showStatus("Unsaved changes couldn't be written — resolve that first, then retry.")
+            model.refuse("Unsaved changes couldn't be written — resolve that first, then retry.")
             return
         }
         let slots: [Queries.RenderedBlock]
@@ -674,7 +674,7 @@ final class EditorSurfaceController {
     ) async -> Bool {
         await model.autosave.flushNow()
         guard !model.autosave.isDirty else {
-            model.showStatus("Unsaved changes couldn't be written — resolve that first, then retry.")
+            model.refuse("Unsaved changes couldn't be written — resolve that first, then retry.")
             return false
         }
         let fans: (leading: [Variant], trailing: [Variant])
@@ -697,14 +697,14 @@ final class EditorSurfaceController {
                 ?? model.index.entries.first { $0.blockID == trailingID }?.variantID,
             trailingFan: fans.trailing)
         else {
-            model.showStatus(FannedDefaultsCopy.takesChangedMerge)
+            model.refuse(FannedDefaultsCopy.takesChangedMerge)
             return false
         }
         // By id, at act time (R1-2) — the length that places the caret at
         // the join must be the trailing block's, not whatever entry the
         // open-time index pointed at.
         guard let trailingIndex = entryIndex(of: trailingID) else {
-            model.showStatus(FannedDefaultsCopy.blocksChangedMerge)
+            model.refuse(FannedDefaultsCopy.blocksChangedMerge)
             return false
         }
         let trailingLength = model.index.entries[trailingIndex].length
@@ -744,13 +744,13 @@ final class EditorSurfaceController {
         // By id, at act time (R1-2): the run's leading block, wherever the
         // surface tiles it now.
         guard let first = blockIDs.first, let leadingIndex = entryIndex(of: first) else {
-            model.showStatus(FannedDefaultsCopy.blocksChangedMerge)
+            model.refuse(FannedDefaultsCopy.blocksChangedMerge)
             return false
         }
         let leadingLength = model.index.entries[leadingIndex].length
         await model.autosave.flushNow()
         guard !model.autosave.isDirty else {
-            model.showStatus("Unsaved changes couldn't be written — resolve that first, then retry.")
+            model.refuse("Unsaved changes couldn't be written — resolve that first, then retry.")
             return false
         }
         let fans: [String: [Variant]]
@@ -781,7 +781,7 @@ final class EditorSurfaceController {
         // it on this would refuse a race it cannot suffer.
         if bringEveryTake, !CarryAllMerge.chainComposes(
             order: blockIDs, fans: fans, displayed: displayed) {
-            model.showStatus(FannedDefaultsCopy.takesChangedMerge)
+            model.refuse(FannedDefaultsCopy.takesChangedMerge)
             return false
         }
         let stack = model.session.undoStack
@@ -1370,7 +1370,7 @@ final class EditorSurfaceController {
     private func openMergeCeremony(leadingID: String, trailingID: String) async {
         await model.autosave.flushNow()
         guard !model.autosave.isDirty else {
-            model.showStatus("Unsaved changes couldn't be written — resolve that first, then retry.")
+            model.refuse("Unsaved changes couldn't be written — resolve that first, then retry.")
             return
         }
         do {
@@ -1427,7 +1427,7 @@ final class EditorSurfaceController {
     private func openMergeRunChoice(blockIDs: [String]) async {
         await model.autosave.flushNow()
         guard !model.autosave.isDirty else {
-            model.showStatus("Unsaved changes couldn't be written — resolve that first, then retry.")
+            model.refuse("Unsaved changes couldn't be written — resolve that first, then retry.")
             return
         }
         let fans: [String: [Variant]]
@@ -1563,7 +1563,7 @@ final class EditorSurfaceController {
                   state.blockIDs.allSatisfy({ entryIndex(of: $0) != nil })
             else {
                 mergeCeremony = nil
-                model.showStatus(FannedDefaultsCopy.blocksChangedMerge)
+                model.refuse(FannedDefaultsCopy.blocksChangedMerge)
                 return
             }
             // A PAIR's preset roads confirm what the sheet SHOWED (18f ladder
@@ -1720,7 +1720,7 @@ final class EditorSurfaceController {
             // ceremony no longer applies — re-invoke and the door
             // re-decides against truth.
             mergeCeremony = nil
-            model.showStatus("These blocks' takes changed — try the merge again.")
+            model.refuse("These blocks' takes changed — try the merge again.")
             return
         }
         let carried = Set(state.carriedIDs)
@@ -1745,7 +1745,9 @@ final class EditorSurfaceController {
             firstIDs.contains($0.firstVariantID) && secondIDs.contains($0.secondVariantID)
         }
         mergeCeremony = next
-        model.showStatus(state.arrangement == .pairByHand
+        // A DIRECTION (row 56's class, named): the sheet REFRESHED itself —
+        // nothing was refused, and she must see that her pairings moved.
+        model.direct(state.arrangement == .pairByHand
             ? "The takes changed while the sheet was open — review the pairings before merging."
             : "The takes changed while the sheet was open — review before merging.")
     }
@@ -1909,7 +1911,7 @@ final class EditorSurfaceController {
         // flushes again, harmlessly).
         await model.autosave.flushNow()
         guard !model.autosave.isDirty else {
-            model.showStatus("Unsaved changes couldn't be written — resolve that first, then retry.")
+            model.refuse("Unsaved changes couldn't be written — resolve that first, then retry.")
             return
         }
         var firstCuts: [String: Int]?
@@ -2021,7 +2023,7 @@ final class EditorSurfaceController {
                     targetText: take.workingText)
                 else {
                     await openDivideWCeremony(blockID: blockID, activeCut: activeCut)
-                    model.showTransientStatus(
+                    model.directTransiently(
                         "One of this block's takes needs its cut placed by hand — "
                         + "finish Divide choosing takes, then run Make Block from Selection again.")
                     return nil
@@ -2426,7 +2428,7 @@ final class EditorSurfaceController {
 
         await model.autosave.flushNow()
         guard !model.autosave.isDirty else {
-            model.showStatus("Unsaved changes couldn't be written — resolve that first, then retry.")
+            model.refuse("Unsaved changes couldn't be written — resolve that first, then retry.")
             return
         }
         // The per-take locate happens against STORE texts (== the flushed
@@ -2573,7 +2575,7 @@ final class EditorSurfaceController {
 
         await model.autosave.flushNow()
         guard !model.autosave.isDirty else {
-            model.showStatus("Unsaved changes couldn't be written — resolve that first, then retry.")
+            model.refuse("Unsaved changes couldn't be written — resolve that first, then retry.")
             return
         }
 
@@ -2731,7 +2733,7 @@ final class EditorSurfaceController {
             // A refused flush keeps its text pending (Phase 7 MAJOR 1); a
             // structural op against a store that disagrees with the surface
             // must not run.
-            model.showStatus("Unsaved changes couldn't be written — resolve that first, then retry.")
+            model.refuse("Unsaved changes couldn't be written — resolve that first, then retry.")
             return false
         }
         // An in-flight crystallization mint reconciles before the rewrite
@@ -2752,7 +2754,7 @@ final class EditorSurfaceController {
             // delete) becomes a receipt at this ONE line. The one exception
             // declares itself: a note that says nothing happened.
             if let note = outcome.note {
-                outcome.noteIsRefusal ? model.showStatus(note) : model.showReceipt(note)
+                outcome.noteIsRefusal ? model.refuse(note) : model.showReceipt(note)
             }
             return true
         } catch {
@@ -2922,7 +2924,7 @@ extension EditorSurfaceController: DivideWCeremonyHost {
     func flushPendingText() async -> Bool {
         await model.autosave.flushNow()
         guard !model.autosave.isDirty else {
-            model.showStatus("Unsaved changes couldn't be written — resolve that first, then retry.")
+            model.refuse("Unsaved changes couldn't be written — resolve that first, then retry.")
             return false
         }
         return true
@@ -2966,7 +2968,7 @@ extension EditorSurfaceController: DivideWCeremonyHost {
     }
 
     func speakCeremonyStatus(_ message: String) {
-        model.showStatus(message)
+        model.refuse(message)
     }
 
     /// 18i: the ceremony’s one RECEIPT (the released original’s note) —

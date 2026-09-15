@@ -291,7 +291,7 @@ struct LensesBoardView: View {
             break
         case .branch:
             guard let pane = model.focusedPane else {
-                model.speak("Click into a pane first — ⌘T diverges that column at that block.")
+                model.refuse("Click into a pane first — ⌘T diverges that column at that block.")
                 return
             }
             Task {
@@ -301,7 +301,7 @@ struct LensesBoardView: View {
             }
         case .blank:
             guard let pane = model.focusedPane else {
-                model.speak("Click into a pane first — ⌥⌘T adds a blank take on that block.")
+                model.refuse("Click into a pane first — ⌥⌘T adds a blank take on that block.")
                 return
             }
             // R2-A: ONE brain with the bar/menu doors (host-gated inside).
@@ -313,7 +313,7 @@ struct LensesBoardView: View {
             }
         case .blankChoose:
             guard let pane = model.focusedPane else {
-                model.speak("Click into a pane first — ⇧⌥⌘T opens a blank take as chosen there.")
+                model.refuse("Click into a pane first — ⇧⌥⌘T opens a blank take as chosen there.")
                 return
             }
             Task { await model.newBlankTakeAsChosen(blockID: pane.blockID) }
@@ -335,7 +335,7 @@ struct LensesBoardView: View {
             }) {
                 lensNamePrompt = LensPrompt(columnID: scratch.id)
             } else {
-                model.speak("Nothing unnamed to save — named lenses save themselves as you work.")
+                model.refuse("Nothing unnamed to save — named lenses save themselves as you work.")
             }
         }
     }

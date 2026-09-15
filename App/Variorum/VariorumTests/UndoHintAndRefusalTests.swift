@@ -124,7 +124,7 @@ struct UndoHintAndRefusalTests {
             harness.textView.undoManager?.removeAllActions()
             #expect(harness.textView.undoManager?.canUndo == false,
                     "nothing left in the TEXT stack — her exact moment")
-            harness.model.showStatus("")
+            harness.model.refuse("")
 
             let claimed = harness.textView.performKeyEquivalent(with: Self.zEvent(.command))
             #expect(claimed == false, "the key is NEVER consumed — ⌘Z falls straight through")
@@ -158,7 +158,7 @@ struct UndoHintAndRefusalTests {
             harness.type("x", at: 0)
             await harness.flush()
             #expect(harness.textView.undoManager?.canUndo == true)
-            harness.model.showStatus("")
+            harness.model.refuse("")
 
             _ = harness.textView.performKeyEquivalent(with: Self.zEvent(.command))
             #expect(harness.model.statusMessage == "",

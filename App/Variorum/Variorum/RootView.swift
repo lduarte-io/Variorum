@@ -453,7 +453,7 @@ struct RootView: View {
         // has visited — which lives per window, so it reads the key one too.
         session.recentBookIDs = { windows.activeRouter?.workspace.recentBookIDs ?? [] }
         let status = session.status
-        router.speak = { status.speak($0) }
+        router.refuse = { status.refuse($0) }
         // 13j J11: THIS window's workspace raises its departures to the
         // session's one savepoint entry. Per-window (unlike the gates above,
         // which read the key window through the registry) because leaving is
@@ -500,7 +500,7 @@ struct RootView: View {
         case .adopted:
             break
         case .focusedExistingPane:
-            session.status.speak(
+            session.status.refuse(
                 WorkspaceNaming.sameNoteNote(router.workspace.label(for: destination)))
         }
     }

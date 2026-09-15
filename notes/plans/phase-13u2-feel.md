@@ -2331,7 +2331,7 @@ alternative proof it ran instead.
 | item | state |
 |---|---|
 | the record opened | **DONE** |
-| **item 1** — row 56: the status seam's rename + the single writer | PENDING |
+| **item 1** — row 56: the status seam's rename + the single writer | **DONE** — steps (1) and (2) built; step (3) recorded as the row's residual with its reason, and its cheap checkable half shipped (`StatusSeamVocabularyTests`). 40 files; the 18i classification pins green with assertions unmodified (55 tests / 5 suites); a literal-by-literal diff found **exactly one string changed in the whole rename — a test's failure message** |
 | **item 2** — row 50: the DEBUG-oracle keying sweep | **DONE** — all six scoped by the mounting SESSION (a stronger key than the row asked for, and the measurement that forced it is recorded); `TakeCardGeometry` bounded too (row 47's second oracle item); 156 read sites moved with every assertion byte-unchanged; the construction pinned as arithmetic (7 tests) and the 18 reading suites GREEN (78 tests) |
 | **item 3** — row 48: ⌘A in a live take pane (WALK first) | PENDING |
 | **item 4** — row 59: the masthead pin's settle | **DONE** — both fixed turn budgets replaced by an until-clause on the oracle's REPORT COUNT (quiet for 4 consecutive turns, ceiling 200, loud on never-quiet); the row's stated mechanism CORRECTED by measurement (a field-open moves no card on a quiet machine — 0/5, both voices); falsifiability DEMONSTRATED with a synthetic 200-pt overlap that failed loud in 0.73 s. 3/3 isolated green |
@@ -2532,6 +2532,97 @@ file's own header says this rather than implying a stronger proof than exists.
 the brief fences that row's oracle items to 13u4; it is not in row 50's enumeration either.
 `PostDetailOracle`'s own statics were left as the 18h ladder's R1-14 keyed them (by note), except
 `resetStamp`, which gained the scope it needs to reach `MastheadGeometry.forgetStamp`.
+
+
+
+## ITEM 1 — ROW 56's STATUS SEAM (the ~150-site rename, and the fence under it)
+
+**The row's finding, restated because it is what the work is for:** the CLASS of every status
+message — refusal · offer · receipt (18i, her R-Q5) — is decided at the door, and **not one door's
+name said which class it made**. So the 18i ladder found FOUR mis-classified families *by hand*, in
+three rounds, against a suite of 2,577 green tests: J29 (note delete + import + export), J33
+(`.alreadyWhole`), J38 (eight direct board assignments), J42/J43 (nine Write doors). A pin that
+reads the WORDS cannot see a class, which is why the row asks for structure rather than a fifth fix.
+
+### Step 1 — the doors say their class (~150 sites, zero behaviour)
+
+| was | is | why |
+|---|---|---|
+| `StatusCenter.speak(_:action:)` | `refuse(_:)` · `offer(_:action:)` · `direct(_:)` | it **INFERRED** the class from whether an action rode along, so ~100 sites said nothing. `refuse` takes no action, `offer` requires one — the class is now unreadable-as-wrong. |
+| `EditorViewModel.showStatus` (46) | `refuse` (43) · `direct` (3) | "status" names a PLACEMENT, not a class. |
+| `EditorViewModel.showTransientStatus` | `directTransiently` | its one caller's words are *"finish Divide choosing takes, then run Make Block from Selection again"* — a direction. |
+| `TakesViewModel.speak` · `BlockTOCViewModel.speak` · `CanvasViewModel.speak` · `CompareBoardModel.speak` | `refuse` | the four fire-and-speak doors; every caller is a sentence about a door that could not act (P-2). |
+| `ShellRouter.speak` · `CommandRouter.speak` (closures) | `refuse` | both are only ever fed refusals. |
+| `TakesViewModel.setStatus(_ message: String?)` | `setReceipt(_:)` + `clearStatus()` | **beyond the row's letter, and deliberately**: step 2 makes this one of the two doors that are THE writers, and shipping "these are the only writers" with one of them not naming its class would have recorded the defect rather than fixed it. `setStatus(nil)` never meant "set a receipt to nothing"; it meant *clear the line before an act*, which is now what it says. |
+
+**`direct` is a NAME, not a new class.** It delivers `StatusCenter.Kind.refusal` — the always-shown
+class her receipt setting does not govern — exactly as `refuse` does. It exists because three sites
+say something true that is *not* a refusal, and a reader of `refuse(…)` there would be told an act
+failed when nothing did. `Kind.refusal`'s own doc already carried the distinction in prose (*"a
+DIRECTION (the undo hint at the junction …) rides this class for the same reason"*); a door carries
+it better. The three: `speakUndoHint`'s sign at the junction, `jumpToDocumentEnd`'s *"Caret at the
+end — typing here starts a new block"* (the jump LANDED), and the merge sheet's own refresh (*"the
+takes changed while the sheet was open — review before merging"*).
+
+**The one OFFER site was rewritten rather than translated.** `AppSession.noteMultiBookEdit` passed
+`action: target.map { … }` — an OPTIONAL action — so `speak`'s inference made it an offer with a
+book to diverge into and a refusal without one. The site now says that out loud (`if let book {
+offer } else { refuse }`), which is byte-identical delivery and the only place the inference was
+load-bearing.
+
+### Step 2 — the board's status line has no bypass
+
+The row: *"J38's 25 direct assignments exist only because the door can be bypassed."* They existed
+for a sharper reason than the row states, and it is worth the next reader's eye: **the property was
+ALREADY `private(set)`.** In Swift that means private to the TYPE *and its same-file extensions* —
+and `TakesViewModel.swift` is 2,600 lines, so 66 sites wrote the slot directly and the doors were a
+habit rather than a fence.
+
+The stored slot is `private var statusSlot` now and `status` is a read-only computed forward, so
+**`status = …` does not compile anywhere, including inside the file**. The 66 writes route onto the
+three classed doors (`setReceipt` · `setRefusal` · `clearStatus`). Readers are untouched:
+`@Observable` tracks the stored slot the getter reads, so every view and every pin observes what it
+observed before.
+
+### Step 3 — the registry walk is NOT built, and that is a verdict
+
+P-1's shape — every classed door declared, a walk asserting the class at each — is what the row calls
+"the checkable form", and it is a **design, not a rename**: it wants the capability registry's own
+vocabulary and a decision about what a "declared door" is when a door is a view-model method rather
+than a `CapabilityID`. Starting it at the end of a mechanical sweep is how a sweep becomes a
+redesign. **It stays the row's residual**, recorded with this reason.
+
+What shipped instead is its cheap checkable half: **`StatusSeamVocabularyTests`**, a source walk
+(the `NoLiteralColourTests` house form) that fails the suite if `showStatus` · `showTransientStatus`
+· `setStatus` · `.speak(` ever come back, and that counts the board's slot writers — exactly three.
+The vocabulary cannot regrow silently, which is the half of P-1 a grep can actually keep.
+
+### THE ZERO-BEHAVIOUR PROOF, in two parts
+
+1. **The 18i classification pins ride GREEN with their assertions unmodified** — `StatusCenterTests`
+   · `ConfirmationsSettingTests` (the ladder's own classification suite) · `UndoHintAndRefusalTests`
+   · `CommandRoutingTests` · `NoteVersionsPaneTests`: **55 tests / 5 suites, 2.86 s.** Two pins'
+   call sites moved from `speak(…, action:)` to `offer(…, action:)` and their PROSE was updated to
+   say the class is the door's name rather than an inference; what they assert is byte-unchanged.
+2. **Not one user-facing string moved, and this is measured rather than asserted.** A
+   literal-by-literal diff of the whole 40-file rename (every `"…"` on the `-` side against every
+   one on the `+` side, comments excluded) reports **exactly ONE change in the entire diff**:
+
+   ```
+   + "the offer door makes it an offer under \(style.rawValue)"
+   - "an action makes it an offer under \(style.rawValue)"
+   ```
+
+   …a TEST's failure message. Everything the app says is byte-identical.
+
+### WHAT WAS DELIBERATELY LEFT, named so it is not mistaken for an oversight
+
+The **`speakCeremony…` quartet** on the `DivideWCeremony` host protocol —
+`speakCeremonyStatus` (a refusal whose name does not say so), `speakCeremonyRefusal` (a refusal that
+BEEPS, because Write's structural refusals beep and a board's speak), `speakCeremonyReceipt`,
+`speakCeremonyError`. It is a PROTOCOL with two conformers carrying a recorded distinction between
+two refusal doors, and renaming it well is the registry-walk design's work rather than a sweep's.
+Recorded on row 56 with the residual.
 
 
 ---

@@ -620,7 +620,7 @@ extension EditorSurfaceDelegate: NSTextViewDelegate {
         // editor v1's scope: each range would need its own verdict and the
         // index shifts would interleave — refuse rather than guess.
         guard affectedRanges.count == 1 else {
-            model.showStatus("Multi-range edits aren't supported yet.")
+            model.refuse("Multi-range edits aren't supported yet.")
             return false
         }
         return model.shouldChangeText(

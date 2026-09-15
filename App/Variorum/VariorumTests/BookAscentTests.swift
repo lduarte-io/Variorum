@@ -789,14 +789,16 @@ struct DivergeDoorTests {
     }
 
     /// A status item may carry ONE door, and carrying one changes nothing
-    /// about the ones that don't (every existing `speak` call is unchanged).
+    /// about the ones that don't (13u2 UNIT E — row 56: the door that carries
+    /// one is `offer`, the one that does not is `refuse`; before the rename
+    /// both were `speak` and the class was inferred).
     @Test func aStatusNoteCanCarryOneDoor() {
         let center = StatusCenter()
-        center.speak("plain")
+        center.refuse("plain")
         #expect(center.current?.action == nil)
 
         let fired = LockIsolated(0)
-        center.speak("offer", action: StatusCenter.Item.Action(
+        center.offer("offer", action: StatusCenter.Item.Action(
             label: "Do it", perform: { fired.withValue { $0 += 1 } }))
         let action = try? #require(center.current?.action)
         #expect(action?.label == "Do it")

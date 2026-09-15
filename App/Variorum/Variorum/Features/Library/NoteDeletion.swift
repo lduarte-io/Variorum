@@ -221,7 +221,7 @@ enum NoteDeletion {
                 let outcome = try await report(session: session, postIDs: postIDs)
                 session.status.say(outcome.text, refusing: outcome.isRefusal)
             } catch {
-                session.status.speak(DeletionRefusal.words(error, act: .delete))
+                session.status.refuse(DeletionRefusal.words(error, act: .delete))
             }
         }
     }

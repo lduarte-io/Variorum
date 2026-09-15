@@ -816,7 +816,7 @@ struct EditorCommands: Commands {
         // session has no status surface to speak to — nothing exists yet.
         guard let actions else {
             if case .ready(let session) = bootstrap.state {
-                session.status.speak(CapabilityRegistry.capability(.callout).unavailableNote)
+                session.status.refuse(CapabilityRegistry.capability(.callout).unavailableNote)
             }
             return
         }

@@ -193,7 +193,7 @@ struct MastheadTagCluster: View {
         let model = TagAssignmentViewModel(session: session, postID: postID)
         Task {
             if await model.applyTypedPath(path) == nil, let error = model.lastError {
-                session.status.speak(error)
+                session.status.refuse(error)
             }
             await load()
         }
@@ -206,7 +206,7 @@ struct MastheadTagCluster: View {
                     try ops.removeTag(tag.id, fromPost: postID)
                 }
             } catch {
-                session.status.speak(TagsViewModel.message(error))
+                session.status.refuse(TagsViewModel.message(error))
             }
             await load()
         }

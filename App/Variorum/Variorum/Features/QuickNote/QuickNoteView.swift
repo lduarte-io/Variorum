@@ -173,7 +173,7 @@ struct QuickNoteView: View {
             // looking at (the 5b menu-gates defect, refused re-entry).
             windows.register(windowID, router: router, kind: .quickNote)
             let status = session.status
-            router.speak = { status.speak($0) }
+            router.refuse = { status.refuse($0) }
             // THE QUIT PATH: a non-empty pad at app quit files itself.
             let pad = self.pad
             quitToken = session.quitFinalize.register { @MainActor in
@@ -254,11 +254,11 @@ enum QuickNoteMint {
             case .filed, .alreadyTagged:
                 session.status.receipt(QuickNoteCopy.filedNote)  // 18i: it landed
             case .refused(let reason):
-                session.status.speak(QuickNoteCopy.refusedFilingLine(reason))
+                session.status.refuse(QuickNoteCopy.refusedFilingLine(reason))
             }
             return result.container.id
         } catch {
-            session.status.speak(
+            session.status.refuse(
                 "\(QuickNoteCopy.refusedPrefix) \(OpsRefusalCopy.message(for: error))")
             return nil
         }
