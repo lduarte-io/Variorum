@@ -767,7 +767,12 @@ struct RootView: View {
                 starDoor: starDoor)
         case .poolPosts:
             PoolPostsView(
-                session: session, model: poolPosts, library: library,
+                session: session, model: poolPosts,
+                // P39a: the PARENT owns the sibling and passes its acts down
+                // (CLAUDE.md's cross-feature rule — "parents construct;
+                // features receive view models, values, and closures").
+                onDuplicateAsVersion: { await library.duplicateAsVersion(postID: $0) },
+                onArchive: { await library.archive(postID: $0) },
                 readings: readings, tags: tags,
                 onOpen: openHere,
                 onOpenBeside: { router.openBeside(.post($0)) },

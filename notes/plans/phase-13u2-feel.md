@@ -1765,8 +1765,8 @@ foreign-string compare).
 | item 10 — starred items scroll past ~7 | **BUILT + pinned (red-on-old: the section drew 360 pt where the window is 225)** — with the item's headline FINDING handed up: `Operations.starLimit = 5`, so the scroll cannot engage in the shipped app. QUESTIONS #112(b) |
 | item 11 — paste without newlines (+ the phone's rule) | **BUILT — ⇧⌘V on the Mac, the RULE in `Shared/` for both platforms, 10 pins; the phone's DOOR recorded as owed** (TRACE D-5) |
 | item 13 — the note title's room · row 93 — the nameless prompt | **item 13's FIRST half: HEALED by row 11 and MEASURED (585.5 pt of room, ending at the icon row where the scraps door is); row 93: FIXED with an open mark, pinned in both voices** (TRACE D-4) |
-| P39a — Pool stops holding `LibraryViewModel` | PENDING |
-| P39b — `WriteTakesPanel` stops constructing `TakesViewModel` | PENDING |
+| P39a — Pool stops holding `LibraryViewModel` | **FIXED** — two closures from `RootView`; zero behaviour change, pins unmodified |
+| P39b — `WriteTakesPanel` stops constructing `TakesViewModel` | **FIXED by MOVING THE FILE to the Takes feature** — the literal "RootView constructs" road measured and rejected with its reason; zero behaviour change, pins unmodified |
 | roster item 8 — the four protection items VERIFIED | PENDING |
 | row 57 — the RE-FONT road | PENDING |
 | TRACE 1a — the pane's projection compare | **FIXED + MEASURED** — 0.42 ms → 0.00009 ms per read pane per update pass at 200 blocks, and FLAT in the text's length where it was linear (TRACE D-3) |
@@ -2066,6 +2066,47 @@ by construction**: neither platform had such a door (grep-verified, and the mast
 which is the mobile catch-up's work and is recorded as a MOBILE PARITY row rather than guessed at
 here. Putting the rule in shared code is exactly what makes that build a face and not a second
 decision.
+
+## P39a / P39b — the cross-feature rule's two real violations
+
+The carried section at this file's end records the falsifiable check the pre-13u sweep ran: after
+the 2026-08-30 REFINEMENT (the prohibition binds **state and ownership** — constructing, holding a
+reference, calling business logic, owning a lifecycle — while a view RENDERING a sibling's view is
+legal composition), 57 candidate sites were measured and exactly **two** survived as real
+violations. Both are fixed here, and both are ZERO-behaviour changes whose proof is the suite
+riding green with **pins unmodified**.
+
+**P39a — Pool stops holding `LibraryViewModel`.** `PoolPostsView` took `let library:
+LibraryViewModel` and called two of its methods from the row's context menu (`duplicateAsVersion`,
+`archive`). It now takes two CLOSURES — `onDuplicateAsVersion` · `onArchive` — and `RootView`, which
+already owns both view models, passes the Library's methods in. CLAUDE.md's own sentence, made
+literal: *"parents construct; features receive view models, values, and closures."* The acts are
+byte-identical; what changes is that Pool no longer knows a `LibraryViewModel` exists, which is the
+refined rule's stated REASON (a cross-feature view-model reference destroys testability and
+isolation — lifecycle entanglement, hidden mutation paths, an un-mockable seam).
+
+**P39b — `WriteTakesPanel` stops constructing `TakesViewModel`, and the fix is that the FILE
+MOVED.** The panel lived in `Features/Editor/` and minted a `TakesViewModel` at its `init`
+(`_model = State(initialValue: TakesViewModel(...))`) — a feature constructing a sibling's view
+model, i.e. owning its lifecycle. **The file belongs to Takes by its own first paragraph** ("Write's
+take machinery … wearing the SAME v2 card grammar as the Takes tab"), over the Takes tab's own view
+model. Moved to `Features/Takes/`, the construction is a feature building its OWN model, and what
+the Editor does — presenting the view in a sheet — is precisely what the refined rule blesses.
+
+**The literal remedy P39b sketched ("RootView constructs, features receive") was MEASURED and
+rejected, and the measurement is the reason:** `EditorView` is constructed at **five sites in four
+features** (the post detail · Canvas · the book view · the book spread, twice) and at **none** of
+them by `RootView` — so threading a `TakesViewModel` factory down to this sheet would have touched
+four surfaces (three of them fenced to units A/B/E) to relocate one `init`. And the model's life is
+the SHEET's, which is exactly what `@State`'s `init(initialValue:)` is for. **Moving the file
+removes the violation; threading a factory would have moved it.** The reasoning is written at the
+file's head so the next reader does not re-derive it.
+
+**Evidence:** not one line of either view's body changed, and `WriteTakesPanelTests` +
+`CapabilityRegistryTests` (whose declared ⇔ rendered walk unions `WriteTakesPanel`'s and
+`PoolPostsView`'s `surfaceCapabilities`) ride **UNMODIFIED** — 25 tests green. That zero-test-edit
+shape is the parity-refactor proof the forked-brains rule already uses for a hoist: the address
+moved, not the behaviour.
 
 ---
 

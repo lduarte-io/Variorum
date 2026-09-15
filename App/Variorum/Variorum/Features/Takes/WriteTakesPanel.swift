@@ -11,6 +11,33 @@
 //  (archive/lock/delete, refusals speaking), archived takes visible with
 //  their way back, and the R84 note on journal-shaped posts.
 //
+//  **P39b (the pre-13u round, Act 2's sweep; fixed at 13u2 UNIT D) — THIS
+//  FILE MOVED, and the move IS the fix.** It lived in `Features/Editor/` and
+//  constructed a `TakesViewModel` at its `init` — a feature CONSTRUCTING a
+//  sibling feature's view model, which is lifecycle ownership and exactly
+//  what the cross-feature rule forbids after its 2026-08-30 refinement. The
+//  sweep measured 57 candidate sites across the app and found two real
+//  violations; this is the second.
+//
+//  The file belongs HERE by its own first paragraph: it is take machinery
+//  wearing the Takes tab's card grammar, over the Takes tab's view model.
+//  With it in the Takes feature, the construction is a feature building its
+//  OWN model, and what the Editor does — presenting this view in a sheet —
+//  is the thing the refined rule explicitly blesses: *"A view RENDERING a
+//  sibling's view is legal composition, not a violation."*
+//
+//  **The literal remedy P39b sketched — "RootView constructs, features
+//  receive" — was measured and rejected, and the measurement is the reason:**
+//  `EditorView` is constructed at FIVE sites in FOUR features (the post
+//  detail, Canvas, the book view, the book spread ×2) and at none of them by
+//  `RootView`, so threading a `TakesViewModel` factory down to this sheet
+//  would have touched four surfaces to relocate one `init` — and the model's
+//  life is the SHEET's, which is what `@State`'s `init(initialValue:)` is
+//  for. Moving the file removes the violation instead of moving it.
+//
+//  ZERO behaviour change: no line of this view's body was touched and every
+//  pin that names it rides unmodified.
+//
 
 import GRDB
 import SwiftUI

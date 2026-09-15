@@ -140,7 +140,22 @@ struct PoolPostsView: View {
 
     let session: AppSession
     let model: PoolPostsModel
-    let library: LibraryViewModel
+    /// **P39a (the pre-13u round, Act 2's sweep; fixed at 13u2 UNIT D).**
+    /// This used to be `let library: LibraryViewModel` — a feature holding a
+    /// REFERENCE to a sibling feature's view model, which is the cross-feature
+    /// rule's own wording after its 2026-08-30 refinement ("never holds a
+    /// reference to one, never calls its business logic"). The sweep measured
+    /// 57 candidate sites and found exactly two real violations; this is one.
+    ///
+    /// The refined rule's stated REASON is what the shape below answers: a
+    /// cross-feature view-model reference destroys testability and isolation
+    /// (lifecycle entanglement, hidden mutation paths, an un-mockable seam) —
+    /// so Pool now receives two CLOSURES and `RootView` passes the Library's
+    /// methods into them. The acts are byte-identical; what changes is that
+    /// the Pool no longer knows a `LibraryViewModel` exists, and a pin can
+    /// hand it two closures instead of a whole sibling.
+    let onDuplicateAsVersion: (String) async -> Void
+    let onArchive: (String) async -> Void
     let readings: ReadingsViewModel
     let tags: TagsViewModel
     let onOpen: (SidebarSelection) -> Void
@@ -314,13 +329,13 @@ struct PoolPostsView: View {
                 }
             }
             Button("Duplicate as Version") {
-                Task { await library.duplicateAsVersion(postID: item.postID) }
+                Task { await onDuplicateAsVersion(item.postID) }
             }
             Divider()
             // Ledger row 25: the same declaration the Library's row renders
             // (`SidebarView.contextMenuCapabilities`), so both say one word.
             Button(CapabilityRegistry.capability(.archiveNote).verb) {
-                Task { await library.archive(postID: item.postID) }
+                Task { await onArchive(item.postID) }
             }
             // 13l Act 2 (item 3): the note-row grammar's delete door, with
             // the confirmation her ruling gave the Library's — this row
