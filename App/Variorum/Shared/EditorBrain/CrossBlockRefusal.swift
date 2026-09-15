@@ -62,8 +62,24 @@ nonisolated enum CrossBlockRefusal {
         /// whose text she has never seen would delete a peer's paragraph
         /// under tombstone-wins.
         case unsyncedBlock
-        /// The span reaches into the open tail, which is not a block yet.
+        /// The span reaches into the open tail, which is not a block yet —
+        /// a tail WITH TEXT, where waiting is a real road (the idle mint
+        /// crystallizes it moments after she pauses). The EMPTY tail's
+        /// doorstep is the case below.
         case openTail
+        /// The span reaches the tail region while the tail is EMPTY — the
+        /// trailing empty line a ⏎ at the note's end leaves behind. Split
+        /// from `.openTail` at the 13u1 ladder, round 2 (the
+        /// `seamBesideArchivedTake` doctrine: ONE declining guard — the
+        /// plan's contiguity/tail condition — split into the causes whose
+        /// ROADS differ): a typed-on tail crystallizes moments after she
+        /// pauses, so `.openTail`'s waiting road is true there; an EMPTY
+        /// tail never mints (every crystallizer guards
+        /// `!tail.allSatisfy(\.isWhitespace)`, which an empty string
+        /// satisfies vacuously), so that promise is false here and the true
+        /// roads are the nudge and the empty line's own delete
+        /// (`BlockRangeIndex.verdict`'s `.closeTail`).
+        case emptyTailAtSpanEnd
         /// **The residual geometry, and 13u1 UNIT 2 shrank it to almost
         /// nothing.** Before item 5 this covered every cross-block selection
         /// with a partially covered block in it — her commonest gesture, and
@@ -107,6 +123,8 @@ nonisolated enum CrossBlockRefusal {
     /// 2. **the open tail** — the span overlaps the tail region, or ends ON
     ///    the tail's own separator (either way the compound's contiguity
     ///    guard is what declined, so the tail's cause and road speak);
+    ///    an EMPTY tail answers `.emptyTailAtSpanEnd` instead, because the
+    ///    waiting road is false for it (round 2's split);
     /// 3. **not editable** — an entry IN THE RUN is locked, or is a gap;
     /// 4. **the boundary-edge residual** — everything left: a span end
     ///    sitting on a boundary separator (either orientation, one block's
@@ -168,7 +186,11 @@ nonisolated enum CrossBlockRefusal {
         if let tail = index.tailRange,
            NSIntersectionRange(range, tail).length > 0
             || (index.tailSeparatorOffset.map { range.upperBound > $0 } ?? false) {
-            return .openTail
+            // Round 2's split: same declining guard, different true roads.
+            // An empty tail can only arrive via the separator arm (a
+            // zero-length region intersects nothing), and its waiting road
+            // is false — see the Cause's own doc.
+            return tail.length == 0 ? .emptyTailAtSpanEnd : .openTail
         }
 
         // 3. An entry IN THE RUN that no road can write into. ONE tiling
@@ -224,6 +246,10 @@ nonisolated enum CrossBlockRefusal {
             "A block in this selection hasn't arrived yet — nothing was changed."
         case .openTail:
             "The end of this selection isn't a block yet."
+        case .emptyTailAtSpanEnd:
+            // Round 2 (NIT-A): what she is looking at is the empty line her
+            // ⏎ left at the note's end — name that, not an abstract region.
+            "The end of this selection is the empty line at the note's end."
         case .partialBlockAcrossSeam:
             // 13u1 UNIT 2 re-narrowed this line; the LADDER's round 1
             // corrected it — the first sentence here claimed the selection
@@ -264,6 +290,12 @@ nonisolated enum CrossBlockRefusal {
             "It stays read-only until it syncs."
         case .openTail:
             "It becomes one moments after you pause typing, and then it can go with the rest."
+        case .emptyTailAtSpanEnd:
+            // Round 2 (NIT-A): the crystallization promise is FALSE for an
+            // empty tail (nothing will ever mint), so the road names the two
+            // moves that exist — both platform-neutral: the nudge, and the
+            // line's own delete (`.closeTail`).
+            "Nudge that end back one character, or delete the empty line on its own."
         case .partialBlockAcrossSeam:
             // The road must work for every residual shape: extending helps
             // the trailing cases, retracting helps the leading ones, so the

@@ -317,12 +317,50 @@ struct UndoHintAndRefusalTests {
             == .openTail)
     }
 
+    /// **An EMPTY tail's doorstep gets a road that actually opens** (13u1
+    /// ladder round 2, NIT-A — reviewer-found, implementer-agreed, fixed by
+    /// the reviewer). SP-2's widening sent every separator-covering span to
+    /// `.openTail`, whose road promises *"It becomes one moments after you
+    /// pause typing"* — true for a tail with TEXT, and FALSE for the empty
+    /// line a ⏎ at the note's end leaves behind: every crystallizer guards
+    /// `!tail.allSatisfy(\.isWhitespace)`, which an empty string satisfies
+    /// vacuously, so an empty tail never mints and the promised road never
+    /// opens. Worse than round 1 left it: the residual's nudge road, which
+    /// this shape spoke before SP-2, actually WORKS here. The diagnosis now
+    /// splits the one declining guard by the tail's emptiness (the
+    /// `seamBesideArchivedTake` doctrine — one guard, split causes, because
+    /// the true roads differ) and the empty-tail sentence names the two
+    /// roads that exist: the nudge, and the empty line's own delete
+    /// (`BlockRangeIndex.verdict`'s `.closeTail`).
+    ///
+    /// **RED ON OLD:** this shape spoke `.openTail`'s crystallization
+    /// promise (the message assertions below failed; the cause read
+    /// `.openTail`).
+    @Test func aSpanReachingTheEmptyTailLineGetsARoadThatOpens() {
+        // SP-2's own fixture with the tail EMPTIED: she pressed ⏎ at the
+        // end and typed nothing. [1,7): part of b0, all of b1, and the
+        // tail separator at 6 — the empty last line's doorstep.
+        let emptyTailed = Self.index([(2, "v0", true), (3, "v1", true)], tail: 0)
+        let cause = CrossBlockRefusal.diagnose(
+            range: NSRange(location: 1, length: 6), index: emptyTailed,
+            slots: [slot("b0", text: "aa"), slot("b1", text: "bbb")])
+        #expect(cause == .emptyTailAtSpanEnd)
+        let message = CrossBlockRefusal.message(for: cause)
+        #expect(!message.contains("pause typing"),
+                "the road promises a mint that never comes: \(message)")
+        #expect(message.contains("empty line"),
+                "the sentence names what she is looking at: \(message)")
+        #expect(message.contains("delete the empty line"),
+                "the second true road — the line's own delete: \(message)")
+    }
+
     /// **The words stop guessing.** The shipped line named three causes at
     /// once; no diagnosis may do that again, and each names its own road out.
     @Test func noRefusalLineListsCausesItDidNotEstablish() {
         let causes: [CrossBlockRefusal.Cause] = [
             .seamBesideFan, .seamBesideArchivedTake, .seamBesideComment,
-            .lockedTake, .unsyncedBlock, .openTail, .partialBlockAcrossSeam,
+            .lockedTake, .unsyncedBlock, .openTail, .emptyTailAtSpanEnd,
+            .partialBlockAcrossSeam,
         ]
         for cause in causes {
             // The CAUSE half names one thing. (The ROAD half may offer a
