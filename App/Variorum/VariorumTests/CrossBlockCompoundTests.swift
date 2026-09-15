@@ -242,7 +242,8 @@ struct CrossBlockCompoundTests {
             }
             #expect(fan.contains("Alpha one, unshown."), "the unshown take is untouched")
             let status = try #require(h.model.statusMessage)
-            #expect(status.contains("takes"), "the receipt says WHY they stayed apart: \(status)")
+            #expect(status.contains("one has takes"),
+                    "the receipt says WHY they stayed apart: \(status)")
         }
     }
 
@@ -435,6 +436,27 @@ struct CrossBlockCompoundTests {
                     "the FIRST block keeps its identity and holds the typed text")
         }
     }
+
+    /// **HER LEGIBILITY MANDATE, pinned at the words**: *"receipts name where
+    /// every block went."* Both destinations, by the nouns the rest of the
+    /// app uses for them, and short enough to survive the quiet line's
+    /// one-line truncation — the walk measured the first build falling off
+    /// the bar at exactly the join clause.
+    @Test func theReceiptNamesBothDestinationsAndStaysShortEnoughToRead() async throws {
+        try await withEditor(
+            seedBlocks: ["Alpha one.", "Beta two.", "Gamma three."]
+        ) { h in
+            h.replace(NSRange(location: 6, length: 21), with: "")
+            await h.flush()
+            let status = try #require(h.model.statusMessage)
+            #expect(status.contains(TrayPath.menuLabel), "where the middle went")
+            #expect(status.contains(BlockHistoryPath.cameFromSection),
+                    "where the two ends went")
+            #expect(status.contains("\u{2325}\u{2318}Z"), "and the road back")
+            #expect(status.count <= 100,
+                    "short enough for the quiet line: \(status.count) — \(status)")
+        }
+    }
 }
 
 // MARK: - The MENU flight the doors did not wait for (KnownIssues, 13u1 UNIT 2)
@@ -550,4 +572,5 @@ struct ReturnKeyUndoSignTests {
                     "⌥⌘Z removed the block ⏎ just made — her ask, verbatim")
         }
     }
+
 }

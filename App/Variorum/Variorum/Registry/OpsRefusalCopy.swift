@@ -622,36 +622,47 @@ nonisolated enum CrossBlockEditCopy {
     /// The receipt, built from what the compound ACTUALLY did — never from
     /// what the plan hoped (the 13e receipt rule: counts come from the
     /// operation's own results).
+    ///
+    /// **SHORT, AND IN THAT ORDER, BECAUSE THE WALK MEASURED IT.** The first
+    /// build composed `BlockSelectionCopy.deletedNote` whole and appended the
+    /// join clause — one grammar with the bulk bar, and on the dev build's
+    /// 1728 pt window it TRUNCATED at *"…the tray icon at the top of the
+    /// note…"*, which is exactly where the join clause began. A receipt whose
+    /// second destination falls off the end does not keep her mandate
+    /// (*receipts name where every block went*), and the quiet line truncates
+    /// by design — one line, tail, the whole sentence one hover away
+    /// (`QuietReceiptLine`'s own contract). So this says both destinations by
+    /// their NOUNS, first, and spends what is left on the road out.
+    ///
+    /// The nouns are the shared constants, not new words: the tray the bulk
+    /// bar names (`TrayPath.menuLabel`, home-aware — the scraps editor
+    /// composes this bar too) and the lineage region Block History names
+    /// (`BlockHistoryPath.cameFromSection`). One grammar is kept where it
+    /// matters — the same PLACES, called the same things, with the same ⌥⌘Z.
     static func receipt(
         _ outcome: CrossBlockCompound.Outcome, home: ContainerKind = .post
     ) -> String {
-        var line: String
+        var clauses: [String] = []
         if outcome.deletedCount > 0 {
-            // The SAME sentence the ⌘-click multi-delete and the whole-block
-            // selection speak, including its two roads (⌥⌘Z now, the tray
-            // afterwards) — so a block that left this way is found exactly
-            // where a block that left the other way is found.
-            line = BlockSelectionCopy.deletedNote(outcome.deletedCount, home: home)
-        } else {
-            // Nothing left the note, but a STRUCTURAL act landed from an
-            // ordinary keystroke and ⌘Z — the text stack — cannot take it
-            // back (the rewrite clears it by design). Naming the door that
-            // can is load-bearing, not chatter (A7's carve set this shape).
-            line = "Edited across blocks \u{2014} \u{2325}\u{2318}Z undoes it."
+            let noun = outcome.deletedCount == 1 ? "1 block" : "\(outcome.deletedCount) blocks"
+            clauses.append("\(noun) to \(TrayPath.menuLabel(for: home))")
         }
         if outcome.merged {
-            // Her condition on the join ruling, in the receipt: *the previous
-            // blocks must be EASY TO SEE in lineage.* The line names the
-            // door and says the thing that distinguishes this exit from the
-            // other one — nothing is counting down.
-            line += " The two ends joined into one block \u{2014} both originals are kept, "
-                + "with no countdown, under \(BlockHistoryPath.cameFromPath)."
+            // Her condition on the join ruling: *the previous blocks must be
+            // EASY TO SEE in lineage.* The region's own name is the road.
+            clauses.append(
+                "the ends joined \u{2014} originals under \(BlockHistoryPath.cameFromSection)")
         } else if outcome.joinSuppressedByFan {
             // #11a's standing rule, said out loud instead of left to be
             // noticed: the halves join only where no fan hangs on the seam.
-            line += " The ends kept their own blocks \u{2014} one of them has takes, "
-                + "and a keystroke won't fold a fan away."
+            clauses.append("the ends kept their own blocks \u{2014} one has takes")
         }
-        return line
+        // Nothing left the note and nothing joined: two ordinary buffer
+        // edits. It still speaks, because a STRUCTURAL act landed from an
+        // ordinary keystroke and ⌘Z — the text stack — cannot take it back
+        // (the rewrite clears it by design). Naming the door that can is
+        // load-bearing, not chatter (A7's carve set this shape).
+        if clauses.isEmpty { clauses.append("edited across blocks") }
+        return clauses.joined(separator: "; ") + ". \u{2325}\u{2318}Z undoes it."
     }
 }
