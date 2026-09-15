@@ -453,6 +453,17 @@ final class TakesViewModel {
     /// never fires `.task`).
     func adopt(_ new: Queries.TakesProjection) {
         loaded = true
+        // **13u2 UNIT E — THE ONE STRUCTURAL ARM** (KnownIssues row 51's
+        // recommended design, built inside the `TakesArticleScroll` split).
+        // A pending article landing ends when the content it was judged
+        // against changes — whatever changed it: her gesture, a SYNC arrival,
+        // a structural undo in another window, an engine repair. The dozen
+        // enumerated gesture arms stay (they end a landing AT the gesture,
+        // which is when her hand moved, and their pins assert exactly that);
+        // this makes a road nobody enumerated impossible rather than
+        // improbable. It runs FIRST, before `consumeLandings` below can make
+        // a new landing against this projection.
+        board.article.noteProjectionArrived(new)
         refreshWordCounts(old: projection, new: new)
         projection = new
         // THE CONVERGENCE HALF of the buffer-authoritative discipline

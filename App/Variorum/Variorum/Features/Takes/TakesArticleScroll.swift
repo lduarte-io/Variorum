@@ -298,6 +298,61 @@ final class TakesArticleScroll {
     /// arrival's, end a landing by construction. `!=` on the projection fires
     /// on any field, so a pure metadata arrival would end one too; chosen
     /// behaviour to write down there, not to discover.
+    // MARK: - THE ONE STRUCTURAL ARM (13u2 UNIT E — row 51's recommended design)
+
+    /// The projection a PENDING landing was judged against — the last one
+    /// this brain was told about when the landing was made.
+    ///
+    /// `@ObservationIgnored` because nothing renders from it: it is the arm's
+    /// own bookkeeping, and tracking it would invalidate every view on every
+    /// autosave-cadence adoption.
+    @ObservationIgnored private var landingProjection: Queries.TakesProjection?
+
+    /// **A PROJECTION ARRIVED.** If a landing is pending and this projection
+    /// differs from the one it was judged against, the landing ends.
+    ///
+    /// **Why this exists** (`clearArticleLanding`'s road table, and the
+    /// residue row 51 carries): a landing is a REVEAL kept alive against the
+    /// lazy column's own settling passes, and what can defeat it afterwards
+    /// is a change to the article's CONTENT height, its VIEWPORT height, or
+    /// the LIVE PANE. Until now every content-height road was covered BY
+    /// ENUMERATION — a table of a dozen gesture doors, each with its own
+    /// `clearArticleLanding()` arm, whose completeness was argued three times
+    /// and falsified twice (round 1 claimed "by construction" for the
+    /// structure controller; round 2 measured the split and the callout;
+    /// round 3 measured the ⌘-pick's banner). An enumeration of gesture doors
+    /// also cannot, in principle, cover the roads that are NOT gestures: a
+    /// SYNC arrival, a structural undo performed in another window, an engine
+    /// repair. Those change the content height with nobody's hand on the
+    /// board.
+    ///
+    /// This closes the class by construction for every content change,
+    /// whatever produced it, because a content change is exactly a projection
+    /// that differs. The enumerated arms STAY — see the record — so nothing
+    /// about when her own gestures end a landing moves.
+    ///
+    /// **THE CHOSEN BEHAVIOUR, written down rather than discovered** (the
+    /// exact caveat row 51 asks to be recorded here): `!=` on
+    /// `Queries.TakesProjection` fires on ANY field, so a projection that
+    /// differs only in METADATA — a title edit, a word target, a lens
+    /// rename, a seal — ends a pending landing too. That is deliberate and it
+    /// is the safe direction: a landing is a one-shot reveal with a 64-aim
+    /// budget measured in milliseconds, and the states in which a metadata-only
+    /// arrival can race one are rare and self-correcting (the page simply
+    /// stays where it is, which is where she left it). The alternative — a
+    /// field-by-field "does this change heights" predicate — is a second
+    /// completeness argument of exactly the kind this arm exists to retire.
+    ///
+    /// **The first arrival never ends anything:** with no judged projection in
+    /// hand there is nothing to differ FROM, and a mount whose landing is set
+    /// before its first adoption (every pin's order, and the app's when a
+    /// door lands before the observation delivers) must keep it.
+    func noteProjectionArrived(_ projection: Queries.TakesProjection) {
+        defer { landingProjection = projection }
+        guard articleLanding != nil, let judged = landingProjection else { return }
+        if judged != projection { clearArticleLanding() }
+    }
+
     func clearArticleLanding() {
         // The 17q ladder's round 3 (R3-1): her hand ends the restore's HOLD
         // exactly as it ends the landing — here, in the ONE funnel every arm
