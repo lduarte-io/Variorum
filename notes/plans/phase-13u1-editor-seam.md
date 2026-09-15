@@ -709,11 +709,11 @@ Migrations: **zero**. Lockstep marker: **8**, untouched.
 
 | # | Piece | Status |
 |---|---|---|
-| A | The SEVENTH quiet auto-commit occasion — the core door the compound insures through, + core pins | NOT-STARTED |
-| B | The shared compound brain (`CrossBlockCompound`): the plan (geometry + the paragraph-break rule + the fates) and the compound body over `Operations` | NOT-STARTED |
-| C | `CrossBlockRefusal` HOISTED to `Shared/` (U-5) with item 5 writing what it says; the gap fence's Mac face (U-3); the empty-block-in-a-span plan (U-4); the fan fence's policy half on a RUN-TIME read (U-1) | NOT-STARTED |
-| D | The Mac's face: the routing arm, the receipts that name where every block went, the refusals shrunk to sealed note + locked take | NOT-STARTED |
-| E | The PHONE's consumer carried to the new brain (the semantics are ruled for both platforms; the face stays the mobile project's) | NOT-STARTED |
+| A | The SEVENTH quiet auto-commit occasion — the core door the compound insures through, + core pins | DONE(`090bbbbb`) |
+| B | The shared compound brain (`CrossBlockCompound`): the plan (geometry + the paragraph-break rule + the fates) and the compound body over `Operations` | DONE(`c76dcd60`, `85a92be2`) |
+| C | `CrossBlockRefusal` HOISTED to `Shared/` (U-5) with item 5 writing what it says; the gap fence's Mac face (U-3); the empty-block-in-a-span plan (U-4); the fan fence's policy half on a RUN-TIME read (U-1) | DONE(`c76dcd60`) |
+| D | The Mac's face: the routing arm, the receipts that name where every block went, the refusals shrunk to sealed note + locked take | DONE(`c76dcd60`) |
+| E | The PHONE's consumer carried to the new brain (the semantics are ruled for both platforms; the face stays the mobile project's) | DONE(`c76dcd60`) — mobile suite PENDING |
 | F | `newBlock` registers structural undo (R-13u-3) + the AppSpec §9 canon delta in the SAME commit | NOT-STARTED |
 | G | The MENU-flight door-await neighbour (KnownIssues row 63) | NOT-STARTED |
 | H | Row 43 half (1) — the ⌘Z-across-a-break directive: the judgment, made and RECORDED with its traced mechanism | NOT-STARTED |
@@ -722,6 +722,168 @@ Migrations: **zero**. Lockstep marker: **8**, untouched.
 | K | Close — suites green, KnownIssues rows resolved/re-owned, the handback rows flipped, the mobile parity facts | NOT-STARTED |
 
 *(Traces, pins, PROVISIONALs and measurements are filled in below as each piece lands.)*
+
+---
+
+### A — THE SEVENTH QUIET AUTO-COMMIT OCCASION (`090bbbbb`)
+
+**Her own insurance idea, adopted verbatim into item 5's sketch:** *"a quiet auto-commit of the
+affected takes' state RIGHT BEFORE a multi-block edit"*, and the reason she gave beside it —
+*"doubly right here because the gesture mixes the text-undo and structural-undo worlds"*.
+
+`Operations.insureTakes(_ variantIDs:)` (`Sources/VariorumCore/Operations/Operations+Variant.swift`)
+— one transaction, `kind: .auto`, deduped against each take's own last commit (`isDirty`, the same
+rule the five occasions before it share), locked/archived/tombstoned/absent takes SKIPPED, a sealed
+note THROWN on. **Not governed by `savepoint_cadence`:** J11's setting governs the two CADENCE
+occasions only, and turning savepoints down must never turn protection off — pinned.
+
+**What it insures and what it deliberately does not.** It takes the takes the compound will EDIT.
+A block the compound DELETES WHOLE is not there, and that is not an omission: `deleteBlock`
+preserves the block and every take on it and Put back is real. A block RELEASED to lineage by the
+edge merge is not there either: the standing merge preserves both sources whole and the History
+came-from door is one button back. **The doctrine is unchanged — insure exactly what an operation
+is about to make unreachable** — and the unreachable thing here is the pre-gesture buffer, because
+the structural rewrite clears the text-undo stack by design.
+
+**PINS:** `Tests/VariorumCoreTests/InsureTakesTests.swift`, 7 — the savepoint IS the pre-edit state ·
+dedupe · a repeated id insures once · locked/archived/vanished skip · the seal refuses · the cadence
+setting does not reach it (the same call turns `closeAutoCommit` off and leaves this on) · an empty
+list writes nothing.
+
+**CANON DELTA (recorded with the build, per the ruling):** `notes/OverallModel.md` §3's enumeration
+now reads **six** quiet automatic exceptions and carries the SEVENTH as its own clause with her
+reason and the two things it deliberately does not insure. (The ordinal stays 7 because the RETIRED
+sixth — the Fragments-bridge landing's — is still counted in that sentence's own history.)
+
+---
+
+### B · C · D · E — THE CROSS-BLOCK COMPOUND (`c76dcd60`, pins `85a92be2`)
+
+**THE MECHANISM, TRACED HERE BEFORE A LINE MOVED.** The shipped road was
+`CrossBlockEditPlanner` (the ratified 2026-07-09 merge-then-edit): it collected the entries the span
+INTERSECTED, refused unless every one of them had exactly one live active take, **merged the WHOLE
+touched run into one block**, and then applied the edit to the merged buffer. Four consequences, each
+of which item 5 or item 8 names:
+
+1. **A fully-selected middle block lost its identity.** `merge` releases both sources to lineage and
+   mints a fresh block; chaining it across five paragraphs releases all five. There is no tombstone,
+   so nothing is in the tray and Put back has nothing to put back — which is exactly the road her
+   ruling replaces (*"fully-selected middle blocks ride `deleteBlock`… the 13j Trash/tray road:
+   takes preserved, Put back real"*).
+2. **A FANNED span never reached it at all** — it routed to #11a's visible-take edit, which emptied
+   each touched block's shown take in place. A fanned block she had selected WHOLE therefore became
+   a blank block with a fan hanging on it.
+3. **A zero-length entry inside the span was invisible.** An EMPTY block or a GAP renders no
+   characters, so the intersection walk skipped it and the merge chain reached ACROSS it.
+4. **The fan fence read `model.slots`** — the projection the engine deliberately freezes for the
+   length of a typing burst.
+
+**RED ON OLD — every claim above measured on the real pre-fix tree**, a scratch `git worktree` at
+`ecb7587a` (this unit's record-only first commit, zero code in it) with throwaway probes written
+against the OLD API and its own DerivedData:
+
+| probe | PRE-FIX (measured) | POST-FIX |
+|---|---|---|
+| a take ARRIVES during the typing burst, then a mid-to-mid span (U-1) | `["Alpha two."]` — **merged anyway**, the arrived take left on a released original | `["Alpha ", "two."]` — the join stands down |
+| a GAP inside the span: the plan (U-3) | `Edit(blockIDs: ["b0", "b2"] …)` — **plans a merge ACROSS the block that has not arrived** | `nil` — the run fences it |
+| a GAP inside the span: the diagnosis (U-3) | `.partialBlockAcrossSeam` — **the wrong cause** | `.unsyncedBlock` |
+| an EMPTY block inside the span (U-4) | store UNCHANGED and the status line reads **`The operation was refused: blocksNotAdjacent(first: "00000000-…-0001", second: "00000000-…-0007")`** — the raw enum dump with two UUIDs in it, exactly as the handback row said | the gesture works; the empty block trays |
+| three blocks, mid-to-mid: what the middle does | texts `["Alpha three."]`, **trayed 0 of 3** — the middle was merged away | the middle trays; the ends join |
+| the seventh occasion | savepoints on the edited take: **`[]`** | `["Alpha one."]` |
+
+**THE BUILD.**
+
+**`App/Variorum/Shared/EditorBrain/CrossBlockCompound.swift`** — one brain, both platforms:
+
+- **The RUN is an index RANGE**, not the intersected set: every entry the span genuinely overlaps
+  PLUS any zero-length entry sitting inside it. That single change is U-3's and U-4's fix, and it is
+  why the gap can be FENCED (it is now visible to the plan) and why an interior empty block is an
+  ordinary member (covered whole ⇒ deleted).
+- **WHOLE vs PART decides the fate.** Covered whole ⇒ `deleteBlock` (the standing unrestricted
+  door, #33(a)) — a fanned middle included, her ruling. Covered in part ⇒ the CHOSEN take takes an
+  ordinary buffer edit — a fanned edge touches the chosen take only, the standing fanned-extract
+  class. A gesture that TYPES keeps the first block even where the span covers it whole, so the
+  typed text stays where the selection opened (select three paragraphs, type "Fresh." → ONE block
+  holding "Fresh.", which is what every editor does).
+- **R-13u-2 is ONE pure function**, `cutIsAtAParagraphBreak(_:offset:)`, asked at both ends: a cut
+  point is at a paragraph break iff it is at the take's own start or end (the BLOCK SEAM — the
+  surface really does carry a newline there) or adjacent to an internal newline (I4's surface
+  paragraphs). Symmetric on purpose, so the two halves of her ruling cannot drift.
+- **The FAN question is not in the plan at all.** `apply` takes a `liveActiveTakeCount` closure and
+  both platforms hand it a synchronous STORE read, run INSIDE the flight (after `runStructural`'s
+  flush, under the one-flight latch, on the serialized operations runner). That is U-1's correctness
+  half stated as a law — *never authorize from stale state* — and the remaining window is the
+  recorded ms-window sync-apply residual, strictly narrower than the projection's whole burst.
+- **The ORDER inside the compound is the design.** insure → compare-and-set → delete the wholly
+  covered → then either edit both ends or merge-and-write. The merge is LAST and takes both texts
+  WHOLE, which is what makes the join character the canon merge mints fall inside what the gesture
+  removed: the surface reads *"the selection vanished"*, never *"the selection vanished and left a
+  space"*. The insurance is OUTSIDE the compound deliberately — a commit registers no undo entry,
+  and insurance that unwinds with the act it insured against protects nothing.
+- **Churn is the EDIT's own cost**, computed at plan time from the cut (`Edge.charDelta`), never a
+  length difference and never a storage report — UNIT 1's churn-pair rule, applied at birth.
+
+**`App/Variorum/Shared/EditorBrain/CrossBlockRefusal.swift`** — the HOIST (U-5). The causes, the
+diagnosis and every road that names an ACT moved to `Shared/`; the one sentence that names a
+platform CHORD arrives as a `fanRoads` parameter, because a shared home must not hold a door one
+platform does not have (MobileSoul §4.4 from the other side). The Mac keeps three forwards
+(`CrossBlockRefusalRoads.swift`) so **every Mac call site and every Mac pin reads exactly as before
+the hoist** — the 3C zero-test-edit proof. `diagnose` step 3 now walks the RUN the plan walks, or a
+refusal could name a cause the planner did not decline on.
+
+**The wording, re-narrowed by item 5** (the row's own instruction: *"let item 5 write what it
+says"*): `.partialBlockAcrossSeam` no longer claims every partially-covered span — the compound
+takes those — and says what is actually left; `.lockedTake` and `.unsyncedBlock` carry *"nothing was
+changed"*, because a refusal that does not say so reads as a half-done gesture. The PHONE's single
+line (*"This edit spans more than one block — edit inside one block for now"*), which carried an
+unexecuted instruction in its own doc comment to re-narrow itself, is retired for the shared
+diagnosis in the phone's own roads.
+
+**The Mac's face.** The routing arm keeps its ruled order — A7's carve · #34's texted seam · J9's
+whole-block delete · **the compound** · the diagnosing refusal — and #11a's visible-take road is
+retired into the compound with a note at the address where it stood saying what it ruled and what
+deliberately changed. The RECEIPT rides `StructuralOutcome.note` (18i's one structural receipt seam)
+and is built from what the compound ACTUALLY did: the deletion clause is
+`BlockSelectionCopy.deletedNote` — **the same sentence the ⌘-click multi-delete and the bulk bar
+speak**, which is her *"one undo grammar, one refusal grammar, never two"* made literal — plus the
+join clause naming `Block History → Came from` (her condition: the previous blocks must be EASY TO
+SEE in lineage) or the fan clause saying why the ends stayed apart. `blocksNotAdjacent` gained Mac
+words as the belt behind the run fence.
+
+**The phone.** Its two consumers were carried to the new brain, so the phone INHERITS the ruled
+semantics rather than re-deciding them (her own coordination flag: *"the semantics are ruled HERE,
+once, for both platforms"*). What is NOT built is the phone's FACE — a receipt naming where every
+block went — which is the mobile project's and is recorded in the parity row, not guessed at from
+the Mac side.
+
+**PINS — `App/Variorum/VariorumTests/CrossBlockCompoundTests.swift`, 15, every one driving the REAL
+keystroke path** (`textView.insertText` → the gate → the deferred compound → the rewrite) and then
+reading the STORE:
+
+| pin | the ruling it holds |
+|---|---|
+| `aSpanFromMidParagraphToMidParagraphJoinsTheRemainders` | the everyday case; both originals under Came from |
+| `aSpanOpeningAtABlockSStartDoesNotJoinTheEnds` | R-13u-2, the BLOCK-SEAM half |
+| `aSpanOpeningAfterAnInternalNewlineDoesNotJoinTheEnds` | R-13u-2, the INTERNAL-NEWLINE half |
+| `aSpanClosingAtAnInternalParagraphEndDoesNotJoinTheEnds` | the same rule at the other end |
+| `whollyCoveredMiddlesGoToTheTrayAndTheEndsJoin` | the Trash/tray road, read from `Queries.trayBlocks` |
+| `theWholeGestureIsOneUndoEntryAndRedoReturnsTheExactRows` | ONE ⌥⌘Z entry; undo restores the exact block ids; redo returns the SAME merged block id |
+| `aFannedMiddleBlockGoesToTheTrayWithItsWholeFan` | her ruling; both takes preserved on the tombstoned block |
+| `aFanOnASurvivingEndKeepsTwoBlocksAndTouchesOnlyTheChosenTake` | #11a at the ends; the unshown take untouched; the receipt says why |
+| `aTakeArrivingDuringTheTypingBurstStopsTheJoin` | **U-1's red-on-old**: the projection still says one take, the store says two, the join stands down |
+| `aLockedTakeInTheRunRefusesTheWholeGestureNamingTheLock` | R-13u-1, refuse whole, nothing changed |
+| `aSealedNoteRefusesTheGestureBeforeAnyPlanRuns` | the seal, at the surface and at the gate |
+| `aGapInsideTheSpanRefusesAndNamesTheBlockThatHasNotArrived` | **U-3's red-on-old**: the cause is `.unsyncedBlock`, never the raw enum |
+| `aLoneSeparatorCanNeverReachTheCompound` | walked over EVERY separator of an empty-heavy document — what keeps A7's carve and #34's seam merge safe to run first |
+| `theCompoundLeavesAQuietSavepointOfEveryTakeItEdits` | the seventh occasion at the gesture it was invented for |
+| `typingOverAWholeParagraphRunLeavesOneBlockHoldingWhatYouTyped` | the type-over shape |
+
+Four DISPLACED pins were carried to the road that replaced theirs rather than deleted with the
+method: `EditorSeamCostTests`' two (the 8,000-block cost pin, now on the compound's plan; the
+geometry pin, now asserting U-4's empty-block fix), `BoundaryFluidityTests`' CAS fence (the fanned
+span the old road sent to #11a), and its routing pin — whose CLAIM (*"eligible cross-block edits
+never show the refusal"*) is unchanged and whose ASSERTION now reads the status KIND, since the
+gesture speaks a RECEIPT and 18i made a receipt quiet by default.
 
 ## CLOSEOUT (findings → dispositions; filled at the ladder's end)
 
