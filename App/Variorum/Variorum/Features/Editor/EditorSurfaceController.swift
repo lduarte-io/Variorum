@@ -99,12 +99,36 @@ final class EditorSurfaceController {
 
     /// Same block sequence, different content (choose-variant, an external
     /// edit, restoreCommit): replace only the changed slots, last-to-first
-    /// so earlier ranges stay valid. Cost ∝ changed blocks, never the post.
+    /// so earlier ranges stay valid.
+    ///
+    /// **Cost, stated honestly (13u1 UNIT 1 — P17).** The STORAGE WRITES are
+    /// ∝ the changed blocks, which is what this comment used to claim for
+    /// the whole method; the COMPARISON is ∝ the note's text, because
+    /// deciding which slots changed means reading every slot's surface text.
+    /// What was wrong beyond the wording was the tiling walk: this asked
+    /// `model.index.range(ofEntryAt: i)` once per slot and that accessor
+    /// walks the entries from zero, so the loop cost Σi ≈ N²/2 in the BLOCK
+    /// COUNT on top of the linear term — a quadratic on the road every take
+    /// switch, `restoreCommit` and sync landing takes. Measured at 8,000
+    /// blocks: **3.94 s → 5.7 ms** (the record's table). The tiling is now
+    /// read ONCE through the shared accumulating walk.
+    ///
+    /// **The ranges are computed BEFORE the loop and stay correct:** the
+    /// walk descends, and replacing slot `j` changes the lengths of entries
+    /// at or after `j` only — never the prefix sum of an entry below it,
+    /// which is all `ranges[i]` for `i < j` depends on. (That is the same
+    /// reason the loop descends at all.)
     func applyDifferential(_ new: [Queries.RenderedBlock]) {
         var edited = false
+        let ranges = model.index.entryRanges()
         for i in stride(from: new.count - 1, through: 0, by: -1) {
             let newText = new[i].text ?? ""
-            let range = model.index.range(ofEntryAt: i)
+            // No bounds guard, deliberately: `.differential` is only chosen
+            // when the block SEQUENCE matches, so `new.count ==
+            // entries.count` by construction, and a violation should stay
+            // the loud trap the accessor's own precondition always was
+            // rather than becoming a silent skip.
+            let range = ranges[i]
             if model.viewText(range) != newText {
                 model.programmaticReplace(range, with: newText, blockID: new[i].blockID)
                 edited = true
@@ -2312,25 +2336,33 @@ final class EditorSurfaceController {
 
     /// Nil = not eligible (gap/locked visible take, tail overlap, or a
     /// single-block range) — the remaining refusal speaks.
+    ///
+    /// **ONE tiling walk (13u1 UNIT 1 — this is `KnownIssuesAndTechDebt`'s
+    /// own named O(N²) site, the surviving twin of the one mobile round 2
+    /// fixed).** It asked `model.index.range(ofEntryAt: i)` once per entry
+    /// over the whole note plus four more times for the edges, and that
+    /// accessor walks from zero: Σi ≈ N²/2, on the cross-block KEYSTROKE
+    /// road, on the main actor. Measured at 8,000 blocks: **3.84 s → 4.2 ms**
+    /// (the record's table). The conditions below are untouched.
     func planVisibleTakeEdit(range: NSRange, replacement: String) -> VisibleTakeEdit? {
         let entries = model.index.entries
+        let ranges = model.index.entryRanges()
         var touched: [Int] = []
         for i in entries.indices {
-            let entryRange = model.index.range(ofEntryAt: i)
-            if NSIntersectionRange(range, entryRange).length > 0 {
+            if NSIntersectionRange(range, ranges[i]).length > 0 {
                 touched.append(i)
             }
         }
         guard touched.count >= 2, let first = touched.first, let last = touched.last else {
             return nil
         }
-        guard range.location >= model.index.range(ofEntryAt: first).location,
-              range.upperBound <= model.index.range(ofEntryAt: last).upperBound
+        guard range.location >= ranges[first].location,
+              range.upperBound <= ranges[last].upperBound
         else { return nil }
         var pieces: [VisibleTakeEdit.Piece] = []
         for i in touched {
             guard let variantID = entries[i].variantID, entries[i].editable else { return nil }
-            let entryRange = model.index.range(ofEntryAt: i)
+            let entryRange = ranges[i]
             let intersection = NSIntersectionRange(range, entryRange)
             let intraRange = NSRange(
                 location: intersection.location - entryRange.location,
@@ -2346,7 +2378,7 @@ final class EditorSurfaceController {
             pieces: pieces,
             replacement: replacement,
             caretBlockID: entries[first].blockID,
-            caretOffset: max(0, range.location - model.index.range(ofEntryAt: first).location)
+            caretOffset: max(0, range.location - ranges[first].location)
                 + (replacement as NSString).length)
     }
 
@@ -2393,16 +2425,19 @@ final class EditorSurfaceController {
             model.refuseFeedback("Select the text to delete in every take first.")
             return
         }
-        // No tail: the open tail is not a block yet.
+        // No tail: the open tail is not a block yet. ONE tiling walk (13u1
+        // UNIT 1 — the same accessor-in-a-loop class as `planVisibleTakeEdit`
+        // above, on the "Delete in Every Take" road; unnamed by the sweep,
+        // found by its own completion rule).
         let entries = model.index.entries
+        let ranges = model.index.entryRanges()
         var touched: [Int] = []
         for i in entries.indices {
-            let entryRange = model.index.range(ofEntryAt: i)
-            if NSIntersectionRange(selection, entryRange).length > 0 { touched.append(i) }
+            if NSIntersectionRange(selection, ranges[i]).length > 0 { touched.append(i) }
         }
         guard let first = touched.first, let last = touched.last,
-              selection.location >= model.index.range(ofEntryAt: first).location,
-              selection.upperBound <= model.index.range(ofEntryAt: last).upperBound
+              selection.location >= ranges[first].location,
+              selection.upperBound <= ranges[last].upperBound
         else {
             model.refuseFeedback(RefusalCopy.message(for: .openTailTarget))
             return
@@ -2423,7 +2458,7 @@ final class EditorSurfaceController {
                     for: entries[i].variantID == nil ? .unsyncedBlock : .lockedTake))
                 return
             }
-            let entryRange = model.index.range(ofEntryAt: i)
+            let entryRange = ranges[i]
             let intersection = NSIntersectionRange(selection, entryRange)
             targets.append(Target(
                 blockID: entries[i].blockID,
@@ -2548,12 +2583,20 @@ final class EditorSurfaceController {
             var items: [FindReplaceItem]
         }
         let entries = model.index.entries
+        // ONE tiling walk for the WHOLE placement pass (13u1 UNIT 1 — P22).
+        // This asked `model.index.range(ofEntryAt: i)` inside a loop that is
+        // itself inside the loop over approved matches, so the placement
+        // pass was O(Σ_items k_item²) — worst case O(matches × blocks²) — on
+        // the main actor, on the Replace-All-in-Every-Take road she presses.
+        // The walk is hoisted out of BOTH loops; the inner break is
+        // untouched.
+        let ranges = model.index.entryRanges()
         var targets: [Target] = []
         var moved = 0
         for item in plan {
             var placed = false
             for i in entries.indices {
-                let entryRange = model.index.range(ofEntryAt: i)
+                let entryRange = ranges[i]
                 guard item.range.location >= entryRange.location,
                       item.range.upperBound <= entryRange.upperBound
                 else { continue }
@@ -2850,8 +2893,15 @@ final class EditorSurfaceController {
         #if DEBUG
         var matches = model.index.documentLength == (model.textView?.textStorage?.length ?? -1)
         if matches {
+            // ONE tiling walk (13u1 UNIT 1 — the same accessor-in-a-loop
+            // class, DEBUG-only but on every differential structural apply,
+            // which is to say on every Debug build's every divide/merge).
+            // (`adoptRewrite` above set the index FROM `fresh`, so the two
+            // counts are equal by construction — no bounds guard is added,
+            // for the same reason `applyDifferential` adds none.)
+            let ranges = model.index.entryRanges()
             for (j, slot) in fresh.enumerated() {
-                if model.viewText(model.index.range(ofEntryAt: j)) != (slot.text ?? "") {
+                if model.viewText(ranges[j]) != (slot.text ?? "") {
                     matches = false
                     break
                 }

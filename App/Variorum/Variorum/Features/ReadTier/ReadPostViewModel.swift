@@ -212,10 +212,18 @@ final class ReadPostViewModel {
     private func applyDifferential(_ new: [Queries.RenderedBlock]) {
         guard let storage = textView?.textStorage else { return }
         var edited = false
+        // ONE tiling walk (13u1 UNIT 1 — P17's third site). The text
+        // inequality above it kept this at O(N × changedSlots) rather than
+        // the editors' full Σi, which is why the sweep rated it lower — but
+        // a sync pull landing many of one note's slots at once makes
+        // changedSlots ≈ N and the term is quadratic again. Correct BEFORE
+        // the loop for the same reason as the editor's twin: the walk
+        // descends, so no replacement can move a lower entry's prefix sum.
+        let ranges = index.entryRanges()
         for i in stride(from: new.count - 1, through: 0, by: -1) {
             let newText = new[i].text ?? ""
             guard newText != (slots[i].text ?? "") else { continue }
-            let range = index.range(ofEntryAt: i)
+            let range = ranges[i]
             guard range.upperBound <= storage.length else {
                 renderFull(new)  // never out-of-bounds; heal from the store
                 return
@@ -312,9 +320,11 @@ final class ReadPostViewModel {
         // container-relative; the badge buttons live in the view.
         let origin = textView.textContainerOrigin
         var result: [ReadBadge] = []
+        // ONE tiling walk (13u1 UNIT 1 — the editor badge pass's twin).
+        let ranges = index.entryRanges()
         for (i, slot) in slots.enumerated() where slot.hasFan {
-            guard i < index.entries.count else { break }
-            let range = index.range(ofEntryAt: i)
+            guard i < ranges.count else { break }
+            let range = ranges[i]
             guard let location = contentManager.location(
                 contentManager.documentRange.location, offsetBy: range.location)
             else { continue }

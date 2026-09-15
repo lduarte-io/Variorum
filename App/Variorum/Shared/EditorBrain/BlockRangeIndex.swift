@@ -80,6 +80,42 @@ nonisolated struct BlockRangeIndex: Equatable, Sendable {
         preconditionFailure("entry index out of range")
     }
 
+    /// **EVERY entry's range, from ONE accumulating pass.**
+    ///
+    /// 13u1 UNIT 1 — the sweep-to-completion of the O(N²) class
+    /// `KnownIssuesAndTechDebt.md` opened on `planVisibleTakeEdit` and the
+    /// 2026-08-30 tech-debt sweep widened (P16 · P17 · P22). The accessor
+    /// above walks the entries from ZERO on every call, so it is O(i); a
+    /// caller that asks it once per entry inside a loop therefore pays
+    /// Σi ≈ N²/2 — **cost proportional to the DOCUMENT, which is P1's one
+    /// prohibition**, and the fixed twin
+    /// (`CrossBlockEditPlanner.plan`) measured 23.8 s for a single plan at
+    /// 20,000 entries before it accumulated instead.
+    ///
+    /// **The arithmetic is the accessor's own:** entry `i` starts at
+    /// `Σ_{j<i}(length_j + 1)` BY DEFINITION — the tiling invariant in this
+    /// file's header — which is exactly what `range(ofEntryAt:)` computes
+    /// one call at a time. Accumulating it once answers identically;
+    /// `EditorSeamCostTests.theEntryRangesWalkAgreesWithTheIndexsOwnAccessor`
+    /// pins that against the accessor itself on an irregular tiling with
+    /// empty entries at both edges and in the middle, which is where an
+    /// off-by-one would hide.
+    ///
+    /// **ONE brain, not N hand-rolled walks** — every loop caller on both
+    /// platforms consumes this (the hoist discipline: a rule that lives
+    /// twice drifts). The accessor stays for the single-lookup callers,
+    /// where O(i) once is the honest cost of the question.
+    func entryRanges() -> [NSRange] {
+        var ranges: [NSRange] = []
+        ranges.reserveCapacity(entries.count)
+        var location = 0
+        for entry in entries {
+            ranges.append(NSRange(location: location, length: entry.length))
+            location += entry.length + 1
+        }
+        return ranges
+    }
+
     /// The open tail's range (nil when no tail region exists).
     var tailRange: NSRange? {
         guard let tailLength else { return nil }

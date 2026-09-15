@@ -1493,8 +1493,13 @@ final class EditorViewModel {
             remainingTailLength: outcome.newTail?.utf16.count)
         tailText = outcome.newTail ?? ""
         let firstNew = index.entries.count - outcome.applied.count
+        // ONE tiling walk for the whole mint (13u1 UNIT 1 — the O(N²) class,
+        // this member found by its own sweep rule): the accessor walks from
+        // zero, so stamping M freshly-minted paragraphs over a note of N
+        // blocks cost O(M·N) — and a bulk paste makes M large.
+        let ranges = index.entryRanges()
         for (offset, block) in outcome.applied.enumerated() {
-            let range = index.range(ofEntryAt: firstNew + offset)
+            let range = ranges[firstNew + offset]
             if range.length > 0 {
                 setBlockAttribute(block.blockID, over: range)
             }
@@ -3044,9 +3049,14 @@ final class EditorViewModel {
         // buttons live in the view.
         let origin = textView.textContainerOrigin
         var result: [BlockBadge] = []
+        // ONE tiling walk (13u1 UNIT 1 — the O(N²) class): the badge pass
+        // asked the accessor once per FANNED slot, and the accessor walks
+        // from zero, so a note with many fans paid O(fans × blocks) on a
+        // pass that re-runs on every scroll and every projection.
+        let ranges = index.entryRanges()
         for (i, slot) in slots.enumerated() where slot.hasFan {
-            guard i < index.entries.count else { break }
-            let range = index.range(ofEntryAt: i)
+            guard i < ranges.count else { break }
+            let range = ranges[i]
             guard let location = contentManager.location(
                 contentManager.documentRange.location, offsetBy: range.location)
             else { continue }

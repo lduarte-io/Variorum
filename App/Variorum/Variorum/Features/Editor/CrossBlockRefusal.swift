@@ -103,9 +103,14 @@ nonisolated enum CrossBlockRefusal {
             return .openTail
         }
 
-        // 3. A touched block that no road can write into.
+        // 3. A touched block that no road can write into. ONE tiling walk
+        // (13u1 UNIT 1 — the O(N²) class): this asked
+        // `index.range(ofEntryAt: i)` per entry, and the accessor walks from
+        // zero, so diagnosing a refusal cost Σi ≈ N²/2 — document-
+        // proportional work at the exact moment the author is being told no.
+        let ranges = index.entryRanges()
         for i in entries.indices {
-            let entryRange = index.range(ofEntryAt: i)
+            let entryRange = ranges[i]
             guard NSIntersectionRange(range, entryRange).length > 0 else { continue }
             if !entries[i].editable {
                 return entries[i].variantID == nil ? .unsyncedBlock : .lockedTake

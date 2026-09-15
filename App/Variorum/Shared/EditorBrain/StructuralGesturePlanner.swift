@@ -400,14 +400,25 @@ nonisolated enum StructuralGesturePlanner {
 
     /// The pair named by a selection covering exactly ONE separator
     /// character (the pure-seam merge gesture).
+    /// **ONE accumulating pass** (13u1 UNIT 1, the O(N²) sweep — P16's
+    /// sibling): this asked `index.range(ofEntryAt: i)` per iteration, and
+    /// that accessor walks from zero on every call, so the loop was
+    /// Σi ≈ N²/2 in the note's block count. The separator after entry `i`
+    /// sits at `Σ_{j≤i}(length_j) + i` — the running location this walk
+    /// carries — so the answer is byte-identical; the early return is sound
+    /// because separator positions strictly increase. Same shape as
+    /// `entryTouching` / `entriesIntersecting` below, which have always
+    /// accumulated.
     private static func separatorPair(
         coveredBy selection: NSRange, index: BlockRangeIndex
     ) -> (Int, Int)? {
         guard selection.length == 1 else { return nil }
+        var location = 0
         for i in 0..<max(0, index.entries.count - 1) {
-            if selection.location == index.range(ofEntryAt: i).upperBound {
-                return (i, i + 1)
-            }
+            let separator = location + index.entries[i].length
+            if selection.location == separator { return (i, i + 1) }
+            if separator > selection.location { return nil }
+            location = separator + 1
         }
         return nil
     }
@@ -415,12 +426,33 @@ nonisolated enum StructuralGesturePlanner {
     /// A caret sits at the seam between entries i and i+1 when it is at the
     /// separator's either side: the leading block's exact end, or the
     /// trailing block's exact start.
+    ///
+    /// **ONE accumulating pass, and this one was the sweep's MAJOR** (13u1
+    /// UNIT 1 — P16, `notes/ProactiveTechDebtReview-2026-08-30.md`). It
+    /// asked `index.range(ofEntryAt: i)` per iteration — O(i) each — so the
+    /// loop cost Σi ≈ N²/2, and it runs on **the most protected road in the
+    /// app**: `refreshGestureAvailability` evaluates `enabled(.mergeBlocks)`
+    /// unconditionally from `updateCaretContext`, which is reached from
+    /// `textViewDidChangeSelection` (every arrow key, every click) AND from
+    /// the end of `storageDidEdit` (every keystroke). A caret anywhere but a
+    /// seam — essentially always — ran the loop to completion. Cost ∝ the
+    /// document on the keystroke road is exactly what P1 forbids.
+    ///
+    /// The running location IS what the accessor computes (the tiling
+    /// invariant), so the answer is byte-identical. **The early return is
+    /// the second half of the fix and it is sound:** separator positions
+    /// strictly increase, so once one passes `caret + 1` no later entry can
+    /// match — which turns the common in-block caret from O(N) into O(the
+    /// caret's own entry index).
     private static func seamPair(atCaret caret: Int, index: BlockRangeIndex) -> (Int, Int)? {
+        var location = 0
         for i in 0..<max(0, index.entries.count - 1) {
-            let separator = index.range(ofEntryAt: i).upperBound
+            let separator = location + index.entries[i].length
             if caret == separator || caret == separator + 1 {
                 return (i, i + 1)
             }
+            if separator > caret + 1 { return nil }
+            location = separator + 1
         }
         return nil
     }
