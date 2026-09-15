@@ -491,14 +491,12 @@ struct RootView: View {
         // open-post broadcast — and none of them names a block, so the park
         // must not outlive them.
         //
-        // Round 1 shipped this as two statements in `open` (adopt, then
-        // park) and the ORDER was load-bearing with nothing holding it:
-        // reverse the two and the clear eats every park as it is made,
-        // deleting the whole Stage C landing road with the suite green.
-        // Folding the landing into the one adoption door makes the wrong
-        // order UNEXPRESSIBLE rather than merely untaken.
-        router.park(ShellRouter.BlockLanding(destination, blockID: blockID))
-        switch router.workspace.select(destination, in: pane) {
+        // 13u2 UNIT E (row 47's PARK half): those two statements now live on
+        // the ROUTER as `ShellRouter.adopt`, so `park` is private to them and
+        // no door can park without navigating. The shell keeps the outcome,
+        // because saying the same-note refusal out loud is the shell's job,
+        // not the router's (P-4).
+        switch router.adopt(destination, in: pane, landing: blockID) {
         case .adopted:
             break
         case .focusedExistingPane:

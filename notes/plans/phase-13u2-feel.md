@@ -2335,13 +2335,59 @@ alternative proof it ran instead.
 | **item 2** — row 50: the DEBUG-oracle keying sweep | PENDING |
 | **item 3** — row 48: ⌘A in a live take pane (WALK first) | PENDING |
 | **item 4** — row 59: the masthead pin's settle | PENDING |
-| **item 5** — row 47's PARK half | PENDING |
+| **item 5** — row 47's PARK half | **DONE** — `park` is `private` to the router's new ONE adoption door (`ShellRouter.adopt`, `RootView.adopt`'s two statements moved onto it); all seven pin calls folded onto that door with their arithmetic byte-unchanged; RULE ONE reworded to what actually holds AND to name the one road the fence cannot reach. 7 tests / 3 suites GREEN |
 | **item 6** — row 51: the `TakesArticleScroll` split + the structural arm | PENDING |
 | the WALK + captures (60 onward) | PENDING |
 | tests (core · FULL Mac · iOS build · mobile if `Shared/` moved) | PENDING |
 | PROVISIONALs → `notes/QUESTIONS.md` (next free **#113**) | PENDING |
 
 *(Every line starts PENDING and is flipped in the same commit as the piece it names.)*
+
+
+## ITEM 5 — ROW 47's PARK HALF (the smallest of the six, taken first)
+
+**The row's ask, verbatim:** *"the fix shape is to make `park` private to the adoption door (or fold
+the pins onto it) and reword RULE ONE."* Both halves, plus the third thing the row implies and does
+not say: what the doc may now honestly promise.
+
+**What was true before.** `ShellRouter.park(_:)` was internal. `RootView.adopt` — the ONE door a
+destination enters a pane through — called it and then `router.workspace.select`, in that order, in
+two statements. The 17o round-2 fold made the WRONG order unexpressible *on that road* (both
+statements sit in one function), but nothing stopped a NEW door from calling `router.park(…)` and
+then navigating some other way, which is the order that silently deletes the whole landing road; and
+two mount pins reached past the shell and parked directly, which is how that shape stayed writable
+and exercised.
+
+**What shipped.** `RootView.adopt`'s two statements moved ONTO THE ROUTER as
+`ShellRouter.adopt(_:in:landing:)`, returning `WorkspaceModel.SelectionOutcome` so the shell still
+speaks the same-note refusal in its one voice (P-4 — the router decides what a destination means; the
+shell says it out loud, and holds no `StatusCenter`). `park` is now `private`. `RootView.adopt`
+became one `switch` over the router's answer.
+
+**RULE ONE's new wording says two things the old one did not.** (1) What holds it: parking is
+private to `adopt`, so there is no door that parks WITHOUT navigating, and a park followed by any
+navigation is a park followed by another `adopt`, which expires it. (2) **The road the fence does
+not reach, named at the code rather than left for the next reader to discover:** a door that
+navigates by calling `workspace.select` DIRECTLY would move the shell without expiring a park.
+Today `adopt` is that method's only caller outside `WorkspaceModel`'s own `openBeside` mint and the
+workspace's own pins — and the doc now says so, which is the honest form of a promise the compiler
+cannot keep.
+
+**The pins folded, not rewritten.** All seven `router.park(…)` calls became `router.adopt(…)`; every
+`#expect` in the file is byte-unchanged. The two MOUNT pins now drive the production road exactly
+(one call that navigates AND lands) where they used to stage it in two steps — closer to the app,
+not further. **7 tests / 3 suites GREEN** (`ShellLandingRuleTests` · `ShellLandingMountTests` ·
+`ShellLandingDoorTests`), 1.20 s.
+
+**Zero behaviour:** the only production call site is `RootView.adopt`, whose two statements execute
+in the same order with the same arguments, one stack frame deeper.
+
+**What this item did NOT take:** `ShellRouter.blockNamingDoor`, the row's other oracle-hygiene item
+(a process-global DEBUG closure cleared by one of eight mount sites) — the brief fences the row's
+oracle items to 13u4 and that one is not in row 50's enumeration either, so it stays where its owner
+sits. `TakeCardGeometry`, the row's SECOND oracle item, IS in row 50's enumeration and is therefore
+taken by item 2 below; the row records that split.
+
 
 ---
 

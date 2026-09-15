@@ -86,9 +86,27 @@ final class ShellRouter {
     }
 
     /// **RULE ONE — a NAVIGATION expires whatever is parked, and parks only
-    /// what it names.** `RootView.adopt` calls this on every navigation, in
-    /// one statement, so no door can express "park, then navigate" (round 2,
-    /// MINOR-1: that order deletes the landing road with the suite green).
+    /// what it names.**
+    ///
+    /// **What holds it, exactly** (13u2 UNIT E, KnownIssues row 47's PARK
+    /// half — the sentence this doc carried before overclaimed, and this one
+    /// is the true statement): parking is `private` to `adopt` below, which
+    /// parks and navigates in ONE statement. So "park, then navigate" is not
+    /// expressible *by a second door*: there is no door that parks without
+    /// navigating, and a park followed by any navigation is a park followed
+    /// by another `adopt`, which expires it — which is the rule.
+    ///
+    /// **The road a reader must not add, named because the fence does not
+    /// reach it:** a door that navigates by calling `workspace.select`
+    /// DIRECTLY rather than going through `adopt` would move the shell
+    /// without expiring a park. Today `adopt` is `select`'s only caller
+    /// outside `WorkspaceModel` itself (`openBeside`'s own mint) and outside
+    /// the workspace's own pins — keep it that way, or the rule above stops
+    /// being true and nothing in the compiler says so. Round 1 shipped this
+    /// as two statements in `RootView.open` (adopt, then park) and the ORDER
+    /// was load-bearing with nothing holding it: reverse the two and the
+    /// clear eats every park as it is made, deleting the whole Stage C
+    /// landing road with the suite green (round 2, MINOR-1).
     ///
     /// **RULE TWO — a park is SPENT WHEN IT LANDS** (`spendLanding`), because
     /// a RE-MOUNT is not a navigation: the detail view applies the landing in
@@ -97,7 +115,7 @@ final class ShellRouter {
     /// becoming key — neither of which passes through a navigation door. An
     /// unspent park therefore re-threw her to the block a door named an hour
     /// ago every time she came back (round 2's MAJOR).
-    func park(_ landing: BlockLanding?) {
+    private func park(_ landing: BlockLanding?) {
         blockLanding = landing
         // Only a NEW park bumps the generation; spending one must not, or
         // the mount's identity would change under a view that has already
@@ -105,6 +123,26 @@ final class ShellRouter {
         if let landing {
             landingGenerations[landing.containerID, default: 0] += 1
         }
+    }
+
+    /// **THE ONE DOOR a destination enters a pane through** (13u2 UNIT E —
+    /// KnownIssues row 47's PARK half; the body is `RootView.adopt`'s two
+    /// statements, moved here so `park` can be private to it).
+    ///
+    /// It parks what the caller NAMES — nothing, for every ordinary
+    /// navigation — and then selects, in one statement, which is what makes
+    /// the wrong order unexpressible rather than merely untaken. The caller
+    /// keeps the outcome so the shell can speak the same-note refusal in its
+    /// one voice; the router holds no `StatusCenter` (P-4: it decides what a
+    /// destination MEANS; the shell says it out loud).
+    @discardableResult
+    func adopt(
+        _ destination: SidebarSelection,
+        in pane: PaneID? = nil,
+        landing blockID: String? = nil
+    ) -> WorkspaceModel.SelectionOutcome {
+        park(BlockLanding(destination, blockID: blockID))
+        return workspace.select(destination, in: pane)
     }
 
     /// What a mounting container should land on, if this park is its own.

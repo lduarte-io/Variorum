@@ -21,8 +21,13 @@
 //  reason) — which is also what makes the rule readable by a pin at all.
 //
 //  Red-on-old is by BEHAVIORAL REVERT on the committed tree (the house
-//  method, this batch's own): `adopt`'s `router.park(nil)` removed in place.
-//  Numbers in the batch record.
+//  method, this batch's own): `adopt`'s park-of-what-it-names removed in
+//  place. Numbers in the batch record.
+//
+//  13u2 UNIT E (row 47's PARK half): parking is now `private` to
+//  `ShellRouter.adopt`, which parks and navigates in one statement — so
+//  these pins drive that ONE door rather than reaching past it to `park`.
+//  The arithmetic they assert is byte-unchanged; only the road in is.
 //
 
 import AppKit
@@ -44,12 +49,12 @@ struct ShellLandingRuleTests {
         #expect(router.blockLanding == nil, "nothing is parked at rest")
         #expect(router.landing(for: "X") == nil)
 
-        router.park(ShellRouter.BlockLanding(containerID: "X", blockID: "b3"))
+        router.adopt(.post("X"), landing: "b3")
         #expect(router.landing(for: "X") == "b3", "the container the door named")
         #expect(router.landing(for: "Y") == nil, "…and no other")
 
         // What every ordinary navigation does: name no block.
-        router.park(nil)
+        router.adopt(.library)
         #expect(router.blockLanding == nil)
         #expect(router.landing(for: "X") == nil,
                 "a park does not outlive the navigation that follows it")
@@ -59,8 +64,8 @@ struct ShellLandingRuleTests {
     /// both be waiting for a landing.
     @Test func asecondParkReplacesTheFirst() {
         let router = ShellRouter()
-        router.park(ShellRouter.BlockLanding(containerID: "X", blockID: "b1"))
-        router.park(ShellRouter.BlockLanding(containerID: "Y", blockID: "b9"))
+        router.adopt(.post("X"), landing: "b1")
+        router.adopt(.post("Y"), landing: "b9")
         #expect(router.landing(for: "X") == nil)
         #expect(router.landing(for: "Y") == "b9")
     }
@@ -75,7 +80,7 @@ struct ShellLandingRuleTests {
         #expect(router.landingGeneration(for: "X") == 0,
                 "a container never opened at a block never churns its identity")
 
-        router.park(ShellRouter.BlockLanding(containerID: "X", blockID: "b3"))
+        router.adopt(.post("X"), landing: "b3")
         #expect(router.landingGeneration(for: "X") == 1)
         #expect(router.landing(for: "X") == "b3")
 
@@ -86,7 +91,7 @@ struct ShellLandingRuleTests {
 
         // Spending again, and spending someone else's, are free.
         router.spendLanding(for: "X")
-        router.park(ShellRouter.BlockLanding(containerID: "X", blockID: "b7"))
+        router.adopt(.post("X"), landing: "b7")
         router.spendLanding(for: "Y")
         #expect(router.landing(for: "X") == "b7", "another container's spend is not ours")
         #expect(router.landingGeneration(for: "X") == 2,
@@ -210,8 +215,7 @@ struct ShellLandingMountTests {
             #expect(await Self.settle(window, hosting) {
                 router.workspace.focusedSelection == .post(noteX.id)
             }, "X is showing")
-            router.park(ShellRouter.BlockLanding(
-                containerID: noteX.id, blockID: blocks[2]))
+            router.adopt(.post(noteX.id), in: .primary, landing: blocks[2])
             #expect(await Self.settle(window, hosting) {
                 guard let view = Self.views(EditorTextView.self, in: hosting).first,
                       view.string.count >= index.documentLength else { return false }
@@ -315,8 +319,7 @@ struct ShellLandingMountTests {
                 router.workspace.focusedSelection == .post(noteX.id)
             }
             #expect(showing, "X is showing")
-            router.park(ShellRouter.BlockLanding(
-                containerID: noteX.id, blockID: blocks[2]))
+            router.adopt(.post(noteX.id), in: .primary, landing: blocks[2])
             let landedOnThree = await Self.settle(window, hosting) {
                 guard let view = Self.views(EditorTextView.self, in: hosting).first,
                       view.string.count >= index.documentLength else { return false }
@@ -373,12 +376,13 @@ struct ShellLandingDoorTests {
     /// **The order, held where it lives.** Round 1 shipped the rule as two
     /// statements in `RootView.open` — adopt (which clears) then park — and
     /// nothing held it: `open` is private, every production caller is a view
-    /// closure, and both existing pins reach past the shell (one calls
+    /// closure, and both existing pins reached past the shell (one called
     /// `router.park` itself, the other mounts `PoolDetailView` directly), so
     /// reversing the two lines left the suite green while the whole Stage C
     /// landing road died. The landing is folded into the one adoption door
-    /// now — an order that cannot be expressed — and this drives the REAL
-    /// door through the shell's own DEBUG publication of it.
+    /// now — an order that cannot be expressed, and since 13u2 UNIT E cannot
+    /// be reached past either (`park` is private to `adopt`) — and this
+    /// drives the REAL door through the shell's own DEBUG publication of it.
     @Test func theDoorNavigatesAndLeavesItsLandingParked() async throws {
         let db = try AppDatabase.inMemory()
         try await withDependencies {
