@@ -70,11 +70,14 @@ Take any note with four paragraphs. Every row below was walked on the dev build 
 
 ### 3. To ratify
 
-- **QUESTIONS #109 — a selection with an end sitting on a block boundary.** The phase's ONE
-  PROVISIONAL. Shipped as (a): it keeps its old refusal, now worded truthfully. **Part (d) is the
-  one I'd read closely** — it names a shape where taking the gesture is clean under your own
-  R-13u-2 ruling (a whole paragraph really does get deleted), and says why the *other* shape in the
-  family is a different question. Nothing is built past (a).
+- ~~**QUESTIONS #109 — a selection with an end sitting on a block boundary.**~~ **RULED at the
+  checkpoint itself (2026-09-15, in-session — nothing left to ratify here):** BOTH shapes taken
+  under ONE uniform law — a selection edge on a boundary CLAMPS to block text (separators are
+  structure, never deletable content) and no boundary-anchored selection refuses. Shape (i)
+  clamp-and-edit (your lean, confirmed after the clarification that selecting to a paragraph's
+  text-end never refused); shape (ii) the (d) trim road, your pick "Take it — build at 13u2".
+  The build is 13u2 roster item 10, red-on-old pinned, Fable-reviewed (the seam). #109's RULED
+  block in `notes/QUESTIONS.md` is the binding text.
 - **QUESTIONS #103** — still outstanding from the 2026-09-12 round (three PROVISIONAL calls on the
   Library card's two facts). Unchanged by this phase; listed so it does not get lost.
 
@@ -197,9 +200,9 @@ promised a road that can never open. Both fixed. **No round 3 owed.**
 
 | item | owner |
 |---|---|
-| **QUESTIONS #109** (a)–(d) | **you** |
+| ~~**QUESTIONS #109** (a)–(d)~~ **RULED 2026-09-15 at the checkpoint — the build is 13u2's roster item 10** | ~~you~~ done |
 | The phone's FACE for the compound — a receipt naming where every block went, its own device walk, the R-13u-4 capture face (⏎ files · ⇧⏎ paragraph), a call on "Undo New Block" in its undo sheet | the mobile app project (`notes/MobileSoul.md`, **PL-23**) |
-| The phone's tutorial lesson (row 64) | the mobile project — **or a 17 entry at your word** |
+| The phone's tutorial lesson (row 64) | the mobile project — **her priority call RULED 2026-09-15 at the checkpoint: stays with the mobile catch-up** (the phone ships to nobody before it; the visible known-issue keeps it unforgettable) |
 | **Multi-block paragraph drag** (item 12) | its own unslotted row in `notes/FuturePhases.md` (**R-13u-5**); it reuses this phase's machinery and wants a short design sitting |
 | Item 9's quick-capture FACES (the model is ruled) | 13u3 (Mac) · the mobile catch-up (phone) — **R-13u-4** |
 | The rows 13u1 inherited and re-owned (the `TakesArticleScroll` split, the status seam's audit surface, the re-font road, the Outline's shadow editor, the DEBUG-oracle sweep, ⌘A in a pane, M12) | **13u2** |

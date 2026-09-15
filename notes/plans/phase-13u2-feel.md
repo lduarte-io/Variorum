@@ -63,6 +63,19 @@ plus the 2026-09-14 items 18 · 19). Where this file and that section disagree, 
    roster — record the verdict per item; #86(c)'s home was ruled "with the rebuilt Replace
    Keys" (#87's pointer).
 9. **Row 57 stays OUT** (her R-cor-16 word — the Act 10 ledger row, not built here).
+10. **#109 — THE BOUNDARY-CLAMP LAW, BOTH SHAPES RULED 2026-09-15 (the 13u1 checkpoint; the
+    binding text is #109's RULED block in `notes/QUESTIONS.md`):** ONE uniform law — a selection
+    edge sitting on a block boundary CLAMPS to block text (separators are structure, never
+    deletable content) and NO boundary-anchored selection refuses. Shape (i), the trailing
+    one-block span: clamp and edit — the break she selected stands (R-13u-2's own consequence).
+    Shape (ii), the leading/trailing multi-block span: the (d) TRIM road — the edge separator is
+    absorbed into the run, the block beside it is covered whole → tray, R-13u-2 answers the
+    join. **The tail fence binds:** a trim never absorbs the open tail's separator (a span
+    reaching it keeps the tail's own causes — `.openTail` / `.emptyTailAtSpanEnd`). Both land
+    with red-on-old pins; the pins #109's "the line" names flip; `.partialBlockAcrossSeam`
+    retires to whatever residual genuinely survives (possibly none). The seam brain is 13u1's
+    `CrossBlockCompound`/`CrossBlockRefusal` — a `fable-reviewer` ladder round is mandatory for
+    this item's diff (R-cor-14, the editor seam).
 
 ## What left this roster (so nobody re-derives it)
 
