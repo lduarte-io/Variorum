@@ -374,7 +374,7 @@ registers behaving as her sentences describe) beside the dark pass already owed.
 | B — book-Index presentation + shadow editor | **CLOSED 2026-09-15** — item 19's five ruled behaviours BUILT (one of the intended fixes DISMISSED AS HOLLOW, with its evidence) · the double editing ring removed · **KnownIssues row 49's ROUTER half FIXED** (red-on-old + verified in the app) and the row NARROWED to the surviving double realization, which is traced with three causes eliminated · scope 4 RE-EXAMINED: the run-scale split stays CLOSED, its evidence downgraded, the successor's measurement named · 3 PROVISIONALs (QUESTIONS #110) · finals: core **1567/171** · Mac **2682/449** (1 known issue + 1 load-flaky red, recorded with paired numbers, the product road walked clean) · iOS **green** |
 | C — #109 boundary-clamp law | **CLOSED 2026-09-15** — her law BUILT, both shapes, BOTH platforms (the phone got the trim free and shape (i) with three mirrors of the Mac's road) · the family ENUMERATED in an 18-cell sweep table · 10 of 14 behaviour pins RED on the pre-fix tree · `.partialBlockAcrossSeam` retired by SPLITTING into two causes whose roads differ (forced by a finding: the phone has no seam carves — new KnownIssues row) · walked with 11 captures incl. both undo grammars · 1 PROVISIONAL (QUESTIONS #111) · finals: core **1567/171** · Mac **2702/450** (+20 pins; 1 known issue + the load-flaky red, PAIRED-measured as unchanged by this diff) · iOS **green** · mobile cross-block suites **67/6** |
 | D — the singles (+ TRACE 1a, routed by RULING A-1) | **CLOSED 2026-09-15** — item 2 FIXED at the ONE shared brain with red-on-old on BOTH trees · item 10 BUILT and pinned but **it cannot fire until she rules the star cap** (#112(b), the item's headline) · item 11 BUILT (⇧⌘V, the rule shared; the phone owes the door) · item 13 MEASURED and VERIFIED HEALED + row 93 FIXED · P39a/P39b FIXED with zero behaviour change and pins unmodified · roster item 8 VERIFIED (2 moot, 2 return) · **row 57 TRACED and it does NOT reproduce — nothing built, the row narrowed** · TRACE 1a FIXED and measured (0.42 ms → 0.00009 ms, flat where it was linear) · 8 captures · 3 PROVISIONALs (QUESTIONS #112) · finals: core **1567/171** · Mac **2730/456** (+28/+6; 1 known issue + the load-flaky red, PAIRED as unchanged) · iOS **green** · mobile **626/106 with 4 known** |
-| E — the mechanical sweeps | NOT-STARTED |
+| E — the mechanical sweeps | **RUNNING 2026-09-15** — the record is open below (UNIT E RECORD); six items, each with its own LIVE STATUS line |
 | LADDER | NOT-STARTED |
 | CLOSEOUT | NOT-STARTED |
 
@@ -2302,6 +2302,46 @@ ruling and raising it is hers alone; the built scrolling waits on her word.
 4. **The pane-compare fix (TRACE 1a → D-3) is the night's quiet win** — linear → flat, ~4,600×
    at 200 blocks, per read pane per update pass; with A2's priming this is item 1's two measured
    mechanisms both closed. Item 1 itself still closes only in her hands.
+
+---
+
+# UNIT E RECORD — THE MECHANICAL SWEEPS (opened 2026-09-15, `opus-implementer`, the overnight run)
+
+**WHAT THIS UNIT HAS NOT DONE — the record's first line, per the brief.** *(PENDING — this line is
+rewritten with the unit's honest omissions at its close; it is opened here so the record's shape is
+right from the first commit and the cold reviewer meets the omissions before the claims.)*
+
+**What it is:** six items, each independently scoped and dispositioned — row **56** (the status
+seam's audit surface: the ~150-site rename + `TakesViewModel.status`'s single writer) · row **50**
+(the DEBUG-oracle keying sweep, six unexamined oracles) · row **48** (⌘A in a live take pane — the
+evidence class is a WALK) · row **59** (the masthead pin's fixed-turn-budget flake — an until-clause
+on the CARDS' re-report) · row **47**'s PARK half (`ShellRouter.park` made private to the adoption
+door; RULE ONE reworded) · row **51** (the `TakesArticleScroll` split — owed three times — with the
+row's recommended ONE structural arm at `adopt` built inside it).
+
+**The proof discipline this unit runs under, stated up front because five of its six items claim to
+change NOTHING:** a mechanical claim gets a mechanical proof (the suite green with the pins'
+ASSERTIONS unmodified — a door's NAME changing at a pin's call site is the same mechanical edit as
+at a production call site, and is counted, never hidden); a behaviour change gets a red-on-old pin;
+the one item whose fix is a flake-settle (row 59) states its impracticality honestly and names the
+alternative proof it ran instead.
+
+## LIVE STATUS
+
+| item | state |
+|---|---|
+| the record opened | **DONE** |
+| **item 1** — row 56: the status seam's rename + the single writer | PENDING |
+| **item 2** — row 50: the DEBUG-oracle keying sweep | PENDING |
+| **item 3** — row 48: ⌘A in a live take pane (WALK first) | PENDING |
+| **item 4** — row 59: the masthead pin's settle | PENDING |
+| **item 5** — row 47's PARK half | PENDING |
+| **item 6** — row 51: the `TakesArticleScroll` split + the structural arm | PENDING |
+| the WALK + captures (60 onward) | PENDING |
+| tests (core · FULL Mac · iOS build · mobile if `Shared/` moved) | PENDING |
+| PROVISIONALs → `notes/QUESTIONS.md` (next free **#113**) | PENDING |
+
+*(Every line starts PENDING and is flipped in the same commit as the piece it names.)*
 
 ---
 
