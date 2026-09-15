@@ -1109,13 +1109,106 @@ evidence either way.
 | (c) the click-into-a-block INDENT defect — traced | PENDING |
 | (d) the highlight grammar (left follows the cursor · right first-click stays) | PENDING |
 | (e) the editing highlight as a SETTING (the R14/R22 family) | PENDING |
-| row 49 — the Outline SHADOW editor: traced | PENDING |
-| row 49 — fixed | PENDING |
+| row 49 — the Outline SHADOW editor: traced | **DONE** — reproduced in the app on a LONG note (and NOT on a short one); three candidate causes eliminated by measurement; the orphan's discriminator MEASURED (TRACE B-1) |
+| row 49 — fixed | **DONE** — `active` is claimed again when a text view reaches a WINDOW; red-on-old on 2 of 4 arms (`EditorRouterActiveTests`), `NoteBoxCompositionTests` rides unmodified (9/2 green) |
 | scope 4 — the run-scale split, re-measured after the shadow fix | PENDING |
 | tests (core · FULL Mac · iOS build) | PENDING |
 | the WALK + captures (both voices, both appearances, a palette on) | PENDING |
 
 *(Every line starts PENDING and is flipped in the same commit as the piece it names.)*
+
+## TRACE B-1 — THE OUTLINE'S SHADOW EDITOR, REPRODUCED AND FIXED (KnownIssues row 49)
+
+**It reproduces on a LONG note and NOT on a short one, which is why the row has stood for a week.**
+The gesture: dev-store Debug build · the Sherlock book · Outline · `▸` to expand *A Scandal in
+Bohemia* (262 blocks) · click its prose to focus it. With an `NSLog` at
+`InlineEditorSurface.makeNSView` carrying an attach-time stack:
+
+```
+07:51:24.567 init  model A        ← EditorView.init (SwiftUI builds the struct)
+07:51:24.607 MOUNT model A        ← makeNSView
+07:51:24.612 liveSurfaceAppear    ← the StableSurface subtree's .onAppear, ONCE
+07:51:24.630 init  model B
+07:51:24.648 MOUNT model B        ← A SECOND NSView, 41 ms later
+   (no dismantleNSView · no liveSurfaceDisappear — both are alive)
+```
+
+The same gesture on a ONE-BLOCK note (*field notes*), three times: **one mount, every time.**
+
+**WHAT THE SECOND VIEW IS — the measurement that decided the fix.** Probing each mounted text view
+at +0.05 s, +0.5 s and +2 s:
+
+| | the real editor | the second realization |
+|---|---|---|
+| `window != nil` | **Y · Y · Y** | **N · N · N** |
+| `superview != nil` | Y | Y |
+| `index.entries` | 0 → **262** | **0 · 0 · 0** |
+
+So the second view is an ORPHAN: SwiftUI gives it a container and never puts that container in a
+window. **"Is this view in a window" is the exact discriminator between the editor she is looking at
+and the shadow; "has it attached" is not** — both attach, and at attach time neither has a
+projection, which is why the row's own sketch ("refuse `active` for a model that has no projection")
+cannot be applied literally at `attach`.
+
+**THREE CANDIDATE CAUSES ELIMINATED BY MEASUREMENT** (each built, run on the dev store, and walked —
+none of them is it, and none of them shipped):
+
+1. **The inline height publish.** `Coordinator.install` ends in `remeasure()`, which writes
+   `EditorView`'s `@State inlineHeight` **inside `makeNSView`**, and `updateNSView` does it again —
+   the textbook "modifying state during view update", and it fits the short-note case exactly (a
+   one-block note measures 24 pt, the guard `abs(height - newHeight) > 0.5` never fires, no write).
+   Deferred both to the next runloop turn: **still doubled.**
+2. **The `session.editorRouter.active = self` write inside `attach`** (an `@Observable` write during
+   the same update). Deferred: **still doubled.**
+3. **`StableSurface`** — its geometry action, its `.frame(minHeight:)` reservation, its settle.
+   Bypassed entirely (the focused branch rendering `EditorView` directly): **still doubled.**
+
+**AND THE `ForEach` IDENTITY IS NOT CHURNING EITHER**, which was the row's first suspect ("the
+near/far swap re-identifying the content"). With the segment id list logged on every outline body
+evaluation, both passes print the SAME list byte for byte
+(`run-chapter-21238…,page-4EBE2134…,run-chapter-EE0B18…`), the row's own state is identical on both
+body runs (`expanded=Y live=Y near=Y`), and the `nearViewport` flip never fires during the gesture.
+**The second mount arrives with a FRESH `@State` at an unchanged structural position** — SwiftUI
+discarding and rebuilding the node without dismantling it. Both mounts come through
+`InvalidatableLeafLayoutComputer.updateValue` → `PlatformViewChild.updateValue`, i.e. the
+representable is realized during the LAYOUT pass, twice.
+
+**THE FIX — the row's second remedy, in the form the measurement licenses.** `attach` still claims
+`active` at once (every harness that attaches a bare view, and 18d's own shadow pin, depend on
+exactly that and ride unmodified), and **a text view claims it AGAIN when it reaches a window**
+(`EditorTextView.onWindowChange`, an `NSView` override — `viewDidMoveToWindow`, not a TextKit 1 API;
+`PaneTextView` overrides the same door). The real view reaches the screen a few milliseconds later
+and takes `active` back; the orphan, measured window-nil at +2 s, never can. A view LEAVING a window
+does not relinquish — `teardown` stays the one door that clears `active` — and `teardown` disarms the
+claim so a released model cannot return through a re-parent.
+
+**WHAT IT CLOSES, which is the row's own sharpest reason:** `MacWillLock.swift:48` and
+`VariorumAppDelegate.swift:63` call `active?.finalizeWork()` at lock and at quit. The shadow has no
+pending text, so it returned nil and the door believed there was nothing to await — and the OPEN
+TAIL's crystallization, which only `finalizeWork()` performs, had no other road inside the idle
+interval. Those doors now find the editor she is writing in.
+
+**WHAT IT DOES NOT CLOSE, stated plainly:** the orphan NSView, its `EditorViewModel` and that model's
+autosave observer still exist for as long as the note stays focused in Outline — SwiftUI leaks them
+and this fix does not stop the second realization. The root cause is a SwiftUI node-identity
+behaviour that three measured attempts did not move, and chasing it further is exactly the kind of
+Outline surgery UNIT A was burned by twice. The KnownIssues row is NARROWED to that residual rather
+than removed.
+
+**Should 18d's `EditorRouter.editing` workaround or the `editingOrActive` fallbacks now simplify? NO,
+and the reason is not caution.** `editing` answers a different question — *which editor is under the
+caret* — and the caret doors are right to ask it; `active` still means attachment, and in the
+milliseconds between `attach` and the window event it can still name a model that is not on screen.
+Collapsing them would trade a correct two-field answer for a racy one, and would break the brief's
+own constraint that behaviour outside the Outline stays byte-identical.
+`NoteBoxCompositionTests.theCaretDoorsActOnTheEditorSheIsWritingInNotTheLastToAttach` is green
+UNMODIFIED, and that is the proof.
+
+**PINS:** `App/Variorum/VariorumTests/EditorRouterActiveTests.swift`, 4 arms. RED ON OLD on exactly
+the two that pin the fix — `active !== real` after the real view reaches the screen (line 134), and
+again after an orphan attaches beside it (line 172) — while the two that pin the PRESERVED behaviour
+(a bare attach still claims at once; teardown still clears and a released model never returns) pass
+on BOTH trees. Green after: **9 tests / 2 suites**, `NoteBoxCompositionTests` included and unmodified.
 
 ---
 
