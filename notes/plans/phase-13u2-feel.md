@@ -2336,7 +2336,7 @@ alternative proof it ran instead.
 | **item 3** — row 48: ⌘A in a live take pane (WALK first) | PENDING |
 | **item 4** — row 59: the masthead pin's settle | **DONE** — both fixed turn budgets replaced by an until-clause on the oracle's REPORT COUNT (quiet for 4 consecutive turns, ceiling 200, loud on never-quiet); the row's stated mechanism CORRECTED by measurement (a field-open moves no card on a quiet machine — 0/5, both voices); falsifiability DEMONSTRATED with a synthetic 200-pt overlap that failed loud in 0.73 s. 3/3 isolated green |
 | **item 5** — row 47's PARK half | **DONE** — `park` is `private` to the router's new ONE adoption door (`ShellRouter.adopt`, `RootView.adopt`'s two statements moved onto it); all seven pin calls folded onto that door with their arithmetic byte-unchanged; RULE ONE reworded to what actually holds AND to name the one road the fence cannot reach. 7 tests / 3 suites GREEN |
-| **item 6** — row 51: the `TakesArticleScroll` split + the structural arm | PENDING |
+| **item 6** — row 51: the `TakesArticleScroll` split + the structural arm | **SPLIT DONE** (876 lines out of `TakesBoardLayout`, every pre-move name forwarded, **ZERO test edits** — 81 tests / 7 suites green) · the structural arm at `adopt` PENDING |
 | the WALK + captures (60 onward) | PENDING |
 | tests (core · FULL Mac · iOS build · mobile if `Shared/` moved) | PENDING |
 | PROVISIONALs → `notes/QUESTIONS.md` (next free **#113**) | PENDING |
