@@ -2933,6 +2933,25 @@ DOOR, word-screen COPY ALL doors, title width, seam carves, and the compound's f
 mobile catch-up's (each a named row). **Zero canon deltas — AppSpec/OverallModel untouched; §14
 carries no 13u2 entry and 13u1's delta stays in place per the lean-docs rule.**
 
+### THE `/APPLICATIONS` REFRESH (2026-09-15, at her standing pre-authorization — *"the applications refresh is allowed"*)
+
+Run on the standing rails after the walk; **her store never opened, the app never launched**;
+zero instances verified before the backup, before the copy and after.
+
+| | |
+|---|---|
+| backup | `~/dev/variorum-store-backups/13u2-refresh-20260915T234732Z/` — the whole store folder |
+| backup verified | `cmp` byte-identical on all six files; sqlite header CIPHERTEXT (`1799 8efb 28ec 84e2 …`) |
+| built from | `348ef8aa`, clean throwaway worktree `~/dev/variorum-13u2-release` (removed), Release, DerivedData in `/tmp` (removed) |
+| old binary SHA-256 | `ffe42c8817e324ce9484fd2fa3b5248363ae8ca37508fb595aeb032f26c9f65c` (= 13u1's recorded hash) |
+| new binary SHA-256 | `185c6cf1ed872a8892669229456ba0ff6d8936ceb35dc4fb43b748b496cd9d5f` (identical installed) |
+*[removed for publication]*
+
+**THE AUTHOR HANDOFF, written LAST:** `notes/handoffs/phase-13u2-handoff.md` — her checklist at
+the top (the refresh evidence, the seven-row walk with items 1/18 hers to accept, the ratify
+bundle led by #112(b)'s star cap, the two orchestrator rulings to sanity-check, the judgment
+calls).
+
 # CARRIED VERBATIM AT THE SPLIT (2026-09-14) — from `phase-13u-feel-and-polish.md` (P39's section, per its banner: "The file split must carry that section to 13u2")
 
 ## ADDENDUM 2026-08-30 (the pre-13u round, Act 2) — P39's two real defects join 13u2's roster
