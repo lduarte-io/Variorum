@@ -289,9 +289,9 @@ zero. Lockstep marker: 8, untouched.
 
 | # | Piece | Status |
 |---|---|---|
-| A1 | The O(N²) sweep — the SHARED brain (`BlockRangeIndex.entryRanges()` + `StructuralGesturePlanner`'s two walks) + pins | NOT-STARTED |
-| A2 | The O(N²) sweep — the MAC app's loop sites + pins | NOT-STARTED |
-| A3 | The O(N²) sweep — the PHONE's loop sites + pins | NOT-STARTED |
+| A1 | The O(N²) sweep — the SHARED brain (`BlockRangeIndex.entryRanges()` + `StructuralGesturePlanner`'s two walks) + pins | DONE(`e689db54`) |
+| A2 | The O(N²) sweep — the MAC app's loop sites + pins | DONE(`e689db54`) |
+| A3 | The O(N²) sweep — the PHONE's loop sites + pins | IN-PROGRESS |
 | A4 | The sweep's verdict table — EVERY production `range(ofEntryAt:)` caller enumerated and verdicted | NOT-STARTED |
 | B | The churn pair P24/P25 — the Mac adopts `ArmedEdit.exactCost` + red-on-old pin on the REAL typed path | NOT-STARTED |
 | C | The door-await chain loop (KnownIssues row 44) + the round-3 record's designed pin | NOT-STARTED |
