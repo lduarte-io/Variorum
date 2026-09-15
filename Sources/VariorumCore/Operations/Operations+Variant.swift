@@ -145,6 +145,70 @@ extension Operations {
         }
     }
 
+    /// **THE SEVENTH QUIET AUTO-COMMIT OCCASION** — the author's own
+    /// insurance idea, adopted into item 5's design sketch verbatim: *"a
+    /// quiet auto-commit of the affected takes' state RIGHT BEFORE a
+    /// multi-block edit"* (master plan `### 13u` item 5; built at 13u1
+    /// UNIT 2 with the cross-block compound it insures).
+    ///
+    /// **Why this occasion and not one of the six** (the doctrine is
+    /// unchanged — *insure exactly what an operation is about to make
+    /// unreachable*, OverallModel §3): a cross-block gesture MIXES the
+    /// text-undo and structural-undo worlds, which never interleave by
+    /// design. The structural rewrite that lands the compound CLEARS the
+    /// text stack (stale offsets after a seam moved are the corruption
+    /// class), so the buffer state the gesture is about to overwrite has no
+    /// ⌘Z road afterwards — only ⌥⌘Z, which dies with the session. The
+    /// savepoint is what survives the session, and that is the whole
+    /// argument: one compound entry PLUS insurance commits is what makes
+    /// mixing the two worlds safe.
+    ///
+    /// **What it insures and what it deliberately does not.** It takes the
+    /// takes the compound will EDIT — the surviving edge blocks' chosen
+    /// takes. A block the compound DELETES WHOLE is not here, and that is
+    /// not an omission: `deleteBlock` preserves the block and every take on
+    /// it, and Put back is real (13j's tray/Trash road), so nothing on it
+    /// becomes unreachable. A block RELEASED to lineage by the edge merge is
+    /// not here for the same reason — the standing merge preserves both
+    /// sources whole, and the History came-from door is one button back.
+    ///
+    /// Same body as the five before it: `kind: .auto`, deduped against the
+    /// take's own last commit (`isDirty`), locked takes skipped (a lock
+    /// already insured its buffer — `lockVariant`'s own occasion), and one
+    /// transaction. **NOT governed by `savepoint_cadence`:** like `lockPost`,
+    /// `lockVariant` and the structural-undo divergence, this is INSURANCE
+    /// rather than a cadence — J11's setting governs the two cadence
+    /// occasions only (`idleAutoCommit`, `closeAutoCommit`), and turning
+    /// savepoints down must never turn protection off.
+    ///
+    /// A take that is missing, tombstoned or archived is skipped rather than
+    /// thrown on: this runs at the head of a compound whose real refusals
+    /// are the compound's own, and an insurance pass must never be the thing
+    /// that decides a gesture. A SEALED note does throw (`lockedPost`
+    /// through `ensurePlacementUnlocked`) — the seal refuses everything
+    /// under the post, and the compound refuses there anyway.
+    @discardableResult
+    public func insureTakes(_ variantIDs: [String]) throws -> [CommitPoint] {
+        guard !variantIDs.isEmpty else { return [] }
+        return try database.write { db in
+            let now = date.now
+            var committed: [CommitPoint] = []
+            var seen: Set<String> = []
+            for variantID in variantIDs where seen.insert(variantID).inserted {
+                guard let variant = try Variant.fetchOne(db, key: variantID),
+                      variant.deletedAt == nil,
+                      variant.status != .archived,
+                      !variant.locked
+                else { continue }
+                try ensurePlacementUnlocked(db, blockID: variant.blockId)
+                guard try isDirty(db, variant) else { continue }
+                committed.append(
+                    try insertCommit(db, variant: variant, kind: .auto, message: nil, now: now))
+            }
+            return committed
+        }
+    }
+
     /// Shared by `idleAutoCommit` and `lockPost` (which seals only after
     /// insuring its dirty buffers).
     func autoCommitDirtyVariants(
