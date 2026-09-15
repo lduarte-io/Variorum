@@ -1995,7 +1995,7 @@ final class MobileEditorViewModel {
     /// two chords; the phone names the menu row it actually has.
     static let fanFoldRoads =
         "Merge the blocks deliberately instead (\u{22EF} \u{2192} "
-        + "\(MobileBlockMenu.mergeTitle)), which brings every take along."
+        + "\(MobileBlockMenuController.mergeTitle)), which brings every take along."
 
     private func refuse(_ message: String) {
         statusMessage = message
