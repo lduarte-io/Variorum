@@ -293,6 +293,30 @@ struct UndoHintAndRefusalTests {
             == .partialBlockAcrossSeam)
     }
 
+    /// **The tail's DOORSTEP is the tail's, never "between two blocks"**
+    /// (13u1 ladder round 1 — the implementer's sanity-pass find over the
+    /// reviewer's F-2, confirmed and fixed by the reviewer). A span that
+    /// covers the LAST block's trailing separator and stops exactly where a
+    /// NON-EMPTY tail begins intersects no tail character, so the tail step
+    /// missed it and the walk fell through to the boundary residual — whose
+    /// sentence ("between two blocks") is inexact there: the far side is
+    /// the open tail, not a block. The plan refuses this shape on its
+    /// TAIL/contiguity condition, so the diagnosis must decline on the same
+    /// ground — `.openTail`, whose cause and road (wait a moment; the mint
+    /// makes it a block) are exactly right for it.
+    ///
+    /// **RED ON OLD:** this shape diagnosed `.partialBlockAcrossSeam`.
+    @Test func aSpanEndingOnTheTailsOwnSeparatorIsTheTailsRefusal() {
+        let tailed = Self.index([(2, "v0", true), (3, "v1", true)], tail: 4)
+        // [1,7): part of b0, all of b1, the separator at 6 — stopping
+        // exactly at the tail's first character (offset 7), touching none
+        // of the tail's own text.
+        #expect(CrossBlockRefusal.diagnose(
+            range: NSRange(location: 1, length: 6), index: tailed,
+            slots: [slot("b0", text: "aa"), slot("b1", text: "bbb")])
+            == .openTail)
+    }
+
     /// **The words stop guessing.** The shipped line named three causes at
     /// once; no diagnosis may do that again, and each names its own road out.
     @Test func noRefusalLineListsCausesItDidNotEstablish() {

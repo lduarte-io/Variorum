@@ -96,8 +96,9 @@ nonisolated enum CrossBlockRefusal {
     /// 1. **the seam keystroke** — `interEntrySeparatorPair` non-nil means
     ///    A7 and #34 both looked at this and declined; only their own
     ///    reasons are left (fan / unshown text / not editable);
-    /// 2. **the open tail** — the span overlaps the tail region, which the
-    ///    compound excludes by its contiguity guard;
+    /// 2. **the open tail** — the span overlaps the tail region, or ends ON
+    ///    the tail's own separator (either way the compound's contiguity
+    ///    guard is what declined, so the tail's cause and road speak);
     /// 3. **not editable** — an entry IN THE RUN is locked, or is a gap;
     /// 4. **the boundary-edge residual** — everything left: a span end
     ///    sitting on a boundary separator (either orientation, one block's
@@ -137,10 +138,20 @@ nonisolated enum CrossBlockRefusal {
             return .partialBlockAcrossSeam
         }
 
-        // 2. The open tail inside the span.
+        // 2. The open tail inside the span — or at its very END (the 13u1
+        // ladder, round 1, the sanity-pass find on F-2's new sentence): a
+        // span that covers the LAST block's trailing separator and stops
+        // exactly where a non-empty tail begins intersects no tail
+        // character, yet the plan refuses it on this same condition (its
+        // contiguity guard excludes the tail), so the diagnosis declines on
+        // the tail's ground too — the boundary residual's sentence says
+        // "between two blocks", and the far side here is not a block yet.
+        // The tail outranking step 3 is the plan's own order: contiguity
+        // declines before the run's locks and gaps are ever read.
         if let tail = index.tailRange,
            NSIntersectionRange(range, tail).length > 0
-            || (tail.length == 0 && range.upperBound > tail.location) {
+            || (tail.length == 0 && range.upperBound > tail.location)
+            || (index.tailSeparatorOffset.map { range.upperBound > $0 } ?? false) {
             return .openTail
         }
 
