@@ -357,7 +357,7 @@ on the standing rails, zero-instance pgrep first, record-instead-of-kill if her 
 
 | unit | status |
 |---|---|
-| A — pane stability trace + landing/settle | **RUNNING** (opened 2026-09-15; the UNIT A RECORD below is live) |
+| A — pane stability trace + landing/settle | **CLOSED 2026-09-15** — item 1 TRACED (her hands owed, never claimed closed) · row 100 FIXED + walked · row 98 DISMISSED AS HOLLOW · M12 VERIFIED · item 18's Outline half TRACED, built, and REVERTED on a 3-vs-3 measurement, with its designed successor recorded · 54/92/94 DEFERRED with reasons. Finals = baseline: core 1562/170 · Mac 2668/445 · iOS green |
 | B — book-Index presentation + shadow editor | NOT-STARTED |
 | C — #109 boundary-clamp law | NOT-STARTED |
 | D — the singles | NOT-STARTED |
@@ -393,10 +393,10 @@ owed**.
 | row 92 — canvas silhouette click lands mid-board | **NOT RE-VERIFIABLE by the rig** — DEFERRED with the reason |
 | row 94 — Blocks' ~0.2–0.3 s residual arrival | **DEFERRED** (its next step is a cross-mode rewrite) |
 | row 98 — paged reader's paragraph over-count | **DISMISSED AS HOLLOW** (traced — see the row) |
-| row 100 — the flow's landing off after a content creep | **REPRODUCED + FIXED** (TRACE 3; walk pending) |
+| row 100 — the flow's landing off after a content creep | **REPRODUCED + FIXED + WALKED** (TRACE 3: `gave up at top=1857` → `settled at top=-2.0`) |
 | M12 — `desyncRecoveryCount` oracles | **VERIFIED** — every oracle suite green (52 tests / 8 suites) |
 | row 51 — the `TakesArticleScroll` split (CONDITIONAL) | **NOT OWED** — no article-scroll machinery touched (3 files changed); stays unit E's |
-| tests | core **1562 / 170 GREEN** (= baseline) · full Mac suite PENDING · iOS build PENDING |
+| tests | **ALL THREE GATES = BASELINE.** core **1562 / 170 GREEN** · FULL Mac suite **2668 / 445 GREEN** (726.6 s) · iOS build **GREEN** |
 | walk + captures | **DONE** — `notes/plans/13u2-screens/` (gitignored), 18 captures; both the before and after landing logs |
 
 *(Every line above starts PENDING and is flipped in the same commit as the piece it names.)*
@@ -458,6 +458,58 @@ of `SurfaceSizeMemory`, 18d's U-12 work). It was the CARDS. So option 2 is **not
 she reported**, and building it would have been motion without a mechanism. Recorded as the reason
 rather than done. *(The Outline is the surface her report names; the flow's own per-story
 persistence already exists and is what makes the `h=18680` first report possible.)*
+
+
+## FINALS, AND THE ONE THING FOR HER MORNING
+
+| gate | result | baseline |
+|---|---|---|
+| core `swift test` | **1562 / 170 GREEN** | 1562 / 170 — identical |
+| the FULL Mac suite | **2668 / 445 GREEN**, 726.6 s | 2668 / 445, 726 s — identical |
+| iOS build | **GREEN** | green |
+| lockstep marker | untouched — **8** | 8 |
+
+**Not one failure in the full run**, so neither load-flaky suite (the differential-latency pin,
+`CanvasDragTrackingTests`, `MastheadLayoutTests`' open-field arm, `BlocksWorkbenchFaceTests`' single
+-click budget) fired. The full mobile suite is **not owed by this unit**: no `Shared/` file moved.
+
+**NO PROVISIONAL WAS MADE, and that is deliberate rather than an omission.** Every call this unit
+made was a technical verdict with a measurement behind it — row 98's dismissal, row 100's mechanism,
+the card fix's revert — and none of them decided product behaviour. So nothing is appended to
+`notes/QUESTIONS.md` and the next free number stays **#110**.
+
+**The one thing worth her eye: QUESTIONS #88(c) can be STRUCK.** She left it conditional — persist
+per-story measured heights *"only if you notice a shift after a chapter click in your own use."* She
+noticed the shift, which is item 18; and the trace shows the shift was **not** a story's height being
+unknown. The stories' heights were already remembered and honest — `page-E1483921 h=18680` on the
+FIRST report, straight out of `SurfaceSizeMemory` (18d's U-12 work). It was the CARDS. Option 2 would
+have been motion without a mechanism. Hers to strike or keep; the evidence is TRACE 2.
+
+## WHAT SHIPPED — the diff, in three files
+
+`git diff b5feeecb..HEAD --stat` (this unit's whole footprint):
+
+- **`App/Variorum/Variorum/Features/BookView/ReadingFlowView.swift`** — row 100: the anchor REPORT
+  no longer re-lands; the quiet interval decides (`checkLanding`), a correction is spent only on a
+  target genuinely off the top and only from quiet. The mechanism is written at both sites.
+- **`App/Variorum/VariorumTests/BookOutlineLandingTests.swift`** — the landing fixture's collapsed
+  notes now carry a REALISTIC preview. They read *"Prose of note N, short enough to card."* — one
+  line, which nothing in the sample library or her corpus looks like — and that made the suite blind
+  to the ~three-line cards every real book has. Zero behaviour change; 3/3 green on the pre-fix tree
+  with them, which is how the card fix's 0/3 was shown to be the fix and not the fixture.
+- **`notes/plans/phase-13u2-feel.md`** — this record.
+
+**Zero `Sources/VariorumCore/` lines. Zero `Sync/`. Zero schema. Zero migrations. Marker stays 8.**
+No `Shared/` file moved, so the phone inherits nothing from this unit and no mobile suite run is
+owed by it.
+
+**Commits** (each pushed as it landed, per the checkpoint protocol): `b5feeecb` (the record opened +
+TRACE 1) · `a7ee8c32` (item 18 traced + the card fix, with its pin) · `f5f2b863` (the slot's
+`reservesSpace` correction + the run-scale split, with the elimination evidence) · `f0486657` (the
+before/after walk on the real book) · `96e2821a` (**the revert**, with the 3-vs-3 measurement that
+forced it) · `17f5c024` (TRACE 3, the dispositions) · this commit (the counts). The reverted work
+stays reachable at `a7ee8c32`/`f5f2b863` — nothing was discarded unrecorded, and no history was
+rewritten.
 
 ## DISPOSITIONS (every row this unit was given)
 
