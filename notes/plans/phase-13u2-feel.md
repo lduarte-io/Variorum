@@ -359,7 +359,7 @@ on the standing rails, zero-instance pgrep first, record-instead-of-kill if her 
 |---|---|
 | A — pane stability trace + landing/settle | **CLOSED 2026-09-15** — item 1 TRACED (her hands owed, never claimed closed) · row 100 FIXED + walked · row 98 DISMISSED AS HOLLOW · M12 VERIFIED · item 18's Outline half TRACED, built, and REVERTED on a 3-vs-3 measurement, with its designed successor recorded · 54/92/94 DEFERRED with reasons. Finals = baseline: core 1562/170 · Mac 2668/445 · iOS green |
 | A2 — item 18's successor: preview priming (RULING A-1) | **CLOSED 2026-09-15 — RULING A-2: the priming SHIPS** — item 18's card drift FIXED (red-on-old; no `h=46` on the real book, 3 runs) · the bounded core read MEASURED FLAT · the gate arm ADJUDICATED: hard-bounded at the residual's magnitude + the ≤ 4 aspiration in `withKnownIssue` (the scale-mix residual; unit B re-examines its closed cure beside the shadow fix) · finals: core 1567/171 · Mac 2670/446 GREEN with 1 known issue · iOS green · item 18 field acceptance: **her hands owed** |
-| B — book-Index presentation + shadow editor | NOT-STARTED |
+| B — book-Index presentation + shadow editor | **RUNNING** (opened 2026-09-15) — the UNIT B RECORD below carries its LIVE STATUS |
 | C — #109 boundary-clamp law | NOT-STARTED |
 | D — the singles (+ TRACE 1a, routed by RULING A-1) | NOT-STARTED |
 | E — the mechanical sweeps | NOT-STARTED |
@@ -1080,6 +1080,42 @@ the pumped run loop; the real app mounts ONCE, measured both trees). **Unit B, w
 shadow-editor row, re-examines that closed road beside its fix** — if the shadow fix changes the
 picture, the structural cure may become viable and the wrapped arm comes right. Routed into B's
 brief.
+
+---
+
+# UNIT B RECORD — item 19's book-Index presentation set + the Outline SHADOW editor (opened 2026-09-15, `opus-implementer`, the overnight run)
+
+**WHAT THIS UNIT HAS NOT DONE — the record's first line, kept current.** *(Opened; nothing built yet.
+This line is rewritten at the close with the honest list.)*
+
+**What it is:** R-13u-10's five ruled behaviours (the master plan's item 19 carries her words verbatim)
+plus `KnownIssuesAndTechDebt` row 49 — the book Outline's SECOND, projection-less
+`InlineEditorSurface` that takes `EditorRouter.active`. They share one surface family (the book's
+Index/Outline and the note's Read ▸ edit, which compose the same pane + read-tier grammar), which is
+why they are one acceptance unit.
+
+**Routed in by the ORCHESTRATOR ADJUDICATION — UNIT A2:** re-examine the CLOSED run-scale-split road
+(one row scale per lazy run) after the shadow fix — UNIT A closed it on `editorHeight == 24`, which A2
+traced to the harness's double realization. Measure, then decide; the verdict lands here with its
+evidence either way.
+
+## LIVE STATUS
+
+| piece | state |
+|---|---|
+| the record opened | **DONE** |
+| (a) no whole-note palette wash in Index | PENDING |
+| (b) neutral backdrop behind the cream read page | PENDING |
+| (c) the click-into-a-block INDENT defect — traced | PENDING |
+| (d) the highlight grammar (left follows the cursor · right first-click stays) | PENDING |
+| (e) the editing highlight as a SETTING (the R14/R22 family) | PENDING |
+| row 49 — the Outline SHADOW editor: traced | PENDING |
+| row 49 — fixed | PENDING |
+| scope 4 — the run-scale split, re-measured after the shadow fix | PENDING |
+| tests (core · FULL Mac · iOS build) | PENDING |
+| the WALK + captures (both voices, both appearances, a palette on) | PENDING |
+
+*(Every line starts PENDING and is flipped in the same commit as the piece it names.)*
 
 ---
 
