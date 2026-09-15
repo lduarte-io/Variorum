@@ -167,7 +167,19 @@ func withEditor<T>(
         let session = AppSession(database: db)
         let post = try session.operations.createPost(title: "T", profile: profile)
         for text in seedBlocks {
-            _ = try session.operations.newBlock(in: post.id, text: text)
+            // **A FIXTURE MINT IS NOT A GESTURE** (13u1 UNIT 2). `newBlock`
+            // joined AppSpec §9's structural-undo list at her ruling R-13u-3,
+            // so every mint registers an entry — right for the doors she
+            // presses, wrong for the blocks a harness lays down before the
+            // act a test is actually about. A suite that counts `depth`
+            // after building a three-block note is asserting something about
+            // the OPERATION under test, not about how its fixture came to
+            // exist, so the seed passes the same `registeringUndo: false` the
+            // type-time crystallizers pass, for the same stated reason. Every
+            // depth assertion in this target therefore reads exactly as it
+            // did before the ruling.
+            _ = try session.operations.newBlock(
+                in: post.id, text: text, registeringUndo: false)
         }
         let model = EditorViewModel(session: session, postID: post.id)
         // Deterministic tests: the idle-mint clock never fires on its own —
