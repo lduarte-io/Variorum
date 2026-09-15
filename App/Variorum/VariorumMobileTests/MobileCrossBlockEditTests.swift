@@ -409,6 +409,71 @@ struct MobileCrossBlockEditTests {
         }
     }
 
+    // MARK: - #109's boundary-clamp law reaching the phone (13u2 UNIT C)
+
+    /// **SHAPE (ii) — the TRIM — reaches the phone through the SHARED
+    /// compound**, with no phone-side arm at all: the clamp lives inside
+    /// `CrossBlockCompound.plan`, so the road this suite already drives
+    /// inherits it. Her ruling of 2026-09-15, both platforms, one brain.
+    ///
+    /// **RED ON OLD:** the compound's contiguity guard refused this span,
+    /// nothing was trayed, and `statusMessage` carried the boundary line.
+    @Test func aSpanOpeningOnTheSeparatorTrimsAndTraysTheWholeBlock() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedThreeParagraphs(session)
+            let (model, storage) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+
+            // From the END of "Alpha one." (offset 10 — ON the separator)
+            // through "Gamma ": "Beta two." covered whole, "Gamma three." in
+            // part, the first block's characters untouched.
+            await editSpan(model, storage, NSRange(location: 10, length: 17))
+
+            #expect(try await storedBlockTexts(db, postID: seed.postID)
+                == ["Alpha one.", "three."],
+                    "the whole block went; the ends kept their own blocks (R-13u-2)")
+            #expect(model.statusMessage == nil, "no refusal: \(model.statusMessage ?? "")")
+        }
+    }
+
+    /// **SHAPE (i) — clamp and EDIT — is PLANNED on the phone from the same
+    /// brain**, and the phone's arm routes to it.
+    ///
+    /// **What this pin deliberately does NOT assert, and why:** the LANDING.
+    /// Shape (i) lands through the phone's one ordinary input door
+    /// (`MobileMarkdownActs.inputReplace`), which needs a real `UITextView`
+    /// — and this harness attaches STORAGE only, never a view. Making the
+    /// road work without one would mean a SECOND input path on the phone,
+    /// which is the exact thing that door exists to prevent. So the plan is
+    /// pinned here, the landing is pinned on the Mac (`BoundaryClampTests`,
+    /// same shared brain), and the phone's own walk is the mobile catch-up's
+    /// (PL-23). The gate's routing is visible in the two assertions below:
+    /// the keystroke is refused and NOTHING is spoken, where before the
+    /// refusal line was.
+    @Test func shapeOneIsPlannedFromTheSharedBrainAndTheGateRoutesToIt() async throws {
+        try await withEditorWorld { session, db in
+            let seed = try await seedThreeParagraphs(session)
+            let (model, storage) = makeEditor(session, postID: seed.postID)
+            await model.loadOnce()
+
+            // "one." plus the separator at 10 — released exactly where
+            // "Beta" begins.
+            let span = NSRange(location: 6, length: 5)
+            let planned = try #require(
+                model.planClampedInBlockEdit(range: span, replacement: ""))
+            #expect(planned.range == NSRange(location: 6, length: 4),
+                    "clamped to the block's own text — the break stands")
+            #expect(planned.blockID == seed.blockIDs[0])
+
+            await editSpan(model, storage, span)
+            #expect(model.statusMessage == nil,
+                    "the boundary refusal is gone: \(model.statusMessage ?? "")")
+            #expect(try await storedBlockTexts(db, postID: seed.postID)
+                == ["Alpha one.", "Beta two.", "Gamma three."],
+                    "…and nothing was half-applied by the refused keystroke")
+        }
+    }
+
     /// A span across THREE paragraphs merges the whole run — the chain, not
     /// just the pair.
     ///

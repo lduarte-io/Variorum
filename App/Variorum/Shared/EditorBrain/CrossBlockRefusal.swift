@@ -80,6 +80,30 @@ nonisolated enum CrossBlockRefusal {
         /// roads are the nudge and the empty line's own delete
         /// (`BlockRangeIndex.verdict`'s `.closeTail`).
         case emptyTailAtSpanEnd
+        /// **THE SEAM KEYSTROKE NO CARVE COULD TAKE** (13u2 UNIT C). One of
+        /// the two halves the retired boundary residual split into — the
+        /// `seamBesideArchivedTake` doctrine again: ONE declining guard,
+        /// split into the causes whose ROADS differ. This is the
+        /// single-separator keystroke that reached `diagnose` step 1 and
+        /// matched none of the seam's named conditions, and it has a
+        /// different shape on each platform:
+        ///
+        /// - **Mac:** A7's empty-block carve declined on its own bounds
+        ///   guard (`i < model.slots.count`) because the PROJECTION has not
+        ///   arrived for that entry — `slots` is deliberately held stale
+        ///   while the buffer is dirty and can be shorter than `entries` —
+        ///   and step 1's fan/archived/comment reads are bounds-guarded, so
+        ///   none of them can say which authorization failed.
+        /// - **iPhone:** there are no seam carves at all (neither A7's nor
+        ///   #34's is built there), so an ordinary backspace at a seam
+        ///   between two texted blocks lands here permanently. A standing
+        ///   parity gap, not a new one.
+        ///
+        /// The ROAD is the same on both and it genuinely opens: the
+        /// DELIBERATE merge gesture, which is the act the keystroke was
+        /// reaching for. (It arrives as `fanRoads` — the one sentence that
+        /// names a platform's own chord or menu row.)
+        case seamKeystrokeDeclined
         /// **THE RESIDUAL, AND IT IS NO LONGER A GEOMETRY** (13u2 UNIT C —
         /// her #109 ruling of 2026-09-15). This case used to be the
         /// boundary-edge shape: a selection whose end sat ON the separator
@@ -89,25 +113,16 @@ nonisolated enum CrossBlockRefusal {
         /// into the run (shape (ii)), so no boundary-anchored selection
         /// refuses any more. The case did not become unreachable, though,
         /// and the ruling's own instruction was to name what genuinely
-        /// survives rather than delete a cause that can still fire. Exactly
-        /// TWO shapes reach it, and they are one thing:
+        /// survives rather than delete a cause that can still fire.
         ///
-        /// 1. **The seam keystroke whose neighbour the PROJECTION cannot
-        ///    describe yet.** `slots` is deliberately held stale while the
-        ///    buffer is dirty and can be SHORTER than `entries` (a
-        ///    just-crystallized block has no slot yet). A7's carve declines
-        ///    on exactly that (`i < model.slots.count`), and step 1's
-        ///    fan/archived/comment reads are bounds-guarded, so none of them
-        ///    can say which of A7's authorizations failed.
-        /// 2. **The plan declining on a surface that disagrees with the
-        ///    index** (`CrossBlockCompound.plan`'s
-        ///    `text.length == ranges[i].length` guard) — a desync the
-        ///    surface heals by re-rendering from the store.
-        ///
-        /// Both are the same sentence: the editor's own bookkeeping has not
-        /// caught up, and waiting a moment is a road that actually opens
-        /// (the 13u1 ladder's rule — every cause names a road that opens).
-        /// Neither is about where her selection's edges sat.
+        /// What reaches it, after the split above: **`plan` declining on a
+        /// surface that disagrees with its index**
+        /// (`CrossBlockCompound.plan`'s `text.length == ranges[i].length`
+        /// guard) — a desync the surface heals by re-rendering from the
+        /// store, and the one production road to `diagnose`'s step 4. The
+        /// words therefore name no geometry, because this shape has none:
+        /// the editor's own bookkeeping has not caught up, and waiting a
+        /// beat is a road that actually opens (the 13u1 ladder's rule).
         case surfaceNotSettled
     }
 
@@ -142,7 +157,9 @@ nonisolated enum CrossBlockRefusal {
     ///    boundary-clamp law, is no longer a geometry at all: the
     ///    boundary-edge family is taken (clamped or trimmed), and what still
     ///    reaches here is a surface whose own bookkeeping has not caught up
-    ///    (`.surfaceNotSettled`'s own doc names both shapes).
+    ///    (`.surfaceNotSettled`'s own doc names it). Step 1's own
+    ///    fallthrough is `.seamKeystrokeDeclined`, split from it for the
+    ///    road they do not share.
     ///
     /// **The RUN this walks is the span SHE MADE, not the clamped one, and
     /// that is what keeps the diagnosis honest** (13u2 UNIT C): the plan
@@ -185,7 +202,7 @@ nonisolated enum CrossBlockRefusal {
             for i in [before, after] where i < slots.count {
                 if slots[i].hasComments { return .seamBesideComment }
             }
-            return .surfaceNotSettled
+            return .seamKeystrokeDeclined
         }
 
         // 2. The open tail inside the span — or at its very END (the 13u1
@@ -275,6 +292,13 @@ nonisolated enum CrossBlockRefusal {
             // Round 2 (NIT-A): what she is looking at is the empty line her
             // ⏎ left at the note's end — name that, not an abstract region.
             "The end of this selection is the empty line at the note's end."
+        case .seamKeystrokeDeclined:
+            // 13u2 UNIT C: the half of the retired residual that really IS a
+            // seam. It names what declined — this keystroke, at this seam —
+            // and never why, because on the Mac the why is a projection that
+            // has not arrived and on the phone it is a carve that was never
+            // built. The ROAD is what both shapes share.
+            "This keystroke can't join these two blocks."
         case .surfaceNotSettled:
             // 13u2 UNIT C. The boundary sentence this line used to carry —
             // *"One end of this selection sits on the boundary between two
@@ -282,9 +306,9 @@ nonisolated enum CrossBlockRefusal {
             // clamp law takes that family now, and a sentence describing a
             // shape that can no longer refuse is the same defect class F-2
             // fixed. What is left is a surface whose bookkeeping has not
-            // caught up (the Cause's own doc names both shapes), so the line
-            // says exactly that and names no block, because neither shape
-            // knows which one.
+            // caught up (the Cause's own doc names the shape), so the line
+            // says exactly that and names no block, because this shape does
+            // not know one.
             "This part of the note is still settling."
         }
     }
@@ -321,13 +345,18 @@ nonisolated enum CrossBlockRefusal {
             // moves that exist — both platform-neutral: the nudge, and the
             // line's own delete (`.closeTail`).
             "Nudge that end back one character, or delete the empty line on its own."
+        case .seamKeystrokeDeclined:
+            // The deliberate merge is the act the keystroke was reaching
+            // for, and it opens on BOTH platforms — the phone has the menu
+            // row, the Mac the chords. Same roads constant the fan-fold
+            // refusal reads, which is why it arrives as a parameter.
+            fanRoads
         case .surfaceNotSettled:
-            // The road the two surviving shapes actually have. The old
+            // The road the surviving shape actually has. The old
             // "nudge that end one character either way" retired with the
-            // boundary geometry: nudging answers nothing when the decline is
-            // a projection that has not arrived or an index that disagrees
-            // with the surface — both of which resolve on their own, within
-            // a beat, and the surface re-renders from the store besides.
+            // boundary geometry: nudging answers nothing when the decline
+            // is an index that disagrees with the surface, which resolves on
+            // its own within a beat — the surface re-renders from the store.
             "Try that again in a moment."
         }
     }

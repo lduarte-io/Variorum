@@ -50,8 +50,14 @@ enum MobileMarkdownActs {
     /// storage delegate reports it, the verdict routes, and undo is the
     /// system's business. Returns whether the edit landed (false = refused
     /// or out of bounds; a refusal has already spoken through the gate).
+    ///
+    /// **Internal since 13u2 UNIT C** (was private): #109's boundary-clamp
+    /// law lands shape (i) through this same door — after the clamp the
+    /// gesture is an ordinary in-block edit, and the phone must not grow a
+    /// second way to make one. The Mac's twin is `OrdinaryInputEdit.apply`,
+    /// which `OneInputPathTests` guards for exactly this reason.
     @discardableResult
-    private static func inputReplace(
+    static func inputReplace(
         _ textView: UITextView, range: NSRange, with replacement: String
     ) -> Bool {
         guard range.location >= 0, range.upperBound <= textView.textStorage.length,

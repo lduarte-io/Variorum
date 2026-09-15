@@ -1427,9 +1427,9 @@ absorbs the open tail's separator, and the tail's two causes stand untouched.
 | shape (i) — clamp and edit (the Mac's road) | **DONE** — the ordinary input path, NOT a compound (the undo grammar is why) |
 | shape (ii) — the trim (the shared compound; both platforms) | **DONE** — the run from the span she made, the CUTS from the clamped one |
 | the tail fence — the two causes still refuse | **DONE** — the fence IS the loop's `ranges.count - 1` bound; both causes pinned in the app |
-| `.partialBlockAcrossSeam` — retired to what survives | **DONE** — renamed `.surfaceNotSettled`, two surviving shapes enumerated and one pinned |
+| `.partialBlockAcrossSeam` — retired to what survives | **DONE** — SPLIT into `.seamKeystrokeDeclined` + `.surfaceNotSettled` (their roads differ), both enumerated and pinned |
 | the flipped pins, RED ON OLD | **DONE** — 10 of 14 behaviour pins fail on the pre-fix tree (20 issues); the 4 that pass on both are named |
-| the phone's consumer (or the parity row, with the reason) | PENDING |
+| the phone's consumer (or the parity row, with the reason) | **DONE** — shape (ii) inherited with no arm; shape (i) given one (3 mirrors, zero new brain); the LANDING pin is the catch-up's, with the harness reason |
 | tests (core · FULL Mac · iOS build) | PENDING |
 | the WALK + captures | PENDING |
 | PROVISIONALs → `notes/QUESTIONS.md` | PENDING |
@@ -1513,25 +1513,63 @@ re-schedule itself).
 
 Her ruling: *"`.partialBlockAcrossSeam` retires to the shapes that remain, if any."* The boundary
 FAMILY is gone — cells 2/3/4/6/7/8/11/14/18 are all taken — but the case did **not** become
-unreachable, so deleting it would have been as false as keeping its sentence. It is **renamed
-`.surfaceNotSettled`**, and exactly two production shapes reach it:
+unreachable, so deleting it would have been as false as keeping its sentence. Enumerating what
+survives found **two shapes with DIFFERENT true roads**, so the one case became two — the
+`seamBesideArchivedTake` doctrine this file already carries twice (*one declining guard, split into
+the causes whose ROADS differ*):
 
-1. **the seam keystroke whose neighbour the PROJECTION cannot describe yet.** `slots` is
-   deliberately held stale while the buffer is dirty and can be SHORTER than `entries`; A7's carve
-   declines on exactly that bounds guard (`i < model.slots.count`) and `diagnose` step 1's
-   fan/archived/comment reads are all skipped, so none of them can say which authorization failed.
-   **Pinned:** `BoundaryClampTests.theSurvivingResidualIsASurfaceThatHasNotCaughtUp`.
-2. **`plan` declining on a surface that disagrees with its index** (the
-   `text.length == ranges[i].length` guard) — a desync the surface heals by re-rendering from the
-   store. This is `diagnose` step 4's only production reach after the clamp.
+**1. `.seamKeystrokeDeclined` — `diagnose` step 1's own fallthrough.** A single-separator keystroke
+that reached the seam step and matched none of its named conditions.
+  - **Mac:** A7's empty-block carve declined on its own bounds guard (`i < model.slots.count`)
+    because the PROJECTION has not arrived for that entry, and step 1's fan/archived/comment reads
+    are bounds-guarded, so none of them can say which authorization failed.
+  - **iPhone:** *the phone has NO seam carves at all* — neither A7's nor #34's is built there
+    (grep-verified) — so an ordinary backspace at a seam between two texted blocks lands here
+    **permanently**. A standing parity gap this unit found rather than made, and the reason the
+    retirement could not be a single "still settling" line: that copy would have been FALSE on the
+    phone's commonest seam keystroke.
+  - The ROAD both shapes share, and it really opens: **the deliberate merge** (`fanRoads`, the one
+    platform-shaped sentence — ⌘⇧M / ⌥⌘⇧M on the Mac, the ⋯ → Merge row on the phone).
+    Words: *"This keystroke can't join these two blocks."* + that road.
 
-Both are one thing — the editor's own bookkeeping has not caught up — so the words say that and name
-no geometry: **"This part of the note is still settling. Try that again in a moment."** The retired
-sentence (*"One end of this selection sits on the boundary between two blocks. Nudge that end one
-character either way…"*) described a shape that can no longer refuse, which is the same defect class
-the 13u1 ladder's F-2 fixed; and its road helped only that shape. *(The new copy is the ruling's own
-instruction executed — "name its true geometry and a road that actually opens" — and is flagged for
-her eye as #111(b).)*
+**2. `.surfaceNotSettled` — `diagnose` step 4's fallback,** whose one production reach after the
+clamp is **`plan` declining on a surface that disagrees with its index** (the
+`text.length == ranges[i].length` guard) — a desync the surface heals by re-rendering from the
+store. It names no geometry because this shape has none:
+*"This part of the note is still settling. Try that again in a moment."*
+
+**Pinned:** `BoundaryClampTests.theSurvivingResidualsAreNamedAndNeitherIsAGeometry` drives both, and
+asserts that neither keeps the retired boundary words or the nudge road;
+`UndoHintAndRefusalTests.noRefusalLineListsCausesItDidNotEstablish` rides with both cases added.
+
+The retired sentence (*"One end of this selection sits on the boundary between two blocks. Nudge
+that end one character either way…"*) described a shape that can no longer refuse — the same defect
+class the 13u1 ladder's F-2 fixed — and its road helped only that shape. *(The new copy executes the
+ruling's own instruction — "name its true geometry and a road that actually opens" — and is flagged
+for her eye as #111(b).)*
+
+## BOTH PLATFORMS — what the phone got, and the one thing it did not
+
+**Shape (ii) reached the phone with NO phone-side arm at all:** the trim lives inside
+`CrossBlockCompound.plan`, which the phone's `planCrossBlockEdit` already consumes. Pinned on the
+phone at the store level — `MobileCrossBlockEditTests.aSpanOpeningOnTheSeparatorTrimsAndTraysTheWholeBlock`.
+
+**Shape (i) needed an arm, and it got one** — three pieces, all mirrors of the Mac's, none of them a
+new brain: `planClampedInBlockEdit` (the SHARED `clampedInBlockEdit`), `runClampedInBlockEdit` (the
+CAS, then the phone's ONE ordinary input door, `MobileMarkdownActs.inputReplace`, which became
+internal for exactly this — a second input path on the phone is what that door exists to prevent),
+and the arm itself, below the whole-block delete for the Mac's own reason. **Why this was not left to
+the mobile catch-up:** leaving shape (i) refusing on the phone while shape (ii) clamped would have
+SPLIT THE LAW across platforms — and it would have forced the retired cause to keep its boundary
+wording for the phone alone, which is the fork the `Shared/` hoist exists to prevent.
+
+**What the phone did NOT get, stated plainly:** a pin on shape (i)'s LANDING. That road ends in
+`inputReplace`, which needs a real `UITextView`, and the mobile harness attaches STORAGE only
+(`makeEditor`). Making the road work without a view would mean a second input path — the exact thing
+the door prevents. So the phone pins the PLAN and the gate's routing
+(`shapeOneIsPlannedFromTheSharedBrainAndTheGateRoutesToIt`), the LANDING is pinned on the Mac over
+the same shared brain, and the phone's hands-on walk is the mobile catch-up's (**PL-23**). No phone
+UI was built.
 
 ## RED ON OLD — measured on the real pre-fix tree
 

@@ -1306,6 +1306,24 @@ final class MobileEditorViewModel {
                 scheduleGestureCompound { [weak self] in
                     await self?.structural.deleteWholeBlockRun(blockIDs)
                 }
+            } else if let inBlock = planClampedInBlockEdit(
+                range: range, replacement: replacement) {
+                // **#109's SHAPE (i), her ruling of 2026-09-15** — the phone
+                // inherits the semantics from the SAME shared brain the Mac
+                // consumes (`CrossBlockCompound.clampedInBlockEdit`), never a
+                // copy. A span touching only ONE block's characters plus the
+                // separator at one end clamps to that block's text and edits;
+                // the break she selected stands (R-13u-2's own consequence).
+                // Shape (ii) — the TRIM — needs no arm at all here: it lives
+                // inside `CrossBlockCompound.plan`, so the compound road
+                // below inherits it.
+                //
+                // It sits BELOW the whole-block delete for the Mac's reason:
+                // a whole paragraph plus its newline plus Delete is her J9
+                // gesture and the paragraph GOES.
+                scheduleGestureCompound { [weak self] in
+                    self?.runClampedInBlockEdit(inBlock)
+                }
             } else if index.wholeBlockRunAwaitsSync(covering: range) {
                 // The gap fence's face (ladder MINOR 3(a)). The span IS a
                 // whole-block run — the geometry is fine and the
@@ -1400,6 +1418,47 @@ final class MobileEditorViewModel {
             replacing: range, with: replacement,
             index: index,
             surfaceText: { [weak self] range in self?.viewText(range) ?? "" })
+    }
+
+    /// **#109's shape (i) — the phone's face on the shared clamp brain**
+    /// (13u2 UNIT C; the Mac's `EditorViewModel.planClampedInBlockEdit`
+    /// twin). Exposed (not private) so pins can assert what it plans without
+    /// driving a store write.
+    func planClampedInBlockEdit(
+        range: NSRange, replacement: String
+    ) -> CrossBlockCompound.InBlockEdit? {
+        CrossBlockCompound.clampedInBlockEdit(
+            replacing: range, with: replacement, index: index,
+            surfaceText: { [weak self] range in self?.viewText(range) ?? "" })
+    }
+
+    /// **The ordinary input path, deliberately — this road is NOT
+    /// structural.** After the clamp the edit sits inside one block, so it
+    /// takes the phone's own one input door (`MobileMarkdownActs.
+    /// inputReplace`: pre-gate → select → UIKit's `insertText`/
+    /// `deleteBackward`), which means the index bookkeeping, the autosave
+    /// arming, every existing refusal and the SYSTEM's own text undo all
+    /// work unchanged. Routing it through a structural compound would have
+    /// registered an undo-stack entry for a plain deletion inside one
+    /// paragraph — the Mac's reasoning, and the same on the phone.
+    ///
+    /// It runs on the next main-actor turn (the keystroke itself must be
+    /// refused, because the storage must never half-apply a span this road
+    /// did not take), behind the plan's COMPARE-AND-SET — a chained compound
+    /// can land in that window, and the CAS also makes the re-entrant gate
+    /// consult provably terminal.
+    func runClampedInBlockEdit(_ edit: CrossBlockCompound.InBlockEdit) {
+        guard let textView else { return }
+        guard index.documentLength == edit.documentLength,
+              viewText(edit.range) == edit.expectedText
+        else {
+            refuse(
+                "The text changed while that gesture was landing — nothing was altered; "
+                    + "try it again on the current text.")
+            return
+        }
+        MobileMarkdownActs.inputReplace(
+            textView, range: edit.range, with: edit.replacement)
     }
 
     /// A gesture the GATE refused so a structural compound could reproduce

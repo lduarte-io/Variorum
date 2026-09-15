@@ -207,9 +207,13 @@ struct BoundaryClampTests {
     ///
     /// The sentence must no longer claim a geometry, and must still name a
     /// road that opens (the 13u1 ladder's rule).
-    @Test func theSurvivingResidualIsASurfaceThatHasNotCaughtUp() {
-        // An EMPTY block beside a texted one — A7's own geometry — with NO
-        // projection yet.
+    @Test func theSurvivingResidualsAreNamedAndNeitherIsAGeometry() {
+        // SURVIVOR 1 — the SEAM keystroke no carve could take. An EMPTY
+        // block beside a texted one (A7's own geometry) with NO projection
+        // yet: A7 declines on its bounds guard and step 1's fan/archived/
+        // comment reads are all skipped, so none of them can say which
+        // authorization failed. (On the phone this shape is permanent: it
+        // has no seam carves at all.)
         let seam = BlockRangeIndex(
             entries: [
                 BlockRangeIndex.Entry(blockID: "b0", variantID: "v0", length: 0, editable: true),
@@ -218,15 +222,32 @@ struct BoundaryClampTests {
             tailLength: nil)
         #expect(CrossBlockRefusal.diagnose(
             range: NSRange(location: 0, length: 1), index: seam, slots: [])
+            == .seamKeystrokeDeclined)
+        let seamMessage = CrossBlockRefusal.message(for: .seamKeystrokeDeclined)
+        #expect(seamMessage.contains("can't join these two blocks"),
+                "it names what declined: \(seamMessage)")
+        #expect(seamMessage.contains("Merge"),
+                "…and the deliberate merge, which really opens: \(seamMessage)")
+
+        // SURVIVOR 2 — step 4's fallback, whose production reach is a
+        // surface that disagrees with its own index.
+        let clean = Self.index([2, 3, 1])
+        #expect(CrossBlockRefusal.diagnose(
+            range: NSRange(location: 1, length: 5), index: clean,
+            slots: [slot("b0", text: "aa"), slot("b1", text: "bbb"), slot("b2", text: "c")])
             == .surfaceNotSettled)
 
-        let message = CrossBlockRefusal.message(for: .surfaceNotSettled)
-        #expect(!message.lowercased().contains("boundary"),
-                "the retired geometry must not survive in the words: \(message)")
-        #expect(!message.contains("Nudge"),
-                "…nor the road that only helped that geometry: \(message)")
-        #expect(message.contains("settling"), "it names what actually declined: \(message)")
-        #expect(message.contains("moment"), "…and a road that opens: \(message)")
+        // NEITHER may keep the retired boundary geometry in its words.
+        for cause in [CrossBlockRefusal.Cause.seamKeystrokeDeclined, .surfaceNotSettled] {
+            let message = CrossBlockRefusal.message(for: cause)
+            #expect(!message.lowercased().contains("boundary"),
+                    "the retired geometry must not survive in the words: \(message)")
+            #expect(!message.contains("Nudge that end"),
+                    "…nor the road that only helped that geometry: \(message)")
+        }
+        let settling = CrossBlockRefusal.message(for: .surfaceNotSettled)
+        #expect(settling.contains("settling"), "it names what actually declined: \(settling)")
+        #expect(settling.contains("moment"), "…and a road that opens: \(settling)")
     }
 
     // MARK: - Shape (i): clamp and EDIT, through the real keystroke path

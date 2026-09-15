@@ -366,7 +366,7 @@ struct UndoHintAndRefusalTests {
         let causes: [CrossBlockRefusal.Cause] = [
             .seamBesideFan, .seamBesideArchivedTake, .seamBesideComment,
             .lockedTake, .unsyncedBlock, .openTail, .emptyTailAtSpanEnd,
-            .surfaceNotSettled,
+            .seamKeystrokeDeclined, .surfaceNotSettled,
         ]
         for cause in causes {
             // The CAUSE half names one thing. (The ROAD half may offer a
