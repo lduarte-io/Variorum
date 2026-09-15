@@ -1432,7 +1432,7 @@ absorbs the open tail's separator, and the tail's two causes stand untouched.
 | the phone's consumer (or the parity row, with the reason) | **DONE** — shape (ii) inherited with no arm; shape (i) given one (3 mirrors, zero new brain); the LANDING pin is the catch-up's, with the harness reason |
 | tests (core · FULL Mac · iOS build) | PENDING |
 | the WALK + captures | PENDING |
-| PROVISIONALs → `notes/QUESTIONS.md` | PENDING |
+| PROVISIONALs → `notes/QUESTIONS.md` | **DONE** — **#111** (a) BUILT PROVISIONAL · (b) the retired cause's new words · (c) the phone's missing seam carves, a FINDING with a KnownIssues row; the marker moved to #112 |
 
 *(Every line starts PENDING and is flipped in the same commit as the piece it names.)*
 
