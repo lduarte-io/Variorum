@@ -1216,8 +1216,28 @@ iOS build green · mobile 622/105 with the one owned red):**
 | iOS build | **green** (BUILD SUCCEEDED) |
 | the FULL mobile suite | **622 / 105 PASSED with 4 known issues** — the 2 standing (`MobileTrashTests`' accessibility-tree wrapper) + the converted tutorial pin's 2 (the keep-on-top facts, reported per F-5's design). **The mobile suite exits green for the first time since UNIT 1 filed the tutorial red**, with the mismatch still visible on every run |
 
+#### The implementer's sanity pass over the reviewer's diff (the cross-model flow's last step) — CLEAR on the fixes, THREE items raised; the reviewer's final word on each:
+
+| # | the reviewer's call → what landed |
+|---|---|
+| **SP-1** (NIT, record) | **CONFIRMED, FIXED** (in the dispositions commit): #109 (d)'s trim road could be read as reaching the TAIL's separator at the trailing end — text that is not a block yet, which the plan's condition 2 exists to exclude. (d) now carries the fence: the trim speaks only of a separator BETWEEN TWO BLOCKS; at the tail's doorstep a trim means CLAMPING to the last block's end, and the span refuses today as the tail's own cause. One clause, protecting a ruling she is about to make. |
+| **SP-2** (NIT raised, **bug-class on the reviewer's own trace — CONFIRMED, FIXED `f0b758f5`**) | A span covering the LAST block's trailing separator and stopping exactly where a NON-EMPTY tail begins intersected no tail character, missed `diagnose` step 2, and spoke F-2's new sentence — *"between two blocks"* — with the open tail on its far side (traced by the reviewer on `{2,3}+tail`, span `[1,7)`). Pre-existing step ordering, not introduced by F-2, but F-2's sentence made it inexact where the old one was merely vague. Step 2 now catches a span ending past `tailSeparatorOffset` — faithful to the plan's OWN decline order (contiguity refuses before the run's locks and gaps are ever read; the tail-first precedent already stood for spans intersecting tail text), and the tail's cause and road were already exactly right for it. The one deliberate widening beside the found shape: the same span against an EMPTY tail now also speaks the tail's cause (it previously fell to the residual — equally loose there). **PIN (red on old):** `UndoHintAndRefusalTests.aSpanEndingOnTheTailsOwnSeparatorIsTheTailsRefusal` (`.partialBlockAcrossSeam` pre-fix). |
+| **SP-3** (NIT, record) | **CONFIRMED, FIXED** (in the dispositions commit): #109's *"Why it is a question and not a bug"* paragraph argued the whole family has no good answer under R-13u-2, which part (d) contradicts for shape (ii) — the paragraph is now scoped to shape (i) with a pointer at (d). |
+
+**Suite re-runs after SP-2 (the one code change of the pass — `Shared/`, both platforms compile it):**
+
+| suite | result |
+|---|---|
+| the FULL Mac suite | **2667 / 445, ALL GREEN** in 712 s (+1 = SP-2's pin; zero failures, no isolated re-runs owed) |
+| iOS build | **green** (BUILD SUCCEEDED) |
+| the FULL mobile suite | **622 / 105 PASSED with the same 4 known issues** (the 2 standing + the converted tutorial pin's 2) |
+
+*(Core untouched by the pass — `CrossBlockRefusal` is App-`Shared/`, not the core package; the
+round's core run above stands.)*
+
 *(Round 2 anchors here: a fresh cold reviewer re-reviews the fixes and what they touched —
-commits `45f5c956` · `715381de` · `3d3ace49` · `b88a54ae` · `0af79a38` and this block.)*
+commits `45f5c956` · `715381de` · `3d3ace49` · `b88a54ae` · `0af79a38` · `f0b758f5` and this
+block, the sanity-pass table included.)*
 
 ---
 
