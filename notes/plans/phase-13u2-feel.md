@@ -1704,6 +1704,30 @@ differential-latency pin, `CanvasDragTrackingTests`, `MastheadLayoutTests`' open
 `7f1c1c9e` (the cause split + the phone's arm) · `98b14068` (QUESTIONS #111 + the KnownIssues row) ·
 `c42404f7` (the walk) · this commit (the dispositions and the finals).
 
+## ORCHESTRATOR ADJUDICATION — UNIT C (2026-09-15, the same night)
+
+**Spot-check verdict: VERIFIES.** Seven commits pushed, tree clean; the diff shape matches the
+record (5 seam sources + 5 test files, +20 Mac pins, +2 mobile); #111 appended with the marker
+moved to #112; the phone's seam-gap KnownIssues row lands with the mobile catch-up as owner. The
+scratch-worktree red-on-old (10 of 14 failed pre-fix, the 4 both-green NAMED) is the guard's
+letter.
+
+**Design endorsements, recorded for the ladder to test rather than take on faith:** (1) shape (i)
+landing through `OrdinaryInputEdit.apply` rather than the compound is the one-undo-grammar law
+speaking — a clamped span IS an in-block edit, and in-block edits are ⌘Z's; routing it through the
+compound would have destroyed text undo for a plain deletion. (2) The cause SPLIT was forced by a
+measured finding (a single "still settling" sentence would be false on the phone's commonest seam
+keystroke) — the road rule ("every cause names a road that actually opens") held under pressure.
+(3) The tail fence as the loop's own bound is the cheapest true fence; the ladder should test it
+across tilings, as the record itself invites.
+
+**The flake's escalation, appended honestly:** `theReadClickLandsInIndexAtThatBlock` now fails 3/3
+isolated on BOTH trees (post-C and the pre-C scratch worktree carrying zero C code) — worse than
+unit B's recorded 2-of-9 under load on both, so the axis is ENVIRONMENT (a machine many suites
+deep into an overnight run), not either unit's diff. The KnownIssues row carries the paired
+numbers; owner 12 stands. If the phase-end acceptance walk reproduces any product-side landing
+miss, that verdict re-opens — the walk, not the harness, is the authority on the shipped road.
+
 ---
 
 # CARRIED VERBATIM AT THE SPLIT (2026-09-14) — from `phase-13u-feel-and-polish.md` (P39's section, per its banner: "The file split must carry that section to 13u2")
