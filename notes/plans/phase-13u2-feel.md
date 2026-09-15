@@ -378,7 +378,7 @@ DISPOSITIONS table.)*
 |---|---|
 | the 13l hang lead — trace | IN PROGRESS (the capture read; the analysis is TRACE 1 below) |
 | item 1 — the pane-stability trace | NOT-STARTED |
-| item 18 — the long-book landing & settle | NOT-STARTED |
+| item 18 — the long-book landing & settle | **TRACED + FIRST FIX IN** (the card-height drift; pin green, red-on-old measurement next) |
 | row 54 — read tier's provisional-width first measure | NOT-STARTED |
 | row 92 — canvas silhouette click lands mid-board | NOT-STARTED |
 | row 94 — Blocks' ~0.2–0.3 s residual arrival | NOT-STARTED |

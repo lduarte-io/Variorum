@@ -1056,6 +1056,12 @@ struct BookView: View {
     ) {
         #if DEBUG
         BookOutlineGeometry.anchorTops[anchorID] = top
+        // 13u2 UNIT A: the row's HEIGHT, recorded on the same road and keyed
+        // the same way (the anchor id carries the post/section id, so this is
+        // subject-keyed like `anchorTops` beside it — never "the row"). The
+        // landing's own copy below stays as it was: it is a per-landing
+        // change LOG, and this is the current fact a pin reads.
+        BookOutlineGeometry.rowHeights[anchorID] = height
         if outlineLanding != nil {
             let known = landingBox.rowHeights[anchorID]
             if known == nil || abs((known ?? 0) - height) > 0.5 {
@@ -1706,6 +1712,12 @@ enum BookOutlineFactsReads {
 @MainActor
 enum BookOutlineGeometry {
     static var anchorTops: [String: CGFloat] = [:]
+    /// 13u2 UNIT A: each anchor row's CURRENT height, recorded on the same
+    /// report as its top and keyed the same way. The pin item 18's fix lands
+    /// with reads this before and after a card's preview arrives — a card
+    /// whose height moves when its read returns is the 854-pt drift the
+    /// Sherlock trace measured.
+    static var rowHeights: [String: CGFloat] = [:]
     /// The pending landing's report sequence (id · top · hop) — what a pin
     /// prints when a landing does not converge.
     static var trace: [String] = []
@@ -1868,6 +1880,12 @@ private struct OutlinePostRow: View {
     @State private var dropTargeted = false
     /// The card's preview (fetched once per realized row).
     @State private var excerpt = ""
+    /// **13u2 UNIT A (item 18's traced mechanism): has the preview read come
+    /// BACK yet?** Until it has, the card must still stand at the height it
+    /// will have — see `excerptSlotStands`. Separate from `excerpt.isEmpty`
+    /// precisely because "" means two different things before and after the
+    /// read, and the card's geometry must tell them apart.
+    @State private var factsLoaded = false
 
     var body: some View {
         Group {
@@ -2023,7 +2041,21 @@ private struct OutlinePostRow: View {
         // Row 45: the preview reads ACROSS the leading blocks and skips a
         // lone heading/numeral ("I.").
         excerpt = BookOutlineRows.cardPreview(blocks: slots.compactMap(\.text))
+        // 13u2 UNIT A: the answer is IN — from here the slot may honestly
+        // stand down for a note that has nothing to preview.
+        factsLoaded = true
     }
+
+    /// **13u2 UNIT A — does the card's preview slot take its room?** Yes while
+    /// the read is still in flight (the height must not depend on when the
+    /// answer arrives), and yes once the answer is a preview. The ONE case it
+    /// stands down is a note the read says has nothing to show — the
+    /// `FlowStoryRow.loadedEmpty` rule in the Outline's own terms, and the
+    /// only shape whose card height can still change after its first frame.
+    /// Empty notes in a book are rare and, being empty, sit at the top of no
+    /// one's landing; a card that reserved three blank lines forever would be
+    /// a worse answer than a bounded, stated exception.
+    private var excerptSlotStands: Bool { !factsLoaded || !excerpt.isEmpty }
 
     /// 13f W11 — the row's own drag/drop contract, shared by both forms
     /// (collapsed card and expanded header) through `bookDropRow`.
@@ -2122,12 +2154,47 @@ private struct OutlinePostRow: View {
                 // gutter to the right until 18d batch 1 retired it (U-17);
                 // the sidebar's note box carries them now, for whichever
                 // note the book is pointing at.
-                if !excerpt.isEmpty {
-                    Text(excerpt)
-                        .font(tokens.body)
-                        .foregroundStyle(tokens.ink)
-                        .lineLimit(3)
-                        .multilineTextAlignment(.leading)
+                // 13u2 UNIT A — THE CARD'S HEIGHT IS HONEST FROM ITS FIRST
+                // FRAME (item 18; the mechanism is traced in the plan's UNIT A
+                // RECORD, TRACE 2). Two changes, both about geometry:
+                //
+                //  (1) the slot STANDS while the read is in flight
+                //      (`excerptSlotStands`), so a card does not grow the
+                //      moment its preview lands; and
+                //  (2) `reservesSpace` — the slot is three lines WHATEVER the
+                //      preview turns out to be, so a two-line preview does not
+                //      shrink it either.
+                //
+                // Why it matters beyond tidiness: every card ABOVE a landing
+                // target used to grow ~57 pt when its preview arrived, and on
+                // the Sherlock book that summed to 854 pt of drift AFTER the
+                // page had already arrived — measured, her "stutter … once
+                // I've already arrived", and the reason the landing then took
+                // a second, separate hop a full second later ("moved down to
+                // where the note started"). A card whose height does not
+                // depend on WHEN its read returns cannot do either.
+                if excerptSlotStands {
+                    ZStack(alignment: .topLeading) {
+                        // The slot's FLOOR: three lines of the card's own type,
+                        // hidden. Deliberately a prototype rather than
+                        // `lineLimit(3, reservesSpace: true)` — MEASURED: with
+                        // an EMPTY string (which is exactly the in-flight
+                        // state this exists for) `reservesSpace` reserved ONE
+                        // line, not three (the pin caught it: 66 → 103), so the
+                        // card still grew by two lines when the read landed.
+                        // A prototype in the same font cannot be wrong about
+                        // what three lines of it take.
+                        Text("X\nX\nX")
+                            .font(tokens.body)
+                            .hidden()
+                            .accessibilityHidden(true)
+                        Text(excerpt)
+                            .font(tokens.body)
+                            .foregroundStyle(tokens.ink)
+                            .lineLimit(3)
+                            .multilineTextAlignment(.leading)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .topLeading)
                 }
             }
             .padding(.horizontal, 16)
