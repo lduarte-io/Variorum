@@ -105,13 +105,33 @@ private func withLandingBook<T>(
     }
 }
 
+/// **The editor SHE IS WRITING IN — not "the first text view in the tree"
+/// (13u2 UNIT A2).** These tests ask whether the focused story's editor has
+/// its text and its height; the tree order is not part of that claim, and
+/// relying on it made the suite depend on a race.
+///
+/// What was measured, so the change is not a test bent to pass: under this
+/// harness — which drives SwiftUI by pumping the run loop by hand — the
+/// Outline's editor representable can realize TWICE for the same post (two
+/// `InlineEditorSurface.makeNSView` calls ~7 ms apart, two `EditorViewModel`s;
+/// only the first receives a projection, exactly as `KnownIssuesAndTechDebt`'s
+/// shadow-editor row describes). **In the REAL APP it does not:** the same
+/// gesture on the dev-store Debug build against the Sherlock book logged
+/// exactly ONE mount, on the pre-fix tree and on this one alike (the walk's
+/// probe, recorded in the plan's UNIT A2 RECORD). So the shadow here is the
+/// harness's, and "the first `EditorTextView`" is the wrong question: the
+/// right one is which editor holds the note's text.
 @MainActor
-private func firstEditor(in view: NSView) -> EditorTextView? {
-    if let editor = view as? EditorTextView { return editor }
-    for sub in view.subviews {
-        if let found = firstEditor(in: sub) { return found }
+private func writingEditor(in view: NSView) -> EditorTextView? {
+    var found: [EditorTextView] = []
+    func walk(_ v: NSView) {
+        if let editor = v as? EditorTextView { found.append(editor) }
+        for sub in v.subviews { walk(sub) }
     }
-    return nil
+    walk(view)
+    // The one with text; ties (and the all-empty case) keep tree order, so a
+    // single-editor tree behaves exactly as before.
+    return found.max(by: { $0.string.count < $1.string.count })
 }
 
 /// The livelock guard: a foreign thread that ends the run when the main
@@ -326,9 +346,9 @@ struct BookOutlineLandingTests {
             // editor), its projection filled, its row really tall.
             model.focus(longPostID)
             await settle(window, hosting, watchdog: watchdog, until: {
-                (firstEditor(in: hosting)?.frame.height ?? 0) > 3000
+                (writingEditor(in: hosting)?.frame.height ?? 0) > 3000
             })
-            let editorHeight = firstEditor(in: hosting)?.frame.height ?? 0
+            let editorHeight = writingEditor(in: hosting)?.frame.height ?? 0
             #expect(editorHeight > 3000, "the story's editor is tall: \(editorHeight)")
 
             // The navigator's chapter click for the chapter AFTER the story
@@ -413,11 +433,11 @@ struct BookOutlineLandingTests {
             model.focus(longPostID)
             #expect(model.caretSeed == 0, "a bare focus seeds the first block")
             await settle(window, hosting, watchdog: watchdog, until: {
-                (firstEditor(in: hosting)?.string.count ?? 0) > 5000
+                (writingEditor(in: hosting)?.string.count ?? 0) > 5000
             })
             // One more beat so the seed is applied after the first render.
             await settle(window, hosting, watchdog: watchdog, until: { false }, maxTurns: 3)
-            let editor = try #require(firstEditor(in: hosting))
+            let editor = try #require(writingEditor(in: hosting))
             #expect(editor.string.count > 5000, "the projection filled")
             #expect(editor.selectedRange().location == 0,
                     "the caret is at the first block, not at \(editor.selectedRange().location)")
@@ -475,7 +495,7 @@ struct BookOutlineLandingTests {
                 let top = try await open(i, what)
                 #expect(abs(top) <= 4, "\(what) opens at its top, not \(top) pt away")
             }
-            let editorHeight = firstEditor(in: hosting)?.frame.height ?? 0
+            let editorHeight = writingEditor(in: hosting)?.frame.height ?? 0
             #expect(editorHeight > 3000, "the newest story's editor is tall: \(editorHeight)")
 
             // Far BELOW (three expanded stories above and between).
