@@ -374,7 +374,7 @@ registers behaving as her sentences describe) beside the dark pass already owed.
 | B — book-Index presentation + shadow editor | **CLOSED 2026-09-15** — item 19's five ruled behaviours BUILT (one of the intended fixes DISMISSED AS HOLLOW, with its evidence) · the double editing ring removed · **KnownIssues row 49's ROUTER half FIXED** (red-on-old + verified in the app) and the row NARROWED to the surviving double realization, which is traced with three causes eliminated · scope 4 RE-EXAMINED: the run-scale split stays CLOSED, its evidence downgraded, the successor's measurement named · 3 PROVISIONALs (QUESTIONS #110) · finals: core **1567/171** · Mac **2682/449** (1 known issue + 1 load-flaky red, recorded with paired numbers, the product road walked clean) · iOS **green** |
 | C — #109 boundary-clamp law | **CLOSED 2026-09-15** — her law BUILT, both shapes, BOTH platforms (the phone got the trim free and shape (i) with three mirrors of the Mac's road) · the family ENUMERATED in an 18-cell sweep table · 10 of 14 behaviour pins RED on the pre-fix tree · `.partialBlockAcrossSeam` retired by SPLITTING into two causes whose roads differ (forced by a finding: the phone has no seam carves — new KnownIssues row) · walked with 11 captures incl. both undo grammars · 1 PROVISIONAL (QUESTIONS #111) · finals: core **1567/171** · Mac **2702/450** (+20 pins; 1 known issue + the load-flaky red, PAIRED-measured as unchanged by this diff) · iOS **green** · mobile cross-block suites **67/6** |
 | D — the singles (+ TRACE 1a, routed by RULING A-1) | **CLOSED 2026-09-15** — item 2 FIXED at the ONE shared brain with red-on-old on BOTH trees · item 10 BUILT and pinned but **it cannot fire until she rules the star cap** (#112(b), the item's headline) · item 11 BUILT (⇧⌘V, the rule shared; the phone owes the door) · item 13 MEASURED and VERIFIED HEALED + row 93 FIXED · P39a/P39b FIXED with zero behaviour change and pins unmodified · roster item 8 VERIFIED (2 moot, 2 return) · **row 57 TRACED and it does NOT reproduce — nothing built, the row narrowed** · TRACE 1a FIXED and measured (0.42 ms → 0.00009 ms, flat where it was linear) · 8 captures · 3 PROVISIONALs (QUESTIONS #112) · finals: core **1567/171** · Mac **2730/456** (+28/+6; 1 known issue + the load-flaky red, PAIRED as unchanged) · iOS **green** · mobile **626/106 with 4 known** |
-| E — the mechanical sweeps | **RUNNING 2026-09-15** — the record is open below (UNIT E RECORD); six items, each with its own LIVE STATUS line |
+| E — the mechanical sweeps | **CLOSED 2026-09-15** — all six dispositioned: row 56 steps 1+2 BUILT (step 3 deferred with its reason, its grep half shipped) · row 50's six oracles SWEPT with a stronger key than asked, and the measurement that forced it · row 48 WALKED and **NOT REPRODUCIBLE** (four arms) · row 59 FIXED with falsifiability demonstrated, and its arm comes OFF the flake list · row 47's park half DONE · row 51's split (**ZERO test edits**) + the ONE structural arm (red-on-old). 7 captures · 1 PROVISIONAL (#113) · finals: core **1567/171** · Mac **2744/459** (+14/+3; 1 known issue + the load-flaky red, PAIRED as unchanged) · iOS **green** · mobile **626/106 with 4 known** |
 | LADDER | NOT-STARTED |
 | CLOSEOUT | NOT-STARTED |
 
@@ -2307,9 +2307,23 @@ ruling and raising it is hers alone; the built scrolling waits on her word.
 
 # UNIT E RECORD — THE MECHANICAL SWEEPS (opened 2026-09-15, `opus-implementer`, the overnight run)
 
-**WHAT THIS UNIT HAS NOT DONE — the record's first line, per the brief.** *(PENDING — this line is
-rewritten with the unit's honest omissions at its close; it is opened here so the record's shape is
-right from the first commit and the cold reviewer meets the omissions before the claims.)*
+**WHAT THIS UNIT DID NOT DO — the record's first line, per the brief.** It did **not build row 56's
+STEP 3** — P-1's registry walk (every classed door declared, a walk asserting the class at each) is a
+DESIGN and not a rename, and starting it at the end of a mechanical sweep is how a sweep becomes a
+redesign; the row keeps it as its residual and the cheap checkable half shipped instead
+(`StatusSeamVocabularyTests`). It did **not rename the `speakCeremony…` quartet** on the
+`DivideWCeremony` host protocol, which is the status seam's one surviving unclassed vocabulary —
+recorded on row 56 rather than swept. It did **not consolidate row 51's enumerated gesture arms**
+into the new structural arm: they end a landing AT the gesture and ~15 pins assert that TIMING, so
+folding them would be a second behaviour change smuggled inside a parity refactor — the arm is a net
+UNDER them and the record says so. It did **not take `ShellRouter.blockNamingDoor`** (row 47's other
+oracle item, fenced to 13u4 by the brief and absent from row 50's enumeration). It could **not
+explain WHY row 48's ⌘A symptom was seen at 17o** — four arms walked clean, so there was no failing
+road to instrument, and the row is resolved as NOT REPRODUCIBLE rather than as fixed. It did **not
+walk row 51's page-tall STRADDLER** (a bloomed card taller than the viewport at the fold), which
+stays the row's own residue with its mounted pin as the whole of its evidence. It did **not walk
+DARK** — nothing this unit changed is a colour, a token or a face. **Zero
+`Sources/VariorumCore/` lines, zero `Sync/`, zero schema, zero migrations, marker 8.**
 
 **What it is:** six items, each independently scoped and dispositioned — row **56** (the status
 seam's audit surface: the ~150-site rename + `TakesViewModel.status`'s single writer) · row **50**
@@ -2338,7 +2352,7 @@ alternative proof it ran instead.
 | **item 5** — row 47's PARK half | **DONE** — `park` is `private` to the router's new ONE adoption door (`ShellRouter.adopt`, `RootView.adopt`'s two statements moved onto it); all seven pin calls folded onto that door with their arithmetic byte-unchanged; RULE ONE reworded to what actually holds AND to name the one road the fence cannot reach. 7 tests / 3 suites GREEN |
 | **item 6** — row 51: the `TakesArticleScroll` split + the structural arm | **DONE** — the split (876 lines, every pre-move name forwarded, **ZERO test edits**) and the ONE structural arm at `adopt` (red-on-old by behavioural revert: 3 of 5 pins red with the body emptied). Walked on the real 262-block story: the restore is **byte-identical**, and a structural act does not haul the page. QUESTIONS #113 |
 | the WALK + captures (60 onward) | **DONE — 7 captures (60–66)** on the dev-store Debug build: ⌘A on three surfaces · the Takes article left, re-entered and restored **BYTE-IDENTICALLY** (`cmp` on the two PNGs) · a structural act on the 262-block story leaving the page exactly where it was |
-| tests (core · FULL Mac · iOS build · mobile if `Shared/` moved) | PENDING |
+| tests (core · FULL Mac · iOS build · mobile) | **DONE** — core **1567/171 GREEN** · the FULL Mac suite **2744/459** (+14/+3, exactly this unit's pins) with the expected **1 known issue** and the recorded load-flaky red, PAIRED-measured 3/3 on BOTH trees with a byte-identical signature · iOS build **GREEN** · the FULL mobile suite **626/106 PASSED with 4 known issues** (owed — `Shared/AppSession.swift` moved) |
 | PROVISIONALs → `notes/QUESTIONS.md` (next free **#113**) | **DONE — ONE: #113**, the structural arm's chosen behaviour (a metadata-only arrival ends a landing too). The marker moved to **#114** |
 
 *(Every line starts PENDING and is flipped in the same commit as the piece it names.)*
@@ -2689,6 +2703,72 @@ taller than the viewport sitting at the fold — a bloomed fan on a long block).
 bloomed card exceeds the window, and staging it by synthetic clicks was beyond this unit's walk
 budget. It remains the row's own residue, and the row still says its mounted pin is the whole of its
 evidence.
+
+
+
+## DISPOSITIONS — every item this unit was given
+
+| item | verdict | evidence |
+|---|---|---|
+| **row 56** — the status seam's audit surface | **STEPS 1+2 BUILT, zero behaviour · STEP 3 DEFERRED with its reason** | ~150 sites renamed so each reads its class; `TakesViewModel.status` made unwritable except through three classed doors (the bypass now fails to COMPILE). The 18i classification pins green with assertions unmodified (55/5); **a literal-by-literal diff of the whole 40-file rename found ONE string changed anywhere — a test's failure message.** Step 3 is a design, not a rename; its grep half ships as `StatusSeamVocabularyTests`. |
+| **row 50** — the DEBUG-oracle keying sweep | **ALL SIX SWEPT, with a STRONGER key than the row asked for** | Eight of the ten reading suites mint `.incrementing` uuids, so subject-id keying alone separates nothing — measured, and the reason the scope is the mounting SESSION by object identity instead. Construction pinned as arithmetic (7 tests); the 18 reading suites 78/18 GREEN with assertions unmodified. `TakeCardGeometry` bounded in the same rewrite (row 47's second oracle item). |
+| **row 48** — ⌘A in a live take pane | **WALKED; DOES NOT REPRODUCE. Nothing built.** | Four arms, each captured: the entry pane · a pane made live by a click (the old pane's selection going GREY is the visible proof first responder moved) · the Edit ▸ Select All MENU road · a bloomed take card's pane. The row is resolved-as-not-reproducible with the first-responder probe named for a re-report. |
+| **row 59** — the masthead pin's settle | **FIXED; the row's own stated mechanism CORRECTED by measurement** | Both fixed turn budgets replaced by an until-clause on a new monotonic report count (quiet for four turns, ceiling 200, loud if it never settles). A field-open moves NO card on a quiet machine (0/5, both voices), so "until the cards re-report" would have waited on an event that does not happen. Falsifiability DEMONSTRATED: a synthetic 200-pt overlap fails loud in 0.73 s. 3/3 isolated green **and green in the full suite** — the arm comes OFF the flake list. |
+| **row 47's PARK half** | **BOTH HALVES DONE** | `park` is `private` to the router's new one adoption door; all seven pin calls folded onto it with every `#expect` byte-unchanged (7/3 green); RULE ONE reworded to what actually holds AND to name the one road the fence cannot reach. |
+| **row 51** — the `TakesArticleScroll` split | **SPLIT (zero test edits) + the ONE structural arm (red-on-old)** | 876 lines moved with no body edited, because the region had no code dependency on the rest of the file. The arm: a differing projection ends a pending landing, so every content change ends one by construction. Walked on the real 262-block story — the restore is **byte-identical by `cmp`**, and a structural act leaves the page where it is. |
+| **a PROVISIONAL** | **ONE — QUESTIONS #113** | The structural arm's chosen behaviour: `!=` on the projection fires on any field, so a metadata-only arrival ends a landing too. The row asked for it to be written down; it is written at the code, pinned, and bundled for her. The marker moved to **#114**. |
+
+## FINALS
+
+| gate | result | baseline (UNIT D's) |
+|---|---|---|
+| core `swift test` | **1567 / 171 GREEN**, 53.2 s | 1567 / 171 — identical (this unit added no core pins) |
+| the FULL Mac suite | **2744 / 459**, 748.1 s — **+14 tests, +3 suites**, exactly this unit's pins, with the expected **1 known issue** (`abs(below) → 73.0`) and **1 load-flaky red** (`theReadClickLandsInIndexAtThatBlock`) | 2730 / 456 with the same two |
+| iOS build (`VariorumMobile`) | **GREEN** | green |
+| the FULL mobile suite | **626 / 106 PASSED with 4 known issues**, 148.9 s — **owed**, because `Shared/AppSession.swift` moved | 626 / 106 w/ 4 known — identical |
+| lockstep marker | untouched — **8** | 8 |
+
+**THE LOAD-FLAKY RED, MEASURED IN PAIRS — and this diff earned the pairing, because it touches two
+lines of the book Index.** `theReadClickLandsInIndexAtThatBlock` failed **3 of 3 isolated runs on the
+post-E tree** (5.59–5.65 s) **and 3 of 3 on a scratch worktree built at `5ca12776`, this unit's
+record-only opening commit with zero code in it** (5.58–5.63 s), with a **byte-identical signature**
+down to the variant id (`live.count → 0`; the pane identifier nil; `…0032`). **This diff changes
+nothing about it** — and the two book-Index lines it touches are `.speak(` → `.refuse(`, a door
+rename whose delivery and words are identical (item 1's literal diff proves no string moved). That
+matches UNIT C's and UNIT D's own paired measurements exactly; KnownIssues row 61's environment/load
+verdict stands.
+
+**`MASTHEADLAYOUTTESTS` COMES OFF THE FLAKE LIST — recorded here for the closeout to execute.** Its
+open-field arm was added to the carry-forward list at the 18j close (two consecutive full-suite
+failures); item 4 replaced its two fixed turn budgets with a falsifiable until-clause, and it ran
+green **in this unit's full suite** as well as 3/3 isolated. The other three rules stand unchanged —
+the differential-latency pin, `CanvasDragTrackingTests` and `BlocksWorkbenchFaceTests`' single-click
+budget, **none of which fired in this run either**.
+
+**Zero `Sources/VariorumCore/` lines. Zero `Sync/`. Zero schema. Zero migrations. Marker 8.**
+
+**THE MOBILE PARITY LINE, answered rather than skipped: nothing here is owed to the phone.** The one
+`Shared/` file that moved is `AppSession.swift`, and its change is the status seam's door rename plus
+the one offer site spelled out — the phone has no `StatusCenter` surface of its own and its own
+`MobileStars.speak` is a private door this rename deliberately did not touch (it is not this seam).
+The five other items are Mac-only by construction: DEBUG oracles the phone does not have, a Mac shell
+router, a Mac masthead pin, the Mac's Takes article, and a Mac keyboard chord.
+
+**Commits** (each pushed as it landed, per the checkpoint protocol): `5ca12776` (the record opened) ·
+`2374365b` (item 5, row 47's park half) · `72d199f7` (item 4, row 59's settle) · `eed3c73e` (item 2,
+the oracle sweep) · `0b35da58` (item 1, the status seam) · `8b7efe48` (item 6a, THE SPLIT) ·
+`8e9aa710` (item 6b, the structural arm + #113) · `1164e18c` (the walk) · this one (the dispositions
+and the finals). No history was rewritten and nothing was reverted.
+
+**Captures** (gitignored, `notes/plans/13u2-screens/`, continuing UNIT D's numbering): `60-e-open` ·
+`61-e-cmdA-menu-select-all` · `62-e-cmdA-first-block` · `63-e-cmdA-in-a-take-card` ·
+`64-e-takes-left-here` · `65-e-takes-restored` (byte-identical to 64 by `cmp`) ·
+`66-e-takes-structural-act`.
+
+**The dev store carries two takes this walk added** (one on *Chapter 1 — What is encrypted*, one on
+*A Scandal in Bohemia* block 239) — left in place deliberately: the fenced dev store is scratch, and
+`branchVariant` is correctly not on AppSpec §9's structural-undo list, so there is no one-gesture way
+back and hand-deleting them would have been motion. Recorded so the next walker is not puzzled.
 
 
 ---
