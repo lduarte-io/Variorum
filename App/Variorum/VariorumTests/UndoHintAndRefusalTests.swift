@@ -285,12 +285,17 @@ struct UndoHintAndRefusalTests {
                     slot("b2", text: "c")])
             == .lockedTake)
 
-        // The residual: a boundary crossed with a block covered in part.
+        // What is LEFT after #109's clamp law (13u2 UNIT C): step 4's
+        // fallback. The span here — mid-block to mid-block across a seam,
+        // every entry editable — is TAKEN by the compound in production and
+        // never diagnosed at all; this drives the pure brain's last arm,
+        // whose production reach is a surface that disagrees with its own
+        // index (`.surfaceNotSettled`'s own doc names both shapes).
         let clean = Self.index([(2, "v0", true), (3, "v1", true), (1, "v2", true)])
         #expect(CrossBlockRefusal.diagnose(
             range: NSRange(location: 1, length: 5), index: clean,
             slots: [slot("b0", text: "aa"), slot("b1", text: "bbb"), slot("b2", text: "c")])
-            == .partialBlockAcrossSeam)
+            == .surfaceNotSettled)
     }
 
     /// **The tail's DOORSTEP is the tail's, never "between two blocks"**
@@ -305,7 +310,8 @@ struct UndoHintAndRefusalTests {
     /// ground — `.openTail`, whose cause and road (wait a moment; the mint
     /// makes it a block) are exactly right for it.
     ///
-    /// **RED ON OLD:** this shape diagnosed `.partialBlockAcrossSeam`.
+    /// **RED ON OLD:** this shape diagnosed the boundary residual (the case
+    /// 13u2 UNIT C retired into `.surfaceNotSettled`).
     @Test func aSpanEndingOnTheTailsOwnSeparatorIsTheTailsRefusal() {
         let tailed = Self.index([(2, "v0", true), (3, "v1", true)], tail: 4)
         // [1,7): part of b0, all of b1, the separator at 6 — stopping
@@ -360,7 +366,7 @@ struct UndoHintAndRefusalTests {
         let causes: [CrossBlockRefusal.Cause] = [
             .seamBesideFan, .seamBesideArchivedTake, .seamBesideComment,
             .lockedTake, .unsyncedBlock, .openTail, .emptyTailAtSpanEnd,
-            .partialBlockAcrossSeam,
+            .surfaceNotSettled,
         ]
         for cause in causes {
             // The CAUSE half names one thing. (The ROAD half may offer a

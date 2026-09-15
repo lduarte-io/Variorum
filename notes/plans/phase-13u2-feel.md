@@ -1422,19 +1422,144 @@ absorbs the open tail's separator, and the tail's two causes stand untouched.
 | piece | state |
 |---|---|
 | the record opened | **DONE** |
-| the family ENUMERATED (the sweep table) | PENDING |
-| the law BUILT — the shared clamp brain | PENDING |
-| shape (i) — clamp and edit (the Mac's road) | PENDING |
-| shape (ii) — the trim (the shared compound; both platforms) | PENDING |
-| the tail fence — the two causes still refuse | PENDING |
-| `.partialBlockAcrossSeam` — retired to what survives | PENDING |
-| the flipped pins, RED ON OLD | PENDING |
+| the family ENUMERATED (the sweep table) | **DONE** — THE SWEEP TABLE below, 18 cells |
+| the law BUILT — the shared clamp brain | **DONE** — `CrossBlockCompound.clampedToBlockText`, ONE pure rule, both platforms |
+| shape (i) — clamp and edit (the Mac's road) | **DONE** — the ordinary input path, NOT a compound (the undo grammar is why) |
+| shape (ii) — the trim (the shared compound; both platforms) | **DONE** — the run from the span she made, the CUTS from the clamped one |
+| the tail fence — the two causes still refuse | **DONE** — the fence IS the loop's `ranges.count - 1` bound; both causes pinned in the app |
+| `.partialBlockAcrossSeam` — retired to what survives | **DONE** — renamed `.surfaceNotSettled`, two surviving shapes enumerated and one pinned |
+| the flipped pins, RED ON OLD | **DONE** — 10 of 14 behaviour pins fail on the pre-fix tree (20 issues); the 4 that pass on both are named |
 | the phone's consumer (or the parity row, with the reason) | PENDING |
 | tests (core · FULL Mac · iOS build) | PENDING |
 | the WALK + captures | PENDING |
 | PROVISIONALs → `notes/QUESTIONS.md` | PENDING |
 
 *(Every line starts PENDING and is flipped in the same commit as the piece it names.)*
+
+## THE SWEEP TABLE — the boundary-span family, enumerated COMPLETELY
+
+The document tiles `E0 · sep · E1 · sep · … · E(n-1) [· sep · TAIL]` (`BlockRangeIndex`'s own
+invariant). A span's LEADING edge "sits on a boundary" when the character AT it is a separator; its
+TRAILING edge does when the character just BEFORE it is. Every cell below is either BUILT with its
+pin or REFUSES with its true cause; nothing in the family is unaccounted for.
+
+| # | the shape | before | after | pin |
+|---|---|---|---|---|
+| 1 | both edges inside block text, ≥ 2 blocks (the everyday span) | compound (13u1) | **UNCHANGED, byte for byte** | `CrossBlockCompoundTests`, all 15, unmodified |
+| 2 | **shape (i), trailing** — mid-A → exactly where B begins | REFUSED | **CLAMP AND EDIT** in A | `aSpanEndingWhereTheNextBlockBeginsClampsAndEdits` *(red)* |
+| 3 | **shape (i), leading** — A's end (on the separator) → mid-B | REFUSED | **CLAMP AND EDIT** in B | `aSpanOpeningAtAParagraphsEndClampsAndEdits` *(red)* |
+| 4 | shape (i), either mirror, TYPED OVER | REFUSED | the typed text lands inside the one block | `typingOverABoundaryAnchoredSpanLandsInsideTheOneBlock` *(red)* |
+| 5 | a whole block plus BOTH its separators, **deleted** | J9 → the tray | **UNCHANGED** (J9 is consulted first, and must be) | `WholeBlockDeleteTests.aWholeParagraphSelectionDeletesTheBlock` |
+| 6 | the same span **typed over** (J9 declines a replacement) | REFUSED | clamps to the block WHOLE and replaces its text in place | `typingOverAParagraphWithBothItsNewlinesReplacesItInPlace` *(red)* |
+| 7 | **shape (ii), leading** — A's end → B whole → mid-C | REFUSED | **TRIM**: B → tray, C partial, A untouched, **no join** (R-13u-2) | `aSpanOpeningOnTheSeparatorTrimsAndTraysTheWholeBlock` *(red)* |
+| 8 | **shape (ii), trailing** — mid-A → B whole → where C begins | REFUSED | **TRIM**: B → tray, A partial, no join | `aSpanClosingOnTheSeparatorTrimsAndTraysTheWholeBlock` *(red)* |
+| 9 | a trimmed gesture's undo | — | ONE ⌥⌘Z entry, exact-row, the standing label | `theTrimmedGestureIsOneStructuralEntryAndUndoRestoresTheExactRows` *(red)* |
+| 10 | shape (i)'s undo | — | **NO structural entry** — ordinary text undo, which is why it is not a compound | `shapeOneIsOrdinaryTextUndoAndRegistersNoStructuralEntry` *(red)* |
+| 11 | an EMPTY block at the trimmed end | REFUSED | an ordinary run member: covered whole → the tray | `anEmptyBlockAtTheTrimmedEndGoesToTheTrayLikeAnyOther` *(red)* |
+| 12 | an empty block at the span's START (its position IS the separator) | taken (13u1's U-4) | **UNCHANGED** — the leading trim requires characters (the A8 asymmetry) | `aZeroLengthEntryAtTheSpansStartIsNotTrimmedAway` |
+| 13 | **the lone separator, DELETED** | A7's carve / #34's merge, and their refusals | **UNCHANGED** — this road's "nothing to do" guard declines it | `theLoneSeparatorCollapsesToTheLeadingBlocksEndAndADeleteIsNotThisRoads` |
+| 14 | **the lone separator, TYPED OVER** | REFUSED | a zero-length insert at the LEADING block's end — *PROVISIONAL, #111(a)* | same pin |
+| 15 | a span closing on the OPEN TAIL's separator | `.openTail` | **REFUSES, UNCHANGED** — the tail fence | `aSpanClosingOnTheTailsSeparatorStillSpeaksTheTailsRefusal` *(green both sides)* |
+| 16 | a span closing on an EMPTY tail's separator | `.emptyTailAtSpanEnd` | **REFUSES, UNCHANGED** | `aSpanClosingOnAnEmptyTailsSeparatorKeepsItsOwnRefusal` *(green both sides)* |
+| 17 | a LOCKED take inside the (trimmed) run | `.lockedTake`, refuse whole | **REFUSES, UNCHANGED** (R-13u-1) | `aLockedTakeInATrimmedRunStillRefusesTheWholeGesture` *(green both sides)* |
+| 18 | a locked block the clamp merely TRIMMED PAST | REFUSED (it was in nobody's road) | **TAKEN** — it is not in the run, so it cannot refuse a gesture it does not touch | `aLockedBlockBesideTheTrimmedSeparatorDoesNotRefuse` *(red)* |
+
+**A GAP in the run** keeps `.unsyncedBlock` and a **sealed note** refuses at the gate before any plan
+runs — neither is a boundary shape and neither moved (`CrossBlockCompoundTests`' own pins, unmodified).
+
+## THE LAW AS BUILT — three pieces, and why each sits where it does
+
+**1. The clamp is ONE pure rule** — `CrossBlockCompound.clampedToBlockText(_:ranges:)`,
+`App/Variorum/Shared/EditorBrain/`. It trims one separator character off whichever edge sits on one.
+Three things are stated at the line because a reader will otherwise re-derive them:
+
+- **THE TAIL FENCE IS THE LOOP'S BOUND.** `i` runs `0..<ranges.count - 1`, so the LAST entry's
+  `upperBound` — which is the open tail's separator when a tail exists — is never a candidate. The
+  tail is not a block, so it is never a neighbour the run can absorb (the ruling's own fence).
+- **THE ONE ASYMMETRY.** The LEADING trim additionally requires `ranges[i].length > 0`. A
+  zero-length entry's position IS its predecessor's separator offset, and for a half-open span such
+  an entry at `range.location` is INSIDE the span — she dragged from the blank line. Trimming there
+  would drop the empty block out of her own selection. At the trailing edge the mirror is false (an
+  entry at `upperBound` is not covered), so the trailing trim needs no condition. This is
+  `BlockRangeIndex.wholeBlockRun`'s A8 fence, from the other side, verbatim in its reasoning.
+- **BOTH TESTS READ THE ORIGINAL BOUNDS**, never the mutated ones, so a chain of empty blocks (whose
+  separators sit exactly one apart) can never trim an edge twice.
+
+**2. Shape (ii) — the trim — is FOUR LINES inside `plan`, and the shape of those four lines is the
+whole design.** The RUN is still derived from the span SHE MADE (that is what decides which blocks
+are in the selection, empty ones included); only the CONTIGUITY guard and the two intra-block CUTS
+read the clamped span. Three consequences fall out for free, and each is worth naming:
+
+- the existing `max(0, …)` / `min(length, …)` arithmetic already absorbed a one-character trim, so
+  **the only thing that ever blocked these spans was the contiguity guard**;
+- a block whose separator was merely trimmed **is not in the run** (it contributes no characters), so
+  R-13u-1 cannot refuse a gesture that does not touch it — the cost option (c) was criticised for in
+  #109 is not paid (cell 18);
+- `CrossBlockRefusal.diagnose` walks the same raw-span run, so **the diagnosis and the plan still
+  agree** with no change to `diagnose`'s geometry at all.
+
+**3. Shape (i) — clamp and edit — is deliberately NOT a `Plan`.** After the clamp the gesture sits
+inside one block. Routing it through the compound would have given a one-block text edit a
+STRUCTURAL undo entry, and a structural rewrite clears the text-undo stack — so ⌘Z would be dead on
+what is now a plain deletion inside one paragraph. That is the *"headache compared to using a
+different editor"* her item 5 exists to end. It lands through `OrdinaryInputEdit.apply` — the ONE
+Mac input door (`OneInputPathTests` guards the claim) — on the next main-actor turn, behind a
+COMPARE-AND-SET of the plan-time surface text and document length. The CAS is not decoration: a
+chained compound can land in that window, and it also makes the re-entrant gate consult provably
+terminal (a verified-unchanged index answers `.block(i)`, so this road can never re-clamp and
+re-schedule itself).
+
+## `.partialBlockAcrossSeam` — WHAT IT RETIRED TO, with the enumeration that proves it
+
+Her ruling: *"`.partialBlockAcrossSeam` retires to the shapes that remain, if any."* The boundary
+FAMILY is gone — cells 2/3/4/6/7/8/11/14/18 are all taken — but the case did **not** become
+unreachable, so deleting it would have been as false as keeping its sentence. It is **renamed
+`.surfaceNotSettled`**, and exactly two production shapes reach it:
+
+1. **the seam keystroke whose neighbour the PROJECTION cannot describe yet.** `slots` is
+   deliberately held stale while the buffer is dirty and can be SHORTER than `entries`; A7's carve
+   declines on exactly that bounds guard (`i < model.slots.count`) and `diagnose` step 1's
+   fan/archived/comment reads are all skipped, so none of them can say which authorization failed.
+   **Pinned:** `BoundaryClampTests.theSurvivingResidualIsASurfaceThatHasNotCaughtUp`.
+2. **`plan` declining on a surface that disagrees with its index** (the
+   `text.length == ranges[i].length` guard) — a desync the surface heals by re-rendering from the
+   store. This is `diagnose` step 4's only production reach after the clamp.
+
+Both are one thing — the editor's own bookkeeping has not caught up — so the words say that and name
+no geometry: **"This part of the note is still settling. Try that again in a moment."** The retired
+sentence (*"One end of this selection sits on the boundary between two blocks. Nudge that end one
+character either way…"*) described a shape that can no longer refuse, which is the same defect class
+the 13u1 ladder's F-2 fixed; and its road helped only that shape. *(The new copy is the ruling's own
+instruction executed — "name its true geometry and a road that actually opens" — and is flagged for
+her eye as #111(b).)*
+
+## RED ON OLD — measured on the real pre-fix tree
+
+A scratch `git worktree` at `c14ad2ed` (this unit's record-only first commit, **zero code in it**)
+with its own DerivedData, carrying `BoundaryClampTests`' fourteen BEHAVIOUR pins verbatim, minus
+every line naming an API the pre-fix tree does not have (a throwaway `RedOnOldProbe.swift`; the
+geometry pins could not compile there and are not claimed as red-on-old).
+
+**Result: 10 of 14 FAILED, with 20 issues.** The pre-fix refusal, quoted from the run:
+
+```
+✘ aSpanEndingWhereTheNextBlockBeginsClampsAndEdits
+    (after.compactMap(\.text) → ["Alpha one.", "Beta two.", "Gamma three."])
+      == ["Alpha ", "Beta two.", "Gamma three."]
+    (h.model.statusMessage → "One end of this selection sits on the boundary between two
+      blocks. Nudge that end one character either way, or select the whole paragraphs.") == nil
+✘ aSpanOpeningOnTheSeparatorTrimsAndTraysTheWholeBlock
+    (after.map(\.blockID) → [b0, b1, b2]) == [b0, b2]        ← nothing was trayed
+    (trayed → []) == [b1]
+✘ theTrimmedGestureIsOneStructuralEntryAndUndoRestoresTheExactRows
+    (h.session.undoStack.depth → 0) == 1                      ← no gesture happened at all
+```
+
+**The FOUR that pass on both trees are named rather than claimed** (a pin green on both sides proves
+a PRESERVED behaviour, never a fix): the two tail fences (cells 15/16), the locked-take refuse-whole
+(cell 17), and `aClampedSpanInsideALockedTakeRefusesInTheTakesOwnWords` — which refused before
+through `diagnose`'s run walk and refuses now through the in-block verdict, saying "locked" either
+way. It is kept because it pins that the clamp road does **not** swallow a lock.
 
 ---
 

@@ -104,6 +104,148 @@ nonisolated enum CrossBlockCompound {
         return text.character(at: offset - 1) == 0x0A || text.character(at: offset) == 0x0A
     }
 
+    // MARK: - #109's BOUNDARY-CLAMP LAW (her ruling, 2026-09-15 — BOTH shapes)
+
+    /// **THE LAW, as ONE pure geometric rule.** Her ruling at the 13u1
+    /// checkpoint, verbatim in `notes/QUESTIONS.md` #109's RULED block:
+    ///
+    /// > **ONE uniform law: a selection edge sitting on a boundary clamps to
+    /// > block text — separators are structure, never deletable content — and
+    /// > NO boundary-anchored selection refuses.**
+    ///
+    /// Her words for shape (i), the span touching only ONE block's
+    /// characters: *"I leant towards taking it as an in-block edit… if it's
+    /// on the boundary, why not treat it as just part of that one block?"*
+    /// Her pick for shape (ii), the span reaching two or more: *"Take it —
+    /// build at 13u2"* (the (d) TRIM road). One rule answers both: trim the
+    /// separator character off whichever edge sits on one, and let the rest
+    /// of this brain read the result. The break she selected STANDS, which is
+    /// **R-13u-2 speaking rather than a compromise of it** — a cut at a
+    /// paragraph break never merges, so the ends simply keep their own
+    /// blocks.
+    ///
+    /// **The rule is stated on CHARACTERS, because characters are
+    /// unambiguous:** the leading edge sits on a boundary when the character
+    /// AT it is a separator; the trailing edge sits on one when the character
+    /// just BEFORE it is. A separator's offset is `ranges[i].upperBound`.
+    ///
+    /// **THE TAIL FENCE, and it is the loop's own bound** (the ruling's fence,
+    /// from the 13u1 ladder's sanity pass): the trim speaks only of a
+    /// separator BETWEEN TWO BLOCKS. `i` runs to `ranges.count - 2`, so the
+    /// LAST entry's `upperBound` — which is the open tail's separator when a
+    /// tail exists — is never a candidate. The tail is not a block, so it is
+    /// never a neighbour the run can absorb, and a span reaching its
+    /// separator therefore keeps refusing on the plan's contiguity
+    /// condition, with the tail's own causes and roads
+    /// (`CrossBlockRefusal.openTail` / `.emptyTailAtSpanEnd`).
+    ///
+    /// **THE ONE ASYMMETRY, and it has a ruled precedent.** The LEADING trim
+    /// additionally requires `ranges[i].length > 0`. A ZERO-LENGTH entry's
+    /// position IS its predecessor's separator offset, and for a half-open
+    /// span a zero-length entry sitting at `range.location` is INSIDE the
+    /// span (it is `>= location` and `< upperBound`) — she dragged from the
+    /// blank line, and the run rule already says so. Trimming there would
+    /// silently drop the empty block she selected out of her own selection.
+    /// At the TRAILING edge the mirror is false — a zero-length entry at
+    /// `upperBound` is NOT covered (the span stops at its position) — so the
+    /// trailing trim needs no such condition. This is
+    /// `BlockRangeIndex.wholeBlockRun`'s A8 fence, exactly, from the other
+    /// side: *"Trailing edge only: at the LEADING edge a zero-length entry at
+    /// `range.location` IS inside the half-open span, so `first` needs no
+    /// mirror."*
+    ///
+    /// **THE DEGENERATE SHAPE, named so it is never a surprise:** when both
+    /// edges trim toward each other and cross, the span was exactly ONE
+    /// separator character and holds no block text at all. The answer is a
+    /// ZERO-LENGTH span at the original location — which is the LEADING
+    /// block's own end, a legal in-block offset — so a gesture that TYPES
+    /// puts its text where the selection opened (this brain's own rule for a
+    /// wholly-covered first block, applied to the smallest case). A gesture
+    /// that DELETES has nothing to do there and is declined by
+    /// `clampedInBlockEdit`'s own guard, which leaves A7's empty-block carve
+    /// and #34's texted-seam merge — both her rulings, both consulted before
+    /// this road — owning the lone-separator keystroke exactly as they always
+    /// have. *(PROVISIONAL, QUESTIONS #111.)*
+    static func clampedToBlockText(_ range: NSRange, ranges: [NSRange]) -> NSRange {
+        guard ranges.count >= 2 else { return range }
+        var lower = range.location
+        var upper = range.upperBound
+        // Separator offsets increase strictly (each entry consumes its length
+        // plus one separator), so the walk stops as soon as it passes the
+        // span — and both tests read the ORIGINAL bounds, never the mutated
+        // ones, so neither edge can trim twice through a chain of empty
+        // blocks whose separators sit one apart.
+        for i in 0..<(ranges.count - 1) {
+            let separator = ranges[i].upperBound
+            if separator > range.upperBound { break }
+            if separator == range.location, ranges[i].length > 0 {
+                lower = range.location + 1
+            }
+            if separator == range.upperBound - 1 {
+                upper = range.upperBound - 1
+            }
+        }
+        guard lower <= upper else { return NSRange(location: range.location, length: 0) }
+        return NSRange(location: lower, length: upper - lower)
+    }
+
+    /// **SHAPE (i)'s road: clamp and EDIT.** The clamped span lies inside ONE
+    /// block, so the gesture is an ordinary in-block edit and nothing
+    /// structural happens at all — which is the whole point of her ruling.
+    ///
+    /// **Why this is deliberately NOT a `Plan`.** Routing it through the
+    /// compound would give a one-block text edit a STRUCTURAL undo entry, and
+    /// a structural rewrite clears the text-undo stack — so ⌘Z would be dead
+    /// on a gesture that, after the clamp, deleted characters inside one
+    /// paragraph. That is the *"headache compared to using a different
+    /// editor"* her item 5 exists to end. The caller applies this through its
+    /// own ordinary input path, where text undo, autosave and every existing
+    /// refusal work unchanged.
+    ///
+    /// Returns nil when no edge sat on an inter-block separator (the span is
+    /// what it always was), when the clamped span still reaches two or more
+    /// blocks (that is shape (ii) — `plan` takes it), or when the clamp
+    /// leaves NOTHING TO DO (an empty span with nothing typed: the
+    /// lone-separator DELETE, which belongs to A7 and #34 and keeps every
+    /// case they ruled, refusals included).
+    struct InBlockEdit: Sendable, Equatable {
+        /// The clamped span — block text only.
+        let range: NSRange
+        let entryIndex: Int
+        let blockID: String
+        let replacement: String
+        /// The PLAN-TIME compare-and-set inputs. The caller applies this on
+        /// the next main-actor turn (the keystroke itself must be refused, so
+        /// the storage never half-applies a span it was never handed), and a
+        /// chained compound can land in that window — so the surface is
+        /// verified before a character moves, exactly as the compound
+        /// verifies its ends.
+        let expectedText: String
+        let documentLength: Int
+    }
+
+    static func clampedInBlockEdit(
+        replacing range: NSRange,
+        with replacement: String,
+        index: BlockRangeIndex,
+        surfaceText: (NSRange) -> String
+    ) -> InBlockEdit? {
+        let entries = index.entries
+        guard entries.count >= 2 else { return nil }
+        let ranges = index.entryRanges()
+        let span = clampedToBlockText(range, ranges: ranges)
+        guard span != range else { return nil }
+        guard !(span.length == 0 && replacement.isEmpty) else { return nil }
+        guard let i = ranges.firstIndex(where: {
+            span.location >= $0.location && span.upperBound <= $0.upperBound
+        }) else { return nil }
+        return InBlockEdit(
+            range: span, entryIndex: i, blockID: entries[i].blockID,
+            replacement: replacement,
+            expectedText: surfaceText(span),
+            documentLength: index.documentLength)
+    }
+
     // MARK: - The plan (pure)
 
     /// A surviving end: it keeps its block identity and its chosen take takes
@@ -243,9 +385,27 @@ nonisolated enum CrossBlockCompound {
         }
         guard let first, let last, last > first else { return nil }
 
-        // Contiguity + no tail: the range must sit inside the run.
-        guard range.location >= ranges[first].location,
-              range.upperBound <= ranges[last].upperBound
+        // **#109's TRIM, shape (ii)** (her ruling, 2026-09-15). The RUN above
+        // is derived from the span SHE MADE — that is what decides which
+        // blocks are in the selection, empty ones included — and the CUTS
+        // below are derived from the span clamped to block text. A span that
+        // opens (or closes) ON an inter-block separator therefore keeps every
+        // block it covers and simply stops treating the separator as
+        // content: the block beside the trimmed separator is then covered
+        // WHOLE and rides `deleteBlock` to the tray, the far end keeps its
+        // ordinary partial edit, and R-13u-2 answers the join with no
+        // awkwardness (that cut sits at a paragraph break, so the ends keep
+        // their own blocks).
+        let span = Self.clampedToBlockText(range, ranges: ranges)
+
+        // Contiguity + no tail: the CLAMPED range must sit inside the run.
+        // **This guard IS the tail fence** (#109's own, from the 13u1
+        // ladder's sanity pass): the clamp never trims the open tail's
+        // separator, so a span reaching it still ends one past the last
+        // entry and still declines here — and `CrossBlockRefusal` still
+        // answers with the tail's own cause and its own road.
+        guard span.location >= ranges[first].location,
+              span.upperBound <= ranges[last].upperBound
         else { return nil }
 
         for i in first...last {
@@ -256,8 +416,8 @@ nonisolated enum CrossBlockCompound {
         let replacementLength = (replacement as NSString).length
         let firstRange = ranges[first]
         let lastRange = ranges[last]
-        let intraStart = max(0, range.location - firstRange.location)
-        let intraEnd = min(lastRange.length, max(0, range.upperBound - lastRange.location))
+        let intraStart = max(0, span.location - firstRange.location)
+        let intraEnd = min(lastRange.length, max(0, span.upperBound - lastRange.location))
 
         // WHOLE vs PART. Given the contiguity guard, the first entry is
         // covered whole exactly when the span opens at its start, and the

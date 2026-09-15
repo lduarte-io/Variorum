@@ -2013,11 +2013,14 @@ final class MobileEditorViewModel {
             // one block for now"* — named a limitation the app no longer
             // has. The live door DIAGNOSES (see the cross-block arm above);
             // what remains here is the range-less fallback for any future
-            // caller that has neither a range nor the slots, and it says the
-            // residual geometry and guesses nothing. ONE brain with the
-            // Mac's, in the phone's own roads.
+            // caller that has neither a range nor the slots. **13u2 UNIT C:**
+            // it used to speak the boundary residual, which #109's clamp law
+            // retired — the surviving cause says only that the surface has
+            // not caught up, which is the honest answer when nobody can name
+            // the condition. ONE brain with the Mac's, in the phone's own
+            // roads.
             CrossBlockRefusal.message(
-                for: .partialBlockAcrossSeam, fanRoads: Self.fanFoldRoads)
+                for: .surfaceNotSettled, fanRoads: Self.fanFoldRoads)
         case .readOnlySlot:
             "This block hasn't fully synced; it is read-only for now."
         case .lockedVariant:

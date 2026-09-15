@@ -360,20 +360,23 @@ struct CrossBlockCompoundTests {
         }
     }
 
-    /// **The residual's TRUE geometry, spoken truthfully (the 13u1 ladder,
-    /// round 1).** A span can open (or close) ON the boundary separator
+    /// **THE SHAPE SHE RULED ON, NOW TAKEN** (13u2 UNIT C — #109's boundary
+    /// -clamp law). A span can open (or close) ON the boundary separator
     /// while reaching into TWO OR MORE blocks' characters — anchor the
     /// selection at a paragraph's END (the offset before the newline) and
-    /// ⇧-extend into the paragraph after next. The compound refuses it (the
-    /// run's contiguity guard — the standing pre-item-5 refusal; whether it
-    /// should instead trim the boundary separator into the run is QUESTIONS
-    /// #109(d), hers to rule), and the diagnosis must describe THAT shape.
+    /// ⇧-extend into the paragraph after next. The 13u1 ladder's round 1
+    /// landed a pin here on that span's REFUSAL and its exact sentence; her
+    /// ruling of 2026-09-15 replaced the refusal with the (d) TRIM road, so
+    /// the pin says what the trim does instead.
     ///
-    /// **RED ON OLD:** the re-narrowed sentence claimed the selection did
-    /// not reach the next block — false here (it reaches two) — and its
-    /// road ("reach a little further into the next block") changed nothing,
-    /// since she already had.
-    @Test func aSpanOpeningOnTheBoundaryRefusesWithTheTrueGeometry() async throws {
+    /// **RED ON OLD:** `planCrossBlockEdit` answered nil for this span (the
+    /// run's contiguity guard), and the diagnosis spoke *"One end of this
+    /// selection sits on the boundary between two blocks."*
+    ///
+    /// *(The store-level behaviour — b1 to the tray, b2's partial edit, no
+    /// join — is pinned in `BoundaryClampTests`, which drives the same span
+    /// through the real keystroke path.)*
+    @Test func aSpanOpeningOnTheBoundaryIsTakenByTheTrim() async throws {
         try await withEditor { h in
             h.model.applyProjection([
                 slot("b0", text: "Alpha one."),   //  0..10, separator at 10
@@ -384,17 +387,16 @@ struct CrossBlockCompoundTests {
             // "Gamma " — b1 covered whole, b2 in part, b0's characters
             // untouched.
             let span = NSRange(location: 10, length: 17)
-            #expect(h.model.planCrossBlockEdit(range: span, replacement: "") == nil,
-                    "the separator-edge span keeps its refusal — #109's family")
-
-            let cause = CrossBlockRefusal.diagnose(
-                range: span, index: h.model.index, slots: h.model.slots)
-            #expect(cause == .partialBlockAcrossSeam)
-            let message = CrossBlockRefusal.message(for: cause)
-            #expect(!message.contains("without reaching into the next block"),
-                    "the sentence denied a reach the selection made: \(message)")
-            #expect(message.contains("sits on the boundary"),
-                    "the sentence says the true geometry: \(message)")
+            let plan = try #require(
+                h.model.planCrossBlockEdit(range: span, replacement: ""),
+                "the trim takes the span her ruling said to take")
+            #expect(plan.deletedBlockIDs == ["b1"],
+                    "the block beside the trimmed separator is covered WHOLE")
+            #expect(plan.leading == nil, "b0 contributes no characters and is not an end")
+            #expect(plan.trailing?.blockID == "b2")
+            #expect(plan.trailing?.newText == "three.")
+            #expect(plan.joinsEnds == false,
+                    "R-13u-2 answers the join: the trimmed cut sits at a paragraph break")
         }
     }
 

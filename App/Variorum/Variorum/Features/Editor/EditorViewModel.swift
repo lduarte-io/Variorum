@@ -1085,6 +1085,30 @@ final class EditorViewModel {
                 scheduleCrossBlockCompound { [weak self] in
                     await self?.runWholeBlockDeletion(whole)
                 }
+            } else if let inBlock = planClampedInBlockEdit(
+                range: range, replacement: replacement) {
+                // **#109's SHAPE (i), her ruling of 2026-09-15:** a span
+                // touching only ONE block's characters plus the separator at
+                // one end CLAMPS to that block's text and edits — *"if it's
+                // on the boundary, why not treat it as just part of that one
+                // block?"* The break she selected stands, which is R-13u-2
+                // speaking rather than a compromise of it.
+                //
+                // **It sits BELOW J9 deliberately.** A whole paragraph plus
+                // its newline plus Delete is her J9 gesture and the paragraph
+                // GOES (tray, Put back real); clamping first would have left
+                // an empty block instead. J9 declines a type-over, which is
+                // why the same span typed over lands here and replaces the
+                // block's text in place.
+                //
+                // **And BELOW the seam carves**, which own the one-character
+                // separator keystroke whole: a lone-separator DELETE is A7's
+                // carve or #34's merge, with their own authorizations and
+                // their own refusals, and this road's "nothing to do" guard
+                // declines it so it can never route around them.
+                scheduleCrossBlockCompound { [weak self] in
+                    self?.runClampedInBlockEdit(inBlock)
+                }
             } else if let compound = planCrossBlockEdit(range: range, replacement: replacement) {
                 // **THE CROSS-BLOCK COMPOUND** (13u1 UNIT 2 — item 5). One
                 // gesture, one structural compound, one ⌥⌘Z entry.
@@ -1827,6 +1851,65 @@ final class EditorViewModel {
         let range = NSRange(location: separator, length: 1)
         guard range.upperBound <= (textView.string as NSString).length else { return }
         OrdinaryInputEdit.apply("", over: range, in: textView)
+    }
+
+    // MARK: - #109's SHAPE (i): clamp and EDIT (13u2 UNIT C)
+
+    typealias ClampedInBlockEdit = CrossBlockCompound.InBlockEdit
+
+    /// Her #109 ruling's shape (i): a span touching only ONE block's
+    /// characters plus the separator at one end. The selection clamps to that
+    /// block's text and the gesture becomes an ORDINARY in-block edit; the
+    /// break she selected stands (R-13u-2's own consequence).
+    ///
+    /// The geometry is the shared brain's — the phone consumes the same rule
+    /// — and what is per-platform is only the road it lands on.
+    func planClampedInBlockEdit(range: NSRange, replacement: String) -> ClampedInBlockEdit? {
+        CrossBlockCompound.clampedInBlockEdit(
+            replacing: range, with: replacement, index: index,
+            surfaceText: { [weak self] range in self?.viewText(range) ?? "" })
+    }
+
+    /// **The ordinary input path, deliberately — this road is NOT
+    /// structural.** After the clamp the edit sits inside one block, so it
+    /// takes `shouldChangeText` → `replaceCharacters` → `didChangeText` (the
+    /// ONE input door, `OrdinaryInputEdit`): the index bookkeeping, the
+    /// autosave arming, every existing refusal AND **⌘Z's ordinary text
+    /// undo** all work unchanged. Routing it through a structural compound
+    /// would have registered an ⌥⌘Z entry and cleared the text-undo stack for
+    /// what is, after the clamp, a plain deletion inside one paragraph — the
+    /// *"headache compared to using a different editor"* her item 5 exists to
+    /// end.
+    ///
+    /// **It runs on the NEXT main-actor turn** (the caller schedules it on
+    /// the same chain the cross-block compound uses): the keystroke itself
+    /// must be refused synchronously, because the storage must never
+    /// half-apply a span AppKit was handed and this road did not take, and a
+    /// mutation issued from inside `shouldChangeText` would re-enter the text
+    /// system mid-flight.
+    ///
+    /// **COMPARE-AND-SET before a character moves.** A chained compound can
+    /// land in that window, so the plan-time surface text and document length
+    /// are verified first — the same discipline `editTakesAtomically`'s
+    /// `expectedText` gives the compound, and the same words when it fails.
+    /// It also makes the re-entrant gate consult below provably terminal: a
+    /// verified-unchanged index answers `.block(i)` for the clamped range, so
+    /// this road can never re-clamp and re-schedule itself.
+    func runClampedInBlockEdit(_ edit: ClampedInBlockEdit) {
+        guard let textView else { return }
+        guard index.documentLength == edit.documentLength,
+              edit.range.upperBound <= (textView.string as NSString).length,
+              viewText(edit.range) == edit.expectedText
+        else {
+            refuseFeedback(
+                "The text changed while that gesture was landing — nothing was altered; "
+                    + "try it again on the current text.")
+            return
+        }
+        guard OrdinaryInputEdit.apply(edit.replacement, over: edit.range, in: textView)
+        else { return }  // the pipeline refused and has already spoken
+        let caret = edit.range.location + (edit.replacement as NSString).length
+        textView.setSelectedRange(NSRange(location: caret, length: 0))
     }
 
     // The three doors' entry points (menu bar, context menu, shortcut all
@@ -3643,9 +3726,13 @@ final class EditorViewModel {
             // DIAGNOSE — they hold the range and the slots, so they call
             // `CrossBlockRefusal.message(range:index:slots:)`, which asks
             // which condition actually declined. What remains here is the
-            // range-less fallback for any future caller that has neither:
-            // the residual geometry, stated plainly and guessing nothing.
-            CrossBlockRefusal.message(for: .partialBlockAcrossSeam)
+            // range-less fallback for any future caller that has neither.
+            // **13u2 UNIT C:** it used to speak the boundary residual, which
+            // #109's clamp law retired — and a range-less caller could not
+            // claim that geometry anyway. The surviving cause says only that
+            // the surface has not caught up, which is the honest answer when
+            // nobody can name the condition.
+            CrossBlockRefusal.message(for: .surfaceNotSettled)
         case .readOnlySlot:
             "This block hasn't fully synced; it is read-only for now."
         case .lockedVariant:

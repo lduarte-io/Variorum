@@ -40,11 +40,23 @@ struct WholeBlockDeleteTests {
     ///   #11a's visible-take edit — retired into that one compound, so this
     ///   trace now names one road where it named two; the guards are the
     ///   same guards.)*
-    /// - so `shouldChangeText` falls to the final `else` and speaks.
+    /// - so before J9 built the road above it, `shouldChangeText` fell to the
+    ///   final `else` and spoke.
     ///
     /// The open tail is NOT the decliner — the same decline happens without
     /// one (the sibling test below). It was a plausible suspect in the
     /// post-close reading and the trace rules it out.
+    ///
+    /// **WHAT 13u2 UNIT C CHANGED HERE, and it is the half this trace used
+    /// to record as a dead end (#109's boundary-clamp law, her ruling of
+    /// 2026-09-15).** The two guards above are unchanged and still decline —
+    /// the geometry did not move — but the span no longer falls through to a
+    /// refusal. A DELETE of it is J9's gesture (the paragraph goes to the
+    /// tray, pinned below), and a TYPE-OVER, which J9 declines, now CLAMPS to
+    /// the block's own text and replaces it in place: *separators are
+    /// structure, never deletable content.* The last assertion here is that
+    /// flip, and it is **RED ON OLD** — the type-over refused, the store
+    /// never moved.
     @Test func tracePreFixWholeParagraphSelectionDeclinesOnTouchedCountAndContiguity() async throws {
         try await withEditor(seedBlocks: ["Alpha one.", "Beta two.", "Gamma three."]) { harness in
             // Open a tail exactly as typing past the last paragraph does.
@@ -75,14 +87,28 @@ struct WholeBlockDeleteTests {
             #expect(selection.upperBound == last.upperBound + 1,
                     "TRACE 2b: the span ends one past the last touched entry — the contiguity guard declines")
 
-            // TRACE 3: the cross-block plan returns nil, so the refusal is
-            // what runs (before J9 built the road above it).
+            // TRACE 3: the cross-block plan still returns nil — the run holds
+            // exactly one entry, which was never a cross-block edit.
             #expect(harness.model.planCrossBlockEdit(range: selection, replacement: "") == nil)
+
+            // TRACE 4 (13u2 UNIT C): …and the span is no longer a dead end.
+            // #109's law clamps it to the block's own text, so a TYPE-OVER
+            // replaces that block in place. RED ON OLD: this refused.
+            let clamped = try #require(harness.model.planClampedInBlockEdit(
+                range: selection, replacement: "Fresh."))
+            #expect(clamped.range == beta, "clamped to the block's text — the break stands")
+            harness.replace(selection, with: "Fresh.")
+            await harness.flush()
+            let texts = try harness.storeSlots().compactMap(\.text)
+            #expect(texts
+                == ["Alpha one.", "Fresh.", "Gamma three."])
         }
     }
 
     /// The open tail is not the decliner: the same span in a tail-free note
-    /// declines identically.
+    /// declines identically — and, since 13u2 UNIT C, clamps identically too.
+    ///
+    /// **RED ON OLD** on its last two lines: the type-over refused.
     @Test func traceTheOpenTailIsNotTheDecliner() async throws {
         try await withEditor(seedBlocks: ["Alpha one.", "Beta two.", "Gamma three."]) { harness in
             #expect(harness.model.index.tailLength == nil, "no tail in this note")
@@ -92,6 +118,13 @@ struct WholeBlockDeleteTests {
                 replacing: selection, replacementIsSingleNewline: false,
                 segmentation: .paragraph) == .refuse(.crossesBlockBoundary))
             #expect(harness.model.planCrossBlockEdit(range: selection, replacement: "") == nil)
+
+            harness.replace(selection, with: "Fresh.")
+            await harness.flush()
+            let texts = try harness.storeSlots().compactMap(\.text)
+            #expect(texts
+                == ["Alpha one.", "Fresh.", "Gamma three."],
+                "the clamp does not need a tail either")
         }
     }
 

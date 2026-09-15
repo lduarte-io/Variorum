@@ -80,23 +80,35 @@ nonisolated enum CrossBlockRefusal {
         /// roads are the nudge and the empty line's own delete
         /// (`BlockRangeIndex.verdict`'s `.closeTail`).
         case emptyTailAtSpanEnd
-        /// **The residual geometry, and 13u1 UNIT 2 shrank it to almost
-        /// nothing.** Before item 5 this covered every cross-block selection
-        /// with a partially covered block in it — her commonest gesture, and
-        /// the refusal she called *"more annoying than it's worth"*. The
-        /// compound now takes all of those. **What is left is the span with
-        /// an end SITTING ON a boundary separator** (the ladder's round-1
-        /// correction — the first wording claimed only the one-block case):
-        /// a selection ending exactly where the next block begins or
-        /// starting exactly where the previous one ends, touching one
-        /// block's characters — AND its wider sibling, a span that reaches
-        /// into two or more blocks while opening or closing ON the
-        /// separator (anchor at a paragraph's end, ⇧-extend two paragraphs
-        /// down). All of it keeps the pre-item-5 refusal — the compound's
-        /// contiguity guard — and whether the compound should instead trim
-        /// the boundary separator into the run is QUESTIONS #109 (a) and
-        /// (d), PROVISIONAL, hers.
-        case partialBlockAcrossSeam
+        /// **THE RESIDUAL, AND IT IS NO LONGER A GEOMETRY** (13u2 UNIT C —
+        /// her #109 ruling of 2026-09-15). This case used to be the
+        /// boundary-edge shape: a selection whose end sat ON the separator
+        /// between two blocks, in both sizes. **That whole family is GONE**
+        /// — the boundary-clamp law clamps such a span to block text and
+        /// either edits inside one block (shape (i)) or trims the separator
+        /// into the run (shape (ii)), so no boundary-anchored selection
+        /// refuses any more. The case did not become unreachable, though,
+        /// and the ruling's own instruction was to name what genuinely
+        /// survives rather than delete a cause that can still fire. Exactly
+        /// TWO shapes reach it, and they are one thing:
+        ///
+        /// 1. **The seam keystroke whose neighbour the PROJECTION cannot
+        ///    describe yet.** `slots` is deliberately held stale while the
+        ///    buffer is dirty and can be SHORTER than `entries` (a
+        ///    just-crystallized block has no slot yet). A7's carve declines
+        ///    on exactly that (`i < model.slots.count`), and step 1's
+        ///    fan/archived/comment reads are bounds-guarded, so none of them
+        ///    can say which of A7's authorizations failed.
+        /// 2. **The plan declining on a surface that disagrees with the
+        ///    index** (`CrossBlockCompound.plan`'s
+        ///    `text.length == ranges[i].length` guard) — a desync the
+        ///    surface heals by re-rendering from the store.
+        ///
+        /// Both are the same sentence: the editor's own bookkeeping has not
+        /// caught up, and waiting a moment is a road that actually opens
+        /// (the 13u1 ladder's rule — every cause names a road that opens).
+        /// Neither is about where her selection's edges sat.
+        case surfaceNotSettled
     }
 
     /// Answers WHICH condition declined, given exactly what the routing arm
@@ -126,9 +138,21 @@ nonisolated enum CrossBlockRefusal {
     ///    an EMPTY tail answers `.emptyTailAtSpanEnd` instead, because the
     ///    waiting road is false for it (round 2's split);
     /// 3. **not editable** — an entry IN THE RUN is locked, or is a gap;
-    /// 4. **the boundary-edge residual** — everything left: a span end
-    ///    sitting on a boundary separator (either orientation, one block's
-    ///    characters or several).
+    /// 4. **everything left** — which, since 13u2 UNIT C built #109's
+    ///    boundary-clamp law, is no longer a geometry at all: the
+    ///    boundary-edge family is taken (clamped or trimmed), and what still
+    ///    reaches here is a surface whose own bookkeeping has not caught up
+    ///    (`.surfaceNotSettled`'s own doc names both shapes).
+    ///
+    /// **The RUN this walks is the span SHE MADE, not the clamped one, and
+    /// that is what keeps the diagnosis honest** (13u2 UNIT C): the plan
+    /// derives its run from the raw span too and clamps only the CUTS, so
+    /// the entries this walk reads are exactly the entries the plan read. A
+    /// locked take or a gap anywhere in that run still refuses the whole
+    /// gesture (R-13u-1) — and a block whose separator the clamp merely
+    /// trimmed is not in the run at all, because it contributes no
+    /// characters, so a locked neighbour can never refuse a gesture that
+    /// does not touch it.
     ///
     /// **Step 3 walks the RUN, not the intersected entries** (13u1 UNIT 2,
     /// with the compound that shares the rule): a zero-length entry — an
@@ -161,7 +185,7 @@ nonisolated enum CrossBlockRefusal {
             for i in [before, after] where i < slots.count {
                 if slots[i].hasComments { return .seamBesideComment }
             }
-            return .partialBlockAcrossSeam
+            return .surfaceNotSettled
         }
 
         // 2. The open tail inside the span — or at its very END (the 13u1
@@ -218,10 +242,11 @@ nonisolated enum CrossBlockRefusal {
             }
         }
 
-        // 4. The residual: an end of the span sits ON a boundary separator
-        // (whether the span touches one block's characters or reaches into
-        // several — the ladder's round-1 correction).
-        return .partialBlockAcrossSeam
+        // 4. What is left. Since #109's boundary-clamp law (13u2 UNIT C) the
+        // boundary-edge family never arrives here — the clamp took it — and
+        // the production shape that does is the plan declining on a surface
+        // that disagrees with its own index.
+        return .surfaceNotSettled
     }
 
     /// **The cause, in one sentence, naming ONE thing.** Split from the road
@@ -250,17 +275,17 @@ nonisolated enum CrossBlockRefusal {
             // Round 2 (NIT-A): what she is looking at is the empty line her
             // ⏎ left at the note's end — name that, not an abstract region.
             "The end of this selection is the empty line at the note's end."
-        case .partialBlockAcrossSeam:
-            // 13u1 UNIT 2 re-narrowed this line; the LADDER's round 1
-            // corrected it — the first sentence here claimed the selection
-            // did not reach the next block, which is FALSE for the residual's
-            // wider member (a span reaching into two blocks while opening ON
-            // the separator: anchor at a paragraph's end, ⇧-extend two
-            // paragraphs down). What every residual shape shares is an end
-            // sitting ON the boundary between two blocks, so that is what
-            // the sentence says — true in both orientations and at both
-            // span widths.
-            "One end of this selection sits on the boundary between two blocks."
+        case .surfaceNotSettled:
+            // 13u2 UNIT C. The boundary sentence this line used to carry —
+            // *"One end of this selection sits on the boundary between two
+            // blocks."* — RETIRED with the geometry it described: #109's
+            // clamp law takes that family now, and a sentence describing a
+            // shape that can no longer refuse is the same defect class F-2
+            // fixed. What is left is a surface whose bookkeeping has not
+            // caught up (the Cause's own doc names both shapes), so the line
+            // says exactly that and names no block, because neither shape
+            // knows which one.
+            "This part of the note is still settling."
         }
     }
 
@@ -296,13 +321,14 @@ nonisolated enum CrossBlockRefusal {
             // moves that exist — both platform-neutral: the nudge, and the
             // line's own delete (`.closeTail`).
             "Nudge that end back one character, or delete the empty line on its own."
-        case .partialBlockAcrossSeam:
-            // The road must work for every residual shape: extending helps
-            // the trailing cases, retracting helps the leading ones, so the
-            // sentence names the MOVE (off the boundary) rather than one
-            // direction — and the whole-paragraphs road (J9's delete) works
-            // for all of them.
-            "Nudge that end one character either way, or select the whole paragraphs."
+        case .surfaceNotSettled:
+            // The road the two surviving shapes actually have. The old
+            // "nudge that end one character either way" retired with the
+            // boundary geometry: nudging answers nothing when the decline is
+            // a projection that has not arrived or an index that disagrees
+            // with the surface — both of which resolve on their own, within
+            // a beat, and the surface re-renders from the store besides.
+            "Try that again in a moment."
         }
     }
 
