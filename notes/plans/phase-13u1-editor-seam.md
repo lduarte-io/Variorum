@@ -1211,10 +1211,10 @@ iOS build green · mobile 622/105 with the one owned red):**
 
 | suite | result |
 |---|---|
-| core `swift test` | PENDING |
-| the FULL Mac suite | PENDING |
-| iOS build | PENDING |
-| the FULL mobile suite | PENDING |
+| core `swift test` | **1562 / 170, all green** — the baseline exactly |
+| the FULL Mac suite | **2666 / 445, ALL GREEN** in 712 s (+2 on the baseline = the two ladder pins; the renamed gap pin counts as itself; NEITHER load-flaky suite fired — zero failures in the run, so no isolated re-runs were owed) |
+| iOS build | **green** (BUILD SUCCEEDED) |
+| the FULL mobile suite | **622 / 105 PASSED with 4 known issues** — the 2 standing (`MobileTrashTests`' accessibility-tree wrapper) + the converted tutorial pin's 2 (the keep-on-top facts, reported per F-5's design). **The mobile suite exits green for the first time since UNIT 1 filed the tutorial red**, with the mismatch still visible on every run |
 
 *(Round 2 anchors here: a fresh cold reviewer re-reviews the fixes and what they touched —
 commits `45f5c956` · `715381de` · `3d3ace49` · `b88a54ae` · `0af79a38` and this block.)*
