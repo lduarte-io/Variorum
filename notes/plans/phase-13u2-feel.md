@@ -369,25 +369,35 @@ on the standing rails, zero-instance pgrep first, record-instead-of-kill if her 
 
 # UNIT A RECORD — item 1's TRACE + the landing/settle family (opened 2026-09-15, `opus-implementer`, the overnight run)
 
-**WHAT THIS UNIT DID NOT DO (the record's first line, per the brief):** *(filled at close — see the
-DISPOSITIONS table.)*
+**WHAT THIS UNIT DID NOT DO — the record's first line, per the brief.** It did **not fix item 18's
+Outline half**: the fix was built, red-on-old pinned, walked clean on the real Sherlock book, and
+then **reverted**, because a 3-vs-3 measurement showed it trading her reported defect for another
+one (the REVERT section under TRACE 2 has the numbers). It did **not** take row 54 (the read tier's
+provisional-width first measure — hosts enumerated, mechanism not traced, so not touched), row 94
+(its own "next step" is a cross-mode projection rewrite), or the `TakesArticleScroll` split (this
+unit touched no article-scroll machinery, so the conditional never fired). It could **not**
+re-verify row 92 — two synthetic clicks on a canvas silhouette produced no state change at all,
+which is the real-click rig's limitation (KnownIssues rows 62/96), not a verdict on the row. It
+dismissed row 98 as hollow with the mechanism traced. **Item 1 is NOT closed** — three mechanisms
+are traced and one is fixed; the brief's own words apply: walked, captures recorded, **her hands
+owed**.
 
 ## LIVE STATUS
 
 | piece | state |
 |---|---|
-| the 13l hang lead — trace | IN PROGRESS (the capture read; the analysis is TRACE 1 below) |
-| item 1 — the pane-stability trace | NOT-STARTED |
+| the 13l hang lead — trace | **DONE** — the recorded lead was wrong on both halves (TRACE 1); a real finding falls out and is DEFERRED |
+| item 1 — the pane-stability trace | **TRACED** (3 mechanisms; 1 fixed) — **her hands owed**, never closed here |
 | item 18 — the long-book landing & settle | **TRACED (fully) · the card fix REVERTED and DEFERRED with its designed successor** — see TRACE 2 and its REVERT section; the flow half (row 100) is FIXED |
-| row 54 — read tier's provisional-width first measure | NOT-STARTED |
-| row 92 — canvas silhouette click lands mid-board | NOT-STARTED |
-| row 94 — Blocks' ~0.2–0.3 s residual arrival | NOT-STARTED |
+| row 54 — read tier's provisional-width first measure | **DEFERRED** (hosts enumerated; not traced, so not touched) |
+| row 92 — canvas silhouette click lands mid-board | **NOT RE-VERIFIABLE by the rig** — DEFERRED with the reason |
+| row 94 — Blocks' ~0.2–0.3 s residual arrival | **DEFERRED** (its next step is a cross-mode rewrite) |
 | row 98 — paged reader's paragraph over-count | **DISMISSED AS HOLLOW** (traced — see the row) |
 | row 100 — the flow's landing off after a content creep | **REPRODUCED + FIXED** (TRACE 3; walk pending) |
 | M12 — `desyncRecoveryCount` oracles | **VERIFIED** — every oracle suite green (52 tests / 8 suites) |
-| row 51 — the `TakesArticleScroll` split (CONDITIONAL) | NOT-TAKEN so far (this unit has touched no article-scroll machinery) |
-| tests | NOT-STARTED |
-| walk + captures | NOT-STARTED |
+| row 51 — the `TakesArticleScroll` split (CONDITIONAL) | **NOT OWED** — no article-scroll machinery touched (3 files changed); stays unit E's |
+| tests | core **1562 / 170 GREEN** (= baseline) · full Mac suite PENDING · iOS build PENDING |
+| walk + captures | **DONE** — `notes/plans/13u2-screens/` (gitignored), 18 captures; both the before and after landing logs |
 
 *(Every line above starts PENDING and is flipped in the same commit as the piece it names.)*
 
@@ -448,6 +458,121 @@ of `SurfaceSizeMemory`, 18d's U-12 work). It was the CARDS. So option 2 is **not
 she reported**, and building it would have been motion without a mechanism. Recorded as the reason
 rather than done. *(The Outline is the surface her report names; the flow's own per-story
 persistence already exists and is what makes the `h=18680` first report possible.)*
+
+## DISPOSITIONS (every row this unit was given)
+
+| row | verdict | evidence |
+|---|---|---|
+| **the 13l hang lead** | **TRACED — the recorded lead was WRONG on both halves; corrected** | TRACE 1. One `updateNSView` frame on the path, not recursion; 3.2 % of the sample, not the hang. The hang is one `GraphHost.flushTransactions` storm with **TK2 at zero samples**. A real finding falls out (TRACE 1a) and is DEFERRED below. |
+| **item 1 — pane stability** | **TRACED, NOT CLOSED — her hands are owed** | TRACE 1 + TRACE 2 + TRACE 3. Three mechanisms named and measured; one fixed (row 100), one fixed-then-reverted with the reason (item 18's cards), one recorded (TRACE 1a). Per the brief this item closes only in her hands; nothing here claims otherwise. |
+| **item 18 — the long-book landing & settle** | **TRACED in full · flow half FIXED · Outline half REVERTED and DEFERRED with its designed successor** | TRACE 2 (before/after landing logs on the real Sherlock book), the REVERT table (3/3 vs 0/3), TRACE 3 (row 100 fixed). Her LIKE preserved and verified in every capture. |
+| **#88(c)** | **ANSWERED WITHOUT BUILDING IT** | TRACE 2's closing paragraph. The stories' heights were ALREADY remembered and honest (`h=18680` on the first report); the shift she noticed was the CARDS. Option 2 is not the fix for what she reported. |
+| **row 54** — read tier's provisional-width first measure | **NOT TAKEN — DEFERRED, owner 13u2 (a later unit) or 13u3** | Hosts enumerated (`RootView`, `NoteWindowView`, `BookView`'s Outline — hidden behind `StableSurface` — and `SpreadBookView`). Not traced to a mechanism, and this unit will not "fix" a measurement lifecycle it has not measured. Stated plainly rather than guessed at. |
+| **row 92** — canvas silhouette click lands mid-board | **NOT RE-VERIFIED — the harness cannot exercise it; DEFERRED** | Walked: Boscombe ▸ Canvas ▸ `fit all` → the overview drew correctly (`11-canvas-fitall`), and **two synthetic clicks on silhouettes produced no state change at all** (`12-…`, `13-crop`: still in overview). The same CGEvent poster drives the navigator's `Button`s fine, so the difference is `onTapGesture` (the overview card's door, `CanvasView.swift`) vs `Button`. That is KnownIssues rows 62/96's class (the real-click rig), owner 12 — and it means row 92 cannot be judged from a scripted walk. |
+| **row 94** — Blocks' ~0.2–0.3 s residual arrival | **NOT TAKEN — DEFERRED with its reason** | The row's own "next step" is *a note projection shared across modes* — a surface rewrite, not a bounded fix, and the brief tells a unit that finds itself crossing a seam to record and stop. Recorded. |
+| **row 98** — the paged reader's paragraph over-count | **DISMISSED AS HOLLOW** | Traced: the two estimators differ because the two SURFACES render differently. The paged reader composes one string with `Queries.blockJoinSeparator`'s completion rule (`PagePaginator`: `composed.hasSuffix("\n") ? "\n" : "\n\n"`), so a block's stored trailing newline becomes a real blank display line — `newlines + 1` is CORRECT there. The flow DROPS blank display lines, so `max(1, newlines)` is correct there. The recorded "~39 % over-count" was measured in the FLOW. Adopting the flow's rule would have made the paged reader under-count by a line per block. No defect, nothing to pin, not fixed. |
+| **row 100** — the flow's landing off after a content creep | **FIXED with a reproduced before/after** | TRACE 3. `gave up at top=1857` → `settled at top=-2.0`; 6 re-lands → 0; 4218 ms → 1029 ms. |
+| **M12** (KnownIssues row 30) | **VERIFIED — the oracles still pin zero** | Every suite carrying a `desyncRecoveryCount` oracle run green: `IdentityProjectionAuditWalkTests` · `MacIdentityAuditWiringTests` · `StructuralRewriteDoorTests` · `DivideExtractGestureTests` · `ArmedEditTests` · `MacEditRoutingTests` · `GestureSoakTests` · `EditorWindowSmokeTests` — 52 tests / 8 suites. The gate-less class itself remains unexercisable by construction (the row says so); nothing here claims to have exercised it. |
+| **row 51** — the `TakesArticleScroll` split (CONDITIONAL) | **NOT OWED — not taken** | This unit touched no `TakesBoardLayout` article-scroll machinery (`git diff` names three files: `ReadingFlowView.swift`, `BookOutlineLandingTests.swift`, this plan). The hoist-at-next-touch rule was not triggered, so the split stays unit E's. |
+
+**DEFERRED, with owners, found by this unit:**
+
+- **TRACE 1a — the pane's projection compare is a foreign-string compare.** `PaneSurface.swift`'s
+  `if !isLive, view.string != text` compares a lazily bridged `__NSCFString` against a native Swift
+  string, so it takes `_stringCompareSlow`: full NFC normalization, one
+  `-[__NSCFString characterAtIndex:]` per UTF-16 unit, **worst-case exactly when the strings are
+  equal** (the common case). Paid per read pane per SwiftUI update pass; on the Takes margin grid
+  that is the whole board. It is 51 of the hang capture's 2,551 samples and the only Variorum leaf
+  in it. **Not fixed here** — the obvious repair (compare `NSString` lengths first, or hold the last
+  adopted text in the coordinator and compare against that) touches the pane surface every composer
+  shares, and this unit had already learned twice today what a small change to shared geometry can
+  do. **Owner: 13u2's pane unit** (or 13u3), with this trace as its brief.
+- **The Outline's card:heading scale mix inside one lazy run.** Measured at 68–74 pt of column swing
+  per pass when the ratio widens, and proven to be the lazy ESTIMATE (with the per-row deltas
+  instrumented, NOT ONE anchored row changed height through the drift). The naive fix — one scale per
+  run — is recorded above as having broken the live editor's mount. **Owner: item 18's successor
+  batch**, alongside the preview-priming design.
+
+### …AND THE FIX WAS REVERTED. Here is the measurement that killed it.
+
+The fix passed its own red-on-old pin (cards `46 → 103` on the old tree, constant on the new) and
+walked clean on the real book. It still **breaks a neighbouring claim**, and not marginally:
+
+| tree | `openingACollapsedStoryLandsAtItsTopWithThreeStoriesExpanded`, isolated, ×3 |
+|---|---|
+| baseline + the realistic fixture | **PASSED 3/3** (13.2 · 13.4 · 12.7 s) |
+| the card fix + the realistic fixture | **FAILED 3/3** (112 · 112 · 112 pt off target) |
+
+Same machine, same command, the only difference the fix — so it is neither flake nor fixture.
+**What it means:** with THREE 215-block stories expanded, making every card 37 pt taller shifts
+the column enough that the expanded stories' own `StableSurface` settles now land the page 70–112
+pt off. That is **the same family as the defect being fixed** — something above the target moving
+after the landing has arrived — merely relocated from the cards to the stories. Shipping it would
+have fixed the one-expanded-note case she reported and broken the three-expanded case she also
+uses. So it is out.
+
+**The stabiliser tried first is out with it, and for a worse reason.** Splitting the lazy runs by
+row scale (a run holds headings OR cards, never both) did fix the landing — and made the expanded
+note's editor **mount empty and stay empty**: `editorHeight == 24` after 200 settle turns (~9.7 s),
+1 pass / 2 fails. A liveness failure of the ONE live editor is not a price worth paying for a
+landing, and chasing it was out of this unit's budget.
+
+**THE DESIGNED SUCCESSOR, for whoever takes item 18 next — and it follows from the trace rather
+than from taste.** Every route above failed the same way because each *changed a card's size* to
+make its height predictable. The card's size is not the problem; the fact that its height depends
+on **when an async read returns** is. So: **prime the previews.** One bounded leading-blocks query
+per book (the first two or three blocks of each entry — `cardPreview` needs at most forty words and
+skips a lone heading), read when the book's entries arrive, so a card's excerpt is in hand BEFORE
+its first frame. Then no card ever changes height, no card changes SIZE either, the column is
+byte-identical to today's settled geometry, and there is nothing for the landing to fight. Cost is
+∝ entries × a small constant, not ∝ the book's text (not the `bookWordCounts` class). It needs a
+new read in `VariorumCore/Queries` plus `BookViewModel` plumbing — **a batch, not a tail-end edit**,
+which is exactly why this unit recorded it instead of starting it at the end of a session.
+
+## TRACE 3 — ROW 100, REPRODUCED AND FIXED (the reading flow's landing)
+
+Reproduced on the dev store exactly as the ledger describes it — Sherlock, Read ▸ Scroll, a ~950 pt
+window, the eleventh chapter clicked after the ninth had landed:
+
+```
+LAND | content=306562 | content=306559 | content=306554 | content=306553
+| top=-4  offset=225936 | content=306551 | top=-6  offset=225936 | RE-LAND 1
+| content=306548 | top=-9  offset=225936 | RE-LAND 2 | … | RE-LAND 5
+| top=0 offset=225920 | top=-16 offset=225936 | RE-LAND 6 | top=-18 offset=225936
+| top=0 offset=225918 | … | content=306460 | top=-77 | top=1857 offset=225916
+| DONE: gave up at top=1857.0 after 6 re-lands, 4218 ms
+```
+
+**The mechanism, now complete** (the ledger row had it "traced as far as the DEBUG story reaches";
+this closes it). The content SHRINKS 2–3 pt a report for about a second as the stories above trade
+estimates for real heights. Each shrink moves the target **with the scroll offset CONSTANT**
+(`offset=225936` right across `top=-4 … -18`). A re-land issued from inside that storm DOES move
+the offset (`225920`) — and **the very next report shows it RESTORED** (`225936`, the target back at
+−16): SwiftUI's `ScrollView` re-applies its own offset on a content-size change and undoes a proxy
+`scrollTo` made during it. All six corrections are therefore spent on 2-pt drifts, and when the real
+transient arrives (`content=306460` → `top=-77` → `top=1857`) there is no budget left.
+
+**The fix:** the REPORT no longer re-lands. It records and re-arms; the decision belongs to the
+quiet interval (`checkLanding`), which is the book Outline's own discipline and the reason the
+Outline converges where this surface did not. A correction is spent only on a target genuinely off
+the top, issued from quiet, so it sticks; `armCheck`'s ceiling (`BookView.landingMaxWait`) still
+guarantees progress under a storm.
+
+**AFTER, the identical walk:**
+
+```
+LAND | content=306225 … 306202 | top=-4 … -18   (offset CONSTANT 225860 — no correction spent)
+| top=0 offset=225842 corrections=0             ← the page settles ITSELF once the content stops
+| top=-1 | top=-2
+| DONE: settled at top=-2.0 after 0 re-lands, 1029 ms
+```
+
+**`gave up at top=1857` → `settled at top=-2.0`; 6 re-lands → 0; 4218 ms → 1029 ms.** She was
+landing two paragraphs into the wrong story and now lands on the chapter's heading (capture
+`18-row100-after-lands-on-target`, crop `18-crop`). The ninth chapter's landing improved in the same
+walk: `after 2 re-lands` → `after 0`. And note what the after-log proves about the mechanism — with
+the report no longer re-landing, the offset holds through the whole creep and the ScrollView settles
+the page itself: **the re-lands were the thing causing the instability.**
 
 ## TRACE 1 — THE 13l HANG LEAD, READ AT LAST (`hang-sample-takes-margin-grid.txt`, 7,874 lines)
 
