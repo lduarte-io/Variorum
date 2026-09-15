@@ -353,6 +353,18 @@ on the standing rails, zero-instance pgrep first, record-instead-of-kill if her 
   entry to `notes/QUESTIONS.md` at the next free number (currently **#110**; update the marker
   line) in the same commit. Author-only calls STOP the thread: record in the unit record, move on.
 
+## MID-RUN AUTHOR CHECK-IN (2026-09-15, during unit D — she surfaced via remote control; rulings recorded verbatim in QUESTIONS #88/#110 and committed at `63d3c515`)
+
+Her replies, in order: **#88(c) STRUCK** (*"yeah, I'm fine with striking #88c."*) · **RULING A-2
+ratified** (*"that's fine on A-2."*) · **#110(a) ratified for the book** with the within-a-note
+on/off rider (covered by the R14/R22 editing setting as built; verification joins the end-of-phase
+walk) · **#110(b) ratified** with her refinement (initial highlight ALWAYS; the setting governs
+whether the mark survives once editing starts) · **the Settings appearance-control FOLD issue →
+owner 13u4** (*"you can add the fold issue to 13u4."* — the KnownIssues row is in). #111(a) not
+addressed — stays PROVISIONAL for the morning bundle. **Walk-list additions:** the 110a/110b
+composition check (initial highlight always; setting-governed persistence; the book vs note
+registers behaving as her sentences describe) beside the dark pass already owed.
+
 ## LIVE STATUS (the run ledger — flipped per unit, PENDING until runs complete)
 
 | unit | status |
